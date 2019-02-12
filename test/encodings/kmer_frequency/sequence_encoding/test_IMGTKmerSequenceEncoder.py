@@ -1,0 +1,27 @@
+from unittest import TestCase
+
+from source.data_model.sequence.Sequence import Sequence
+from source.encodings.kmer_frequency.sequence_encoding.IMGTKmerSequenceEncoder import IMGTKmerSequenceEncoder
+
+
+class TestIMGTKmerSequenceEncoder(TestCase):
+    def test_encode_sequence(self):
+        sequence = Sequence("CASSPRERATYEQCASSPRERATYEQCASSPRERATYEQ", None, None)
+        kmers = IMGTKmerSequenceEncoder.encode_sequence(sequence, {"k": 3})
+        self.assertEqual({('CAS', 105), ('ASS', 106), ('SSP', 107), ('SPR', 108), ('PRE', 109), ('RER', 110),
+                          ('ERA', 111), ('RAT', 111.001), ('ATY', 111.002), ('TYE', 111.003), ('YEQ', 111.004),
+                          ('EQC', 111.005), ('QCA', 111.006), ('CAS', 111.007), ('ASS', 111.008), ('SSP', 111.009),
+                          ('SPR', 111.01), ('PRE', 111.011), ('RER', 111.012), ('ERA', 111.013), ('RAT', 112.013),
+                          ('ATY', 112.012), ('TYE', 112.011), ('YEQ', 112.01), ('EQC', 112.009), ('QCA', 112.008),
+                          ('CAS', 112.007), ('ASS', 112.006), ('SSP', 112.005), ('SPR', 112.004), ('PRE', 112.003),
+                          ('RER', 112.002), ('ERA', 112.001), ('RAT', 112), ('ATY', 113), ('TYE', 114), ('YEQ', 115)},
+                         set(kmers))
+
+        self.assertEqual(len(kmers), len(sequence.get_sequence()) - 3 + 1)
+
+        sequence = Sequence("AHCDE", None, None)
+        kmers = IMGTKmerSequenceEncoder.encode_sequence(sequence, {"k": 3})
+        self.assertEqual({('AHC', 105), ('HCD', 106), ('CDE', 107)},
+                         set(kmers))
+        self.assertEqual(len(kmers), len(sequence.get_sequence()) - 3 + 1)
+        self.assertRaises(ValueError, IMGTKmerSequenceEncoder.encode_sequence, sequence, {"k": 25})
