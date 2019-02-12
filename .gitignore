@@ -32,3 +32,4 @@ docs/build/
 
 # PyCharm-specific
 .idea/
+venv/
