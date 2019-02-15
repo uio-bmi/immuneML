@@ -1,4 +1,4 @@
-from source.data_model.sequence.Sequence import Sequence
+from source.data_model.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.encodings.kmer_frequency.sequence_encoding.SequenceEncodingStrategy import SequenceEncodingStrategy
 from source.util.KmerHelper import KmerHelper
 
@@ -6,7 +6,7 @@ from source.util.KmerHelper import KmerHelper
 class IMGTKmerSequenceEncoder(SequenceEncodingStrategy):
 
     @staticmethod
-    def encode_sequence(sequence: Sequence, params: dict):
+    def encode_sequence(sequence: ReceptorSequence, params: dict):
         k = params["k"]
         length = len(sequence.get_sequence())
         if length <= k:

@@ -7,7 +7,7 @@ from source.data_model.dataset.DatasetParams import DatasetParams
 from source.data_model.metadata.Sample import Sample
 from source.data_model.repertoire.Repertoire import Repertoire
 from source.data_model.repertoire.RepertoireMetadata import RepertoireMetadata
-from source.data_model.sequence.Sequence import Sequence
+from source.data_model.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.encodings.word2vec.Word2VecEncoder import Word2VecEncoder
 from source.encodings.word2vec.model_creator.ModelType import ModelType
 from source.environment.LabelConfiguration import LabelConfiguration
@@ -22,8 +22,8 @@ class TestWord2VecEncoder(TestCase):
 
         PathBuilder.build(test_path)
 
-        sequence1 = Sequence("CASSVFA")
-        sequence2 = Sequence("CASSCCC")
+        sequence1 = ReceptorSequence("CASSVFA")
+        sequence2 = ReceptorSequence("CASSCCC")
 
         sample1 = Sample(1, custom_params={"T1D": "T1D"})
         metadata1 = RepertoireMetadata(sample=sample1)

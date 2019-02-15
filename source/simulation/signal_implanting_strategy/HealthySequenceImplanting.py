@@ -4,7 +4,7 @@ import random
 from source.data_model.metadata.Sample import Sample
 from source.data_model.repertoire.Repertoire import Repertoire
 from source.data_model.repertoire.RepertoireMetadata import RepertoireMetadata
-from source.data_model.sequence.Sequence import Sequence
+from source.data_model.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.simulation.implants.Implant import Implant
 from source.simulation.signal_implanting_strategy.SignalImplantingStrategy import SignalImplantingStrategy
 from source.simulation.signal_implanting_strategy.sequence_implanting.SequenceImplantingStrategy import \
@@ -16,9 +16,9 @@ class HealthySequenceImplanting(SignalImplantingStrategy):
     Class for implanting a signal into a repertoire:
         - always chooses only sequences in which no signal has been implanted to implant the new signal
         - sequence_position_weights define the probability that the signal will be implanted at the
-            certain position in the sequence
+            certain position in the receptor_sequence
         - if sequence_position_weights are not set, then SequenceImplantingStrategy will make all of the positions
-            equally likely for each sequence
+            equally likely for each receptor_sequence
     """
 
     def __init__(self, sequence_implanting_strategy: SequenceImplantingStrategy, sequence_position_weights: dict = None):
@@ -56,7 +56,7 @@ class HealthySequenceImplanting(SignalImplantingStrategy):
             metadata = RepertoireMetadata()
 
         # when adding implant to a repertoire, only signal id is stored:
-        # more detailed information is available in each sequence
+        # more detailed information is available in each receptor_sequence
         # (specific motif and motif instance)
         implant = Implant(signal_id=signal.id)
         metadata.add_implant(implant)
@@ -65,7 +65,7 @@ class HealthySequenceImplanting(SignalImplantingStrategy):
         return repertoire
 
     def __implant_in_sequences(self, sequences_to_be_processed: list, signal):
-        assert self.sequence_implanting_strategy is not None, "HealthySequenceImplanting: add sequence implanting strategy when creating a HealthySequenceImplanting object."
+        assert self.sequence_implanting_strategy is not None, "HealthySequenceImplanting: add receptor_sequence implanting strategy when creating a HealthySequenceImplanting object."
 
         sequences = []
         for sequence in sequences_to_be_processed:
@@ -95,7 +95,7 @@ class HealthySequenceImplanting(SignalImplantingStrategy):
 
         return sequences_to_be_infected, other_sequences
 
-    def implant_in_sequence(self, sequence: Sequence, signal) -> Sequence:
+    def implant_in_sequence(self, sequence: ReceptorSequence, signal) -> ReceptorSequence:
         assert self.sequence_implanting_strategy is not None, "HealthySequenceImplanting: set SequenceImplantingStrategy in HealtySequenceImplanting object before calling implant_in_sequence method."
 
         motif = random.choice(signal.motifs)

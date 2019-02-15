@@ -1,12 +1,12 @@
 from unittest import TestCase
 
-from source.data_model.sequence.Sequence import Sequence
+from source.data_model.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.encodings.kmer_frequency.sequence_encoding.GappedKmerSequenceEncoder import GappedKmerSequenceEncoder
 
 
 class TestGappedKmerSequenceEncoder(TestCase):
     def test_encode_sequence(self):
-        sequence = Sequence("ABCDEFG", None, None)
+        sequence = ReceptorSequence("ABCDEFG", None, None)
         kmers = GappedKmerSequenceEncoder.encode_sequence(sequence, {"k_left": 3, "max_gap": 1})
         self.assertEqual({'ABC.EFG', 'ABCDEF', 'BCDEFG'}, set(kmers))
 

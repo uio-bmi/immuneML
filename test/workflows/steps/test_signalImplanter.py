@@ -5,7 +5,7 @@ from unittest import TestCase
 
 from source.data_model.dataset.Dataset import Dataset
 from source.data_model.repertoire.Repertoire import Repertoire
-from source.data_model.sequence.Sequence import Sequence
+from source.data_model.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.simulation.implants.Motif import Motif
 from source.simulation.implants.Signal import Signal
 from source.simulation.motif_instantiation_strategy.IdentityMotifInstantiation import IdentityMotifInstantiation
@@ -23,7 +23,7 @@ class TestSignalImplanter(TestCase):
             os.makedirs("/Users/milenpa/PycharmProjects/ImmuneML/test/tmp/")
 
         for i in range(10):
-            rep = Repertoire(sequences=[Sequence("ACDEFG"), Sequence("ACDEFG"), Sequence("ACDEFG"), Sequence("ACDEFG")])
+            rep = Repertoire(sequences=[ReceptorSequence("ACDEFG"), ReceptorSequence("ACDEFG"), ReceptorSequence("ACDEFG"), ReceptorSequence("ACDEFG")])
             filename = "../../tmp/rep" + str(i+1) + ".pkl"
             with open(filename, "wb") as file:
                 pickle.dump(rep, file)

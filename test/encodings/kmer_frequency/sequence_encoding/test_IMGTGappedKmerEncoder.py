@@ -1,17 +1,17 @@
 from unittest import TestCase
 
-from source.data_model.sequence.Sequence import Sequence
+from source.data_model.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.encodings.kmer_frequency.sequence_encoding.IMGTGappedKmerEncoder import IMGTGappedKmerEncoder
 
 
 class TestIMGTGappedKmerEncoder(TestCase):
     def test_encode_sequence(self):
-        sequence = Sequence("AHCDE", None, None)
+        sequence = ReceptorSequence("AHCDE", None, None)
         kmers = IMGTGappedKmerEncoder.encode_sequence(sequence, {"k_left": 1, "max_gap": 1})
         self.assertEqual({('AH', 105), ('HC', 106), ('CD', 107), ('DE', 116), ('A.C', 105), ('H.D', 106), ('C.E', 107)},
                          set(kmers))
 
-        sequence = Sequence("CASSPRERATYEQCAY", None, None)
+        sequence = ReceptorSequence("CASSPRERATYEQCAY", None, None)
         kmers = IMGTGappedKmerEncoder.encode_sequence(sequence, {"k_left": 1, "max_gap": 1})
         self.assertEqual({('CA', 105), ('AS', 106), ('SS', 107), ('SP', 108), ('PR', 109), ('RE', 110), ('ER', 111),
                           ('RA', 111.001), ('AT', 112.002), ('TY', 112.001), ('YE', 112), ('EQ', 113), ('QC', 114),

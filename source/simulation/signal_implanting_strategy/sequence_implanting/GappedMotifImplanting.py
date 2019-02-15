@@ -4,8 +4,8 @@ from collections import Counter
 
 import numpy as np
 
-from source.data_model.sequence.Sequence import Sequence
-from source.data_model.sequence.SequenceAnnotation import SequenceAnnotation
+from source.data_model.receptor_sequence.ReceptorSequence import ReceptorSequence
+from source.data_model.receptor_sequence.SequenceAnnotation import SequenceAnnotation
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.simulation.implants.Implant import Implant
 from source.simulation.implants.MotifInstance import MotifInstance
@@ -16,7 +16,7 @@ from source.util.PositionHelper import PositionHelper
 
 class GappedMotifImplanting(SequenceImplantingStrategy):
 
-    def implant(self, sequence: Sequence, signal: dict, sequence_position_weights=None) -> Sequence:
+    def implant(self, sequence: ReceptorSequence, signal: dict, sequence_position_weights=None) -> ReceptorSequence:
         motif_instance = signal["motif_instance"]
         imgt_positions = self.__build_imgt_positions(sequence, motif_instance)
         limit = len(motif_instance.instance) - motif_instance.instance.count("/") + motif_instance.gap
@@ -25,9 +25,9 @@ class GappedMotifImplanting(SequenceImplantingStrategy):
         new_sequence = self.__build_new_sequence(sequence, implant_position, signal)
         return new_sequence
 
-    def __build_imgt_positions(self, sequence: Sequence, motif_instance: MotifInstance):
+    def __build_imgt_positions(self, sequence: ReceptorSequence, motif_instance: MotifInstance):
         assert len(sequence.get_sequence()) > motif_instance.gap + len(motif_instance.instance) - 1, \
-            "The motif instance is longer than sequence length. Remove the sequence from the repertoire or reduce max gap length to be able to proceed."
+            "The motif instance is longer than receptor_sequence length. Remove the receptor_sequence from the repertoire or reduce max gap length to be able to proceed."
         length = len(sequence.get_sequence())
         return PositionHelper.gen_imgt_positions_from_length(length)
 
@@ -38,7 +38,7 @@ class GappedMotifImplanting(SequenceImplantingStrategy):
         position = random.choice(possible_indices)
         return position
 
-    def __build_new_sequence(self, sequence: Sequence, position, signal: dict) -> Sequence:
+    def __build_new_sequence(self, sequence: ReceptorSequence, position, signal: dict) -> ReceptorSequence:
 
         gap_length = signal["motif_instance"].gap
         if gap_length > 0:
@@ -62,7 +62,7 @@ class GappedMotifImplanting(SequenceImplantingStrategy):
                           position=position)
         annotation.add_implant(implant)
 
-        new_sequence = Sequence()
+        new_sequence = ReceptorSequence()
         new_sequence.set_annotation(annotation)
         new_sequence.set_metadata(copy.deepcopy(sequence.metadata))
         new_sequence.set_sequence(new_sequence_string, EnvironmentSettings.get_sequence_type())

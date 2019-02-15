@@ -1,14 +1,14 @@
-from source.data_model.sequence.Sequence import Sequence
+from source.data_model.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.encodings.kmer_frequency.sequence_encoding.SequenceEncodingStrategy import SequenceEncodingStrategy
 
 
 class IdentitySequenceEncoder(SequenceEncodingStrategy):
     """
-    Allows to measure the frequency of the sequence in the dataset
+    Allows to measure the frequency of the receptor_sequence in the dataset
     """
 
     @staticmethod
-    def encode_sequence(sequence: Sequence, params: dict):
+    def encode_sequence(sequence: ReceptorSequence, params: dict):
 
         encoded = sequence.get_sequence()
         res = [encoded]

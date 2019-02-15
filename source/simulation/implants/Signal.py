@@ -10,7 +10,7 @@ class Signal:
     Class representing the signal that will be implanted;
     Used in simulation setting;
     It contains information about:
-        - motifs that can be instantiated and implanted into a sequence / repertoire
+        - motifs that can be instantiated and implanted into a receptor_sequence / repertoire
         - implanting strategy: the way the motif instances will be implanted in sequences/repertoires
     """
     def __init__(self, identifier, motifs: list, implanting_strategy: SignalImplantingStrategy):

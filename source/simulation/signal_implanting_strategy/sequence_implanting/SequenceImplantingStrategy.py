@@ -1,10 +1,10 @@
 import abc
 
-from source.data_model.sequence.Sequence import Sequence
+from source.data_model.receptor_sequence.ReceptorSequence import ReceptorSequence
 
 
 class SequenceImplantingStrategy(metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
-    def implant(self, sequence: Sequence, signal: dict, sequence_position_weights) -> Sequence:
+    def implant(self, sequence: ReceptorSequence, signal: dict, sequence_position_weights) -> ReceptorSequence:
         pass

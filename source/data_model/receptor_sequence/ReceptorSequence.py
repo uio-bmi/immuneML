@@ -1,11 +1,11 @@
 # quality: gold
-from source.data_model.sequence.SequenceAnnotation import SequenceAnnotation
-from source.data_model.sequence.SequenceMetadata import SequenceMetadata
+from source.data_model.receptor_sequence.SequenceAnnotation import SequenceAnnotation
+from source.data_model.receptor_sequence.SequenceMetadata import SequenceMetadata
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.environment.SequenceType import SequenceType
 
 
-class Sequence:
+class ReceptorSequence:
 
     def __init__(self,
                  amino_acid_sequence: str = None,
@@ -27,8 +27,8 @@ class Sequence:
 
     def get_sequence(self):
         """
-        :return: sequence (nucleotide/amino acid) that corresponds to preset
-        sequence type from EnvironmentSettings class
+        :return: receptor_sequence (nucleotide/amino acid) that corresponds to preset
+        receptor_sequence type from EnvironmentSettings class
         """
         if EnvironmentSettings.get_sequence_type() == SequenceType.AMINO_ACID:
             return self.amino_acid_sequence

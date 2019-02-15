@@ -1,7 +1,7 @@
 import math
 import warnings
 
-from source.data_model.sequence.Sequence import Sequence
+from source.data_model.receptor_sequence.ReceptorSequence import ReceptorSequence
 
 
 class PositionHelper:
@@ -21,20 +21,20 @@ class PositionHelper:
         return imgt_positions
 
     @staticmethod
-    def gen_imgt_positions_from_sequence(sequence: Sequence):
+    def gen_imgt_positions_from_sequence(sequence: ReceptorSequence):
         input_length = len(sequence.get_sequence())
         return PositionHelper.gen_imgt_positions_from_length(input_length)
 
     @staticmethod
     def adjust_position_weights(sequence_position_weights: dict, imgt_positions, limit: int) -> dict:
         """
-        :param sequence_position_weights: weights supplied by the user as to where in the sequence to implant
-        :param imgt_positions: IMGT positions present in the specific sequence
-        :param limit: how far from the end of the sequence the motif at latest must start
-                        in order not to elongate the sequence
-        :return: position_weights for implanting a motif instance into a sequence
+        :param sequence_position_weights: weights supplied by the user as to where in the receptor_sequence to implant
+        :param imgt_positions: IMGT positions present in the specific receptor_sequence
+        :param limit: how far from the end of the receptor_sequence the motif at latest must start
+                        in order not to elongate the receptor_sequence
+        :return: position_weights for implanting a motif instance into a receptor_sequence
         """
-        # filter only position weights where there are imgt positions in the sequence and 0 if this imgt position is
+        # filter only position weights where there are imgt positions in the receptor_sequence and 0 if this imgt position is
         # not in the sequence_position_weights
         index_limit = len(imgt_positions) - limit
 

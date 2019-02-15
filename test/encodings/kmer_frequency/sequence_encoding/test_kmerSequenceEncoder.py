@@ -1,12 +1,12 @@
 from unittest import TestCase
 
-from source.data_model.sequence.Sequence import Sequence
+from source.data_model.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.encodings.kmer_frequency.sequence_encoding.KmerSequenceEncoder import KmerSequenceEncoder
 
 
 class TestKmerSequenceEncoder(TestCase):
     def test_encode_sequence(self):
-        seq = Sequence(amino_acid_sequence="CASSVFRTY")
+        seq = ReceptorSequence(amino_acid_sequence="CASSVFRTY")
         kmers = KmerSequenceEncoder.encode_sequence(seq, {
             "k": 3
         })
@@ -20,4 +20,4 @@ class TestKmerSequenceEncoder(TestCase):
         self.assertTrue("RTY" in kmers)
 
         self.assertEqual(7, len(kmers))
-        self.assertRaises(ValueError, KmerSequenceEncoder.encode_sequence, Sequence(amino_acid_sequence="AC"), {"k": 3})
+        self.assertRaises(ValueError, KmerSequenceEncoder.encode_sequence, ReceptorSequence(amino_acid_sequence="AC"), {"k": 3})

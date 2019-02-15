@@ -13,7 +13,7 @@ from source.IO.PickleLoader import PickleLoader
 from source.data_model.dataset.Dataset import Dataset
 from source.data_model.dataset.DatasetParams import DatasetParams
 from source.data_model.repertoire.Repertoire import Repertoire
-from source.data_model.sequence.Sequence import Sequence
+from source.data_model.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.encodings.DatasetEncoder import DatasetEncoder
 from source.encodings.kmer_frequency.NormalizationType import NormalizationType
 from source.encodings.kmer_frequency.ReadsType import ReadsType
@@ -151,7 +151,7 @@ class KmerFrequencyEncoder(DatasetEncoder):
         return counts
 
     @staticmethod
-    def __encode_sequence(sequence: Sequence, params: dict):
+    def __encode_sequence(sequence: ReceptorSequence, params: dict):
         sequence_encoder = KmerFrequencyEncoder.__prepare_sequence_encoder(params)
         encoded_sequence = sequence_encoder.encode_sequence(sequence=sequence, params=params)
         return encoded_sequence

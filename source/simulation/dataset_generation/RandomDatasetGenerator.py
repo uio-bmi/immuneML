@@ -3,7 +3,7 @@ import random
 
 from source.data_model.dataset.Dataset import Dataset
 from source.data_model.repertoire.Repertoire import Repertoire
-from source.data_model.sequence.Sequence import Sequence
+from source.data_model.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.util.PathBuilder import PathBuilder
 
@@ -15,7 +15,7 @@ class RandomDatasetGenerator:
         sequences = []
         for j in range(sequence_count):
             s = "".join(random.choices(alphabet, k=sequence_length))
-            sequence = Sequence(amino_acid_sequence=s)
+            sequence = ReceptorSequence(amino_acid_sequence=s)
             sequences.append(sequence)
         return Repertoire(sequences=sequences)
 

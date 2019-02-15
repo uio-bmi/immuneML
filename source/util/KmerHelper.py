@@ -3,14 +3,14 @@ import itertools
 import warnings
 
 from source.data_model.repertoire.Repertoire import Repertoire
-from source.data_model.sequence.Sequence import Sequence
+from source.data_model.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.util.PositionHelper import PositionHelper
 
 
 class KmerHelper:
 
     @staticmethod
-    def create_kmers_from_sequence(sequence: Sequence, k: int, overlap: bool = True):
+    def create_kmers_from_sequence(sequence: ReceptorSequence, k: int, overlap: bool = True):
         return KmerHelper.create_kmers_from_string(sequence.get_sequence(), k, overlap)
 
     @staticmethod
@@ -22,7 +22,7 @@ class KmerHelper:
         return kmers
 
     @staticmethod
-    def create_IMGT_kmers_from_sequence(sequence: Sequence, k: int):
+    def create_IMGT_kmers_from_sequence(sequence: ReceptorSequence, k: int):
         positions = PositionHelper.gen_imgt_positions_from_length(len(sequence.get_sequence()))
         sequence_w_pos = list(zip(list(sequence.get_sequence()), positions))
         kmers = KmerHelper.create_kmers_from_string(sequence_w_pos, k)
@@ -33,7 +33,7 @@ class KmerHelper:
         return kmers
 
     @staticmethod
-    def create_IMGT_gapped_kmers_from_sequence(sequence: Sequence, k_left: int, max_gap: int, k_right: int = None, min_gap: int = 0):
+    def create_IMGT_gapped_kmers_from_sequence(sequence: ReceptorSequence, k_left: int, max_gap: int, k_right: int = None, min_gap: int = 0):
         positions = PositionHelper.gen_imgt_positions_from_length(len(sequence.get_sequence()))
         sequence_w_pos = list(zip(list(sequence.get_sequence()), positions))
         kmers = KmerHelper.create_gapped_kmers_from_string(sequence_w_pos, k_left=k_left, max_gap=max_gap,
@@ -68,7 +68,7 @@ class KmerHelper:
         return gapped_kmers
 
     @staticmethod
-    def create_gapped_kmers_from_sequence(sequence: Sequence, k_left: int, max_gap: int, k_right: int = None, min_gap: int = 0):
+    def create_gapped_kmers_from_sequence(sequence: ReceptorSequence, k_left: int, max_gap: int, k_right: int = None, min_gap: int = 0):
         return KmerHelper.create_gapped_kmers_from_string(sequence.get_sequence(), k_left, max_gap, k_right, min_gap)
 
     @staticmethod

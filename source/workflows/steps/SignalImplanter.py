@@ -77,7 +77,7 @@ class SignalImplanter(Step):
             new_repertoire.metadata = RepertoireMetadata(sample=Sample(identifier=""))
 
         # TODO: make it work like in this comment: the user is able to define what a label means (e.g. is it a signal
-        #   or a combination of signals, maybe even consider the implanting percentages on the sequence level?
+        #   or a combination of signals, maybe even consider the implanting percentages on the receptor_sequence level?
         # for label in input_params["simulation"]["labels"]:
         #    new_repertoire.metadata.sample.custom_params[label["id"]] = False  # TODO: define the constants somewhere
 

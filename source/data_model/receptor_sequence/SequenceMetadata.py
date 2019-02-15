@@ -3,7 +3,7 @@
 
 class SequenceMetadata:
     """
-    class modeling the existing knowledge about a sequence:
+    class modeling the existing knowledge about a receptor_sequence:
         - v gene
         - j gene
         - chain

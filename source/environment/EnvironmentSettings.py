@@ -4,7 +4,7 @@ from source.environment.SequenceType import SequenceType
 
 class EnvironmentSettings:
     """
-    Class containing environment variables, like sequence type,
+    Class containing environment variables, like receptor_sequence type,
     root path etc.
     """
 
@@ -39,7 +39,7 @@ class EnvironmentSettings:
     @staticmethod
     def get_sequence_alphabet():
         """
-        :return: alphabetically sorted sequence alphabet
+        :return: alphabetically sorted receptor_sequence alphabet
         """
         if EnvironmentSettings.sequence_type == SequenceType.AMINO_ACID:
             alphabet = list("ACDEFGHIKLMNPQRSTVWY")

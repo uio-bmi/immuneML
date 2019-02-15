@@ -1,11 +1,11 @@
 import abc
 
-from source.data_model.sequence.Sequence import Sequence
+from source.data_model.receptor_sequence.ReceptorSequence import ReceptorSequence
 
 
 class SequenceEncodingStrategy(metaclass=abc.ABCMeta):
 
     @staticmethod
     @abc.abstractmethod
-    def encode_sequence(sequence: Sequence, params: dict):
+    def encode_sequence(sequence: ReceptorSequence, params: dict):
         pass

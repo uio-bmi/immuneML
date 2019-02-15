@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from source.data_model.sequence.Sequence import Sequence
+from source.data_model.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.simulation.implants.MotifInstance import MotifInstance
 from source.simulation.signal_implanting_strategy.sequence_implanting.GappedMotifImplanting import GappedMotifImplanting
 
@@ -10,7 +10,7 @@ class TestGappedMotifImplanting(TestCase):
 
         strategy = GappedMotifImplanting()
         motif_instance = MotifInstance("CC/T", 2)
-        sequence = strategy.implant(Sequence(amino_acid_sequence="AAAAAAAAAA"), {"signal_id": "1",
+        sequence = strategy.implant(ReceptorSequence(amino_acid_sequence="AAAAAAAAAA"), {"signal_id": "1",
                                                                                  "motif_id": "1",
                                                                                  "motif_instance": motif_instance})
 
@@ -18,7 +18,7 @@ class TestGappedMotifImplanting(TestCase):
         self.assertTrue(sequence.get_sequence().find("CCAAT") > -1)
         self.assertEqual(10, len(sequence.get_sequence()))
 
-        sequence = strategy.implant(Sequence(amino_acid_sequence="AAAAAAAAAA"), {"signal_id": "1",
+        sequence = strategy.implant(ReceptorSequence(amino_acid_sequence="AAAAAAAAAA"), {"signal_id": "1",
                                                                                  "motif_id": "1",
                                                                                  "motif_instance": motif_instance},
                                     sequence_position_weights={105: 0.8, 106: 0.2})
@@ -28,7 +28,7 @@ class TestGappedMotifImplanting(TestCase):
         self.assertEqual(10, len(sequence.get_sequence()))
 
         motif_instance = MotifInstance("CCT", 0)
-        sequence = strategy.implant(Sequence(amino_acid_sequence="AAAAAAAAAA"), {"signal_id": "1",
+        sequence = strategy.implant(ReceptorSequence(amino_acid_sequence="AAAAAAAAAA"), {"signal_id": "1",
                                                                                  "motif_id": "1",
                                                                                  "motif_instance": motif_instance},
                                     sequence_position_weights={105: 0.8, 106: 0.2})

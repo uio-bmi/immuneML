@@ -1,12 +1,12 @@
 from unittest import TestCase
 
-from source.data_model.sequence.Sequence import Sequence
+from source.data_model.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.encodings.kmer_frequency.sequence_encoding.IMGTKmerSequenceEncoder import IMGTKmerSequenceEncoder
 
 
 class TestIMGTKmerSequenceEncoder(TestCase):
     def test_encode_sequence(self):
-        sequence = Sequence("CASSPRERATYEQCASSPRERATYEQCASSPRERATYEQ", None, None)
+        sequence = ReceptorSequence("CASSPRERATYEQCASSPRERATYEQCASSPRERATYEQ", None, None)
         kmers = IMGTKmerSequenceEncoder.encode_sequence(sequence, {"k": 3})
         self.assertEqual({('CAS', 105), ('ASS', 106), ('SSP', 107), ('SPR', 108), ('PRE', 109), ('RER', 110),
                           ('ERA', 111), ('RAT', 111.001), ('ATY', 111.002), ('TYE', 111.003), ('YEQ', 111.004),
@@ -19,7 +19,7 @@ class TestIMGTKmerSequenceEncoder(TestCase):
 
         self.assertEqual(len(kmers), len(sequence.get_sequence()) - 3 + 1)
 
-        sequence = Sequence("AHCDE", None, None)
+        sequence = ReceptorSequence("AHCDE", None, None)
         kmers = IMGTKmerSequenceEncoder.encode_sequence(sequence, {"k": 3})
         self.assertEqual({('AHC', 105), ('HCD', 106), ('CDE', 107)},
                          set(kmers))

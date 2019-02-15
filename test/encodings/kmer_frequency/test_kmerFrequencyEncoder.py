@@ -7,7 +7,7 @@ from source.data_model.dataset.DatasetParams import DatasetParams
 from source.data_model.metadata.Sample import Sample
 from source.data_model.repertoire.Repertoire import Repertoire
 from source.data_model.repertoire.RepertoireMetadata import RepertoireMetadata
-from source.data_model.sequence.Sequence import Sequence
+from source.data_model.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.encodings.kmer_frequency.KmerFrequencyEncoder import KmerFrequencyEncoder
 from source.encodings.kmer_frequency.NormalizationType import NormalizationType
 from source.encodings.kmer_frequency.ReadsType import ReadsType
@@ -22,12 +22,12 @@ class TestKmerFrequencyEncoder(TestCase):
     def test_encode(self):
         PathBuilder.build("./tmp/")
 
-        rep1 = Repertoire(sequences=[Sequence("AAA"), Sequence("ATA"), Sequence("ATA")],
+        rep1 = Repertoire(sequences=[ReceptorSequence("AAA"), ReceptorSequence("ATA"), ReceptorSequence("ATA")],
                           metadata=RepertoireMetadata(Sample(1, custom_params={"l1": 1, "l2": 2})))
         with open("./tmp/rep1.pkl", "wb") as file:
             pickle.dump(rep1, file)
 
-        rep2 = Repertoire(sequences=[Sequence("ATA"), Sequence("TAA"), Sequence("AAC")],
+        rep2 = Repertoire(sequences=[ReceptorSequence("ATA"), ReceptorSequence("TAA"), ReceptorSequence("AAC")],
                           metadata=RepertoireMetadata(Sample(2, custom_params={"l1": 0, "l2": 3})))
         with open("./tmp/rep2.pkl", "wb") as file:
             pickle.dump(rep2, file)

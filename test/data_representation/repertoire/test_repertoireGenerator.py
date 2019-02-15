@@ -6,7 +6,7 @@ from source.data_model.dataset.Dataset import Dataset
 from source.data_model.repertoire.Repertoire import Repertoire
 from source.data_model.repertoire.RepertoireGenerator import RepertoireGenerator
 from source.data_model.repertoire.RepertoireMetadata import RepertoireMetadata
-from source.data_model.sequence.Sequence import Sequence
+from source.data_model.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.util.PathBuilder import PathBuilder
 
 
@@ -14,8 +14,8 @@ class TestRepertoireGenerator(TestCase):
     def test_build_generator(self):
 
         # prepare data
-        sequence1 = Sequence(amino_acid_sequence="CAS")
-        sequence2 = Sequence(amino_acid_sequence="VFA")
+        sequence1 = ReceptorSequence(amino_acid_sequence="CAS")
+        sequence2 = ReceptorSequence(amino_acid_sequence="VFA")
 
         repertoire1 = Repertoire([sequence2, sequence1], RepertoireMetadata())
         repertoire2 = Repertoire([sequence1, sequence2], RepertoireMetadata())

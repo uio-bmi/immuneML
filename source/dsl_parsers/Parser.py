@@ -20,7 +20,7 @@ from source.simulation.signal_implanting_strategy.sequence_implanting.GappedMoti
 
 class Parser:
     """
-    Simple DSL parser from python dictionary for configuring repertoire / sequence classification
+    Simple DSL parser from python dictionary for configuring repertoire / receptor_sequence classification
     in the (simulated) settings
     """
     @staticmethod
@@ -67,7 +67,7 @@ class Parser:
             parsed_encoder_params["model"] = {
                 "k": encoder_params["model"]["k"],
                 "size": encoder_params["model"]["size"],
-                "model_creator": ModelType.SEQUENCE if encoder_params["model"]["model_creator"] == "sequence" else ModelType.KMER_PAIR
+                "model_creator": ModelType.SEQUENCE if encoder_params["model"]["model_creator"] == "receptor_sequence" else ModelType.KMER_PAIR
             }
 
         for key in encoder_params.keys():
