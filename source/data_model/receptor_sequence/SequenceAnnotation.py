@@ -1,5 +1,5 @@
 # quality: gold
-from source.simulation.implants.Implant import Implant
+from source.simulation.implants.ImplantAnnotation import ImplantAnnotation
 
 
 class SequenceAnnotation:
@@ -11,5 +11,5 @@ class SequenceAnnotation:
         self.implants = implants if implants is not None else []
         self.other = other if other is not None else {}
 
-    def add_implant(self, implant: Implant):
+    def add_implant(self, implant: ImplantAnnotation):
         self.implants.append(implant)

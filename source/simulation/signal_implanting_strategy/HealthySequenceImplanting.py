@@ -5,7 +5,7 @@ from source.data_model.metadata.Sample import Sample
 from source.data_model.repertoire.Repertoire import Repertoire
 from source.data_model.repertoire.RepertoireMetadata import RepertoireMetadata
 from source.data_model.receptor_sequence.ReceptorSequence import ReceptorSequence
-from source.simulation.implants.Implant import Implant
+from source.simulation.implants.ImplantAnnotation import ImplantAnnotation
 from source.simulation.signal_implanting_strategy.SignalImplantingStrategy import SignalImplantingStrategy
 from source.simulation.signal_implanting_strategy.sequence_implanting.SequenceImplantingStrategy import \
     SequenceImplantingStrategy
@@ -58,7 +58,7 @@ class HealthySequenceImplanting(SignalImplantingStrategy):
         # when adding implant to a repertoire, only signal id is stored:
         # more detailed information is available in each receptor_sequence
         # (specific motif and motif instance)
-        implant = Implant(signal_id=signal.id)
+        implant = ImplantAnnotation(signal_id=signal.id)
         metadata.add_implant(implant)
         repertoire = Repertoire(sequences=sequences, metadata=metadata)
 

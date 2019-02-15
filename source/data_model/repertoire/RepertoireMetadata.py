@@ -2,7 +2,7 @@
 
 from source.data_model.metadata.Label import Label
 from source.data_model.metadata.Sample import Sample
-from source.simulation.implants.Implant import Implant
+from source.simulation.implants.ImplantAnnotation import ImplantAnnotation
 
 
 class RepertoireMetadata:
@@ -23,7 +23,7 @@ class RepertoireMetadata:
         self.other_metadata = {}
         self.implants = []
 
-    def add_implant(self, implant: Implant):
+    def add_implant(self, implant: ImplantAnnotation):
         self.implants.append(implant)
 
     def add_to_other_metadata(self, name, value):

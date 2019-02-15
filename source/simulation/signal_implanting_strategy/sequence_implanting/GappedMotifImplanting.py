@@ -1,13 +1,12 @@
 import copy
 import random
-from collections import Counter
 
 import numpy as np
 
 from source.data_model.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.data_model.receptor_sequence.SequenceAnnotation import SequenceAnnotation
 from source.environment.EnvironmentSettings import EnvironmentSettings
-from source.simulation.implants.Implant import Implant
+from source.simulation.implants.ImplantAnnotation import ImplantAnnotation
 from source.simulation.implants.MotifInstance import MotifInstance
 from source.simulation.signal_implanting_strategy.sequence_implanting.SequenceImplantingStrategy import \
     SequenceImplantingStrategy
@@ -56,10 +55,10 @@ class GappedMotifImplanting(SequenceImplantingStrategy):
         new_sequence_string = part1 + motif_left + part2 + motif_right + part3
 
         annotation = SequenceAnnotation()
-        implant = Implant(signal_id=signal["signal_id"],
-                          motif_id=signal["motif_id"],
-                          motif_instance=signal["motif_instance"],
-                          position=position)
+        implant = ImplantAnnotation(signal_id=signal["signal_id"],
+                                    motif_id=signal["motif_id"],
+                                    motif_instance=signal["motif_instance"],
+                                    position=position)
         annotation.add_implant(implant)
 
         new_sequence = ReceptorSequence()
