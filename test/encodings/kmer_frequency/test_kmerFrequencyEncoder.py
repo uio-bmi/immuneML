@@ -37,7 +37,7 @@ class TestKmerFrequencyEncoder(TestCase):
         lc.add_label("l2", [0, 3])
 
         dataset = Dataset(filenames=["./tmp/rep1.pkl", "./tmp/rep2.pkl"],
-                          dataset_params=DatasetParams(number_of_examples=2))
+                          dataset_params=DatasetParams())
 
         d1 = KmerFrequencyEncoder.encode(dataset, {
             "result_path": "./tmp/",

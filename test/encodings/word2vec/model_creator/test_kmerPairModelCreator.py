@@ -39,7 +39,7 @@ class TestKmerPairModelCreator(TestCase):
         with open(file2, "wb") as file:
             pickle.dump(rep2, file)
 
-        params = DatasetParams(number_of_examples=2)
+        params = DatasetParams()
         dataset = Dataset(filenames=[file1, file2], dataset_params=params)
 
         config_params = {

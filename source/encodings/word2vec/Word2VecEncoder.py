@@ -134,7 +134,7 @@ class Word2VecEncoder(DatasetEncoder):
 
         encoded_dataset = Dataset()
         data = RepertoireGenerator.build_generator(dataset.filenames, params["batch_size"])
-        repertoires = np.zeros(shape=[dataset.params.number_of_examples, vectors.vector_size])
+        repertoires = np.zeros(shape=[dataset.get_repertoire_count(), vectors.vector_size])
         for (index, repertoire) in enumerate(data):
             repertoires[index] = Word2VecEncoder._encode_repertoire(repertoire, vectors, params)
 

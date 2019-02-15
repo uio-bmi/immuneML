@@ -35,7 +35,7 @@ class TestDataEncoder(TestCase):
         lc.add_label("l1", [1, 2])
         lc.add_label("l2", [0, 3])
 
-        dataset = Dataset(filenames=["./tmp/rep1.pkl", "./tmp/rep2.pkl"], dataset_params=DatasetParams(number_of_examples=2))
+        dataset = Dataset(filenames=["./tmp/rep1.pkl", "./tmp/rep2.pkl"], dataset_params=DatasetParams())
 
         res = DataEncoder.run({
             "dataset": dataset,
