@@ -51,7 +51,7 @@ class MLMethodAssessment(Step):
         predicted_y = method.predict(X, labels)
         true_y = input_params["dataset"].encoded_data["labels"]
 
-        MLMethodAssessment.__store_predictions(method.__class__.__name__,
+        MLMethodAssessment._store_predictions(method.__class__.__name__,
                                                true_y,
                                                predicted_y,
                                                labels,
@@ -61,13 +61,13 @@ class MLMethodAssessment(Step):
 
         for metric in input_params["metrics"]:
             for index, label in enumerate(labels):
-                score = MLMethodAssessment.__score(metric, predicted_y[label], true_y[index])
+                score = MLMethodAssessment._score(metric, predicted_y[label], true_y[index])
                 results[label][metric.name] = score
 
         return results
 
     @staticmethod
-    def __score(metric: MetricType, predicted_y, true_y):
+    def _score(metric: MetricType, predicted_y, true_y):
 
         # TODO: add parameters for metrics functions if set (such as value names for conf matrix etc)
 
@@ -88,7 +88,7 @@ class MLMethodAssessment(Step):
 
 
     @staticmethod
-    def __store_predictions(method_name, true_y, predicted_y, labels, predictions_path):
+    def _store_predictions(method_name, true_y, predicted_y, labels, predictions_path):
 
         if predictions_path is not None:
             PathBuilder.build(predictions_path)

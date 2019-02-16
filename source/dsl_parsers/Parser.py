@@ -27,11 +27,11 @@ class Parser:
     def parse(workflow_specification: dict) -> dict:
         result = {}
         if "simulation" in workflow_specification:
-            result["simulation"], result["signals"] = Parser.__parse_simulation(workflow_specification["simulation"])
+            result["simulation"], result["signals"] = Parser._parse_simulation(workflow_specification["simulation"])
         if "ml_methods" in workflow_specification:
-            result["ml_methods"] = Parser.__parse_ml_methods(workflow_specification["ml_methods"])
+            result["ml_methods"] = Parser._parse_ml_methods(workflow_specification["ml_methods"])
         if "encoder" in workflow_specification and "encoder_params" in workflow_specification:
-            result["encoder"], result["encoder_params"] = Parser.__parse_encoder(workflow_specification)
+            result["encoder"], result["encoder_params"] = Parser._parse_encoder(workflow_specification)
 
         for key in workflow_specification.keys():
             if key not in result.keys():
@@ -43,24 +43,24 @@ class Parser:
         return result
 
     @staticmethod
-    def __parse_encoder(workflow_specification: dict):
+    def _parse_encoder(workflow_specification: dict):
         if workflow_specification["encoder"] == "KmerFrequencyEncoder":
             assert "sequence_encoding" in workflow_specification["encoder_params"], "Parser: creating encoder: sequence_encoding for KmerFrequencyEncoder is not specified."
             encoder = KmerFrequencyEncoder()
-            encoder_params = Parser.__parse_encoder_params(workflow_specification["encoder_params"], encoder)
+            encoder_params = Parser._parse_encoder_params(workflow_specification["encoder_params"], encoder)
         else:
             assert "model" in workflow_specification["encoder_params"] and "model_creator" in workflow_specification["encoder_params"]["model"], "Parser: creating encoder: model_creator for Word2VecEncoder is not specified."
             encoder = Word2VecEncoder()
-            encoder_params = Parser.__parse_encoder_params(workflow_specification["encoder_params"], encoder)
+            encoder_params = Parser._parse_encoder_params(workflow_specification["encoder_params"], encoder)
 
         return encoder, encoder_params
 
     @staticmethod
-    def __parse_encoder_params(encoder_params: dict, encoder: DatasetEncoder) -> dict:
+    def _parse_encoder_params(encoder_params: dict, encoder: DatasetEncoder) -> dict:
         parsed_encoder_params = {}
 
         if isinstance(encoder, KmerFrequencyEncoder):
-            parsed_encoder_params["sequence_encoding_strategy"] = Parser.__transform_sequence_encoding_strategy(encoder_params["sequence_encoding"])
+            parsed_encoder_params["sequence_encoding_strategy"] = Parser._transform_sequence_encoding_strategy(encoder_params["sequence_encoding"])
             parsed_encoder_params["reads"] = ReadsType.UNIQUE if encoder_params["reads"] == "unique" else ReadsType.ALL
             parsed_encoder_params["normalization_type"] = NormalizationType.L2 if encoder_params["normalization_type"] == "l2" else NormalizationType.RELATIVE_FREQUENCY
         elif isinstance(encoder, Word2VecEncoder):
@@ -77,7 +77,7 @@ class Parser:
         return parsed_encoder_params
 
     @staticmethod
-    def __transform_sequence_encoding_strategy(sequence_encoding_strategy: str) -> SequenceEncodingType:
+    def _transform_sequence_encoding_strategy(sequence_encoding_strategy: str) -> SequenceEncodingType:
         if sequence_encoding_strategy == "gapped_kmer":
             sequence_encoding_type = SequenceEncodingType.GAPPED_KMER
         elif sequence_encoding_strategy == "IMGT_gapped_kmer":
@@ -92,7 +92,7 @@ class Parser:
         return sequence_encoding_type
 
     @staticmethod
-    def __parse_ml_methods(ml_methods: list) -> list:
+    def _parse_ml_methods(ml_methods: list) -> list:
 
         methods = []
 
@@ -106,18 +106,18 @@ class Parser:
         return methods
 
     @staticmethod
-    def __parse_simulation(simulation: dict):
+    def _parse_simulation(simulation: dict):
         assert "motifs" in simulation, "Workflow specification parser: no motifs were defined for the simulation."
         assert "signals" in simulation, "Workflow specification parser: no signals were defined for the simulation."
 
-        motifs = Parser.__extract_motifs(simulation)
-        signals = Parser.__extract_signals(simulation, motifs)
-        implanting = Parser.__add_signals_to_implanting(simulation, signals)
+        motifs = Parser._extract_motifs(simulation)
+        signals = Parser._extract_signals(simulation, motifs)
+        implanting = Parser._add_signals_to_implanting(simulation, signals)
 
         return implanting, signals
 
     @staticmethod
-    def __add_signals_to_implanting(simulation: dict, signals: list) -> list:
+    def _add_signals_to_implanting(simulation: dict, signals: list) -> list:
         result = []
         for item in simulation["implanting"]:
             result.append({
@@ -128,26 +128,26 @@ class Parser:
         return result
 
     @staticmethod
-    def __extract_motifs(simulation: dict) -> list:
+    def _extract_motifs(simulation: dict) -> list:
         motifs = []
         for item in simulation["motifs"]:
-            instantiation_strategy = Parser.__get_instantiation_strategy(item)
+            instantiation_strategy = Parser._get_instantiation_strategy(item)
             motif = Motif(item["id"], instantiation_strategy, item["seed"])
             motifs.append(motif)
         return motifs
 
     @staticmethod
-    def __extract_signals(simulation: dict, motifs: list) -> list:
+    def _extract_signals(simulation: dict, motifs: list) -> list:
         signals = []
         for item in simulation["signals"]:
-            implanting_strategy = Parser.__get_implanting_strategy(item)
+            implanting_strategy = Parser._get_implanting_strategy(item)
             signal_motifs = [motif for motif in motifs if motif.id in item["motifs"]]
             signal = Signal(item["id"], signal_motifs, implanting_strategy)
             signals.append(signal)
         return signals
 
     @staticmethod
-    def __get_implanting_strategy(signal: dict) -> SignalImplantingStrategy:
+    def _get_implanting_strategy(signal: dict) -> SignalImplantingStrategy:
         if "implanting" in signal and signal["implanting"] == "healthy_sequences":
             implanting_strategy = HealthySequenceImplanting(GappedMotifImplanting())
         else:
@@ -155,7 +155,7 @@ class Parser:
         return implanting_strategy
 
     @staticmethod
-    def __get_instantiation_strategy(motif_item: dict) -> MotifInstantiationStrategy:
+    def _get_instantiation_strategy(motif_item: dict) -> MotifInstantiationStrategy:
         if "instantiation" in motif_item and motif_item["instantiation"] == "identity":
             instantiation_strategy = IdentityMotifInstantiation()
         else:

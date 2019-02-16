@@ -32,18 +32,18 @@ class SignalImplanter(Step):
         if os.path.isfile(input_params["result_path"] + "dataset.pkl"):
             dataset = PickleLoader.load(input_params["result_path"] + "dataset.pkl")
         else:
-            dataset = SignalImplanter.__implant_signals(input_params)
+            dataset = SignalImplanter._implant_signals(input_params)
 
         return dataset
 
     @staticmethod
-    def __implant_signals(input_params: dict = None) -> Dataset:
+    def _implant_signals(input_params: dict = None) -> Dataset:
 
         PathBuilder.build(input_params["result_path"])
 
         dataset = input_params["dataset"]
         processed_filenames = []
-        simulation_limits = SignalImplanter.__prepare_simulation_limits(input_params["simulation"],
+        simulation_limits = SignalImplanter._prepare_simulation_limits(input_params["simulation"],
                                                                         dataset.get_repertoire_count())
         simulation_index = 0
 
@@ -52,7 +52,7 @@ class SignalImplanter(Step):
             if simulation_index <= len(simulation_limits) - 1 and index >= simulation_limits[simulation_index]:
                 simulation_index += 1
 
-            filename = SignalImplanter.__process_repertoire(index, repertoire, simulation_index, simulation_limits, input_params)
+            filename = SignalImplanter._process_repertoire(index, repertoire, simulation_index, simulation_limits, input_params)
             processed_filenames.append(filename)
 
         processed_dataset = Dataset(filenames=processed_filenames, dataset_params=copy.copy(dataset.params))
@@ -61,17 +61,17 @@ class SignalImplanter(Step):
         return processed_dataset
 
     @staticmethod
-    def __process_repertoire(index, repertoire, simulation_index, simulation_limits, input_params):
+    def _process_repertoire(index, repertoire, simulation_index, simulation_limits, input_params):
 
         if simulation_index < len(simulation_limits):
-            filename = SignalImplanter.__implant_in_repertoire(index, repertoire, simulation_index, input_params)
+            filename = SignalImplanter._implant_in_repertoire(index, repertoire, simulation_index, input_params)
         else:
-            filename = SignalImplanter.__copy_repertoire(index, repertoire, input_params)
+            filename = SignalImplanter._copy_repertoire(index, repertoire, input_params)
 
         return filename
 
     @staticmethod
-    def __copy_repertoire(index: int, repertoire: Repertoire, input_params: dict) -> str:
+    def _copy_repertoire(index: int, repertoire: Repertoire, input_params: dict) -> str:
         new_repertoire = copy.deepcopy(repertoire)
         if new_repertoire.metadata is None:
             new_repertoire.metadata = RepertoireMetadata(sample=Sample(identifier=""))
@@ -95,7 +95,7 @@ class SignalImplanter(Step):
         return filename
 
     @staticmethod
-    def __implant_in_repertoire(index, repertoire, simulation_index, input_params) -> str:
+    def _implant_in_repertoire(index, repertoire, simulation_index, input_params) -> str:
         new_repertoire = repertoire
         for signal in input_params["simulation"][simulation_index]["signals"]:
             new_repertoire = signal.implant_to_repertoire(repertoire=new_repertoire,
@@ -115,7 +115,7 @@ class SignalImplanter(Step):
         return filename
 
     @staticmethod
-    def __prepare_simulation_limits(simulation: dict, repertoire_count: int) -> list:
+    def _prepare_simulation_limits(simulation: dict, repertoire_count: int) -> list:
         limits = [int(item["repertoires"] * repertoire_count) for item in simulation]
         limits = [sum(limits[:i+1]) for i in range(len(limits))]
         return limits

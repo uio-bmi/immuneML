@@ -26,7 +26,7 @@ class MLMethodTrainer(Step):
         method = input_params["method"]
 
         if not method.check_if_exists(input_params["result_path"]):
-            method = MLMethodTrainer.__fit_method(input_params)
+            method = MLMethodTrainer._fit_method(input_params)
             method.store(input_params["result_path"])
         else:
             method.load(input_params["result_path"])
@@ -34,9 +34,9 @@ class MLMethodTrainer(Step):
         return method
 
     @staticmethod
-    def __fit_method(input_params: dict):
+    def _fit_method(input_params: dict):
         X = input_params["dataset"].encoded_data["repertoires"]
-        y = MLMethodTrainer.__filter_labels(input_params)
+        y = MLMethodTrainer._filter_labels(input_params)
         parameter_grid = input_params["parameter_grid"] if "parameter_grid" in input_params else None
         method = input_params["method"]
         input_params["labels"].sort()
@@ -52,7 +52,7 @@ class MLMethodTrainer(Step):
         return method
 
     @staticmethod
-    def __filter_labels(input_params: dict):
+    def _filter_labels(input_params: dict):
 
         label_names = input_params["dataset"].encoded_data["label_names"]
         y = input_params["dataset"].encoded_data["labels"].copy()

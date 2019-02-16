@@ -30,25 +30,25 @@ class BaselineDatasetCreator(Step):
         # if os.path.isfile(path):
         #     dataset = PickleLoader.load(path)
         # else:
-        #     dataset = BaselineDatasetCreator.__create_baseline_dataset(input_params)
+        #     dataset = BaselineDatasetCreator._create_baseline_dataset(input_params)
         #
         # return dataset
 
     @staticmethod
-    def __create_baseline_dataset(input_params: dict):
+    def _create_baseline_dataset(input_params: dict):
         raise NotImplementedError
 
     @staticmethod
-    def __create_baseline_from_experimental_data(input_params: dict):
-        dataset_loader = BaselineDatasetCreator.__create_data_loader(input_params)
+    def _create_baseline_from_experimental_data(input_params: dict):
+        dataset_loader = BaselineDatasetCreator._create_data_loader(input_params)
         raise NotImplementedError
 
     @staticmethod
-    def __create_baseline_from_synthetic_data(input_params: dict):
+    def _create_baseline_from_synthetic_data(input_params: dict):
         raise NotImplementedError
 
     @staticmethod
-    def __create_data_loader(input_params: dict):
+    def _create_data_loader(input_params: dict):
         # TODO: add checking, e.g. if DataLoaderType.PICKLE == input_params["data_loader"]:
         data_loader = PickleLoader()
         return data_loader

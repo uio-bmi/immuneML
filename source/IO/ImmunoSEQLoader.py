@@ -25,18 +25,18 @@ class ImmunoSEQLoader(DataLoader):
         if os.path.isfile(path + "dataset.pkl"):
             dataset = PickleLoader.load(path)
         else:
-            dataset = ImmunoSEQLoader.__process_dataset(path, params)
+            dataset = ImmunoSEQLoader._process_dataset(path, params)
 
         return dataset
 
     @staticmethod
-    def __process_dataset(path, params: dict = None):
+    def _process_dataset(path, params: dict = None):
 
-        filenames = ImmunoSEQLoader.__get_filenames(path, params)
+        filenames = ImmunoSEQLoader._get_filenames(path, params)
         PathBuilder.build(params["result_path"])
-        repertoire_filenames, sample_parameter_names = ImmunoSEQLoader.__process_repertoires(filenames, params)
+        repertoire_filenames, sample_parameter_names = ImmunoSEQLoader._process_repertoires(filenames, params)
 
-        params = DatasetParams(number_of_examples=len(repertoire_filenames), sample_param_names=sample_parameter_names)
+        params = DatasetParams(sample_param_names=sample_parameter_names)
         dataset = Dataset(filenames=repertoire_filenames, dataset_params=params)
 
         PickleExporter.export(dataset, path, "dataset.pkl")
@@ -44,17 +44,17 @@ class ImmunoSEQLoader(DataLoader):
         return dataset
 
     @staticmethod
-    def __process_repertoire(filename, params):
+    def _process_repertoire(filename, params):
         basename = os.path.splitext(os.path.basename(filename))[0]
         filepath = params["result_path"] + basename + ".pkl"
 
         if not os.path.isfile(filepath):
-            ImmunoSEQLoader.__load_repertoire(filename, params, filepath)
+            ImmunoSEQLoader._load_repertoire(filename, params, filepath)
 
         return filepath
 
     @staticmethod
-    def __load_repertoire(filename, params, result_file_path):
+    def _load_repertoire(filename, params, result_file_path):
         repertoire = Repertoire()
 
         # add metadata
@@ -62,7 +62,7 @@ class ImmunoSEQLoader(DataLoader):
         repertoire.metadata = RepertoireMetadata(sample=sample)
 
         # add sequences
-        sequences = ImmunoSEQLoader.__preprocess_sequences()
+        sequences = ImmunoSEQLoader._preprocess_sequences()
         repertoire.sequences = sequences
 
         # store as pickle
@@ -71,18 +71,18 @@ class ImmunoSEQLoader(DataLoader):
 
 
     @staticmethod
-    def __process_repertoires(filenames: list, params: dict):
+    def _process_repertoires(filenames: list, params: dict):
         process_count = ParallelismManager.assign_cores_to_job("load_experimental_data")
 
         with Pool(process_count) as pool:
-            results = pool.starmap(ImmunoSEQLoader.__process_repertoire, product(filenames, params))
+            results = pool.starmap(ImmunoSEQLoader._process_repertoire, product(filenames, params))
 
         outputs = [result[0] for result in results]
 
         return outputs
 
     @staticmethod
-    def __get_filenames(path, params: dict):
+    def _get_filenames(path, params: dict):
         ext = params["file_type"]  # should be tsv, csv...
         if "file_names" in params and params["file_names"] is not None:
             filenames = params["file_names"]

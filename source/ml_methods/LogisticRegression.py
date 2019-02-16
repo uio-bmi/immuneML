@@ -38,17 +38,17 @@ class LogisticRegression(MLMethod):
         cores = ParallelismManager.assign_cores_to_job()
 
         if label_names is not None and len(label_names) == 1:
-            self.__fit_for_label(X, y, label_names[0], cores)
+            self._fit_for_label(X, y, label_names[0], cores)
         elif label_names is not None and len(label_names) > 1:
             for index, label in enumerate(label_names):
-                self.__fit_for_label(X, y[index], label, cores)
+                self._fit_for_label(X, y[index], label, cores)
         else:
             warnings.warn("LogisticRegression: label names not set, assuming only one and attempting to fit the model with label 'default'...", Warning)
-            self.__fit_for_label(X, y, "default", cores)
+            self._fit_for_label(X, y, "default", cores)
 
         ParallelismManager.free_cores(cores=cores)
 
-    def __fit_for_label(self, X: Iterable, y: np.ndarray, label: str, cores: int):
+    def _fit_for_label(self, X: Iterable, y: np.ndarray, label: str, cores: int):
         self.__models[label] = SGDClassifier(loss="log", n_jobs=cores, tol=1e-3)  # log loss + SGD classifier -> logistic regression
         self.__models[label].fit(X, y)
 
@@ -65,11 +65,11 @@ class LogisticRegression(MLMethod):
         n_jobs = ParallelismManager.assign_cores_to_job()
 
         for index, label in enumerate(label_names):
-            self.__fit_for_label_by_cv(X, y[index], label, n_jobs, number_of_splits)
+            self._fit_for_label_by_cv(X, y[index], label, n_jobs, number_of_splits)
 
         ParallelismManager.free_cores(cores=n_jobs)
 
-    def __fit_for_label_by_cv(self, X: Iterable, y: np.ndarray, label: str, cores: int, number_of_splits: int = 5):
+    def _fit_for_label_by_cv(self, X: Iterable, y: np.ndarray, label: str, cores: int, number_of_splits: int = 5):
         self.__models[label] = RandomizedSearchCV(SGDClassifier(loss="log", tol=1e-3),
                                                   param_distributions=self.__parameter_grid,
                                                   cv=number_of_splits, n_jobs=cores,

@@ -26,18 +26,18 @@ class HealthySequenceImplanting(SignalImplantingStrategy):
         self.sequence_position_weights = sequence_position_weights
 
     def implant_in_repertoire(self, repertoire: Repertoire, repertoire_implanting_rate: float, signal) -> Repertoire:
-        max_motif_length = self.__calculate_max_motif_length(signal)
-        sequences_to_be_processed, other_sequences = self.__choose_sequences_for_implanting(repertoire,
+        max_motif_length = self._calculate_max_motif_length(signal)
+        sequences_to_be_processed, other_sequences = self._choose_sequences_for_implanting(repertoire,
                                                                                             repertoire_implanting_rate,
                                                                                             max_motif_length)
-        processed_sequences = self.__implant_in_sequences(sequences_to_be_processed, signal)
+        processed_sequences = self._implant_in_sequences(sequences_to_be_processed, signal)
         sequences = other_sequences + processed_sequences
-        metadata = self.__build_new_metadata(repertoire.metadata)
-        new_repertoire = self.__build_new_repertoire(sequences, metadata, signal)
+        metadata = self._build_new_metadata(repertoire.metadata)
+        new_repertoire = self._build_new_repertoire(sequences, metadata, signal)
 
         return new_repertoire
 
-    def __build_new_metadata(self, metadata: RepertoireMetadata) -> RepertoireMetadata:
+    def _build_new_metadata(self, metadata: RepertoireMetadata) -> RepertoireMetadata:
         new_metadata = copy.deepcopy(metadata) if metadata is not None else RepertoireMetadata()
 
         if new_metadata.sample is None:
@@ -45,11 +45,11 @@ class HealthySequenceImplanting(SignalImplantingStrategy):
 
         return new_metadata
 
-    def __calculate_max_motif_length(self, signal):
+    def _calculate_max_motif_length(self, signal):
         max_motif_length = max([motif.get_max_length() for motif in signal.motifs])
         return max_motif_length
 
-    def __build_new_repertoire(self, sequences, repertoire_metadata, signal) -> Repertoire:
+    def _build_new_repertoire(self, sequences, repertoire_metadata, signal) -> Repertoire:
         if repertoire_metadata is not None:
             metadata = copy.deepcopy(repertoire_metadata)
         else:
@@ -64,7 +64,7 @@ class HealthySequenceImplanting(SignalImplantingStrategy):
 
         return repertoire
 
-    def __implant_in_sequences(self, sequences_to_be_processed: list, signal):
+    def _implant_in_sequences(self, sequences_to_be_processed: list, signal):
         assert self.sequence_implanting_strategy is not None, "HealthySequenceImplanting: add receptor_sequence implanting strategy when creating a HealthySequenceImplanting object."
 
         sequences = []
@@ -74,7 +74,7 @@ class HealthySequenceImplanting(SignalImplantingStrategy):
 
         return sequences
 
-    def __choose_sequences_for_implanting(self, repertoire: Repertoire, repertoire_implanting_rate: float, max_motif_length: int):
+    def _choose_sequences_for_implanting(self, repertoire: Repertoire, repertoire_implanting_rate: float, max_motif_length: int):
         number_of_sequences_to_implant = int(repertoire_implanting_rate * len(repertoire.sequences))
         unusable_sequences = []
         unprocessed_sequences = []
