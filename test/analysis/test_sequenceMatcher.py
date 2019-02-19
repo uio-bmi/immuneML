@@ -6,6 +6,7 @@ from source.analysis.SequenceMatcher import SequenceMatcher
 from source.data_model.dataset.Dataset import Dataset
 from source.data_model.metadata.Sample import Sample
 from source.data_model.receptor_sequence.ReceptorSequence import ReceptorSequence
+from source.data_model.receptor_sequence.SequenceMetadata import SequenceMetadata
 from source.data_model.repertoire.Repertoire import Repertoire
 from source.data_model.repertoire.RepertoireMetadata import RepertoireMetadata
 
@@ -13,17 +14,18 @@ from source.data_model.repertoire.RepertoireMetadata import RepertoireMetadata
 class TestSequenceMatcher(TestCase):
 
     def test_match(self):
-        repertoire = Repertoire(sequences=[ReceptorSequence(amino_acid_sequence="AAAAAA"),
-                                           ReceptorSequence(amino_acid_sequence="CCCCCC"),
-                                           ReceptorSequence(amino_acid_sequence="AAAACC"),
-                                           ReceptorSequence(amino_acid_sequence="TADQVF")],
+        repertoire = Repertoire(sequences=[ReceptorSequence(amino_acid_sequence="AAAAAA", metadata=SequenceMetadata(chain="A", v_gene="V1", j_gene="J2")),
+                                           ReceptorSequence(amino_acid_sequence="CCCCCC", metadata=SequenceMetadata(chain="A", v_gene="V1", j_gene="J2")),
+                                           ReceptorSequence(amino_acid_sequence="AAAACC", metadata=SequenceMetadata(chain="A", v_gene="V1", j_gene="J2")),
+                                           ReceptorSequence(amino_acid_sequence="TADQVF", metadata=SequenceMetadata(chain="A", v_gene="V1", j_gene="J3"))],
                                 metadata=RepertoireMetadata(Sample("CD123", custom_params={"CD": True})))
 
         with open("./rep0.pkl", "wb") as file:
             pickle.dump(repertoire, file)
 
         dataset = Dataset(filenames=["./rep0.pkl"])
-        sequences = ["AAAACA", "TADQV"]
+        sequences = [ReceptorSequence("AAAACA", metadata=SequenceMetadata(chain="A", v_gene="V1", j_gene="J2")),
+                     ReceptorSequence("TADQV", metadata=SequenceMetadata(chain="A", v_gene="V1", j_gene="J3"))]
 
         matcher = SequenceMatcher()
         result = matcher.match(dataset, sequences, 2)
@@ -36,13 +38,14 @@ class TestSequenceMatcher(TestCase):
         os.remove("./rep0.pkl")
 
     def test_match_repertoire(self):
-        repertoire = Repertoire(sequences=[ReceptorSequence(amino_acid_sequence="AAAAAA"),
-                                           ReceptorSequence(amino_acid_sequence="CCCCCC"),
-                                           ReceptorSequence(amino_acid_sequence="AAAACC"),
-                                           ReceptorSequence(amino_acid_sequence="TADQVF")],
+        repertoire = Repertoire(sequences=[ReceptorSequence(amino_acid_sequence="AAAAAA", metadata=SequenceMetadata(chain="A")),
+                                           ReceptorSequence(amino_acid_sequence="CCCCCC", metadata=SequenceMetadata(chain="A")),
+                                           ReceptorSequence(amino_acid_sequence="AAAACC", metadata=SequenceMetadata(chain="A")),
+                                           ReceptorSequence(amino_acid_sequence="TADQVF", metadata=SequenceMetadata(chain="A"))],
                                 metadata=RepertoireMetadata(Sample("CD123", custom_params={"CD": True})))
 
-        sequences = ["AAAACA", "TADQV"]
+        sequences = [ReceptorSequence("AAAACA", metadata=SequenceMetadata(chain="A")),
+                     ReceptorSequence("TADQV", metadata=SequenceMetadata(chain="A"))]
 
         matcher = SequenceMatcher()
         result = matcher.match_repertoire(repertoire, 0, sequences, 2)
