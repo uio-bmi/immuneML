@@ -26,7 +26,7 @@ a CDR3 sequence. The information stored about a sequence are:
 
 **Id** is any unique string that will unambiguously identify the sequence.
 
-**Sequence metadata** contains information about V gene, J gene, chain, sequence count and frame type. They can be used for
+**Sequence metadata** contains information about V gene, J gene, chain, sequence count, region and frame type. They can be used for
 further analysis. For instance, when analyzing sequences, those that have "Out" or "Stop" frame types would be discarded.
 
 **Sequence annotation** is used for simulation purposes. In cases when sequences are modified to include an artificial
