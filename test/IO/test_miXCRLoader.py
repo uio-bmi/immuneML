@@ -20,8 +20,8 @@ class TestMiXCRLoader(TestCase):
                 "patient": "CD12",
                 "dilution": "108'",
                 "cloneCount": 3,
-                "allVHitsWithScore": "TRAV13-1*00(735)",
-                "allJHitsWithScore": "TRAJ15*00(243)",
+                "allVHitsWithScore": "V13-1*00(735)",
+                "allJHitsWithScore": "J15*00(243)",
                 "nSeqCDR3": "TGTGCAGCAA",
                 "minQualCDR3": 10,
                 "aaSeqCDR3": "VFAVFA",
@@ -30,8 +30,8 @@ class TestMiXCRLoader(TestCase):
                 "patient": "CD12",
                 "dilution": "108'",
                 "cloneCount": 5,
-                "allVHitsWithScore": "TRAV14-1*00(735)",
-                "allJHitsWithScore": "TRAJ12*00(243)",
+                "allVHitsWithScore": "V14-1*00(735)",
+                "allJHitsWithScore": "J12*00(243)",
                 "nSeqCDR3": "CAATGTGA",
                 "minQualCDR3": 10,
                 "aaSeqCDR3": "CASCAS",
@@ -90,7 +90,7 @@ class TestMiXCRLoader(TestCase):
         for index, repertoire in enumerate(dataset.get_data()):
             if index == 0:
                 self.assertTrue(repertoire.sequences[0].amino_acid_sequence == "VFAVFA")
-                self.assertTrue(repertoire.sequences[1].metadata.v_gene == "TRAV14-1*00(735)")
+                self.assertTrue(repertoire.sequences[1].metadata.v_gene == "V14-1")
                 self.assertTrue(repertoire.metadata.sample.custom_params["CD"])
             else:
                 self.assertEqual("TGTGCAGCAA", repertoire.sequences[0].nucleotide_sequence)

@@ -1,6 +1,7 @@
 import csv
 import itertools
 import pickle
+import warnings
 from glob import iglob
 from multiprocessing.pool import Pool
 
@@ -65,7 +66,8 @@ class MiXCRLoader(DataLoader):
 
     @staticmethod
     def _extract_patient(filepath: str, df):
-        assert df[MiXCRLoader.PATIENT].nunique() == 1, "MiXCRLoader: multiple patients in a single file are not supported."
+        assert df[MiXCRLoader.PATIENT].nunique() == 1, \
+            "MiXCRLoader: multiple patients in a single file are not supported. Issue with " + filepath
         patient_id = df[MiXCRLoader.PATIENT][0]
         return patient_id
 
@@ -76,13 +78,17 @@ class MiXCRLoader(DataLoader):
         return metadata
 
     @staticmethod
-    def _get_sample_id(df: DataFrame):
-        assert df[MiXCRLoader.SAMPLE_ID].nunique() == 1, "MiXCRLoader: multiple sample IDs in a single file are not supported."
-        return df[MiXCRLoader.SAMPLE_ID][0]
+    def _get_sample_id(df: DataFrame, filepath):
+        if df[MiXCRLoader.SAMPLE_ID].nunique() != 1:
+            warnings.warn("MiXCRLoader: multiple sample IDs in a single file are not supported. Ignoring sample id... Issue with " + filepath, Warning)
+            sample_id = None
+        else:
+            sample_id = df[MiXCRLoader.SAMPLE_ID][0]
+        return sample_id
 
     @staticmethod
     def _extract_sample_information(filepath, params, df) -> Sample:
-        sample = Sample(identifier=MiXCRLoader._get_sample_id(df))
+        sample = Sample(identifier=MiXCRLoader._get_sample_id(df, filepath))
         sample.custom_params = {}
 
         for param in params["custom_params"]:
@@ -122,11 +128,11 @@ class MiXCRLoader(DataLoader):
 
     @staticmethod
     def _extract_v_gene(df, row):
-        return row[MiXCRLoader.V_GENES_WITH_SCORE].split(",")[0]
+        return row[MiXCRLoader.V_GENES_WITH_SCORE].split(",")[0].replace("TRB", "").replace("TRA", "").split("*", 1)[0]
 
     @staticmethod
     def _extract_j_gene(df, row):
-        return row[MiXCRLoader.J_GENES_WITH_SCORE].split(",")[0]
+        return row[MiXCRLoader.J_GENES_WITH_SCORE].split(",")[0].replace("TRB", "").replace("TRA", "").split("*", 1)[0]
 
     @staticmethod
     def _extract_sequence_metadata(df, row, chain, params):
