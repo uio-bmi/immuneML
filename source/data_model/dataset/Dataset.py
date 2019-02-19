@@ -16,7 +16,7 @@ class Dataset:
         self.data = data
         self.params = dataset_params
         self.encoded_data = encoded_data
-        self.filenames = filenames
+        self.filenames = sorted(filenames)
         self.id = identifier if identifier is not None else uuid.uuid1()
 
     def add_data(self, data: collections.Iterable):
@@ -32,6 +32,7 @@ class Dataset:
         self.encoded_data = encoded_data
 
     def get_data(self, batch_size: int = 1):
+        sorted(self.filenames)
         return RepertoireGenerator.build_generator(file_list=self.filenames, batch_size=batch_size)
 
     def get_repertoire_count(self):
