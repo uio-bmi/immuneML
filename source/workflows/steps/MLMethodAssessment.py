@@ -3,6 +3,7 @@ from itertools import product
 from multiprocessing.pool import Pool
 from sklearn import metrics
 
+from source.ml_metrics import ml_metrics
 from source.environment.MetricType import MetricType
 from source.environment.ParallelismManager import ParallelismManager
 from source.ml_methods.MLMethod import MLMethod
@@ -68,21 +69,10 @@ class MLMethodAssessment(Step):
 
     @staticmethod
     def _score(metric: MetricType, predicted_y, true_y):
-
-        # TODO: add parameters for metrics functions if set (such as value names for conf matrix etc)
-
-        if metric == MetricType.ACCURACY:
-            score = metrics.accuracy_score(true_y, predicted_y)
-        elif metric == MetricType.BALANCED_ACCURACY:
-            score = metrics.balanced_accuracy_score(true_y, predicted_y)
-        elif metric == MetricType.F1_MACRO:
-            score = metrics.f1_score(true_y, predicted_y, average="macro")
-        elif metric == MetricType.F1_MICRO:
-            score = metrics.f1_score(true_y, predicted_y, average="micro")
-        elif metric == MetricType.F1_WEIGHTED:
-            score = metrics.f1_score(true_y, predicted_y, average="weighted")
+        if hasattr(metrics, metric.value) and callable(getattr(metrics, metric.value)):
+            score = getattr(metrics, metric.value)(true_y, predicted_y)
         else:
-            score = metrics.confusion_matrix(true_y, predicted_y)
+            score = getattr(ml_metrics, metric.value)(true_y, predicted_y)
 
         return score
 
