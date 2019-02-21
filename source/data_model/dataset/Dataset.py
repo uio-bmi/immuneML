@@ -16,7 +16,7 @@ class Dataset:
         self.data = data
         self.params = dataset_params
         self.encoded_data = encoded_data
-        self.filenames = sorted(filenames)
+        self.filenames = sorted(filenames) if filenames is not None else None
         self.id = identifier if identifier is not None else uuid.uuid1()
 
     def add_data(self, data: collections.Iterable):
