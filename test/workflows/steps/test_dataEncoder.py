@@ -3,7 +3,6 @@ import shutil
 from unittest import TestCase
 
 from source.data_model.dataset.Dataset import Dataset
-from source.data_model.dataset.DatasetParams import DatasetParams
 from source.data_model.metadata.Sample import Sample
 from source.data_model.repertoire.Repertoire import Repertoire
 from source.data_model.repertoire.RepertoireMetadata import RepertoireMetadata
@@ -35,7 +34,7 @@ class TestDataEncoder(TestCase):
         lc.add_label("l1", [1, 2])
         lc.add_label("l2", [0, 3])
 
-        dataset = Dataset(filenames=["./tmp/rep1.pkl", "./tmp/rep2.pkl"], dataset_params=DatasetParams())
+        dataset = Dataset(filenames=["./tmp/rep1.pkl", "./tmp/rep2.pkl"])
 
         res = DataEncoder.run({
             "dataset": dataset,

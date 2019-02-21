@@ -142,10 +142,8 @@ class Word2VecEncoder(DatasetEncoder):
 
         scaled_repertoires = Word2VecEncoder._scale_encoding(repertoires, params)
 
-        dataset_params = copy(dataset.params)
-        dataset_params.encoding = "W2V"
+        encoded_dataset.params = dataset.params
 
-        encoded_dataset.add_params(dataset_params)
         encoded_dataset.add_encoded_data({
             "repertoires": scaled_repertoires,
             "labels": labels,

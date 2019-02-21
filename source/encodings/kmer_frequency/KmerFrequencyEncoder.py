@@ -11,7 +11,6 @@ import numpy as np
 from source.IO.PickleExporter import PickleExporter
 from source.IO.PickleLoader import PickleLoader
 from source.data_model.dataset.Dataset import Dataset
-from source.data_model.dataset.DatasetParams import DatasetParams
 from source.data_model.repertoire.Repertoire import Repertoire
 from source.data_model.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.encodings.DatasetEncoder import DatasetEncoder
@@ -72,7 +71,7 @@ class KmerFrequencyEncoder(DatasetEncoder):
 
         encoded_dataset = Dataset(filenames=dataset.filenames,
                                   encoded_data=encoded_dataset,
-                                  dataset_params=copy.deepcopy(dataset.params) if dataset.params is not None else DatasetParams())
+                                  params=dataset.params)
 
         KmerFrequencyEncoder.store(encoded_dataset, params)
 

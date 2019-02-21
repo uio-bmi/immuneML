@@ -24,6 +24,8 @@ class MiXCRLoader(DataLoader):
     CLONE_COUNT = "cloneCount"
     PATIENT = "patient"
     V_GENES_WITH_SCORE = "allVHitsWithScore"
+    V_HIT = "vHit"
+    J_HIT = "jHit"
     J_GENES_WITH_SCORE = "allJHitsWithScore"
     CDR3_AA_SEQUENCE = "aaSeqCDR3"
     CDR3_NT_SEQUENCE = "nSeqCDR3"
@@ -41,10 +43,25 @@ class MiXCRLoader(DataLoader):
         arguments = [(filepath, filepaths, params) for filepath in filepaths]
 
         with Pool(params["batch_size"]) as pool:
-            repertoire_filenames = pool.starmap(MiXCRLoader._load_repertoire, arguments)
+            output = pool.starmap(MiXCRLoader._load_repertoire, arguments)
 
-        dataset = Dataset(filenames=repertoire_filenames)
+        repertoire_filenames = [out[0] for out in output]
+        custom_params = MiXCRLoader._prepare_sample_custom_params([out[1] for out in output])
+
+        dataset = Dataset(filenames=repertoire_filenames, params=custom_params)
         return dataset
+
+    @staticmethod
+    def _prepare_sample_custom_params(params) -> dict:
+        custom_params = {}
+        for p in params:
+            for key in p.keys():
+                if key in custom_params:
+                    custom_params[key].add(p[key])
+                else:
+                    custom_params[key] = {p[key]}
+
+        return custom_params
 
     @staticmethod
     def _load_repertoire(filepath, filepaths, params):
@@ -62,14 +79,13 @@ class MiXCRLoader(DataLoader):
         with open(filename, "wb") as file:
             pickle.dump(repertoire, file)
 
-        return filename
+        return filename, metadata.sample.custom_params
 
     @staticmethod
     def _extract_patient(filepath: str, df):
         assert df[MiXCRLoader.PATIENT].nunique() == 1, \
             "MiXCRLoader: multiple patients in a single file are not supported. Issue with " + filepath
-        patient_id = df[MiXCRLoader.PATIENT][0]
-        return patient_id
+        return df[MiXCRLoader.PATIENT][0]
 
     @staticmethod
     def _extract_repertoire_metadata(filepath, params, df):
@@ -92,12 +108,12 @@ class MiXCRLoader(DataLoader):
         sample.custom_params = {}
 
         for param in params["custom_params"]:
-            sample.custom_params[param["name"]] = MiXCRLoader._extract_custom_param(param, filepath, df)
+            sample.custom_params[param["name"]] = MiXCRLoader._extract_custom_param(param, filepath)
 
         return sample
 
     @staticmethod
-    def _extract_custom_param(param, filepath, df):
+    def _extract_custom_param(param, filepath):
         if param["location"] == "filepath_binary":
             val = True if param["name"] in filepath and param["alternative"] not in filepath else False
         else:
@@ -127,23 +143,32 @@ class MiXCRLoader(DataLoader):
         return "A" if "TRA" in filename else "B" if "TRB" in filename else "NA"
 
     @staticmethod
-    def _extract_v_gene(df, row):
-        return row[MiXCRLoader.V_GENES_WITH_SCORE].split(",")[0].replace("TRB", "").replace("TRA", "").split("*", 1)[0]
+    def _extract_gene(row, fields):
+        """
+        :param df: dataframe
+        :param row: dataframe row
+        :param fields: list of field names sorted by preference
+        :return: the field value in the row for the first matched field name from fields
+        """
+        i = 0
+        gene = None
+        while i < len(fields) and gene is None:
+            if fields[i] in row and isinstance(row[fields[i]], str):
+                gene = row[fields[i]].split(",")[0].replace("TRB", "").replace("TRA", "").split("*", 1)[0]
+            i += 1
 
-    @staticmethod
-    def _extract_j_gene(df, row):
-        return row[MiXCRLoader.J_GENES_WITH_SCORE].split(",")[0].replace("TRB", "").replace("TRA", "").split("*", 1)[0]
+        return gene
 
     @staticmethod
     def _extract_sequence_metadata(df, row, chain, params):
         count = row[MiXCRLoader.CLONE_COUNT]
-        v_gene = MiXCRLoader._extract_v_gene(df, row)
-        j_gene = MiXCRLoader._extract_j_gene(df, row)
+        v_gene = MiXCRLoader._extract_gene(row, [MiXCRLoader.V_HIT, MiXCRLoader.V_GENES_WITH_SCORE])
+        j_gene = MiXCRLoader._extract_gene(row, [MiXCRLoader.J_HIT, MiXCRLoader.J_GENES_WITH_SCORE])
         region_type = params["sequence_type"]
         metadata = SequenceMetadata(v_gene=v_gene, j_gene=j_gene, chain=chain, count=count, region_type=region_type)
 
         for column in df.keys():
-            if column in params["additional_columns"]:
+            if params["additional_columns"] == "*" or column in params["additional_columns"]:
                 metadata.custom_params[column] = row[column]
 
         return metadata

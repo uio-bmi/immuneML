@@ -3,7 +3,6 @@ import shutil
 from unittest import TestCase
 
 from source.data_model.dataset.Dataset import Dataset
-from source.data_model.dataset.DatasetParams import DatasetParams
 from source.data_model.metadata.Sample import Sample
 from source.data_model.repertoire.Repertoire import Repertoire
 from source.data_model.repertoire.RepertoireMetadata import RepertoireMetadata
@@ -41,8 +40,7 @@ class TestWord2VecEncoder(TestCase):
         with open(file2, "wb") as file:
             pickle.dump(rep2, file)
 
-        params = DatasetParams()
-        dataset = Dataset(filenames=[file1, file2], dataset_params=params)
+        dataset = Dataset(filenames=[file1, file2])
 
         label_configuration = LabelConfiguration()
         label_configuration.add_label("T1D", ["T1D", "CTL"], LabelType.CLASSIFICATION)
