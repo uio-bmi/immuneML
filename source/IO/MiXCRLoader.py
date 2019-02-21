@@ -9,6 +9,7 @@ import pandas as pd
 from pandas import DataFrame
 
 from source.IO.DataLoader import DataLoader
+from source.IO.PickleExporter import PickleExporter
 from source.data_model.dataset.Dataset import Dataset
 from source.data_model.metadata.Sample import Sample
 from source.data_model.receptor_sequence.ReceptorSequence import ReceptorSequence
@@ -35,6 +36,7 @@ class MiXCRLoader(DataLoader):
         PathBuilder.build(params["result_path"])
         filepaths = sorted(list(iglob(path + "**/*." + params["extension"], recursive=True)))
         dataset = MiXCRLoader._load(filepaths, params)
+        PickleExporter.export(dataset, params["result_path"], "dataset.pkl")
         return dataset
 
     @staticmethod
