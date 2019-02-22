@@ -45,15 +45,15 @@ class TestSVM(TestCase):
         svm.fit(sparse.csr_matrix(x), y)
 
         svm.store("./")
-        self.assertTrue(os.path.isfile("./svm.pkl"))
+        self.assertTrue(os.path.isfile("./svm.pickle"))
 
-        with open("./svm.pkl", "rb") as file:
+        with open("./svm.pickle", "rb") as file:
             svm2 = pickle.load(file)
 
         self.assertTrue(isinstance(svm2["default"], SGDClassifier))
 
-        os.remove("./svm.pkl")
-        os.remove("./svm_optimal_params.json")
+        os.remove("./svm.pickle")
+        os.remove("./svm.json")
 
     def test_load(self):
         x = np.array([[1, 0, 0], [0, 1, 1], [1, 1, 1], [0, 1, 1]])
@@ -62,7 +62,7 @@ class TestSVM(TestCase):
         svm = SVM()
         svm.fit(sparse.csr_matrix(x), y)
 
-        with open("./svm.pkl", "wb") as file:
+        with open("./svm.pickle", "wb") as file:
             pickle.dump(svm.get_model(), file)
 
         svm2 = SVM()
@@ -70,4 +70,4 @@ class TestSVM(TestCase):
 
         self.assertTrue(isinstance(svm2.get_model()["default"], SGDClassifier))
 
-        os.remove("./svm.pkl")
+        os.remove("./svm.pickle")

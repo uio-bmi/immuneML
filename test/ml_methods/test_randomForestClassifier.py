@@ -47,15 +47,15 @@ class TestRandomForestClassifier(TestCase):
         rfc.fit(sparse.csr_matrix(x), y)
 
         rfc.store("./")
-        self.assertTrue(os.path.isfile("./random_forest_classifier.pkl"))
+        self.assertTrue(os.path.isfile("./random_forest_classifier.pickle"))
 
-        with open("./random_forest_classifier.pkl", "rb") as file:
+        with open("./random_forest_classifier.pickle", "rb") as file:
             rfc2 = pickle.load(file)
 
         self.assertTrue(isinstance(rfc2["default"], RFC))
 
-        os.remove("./random_forest_classifier.pkl")
-        os.remove("./rfc_optimal_params.json")
+        os.remove("./random_forest_classifier.pickle")
+        os.remove("./random_forest_classifier.json")
 
     def test_load(self):
         x = np.array([[1, 0, 0], [0, 1, 1], [1, 1, 1], [0, 1, 1]])
@@ -64,7 +64,7 @@ class TestRandomForestClassifier(TestCase):
         rfc = RandomForestClassifier()
         rfc.fit(sparse.csr_matrix(x), y)
 
-        with open("./random_forest_classifier.pkl", "wb") as file:
+        with open("./random_forest_classifier.pickle", "wb") as file:
             pickle.dump(rfc.get_model(), file)
 
         rfc2 = RandomForestClassifier()
@@ -72,5 +72,5 @@ class TestRandomForestClassifier(TestCase):
 
         self.assertTrue(isinstance(rfc2.get_model()["default"], RFC))
 
-        os.remove("./random_forest_classifier.pkl")
+        os.remove("./random_forest_classifier.pickle")
 
