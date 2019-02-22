@@ -1,4 +1,5 @@
 from source.data_model.receptor_sequence.ReceptorSequence import ReceptorSequence
+from source.encodings.EncoderParams import EncoderParams
 from source.encodings.kmer_frequency.sequence_encoding.SequenceEncodingStrategy import SequenceEncodingStrategy
 
 
@@ -8,7 +9,7 @@ class IdentitySequenceEncoder(SequenceEncodingStrategy):
     """
 
     @staticmethod
-    def encode_sequence(sequence: ReceptorSequence, params: dict):
+    def encode_sequence(sequence: ReceptorSequence, params: EncoderParams):
 
         encoded = sequence.get_sequence()
         res = [encoded]

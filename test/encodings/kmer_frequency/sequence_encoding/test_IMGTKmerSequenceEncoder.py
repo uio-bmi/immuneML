@@ -1,13 +1,18 @@
 from unittest import TestCase
 
 from source.data_model.receptor_sequence.ReceptorSequence import ReceptorSequence
+from source.encodings.EncoderParams import EncoderParams
 from source.encodings.kmer_frequency.sequence_encoding.IMGTKmerSequenceEncoder import IMGTKmerSequenceEncoder
+from source.environment.LabelConfiguration import LabelConfiguration
 
 
 class TestIMGTKmerSequenceEncoder(TestCase):
     def test_encode_sequence(self):
         sequence = ReceptorSequence("CASSPRERATYEQCASSPRERATYEQCASSPRERATYEQ", None, None)
-        kmers = IMGTKmerSequenceEncoder.encode_sequence(sequence, {"k": 3})
+        kmers = IMGTKmerSequenceEncoder.encode_sequence(sequence, EncoderParams(
+                                                                    model={"k": 3},
+                                                                    label_configuration=LabelConfiguration(),
+                                                                    result_path=""))
         self.assertEqual({('CAS', 105), ('ASS', 106), ('SSP', 107), ('SPR', 108), ('PRE', 109), ('RER', 110),
                           ('ERA', 111), ('RAT', 111.001), ('ATY', 111.002), ('TYE', 111.003), ('YEQ', 111.004),
                           ('EQC', 111.005), ('QCA', 111.006), ('CAS', 111.007), ('ASS', 111.008), ('SSP', 111.009),
@@ -20,8 +25,14 @@ class TestIMGTKmerSequenceEncoder(TestCase):
         self.assertEqual(len(kmers), len(sequence.get_sequence()) - 3 + 1)
 
         sequence = ReceptorSequence("AHCDE", None, None)
-        kmers = IMGTKmerSequenceEncoder.encode_sequence(sequence, {"k": 3})
+        kmers = IMGTKmerSequenceEncoder.encode_sequence(sequence, EncoderParams(
+                                                                    model={"k": 3},
+                                                                    label_configuration=LabelConfiguration(),
+                                                                    result_path=""))
         self.assertEqual({('AHC', 105), ('HCD', 106), ('CDE', 107)},
                          set(kmers))
         self.assertEqual(len(kmers), len(sequence.get_sequence()) - 3 + 1)
-        self.assertRaises(ValueError, IMGTKmerSequenceEncoder.encode_sequence, sequence, {"k": 25})
+        self.assertRaises(ValueError, IMGTKmerSequenceEncoder.encode_sequence, sequence, EncoderParams(
+                                                                    model={"k": 25},
+                                                                    label_configuration=LabelConfiguration(),
+                                                                    result_path=""))

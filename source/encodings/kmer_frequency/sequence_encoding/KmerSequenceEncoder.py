@@ -1,4 +1,5 @@
 from source.data_model.receptor_sequence.ReceptorSequence import ReceptorSequence
+from source.encodings.EncoderParams import EncoderParams
 from source.encodings.kmer_frequency.sequence_encoding.SequenceEncodingStrategy import SequenceEncodingStrategy
 from source.util.KmerHelper import KmerHelper
 
@@ -6,8 +7,8 @@ from source.util.KmerHelper import KmerHelper
 class KmerSequenceEncoder(SequenceEncodingStrategy):
 
     @staticmethod
-    def encode_sequence(sequence: ReceptorSequence, params: dict):
-        k = params["k"]
+    def encode_sequence(sequence: ReceptorSequence, params: EncoderParams):
+        k = params["model"]["k"]
         length = len(sequence.get_sequence())
         if length < k:
             raise ValueError('Sequence length is less than k. '

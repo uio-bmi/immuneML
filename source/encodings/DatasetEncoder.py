@@ -16,8 +16,3 @@ class DatasetEncoder(metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def store(encoded_dataset: Dataset, params: dict):
         pass
-
-    @staticmethod
-    @abc.abstractmethod
-    def validate_configuration(params: dict):
-        pass

@@ -8,6 +8,7 @@ from source.data_model.metadata.Sample import Sample
 from source.data_model.repertoire.Repertoire import Repertoire
 from source.data_model.repertoire.RepertoireMetadata import RepertoireMetadata
 from source.data_model.receptor_sequence.ReceptorSequence import ReceptorSequence
+from source.encodings.EncoderParams import EncoderParams
 from source.encodings.word2vec.Word2VecEncoder import Word2VecEncoder
 from source.encodings.word2vec.model_creator.ModelType import ModelType
 from source.environment.LabelConfiguration import LabelConfiguration
@@ -47,19 +48,19 @@ class TestWord2VecEncoder(TestCase):
         label_configuration = LabelConfiguration()
         label_configuration.add_label("T1D", ["T1D", "CTL"], LabelType.CLASSIFICATION)
 
-        config_params = {
-            "model": {
+        config_params = EncoderParams(
+            model={
                 "k": 3,
                 "model_creator": ModelType.SEQUENCE,
                 "size": 16
             },
-            "batch_size": 1,
-            "learn_model": True,
-            "result_path": test_path,
-            "label_configuration": label_configuration,
-            "model_path": test_path,
-            "scaler_path": test_path
-        }
+            batch_size=1,
+            learn_model=True,
+            result_path=test_path,
+            label_configuration=label_configuration,
+            model_path=test_path,
+            scaler_path=test_path
+        )
 
         encoded_dataset = Word2VecEncoder.encode(dataset=dataset, params=config_params)
 
@@ -70,10 +71,5 @@ class TestWord2VecEncoder(TestCase):
         self.assertTrue("labels" in encoded_dataset.encoded_data)
         self.assertTrue(len(encoded_dataset.encoded_data["labels"][0]) == 2)
         self.assertTrue(encoded_dataset.encoded_data["labels"][0][0] == "T1D")
-
-        del config_params["model"]["k"]
-        self.assertRaises(AssertionError, Word2VecEncoder.encode, dataset, config_params)
-        del config_params["model"]
-        self.assertRaises(AssertionError, Word2VecEncoder.encode, dataset, config_params)
 
         shutil.rmtree(test_path)
