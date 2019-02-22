@@ -5,6 +5,7 @@ import random
 from source.IO.PickleExporter import PickleExporter
 from source.data_model.dataset.Dataset import Dataset
 from source.data_model.repertoire.Repertoire import Repertoire
+from source.util.FilenameHandler import FilenameHandler
 from source.util.PathBuilder import PathBuilder
 from source.workflows.steps.Step import Step
 
@@ -46,7 +47,7 @@ class DatasetMerger(Step):
         dataset.filenames = file_paths
         dataset.params = sample_params
 
-        PickleExporter.export(dataset, input_params["result_path"], "dataset.pkl")
+        PickleExporter.export(dataset, input_params["result_path"], FilenameHandler.get_dataset_name(DatasetMerger.__name__))
 
         return dataset
 

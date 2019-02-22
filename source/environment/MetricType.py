@@ -5,9 +5,9 @@ class MetricType(Enum):
 
     # TODO: add more metrics
 
-    ACCURACY = 1
-    BALANCED_ACCURACY = 2
-    CONFUSION_MATRIX = 4
-    F1_MICRO = 5
-    F1_MACRO = 6
-    F1_WEIGHTED = 7
+    ACCURACY = "accuracy_score"
+    BALANCED_ACCURACY = "balanced_accuracy_score"
+    CONFUSION_MATRIX = "confusion_matrix"
+    F1_MICRO = "f1_score_micro"
+    F1_MACRO = "f1_score_macro"
+    F1_WEIGHTED = "f1_score_weighted"

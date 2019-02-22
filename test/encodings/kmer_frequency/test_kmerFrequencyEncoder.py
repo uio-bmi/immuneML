@@ -7,11 +7,10 @@ from source.data_model.metadata.Sample import Sample
 from source.data_model.repertoire.Repertoire import Repertoire
 from source.data_model.repertoire.RepertoireMetadata import RepertoireMetadata
 from source.data_model.receptor_sequence.ReceptorSequence import ReceptorSequence
+from source.encodings.EncoderParams import EncoderParams
 from source.encodings.kmer_frequency.KmerFrequencyEncoder import KmerFrequencyEncoder
 from source.encodings.kmer_frequency.NormalizationType import NormalizationType
 from source.encodings.kmer_frequency.ReadsType import ReadsType
-from source.encodings.kmer_frequency.sequence_encoding.IdentitySequenceEncoder import IdentitySequenceEncoder
-from source.encodings.kmer_frequency.sequence_encoding.KmerSequenceEncoder import KmerSequenceEncoder
 from source.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType import SequenceEncodingType
 from source.environment.LabelConfiguration import LabelConfiguration
 from source.util.PathBuilder import PathBuilder
@@ -37,29 +36,33 @@ class TestKmerFrequencyEncoder(TestCase):
 
         dataset = Dataset(filenames=["./tmp/rep1.pkl", "./tmp/rep2.pkl"])
 
-        d1 = KmerFrequencyEncoder.encode(dataset, {
-            "result_path": "./tmp/",
-            "label_configuration": lc,
-            "batch_size": 2,
-            "learn_model": True,
-            "vectorizer_path": "./tmp/",
-            "normalization_type": NormalizationType.RELATIVE_FREQUENCY,
-            "reads": ReadsType.UNIQUE,
-            "sequence_encoding_strategy": SequenceEncodingType.IDENTITY,
-            "k": 3
-        })
+        d1 = KmerFrequencyEncoder.encode(dataset, EncoderParams(
+            result_path="./tmp/",
+            label_configuration=lc,
+            batch_size=2,
+            learn_model=True,
+            vectorizer_path="./tmp/",
+            model={
+                "normalization_type": NormalizationType.RELATIVE_FREQUENCY,
+                "reads": ReadsType.UNIQUE,
+                "sequence_encoding_strategy": SequenceEncodingType.IDENTITY,
+                "k": 3
+            }
+        ))
 
-        d2 = KmerFrequencyEncoder.encode(dataset, {
-            "result_path": "./tmp/",
-            "label_configuration": lc,
-            "batch_size": 2,
-            "learn_model": True,
-            "vectorizer_path": "./tmp/",
-            "normalization_type": NormalizationType.RELATIVE_FREQUENCY,
-            "reads": ReadsType.UNIQUE,
-            "sequence_encoding_strategy": SequenceEncodingType.IDENTITY,
-            "k": 3
-        })
+        d2 = KmerFrequencyEncoder.encode(dataset, EncoderParams(
+            result_path="./tmp/",
+            label_configuration=lc,
+            batch_size=2,
+            learn_model=True,
+            vectorizer_path="./tmp/",
+            model={
+                "normalization_type": NormalizationType.RELATIVE_FREQUENCY,
+                "reads": ReadsType.UNIQUE,
+                "sequence_encoding_strategy": SequenceEncodingType.IDENTITY,
+                "k": 3
+            }
+        ))
 
         shutil.rmtree("./tmp/")
 

@@ -48,15 +48,15 @@ class TestLogisticRegression(TestCase):
         lr.fit(sparse.csr_matrix(x), y)
 
         lr.store("./")
-        self.assertTrue(os.path.isfile("./logistic_regression.pkl"))
+        self.assertTrue(os.path.isfile("./logistic_regression.pickle"))
 
-        with open("./logistic_regression.pkl", "rb") as file:
+        with open("./logistic_regression.pickle", "rb") as file:
             lr2 = pickle.load(file)
 
         self.assertTrue(isinstance(lr2["default"], SGDClassifier))
 
-        os.remove("./logistic_regression.pkl")
-        os.remove("./logistic_regression_optimal_params.json")
+        os.remove("./logistic_regression.pickle")
+        os.remove("./logistic_regression.json")
 
     def test_load(self):
         x = np.array([[1, 0, 0], [0, 1, 1], [1, 1, 1], [0, 1, 1]])
@@ -65,7 +65,7 @@ class TestLogisticRegression(TestCase):
         lr = LogisticRegression()
         lr.fit(sparse.csr_matrix(x), y)
 
-        with open("./logistic_regression.pkl", "wb") as file:
+        with open("./logistic_regression.pickle", "wb") as file:
             pickle.dump(lr.get_model(), file)
 
         lr2 = LogisticRegression()
@@ -73,5 +73,5 @@ class TestLogisticRegression(TestCase):
 
         self.assertTrue(isinstance(lr2.get_model()["default"], SGDClassifier))
 
-        os.remove("./logistic_regression.pkl")
+        os.remove("./logistic_regression.pickle")
 

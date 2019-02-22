@@ -7,6 +7,7 @@ from source.data_model.metadata.Sample import Sample
 from source.data_model.repertoire.Repertoire import Repertoire
 from source.data_model.repertoire.RepertoireMetadata import RepertoireMetadata
 from source.data_model.receptor_sequence.ReceptorSequence import ReceptorSequence
+from source.encodings.EncoderParams import EncoderParams
 from source.encodings.word2vec.Word2VecEncoder import Word2VecEncoder
 from source.encodings.word2vec.model_creator.ModelType import ModelType
 from source.environment.LabelConfiguration import LabelConfiguration
@@ -38,22 +39,19 @@ class TestDataEncoder(TestCase):
 
         res = DataEncoder.run({
             "dataset": dataset,
-            "result_path": "./tmp/",
             "encoder": encoder,
-            "encoder_params": {
-                "model": {
+            "encoder_params": EncoderParams(
+                model={
                     "k": 3,
                     "model_creator": ModelType.SEQUENCE,
                     "size": 6
                 },
-            },
-            "batch_size": 2,
-            "learn_model": True,
-            "label_configuration": lc,
-            "model_path": "./tmp/",
-            "vectorizer_path": "",
-            "pipeline_path": "",
-            "scaler_path": "./tmp/"
+                batch_size=2,
+                label_configuration=lc,
+                model_path="./tmp/",
+                scaler_path="./tmp/",
+                result_path="./tmp/"
+            )
         })
 
         self.assertTrue(isinstance(res, Dataset))

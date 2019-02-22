@@ -2,6 +2,7 @@ import warnings
 
 from source.data_model.dataset.Dataset import Dataset
 from source.dsl_parsers.Parser import Parser
+from source.encodings.EncoderParams import EncoderParams
 from source.environment.LabelConfiguration import LabelConfiguration
 from source.environment.MetricType import MetricType
 from source.simulation.dataset_generation.RandomDatasetGenerator import RandomDatasetGenerator
@@ -86,29 +87,32 @@ class Quickstart:
         encoded_train_dataset = DataEncoder.run({
             "dataset": train_dataset,
             "encoder": params["encoder"],
-            "encoder_params": params["encoder_params"],
-            "result_path": path + "train/",
-            "model_path": path,
-            "vectorizer_path": path,
-            "scaler_path": path,
-            "pipeline_path": path,
-            "batch_size": params["batch_size"],
-            "learn_model": True,
-            "label_configuration": params["label_configuration"]
+            "encoder_params": EncoderParams(
+                model=params["encoder_params"],
+                result_path=path + "train/",
+                model_path=path,
+                vectorizer_path=path,
+                scaler_path=path,
+                pipeline_path=path,
+                batch_size=params["batch_size"],
+                label_configuration=params["label_configuration"]
+            )
         })
 
         encoded_test_dataset = DataEncoder.run({
             "dataset": test_dataset,
             "encoder": params["encoder"],
-            "encoder_params": params["encoder_params"],
-            "result_path": path + "test/",
-            "model_path": path,
-            "vectorizer_path": path,
-            "scaler_path": path,
-            "pipeline_path": path,
-            "batch_size": params["batch_size"],
-            "learn_model": False,
-            "label_configuration": params["label_configuration"]
+            "encoder_params": EncoderParams(
+                model=params["encoder_params"],
+                result_path=path + "test/",
+                model_path=path,
+                vectorizer_path=path,
+                scaler_path=path,
+                pipeline_path=path,
+                batch_size=params["batch_size"],
+                learn_model=False,
+                label_configuration=params["label_configuration"]
+            )
         })
 
         print("#### datasets encoded....")
@@ -151,6 +155,7 @@ class Quickstart:
         print("#### performance assessed....")
 
         return results
+
 
 Quickstart.perform_analysis({
     "repertoire_count": 400,

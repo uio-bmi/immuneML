@@ -15,10 +15,11 @@ from source.data_model.dataset.Dataset import Dataset
 from source.data_model.repertoire.Repertoire import Repertoire
 from source.data_model.repertoire.RepertoireGenerator import RepertoireGenerator
 from source.encodings.DatasetEncoder import DatasetEncoder
+from source.encodings.EncoderParams import EncoderParams
 from source.encodings.word2vec.model_creator.KmerPairModelCreator import KmerPairModelCreator
 from source.encodings.word2vec.model_creator.ModelType import ModelType
 from source.encodings.word2vec.model_creator.SequenceModelCreator import SequenceModelCreator
-from source.environment.LabelConfiguration import LabelConfiguration
+from source.util.FilenameHandler import FilenameHandler
 from source.util.KmerHelper import KmerHelper
 from source.util.NameBuilder import NameBuilder
 from source.util.PathBuilder import PathBuilder
@@ -29,7 +30,7 @@ class Word2VecEncoder(DatasetEncoder):
     Encodes the dataset using Word2Vec model.
     It relies on gensim's implementation of Word2Vec and KmerHelper for k-mer extraction.
 
-    Configuration parameters example:
+    Configuration parameters are an instance of EncoderParams class:
     {
         "model": {
             "k": 3,
@@ -41,18 +42,17 @@ class Word2VecEncoder(DatasetEncoder):
         "result_path": "../",
         "label_configuration": LabelConfiguration(), # labels should be set before encodings is invoked,
         "model_path": "../",
-        "scaler_path": "../"
+        "scaler_path": "../",
+        "vectorizer_path": None
     }
 
     NB: In order to use the workers properly and be able to parallelize the training process,
     it is necessary that Cython is installed on the machine.
     """
     @staticmethod
-    def encode(dataset: Dataset, params: dict) -> Dataset:
+    def encode(dataset: Dataset, params: EncoderParams) -> Dataset:
 
-        Word2VecEncoder.validate_configuration(params)
-
-        filepath = params["result_path"] + "encoded_dataset.pkl"
+        filepath = params["result_path"] + FilenameHandler.get_dataset_name(Word2VecEncoder.__name__)
 
         if os.path.isfile(filepath):
             encoded_dataset = PickleLoader.load(filepath)
@@ -62,20 +62,7 @@ class Word2VecEncoder(DatasetEncoder):
         return encoded_dataset
 
     @staticmethod
-    def validate_configuration(params: dict):
-        assert "model" in params, "Word2VecEncoder: the model dict is missing in the parameters."
-        assert "k" in params["model"] and isinstance(params["model"]["k"], int), "Word2VecEncoder: the k param is not set in the parameters of the model."
-        assert "model_creator" in params["model"] and isinstance(params["model"]["model_creator"], ModelType), "Word2VecEncoder: the model_creator param is not set properly in the parameters of the model."
-        assert "size" in params["model"], "Word2VecEncoder: the size param is not set properly in the parameters of the model."
-        assert "batch_size" in params and isinstance(params["batch_size"], int), "Word2VecEncoder: the batch_size param is not set in the parameters."
-        assert "learn_model" in params and isinstance(params["learn_model"], bool), "Word2VecEncoder: the learn_model param is not set in the parameters."
-        assert "result_path" in params, "Word2VecEncoder: the result_path param is not set in the parameters."
-        assert "label_configuration" in params and isinstance(params["label_configuration"], LabelConfiguration), "Word2VecEncoder: the label_configuration param is not properly set in the parameters."
-        assert "model_path" in params, "Word2VecEncoder: the model_path param is not set in the parameters."
-        assert "scaler_path" in params, "Word2VecEncoder: the scaler_path param is not set in the parameters."
-
-    @staticmethod
-    def _encode_new_dataset(dataset: Dataset, params: dict) -> Dataset:
+    def _encode_new_dataset(dataset: Dataset, params: EncoderParams) -> Dataset:
         if params["learn_model"] is True and not Word2VecEncoder._exists_model(params):
             model = Word2VecEncoder._create_model(dataset, params)
         else:
@@ -91,7 +78,7 @@ class Word2VecEncoder(DatasetEncoder):
         return encoded_dataset
 
     @staticmethod
-    def _encode_repertoire(repertoire: Repertoire, vectors, params):
+    def _encode_repertoire(repertoire: Repertoire, vectors, params: EncoderParams):
         repertoire_vector = np.zeros(vectors.vector_size)
         for (index2, sequence) in enumerate(repertoire.sequences):
             kmers = KmerHelper.create_kmers_from_sequence(sequence=sequence, k=params["model"]["k"])
@@ -107,7 +94,7 @@ class Word2VecEncoder(DatasetEncoder):
         return repertoire_vector
 
     @staticmethod
-    def _encode_labels(dataset: Dataset, params: dict):
+    def _encode_labels(dataset: Dataset, params: EncoderParams):
 
         label_config = params["label_configuration"]
         labels = {name: [] for name in label_config.get_labels_by_name()}
@@ -118,19 +105,12 @@ class Word2VecEncoder(DatasetEncoder):
 
             for label_name in label_config.get_labels_by_name():
                 label = sample.custom_params[label_name]
-
-                # binarizer = label_config.get_label_binarizer(label_name)
-                # label = binarizer.transform([label])
-
-                # TODO: binarization removed from encodings because ML methods require different inputs:
-                #   this will be part of the ML method itself; but remove this comment when this is checked
-
                 labels[label_name].append(label)
 
         return np.array([labels[name] for name in labels.keys()])
 
     @staticmethod
-    def _encode_by_model(dataset, vectors, params) -> Dataset:
+    def _encode_by_model(dataset, vectors, params: EncoderParams) -> Dataset:
 
         encoded_dataset = Dataset()
         data = RepertoireGenerator.build_generator(dataset.filenames, params["batch_size"])
@@ -154,10 +134,10 @@ class Word2VecEncoder(DatasetEncoder):
         return encoded_dataset
 
     @staticmethod
-    def _scale_encoding(repertoires: np.ndarray, params):
+    def _scale_encoding(repertoires: np.ndarray, params: EncoderParams):
 
         scaler_path = params["scaler_path"]
-        scaler_file = scaler_path + "scaler.pkl"
+        scaler_file = scaler_path + FilenameHandler.get_filename(StandardScaler.__name__, "pickle")
 
         if os.path.isfile(scaler_file):
             with open(scaler_file, 'rb') as file:
@@ -175,13 +155,13 @@ class Word2VecEncoder(DatasetEncoder):
         return sparse.csc_matrix(scaled_repertoires)
 
     @staticmethod
-    def _load_model(params):
+    def _load_model(params: EncoderParams):
         model_path = Word2VecEncoder._create_model_path(params)
         model = Word2Vec.load(model_path)
         return model
 
     @staticmethod
-    def _create_model(dataset, params):
+    def _create_model(dataset: Dataset, params: EncoderParams):
 
         if params["model"]["model_creator"] == ModelType.SEQUENCE:
             model_creator = SequenceModelCreator()
@@ -195,14 +175,15 @@ class Word2VecEncoder(DatasetEncoder):
         return model
 
     @staticmethod
-    def store(encoded_dataset: Dataset, params: dict):
-        PickleExporter.export(encoded_dataset, params["result_path"], "encoded_dataset.pkl")
+    def store(encoded_dataset: Dataset, params: EncoderParams):
+        PickleExporter.export(encoded_dataset, params["result_path"],
+                              FilenameHandler.get_dataset_name(Word2VecEncoder.__name__))
 
     @staticmethod
-    def _exists_model(params) -> bool:
+    def _exists_model(params: EncoderParams) -> bool:
         return os.path.isfile(Word2VecEncoder._create_model_path(params))
 
     @staticmethod
-    def _create_model_path(params):
+    def _create_model_path(params: EncoderParams):
         return params["model_path"] + "W2V_" + NameBuilder.build_name_from_dict(params["model"]) + ".model"
 
