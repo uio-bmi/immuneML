@@ -46,7 +46,7 @@ class SklearnMethod(MLMethod):
         ParallelismManager.free_cores(cores=cores)
 
     def check_is_fitted(self, labels):
-        return all([check_is_fitted(self._models[label], ["estimators_", "coef_"], all_or_any=any) for label in labels])
+        return all([check_is_fitted(self._models[label], ["estimators_", "coef_", "estimator"], all_or_any=any) for label in labels])
 
     def predict(self, X, label_names: list = None):
         labels = label_names if label_names is not None else self._models.keys()
@@ -54,7 +54,7 @@ class SklearnMethod(MLMethod):
         return {label: self._models[label].predict(X) for label in labels}
 
     def _fit_for_label_by_cv(self, X: Iterable, y: np.ndarray, label: str, cores: int, number_of_splits: int = 5):
-        self._models[label] = RandomizedSearchCV(self._get_ml_model(),
+        self._models[label] = RandomizedSearchCV(self._get_ml_model(cores_for_training=1),
                                                  param_distributions=self._parameter_grid,
                                                  cv=number_of_splits, n_jobs=cores,
                                                  scoring="balanced_accuracy", refit=True)
