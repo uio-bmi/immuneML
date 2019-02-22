@@ -12,6 +12,7 @@ from source.data_model.dataset.DatasetParams import DatasetParams
 from source.data_model.repertoire.Repertoire import Repertoire
 from source.data_model.repertoire.RepertoireMetadata import RepertoireMetadata
 from source.environment.ParallelismManager import ParallelismManager
+from source.util.FilenameHandler import FilenameHandler
 from source.util.PathBuilder import PathBuilder
 
 
@@ -22,8 +23,10 @@ class ImmunoSEQLoader(DataLoader):
     @staticmethod
     def load(path, params: dict = None) -> Dataset:
 
-        if os.path.isfile(path + "dataset.pkl"):
-            dataset = PickleLoader.load(path)
+        file_path = path + FilenameHandler.get_dataset_name(ImmunoSEQLoader.__name__)
+
+        if os.path.isfile(file_path):
+            dataset = PickleLoader.load(file_path)
         else:
             dataset = ImmunoSEQLoader._process_dataset(path, params)
 
@@ -39,14 +42,14 @@ class ImmunoSEQLoader(DataLoader):
         params = DatasetParams(sample_param_names=sample_parameter_names)
         dataset = Dataset(filenames=repertoire_filenames, dataset_params=params)
 
-        PickleExporter.export(dataset, path, "dataset.pkl")
+        PickleExporter.export(dataset, path, FilenameHandler.get_dataset_name(ImmunoSEQLoader.__name__))
 
         return dataset
 
     @staticmethod
     def _process_repertoire(filename, params):
         basename = os.path.splitext(os.path.basename(filename))[0]
-        filepath = params["result_path"] + basename + ".pkl"
+        filepath = params["result_path"] + basename + ".pickle"
 
         if not os.path.isfile(filepath):
             ImmunoSEQLoader._load_repertoire(filename, params, filepath)

@@ -8,6 +8,7 @@ from source.data_model.dataset.Dataset import Dataset
 from source.data_model.metadata.Sample import Sample
 from source.data_model.repertoire.Repertoire import Repertoire
 from source.data_model.repertoire.RepertoireMetadata import RepertoireMetadata
+from source.util.FilenameHandler import FilenameHandler
 from source.util.PathBuilder import PathBuilder
 from source.workflows.steps.Step import Step
 
@@ -29,8 +30,10 @@ class SignalImplanter(Step):
     @staticmethod
     def perform_step(input_params: dict = None):
 
-        if os.path.isfile(input_params["result_path"] + "dataset.pkl"):
-            dataset = PickleLoader.load(input_params["result_path"] + "dataset.pkl")
+        path = input_params["result_path"] + FilenameHandler.get_dataset_name(SignalImplanter.__name__)
+
+        if os.path.isfile(path):
+            dataset = PickleLoader.load(path)
         else:
             dataset = SignalImplanter._implant_signals(input_params)
 
@@ -56,7 +59,7 @@ class SignalImplanter(Step):
             processed_filenames.append(filename)
 
         processed_dataset = Dataset(filenames=processed_filenames, dataset_params=copy.copy(dataset.params))
-        PickleExporter.export(processed_dataset, input_params["result_path"], "dataset.pkl")
+        PickleExporter.export(processed_dataset, input_params["result_path"], FilenameHandler.get_dataset_name(SignalImplanter.__name__))
 
         return processed_dataset
 
@@ -87,7 +90,7 @@ class SignalImplanter(Step):
         for signal in input_params["signals"]:
             new_repertoire.metadata.sample.custom_params[signal.id] = False
 
-        filename = input_params["result_path"] + "rep" + str(index) + ".pkl"
+        filename = input_params["result_path"] + "rep" + str(index) + ".pickle"
 
         with open(filename, "wb") as file:
             pickle.dump(new_repertoire, file)
@@ -107,7 +110,7 @@ class SignalImplanter(Step):
             if signal not in input_params["simulation"][simulation_index]["signals"]:
                 new_repertoire.metadata.sample.custom_params[signal.id] = False
 
-        filename = input_params["result_path"] + "rep" + str(index) + ".pkl"
+        filename = input_params["result_path"] + "rep" + str(index) + ".pickle"
 
         with open(filename, "wb") as file:
             pickle.dump(new_repertoire, file)

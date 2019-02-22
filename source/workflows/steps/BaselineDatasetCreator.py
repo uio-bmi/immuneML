@@ -25,7 +25,7 @@ class BaselineDatasetCreator(Step):
 
         raise NotImplementedError
 
-        # path = input_params["result_path"] + "dataset.pkl"
+        # path = input_params["result_path"] + FilenameHandler.get_dataset_name(BaselineDatasetCreator.__name__)
         #
         # if os.path.isfile(path):
         #     dataset = PickleLoader.load(path)

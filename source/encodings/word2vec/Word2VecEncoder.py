@@ -19,7 +19,7 @@ from source.encodings.EncoderParams import EncoderParams
 from source.encodings.word2vec.model_creator.KmerPairModelCreator import KmerPairModelCreator
 from source.encodings.word2vec.model_creator.ModelType import ModelType
 from source.encodings.word2vec.model_creator.SequenceModelCreator import SequenceModelCreator
-from source.environment.LabelConfiguration import LabelConfiguration
+from source.util.FilenameHandler import FilenameHandler
 from source.util.KmerHelper import KmerHelper
 from source.util.NameBuilder import NameBuilder
 from source.util.PathBuilder import PathBuilder
@@ -52,7 +52,7 @@ class Word2VecEncoder(DatasetEncoder):
     @staticmethod
     def encode(dataset: Dataset, params: EncoderParams) -> Dataset:
 
-        filepath = params["result_path"] + "encoded_dataset.pkl"
+        filepath = params["result_path"] + FilenameHandler.get_dataset_name(Word2VecEncoder.__name__)
 
         if os.path.isfile(filepath):
             encoded_dataset = PickleLoader.load(filepath)
@@ -139,7 +139,7 @@ class Word2VecEncoder(DatasetEncoder):
     def _scale_encoding(repertoires: np.ndarray, params: EncoderParams):
 
         scaler_path = params["scaler_path"]
-        scaler_file = scaler_path + "scaler.pkl"
+        scaler_file = scaler_path + FilenameHandler.get_filename(StandardScaler.__name__, "pickle")
 
         if os.path.isfile(scaler_file):
             with open(scaler_file, 'rb') as file:
@@ -178,7 +178,8 @@ class Word2VecEncoder(DatasetEncoder):
 
     @staticmethod
     def store(encoded_dataset: Dataset, params: EncoderParams):
-        PickleExporter.export(encoded_dataset, params["result_path"], "encoded_dataset.pkl")
+        PickleExporter.export(encoded_dataset, params["result_path"],
+                              FilenameHandler.get_dataset_name(Word2VecEncoder.__name__))
 
     @staticmethod
     def _exists_model(params: EncoderParams) -> bool:
