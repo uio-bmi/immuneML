@@ -19,9 +19,6 @@ All of the encoders inherit DatasetEncoder class and provide the following metho
     def store(encoded_dataset: Dataset, params: dict):
         ...
 
-    def validate_configuration(params: dict):
-        ...
-
 All of them take in a *Dataset* object that they will encode. For more information on the dataset representation, see
 :ref:`Dataset` and :ref:`Data model` sections.
 
@@ -77,17 +74,27 @@ To specify the encoding, one must define the following parameters:
             ...
         }
 
+Normalization types can be:
+
+1.  NormalizationType.RELATIVE_FREQUENCY
+2.  NormalizationType.L2
+
+Read types can be:
+
+1.  ReadsType.UNIQUE
+2.  ReadsType.ALL
+
 Reads type signify whether the number of sequence occurrences in the repertoire will be taken into account. If ``unique``,
 only unique sequences are encoded, and if ``all``, the number of sequence occurrences is incorporated into the frequencies
 of k-mers created from the sequence.
 
 Sequence encoding types can be:
 
-1.  GAPPED_KMER
-2.  CONTINUOUS_KMER
-3.  IMGT_CONTINUOUS_KMER
-4.  IMGT_GAPPPED_KMER
-5.  IDENTITY
+1.  SequenceEncodingType.GAPPED_KMER
+2.  SequenceEncodingType.CONTINUOUS_KMER
+3.  SequenceEncodingType.IMGT_CONTINUOUS_KMER
+4.  SequenceEncodingType.IMGT_GAPPPED_KMER
+5.  SequenceEncodingType.IDENTITY
 
 IMGT encodings include positional information of k-mers in the sequence. Identity sequence encoding returns the whole sequence and
 measures the frequency of sequences in repertoires.
@@ -107,12 +114,9 @@ context the k-mers appear in. To specify the encoding, one must define the follo
 .. code-block:: python
 
     {
-        "model": {
-            "k": 3,                                 # k-mer length
-            "model_creator": ModelType.SEQUENCE,    # the context definition
-            "size": 16                              # size of the vector to be learnt
-        },
-        ...
+        "k": 3,                                 # k-mer length
+        "model_creator": ModelType.SEQUENCE,    # the context definition
+        "size": 16                              # size of the vector to be learnt
     }
 
 Model creator in this setting defines the context which will be used to infer the representation of the sequence. Currently,

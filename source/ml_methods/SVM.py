@@ -24,7 +24,7 @@ class SVM(SklearnMethod):
         else:
             self._parameter_grid = {"max_iter": [150000],
                                     "penalty": ["l1"],
-                                    "class_weight": ["balanced"]}
+                                    "class_weight": ["balanced", None]}
 
     def _get_ml_model(self, cores_for_training: int = 2):
         return SGDClassifier(loss="hinge", n_jobs=cores_for_training, tol=1e-3)  # hinge loss + SGD classifier -> SVM

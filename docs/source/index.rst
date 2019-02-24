@@ -15,6 +15,7 @@ Welcome to ImmuneML's documentation!
    simulation_model
    simulation_strategies
    encodings
+   ml_models
 
 
 Indices and tables
