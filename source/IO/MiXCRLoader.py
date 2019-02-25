@@ -1,7 +1,4 @@
-import csv
-import itertools
 import pickle
-import warnings
 from glob import iglob
 from multiprocessing.pool import Pool
 
@@ -30,6 +27,15 @@ class MiXCRLoader(DataLoader):
     J_GENES_WITH_SCORE = "allJHitsWithScore"
     CDR3_AA_SEQUENCE = "aaSeqCDR3"
     CDR3_NT_SEQUENCE = "nSeqCDR3"
+    SEQUENCE_NAME_MAP = {
+        "CDR3": {"AA": "aaSeqCDR3", "NT": "nSeqCDR3"},
+        "CDR1": {"AA": "aaSeqCDR1", "NT": "nSeqCDR1"},
+        "CDR2": {"AA": "aaSeqCDR2", "NT": "nSeqCDR2"},
+        "FR1":  {"AA": "aaSeqFR1",  "NT": "nSeqFR1"},
+        "FR2":  {"AA": "aaSeqFR2",  "NT": "nSeqFR2"},
+        "FR3":  {"AA": "aaSeqFR3",  "NT": "nSeqFR3"},
+        "FR4":  {"AA": "aaSeqFR4",  "NT": "nSeqFR4"}
+    }
 
     @staticmethod
     def load(path, params: dict = None) -> Dataset:
@@ -72,8 +78,12 @@ class MiXCRLoader(DataLoader):
         df = pd.read_csv(filepath, sep="\t")
         df.dropna(axis=1, how="all", inplace=True)
 
-        sequences = MiXCRLoader._load_sequences(filepath, params, df)
         metadata = MiXCRLoader._extract_repertoire_metadata(filepath, params, df)
+
+        if metadata.sample.id is None:
+            params["additional_columns"].append(MiXCRLoader.SAMPLE_ID)
+
+        sequences = MiXCRLoader._load_sequences(filepath, params, df)
         patient_id = MiXCRLoader._extract_patient(filepath, df)
         repertoire = Repertoire(sequences=sequences, metadata=metadata, identifier=patient_id)
         filename = params["result_path"] + str(index) + ".pkl"
@@ -96,9 +106,8 @@ class MiXCRLoader(DataLoader):
         return metadata
 
     @staticmethod
-    def _get_sample_id(df: DataFrame, filepath):
+    def _get_sample_id(df: DataFrame):
         if df[MiXCRLoader.SAMPLE_ID].nunique() != 1:
-            warnings.warn("MiXCRLoader: multiple sample IDs in a single file are not supported. Ignoring sample id... Issue with " + filepath, Warning)
             sample_id = None
         else:
             sample_id = df[MiXCRLoader.SAMPLE_ID][0]
@@ -106,7 +115,7 @@ class MiXCRLoader(DataLoader):
 
     @staticmethod
     def _extract_sample_information(filepath, params, df) -> Sample:
-        sample = Sample(identifier=MiXCRLoader._get_sample_id(df, filepath))
+        sample = Sample(identifier=MiXCRLoader._get_sample_id(df))
         sample.custom_params = {}
 
         for param in params["custom_params"]:
@@ -131,7 +140,7 @@ class MiXCRLoader(DataLoader):
         return sequences
 
     @staticmethod
-    def _process_row(filepath, df, row, params) -> ReceptorSequence:
+    def _process_row(filepath, df, row, params,) -> ReceptorSequence:
         chain = MiXCRLoader._extract_chain(filepath)
         sequence_aa, sequence_nt = MiXCRLoader._extract_sequence_by_type(row, params)
         metadata = MiXCRLoader._extract_sequence_metadata(df, row, chain, params)
@@ -177,10 +186,10 @@ class MiXCRLoader(DataLoader):
 
     @staticmethod
     def _extract_sequence_by_type(row, params):
-        if params["sequence_type"] == "CDR3":
-            sequence_aa = row[MiXCRLoader.CDR3_AA_SEQUENCE]
-            sequence_nt = row[MiXCRLoader.CDR3_NT_SEQUENCE]
-        else:
-            raise NotImplementedError
+
+        column_names = params["sequence_type"].split("+")
+
+        sequence_aa = "".join([row[MiXCRLoader.SEQUENCE_NAME_MAP[item]["AA"]] for item in column_names])
+        sequence_nt = "".join([row[MiXCRLoader.SEQUENCE_NAME_MAP[item]["NT"]] for item in column_names])
 
         return sequence_aa, sequence_nt
