@@ -1,4 +1,8 @@
 # quality: peripheral
+from importlib import import_module
+
+import yaml
+
 from source.encodings.DatasetEncoder import DatasetEncoder
 from source.encodings.kmer_frequency.KmerFrequencyEncoder import KmerFrequencyEncoder
 from source.encodings.kmer_frequency.NormalizationType import NormalizationType
@@ -20,9 +24,17 @@ from source.simulation.signal_implanting_strategy.sequence_implanting.GappedMoti
 
 class Parser:
     """
-    Simple DSL parser from python dictionary for configuring repertoire / receptor_sequence classification
-    in the (simulated) settings
+    Simple DSL parser from python dictionary or equivalent YAML for configuring repertoire / receptor_sequence
+    classification in the (simulated) settings
     """
+
+    @staticmethod
+    def parse_yaml_file(file_path) -> dict:
+        with open(file_path, "r") as file:
+            workflow_specification = yaml.load(file)
+
+        return Parser.parse(workflow_specification)
+
     @staticmethod
     def parse(workflow_specification: dict) -> dict:
         result = {}
@@ -92,8 +104,7 @@ class Parser:
         return sequence_encoding_type
 
     @staticmethod
-    def _parse_ml_methods(ml_methods: list) -> list:
-
+    def _build_default_methods(ml_methods: list) -> list:
         methods = []
 
         if "LogisticRegression" in ml_methods:
@@ -102,6 +113,30 @@ class Parser:
             methods.append(SVM())
         if "RandomForest" in ml_methods:
             methods.append(RandomForestClassifier())
+
+        return methods
+
+    @staticmethod
+    def _build_methods_with_params(ml_methods: dict) -> list:
+        methods = []
+        for key in ml_methods.keys():
+
+            param_grid = {k: ml_methods[key][k] if isinstance(ml_methods[key][k], list) else [ml_methods[key][k]]
+                          for k in ml_methods[key].keys()}
+
+            mod = import_module("source.ml_methods.{}".format(key))
+            method = getattr(mod, key)(parameter_grid=param_grid)
+            methods.append(method)
+
+        return methods
+
+    @staticmethod
+    def _parse_ml_methods(ml_methods) -> list:
+
+        if isinstance(ml_methods, list):
+            methods = Parser._build_default_methods(ml_methods)
+        else:
+            methods = Parser._build_methods_with_params(ml_methods)
 
         return methods
 
