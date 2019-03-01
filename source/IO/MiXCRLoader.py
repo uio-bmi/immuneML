@@ -54,13 +54,13 @@ class MiXCRLoader(DataLoader):
             output = pool.starmap(MiXCRLoader._load_repertoire, arguments)
 
         repertoire_filenames = [out[0] for out in output]
-        custom_params = MiXCRLoader._prepare_sample_custom_params([out[1] for out in output])
+        custom_params = MiXCRLoader._prepare_custom_params([out[1] for out in output])
 
         dataset = Dataset(filenames=repertoire_filenames, params=custom_params)
         return dataset
 
     @staticmethod
-    def _prepare_sample_custom_params(params) -> dict:
+    def _prepare_custom_params(params: list) -> dict:
         custom_params = {}
         for p in params:
             for key in p.keys():
@@ -80,7 +80,7 @@ class MiXCRLoader(DataLoader):
 
         metadata = MiXCRLoader._extract_repertoire_metadata(filepath, params, df)
 
-        if metadata.sample.id is None:
+        if metadata.sample is None or metadata.sample.id is None:
             params["additional_columns"].append(MiXCRLoader.SAMPLE_ID)
 
         sequences = MiXCRLoader._load_sequences(filepath, params, df)
@@ -91,7 +91,7 @@ class MiXCRLoader(DataLoader):
         with open(filename, "wb") as file:
             pickle.dump(repertoire, file)
 
-        return filename, metadata.sample.custom_params
+        return filename, metadata.custom_params
 
     @staticmethod
     def _extract_patient(filepath: str, df):
@@ -101,8 +101,13 @@ class MiXCRLoader(DataLoader):
 
     @staticmethod
     def _extract_repertoire_metadata(filepath, params, df):
-        sample = MiXCRLoader._extract_sample_information(filepath, params, df)
+        sample = MiXCRLoader._extract_sample_information(df)
+
         metadata = RepertoireMetadata(sample=sample)
+
+        for param in params["custom_params"]:
+            metadata.custom_params[param["name"]] = MiXCRLoader._extract_custom_param(param, filepath)
+
         return metadata
 
     @staticmethod
@@ -114,12 +119,12 @@ class MiXCRLoader(DataLoader):
         return sample_id
 
     @staticmethod
-    def _extract_sample_information(filepath, params, df) -> Sample:
-        sample = Sample(identifier=MiXCRLoader._get_sample_id(df))
-        sample.custom_params = {}
+    def _extract_sample_information(df) -> Sample:
+        identifier = MiXCRLoader._get_sample_id(df)
+        sample = None
 
-        for param in params["custom_params"]:
-            sample.custom_params[param["name"]] = MiXCRLoader._extract_custom_param(param, filepath)
+        if identifier is not None:
+            sample = Sample(identifier=identifier)
 
         return sample
 
@@ -156,8 +161,7 @@ class MiXCRLoader(DataLoader):
     @staticmethod
     def _extract_gene(row, fields):
         """
-        :param df: dataframe
-        :param row: dataframe row
+        :param row: row of the dataframe <=> one MiXCR line
         :param fields: list of field names sorted by preference
         :return: the field value in the row for the first matched field name from fields
         """
@@ -177,6 +181,10 @@ class MiXCRLoader(DataLoader):
         j_gene = MiXCRLoader._extract_gene(row, [MiXCRLoader.J_HIT, MiXCRLoader.J_GENES_WITH_SCORE])
         region_type = params["sequence_type"]
         metadata = SequenceMetadata(v_gene=v_gene, j_gene=j_gene, chain=chain, count=count, region_type=region_type)
+
+        if MiXCRLoader.SAMPLE_ID in params["additional_columns"]:
+            sample = Sample(identifier=row[MiXCRLoader.SAMPLE_ID])
+            metadata.sample = sample
 
         for column in df.keys():
             if params["additional_columns"] == "*" or column in params["additional_columns"]:

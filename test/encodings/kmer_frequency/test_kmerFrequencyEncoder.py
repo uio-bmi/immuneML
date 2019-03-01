@@ -21,12 +21,12 @@ class TestKmerFrequencyEncoder(TestCase):
         PathBuilder.build("./tmp/")
 
         rep1 = Repertoire(sequences=[ReceptorSequence("AAA"), ReceptorSequence("ATA"), ReceptorSequence("ATA")],
-                          metadata=RepertoireMetadata(Sample(1, custom_params={"l1": 1, "l2": 2})))
+                          metadata=RepertoireMetadata(sample=Sample(1), custom_params={"l1": 1, "l2": 2}))
         with open("./tmp/rep1.pkl", "wb") as file:
             pickle.dump(rep1, file)
 
         rep2 = Repertoire(sequences=[ReceptorSequence("ATA"), ReceptorSequence("TAA"), ReceptorSequence("AAC")],
-                          metadata=RepertoireMetadata(Sample(2, custom_params={"l1": 0, "l2": 3})))
+                          metadata=RepertoireMetadata(sample=Sample(2), custom_params={"l1": 0, "l2": 3}))
         with open("./tmp/rep2.pkl", "wb") as file:
             pickle.dump(rep2, file)
 

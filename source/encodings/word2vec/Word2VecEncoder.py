@@ -2,7 +2,6 @@
 
 import os
 import pickle
-from copy import copy
 
 import numpy as np
 from gensim.models import Word2Vec
@@ -101,10 +100,8 @@ class Word2VecEncoder(DatasetEncoder):
 
         for repertoire in dataset.get_data(params["batch_size"]):
 
-            sample = repertoire.metadata.sample
-
             for label_name in label_config.get_labels_by_name():
-                label = sample.custom_params[label_name]
+                label = repertoire.metadata.custom_params[label_name]
                 labels[label_name].append(label)
 
         return np.array([labels[name] for name in labels.keys()])

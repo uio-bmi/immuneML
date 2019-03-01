@@ -39,10 +39,6 @@ class HealthySequenceImplanting(SignalImplantingStrategy):
 
     def _build_new_metadata(self, metadata: RepertoireMetadata) -> RepertoireMetadata:
         new_metadata = copy.deepcopy(metadata) if metadata is not None else RepertoireMetadata()
-
-        if new_metadata.sample is None:
-            new_metadata.sample = Sample("", custom_params={})
-
         return new_metadata
 
     def _calculate_max_motif_length(self, signal):

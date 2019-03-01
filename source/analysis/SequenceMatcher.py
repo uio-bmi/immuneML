@@ -67,8 +67,8 @@ class SequenceMatcher:
 
         matched["sequences_matched"] = len([r for r in matched["sequences"] if len(r["matching_sequences"]) > 0])
         matched["percentage_of_sequences_matched"] = matched["sequences_matched"] / len(matched["sequences"])
-        matched["metadata"] = repertoire.metadata.sample.custom_params \
-            if repertoire.metadata is not None and repertoire.metadata.sample is not None else None
+        matched["metadata"] = repertoire.metadata.custom_params \
+            if repertoire.metadata is not None else None
         matched["patient_id"] = repertoire.identifier
         matched["chains"] = list(set([sequence.metadata.chain for sequence in repertoire.sequences]))
 

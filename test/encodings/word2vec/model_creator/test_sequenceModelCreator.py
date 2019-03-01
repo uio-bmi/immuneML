@@ -22,16 +22,14 @@ class TestSequenceModelCreator(TestCase):
         sequence1 = ReceptorSequence("CASSVFA")
         sequence2 = ReceptorSequence("CASSCCC")
 
-        sample1 = Sample(1, custom_params={"T1D": "T1D"})
-        metadata1 = RepertoireMetadata(sample=sample1)
+        metadata1 = RepertoireMetadata(custom_params={"T1D": "T1D"})
         rep1 = Repertoire([sequence1, sequence2], metadata1)
         file1 = test_path + "rep1.pkl"
 
         with open(file1, "wb") as file:
             pickle.dump(rep1, file)
 
-        sample2 = Sample(2, custom_params={"T1D": "CTL"})
-        metadata2 = RepertoireMetadata(sample=sample2)
+        metadata2 = RepertoireMetadata(custom_params={"T1D": "CTL"})
         rep2 = Repertoire([sequence1], metadata2)
         file2 = test_path + "rep2.pkl"
 

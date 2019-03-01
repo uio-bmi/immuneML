@@ -71,16 +71,16 @@ class DatasetMerger(Step):
         with the default value None
         """
         if "mappings" in input_params:
-            for key in repertoire.metadata.sample.custom_params.keys():
+            for key in repertoire.metadata.custom_params.keys():
                 new_key = DatasetMerger._is_name_in_dict(key, input_params["mappings"])
                 if key not in new_sample_params.keys() and new_key is not None:
-                    value = repertoire.metadata.sample.custom_params[key]
-                    del repertoire.metadata.sample.custom_params[key]
-                    repertoire.metadata.sample.custom_params[new_key] = value
+                    value = repertoire.metadata.custom_params[key]
+                    del repertoire.metadata.custom_params[key]
+                    repertoire.metadata.custom_params[new_key] = value
         else:
             for key in new_sample_params.keys():
-                if key not in repertoire.metadata.sample.custom_params.keys():
-                    repertoire.metadata.sample.custom_params[key] = set()
+                if key not in repertoire.metadata.custom_params.keys():
+                    repertoire.metadata.custom_params[key] = set()
 
         filepath = DatasetMerger._store_repertoire(repertoire, input_params)
         return filepath

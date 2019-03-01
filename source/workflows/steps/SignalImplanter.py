@@ -82,13 +82,10 @@ class SignalImplanter(Step):
         # TODO: make it work like in this comment: the user is able to define what a label means (e.g. is it a signal
         #   or a combination of signals, maybe even consider the implanting percentages on the receptor_sequence level?
         # for label in input_params["simulation"]["labels"]:
-        #    new_repertoire.metadata.sample.custom_params[label["id"]] = False  # TODO: define the constants somewhere
-
-        if new_repertoire.metadata.sample.custom_params is None:
-            new_repertoire.metadata.sample.custom_params = {}
+        #    new_repertoire.metadata.custom_params[label["id"]] = False  # TODO: define the constants somewhere
 
         for signal in input_params["signals"]:
-            new_repertoire.metadata.sample.custom_params[signal.id] = False
+            new_repertoire.metadata.custom_params[signal.id] = False
 
         filename = input_params["result_path"] + "rep" + str(index) + ".pickle"
 
@@ -105,10 +102,10 @@ class SignalImplanter(Step):
                                                           repertoire_implanting_rate=input_params["simulation"][simulation_index]["sequences"])
 
         for signal in input_params["simulation"][simulation_index]["signals"]:
-            new_repertoire.metadata.sample.custom_params[signal.id] = True
+            new_repertoire.metadata.custom_params[signal.id] = True
         for signal in input_params["signals"]:
             if signal not in input_params["simulation"][simulation_index]["signals"]:
-                new_repertoire.metadata.sample.custom_params[signal.id] = False
+                new_repertoire.metadata.custom_params[signal.id] = False
 
         filename = input_params["result_path"] + "rep" + str(index) + ".pickle"
 

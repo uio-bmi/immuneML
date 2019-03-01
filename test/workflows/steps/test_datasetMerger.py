@@ -14,26 +14,26 @@ from source.workflows.steps.DatasetMerger import DatasetMerger
 class TestDatasetMerger(TestCase):
 
     def test_perform_step(self):
-        rep1 = Repertoire([], RepertoireMetadata(Sample(1, custom_params={
+        rep1 = Repertoire([], RepertoireMetadata(Sample(1), custom_params={
             "p1": 1,
             "p2": 2
-        })))
+        }))
 
         with open("./rep1.repertoire.pkl", "wb") as file:
             pickle.dump(rep1, file)
 
-        rep2 = Repertoire([], RepertoireMetadata(Sample(2, custom_params={
+        rep2 = Repertoire([], RepertoireMetadata(Sample(2), custom_params={
             "p1": 1,
             "p2": 4
-        })))
+        }))
 
         with open("./rep2.repertoire.pkl", "wb") as file:
             pickle.dump(rep2, file)
 
-        rep3 = Repertoire([], RepertoireMetadata(Sample(1, custom_params={
+        rep3 = Repertoire([], RepertoireMetadata(Sample(1), custom_params={
             "p1": 1,
             "p3": 8
-        })))
+        }))
 
         with open("./rep3.repertoire.pkl", "wb") as file:
             pickle.dump(rep3, file)
@@ -63,8 +63,8 @@ class TestDatasetMerger(TestCase):
         files_count = len(glob("./dataset/*"))
 
         for rep in dataset.get_data(3):
-            self.assertEqual(2, len(rep.metadata.sample.custom_params.keys()))
-            self.assertTrue(all([item in rep.metadata.sample.custom_params.keys() for item in ["p1", "p2"]]))
+            self.assertEqual(2, len(rep.metadata.custom_params.keys()))
+            self.assertTrue(all([item in rep.metadata.custom_params.keys() for item in ["p1", "p2"]]))
 
         shutil.rmtree("./dataset/")
         for file in glob("./*.pkl"):

@@ -57,11 +57,11 @@ class TestSignalImplanter(TestCase):
         }
 
         new_dataset = SignalImplanter.run(input_params)
-        reps_with_s2 = sum([rep.metadata.sample.custom_params[s2.id] is True for rep in new_dataset.get_data(batch_size=10)])
-        reps_with_s1 = sum([rep.metadata.sample.custom_params[s1.id] is True for rep in new_dataset.get_data(batch_size=10)])
+        reps_with_s2 = sum([rep.metadata.custom_params[s2.id] is True for rep in new_dataset.get_data(batch_size=10)])
+        reps_with_s1 = sum([rep.metadata.custom_params[s1.id] is True for rep in new_dataset.get_data(batch_size=10)])
         self.assertEqual(10, len(new_dataset.filenames))
-        self.assertTrue(all([s1.id in rep.metadata.sample.custom_params.keys() for rep in new_dataset.get_data(batch_size=10)]))
-        self.assertTrue(all([s2.id in rep.metadata.sample.custom_params.keys() for rep in new_dataset.get_data(batch_size=10)]))
+        self.assertTrue(all([s1.id in rep.metadata.custom_params.keys() for rep in new_dataset.get_data(batch_size=10)]))
+        self.assertTrue(all([s2.id in rep.metadata.custom_params.keys() for rep in new_dataset.get_data(batch_size=10)]))
         self.assertTrue(reps_with_s2 == 4)
         self.assertTrue(reps_with_s1 == 2)
 
