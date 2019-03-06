@@ -23,7 +23,7 @@ To load the data that is available as an output from MiXCR, use **MiXCRLoader** 
 
     dataset = MiXCRLoader.load(path="./input_files/", params={
         "additional_columns": ["minQualCDR3"],
-        "sequence_type": "CDR3",
+        "sequence_type": "CDR3", # instead of "CDR3" here it can be also "CDR1+CDR2+CDR3"
         "result_path": "./output_files/",
         "batch_size": 2,
         "extension": "csv",
@@ -42,14 +42,17 @@ discover all files in that path having the extension specified in the ``params``
 
 The ``params`` dictionary defines how to perform the import. It consists of the following fields:
 
-1.  ``additional_columns``: by default, only V gene, J gene, clone count, patient, sample ID and the nucleotide and
-amino acid sequences of the given sequence type are stored. Other fields are stored in **SequenceMetadata** object only
-if they are specifically mentioned by their MiXCR name in ``additional_columns``. ``additional_columns`` is a list of
-field names that will be stored for the sequence.
+1.  ``additional_columns``: by default, only V gene name (without allele information), J gene (without allele information),
+clone count, patient, sample ID and the nucleotide and amino acid sequences of the given sequence type are stored.
+Other fields are stored in **SequenceMetadata** object only if they are specifically mentioned by their MiXCR name in
+``additional_columns``. Therefore, ``additional_columns`` is a list of field names that will be stored for the sequence.
 
 2.  ``sequence_type``: defines which immune receptor region should be stored in the receptor sequence objects to be used
 for the subsequent analysis. In this example, it is ``CDR3``, but can be any other region name which is provided in the
-MiXCR output and which is not ``NA`` for all the sequences.
+MiXCR output and which is not ``NA`` for all the sequences. It is also possible to concatenate multiple fields in order
+to obtain a full CDR sequence, for example. In order to concatenate fields, write `+` between field names. For instance,
+to get all CDRs, write ``CDR1+CDR2+CDR3``. Possible fields are ``CDR1``, ``CDR2``, ``CDR3``, ``FR1``, ``FR2``, ``FR3``
+and ``FR4``.
 
 3.  ``result_path``: this is the path on which the loaded repertoires and the dataset will be stored.
 
@@ -66,6 +69,9 @@ each of which contains a disease status in its name (e.g. CD_files/ for repertoi
 repertoires of healthy controls), then this defines what the ``name`` of that parameter is, the ``location`` it can be found at and what the
 ``alternative`` value is if this is a binary case. This option with writing the disease status explicitly in the subfolder name
 is the only one supported so far for ``custom_params``.
+
+Note that for specified region (or a combination of regions), **MiXCRLoader** will always load both the amino acid and
+the nucleotide sequences.
 
 The ``load()`` function will return a valid dataset object which is also stored as a pickle file in the given ``result_path``.
 
