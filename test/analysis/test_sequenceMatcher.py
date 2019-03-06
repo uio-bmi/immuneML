@@ -18,7 +18,7 @@ class TestSequenceMatcher(TestCase):
                                            ReceptorSequence(amino_acid_sequence="CCCCCC", metadata=SequenceMetadata(chain="A", v_gene="V1", j_gene="J2")),
                                            ReceptorSequence(amino_acid_sequence="AAAACC", metadata=SequenceMetadata(chain="A", v_gene="V1", j_gene="J2")),
                                            ReceptorSequence(amino_acid_sequence="TADQVF", metadata=SequenceMetadata(chain="A", v_gene="V1", j_gene="J3"))],
-                                metadata=RepertoireMetadata(Sample("CD123", custom_params={"CD": True})))
+                                metadata=RepertoireMetadata(sample=Sample("CD123"), custom_params={"CD": True}))
 
         with open("./rep0.pkl", "wb") as file:
             pickle.dump(repertoire, file)
@@ -42,7 +42,7 @@ class TestSequenceMatcher(TestCase):
                                            ReceptorSequence(amino_acid_sequence="CCCCCC", metadata=SequenceMetadata(chain="A")),
                                            ReceptorSequence(amino_acid_sequence="AAAACC", metadata=SequenceMetadata(chain="A")),
                                            ReceptorSequence(amino_acid_sequence="TADQVF", metadata=SequenceMetadata(chain="A"))],
-                                metadata=RepertoireMetadata(Sample("CD123", custom_params={"CD": True})))
+                                metadata=RepertoireMetadata(sample=Sample("CD123"), custom_params={"CD": True}))
 
         sequences = [ReceptorSequence("AAAACA", metadata=SequenceMetadata(chain="A")),
                      ReceptorSequence("TADQV", metadata=SequenceMetadata(chain="A"))]

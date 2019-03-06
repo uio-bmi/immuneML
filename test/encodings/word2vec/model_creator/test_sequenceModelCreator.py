@@ -5,7 +5,6 @@ from unittest import TestCase
 from gensim.models import Word2Vec
 
 from source.data_model.dataset.Dataset import Dataset
-from source.data_model.dataset.DatasetParams import DatasetParams
 from source.data_model.metadata.Sample import Sample
 from source.data_model.repertoire.Repertoire import Repertoire
 from source.data_model.repertoire.RepertoireMetadata import RepertoireMetadata
@@ -23,24 +22,21 @@ class TestSequenceModelCreator(TestCase):
         sequence1 = ReceptorSequence("CASSVFA")
         sequence2 = ReceptorSequence("CASSCCC")
 
-        sample1 = Sample(1, custom_params={"T1D": "T1D"})
-        metadata1 = RepertoireMetadata(sample=sample1)
+        metadata1 = RepertoireMetadata(custom_params={"T1D": "T1D"})
         rep1 = Repertoire([sequence1, sequence2], metadata1)
         file1 = test_path + "rep1.pkl"
 
         with open(file1, "wb") as file:
             pickle.dump(rep1, file)
 
-        sample2 = Sample(2, custom_params={"T1D": "CTL"})
-        metadata2 = RepertoireMetadata(sample=sample2)
+        metadata2 = RepertoireMetadata(custom_params={"T1D": "CTL"})
         rep2 = Repertoire([sequence1], metadata2)
         file2 = test_path + "rep2.pkl"
 
         with open(file2, "wb") as file:
             pickle.dump(rep2, file)
 
-        params = DatasetParams()
-        dataset = Dataset(filenames=[file1, file2], dataset_params=params)
+        dataset = Dataset(filenames=[file1, file2])
 
         config_params = {
             "model": {

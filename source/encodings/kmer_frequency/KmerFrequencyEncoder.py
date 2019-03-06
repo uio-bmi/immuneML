@@ -1,4 +1,3 @@
-import copy
 import os
 import pickle
 from collections import Counter
@@ -11,7 +10,6 @@ import numpy as np
 from source.IO.PickleExporter import PickleExporter
 from source.IO.PickleLoader import PickleLoader
 from source.data_model.dataset.Dataset import Dataset
-from source.data_model.dataset.DatasetParams import DatasetParams
 from source.data_model.repertoire.Repertoire import Repertoire
 from source.data_model.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.encodings.DatasetEncoder import DatasetEncoder
@@ -53,7 +51,8 @@ class KmerFrequencyEncoder(DatasetEncoder):
                            'feature_names': feature_names}
 
         encoded_dataset = Dataset(filenames=dataset.filenames,
-                                  encoded_data=encoded_dataset)
+                                  encoded_data=encoded_dataset,
+                                  params=dataset.params)
 
         KmerFrequencyEncoder.store(encoded_dataset, params)
 
@@ -101,10 +100,8 @@ class KmerFrequencyEncoder(DatasetEncoder):
 
         for repertoire in dataset.get_data(params["batch_size"]):
 
-            sample = repertoire.metadata.sample
-
             for label_name in label_config.get_labels_by_name():
-                label = sample.custom_params[label_name]
+                label = repertoire.metadata.custom_params[label_name]
                 labels[label_name].append(label)
 
         return np.array([labels[name] for name in labels.keys()])

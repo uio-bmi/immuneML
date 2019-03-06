@@ -8,7 +8,6 @@ from source.IO.DataLoader import DataLoader
 from source.IO.PickleExporter import PickleExporter
 from source.IO.PickleLoader import PickleLoader
 from source.data_model.dataset.Dataset import Dataset
-from source.data_model.dataset.DatasetParams import DatasetParams
 from source.data_model.repertoire.Repertoire import Repertoire
 from source.data_model.repertoire.RepertoireMetadata import RepertoireMetadata
 from source.environment.ParallelismManager import ParallelismManager
@@ -37,10 +36,9 @@ class ImmunoSEQLoader(DataLoader):
 
         filenames = ImmunoSEQLoader._get_filenames(path, params)
         PathBuilder.build(params["result_path"])
-        repertoire_filenames, sample_parameter_names = ImmunoSEQLoader._process_repertoires(filenames, params)
+        repertoire_filenames, sample_params = ImmunoSEQLoader._process_repertoires(filenames, params)
 
-        params = DatasetParams(sample_param_names=sample_parameter_names)
-        dataset = Dataset(filenames=repertoire_filenames, dataset_params=params)
+        dataset = Dataset(filenames=repertoire_filenames, params=sample_params)
 
         PickleExporter.export(dataset, path, FilenameHandler.get_dataset_name(ImmunoSEQLoader.__name__))
 

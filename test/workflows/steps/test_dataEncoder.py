@@ -3,7 +3,6 @@ import shutil
 from unittest import TestCase
 
 from source.data_model.dataset.Dataset import Dataset
-from source.data_model.dataset.DatasetParams import DatasetParams
 from source.data_model.metadata.Sample import Sample
 from source.data_model.repertoire.Repertoire import Repertoire
 from source.data_model.repertoire.RepertoireMetadata import RepertoireMetadata
@@ -23,12 +22,12 @@ class TestDataEncoder(TestCase):
         PathBuilder.build("./tmp/")
 
         rep1 = Repertoire(sequences=[ReceptorSequence("AAA")],
-                          metadata=RepertoireMetadata(Sample(1, custom_params={"l1": 1, "l2": 2})))
+                          metadata=RepertoireMetadata(Sample(1), custom_params={"l1": 1, "l2": 2}))
         with open("./tmp/rep1.pkl", "wb") as file:
             pickle.dump(rep1, file)
 
         rep2 = Repertoire(sequences=[ReceptorSequence("ATA")],
-                          metadata=RepertoireMetadata(Sample(2, custom_params={"l1": 0, "l2": 3})))
+                          metadata=RepertoireMetadata(Sample(2), custom_params={"l1": 0, "l2": 3}))
         with open("./tmp/rep2.pkl", "wb") as file:
             pickle.dump(rep2, file)
 
@@ -36,7 +35,7 @@ class TestDataEncoder(TestCase):
         lc.add_label("l1", [1, 2])
         lc.add_label("l2", [0, 3])
 
-        dataset = Dataset(filenames=["./tmp/rep1.pkl", "./tmp/rep2.pkl"], dataset_params=DatasetParams())
+        dataset = Dataset(filenames=["./tmp/rep1.pkl", "./tmp/rep2.pkl"])
 
         res = DataEncoder.run({
             "dataset": dataset,

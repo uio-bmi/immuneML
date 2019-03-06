@@ -12,6 +12,7 @@ Welcome to ImmuneML's documentation!
 
    quickstart
    datamodel
+   input_output
    simulation_model
    simulation_strategies
    encodings
