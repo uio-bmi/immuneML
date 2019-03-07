@@ -7,6 +7,7 @@ from source.encodings.DatasetEncoder import DatasetEncoder
 from source.encodings.kmer_frequency.KmerFrequencyEncoder import KmerFrequencyEncoder
 from source.encodings.kmer_frequency.NormalizationType import NormalizationType
 from source.encodings.kmer_frequency.ReadsType import ReadsType
+from source.encodings.kmer_frequency.sequence_encoding.SequenceEncodingStrategy import SequenceEncodingStrategy
 from source.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType import SequenceEncodingType
 from source.encodings.word2vec.Word2VecEncoder import Word2VecEncoder
 from source.encodings.word2vec.model_creator.ModelType import ModelType
@@ -89,30 +90,21 @@ class Parser:
         return parsed_encoder_params
 
     @staticmethod
-    def _transform_sequence_encoding_strategy(sequence_encoding_strategy: str) -> SequenceEncodingType:
-        if sequence_encoding_strategy == "gapped_kmer":
-            sequence_encoding_type = SequenceEncodingType.GAPPED_KMER
-        elif sequence_encoding_strategy == "IMGT_gapped_kmer":
-            sequence_encoding_type = SequenceEncodingType.IMGT_GAPPED_KMER
-        elif sequence_encoding_strategy == "IMGT_continuous_kmer":
-            sequence_encoding_type = SequenceEncodingType.IMGT_CONTINUOUS_KMER
-        elif sequence_encoding_strategy == "continuous_kmer":
-            sequence_encoding_type = SequenceEncodingType.CONTINUOUS_KMER
-        else:
-            sequence_encoding_type = SequenceEncodingType.IDENTITY
-
-        return sequence_encoding_type
+    def _transform_sequence_encoding_strategy(sequence_encoding_strategy: str) -> SequenceEncodingStrategy:
+        val = getattr(SequenceEncodingType, sequence_encoding_strategy.upper()).value
+        (module_path, _, class_name) = val.rpartition(".")
+        module = import_module(module_path)
+        sequence_encoding_strategy_instance = getattr(module, class_name)()
+        return sequence_encoding_strategy_instance
 
     @staticmethod
     def _build_default_methods(ml_methods: list) -> list:
         methods = []
 
-        if "LogisticRegression" in ml_methods:
-            methods.append(LogisticRegression())
-        if "SVM" in ml_methods:
-            methods.append(SVM())
-        if "RandomForest" in ml_methods:
-            methods.append(RandomForestClassifier())
+        for key in ml_methods:
+            mod = import_module("source.ml_methods.{}".format(key))
+            method = getattr(mod, key)()
+            methods.append(method)
 
         return methods
 

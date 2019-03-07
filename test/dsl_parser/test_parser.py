@@ -13,7 +13,7 @@ class TestParser(TestCase):
         parsed = Parser.parse({
             "repertoire_count": 200,
             "sequence_count": 50,
-            "ml_methods": ["LogisticRegression", "SVM", "RandomForest"],
+            "ml_methods": ["LogisticRegression", "SVM", "RandomForestClassifier"],
             "encoder": "KmerFrequencyEncoder",
             "encoder_params": {
                 "normalization_type": "relative_frequency",
