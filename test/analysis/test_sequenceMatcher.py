@@ -1,5 +1,5 @@
-import os
 import pickle
+import shutil
 from unittest import TestCase
 
 from source.analysis.SequenceMatcher import SequenceMatcher
@@ -9,6 +9,8 @@ from source.data_model.receptor_sequence.ReceptorSequence import ReceptorSequenc
 from source.data_model.receptor_sequence.SequenceMetadata import SequenceMetadata
 from source.data_model.repertoire.Repertoire import Repertoire
 from source.data_model.repertoire.RepertoireMetadata import RepertoireMetadata
+from source.environment.EnvironmentSettings import EnvironmentSettings
+from source.util.PathBuilder import PathBuilder
 
 
 class TestSequenceMatcher(TestCase):
@@ -20,10 +22,12 @@ class TestSequenceMatcher(TestCase):
                                            ReceptorSequence(amino_acid_sequence="TADQVF", metadata=SequenceMetadata(chain="A", v_gene="V1", j_gene="J3"))],
                                 metadata=RepertoireMetadata(sample=Sample("CD123"), custom_params={"CD": True}))
 
-        with open("./rep0.pkl", "wb") as file:
+        path = EnvironmentSettings.root_path + "test/tmp/seqmatch/"
+        PathBuilder.build(path)
+        with open(path + "rep0.pkl", "wb") as file:
             pickle.dump(repertoire, file)
 
-        dataset = Dataset(filenames=["./rep0.pkl"])
+        dataset = Dataset(filenames=[path + "rep0.pkl"])
         sequences = [ReceptorSequence("AAAACA", metadata=SequenceMetadata(chain="A", v_gene="V1", j_gene="J2")),
                      ReceptorSequence("TADQV", metadata=SequenceMetadata(chain="A", v_gene="V1", j_gene="J3"))]
 
@@ -35,7 +39,7 @@ class TestSequenceMatcher(TestCase):
         self.assertTrue(result["repertoires"][0]["metadata"]["CD"])
         self.assertEqual(1, len(result["repertoires"]))
 
-        os.remove("./rep0.pkl")
+        shutil.rmtree(path)
 
     def test_match_repertoire(self):
         repertoire = Repertoire(sequences=[ReceptorSequence(amino_acid_sequence="AAAAAA", metadata=SequenceMetadata(chain="A")),

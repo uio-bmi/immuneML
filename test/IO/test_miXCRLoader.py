@@ -3,14 +3,16 @@ import shutil
 from unittest import TestCase
 
 from source.IO.MiXCRLoader import MiXCRLoader
+from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.util.PathBuilder import PathBuilder
 
 
 class TestMiXCRLoader(TestCase):
     def test_load(self):
+        path = EnvironmentSettings.root_path + "test/tmp/mixcr/"
 
-        PathBuilder.build("./tmp_input/")
-        with open("./tmp_input/CD1_TRA.csv", "w") as file:
+        PathBuilder.build(path + "tmp_input/")
+        with open(path + "tmp_input/CD1_TRA.csv", "w") as file:
             writer = csv.DictWriter(file,
                                     delimiter="\t",
                                     fieldnames=["patient", "dilution", "cloneCount", "allVHitsWithScore",
@@ -49,7 +51,7 @@ class TestMiXCRLoader(TestCase):
             writer.writeheader()
             writer.writerows(dicts)
 
-        with open("./tmp_input/HC2_TRB.csv", "w") as file:
+        with open(path + "tmp_input/HC2_TRB.csv", "w") as file:
             writer = csv.DictWriter(file,
                                     delimiter="\t",
                                     fieldnames=["patient", "dilution", "cloneCount", "allVHitsWithScore",
@@ -88,10 +90,10 @@ class TestMiXCRLoader(TestCase):
             writer.writeheader()
             writer.writerows(dicts)
 
-        dataset = MiXCRLoader.load("./tmp_input/", {
+        dataset = MiXCRLoader.load(path + "tmp_input/", {
             "additional_columns": ["minQualCDR3"],
             "sequence_type": "CDR1+CDR2+CDR3",
-            "result_path": "./tmp_output/",
+            "result_path": path + "tmp_output/",
             "batch_size": 2,
             "extension": "csv",
             "custom_params": [{
@@ -113,5 +115,4 @@ class TestMiXCRLoader(TestCase):
                 self.assertEqual(6, repertoire.sequences[1].metadata.count)
                 self.assertFalse(repertoire.metadata.custom_params["CD"])
 
-        shutil.rmtree("./tmp_input/")
-        shutil.rmtree("./tmp_output/")
+        shutil.rmtree(path)

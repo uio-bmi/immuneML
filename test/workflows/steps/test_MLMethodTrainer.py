@@ -4,6 +4,7 @@ from unittest import TestCase
 import numpy as np
 
 from source.data_model.dataset.Dataset import Dataset
+from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.ml_methods.LogisticRegression import LogisticRegression
 from source.workflows.steps.MLMethodTrainer import MLMethodTrainer
 
@@ -25,8 +26,10 @@ class TestMLMethodTrainer(TestCase):
             "label_names": ["l1", "l2"]
         }
 
+        path = EnvironmentSettings.root_path + "test/tmp/mlmethodtrainer/"
+
         method = MLMethodTrainer.perform_step({
-            "result_path": "./tmp/",
+            "result_path": path,
             "dataset": dataset,
             "labels": ["l1"],
             "method": method,
@@ -35,4 +38,4 @@ class TestMLMethodTrainer(TestCase):
 
         method.predict(np.array([1, 2, 3]).reshape(1, -1), ["l1"])
 
-        shutil.rmtree("./tmp/")
+        shutil.rmtree(path)

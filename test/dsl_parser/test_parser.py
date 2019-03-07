@@ -1,11 +1,13 @@
-import os
+import shutil
 from unittest import TestCase
 
 import yaml
 
 from source.dsl_parsers.Parser import Parser
+from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.ml_methods.MLMethod import MLMethod
 from source.simulation.implants.Signal import Signal
+from source.util.PathBuilder import PathBuilder
 
 
 class TestParser(TestCase):
@@ -151,10 +153,13 @@ class TestParser(TestCase):
                 }
             }
 
-        with open("./tmp_yaml_spec.yaml", "w") as file:
+        path = EnvironmentSettings.root_path + "test/tmp/parser_yaml/"
+        PathBuilder.build(path)
+
+        with open(path + "tmp_yaml_spec.yaml", "w") as file:
             yaml.dump(spec, file, default_flow_style=False)
 
-        parsed = Parser.parse_yaml_file("./tmp_yaml_spec.yaml")
+        parsed = Parser.parse_yaml_file(path + "tmp_yaml_spec.yaml")
 
         keys = ["repertoire_count", "sequence_count", "ml_methods", "simulation", "signals"]
 
@@ -167,4 +172,4 @@ class TestParser(TestCase):
         self.assertTrue(
             all([all(isinstance(item, Signal) for item in item2["signals"]) for item2 in parsed["simulation"]]))
 
-        os.remove("./tmp_yaml_spec.yaml")
+        shutil.rmtree(path)
