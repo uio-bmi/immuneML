@@ -3,6 +3,7 @@ import warnings
 from source.data_model.dataset.Dataset import Dataset
 from source.dsl_parsers.Parser import Parser
 from source.encodings.EncoderParams import EncoderParams
+from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.environment.LabelConfiguration import LabelConfiguration
 from source.environment.MetricType import MetricType
 from source.simulation.dataset_generation.RandomDatasetGenerator import RandomDatasetGenerator
@@ -161,7 +162,7 @@ Quickstart.perform_analysis({
     "repertoire_count": 400,
     "sequence_count": 500,
     "receptor_type": "TCR",
-    "result_path": "/Users/milenpa/PycharmProjects/ImmuneML/simulation_results/",
+    "result_path": EnvironmentSettings.root_path + "simulation_results/",
     "ml_methods": ["LogisticRegression", "SVM", "RandomForest"],
     "training_percentage": 0.7,
     "cv": 10,
