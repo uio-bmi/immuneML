@@ -5,7 +5,7 @@ Machine learning models
 .. toctree::
    :maxdepth: 2
 
-To perform machine learning (ML) on the immune receptor sequence, one should execute the following workflow:
+To perform machine learning (ML) on the immune receptor sequences, one should execute the following workflow:
 
 1.  Load or simulate the immune receptor data in order to obtain a valid dataset,
 2.  Encode the data, using one of :ref:`Encodings` and then
@@ -19,7 +19,7 @@ Classification
 In the case of classification, it is possible to perform binary classification, multi-class classification,
 multi-label and multi-class multi-label classification.
 
-For the case of immune status prediction, multi-label classification can be useful for predicting the status multiple
+For the case of immune status prediction, multi-label classification can be useful for predicting the status of multiple
 diseases, while multi-class classification could be used to predict different stages of one specific disease. However,
 in order to use this, the user needs only to supply labels for each of the diseases and an appropriate scenario will
 be implemented internally.
@@ -94,7 +94,7 @@ Algorithms
 ==========
 
 ========================
-Logistic regression
+Logistic Regression
 ========================
 
 Internally, **LogisticRegression** class is a wrapper around a *SGDClassifier* object with a logarithmic loss function.
@@ -148,7 +148,7 @@ In addition to examples and labels, if performing a fit by cross-validation, it 
 splits and the names of labels for which models need to be learnt form the data.
 
 ========================
-Support vector machine
+Support Vector Machine
 ========================
 
 **SVM** class is a wrapper class around sklearn's *SGDClassifier* class. Therefore, the same parameters apply as

@@ -30,7 +30,11 @@ The **Signal** class corresponds to a disease. An object of the Signal class con
 
 *   a unique identifier,
 *   a list of motifs,
-*   a strategy for implanting
+*   a strategy for implanting.
+
+When creating a signal, it is necessary to specify a unique, human-readable identifier since it will be used later to
+distinguish between different signals. Unlike dataset identifiers which will be automatically created if none are given,
+for the signal, it is required to manually specify one.
 
 Motif
 =====
@@ -44,16 +48,20 @@ It consists of:
 *   alphabet weights,
 *   a strategy for creating instances of the motif.
 
+When creating a motif, it is necessary to specify a unique, human-readable identifier since it will be used later to
+distinguish between different motifs. Unlike dataset identifiers which will be automatically created if none are given,
+for the motif, it is required to manually specify one. This can be equal to the seed or can have a different value.
+
 *Seed* is a starting point for creating a sequence which will be implanted into an immune receptor sequence. It is a
 sequence of amino acid or nucleotide one letter codes, such as ``CAS`` or ``ACT``, respectively. Since the epitopes can
 have a gap within the sequence, the position of the gap can also be marked in the seed with ``/`` character. For seed
 ``C/AS``, the gap is located after ``C`` and before ``AS``.
 
-Position weights are probabilities that a position in the seed will be changed when creating a specific instance of the
+*Position weights* are probabilities that a position in the seed will be changed when creating a specific instance of the
 motif. If a seed is ``CAS``, then position weight 1 for the first position means that when creating a motif instance, the
 first letter (``C``) will be changed if changes from the seed are allowed.
 
-Alphabet weights are probabilities that a given letter (either an amino acid or a nucleotide) will be chosen to replace
+*Alphabet weights* are probabilities that a given letter (either an amino acid or a nucleotide) will be chosen to replace
 the letter in the seed sequence. For amino acid sequences, alphabet consists of 20 letters corresponding to each amino acid
 one letter code. If weight for ``A`` is specified to be 1, then when choosing a letter to change one of the letters from
 the seed, letter ``A`` will always be chosen. If alphabet weights are not specified, then all letters have equal probability

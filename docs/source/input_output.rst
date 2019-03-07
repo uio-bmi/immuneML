@@ -12,7 +12,9 @@ Import
 
 The data can be imported from the following formats:
 
-1. MiXCR_
+1. MiXCR_,
+2. Adaptive Biotechnologies,
+3. IMGT.
 
 MiXCR
 -----

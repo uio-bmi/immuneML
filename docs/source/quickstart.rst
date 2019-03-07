@@ -18,10 +18,10 @@ repertoires of the people who do not have the disease. With these examples at ha
 distinguish between repertoires with the disease and those without, thus yielding a useful approach to prediction.
 
 To be able to learn something from the immune repertoires, machine learning algorithms require the repertoires to have a
-suitable representation. In this analysis, a suitable representation will be made by calculating k-mer frequencies in a repertoire.
-For instance, given a sequence ``CASSRTY``, then the resulting 3-mers are ``CAS``, ``ASS``, ``SSR``, ``SRT``, ``RTY``. To obtain
-this representation, each sequence in a repertoire is split into overlapping 3-mers and the frequency of each possible
-3-mer is calculated for the repertoire.
+suitable representation. In this analysis, a suitable representation will be made by calculating k-mer frequencies in a
+repertoire. For instance, given a sequence ``CASSRTY``, then the resulting 3-mers are ``CAS``, ``ASS``, ``SSR``,
+``SRT``, ``RTY``. To obtain this representation, each sequence in a repertoire is split into overlapping 3-mers and the
+frequency of each possible 3-mer is calculated for the repertoire.
 
 The workflow of the quickstart analysis
 =======================================
@@ -110,21 +110,22 @@ is given as a Python dictionary in the following manner:
 Prerequisites
 -------------
 
-To be able to run the code, first install the following Python packages:
+To be able to run the code, first install the Python packages listed below. Installation instructions are given using pip.
+More details and installation instructions can be found on the corresponding package's websites.
 
-1.  numpy
+1.  Numpy_
 
 .. code-block:: RST
 
     $ pip install numpy
 
-2.  sklearn
+2.  Sklearn_
 
 .. code-block:: RST
 
     $ pip install sklearn
 
-3.  gensim
+3.  Gensim_
 
 .. code-block:: RST
 
@@ -142,4 +143,8 @@ To perform the analysis described in the previous sections, do the following:
 .. code-block:: RST
 
     $ python3 source/workflows/processes/quickstart.py
+
+.. _Numpy: http://www.numpy.org/
+.. _Sklearn: https://scikit-learn.org/stable/index.html
+.. _Gensim: https://radimrehurek.com/gensim/
 
