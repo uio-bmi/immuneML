@@ -1,5 +1,6 @@
 # Byte-compiled / optimized / DLL files
 __pycache__/
+*/__pychache__/
 *.py[cod]
 
 # C extensions
@@ -33,3 +34,6 @@ docs/build/
 # PyCharm-specific
 .idea/
 venv/
+
+# temporary files and folders
+tmp/
