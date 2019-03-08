@@ -1,3 +1,4 @@
+import os
 import pickle
 from glob import iglob
 from multiprocessing.pool import Pool
@@ -7,6 +8,7 @@ from pandas import DataFrame
 
 from source.IO.DataLoader import DataLoader
 from source.IO.PickleExporter import PickleExporter
+from source.IO.metadata_import.MetadataImport import MetadataImport
 from source.data_model.dataset.Dataset import Dataset
 from source.data_model.metadata.Sample import Sample
 from source.data_model.receptor_sequence.ReceptorSequence import ReceptorSequence
@@ -41,6 +43,9 @@ class MiXCRLoader(DataLoader):
     def load(path, params: dict = None) -> Dataset:
         PathBuilder.build(params["result_path"])
         filepaths = sorted(list(iglob(path + "**/*." + params["extension"], recursive=True)))
+        if "metadata_file" in params:
+            metadata = MetadataImport.import_metadata(params["metadata_file"])
+            params["metadata"] = metadata
         dataset = MiXCRLoader._load(filepaths, params)
         PickleExporter.export(dataset, params["result_path"], "dataset.pkl")
         return dataset
@@ -80,11 +85,10 @@ class MiXCRLoader(DataLoader):
 
         metadata = MiXCRLoader._extract_repertoire_metadata(filepath, params, df)
 
-        if metadata.sample is None or metadata.sample.id is None:
-            params["additional_columns"].append(MiXCRLoader.SAMPLE_ID)
-
         sequences = MiXCRLoader._load_sequences(filepath, params, df)
         patient_id = MiXCRLoader._extract_patient(filepath, df)
+        if patient_id is None and "donor" in metadata.custom_params:
+            patient_id = metadata.custom_params["donor"]
         repertoire = Repertoire(sequences=sequences, metadata=metadata, identifier=patient_id)
         filename = params["result_path"] + str(index) + ".pkl"
 
@@ -95,27 +99,40 @@ class MiXCRLoader(DataLoader):
 
     @staticmethod
     def _extract_patient(filepath: str, df):
-        assert df[MiXCRLoader.PATIENT].nunique() == 1, \
-            "MiXCRLoader: multiple patients in a single file are not supported. Issue with " + filepath
-        return df[MiXCRLoader.PATIENT][0]
+
+        if MiXCRLoader.PATIENT in df.keys():
+
+            assert df[MiXCRLoader.PATIENT].nunique() == 1, \
+                "MiXCRLoader: multiple patients in a single file are not supported. Issue with " + filepath
+            return df[MiXCRLoader.PATIENT][0]
+
+        else:
+            return None
 
     @staticmethod
-    def _extract_repertoire_metadata(filepath, params, df):
-        sample = MiXCRLoader._extract_sample_information(df)
-
-        metadata = RepertoireMetadata(sample=sample)
-
-        for param in params["custom_params"]:
-            metadata.custom_params[param["name"]] = MiXCRLoader._extract_custom_param(param, filepath)
+    def _extract_repertoire_metadata(filepath, params, df) -> RepertoireMetadata:
+        if "metadata" in params:
+            metadata = [m for m in params["metadata"] if m["rep_file"] == os.path.basename(filepath)][0]["metadata"]
+        else:
+            sample = MiXCRLoader._extract_sample_information(df)
+            metadata = RepertoireMetadata(sample=sample)
+            for param in params["custom_params"]:
+                metadata.custom_params[param["name"]] = MiXCRLoader._extract_custom_param(param, filepath)
 
         return metadata
 
     @staticmethod
     def _get_sample_id(df: DataFrame):
-        if df[MiXCRLoader.SAMPLE_ID].nunique() != 1:
-            sample_id = None
-        else:
-            sample_id = df[MiXCRLoader.SAMPLE_ID][0]
+
+        sample_id = None
+
+        if MiXCRLoader.SAMPLE_ID in df.keys():
+
+            if df[MiXCRLoader.SAMPLE_ID].nunique() != 1:
+                sample_id = None
+            else:
+                sample_id = df[MiXCRLoader.SAMPLE_ID][0]
+
         return sample_id
 
     @staticmethod
@@ -138,14 +155,11 @@ class MiXCRLoader(DataLoader):
 
     @staticmethod
     def _load_sequences(filepath, params, df):
-        sequences = []
-        for index, row in df.iterrows():
-            sequence = MiXCRLoader._process_row(filepath, df, row, params)
-            sequences.append(sequence)
+        sequences = df.apply(MiXCRLoader._process_row, axis=1, args=(filepath, df, params, )).values
         return sequences
 
     @staticmethod
-    def _process_row(filepath, df, row, params,) -> ReceptorSequence:
+    def _process_row(row, filepath, df, params,) -> ReceptorSequence:
         chain = MiXCRLoader._extract_chain(filepath)
         sequence_aa, sequence_nt = MiXCRLoader._extract_sequence_by_type(row, params)
         metadata = MiXCRLoader._extract_sequence_metadata(df, row, chain, params)
