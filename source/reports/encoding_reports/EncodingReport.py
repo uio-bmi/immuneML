@@ -1,3 +1,5 @@
+import abc
+
 from source.data_model.dataset.Dataset import Dataset
 from source.reports.Report import Report
 
@@ -10,5 +12,6 @@ class EncodingReport(Report):
             "dataset and try again."
         return self.generate(dataset=params["dataset"], result_path=params["result_path"], params=params)
 
+    @abc.abstractmethod
     def generate(self, dataset: Dataset, result_path: str, params: dict):
         pass
