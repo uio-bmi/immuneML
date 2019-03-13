@@ -12,6 +12,9 @@ The ImmuneML's data model consists of:
 *   Repertoire class
 *   Dataset class
 
+.. note:: In case only sequences should be analyzed, regardless of the repertoires, the *Sequence*, *Repertoire* and *Dataset* classes should still be used, but it is necessary then to make each repertoire to consist of only one sequence. Everything else in the analysis, except where noted, can be used in the same manner as when the analysis has repertoires consisting of a bulk of sequences.
+
+
 Sequence
 ========
 
@@ -51,11 +54,6 @@ and optional other parameters. Examples of such parameters could be:
 *   date of the experiment,
 *   age of the patient,
 *   known diseases of the patient etc.
-
-In case only sequences should be analyzed, regardless of the repertoires, the *Sequence*, *Repertoire* and *Dataset* classess
-should still be used, but it is necessary then to make each repertoire to consist of only one sequence. Everything else in the
-analysis, except where noted, can be used in the same manner as when the analysis has repertoires consisting of a bulk of
-sequences.
 
 Dataset
 =======
