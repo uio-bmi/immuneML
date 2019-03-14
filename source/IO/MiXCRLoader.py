@@ -107,7 +107,7 @@ class MiXCRLoader(DataLoader):
             return df[MiXCRLoader.PATIENT][0]
 
         else:
-            return None
+            return os.path.basename(filepath).split("_clones_")[0]
 
     @staticmethod
     def _extract_repertoire_metadata(filepath, params, df) -> RepertoireMetadata:
@@ -196,7 +196,7 @@ class MiXCRLoader(DataLoader):
         region_type = params["sequence_type"]
         metadata = SequenceMetadata(v_gene=v_gene, j_gene=j_gene, chain=chain, count=count, region_type=region_type)
 
-        if MiXCRLoader.SAMPLE_ID in params["additional_columns"]:
+        if MiXCRLoader.SAMPLE_ID in params["additional_columns"] and MiXCRLoader.SAMPLE_ID in df.keys():
             sample = Sample(identifier=row[MiXCRLoader.SAMPLE_ID])
             metadata.sample = sample
 
