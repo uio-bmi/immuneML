@@ -1,12 +1,14 @@
+import inspect
 import json
 from itertools import product
 from multiprocessing.pool import Pool
+
 from sklearn import metrics
 
-from source.ml_metrics import ml_metrics
 from source.environment.MetricType import MetricType
 from source.environment.ParallelismManager import ParallelismManager
 from source.ml_methods.MLMethod import MLMethod
+from source.ml_metrics import ml_metrics
 from source.util.PathBuilder import PathBuilder
 from source.workflows.steps.Step import Step
 
@@ -51,6 +53,7 @@ class MLMethodAssessment(Step):
         X = input_params["dataset"].encoded_data["repertoires"]
         predicted_y = method.predict(X, labels)
         true_y = input_params["dataset"].encoded_data["labels"]
+        label_config = input_params["label_configuration"]
 
         MLMethodAssessment._store_predictions(method.__class__.__name__,
                                                true_y,
@@ -62,20 +65,24 @@ class MLMethodAssessment(Step):
 
         for metric in input_params["metrics"]:
             for index, label in enumerate(labels):
-                score = MLMethodAssessment._score(metric, predicted_y[label], true_y[index])
+                score = MLMethodAssessment._score(metric, predicted_y[label], true_y[index], label_config.get_label_values(label))
                 results[label][metric.name] = score
 
         return results
 
     @staticmethod
-    def _score(metric: MetricType, predicted_y, true_y):
+    def _score(metric: MetricType, predicted_y, true_y, labels):
         if hasattr(metrics, metric.value) and callable(getattr(metrics, metric.value)):
-            score = getattr(metrics, metric.value)(true_y, predicted_y)
+            fn = getattr(metrics, metric.value)
         else:
-            score = getattr(ml_metrics, metric.value)(true_y, predicted_y)
+            fn = getattr(ml_metrics, metric.value)
+
+        if "labels" in inspect.signature(fn).parameters.keys():
+            score = fn(true_y, predicted_y, labels=labels)
+        else:
+            score = fn(true_y, predicted_y)
 
         return score
-
 
     @staticmethod
     def _store_predictions(method_name, true_y, predicted_y, labels, predictions_path):

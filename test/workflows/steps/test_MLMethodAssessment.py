@@ -3,6 +3,7 @@ from unittest import TestCase
 import numpy as np
 
 from source.data_model.dataset.Dataset import Dataset
+from source.environment.LabelConfiguration import LabelConfiguration
 from source.environment.MetricType import MetricType
 from source.ml_methods.LogisticRegression import LogisticRegression
 from source.ml_methods.SVM import SVM
@@ -19,6 +20,10 @@ class TestMLMethodAssessment(TestCase):
             "label_names": ["l1", "l2"]
         }
 
+        label_config = LabelConfiguration()
+        label_config.add_label("l1", [1, 2, 3])
+        label_config.add_label("l2", [1, 2, 3])
+
         method1 = SVM()
         method1.fit(dataset.encoded_data["repertoires"], dataset.encoded_data["labels"], dataset.encoded_data["label_names"])
 
@@ -31,7 +36,8 @@ class TestMLMethodAssessment(TestCase):
             "methods": [method1, method2],
             "labels": ["l1", "l2"],
             "metrics": [MetricType.ACCURACY, MetricType.BALANCED_ACCURACY, MetricType.F1_MACRO],
-            "predictions_path": None
+            "predictions_path": None,
+            "label_configuration": label_config
         })
 
         self.assertTrue("SVM" in res)
