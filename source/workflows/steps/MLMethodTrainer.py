@@ -47,7 +47,7 @@ class MLMethodTrainer(Step):
                                            parameter_grid=parameter_grid,
                                            label_names=input_params["labels"])
         else:
-            method.fit(X, y)
+            method.fit(X, y, label_names=input_params["labels"])
 
         return method
 
