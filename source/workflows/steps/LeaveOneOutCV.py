@@ -86,10 +86,10 @@ class LeaveOneOutCV(Step):
         for method in input_params["methods"]:
             trained_method = MLMethodTrainer.run({
                 "method": method,
-                "result_path": input_params["result_path"] + "loocv{}/".format(index) + input_params["encoder"].__name__ + "/",
+                "result_path": input_params["result_path"] + "loocv{}/".format(index) + input_params["encoder"].__name__ + "/ml_methods/",
                 "dataset": dataset,
                 "labels": input_params["labels"],
-                "number_of_splits": input_params["cv"],
+                "number_of_splits": input_params["cv"] if "cv" in input_params else 0,
                 "fit_method": input_params["fit_method"] if "fit_method" in input_params else "cv" if input_params["cv"] > 0 else None
             })
             trained_methods.append(trained_method)
@@ -134,7 +134,7 @@ class LeaveOneOutCV(Step):
 
         for label in input_params["labels"]:
             if label in input_params["dataset"].params.keys():
-                label_config.add_label(label, input_params["dataset"].params[label])
+                label_config.add_label(label, list(input_params["dataset"].params[label]))
 
         return label_config
 
