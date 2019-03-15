@@ -1,10 +1,12 @@
 # quality: peripheral
 
 import copy
+import json
 
 from source.data_model.dataset.Dataset import Dataset
 from source.encodings.EncoderParams import EncoderParams
 from source.environment.LabelConfiguration import LabelConfiguration
+from source.environment.MetricType import MetricType
 from source.workflows.steps.DataEncoder import DataEncoder
 from source.workflows.steps.MLMethodAssessment import MLMethodAssessment
 from source.workflows.steps.MLMethodTrainer import MLMethodTrainer
@@ -29,21 +31,52 @@ class LeaveOneOutCV(Step):
         label_config = LeaveOneOutCV.build_label_configuration(input_params)
 
         for i in range(input_params["dataset"].get_repertoire_count()):
+            print("Iteration {} out of {}".format(i, input_params["dataset"].get_repertoire_count()))
             train_dataset, test_dataset = LeaveOneOutCV.split_dataset(input_params["dataset"], i)
             train_dataset, test_dataset = LeaveOneOutCV.encode_dataset(train_dataset, test_dataset, input_params, i, label_config)
             trained_methods = LeaveOneOutCV.train_methods(train_dataset, input_params, i)
             assessment = LeaveOneOutCV.assess(trained_methods, test_dataset, input_params, i, label_config)
             assessments.append(assessment)
 
+        errors = LeaveOneOutCV.extract_errors(input_params["dataset"], assessments, input_params["metrics"])
+
         final_assessment = LeaveOneOutCV.assess_all(assessments, input_params["metrics"], input_params["results_aggregator"])
+
+        with open(input_params["result_path"] + "assessments.json", "w") as file:
+            json.dump(final_assessment, file, indent=2)
+
+        with open(input_params["result_path"] + "errors.json", "w") as file:
+            json.dump(errors, file, indent=2)
 
         return final_assessment
 
     @staticmethod
+    def extract_errors(dataset: Dataset, assessments: list, metrics) -> dict:
+        if MetricType.BALANCED_ACCURACY not in metrics and MetricType.ACCURACY not in metrics:
+            return {}
+        else:
+            metric = MetricType.BALANCED_ACCURACY if MetricType.BALANCED_ACCURACY in metrics else MetricType.ACCURACY
+            errors = {}
+            random_performance = {label: 1.0 / len(dataset.params[label]) for label in dataset.params.keys()}
+            for index, rep in enumerate(dataset.get_data()):
+                if any([any([assessments[index][method][label][metric.name] <= random_performance[label] for label in assessments[index][method].keys()]) for method in assessments[index].keys()]):
+                    errors[str(index) + "_" + rep.identifier] = {
+                        "status": rep.metadata.custom_params,
+                        "assessments": assessments[index],
+                        "other_info": {
+                            "chains": list({seq.metadata.chain if seq.metadata else None for seq in rep.sequences})
+                        }
+                    }
+            return errors
+
+    @staticmethod
     def average_assessment(assessments: list, metrics: list):
-        res = {
-        method_name: {label: {metric.name: 0 for metric in metrics} for label in assessments[0][method_name].keys()} for
-        method_name in assessments[0].keys()}
+        res = {method_name:
+                   {label:
+                        {metric.name: 0 for metric in metrics}
+                    for label in assessments[0][method_name].keys()}
+               for method_name in assessments[0].keys()}
+
         for item in assessments:
             for metric in metrics:
                 for method_name in item:
