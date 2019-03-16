@@ -2,20 +2,21 @@ import os
 import pickle
 from collections import Counter
 
+import numpy as np
 from scipy import sparse
 from sklearn.feature_extraction import DictVectorizer
 from sklearn.preprocessing import normalize
-import numpy as np
 
 from source.IO.PickleExporter import PickleExporter
 from source.IO.PickleLoader import PickleLoader
 from source.data_model.dataset.Dataset import Dataset
-from source.data_model.repertoire.Repertoire import Repertoire
 from source.data_model.receptor_sequence.ReceptorSequence import ReceptorSequence
+from source.data_model.repertoire.Repertoire import Repertoire
 from source.encodings.DatasetEncoder import DatasetEncoder
 from source.encodings.EncoderParams import EncoderParams
 from source.encodings.kmer_frequency.NormalizationType import NormalizationType
 from source.encodings.kmer_frequency.ReadsType import ReadsType
+from source.encodings.kmer_frequency.sequence_encoding.SequenceEncodingStrategy import SequenceEncodingStrategy
 from source.util.FilenameHandler import FilenameHandler
 from source.util.PathBuilder import PathBuilder
 
@@ -125,7 +126,9 @@ class KmerFrequencyEncoder(DatasetEncoder):
 
     @staticmethod
     def _encode_sequence(sequence: ReceptorSequence, params: EncoderParams):
-        sequence_encoder = KmerFrequencyEncoder._prepare_sequence_encoder(params)
+        sequence_encoder = params["model"]["sequence_encoding_strategy"]
+        if not isinstance(sequence_encoder, SequenceEncodingStrategy):
+            sequence_encoder = KmerFrequencyEncoder._prepare_sequence_encoder(params)
         encoded_sequence = sequence_encoder.encode_sequence(sequence=sequence, params=params)
         return encoded_sequence
 

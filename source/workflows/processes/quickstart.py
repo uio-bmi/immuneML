@@ -1,5 +1,3 @@
-import warnings
-
 from source.data_model.dataset.Dataset import Dataset
 from source.dsl_parsers.Parser import Parser
 from source.encodings.EncoderParams import EncoderParams
@@ -150,7 +148,8 @@ class Quickstart:
             "dataset": test_dataset,
             "metrics": [MetricType.BALANCED_ACCURACY],
             "labels": params["label_configuration"].get_labels_by_name(),
-            "predictions_path": params["result_path"] + params["encoder"].__class__.__name__ + "/predictions/"
+            "predictions_path": params["result_path"] + params["encoder"].__class__.__name__ + "/predictions/",
+            "label_configuration": params["label_configuration"]
         })
 
         print("#### performance assessed....")
@@ -163,7 +162,7 @@ Quickstart.perform_analysis({
     "sequence_count": 500,
     "receptor_type": "TCR",
     "result_path": EnvironmentSettings.root_path + "simulation_results/",
-    "ml_methods": ["LogisticRegression", "SVM", "RandomForest"],
+    "ml_methods": ["RandomForestClassifier"],  # other classifiers: "LogisticRegression", "SVM"
     "training_percentage": 0.7,
     "cv": 10,
     "encoder": "KmerFrequencyEncoder",
