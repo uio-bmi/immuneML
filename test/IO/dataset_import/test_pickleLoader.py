@@ -2,7 +2,7 @@ import pickle
 import shutil
 from unittest import TestCase
 
-from source.IO.PickleLoader import PickleLoader
+from source.IO.dataset_import.PickleLoader import PickleLoader
 from source.data_model.dataset.Dataset import Dataset
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.util.PathBuilder import PathBuilder

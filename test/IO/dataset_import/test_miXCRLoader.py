@@ -2,7 +2,7 @@ import csv
 import shutil
 from unittest import TestCase
 
-from source.IO.MiXCRLoader import MiXCRLoader
+from source.IO.dataset_import.MiXCRLoader import MiXCRLoader
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.util.PathBuilder import PathBuilder
 

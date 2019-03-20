@@ -1,9 +1,9 @@
+import copy
 import os
 import pickle
-import copy
 
 from source.IO.PickleExporter import PickleExporter
-from source.IO.PickleLoader import PickleLoader
+from source.IO.dataset_import.PickleLoader import PickleLoader
 from source.data_model.dataset.Dataset import Dataset
 from source.data_model.metadata.Sample import Sample
 from source.data_model.repertoire.Repertoire import Repertoire

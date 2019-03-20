@@ -8,7 +8,7 @@ from sklearn.feature_extraction import DictVectorizer
 from sklearn.preprocessing import normalize
 
 from source.IO.PickleExporter import PickleExporter
-from source.IO.PickleLoader import PickleLoader
+from source.IO.dataset_import.PickleLoader import PickleLoader
 from source.data_model.dataset.Dataset import Dataset
 from source.data_model.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.data_model.repertoire.Repertoire import Repertoire

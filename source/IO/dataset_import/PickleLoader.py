@@ -3,7 +3,7 @@
 import os
 import pickle
 
-from source.IO.DataLoader import DataLoader
+from source.IO.dataset_import.DataLoader import DataLoader
 from source.data_model.dataset.Dataset import Dataset
 
 

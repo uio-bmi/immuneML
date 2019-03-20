@@ -6,8 +6,8 @@ from multiprocessing.pool import Pool
 import pandas as pd
 from pandas import DataFrame
 
-from source.IO.DataLoader import DataLoader
 from source.IO.PickleExporter import PickleExporter
+from source.IO.dataset_import.DataLoader import DataLoader
 from source.IO.metadata_import.MetadataImport import MetadataImport
 from source.data_model.dataset.Dataset import Dataset
 from source.data_model.metadata.Sample import Sample

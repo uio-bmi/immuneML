@@ -9,7 +9,7 @@ from scipy import sparse
 from sklearn.preprocessing import StandardScaler
 
 from source.IO.PickleExporter import PickleExporter
-from source.IO.PickleLoader import PickleLoader
+from source.IO.dataset_import.PickleLoader import PickleLoader
 from source.data_model.dataset.Dataset import Dataset
 from source.data_model.repertoire.Repertoire import Repertoire
 from source.data_model.repertoire.RepertoireGenerator import RepertoireGenerator

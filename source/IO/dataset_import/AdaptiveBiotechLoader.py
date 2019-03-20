@@ -5,7 +5,7 @@ from multiprocessing.pool import Pool
 
 import pandas as pd
 
-from source.IO.DataLoader import DataLoader
+from source.IO.dataset_import.DataLoader import DataLoader
 from source.data_model.dataset.Dataset import Dataset
 from source.data_model.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.data_model.receptor_sequence.SequenceMetadata import SequenceMetadata
