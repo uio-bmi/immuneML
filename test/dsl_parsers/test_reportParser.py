@@ -7,8 +7,8 @@ from source.reports.data_reports.SequenceLengthDistribution import SequenceLengt
 class TestReportParser(TestCase):
     def test_parse_reports(self):
         reports = ["SequenceLengthDistribution"]
-        parsed_spec = ReportParser.parse_reports(reports)
-        self.assertTrue(isinstance(parsed_spec, dict))
-        self.assertTrue(isinstance(parsed_spec["SequenceLengthDistribution"]["report"], SequenceLengthDistribution))
-        self.assertTrue(parsed_spec["SequenceLengthDistribution"]["params"] is None)
+        parsed = ReportParser.parse_reports(reports)
+        self.assertTrue(isinstance(parsed, dict))
+        self.assertTrue(isinstance(parsed["SequenceLengthDistribution"]["report"], SequenceLengthDistribution))
+        self.assertTrue(parsed["SequenceLengthDistribution"]["params"] is None)
 
