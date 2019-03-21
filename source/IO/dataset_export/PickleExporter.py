@@ -2,7 +2,7 @@
 
 import pickle
 
-from source.IO.DataExporter import DataExporter
+from source.IO.dataset_export.DataExporter import DataExporter
 from source.data_model.dataset.Dataset import Dataset
 from source.util.PathBuilder import PathBuilder
 

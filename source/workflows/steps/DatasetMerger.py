@@ -2,7 +2,7 @@ import os
 import pickle
 import random
 
-from source.IO.PickleExporter import PickleExporter
+from source.IO.dataset_export.PickleExporter import PickleExporter
 from source.data_model.dataset.Dataset import Dataset
 from source.data_model.repertoire.Repertoire import Repertoire
 from source.util.FilenameHandler import FilenameHandler

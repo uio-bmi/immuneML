@@ -2,7 +2,7 @@ import os
 
 import numpy as np
 
-from source.IO.PickleExporter import PickleExporter
+from source.IO.dataset_export.PickleExporter import PickleExporter
 from source.IO.dataset_import.PickleLoader import PickleLoader
 from source.analysis.SequenceMatcher import SequenceMatcher
 from source.data_model.dataset.Dataset import Dataset

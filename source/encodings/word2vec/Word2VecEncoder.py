@@ -8,7 +8,7 @@ from gensim.models import Word2Vec
 from scipy import sparse
 from sklearn.preprocessing import StandardScaler
 
-from source.IO.PickleExporter import PickleExporter
+from source.IO.dataset_export.PickleExporter import PickleExporter
 from source.IO.dataset_import.PickleLoader import PickleLoader
 from source.data_model.dataset.Dataset import Dataset
 from source.data_model.repertoire.Repertoire import Repertoire

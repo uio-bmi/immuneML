@@ -2,7 +2,7 @@ import copy
 import os
 import pickle
 
-from source.IO.PickleExporter import PickleExporter
+from source.IO.dataset_export.PickleExporter import PickleExporter
 from source.IO.dataset_import.PickleLoader import PickleLoader
 from source.data_model.dataset.Dataset import Dataset
 from source.data_model.metadata.Sample import Sample
