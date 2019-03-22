@@ -9,7 +9,7 @@ from source.util.RepertoireBuilder import RepertoireBuilder
 
 class TestRepertoireBuilder(TestCase):
     def test_build(self):
-        path = EnvironmentSettings.root_path + "test/mp/repbuilder/"
+        path = EnvironmentSettings.root_path + "test/tmp/repbuilder/"
         filenames = RepertoireBuilder.build([["AAA", "CCC"], ["TTTT"]], path, {"default": [1, 2]})
 
         self.assertEqual(2, len(filenames))
