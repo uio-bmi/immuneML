@@ -2,6 +2,7 @@
 import yaml
 
 from source.dsl_parsers.EncodingParser import EncodingParser
+from source.dsl_parsers.ImportParser import ImportParser
 from source.dsl_parsers.MLParser import MLParser
 from source.dsl_parsers.ReportParser import ReportParser
 from source.dsl_parsers.SimulationParser import SimulationParser
@@ -23,6 +24,8 @@ class Parser:
     @staticmethod
     def parse(workflow_specification: dict) -> dict:
         result = {}
+        if "dataset_import" in workflow_specification:
+            result["dataset"] = ImportParser.parse(workflow_specification)
         if "simulation" in workflow_specification:
             result["simulation"], result["signals"] = SimulationParser.parse_simulation(workflow_specification["simulation"])
         if "ml_methods" in workflow_specification:
