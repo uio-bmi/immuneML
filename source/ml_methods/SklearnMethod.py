@@ -4,8 +4,8 @@ import os
 import pickle
 import warnings
 from collections import Iterable
-import numpy as np
 
+import numpy as np
 from sklearn.model_selection import RandomizedSearchCV
 from sklearn.utils.validation import check_is_fitted
 
@@ -20,12 +20,13 @@ class SklearnMethod(MLMethod):
     def __init__(self):
         self._models = {}
         self._parameter_grid = {}
+        self._parameters = None
 
     def _fit_for_label(self, X: Iterable, y: np.ndarray, label: str, cores: int):
         self._models[label] = self._get_ml_model()
         self._models[label].fit(X, y)
 
-    def fit(self, X, y, label_names: list = None):
+    def fit(self, X: Iterable, y, label_names: list = None):
         cores = ParallelismManager.assign_cores_to_job()
         ys = []
         if isinstance(y, list) or (isinstance(y, np.ndarray) and y.ndim > 1):
@@ -45,13 +46,23 @@ class SklearnMethod(MLMethod):
 
         ParallelismManager.free_cores(cores=cores)
 
+    def _can_predict_proba(self) -> bool:
+        return False
+
     def check_is_fitted(self, labels):
         return all([check_is_fitted(self._models[label], ["estimators_", "coef_", "estimator"], all_or_any=any) for label in labels])
 
-    def predict(self, X, label_names: list = None):
+    def predict(self, X: Iterable, label_names: list = None):
         labels = label_names if label_names is not None else self._models.keys()
         self.check_is_fitted(labels)
         return {label: self._models[label].predict(X) for label in labels}
+
+    def predict_proba(self, X: Iterable, labels: list):
+        if self._can_predict_proba():
+            predictions = {label: self._models[label].predict_proba(X) for label in labels}
+            return predictions
+        else:
+            return None
 
     def _fit_for_label_by_cv(self, X: Iterable, y: np.ndarray, label: str, cores: int, number_of_splits: int = 5):
         self._models[label] = RandomizedSearchCV(self._get_ml_model(cores_for_training=1),
@@ -59,6 +70,7 @@ class SklearnMethod(MLMethod):
                                                  cv=number_of_splits, n_jobs=cores,
                                                  scoring="balanced_accuracy", refit=True)
         self._models[label].fit(X, y)
+        self._models[label] = self._models[label].best_estimator_  # do not leave RandomSearchCV object to be in models, but use the best estimator instead
 
     def fit_by_cross_validation(self, X, y, number_of_splits: int = 5, parameter_grid: dict = None,
                                 label_names: list = None):
@@ -98,6 +110,9 @@ class SklearnMethod(MLMethod):
             return self._models
         else:
             return {key: self._models[key] for key in self._models.keys() if key in label_names}
+
+    def get_classes_for_label(self, label):
+        return self._models[label].classes_
 
     def check_if_exists(self, path):
         return os.path.isfile(path + FilenameHandler.get_filename(self.__class__.__name__, "pickle"))

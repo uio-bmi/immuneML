@@ -22,3 +22,12 @@ class LogisticRegression(SklearnMethod):
         default = {"loss": "log", "n_jobs": cores_for_training}  # log loss + SGD classifier -> LR
         params = {**self._parameters, **default}
         return SGDClassifier(**params)
+
+    def _can_predict_proba(self) -> bool:
+        return True
+
+    def get_params(self, label):
+        params = self._models[label].get_params(deep=True)
+        params["coefficients"] = self._models[label].coef_
+        params["intercept"] = self._models[label].intercept_
+        return params
