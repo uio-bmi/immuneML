@@ -28,7 +28,7 @@ class ReflectionHandler:
 
     @staticmethod
     def get_class_by_name(class_name: str):
-        filename = glob.glob(EnvironmentSettings.root_path + "source/**/{}.py".format(class_name))
+        filename = glob.glob(EnvironmentSettings.root_path + "source/**/{}.py".format(class_name), recursive=True)
         if len(filename) != 1:
             raise ValueError("ReflectionHandler could not find class named {}. Check spelling and try again."
                              .format(class_name))
