@@ -2,14 +2,16 @@ import csv
 import shutil
 from unittest import TestCase
 
-from source.IO.dataset_import.MiXCRLoader import MiXCRLoader
+from source.data_model.dataset.Dataset import Dataset
+from source.dsl.ImportParser import ImportParser
+from source.dsl.SymbolTable import SymbolTable
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.util.PathBuilder import PathBuilder
 
 
-class TestMiXCRLoader(TestCase):
-    def test_load(self):
-        path = EnvironmentSettings.root_path + "test/tmp/mixcr/"
+class TestImportParser(TestCase):
+    def test_parse(self):
+        path = EnvironmentSettings.root_path + "test/tmp/parser/"
 
         PathBuilder.build(path + "tmp_input/")
         with open(path + "tmp_input/CD1_TRA.csv", "w") as file:
@@ -90,29 +92,30 @@ class TestMiXCRLoader(TestCase):
             writer.writeheader()
             writer.writerows(dicts)
 
-        dataset = MiXCRLoader.load(path + "tmp_input/", {
-            "additional_columns": ["minQualCDR3"],
-            "sequence_type": "CDR1+CDR2+CDR3",
-            "result_path": path + "tmp_output/",
-            "batch_size": 2,
-            "extension": "csv",
-            "custom_params": [{
-                "name": "CD",
-                "location": "filepath_binary",
-                "alternative": "HC"
-            }]
-        })
+        specs = {
+            "dataset_import": {
+                "d1": {
+                    "path": path + "tmp_input/",
+                    "format": "MiXCR",
+                    "params": {
+                        "additional_columns": ["minQualCDR3"],
+                        "sequence_type": "CDR2+CDR3",
+                        "result_path": path + "tmp_output/",
+                        "batch_size": 2,
+                        "extension": "csv",
+                        "custom_params": [{
+                            "name": "CD",
+                            "location": "filepath_binary",
+                            "alternative": "HC"
+                        }]
+                    },
+                    "result_path": path + "tmp_output/",
+                    "assessment_type": "CV",
+                    "CV_folds_number": "LOOCV"
+                }
+            }
+        }
 
-        self.assertEqual(2, dataset.get_repertoire_count())
-
-        for index, repertoire in enumerate(dataset.get_data()):
-            if index == 0:
-                self.assertTrue(repertoire.sequences[0].amino_acid_sequence == "VFAVFAVFAVFAFAVF")
-                self.assertTrue(repertoire.sequences[1].metadata.v_gene == "V14-1")
-                self.assertTrue(repertoire.metadata.custom_params["CD"])
-            else:
-                self.assertEqual("TGTGCAGCAATGTGCAGCAAGCAG", repertoire.sequences[0].nucleotide_sequence)
-                self.assertEqual(6, repertoire.sequences[1].metadata.count)
-                self.assertFalse(repertoire.metadata.custom_params["CD"])
-
+        st, desc = ImportParser.parse(specs, SymbolTable())
+        self.assertTrue(isinstance(st.get("d1")["dataset"], Dataset))
         shutil.rmtree(path)

@@ -32,3 +32,12 @@ class SVM(SklearnMethod):
         default = {"loss": "hinge", "n_jobs": cores_for_training}  # hinge loss + SGD classifier -> SVM
         params = {**self._parameters, **default}
         return SGDClassifier(**params)
+
+    def _can_predict_proba(self) -> bool:
+        return False
+
+    def get_params(self, label):
+        params = self._models[label].get_params()
+        params["coefficients"] = self._models[label].coef_
+        params["intercept"] = self._models[label].intercept_
+        return params

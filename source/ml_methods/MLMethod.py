@@ -41,3 +41,11 @@ class MLMethod(metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def check_if_exists(self, path):
         pass
+
+    @abc.abstractmethod
+    def get_classes_for_label(self, label):
+        pass
+
+    @abc.abstractmethod
+    def get_params(self, label):
+        pass

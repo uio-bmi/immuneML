@@ -20,7 +20,6 @@ from source.encodings.word2vec.model_creator.ModelType import ModelType
 from source.encodings.word2vec.model_creator.SequenceModelCreator import SequenceModelCreator
 from source.util.FilenameHandler import FilenameHandler
 from source.util.KmerHelper import KmerHelper
-from source.util.NameBuilder import NameBuilder
 from source.util.PathBuilder import PathBuilder
 
 
@@ -182,5 +181,5 @@ class Word2VecEncoder(DatasetEncoder):
 
     @staticmethod
     def _create_model_path(params: EncoderParams):
-        return params["model_path"] + "W2V_" + NameBuilder.build_name_from_dict(params["model"]) + ".model"
+        return params["model_path"] + "W2V.model"
 

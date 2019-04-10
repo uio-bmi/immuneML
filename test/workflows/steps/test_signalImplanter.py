@@ -9,7 +9,7 @@ from source.data_model.repertoire.Repertoire import Repertoire
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.simulation.implants.Motif import Motif
 from source.simulation.implants.Signal import Signal
-from source.simulation.motif_instantiation_strategy.IdentityMotifInstantiation import IdentityMotifInstantiation
+from source.simulation.motif_instantiation_strategy.IdentityInstantiation import IdentityInstantiation
 from source.simulation.signal_implanting_strategy.HealthySequenceImplanting import HealthySequenceImplanting
 from source.simulation.signal_implanting_strategy.sequence_implanting.GappedMotifImplanting import GappedMotifImplanting
 from source.workflows.steps.SignalImplanter import SignalImplanter
@@ -34,8 +34,8 @@ class TestSignalImplanter(TestCase):
 
         dataset = Dataset(filenames=r)
 
-        m1 = Motif(identifier="m1", instantiation_strategy=IdentityMotifInstantiation(), seed="CAS")
-        m2 = Motif(identifier="m2", instantiation_strategy=IdentityMotifInstantiation(), seed="CCC")
+        m1 = Motif(identifier="m1", instantiation_strategy=IdentityInstantiation(), seed="CAS")
+        m2 = Motif(identifier="m2", instantiation_strategy=IdentityInstantiation(), seed="CCC")
         s1 = Signal(identifier="s1", motifs=[m1], implanting_strategy=HealthySequenceImplanting(GappedMotifImplanting()))
         s2 = Signal(identifier="s2", motifs=[m1, m2],
                     implanting_strategy=HealthySequenceImplanting(GappedMotifImplanting()))

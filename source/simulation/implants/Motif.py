@@ -28,14 +28,22 @@ class Motif:
 
         # if weights are not given for each letter of the alphabet, distribute the remaining probability
         # equally among letters
+        self.alphabet_weights = self.set_default_weights(self.alphabet_weights, EnvironmentSettings.get_sequence_alphabet())
+        self.position_weights = self.set_default_weights(self.position_weights, [i for i in range(len(seed)) if seed[i] != "/"])
 
-        if self.alphabet_weights is not None and len(self.alphabet_weights.keys()) < len(EnvironmentSettings.get_sequence_alphabet()):
-            # TODO: always set alphabet weights - to uniform if nothing specified
-            remaining_probability = (1 - sum(self.alphabet_weights.values())) / (len(EnvironmentSettings.get_sequence_alphabet())-len(self.alphabet_weights.keys()))
-            additional_keys = set(EnvironmentSettings.get_sequence_alphabet()) - set(self.alphabet_weights.keys())
+    def set_default_weights(self, weights, keys, ):
+        if weights is not None and len(weights.keys()) < len(keys):
+            remaining_probability = (1 - sum(weights.values())) / (len(keys)-len(weights.keys()))
+            additional_keys = set(keys) - set(weights.keys())
 
             for key in additional_keys:
-                self.alphabet_weights[key] = remaining_probability
+                weights[key] = remaining_probability
+
+        else:
+            remaining_probability = 1 / len(keys)
+            weights = {key: remaining_probability for key in keys}
+
+        return weights
 
     def instantiate_motif(self):
         assert self.instantiation_strategy is not None, "Motif: set instantiation strategy before instantiating a motif."
