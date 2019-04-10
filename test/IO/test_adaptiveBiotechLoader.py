@@ -1,7 +1,7 @@
 import shutil
 from unittest import TestCase
 
-from source.IO.AdaptiveBiotechLoader import AdaptiveBiotechLoader
+from source.IO.dataset_import.AdaptiveBiotechLoader import AdaptiveBiotechLoader
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.util.PathBuilder import PathBuilder
 

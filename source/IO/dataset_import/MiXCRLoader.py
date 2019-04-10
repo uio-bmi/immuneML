@@ -1,13 +1,14 @@
 import os
 import pickle
-from glob import iglob
+from glob import iglob, glob
 from multiprocessing.pool import Pool
 
 import pandas as pd
 from pandas import DataFrame
 
-from source.IO.DataLoader import DataLoader
-from source.IO.PickleExporter import PickleExporter
+from source.IO.dataset_export.PickleExporter import PickleExporter
+from source.IO.dataset_import.DataLoader import DataLoader
+from source.IO.dataset_import.PickleLoader import PickleLoader
 from source.IO.metadata_import.MetadataImport import MetadataImport
 from source.data_model.dataset.Dataset import Dataset
 from source.data_model.metadata.Sample import Sample
@@ -41,13 +42,18 @@ class MiXCRLoader(DataLoader):
 
     @staticmethod
     def load(path, params: dict = None) -> Dataset:
+
         PathBuilder.build(params["result_path"])
         filepaths = sorted(list(iglob(path + "**/*." + params["extension"], recursive=True)))
-        if "metadata_file" in params:
-            metadata = MetadataImport.import_metadata(params["metadata_file"])
-            params["metadata"] = metadata
-        dataset = MiXCRLoader._load(filepaths, params)
-        PickleExporter.export(dataset, params["result_path"], "dataset.pkl")
+
+        if os.path.isfile(params["result_path"] + "dataset.pkl") and len(glob(params["result_path"])) == len(filepaths):
+            dataset = PickleLoader.load(params["result_path"] + "dataset.pkl")
+        else:
+            if "metadata_file" in params:
+                metadata = MetadataImport.import_metadata(params["metadata_file"])
+                params["metadata"] = metadata
+            dataset = MiXCRLoader._load(filepaths, params)
+            PickleExporter.export(dataset, params["result_path"], "dataset.pkl")
         return dataset
 
     @staticmethod
@@ -211,7 +217,7 @@ class MiXCRLoader(DataLoader):
 
         column_names = params["sequence_type"].split("+")
 
-        sequence_aa = "".join([row[MiXCRLoader.SEQUENCE_NAME_MAP[item]["AA"]] for item in column_names])
-        sequence_nt = "".join([row[MiXCRLoader.SEQUENCE_NAME_MAP[item]["NT"]] for item in column_names])
+        sequence_aa = "".join([row[MiXCRLoader.SEQUENCE_NAME_MAP[item]["AA"]][1:-1] if item == "CDR3" else row[MiXCRLoader.SEQUENCE_NAME_MAP[item]["AA"]] for item in column_names])
+        sequence_nt = "".join([row[MiXCRLoader.SEQUENCE_NAME_MAP[item]["NT"]][3:-3] if item == "CDR3" else row[MiXCRLoader.SEQUENCE_NAME_MAP[item]["NT"]] for item in column_names])
 
         return sequence_aa, sequence_nt

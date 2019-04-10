@@ -2,7 +2,7 @@ import csv
 import shutil
 from unittest import TestCase
 
-from source.IO.MiXCRLoader import MiXCRLoader
+from source.IO.dataset_import.MiXCRLoader import MiXCRLoader
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.util.PathBuilder import PathBuilder
 
@@ -107,11 +107,11 @@ class TestMiXCRLoader(TestCase):
 
         for index, repertoire in enumerate(dataset.get_data()):
             if index == 0:
-                self.assertTrue(repertoire.sequences[0].amino_acid_sequence == "VFAVFAVFAVFAVFAVFA")
+                self.assertTrue(repertoire.sequences[0].amino_acid_sequence == "VFAVFAVFAVFAFAVF")
                 self.assertTrue(repertoire.sequences[1].metadata.v_gene == "V14-1")
                 self.assertTrue(repertoire.metadata.custom_params["CD"])
             else:
-                self.assertEqual("TGTGCAGCAATGTGCAGCAATGTGCAGCAA", repertoire.sequences[0].nucleotide_sequence)
+                self.assertEqual("TGTGCAGCAATGTGCAGCAAGCAG", repertoire.sequences[0].nucleotide_sequence)
                 self.assertEqual(6, repertoire.sequences[1].metadata.count)
                 self.assertFalse(repertoire.metadata.custom_params["CD"])
 
