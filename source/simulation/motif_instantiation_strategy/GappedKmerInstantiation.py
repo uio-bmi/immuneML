@@ -26,14 +26,14 @@ class GappedKmerInstantiation(MotifInstantiationStrategy):
         if "/" in base:
             gap_index = base.index("/")
             allowed_positions.remove(gap_index)
-            del instance[gap_index]
+            # del instance[gap_index]
 
         gap_size = np.random.choice(range(self._min_gap, self._max_gap + 1))
         instance = self._substitute_letters(params["position_weights"], allowed_positions, params["alphabet_weights"], instance)
         instance = "".join(instance)
 
-        if gap_index != -1:
-            instance = instance[:gap_index] + "/" + instance[gap_index:]
+        # if gap_index != -1:
+        #    instance = instance[:gap_index] + "/" + instance[gap_index:]
 
         return MotifInstance(instance, gap_size)
 

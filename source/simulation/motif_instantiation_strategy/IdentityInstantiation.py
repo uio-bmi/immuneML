@@ -2,7 +2,7 @@ from source.simulation.implants.MotifInstance import MotifInstance
 from source.simulation.motif_instantiation_strategy.MotifInstantiationStrategy import MotifInstantiationStrategy
 
 
-class IdentityMotifInstantiation(MotifInstantiationStrategy):
+class IdentityInstantiation(MotifInstantiationStrategy):
     """
     Motif instantiation strategy which always return the seed
     """
