@@ -14,10 +14,11 @@ class EncodingParser:
         if "encodings" in workflow_specification.keys():
             for key in workflow_specification["encodings"].keys():
                 encoder, params = EncodingParser.parse_encoder(workflow_specification, key)
-                symbol_table.add(key,
-                                 SymbolType.ENCODING,
-                                 {"encoder": encoder, "params": params,
-                                  "dataset": workflow_specification["encodings"][key]["dataset"]})
+                item = {"encoder": encoder, "params": params,
+                        "dataset": workflow_specification["encodings"][key]["dataset"]}
+                if "labels" in workflow_specification["encodings"][key].keys():
+                    item["labels"] = workflow_specification["encodings"][key]["labels"]
+                symbol_table.add(key, SymbolType.ENCODING, item)
         return symbol_table, {}
 
     @staticmethod

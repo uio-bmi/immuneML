@@ -1,3 +1,4 @@
+from source.data_model.dataset.Dataset import Dataset
 from source.dsl.SymbolTable import SymbolTable
 from source.dsl.SymbolType import SymbolType
 from source.util.ReflectionHandler import ReflectionHandler
@@ -21,6 +22,16 @@ class ImportParser:
             params = dataset_specs["params"]
         dataset = loader.load(dataset_specs["path"], params)
 
+        dataset = ImportParser._preprocess(dataset, dataset_specs)
+
         symbol_table.add(key, SymbolType.DATASET, {"dataset": dataset})
         return symbol_table
 
+    @staticmethod
+    def _preprocess(dataset: Dataset, dataset_specs: dict) -> Dataset:
+        if "preprocessing" in dataset_specs.keys():
+            for key in dataset_specs["preprocessing"].keys():
+                preproc_class = ReflectionHandler.get_class_by_name(dataset_specs["preprocessing"][key]["type"])
+                dataset = preproc_class.process(dataset, dataset_specs["preprocessing"][key]["params"])
+
+        return dataset
