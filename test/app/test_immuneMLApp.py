@@ -86,7 +86,8 @@ class TestImmuneMLApp(TestCase):
                     "metrics": ["accuracy", "balanced_accuracy"],
                     "split_count": 1,
                     "model_selection_cv": False,
-                    "model_selection_n_folds": -1
+                    "model_selection_n_folds": -1,
+                    "min_example_count": 1
                 }
             },
             "reports": {
