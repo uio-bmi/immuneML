@@ -19,19 +19,21 @@ class LabelConfiguration:
 
     def add_label(self, label: str, values: list, label_type: LabelType = LabelType.CLASSIFICATION):
 
+        vals = list(values)
+
         if label in self._labels and self._labels[label] is not None and len(self._labels[label]) > 0:
             warnings.warn("Label " + label + " has already been set. Overriding existing values...", Warning)
 
-        self._labels[label] = values
+        self._labels[label] = vals
 
         if label_type == LabelType.CLASSIFICATION:
 
             label_binarizer = LabelBinarizer()
-            label_binarizer.fit(values)
+            label_binarizer.fit(vals)
             self._label_binarizers[label] = label_binarizer
 
             label_encoder = LabelEncoder()
-            label_encoder.fit(values)
+            label_encoder.fit(vals)
             self._label_encoders[label] = label_encoder
 
     def get_labels_by_name(self):
