@@ -22,7 +22,8 @@ class TestMLParser(TestCase):
                     "split_count": 1,
                     "model_selection_cv": False,
                     "model_selection_n_folds": -1,
-                    "assessment_type": "LOOCV"
+                    "assessment_type": "LOOCV",
+                    "min_example_count": 1
                 },
                 "SVM1": {
                     "type": "SVM",
@@ -36,7 +37,8 @@ class TestMLParser(TestCase):
                     "split_count": 1,
                     "model_selection_cv": False,
                     "model_selection_n_folds": -1,
-                    "assessment_type": "LOOCV"
+                    "assessment_type": "LOOCV",
+                    "min_example_count": 2
                 }
             }
         }

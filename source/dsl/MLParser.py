@@ -39,7 +39,8 @@ class MLParser:
             "model_selection_cv": method_dict["model_selection_cv"],
             "model_selection_n_folds": method_dict["model_selection_n_folds"],
             "split_count": method_dict["split_count"],
-            "assessment_type": AssessmentType[method_dict["assessment_type"].lower()]
+            "assessment_type": AssessmentType[method_dict["assessment_type"].lower()],
+            "min_example_count": method_dict["min_example_count"]
         }
 
     @staticmethod

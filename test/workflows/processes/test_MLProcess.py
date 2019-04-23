@@ -1,14 +1,10 @@
 import os
-import pickle
 import shutil
 from unittest import TestCase
 
 import yaml
 
 from source.data_model.dataset.Dataset import Dataset
-from source.data_model.receptor_sequence.ReceptorSequence import ReceptorSequence
-from source.data_model.repertoire.Repertoire import Repertoire
-from source.data_model.repertoire.RepertoireMetadata import RepertoireMetadata
 from source.dsl.AssessmentType import AssessmentType
 from source.encodings.word2vec.Word2VecEncoder import Word2VecEncoder
 from source.encodings.word2vec.model_creator.ModelType import ModelType
@@ -17,38 +13,37 @@ from source.environment.LabelConfiguration import LabelConfiguration
 from source.environment.MetricType import MetricType
 from source.ml_methods.SimpleLogisticRegression import SimpleLogisticRegression
 from source.util.PathBuilder import PathBuilder
+from source.util.RepertoireBuilder import RepertoireBuilder
 from source.workflows.processes.MLProcess import MLProcess
 
 
 class TestMLProcess(TestCase):
+    def test_is_ml_possible(self):
+        path = EnvironmentSettings.root_path + "test/tmp/mlproc_possible/"
+        lbl_conf = LabelConfiguration()
+        lbl_conf.add_label("CD", [True, False])
+        proc = MLProcess(None, "", lbl_conf, None, {}, None, AssessmentType.loocv, [], False, min_example_count=2)
+        enc_d = Dataset(filenames=RepertoireBuilder.build([[], [], []], path, {"CD": [True, True, False]}), params={"CD": {True, False}})
+
+        self.assertFalse(proc._is_ml_possible(enc_d))
+        self.assertWarns(Warning, proc._is_ml_possible, enc_d)
+
+        enc_d = Dataset(filenames=RepertoireBuilder.build([[], [], [], []], path, {"CD": [True, True, False, False]}), params={"CD": {True, False}})
+
+        self.assertTrue(proc._is_ml_possible(enc_d))
+
+        shutil.rmtree(path)
+
     def test_run(self):
 
         path = EnvironmentSettings.root_path + "test/tmp/mlproc/"
 
         PathBuilder.build(path)
 
-        rep1 = Repertoire(sequences=[ReceptorSequence("AAA"), ReceptorSequence("ATA"), ReceptorSequence("ATA")],
-                          metadata=RepertoireMetadata(custom_params={"l1": 1, "l2": 2}))
-        with open(path + "rep1.pkl", "wb") as file:
-            pickle.dump(rep1, file)
+        filenames = RepertoireBuilder.build([["AAA"], ["AAA"], ["AAA"], ["AAA"], ["AAA"], ["AAA"]], path,
+                                            {"l1": [1, 1, 1, 0, 0, 0], "l2": [2, 3, 2, 3, 2, 3]})
 
-        rep2 = Repertoire(sequences=[ReceptorSequence("ATA"), ReceptorSequence("TAA"), ReceptorSequence("AAC")],
-                          metadata=RepertoireMetadata(custom_params={"l1": 0, "l2": 3}))
-        with open(path + "rep2.pkl", "wb") as file:
-            pickle.dump(rep2, file)
-
-        rep3 = Repertoire(sequences=[ReceptorSequence("ATA"), ReceptorSequence("TAA"), ReceptorSequence("AAC")],
-                          metadata=RepertoireMetadata(custom_params={"l1": 1, "l2": 3}))
-        with open(path + "rep3.pkl", "wb") as file:
-            pickle.dump(rep3, file)
-
-        rep4 = Repertoire(sequences=[ReceptorSequence("ATA"), ReceptorSequence("TAA"), ReceptorSequence("AAC")],
-                          metadata=RepertoireMetadata(custom_params={"l1": 0, "l2": 2}))
-        with open(path + "rep4.pkl", "wb") as file:
-            pickle.dump(rep4, file)
-
-        dataset = Dataset(filenames=[path + "rep1.pkl", path + "rep2.pkl", path + "rep3.pkl", path + "rep4.pkl"],
-                          params={"l1": [0, 1], "l2": [2, 3]})
+        dataset = Dataset(filenames=filenames, params={"l1": [0, 1], "l2": [2, 3]})
         label_config = LabelConfiguration()
         label_config.add_label("l1", [0, 1])
         label_config.add_label("l2", [2, 3])
@@ -60,7 +55,8 @@ class TestMLProcess(TestCase):
         metrics = [MetricType.BALANCED_ACCURACY]
         proc = MLProcess(dataset=dataset, split_count=2, path=path, label_configuration=label_config,
                          encoder=Word2VecEncoder, encoder_params=encoder_params, method=SimpleLogisticRegression(),
-                         assessment_type=AssessmentType.loocv, metrics=metrics, model_selection_cv=False)
+                         assessment_type=AssessmentType.loocv, metrics=metrics, model_selection_cv=False,
+                         min_example_count=1)
 
         proc.run()
 
@@ -73,5 +69,14 @@ class TestMLProcess(TestCase):
         self.assertEqual({"min", "max", "mean", "median"}, set(summary["l2"]["balanced_accuracy"]))
         self.assertTrue(all([isinstance(summary["l1"]["balanced_accuracy"][key], float) for key in ["min", "max", "median", "mean"]]))
         self.assertTrue(all([isinstance(summary["l2"]["balanced_accuracy"][key], float) for key in ["min", "max", "median", "mean"]]))
+
+        dataset = Dataset(filenames=filenames[:3], params={"l1": [0, 1], "l2": [2, 3]})
+        proc = MLProcess(dataset=dataset, split_count=2, path=path, label_configuration=label_config,
+                         encoder=Word2VecEncoder, encoder_params=encoder_params, method=SimpleLogisticRegression(),
+                         assessment_type=AssessmentType.loocv, metrics=metrics, model_selection_cv=False,
+                         min_example_count=2)
+
+        with self.assertWarns(Warning):
+            proc.run()
 
         shutil.rmtree(path)

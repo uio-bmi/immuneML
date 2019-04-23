@@ -1,3 +1,6 @@
+import warnings
+
+import numpy as np
 import pandas as pd
 import yaml
 
@@ -20,7 +23,7 @@ class MLProcess:
     def __init__(self, dataset: Dataset, path: str, label_configuration: LabelConfiguration, encoder: DatasetEncoder,
                  encoder_params: dict, method: MLMethod, assessment_type: AssessmentType, metrics: list,
                  model_selection_cv: bool, model_selection_n_folds: int = None, training_percentage: float = None,
-                 split_count: int = None):
+                 split_count: int = None, min_example_count: int = 1):
         self._dataset = dataset
         self._split_count = split_count
         self._training_percentage = training_percentage
@@ -36,10 +39,16 @@ class MLProcess:
             "MLProcess: metrics are not set to be an instance of MetricType."
         self._metrics = metrics
         self._details_path = self._path + "ml_details.csv"
+        self._all_predictions_path = self._path + "predictions.csv"
+        self._min_example_count = min_example_count
 
     def run(self):
         train_datasets, test_datasets = self._run_data_splitter()
-        path = self._run(train_datasets, test_datasets)
+        if all(self._is_ml_possible(ds) for ds in train_datasets):
+            path = self._run(train_datasets, test_datasets)
+        else:
+            path = ""
+            warnings.warn("MLProcess: There were not enough examples (repertoires) to run machine learning.")
         return path
 
     def _run(self, train_datasets: list, test_datasets: list) -> str:
@@ -78,13 +87,31 @@ class MLProcess:
 
         return file_path
 
-    def _run_for_setting(self, train_dataset: Dataset, test_dataset: Dataset, index: int):
-        path = self._path + "run_{}/".format(index+1)
+    def _run_for_setting(self, train_dataset: Dataset, test_dataset: Dataset, run: int):
+
+        path = self._path + "run_{}/".format(run+1)
         PathBuilder.build(path)
         encoded_train = self._run_encoder(train_dataset, True, path)
         encoded_test = self._run_encoder(test_dataset, False, path)
         method = self._train_ml_method(encoded_train, path)
-        self._assess_ml_method(method, encoded_test, index, path)
+        self._assess_ml_method(method, encoded_test, run, path)
+
+    def _is_ml_possible(self, dataset: Dataset) -> bool:
+        valid = True
+        labels = self._label_configuration.get_labels_by_name()
+        index = len(labels) - 1
+        while valid and index >= 0:
+            unique_labels_count = [rep.metadata.custom_params[labels[index]] for rep in dataset.get_data()]
+            unique, counts = np.unique(unique_labels_count, return_counts=True)
+            valid = valid and len(unique) > 1 and all(count >= self._min_example_count for count in counts) \
+                    and all(el in dataset.params[labels[index]] for el in unique)
+            index -= 1
+
+        if valid is not True:
+            warnings.warn("For label {}: there are not enough different examples to run a ML algorithm."
+                          .format(labels[index]))
+
+        return valid
 
     def _assess_ml_method(self, method: MLMethod, encoded_test_dataset: Dataset, run: int, path: str):
         MLMethodAssessment.run({
@@ -95,7 +122,8 @@ class MLProcess:
             "predictions_path": path + "/prediction/",
             "label_configuration": self._label_configuration,
             "run": run,
-            "ml_details_path": self._details_path
+            "ml_details_path": self._details_path,
+            "all_predictions_path": self._all_predictions_path
         })
 
     def _run_encoder(self, train_dataset: Dataset, infer_model: bool, path: str):
@@ -120,7 +148,7 @@ class MLProcess:
             "dataset": encoded_train_dataset,
             "labels": self._label_configuration.get_labels_by_name(),
             "model_selection_cv": self._model_selection_cv,
-            "n_folds": self._n_folds
+            "model_selection_n_folds": self._n_folds
         })
 
     def _run_data_splitter(self) -> tuple:
