@@ -38,7 +38,8 @@ class TestMLMethodAssessment(TestCase):
             "predictions_path":  EnvironmentSettings.root_path + "test/tmp/mlmethodassessment/predictions/",
             "label_configuration": label_config,
             "ml_details_path": EnvironmentSettings.root_path + "test/tmp/mlmethodassessment/ml_details.csv",
-            "run": 1
+            "run": 1,
+            "all_predictions_path": EnvironmentSettings.root_path + "test/tmp/mlmethodassessment/predictions.csv"
         })
 
         self.assertTrue("l1_accuracy" in res.keys())
@@ -49,5 +50,8 @@ class TestMLMethodAssessment(TestCase):
 
         df = pd.read_csv(EnvironmentSettings.root_path + "test/tmp/mlmethodassessment/ml_details.csv")
         self.assertTrue(df.shape[0] == 1)
+
+        df = pd.read_csv(EnvironmentSettings.root_path + "test/tmp/mlmethodassessment/predictions.csv")
+        self.assertEqual(6, df.shape[0])
 
         shutil.rmtree(EnvironmentSettings.root_path + "test/tmp/mlmethodassessment/")

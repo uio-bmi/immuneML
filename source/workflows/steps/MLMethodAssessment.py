@@ -39,7 +39,8 @@ class MLMethodAssessment(Step):
                                               predicted_y,
                                               predicted_proba_y,
                                               labels,
-                                              input_params["predictions_path"])
+                                              input_params["predictions_path"],
+                                              input_params["all_predictions_path"])
 
         results = MLMethodAssessment._score(metrics_list=input_params["metrics"], labels=labels,
                                             label_config=input_params["label_configuration"], predicted_y=predicted_y,
@@ -86,18 +87,25 @@ class MLMethodAssessment(Step):
         return score
 
     @staticmethod
-    def _store_predictions(method, true_y, predicted_y, predicted_proba_y, labels, predictions_path):
+    def _store_predictions(method, true_y, predicted_y, predicted_proba_y, labels, predictions_path, summary_path=None):
+
+        df = pd.DataFrame()
+        for index, label in enumerate(labels):
+            df["{}_true_class".format(label)] = true_y[index]
+            df["{}_predicted_class".format(label)] = predicted_y[label]
+
+            classes = method.get_classes_for_label(label)
+            for cls_index, cls in enumerate(classes):
+                tmp = predicted_proba_y[label][:, cls_index] if predicted_proba_y is not None else None
+                df["{}_{}_proba".format(label, cls)] = tmp
 
         if predictions_path is not None:
             PathBuilder.build(predictions_path)
-            df = pd.DataFrame()
-            for index, label in enumerate(labels):
-                df["{}_true_class".format(label)] = true_y[index]
-                df["{}_predicted_class".format(label)] = predicted_y[label]
-
-                classes = method.get_classes_for_label(label)
-                for cls_index, cls in enumerate(classes):
-                    tmp = predicted_proba_y[label][:, cls_index] if predicted_proba_y is not None else None
-                    df["{}_{}_proba".format(label, cls)] = tmp
-
             df.to_csv("{}{}.csv".format(predictions_path, method.__class__.__name__), index=False)
+
+        if summary_path is not None:
+            PathBuilder.build(os.path.dirname(os.path.abspath(summary_path)))
+            if os.path.isfile(summary_path) and os.path.getsize(summary_path) > 0:
+                df.to_csv(summary_path, mode='a', header=False, index=False)
+            else:
+                df.to_csv(summary_path, index=False)
