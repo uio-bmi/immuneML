@@ -1,8 +1,10 @@
 import datetime
 import warnings
 
+from source.data_model.dataset.Dataset import Dataset
 from source.dsl.SymbolTable import SymbolTable
 from source.dsl.SymbolType import SymbolType
+from source.dsl.semantic_model.Blackboard import Blackboard
 from source.encodings.EncoderParams import EncoderParams
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.environment.LabelConfiguration import LabelConfiguration
@@ -19,6 +21,7 @@ class SemanticModel:
         self._executed = set()
         self._symbol_table = None
         self._path = path if path is not None else EnvironmentSettings.root_path + "analysis/"
+        self._blackboard = Blackboard()
 
     def fill(self, symbol_table: SymbolTable):
         self._symbol_table = symbol_table
@@ -26,26 +29,6 @@ class SemanticModel:
         self.add_connections(self.add_report_connection, ["encoding", "ml_method", "dataset"], SymbolType.REPORT)
         self.add_connections(self.add_ml_connection, ["encoding"], SymbolType.ML_METHOD)
         self.add_connections(self.add_encoding_connection, ["dataset"], SymbolType.ENCODING)
-
-    def add_connections(self, fn, keys, symbol_type: SymbolType):
-        for item_id, item in self._symbol_table.get_by_type(symbol_type):
-            existing_keys = [key for key in keys if key in item.keys()]
-            fn(item_id, {key: item[key] for key in existing_keys})
-
-    def add_encoding_connection(self, encoding_id: str, connection: dict):
-        assert "dataset" in connection.keys(), \
-            "Dependency is not properly defined between the encoding and the dataset."
-        self._encoding_connections[encoding_id] = connection
-
-    def add_ml_connection(self, ml_id: str, connection: dict):
-        assert "encoding" in connection.keys(), \
-            "Dependency is not properly defined between the machine learning model {} and the encoding.".format(ml_id)
-        self._ml_method_connections[ml_id] = connection
-
-    def add_report_connection(self, report_id: str, connection: dict):
-        assert any([key in connection.keys() for key in ["encoding", "dataset", "ml_method"]]), \
-            "Dependency is not properly defined for the report, input is not declared."
-        self._report_connections[report_id] = connection
 
     def execute(self):
         if self._is_ready():
@@ -63,9 +46,9 @@ class SemanticModel:
         self._execute_encoding_reports()
         self._execute_ml_reports()
 
-    def _create_result_path(self, result_type: str):
-        now = datetime.datetime.now()
-        return self._path + "{}_{}/".format(result_type, str(now).replace(".", "_").replace(":", "_"))
+    def _execute_ml_methods(self):
+        for method_id in self._ml_method_connections.keys():
+            self._execute_ml_method(method_id)
 
     def _execute_ml_method(self, method_id):
 
@@ -79,7 +62,7 @@ class SemanticModel:
 
             proc = MLProcess(dataset=dataset,
                              split_count=method["split_count"],
-                             path=self._create_result_path("machine_learning"),
+                             path=self._create_result_path("machine_learning_{}".format(method_id)),
                              label_configuration=label_config,
                              encoder=self._symbol_table.get(method["encoding"])["encoder"],
                              encoder_params=self._symbol_table.get(method["encoding"])["params"],
@@ -87,13 +70,19 @@ class SemanticModel:
                              assessment_type=method["assessment_type"],
                              metrics=method["metrics"],
                              model_selection_cv=method["model_selection_cv"],
-                             model_selection_n_folds=method["model_selection_n_folds"])
+                             model_selection_n_folds=method["model_selection_n_folds"],
+                             min_example_count=method["min_example_count"])
             proc.run()
             self._update_executed(method_id)
 
-    def _execute_ml_methods(self):
-        for method_id in self._ml_method_connections.keys():
-            self._execute_ml_method(method_id)
+    def _execute_dataset_reports(self):
+        self._execute_reports_by_type("dataset")
+
+    def _execute_encoding_reports(self):
+        self._execute_reports_by_type("encoding")
+
+    def _execute_ml_reports(self):
+        self._execute_reports_by_type("ml_method")
 
     def _execute_reports_by_type(self, key_to_check: str):
         report_ids = [key for key in self._report_connections.keys()
@@ -110,17 +99,6 @@ class SemanticModel:
                 report["report"].generate_report(params)
                 self._update_executed(report_ids[index])
 
-    def _prepare_report_params(self, report_id: str, initial_params: dict) -> dict:
-        params = {"result_path": self._create_result_path("report_{}".format(report_id)),
-                  "dataset": self._symbol_table.get(initial_params["dataset"])["dataset"]
-                             if "dataset" in initial_params else None,
-                  "encoding": self._symbol_table.get(
-                      initial_params["encoding"]) if "encoding" in initial_params else None,
-                  "ml_method": self._symbol_table.get(
-                      initial_params["ml_method"]) if "ml_method" in initial_params else None}
-        params = {**initial_params, **params}
-        return params
-
     def _execute_prerequisites(self, prerequisites: dict):
         if "ml_method" in prerequisites and prerequisites["ml_method"] is not None:
             self._execute_ml_method(prerequisites["ml_method"])
@@ -131,36 +109,13 @@ class SemanticModel:
     def _execute_encoding(self, encoding_id: str):
         if encoding_id not in self._executed:
             encoder_dict = self._symbol_table.get(encoding_id)
-            dataset = self._symbol_table.get(encoder_dict["dataset"])
+            dataset = self._symbol_table.get(encoder_dict["dataset"])["dataset"]
             path = self._create_result_path("encoding")
+            label_config = self._prepare_label_config(encoder_dict["labels"], dataset)
 
-            label_config = LabelConfiguration()
-            for label in encoder_dict["labels"]:
-                label_config.add_label(label, dataset.params[label])
-
-            DataEncoder.run({
-                "dataset": dataset,
-                "encoder": self._symbol_table.get(encoder_dict["encoder"]),
-                "encoder_params": EncoderParams(result_path="", label_configuration=label_config,
-                                                model=encoder_dict["encoder_params"], batch_size=4, learn_model=True,
-                                                model_path=path, scaler_path=path, vectorizer_path=path, pipeline_path=path)
-            })
-
+            encoded = self._encode_dataset(dataset, encoder_dict["encoder"], label_config, encoder_dict["params"], path)
+            self._blackboard.add("{}_{}".format(encoder_dict["dataset"], encoding_id), encoded)
             self._update_executed(encoding_id)
-
-    def _update_executed(self, key: str):
-        self._executed.add(key)
-        if key in self._report_connections.keys() and "ml_method" in self._report_connections[key]:
-            self._executed.add(self._report_connections[key]["ml_method"])
-
-    def _execute_dataset_reports(self):
-        self._execute_reports_by_type("dataset")
-
-    def _execute_encoding_reports(self):
-        self._execute_reports_by_type("encoding")
-
-    def _execute_ml_reports(self):
-        self._execute_reports_by_type("ml_method")
 
     def _is_ready(self):
         """
@@ -185,3 +140,61 @@ class SemanticModel:
                 ready = keys[i] in dependency_items.keys()
             i += 1
         return ready
+
+    def _encode_dataset(self, dataset, encoder, label_config, params, path) -> Dataset:
+        return DataEncoder.run({
+            "dataset": dataset,
+            "encoder": encoder,
+            "encoder_params": EncoderParams(result_path=self._create_result_path("encoding"),
+                                            label_configuration=label_config,
+                                            model=params, batch_size=4, learn_model=True,
+                                            model_path=path, scaler_path=path, vectorizer_path=path, pipeline_path=path)
+        })
+
+    def _prepare_label_config(self, labels, dataset):
+        label_config = LabelConfiguration()
+        for label in labels:
+            label_config.add_label(label, dataset.params[label])
+        return label_config
+
+    def _update_executed(self, key: str):
+        self._executed.add(key)
+        if key in self._report_connections.keys() and "ml_method" in self._report_connections[key]:
+            self._executed.add(self._report_connections[key]["ml_method"])
+
+    def _prepare_report_params(self, report_id: str, initial_params: dict) -> dict:
+        params = {"result_path": self._create_result_path("report_{}".format(report_id)),
+                  "dataset": self._symbol_table.get(initial_params["dataset"])["dataset"]
+                  if "dataset" in initial_params else None}
+        if "encoding" in initial_params.keys():
+            params["dataset"] = self._blackboard.get("{}_{}".format(self._symbol_table
+                                                                    .get(initial_params["encoding"])["dataset"],
+                                                                    initial_params["encoding"]))
+        params = {**initial_params, **params}
+        return params
+
+    def _create_result_path(self, result_type: str):
+        now = datetime.datetime.now()
+        print("storing results in {}".format(self._path + "{}_{}/".format(result_type, str(now).replace(".", "_").replace(":", "_"))))
+        return self._path + "{}_{}/".format(result_type, str(now).replace(".", "_").replace(":", "_"))
+
+
+    def add_connections(self, fn, keys, symbol_type: SymbolType):
+        for item_id, item in self._symbol_table.get_by_type(symbol_type):
+            existing_keys = [key for key in keys if key in item.keys()]
+            fn(item_id, {key: item[key] for key in existing_keys})
+
+    def add_encoding_connection(self, encoding_id: str, connection: dict):
+        assert "dataset" in connection.keys(), \
+            "Dependency is not properly defined between the encoding and the dataset."
+        self._encoding_connections[encoding_id] = connection
+
+    def add_ml_connection(self, ml_id: str, connection: dict):
+        assert "encoding" in connection.keys(), \
+            "Dependency is not properly defined between the machine learning model {} and the encoding.".format(ml_id)
+        self._ml_method_connections[ml_id] = connection
+
+    def add_report_connection(self, report_id: str, connection: dict):
+        assert any([key in connection.keys() for key in ["encoding", "dataset", "ml_method"]]), \
+            "Dependency is not properly defined for the report, input is not declared."
+        self._report_connections[report_id] = connection
