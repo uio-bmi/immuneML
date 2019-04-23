@@ -34,7 +34,7 @@ class MatchedReferenceEncoder(DatasetEncoder):
         encoded_repertoires, labels = MatchedReferenceEncoder._encode_repertoires(dataset, matched_info, params)
 
         feature_name = "percentage_of_sequences_matched" \
-            if "percentage" in params["model"] and params["model"]["percentage"] \
+            if "percentages" in params["model"] and params["model"]["percentages"] \
             else "count_of_sequences_matched"
 
         encoded_dataset.encoded_data = {
@@ -54,8 +54,8 @@ class MatchedReferenceEncoder(DatasetEncoder):
         c = 100 if "percentages" in params["model"] and params["model"]["percentages"] else 1
 
         for index, repertoire in enumerate(dataset.get_data()):
-            assert index == matched_info["repertoires"][index][
-                "repertoire_index"], "MatchedReferenceEncoder: error in SequenceMatcher ordering of repertoires."
+            assert index == matched_info["repertoires"][index]["repertoire_index"], \
+                "MatchedReferenceEncoder: error in SequenceMatcher ordering of repertoires."
             encoded_repertories[index] = matched_info["repertoires"][index]["percentage_of_sequences_matched"] * c
             for label_index, label in enumerate(params["label_configuration"].get_labels_by_name()):
                 labels[label_index][index] = repertoire.metadata.custom_params[label]
@@ -67,7 +67,8 @@ class MatchedReferenceEncoder(DatasetEncoder):
         matcher = SequenceMatcher()
         matched_info = matcher.match(dataset=dataset,
                                      reference_sequences=params["model"]["reference_sequences"],
-                                     max_distance=params["model"]["max_distance"])
+                                     max_distance=params["model"]["max_distance"],
+                                     summary_type=params["model"]["summary"])
         return matched_info
 
     @staticmethod

@@ -4,8 +4,9 @@ from unittest import TestCase
 from source.data_model.dataset.Dataset import Dataset
 from source.data_model.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.data_model.receptor_sequence.SequenceMetadata import SequenceMetadata
+from source.dsl.SequenceMatchingSummaryType import SequenceMatchingSummaryType
 from source.encodings.EncoderParams import EncoderParams
-from source.encodings.MatchedReferenceEncoder import MatchedReferenceEncoder
+from source.encodings.reference_encoding.MatchedReferenceEncoder import MatchedReferenceEncoder
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.environment.LabelConfiguration import LabelConfiguration
 from source.util.RepertoireBuilder import RepertoireBuilder
@@ -25,7 +26,8 @@ class TestMatchedReferenceEncoder(TestCase):
             label_configuration=label_config,
             model={
                 "reference_sequences": [ReceptorSequence("AAAA", metadata=SequenceMetadata())],
-                "max_distance": 2
+                "max_distance": 2,
+                "summary": SequenceMatchingSummaryType.PERCENTAGE
             }
         ))
 
