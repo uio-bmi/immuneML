@@ -35,3 +35,11 @@ class ReflectionHandler:
         filename = filename[0]
 
         return ReflectionHandler._import_class(filename, class_name)
+
+    @staticmethod
+    def exists(class_name: str):
+        filename = glob.glob(EnvironmentSettings.root_path + "source/**/{}.py".format(class_name), recursive=True)
+        if len(filename) == 1:
+            return True
+        else:
+            return False

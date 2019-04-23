@@ -19,3 +19,7 @@ class TestReflectionHandler(TestCase):
     def test_get_class_by_name(self):
         cls = ReflectionHandler.get_class_by_name("KmerHelper")
         self.assertEqual(KmerHelper, cls)
+
+    def test_exists(self):
+        self.assertTrue(ReflectionHandler.exists("ReflectionHandler"))
+        self.assertFalse(ReflectionHandler.exists("RandomClassName"))
