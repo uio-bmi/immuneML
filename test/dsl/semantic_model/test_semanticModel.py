@@ -3,6 +3,8 @@ import pickle
 import shutil
 from unittest import TestCase
 
+import yaml
+
 from source.data_model.dataset.Dataset import Dataset
 from source.data_model.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.data_model.repertoire.Repertoire import Repertoire
@@ -72,14 +74,19 @@ class TestSemanticModel(TestCase):
 
         symbol_table.add("report1", SymbolType.REPORT, {"report": SequenceLengthDistribution(), "dataset": "dataset1",
                                                         "params": {"batch_size": 2, "dataset": "dataset1"}})
+        specs_path = path + "specs.yaml"
+        with open(specs_path, "w") as file:
+            yaml.dump({"test": "successful!"}, file)
 
-        model = SemanticModel(path=path)
+        model = SemanticModel(path=path, specification_path=specs_path)
         model.fill(symbol_table)
 
         model.execute()
         filename = glob.glob(path + "**/sequence_length_distribution.png")
         self.assertEqual(1, len(filename))
         self.assertTrue("report1" in model._executed)
+
+        self.assertEqual(1, len(glob.glob(path + "**/specs.yaml")))
 
         shutil.rmtree(path)
 

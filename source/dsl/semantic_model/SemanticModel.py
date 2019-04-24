@@ -1,4 +1,5 @@
 import datetime
+import shutil
 import warnings
 
 from source.data_model.dataset.Dataset import Dataset
@@ -8,19 +9,21 @@ from source.dsl.semantic_model.Blackboard import Blackboard
 from source.encodings.EncoderParams import EncoderParams
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.environment.LabelConfiguration import LabelConfiguration
+from source.util.PathBuilder import PathBuilder
 from source.workflows.processes.MLProcess import MLProcess
 from source.workflows.steps.DataEncoder import DataEncoder
 
 
 class SemanticModel:
 
-    def __init__(self, path: str = None):
+    def __init__(self, path: str = None, specification_path: str = None):
         self._encoding_connections = {}  # e1: d1, e2: d2 -> encoding_id: dataset_id
         self._ml_method_connections = {}  # ml1: {encoding: e1, assessment_type: LOOCV} -> ml_id: {encoding: enc_id, assessment_type: str}
         self._report_connections = {}  # r1: {encoding: e1}, r2: {ml_method: ml1} -> report_id: {encoding: enc_id, ml_method: ml_id, dataset: dataset_id}
         self._executed = set()
         self._symbol_table = None
         self._path = path if path is not None else EnvironmentSettings.root_path + "analysis/"
+        self._specification_path = specification_path
         self._blackboard = Blackboard()
 
     def fill(self, symbol_table: SymbolTable):
@@ -60,9 +63,12 @@ class SemanticModel:
             for label in method["labels"]:
                 label_config.add_label(label, dataset.params[label])
 
+            ml_path = self._create_result_path("machine_learning_{}".format(method_id))
+            self._copy_specification_to_result(ml_path)
+
             proc = MLProcess(dataset=dataset,
                              split_count=method["split_count"],
-                             path=self._create_result_path("machine_learning_{}".format(method_id)),
+                             path=ml_path,
                              label_configuration=label_config,
                              encoder=self._symbol_table.get(method["encoding"])["encoder"],
                              encoder_params=self._symbol_table.get(method["encoding"])["params"],
@@ -96,6 +102,7 @@ class SemanticModel:
             if report_ids[index] not in self._executed:
                 self._execute_prerequisites(self._report_connections[report_ids[index]])
                 params = self._prepare_report_params(report_ids[index], report["params"])
+                self._copy_specification_to_result(params["result_path"])
                 report["report"].generate_report(params)
                 self._update_executed(report_ids[index])
 
@@ -116,6 +123,10 @@ class SemanticModel:
             encoded = self._encode_dataset(dataset, encoder_dict["encoder"], label_config, encoder_dict["params"], path)
             self._blackboard.add("{}_{}".format(encoder_dict["dataset"], encoding_id), encoded)
             self._update_executed(encoding_id)
+
+    def _copy_specification_to_result(self, result_path):
+        PathBuilder.build(result_path)
+        shutil.copy(self._specification_path, result_path)
 
     def _is_ready(self):
         """

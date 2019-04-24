@@ -15,7 +15,7 @@ class ImmuneMLApp:
 
         print("ImmuneML: starting the analysis...")
 
-        model = SemanticModel(self._result_path)
+        model = SemanticModel(self._result_path, self._specification_path)
         model.fill(symbol_table)
         model.execute()
 
