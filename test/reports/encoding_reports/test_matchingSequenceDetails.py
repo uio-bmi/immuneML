@@ -41,7 +41,7 @@ class TestMatchingSequenceDetails(TestCase):
         self.assertEqual(4, len([name for name in glob.glob(path + "result/*.tsv") if os.path.isfile(name)]))
 
         df = pd.read_csv(path + "result/matching_sequence_overview.tsv", sep="\t")
-        self.assertTrue(all([key in df.keys() for key in ["patient", "chain", "matching_sequence_count", "repertoire_size", "max_levenshtein_distance"]]))
+        self.assertTrue(all([key in df.keys() for key in ["patient", "chain", "percentage_of_sequences_matched", "repertoire_size", "max_levenshtein_distance"]]))
         self.assertEqual(3, df.shape[0])
 
         shutil.rmtree(path)
