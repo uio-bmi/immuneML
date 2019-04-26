@@ -8,8 +8,8 @@ from gensim.models import Word2Vec
 from scipy import sparse
 from sklearn.preprocessing import StandardScaler
 
-from source.IO.PickleExporter import PickleExporter
-from source.IO.PickleLoader import PickleLoader
+from source.IO.dataset_export.PickleExporter import PickleExporter
+from source.IO.dataset_import.PickleLoader import PickleLoader
 from source.data_model.dataset.Dataset import Dataset
 from source.data_model.repertoire.Repertoire import Repertoire
 from source.data_model.repertoire.RepertoireGenerator import RepertoireGenerator
@@ -20,7 +20,6 @@ from source.encodings.word2vec.model_creator.ModelType import ModelType
 from source.encodings.word2vec.model_creator.SequenceModelCreator import SequenceModelCreator
 from source.util.FilenameHandler import FilenameHandler
 from source.util.KmerHelper import KmerHelper
-from source.util.NameBuilder import NameBuilder
 from source.util.PathBuilder import PathBuilder
 
 
@@ -182,5 +181,5 @@ class Word2VecEncoder(DatasetEncoder):
 
     @staticmethod
     def _create_model_path(params: EncoderParams):
-        return params["model_path"] + "W2V_" + NameBuilder.build_name_from_dict(params["model"]) + ".model"
+        return params["model_path"] + "W2V.model"
 

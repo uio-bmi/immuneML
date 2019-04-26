@@ -7,8 +7,8 @@ from scipy import sparse
 from sklearn.feature_extraction import DictVectorizer
 from sklearn.preprocessing import normalize
 
-from source.IO.PickleExporter import PickleExporter
-from source.IO.PickleLoader import PickleLoader
+from source.IO.dataset_export.PickleExporter import PickleExporter
+from source.IO.dataset_import.PickleLoader import PickleLoader
 from source.data_model.dataset.Dataset import Dataset
 from source.data_model.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.data_model.repertoire.Repertoire import Repertoire
@@ -87,9 +87,9 @@ class KmerFrequencyEncoder(DatasetEncoder):
     @staticmethod
     def _normalize_repertoires(repertoires, params: EncoderParams):
         normalized_repertoires = repertoires
-        if params.get('normalization_type') == NormalizationType.RELATIVE_FREQUENCY:
+        if params["model"]['normalization_type'] == NormalizationType.RELATIVE_FREQUENCY:
             normalized_repertoires = sparse.diags(1 / repertoires.sum(axis=1).A.ravel()) @ repertoires
-        elif params.get('normalization_type') == NormalizationType.L2:
+        elif params["model"]['normalization_type'] == NormalizationType.L2:
             normalized_repertoires = normalize(repertoires)
         return normalized_repertoires
 

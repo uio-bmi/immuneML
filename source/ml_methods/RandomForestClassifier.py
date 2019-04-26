@@ -19,3 +19,11 @@ class RandomForestClassifier(SklearnMethod):
         default = {"n_jobs": cores_for_training}
         params = {**self._parameters, **default}
         return RFC(**params)
+
+    def _can_predict_proba(self) -> bool:
+        return True
+
+    def get_params(self, label):
+        params = self._models[label].get_params(deep=True)
+        params["feature_importances"] = self._models[label].feature_importances_
+        return params
