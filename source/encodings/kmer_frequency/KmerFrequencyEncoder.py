@@ -87,9 +87,9 @@ class KmerFrequencyEncoder(DatasetEncoder):
     @staticmethod
     def _normalize_repertoires(repertoires, params: EncoderParams):
         normalized_repertoires = repertoires
-        if params.get('normalization_type') == NormalizationType.RELATIVE_FREQUENCY:
+        if params["model"]['normalization_type'] == NormalizationType.RELATIVE_FREQUENCY:
             normalized_repertoires = sparse.diags(1 / repertoires.sum(axis=1).A.ravel()) @ repertoires
-        elif params.get('normalization_type') == NormalizationType.L2:
+        elif params["model"]['normalization_type'] == NormalizationType.L2:
             normalized_repertoires = normalize(repertoires)
         return normalized_repertoires
 

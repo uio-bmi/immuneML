@@ -41,7 +41,7 @@ class TestKmerFrequencyEncoder(TestCase):
         dataset = Dataset(filenames=[path + "rep1.pkl", path + "rep2.pkl"])
 
         d1 = KmerFrequencyEncoder.encode(dataset, EncoderParams(
-            result_path=path,
+            result_path=path + "1/",
             label_configuration=lc,
             batch_size=2,
             learn_model=True,
@@ -55,7 +55,7 @@ class TestKmerFrequencyEncoder(TestCase):
         ))
 
         d2 = KmerFrequencyEncoder.encode(dataset, EncoderParams(
-            result_path=path,
+            result_path=path + "2/",
             label_configuration=lc,
             batch_size=2,
             learn_model=True,
@@ -63,7 +63,7 @@ class TestKmerFrequencyEncoder(TestCase):
             model={
                 "normalization_type": NormalizationType.RELATIVE_FREQUENCY,
                 "reads": ReadsType.UNIQUE,
-                "sequence_encoding_strategy": SequenceEncodingType.IDENTITY,
+                "sequence_encoding_strategy": SequenceEncodingType.CONTINUOUS_KMER,
                 "k": 3
             }
         ))
@@ -74,3 +74,4 @@ class TestKmerFrequencyEncoder(TestCase):
         self.assertTrue(isinstance(d2, Dataset))
         self.assertTrue("repertoires" in d1.encoded_data)
         self.assertTrue("repertoires" in d2.encoded_data)
+        self.assertEqual(0.67, round(d2.encoded_data["repertoires"][0][2], 2))
