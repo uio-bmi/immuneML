@@ -23,7 +23,7 @@ class RepertoireBuilder:
             for sequence in sequence_list:
                 s = ReceptorSequence(amino_acid_sequence=sequence, metadata=SequenceMetadata())
                 rep_sequences.append(s)
-            repertoire = Repertoire(sequences=rep_sequences)
+            repertoire = Repertoire(sequences=rep_sequences, identifier=str(index))
 
             if labels is not None:
                 rep_labels = {key: labels[key][index] for key in labels.keys()}

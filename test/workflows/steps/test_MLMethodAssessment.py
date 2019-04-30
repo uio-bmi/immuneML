@@ -10,13 +10,17 @@ from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.environment.LabelConfiguration import LabelConfiguration
 from source.environment.MetricType import MetricType
 from source.ml_methods.SVM import SVM
+from source.util.PathBuilder import PathBuilder
+from source.util.RepertoireBuilder import RepertoireBuilder
 from source.workflows.steps.MLMethodAssessment import MLMethodAssessment
 
 
 class TestMLMethodAssessment(TestCase):
 
     def test_perform_step(self):
-        dataset = Dataset()
+        path = EnvironmentSettings.root_path + "test/tmp/mlmethodassessment/"
+        PathBuilder.build(path)
+        dataset = Dataset(filenames=RepertoireBuilder.build([["AA"], ["CC"], ["AA"], ["CC"], ["AA"], ["CC"]], path))
         dataset.encoded_data = {
             "repertoires": np.array([[1, 2], [1, 2], [1, 2], [1, 2], [1, 2], [1, 2]]),
             "labels": np.array([[1, 2, 3, 1, 2, 3], [1, 2, 3, 1, 2, 3]]),

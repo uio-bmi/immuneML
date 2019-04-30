@@ -33,6 +33,7 @@ class MLMethodAssessment(Step):
         predicted_y = method.predict(X, labels)
         predicted_proba_y = method.predict_proba(X, labels)
         true_y = input_params["dataset"].encoded_data["labels"]
+        repertoire_ids = [rep.identifier for rep in input_params["dataset"].get_data()]
 
         MLMethodAssessment._store_predictions(method,
                                               true_y,
@@ -40,7 +41,9 @@ class MLMethodAssessment(Step):
                                               predicted_proba_y,
                                               labels,
                                               input_params["predictions_path"],
-                                              input_params["all_predictions_path"])
+                                              input_params["all_predictions_path"],
+                                              repertoire_ids,
+                                              input_params["run"])
 
         results = MLMethodAssessment._score(metrics_list=input_params["metrics"], labels=labels,
                                             label_config=input_params["label_configuration"], predicted_y=predicted_y,
@@ -87,9 +90,12 @@ class MLMethodAssessment(Step):
         return score
 
     @staticmethod
-    def _store_predictions(method, true_y, predicted_y, predicted_proba_y, labels, predictions_path, summary_path=None):
+    def _store_predictions(method, true_y, predicted_y, predicted_proba_y, labels, predictions_path, summary_path=None,
+                           repertoire_ids: list = None, run: str = None):
 
         df = pd.DataFrame()
+        df["example_id"] = repertoire_ids
+        df["run"] = [run for i in range(len(repertoire_ids))]
         for index, label in enumerate(labels):
             df["{}_true_class".format(label)] = true_y[index]
             df["{}_predicted_class".format(label)] = predicted_y[label]
