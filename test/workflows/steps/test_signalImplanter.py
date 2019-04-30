@@ -4,11 +4,12 @@ import shutil
 from unittest import TestCase
 
 from source.data_model.dataset.Dataset import Dataset
-from source.data_model.repertoire.Repertoire import Repertoire
 from source.data_model.receptor_sequence.ReceptorSequence import ReceptorSequence
+from source.data_model.repertoire.Repertoire import Repertoire
+from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.simulation.implants.Motif import Motif
 from source.simulation.implants.Signal import Signal
-from source.simulation.motif_instantiation_strategy.IdentityMotifInstantiation import IdentityMotifInstantiation
+from source.simulation.motif_instantiation_strategy.IdentityInstantiation import IdentityInstantiation
 from source.simulation.signal_implanting_strategy.HealthySequenceImplanting import HealthySequenceImplanting
 from source.simulation.signal_implanting_strategy.sequence_implanting.GappedMotifImplanting import GappedMotifImplanting
 from source.workflows.steps.SignalImplanter import SignalImplanter
@@ -19,20 +20,22 @@ class TestSignalImplanter(TestCase):
 
         r = []
 
-        if not os.path.isdir("/Users/milenpa/PycharmProjects/ImmuneML/test/tmp/"):
-            os.makedirs("/Users/milenpa/PycharmProjects/ImmuneML/test/tmp/")
+        path = EnvironmentSettings.root_path + "test/tmp/signalImplanter/"
+
+        if not os.path.isdir(path):
+            os.makedirs(path)
 
         for i in range(10):
             rep = Repertoire(sequences=[ReceptorSequence("ACDEFG"), ReceptorSequence("ACDEFG"), ReceptorSequence("ACDEFG"), ReceptorSequence("ACDEFG")])
-            filename = "../../tmp/rep" + str(i+1) + ".pkl"
+            filename = path + "rep" + str(i+1) + ".pkl"
             with open(filename, "wb") as file:
                 pickle.dump(rep, file)
             r.append(filename)
 
         dataset = Dataset(filenames=r)
 
-        m1 = Motif(identifier="m1", instantiation_strategy=IdentityMotifInstantiation(), seed="CAS")
-        m2 = Motif(identifier="m2", instantiation_strategy=IdentityMotifInstantiation(), seed="CCC")
+        m1 = Motif(identifier="m1", instantiation_strategy=IdentityInstantiation(), seed="CAS")
+        m2 = Motif(identifier="m2", instantiation_strategy=IdentityInstantiation(), seed="CCC")
         s1 = Signal(identifier="s1", motifs=[m1], implanting_strategy=HealthySequenceImplanting(GappedMotifImplanting()))
         s2 = Signal(identifier="s2", motifs=[m1, m2],
                     implanting_strategy=HealthySequenceImplanting(GappedMotifImplanting()))
@@ -50,7 +53,7 @@ class TestSignalImplanter(TestCase):
                     "sequences": 0.5
                 }
             ],
-            "result_path": "/Users/milenpa/PycharmProjects/ImmuneML/test/tmp/",
+            "result_path": path,
             "dataset": dataset,
             "batch_size": 5,
             "signals": [s1, s2]
@@ -65,4 +68,4 @@ class TestSignalImplanter(TestCase):
         self.assertTrue(reps_with_s2 == 4)
         self.assertTrue(reps_with_s1 == 2)
 
-        shutil.rmtree("/Users/milenpa/PycharmProjects/ImmuneML/test/tmp/")
+        shutil.rmtree(path)

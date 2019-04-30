@@ -11,3 +11,5 @@ class MetricType(Enum):
     F1_MICRO = "f1_score_micro"
     F1_MACRO = "f1_score_macro"
     F1_WEIGHTED = "f1_score_weighted"
+    PRECISION = "precision_score"
+    RECALL = "recall_score"

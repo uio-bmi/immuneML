@@ -14,7 +14,3 @@ class TestSequence(TestCase):
         EnvironmentSettings.set_sequence_type(SequenceType.AMINO_ACID)
 
         self.assertEqual(sequence.get_sequence(), "CAS")
-
-        EnvironmentSettings.set_sequence_type(SequenceType.NUCLEOTIDE)
-
-        self.assertEqual(sequence.get_sequence(), "TGTGCTTCC")

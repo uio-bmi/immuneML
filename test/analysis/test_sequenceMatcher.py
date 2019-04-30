@@ -1,5 +1,5 @@
-import os
 import pickle
+import shutil
 from unittest import TestCase
 
 from source.analysis.SequenceMatcher import SequenceMatcher
@@ -9,6 +9,9 @@ from source.data_model.receptor_sequence.ReceptorSequence import ReceptorSequenc
 from source.data_model.receptor_sequence.SequenceMetadata import SequenceMetadata
 from source.data_model.repertoire.Repertoire import Repertoire
 from source.data_model.repertoire.RepertoireMetadata import RepertoireMetadata
+from source.dsl.SequenceMatchingSummaryType import SequenceMatchingSummaryType
+from source.environment.EnvironmentSettings import EnvironmentSettings
+from source.util.PathBuilder import PathBuilder
 
 
 class TestSequenceMatcher(TestCase):
@@ -20,35 +23,37 @@ class TestSequenceMatcher(TestCase):
                                            ReceptorSequence(amino_acid_sequence="TADQVF", metadata=SequenceMetadata(chain="A", v_gene="V1", j_gene="J3"))],
                                 metadata=RepertoireMetadata(sample=Sample("CD123"), custom_params={"CD": True}))
 
-        with open("./rep0.pkl", "wb") as file:
+        path = EnvironmentSettings.root_path + "test/tmp/seqmatch/"
+        PathBuilder.build(path)
+        with open(path + "rep0.pkl", "wb") as file:
             pickle.dump(repertoire, file)
 
-        dataset = Dataset(filenames=["./rep0.pkl"])
+        dataset = Dataset(filenames=[path + "rep0.pkl"])
         sequences = [ReceptorSequence("AAAACA", metadata=SequenceMetadata(chain="A", v_gene="V1", j_gene="J2")),
                      ReceptorSequence("TADQV", metadata=SequenceMetadata(chain="A", v_gene="V1", j_gene="J3"))]
 
         matcher = SequenceMatcher()
-        result = matcher.match(dataset, sequences, 2)
+        result = matcher.match(dataset, sequences, 2, SequenceMatchingSummaryType.PERCENTAGE)
 
         self.assertTrue("repertoires" in result)
         self.assertEqual(1, len(result["repertoires"][0]["sequences"][3]["matching_sequences"]))
         self.assertTrue(result["repertoires"][0]["metadata"]["CD"])
         self.assertEqual(1, len(result["repertoires"]))
 
-        os.remove("./rep0.pkl")
+        shutil.rmtree(path)
 
     def test_match_repertoire(self):
-        repertoire = Repertoire(sequences=[ReceptorSequence(amino_acid_sequence="AAAAAA", metadata=SequenceMetadata(chain="A")),
-                                           ReceptorSequence(amino_acid_sequence="CCCCCC", metadata=SequenceMetadata(chain="A")),
-                                           ReceptorSequence(amino_acid_sequence="AAAACC", metadata=SequenceMetadata(chain="A")),
-                                           ReceptorSequence(amino_acid_sequence="TADQVF", metadata=SequenceMetadata(chain="A"))],
+        repertoire = Repertoire(sequences=[ReceptorSequence(amino_acid_sequence="AAAAAA", metadata=SequenceMetadata(chain="A", count=3)),
+                                           ReceptorSequence(amino_acid_sequence="CCCCCC", metadata=SequenceMetadata(chain="A", count=2)),
+                                           ReceptorSequence(amino_acid_sequence="AAAACC", metadata=SequenceMetadata(chain="A", count=1)),
+                                           ReceptorSequence(amino_acid_sequence="TADQVF", metadata=SequenceMetadata(chain="A", count=4))],
                                 metadata=RepertoireMetadata(sample=Sample("CD123"), custom_params={"CD": True}))
 
         sequences = [ReceptorSequence("AAAACA", metadata=SequenceMetadata(chain="A")),
                      ReceptorSequence("TADQV", metadata=SequenceMetadata(chain="A"))]
 
         matcher = SequenceMatcher()
-        result = matcher.match_repertoire(repertoire, 0, sequences, 2)
+        result = matcher.match_repertoire(repertoire, 0, sequences, 2, SequenceMatchingSummaryType.COUNT)
 
         self.assertTrue("sequences" in result)
         self.assertTrue("repertoire" in result)
@@ -63,3 +68,5 @@ class TestSequenceMatcher(TestCase):
         self.assertEqual(3, len([r for r in result["sequences"] if len(r["matching_sequences"]) > 0]))
         self.assertTrue(result["metadata"]["CD"])
 
+        result = matcher.match_repertoire(repertoire, 0, sequences, 2, SequenceMatchingSummaryType.CLONAL_PERCENTAGE)
+        self.assertEqual(0.8, result["percentage_of_sequences_matched"])

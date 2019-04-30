@@ -1,11 +1,15 @@
 import os
 import pickle
+import shutil
 from unittest import TestCase
-from scipy import sparse
+
 import numpy as np
+from scipy import sparse
 from sklearn.linear_model import SGDClassifier
 
+from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.ml_methods.SVM import SVM
+from source.util.PathBuilder import PathBuilder
 
 
 class TestSVM(TestCase):
@@ -44,16 +48,17 @@ class TestSVM(TestCase):
         svm = SVM()
         svm.fit(sparse.csr_matrix(x), y)
 
-        svm.store("./")
-        self.assertTrue(os.path.isfile("./svm.pickle"))
+        path = EnvironmentSettings.root_path + "test/tmp/svm/"
 
-        with open("./svm.pickle", "rb") as file:
+        svm.store(path)
+        self.assertTrue(os.path.isfile(path + "svm.pickle"))
+
+        with open(path + "svm.pickle", "rb") as file:
             svm2 = pickle.load(file)
 
         self.assertTrue(isinstance(svm2["default"], SGDClassifier))
 
-        os.remove("./svm.pickle")
-        os.remove("./svm.json")
+        shutil.rmtree(path)
 
     def test_load(self):
         x = np.array([[1, 0, 0], [0, 1, 1], [1, 1, 1], [0, 1, 1]])
@@ -62,12 +67,15 @@ class TestSVM(TestCase):
         svm = SVM()
         svm.fit(sparse.csr_matrix(x), y)
 
-        with open("./svm.pickle", "wb") as file:
+        path = EnvironmentSettings.root_path + "test/tmp/svm2/"
+        PathBuilder.build(path)
+
+        with open(path + "svm.pickle", "wb") as file:
             pickle.dump(svm.get_model(), file)
 
         svm2 = SVM()
-        svm2.load("./")
+        svm2.load(path)
 
         self.assertTrue(isinstance(svm2.get_model()["default"], SGDClassifier))
 
-        os.remove("./svm.pickle")
+        shutil.rmtree(path)

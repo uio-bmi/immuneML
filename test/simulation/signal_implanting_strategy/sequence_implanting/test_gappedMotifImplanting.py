@@ -14,7 +14,6 @@ class TestGappedMotifImplanting(TestCase):
                                                                                  "motif_id": "1",
                                                                                  "motif_instance": motif_instance})
 
-        print(sequence.get_sequence())
         self.assertTrue(sequence.get_sequence().find("CCAAT") > -1)
         self.assertEqual(10, len(sequence.get_sequence()))
 
@@ -23,7 +22,6 @@ class TestGappedMotifImplanting(TestCase):
                                                                                  "motif_instance": motif_instance},
                                     sequence_position_weights={105: 0.8, 106: 0.2})
 
-        print(sequence.get_sequence())
         self.assertTrue(-1 < sequence.get_sequence().find("CCAAT") < 2)
         self.assertEqual(10, len(sequence.get_sequence()))
 
@@ -33,6 +31,14 @@ class TestGappedMotifImplanting(TestCase):
                                                                                  "motif_instance": motif_instance},
                                     sequence_position_weights={105: 0.8, 106: 0.2})
 
-        print(sequence.get_sequence())
         self.assertTrue(-1 < sequence.get_sequence().find("CCT") < 2)
         self.assertEqual(10, len(sequence.get_sequence()))
+
+        motif_instance = MotifInstance("C/T", 0)
+        sequence = strategy.implant(ReceptorSequence(amino_acid_sequence="AAAAAAAAAA"), {"signal_id": "1",
+                                                                                 "motif_id": "1",
+                                                                                 "motif_instance": motif_instance},
+                                    sequence_position_weights={105: 0.8, 106: 0.2})
+
+        self.assertTrue(-1 < sequence.get_sequence().find("CT") < 2)
+        self.assertTrue("/" not in sequence.get_sequence())

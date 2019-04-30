@@ -1,11 +1,15 @@
 import os
 import pickle
+import shutil
 from unittest import TestCase
-from scipy import sparse
+
 import numpy as np
+from scipy import sparse
 from sklearn.ensemble import RandomForestClassifier as RFC
 
+from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.ml_methods.RandomForestClassifier import RandomForestClassifier
+from source.util.PathBuilder import PathBuilder
 
 
 class TestRandomForestClassifier(TestCase):
@@ -46,16 +50,17 @@ class TestRandomForestClassifier(TestCase):
         rfc = RandomForestClassifier()
         rfc.fit(sparse.csr_matrix(x), y)
 
-        rfc.store("./")
-        self.assertTrue(os.path.isfile("./random_forest_classifier.pickle"))
+        path = EnvironmentSettings.root_path + "test/tmp/rfc/"
 
-        with open("./random_forest_classifier.pickle", "rb") as file:
+        rfc.store(path)
+        self.assertTrue(os.path.isfile(path + "random_forest_classifier.pickle"))
+
+        with open(path + "random_forest_classifier.pickle", "rb") as file:
             rfc2 = pickle.load(file)
 
         self.assertTrue(isinstance(rfc2["default"], RFC))
 
-        os.remove("./random_forest_classifier.pickle")
-        os.remove("./random_forest_classifier.json")
+        shutil.rmtree(path)
 
     def test_load(self):
         x = np.array([[1, 0, 0], [0, 1, 1], [1, 1, 1], [0, 1, 1]])
@@ -64,13 +69,16 @@ class TestRandomForestClassifier(TestCase):
         rfc = RandomForestClassifier()
         rfc.fit(sparse.csr_matrix(x), y)
 
-        with open("./random_forest_classifier.pickle", "wb") as file:
+        path = EnvironmentSettings.root_path + "test/tmp/rfc2/"
+        PathBuilder.build(path)
+
+        with open(path + "random_forest_classifier.pickle", "wb") as file:
             pickle.dump(rfc.get_model(), file)
 
         rfc2 = RandomForestClassifier()
-        rfc2.load("./")
+        rfc2.load(path)
 
         self.assertTrue(isinstance(rfc2.get_model()["default"], RFC))
 
-        os.remove("./random_forest_classifier.pickle")
+        shutil.rmtree(path)
 

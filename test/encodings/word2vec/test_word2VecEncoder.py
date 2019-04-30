@@ -3,13 +3,13 @@ import shutil
 from unittest import TestCase
 
 from source.data_model.dataset.Dataset import Dataset
-from source.data_model.metadata.Sample import Sample
+from source.data_model.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.data_model.repertoire.Repertoire import Repertoire
 from source.data_model.repertoire.RepertoireMetadata import RepertoireMetadata
-from source.data_model.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.encodings.EncoderParams import EncoderParams
 from source.encodings.word2vec.Word2VecEncoder import Word2VecEncoder
 from source.encodings.word2vec.model_creator.ModelType import ModelType
+from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.environment.LabelConfiguration import LabelConfiguration
 from source.environment.LabelType import LabelType
 from source.util.PathBuilder import PathBuilder
@@ -18,7 +18,7 @@ from source.util.PathBuilder import PathBuilder
 class TestWord2VecEncoder(TestCase):
     def test_encode(self):
 
-        test_path = "./w2v_test_tmp/"
+        test_path = EnvironmentSettings.root_path + "test/tmp/w2v/"
 
         PathBuilder.build(test_path)
 

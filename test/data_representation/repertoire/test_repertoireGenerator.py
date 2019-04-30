@@ -2,11 +2,11 @@ import pickle
 import shutil
 from unittest import TestCase
 
-from source.data_model.dataset.Dataset import Dataset
+from source.data_model.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.data_model.repertoire.Repertoire import Repertoire
 from source.data_model.repertoire.RepertoireGenerator import RepertoireGenerator
 from source.data_model.repertoire.RepertoireMetadata import RepertoireMetadata
-from source.data_model.receptor_sequence.ReceptorSequence import ReceptorSequence
+from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.util.PathBuilder import PathBuilder
 
 
@@ -20,7 +20,7 @@ class TestRepertoireGenerator(TestCase):
         repertoire1 = Repertoire([sequence2, sequence1], RepertoireMetadata())
         repertoire2 = Repertoire([sequence1, sequence2], RepertoireMetadata())
 
-        path = "./repertoire_generator/"
+        path = EnvironmentSettings.root_path + "test/tmp/repertoire_generator/"
         file1 = path + "rep1"
         file2 = path + "rep2"
         file3 = path + "rep3"

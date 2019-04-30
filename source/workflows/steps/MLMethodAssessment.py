@@ -1,21 +1,19 @@
-import json
-from itertools import product
-from multiprocessing.pool import Pool
+import inspect
+import os
+
+import pandas as pd
 from sklearn import metrics
 
-from source.ml_metrics import ml_metrics
 from source.environment.MetricType import MetricType
-from source.environment.ParallelismManager import ParallelismManager
 from source.ml_methods.MLMethod import MLMethod
+from source.ml_metrics import ml_metrics
 from source.util.PathBuilder import PathBuilder
 from source.workflows.steps.Step import Step
 
 
-def assess_per_method(method: MLMethod, input_params: dict):
-    return MLMethodAssessment.assess_per_method(method, input_params)
-
-
 class MLMethodAssessment(Step):
+
+    fieldnames = ["run", "optimal_method_params", "method", "encoding_params", "encoding", "evaluated_on"]
 
     @staticmethod
     def run(input_params: dict = None):
@@ -24,73 +22,96 @@ class MLMethodAssessment(Step):
 
     @staticmethod
     def check_prerequisites(input_params: dict = None):
-        assert input_params is not None, "MLMethodAssessment: input_params have to be set."
-        assert "methods" in input_params, "MLMethodAssessment: the methods parameter has to be set to a list of trained ML method instances."
-        assert "dataset" in input_params, "MLMethodAssessment: the dataset parameter has to be set to contain an instance of a Dataset object to be used for testing."
-        assert "metrics" in input_params, "MLMethodAssessment: the metrics parameter has to be set to a list of metrics to be evaluated for the methods."
+        pass
 
     @staticmethod
     def perform_step(input_params: dict = None):
-        assessment_result = {}
-
-        n_jobs = ParallelismManager.assign_cores_to_job("ml_method_assessment")
-        with Pool(n_jobs) as pool:
-            results = pool.starmap(assess_per_method, product(input_params["methods"], [input_params]))
-
-        outputs = [result for result in results]
-
-        for index, method in enumerate(input_params["methods"]):
-            assessment_result[method.__class__.__name__] = outputs[index]
-
-        return assessment_result
-
-    @staticmethod
-    def assess_per_method(method: MLMethod, input_params: dict):
-
+        method = input_params["method"]
         labels = input_params["labels"]
         X = input_params["dataset"].encoded_data["repertoires"]
+        # predict
         predicted_y = method.predict(X, labels)
+        predicted_proba_y = method.predict_proba(X, labels)
         true_y = input_params["dataset"].encoded_data["labels"]
+        repertoire_ids = [rep.identifier for rep in input_params["dataset"].get_data()]
 
-        MLMethodAssessment._store_predictions(method.__class__.__name__,
-                                               true_y,
-                                               predicted_y,
-                                               labels,
-                                               input_params["predictions_path"])
+        MLMethodAssessment._store_predictions(method,
+                                              true_y,
+                                              predicted_y,
+                                              predicted_proba_y,
+                                              labels,
+                                              input_params["predictions_path"],
+                                              input_params["all_predictions_path"],
+                                              repertoire_ids,
+                                              input_params["run"])
 
-        results = {label: {} for label in labels}
-
-        for metric in input_params["metrics"]:
-            for index, label in enumerate(labels):
-                score = MLMethodAssessment._score(metric, predicted_y[label], true_y[index])
-                results[label][metric.name] = score
+        results = MLMethodAssessment._score(metrics_list=input_params["metrics"], labels=labels,
+                                            label_config=input_params["label_configuration"], predicted_y=predicted_y,
+                                            true_y=true_y, ml_details_path=input_params["ml_details_path"],
+                                            run=input_params["run"], method=method)
 
         return results
 
     @staticmethod
-    def _score(metric: MetricType, predicted_y, true_y):
-        if hasattr(metrics, metric.value) and callable(getattr(metrics, metric.value)):
-            score = getattr(metrics, metric.value)(true_y, predicted_y)
+    def _score(metrics_list: list, labels: list, label_config, predicted_y, true_y, ml_details_path: str, run: int, method: MLMethod):
+        results = {}
+
+        for metric in metrics_list:
+            for index, label in enumerate(labels):
+                score = MLMethodAssessment._score_for_metric(metric, predicted_y[label], true_y[index],
+                                                             label_config.get_label_values(label))
+                results["{}_{}".format(label, metric.name.lower())] = score
+
+        results["run"] = run
+        for label in labels:
+            results["{}_method_params".format(label)] = method.get_params(label)
+
+        df = pd.DataFrame([results])
+
+        if os.path.isfile(ml_details_path) and os.path.getsize(ml_details_path) > 0:
+            df.to_csv(ml_details_path, mode='a', header=False, index=False)
         else:
-            score = getattr(ml_metrics, metric.value)(true_y, predicted_y)
+            df.to_csv(ml_details_path, index=False)
+
+        return df
+
+    @staticmethod
+    def _score_for_metric(metric: MetricType, predicted_y, true_y, labels):
+        if hasattr(metrics, metric.value) and callable(getattr(metrics, metric.value)):
+            fn = getattr(metrics, metric.value)
+        else:
+            fn = getattr(ml_metrics, metric.value)
+
+        if "labels" in inspect.signature(fn).parameters.keys():
+            score = fn(true_y, predicted_y, labels=labels)
+        else:
+            score = fn(true_y, predicted_y)
 
         return score
 
-
     @staticmethod
-    def _store_predictions(method_name, true_y, predicted_y, labels, predictions_path):
+    def _store_predictions(method, true_y, predicted_y, predicted_proba_y, labels, predictions_path, summary_path=None,
+                           repertoire_ids: list = None, run: str = None):
+
+        df = pd.DataFrame()
+        df["example_id"] = repertoire_ids
+        df["run"] = [run for i in range(len(repertoire_ids))]
+        for index, label in enumerate(labels):
+            df["{}_true_class".format(label)] = true_y[index]
+            df["{}_predicted_class".format(label)] = predicted_y[label]
+
+            classes = method.get_classes_for_label(label)
+            for cls_index, cls in enumerate(classes):
+                tmp = predicted_proba_y[label][:, cls_index] if predicted_proba_y is not None else None
+                df["{}_{}_proba".format(label, cls)] = tmp
 
         if predictions_path is not None:
             PathBuilder.build(predictions_path)
+            df.to_csv("{}{}.csv".format(predictions_path, method.__class__.__name__), index=False)
 
-            obj = []
-
-            for index, label in enumerate(labels):
-                obj.append({
-                    "label": label,
-                    "predicted_y": predicted_y[label].tolist(),
-                    "true_y": true_y[index].tolist()
-                })
-
-            with open(predictions_path + method_name + ".json", "w") as file:
-                json.dump(obj, file, indent=2)
+        if summary_path is not None:
+            PathBuilder.build(os.path.dirname(os.path.abspath(summary_path)))
+            if os.path.isfile(summary_path) and os.path.getsize(summary_path) > 0:
+                df.to_csv(summary_path, mode='a', header=False, index=False)
+            else:
+                df.to_csv(summary_path, index=False)

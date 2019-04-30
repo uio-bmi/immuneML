@@ -1,13 +1,15 @@
 import os
 import pickle
-
-import numpy as np
+import shutil
 from unittest import TestCase
 
+import numpy as np
 from scipy import sparse
 from sklearn.linear_model import SGDClassifier
 
+from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.ml_methods.LogisticRegression import LogisticRegression
+from source.util.PathBuilder import PathBuilder
 
 
 class TestLogisticRegression(TestCase):
@@ -47,16 +49,17 @@ class TestLogisticRegression(TestCase):
         lr = LogisticRegression()
         lr.fit(sparse.csr_matrix(x), y)
 
-        lr.store("./")
-        self.assertTrue(os.path.isfile("./logistic_regression.pickle"))
+        path = EnvironmentSettings.root_path + "test/tmp/lr/"
 
-        with open("./logistic_regression.pickle", "rb") as file:
+        lr.store(path)
+        self.assertTrue(os.path.isfile(path + "logistic_regression.pickle"))
+
+        with open(path + "logistic_regression.pickle", "rb") as file:
             lr2 = pickle.load(file)
 
         self.assertTrue(isinstance(lr2["default"], SGDClassifier))
 
-        os.remove("./logistic_regression.pickle")
-        os.remove("./logistic_regression.json")
+        shutil.rmtree(path)
 
     def test_load(self):
         x = np.array([[1, 0, 0], [0, 1, 1], [1, 1, 1], [0, 1, 1]])
@@ -65,13 +68,16 @@ class TestLogisticRegression(TestCase):
         lr = LogisticRegression()
         lr.fit(sparse.csr_matrix(x), y)
 
-        with open("./logistic_regression.pickle", "wb") as file:
+        path = EnvironmentSettings.root_path + "test/tmp/lr2/"
+        PathBuilder.build(path)
+
+        with open(path + "logistic_regression.pickle", "wb") as file:
             pickle.dump(lr.get_model(), file)
 
         lr2 = LogisticRegression()
-        lr2.load("./")
+        lr2.load(path)
 
         self.assertTrue(isinstance(lr2.get_model()["default"], SGDClassifier))
 
-        os.remove("./logistic_regression.pickle")
+        shutil.rmtree(path)
 

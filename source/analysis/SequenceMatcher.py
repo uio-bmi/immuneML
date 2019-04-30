@@ -1,10 +1,12 @@
 from multiprocessing.pool import Pool
 
+import numpy as np
 from editdistance import eval as edit_distance
 
 from source.data_model.dataset.Dataset import Dataset
 from source.data_model.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.data_model.repertoire.Repertoire import Repertoire
+from source.dsl.SequenceMatchingSummaryType import SequenceMatchingSummaryType
 from source.environment.ParallelismManager import ParallelismManager
 
 
@@ -30,12 +32,13 @@ class SequenceMatcher:
     }
     """
 
-    def match(self, dataset: Dataset, reference_sequences: list, max_distance: int) -> dict:
+    def match(self, dataset: Dataset, reference_sequences: list, max_distance: int, summary_type: SequenceMatchingSummaryType) -> dict:
 
         matched = {"repertoires": []}
 
         for index, repertoire in enumerate(dataset.get_data()):
-            matched["repertoires"].append(self.match_repertoire(repertoire, index, reference_sequences, max_distance))
+            matched["repertoires"].append(self.match_repertoire(repertoire, index,
+                                                                reference_sequences, max_distance, summary_type))
 
         return matched
 
@@ -57,7 +60,8 @@ class SequenceMatcher:
             and self.matches_gene(reference_sequence.metadata.j_gene, original_sequence.metadata.j_gene) \
             and edit_distance(original_sequence.get_sequence(), reference_sequence.get_sequence()) <= max_distance
 
-    def match_repertoire(self, repertoire: Repertoire, index: int, reference_sequences: list, max_distance: int) -> dict:
+    def match_repertoire(self, repertoire: Repertoire, index: int, reference_sequences: list, max_distance: int,
+                         summary_type: SequenceMatchingSummaryType) -> dict:
 
         matched = {"sequences": [], "repertoire": repertoire.identifier, "repertoire_index": index}
         arguments = [(seq, reference_sequences, max_distance) for seq in repertoire.sequences]
@@ -65,8 +69,12 @@ class SequenceMatcher:
         with Pool(ParallelismManager.assign_cores_to_job("stat_analysis")) as pool:
             matched["sequences"] = pool.starmap(self.match_sequence, arguments)
 
-        matched["sequences_matched"] = len([r for r in matched["sequences"] if len(r["matching_sequences"]) > 0])
-        matched["percentage_of_sequences_matched"] = matched["sequences_matched"] / len(matched["sequences"])
+        if summary_type == SequenceMatchingSummaryType.CLONAL_PERCENTAGE:
+            total_count = np.sum([sequence.metadata.count for sequence in repertoire.sequences])
+            matched["percentage_of_sequences_matched"] = np.sum([sequence.metadata.count for index, sequence in enumerate(repertoire.sequences) if len(matched["sequences"][index]["matching_sequences"]) > 0]) / total_count
+        else:
+            matched["sequences_matched"] = len([r for r in matched["sequences"] if len(r["matching_sequences"]) > 0])
+            matched["percentage_of_sequences_matched"] = matched["sequences_matched"] / len(matched["sequences"])
         matched["metadata"] = repertoire.metadata.custom_params \
             if repertoire.metadata is not None else None
         matched["patient_id"] = repertoire.identifier

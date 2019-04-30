@@ -5,17 +5,18 @@ from unittest import TestCase
 from gensim.models import Word2Vec
 
 from source.data_model.dataset.Dataset import Dataset
-from source.data_model.metadata.Sample import Sample
+from source.data_model.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.data_model.repertoire.Repertoire import Repertoire
 from source.data_model.repertoire.RepertoireMetadata import RepertoireMetadata
-from source.data_model.receptor_sequence.ReceptorSequence import ReceptorSequence
+from source.encodings.EncoderParams import EncoderParams
 from source.encodings.word2vec.model_creator.KmerPairModelCreator import KmerPairModelCreator
+from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.util.PathBuilder import PathBuilder
 
 
 class TestKmerPairModelCreator(TestCase):
     def test_create_model(self):
-        test_path = "./w2v_test_tmp/"
+        test_path = EnvironmentSettings.root_path + "test/tmp/w2v_test_tmp/"
 
         PathBuilder.build(test_path)
 
@@ -40,12 +41,11 @@ class TestKmerPairModelCreator(TestCase):
 
         dataset = Dataset(filenames=[file1, file2])
 
-        config_params = {
-            "model": {
+        from source.environment.LabelConfiguration import LabelConfiguration
+        config_params = EncoderParams(model={
                 "k": 2,
                 "size": 16
-            }
-        }
+            }, result_path="", label_configuration=LabelConfiguration())
 
         model_creator = KmerPairModelCreator()
         model = model_creator.create_model(dataset=dataset, params=config_params, model_path=test_path+"model.model")

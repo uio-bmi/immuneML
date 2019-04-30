@@ -40,7 +40,7 @@ class GappedMotifImplanting(SequenceImplantingStrategy):
     def _build_new_sequence(self, sequence: ReceptorSequence, position, signal: dict) -> ReceptorSequence:
 
         gap_length = signal["motif_instance"].gap
-        if gap_length > 0:
+        if "/" in signal["motif_instance"].instance:
             motif_left, motif_right = signal["motif_instance"].instance.split("/")
         else:
             motif_left = signal["motif_instance"].instance
