@@ -18,6 +18,7 @@ Welcome to ImmuneML's documentation!
    encodings
    ml_models
    how_to_add_report
+   DSL
 
 
 Indices and tables
