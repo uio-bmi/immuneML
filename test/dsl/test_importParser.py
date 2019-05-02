@@ -87,6 +87,20 @@ class TestImportParser(TestCase):
                 "aaSeqCDR2": "CAASNTTA",
                 "aaSeqCDR3": "CAASNTTA",
                 "sampleID": 1
+            }, {
+                "patient": "CD12",
+                "dilution": "108'",
+                "cloneCount": 6,
+                "allVHitsWithScore": "TRAV19-1*00(735)",
+                "allJHitsWithScore": "TRAJ12*00(243)",
+                "nSeqCDR1": "CAATGTGA",
+                "nSeqCDR2": "CAATGTGA",
+                "nSeqCDR3": "CAATGTGA",
+                "minQualCDR3": 10,
+                "aaSeqCDR1": "CAASNTTA",
+                "aaSeqCDR2": "CAASNTTA",
+                "aaSeqCDR3": "CAASNTTA",
+                "sampleID": 1
             }]
 
             writer.writeheader()
@@ -98,10 +112,8 @@ class TestImportParser(TestCase):
                     "path": path + "tmp_input/",
                     "format": "MiXCR",
                     "params": {
-                        "additional_columns": ["minQualCDR3"],
                         "sequence_type": "CDR2+CDR3",
                         "result_path": path + "tmp_output/",
-                        "batch_size": 2,
                         "extension": "csv",
                         "custom_params": [{
                             "name": "CD",
@@ -109,13 +121,48 @@ class TestImportParser(TestCase):
                             "alternative": "HC"
                         }]
                     },
-                    "result_path": path + "tmp_output/",
-                    "assessment_type": "CV",
-                    "CV_folds_number": "LOOCV"
+                    "preprocessing": {
+                        "filter_out_short_reps": {
+                            "params": {"lower_limit": 3},
+                            "type": "ClonotypeCountFilter"
+                        }
+                    }
                 }
             }
         }
 
         st, desc = ImportParser.parse(specs, SymbolTable())
         self.assertTrue(isinstance(st.get("d1")["dataset"], Dataset))
+        self.assertEqual(1, len(st.get("d1")["dataset"].filenames))
+
+        specs = {
+            "dataset_import": {
+                "d1": {
+                    "path": path + "tmp_input/",
+                    "format": "MiXCR",
+                    "params": {
+                        "sequence_type": "CDR2+CDR3",
+                        "result_path": path + "tmp_output/",
+                        "extension": "csv",
+                        "custom_params": [{
+                            "name": "CD",
+                            "location": "filepath_binary",
+                            "alternative": "HC"
+                        }]
+                    },
+                    "preprocessing": {
+                        "filter_out_short_reps": {
+                            "type": "ClonotypeCountFilter"
+                        }
+                    }
+                }
+            }
+        }
+
+        st, desc = ImportParser.parse(specs, SymbolTable())
+        self.assertTrue(isinstance(st.get("d1")["dataset"], Dataset))
+        self.assertEqual(0, len(st.get("d1")["dataset"].filenames))
+
+        self.assertEqual(100, desc["d1"]["preprocessing"]["filter_out_short_reps"]["params"]["lower_limit"])
+
         shutil.rmtree(path)

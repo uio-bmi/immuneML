@@ -1,3 +1,6 @@
+import copy
+
+from source.dsl.DefaultParamsLoader import DefaultParamsLoader
 from source.dsl.encoding_parsers.EncodingParameterParser import EncodingParameterParser
 from source.encodings.word2vec.model_creator.ModelType import ModelType
 
@@ -14,9 +17,12 @@ class Word2VecParser(EncodingParameterParser):
 
     @staticmethod
     def parse(params: dict):
-        Word2VecParser.check_parameters(params)
 
-        parsed = {key: params[key] for key in params.keys()
-                  if key not in ["model_creator"]}
-        parsed["model_creator"] = ModelType[params["model_creator"].upper()]
-        return parsed
+        defaults = DefaultParamsLoader.load("encodings/", "Word2Vec")
+        parsed = {**defaults, **params}
+        Word2VecParser.check_parameters(parsed)
+
+        specs = copy.deepcopy(parsed)
+        parsed["model_creator"] = ModelType[parsed["model_creator"].upper()]
+
+        return parsed, specs

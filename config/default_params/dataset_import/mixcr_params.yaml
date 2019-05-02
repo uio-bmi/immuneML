@@ -1,0 +1,3 @@
+additional_columns: [] # what additional columns to load from the file: here none
+sequence_type: "CDR3" # which part of the sequence to load by default
+batch_size: 4 # how many repertoires can be loaded at once by default

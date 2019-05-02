@@ -42,15 +42,29 @@ class TestMatchedReferenceParser(TestCase):
                 "path": path + "refs.csv",
                 "format": "IRIS"  # or VDJdb
             },
-            "summary": "count",  # or percentage or clonotype_frequency (-> count sequences)
-            "max_distance": 2
+            # "summary": "count",  # or percentage or clonotype_frequency (-> count sequences)
         }
 
-        parsed = MatchedReferenceParser.parse(specs)
+        parsed, full_specs = MatchedReferenceParser.parse(specs)
         self.assertEqual(4, len(parsed["reference_sequences"]))
         self.assertEqual(2, parsed["max_distance"])
         self.assertTrue(all([isinstance(seq, ReceptorSequence) for seq in parsed["reference_sequences"]]))
         self.assertEqual(SequenceMatchingSummaryType.COUNT, parsed["summary"])
+
+        specs = {
+            "reference_sequences": {
+                "path": path + "refs.csv",
+                "format": "IRIS"  # or VDJdb
+            },
+            "summary": "percentage",  # or percentage or clonal_percentages (-> count sequences)
+            "max_distance": 0
+        }
+
+        parsed, full_specs = MatchedReferenceParser.parse(specs)
+        self.assertEqual(4, len(parsed["reference_sequences"]))
+        self.assertEqual(0, parsed["max_distance"])
+        self.assertTrue(all([isinstance(seq, ReceptorSequence) for seq in parsed["reference_sequences"]]))
+        self.assertEqual(SequenceMatchingSummaryType.PERCENTAGE, parsed["summary"])
 
         specs["reference_sequences"]["format"] = 0
         self.assertRaises(AssertionError, MatchedReferenceParser.parse, specs)

@@ -13,19 +13,20 @@ class EncodingParser:
     def parse(workflow_specification: dict, symbol_table: SymbolTable):
         if "encodings" in workflow_specification.keys():
             for key in workflow_specification["encodings"].keys():
-                encoder, params = EncodingParser.parse_encoder(workflow_specification, key)
+                encoder, params, params_specs = EncodingParser.parse_encoder(workflow_specification, key)
                 item = {"encoder": encoder, "params": params,
                         "dataset": workflow_specification["encodings"][key]["dataset"]}
                 if "labels" in workflow_specification["encodings"][key].keys():
                     item["labels"] = workflow_specification["encodings"][key]["labels"]
+                workflow_specification["encodings"][key]["params"] = params_specs
                 symbol_table.add(key, SymbolType.ENCODING, item)
-        return symbol_table, {}
+        return symbol_table, workflow_specification["encodings"]
 
     @staticmethod
     def parse_encoder(workflow_specification: dict, encoder_id: str):
         encoder_class = EncodingParser.get_encoder_class(workflow_specification["encodings"][encoder_id]["type"])
-        params = EncodingParser.get_encoder_params(workflow_specification["encodings"][encoder_id]["params"], workflow_specification["encodings"][encoder_id]["type"])
-        return encoder_class, params
+        params, params_specs = EncodingParser.get_encoder_params(workflow_specification["encodings"][encoder_id]["params"], workflow_specification["encodings"][encoder_id]["type"])
+        return encoder_class, params, params_specs
 
     @staticmethod
     def get_encoder_class(name) -> DatasetEncoder:
@@ -36,7 +37,7 @@ class EncodingParser:
     @staticmethod
     def get_encoder_params(params, encoder_type: str):
         parser_class = ReflectionHandler.get_class_by_name("{}Parser".format(encoder_type))
-        parsed_params = parser_class.parse(params)
-        return parsed_params
+        parsed_params, params_specs = parser_class.parse(params)
+        return parsed_params, params_specs
 
 

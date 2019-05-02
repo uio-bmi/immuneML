@@ -83,7 +83,6 @@ class TestImmuneMLApp(TestCase):
                     },
                     "encoding": "a1",
                     "labels": ["CD"],
-                    "metrics": ["accuracy", "balanced_accuracy"],
                     "split_count": 1,
                     "model_selection_cv": False,
                     "model_selection_n_folds": -1,
