@@ -11,7 +11,7 @@ class MetadataImport:
         metadata_df = pd.read_csv(path, sep="\t")
         custom_keys = metadata_df.keys().values.tolist()
 
-        standard_keys = ["###filename", "chain", "donor"]
+        standard_keys = ["filename", "chain", "donor"]
         for key in standard_keys:
             custom_keys.remove(key)
 
@@ -27,6 +27,6 @@ class MetadataImport:
         custom_params["donor"] = row["donor"]
 
         return {
-            "rep_file": row["###filename"],
+            "rep_file": row["filename"],
             "metadata": RepertoireMetadata(custom_params=custom_params)
         }
