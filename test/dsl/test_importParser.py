@@ -2,6 +2,7 @@ import csv
 import shutil
 from unittest import TestCase
 
+from helpers.metadata_converter import convert_metadata
 from source.data_model.dataset.Dataset import Dataset
 from source.dsl.ImportParser import ImportParser
 from source.dsl.SymbolTable import SymbolTable
@@ -14,7 +15,7 @@ class TestImportParser(TestCase):
         path = EnvironmentSettings.root_path + "test/tmp/parser/"
 
         PathBuilder.build(path + "tmp_input/")
-        with open(path + "tmp_input/CD1_TRA.csv", "w") as file:
+        with open(path + "tmp_input/CD1_clones_TRA.csv", "w") as file:
             writer = csv.DictWriter(file,
                                     delimiter="\t",
                                     fieldnames=["patient", "dilution", "cloneCount", "allVHitsWithScore",
@@ -53,7 +54,7 @@ class TestImportParser(TestCase):
             writer.writeheader()
             writer.writerows(dicts)
 
-        with open(path + "tmp_input/HC2_TRB.csv", "w") as file:
+        with open(path + "tmp_input/HC2_clones_TRB.csv", "w") as file:
             writer = csv.DictWriter(file,
                                     delimiter="\t",
                                     fieldnames=["patient", "dilution", "cloneCount", "allVHitsWithScore",
@@ -106,6 +107,8 @@ class TestImportParser(TestCase):
             writer.writeheader()
             writer.writerows(dicts)
 
+        convert_metadata(path + "tmp_input/", path + "metadata.csv", "CD", "HC")
+
         specs = {
             "dataset_import": {
                 "d1": {
@@ -115,11 +118,7 @@ class TestImportParser(TestCase):
                         "sequence_type": "CDR2+CDR3",
                         "result_path": path + "tmp_output/",
                         "extension": "csv",
-                        "custom_params": [{
-                            "name": "CD",
-                            "location": "filepath_binary",
-                            "alternative": "HC"
-                        }]
+                        "metadata_file": path + "metadata.csv"
                     },
                     "preprocessing": {
                         "filter_out_short_reps": {
@@ -144,11 +143,7 @@ class TestImportParser(TestCase):
                         "sequence_type": "CDR2+CDR3",
                         "result_path": path + "tmp_output/",
                         "extension": "csv",
-                        "custom_params": [{
-                            "name": "CD",
-                            "location": "filepath_binary",
-                            "alternative": "HC"
-                        }]
+                        "metadata_file": path + "metadata.csv"
                     },
                     "preprocessing": {
                         "filter_out_short_reps": {

@@ -2,6 +2,7 @@ import csv
 import shutil
 from unittest import TestCase
 
+from helpers.metadata_converter import convert_metadata
 from source.IO.dataset_import.MiXCRLoader import MiXCRLoader
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.util.PathBuilder import PathBuilder
@@ -11,8 +12,9 @@ class TestMiXCRLoader(TestCase):
     def test_load(self):
         path = EnvironmentSettings.root_path + "test/tmp/mixcr/"
 
-        PathBuilder.build(path + "tmp_input/")
-        with open(path + "tmp_input/CD1_TRA.csv", "w") as file:
+        PathBuilder.build(path + "tmp_input/_CD/")
+        PathBuilder.build(path + "tmp_input/_HC/")
+        with open(path + "tmp_input/_CD/CD1_clones_TRA.csv", "w") as file:
             writer = csv.DictWriter(file,
                                     delimiter="\t",
                                     fieldnames=["patient", "dilution", "cloneCount", "allVHitsWithScore",
@@ -51,7 +53,7 @@ class TestMiXCRLoader(TestCase):
             writer.writeheader()
             writer.writerows(dicts)
 
-        with open(path + "tmp_input/HC2_TRB.csv", "w") as file:
+        with open(path + "tmp_input/_HC/HC2_clones_TRB.csv", "w") as file:
             writer = csv.DictWriter(file,
                                     delimiter="\t",
                                     fieldnames=["patient", "dilution", "cloneCount", "allVHitsWithScore",
@@ -90,17 +92,15 @@ class TestMiXCRLoader(TestCase):
             writer.writeheader()
             writer.writerows(dicts)
 
+        convert_metadata(path + "tmp_input/", path + "metadata.csv", "CD", "HC")
+
         dataset = MiXCRLoader.load(path + "tmp_input/", {
             "additional_columns": ["minQualCDR3"],
             "sequence_type": "CDR1+CDR2+CDR3",
             "result_path": path + "tmp_output/",
             "batch_size": 2,
             "extension": "csv",
-            "custom_params": [{
-                "name": "CD",
-                "location": "filepath_binary",
-                "alternative": "HC"
-            }]
+            "metadata_file": path + "metadata.csv"
         })
 
         self.assertEqual(2, dataset.get_repertoire_count())

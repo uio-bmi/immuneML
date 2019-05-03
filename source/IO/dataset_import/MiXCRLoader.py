@@ -89,12 +89,10 @@ class MiXCRLoader(DataLoader):
         df = pd.read_csv(filepath, sep="\t")
         df.dropna(axis=1, how="all", inplace=True)
 
-        metadata = MiXCRLoader._extract_repertoire_metadata(filepath, params, df)
+        metadata = MiXCRLoader._extract_repertoire_metadata(filepath, params)
 
         sequences = MiXCRLoader._load_sequences(filepath, params, df)
-        patient_id = MiXCRLoader._extract_patient(filepath, df)
-        if patient_id is None and "donor" in metadata.custom_params:
-            patient_id = metadata.custom_params["donor"]
+        patient_id = metadata.custom_params["donor"]
         repertoire = Repertoire(sequences=sequences, metadata=metadata, identifier=patient_id)
         filename = params["result_path"] + str(index) + ".pkl"
 
@@ -104,27 +102,9 @@ class MiXCRLoader(DataLoader):
         return filename, metadata.custom_params
 
     @staticmethod
-    def _extract_patient(filepath: str, df):
-
-        if MiXCRLoader.PATIENT in df.keys():
-
-            assert df[MiXCRLoader.PATIENT].nunique() == 1, \
-                "MiXCRLoader: multiple patients in a single file are not supported. Issue with " + filepath
-            return df[MiXCRLoader.PATIENT][0]
-
-        else:
-            return os.path.basename(filepath).split("_clones_")[0]
-
-    @staticmethod
-    def _extract_repertoire_metadata(filepath, params, df) -> RepertoireMetadata:
-        if "metadata" in params:
-            metadata = [m for m in params["metadata"] if m["rep_file"] == os.path.basename(filepath)][0]["metadata"]
-        else:
-            sample = MiXCRLoader._extract_sample_information(df)
-            metadata = RepertoireMetadata(sample=sample)
-            for param in params["custom_params"]:
-                metadata.custom_params[param["name"]] = MiXCRLoader._extract_custom_param(param, filepath)
-
+    def _extract_repertoire_metadata(filepath, params) -> RepertoireMetadata:
+        metadata = [m for m in params["metadata"] if os.path.basename(m["rep_file"]) == os.path.basename(filepath)]
+        metadata = metadata[0]["metadata"]
         return metadata
 
     @staticmethod
@@ -150,14 +130,6 @@ class MiXCRLoader(DataLoader):
             sample = Sample(identifier=identifier)
 
         return sample
-
-    @staticmethod
-    def _extract_custom_param(param, filepath):
-        if param["location"] == "filepath_binary":
-            val = True if param["name"] in filepath and param["alternative"] not in filepath else False
-        else:
-            raise NotImplementedError
-        return val
 
     @staticmethod
     def _load_sequences(filepath, params, df):
