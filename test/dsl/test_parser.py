@@ -63,25 +63,25 @@ class TestParser(TestCase):
                 }
             },
             "simulation": {
-                "motifs": [
-                    {
-                        "id": "motif1",
+                "motifs": {
+                    "motif1": {
                         "seed": "CAS",
                         "instantiation": "Identity"
                     }
-                ],
-                "signals": [
-                    {
-                        "id": "signal1",
+                },
+                "signals": {
+                    "signal1": {
                         "motifs": ["motif1"],
                         "implanting": "healthy_sequences"
                     }
-                ],
-                "implanting": [{
-                    "signals": ["signal1"],
-                    "repertoires": 100,
-                    "sequences": 10
-                }]
+                },
+                "implanting": {
+                    "var1": {
+                        "signals": ["signal1"],
+                        "repertoires": 0.4,
+                        "sequences": 0.01
+                    }
+                }
             }
         }
 
@@ -90,10 +90,10 @@ class TestParser(TestCase):
         with open(path + "tmp_yaml_spec.yaml", "w") as file:
             yaml.dump(spec, file, default_flow_style=False)
 
-        symbol_table = Parser.parse_yaml_file(path + "tmp_yaml_spec.yaml")
+        symbol_table, _ = Parser.parse_yaml_file(path + "tmp_yaml_spec.yaml")
 
         self.assertTrue(all([symbol_table.contains(key) for key in
-                             ["simulation", "motif1", "signal1", "simpleLR", "rep1", "a1", "d1"]]))
+                             ["motif1", "signal1", "simpleLR", "rep1", "a1", "d1", "var1"]]))
         self.assertTrue(isinstance(symbol_table.get("d1")["dataset"], Dataset))
 
         shutil.rmtree(path)

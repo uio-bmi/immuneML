@@ -27,8 +27,9 @@ class ReflectionHandler:
         return cls
 
     @staticmethod
-    def get_class_by_name(class_name: str):
+    def get_class_by_name(class_name: str, subdirectory: str = ""):
         filename = glob.glob(EnvironmentSettings.root_path + "source/**/{}.py".format(class_name), recursive=True)
+        filename = [f for f in filename if subdirectory in f]
         if len(filename) != 1:
             raise ValueError("ReflectionHandler could not find class named {}. Check spelling and try again."
                              .format(class_name))
@@ -37,8 +38,9 @@ class ReflectionHandler:
         return ReflectionHandler._import_class(filename, class_name)
 
     @staticmethod
-    def exists(class_name: str):
+    def exists(class_name: str, subdirectory: str = ""):
         filename = glob.glob(EnvironmentSettings.root_path + "source/**/{}.py".format(class_name), recursive=True)
+        filename = [f for f in filename if subdirectory in f]
         if len(filename) == 1:
             return True
         else:

@@ -14,7 +14,7 @@ class TestMetadataImport(TestCase):
         PathBuilder.build(path)
 
         with open(path + "metadata.tsv", "w") as file:
-            file.writelines("""###filename	chain	donor	coeliac status (yes/no)
+            file.writelines("""filename	chain	donor	coeliac status (yes/no)
 Mixcr_1234_TRA.clonotypes.TRA.txt	TRA	1234	no
 Mixcr_1234_TRB.clonotypes.TRB.txt	TRB	1234	no
 Mixcr_1363_TRA.clonotypes.TRA.txt	TRA	1363	yes

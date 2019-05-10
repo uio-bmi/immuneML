@@ -11,7 +11,7 @@ class ImmuneMLApp:
         self._result_path = result_path
 
     def run(self):
-        symbol_table = Parser.parse_yaml_file(self._specification_path)
+        symbol_table, self._specification_path = Parser.parse_yaml_file(self._specification_path, self._result_path)
 
         print("ImmuneML: starting the analysis...")
 

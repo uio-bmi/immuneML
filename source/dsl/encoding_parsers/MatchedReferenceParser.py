@@ -6,6 +6,7 @@ import pandas as pd
 from source.IO.sequence_import.VDJdbSequenceImport import VDJdbSequenceImport
 from source.data_model.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.data_model.receptor_sequence.SequenceMetadata import SequenceMetadata
+from source.dsl.DefaultParamsLoader import DefaultParamsLoader
 from source.dsl.SequenceMatchingSummaryType import SequenceMatchingSummaryType
 from source.dsl.encoding_parsers.EncodingParameterParser import EncodingParameterParser
 
@@ -15,11 +16,12 @@ class MatchedReferenceParser(EncodingParameterParser):
     @staticmethod
     def parse(params: dict):
 
+        defaults = DefaultParamsLoader.load("encodings/", "MatchedReference")
+        parsed = {**defaults, **params}
+
         assert "reference_sequences" in params.keys(), "MatchedReferenceParser: set reference sequences and try again."
         assert all([item in params["reference_sequences"].keys() for item in ["path", "format"]]), \
             "MatchedReferenceParser: set path and format for reference sequences and try again."
-        assert "max_distance" in params.keys() and isinstance(params["max_distance"], int), \
-            "MatchedReferenceParser: set max_distance to positive integer value and try again."
         assert isinstance(params["reference_sequences"]["format"], str) and \
                params["reference_sequences"]["format"].lower() in ["vdjdb", "iris"], \
             "MatchedReferenceParser: reference sequences are accepted only in VDJdb and IRIS formats."
@@ -29,11 +31,13 @@ class MatchedReferenceParser(EncodingParameterParser):
 
         parsed = {
             "reference_sequences": seqs,
-            "max_distance": params["max_distance"],
-            "summary": SequenceMatchingSummaryType[params["summary"].upper()]
+            "max_distance": parsed["max_distance"],
+            "summary": SequenceMatchingSummaryType[parsed["summary"].upper()]
         }
 
-        return parsed
+        specs = {**parsed, **{"reference_sequences": params["reference_sequences"]}}
+
+        return parsed, specs
 
     @staticmethod
     def parse_iris(path: str) -> list:

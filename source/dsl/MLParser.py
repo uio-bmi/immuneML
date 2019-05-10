@@ -1,4 +1,5 @@
 from source.dsl.AssessmentType import AssessmentType
+from source.dsl.DefaultParamsLoader import DefaultParamsLoader
 from source.dsl.SymbolTable import SymbolTable
 from source.dsl.SymbolType import SymbolType
 from source.environment.EnvironmentSettings import EnvironmentSettings
@@ -16,7 +17,7 @@ class MLParser:
             for method_id in specification["ml_methods"].keys():
                 parsed = MLParser._parse_method(specification["ml_methods"], method_id, symbol_table)
                 symbol_table.add(method_id, SymbolType.ML_METHOD, parsed)
-        return symbol_table, {}
+        return symbol_table, specification["ml_methods"]
 
     @staticmethod
     def _parse_method(ml_specification: dict, method_id: str, symbol_table: SymbolTable) -> dict:
@@ -29,18 +30,19 @@ class MLParser:
                                                              .format(EnvironmentSettings.root_path,
                                                                      ml_specification[method_id]["type"]))
 
-        method_dict = ml_specification[method_id]
+        ml_specification[method_id] = {**DefaultParamsLoader.load("ml_methods/", "MLMethod"),
+                                       **ml_specification[method_id]}
 
         return {
             "method": MLParser.create_method_instance(ml_specification, method_id, method_class),
-            "encoding": method_dict["encoding"],
-            "labels": method_dict["labels"],
+            "encoding": ml_specification[method_id]["encoding"],
+            "labels": ml_specification[method_id]["labels"],
             "metrics": MLParser.map_metrics(ml_specification[method_id]),
-            "model_selection_cv": method_dict["model_selection_cv"],
-            "model_selection_n_folds": method_dict["model_selection_n_folds"],
-            "split_count": method_dict["split_count"],
-            "assessment_type": AssessmentType[method_dict["assessment_type"].lower()],
-            "min_example_count": method_dict["min_example_count"]
+            "model_selection_cv": ml_specification[method_id]["model_selection_cv"],
+            "model_selection_n_folds": ml_specification[method_id]["model_selection_n_folds"],
+            "split_count": ml_specification[method_id]["split_count"],
+            "assessment_type": AssessmentType[ml_specification[method_id]["assessment_type"].lower()],
+            "min_example_count": ml_specification[method_id]["min_example_count"]
         }
 
     @staticmethod
@@ -50,7 +52,9 @@ class MLParser:
 
     @staticmethod
     def create_method_instance(ml_specification: dict, method_id: str, method_class) -> MLMethod:
-        if any([isinstance(ml_specification[method_id]["params"][key], list) for key in ml_specification[method_id]["params"].keys()]):
+        if "params" not in ml_specification[method_id].keys():
+            method = method_class()
+        elif any([isinstance(ml_specification[method_id]["params"][key], list) for key in ml_specification[method_id]["params"].keys()]):
             method = method_class(parameter_grid={key: [ml_specification[method_id]["params"][key]]
                                                   if not isinstance(ml_specification[method_id]["params"][key], list)
                                                   else ml_specification[method_id]["params"][key]
