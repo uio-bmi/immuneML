@@ -22,7 +22,7 @@ class SemanticModel:
         self._report_connections = {}  # r1: {encoding: e1}, r2: {ml_method: ml1} -> report_id: {encoding: enc_id, ml_method: ml_id, dataset: dataset_id}
         self._executed = set()
         self._symbol_table = None
-        self._path = path if path is not None else EnvironmentSettings.root_path + "analysis/"
+        self._path = path if path is not None else EnvironmentSettings.default_analysis_path
         self._specification_path = specification_path
         self._blackboard = Blackboard()
 
