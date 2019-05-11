@@ -172,8 +172,7 @@ class Word2VecEncoder(DatasetEncoder):
 
     @staticmethod
     def store(encoded_dataset: Dataset, params: EncoderParams):
-        PickleExporter.export(encoded_dataset, params["result_path"],
-                              FilenameHandler.get_dataset_name(Word2VecEncoder.__name__))
+        PickleExporter.export(encoded_dataset, params["result_path"], params["filename"])
 
     @staticmethod
     def _exists_model(params: EncoderParams) -> bool:

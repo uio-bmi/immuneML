@@ -51,7 +51,8 @@ class TestKmerFrequencyEncoder(TestCase):
                 "reads": ReadsType.UNIQUE,
                 "sequence_encoding_strategy": SequenceEncodingType.IDENTITY,
                 "k": 3
-            }
+            },
+            filename="dataset.pkl"
         ))
 
         d2 = KmerFrequencyEncoder.encode(dataset, EncoderParams(
@@ -65,7 +66,8 @@ class TestKmerFrequencyEncoder(TestCase):
                 "reads": ReadsType.UNIQUE,
                 "sequence_encoding_strategy": SequenceEncodingType.CONTINUOUS_KMER,
                 "k": 3
-            }
+            },
+            filename="dataset.csv"
         ))
 
         shutil.rmtree(path)

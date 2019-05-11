@@ -132,12 +132,13 @@ class MLProcess:
             "encoder": self._encoder,
             "encoder_params": EncoderParams(
                 model=self._encoder_params,
-                result_path=path + "train/" if infer_model else path + "test/",
+                result_path=path,
                 model_path=path,
                 vectorizer_path=path,
                 scaler_path=path,
                 pipeline_path=path,
-                label_configuration=self._label_configuration
+                label_configuration=self._label_configuration,
+                filename="train_dataset.pkl" if infer_model else "test_dataset.pkl"
             )
         })
 

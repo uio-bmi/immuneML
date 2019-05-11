@@ -28,7 +28,8 @@ class TestMatchedReferenceEncoder(TestCase):
                 "reference_sequences": [ReceptorSequence("AAAA", metadata=SequenceMetadata())],
                 "max_distance": 2,
                 "summary": SequenceMatchingSummaryType.PERCENTAGE
-            }
+            },
+            filename="dataset.csv"
         ))
 
         self.assertTrue(all(all([val <= 1 for val in rep]) for rep in [encoded.encoded_data["repertoires"]]))

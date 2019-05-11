@@ -7,7 +7,7 @@ class EncoderParams(collections.abc.MutableMapping):
 
     def __init__(self, result_path: str, label_configuration: LabelConfiguration, model: dict,
                  batch_size: int = 2, learn_model: bool = True, model_path: str = None, scaler_path: str = None,
-                 vectorizer_path: str = None, pipeline_path: str = None):
+                 vectorizer_path: str = None, pipeline_path: str = None, filename: str = ""):
 
         self.store = {
             "model": model,
@@ -18,7 +18,8 @@ class EncoderParams(collections.abc.MutableMapping):
             "model_path": model_path,
             "scaler_path": scaler_path,
             "vectorizer_path": vectorizer_path,
-            "pipeline_path": pipeline_path
+            "pipeline_path": pipeline_path,
+            "filename": filename
         }
 
     def __getitem__(self, key):

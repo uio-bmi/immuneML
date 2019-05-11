@@ -57,7 +57,8 @@ class TestWord2VecEncoder(TestCase):
             result_path=test_path,
             label_configuration=label_configuration,
             model_path=test_path,
-            scaler_path=test_path
+            scaler_path=test_path,
+            filename="dataset.pkl"
         )
 
         encoded_dataset = Word2VecEncoder.encode(dataset=dataset, params=config_params)
