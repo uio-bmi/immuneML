@@ -74,6 +74,4 @@ class TestKmerFrequencyEncoder(TestCase):
 
         self.assertTrue(isinstance(d1, Dataset))
         self.assertTrue(isinstance(d2, Dataset))
-        self.assertTrue("repertoires" in d1.encoded_data)
-        self.assertTrue("repertoires" in d2.encoded_data)
-        self.assertEqual(0.67, round(d2.encoded_data["repertoires"][0][2], 2))
+        self.assertEqual(0.67, round(d2.encoded_data.repertoires[0][2], 2))

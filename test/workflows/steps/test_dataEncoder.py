@@ -57,6 +57,6 @@ class TestDataEncoder(TestCase):
         })
 
         self.assertTrue(isinstance(res, Dataset))
-        self.assertTrue(res.encoded_data["repertoires"].shape[0] == 2)
+        self.assertTrue(res.encoded_data.repertoires.shape[0] == 2)
 
         shutil.rmtree(path)

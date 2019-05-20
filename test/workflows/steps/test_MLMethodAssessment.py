@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 
 from source.data_model.dataset.Dataset import Dataset
+from source.data_model.encoded_data.EncodedData import EncodedData
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.environment.LabelConfiguration import LabelConfiguration
 from source.environment.MetricType import MetricType
@@ -21,18 +22,17 @@ class TestMLMethodAssessment(TestCase):
         path = EnvironmentSettings.root_path + "test/tmp/mlmethodassessment/"
         PathBuilder.build(path)
         dataset = Dataset(filenames=RepertoireBuilder.build([["AA"], ["CC"], ["AA"], ["CC"], ["AA"], ["CC"]], path))
-        dataset.encoded_data = {
-            "repertoires": np.array([[1, 2], [1, 2], [1, 2], [1, 2], [1, 2], [1, 2]]),
-            "labels": np.array([[1, 2, 3, 1, 2, 3], [1, 2, 3, 1, 2, 3]]),
-            "label_names": ["l1", "l2"]
-        }
+        dataset.encoded_data = EncodedData(
+            repertoires=np.array([[1, 2], [1, 2], [1, 2], [1, 2], [1, 2], [1, 2]]),
+            labels={"l1": [1, 2, 3, 1, 2, 3], "l2": [1, 2, 3, 1, 2, 3]}
+        )
 
         label_config = LabelConfiguration()
         label_config.add_label("l1", [1, 2, 3])
         label_config.add_label("l2", [1, 2, 3])
 
         method1 = SVM()
-        method1.fit(dataset.encoded_data["repertoires"], dataset.encoded_data["labels"], dataset.encoded_data["label_names"])
+        method1.fit(dataset.encoded_data.repertoires, dataset.encoded_data.labels, dataset.encoded_data.labels.keys())
 
         res = MLMethodAssessment.perform_step({
             "dataset": dataset,

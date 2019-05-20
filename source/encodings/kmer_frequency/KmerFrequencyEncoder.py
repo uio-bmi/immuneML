@@ -2,7 +2,6 @@ import os
 import pickle
 from collections import Counter
 
-import numpy as np
 from scipy import sparse
 from sklearn.feature_extraction import DictVectorizer
 from sklearn.preprocessing import normalize
@@ -10,6 +9,7 @@ from sklearn.preprocessing import normalize
 from source.IO.dataset_export.PickleExporter import PickleExporter
 from source.IO.dataset_import.PickleLoader import PickleLoader
 from source.data_model.dataset.Dataset import Dataset
+from source.data_model.encoded_data.EncodedData import EncodedData
 from source.data_model.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.data_model.repertoire.Repertoire import Repertoire
 from source.encodings.DatasetEncoder import DatasetEncoder
@@ -46,13 +46,13 @@ class KmerFrequencyEncoder(DatasetEncoder):
         normalized_repertoires = KmerFrequencyEncoder._normalize_repertoires(repertoires=vectorized_repertoires, params=params)
         encoded_labels = KmerFrequencyEncoder._encode_labels(dataset, params)
 
-        encoded_dataset = {'repertoires': normalized_repertoires.toarray(),
-                           'labels': encoded_labels,
-                           'label_names': params["label_configuration"].get_labels_by_name(),
-                           'feature_names': feature_names}
+        encoded_data = EncodedData(repertoires=normalized_repertoires.toarray(),
+                                   labels=encoded_labels,
+                                   feature_names=feature_names,
+                                   repertoire_ids=[repertoire.identifier for repertoire in dataset.get_data()])
 
         encoded_dataset = Dataset(filenames=dataset.filenames,
-                                  encoded_data=encoded_dataset,
+                                  encoded_data=encoded_data,
                                   params=dataset.params)
 
         KmerFrequencyEncoder.store(encoded_dataset, params)
@@ -105,7 +105,7 @@ class KmerFrequencyEncoder(DatasetEncoder):
                 label = repertoire.metadata.custom_params[label_name]
                 labels[label_name].append(label)
 
-        return np.array([labels[name] for name in labels.keys()])
+        return labels
 
     @staticmethod
     def store(encoded_dataset: Dataset, params: EncoderParams):

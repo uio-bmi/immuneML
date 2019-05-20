@@ -1,5 +1,5 @@
 # quality: gold
-
+import copy
 import os
 import pickle
 
@@ -11,8 +11,8 @@ from sklearn.preprocessing import StandardScaler
 from source.IO.dataset_export.PickleExporter import PickleExporter
 from source.IO.dataset_import.PickleLoader import PickleLoader
 from source.data_model.dataset.Dataset import Dataset
+from source.data_model.encoded_data.EncodedData import EncodedData
 from source.data_model.repertoire.Repertoire import Repertoire
-from source.data_model.repertoire.RepertoireGenerator import RepertoireGenerator
 from source.encodings.DatasetEncoder import DatasetEncoder
 from source.encodings.EncoderParams import EncoderParams
 from source.encodings.word2vec.model_creator.KmerPairModelCreator import KmerPairModelCreator
@@ -108,10 +108,9 @@ class Word2VecEncoder(DatasetEncoder):
     @staticmethod
     def _encode_by_model(dataset, vectors, params: EncoderParams) -> Dataset:
 
-        encoded_dataset = Dataset()
-        data = RepertoireGenerator.build_generator(dataset.filenames, params["batch_size"])
+        encoded_dataset = copy.deepcopy(dataset)
         repertoires = np.zeros(shape=[dataset.get_repertoire_count(), vectors.vector_size])
-        for (index, repertoire) in enumerate(data):
+        for (index, repertoire) in enumerate(encoded_dataset.get_data()):
             repertoires[index] = Word2VecEncoder._encode_repertoire(repertoire, vectors, params)
 
         labels = Word2VecEncoder._encode_labels(dataset, params)
@@ -120,13 +119,14 @@ class Word2VecEncoder(DatasetEncoder):
 
         encoded_dataset.params = dataset.params
         encoded_dataset.filenames = dataset.filenames
-        encoded_dataset.add_encoded_data({
-            "repertoires": scaled_repertoires,
-            "labels": labels,
-            "feature_names": [],
-            "label_names": params["label_configuration"].get_labels_by_name()
-        })
 
+        label_names = params["label_configuration"].get_labels_by_name()
+
+        encoded_data = EncodedData(repertoires=scaled_repertoires,
+                                   labels={label: labels[i] for i, label in enumerate(label_names)},
+                                   repertoire_ids=[repertoire.identifier for repertoire in encoded_dataset.get_data()])
+
+        encoded_dataset.add_encoded_data(encoded_data)
         return encoded_dataset
 
     @staticmethod

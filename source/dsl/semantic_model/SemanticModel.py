@@ -117,7 +117,7 @@ class SemanticModel:
         if encoding_id not in self._executed:
             encoder_dict = self._symbol_table.get(encoding_id)
             dataset = self._symbol_table.get(encoder_dict["dataset"])["dataset"]
-            path = self._create_result_path("encoding")
+            path = self._create_result_path("encoding_{}".format(encoding_id))
             label_config = self._prepare_label_config(encoder_dict["labels"], dataset)
 
             encoded = self._encode_dataset(dataset, encoder_dict["encoder"], label_config, encoder_dict["params"], path)
@@ -157,6 +157,7 @@ class SemanticModel:
             "dataset": dataset,
             "encoder": encoder,
             "encoder_params": EncoderParams(result_path=self._create_result_path("encoding"),
+                                            filename="dataset.pickle",
                                             label_configuration=label_config,
                                             model=params, batch_size=4, learn_model=True,
                                             model_path=path, scaler_path=path, vectorizer_path=path, pipeline_path=path)

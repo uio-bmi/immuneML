@@ -6,6 +6,7 @@ from source.IO.dataset_export.PickleExporter import PickleExporter
 from source.IO.dataset_import.PickleLoader import PickleLoader
 from source.analysis.SequenceMatcher import SequenceMatcher
 from source.data_model.dataset.Dataset import Dataset
+from source.data_model.encoded_data.EncodedData import EncodedData
 from source.encodings.DatasetEncoder import DatasetEncoder
 from source.encodings.EncoderParams import EncoderParams
 from source.util.FilenameHandler import FilenameHandler
@@ -37,12 +38,12 @@ class MatchedReferenceEncoder(DatasetEncoder):
             if "percentages" in params["model"] and params["model"]["percentages"] \
             else "count_of_sequences_matched"
 
-        encoded_dataset.encoded_data = {
-            "repertoires": encoded_repertoires,
-            "labels": labels,
-            "label_names": params["label_configuration"].get_labels_by_name(),
-            "feature_names": [feature_name]
-        }
+        encoded_dataset.add_encoded_data(EncodedData(
+            repertoires=encoded_repertoires,
+            labels=labels,
+            feature_names=[feature_name],
+            repertoire_ids=[repertoire.identifier for repertoire in dataset.get_data()]
+        ))
 
         MatchedReferenceEncoder.store(encoded_dataset, params)
         return encoded_dataset
@@ -50,7 +51,7 @@ class MatchedReferenceEncoder(DatasetEncoder):
     @staticmethod
     def _encode_repertoires(dataset: Dataset, matched_info, params: EncoderParams):
         encoded_repertories = np.zeros((dataset.get_repertoire_count(), 1), dtype=float)
-        labels = np.zeros(shape=(params["label_configuration"].get_label_count(), dataset.get_repertoire_count()))
+        labels = {label: [] for label in params["label_configuration"].get_labels_by_name()}
         c = 100 if "percentages" in params["model"] and params["model"]["percentages"] else 1
 
         for index, repertoire in enumerate(dataset.get_data()):
@@ -58,7 +59,7 @@ class MatchedReferenceEncoder(DatasetEncoder):
                 "MatchedReferenceEncoder: error in SequenceMatcher ordering of repertoires."
             encoded_repertories[index] = matched_info["repertoires"][index]["percentage_of_sequences_matched"] * c
             for label_index, label in enumerate(params["label_configuration"].get_labels_by_name()):
-                labels[label_index][index] = repertoire.metadata.custom_params[label]
+                labels[label].append(repertoire.metadata.custom_params[label])
 
         return np.reshape(encoded_repertories, newshape=(-1, 1)), labels
 

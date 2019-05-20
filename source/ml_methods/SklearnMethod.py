@@ -28,21 +28,16 @@ class SklearnMethod(MLMethod):
 
     def fit(self, X: Iterable, y, label_names: list = None):
         cores = ParallelismManager.assign_cores_to_job()
-        ys = []
-        if isinstance(y, list) or (isinstance(y, np.ndarray) and y.ndim > 1):
-            ys = y
-        else:
-            ys.append(y)
 
         if label_names is not None:
             for index, label in enumerate(label_names):
-                self._fit_for_label(X, ys[index], label, cores)
+                self._fit_for_label(X, y[label], label, cores)
         else:
             warnings.warn(
                 "{}: label names not set, assuming only one and attempting to fit the model with label 'default'..."
                     .format(self.__class__.__name__),
                 Warning)
-            self._fit_for_label(X, ys[0], "default", cores)
+            self._fit_for_label(X, y["default"], "default", cores)
 
         ParallelismManager.free_cores(cores=cores)
 
@@ -79,8 +74,8 @@ class SklearnMethod(MLMethod):
 
         n_jobs = ParallelismManager.assign_cores_to_job()
 
-        for index, label in enumerate(label_names):
-            self._fit_for_label_by_cv(X, y[index], label, n_jobs, number_of_splits)
+        for label in label_names:
+            self._fit_for_label_by_cv(X, y[label], label, n_jobs, number_of_splits)
 
         ParallelismManager.free_cores(cores=n_jobs)
 

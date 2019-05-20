@@ -4,6 +4,7 @@ from unittest import TestCase
 import numpy as np
 
 from source.data_model.dataset.Dataset import Dataset
+from source.data_model.encoded_data.EncodedData import EncodedData
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.ml_methods.LogisticRegression import LogisticRegression
 from source.workflows.steps.MLMethodTrainer import MLMethodTrainer
@@ -14,11 +15,14 @@ class TestMLMethodTrainer(TestCase):
     def test_perform_step(self):
         method = LogisticRegression()
         dataset = Dataset()
-        dataset.encoded_data = {
-            "repertoires": np.array([[1, 2, 3], [2, 3, 4], [1, 2, 3], [2, 3, 4], [1, 2, 3], [2, 3, 4]]),
-            "labels": np.array([[1, 0, 1, 0, 1, 0], [0, 1, 0, 1, 0, 1]]),
-            "label_names": ["l1", "l2"]
-        }
+        dataset.encoded_data = EncodedData(
+            repertoires=np.array([[1, 2, 3], [2, 3, 4], [1, 2, 3], [2, 3, 4], [1, 2, 3], [2, 3, 4]]),
+            labels={
+                "l1": [1, 0, 1, 0, 1, 0],
+                "l2": [0, 1, 0, 1, 0, 1]
+            },
+            feature_names=["f1", "f2", "f3"]
+        )
 
         path = EnvironmentSettings.root_path + "test/tmp/mlmethodtrainer/"
 

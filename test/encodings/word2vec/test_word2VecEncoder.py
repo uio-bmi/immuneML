@@ -64,11 +64,9 @@ class TestWord2VecEncoder(TestCase):
         encoded_dataset = Word2VecEncoder.encode(dataset=dataset, params=config_params)
 
         self.assertIsNotNone(encoded_dataset.encoded_data)
-        self.assertTrue("repertoires" in encoded_dataset.encoded_data)
-        self.assertTrue(encoded_dataset.encoded_data["repertoires"].shape[0] == 2)
-        self.assertTrue(encoded_dataset.encoded_data["repertoires"].shape[1] == 16)
-        self.assertTrue("labels" in encoded_dataset.encoded_data)
-        self.assertTrue(len(encoded_dataset.encoded_data["labels"][0]) == 2)
-        self.assertTrue(encoded_dataset.encoded_data["labels"][0][0] == "T1D")
+        self.assertTrue(encoded_dataset.encoded_data.repertoires.shape[0] == 2)
+        self.assertTrue(encoded_dataset.encoded_data.repertoires.shape[1] == 16)
+        self.assertTrue(len(encoded_dataset.encoded_data.labels["T1D"]) == 2)
+        self.assertTrue(encoded_dataset.encoded_data.labels["T1D"][0] == "T1D")
 
         shutil.rmtree(test_path)

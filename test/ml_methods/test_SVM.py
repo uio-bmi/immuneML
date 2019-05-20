@@ -15,14 +15,14 @@ from source.util.PathBuilder import PathBuilder
 class TestSVM(TestCase):
     def test_fit(self):
         x = np.array([[1, 0, 0], [0, 1, 1], [1, 1, 1], [0, 1, 1]])
-        y = np.array([1, 0, 2, 0])
+        y = {"default": np.array([1, 0, 2, 0])}
 
         svm = SVM()
         svm.fit(sparse.csr_matrix(x), y)
 
     def test_predict(self):
         x = np.array([[1, 0, 0], [0, 1, 1], [1, 1, 1], [0, 1, 1]])
-        y = np.array([1, 0, 2, 0])
+        y = {"test": np.array([1, 0, 2, 0])}
 
         svm = SVM()
         svm.fit(sparse.csr_matrix(x), y, ["test"])
@@ -36,14 +36,14 @@ class TestSVM(TestCase):
 
     def test_fit_by_cross_validation(self):
         x = sparse.csr_matrix(np.array([[1, 0, 0], [0, 1, 1], [1, 1, 1], [0, 1, 1], [1, 0, 0], [0, 1, 1], [1, 1, 1], [0, 1, 1]]))
-        y = np.array([[1, 0, 2, 0, 1, 0, 2, 0], [1, 0, 2, 0, 1, 0, 2, 0]])
+        y = {"t1": [1, 0, 2, 0, 1, 0, 2, 0], "t2": [1, 0, 2, 0, 1, 0, 2, 0]}
 
         svm = SVM()
         svm.fit_by_cross_validation(x, y, number_of_splits=2, label_names=["t1", "t2"])
 
     def test_store(self):
         x = np.array([[1, 0, 0], [0, 1, 1], [1, 1, 1], [0, 1, 1]])
-        y = np.array([1, 0, 2, 0])
+        y = {"default": np.array([1, 0, 2, 0])}
 
         svm = SVM()
         svm.fit(sparse.csr_matrix(x), y)
@@ -62,7 +62,7 @@ class TestSVM(TestCase):
 
     def test_load(self):
         x = np.array([[1, 0, 0], [0, 1, 1], [1, 1, 1], [0, 1, 1]])
-        y = np.array([1, 0, 2, 0])
+        y = {"default": np.array([1, 0, 2, 0])}
 
         svm = SVM()
         svm.fit(sparse.csr_matrix(x), y)

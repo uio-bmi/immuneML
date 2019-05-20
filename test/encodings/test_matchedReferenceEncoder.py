@@ -32,6 +32,6 @@ class TestMatchedReferenceEncoder(TestCase):
             filename="dataset.csv"
         ))
 
-        self.assertTrue(all(all([val <= 1 for val in rep]) for rep in [encoded.encoded_data["repertoires"]]))
+        self.assertTrue(all(all([val <= 1 for val in rep]) for rep in encoded.encoded_data.repertoires))
 
         shutil.rmtree(path)

@@ -1,4 +1,4 @@
-import numpy as np
+import copy
 
 from source.workflows.steps.Step import Step
 
@@ -29,7 +29,7 @@ class MLMethodTrainer(Step):
 
     @staticmethod
     def _fit_method(input_params: dict):
-        X = input_params["dataset"].encoded_data["repertoires"]
+        X = input_params["dataset"].encoded_data.repertoires
         y = MLMethodTrainer._filter_labels(input_params)
         method = input_params["method"]
         input_params["labels"].sort()
@@ -46,11 +46,10 @@ class MLMethodTrainer(Step):
     @staticmethod
     def _filter_labels(input_params: dict):
 
-        label_names = input_params["dataset"].encoded_data["label_names"]
-        y = input_params["dataset"].encoded_data["labels"].copy()
+        y = copy.deepcopy(input_params["dataset"].encoded_data.labels)
 
-        for index, label in enumerate(label_names):
+        for label in input_params["dataset"].encoded_data.labels.keys():
             if label not in input_params["labels"]:  # if the user did not specify that ML model should be built for this label
-                y = np.delete(y, index, 0)
+                del y[label]
 
         return y
