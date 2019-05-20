@@ -27,5 +27,9 @@ class Dataset:
         sorted(self.filenames)
         return RepertoireGenerator.build_generator(file_list=self.filenames, batch_size=batch_size)
 
+    def get_repertoire(self, index: int = -1, filename: str = ""):
+        assert index != -1 or filename != "", "Dataset: cannot load repertoire since the index nor filename are set."
+        return RepertoireGenerator.load_repertoire(filename if filename != "" else self.filenames[index])
+
     def get_repertoire_count(self):
         return len(self.filenames)
