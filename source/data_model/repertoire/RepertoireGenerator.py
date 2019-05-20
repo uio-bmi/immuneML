@@ -6,7 +6,7 @@ import pickle
 class RepertoireGenerator:
 
     @staticmethod
-    def load_repertoire(filename):
+    def load_repertoire(filename: str):
         with open(filename, "rb") as file:
             repertoire = pickle.load(file)
         return repertoire

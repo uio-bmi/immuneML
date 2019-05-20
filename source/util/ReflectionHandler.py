@@ -22,7 +22,8 @@ class ReflectionHandler:
 
     @staticmethod
     def _import_class(path: str, class_name: str):
-        mod = import_module(path[path.rfind("source"):].replace("../", "").replace("/", ".")[:-3])
+        module_path = os.path.normpath(path[path.rfind("source"):]).replace("\\", "/").replace("/", ".")[:-3]
+        mod = import_module(module_path)
         cls = getattr(mod, class_name)
         return cls
 
