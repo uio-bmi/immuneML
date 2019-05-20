@@ -69,4 +69,4 @@ class TestSequenceMatcher(TestCase):
         self.assertTrue(result["metadata"]["CD"])
 
         result = matcher.match_repertoire(repertoire, 0, sequences, 2, SequenceMatchingSummaryType.CLONAL_PERCENTAGE)
-        self.assertEqual(0.8, result["percentage_of_sequences_matched"])
+        self.assertEqual(0.8, result["clonal_percentage"])

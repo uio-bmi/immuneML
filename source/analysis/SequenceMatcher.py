@@ -71,10 +71,10 @@ class SequenceMatcher:
 
         if summary_type == SequenceMatchingSummaryType.CLONAL_PERCENTAGE:
             total_count = np.sum([sequence.metadata.count for sequence in repertoire.sequences])
-            matched["percentage_of_sequences_matched"] = np.sum([sequence.metadata.count for index, sequence in enumerate(repertoire.sequences) if len(matched["sequences"][index]["matching_sequences"]) > 0]) / total_count
+            matched["clonal_percentage"] = np.sum([sequence.metadata.count for index, sequence in enumerate(repertoire.sequences) if len(matched["sequences"][index]["matching_sequences"]) > 0]) / total_count
         else:
-            matched["sequences_matched"] = len([r for r in matched["sequences"] if len(r["matching_sequences"]) > 0])
-            matched["percentage_of_sequences_matched"] = matched["sequences_matched"] / len(matched["sequences"])
+            matched["count"] = len([r for r in matched["sequences"] if len(r["matching_sequences"]) > 0])
+            matched["percentage"] = matched["count"] / len(matched["sequences"])
         matched["metadata"] = repertoire.metadata.custom_params \
             if repertoire.metadata is not None else None
         matched["patient_id"] = repertoire.identifier

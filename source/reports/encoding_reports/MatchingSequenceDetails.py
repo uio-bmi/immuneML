@@ -28,7 +28,7 @@ class MatchingSequenceDetails(EncodingReport):
 
     def _make_overview(self, dataset: Dataset, result_path: str, params: dict):
         filename = result_path + "matching_sequence_overview.tsv"
-        fieldnames = ["patient", "chain", dataset.encoded_data["feature_names"][0],
+        fieldnames = ["patient", "chain", dataset.encoded_data.feature_names[0],
                       "repertoire_size", "max_levenshtein_distance"]
         for label in dataset.params.keys():
             fieldnames.append("{}_status".format(label))
@@ -44,7 +44,7 @@ class MatchingSequenceDetails(EncodingReport):
                 row = {
                     "patient": repertoire.identifier,
                     "chain": str(list({seq.metadata.chain for seq in repertoire.sequences}))[1:-1],
-                    dataset.encoded_data["feature_names"][0]: dataset.encoded_data["repertoires"][index][0],
+                    dataset.encoded_data.feature_names[0]: dataset.encoded_data.repertoires[index][0],
                     "repertoire_size": len(repertoire.sequences),
                     "max_levenshtein_distance": params["max_distance"]
                 }

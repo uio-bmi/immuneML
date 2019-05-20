@@ -52,12 +52,11 @@ class MatchedReferenceEncoder(DatasetEncoder):
     def _encode_repertoires(dataset: Dataset, matched_info, params: EncoderParams):
         encoded_repertories = np.zeros((dataset.get_repertoire_count(), 1), dtype=float)
         labels = {label: [] for label in params["label_configuration"].get_labels_by_name()}
-        c = 100 if "percentages" in params["model"] and params["model"]["percentages"] else 1
 
         for index, repertoire in enumerate(dataset.get_data()):
             assert index == matched_info["repertoires"][index]["repertoire_index"], \
                 "MatchedReferenceEncoder: error in SequenceMatcher ordering of repertoires."
-            encoded_repertories[index] = matched_info["repertoires"][index]["percentage_of_sequences_matched"] * c
+            encoded_repertories[index] = matched_info["repertoires"][index][params["model"]["summary"].name.lower()]
             for label_index, label in enumerate(params["label_configuration"].get_labels_by_name()):
                 labels[label].append(repertoire.metadata.custom_params[label])
 
