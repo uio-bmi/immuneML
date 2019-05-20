@@ -1,88 +1,47 @@
-import os
+import numpy as np
+import pandas as pd
 
-from source.IO.dataset_import.DataLoader import DataLoader
-from source.IO.dataset_import.PickleLoader import PickleLoader
-from source.data_model.dataset.Dataset import Dataset
-from source.util.FilenameHandler import FilenameHandler
+from source.IO.dataset_import.AdaptiveBiotechLoader import AdaptiveBiotechLoader
+from source.IO.dataset_import.GenericLoader import GenericLoader
+from source.environment.Constants import Constants
 
 
-class ImmunoSEQLoader(DataLoader):
+class ImmunoSEQLoader(GenericLoader):
 
-    COLUMNS = ['nucleotide', 'aminoAcid', 'count (tempates/reads)', 'vMaxResolved', 'jMaxResolved', 'vFamilyName', 'jFamilyName', 'sequenceStatus']
+    def _read_preprocess_file(self, filepath, params):
+        df = pd.read_csv(filepath,
+                         sep="\t",
+                         iterator=False,
+                         usecols=['nucleotide', 'aminoAcid', 'count (templates/reads)',
+                                  'vFamilyName', 'vGeneName', 'vGeneAllele',
+                                  'jFamilyName', 'jGeneName', 'jGeneAllele',
+                                  'sequenceStatus'],
+                         dtype={"nucleotide": str,
+                                "aminoAcid": str,
+                                "count (templates/reads)": int,
+                                "vFamilyName": str,
+                                "vGeneName": str,
+                                "vGeneAllele": str,
+                                "jFamilyName": str,
+                                "jGeneName": str,
+                                "jGeneAllele": str,
+                                "sequenceStatus": str})
 
-    @staticmethod
-    def load(path, params: dict = None) -> Dataset:
+        df = df.rename(columns={'aminoAcid': 'amino_acid',
+                                "sequenceStatus": "frame_type",
+                                "vFamilyName": "v_subgroup",
+                                "vGeneName": "v_gene",
+                                "vGeneAllele": "v_allele",
+                                "jFamilyName": "j_subgroup",
+                                "jGeneName": "j_gene",
+                                "jGeneAllele": "j_allele",
+                                'count (templates/reads)': 'templates'})
 
-        file_path = path + FilenameHandler.get_dataset_name(ImmunoSEQLoader.__name__)
+        df = df.replace(["unresolved", "no data", "na", "unknown", "null", "nan", np.nan], Constants.UNKNOWN)
 
-        if os.path.isfile(file_path):
-            dataset = PickleLoader.load(file_path)
-        else:
-            dataset = None
-        #     dataset = ImmunoSEQLoader._process_dataset(path, params)
+        df['nucleotide'] = [y[(84 - 3 * len(x)): 78] for x, y in zip(df['amino_acid'], df['nucleotide'])]
+        df['amino_acid'] = df["amino_acid"].str[1:-1]
 
-        return dataset
+        df = AdaptiveBiotechLoader.parse_germline(df)
 
-    # @staticmethod
-    # def _process_dataset(path, params: dict = None):
-    #
-    #     filenames = ImmunoSEQLoader._get_filenames(path, params)
-    #     PathBuilder.build(params["result_path"])
-    #     repertoire_filenames, sample_params = ImmunoSEQLoader._process_repertoires(filenames, params)
-    #
-    #     dataset = Dataset(filenames=repertoire_filenames, params=sample_params)
-    #
-    #     PickleExporter.export(dataset, path, FilenameHandler.get_dataset_name(ImmunoSEQLoader.__name__))
-    #
-    #     return dataset
-    #
-    # @staticmethod
-    # def _process_repertoire(filename, params):
-    #     basename = os.path.splitext(os.path.basename(filename))[0]
-    #     filepath = params["result_path"] + basename + ".pickle"
-    #
-    #     if not os.path.isfile(filepath):
-    #         ImmunoSEQLoader._load_repertoire(filename, params, filepath)
-    #
-    #     return filepath
-
-    # @staticmethod
-    # def _load_repertoire(filename, params, result_file_path):
-    #     repertoire = Repertoire()
-    #
-    #     # add metadata
-    #     sample = SampleParser.parse(filename, params["sample_name_parser"], params["sample_parser_params"])
-    #     repertoire.metadata = RepertoireMetadata(sample=sample)
-    #
-    #     # add sequences
-    #     sequences = ImmunoSEQLoader._preprocess_sequences()
-    #     repertoire.sequences = sequences
-    #
-    #     # store as pickle
-    #     with open(result_file_path, "wb") as file:
-    #         pickle.dump(repertoire, file)
-    #
-    #
-    # @staticmethod
-    # def _process_repertoires(filenames: list, params: dict):
-    #     process_count = ParallelismManager.assign_cores_to_job("load_experimental_data")
-    #
-    #     with Pool(process_count) as pool:
-    #         results = pool.starmap(ImmunoSEQLoader._process_repertoire, product(filenames, params))
-    #
-    #     outputs = [result[0] for result in results]
-    #
-    #     return outputs
-    #
-    # @staticmethod
-    # def _get_filenames(path, params: dict):
-    #     ext = params["file_type"]  # should be tsv, csv...
-    #     if "file_names" in params and params["file_names"] is not None:
-    #         filenames = params["file_names"]
-    #     else:
-    #         filenames = sorted(glob.glob(path + "*." + ext))
-    #
-    #     if "file_indices" is not None:
-    #         filenames = [filenames[i] for i in params["file_indices"]]
-    #
-    #     return filenames
+        return df
