@@ -14,7 +14,6 @@ from source.IO.dataset_import.PickleLoader import PickleLoader
 from source.data_model.dataset.Dataset import Dataset
 from source.data_model.encoded_data.EncodedData import EncodedData
 from source.data_model.receptor_sequence.ReceptorSequence import ReceptorSequence
-from source.data_model.repertoire.Repertoire import Repertoire
 from source.encodings.DatasetEncoder import DatasetEncoder
 from source.encodings.EncoderParams import EncoderParams
 from source.encodings.kmer_frequency.NormalizationType import NormalizationType
@@ -94,7 +93,7 @@ class KmerFrequencyEncoder(DatasetEncoder):
     @staticmethod
     def _encode_repertoires(dataset: Dataset, params: EncoderParams):
 
-        arguments = [(dataset.get_repertoire(filename=filename), params) for filename in dataset.filenames]
+        arguments = [(filename, dataset, params) for filename in dataset.filenames]
 
         with Pool(params["batch_size"]) as pool:
             repertoires = pool.starmap(KmerFrequencyEncoder._encode_repertoire, arguments, chunksize=math.ceil(len(dataset.filenames)/params["batch_size"]))
@@ -141,8 +140,8 @@ class KmerFrequencyEncoder(DatasetEncoder):
         return feature_annotations
 
     @staticmethod
-    def _encode_repertoire(repertoire: Repertoire, params: EncoderParams):
-
+    def _encode_repertoire(filename: str, dataset: Dataset, params: EncoderParams):
+        repertoire = dataset.get_repertoire(filename=filename)
         counts = Counter()
         feature_names = []
         for sequence in repertoire.sequences:
