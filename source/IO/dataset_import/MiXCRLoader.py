@@ -16,6 +16,7 @@ from source.data_model.receptor_sequence.ReceptorSequence import ReceptorSequenc
 from source.data_model.receptor_sequence.SequenceMetadata import SequenceMetadata
 from source.data_model.repertoire.Repertoire import Repertoire
 from source.data_model.repertoire.RepertoireMetadata import RepertoireMetadata
+from source.environment.Constants import Constants
 from source.util.PathBuilder import PathBuilder
 
 
@@ -171,8 +172,12 @@ class MiXCRLoader(DataLoader):
         count = row[MiXCRLoader.CLONE_COUNT]
         v_gene = MiXCRLoader._extract_gene(row, [MiXCRLoader.V_HIT, MiXCRLoader.V_GENES_WITH_SCORE])
         j_gene = MiXCRLoader._extract_gene(row, [MiXCRLoader.J_HIT, MiXCRLoader.J_GENES_WITH_SCORE])
+        v_subgroup = v_gene.split("-")[0]
+        j_subgroup = j_gene.split("-")[0]
+        v_allele = v_gene + Constants.ALLELE_DELIMITER + Constants.UNKNOWN
+        j_allele = j_gene + Constants.ALLELE_DELIMITER + Constants.UNKNOWN
         region_type = params["sequence_type"]
-        metadata = SequenceMetadata(v_gene=v_gene, j_gene=j_gene, chain=chain, count=count, region_type=region_type)
+        metadata = SequenceMetadata(v_subgroup=v_subgroup, v_gene=v_gene, v_allele=v_allele, j_subgroup=j_subgroup, j_gene=j_gene, j_allele=j_allele, chain=chain, count=count, region_type=region_type)
 
         if MiXCRLoader.SAMPLE_ID in params["additional_columns"] and MiXCRLoader.SAMPLE_ID in df.keys():
             sample = Sample(identifier=row[MiXCRLoader.SAMPLE_ID])

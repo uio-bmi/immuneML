@@ -1,74 +1,58 @@
-import glob
-import os
-import pickle
-from multiprocessing.pool import Pool
-
+import numpy as np
 import pandas as pd
 
-from source.IO.dataset_import.DataLoader import DataLoader
-from source.data_model.dataset.Dataset import Dataset
-from source.data_model.receptor_sequence.ReceptorSequence import ReceptorSequence
-from source.data_model.receptor_sequence.SequenceMetadata import SequenceMetadata
-from source.data_model.repertoire.Repertoire import Repertoire
-from source.util.PathBuilder import PathBuilder
+from source.IO.dataset_import.GenericLoader import GenericLoader
+from source.environment.Constants import Constants
+from source.environment.EnvironmentSettings import EnvironmentSettings
 
 
-class AdaptiveBiotechLoader(DataLoader):
+class AdaptiveBiotechLoader(GenericLoader):
 
-    @staticmethod
-    def load(path, params: dict = None) -> Dataset:
+    def _read_preprocess_file(self, filepath, params):
 
-        files = glob.glob(path + "*." + params["extension"])
-        repertoire_filenames, custom_params = AdaptiveBiotechLoader._load_repertoires(files, params)
-        dataset = Dataset(filenames=repertoire_filenames, identifier=params["dataset_id"], params=custom_params)
+        df = pd.read_csv(filepath,
+                         sep="\t",
+                         iterator=False,
+                         usecols=["rearrangement", "v_family", "v_gene", "v_allele", "j_family", "j_gene",
+                                  "j_allele", "amino_acid", "templates", "frame_type"],
+                         dtype={"v_family": str,
+                                "v_gene": str,
+                                "v_allele": str,
+                                "j_family": str,
+                                "j_gene": str,
+                                "j_allele": str,
+                                "amino_acid": str,
+                                "rearrangement": str,
+                                "templates": int,
+                                "frame_type": str})
 
-        return dataset
+        df = df.rename(columns={'rearrangement': 'nucleotide', 'v_family': 'v_subgroup', 'j_family': 'j_subgroup'})
 
-    @staticmethod
-    def _load_repertoires(files, params) -> tuple:
+        df = df.replace(["unresolved", "no data", "na", "unknown", "null", "nan", np.nan], Constants.UNKNOWN)
+        df['nucleotide'] = [y[(84 - 3 * len(x)): 78] for x, y in zip(df['amino_acid'], df['nucleotide'])]
+        df['amino_acid'] = df["amino_acid"].str[1:-1]
 
-        PathBuilder.build(params["result_path"])
+        df = AdaptiveBiotechLoader.parse_germline(df)
 
-        arguments = [(filepath, params) for filepath in files]
-
-        with Pool(params["batch_size"]) as pool:
-            output = pool.starmap(AdaptiveBiotechLoader._load_repertoire, arguments)
-
-        repertoire_filenames = [out[0] for out in output]
-        #custom_params = AdaptiveBiotechLoader._prepare_custom_params([out[1] for out in output])
-
-        return repertoire_filenames, None
-
-    @staticmethod
-    def _load_repertoire(file, params):
-        identifier = str(os.path.basename(file).rpartition(".")[0])
-
-        df = pd.read_csv(file, sep="\t", iterator=False,
-                         usecols=["v_gene", "j_gene", "amino_acid", "templates", "frame_type"])
-        df = df[df.amino_acid.notnull() & df.frame_type.isin(["In"])]
-        sequences = df.apply(AdaptiveBiotechLoader._load_sequence, axis=1, args=(params, )).values
-
-        del df
-
-        repertoire = Repertoire(sequences=sequences, metadata=None, identifier=identifier)
-        repertoire_filename = params["result_path"] + identifier + ".pickle"
-
-        with open(repertoire_filename, "wb") as f:
-            pickle.dump(repertoire, f)
-
-        del sequences
-        del repertoire
-
-        return repertoire_filename, None
+        return df
 
     @staticmethod
-    def _load_sequence(row, params) -> ReceptorSequence:
+    def parse_germline(df):
+        replace_imgt = pd.read_csv(
+            EnvironmentSettings.root_path + "source/IO/dataset_import/conversion/imgt_adaptive_conversion.csv")
+        replace_imgt = dict(zip(replace_imgt.Adaptive, replace_imgt.IMGT))
 
-        chain = "B" if "B" in row["v_gene"] or "B" in row["j_gene"] else "A"
-        metadata = SequenceMetadata(v_gene=row["v_gene"], j_gene=row["j_gene"], chain=chain, count=row["templates"],
-                                    frame_type=row["frame_type"], region_type=params["region_type"])
+        df[["v_gene", "j_gene"]] = df[["v_gene", "j_gene"]].replace(replace_imgt)
 
-        sequence = ReceptorSequence(amino_acid_sequence=row["amino_acid"],
-                                    metadata=metadata)
+        replace_dict = {"TCRB": "TRB"}
 
-        return sequence
+        replace_dict = {**replace_dict,
+                        **{("0" + str(i)): str(i) for i in range(10)}}
+
+        df[["v_subgroup", "v_gene", "j_subgroup", "j_gene"]] = df[
+            ["v_subgroup", "v_gene", "j_subgroup", "j_gene"]].replace(replace_dict)
+
+        df["v_allele"] = df['v_gene'].str.cat(df['v_allele'], sep=Constants.ALLELE_DELIMITER)
+        df["j_allele"] = df['j_gene'].str.cat(df['j_allele'], sep=Constants.ALLELE_DELIMITER)
+
+        return df

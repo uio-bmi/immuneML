@@ -109,6 +109,7 @@ class TestMiXCRLoader(TestCase):
             if index == 0:
                 self.assertTrue(repertoire.sequences[0].amino_acid_sequence == "VFAVFAVFAVFAFAVF")
                 self.assertTrue(repertoire.sequences[1].metadata.v_gene == "V14-1")
+                self.assertTrue(repertoire.sequences[1].metadata.v_subgroup == "V14")
                 self.assertTrue(repertoire.metadata.custom_params["CD"])
             else:
                 self.assertEqual("TGTGCAGCAATGTGCAGCAAGCAG", repertoire.sequences[0].nucleotide_sequence)

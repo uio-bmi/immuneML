@@ -9,6 +9,7 @@ from source.data_model.receptor_sequence.SequenceMetadata import SequenceMetadat
 from source.dsl.DefaultParamsLoader import DefaultParamsLoader
 from source.dsl.SequenceMatchingSummaryType import SequenceMatchingSummaryType
 from source.dsl.encoding_parsers.EncodingParameterParser import EncodingParameterParser
+from source.environment.Constants import Constants
 
 
 class MatchedReferenceParser(EncodingParameterParser):
@@ -64,9 +65,9 @@ class MatchedReferenceParser(EncodingParameterParser):
     def process_iris_chain(row, chain):
         sequences = []
 
-        v_genes = set([gene.split("*")[0].replace("TR{}".format(chain), "").replace(chain, "") for gene in
+        v_genes = set([gene.split(Constants.ALLELE_DELIMITER)[0].replace("TR{}".format(chain), "").replace(chain, "") for gene in
                        row["TR{} - V gene (1)".format(chain)].split(" | ")])
-        j_genes = set([gene.split("*")[0].replace("TR{}".format(chain), "").replace(chain, "") for gene in
+        j_genes = set([gene.split(Constants.ALLELE_DELIMITER)[0].replace("TR{}".format(chain), "").replace(chain, "") for gene in
                        row["TR{} - J gene (1)".format(chain)].split(" | ")])
 
         for v_gene in v_genes:
