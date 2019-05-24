@@ -54,7 +54,7 @@ class MatchedReferenceEncoder(DatasetEncoder):
         labels = {label: [] for label in params["label_configuration"].get_labels_by_name()}
 
         for index, repertoire in enumerate(dataset.get_data()):
-            assert index == matched_info["repertoires"][index]["repertoire_index"], \
+            assert repertoire.identifier == matched_info["repertoires"][index]["repertoire"], \
                 "MatchedReferenceEncoder: error in SequenceMatcher ordering of repertoires."
             encoded_repertories[index] = matched_info["repertoires"][index][params["model"]["summary"].name.lower()]
             for label_index, label in enumerate(params["label_configuration"].get_labels_by_name()):
