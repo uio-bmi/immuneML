@@ -28,10 +28,10 @@ class MatchingSequenceDetails(EncodingReport):
 
     def _make_overview(self, dataset: Dataset, result_path: str, params: dict):
         filename = result_path + "matching_sequence_overview.tsv"
-        fieldnames = ["patient", "chain", dataset.encoded_data.feature_names[0],
+        fieldnames = ["repertoire_identifier", dataset.encoded_data.feature_names[0],
                       "repertoire_size", "max_levenshtein_distance"]
         for label in dataset.params.keys():
-            fieldnames.append("{}_status".format(label))
+            fieldnames.append("{}".format(label))
         self._write_rows(dataset, params, filename, fieldnames)
 
         return filename
@@ -42,14 +42,13 @@ class MatchingSequenceDetails(EncodingReport):
             csv_writer.writeheader()
             for index, repertoire in enumerate(dataset.get_data()):
                 row = {
-                    "patient": repertoire.identifier,
-                    "chain": str(list({seq.metadata.chain for seq in repertoire.sequences}))[1:-1],
+                    "repertoire_identifier": repertoire.identifier,
                     dataset.encoded_data.feature_names[0]: dataset.encoded_data.repertoires[index][0],
                     "repertoire_size": len(repertoire.sequences),
                     "max_levenshtein_distance": params["max_distance"]
                 }
                 for label in dataset.params.keys():
-                    row["{}_status".format(label)] = repertoire.metadata.custom_params[label]
+                    row["{}".format(label)] = repertoire.metadata.custom_params[label]
                 csv_writer.writerow(row)
 
     def _make_matching_report(self, dataset: Dataset, result_path: str, params: dict):
@@ -67,7 +66,7 @@ class MatchingSequenceDetails(EncodingReport):
                                                     list({seq.metadata.chain for seq in repertoire.sequences}))
 
         with open(filename, "w") as file:
-            csv_writer = csv.DictWriter(file, fieldnames=["sequence", "v_gene", "j_gene", "chain", "matching_sequences", "max_distance"], delimiter="\t")
+            csv_writer = csv.DictWriter(file, fieldnames=["sequence", "v_gene", "j_gene", "chain", "clone_count", "matching_sequences", "max_distance"], delimiter="\t")
             csv_writer.writeheader()
             for index, sequence in enumerate(repertoire.sequences):
 
@@ -78,6 +77,7 @@ class MatchingSequenceDetails(EncodingReport):
                     "v_gene": sequence.metadata.v_gene,
                     "j_gene": sequence.metadata.j_gene,
                     "chain": sequence.metadata.chain,
+                    "clone_count": sequence.metadata.count,
                     "matching_sequences": str(matching_sequences)[1:-1].replace("'", ""),
                     "max_distance": params["max_distance"]
                 })

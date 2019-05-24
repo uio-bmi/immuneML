@@ -34,9 +34,7 @@ class MatchedReferenceEncoder(DatasetEncoder):
         encoded_dataset = Dataset(filenames=dataset.get_filenames(), params=dataset.params)
         encoded_repertoires, labels = MatchedReferenceEncoder._encode_repertoires(dataset, matched_info, params)
 
-        feature_name = "percentage_of_sequences_matched" \
-            if "percentages" in params["model"] and params["model"]["percentages"] \
-            else "count_of_sequences_matched"
+        feature_name = params["model"]["summary"].name.lower()
 
         encoded_dataset.add_encoded_data(EncodedData(
             repertoires=encoded_repertoires,
