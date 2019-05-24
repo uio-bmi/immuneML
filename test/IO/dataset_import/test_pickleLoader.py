@@ -21,5 +21,5 @@ class TestPickleLoader(TestCase):
 
         shutil.rmtree(path)
 
-        self.assertEqual(2, len(dataset2.filenames))
-        self.assertEqual("f2.pkl", dataset2.filenames[1])
+        self.assertEqual(2, len(dataset2.get_filenames()))
+        self.assertEqual("f2.pkl", dataset2.get_filenames()[1])

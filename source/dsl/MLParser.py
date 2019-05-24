@@ -17,6 +17,8 @@ class MLParser:
             for method_id in specification["ml_methods"].keys():
                 parsed = MLParser._parse_method(specification["ml_methods"], method_id, symbol_table)
                 symbol_table.add(method_id, SymbolType.ML_METHOD, parsed)
+        else:
+            specification["ml_methods"] = {}
         return symbol_table, specification["ml_methods"]
 
     @staticmethod

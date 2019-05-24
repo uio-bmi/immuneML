@@ -44,7 +44,7 @@ class DatasetMerger(Step):
         for ds in input_params["datasets"]:
             file_paths.extend(DatasetMerger._process_dataset(ds, input_params, sample_params))
 
-        dataset.filenames = file_paths
+        dataset.set_filenames(file_paths)
         dataset.params = sample_params
 
         PickleExporter.export(dataset, input_params["result_path"], FilenameHandler.get_dataset_name(DatasetMerger.__name__))

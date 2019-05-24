@@ -20,7 +20,7 @@ class TestPatientRepertoireCollector(TestCase):
         PathBuilder.build(path)
         files = []
         for i, rep in enumerate(reps):
-            files.append(path + "rep{}.pkl".format(i))
+            files.append(path + "rep{}.pkl".format(len(reps)-1-i))
             with open(files[-1], "wb") as file:
                 pickle.dump(rep, file)
 
@@ -28,8 +28,8 @@ class TestPatientRepertoireCollector(TestCase):
 
         dataset2 = PatientRepertoireCollector.process(dataset, {"result_path": path + "result/"})
 
-        self.assertEqual(2, len(dataset2.filenames))
-        self.assertEqual(3, len(dataset.filenames))
+        self.assertEqual(2, len(dataset2.get_filenames()))
+        self.assertEqual(3, len(dataset.get_filenames()))
 
         values = [2, 1]
         for index, rep in enumerate(dataset2.get_data()):

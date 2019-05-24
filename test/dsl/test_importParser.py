@@ -132,7 +132,7 @@ class TestImportParser(TestCase):
 
         st, desc = ImportParser.parse(specs, SymbolTable())
         self.assertTrue(isinstance(st.get("d1")["dataset"], Dataset))
-        self.assertEqual(1, len(st.get("d1")["dataset"].filenames))
+        self.assertEqual(1, len(st.get("d1")["dataset"].get_filenames()))
 
         specs = {
             "dataset_import": {
@@ -156,7 +156,7 @@ class TestImportParser(TestCase):
 
         st, desc = ImportParser.parse(specs, SymbolTable())
         self.assertTrue(isinstance(st.get("d1")["dataset"], Dataset))
-        self.assertEqual(0, len(st.get("d1")["dataset"].filenames))
+        self.assertEqual(0, len(st.get("d1")["dataset"].get_filenames()))
 
         self.assertEqual(100, desc["d1"]["preprocessing"]["filter_out_short_reps"]["params"]["lower_limit"])
 

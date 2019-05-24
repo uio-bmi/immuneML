@@ -32,7 +32,7 @@ class PatientRepertoireCollector(Preprocessor):
             filenames.append(PatientRepertoireCollector.store_repertoire(params["result_path"] + key + ".pkl",
                                                                          rep_map[key]))
 
-        processed_dataset.filenames = filenames
+        processed_dataset.set_filenames(filenames)
 
         return processed_dataset
 

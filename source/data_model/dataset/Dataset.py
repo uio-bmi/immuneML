@@ -14,8 +14,8 @@ class Dataset:
         self.data = data
         self.params = params
         self.encoded_data = encoded_data
-        self.filenames = sorted(filenames) if filenames is not None else []
         self.id = identifier if identifier is not None else uuid.uuid1()
+        self._filenames = sorted(filenames) if filenames is not None else []
 
     def add_data(self, data: collections.Iterable):
         self.data = data
@@ -24,12 +24,18 @@ class Dataset:
         self.encoded_data = encoded_data
 
     def get_data(self, batch_size: int = 1):
-        sorted(self.filenames)
-        return RepertoireGenerator.build_generator(file_list=self.filenames, batch_size=batch_size)
+        self._filenames.sort()
+        return RepertoireGenerator.build_generator(file_list=self._filenames, batch_size=batch_size)
 
     def get_repertoire(self, index: int = -1, filename: str = ""):
         assert index != -1 or filename != "", "Dataset: cannot load repertoire since the index nor filename are set."
-        return RepertoireGenerator.load_repertoire(filename if filename != "" else self.filenames[index])
+        return RepertoireGenerator.load_repertoire(filename if filename != "" else self._filenames[index])
 
     def get_repertoire_count(self):
-        return len(self.filenames)
+        return len(self._filenames)
+
+    def set_filenames(self, filenames: list):
+        self._filenames = sorted(filenames)
+
+    def get_filenames(self):
+        return self._filenames

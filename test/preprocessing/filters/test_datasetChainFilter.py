@@ -27,8 +27,8 @@ class TestDatasetChainFilter(TestCase):
 
         dataset2 = DatasetChainFilter.process(dataset, {"keep_chain": "A"})
 
-        self.assertEqual(1, len(dataset2.filenames))
-        self.assertEqual(2, len(dataset.filenames))
+        self.assertEqual(1, len(dataset2.get_filenames()))
+        self.assertEqual(2, len(dataset.get_filenames()))
 
         for rep in dataset2.get_data():
             self.assertEqual("AAA", rep.sequences[0].get_sequence())

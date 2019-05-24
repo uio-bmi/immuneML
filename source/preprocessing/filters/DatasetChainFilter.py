@@ -12,6 +12,6 @@ class DatasetChainFilter(Preprocessor):
         filenames = []
         for index, repertoire in enumerate(dataset.get_data()):
             if all(sequence.metadata.chain == params["keep_chain"] for sequence in repertoire.sequences):
-                filenames.append(dataset.filenames[index])
-        processed_dataset.filenames = filenames
+                filenames.append(dataset.get_filenames()[index])
+        processed_dataset.set_filenames(filenames)
         return processed_dataset

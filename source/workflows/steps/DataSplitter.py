@@ -38,17 +38,18 @@ class DataSplitter(Step):
         dataset = input_params["dataset"]
         splits_count = input_params["count"]
         train_datasets, test_datasets = [], []
-        random.shuffle(dataset.filenames)
-        dataset.filenames = np.array(dataset.filenames)
+        filenames = copy.deepcopy(dataset.get_filenames())
+        random.shuffle(filenames)
+        filenames = np.array(filenames)
 
         k_fold = KFold(n_splits=splits_count)
-        for train_index, test_index in k_fold.split(dataset.filenames):
+        for train_index, test_index in k_fold.split(filenames):
             train_dataset = copy.deepcopy(dataset)
-            train_dataset.filenames = train_dataset.filenames[train_index]
+            train_dataset.set_filenames([train_dataset.get_filenames()[i] for i in train_index])
             train_datasets.append(train_dataset)
 
             test_dataset = copy.deepcopy(dataset)
-            test_dataset.filenames = test_dataset.filenames[test_index]
+            test_dataset.set_filenames([test_dataset.get_filenames()[i] for i in test_index])
             test_datasets.append(test_dataset)
 
         return train_datasets, test_datasets
@@ -58,19 +59,20 @@ class DataSplitter(Step):
 
         dataset = input_params["dataset"]
         training_percentage = input_params["training_percentage"]
-        train_count = int(len(dataset.filenames) * training_percentage)
+        train_count = int(len(dataset.get_filenames()) * training_percentage)
         train_datasets, test_datasets = [], []
 
         for i in range(input_params["count"]):
 
-            random.shuffle(dataset.filenames)
+            filenames = copy.deepcopy(dataset.get_filenames())
+            random.shuffle(filenames)
 
             train_dataset = copy.deepcopy(dataset)
-            train_dataset.filenames = train_dataset.filenames[:train_count]
+            train_dataset.set_filenames(filenames[:train_count])
             train_datasets.append(train_dataset)
 
             test_dataset = copy.deepcopy(dataset)
-            test_dataset.filenames = test_dataset.filenames[train_count:]
+            test_dataset.set_filenames(filenames[train_count:])
             test_datasets.append(test_dataset)
 
         return train_datasets, test_datasets

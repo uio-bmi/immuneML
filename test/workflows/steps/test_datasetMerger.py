@@ -64,7 +64,7 @@ class TestDatasetMerger(TestCase):
             }
         })
 
-        filenames_length = len(dataset.filenames)
+        filenames_length = len(dataset.get_filenames())
         files_count = len(glob(path + "dataset/*"))
 
         for rep in dataset.get_data(3):

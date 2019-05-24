@@ -118,7 +118,7 @@ class Word2VecEncoder(DatasetEncoder):
         scaled_repertoires = Word2VecEncoder._scale_encoding(repertoires, params)
 
         encoded_dataset.params = dataset.params
-        encoded_dataset.filenames = dataset.filenames
+        encoded_dataset.set_filenames(dataset.get_filenames())
 
         label_names = params["label_configuration"].get_labels_by_name()
 

@@ -18,5 +18,5 @@ class TestPickleExporter(TestCase):
         shutil.rmtree(EnvironmentSettings.root_path + "test/tmp/")
 
         self.assertTrue(isinstance(dataset2, Dataset))
-        self.assertEqual(2, len(dataset2.filenames))
-        self.assertEqual("f1.pkl", dataset2.filenames[0])
+        self.assertEqual(2, len(dataset2.get_filenames()))
+        self.assertEqual("f1.pkl", dataset2.get_filenames()[0])

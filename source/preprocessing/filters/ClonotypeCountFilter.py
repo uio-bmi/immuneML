@@ -13,6 +13,6 @@ class ClonotypeCountFilter(Preprocessor):
         for index, repertoire in enumerate(dataset.get_data()):
             if "lower_limit" in params.keys() and len(repertoire.sequences) >= params["lower_limit"] or \
                 "upper_limit" in params.keys() and len(repertoire.sequences) <= params["upper_limit"]:
-                filenames.append(dataset.filenames[index])
-        processed_dataset.filenames = filenames
+                filenames.append(dataset.get_filenames()[index])
+        processed_dataset.set_filenames(filenames)
         return processed_dataset

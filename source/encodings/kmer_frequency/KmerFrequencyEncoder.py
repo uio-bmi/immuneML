@@ -82,7 +82,7 @@ class KmerFrequencyEncoder(DatasetEncoder):
                                    repertoire_ids=[repertoire.identifier for repertoire in dataset.get_data()],
                                    feature_annotations=feature_annotations)
 
-        encoded_dataset = Dataset(filenames=dataset.filenames,
+        encoded_dataset = Dataset(filenames=dataset.get_filenames(),
                                   encoded_data=encoded_data,
                                   params=dataset.params)
 
@@ -93,10 +93,10 @@ class KmerFrequencyEncoder(DatasetEncoder):
     @staticmethod
     def _encode_repertoires(dataset: Dataset, params: EncoderParams):
 
-        arguments = [(filename, dataset, params) for filename in dataset.filenames]
+        arguments = [(filename, dataset, params) for filename in dataset.get_filenames()]
 
         with Pool(params["batch_size"]) as pool:
-            repertoires = pool.starmap(KmerFrequencyEncoder._encode_repertoire, arguments, chunksize=math.ceil(len(dataset.filenames)/params["batch_size"]))
+            repertoires = pool.starmap(KmerFrequencyEncoder._encode_repertoire, arguments, chunksize=math.ceil(len(dataset.get_filenames())/params["batch_size"]))
 
         encoded_repertoire_list, repertoire_names, labels, feature_annotation_names = zip(*repertoires)
 
