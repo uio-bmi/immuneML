@@ -3,7 +3,6 @@ import warnings
 from source.data_model.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.data_model.receptor_sequence.SequenceFrameType import SequenceFrameType
 from source.encodings.EncoderParams import EncoderParams
-from source.encodings.kmer_frequency.sequence_encoding.SequenceEncodingResult import SequenceEncodingResult
 from source.encodings.kmer_frequency.sequence_encoding.SequenceEncodingStrategy import SequenceEncodingStrategy
 from source.util.KmerHelper import KmerHelper
 
@@ -11,7 +10,7 @@ from source.util.KmerHelper import KmerHelper
 class GappedKmerSequenceEncoder(SequenceEncodingStrategy):
 
     @staticmethod
-    def encode_sequence(sequence: ReceptorSequence, params: EncoderParams) -> SequenceEncodingResult:
+    def encode_sequence(sequence: ReceptorSequence, params: EncoderParams):
         """
         creates all overlapping gapped k-mers from a sequence as features for use in KmerFrequencyEncoder.
         this gap length goes from min_gap to max_gap inclusive, and there is a k-mer of length k_left on the left
@@ -27,15 +26,19 @@ class GappedKmerSequenceEncoder(SequenceEncodingStrategy):
         min_gap = params["model"].get('min_gap', 0)
         length = len(sequence.get_sequence())
 
-        if sequence.metadata is not None and sequence.metadata.frame_type.upper() in [SequenceFrameType.OUT.name, SequenceFrameType.STOP.name]:
+        if sequence.metadata is not None and sequence.metadata.frame_type.upper() != SequenceFrameType.IN.name:
             warnings.warn('Sequence either has out or stop codon. Ignoring sequence.')
-            return SequenceEncodingResult(None, None)
+            return None
 
         if length < k_left + k_right + max_gap:
             warnings.warn('Sequence length is less than k_left + k_right + max_gap. Ignoring sequence')
-            return SequenceEncodingResult(None, None)
+            return None
 
         gapped_kmers = KmerHelper.create_gapped_kmers_from_sequence(sequence, k_left=k_left, max_gap=max_gap,
                                                                     min_gap=min_gap, k_right=k_right)
 
-        return SequenceEncodingResult(features=gapped_kmers, feature_information_names=["sequence"])
+        return gapped_kmers
+
+    @staticmethod
+    def get_feature_names(params: EncoderParams):
+        return ["sequence"]

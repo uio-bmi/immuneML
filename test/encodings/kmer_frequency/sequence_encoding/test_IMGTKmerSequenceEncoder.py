@@ -3,7 +3,6 @@ from unittest import TestCase
 from source.data_model.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.encodings.EncoderParams import EncoderParams
 from source.encodings.kmer_frequency.sequence_encoding.IMGTKmerSequenceEncoder import IMGTKmerSequenceEncoder
-from source.encodings.kmer_frequency.sequence_encoding.SequenceEncodingResult import SequenceEncodingResult
 from source.environment.LabelConfiguration import LabelConfiguration
 
 
@@ -22,9 +21,9 @@ class TestIMGTKmerSequenceEncoder(TestCase):
                           'TYE///112.011', 'YEQ///112.01', 'EQC///112.009', 'QCA///112.008', 'CAS///112.007',
                           'ASS///112.006', 'SSP///112.005', 'SPR///112.004', 'PRE///112.003', 'RER///112.002',
                           'ERA///112.001', 'RAT///112', 'ATY///113', 'TYE///114', 'YEQ///115'},
-                         set(result.features))
+                         set(result))
 
-        self.assertEqual(len(result.features), len(sequence.get_sequence()) - 3 + 1)
+        self.assertEqual(len(result), len(sequence.get_sequence()) - 3 + 1)
 
         sequence = ReceptorSequence("AHCDE", None, None)
         result = IMGTKmerSequenceEncoder.encode_sequence(sequence, EncoderParams(
@@ -33,9 +32,9 @@ class TestIMGTKmerSequenceEncoder(TestCase):
                                                                     result_path=""))
 
         self.assertEqual({'AHC///105', 'HCD///106', 'CDE///107'},
-                         set(result.features))
+                         set(result))
 
-        self.assertEqual(len(result.features), len(sequence.get_sequence()) - 3 + 1)
+        self.assertEqual(len(result), len(sequence.get_sequence()) - 3 + 1)
         self.assertEqual(
             IMGTKmerSequenceEncoder.encode_sequence(
                               sequence,
@@ -43,5 +42,5 @@ class TestIMGTKmerSequenceEncoder(TestCase):
                                             label_configuration=LabelConfiguration(),
                                             result_path="")
             ),
-            SequenceEncodingResult(None, None)
+            None
         )

@@ -13,13 +13,10 @@ from source.IO.dataset_export.PickleExporter import PickleExporter
 from source.IO.dataset_import.PickleLoader import PickleLoader
 from source.data_model.dataset.Dataset import Dataset
 from source.data_model.encoded_data.EncodedData import EncodedData
-from source.data_model.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.encodings.DatasetEncoder import DatasetEncoder
 from source.encodings.EncoderParams import EncoderParams
 from source.encodings.kmer_frequency.NormalizationType import NormalizationType
 from source.encodings.kmer_frequency.ReadsType import ReadsType
-from source.encodings.kmer_frequency.sequence_encoding.SequenceEncodingResult import SequenceEncodingResult
-from source.encodings.kmer_frequency.sequence_encoding.SequenceEncodingStrategy import SequenceEncodingStrategy
 from source.environment.Constants import Constants
 from source.util.FilenameHandler import FilenameHandler
 from source.util.PathBuilder import PathBuilder
@@ -56,9 +53,7 @@ class KmerFrequencyEncoder(DatasetEncoder):
     @staticmethod
     def encode(dataset: Dataset, params: EncoderParams) -> Dataset:
 
-        filepath = params["result_path"] + "/" + \
-                   ("train" if params["learn_model"] else "test") + "/" + \
-                   FilenameHandler.get_dataset_name(KmerFrequencyEncoder.__name__)
+        filepath = params["result_path"] + "/" + params["filename"]
 
         if os.path.isfile(filepath):
             encoded_dataset = PickleLoader.load(filepath)
@@ -71,15 +66,14 @@ class KmerFrequencyEncoder(DatasetEncoder):
     def _encode_new_dataset(dataset: Dataset, params: EncoderParams) -> Dataset:
 
         encoded_repertoire_list, repertoire_names, encoded_labels, feature_annotation_names = KmerFrequencyEncoder._encode_repertoires(dataset, params)
-
         vectorized_repertoires, feature_names = KmerFrequencyEncoder._vectorize_encoded_repertoires(repertoires=encoded_repertoire_list, params=params)
         normalized_repertoires = KmerFrequencyEncoder._normalize_repertoires(repertoires=vectorized_repertoires, params=params)
         feature_annotations = KmerFrequencyEncoder._get_feature_annotations(feature_names, feature_annotation_names)
 
-        encoded_data = EncodedData(repertoires=normalized_repertoires.toarray(),
+        encoded_data = EncodedData(repertoires=normalized_repertoires,
                                    labels=encoded_labels,
                                    feature_names=feature_names,
-                                   repertoire_ids=[repertoire.identifier for repertoire in dataset.get_data()],
+                                   repertoire_ids=repertoire_names,
                                    feature_annotations=feature_annotations)
 
         encoded_dataset = Dataset(filenames=dataset.get_filenames(),
@@ -96,7 +90,7 @@ class KmerFrequencyEncoder(DatasetEncoder):
         arguments = [(filename, dataset, params) for filename in dataset.get_filenames()]
 
         with Pool(params["batch_size"]) as pool:
-            repertoires = pool.starmap(KmerFrequencyEncoder._encode_repertoire, arguments, chunksize=math.ceil(len(dataset.get_filenames())/params["batch_size"]))
+            repertoires = pool.starmap(KmerFrequencyEncoder._encode_repertoire, arguments, chunksize=math.floor(len(dataset.get_filenames())/params["batch_size"]) + 1)
 
         encoded_repertoire_list, repertoire_names, labels, feature_annotation_names = zip(*repertoires)
 
@@ -104,21 +98,21 @@ class KmerFrequencyEncoder(DatasetEncoder):
 
         feature_annotation_names = feature_annotation_names[0]
 
-        return encoded_repertoire_list, repertoire_names, encoded_labels, feature_annotation_names
+        return list(encoded_repertoire_list), list(repertoire_names), encoded_labels, feature_annotation_names
 
     @staticmethod
     def _vectorize_encoded_repertoires(repertoires: list, params: EncoderParams):
 
-        filepath = params["vectorizer_path"] + FilenameHandler.get_filename(DictVectorizer.__name__, "pickle")
+        filename= params["result_path"] + FilenameHandler.get_filename(DictVectorizer.__name__, "pickle")
 
         if params["learn_model"]:
             vectorizer = DictVectorizer(sparse=True, dtype=float)
             vectorized_repertoires = vectorizer.fit_transform(repertoires)
-            PathBuilder.build(params["vectorizer_path"])
-            with open(filepath, 'wb') as file:
+            PathBuilder.build(params["result_path"])
+            with open(filename, 'wb') as file:
                 pickle.dump(vectorizer, file)
         else:
-            with open(filepath, 'rb') as file:
+            with open(filename, 'rb') as file:
                 vectorizer = pickle.load(file)
             vectorized_repertoires = vectorizer.transform(repertoires)
 
@@ -143,16 +137,16 @@ class KmerFrequencyEncoder(DatasetEncoder):
     def _encode_repertoire(filename: str, dataset: Dataset, params: EncoderParams):
         repertoire = dataset.get_repertoire(filename=filename)
         counts = Counter()
-        feature_names = []
+        sequence_encoder = KmerFrequencyEncoder._prepare_sequence_encoder(params)
+        feature_names = sequence_encoder.get_feature_names(params)
         for sequence in repertoire.sequences:
-            sequence_encoding_result = KmerFrequencyEncoder._encode_sequence(sequence, params)
-            feature_names = sequence_encoding_result.feature_information_names
-            if sequence_encoding_result.features is not None:
-                for i in sequence_encoding_result.features:
+            features = sequence_encoder.encode_sequence(sequence, params)
+            if features is not None:
+                for i in features:
                     if params["model"].get('reads') == ReadsType.UNIQUE:
                         counts[i] += 1
                     elif params["model"].get('reads') == ReadsType.ALL:
-                        counts[i] += sequence.count
+                        counts[i] += sequence.metadata.count
 
         label_config = params["label_configuration"]
         labels = dict()
@@ -163,14 +157,6 @@ class KmerFrequencyEncoder(DatasetEncoder):
 
         # TODO: refactor this not to return 4 values but e.g. a dict or split into different functions?
         return counts, repertoire.identifier, labels, feature_names
-
-    @staticmethod
-    def _encode_sequence(sequence: ReceptorSequence, params: EncoderParams) -> SequenceEncodingResult:
-        sequence_encoder = params["model"]["sequence_encoding_strategy"]
-        if not isinstance(sequence_encoder, SequenceEncodingStrategy):
-            sequence_encoder = KmerFrequencyEncoder._prepare_sequence_encoder(params)
-        sequence_encoding_result = sequence_encoder.encode_sequence(sequence=sequence, params=params)
-        return sequence_encoding_result
 
     @staticmethod
     def _prepare_sequence_encoder(params: EncoderParams):
