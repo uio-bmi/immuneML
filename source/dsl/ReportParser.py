@@ -14,8 +14,9 @@ class ReportParser:
             for rep_id in reports.keys():
                 symbol_table, workflow_specification["reports"][rep_id] = ReportParser._parse(rep_id, reports[rep_id],
                                                                                               symbol_table)
-
-        return symbol_table, workflow_specification["reports"]
+        else:
+            reports = {}
+        return symbol_table, reports
 
     @staticmethod
     def _parse(key: str, params: dict, symbol_table: SymbolTable):
