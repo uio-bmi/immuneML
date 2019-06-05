@@ -49,3 +49,7 @@ class MLMethod(metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def get_params(self, label):
         pass
+
+    @abc.abstractmethod
+    def predict_proba(self, X, labels):
+        pass
