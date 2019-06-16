@@ -153,7 +153,7 @@ class GenericLoader(DataLoader):
 
     def _extract_repertoire_metadata(self, filepath, params, df) -> RepertoireMetadata:
         if "metadata" in params:
-            metadata = [m for m in params["metadata"] if m["rep_file"] == os.path.basename(filepath)][0]["metadata"]
+            metadata = [m for m in params["metadata"] if os.path.basename(m["rep_file"]) == os.path.basename(filepath)][0]["metadata"]
         else:
             metadata = None
         return metadata

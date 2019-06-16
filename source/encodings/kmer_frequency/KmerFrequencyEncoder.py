@@ -5,17 +5,16 @@ from collections import Counter
 from multiprocessing.pool import Pool
 
 import pandas as pd
-from scipy import sparse
 from sklearn.feature_extraction import DictVectorizer
-from sklearn.preprocessing import normalize
 
 from source.IO.dataset_export.PickleExporter import PickleExporter
 from source.IO.dataset_import.PickleLoader import PickleLoader
+from source.analysis.AxisType import AxisType
 from source.data_model.dataset.Dataset import Dataset
 from source.data_model.encoded_data.EncodedData import EncodedData
 from source.encodings.DatasetEncoder import DatasetEncoder
 from source.encodings.EncoderParams import EncoderParams
-from source.encodings.kmer_frequency.NormalizationType import NormalizationType
+from source.analysis.data_manipulation.DataSummarizer import DataSummarizer
 from source.encodings.kmer_frequency.ReadsType import ReadsType
 from source.environment.Constants import Constants
 from source.util.FilenameHandler import FilenameHandler
@@ -67,7 +66,7 @@ class KmerFrequencyEncoder(DatasetEncoder):
 
         encoded_repertoire_list, repertoire_names, encoded_labels, feature_annotation_names = KmerFrequencyEncoder._encode_repertoires(dataset, params)
         vectorized_repertoires, feature_names = KmerFrequencyEncoder._vectorize_encoded_repertoires(repertoires=encoded_repertoire_list, params=params)
-        normalized_repertoires = KmerFrequencyEncoder._normalize_repertoires(repertoires=vectorized_repertoires, params=params)
+        normalized_repertoires = DataSummarizer.normalize_matrix(vectorized_repertoires, params["model"]["normalization_type"], AxisType.REPERTOIRES)
         feature_annotations = KmerFrequencyEncoder._get_feature_annotations(feature_names, feature_annotation_names)
 
         encoded_data = EncodedData(repertoires=normalized_repertoires,
@@ -117,15 +116,6 @@ class KmerFrequencyEncoder(DatasetEncoder):
             vectorized_repertoires = vectorizer.transform(repertoires)
 
         return vectorized_repertoires, vectorizer.get_feature_names()
-
-    @staticmethod
-    def _normalize_repertoires(repertoires, params: EncoderParams):
-        normalized_repertoires = repertoires
-        if params["model"]['normalization_type'] == NormalizationType.RELATIVE_FREQUENCY:
-            normalized_repertoires = sparse.diags(1 / repertoires.sum(axis=1).A.ravel()) @ repertoires
-        elif params["model"]['normalization_type'] == NormalizationType.L2:
-            normalized_repertoires = normalize(repertoires)
-        return normalized_repertoires
 
     @staticmethod
     def _get_feature_annotations(feature_names, feature_annotation_names):

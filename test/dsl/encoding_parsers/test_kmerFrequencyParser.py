@@ -1,7 +1,7 @@
 from unittest import TestCase
 
 from source.dsl.encoding_parsers.KmerFrequencyParser import KmerFrequencyParser
-from source.encodings.kmer_frequency.NormalizationType import NormalizationType
+from source.analysis.data_manipulation.NormalizationType import NormalizationType
 from source.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType import SequenceEncodingType
 
 

@@ -11,7 +11,7 @@ class MetadataImport:
         metadata_df = pd.read_csv(path, sep="\t")
         custom_keys = metadata_df.keys().values.tolist()
 
-        standard_keys = ["filename", "chain", "donor"]
+        standard_keys = ["filename"]
         for key in standard_keys:
             custom_keys.remove(key)
 
@@ -23,8 +23,6 @@ class MetadataImport:
     def extract_repertoire(row, custom_keys):
 
         custom_params = {key: row[key] for key in custom_keys}
-        custom_params["chain"] = row["chain"]
-        custom_params["donor"] = row["donor"]
 
         return {
             "rep_file": row["filename"],

@@ -1,6 +1,8 @@
 import shutil
 from unittest import TestCase
 
+import numpy as np
+
 from source.data_model.dataset.Dataset import Dataset
 from source.data_model.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.data_model.receptor_sequence.SequenceMetadata import SequenceMetadata
@@ -15,7 +17,7 @@ from source.util.RepertoireBuilder import RepertoireBuilder
 class TestMatchedReferenceEncoder(TestCase):
     def test__encode_new_dataset(self):
         path = EnvironmentSettings.root_path + "test/tmp/matched_ref_encoder/"
-        filenames = RepertoireBuilder.build([["AAAA", "AACA"], ["TTTA", "AAAA"]], path, {"default": [1, 2]})
+        filenames = RepertoireBuilder.build([["AAAA", "AACA"], ["TTTA", "AAAA"]], path, {"default": np.array([1, 2])})
         dataset = Dataset(filenames=filenames)
 
         label_config = LabelConfiguration()

@@ -8,6 +8,10 @@ from source.environment.EnvironmentSettings import EnvironmentSettings
 class ReflectionHandler:
 
     @staticmethod
+    def import_module(name: str, package: str = None):
+        return import_module(name, package)
+
+    @staticmethod
     def get_class_from_path(path: str, class_name: str = None):
         """
         :param path: path to file where class is located

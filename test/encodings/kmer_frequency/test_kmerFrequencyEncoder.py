@@ -9,7 +9,7 @@ from source.data_model.repertoire.Repertoire import Repertoire
 from source.data_model.repertoire.RepertoireMetadata import RepertoireMetadata
 from source.encodings.EncoderParams import EncoderParams
 from source.encodings.kmer_frequency.KmerFrequencyEncoder import KmerFrequencyEncoder
-from source.encodings.kmer_frequency.NormalizationType import NormalizationType
+from source.analysis.data_manipulation.NormalizationType import NormalizationType
 from source.encodings.kmer_frequency.ReadsType import ReadsType
 from source.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType import SequenceEncodingType
 from source.environment.EnvironmentSettings import EnvironmentSettings

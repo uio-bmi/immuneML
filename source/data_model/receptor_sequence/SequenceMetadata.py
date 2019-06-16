@@ -1,6 +1,6 @@
 # quality: gold
 from source.data_model.metadata.Sample import Sample
-
+from source.data_model.receptor_sequence.SequenceFrameType import SequenceFrameType
 
 class SequenceMetadata:
     """
@@ -25,7 +25,7 @@ class SequenceMetadata:
                  j_subgroup: str = None, j_gene: str = None, j_allele: str = None,
                  chain: str = None,
                  count: int = None,
-                 frame_type: str = None,
+                 frame_type: str = SequenceFrameType.IN.name,
                  region_type: str = None,
                  sample: Sample = None):
         self.v_subgroup = v_subgroup

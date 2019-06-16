@@ -50,7 +50,7 @@ class AdaptiveBiotechLoader(GenericLoader):
                         **{("0" + str(i)): str(i) for i in range(10)}}
 
         df[["v_subgroup", "v_gene", "j_subgroup", "j_gene"]] = df[
-            ["v_subgroup", "v_gene", "j_subgroup", "j_gene"]].replace(replace_dict)
+            ["v_subgroup", "v_gene", "j_subgroup", "j_gene"]].replace(replace_dict, regex=True)
 
         df["v_allele"] = df['v_gene'].str.cat(df['v_allele'], sep=Constants.ALLELE_DELIMITER)
         df["j_allele"] = df['j_gene'].str.cat(df['j_allele'], sep=Constants.ALLELE_DELIMITER)

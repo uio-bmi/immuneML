@@ -2,7 +2,7 @@ import copy
 
 from source.dsl.DefaultParamsLoader import DefaultParamsLoader
 from source.dsl.encoding_parsers.EncodingParameterParser import EncodingParameterParser
-from source.encodings.kmer_frequency.NormalizationType import NormalizationType
+from source.analysis.data_manipulation.NormalizationType import NormalizationType
 from source.encodings.kmer_frequency.ReadsType import ReadsType
 from source.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType import SequenceEncodingType
 
