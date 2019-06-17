@@ -1,4 +1,5 @@
 import copy
+import os
 
 import numpy as np
 import pandas as pd
@@ -34,10 +35,11 @@ class DataSummarizer:
 
         repertoires = mask.T.dot(dataset.encoded_data.repertoires)
         labels = DataSummarizer.split_values(groups, group_columns)
+        metadata_path = DataSummarizer.build_metadata_from_labels(dataset.metadata_path, labels)
 
         encoded = EncodedData(
             repertoires=repertoires,
-            labels=labels.to_dict(),
+            labels=labels.to_dict("list"),
             repertoire_ids=groups,
             feature_names=dataset.encoded_data.feature_names,
             feature_annotations=dataset.encoded_data.feature_annotations
@@ -49,10 +51,20 @@ class DataSummarizer:
             encoded_data=encoded,
             filenames=dataset.get_filenames(),
             identifier=dataset.id,
-            metadata_path=dataset.metadata_path
+            metadata_path=metadata_path
         )
 
         return result
+
+    @staticmethod
+    def build_metadata_from_labels(old_metadata_path: str, labels: pd.DataFrame) -> str:
+        if old_metadata_path:
+            path = os.path.dirname(os.path.abspath(old_metadata_path)) + "_{}_{}.csv"\
+                    .format(os.path.splitext(os.path.basename(old_metadata_path))[0], str(labels.columns).replace(",", "_"))
+            labels.to_csv(path)
+        else:
+            path = None
+        return path
 
     @staticmethod
     def group_features(dataset: Dataset, group_columns, group_summarization_type: GroupSummarizationType):
@@ -139,6 +151,17 @@ class DataSummarizer:
         return mask
 
     @staticmethod
+    def build_metadata(metadata_path: str, indices):
+        if metadata_path:
+            df = pd.read_csv(metadata_path, index_col=0).iloc[indices, :]
+            path = os.path.dirname(os.path.abspath(metadata_path)) + "_{}_filtered.csv"\
+                .format(os.path.splitext(os.path.basename(metadata_path))[0])
+            df.to_csv(path)
+        else:
+            path = None
+        return path
+
+    @staticmethod
     def filter_repertoires(dataset: Dataset, criteria: dict):
         """
         Takes an encoded dataset and filters repertoires based on a given set of criteria. Only repertories meeting
@@ -152,7 +175,8 @@ class DataSummarizer:
         results = matcher.match(criteria=criteria, data=data)
         indices = np.where(np.array(results))[0]
 
-        labels = data.iloc[indices, :].to_dict()
+        metadata_path = DataSummarizer.build_metadata(dataset.metadata_path, indices)
+        labels = data.iloc[indices, :].to_dict("list")
         repertoires = dataset.encoded_data.repertoires[indices, :]
         filenames = [dataset.get_filenames()[i] for i in indices]
         repertoire_ids = [dataset.encoded_data.repertoire_ids[i] for i in indices]
@@ -171,7 +195,7 @@ class DataSummarizer:
             encoded_data=encoded,
             filenames=filenames,
             identifier=dataset.id,
-            metadata_path=dataset.metadata_path
+            metadata_path=metadata_path
         )
 
         return result

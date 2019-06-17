@@ -100,9 +100,9 @@ class MLProcess:
         valid = True
         labels = self._label_configuration.get_labels_by_name()
         index = len(labels) - 1
+        metadata = self._get_metadata(dataset, labels)
         while valid and index >= 0:
-            unique_labels_count = [rep.metadata.custom_params[labels[index]] for rep in dataset.get_data()]
-            unique, counts = np.unique(unique_labels_count, return_counts=True)
+            unique, counts = np.unique(metadata[labels[index]], return_counts=True)
             valid = valid and len(unique) > 1 and all(count >= self._min_example_count for count in counts) \
                     and all(el in dataset.params[labels[index]] for el in unique)
             index -= 1
@@ -112,6 +112,16 @@ class MLProcess:
                           .format(labels[index]))
 
         return valid
+
+    def _get_metadata(self, dataset: Dataset, labels):
+        if dataset.metadata_path:
+            return dataset.get_metadata(labels)
+        else:
+            metadata = {label: [] for label in labels}
+            for rep in dataset.get_data():
+                for label in labels:
+                    metadata[label].append(rep.metadata.custom_params[label])
+            return metadata
 
     def _assess_ml_method(self, method: MLMethod, encoded_test_dataset: Dataset, run: int, path: str):
         MLMethodAssessment.run({

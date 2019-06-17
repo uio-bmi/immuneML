@@ -63,12 +63,12 @@ class DataSplitter(Step):
     @staticmethod
     def build_new_metadata(old_metadata_path, indices, split_type, split_index: int, dataset_type: str) -> str:
 
-        if old_metadata_path is not None and old_metadata_path != "":
+        if old_metadata_path:
 
             df = pd.read_csv(old_metadata_path, index_col=0)
             df = df.iloc[indices, :]
 
-            new_path = os.path.dirname(os.path.abspath(old_metadata_path)) + "{}_{}_{}_{}.csv"\
+            new_path = os.path.dirname(os.path.abspath(old_metadata_path)) + "/{}_{}_{}_{}.csv"\
                 .format(os.path.splitext(os.path.basename(old_metadata_path))[0], split_type, split_index, dataset_type)
             df.to_csv(new_path)
         else:
