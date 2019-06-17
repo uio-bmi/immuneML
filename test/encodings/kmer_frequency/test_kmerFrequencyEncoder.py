@@ -2,6 +2,9 @@ import pickle
 import shutil
 from unittest import TestCase
 
+import numpy as np
+
+from source.analysis.data_manipulation.NormalizationType import NormalizationType
 from source.data_model.dataset.Dataset import Dataset
 from source.data_model.metadata.Sample import Sample
 from source.data_model.receptor_sequence.ReceptorSequence import ReceptorSequence
@@ -9,7 +12,6 @@ from source.data_model.repertoire.Repertoire import Repertoire
 from source.data_model.repertoire.RepertoireMetadata import RepertoireMetadata
 from source.encodings.EncoderParams import EncoderParams
 from source.encodings.kmer_frequency.KmerFrequencyEncoder import KmerFrequencyEncoder
-from source.analysis.data_manipulation.NormalizationType import NormalizationType
 from source.encodings.kmer_frequency.ReadsType import ReadsType
 from source.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType import SequenceEncodingType
 from source.environment.EnvironmentSettings import EnvironmentSettings
@@ -74,4 +76,4 @@ class TestKmerFrequencyEncoder(TestCase):
 
         self.assertTrue(isinstance(d1, Dataset))
         self.assertTrue(isinstance(d2, Dataset))
-        self.assertEqual(0.67, round(d2.encoded_data.repertoires[0, 2], 2))
+        self.assertEqual(0.67, np.round(d2.encoded_data.repertoires[0, 2], 2))
