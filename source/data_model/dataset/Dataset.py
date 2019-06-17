@@ -45,4 +45,4 @@ class Dataset:
 
     def get_metadata(self, field_names: list):
         df = pd.read_csv(self.metadata_path, sep=",", usecols=field_names)
-        return df.to_dict()
+        return df.to_dict("list")
