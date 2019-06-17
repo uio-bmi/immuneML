@@ -44,7 +44,8 @@ class FisherExactFeatureAnnotation(TransformerMixin):
                 params=X.params,
                 encoded_data=encoded,
                 filenames=X.get_filenames(),
-                identifier=X.id
+                identifier=X.id,
+                metadata_path=X.metadata_path
             )
             dataset.encoded_data.feature_annotations.to_csv(self.result_path + "/feature_annotations.csv")
             FisherExactFeatureAnnotation.store(dataset, self.result_path, self.filename)
@@ -52,21 +53,21 @@ class FisherExactFeatureAnnotation(TransformerMixin):
             dataset = copy.deepcopy(X)
         return dataset
 
-    def fit(self, X, y=None):
+    def fit(self, X: Dataset, y=None):
         if not any(["fisher" in column for column in X.encoded_data.feature_annotations.columns]):
             repertoire_classes = FisherExactFeatureAnnotation.get_positive(X, self.positive_criteria)
             self.fisher_annotations = FisherExactFeatureAnnotation.compute_fisher_annotations(X, repertoire_classes)
         return self
 
     @staticmethod
-    def get_positive(X, positive_criteria):
+    def get_positive(X: Dataset, positive_criteria):
         data = pd.DataFrame(X.encoded_data.labels)
         matcher = CriteriaMatcher()
         results = matcher.match(criteria=positive_criteria, data=data)
         return results
 
     @staticmethod
-    def compute_fisher_annotations(X, repertoire_classes):
+    def compute_fisher_annotations(X: Dataset, repertoire_classes):
         feature_chunks = FisherExactFeatureAnnotation.create_chunks(X.encoded_data.repertoires, X.encoded_data.feature_names)
         args = [(feature_chunk, repertoire_classes, FisherExactWrapper()) for feature_chunk in feature_chunks]
         with Pool(os.cpu_count()) as pool:

@@ -1,6 +1,10 @@
 import shutil
 from unittest import TestCase
 
+from source.analysis.AxisType import AxisType
+from source.analysis.criteria_matches.DataType import DataType
+from source.analysis.criteria_matches.OperationType import OperationType
+from source.analysis.data_manipulation.NormalizationType import NormalizationType
 from source.data_model.dataset.Dataset import Dataset
 from source.encodings.EncoderParams import EncoderParams
 from source.encodings.kmer_frequency.KmerFrequencyEncoder import KmerFrequencyEncoder
@@ -13,10 +17,6 @@ from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.environment.LabelConfiguration import LabelConfiguration
 from source.util.PathBuilder import PathBuilder
 from source.util.RepertoireBuilder import RepertoireBuilder
-from source.analysis.AxisType import AxisType
-from source.analysis.criteria_matches.OperationType import OperationType
-from source.analysis.criteria_matches.DataType import DataType
-from source.analysis.data_manipulation.NormalizationType import NormalizationType
 
 
 class TestTopPublicFeatureEncoding(TestCase):

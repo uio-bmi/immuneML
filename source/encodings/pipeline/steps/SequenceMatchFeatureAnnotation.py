@@ -58,7 +58,7 @@ class SequenceMatchFeatureAnnotation(TransformerMixin):
     def fit(self, X, y=None):
         return self
 
-    def annotate(self, X):
+    def annotate(self, X: Dataset):
         match_annotations = self.compute_match_annotations(X)
         match_annotations.to_csv(self.result_path + "match_annotations.csv")
         feature_annotations = pd.merge(X.encoded_data.feature_annotations,
@@ -74,11 +74,11 @@ class SequenceMatchFeatureAnnotation(TransformerMixin):
             feature_annotations=feature_annotations
         )
         return Dataset(
-            data=X.data,
             params=X.params,
             encoded_data=encoded,
             filenames=X.get_filenames(),
-            identifier=X.id
+            identifier=X.id,
+            metadata_path=X.metadata_path
         )
 
     def is_annotated(self, X):

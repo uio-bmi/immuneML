@@ -68,7 +68,7 @@ class MiXCRLoader(DataLoader):
         repertoire_filenames = [out[0] for out in output]
         custom_params = MiXCRLoader._prepare_custom_params([out[1] for out in output])
 
-        dataset = Dataset(filenames=repertoire_filenames, params=custom_params)
+        dataset = Dataset(filenames=repertoire_filenames, params=custom_params, metadata_path=params["metadata_file"])
         return dataset
 
     @staticmethod

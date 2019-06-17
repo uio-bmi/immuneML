@@ -26,7 +26,7 @@ class GenericLoader(DataLoader):
         if os.path.exists(params["result_path"] + "/dataset.pkl"):
             return PickleLoader().load(params["result_path"] + "/dataset.pkl")
         PathBuilder.build(params["result_path"])
-        metadata = MetadataImport.import_metadata(params["metadata_file"])
+        metadata = MetadataImport.import_metadata(params["metadata_path"])
         params["metadata"] = metadata
         filepaths = [path + "/" + rep["rep_file"] for rep in metadata]
         dataset = self._load(filepaths, params)
@@ -45,7 +45,7 @@ class GenericLoader(DataLoader):
         repertoire_filenames = [out[0] for out in output]
         custom_params = self._prepare_custom_params([out[1] for out in output])
 
-        dataset = Dataset(filenames=repertoire_filenames, params=custom_params)
+        dataset = Dataset(filenames=repertoire_filenames, params=custom_params, metadata_path=params["metadata_path"])
         return dataset
 
     def _build_dtype(self, params, column_mapping):

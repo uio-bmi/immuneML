@@ -1,8 +1,13 @@
+import shutil
 from unittest import TestCase
 
 import numpy as np
+import pandas as pd
 
 from source.data_model.dataset.Dataset import Dataset
+from source.dsl.AssessmentType import AssessmentType
+from source.environment.EnvironmentSettings import EnvironmentSettings
+from source.util.PathBuilder import PathBuilder
 from source.workflows.steps.DataSplitter import DataSplitter
 
 
@@ -51,3 +56,21 @@ class TestDataSplitter(TestCase):
         self.assertEqual(len(tests[0].get_filenames()), 2)
         self.assertEqual(5, len(trains))
         self.assertEqual(5, len(tests))
+
+    def test_build_new_metadata(self):
+
+        path = EnvironmentSettings.tmp_test_path + "data_splitter/"
+        PathBuilder.build(path)
+
+        df = pd.DataFrame(data={"key1": [0, 1, 2, 3, 4, 5], "key2": [0, 1, 2, 3, 4, 5]})
+        df.to_csv(path+"metadata.csv")
+
+        filepath = DataSplitter.build_new_metadata(path+"metadata.csv", [1, 3, 4], AssessmentType.k_fold, 2, DataSplitter.TRAIN)
+
+        df2 = pd.read_csv(filepath, index_col=0)
+        self.assertEqual(3, df2.shape[0])
+        self.assertEqual(1, df2.iloc[0, 0])
+        self.assertEqual(3, df2.iloc[1, 1])
+        self.assertEqual(4, df2.iloc[2, 0])
+
+        shutil.rmtree(path)

@@ -10,11 +10,11 @@ from sklearn.feature_extraction import DictVectorizer
 from source.IO.dataset_export.PickleExporter import PickleExporter
 from source.IO.dataset_import.PickleLoader import PickleLoader
 from source.analysis.AxisType import AxisType
+from source.analysis.data_manipulation.DataSummarizer import DataSummarizer
 from source.data_model.dataset.Dataset import Dataset
 from source.data_model.encoded_data.EncodedData import EncodedData
 from source.encodings.DatasetEncoder import DatasetEncoder
 from source.encodings.EncoderParams import EncoderParams
-from source.analysis.data_manipulation.DataSummarizer import DataSummarizer
 from source.encodings.kmer_frequency.ReadsType import ReadsType
 from source.environment.Constants import Constants
 from source.util.FilenameHandler import FilenameHandler
@@ -77,7 +77,8 @@ class KmerFrequencyEncoder(DatasetEncoder):
 
         encoded_dataset = Dataset(filenames=dataset.get_filenames(),
                                   encoded_data=encoded_data,
-                                  params=dataset.params)
+                                  params=dataset.params,
+                                  metadata_path=dataset.metadata_path)
 
         KmerFrequencyEncoder.store(encoded_dataset, params)
 

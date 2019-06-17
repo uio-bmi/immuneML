@@ -22,7 +22,7 @@ class PublicSequenceFeatureAnnotation(TransformerMixin):
         self.filename = filename
         self.public_annotations = None
 
-    def _annotate_public_features(self, X):
+    def _annotate_public_features(self, X: Dataset):
         feature_annotations = pd.merge(X.encoded_data.feature_annotations,
                                        self.public_annotations,
                                        on="feature",
@@ -39,7 +39,8 @@ class PublicSequenceFeatureAnnotation(TransformerMixin):
             params=X.params,
             encoded_data=encoded,
             filenames=X.get_filenames(),
-            identifier=X.id
+            identifier=X.id,
+            metadata_path=X.metadata_path
         )
         return dataset
 

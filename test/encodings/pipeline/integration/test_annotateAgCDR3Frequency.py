@@ -1,18 +1,18 @@
 import shutil
 from unittest import TestCase
 
+from source.analysis.data_manipulation.NormalizationType import NormalizationType
 from source.data_model.dataset.Dataset import Dataset
 from source.encodings.EncoderParams import EncoderParams
 from source.encodings.kmer_frequency.KmerFrequencyEncoder import KmerFrequencyEncoder
-from source.analysis.data_manipulation.NormalizationType import NormalizationType
 from source.encodings.kmer_frequency.ReadsType import ReadsType
 from source.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType import SequenceEncodingType
 from source.encodings.pipeline.PipelineEncoder import PipelineEncoder
+from source.encodings.pipeline.steps.SequenceMatchFeatureAnnotation import SequenceMatchFeatureAnnotation
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.environment.LabelConfiguration import LabelConfiguration
 from source.util.PathBuilder import PathBuilder
 from source.util.RepertoireBuilder import RepertoireBuilder
-from source.encodings.pipeline.steps.SequenceMatchFeatureAnnotation import SequenceMatchFeatureAnnotation
 
 
 class TestAnnotateAgCDR3Frequency(TestCase):
@@ -74,7 +74,7 @@ reference_rep.tsv"""
             },
             "additional_columns": ["Antigen Protein", "MHC Class"],
             "strip_CF": True,
-            "metadata_file": path + "metadata.tsv"
+            "metadata_path": path + "metadata.tsv"
         }
 
         kmer_freq_params = {

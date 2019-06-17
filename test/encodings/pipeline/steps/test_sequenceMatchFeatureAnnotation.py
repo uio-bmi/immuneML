@@ -6,10 +6,8 @@ from scipy import sparse
 
 from source.data_model.dataset.Dataset import Dataset
 from source.data_model.encoded_data.EncodedData import EncodedData
-from source.encodings.EncoderParams import EncoderParams
 from source.encodings.pipeline.steps.SequenceMatchFeatureAnnotation import SequenceMatchFeatureAnnotation
 from source.environment.EnvironmentSettings import EnvironmentSettings
-from source.environment.LabelConfiguration import LabelConfiguration
 from source.util.PathBuilder import PathBuilder
 
 
@@ -62,7 +60,7 @@ reference_rep.tsv"""
                          "v_gene": "TRBV Gene"},
         "additional_columns": ["Antigen Protein", "MHC Class"],
         "strip_CF": True,
-        "metadata_file": path + "metadata.tsv"
+        "metadata_path": path + "metadata.tsv"
     }
 
     def test_transform_1(self):
