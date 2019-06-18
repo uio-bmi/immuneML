@@ -78,7 +78,7 @@ class KmerFrequencyEncoder(DatasetEncoder):
         encoded_dataset = Dataset(filenames=dataset.get_filenames(),
                                   encoded_data=encoded_data,
                                   params=dataset.params,
-                                  metadata_path=dataset.metadata_path)
+                                  metadata_file=dataset.metadata_file)
 
         KmerFrequencyEncoder.store(encoded_dataset, params)
 

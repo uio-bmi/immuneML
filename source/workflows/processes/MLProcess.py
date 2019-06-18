@@ -114,7 +114,7 @@ class MLProcess:
         return valid
 
     def _get_metadata(self, dataset: Dataset, labels):
-        if dataset.metadata_path:
+        if dataset.metadata_file:
             return dataset.get_metadata(labels)
         else:
             metadata = {label: [] for label in labels}

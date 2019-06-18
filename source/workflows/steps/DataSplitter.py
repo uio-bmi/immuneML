@@ -61,15 +61,15 @@ class DataSplitter(Step):
         return train_datasets, test_datasets
 
     @staticmethod
-    def build_new_metadata(old_metadata_path, indices, split_type, split_index: int, dataset_type: str) -> str:
+    def build_new_metadata(old_metadata_file, indices, split_type, split_index: int, dataset_type: str) -> str:
 
-        if old_metadata_path:
+        if old_metadata_file:
 
-            df = pd.read_csv(old_metadata_path, index_col=0)
+            df = pd.read_csv(old_metadata_file, index_col=0)
             df = df.iloc[indices, :]
 
-            new_path = os.path.dirname(os.path.abspath(old_metadata_path)) + "/{}_{}_{}_{}.csv"\
-                .format(os.path.splitext(os.path.basename(old_metadata_path))[0], split_type, split_index, dataset_type)
+            new_path = os.path.dirname(os.path.abspath(old_metadata_file)) + "/{}_{}_{}_{}.csv"\
+                .format(os.path.splitext(os.path.basename(old_metadata_file))[0], split_type, split_index, dataset_type)
             df.to_csv(new_path)
         else:
             new_path = None
@@ -107,6 +107,6 @@ class DataSplitter(Step):
     def build_dataset(dataset, indices_to_include, assessment_type, iteration, dataset_type):
         new_dataset = copy.deepcopy(dataset)
         new_dataset.set_filenames([new_dataset.get_filenames()[ind] for ind in indices_to_include])
-        new_dataset.metadata_path = DataSplitter.build_new_metadata(new_dataset.metadata_path, indices_to_include,
+        new_dataset.metadata_file = DataSplitter.build_new_metadata(new_dataset.metadata_file, indices_to_include,
                                                                     assessment_type, iteration, dataset_type)
         return new_dataset

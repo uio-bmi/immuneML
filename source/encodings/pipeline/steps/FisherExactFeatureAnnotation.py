@@ -45,7 +45,7 @@ class FisherExactFeatureAnnotation(TransformerMixin):
                 encoded_data=encoded,
                 filenames=X.get_filenames(),
                 identifier=X.id,
-                metadata_path=X.metadata_path
+                metadata_file=X.metadata_file
             )
             dataset.encoded_data.feature_annotations.to_csv(self.result_path + "/feature_annotations.csv")
             FisherExactFeatureAnnotation.store(dataset, self.result_path, self.filename)

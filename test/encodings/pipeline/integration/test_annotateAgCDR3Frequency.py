@@ -74,7 +74,7 @@ reference_rep.tsv"""
             },
             "additional_columns": ["Antigen Protein", "MHC Class"],
             "strip_CF": True,
-            "metadata_path": path + "metadata.csv"
+            "metadata_file": path + "metadata.csv"
         }
 
         kmer_freq_params = {

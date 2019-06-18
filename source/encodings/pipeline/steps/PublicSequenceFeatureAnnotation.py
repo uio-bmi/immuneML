@@ -40,7 +40,7 @@ class PublicSequenceFeatureAnnotation(TransformerMixin):
             encoded_data=encoded,
             filenames=X.get_filenames(),
             identifier=X.id,
-            metadata_path=X.metadata_path
+            metadata_file=X.metadata_file
         )
         return dataset
 

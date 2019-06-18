@@ -32,7 +32,7 @@ class MatchedReferenceEncoder(DatasetEncoder):
         matched_info = MatchedReferenceEncoder._match_repertories(dataset, params)
 
         encoded_dataset = Dataset(filenames=dataset.get_filenames(), params=dataset.params,
-                                  metadata_path=dataset.metadata_path)
+                                  metadata_file=dataset.metadata_file)
         encoded_repertoires, labels = MatchedReferenceEncoder._encode_repertoires(dataset, matched_info, params)
 
         feature_name = params["model"]["summary"].name.lower()

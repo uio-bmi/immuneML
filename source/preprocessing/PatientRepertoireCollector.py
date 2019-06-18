@@ -36,16 +36,16 @@ class PatientRepertoireCollector(Preprocessor):
                                                                          rep_map[key]))
 
         processed_dataset.set_filenames(filenames)
-        processed_dataset.metadata_path = PatientRepertoireCollector.build_new_metadata(dataset, indices_to_keep)
+        processed_dataset.metadata_file = PatientRepertoireCollector.build_new_metadata(dataset, indices_to_keep)
 
         return processed_dataset
 
     @staticmethod
     def build_new_metadata(dataset, indices_to_keep):
-        if dataset.metadata_path:
-            df = pd.read_csv(dataset.metadata_path, index_col=0).iloc[indices_to_keep, :]
-            path = os.path.dirname(os.path.abspath(dataset.metadata_path)) + "_{}_collected_repertoires.csv"\
-                .format(os.path.splitext(os.path.basename(dataset.metadata_path))[0])
+        if dataset.metadata_file:
+            df = pd.read_csv(dataset.metadata_file, index_col=0).iloc[indices_to_keep, :]
+            path = os.path.dirname(os.path.abspath(dataset.metadata_file)) + "_{}_collected_repertoires.csv"\
+                .format(os.path.splitext(os.path.basename(dataset.metadata_file))[0])
             df.to_csv(path)
         else:
             path = None
