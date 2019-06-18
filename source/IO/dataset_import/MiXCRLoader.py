@@ -41,8 +41,7 @@ class MiXCRLoader(DataLoader):
         "FR4":  {"AA": "aaSeqFR4",  "NT": "nSeqFR4"}
     }
 
-    @staticmethod
-    def load(path, params: dict = None) -> Dataset:
+    def load(self, path, params: dict = None) -> Dataset:
 
         PathBuilder.build(params["result_path"])
         filepaths = sorted(list(iglob(path + "**/*." + params["extension"], recursive=True)))

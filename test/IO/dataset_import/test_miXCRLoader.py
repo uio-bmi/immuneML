@@ -94,7 +94,7 @@ class TestMiXCRLoader(TestCase):
 
         convert_metadata(path + "tmp_input/", path + "metadata.csv", "CD", "HC")
 
-        dataset = MiXCRLoader.load(path + "tmp_input/", {
+        dataset = MiXCRLoader().load(path + "tmp_input/", {
             "additional_columns": ["minQualCDR3"],
             "sequence_type": "CDR1+CDR2+CDR3",
             "result_path": path + "tmp_output/",
