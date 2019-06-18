@@ -78,7 +78,9 @@ class SemanticModel:
                              model_selection_n_folds=method["model_selection_n_folds"],
                              training_percentage=method["training_percentage"],
                              split_count=method["split_count"],
-                             min_example_count=method["min_example_count"])
+                             min_example_count=method["min_example_count"],
+                             cores_for_training=method["cores_for_training"])
+
             proc.run()
             self._update_executed(method_id)
 

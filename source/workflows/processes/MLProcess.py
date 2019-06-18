@@ -22,7 +22,7 @@ class MLProcess:
 
     def __init__(self, dataset: Dataset, path: str, label_configuration: LabelConfiguration, encoder: DatasetEncoder,
                  encoder_params: dict, method: MLMethod, assessment_type: AssessmentType, metrics: list,
-                 model_selection_cv: bool, model_selection_n_folds: int = None, training_percentage: float = None,
+                 model_selection_cv: bool, model_selection_n_folds: int = None, cores_for_training : int = 1, training_percentage: float = None,
                  split_count: int = None, min_example_count: int = 1):
         self._dataset = dataset
         self._split_count = split_count
@@ -35,6 +35,7 @@ class MLProcess:
         self._assessment_type = assessment_type
         self._model_selection_cv = model_selection_cv
         self._n_folds = model_selection_n_folds
+        self._cores_for_training = cores_for_training
         assert all([isinstance(metric, MetricType) for metric in metrics]), \
             "MLProcess: metrics are not set to be an instance of MetricType."
         self._metrics = metrics
@@ -159,7 +160,8 @@ class MLProcess:
             "dataset": encoded_train_dataset,
             "labels": self._label_configuration.get_labels_by_name(),
             "model_selection_cv": self._model_selection_cv,
-            "model_selection_n_folds": self._n_folds
+            "model_selection_n_folds": self._n_folds,
+            "cores_for_training": self._cores_for_training
         })
 
     def _run_data_splitter(self) -> tuple:
