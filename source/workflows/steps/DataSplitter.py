@@ -84,7 +84,7 @@ class DataSplitter(Step):
         train_count = int(len(dataset.get_filenames()) * training_percentage)
         train_datasets, test_datasets = [], []
 
-        for i in range(input_params["count"]):
+        for i in range(input_params["split_count"]):
 
             indices = list(range(dataset.get_repertoire_count()))
             random.shuffle(indices)

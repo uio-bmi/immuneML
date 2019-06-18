@@ -42,6 +42,7 @@ class MLParser:
             "metrics": MLParser.map_metrics(ml_specification[method_id]),
             "model_selection_cv": ml_specification[method_id]["model_selection_cv"],
             "model_selection_n_folds": ml_specification[method_id]["model_selection_n_folds"],
+            "training_percentage": ml_specification[method_id]["training_percentage"],
             "split_count": ml_specification[method_id]["split_count"],
             "assessment_type": AssessmentType[ml_specification[method_id]["assessment_type"].lower()],
             "min_example_count": ml_specification[method_id]["min_example_count"]
