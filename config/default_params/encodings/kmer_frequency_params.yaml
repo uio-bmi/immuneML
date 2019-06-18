@@ -1,6 +1,6 @@
 normalization_type: l2  # normalize the frequency
 reads: unique  # count one clonotype as 1 vs count one clonotype as the number of reads for the clonotype
-sequence_encoding_type: continuous_kmer  # split sequence into overlapping k-mers
+sequence_encoding: continuous_kmer  # split sequence into overlapping k-mers
 k: 3  # k-mer length if k-mers are not gapped
 k_left: 1  # left k-mer length for gapped k-mers
 k_right: 1  # right k-mer length for gapped k-mer

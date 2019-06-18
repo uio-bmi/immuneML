@@ -59,7 +59,7 @@ class SignalImplanter(Step):
             processed_filenames.append(filename)
 
         processed_dataset = Dataset(filenames=processed_filenames, params=dataset.params,
-                                    metadata_path=dataset.metadata_path)
+                                    metadata_file=dataset.metadata_file)
         PickleExporter.export(processed_dataset, input_params["result_path"], FilenameHandler.get_dataset_name(SignalImplanter.__name__))
 
         return processed_dataset

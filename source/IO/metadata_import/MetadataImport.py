@@ -8,7 +8,7 @@ class MetadataImport:
     @staticmethod
     def import_metadata(path) -> list:
 
-        metadata_df = pd.read_csv(path, sep="\t")
+        metadata_df = pd.read_csv(path)
         custom_keys = metadata_df.keys().values.tolist()
 
         standard_keys = ["filename"]

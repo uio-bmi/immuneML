@@ -33,7 +33,7 @@ class KmerFrequencyEncoder(DatasetEncoder):
         "model": {
             "normalization_type": NormalizationType.RELATIVE_FREQUENCY,         # relative frequencies of k-mers or L2
             "reads": ReadsType.UNIQUE,                                          # unique or all
-            "sequence_encoding_strategy": SequenceEncodingType.CONTINUOUS_KMER, # continuous k-mers, gapped, IMGT-annotated or not
+            "sequence_encoding": SequenceEncodingType.CONTINUOUS_KMER, # continuous k-mers, gapped, IMGT-annotated or not
             "k": 3,                                                             # k-mer length
             ...
         },
@@ -78,7 +78,7 @@ class KmerFrequencyEncoder(DatasetEncoder):
         encoded_dataset = Dataset(filenames=dataset.get_filenames(),
                                   encoded_data=encoded_data,
                                   params=dataset.params,
-                                  metadata_path=dataset.metadata_path)
+                                  metadata_file=dataset.metadata_file)
 
         KmerFrequencyEncoder.store(encoded_dataset, params)
 
@@ -151,7 +151,7 @@ class KmerFrequencyEncoder(DatasetEncoder):
 
     @staticmethod
     def _prepare_sequence_encoder(params: EncoderParams):
-        class_name = params["model"]["sequence_encoding_strategy"].value
+        class_name = params["model"]["sequence_encoding"].value
         sequence_encoder = ReflectionHandler.get_class_by_name(class_name, "encodings")
         return sequence_encoder
 

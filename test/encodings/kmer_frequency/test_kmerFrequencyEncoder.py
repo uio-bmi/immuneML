@@ -51,7 +51,7 @@ class TestKmerFrequencyEncoder(TestCase):
             model={
                 "normalization_type": NormalizationType.RELATIVE_FREQUENCY,
                 "reads": ReadsType.UNIQUE,
-                "sequence_encoding_strategy": SequenceEncodingType.IDENTITY,
+                "sequence_encoding": SequenceEncodingType.IDENTITY,
                 "k": 3
             },
             filename="dataset.pkl"
@@ -66,7 +66,7 @@ class TestKmerFrequencyEncoder(TestCase):
             model={
                 "normalization_type": NormalizationType.RELATIVE_FREQUENCY,
                 "reads": ReadsType.UNIQUE,
-                "sequence_encoding_strategy": SequenceEncodingType.CONTINUOUS_KMER,
+                "sequence_encoding": SequenceEncodingType.CONTINUOUS_KMER,
                 "k": 3
             },
             filename="dataset.csv"

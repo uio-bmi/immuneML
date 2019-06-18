@@ -35,7 +35,7 @@ class DataSummarizer:
 
         repertoires = mask.T.dot(dataset.encoded_data.repertoires)
         labels = DataSummarizer.split_values(groups, group_columns)
-        metadata_path = DataSummarizer.build_metadata_from_labels(dataset.metadata_path, labels)
+        metadata_file = DataSummarizer.build_metadata_from_labels(dataset.metadata_file, labels)
 
         encoded = EncodedData(
             repertoires=repertoires,
@@ -51,16 +51,16 @@ class DataSummarizer:
             encoded_data=encoded,
             filenames=dataset.get_filenames(),
             identifier=dataset.id,
-            metadata_path=metadata_path
+            metadata_file=metadata_file
         )
 
         return result
 
     @staticmethod
-    def build_metadata_from_labels(old_metadata_path: str, labels: pd.DataFrame) -> str:
-        if old_metadata_path:
-            path = os.path.dirname(os.path.abspath(old_metadata_path)) + "_{}_{}.csv"\
-                    .format(os.path.splitext(os.path.basename(old_metadata_path))[0], str(labels.columns).replace(",", "_"))
+    def build_metadata_from_labels(old_metadata_file: str, labels: pd.DataFrame) -> str:
+        if old_metadata_file:
+            path = os.path.dirname(os.path.abspath(old_metadata_file)) + "_{}_{}.csv"\
+                    .format(os.path.splitext(os.path.basename(old_metadata_file))[0], str(labels.columns).replace(",", "_"))
             labels.to_csv(path)
         else:
             path = None
@@ -102,7 +102,7 @@ class DataSummarizer:
             encoded_data=encoded,
             filenames=dataset.get_filenames(),
             identifier=dataset.id,
-            metadata_path=dataset.metadata_path
+            metadata_file=dataset.metadata_file
         )
 
         return result
@@ -151,11 +151,11 @@ class DataSummarizer:
         return mask
 
     @staticmethod
-    def build_metadata(metadata_path: str, indices):
-        if metadata_path:
-            df = pd.read_csv(metadata_path, index_col=0).iloc[indices, :]
-            path = os.path.dirname(os.path.abspath(metadata_path)) + "_{}_filtered.csv"\
-                .format(os.path.splitext(os.path.basename(metadata_path))[0])
+    def build_metadata(metadata_file: str, indices):
+        if metadata_file:
+            df = pd.read_csv(metadata_file, index_col=0).iloc[indices, :]
+            path = os.path.dirname(os.path.abspath(metadata_file)) + "_{}_filtered.csv"\
+                .format(os.path.splitext(os.path.basename(metadata_file))[0])
             df.to_csv(path)
         else:
             path = None
@@ -175,7 +175,7 @@ class DataSummarizer:
         results = matcher.match(criteria=criteria, data=data)
         indices = np.where(np.array(results))[0]
 
-        metadata_path = DataSummarizer.build_metadata(dataset.metadata_path, indices)
+        metadata_file = DataSummarizer.build_metadata(dataset.metadata_file, indices)
         labels = data.iloc[indices, :].to_dict("list")
         repertoires = dataset.encoded_data.repertoires[indices, :]
         filenames = [dataset.get_filenames()[i] for i in indices]
@@ -195,7 +195,7 @@ class DataSummarizer:
             encoded_data=encoded,
             filenames=filenames,
             identifier=dataset.id,
-            metadata_path=metadata_path
+            metadata_file=metadata_file
         )
 
         return result
@@ -232,7 +232,7 @@ class DataSummarizer:
             encoded_data=encoded,
             filenames=dataset.get_filenames(),
             identifier=dataset.id,
-            metadata_path=dataset.metadata_path
+            metadata_file=dataset.metadata_file
         )
 
         return result
@@ -267,7 +267,7 @@ class DataSummarizer:
             encoded_data=encoded,
             filenames=dataset.get_filenames(),
             identifier=dataset.id,
-            metadata_path=dataset.metadata_path
+            metadata_file=dataset.metadata_file
         )
 
         return result
@@ -301,7 +301,7 @@ class DataSummarizer:
             encoded_data=encoded,
             filenames=dataset.get_filenames(),
             identifier=dataset.id,
-            metadata_path=dataset.metadata_path
+            metadata_file=dataset.metadata_file
         )
 
         return result
@@ -324,7 +324,7 @@ class DataSummarizer:
             encoded_data=encoded,
             filenames=dataset.get_filenames(),
             identifier=dataset.id,
-            metadata_path=dataset.metadata_path
+            metadata_file=dataset.metadata_file
         )
         return result
 
@@ -346,7 +346,7 @@ class DataSummarizer:
             encoded_data=encoded,
             filenames=dataset.get_filenames(),
             identifier=dataset.id,
-            metadata_path=dataset.metadata_path
+            metadata_file=dataset.metadata_file
         )
         return result
 

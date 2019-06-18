@@ -36,17 +36,17 @@ AAGAAGCTCCTTCTCAGTGACTCTGGCTTCTATCTCTGTGCCTGGAGTGTACGTCCGGGCGCAGGGTACGAGCAGTACTT
         with open(path + "rep1.tsv", "w") as file:
             file.writelines(rep1text)
 
-        with open(path + "metadata.tsv", "w") as file:
+        with open(path + "metadata.csv", "w") as file:
             file.writelines(
-            """filename	chain	donor	coeliac status (yes/no)
-rep1.tsv	TRA	1234	no"""
+            """filename,chain,donor,coeliac status (yes/no)
+rep1.tsv,TRA,1234,no"""
             )
 
         dataset = ImmunoSEQLoader().load(path, {"result_path": path,
                                               "dataset_id": "emerson2017",
                                               "batch_size": 1,
                                               "region_type": "CDR3",  # can be loaded from metadata if available?"
-                                              "metadata_file": path + "metadata.tsv"})
+                                              "metadata_file": path + "metadata.csv"})
 
         self.assertEqual(1, dataset.get_repertoire_count())
         for index, rep in enumerate(dataset.get_data()):

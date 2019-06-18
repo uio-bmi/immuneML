@@ -36,13 +36,13 @@ class DataSplitter(Step):
 
     @staticmethod
     def loocv_split(input_params: dict):
-        input_params["count"] = input_params["dataset"].get_repertoire_count()
+        input_params["split_count"] = input_params["dataset"].get_repertoire_count()
         return DataSplitter.k_fold_cv_split(input_params)
 
     @staticmethod
     def k_fold_cv_split(input_params: dict):
         dataset = input_params["dataset"]
-        splits_count = input_params["count"]
+        splits_count = input_params["split_count"]
         train_datasets, test_datasets = [], []
         filenames = copy.deepcopy(dataset.get_filenames())
         filenames = np.array(filenames)
@@ -61,15 +61,15 @@ class DataSplitter(Step):
         return train_datasets, test_datasets
 
     @staticmethod
-    def build_new_metadata(old_metadata_path, indices, split_type, split_index: int, dataset_type: str) -> str:
+    def build_new_metadata(old_metadata_file, indices, split_type, split_index: int, dataset_type: str) -> str:
 
-        if old_metadata_path:
+        if old_metadata_file:
 
-            df = pd.read_csv(old_metadata_path, index_col=0)
+            df = pd.read_csv(old_metadata_file, index_col=0)
             df = df.iloc[indices, :]
 
-            new_path = os.path.dirname(os.path.abspath(old_metadata_path)) + "/{}_{}_{}_{}.csv"\
-                .format(os.path.splitext(os.path.basename(old_metadata_path))[0], split_type, split_index, dataset_type)
+            new_path = os.path.dirname(os.path.abspath(old_metadata_file)) + "/{}_{}_{}_{}.csv"\
+                .format(os.path.splitext(os.path.basename(old_metadata_file))[0], split_type, split_index, dataset_type)
             df.to_csv(new_path)
         else:
             new_path = None
@@ -84,7 +84,7 @@ class DataSplitter(Step):
         train_count = int(len(dataset.get_filenames()) * training_percentage)
         train_datasets, test_datasets = [], []
 
-        for i in range(input_params["count"]):
+        for i in range(input_params["split_count"]):
 
             indices = list(range(dataset.get_repertoire_count()))
             random.shuffle(indices)
@@ -107,6 +107,6 @@ class DataSplitter(Step):
     def build_dataset(dataset, indices_to_include, assessment_type, iteration, dataset_type):
         new_dataset = copy.deepcopy(dataset)
         new_dataset.set_filenames([new_dataset.get_filenames()[ind] for ind in indices_to_include])
-        new_dataset.metadata_path = DataSplitter.build_new_metadata(new_dataset.metadata_path, indices_to_include,
+        new_dataset.metadata_file = DataSplitter.build_new_metadata(new_dataset.metadata_file, indices_to_include,
                                                                     assessment_type, iteration, dataset_type)
         return new_dataset

@@ -14,4 +14,4 @@ class TestKmerFrequencyParser(TestCase):
         parsed, specs = KmerFrequencyParser.parse(params)
         self.assertEqual(NormalizationType.L2, parsed["normalization_type"])
         self.assertEqual(3, parsed["k"])
-        self.assertEqual(SequenceEncodingType.CONTINUOUS_KMER, parsed["sequence_encoding_type"])
+        self.assertEqual(SequenceEncodingType.CONTINUOUS_KMER, parsed["sequence_encoding"])

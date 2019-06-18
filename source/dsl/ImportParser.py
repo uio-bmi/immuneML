@@ -22,7 +22,7 @@ class ImportParser:
         if "params" in dataset_specs.keys():
             params = {**params, **dataset_specs["params"]}
         workflow_specification["dataset_import"][key]["params"] = params  # update params with defaults
-        dataset = loader.load(dataset_specs["path"], params)
+        dataset = loader().load(dataset_specs["path"], params)
 
         dataset = ImportParser._preprocess(dataset, dataset_specs)
 

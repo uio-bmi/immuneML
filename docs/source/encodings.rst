@@ -69,7 +69,7 @@ To specify the encoding, one must define the following parameters:
         {
             "normalization_type": NormalizationType.RELATIVE_FREQUENCY,         # relative frequencies of k-mers or L2
             "reads": ReadsType.UNIQUE,                                          # unique or all
-            "sequence_encoding_strategy": SequenceEncodingType.CONTINUOUS_KMER, # continuous k-mers, gapped, IMGT-annotated or not
+            "sequence_encoding": SequenceEncodingType.CONTINUOUS_KMER, # continuous k-mers, gapped, IMGT-annotated or not
             "k": 3,                                                             # k-mer length
             ...
         }

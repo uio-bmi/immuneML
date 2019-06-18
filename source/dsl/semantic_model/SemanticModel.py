@@ -67,7 +67,6 @@ class SemanticModel:
             self._copy_specification_to_result(ml_path)
 
             proc = MLProcess(dataset=dataset,
-                             split_count=method["split_count"],
                              path=ml_path,
                              label_configuration=label_config,
                              encoder=self._symbol_table.get(method["encoding"])["encoder"],
@@ -77,6 +76,8 @@ class SemanticModel:
                              metrics=method["metrics"],
                              model_selection_cv=method["model_selection_cv"],
                              model_selection_n_folds=method["model_selection_n_folds"],
+                             training_percentage=method["training_percentage"],
+                             split_count=method["split_count"],
                              min_example_count=method["min_example_count"])
             proc.run()
             self._update_executed(method_id)
