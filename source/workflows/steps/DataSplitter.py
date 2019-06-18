@@ -36,13 +36,13 @@ class DataSplitter(Step):
 
     @staticmethod
     def loocv_split(input_params: dict):
-        input_params["count"] = input_params["dataset"].get_repertoire_count()
+        input_params["split_count"] = input_params["dataset"].get_repertoire_count()
         return DataSplitter.k_fold_cv_split(input_params)
 
     @staticmethod
     def k_fold_cv_split(input_params: dict):
         dataset = input_params["dataset"]
-        splits_count = input_params["count"]
+        splits_count = input_params["split_count"]
         train_datasets, test_datasets = [], []
         filenames = copy.deepcopy(dataset.get_filenames())
         filenames = np.array(filenames)

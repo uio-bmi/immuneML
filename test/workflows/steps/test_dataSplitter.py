@@ -21,7 +21,7 @@ class TestDataSplitter(TestCase):
             "dataset": dataset,
             "training_percentage": training_percentage,
             "assessment_type": "random",
-            "count": 5
+            "split_count": 5
         })
 
         self.assertTrue(isinstance(trains[0], Dataset))
@@ -47,7 +47,7 @@ class TestDataSplitter(TestCase):
         trains, tests = DataSplitter.perform_step({
             "dataset": dataset,
             "assessment_type": "k_fold_cv",
-            "count": 5
+            "split_count": 5
         })
 
         self.assertTrue(isinstance(trains[0], Dataset))

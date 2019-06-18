@@ -4,3 +4,4 @@ min_example_count: 2 # minimum number of examples per class for the machine lear
 model_selection_cv: false # whether to use cross-validation and random search to estimate the optimal parameters for one split to train/test
 model_selection_n_folds: -1 # number of folds if cross-validation is used for model selection and optimal parameter estimation
 split_count: 5 # if assessment type is repeated random splits, how many times to do the random splitting
+training_percentage: 80 # if assessment type is random split, how much to use for training the model
