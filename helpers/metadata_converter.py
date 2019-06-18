@@ -21,7 +21,7 @@ def convert_metadata(path, result_path, disease_name: str, negative_class_name: 
 
     df = pd.DataFrame.from_dict({"donor": donors, "chain": chains, disease_name: disease, "filename": filenames})
     with open(result_path, "w") as file:
-        df.to_csv(file, sep="\t", index=False, header=True)
+        df.to_csv(file, index=False, header=True)
 
 
 if __name__ == "__main__":

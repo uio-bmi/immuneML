@@ -49,11 +49,11 @@ class TestAdaptiveBiotechLoader(TestCase):
         with open(path + "rep2.tsv", "w") as file:
             file.writelines(rep2text)
 
-        with open(path + "metadata.tsv", "w") as file:
+        with open(path + "metadata.csv", "w") as file:
             file.writelines(
-            """filename	chain	donor	coeliac status (yes/no)
-rep1.tsv	TRA	1234	no
-rep2.tsv	TRB	1234	no"""
+            """filename,chain,donor,coeliac status (yes/no)
+rep1.tsv,TRA,1234,no
+rep2.tsv,TRB,1234,no"""
             )
 
         dataset = AdaptiveBiotechLoader().load(path,
@@ -62,7 +62,7 @@ rep2.tsv	TRB	1234	no"""
                                                   "dataset_id": "emerson2017",
                                                   "batch_size": 1,
                                                   "region_type": "CDR3",  # can be loaded from metadata if available?
-                                                  "metadata_file": path + "metadata.tsv"
+                                                  "metadata_file": path + "metadata.csv"
                                                }
                                                )
 

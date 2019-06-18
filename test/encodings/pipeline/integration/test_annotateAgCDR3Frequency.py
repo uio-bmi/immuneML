@@ -61,7 +61,7 @@ reference_rep.tsv"""
         PathBuilder.build(path)
         with open(path + "reference_rep.tsv", "w") as file:
             file.writelines(reference_rep)
-        with open(path + "metadata.tsv", "w") as file:
+        with open(path + "metadata.csv", "w") as file:
             file.writelines(reference_metadata)
 
         reference_data_loader_params = {
@@ -74,7 +74,7 @@ reference_rep.tsv"""
             },
             "additional_columns": ["Antigen Protein", "MHC Class"],
             "strip_CF": True,
-            "metadata_path": path + "metadata.tsv"
+            "metadata_path": path + "metadata.csv"
         }
 
         kmer_freq_params = {

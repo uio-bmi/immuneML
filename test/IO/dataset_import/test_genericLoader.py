@@ -31,10 +31,10 @@ T1D#3 C8	TBD	TRAJ23	TRAV17	CATDAGYNQGGKLIF	TRBV5-1	TRBD2	TRBJ1-3	CASSAGNTIYF	Ins
         with open(path + "rep1.tsv", "w") as file:
             file.writelines(rep1text)
 
-        with open(path + "metadata.tsv", "w") as file:
+        with open(path + "metadata.csv", "w") as file:
             file.writelines(
-                """filename	chain	donor	coeliac status (yes/no)
-rep1.tsv	TRA	1234	no"""
+                """filename,chain,donor,coeliac status (yes/no)
+rep1.tsv,TRA,1234,no"""
             )
 
         dataset = GenericLoader().load(path, {"result_path": path,
@@ -44,7 +44,7 @@ rep1.tsv	TRA	1234	no"""
                                                                  "j_gene": "TRBJ Gene",},
                                               "additional_columns": ["Antigen Protein", "MHC Class"],
                                               "strip_CF": True,
-                                              "metadata_file": path + "metadata.tsv"})
+                                              "metadata_file": path + "metadata.csv"})
 
         self.assertEqual(1, dataset.get_repertoire_count())
         for index, rep in enumerate(dataset.get_data()):

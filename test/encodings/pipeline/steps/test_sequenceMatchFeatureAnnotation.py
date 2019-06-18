@@ -6,8 +6,10 @@ from scipy import sparse
 
 from source.data_model.dataset.Dataset import Dataset
 from source.data_model.encoded_data.EncodedData import EncodedData
+from source.encodings.EncoderParams import EncoderParams
 from source.encodings.pipeline.steps.SequenceMatchFeatureAnnotation import SequenceMatchFeatureAnnotation
 from source.environment.EnvironmentSettings import EnvironmentSettings
+from source.environment.LabelConfiguration import LabelConfiguration
 from source.util.PathBuilder import PathBuilder
 
 
@@ -57,10 +59,10 @@ reference_rep.tsv"""
         "dataset_id": "t1d_verified",
         "extension": "tsv",
         "column_mapping": {"amino_acid": "CDR3B AA Sequence",
-                         "v_gene": "TRBV Gene"},
+                           "v_gene": "TRBV Gene"},
         "additional_columns": ["Antigen Protein", "MHC Class"],
         "strip_CF": True,
-        "metadata_path": path + "metadata.tsv"
+        "metadata_file": path + "metadata.csv"
     }
 
     def test_transform_1(self):
@@ -69,7 +71,7 @@ reference_rep.tsv"""
         PathBuilder.build(path)
         with open(path + "reference_rep.tsv", "w") as file:
             file.writelines(TestSequenceMatchFeatureAnnotation.reference_rep)
-        with open(path + "metadata.tsv", "w") as file:
+        with open(path + "metadata.csv", "w") as file:
             file.writelines(TestSequenceMatchFeatureAnnotation.reference_metadata)
 
         step = SequenceMatchFeatureAnnotation(reference_sequence_path=path,
@@ -96,7 +98,7 @@ reference_rep.tsv"""
         PathBuilder.build(path)
         with open(path + "reference_rep.tsv", "w") as file:
             file.writelines(TestSequenceMatchFeatureAnnotation.reference_rep)
-        with open(path + "metadata.tsv", "w") as file:
+        with open(path + "metadata.csv", "w") as file:
             file.writelines(TestSequenceMatchFeatureAnnotation.reference_metadata)
 
         step = SequenceMatchFeatureAnnotation(reference_sequence_path=path,
@@ -123,7 +125,7 @@ reference_rep.tsv"""
         PathBuilder.build(path)
         with open(path + "reference_rep.tsv", "w") as file:
             file.writelines(TestSequenceMatchFeatureAnnotation.reference_rep)
-        with open(path + "metadata.tsv", "w") as file:
+        with open(path + "metadata.csv", "w") as file:
             file.writelines(TestSequenceMatchFeatureAnnotation.reference_metadata)
 
         step = SequenceMatchFeatureAnnotation(reference_sequence_path=path,
@@ -150,7 +152,7 @@ reference_rep.tsv"""
         PathBuilder.build(path)
         with open(path + "reference_rep.tsv", "w") as file:
             file.writelines(TestSequenceMatchFeatureAnnotation.reference_rep)
-        with open(path + "metadata.tsv", "w") as file:
+        with open(path + "metadata.csv", "w") as file:
             file.writelines(TestSequenceMatchFeatureAnnotation.reference_metadata)
 
         step = SequenceMatchFeatureAnnotation(reference_sequence_path=path,
