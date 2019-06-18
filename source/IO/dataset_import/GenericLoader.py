@@ -1,6 +1,7 @@
 import os
 import pickle
 from multiprocessing.pool import Pool
+import copy
 
 import numpy as np
 import pandas as pd
@@ -23,6 +24,7 @@ from source.util.PathBuilder import PathBuilder
 class GenericLoader(DataLoader):
 
     def load(self, path, params: dict = None) -> Dataset:
+        params = copy.deepcopy(params)
         if os.path.exists(params["result_path"] + "/dataset.pkl"):
             return PickleLoader().load(params["result_path"] + "/dataset.pkl")
         PathBuilder.build(params["result_path"])
