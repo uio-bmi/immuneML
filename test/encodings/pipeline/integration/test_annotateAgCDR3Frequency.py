@@ -80,7 +80,7 @@ reference_rep.tsv"""
         kmer_freq_params = {
             "normalization_type": NormalizationType.RELATIVE_FREQUENCY,
             "reads": ReadsType.UNIQUE,
-            "sequence_encoding_strategy": SequenceEncodingType.IDENTITY,
+            "sequence_encoding": SequenceEncodingType.IDENTITY,
             "metadata_fields_to_include": []
         }
 

@@ -26,6 +26,6 @@ class KmerFrequencyParser(EncodingParameterParser):
         KmerFrequencyParser.check_parameters(model_params)
         model_params["normalization_type"] = NormalizationType[model_params["normalization_type"].upper()]
         model_params["reads"] = ReadsType[model_params["reads"].upper()]
-        model_params["sequence_encoding_type"] = SequenceEncodingType[model_params["sequence_encoding_type"].upper()]
+        model_params["sequence_encoding"] = SequenceEncodingType[model_params["sequence_encoding"].upper()]
 
         return model_params, specs

@@ -68,7 +68,7 @@ class TestTopPublicFeatureEncoding(TestCase):
                     "initial_encoder_params": {
                         "normalization_type": NormalizationType.NONE,
                         "reads": ReadsType.UNIQUE,
-                        "sequence_encoding_strategy": SequenceEncodingType.IDENTITY,
+                        "sequence_encoding": SequenceEncodingType.IDENTITY,
                         "metadata_fields_to_include": []
                     },
                     "steps": [PublicSequenceFeatureAnnotation(result_path=path, filename="encoded_data.pickle"), CriteriaBasedFilter(

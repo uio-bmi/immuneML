@@ -14,7 +14,7 @@ class TestEncodingParser(TestCase):
                     "type": "KmerFrequency",
                     "params": {
                         "normalization_type": "relative_frequency",
-                        "sequence_encoding_type": "identity",
+                        "sequence_encoding": "identity",
                         "k": 3
                     },
                     "dataset": "d1"
