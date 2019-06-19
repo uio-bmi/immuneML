@@ -153,6 +153,7 @@ class MLProcess:
                 pipeline_path=path,
                 batch_size=self._batch_size,
                 label_configuration=self._label_configuration,
+                learn_model=infer_model,
                 filename="train_dataset.pkl" if infer_model else "test_dataset.pkl"
             )
         })
