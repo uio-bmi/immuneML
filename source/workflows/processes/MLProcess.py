@@ -94,7 +94,6 @@ class MLProcess:
 
         path = self._path + "run_{}/".format(run+1)
         PathBuilder.build(path)
-        print(len(train_dataset.get_filenames()), len(test_dataset.get_filenames()))
         encoded_train = self._run_encoder(train_dataset, True, path)
         encoded_test = self._run_encoder(test_dataset, False, path)
         method = self._train_ml_method(encoded_train, path)
@@ -178,5 +177,4 @@ class MLProcess:
             params["split_count"] = self._split_count  # ignored for loocv
         if self._training_percentage is not None:
             params["training_percentage"] = self._training_percentage
-        print(params["training_percentage"], "for training")
         return DataSplitter.run(params)
