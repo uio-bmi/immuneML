@@ -177,5 +177,5 @@ class MLProcess:
             params["split_count"] = self._split_count  # ignored for loocv
         if self._training_percentage is not None:
             params["training_percentage"] = self._training_percentage
-        print(params["split_count"], "splits")
+        print(params["training_percentage"], "for training")
         return DataSplitter.run(params)
