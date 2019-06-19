@@ -92,6 +92,9 @@ class KmerFrequencyEncoder(DatasetEncoder):
         print(arguments)
         print(len(arguments))
 
+        print(params["batch_size"])
+        print(math.floor(len(dataset.get_filenames())/params["batch_size"]) + 1)
+
         with Pool(params["batch_size"]) as pool:
             repertoires = pool.starmap(KmerFrequencyEncoder._encode_repertoire, arguments, chunksize=math.floor(len(dataset.get_filenames())/params["batch_size"]) + 1)
 
