@@ -79,7 +79,8 @@ class SemanticModel:
                              training_percentage=method["training_percentage"],
                              split_count=method["split_count"],
                              min_example_count=method["min_example_count"],
-                             cores_for_training=method["cores_for_training"])
+                             cores_for_training=method["cores_for_training"],
+                             batch_size=method["batch_size"])
 
             proc.run()
             self._update_executed(method_id)
@@ -162,7 +163,7 @@ class SemanticModel:
             "encoder_params": EncoderParams(result_path=self._create_result_path("encoding"),
                                             filename="dataset.pickle",
                                             label_configuration=label_config,
-                                            model=params, batch_size=4, learn_model=True,
+                                            model=params, batch_size=params["batch_size"], learn_model=True,
                                             model_path=path, scaler_path=path, vectorizer_path=path, pipeline_path=path)
         })
 

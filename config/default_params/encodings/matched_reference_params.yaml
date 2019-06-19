@@ -1,2 +1,3 @@
 summary: count # matched percentage if the clonal count of the sequence divided by total clonal count in the repertoire
 max_distance: 2 # max Levenshtein distance
+batch_size: 1
