@@ -9,7 +9,6 @@ import numpy as np
 from sklearn.model_selection import RandomizedSearchCV
 from sklearn.utils.validation import check_is_fitted
 
-from source.environment.ParallelismManager import ParallelismManager
 from source.ml_methods.MLMethod import MLMethod
 from source.util.FilenameHandler import FilenameHandler
 from source.util.PathBuilder import PathBuilder
@@ -72,16 +71,20 @@ class SklearnMethod(MLMethod):
         for label in label_names:
             self._fit_for_label_by_cv(X, y[label], label, cores_for_training, number_of_splits)
 
-    def store(self, path):
+    def store(self, path, feature_names=None):
         PathBuilder.build(path)
         name = FilenameHandler.get_filename(self.__class__.__name__, "pickle")
         params_name = FilenameHandler.get_filename(self.__class__.__name__, "json")
         with open(path + name, "wb") as file:
             pickle.dump(self._models, file)
         with open(path + params_name, "w") as file:
-            desc = {label: self._models[label].estimator.get_params()
-                    if isinstance(self._models[label], RandomizedSearchCV)
-                    else self._models[label].get_params() for label in self._models.keys()}
+            desc = {}
+            for label in self._models.keys():
+                desc[label] = {
+                    **(self.get_params(label)),
+                    "feature_names": feature_names,
+                    "classes": self._models[label].classes_.tolist()
+                }
             json.dump(desc, file, indent=2)
 
     def load(self, path):

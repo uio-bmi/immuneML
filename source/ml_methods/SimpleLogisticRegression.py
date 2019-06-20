@@ -1,11 +1,12 @@
 from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import RandomizedSearchCV
 
 from source.ml_methods.SklearnMethod import SklearnMethod
 
 
 class SimpleLogisticRegression(SklearnMethod):
 
-    default_parameters = {"max_iter": 1000, "solver": "saga", "multi_class": "multinomial"}
+    default_parameters = {"max_iter": 1000}
 
     def __init__(self, parameter_grid: dict = None, parameters: dict = None):
         super(SimpleLogisticRegression, self).__init__()
@@ -28,7 +29,8 @@ class SimpleLogisticRegression(SklearnMethod):
         return True
 
     def get_params(self, label):
-        params = self._models[label].get_params()
-        params["coefficients"] = self._models[label].coef_
-        params["intercept"] = self._models[label].intercept_
+        params = self._models[label].estimator.get_params() if isinstance(self._models[label], RandomizedSearchCV) \
+            else self._models[label].get_params()
+        params["coefficients"] = self._models[label].coef_.tolist()
+        params["intercept"] = self._models[label].intercept_.tolist()
         return params

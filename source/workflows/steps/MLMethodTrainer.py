@@ -21,7 +21,7 @@ class MLMethodTrainer(Step):
 
         if not method.check_if_exists(input_params["result_path"]):
             method = MLMethodTrainer._fit_method(input_params)
-            method.store(input_params["result_path"])
+            method.store(input_params["result_path"], input_params["dataset"].encoded_data.feature_names)
         else:
             method.load(input_params["result_path"])
 
