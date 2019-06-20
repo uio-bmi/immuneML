@@ -3,13 +3,13 @@ import shutil
 from unittest import TestCase
 
 import pandas as pd
-from source.preprocessing.filters.DatasetChainFilter import DatasetChainFilter
 
 from source.data_model.dataset.Dataset import Dataset
 from source.data_model.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.data_model.receptor_sequence.SequenceMetadata import SequenceMetadata
 from source.data_model.repertoire.Repertoire import Repertoire
 from source.environment.EnvironmentSettings import EnvironmentSettings
+from source.preprocessing.filters.DatasetChainFilter import DatasetChainFilter
 from source.util.PathBuilder import PathBuilder
 
 
