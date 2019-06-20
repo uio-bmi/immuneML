@@ -57,7 +57,7 @@ class SklearnMethod(MLMethod):
             return None
 
     def _fit_for_label_by_cv(self, X: Iterable, y: np.ndarray, label: str, cores_for_training: int, number_of_splits: int = 5):
-        self._models[label] = RandomizedSearchCV(self._get_ml_model(cores_for_training=1),
+        self._models[label] = RandomizedSearchCV(self._get_ml_model(cores_for_training=cores_for_training),
                                                  param_distributions=self._parameter_grid,
                                                  cv=number_of_splits, n_jobs=cores_for_training,
                                                  scoring="balanced_accuracy", refit=True)
