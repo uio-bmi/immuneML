@@ -11,9 +11,7 @@ class MetadataImport:
         metadata_df = pd.read_csv(path)
         custom_keys = metadata_df.keys().values.tolist()
 
-        standard_keys = ["filename"]
-        for key in standard_keys:
-            custom_keys.remove(key)
+        custom_keys.remove("filename")
 
         mapping = metadata_df.apply(MetadataImport.extract_repertoire, axis=1, args=(custom_keys, )).values
 
