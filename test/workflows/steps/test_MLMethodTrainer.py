@@ -32,7 +32,8 @@ class TestMLMethodTrainer(TestCase):
             "labels": ["l1"],
             "method": method,
             "model_selection_n_folds": 2,
-            "model_selection_cv": True
+            "model_selection_cv": True,
+            "cores_for_training": 1
         })
 
         method.predict(np.array([1, 2, 3]).reshape(1, -1), ["l1"])

@@ -37,9 +37,10 @@ class MLMethodTrainer(Step):
         if input_params["model_selection_cv"] is True:
             method.fit_by_cross_validation(X=X, y=y,
                                            number_of_splits=input_params["model_selection_n_folds"],
-                                           label_names=input_params["labels"])
+                                           label_names=input_params["labels"],
+                                           cores_for_training=input_params["cores_for_training"])
         else:
-            method.fit(X, y, label_names=input_params["labels"])
+            method.fit(X, y, label_names=input_params["labels"], cores_for_training=input_params["cores_for_training"])
 
         return method
 

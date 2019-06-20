@@ -81,7 +81,12 @@ class DataSplitter(Step):
 
         dataset = input_params["dataset"]
         training_percentage = input_params["training_percentage"]
+
+        if training_percentage > 1:
+            training_percentage = training_percentage/100
+
         train_count = int(len(dataset.get_filenames()) * training_percentage)
+
         train_datasets, test_datasets = [], []
 
         for i in range(input_params["split_count"]):

@@ -22,24 +22,21 @@ class SklearnMethod(MLMethod):
         self._parameter_grid = {}
         self._parameters = None
 
-    def _fit_for_label(self, X: Iterable, y: np.ndarray, label: str, cores: int):
-        self._models[label] = self._get_ml_model()
+    def _fit_for_label(self, X: Iterable, y: np.ndarray, label: str, cores_for_training: int):
+        self._models[label] = self._get_ml_model(cores_for_training)
         self._models[label].fit(X, y)
 
-    def fit(self, X: Iterable, y, label_names: list = None):
-        cores = ParallelismManager.assign_cores_to_job()
+    def fit(self, X: Iterable, y, label_names: list = None, cores_for_training: int = 1):
 
         if label_names is not None:
             for index, label in enumerate(label_names):
-                self._fit_for_label(X, y[label], label, cores)
+                self._fit_for_label(X, y[label], label, cores_for_training)
         else:
             warnings.warn(
                 "{}: label names not set, assuming only one and attempting to fit the model with label 'default'..."
                     .format(self.__class__.__name__),
                 Warning)
-            self._fit_for_label(X, y["default"], "default", cores)
-
-        ParallelismManager.free_cores(cores=cores)
+            self._fit_for_label(X, y["default"], "default", cores_for_training)
 
     def _can_predict_proba(self) -> bool:
         return False
@@ -59,25 +56,21 @@ class SklearnMethod(MLMethod):
         else:
             return None
 
-    def _fit_for_label_by_cv(self, X: Iterable, y: np.ndarray, label: str, cores: int, number_of_splits: int = 5):
+    def _fit_for_label_by_cv(self, X: Iterable, y: np.ndarray, label: str, cores_for_training: int, number_of_splits: int = 5):
         self._models[label] = RandomizedSearchCV(self._get_ml_model(cores_for_training=1),
                                                  param_distributions=self._parameter_grid,
-                                                 cv=number_of_splits, n_jobs=cores,
+                                                 cv=number_of_splits, n_jobs=cores_for_training,
                                                  scoring="balanced_accuracy", refit=True)
         self._models[label].fit(X, y)
         self._models[label] = self._models[label].best_estimator_  # do not leave RandomSearchCV object to be in models, but use the best estimator instead
 
     def fit_by_cross_validation(self, X, y, number_of_splits: int = 5, parameter_grid: dict = None,
-                                label_names: list = None):
+                                label_names: list = None, cores_for_training: int = 1):
         if parameter_grid is not None:
             self._parameter_grid = parameter_grid
 
-        n_jobs = ParallelismManager.assign_cores_to_job()
-
         for label in label_names:
-            self._fit_for_label_by_cv(X, y[label], label, n_jobs, number_of_splits)
-
-        ParallelismManager.free_cores(cores=n_jobs)
+            self._fit_for_label_by_cv(X, y[label], label, cores_for_training, number_of_splits)
 
     def store(self, path):
         PathBuilder.build(path)

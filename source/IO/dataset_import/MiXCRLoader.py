@@ -2,6 +2,7 @@ import os
 import pickle
 from glob import iglob, glob
 from multiprocessing.pool import Pool
+import copy
 
 import pandas as pd
 from pandas import DataFrame
@@ -42,7 +43,7 @@ class MiXCRLoader(DataLoader):
     }
 
     def load(self, path, params: dict = None) -> Dataset:
-
+        params = copy.deepcopy(params)
         PathBuilder.build(params["result_path"])
         filepaths = sorted(list(iglob(path + "**/*." + params["extension"], recursive=True)))
 
