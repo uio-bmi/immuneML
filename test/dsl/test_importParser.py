@@ -4,8 +4,8 @@ from unittest import TestCase
 
 from helpers.metadata_converter import convert_metadata
 from source.data_model.dataset.Dataset import Dataset
-from source.dsl.ImportParser import ImportParser
 from source.dsl.SymbolTable import SymbolTable
+from source.dsl.import_parsers.ImportParser import ImportParser
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.util.PathBuilder import PathBuilder
 
@@ -159,5 +159,39 @@ class TestImportParser(TestCase):
         self.assertEqual(0, len(st.get("d1")["dataset"].get_filenames()))
 
         self.assertEqual(100, desc["d1"]["preprocessing"]["filter_out_short_reps"]["params"]["lower_limit"])
+
+        specs = {
+            "dataset_import": {
+                "d1": {
+                    "path": path + "tmp_input/",
+                    "format": "MiXCR",
+                    "params": {
+                        "sequence_type": "CDR2+CDR3",
+                        "result_path": path + "tmp_output/",
+                        "extension": "csv",
+                        "metadata_file": path + "metadata.csv"
+                    },
+                    "preprocessing": {
+                        "filter_cd": {
+                            "type": "MetadataFilter",
+                            "params": {
+                                "criteria": {
+                                    "type": "in",
+                                    "value": {
+                                        "type": "column",
+                                        "name": "donor"
+                                    },
+                                    "allowed_values": ["CD1"]
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        st, desc = ImportParser.parse(specs, SymbolTable())
+        self.assertTrue(isinstance(st.get("d1")["dataset"], Dataset))
+        self.assertEqual(1, len(st.get("d1")["dataset"].get_filenames()))
 
         shutil.rmtree(path)
