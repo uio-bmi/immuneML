@@ -6,5 +6,5 @@ model_selection_n_folds: -1 # number of folds if cross-validation is used for mo
 split_count: 5 # if assessment type is repeated random splits, how many times to do the random splitting
 training_percentage: 80 # if assessment type is random split, how much to use for training the model
 cores_for_training: 1
-batch_size: 2,
+batch_size: 2
 label_to_balance:
