@@ -3,7 +3,7 @@ import os
 
 import yaml
 
-from source.dsl.ImportParser import ImportParser
+from source.dsl.import_parsers.ImportParser import ImportParser
 from source.dsl.MLParser import MLParser
 from source.dsl.ReportParser import ReportParser
 from source.dsl.SimulationParser import SimulationParser

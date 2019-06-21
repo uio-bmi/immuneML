@@ -1,14 +1,17 @@
 from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import RandomizedSearchCV
 
 from source.ml_methods.SklearnMethod import SklearnMethod
 
 
 class SimpleLogisticRegression(SklearnMethod):
 
+    default_parameters = {"max_iter": 1000}
+
     def __init__(self, parameter_grid: dict = None, parameters: dict = None):
         super(SimpleLogisticRegression, self).__init__()
 
-        self._parameters = parameters if parameters is not None else {"max_iter": 1000}
+        self._parameters = {**self.default_parameters, **(parameters if parameters is not None else {})}
 
         if parameter_grid is not None:
             self._parameter_grid = parameter_grid
@@ -19,14 +22,15 @@ class SimpleLogisticRegression(SklearnMethod):
                                     "class_weight": ["balanced"]}
 
     def _get_ml_model(self, cores_for_training: int = 2):
-        self._parameters["solver"] = "liblinear"
+        self._parameters["n_jobs"] = cores_for_training
         return LogisticRegression(**self._parameters)
 
     def _can_predict_proba(self) -> bool:
         return True
 
     def get_params(self, label):
-        params = self._models[label].get_params()
-        params["coefficients"] = self._models[label].coef_
-        params["intercept"] = self._models[label].intercept_
+        params = self._models[label].estimator.get_params() if isinstance(self._models[label], RandomizedSearchCV) \
+            else self._models[label].get_params()
+        params["coefficients"] = self._models[label].coef_.tolist()
+        params["intercept"] = self._models[label].intercept_.tolist()
         return params

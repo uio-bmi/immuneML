@@ -21,7 +21,7 @@ class MLMethodTrainer(Step):
 
         if not method.check_if_exists(input_params["result_path"]):
             method = MLMethodTrainer._fit_method(input_params)
-            method.store(input_params["result_path"])
+            method.store(input_params["result_path"], input_params["dataset"].encoded_data.feature_names)
         else:
             method.load(input_params["result_path"])
 
@@ -37,9 +37,10 @@ class MLMethodTrainer(Step):
         if input_params["model_selection_cv"] is True:
             method.fit_by_cross_validation(X=X, y=y,
                                            number_of_splits=input_params["model_selection_n_folds"],
-                                           label_names=input_params["labels"])
+                                           label_names=input_params["labels"],
+                                           cores_for_training=input_params["cores_for_training"])
         else:
-            method.fit(X, y, label_names=input_params["labels"])
+            method.fit(X, y, label_names=input_params["labels"], cores_for_training=input_params["cores_for_training"])
 
         return method
 

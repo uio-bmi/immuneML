@@ -5,7 +5,7 @@ from unittest import TestCase
 
 import numpy as np
 from scipy import sparse
-from sklearn.linear_model import SGDClassifier
+from sklearn.svm import LinearSVC
 
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.ml_methods.SVM import SVM
@@ -43,7 +43,7 @@ class TestSVM(TestCase):
 
     def test_store(self):
         x = np.array([[1, 0, 0], [0, 1, 1], [1, 1, 1], [0, 1, 1]])
-        y = {"default": np.array([1, 0, 2, 0])}
+        y = {"default": np.array(['a', "b", "c", "a"])}
 
         svm = SVM()
         svm.fit(sparse.csr_matrix(x), y)
@@ -56,7 +56,7 @@ class TestSVM(TestCase):
         with open(path + "svm.pickle", "rb") as file:
             svm2 = pickle.load(file)
 
-        self.assertTrue(isinstance(svm2["default"], SGDClassifier))
+        self.assertTrue(isinstance(svm2["default"], LinearSVC))
 
         shutil.rmtree(path)
 
@@ -76,6 +76,6 @@ class TestSVM(TestCase):
         svm2 = SVM()
         svm2.load(path)
 
-        self.assertTrue(isinstance(svm2.get_model()["default"], SGDClassifier))
+        self.assertTrue(isinstance(svm2.get_model()["default"], LinearSVC))
 
         shutil.rmtree(path)
