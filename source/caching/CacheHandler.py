@@ -8,9 +8,9 @@ from source.util.PathBuilder import PathBuilder
 class CacheHandler:
 
     @staticmethod
-    def get(params: tuple):
+    def get(params: tuple, cache_type=None):
         h = CacheHandler._hash(params)
-        filename = CacheHandler._build_filename(h)
+        filename = CacheHandler._build_filename(h, cache_type)
 
         obj = None
         if os.path.isfile(filename):
@@ -20,8 +20,8 @@ class CacheHandler:
         return obj
 
     @staticmethod
-    def get_by_key(cache_key: str):
-        filename = CacheHandler._build_filename(cache_key)
+    def get_by_key(cache_key: str, cache_type=None):
+        filename = CacheHandler._build_filename(cache_key, cache_type)
         obj = None
         if os.path.isfile(filename):
             with open(filename, "rb") as file:
@@ -29,20 +29,20 @@ class CacheHandler:
         return obj
 
     @staticmethod
-    def _build_filename(cache_key: str):
-        return "{}{}.pickle".format(EnvironmentSettings.cache_path, cache_key)
+    def _build_filename(cache_key: str, cache_type=None):
+        return "{}{}.pickle".format(EnvironmentSettings.get_cache_path(cache_type), cache_key)
 
     @staticmethod
-    def add(params: tuple, caching_object):
-        PathBuilder.build(EnvironmentSettings.cache_path)
+    def add(params: tuple, caching_object, cache_type=None):
+        PathBuilder.build(EnvironmentSettings.get_cache_path(cache_type))
         h = CacheHandler._hash(params)
-        with open(CacheHandler._build_filename(h), "wb") as file:
+        with open(CacheHandler._build_filename(h, cache_type), "wb") as file:
             pickle.dump(caching_object, file)
 
     @staticmethod
-    def add_by_key(cache_key: str, caching_object):
-        PathBuilder.build(EnvironmentSettings.cache_path)
-        with open(CacheHandler._build_filename(cache_key), "wb") as file:
+    def add_by_key(cache_key: str, caching_object, cache_type=None):
+        PathBuilder.build(EnvironmentSettings.get_cache_path(cache_type))
+        with open(CacheHandler._build_filename(cache_key, cache_type), "wb") as file:
             pickle.dump(caching_object, file)
 
     @staticmethod
@@ -50,11 +50,11 @@ class CacheHandler:
         return CacheHandler._hash(params) + suffix
 
     @staticmethod
-    def memo(cache_key: str, fn):
-        result = CacheHandler.get_by_key(cache_key)
+    def memo(cache_key: str, fn, cache_type=None):
+        result = CacheHandler.get_by_key(cache_key, cache_type)
         if result is None:
             result = fn()
-            CacheHandler.add_by_key(cache_key, result)
+            CacheHandler.add_by_key(cache_key, result, cache_type)
         return result
 
     @staticmethod

@@ -1,6 +1,7 @@
 # quality: gold
 import os
 
+from source.caching.CacheType import CacheType
 from source.environment.SequenceType import SequenceType
 
 
@@ -16,7 +17,18 @@ class EnvironmentSettings:
     tmp_test_path = root_path + "test/tmp/"
     default_analysis_path = root_path + "analysis_runs/"
     cache_path = root_path + "cache/"
+    tmp_cache_path = tmp_test_path + "cache/"
     max_sequence_length = 20
+
+    @staticmethod
+    def get_cache_path(cache_type: CacheType = None):
+        cache_type = CacheType[os.environ["cache_type"].upper()] if cache_type is None else cache_type
+        if cache_type == CacheType.PRODUCTION:
+            return EnvironmentSettings.cache_path
+        elif cache_type == CacheType.TEST:
+            return EnvironmentSettings.tmp_cache_path
+        else:
+            raise RuntimeError("Cache is not set up.")
 
     @staticmethod
     def set_sequence_type(sequence_type: SequenceType):

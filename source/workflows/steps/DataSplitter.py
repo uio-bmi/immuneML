@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 from sklearn.model_selection import KFold
 
+from source.caching.CacheHandler import CacheHandler
 from source.data_model.dataset.Dataset import Dataset
 from source.dsl.AssessmentType import AssessmentType
 from source.workflows.steps.Step import Step
@@ -15,6 +16,7 @@ class DataSplitter(Step):
 
     TRAIN = "train"
     TEST = "test"
+    CACHING_CONST = "data_splitter"
 
     @staticmethod
     def run(input_params: dict = None):
@@ -31,8 +33,20 @@ class DataSplitter(Step):
 
     @staticmethod
     def perform_step(input_params: dict = None):
+        cache_key = CacheHandler.generate_cache_key(DataSplitter._prepare_caching_params(input_params),
+                                                    DataSplitter.CACHING_CONST)
         fn = getattr(DataSplitter, "{}_split".format(input_params["assessment_type"].lower()))
-        return fn(input_params)
+        datasets = CacheHandler.memo(cache_key, lambda: fn(input_params))
+        return datasets
+
+    @staticmethod
+    def _prepare_caching_params(input_params: dict):
+        return (("dataset_filenames", tuple(input_params["dataset"].get_filenames())),
+                ("dataset_metadata", input_params["dataset"].metadata_file),
+                ("split_count", input_params["split_count"]),
+                ("assessment_type", input_params["assessment_type"]),
+                ("label_to_balance", input_params["label_to_balance"]),
+                ("training_percentage", input_params["training_percentage"]), )
 
     @staticmethod
     def loocv_split(input_params: dict):

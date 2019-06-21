@@ -30,7 +30,8 @@ class TestDataSplitter(TestCase):
             "dataset": dataset,
             "training_percentage": training_percentage,
             "assessment_type": "random",
-            "split_count": 5
+            "split_count": 5,
+            "label_to_balance": None
         })
 
         self.assertTrue(isinstance(trains[0], Dataset))
@@ -41,9 +42,22 @@ class TestDataSplitter(TestCase):
         self.assertEqual(5, len(tests))
         self.assertEqual(5, len(np.unique(trains[0].get_filenames())))
 
+        trains2, tests2 = DataSplitter.perform_step({
+            "dataset": dataset,
+            "training_percentage": training_percentage,
+            "assessment_type": "random",
+            "split_count": 5,
+            "label_to_balance": None
+        })
+
+        self.assertEqual(trains[0].get_filenames(), trains2[0].get_filenames())
+
         trains, tests = DataSplitter.perform_step({
             "dataset": dataset,
             "assessment_type": "loocv",
+            "split_count": -1,
+            "label_to_balance": None,
+            "training_percentage": -1
         })
 
         self.assertTrue(isinstance(trains[0], Dataset))
@@ -56,7 +70,9 @@ class TestDataSplitter(TestCase):
         trains, tests = DataSplitter.perform_step({
             "dataset": dataset,
             "assessment_type": "k_fold_cv",
-            "split_count": 5
+            "split_count": 5,
+            "label_to_balance": None,
+            "training_percentage": -1
         })
 
         self.assertTrue(isinstance(trains[0], Dataset))
@@ -71,7 +87,7 @@ class TestDataSplitter(TestCase):
             "assessment_type": "random_balanced",
             "training_percentage": training_percentage,
             "split_count": 10,
-            "label_to_balance": "key1",
+            "label_to_balance": "key1"
         })
 
         self.assertTrue(isinstance(trains[0], Dataset))

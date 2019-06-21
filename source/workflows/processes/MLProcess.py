@@ -95,9 +95,9 @@ class MLProcess:
 
         path = self._path + "run_{}/".format(run+1)
         PathBuilder.build(path)
-        encoded_train = self._run_encoder(train_dataset, True, path)
-        encoded_test = self._run_encoder(test_dataset, False, path)
-        method = self._train_ml_method(encoded_train, path)
+        encoded_train = self._run_encoder(train_dataset, True, path, run)
+        encoded_test = self._run_encoder(test_dataset, False, path, run)
+        method = self._train_ml_method(encoded_train, path, run)
         self._assess_ml_method(method, encoded_test, run, path)
 
     def _is_ml_possible(self, dataset: Dataset) -> bool:
@@ -140,7 +140,7 @@ class MLProcess:
             "all_predictions_path": self._all_predictions_path
         })
 
-    def _run_encoder(self, train_dataset: Dataset, infer_model: bool, path: str):
+    def _run_encoder(self, train_dataset: Dataset, infer_model: bool, path: str, run: int):
         return DataEncoder.run({
             "dataset": train_dataset,
             "encoder": self._encoder,
@@ -151,10 +151,11 @@ class MLProcess:
                 label_configuration=self._label_configuration,
                 learn_model=infer_model,
                 filename="train_dataset.pkl" if infer_model else "test_dataset.pkl"
-            )
+            ),
+            "run": run
         })
 
-    def _train_ml_method(self, encoded_train_dataset: Dataset, path: str) -> MLMethod:
+    def _train_ml_method(self, encoded_train_dataset: Dataset, path: str, run: int) -> MLMethod:
         return MLMethodTrainer.run({
             "method": self._method,
             "result_path": path + "/ml_method/",
@@ -168,12 +169,9 @@ class MLProcess:
     def _run_data_splitter(self) -> tuple:
         params = {
             "dataset": self._dataset,
-            "assessment_type": self._assessment_type.name
+            "assessment_type": self._assessment_type.name,
+            "split_count": self._split_count,
+            "training_percentage": self._training_percentage,
+            "label_to_balance": self._label_to_balance
         }
-        if self._assessment_type != AssessmentType.loocv:
-            params["split_count"] = self._split_count  # ignored for loocv
-        if self._training_percentage is not None:
-            params["training_percentage"] = self._training_percentage
-        if self._assessment_type == AssessmentType.random_balanced:
-            params["label_to_balance"] = self._label_to_balance
         return DataSplitter.run(params)

@@ -13,7 +13,7 @@ class TestCacheHandler(TestCase):
         obj = "object_example"
 
         h = str(hash(params)).replace("-", "_")
-        filename = "{}{}.pickle".format(EnvironmentSettings.cache_path, h)
+        filename = "{}{}.pickle".format(EnvironmentSettings.get_cache_path(), h)
         with open(filename, "wb") as file:
             pickle.dump(obj, file)
 
