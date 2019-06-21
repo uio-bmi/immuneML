@@ -56,8 +56,6 @@ class TestWord2VecEncoder(TestCase):
             learn_model=True,
             result_path=test_path,
             label_configuration=label_configuration,
-            model_path=test_path,
-            scaler_path=test_path,
             filename="dataset.pkl"
         )
 

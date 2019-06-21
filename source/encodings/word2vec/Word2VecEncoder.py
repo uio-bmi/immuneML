@@ -4,10 +4,10 @@ import os
 import pickle
 
 import numpy as np
+import pandas as pd
 from gensim.models import Word2Vec
 from scipy import sparse
 from sklearn.preprocessing import StandardScaler
-import pandas as pd
 
 from source.IO.dataset_export.PickleExporter import PickleExporter
 from source.IO.dataset_import.PickleLoader import PickleLoader
@@ -139,7 +139,7 @@ class Word2VecEncoder(DatasetEncoder):
     @staticmethod
     def _scale_encoding(repertoires: np.ndarray, params: EncoderParams):
 
-        scaler_path = params["scaler_path"]
+        scaler_path = params["result_path"]
         scaler_file = scaler_path + FilenameHandler.get_filename(StandardScaler.__name__, "pickle")
 
         if os.path.isfile(scaler_file):
@@ -187,5 +187,5 @@ class Word2VecEncoder(DatasetEncoder):
 
     @staticmethod
     def _create_model_path(params: EncoderParams):
-        return params["model_path"] + "W2V.model"
+        return params["result_path"] + "W2V.model"
 

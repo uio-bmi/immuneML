@@ -49,8 +49,6 @@ class TestDataEncoder(TestCase):
                 },
                 batch_size=2,
                 label_configuration=lc,
-                model_path=path,
-                scaler_path=path,
                 result_path=path,
                 filename="dataset.csv"
             )

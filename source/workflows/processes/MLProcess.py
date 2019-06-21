@@ -146,10 +146,6 @@ class MLProcess:
             "encoder_params": EncoderParams(
                 model=self._encoder_params,
                 result_path=path,
-                model_path=path,
-                vectorizer_path=path,
-                scaler_path=path,
-                pipeline_path=path,
                 batch_size=self._batch_size,
                 label_configuration=self._label_configuration,
                 learn_model=infer_model,

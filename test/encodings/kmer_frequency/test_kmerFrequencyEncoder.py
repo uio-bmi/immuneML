@@ -47,7 +47,6 @@ class TestKmerFrequencyEncoder(TestCase):
             label_configuration=lc,
             batch_size=2,
             learn_model=True,
-            vectorizer_path=path,
             model={
                 "normalization_type": NormalizationType.RELATIVE_FREQUENCY,
                 "reads": ReadsType.UNIQUE,
@@ -62,7 +61,6 @@ class TestKmerFrequencyEncoder(TestCase):
             label_configuration=lc,
             batch_size=2,
             learn_model=True,
-            vectorizer_path=path,
             model={
                 "normalization_type": NormalizationType.RELATIVE_FREQUENCY,
                 "reads": ReadsType.UNIQUE,

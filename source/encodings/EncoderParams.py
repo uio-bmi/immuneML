@@ -6,8 +6,7 @@ from source.environment.LabelConfiguration import LabelConfiguration
 class EncoderParams(collections.abc.MutableMapping):
 
     def __init__(self, result_path: str, label_configuration: LabelConfiguration, model: dict,
-                 batch_size: int = 2, learn_model: bool = True, model_path: str = None, scaler_path: str = None,
-                 vectorizer_path: str = None, pipeline_path: str = None, filename: str = ""):
+                 batch_size: int = 2, learn_model: bool = True, filename: str = ""):
 
         self.store = {
             "model": model,
@@ -15,10 +14,6 @@ class EncoderParams(collections.abc.MutableMapping):
             "learn_model": learn_model,
             "result_path": result_path,
             "label_configuration": label_configuration,
-            "model_path": model_path,
-            "scaler_path": scaler_path,
-            "vectorizer_path": vectorizer_path,
-            "pipeline_path": pipeline_path,
             "filename": filename
         }
 
