@@ -47,7 +47,8 @@ class MLParser:
             "assessment_type": AssessmentType[ml_specification[method_id]["assessment_type"].lower()],
             "min_example_count": ml_specification[method_id]["min_example_count"],
             "cores_for_training": ml_specification[method_id]["cores_for_training"],
-            "batch_size": ml_specification[method_id]["batch_size"]
+            "batch_size": ml_specification[method_id]["batch_size"],
+            "label_to_balance": ml_specification[method_id]["label_to_balance"]
         }
 
     @staticmethod

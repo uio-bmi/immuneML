@@ -23,7 +23,7 @@ class MLProcess:
     def __init__(self, dataset: Dataset, path: str, label_configuration: LabelConfiguration, encoder: DatasetEncoder,
                  encoder_params: dict, method: MLMethod, assessment_type: AssessmentType, metrics: list,
                  model_selection_cv: bool, model_selection_n_folds: int = None, cores_for_training : int = 1,
-                 batch_size: int = 2, training_percentage: float = None,
+                 batch_size: int = 2, training_percentage: float = None, label_to_balance: str = None,
                  split_count: int = None, min_example_count: int = 1):
         self._dataset = dataset
         self._split_count = split_count
@@ -37,6 +37,7 @@ class MLProcess:
         self._model_selection_cv = model_selection_cv
         self._n_folds = model_selection_n_folds
         self._cores_for_training = cores_for_training
+        self._label_to_balance = label_to_balance
         self._batch_size = batch_size
         assert all([isinstance(metric, MetricType) for metric in metrics]), \
             "MLProcess: metrics are not set to be an instance of MetricType."
@@ -173,4 +174,6 @@ class MLProcess:
             params["split_count"] = self._split_count  # ignored for loocv
         if self._training_percentage is not None:
             params["training_percentage"] = self._training_percentage
+        if self._assessment_type == AssessmentType.random_balanced:
+            params["label_to_balance"] = self._label_to_balance
         return DataSplitter.run(params)
