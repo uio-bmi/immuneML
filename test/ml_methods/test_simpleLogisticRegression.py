@@ -51,7 +51,7 @@ class TestSimpleLogisticRegression(TestCase):
 
         path = EnvironmentSettings.root_path + "test/tmp/lr/"
 
-        lr.store(path)
+        lr.store(path, ["f1", "f2", "f3"])
         self.assertTrue(os.path.isfile(path + "simple_logistic_regression.pickle"))
 
         with open(path + "simple_logistic_regression.pickle", "rb") as file:

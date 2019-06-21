@@ -1,14 +1,15 @@
 from unittest import TestCase
 
-import pandas as pd
 import numpy as np
+import pandas as pd
 
-from source.analysis.criteria_matches.CriteriaMatcher import CriteriaMatcher
 from source.analysis.criteria_matches.BooleanType import BooleanType
-from source.analysis.criteria_matches.OperationType import OperationType
+from source.analysis.criteria_matches.CriteriaMatcher import CriteriaMatcher
 from source.analysis.criteria_matches.DataType import DataType
+from source.analysis.criteria_matches.OperationType import OperationType
 
-class TestSequenceMatcher(TestCase):
+
+class TestCriteriaMatcher(TestCase):
 
     def test_match(self):
 

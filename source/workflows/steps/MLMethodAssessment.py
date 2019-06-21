@@ -9,6 +9,7 @@ from source.ml_methods.MLMethod import MLMethod
 from source.ml_metrics import ml_metrics
 from source.util.PathBuilder import PathBuilder
 from source.workflows.steps.Step import Step
+from source.data_model.dataset.Dataset import Dataset
 
 
 class MLMethodAssessment(Step):
@@ -48,12 +49,12 @@ class MLMethodAssessment(Step):
         results = MLMethodAssessment._score(metrics_list=input_params["metrics"], labels=labels,
                                             label_config=input_params["label_configuration"], predicted_y=predicted_y,
                                             true_y=true_y, ml_details_path=input_params["ml_details_path"],
-                                            run=input_params["run"], method=method)
+                                            run=input_params["run"], method=method, dataset=input_params["dataset"])
 
         return results
 
     @staticmethod
-    def _score(metrics_list: list, labels: list, label_config, predicted_y, true_y, ml_details_path: str, run: int, method: MLMethod):
+    def _score(metrics_list: list, labels: list, label_config, predicted_y, true_y, ml_details_path: str, run: int, method: MLMethod, dataset: Dataset):
         results = {}
 
         for metric in metrics_list:
@@ -64,7 +65,7 @@ class MLMethodAssessment(Step):
 
         results["run"] = run
         for label in labels:
-            results["{}_method_params".format(label)] = method.get_params(label)
+            results["{}_method_params".format(label)] = {**method.get_params(label), "feature_names": dataset.encoded_data.feature_names if dataset is not None else None}
 
         df = pd.DataFrame([results])
 

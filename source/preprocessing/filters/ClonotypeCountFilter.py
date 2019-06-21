@@ -27,7 +27,7 @@ class ClonotypeCountFilter(Preprocessor):
     def build_new_metadata(dataset, indices_to_keep):
         if dataset.metadata_file:
             df = pd.read_csv(dataset.metadata_file, index_col=0).iloc[indices_to_keep, :]
-            path = os.path.dirname(os.path.abspath(dataset.metadata_file)) + "_{}_clonotype_count_filtered.csv"\
+            path = os.path.dirname(os.path.abspath(dataset.metadata_file)) + "/_{}_clonotype_count_filtered.csv"\
                 .format(os.path.splitext(os.path.basename(dataset.metadata_file))[0])
             df.to_csv(path)
         else:

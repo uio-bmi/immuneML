@@ -1,4 +1,5 @@
 from sklearn.linear_model import SGDClassifier
+from sklearn.model_selection import RandomizedSearchCV
 
 from source.ml_methods.SklearnMethod import SklearnMethod
 
@@ -27,7 +28,9 @@ class LogisticRegression(SklearnMethod):
         return True
 
     def get_params(self, label):
-        params = self._models[label].get_params(deep=True)
-        params["coefficients"] = self._models[label].coef_
-        params["intercept"] = self._models[label].intercept_
+        params = self._models[label].estimator.get_params(deep=True) \
+            if isinstance(self._models[label], RandomizedSearchCV) \
+            else self._models[label].get_params(deep=True)
+        params["coefficients"] = self._models[label].coef_.tolist()
+        params["intercept"] = self._models[label].intercept_.tolist()
         return params

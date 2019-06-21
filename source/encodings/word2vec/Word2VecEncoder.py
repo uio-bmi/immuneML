@@ -7,6 +7,7 @@ import numpy as np
 from gensim.models import Word2Vec
 from scipy import sparse
 from sklearn.preprocessing import StandardScaler
+import pandas as pd
 
 from source.IO.dataset_export.PickleExporter import PickleExporter
 from source.IO.dataset_import.PickleLoader import PickleLoader
@@ -122,9 +123,15 @@ class Word2VecEncoder(DatasetEncoder):
 
         label_names = params["label_configuration"].get_labels_by_name()
 
+        feature_names = [str(i) for i in range(scaled_repertoires.shape[1])]
+
+        feature_annotations = pd.DataFrame({"feature": feature_names})
+
         encoded_data = EncodedData(repertoires=scaled_repertoires,
                                    labels={label: labels[i] for i, label in enumerate(label_names)},
-                                   repertoire_ids=[repertoire.identifier for repertoire in encoded_dataset.get_data()])
+                                   repertoire_ids=[repertoire.identifier for repertoire in encoded_dataset.get_data()],
+                                   feature_names=feature_names,
+                                   feature_annotations=feature_annotations)
 
         encoded_dataset.add_encoded_data(encoded_data)
         return encoded_dataset
