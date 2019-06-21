@@ -84,6 +84,7 @@ class SemanticModel:
                              label_to_balance=method["label_to_balance"])
 
             proc.run()
+            self._blackboard.add(method_id, proc.get_ML_result())
             self._update_executed(method_id)
 
     def _execute_dataset_reports(self):
@@ -186,6 +187,8 @@ class SemanticModel:
             params["dataset"] = self._blackboard.get("{}_{}".format(self._symbol_table
                                                                     .get(initial_params["encoding"])["dataset"],
                                                                     initial_params["encoding"]))
+        if "ml_methods" in initial_params.keys():
+            params["ml_methods"] = {key: self._blackboard.get(key) for key in initial_params["ml_methods"]}
         params = {**initial_params, **params}
         return params
 
@@ -193,7 +196,6 @@ class SemanticModel:
         now = datetime.datetime.now()
         print("storing results in {}".format(self._path + "{}_{}/".format(result_type, str(now).replace(".", "_").replace(":", "_"))))
         return self._path + "{}_{}/".format(result_type, str(now).replace(".", "_").replace(":", "_"))
-
 
     def add_connections(self, fn, keys, symbol_type: SymbolType):
         for item_id, item in self._symbol_table.get_by_type(symbol_type):

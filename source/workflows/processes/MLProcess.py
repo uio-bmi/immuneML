@@ -6,6 +6,7 @@ import yaml
 
 from source.data_model.dataset.Dataset import Dataset
 from source.dsl.AssessmentType import AssessmentType
+from source.dsl.semantic_model.MLResult import MLResult
 from source.encodings.DatasetEncoder import DatasetEncoder
 from source.encodings.EncoderParams import EncoderParams
 from source.environment.LabelConfiguration import LabelConfiguration
@@ -45,6 +46,9 @@ class MLProcess:
         self._details_path = self._path + "ml_details.csv"
         self._all_predictions_path = self._path + "predictions.csv"
         self._min_example_count = min_example_count
+
+    def get_ML_result(self):
+        return MLResult(self._path)
 
     def run(self):
         train_datasets, test_datasets = self._run_data_splitter()

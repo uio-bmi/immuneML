@@ -11,6 +11,7 @@ from source.data_model.repertoire.Repertoire import Repertoire
 from source.data_model.repertoire.RepertoireMetadata import RepertoireMetadata
 from source.dsl.SymbolTable import SymbolTable
 from source.dsl.SymbolType import SymbolType
+from source.dsl.semantic_model.MLResult import MLResult
 from source.dsl.semantic_model.SemanticModel import SemanticModel
 from source.encodings.word2vec.Word2VecEncoder import Word2VecEncoder
 from source.encodings.word2vec.model_creator.ModelType import ModelType
@@ -26,6 +27,21 @@ class TestSemanticModel(TestCase):
 
         with self.assertRaises(AssertionError):
             model.add_ml_connection("m1", {})
+
+    def test__prepare_report_params(self):
+
+        model = SemanticModel()
+        model._blackboard.add("SVM1", MLResult("path1"))
+        model._blackboard.add("SVM2", MLResult("path2"))
+
+        initial_params = {
+            "ml_methods": ["SVM1", "SVM2"]
+        }
+
+        params = model._prepare_report_params("report1", initial_params)
+        self.assertTrue("ml_methods" in params.keys())
+        self.assertTrue("SVM1" in params["ml_methods"])
+        self.assertTrue(isinstance(params["ml_methods"]["SVM1"], MLResult))
 
     def test_add_report_connection(self):
         model = SemanticModel()
