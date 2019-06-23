@@ -1,3 +1,4 @@
+import hashlib
 import os
 import pickle
 
@@ -59,4 +60,4 @@ class CacheHandler:
 
     @staticmethod
     def _hash(params: tuple) -> str:
-        return str(hash(params)).replace("-", "_")
+        return hashlib.sha256(str(params).encode()).hexdigest()
