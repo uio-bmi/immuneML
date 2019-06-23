@@ -1,5 +1,4 @@
 import math
-import os
 import pickle
 from collections import Counter
 from multiprocessing.pool import Pool
@@ -8,9 +7,9 @@ import pandas as pd
 from sklearn.feature_extraction import DictVectorizer
 
 from source.IO.dataset_export.PickleExporter import PickleExporter
-from source.IO.dataset_import.PickleLoader import PickleLoader
 from source.analysis.AxisType import AxisType
 from source.analysis.data_manipulation.DataSummarizer import DataSummarizer
+from source.caching.CacheHandler import CacheHandler
 from source.data_model.dataset.Dataset import Dataset
 from source.data_model.encoded_data.EncodedData import EncodedData
 from source.encodings.DatasetEncoder import DatasetEncoder
@@ -33,17 +32,14 @@ class KmerFrequencyEncoder(DatasetEncoder):
         "model": {
             "normalization_type": NormalizationType.RELATIVE_FREQUENCY,         # relative frequencies of k-mers or L2
             "reads": ReadsType.UNIQUE,                                          # unique or all
-            "sequence_encoding": SequenceEncodingType.CONTINUOUS_KMER, # continuous k-mers, gapped, IMGT-annotated or not
+            "sequence_encoding": SequenceEncodingType.CONTINUOUS_KMER,          # how to build k-mers
             "k": 3,                                                             # k-mer length
             ...
         },
         "batch_size": 1,
         "learn_model": True, # true for training set and false for test set
         "result_path": "../",
-        "label_configuration": LabelConfiguration(), # labels should be set before encodings is invoked,
-        "model_path": "../",
-        "scaler_path": "../",
-        "vectorizer_path": None
+        "label_configuration": LabelConfiguration(), # labels should be set before encodings is invoked
     }
 
     Parallelization is supported based on the value in the batch_size parameter. The same number of processes will be
@@ -52,14 +48,20 @@ class KmerFrequencyEncoder(DatasetEncoder):
     @staticmethod
     def encode(dataset: Dataset, params: EncoderParams) -> Dataset:
 
-        filepath = params["result_path"] + "/" + params["filename"]
-
-        if os.path.isfile(filepath):
-            encoded_dataset = PickleLoader.load(filepath)
-        else:
-            encoded_dataset = KmerFrequencyEncoder._encode_new_dataset(dataset, params)
+        cache_key = CacheHandler.generate_cache_key(KmerFrequencyEncoder._prepare_caching_params(dataset, params), "")
+        encoded_dataset = CacheHandler.memo(cache_key,
+                                            lambda: KmerFrequencyEncoder._encode_new_dataset(dataset, params))
 
         return encoded_dataset
+
+    @staticmethod
+    def _prepare_caching_params(dataset: Dataset, params: EncoderParams):
+        return (("dataset_filenames", tuple(dataset.get_filenames())),
+                ("dataset_metadata", dataset.metadata_file),
+                ("labels", tuple(params["label_configuration"].get_labels_by_name())),
+                ("encoding", KmerFrequencyEncoder.__name__),
+                ("learn_model", params["learn_model"]),
+                ("encoding_params", tuple(frozenset(params["model"]))), )
 
     @staticmethod
     def _encode_new_dataset(dataset: Dataset, params: EncoderParams) -> Dataset:
@@ -103,7 +105,7 @@ class KmerFrequencyEncoder(DatasetEncoder):
     @staticmethod
     def _vectorize_encoded_repertoires(repertoires: list, params: EncoderParams):
 
-        filename= params["result_path"] + FilenameHandler.get_filename(DictVectorizer.__name__, "pickle")
+        filename = params["result_path"] + FilenameHandler.get_filename(DictVectorizer.__name__, "pickle")
 
         if params["learn_model"]:
             vectorizer = DictVectorizer(sparse=True, dtype=float)
