@@ -1,12 +1,9 @@
-import glob
-
 from source.data_model.dataset.Dataset import Dataset
 from source.dsl.DefaultParamsLoader import DefaultParamsLoader
 from source.dsl.SymbolTable import SymbolTable
 from source.dsl.SymbolType import SymbolType
-from source.util.ReflectionHandler import ReflectionHandler
 from source.preprocessing.Preprocessor import Preprocessor
-from source.environment.EnvironmentSettings import EnvironmentSettings
+from source.util.ReflectionHandler import ReflectionHandler
 
 
 class ImportParser:
@@ -50,9 +47,7 @@ class ImportParser:
 
     @staticmethod
     def _get_preprocessor_class(name) -> Preprocessor:
-        filenames = glob.glob(EnvironmentSettings.root_path + "source/preprocessing/**/{}.py".format(name))
-        assert len(filenames) == 1, "EncodingParser: the preprocessor type was not correctly specified."
-        return ReflectionHandler.get_class_from_path(filenames[0])
+        return ReflectionHandler.get_class_by_name(name, "preprocessing/")
 
     @staticmethod
     def _get_preprocessor_params(params, preprocessor_type: str):
