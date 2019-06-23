@@ -13,7 +13,7 @@ class TestCacheHandler(TestCase):
         params = (("k1", 1), ("k2", 2))
         obj = "object_example"
 
-        h = hashlib.sha256(str(params).encode()).hexdigest()
+        h = hashlib.sha256(str(params).encode('utf-8')).hexdigest()
         filename = "{}{}.pickle".format(EnvironmentSettings.get_cache_path(), h)
         with open(filename, "wb") as file:
             pickle.dump(obj, file)

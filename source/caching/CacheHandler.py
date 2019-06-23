@@ -60,4 +60,4 @@ class CacheHandler:
 
     @staticmethod
     def _hash(params: tuple) -> str:
-        return hashlib.sha256(str(params).encode()).hexdigest()
+        return hashlib.sha256(str(params).encode('utf-8')).hexdigest()

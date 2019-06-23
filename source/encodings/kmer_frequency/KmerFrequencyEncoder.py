@@ -61,7 +61,7 @@ class KmerFrequencyEncoder(DatasetEncoder):
                 ("labels", tuple(params["label_configuration"].get_labels_by_name())),
                 ("encoding", KmerFrequencyEncoder.__name__),
                 ("learn_model", params["learn_model"]),
-                ("encoding_params", tuple(frozenset(params["model"]))), )
+                ("encoding_params", tuple([(key, params["model"][key]) for key in params["model"].keys()])), )
 
     @staticmethod
     def _encode_new_dataset(dataset: Dataset, params: EncoderParams) -> Dataset:

@@ -10,7 +10,7 @@ from scipy import sparse
 from sklearn.preprocessing import StandardScaler
 
 from source.IO.dataset_export.PickleExporter import PickleExporter
-from source.IO.dataset_import.PickleLoader import PickleLoader
+from source.caching.CacheHandler import CacheHandler
 from source.data_model.dataset.Dataset import Dataset
 from source.data_model.encoded_data.EncodedData import EncodedData
 from source.data_model.repertoire.Repertoire import Repertoire
@@ -39,10 +39,7 @@ class Word2VecEncoder(DatasetEncoder):
         "batch_size": 1,
         "learn_model": True, # true for training set and false for test set
         "result_path": "../",
-        "label_configuration": LabelConfiguration(), # labels should be set before encodings is invoked,
-        "model_path": "../",
-        "scaler_path": "../",
-        "vectorizer_path": None
+        "label_configuration": LabelConfiguration(), # labels should be set before encodings is invoked
     }
 
     NB: In order to use the workers properly and be able to parallelize the training process,
@@ -50,15 +47,20 @@ class Word2VecEncoder(DatasetEncoder):
     """
     @staticmethod
     def encode(dataset: Dataset, params: EncoderParams) -> Dataset:
-
-        filepath = params["result_path"] + FilenameHandler.get_dataset_name(Word2VecEncoder.__name__)
-
-        if os.path.isfile(filepath):
-            encoded_dataset = PickleLoader.load(filepath)
-        else:
-            encoded_dataset = Word2VecEncoder._encode_new_dataset(dataset, params)
+        cache_key = CacheHandler.generate_cache_key(Word2VecEncoder._prepare_caching_params(dataset, params), "")
+        encoded_dataset = CacheHandler.memo(cache_key,
+                                            lambda: Word2VecEncoder._encode_new_dataset(dataset, params))
 
         return encoded_dataset
+
+    @staticmethod
+    def _prepare_caching_params(dataset: Dataset, params: EncoderParams):
+        return (("dataset_filenames", tuple(dataset.get_filenames())),
+                ("dataset_metadata", dataset.metadata_file),
+                ("labels", tuple(params["label_configuration"].get_labels_by_name())),
+                ("encoding", Word2VecEncoder.__name__),
+                ("learn_model", params["learn_model"]),
+                ("encoding_params", tuple([(key, params["model"][key]) for key in params["model"].keys()])), )
 
     @staticmethod
     def _encode_new_dataset(dataset: Dataset, params: EncoderParams) -> Dataset:
