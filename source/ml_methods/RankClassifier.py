@@ -47,7 +47,7 @@ class RankClassifier(MLMethod):
             encoded_y[label] = self._label_encoders[label].fit_transform(y[label])
         return encoded_y
 
-    def fit(self, X, y: dict, label_names: list = None):
+    def fit(self, X, y: dict, label_names: list = None, cores_for_training: int = 2):
         self._check_labels(label_names, y)
         transformed_y = self._transform_labels(y, label_names)
         self._fit(X, transformed_y, label_names)
@@ -84,7 +84,7 @@ class RankClassifier(MLMethod):
                                 label_names: list = None):
         return self.fit(X, y, label_names)
 
-    def store(self, path):
+    def store(self, path, features_names):
         PathBuilder.build(path)
         name = FilenameHandler.get_filename(self.__class__.__name__, "pickle")
         params_name = FilenameHandler.get_filename(self.__class__.__name__, "json")

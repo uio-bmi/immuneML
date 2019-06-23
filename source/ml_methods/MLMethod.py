@@ -15,7 +15,7 @@ class MLMethod(metaclass=abc.ABCMeta):
     """
 
     @abc.abstractmethod
-    def fit(self, X, y, label_names: list = None):
+    def fit(self, X, y, label_names: list = None, cores_for_training: int = 2):
         pass
 
     @abc.abstractmethod
