@@ -1,30 +1,32 @@
-import os
-
 import numpy as np
 
 from source.IO.dataset_export.PickleExporter import PickleExporter
-from source.IO.dataset_import.PickleLoader import PickleLoader
 from source.analysis.SequenceMatcher import SequenceMatcher
+from source.caching.CacheHandler import CacheHandler
 from source.data_model.dataset.Dataset import Dataset
 from source.data_model.encoded_data.EncodedData import EncodedData
 from source.encodings.DatasetEncoder import DatasetEncoder
 from source.encodings.EncoderParams import EncoderParams
-from source.util.FilenameHandler import FilenameHandler
 
 
 class MatchedReferenceEncoder(DatasetEncoder):
 
     @staticmethod
     def encode(dataset: Dataset, params: EncoderParams) -> Dataset:
-
-        filepath = params["result_path"] + FilenameHandler.get_dataset_name(MatchedReferenceEncoder.__name__)
-
-        if os.path.isfile(filepath):
-            encoded_dataset = PickleLoader.load(filepath)
-        else:
-            encoded_dataset = MatchedReferenceEncoder._encode_new_dataset(dataset, params)
+        cache_key = CacheHandler.generate_cache_key(MatchedReferenceEncoder._prepare_caching_params(dataset, params), "")
+        encoded_dataset = CacheHandler.memo(cache_key,
+                                            lambda: MatchedReferenceEncoder._encode_new_dataset(dataset, params))
 
         return encoded_dataset
+
+    @staticmethod
+    def _prepare_caching_params(dataset: Dataset, params: EncoderParams):
+        return (("dataset_filenames", tuple(dataset.get_filenames())),
+                ("dataset_metadata", dataset.metadata_file),
+                ("labels", tuple(params["label_configuration"].get_labels_by_name())),
+                ("encoding", MatchedReferenceEncoder.__name__),
+                ("learn_model", params["learn_model"]),
+                ("encoding_params", tuple(frozenset(params["model"]))), )
 
     @staticmethod
     def _encode_new_dataset(dataset: Dataset, params: EncoderParams) -> Dataset:

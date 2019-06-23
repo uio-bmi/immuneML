@@ -35,5 +35,6 @@ class TestMatchedReferenceEncoder(TestCase):
         ))
 
         self.assertTrue(all(all([val <= 1 for val in rep]) for rep in encoded.encoded_data.repertoires))
+        self.assertEqual(2, encoded.encoded_data.repertoires.shape[0])
 
         shutil.rmtree(path)
