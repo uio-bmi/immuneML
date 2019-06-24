@@ -16,7 +16,6 @@ class DataSplitter(Step):
 
     TRAIN = "train"
     TEST = "test"
-    CACHING_CONST = "data_splitter"
 
     @staticmethod
     def run(input_params: dict = None):
@@ -33,8 +32,7 @@ class DataSplitter(Step):
 
     @staticmethod
     def perform_step(input_params: dict = None):
-        cache_key = CacheHandler.generate_cache_key(DataSplitter._prepare_caching_params(input_params),
-                                                    DataSplitter.CACHING_CONST)
+        cache_key = CacheHandler.generate_cache_key(DataSplitter._prepare_caching_params(input_params))
         fn = getattr(DataSplitter, "{}_split".format(input_params["assessment_type"].lower()))
         datasets = CacheHandler.memo(cache_key, lambda: fn(input_params))
         return datasets

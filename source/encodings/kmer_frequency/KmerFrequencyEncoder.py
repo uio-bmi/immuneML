@@ -48,7 +48,7 @@ class KmerFrequencyEncoder(DatasetEncoder):
     @staticmethod
     def encode(dataset: Dataset, params: EncoderParams) -> Dataset:
 
-        cache_key = CacheHandler.generate_cache_key(KmerFrequencyEncoder._prepare_caching_params(dataset, params), "")
+        cache_key = CacheHandler.generate_cache_key(KmerFrequencyEncoder._prepare_caching_params(dataset, params))
         encoded_dataset = CacheHandler.memo(cache_key,
                                             lambda: KmerFrequencyEncoder._encode_new_dataset(dataset, params))
 

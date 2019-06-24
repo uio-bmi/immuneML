@@ -43,7 +43,7 @@ class GroupDataTransformation(TransformerMixin):
                 ("group_summarization_type", self.group_summarization_type),)
 
     def transform(self, X):
-        cache_key = CacheHandler.generate_cache_key(self._prepare_caching_params(X), "")
+        cache_key = CacheHandler.generate_cache_key(self._prepare_caching_params(X))
         dataset = CacheHandler.memo(cache_key, lambda: self._transform(X))
         return dataset
 
