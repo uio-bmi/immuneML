@@ -10,6 +10,7 @@ from editdistance import eval
 from sklearn.base import TransformerMixin
 
 from source.IO.dataset_export.PickleExporter import PickleExporter
+from source.caching.CacheHandler import CacheHandler
 from source.data_model.dataset.Dataset import Dataset
 from source.data_model.encoded_data.EncodedData import EncodedData
 from source.util.ReflectionHandler import ReflectionHandler
@@ -54,9 +55,39 @@ class SequenceMatchFeatureAnnotation(TransformerMixin):
         self.annotation_prefix = annotation_prefix
         self.result_path = result_path
         self.filename = filename
+        self.initial_encoder = ""
+        self.initial_encoder_params = ""
+        self.previous_steps = None
 
     def fit(self, X, y=None):
         return self
+
+    def to_tuple(self):
+        return (("data_loader", self.data_loader.__class__.__name__),
+                ("reference_sequence_path", self.reference_sequence_path),
+                ("sequence_matcher_params", tuple([(key, self.sequence_matcher_params[key])
+                                                   for key in self.sequence_matcher_params.keys()])),
+                ("annotation_prefix", self.annotation_prefix),
+                ("encoding_step", self.__class__.__name__),)
+
+    def _prepare_caching_params(self, dataset):
+        return (("dataset_filenames", tuple(dataset.get_filenames())),
+                ("dataset_metadata", dataset.metadata_file),
+                ("encoding", "PipelineEncoder"),
+                ("initial_encoder", self.initial_encoder),
+                ("initial_encoder_params", self.initial_encoder_params),
+                ("previous_steps", self.previous_steps),
+                ("encoding_step", self.__class__.__name__),
+                ("data_loader", self.data_loader.__class__.__name__),
+                ("reference_sequence_path", self.reference_sequence_path),
+                ("sequence_matcher_params", tuple([(key, self.sequence_matcher_params[key])
+                                                   for key in self.sequence_matcher_params.keys()])),
+                ("annotation_prefix", self.annotation_prefix),)
+
+    def transform(self, X):
+        cache_key = CacheHandler.generate_cache_key(self._prepare_caching_params(X), "")
+        dataset = CacheHandler.memo(cache_key, lambda: self._transform(X))
+        return dataset
 
     def annotate(self, X: Dataset):
         match_annotations = self.compute_match_annotations(X)
@@ -85,7 +116,7 @@ class SequenceMatchFeatureAnnotation(TransformerMixin):
         return (self.annotation_prefix is not "" and any(
             [self.annotation_prefix in column for column in X.encoded_data.feature_annotations.columns]))
 
-    def transform(self, X):
+    def _transform(self, X):
         if not self.is_annotated(X):
             dataset = self.annotate(X)
         else:

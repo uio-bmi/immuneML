@@ -2,6 +2,7 @@ import pandas as pd
 from sklearn.base import TransformerMixin
 
 from source.IO.dataset_export.PickleExporter import PickleExporter
+from source.caching.CacheHandler import CacheHandler
 from source.data_model.dataset.Dataset import Dataset
 from source.data_model.encoded_data.EncodedData import EncodedData
 
@@ -21,6 +22,26 @@ class PublicSequenceFeatureAnnotation(TransformerMixin):
         self.result_path = result_path
         self.filename = filename
         self.public_annotations = None
+        self.initial_encoder = ""
+        self.initial_encoder_params = ""
+        self.previous_steps = None
+
+    def to_tuple(self):
+        return ("encoding_step", self.__class__.__name__)
+
+    def _prepare_caching_params(self, dataset):
+        return (("dataset_filenames", tuple(dataset.get_filenames())),
+                ("dataset_metadata", dataset.metadata_file),
+                ("encoding", "PipelineEncoder"),
+                ("initial_encoder", self.initial_encoder),
+                ("initial_encoder_params", self.initial_encoder_params),
+                ("previous_steps", self.previous_steps),
+                ("encoding_step", self.__class__.__name__),)
+
+    def transform(self, X):
+        cache_key = CacheHandler.generate_cache_key(self._prepare_caching_params(X), "")
+        dataset = CacheHandler.memo(cache_key, lambda: self._transform(X))
+        return dataset
 
     def _annotate_public_features(self, X: Dataset):
         feature_annotations = pd.merge(X.encoded_data.feature_annotations,
@@ -44,7 +65,7 @@ class PublicSequenceFeatureAnnotation(TransformerMixin):
         )
         return dataset
 
-    def transform(self, X):
+    def _transform(self, X):
         if not any([self.COLUMNS_PUBLIC in column for column in X.encoded_data.feature_annotations.columns]):
             dataset = self._annotate_public_features(X)
             dataset.encoded_data.feature_annotations.to_csv(self.result_path + "/feature_annotations.csv")

@@ -9,6 +9,7 @@ from sklearn.metrics import confusion_matrix
 
 from source.IO.dataset_export.PickleExporter import PickleExporter
 from source.analysis.criteria_matches.CriteriaMatcher import CriteriaMatcher
+from source.caching.CacheHandler import CacheHandler
 from source.data_model.dataset.Dataset import Dataset
 from source.data_model.encoded_data.EncodedData import EncodedData
 from source.encodings.pipeline.steps.FisherExactWrapper import FisherExactWrapper
@@ -25,8 +26,31 @@ class FisherExactFeatureAnnotation(TransformerMixin):
         self.result_path = result_path
         self.filename = filename
         self.fisher_annotations = None
+        self.initial_encoder = ""
+        self.initial_encoder_params = ""
+        self.previous_steps = ""
 
     def transform(self, X):
+        cache_key = CacheHandler.generate_cache_key(self._prepare_caching_params(X), "")
+        dataset = CacheHandler.memo(cache_key, lambda: self._transform(X))
+        return dataset
+
+    def to_tuple(self):
+        return (("axis", tuple(self.positive_criteria)),
+                ("fisher_annotations", tuple(self.filename)),
+                ("encoding_step", self.__class__.__name__),)
+
+    def _prepare_caching_params(self, dataset):
+        return (("dataset_filenames", tuple(dataset.get_filenames())),
+                ("dataset_metadata", dataset.metadata_file),
+                ("encoding", "PipelineEncoder"),
+                ("initial_encoder", self.initial_encoder),
+                ("initial_encoder_params", self.initial_encoder_params),
+                ("previous_steps", self.previous_steps),
+                ("encoding_step", FisherExactFeatureAnnotation.__name__),
+                ("positive_criteria", str(self.positive_criteria)),)
+
+    def _transform(self, X):
         if not any(["fisher" in column for column in X.encoded_data.feature_annotations.columns]):
             feature_annotations = pd.merge(X.encoded_data.feature_annotations,
                                            self.fisher_annotations,

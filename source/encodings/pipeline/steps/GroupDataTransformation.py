@@ -1,8 +1,10 @@
 from sklearn.base import TransformerMixin
 
+from source.analysis.AxisType import AxisType
 from source.analysis.data_manipulation.DataSummarizer import DataSummarizer
 from source.analysis.data_manipulation.GroupSummarizationType import GroupSummarizationType
-from source.analysis.AxisType import AxisType
+from source.caching.CacheHandler import CacheHandler
+
 
 class GroupDataTransformation(TransformerMixin):
     """
@@ -18,8 +20,34 @@ class GroupDataTransformation(TransformerMixin):
         self.group_summarization_type = group_summarization_type
         self.result_path = result_path
         self.filename = filename
+        self.initial_encoder = ""
+        self.initial_encoder_params = ""
+        self.previous_steps = ""
+
+    def to_tuple(self):
+        return (("axis", self.axis),
+                ("group_columns", tuple(self.group_columns)),
+                ("group_summarization_type", self.group_summarization_type),
+                ("encoding_step", self.__class__.__name__),)
+
+    def _prepare_caching_params(self, dataset):
+        return (("dataset_filenames", tuple(dataset.get_filenames())),
+                ("dataset_metadata", dataset.metadata_file),
+                ("encoding", "PipelineEncoder"),
+                ("initial_encoder", self.initial_encoder),
+                ("initial_encoder_params", self.initial_encoder_params),
+                ("previous_steps", self.previous_steps),
+                ("encoding_step", GroupDataTransformation.__name__),
+                ("axis", self.axis),
+                ("group_columns", self.group_columns),
+                ("group_summarization_type", self.group_summarization_type),)
 
     def transform(self, X):
+        cache_key = CacheHandler.generate_cache_key(self._prepare_caching_params(X), "")
+        dataset = CacheHandler.memo(cache_key, lambda: self._transform(X))
+        return dataset
+
+    def _transform(self, X):
 
         if self.axis == AxisType.REPERTOIRES:
             dataset = DataSummarizer.group_repertoires(X, self.group_columns, self.group_summarization_type)

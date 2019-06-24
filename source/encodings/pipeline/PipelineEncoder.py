@@ -121,10 +121,18 @@ class PipelineEncoder(DatasetEncoder):
 
     @staticmethod
     def extend_steps(params: EncoderParams):
-        for step in params["model"]["steps"]:
+        for index, step in enumerate(params["model"]["steps"]):
             step.result_path = params["result_path"]
             step.filename = params["filename"]
+            step.initial_encoder = params["model"]["initial_encoder"].__class__.__name__
+            step.initial_params = tuple((key, params["model"]["initial_encoder_params"][key])
+                                         for key in params["model"]["initial_encoder_params"].keys())
+            step.previous_steps = PipelineEncoder._prepare_previous_steps(params["model"], index)
         return params["model"]
+
+    @staticmethod
+    def _prepare_previous_steps(model, index):
+        return tuple(step.to_tuple() for i, step in enumerate(model["steps"]) if i < index)
 
     @staticmethod
     def store(encoded_dataset: Dataset, params: EncoderParams):

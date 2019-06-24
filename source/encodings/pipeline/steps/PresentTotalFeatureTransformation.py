@@ -1,12 +1,12 @@
-from sklearn.base import TransformerMixin
 import numpy as np
 import pandas as pd
 from scipy import sparse
+from sklearn.base import TransformerMixin
 
+from source.analysis.data_manipulation.DataSummarizer import DataSummarizer
+from source.caching.CacheHandler import CacheHandler
 from source.data_model.dataset.Dataset import Dataset
 from source.data_model.encoded_data.EncodedData import EncodedData
-from source.analysis.data_manipulation.DataSummarizer import DataSummarizer
-from source.encodings.EncoderParams import EncoderParams
 
 
 class PresentTotalFeatureTransformation(TransformerMixin):
@@ -23,8 +23,32 @@ class PresentTotalFeatureTransformation(TransformerMixin):
         self.nonzero = nonzero
         self.result_path = result_path
         self.filename = filename
+        self.initial_encoder = ""
+        self.initial_encoder_params = ""
+        self.previous_steps = None
+
+    def to_tuple(self):
+        return (("criteria", tuple(self.criteria)),
+                ("nonzero", self.nonzero),
+                ("encoding_step", self.__class__.__name__),)
+
+    def _prepare_caching_params(self, dataset):
+        return (("dataset_filenames", tuple(dataset.get_filenames())),
+                ("dataset_metadata", dataset.metadata_file),
+                ("encoding", "PipelineEncoder"),
+                ("initial_encoder", self.initial_encoder),
+                ("initial_encoder_params", self.initial_encoder_params),
+                ("previous_steps", self.previous_steps),
+                ("encoding_step", self.__class__.__name__),
+                ("criteria", tuple(self.criteria)),
+                ("nonzero", self.nonzero),)
 
     def transform(self, X):
+        cache_key = CacheHandler.generate_cache_key(self._prepare_caching_params(X), "")
+        dataset = CacheHandler.memo(cache_key, lambda: self._transform(X))
+        return dataset
+
+    def _transform(self, X):
         repertoires = self.get_repertoires(X)
         feature_names = ["present", "total"]
         feature_annotations = pd.DataFrame({"feature": ["present", "total"]})
