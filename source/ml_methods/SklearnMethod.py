@@ -1,4 +1,5 @@
 import abc
+import hashlib
 import json
 import os
 import pickle
@@ -9,12 +10,16 @@ import numpy as np
 from sklearn.model_selection import RandomizedSearchCV
 from sklearn.utils.validation import check_is_fitted
 
+from source.caching.CacheHandler import CacheHandler
 from source.ml_methods.MLMethod import MLMethod
 from source.util.FilenameHandler import FilenameHandler
 from source.util.PathBuilder import PathBuilder
 
 
 class SklearnMethod(MLMethod):
+
+    FIT_CV = "fit_CV"
+    FIT = "fit"
 
     def __init__(self):
         self._models = {}
@@ -25,7 +30,21 @@ class SklearnMethod(MLMethod):
         self._models[label] = self._get_ml_model(cores_for_training)
         self._models[label].fit(X, y)
 
+    def _prepare_caching_params(self, X: Iterable, y, type: str, label_names: list = None, number_of_splits: int = -1):
+        return (("X", hashlib.sha256(str(X).encode("utf-8")).hexdigest()),
+                ("y", hashlib.sha256(str(y).encode("utf-8")).hexdigest()),
+                ("label_names", str(label_names)),
+                ("type", type),
+                ("number_of_splits", str(number_of_splits)),
+                ("parameters", str(self._parameters)),
+                ("parameter_grid", str(self._parameter_grid)),)
+
     def fit(self, X: Iterable, y, label_names: list = None, cores_for_training: int = 1):
+
+        cache_key = CacheHandler.generate_cache_key(self._prepare_caching_params(X, y, self.FIT, label_names))
+        CacheHandler.memo(cache_key, lambda: self._fit(X, y, label_names, cores_for_training))
+
+    def _fit(self, X: Iterable, y, label_names: list = None, cores_for_training: int = 1):
 
         if label_names is not None:
             for index, label in enumerate(label_names):
@@ -63,10 +82,18 @@ class SklearnMethod(MLMethod):
         self._models[label].fit(X, y)
         self._models[label] = self._models[label].best_estimator_  # do not leave RandomSearchCV object to be in models, but use the best estimator instead
 
-    def fit_by_cross_validation(self, X, y, number_of_splits: int = 5, parameter_grid: dict = None,
+    def fit_by_cross_validation(self,  X, y, number_of_splits: int = 5, parameter_grid: dict = None,
                                 label_names: list = None, cores_for_training: int = 1):
+
         if parameter_grid is not None:
             self._parameter_grid = parameter_grid
+
+        cache_key = CacheHandler.generate_cache_key(self._prepare_caching_params(X, y, self.FIT_CV, label_names,
+                                                                                 number_of_splits))
+        CacheHandler.memo(cache_key, lambda: self._fit(X, y, label_names, cores_for_training))
+
+    def _fit_by_cross_validation(self, X, y, number_of_splits: int = 5, label_names: list = None,
+                                 cores_for_training: int = 1):
 
         for label in label_names:
             self._fit_for_label_by_cv(X, y[label], label, cores_for_training, number_of_splits)
