@@ -38,13 +38,13 @@ class CacheHandler:
         PathBuilder.build(EnvironmentSettings.get_cache_path(cache_type))
         h = CacheHandler.generate_cache_key(params)
         with open(CacheHandler._build_filename(h, cache_type), "wb") as file:
-            pickle.dump(caching_object, file)
+            pickle.dump(caching_object, file, protocol=pickle.HIGHEST_PROTOCOL)
 
     @staticmethod
     def add_by_key(cache_key: str, caching_object, cache_type=None):
         PathBuilder.build(EnvironmentSettings.get_cache_path(cache_type))
         with open(CacheHandler._build_filename(cache_key, cache_type), "wb") as file:
-            pickle.dump(caching_object, file)
+            pickle.dump(caching_object, file, protocol=pickle.HIGHEST_PROTOCOL)
 
     @staticmethod
     def generate_cache_key(params: tuple):
@@ -57,6 +57,11 @@ class CacheHandler:
             result = fn()
             CacheHandler.add_by_key(cache_key, result, cache_type)
         return result
+
+    @staticmethod
+    def memo_by_params(params: tuple, fn, cache_type=None):
+        cache_key = CacheHandler.generate_cache_key(params)
+        return CacheHandler.memo(cache_key, fn, cache_type)
 
     @staticmethod
     def _hash(params: tuple) -> str:
