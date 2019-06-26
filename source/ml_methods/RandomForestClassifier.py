@@ -25,8 +25,8 @@ class RandomForestClassifier(SklearnMethod):
         return True
 
     def get_params(self, label):
-        params = self._models[label].estimator.get_params(deep=True) \
-            if isinstance(self._models[label], RandomizedSearchCV) \
-            else self._models[label].get_params(deep=True)
-        params["feature_importances"] = self._models[label].feature_importances_.tolist()
+        params = self.models[label].estimator.get_params(deep=True) \
+            if isinstance(self.models[label], RandomizedSearchCV) \
+            else self.models[label].get_params(deep=True)
+        params["feature_importances"] = self.models[label].feature_importances_.tolist()
         return params

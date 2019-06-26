@@ -29,8 +29,8 @@ class SimpleLogisticRegression(SklearnMethod):
         return True
 
     def get_params(self, label):
-        params = self._models[label].estimator.get_params() if isinstance(self._models[label], RandomizedSearchCV) \
-            else self._models[label].get_params()
-        params["coefficients"] = self._models[label].coef_.tolist()
-        params["intercept"] = self._models[label].intercept_.tolist()
+        params = self.models[label].estimator.get_params() if isinstance(self.models[label], RandomizedSearchCV) \
+            else self.models[label].get_params()
+        params["coefficients"] = self.models[label].coef_.tolist()
+        params["intercept"] = self.models[label].intercept_.tolist()
         return params

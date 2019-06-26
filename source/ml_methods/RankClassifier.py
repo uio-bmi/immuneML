@@ -22,7 +22,7 @@ class RankClassifier(MLMethod):
     outputs of the model (e.g. predictions) will consist of original labels.s
     """
     def __init__(self, parameters=None):
-        self._models = {}
+        self.models = {}
         self._label_encoders = {}
         # a name of any valid binary operator function in numpy:
         self._parameters = {**{"comparison": "greater_equal"}, **(parameters if parameters is not None else {})}
@@ -59,7 +59,7 @@ class RankClassifier(MLMethod):
 
     def _fit_for_label(self, label: str, sorted_X, sorted_y: dict):
         max_balanced_accuracy = -1
-        self._models[label] = {"threshold": float(np.min(sorted_X))}
+        self.models[label] = {"threshold": float(np.min(sorted_X))}
 
         for index in range(sorted_X.shape[0]):
 
@@ -70,12 +70,12 @@ class RankClassifier(MLMethod):
 
             if balanced_accuracy > max_balanced_accuracy:
                 max_balanced_accuracy = balanced_accuracy
-                self._models[label]["threshold"] = float((sorted_X[index] + sorted_X[index+1]) / 2) if index < sorted_X.shape[0]-1 else float(sorted_X[index])
+                self.models[label]["threshold"] = float((sorted_X[index] + sorted_X[index+1]) / 2) if index < sorted_X.shape[0]-1 else float(sorted_X[index])
 
     def predict(self, X, label_names: list = None):
         predictions = {}
         for label in label_names if label_names is not None else ["default"]:
-            predictions[label] = getattr(np, self._parameters["comparison"])(X, self._models[label]["threshold"])
+            predictions[label] = getattr(np, self._parameters["comparison"])(X, self.models[label]["threshold"])
             if label in self._label_encoders and not set.issubset(set(np.unique(predictions[label])), set(self._label_encoders[label].classes_)):
                 predictions[label] = self._label_encoders[label].inverse_transform(predictions[label][:,0])
         return predictions
@@ -89,25 +89,25 @@ class RankClassifier(MLMethod):
         name = FilenameHandler.get_filename(self.__class__.__name__, "pickle")
         params_name = FilenameHandler.get_filename(self.__class__.__name__, "json")
         with open(path + name, "wb") as file:
-            pickle.dump(self._models, file)
+            pickle.dump(self.models, file)
         with open(path + params_name, "w") as file:
-            desc = self._models
+            desc = self.models
             json.dump(desc, file, indent=2)
 
     def load(self, path):
         name = FilenameHandler.get_filename(self.__class__.__name__, "pickle")
         if os.path.isfile(path + name):
             with open(path + name, "rb") as file:
-                self._models = pickle.load(file)
+                self.models = pickle.load(file)
         else:
             raise FileNotFoundError(self.__class__.__name__ + " model could not be loaded from " + str(
                 path + name) + ". Check if the path to the " + name + " file is properly set.")
 
     def get_model(self, label_names: list = None):
         if label_names is None:
-            return self._models
+            return self.models
         else:
-            return {label: self._models[label] for label in label_names}
+            return {label: self.models[label] for label in label_names}
 
     def check_if_exists(self, path):
         return os.path.isfile(path + FilenameHandler.get_filename(self.__class__.__name__, "pickle"))
@@ -116,7 +116,7 @@ class RankClassifier(MLMethod):
         return self._label_encoders[label].classes_
 
     def get_params(self, label):
-        return self._models[label]
+        return self.models[label]
 
     def predict_proba(self, X, labels):
         return None

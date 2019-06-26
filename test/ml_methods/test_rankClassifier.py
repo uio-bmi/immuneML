@@ -13,7 +13,7 @@ class TestRankClassifier(TestCase):
         rank_classifier = RankClassifier()
         rank_classifier._fit_for_label("l1", X, y)
 
-        self.assertEqual(1.5, rank_classifier._models["l1"]["threshold"])
+        self.assertEqual(1.5, rank_classifier.models["l1"]["threshold"])
 
     def test_fit(self):
         X = np.array([[4], [5], [1], [2], [3]])
@@ -21,7 +21,7 @@ class TestRankClassifier(TestCase):
 
         rank_cls = RankClassifier()
         rank_cls.fit(X, y, ["l1", "l2"])
-        self.assertEqual(1.5, rank_cls._models["l1"]["threshold"])
+        self.assertEqual(1.5, rank_cls.models["l1"]["threshold"])
 
     def test_predict(self):
         X = np.array([[5], [4], [3], [2], [1]])
