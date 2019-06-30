@@ -1,13 +1,11 @@
 # quality: gold
 import copy
+import hashlib
 import os
-import pickle
 
 import numpy as np
 import pandas as pd
 from gensim.models import Word2Vec
-from scipy import sparse
-from sklearn.preprocessing import StandardScaler
 
 from source.IO.dataset_export.PickleExporter import PickleExporter
 from source.caching.CacheHandler import CacheHandler
@@ -16,12 +14,12 @@ from source.data_model.encoded_data.EncodedData import EncodedData
 from source.data_model.repertoire.Repertoire import Repertoire
 from source.encodings.DatasetEncoder import DatasetEncoder
 from source.encodings.EncoderParams import EncoderParams
+from source.encodings.preprocessing.FeatureScaler import FeatureScaler
 from source.encodings.word2vec.model_creator.KmerPairModelCreator import KmerPairModelCreator
 from source.encodings.word2vec.model_creator.ModelType import ModelType
 from source.encodings.word2vec.model_creator.SequenceModelCreator import SequenceModelCreator
 from source.util.FilenameHandler import FilenameHandler
 from source.util.KmerHelper import KmerHelper
-from source.util.PathBuilder import PathBuilder
 
 
 class Word2VecEncoder(DatasetEncoder):
@@ -45,6 +43,10 @@ class Word2VecEncoder(DatasetEncoder):
     NB: In order to use the workers properly and be able to parallelize the training process,
     it is necessary that Cython is installed on the machine.
     """
+
+    DESCRIPTION_REPERTOIRES = "repertoires"
+    DESCRIPTION_LABELS = "labels"
+
     @staticmethod
     def encode(dataset: Dataset, params: EncoderParams) -> Dataset:
         encoded_dataset = CacheHandler.memo_by_params(Word2VecEncoder._prepare_caching_params(dataset, params),
@@ -53,10 +55,12 @@ class Word2VecEncoder(DatasetEncoder):
         return encoded_dataset
 
     @staticmethod
-    def _prepare_caching_params(dataset: Dataset, params: EncoderParams):
+    def _prepare_caching_params(dataset: Dataset, params: EncoderParams, vectors=None, description: str = ""):
         return (("dataset_filenames", tuple(dataset.get_filenames())),
                 ("dataset_metadata", dataset.metadata_file),
                 ("labels", tuple(params["label_configuration"].get_labels_by_name())),
+                ("vectors", hashlib.sha256(str(vectors).encode("utf-8")).hexdigest()),
+                ("description", description),
                 ("encoding", Word2VecEncoder.__name__),
                 ("learn_model", params["learn_model"]),
                 ("encoding_params", tuple([(key, params["model"][key]) for key in params["model"].keys()])), )
@@ -111,21 +115,24 @@ class Word2VecEncoder(DatasetEncoder):
     def _encode_by_model(dataset, vectors, params: EncoderParams) -> Dataset:
 
         encoded_dataset = copy.deepcopy(dataset)
-        repertoires = np.zeros(shape=[dataset.get_repertoire_count(), vectors.vector_size])
-        for (index, repertoire) in enumerate(encoded_dataset.get_data()):
-            repertoires[index] = Word2VecEncoder._encode_repertoire(repertoire, vectors, params)
 
-        labels = Word2VecEncoder._encode_labels(dataset, params)
+        repertoires = CacheHandler.memo_by_params(Word2VecEncoder._prepare_caching_params(dataset, params, vectors, Word2VecEncoder.DESCRIPTION_REPERTOIRES),
+                                                  lambda: Word2VecEncoder._encode_repertoires(encoded_dataset, vectors, params))
 
-        scaled_repertoires = Word2VecEncoder._scale_encoding(repertoires, params)
+        labels = CacheHandler.memo_by_params(Word2VecEncoder._prepare_caching_params(dataset, params, vectors, Word2VecEncoder.DESCRIPTION_LABELS),
+                                             lambda: Word2VecEncoder._encode_labels(dataset, params))
 
-        encoded_dataset.params = dataset.params
-        encoded_dataset.set_filenames(dataset.get_filenames())
+        scaler_filename = params["result_path"] + FilenameHandler.get_filename("standard_scaling", "pkl")
+        scaled_repertoires = FeatureScaler.standard_scale(scaler_filename, repertoires)
+
+        encoded_dataset = Word2VecEncoder._build_encoded_dataset(encoded_dataset, scaled_repertoires, labels, params)
+        return encoded_dataset
+
+    @staticmethod
+    def _build_encoded_dataset(encoded_dataset, scaled_repertoires, labels, params):
 
         label_names = params["label_configuration"].get_labels_by_name()
-
         feature_names = [str(i) for i in range(scaled_repertoires.shape[1])]
-
         feature_annotations = pd.DataFrame({"feature": feature_names})
 
         encoded_data = EncodedData(repertoires=scaled_repertoires,
@@ -138,25 +145,11 @@ class Word2VecEncoder(DatasetEncoder):
         return encoded_dataset
 
     @staticmethod
-    def _scale_encoding(repertoires: np.ndarray, params: EncoderParams):
-
-        scaler_path = params["result_path"]
-        scaler_file = scaler_path + FilenameHandler.get_filename(StandardScaler.__name__, "pickle")
-
-        if os.path.isfile(scaler_file):
-            with open(scaler_file, 'rb') as file:
-                scaler = pickle.load(file)
-                scaled_repertoires = scaler.transform(repertoires)
-        else:
-            scaler = StandardScaler()
-            scaled_repertoires = scaler.fit_transform(repertoires)
-
-            PathBuilder.build(scaler_path)
-
-            with open(scaler_file, 'wb') as file:
-                pickle.dump(scaler, file)
-
-        return sparse.csc_matrix(scaled_repertoires)
+    def _encode_repertoires(encoded_dataset, vectors, params: EncoderParams):
+        repertoires = np.zeros(shape=[encoded_dataset.get_repertoire_count(), vectors.vector_size])
+        for (index, repertoire) in enumerate(encoded_dataset.get_data()):
+            repertoires[index] = Word2VecEncoder._encode_repertoire(repertoire, vectors, params)
+        return repertoires
 
     @staticmethod
     def _load_model(params: EncoderParams):

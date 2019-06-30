@@ -7,14 +7,13 @@ import pandas as pd
 from sklearn.feature_extraction import DictVectorizer
 
 from source.IO.dataset_export.PickleExporter import PickleExporter
-from source.analysis.AxisType import AxisType
-from source.analysis.data_manipulation.DataSummarizer import DataSummarizer
 from source.caching.CacheHandler import CacheHandler
 from source.data_model.dataset.Dataset import Dataset
 from source.data_model.encoded_data.EncodedData import EncodedData
 from source.encodings.DatasetEncoder import DatasetEncoder
 from source.encodings.EncoderParams import EncoderParams
 from source.encodings.kmer_frequency.ReadsType import ReadsType
+from source.encodings.preprocessing.FeatureScaler import FeatureScaler
 from source.environment.Constants import Constants
 from source.util.FilenameHandler import FilenameHandler
 from source.util.PathBuilder import PathBuilder
@@ -45,6 +44,11 @@ class KmerFrequencyEncoder(DatasetEncoder):
     Parallelization is supported based on the value in the batch_size parameter. The same number of processes will be
     created as the batch_size parameter.
     """
+
+    STEP_ENCODED = "encoded"
+    STEP_VECTORIZED = "vectorized"
+    STEP_NORMALIZED = "normalized"
+
     @staticmethod
     def encode(dataset: Dataset, params: EncoderParams) -> Dataset:
 
@@ -54,20 +58,24 @@ class KmerFrequencyEncoder(DatasetEncoder):
         return encoded_dataset
 
     @staticmethod
-    def _prepare_caching_params(dataset: Dataset, params: EncoderParams):
+    def _prepare_caching_params(dataset: Dataset, params: EncoderParams, step: str = ""):
         return (("dataset_filenames", tuple(dataset.get_filenames())),
                 ("dataset_metadata", dataset.metadata_file),
                 ("labels", tuple(params["label_configuration"].get_labels_by_name())),
                 ("encoding", KmerFrequencyEncoder.__name__),
                 ("learn_model", params["learn_model"]),
+                ("step", step),
                 ("encoding_params", tuple([(key, params["model"][key]) for key in params["model"].keys()])), )
 
     @staticmethod
     def _encode_new_dataset(dataset: Dataset, params: EncoderParams) -> Dataset:
 
-        encoded_repertoire_list, repertoire_names, encoded_labels, feature_annotation_names = KmerFrequencyEncoder._encode_repertoires(dataset, params)
-        vectorized_repertoires, feature_names = KmerFrequencyEncoder._vectorize_encoded_repertoires(repertoires=encoded_repertoire_list, params=params)
-        normalized_repertoires = DataSummarizer.normalize_matrix(vectorized_repertoires, params["model"]["normalization_type"], AxisType.REPERTOIRES)
+        encoded_repertoire_list, repertoire_names, encoded_labels, feature_annotation_names = CacheHandler.memo_by_params(KmerFrequencyEncoder._prepare_caching_params(dataset, params, KmerFrequencyEncoder.STEP_ENCODED),
+                                                                                                                          lambda: KmerFrequencyEncoder._encode_repertoires(dataset, params))
+        vectorized_repertoires, feature_names = CacheHandler.memo_by_params(KmerFrequencyEncoder._prepare_caching_params(dataset, params, KmerFrequencyEncoder.STEP_VECTORIZED),
+                                                                            lambda: KmerFrequencyEncoder._vectorize_encoded_repertoires(repertoires=encoded_repertoire_list, params=params))
+        normalized_repertoires = CacheHandler.memo_by_params(KmerFrequencyEncoder._prepare_caching_params(dataset, params, KmerFrequencyEncoder.STEP_NORMALIZED),
+                                                             lambda: FeatureScaler.normalize(params["result_path"] + "normalizer.pkl", vectorized_repertoires, params["model"]["normalization_type"]))
         feature_annotations = KmerFrequencyEncoder._get_feature_annotations(feature_names, feature_annotation_names)
 
         encoded_data = EncodedData(repertoires=normalized_repertoires,
