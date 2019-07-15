@@ -6,4 +6,4 @@ class SequenceEncodingType(Enum):
     IMGT_CONTINUOUS_KMER = "IMGTKmerSequenceEncoder"
     CONTINUOUS_KMER = "KmerSequenceEncoder"
     IDENTITY = "IdentitySequenceEncoder"
-    IMGT_GAPPPED_KMER = "IMGTGappedKmerEncoder"
+    IMGT_GAPPED_KMER = "IMGTGappedKmerEncoder"
