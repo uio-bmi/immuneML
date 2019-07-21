@@ -1,7 +1,7 @@
 from enum import Enum
 
 
-class AssessmentType(Enum):
+class SplitType(Enum):
 
     k_fold = 0
     loocv = 1
