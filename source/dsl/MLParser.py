@@ -1,9 +1,9 @@
-from source.dsl.AssessmentType import AssessmentType
 from source.dsl.DefaultParamsLoader import DefaultParamsLoader
 from source.dsl.SymbolTable import SymbolTable
 from source.dsl.SymbolType import SymbolType
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.environment.MetricType import MetricType
+from source.hyperparameter_optimization.SplitType import SplitType
 from source.ml_methods.MLMethod import MLMethod
 from source.util.ReflectionHandler import ReflectionHandler
 
@@ -44,7 +44,7 @@ class MLParser:
             "model_selection_n_folds": ml_specification[method_id]["model_selection_n_folds"],
             "training_percentage": ml_specification[method_id]["training_percentage"],
             "split_count": ml_specification[method_id]["split_count"],
-            "assessment_type": AssessmentType[ml_specification[method_id]["assessment_type"].lower()],
+            "assessment_type": SplitType[ml_specification[method_id]["assessment_type"].lower()],
             "min_example_count": ml_specification[method_id]["min_example_count"],
             "cores_for_training": ml_specification[method_id]["cores_for_training"],
             "batch_size": ml_specification[method_id]["batch_size"],
