@@ -8,11 +8,12 @@ from source.data_model.encoded_data.EncodedData import EncodedData
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.ml_methods.LogisticRegression import LogisticRegression
 from source.workflows.steps.MLMethodTrainer import MLMethodTrainer
+from source.workflows.steps.MLMethodTrainerParams import MLMethodTrainerParams
 
 
 class TestMLMethodTrainer(TestCase):
 
-    def test_perform_step(self):
+    def test_run(self):
         method = LogisticRegression()
         dataset = Dataset()
         dataset.encoded_data = EncodedData(
@@ -26,15 +27,15 @@ class TestMLMethodTrainer(TestCase):
 
         path = EnvironmentSettings.root_path + "test/tmp/mlmethodtrainer/"
 
-        method = MLMethodTrainer.perform_step({
-            "result_path": path,
-            "dataset": dataset,
-            "labels": ["l1"],
-            "method": method,
-            "model_selection_n_folds": 2,
-            "model_selection_cv": True,
-            "cores_for_training": 1
-        })
+        method = MLMethodTrainer.run(MLMethodTrainerParams(
+            result_path=path,
+            dataset=dataset,
+            labels=["l1"],
+            method=method,
+            model_selection_n_folds=2,
+            model_selection_cv=True,
+            cores_for_training=1
+        ))
 
         method.predict(np.array([1, 2, 3]).reshape(1, -1), ["l1"])
 

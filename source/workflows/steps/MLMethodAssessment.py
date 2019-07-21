@@ -4,12 +4,13 @@ import os
 import pandas as pd
 from sklearn import metrics
 
+from source.data_model.dataset.Dataset import Dataset
 from source.environment.MetricType import MetricType
 from source.ml_methods.MLMethod import MLMethod
 from source.ml_metrics import ml_metrics
 from source.util.PathBuilder import PathBuilder
+from source.workflows.steps.MLMethodAssessmentParams import MLMethodAssessmentParams
 from source.workflows.steps.Step import Step
-from source.data_model.dataset.Dataset import Dataset
 
 
 class MLMethodAssessment(Step):
@@ -17,44 +18,34 @@ class MLMethodAssessment(Step):
     fieldnames = ["run", "optimal_method_params", "method", "encoding_params", "encoding", "evaluated_on"]
 
     @staticmethod
-    def run(input_params: dict = None):
-        MLMethodAssessment.check_prerequisites(input_params)
-        return MLMethodAssessment.perform_step(input_params)
+    def run(input_params: MLMethodAssessmentParams = None):
+        labels = input_params.label_configuration.get_labels_by_name()
+        X = input_params.dataset.encoded_data.repertoires
+        predicted_y = input_params.method.predict(X, labels)
+        predicted_proba_y = input_params.method.predict_proba(X, labels)
+        true_y = input_params.dataset.encoded_data.labels
+        repertoire_ids = [rep.identifier for rep in input_params.dataset.get_data()]
 
-    @staticmethod
-    def check_prerequisites(input_params: dict = None):
-        pass
-
-    @staticmethod
-    def perform_step(input_params: dict = None):
-        method = input_params["method"]
-        labels = input_params["labels"]
-        X = input_params["dataset"].encoded_data.repertoires
-        # predict
-        predicted_y = method.predict(X, labels)
-        predicted_proba_y = method.predict_proba(X, labels)
-        true_y = input_params["dataset"].encoded_data.labels
-        repertoire_ids = [rep.identifier for rep in input_params["dataset"].get_data()]
-
-        MLMethodAssessment._store_predictions(method,
+        MLMethodAssessment._store_predictions(input_params.method,
                                               true_y,
                                               predicted_y,
                                               predicted_proba_y,
                                               labels,
-                                              input_params["predictions_path"],
-                                              input_params["all_predictions_path"],
+                                              input_params.predictions_path,
+                                              input_params.all_predictions_path,
                                               repertoire_ids,
-                                              input_params["run"])
+                                              input_params.run)
 
-        results = MLMethodAssessment._score(metrics_list=input_params["metrics"], labels=labels,
-                                            label_config=input_params["label_configuration"], predicted_y=predicted_y,
-                                            true_y=true_y, ml_details_path=input_params["ml_details_path"],
-                                            run=input_params["run"], method=method, dataset=input_params["dataset"])
+        results = MLMethodAssessment._score(metrics_list=input_params.metrics, labels=labels, run=input_params.run,
+                                            label_config=input_params.label_configuration, predicted_y=predicted_y,
+                                            true_y=true_y, ml_details_path=input_params.ml_details_path,
+                                            method=input_params.method, dataset=input_params.dataset)
 
         return results
 
     @staticmethod
-    def _score(metrics_list: list, labels: list, label_config, predicted_y, true_y, ml_details_path: str, run: int, method: MLMethod, dataset: Dataset):
+    def _score(metrics_list: list, labels: list, label_config, predicted_y, true_y, ml_details_path: str, run: int,
+               method: MLMethod, dataset: Dataset):
         results = {}
 
         for metric in metrics_list:
@@ -65,7 +56,9 @@ class MLMethodAssessment(Step):
 
         results["run"] = run
         for label in labels:
-            results["{}_method_params".format(label)] = {**method.get_params(label), "feature_names": dataset.encoded_data.feature_names if dataset is not None else None}
+            results["{}_method_params".format(label)] = {**method.get_params(label),
+                                                         "feature_names": dataset.encoded_data.feature_names
+                                                         if dataset is not None else None}
 
         df = pd.DataFrame([results])
 

@@ -14,6 +14,7 @@ from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.environment.LabelConfiguration import LabelConfiguration
 from source.util.PathBuilder import PathBuilder
 from source.workflows.steps.DataEncoder import DataEncoder
+from source.workflows.steps.DataEncoderParams import DataEncoderParams
 
 
 class TestDataEncoder(TestCase):
@@ -38,10 +39,10 @@ class TestDataEncoder(TestCase):
 
         dataset = Dataset(filenames=[path + "rep1.pkl", path + "rep2.pkl"])
 
-        res = DataEncoder.run({
-            "dataset": dataset,
-            "encoder": encoder,
-            "encoder_params": EncoderParams(
+        res = DataEncoder.run(DataEncoderParams(
+            dataset=dataset,
+            encoder=encoder,
+            encoder_params=EncoderParams(
                 model={
                     "k": 3,
                     "model_creator": ModelType.SEQUENCE,
@@ -52,7 +53,7 @@ class TestDataEncoder(TestCase):
                 result_path=path,
                 filename="dataset.csv"
             )
-        })
+        ))
 
         self.assertTrue(isinstance(res, Dataset))
         self.assertTrue(res.encoded_data.repertoires.shape[0] == 2)

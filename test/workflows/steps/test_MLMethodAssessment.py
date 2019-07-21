@@ -14,11 +14,12 @@ from source.ml_methods.SVM import SVM
 from source.util.PathBuilder import PathBuilder
 from source.util.RepertoireBuilder import RepertoireBuilder
 from source.workflows.steps.MLMethodAssessment import MLMethodAssessment
+from source.workflows.steps.MLMethodAssessmentParams import MLMethodAssessmentParams
 
 
 class TestMLMethodAssessment(TestCase):
 
-    def test_perform_step(self):
+    def test_run(self):
         path = EnvironmentSettings.root_path + "test/tmp/mlmethodassessment/"
         PathBuilder.build(path)
         dataset = Dataset(filenames=RepertoireBuilder.build([["AA"], ["CC"], ["AA"], ["CC"], ["AA"], ["CC"]], path))
@@ -34,17 +35,17 @@ class TestMLMethodAssessment(TestCase):
         method1 = SVM()
         method1.fit(dataset.encoded_data.repertoires, dataset.encoded_data.labels, dataset.encoded_data.labels.keys())
 
-        res = MLMethodAssessment.perform_step({
-            "dataset": dataset,
-            "method": method1,
-            "labels": ["l1", "l2"],
-            "metrics": [MetricType.ACCURACY, MetricType.BALANCED_ACCURACY, MetricType.F1_MACRO],
-            "predictions_path":  EnvironmentSettings.root_path + "test/tmp/mlmethodassessment/predictions/",
-            "label_configuration": label_config,
-            "ml_details_path": EnvironmentSettings.root_path + "test/tmp/mlmethodassessment/ml_details.csv",
-            "run": 1,
-            "all_predictions_path": EnvironmentSettings.root_path + "test/tmp/mlmethodassessment/predictions.csv"
-        })
+        res = MLMethodAssessment.run(MLMethodAssessmentParams(
+            dataset=dataset,
+            method=method1,
+            metrics=[MetricType.ACCURACY, MetricType.BALANCED_ACCURACY, MetricType.F1_MACRO],
+            predictions_path=EnvironmentSettings.root_path + "test/tmp/mlmethodassessment/predictions/",
+            label_configuration=label_config,
+            ml_details_path=EnvironmentSettings.root_path + "test/tmp/mlmethodassessment/ml_details.csv",
+            run=1,
+            all_predictions_path=EnvironmentSettings.root_path + "test/tmp/mlmethodassessment/predictions.csv",
+            path=EnvironmentSettings.root_path + "test/tmp/mlmethodassessment/"
+        ))
 
         self.assertTrue("l1_accuracy" in res.keys())
         self.assertTrue("l2_accuracy" in res.keys())

@@ -1,5 +1,7 @@
 import abc
 
+from source.workflows.steps.StepParams import StepParams
+
 
 class Step(metaclass=abc.ABCMeta):
     """
@@ -15,15 +17,5 @@ class Step(metaclass=abc.ABCMeta):
 
     @staticmethod
     @abc.abstractmethod
-    def run(input_params: dict = None):
-        pass
-
-    @staticmethod
-    @abc.abstractmethod
-    def check_prerequisites(input_params: dict = None):
-        pass
-
-    @staticmethod
-    @abc.abstractmethod
-    def perform_step(input_params: dict = None):
+    def run(input_params: StepParams = None):
         pass

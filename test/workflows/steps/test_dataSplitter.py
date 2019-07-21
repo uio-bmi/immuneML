@@ -5,15 +5,16 @@ import numpy as np
 import pandas as pd
 
 from source.data_model.dataset.Dataset import Dataset
-from source.dsl.AssessmentType import AssessmentType
 from source.environment.EnvironmentSettings import EnvironmentSettings
+from source.hyperparameter_optimization.SplitType import SplitType
 from source.util.PathBuilder import PathBuilder
 from source.workflows.steps.DataSplitter import DataSplitter
+from source.workflows.steps.DataSplitterParams import DataSplitterParams
 
 
 class TestDataSplitter(TestCase):
 
-    def test_perform_step(self):
+    def test_run(self):
         dataset = Dataset(filenames=["file1.pkl", "file2.pkl", "file3.pkl", "file4.pkl", "file5.pkl", "file6.pkl", "file7.pkl", "file8.pkl"])
 
         path = EnvironmentSettings.root_path + "test/tmp/datasplitter/"
@@ -26,13 +27,13 @@ class TestDataSplitter(TestCase):
 
         training_percentage = 0.7
 
-        trains, tests = DataSplitter.perform_step({
-            "dataset": dataset,
-            "training_percentage": training_percentage,
-            "assessment_type": "random",
-            "split_count": 5,
-            "label_to_balance": None
-        })
+        trains, tests = DataSplitter.run(DataSplitterParams(
+            dataset=dataset,
+            training_percentage=training_percentage,
+            split_strategy=SplitType.random,
+            split_count=5,
+            label_to_balance=None
+        ))
 
         self.assertTrue(isinstance(trains[0], Dataset))
         self.assertTrue(isinstance(tests[0], Dataset))
@@ -42,23 +43,23 @@ class TestDataSplitter(TestCase):
         self.assertEqual(5, len(tests))
         self.assertEqual(5, len(np.unique(trains[0].get_filenames())))
 
-        trains2, tests2 = DataSplitter.perform_step({
-            "dataset": dataset,
-            "training_percentage": training_percentage,
-            "assessment_type": "random",
-            "split_count": 5,
-            "label_to_balance": None
-        })
+        trains2, tests2 = DataSplitter.run(DataSplitterParams(
+            dataset=dataset,
+            training_percentage=training_percentage,
+            split_strategy=SplitType.random,
+            split_count=5,
+            label_to_balance=None
+        ))
 
         self.assertEqual(trains[0].get_filenames(), trains2[0].get_filenames())
 
-        trains, tests = DataSplitter.perform_step({
-            "dataset": dataset,
-            "assessment_type": "loocv",
-            "split_count": -1,
-            "label_to_balance": None,
-            "training_percentage": -1
-        })
+        trains, tests = DataSplitter.run(DataSplitterParams(
+            dataset=dataset,
+            split_strategy=SplitType.loocv,
+            split_count=-1,
+            label_to_balance=None,
+            training_percentage=-1
+        ))
 
         self.assertTrue(isinstance(trains[0], Dataset))
         self.assertTrue(isinstance(tests[0], Dataset))
@@ -67,13 +68,13 @@ class TestDataSplitter(TestCase):
         self.assertEqual(8, len(trains))
         self.assertEqual(8, len(tests))
 
-        trains, tests = DataSplitter.perform_step({
-            "dataset": dataset,
-            "assessment_type": "k_fold_cv",
-            "split_count": 5,
-            "label_to_balance": None,
-            "training_percentage": -1
-        })
+        trains, tests = DataSplitter.run(DataSplitterParams(
+            dataset=dataset,
+            split_strategy=SplitType.k_fold,
+            split_count=5,
+            label_to_balance=None,
+            training_percentage=-1
+        ))
 
         self.assertTrue(isinstance(trains[0], Dataset))
         self.assertTrue(isinstance(tests[0], Dataset))
@@ -82,13 +83,13 @@ class TestDataSplitter(TestCase):
         self.assertEqual(5, len(trains))
         self.assertEqual(5, len(tests))
 
-        trains, tests = DataSplitter.perform_step({
-            "dataset": dataset,
-            "assessment_type": "random_balanced",
-            "training_percentage": training_percentage,
-            "split_count": 10,
-            "label_to_balance": "key1"
-        })
+        trains, tests = DataSplitter.run(DataSplitterParams(
+            dataset=dataset,
+            split_strategy=SplitType.random_balanced,
+            training_percentage=training_percentage,
+            split_count=10,
+            label_to_balance="key1"
+        ))
 
         self.assertTrue(isinstance(trains[0], Dataset))
         self.assertTrue(isinstance(tests[0], Dataset))
@@ -106,7 +107,7 @@ class TestDataSplitter(TestCase):
         df = pd.DataFrame(data={"key1": [0, 1, 2, 3, 4, 5], "key2": [0, 1, 2, 3, 4, 5]})
         df.to_csv(path+"metadata.csv")
 
-        filepath = DataSplitter.build_new_metadata(path+"metadata.csv", [1, 3, 4], AssessmentType.k_fold, 2, DataSplitter.TRAIN)
+        filepath = DataSplitter.build_new_metadata(path+"metadata.csv", [1, 3, 4], SplitType.k_fold, 2, DataSplitter.TRAIN)
 
         df2 = pd.read_csv(filepath, index_col=0)
         self.assertEqual(3, df2.shape[0])
