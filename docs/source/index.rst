@@ -19,7 +19,7 @@ Welcome to ImmuneML's documentation!
    ml_models
    how_to_add_report
    DSL
-   source
+   modules
 
 
 Indices and tables
