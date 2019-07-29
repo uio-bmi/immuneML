@@ -110,7 +110,7 @@ class TestImportParser(TestCase):
         convert_metadata(path + "tmp_input/", path + "metadata.csv", "CD", "HC")
 
         specs = {
-            "dataset_import": {
+            "datasets": {
                 "d1": {
                     "path": path + "tmp_input/",
                     "format": "MiXCR",
@@ -118,7 +118,9 @@ class TestImportParser(TestCase):
                         "sequence_type": "CDR2+CDR3",
                         "result_path": path + "tmp_output/",
                         "extension": "csv",
-                        "metadata_file": path + "metadata.csv"
+                        "metadata_file": path + "metadata.csv",
+                        "batch_size": 2,
+                        "additional_columns": []
                     },
                     "preprocessing": {
                         "filter_out_short_reps": {
@@ -131,11 +133,11 @@ class TestImportParser(TestCase):
         }
 
         st, desc = ImportParser.parse(specs, SymbolTable())
-        self.assertTrue(isinstance(st.get("d1")["dataset"], Dataset))
-        self.assertEqual(1, len(st.get("d1")["dataset"].get_filenames()))
+        self.assertTrue(isinstance(st.get("d1"), Dataset))
+        self.assertEqual(1, len(st.get("d1").get_filenames()))
 
         specs = {
-            "dataset_import": {
+            "datasets": {
                 "d1": {
                     "path": path + "tmp_input/",
                     "format": "MiXCR",
@@ -143,7 +145,9 @@ class TestImportParser(TestCase):
                         "sequence_type": "CDR2+CDR3",
                         "result_path": path + "tmp_output/",
                         "extension": "csv",
-                        "metadata_file": path + "metadata.csv"
+                        "metadata_file": path + "metadata.csv",
+                        "additional_columns": [],
+                        "batch_size": 2
                     },
                     "preprocessing": {
                         "filter_out_short_reps": {
@@ -155,13 +159,13 @@ class TestImportParser(TestCase):
         }
 
         st, desc = ImportParser.parse(specs, SymbolTable())
-        self.assertTrue(isinstance(st.get("d1")["dataset"], Dataset))
-        self.assertEqual(0, len(st.get("d1")["dataset"].get_filenames()))
+        self.assertTrue(isinstance(st.get("d1"), Dataset))
+        self.assertEqual(0, len(st.get("d1").get_filenames()))
 
         self.assertEqual(100, desc["d1"]["preprocessing"]["filter_out_short_reps"]["params"]["lower_limit"])
 
         specs = {
-            "dataset_import": {
+            "datasets": {
                 "d1": {
                     "path": path + "tmp_input/",
                     "format": "MiXCR",
@@ -169,7 +173,9 @@ class TestImportParser(TestCase):
                         "sequence_type": "CDR2+CDR3",
                         "result_path": path + "tmp_output/",
                         "extension": "csv",
-                        "metadata_file": path + "metadata.csv"
+                        "metadata_file": path + "metadata.csv",
+                        "additional_columns": [],
+                        "batch_size": 2
                     },
                     "preprocessing": {
                         "filter_cd": {
@@ -191,7 +197,7 @@ class TestImportParser(TestCase):
         }
 
         st, desc = ImportParser.parse(specs, SymbolTable())
-        self.assertTrue(isinstance(st.get("d1")["dataset"], Dataset))
-        self.assertEqual(1, len(st.get("d1")["dataset"].get_filenames()))
+        self.assertTrue(isinstance(st.get("d1"), Dataset))
+        self.assertEqual(1, len(st.get("d1").get_filenames()))
 
         shutil.rmtree(path)

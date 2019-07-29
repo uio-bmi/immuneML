@@ -3,7 +3,6 @@ from source.dsl.SymbolTable import SymbolTable
 from source.dsl.SymbolType import SymbolType
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.environment.MetricType import MetricType
-from source.hyperparameter_optimization.SplitType import SplitType
 from source.ml_methods.MLMethod import MLMethod
 from source.util.ReflectionHandler import ReflectionHandler
 
@@ -15,18 +14,14 @@ class MLParser:
 
         if "ml_methods" in specification:
             for method_id in specification["ml_methods"].keys():
-                parsed = MLParser._parse_method(specification["ml_methods"], method_id, symbol_table)
-                symbol_table.add(method_id, SymbolType.ML_METHOD, parsed)
+                method, config = MLParser._parse_method(specification["ml_methods"], method_id)
+                symbol_table.add(method_id, SymbolType.ML_METHOD, method, config)
         else:
             specification["ml_methods"] = {}
         return symbol_table, specification["ml_methods"]
 
     @staticmethod
-    def _parse_method(ml_specification: dict, method_id: str, symbol_table: SymbolTable) -> dict:
-
-        assert symbol_table.contains(ml_specification[method_id]["encoding"]), \
-            "MLParser: encoding {} for method {} was not properly specified, there is no such encoding defined."\
-            .format(ml_specification[method_id]["encoding"], method_id)
+    def _parse_method(ml_specification: dict, method_id: str) -> tuple:
 
         method_class = ReflectionHandler.get_class_from_path("{}/../../source/ml_methods/{}.py"
                                                              .format(EnvironmentSettings.root_path,
@@ -35,20 +30,13 @@ class MLParser:
         ml_specification[method_id] = {**DefaultParamsLoader.load("ml_methods/", "MLMethod"),
                                        **ml_specification[method_id]}
 
-        return {
-            "method": MLParser.create_method_instance(ml_specification, method_id, method_class),
-            "encoding": ml_specification[method_id]["encoding"],
-            "labels": ml_specification[method_id]["labels"],
+        return MLParser.create_method_instance(ml_specification, method_id, method_class), {
             "metrics": MLParser.map_metrics(ml_specification[method_id]),
             "model_selection_cv": ml_specification[method_id]["model_selection_cv"],
             "model_selection_n_folds": ml_specification[method_id]["model_selection_n_folds"],
-            "training_percentage": ml_specification[method_id]["training_percentage"],
-            "split_count": ml_specification[method_id]["split_count"],
-            "assessment_type": SplitType[ml_specification[method_id]["assessment_type"].lower()],
             "min_example_count": ml_specification[method_id]["min_example_count"],
             "cores_for_training": ml_specification[method_id]["cores_for_training"],
             "batch_size": ml_specification[method_id]["batch_size"],
-            "label_to_balance": ml_specification[method_id]["label_to_balance"]
         }
 
     @staticmethod

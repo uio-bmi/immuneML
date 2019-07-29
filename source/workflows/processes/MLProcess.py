@@ -25,7 +25,7 @@ class MLProcess:
     """
 
     def __init__(self, train_dataset: Dataset, test_dataset: Dataset, label_configuration: LabelConfiguration,
-                 encoder: DatasetEncoder, encoder_params: dict, method: MLMethod, ml_params: dict, metrics: list,
+                 encoder: DatasetEncoder, encoder_params: dict, method: MLMethod, ml_params: dict, metrics: set,
                  path: str, min_example_count: int = 2, batch_size: int = 2, cores: int = -1):
         self.train_dataset = train_dataset
         self.test_dataset = test_dataset
@@ -40,6 +40,7 @@ class MLProcess:
         assert all([isinstance(metric, MetricType) for metric in metrics]), \
             "MLProcess: metrics are not set to be an instance of MetricType."
         self.metrics = metrics
+        self.metrics.add(MetricType.BALANCED_ACCURACY)
         self.min_example_count = min_example_count
         self.ml_details_path = "{}ml_details.csv".format(path)
         self.predictions_path = "{}predictions.csv".format(path)
@@ -82,7 +83,7 @@ class MLProcess:
 
     def _assess_ml_method(self, method: MLMethod, encoded_test_dataset: Dataset, run: int):
         if encoded_test_dataset is not None and encoded_test_dataset.encoded_data is not None:
-            MLMethodAssessment.run(MLMethodAssessmentParams(
+            return MLMethodAssessment.run(MLMethodAssessmentParams(
                 method=method,
                 dataset=encoded_test_dataset,
                 metrics=self.metrics,
@@ -93,6 +94,8 @@ class MLProcess:
                 all_predictions_path=self.predictions_path,
                 path=self.path
             ))
+        else:
+            raise ValueError("MLProcess: encoded test dataset does not contain valid data or is not encoded.")
 
     def _run_encoder(self, train_dataset: Dataset, learn_model: bool):
         return DataEncoder.run(DataEncoderParams(
@@ -115,6 +118,6 @@ class MLProcess:
             dataset=encoded_train_dataset,
             labels=self.label_configuration.get_labels_by_name(),
             model_selection_cv=self.ml_params["model_selection_cv"],
-            model_selection_n_folds=self.ml_params["n_folds"],
+            model_selection_n_folds=self.ml_params["model_selection_n_folds"],
             cores_for_training=self.cores_for_training
         ))

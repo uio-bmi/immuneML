@@ -1,24 +1,24 @@
-from unittest import TestCase
 import shutil
+from unittest import TestCase
 
 import numpy as np
 
+from source.analysis.criteria_matches.BooleanType import BooleanType
+from source.analysis.criteria_matches.DataType import DataType
+from source.analysis.criteria_matches.OperationType import OperationType
+from source.analysis.data_manipulation.NormalizationType import NormalizationType
 from source.data_model.dataset.Dataset import Dataset
 from source.encodings.EncoderParams import EncoderParams
-from source.encodings.pipeline.PipelineEncoder import PipelineEncoder
 from source.encodings.kmer_frequency.KmerFrequencyEncoder import KmerFrequencyEncoder
-from source.analysis.data_manipulation.NormalizationType import NormalizationType
 from source.encodings.kmer_frequency.ReadsType import ReadsType
 from source.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType import SequenceEncodingType
+from source.encodings.pipeline.PipelineEncoder import PipelineEncoder
+from source.encodings.pipeline.steps.FisherExactFeatureAnnotation import FisherExactFeatureAnnotation
+from source.encodings.pipeline.steps.PresentTotalFeatureTransformation import PresentTotalFeatureTransformation
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.environment.LabelConfiguration import LabelConfiguration
 from source.util.PathBuilder import PathBuilder
 from source.util.RepertoireBuilder import RepertoireBuilder
-from source.analysis.criteria_matches.DataType import DataType
-from source.analysis.criteria_matches.BooleanType import BooleanType
-from source.analysis.criteria_matches.OperationType import OperationType
-from source.encodings.pipeline.steps.FisherExactFeatureAnnotation import FisherExactFeatureAnnotation
-from source.encodings.pipeline.steps.PresentTotalFeatureTransformation import PresentTotalFeatureTransformation
 
 
 class TestEmerson2018NatGenEncoding(TestCase):
@@ -37,7 +37,7 @@ class TestEmerson2018NatGenEncoding(TestCase):
             "aab": np.array([2, 1, 2, 1, 2, 1, 2, 1])
         }
 
-        dataset_filenames = RepertoireBuilder.build(
+        dataset_filenames, metadata = RepertoireBuilder.build(
             [
                 ["AAA", "ATA", "ATA"],
                 ["ATA", "TAA", "AAC"],

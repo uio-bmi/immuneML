@@ -9,6 +9,7 @@ from source.IO.dataset_export.PickleExporter import PickleExporter
 from source.app.ImmuneMLApp import ImmuneMLApp
 from source.data_model.dataset.Dataset import Dataset
 from source.data_model.receptor_sequence.ReceptorSequence import ReceptorSequence
+from source.data_model.receptor_sequence.SequenceMetadata import SequenceMetadata
 from source.data_model.repertoire.Repertoire import Repertoire
 from source.data_model.repertoire.RepertoireMetadata import RepertoireMetadata
 from source.environment.EnvironmentSettings import EnvironmentSettings
@@ -21,15 +22,15 @@ class TestImmuneMLApp(TestCase):
         path = EnvironmentSettings.root_path + "test/tmp/immunemlapp/"
         PathBuilder.build(path)
 
-        rep1 = Repertoire(sequences=[ReceptorSequence(amino_acid_sequence="AAA"),
-                                     ReceptorSequence(amino_acid_sequence="AAAA"),
-                                     ReceptorSequence(amino_acid_sequence="AAAAA"),
-                                     ReceptorSequence(amino_acid_sequence="AAA")],
+        rep1 = Repertoire(sequences=[ReceptorSequence(amino_acid_sequence="AAA", metadata=SequenceMetadata(chain="A")),
+                                     ReceptorSequence(amino_acid_sequence="AAAA", metadata=SequenceMetadata(chain="B")),
+                                     ReceptorSequence(amino_acid_sequence="AAAAA", metadata=SequenceMetadata(chain="B")),
+                                     ReceptorSequence(amino_acid_sequence="AAA", metadata=SequenceMetadata(chain="A"))],
                           metadata=RepertoireMetadata(custom_params={"CD": True}))
-        rep2 = Repertoire(sequences=[ReceptorSequence(amino_acid_sequence="AAA"),
-                                     ReceptorSequence(amino_acid_sequence="AAAA"),
-                                     ReceptorSequence(amino_acid_sequence="AAAA"),
-                                     ReceptorSequence(amino_acid_sequence="AAA")],
+        rep2 = Repertoire(sequences=[ReceptorSequence(amino_acid_sequence="AAA", metadata=SequenceMetadata(chain="B")),
+                                     ReceptorSequence(amino_acid_sequence="AAAA", metadata=SequenceMetadata(chain="A")),
+                                     ReceptorSequence(amino_acid_sequence="AAAA", metadata=SequenceMetadata(chain="B")),
+                                     ReceptorSequence(amino_acid_sequence="AAA", metadata=SequenceMetadata(chain="A"))],
                           metadata=RepertoireMetadata(custom_params={"CD": False}))
 
         with open(path + "rep1.pkl", "wb") as file:
@@ -44,8 +45,24 @@ class TestImmuneMLApp(TestCase):
             pickle.dump(rep1, file)
         with open(path + "rep6.pkl", "wb") as file:
             pickle.dump(rep2, file)
+        with open(path + "rep7.pkl", "wb") as file:
+            pickle.dump(rep1, file)
+        with open(path + "rep8.pkl", "wb") as file:
+            pickle.dump(rep2, file)
+        with open(path + "rep9.pkl", "wb") as file:
+            pickle.dump(rep1, file)
+        with open(path + "rep10.pkl", "wb") as file:
+            pickle.dump(rep2, file)
+        with open(path + "rep11.pkl", "wb") as file:
+            pickle.dump(rep1, file)
+        with open(path + "rep12.pkl", "wb") as file:
+            pickle.dump(rep2, file)
+        with open(path + "rep13.pkl", "wb") as file:
+            pickle.dump(rep1, file)
+        with open(path + "rep14.pkl", "wb") as file:
+            pickle.dump(rep2, file)
 
-        dataset = Dataset(filenames=[path + "rep{}.pkl".format(i) for i in range(1, 7)], params={"CD": [True, False]})
+        dataset = Dataset(filenames=[path + "rep{}.pkl".format(i) for i in range(1, 14)], params={"CD": [True, False]})
 
         PickleExporter.export(dataset, path, "dataset.pkl")
 
@@ -56,7 +73,7 @@ class TestImmuneMLApp(TestCase):
         dataset_path = self.create_dataset()
 
         specs = {
-            "dataset_import": {
+            "datasets": {
                 "d1": {
                     "format": "Pickle",
                     "path": dataset_path,
@@ -64,8 +81,7 @@ class TestImmuneMLApp(TestCase):
                 }
             },
             "encodings": {
-                "a1": {
-                    "dataset": "d1",
+                "e1": {
                     "type": "Word2Vec",
                     "params": {
                         "k": 3,
@@ -76,26 +92,73 @@ class TestImmuneMLApp(TestCase):
             },
             "ml_methods": {
                 "simpleLR": {
-                    "assessment_type": "LOOCV",
                     "type": "SimpleLogisticRegression",
                     "params": {
                         "penalty": "l1"
                     },
-                    "encoding": "a1",
-                    "labels": ["CD"],
-                    "split_count": 1,
                     "model_selection_cv": False,
                     "model_selection_n_folds": -1,
-                    "min_example_count": 1
                 }
+            },
+            "preprocessing_sequences": {
+                "seq1": [
+                    {"filter_chain_B": {
+                        "type": "DatasetChainFilter",
+                        "params": {
+                            "keep_chain": "A"
+                        }
+                    }}
+                ],
+                "seq2": [
+                    {"filter_chain_A": {
+                        "type": "DatasetChainFilter",
+                        "params": {
+                            "keep_chain": "B"
+                        }
+                    }}
+                ]
             },
             "reports": {
                 "rep1": {
                     "type": "SequenceLengthDistribution",
                     "params": {
-                        "dataset": "d1",
                         "batch_size": 3
                     }
+                }
+            },
+            "instructions": {
+                "HPOptimization": {
+                    "settings": [
+                        {
+                            "preprocessing": "seq1",
+                            "encoding": "e1",
+                            "ml_method": "simpleLR"
+                        },
+                        {
+                            "preprocessing": "seq2",
+                            "encoding": "e1",
+                            "ml_method": "simpleLR"
+                        }
+                    ],
+                    "assessment": {
+                        "split_strategy": "random",
+                        "split_count": 1,
+                        "training_percentage": 0.7,
+                        "label_to_balance": None,
+                        "reports": ["rep1"]
+                    },
+                    "selection": {
+                        "split_strategy": "random",
+                        "split_count": 1,
+                        "training_percentage": 0.7,
+                        "label_to_balance": None,
+                        "reports": ["rep1"]
+                    },
+                    "labels": ["CD"],
+                    "dataset": "d1",
+                    "strategy": "GridSearch",
+                    "metrics": ["accuracy"],
+                    "reports": ["rep1"]
                 }
             }
         }

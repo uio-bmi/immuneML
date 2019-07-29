@@ -10,3 +10,5 @@ class SymbolType(Enum):
     ENCODING = 4
     REPORT = 5
     SIMULATION = 6
+    PREPROCESSING = 7
+    INSTRUCTION = 8

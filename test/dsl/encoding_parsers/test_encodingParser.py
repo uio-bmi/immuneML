@@ -16,8 +16,7 @@ class TestEncodingParser(TestCase):
                         "normalization_type": "relative_frequency",
                         "sequence_encoding": "identity",
                         "k": 3
-                    },
-                    "dataset": "d1"
+                    }
                 }
             }
         }
@@ -25,10 +24,8 @@ class TestEncodingParser(TestCase):
         symbol_table = SymbolTable()
         symbol_table.add("d1", SymbolType.DATASET, {})
         symbol_table, specs = EncodingParser.parse(param, symbol_table)
-        self.assertTrue(isinstance(symbol_table.get("KF"), dict))
-        self.assertEqual(4, len(symbol_table.get("KF").keys()))
-        self.assertTrue(isinstance(symbol_table.get("KF")["params"], dict))
-        self.assertEqual(KmerFrequencyEncoder, symbol_table.get("KF")["encoder"])
+        self.assertEqual(KmerFrequencyEncoder, symbol_table.get("KF"))
+        self.assertEqual(9, len(symbol_table.get_config("KF")["encoder_params"].keys()))
 
         self.assertTrue("reads" in specs["KF"]["params"].keys())
         self.assertEqual("unique", specs["KF"]["params"]["reads"])

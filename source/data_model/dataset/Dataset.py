@@ -1,7 +1,7 @@
 # quality: gold
 
-import collections
 import uuid
+from collections.abc import Iterable
 
 import pandas as pd
 
@@ -11,7 +11,7 @@ from source.data_model.repertoire.RepertoireGenerator import RepertoireGenerator
 
 class Dataset:
 
-    def __init__(self, data: collections.Iterable = None, params: dict = None, encoded_data: EncodedData = None,
+    def __init__(self, data: Iterable = None, params: dict = None, encoded_data: EncodedData = None,
                  filenames: list = None, identifier: str = None, metadata_file: str = None):
         self.data = data
         self.params = params
@@ -20,7 +20,7 @@ class Dataset:
         self._filenames = sorted(filenames) if filenames is not None else []
         self.metadata_file = metadata_file
 
-    def add_data(self, data: collections.Iterable):
+    def add_data(self, data: Iterable):
         self.data = data
 
     def add_encoded_data(self, encoded_data: EncodedData):

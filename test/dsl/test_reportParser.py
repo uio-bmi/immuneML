@@ -8,10 +8,9 @@ from source.reports.data_reports.SequenceLengthDistribution import SequenceLengt
 
 class TestReportParser(TestCase):
     def test_parse_reports(self):
-        reports = {"reports": {"r1": {"type": "SequenceLengthDistribution", "params": {"dataset": "d1"}}}}
+        reports = {"reports": {"r1": {"type": "SequenceLengthDistribution"}}}
         symbol_table = SymbolTable()
         symbol_table.add("d1", SymbolType.REPORT, {})
         symbol_table, specs = ReportParser.parse_reports(reports, symbol_table)
         self.assertTrue(symbol_table.contains("r1"))
-        self.assertTrue(isinstance(symbol_table.get("r1")["report"], SequenceLengthDistribution))
-        self.assertTrue(symbol_table.get("r1")["params"]["dataset"] == "d1")
+        self.assertTrue(isinstance(symbol_table.get("r1"), SequenceLengthDistribution))

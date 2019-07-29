@@ -22,7 +22,7 @@ class TestMLMethodAssessment(TestCase):
     def test_run(self):
         path = EnvironmentSettings.root_path + "test/tmp/mlmethodassessment/"
         PathBuilder.build(path)
-        dataset = Dataset(filenames=RepertoireBuilder.build([["AA"], ["CC"], ["AA"], ["CC"], ["AA"], ["CC"]], path))
+        dataset = Dataset(filenames=RepertoireBuilder.build([["AA"], ["CC"], ["AA"], ["CC"], ["AA"], ["CC"]], path)[0])
         dataset.encoded_data = EncodedData(
             repertoires=np.array([[1, 2], [1, 2], [1, 2], [1, 2], [1, 2], [1, 2]]),
             labels={"l1": [1, 2, 3, 1, 2, 3], "l2": [1, 2, 3, 1, 2, 3]}
@@ -38,7 +38,7 @@ class TestMLMethodAssessment(TestCase):
         res = MLMethodAssessment.run(MLMethodAssessmentParams(
             dataset=dataset,
             method=method1,
-            metrics=[MetricType.ACCURACY, MetricType.BALANCED_ACCURACY, MetricType.F1_MACRO],
+            metrics={MetricType.ACCURACY, MetricType.BALANCED_ACCURACY, MetricType.F1_MACRO},
             predictions_path=EnvironmentSettings.root_path + "test/tmp/mlmethodassessment/predictions/",
             label_configuration=label_config,
             ml_details_path=EnvironmentSettings.root_path + "test/tmp/mlmethodassessment/ml_details.csv",
@@ -47,9 +47,8 @@ class TestMLMethodAssessment(TestCase):
             path=EnvironmentSettings.root_path + "test/tmp/mlmethodassessment/"
         ))
 
-        self.assertTrue("l1_accuracy" in res.keys())
-        self.assertTrue("l2_accuracy" in res.keys())
-        self.assertTrue("l1_f1_macro" in res.keys())
+        self.assertTrue("l1" in res)
+        self.assertTrue("l2" in res)
 
         self.assertTrue(os.path.isfile(EnvironmentSettings.root_path + "test/tmp/mlmethodassessment/ml_details.csv"))
 

@@ -30,11 +30,11 @@ class SimulationParser:
             item = {
                 "repertoires": simulation["implanting"][key]["repertoires"],
                 "sequences": simulation["implanting"][key]["sequences"],
-                "signals": [signal[1]["signal"] for signal in symbol_table.get_by_type(SymbolType.SIGNAL)
-                            if signal[1]["signal"].id in simulation["implanting"][key]["signals"]]
+                "signals": [signal[1] for signal in symbol_table.get_by_type(SymbolType.SIGNAL)
+                            if signal[1].id in simulation["implanting"][key]["signals"]]
             }
 
-            symbol_table.add(key, SymbolType.SIMULATION, {"simulation": item})
+            symbol_table.add(key, SymbolType.SIMULATION, item)
 
         return symbol_table
 
@@ -43,16 +43,16 @@ class SimulationParser:
         for key in simulation["motifs"].keys():
             instantiation_strategy = SimulationParser._get_instantiation_strategy(simulation["motifs"][key])
             motif = Motif(key, instantiation_strategy, simulation["motifs"][key]["seed"])
-            symbol_table.add(key, SymbolType.MOTIF, {"motif": motif})
+            symbol_table.add(key, SymbolType.MOTIF, motif)
         return symbol_table
 
     @staticmethod
     def _extract_signals(simulation: dict, symbol_table: SymbolTable) -> SymbolTable:
         for key in simulation["signals"].keys():
             implanting_strategy = SimulationParser._get_implanting_strategy(simulation["signals"][key])
-            signal_motifs = [symbol_table.get(motif_id)["motif"] for motif_id in simulation["signals"][key]["motifs"]]
+            signal_motifs = [symbol_table.get(motif_id) for motif_id in simulation["signals"][key]["motifs"]]
             signal = Signal(key, signal_motifs, implanting_strategy)
-            symbol_table.add(key, SymbolType.SIGNAL, {"signal": signal})
+            symbol_table.add(key, SymbolType.SIGNAL, signal)
         return symbol_table
 
     @staticmethod

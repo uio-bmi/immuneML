@@ -1,5 +1,6 @@
 # quality: gold
 from source.data_model.metadata.Sample import Sample
+from source.data_model.receptor_sequence.Chain import Chain
 from source.data_model.receptor_sequence.SequenceFrameType import SequenceFrameType
 
 class SequenceMetadata:
@@ -34,7 +35,7 @@ class SequenceMetadata:
         self.j_subgroup = j_subgroup
         self.j_gene = j_gene
         self.j_allele = j_allele
-        self.chain = chain
+        self.chain = Chain[chain] if chain is not None else None
         self.count = count
         self.frame_type = frame_type
         self.region_type = region_type  # should be e.g. CDR, CDR3, whole sequence etc

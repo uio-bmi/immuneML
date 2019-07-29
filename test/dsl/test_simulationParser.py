@@ -36,8 +36,8 @@ class TestSimulationParser(TestCase):
 
         symbol_table, specs = SimulationParser.parse_simulation(simulation, SymbolTable())
         self.assertEqual(1, len(symbol_table.get_by_type(SymbolType.SIGNAL)))
-        self.assertTrue(isinstance(symbol_table.get("motif1")["motif"], Motif))
-        self.assertTrue(isinstance(symbol_table.get("signal1")["signal"], Signal))
+        self.assertTrue(isinstance(symbol_table.get("motif1"), Motif))
+        self.assertTrue(isinstance(symbol_table.get("signal1"), Signal))
 
         self.assertTrue("implanting" in specs)
         self.assertTrue("signal1" in specs["signals"].keys())

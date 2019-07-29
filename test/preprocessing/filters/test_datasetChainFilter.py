@@ -5,6 +5,7 @@ from unittest import TestCase
 import pandas as pd
 
 from source.data_model.dataset.Dataset import Dataset
+from source.data_model.receptor_sequence.Chain import Chain
 from source.data_model.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.data_model.receptor_sequence.SequenceMetadata import SequenceMetadata
 from source.data_model.repertoire.Repertoire import Repertoire
@@ -30,7 +31,7 @@ class TestDatasetChainFilter(TestCase):
 
         dataset = Dataset(filenames=[path + "rep1.pkl", path + "rep2.pkl"], metadata_file=path + "metadata.csv")
 
-        dataset2 = DatasetChainFilter.process(dataset, {"keep_chain": "A"})
+        dataset2 = DatasetChainFilter.process(dataset, {"keep_chain": Chain.A})
 
         self.assertEqual(1, len(dataset2.get_filenames()))
         self.assertEqual(2, len(dataset.get_filenames()))

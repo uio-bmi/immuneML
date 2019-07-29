@@ -17,7 +17,7 @@ from source.util.RepertoireBuilder import RepertoireBuilder
 class TestMatchedReferenceEncoder(TestCase):
     def test__encode_new_dataset(self):
         path = EnvironmentSettings.root_path + "test/tmp/matched_ref_encoder/"
-        filenames = RepertoireBuilder.build([["AAAA", "AACA"], ["TTTA", "AAAA"]], path, {"default": np.array([1, 2])})
+        filenames, metadata = RepertoireBuilder.build([["AAAA", "AACA"], ["TTTA", "AAAA"]], path, {"default": np.array([1, 2])})
         dataset = Dataset(filenames=filenames)
 
         label_config = LabelConfiguration()

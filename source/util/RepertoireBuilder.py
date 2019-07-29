@@ -1,5 +1,7 @@
 import pickle
 
+import pandas as pd
+
 from source.data_model.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.data_model.receptor_sequence.SequenceMetadata import SequenceMetadata
 from source.data_model.repertoire.Repertoire import Repertoire
@@ -34,4 +36,7 @@ class RepertoireBuilder:
             with open(filenames[-1], "wb") as file:
                 pickle.dump(repertoire, file)
 
-        return filenames
+        df = pd.DataFrame({**{"filename": filenames}, **(labels if labels is not None else {})})
+        df.to_csv(path + "metadata.csv", index=False)
+
+        return filenames, path + "metadata.csv"

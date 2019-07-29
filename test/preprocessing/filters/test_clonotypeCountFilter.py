@@ -14,7 +14,7 @@ class TestClonotypeCountFilter(TestCase):
         PathBuilder.build(path)
         dataset = Dataset(filenames=RepertoireBuilder.build([["ACF", "ACF", "ACF"],
                                                              ["ACF", "ACF"],
-                                                             ["ACF", "ACF", "ACF", "ACF"]], path))
+                                                             ["ACF", "ACF", "ACF", "ACF"]], path)[0])
 
         dataset1 = ClonotypeCountFilter.process(dataset, {"lower_limit": 3})
         self.assertEqual(2, dataset1.get_repertoire_count())

@@ -35,7 +35,7 @@ class TestTopPublicFeatureEncoding(TestCase):
             "aab": [2, 1, 2, 1, 2, 1, 2, 1]
         }
 
-        dataset_filenames = RepertoireBuilder.build(
+        dataset_filenames, metadata = RepertoireBuilder.build(
             [
                 ["AAA", "ATA", "ATA"],
                 ["ATA", "TAA", "AAC"],

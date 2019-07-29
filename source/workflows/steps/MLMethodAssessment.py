@@ -41,7 +41,13 @@ class MLMethodAssessment(Step):
                                             true_y=true_y, ml_details_path=input_params.ml_details_path,
                                             method=input_params.method, dataset=input_params.dataset)
 
-        return results
+        summary_metric = MLMethodAssessment._get_summary_metric(results, labels)
+
+        return summary_metric
+
+    @staticmethod
+    def _get_summary_metric(df: pd.DataFrame, labels: list) -> dict:
+        return {label: df["{}_{}".format(label, MetricType.BALANCED_ACCURACY.name.lower())].iloc[0] for label in labels}
 
     @staticmethod
     def _score(metrics_list: list, labels: list, label_config, predicted_y, true_y, ml_details_path: str, run: int,

@@ -44,7 +44,7 @@ class TestAnnotateAgCDR3Frequency(TestCase):
                 ],
                 root_path,
                 dataset_params
-            ),
+            )[0],
             params=dataset_params
         )
 

@@ -5,21 +5,21 @@ import yaml
 
 from source.IO.dataset_export.PickleExporter import PickleExporter
 from source.data_model.dataset.Dataset import Dataset
-from source.dsl.Parser import Parser
+from source.dsl.ImmuneMLParser import ImmuneMLParser
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.util.PathBuilder import PathBuilder
 from source.util.RepertoireBuilder import RepertoireBuilder
 
 
-class TestParser(TestCase):
+class TestImmuneMLParser(TestCase):
     def test_parse_yaml_file(self):
         path = EnvironmentSettings.root_path + "test/tmp/parser/"
-        dataset = Dataset(filenames=RepertoireBuilder.build([["AAA", "CCC"], ["TTTT"]], path, {"default": [1, 2]}),
+        dataset = Dataset(filenames=RepertoireBuilder.build([["AAA", "CCC"], ["TTTT"]], path, {"default": [1, 2]})[0],
                           params={"default": [1, 2]})
         PickleExporter.export(dataset, path, "dataset.pkl")
 
         spec = {
-            "dataset_import": {
+            "datasets": {
                 "d1": {
                     "format": "Pickle",
                     "path": path + "dataset.pkl",
@@ -62,27 +62,27 @@ class TestParser(TestCase):
                     }
                 }
             },
-            "simulation": {
-                "motifs": {
-                    "motif1": {
-                        "seed": "CAS",
-                        "instantiation": "Identity"
-                    }
-                },
-                "signals": {
-                    "signal1": {
-                        "motifs": ["motif1"],
-                        "implanting": "healthy_sequences"
-                    }
-                },
-                "implanting": {
-                    "var1": {
-                        "signals": ["signal1"],
-                        "repertoires": 0.4,
-                        "sequences": 0.01
-                    }
-                }
-            }
+            # "simulation": {
+            #     "motifs": {
+            #         "motif1": {
+            #             "seed": "CAS",
+            #             "instantiation": "Identity"
+            #         }
+            #     },
+            #     "signals": {
+            #         "signal1": {
+            #             "motifs": ["motif1"],
+            #             "implanting": "healthy_sequences"
+            #         }
+            #     },
+            #     "implanting": {
+            #         "var1": {
+            #             "signals": ["signal1"],
+            #             "repertoires": 0.4,
+            #             "sequences": 0.01
+            #         }
+            #     }
+            # }
         }
 
         PathBuilder.build(path)
@@ -90,10 +90,10 @@ class TestParser(TestCase):
         with open(path + "tmp_yaml_spec.yaml", "w") as file:
             yaml.dump(spec, file, default_flow_style=False)
 
-        symbol_table, _ = Parser.parse_yaml_file(path + "tmp_yaml_spec.yaml")
+        symbol_table, _ = ImmuneMLParser.parse_yaml_file(path + "tmp_yaml_spec.yaml")
 
         self.assertTrue(all([symbol_table.contains(key) for key in
-                             ["motif1", "signal1", "simpleLR", "rep1", "a1", "d1", "var1"]]))
-        self.assertTrue(isinstance(symbol_table.get("d1")["dataset"], Dataset))
+                             ["simpleLR", "rep1", "a1", "d1"]]))
+        self.assertTrue(isinstance(symbol_table.get("d1"), Dataset))
 
         shutil.rmtree(path)

@@ -6,7 +6,7 @@ from source.workflows.steps.StepParams import StepParams
 
 class MLMethodAssessmentParams(StepParams):
 
-    def __init__(self, method: MLMethod, dataset: Dataset, metrics: list, label_configuration: LabelConfiguration,
+    def __init__(self, method: MLMethod, dataset: Dataset, metrics: set, label_configuration: LabelConfiguration,
                  path: str, run: int, ml_details_path: str, predictions_path: str, all_predictions_path: str):
         self.method = method
         self.dataset = dataset

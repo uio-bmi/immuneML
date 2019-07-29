@@ -30,7 +30,7 @@ class TestDataSplitter(TestCase):
         trains, tests = DataSplitter.run(DataSplitterParams(
             dataset=dataset,
             training_percentage=training_percentage,
-            split_strategy=SplitType.random,
+            split_strategy=SplitType.RANDOM,
             split_count=5,
             label_to_balance=None
         ))
@@ -46,7 +46,7 @@ class TestDataSplitter(TestCase):
         trains2, tests2 = DataSplitter.run(DataSplitterParams(
             dataset=dataset,
             training_percentage=training_percentage,
-            split_strategy=SplitType.random,
+            split_strategy=SplitType.RANDOM,
             split_count=5,
             label_to_balance=None
         ))
@@ -55,7 +55,7 @@ class TestDataSplitter(TestCase):
 
         trains, tests = DataSplitter.run(DataSplitterParams(
             dataset=dataset,
-            split_strategy=SplitType.loocv,
+            split_strategy=SplitType.LOOCV,
             split_count=-1,
             label_to_balance=None,
             training_percentage=-1
@@ -70,7 +70,7 @@ class TestDataSplitter(TestCase):
 
         trains, tests = DataSplitter.run(DataSplitterParams(
             dataset=dataset,
-            split_strategy=SplitType.k_fold,
+            split_strategy=SplitType.K_FOLD,
             split_count=5,
             label_to_balance=None,
             training_percentage=-1
@@ -85,7 +85,7 @@ class TestDataSplitter(TestCase):
 
         trains, tests = DataSplitter.run(DataSplitterParams(
             dataset=dataset,
-            split_strategy=SplitType.random_balanced,
+            split_strategy=SplitType.RANDOM_BALANCED,
             training_percentage=training_percentage,
             split_count=10,
             label_to_balance="key1"
@@ -107,7 +107,7 @@ class TestDataSplitter(TestCase):
         df = pd.DataFrame(data={"key1": [0, 1, 2, 3, 4, 5], "key2": [0, 1, 2, 3, 4, 5]})
         df.to_csv(path+"metadata.csv")
 
-        filepath = DataSplitter.build_new_metadata(path+"metadata.csv", [1, 3, 4], SplitType.k_fold, 2, DataSplitter.TRAIN)
+        filepath = DataSplitter.build_new_metadata(path+"metadata.csv", [1, 3, 4], SplitType.K_FOLD, 2, DataSplitter.TRAIN)
 
         df2 = pd.read_csv(filepath, index_col=0)
         self.assertEqual(3, df2.shape[0])

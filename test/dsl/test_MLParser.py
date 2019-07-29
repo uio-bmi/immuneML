@@ -2,7 +2,6 @@ from unittest import TestCase
 
 from source.dsl.MLParser import MLParser
 from source.dsl.SymbolTable import SymbolTable
-from source.dsl.SymbolType import SymbolType
 from source.ml_methods.LogisticRegression import LogisticRegression
 
 
@@ -47,13 +46,10 @@ class TestMLParser(TestCase):
         }
 
         symbol_table = SymbolTable()
-        with self.assertRaises(AssertionError):
-            MLParser.parse(params, symbol_table)
-        symbol_table.add("e1", SymbolType.ENCODING, {})
         symbol_table, desc = MLParser.parse(params, symbol_table)
-        self.assertTrue(symbol_table.get("SVM1")["method"]._parameter_grid is not None and len(symbol_table.get("SVM1")["method"]._parameter_grid["max_iter"]) == 2)
-        self.assertTrue(symbol_table.get("LR1")["method"]._parameters is not None and symbol_table.get("LR1")["method"]._parameters["penalty"] == "l1")
-        self.assertTrue(isinstance(symbol_table.get("LR2")["method"], LogisticRegression))
+        self.assertTrue(symbol_table.get("SVM1")._parameter_grid is not None and len(symbol_table.get("SVM1")._parameter_grid["max_iter"]) == 2)
+        self.assertTrue(symbol_table.get("LR1")._parameters is not None and symbol_table.get("LR1")._parameters["penalty"] == "l1")
+        self.assertTrue(isinstance(symbol_table.get("LR2"), LogisticRegression))
 
         self.assertEqual("SVM", desc["SVM1"]["type"])
         self.assertEqual(2, desc["SVM1"]["min_example_count"])

@@ -1,6 +1,7 @@
 import sys
 
-from source.dsl.Parser import Parser
+from source.dsl.ImmuneMLParser import ImmuneMLParser
+from source.dsl.SymbolType import SymbolType
 from source.dsl.semantic_model.SemanticModel import SemanticModel
 
 
@@ -11,13 +12,14 @@ class ImmuneMLApp:
         self._result_path = result_path
 
     def run(self):
-        symbol_table, self._specification_path = Parser.parse_yaml_file(self._specification_path, self._result_path)
+        symbol_table, self._specification_path = ImmuneMLParser.parse_yaml_file(self._specification_path,
+                                                                                self._result_path)
 
         print("ImmuneML: starting the analysis...")
 
-        model = SemanticModel(self._result_path, self._specification_path)
-        model.fill(symbol_table)
-        model.execute()
+        instructions = symbol_table.get_by_type(SymbolType.INSTRUCTION)
+        model = SemanticModel([instruction[1] for instruction in instructions], self._result_path)
+        model.run()
 
 
 if __name__ == "__main__":

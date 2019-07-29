@@ -9,6 +9,18 @@ from source.preprocessing.Preprocessor import Preprocessor
 
 class ClonotypeCountFilter(Preprocessor):
 
+    def __init__(self, lower_limit: int = -1, upper_limit: int = -1):
+        self.lower_limit = lower_limit
+        self.upper_limit = upper_limit
+
+    def process_dataset(self, dataset: Dataset):
+        params = {}
+        if self.lower_limit > -1:
+            params["lower_limit"] = self.lower_limit
+        if self.upper_limit > -1:
+            params["upper_limit"] = self.upper_limit
+        return ClonotypeCountFilter.process(dataset, params)
+
     @staticmethod
     def process(dataset: Dataset, params: dict) -> Dataset:
         processed_dataset = copy.deepcopy(dataset)
@@ -16,7 +28,7 @@ class ClonotypeCountFilter(Preprocessor):
         indices =[]
         for index, repertoire in enumerate(dataset.get_data()):
             if "lower_limit" in params.keys() and len(repertoire.sequences) >= params["lower_limit"] or \
-                "upper_limit" in params.keys() and len(repertoire.sequences) <= params["upper_limit"]:
+                 "upper_limit" in params.keys() and len(repertoire.sequences) <= params["upper_limit"]:
                 filenames.append(dataset.get_filenames()[index])
                 indices.append(index)
         processed_dataset.set_filenames(filenames)

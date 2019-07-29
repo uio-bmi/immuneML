@@ -31,6 +31,12 @@ class MetadataFilter(Preprocessor):
     This filter includes only repertoires with values greater than 1 in the "key2" column of the metadata_file
     """
 
+    def __init__(self, params: dict):
+        self.params = params
+
+    def process_dataset(self, dataset: Dataset):
+        return MetadataFilter.process(dataset, self.params)
+
     @staticmethod
     def process(dataset: Dataset, params: dict) -> Dataset:
         processed_dataset = copy.deepcopy(dataset)

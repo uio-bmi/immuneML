@@ -12,6 +12,12 @@ from source.util.PathBuilder import PathBuilder
 
 class PatientRepertoireCollector(Preprocessor):
 
+    def __init__(self, result_path: str):
+        self.result_path = result_path
+
+    def process_dataset(self, dataset: Dataset):
+        return PatientRepertoireCollector.process(dataset, {"result_path": self.result_path})
+
     @staticmethod
     def process(dataset: Dataset, params: dict) -> Dataset:
         rep_map = {}

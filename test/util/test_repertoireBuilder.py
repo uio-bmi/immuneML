@@ -2,6 +2,8 @@ import pickle
 import shutil
 from unittest import TestCase
 
+import pandas as pd
+
 from source.data_model.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.util.RepertoireBuilder import RepertoireBuilder
@@ -10,9 +12,10 @@ from source.util.RepertoireBuilder import RepertoireBuilder
 class TestRepertoireBuilder(TestCase):
     def test_build(self):
         path = EnvironmentSettings.root_path + "test/tmp/repbuilder/"
-        filenames = RepertoireBuilder.build([["AAA", "CCC"], ["TTTT"]], path, {"default": [1, 2]})
+        filenames, metadata = RepertoireBuilder.build([["AAA", "CCC"], ["TTTT"]], path, {"default": [1, 2]})
 
         self.assertEqual(2, len(filenames))
+        self.assertEqual((2, 2), pd.read_csv(metadata).shape)
 
         with open(filenames[0], "rb") as file:
             rep1 = pickle.load(file)

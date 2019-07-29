@@ -9,3 +9,7 @@ class Preprocessor(metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def process(dataset: Dataset, params: dict) -> Dataset:
         pass
+
+    @abc.abstractmethod
+    def process_dataset(self, dataset: Dataset) -> Dataset:
+        pass

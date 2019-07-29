@@ -48,12 +48,12 @@ class DataSplitter(Step):
 
         k_fold = KFold(n_splits=splits_count)
         for split_index, (train_index, test_index) in enumerate(k_fold.split(filenames)):
-            train_dataset = DataSplitter.build_dataset(dataset, train_index, SplitType.k_fold,
+            train_dataset = DataSplitter.build_dataset(dataset, train_index, SplitType.K_FOLD,
                                                        split_index, DataSplitter.TRAIN)
             train_datasets.append(train_dataset)
 
             test_dataset = DataSplitter.build_dataset(dataset=dataset, indices_to_include=test_index,
-                                                      assessment_type=SplitType.k_fold,
+                                                      assessment_type=SplitType.K_FOLD,
                                                       iteration=split_index, dataset_type=DataSplitter.TEST)
             test_datasets.append(test_dataset)
 
@@ -95,12 +95,12 @@ class DataSplitter(Step):
             test_index = indices[train_count:]
 
             train_dataset = DataSplitter.build_dataset(dataset=dataset, indices_to_include=train_index,
-                                                       assessment_type=SplitType.random,
+                                                       assessment_type=SplitType.RANDOM,
                                                        iteration=i, dataset_type=DataSplitter.TRAIN)
             train_datasets.append(train_dataset)
 
             test_dataset = DataSplitter.build_dataset(dataset=dataset, indices_to_include=test_index,
-                                                      assessment_type=SplitType.random,
+                                                      assessment_type=SplitType.RANDOM,
                                                       iteration=i, dataset_type=DataSplitter.TEST)
             test_datasets.append(test_dataset)
 
@@ -126,12 +126,12 @@ class DataSplitter(Step):
             test_index = indices_to_include[train_count:]
 
             train_dataset = DataSplitter.build_dataset(dataset=dataset, indices_to_include=train_index,
-                                                       assessment_type=SplitType.random_balanced,
+                                                       assessment_type=SplitType.RANDOM_BALANCED,
                                                        iteration=i, dataset_type=DataSplitter.TRAIN)
             train_datasets.append(train_dataset)
 
             test_dataset = DataSplitter.build_dataset(dataset=dataset, indices_to_include=test_index,
-                                                      assessment_type=SplitType.random_balanced,
+                                                      assessment_type=SplitType.RANDOM_BALANCED,
                                                       iteration=i, dataset_type=DataSplitter.TEST)
             test_datasets.append(test_dataset)
 

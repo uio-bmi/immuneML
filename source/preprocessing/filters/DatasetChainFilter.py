@@ -4,10 +4,17 @@ import os
 import pandas as pd
 
 from source.data_model.dataset.Dataset import Dataset
+from source.data_model.receptor_sequence.Chain import Chain
 from source.preprocessing.Preprocessor import Preprocessor
 
 
 class DatasetChainFilter(Preprocessor):
+
+    def __init__(self, keep_chain: Chain):
+        self.keep_chain = keep_chain
+
+    def process_dataset(self, dataset: Dataset):
+        return DatasetChainFilter.process(dataset=dataset, params={"keep_chain": self.keep_chain})
 
     @staticmethod
     def process(dataset: Dataset, params: dict) -> Dataset:

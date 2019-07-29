@@ -1,11 +1,12 @@
 from source.data_model.dataset.Dataset import Dataset
 from source.encodings.EncoderParams import EncoderParams
 from source.environment.LabelConfiguration import LabelConfiguration
-from source.hyperparameter_optimization.HPOptimizationStrategy import HPOptimizationStrategy
 from source.hyperparameter_optimization.HPSetting import HPSetting
 from source.hyperparameter_optimization.SplitConfig import SplitConfig
+from source.hyperparameter_optimization.strategy.HPOptimizationStrategy import HPOptimizationStrategy
 from source.ml_methods.MLMethod import MLMethod
 from source.util.PathBuilder import PathBuilder
+from source.workflows.processes.InstructionProcess import InstructionProcess
 from source.workflows.processes.MLProcess import MLProcess
 from source.workflows.steps.DataEncoder import DataEncoder
 from source.workflows.steps.DataEncoderParams import DataEncoderParams
@@ -17,7 +18,7 @@ from source.workflows.steps.MLMethodTrainer import MLMethodTrainer
 from source.workflows.steps.MLMethodTrainerParams import MLMethodTrainerParams
 
 
-class HPOptimizationProcess:
+class HPOptimizationProcess(InstructionProcess):
     """
     Class implementing hyper-parameter optimization and nested model training and assessment:
 
@@ -30,27 +31,52 @@ class HPOptimizationProcess:
 
     """
 
-    def __init__(self, dataset: Dataset, hp_strategy: HPOptimizationStrategy, path: str,
-                 assessment: SplitConfig, selection: SplitConfig, metrics: list,
-                 label_configuration: LabelConfiguration):
+    def __init__(self, dataset: Dataset, hp_strategy: HPOptimizationStrategy, hp_settings: list,
+                 assessment: SplitConfig, selection: SplitConfig, metrics: set,
+                 label_configuration: LabelConfiguration, path: str = None):
         self.dataset = dataset
         self.selection = selection
         self.hp_strategy = hp_strategy
+        assert all(isinstance(hp_setting, HPSetting) for hp_setting in hp_settings), \
+            "HPOptimizationProcess: object of other type passed in instead of HPSetting."
+        self.hp_settings = hp_settings
         self.path = path
         self.batch_size = 10
         self.label_configuration = label_configuration
         self.metrics = metrics
         self.assessment = assessment
 
+    def run(self):
+        return self.run_outer_cv()
+
     def run_outer_cv(self):
         train_datasets, test_datasets = self.split_data(self.dataset, self.assessment)
         fold_performances = []
         for index in range(self.assessment.split_count):
             fold_performances.append(self.run_outer_fold(train_datasets[index], test_datasets[index], index+1))
-        return sum(fold_performances)/len(fold_performances)
+        self.print_performances(performances=fold_performances)
+        return fold_performances
+
+    def print_performances(self, performances: list):
+        print("------ Assessment scores (balanced accuracy) per label ------")
+        header = "run\t"
+        for label in self.label_configuration.get_labels_by_name():
+            header += label + "\t"
+        print(header)
+        for index, performance in enumerate(performances):
+            row = str(index+1) + "\t"
+            for label in self.label_configuration.get_labels_by_name():
+                row += str(performance[label]) + "\t"
+            print(row)
+        print("--------------------------------------------------------------")
+        for label in self.label_configuration.get_labels_by_name():
+            print("Label: {}, average balanced accuracy: {}".format(label,
+                                                                    sum(perf[label] for perf in performances) /
+                                                                    len(performances)))
 
     def run_outer_fold(self, train_dataset, test_dataset, run):
         current_path = "{}{}/run_{}/".format(self.path, self.assessment.split_strategy.name, run)
+        PathBuilder.build(current_path)
         optimal_hp_setting = self.run_inner_cv(train_dataset)
         encoded_train_dataset = self.encode_dataset(train_dataset, optimal_hp_setting, current_path, learn_model=True)
         optimal_method = self.train_optimal_method(encoded_train_dataset, optimal_hp_setting, current_path)
@@ -58,7 +84,8 @@ class HPOptimizationProcess:
         performance = MLMethodAssessment.run(MLMethodAssessmentParams(
             method=optimal_method,
             dataset=encoded_test_dataset,
-            predictions_path="{}{}/run_{}/{}/predictions.csv".format(self.path, self.assessment.split_strategy.name, run, optimal_hp_setting),
+            predictions_path="{}{}/run_{}/{}/predictions.csv".format(self.path, self.assessment.split_strategy.name,
+                                                                     run, optimal_hp_setting),
             all_predictions_path="{}{}/all_predictions.csv".format(self.path, self.assessment.split_strategy.name),
             ml_details_path="{}{}/ml_details.csv".format(self.path, self.assessment.split_strategy.name),
             run=run,
@@ -70,45 +97,22 @@ class HPOptimizationProcess:
 
     def run_inner_cv(self, train_dataset) -> HPSetting:
         train_datasets, test_datasets = self.split_data(train_dataset, self.selection)
-        performance = -1
-        hp_setting = None
-        for hp_setting in self.hp_strategy.get_next_setting(hp_setting, performance):
+        hp_setting = self.hp_strategy.get_next_setting()
+        while hp_setting is not None:
             performance = self.test_hp_setting(hp_setting, train_datasets, test_datasets)
+            hp_setting = self.hp_strategy.get_next_setting(hp_setting, performance)
 
         return self.hp_strategy.get_optimal_hps()
 
-    def train_optimal_method(self, dataset: Dataset, hp_setting: HPSetting, path: str) -> MLMethod:
-        method = MLMethodTrainer.run(MLMethodTrainerParams(
-            method=hp_setting.ml_method,
-            result_path=path + "/ml_method/",
-            dataset=dataset,
-            labels=self.label_configuration.get_labels_by_name(),
-            model_selection_cv=hp_setting.ml_params["model_selection_cv"],
-            model_selection_n_folds=hp_setting.ml_params["_n_folds"],
-            cores_for_training=-1  # TODO: make it configurable, add cores_for_training
-        ))
-        return method
-
-    def encode_dataset(self, dataset: Dataset, hp_setting: HPSetting, path: str, learn_model: bool) -> Dataset:
-        encoded_dataset = DataEncoder.run(DataEncoderParams(
-            dataset=dataset,
-            encoder=hp_setting.encoder,
-            encoder_params=EncoderParams(
-                model=hp_setting.encoder_params,
-                result_path=path,
-                batch_size=self.batch_size,
-                label_configuration=self.label_configuration,
-                learn_model=learn_model,
-                filename="train_dataset.pkl" if learn_model else "test_dataset.pkl"
-            )
-        ))
-        return encoded_dataset
-
-    def test_hp_setting(self, hp_setting, train_datasets, test_datasets) -> float:
+    def test_hp_setting(self, hp_setting, train_datasets, test_datasets) -> dict:
         fold_performances = []
         for index in range(self.selection.split_count):
             fold_performances.append(self.run_setting(hp_setting, train_datasets[index], test_datasets[index], index+1))
-        return sum(fold_performances)/self.selection.split_count
+        return self.get_average_performance(fold_performances)
+
+    def get_average_performance(self, metrics_per_label):
+        return {label: sum(perf[label] for perf in metrics_per_label) / len(metrics_per_label)
+                for label in self.label_configuration.get_labels_by_name()}
 
     def run_setting(self, hp_setting, train_dataset, test_dataset, run_id: int):
         path = self.path + "{}/fold_{}/".format(hp_setting, run_id)
@@ -128,3 +132,30 @@ class HPOptimizationProcess:
             label_to_balance=split_config.label_to_balance
         )
         return DataSplitter.run(params)
+
+    def train_optimal_method(self, dataset: Dataset, hp_setting: HPSetting, path: str) -> MLMethod:
+        method = MLMethodTrainer.run(MLMethodTrainerParams(
+            method=hp_setting.ml_method,
+            result_path=path + "/ml_method/",
+            dataset=dataset,
+            labels=self.label_configuration.get_labels_by_name(),
+            model_selection_cv=hp_setting.ml_params["model_selection_cv"],
+            model_selection_n_folds=hp_setting.ml_params["model_selection_n_folds"],
+            cores_for_training=-1  # TODO: make it configurable, add cores_for_training
+        ))
+        return method
+
+    def encode_dataset(self, dataset: Dataset, hp_setting: HPSetting, path: str, learn_model: bool) -> Dataset:
+        encoded_dataset = DataEncoder.run(DataEncoderParams(
+            dataset=dataset,
+            encoder=hp_setting.encoder,
+            encoder_params=EncoderParams(
+                model=hp_setting.encoder_params,
+                result_path=path,
+                batch_size=self.batch_size,
+                label_configuration=self.label_configuration,
+                learn_model=learn_model,
+                filename="train_dataset.pkl" if learn_model else "test_dataset.pkl"
+            )
+        ))
+        return encoded_dataset

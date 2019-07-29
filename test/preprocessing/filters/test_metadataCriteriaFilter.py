@@ -18,7 +18,7 @@ class TestMetadataFilter(TestCase):
         PathBuilder.build(path)
         dataset = Dataset(filenames=RepertoireBuilder.build([["ACF", "ACF", "ACF"],
                                                              ["ACF", "ACF"],
-                                                             ["ACF", "ACF", "ACF", "ACF"]], path))
+                                                             ["ACF", "ACF", "ACF", "ACF"]], path)[0])
 
         df = pd.DataFrame(data={"key1": [0, 1, 2], "key2": [0, 1, 2]})
         df.to_csv(path+"metadata.csv")
