@@ -39,7 +39,7 @@ class TestMLMethodAssessment(TestCase):
             dataset=dataset,
             method=method1,
             metrics={MetricType.ACCURACY, MetricType.BALANCED_ACCURACY, MetricType.F1_MACRO},
-            predictions_path=EnvironmentSettings.root_path + "test/tmp/mlmethodassessment/predictions/",
+            predictions_path=EnvironmentSettings.root_path + "test/tmp/mlmethodassessment/fold_predictions.csv",
             label_configuration=label_config,
             ml_details_path=EnvironmentSettings.root_path + "test/tmp/mlmethodassessment/ml_details.csv",
             run=1,

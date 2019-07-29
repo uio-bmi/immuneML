@@ -106,8 +106,7 @@ class MLMethodAssessment(Step):
                 df["{}_{}_proba".format(label, cls)] = tmp
 
         if predictions_path is not None:
-            PathBuilder.build(predictions_path)
-            df.to_csv("{}{}.csv".format(predictions_path, method.__class__.__name__), index=False)
+            df.to_csv(predictions_path, index=False)
 
         if summary_path is not None:
             PathBuilder.build(os.path.dirname(os.path.abspath(summary_path)))

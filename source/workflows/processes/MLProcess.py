@@ -87,7 +87,7 @@ class MLProcess:
                 method=method,
                 dataset=encoded_test_dataset,
                 metrics=self.metrics,
-                predictions_path=self.path + "/prediction/",
+                predictions_path=self.path + "predictions.csv",
                 label_configuration=self.label_configuration,
                 run=run,
                 ml_details_path=self.ml_details_path,

@@ -75,47 +75,51 @@ class HPOptimizationProcess(InstructionProcess):
                                                                     len(performances)))
 
     def run_outer_fold(self, train_dataset, test_dataset, run):
-        current_path = "{}{}/run_{}/".format(self.path, self.assessment.split_strategy.name, run)
+        current_path = "{}assessment_{}/run_{}/".format(self.path, self.assessment.split_strategy.name, run)
         PathBuilder.build(current_path)
-        optimal_hp_setting = self.run_inner_cv(train_dataset)
+        optimal_hp_setting = self.run_inner_cv(train_dataset, current_path)
         encoded_train_dataset = self.encode_dataset(train_dataset, optimal_hp_setting, current_path, learn_model=True)
-        optimal_method = self.train_optimal_method(encoded_train_dataset, optimal_hp_setting, current_path)
+        optimal_method = self.train_optimal_method(encoded_train_dataset, optimal_hp_setting, current_path + "optimal/")
         encoded_test_dataset = self.encode_dataset(test_dataset, optimal_hp_setting, current_path, learn_model=False)
-        performance = MLMethodAssessment.run(MLMethodAssessmentParams(
+        performance = self.assess_performance(optimal_method, encoded_test_dataset, run, current_path)
+        return performance
+
+    def assess_performance(self, optimal_method, dataset, run, current_path):
+        return MLMethodAssessment.run(MLMethodAssessmentParams(
             method=optimal_method,
-            dataset=encoded_test_dataset,
-            predictions_path="{}{}/run_{}/{}/predictions.csv".format(self.path, self.assessment.split_strategy.name,
-                                                                     run, optimal_hp_setting),
-            all_predictions_path="{}{}/all_predictions.csv".format(self.path, self.assessment.split_strategy.name),
-            ml_details_path="{}{}/ml_details.csv".format(self.path, self.assessment.split_strategy.name),
+            dataset=dataset,
+            predictions_path="{}predictions.csv".format(current_path),
+            all_predictions_path="{}assessment_{}/all_predictions.csv".format(self.path, self.assessment.split_strategy.name),
+            ml_details_path="{}ml_details.csv".format(current_path),
             run=run,
             label_configuration=self.label_configuration,
             metrics=self.metrics,
             path=current_path
         ))
-        return performance
 
-    def run_inner_cv(self, train_dataset) -> HPSetting:
+    def run_inner_cv(self, train_dataset: Dataset, current_path: str) -> HPSetting:
         train_datasets, test_datasets = self.split_data(train_dataset, self.selection)
+        path = "{}selection_{}/".format(current_path, self.selection.split_strategy.name)
+        PathBuilder.build(path)
         hp_setting = self.hp_strategy.get_next_setting()
         while hp_setting is not None:
-            performance = self.test_hp_setting(hp_setting, train_datasets, test_datasets)
+            performance = self.test_hp_setting(hp_setting, train_datasets, test_datasets, path)
             hp_setting = self.hp_strategy.get_next_setting(hp_setting, performance)
 
         return self.hp_strategy.get_optimal_hps()
 
-    def test_hp_setting(self, hp_setting, train_datasets, test_datasets) -> dict:
+    def test_hp_setting(self, hp_setting, train_datasets: list, test_datasets: list, current_path: str) -> dict:
         fold_performances = []
         for index in range(self.selection.split_count):
-            fold_performances.append(self.run_setting(hp_setting, train_datasets[index], test_datasets[index], index+1))
+            fold_performances.append(self.run_setting(hp_setting, train_datasets[index], test_datasets[index], index+1, current_path))
         return self.get_average_performance(fold_performances)
 
     def get_average_performance(self, metrics_per_label):
         return {label: sum(perf[label] for perf in metrics_per_label) / len(metrics_per_label)
                 for label in self.label_configuration.get_labels_by_name()}
 
-    def run_setting(self, hp_setting, train_dataset, test_dataset, run_id: int):
-        path = self.path + "{}/fold_{}/".format(hp_setting, run_id)
+    def run_setting(self, hp_setting, train_dataset, test_dataset, run_id: int, current_path: str):
+        path = current_path + "{}/fold_{}/".format(hp_setting, run_id)
         PathBuilder.build(path)
         ml_process = MLProcess(train_dataset=train_dataset, test_dataset=test_dataset,
                                label_configuration=self.label_configuration, encoder=hp_setting.encoder,
