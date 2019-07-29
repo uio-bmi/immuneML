@@ -11,7 +11,6 @@ from source.encodings.word2vec.Word2VecEncoder import Word2VecEncoder
 from source.encodings.word2vec.model_creator.ModelType import ModelType
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.environment.LabelConfiguration import LabelConfiguration
-from source.environment.LabelType import LabelType
 from source.util.PathBuilder import PathBuilder
 
 
@@ -44,7 +43,7 @@ class TestWord2VecEncoder(TestCase):
         dataset = Dataset(filenames=[file1, file2])
 
         label_configuration = LabelConfiguration()
-        label_configuration.add_label("T1D", ["T1D", "CTL"], LabelType.CLASSIFICATION)
+        label_configuration.add_label("T1D", ["T1D", "CTL"])
 
         config_params = EncoderParams(
             model={
