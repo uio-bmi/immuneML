@@ -22,7 +22,6 @@ class GridSearch(HPOptimizationStrategy):
         """
         :return: the hyper-parameter setting which has the highest average performance across all labels
         """
-        print(self.search_space_metric)
         key = max(self.search_space_metric.keys(), key=(lambda k: sum(self.search_space_metric[k][label]
                                                                       for label in self.search_space_metric[k])
                                                                   / len(self.search_space_metric[k])))
