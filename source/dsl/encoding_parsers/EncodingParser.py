@@ -1,5 +1,6 @@
 import glob
 
+from source.dsl.ParameterParser import ParameterParser
 from source.dsl.SymbolTable import SymbolTable
 from source.dsl.SymbolType import SymbolType
 from source.encodings.DatasetEncoder import DatasetEncoder
@@ -26,7 +27,7 @@ class EncodingParser:
     @staticmethod
     def parse_encoder(encoder_class_name: str, encoder_params: dict):
         encoder_class = EncodingParser.get_encoder_class(encoder_class_name)
-        params, params_specs = EncodingParser.get_encoder_params(encoder_params, encoder_class_name)
+        params, params_specs = ParameterParser.parse(encoder_params, encoder_class_name, "encoding_parsers/")
         return encoder_class, params, params_specs
 
     @staticmethod
@@ -34,11 +35,5 @@ class EncodingParser:
         filenames = glob.glob(EnvironmentSettings.root_path + "source/encodings/**/{}Encoder.py".format(name))
         assert len(filenames) == 1, "EncodingParser: the encoder type was not correctly specified."
         return ReflectionHandler.get_class_from_path(filenames[0])
-
-    @staticmethod
-    def get_encoder_params(params, encoder_type: str):
-        parser_class = ReflectionHandler.get_class_by_name("{}Parser".format(encoder_type))
-        parsed_params, params_specs = parser_class.parse(params)
-        return parsed_params, params_specs
 
 

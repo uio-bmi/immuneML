@@ -8,6 +8,7 @@ from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.environment.LabelConfiguration import LabelConfiguration
 from source.environment.MetricType import MetricType
 from source.hyperparameter_optimization.HPSetting import HPSetting
+from source.hyperparameter_optimization.ReportConfig import ReportConfig
 from source.hyperparameter_optimization.SplitConfig import SplitConfig
 from source.hyperparameter_optimization.SplitType import SplitType
 from source.hyperparameter_optimization.strategy.GridSearch import GridSearch
@@ -61,9 +62,10 @@ class TestHPOptimizationProcess(TestCase):
         report = SequenceLengthDistribution()
         label_config = LabelConfiguration({"l1": [1, 2], "l2": [0, 1]})
 
-        process = HPOptimizationProcess(dataset, GridSearch(hp_settings), hp_settings, SplitConfig(SplitType.RANDOM, 1, 0.5),
-                                        SplitConfig(SplitType.RANDOM, 1, 0.5, reports=[report]), {MetricType.BALANCED_ACCURACY},
-                                        label_config, path)
+        process = HPOptimizationProcess(dataset, GridSearch(hp_settings), hp_settings,
+                                        SplitConfig(SplitType.RANDOM, 1, 0.5, reports=ReportConfig(data_splits=[report])),
+                                        SplitConfig(SplitType.RANDOM, 1, 0.5, reports=ReportConfig(data_splits=[report])),
+                                        {MetricType.BALANCED_ACCURACY}, label_config, path)
 
         results = process.run()
 

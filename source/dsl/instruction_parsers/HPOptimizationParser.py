@@ -6,6 +6,7 @@ from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.environment.LabelConfiguration import LabelConfiguration
 from source.environment.MetricType import MetricType
 from source.hyperparameter_optimization.HPSetting import HPSetting
+from source.hyperparameter_optimization.ReportConfig import ReportConfig
 from source.hyperparameter_optimization.SplitConfig import SplitConfig
 from source.hyperparameter_optimization.SplitType import SplitType
 from source.util.ReflectionHandler import ReflectionHandler
@@ -60,12 +61,11 @@ class HPOptimizationParser:
 
     def _parse_split_config(self, instruction: dict, key: str, symbol_table: SymbolTable) -> SplitConfig:
 
-        for report_id in instruction[key]["reports"]:
-            assert symbol_table.contains(report_id), \
-                "HPOptimizationParser: report {} has not been defined previously.".format(report_id)
+        report_config_input = {report_type: [symbol_table.get(report_id) for report_id in instruction[key]["reports"][report_type]]
+                               for report_type in instruction[key]["reports"]}
 
         return SplitConfig(split_strategy=SplitType[instruction[key]["split_strategy"].upper()],
                            split_count=int(instruction[key]["split_count"]),
                            training_percentage=float(instruction[key]["training_percentage"]),
                            label_to_balance=instruction[key]["label_to_balance"],
-                           reports=[symbol_table.get(report_id) for report_id in instruction[key]["reports"]])
+                           reports=ReportConfig(**report_config_input))

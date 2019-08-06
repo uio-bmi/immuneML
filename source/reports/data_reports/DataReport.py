@@ -1,14 +1,13 @@
-import abc
+from abc import ABC
 
 from source.data_model.dataset.Dataset import Dataset
 from source.reports.Report import Report
 
 
-class DataReport(Report):
+class DataReport(Report, ABC):
 
-    def generate_report(self, params):
-        return self.generate(dataset=params["dataset"], result_path=params["result_path"], params=params)
+    def __init__(self, dataset: Dataset = None, path: str = None):
+        self.dataset = dataset
+        self.path = path
 
-    @abc.abstractmethod
-    def generate(self, dataset: Dataset, result_path: str, params: dict):
-        pass
+    pass

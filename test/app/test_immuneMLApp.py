@@ -145,14 +145,21 @@ class TestImmuneMLApp(TestCase):
                         "split_count": 1,
                         "training_percentage": 0.7,
                         "label_to_balance": None,
-                        "reports": ["rep1"]
+                        "reports": {
+                            "data_splits": [],
+                            "performance": []
+                        }
                     },
                     "selection": {
                         "split_strategy": "random",
                         "split_count": 1,
                         "training_percentage": 0.7,
                         "label_to_balance": None,
-                        "reports": ["rep1"]
+                        "reports": {
+                            "data_splits": ["rep1"],
+                            "models": [],
+                            "optimal_models": []
+                        }
                     },
                     "labels": ["CD"],
                     "dataset": "d1",

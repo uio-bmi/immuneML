@@ -1,22 +1,13 @@
-import functools
-import operator
-
-import pandas as pd
-
-from source.IO.sequence_import.VDJdbSequenceImport import VDJdbSequenceImport
-from source.data_model.receptor_sequence.ReceptorSequence import ReceptorSequence
-from source.data_model.receptor_sequence.SequenceMetadata import SequenceMetadata
 from source.dsl.DefaultParamsLoader import DefaultParamsLoader
 from source.dsl.SequenceMatchingSummaryType import SequenceMatchingSummaryType
 from source.dsl.encoding_parsers.EncodingParameterParser import EncodingParameterParser
-from source.environment.Constants import Constants
+from source.util.ReflectionHandler import ReflectionHandler
 
 
 class MatchedReferenceParser(EncodingParameterParser):
 
     @staticmethod
     def parse(params: dict):
-
         defaults = DefaultParamsLoader.load("encodings/", "MatchedReference")
         parsed = {**defaults, **params}
 
@@ -27,8 +18,8 @@ class MatchedReferenceParser(EncodingParameterParser):
                params["reference_sequences"]["format"].lower() in ["vdjdb", "iris"], \
             "MatchedReferenceParser: reference sequences are accepted only in VDJdb and IRIS formats."
 
-        seqs = getattr(MatchedReferenceParser,
-                       "parse_{}".format(params["reference_sequences"]["format"].lower()))(params["reference_sequences"]["path"])
+        seqs = ReflectionHandler.get_class_by_name("{}SequenceImport".format(params["reference_sequences"]["format"]))\
+            .import_sequences(params["reference_sequences"]["path"])
 
         parsed = {
             "reference_sequences": seqs,
@@ -39,45 +30,3 @@ class MatchedReferenceParser(EncodingParameterParser):
         specs = {**parsed, **{"reference_sequences": params["reference_sequences"]}}
 
         return parsed, specs
-
-    @staticmethod
-    def parse_iris(path: str) -> list:
-        df = pd.read_csv(path, sep=";")
-        df = df.where((pd.notnull(df)), None)
-
-        sequences = df.apply(MatchedReferenceParser.process_iris_row, axis=1).values
-        sequences = functools.reduce(operator.iconcat, sequences, [])
-
-        return sequences
-
-    @staticmethod
-    def process_iris_row(row):
-        sequences = []
-
-        if row["Chain: TRA (1)"] is not None:
-            sequences.extend(MatchedReferenceParser.process_iris_chain(row, "A"))
-        if row["Chain: TRB (1)"] is not None:
-            sequences.extend(MatchedReferenceParser.process_iris_chain(row, "B"))
-
-        return sequences
-
-    @staticmethod
-    def process_iris_chain(row, chain):
-        sequences = []
-
-        v_genes = set([gene.split(Constants.ALLELE_DELIMITER)[0].replace("TR{}".format(chain), "").replace(chain, "") for gene in
-                       row["TR{} - V gene (1)".format(chain)].split(" | ")])
-        j_genes = set([gene.split(Constants.ALLELE_DELIMITER)[0].replace("TR{}".format(chain), "").replace(chain, "") for gene in
-                       row["TR{} - J gene (1)".format(chain)].split(" | ")])
-
-        for v_gene in v_genes:
-            for j_gene in j_genes:
-                metadata = SequenceMetadata(v_gene=v_gene, j_gene=j_gene, chain=chain)
-                sequences.append(ReceptorSequence(amino_acid_sequence=row["Chain: TR{} (1)".format(chain)],
-                                                  metadata=metadata))
-
-        return sequences
-
-    @staticmethod
-    def parse_vdjdb(path: str) -> list:
-        return VDJdbSequenceImport.import_sequences(path)

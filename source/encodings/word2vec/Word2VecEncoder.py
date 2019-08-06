@@ -139,7 +139,8 @@ class Word2VecEncoder(DatasetEncoder):
                                    labels={label: labels[i] for i, label in enumerate(label_names)},
                                    repertoire_ids=[repertoire.identifier for repertoire in encoded_dataset.get_data()],
                                    feature_names=feature_names,
-                                   feature_annotations=feature_annotations)
+                                   feature_annotations=feature_annotations,
+                                   encoding=Word2VecEncoder.__name__)
 
         encoded_dataset.add_encoded_data(encoded_data)
         return encoded_dataset

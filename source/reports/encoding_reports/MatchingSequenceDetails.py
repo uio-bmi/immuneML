@@ -20,57 +20,66 @@ class MatchingSequenceDetails(EncodingReport):
                     * get the percentage of sequences from the repertoire matched with respect to clonal counts
     """
 
-    def generate(self, dataset: Dataset, result_path: str, params: dict):
+    def __init__(self, dataset: Dataset = None, max_distance: int = None, reference_sequences: list = None, result_path: str = None):
+        self.dataset = dataset
+        self.max_distance = max_distance
+        self.reference_sequences = reference_sequences
+        self.result_path = result_path
 
-        PathBuilder.build(result_path)
-        self._make_overview(dataset, result_path, params)
-        self._make_matching_report(dataset, result_path, params)
+    def generate(self):
+        PathBuilder.build(self.result_path)
+        self._make_overview()
+        self._make_matching_report()
 
-    def _make_overview(self, dataset: Dataset, result_path: str, params: dict):
-        filename = result_path + "matching_sequence_overview.tsv"
-        fieldnames = ["repertoire_identifier", dataset.encoded_data.feature_names[0],
+    def check_prerequisites(self):
+        assert "MatchedReferenceEncoder" == self.dataset.encoded_data.encoding, "Encoding is not compatible with the report type. " \
+                                                                                "MatchingSequenceDetails report will not be created."
+
+    def _make_overview(self):
+        filename = self.result_path + "matching_sequence_overview.tsv"
+        fieldnames = ["repertoire_identifier", self.dataset.encoded_data.feature_names[0],
                       "repertoire_size", "max_levenshtein_distance"]
-        for label in dataset.params.keys():
+        for label in self.dataset.params.keys():
             fieldnames.append("{}".format(label))
-        self._write_rows(dataset, params, filename, fieldnames)
+        self._write_rows(filename, fieldnames)
 
         return filename
 
-    def _write_rows(self, dataset: Dataset, params: dict, filename: str, fieldnames: list):
+    def _write_rows(self, filename: str, fieldnames: list):
         with open(filename, "w") as file:
             csv_writer = csv.DictWriter(file, fieldnames=fieldnames, delimiter="\t")
             csv_writer.writeheader()
-            for index, repertoire in enumerate(dataset.get_data()):
+            for index, repertoire in enumerate(self.dataset.get_data()):
                 row = {
                     "repertoire_identifier": repertoire.identifier,
-                    dataset.encoded_data.feature_names[0]: dataset.encoded_data.repertoires[index][0],
+                    self.dataset.encoded_data.feature_names[0]: self.dataset.encoded_data.repertoires[index][0],
                     "repertoire_size": len(repertoire.sequences),
-                    "max_levenshtein_distance": params["max_distance"]
+                    "max_levenshtein_distance": self.max_distance
                 }
-                for label in dataset.params.keys():
+                for label in self.dataset.params.keys():
                     row["{}".format(label)] = repertoire.metadata.custom_params[label]
                 csv_writer.writerow(row)
 
-    def _make_matching_report(self, dataset: Dataset, result_path: str, params: dict):
+    def _make_matching_report(self):
 
         filenames = []
 
-        for repertoire in dataset.get_data():
-            filenames.append(self._make_repertoire_report(repertoire, result_path, params))
+        for repertoire in self.dataset.get_data():
+            filenames.append(self._make_repertoire_report(repertoire))
 
         return filenames
 
-    def _make_repertoire_report(self, repertoire: Repertoire, result_path: str, params: dict):
+    def _make_repertoire_report(self, repertoire: Repertoire):
 
-        filename = result_path + "{}_{}.tsv".format(repertoire.identifier,
-                                                    list({seq.metadata.chain for seq in repertoire.sequences}))
+        filename = self.result_path + "{}_{}.tsv".format(repertoire.identifier,
+                                                         list({seq.metadata.chain for seq in repertoire.sequences}))
 
         with open(filename, "w") as file:
             csv_writer = csv.DictWriter(file, fieldnames=["sequence", "v_gene", "j_gene", "chain", "clone_count", "matching_sequences", "max_distance"], delimiter="\t")
             csv_writer.writeheader()
             for index, sequence in enumerate(repertoire.sequences):
 
-                matching_sequences = self._find_matching_sequences(sequence, params["reference_sequences"], params["max_distance"])
+                matching_sequences = self._find_matching_sequences(sequence)
 
                 csv_writer.writerow({
                     "sequence": sequence.get_sequence(),
@@ -79,11 +88,11 @@ class MatchingSequenceDetails(EncodingReport):
                     "chain": sequence.metadata.chain,
                     "clone_count": sequence.metadata.count,
                     "matching_sequences": str(matching_sequences)[1:-1].replace("'", ""),
-                    "max_distance": params["max_distance"]
+                    "max_distance": self.max_distance
                 })
 
         return filename
 
-    def _find_matching_sequences(self, sequence: ReceptorSequence, reference_sequences: list, max_distance: int):
+    def _find_matching_sequences(self, sequence: ReceptorSequence):
         matcher = SequenceMatcher()
-        return matcher.match_sequence(sequence, reference_sequences, max_distance)["matching_sequences"]
+        return matcher.match_sequence(sequence, self.reference_sequences, self.max_distance)["matching_sequences"]

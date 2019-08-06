@@ -47,6 +47,14 @@ source.dsl.MLParser module
     :undoc-members:
     :show-inheritance:
 
+source.dsl.ParameterParser module
+---------------------------------
+
+.. automodule:: source.dsl.ParameterParser
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 source.dsl.Parser module
 ------------------------
 

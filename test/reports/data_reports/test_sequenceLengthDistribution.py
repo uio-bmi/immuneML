@@ -31,8 +31,8 @@ class TestSequenceLengthDistribution(TestCase):
 
         dataset = Dataset(filenames=[path + "rep1.pkl", path + "rep2.pkl"])
 
-        sld = SequenceLengthDistribution()
-        lengths = sld.get_normalized_sequence_lengths(dataset, 2)
+        sld = SequenceLengthDistribution(dataset, 1, path)
+        lengths = sld.get_normalized_sequence_lengths()
 
         self.assertTrue(all([key in lengths.keys() for key in [3, 4, 5]]))
         self.assertEqual(0.5, lengths[3])

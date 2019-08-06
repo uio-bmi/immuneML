@@ -30,14 +30,14 @@ class TestMatchingSequenceDetails(TestCase):
                               feature_names=["percentage"]
                           ))
 
-        report = MatchingSequenceDetails()
-
-        report.generate_report({
+        report = MatchingSequenceDetails(**{
             "dataset": dataset,
             "result_path": path + "result/",
             "reference_sequences": ref_seqs,
             "max_distance": 1
         })
+
+        report.generate()
 
         self.assertTrue(os.path.isfile(path + "result/matching_sequence_overview.tsv"))
         self.assertEqual(4, len([name for name in glob.glob(path + "result/*.tsv") if os.path.isfile(name)]))

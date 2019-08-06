@@ -10,14 +10,18 @@ from source.util.PathBuilder import PathBuilder
 
 class SequenceLengthDistribution(DataReport):
 
-    def generate(self, dataset: Dataset, result_path: str, params: dict):
-        normalized_sequence_lengths = self.get_normalized_sequence_lengths(dataset, params["batch_size"])
-        self.plot(normalized_sequence_lengths, result_path)
+    def __init__(self, dataset: Dataset = None, batch_size: int = 1, path: str = None):
+        DataReport.__init__(self, dataset=dataset, path=path)
+        self.batch_size = batch_size
 
-    def get_normalized_sequence_lengths(self, dataset: Dataset, batch_size: int) -> Counter:
+    def generate(self):
+        normalized_sequence_lengths = self.get_normalized_sequence_lengths()
+        self.plot(normalized_sequence_lengths)
+
+    def get_normalized_sequence_lengths(self) -> Counter:
         sequence_lenghts = Counter()
 
-        for repertoire in dataset.get_data(batch_size):
+        for repertoire in self.dataset.get_data(self.batch_size):
             seq_lengths = self.count_in_repertoire(repertoire)
             sequence_lenghts += seq_lengths
 
@@ -32,7 +36,7 @@ class SequenceLengthDistribution(DataReport):
         c = Counter([len(sequence.get_sequence()) for sequence in repertoire.sequences])
         return c
 
-    def plot(self, normalized_sequence_length, result_path):
+    def plot(self, normalized_sequence_length):
 
         plt.style.use('ggplot')
 
@@ -45,7 +49,7 @@ class SequenceLengthDistribution(DataReport):
         plt.ylabel("Frequency")
         plt.title("Sequence length distribution")
 
-        PathBuilder.build(result_path)
+        PathBuilder.build(self.path)
 
-        plt.savefig(result_path + "sequence_length_distribution.png", transparent=True)
+        plt.savefig(self.path + "sequence_length_distribution.png", transparent=True)
 

@@ -19,6 +19,14 @@ source.hyperparameter\_optimization.HPSetting module
     :undoc-members:
     :show-inheritance:
 
+source.hyperparameter\_optimization.ReportConfig module
+-------------------------------------------------------
+
+.. automodule:: source.hyperparameter_optimization.ReportConfig
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 source.hyperparameter\_optimization.SplitConfig module
 ------------------------------------------------------
 

@@ -1,5 +1,4 @@
-import copy
-
+from source.dsl.ParameterParser import ParameterParser
 from source.dsl.SymbolTable import SymbolTable
 from source.dsl.SymbolType import SymbolType
 from source.util.ReflectionHandler import ReflectionHandler
@@ -20,16 +19,8 @@ class ReportParser:
 
     @staticmethod
     def _parse(key: str, params: dict, symbol_table: SymbolTable):
-        report = ReflectionHandler.get_class_by_name(params["type"])()
-
+        report = ReflectionHandler.get_class_by_name(params["type"])
         user_params = params["params"] if "params" in params else {}
-
-        if ReflectionHandler.exists("{}Parser".format(params["type"])):
-            report_parser = ReflectionHandler.get_class_by_name("{}Parser".format(params["type"]))
-            parsed_params, specs = report_parser.parse(user_params, symbol_table)
-        else:
-            parsed_params = user_params
-            specs = copy.deepcopy(parsed_params)
-
-        symbol_table.add(key, SymbolType.REPORT, report, parsed_params)
+        parsed_params, specs = ParameterParser.parse(user_params, "{}Parser".format(params["type"]), "report_params_parsers/")
+        symbol_table.add(key, SymbolType.REPORT, report(**parsed_params))
         return symbol_table, specs

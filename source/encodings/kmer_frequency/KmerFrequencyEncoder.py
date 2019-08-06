@@ -82,7 +82,8 @@ class KmerFrequencyEncoder(DatasetEncoder):
                                    labels=encoded_labels,
                                    feature_names=feature_names,
                                    repertoire_ids=repertoire_names,
-                                   feature_annotations=feature_annotations)
+                                   feature_annotations=feature_annotations,
+                                   encoding=KmerFrequencyEncoder.__name__)
 
         encoded_dataset = Dataset(filenames=dataset.get_filenames(),
                                   encoded_data=encoded_data,

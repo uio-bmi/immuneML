@@ -16,7 +16,8 @@ class EncodedData:
                 Each list associated with a label has to have values for all repertoires
     """
 
-    def __init__(self, repertoires, labels: dict, repertoire_ids: list = None, feature_names: list = None, feature_annotations: pd.DataFrame = None):
+    def __init__(self, repertoires, labels: dict, repertoire_ids: list = None, feature_names: list = None,
+                 feature_annotations: pd.DataFrame = None, encoding: str = None):
 
         assert feature_names is None or repertoires.shape[1] == len(feature_names)
         if feature_names is not None:
@@ -29,6 +30,7 @@ class EncodedData:
 
         self.repertoires = repertoires
         self.labels = labels
-        self.repertoire_ids  = repertoire_ids
+        self.repertoire_ids = repertoire_ids
         self.feature_names = feature_names
         self.feature_annotations = feature_annotations
+        self.encoding = encoding

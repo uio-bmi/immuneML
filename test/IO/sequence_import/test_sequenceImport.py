@@ -2,6 +2,7 @@ import shutil
 from unittest import TestCase
 
 from source.IO.sequence_import.VDJdbSequenceImport import VDJdbSequenceImport
+from source.data_model.receptor_sequence.Chain import Chain
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.util.PathBuilder import PathBuilder
 
@@ -29,6 +30,6 @@ class TestSequenceImport(TestCase):
         self.assertEqual("CASSYVGNTGELFF", sequences[0].get_sequence())
         self.assertEqual("J2-2*01", sequences[3].metadata.j_gene)
         self.assertEqual("V6-5*01", sequences[3].metadata.v_gene)
-        self.assertTrue(all([sequence.metadata.chain == "B" for sequence in sequences]))
+        self.assertTrue(all([sequence.metadata.chain == Chain.B for sequence in sequences]))
 
         shutil.rmtree(path)

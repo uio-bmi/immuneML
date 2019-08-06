@@ -1,3 +1,5 @@
+import copy
+
 from source.data_model.dataset.Dataset import Dataset
 from source.dsl.semantic_model.MLResult import MLResult
 from source.encodings.DatasetEncoder import DatasetEncoder
@@ -26,7 +28,7 @@ class MLProcess:
 
     def __init__(self, train_dataset: Dataset, test_dataset: Dataset, label_configuration: LabelConfiguration,
                  encoder: DatasetEncoder, encoder_params: dict, method: MLMethod, ml_params: dict, metrics: set,
-                 path: str, min_example_count: int = 2, batch_size: int = 2, cores: int = -1):
+                 path: str, reports: list = None, min_example_count: int = 2, batch_size: int = 2, cores: int = -1):
         self.train_dataset = train_dataset
         self.test_dataset = test_dataset
         self.label_configuration = label_configuration
@@ -44,6 +46,7 @@ class MLProcess:
         self.min_example_count = min_example_count
         self.ml_details_path = "{}ml_details.csv".format(path)
         self.predictions_path = "{}predictions.csv".format(path)
+        self.reports = reports if reports is not None else []
 
     def get_ML_result(self):
         return MLResult(self.path)
@@ -52,34 +55,18 @@ class MLProcess:
         encoded_train = self._run_encoder(self.train_dataset, True)
         encoded_test = self._run_encoder(self.test_dataset, False)
         method = self._train_ml_method(encoded_train)
-        return self._assess_ml_method(method, encoded_test, run_id)
+        performance = self._assess_ml_method(method, encoded_test, run_id)
+        self._run_reports(method, encoded_train, encoded_test, self.path + "reports/")
+        return performance
 
-    # def _is_ml_possible(self, dataset: Dataset) -> bool:
-    #     valid = True
-    #     labels = self.label_configuration.get_labels_by_name()
-    #     index = len(labels) - 1
-    #     metadata = self._get_metadata(dataset, labels)
-    #     while valid and index >= 0:
-    #         unique, counts = np.unique(metadata[labels[index]], return_counts=True)
-    #         valid = valid and len(unique) > 1 and all(count >= self.min_example_count for count in counts) \
-    #                 and all(el in dataset.params[labels[index]] for el in unique)
-    #         index -= 1
-    #
-    #     if valid is not True:
-    #         warnings.warn("For label {}: there are not enough different examples to run a ML algorithm."
-    #                       .format(labels[index]))
-    #
-    #     return valid
-
-    # def _get_metadata(self, dataset: Dataset, labels):
-    #     if dataset.metadata_file:
-    #         return dataset.get_metadata(labels)
-    #     else:
-    #         metadata = {label: [] for label in labels}
-    #         for rep in dataset.get_data():
-    #             for label in labels:
-    #                 metadata[label].append(rep.metadata.custom_params[label])
-    #         return metadata
+    def _run_reports(self, method: MLMethod, train_dataset: Dataset, test_dataset: Dataset, path: str):
+        for report in self.reports:
+            tmp_report = copy.deepcopy(report)
+            tmp_report.method = method
+            tmp_report.train_dataset = train_dataset
+            tmp_report.test_dataset = test_dataset
+            tmp_report.result_path = path
+            tmp_report.generate_report()
 
     def _assess_ml_method(self, method: MLMethod, encoded_test_dataset: Dataset, run: int):
         if encoded_test_dataset is not None and encoded_test_dataset.encoded_data is not None:

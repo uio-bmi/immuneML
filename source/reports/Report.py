@@ -8,5 +8,12 @@ class Report(metaclass=abc.ABCMeta):
     """
 
     @abc.abstractmethod
-    def generate_report(self, params):
+    def generate(self):
         pass
+
+    def check_prerequisites(self):
+        pass
+
+    def generate_report(self):
+        self.check_prerequisites()
+        self.generate()

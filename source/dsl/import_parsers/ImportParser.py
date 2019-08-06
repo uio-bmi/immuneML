@@ -1,5 +1,6 @@
 from source.data_model.dataset.Dataset import Dataset
 from source.dsl.DefaultParamsLoader import DefaultParamsLoader
+from source.dsl.ParameterParser import ParameterParser
 from source.dsl.SymbolTable import SymbolTable
 from source.dsl.SymbolType import SymbolType
 from source.preprocessing.Preprocessor import Preprocessor
@@ -44,15 +45,9 @@ class ImportParser:
     @staticmethod
     def _parse_preprocessor(preprocessor_class_name: str, preprocessor_params: dict):
         preprocessor_class = ImportParser._get_preprocessor_class(preprocessor_class_name)
-        params, params_specs = ImportParser._get_preprocessor_params(preprocessor_params, preprocessor_class_name)
+        params, params_specs = ParameterParser.parse(preprocessor_params, preprocessor_class_name, "import_parsers/")
         return preprocessor_class, params, params_specs
 
     @staticmethod
     def _get_preprocessor_class(name) -> Preprocessor:
         return ReflectionHandler.get_class_by_name(name, "preprocessing/")
-
-    @staticmethod
-    def _get_preprocessor_params(params, preprocessor_type: str):
-        parser_class = ReflectionHandler.get_class_by_name("{}Parser".format(preprocessor_type))
-        parsed_params, params_specs = parser_class.parse(params)
-        return parsed_params, params_specs

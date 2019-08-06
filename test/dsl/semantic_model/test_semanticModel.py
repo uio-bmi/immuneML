@@ -9,6 +9,7 @@ from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.environment.LabelConfiguration import LabelConfiguration
 from source.environment.MetricType import MetricType
 from source.hyperparameter_optimization.HPSetting import HPSetting
+from source.hyperparameter_optimization.ReportConfig import ReportConfig
 from source.hyperparameter_optimization.SplitConfig import SplitConfig
 from source.hyperparameter_optimization.SplitType import SplitType
 from source.hyperparameter_optimization.strategy.GridSearch import GridSearch
@@ -46,8 +47,8 @@ class TestSemanticModel(TestCase):
                                  {"model_selection_cv": False, "model_selection_n_folds": -1}, [])]
 
         instruction = HPOptimizationProcess(dataset, GridSearch(hp_settings), hp_settings,
-                                            SplitConfig(SplitType.RANDOM, 1, 0.5, "default"),
-                                            SplitConfig(SplitType.RANDOM, 1, 0.5, "default"),
+                                            SplitConfig(SplitType.RANDOM, 1, 0.5, "default", ReportConfig()),
+                                            SplitConfig(SplitType.RANDOM, 1, 0.5, "default", ReportConfig()),
                                             {MetricType.BALANCED_ACCURACY},
                                             label_config, path)
         semantic_model = SemanticModel([instruction], path)

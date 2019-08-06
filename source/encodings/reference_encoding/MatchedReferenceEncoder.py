@@ -49,7 +49,8 @@ class MatchedReferenceEncoder(DatasetEncoder):
             repertoires=encoded_repertoires,
             labels=labels,
             feature_names=[feature_name],
-            repertoire_ids=[repertoire.identifier for repertoire in dataset.get_data()]
+            repertoire_ids=[repertoire.identifier for repertoire in dataset.get_data()],
+            encoding=MatchedReferenceEncoder.__name__
         ))
 
         MatchedReferenceEncoder.store(encoded_dataset, params)

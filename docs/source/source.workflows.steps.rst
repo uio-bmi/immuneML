@@ -76,14 +76,6 @@ source.workflows.steps.MLMethodTrainerParams module
     :undoc-members:
     :show-inheritance:
 
-source.workflows.steps.ReportGenerator module
----------------------------------------------
-
-.. automodule:: source.workflows.steps.ReportGenerator
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 source.workflows.steps.SignalImplanter module
 ---------------------------------------------
 

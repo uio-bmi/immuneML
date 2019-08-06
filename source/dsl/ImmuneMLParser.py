@@ -19,6 +19,9 @@ class ImmuneMLParser:
 
     DSL example with hyper-parameter optimization:
 
+    .. highlight:: yaml
+    .. code-block:: yaml
+
         datasets:
             d1:
                 metadata: "./metadata.csv"
@@ -76,12 +79,17 @@ class ImmuneMLParser:
                 split_count: 1
                 training_percentage: 70
                 label_to_balance: None
-                reports: None
+                reports:
+                    data_splits: []
+                    performance: []
+                    optimal_models: []
             selection:
                 split_strategy: k-fold
                 split_count: 5
                 reports:
-                    - r1
+                    data_splits: [r1]
+                    models: []
+                    data: []
             labels:
                 - CD
             dataset: d1

@@ -10,12 +10,12 @@ from source.environment.EnvironmentSettings import EnvironmentSettings
 class TestPickleExporter(TestCase):
     def test_export(self):
         dataset = Dataset(filenames=["f1.pkl", "f2.pkl"])
-        PickleExporter.export(dataset, EnvironmentSettings.root_path + "test/tmp/pickleexporter/", "dataset.pkl")
+        PickleExporter.export(dataset, EnvironmentSettings.tmp_test_path + "pickleexporter/", "dataset.pkl")
 
-        with open(EnvironmentSettings.root_path + "test/tmp/dataset.pkl", "rb") as file:
+        with open(EnvironmentSettings.tmp_test_path + "pickleexporter/dataset.pkl", "rb") as file:
             dataset2 = pickle.load(file)
 
-        shutil.rmtree(EnvironmentSettings.root_path + "test/tmp/pickleexporter/")
+        shutil.rmtree(EnvironmentSettings.tmp_test_path + "pickleexporter/")
 
         self.assertTrue(isinstance(dataset2, Dataset))
         self.assertEqual(2, len(dataset2.get_filenames()))
