@@ -13,7 +13,7 @@ class EnvironmentSettings:
     """
 
     sequence_type = SequenceType.AMINO_ACID
-    root_path = os.path.dirname(os.path.abspath(__file__)) + "/../../"
+    root_path = os.path.normpath(os.path.dirname(os.path.abspath(__file__)) + "/../../") + "/"
     default_params_path = root_path + "config/default_params/"
     tmp_test_path = root_path + "test/tmp/"
     default_analysis_path = root_path + "analysis_runs/"
