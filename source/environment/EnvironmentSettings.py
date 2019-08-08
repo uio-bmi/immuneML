@@ -2,6 +2,7 @@
 import os
 
 from source.caching.CacheType import CacheType
+from source.environment.Constants import Constants
 from source.environment.SequenceType import SequenceType
 
 
@@ -22,7 +23,7 @@ class EnvironmentSettings:
 
     @staticmethod
     def get_cache_path(cache_type: CacheType = None):
-        cache_type = CacheType[os.environ["cache_type"].upper()] if cache_type is None else cache_type
+        cache_type = CacheType[os.environ[Constants.CACHE_TYPE].upper()] if cache_type is None else cache_type
         if cache_type == CacheType.PRODUCTION:
             return EnvironmentSettings.cache_path
         elif cache_type == CacheType.TEST:

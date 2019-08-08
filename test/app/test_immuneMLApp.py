@@ -33,34 +33,9 @@ class TestImmuneMLApp(TestCase):
                                      ReceptorSequence(amino_acid_sequence="AAA", metadata=SequenceMetadata(chain="A"))],
                           metadata=RepertoireMetadata(custom_params={"CD": False}))
 
-        with open(path + "rep1.pkl", "wb") as file:
-            pickle.dump(rep1, file)
-        with open(path + "rep2.pkl", "wb") as file:
-            pickle.dump(rep2, file)
-        with open(path + "rep3.pkl", "wb") as file:
-            pickle.dump(rep1, file)
-        with open(path + "rep4.pkl", "wb") as file:
-            pickle.dump(rep2, file)
-        with open(path + "rep5.pkl", "wb") as file:
-            pickle.dump(rep1, file)
-        with open(path + "rep6.pkl", "wb") as file:
-            pickle.dump(rep2, file)
-        with open(path + "rep7.pkl", "wb") as file:
-            pickle.dump(rep1, file)
-        with open(path + "rep8.pkl", "wb") as file:
-            pickle.dump(rep2, file)
-        with open(path + "rep9.pkl", "wb") as file:
-            pickle.dump(rep1, file)
-        with open(path + "rep10.pkl", "wb") as file:
-            pickle.dump(rep2, file)
-        with open(path + "rep11.pkl", "wb") as file:
-            pickle.dump(rep1, file)
-        with open(path + "rep12.pkl", "wb") as file:
-            pickle.dump(rep2, file)
-        with open(path + "rep13.pkl", "wb") as file:
-            pickle.dump(rep1, file)
-        with open(path + "rep14.pkl", "wb") as file:
-            pickle.dump(rep2, file)
+        for index in range(1, 14):
+            with open("{}rep{}.pkl".format(path, index), "wb") as file:
+                pickle.dump(rep1 if index % 2 == 0 else rep2, file)
 
         dataset = Dataset(filenames=[path + "rep{}.pkl".format(i) for i in range(1, 14)], params={"CD": [True, False]})
 

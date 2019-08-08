@@ -1,196 +1,165 @@
+import os
+import pickle
+import shutil
+
+import yaml
+
+from source.IO.dataset_export.PickleExporter import PickleExporter
+from source.app.ImmuneMLApp import ImmuneMLApp
 from source.data_model.dataset.Dataset import Dataset
-from source.dsl_parsers.Parser import Parser
-from source.encodings.EncoderParams import EncoderParams
+from source.data_model.receptor_sequence.ReceptorSequence import ReceptorSequence
+from source.data_model.receptor_sequence.SequenceMetadata import SequenceMetadata
+from source.data_model.repertoire.Repertoire import Repertoire
+from source.data_model.repertoire.RepertoireMetadata import RepertoireMetadata
 from source.environment.EnvironmentSettings import EnvironmentSettings
-from source.environment.LabelConfiguration import LabelConfiguration
-from source.environment.MetricType import MetricType
-from source.simulation.dataset_generation.RandomDatasetGenerator import RandomDatasetGenerator
-from source.workflows.steps.DataEncoder import DataEncoder
-from source.workflows.steps.DataSplitter import DataSplitter
-from source.workflows.steps.MLMethodAssessment import MLMethodAssessment
-from source.workflows.steps.MLMethodTrainer import MLMethodTrainer
-from source.workflows.steps.SignalImplanter import SignalImplanter
+from source.util.PathBuilder import PathBuilder
 
 
 class Quickstart:
 
-    @staticmethod
-    def perform_analysis(params: dict):
-        params = Quickstart.preprocess_params(params)
-        dataset = Quickstart.generate_dataset(params)
-        dataset = Quickstart.implant_signal(params, dataset)
-        train, test = Quickstart.split_dataset(params, dataset)
-        train, test = Quickstart.encode_datasets(params, train, test)
-        methods = Quickstart.train_ml_algorithms(params, train)
-        results = Quickstart.assess_ml_algorithms(methods, test, params)
-        print(results)
+    def create_dataset(self, path):
+        PathBuilder.build(path)
 
-    @staticmethod
-    def preprocess_params(params: dict) -> dict:
-        processed_params = Parser.parse(params)
+        rep1 = Repertoire(sequences=[ReceptorSequence(amino_acid_sequence="AAA", metadata=SequenceMetadata(chain="A")),
+                                     ReceptorSequence(amino_acid_sequence="AAAA", metadata=SequenceMetadata(chain="B")),
+                                     ReceptorSequence(amino_acid_sequence="AAAAA", metadata=SequenceMetadata(chain="B")),
+                                     ReceptorSequence(amino_acid_sequence="AAA", metadata=SequenceMetadata(chain="A"))],
+                          metadata=RepertoireMetadata(custom_params={"CD": True}))
+        rep2 = Repertoire(sequences=[ReceptorSequence(amino_acid_sequence="AAA", metadata=SequenceMetadata(chain="B")),
+                                     ReceptorSequence(amino_acid_sequence="AAAA", metadata=SequenceMetadata(chain="A")),
+                                     ReceptorSequence(amino_acid_sequence="AAAA", metadata=SequenceMetadata(chain="B")),
+                                     ReceptorSequence(amino_acid_sequence="AAA", metadata=SequenceMetadata(chain="A"))],
+                          metadata=RepertoireMetadata(custom_params={"CD": False}))
 
-        lc = LabelConfiguration()
-        for signal in processed_params["signals"]:
-            lc.add_label(signal.id, [True, False])
-        processed_params["label_configuration"] = lc
+        for index in range(1, 14):
+            with open("{}rep{}.pkl".format(path, index), "wb") as file:
+                pickle.dump(rep1 if index % 2 == 0 else rep2, file)
 
-        return processed_params
+        dataset = Dataset(filenames=[path + "rep{}.pkl".format(i) for i in range(1, 14)], params={"CD": [True, False]})
 
-    @staticmethod
-    def generate_dataset(params: dict) -> Dataset:
-        print("#### generating dataset....")
+        PickleExporter.export(dataset, path, "dataset.pkl")
 
-        dataset = RandomDatasetGenerator.generate_dataset(repertoire_count=params["repertoire_count"],
-                                                          sequence_count=params["sequence_count"],
-                                                          path=params["result_path"])
+        return path + "dataset.pkl"
 
-        print("#### dataset generated....")
+    def create_specfication(self, path):
+        dataset_path = self.create_dataset(path)
 
-        return dataset
-
-    @staticmethod
-    def implant_signal(params: dict, dataset: Dataset) -> Dataset:
-        print("#### implanting signal....")
-
-        new_dataset = SignalImplanter.run({
-            "repertoire_count": params["repertoire_count"],
-            "sequence_count": params["sequence_count"],
-            "simulation": params["simulation"],
-            "signals": params["signals"],
-            "result_path": params["result_path"] + "_".join([signal.id for signal in params["signals"]]) + "/",
-            "dataset": dataset,
-            "batch_size": params["batch_size"]
-        })
-
-        print("#### signal implanted....")
-        return new_dataset
-
-    @staticmethod
-    def split_dataset(params: dict, dataset: Dataset):
-        print("#### splitting dataset....")
-
-        train_dataset, test_dataset = DataSplitter.run({
-            "dataset": dataset,
-            "training_percentage": params["training_percentage"]
-        })
-
-        print("#### dataset split....")
-        return train_dataset, test_dataset
-
-    @staticmethod
-    def encode_datasets(params: dict, train_dataset: Dataset, test_dataset: Dataset):
-        print("#### encoding datasets....")
-
-        path = params["result_path"] + params["encoder"].__class__.__name__ + "/"
-
-        encoded_train_dataset = DataEncoder.run({
-            "dataset": train_dataset,
-            "encoder": params["encoder"],
-            "encoder_params": EncoderParams(
-                model=params["encoder_params"],
-                result_path=path + "train/",
-                model_path=path,
-                vectorizer_path=path,
-                scaler_path=path,
-                pipeline_path=path,
-                batch_size=params["batch_size"],
-                label_configuration=params["label_configuration"]
-            )
-        })
-
-        encoded_test_dataset = DataEncoder.run({
-            "dataset": test_dataset,
-            "encoder": params["encoder"],
-            "encoder_params": EncoderParams(
-                model=params["encoder_params"],
-                result_path=path + "test/",
-                model_path=path,
-                vectorizer_path=path,
-                scaler_path=path,
-                pipeline_path=path,
-                batch_size=params["batch_size"],
-                learn_model=False,
-                label_configuration=params["label_configuration"]
-            )
-        })
-
-        print("#### datasets encoded....")
-
-        return encoded_train_dataset, encoded_test_dataset
-
-    @staticmethod
-    def train_ml_algorithms(params: dict, train_dataset: Dataset):
-        print("#### training ML algorithms....")
-
-        methods = []
-
-        for method in params["ml_methods"]:
-            trained_method = MLMethodTrainer.run({
-                "method": method,
-                "result_path": params["result_path"] + params["encoder"].__class__.__name__ + "/ml_methods/",
-                "dataset": train_dataset,
-                "labels": params["label_configuration"].get_labels_by_name(),
-                "number_of_splits": params["cv"]
-            })
-
-            methods.append(trained_method)
-
-        print("#### ML algorithms trained....")
-
-        return methods
-
-    @staticmethod
-    def assess_ml_algorithms(methods: list, test_dataset: Dataset, params: dict) -> dict:
-        print("#### assessing performance....")
-
-        results = MLMethodAssessment.run({
-            "methods": methods,
-            "dataset": test_dataset,
-            "metrics": [MetricType.BALANCED_ACCURACY],
-            "labels": params["label_configuration"].get_labels_by_name(),
-            "predictions_path": params["result_path"] + params["encoder"].__class__.__name__ + "/predictions/",
-            "label_configuration": params["label_configuration"]
-        })
-
-        print("#### performance assessed....")
-
-        return results
-
-
-Quickstart.perform_analysis({
-    "repertoire_count": 400,
-    "sequence_count": 500,
-    "receptor_type": "TCR",
-    "result_path": EnvironmentSettings.root_path + "simulation_results/",
-    "ml_methods": ["RandomForestClassifier"],  # other classifiers: "LogisticRegression", "SVM"
-    "training_percentage": 0.7,
-    "cv": 10,
-    "encoder": "KmerFrequencyEncoder",
-    "encoder_params": {
-        "sequence_encoding": "continuous_kmer",
-        "k": 3,
-        "reads": "unique",
-        "normalization_type": "relative_frequency"
-    },
-    "simulation": {
-        "motifs": [
-            {
-                "id": "motif1",
-                "seed": "CAS",
-                "instantiation": "identity"
+        specs = {
+            "datasets": {
+                "d1": {
+                    "format": "Pickle",
+                    "path": dataset_path,
+                    "result_path": dataset_path
+                }
+            },
+            "encodings": {
+                "e1": {
+                    "type": "Word2Vec",
+                    "params": {
+                        "k": 3,
+                        "model_creator": "sequence",
+                        "size": 8,
+                    }
+                }
+            },
+            "ml_methods": {
+                "simpleLR": {
+                    "type": "SimpleLogisticRegression",
+                    "params": {
+                        "penalty": "l1"
+                    },
+                    "model_selection_cv": False,
+                    "model_selection_n_folds": -1,
+                }
+            },
+            "preprocessing_sequences": {
+                "seq1": [
+                    {"filter_chain_B": {
+                        "type": "DatasetChainFilter",
+                        "params": {
+                            "keep_chain": "A"
+                        }
+                    }}
+                ],
+                "seq2": [
+                    {"filter_chain_A": {
+                        "type": "DatasetChainFilter",
+                        "params": {
+                            "keep_chain": "B"
+                        }
+                    }}
+                ]
+            },
+            "reports": {
+                "rep1": {
+                    "type": "SequenceLengthDistribution",
+                    "params": {
+                        "batch_size": 3
+                    }
+                }
+            },
+            "instructions": {
+                "HPOptimization": {
+                    "settings": [
+                        {
+                            "preprocessing": "seq1",
+                            "encoding": "e1",
+                            "ml_method": "simpleLR"
+                        },
+                        {
+                            "preprocessing": "seq2",
+                            "encoding": "e1",
+                            "ml_method": "simpleLR"
+                        }
+                    ],
+                    "assessment": {
+                        "split_strategy": "random",
+                        "split_count": 1,
+                        "training_percentage": 0.7,
+                        "label_to_balance": None,
+                        "reports": {
+                            "data_splits": [],
+                            "performance": []
+                        }
+                    },
+                    "selection": {
+                        "split_strategy": "random",
+                        "split_count": 1,
+                        "training_percentage": 0.7,
+                        "label_to_balance": None,
+                        "reports": {
+                            "data_splits": ["rep1"],
+                            "models": [],
+                            "optimal_models": []
+                        }
+                    },
+                    "labels": ["CD"],
+                    "dataset": "d1",
+                    "strategy": "GridSearch",
+                    "metrics": ["accuracy"],
+                    "reports": ["rep1"]
+                }
             }
-        ],
-        "signals": [
-            {
-                "id": "signal1",
-                "motifs": ["motif1"],
-                "implanting": "healthy_sequences"
-            }
-        ],
-        "implanting": [{
-            "signals": ["signal1"],
-            "repertoires": 0.5,
-            "sequences": 0.2
-        }]
-    }
-})
+        }
+
+        specs_file = path + "specs.yaml"
+        with open(specs_file, "w") as file:
+            yaml.dump(specs, file)
+
+        return specs_file
+
+    def run(self):
+
+        path = EnvironmentSettings.root_path + "quickstart/"
+        if os.path.isdir(path):
+            shutil.rmtree(path)
+        PathBuilder.build(path)
+
+        specs_file = self.create_specfication(path)
+        app = ImmuneMLApp(specs_file, path)
+        app.run()
+
+
+if __name__ == "__main__":
+    quickstart = Quickstart()
+    quickstart.run()

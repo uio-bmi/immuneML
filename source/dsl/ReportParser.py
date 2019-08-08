@@ -23,4 +23,4 @@ class ReportParser:
         user_params = params["params"] if "params" in params else {}
         parsed_params, specs = ParameterParser.parse(user_params, "{}Parser".format(params["type"]), "report_params_parsers/")
         symbol_table.add(key, SymbolType.REPORT, report(**parsed_params))
-        return symbol_table, specs
+        return symbol_table, {**params, **{"params": specs}}

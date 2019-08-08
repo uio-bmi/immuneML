@@ -8,7 +8,8 @@ Analysis example
 =================
 
 The goal of the analysis is to predict whether an individual has a disease or not (i.e. to predict the immune state
-of an individual). This prediction will be made based on the machine learning analysis of the immune repertoire of a
+of an individual). In this case, the goal is to predict whether an individual has celiac disease or not.
+This prediction will be made based on the machine learning analysis of the immune repertoire of a
 person. The person's immune repertoire consists of all immune receptor sequences in the individual, some of which are
 specific for the disease in question.
 
@@ -18,44 +19,21 @@ repertoires of the people who do not have the disease. With these examples at ha
 distinguish between repertoires with the disease and those without, thus yielding a useful approach to prediction.
 
 To be able to learn something from the immune repertoires, machine learning algorithms require the repertoires to have a
-suitable representation. In this analysis, a suitable representation will be made by calculating k-mer frequencies in a
-repertoire. For instance, given a sequence ``CASSRTY``, then the resulting 3-mers are ``CAS``, ``ASS``, ``SSR``,
-``SRT``, ``RTY``. To obtain this representation, each sequence in a repertoire is split into overlapping 3-mers and the
-frequency of each possible 3-mer is calculated for the repertoire.
+suitable representation. In this analysis, a suitable representation will be made by inferring repertoires' vector representation
+with Word2Vec.
 
 The workflow of the quickstart analysis
 =======================================
 
 The analysis will consist of the following steps:
 
-1.  Simulation of the repertoires
-2.  Signal implantation in some of the repertoires
-3.  Splitting the repertoires to train and test set
-4.  Representing repertoires by their k-mer frequencies
-5.  Training a machine learning algorithm
-6.  Testing the algorithm
+1.  Definition of the instruction to execute
+2.  Hyperparameter optimization in order to choose the best model
+3.  Assessment of the trained model on independent test set
 
-The repertoires are simulated by *RandomDatasetGenerator*. All repertoires will consist of a predefined number of immune
-receptor sequences which will be randomly generated from the list of available amino acids. Defined in this manner, all
-repertoires are generated in the same way and none are disease-specific.
+Hyperparameter optimization (implemented as nested cross-validation) is illustrated in the following figure.
 
-In order to simulate the fact that some of the repertoires (and corresponding individuals) have encountered a certain
-disease, a specific signal will be implanted into some of the repertoires. The disease-specific signal, as defined in the
-:ref:`Simulation model` will consist of one motif which will be instantiated using the *IdentityMotifInstantiation*.
-This means that when for a disease (i.e. for the signal) a motif with seed ``CAS`` is defined, ``CAS`` is what will always
-be implanted into the repertoires.
-
-The repertoires defined in this manner will be split to train and test sets which are necessary to evaluate the performance
-of machine learning algorithms and provide the best possible estimate of the expected prediction error when the algorithm
-is used on new examples.
-
-The split datasets will then be transformed to suitable representation based on k-mer frequencies.
-
-Three different machine learning algorithms will be trained to perform the prediction if the patient has a disease or not.
-Those algorithms are support vector machine, logistic regression and random forest.
-
-Each of these algorithms will then be tested and their prediction accuracy measured on the test dataset. The reported
-accuracy is the expected prediction accuracy of classification of new repertoires.
+..  image:: _static/images/hp_optimization.png
 
 Performing the analysis
 ========================
@@ -68,43 +46,103 @@ is given as a Python dictionary in the following manner:
 
 .. code-block:: python
 
-    Quickstart.perform_analysis({
-        "repertoire_count": 400, # number of repertoires to create
-        "sequence_count": 500, # number of sequences in each repertoire
-        "receptor_type": "TCR",
-        "result_path": "../../../simulation_results/", # store results in the root project folder under simulation_results
-        "ml_methods": ["LogisticRegression", "SVM", "RandomForest"],
-        "training_percentage": 0.7,
-        "cv": 10, # choose hyperparameters for ML algorithms by 10-fold cross-validation
-        "encoder": "KmerFrequencyEncoder",
-        "encoder_params": {
-            "sequence_encoding": "continuous_kmer",
-            "k": 3,
-            "reads": "unique",
-            "normalization_type": "relative_frequency"
-        },
-        "simulation": {
-            "motifs": [
-                {
-                    "id": "motif1",
-                    "seed": "CAS",
-                    "instantiation": "identity"
-                }
-            ],
-            "signals": [
-                {
-                    "id": "signal1",
-                    "motifs": ["motif1"],
-                    "implanting": "healthy_sequences"
-                }
-            ],
-            "implanting": [{
-                "signals": ["signal1"],
-                "repertoires": 0.5, # the percentage of repertoires with implanted signal
-                "sequences": 0.2 # the percentage of sequences with the given signal in the repertoire chosen for implanting
-            }]
+            specs = {
+              "datasets": {
+                  "d1": {
+                      "format": "Pickle",
+                      "path": dataset_path,
+                      "result_path": dataset_path
+                  }
+              },
+              "encodings": {
+                  "e1": {
+                      "type": "Word2Vec",
+                      "params": {
+                          "k": 3,
+                          "model_creator": "sequence",
+                          "size": 8,
+                      }
+                  }
+              },
+              "ml_methods": {
+                  "simpleLR": {
+                      "type": "SimpleLogisticRegression",
+                      "params": {
+                          "penalty": "l1"
+                      },
+                      "model_selection_cv": False,
+                      "model_selection_n_folds": -1,
+                  }
+              },
+              "preprocessing_sequences": {
+                  "seq1": [
+                      {"filter_chain_B": {
+                          "type": "DatasetChainFilter",
+                          "params": {
+                              "keep_chain": "A"
+                          }
+                      }}
+                  ],
+                  "seq2": [
+                      {"filter_chain_A": {
+                          "type": "DatasetChainFilter",
+                          "params": {
+                              "keep_chain": "B"
+                          }
+                      }}
+                  ]
+              },
+              "reports": {
+                  "rep1": {
+                      "type": "SequenceLengthDistribution",
+                      "params": {
+                          "batch_size": 3
+                      }
+                  }
+              },
+              "instructions": {
+                  "HPOptimization": {
+                      "settings": [
+                          {
+                              "preprocessing": "seq1",
+                              "encoding": "e1",
+                              "ml_method": "simpleLR"
+                          },
+                          {
+                              "preprocessing": "seq2",
+                              "encoding": "e1",
+                              "ml_method": "simpleLR"
+                          }
+                      ],
+                      "assessment": {
+                          "split_strategy": "random",
+                          "split_count": 1,
+                          "training_percentage": 0.7,
+                          "label_to_balance": None,
+                          "reports": {
+                              "data_splits": [],
+                              "performance": []
+                          }
+                      },
+                      "selection": {
+                          "split_strategy": "random",
+                          "split_count": 1,
+                          "training_percentage": 0.7,
+                          "label_to_balance": None,
+                          "reports": {
+                              "data_splits": ["rep1"],
+                              "models": [],
+                              "optimal_models": []
+                          }
+                      },
+                      "labels": ["CD"],
+                      "dataset": "d1",
+                      "strategy": "GridSearch",
+                      "metrics": ["accuracy"],
+                      "reports": ["rep1"]
+                  }
+              }
         }
-    })
 
 
 Prerequisites

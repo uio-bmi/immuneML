@@ -1,8 +1,11 @@
+import os
 import sys
 
+from source.caching.CacheType import CacheType
 from source.dsl.ImmuneMLParser import ImmuneMLParser
 from source.dsl.SymbolType import SymbolType
 from source.dsl.semantic_model.SemanticModel import SemanticModel
+from source.environment.Constants import Constants
 
 
 class ImmuneMLApp:
@@ -11,7 +14,14 @@ class ImmuneMLApp:
         self._specification_path = specification_path
         self._result_path = result_path
 
+    def set_cache(self):
+        if Constants.CACHE_TYPE not in os.environ:
+            os.environ[Constants.CACHE_TYPE] = CacheType.TEST.value
+
     def run(self):
+
+        self.set_cache()
+
         symbol_table, self._specification_path = ImmuneMLParser.parse_yaml_file(self._specification_path,
                                                                                 self._result_path)
 
