@@ -4,8 +4,8 @@ from unittest import TestCase
 import numpy as np
 
 from source.data_model.dataset.Dataset import Dataset
-from source.data_model.receptor_sequence.ReceptorSequence import ReceptorSequence
-from source.data_model.receptor_sequence.SequenceMetadata import SequenceMetadata
+from source.data_model.receptor.receptor_sequence import ReceptorSequence
+from source.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
 from source.dsl.SequenceMatchingSummaryType import SequenceMatchingSummaryType
 from source.encodings.EncoderParams import EncoderParams
 from source.encodings.reference_encoding.MatchedReferenceEncoder import MatchedReferenceEncoder

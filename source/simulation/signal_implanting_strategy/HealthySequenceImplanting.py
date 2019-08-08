@@ -1,10 +1,9 @@
 import copy
 import random
 
-from source.data_model.metadata.Sample import Sample
+from source.data_model.receptor.receptor_sequence import ReceptorSequence
 from source.data_model.repertoire.Repertoire import Repertoire
 from source.data_model.repertoire.RepertoireMetadata import RepertoireMetadata
-from source.data_model.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.simulation.implants.ImplantAnnotation import ImplantAnnotation
 from source.simulation.signal_implanting_strategy.SignalImplantingStrategy import SignalImplantingStrategy
 from source.simulation.signal_implanting_strategy.sequence_implanting.SequenceImplantingStrategy import \

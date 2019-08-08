@@ -1,8 +1,8 @@
+import copy
 import os
 import pickle
 from glob import iglob, glob
 from multiprocessing.pool import Pool
-import copy
 
 import pandas as pd
 from pandas import DataFrame
@@ -13,8 +13,8 @@ from source.IO.dataset_import.PickleLoader import PickleLoader
 from source.IO.metadata_import.MetadataImport import MetadataImport
 from source.data_model.dataset.Dataset import Dataset
 from source.data_model.metadata.Sample import Sample
-from source.data_model.receptor_sequence.ReceptorSequence import ReceptorSequence
-from source.data_model.receptor_sequence.SequenceMetadata import SequenceMetadata
+from source.data_model.receptor.receptor_sequence import ReceptorSequence
+from source.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
 from source.data_model.repertoire.Repertoire import Repertoire
 from source.data_model.repertoire.RepertoireMetadata import RepertoireMetadata
 from source.environment.Constants import Constants

@@ -7,7 +7,7 @@ import numpy as np
 from source.analysis.data_manipulation.NormalizationType import NormalizationType
 from source.data_model.dataset.Dataset import Dataset
 from source.data_model.metadata.Sample import Sample
-from source.data_model.receptor_sequence.ReceptorSequence import ReceptorSequence
+from source.data_model.receptor.receptor_sequence import ReceptorSequence
 from source.data_model.repertoire.Repertoire import Repertoire
 from source.data_model.repertoire.RepertoireMetadata import RepertoireMetadata
 from source.encodings.EncoderParams import EncoderParams

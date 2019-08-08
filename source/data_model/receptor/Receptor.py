@@ -1,0 +1,2 @@
+class Receptor:
+    pass

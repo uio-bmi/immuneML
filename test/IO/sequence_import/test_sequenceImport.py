@@ -2,7 +2,7 @@ import shutil
 from unittest import TestCase
 
 from source.IO.sequence_import.VDJdbSequenceImport import VDJdbSequenceImport
-from source.data_model.receptor_sequence.Chain import Chain
+from source.data_model.receptor.receptor_sequence.Chain import Chain
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.util.PathBuilder import PathBuilder
 

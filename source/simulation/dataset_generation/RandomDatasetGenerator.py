@@ -2,8 +2,8 @@ import pickle
 import random
 
 from source.data_model.dataset.Dataset import Dataset
+from source.data_model.receptor.receptor_sequence import ReceptorSequence
 from source.data_model.repertoire.Repertoire import Repertoire
-from source.data_model.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.util.PathBuilder import PathBuilder
 

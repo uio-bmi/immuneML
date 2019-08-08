@@ -2,8 +2,8 @@
 import itertools
 import warnings
 
+from source.data_model.receptor.receptor_sequence import ReceptorSequence
 from source.data_model.repertoire.Repertoire import Repertoire
-from source.data_model.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.util.PositionHelper import PositionHelper
 
 

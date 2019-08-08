@@ -4,7 +4,7 @@ from unittest import TestCase
 
 import pandas as pd
 
-from source.data_model.receptor_sequence.ReceptorSequence import ReceptorSequence
+from source.data_model.receptor.receptor_sequence import ReceptorSequence
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.util.RepertoireBuilder import RepertoireBuilder
 

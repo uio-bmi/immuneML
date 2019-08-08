@@ -5,9 +5,9 @@ from unittest import TestCase
 import pandas as pd
 
 from source.data_model.dataset.Dataset import Dataset
-from source.data_model.receptor_sequence.Chain import Chain
-from source.data_model.receptor_sequence.ReceptorSequence import ReceptorSequence
-from source.data_model.receptor_sequence.SequenceMetadata import SequenceMetadata
+from source.data_model.receptor.receptor_sequence import ReceptorSequence
+from source.data_model.receptor.receptor_sequence.Chain import Chain
+from source.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
 from source.data_model.repertoire.Repertoire import Repertoire
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.preprocessing.filters.DatasetChainFilter import DatasetChainFilter

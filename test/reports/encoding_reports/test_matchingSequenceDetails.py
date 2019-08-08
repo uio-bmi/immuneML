@@ -8,8 +8,7 @@ import pandas as pd
 
 from source.data_model.dataset.Dataset import Dataset
 from source.data_model.encoded_data.EncodedData import EncodedData
-from source.data_model.receptor_sequence.ReceptorSequence import ReceptorSequence
-from source.data_model.receptor_sequence.SequenceMetadata import SequenceMetadata
+from source.data_model.receptor.receptor_sequence import SequenceMetadata, ReceptorSequence
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.reports.encoding_reports.MatchingSequenceDetails import MatchingSequenceDetails
 from source.util.RepertoireBuilder import RepertoireBuilder

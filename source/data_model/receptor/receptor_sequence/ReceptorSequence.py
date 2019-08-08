@@ -1,6 +1,6 @@
 # quality: gold
-from source.data_model.receptor_sequence.SequenceAnnotation import SequenceAnnotation
-from source.data_model.receptor_sequence.SequenceMetadata import SequenceMetadata
+from source.data_model.receptor.receptor_sequence.SequenceAnnotation import SequenceAnnotation
+from source.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.environment.SequenceType import SequenceType
 

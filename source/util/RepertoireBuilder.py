@@ -2,8 +2,8 @@ import pickle
 
 import pandas as pd
 
-from source.data_model.receptor_sequence.ReceptorSequence import ReceptorSequence
-from source.data_model.receptor_sequence.SequenceMetadata import SequenceMetadata
+from source.data_model.receptor.receptor_sequence import ReceptorSequence
+from source.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
 from source.data_model.repertoire.Repertoire import Repertoire
 from source.data_model.repertoire.RepertoireMetadata import RepertoireMetadata
 from source.util.PathBuilder import PathBuilder

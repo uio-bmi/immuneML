@@ -2,7 +2,7 @@ import csv
 
 from source.analysis.SequenceMatcher import SequenceMatcher
 from source.data_model.dataset.Dataset import Dataset
-from source.data_model.receptor_sequence.ReceptorSequence import ReceptorSequence
+from source.data_model.receptor.receptor_sequence import ReceptorSequence
 from source.data_model.repertoire.Repertoire import Repertoire
 from source.reports.encoding_reports.EncodingReport import EncodingReport
 from source.util.PathBuilder import PathBuilder
