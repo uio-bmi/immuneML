@@ -57,7 +57,7 @@ class HPOptimizationProcess(InstructionProcess):
     def run_assessment(self):
         train_datasets, test_datasets = self.split_data(self.dataset, self.assessment)
         fold_performances = []
-        for index in range(self.assessment.split_count):
+        for index in range(len(train_datasets)):
             fold_performances.append(self.run_assessment_fold(train_datasets[index], test_datasets[index], index + 1))
         self.print_performances(performances=fold_performances)
         return fold_performances
@@ -89,7 +89,11 @@ class HPOptimizationProcess(InstructionProcess):
         fold_performances = []
         for index in range(self.selection.split_count):
             fold_performances.append(self.run_setting(hp_setting, train_datasets[index], test_datasets[index], index + 1, current_path))
-        return self.get_average_performance(fold_performances)
+
+        if all(performance is not None for performance in fold_performances):
+            return self.get_average_performance(fold_performances)
+        else:
+            return {label: -1 for label in self.label_configuration.get_labels_by_name()}
 
     def run_setting(self, hp_setting, train_dataset, test_dataset, run_id: int, current_path: str):
         path = current_path + "{}/fold_{}/".format(hp_setting, run_id)

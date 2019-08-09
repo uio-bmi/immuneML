@@ -69,7 +69,8 @@ class MLProcess:
             tmp_report.generate_report()
 
     def _assess_ml_method(self, method: MLMethod, encoded_test_dataset: Dataset, run: int):
-        if encoded_test_dataset is not None and encoded_test_dataset.encoded_data is not None:
+        if encoded_test_dataset is not None and encoded_test_dataset.encoded_data is not None \
+                and encoded_test_dataset.get_repertoire_count() > 0:
             return MLMethodAssessment.run(MLMethodAssessmentParams(
                 method=method,
                 dataset=encoded_test_dataset,
@@ -81,6 +82,8 @@ class MLProcess:
                 all_predictions_path=self.predictions_path,
                 path=self.path
             ))
+        elif encoded_test_dataset.get_repertoire_count() == 0:
+            pass
         else:
             raise ValueError("MLProcess: encoded test dataset does not contain valid data or is not encoded.")
 

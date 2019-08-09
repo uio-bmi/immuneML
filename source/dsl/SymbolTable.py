@@ -27,7 +27,10 @@ class SymbolTable:
         self._items[symbol] = {"item": item, "config": config, "type": symbol_type}
 
     def get(self, symbol):
-        return self._items[symbol]["item"]
+        if symbol is not None:
+            return self._items[symbol]["item"]
+        else:
+            return None
 
     def get_config(self, symbol):
         return self._items[symbol]["config"]
