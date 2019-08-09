@@ -22,7 +22,7 @@ class DatasetChainFilter(Preprocessor):
         filenames = []
         indices = []
         for index, repertoire in enumerate(dataset.get_data()):
-            if all(sequence.metadata.chain == params["keep_chain"] for sequence in repertoire.sequences):
+            if all(sequence.metadata.chain == Chain[params["keep_chain"].upper()] for sequence in repertoire.sequences):
                 filename = dataset.get_filenames()[index].replace(os.path.basename(dataset.get_filenames()[index]),
                                                                   "{}.pickle".format(repertoire.identifier))
                 os.rename(dataset.get_filenames()[index], filename)

@@ -6,7 +6,7 @@ from source.ml_methods.SklearnMethod import SklearnMethod
 
 class SimpleLogisticRegression(SklearnMethod):
 
-    default_parameters = {"max_iter": 1000}
+    default_parameters = {"max_iter": 1000, "solver": "saga"}
 
     def __init__(self, parameter_grid: dict = None, parameters: dict = None):
         super(SimpleLogisticRegression, self).__init__()
