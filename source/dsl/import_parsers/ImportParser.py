@@ -1,4 +1,4 @@
-from source.data_model.dataset.Dataset import Dataset
+from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.dsl.DefaultParamsLoader import DefaultParamsLoader
 from source.dsl.ParameterParser import ParameterParser
 from source.dsl.SymbolTable import SymbolTable
@@ -34,7 +34,7 @@ class ImportParser:
         return symbol_table
 
     @staticmethod
-    def _preprocess(dataset: Dataset, workflow_specification: dict) -> Dataset:
+    def _preprocess(dataset: RepertoireDataset, workflow_specification: dict) -> RepertoireDataset:
         if "preprocessing" in workflow_specification.keys():
             for key in workflow_specification["preprocessing"].keys():
                 preproc_class, params, dataset_specs = ImportParser._parse_preprocessor(workflow_specification["preprocessing"][key]["type"], workflow_specification["preprocessing"][key].get("params", {}))

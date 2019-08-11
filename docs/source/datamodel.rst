@@ -10,9 +10,9 @@ The ImmuneML's data model consists of:
 
 *   Sequence class,
 *   Repertoire class and
-*   Dataset class
+*   RepertoireDataset class
 
-.. note:: In case only sequences should be analyzed, regardless of the repertoires, the *Sequence*, *Repertoire* and *Dataset* classes should still be used, but it is necessary then to make each repertoire to consist of only one sequence. Everything else in the analysis, except where noted, can be used in the same manner as when the analysis has repertoires consisting of a bulk of sequences.
+.. note:: In case only sequences should be analyzed, regardless of the repertoires, the *Sequence*, *Repertoire* and *RepertoireDataset* classes should still be used, but it is necessary then to make each repertoire to consist of only one sequence. Everything else in the analysis, except where noted, can be used in the same manner as when the analysis has repertoires consisting of a bulk of sequences.
 
 
 Sequence
@@ -55,10 +55,10 @@ and optional other parameters. Examples of such parameters could be:
 *   age of the patient,
 *   known diseases of the patient etc.
 
-Dataset
+RepertoireDataset
 =======
 
-Dataset class models a list of repertoires. It contains the following information:
+RepertoireDataset class models a list of repertoires. It contains the following information:
 
 *   a unique identifier,
 *   a list of repertoires,
@@ -72,7 +72,7 @@ A list of repertoires is a list of objects of :ref:`Repertoire` class. In case t
 and cannot be loaded all at once, the dataset contains a list of paths to each repertoire file for the dataset. Each
 repertoire then is loaded from the file as needed, thus avoiding memory issues.
 
-Note that in the case that only sequences should be analyzed, regardless of the repertoires, the *Sequence*, *Repertoire* and *Dataset* classess
+Note that in the case that only sequences should be analyzed, regardless of the repertoires, the *Sequence*, *Repertoire* and *RepertoireDataset* classess
 should still be used, but it is necessary then to make each repertoire to consist of only one sequence. Everything else in the
 analysis, except where noted, can be used in the same manner as when the analysis has repertoires consisting of a bulk of
 sequences.
@@ -81,7 +81,7 @@ Encoded repertoires are used for machine learning setting. Since machine learnin
 in their original format, they are encoded so that they can be further analyzed. Examples of the encoding include k-mer
 decomposition and encoded a repertoire by k-mer frequencies, vector embeddings on repertoire level and others.
 
-Dataset parameters is a Python dictionary which includes all information types that are available for each repertoire.
+RepertoireDataset parameters is a Python dictionary which includes all information types that are available for each repertoire.
 
 
 

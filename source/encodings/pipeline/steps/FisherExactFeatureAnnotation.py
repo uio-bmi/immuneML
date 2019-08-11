@@ -10,7 +10,7 @@ from sklearn.metrics import confusion_matrix
 from source.IO.dataset_export.PickleExporter import PickleExporter
 from source.analysis.criteria_matches.CriteriaMatcher import CriteriaMatcher
 from source.caching.CacheHandler import CacheHandler
-from source.data_model.dataset.Dataset import Dataset
+from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.encoded_data.EncodedData import EncodedData
 from source.encodings.pipeline.steps.FisherExactWrapper import FisherExactWrapper
 
@@ -57,14 +57,13 @@ class FisherExactFeatureAnnotation(TransformerMixin):
                                            on="feature",
                                            how='left')
             encoded = EncodedData(
-                repertoires=X.encoded_data.repertoires,
+                examples=X.encoded_data.examples,
                 labels=X.encoded_data.labels,
-                repertoire_ids=X.encoded_data.repertoire_ids,
+                example_ids=X.encoded_data.example_ids,
                 feature_names=X.encoded_data.feature_names,
                 feature_annotations=feature_annotations
             )
-            dataset = Dataset(
-                data=X.data,
+            dataset = RepertoireDataset(
                 params=X.params,
                 encoded_data=encoded,
                 filenames=X.get_filenames(),
@@ -77,22 +76,22 @@ class FisherExactFeatureAnnotation(TransformerMixin):
             dataset = copy.deepcopy(X)
         return dataset
 
-    def fit(self, X: Dataset, y=None):
+    def fit(self, X: RepertoireDataset, y=None):
         if not any(["fisher" in column for column in X.encoded_data.feature_annotations.columns]):
             repertoire_classes = FisherExactFeatureAnnotation.get_positive(X, self.positive_criteria)
             self.fisher_annotations = FisherExactFeatureAnnotation.compute_fisher_annotations(X, repertoire_classes)
         return self
 
     @staticmethod
-    def get_positive(X: Dataset, positive_criteria):
+    def get_positive(X: RepertoireDataset, positive_criteria):
         data = pd.DataFrame(X.encoded_data.labels)
         matcher = CriteriaMatcher()
         results = matcher.match(criteria=positive_criteria, data=data)
         return results
 
     @staticmethod
-    def compute_fisher_annotations(X: Dataset, repertoire_classes):
-        feature_chunks = FisherExactFeatureAnnotation.create_chunks(X.encoded_data.repertoires, X.encoded_data.feature_names)
+    def compute_fisher_annotations(X: RepertoireDataset, repertoire_classes):
+        feature_chunks = FisherExactFeatureAnnotation.create_chunks(X.encoded_data.examples, X.encoded_data.feature_names)
         args = [(feature_chunk, repertoire_classes, FisherExactWrapper()) for feature_chunk in feature_chunks]
         with Pool(os.cpu_count()) as pool:
             results = pool.starmap(FisherExactFeatureAnnotation.compute_fisher, args)
@@ -134,5 +133,5 @@ class FisherExactFeatureAnnotation(TransformerMixin):
         return results
 
     @staticmethod
-    def store(encoded_dataset: Dataset, result_path, filename):
+    def store(encoded_dataset: RepertoireDataset, result_path, filename):
         PickleExporter.export(encoded_dataset, result_path, filename)

@@ -10,8 +10,8 @@ from source.IO.dataset_export.PickleExporter import PickleExporter
 from source.IO.dataset_import.DataLoader import DataLoader
 from source.IO.dataset_import.PickleLoader import PickleLoader
 from source.IO.metadata_import.MetadataImport import MetadataImport
-from source.data_model.dataset.Dataset import Dataset
-from source.data_model.receptor.receptor_sequence import ReceptorSequence
+from source.data_model.dataset.RepertoireDataset import RepertoireDataset
+from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.data_model.receptor.receptor_sequence.SequenceFrameType import SequenceFrameType
 from source.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
 from source.data_model.repertoire.Repertoire import Repertoire
@@ -23,7 +23,7 @@ from source.util.PathBuilder import PathBuilder
 
 class GenericLoader(DataLoader):
 
-    def load(self, path, params: dict = None) -> Dataset:
+    def load(self, path, params: dict = None) -> RepertoireDataset:
         params = copy.deepcopy(params)
         if os.path.exists(params["result_path"] + "/dataset.pkl"):
             return PickleLoader().load(params["result_path"] + "/dataset.pkl")
@@ -35,7 +35,7 @@ class GenericLoader(DataLoader):
         PickleExporter.export(dataset, params["result_path"], "dataset.pkl")
         return dataset
 
-    def _load(self, filepaths: list, params: dict) -> Dataset:
+    def _load(self, filepaths: list, params: dict) -> RepertoireDataset:
 
         arguments = [(filepath, params) for filepath in filepaths]
 
@@ -47,7 +47,7 @@ class GenericLoader(DataLoader):
         repertoire_filenames = [out[0] for out in output]
         custom_params = self._prepare_custom_params([out[1] for out in output])
 
-        dataset = Dataset(filenames=repertoire_filenames, params=custom_params, metadata_file=params["metadata_file"])
+        dataset = RepertoireDataset(filenames=repertoire_filenames, params=custom_params, metadata_file=params["metadata_file"])
         return dataset
 
     def _build_dtype(self, params, column_mapping):

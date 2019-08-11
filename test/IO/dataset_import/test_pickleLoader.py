@@ -3,14 +3,14 @@ import shutil
 from unittest import TestCase
 
 from source.IO.dataset_import.PickleLoader import PickleLoader
-from source.data_model.dataset.Dataset import Dataset
+from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.util.PathBuilder import PathBuilder
 
 
 class TestPickleLoader(TestCase):
     def test_load(self):
-        dataset = Dataset(filenames=["f1.pkl", "f2.pkl"])
+        dataset = RepertoireDataset(filenames=["f1.pkl", "f2.pkl"])
         path = EnvironmentSettings.root_path + "test/tmp/pathbuilder/"
         PathBuilder.build(path)
 

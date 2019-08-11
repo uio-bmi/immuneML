@@ -3,7 +3,7 @@ import numpy as np
 from source.IO.dataset_export.PickleExporter import PickleExporter
 from source.analysis.SequenceMatcher import SequenceMatcher
 from source.caching.CacheHandler import CacheHandler
-from source.data_model.dataset.Dataset import Dataset
+from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.encoded_data.EncodedData import EncodedData
 from source.encodings.DatasetEncoder import DatasetEncoder
 from source.encodings.EncoderParams import EncoderParams
@@ -12,7 +12,7 @@ from source.encodings.EncoderParams import EncoderParams
 class MatchedReferenceEncoder(DatasetEncoder):
 
     @staticmethod
-    def encode(dataset: Dataset, params: EncoderParams) -> Dataset:
+    def encode(dataset: RepertoireDataset, params: EncoderParams) -> RepertoireDataset:
         cache_key = CacheHandler.generate_cache_key(MatchedReferenceEncoder._prepare_caching_params(dataset, params))
         encoded_dataset = CacheHandler.memo(cache_key,
                                             lambda: MatchedReferenceEncoder._encode_new_dataset(dataset, params))
@@ -20,7 +20,7 @@ class MatchedReferenceEncoder(DatasetEncoder):
         return encoded_dataset
 
     @staticmethod
-    def _prepare_caching_params(dataset: Dataset, params: EncoderParams):
+    def _prepare_caching_params(dataset: RepertoireDataset, params: EncoderParams):
 
         encoding_params_desc = {"max_distance": params["model"]["max_distance"],
                                 "summary": params["model"]["summary"],
@@ -35,21 +35,21 @@ class MatchedReferenceEncoder(DatasetEncoder):
                 ("encoding_params", encoding_params_desc), )
 
     @staticmethod
-    def _encode_new_dataset(dataset: Dataset, params: EncoderParams) -> Dataset:
+    def _encode_new_dataset(dataset: RepertoireDataset, params: EncoderParams) -> RepertoireDataset:
 
         matched_info = MatchedReferenceEncoder._match_repertories(dataset, params)
 
-        encoded_dataset = Dataset(filenames=dataset.get_filenames(), params=dataset.params,
-                                  metadata_file=dataset.metadata_file)
+        encoded_dataset = RepertoireDataset(filenames=dataset.get_filenames(), params=dataset.params,
+                                            metadata_file=dataset.metadata_file)
         encoded_repertoires, labels = MatchedReferenceEncoder._encode_repertoires(dataset, matched_info, params)
 
         feature_name = params["model"]["summary"].name.lower()
 
         encoded_dataset.add_encoded_data(EncodedData(
-            repertoires=encoded_repertoires,
+            examples=encoded_repertoires,
             labels=labels,
             feature_names=[feature_name],
-            repertoire_ids=[repertoire.identifier for repertoire in dataset.get_data()],
+            example_ids=[repertoire.identifier for repertoire in dataset.get_data()],
             encoding=MatchedReferenceEncoder.__name__
         ))
 
@@ -57,7 +57,7 @@ class MatchedReferenceEncoder(DatasetEncoder):
         return encoded_dataset
 
     @staticmethod
-    def _encode_repertoires(dataset: Dataset, matched_info, params: EncoderParams):
+    def _encode_repertoires(dataset: RepertoireDataset, matched_info, params: EncoderParams):
         encoded_repertories = np.zeros((dataset.get_repertoire_count(), 1), dtype=float)
         labels = {label: [] for label in params["label_configuration"].get_labels_by_name()}
 
@@ -71,7 +71,7 @@ class MatchedReferenceEncoder(DatasetEncoder):
         return np.reshape(encoded_repertories, newshape=(-1, 1)), labels
 
     @staticmethod
-    def _match_repertories(dataset: Dataset, params: EncoderParams):
+    def _match_repertories(dataset: RepertoireDataset, params: EncoderParams):
         matcher = SequenceMatcher()
         matched_info = matcher.match(dataset=dataset,
                                      reference_sequences=params["model"]["reference_sequences"],
@@ -80,5 +80,5 @@ class MatchedReferenceEncoder(DatasetEncoder):
         return matched_info
 
     @staticmethod
-    def store(encoded_dataset: Dataset, params: EncoderParams):
+    def store(encoded_dataset: RepertoireDataset, params: EncoderParams):
         PickleExporter.export(encoded_dataset, params["result_path"], params["filename"])

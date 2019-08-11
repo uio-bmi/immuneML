@@ -2,19 +2,12 @@
 import itertools
 import warnings
 
-from source.data_model.receptor.receptor_sequence import ReceptorSequence
+from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.data_model.repertoire.Repertoire import Repertoire
 from source.util.PositionHelper import PositionHelper
 
 
 class KmerHelper:
-
-    """
-    creates k-mers from a sequence
-    :param k: length of k-mer (int)
-    :param overlap: boolean whether to have overlapping or non-overlapping k-mers
-    :return: (overlapping) continuous k-mers of sequence.get_sequence()
-    """
     @staticmethod
     def create_kmers_from_sequence(sequence: ReceptorSequence, k: int, overlap: bool = True):
         return KmerHelper.create_kmers_from_string(sequence.get_sequence(), k, overlap)

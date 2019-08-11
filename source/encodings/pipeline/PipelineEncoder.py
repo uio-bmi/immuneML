@@ -5,7 +5,7 @@ from sklearn.pipeline import make_pipeline
 
 from source.IO.dataset_export.PickleExporter import PickleExporter
 from source.IO.dataset_import.PickleLoader import PickleLoader
-from source.data_model.dataset.Dataset import Dataset
+from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.encodings.DatasetEncoder import DatasetEncoder
 from source.encodings.EncoderParams import EncoderParams
 
@@ -72,7 +72,7 @@ class PipelineEncoder(DatasetEncoder):
     """
 
     @staticmethod
-    def encode(dataset: Dataset, params: EncoderParams) -> Dataset:
+    def encode(dataset: RepertoireDataset, params: EncoderParams) -> RepertoireDataset:
         filepath = params["result_path"] + "/" + params["filename"]
         if os.path.isfile(filepath):
             encoded_dataset = PipelineEncoder._run_pipeline(PickleLoader.load(filepath), params)
@@ -81,14 +81,14 @@ class PipelineEncoder(DatasetEncoder):
         return encoded_dataset
 
     @staticmethod
-    def _encode_new_dataset(dataset: Dataset, params: EncoderParams) -> Dataset:
+    def _encode_new_dataset(dataset: RepertoireDataset, params: EncoderParams) -> RepertoireDataset:
         inital_encoded_dataset = PipelineEncoder._initial_encode_repertoires(dataset, params)
         encoded_dataset = PipelineEncoder._run_pipeline(inital_encoded_dataset, params)
         PipelineEncoder.store(encoded_dataset, params)
         return encoded_dataset
 
     @staticmethod
-    def _initial_encode_repertoires(dataset: Dataset, params: EncoderParams):
+    def _initial_encode_repertoires(dataset: RepertoireDataset, params: EncoderParams):
         initial_params = EncoderParams(
             result_path=params["result_path"],
             label_configuration=params["label_configuration"],
@@ -101,7 +101,7 @@ class PipelineEncoder(DatasetEncoder):
         return encoded_dataset
 
     @staticmethod
-    def _run_pipeline(dataset: Dataset, params: EncoderParams):
+    def _run_pipeline(dataset: RepertoireDataset, params: EncoderParams):
         pipeline_file = params["result_path"] + "Pipeline.pickle"
         params["model"] = PipelineEncoder.extend_steps(params)
         if params["learn_model"]:
@@ -135,5 +135,5 @@ class PipelineEncoder(DatasetEncoder):
         return tuple(step.to_tuple() for i, step in enumerate(model["steps"]) if i < index)
 
     @staticmethod
-    def store(encoded_dataset: Dataset, params: EncoderParams):
+    def store(encoded_dataset: RepertoireDataset, params: EncoderParams):
         PickleExporter.export(encoded_dataset, params["result_path"], params["filename"])

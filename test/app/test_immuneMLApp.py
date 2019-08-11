@@ -7,8 +7,8 @@ import yaml
 
 from source.IO.dataset_export.PickleExporter import PickleExporter
 from source.app.ImmuneMLApp import ImmuneMLApp
-from source.data_model.dataset.Dataset import Dataset
-from source.data_model.receptor.receptor_sequence import ReceptorSequence
+from source.data_model.dataset.RepertoireDataset import RepertoireDataset
+from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
 from source.data_model.repertoire.Repertoire import Repertoire
 from source.data_model.repertoire.RepertoireMetadata import RepertoireMetadata
@@ -37,7 +37,7 @@ class TestImmuneMLApp(TestCase):
             with open("{}rep{}.pkl".format(path, index), "wb") as file:
                 pickle.dump(rep1 if index % 2 == 0 else rep2, file)
 
-        dataset = Dataset(filenames=[path + "rep{}.pkl".format(i) for i in range(1, 14)], params={"CD": [True, False]})
+        dataset = RepertoireDataset(filenames=[path + "rep{}.pkl".format(i) for i in range(1, 14)], params={"CD": [True, False]})
 
         PickleExporter.export(dataset, path, "dataset.pkl")
 

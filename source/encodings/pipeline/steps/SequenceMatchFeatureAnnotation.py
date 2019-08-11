@@ -11,7 +11,7 @@ from sklearn.base import TransformerMixin
 
 from source.IO.dataset_export.PickleExporter import PickleExporter
 from source.caching.CacheHandler import CacheHandler
-from source.data_model.dataset.Dataset import Dataset
+from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.encoded_data.EncodedData import EncodedData
 from source.util.ReflectionHandler import ReflectionHandler
 
@@ -89,7 +89,7 @@ class SequenceMatchFeatureAnnotation(TransformerMixin):
         dataset = CacheHandler.memo(cache_key, lambda: self._transform(X))
         return dataset
 
-    def annotate(self, X: Dataset):
+    def annotate(self, X: RepertoireDataset):
         match_annotations = self.compute_match_annotations(X)
         match_annotations.to_csv(self.result_path + "match_annotations.csv")
         feature_annotations = pd.merge(X.encoded_data.feature_annotations,
@@ -98,13 +98,13 @@ class SequenceMatchFeatureAnnotation(TransformerMixin):
                                            self.SEQUENCE],
                                        how='left')
         encoded = EncodedData(
-            repertoires=X.encoded_data.repertoires,
+            examples=X.encoded_data.examples,
             labels=X.encoded_data.labels,
-            repertoire_ids=X.encoded_data.repertoire_ids,
+            example_ids=X.encoded_data.example_ids,
             feature_names=X.encoded_data.feature_names,
             feature_annotations=feature_annotations
         )
-        return Dataset(
+        return RepertoireDataset(
             params=X.params,
             encoded_data=encoded,
             filenames=X.get_filenames(),
@@ -154,7 +154,7 @@ class SequenceMatchFeatureAnnotation(TransformerMixin):
     def match_regex(self, rx, value):
         return bool(rx.match(value))
 
-    def store(self, encoded_dataset: Dataset, result_path, filename):
+    def store(self, encoded_dataset: RepertoireDataset, result_path, filename):
         PickleExporter.export(encoded_dataset, result_path, filename)
 
     def filter_query(self, query, reference, max_distance, same_length):

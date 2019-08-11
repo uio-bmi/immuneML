@@ -1,6 +1,6 @@
 import copy
 
-from source.data_model.dataset.Dataset import Dataset
+from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.dsl.semantic_model.MLResult import MLResult
 from source.encodings.DatasetEncoder import DatasetEncoder
 from source.encodings.EncoderParams import EncoderParams
@@ -26,7 +26,7 @@ class MLProcess:
     It performs the task for a given label configuration, and given list of metrics (used only in the assessment step).
     """
 
-    def __init__(self, train_dataset: Dataset, test_dataset: Dataset, label_configuration: LabelConfiguration,
+    def __init__(self, train_dataset: RepertoireDataset, test_dataset: RepertoireDataset, label_configuration: LabelConfiguration,
                  encoder: DatasetEncoder, encoder_params: dict, method: MLMethod, ml_params: dict, metrics: set,
                  path: str, reports: list = None, min_example_count: int = 2, batch_size: int = 2, cores: int = -1):
         self.train_dataset = train_dataset
@@ -59,7 +59,7 @@ class MLProcess:
         self._run_reports(method, encoded_train, encoded_test, self.path + "reports/")
         return performance
 
-    def _run_reports(self, method: MLMethod, train_dataset: Dataset, test_dataset: Dataset, path: str):
+    def _run_reports(self, method: MLMethod, train_dataset: RepertoireDataset, test_dataset: RepertoireDataset, path: str):
         for report in self.reports:
             tmp_report = copy.deepcopy(report)
             tmp_report.method = method
@@ -68,7 +68,7 @@ class MLProcess:
             tmp_report.result_path = path
             tmp_report.generate_report()
 
-    def _assess_ml_method(self, method: MLMethod, encoded_test_dataset: Dataset, run: int):
+    def _assess_ml_method(self, method: MLMethod, encoded_test_dataset: RepertoireDataset, run: int):
         if encoded_test_dataset is not None and encoded_test_dataset.encoded_data is not None \
                 and encoded_test_dataset.get_repertoire_count() > 0:
             return MLMethodAssessment.run(MLMethodAssessmentParams(
@@ -87,7 +87,7 @@ class MLProcess:
         else:
             raise ValueError("MLProcess: encoded test dataset does not contain valid data or is not encoded.")
 
-    def _run_encoder(self, train_dataset: Dataset, learn_model: bool):
+    def _run_encoder(self, train_dataset: RepertoireDataset, learn_model: bool):
         return DataEncoder.run(DataEncoderParams(
             dataset=train_dataset,
             encoder=self.encoder,
@@ -101,7 +101,7 @@ class MLProcess:
             )
         ))
 
-    def _train_ml_method(self, encoded_train_dataset: Dataset) -> MLMethod:
+    def _train_ml_method(self, encoded_train_dataset: RepertoireDataset) -> MLMethod:
         return MLMethodTrainer.run(MLMethodTrainerParams(
             method=self.method,
             result_path=self.path + "/ml_method/",

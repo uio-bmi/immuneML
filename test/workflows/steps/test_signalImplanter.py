@@ -3,8 +3,8 @@ import pickle
 import shutil
 from unittest import TestCase
 
-from source.data_model.dataset.Dataset import Dataset
-from source.data_model.receptor.receptor_sequence import ReceptorSequence
+from source.data_model.dataset.RepertoireDataset import RepertoireDataset
+from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.data_model.repertoire.Repertoire import Repertoire
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.simulation.implants.Motif import Motif
@@ -32,7 +32,7 @@ class TestSignalImplanter(TestCase):
                 pickle.dump(rep, file)
             r.append(filename)
 
-        dataset = Dataset(filenames=r)
+        dataset = RepertoireDataset(filenames=r)
 
         m1 = Motif(identifier="m1", instantiation_strategy=IdentityInstantiation(), seed="CAS")
         m2 = Motif(identifier="m2", instantiation_strategy=IdentityInstantiation(), seed="CCC")

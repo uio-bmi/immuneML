@@ -3,8 +3,8 @@ from multiprocessing.pool import Pool
 import numpy as np
 from editdistance import eval as edit_distance
 
-from source.data_model.dataset.Dataset import Dataset
-from source.data_model.receptor.receptor_sequence import ReceptorSequence
+from source.data_model.dataset.RepertoireDataset import RepertoireDataset
+from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.data_model.repertoire.Repertoire import Repertoire
 from source.dsl.SequenceMatchingSummaryType import SequenceMatchingSummaryType
 from source.environment.ParallelismManager import ParallelismManager
@@ -32,7 +32,7 @@ class SequenceMatcher:
     }
     """
 
-    def match(self, dataset: Dataset, reference_sequences: list, max_distance: int, summary_type: SequenceMatchingSummaryType) -> dict:
+    def match(self, dataset: RepertoireDataset, reference_sequences: list, max_distance: int, summary_type: SequenceMatchingSummaryType) -> dict:
 
         matched = {"repertoires": []}
 

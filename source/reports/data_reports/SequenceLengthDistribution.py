@@ -2,7 +2,7 @@ from collections import Counter, OrderedDict
 
 import matplotlib.pyplot as plt
 
-from source.data_model.dataset.Dataset import Dataset
+from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.repertoire.Repertoire import Repertoire
 from source.reports.data_reports.DataReport import DataReport
 from source.util.PathBuilder import PathBuilder
@@ -10,7 +10,7 @@ from source.util.PathBuilder import PathBuilder
 
 class SequenceLengthDistribution(DataReport):
 
-    def __init__(self, dataset: Dataset = None, batch_size: int = 1, path: str = None):
+    def __init__(self, dataset: RepertoireDataset = None, batch_size: int = 1, path: str = None):
         DataReport.__init__(self, dataset=dataset, path=path)
         self.batch_size = batch_size
 

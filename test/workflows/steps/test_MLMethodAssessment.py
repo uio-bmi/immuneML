@@ -5,7 +5,7 @@ from unittest import TestCase
 import numpy as np
 import pandas as pd
 
-from source.data_model.dataset.Dataset import Dataset
+from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.encoded_data.EncodedData import EncodedData
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.environment.LabelConfiguration import LabelConfiguration
@@ -22,9 +22,9 @@ class TestMLMethodAssessment(TestCase):
     def test_run(self):
         path = EnvironmentSettings.root_path + "test/tmp/mlmethodassessment/"
         PathBuilder.build(path)
-        dataset = Dataset(filenames=RepertoireBuilder.build([["AA"], ["CC"], ["AA"], ["CC"], ["AA"], ["CC"]], path)[0])
+        dataset = RepertoireDataset(filenames=RepertoireBuilder.build([["AA"], ["CC"], ["AA"], ["CC"], ["AA"], ["CC"]], path)[0])
         dataset.encoded_data = EncodedData(
-            repertoires=np.array([[1, 2], [1, 2], [1, 2], [1, 2], [1, 2], [1, 2]]),
+            examples=np.array([[1, 2], [1, 2], [1, 2], [1, 2], [1, 2], [1, 2]]),
             labels={"l1": [1, 2, 3, 1, 2, 3], "l2": [1, 2, 3, 1, 2, 3]}
         )
 
@@ -33,7 +33,7 @@ class TestMLMethodAssessment(TestCase):
         label_config.add_label("l2", [1, 2, 3])
 
         method1 = SVM()
-        method1.fit(dataset.encoded_data.repertoires, dataset.encoded_data.labels, dataset.encoded_data.labels.keys())
+        method1.fit(dataset.encoded_data.examples, dataset.encoded_data.labels, dataset.encoded_data.labels.keys())
 
         res = MLMethodAssessment.run(MLMethodAssessmentParams(
             dataset=dataset,

@@ -3,9 +3,9 @@ import shutil
 from unittest import TestCase
 
 from source.analysis.SequenceMatcher import SequenceMatcher
-from source.data_model.dataset.Dataset import Dataset
+from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.metadata.Sample import Sample
-from source.data_model.receptor.receptor_sequence import ReceptorSequence
+from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
 from source.data_model.repertoire.Repertoire import Repertoire
 from source.data_model.repertoire.RepertoireMetadata import RepertoireMetadata
@@ -29,7 +29,7 @@ class TestSequenceMatcher(TestCase):
         with open(path + "rep0.pkl", "wb") as file:
             pickle.dump(repertoire, file)
 
-        dataset = Dataset(filenames=[path + "rep0.pkl"])
+        dataset = RepertoireDataset(filenames=[path + "rep0.pkl"])
         sequences = [ReceptorSequence("AAAACA", metadata=SequenceMetadata(chain="A", v_gene="V1", j_gene="J2")),
                      ReceptorSequence("TADQV", metadata=SequenceMetadata(chain="A", v_gene="V1", j_gene="J3"))]
 

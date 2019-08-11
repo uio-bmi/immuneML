@@ -5,9 +5,9 @@ from unittest import TestCase
 import numpy as np
 
 from source.analysis.data_manipulation.NormalizationType import NormalizationType
-from source.data_model.dataset.Dataset import Dataset
+from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.metadata.Sample import Sample
-from source.data_model.receptor.receptor_sequence import ReceptorSequence
+from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.data_model.repertoire.Repertoire import Repertoire
 from source.data_model.repertoire.RepertoireMetadata import RepertoireMetadata
 from source.encodings.EncoderParams import EncoderParams
@@ -40,7 +40,7 @@ class TestKmerFrequencyEncoder(TestCase):
         lc.add_label("l1", [1, 2])
         lc.add_label("l2", [0, 3])
 
-        dataset = Dataset(filenames=[path + "rep1.pkl", path + "rep2.pkl"])
+        dataset = RepertoireDataset(filenames=[path + "rep1.pkl", path + "rep2.pkl"])
 
         d1 = KmerFrequencyEncoder.encode(dataset, EncoderParams(
             result_path=path + "1/",
@@ -72,6 +72,6 @@ class TestKmerFrequencyEncoder(TestCase):
 
         shutil.rmtree(path)
 
-        self.assertTrue(isinstance(d1, Dataset))
-        self.assertTrue(isinstance(d2, Dataset))
-        self.assertEqual(0.67, np.round(d2.encoded_data.repertoires[0, 2], 2))
+        self.assertTrue(isinstance(d1, RepertoireDataset))
+        self.assertTrue(isinstance(d2, RepertoireDataset))
+        self.assertEqual(0.67, np.round(d2.encoded_data.examples[0, 2], 2))

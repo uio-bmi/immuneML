@@ -3,7 +3,7 @@ import os
 
 import pandas as pd
 
-from source.data_model.dataset.Dataset import Dataset
+from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.preprocessing.Preprocessor import Preprocessor
 
 
@@ -13,7 +13,7 @@ class ClonotypeCountFilter(Preprocessor):
         self.lower_limit = lower_limit
         self.upper_limit = upper_limit
 
-    def process_dataset(self, dataset: Dataset):
+    def process_dataset(self, dataset: RepertoireDataset):
         params = {}
         if self.lower_limit > -1:
             params["lower_limit"] = self.lower_limit
@@ -22,7 +22,7 @@ class ClonotypeCountFilter(Preprocessor):
         return ClonotypeCountFilter.process(dataset, params)
 
     @staticmethod
-    def process(dataset: Dataset, params: dict) -> Dataset:
+    def process(dataset: RepertoireDataset, params: dict) -> RepertoireDataset:
         processed_dataset = copy.deepcopy(dataset)
         filenames = []
         indices =[]

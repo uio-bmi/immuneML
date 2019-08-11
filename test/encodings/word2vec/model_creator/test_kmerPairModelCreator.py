@@ -4,8 +4,8 @@ from unittest import TestCase
 
 from gensim.models import Word2Vec
 
-from source.data_model.dataset.Dataset import Dataset
-from source.data_model.receptor.receptor_sequence import ReceptorSequence
+from source.data_model.dataset.RepertoireDataset import RepertoireDataset
+from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.data_model.repertoire.Repertoire import Repertoire
 from source.data_model.repertoire.RepertoireMetadata import RepertoireMetadata
 from source.encodings.EncoderParams import EncoderParams
@@ -39,7 +39,7 @@ class TestKmerPairModelCreator(TestCase):
         with open(file2, "wb") as file:
             pickle.dump(rep2, file)
 
-        dataset = Dataset(filenames=[file1, file2])
+        dataset = RepertoireDataset(filenames=[file1, file2])
 
         from source.environment.LabelConfiguration import LabelConfiguration
         config_params = EncoderParams(model={

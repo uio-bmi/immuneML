@@ -4,12 +4,10 @@ from unittest import TestCase
 import pandas as pd
 from scipy import sparse
 
-from source.data_model.dataset.Dataset import Dataset
+from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.encoded_data.EncodedData import EncodedData
-from source.encodings.EncoderParams import EncoderParams
 from source.encodings.pipeline.steps.SequenceMatchFeatureAnnotation import SequenceMatchFeatureAnnotation
 from source.environment.EnvironmentSettings import EnvironmentSettings
-from source.environment.LabelConfiguration import LabelConfiguration
 from source.util.PathBuilder import PathBuilder
 
 
@@ -27,8 +25,8 @@ class TestSequenceMatchFeatureAnnotation(TestCase):
     #             4: match v_gene and sequence, 0 mismatch: 0 matches
 
     encoded_data = {
-        'repertoires': sparse.rand(5, 5, density=0.2, format='csr'),
-        'repertoire_ids': ["A", "B", "C", "D", "E"],
+        'examples': sparse.rand(5, 5, density=0.2, format='csr'),
+        'example_ids': ["A", "B", "C", "D", "E"],
         'labels': {
             "diabetes": [1, 0, 0, 1, 1],
         },
@@ -40,8 +38,8 @@ class TestSequenceMatchFeatureAnnotation(TestCase):
         })
     }
 
-    dataset = Dataset(encoded_data=EncodedData(**encoded_data),
-                      filenames=[filename + ".tsv" for filename in encoded_data["repertoire_ids"]])
+    dataset = RepertoireDataset(encoded_data=EncodedData(**encoded_data),
+                                filenames=[filename + ".tsv" for filename in encoded_data["example_ids"]])
 
     # there are only matches to the first 3 sequences in this reference
     reference_rep = """TRBV Gene	CDR3B AA Sequence	Antigen Protein	MHC Class									

@@ -5,7 +5,7 @@ import pickle
 import numpy as np
 import pandas as pd
 
-from source.data_model.dataset.Dataset import Dataset
+from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.preprocessing.Preprocessor import Preprocessor
 from source.util.PathBuilder import PathBuilder
 
@@ -15,11 +15,11 @@ class PatientRepertoireCollector(Preprocessor):
     def __init__(self, result_path: str):
         self.result_path = result_path
 
-    def process_dataset(self, dataset: Dataset):
+    def process_dataset(self, dataset: RepertoireDataset):
         return PatientRepertoireCollector.process(dataset, {"result_path": self.result_path})
 
     @staticmethod
-    def process(dataset: Dataset, params: dict) -> Dataset:
+    def process(dataset: RepertoireDataset, params: dict) -> RepertoireDataset:
         rep_map = {}
         filenames = []
         indices_to_keep = []

@@ -10,7 +10,7 @@ from source.analysis.AxisType import AxisType
 from source.analysis.criteria_matches.CriteriaMatcher import CriteriaMatcher
 from source.analysis.data_manipulation.GroupSummarizationType import GroupSummarizationType
 from source.analysis.data_manipulation.NormalizationType import NormalizationType
-from source.data_model.dataset.Dataset import Dataset
+from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.encoded_data.EncodedData import EncodedData
 from source.environment.Constants import Constants
 
@@ -18,7 +18,7 @@ from source.environment.Constants import Constants
 class DataSummarizer:
 
     @staticmethod
-    def group_repertoires(dataset: Dataset, group_columns, group_summarization_type: GroupSummarizationType):
+    def group_repertoires(dataset: RepertoireDataset, group_columns, group_summarization_type: GroupSummarizationType):
         """
         Takes an encoded dataset and groups together repertoires by either adding or averaging the feature values for
         all repertoires with the same values (or combination of values) for the specified group_columns.
@@ -33,20 +33,19 @@ class DataSummarizer:
         groups = group_mask["groups"]
         mask = group_mask["mask"]
 
-        repertoires = mask.T.dot(dataset.encoded_data.repertoires)
+        repertoires = mask.T.dot(dataset.encoded_data.examples)
         labels = DataSummarizer.split_values(groups, group_columns)
         metadata_file = DataSummarizer.build_metadata_from_labels(dataset.metadata_file, labels)
 
         encoded = EncodedData(
-            repertoires=repertoires,
+            examples=repertoires,
             labels=labels.to_dict("list"),
-            repertoire_ids=groups,
+            example_ids=groups,
             feature_names=dataset.encoded_data.feature_names,
             feature_annotations=dataset.encoded_data.feature_annotations
         )
 
-        result = Dataset(
-            data=dataset.data,
+        result = RepertoireDataset(
             params=dataset.params,
             encoded_data=encoded,
             filenames=dataset.get_filenames(),
@@ -67,7 +66,7 @@ class DataSummarizer:
         return path
 
     @staticmethod
-    def group_features(dataset: Dataset, group_columns, group_summarization_type: GroupSummarizationType):
+    def group_features(dataset: RepertoireDataset, group_columns, group_summarization_type: GroupSummarizationType):
         """
         Takes an encoded dataset and groups together features by either adding or averaging the feature values for
         all features with the same values (or combination of values) for the specified group_columns.
@@ -75,7 +74,7 @@ class DataSummarizer:
         dataset = copy.deepcopy(dataset)
 
         if group_summarization_type == GroupSummarizationType.NONZERO:
-            dataset.encoded_data.repertoires.data[:] = 1
+            dataset.encoded_data.examples.data[:] = 1
 
         feature_annotations = dataset.encoded_data.feature_annotations
 
@@ -85,19 +84,18 @@ class DataSummarizer:
         groups = group_mask["groups"]
         mask = group_mask["mask"]
 
-        repertoires = dataset.encoded_data.repertoires.dot(mask)
+        repertoires = dataset.encoded_data.examples.dot(mask)
         feature_annotations = DataSummarizer.split_values(groups, group_columns)
 
         encoded = EncodedData(
-            repertoires=repertoires,
+            examples=repertoires,
             labels=dataset.encoded_data.labels,
-            repertoire_ids=dataset.encoded_data.repertoire_ids,
+            example_ids=dataset.encoded_data.example_ids,
             feature_names=groups,
             feature_annotations=feature_annotations
         )
 
-        result = Dataset(
-            data=dataset.data,
+        result = RepertoireDataset(
             params=dataset.params,
             encoded_data=encoded,
             filenames=dataset.get_filenames(),
@@ -162,7 +160,7 @@ class DataSummarizer:
         return path
 
     @staticmethod
-    def filter_repertoires(dataset: Dataset, criteria: dict):
+    def filter_repertoires(dataset: RepertoireDataset, criteria: dict):
         """
         Takes an encoded dataset and filters repertoires based on a given set of criteria. Only repertories meeting
         these criteria will be retained in the new dataset object.
@@ -177,20 +175,19 @@ class DataSummarizer:
 
         metadata_file = DataSummarizer.build_metadata(dataset.metadata_file, indices)
         labels = data.iloc[indices, :].to_dict("list")
-        repertoires = dataset.encoded_data.repertoires[indices, :]
+        repertoires = dataset.encoded_data.examples[indices, :]
         filenames = [dataset.get_filenames()[i] for i in indices]
-        repertoire_ids = [dataset.encoded_data.repertoire_ids[i] for i in indices]
+        repertoire_ids = [dataset.encoded_data.example_ids[i] for i in indices]
 
         encoded = EncodedData(
-            repertoires=repertoires,
+            examples=repertoires,
             labels=labels,
-            repertoire_ids=repertoire_ids,
+            example_ids=repertoire_ids,
             feature_names=dataset.encoded_data.feature_names,
             feature_annotations=dataset.encoded_data.feature_annotations
         )
 
-        result = Dataset(
-            data=dataset.data,
+        result = RepertoireDataset(
             params=dataset.params,
             encoded_data=encoded,
             filenames=filenames,
@@ -201,7 +198,7 @@ class DataSummarizer:
         return result
 
     @staticmethod
-    def filter_features(dataset: Dataset, criteria: dict):
+    def filter_features(dataset: RepertoireDataset, criteria: dict):
         """
         Takes an encoded dataset and filters features based on a given set of criteria. Only features meeting
         these criteria will be retained in the new dataset object.
@@ -215,19 +212,18 @@ class DataSummarizer:
         indices = np.where(np.array(results))[0]
 
         feature_annotations = feature_annotations.iloc[indices, :]
-        repertoires = dataset.encoded_data.repertoires[:, indices]
+        repertoires = dataset.encoded_data.examples[:, indices]
         feature_names = [dataset.encoded_data.feature_names[i] for i in indices]
 
         encoded = EncodedData(
-            repertoires=repertoires,
+            examples=repertoires,
             labels=dataset.encoded_data.labels,
-            repertoire_ids=dataset.encoded_data.repertoire_ids,
+            example_ids=dataset.encoded_data.example_ids,
             feature_names=feature_names,
             feature_annotations=feature_annotations
         )
 
-        result = Dataset(
-            data=dataset.data,
+        result = RepertoireDataset(
             params=dataset.params,
             encoded_data=encoded,
             filenames=dataset.get_filenames(),
@@ -238,7 +234,7 @@ class DataSummarizer:
         return result
 
     @staticmethod
-    def annotate_repertoires(dataset: Dataset, criteria: dict, name: str = "annotation"):
+    def annotate_repertoires(dataset: RepertoireDataset, criteria: dict, name: str = "annotation"):
         """
         Takes an encoded dataset and adds a new label to the encoded_dataset with boolean values showing whether a
         repertoire matched the specified criteria or not.
@@ -254,15 +250,14 @@ class DataSummarizer:
         labels[name] = np.array(results)
 
         encoded = EncodedData(
-            repertoires=dataset.encoded_data.repertoires,
+            examples=dataset.encoded_data.examples,
             labels=labels,
-            repertoire_ids=dataset.encoded_data.repertoire_ids,
+            example_ids=dataset.encoded_data.example_ids,
             feature_names=dataset.encoded_data.feature_names,
             feature_annotations=dataset.encoded_data.feature_annotations
         )
 
-        result = Dataset(
-            data=dataset.data,
+        result = RepertoireDataset(
             params=dataset.params,
             encoded_data=encoded,
             filenames=dataset.get_filenames(),
@@ -273,7 +268,7 @@ class DataSummarizer:
         return result
 
     @staticmethod
-    def annotate_features(dataset: Dataset, criteria: dict, name: str = "annotation"):
+    def annotate_features(dataset: RepertoireDataset, criteria: dict, name: str = "annotation"):
         """
         Takes an encoded dataset and adds a new column to the feature_annotations with boolean values showing whether a
         feature matched the specified criteria or not.
@@ -288,15 +283,14 @@ class DataSummarizer:
         feature_annotations[name] = results
 
         encoded = EncodedData(
-            repertoires=dataset.encoded_data.repertoires,
+            examples=dataset.encoded_data.examples,
             labels=dataset.encoded_data.labels,
-            repertoire_ids=dataset.encoded_data.repertoire_ids,
+            example_ids=dataset.encoded_data.example_ids,
             feature_names=dataset.encoded_data.feature_names,
             feature_annotations=feature_annotations
         )
 
-        result = Dataset(
-            data=dataset.data,
+        result = RepertoireDataset(
             params=dataset.params,
             encoded_data=encoded,
             filenames=dataset.get_filenames(),
@@ -307,19 +301,18 @@ class DataSummarizer:
         return result
 
     @staticmethod
-    def normalize_repertoires(dataset: Dataset, normalization_type: NormalizationType):
+    def normalize_repertoires(dataset: RepertoireDataset, normalization_type: NormalizationType):
         assert normalization_type in [NormalizationType.L2, NormalizationType.RELATIVE_FREQUENCY, NormalizationType.BINARY]
         dataset = copy.deepcopy(dataset)
-        repertoires = DataSummarizer.normalize_matrix(dataset.encoded_data.repertoires, normalization_type, AxisType.REPERTOIRES)
+        repertoires = DataSummarizer.normalize_matrix(dataset.encoded_data.examples, normalization_type, AxisType.REPERTOIRES)
         encoded = EncodedData(
-            repertoires=repertoires,
+            examples=repertoires,
             labels=dataset.encoded_data.labels,
-            repertoire_ids=dataset.encoded_data.repertoire_ids,
+            example_ids=dataset.encoded_data.example_ids,
             feature_names=dataset.encoded_data.feature_names,
             feature_annotations=dataset.encoded_data.feature_annotations
         )
-        result = Dataset(
-            data=dataset.data,
+        result = RepertoireDataset(
             params=dataset.params,
             encoded_data=encoded,
             filenames=dataset.get_filenames(),
@@ -329,19 +322,18 @@ class DataSummarizer:
         return result
 
     @staticmethod
-    def normalize_features(dataset: Dataset, normalization_type: NormalizationType):
+    def normalize_features(dataset: RepertoireDataset, normalization_type: NormalizationType):
         assert normalization_type in [NormalizationType.BINARY]
         dataset = copy.deepcopy(dataset)
-        repertoires = DataSummarizer.normalize_matrix(dataset.encoded_data.repertoires, normalization_type, AxisType.FEATURES)
+        repertoires = DataSummarizer.normalize_matrix(dataset.encoded_data.examples, normalization_type, AxisType.FEATURES)
         encoded = EncodedData(
-            repertoires=repertoires,
+            examples=repertoires,
             labels=dataset.encoded_data.labels,
-            repertoire_ids=dataset.encoded_data.repertoire_ids,
+            example_ids=dataset.encoded_data.example_ids,
             feature_names=dataset.encoded_data.feature_names,
             feature_annotations=dataset.encoded_data.feature_annotations
         )
-        result = Dataset(
-            data=dataset.data,
+        result = RepertoireDataset(
             params=dataset.params,
             encoded_data=encoded,
             filenames=dataset.get_filenames(),

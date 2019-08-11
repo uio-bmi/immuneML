@@ -7,7 +7,7 @@ from source.analysis.criteria_matches.BooleanType import BooleanType
 from source.analysis.criteria_matches.DataType import DataType
 from source.analysis.criteria_matches.OperationType import OperationType
 from source.analysis.data_manipulation.NormalizationType import NormalizationType
-from source.data_model.dataset.Dataset import Dataset
+from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.encodings.EncoderParams import EncoderParams
 from source.encodings.kmer_frequency.KmerFrequencyEncoder import KmerFrequencyEncoder
 from source.encodings.kmer_frequency.ReadsType import ReadsType
@@ -52,7 +52,7 @@ class TestEmerson2018NatGenEncoding(TestCase):
             dataset_params
         )
 
-        dataset = Dataset(
+        dataset = RepertoireDataset(
             filenames=dataset_filenames,
             params=dataset_params
         )
@@ -134,17 +134,17 @@ class TestEmerson2018NatGenEncoding(TestCase):
         params["learn_model"] = False
         params["filename"] = "test_2.pickle"
 
-        dataset2 = Dataset(filenames=[dataset_filenames[num] for num in range(1, 4)])
+        dataset2 = RepertoireDataset(filenames=[dataset_filenames[num] for num in range(1, 4)])
 
         d2 = PipelineEncoder.encode(
             dataset2,
             params
         )
 
-        self.assertTrue(isinstance(d1, Dataset))
-        self.assertTrue(d1.encoded_data.repertoires.shape == (8, 2))
-        self.assertTrue(isinstance(d2, Dataset))
-        self.assertTrue(d2.encoded_data.repertoires.shape == (3, 2))
-        self.assertTrue(np.array_equal(d1.encoded_data.repertoires[1:4, :].A, d2.encoded_data.repertoires.A))
+        self.assertTrue(isinstance(d1, RepertoireDataset))
+        self.assertTrue(d1.encoded_data.examples.shape == (8, 2))
+        self.assertTrue(isinstance(d2, RepertoireDataset))
+        self.assertTrue(d2.encoded_data.examples.shape == (3, 2))
+        self.assertTrue(np.array_equal(d1.encoded_data.examples[1:4, :].A, d2.encoded_data.examples.A))
 
         shutil.rmtree(path)

@@ -5,7 +5,7 @@ import pandas as pd
 
 from source.analysis.criteria_matches.DataType import DataType
 from source.analysis.criteria_matches.OperationType import OperationType
-from source.data_model.dataset.Dataset import Dataset
+from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.preprocessing.filters.MetadataFilter import MetadataFilter
 from source.util.PathBuilder import PathBuilder
@@ -16,9 +16,9 @@ class TestMetadataFilter(TestCase):
     def test_process(self):
         path = EnvironmentSettings.root_path + "test/tmp/clonotypecountfilter/"
         PathBuilder.build(path)
-        dataset = Dataset(filenames=RepertoireBuilder.build([["ACF", "ACF", "ACF"],
-                                                             ["ACF", "ACF"],
-                                                             ["ACF", "ACF", "ACF", "ACF"]], path)[0])
+        dataset = RepertoireDataset(filenames=RepertoireBuilder.build([["ACF", "ACF", "ACF"],
+                                                                       ["ACF", "ACF"],
+                                                                       ["ACF", "ACF", "ACF", "ACF"]], path)[0])
 
         df = pd.DataFrame(data={"key1": [0, 1, 2], "key2": [0, 1, 2]})
         df.to_csv(path+"metadata.csv")

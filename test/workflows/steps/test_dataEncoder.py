@@ -2,9 +2,9 @@ import pickle
 import shutil
 from unittest import TestCase
 
-from source.data_model.dataset.Dataset import Dataset
+from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.metadata.Sample import Sample
-from source.data_model.receptor.receptor_sequence import ReceptorSequence
+from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.data_model.repertoire.Repertoire import Repertoire
 from source.data_model.repertoire.RepertoireMetadata import RepertoireMetadata
 from source.encodings.EncoderParams import EncoderParams
@@ -37,7 +37,7 @@ class TestDataEncoder(TestCase):
         lc.add_label("l1", [1, 2])
         lc.add_label("l2", [0, 3])
 
-        dataset = Dataset(filenames=[path + "rep1.pkl", path + "rep2.pkl"])
+        dataset = RepertoireDataset(filenames=[path + "rep1.pkl", path + "rep2.pkl"])
 
         res = DataEncoder.run(DataEncoderParams(
             dataset=dataset,
@@ -55,7 +55,7 @@ class TestDataEncoder(TestCase):
             )
         ))
 
-        self.assertTrue(isinstance(res, Dataset))
-        self.assertTrue(res.encoded_data.repertoires.shape[0] == 2)
+        self.assertTrue(isinstance(res, RepertoireDataset))
+        self.assertTrue(res.encoded_data.examples.shape[0] == 2)
 
         shutil.rmtree(path)

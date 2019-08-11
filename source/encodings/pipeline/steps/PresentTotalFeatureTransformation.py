@@ -5,7 +5,7 @@ from sklearn.base import TransformerMixin
 
 from source.analysis.data_manipulation.DataSummarizer import DataSummarizer
 from source.caching.CacheHandler import CacheHandler
-from source.data_model.dataset.Dataset import Dataset
+from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.encoded_data.EncodedData import EncodedData
 
 
@@ -54,14 +54,13 @@ class PresentTotalFeatureTransformation(TransformerMixin):
         feature_annotations = pd.DataFrame({"feature": ["present", "total"]})
 
         encoded = EncodedData(
-            repertoires=repertoires,
+            examples=repertoires,
             labels=X.encoded_data.labels,
-            repertoire_ids=X.encoded_data.repertoire_ids,
+            example_ids=X.encoded_data.example_ids,
             feature_names=feature_names,
             feature_annotations=feature_annotations
         )
-        dataset = Dataset(
-            data=X.data,
+        dataset = RepertoireDataset(
             params=X.params,
             encoded_data=encoded,
             filenames=X.get_filenames(),
@@ -75,13 +74,13 @@ class PresentTotalFeatureTransformation(TransformerMixin):
 
     def get_repertoires(self, X):
         if self.nonzero:
-            total = X.encoded_data.repertoires.getnnz(axis=1)
+            total = X.encoded_data.examples.getnnz(axis=1)
             dataset = DataSummarizer.filter_features(X, self.criteria)
-            present = dataset.encoded_data.repertoires.getnnz(axis=1)
+            present = dataset.encoded_data.examples.getnnz(axis=1)
         else:
-            total = X.encoded_data.repertoires.sum(axis=1)
+            total = X.encoded_data.examples.sum(axis=1)
             dataset = DataSummarizer.filter_features(X, self.criteria)
-            present = dataset.encoded_data.repertoires.sum(axis=1)
+            present = dataset.encoded_data.examples.sum(axis=1)
 
         repertoires = sparse.csr_matrix(np.column_stack((present, total)))
         return repertoires

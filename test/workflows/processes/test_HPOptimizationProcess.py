@@ -1,7 +1,7 @@
 import shutil
 from unittest import TestCase
 
-from source.data_model.dataset.Dataset import Dataset
+from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.encodings.word2vec.Word2VecEncoder import Word2VecEncoder
 from source.encodings.word2vec.model_creator.ModelType import ModelType
 from source.environment.EnvironmentSettings import EnvironmentSettings
@@ -50,7 +50,7 @@ class TestHPOptimizationProcess(TestCase):
                                                               "l2": [0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 1,
                                                                      0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1]})
 
-        dataset = Dataset(filenames=filenames, metadata_file=metadata, params={"l1": [1, 2], "l2": [0, 1]})
+        dataset = RepertoireDataset(filenames=filenames, metadata_file=metadata, params={"l1": [1, 2], "l2": [0, 1]})
         hp_settings = [HPSetting(Word2VecEncoder, {"k": 3, "model_creator": ModelType.SEQUENCE, "size": 4},
                                  SimpleLogisticRegression(), {"model_selection_cv": False, "model_selection_n_folds": -1},
                                  []),

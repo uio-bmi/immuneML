@@ -2,7 +2,7 @@ import shutil
 from unittest import TestCase
 
 from source.analysis.data_manipulation.NormalizationType import NormalizationType
-from source.data_model.dataset.Dataset import Dataset
+from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.encodings.EncoderParams import EncoderParams
 from source.encodings.kmer_frequency.KmerFrequencyEncoder import KmerFrequencyEncoder
 from source.encodings.kmer_frequency.ReadsType import ReadsType
@@ -30,7 +30,7 @@ class TestAnnotateAgCDR3Frequency(TestCase):
             "aab": [2, 1, 2, 1, 2, 1, 2, 1]
         }
 
-        dataset = Dataset(
+        dataset = RepertoireDataset(
             filenames=RepertoireBuilder.build(
                 [
                     ["AAA", "ATA", "ATA"],
@@ -116,7 +116,7 @@ reference_rep.tsv"""
 
         n_matched = d1.encoded_data.feature_annotations["t1d_matched_MHC Class"].count()
 
-        self.assertTrue(isinstance(d1, Dataset))
+        self.assertTrue(isinstance(d1, RepertoireDataset))
         self.assertEqual(n_matched, 3)
 
         shutil.rmtree(root_path)

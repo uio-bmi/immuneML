@@ -11,9 +11,9 @@ from source.IO.dataset_export.PickleExporter import PickleExporter
 from source.IO.dataset_import.DataLoader import DataLoader
 from source.IO.dataset_import.PickleLoader import PickleLoader
 from source.IO.metadata_import.MetadataImport import MetadataImport
-from source.data_model.dataset.Dataset import Dataset
+from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.metadata.Sample import Sample
-from source.data_model.receptor.receptor_sequence import ReceptorSequence
+from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
 from source.data_model.repertoire.Repertoire import Repertoire
 from source.data_model.repertoire.RepertoireMetadata import RepertoireMetadata
@@ -42,7 +42,7 @@ class MiXCRLoader(DataLoader):
         "FR4":  {"AA": "aaSeqFR4",  "NT": "nSeqFR4"}
     }
 
-    def load(self, path, params: dict = None) -> Dataset:
+    def load(self, path, params: dict = None) -> RepertoireDataset:
         params = copy.deepcopy(params)
         PathBuilder.build(params["result_path"])
         filepaths = sorted(list(iglob(path + "**/*." + params["extension"], recursive=True)))
@@ -58,7 +58,7 @@ class MiXCRLoader(DataLoader):
         return dataset
 
     @staticmethod
-    def _load(filepaths: list, params: dict) -> Dataset:
+    def _load(filepaths: list, params: dict) -> RepertoireDataset:
 
         arguments = [(filepath, filepaths, params) for filepath in filepaths]
 
@@ -68,7 +68,7 @@ class MiXCRLoader(DataLoader):
         repertoire_filenames = [out[0] for out in output]
         custom_params = MiXCRLoader._prepare_custom_params([out[1] for out in output])
 
-        dataset = Dataset(filenames=repertoire_filenames, params=custom_params, metadata_file=params["metadata_file"])
+        dataset = RepertoireDataset(filenames=repertoire_filenames, params=custom_params, metadata_file=params["metadata_file"])
         return dataset
 
     @staticmethod

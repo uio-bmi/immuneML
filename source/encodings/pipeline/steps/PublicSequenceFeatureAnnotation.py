@@ -3,7 +3,7 @@ from sklearn.base import TransformerMixin
 
 from source.IO.dataset_export.PickleExporter import PickleExporter
 from source.caching.CacheHandler import CacheHandler
-from source.data_model.dataset.Dataset import Dataset
+from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.encoded_data.EncodedData import EncodedData
 
 
@@ -43,20 +43,19 @@ class PublicSequenceFeatureAnnotation(TransformerMixin):
         dataset = CacheHandler.memo(cache_key, lambda: self._transform(X))
         return dataset
 
-    def _annotate_public_features(self, X: Dataset):
+    def _annotate_public_features(self, X: RepertoireDataset):
         feature_annotations = pd.merge(X.encoded_data.feature_annotations,
                                        self.public_annotations,
                                        on="feature",
                                        how='left')
         encoded = EncodedData(
-            repertoires=X.encoded_data.repertoires,
+            examples=X.encoded_data.examples,
             labels=X.encoded_data.labels,
-            repertoire_ids=X.encoded_data.repertoire_ids,
+            example_ids=X.encoded_data.example_ids,
             feature_names=X.encoded_data.feature_names,
             feature_annotations=feature_annotations
         )
-        dataset = Dataset(
-            data=X.data,
+        dataset = RepertoireDataset(
             params=X.params,
             encoded_data=encoded,
             filenames=X.get_filenames(),
@@ -80,10 +79,10 @@ class PublicSequenceFeatureAnnotation(TransformerMixin):
         return self
 
     def compute_public_annotations(self, X):
-        sums = X.encoded_data.repertoires.getnnz(axis=0)
+        sums = X.encoded_data.examples.getnnz(axis=0)
         public_annotations = pd.DataFrame({PublicSequenceFeatureAnnotation.FEATURE: X.encoded_data.feature_names,
                                            PublicSequenceFeatureAnnotation.PUBLIC_REPERTOIRE_COUNT: sums})
         return public_annotations
 
-    def store(self, encoded_dataset: Dataset, result_path, filename):
+    def store(self, encoded_dataset: RepertoireDataset, result_path, filename):
         PickleExporter.export(encoded_dataset, result_path, filename)

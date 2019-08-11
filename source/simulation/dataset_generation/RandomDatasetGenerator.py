@@ -1,8 +1,8 @@
 import pickle
 import random
 
-from source.data_model.dataset.Dataset import Dataset
-from source.data_model.receptor.receptor_sequence import ReceptorSequence
+from source.data_model.dataset.RepertoireDataset import RepertoireDataset
+from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.data_model.repertoire.Repertoire import Repertoire
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.util.PathBuilder import PathBuilder
@@ -29,7 +29,7 @@ class RandomDatasetGenerator:
         return filepath
 
     @staticmethod
-    def generate_dataset(repertoire_count: int, sequence_count: int, path: str) -> Dataset:
+    def generate_dataset(repertoire_count: int, sequence_count: int, path: str) -> RepertoireDataset:
 
         alphabet = EnvironmentSettings.get_sequence_alphabet()
         sequence_length = 12
@@ -41,4 +41,4 @@ class RandomDatasetGenerator:
             filepath = RandomDatasetGenerator.store_repertoire(repertoire, i, path)
             filepaths.append(filepath)
 
-        return Dataset(filenames=filepaths)
+        return RepertoireDataset(filenames=filepaths)

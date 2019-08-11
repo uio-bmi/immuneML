@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 
 from source.analysis.criteria_matches.CriteriaMatcher import CriteriaMatcher
-from source.data_model.dataset.Dataset import Dataset
+from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.preprocessing.Preprocessor import Preprocessor
 
 
@@ -34,11 +34,11 @@ class MetadataFilter(Preprocessor):
     def __init__(self, params: dict):
         self.params = params
 
-    def process_dataset(self, dataset: Dataset):
+    def process_dataset(self, dataset: RepertoireDataset):
         return MetadataFilter.process(dataset, self.params)
 
     @staticmethod
-    def process(dataset: Dataset, params: dict) -> Dataset:
+    def process(dataset: RepertoireDataset, params: dict) -> RepertoireDataset:
         processed_dataset = copy.deepcopy(dataset)
         original_filenames = processed_dataset.get_filenames()
         indices = MetadataFilter.get_matching_indices(processed_dataset, params["criteria"])
@@ -47,7 +47,7 @@ class MetadataFilter(Preprocessor):
         return processed_dataset
 
     @staticmethod
-    def get_matching_indices(dataset: Dataset, criteria):
+    def get_matching_indices(dataset: RepertoireDataset, criteria):
         metadata = pd.DataFrame(dataset.get_metadata(None))
         matches = CriteriaMatcher().match(criteria, metadata)
         indices = np.where(matches)[0]

@@ -1,7 +1,7 @@
 import shutil
 from unittest import TestCase
 
-from source.data_model.dataset.Dataset import Dataset
+from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.dsl.semantic_model.SemanticModel import SemanticModel
 from source.encodings.word2vec.Word2VecEncoder import Word2VecEncoder
 from source.encodings.word2vec.model_creator.ModelType import ModelType
@@ -35,9 +35,9 @@ class TestSemanticModel(TestCase):
                                                        ["AAA", "CCC"], ["TTTT"], ["AAA", "CCC"], ["TTTT"]], path,
                                                       {"default": [1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2,
                                                                    1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2]})
-        dataset = Dataset(filenames=filenames,
-                          params={"default": [1, 2]},
-                          metadata_file=metadata)
+        dataset = RepertoireDataset(filenames=filenames,
+                                    params={"default": [1, 2]},
+                                    metadata_file=metadata)
 
         label_config = LabelConfiguration()
         label_config.add_label("default", [1, 2])

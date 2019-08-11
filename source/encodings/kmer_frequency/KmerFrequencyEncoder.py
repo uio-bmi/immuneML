@@ -8,7 +8,7 @@ from sklearn.feature_extraction import DictVectorizer
 
 from source.IO.dataset_export.PickleExporter import PickleExporter
 from source.caching.CacheHandler import CacheHandler
-from source.data_model.dataset.Dataset import Dataset
+from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.encoded_data.EncodedData import EncodedData
 from source.encodings.DatasetEncoder import DatasetEncoder
 from source.encodings.EncoderParams import EncoderParams
@@ -50,7 +50,7 @@ class KmerFrequencyEncoder(DatasetEncoder):
     STEP_NORMALIZED = "normalized"
 
     @staticmethod
-    def encode(dataset: Dataset, params: EncoderParams) -> Dataset:
+    def encode(dataset: RepertoireDataset, params: EncoderParams) -> RepertoireDataset:
 
         encoded_dataset = CacheHandler.memo_by_params(KmerFrequencyEncoder._prepare_caching_params(dataset, params),
                                                       lambda: KmerFrequencyEncoder._encode_new_dataset(dataset, params))
@@ -58,7 +58,7 @@ class KmerFrequencyEncoder(DatasetEncoder):
         return encoded_dataset
 
     @staticmethod
-    def _prepare_caching_params(dataset: Dataset, params: EncoderParams, step: str = ""):
+    def _prepare_caching_params(dataset: RepertoireDataset, params: EncoderParams, step: str = ""):
         return (("dataset_filenames", tuple(dataset.get_filenames())),
                 ("dataset_metadata", dataset.metadata_file),
                 ("labels", tuple(params["label_configuration"].get_labels_by_name())),
@@ -68,7 +68,7 @@ class KmerFrequencyEncoder(DatasetEncoder):
                 ("encoding_params", tuple([(key, params["model"][key]) for key in params["model"].keys()])), )
 
     @staticmethod
-    def _encode_new_dataset(dataset: Dataset, params: EncoderParams) -> Dataset:
+    def _encode_new_dataset(dataset: RepertoireDataset, params: EncoderParams) -> RepertoireDataset:
 
         encoded_repertoire_list, repertoire_names, encoded_labels, feature_annotation_names = CacheHandler.memo_by_params(KmerFrequencyEncoder._prepare_caching_params(dataset, params, KmerFrequencyEncoder.STEP_ENCODED),
                                                                                                                           lambda: KmerFrequencyEncoder._encode_repertoires(dataset, params))
@@ -78,24 +78,24 @@ class KmerFrequencyEncoder(DatasetEncoder):
                                                              lambda: FeatureScaler.normalize(params["result_path"] + "normalizer.pkl", vectorized_repertoires, params["model"]["normalization_type"]))
         feature_annotations = KmerFrequencyEncoder._get_feature_annotations(feature_names, feature_annotation_names)
 
-        encoded_data = EncodedData(repertoires=normalized_repertoires,
+        encoded_data = EncodedData(examples=normalized_repertoires,
                                    labels=encoded_labels,
                                    feature_names=feature_names,
-                                   repertoire_ids=repertoire_names,
+                                   example_ids=repertoire_names,
                                    feature_annotations=feature_annotations,
                                    encoding=KmerFrequencyEncoder.__name__)
 
-        encoded_dataset = Dataset(filenames=dataset.get_filenames(),
-                                  encoded_data=encoded_data,
-                                  params=dataset.params,
-                                  metadata_file=dataset.metadata_file)
+        encoded_dataset = RepertoireDataset(filenames=dataset.get_filenames(),
+                                            encoded_data=encoded_data,
+                                            params=dataset.params,
+                                            metadata_file=dataset.metadata_file)
 
         KmerFrequencyEncoder.store(encoded_dataset, params)
 
         return encoded_dataset
 
     @staticmethod
-    def _encode_repertoires(dataset: Dataset, params: EncoderParams):
+    def _encode_repertoires(dataset: RepertoireDataset, params: EncoderParams):
 
         arguments = [(filename, dataset, params) for filename in dataset.get_filenames()]
 
@@ -135,7 +135,7 @@ class KmerFrequencyEncoder(DatasetEncoder):
         return feature_annotations
 
     @staticmethod
-    def _encode_repertoire(filename: str, dataset: Dataset, params: EncoderParams):
+    def _encode_repertoire(filename: str, dataset: RepertoireDataset, params: EncoderParams):
         repertoire = dataset.get_repertoire(filename=filename)
         counts = Counter()
         sequence_encoder = KmerFrequencyEncoder._prepare_sequence_encoder(params)
@@ -166,5 +166,5 @@ class KmerFrequencyEncoder(DatasetEncoder):
         return sequence_encoder
 
     @staticmethod
-    def store(encoded_dataset: Dataset, params: EncoderParams):
+    def store(encoded_dataset: RepertoireDataset, params: EncoderParams):
         PickleExporter.export(encoded_dataset, params["result_path"], params["filename"])

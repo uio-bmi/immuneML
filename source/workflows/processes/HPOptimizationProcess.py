@@ -1,6 +1,6 @@
 import copy
 
-from source.data_model.dataset.Dataset import Dataset
+from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.encodings.EncoderParams import EncoderParams
 from source.environment.LabelConfiguration import LabelConfiguration
 from source.hyperparameter_optimization.HPSetting import HPSetting
@@ -36,7 +36,7 @@ class HPOptimizationProcess(InstructionProcess):
 
     """
 
-    def __init__(self, dataset: Dataset, hp_strategy: HPOptimizationStrategy, hp_settings: list,
+    def __init__(self, dataset: RepertoireDataset, hp_strategy: HPOptimizationStrategy, hp_settings: list,
                  assessment: SplitConfig, selection: SplitConfig, metrics: set,
                  label_configuration: LabelConfiguration, path: str = None):
         self.dataset = dataset
@@ -62,7 +62,7 @@ class HPOptimizationProcess(InstructionProcess):
         self.print_performances(performances=fold_performances)
         return fold_performances
 
-    def run_assessment_fold(self, train_dataset: Dataset, test_dataset: Dataset, run):
+    def run_assessment_fold(self, train_dataset: RepertoireDataset, test_dataset: RepertoireDataset, run):
         current_path = "{}assessment_{}/run_{}/".format(self.path, self.assessment.split_strategy.name, run)
         PathBuilder.build(current_path)
         optimal_hp_setting = self.run_selection(train_dataset, current_path)
@@ -73,7 +73,7 @@ class HPOptimizationProcess(InstructionProcess):
         self.run_assessment_reports(train_dataset, test_dataset, optimal_method, current_path + "reports/")
         return performance
 
-    def run_selection(self, train_dataset: Dataset, current_path: str) -> HPSetting:
+    def run_selection(self, train_dataset: RepertoireDataset, current_path: str) -> HPSetting:
         train_datasets, test_datasets = self.split_data(train_dataset, self.selection)
         path = "{}selection_{}/".format(current_path, self.selection.split_strategy.name)
         PathBuilder.build(path)
@@ -106,7 +106,7 @@ class HPOptimizationProcess(InstructionProcess):
         performance = ml_process.run(run_id)
         return performance
 
-    def run_assessment_reports(self, train_dataset: Dataset, test_dataset: Dataset, method: MLMethod, path: str):
+    def run_assessment_reports(self, train_dataset: RepertoireDataset, test_dataset: RepertoireDataset, method: MLMethod, path: str):
         for report in self.assessment.reports.data_split_reports:
             self.run_data_report(report, train_dataset, path + "train/")
             self.run_data_report(report, test_dataset, path + "test/")
@@ -117,7 +117,7 @@ class HPOptimizationProcess(InstructionProcess):
         for report in self.assessment.reports.performance_reports:
             self.run_performance_report(report, method, train_dataset, test_dataset, path)
 
-    def run_selection_reports(self, dataset: Dataset, train_datasets: list, test_datasets: list, path: str):
+    def run_selection_reports(self, dataset: RepertoireDataset, train_datasets: list, test_datasets: list, path: str):
         for report in self.selection.reports.data_split_reports:
             for index in range(len(train_datasets)):
                 self.run_data_report(report, train_datasets[index], path + "split_{}/train/".format(index+1))
@@ -125,11 +125,11 @@ class HPOptimizationProcess(InstructionProcess):
         for report in self.selection.reports.data_reports:
             self.run_data_report(report, dataset, path)
 
-    def run_performance_report(self, report: Report, method: MLMethod, train_dataset: Dataset, test_dataset: Dataset, path: str):
+    def run_performance_report(self, report: Report, method: MLMethod, train_dataset: RepertoireDataset, test_dataset: RepertoireDataset, path: str):
         # TODO: performance reports should be only on results from test set predictions - update
         raise NotImplementedError
 
-    def run_model_report(self, report: MLReport, train_dataset: Dataset, test_dataset: Dataset, method: MLMethod, path: str):
+    def run_model_report(self, report: MLReport, train_dataset: RepertoireDataset, test_dataset: RepertoireDataset, method: MLMethod, path: str):
         tmp_report = copy.deepcopy(report)
         tmp_report.train_dataset = train_dataset
         tmp_report.test_dataset = test_dataset
@@ -137,7 +137,7 @@ class HPOptimizationProcess(InstructionProcess):
         tmp_report.path = path
         tmp_report.generate_report()
 
-    def run_data_report(self, report: DataReport, dataset: Dataset, path: str):
+    def run_data_report(self, report: DataReport, dataset: RepertoireDataset, path: str):
         tmp_report = copy.deepcopy(report)
         tmp_report.dataset = dataset
         tmp_report.path = path
@@ -157,7 +157,7 @@ class HPOptimizationProcess(InstructionProcess):
         return {label: sum(perf[label] for perf in metrics_per_label) / len(metrics_per_label)
                 for label in self.label_configuration.get_labels_by_name()}
 
-    def train_optimal_method(self, dataset: Dataset, hp_setting: HPSetting, path: str) -> MLMethod:
+    def train_optimal_method(self, dataset: RepertoireDataset, hp_setting: HPSetting, path: str) -> MLMethod:
         method = MLMethodTrainer.run(MLMethodTrainerParams(
             method=hp_setting.ml_method,
             result_path=path + "/ml_method/",
@@ -169,7 +169,7 @@ class HPOptimizationProcess(InstructionProcess):
         ))
         return method
 
-    def encode_dataset(self, dataset: Dataset, hp_setting: HPSetting, path: str, learn_model: bool) -> Dataset:
+    def encode_dataset(self, dataset: RepertoireDataset, hp_setting: HPSetting, path: str, learn_model: bool) -> RepertoireDataset:
         encoded_dataset = DataEncoder.run(DataEncoderParams(
             dataset=dataset,
             encoder=hp_setting.encoder,

@@ -3,7 +3,7 @@ import random
 
 import numpy as np
 
-from source.data_model.receptor.receptor_sequence import ReceptorSequence
+from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.data_model.receptor.receptor_sequence.SequenceAnnotation import SequenceAnnotation
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.simulation.implants.ImplantAnnotation import ImplantAnnotation

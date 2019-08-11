@@ -4,7 +4,7 @@ import pickle
 
 from source.IO.dataset_export.PickleExporter import PickleExporter
 from source.IO.dataset_import.PickleLoader import PickleLoader
-from source.data_model.dataset.Dataset import Dataset
+from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.metadata.Sample import Sample
 from source.data_model.repertoire.Repertoire import Repertoire
 from source.data_model.repertoire.RepertoireMetadata import RepertoireMetadata
@@ -23,7 +23,7 @@ class SignalImplanter(Step):
     @staticmethod
     def check_prerequisites(input_params: dict = None):
         assert "simulation" in input_params, "SignalImplanterStep: specify the simulation parameter."
-        assert "dataset" in input_params and isinstance(input_params["dataset"], Dataset), "SignalImplanterStep: specify the dataset parameter."
+        assert "dataset" in input_params and isinstance(input_params["dataset"], RepertoireDataset), "SignalImplanterStep: specify the dataset parameter."
         assert "result_path" in input_params, "SignalImplanterStep: specify the result_path parameter."
         assert "batch_size" in input_params, "SignalImplanterStep: specify the batch_size parameter for loading repertoires."
 
@@ -40,7 +40,7 @@ class SignalImplanter(Step):
         return dataset
 
     @staticmethod
-    def _implant_signals(input_params: dict = None) -> Dataset:
+    def _implant_signals(input_params: dict = None) -> RepertoireDataset:
 
         PathBuilder.build(input_params["result_path"])
 
@@ -58,8 +58,8 @@ class SignalImplanter(Step):
             filename = SignalImplanter._process_repertoire(index, repertoire, simulation_index, simulation_limits, input_params)
             processed_filenames.append(filename)
 
-        processed_dataset = Dataset(filenames=processed_filenames, params=dataset.params,
-                                    metadata_file=dataset.metadata_file)
+        processed_dataset = RepertoireDataset(filenames=processed_filenames, params=dataset.params,
+                                              metadata_file=dataset.metadata_file)
         PickleExporter.export(processed_dataset, input_params["result_path"], FilenameHandler.get_dataset_name(SignalImplanter.__name__))
 
         return processed_dataset

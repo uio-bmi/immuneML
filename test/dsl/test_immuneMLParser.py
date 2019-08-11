@@ -4,7 +4,7 @@ from unittest import TestCase
 import yaml
 
 from source.IO.dataset_export.PickleExporter import PickleExporter
-from source.data_model.dataset.Dataset import Dataset
+from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.dsl.ImmuneMLParser import ImmuneMLParser
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.util.PathBuilder import PathBuilder
@@ -14,8 +14,8 @@ from source.util.RepertoireBuilder import RepertoireBuilder
 class TestImmuneMLParser(TestCase):
     def test_parse_yaml_file(self):
         path = EnvironmentSettings.root_path + "test/tmp/parser/"
-        dataset = Dataset(filenames=RepertoireBuilder.build([["AAA", "CCC"], ["TTTT"]], path, {"default": [1, 2]})[0],
-                          params={"default": [1, 2]})
+        dataset = RepertoireDataset(filenames=RepertoireBuilder.build([["AAA", "CCC"], ["TTTT"]], path, {"default": [1, 2]})[0],
+                                    params={"default": [1, 2]})
         PickleExporter.export(dataset, path, "dataset.pkl")
 
         spec = {
@@ -94,6 +94,6 @@ class TestImmuneMLParser(TestCase):
 
         self.assertTrue(all([symbol_table.contains(key) for key in
                              ["simpleLR", "rep1", "a1", "d1"]]))
-        self.assertTrue(isinstance(symbol_table.get("d1"), Dataset))
+        self.assertTrue(isinstance(symbol_table.get("d1"), RepertoireDataset))
 
         shutil.rmtree(path)

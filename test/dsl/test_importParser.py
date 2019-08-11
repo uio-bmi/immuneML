@@ -3,7 +3,7 @@ import shutil
 from unittest import TestCase
 
 from helpers.metadata_converter import convert_metadata
-from source.data_model.dataset.Dataset import Dataset
+from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.dsl.SymbolTable import SymbolTable
 from source.dsl.import_parsers.ImportParser import ImportParser
 from source.environment.EnvironmentSettings import EnvironmentSettings
@@ -133,7 +133,7 @@ class TestImportParser(TestCase):
         }
 
         st, desc = ImportParser.parse(specs, SymbolTable())
-        self.assertTrue(isinstance(st.get("d1"), Dataset))
+        self.assertTrue(isinstance(st.get("d1"), RepertoireDataset))
         self.assertEqual(1, len(st.get("d1").get_filenames()))
 
         specs = {
@@ -159,7 +159,7 @@ class TestImportParser(TestCase):
         }
 
         st, desc = ImportParser.parse(specs, SymbolTable())
-        self.assertTrue(isinstance(st.get("d1"), Dataset))
+        self.assertTrue(isinstance(st.get("d1"), RepertoireDataset))
         self.assertEqual(0, len(st.get("d1").get_filenames()))
 
         self.assertEqual(100, desc["d1"]["preprocessing"]["filter_out_short_reps"]["params"]["lower_limit"])
@@ -197,7 +197,7 @@ class TestImportParser(TestCase):
         }
 
         st, desc = ImportParser.parse(specs, SymbolTable())
-        self.assertTrue(isinstance(st.get("d1"), Dataset))
+        self.assertTrue(isinstance(st.get("d1"), RepertoireDataset))
         self.assertEqual(1, len(st.get("d1").get_filenames()))
 
         shutil.rmtree(path)

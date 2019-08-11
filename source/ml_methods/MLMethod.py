@@ -4,7 +4,7 @@ import abc
 class MLMethod(metaclass=abc.ABCMeta):
     """
         Base class for wrappers for different ML/DL methods
-        adapted to work with Dataset objects and use their encoded_data
+        adapted to work with RepertoireDataset objects and use their encoded_data
         attribute to access the data;
 
         These classes (MLMethod and subclasses) assume that encoded_data has

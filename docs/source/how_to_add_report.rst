@@ -55,7 +55,7 @@ the next step is to build a class **SequenceLengthDistribution** which will inhe
 
     class SequenceLengthDistribution(DataReport):
 
-        def generate(self, dataset: Dataset, result_path: str, params: dict):
+        def generate(self, dataset: RepertoireDataset, result_path: str, params: dict):
             pass
 
 **DataReport** class has an abstract method ``generate(...)`` which takes in the following arguments:
@@ -92,7 +92,7 @@ in the repertoire.
 
 .. code-block:: python
 
-        def get_normalized_sequence_lengths(self, dataset: Dataset) -> Counter:
+        def get_normalized_sequence_lengths(self, dataset: RepertoireDataset) -> Counter:
             sequence_lenghts = Counter()
 
             # sum occurrences of each length across all repertoires in the dataset
@@ -135,7 +135,7 @@ Finally, with these functions defined, the only thing left is to put them togeth
 
 .. code-block:: python
 
-        def generate(self, dataset: Dataset, result_path: str, params: dict):
+        def generate(self, dataset: RepertoireDataset, result_path: str, params: dict):
             normalized_sequence_lengths = self.get_normalized_sequence_lengths(dataset)
             self.plot(normalized_sequence_lengths, result_path)
 

@@ -2,8 +2,8 @@ import pickle
 import shutil
 from unittest import TestCase
 
-from source.data_model.dataset.Dataset import Dataset
-from source.data_model.receptor.receptor_sequence import ReceptorSequence
+from source.data_model.dataset.RepertoireDataset import RepertoireDataset
+from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.data_model.repertoire.Repertoire import Repertoire
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.reports.data_reports.SequenceLengthDistribution import SequenceLengthDistribution
@@ -29,7 +29,7 @@ class TestSequenceLengthDistribution(TestCase):
         with open(path + "rep2.pkl", "wb") as file:
             pickle.dump(rep2, file)
 
-        dataset = Dataset(filenames=[path + "rep1.pkl", path + "rep2.pkl"])
+        dataset = RepertoireDataset(filenames=[path + "rep1.pkl", path + "rep2.pkl"])
 
         sld = SequenceLengthDistribution(dataset, 1, path)
         lengths = sld.get_normalized_sequence_lengths()

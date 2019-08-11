@@ -4,7 +4,7 @@ import os
 import pandas as pd
 from sklearn import metrics
 
-from source.data_model.dataset.Dataset import Dataset
+from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.environment.MetricType import MetricType
 from source.ml_methods.MLMethod import MLMethod
 from source.ml_metrics import ml_metrics
@@ -20,7 +20,7 @@ class MLMethodAssessment(Step):
     @staticmethod
     def run(input_params: MLMethodAssessmentParams = None):
         labels = input_params.label_configuration.get_labels_by_name()
-        X = input_params.dataset.encoded_data.repertoires
+        X = input_params.dataset.encoded_data.examples
         predicted_y = input_params.method.predict(X, labels)
         predicted_proba_y = input_params.method.predict_proba(X, labels)
         true_y = input_params.dataset.encoded_data.labels
@@ -51,7 +51,7 @@ class MLMethodAssessment(Step):
 
     @staticmethod
     def _score(metrics_list: list, labels: list, label_config, predicted_y, true_y, ml_details_path: str, run: int,
-               method: MLMethod, dataset: Dataset):
+               method: MLMethod, dataset: RepertoireDataset):
         results = {}
 
         for metric in metrics_list:

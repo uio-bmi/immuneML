@@ -14,11 +14,11 @@ class DataReshaper:
         """
 
         row_annotations = pd.DataFrame(dataset.encoded_data.labels)
-        row_annotations["identifier"] = dataset.encoded_data.repertoire_ids
+        row_annotations["identifier"] = dataset.encoded_data.example_ids
 
         column_annotations = dataset.encoded_data.feature_annotations
 
-        matrix = dataset.encoded_data.repertoires
+        matrix = dataset.encoded_data.examples
         matrix_1d = matrix.A.ravel()
 
         column_annotations = pd.concat([column_annotations]*matrix.shape[0], ignore_index=True)

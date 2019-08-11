@@ -13,14 +13,14 @@ All of the encoders inherit DatasetEncoder class and provide the following metho
 .. code-block:: python
 
 
-    def encode(dataset: Dataset, params: dict) -> Dataset:
+    def encode(dataset: RepertoireDataset, params: dict) -> RepertoireDataset:
         ...
 
-    def store(encoded_dataset: Dataset, params: dict):
+    def store(encoded_dataset: RepertoireDataset, params: dict):
         ...
 
-All of them take in a *Dataset* object that they will encode. For more information on the dataset representation, see
-:ref:`Dataset` and :ref:`Data model` sections.
+All of them take in a *RepertoireDataset* object that they will encode. For more information on the dataset representation, see
+:ref:`RepertoireDataset` and :ref:`Data model` sections.
 
 In addition to the parameters already in the original dataset object, the returned dataset object contains an encoded_data
 parameter of the following format:

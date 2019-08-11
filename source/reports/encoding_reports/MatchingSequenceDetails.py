@@ -1,8 +1,8 @@
 import csv
 
 from source.analysis.SequenceMatcher import SequenceMatcher
-from source.data_model.dataset.Dataset import Dataset
-from source.data_model.receptor.receptor_sequence import ReceptorSequence
+from source.data_model.dataset.RepertoireDataset import RepertoireDataset
+from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.data_model.repertoire.Repertoire import Repertoire
 from source.reports.encoding_reports.EncodingReport import EncodingReport
 from source.util.PathBuilder import PathBuilder
@@ -20,7 +20,7 @@ class MatchingSequenceDetails(EncodingReport):
                     * get the percentage of sequences from the repertoire matched with respect to clonal counts
     """
 
-    def __init__(self, dataset: Dataset = None, max_distance: int = None, reference_sequences: list = None, result_path: str = None):
+    def __init__(self, dataset: RepertoireDataset = None, max_distance: int = None, reference_sequences: list = None, result_path: str = None):
         self.dataset = dataset
         self.max_distance = max_distance
         self.reference_sequences = reference_sequences
@@ -52,7 +52,7 @@ class MatchingSequenceDetails(EncodingReport):
             for index, repertoire in enumerate(self.dataset.get_data()):
                 row = {
                     "repertoire_identifier": repertoire.identifier,
-                    self.dataset.encoded_data.feature_names[0]: self.dataset.encoded_data.repertoires[index][0],
+                    self.dataset.encoded_data.feature_names[0]: self.dataset.encoded_data.examples[index][0],
                     "repertoire_size": len(repertoire.sequences),
                     "max_levenshtein_distance": self.max_distance
                 }

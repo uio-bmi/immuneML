@@ -3,7 +3,7 @@ import shutil
 from glob import glob
 from unittest import TestCase
 
-from source.data_model.dataset.Dataset import Dataset
+from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.metadata.Sample import Sample
 from source.data_model.repertoire.Repertoire import Repertoire
 from source.data_model.repertoire.RepertoireMetadata import RepertoireMetadata
@@ -43,10 +43,10 @@ class TestDatasetMerger(TestCase):
         with open(path + "rep3.repertoire.pkl", "wb") as file:
             pickle.dump(rep3, file)
 
-        d1 = Dataset(filenames=[path + "rep1.repertoire.pkl", path + "rep1.repertoire.pkl"],
-                     params={"p1": {1, 2}, "p2": {4, 5}})
-        d2 = Dataset(filenames=[path + "rep3.repertoire.pkl"],
-                     params={"p1": {1, 2}, "p3": {8, 9}})
+        d1 = RepertoireDataset(filenames=[path + "rep1.repertoire.pkl", path + "rep1.repertoire.pkl"],
+                               params={"p1": {1, 2}, "p2": {4, 5}})
+        d2 = RepertoireDataset(filenames=[path + "rep3.repertoire.pkl"],
+                               params={"p1": {1, 2}, "p3": {8, 9}})
 
         dataset = DatasetMerger.perform_step({
             "datasets": [d1, d2],

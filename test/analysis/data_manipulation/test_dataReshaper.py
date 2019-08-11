@@ -1,25 +1,26 @@
 from unittest import TestCase
 
-from scipy import sparse
 import numpy as np
 import pandas as pd
+from scipy import sparse
 
-from source.data_model.encoded_data.EncodedData import EncodedData
 from source.analysis.data_manipulation.DataReshaper import DataReshaper
-from source.data_model.dataset.Dataset import Dataset
+from source.data_model.dataset.RepertoireDataset import RepertoireDataset
+from source.data_model.encoded_data.EncodedData import EncodedData
+
 
 class TestDataReshaper(TestCase):
 
     # 5 features, 5 repertoires. Each repertoire has 3 labels. Each feature has 2 annotations.
     encoded_data = {
-        'repertoires': sparse.csr_matrix(np.array([
+        'examples': sparse.csr_matrix(np.array([
             [1, 2, 3, 4, 5],
             [0, 0, 0, 1, 1],
             [1, 1, 0, 0, 0],
             [90, 10, 1, 3, 4],
             [0, 1, 1, 100, 200]
         ])),
-        'repertoire_ids': ["A", "B", "C", "D", "E"],
+        'example_ids': ["A", "B", "C", "D", "E"],
         'labels': {
             "diabetes": ['T1D', 'CTL', 'FDR', 'CTL', 'T1D'],
         },
@@ -36,8 +37,8 @@ class TestDataReshaper(TestCase):
         })
     }
 
-    dataset = Dataset(encoded_data=EncodedData(**encoded_data),
-                      filenames=[filename + ".tsv" for filename in encoded_data["repertoire_ids"]])
+    dataset = RepertoireDataset(encoded_data=EncodedData(**encoded_data),
+                                filenames=[filename + ".tsv" for filename in encoded_data["example_ids"]])
 
     def test_melt(self):
         result = DataReshaper.reshape(dataset=TestDataReshaper.dataset)

@@ -2,17 +2,17 @@
 
 import abc
 
-from source.data_model.dataset.Dataset import Dataset
+from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 
 
 class DatasetEncoder(metaclass=abc.ABCMeta):
 
     @staticmethod
     @abc.abstractmethod
-    def encode(dataset: Dataset, params: dict) -> Dataset:
+    def encode(dataset: RepertoireDataset, params: dict) -> RepertoireDataset:
         pass
 
     @staticmethod
     @abc.abstractmethod
-    def store(encoded_dataset: Dataset, params: dict):
+    def store(encoded_dataset: RepertoireDataset, params: dict):
         pass

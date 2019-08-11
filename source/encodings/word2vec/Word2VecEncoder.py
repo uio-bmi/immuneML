@@ -9,7 +9,7 @@ from gensim.models import Word2Vec
 
 from source.IO.dataset_export.PickleExporter import PickleExporter
 from source.caching.CacheHandler import CacheHandler
-from source.data_model.dataset.Dataset import Dataset
+from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.encoded_data.EncodedData import EncodedData
 from source.data_model.repertoire.Repertoire import Repertoire
 from source.encodings.DatasetEncoder import DatasetEncoder
@@ -48,14 +48,14 @@ class Word2VecEncoder(DatasetEncoder):
     DESCRIPTION_LABELS = "labels"
 
     @staticmethod
-    def encode(dataset: Dataset, params: EncoderParams) -> Dataset:
+    def encode(dataset: RepertoireDataset, params: EncoderParams) -> RepertoireDataset:
         encoded_dataset = CacheHandler.memo_by_params(Word2VecEncoder._prepare_caching_params(dataset, params),
                                                       lambda: Word2VecEncoder._encode_new_dataset(dataset, params))
 
         return encoded_dataset
 
     @staticmethod
-    def _prepare_caching_params(dataset: Dataset, params: EncoderParams, vectors=None, description: str = ""):
+    def _prepare_caching_params(dataset: RepertoireDataset, params: EncoderParams, vectors=None, description: str = ""):
         return (("dataset_filenames", tuple(dataset.get_filenames())),
                 ("dataset_metadata", dataset.metadata_file),
                 ("labels", tuple(params["label_configuration"].get_labels_by_name())),
@@ -66,7 +66,7 @@ class Word2VecEncoder(DatasetEncoder):
                 ("encoding_params", tuple([(key, params["model"][key]) for key in params["model"].keys()])), )
 
     @staticmethod
-    def _encode_new_dataset(dataset: Dataset, params: EncoderParams) -> Dataset:
+    def _encode_new_dataset(dataset: RepertoireDataset, params: EncoderParams) -> RepertoireDataset:
         if params["learn_model"] is True and not Word2VecEncoder._exists_model(params):
             model = Word2VecEncoder._create_model(dataset, params)
         else:
@@ -98,7 +98,7 @@ class Word2VecEncoder(DatasetEncoder):
         return repertoire_vector
 
     @staticmethod
-    def _encode_labels(dataset: Dataset, params: EncoderParams):
+    def _encode_labels(dataset: RepertoireDataset, params: EncoderParams):
 
         label_config = params["label_configuration"]
         labels = {name: [] for name in label_config.get_labels_by_name()}
@@ -112,7 +112,7 @@ class Word2VecEncoder(DatasetEncoder):
         return np.array([labels[name] for name in labels.keys()])
 
     @staticmethod
-    def _encode_by_model(dataset, vectors, params: EncoderParams) -> Dataset:
+    def _encode_by_model(dataset, vectors, params: EncoderParams) -> RepertoireDataset:
 
         encoded_dataset = copy.deepcopy(dataset)
 
@@ -135,9 +135,9 @@ class Word2VecEncoder(DatasetEncoder):
         feature_names = [str(i) for i in range(scaled_repertoires.shape[1])]
         feature_annotations = pd.DataFrame({"feature": feature_names})
 
-        encoded_data = EncodedData(repertoires=scaled_repertoires,
+        encoded_data = EncodedData(examples=scaled_repertoires,
                                    labels={label: labels[i] for i, label in enumerate(label_names)},
-                                   repertoire_ids=[repertoire.identifier for repertoire in encoded_dataset.get_data()],
+                                   example_ids=[repertoire.identifier for repertoire in encoded_dataset.get_data()],
                                    feature_names=feature_names,
                                    feature_annotations=feature_annotations,
                                    encoding=Word2VecEncoder.__name__)
@@ -159,7 +159,7 @@ class Word2VecEncoder(DatasetEncoder):
         return model
 
     @staticmethod
-    def _create_model(dataset: Dataset, params: EncoderParams):
+    def _create_model(dataset: RepertoireDataset, params: EncoderParams):
 
         if params["model"]["model_creator"] == ModelType.SEQUENCE:
             model_creator = SequenceModelCreator()
@@ -173,7 +173,7 @@ class Word2VecEncoder(DatasetEncoder):
         return model
 
     @staticmethod
-    def store(encoded_dataset: Dataset, params: EncoderParams):
+    def store(encoded_dataset: RepertoireDataset, params: EncoderParams):
         PickleExporter.export(encoded_dataset, params["result_path"], params["filename"])
 
     @staticmethod

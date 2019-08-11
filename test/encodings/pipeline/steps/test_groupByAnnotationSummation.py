@@ -1,16 +1,16 @@
-from unittest import TestCase
 import shutil
+from unittest import TestCase
 
 import numpy as np
-from scipy import sparse
 import pandas as pd
+from scipy import sparse
 
-from source.data_model.dataset.Dataset import Dataset
-from source.data_model.encoded_data.EncodedData import EncodedData
-from source.environment.EnvironmentSettings import EnvironmentSettings
-from source.encodings.pipeline.steps.GroupDataTransformation import GroupDataTransformation
-from source.analysis.data_manipulation.GroupSummarizationType import GroupSummarizationType
 from source.analysis.AxisType import AxisType
+from source.analysis.data_manipulation.GroupSummarizationType import GroupSummarizationType
+from source.data_model.dataset.RepertoireDataset import RepertoireDataset
+from source.data_model.encoded_data.EncodedData import EncodedData
+from source.encodings.pipeline.steps.GroupDataTransformation import GroupDataTransformation
+from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.util.PathBuilder import PathBuilder
 
 
@@ -19,14 +19,14 @@ class TestGroupByAnnotationSummation(TestCase):
     # 5 features, 5 repertoires. Each repertoire has 3 labels. Each feature has 2 annotations.
 
     encoded_data = {
-        'repertoires': sparse.csr_matrix(np.array([
+        'examples': sparse.csr_matrix(np.array([
             [1, 2, 3, 4, 5],
             [0, 0, 0, 1, 1],
             [1, 1, 0, 0, 0],
             [90, 10, 1, 3, 4],
             [0, 1, 1, 100, 200]
         ])),
-        'repertoire_ids': ["A", "B", "C", "D", "E"],
+        'example_ids': ["A", "B", "C", "D", "E"],
         'labels': {
             "diabetes": ['diabetes pos', 'diabetes neg', 'diabetes neg', 'diabetes pos', 'diabetes pos'],
             "celiac": ['celiac pos', 'celiac pos', 'celiac pos', 'celiac neg', 'celiac pos'],
@@ -43,8 +43,8 @@ class TestGroupByAnnotationSummation(TestCase):
         })
     }
 
-    dataset = Dataset(encoded_data=EncodedData(**encoded_data),
-                      filenames=[filename + ".tsv" for filename in encoded_data["repertoire_ids"]])
+    dataset = RepertoireDataset(encoded_data=EncodedData(**encoded_data),
+                                filenames=[filename + ".tsv" for filename in encoded_data["example_ids"]])
 
     def test_group_repertoires_1(self):
 
@@ -64,12 +64,12 @@ class TestGroupByAnnotationSummation(TestCase):
 
         encoded = dataset.encoded_data
 
-        self.assertTrue(pd.DataFrame(encoded.labels).shape[0] == encoded.repertoires.shape[0])
-        self.assertTrue(len(encoded.repertoire_ids ) == encoded.repertoires.shape[0])
-        self.assertTrue(encoded.repertoires.shape[0] == 2)
-        self.assertTrue(encoded.repertoires.shape[1] == 5)
-        self.assertTrue(np.equal(encoded.repertoires[0, 0], 0.5))
-        self.assertTrue(np.equal(encoded.repertoires[1, 0], 30.333333333333332))
+        self.assertTrue(pd.DataFrame(encoded.labels).shape[0] == encoded.examples.shape[0])
+        self.assertTrue(len(encoded.example_ids) == encoded.examples.shape[0])
+        self.assertTrue(encoded.examples.shape[0] == 2)
+        self.assertTrue(encoded.examples.shape[1] == 5)
+        self.assertTrue(np.equal(encoded.examples[0, 0], 0.5))
+        self.assertTrue(np.equal(encoded.examples[1, 0], 30.333333333333332))
 
         shutil.rmtree(path)
 
@@ -91,10 +91,10 @@ class TestGroupByAnnotationSummation(TestCase):
 
         encoded = dataset.encoded_data
 
-        self.assertTrue(pd.DataFrame(encoded.labels).shape[0] == encoded.repertoires.shape[0])
-        self.assertTrue(len(encoded.repertoire_ids) == encoded.repertoires.shape[0])
-        self.assertTrue(encoded.repertoires.shape[0] == 3)
-        self.assertTrue(encoded.repertoires.shape[1] == 5)
+        self.assertTrue(pd.DataFrame(encoded.labels).shape[0] == encoded.examples.shape[0])
+        self.assertTrue(len(encoded.example_ids) == encoded.examples.shape[0])
+        self.assertTrue(encoded.examples.shape[0] == 3)
+        self.assertTrue(encoded.examples.shape[1] == 5)
 
         shutil.rmtree(path)
 
@@ -116,12 +116,12 @@ class TestGroupByAnnotationSummation(TestCase):
 
         encoded = dataset.encoded_data
 
-        self.assertTrue(pd.DataFrame(encoded.labels).shape[0] == encoded.repertoires.shape[0])
-        self.assertTrue(len(encoded.repertoire_ids) == encoded.repertoires.shape[0])
-        self.assertTrue(encoded.repertoires.shape[0] == 2)
-        self.assertTrue(encoded.repertoires.shape[1] == 5)
-        self.assertTrue(np.equal(encoded.repertoires[0, 0], 1))
-        self.assertTrue(np.equal(encoded.repertoires[1, 0], 91))
+        self.assertTrue(pd.DataFrame(encoded.labels).shape[0] == encoded.examples.shape[0])
+        self.assertTrue(len(encoded.example_ids) == encoded.examples.shape[0])
+        self.assertTrue(encoded.examples.shape[0] == 2)
+        self.assertTrue(encoded.examples.shape[1] == 5)
+        self.assertTrue(np.equal(encoded.examples[0, 0], 1))
+        self.assertTrue(np.equal(encoded.examples[1, 0], 91))
 
         shutil.rmtree(path)
 
@@ -142,10 +142,10 @@ class TestGroupByAnnotationSummation(TestCase):
 
         encoded = dataset.encoded_data
 
-        self.assertTrue(encoded.repertoires.shape[1] == encoded.feature_annotations.shape[0])
+        self.assertTrue(encoded.examples.shape[1] == encoded.feature_annotations.shape[0])
         self.assertTrue(len(encoded.feature_names) == encoded.feature_annotations.shape[0])
-        self.assertTrue(encoded.repertoires.shape[0] == 5)
-        self.assertTrue(encoded.repertoires.shape[1] == 3)
+        self.assertTrue(encoded.examples.shape[0] == 5)
+        self.assertTrue(encoded.examples.shape[1] == 3)
 
         shutil.rmtree(path)
         
@@ -166,9 +166,9 @@ class TestGroupByAnnotationSummation(TestCase):
 
         encoded = dataset.encoded_data
 
-        self.assertTrue(pd.DataFrame(encoded.labels).shape[0] == encoded.repertoires.shape[0])
-        self.assertTrue(len(encoded.repertoire_ids) == encoded.repertoires.shape[0])
-        self.assertTrue(encoded.repertoires.shape[0] == 5)
-        self.assertTrue(encoded.repertoires.shape[1] == 4)
+        self.assertTrue(pd.DataFrame(encoded.labels).shape[0] == encoded.examples.shape[0])
+        self.assertTrue(len(encoded.example_ids) == encoded.examples.shape[0])
+        self.assertTrue(encoded.examples.shape[0] == 5)
+        self.assertTrue(encoded.examples.shape[1] == 4)
 
         shutil.rmtree(path)

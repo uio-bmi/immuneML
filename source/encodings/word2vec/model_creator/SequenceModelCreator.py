@@ -2,7 +2,7 @@
 
 from gensim.models import Word2Vec
 
-from source.data_model.dataset.Dataset import Dataset
+from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.encodings.EncoderParams import EncoderParams
 from source.encodings.word2vec.model_creator.ModelCreatorStrategy import ModelCreatorStrategy
 from source.environment.EnvironmentSettings import EnvironmentSettings
@@ -11,7 +11,7 @@ from source.util.KmerHelper import KmerHelper
 
 class SequenceModelCreator(ModelCreatorStrategy):
 
-    def create_model(self, dataset: Dataset, params: EncoderParams, model_path):
+    def create_model(self, dataset: RepertoireDataset, params: EncoderParams, model_path):
         k = params["model"]["k"]
 
         model = Word2Vec(size=params["model"]["size"], min_count=1, window=5)  # creates an empty model

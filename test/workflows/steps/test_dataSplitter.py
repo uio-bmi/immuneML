@@ -4,7 +4,7 @@ from unittest import TestCase
 import numpy as np
 import pandas as pd
 
-from source.data_model.dataset.Dataset import Dataset
+from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.hyperparameter_optimization.SplitType import SplitType
 from source.util.PathBuilder import PathBuilder
@@ -15,7 +15,7 @@ from source.workflows.steps.DataSplitterParams import DataSplitterParams
 class TestDataSplitter(TestCase):
 
     def test_run(self):
-        dataset = Dataset(filenames=["file1.pkl", "file2.pkl", "file3.pkl", "file4.pkl", "file5.pkl", "file6.pkl", "file7.pkl", "file8.pkl"])
+        dataset = RepertoireDataset(filenames=["file1.pkl", "file2.pkl", "file3.pkl", "file4.pkl", "file5.pkl", "file6.pkl", "file7.pkl", "file8.pkl"])
 
         path = EnvironmentSettings.root_path + "test/tmp/datasplitter/"
         PathBuilder.build(path)
@@ -35,8 +35,8 @@ class TestDataSplitter(TestCase):
             label_to_balance=None
         ))
 
-        self.assertTrue(isinstance(trains[0], Dataset))
-        self.assertTrue(isinstance(tests[0], Dataset))
+        self.assertTrue(isinstance(trains[0], RepertoireDataset))
+        self.assertTrue(isinstance(tests[0], RepertoireDataset))
         self.assertEqual(len(trains[0].get_filenames()), 5)
         self.assertEqual(len(tests[0].get_filenames()), 3)
         self.assertEqual(5, len(trains))
@@ -61,8 +61,8 @@ class TestDataSplitter(TestCase):
             training_percentage=-1
         ))
 
-        self.assertTrue(isinstance(trains[0], Dataset))
-        self.assertTrue(isinstance(tests[0], Dataset))
+        self.assertTrue(isinstance(trains[0], RepertoireDataset))
+        self.assertTrue(isinstance(tests[0], RepertoireDataset))
         self.assertEqual(len(trains[0].get_filenames()), 7)
         self.assertEqual(len(tests[0].get_filenames()), 1)
         self.assertEqual(8, len(trains))
@@ -76,8 +76,8 @@ class TestDataSplitter(TestCase):
             training_percentage=-1
         ))
 
-        self.assertTrue(isinstance(trains[0], Dataset))
-        self.assertTrue(isinstance(tests[0], Dataset))
+        self.assertTrue(isinstance(trains[0], RepertoireDataset))
+        self.assertTrue(isinstance(tests[0], RepertoireDataset))
         self.assertEqual(len(trains[0].get_filenames()), 6)
         self.assertEqual(len(tests[0].get_filenames()), 2)
         self.assertEqual(5, len(trains))
@@ -91,8 +91,8 @@ class TestDataSplitter(TestCase):
             label_to_balance="key1"
         ))
 
-        self.assertTrue(isinstance(trains[0], Dataset))
-        self.assertTrue(isinstance(tests[0], Dataset))
+        self.assertTrue(isinstance(trains[0], RepertoireDataset))
+        self.assertTrue(isinstance(tests[0], RepertoireDataset))
         self.assertEqual(10, len(trains))
         self.assertEqual(10, len(tests))
         self.assertEqual(len(trains[0].get_filenames()) + len(tests[0].get_filenames()), 6)

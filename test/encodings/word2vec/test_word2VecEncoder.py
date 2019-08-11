@@ -2,8 +2,8 @@ import pickle
 import shutil
 from unittest import TestCase
 
-from source.data_model.dataset.Dataset import Dataset
-from source.data_model.receptor.receptor_sequence import ReceptorSequence
+from source.data_model.dataset.RepertoireDataset import RepertoireDataset
+from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.data_model.repertoire.Repertoire import Repertoire
 from source.data_model.repertoire.RepertoireMetadata import RepertoireMetadata
 from source.encodings.EncoderParams import EncoderParams
@@ -40,7 +40,7 @@ class TestWord2VecEncoder(TestCase):
         with open(file2, "wb") as file:
             pickle.dump(rep2, file)
 
-        dataset = Dataset(filenames=[file1, file2])
+        dataset = RepertoireDataset(filenames=[file1, file2])
 
         label_configuration = LabelConfiguration()
         label_configuration.add_label("T1D", ["T1D", "CTL"])
@@ -61,8 +61,8 @@ class TestWord2VecEncoder(TestCase):
         encoded_dataset = Word2VecEncoder.encode(dataset=dataset, params=config_params)
 
         self.assertIsNotNone(encoded_dataset.encoded_data)
-        self.assertTrue(encoded_dataset.encoded_data.repertoires.shape[0] == 2)
-        self.assertTrue(encoded_dataset.encoded_data.repertoires.shape[1] == 16)
+        self.assertTrue(encoded_dataset.encoded_data.examples.shape[0] == 2)
+        self.assertTrue(encoded_dataset.encoded_data.examples.shape[1] == 16)
         self.assertTrue(len(encoded_dataset.encoded_data.labels["T1D"]) == 2)
         self.assertTrue(encoded_dataset.encoded_data.labels["T1D"][0] == "T1D")
 

@@ -20,7 +20,7 @@ class MLMethodTrainer(Step):
 
     @staticmethod
     def _fit_method(input_params: MLMethodTrainerParams):
-        X = input_params.dataset.encoded_data.repertoires
+        X = input_params.dataset.encoded_data.examples
         y = MLMethodTrainer._filter_labels(input_params)
         method = input_params.method
         input_params.labels.sort()

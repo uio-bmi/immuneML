@@ -3,7 +3,7 @@ import pickle
 import random
 
 from source.IO.dataset_export.PickleExporter import PickleExporter
-from source.data_model.dataset.Dataset import Dataset
+from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.repertoire.Repertoire import Repertoire
 from source.util.FilenameHandler import FilenameHandler
 from source.util.PathBuilder import PathBuilder
@@ -23,7 +23,7 @@ class DatasetMerger(Step):
     @staticmethod
     def check_prerequisites(input_params: dict = None):
         assert input_params is not None, "DatasetMerger: input parameters were not set."
-        assert "datasets" in input_params and isinstance(input_params["datasets"], list) and all([isinstance(d, Dataset) for d in input_params["datasets"]]), "DatasetMerger: set datasets parameter to contain a list of Dataset objects to merge."
+        assert "datasets" in input_params and isinstance(input_params["datasets"], list) and all([isinstance(d, RepertoireDataset) for d in input_params["datasets"]]), "DatasetMerger: set datasets parameter to contain a list of RepertoireDataset objects to merge."
         assert "result_path" in input_params, "DatasetMerger: result_path is not set for the merged dataset."
 
     @staticmethod
@@ -36,7 +36,7 @@ class DatasetMerger(Step):
 
     @staticmethod
     def _build_dataset(input_params: dict, sample_params: dict):
-        dataset = Dataset()
+        dataset = RepertoireDataset()
         file_paths = []
 
         PathBuilder.build(input_params["result_path"])
@@ -52,7 +52,7 @@ class DatasetMerger(Step):
         return dataset
 
     @staticmethod
-    def _process_dataset(dataset: Dataset, input_params: dict, new_sample_params: dict):
+    def _process_dataset(dataset: RepertoireDataset, input_params: dict, new_sample_params: dict):
         # TODO: get batch size from some other place, do not hard-code it here
         batch_size = input_params["batch_size"] if "batch_size" in input_params else 2
         file_paths = []
