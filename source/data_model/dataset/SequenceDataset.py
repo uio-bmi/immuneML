@@ -11,12 +11,15 @@ class SequenceDataset:
         self.encoded_data = encoded_data
         self.id = identifier if identifier is not None else uuid.uuid1()
         self._filenames = sorted(filenames) if filenames is not None else []
-        self.sequence_generator = SequenceGenerator(self._filenames, )
-
-    def add_encoded_data(self, encoded_data: EncodedData):
-        self.encoded_data = encoded_data
+        self.sequence_generator = SequenceGenerator(self._filenames)
 
     def get_data(self, batch_size: int = 1000):
         self._filenames.sort()
         self.sequence_generator.file_list = self._filenames
         return self.sequence_generator.build_generator(batch_size)
+
+    def get_sequence_count(self):
+        return self.sequence_generator.get_sequence_count()
+
+    def get_metadata(self, field_names: list):
+        raise NotImplementedError

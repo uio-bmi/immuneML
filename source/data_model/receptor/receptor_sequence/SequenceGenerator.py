@@ -49,6 +49,12 @@ class SequenceGenerator:
     def _has_more_files(self, cursor: dict):
         return cursor["file_index"] != len(self.file_list) - 1
 
+    def get_sequence_count(self):
+        for index in range(len(self.file_list)):
+            if self.file_lengths[index] == -1:
+                self._get_line_count(index)
+        return sum(self.file_lengths)
+
     def build_generator(self, batch_size):
         """
         creates a generator which will return one batch of sequences at the time
