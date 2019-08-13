@@ -27,6 +27,7 @@ class TestReceptorGenerator(TestCase):
         for batch in generator:
             for receptor in batch:
                 self.assertEqual(counter, int(receptor.id))
+                self.assertTrue(isinstance(receptor, BCReceptor))
                 counter += 1
 
         self.assertEqual(307, counter)
