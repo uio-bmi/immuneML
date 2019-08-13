@@ -1,5 +1,6 @@
+
 from source.util.ItemGenerator import ItemGenerator
 
 
-class SequenceGenerator(ItemGenerator):
+class ReceptorGenerator(ItemGenerator):
     pass
