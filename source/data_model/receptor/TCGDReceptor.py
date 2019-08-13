@@ -4,8 +4,9 @@ from source.data_model.receptor.receptor_sequence.ReceptorSequence import Recept
 
 class TCGDReceptor(Receptor):
 
-    def __init__(self, gamma: ReceptorSequence = None, delta: ReceptorSequence = None, metadata: dict = None):
+    def __init__(self, gamma: ReceptorSequence = None, delta: ReceptorSequence = None, metadata: dict = None, id: str = None):
 
         self.gamma = gamma
         self.delta = delta
         self.metadata = metadata
+        self.id = id

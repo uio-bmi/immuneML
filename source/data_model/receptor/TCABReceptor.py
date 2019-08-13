@@ -4,8 +4,9 @@ from source.data_model.receptor.receptor_sequence.ReceptorSequence import Recept
 
 class TCABReceptor(Receptor):
 
-    def __init__(self, alpha : ReceptorSequence = None, beta: ReceptorSequence = None, metadata: dict = None):
+    def __init__(self, alpha: ReceptorSequence = None, beta: ReceptorSequence = None, metadata: dict = None, id: str = None):
 
         self.alpha = alpha
         self.beta = beta
         self.metadata = metadata
+        self.id = id
