@@ -5,7 +5,7 @@ from editdistance import eval as edit_distance
 
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
-from source.data_model.repertoire.Repertoire import Repertoire
+from source.data_model.repertoire.SequenceRepertoire import SequenceRepertoire
 from source.dsl.SequenceMatchingSummaryType import SequenceMatchingSummaryType
 from source.environment.ParallelismManager import ParallelismManager
 
@@ -60,7 +60,7 @@ class SequenceMatcher:
             and self.matches_gene(reference_sequence.metadata.j_gene, original_sequence.metadata.j_gene) \
             and edit_distance(original_sequence.get_sequence(), reference_sequence.get_sequence()) <= max_distance
 
-    def match_repertoire(self, repertoire: Repertoire, index: int, reference_sequences: list, max_distance: int,
+    def match_repertoire(self, repertoire: SequenceRepertoire, index: int, reference_sequences: list, max_distance: int,
                          summary_type: SequenceMatchingSummaryType) -> dict:
 
         matched = {"sequences": [], "repertoire": repertoire.identifier, "repertoire_index": index}

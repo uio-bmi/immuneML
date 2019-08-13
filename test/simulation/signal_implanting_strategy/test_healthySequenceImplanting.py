@@ -1,7 +1,7 @@
 from unittest import TestCase
 
 from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
-from source.data_model.repertoire.Repertoire import Repertoire
+from source.data_model.repertoire.SequenceRepertoire import SequenceRepertoire
 from source.simulation.implants.Motif import Motif
 from source.simulation.implants.Signal import Signal
 from source.simulation.motif_instantiation_strategy.IdentityInstantiation import IdentityInstantiation
@@ -11,7 +11,7 @@ from source.simulation.signal_implanting_strategy.sequence_implanting.GappedMoti
 
 class TestHealthySequenceImplanting(TestCase):
     def test_implant_in_repertoire(self):
-        repertoire = Repertoire([ReceptorSequence(amino_acid_sequence="ACDFQ"), ReceptorSequence(amino_acid_sequence="TGCDF")])
+        repertoire = SequenceRepertoire([ReceptorSequence(amino_acid_sequence="ACDFQ"), ReceptorSequence(amino_acid_sequence="TGCDF")])
         implanting = HealthySequenceImplanting(GappedMotifImplanting())
         signal = Signal(1, [Motif("m1", IdentityInstantiation(), "CCC")], implanting)
 

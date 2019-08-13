@@ -10,8 +10,8 @@ from source.app.ImmuneMLApp import ImmuneMLApp
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
-from source.data_model.repertoire.Repertoire import Repertoire
 from source.data_model.repertoire.RepertoireMetadata import RepertoireMetadata
+from source.data_model.repertoire.SequenceRepertoire import SequenceRepertoire
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.util.PathBuilder import PathBuilder
 
@@ -22,16 +22,16 @@ class TestImmuneMLApp(TestCase):
         path = EnvironmentSettings.root_path + "test/tmp/immunemlapp/"
         PathBuilder.build(path)
 
-        rep1 = Repertoire(sequences=[ReceptorSequence(amino_acid_sequence="AAA", metadata=SequenceMetadata(chain="A")),
-                                     ReceptorSequence(amino_acid_sequence="AAAA", metadata=SequenceMetadata(chain="B")),
-                                     ReceptorSequence(amino_acid_sequence="AAAAA", metadata=SequenceMetadata(chain="B")),
-                                     ReceptorSequence(amino_acid_sequence="AAA", metadata=SequenceMetadata(chain="A"))],
-                          metadata=RepertoireMetadata(custom_params={"CD": True}))
-        rep2 = Repertoire(sequences=[ReceptorSequence(amino_acid_sequence="AAA", metadata=SequenceMetadata(chain="B")),
-                                     ReceptorSequence(amino_acid_sequence="AAAA", metadata=SequenceMetadata(chain="A")),
-                                     ReceptorSequence(amino_acid_sequence="AAAA", metadata=SequenceMetadata(chain="B")),
-                                     ReceptorSequence(amino_acid_sequence="AAA", metadata=SequenceMetadata(chain="A"))],
-                          metadata=RepertoireMetadata(custom_params={"CD": False}))
+        rep1 = SequenceRepertoire(sequences=[ReceptorSequence(amino_acid_sequence="AAA", metadata=SequenceMetadata(chain="A")),
+                                             ReceptorSequence(amino_acid_sequence="AAAA", metadata=SequenceMetadata(chain="B")),
+                                             ReceptorSequence(amino_acid_sequence="AAAAA", metadata=SequenceMetadata(chain="B")),
+                                             ReceptorSequence(amino_acid_sequence="AAA", metadata=SequenceMetadata(chain="A"))],
+                                  metadata=RepertoireMetadata(custom_params={"CD": True}))
+        rep2 = SequenceRepertoire(sequences=[ReceptorSequence(amino_acid_sequence="AAA", metadata=SequenceMetadata(chain="B")),
+                                             ReceptorSequence(amino_acid_sequence="AAAA", metadata=SequenceMetadata(chain="A")),
+                                             ReceptorSequence(amino_acid_sequence="AAAA", metadata=SequenceMetadata(chain="B")),
+                                             ReceptorSequence(amino_acid_sequence="AAA", metadata=SequenceMetadata(chain="A"))],
+                                  metadata=RepertoireMetadata(custom_params={"CD": False}))
 
         for index in range(1, 14):
             with open("{}rep{}.pkl".format(path, index), "wb") as file:

@@ -4,8 +4,8 @@ import pandas as pd
 
 from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
-from source.data_model.repertoire.Repertoire import Repertoire
 from source.data_model.repertoire.RepertoireMetadata import RepertoireMetadata
+from source.data_model.repertoire.SequenceRepertoire import SequenceRepertoire
 from source.util.PathBuilder import PathBuilder
 
 
@@ -25,7 +25,7 @@ class RepertoireBuilder:
             for sequence in sequence_list:
                 s = ReceptorSequence(amino_acid_sequence=sequence, metadata=SequenceMetadata())
                 rep_sequences.append(s)
-            repertoire = Repertoire(sequences=rep_sequences, identifier=str(index))
+            repertoire = SequenceRepertoire(sequences=rep_sequences, identifier=str(index))
 
             if labels is not None:
                 rep_labels = {key: labels[key][index] for key in labels.keys()}

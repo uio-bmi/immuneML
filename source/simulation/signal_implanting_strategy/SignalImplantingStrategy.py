@@ -2,13 +2,13 @@
 
 import abc
 
-from source.data_model.repertoire.Repertoire import Repertoire
+from source.data_model.repertoire.SequenceRepertoire import SequenceRepertoire
 
 
 class SignalImplantingStrategy(metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
-    def implant_in_repertoire(self, repertoire: Repertoire, repertoire_implanting_rate: float, signal):
+    def implant_in_repertoire(self, repertoire: SequenceRepertoire, repertoire_implanting_rate: float, signal):
         pass
 
     @abc.abstractmethod

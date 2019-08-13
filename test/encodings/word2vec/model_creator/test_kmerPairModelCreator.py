@@ -6,8 +6,8 @@ from gensim.models import Word2Vec
 
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
-from source.data_model.repertoire.Repertoire import Repertoire
 from source.data_model.repertoire.RepertoireMetadata import RepertoireMetadata
+from source.data_model.repertoire.SequenceRepertoire import SequenceRepertoire
 from source.encodings.EncoderParams import EncoderParams
 from source.encodings.word2vec.model_creator.KmerPairModelCreator import KmerPairModelCreator
 from source.environment.EnvironmentSettings import EnvironmentSettings
@@ -25,7 +25,7 @@ class TestKmerPairModelCreator(TestCase):
 
         metadata1 = RepertoireMetadata()
         metadata1.custom_params = {"T1D": "T1D"}
-        rep1 = Repertoire([sequence1, sequence2], metadata1)
+        rep1 = SequenceRepertoire([sequence1, sequence2], metadata1)
         file1 = test_path + "rep1.pkl"
 
         with open(file1, "wb") as file:
@@ -33,7 +33,7 @@ class TestKmerPairModelCreator(TestCase):
 
         metadata2 = RepertoireMetadata()
         metadata2.custom_params = {"T1D": "CTL"}
-        rep2 = Repertoire([sequence1], metadata2)
+        rep2 = SequenceRepertoire([sequence1], metadata2)
         file2 = test_path + "rep2.pkl"
 
         with open(file2, "wb") as file:

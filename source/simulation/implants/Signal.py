@@ -1,6 +1,6 @@
 # quality: gold
 
-from source.data_model.repertoire.Repertoire import Repertoire
+from source.data_model.repertoire.SequenceRepertoire import SequenceRepertoire
 from source.simulation.implants.Motif import Motif
 from source.simulation.signal_implanting_strategy.SignalImplantingStrategy import SignalImplantingStrategy
 
@@ -21,8 +21,8 @@ class Signal:
         self.motifs = motifs
         self.implanting_strategy = implanting_strategy
 
-    def implant_to_repertoire(self, repertoire: Repertoire, repertoire_implanting_rate: float) \
-            -> Repertoire:
+    def implant_to_repertoire(self, repertoire: SequenceRepertoire, repertoire_implanting_rate: float) \
+            -> SequenceRepertoire:
         processed_repertoire = self.implanting_strategy\
                                 .implant_in_repertoire(repertoire=repertoire,
                                                        repertoire_implanting_rate=repertoire_implanting_rate,

@@ -15,8 +15,8 @@ from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.metadata.Sample import Sample
 from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
-from source.data_model.repertoire.Repertoire import Repertoire
 from source.data_model.repertoire.RepertoireMetadata import RepertoireMetadata
+from source.data_model.repertoire.SequenceRepertoire import SequenceRepertoire
 from source.environment.Constants import Constants
 from source.util.PathBuilder import PathBuilder
 
@@ -94,7 +94,7 @@ class MiXCRLoader(DataLoader):
 
         sequences = MiXCRLoader._load_sequences(filepath, params, df)
         patient_id = metadata.custom_params["donor"]
-        repertoire = Repertoire(sequences=sequences, metadata=metadata, identifier=patient_id)
+        repertoire = SequenceRepertoire(sequences=sequences, metadata=metadata, identifier=patient_id)
         filename = params["result_path"] + str(index) + ".pkl"
 
         with open(filename, "wb") as file:

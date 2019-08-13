@@ -6,8 +6,8 @@ from source.IO.dataset_export.PickleExporter import PickleExporter
 from source.IO.dataset_import.PickleLoader import PickleLoader
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.metadata.Sample import Sample
-from source.data_model.repertoire.Repertoire import Repertoire
 from source.data_model.repertoire.RepertoireMetadata import RepertoireMetadata
+from source.data_model.repertoire.SequenceRepertoire import SequenceRepertoire
 from source.util.FilenameHandler import FilenameHandler
 from source.util.PathBuilder import PathBuilder
 from source.workflows.steps.Step import Step
@@ -75,7 +75,7 @@ class SignalImplanter(Step):
         return filename
 
     @staticmethod
-    def _copy_repertoire(index: int, repertoire: Repertoire, input_params: dict) -> str:
+    def _copy_repertoire(index: int, repertoire: SequenceRepertoire, input_params: dict) -> str:
         new_repertoire = copy.deepcopy(repertoire)
         if new_repertoire.metadata is None:
             new_repertoire.metadata = RepertoireMetadata(sample=Sample(identifier=""))

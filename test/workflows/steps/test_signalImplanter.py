@@ -5,7 +5,7 @@ from unittest import TestCase
 
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
-from source.data_model.repertoire.Repertoire import Repertoire
+from source.data_model.repertoire.SequenceRepertoire import SequenceRepertoire
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.simulation.implants.Motif import Motif
 from source.simulation.implants.Signal import Signal
@@ -26,7 +26,7 @@ class TestSignalImplanter(TestCase):
             os.makedirs(path)
 
         for i in range(10):
-            rep = Repertoire(sequences=[ReceptorSequence("ACDEFG"), ReceptorSequence("ACDEFG"), ReceptorSequence("ACDEFG"), ReceptorSequence("ACDEFG")])
+            rep = SequenceRepertoire(sequences=[ReceptorSequence("ACDEFG"), ReceptorSequence("ACDEFG"), ReceptorSequence("ACDEFG"), ReceptorSequence("ACDEFG")])
             filename = path + "rep" + str(i+1) + ".pkl"
             with open(filename, "wb") as file:
                 pickle.dump(rep, file)

@@ -2,8 +2,8 @@ import copy
 import random
 
 from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
-from source.data_model.repertoire.Repertoire import Repertoire
 from source.data_model.repertoire.RepertoireMetadata import RepertoireMetadata
+from source.data_model.repertoire.SequenceRepertoire import SequenceRepertoire
 from source.simulation.implants.ImplantAnnotation import ImplantAnnotation
 from source.simulation.signal_implanting_strategy.SignalImplantingStrategy import SignalImplantingStrategy
 from source.simulation.signal_implanting_strategy.sequence_implanting.SequenceImplantingStrategy import \
@@ -24,7 +24,7 @@ class HealthySequenceImplanting(SignalImplantingStrategy):
         self.sequence_implanting_strategy = sequence_implanting_strategy
         self.sequence_position_weights = sequence_position_weights
 
-    def implant_in_repertoire(self, repertoire: Repertoire, repertoire_implanting_rate: float, signal) -> Repertoire:
+    def implant_in_repertoire(self, repertoire: SequenceRepertoire, repertoire_implanting_rate: float, signal) -> SequenceRepertoire:
         max_motif_length = self._calculate_max_motif_length(signal)
         sequences_to_be_processed, other_sequences = self._choose_sequences_for_implanting(repertoire,
                                                                                             repertoire_implanting_rate,
@@ -44,7 +44,7 @@ class HealthySequenceImplanting(SignalImplantingStrategy):
         max_motif_length = max([motif.get_max_length() for motif in signal.motifs])
         return max_motif_length
 
-    def _build_new_repertoire(self, sequences, repertoire_metadata, signal) -> Repertoire:
+    def _build_new_repertoire(self, sequences, repertoire_metadata, signal) -> SequenceRepertoire:
         if repertoire_metadata is not None:
             metadata = copy.deepcopy(repertoire_metadata)
         else:
@@ -55,7 +55,7 @@ class HealthySequenceImplanting(SignalImplantingStrategy):
         # (specific motif and motif instance)
         implant = ImplantAnnotation(signal_id=signal.id)
         metadata.add_implant(implant)
-        repertoire = Repertoire(sequences=sequences, metadata=metadata)
+        repertoire = SequenceRepertoire(sequences=sequences, metadata=metadata)
 
         return repertoire
 
@@ -69,7 +69,7 @@ class HealthySequenceImplanting(SignalImplantingStrategy):
 
         return sequences
 
-    def _choose_sequences_for_implanting(self, repertoire: Repertoire, repertoire_implanting_rate: float, max_motif_length: int):
+    def _choose_sequences_for_implanting(self, repertoire: SequenceRepertoire, repertoire_implanting_rate: float, max_motif_length: int):
         number_of_sequences_to_implant = int(repertoire_implanting_rate * len(repertoire.sequences))
         unusable_sequences = []
         unprocessed_sequences = []

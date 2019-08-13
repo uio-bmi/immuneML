@@ -4,7 +4,7 @@ from unittest import TestCase
 
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
-from source.data_model.repertoire.Repertoire import Repertoire
+from source.data_model.repertoire.SequenceRepertoire import SequenceRepertoire
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.reports.data_reports.SequenceLengthDistribution import SequenceLengthDistribution
 from source.util.PathBuilder import PathBuilder
@@ -15,14 +15,14 @@ class TestSequenceLengthDistribution(TestCase):
         path = EnvironmentSettings.root_path + "test/tmp/datareports/"
         PathBuilder.build(path)
 
-        rep1 = Repertoire(sequences=[ReceptorSequence(amino_acid_sequence="AAA"),
-                                     ReceptorSequence(amino_acid_sequence="AAAA"),
-                                     ReceptorSequence(amino_acid_sequence="AAAAA"),
-                                     ReceptorSequence(amino_acid_sequence="AAA")])
-        rep2 = Repertoire(sequences=[ReceptorSequence(amino_acid_sequence="AAA"),
-                                     ReceptorSequence(amino_acid_sequence="AAAA"),
-                                     ReceptorSequence(amino_acid_sequence="AAAA"),
-                                     ReceptorSequence(amino_acid_sequence="AAA")])
+        rep1 = SequenceRepertoire(sequences=[ReceptorSequence(amino_acid_sequence="AAA"),
+                                             ReceptorSequence(amino_acid_sequence="AAAA"),
+                                             ReceptorSequence(amino_acid_sequence="AAAAA"),
+                                             ReceptorSequence(amino_acid_sequence="AAA")])
+        rep2 = SequenceRepertoire(sequences=[ReceptorSequence(amino_acid_sequence="AAA"),
+                                             ReceptorSequence(amino_acid_sequence="AAAA"),
+                                             ReceptorSequence(amino_acid_sequence="AAAA"),
+                                             ReceptorSequence(amino_acid_sequence="AAA")])
 
         with open(path + "rep1.pkl", "wb") as file:
             pickle.dump(rep1, file)

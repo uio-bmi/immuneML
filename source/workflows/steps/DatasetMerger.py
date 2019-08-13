@@ -4,7 +4,7 @@ import random
 
 from source.IO.dataset_export.PickleExporter import PickleExporter
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
-from source.data_model.repertoire.Repertoire import Repertoire
+from source.data_model.repertoire.SequenceRepertoire import SequenceRepertoire
 from source.util.FilenameHandler import FilenameHandler
 from source.util.PathBuilder import PathBuilder
 from source.workflows.steps.Step import Step
@@ -62,7 +62,7 @@ class DatasetMerger(Step):
         return file_paths
 
     @staticmethod
-    def _process_repertoire(repertoire: Repertoire, input_params: dict, new_sample_params: dict):
+    def _process_repertoire(repertoire: SequenceRepertoire, input_params: dict, new_sample_params: dict):
         """
         For mappings defined in input params, rename every key in custom_params
         in sample with new names for a repertoire;
@@ -86,7 +86,7 @@ class DatasetMerger(Step):
         return filepath
 
     @staticmethod
-    def _store_repertoire(repertoire: Repertoire, input_params: dict):
+    def _store_repertoire(repertoire: SequenceRepertoire, input_params: dict):
         path = input_params["result_path"] + repertoire.get_identifier() + ".repertoire.pkl"
 
         if os.path.isfile(path):

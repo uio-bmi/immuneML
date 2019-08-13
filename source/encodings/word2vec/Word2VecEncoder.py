@@ -11,7 +11,7 @@ from source.IO.dataset_export.PickleExporter import PickleExporter
 from source.caching.CacheHandler import CacheHandler
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.encoded_data.EncodedData import EncodedData
-from source.data_model.repertoire.Repertoire import Repertoire
+from source.data_model.repertoire.SequenceRepertoire import SequenceRepertoire
 from source.encodings.DatasetEncoder import DatasetEncoder
 from source.encodings.EncoderParams import EncoderParams
 from source.encodings.preprocessing.FeatureScaler import FeatureScaler
@@ -82,7 +82,7 @@ class Word2VecEncoder(DatasetEncoder):
         return encoded_dataset
 
     @staticmethod
-    def _encode_repertoire(repertoire: Repertoire, vectors, params: EncoderParams):
+    def _encode_repertoire(repertoire: SequenceRepertoire, vectors, params: EncoderParams):
         repertoire_vector = np.zeros(vectors.vector_size)
         for (index2, sequence) in enumerate(repertoire.sequences):
             kmers = KmerHelper.create_kmers_from_sequence(sequence=sequence, k=params["model"]["k"])

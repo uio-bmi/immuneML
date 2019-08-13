@@ -7,7 +7,7 @@ import pandas as pd
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
-from source.data_model.repertoire.Repertoire import Repertoire
+from source.data_model.repertoire.SequenceRepertoire import SequenceRepertoire
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.preprocessing.filters.DatasetChainFilter import DatasetChainFilter
 from source.util.PathBuilder import PathBuilder
@@ -15,8 +15,8 @@ from source.util.PathBuilder import PathBuilder
 
 class TestDatasetChainFilter(TestCase):
     def test_process(self):
-        rep1 = Repertoire(sequences=[ReceptorSequence("AAA", metadata=SequenceMetadata(chain="A"))])
-        rep2 = Repertoire(sequences=[ReceptorSequence("AAC", metadata=SequenceMetadata(chain="B"))])
+        rep1 = SequenceRepertoire(sequences=[ReceptorSequence("AAA", metadata=SequenceMetadata(chain="A"))])
+        rep2 = SequenceRepertoire(sequences=[ReceptorSequence("AAC", metadata=SequenceMetadata(chain="B"))])
 
         path = EnvironmentSettings.root_path + "test/tmp/datasetchainfilter/"
         PathBuilder.build(path)

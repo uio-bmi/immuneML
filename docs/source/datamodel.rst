@@ -9,11 +9,8 @@ Data model
 The ImmuneML's data model consists of:
 
 *   Sequence class,
-*   Repertoire class and
+*   SequenceRepertoire class and
 *   RepertoireDataset class
-
-.. note:: In case only sequences should be analyzed, regardless of the repertoires, the *Sequence*, *Repertoire* and *RepertoireDataset* classes should still be used, but it is necessary then to make each repertoire to consist of only one sequence. Everything else in the analysis, except where noted, can be used in the same manner as when the analysis has repertoires consisting of a bulk of sequences.
-
 
 Sequence
 ========
@@ -35,17 +32,17 @@ further analysis. For instance, when analyzing sequences, those that have "Out" 
 **Sequence annotation** is used for simulation purposes. In cases when sequences are modified to include an artificial
 disease signal, this object will store the information on how exactly the sequence was modified.
 
-Repertoire
+SequenceRepertoire
 ==========
 
-The Repertoire class contains information about a single immune repertoire. A repertoire object consists of:
+The SequenceRepertoire class contains information about a single immune repertoire. A repertoire object consists of:
 
 *   a list of sequences and
 *   a metadata object.
 
 A list of **sequences** includes all sequences coming from the same person. Each sequence is an instance of a :ref:`Sequence` object.
 
-**Repertoire metadata** contains information about a repertoire. That information is modeled by information about a sample
+**SequenceRepertoire metadata** contains information about a repertoire. That information is modeled by information about a sample
 and, in case of simulation, list of modifications to sequences in the repertoire.
 
 **Sample** is defined by a unique identifier, an optional name (in case the unique identifier is not descriptive enough)
@@ -68,14 +65,9 @@ RepertoireDataset class models a list of repertoires. It contains the following 
 
 If not set manually by the user, the unique identifier is automatically generated.
 
-A list of repertoires is a list of objects of :ref:`Repertoire` class. In case the repertoires occupy too much memory,
+A list of repertoires is a list of objects of :ref:`SequenceRepertoire` class. In case the repertoires occupy too much memory,
 and cannot be loaded all at once, the dataset contains a list of paths to each repertoire file for the dataset. Each
 repertoire then is loaded from the file as needed, thus avoiding memory issues.
-
-Note that in the case that only sequences should be analyzed, regardless of the repertoires, the *Sequence*, *Repertoire* and *RepertoireDataset* classess
-should still be used, but it is necessary then to make each repertoire to consist of only one sequence. Everything else in the
-analysis, except where noted, can be used in the same manner as when the analysis has repertoires consisting of a bulk of
-sequences.
 
 Encoded repertoires are used for machine learning setting. Since machine learning algorithms cannot work with the data
 in their original format, they are encoded so that they can be further analyzed. Examples of the encoding include k-mer

@@ -1,7 +1,7 @@
 from unittest import TestCase
 
 from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
-from source.data_model.repertoire.Repertoire import Repertoire
+from source.data_model.repertoire.SequenceRepertoire import SequenceRepertoire
 from source.util.KmerHelper import KmerHelper
 
 
@@ -23,9 +23,9 @@ class TestKmerHelper(TestCase):
         self.assertTrue(len(kmers) == 0)
 
     def test_create_sentences_from_repertoire(self):
-        rep = Repertoire([ReceptorSequence(amino_acid_sequence="AACT"),
-                          ReceptorSequence(amino_acid_sequence="ACCT"),
-                          ReceptorSequence(amino_acid_sequence="AACT")])
+        rep = SequenceRepertoire([ReceptorSequence(amino_acid_sequence="AACT"),
+                                  ReceptorSequence(amino_acid_sequence="ACCT"),
+                                  ReceptorSequence(amino_acid_sequence="AACT")])
 
         sentences = KmerHelper.create_sentences_from_repertoire(rep, 3)
 

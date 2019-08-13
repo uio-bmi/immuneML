@@ -81,7 +81,7 @@ Counting the number of occurrences of each sequence length in one repertoire can
 
 .. code-block:: python
 
-        def count_in_repertoire(self, repertoire: Repertoire) -> Counter:
+        def count_in_repertoire(self, repertoire: SequenceRepertoire) -> Counter:
             # map each sequence to its length and count how many times that length appears for the repertoire
             c = Counter([len(sequence.get_sequence()) for sequence in repertoire.sequences])
             return c

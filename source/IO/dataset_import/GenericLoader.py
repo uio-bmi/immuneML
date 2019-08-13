@@ -14,9 +14,9 @@ from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.data_model.receptor.receptor_sequence.SequenceFrameType import SequenceFrameType
 from source.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
-from source.data_model.repertoire.Repertoire import Repertoire
 from source.data_model.repertoire.RepertoireGenerator import RepertoireGenerator
 from source.data_model.repertoire.RepertoireMetadata import RepertoireMetadata
+from source.data_model.repertoire.SequenceRepertoire import SequenceRepertoire
 from source.environment.Constants import Constants
 from source.util.PathBuilder import PathBuilder
 
@@ -105,7 +105,7 @@ class GenericLoader(DataLoader):
 
         del df
 
-        repertoire = Repertoire(sequences=sequences, metadata=metadata, identifier=identifier)
+        repertoire = SequenceRepertoire(sequences=sequences, metadata=metadata, identifier=identifier)
 
         with open(repertoire_filename, "wb") as f:
             pickle.dump(repertoire, f)

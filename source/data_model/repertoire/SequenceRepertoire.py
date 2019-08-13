@@ -4,7 +4,7 @@ import collections
 import uuid
 
 
-class Repertoire:
+class SequenceRepertoire:
 
     def __init__(self, sequences: collections.Iterable = None, metadata=None, identifier: str = None):
         self.sequences = sequences

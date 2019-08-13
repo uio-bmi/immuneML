@@ -7,8 +7,8 @@ from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.metadata.Sample import Sample
 from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
-from source.data_model.repertoire.Repertoire import Repertoire
 from source.data_model.repertoire.RepertoireMetadata import RepertoireMetadata
+from source.data_model.repertoire.SequenceRepertoire import SequenceRepertoire
 from source.dsl.SequenceMatchingSummaryType import SequenceMatchingSummaryType
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.util.PathBuilder import PathBuilder
@@ -17,7 +17,7 @@ from source.util.PathBuilder import PathBuilder
 class TestSequenceMatcher(TestCase):
 
     def test_match(self):
-        repertoire = Repertoire(sequences=[
+        repertoire = SequenceRepertoire(sequences=[
             ReceptorSequence(amino_acid_sequence="AAAAAA", metadata=SequenceMetadata(chain="A", v_gene="V1", j_gene="J2")),
             ReceptorSequence(amino_acid_sequence="CCCCCC", metadata=SequenceMetadata(chain="A", v_gene="V1", j_gene="J2")),
             ReceptorSequence(amino_acid_sequence="AAAACC", metadata=SequenceMetadata(chain="A", v_gene="V1", j_gene="J2")),
@@ -44,11 +44,11 @@ class TestSequenceMatcher(TestCase):
         shutil.rmtree(path)
 
     def test_match_repertoire(self):
-        repertoire = Repertoire(sequences=[ReceptorSequence(amino_acid_sequence="AAAAAA", metadata=SequenceMetadata(chain="A", count=3)),
-                                           ReceptorSequence(amino_acid_sequence="CCCCCC", metadata=SequenceMetadata(chain="A", count=2)),
-                                           ReceptorSequence(amino_acid_sequence="AAAACC", metadata=SequenceMetadata(chain="A", count=1)),
-                                           ReceptorSequence(amino_acid_sequence="TADQVF", metadata=SequenceMetadata(chain="A", count=4))],
-                                metadata=RepertoireMetadata(sample=Sample("CD123"), custom_params={"CD": True}))
+        repertoire = SequenceRepertoire(sequences=[ReceptorSequence(amino_acid_sequence="AAAAAA", metadata=SequenceMetadata(chain="A", count=3)),
+                                                   ReceptorSequence(amino_acid_sequence="CCCCCC", metadata=SequenceMetadata(chain="A", count=2)),
+                                                   ReceptorSequence(amino_acid_sequence="AAAACC", metadata=SequenceMetadata(chain="A", count=1)),
+                                                   ReceptorSequence(amino_acid_sequence="TADQVF", metadata=SequenceMetadata(chain="A", count=4))],
+                                        metadata=RepertoireMetadata(sample=Sample("CD123"), custom_params={"CD": True}))
 
         sequences = [ReceptorSequence("AAAACA", metadata=SequenceMetadata(chain="A")),
                      ReceptorSequence("TADQV", metadata=SequenceMetadata(chain="A"))]

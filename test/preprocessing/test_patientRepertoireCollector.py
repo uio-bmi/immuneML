@@ -4,7 +4,7 @@ from unittest import TestCase
 
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
-from source.data_model.repertoire.Repertoire import Repertoire
+from source.data_model.repertoire.SequenceRepertoire import SequenceRepertoire
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.preprocessing.PatientRepertoireCollector import PatientRepertoireCollector
 from source.util.PathBuilder import PathBuilder
@@ -12,9 +12,9 @@ from source.util.PathBuilder import PathBuilder
 
 class TestPatientRepertoireCollector(TestCase):
     def test_process(self):
-        reps = [Repertoire(sequences=[ReceptorSequence("AAA")], identifier="patient1"),
-                Repertoire(sequences=[ReceptorSequence("AAC")], identifier="patient1"),
-                Repertoire(sequences=[ReceptorSequence("AAC")], identifier="patient2")]
+        reps = [SequenceRepertoire(sequences=[ReceptorSequence("AAA")], identifier="patient1"),
+                SequenceRepertoire(sequences=[ReceptorSequence("AAC")], identifier="patient1"),
+                SequenceRepertoire(sequences=[ReceptorSequence("AAC")], identifier="patient2")]
 
         path = EnvironmentSettings.root_path + "test/tmp/patientrepertoirecollector/"
         PathBuilder.build(path)

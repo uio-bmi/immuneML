@@ -3,7 +3,7 @@ import random
 
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
-from source.data_model.repertoire.Repertoire import Repertoire
+from source.data_model.repertoire.SequenceRepertoire import SequenceRepertoire
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.util.PathBuilder import PathBuilder
 
@@ -11,16 +11,16 @@ from source.util.PathBuilder import PathBuilder
 class RandomDatasetGenerator:
 
     @staticmethod
-    def generate_repertoire(alphabet, sequence_count, sequence_length) -> Repertoire:
+    def generate_repertoire(alphabet, sequence_count, sequence_length) -> SequenceRepertoire:
         sequences = []
         for j in range(sequence_count):
             s = "".join(random.choices(alphabet, k=sequence_length))
             sequence = ReceptorSequence(amino_acid_sequence=s)
             sequences.append(sequence)
-        return Repertoire(sequences=sequences)
+        return SequenceRepertoire(sequences=sequences)
 
     @staticmethod
-    def store_repertoire(repertoire: Repertoire, index: int, path):
+    def store_repertoire(repertoire: SequenceRepertoire, index: int, path):
         filepath = path + "rep" + str(index) + ".pkl"
 
         with open(filepath, "wb") as file:
