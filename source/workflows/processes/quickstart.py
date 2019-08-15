@@ -1,6 +1,7 @@
 import os
 import pickle
 import shutil
+import sys
 
 import yaml
 
@@ -17,7 +18,10 @@ from source.util.PathBuilder import PathBuilder
 
 class Quickstart:
 
-    def create_dataset(self, path):
+    def __init__(self, path: str = None):
+        self.path = path if path is not None else EnvironmentSettings.root_path
+
+    def create_dataset(self, path: str):
         PathBuilder.build(path)
 
         rep1 = Repertoire(sequences=[ReceptorSequence(amino_acid_sequence="AAA", metadata=SequenceMetadata(chain="A")),
@@ -31,11 +35,13 @@ class Quickstart:
                                      ReceptorSequence(amino_acid_sequence="AAA", metadata=SequenceMetadata(chain="A"))],
                           metadata=RepertoireMetadata(custom_params={"CD": False}))
 
-        for index in range(1, 14):
+        repertoire_count = 30
+
+        for index in range(1, repertoire_count + 1):
             with open("{}rep{}.pkl".format(path, index), "wb") as file:
                 pickle.dump(rep1 if index % 2 == 0 else rep2, file)
 
-        dataset = Dataset(filenames=[path + "rep{}.pkl".format(i) for i in range(1, 14)], params={"CD": [True, False]})
+        dataset = Dataset(filenames=[path + "rep{}.pkl".format(i) for i in range(1, repertoire_count+1)], params={"CD": [True, False]})
 
         PickleExporter.export(dataset, path, "dataset.pkl")
 
@@ -148,18 +154,21 @@ class Quickstart:
 
         return specs_file
 
-    def run(self):
-
-        path = EnvironmentSettings.root_path + "quickstart/"
+    def create_clean_working_directory(self):
+        path = self.path + "quickstart/"
         if os.path.isdir(path):
             shutil.rmtree(path)
         PathBuilder.build(path)
+        return path
 
+    def run(self):
+        path = self.create_clean_working_directory()
         specs_file = self.create_specfication(path)
         app = ImmuneMLApp(specs_file, path)
         app.run()
 
 
 if __name__ == "__main__":
-    quickstart = Quickstart()
+    path = sys.argv[1] if len(sys.argv) > 1 else None
+    quickstart = Quickstart(path=path)
     quickstart.run()
