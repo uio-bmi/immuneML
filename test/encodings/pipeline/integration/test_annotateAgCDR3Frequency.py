@@ -103,7 +103,7 @@ reference_rep.tsv"""
                 learn_model=True,
                 filename="test.pickle",
                 model={
-                    "initial_encoder": KmerFrequencyEncoder(),
+                    "initial_encoder": KmerFrequencyEncoder.create_encoder(dataset),
                     "initial_encoder_params": kmer_freq_params,
                     "steps": [SequenceMatchFeatureAnnotation(**annotate_params, filename="test.pickle", result_path=path)]
                 }

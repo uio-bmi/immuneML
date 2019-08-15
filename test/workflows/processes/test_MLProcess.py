@@ -36,9 +36,9 @@ class TestMLProcess(TestCase):
         }
         metrics = {MetricType.BALANCED_ACCURACY}
         proc = MLProcess(train_dataset=dataset, test_dataset=dataset, path=path, label_configuration=label_config,
-                         encoder=Word2VecEncoder, encoder_params=encoder_params, method=SimpleLogisticRegression(),
-                         metrics=metrics, min_example_count=1, ml_params={"model_selection_cv": SplitType.LOOCV,
-                                                                          "model_selection_n_folds": 3})
+                         encoder=Word2VecEncoder.create_encoder(dataset), encoder_params=encoder_params,
+                         method=SimpleLogisticRegression(), metrics=metrics, min_example_count=1,
+                         ml_params={"model_selection_cv": SplitType.LOOCV, "model_selection_n_folds": 3})
 
         proc.run(1)
 

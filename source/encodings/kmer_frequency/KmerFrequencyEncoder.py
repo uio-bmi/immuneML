@@ -1,19 +1,13 @@
-import math
+import abc
 import pickle
-from collections import Counter
-from multiprocessing.pool import Pool
 
 import pandas as pd
 from sklearn.feature_extraction import DictVectorizer
 
 from source.IO.dataset_export.PickleExporter import PickleExporter
 from source.caching.CacheHandler import CacheHandler
-from source.data_model.dataset.RepertoireDataset import RepertoireDataset
-from source.data_model.encoded_data.EncodedData import EncodedData
 from source.encodings.DatasetEncoder import DatasetEncoder
 from source.encodings.EncoderParams import EncoderParams
-from source.encodings.kmer_frequency.ReadsType import ReadsType
-from source.encodings.preprocessing.FeatureScaler import FeatureScaler
 from source.environment.Constants import Constants
 from source.util.FilenameHandler import FilenameHandler
 from source.util.PathBuilder import PathBuilder
@@ -49,16 +43,22 @@ class KmerFrequencyEncoder(DatasetEncoder):
     STEP_VECTORIZED = "vectorized"
     STEP_NORMALIZED = "normalized"
 
-    @staticmethod
-    def encode(dataset: RepertoireDataset, params: EncoderParams) -> RepertoireDataset:
+    dataset_mapping = {
+        "RepertoireDataset": "KmerFreqRepertoireEncoder"
+    }
 
-        encoded_dataset = CacheHandler.memo_by_params(KmerFrequencyEncoder._prepare_caching_params(dataset, params),
-                                                      lambda: KmerFrequencyEncoder._encode_new_dataset(dataset, params))
+    @staticmethod
+    def create_encoder(dataset=None):
+        return ReflectionHandler.get_class_by_name(KmerFrequencyEncoder.dataset_mapping[dataset.__class__.__name__], "kmer_frequency/")()
+
+    def encode(self, dataset, params: EncoderParams):
+
+        encoded_dataset = CacheHandler.memo_by_params(self._prepare_caching_params(dataset, params),
+                                                      lambda: self._encode_new_dataset(dataset, params))
 
         return encoded_dataset
 
-    @staticmethod
-    def _prepare_caching_params(dataset: RepertoireDataset, params: EncoderParams, step: str = ""):
+    def _prepare_caching_params(self, dataset, params: EncoderParams, step: str = ""):
         return (("dataset_filenames", tuple(dataset.get_filenames())),
                 ("dataset_metadata", dataset.metadata_file),
                 ("labels", tuple(params["label_configuration"].get_labels_by_name())),
@@ -67,104 +67,40 @@ class KmerFrequencyEncoder(DatasetEncoder):
                 ("step", step),
                 ("encoding_params", tuple([(key, params["model"][key]) for key in params["model"].keys()])), )
 
-    @staticmethod
-    def _encode_new_dataset(dataset: RepertoireDataset, params: EncoderParams) -> RepertoireDataset:
+    @abc.abstractmethod
+    def _encode_new_dataset(self, dataset, params: EncoderParams):
+        pass
 
-        encoded_repertoire_list, repertoire_names, encoded_labels, feature_annotation_names = CacheHandler.memo_by_params(KmerFrequencyEncoder._prepare_caching_params(dataset, params, KmerFrequencyEncoder.STEP_ENCODED),
-                                                                                                                          lambda: KmerFrequencyEncoder._encode_repertoires(dataset, params))
-        vectorized_repertoires, feature_names = CacheHandler.memo_by_params(KmerFrequencyEncoder._prepare_caching_params(dataset, params, KmerFrequencyEncoder.STEP_VECTORIZED),
-                                                                            lambda: KmerFrequencyEncoder._vectorize_encoded_repertoires(repertoires=encoded_repertoire_list, params=params))
-        normalized_repertoires = CacheHandler.memo_by_params(KmerFrequencyEncoder._prepare_caching_params(dataset, params, KmerFrequencyEncoder.STEP_NORMALIZED),
-                                                             lambda: FeatureScaler.normalize(params["result_path"] + "normalizer.pkl", vectorized_repertoires, params["model"]["normalization_type"]))
-        feature_annotations = KmerFrequencyEncoder._get_feature_annotations(feature_names, feature_annotation_names)
+    @abc.abstractmethod
+    def _encode_examples(self, dataset, params: EncoderParams):
+        pass
 
-        encoded_data = EncodedData(examples=normalized_repertoires,
-                                   labels=encoded_labels,
-                                   feature_names=feature_names,
-                                   example_ids=repertoire_names,
-                                   feature_annotations=feature_annotations,
-                                   encoding=KmerFrequencyEncoder.__name__)
-
-        encoded_dataset = RepertoireDataset(filenames=dataset.get_filenames(),
-                                            encoded_data=encoded_data,
-                                            params=dataset.params,
-                                            metadata_file=dataset.metadata_file)
-
-        KmerFrequencyEncoder.store(encoded_dataset, params)
-
-        return encoded_dataset
-
-    @staticmethod
-    def _encode_repertoires(dataset: RepertoireDataset, params: EncoderParams):
-
-        arguments = [(filename, dataset, params) for filename in dataset.get_filenames()]
-
-        with Pool(params["batch_size"]) as pool:
-            repertoires = pool.starmap(KmerFrequencyEncoder._encode_repertoire, arguments, chunksize=math.floor(len(dataset.get_filenames())/params["batch_size"]) + 1)
-
-        encoded_repertoire_list, repertoire_names, labels, feature_annotation_names = zip(*repertoires)
-
-        encoded_labels = {k: [dic[k] for dic in labels] for k in labels[0]}
-
-        feature_annotation_names = feature_annotation_names[0]
-
-        return list(encoded_repertoire_list), list(repertoire_names), encoded_labels, feature_annotation_names
-
-    @staticmethod
-    def _vectorize_encoded_repertoires(repertoires: list, params: EncoderParams):
+    def _vectorize_encoded(self, examples: list, params: EncoderParams):
 
         filename = params["result_path"] + FilenameHandler.get_filename(DictVectorizer.__name__, "pickle")
 
         if params["learn_model"]:
             vectorizer = DictVectorizer(sparse=True, dtype=float)
-            vectorized_repertoires = vectorizer.fit_transform(repertoires)
+            vectorized_examples = vectorizer.fit_transform(examples)
             PathBuilder.build(params["result_path"])
             with open(filename, 'wb') as file:
                 pickle.dump(vectorizer, file)
         else:
             with open(filename, 'rb') as file:
                 vectorizer = pickle.load(file)
-            vectorized_repertoires = vectorizer.transform(repertoires)
+            vectorized_examples = vectorizer.transform(examples)
 
-        return vectorized_repertoires, vectorizer.get_feature_names()
+        return vectorized_examples, vectorizer.get_feature_names()
 
-    @staticmethod
-    def _get_feature_annotations(feature_names, feature_annotation_names):
+    def _get_feature_annotations(self, feature_names, feature_annotation_names):
         feature_annotations = pd.DataFrame({"feature": feature_names})
         feature_annotations[feature_annotation_names] = feature_annotations['feature'].str.split(Constants.FEATURE_DELIMITER, expand=True)
         return feature_annotations
 
-    @staticmethod
-    def _encode_repertoire(filename: str, dataset: RepertoireDataset, params: EncoderParams):
-        repertoire = dataset.get_repertoire(filename=filename)
-        counts = Counter()
-        sequence_encoder = KmerFrequencyEncoder._prepare_sequence_encoder(params)
-        feature_names = sequence_encoder.get_feature_names(params)
-        for sequence in repertoire.sequences:
-            features = sequence_encoder.encode_sequence(sequence, params)
-            if features is not None:
-                for i in features:
-                    if params["model"].get('reads') == ReadsType.UNIQUE:
-                        counts[i] += 1
-                    elif params["model"].get('reads') == ReadsType.ALL:
-                        counts[i] += sequence.metadata.count
-
-        label_config = params["label_configuration"]
-        labels = dict()
-
-        for label_name in label_config.get_labels_by_name():
-            label = repertoire.metadata.custom_params[label_name]
-            labels[label_name] = label
-
-        # TODO: refactor this not to return 4 values but e.g. a dict or split into different functions?
-        return counts, repertoire.identifier, labels, feature_names
-
-    @staticmethod
-    def _prepare_sequence_encoder(params: EncoderParams):
+    def _prepare_sequence_encoder(self, params: EncoderParams):
         class_name = params["model"]["sequence_encoding"].value
         sequence_encoder = ReflectionHandler.get_class_by_name(class_name, "encodings")
         return sequence_encoder
 
-    @staticmethod
-    def store(encoded_dataset: RepertoireDataset, params: EncoderParams):
+    def store(self, encoded_dataset, params: EncoderParams):
         PickleExporter.export(encoded_dataset, params["result_path"], params["filename"])

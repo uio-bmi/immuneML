@@ -4,6 +4,7 @@ from unittest import TestCase
 import numpy as np
 
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
+from source.data_model.receptor.receptor_sequence.Chain import Chain
 from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
 from source.dsl.SequenceMatchingSummaryType import SequenceMatchingSummaryType
@@ -23,11 +24,14 @@ class TestMatchedReferenceEncoder(TestCase):
         label_config = LabelConfiguration()
         label_config.add_label("default", [1, 2])
 
-        encoded = MatchedReferenceEncoder._encode_new_dataset(dataset, EncoderParams(
+        encoder = MatchedReferenceEncoder.create_encoder(dataset)
+
+        encoded = encoder.encode(dataset, EncoderParams(
             result_path=path,
             label_configuration=label_config,
             model={
-                "reference_sequences": [ReceptorSequence("AAAA", metadata=SequenceMetadata())],
+                "reference_sequences": [ReceptorSequence("AAAA",
+                                                         metadata=SequenceMetadata(chain=Chain.A.value, v_gene="V12", j_gene="J1"))],
                 "max_distance": 2,
                 "summary": SequenceMatchingSummaryType.PERCENTAGE
             },
@@ -36,5 +40,6 @@ class TestMatchedReferenceEncoder(TestCase):
 
         self.assertTrue(all(all([val <= 1 for val in rep]) for rep in encoded.encoded_data.examples))
         self.assertEqual(2, encoded.encoded_data.examples.shape[0])
+        self.assertTrue(isinstance(encoder, MatchedReferenceEncoder))
 
         shutil.rmtree(path)

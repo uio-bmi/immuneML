@@ -71,8 +71,8 @@ class PipelineEncoder(DatasetEncoder):
     Some examples of workflows can be seen in the PipelineEncoder integration tests.
     """
 
-    @staticmethod
-    def encode(dataset: RepertoireDataset, params: EncoderParams) -> RepertoireDataset:
+
+    def encode(self, dataset, params: EncoderParams) -> RepertoireDataset:
         filepath = params["result_path"] + "/" + params["filename"]
         if os.path.isfile(filepath):
             encoded_dataset = PipelineEncoder._run_pipeline(PickleLoader.load(filepath), params)
@@ -80,15 +80,13 @@ class PipelineEncoder(DatasetEncoder):
             encoded_dataset = PipelineEncoder._encode_new_dataset(dataset, params)
         return encoded_dataset
 
-    @staticmethod
-    def _encode_new_dataset(dataset: RepertoireDataset, params: EncoderParams) -> RepertoireDataset:
+    def _encode_new_dataset(self, dataset, params: EncoderParams):
         inital_encoded_dataset = PipelineEncoder._initial_encode_repertoires(dataset, params)
         encoded_dataset = PipelineEncoder._run_pipeline(inital_encoded_dataset, params)
         PipelineEncoder.store(encoded_dataset, params)
         return encoded_dataset
 
-    @staticmethod
-    def _initial_encode_repertoires(dataset: RepertoireDataset, params: EncoderParams):
+    def _initial_encode_repertoires(self, dataset: RepertoireDataset, params: EncoderParams):
         initial_params = EncoderParams(
             result_path=params["result_path"],
             label_configuration=params["label_configuration"],

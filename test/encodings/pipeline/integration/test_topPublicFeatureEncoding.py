@@ -64,7 +64,7 @@ class TestTopPublicFeatureEncoding(TestCase):
                 learn_model=True,
                 filename="encoded_data.pickle",
                 model={
-                    "initial_encoder": KmerFrequencyEncoder,
+                    "initial_encoder": KmerFrequencyEncoder.create_encoder(dataset),
                     "initial_encoder_params": {
                         "normalization_type": NormalizationType.NONE,
                         "reads": ReadsType.UNIQUE,

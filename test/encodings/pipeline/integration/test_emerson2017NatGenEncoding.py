@@ -120,7 +120,7 @@ class TestEmerson2018NatGenEncoding(TestCase):
                 learn_model=True,
                 filename="test.pickle",
                 model={
-                    "initial_encoder": KmerFrequencyEncoder(),
+                    "initial_encoder": KmerFrequencyEncoder.create_encoder(dataset),
                     "initial_encoder_params": kmer_freq_params,
                     "steps": [FisherExactFeatureAnnotation(**fisher_exact_params, filename="test.pickle", result_path=path), PresentTotalFeatureTransformation(**transform_params, filename="test.pickle", result_path=path)]
                 }

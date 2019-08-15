@@ -7,7 +7,7 @@ from source.data_model.receptor.receptor_sequence.ReceptorSequence import Recept
 from source.data_model.repertoire.RepertoireMetadata import RepertoireMetadata
 from source.data_model.repertoire.SequenceRepertoire import SequenceRepertoire
 from source.encodings.EncoderParams import EncoderParams
-from source.encodings.word2vec.Word2VecEncoder import Word2VecEncoder
+from source.encodings.word2vec.W2VRepertoireEncoder import W2VRepertoireEncoder, Word2VecEncoder
 from source.encodings.word2vec.model_creator.ModelType import ModelType
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.environment.LabelConfiguration import LabelConfiguration
@@ -58,12 +58,15 @@ class TestWord2VecEncoder(TestCase):
             filename="dataset.pkl"
         )
 
-        encoded_dataset = Word2VecEncoder.encode(dataset=dataset, params=config_params)
+        encoder = Word2VecEncoder.create_encoder(dataset)
+
+        encoded_dataset = encoder.encode(dataset=dataset, params=config_params)
 
         self.assertIsNotNone(encoded_dataset.encoded_data)
         self.assertTrue(encoded_dataset.encoded_data.examples.shape[0] == 2)
         self.assertTrue(encoded_dataset.encoded_data.examples.shape[1] == 16)
         self.assertTrue(len(encoded_dataset.encoded_data.labels["T1D"]) == 2)
         self.assertTrue(encoded_dataset.encoded_data.labels["T1D"][0] == "T1D")
+        self.assertTrue(isinstance(encoder, W2VRepertoireEncoder))
 
         shutil.rmtree(test_path)

@@ -42,7 +42,9 @@ class TestKmerFrequencyEncoder(TestCase):
 
         dataset = RepertoireDataset(filenames=[path + "rep1.pkl", path + "rep2.pkl"])
 
-        d1 = KmerFrequencyEncoder.encode(dataset, EncoderParams(
+        encoder = KmerFrequencyEncoder.create_encoder(dataset)
+
+        d1 = encoder.encode(dataset, EncoderParams(
             result_path=path + "1/",
             label_configuration=lc,
             batch_size=2,
@@ -56,7 +58,9 @@ class TestKmerFrequencyEncoder(TestCase):
             filename="dataset.pkl"
         ))
 
-        d2 = KmerFrequencyEncoder.encode(dataset, EncoderParams(
+        encoder = KmerFrequencyEncoder.create_encoder(dataset)
+
+        d2 = encoder.encode(dataset, EncoderParams(
             result_path=path + "2/",
             label_configuration=lc,
             batch_size=2,
@@ -75,3 +79,4 @@ class TestKmerFrequencyEncoder(TestCase):
         self.assertTrue(isinstance(d1, RepertoireDataset))
         self.assertTrue(isinstance(d2, RepertoireDataset))
         self.assertEqual(0.67, np.round(d2.encoded_data.examples[0, 2], 2))
+        self.assertTrue(isinstance(encoder, KmerFrequencyEncoder))

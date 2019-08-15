@@ -1,26 +1,31 @@
-import numpy as np
+import abc
 
 from source.IO.dataset_export.PickleExporter import PickleExporter
-from source.analysis.SequenceMatcher import SequenceMatcher
 from source.caching.CacheHandler import CacheHandler
-from source.data_model.dataset.RepertoireDataset import RepertoireDataset
-from source.data_model.encoded_data.EncodedData import EncodedData
 from source.encodings.DatasetEncoder import DatasetEncoder
 from source.encodings.EncoderParams import EncoderParams
+from source.util.ReflectionHandler import ReflectionHandler
 
 
 class MatchedReferenceEncoder(DatasetEncoder):
 
+    dataset_mapping = {
+        "RepertoireDataset": "ReferenceRepertoireEncoder"
+    }
+
     @staticmethod
-    def encode(dataset: RepertoireDataset, params: EncoderParams) -> RepertoireDataset:
-        cache_key = CacheHandler.generate_cache_key(MatchedReferenceEncoder._prepare_caching_params(dataset, params))
+    def create_encoder(dataset=None):
+        return ReflectionHandler.get_class_by_name(MatchedReferenceEncoder.dataset_mapping[dataset.__class__.__name__],
+                                                   "reference_encoding/")()
+
+    def encode(self, dataset, params: EncoderParams):
+        cache_key = CacheHandler.generate_cache_key(self._prepare_caching_params(dataset, params))
         encoded_dataset = CacheHandler.memo(cache_key,
-                                            lambda: MatchedReferenceEncoder._encode_new_dataset(dataset, params))
+                                            lambda: self._encode_new_dataset(dataset, params))
 
         return encoded_dataset
 
-    @staticmethod
-    def _prepare_caching_params(dataset: RepertoireDataset, params: EncoderParams):
+    def _prepare_caching_params(self, dataset, params: EncoderParams):
 
         encoding_params_desc = {"max_distance": params["model"]["max_distance"],
                                 "summary": params["model"]["summary"],
@@ -34,51 +39,9 @@ class MatchedReferenceEncoder(DatasetEncoder):
                 ("learn_model", params["learn_model"]),
                 ("encoding_params", encoding_params_desc), )
 
-    @staticmethod
-    def _encode_new_dataset(dataset: RepertoireDataset, params: EncoderParams) -> RepertoireDataset:
+    @abc.abstractmethod
+    def _encode_new_dataset(self, dataset, params: EncoderParams):
+        pass
 
-        matched_info = MatchedReferenceEncoder._match_repertories(dataset, params)
-
-        encoded_dataset = RepertoireDataset(filenames=dataset.get_filenames(), params=dataset.params,
-                                            metadata_file=dataset.metadata_file)
-        encoded_repertoires, labels = MatchedReferenceEncoder._encode_repertoires(dataset, matched_info, params)
-
-        feature_name = params["model"]["summary"].name.lower()
-
-        encoded_dataset.add_encoded_data(EncodedData(
-            examples=encoded_repertoires,
-            labels=labels,
-            feature_names=[feature_name],
-            example_ids=[repertoire.identifier for repertoire in dataset.get_data()],
-            encoding=MatchedReferenceEncoder.__name__
-        ))
-
-        MatchedReferenceEncoder.store(encoded_dataset, params)
-        return encoded_dataset
-
-    @staticmethod
-    def _encode_repertoires(dataset: RepertoireDataset, matched_info, params: EncoderParams):
-        encoded_repertories = np.zeros((dataset.get_repertoire_count(), 1), dtype=float)
-        labels = {label: [] for label in params["label_configuration"].get_labels_by_name()}
-
-        for index, repertoire in enumerate(dataset.get_data()):
-            assert repertoire.identifier == matched_info["repertoires"][index]["repertoire"], \
-                "MatchedReferenceEncoder: error in SequenceMatcher ordering of repertoires."
-            encoded_repertories[index] = matched_info["repertoires"][index][params["model"]["summary"].name.lower()]
-            for label_index, label in enumerate(params["label_configuration"].get_labels_by_name()):
-                labels[label].append(repertoire.metadata.custom_params[label])
-
-        return np.reshape(encoded_repertories, newshape=(-1, 1)), labels
-
-    @staticmethod
-    def _match_repertories(dataset: RepertoireDataset, params: EncoderParams):
-        matcher = SequenceMatcher()
-        matched_info = matcher.match(dataset=dataset,
-                                     reference_sequences=params["model"]["reference_sequences"],
-                                     max_distance=params["model"]["max_distance"],
-                                     summary_type=params["model"]["summary"])
-        return matched_info
-
-    @staticmethod
-    def store(encoded_dataset: RepertoireDataset, params: EncoderParams):
+    def store(self, encoded_dataset, params: EncoderParams):
         PickleExporter.export(encoded_dataset, params["result_path"], params["filename"])

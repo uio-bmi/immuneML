@@ -98,7 +98,7 @@ class HPOptimizationProcess(InstructionProcess):
         path = current_path + "{}/fold_{}/".format(hp_setting, run_id)
         PathBuilder.build(path)
         ml_process = MLProcess(train_dataset=train_dataset, test_dataset=test_dataset,
-                               label_configuration=self.label_configuration, encoder=hp_setting.encoder,
+                               label_configuration=self.label_configuration, encoder=hp_setting.encoder.create_encoder(train_dataset),
                                encoder_params=hp_setting.encoder_params, method=hp_setting.ml_method,
                                ml_params=hp_setting.ml_params, metrics=self.metrics, path=path,
                                reports=self.selection.reports.model_reports)
@@ -171,7 +171,7 @@ class HPOptimizationProcess(InstructionProcess):
     def encode_dataset(self, dataset, hp_setting: HPSetting, path: str, learn_model: bool):
         encoded_dataset = DataEncoder.run(DataEncoderParams(
             dataset=dataset,
-            encoder=hp_setting.encoder,
+            encoder=hp_setting.encoder.create_encoder(dataset),
             encoder_params=EncoderParams(
                 model=hp_setting.encoder_params,
                 result_path=path,

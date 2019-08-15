@@ -19,7 +19,6 @@ from source.workflows.steps.DataEncoderParams import DataEncoderParams
 
 class TestDataEncoder(TestCase):
     def test_run(self):
-        encoder = Word2VecEncoder()
         path = EnvironmentSettings.root_path + "test/tmp/dataencoder/"
         PathBuilder.build(path)
 
@@ -38,6 +37,7 @@ class TestDataEncoder(TestCase):
         lc.add_label("l2", [0, 3])
 
         dataset = RepertoireDataset(filenames=[path + "rep1.pkl", path + "rep2.pkl"])
+        encoder = Word2VecEncoder.create_encoder(dataset)
 
         res = DataEncoder.run(DataEncoderParams(
             dataset=dataset,
