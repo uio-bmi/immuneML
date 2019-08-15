@@ -1,6 +1,5 @@
 import os
 import pickle
-import shutil
 import sys
 
 import yaml
@@ -156,9 +155,8 @@ class Quickstart:
 
     def create_clean_working_directory(self):
         path = self.path + "quickstart/"
-        if os.path.isdir(path):
-            shutil.rmtree(path)
-        PathBuilder.build(path)
+        if not os.path.isdir(path):
+            PathBuilder.build(path)
         return path
 
     def run(self):
