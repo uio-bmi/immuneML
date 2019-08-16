@@ -2,35 +2,16 @@ import math
 from collections import Counter
 from multiprocessing.pool import Pool
 
-from source.caching.CacheHandler import CacheHandler
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
-from source.data_model.encoded_data.EncodedData import EncodedData
 from source.encodings.EncoderParams import EncoderParams
 from source.encodings.kmer_frequency.KmerFrequencyEncoder import KmerFrequencyEncoder
-from source.encodings.kmer_frequency.ReadsType import ReadsType
-from source.encodings.preprocessing.FeatureScaler import FeatureScaler
 
 
 class KmerFreqRepertoireEncoder(KmerFrequencyEncoder):
 
     def _encode_new_dataset(self, dataset, params: EncoderParams):
 
-        encoded_example_list, example_ids, encoded_labels, feature_annotation_names = CacheHandler.memo_by_params(self._prepare_caching_params(dataset, params, KmerFrequencyEncoder.STEP_ENCODED),
-                                                                                                                  lambda: self._encode_examples(dataset, params))
-        vectorized_examples, feature_names = CacheHandler.memo_by_params(self._prepare_caching_params(dataset, params, KmerFrequencyEncoder.STEP_VECTORIZED),
-                                                                         lambda: self._vectorize_encoded(examples=encoded_example_list, params=params))
-        normalized_examples = CacheHandler.memo_by_params(self._prepare_caching_params(dataset, params, KmerFrequencyEncoder.STEP_NORMALIZED),
-                                                          lambda: FeatureScaler.normalize(params["result_path"] + "normalizer.pkl",
-                                                                                          vectorized_examples,
-                                                                                          params["model"]["normalization_type"]))
-        feature_annotations = self._get_feature_annotations(feature_names, feature_annotation_names)
-
-        encoded_data = EncodedData(examples=normalized_examples,
-                                   labels=encoded_labels,
-                                   feature_names=feature_names,
-                                   example_ids=example_ids,
-                                   feature_annotations=feature_annotations,
-                                   encoding=KmerFrequencyEncoder.__name__)
+        encoded_data = self._encode_data(dataset, params)
 
         encoded_dataset = RepertoireDataset(filenames=dataset.get_filenames(),
                                             encoded_data=encoded_data,
@@ -64,13 +45,7 @@ class KmerFreqRepertoireEncoder(KmerFrequencyEncoder):
         sequence_encoder = self._prepare_sequence_encoder(params)
         feature_names = sequence_encoder.get_feature_names(params)
         for sequence in repertoire.sequences:
-            features = sequence_encoder.encode_sequence(sequence, params)
-            if features is not None:
-                for i in features:
-                    if params["model"].get('reads') == ReadsType.UNIQUE:
-                        counts[i] += 1
-                    elif params["model"].get('reads') == ReadsType.ALL:
-                        counts[i] += sequence.metadata.count
+            counts = self._encode_sequence(sequence, params, sequence_encoder, counts)
 
         label_config = params["label_configuration"]
         labels = dict()

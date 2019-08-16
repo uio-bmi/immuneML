@@ -101,10 +101,7 @@ class PipelineEncoder(DatasetEncoder):
             filename=params["filename"],
             model=params["model"]["initial_encoder_params"]
         )
-
-        encoder = params["model"]["initial_encoder"].create_encoder(dataset)
-
-        encoded_dataset = encoder.encode(dataset, initial_params)
+        encoded_dataset = params["model"]["initial_encoder"].encode(dataset, initial_params)
         return encoded_dataset
 
     def _run_pipeline(self, dataset, params: EncoderParams):

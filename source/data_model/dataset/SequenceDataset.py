@@ -19,7 +19,10 @@ class SequenceDataset:
         return self.sequence_generator.build_generator(batch_size)
 
     def get_sequence_count(self):
-        return self.sequence_generator.get_sequence_count()
+        return self.sequence_generator.get_item_count()
 
     def get_metadata(self, field_names: list):
         raise NotImplementedError
+
+    def get_filenames(self):
+        return self._filenames

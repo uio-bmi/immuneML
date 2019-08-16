@@ -13,10 +13,7 @@ class ItemGenerator:
         while len(items) < batch_size and cursor is not None:
             lines_to_read = batch_size - len(items)
             items.extend(self._load_from_file(cursor, lines_to_read))
-            if self._has_more_files(cursor):
-                cursor = self._get_next_cursor(cursor, lines_to_read)
-            else:
-                cursor = None
+            cursor = self._get_next_cursor(cursor, lines_to_read)
 
         return items, cursor
 
@@ -41,16 +38,19 @@ class ItemGenerator:
 
     def _get_next_cursor(self, cursor, lines_to_read):
         lines = self._get_item_count(cursor["file_index"])
+
         if lines > cursor["line"] + lines_to_read:
             return {
                 "file_index": cursor["file_index"],
                 "line": cursor["line"] + lines_to_read
             }
-        else:
+        elif self._has_more_files(cursor):
             return {
                 "file_index": cursor["file_index"] + 1,
                 "line": 0
             }
+        else:
+            return None
 
     def _has_more_files(self, cursor: dict):
         return cursor["file_index"] != len(self.file_list) - 1

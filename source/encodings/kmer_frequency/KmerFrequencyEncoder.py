@@ -6,8 +6,12 @@ from sklearn.feature_extraction import DictVectorizer
 
 from source.IO.dataset_export.PickleExporter import PickleExporter
 from source.caching.CacheHandler import CacheHandler
+from source.data_model.encoded_data.EncodedData import EncodedData
+from source.data_model.receptor.receptor_sequence import ReceptorSequence
 from source.encodings.DatasetEncoder import DatasetEncoder
 from source.encodings.EncoderParams import EncoderParams
+from source.encodings.kmer_frequency.ReadsType import ReadsType
+from source.encodings.preprocessing.FeatureScaler import FeatureScaler
 from source.environment.Constants import Constants
 from source.util.FilenameHandler import FilenameHandler
 from source.util.PathBuilder import PathBuilder
@@ -44,7 +48,8 @@ class KmerFrequencyEncoder(DatasetEncoder):
     STEP_NORMALIZED = "normalized"
 
     dataset_mapping = {
-        "RepertoireDataset": "KmerFreqRepertoireEncoder"
+        "RepertoireDataset": "KmerFreqRepertoireEncoder",
+        "SequenceDataset": "KmerFreqSequenceEncoder"
     }
 
     @staticmethod
@@ -60,13 +65,39 @@ class KmerFrequencyEncoder(DatasetEncoder):
 
     def _prepare_caching_params(self, dataset, params: EncoderParams, step: str = ""):
         return (("dataset_filenames", tuple(dataset.get_filenames())),
-                ("dataset_metadata", dataset.metadata_file),
+                ("dataset_metadata", dataset.metadata_file if hasattr(dataset, "metadata_file") else None),
                 ("dataset_type", dataset.__class__.__name__),
                 ("labels", tuple(params["label_configuration"].get_labels_by_name())),
                 ("encoding", KmerFrequencyEncoder.__name__),
                 ("learn_model", params["learn_model"]),
                 ("step", step),
                 ("encoding_params", tuple([(key, params["model"][key]) for key in params["model"].keys()])), )
+
+    def _encode_data(self, dataset, params: EncoderParams) -> EncodedData:
+        encoded_example_list, example_ids, encoded_labels, feature_annotation_names = CacheHandler.memo_by_params(
+            self._prepare_caching_params(dataset, params, KmerFrequencyEncoder.STEP_ENCODED),
+            lambda: self._encode_examples(dataset, params))
+
+        vectorized_examples, feature_names = CacheHandler.memo_by_params(
+            self._prepare_caching_params(dataset, params, KmerFrequencyEncoder.STEP_VECTORIZED),
+            lambda: self._vectorize_encoded(examples=encoded_example_list, params=params))
+
+        normalized_examples = CacheHandler.memo_by_params(
+            self._prepare_caching_params(dataset, params, KmerFrequencyEncoder.STEP_NORMALIZED),
+            lambda: FeatureScaler.normalize(params["result_path"] + "normalizer.pkl",
+                                            vectorized_examples,
+                                            params["model"]["normalization_type"]))
+
+        feature_annotations = self._get_feature_annotations(feature_names, feature_annotation_names)
+
+        encoded_data = EncodedData(examples=normalized_examples,
+                                   labels=encoded_labels,
+                                   feature_names=feature_names,
+                                   example_ids=example_ids,
+                                   feature_annotations=feature_annotations,
+                                   encoding=KmerFrequencyEncoder.__name__)
+
+        return encoded_data
 
     @abc.abstractmethod
     def _encode_new_dataset(self, dataset, params: EncoderParams):
@@ -102,6 +133,16 @@ class KmerFrequencyEncoder(DatasetEncoder):
         class_name = params["model"]["sequence_encoding"].value
         sequence_encoder = ReflectionHandler.get_class_by_name(class_name, "encodings")
         return sequence_encoder
+
+    def _encode_sequence(self, sequence: ReceptorSequence, params:EncoderParams, sequence_encoder, counts):
+        features = sequence_encoder.encode_sequence(sequence, params)
+        if features is not None:
+            for i in features:
+                if params["model"].get('reads') == ReadsType.UNIQUE:
+                    counts[i] += 1
+                elif params["model"].get('reads') == ReadsType.ALL:
+                    counts[i] += sequence.metadata.count
+        return counts
 
     def store(self, encoded_dataset, params: EncoderParams):
         PickleExporter.export(encoded_dataset, params["result_path"], params["filename"])
