@@ -1,7 +1,7 @@
 import copy
 import random
 
-from source.data_model.receptor.receptor_sequence import ReceptorSequence
+from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.data_model.repertoire.Repertoire import Repertoire
 from source.data_model.repertoire.RepertoireMetadata import RepertoireMetadata
 from source.simulation.implants.ImplantAnnotation import ImplantAnnotation
