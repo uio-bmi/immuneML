@@ -4,7 +4,7 @@ import os
 import pandas as pd
 
 from source.data_model.dataset.Dataset import Dataset
-from source.data_model.receptor_sequence.Chain import Chain
+from source.data_model.receptor.receptor_sequence.Chain import Chain
 from source.preprocessing.Preprocessor import Preprocessor
 
 

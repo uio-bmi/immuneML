@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from source.data_model.receptor_sequence.ReceptorSequence import ReceptorSequence
+from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.encodings.EncoderParams import EncoderParams
 from source.encodings.kmer_frequency.sequence_encoding.IMGTGappedKmerEncoder import IMGTGappedKmerEncoder
 from source.environment.LabelConfiguration import LabelConfiguration

@@ -2,7 +2,7 @@ import pickle
 import shutil
 from unittest import TestCase
 
-from source.data_model.receptor_sequence.ReceptorSequence import ReceptorSequence
+from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.data_model.repertoire.Repertoire import Repertoire
 from source.data_model.repertoire.RepertoireGenerator import RepertoireGenerator
 from source.data_model.repertoire.RepertoireMetadata import RepertoireMetadata

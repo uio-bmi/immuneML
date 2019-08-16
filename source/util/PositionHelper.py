@@ -1,7 +1,7 @@
 import math
 import warnings
 
-from source.data_model.receptor_sequence.ReceptorSequence import ReceptorSequence
+from source.data_model.receptor.receptor_sequence import ReceptorSequence
 
 
 class PositionHelper:

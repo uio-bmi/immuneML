@@ -1,7 +1,7 @@
 # quality: gold
 from source.data_model.metadata.Sample import Sample
-from source.data_model.receptor_sequence.Chain import Chain
-from source.data_model.receptor_sequence.SequenceFrameType import SequenceFrameType
+from source.data_model.receptor.receptor_sequence.Chain import Chain
+from source.data_model.receptor.receptor_sequence.SequenceFrameType import SequenceFrameType
 
 class SequenceMetadata:
     """

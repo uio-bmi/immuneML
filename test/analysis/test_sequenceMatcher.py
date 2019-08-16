@@ -5,8 +5,8 @@ from unittest import TestCase
 from source.analysis.SequenceMatcher import SequenceMatcher
 from source.data_model.dataset.Dataset import Dataset
 from source.data_model.metadata.Sample import Sample
-from source.data_model.receptor_sequence.ReceptorSequence import ReceptorSequence
-from source.data_model.receptor_sequence.SequenceMetadata import SequenceMetadata
+from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
+from source.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
 from source.data_model.repertoire.Repertoire import Repertoire
 from source.data_model.repertoire.RepertoireMetadata import RepertoireMetadata
 from source.dsl.SequenceMatchingSummaryType import SequenceMatchingSummaryType
@@ -17,10 +17,11 @@ from source.util.PathBuilder import PathBuilder
 class TestSequenceMatcher(TestCase):
 
     def test_match(self):
-        repertoire = Repertoire(sequences=[ReceptorSequence(amino_acid_sequence="AAAAAA", metadata=SequenceMetadata(chain="A", v_gene="V1", j_gene="J2")),
-                                           ReceptorSequence(amino_acid_sequence="CCCCCC", metadata=SequenceMetadata(chain="A", v_gene="V1", j_gene="J2")),
-                                           ReceptorSequence(amino_acid_sequence="AAAACC", metadata=SequenceMetadata(chain="A", v_gene="V1", j_gene="J2")),
-                                           ReceptorSequence(amino_acid_sequence="TADQVF", metadata=SequenceMetadata(chain="A", v_gene="V1", j_gene="J3"))],
+        repertoire = Repertoire(sequences=[
+            ReceptorSequence(amino_acid_sequence="AAAAAA", metadata=SequenceMetadata(chain="A", v_gene="V1", j_gene="J2")),
+            ReceptorSequence(amino_acid_sequence="CCCCCC", metadata=SequenceMetadata(chain="A", v_gene="V1", j_gene="J2")),
+            ReceptorSequence(amino_acid_sequence="AAAACC", metadata=SequenceMetadata(chain="A", v_gene="V1", j_gene="J2")),
+            ReceptorSequence(amino_acid_sequence="TADQVF", metadata=SequenceMetadata(chain="A", v_gene="V1", j_gene="J3"))],
                                 metadata=RepertoireMetadata(sample=Sample("CD123"), custom_params={"CD": True}))
 
         path = EnvironmentSettings.root_path + "test/tmp/seqmatch/"

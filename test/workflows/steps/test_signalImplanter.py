@@ -4,7 +4,7 @@ import shutil
 from unittest import TestCase
 
 from source.data_model.dataset.Dataset import Dataset
-from source.data_model.receptor_sequence.ReceptorSequence import ReceptorSequence
+from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.data_model.repertoire.Repertoire import Repertoire
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.simulation.implants.Motif import Motif

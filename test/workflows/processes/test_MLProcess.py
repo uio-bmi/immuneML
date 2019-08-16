@@ -61,24 +61,5 @@ class TestMLProcess(TestCase):
         proc.run(1)
 
         self.assertTrue(os.path.isfile("{}ml_details.csv".format(path)))
-        # self.assertTrue(os.path.isfile("{}summary.yml".format(path)))
-        # with open("{}summary.yml".format(path), "r") as file:
-        #     summary = yaml.load(file)
-        # self.assertTrue("l1" in summary.keys() and "l2" in summary.keys())
-        # self.assertEqual({"min", "max", "mean", "median"}, set(summary["l1"]["balanced_accuracy"]))
-        # self.assertEqual({"min", "max", "mean", "median"}, set(summary["l2"]["balanced_accuracy"]))
-        # self.assertTrue(all([isinstance(summary["l1"]["balanced_accuracy"][key], float)
-        # for key in ["min", "max", "median", "mean"]]))
-        # self.assertTrue(all([isinstance(summary["l2"]["balanced_accuracy"][key], float)
-        # for key in ["min", "max", "median", "mean"]]))
-
-        dataset = Dataset(filenames=filenames[:3], params={"l1": [0, 1], "l2": [2, 3]})
-        proc = MLProcess(train_dataset=dataset, test_dataset=dataset, path=path, label_configuration=label_config,
-                         encoder=Word2VecEncoder, encoder_params=encoder_params, method=SimpleLogisticRegression(),
-                         metrics=metrics, min_example_count=2, ml_params={"model_selection_cv": SplitType.LOOCV,
-                                                                          "model_selection_n_folds": 3})
-
-        with self.assertWarns(Warning):
-            proc.run(2)
 
         shutil.rmtree(path)

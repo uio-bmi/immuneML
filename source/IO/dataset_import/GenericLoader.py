@@ -1,7 +1,7 @@
+import copy
 import os
 import pickle
 from multiprocessing.pool import Pool
-import copy
 
 import numpy as np
 import pandas as pd
@@ -11,9 +11,9 @@ from source.IO.dataset_import.DataLoader import DataLoader
 from source.IO.dataset_import.PickleLoader import PickleLoader
 from source.IO.metadata_import.MetadataImport import MetadataImport
 from source.data_model.dataset.Dataset import Dataset
-from source.data_model.receptor_sequence.ReceptorSequence import ReceptorSequence
-from source.data_model.receptor_sequence.SequenceFrameType import SequenceFrameType
-from source.data_model.receptor_sequence.SequenceMetadata import SequenceMetadata
+from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
+from source.data_model.receptor.receptor_sequence.SequenceFrameType import SequenceFrameType
+from source.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
 from source.data_model.repertoire.Repertoire import Repertoire
 from source.data_model.repertoire.RepertoireGenerator import RepertoireGenerator
 from source.data_model.repertoire.RepertoireMetadata import RepertoireMetadata

@@ -1,7 +1,7 @@
 from unittest import TestCase
 
+from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.data_model.repertoire.Repertoire import Repertoire
-from source.data_model.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.util.KmerHelper import KmerHelper
 
 
