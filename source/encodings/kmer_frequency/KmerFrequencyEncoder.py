@@ -61,6 +61,7 @@ class KmerFrequencyEncoder(DatasetEncoder):
     def _prepare_caching_params(self, dataset, params: EncoderParams, step: str = ""):
         return (("dataset_filenames", tuple(dataset.get_filenames())),
                 ("dataset_metadata", dataset.metadata_file),
+                ("dataset_type", dataset.__class__.__name__),
                 ("labels", tuple(params["label_configuration"].get_labels_by_name())),
                 ("encoding", KmerFrequencyEncoder.__name__),
                 ("learn_model", params["learn_model"]),

@@ -55,7 +55,9 @@ class TestTopPublicFeatureEncoding(TestCase):
             params=dataset_params
         )
 
-        d1 = PipelineEncoder.encode(
+        encoder = PipelineEncoder.create_encoder(dataset)
+
+        d1 = encoder.encode(
             dataset,
             EncoderParams(
                 result_path=path,

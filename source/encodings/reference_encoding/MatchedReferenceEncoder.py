@@ -30,10 +30,11 @@ class MatchedReferenceEncoder(DatasetEncoder):
         encoding_params_desc = {"max_distance": params["model"]["max_distance"],
                                 "summary": params["model"]["summary"],
                                 "reference_sequences": sorted([seq.get_sequence() + seq.metadata.v_gene + seq.metadata.j_gene
-                                                        for seq in params["model"]["reference_sequences"]])}
+                                                               for seq in params["model"]["reference_sequences"]])}
 
         return (("dataset_filenames", tuple(dataset.get_filenames())),
                 ("dataset_metadata", dataset.metadata_file),
+                ("dataset_type", dataset.__class__.__name__),
                 ("labels", tuple(params["label_configuration"].get_labels_by_name())),
                 ("encoding", MatchedReferenceEncoder.__name__),
                 ("learn_model", params["learn_model"]),

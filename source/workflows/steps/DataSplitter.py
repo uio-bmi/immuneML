@@ -28,6 +28,7 @@ class DataSplitter(Step):
     def _prepare_caching_params(input_params: DataSplitterParams):
         return (("dataset_filenames", tuple(input_params.dataset.get_filenames())),
                 ("dataset_metadata", input_params.dataset.metadata_file),
+                ("dataset_type", input_params.dataset.__class__.__name__),
                 ("split_count", input_params.split_count),
                 ("split_strategy", input_params.split_strategy.name),
                 ("label_to_balance", input_params.label_to_balance),

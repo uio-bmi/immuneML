@@ -126,7 +126,9 @@ class TestEmerson2018NatGenEncoding(TestCase):
                 }
             )
 
-        d1 = PipelineEncoder.encode(
+        encoder = PipelineEncoder.create_encoder(dataset)
+
+        d1 = encoder.encode(
             dataset,
             params
         )
@@ -136,7 +138,9 @@ class TestEmerson2018NatGenEncoding(TestCase):
 
         dataset2 = RepertoireDataset(filenames=[dataset_filenames[num] for num in range(1, 4)])
 
-        d2 = PipelineEncoder.encode(
+        encoder = PipelineEncoder.create_encoder(dataset)
+
+        d2 = encoder.encode(
             dataset2,
             params
         )

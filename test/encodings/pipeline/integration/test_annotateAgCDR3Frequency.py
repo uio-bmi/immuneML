@@ -109,7 +109,9 @@ reference_rep.tsv"""
                 }
             )
 
-        d1 = PipelineEncoder.encode(
+        encoder = PipelineEncoder.create_encoder(dataset)
+
+        d1 = encoder.encode(
             dataset,
             encoder_params
         )
