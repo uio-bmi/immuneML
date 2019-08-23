@@ -20,24 +20,24 @@ class TestSequenceGenerator(TestCase):
                 pickle.dump(sequences[i * 100: (i+1) * 100], file)
 
         sequence_generator = SequenceGenerator(file_list)
-        generator = sequence_generator.build_generator(41)
+        generator = sequence_generator.build_batch_generator(41)
 
         counter = 0
 
         for batch in generator:
             for sequence in batch:
-                self.assertEqual(counter, int(sequence.id))
+                self.assertEqual(counter, int(sequence.identifier))
                 counter += 1
 
         self.assertEqual(307, counter)
 
-        generator = sequence_generator.build_generator(110)
+        generator = sequence_generator.build_batch_generator(110)
 
         counter = 0
 
         for batch in generator:
             for sequence in batch:
-                self.assertEqual(counter, int(sequence.id))
+                self.assertEqual(counter, int(sequence.identifier))
                 counter += 1
 
         self.assertEqual(307, counter)

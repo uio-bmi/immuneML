@@ -17,7 +17,7 @@ class HPSetting:
         self.preproc_sequence = preproc_sequence
 
     def get_key(self):
-        return "{}_{}_{}".format(self.encoder.__name__,
+        return "{}_{}_{}".format(self.encoder.__class__.__name__ if isinstance(self.encoder, DatasetEncoder) else self.encoder.__name__,
                                  self.ml_method.__class__.__name__,
                                  hashlib.md5((str(self.encoder_params) +
                                               str(self.ml_params) +

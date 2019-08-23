@@ -103,7 +103,7 @@ class TestMiXCRLoader(TestCase):
             "metadata_file": path + "metadata.csv"
         })
 
-        self.assertEqual(2, dataset.get_repertoire_count())
+        self.assertEqual(2, dataset.get_example_count())
 
         for index, repertoire in enumerate(dataset.get_data()):
             if index == 0:

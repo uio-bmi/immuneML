@@ -32,7 +32,8 @@ class TestDataSplitter(TestCase):
             training_percentage=training_percentage,
             split_strategy=SplitType.RANDOM,
             split_count=5,
-            label_to_balance=None
+            label_to_balance=None,
+            path=path
         ))
 
         self.assertTrue(isinstance(trains[0], RepertoireDataset))
@@ -48,7 +49,8 @@ class TestDataSplitter(TestCase):
             training_percentage=training_percentage,
             split_strategy=SplitType.RANDOM,
             split_count=5,
-            label_to_balance=None
+            label_to_balance=None,
+            path=path
         ))
 
         self.assertEqual(trains[0].get_filenames(), trains2[0].get_filenames())
@@ -58,7 +60,8 @@ class TestDataSplitter(TestCase):
             split_strategy=SplitType.LOOCV,
             split_count=-1,
             label_to_balance=None,
-            training_percentage=-1
+            training_percentage=-1,
+            path=path
         ))
 
         self.assertTrue(isinstance(trains[0], RepertoireDataset))
@@ -73,7 +76,8 @@ class TestDataSplitter(TestCase):
             split_strategy=SplitType.K_FOLD,
             split_count=5,
             label_to_balance=None,
-            training_percentage=-1
+            training_percentage=-1,
+            path=path
         ))
 
         self.assertTrue(isinstance(trains[0], RepertoireDataset))
@@ -88,7 +92,8 @@ class TestDataSplitter(TestCase):
             split_strategy=SplitType.RANDOM_BALANCED,
             training_percentage=training_percentage,
             split_count=10,
-            label_to_balance="key1"
+            label_to_balance="key1",
+            path=path
         ))
 
         self.assertTrue(isinstance(trains[0], RepertoireDataset))
@@ -96,23 +101,5 @@ class TestDataSplitter(TestCase):
         self.assertEqual(10, len(trains))
         self.assertEqual(10, len(tests))
         self.assertEqual(len(trains[0].get_filenames()) + len(tests[0].get_filenames()), 6)
-
-        shutil.rmtree(path)
-
-    def test_build_new_metadata(self):
-
-        path = EnvironmentSettings.tmp_test_path + "data_splitter/"
-        PathBuilder.build(path)
-
-        df = pd.DataFrame(data={"key1": [0, 1, 2, 3, 4, 5], "key2": [0, 1, 2, 3, 4, 5]})
-        df.to_csv(path+"metadata.csv")
-
-        filepath = DataSplitter.build_new_metadata(path+"metadata.csv", [1, 3, 4], SplitType.K_FOLD, 2, DataSplitter.TRAIN)
-
-        df2 = pd.read_csv(filepath, index_col=0)
-        self.assertEqual(3, df2.shape[0])
-        self.assertEqual(1, df2.iloc[0, 0])
-        self.assertEqual(3, df2.iloc[1, 1])
-        self.assertEqual(4, df2.iloc[2, 0])
 
         shutil.rmtree(path)

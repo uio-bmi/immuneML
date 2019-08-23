@@ -92,7 +92,7 @@ class TestDataSummarizer(TestCase):
 
         filtered = DataSummarizer.filter_repertoires(dataset, criteria)
 
-        self.assertTrue(filtered.get_repertoire_count() == 2)
+        self.assertTrue(filtered.get_example_count() == 2)
         self.assertTrue(filtered.encoded_data.examples.shape[0] == 2)
         self.assertTrue(filtered.encoded_data.examples.shape[1] == 5)
 
@@ -124,7 +124,7 @@ class TestDataSummarizer(TestCase):
 
         filtered = DataSummarizer.filter_features(dataset, criteria)
 
-        self.assertTrue(filtered.get_repertoire_count() == 3)
+        self.assertTrue(filtered.get_example_count() == 3)
         self.assertTrue(filtered.encoded_data.examples.shape[0] == 3)
         self.assertTrue(filtered.encoded_data.examples.shape[1] == 3)
 
@@ -156,7 +156,7 @@ class TestDataSummarizer(TestCase):
 
         annotated = DataSummarizer.annotate_repertoires(dataset, criteria, "annotate")
 
-        self.assertTrue(annotated.get_repertoire_count() == 3)
+        self.assertTrue(annotated.get_example_count() == 3)
         self.assertTrue(annotated.encoded_data.examples.shape[0] == 3)
         self.assertTrue(annotated.encoded_data.examples.shape[1] == 5)
 
@@ -188,7 +188,7 @@ class TestDataSummarizer(TestCase):
 
         annotated = DataSummarizer.annotate_features(dataset, criteria, "annotate")
 
-        self.assertTrue(annotated.get_repertoire_count() == 3)
+        self.assertTrue(annotated.get_example_count() == 3)
         self.assertTrue(annotated.encoded_data.examples.shape[0] == 3)
         self.assertTrue(annotated.encoded_data.examples.shape[1] == 5)
 
@@ -215,6 +215,6 @@ class TestDataSummarizer(TestCase):
 
         annotated = DataSummarizer.annotate_features(dataset, criteria, "annotate")
 
-        self.assertTrue(annotated.get_repertoire_count() == 3)
+        self.assertTrue(annotated.get_example_count() == 3)
         self.assertTrue(annotated.encoded_data.examples.shape[0] == 3)
         self.assertTrue(annotated.encoded_data.examples.shape[1] == 5)

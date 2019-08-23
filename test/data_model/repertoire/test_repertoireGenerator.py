@@ -35,7 +35,7 @@ class TestRepertoireGenerator(TestCase):
             pickle.dump(repertoire1, file)
 
         # test generator behavior
-        rep_gen1 = RepertoireGenerator.build_generator([file1, file2], 1)
+        rep_gen1 = RepertoireGenerator.build_item_generator([file1, file2], 1)
         rep1 = next(rep_gen1)
         self.assertTrue(isinstance(rep1, SequenceRepertoire))
         self.assertEqual(len(rep1.sequences), 2)
@@ -48,7 +48,7 @@ class TestRepertoireGenerator(TestCase):
         self.assertEqual(rep2.sequences[0].amino_acid_sequence, "CAS")
         self.assertEqual(rep2.sequences[1].amino_acid_sequence, "VFA")
 
-        rep_gen2 = RepertoireGenerator.build_generator([file1, file2, file3], 2)
+        rep_gen2 = RepertoireGenerator.build_item_generator([file1, file2, file3], 2)
 
         i = 0
 

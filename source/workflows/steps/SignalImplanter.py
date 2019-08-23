@@ -46,8 +46,7 @@ class SignalImplanter(Step):
 
         dataset = input_params["dataset"]
         processed_filenames = []
-        simulation_limits = SignalImplanter._prepare_simulation_limits(input_params["simulation"],
-                                                                        dataset.get_repertoire_count())
+        simulation_limits = SignalImplanter._prepare_simulation_limits(input_params["simulation"], dataset.get_example_count())
         simulation_index = 0
 
         for index, repertoire in enumerate(dataset.get_data(input_params["batch_size"])):

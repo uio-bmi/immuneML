@@ -31,7 +31,7 @@ class ReferenceRepertoireEncoder(MatchedReferenceEncoder):
         return encoded_dataset
 
     def _encode_repertoires(self, dataset, matched_info, params: EncoderParams):
-        encoded_repertories = np.zeros((dataset.get_repertoire_count(), 1), dtype=float)
+        encoded_repertories = np.zeros((dataset.get_example_count(), 1), dtype=float)
         labels = {label: [] for label in params["label_configuration"].get_labels_by_name()}
 
         for index, repertoire in enumerate(dataset.get_data()):

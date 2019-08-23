@@ -48,7 +48,7 @@ rep1.tsv,TRA,1234,no"""
                                               "region_type": "CDR3",  # can be loaded from metadata if available?"
                                               "metadata_file": path + "metadata.csv"})
 
-        self.assertEqual(1, dataset.get_repertoire_count())
+        self.assertEqual(1, dataset.get_example_count())
         for index, rep in enumerate(dataset.get_data()):
             self.assertEqual("rep1", rep.identifier)
             self.assertEqual(19, len(rep.sequences))

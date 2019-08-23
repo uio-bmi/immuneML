@@ -108,7 +108,7 @@ class SequenceMatchFeatureAnnotation(TransformerMixin):
             params=X.params,
             encoded_data=encoded,
             filenames=X.get_filenames(),
-            identifier=X.id,
+            identifier=X.identifier,
             metadata_file=X.metadata_file
         )
 

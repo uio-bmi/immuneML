@@ -28,14 +28,13 @@ class KmerFreqSequenceEncoder(KmerFrequencyEncoder):
 
         sequence_encoder = self._prepare_sequence_encoder(params)
         feature_names = sequence_encoder.get_feature_names(params)
-        for batch in dataset.get_data(params["batch_size"]):
-            for sequence in batch:
-                counts = self._encode_sequence(sequence, params, sequence_encoder, Counter())
-                encoded_sequences.append(counts)
-                sequence_ids.append(sequence.id)
+        for sequence in dataset.get_data(params["batch_size"]):
+            counts = self._encode_sequence(sequence, params, sequence_encoder, Counter())
+            encoded_sequences.append(counts)
+            sequence_ids.append(sequence.identifier)
 
-                for label_name in label_config.get_labels_by_name():
-                    label = sequence.metadata.custom_params[label_name]
-                    labels[label_name].append(label)
+            for label_name in label_config.get_labels_by_name():
+                label = sequence.metadata.custom_params[label_name]
+                labels[label_name].append(label)
 
         return encoded_sequences, sequence_ids, labels, feature_names

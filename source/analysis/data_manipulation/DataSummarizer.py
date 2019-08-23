@@ -49,7 +49,7 @@ class DataSummarizer:
             params=dataset.params,
             encoded_data=encoded,
             filenames=dataset.get_filenames(),
-            identifier=dataset.id,
+            identifier=dataset.identifier,
             metadata_file=metadata_file
         )
 
@@ -99,7 +99,7 @@ class DataSummarizer:
             params=dataset.params,
             encoded_data=encoded,
             filenames=dataset.get_filenames(),
-            identifier=dataset.id,
+            identifier=dataset.identifier,
             metadata_file=dataset.metadata_file
         )
 
@@ -191,7 +191,7 @@ class DataSummarizer:
             params=dataset.params,
             encoded_data=encoded,
             filenames=filenames,
-            identifier=dataset.id,
+            identifier=dataset.identifier,
             metadata_file=metadata_file
         )
 
@@ -227,7 +227,7 @@ class DataSummarizer:
             params=dataset.params,
             encoded_data=encoded,
             filenames=dataset.get_filenames(),
-            identifier=dataset.id,
+            identifier=dataset.identifier,
             metadata_file=dataset.metadata_file
         )
 
@@ -261,7 +261,7 @@ class DataSummarizer:
             params=dataset.params,
             encoded_data=encoded,
             filenames=dataset.get_filenames(),
-            identifier=dataset.id,
+            identifier=dataset.identifier,
             metadata_file=dataset.metadata_file
         )
 
@@ -294,7 +294,7 @@ class DataSummarizer:
             params=dataset.params,
             encoded_data=encoded,
             filenames=dataset.get_filenames(),
-            identifier=dataset.id,
+            identifier=dataset.identifier,
             metadata_file=dataset.metadata_file
         )
 
@@ -316,7 +316,7 @@ class DataSummarizer:
             params=dataset.params,
             encoded_data=encoded,
             filenames=dataset.get_filenames(),
-            identifier=dataset.id,
+            identifier=dataset.identifier,
             metadata_file=dataset.metadata_file
         )
         return result
@@ -337,7 +337,7 @@ class DataSummarizer:
             params=dataset.params,
             encoded_data=encoded,
             filenames=dataset.get_filenames(),
-            identifier=dataset.id,
+            identifier=dataset.identifier,
             metadata_file=dataset.metadata_file
         )
         return result

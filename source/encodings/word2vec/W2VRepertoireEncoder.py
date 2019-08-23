@@ -8,7 +8,7 @@ from source.util.KmerHelper import KmerHelper
 class W2VRepertoireEncoder(Word2VecEncoder):
 
     def _encode_examples(self, encoded_dataset, vectors, params):
-        repertoires = np.zeros(shape=[encoded_dataset.get_repertoire_count(), vectors.vector_size])
+        repertoires = np.zeros(shape=[encoded_dataset.get_example_count(), vectors.vector_size])
         for (index, repertoire) in enumerate(encoded_dataset.get_data()):
             repertoires[index] = self._encode_repertoire(repertoire, vectors, params)
         return repertoires

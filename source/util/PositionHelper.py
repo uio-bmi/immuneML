@@ -41,9 +41,14 @@ class PositionHelper:
         position_weights = {int(imgt_positions[k]): sequence_position_weights[imgt_positions[k]]
                             if imgt_positions[k] in sequence_position_weights.keys() and k < index_limit else 0.0 for k
                             in range(len(imgt_positions))}
-        weights_sum = sum([position_weights[k] for k in sequence_position_weights.keys()])
+        print("Sequence position weights: {}".format(sequence_position_weights.keys()))
+        print("Position weights: {}".format(position_weights.keys()))
+        weights_sum = sum([position_weights[k] for k in sequence_position_weights.keys() if k in position_weights])
         # normalize weights
-        position_weights = {int(k): float(position_weights[k]) / float(weights_sum) for k in position_weights.keys()}
+        if weights_sum != 0:
+            position_weights = {int(k): float(position_weights[k]) / float(weights_sum) for k in position_weights.keys()}
+        else:
+            position_weights = {int(k): 1 / len(position_weights.keys()) for k in position_weights}
         return position_weights
 
     @staticmethod

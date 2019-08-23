@@ -66,7 +66,7 @@ rep2.tsv,TRB,1234,no"""
                                                }
                                                )
 
-        self.assertEqual(2, dataset.get_repertoire_count())
+        self.assertEqual(2, dataset.get_example_count())
         for index, rep in enumerate(dataset.get_data()):
             if index == 0:
                 self.assertEqual("rep1", rep.identifier)

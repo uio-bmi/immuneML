@@ -61,7 +61,7 @@ class ItemGenerator:
                 self._get_item_count(index)
         return sum(self.file_lengths)
 
-    def build_generator(self, batch_size):
+    def build_batch_generator(self, batch_size: int):
         """
         creates a generator which will return one batch of items at the time
 
@@ -76,3 +76,20 @@ class ItemGenerator:
         while cursor is not None:
             batch, cursor = self._load_batch(cursor, batch_size)
             yield batch
+
+    def build_item_generator(self, batch_size: int):
+        """
+        creates a generator which will return one item at the time
+
+        :param batch_size: how many items should be loaded at once (default 1)
+        :return: item generator
+        """
+        cursor = {
+            "file_index": 0,
+            "line": 0
+        }
+
+        while cursor is not None:
+            batch, cursor = self._load_batch(cursor, batch_size)
+            for sequence in batch:
+                yield sequence

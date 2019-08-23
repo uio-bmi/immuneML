@@ -1,5 +1,6 @@
 import copy
 
+from source.data_model.dataset.Dataset import Dataset
 from source.encodings.EncoderParams import EncoderParams
 from source.environment.LabelConfiguration import LabelConfiguration
 from source.hyperparameter_optimization.HPSetting import HPSetting
@@ -54,7 +55,7 @@ class HPOptimizationProcess(InstructionProcess):
         return self.run_assessment()
 
     def run_assessment(self):
-        train_datasets, test_datasets = self.split_data(self.dataset, self.assessment)
+        train_datasets, test_datasets = self.split_data(self.dataset, self.assessment, self.path)
         fold_performances = []
         for index in range(len(train_datasets)):
             fold_performances.append(self.run_assessment_fold(train_datasets[index], test_datasets[index], index + 1))
@@ -73,9 +74,9 @@ class HPOptimizationProcess(InstructionProcess):
         return performance
 
     def run_selection(self, train_dataset, current_path: str) -> HPSetting:
-        train_datasets, test_datasets = self.split_data(train_dataset, self.selection)
         path = "{}selection_{}/".format(current_path, self.selection.split_strategy.name)
         PathBuilder.build(path)
+        train_datasets, test_datasets = self.split_data(train_dataset, self.selection, path)
         hp_setting = self.hp_strategy.get_next_setting()
         while hp_setting is not None:
             performance = self.test_hp_setting(hp_setting, train_datasets, test_datasets, path)
@@ -142,13 +143,14 @@ class HPOptimizationProcess(InstructionProcess):
         tmp_report.path = path
         tmp_report.generate_report()
 
-    def split_data(self, dataset, split_config: SplitConfig) -> tuple:
+    def split_data(self, dataset: Dataset, split_config: SplitConfig, path: str) -> tuple:
         params = DataSplitterParams(
             dataset=dataset,
             split_strategy=split_config.split_strategy,
             split_count=split_config.split_count,
             training_percentage=split_config.training_percentage,
-            label_to_balance=split_config.label_to_balance
+            label_to_balance=split_config.label_to_balance,
+            path=path
         )
         return DataSplitter.run(params)
 

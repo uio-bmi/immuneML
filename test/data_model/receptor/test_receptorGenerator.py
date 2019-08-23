@@ -9,7 +9,7 @@ from source.util.PathBuilder import PathBuilder
 
 
 class TestReceptorGenerator(TestCase):
-    def test_build_generator(self):
+    def test_build_batch_generator(self):
         path = EnvironmentSettings.tmp_test_path + "receptor_generator/"
         PathBuilder.build(path)
         receptors = [BCReceptor(id=str(i)) for i in range(307)]
@@ -20,7 +20,7 @@ class TestReceptorGenerator(TestCase):
                 pickle.dump(receptors[i * 100: (i+1) * 100], file)
 
         receptor_generator = ReceptorGenerator(file_list)
-        generator = receptor_generator.build_generator(41)
+        generator = receptor_generator.build_batch_generator(41)
 
         counter = 0
 
@@ -32,7 +32,7 @@ class TestReceptorGenerator(TestCase):
 
         self.assertEqual(307, counter)
 
-        generator = receptor_generator.build_generator(110)
+        generator = receptor_generator.build_batch_generator(110)
 
         counter = 0
 

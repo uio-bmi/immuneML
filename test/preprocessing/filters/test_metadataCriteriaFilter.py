@@ -36,6 +36,6 @@ class TestMetadataFilter(TestCase):
             }
         })
 
-        self.assertEqual(1, dataset1.get_repertoire_count())
+        self.assertEqual(1, dataset1.get_example_count())
 
         shutil.rmtree(path)

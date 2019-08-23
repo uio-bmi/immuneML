@@ -13,7 +13,7 @@ class ReceptorSequence:
                  identifier: str = None,
                  annotation: SequenceAnnotation = None,
                  metadata: SequenceMetadata = None):
-        self.id = identifier
+        self.identifier = identifier
         self.amino_acid_sequence = amino_acid_sequence
         self.nucleotide_sequence = nucleotide_sequence
         self.annotation = annotation
