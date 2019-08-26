@@ -8,12 +8,16 @@ from source.simulation.motif_instantiation_strategy.MotifInstantiationStrategy i
 
 
 class GappedKmerInstantiation(MotifInstantiationStrategy):
+    """
+    Creates a motif from the predefined parameters in the constructor and the seed given in the instantiate_motif();
+    currently works only for single gap in the sequence
+    """
 
-    def __init__(self, params: dict = None):
-        self._max_hamming_distance = params["max_hamming_distance"] if "max_hamming_distance" in params else 0
-        self._min_gap = params["min_gap"] if "min_gap" in params else 0
-        self._max_gap = params["max_gap"] if "max_gap" in params else 0
-        # TODO: extract default values to config files / classes maybe?
+    def __init__(self, max_hamming_distance: int = 0, min_gap: int = 0, max_gap: int = 0, alphabet_weights: dict = None):
+        self._max_hamming_distance = max_hamming_distance
+        self._min_gap = min_gap
+        self._max_gap = max_gap
+        self._alphabet_weights = alphabet_weights
 
     def get_max_gap(self) -> int:
         return self._max_gap
@@ -21,19 +25,13 @@ class GappedKmerInstantiation(MotifInstantiationStrategy):
     def instantiate_motif(self, base, params: dict = None) -> MotifInstance:
         allowed_positions = list(range(len(base)))
         instance = list(base)
-        gap_index = -1
 
         if "/" in base:
             gap_index = base.index("/")
             allowed_positions.remove(gap_index)
-            # del instance[gap_index]
 
         gap_size = np.random.choice(range(self._min_gap, self._max_gap + 1))
-        instance = self._substitute_letters(params["position_weights"], allowed_positions, params["alphabet_weights"], instance)
         instance = "".join(instance)
-
-        # if gap_index != -1:
-        #    instance = instance[:gap_index] + "/" + instance[gap_index:]
 
         return MotifInstance(instance, gap_size)
 

@@ -4,7 +4,7 @@ from source.simulation.motif_instantiation_strategy.MotifInstantiationStrategy i
 
 class IdentityInstantiation(MotifInstantiationStrategy):
     """
-    Motif instantiation strategy which always return the seed
+    Motif instantiation strategy which always returns the seed
     """
 
     def get_max_gap(self) -> int:

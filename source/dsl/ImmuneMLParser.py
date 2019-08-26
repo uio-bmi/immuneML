@@ -7,6 +7,7 @@ from source.dsl.InstructionParser import InstructionParser
 from source.dsl.MLParser import MLParser
 from source.dsl.PreprocessingParser import PreprocessingParser
 from source.dsl.ReportParser import ReportParser
+from source.dsl.SimulationParser import SimulationParser
 from source.dsl.SymbolTable import SymbolTable
 from source.dsl.encoding_parsers.EncodingParser import EncodingParser
 from source.dsl.import_parsers.ImportParser import ImportParser
@@ -114,8 +115,7 @@ class ImmuneMLParser:
         symbol_table = SymbolTable()
 
         symbol_table, specs_import = ImportParser.parse(workflow_specification, symbol_table)
-        # TODO: add simulation to this scenario
-        # symbol_table, specs_simulation = SimulationParser.parse_simulation(workflow_specification, symbol_table)
+        symbol_table, specs_simulation = SimulationParser.parse_simulation(workflow_specification, symbol_table)
         symbol_table, specs_preprocessing = PreprocessingParser.parse(workflow_specification, symbol_table)
         symbol_table, specs_encoding = EncodingParser.parse(workflow_specification, symbol_table)
         symbol_table, specs_ml = MLParser.parse(workflow_specification, symbol_table)

@@ -1,5 +1,6 @@
 from source.dsl.SymbolTable import SymbolTable
 from source.dsl.SymbolType import SymbolType
+from source.simulation.Simulation import Simulation
 from source.simulation.implants.Motif import Motif
 from source.simulation.implants.Signal import Signal
 from source.simulation.motif_instantiation_strategy.MotifInstantiationStrategy import MotifInstantiationStrategy
@@ -10,6 +11,43 @@ from source.util.ReflectionHandler import ReflectionHandler
 
 
 class SimulationParser:
+    """
+    Simulation should be defined in the following manner:
+
+    .. highlight:: yaml
+    .. code-block:: yaml
+
+        simulation:
+            motifs:
+                m1:
+                    seed: AAC
+                    instantiation: GappedKmer
+                    params:
+                        max_hamming_distance: 1 # max 1 letter can differ at one time
+                        min_gap: 0
+                        max_gap: 1
+                        # probability that when hamming distance is allowed a letter in the seed will be replaced by
+                        # other alphabet letters - alphabet_weights
+                        alphabet_weights:
+                            A: 0.2
+                            C: 0.2
+                            D: 0.4
+                            E: 0.2
+            signals:
+                s1:
+                    motifs:
+                        - m1
+                    sequence_position_weights: # likelihood of implanting at IMGT position of receptor sequence
+                        107: 0.5
+                    implanting: HealthySequences
+            implanting:
+                i1:
+                    dataset_implanting_rate: 0.5 # percentage of repertoire where the signals will be implanted
+                    repertoire_implanting_rate: 0.01 # percentage of sequences within repertoire where the signals will be implanted
+                    signals:
+                        - s1
+
+    """
 
     @staticmethod
     def parse_simulation(workflow_specification: dict, symbol_table: SymbolTable):
@@ -27,12 +65,14 @@ class SimulationParser:
     @staticmethod
     def _add_signals_to_implanting(simulation: dict, symbol_table: SymbolTable) -> SymbolTable:
         for key in simulation["implanting"].keys():
-            item = {
-                "repertoires": simulation["implanting"][key]["repertoires"],
-                "sequences": simulation["implanting"][key]["sequences"],
-                "signals": [signal[1] for signal in symbol_table.get_by_type(SymbolType.SIGNAL)
-                            if signal[1].id in simulation["implanting"][key]["signals"]]
-            }
+
+            item = Simulation(
+                dataset_implanting_rate=simulation["implanting"][key]["dataset_implanting_rate"],
+                repertoire_implanting_rate=simulation["implanting"][key]["repertoire_implanting_rate"],
+                signals=[signal[1] for signal in symbol_table.get_by_type(SymbolType.SIGNAL)
+                         if signal[1].id in simulation["implanting"][key]["signals"]],
+                name=key
+            )
 
             symbol_table.add(key, SymbolType.SIMULATION, item)
 
@@ -57,7 +97,7 @@ class SimulationParser:
 
     @staticmethod
     def _get_implanting_strategy(signal: dict) -> SignalImplantingStrategy:
-        if "implanting" in signal and signal["implanting"] == "healthy_sequences":
+        if "implanting" in signal and signal["implanting"] == "HealthySequences":
             implanting_strategy = HealthySequenceImplanting(GappedMotifImplanting(),
                                                             signal["sequence_position_weights"] if
                                                             "sequence_position_weights" in signal else None)
@@ -68,4 +108,5 @@ class SimulationParser:
     @staticmethod
     def _get_instantiation_strategy(motif_item: dict) -> MotifInstantiationStrategy:
         if "instantiation" in motif_item:
-            return ReflectionHandler.get_class_by_name("{}Instantiation".format(motif_item["instantiation"]))
+            params = motif_item["params"] if "params" in motif_item else {}
+            return ReflectionHandler.get_class_by_name("{}Instantiation".format(motif_item["instantiation"]))(**params)
