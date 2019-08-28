@@ -1,5 +1,6 @@
 import pandas as pd
 
+from source.data_model.receptor.TCABReceptor import TCABReceptor
 from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
 
@@ -9,7 +10,7 @@ class VDJdbSequenceImport:
     Loads in the data to a list of sequences from VDJdb format
     """
 
-    COLUMNS = ["V", "J", "Gene", "CDR3"]
+    COLUMNS = ["V", "J", "Gene", "CDR3", "complex.id"]
 
     @staticmethod
     def import_sequences(path, paired: bool = False):
@@ -21,9 +22,24 @@ class VDJdbSequenceImport:
         return sequences
 
     @staticmethod
-    def import_paired_sequences(path) -> list:
-        # TODO: add implementation when data model for paired sequences is defined
-        raise NotImplementedError
+    def import_paired_sequences(path, columns) -> list:
+        df = pd.read_csv(path, sep="\t", usecols=columns)
+        identifiers = df["complex.id"].unique()
+        receptors = []
+
+        for identifier in identifiers:
+            receptor = VDJdbSequenceImport.import_receptor(df, identifier)
+            receptors.append(receptor)
+
+        return receptors
+
+    @staticmethod
+    def import_receptor(df, identifier) -> TCABReceptor:
+        alpha_row = df.loc[(df["complex.id"] == identifier) & (df["Gene"] == "TRA")].iloc[0]
+        beta_row = df.loc[(df["complex.id"] == identifier) & (df["Gene"] == "TRB")].iloc[0]
+        return TCABReceptor(alpha=VDJdbSequenceImport.import_sequence(alpha_row),
+                            beta=VDJdbSequenceImport.import_sequence(beta_row),
+                            identifier=identifier)
 
     @staticmethod
     def import_all_sequences(path, columns: list = None) -> list:
