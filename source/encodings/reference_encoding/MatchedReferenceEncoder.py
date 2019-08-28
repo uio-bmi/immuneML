@@ -15,8 +15,13 @@ class MatchedReferenceEncoder(DatasetEncoder):
 
     @staticmethod
     def create_encoder(dataset=None):
-        return ReflectionHandler.get_class_by_name(MatchedReferenceEncoder.dataset_mapping[dataset.__class__.__name__],
-                                                   "reference_encoding/")()
+        try:
+            encoder = ReflectionHandler.get_class_by_name(MatchedReferenceEncoder.dataset_mapping[dataset.__class__.__name__],
+                                                          "reference_encoding/")()
+        except ValueError:
+            raise ValueError("{} is not defined for dataset of type {}.".format(MatchedReferenceEncoder.__name__,
+                                                                                dataset.__class__.__name__))
+        return encoder
 
     def encode(self, dataset, params: EncoderParams):
         cache_key = CacheHandler.generate_cache_key(self._prepare_caching_params(dataset, params))

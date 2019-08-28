@@ -55,7 +55,12 @@ class KmerFrequencyEncoder(DatasetEncoder):
 
     @staticmethod
     def create_encoder(dataset=None):
-        return ReflectionHandler.get_class_by_name(KmerFrequencyEncoder.dataset_mapping[dataset.__class__.__name__], "kmer_frequency/")()
+        try:
+            encoder = ReflectionHandler.get_class_by_name(KmerFrequencyEncoder.dataset_mapping[dataset.__class__.__name__],
+                                                          "kmer_frequency/")()
+        except ValueError:
+            raise ValueError("{} is not defined for dataset of type {}.".format(KmerFrequencyEncoder.__name__, dataset.__class__.__name__))
+        return encoder
 
     def encode(self, dataset, params: EncoderParams):
 

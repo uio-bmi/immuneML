@@ -76,7 +76,7 @@ class PipelineEncoder(DatasetEncoder):
         if isinstance(dataset, RepertoireDataset):
             return PipelineEncoder()
         else:
-            raise NotImplementedError("PipelineEncoder is not implemented for dataset types which are not RepertoireDataset.")
+            raise ValueError("PipelineEncoder is not defined for dataset types which are not RepertoireDataset.")
 
     def encode(self, dataset, params: EncoderParams):
         filepath = params["result_path"] + "/" + params["filename"]
