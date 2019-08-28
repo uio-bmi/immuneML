@@ -21,3 +21,7 @@ class Dataset:
     @abc.abstractmethod
     def get_batch(self, batch_size: int):
         pass
+
+    @abc.abstractmethod
+    def get_filenames(self):
+        pass

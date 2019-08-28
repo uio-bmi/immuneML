@@ -24,7 +24,7 @@ class TestSequenceImport(TestCase):
         with open(path + "seqs.tsv", "w") as file:
             file.writelines(file_content)
 
-        sequences = VDJdbSequenceImport.import_all_sequences(path + "seqs.tsv", VDJdbSequenceImport.COLUMNS)
+        sequences = VDJdbSequenceImport.import_all_sequences(path + "seqs.tsv")
 
         self.assertEqual(7, len(sequences))
         self.assertEqual("CASSYVGNTGELFF", sequences[0].get_sequence())
@@ -48,7 +48,7 @@ class TestSequenceImport(TestCase):
         with open(path + "receptors.tsv", "w") as file:
             file.writelines(file_content)
 
-        receptors = VDJdbSequenceImport.import_paired_sequences(path + "receptors.tsv", VDJdbSequenceImport.COLUMNS)
+        receptors = VDJdbSequenceImport.import_paired_sequences(path + "receptors.tsv")
 
         self.assertEqual(2, len(receptors))
         self.assertTrue(receptor.identifier in ["3050", "15760"] for receptor in receptors)

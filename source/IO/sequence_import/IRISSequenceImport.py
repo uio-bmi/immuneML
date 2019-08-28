@@ -11,7 +11,7 @@ from source.environment.Constants import Constants
 class IRISSequenceImport:
 
     @staticmethod
-    def import_sequences(path: str):
+    def import_items(path: str):
         df = pd.read_csv(path, sep=";")
         df = df.where((pd.notnull(df)), None)
 

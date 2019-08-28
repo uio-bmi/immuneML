@@ -27,7 +27,7 @@ class DefaultParamsLoader:
         if os.path.isabs(path):
             filepath = path + DefaultParamsLoader._convert_to_snake_case(class_name) + "_params.yaml"
         else:
-            filepath = EnvironmentSettings.default_params_path + path \
+            filepath = EnvironmentSettings.default_params_path + path + ("/" if path[-1] != "/" else "") \
                        + DefaultParamsLoader._convert_to_snake_case(class_name) + "_params.yaml"
 
         if os.path.isfile(filepath):

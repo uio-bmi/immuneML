@@ -19,7 +19,7 @@ class MatchedReferenceParser(EncodingParameterParser):
             "MatchedReferenceParser: reference sequences are accepted only in VDJdb and IRIS formats."
 
         seqs = ReflectionHandler.get_class_by_name("{}SequenceImport".format(params["reference_sequences"]["format"]))\
-            .import_sequences(params["reference_sequences"]["path"])
+            .import_items(params["reference_sequences"]["path"])
 
         parsed = {
             "reference_sequences": seqs,

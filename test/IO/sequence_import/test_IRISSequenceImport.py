@@ -33,7 +33,7 @@ class TestIRISSequenceImport(TestCase):
                 TCR_AB;3511;KII;TRAV12-1*01;null;TRAJ3*01;null;null;null;null;null;null;null;null;null;null;null;null\n\
                 TCR_AB;3821;LVGD;TRAV8*01;null;TRAJ4*01;null;null;null;null;null;null;null;null;null;null;null;null\n")
 
-        sequences = IRISSequenceImport.import_sequences(path)
+        sequences = IRISSequenceImport.import_items(path)
 
         self.assertEqual(15, len(sequences))
         self.assertTrue(all(isinstance(sequence, ReceptorSequence) for sequence in sequences))
