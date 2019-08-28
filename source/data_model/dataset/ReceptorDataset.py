@@ -17,7 +17,12 @@ class ReceptorDataset(Dataset):
     def get_data(self, batch_size: int = 1000):
         self._filenames.sort()
         self.receptor_generator.file_list = self._filenames
-        return self.receptor_generator.build_generator(batch_size)
+        return self.receptor_generator.build_item_generator(batch_size)
+
+    def get_batch(self, batch_size: int = 1000):
+        self._filenames.sort()
+        self.receptor_generator.file_list = self._filenames
+        return self.receptor_generator.build_batch_generator(batch_size)
 
     def get_receptor_count(self):
         return self.receptor_generator.get_item_count()

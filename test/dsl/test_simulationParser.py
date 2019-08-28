@@ -15,20 +15,20 @@ class TestSimulationParser(TestCase):
                 "motifs": {
                     "motif1": {
                         "seed": "CAS",
-                        "instantiation": "Identity"
+                        "instantiation": "Identity",
                     }
                 },
                 "signals": {
                     "signal1": {
                         "motifs": ["motif1"],
-                        "implanting": "healthy_sequences"
+                        "implanting": "HealthySequences"
                     }
                 },
                 "implanting": {
                     "var1": {
                         "signals": ["signal1"],
-                        "repertoires": 0.5,
-                        "sequences": 0.1
+                        "dataset_implanting_rate": 0.5,
+                        "repertoire_implanting_rate": 0.1
                     }
                 }
             }

@@ -4,7 +4,6 @@ from source.simulation.implants.MotifInstance import MotifInstance
 
 
 class MotifInstantiationStrategy(metaclass=abc.ABCMeta):
-    # TODO: ensure that all motif instantiation strategies have the same init method signature?
 
     @abc.abstractmethod
     def instantiate_motif(self, base, params: dict = None) -> MotifInstance:
