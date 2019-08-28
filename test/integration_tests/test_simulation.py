@@ -7,7 +7,7 @@ import yaml
 
 from source.IO.dataset_export.PickleExporter import PickleExporter
 from source.app.ImmuneMLApp import ImmuneMLApp
-from source.data_model.dataset.Dataset import Dataset
+from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.util.PathBuilder import PathBuilder
 from source.util.RepertoireBuilder import RepertoireBuilder
@@ -83,7 +83,7 @@ class TestSimulation(TestCase):
                                                               "l2": [0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 1,
                                                                      0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1]})
 
-        dataset = Dataset(filenames=filenames, metadata_file=metadata, params={"l1": [1, 2], "l2": [0, 1]})
+        dataset = RepertoireDataset(filenames=filenames, metadata_file=metadata, params={"l1": [1, 2], "l2": [0, 1]})
         PickleExporter.export(dataset, path, "dataset.pkl")
 
     def test_simulation(self):

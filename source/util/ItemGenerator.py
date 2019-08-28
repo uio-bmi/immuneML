@@ -1,11 +1,13 @@
+import math
 import pickle
 
 
 class ItemGenerator:
 
-    def __init__(self, file_list: list):
+    def __init__(self, file_list: list, file_size: int = 1000):
         self.file_list = file_list
         self.file_lengths = [-1 for i in range(len(file_list))]
+        self.file_size = file_size
 
     def _load_batch(self, cursor: dict, batch_size: int):
         items = []
@@ -91,5 +93,42 @@ class ItemGenerator:
 
         while cursor is not None:
             batch, cursor = self._load_batch(cursor, batch_size)
-            for sequence in batch:
-                yield sequence
+            for item in batch:
+                yield item
+
+    def make_subset(self, example_indices: list, path: str):
+        batch_size = 1000
+        items = []
+        file_count = 1
+
+        example_indices.sort()
+
+        batch_filenames = self._prepare_batch_filenames(len(example_indices), path)
+
+        for index, batch in enumerate(self.build_batch_generator(batch_size)):
+            extracted_items = self._extract_items_from_batch(index, batch_size, batch, example_indices)
+            items.extend(extracted_items)
+
+            if len(items) >= self.file_size or len(items) == len(example_indices):
+                self._store_items_to_file(batch_filenames[file_count-1], items[:self.file_size])
+                file_count += 1
+                items = items[self.file_size:]
+
+        return batch_filenames
+
+    def _prepare_batch_filenames(self, example_count: int, path: str):
+        batch_count = math.ceil(example_count / self.file_size)
+        digits_count = len(str(batch_count))
+        filenames = [path + "batch".join(["0" for i in range(digits_count-len(str(index)))]) + str(index) + ".pkl"
+                     for index in range(digits_count)]
+        return filenames
+
+    def _store_items_to_file(self, path, items):
+        with open(path, "wb") as file:
+            pickle.dump(items, file)
+
+    def _extract_items_from_batch(self, index, batch_size, batch, example_indices):
+        upper_limit, lower_limit = (index + 1) * batch_size, index * batch_size
+        batch_indices = [ind for ind in example_indices if lower_limit <= ind <= upper_limit]
+        items = [batch[i - lower_limit] for i in batch_indices]
+        return items

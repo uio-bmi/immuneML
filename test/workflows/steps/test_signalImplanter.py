@@ -7,12 +7,14 @@ from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.data_model.repertoire.SequenceRepertoire import SequenceRepertoire
 from source.environment.EnvironmentSettings import EnvironmentSettings
+from source.simulation.Simulation import Simulation
 from source.simulation.implants.Motif import Motif
 from source.simulation.implants.Signal import Signal
 from source.simulation.motif_instantiation_strategy.IdentityInstantiation import IdentityInstantiation
 from source.simulation.signal_implanting_strategy.HealthySequenceImplanting import HealthySequenceImplanting
 from source.simulation.signal_implanting_strategy.sequence_implanting.GappedMotifImplanting import GappedMotifImplanting
 from source.workflows.steps.SignalImplanter import SignalImplanter
+from source.workflows.steps.SignalImplanterParams import SignalImplanterParams
 
 
 class TestSignalImplanter(TestCase):
@@ -26,7 +28,10 @@ class TestSignalImplanter(TestCase):
             os.makedirs(path)
 
         for i in range(10):
-            rep = SequenceRepertoire(sequences=[ReceptorSequence("ACDEFG"), ReceptorSequence("ACDEFG"), ReceptorSequence("ACDEFG"), ReceptorSequence("ACDEFG")])
+            rep = SequenceRepertoire(sequences=[ReceptorSequence("ACDEFG"),
+                                                ReceptorSequence("ACDEFG"),
+                                                ReceptorSequence("ACDEFG"),
+                                                ReceptorSequence("ACDEFG")])
             filename = path + "rep" + str(i+1) + ".pkl"
             with open(filename, "wb") as file:
                 pickle.dump(rep, file)
@@ -40,24 +45,10 @@ class TestSignalImplanter(TestCase):
         s2 = Signal(identifier="s2", motifs=[m1, m2],
                     implanting_strategy=HealthySequenceImplanting(GappedMotifImplanting()))
 
-        input_params = {
-            "repertoire_count": 10,
-            "sequence_count": 4,
-            "simulation": [{
-                    "signals": [s1, s2],
-                    "repertoires": 0.2,
-                    "sequences": 0.5
-                }, {
-                    "signals": [s2],
-                    "repertoires": 0.2,
-                    "sequences": 0.5
-                }
-            ],
-            "result_path": path,
-            "dataset": dataset,
-            "batch_size": 5,
-            "signals": [s1, s2]
-        }
+        simulations = [Simulation(dataset_implanting_rate=0.2, repertoire_implanting_rate=0.5, signals=[s1, s2]),
+                       Simulation(dataset_implanting_rate=0.2, repertoire_implanting_rate=0.5, signals=[s2])]
+
+        input_params = SignalImplanterParams(dataset=dataset, result_path=path, simulations=simulations, signals=[s1, s2], batch_size=1)
 
         new_dataset = SignalImplanter.run(input_params)
         reps_with_s2 = sum([rep.metadata.custom_params[s2.id] is True for rep in new_dataset.get_data(batch_size=10)])

@@ -23,7 +23,7 @@ class SimulationProcess(InstructionProcess):
                                                             batch_size=self.batch_size))
 
         return {
-            "repertoires": dataset.get_repertoire_count(),
+            "repertoires": dataset.get_example_count(),
             "result_path": dataset.metadata_file,
             "signals": [str(s) for s in self.signals],
             "simulations": [str(s) for s in self.simulations]
