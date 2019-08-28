@@ -49,7 +49,8 @@ class KmerFrequencyEncoder(DatasetEncoder):
 
     dataset_mapping = {
         "RepertoireDataset": "KmerFreqRepertoireEncoder",
-        "SequenceDataset": "KmerFreqSequenceEncoder"
+        "SequenceDataset": "KmerFreqSequenceEncoder",
+        "ReceptorDataset": "KmerFreqReceptorEncoder"
     }
 
     @staticmethod

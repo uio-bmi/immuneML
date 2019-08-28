@@ -68,9 +68,12 @@ class HPOptimizationProcess(InstructionProcess):
         optimal_hp_setting = self.run_selection(train_dataset, current_path)
         encoded_train_dataset = self.encode_dataset(train_dataset, optimal_hp_setting, current_path, learn_model=True)
         optimal_method = self.train_optimal_method(encoded_train_dataset, optimal_hp_setting, current_path + "optimal/")
-        encoded_test_dataset = self.encode_dataset(test_dataset, optimal_hp_setting, current_path, learn_model=False)
-        performance = self.assess_performance(optimal_method, encoded_test_dataset, run, current_path)
-        self.run_assessment_reports(train_dataset, test_dataset, optimal_method, current_path + "reports/")
+        if test_dataset.get_example_count() > 0:
+            encoded_test_dataset = self.encode_dataset(test_dataset, optimal_hp_setting, current_path, learn_model=False)
+            performance = self.assess_performance(optimal_method, encoded_test_dataset, run, current_path)
+            self.run_assessment_reports(train_dataset, test_dataset, optimal_method, current_path + "reports/")
+        else:
+            performance = {}
         return performance
 
     def run_selection(self, train_dataset, current_path: str) -> HPSetting:
@@ -155,8 +158,11 @@ class HPOptimizationProcess(InstructionProcess):
         return DataSplitter.run(params)
 
     def get_average_performance(self, metrics_per_label):
-        return {label: sum(perf[label] for perf in metrics_per_label) / len(metrics_per_label)
-                for label in self.label_configuration.get_labels_by_name()}
+        if all(all(label in performance for label in self.label_configuration.get_labels_by_name()) for performance in metrics_per_label):
+            return {label: sum(perf[label] for perf in metrics_per_label) / len(metrics_per_label)
+                    for label in self.label_configuration.get_labels_by_name()}
+        else:
+            return metrics_per_label
 
     def train_optimal_method(self, dataset, hp_setting: HPSetting, path: str) -> MLMethod:
         method = MLMethodTrainer.run(MLMethodTrainerParams(
@@ -207,10 +213,11 @@ class HPOptimizationProcess(InstructionProcess):
         for index, performance in enumerate(performances):
             row = str(index + 1) + "\t"
             for label in self.label_configuration.get_labels_by_name():
-                row += str(performance[label]) + "\t"
+                row += str(performance[label]) if label in performance else "/" + "\t"
             print(row)
         print("--------------------------------------------------------------")
         for label in self.label_configuration.get_labels_by_name():
             print("Label: {}, average balanced accuracy: {}".format(label,
-                                                                    sum(perf[label] for perf in performances) /
+                                                                    sum(perf[label] for perf in performances if label in perf) /
                                                                     len(performances)))
+

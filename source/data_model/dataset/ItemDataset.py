@@ -2,7 +2,7 @@ import uuid
 
 from source.data_model.dataset.Dataset import Dataset
 from source.data_model.encoded_data.EncodedData import EncodedData
-from source.util.ItemGenerator import ItemGenerator
+from source.data_model.receptor.ItemGenerator import ItemGenerator
 
 
 class ItemDataset(Dataset):

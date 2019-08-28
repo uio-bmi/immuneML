@@ -53,10 +53,13 @@ class MLProcess:
 
     def run(self, run_id: int):
         encoded_train = self._run_encoder(self.train_dataset, True)
-        encoded_test = self._run_encoder(self.test_dataset, False)
         method = self._train_ml_method(encoded_train)
-        performance = self._assess_ml_method(method, encoded_test, run_id)
-        self._run_reports(method, encoded_train, encoded_test, self.path + "reports/")
+        if self.test_dataset.get_example_count() > 0:
+            encoded_test = self._run_encoder(self.test_dataset, False)
+            performance = self._assess_ml_method(method, encoded_test, run_id)
+            self._run_reports(method, encoded_train, encoded_test, self.path + "reports/")
+        else:
+            performance = {}
         return performance
 
     def _run_reports(self, method: MLMethod, train_dataset: RepertoireDataset, test_dataset: RepertoireDataset, path: str):
@@ -69,8 +72,6 @@ class MLProcess:
             tmp_report.generate_report()
 
     def _assess_ml_method(self, method: MLMethod, encoded_test_dataset: RepertoireDataset, run: int):
-        if encoded_test_dataset is not None and encoded_test_dataset.encoded_data is not None \
-                and encoded_test_dataset.get_example_count() > 0:
             return MLMethodAssessment.run(MLMethodAssessmentParams(
                 method=method,
                 dataset=encoded_test_dataset,
@@ -82,10 +83,6 @@ class MLProcess:
                 all_predictions_path=self.predictions_path,
                 path=self.path
             ))
-        elif encoded_test_dataset.get_example_count() == 0:
-            pass
-        else:
-            raise ValueError("MLProcess: encoded test dataset does not contain valid data or is not encoded.")
 
     def _run_encoder(self, train_dataset: RepertoireDataset, learn_model: bool):
         return DataEncoder.run(DataEncoderParams(

@@ -4,31 +4,31 @@ from unittest import TestCase
 
 from source.data_model.dataset.SequenceDataset import SequenceDataset
 from source.data_model.receptor.BCReceptor import BCReceptor
-from source.data_model.receptor.ReceptorGenerator import ReceptorGenerator
+from source.data_model.receptor.ItemGenerator import ItemGenerator
 from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.util.PathBuilder import PathBuilder
 
 
-class TestReceptorGenerator(TestCase):
+class TestItemGenerator(TestCase):
     def test_build_batch_generator(self):
         path = EnvironmentSettings.tmp_test_path + "itembatch_generator/"
         PathBuilder.build(path)
-        receptors = [BCReceptor(id=str(i)) for i in range(307)]
+        receptors = [BCReceptor(identifier=str(i)) for i in range(307)]
         file_list = ["{}batch{}.pkl".format(path, i) for i in range(4)]
 
         for i in range(4):
             with open(file_list[i], "wb") as file:
                 pickle.dump(receptors[i * 100: (i+1) * 100], file)
 
-        receptor_generator = ReceptorGenerator(file_list)
+        receptor_generator = ItemGenerator(file_list)
         generator = receptor_generator.build_batch_generator(41)
 
         counter = 0
 
         for batch in generator:
             for receptor in batch:
-                self.assertEqual(counter, int(receptor.id))
+                self.assertEqual(counter, int(receptor.identifier))
                 self.assertTrue(isinstance(receptor, BCReceptor))
                 counter += 1
 
@@ -40,7 +40,7 @@ class TestReceptorGenerator(TestCase):
 
         for batch in generator:
             for receptor in batch:
-                self.assertEqual(counter, int(receptor.id))
+                self.assertEqual(counter, int(receptor.identifier))
                 self.assertTrue(isinstance(receptor, BCReceptor))
                 counter += 1
 
