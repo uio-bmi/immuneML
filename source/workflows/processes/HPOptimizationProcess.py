@@ -114,14 +114,14 @@ class HPOptimizationProcess(InstructionProcess):
 
         hp_setting = self.hp_strategy.get_next_setting()
         while hp_setting is not None:
-            performance = self.test_hp_setting(hp_setting, train_datasets, val_datasets, path)
+            performance = self.evaluate_hp_setting(hp_setting, train_datasets, val_datasets, path)
             hp_setting = self.hp_strategy.get_next_setting(hp_setting, performance)
 
         self.run_selection_reports(train_val_dataset, train_datasets, val_datasets, path + "reports/")
 
         return self.hp_strategy.get_optimal_hps()
 
-    def test_hp_setting(self, hp_setting, train_datasets: list, val_datasets: list, current_path: str) -> dict:
+    def evaluate_hp_setting(self, hp_setting, train_datasets: list, val_datasets: list, current_path: str) -> dict:
 
         fold_performances = []
         for index in range(self.selection.split_count):
