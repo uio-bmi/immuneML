@@ -1,6 +1,7 @@
 import os
 import pickle
 import shutil
+import sys
 
 import yaml
 
@@ -45,56 +46,58 @@ class Quickstart:
         dataset_path = self.create_dataset(path)
 
         specs = {
-            "datasets": {
-                "d1": {
-                    "format": "Pickle",
-                    "path": dataset_path,
-                    "result_path": dataset_path
-                }
-            },
-            "encodings": {
-                "e1": {
-                    "type": "Word2Vec",
-                    "params": {
-                        "k": 3,
-                        "model_creator": "sequence",
-                        "size": 8,
+            "definitions": {
+                "datasets": {
+                    "d1": {
+                        "format": "Pickle",
+                        "path": dataset_path,
+                        "result_path": dataset_path
                     }
-                }
-            },
-            "ml_methods": {
-                "simpleLR": {
-                    "type": "SimpleLogisticRegression",
-                    "params": {
-                        "penalty": "l1"
-                    },
-                    "model_selection_cv": False,
-                    "model_selection_n_folds": -1,
-                }
-            },
-            "preprocessing_sequences": {
-                "seq1": [
-                    {"filter_chain_B": {
-                        "type": "DatasetChainFilter",
+                },
+                "encodings": {
+                    "e1": {
+                        "type": "Word2Vec",
                         "params": {
-                            "keep_chain": "A"
+                            "k": 3,
+                            "model_creator": "sequence",
+                            "size": 8,
                         }
-                    }}
-                ],
-                "seq2": [
-                    {"filter_chain_A": {
-                        "type": "DatasetChainFilter",
+                    }
+                },
+                "ml_methods": {
+                    "simpleLR": {
+                        "type": "SimpleLogisticRegression",
                         "params": {
-                            "keep_chain": "B"
+                            "penalty": "l1"
+                        },
+                        "model_selection_cv": False,
+                        "model_selection_n_folds": -1,
+                    }
+                },
+                "preprocessing_sequences": {
+                    "seq1": [
+                        {"filter_chain_B": {
+                            "type": "DatasetChainFilter",
+                            "params": {
+                                "keep_chain": "A"
+                            }
+                        }}
+                    ],
+                    "seq2": [
+                        {"filter_chain_A": {
+                            "type": "DatasetChainFilter",
+                            "params": {
+                                "keep_chain": "B"
+                            }
+                        }}
+                    ]
+                },
+                "reports": {
+                    "rep1": {
+                        "type": "SequenceLengthDistribution",
+                        "params": {
+                            "batch_size": 3
                         }
-                    }}
-                ]
-            },
-            "reports": {
-                "rep1": {
-                    "type": "SequenceLengthDistribution",
-                    "params": {
-                        "batch_size": 3
                     }
                 }
             },
@@ -148,16 +151,17 @@ class Quickstart:
 
         return specs_file
 
-    def build_path(self):
-        path = EnvironmentSettings.root_path + "quickstart/"
-        if os.path.isdir(path):
-            shutil.rmtree(path)
-        PathBuilder.build(path)
+    def build_path(self, path: str = None):
+        if path is None:
+            path = EnvironmentSettings.root_path + "quickstart/"
+            if os.path.isdir(path):
+                shutil.rmtree(path)
+            PathBuilder.build(path)
         return path
 
-    def run(self):
+    def run(self, path: str):
 
-        path = self.build_path()
+        path = self.build_path(path)
         specs_file = self.create_specfication(path)
         app = ImmuneMLApp(specs_file, path)
         app.run()
@@ -165,4 +169,4 @@ class Quickstart:
 
 if __name__ == "__main__":
     quickstart = Quickstart()
-    quickstart.run()
+    quickstart.run(sys.argv[1] if len(sys.argv) == 2 else None)

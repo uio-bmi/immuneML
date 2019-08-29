@@ -19,70 +19,72 @@ class TestImmuneMLParser(TestCase):
         PickleExporter.export(dataset, path, "dataset.pkl")
 
         spec = {
-            "datasets": {
-                "d1": {
-                    "format": "Pickle",
-                    "path": path + "dataset.pkl",
-                    "result_path": path
-                }
-            },
-            "encodings": {
-                "a1": {
-                    "dataset": "d1",
-                    "type": "Word2Vec",
-                    "params": {
-                        "k": 3,
-                        "model_creator": "sequence",
-                        "size": 8,
+            "definitions": {
+                "datasets": {
+                    "d1": {
+                        "format": "Pickle",
+                        "path": path + "dataset.pkl",
+                        "result_path": path
                     }
-                }
-            },
-            "ml_methods": {
-                "simpleLR": {
-                    "assessment_type": "LOOCV",
-                    "type": "SimpleLogisticRegression",
-                    "params": {
-                        "penalty": "l1"
-                    },
-                    "encoding": "a1",
-                    "labels": ["CD"],
-                    "metrics": ["accuracy", "balanced_accuracy"],
-                    "split_count": 1,
-                    "model_selection_cv": False,
-                    "model_selection_n_folds": -1,
-                    "min_example_count": 3
-                }
-            },
-            "reports": {
-                "rep1": {
-                    "type": "SequenceLengthDistribution",
-                    "params": {
+                },
+                "encodings": {
+                    "a1": {
                         "dataset": "d1",
-                        "batch_size": 3
+                        "type": "Word2Vec",
+                        "params": {
+                            "k": 3,
+                            "model_creator": "sequence",
+                            "size": 8,
+                        }
                     }
-                }
-            },
-            # "simulation": {
-            #     "motifs": {
-            #         "motif1": {
-            #             "seed": "CAS",
-            #             "instantiation": "Identity"
-            #         }
-            #     },
-            #     "signals": {
-            #         "signal1": {
-            #             "motifs": ["motif1"],
-            #             "implanting": "healthy_sequences"
-            #         }
-            #     },
-            #     "implanting": {
-            #         "var1": {
-            #             "signals": ["signal1"],
-            #             "repertoires": 0.4,
-            #             "sequences": 0.01
-            #         }
-            #     }
-            # }
+                },
+                "ml_methods": {
+                    "simpleLR": {
+                        "assessment_type": "LOOCV",
+                        "type": "SimpleLogisticRegression",
+                        "params": {
+                            "penalty": "l1"
+                        },
+                        "encoding": "a1",
+                        "labels": ["CD"],
+                        "metrics": ["accuracy", "balanced_accuracy"],
+                        "split_count": 1,
+                        "model_selection_cv": False,
+                        "model_selection_n_folds": -1,
+                        "min_example_count": 3
+                    }
+                },
+                "reports": {
+                    "rep1": {
+                        "type": "SequenceLengthDistribution",
+                        "params": {
+                            "dataset": "d1",
+                            "batch_size": 3
+                        }
+                    }
+                },
+                # "simulation": {
+                #     "motifs": {
+                #         "motif1": {
+                #             "seed": "CAS",
+                #             "instantiation": "Identity"
+                #         }
+                #     },
+                #     "signals": {
+                #         "signal1": {
+                #             "motifs": ["motif1"],
+                #             "implanting": "healthy_sequences"
+                #         }
+                #     },
+                #     "implanting": {
+                #         "var1": {
+                #             "signals": ["signal1"],
+                #             "repertoires": 0.4,
+                #             "sequences": 0.01
+                #         }
+                #     }
+                # }
+            }
         }
 
         PathBuilder.build(path)

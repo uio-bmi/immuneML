@@ -17,34 +17,36 @@ class TestSimulation(TestCase):
 
     def prepare_specs(self, path) -> str:
         specs = {
-            "datasets": {
-                "d1": {
-                    "metadata": path + "metadata.csv",
-                    "format": 'Pickle',
-                    "path": path + "dataset.pkl",
-                    "params": {}
-                }
-            },
-            "simulation": {
-                "motifs": {
-                    "motif1": {
-                        "seed": "EEE",
-                        "instantiation": "Identity",
+            "definitions": {
+                "datasets": {
+                    "d1": {
+                        "metadata": path + "metadata.csv",
+                        "format": 'Pickle',
+                        "path": path + "dataset.pkl",
+                        "params": {}
                     }
                 },
-                "signals": {
-                    "signal1": {
-                        "motifs": ["motif1"],
-                        "implanting": "HealthySequences"
+                "simulation": {
+                    "motifs": {
+                        "motif1": {
+                            "seed": "EEE",
+                            "instantiation": "Identity",
+                        }
+                    },
+                    "signals": {
+                        "signal1": {
+                            "motifs": ["motif1"],
+                            "implanting": "HealthySequences"
+                        }
+                    },
+                    "implanting": {
+                        "var1": {
+                            "signals": ["signal1"],
+                            "dataset_implanting_rate": 0.5,
+                            "repertoire_implanting_rate": 0.33
+                        }
                     }
                 },
-                "implanting": {
-                    "var1": {
-                        "signals": ["signal1"],
-                        "dataset_implanting_rate": 0.5,
-                        "repertoire_implanting_rate": 0.33
-                    }
-                }
             },
             "instructions": {
                 "Simulation": {
