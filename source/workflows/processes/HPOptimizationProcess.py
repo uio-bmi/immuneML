@@ -56,53 +56,53 @@ class HPOptimizationProcess(InstructionProcess):
         return self.run_assessment()
 
     def run_assessment(self):
-        train_datasets, test_datasets = self.split_data(self.dataset, self.assessment, self.path)
+        train_val_datasets, test_datasets = self.split_data(self.dataset, self.assessment, self.path)
         fold_performances = []
-        for index in range(len(train_datasets)):
-            fold_performances.append(self.run_assessment_fold(train_datasets[index], test_datasets[index], index + 1))
+        for index in range(len(train_val_datasets)):
+            fold_performances.append(self.run_assessment_fold(train_val_datasets[index], test_datasets[index], index + 1))
         self.print_performances(performances=fold_performances)
         return fold_performances
 
-    def run_assessment_fold(self, train_dataset, test_dataset, run):
+    def run_assessment_fold(self, train_val_dataset, test_dataset, run):
         current_path = "{}assessment_{}/run_{}/".format(self.path, self.assessment.split_strategy.name, run)
         PathBuilder.build(current_path)
-        optimal_hp_setting = self.run_selection(train_dataset, current_path)
-        encoded_train_dataset = self.encode_dataset(train_dataset, optimal_hp_setting, current_path, learn_model=True)
+        optimal_hp_setting = self.run_selection(train_val_dataset, current_path)
+        encoded_train_dataset = self.encode_dataset(train_val_dataset, optimal_hp_setting, current_path, learn_model=True)
         optimal_method = self.train_optimal_method(encoded_train_dataset, optimal_hp_setting, current_path + "optimal/")
         if test_dataset.get_example_count() > 0:
             encoded_test_dataset = self.encode_dataset(test_dataset, optimal_hp_setting, current_path, learn_model=False)
             performance = self.assess_performance(optimal_method, encoded_test_dataset, run, current_path)
-            self.run_assessment_reports(train_dataset, test_dataset, optimal_method, current_path + "reports/")
+            self.run_assessment_reports(train_val_dataset, test_dataset, optimal_method, current_path + "reports/")
         else:
             performance = {}
         return performance
 
-    def run_selection(self, train_dataset, current_path: str) -> HPSetting:
+    def run_selection(self, train_val_dataset, current_path: str) -> HPSetting:
         path = "{}selection_{}/".format(current_path, self.selection.split_strategy.name)
         PathBuilder.build(path)
-        train_datasets, test_datasets = self.split_data(train_dataset, self.selection, path)
+        train_datasets, val_datasets = self.split_data(train_val_dataset, self.selection, path)
         hp_setting = self.hp_strategy.get_next_setting()
         while hp_setting is not None:
-            performance = self.test_hp_setting(hp_setting, train_datasets, test_datasets, path)
+            performance = self.test_hp_setting(hp_setting, train_datasets, val_datasets, path)
             hp_setting = self.hp_strategy.get_next_setting(hp_setting, performance)
 
-        self.run_selection_reports(train_dataset, train_datasets, test_datasets, path + "reports/")
+        self.run_selection_reports(train_val_dataset, train_datasets, val_datasets, path + "reports/")
         return self.hp_strategy.get_optimal_hps()
 
-    def test_hp_setting(self, hp_setting, train_datasets: list, test_datasets: list, current_path: str) -> dict:
+    def test_hp_setting(self, hp_setting, train_datasets: list, val_datasets: list, current_path: str) -> dict:
         fold_performances = []
         for index in range(self.selection.split_count):
-            fold_performances.append(self.run_setting(hp_setting, train_datasets[index], test_datasets[index], index + 1, current_path))
+            fold_performances.append(self.run_setting(hp_setting, train_datasets[index], val_datasets[index], index + 1, current_path))
 
         if all(performance is not None for performance in fold_performances):
             return self.get_average_performance(fold_performances)
         else:
             return {label: -1 for label in self.label_configuration.get_labels_by_name()}
 
-    def run_setting(self, hp_setting, train_dataset, test_dataset, run_id: int, current_path: str):
+    def run_setting(self, hp_setting, train_dataset, val_dataset, run_id: int, current_path: str):
         path = current_path + "{}/fold_{}/".format(hp_setting, run_id)
         PathBuilder.build(path)
-        ml_process = MLProcess(train_dataset=train_dataset, test_dataset=test_dataset,
+        ml_process = MLProcess(train_dataset=train_dataset, test_dataset=val_dataset,
                                label_configuration=self.label_configuration, encoder=hp_setting.encoder.create_encoder(train_dataset),
                                encoder_params=hp_setting.encoder_params, method=hp_setting.ml_method,
                                ml_params=hp_setting.ml_params, metrics=self.metrics, path=path,
@@ -110,22 +110,22 @@ class HPOptimizationProcess(InstructionProcess):
         performance = ml_process.run(run_id)
         return performance
 
-    def run_assessment_reports(self, train_dataset, test_dataset, method: MLMethod, path: str):
+    def run_assessment_reports(self, train_val_dataset, test_dataset, method: MLMethod, path: str):
         for report in self.assessment.reports.data_split_reports:
-            self.run_data_report(report, train_dataset, path + "train/")
+            self.run_data_report(report, train_val_dataset, path + "train/")
             self.run_data_report(report, test_dataset, path + "test/")
 
         for report in self.assessment.reports.optimal_model_reports:
-            self.run_model_report(report, train_dataset, test_dataset, method, path)
+            self.run_model_report(report, train_val_dataset, test_dataset, method, path)
 
         for report in self.assessment.reports.performance_reports:
-            self.run_performance_report(report, method, train_dataset, test_dataset, path)
+            self.run_performance_report(report, method, train_val_dataset, test_dataset, path)
 
-    def run_selection_reports(self, dataset, train_datasets: list, test_datasets: list, path: str):
+    def run_selection_reports(self, dataset, train_datasets: list, val_datasets: list, path: str):
         for report in self.selection.reports.data_split_reports:
             for index in range(len(train_datasets)):
                 self.run_data_report(report, train_datasets[index], path + "split_{}/train/".format(index+1))
-                self.run_data_report(report, test_datasets[index], path + "split_{}/test/".format(index+1))
+                self.run_data_report(report, val_datasets[index], path + "split_{}/test/".format(index+1))
         for report in self.selection.reports.data_reports:
             self.run_data_report(report, dataset, path)
 
