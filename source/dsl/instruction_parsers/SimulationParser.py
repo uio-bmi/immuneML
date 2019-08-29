@@ -7,8 +7,8 @@ class SimulationParser:
 
     def parse(self, instruction: dict, symbol_table: SymbolTable) -> SimulationProcess:
 
-        signals = [item[1] for item in symbol_table.get_by_type(SymbolType.SIGNAL)]
-        simulations = [item[1] for item in symbol_table.get_by_type(SymbolType.SIMULATION)]
+        signals = [signal.item for signal in symbol_table.get_by_type(SymbolType.SIGNAL)]
+        simulations = [simulation.item for simulation in symbol_table.get_by_type(SymbolType.SIMULATION)]
         dataset = symbol_table.get(instruction["dataset"])
         batch_size = instruction["batch_size"]
 

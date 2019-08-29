@@ -69,8 +69,8 @@ class SimulationParser:
             item = Simulation(
                 dataset_implanting_rate=simulation["implanting"][key]["dataset_implanting_rate"],
                 repertoire_implanting_rate=simulation["implanting"][key]["repertoire_implanting_rate"],
-                signals=[signal[1] for signal in symbol_table.get_by_type(SymbolType.SIGNAL)
-                         if signal[1].id in simulation["implanting"][key]["signals"]],
+                signals=[signal.item for signal in symbol_table.get_by_type(SymbolType.SIGNAL)
+                         if signal.item.id in simulation["implanting"][key]["signals"]],
                 name=key
             )
 

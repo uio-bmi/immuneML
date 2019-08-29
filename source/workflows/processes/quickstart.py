@@ -148,13 +148,16 @@ class Quickstart:
 
         return specs_file
 
-    def run(self):
-
+    def build_path(self):
         path = EnvironmentSettings.root_path + "quickstart/"
         if os.path.isdir(path):
             shutil.rmtree(path)
         PathBuilder.build(path)
+        return path
 
+    def run(self):
+
+        path = self.build_path()
         specs_file = self.create_specfication(path)
         app = ImmuneMLApp(specs_file, path)
         app.run()

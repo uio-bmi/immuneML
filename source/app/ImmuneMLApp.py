@@ -28,7 +28,7 @@ class ImmuneMLApp:
         print("ImmuneML: starting the analysis...")
 
         instructions = symbol_table.get_by_type(SymbolType.INSTRUCTION)
-        model = SemanticModel([instruction[1] for instruction in instructions], self._result_path)
+        model = SemanticModel([instruction.item for instruction in instructions], self._result_path)
         model.run()
 
 
