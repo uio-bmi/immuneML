@@ -51,7 +51,8 @@ class HPOptimizationProcess(InstructionProcess):
         self.metrics = metrics
         self.assessment = assessment
 
-    def run(self):
+    def run(self, result_path: str):
+        self.path = result_path
         return self.run_assessment()
 
     def run_assessment(self):

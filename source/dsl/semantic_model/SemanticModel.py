@@ -12,6 +12,5 @@ class SemanticModel:
     def run(self):
         for index, instruction in enumerate(self.instructions):
             print("Instruction {}/{} has started.".format(index+1, len(self.instructions)))
-            instruction.path = self.path
-            result = instruction.run()
+            result = instruction.run(result_path=self.path)
             print("Instruction {}/{} has finished. Result: {}".format(index+1, len(self.instructions), result))

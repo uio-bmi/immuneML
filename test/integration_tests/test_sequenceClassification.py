@@ -73,7 +73,7 @@ class TestSequenceClassification(TestCase):
                                             SplitConfig(SplitType.RANDOM, 1, 0.5, reports=ReportConfig()),
                                             {MetricType.BALANCED_ACCURACY}, lc, path)
 
-        result = instruction.run()
+        result = instruction.run(result_path=path)
         print(result)
 
         shutil.rmtree(path)

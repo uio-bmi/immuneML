@@ -17,7 +17,8 @@ class SimulationProcess(InstructionProcess):
         self.path = path
         self.batch_size = batch_size
 
-    def run(self):
+    def run(self, result_path: str):
+        self.path = result_path
         dataset = SignalImplanter.run(SignalImplanterParams(dataset=self.dataset, result_path=self.path,
                                                             simulations=self.simulations, signals=self.signals,
                                                             batch_size=self.batch_size))

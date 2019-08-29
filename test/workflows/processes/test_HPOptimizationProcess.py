@@ -67,7 +67,7 @@ class TestHPOptimizationProcess(TestCase):
                                         SplitConfig(SplitType.RANDOM, 1, 0.5, reports=ReportConfig(data_splits=[report])),
                                         {MetricType.BALANCED_ACCURACY}, label_config, path)
 
-        results = process.run()
+        results = process.run(result_path=path)
 
         self.assertTrue(isinstance(results, list))
         self.assertEqual(1, len(results))
