@@ -49,7 +49,8 @@ class TestSimulation(TestCase):
                 },
             },
             "instructions": {
-                "Simulation": {
+                "inst1": {
+                    "type": "Simulation",
                     "dataset": "d1",
                     "batch_size": 5
                 }

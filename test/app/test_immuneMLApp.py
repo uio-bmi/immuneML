@@ -104,7 +104,8 @@ class TestImmuneMLApp(TestCase):
                 },
             },
             "instructions": {
-                "HPOptimization": {
+                "inst1": {
+                    "type": "HPOptimization",
                     "settings": [
                         {
                             "preprocessing": "seq1",

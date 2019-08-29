@@ -102,7 +102,8 @@ class Quickstart:
                 }
             },
             "instructions": {
-                "HPOptimization": {
+                "inst1": {
+                    "type": "HPOptimization",
                     "settings": [
                         {
                             "preprocessing": "seq1",
