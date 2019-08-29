@@ -159,11 +159,12 @@ class Quickstart:
             PathBuilder.build(path)
         return path
 
-    def run(self, path: str):
+    def run(self, result_path: str):
 
-        path = self.build_path(path)
-        specs_file = self.create_specfication(path)
-        app = ImmuneMLApp(specs_file, path)
+        result_path = self.build_path(result_path)
+        specs_file = self.create_specfication(result_path)
+
+        app = ImmuneMLApp(specs_file, result_path)
         app.run()
 
 
