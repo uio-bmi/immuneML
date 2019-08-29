@@ -1,3 +1,4 @@
+from source.dsl.DefinitionParserOutput import DefinitionParserOutput
 from source.dsl.SymbolTable import SymbolTable
 from source.dsl.SymbolType import SymbolType
 from source.util.ReflectionHandler import ReflectionHandler
@@ -8,7 +9,11 @@ class InstructionParser:
     keyword = "instructions"
 
     @staticmethod
-    def parse(specification: dict, symbol_table: SymbolTable):
+    def parse(definition_output: DefinitionParserOutput):
+
+        specification = definition_output.specification
+        symbol_table = definition_output.symbol_table
+
         if InstructionParser.keyword in specification:
             for key in specification[InstructionParser.keyword]:
                 specification[InstructionParser.keyword][key], symbol_table = \

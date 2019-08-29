@@ -1,3 +1,4 @@
+from source.dsl.DefinitionParserOutput import DefinitionParserOutput
 from source.dsl.MLParser import MLParser
 from source.dsl.PreprocessingParser import PreprocessingParser
 from source.dsl.ReportParser import ReportParser
@@ -24,7 +25,7 @@ class DefinitionParser:
         specs_defs = DefinitionParser.create_specs_defs(specs_import, specs_simulation, specs_preprocessing,
                                                         specs_encoding, specs_ml, specs_report)
 
-        return symbol_table, specs_defs
+        return DefinitionParserOutput(symbol_table=symbol_table, specification=workflow_specification), specs_defs
 
     @staticmethod
     def create_specs_defs(specs_datasets: dict, simulation: dict, preprocessings: dict,

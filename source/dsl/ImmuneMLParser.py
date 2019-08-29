@@ -109,8 +109,8 @@ class ImmuneMLParser:
 
         symbol_table = SymbolTable()
 
-        symbol_table, specs_defs = DefinitionParser.parse(workflow_specification, symbol_table)
-        symbol_table, specs_instructions = InstructionParser.parse(workflow_specification, symbol_table)
+        def_parser_output, specs_defs = DefinitionParser.parse(workflow_specification, symbol_table)
+        symbol_table, specs_instructions = InstructionParser.parse(def_parser_output)
 
         path = ImmuneMLParser._output_specs(file_path=file_path, result_path=result_path, definitions=specs_defs,
                                             instructions=specs_instructions)
