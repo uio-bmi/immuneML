@@ -154,12 +154,6 @@ class TestImportParser(TestCase):
                         "metadata_file": path + "metadata.csv",
                         "batch_size": 2,
                         "additional_columns": []
-                    },
-                    "preprocessing": {
-                        "filter_out_short_reps": {
-                            "params": {"lower_limit": 3},
-                            "type": "ClonotypeCountFilter"
-                        }
                     }
                 }
             }
@@ -167,70 +161,4 @@ class TestImportParser(TestCase):
 
         st, desc = ImportParser.parse(specs, SymbolTable())
         self.assertTrue(isinstance(st.get("d1"), RepertoireDataset))
-        self.assertEqual(1, len(st.get("d1").get_filenames()))
-
-        specs = {
-            "datasets": {
-                "d1": {
-                    "path": path + "tmp_input/",
-                    "format": "MiXCR",
-                    "params": {
-                        "sequence_type": "CDR2+CDR3",
-                        "result_path": path + "tmp_output/",
-                        "extension": "csv",
-                        "metadata_file": path + "metadata.csv",
-                        "additional_columns": [],
-                        "batch_size": 2
-                    },
-                    "preprocessing": {
-                        "filter_out_short_reps": {
-                            "type": "ClonotypeCountFilter"
-                        }
-                    }
-                }
-            }
-        }
-
-        st, desc = ImportParser.parse(specs, SymbolTable())
-        self.assertTrue(isinstance(st.get("d1"), RepertoireDataset))
-        self.assertEqual(0, len(st.get("d1").get_filenames()))
-
-        self.assertEqual(100, desc["d1"]["preprocessing"]["filter_out_short_reps"]["params"]["lower_limit"])
-
-        specs = {
-            "datasets": {
-                "d1": {
-                    "path": path + "tmp_input/",
-                    "format": "MiXCR",
-                    "params": {
-                        "sequence_type": "CDR2+CDR3",
-                        "result_path": path + "tmp_output/",
-                        "extension": "csv",
-                        "metadata_file": path + "metadata.csv",
-                        "additional_columns": [],
-                        "batch_size": 2
-                    },
-                    "preprocessing": {
-                        "filter_cd": {
-                            "type": "MetadataFilter",
-                            "params": {
-                                "criteria": {
-                                    "type": "in",
-                                    "value": {
-                                        "type": "column",
-                                        "name": "donor"
-                                    },
-                                    "allowed_values": ["CD1"]
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        st, desc = ImportParser.parse(specs, SymbolTable())
-        self.assertTrue(isinstance(st.get("d1"), RepertoireDataset))
-        self.assertEqual(1, len(st.get("d1").get_filenames()))
-
-        shutil.rmtree(path)
+        self.assertEqual(2, len(st.get("d1").get_filenames()))
