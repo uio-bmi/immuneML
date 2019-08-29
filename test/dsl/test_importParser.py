@@ -162,3 +162,5 @@ class TestImportParser(TestCase):
         st, desc = ImportParser.parse(specs, SymbolTable())
         self.assertTrue(isinstance(st.get("d1"), RepertoireDataset))
         self.assertEqual(2, len(st.get("d1").get_filenames()))
+
+        shutil.rmtree(path)
