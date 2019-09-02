@@ -64,7 +64,8 @@ class ImmuneMLParser:
                         params:
                             keep_chain: B
         instructions:
-            HPOptimization:
+            inst1:
+                type: HPOptimization
                 settings:
                     -   preprocessing: seq1
                         encoding: e1
