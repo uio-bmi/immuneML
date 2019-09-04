@@ -5,12 +5,14 @@ import pandas as pd
 from sklearn.feature_extraction import DictVectorizer
 
 from source.IO.dataset_export.PickleExporter import PickleExporter
+from source.analysis.data_manipulation.NormalizationType import NormalizationType
 from source.caching.CacheHandler import CacheHandler
 from source.data_model.encoded_data.EncodedData import EncodedData
 from source.data_model.receptor.receptor_sequence import ReceptorSequence
 from source.encodings.DatasetEncoder import DatasetEncoder
 from source.encodings.EncoderParams import EncoderParams
 from source.encodings.kmer_frequency.ReadsType import ReadsType
+from source.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType import SequenceEncodingType
 from source.encodings.preprocessing.FeatureScaler import FeatureScaler
 from source.environment.Constants import Constants
 from source.util.FilenameHandler import FilenameHandler
@@ -53,11 +55,23 @@ class KmerFrequencyEncoder(DatasetEncoder):
         "ReceptorDataset": "KmerFreqReceptorEncoder"
     }
 
+    def __init__(self, normalization_type: NormalizationType, reads: ReadsType, sequence_encoding: SequenceEncodingType, k: int = 0,
+                 k_left: int = 0, k_right: int = 0, min_gap: int = 0, max_gap: int = 0, metadata_fields_to_include: list = None):
+        self.normalization_type = normalization_type
+        self.reads = reads
+        self.sequence_encoding = sequence_encoding
+        self.k = k
+        self.k_left = k_left
+        self.k_right = k_right
+        self.min_gap = min_gap
+        self.max_gap = max_gap
+        self.metadata_fields_to_include = metadata_fields_to_include if metadata_fields_to_include is not None else []
+
     @staticmethod
-    def create_encoder(dataset=None):
+    def create_encoder(dataset=None, params: dict = None):
         try:
             encoder = ReflectionHandler.get_class_by_name(KmerFrequencyEncoder.dataset_mapping[dataset.__class__.__name__],
-                                                          "kmer_frequency/")()
+                                                          "kmer_frequency/")(**params if params is not None else {})
         except ValueError:
             raise ValueError("{} is not defined for dataset of type {}.".format(KmerFrequencyEncoder.__name__, dataset.__class__.__name__))
         return encoder
@@ -77,7 +91,7 @@ class KmerFrequencyEncoder(DatasetEncoder):
                 ("encoding", KmerFrequencyEncoder.__name__),
                 ("learn_model", params["learn_model"]),
                 ("step", step),
-                ("encoding_params", tuple([(key, params["model"][key]) for key in params["model"].keys()])), )
+                ("encoding_params", tuple(vars(self))))
 
     def _encode_data(self, dataset, params: EncoderParams) -> EncodedData:
         encoded_example_list, example_ids, encoded_labels, feature_annotation_names = CacheHandler.memo_by_params(
@@ -92,7 +106,7 @@ class KmerFrequencyEncoder(DatasetEncoder):
             self._prepare_caching_params(dataset, params, KmerFrequencyEncoder.STEP_NORMALIZED),
             lambda: FeatureScaler.normalize(params["result_path"] + "normalizer.pkl",
                                             vectorized_examples,
-                                            params["model"]["normalization_type"]))
+                                            self.normalization_type))
 
         feature_annotations = self._get_feature_annotations(feature_names, feature_annotation_names)
 
@@ -136,17 +150,18 @@ class KmerFrequencyEncoder(DatasetEncoder):
         return feature_annotations
 
     def _prepare_sequence_encoder(self, params: EncoderParams):
-        class_name = params["model"]["sequence_encoding"].value
+        class_name = self.sequence_encoding.value
         sequence_encoder = ReflectionHandler.get_class_by_name(class_name, "encodings")
         return sequence_encoder
 
-    def _encode_sequence(self, sequence: ReceptorSequence, params:EncoderParams, sequence_encoder, counts):
+    def _encode_sequence(self, sequence: ReceptorSequence, params: EncoderParams, sequence_encoder, counts):
+        params["model"] = vars(self)
         features = sequence_encoder.encode_sequence(sequence, params)
         if features is not None:
             for i in features:
-                if params["model"].get('reads') == ReadsType.UNIQUE:
+                if self.reads == ReadsType.UNIQUE:
                     counts[i] += 1
-                elif params["model"].get('reads') == ReadsType.ALL:
+                elif self.reads == ReadsType.ALL:
                     counts[i] += sequence.metadata.count
         return counts
 

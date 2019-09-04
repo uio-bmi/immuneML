@@ -6,7 +6,7 @@ from editdistance import eval as edit_distance
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.data_model.repertoire.SequenceRepertoire import SequenceRepertoire
-from source.dsl.SequenceMatchingSummaryType import SequenceMatchingSummaryType
+from source.encodings.reference_encoding.SequenceMatchingSummaryType import SequenceMatchingSummaryType
 from source.environment.ParallelismManager import ParallelismManager
 
 

@@ -59,8 +59,8 @@ class Quickstart:
                         "type": "Word2Vec",
                         "params": {
                             "k": 3,
-                            "model_creator": "sequence",
-                            "size": 8,
+                            "model_type": "sequence",
+                            "vector_size": 8,
                         }
                     }
                 },

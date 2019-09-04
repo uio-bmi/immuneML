@@ -29,8 +29,8 @@ class Word2VecEncoder(DatasetEncoder):
     {
         "model": {
             "k": 3,
-            "model_creator": ModelType.SEQUENCE,
-            "size": 16
+            "model_type": ModelType.SEQUENCE,
+            "vector_size": 16
         },
         "batch_size": 1,
         "learn_model": True, # true for training set and false for test set
@@ -49,10 +49,16 @@ class Word2VecEncoder(DatasetEncoder):
         "RepertoireDataset": "W2VRepertoireEncoder"
     }
 
+    def __init__(self, vector_size: int, k: int, model_type: ModelType):
+        self.vector_size = vector_size
+        self.k = k
+        self.model_type = model_type
+
     @staticmethod
-    def create_encoder(dataset=None):
+    def create_encoder(dataset=None, params: dict = None):
         try:
-            encoder = ReflectionHandler.get_class_by_name(Word2VecEncoder.dataset_mapping[dataset.__class__.__name__], "word2vec/")()
+            encoder = ReflectionHandler.get_class_by_name(
+                Word2VecEncoder.dataset_mapping[dataset.__class__.__name__], "word2vec/")(**params if params is not None else {})
         except ValueError:
             raise ValueError("{} is not defined for dataset of type {}.".format(Word2VecEncoder.__name__,
                                                                                 dataset.__class__.__name__))
@@ -137,13 +143,15 @@ class Word2VecEncoder(DatasetEncoder):
 
     def _create_model(self, dataset, params):
 
-        if params["model"]["model_creator"] == ModelType.SEQUENCE:
+        if self.model_type == ModelType.SEQUENCE:
             model_creator = SequenceModelCreator()
         else:
             model_creator = KmerPairModelCreator()
 
         model = model_creator.create_model(dataset=dataset,
-                                           params=params,
+                                           k=self.k,
+                                           vector_size=self.vector_size,
+                                           batch_size=params["batch_size"],
                                            model_path=self._create_model_path(params))
 
         return model

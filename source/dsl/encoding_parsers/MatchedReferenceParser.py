@@ -1,6 +1,6 @@
 from source.dsl.DefaultParamsLoader import DefaultParamsLoader
-from source.dsl.SequenceMatchingSummaryType import SequenceMatchingSummaryType
 from source.dsl.encoding_parsers.EncodingParameterParser import EncodingParameterParser
+from source.encodings.reference_encoding.SequenceMatchingSummaryType import SequenceMatchingSummaryType
 from source.util.ReflectionHandler import ReflectionHandler
 
 

@@ -4,8 +4,8 @@ from unittest import TestCase
 import pandas as pd
 
 from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
-from source.dsl.SequenceMatchingSummaryType import SequenceMatchingSummaryType
 from source.dsl.encoding_parsers.MatchedReferenceParser import MatchedReferenceParser
+from source.encodings.reference_encoding.SequenceMatchingSummaryType import SequenceMatchingSummaryType
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.util.PathBuilder import PathBuilder
 

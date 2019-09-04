@@ -7,9 +7,9 @@ from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.receptor.receptor_sequence.Chain import Chain
 from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
-from source.dsl.SequenceMatchingSummaryType import SequenceMatchingSummaryType
 from source.encodings.EncoderParams import EncoderParams
 from source.encodings.reference_encoding.MatchedReferenceEncoder import MatchedReferenceEncoder
+from source.encodings.reference_encoding.SequenceMatchingSummaryType import SequenceMatchingSummaryType
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.environment.LabelConfiguration import LabelConfiguration
 from source.util.RepertoireBuilder import RepertoireBuilder
@@ -24,17 +24,17 @@ class TestMatchedReferenceEncoder(TestCase):
         label_config = LabelConfiguration()
         label_config.add_label("default", [1, 2])
 
-        encoder = MatchedReferenceEncoder.create_encoder(dataset)
+        encoder = MatchedReferenceEncoder.create_encoder(dataset, {
+                "reference_sequences": [ReceptorSequence("AAAA",
+                                                         metadata=SequenceMetadata(chain=Chain.A.value, v_gene="V12", j_gene="J1"))],
+                "max_edit_distance": 2,
+                "summary": SequenceMatchingSummaryType.PERCENTAGE
+            })
 
         encoded = encoder.encode(dataset, EncoderParams(
             result_path=path,
             label_configuration=label_config,
-            model={
-                "reference_sequences": [ReceptorSequence("AAAA",
-                                                         metadata=SequenceMetadata(chain=Chain.A.value, v_gene="V12", j_gene="J1"))],
-                "max_distance": 2,
-                "summary": SequenceMatchingSummaryType.PERCENTAGE
-            },
+            model={},
             filename="dataset.csv"
         ))
 

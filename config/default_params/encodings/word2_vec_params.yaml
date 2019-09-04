@@ -1,4 +1,3 @@
 k: 3  # word size
-model_creator: "sequence"  # use sequence as context
-size: 64 # vector size
-batch_size: 1
+model_type: "sequence"  # use sequence as context
+vector_size: 64 # vector size

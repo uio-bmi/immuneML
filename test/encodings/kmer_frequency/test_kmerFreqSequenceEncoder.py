@@ -42,19 +42,19 @@ class TestKmerFreqSequenceEncoder(TestCase):
 
         dataset = SequenceDataset(params={"l1": [1, 2]}, filenames=[filename], identifier="d1")
 
-        encoder = KmerFreqSequenceEncoder()
+        encoder = KmerFreqSequenceEncoder.create_encoder(dataset, {
+                "normalization_type": NormalizationType.RELATIVE_FREQUENCY,
+                "reads": ReadsType.UNIQUE,
+                "sequence_encoding": SequenceEncodingType.CONTINUOUS_KMER,
+                "k": 3
+            })
 
         encoded_dataset = encoder.encode(dataset, EncoderParams(
             result_path=path + "2/",
             label_configuration=lc,
             batch_size=2,
             learn_model=True,
-            model={
-                "normalization_type": NormalizationType.RELATIVE_FREQUENCY,
-                "reads": ReadsType.UNIQUE,
-                "sequence_encoding": SequenceEncodingType.CONTINUOUS_KMER,
-                "k": 3
-            },
+            model={},
             filename="dataset.csv"
         ))
 

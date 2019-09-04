@@ -119,14 +119,15 @@ class TestEmerson2018NatGenEncoding(TestCase):
                 batch_size=2,
                 learn_model=True,
                 filename="test.pickle",
-                model={
-                    "initial_encoder": KmerFrequencyEncoder.create_encoder(dataset),
-                    "initial_encoder_params": kmer_freq_params,
-                    "steps": [FisherExactFeatureAnnotation(**fisher_exact_params, filename="test.pickle", result_path=path), PresentTotalFeatureTransformation(**transform_params, filename="test.pickle", result_path=path)]
-                }
+                model={}
             )
 
-        encoder = PipelineEncoder.create_encoder(dataset)
+        encoder = PipelineEncoder.create_encoder(dataset, {
+                    "initial_encoder": KmerFrequencyEncoder,
+                    "initial_encoder_params": kmer_freq_params,
+                    "steps": [FisherExactFeatureAnnotation(**fisher_exact_params, filename="test.pickle", result_path=path),
+                              PresentTotalFeatureTransformation(**transform_params, filename="test.pickle", result_path=path)]
+                })
 
         d1 = encoder.encode(
             dataset,
@@ -138,7 +139,12 @@ class TestEmerson2018NatGenEncoding(TestCase):
 
         dataset2 = RepertoireDataset(filenames=[dataset_filenames[num] for num in range(1, 4)])
 
-        encoder = PipelineEncoder.create_encoder(dataset)
+        encoder = PipelineEncoder.create_encoder(dataset, {
+                    "initial_encoder": KmerFrequencyEncoder,
+                    "initial_encoder_params": kmer_freq_params,
+                    "steps": [FisherExactFeatureAnnotation(**fisher_exact_params, filename="test.pickle", result_path=path),
+                              PresentTotalFeatureTransformation(**transform_params, filename="test.pickle", result_path=path)]
+                })
 
         d2 = encoder.encode(
             dataset2,

@@ -12,7 +12,7 @@ class Word2VecParser(EncodingParameterParser):
         assert "k" in params.keys() and isinstance(params["k"], int) and 0 < params["k"], \
             "Word2VecParser: k-mer length (parameter k) is not correctly specified."
 
-        assert "size" in params.keys() and isinstance(params["size"], int) and 0 < params["k"], \
+        assert "vector_size" in params.keys() and isinstance(params["vector_size"], int) and 0 < params["k"], \
             "Word2VecParser: vector size is not correctly specified."
 
     @staticmethod
@@ -23,6 +23,6 @@ class Word2VecParser(EncodingParameterParser):
         Word2VecParser.check_parameters(parsed)
 
         specs = copy.deepcopy(parsed)
-        parsed["model_creator"] = ModelType[parsed["model_creator"].upper()]
+        parsed["model_type"] = ModelType[parsed["model_type"].upper()]
 
         return parsed, specs

@@ -10,7 +10,7 @@ class W2VRepertoireEncoder(Word2VecEncoder):
     def _encode_examples(self, encoded_dataset, vectors, params):
         repertoires = np.zeros(shape=[encoded_dataset.get_example_count(), vectors.vector_size])
         for (index, repertoire) in enumerate(encoded_dataset.get_data()):
-            repertoires[index] = self._encode_repertoire(repertoire, vectors, params)
+            repertoires[index] = self._encode_repertoire(repertoire, vectors)
         return repertoires
 
     def _encode_labels(self, dataset, params: EncoderParams):
@@ -26,10 +26,10 @@ class W2VRepertoireEncoder(Word2VecEncoder):
 
         return np.array([labels[name] for name in labels.keys()])
 
-    def _encode_repertoire(self, repertoire, vectors, params: EncoderParams):
+    def _encode_repertoire(self, repertoire, vectors):
         repertoire_vector = np.zeros(vectors.vector_size)
         for (index2, sequence) in enumerate(repertoire.sequences):
-            kmers = KmerHelper.create_kmers_from_sequence(sequence=sequence, k=params["model"]["k"])
+            kmers = KmerHelper.create_kmers_from_sequence(sequence=sequence, k=self.k)
             sequence_vector = np.zeros(vectors.vector_size)
             for kmer in kmers:
                 try:

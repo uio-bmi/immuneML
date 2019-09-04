@@ -51,10 +51,10 @@ class TestHPOptimizationProcess(TestCase):
                                                                      0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1]})
 
         dataset = RepertoireDataset(filenames=filenames, metadata_file=metadata, params={"l1": [1, 2], "l2": [0, 1]})
-        hp_settings = [HPSetting(Word2VecEncoder, {"k": 3, "model_creator": ModelType.SEQUENCE, "size": 4},
+        hp_settings = [HPSetting(Word2VecEncoder, {"k": 3, "model_type": ModelType.SEQUENCE, "vector_size": 4},
                                  SimpleLogisticRegression(), {"model_selection_cv": False, "model_selection_n_folds": -1},
                                  []),
-                       HPSetting(Word2VecEncoder, {"k": 3, "model_creator": ModelType.SEQUENCE, "size": 6},
+                       HPSetting(Word2VecEncoder, {"k": 3, "model_type": ModelType.SEQUENCE, "vector_size": 6},
                                  SVM(), {"model_selection_cv": False, "model_selection_n_folds": -1},
                                  [ClonotypeCountFilter(lower_limit=-1, upper_limit=1000)])
                        ]

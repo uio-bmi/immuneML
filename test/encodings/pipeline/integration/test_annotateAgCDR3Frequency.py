@@ -102,14 +102,14 @@ reference_rep.tsv"""
                 batch_size=2,
                 learn_model=True,
                 filename="test.pickle",
-                model={
-                    "initial_encoder": KmerFrequencyEncoder.create_encoder(dataset),
-                    "initial_encoder_params": kmer_freq_params,
-                    "steps": [SequenceMatchFeatureAnnotation(**annotate_params, filename="test.pickle", result_path=path)]
-                }
+                model={}
             )
 
-        encoder = PipelineEncoder.create_encoder(dataset)
+        encoder = PipelineEncoder.create_encoder(dataset, {
+                    "initial_encoder": KmerFrequencyEncoder,
+                    "initial_encoder_params": kmer_freq_params,
+                    "steps": [SequenceMatchFeatureAnnotation(**annotate_params, filename="test.pickle", result_path=path)]
+                })
 
         d1 = encoder.encode(
             dataset,

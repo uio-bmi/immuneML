@@ -1,3 +1,4 @@
+import copy
 import os
 import pickle
 
@@ -71,10 +72,15 @@ class PipelineEncoder(DatasetEncoder):
     Some examples of workflows can be seen in the PipelineEncoder integration tests.
     """
 
+    def __init__(self, initial_encoder, initial_encoder_params, steps: list):
+        self.initial_encoder = initial_encoder
+        self.initial_encoder_params = initial_encoder_params
+        self.steps = steps
+
     @staticmethod
-    def create_encoder(dataset):
+    def create_encoder(dataset, params: dict = None):
         if isinstance(dataset, RepertoireDataset):
-            return PipelineEncoder()
+            return PipelineEncoder(**params if params is not None else {})
         else:
             raise ValueError("PipelineEncoder is not defined for dataset types which are not RepertoireDataset.")
 
@@ -99,16 +105,17 @@ class PipelineEncoder(DatasetEncoder):
             batch_size=params["batch_size"],
             learn_model=params["learn_model"],
             filename=params["filename"],
-            model=params["model"]["initial_encoder_params"]
+            model=None
         )
-        encoded_dataset = params["model"]["initial_encoder"].encode(dataset, initial_params)
+        encoder = self.initial_encoder.create_encoder(dataset, self.initial_encoder_params)
+        encoded_dataset = encoder.encode(dataset, initial_params)
         return encoded_dataset
 
     def _run_pipeline(self, dataset, params: EncoderParams):
         pipeline_file = params["result_path"] + "Pipeline.pickle"
-        params["model"] = self.extend_steps(params)
+        steps = self.extend_steps(params)
         if params["learn_model"]:
-            pipeline = make_pipeline(*params["model"]["steps"])
+            pipeline = make_pipeline(*steps)
             encoded_dataset = pipeline.fit_transform(dataset)
             with open(pipeline_file, 'wb') as file:
                 pickle.dump(pipeline, file)
@@ -123,17 +130,18 @@ class PipelineEncoder(DatasetEncoder):
         return encoded_dataset
 
     def extend_steps(self, params: EncoderParams):
-        for index, step in enumerate(params["model"]["steps"]):
+        steps = copy.deepcopy(self.steps)
+        for index, step in enumerate(steps):
             step.result_path = params["result_path"]
             step.filename = params["filename"]
-            step.initial_encoder = params["model"]["initial_encoder"].__class__.__name__
-            step.initial_params = tuple((key, params["model"]["initial_encoder_params"][key])
-                                         for key in params["model"]["initial_encoder_params"].keys())
-            step.previous_steps = self._prepare_previous_steps(params["model"], index)
-        return params["model"]
+            step.initial_encoder = self.initial_encoder.__class__.__name__
+            step.initial_params = tuple((key, self.initial_encoder_params[key])
+                                        for key in self.initial_encoder_params.keys())
+            step.previous_steps = self._prepare_previous_steps(steps, index)
+        return steps
 
-    def _prepare_previous_steps(self, model, index):
-        return tuple(step.to_tuple() for i, step in enumerate(model["steps"]) if i < index)
+    def _prepare_previous_steps(self, steps, index):
+        return tuple(step.to_tuple() for i, step in enumerate(steps) if i < index)
 
     def store(self, encoded_dataset, params: EncoderParams):
         PickleExporter.export(encoded_dataset, params["result_path"], params["filename"])

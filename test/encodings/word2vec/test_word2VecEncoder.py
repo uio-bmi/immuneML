@@ -46,11 +46,7 @@ class TestWord2VecEncoder(TestCase):
         label_configuration.add_label("T1D", ["T1D", "CTL"])
 
         config_params = EncoderParams(
-            model={
-                "k": 3,
-                "model_creator": ModelType.SEQUENCE,
-                "size": 16
-            },
+            model={},
             batch_size=1,
             learn_model=True,
             result_path=test_path,
@@ -58,7 +54,11 @@ class TestWord2VecEncoder(TestCase):
             filename="dataset.pkl"
         )
 
-        encoder = Word2VecEncoder.create_encoder(dataset)
+        encoder = Word2VecEncoder.create_encoder(dataset, {
+                "k": 3,
+                "model_type": ModelType.SEQUENCE,
+                "vector_size": 16
+            })
 
         encoded_dataset = encoder.encode(dataset=dataset, params=config_params)
 

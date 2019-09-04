@@ -8,7 +8,6 @@ from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.data_model.repertoire.RepertoireMetadata import RepertoireMetadata
 from source.data_model.repertoire.SequenceRepertoire import SequenceRepertoire
-from source.encodings.EncoderParams import EncoderParams
 from source.encodings.word2vec.model_creator.SequenceModelCreator import SequenceModelCreator
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.util.PathBuilder import PathBuilder
@@ -39,14 +38,8 @@ class TestSequenceModelCreator(TestCase):
 
         dataset = RepertoireDataset(filenames=[file1, file2])
 
-        from source.environment.LabelConfiguration import LabelConfiguration
-        config_params = EncoderParams(model={
-                "k": 2,
-                "size": 16
-            }, result_path="", label_configuration=LabelConfiguration(), batch_size=2)
-
         model_creator = SequenceModelCreator()
-        model = model_creator.create_model(dataset=dataset, params=config_params, model_path=test_path + "model.model")
+        model = model_creator.create_model(dataset=dataset, k=2, vector_size=16, batch_size=2, model_path=test_path + "model.model")
 
         self.assertTrue(isinstance(model, Word2Vec))
         self.assertTrue("CA" in model.wv.vocab)

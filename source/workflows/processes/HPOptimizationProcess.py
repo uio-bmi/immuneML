@@ -141,7 +141,8 @@ class HPOptimizationProcess(InstructionProcess):
         path = self.create_setting_path(current_path, hp_setting, run)
 
         ml_process = MLProcess(train_dataset=train_dataset, test_dataset=val_dataset,
-                               label_configuration=self.label_configuration, encoder=hp_setting.encoder.create_encoder(train_dataset),
+                               label_configuration=self.label_configuration,
+                               encoder=hp_setting.encoder.create_encoder(train_dataset, hp_setting.encoder_params),
                                encoder_params=hp_setting.encoder_params, method=hp_setting.ml_method,
                                ml_params=hp_setting.ml_params, metrics=self.metrics, path=path,
                                reports=self.selection.reports.model_reports)
@@ -224,7 +225,7 @@ class HPOptimizationProcess(InstructionProcess):
     def encode_dataset(self, dataset, hp_setting: HPSetting, path: str, learn_model: bool):
         encoded_dataset = DataEncoder.run(DataEncoderParams(
             dataset=dataset,
-            encoder=hp_setting.encoder.create_encoder(dataset),
+            encoder=hp_setting.encoder.create_encoder(dataset, hp_setting.encoder_params),
             encoder_params=EncoderParams(
                 model=hp_setting.encoder_params,
                 result_path=path,

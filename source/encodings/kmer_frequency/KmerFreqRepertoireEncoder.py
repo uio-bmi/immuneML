@@ -39,7 +39,7 @@ class KmerFreqRepertoireEncoder(KmerFrequencyEncoder):
         return list(encoded_repertoire_list), list(repertoire_names), encoded_labels, feature_annotation_names
 
     def _encode_repertoire(self, filename: str, dataset, params: EncoderParams):
-
+        params["model"] = vars(self)
         repertoire = dataset.get_repertoire(filename=filename)
         counts = Counter()
         sequence_encoder = self._prepare_sequence_encoder(params)

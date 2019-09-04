@@ -42,35 +42,35 @@ class TestKmerFrequencyEncoder(TestCase):
 
         dataset = RepertoireDataset(filenames=[path + "rep1.pkl", path + "rep2.pkl"])
 
-        encoder = KmerFrequencyEncoder.create_encoder(dataset)
+        encoder = KmerFrequencyEncoder.create_encoder(dataset, {
+                "normalization_type": NormalizationType.RELATIVE_FREQUENCY,
+                "reads": ReadsType.UNIQUE,
+                "sequence_encoding": SequenceEncodingType.IDENTITY,
+                "k": 3
+            })
 
         d1 = encoder.encode(dataset, EncoderParams(
             result_path=path + "1/",
             label_configuration=lc,
             batch_size=2,
             learn_model=True,
-            model={
-                "normalization_type": NormalizationType.RELATIVE_FREQUENCY,
-                "reads": ReadsType.UNIQUE,
-                "sequence_encoding": SequenceEncodingType.IDENTITY,
-                "k": 3
-            },
+            model={},
             filename="dataset.pkl"
         ))
 
-        encoder = KmerFrequencyEncoder.create_encoder(dataset)
+        encoder = KmerFrequencyEncoder.create_encoder(dataset, {
+                "normalization_type": NormalizationType.RELATIVE_FREQUENCY,
+                "reads": ReadsType.UNIQUE,
+                "sequence_encoding": SequenceEncodingType.CONTINUOUS_KMER,
+                "k": 3
+            })
 
         d2 = encoder.encode(dataset, EncoderParams(
             result_path=path + "2/",
             label_configuration=lc,
             batch_size=2,
             learn_model=True,
-            model={
-                "normalization_type": NormalizationType.RELATIVE_FREQUENCY,
-                "reads": ReadsType.UNIQUE,
-                "sequence_encoding": SequenceEncodingType.CONTINUOUS_KMER,
-                "k": 3
-            },
+            model={},
             filename="dataset.csv"
         ))
 

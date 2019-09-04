@@ -42,7 +42,7 @@ class TestSemanticModel(TestCase):
         label_config = LabelConfiguration()
         label_config.add_label("default", [1, 2])
 
-        hp_settings = [HPSetting(Word2VecEncoder, {"size": 8, "model_creator": ModelType.SEQUENCE, "k": 3},
+        hp_settings = [HPSetting(Word2VecEncoder, {"vector_size": 8, "model_type": ModelType.SEQUENCE, "k": 3},
                                  SimpleLogisticRegression(),
                                  {"model_selection_cv": False, "model_selection_n_folds": -1}, [])]
 

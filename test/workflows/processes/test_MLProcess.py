@@ -31,12 +31,12 @@ class TestMLProcess(TestCase):
         label_config.add_label("l2", [2, 3])
         encoder_params = {
             "k": 3,
-            "model_creator": ModelType.SEQUENCE,
-            "size": 16
+            "model_type": ModelType.SEQUENCE,
+            "vector_size": 16
         }
         metrics = {MetricType.BALANCED_ACCURACY}
         proc = MLProcess(train_dataset=dataset, test_dataset=dataset, path=path, label_configuration=label_config,
-                         encoder=Word2VecEncoder.create_encoder(dataset), encoder_params=encoder_params,
+                         encoder=Word2VecEncoder.create_encoder(dataset, encoder_params), encoder_params=encoder_params,
                          method=SimpleLogisticRegression(), metrics=metrics, min_example_count=1,
                          ml_params={"model_selection_cv": SplitType.LOOCV, "model_selection_n_folds": 3})
 

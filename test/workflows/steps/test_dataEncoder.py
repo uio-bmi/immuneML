@@ -37,17 +37,17 @@ class TestDataEncoder(TestCase):
         lc.add_label("l2", [0, 3])
 
         dataset = RepertoireDataset(filenames=[path + "rep1.pkl", path + "rep2.pkl"])
-        encoder = Word2VecEncoder.create_encoder(dataset)
+        encoder = Word2VecEncoder.create_encoder(dataset, {
+                    "k": 3,
+                    "model_type": ModelType.SEQUENCE,
+                    "vector_size": 6
+                })
 
         res = DataEncoder.run(DataEncoderParams(
             dataset=dataset,
             encoder=encoder,
             encoder_params=EncoderParams(
-                model={
-                    "k": 3,
-                    "model_creator": ModelType.SEQUENCE,
-                    "size": 6
-                },
+                model={},
                 batch_size=2,
                 label_configuration=lc,
                 result_path=path,

@@ -9,7 +9,7 @@ from source.data_model.receptor.receptor_sequence.ReceptorSequence import Recept
 from source.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
 from source.data_model.repertoire.RepertoireMetadata import RepertoireMetadata
 from source.data_model.repertoire.SequenceRepertoire import SequenceRepertoire
-from source.dsl.SequenceMatchingSummaryType import SequenceMatchingSummaryType
+from source.encodings.reference_encoding.SequenceMatchingSummaryType import SequenceMatchingSummaryType
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.util.PathBuilder import PathBuilder
 

@@ -11,13 +11,13 @@ class ReferenceRepertoireEncoder(MatchedReferenceEncoder):
 
     def _encode_new_dataset(self, dataset, params: EncoderParams):
 
-        matched_info = self._match_repertories(dataset, params)
+        matched_info = self._match_repertories(dataset)
 
         encoded_dataset = RepertoireDataset(filenames=dataset.get_filenames(), params=dataset.params,
                                             metadata_file=dataset.metadata_file)
         encoded_repertoires, labels = self._encode_repertoires(dataset, matched_info, params)
 
-        feature_name = params["model"]["summary"].name.lower()
+        feature_name = self.summary.name.lower()
 
         encoded_dataset.add_encoded_data(EncodedData(
             examples=encoded_repertoires,
@@ -37,16 +37,16 @@ class ReferenceRepertoireEncoder(MatchedReferenceEncoder):
         for index, repertoire in enumerate(dataset.get_data()):
             assert repertoire.identifier == matched_info["repertoires"][index]["repertoire"], \
                 "MatchedReferenceEncoder: error in SequenceMatcher ordering of repertoires."
-            encoded_repertories[index] = matched_info["repertoires"][index][params["model"]["summary"].name.lower()]
+            encoded_repertories[index] = matched_info["repertoires"][index][self.summary.name.lower()]
             for label_index, label in enumerate(params["label_configuration"].get_labels_by_name()):
                 labels[label].append(repertoire.metadata.custom_params[label])
 
         return np.reshape(encoded_repertories, newshape=(-1, 1)), labels
 
-    def _match_repertories(self, dataset: RepertoireDataset, params: EncoderParams):
+    def _match_repertories(self, dataset: RepertoireDataset):
         matcher = SequenceMatcher()
         matched_info = matcher.match(dataset=dataset,
-                                     reference_sequences=params["model"]["reference_sequences"],
-                                     max_distance=params["model"]["max_distance"],
-                                     summary_type=params["model"]["summary"])
+                                     reference_sequences=self.reference_sequences,
+                                     max_distance=self.max_edit_distance,
+                                     summary_type=self.summary)
         return matched_info

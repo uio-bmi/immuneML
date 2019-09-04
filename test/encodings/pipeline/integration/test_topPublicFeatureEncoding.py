@@ -55,18 +55,8 @@ class TestTopPublicFeatureEncoding(TestCase):
             params=dataset_params
         )
 
-        encoder = PipelineEncoder.create_encoder(dataset)
-
-        d1 = encoder.encode(
-            dataset,
-            EncoderParams(
-                result_path=path,
-                label_configuration=lc,
-                batch_size=2,
-                learn_model=True,
-                filename="encoded_data.pickle",
-                model={
-                    "initial_encoder": KmerFrequencyEncoder.create_encoder(dataset),
+        encoder = PipelineEncoder.create_encoder(dataset, {
+                    "initial_encoder": KmerFrequencyEncoder,
                     "initial_encoder_params": {
                         "normalization_type": NormalizationType.NONE,
                         "reads": ReadsType.UNIQUE,
@@ -85,7 +75,17 @@ class TestTopPublicFeatureEncoding(TestCase):
                             },
                         })
                     ]
-                }
+                })
+
+        d1 = encoder.encode(
+            dataset,
+            EncoderParams(
+                result_path=path,
+                label_configuration=lc,
+                batch_size=2,
+                learn_model=True,
+                filename="encoded_data.pickle",
+                model={}
             )
         )
 
