@@ -50,8 +50,7 @@ class Quickstart:
                 "datasets": {
                     "d1": {
                         "format": "Pickle",
-                        "path": dataset_path,
-                        "result_path": dataset_path
+                        "path": dataset_path
                     }
                 },
                 "encodings": {
