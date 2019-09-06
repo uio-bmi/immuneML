@@ -57,7 +57,7 @@ class TestVDJdbLoader(TestCase):
 
         pd.DataFrame(metadata).to_csv(path + "metadata.csv")
 
-        dataset = VDJDBLoader.load(path, {"result_path": path, "file_size": 1, "recursive": False, "metadata": path + "metadata.csv"})
+        dataset = VDJDBLoader.load(path, {"result_path": path, "metadata_file": path + "metadata.csv"})
 
         self.assertEqual(number_of_repertoires, dataset.get_example_count())
         self.assertEqual(number_of_repertoires, len(dataset.get_filenames()))

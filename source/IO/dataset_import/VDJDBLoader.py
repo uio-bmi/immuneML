@@ -25,7 +25,7 @@ class VDJDBLoader(DataLoader):
 
         PathBuilder.build(params["result_path"])
 
-        if "metadata" in params and "metadata" is not None:
+        if "metadata_file" in params and "metadata_file" is not None:
             dataset = VDJDBLoader.load_repertoire_dataset(params)
         else:
             dataset = VDJDBLoader.load_sequence_dataset(path, params)
@@ -33,7 +33,7 @@ class VDJDBLoader(DataLoader):
 
     @staticmethod
     def load_repertoire_dataset(params: dict) -> Dataset:
-        metadata = pd.read_csv(params["metadata"])
+        metadata = pd.read_csv(params["metadata_file"])
         labels = {key: set() for key in metadata.keys() if key != "filename"}
         filenames = []
 
@@ -45,7 +45,7 @@ class VDJDBLoader(DataLoader):
 
             filenames.append(VDJDBLoader.store_repertoire(repertoire, params))
 
-        return RepertoireDataset(params=labels, filenames=filenames, metadata_file=params["metadata"])
+        return RepertoireDataset(params=labels, filenames=filenames, metadata_file=params["metadata_file"])
 
     @staticmethod
     def store_repertoire(repertoire, params):
