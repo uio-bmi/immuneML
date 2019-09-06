@@ -5,11 +5,11 @@ from source.environment.LabelConfiguration import LabelConfiguration
 
 class EncoderParams(collections.abc.MutableMapping):
 
-    def __init__(self, result_path: str, label_configuration: LabelConfiguration, model: dict,
+    def __init__(self, result_path: str, label_configuration: LabelConfiguration, model: dict = None,
                  batch_size: int = 2, learn_model: bool = True, filename: str = ""):
 
         self.store = {
-            "model": model,
+            "model": model if model is not None else {},
             "batch_size": batch_size,
             "learn_model": learn_model,
             "result_path": result_path,

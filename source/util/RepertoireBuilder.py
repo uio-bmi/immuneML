@@ -23,7 +23,7 @@ class RepertoireBuilder:
         for index, sequence_list in enumerate(sequences):
             rep_sequences = []
             for sequence in sequence_list:
-                s = ReceptorSequence(amino_acid_sequence=sequence, metadata=SequenceMetadata())
+                s = ReceptorSequence(amino_acid_sequence=sequence, metadata=SequenceMetadata(v_gene="v1", j_gene="j1"))
                 rep_sequences.append(s)
             repertoire = SequenceRepertoire(sequences=rep_sequences, identifier=str(index))
 

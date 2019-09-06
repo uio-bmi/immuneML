@@ -7,8 +7,9 @@ from source.reports.Report import Report
 
 class MLReport(Report, ABC):
 
-    def __init__(self, train_dataset: RepertoireDataset = None, test_dataset: RepertoireDataset = None, method: MLMethod = None, path: str = None):
+    def __init__(self, train_dataset: RepertoireDataset = None, test_dataset: RepertoireDataset = None, method: MLMethod = None,
+                 result_path: str = None):
         self.train_dataset = train_dataset
         self.test_dataset = test_dataset
         self.method = method
-        self.path = path
+        self.result_path = result_path
