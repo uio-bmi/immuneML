@@ -1,20 +1,69 @@
 import pickle
 from glob import glob
 
+import pandas as pd
+
 from source.IO.dataset_import.DataLoader import DataLoader
 from source.IO.sequence_import.VDJdbSequenceImport import VDJdbSequenceImport
 from source.data_model.dataset.Dataset import Dataset
 from source.data_model.dataset.ReceptorDataset import ReceptorDataset
+from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.dataset.SequenceDataset import SequenceDataset
+from source.data_model.repertoire.RepertoireMetadata import RepertoireMetadata
+from source.data_model.repertoire.SequenceRepertoire import SequenceRepertoire
+from source.util.PathBuilder import PathBuilder
 
 
 class VDJDBLoader(DataLoader):
     """
-    Loads data from VDJdb format into a Receptor- or SequenceDataset depending on the value of "paired" parameter
+    Loads data from VDJdb format into a Receptor- or SequenceDataset depending on the value of "paired" parameter or
+    to RepertoireDataset (consisting of a list of receptor sequences)
     """
 
     @staticmethod
-    def load(path, params: dict = None) -> Dataset:
+    def load(path: str = "", params: dict = None) -> Dataset:
+
+        PathBuilder.build(params["result_path"])
+
+        if "metadata" in params and "metadata" is not None:
+            dataset = VDJDBLoader.load_repertoire_dataset(params)
+        else:
+            dataset = VDJDBLoader.load_sequence_dataset(path, params)
+        return dataset
+
+    @staticmethod
+    def load_repertoire_dataset(params: dict) -> Dataset:
+        metadata = pd.read_csv(params["metadata"])
+        labels = {key: set() for key in metadata.keys() if key != "filename"}
+        filenames = []
+
+        for index, row in metadata.iterrows():
+            repertoire = VDJDBLoader.load_repertoire(index, row)
+
+            for key in labels.keys():
+                labels[key].add(row[key])
+
+            filenames.append(VDJDBLoader.store_repertoire(repertoire, params))
+
+        return RepertoireDataset(params=labels, filenames=filenames, metadata_file=params["metadata"])
+
+    @staticmethod
+    def store_repertoire(repertoire, params):
+        filename = params["result_path"] + repertoire.identifier + ".pkl"
+        with open(filename, "wb") as file:
+            pickle.dump(repertoire, file)
+        return filename
+
+    @staticmethod
+    def load_repertoire(index: int, row):
+        sequences = VDJdbSequenceImport.import_items(row["filename"])
+        return SequenceRepertoire(sequences=sequences,
+                                  identifier=str(index),
+                                  metadata=RepertoireMetadata(custom_params={key: row[key] for key in row.keys()
+                                                                             if key != "filename"}))
+
+    @staticmethod
+    def load_sequence_dataset(path: str, params: dict) -> Dataset:
 
         filenames = glob(path + "*.tsv", recursive=params["recursive"])
         file_index = 0
