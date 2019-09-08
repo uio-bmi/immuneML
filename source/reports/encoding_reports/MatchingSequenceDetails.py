@@ -20,7 +20,8 @@ class MatchingSequenceDetails(EncodingReport):
                     * get the percentage of sequences from the repertoire matched with respect to clonal counts
     """
 
-    def __init__(self, dataset: RepertoireDataset = None, max_distance: int = None, reference_sequences: list = None, result_path: str = None):
+    def __init__(self, dataset: RepertoireDataset = None, max_distance: int = None, reference_sequences: list = None,
+                 result_path: str = None):
         self.dataset = dataset
         self.max_distance = max_distance
         self.reference_sequences = reference_sequences

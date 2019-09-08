@@ -47,7 +47,7 @@ class TestMatchedReferenceParser(TestCase):
 
         parsed, full_specs = MatchedReferenceParser.parse(specs)
         self.assertEqual(4, len(parsed["reference_sequences"]))
-        self.assertEqual(2, parsed["max_distance"])
+        self.assertEqual(2, parsed["max_edit_distance"])
         self.assertTrue(all([isinstance(seq, ReceptorSequence) for seq in parsed["reference_sequences"]]))
         self.assertEqual(SequenceMatchingSummaryType.COUNT, parsed["summary"])
 
@@ -57,12 +57,12 @@ class TestMatchedReferenceParser(TestCase):
                 "format": "IRIS"  # or VDJdb
             },
             "summary": "percentage",  # or percentage or clonal_percentages (-> count sequences)
-            "max_distance": 0
+            "max_edit_distance": 0
         }
 
         parsed, full_specs = MatchedReferenceParser.parse(specs)
         self.assertEqual(4, len(parsed["reference_sequences"]))
-        self.assertEqual(0, parsed["max_distance"])
+        self.assertEqual(0, parsed["max_edit_distance"])
         self.assertTrue(all([isinstance(seq, ReceptorSequence) for seq in parsed["reference_sequences"]]))
         self.assertEqual(SequenceMatchingSummaryType.PERCENTAGE, parsed["summary"])
 

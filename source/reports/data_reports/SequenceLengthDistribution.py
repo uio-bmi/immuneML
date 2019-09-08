@@ -10,8 +10,8 @@ from source.util.PathBuilder import PathBuilder
 
 class SequenceLengthDistribution(DataReport):
 
-    def __init__(self, dataset: RepertoireDataset = None, batch_size: int = 1, path: str = None):
-        DataReport.__init__(self, dataset=dataset, path=path)
+    def __init__(self, dataset: RepertoireDataset = None, batch_size: int = 1, result_path: str = None):
+        DataReport.__init__(self, dataset=dataset, result_path=result_path)
         self.batch_size = batch_size
 
     def generate(self):
@@ -49,7 +49,7 @@ class SequenceLengthDistribution(DataReport):
         plt.ylabel("Frequency")
         plt.title("Sequence length distribution")
 
-        PathBuilder.build(self.path)
+        PathBuilder.build(self.result_path)
 
-        plt.savefig(self.path + "sequence_length_distribution.png", transparent=True)
+        plt.savefig(self.result_path + "sequence_length_distribution.png", transparent=True)
 

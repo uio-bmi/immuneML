@@ -23,7 +23,7 @@ class MatchedReferenceParser(EncodingParameterParser):
 
         parsed = {
             "reference_sequences": seqs,
-            "max_distance": parsed["max_distance"],
+            "max_edit_distance": parsed["max_edit_distance"],
             "summary": SequenceMatchingSummaryType[parsed["summary"].upper()]
         }
 

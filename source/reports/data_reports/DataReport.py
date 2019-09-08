@@ -6,8 +6,6 @@ from source.reports.Report import Report
 
 class DataReport(Report, ABC):
 
-    def __init__(self, dataset: RepertoireDataset = None, path: str = None):
+    def __init__(self, dataset: RepertoireDataset = None, result_path: str = None):
         self.dataset = dataset
-        self.path = path
-
-    pass
+        self.result_path = result_path

@@ -186,7 +186,7 @@ class HPOptimizationProcess(InstructionProcess):
     def run_data_report(self, report: DataReport, dataset, path: str):
         tmp_report = copy.deepcopy(report)
         tmp_report.dataset = dataset
-        tmp_report.path = path
+        tmp_report.result_path = path
         tmp_report.generate_report()
 
     def split_data(self, dataset: Dataset, split_config: SplitConfig, path: str) -> tuple:
