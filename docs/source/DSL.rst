@@ -55,7 +55,7 @@ An example of encodings section is given below:
                     path: "./analysis/gut_data_overview/reference_sequences/v3/pubseq.csv"
                     format: "VDJdb"
                 summary: clonal_percentage
-                max_distance: 2
+                max_edit_distance: 2
             labels: # list of labels to encode, labels are given by name, complete list is in the metadata file for the dataset
                 - CD
         encoding2: # unique identifier of the next encoding
@@ -114,7 +114,7 @@ The full specification is given below.
                     path: "./analysis/gut_data_overview/reference_sequences/v3/pubseq.csv"
                     format: "VDJdb"
                 summary: clonal_percentage
-                max_distance: 2
+                max_edit_distance: 2
             labels: # list of labels to encode, labels are given by name, complete list is in the metadata file for the dataset
                 - CD
     ml_methods:
