@@ -53,13 +53,14 @@ class ExploratoryAnalysisParser:
     def _prepare_optional_params(self, analysis: dict, symbol_table: SymbolTable) -> dict:
 
         params = {}
+        dataset = symbol_table.get(analysis["dataset"])
 
         if all(key in analysis for key in ["encoding", "labels"]):
             params["encoder"] = symbol_table.get(analysis["encoding"]) \
-                .create_encoder(symbol_table.get(analysis["dataset"]), symbol_table.get_config(analysis["encoding"])["encoder_params"])
+                .create_encoder(dataset, symbol_table.get_config(analysis["encoding"])["encoder_params"])
             params["label_config"] = LabelConfiguration()
-            for label in params["label_config"].get_labels_by_name():
-                params["label_config"].add_label(label, params["dataset"].params[label])
+            for label in analysis["labels"]:
+                params["label_config"].add_label(label, dataset.params[label])
         elif any(key in analysis for key in ["encoding", "labels"]):
             raise KeyError("ExploratoryAnalysisParser: keys for analyses are not properly defined. "
                            "If encoding is defined, labels have to be defined as well and vice versa.")

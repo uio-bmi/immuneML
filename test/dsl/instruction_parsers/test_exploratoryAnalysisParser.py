@@ -53,6 +53,7 @@ class TestExploratoryAnalysisParser(TestCase):
         self.assertTrue(isinstance(process.exploratory_analysis_units[1].report, MatchingSequenceDetails))
         self.assertTrue(isinstance(process.exploratory_analysis_units[1].encoder, MatchedReferenceEncoder))
         self.assertEqual(1, len(process.exploratory_analysis_units[1].encoder.reference_sequences))
+        self.assertEqual("l1", process.exploratory_analysis_units[1].label_config.get_labels_by_name()[0])
 
         shutil.rmtree(path)
 
