@@ -1,6 +1,5 @@
 import copy
 
-from source.dsl.SymbolTable import SymbolTable
 from source.util.ReflectionHandler import ReflectionHandler
 
 
@@ -16,7 +15,11 @@ class ParameterParser:
     """
 
     @staticmethod
-    def parse(params, class_name: str = "", subdirectory: str = "", symbol_table: SymbolTable = None):
+    def parse(params, class_name: str = "", subdirectory: str = ""):
+
+        assert class_name == "" or "Parser" not in class_name, \
+            "ParameterParser: the class name is incorrectly specified - it should include the component class name without 'Parser'."
+
         if class_name != "" and ReflectionHandler.exists("{}Parser".format(class_name), subdirectory):
             parser_class = ReflectionHandler.get_class_by_name("{}Parser".format(class_name))
             parsed_params, params_specs = parser_class.parse(params)
