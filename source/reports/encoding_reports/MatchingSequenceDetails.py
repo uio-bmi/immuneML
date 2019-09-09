@@ -20,10 +20,10 @@ class MatchingSequenceDetails(EncodingReport):
                     * get the percentage of sequences from the repertoire matched with respect to clonal counts
     """
 
-    def __init__(self, dataset: RepertoireDataset = None, max_distance: int = None, reference_sequences: list = None,
+    def __init__(self, dataset: RepertoireDataset = None, max_edit_distance: int = None, reference_sequences: list = None,
                  result_path: str = None):
         self.dataset = dataset
-        self.max_distance = max_distance
+        self.max_edit_distance = max_edit_distance
         self.reference_sequences = reference_sequences
         self.result_path = result_path
 
@@ -55,7 +55,7 @@ class MatchingSequenceDetails(EncodingReport):
                     "repertoire_identifier": repertoire.identifier,
                     self.dataset.encoded_data.feature_names[0]: self.dataset.encoded_data.examples[index][0],
                     "repertoire_size": len(repertoire.sequences),
-                    "max_levenshtein_distance": self.max_distance
+                    "max_levenshtein_distance": self.max_edit_distance
                 }
                 for label in self.dataset.params.keys():
                     row["{}".format(label)] = repertoire.metadata.custom_params[label]
@@ -89,11 +89,11 @@ class MatchingSequenceDetails(EncodingReport):
                     "chain": sequence.metadata.chain,
                     "clone_count": sequence.metadata.count,
                     "matching_sequences": str(matching_sequences)[1:-1].replace("'", ""),
-                    "max_distance": self.max_distance
+                    "max_distance": self.max_edit_distance
                 })
 
         return filename
 
     def _find_matching_sequences(self, sequence: ReceptorSequence):
         matcher = SequenceMatcher()
-        return matcher.match_sequence(sequence, self.reference_sequences, self.max_distance)["matching_sequences"]
+        return matcher.match_sequence(sequence, self.reference_sequences, self.max_edit_distance)["matching_sequences"]

@@ -34,7 +34,7 @@ class TestMatchingSequenceDetails(TestCase):
             "dataset": dataset,
             "result_path": path + "result/",
             "reference_sequences": ref_seqs,
-            "max_distance": 1
+            "max_edit_distance": 1
         })
 
         report.generate()

@@ -25,7 +25,7 @@ class TestExploratoryAnalysisParser(TestCase):
         dataset = self.prepare_dataset(path)
         report1 = SequenceLengthDistribution()
         refs = [ReceptorSequence("AAAC", metadata=SequenceMetadata(v_gene="v1", j_gene="j1"))]
-        report2 = MatchingSequenceDetails(max_distance=1, reference_sequences=refs)
+        report2 = MatchingSequenceDetails(max_edit_distance=1, reference_sequences=refs)
         encoding = MatchedReferenceEncoder
 
         instruction = {

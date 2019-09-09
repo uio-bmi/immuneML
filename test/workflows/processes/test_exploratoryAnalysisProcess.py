@@ -43,7 +43,7 @@ class TestExploratoryAnalysisProcess(TestCase):
 
         units = [ExploratoryAnalysisUnit(dataset=dataset, report=SequenceLengthDistribution()),
                  ExploratoryAnalysisUnit(dataset=dataset, report=SequenceLengthDistribution()),
-                 ExploratoryAnalysisUnit(dataset=dataset, report=MatchingSequenceDetails(max_distance=1, reference_sequences=refs),
+                 ExploratoryAnalysisUnit(dataset=dataset, report=MatchingSequenceDetails(max_edit_distance=1, reference_sequences=refs),
                                          label_config=label_config,
                                          encoder=ReferenceRepertoireEncoder(max_edit_distance=1,
                                                                             summary=SequenceMatchingSummaryType.COUNT,
