@@ -30,7 +30,7 @@ class TestDatasetChainFilter(TestCase):
 
         dataset = RepertoireDataset(filenames=[path + "rep1.pkl", path + "rep2.pkl"], metadata_file=path + "metadata.csv")
 
-        dataset2 = DatasetChainFilter.process(dataset, {"keep_chain": "A"})
+        dataset2 = DatasetChainFilter.process(dataset, {"keep_chain": "A", "result_path": path + "results/"})
 
         self.assertEqual(1, len(dataset2.get_filenames()))
         self.assertEqual(2, len(dataset.get_filenames()))
