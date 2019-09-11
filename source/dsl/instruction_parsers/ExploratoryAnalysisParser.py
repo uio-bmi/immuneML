@@ -65,4 +65,7 @@ class ExploratoryAnalysisParser:
             raise KeyError("ExploratoryAnalysisParser: keys for analyses are not properly defined. "
                            "If encoding is defined, labels have to be defined as well and vice versa.")
 
+        if "preprocessing_sequence" in analysis:
+            params["preprocessing_sequence"] = symbol_table.get(analysis["preprocessing_sequence"])
+
         return params

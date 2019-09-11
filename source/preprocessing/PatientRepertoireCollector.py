@@ -12,11 +12,11 @@ from source.util.PathBuilder import PathBuilder
 
 class PatientRepertoireCollector(Preprocessor):
 
-    def __init__(self, result_path: str):
+    def __init__(self, result_path: str = None):
         self.result_path = result_path
 
-    def process_dataset(self, dataset: RepertoireDataset):
-        return PatientRepertoireCollector.process(dataset, {"result_path": self.result_path})
+    def process_dataset(self, dataset: RepertoireDataset, result_path: str = None):
+        return PatientRepertoireCollector.process(dataset, {"result_path": result_path if result_path is not None else self.result_path})
 
     @staticmethod
     def process(dataset: RepertoireDataset, params: dict) -> RepertoireDataset:
@@ -42,15 +42,15 @@ class PatientRepertoireCollector(Preprocessor):
                                                                          rep_map[key]))
 
         processed_dataset.set_filenames(filenames)
-        processed_dataset.metadata_file = PatientRepertoireCollector.build_new_metadata(dataset, indices_to_keep)
+        processed_dataset.metadata_file = PatientRepertoireCollector.build_new_metadata(dataset, indices_to_keep, params["result_path"])
 
         return processed_dataset
 
     @staticmethod
-    def build_new_metadata(dataset, indices_to_keep):
+    def build_new_metadata(dataset, indices_to_keep, result_path: str):
         if dataset.metadata_file:
             df = pd.read_csv(dataset.metadata_file, index_col=0).iloc[indices_to_keep, :]
-            path = os.path.dirname(os.path.abspath(dataset.metadata_file)) + "_{}_collected_repertoires.csv"\
+            path = result_path + "_{}_collected_repertoires.csv"\
                 .format(os.path.splitext(os.path.basename(dataset.metadata_file))[0])
             df.to_csv(path)
         else:

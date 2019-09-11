@@ -9,6 +9,7 @@ from source.encodings.reference_encoding.ReferenceRepertoireEncoder import Refer
 from source.encodings.reference_encoding.SequenceMatchingSummaryType import SequenceMatchingSummaryType
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.environment.LabelConfiguration import LabelConfiguration
+from source.preprocessing.PatientRepertoireCollector import PatientRepertoireCollector
 from source.reports.data_reports.SequenceLengthDistribution import SequenceLengthDistribution
 from source.reports.encoding_reports.MatchingSequenceDetails import MatchingSequenceDetails
 from source.util.PathBuilder import PathBuilder
@@ -41,8 +42,10 @@ class TestExploratoryAnalysisProcess(TestCase):
 
         refs = [ReceptorSequence("AAAC", metadata=SequenceMetadata(v_gene="v1", j_gene="j1"))]
 
+        preproc_sequence = [PatientRepertoireCollector()]
+
         units = [ExploratoryAnalysisUnit(dataset=dataset, report=SequenceLengthDistribution()),
-                 ExploratoryAnalysisUnit(dataset=dataset, report=SequenceLengthDistribution()),
+                 ExploratoryAnalysisUnit(dataset=dataset, report=SequenceLengthDistribution(), preprocessing_sequence=preproc_sequence),
                  ExploratoryAnalysisUnit(dataset=dataset, report=MatchingSequenceDetails(max_edit_distance=1, reference_sequences=refs),
                                          label_config=label_config,
                                          encoder=ReferenceRepertoireEncoder(max_edit_distance=1,

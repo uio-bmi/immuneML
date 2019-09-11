@@ -27,10 +27,20 @@ class ExploratoryAnalysisProcess(InstructionProcess):
             print("Finished analysis {}/{}.".format(index+1, len(self.exploratory_analysis_units)))
 
     def run_unit(self, unit: ExploratoryAnalysisUnit, result_path: str):
+        unit.dataset = self.preprocess_dataset(unit, result_path)
         encoded_dataset = self.encode(unit, result_path)
         unit.report.dataset = encoded_dataset
         unit.report.result_path = result_path
         unit.report.generate_report()
+
+    def preprocess_dataset(self, unit: ExploratoryAnalysisUnit, result_path: str) -> Dataset:
+        if unit.preprocessing_sequence is not None and len(unit.preprocessing_sequence) > 0:
+            dataset = unit.dataset
+            for preprocessing in unit.preprocessing_sequence:
+                dataset = preprocessing.process_dataset(dataset, result_path)
+        else:
+            dataset = unit.dataset
+        return dataset
 
     def encode(self, unit: ExploratoryAnalysisUnit, result_path: str) -> Dataset:
         if unit.encoder is not None:

@@ -33,7 +33,8 @@ class TestMetadataFilter(TestCase):
                     "name": "key2"
                 },
                 "threshold": 1
-            }
+            },
+            "result_path": path
         })
 
         self.assertEqual(1, dataset1.get_example_count())

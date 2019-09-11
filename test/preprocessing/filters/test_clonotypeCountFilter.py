@@ -16,10 +16,10 @@ class TestClonotypeCountFilter(TestCase):
                                                                        ["ACF", "ACF"],
                                                                        ["ACF", "ACF", "ACF", "ACF"]], path)[0])
 
-        dataset1 = ClonotypeCountFilter.process(dataset, {"lower_limit": 3})
+        dataset1 = ClonotypeCountFilter.process(dataset, {"lower_limit": 3, "result_path": path})
         self.assertEqual(2, dataset1.get_example_count())
 
-        dataset2 = ClonotypeCountFilter.process(dataset, {"upper_limit": 2})
+        dataset2 = ClonotypeCountFilter.process(dataset, {"upper_limit": 2, "result_path": path})
         self.assertEqual(1, dataset2.get_example_count())
 
         shutil.rmtree(path)

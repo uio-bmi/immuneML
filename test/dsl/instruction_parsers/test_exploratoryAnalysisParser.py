@@ -10,6 +10,7 @@ from source.dsl.instruction_parsers.ExploratoryAnalysisParser import Exploratory
 from source.encodings.reference_encoding.MatchedReferenceEncoder import MatchedReferenceEncoder
 from source.encodings.reference_encoding.SequenceMatchingSummaryType import SequenceMatchingSummaryType
 from source.environment.EnvironmentSettings import EnvironmentSettings
+from source.preprocessing.PatientRepertoireCollector import PatientRepertoireCollector
 from source.reports.data_reports.SequenceLengthDistribution import SequenceLengthDistribution
 from source.reports.encoding_reports.MatchingSequenceDetails import MatchingSequenceDetails
 from source.util.PathBuilder import PathBuilder
@@ -27,11 +28,12 @@ class TestExploratoryAnalysisParser(TestCase):
         refs = [ReceptorSequence("AAAC", metadata=SequenceMetadata(v_gene="v1", j_gene="j1"))]
         report2 = MatchingSequenceDetails(max_edit_distance=1, reference_sequences=refs)
         encoding = MatchedReferenceEncoder
+        p1 = [PatientRepertoireCollector()]
 
         instruction = {
             "type": "ExploratoryAnalysis",
             "analyses": [
-                {"dataset": "d1", "report": "r1"},
+                {"dataset": "d1", "report": "r1", "preprocessing_sequence": "p1"},
                 {"dataset": "d1", "report": "r2", "encoding": "e1", "labels": ["l1"]}
             ]
         }
@@ -45,6 +47,7 @@ class TestExploratoryAnalysisParser(TestCase):
             "summary": SequenceMatchingSummaryType.COUNT,
             "reference_sequences": refs
         }})
+        symbol_table.add("p1", SymbolType.PREPROCESSING, p1)
 
         process = ExploratoryAnalysisParser().parse(instruction, symbol_table)
 

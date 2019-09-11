@@ -1,15 +1,14 @@
 import copy
-import os
 
 import numpy as np
 import pandas as pd
 
 from source.analysis.criteria_matches.CriteriaMatcher import CriteriaMatcher
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
-from source.preprocessing.Preprocessor import Preprocessor
+from source.preprocessing.filters.Filter import Filter
 
 
-class MetadataFilter(Preprocessor):
+class MetadataFilter(Filter):
     """
     For use in filtering out repertoires from the dataset based on information stored in the metadata_file.
 
@@ -34,7 +33,7 @@ class MetadataFilter(Preprocessor):
     def __init__(self, params: dict):
         self.params = params
 
-    def process_dataset(self, dataset: RepertoireDataset):
+    def process_dataset(self, dataset: RepertoireDataset, result_path: str):
         return MetadataFilter.process(dataset, self.params)
 
     @staticmethod
@@ -43,7 +42,7 @@ class MetadataFilter(Preprocessor):
         original_filenames = processed_dataset.get_filenames()
         indices = MetadataFilter.get_matching_indices(processed_dataset, params["criteria"])
         processed_dataset.set_filenames([original_filenames[i] for i in indices])
-        processed_dataset.metadata_file = MetadataFilter.build_new_metadata(dataset, indices)
+        processed_dataset.metadata_file = MetadataFilter.build_new_metadata(dataset, indices, params["result_path"])
         return processed_dataset
 
     @staticmethod
@@ -53,13 +52,4 @@ class MetadataFilter(Preprocessor):
         indices = np.where(matches)[0]
         return indices
 
-    @staticmethod
-    def build_new_metadata(dataset, indices_to_keep):
-        if dataset.metadata_file:
-            df = pd.read_csv(dataset.metadata_file, index_col=0).iloc[indices_to_keep, :]
-            path = os.path.dirname(os.path.abspath(dataset.metadata_file)) + "/{}_metadata_filtered.csv"\
-                .format(os.path.splitext(os.path.basename(dataset.metadata_file))[0])
-            df.to_csv(path)
-        else:
-            path = None
-        return path
+

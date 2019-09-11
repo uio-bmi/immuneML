@@ -11,5 +11,5 @@ class Preprocessor(metaclass=abc.ABCMeta):
         pass
 
     @abc.abstractmethod
-    def process_dataset(self, dataset: RepertoireDataset) -> RepertoireDataset:
+    def process_dataset(self, dataset: RepertoireDataset, result_path: str) -> RepertoireDataset:
         pass

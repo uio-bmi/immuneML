@@ -1,15 +1,13 @@
 import copy
 import os
 
-import pandas as pd
-
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.receptor.receptor_sequence.Chain import Chain
-from source.preprocessing.Preprocessor import Preprocessor
+from source.preprocessing.filters.Filter import Filter
 from source.util.PathBuilder import PathBuilder
 
 
-class DatasetChainFilter(Preprocessor):
+class DatasetChainFilter(Filter):
     """
     Preprocessing filter which removes all repertoires from the RepertoireDataset object which contain at least one sequence
     from chain different than "keep_chain" parameter
@@ -19,8 +17,10 @@ class DatasetChainFilter(Preprocessor):
         self.keep_chain = keep_chain
         self.result_path = result_path
 
-    def process_dataset(self, dataset: RepertoireDataset):
-        return DatasetChainFilter.process(dataset=dataset, params={"keep_chain": self.keep_chain, "result_path": self.result_path})
+    def process_dataset(self, dataset: RepertoireDataset, result_path: str = None):
+        return DatasetChainFilter.process(dataset=dataset, params={"keep_chain": self.keep_chain,
+                                                                   "result_path": result_path if result_path is not None
+                                                                   else self.result_path})
 
     @staticmethod
     def process(dataset: RepertoireDataset, params: dict) -> RepertoireDataset:
@@ -38,16 +38,3 @@ class DatasetChainFilter(Preprocessor):
         processed_dataset.metadata_file = DatasetChainFilter.build_new_metadata(processed_dataset, indices, params["result_path"])
         processed_dataset.set_filenames(filenames)
         return processed_dataset
-
-    @staticmethod
-    def build_new_metadata(dataset: RepertoireDataset, indices_to_keep: list, result_path: str):
-        if dataset.metadata_file:
-            df = pd.read_csv(dataset.metadata_file, index_col=0).iloc[indices_to_keep, :]
-            for index, row in df.iterrows():
-                row["filename"] = dataset.get_filenames()[index]
-            path = result_path + "/{}_dataset_chain_filtered.csv" \
-                .format(os.path.splitext(os.path.basename(dataset.metadata_file))[0])
-            df.to_csv(path)
-        else:
-            path = None
-        return path
