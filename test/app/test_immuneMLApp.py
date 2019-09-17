@@ -64,6 +64,14 @@ class TestImmuneMLApp(TestCase):
                             "model_type": "sequence",
                             "vector_size": 8,
                         }
+                    },
+                    "e2": {
+                        "type": "Word2Vec",
+                        "params": {
+                            "k": 3,
+                            "model_type": "sequence",
+                            "vector_size": 10,
+                        }
                     }
                 },
                 "ml_methods": {
@@ -78,19 +86,9 @@ class TestImmuneMLApp(TestCase):
                 },
                 "preprocessing_sequences": {
                     "seq1": [
-                        {"filter_chain_B": {
-                            "type": "DatasetChainFilter",
-                            "params": {
-                                "keep_chain": "A"
-                            }
-                        }}
-                    ],
-                    "seq2": [
-                        {"filter_chain_A": {
-                            "type": "DatasetChainFilter",
-                            "params": {
-                                "keep_chain": "B"
-                            }
+                        {"collect": {
+                            "type": "PatientRepertoireCollector",
+                            "params": {}
                         }}
                     ]
                 },
@@ -113,8 +111,8 @@ class TestImmuneMLApp(TestCase):
                             "ml_method": "simpleLR"
                         },
                         {
-                            "preprocessing": "seq2",
-                            "encoding": "e1",
+                            "preprocessing": "seq1",
+                            "encoding": "e2",
                             "ml_method": "simpleLR"
                         }
                     ],

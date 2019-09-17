@@ -21,22 +21,43 @@ class Quickstart:
     def create_dataset(self, path):
         PathBuilder.build(path)
 
-        rep1 = SequenceRepertoire(sequences=[ReceptorSequence(amino_acid_sequence="AAA", metadata=SequenceMetadata(chain="A")),
+        rep1 = SequenceRepertoire(sequences=[ReceptorSequence(amino_acid_sequence="AAA", metadata=SequenceMetadata(chain="B")),
                                              ReceptorSequence(amino_acid_sequence="AAAA", metadata=SequenceMetadata(chain="B")),
                                              ReceptorSequence(amino_acid_sequence="AAAAA", metadata=SequenceMetadata(chain="B")),
-                                             ReceptorSequence(amino_acid_sequence="AAA", metadata=SequenceMetadata(chain="A"))],
+                                             ReceptorSequence(amino_acid_sequence="AAA", metadata=SequenceMetadata(chain="B"))],
                                   metadata=RepertoireMetadata(custom_params={"CD": True}))
         rep2 = SequenceRepertoire(sequences=[ReceptorSequence(amino_acid_sequence="AAA", metadata=SequenceMetadata(chain="B")),
-                                             ReceptorSequence(amino_acid_sequence="AAAA", metadata=SequenceMetadata(chain="A")),
                                              ReceptorSequence(amino_acid_sequence="AAAA", metadata=SequenceMetadata(chain="B")),
+                                             ReceptorSequence(amino_acid_sequence="AAAA", metadata=SequenceMetadata(chain="B")),
+                                             ReceptorSequence(amino_acid_sequence="AAA", metadata=SequenceMetadata(chain="B"))],
+                                  metadata=RepertoireMetadata(custom_params={"CD": False}))
+        rep3 = SequenceRepertoire(sequences=[ReceptorSequence(amino_acid_sequence="AAA", metadata=SequenceMetadata(chain="A")),
+                                             ReceptorSequence(amino_acid_sequence="AAAA", metadata=SequenceMetadata(chain="A")),
+                                             ReceptorSequence(amino_acid_sequence="AAAA", metadata=SequenceMetadata(chain="A")),
+                                             ReceptorSequence(amino_acid_sequence="AAA", metadata=SequenceMetadata(chain="A"))],
+                                  metadata=RepertoireMetadata(custom_params={"CD": True}))
+        rep4 = SequenceRepertoire(sequences=[ReceptorSequence(amino_acid_sequence="AAA", metadata=SequenceMetadata(chain="A")),
+                                             ReceptorSequence(amino_acid_sequence="AAAA", metadata=SequenceMetadata(chain="A")),
+                                             ReceptorSequence(amino_acid_sequence="AAAAA", metadata=SequenceMetadata(chain="A")),
                                              ReceptorSequence(amino_acid_sequence="AAA", metadata=SequenceMetadata(chain="A"))],
                                   metadata=RepertoireMetadata(custom_params={"CD": False}))
 
-        for index in range(1, 14):
-            with open("{}rep{}.pkl".format(path, index), "wb") as file:
-                pickle.dump(rep1 if index % 2 == 0 else rep2, file)
+        repertoire_count = 100
+        filenames = []
 
-        dataset = RepertoireDataset(filenames=[path + "rep{}.pkl".format(i) for i in range(1, 14)], params={"CD": [True, False]})
+        for index in range(1, repertoire_count+1):
+            filenames.append("{}rep{}.pkl".format(path, index))
+            with open(filenames[-1], "wb") as file:
+                if index % 4 == 0:
+                    pickle.dump(rep1, file)
+                elif index % 3 == 0:
+                    pickle.dump(rep3, file)
+                elif index % 2 == 0:
+                    pickle.dump(rep2, file)
+                else:
+                    pickle.dump(rep4, file)
+
+        dataset = RepertoireDataset(filenames=filenames, params={"CD": [True, False]})
 
         PickleExporter.export(dataset, path, "dataset.pkl")
 

@@ -1,5 +1,6 @@
 import copy
 
+from source.data_model.dataset.Dataset import Dataset
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.dsl.semantic_model.MLResult import MLResult
 from source.encodings.DatasetEncoder import DatasetEncoder
@@ -26,7 +27,7 @@ class MLProcess:
     It performs the task for a given label configuration, and given list of metrics (used only in the assessment step).
     """
 
-    def __init__(self, train_dataset: RepertoireDataset, test_dataset: RepertoireDataset, label_configuration: LabelConfiguration,
+    def __init__(self, train_dataset: Dataset, test_dataset: Dataset, label_configuration: LabelConfiguration,
                  encoder: DatasetEncoder, encoder_params: dict, method: MLMethod, ml_params: dict, metrics: set,
                  path: str, reports: list = None, min_example_count: int = 2, batch_size: int = 2, cores: int = -1):
         self.train_dataset = train_dataset
@@ -62,7 +63,7 @@ class MLProcess:
             performance = {}
         return performance
 
-    def _run_reports(self, method: MLMethod, train_dataset: RepertoireDataset, test_dataset: RepertoireDataset, path: str):
+    def _run_reports(self, method: MLMethod, train_dataset: Dataset, test_dataset: RepertoireDataset, path: str):
         for report in self.reports:
             tmp_report = copy.deepcopy(report)
             tmp_report.method = method
@@ -71,7 +72,7 @@ class MLProcess:
             tmp_report.result_path = path
             tmp_report.generate_report()
 
-    def _assess_ml_method(self, method: MLMethod, encoded_test_dataset: RepertoireDataset, run: int):
+    def _assess_ml_method(self, method: MLMethod, encoded_test_dataset: Dataset, run: int):
             return MLMethodAssessment.run(MLMethodAssessmentParams(
                 method=method,
                 dataset=encoded_test_dataset,
@@ -84,7 +85,7 @@ class MLProcess:
                 path=self.path
             ))
 
-    def _run_encoder(self, train_dataset: RepertoireDataset, learn_model: bool):
+    def _run_encoder(self, train_dataset: Dataset, learn_model: bool):
         return DataEncoder.run(DataEncoderParams(
             dataset=train_dataset,
             encoder=self.encoder,
@@ -98,7 +99,7 @@ class MLProcess:
             )
         ))
 
-    def _train_ml_method(self, encoded_train_dataset: RepertoireDataset) -> MLMethod:
+    def _train_ml_method(self, encoded_train_dataset: Dataset) -> MLMethod:
         return MLMethodTrainer.run(MLMethodTrainerParams(
             method=self.method,
             result_path=self.path + "/ml_method/",

@@ -1,4 +1,4 @@
-from source.data_model.dataset.RepertoireDataset import RepertoireDataset
+from source.data_model.dataset.Dataset import Dataset
 from source.environment.LabelConfiguration import LabelConfiguration
 from source.ml_methods.MLMethod import MLMethod
 from source.workflows.steps.StepParams import StepParams
@@ -6,7 +6,7 @@ from source.workflows.steps.StepParams import StepParams
 
 class MLMethodAssessmentParams(StepParams):
 
-    def __init__(self, method: MLMethod, dataset: RepertoireDataset, metrics: set, label_configuration: LabelConfiguration,
+    def __init__(self, method: MLMethod, dataset: Dataset, metrics: set, label_configuration: LabelConfiguration,
                  path: str, run: int, ml_details_path: str, predictions_path: str, all_predictions_path: str):
         self.method = method
         self.dataset = dataset

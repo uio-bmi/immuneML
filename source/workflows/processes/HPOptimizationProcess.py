@@ -137,10 +137,20 @@ class HPOptimizationProcess(InstructionProcess):
         PathBuilder.build(path)
         return path
 
+    def preprocess_dataset(self, dataset: Dataset, preproc_sequence: list, path: str) -> Dataset:
+        PathBuilder.build(path)
+        tmp_dataset = copy.deepcopy(dataset)
+        for preprocessing in preproc_sequence:
+            tmp_dataset = preprocessing.process_dataset(tmp_dataset, path)
+        return tmp_dataset
+
     def run_setting(self, hp_setting, train_dataset, val_dataset, run: int, current_path: str):
         path = self.create_setting_path(current_path, hp_setting, run)
 
-        ml_process = MLProcess(train_dataset=train_dataset, test_dataset=val_dataset,
+        new_train_dataset = self.preprocess_dataset(train_dataset, hp_setting.preproc_sequence, path + "train/")
+        new_val_dataset = self.preprocess_dataset(val_dataset, hp_setting.preproc_sequence, path + "val/")
+
+        ml_process = MLProcess(train_dataset=new_train_dataset, test_dataset=new_val_dataset,
                                label_configuration=self.label_configuration,
                                encoder=hp_setting.encoder.create_encoder(train_dataset, hp_setting.encoder_params),
                                encoder_params=hp_setting.encoder_params, method=hp_setting.ml_method,
