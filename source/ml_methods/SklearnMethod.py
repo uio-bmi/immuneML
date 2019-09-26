@@ -61,7 +61,7 @@ class SklearnMethod(MLMethod):
         return False
 
     def check_is_fitted(self, labels):
-        return all([check_is_fitted(self.models[label], ["estimators_", "coef_", "estimator"], all_or_any=any) for label in labels])
+        return all([check_is_fitted(self.models[label], ["estimators_", "coef_", "estimator", "_fit_X"], all_or_any=any) for label in labels])
 
     def predict(self, X: Iterable, label_names: list = None):
         labels = label_names if label_names is not None else self.models.keys()
