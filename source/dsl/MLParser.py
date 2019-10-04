@@ -31,12 +31,12 @@ class MLParser:
                                        **ml_specification[ml_method_id]}
 
         return MLParser.create_method_instance(ml_specification, ml_method_id, ml_method_class), {
-            "metrics": MLParser.map_metrics(ml_specification[ml_method_id]),
+            # "metrics": MLParser.map_metrics(ml_specification[ml_method_id]),
             "model_selection_cv": ml_specification[ml_method_id]["model_selection_cv"],
             "model_selection_n_folds": ml_specification[ml_method_id]["model_selection_n_folds"],
-            "min_example_count": ml_specification[ml_method_id]["min_example_count"],
-            "cores_for_training": ml_specification[ml_method_id]["cores_for_training"],
-            "batch_size": ml_specification[ml_method_id]["batch_size"],
+            # "min_example_count": ml_specification[ml_method_id]["min_example_count"],
+            # "cores_for_training": ml_specification[ml_method_id]["cores_for_training"],
+            # "batch_size": ml_specification[ml_method_id]["batch_size"],
         }
 
     @staticmethod
