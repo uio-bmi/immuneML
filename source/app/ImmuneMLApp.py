@@ -19,12 +19,13 @@ class ImmuneMLApp:
             os.environ[Constants.CACHE_TYPE] = CacheType.TEST.value
 
     def set_logging(self):
-        sys.stderr = open(self._result_path + "log.txt", 'w')
+        print(sys.argv)
+        if all("unittest" not in arg for arg in sys.argv):
+            sys.stderr = open(self._result_path + "log.txt", 'w')
 
     def run(self):
 
         self.set_logging()
-
         self.set_cache()
 
         symbol_table, self._specification_path = ImmuneMLParser.parse_yaml_file(self._specification_path,
