@@ -18,7 +18,12 @@ class ImmuneMLApp:
         if Constants.CACHE_TYPE not in os.environ:
             os.environ[Constants.CACHE_TYPE] = CacheType.TEST.value
 
+    def set_logging(self):
+        sys.stderr = open(self._result_path + "log.txt", 'w')
+
     def run(self):
+
+        self.set_logging()
 
         self.set_cache()
 
