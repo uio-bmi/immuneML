@@ -28,6 +28,6 @@ class InstructionParser:
     @staticmethod
     def parse_instruction(instruction: dict, key: str, symbol_table: SymbolTable) -> tuple:
         parser = ReflectionHandler.get_class_by_name("{}Parser".format(instruction["type"]), "instruction_parsers/")()
-        process = parser.parse(instruction, symbol_table)
-        symbol_table.add(key, SymbolType.INSTRUCTION, process)
+        instruction_object = parser.parse(instruction, symbol_table)
+        symbol_table.add(key, SymbolType.INSTRUCTION, instruction_object)
         return instruction, symbol_table
