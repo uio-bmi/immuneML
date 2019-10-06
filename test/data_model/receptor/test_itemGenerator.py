@@ -4,7 +4,7 @@ from unittest import TestCase
 
 from source.data_model.dataset.SequenceDataset import SequenceDataset
 from source.data_model.receptor.BCReceptor import BCReceptor
-from source.data_model.receptor.ItemGenerator import ItemGenerator
+from source.data_model.receptor.ElementGenerator import ElementGenerator
 from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.util.PathBuilder import PathBuilder
@@ -21,7 +21,7 @@ class TestItemGenerator(TestCase):
             with open(file_list[i], "wb") as file:
                 pickle.dump(receptors[i * 100: (i+1) * 100], file)
 
-        receptor_generator = ItemGenerator(file_list)
+        receptor_generator = ElementGenerator(file_list)
         generator = receptor_generator.build_batch_generator(41)
 
         counter = 0

@@ -13,3 +13,6 @@ class TCABReceptor(Receptor):
 
     def get_chains(self):
         return ["alpha", "beta"]
+
+    def get_attribute(self, name: str):
+        raise NotImplementedError

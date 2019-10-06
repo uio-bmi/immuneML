@@ -14,6 +14,9 @@ class Report(metaclass=abc.ABCMeta):
     def check_prerequisites(self):
         pass
 
+    def set_context(self, context: dict):
+        return self
+
     def generate_report(self):
         self.check_prerequisites()
         self.generate()

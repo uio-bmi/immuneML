@@ -8,6 +8,10 @@ from source.environment.EnvironmentSettings import EnvironmentSettings
 class ReflectionHandler:
 
     @staticmethod
+    def import_function(function: str, module):
+        return getattr(module, function)
+
+    @staticmethod
     def import_module(name: str, package: str = None):
         return import_module(name, package)
 

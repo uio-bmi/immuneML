@@ -38,7 +38,7 @@ class HPOptimizationProcess(InstructionProcess):
 
     def __init__(self, dataset, hp_strategy: HPOptimizationStrategy, hp_settings: list,
                  assessment: SplitConfig, selection: SplitConfig, metrics: set,
-                 label_configuration: LabelConfiguration, path: str = None):
+                 label_configuration: LabelConfiguration, path: str = None, context: dict = None):
         self.dataset = dataset
         self.selection = selection
         self.hp_strategy = hp_strategy
@@ -50,6 +50,7 @@ class HPOptimizationProcess(InstructionProcess):
         self.label_configuration = label_configuration
         self.metrics = metrics
         self.assessment = assessment
+        self.context = context
 
     def run(self, result_path: str):
         self.path = result_path
@@ -152,10 +153,10 @@ class HPOptimizationProcess(InstructionProcess):
 
         ml_process = MLProcess(train_dataset=new_train_dataset, test_dataset=new_val_dataset,
                                label_configuration=self.label_configuration,
-                               encoder=hp_setting.encoder.create_encoder(train_dataset, hp_setting.encoder_params),
+                               encoder=hp_setting.encoder.create_encoder(train_dataset, hp_setting.encoder_params).set_context(self.context),
                                encoder_params=hp_setting.encoder_params, method=hp_setting.ml_method,
                                ml_params=hp_setting.ml_params, metrics=self.metrics, path=path,
-                               reports=self.selection.reports.model_reports)
+                               reports=[report.set_context(self.context) for report in self.selection.reports.model_reports])
         performance = ml_process.run(run)
 
         return performance
@@ -191,12 +192,14 @@ class HPOptimizationProcess(InstructionProcess):
         tmp_report.test_dataset = test_dataset
         tmp_report.method = method
         tmp_report.path = path
+        tmp_report.set_context(self.context)
         tmp_report.generate_report()
 
     def run_data_report(self, report: DataReport, dataset, path: str):
         tmp_report = copy.deepcopy(report)
         tmp_report.dataset = dataset
         tmp_report.result_path = path
+        tmp_report.set_context(self.context)
         tmp_report.generate_report()
 
     def split_data(self, dataset: Dataset, split_config: SplitConfig, path: str) -> tuple:
@@ -235,7 +238,7 @@ class HPOptimizationProcess(InstructionProcess):
     def encode_dataset(self, dataset, hp_setting: HPSetting, path: str, learn_model: bool):
         encoded_dataset = DataEncoder.run(DataEncoderParams(
             dataset=dataset,
-            encoder=hp_setting.encoder.create_encoder(dataset, hp_setting.encoder_params),
+            encoder=hp_setting.encoder.create_encoder(dataset, hp_setting.encoder_params).set_context(self.context),
             encoder_params=EncoderParams(
                 model=hp_setting.encoder_params,
                 result_path=path,

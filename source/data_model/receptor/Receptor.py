@@ -1,7 +1,9 @@
 import abc
 
+from source.data_model.DatasetItem import DatasetItem
 
-class Receptor:
+
+class Receptor(DatasetItem):
 
     @abc.abstractmethod
     def get_chains(self):

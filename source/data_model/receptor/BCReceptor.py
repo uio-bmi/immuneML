@@ -12,3 +12,6 @@ class BCReceptor(Receptor):
 
     def get_chains(self):
         return ["heavy", "light"]
+
+    def get_attribute(self, name: str):
+        raise NotImplementedError

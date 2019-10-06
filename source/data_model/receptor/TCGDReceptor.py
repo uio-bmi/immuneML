@@ -13,3 +13,6 @@ class TCGDReceptor(Receptor):
 
     def get_chains(self):
         return ["gamma", "delta"]
+
+    def get_attribute(self, name: str):
+        raise NotImplementedError

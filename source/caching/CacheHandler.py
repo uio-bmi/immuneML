@@ -9,6 +9,12 @@ from source.util.PathBuilder import PathBuilder
 class CacheHandler:
 
     @staticmethod
+    def get_file_path(cache_type=None):
+        file_path = EnvironmentSettings.get_cache_path(cache_type) + "files/"
+        PathBuilder.build(file_path)
+        return file_path
+
+    @staticmethod
     def get(params: tuple, cache_type=None):
         h = CacheHandler._hash(params)
         filename = CacheHandler._build_filename(h, cache_type)

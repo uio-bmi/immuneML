@@ -1,5 +1,5 @@
-from source.data_model.dataset.ItemDataset import ItemDataset
+from source.data_model.dataset.ElementDataset import ElementDataset
 
 
-class ReceptorDataset(ItemDataset):
+class ReceptorDataset(ElementDataset):
     pass

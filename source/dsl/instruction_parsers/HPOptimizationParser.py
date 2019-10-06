@@ -24,12 +24,16 @@ class HPOptimizationParser:
         strategy = ReflectionHandler.get_class_by_name(instruction["strategy"], "hyperparameter_optimization/")
         metrics = {MetricType[metric.upper()] for metric in instruction["metrics"]}
         path = self._prepare_path(instruction)
+        context = self._prepare_context(instruction, symbol_table)
 
         hp_process = HPOptimizationProcess(dataset=dataset, hp_strategy=strategy(settings), hp_settings=settings,
                                            assessment=assessment, selection=selection, metrics=metrics,
-                                           label_configuration=label_config, path=path)
+                                           label_configuration=label_config, path=path, context=context)
 
         return hp_process
+
+    def _prepare_context(self, instruction: dict, symbol_table: SymbolTable):
+        return {"dataset": symbol_table.get(instruction["dataset"])}
 
     def _parse_settings(self, instruction: dict, symbol_table: SymbolTable) -> list:
         settings = []

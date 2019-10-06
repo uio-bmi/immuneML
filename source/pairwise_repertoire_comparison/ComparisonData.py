@@ -61,16 +61,17 @@ class ComparisonData:
         # TODO: set existing vector in batch to 1 if an item exists in repertoire!!!
 
         swap_count = 0
-        max_swaps = new_items.shape[0]
-        while swap_count < max_swaps:
+        max_swaps = new_items.shape[0] if batch.shape[0] > 0 else 0
+        while swap_count < max_swaps and new_items.shape[0] > 0:
             size = min(new_items.shape[0], batch.shape[0])
             indices_to_keep = np.logical_and.reduce(new_items.values[:size] != batch[new_items.columns.tolist()].values[:size], axis=1)
             batch[:size]["rep_{}".format(repertoire_index)] = np.logical_not(indices_to_keep).astype(int)
             batch.to_csv(batch_path, index=False)
             new_items[:size] = new_items[:size][indices_to_keep]
             new_items = new_items.dropna()
-            new_items = self._rotate_dataframe(new_items)
-            swap_count += 1
+            if new_items.shape[0] > 0:
+                new_items = self._rotate_dataframe(new_items)
+                swap_count += 1
         return new_items
 
     def _rotate_dataframe(self, df: pd.DataFrame):
@@ -87,7 +88,7 @@ class ComparisonData:
             items[column] = 0
 
         items["rep_{}".format(repertoire_index)] = 1
-        batch = batch.append(items, ignore_index=True)
+        batch = batch.append(items, ignore_index=True, sort=False)
 
         batch[:self.batch_size].to_csv(self.batch_paths[-1], index=False)
         batch = batch[self.batch_size:]

@@ -1,11 +1,12 @@
 # quality: gold
+from source.data_model.DatasetItem import DatasetItem
 from source.data_model.receptor.receptor_sequence.SequenceAnnotation import SequenceAnnotation
 from source.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.environment.SequenceType import SequenceType
 
 
-class ReceptorSequence:
+class ReceptorSequence(DatasetItem):
 
     def __init__(self,
                  amino_acid_sequence: str = None,
@@ -40,3 +41,15 @@ class ReceptorSequence:
             self.amino_acid_sequence = sequence
         else:
             self.nucleotide_sequence = sequence
+
+    def get_attribute(self, name: str):
+        if hasattr(self, name):
+            return getattr(self, name)
+        elif hasattr(self.metadata, name):
+            return getattr(self.metadata, name)
+        elif name in self.metadata.custom_params:
+            return self.metadata.custom_params[name]
+        elif hasattr(self.annotation, name):
+            return getattr(self.annotation, name)
+        else:
+            raise KeyError("ReceptorSequence does not have attribute {}.".format(name))
