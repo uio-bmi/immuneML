@@ -19,7 +19,7 @@ class ImmuneMLApp:
             os.environ[Constants.CACHE_TYPE] = CacheType.TEST.value
 
     def set_logging(self):
-        if all("unittest" not in arg for arg in sys.argv):
+        if "ImmuneML_with_Galaxy" in os.environ and os.environ["ImmuneML_with_Galaxy"]:
             sys.stderr = open(self._result_path + "log.txt", 'w')
 
     def run(self):
