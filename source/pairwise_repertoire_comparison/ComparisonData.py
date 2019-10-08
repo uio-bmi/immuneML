@@ -47,6 +47,7 @@ class ComparisonData:
 
     def process_repertoire(self, repertoire, repertoire_index: int, extract_items_fn):
         items = pd.DataFrame(extract_items_fn(repertoire))
+        items.drop_duplicates(inplace=True)
         new_items = self.filter_existing_items(items, repertoire_index)
         self.add_items_for_repertoire(new_items, repertoire_index)
 
@@ -58,27 +59,21 @@ class ComparisonData:
 
     def _remove_existing_items(self, new_items: pd.DataFrame, batch: pd.DataFrame, batch_path: str, repertoire_index: int) -> pd.DataFrame:
 
-        # TODO: set existing vector in batch to 1 if an item exists in repertoire!!!
+        indices_to_keep = []
+        new_items.reset_index(drop=True, inplace=True)
 
-        swap_count = 0
-        max_swaps = new_items.shape[0] if batch.shape[0] > 0 else 0
-        while swap_count < max_swaps and new_items.shape[0] > 0:
-            size = min(new_items.shape[0], batch.shape[0])
-            indices_to_keep = np.logical_and.reduce(new_items.values[:size] != batch[new_items.columns.tolist()].values[:size], axis=1)
-            batch[:size]["rep_{}".format(repertoire_index)] = np.logical_not(indices_to_keep).astype(int)
-            batch.to_csv(batch_path, index=False)
-            new_items[:size] = new_items[:size][indices_to_keep]
-            new_items = new_items.dropna()
-            if new_items.shape[0] > 0:
-                new_items = self._rotate_dataframe(new_items)
-                swap_count += 1
+        for index, item in new_items.iterrows():
+            matches = np.logical_and.reduce(item.values == batch[new_items.columns.tolist()].values, axis=1)
+            occurrences = np.sum(matches)
+            if occurrences == 0:
+                indices_to_keep.append(index)
+            else:
+                batch["rep_{}".format(repertoire_index)] += matches.astype(int)
+                batch.to_csv(batch_path, index=False)
+
+        new_items = new_items.iloc[indices_to_keep]
+
         return new_items
-
-    def _rotate_dataframe(self, df: pd.DataFrame):
-        tmp_1 = df.iloc[-1].copy()
-        df = df.shift(periods=1)
-        df.iloc[0] = tmp_1
-        return df
 
     def add_items_for_repertoire(self, items: pd.DataFrame, repertoire_index: int):
         batch = self.get_batch(self.batch_paths[-1])

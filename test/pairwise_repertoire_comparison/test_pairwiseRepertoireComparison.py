@@ -13,7 +13,7 @@ from source.util.RepertoireBuilder import RepertoireBuilder
 class TestPairwiseRepertoireComparison(TestCase):
 
     def create_dataset(self, path: str) -> RepertoireDataset:
-        filenames, metadata = RepertoireBuilder.build([["A", "B"], ["B", "C"], ["D"], ["E", "F"]], path)
+        filenames, metadata = RepertoireBuilder.build([["A", "B"], ["D"], ["E", "F"], ["B", "C"], ["A", "D"]], path)
         dataset = RepertoireDataset(filenames=filenames, metadata_file=metadata)
         return dataset
 
@@ -31,6 +31,10 @@ class TestPairwiseRepertoireComparison(TestCase):
 
         result = comparison.compare_repertoires(dataset, comparison_fn)
 
-        self.assertTrue(np.array_equal(result, np.array([[1., 0.3333333333333333, 0., 0.], [0.3333333333333333, 1., 0., 0.], [0., 0., 1., 0.], [0., 0., 0., 1.]])))
+        self.assertTrue(np.array_equal(result, np.array([[1., 0., 0., 0.3333333333333333, 0.3333333333333333],
+                                                         [0., 1., 0., 0., 0.5],
+                                                         [0., 0., 1., 0., 0.],
+                                                         [0.3333333333333333, 0., 0., 1., 0.],
+                                                         [0.3333333333333333, 0.5, 0., 0., 1.]])))
 
         shutil.rmtree(path)

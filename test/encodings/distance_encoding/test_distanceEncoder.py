@@ -17,7 +17,7 @@ class TestDistanceEncoder(TestCase):
         filenames, metadata = RepertoireBuilder.build([["A", "B"], ["B", "C"], ["D"], ["E", "F"],
                                                        ["A", "B"], ["B", "C"], ["D"], ["E", "F"]], path,
                                                       {"l1": [1, 0, 1, 0, 1, 0, 1, 0], "l2": [2, 3, 2, 3, 2, 3, 2, 3]})
-        dataset = RepertoireDataset(filenames=filenames, metadata_file=metadata, identifier="1")
+        dataset = RepertoireDataset(filenames=filenames, metadata_file=metadata)
         return dataset
 
     def test_encode(self):
@@ -31,7 +31,8 @@ class TestDistanceEncoder(TestCase):
 
         enc.set_context({"dataset": dataset})
         encoded = enc.encode(dataset, EncoderParams(result_path=path,
-                                                    label_configuration=LabelConfiguration({"l1": [0, 1], "l2": [2, 3]}), batch_size=20))
+                                                    label_configuration=LabelConfiguration({"l1": [0, 1], "l2": [2, 3]}), batch_size=20,
+                                                    filename="dataset.pkl"))
 
         self.assertEqual(8, encoded.encoded_data.examples.shape[0])
         self.assertEqual(8, encoded.encoded_data.examples.shape[1])

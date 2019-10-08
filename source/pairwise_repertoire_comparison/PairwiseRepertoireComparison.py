@@ -57,6 +57,12 @@ class PairwiseRepertoireComparison:
         else:
             return self.create_comparison_data(dataset)
 
+    def compare(self, dataset: RepertoireDataset, comparison_fn, comparison_fn_name):
+        return CacheHandler.memo_by_params((("dataset_identifier", dataset.identifier),
+                                            "pairwise_comparison",
+                                            ("comparison_fn", comparison_fn_name)),
+                                           lambda: self.compare_repertoires(dataset, comparison_fn))
+
     def compare_repertoires(self, dataset: RepertoireDataset, comparison_fn):
         comparison_data = self.memo_by_params(dataset)
         repertoire_count = dataset.get_example_count()
