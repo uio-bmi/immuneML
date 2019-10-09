@@ -54,7 +54,7 @@ class DataSplitter(Step):
 
     @staticmethod
     def prepare_path(input_params: DataSplitterParams, split_index: int, dataset_type: str) -> str:
-        path = input_params.path + "{}/{}/".format(split_index, dataset_type)
+        path = input_params.path + "data_splits/split_{}/{}/".format(split_index, dataset_type)
         PathBuilder.build(path)
         return path
 
