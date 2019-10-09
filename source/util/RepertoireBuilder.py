@@ -23,17 +23,17 @@ class RepertoireBuilder:
 
         for index, sequence_list in enumerate(sequences):
             rep_sequences = []
+            donors.append("rep_" + str(index))
             for sequence in sequence_list:
                 s = ReceptorSequence(amino_acid_sequence=sequence, metadata=SequenceMetadata(v_gene="v1", j_gene="j1"))
                 rep_sequences.append(s)
-            repertoire = SequenceRepertoire(sequences=rep_sequences, identifier=str(index))
+            repertoire = SequenceRepertoire(sequences=rep_sequences, identifier=donors[-1])
 
             if labels is not None:
                 rep_labels = {key: labels[key][index] for key in labels.keys()}
                 repertoire.metadata = RepertoireMetadata(custom_params=rep_labels)
 
             filenames.append(path + "{}.pkl".format(index))
-            donors.append("rep_" + str(index))
 
             with open(filenames[-1], "wb") as file:
                 pickle.dump(repertoire, file)
