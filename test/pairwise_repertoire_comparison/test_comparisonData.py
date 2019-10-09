@@ -12,7 +12,8 @@ from source.util.PathBuilder import PathBuilder
 class TestComparisonData(TestCase):
 
     def create_comparison_data(self, path: str):
-        comparison_data = ComparisonData(repertoire_count=6, matching_columns=["col1", "col2"], item_columns=["col1", "col2"],
+        comparison_data = ComparisonData(repertoire_ids=["1", "2", "3", "4", "5", "6"],
+                                         matching_columns=["col1", "col2"], item_columns=["col1", "col2"],
                                          path=path, batch_size=3)
         df1 = pd.DataFrame({"col1": ["a", "b", "c"], "col2": [1, 2, 3], "rep_1": [1, 0, 0], "rep_2": [0, 1, 0], "rep_3": [0, 0, 1],
                             "rep_4": [0, 0, 0], "rep_5": [0, 0, 0], "rep_6": [0, 0, 0]})
@@ -32,7 +33,7 @@ class TestComparisonData(TestCase):
 
         comparison_data = self.create_comparison_data(path=path)
 
-        rep_vector = comparison_data.get_repertoire_vector(2)
+        rep_vector = comparison_data.get_repertoire_vector("2")
         self.assertTrue(np.array_equal(rep_vector, [0, 1, 0, 0, 0]))
 
         shutil.rmtree(path)
@@ -99,11 +100,11 @@ class TestComparisonData(TestCase):
         comparison_data = self.create_comparison_data(path=path)
         items = pd.DataFrame({"col1": ["x", "y"], "col2": [10, 11]})
 
-        comparison_data.add_items_for_repertoire(items, 6)
+        comparison_data.add_items_for_repertoire(items, "6")
 
         self.assertEqual(7, comparison_data.item_count)
         self.assertEqual(3, len(comparison_data.batch_paths))
-        self.assertEqual(2, sum(comparison_data.get_repertoire_vector(6)))
-        self.assertEqual(1, sum(comparison_data.get_repertoire_vector(2)))
+        self.assertEqual(2, sum(comparison_data.get_repertoire_vector("6")))
+        self.assertEqual(1, sum(comparison_data.get_repertoire_vector("2")))
 
         shutil.rmtree(path)
