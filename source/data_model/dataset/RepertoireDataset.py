@@ -1,5 +1,6 @@
 # quality: gold
 import copy
+import os
 import uuid
 
 import pandas as pd
@@ -64,4 +65,9 @@ class RepertoireDataset(Dataset):
 
         return new_dataset
 
-    # TODO: add specific methods such as getAllVGenes() to dataset class
+    def get_repertoire_ids(self) -> list:
+        if self.metadata_file and os.path.isfile(self.metadata_file):
+            return pd.read_csv(self.metadata_file, usecols=["donor"], squeeze=True).values.tolist()
+            # TODO: rename "donor" to "ID" everywhere (e.g. mixcr import) - standardize the names
+        else:
+            return [repertoire.identifier for repertoire in self.get_data()]
