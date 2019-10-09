@@ -30,7 +30,7 @@ class TestRepertoireBuilder(TestCase):
         self.assertEqual(1, len(rep2.sequences))
         self.assertTrue(all([isinstance(seq, ReceptorSequence) for seq in rep2.sequences]))
         self.assertEqual(2, rep2.metadata.custom_params["default"])
-        self.assertEqual("1", rep2.identifier)
+        self.assertEqual("rep_1", rep2.identifier)
 
         shutil.rmtree(path)
 
