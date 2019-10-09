@@ -19,6 +19,7 @@ class RepertoireBuilder:
         PathBuilder.build(path)
 
         filenames = []
+        donors = []
 
         for index, sequence_list in enumerate(sequences):
             rep_sequences = []
@@ -32,11 +33,12 @@ class RepertoireBuilder:
                 repertoire.metadata = RepertoireMetadata(custom_params=rep_labels)
 
             filenames.append(path + "{}.pkl".format(index))
+            donors.append("rep_" + str(index))
 
             with open(filenames[-1], "wb") as file:
                 pickle.dump(repertoire, file)
 
-        df = pd.DataFrame({**{"filename": filenames}, **(labels if labels is not None else {})})
+        df = pd.DataFrame({**{"filename": filenames, "donor": donors}, **(labels if labels is not None else {})})
         df.to_csv(path + "metadata.csv", index=False)
 
         return filenames, path + "metadata.csv"

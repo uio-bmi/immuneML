@@ -15,7 +15,7 @@ class TestRepertoireBuilder(TestCase):
         filenames, metadata = RepertoireBuilder.build([["AAA", "CCC"], ["TTTT"]], path, {"default": [1, 2]})
 
         self.assertEqual(2, len(filenames))
-        self.assertEqual((2, 2), pd.read_csv(metadata).shape)
+        self.assertEqual((2, 3), pd.read_csv(metadata).shape)
 
         with open(filenames[0], "rb") as file:
             rep1 = pickle.load(file)
