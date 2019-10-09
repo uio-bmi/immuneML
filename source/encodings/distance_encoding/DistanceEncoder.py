@@ -42,7 +42,7 @@ class DistanceEncoder(DatasetEncoder):
 
         distance_matrix = comparison.compare(current_dataset, self.distance_fn, self.distance_metric.value)
 
-        repertoire_ids = [repertoire.identifier for repertoire in dataset.get_data()]
+        repertoire_ids = dataset.get_repertoire_ids()
 
         distance_matrix = distance_matrix.loc[repertoire_ids, train_repertoire_ids]
 
@@ -75,7 +75,7 @@ class DistanceEncoder(DatasetEncoder):
     def prepare_encoding_params(self, dataset: RepertoireDataset, params: EncoderParams):
         PathBuilder.build(params["result_path"])
         if params["learn_model"]:
-            train_repertoire_ids = [repertoire.identifier for repertoire in dataset.get_data()]
+            train_repertoire_ids = dataset.get_repertoire_ids()
             with open(params["result_path"] + "repertoire_ids.pickle", "wb") as file:
                 pickle.dump(train_repertoire_ids, file)
         else:

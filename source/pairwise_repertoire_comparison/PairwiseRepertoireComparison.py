@@ -1,3 +1,4 @@
+import itertools
 import os
 from shutil import copyfile
 
@@ -22,10 +23,10 @@ class PairwiseRepertoireComparison:
 
     def create_comparison_data(self, dataset: RepertoireDataset) -> ComparisonData:
 
-        comparison_data = ComparisonData(dataset.get_example_count(), self.matching_columns, self.item_columns, self.path, self.batch_size)
+        comparison_data = ComparisonData(dataset.get_repertoire_ids(), self.matching_columns, self.item_columns, self.path, self.batch_size)
 
         for index, repertoire in enumerate(dataset.get_data()):
-            comparison_data.process_repertoire(repertoire, index+1, self.extract_items_fn)
+            comparison_data.process_repertoire(repertoire, repertoire.identifier, self.extract_items_fn)
 
         comparison_data = self.add_files_to_cache(comparison_data, dataset)
 
@@ -68,22 +69,15 @@ class PairwiseRepertoireComparison:
         repertoire_count = dataset.get_example_count()
         comparison_result = np.zeros([repertoire_count, repertoire_count])
 
-        repertoire_identifiers = []
+        repertoire_identifiers = dataset.get_repertoire_ids()
 
-        for index1, repertoire1 in enumerate(dataset.get_data()):
-            for index2, repertoire2 in enumerate(dataset.get_data()):
+        for (index1, index2) in itertools.combinations_with_replacement(range(repertoire_count), r=2):
 
-                if index1 > index2:
-                    continue
+            rep1 = comparison_data.get_repertoire_vector(repertoire_identifiers[index1])
+            rep2 = comparison_data.get_repertoire_vector(repertoire_identifiers[index2])
 
-                rep1 = comparison_data.get_repertoire_vector(index1+1)
-                rep2 = comparison_data.get_repertoire_vector(index2+1)
-
-                comparison_result[index1, index2] = comparison_fn(rep1, rep2)
-                comparison_result[index2, index1] = comparison_result[index1, index2]
-
-                if index1 == 0:
-                    repertoire_identifiers.append(repertoire2.identifier)
+            comparison_result[index1, index2] = comparison_fn(rep1, rep2)
+            comparison_result[index2, index1] = comparison_result[index1, index2]
 
         comparison_df = pd.DataFrame(comparison_result, columns=repertoire_identifiers, index=repertoire_identifiers)
 
