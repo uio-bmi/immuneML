@@ -23,7 +23,7 @@ class AdaptiveBiotechLoader(GenericLoader):
                                 "j_allele": str,
                                 "amino_acid": str,
                                 "rearrangement": str,
-                                "templates": int,
+                                "templates": str,
                                 "frame_type": str})
 
         df = df.rename(columns={'rearrangement': 'nucleotide', 'v_family': 'v_subgroup', 'j_family': 'j_subgroup'})

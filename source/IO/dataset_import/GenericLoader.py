@@ -139,7 +139,7 @@ class GenericLoader(DataLoader):
                                     j_gene=row.get("j_gene", Constants.UNKNOWN),
                                     j_allele=row.get("j_allele", Constants.UNKNOWN),
                                     chain=row.get("chain", "TRB"),
-                                    count=row.get("templates", 0),
+                                    count=int(row.get("templates", "0")) if str(row.get("templates", "0")).isdigit() else 0,
                                     frame_type=row.get("frame_type", SequenceFrameType.IN.value),
                                     region_type=params.get("region_type", Constants.UNKNOWN))
 
