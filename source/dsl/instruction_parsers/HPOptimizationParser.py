@@ -38,13 +38,18 @@ class HPOptimizationParser:
     def _parse_settings(self, instruction: dict, symbol_table: SymbolTable) -> list:
         settings = []
         for setting in instruction["settings"]:
+            if "preprocessing" in setting and symbol_table.contains(setting["preprocessing"]):
+                preprocessing_sequence = symbol_table.get(setting["preprocessing"])
+            else:
+                preprocessing_sequence = []
+
             s = HPSetting(encoder=symbol_table.get(setting["encoding"]),
                           encoder_params=symbol_table.get_config(setting["encoding"])["encoder_params"],
                           ml_method=symbol_table.get(setting["ml_method"]),
                           ml_params={"model_selection_cv": symbol_table.get_config(setting["ml_method"])["model_selection_cv"],
                                      "model_selection_n_folds":
                                          symbol_table.get_config(setting["ml_method"])["model_selection_n_folds"]},
-                          preproc_sequence=symbol_table.get(setting["preprocessing"]))
+                          preproc_sequence=preprocessing_sequence)
             settings.append(s)
         return settings
 
@@ -65,8 +70,11 @@ class HPOptimizationParser:
 
     def _parse_split_config(self, instruction: dict, key: str, symbol_table: SymbolTable) -> SplitConfig:
 
-        report_config_input = {report_type: [symbol_table.get(report_id) for report_id in instruction[key]["reports"][report_type]]
-                               for report_type in instruction[key]["reports"]}
+        if "reports" in instruction[key]:
+            report_config_input = {report_type: [symbol_table.get(report_id) for report_id in instruction[key]["reports"][report_type]]
+                                   for report_type in instruction[key]["reports"]}
+        else:
+            report_config_input = {}
 
         return SplitConfig(split_strategy=SplitType[instruction[key]["split_strategy"].upper()],
                            split_count=int(instruction[key]["split_count"]),
