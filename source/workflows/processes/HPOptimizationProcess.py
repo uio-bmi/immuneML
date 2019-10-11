@@ -38,7 +38,7 @@ class HPOptimizationProcess(InstructionProcess):
 
     def __init__(self, dataset, hp_strategy: HPOptimizationStrategy, hp_settings: list,
                  assessment: SplitConfig, selection: SplitConfig, metrics: set,
-                 label_configuration: LabelConfiguration, path: str = None, context: dict = None):
+                 label_configuration: LabelConfiguration, path: str = None, context: dict = None, batch_size: int = 10):
         self.dataset = dataset
         self.selection = selection
         self.hp_strategy = hp_strategy
@@ -46,7 +46,7 @@ class HPOptimizationProcess(InstructionProcess):
             "HPOptimizationProcess: object of other type passed in instead of HPSetting."
         self.hp_settings = hp_settings
         self.path = path
-        self.batch_size = 10
+        self.batch_size = batch_size
         self.label_configuration = label_configuration
         self.metrics = metrics
         self.assessment = assessment

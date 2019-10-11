@@ -28,7 +28,8 @@ class HPOptimizationParser:
 
         hp_process = HPOptimizationProcess(dataset=dataset, hp_strategy=strategy(settings), hp_settings=settings,
                                            assessment=assessment, selection=selection, metrics=metrics,
-                                           label_configuration=label_config, path=path, context=context)
+                                           label_configuration=label_config, path=path, context=context,
+                                           batch_size=instruction["batch_size"])
 
         return hp_process
 

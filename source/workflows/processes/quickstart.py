@@ -161,7 +161,8 @@ class Quickstart:
                     "dataset": "d1",
                     "strategy": "GridSearch",
                     "metrics": ["accuracy"],
-                    "reports": ["rep1"]
+                    "reports": ["rep1"],
+                    "batch_size": 10
                 }
             }
         }
