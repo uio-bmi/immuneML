@@ -3,6 +3,7 @@ import operator
 
 import pandas as pd
 
+from source.data_model.receptor.TCABReceptor import TCABReceptor
 from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
 from source.environment.Constants import Constants
@@ -11,23 +12,30 @@ from source.environment.Constants import Constants
 class IRISSequenceImport:
 
     @staticmethod
-    def import_items(path: str):
+    def import_items(path: str, paired: bool = False):
         df = pd.read_csv(path, sep=";")
         df = df.where((pd.notnull(df)), None)
 
-        sequences = df.apply(IRISSequenceImport.process_iris_row, axis=1).values
+        sequences = df.apply(IRISSequenceImport.process_iris_row, paired=paired, axis=1).values
         sequences = functools.reduce(operator.iconcat, sequences, [])
 
         return sequences
 
     @staticmethod
-    def process_iris_row(row):
+    def process_iris_row(row, paired):
         sequences = []
 
-        if row["Chain: TRA (1)"] is not None:
-            sequences.extend(IRISSequenceImport.process_iris_chain(row, "A"))
-        if row["Chain: TRB (1)"] is not None:
-            sequences.extend(IRISSequenceImport.process_iris_chain(row, "B"))
+        if paired:
+            alpha_chain = IRISSequenceImport.process_iris_chain(row, "A")
+            beta_chain = IRISSequenceImport.process_iris_chain(row, "B")
+
+            # Only uses the first alpha/beta chain, dual chains are ignored
+            sequences.extend([TCABReceptor(alpha=alpha_chain[0], beta=beta_chain[0], identifier=row["Clonotype ID"])])
+        else:
+            if row["Chain: TRA (1)"] is not None:
+                sequences.extend(IRISSequenceImport.process_iris_chain(row, "A"))
+            if row["Chain: TRB (1)"] is not None:
+                sequences.extend(IRISSequenceImport.process_iris_chain(row, "B"))
 
         return sequences
 
