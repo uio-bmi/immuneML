@@ -82,7 +82,7 @@ class ComparisonData:
         for column in columns_to_add:
             items[column] = 0
 
-        items["rep_{}".format(repertoire_id)] = 1
+        items.loc[:, "rep_{}".format(repertoire_id)] = 1
         batch = batch.append(items, ignore_index=True, sort=False)
 
         batch[:self.batch_size].to_csv(self.batch_paths[-1], index=False)

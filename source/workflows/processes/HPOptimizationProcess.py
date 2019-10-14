@@ -152,7 +152,7 @@ class HPOptimizationProcess(InstructionProcess):
         new_val_dataset = self.preprocess_dataset(val_dataset, hp_setting.preproc_sequence, path + "val/")
 
         ml_process = MLProcess(train_dataset=new_train_dataset, test_dataset=new_val_dataset,
-                               label_configuration=self.label_configuration,
+                               label_configuration=self.label_configuration, batch_size=self.batch_size,
                                encoder=hp_setting.encoder.create_encoder(train_dataset, hp_setting.encoder_params).set_context(self.context),
                                encoder_params=hp_setting.encoder_params, method=hp_setting.ml_method,
                                ml_params=hp_setting.ml_params, metrics=self.metrics, path=path,
