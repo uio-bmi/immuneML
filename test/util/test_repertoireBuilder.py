@@ -32,5 +32,17 @@ class TestRepertoireBuilder(TestCase):
         self.assertEqual(2, rep2.metadata.custom_params["default"])
         self.assertEqual("rep_1", rep2.identifier)
 
+
+        # Testing with custom metadata
+        filenames, metadata = RepertoireBuilder.build([["AAA", "CCC"]], path, seq_metadata=[[{"v_gene": "v5", "j_gene": "j5"}, {"v_gene": "v2", "j_gene": "j2"}]])
+
+        with open(filenames[0], "rb") as file:
+            rep3 = pickle.load(file)
+
+        self.assertEqual(rep3.sequences[0].metadata.v_gene, "v5")
+        self.assertEqual(rep3.sequences[0].metadata.j_gene, "j5")
+        self.assertEqual(rep3.sequences[1].metadata.v_gene, "v2")
+        self.assertEqual(rep3.sequences[1].metadata.j_gene, "j2")
+
         shutil.rmtree(path)
 
