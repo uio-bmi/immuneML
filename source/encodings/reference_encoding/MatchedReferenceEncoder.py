@@ -38,7 +38,7 @@ class MatchedReferenceEncoder(DatasetEncoder):
 
     def _prepare_caching_params(self, dataset, params: EncoderParams):
 
-        encoding_params_desc = {"max_distance": self.max_edit_distance,
+        encoding_params_desc = {"max_edit_distance": self.max_edit_distance,
                                 "summary": self.summary,
                                 "reference_sequences": sorted([seq.get_sequence() + seq.metadata.v_gene + seq.metadata.j_gene
                                                                for seq in self.reference_sequences])}
