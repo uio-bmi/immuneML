@@ -27,7 +27,7 @@ class RepertoireBuilder:
 
         for rep_index, sequence_list in enumerate(sequences):
             rep_sequences = []
-            donors.append("rep_" + str(index))
+            donors.append("rep_" + str(rep_index))
             for seq_index, sequence in enumerate(sequence_list):
                 if seq_metadata is None:
                     m = SequenceMetadata(v_gene="v1", j_gene="j1")
