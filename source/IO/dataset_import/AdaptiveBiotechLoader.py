@@ -29,6 +29,8 @@ class AdaptiveBiotechLoader(GenericLoader):
         df = df.rename(columns={'rearrangement': 'nucleotide', 'v_family': 'v_subgroup', 'j_family': 'j_subgroup'})
 
         df = df.replace(["unresolved", "no data", "na", "unknown", "null", "nan", np.nan], Constants.UNKNOWN)
+        if params["remove_out_of_frame"]:
+            df = df[(df["amino_acid"] != Constants.UNKNOWN) & (~df["amino_acid"].str.contains("\*"))]
         df['nucleotide'] = [y[(84 - 3 * len(x)): 78] for x, y in zip(df['amino_acid'], df['nucleotide'])]
         df['amino_acid'] = df["amino_acid"].str[1:-1]
 
