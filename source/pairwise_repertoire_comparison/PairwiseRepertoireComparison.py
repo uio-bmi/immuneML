@@ -13,21 +13,20 @@ from source.util.PathBuilder import PathBuilder
 
 class PairwiseRepertoireComparison:
 
-    def __init__(self, matching_columns: list, item_columns: list, path: str, batch_size: int, extract_items_fn):
+    def __init__(self, matching_columns: list, item_columns: list, path: str, batch_size: int, extract_items_fn, pool_size: int = 4):
         self.matching_columns = matching_columns
         self.item_columns = item_columns
         self.path = path
         PathBuilder.build(path)
         self.batch_size = batch_size
+        self.pool_size = pool_size
         self.extract_items_fn = extract_items_fn
 
     def create_comparison_data(self, dataset: RepertoireDataset) -> ComparisonData:
 
-        comparison_data = ComparisonData(dataset.get_repertoire_ids(), self.matching_columns, self.item_columns, self.path, self.batch_size)
-
-        for index, repertoire in enumerate(dataset.get_data()):
-            comparison_data.process_repertoire(repertoire, repertoire.identifier, self.extract_items_fn)
-
+        comparison_data = ComparisonData(dataset.get_repertoire_ids(), self.matching_columns, self.item_columns, self.pool_size,
+                                         self.batch_size, self.path)
+        comparison_data.process_dataset(dataset, self.extract_items_fn)
         comparison_data = self.add_files_to_cache(comparison_data, dataset)
 
         return comparison_data

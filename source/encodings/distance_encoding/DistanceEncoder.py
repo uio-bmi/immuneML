@@ -17,10 +17,11 @@ from source.util.ReflectionHandler import ReflectionHandler
 
 class DistanceEncoder(DatasetEncoder):
 
-    def __init__(self, distance_metric: DistanceMetricType, attributes_to_match: list, context: dict = None):
+    def __init__(self, distance_metric: DistanceMetricType, attributes_to_match: list, pool_size: int, context: dict = None):
         self.distance_fn = ReflectionHandler.import_function(distance_metric.value, DistanceMetrics)
         self.distance_metric = distance_metric
         self.attributes_to_match = attributes_to_match
+        self.pool_size = pool_size
         self.context = context
 
     def set_context(self, context: dict):
@@ -36,7 +37,7 @@ class DistanceEncoder(DatasetEncoder):
 
     def build_distance_matrix(self, dataset: RepertoireDataset, params: EncoderParams, train_repertoire_ids: list):
         comparison = PairwiseRepertoireComparison(self.attributes_to_match, self.attributes_to_match, params["result_path"],
-                                                  params["batch_size"], self.build_matching_fn())
+                                                  params["batch_size"], self.build_matching_fn(), self.pool_size)
 
         current_dataset = dataset if self.context is None or "dataset" not in self.context else self.context["dataset"]
 

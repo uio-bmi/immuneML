@@ -1,2 +1,3 @@
 attributes_to_match:
     - amino_acid_sequence
+pool_size: 4

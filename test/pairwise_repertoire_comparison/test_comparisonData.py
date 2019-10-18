@@ -12,9 +12,8 @@ from source.util.PathBuilder import PathBuilder
 class TestComparisonData(TestCase):
 
     def create_comparison_data(self, path: str):
-        comparison_data = ComparisonData(repertoire_ids=["1", "2", "3", "4", "5", "6"],
-                                         matching_columns=["col1", "col2"], item_columns=["col1", "col2"],
-                                         path=path, batch_size=3)
+        comparison_data = ComparisonData(repertoire_ids=["1", "2", "3", "4", "5", "6"], matching_columns=["col1", "col2"],
+                                         item_columns=["col1", "col2"], pool_size=4, batch_size=3, path=path)
         df1 = pd.DataFrame({"col1": ["a", "b", "c"], "col2": [1, 2, 3], "rep_1": [1, 0, 0], "rep_2": [0, 1, 0], "rep_3": [0, 0, 1],
                             "rep_4": [0, 0, 0], "rep_5": [0, 0, 0], "rep_6": [0, 0, 0]})
         df1.to_csv(path + "batch1.csv", index=False)
