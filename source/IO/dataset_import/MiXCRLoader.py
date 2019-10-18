@@ -93,7 +93,7 @@ class MiXCRLoader(DataLoader):
         metadata = MiXCRLoader._extract_repertoire_metadata(filepath, params)
 
         sequences = MiXCRLoader._load_sequences(filepath, params, df)
-        patient_id = metadata.custom_params["donor"]
+        patient_id = str(params["metadata"][index]["donor"])
         repertoire = SequenceRepertoire(sequences=sequences, metadata=metadata, identifier=patient_id)
         filename = params["result_path"] + str(index) + ".pkl"
 

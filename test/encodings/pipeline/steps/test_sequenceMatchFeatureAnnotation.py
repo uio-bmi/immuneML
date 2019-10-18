@@ -48,8 +48,8 @@ VGENE2	CBBBBBBF	B	MHC II
 VGENE3	CDDDDDDF	C	MHC II									
 VGENE1	CASSIEGPTGELFF	D Transporter 8	MHC I"""
 
-    reference_metadata = """filename
-reference_rep.tsv"""
+    reference_metadata = """filename,donor
+reference_rep.tsv,rep1"""
 
     path = EnvironmentSettings.root_path + "test/tmp/sequencematchfeatureannotationstep/"
     reference_data_loader_params = {

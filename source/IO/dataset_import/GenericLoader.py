@@ -37,7 +37,7 @@ class GenericLoader(DataLoader):
 
     def _load(self, filepaths: list, params: dict) -> RepertoireDataset:
 
-        arguments = [(filepath, params) for filepath in filepaths]
+        arguments = [(index, filepath, params) for index, filepath in enumerate(filepaths)]
 
         with Pool(params.get("batch_size", 1)) as pool:
             output = pool.starmap(self._load_repertoire, arguments)
@@ -115,8 +115,8 @@ class GenericLoader(DataLoader):
 
         return metadata
 
-    def _load_repertoire(self, filepath, params):
-        identifier = str(os.path.basename(filepath).rpartition(".")[0])
+    def _load_repertoire(self, index, filepath, params):
+        identifier = str(params["metadata"][index]["donor"]) if "metadata" in params else str(os.path.basename(filepath).rpartition(".")[0])
         repertoire_filename = params["result_path"] + identifier + ".pickle"
 
         if os.path.exists(repertoire_filename):

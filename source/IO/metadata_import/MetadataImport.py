@@ -12,6 +12,7 @@ class MetadataImport:
         custom_keys = metadata_df.keys().values.tolist()
 
         custom_keys.remove("filename")
+        custom_keys.remove("donor")
 
         mapping = metadata_df.apply(MetadataImport.extract_repertoire, axis=1, args=(custom_keys, )).values
 
@@ -24,5 +25,6 @@ class MetadataImport:
 
         return {
             "rep_file": row["filename"],
+            "donor": row["donor"],
             "metadata": RepertoireMetadata(custom_params=custom_params)
         }

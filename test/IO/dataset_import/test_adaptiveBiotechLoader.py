@@ -53,7 +53,7 @@ class TestAdaptiveBiotechLoader(TestCase):
             file.writelines(
             """filename,chain,donor,coeliac status (yes/no)
 rep1.tsv,TRA,1234,no
-rep2.tsv,TRB,1234,no"""
+rep2.tsv,TRB,1234a,no"""
             )
 
         dataset = AdaptiveBiotechLoader().load(path,
@@ -62,17 +62,18 @@ rep2.tsv,TRB,1234,no"""
                                                   "dataset_id": "emerson2017",
                                                   "batch_size": 1,
                                                   "region_type": "CDR3",  # can be loaded from metadata if available?
-                                                  "metadata_file": path + "metadata.csv"
+                                                  "metadata_file": path + "metadata.csv",
+                                                  "remove_out_of_frame": True
                                                }
                                                )
 
         self.assertEqual(2, dataset.get_example_count())
         for index, rep in enumerate(dataset.get_data()):
             if index == 0:
-                self.assertEqual("rep1", rep.identifier)
-                self.assertEqual(12, len(rep.sequences))
+                self.assertEqual("1234", rep.identifier)
+                self.assertEqual(8, len(rep.sequences))
             else:
-                self.assertEqual("rep2", rep.identifier)
-                self.assertEqual(15, len(rep.sequences))
+                self.assertEqual("1234a", rep.identifier)
+                self.assertEqual(11, len(rep.sequences))
 
         shutil.rmtree(path)

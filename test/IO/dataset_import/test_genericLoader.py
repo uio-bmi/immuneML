@@ -48,7 +48,7 @@ rep1.tsv,TRA,1234,no"""
 
         self.assertEqual(1, dataset.get_example_count())
         for index, rep in enumerate(dataset.get_data()):
-            self.assertEqual("rep1", rep.identifier)
+            self.assertEqual("1234", rep.identifier)
             self.assertEqual(15, len(rep.sequences))
 
         shutil.rmtree(path)
