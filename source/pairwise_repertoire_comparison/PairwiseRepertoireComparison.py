@@ -13,7 +13,7 @@ from source.util.PathBuilder import PathBuilder
 
 class PairwiseRepertoireComparison:
 
-    def __init__(self, matching_columns: list, item_columns: list, path: str, batch_size: int, extract_items_fn, pool_size: int = 4):
+    def __init__(self, matching_columns: list, item_columns: list, path: str, batch_size: int, extract_items_fn, pool_size: int):
         self.matching_columns = matching_columns
         self.item_columns = item_columns
         self.path = path

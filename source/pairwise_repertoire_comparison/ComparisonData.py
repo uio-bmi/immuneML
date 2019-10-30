@@ -8,7 +8,7 @@ from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 
 class ComparisonData:
 
-    def __init__(self, repertoire_ids: list, matching_columns, item_columns: list, pool_size: int = 4, batch_size: int = 10000,
+    def __init__(self, repertoire_ids: list, matching_columns, item_columns: list, pool_size: int, batch_size: int = 10000,
                  path: str = None):
 
         self.path = path
@@ -106,7 +106,7 @@ class ComparisonData:
 
         arguments = [(item, batch, new_items.columns.values.tolist(), index, repertoire_id) for index, item in new_items.iterrows()]
 
-        with Pool(4) as pool:
+        with Pool(self.pool_size) as pool:
             output = pool.starmap(self._match_item_to_batch, arguments)
 
         indices_to_keep = [output[i][0] for i in range(new_items.shape[0]) if output[i][0] is not None]
