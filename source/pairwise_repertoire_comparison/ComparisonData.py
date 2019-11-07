@@ -1,3 +1,4 @@
+import pickle
 from multiprocessing.pool import Pool
 
 import numpy as np
@@ -16,24 +17,16 @@ class ComparisonData:
         self.pool_size = pool_size
         self.item_count = 0
         self.batch_paths = []
-        self.update_paths = {}
-
-        repertoire_columns = ["rep_{}".format(rep_id) for rep_id in repertoire_ids]
-        repertoire_columns.extend(item_columns)
+        self.tmp_batch_paths = [self.path + "batch_0.pickle"]
+        self.store_tmp_batch({}, 0)
         self.item_columns = item_columns
-
-        batch = pd.DataFrame(columns=repertoire_columns)
-        self.batch_paths.append(self.path + "batch0.csv")
-        batch.to_csv(self.batch_paths[-1], index=False)
-
-        self.create_empty_update(0)
-
         self.matching_columns = matching_columns
+        self.repertoire_ids = repertoire_ids
 
     def get_repertoire_vector(self, identifier: str):
         repertoire_vector = np.zeros(self.item_count)
-        for batch_index, batch in enumerate(self.get_batches(columns=["rep_{}".format(identifier)])):
-            part = batch["rep_{}".format(identifier)].values
+        for batch_index, batch in enumerate(self.get_batches(columns=[identifier])):
+            part = batch[identifier].values
             start = batch_index * self.batch_size
             end = start + part.shape[0]
             repertoire_vector[start: end] = part
@@ -57,93 +50,100 @@ class ComparisonData:
     def process_dataset(self, dataset: RepertoireDataset, extract_items_fn):
         for index, repertoire in enumerate(dataset.get_data()):
             self.process_repertoire(repertoire, repertoire.identifier, extract_items_fn)
-        self.update_batches_from_log()
+        self.merge_tmp_batches_to_matrix()
 
-    def update_batch_from_log(self, batch_to_update):
-        updates = pd.read_csv(self.update_paths[batch_to_update])
-        batch = self.get_batch(self.batch_paths[batch_to_update])
-        for index, update in updates.iterrows():
-            batch[update["column"]][update["index"]] = update["value"]
-        batch.to_csv(self.batch_paths[batch_to_update], index=False)
+    def merge_tmp_batches_to_matrix(self):
+        for index, path in enumerate(self.tmp_batch_paths):
 
-    def update_batches_from_log(self):
-        with Pool(self.pool_size) as pool:
-            pool.map(self.update_batch_from_log, [i for i in range(len(self.batch_paths))])
+            batch = self.load_tmp_batch(index)
+            matrix = np.zeros((self.batch_size, len(self.repertoire_ids)))
+            row_names = []
+
+            for item_index, item in enumerate(batch):
+                row_names.append(item)
+                for repertoire_index, repertoire_id in enumerate(self.repertoire_ids):
+                    if repertoire_id in batch[item]:
+                        matrix[item_index][repertoire_index] = batch[item][repertoire_id]
+
+            df = pd.DataFrame(matrix[:len(row_names)], index=row_names, columns=self.repertoire_ids)
+            self.batch_paths.append(self.path + "batch_{}.pickle".format(index))
+            df.to_csv(self.batch_paths[-1])
 
     def process_repertoire(self, repertoire, repertoire_id: str, extract_items_fn):
-        items = pd.DataFrame(extract_items_fn(repertoire))
-        items.drop_duplicates(inplace=True)
+        items = extract_items_fn(repertoire)
         new_items = self.filter_existing_items(items, repertoire_id)
         self.add_items_for_repertoire(new_items, repertoire_id)
 
-    def filter_existing_items(self, items: pd.DataFrame, repertoire_id: str) -> pd.DataFrame:
+    def filter_existing_items(self, items: list, repertoire_id: str) -> list:
         new_items = items
-        for batch_index, batch in enumerate(self.get_batches()):
+        for batch_index, batch in enumerate(self.get_tmp_batches()):
             new_items = self._remove_existing_items(new_items, batch, batch_index, repertoire_id)
         return new_items
 
-    def _match_item_to_batch(self, item, batch, new_items_columns, index, repertoire_id):
+    def _match_item_to_batch(self, item, batch):
         keep = None
-        column = None
         value = None
-        index_to_update = None
-        matches = np.logical_and.reduce(item.values == batch[new_items_columns].values, axis=1)
-        occurrences = np.sum(matches)
-        if occurrences == 0:
-            keep = index
-        else:
-            column = "rep_{}".format(repertoire_id)
+        item_to_update = None
+
+        if item in batch:
             value = 1
-            index_to_update = np.where(matches == True)[0][0]
+            item_to_update = item
+        else:
+            keep = item
 
-        return keep, column, value, index_to_update
+        return keep, value, item_to_update
 
-    def _remove_existing_items(self, new_items: pd.DataFrame, batch: pd.DataFrame, batch_index: int, repertoire_id: str) -> pd.DataFrame:
-
-        new_items.reset_index(drop=True, inplace=True)
+    def _remove_existing_items(self, new_items: list, batch: dict, batch_index: int, repertoire_id: str) -> list:
 
         update = {"column": [], "value": [], "index": []}
 
-        arguments = [(item, batch, new_items.columns.values.tolist(), index, repertoire_id) for index, item in new_items.iterrows()]
+        arguments = [(item, batch) for item in new_items]
 
         with Pool(self.pool_size) as pool:
             output = pool.starmap(self._match_item_to_batch, arguments)
 
-        indices_to_keep = [output[i][0] for i in range(new_items.shape[0]) if output[i][0] is not None]
-        update["column"] = [output[i][1] for i in range(new_items.shape[0]) if output[i][1] is not None]
-        update["value"] = [output[i][2] for i in range(new_items.shape[0]) if output[i][1] is not None]
-        update["index"] = [output[i][3] for i in range(new_items.shape[0]) if output[i][1] is not None]
+        new_items_to_keep = [output[i][0] for i in range(len(output)) if output[i][0] is not None]
+        update["value"] = [output[i][1] for i in range(len(output)) if output[i][1] is not None]
+        update["index"] = [output[i][2] for i in range(len(output)) if output[i][2] is not None]
 
-        update_path = self.path + "update_{}.csv".format(batch_index)
-        self.update_paths[batch_index] = update_path
-        pd.DataFrame(update).to_csv(update_path, index=False, mode="a", header=None)
+        for index, item in enumerate(update["index"]):
+            batch[item][repertoire_id] = update["value"][index]
 
-        new_items = new_items.iloc[indices_to_keep]
+        self.store_tmp_batch(batch, batch_index)
 
-        return new_items
+        return new_items_to_keep
 
-    def add_items_for_repertoire(self, items: pd.DataFrame, repertoire_id: str):
-        batch = self.get_batch(self.batch_paths[-1])
+    def store_tmp_batch(self, batch: dict, batch_index: int):
+        if batch_index == len(self.tmp_batch_paths):
+            self.tmp_batch_paths.append(self.path + "batch_{}.pickle".format(batch_index))
+        with open(self.tmp_batch_paths[batch_index], "wb") as file:
+            pickle.dump(batch, file)
 
-        columns_to_add = list(set(batch.columns.values.tolist()) - set(items.columns))
-        for column in columns_to_add:
-            items[column] = 0
+    def get_tmp_batches(self):
+        for i in range(len(self.tmp_batch_paths)):
+            yield self.load_tmp_batch(i)
 
-        items.loc[:, "rep_{}".format(repertoire_id)] = 1
-        batch = batch.append(items, ignore_index=True, sort=False)
+    def load_tmp_batch(self, batch_index: int) -> dict:
+        with open(self.tmp_batch_paths[batch_index], "rb") as file:
+            batch = pickle.load(file)
+        return batch
 
-        batch[:self.batch_size].to_csv(self.batch_paths[-1], index=False)
-        batch = batch[self.batch_size:]
-        while batch.shape[0] > 0:
-            new_batch_path = self.path + "batch{}.csv".format(len(self.batch_paths))
-            self.batch_paths.append(new_batch_path)
-            batch[:self.batch_size].to_csv(new_batch_path, index=False)
-            self.create_empty_update(len(self.batch_paths) - 1)
-            batch = batch[self.batch_size:]
+    def add_items_for_repertoire(self, items: list, repertoire_id: str):
+        last_batch_index = len(self.tmp_batch_paths)-1
+        batch = self.load_tmp_batch(last_batch_index)
+        item_index = 0
+        while len(batch) < self.batch_size and item_index < len(items):
+            batch[items[item_index]] = {repertoire_id: 1}
+            item_index += 1
+
+        self.store_tmp_batch(batch, last_batch_index)
 
         self.item_count += len(items)
 
-    def create_empty_update(self, batch_index: int):
-        update_path = self.path + "update_{}.csv".format(batch_index)
-        pd.DataFrame({"column": [], "value": [], "index": []}).to_csv(update_path, index=False)
-        self.update_paths[batch_index] = update_path
+        items = items[item_index:]
+
+        while len(items) > 0:
+            batch = {item: {repertoire_id: 1} for item in items[:self.batch_size]}
+            last_batch_index += 1
+            self.store_tmp_batch(batch, last_batch_index)
+            items = items[self.batch_size:]

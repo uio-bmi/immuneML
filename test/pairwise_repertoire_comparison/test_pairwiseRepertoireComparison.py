@@ -24,7 +24,7 @@ class TestPairwiseRepertoireComparison(TestCase):
 
         dataset = self.create_dataset(path)
 
-        extraction_fn = lambda repertoire: [{"sequence": seq.amino_acid_sequence} for seq in repertoire.sequences]
+        extraction_fn = lambda repertoire: set(seq.amino_acid_sequence for seq in repertoire.sequences)
         comparison = PairwiseRepertoireComparison(["sequence"], ["sequence"], path, 4, extraction_fn, 4)
 
         comparison_fn = lambda rep1, rep2: np.sum(np.logical_and(rep1, rep2)) / np.sum(np.logical_or(rep1, rep2))
