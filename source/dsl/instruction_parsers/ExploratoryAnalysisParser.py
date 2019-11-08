@@ -1,3 +1,5 @@
+import copy
+
 from source.dsl.SymbolTable import SymbolTable
 from source.environment.LabelConfiguration import LabelConfiguration
 from source.workflows.processes.exploratory_analysis.ExploratoryAnalysisProcess import ExploratoryAnalysisProcess
@@ -43,7 +45,7 @@ class ExploratoryAnalysisParser:
         return process
 
     def _prepare_params(self, analysis: dict, symbol_table: SymbolTable) -> dict:
-        params = {"dataset": symbol_table.get(analysis["dataset"]), "report": symbol_table.get(analysis["report"])}
+        params = {"dataset": symbol_table.get(analysis["dataset"]), "report": copy.deepcopy(symbol_table.get(analysis["report"]))}
 
         optional_params = self._prepare_optional_params(analysis, symbol_table)
         params = {**params, **optional_params}
