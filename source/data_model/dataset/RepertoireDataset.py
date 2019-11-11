@@ -67,7 +67,7 @@ class RepertoireDataset(Dataset):
 
     def get_repertoire_ids(self) -> list:
         if self.metadata_file and os.path.isfile(self.metadata_file):
-            return pd.read_csv(self.metadata_file, usecols=["donor"], squeeze=True).values.tolist()
+            return pd.read_csv(self.metadata_file, usecols=["donor"], squeeze=True, dtype=str).values.tolist()
             # TODO: rename "donor" to "ID" everywhere (e.g. mixcr import) - standardize the names
         else:
-            return [repertoire.identifier for repertoire in self.get_data()]
+            return [str(repertoire.identifier) for repertoire in self.get_data()]
