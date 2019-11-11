@@ -1,8 +1,6 @@
 import copy
 import pickle
 
-import pandas as pd
-
 from source.IO.dataset_export.PickleExporter import PickleExporter
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.encoded_data.EncodedData import EncodedData
@@ -85,8 +83,8 @@ class DistanceEncoder(DatasetEncoder):
         return train_repertoire_ids
 
     def build_matching_fn(self):
-        return lambda repertoire: pd.DataFrame([[item.get_attribute(attribute) for attribute in self.attributes_to_match]
-                                                for item in repertoire.sequences], columns=self.attributes_to_match)
+        return lambda repertoire: [tuple(item.get_attribute(attribute) for attribute in self.attributes_to_match)
+                                   for item in repertoire.sequences]
 
     def store(self, encoded_dataset, params: EncoderParams):
         PickleExporter.export(encoded_dataset, params["result_path"], params["filename"])

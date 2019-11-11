@@ -66,7 +66,7 @@ class ComparisonData:
                         matrix[item_index][repertoire_index] = batch[item][repertoire_id]
 
             df = pd.DataFrame(matrix[:len(row_names)], index=row_names, columns=self.repertoire_ids)
-            self.batch_paths.append(self.path + "batch_{}.pickle".format(index))
+            self.batch_paths.append(self.path + "batch_{}.csv".format(index))
             df.to_csv(self.batch_paths[-1])
 
     def process_repertoire(self, repertoire, repertoire_id: str, extract_items_fn):
