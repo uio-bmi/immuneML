@@ -49,7 +49,7 @@ class ComparisonData:
 
     def process_dataset(self, dataset: RepertoireDataset, extract_items_fn):
         for index, repertoire in enumerate(dataset.get_data()):
-            self.process_repertoire(repertoire, repertoire.identifier, extract_items_fn)
+            self.process_repertoire(repertoire, str(repertoire.identifier), extract_items_fn)
         self.merge_tmp_batches_to_matrix()
 
     def merge_tmp_batches_to_matrix(self):
@@ -80,31 +80,40 @@ class ComparisonData:
             new_items = self._remove_existing_items(new_items, batch, batch_index, repertoire_id)
         return new_items
 
-    def _match_item_to_batch(self, item, batch):
-        keep = None
-        value = None
-        item_to_update = None
+    def _match_items_to_batch(self, items, batch):
+        keep = []
+        value = []
+        item_to_update = []
 
-        if item in batch:
-            value = 1
-            item_to_update = item
-        else:
-            keep = item
+        for item in items:
+            if item in batch:
+                value.append(1)
+                item_to_update.append(item)
+            else:
+                keep.append(item)
 
         return keep, value, item_to_update
 
     def _remove_existing_items(self, new_items: list, batch: dict, batch_index: int, repertoire_id: str) -> list:
 
-        update = {"column": [], "value": [], "index": []}
+        update = {"value": [], "index": []}
 
-        arguments = [(item, batch) for item in new_items]
+        step = int(len(new_items) / self.pool_size) if int(len(new_items) / self.pool_size) > 0 else len(new_items)
+        start, end = 0, step
+        arguments = []
+        while start < len(new_items):
+            arguments.append((new_items[start:end], batch))
+            end += step
+            start += step
 
         with Pool(self.pool_size) as pool:
-            output = pool.starmap(self._match_item_to_batch, arguments)
+            output = pool.starmap(self._match_items_to_batch, arguments)
 
-        new_items_to_keep = [output[i][0] for i in range(len(output)) if output[i][0] is not None]
-        update["value"] = [output[i][1] for i in range(len(output)) if output[i][1] is not None]
-        update["index"] = [output[i][2] for i in range(len(output)) if output[i][2] is not None]
+        flatten_and_remove_none = lambda l: [element for sublist in l for element in sublist if element is not None]
+
+        new_items_to_keep = flatten_and_remove_none([output[i][0] for i in range(len(output))])
+        update["value"] = flatten_and_remove_none([output[i][1] for i in range(len(output))])
+        update["index"] = flatten_and_remove_none([output[i][2] for i in range(len(output))])
 
         for index, item in enumerate(update["index"]):
             batch[item][repertoire_id] = update["value"][index]
