@@ -1,6 +1,8 @@
 import shutil
 from unittest import TestCase
 
+import numpy as np
+
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.encodings.EncoderParams import EncoderParams
 from source.encodings.distance_encoding.DistanceEncoder import DistanceEncoder
@@ -16,7 +18,7 @@ class TestDistanceEncoder(TestCase):
     def create_dataset(self, path: str) -> RepertoireDataset:
         filenames, metadata = RepertoireBuilder.build([["A", "B"], ["B", "C"], ["D"], ["E", "F"],
                                                        ["A", "B"], ["B", "C"], ["D"], ["E", "F"]], path,
-                                                      {"l1": [1, 0, 1, 0, 1, 0, 1, 0], "l2": [2, 3, 2, 3, 2, 3, 2, 3]})
+                                                      {"l1": [1, 0, 1, 0, 1, 0, 1, 0], "l2": [2, 3, 2, 3, 2, 3, 3, 3]})
         dataset = RepertoireDataset(filenames=filenames, metadata_file=metadata)
         return dataset
 
@@ -41,5 +43,8 @@ class TestDistanceEncoder(TestCase):
         self.assertEqual(1, encoded.encoded_data.examples.iloc[0, 0])
         self.assertEqual(1, encoded.encoded_data.examples.iloc[1, 1])
         self.assertEqual(1, encoded.encoded_data.examples.iloc[0, 4])
+
+        self.assertTrue(np.array_equal([1, 0, 1, 0, 1, 0, 1, 0], encoded.encoded_data.labels["l1"]))
+        self.assertTrue(np.array_equal([2, 3, 2, 3, 2, 3, 3, 3], encoded.encoded_data.labels["l2"]))
 
         shutil.rmtree(path)

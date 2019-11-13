@@ -25,10 +25,12 @@ class TestComparisonData(TestCase):
         comparison_data.item_count = 5
         df1 = pd.DataFrame({"col1": ["a", "b", "c"], "col2": [1, 2, 3], "1": [1, 0, 0], "2": [0, 1, 0], "3": [0, 0, 1], "4": [0, 0, 0],
                             "5": [0, 0, 0], "6": [0, 0, 0]})
+        comparison_data.batches.append(df1)
         df1.to_csv(path + "b01.csv", index=False)
         df2 = pd.DataFrame({"col1": ["d", "e"], "col2": [4, 5], "1": [1, 0], "2": [0, 0], "3": [0, 0], "4": [0, 0],
                             "5": [0, 1], "6": [0, 0]})
         df2.to_csv(path + "b02.csv", index=False)
+        comparison_data.batches.append(df2)
         comparison_data.batch_paths = [path + "b01.csv", path + "b02.csv"]
         return comparison_data
 

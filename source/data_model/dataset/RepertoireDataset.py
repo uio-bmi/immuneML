@@ -44,9 +44,12 @@ class RepertoireDataset(Dataset):
     def get_filenames(self):
         return self._filenames
 
-    def get_metadata(self, field_names: list):
+    def get_metadata(self, field_names: list, return_df: bool = False):
         df = pd.read_csv(self.metadata_file, sep=",", usecols=field_names)
-        return df.to_dict("list")
+        if return_df:
+            return df
+        else:
+            return df.to_dict("list")
 
     def _build_new_metadata(self, indices, path) -> str:
         if self.metadata_file:

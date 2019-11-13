@@ -1,5 +1,3 @@
-import pickle
-
 import numpy as np
 import pandas as pd
 
@@ -17,10 +15,12 @@ class ComparisonData:
         self.item_count = 0
         self.batch_paths = []
         self.tmp_batch_paths = [self.path + "batch_0.pickle"]
-        self.store_tmp_batch({}, 0)
         self.item_columns = item_columns
         self.matching_columns = matching_columns
         self.repertoire_ids = repertoire_ids
+        self.batches = []
+        self.tmp_batches = []
+        self.store_tmp_batch({}, 0)
 
     def get_repertoire_vector(self, identifier: str):
         repertoire_vector = np.zeros(self.item_count)
@@ -37,14 +37,14 @@ class ComparisonData:
         return pd.read_csv(self.batch_paths[batch_index], nrows=1, skiprows=index_in_batch - 1).iloc[0].values
 
     def get_batches(self, columns: list = None):
-        for batch_path in self.batch_paths:
-            yield self.get_batch(batch_path, columns)
+        for index in range(len(self.batches)):
+            yield self.get_batch(index, columns)
 
-    def get_batch(self, batch_path: str, columns: list = None):
+    def get_batch(self, index: int, columns: list = None):
         if columns is not None:
-            return pd.read_csv(batch_path, usecols=columns)
+            return self.batches[index][columns]
         else:
-            return pd.read_csv(batch_path)
+            return self.batches[index]
 
     def process_dataset(self, dataset: RepertoireDataset, extract_items_fn):
         for index, repertoire in enumerate(dataset.get_data()):
@@ -53,7 +53,7 @@ class ComparisonData:
         self.merge_tmp_batches_to_matrix()
 
     def merge_tmp_batches_to_matrix(self):
-        for index, path in enumerate(self.tmp_batch_paths):
+        for index in range(len(self.tmp_batches)):
 
             batch = self.load_tmp_batch(index)
             matrix = np.zeros((self.batch_size, len(self.repertoire_ids)))
@@ -66,8 +66,7 @@ class ComparisonData:
                         matrix[item_index][repertoire_index] = batch[item][repertoire_id]
 
             df = pd.DataFrame(matrix[:len(row_names)], index=row_names, columns=self.repertoire_ids)
-            self.batch_paths.append(self.path + "batch_{}.csv".format(index))
-            df.to_csv(self.batch_paths[-1])
+            self.batches.append(df)
 
     def process_repertoire(self, repertoire, repertoire_id: str, extract_items_fn):
         items = extract_items_fn(repertoire)
@@ -108,18 +107,21 @@ class ComparisonData:
         return new_items_to_keep
 
     def store_tmp_batch(self, batch: dict, batch_index: int):
-        if batch_index == len(self.tmp_batch_paths):
-            self.tmp_batch_paths.append(self.path + "batch_{}.pickle".format(batch_index))
-        with open(self.tmp_batch_paths[batch_index], "wb") as file:
-            pickle.dump(batch, file)
+
+        if len(self.tmp_batches) > batch_index:
+            self.tmp_batches[batch_index] = batch
+        elif len(self.tmp_batches) == batch_index:
+            self.tmp_batches.append(batch)
+        else:
+            raise KeyError("ComparisonData: batch_index: {} does not exist. tmp_batches length: {}"
+                           .format(batch_index, len(self.tmp_batches)))
 
     def get_tmp_batches(self):
-        for i in range(len(self.tmp_batch_paths)):
+        for i in range(len(self.tmp_batches)):
             yield self.load_tmp_batch(i)
 
     def load_tmp_batch(self, batch_index: int) -> dict:
-        with open(self.tmp_batch_paths[batch_index], "rb") as file:
-            batch = pickle.load(file)
+        batch = self.tmp_batches[batch_index]
         return batch
 
     def add_items_for_repertoire(self, items: list, repertoire_id: str):

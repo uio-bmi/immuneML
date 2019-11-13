@@ -1,6 +1,8 @@
 import copy
 import pickle
 
+import pandas as pd
+
 from source.IO.dataset_export.PickleExporter import PickleExporter
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.encoded_data.EncodedData import EncodedData
@@ -49,13 +51,15 @@ class DistanceEncoder(DatasetEncoder):
 
     def build_labels(self, dataset: RepertoireDataset, params: EncoderParams) -> dict:
 
-        labels = {label: [] for label in params["label_configuration"].get_labels_by_name()}
+        lbl = ["donor"]
+        lbl.extend(params["label_configuration"].get_labels_by_name())
 
-        for repertoire in dataset.get_data():
-            for label in params["label_configuration"].get_labels_by_name():
-                labels[label].append(repertoire.metadata.custom_params[label])
+        tmp_labels = dataset.get_metadata(lbl, return_df=True)
+        tmp_labels = tmp_labels.iloc[pd.Index(tmp_labels['donor']).get_indexer(dataset.get_repertoire_ids())]
+        tmp_labels = tmp_labels.to_dict("list")
+        del tmp_labels["donor"]
 
-        return labels
+        return  tmp_labels
 
     def encode(self, dataset, params: EncoderParams) -> RepertoireDataset:
 
