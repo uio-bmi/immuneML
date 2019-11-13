@@ -1,5 +1,4 @@
 import pickle
-from multiprocessing.pool import Pool
 
 import numpy as np
 import pandas as pd
@@ -50,6 +49,7 @@ class ComparisonData:
     def process_dataset(self, dataset: RepertoireDataset, extract_items_fn):
         for index, repertoire in enumerate(dataset.get_data()):
             self.process_repertoire(repertoire, str(repertoire.identifier), extract_items_fn)
+            print("Repertoire {} ({}/{}) processed.".format(repertoire.identifier, index+1, len(dataset.get_filenames())))
         self.merge_tmp_batches_to_matrix()
 
     def merge_tmp_batches_to_matrix(self):
@@ -98,22 +98,7 @@ class ComparisonData:
 
         update = {"value": [], "index": []}
 
-        step = int(len(new_items) / self.pool_size) if int(len(new_items) / self.pool_size) > 0 else len(new_items)
-        start, end = 0, step
-        arguments = []
-        while start < len(new_items):
-            arguments.append((new_items[start:end], batch))
-            end += step
-            start += step
-
-        with Pool(self.pool_size) as pool:
-            output = pool.starmap(self._match_items_to_batch, arguments)
-
-        flatten_and_remove_none = lambda l: [element for sublist in l for element in sublist if element is not None]
-
-        new_items_to_keep = flatten_and_remove_none([output[i][0] for i in range(len(output))])
-        update["value"] = flatten_and_remove_none([output[i][1] for i in range(len(output))])
-        update["index"] = flatten_and_remove_none([output[i][2] for i in range(len(output))])
+        new_items_to_keep, update["value"], update["index"] = self._match_items_to_batch(new_items, batch)
 
         for index, item in enumerate(update["index"]):
             batch[item][repertoire_id] = update["value"][index]
