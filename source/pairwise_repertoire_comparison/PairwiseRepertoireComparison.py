@@ -1,4 +1,3 @@
-import itertools
 import os
 from shutil import copyfile
 
@@ -70,13 +69,16 @@ class PairwiseRepertoireComparison:
 
         repertoire_identifiers = dataset.get_repertoire_ids()
 
-        for (index1, index2) in itertools.combinations_with_replacement(range(repertoire_count), r=2):
+        for index1 in range(repertoire_count):
 
             rep1 = comparison_data.get_repertoire_vector(repertoire_identifiers[index1])
-            rep2 = comparison_data.get_repertoire_vector(repertoire_identifiers[index2])
 
-            comparison_result[index1, index2] = comparison_fn(rep1, rep2)
-            comparison_result[index2, index1] = comparison_result[index1, index2]
+            for index2 in range(index1, repertoire_count):
+
+                rep2 = comparison_data.get_repertoire_vector(repertoire_identifiers[index2])
+
+                comparison_result[index1, index2] = comparison_fn(rep1, rep2)
+                comparison_result[index2, index1] = comparison_result[index1, index2]
 
         comparison_df = pd.DataFrame(comparison_result, columns=repertoire_identifiers, index=repertoire_identifiers)
 

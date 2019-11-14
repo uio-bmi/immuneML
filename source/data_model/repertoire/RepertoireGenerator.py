@@ -1,11 +1,12 @@
 # quality: gold
-
+import functools
 import pickle
 
 
 class RepertoireGenerator:
 
     @staticmethod
+    @functools.lru_cache(maxsize=128)
     def load_repertoire(filename: str):
         with open(filename, "rb") as file:
             repertoire = pickle.load(file)

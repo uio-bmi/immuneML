@@ -19,6 +19,7 @@ class RepertoireDataset(Dataset):
         self.identifier = identifier if identifier is not None else uuid.uuid1()
         self._filenames = sorted(filenames) if filenames is not None else []
         self.metadata_file = metadata_file
+        self.repertoire_ids = None
 
     def add_encoded_data(self, encoded_data: EncodedData):
         self.encoded_data = encoded_data
@@ -69,8 +70,10 @@ class RepertoireDataset(Dataset):
         return new_dataset
 
     def get_repertoire_ids(self) -> list:
-        if self.metadata_file and os.path.isfile(self.metadata_file):
-            return pd.read_csv(self.metadata_file, usecols=["donor"], squeeze=True, dtype=str).values.tolist()
-            # TODO: rename "donor" to "ID" everywhere (e.g. mixcr import) - standardize the names
-        else:
-            return [str(repertoire.identifier) for repertoire in self.get_data()]
+        if self.repertoire_ids is None:
+            if self.metadata_file and os.path.isfile(self.metadata_file):
+                self.repertoire_ids = pd.read_csv(self.metadata_file, usecols=["donor"], squeeze=True, dtype=str).values.tolist()
+                # TODO: rename "donor" to "ID" everywhere (e.g. mixcr import) - standardize the names
+            else:
+                self.repertoire_ids = [str(repertoire.identifier) for repertoire in self.get_data()]
+        return self.repertoire_ids
