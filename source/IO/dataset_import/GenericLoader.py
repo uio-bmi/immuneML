@@ -14,7 +14,6 @@ from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.data_model.receptor.receptor_sequence.SequenceFrameType import SequenceFrameType
 from source.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
-from source.data_model.repertoire.RepertoireGenerator import RepertoireGenerator
 from source.data_model.repertoire.RepertoireMetadata import RepertoireMetadata
 from source.data_model.repertoire.SequenceRepertoire import SequenceRepertoire
 from source.environment.Constants import Constants
@@ -118,12 +117,8 @@ class GenericLoader(DataLoader):
     def _load_repertoire(self, index, filepath, params):
         identifier = str(params["metadata"][index]["donor"]) if "metadata" in params else str(os.path.basename(filepath).rpartition(".")[0])
         repertoire_filename = params["result_path"] + identifier + ".pickle"
-
-        if os.path.exists(repertoire_filename):
-            repertoire = RepertoireGenerator.load_repertoire(repertoire_filename)
-            metadata = repertoire.metadata
-            del repertoire
-        else:
+        metadata = None
+        if not os.path.exists(repertoire_filename):
             metadata = self._load_repertoire_from_file(filepath, params, repertoire_filename, identifier)
 
         custom_params = metadata.custom_params if metadata is not None else {}
