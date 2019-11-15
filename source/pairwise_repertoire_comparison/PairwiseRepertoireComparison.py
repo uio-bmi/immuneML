@@ -6,12 +6,14 @@ import pandas as pd
 
 from source.caching.CacheHandler import CacheHandler
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
+from source.logging.Logger import log
 from source.pairwise_repertoire_comparison.ComparisonData import ComparisonData
 from source.util.PathBuilder import PathBuilder
 
 
 class PairwiseRepertoireComparison:
 
+    @log
     def __init__(self, matching_columns: list, item_columns: list, path: str, batch_size: int, extract_items_fn, pool_size: int):
         self.matching_columns = matching_columns
         self.item_columns = item_columns
@@ -21,6 +23,7 @@ class PairwiseRepertoireComparison:
         self.pool_size = pool_size
         self.extract_items_fn = extract_items_fn
 
+    @log
     def create_comparison_data(self, dataset: RepertoireDataset) -> ComparisonData:
 
         comparison_data = ComparisonData(dataset.get_repertoire_ids(), self.matching_columns, self.item_columns, self.pool_size,
@@ -62,6 +65,7 @@ class PairwiseRepertoireComparison:
                                             ("comparison_fn", comparison_fn_name)),
                                            lambda: self.compare_repertoires(dataset, comparison_fn))
 
+    @log
     def compare_repertoires(self, dataset: RepertoireDataset, comparison_fn):
         comparison_data = self.memo_by_params(dataset)
         repertoire_count = dataset.get_example_count()

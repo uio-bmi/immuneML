@@ -4,6 +4,7 @@ import os
 from source.caching.CacheType import CacheType
 from source.environment.Constants import Constants
 from source.environment.SequenceType import SequenceType
+from source.logging.LogLevel import LogLevel
 
 
 class EnvironmentSettings:
@@ -20,6 +21,7 @@ class EnvironmentSettings:
     cache_path = root_path + "cache/"
     tmp_cache_path = tmp_test_path + "cache/"
     max_sequence_length = 20
+    log_level = LogLevel.DEBUG
 
     @staticmethod
     def get_cache_path(cache_type: CacheType = None):

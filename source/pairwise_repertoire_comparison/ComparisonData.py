@@ -2,10 +2,11 @@ import numpy as np
 import pandas as pd
 
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
+from source.logging.Logger import log
 
 
 class ComparisonData:
-
+    @log
     def __init__(self, repertoire_ids: list, matching_columns, item_columns: list, pool_size: int, batch_size: int = 10000,
                  path: str = None):
 
@@ -46,6 +47,7 @@ class ComparisonData:
         else:
             return self.batches[index]
 
+    @log
     def process_dataset(self, dataset: RepertoireDataset, extract_items_fn):
         for index, repertoire in enumerate(dataset.get_data()):
             self.process_repertoire(repertoire, str(repertoire.identifier), extract_items_fn)
@@ -68,6 +70,7 @@ class ComparisonData:
             df = pd.DataFrame(matrix[:len(row_names)], index=row_names, columns=self.repertoire_ids)
             self.batches.append(df)
 
+    @log
     def process_repertoire(self, repertoire, repertoire_id: str, extract_items_fn):
         items = extract_items_fn(repertoire)
         new_items = self.filter_existing_items(items, repertoire_id)

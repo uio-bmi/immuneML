@@ -6,6 +6,7 @@ from source.environment.LabelConfiguration import LabelConfiguration
 from source.hyperparameter_optimization.HPSetting import HPSetting
 from source.hyperparameter_optimization.SplitConfig import SplitConfig
 from source.hyperparameter_optimization.strategy.HPOptimizationStrategy import HPOptimizationStrategy
+from source.logging.Logger import trace
 from source.ml_methods.MLMethod import MLMethod
 from source.reports.Report import Report
 from source.reports.data_reports.DataReport import DataReport
@@ -23,6 +24,7 @@ from source.workflows.steps.MLMethodTrainer import MLMethodTrainer
 from source.workflows.steps.MLMethodTrainerParams import MLMethodTrainerParams
 
 
+@trace
 class HPOptimizationProcess(InstructionProcess):
     """
     Class implementing hyper-parameter optimization and nested model training and assessment:
