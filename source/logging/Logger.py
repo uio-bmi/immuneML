@@ -14,7 +14,8 @@ def log(func):
                     return func(*args, **kwargs)
                 except Exception as e:
                     if EnvironmentSettings.log_level == LogLevel.DEBUG:
-                        print('%s --- Exception in %s : %s' % (datetime.datetime.now(), func.__name__, e))
+                        print('\n\n%s --- Exception in %s : %s\n\n' % (datetime.datetime.now(), func.__name__, e))
+                    raise e
             finally:
                 print("%s --- Exiting: %s" % (datetime.datetime.now(), func.__name__))
         else:
