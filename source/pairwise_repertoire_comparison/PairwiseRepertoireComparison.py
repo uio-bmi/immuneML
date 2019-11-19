@@ -71,6 +71,8 @@ class PairwiseRepertoireComparison:
         repertoire_count = dataset.get_example_count()
         comparison_result = np.zeros([repertoire_count, repertoire_count])
 
+        tmp_vector = np.zeros(comparison_data.item_count)
+
         repertoire_identifiers = dataset.get_repertoire_ids()
 
         for index1 in range(repertoire_count):
@@ -81,7 +83,7 @@ class PairwiseRepertoireComparison:
 
                 rep2 = comparison_data.get_repertoire_vector(repertoire_identifiers[index2])
 
-                comparison_result[index1, index2] = comparison_fn(rep1, rep2)
+                comparison_result[index1, index2] = comparison_fn(rep1, rep2, tmp_vector)
                 comparison_result[index2, index1] = comparison_result[index1, index2]
 
         comparison_df = pd.DataFrame(comparison_result, columns=repertoire_identifiers, index=repertoire_identifiers)
