@@ -6,4 +6,3 @@ k_left: 1  # left k-mer length for gapped k-mers
 k_right: 1  # right k-mer length for gapped k-mer
 max_gap: 0  # maximum gap for gapped k-mers
 min_gap: 0  # minimum gap for gapped k-mers
-batch_size: 1
