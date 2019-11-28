@@ -16,9 +16,9 @@ class LabelConfiguration:
 
         self._labels = labels if labels is not None else {}
 
-    def add_label(self, label: str, values: list):
+    def add_label(self, label: str, values: list = None):
 
-        vals = list(values)
+        vals = list(values) if values else None
 
         if label in self._labels and self._labels[label] is not None and len(self._labels[label]) > 0:
             warnings.warn("Label " + label + " has already been set. Overriding existing values...", Warning)

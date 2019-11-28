@@ -66,7 +66,7 @@ class HPOptimizationParser:
         labels = instruction["labels"]
         label_config = LabelConfiguration()
         for label in labels:
-            label_config.add_label(label, dataset_params[label])
+            label_config.add_label(label, dataset_params[label] if dataset_params and label in dataset_params else None)
         return label_config
 
     def _parse_split_config(self, instruction: dict, key: str, symbol_table: SymbolTable) -> SplitConfig:

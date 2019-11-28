@@ -23,14 +23,16 @@ class TestComparisonData(TestCase):
         comparison_data.store_tmp_batch(batch1, 1)
         comparison_data.matching_columns = ["col1", "col2"]
         comparison_data.item_count = 5
-        df1 = pd.DataFrame({"col1": ["a", "b", "c"], "col2": [1, 2, 3], "1": [1, 0, 0], "2": [0, 1, 0], "3": [0, 0, 1], "4": [0, 0, 0],
+        df1 = pd.DataFrame({"1": [1, 0, 0], "2": [0, 1, 0], "3": [0, 0, 1], "4": [0, 0, 0],
                             "5": [0, 0, 0], "6": [0, 0, 0]})
-        comparison_data.batches.append(df1)
+        comparison_data.batches.append({"matrix": df1.values, "row_names": [("a", 1), ("b", 2), ("c", 3)],
+                                        "col_name_index": {"1": 0, "2": 1, "3": 2, "4": 3, "5": 4, "6": 7}})
         df1.to_csv(path + "b01.csv", index=False)
-        df2 = pd.DataFrame({"col1": ["d", "e"], "col2": [4, 5], "1": [1, 0], "2": [0, 0], "3": [0, 0], "4": [0, 0],
+        df2 = pd.DataFrame({"1": [1, 0], "2": [0, 0], "3": [0, 0], "4": [0, 0],
                             "5": [0, 1], "6": [0, 0]})
         df2.to_csv(path + "b02.csv", index=False)
-        comparison_data.batches.append(df2)
+        comparison_data.batches.append({"matrix": df2.values, "row_names": [("d", 4), ("e", 5)],
+                                        "col_name_index": {"1": 0, "2": 1, "3": 2, "4": 3, "5": 4, "6": 7}})
         comparison_data.batch_paths = [path + "b01.csv", path + "b02.csv"]
         return comparison_data
 
@@ -52,7 +54,7 @@ class TestComparisonData(TestCase):
         comparison_data = self.create_comparison_data(path=path)
 
         item_vector = comparison_data.get_item_vector(3)
-        self.assertTrue(np.array_equal(item_vector, np.array(["d", 4, 1, 0, 0, 0, 0, 0], dtype=object)))
+        self.assertTrue(np.array_equal(item_vector, np.array([1, 0, 0, 0, 0, 0], dtype=object)))
 
         shutil.rmtree(path)
 
@@ -66,15 +68,15 @@ class TestComparisonData(TestCase):
         items = 0
         for batch in comparison_data.get_batches():
             index += 1
-            self.assertTrue(all(col in batch.columns for col in ["col1", "col2", "1", "2", "3", "4", "5", "6"]))
-            items += batch.shape[0]
+            self.assertTrue(all(col in batch["col_name_index"] for col in ["1", "2", "3", "4", "5", "6"]))
+            items += batch["matrix"].shape[0]
 
         self.assertEqual(2, index)
         self.assertEqual(5, items)
 
-        for batch in comparison_data.get_batches(columns=["1", "col1"]):
-            self.assertTrue(all(col in batch.columns for col in ["1", "col1"]))
-            self.assertEqual(2, len(batch.columns))
+        for index, batch in enumerate(comparison_data.get_batches(columns=["1"])):
+
+            self.assertEqual(3-index, batch.shape[0])
 
         shutil.rmtree(path)
 

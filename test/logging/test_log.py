@@ -31,18 +31,20 @@ class TestLog(TestCase):
             def print_a(self, desc):
                 print(desc + ": " + self.a)
 
-        output = io.StringIO()
-        stdout = sys.stdout
-        sys.stdout = output
-        test_obj = TestClass(3)
-        test_obj.print_a("sample desc")
-        sys.stdout = stdout
-        out_text = str(output.getvalue())
-        self.assertTrue("Entering: __init__ with parameters" in out_text and "3)" in out_text)
-        self.assertTrue("Exiting: __init__" in out_text)
-        self.assertTrue("Entering: print_a with parameters" in out_text and "sample desc" in out_text)
-        self.assertTrue("Exception in print_a : can only concatenate str (not \"int\") to str" in out_text)
-        self.assertTrue("Exiting: print_a" in out_text)
+        with self.assertRaises(Exception):
+
+            output = io.StringIO()
+            stdout = sys.stdout
+            sys.stdout = output
+            test_obj = TestClass(3)
+            test_obj.print_a("sample desc")
+            sys.stdout = stdout
+            out_text = str(output.getvalue())
+            self.assertTrue("Entering: __init__ with parameters" in out_text and "3)" in out_text)
+            self.assertTrue("Exiting: __init__" in out_text)
+            self.assertTrue("Entering: print_a with parameters" in out_text and "sample desc" in out_text)
+            self.assertTrue("Exception in print_a : can only concatenate str (not \"int\") to str" in out_text)
+            self.assertTrue("Exiting: print_a" in out_text)
 
         EnvironmentSettings.log_level = LogLevel.NONE
         output = io.StringIO()

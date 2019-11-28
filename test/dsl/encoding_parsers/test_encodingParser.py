@@ -25,7 +25,7 @@ class TestEncodingParser(TestCase):
         symbol_table.add("d1", SymbolType.DATASET, {})
         symbol_table, specs = EncodingParser.parse(param, symbol_table)
         self.assertEqual(KmerFrequencyEncoder, symbol_table.get("KF"))
-        self.assertEqual(9, len(symbol_table.get_config("KF")["encoder_params"].keys()))
+        self.assertEqual(8, len(symbol_table.get_config("KF")["encoder_params"].keys()))
 
         self.assertTrue("reads" in specs["KF"]["params"].keys())
         self.assertEqual("unique", specs["KF"]["params"]["reads"])

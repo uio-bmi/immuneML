@@ -1,5 +1,4 @@
 import numpy as np
-import pandas as pd
 
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.logging.Logger import log
@@ -26,16 +25,16 @@ class ComparisonData:
     def get_repertoire_vector(self, identifier: str):
         repertoire_vector = np.zeros(self.item_count)
         for batch_index, batch in enumerate(self.get_batches(columns=[identifier])):
-            part = batch[identifier].values
             start = batch_index * self.batch_size
-            end = start + part.shape[0]
-            repertoire_vector[start: end] = part
+            end = start + batch.shape[0]
+            repertoire_vector[start: end] = batch[:, 0]
         return repertoire_vector
 
     def get_item_vector(self, index: int):
         batch_index = int(index / self.batch_size)
         index_in_batch = index - (batch_index * self.batch_size)
-        return pd.read_csv(self.batch_paths[batch_index], nrows=1, skiprows=index_in_batch - 1).iloc[0].values
+        # return pd.read_csv(self.batch_paths[batch_index], nrows=1, skiprows=index_in_batch - 1).iloc[0].values
+        return self.batches[batch_index]["matrix"][index_in_batch]
 
     def get_batches(self, columns: list = None):
         for index in range(len(self.batches)):
@@ -43,7 +42,8 @@ class ComparisonData:
 
     def get_batch(self, index: int, columns: list = None):
         if columns is not None:
-            return self.batches[index][columns]
+            column_indices = [self.batches[index]["col_name_index"][col] for col in columns]
+            return self.batches[index]["matrix"][:, column_indices]
         else:
             return self.batches[index]
 
@@ -55,10 +55,11 @@ class ComparisonData:
         self.merge_tmp_batches_to_matrix()
 
     def merge_tmp_batches_to_matrix(self):
+
         for index in range(len(self.tmp_batches)):
 
             batch = self.load_tmp_batch(index)
-            matrix = np.zeros((self.batch_size, len(self.repertoire_ids)))
+            matrix = np.zeros((self.batch_size, len(self.repertoire_ids)), order='F')
             row_names = []
 
             for item_index, item in enumerate(batch):
@@ -67,8 +68,10 @@ class ComparisonData:
                     if repertoire_id in batch[item]:
                         matrix[item_index][repertoire_index] = batch[item][repertoire_id]
 
-            df = pd.DataFrame(matrix[:len(row_names)], index=row_names, columns=self.repertoire_ids)
-            self.batches.append(df)
+            df = np.array(matrix[:len(row_names)], order='F')
+
+            self.batches.append({"matrix": df, "row_names": row_names,
+                                 "col_name_index": {rep_id: ind for ind, rep_id in enumerate(self.repertoire_ids)}})
 
     @log
     def process_repertoire(self, repertoire, repertoire_id: str, extract_items_fn):
