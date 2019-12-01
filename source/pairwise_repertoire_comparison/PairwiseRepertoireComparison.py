@@ -78,8 +78,9 @@ class PairwiseRepertoireComparison:
         for index1 in range(repertoire_count):
 
             rep1 = comparison_data.get_repertoire_vector(repertoire_identifiers[index1])
+            comparison_result[index1, index1] = 1
 
-            for index2 in range(index1, repertoire_count):
+            for index2 in range(index1+1, repertoire_count):
 
                 rep2 = comparison_data.get_repertoire_vector(repertoire_identifiers[index2])
 

@@ -1,3 +1,5 @@
+from functools import lru_cache
+
 import numpy as np
 
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
@@ -22,6 +24,7 @@ class ComparisonData:
         self.tmp_batches = []
         self.store_tmp_batch({}, 0)
 
+    @lru_cache(maxsize=110)
     def get_repertoire_vector(self, identifier: str):
         repertoire_vector = np.zeros(self.item_count)
         for batch_index, batch in enumerate(self.get_batches(columns=[identifier])):
