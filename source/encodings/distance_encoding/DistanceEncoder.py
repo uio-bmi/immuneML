@@ -37,7 +37,7 @@ class DistanceEncoder(DatasetEncoder):
 
     def build_distance_matrix(self, dataset: RepertoireDataset, params: EncoderParams, train_repertoire_ids: list):
         comparison = PairwiseRepertoireComparison(self.attributes_to_match, self.attributes_to_match, params["result_path"],
-                                                  params["batch_size"], self.build_matching_fn(), self.pool_size)
+                                                  params["batch_size"], self.pool_size)
 
         current_dataset = dataset if self.context is None or "dataset" not in self.context else self.context["dataset"]
 
@@ -85,10 +85,6 @@ class DistanceEncoder(DatasetEncoder):
             with open(params["result_path"] + "repertoire_ids.pickle", "rb") as file:
                 train_repertoire_ids = pickle.load(file)
         return train_repertoire_ids
-
-    def build_matching_fn(self):
-        return lambda repertoire: [tuple(item.get_attribute(attribute) for attribute in self.attributes_to_match)
-                                   for item in repertoire.sequences]
 
     def store(self, encoded_dataset, params: EncoderParams):
         PickleExporter.export(encoded_dataset, params["result_path"], params["filename"])

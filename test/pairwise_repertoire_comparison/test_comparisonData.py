@@ -12,8 +12,8 @@ from source.util.PathBuilder import PathBuilder
 class TestComparisonData(TestCase):
 
     def create_comparison_data(self, path: str):
-        comparison_data = ComparisonData(repertoire_ids=["1", "2", "3", "4", "5", "6"], matching_columns=["col1", "col2"],
-                                         item_columns=["col1", "col2"], pool_size=4, batch_size=3, path=path)
+        comparison_data = ComparisonData(repertoire_ids=["1", "2", "3", "4", "5", "6"], comparison_attributes=["col1", "col2"],
+                                         pool_size=4, batch_size=3, path=path)
 
         comparison_data.tmp_batch_paths = [path + "batch_0.csv", path + "batch_1.csv"]
         batch0 = {("a", 1): {"1": 1}, ("b", 2): {"2": 1}, ("c", 3): {"3": 1}}
@@ -35,6 +35,69 @@ class TestComparisonData(TestCase):
                                         "col_name_index": {"1": 0, "2": 1, "3": 2, "4": 3, "5": 4, "6": 7}})
         comparison_data.batch_paths = [path + "b01.csv", path + "b02.csv"]
         return comparison_data
+
+    def test__build_abundance_matrix(self):
+        expected_abundance_matrix = np.array([[1, 4], [1, 6], [1, 3], [1, 6]])
+
+        comparison_data = ComparisonData(repertoire_ids=["rep_0", "rep_1", "rep_2", "rep_3"],
+                                         comparison_attributes=["amino_acid_sequence"], pool_size=4, batch_size=2, path="")
+        comparison_data.batches = [{'matrix': np.array([[1., 0., 0., 0.],
+                                                        [1., 1., 0., 0.]]),
+                                    'row_names': [('GGG',), ('III',)],
+                                    'col_name_index': {'rep_0': 0, 'rep_1': 1, 'rep_2': 2, 'rep_3': 3}},
+                                   {'matrix': np.array([[1., 1., 0., 1.],
+                                                        [1., 1., 1., 1.]]),
+                                    'row_names': [('LLL',), ('MMM',)],
+                                    'col_name_index': {'rep_0': 0, 'rep_1': 1, 'rep_2': 2, 'rep_3': 3}},
+                                   {'matrix': np.array([[0., 1., 0., 0.],
+                                                        [0., 1., 0., 1.]]),
+                                    'row_names': [('DDD',), ('EEE',)],
+                                    'col_name_index': {'rep_0': 0, 'rep_1': 1, 'rep_2': 2, 'rep_3': 3}},
+                                   {'matrix': np.array([[0., 1., 1., 1.],
+                                                        [0., 0., 1., 1.]]),
+                                    'row_names': [('FFF',), ('CCC',)],
+                                    'col_name_index': {'rep_0': 0, 'rep_1': 1, 'rep_2': 2, 'rep_3': 3}},
+                                   {'matrix': np.array([[0., 0., 0., 1.]]),
+                                    'row_names': [('AAA',)],
+                                    'col_name_index': {'rep_0': 0, 'rep_1': 1, 'rep_2': 2, 'rep_3': 3}}]
+        comparison_data.item_count = 9
+
+        p_value = 0.4
+        sequence_p_value_indices = np.array([1., 0.3333333333333334, 1., 1., 1., 1., 1., 0.3333333333333334, 1.]) < p_value
+
+        abundance_matrix = comparison_data._build_abundance_matrix(["rep_0", "rep_1", "rep_2", "rep_3"], sequence_p_value_indices)
+
+        self.assertTrue(np.array_equal(expected_abundance_matrix, abundance_matrix))
+
+    def test_find_label_associated_sequence_p_values(self):
+
+        comparison_data = ComparisonData(repertoire_ids=["rep_0", "rep_1", "rep_2", "rep_3"],
+                                         comparison_attributes=["amino_acid_sequence"], pool_size=4, path="")
+        comparison_data.batches = [{'matrix': np.array([[1., 0., 0., 0.],
+                                                        [1., 1., 0., 0.]]),
+                                    'row_names': [('GGG',), ('III',)],
+                                    'col_name_index': {'rep_0': 0, 'rep_1': 1, 'rep_2': 2, 'rep_3': 3}},
+                                   {'matrix': np.array([[1., 1., 0., 1.],
+                                                        [1., 1., 1., 1.]]),
+                                    'row_names': [('LLL',), ('MMM',)],
+                                    'col_name_index': {'rep_0': 0, 'rep_1': 1, 'rep_2': 2, 'rep_3': 3}},
+                                   {'matrix': np.array([[0., 1., 0., 0.],
+                                                        [0., 1., 0., 1.]]),
+                                    'row_names': [('DDD',), ('EEE',)],
+                                    'col_name_index': {'rep_0': 0, 'rep_1': 1, 'rep_2': 2, 'rep_3': 3}},
+                                   {'matrix': np.array([[0., 1., 1., 1.],
+                                                        [0., 0., 1., 1.]]),
+                                    'row_names': [('FFF',), ('CCC',)],
+                                    'col_name_index': {'rep_0': 0, 'rep_1': 1, 'rep_2': 2, 'rep_3': 3}},
+                                   {'matrix': np.array([[0., 0., 0., 1.]]),
+                                    'row_names': [('AAA',)],
+                                    'col_name_index': {'rep_0': 0, 'rep_1': 1, 'rep_2': 2, 'rep_3': 3}}]
+        p_values = comparison_data.find_label_associated_sequence_p_values({"l1": [True, True, False, False],
+                                                                            "donor": ["rep_0", "rep_1", "rep_2", "rep_3"]},
+                                                                           "l1",
+                                                                           ["rep_0", "rep_1", "rep_2", "rep_3"], [True, False])
+
+        self.assertTrue(np.allclose([1., 0.3333333333333334, 1., 1., 1., 1., 1., 0.3333333333333334, 1.], p_values))
 
     def test_get_repertoire_vector(self):
         path = EnvironmentSettings.tmp_test_path + "pairwisecomp_comparisondata/"

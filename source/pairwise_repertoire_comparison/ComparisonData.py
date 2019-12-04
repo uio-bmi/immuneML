@@ -1,6 +1,7 @@
 from functools import lru_cache
 
 import numpy as np
+from scipy.stats import fisher_exact
 
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.logging.Logger import log
@@ -8,7 +9,7 @@ from source.logging.Logger import log
 
 class ComparisonData:
     @log
-    def __init__(self, repertoire_ids: list, matching_columns, item_columns: list, pool_size: int, batch_size: int = 10000,
+    def __init__(self, repertoire_ids: list, comparison_attributes, pool_size: int, batch_size: int = 10000,
                  path: str = None):
 
         self.path = path
@@ -17,12 +18,15 @@ class ComparisonData:
         self.item_count = 0
         self.batch_paths = []
         self.tmp_batch_paths = [self.path + "batch_0.pickle"]
-        self.item_columns = item_columns
-        self.matching_columns = matching_columns
+        self.comparison_attributes = comparison_attributes
         self.repertoire_ids = repertoire_ids
         self.batches = []
         self.tmp_batches = []
         self.store_tmp_batch({}, 0)
+
+    def build_matching_fn(self):
+        return lambda repertoire: [tuple(item.get_attribute(attribute) for attribute in self.comparison_attributes)
+                                   for item in repertoire.sequences]
 
     @lru_cache(maxsize=110)
     def get_repertoire_vector(self, identifier: str):
@@ -50,10 +54,60 @@ class ComparisonData:
         else:
             return self.batches[index]
 
+    def calculate_sequence_abundance(self, dataset: RepertoireDataset, label: str, label_values: list, p_value_threshold):
+
+        sequence_p_values = self.find_label_associated_sequence_info(dataset, label, label_values)
+        sequence_p_values_indices = sequence_p_values < p_value_threshold
+
+        abundance_matrix = self._build_abundance_matrix(dataset.get_repertoire_ids(), sequence_p_values_indices)
+
+        return abundance_matrix
+
+    def _build_abundance_matrix(self, repertoire_ids, sequence_p_values_indices):
+        abundance_matrix = np.zeros((len(repertoire_ids), 2))
+
+        for index, repertoire_id in enumerate(repertoire_ids):
+            repertoire_vector = self.get_repertoire_vector(repertoire_id)
+            relevent_sequence_abundance = np.sum(repertoire_vector[np.logical_and(sequence_p_values_indices, repertoire_vector)])
+            total_sequence_abundance = np.sum(repertoire_vector)
+            abundance_matrix[index] = [relevent_sequence_abundance, total_sequence_abundance]
+
+        return abundance_matrix
+
+    def find_label_associated_sequence_info(self, dataset: RepertoireDataset, label: str, label_values: list):
+
+        assert len(label_values) == 2, "ComparisonData: Label associated sequences can be inferred only for binary labels."
+
+        repertoire_ids = dataset.get_repertoire_ids()
+        metadata = dataset.get_metadata(["donor", label])
+
+        sequence_p_values = self.find_label_associated_sequence_p_values(metadata, label, repertoire_ids, label_values)
+
+        return np.array(sequence_p_values)
+
+    def find_label_associated_sequence_p_values(self, metadata, label, repertoire_ids, label_values):
+        sequence_p_values = []
+        is_first_class = np.array([metadata[label][i] for i in [metadata["donor"].index(id) for id in repertoire_ids]]) == label_values[0]
+
+        for batch in self.get_batches(repertoire_ids):
+
+            for i in range(batch.shape[0]):
+
+                first_class_present = np.sum(batch[i, np.logical_and(batch[i], is_first_class)])
+                second_class_present = np.sum(batch[i, np.logical_and(batch[i], np.logical_not(is_first_class))])
+                first_class_absent = np.sum(np.logical_and(is_first_class, batch[i] == 0))
+                second_class_absent = np.sum(np.logical_and(np.logical_not(is_first_class), batch[i] == 0))
+
+                sequence_p_values.append(fisher_exact([[first_class_present, second_class_present],
+                                                       [first_class_absent, second_class_absent]])[1])
+
+        return sequence_p_values
+
     @log
-    def process_dataset(self, dataset: RepertoireDataset, extract_items_fn):
+    def process_dataset(self, dataset: RepertoireDataset):
+        extract_fn = self.build_matching_fn()
         for index, repertoire in enumerate(dataset.get_data()):
-            self.process_repertoire(repertoire, str(repertoire.identifier), extract_items_fn)
+            self.process_repertoire(repertoire, str(repertoire.identifier), extract_fn)
             print("Repertoire {} ({}/{}) processed.".format(repertoire.identifier, index+1, len(dataset.get_filenames())))
         self.merge_tmp_batches_to_matrix()
 
@@ -134,7 +188,7 @@ class ComparisonData:
         return batch
 
     def add_items_for_repertoire(self, items: list, repertoire_id: str):
-        last_batch_index = len(self.tmp_batch_paths)-1
+        last_batch_index = len(self.tmp_batches)-1
         batch = self.load_tmp_batch(last_batch_index)
         item_index = 0
         while len(batch) < self.batch_size and item_index < len(items):

@@ -1,0 +1,4 @@
+comparison_attributes:
+    - amino_acid_sequence
+p_value_threshold: 0.05
+pool_size: 4
