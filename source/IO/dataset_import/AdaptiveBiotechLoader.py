@@ -40,17 +40,21 @@ class AdaptiveBiotechLoader(GenericLoader):
             EnvironmentSettings.root_path + "source/IO/dataset_import/conversion/imgt_adaptive_conversion.csv")
         replace_imgt = dict(zip(replace_imgt.Adaptive, replace_imgt.IMGT))
 
-        df[["v_gene", "j_gene"]] = df[["v_gene", "j_gene"]].replace(replace_imgt)
+        if all(item in df.columns for item in ["v_gene", "j_gene"]):
+
+            df[["v_gene", "j_gene"]] = df[["v_gene", "j_gene"]].replace(replace_imgt)
 
         replace_dict = {"TCRB": "TRB"}
 
         replace_dict = {**replace_dict,
                         **{("0" + str(i)): str(i) for i in range(10)}}
 
-        df[["v_subgroup", "v_gene", "j_subgroup", "j_gene"]] = df[
-            ["v_subgroup", "v_gene", "j_subgroup", "j_gene"]].replace(replace_dict, regex=True)
+        if all(item in df.columns for item in ["v_subgroup", "v_gene", "j_subgroup", "j_gene"]):
 
-        df["v_allele"] = df['v_gene'].str.cat(df['v_allele'], sep=Constants.ALLELE_DELIMITER)
-        df["j_allele"] = df['j_gene'].str.cat(df['j_allele'], sep=Constants.ALLELE_DELIMITER)
+            df[["v_subgroup", "v_gene", "j_subgroup", "j_gene"]] = df[
+                ["v_subgroup", "v_gene", "j_subgroup", "j_gene"]].replace(replace_dict, regex=True)
+
+            df["v_allele"] = df['v_gene'].str.cat(df['v_allele'], sep=Constants.ALLELE_DELIMITER)
+            df["j_allele"] = df['j_gene'].str.cat(df['j_allele'], sep=Constants.ALLELE_DELIMITER)
 
         return df
