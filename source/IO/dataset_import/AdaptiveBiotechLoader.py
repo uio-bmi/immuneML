@@ -13,25 +13,21 @@ class AdaptiveBiotechLoader(GenericLoader):
         df = pd.read_csv(filepath,
                          sep="\t",
                          iterator=False,
-                         usecols=["rearrangement", "v_family", "v_gene", "v_allele", "j_family", "j_gene",
-                                  "j_allele", "amino_acid", "templates", "frame_type"],
-                         dtype={"v_family": str,
-                                "v_gene": str,
-                                "v_allele": str,
-                                "j_family": str,
-                                "j_gene": str,
-                                "j_allele": str,
-                                "amino_acid": str,
-                                "rearrangement": str,
-                                "templates": str,
-                                "frame_type": str})
+                         usecols=params["columns_to_load"],
+                         dtype={col_name: str for col_name in params["columns_to_load"]})
 
-        df = df.rename(columns={'rearrangement': 'nucleotide', 'v_family': 'v_subgroup', 'j_family': 'j_subgroup'})
+        if 'rearrangement' in params["columns_to_load"]:
+            df = df.rename(columns={'rearrangement': 'nucleotide'})
+        if 'v_family' in params["columns_to_load"]:
+            df = df.rename(columns={'v_family': 'v_subgroup'})
+        if "j_family" in params["columns_to_load"]:
+            df = df.rename(columns={'j_family': 'j_subgroup'})
 
         df = df.replace(["unresolved", "no data", "na", "unknown", "null", "nan", np.nan], Constants.UNKNOWN)
         if params["remove_out_of_frame"]:
             df = df[(df["amino_acid"] != Constants.UNKNOWN) & (~df["amino_acid"].str.contains("\*"))]
-        df['nucleotide'] = [y[(84 - 3 * len(x)): 78] for x, y in zip(df['amino_acid'], df['nucleotide'])]
+        if "nucleotide" in params["columns_to_load"]:
+            df['nucleotide'] = [y[(84 - 3 * len(x)): 78] for x, y in zip(df['amino_acid'], df['nucleotide'])]
         df['amino_acid'] = df["amino_acid"].str[1:-1]
 
         df = AdaptiveBiotechLoader.parse_germline(df)

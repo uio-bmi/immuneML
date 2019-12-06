@@ -1,1 +1,2 @@
 remove_out_of_frame: True
+columns_to_load: [rearrangement, v_family, v_gene, v_allele, j_family, j_gene, j_allele, amino_acid, templates, frame_type]
