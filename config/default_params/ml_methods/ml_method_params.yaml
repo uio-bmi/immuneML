@@ -7,4 +7,4 @@ split_count: 5 # if assessment type is repeated random splits, how many times to
 training_percentage: 80 # if assessment type is random split, how much to use for training the model
 cores_for_training: 1
 batch_size: 2
-label_to_balance:
+label_to_balance: None
