@@ -44,19 +44,20 @@ class TestExploratoryAnalysisProcess(TestCase):
 
         preproc_sequence = [PatientRepertoireCollector()]
 
-        units = [ExploratoryAnalysisUnit(dataset=dataset, report=SequenceLengthDistribution()),
-                 ExploratoryAnalysisUnit(dataset=dataset, report=SequenceLengthDistribution(), preprocessing_sequence=preproc_sequence),
-                 ExploratoryAnalysisUnit(dataset=dataset, report=MatchingSequenceDetails(max_edit_distance=1, reference_sequences=refs),
+        units = {"named_analysis_1": ExploratoryAnalysisUnit(dataset=dataset, report=SequenceLengthDistribution(), batch_size=16),
+                 "named_analysis_2": ExploratoryAnalysisUnit(dataset=dataset, report=SequenceLengthDistribution(), preprocessing_sequence=preproc_sequence),
+                 "named_analysis_3": ExploratoryAnalysisUnit(dataset=dataset, report=MatchingSequenceDetails(max_edit_distance=1, reference_sequences=refs),
                                          label_config=label_config,
                                          encoder=ReferenceRepertoireEncoder(max_edit_distance=1,
                                                                             summary=SequenceMatchingSummaryType.COUNT,
-                                                                            reference_sequences=refs))]
+                                                                            reference_sequences=refs))}
 
         process = ExploratoryAnalysisProcess(units)
         process.run(path + "results/")
 
-        self.assertTrue(os.path.isfile(path + "results/analysis_1/sequence_length_distribution.png"))
-        self.assertTrue(os.path.isfile(path + "results/analysis_2/sequence_length_distribution.png"))
-        self.assertTrue(os.path.isfile(path + "results/analysis_3/matching_sequence_overview.tsv"))
+        self.assertTrue(units["named_analysis_1"].batch_size == 16)
+        self.assertTrue(os.path.isfile(path + "results/analysis_named_analysis_1/sequence_length_distribution.png"))
+        self.assertTrue(os.path.isfile(path + "results/analysis_named_analysis_2/sequence_length_distribution.png"))
+        self.assertTrue(os.path.isfile(path + "results/analysis_named_analysis_3/matching_sequence_overview.tsv"))
 
         shutil.rmtree(path)

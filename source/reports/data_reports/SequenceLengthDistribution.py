@@ -42,7 +42,7 @@ class SequenceLengthDistribution(DataReport):
 
         x = OrderedDict(sorted(normalized_sequence_length.items(), key=lambda item: item[0]))
 
-        plt.bar(x.keys(), x.values(), alpha=0.45, color="b")
+        plt.bar(list(x.keys()), list(x.values()), alpha=0.45, color="b")
         plt.xticks(list(x.keys()), list(x.keys()))
         plt.grid(True, color='k', alpha=0.07, axis='y')
         plt.xlabel("Lengths")

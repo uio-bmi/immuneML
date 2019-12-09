@@ -32,10 +32,10 @@ class TestExploratoryAnalysisParser(TestCase):
 
         instruction = {
             "type": "ExploratoryAnalysis",
-            "analyses": [
-                {"dataset": "d1", "report": "r1", "preprocessing_sequence": "p1"},
-                {"dataset": "d1", "report": "r2", "encoding": "e1", "labels": ["l1"]}
-            ]
+            "analyses": {
+                "1": {"dataset": "d1", "report": "r1", "preprocessing_sequence": "p1"},
+                "2": {"dataset": "d1", "report": "r2", "encoding": "e1", "labels": ["l1"]}
+            }
         }
 
         symbol_table = SymbolTable()
@@ -51,12 +51,12 @@ class TestExploratoryAnalysisParser(TestCase):
 
         process = ExploratoryAnalysisParser().parse(instruction, symbol_table)
 
-        self.assertEqual(2, len(process.exploratory_analysis_units))
-        self.assertTrue(isinstance(process.exploratory_analysis_units[0].report, SequenceLengthDistribution))
-        self.assertTrue(isinstance(process.exploratory_analysis_units[1].report, MatchingSequenceDetails))
-        self.assertTrue(isinstance(process.exploratory_analysis_units[1].encoder, MatchedReferenceEncoder))
-        self.assertEqual(1, len(process.exploratory_analysis_units[1].encoder.reference_sequences))
-        self.assertEqual("l1", process.exploratory_analysis_units[1].label_config.get_labels_by_name()[0])
+        self.assertEqual(2, len(list(process.exploratory_analysis_units.values())))
+        self.assertTrue(isinstance(list(process.exploratory_analysis_units.values())[0].report, SequenceLengthDistribution))
+        self.assertTrue(isinstance(list(process.exploratory_analysis_units.values())[1].report, MatchingSequenceDetails))
+        self.assertTrue(isinstance(list(process.exploratory_analysis_units.values())[1].encoder, MatchedReferenceEncoder))
+        self.assertEqual(1, len(list(process.exploratory_analysis_units.values())[1].encoder.reference_sequences))
+        self.assertEqual("l1", list(process.exploratory_analysis_units.values())[1].label_config.get_labels_by_name()[0])
 
         shutil.rmtree(path)
 
