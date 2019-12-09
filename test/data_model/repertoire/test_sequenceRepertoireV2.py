@@ -1,17 +1,73 @@
 import os
+import pickle
 import shutil
+from time import time
 from unittest import TestCase
 
 import numpy as np
 
 from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
+from source.data_model.repertoire.SequenceRepertoire import SequenceRepertoire
 from source.data_model.repertoire.SequenceRepertoireV2 import SequenceRepertoireV2
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.util.PathBuilder import PathBuilder
 
 
 class TestSequenceRepertoireV2(TestCase):
+
+    def run_performance_test_for_v2(self, sequences, path, rep_id):
+        obj = SequenceRepertoireV2.build_from_sequence_objects(sequences, path, rep_id, {"cmv": "yes"})
+
+        load_start = time()
+
+        obj._load()
+
+        load_end = time()
+
+        print("Loading from disk for repertoire with {} sequences took {}s.".format(len(sequences), load_end - load_start))
+
+    def run_performance_test_for_old_version(self, sequences, path, rep_id):
+        rep = SequenceRepertoire(sequences, {"cmv": "yes"}, rep_id)
+        with open(path + "rep.pickle", "wb") as file:
+            pickle.dump(rep, file)
+
+        load_start = time()
+
+        with open(path + "rep.pickle", "rb") as file:
+            rep2 = pickle.load(file)
+
+        load_end = time()
+
+        print("Loading from disk for repertoire with {} (old version) sequences took {}s.".format(len(sequences), load_end - load_start))
+
+    def create_sequences(self, count):
+        return [ReceptorSequence(amino_acid_sequence="AAA", identifier=str(i),
+                                 metadata=SequenceMetadata(v_gene="V1", j_gene="J2", count=231,
+                                                           custom_params={"cmv": "no", "coeliac": False}))
+                for i in range(count)]
+
+    def test_performance(self):
+        path = EnvironmentSettings.tmp_test_path + "sequencerepertoirev2performance/"
+        PathBuilder.build(path)
+
+        sequences = self.create_sequences(50000)
+
+        self.run_performance_test_for_v2(sequences, path, "1")
+        self.run_performance_test_for_old_version(sequences, path, "2")
+
+        sequences = self.create_sequences(100000)
+
+        self.run_performance_test_for_v2(sequences, path, "3")
+        self.run_performance_test_for_old_version(sequences, path, "4")
+
+        sequences = self.create_sequences(200000)
+
+        self.run_performance_test_for_v2(sequences, path, "5")
+        self.run_performance_test_for_old_version(sequences, path, "6")
+
+        shutil.rmtree(path)
+
     def test_sequence_repertoire(self):
 
         path = EnvironmentSettings.tmp_test_path + "sequencerepertoirev2/"

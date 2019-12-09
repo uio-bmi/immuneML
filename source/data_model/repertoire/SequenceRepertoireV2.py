@@ -104,7 +104,8 @@ class SequenceRepertoireV2(DatasetItem):
                 if field in group.keys():
                     tmp = np.empty((group.attrs["sequence_count"],), dtype=group[field].dtype)
                     group[field].read_direct(tmp)
-                    tmp[tmp == ''] = None
+                    if group[field].dtype == SequenceRepertoireV2.STRING_FORMAT:
+                        tmp['' == tmp] = None
                     if field in SequenceRepertoireV2.FIELDS:
                         self.data[field] = tmp
                     else:
