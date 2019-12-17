@@ -1,6 +1,5 @@
 import copy
 import os
-import pickle
 from multiprocessing.pool import Pool
 
 import numpy as np
@@ -11,6 +10,9 @@ from source.IO.dataset_import.DataLoader import DataLoader
 from source.IO.dataset_import.PickleLoader import PickleLoader
 from source.IO.metadata_import.MetadataImport import MetadataImport
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
+from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
+from source.data_model.receptor.receptor_sequence.SequenceFrameType import SequenceFrameType
+from source.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
 from source.data_model.repertoire.SequenceRepertoire import SequenceRepertoire
 from source.environment.Constants import Constants
 from source.util.PathBuilder import PathBuilder
@@ -39,10 +41,10 @@ class GenericLoader(DataLoader):
 
         output = [out for out in output if out != (None, None)]
 
-        repertoire_filenames = [out[0] for out in output]
+        repertoires = [out[0] for out in output]
         custom_params = self._prepare_custom_params([out[1] for out in output])
 
-        dataset = RepertoireDataset(filenames=repertoire_filenames, params=custom_params, metadata_file=params["metadata_file"])
+        dataset = RepertoireDataset(repertoires=repertoires, params=custom_params, metadata_file=params["metadata_file"])
         return dataset
 
     def _build_dtype(self, params, column_mapping):
@@ -92,52 +94,50 @@ class GenericLoader(DataLoader):
 
         return df.apply(self._load_sequence, axis=1, args=(params,)).values
 
-    def _load_repertoire_from_file(self, filepath, params, repertoire_filename, identifier) -> dict:
+    def _load_repertoire_from_file(self, filepath, params, identifier) -> dict:
         df = self._read_preprocess_file(filepath, params)
 
         sequences = self.get_sequences_from_df(df, params)
         metadata = self._extract_repertoire_metadata(filepath, params, df)
 
-        repertoire = SequenceRepertoire(sequences=sequences, metadata=metadata, identifier=identifier)
+        repertoire = SequenceRepertoire.build_from_sequence_objects(sequences, metadata=metadata, identifier=identifier,
+                                                                    path=params["result_path"])
 
-        with open(repertoire_filename, "wb") as f:
-            pickle.dump(repertoire, f)
-
-        return metadata
+        return repertoire
 
     def _load_repertoire(self, index, filepath, params):
         identifier = str(params["metadata"][index]["donor"]) if "metadata" in params else str(os.path.basename(filepath).rpartition(".")[0])
-        repertoire_filename = params["result_path"] + identifier + ".pickle"
-        metadata = None
-        if not os.path.exists(repertoire_filename):
-            metadata = self._load_repertoire_from_file(filepath, params, repertoire_filename, identifier)
+        metadata_filename = f"{params['result_path']}{identifier}_metadata.pickle"
+        data_filename = f"{params['result_path']}{identifier}.npy"
+        if not os.path.exists(metadata_filename) or not os.path.exists(data_filename):
+            repertoire = self._load_repertoire_from_file(filepath, params, identifier)
+        else:
+            repertoire = SequenceRepertoire(data_filename, metadata_filename, identifier)
 
-        custom_params = metadata.custom_params if metadata is not None else {}
+        return repertoire, repertoire.metadata
 
-        return repertoire_filename, custom_params
+    def _load_sequence(self, row, params) -> ReceptorSequence:
 
-    # def _load_sequence(self, row, params) -> ReceptorSequence:
-    #
-    #     metadata = SequenceMetadata(v_subgroup=row.get("v_subgroup", Constants.UNKNOWN),
-    #                                 v_gene=row.get("v_gene", Constants.UNKNOWN),
-    #                                 v_allele=row.get("v_allele", Constants.UNKNOWN),
-    #                                 j_subgroup=row.get("j_subgroup", Constants.UNKNOWN),
-    #                                 j_gene=row.get("j_gene", Constants.UNKNOWN),
-    #                                 j_allele=row.get("j_allele", Constants.UNKNOWN),
-    #                                 chain=row.get("chain", "TRB"),
-    #                                 count=int(row.get("templates", "0")) if str(row.get("templates", "0")).isdigit() else 0,
-    #                                 frame_type=row.get("frame_type", SequenceFrameType.IN.value),
-    #                                 region_type=params.get("region_type", Constants.UNKNOWN))
-    #
-    #     sequence = ReceptorSequence(amino_acid_sequence=row.get("amino_acid", None),
-    #                                 nucleotide_sequence=row.get("nucleotide", None),
-    #                                 metadata=metadata)
-    #
-    #     for column in row.keys():
-    #         if params.get("additional_columns") == "*" or column in params.get("additional_columns", []):
-    #             metadata.custom_params[column] = row[column]
-    #
-    #     return sequence
+        metadata = SequenceMetadata(v_subgroup=row.get("v_subgroup", Constants.UNKNOWN),
+                                    v_gene=row.get("v_gene", Constants.UNKNOWN),
+                                    v_allele=row.get("v_allele", Constants.UNKNOWN),
+                                    j_subgroup=row.get("j_subgroup", Constants.UNKNOWN),
+                                    j_gene=row.get("j_gene", Constants.UNKNOWN),
+                                    j_allele=row.get("j_allele", Constants.UNKNOWN),
+                                    chain=row.get("chain", "TRB"),
+                                    count=int(row.get("templates", "0")) if str(row.get("templates", "0")).isdigit() else 0,
+                                    frame_type=row.get("frame_type", SequenceFrameType.IN.value),
+                                    region_type=params.get("region_type", Constants.UNKNOWN))
+
+        sequence = ReceptorSequence(amino_acid_sequence=row.get("amino_acid", None),
+                                    nucleotide_sequence=row.get("nucleotide", None),
+                                    metadata=metadata)
+
+        for column in row.keys():
+            if params.get("additional_columns") == "*" or column in params.get("additional_columns", []):
+                metadata.custom_params[column] = row[column]
+
+        return sequence
 
     def _extract_repertoire_metadata(self, filepath, params, df) -> dict:
         if "metadata" in params:
@@ -151,8 +151,8 @@ class GenericLoader(DataLoader):
         for p in params:
             for key in p.keys():
                 if key in custom_params:
-                    custom_params[key].add(p[key])
+                    custom_params[key].add(tuple(p[key]))
                 else:
-                    custom_params[key] = {p[key]}
+                    custom_params[key] = {tuple(p[key])}
 
         return custom_params

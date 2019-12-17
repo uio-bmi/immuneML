@@ -148,7 +148,7 @@ class TestImportParser(TestCase):
                     "path": path + "tmp_input/",
                     "format": "MiXCR",
                     "params": {
-                        "sequence_type": "CDR2+CDR3",
+                        "sequence_type": "CDR3",
                         "result_path": path + "tmp_output/",
                         "extension": "csv",
                         "metadata_file": path + "metadata.csv",
@@ -161,6 +161,6 @@ class TestImportParser(TestCase):
 
         st, desc = ImportParser.parse(specs, SymbolTable())
         self.assertTrue(isinstance(st.get("d1"), RepertoireDataset))
-        self.assertEqual(2, len(st.get("d1").get_filenames()))
+        self.assertEqual(2, len(st.get("d1").get_data()))
 
         shutil.rmtree(path)

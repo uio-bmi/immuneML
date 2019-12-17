@@ -107,7 +107,7 @@ class SequenceMatchFeatureAnnotation(TransformerMixin):
         return RepertoireDataset(
             params=X.params,
             encoded_data=encoded,
-            filenames=X.get_filenames(),
+            repertoires=X.repertoires,
             identifier=X.identifier,
             metadata_file=X.metadata_file
         )

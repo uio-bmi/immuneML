@@ -75,3 +75,5 @@ class TestSequenceMatcher(TestCase):
 
         result = matcher.match_repertoire(repertoire, 0, sequences, 2, SequenceMatchingSummaryType.CLONAL_PERCENTAGE)
         self.assertEqual(0.8, result["clonal_percentage"])
+
+        shutil.rmtree(path)

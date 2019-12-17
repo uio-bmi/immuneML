@@ -96,7 +96,7 @@ class TestMiXCRLoader(TestCase):
 
         dataset = MiXCRLoader().load(path + "tmp_input/", {
             "additional_columns": ["minQualCDR3"],
-            "sequence_type": "CDR1+CDR2+CDR3",
+            "sequence_type": "CDR3",
             "result_path": path + "tmp_output/",
             "batch_size": 2,
             "extension": "csv",
@@ -107,13 +107,12 @@ class TestMiXCRLoader(TestCase):
 
         for index, repertoire in enumerate(dataset.get_data()):
             if index == 0:
-                self.assertTrue(repertoire.sequences[0].amino_acid_sequence == "VFAVFAVFAVFAFAVF")
+                self.assertTrue(repertoire.sequences[0].amino_acid_sequence == "VFAVFA")
                 self.assertTrue(repertoire.sequences[1].metadata.v_gene == "V14-1")
-                self.assertTrue(repertoire.sequences[1].metadata.v_subgroup == "V14")
-                self.assertTrue(repertoire.metadata.custom_params["CD"])
+                self.assertTrue(repertoire.metadata["CD"])
             else:
-                self.assertEqual("TGTGCAGCAATGTGCAGCAAGCAG", repertoire.sequences[0].nucleotide_sequence)
+                self.assertEqual("TGTGCAGCAA", repertoire.sequences[0].nucleotide_sequence)
                 self.assertEqual(6, repertoire.sequences[1].metadata.count)
-                self.assertFalse(repertoire.metadata.custom_params["CD"])
+                self.assertFalse(repertoire.metadata["CD"])
 
         shutil.rmtree(path)

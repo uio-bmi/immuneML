@@ -1,3 +1,4 @@
+import shutil
 from unittest import TestCase
 
 from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
@@ -37,6 +38,8 @@ class TestKmerHelper(TestCase):
 
         self.assertEqual(3, len(sentences))
         self.assertTrue(len(sentences[0]) == 2 and "AAC" in sentences[0] and "ACT" in sentences[0])
+
+        shutil.rmtree(path)
 
     def test_create_kmers_within_HD(self):
 
