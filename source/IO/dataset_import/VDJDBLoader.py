@@ -9,7 +9,6 @@ from source.data_model.dataset.Dataset import Dataset
 from source.data_model.dataset.ReceptorDataset import ReceptorDataset
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.dataset.SequenceDataset import SequenceDataset
-from source.data_model.repertoire.RepertoireMetadata import RepertoireMetadata
 from source.data_model.repertoire.SequenceRepertoire import SequenceRepertoire
 from source.util.PathBuilder import PathBuilder
 
@@ -35,17 +34,18 @@ class VDJDBLoader(DataLoader):
     def load_repertoire_dataset(params: dict) -> Dataset:
         metadata = pd.read_csv(params["metadata_file"])
         labels = {key: set() for key in metadata.keys() if key != "filename"}
-        filenames = []
+        repertoires = []
 
+        PathBuilder.build(params["result_path"])
         for index, row in metadata.iterrows():
-            repertoire = VDJDBLoader.load_repertoire(index, row)
+            repertoire = VDJDBLoader.load_repertoire(index, row, params["result_path"])
 
             for key in labels.keys():
                 labels[key].add(row[key])
 
-            filenames.append(VDJDBLoader.store_repertoire(repertoire, params))
+            repertoires.append(repertoire)
 
-        return RepertoireDataset(params=labels, filenames=filenames, metadata_file=params["metadata_file"])
+        return RepertoireDataset(params=labels, repertoires=repertoires, metadata_file=params["metadata_file"])
 
     @staticmethod
     def store_repertoire(repertoire, params):
@@ -55,12 +55,10 @@ class VDJDBLoader(DataLoader):
         return filename
 
     @staticmethod
-    def load_repertoire(index: int, row):
+    def load_repertoire(index: int, row, result_path: str):
         sequences = VDJdbSequenceImport.import_items(row["filename"])
-        return SequenceRepertoire(sequences=sequences,
-                                  identifier=str(index),
-                                  metadata=RepertoireMetadata(custom_params={key: row[key] for key in row.keys()
-                                                                             if key != "filename"}))
+        return SequenceRepertoire.build_from_sequence_objects(sequences, result_path, str(index), 
+                                                              {key: row[key] for key in row.keys() if key != "filename"})
 
     @staticmethod
     def load_sequence_dataset(path: str, params: dict) -> Dataset:

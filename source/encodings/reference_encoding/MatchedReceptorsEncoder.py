@@ -2,7 +2,6 @@ import abc
 
 from source.IO.dataset_export.PickleExporter import PickleExporter
 from source.caching.CacheHandler import CacheHandler
-from source.data_model.dataset.Dataset import Dataset
 from source.encodings.DatasetEncoder import DatasetEncoder
 from source.encodings.EncoderParams import EncoderParams
 from source.util.ReflectionHandler import ReflectionHandler
@@ -57,7 +56,7 @@ class MatchedReceptorsEncoder(DatasetEncoder):
                                                                 for chain_a, chain_b in chains]),
                                 "one_file_per_donor": self.one_file_per_donor}
 
-        return (("dataset_filenames", tuple(dataset.get_filenames())),
+        return (("dataset_identifiers", tuple(dataset.get_example_ids())),
                 ("dataset_metadata", dataset.metadata_file),
                 ("dataset_type", dataset.__class__.__name__),
                 ("labels", tuple(params["label_configuration"].get_labels_by_name())),

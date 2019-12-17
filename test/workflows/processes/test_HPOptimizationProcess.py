@@ -28,7 +28,7 @@ class TestHPOptimizationProcess(TestCase):
         path = EnvironmentSettings.tmp_test_path + "hpoptimproc/"
         PathBuilder.build(path)
 
-        filenames, metadata = RepertoireBuilder.build(sequences=[["AAA", "CCC", "DDD"], ["AAA", "CCC", "DDD"],
+        repertoires, metadata = RepertoireBuilder.build(sequences=[["AAA", "CCC", "DDD"], ["AAA", "CCC", "DDD"],
                                                                  ["AAA", "CCC", "DDD"], ["AAA", "CCC", "DDD"],
                                                                  ["AAA", "CCC", "DDD"], ["AAA", "CCC", "DDD"],
                                                                  ["AAA", "CCC", "DDD"], ["AAA", "CCC", "DDD"],
@@ -50,7 +50,7 @@ class TestHPOptimizationProcess(TestCase):
                                                               "l2": [0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 1,
                                                                      0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1]})
 
-        dataset = RepertoireDataset(filenames=filenames, metadata_file=metadata, params={"l1": [1, 2], "l2": [0, 1]})
+        dataset = RepertoireDataset(repertoires=repertoires, metadata_file=metadata, params={"l1": [1, 2], "l2": [0, 1]})
         hp_settings = [HPSetting(Word2VecEncoder, {"k": 3, "model_type": ModelType.SEQUENCE, "vector_size": 4},
                                  SimpleLogisticRegression(), {"model_selection_cv": False, "model_selection_n_folds": -1},
                                  []),

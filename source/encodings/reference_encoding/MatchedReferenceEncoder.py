@@ -43,7 +43,7 @@ class MatchedReferenceEncoder(DatasetEncoder):
                                 "reference_sequences": sorted([seq.get_sequence() + seq.metadata.v_gene + seq.metadata.j_gene
                                                                for seq in self.reference_sequences])}
 
-        return (("dataset_filenames", tuple(dataset.get_filenames())),
+        return (("dataset_identifiers", tuple(dataset.get_example_ids())),
                 ("dataset_metadata", dataset.metadata_file),
                 ("dataset_type", dataset.__class__.__name__),
                 ("labels", tuple(params["label_configuration"].get_labels_by_name())),

@@ -6,6 +6,7 @@ from scipy import sparse
 
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.encoded_data.EncodedData import EncodedData
+from source.data_model.repertoire.SequenceRepertoire import SequenceRepertoire
 from source.encodings.pipeline.steps.SequenceMatchFeatureAnnotation import SequenceMatchFeatureAnnotation
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.util.PathBuilder import PathBuilder
@@ -39,7 +40,7 @@ class TestSequenceMatchFeatureAnnotation(TestCase):
     }
 
     dataset = RepertoireDataset(encoded_data=EncodedData(**encoded_data),
-                                filenames=[filename + ".tsv" for filename in encoded_data["example_ids"]])
+                                repertoires=[SequenceRepertoire("0.npy", "", identifier) for identifier in encoded_data["example_ids"]])
 
     # there are only matches to the first 3 sequences in this reference
     reference_rep = """TRBV Gene	CDR3B AA Sequence	Antigen Protein	MHC Class									

@@ -70,13 +70,14 @@ class SequenceAbundanceEncoder(DatasetEncoder):
 
         train_repertoire_ids = self.prepare_encoding_params(dataset, params)
         examples = comparison_data.calculate_sequence_abundance(dataset, labels[0],
-                                                                    params["label_configuration"].get_label_values(labels[0]),
-                                                                    self.p_value_threshold)
+                                                                params["label_configuration"].get_label_values(labels[0]),
+                                                                self.p_value_threshold)
 
         encoded_dataset = RepertoireDataset(params=dataset.params, encoded_data=EncodedData(examples, dataset.get_metadata([labels[0]]),
                                                                                             train_repertoire_ids,
                                                                                             ["relevant_sequence_abundance", "total_sequence_abundance"],
-                                                                                            encoding=SequenceAbundanceEncoder.__name__))
+                                                                                            encoding=SequenceAbundanceEncoder.__name__),
+                                            repertoires=dataset.repertoires)
 
         return encoded_dataset
 

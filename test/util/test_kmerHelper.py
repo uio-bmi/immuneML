@@ -2,7 +2,9 @@ from unittest import TestCase
 
 from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.data_model.repertoire.SequenceRepertoire import SequenceRepertoire
+from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.util.KmerHelper import KmerHelper
+from source.util.PathBuilder import PathBuilder
 
 
 class TestKmerHelper(TestCase):
@@ -23,9 +25,13 @@ class TestKmerHelper(TestCase):
         self.assertTrue(len(kmers) == 0)
 
     def test_create_sentences_from_repertoire(self):
-        rep = SequenceRepertoire([ReceptorSequence(amino_acid_sequence="AACT"),
+
+        path = EnvironmentSettings.tmp_test_path + "kmer/"
+        PathBuilder.build(path)
+
+        rep = SequenceRepertoire.build_from_sequence_objects([ReceptorSequence(amino_acid_sequence="AACT"),
                                   ReceptorSequence(amino_acid_sequence="ACCT"),
-                                  ReceptorSequence(amino_acid_sequence="AACT")])
+                                  ReceptorSequence(amino_acid_sequence="AACT")], path, '1', {})
 
         sentences = KmerHelper.create_sentences_from_repertoire(rep, 3)
 

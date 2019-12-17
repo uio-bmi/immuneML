@@ -36,7 +36,7 @@ class SequenceMetadata:
         self.j_subgroup = j_subgroup
         self.j_gene = j_gene
         self.j_allele = j_allele
-        self.chain = Chain[chain] if chain is not None else None
+        self.chain = Chain[chain] if chain and isinstance(chain, str) else chain if isinstance(chain, Chain) else None
         self.count = count
         self.frame_type = frame_type
         self.region_type = region_type  # should be e.g. CDR, CDR3, whole sequence etc

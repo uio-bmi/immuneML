@@ -25,7 +25,7 @@ class TestEmerson2018NatGenEncoding(TestCase):
 
     def test_encode(self):
 
-        path = EnvironmentSettings.root_path + "test/tmp/emerson2017natgenencoding/"
+        path = EnvironmentSettings.root_path + "test/tmp/emerson2017natgenencoding76868/"
         PathBuilder.build(path)
 
         lc = LabelConfiguration()
@@ -37,7 +37,7 @@ class TestEmerson2018NatGenEncoding(TestCase):
             "aab": np.array([2, 1, 2, 1, 2, 1, 2, 1])
         }
 
-        dataset_filenames, metadata = RepertoireBuilder.build(
+        repertoires, metadata = RepertoireBuilder.build(
             [
                 ["AAA", "ATA", "ATA"],
                 ["ATA", "TAA", "AAC"],
@@ -46,14 +46,14 @@ class TestEmerson2018NatGenEncoding(TestCase):
                 ["AAA", "ATA", "ATA"],
                 ["ATA", "TAA", "AAC"],
                 ["AAA", "ATA", "ATA"],
-                ["ASKLDFJD", "TAA", "AAC"]
+                ["ASKLDD", "TAA", "AAC"]
             ],
             path,
             dataset_params
         )
 
         dataset = RepertoireDataset(
-            filenames=dataset_filenames,
+            repertoires=repertoires,
             params=dataset_params
         )
 
@@ -137,7 +137,7 @@ class TestEmerson2018NatGenEncoding(TestCase):
         params["learn_model"] = False
         params["filename"] = "test_2.pickle"
 
-        dataset2 = RepertoireDataset(filenames=[dataset_filenames[num] for num in range(1, 4)])
+        dataset2 = RepertoireDataset(repertoires=[repertoires[num] for num in range(1, 4)])
 
         encoder = PipelineEncoder.create_encoder(dataset, {
                     "initial_encoder": KmerFrequencyEncoder,

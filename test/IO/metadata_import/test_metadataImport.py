@@ -26,6 +26,6 @@ Mixcr_1365_TRB.clonotypes.TRB.txt,TRB,1365,no""")
 
         self.assertEqual(len(mapping), 6)
         self.assertTrue(all(["rep_file" in item.keys() and "metadata" in item.keys() for item in mapping]))
-        self.assertTrue(all(["coeliac status (yes/no)" in item["metadata"].custom_params for item in mapping]))
+        self.assertTrue(all(["coeliac status (yes/no)" in item["metadata"] for item in mapping]))
 
         shutil.rmtree(path)

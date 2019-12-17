@@ -15,7 +15,6 @@ from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.metadata.Sample import Sample
 from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
-from source.data_model.repertoire.RepertoireMetadata import RepertoireMetadata
 from source.data_model.repertoire.SequenceRepertoire import SequenceRepertoire
 from source.environment.Constants import Constants
 from source.util.PathBuilder import PathBuilder
@@ -103,7 +102,7 @@ class MiXCRLoader(DataLoader):
         return filename, metadata.custom_params
 
     @staticmethod
-    def _extract_repertoire_metadata(filepath, params) -> RepertoireMetadata:
+    def _extract_repertoire_metadata(filepath, params) -> dict:
         metadata = [m for m in params["metadata"] if os.path.basename(m["rep_file"]) == os.path.basename(filepath)]
         metadata = metadata[0]["metadata"]
         return metadata

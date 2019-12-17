@@ -23,5 +23,5 @@ class Dataset:
         pass
 
     @abc.abstractmethod
-    def get_filenames(self):
+    def get_example_ids(self):
         pass

@@ -1,25 +1,35 @@
+import shutil
 from unittest import TestCase
 
 from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.data_model.repertoire.SequenceRepertoire import SequenceRepertoire
+from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.simulation.implants.Motif import Motif
 from source.simulation.implants.Signal import Signal
 from source.simulation.motif_instantiation_strategy.IdentityInstantiation import IdentityInstantiation
 from source.simulation.signal_implanting_strategy.HealthySequenceImplanting import HealthySequenceImplanting
 from source.simulation.signal_implanting_strategy.sequence_implanting.GappedMotifImplanting import GappedMotifImplanting
+from source.util.PathBuilder import PathBuilder
 
 
 class TestHealthySequenceImplanting(TestCase):
     def test_implant_in_repertoire(self):
-        repertoire = SequenceRepertoire([ReceptorSequence(amino_acid_sequence="ACDFQ"), ReceptorSequence(amino_acid_sequence="TGCDF")])
+        path = EnvironmentSettings.tmp_test_path + "healthysequenceimplanting/"
+        PathBuilder.build(path)
+
+        repertoire = SequenceRepertoire.build_from_sequence_objects([ReceptorSequence(amino_acid_sequence="ACDFQ", identifier="1"),
+                                                                     ReceptorSequence(amino_acid_sequence="TGCDF", identifier="2")],
+                                                                    path=path, identifier="1", metadata={})
         implanting = HealthySequenceImplanting(GappedMotifImplanting())
         signal = Signal(1, [Motif("m1", IdentityInstantiation(), "CCC")], implanting)
 
-        repertoire2 = implanting.implant_in_repertoire(repertoire, 0.5, signal)
+        repertoire2 = implanting.implant_in_repertoire(repertoire, 0.5, signal, path)
 
         new_sequences = [sequence.get_sequence() for sequence in repertoire2.sequences]
         self.assertTrue("ACDFQ" in new_sequences or "TGCDF" in new_sequences)
         self.assertTrue(any(["CCC" in sequence for sequence in new_sequences]))
+
+        shutil.rmtree(path)
 
     def test_implant_in_sequence(self):
         implanting = HealthySequenceImplanting(GappedMotifImplanting())

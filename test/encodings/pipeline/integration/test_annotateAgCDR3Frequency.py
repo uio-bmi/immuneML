@@ -26,18 +26,17 @@ class TestAnnotateAgCDR3Frequency(TestCase):
         lc.add_label("aab", [0, 1, 2, 3])
 
         dataset_params = {
-            "diabetes": ["T1D", "Ctl", "FDR", "Ctl", "T1D", "Ctl", "FDR", "CTL"],
-            "aab": [2, 1, 2, 1, 2, 1, 2, 1]
+            "diabetes": ["T1D", "Ctl", "FDR", "Ctl", "Ctl", "FDR", "CTL"],
+            "aab": [2, 1, 2, 1, 1, 2, 1]
         }
 
         dataset = RepertoireDataset(
-            filenames=RepertoireBuilder.build(
+            repertoires=RepertoireBuilder.build(
                 [
                     ["AAA", "ATA", "ATA"],
                     ["ATA", "TAA", "AAC"],
                     ["AAA", "ATA", "ATA"],
                     ["ATA", "TAA", "AAC"],
-                    ["AAA", "ATA", "ATA"],
                     ["ATA", "TAA", "AAC"],
                     ["AAA", "ATA", "ATA"],
                     ["ASKLDFJD", "TAA", "AAC"]

@@ -71,7 +71,7 @@ class Word2VecEncoder(DatasetEncoder):
         return encoded_dataset
 
     def _prepare_caching_params(self, dataset, params, vectors=None, description: str = ""):
-        return (("dataset_filenames", tuple(dataset.get_filenames())),
+        return (("dataset_filenames", tuple(dataset.get_example_ids())),
                 ("dataset_metadata", dataset.metadata_file),
                 ("dataset_type", dataset.__class__.__name__),
                 ("labels", tuple(params["label_configuration"].get_labels_by_name())),

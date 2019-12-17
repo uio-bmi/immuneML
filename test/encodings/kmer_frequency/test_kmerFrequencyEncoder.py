@@ -1,4 +1,3 @@
-import pickle
 import shutil
 from unittest import TestCase
 
@@ -6,9 +5,7 @@ import numpy as np
 
 from source.analysis.data_manipulation.NormalizationType import NormalizationType
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
-from source.data_model.metadata.Sample import Sample
 from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
-from source.data_model.repertoire.RepertoireMetadata import RepertoireMetadata
 from source.data_model.repertoire.SequenceRepertoire import SequenceRepertoire
 from source.encodings.EncoderParams import EncoderParams
 from source.encodings.kmer_frequency.KmerFrequencyEncoder import KmerFrequencyEncoder
@@ -26,21 +23,21 @@ class TestKmerFrequencyEncoder(TestCase):
 
         PathBuilder.build(path)
 
-        rep1 = SequenceRepertoire(sequences=[ReceptorSequence("AAA"), ReceptorSequence("ATA"), ReceptorSequence("ATA")],
-                                  metadata=RepertoireMetadata(sample=Sample(1), custom_params={"l1": 1, "l2": 2}))
-        with open(path + "rep1.pkl", "wb") as file:
-            pickle.dump(rep1, file)
+        rep1 = SequenceRepertoire.build_from_sequence_objects([ReceptorSequence("AAA", identifier="1"),
+                                                               ReceptorSequence("ATA", identifier="2"),
+                                                               ReceptorSequence("ATA", identifier='3')],
+                                                              metadata={"l1": 1, "l2": 2}, path=path, identifier="1")
 
-        rep2 = SequenceRepertoire(sequences=[ReceptorSequence("ATA"), ReceptorSequence("TAA"), ReceptorSequence("AAC")],
-                                  metadata=RepertoireMetadata(sample=Sample(2), custom_params={"l1": 0, "l2": 3}))
-        with open(path + "rep2.pkl", "wb") as file:
-            pickle.dump(rep2, file)
+        rep2 = SequenceRepertoire.build_from_sequence_objects([ReceptorSequence("ATA", identifier="1"),
+                                                               ReceptorSequence("TAA", identifier="2"),
+                                                               ReceptorSequence("AAC", identifier="3")],
+                                                              metadata={"l1": 0, "l2": 3}, path=path, identifier="2")
 
         lc = LabelConfiguration()
         lc.add_label("l1", [1, 2])
         lc.add_label("l2", [0, 3])
 
-        dataset = RepertoireDataset(filenames=[path + "rep1.pkl", path + "rep2.pkl"])
+        dataset = RepertoireDataset(repertoires=[rep1, rep2])
 
         encoder = KmerFrequencyEncoder.create_encoder(dataset, {
                 "normalization_type": NormalizationType.RELATIVE_FREQUENCY,

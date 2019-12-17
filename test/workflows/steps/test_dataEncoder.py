@@ -1,11 +1,8 @@
-import pickle
 import shutil
 from unittest import TestCase
 
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
-from source.data_model.metadata.Sample import Sample
 from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
-from source.data_model.repertoire.RepertoireMetadata import RepertoireMetadata
 from source.data_model.repertoire.SequenceRepertoire import SequenceRepertoire
 from source.encodings.EncoderParams import EncoderParams
 from source.encodings.word2vec.Word2VecEncoder import Word2VecEncoder
@@ -22,21 +19,17 @@ class TestDataEncoder(TestCase):
         path = EnvironmentSettings.root_path + "test/tmp/dataencoder/"
         PathBuilder.build(path)
 
-        rep1 = SequenceRepertoire(sequences=[ReceptorSequence("AAA")],
-                                  metadata=RepertoireMetadata(Sample(1), custom_params={"l1": 1, "l2": 2}))
-        with open(path + "rep1.pkl", "wb") as file:
-            pickle.dump(rep1, file)
+        rep1 = SequenceRepertoire.build_from_sequence_objects([ReceptorSequence("AAA", identifier="1")],
+                                                              metadata={"l1": 1, "l2": 2}, path=path, identifier="1")
 
-        rep2 = SequenceRepertoire(sequences=[ReceptorSequence("ATA")],
-                                  metadata=RepertoireMetadata(Sample(2), custom_params={"l1": 0, "l2": 3}))
-        with open(path + "rep2.pkl", "wb") as file:
-            pickle.dump(rep2, file)
+        rep2 = SequenceRepertoire.build_from_sequence_objects([ReceptorSequence("ATA", identifier="2")],
+                                                              metadata={"l1": 0, "l2": 3}, path=path, identifier="2")
 
         lc = LabelConfiguration()
         lc.add_label("l1", [1, 2])
         lc.add_label("l2", [0, 3])
 
-        dataset = RepertoireDataset(filenames=[path + "rep1.pkl", path + "rep2.pkl"])
+        dataset = RepertoireDataset(repertoires=[rep1, rep2])
         encoder = Word2VecEncoder.create_encoder(dataset, {
                     "k": 3,
                     "model_type": ModelType.SEQUENCE,

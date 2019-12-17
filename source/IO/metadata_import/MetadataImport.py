@@ -1,7 +1,5 @@
 import pandas as pd
 
-from source.data_model.repertoire.RepertoireMetadata import RepertoireMetadata
-
 
 class MetadataImport:
 
@@ -26,5 +24,5 @@ class MetadataImport:
         return {
             "rep_file": row["filename"],
             "donor": row["donor"],
-            "metadata": RepertoireMetadata(custom_params=custom_params)
+            "metadata": custom_params
         }

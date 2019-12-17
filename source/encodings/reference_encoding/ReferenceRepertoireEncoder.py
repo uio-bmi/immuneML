@@ -13,7 +13,7 @@ class ReferenceRepertoireEncoder(MatchedReferenceEncoder):
 
         matched_info = self._match_repertories(dataset)
 
-        encoded_dataset = RepertoireDataset(filenames=dataset.get_filenames(), params=dataset.params,
+        encoded_dataset = RepertoireDataset(repertoires=dataset.repertoires, params=dataset.params,
                                             metadata_file=dataset.metadata_file)
         encoded_repertoires, labels = self._encode_repertoires(dataset, matched_info, params)
 
@@ -39,7 +39,7 @@ class ReferenceRepertoireEncoder(MatchedReferenceEncoder):
                 "MatchedReferenceEncoder: error in SequenceMatcher ordering of repertoires."
             encoded_repertories[index] = matched_info["repertoires"][index][self.summary.name.lower()]
             for label_index, label in enumerate(params["label_configuration"].get_labels_by_name()):
-                labels[label].append(repertoire.metadata.custom_params[label])
+                labels[label].append(repertoire.metadata[label])
 
         return np.reshape(encoded_repertories, newshape=(-1, 1)), labels
 

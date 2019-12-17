@@ -1,15 +1,12 @@
 import shutil
 from unittest import TestCase
 
-import numpy as np
-
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.receptor.TCABReceptor import TCABReceptor
 from source.data_model.receptor.receptor_sequence.Chain import Chain
 from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
 from source.encodings.EncoderParams import EncoderParams
-from source.encodings.reference_encoding.MatchedReceptorsEncoder import MatchedReceptorsEncoder
 from source.encodings.reference_encoding.MatchedReceptorsRepertoireEncoder import MatchedReceptorsRepertoireEncoder
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.environment.LabelConfiguration import LabelConfiguration
@@ -22,13 +19,12 @@ class TestMatchedReceptorsEncoder(TestCase):
 
         # Setting up dummy data
         labels = {"donor": ["donor1", "donor1", "donor2", "donor2", "donor3"],
-                  "label": ["yes","yes","no","no","no"]}
+                  "label": ["yes", "yes", "no", "no", "no"]}
 
+        metadata_alpha = {"v_gene": "v1", "j_gene": "j1", "chain": Chain.A.value}
+        metadata_beta = {"v_gene": "v1", "j_gene": "j1", "chain": Chain.B.value}
 
-        metadata_alpha = {"v_gene": "v1","j_gene": "j1", "chain": Chain.A.value}
-        metadata_beta = {"v_gene": "v1","j_gene": "j1", "chain": Chain.B.value}
-
-        filenames, metadata = RepertoireBuilder.build(sequences=[["AAAA"],
+        repertoires, metadata = RepertoireBuilder.build(sequences=[["AAAA"],
                                                                  ["SSSS"],
                                                                  ["AAAA", "CCCC"],
                                                                  ["SSSS", "TTTT"],
@@ -40,7 +36,7 @@ class TestMatchedReceptorsEncoder(TestCase):
                                                                     [{**metadata_beta, "count": 5}, {**metadata_beta, "count": 5}],
                                                                     [{**metadata_alpha, "count": 1}, {**metadata_alpha, "count": 2}, {**metadata_beta, "count": 1}, {**metadata_beta, "count": 2}]])
 
-        dataset = RepertoireDataset(filenames=filenames)
+        dataset = RepertoireDataset(repertoires=repertoires)
 
         label_config = LabelConfiguration()
         label_config.add_label("donor", labels["donor"])
@@ -48,10 +44,10 @@ class TestMatchedReceptorsEncoder(TestCase):
 
         reference_receptors = [TCABReceptor(alpha=ReceptorSequence("AAAA", metadata=SequenceMetadata(**metadata_alpha)),
                                             beta=ReceptorSequence("SSSS", metadata=SequenceMetadata(**metadata_beta)),
-                                            identifier=100),
+                                            identifier=str(100)),
                                TCABReceptor(alpha=ReceptorSequence("CCCC", metadata=SequenceMetadata(**metadata_alpha)),
                                             beta=ReceptorSequence("TTTT", metadata=SequenceMetadata(**metadata_beta)),
-                                            identifier=200)]
+                                            identifier=str(200))]
 
         encoder = MatchedReceptorsRepertoireEncoder.create_encoder(dataset, {
             "reference_sequences": reference_receptors,
@@ -64,7 +60,6 @@ class TestMatchedReceptorsEncoder(TestCase):
             filename="dataset.csv"
         ))
 
-
         # General tests: does the tool run and give the correct output?
         expected_outcome = [[10, 0, 0, 0],[0, 10, 0, 0],[5, 0, 5, 0], [0, 5, 0, 5], [1, 1, 2, 2]]
         for index, row in enumerate(expected_outcome):
@@ -73,7 +68,7 @@ class TestMatchedReceptorsEncoder(TestCase):
         self.assertDictEqual(encoded.encoded_data.labels, labels)
         self.assertListEqual(encoded.encoded_data.feature_names, ["100.alpha", "100.beta", "200.alpha", "200.beta"])
 
-        self.assertListEqual(list(encoded.encoded_data.feature_annotations.id), [100, 100, 200, 200])
+        self.assertListEqual(list(encoded.encoded_data.feature_annotations.id), ['100', '100', '200', '200'])
         self.assertListEqual(list(encoded.encoded_data.feature_annotations.chain), ["alpha", "beta", "alpha", "beta"])
         self.assertListEqual(list(encoded.encoded_data.feature_annotations.sequence), ["AAAA", "SSSS", "CCCC", "TTTT"])
         self.assertListEqual(list(encoded.encoded_data.feature_annotations.v_gene), ["v1" for i in range(4)])
@@ -95,7 +90,6 @@ class TestMatchedReceptorsEncoder(TestCase):
             self.assertListEqual(list(encoded.encoded_data.examples[index]), expected_outcome[index])
 
         self.assertDictEqual(encoded.encoded_data.labels, {"label": ["yes", "no", "no"]})
-
 
         # If donor is not a label, one_file_per_donor can not be False (KeyError raised)
         label_config = LabelConfiguration()

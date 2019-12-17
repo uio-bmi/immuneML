@@ -1,5 +1,4 @@
 import copy
-import shutil
 
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.receptor.receptor_sequence.Chain import Chain
@@ -26,15 +25,13 @@ class DatasetChainFilter(Filter):
     def process(dataset: RepertoireDataset, params: dict) -> RepertoireDataset:
         processed_dataset = copy.deepcopy(dataset)
         PathBuilder.build(params["result_path"])
-        filenames = []
+        repertoires = []
         indices = []
         for index, repertoire in enumerate(dataset.get_data()):
             if all(sequence.metadata.chain == Chain[params["keep_chain"].upper()] for sequence in repertoire.sequences):
-                filename = params["result_path"] + "{}.pickle".format(repertoire.identifier)
-                shutil.copy(dataset.get_filenames()[index], filename)
-                filenames.append(filename)
+                repertoires.append(repertoire)
                 indices.append(index)
 
-        processed_dataset.set_filenames(filenames)
+        processed_dataset.repertoires = repertoires
         processed_dataset.metadata_file = DatasetChainFilter.build_new_metadata(processed_dataset, indices, params["result_path"])
         return processed_dataset

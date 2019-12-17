@@ -14,8 +14,8 @@ from source.util.RepertoireBuilder import RepertoireBuilder
 class TestPairwiseRepertoireComparison(TestCase):
 
     def create_dataset(self, path: str) -> RepertoireDataset:
-        filenames, metadata = RepertoireBuilder.build([["A", "B"], ["D"], ["E", "F"], ["B", "C"], ["A", "D"]], path)
-        dataset = RepertoireDataset(filenames=filenames, metadata_file=metadata)
+        repertoires, metadata = RepertoireBuilder.build([["A", "B"], ["D"], ["E", "F"], ["B", "C"], ["A", "D"]], path)
+        dataset = RepertoireDataset(repertoires=repertoires, metadata_file=metadata)
         return dataset
 
     def test_compare_repertoires(self):

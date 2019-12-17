@@ -18,13 +18,13 @@ class TestSequenceAbundanceEncoding(TestCase):
         path = EnvironmentSettings.tmp_test_path + "integration_test_emerson_encoding/"
         PathBuilder.build(path)
 
-        filenames, metadata = RepertoireBuilder.build([["GGG", "III", "LLL", "MMM"],
+        repertoires, metadata = RepertoireBuilder.build([["GGG", "III", "LLL", "MMM"],
                                                        ["DDD", "EEE", "FFF", "III", "LLL", "MMM"],
                                                        ["CCC", "FFF", "MMM"],
                                                        ["AAA", "CCC", "EEE", "FFF", "LLL", "MMM"]],
                                                       labels={"l1": [True, True, False, False]}, path=path)
 
-        dataset = RepertoireDataset(filenames=filenames, metadata_file=metadata, identifier="1", params={"l1": [True, False]})
+        dataset = RepertoireDataset(repertoires=repertoires, metadata_file=metadata, identifier="1", params={"l1": [True, False]})
         PickleExporter.export(dataset, path, "dataset.pickle")
 
         specs = {

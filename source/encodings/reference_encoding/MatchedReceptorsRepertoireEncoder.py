@@ -1,9 +1,10 @@
 import numpy as np
 import pandas as pd
+
 from source.analysis.SequenceMatcher import SequenceMatcher
+from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.encoded_data.EncodedData import EncodedData
 from source.data_model.repertoire.SequenceRepertoire import SequenceRepertoire
-from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.encodings.EncoderParams import EncoderParams
 from source.encodings.reference_encoding.MatchedReceptorsEncoder import MatchedReceptorsEncoder
 
@@ -11,7 +12,7 @@ from source.encodings.reference_encoding.MatchedReceptorsEncoder import MatchedR
 class MatchedReceptorsRepertoireEncoder(MatchedReceptorsEncoder):
 
     def _encode_new_dataset(self, dataset, params: EncoderParams):
-        encoded_dataset = RepertoireDataset(filenames=dataset.get_filenames(), params=dataset.params,
+        encoded_dataset = RepertoireDataset(repertoires=dataset.repertoires, params=dataset.params,
                                             metadata_file=dataset.metadata_file)
 
         feature_annotations = self._get_feature_info()
@@ -71,7 +72,7 @@ class MatchedReceptorsRepertoireEncoder(MatchedReceptorsEncoder):
             encoded_repertories[i] = self._match_repertoire_to_receptors(repertoire)
 
             for label in params["label_configuration"].get_labels_by_name():
-                labels[label].append(repertoire.metadata.custom_params[label])
+                labels[label].append(repertoire.metadata[label])
 
         example_ids = [repertoire.identifier for repertoire in dataset.get_data()]
 

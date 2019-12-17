@@ -10,6 +10,7 @@ from source.analysis.criteria_matches.OperationType import OperationType
 from source.analysis.data_manipulation.DataSummarizer import DataSummarizer
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.encoded_data.EncodedData import EncodedData
+from source.data_model.repertoire.SequenceRepertoire import SequenceRepertoire
 
 
 class TestDataSummarizer(TestCase):
@@ -35,8 +36,9 @@ class TestDataSummarizer(TestCase):
         })
     }
 
-    dataset_1 = RepertoireDataset(encoded_data=EncodedData(**encoded_data_1),
-                                  filenames=[filename + ".tsv" for filename in encoded_data_1["example_ids"]])
+    dataset_1 = RepertoireDataset(encoded_data=EncodedData(**encoded_data_1), repertoires=[SequenceRepertoire("1.npy", None, "1"),
+                                                                                           SequenceRepertoire("2.npy", None, "2"),
+                                                                                           SequenceRepertoire("3.npy", None, "3")])
 
     encoded_data_2 = {
         'examples': sparse.csr_matrix(np.array([
@@ -60,8 +62,7 @@ class TestDataSummarizer(TestCase):
         })
     }
 
-    dataset_2 = RepertoireDataset(encoded_data=EncodedData(**encoded_data_2),
-                                  filenames=[filename + ".tsv" for filename in encoded_data_2["example_ids"]])
+    dataset_2 = RepertoireDataset(encoded_data=EncodedData(**encoded_data_2))
 
 
     def test_filter_repertoires(self):
@@ -124,7 +125,7 @@ class TestDataSummarizer(TestCase):
 
         filtered = DataSummarizer.filter_features(dataset, criteria)
 
-        self.assertTrue(filtered.get_example_count() == 3)
+        self.assertEqual(3, filtered.get_example_count())
         self.assertTrue(filtered.encoded_data.examples.shape[0] == 3)
         self.assertTrue(filtered.encoded_data.examples.shape[1] == 3)
 
@@ -156,7 +157,6 @@ class TestDataSummarizer(TestCase):
 
         annotated = DataSummarizer.annotate_repertoires(dataset, criteria, "annotate")
 
-        self.assertTrue(annotated.get_example_count() == 3)
         self.assertTrue(annotated.encoded_data.examples.shape[0] == 3)
         self.assertTrue(annotated.encoded_data.examples.shape[1] == 5)
 
@@ -188,21 +188,12 @@ class TestDataSummarizer(TestCase):
 
         annotated = DataSummarizer.annotate_features(dataset, criteria, "annotate")
 
-        self.assertTrue(annotated.get_example_count() == 3)
         self.assertTrue(annotated.encoded_data.examples.shape[0] == 3)
         self.assertTrue(annotated.encoded_data.examples.shape[1] == 5)
 
     def test_annotate_features_2(self):
 
         dataset = TestDataSummarizer.dataset_1
-
-        criteria = [
-            {
-                "column": "specificity",
-                "type": "in",
-                "value": ["gluten"]
-            },
-        ]
 
         criteria = {
             "type": OperationType.IN,
@@ -215,6 +206,5 @@ class TestDataSummarizer(TestCase):
 
         annotated = DataSummarizer.annotate_features(dataset, criteria, "annotate")
 
-        self.assertTrue(annotated.get_example_count() == 3)
         self.assertTrue(annotated.encoded_data.examples.shape[0] == 3)
         self.assertTrue(annotated.encoded_data.examples.shape[1] == 5)

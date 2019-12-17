@@ -6,13 +6,16 @@ from source.IO.dataset_import.PickleLoader import PickleLoader
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.util.PathBuilder import PathBuilder
+from source.util.RepertoireBuilder import RepertoireBuilder
 
 
 class TestPickleLoader(TestCase):
     def test_load(self):
-        dataset = RepertoireDataset(filenames=["f1.pkl", "f2.pkl"])
         path = EnvironmentSettings.root_path + "test/tmp/pathbuilder/"
         PathBuilder.build(path)
+
+        repertoires, metadata = RepertoireBuilder.build([["AA"], ["CC"]], path)
+        dataset = RepertoireDataset(repertoires=repertoires, metadata_file=metadata)
 
         with open(path + "dataset.pkl", "wb") as file:
             pickle.dump(dataset, file)
@@ -21,5 +24,5 @@ class TestPickleLoader(TestCase):
 
         shutil.rmtree(path)
 
-        self.assertEqual(2, len(dataset2.get_filenames()))
-        self.assertEqual("f2.pkl", dataset2.get_filenames()[1])
+        self.assertEqual(2, len(dataset2.get_data()))
+        self.assertEqual("rep_1", dataset2.get_data()[1].identifier)

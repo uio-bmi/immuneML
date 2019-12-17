@@ -16,7 +16,7 @@ class TestMetadataFilter(TestCase):
     def test_process(self):
         path = EnvironmentSettings.root_path + "test/tmp/clonotypecountfilter/"
         PathBuilder.build(path)
-        dataset = RepertoireDataset(filenames=RepertoireBuilder.build([["ACF", "ACF", "ACF"],
+        dataset = RepertoireDataset(repertoires=RepertoireBuilder.build([["ACF", "ACF", "ACF"],
                                                                        ["ACF", "ACF"],
                                                                        ["ACF", "ACF", "ACF", "ACF"]], path)[0])
 

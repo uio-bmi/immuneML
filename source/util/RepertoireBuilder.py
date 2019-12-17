@@ -1,10 +1,7 @@
-import pickle
-
 import pandas as pd
 
 from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
-from source.data_model.repertoire.RepertoireMetadata import RepertoireMetadata
 from source.data_model.repertoire.SequenceRepertoire import SequenceRepertoire
 from source.util.PathBuilder import PathBuilder
 
@@ -22,7 +19,7 @@ class RepertoireBuilder:
 
         PathBuilder.build(path)
 
-        filenames = []
+        repertoires = []
         donors = []
 
         for rep_index, sequence_list in enumerate(sequences):
@@ -34,20 +31,19 @@ class RepertoireBuilder:
                 else:
                     m = SequenceMetadata(**seq_metadata[rep_index][seq_index])
 
-                s = ReceptorSequence(amino_acid_sequence=sequence, metadata=m)
+                s = ReceptorSequence(amino_acid_sequence=sequence, metadata=m, identifier=str(seq_index))
                 rep_sequences.append(s)
-            repertoire = SequenceRepertoire(sequences=rep_sequences, identifier=donors[-1])
 
             if labels is not None:
-                rep_labels = {key: labels[key][rep_index] for key in labels.keys()}
-                repertoire.metadata = RepertoireMetadata(custom_params=rep_labels)
+                metadata = {key: labels[key][rep_index] for key in labels.keys()}
+            else:
+                metadata = {}
 
-            filenames.append(path + "{}.pkl".format(rep_index))
+            repertoire = SequenceRepertoire.build_from_sequence_objects(rep_sequences, path, donors[-1], metadata)
+            repertoires.append(repertoire)
 
-            with open(filenames[-1], "wb") as file:
-                pickle.dump(repertoire, file)
-
-        df = pd.DataFrame({**{"filename": filenames, "donor": donors}, **(labels if labels is not None else {})})
+        df = pd.DataFrame({**{"filename": [f"{repertoire.identifier}_data.npy" for repertoire in repertoires], "donor": donors},
+                           **(labels if labels is not None else {})})
         df.to_csv(path + "metadata.csv", index=False)
 
-        return filenames, path + "metadata.csv"
+        return repertoires, path + "metadata.csv"

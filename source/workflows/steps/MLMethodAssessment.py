@@ -24,7 +24,7 @@ class MLMethodAssessment(Step):
         predicted_y = input_params.method.predict(X, labels)
         predicted_proba_y = input_params.method.predict_proba(X, labels)
         true_y = input_params.dataset.encoded_data.labels
-        example_ids = [example.identifier for example in input_params.dataset.get_data()]
+        example_ids = input_params.dataset.get_example_ids()
 
         MLMethodAssessment._store_predictions(input_params.method,
                                               true_y,

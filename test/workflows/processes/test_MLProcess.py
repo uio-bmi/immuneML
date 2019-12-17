@@ -22,10 +22,10 @@ class TestMLProcess(TestCase):
 
         PathBuilder.build(path)
 
-        filenames, metadata = RepertoireBuilder.build([["AAA"], ["AAA"], ["AAA"], ["AAA"], ["AAA"], ["AAA"]], path,
+        repertoires, metadata = RepertoireBuilder.build([["AAA"], ["AAA"], ["AAA"], ["AAA"], ["AAA"], ["AAA"]], path,
                                             {"l1": [1, 1, 1, 0, 0, 0], "l2": [2, 3, 2, 3, 2, 3]})
 
-        dataset = RepertoireDataset(filenames=filenames, params={"l1": [0, 1], "l2": [2, 3]}, metadata_file=metadata)
+        dataset = RepertoireDataset(repertoires=repertoires, params={"l1": [0, 1], "l2": [2, 3]}, metadata_file=metadata)
         label_config = LabelConfiguration()
         label_config.add_label("l1", [0, 1])
         label_config.add_label("l2", [2, 3])

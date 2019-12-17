@@ -22,7 +22,7 @@ class TestMLMethodAssessment(TestCase):
     def test_run(self):
         path = EnvironmentSettings.root_path + "test/tmp/mlmethodassessment/"
         PathBuilder.build(path)
-        dataset = RepertoireDataset(filenames=RepertoireBuilder.build([["AA"], ["CC"], ["AA"], ["CC"], ["AA"], ["CC"]], path)[0])
+        dataset = RepertoireDataset(repertoires=RepertoireBuilder.build([["AA"], ["CC"], ["AA"], ["CC"], ["AA"], ["CC"]], path)[0])
         dataset.encoded_data = EncodedData(
             examples=np.array([[1, 2], [1, 2], [1, 2], [1, 2], [1, 2], [1, 2]]),
             labels={"l1": [1, 2, 3, 1, 2, 3], "l2": [1, 2, 3, 1, 2, 3]}

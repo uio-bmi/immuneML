@@ -48,7 +48,7 @@ class DataSummarizer:
         result = RepertoireDataset(
             params=dataset.params,
             encoded_data=encoded,
-            filenames=dataset.get_filenames(),
+            repertoires=dataset.get_data(),
             identifier=dataset.identifier,
             metadata_file=metadata_file
         )
@@ -98,7 +98,7 @@ class DataSummarizer:
         result = RepertoireDataset(
             params=dataset.params,
             encoded_data=encoded,
-            filenames=dataset.get_filenames(),
+            repertoires=dataset.get_data(),
             identifier=dataset.identifier,
             metadata_file=dataset.metadata_file
         )
@@ -175,12 +175,12 @@ class DataSummarizer:
 
         metadata_file = DataSummarizer.build_metadata(dataset.metadata_file, indices)
         labels = data.iloc[indices, :].to_dict("list")
-        repertoires = dataset.encoded_data.examples[indices, :]
-        filenames = [dataset.get_filenames()[i] for i in indices]
+        encoded_examples = dataset.encoded_data.examples[indices, :]
+        repertoires = [dataset.repertoires[i] for i in indices]
         repertoire_ids = [dataset.encoded_data.example_ids[i] for i in indices]
 
         encoded = EncodedData(
-            examples=repertoires,
+            examples=encoded_examples,
             labels=labels,
             example_ids=repertoire_ids,
             feature_names=dataset.encoded_data.feature_names,
@@ -190,7 +190,7 @@ class DataSummarizer:
         result = RepertoireDataset(
             params=dataset.params,
             encoded_data=encoded,
-            filenames=filenames,
+            repertoires=repertoires,
             identifier=dataset.identifier,
             metadata_file=metadata_file
         )
@@ -212,11 +212,12 @@ class DataSummarizer:
         indices = np.where(np.array(results))[0]
 
         feature_annotations = feature_annotations.iloc[indices, :]
-        repertoires = dataset.encoded_data.examples[:, indices]
+        examples = dataset.encoded_data.examples[:, indices]
+        repertoires = dataset.repertoires
         feature_names = [dataset.encoded_data.feature_names[i] for i in indices]
 
         encoded = EncodedData(
-            examples=repertoires,
+            examples=examples,
             labels=dataset.encoded_data.labels,
             example_ids=dataset.encoded_data.example_ids,
             feature_names=feature_names,
@@ -226,7 +227,7 @@ class DataSummarizer:
         result = RepertoireDataset(
             params=dataset.params,
             encoded_data=encoded,
-            filenames=dataset.get_filenames(),
+            repertoires=repertoires,
             identifier=dataset.identifier,
             metadata_file=dataset.metadata_file
         )
@@ -260,7 +261,7 @@ class DataSummarizer:
         result = RepertoireDataset(
             params=dataset.params,
             encoded_data=encoded,
-            filenames=dataset.get_filenames(),
+            repertoires=dataset.repertoires,
             identifier=dataset.identifier,
             metadata_file=dataset.metadata_file
         )
@@ -293,7 +294,7 @@ class DataSummarizer:
         result = RepertoireDataset(
             params=dataset.params,
             encoded_data=encoded,
-            filenames=dataset.get_filenames(),
+            repertoires=dataset.get_data(),
             identifier=dataset.identifier,
             metadata_file=dataset.metadata_file
         )

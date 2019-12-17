@@ -21,12 +21,12 @@ class Signal:
         self.motifs = motifs
         self.implanting_strategy = implanting_strategy
 
-    def implant_to_repertoire(self, repertoire: SequenceRepertoire, repertoire_implanting_rate: float) \
+    def implant_to_repertoire(self, repertoire: SequenceRepertoire, repertoire_implanting_rate: float, path: str) \
             -> SequenceRepertoire:
         processed_repertoire = self.implanting_strategy\
                                 .implant_in_repertoire(repertoire=repertoire,
                                                        repertoire_implanting_rate=repertoire_implanting_rate,
-                                                       signal=self)
+                                                       signal=self, path=path)
         return processed_repertoire
 
     def __str__(self):

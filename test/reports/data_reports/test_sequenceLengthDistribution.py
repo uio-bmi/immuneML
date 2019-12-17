@@ -1,4 +1,3 @@
-import pickle
 import shutil
 from unittest import TestCase
 
@@ -15,21 +14,18 @@ class TestSequenceLengthDistribution(TestCase):
         path = EnvironmentSettings.root_path + "test/tmp/datareports/"
         PathBuilder.build(path)
 
-        rep1 = SequenceRepertoire(sequences=[ReceptorSequence(amino_acid_sequence="AAA"),
-                                             ReceptorSequence(amino_acid_sequence="AAAA"),
-                                             ReceptorSequence(amino_acid_sequence="AAAAA"),
-                                             ReceptorSequence(amino_acid_sequence="AAA")])
-        rep2 = SequenceRepertoire(sequences=[ReceptorSequence(amino_acid_sequence="AAA"),
-                                             ReceptorSequence(amino_acid_sequence="AAAA"),
-                                             ReceptorSequence(amino_acid_sequence="AAAA"),
-                                             ReceptorSequence(amino_acid_sequence="AAA")])
+        rep1 = SequenceRepertoire.build_from_sequence_objects(sequence_objects=[ReceptorSequence(amino_acid_sequence="AAA", identifier="1"),
+                                             ReceptorSequence(amino_acid_sequence="AAAA", identifier="2"),
+                                             ReceptorSequence(amino_acid_sequence="AAAAA", identifier="3"),
+                                             ReceptorSequence(amino_acid_sequence="AAA", identifier="4")],
+                                                              path=path, identifier="1", metadata={})
+        rep2 = SequenceRepertoire.build_from_sequence_objects(sequence_objects=[ReceptorSequence(amino_acid_sequence="AAA", identifier="5"),
+                                             ReceptorSequence(amino_acid_sequence="AAAA", identifier="6"),
+                                             ReceptorSequence(amino_acid_sequence="AAAA", identifier="7"),
+                                             ReceptorSequence(amino_acid_sequence="AAA", identifier="8")],
+                                                              path=path, identifier="2", metadata={})
 
-        with open(path + "rep1.pkl", "wb") as file:
-            pickle.dump(rep1, file)
-        with open(path + "rep2.pkl", "wb") as file:
-            pickle.dump(rep2, file)
-
-        dataset = RepertoireDataset(filenames=[path + "rep1.pkl", path + "rep2.pkl"])
+        dataset = RepertoireDataset(repertoires=[rep1, rep2])
 
         sld = SequenceLengthDistribution(dataset, 1, path)
         lengths = sld.get_normalized_sequence_lengths()

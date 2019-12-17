@@ -1,5 +1,4 @@
 import os
-import pickle
 import shutil
 from unittest import TestCase
 
@@ -28,16 +27,14 @@ class TestSignalImplanter(TestCase):
             os.makedirs(path)
 
         for i in range(10):
-            rep = SequenceRepertoire(sequences=[ReceptorSequence("ACDEFG"),
-                                                ReceptorSequence("ACDEFG"),
-                                                ReceptorSequence("ACDEFG"),
-                                                ReceptorSequence("ACDEFG")])
-            filename = path + "rep" + str(i+1) + ".pkl"
-            with open(filename, "wb") as file:
-                pickle.dump(rep, file)
-            r.append(filename)
+            rep = SequenceRepertoire.build_from_sequence_objects(sequence_objects=[ReceptorSequence("ACDEFG", identifier="1"),
+                                                                                   ReceptorSequence("ACDEFG", identifier="2"),
+                                                                                   ReceptorSequence("ACDEFG", identifier="3"),
+                                                                                   ReceptorSequence("ACDEFG", identifier="4")],
+                                                                 path=path, identifier=str(i+1), metadata={})
+            r.append(rep)
 
-        dataset = RepertoireDataset(filenames=r)
+        dataset = RepertoireDataset(repertoires=r)
 
         m1 = Motif(identifier="m1", instantiation_strategy=IdentityInstantiation(), seed="CAS")
         m2 = Motif(identifier="m2", instantiation_strategy=IdentityInstantiation(), seed="CCC")
@@ -51,11 +48,11 @@ class TestSignalImplanter(TestCase):
         input_params = SignalImplanterParams(dataset=dataset, result_path=path, simulations=simulations, signals=[s1, s2], batch_size=1)
 
         new_dataset = SignalImplanter.run(input_params)
-        reps_with_s2 = sum([rep.metadata.custom_params[s2.id] is True for rep in new_dataset.get_data(batch_size=10)])
-        reps_with_s1 = sum([rep.metadata.custom_params[s1.id] is True for rep in new_dataset.get_data(batch_size=10)])
-        self.assertEqual(10, len(new_dataset.get_filenames()))
-        self.assertTrue(all([s1.id in rep.metadata.custom_params.keys() for rep in new_dataset.get_data(batch_size=10)]))
-        self.assertTrue(all([s2.id in rep.metadata.custom_params.keys() for rep in new_dataset.get_data(batch_size=10)]))
+        reps_with_s2 = sum([rep.metadata[s2.id] is True for rep in new_dataset.get_data(batch_size=10)])
+        reps_with_s1 = sum([rep.metadata[s1.id] is True for rep in new_dataset.get_data(batch_size=10)])
+        self.assertEqual(10, len(new_dataset.get_example_ids()))
+        self.assertTrue(all([s1.id in rep.metadata.keys() for rep in new_dataset.get_data(batch_size=10)]))
+        self.assertTrue(all([s2.id in rep.metadata.keys() for rep in new_dataset.get_data(batch_size=10)]))
         self.assertTrue(reps_with_s2 == 4)
         self.assertTrue(reps_with_s1 == 2)
 

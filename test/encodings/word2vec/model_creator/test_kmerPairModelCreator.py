@@ -1,4 +1,3 @@
-import pickle
 import shutil
 from unittest import TestCase
 
@@ -6,7 +5,6 @@ from gensim.models import Word2Vec
 
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
-from source.data_model.repertoire.RepertoireMetadata import RepertoireMetadata
 from source.data_model.repertoire.SequenceRepertoire import SequenceRepertoire
 from source.encodings.word2vec.model_creator.KmerPairModelCreator import KmerPairModelCreator
 from source.environment.EnvironmentSettings import EnvironmentSettings
@@ -22,23 +20,13 @@ class TestKmerPairModelCreator(TestCase):
         sequence1 = ReceptorSequence("CASSVFA")
         sequence2 = ReceptorSequence("CASSCCC")
 
-        metadata1 = RepertoireMetadata()
-        metadata1.custom_params = {"T1D": "T1D"}
-        rep1 = SequenceRepertoire([sequence1, sequence2], metadata1)
-        file1 = test_path + "rep1.pkl"
+        metadata1 = {"T1D": "T1D"}
+        rep1 = SequenceRepertoire.build_from_sequence_objects([sequence1, sequence2], test_path, "1", metadata1)
 
-        with open(file1, "wb") as file:
-            pickle.dump(rep1, file)
+        metadata2 = {"T1D": "CTL"}
+        rep2 = SequenceRepertoire.build_from_sequence_objects([sequence1], test_path, "2", metadata2)
 
-        metadata2 = RepertoireMetadata()
-        metadata2.custom_params = {"T1D": "CTL"}
-        rep2 = SequenceRepertoire([sequence1], metadata2)
-        file2 = test_path + "rep2.pkl"
-
-        with open(file2, "wb") as file:
-            pickle.dump(rep2, file)
-
-        dataset = RepertoireDataset(filenames=[file1, file2])
+        dataset = RepertoireDataset(repertoires=[rep1, rep2])
 
         model_creator = KmerPairModelCreator()
         model = model_creator.create_model(dataset=dataset, k=2, vector_size=16, batch_size=1, model_path=test_path+"model.model")

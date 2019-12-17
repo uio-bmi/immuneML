@@ -108,7 +108,7 @@ class ComparisonData:
         extract_fn = self.build_matching_fn()
         for index, repertoire in enumerate(dataset.get_data()):
             self.process_repertoire(repertoire, str(repertoire.identifier), extract_fn)
-            print("Repertoire {} ({}/{}) processed.".format(repertoire.identifier, index+1, len(dataset.get_filenames())))
+            print("Repertoire {} ({}/{}) processed.".format(repertoire.identifier, index+1, len(dataset.get_data())))
         self.merge_tmp_batches_to_matrix()
 
     def merge_tmp_batches_to_matrix(self):

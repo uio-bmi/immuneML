@@ -1,6 +1,4 @@
-import copy
 import os
-import pickle
 
 import pandas as pd
 
@@ -8,8 +6,6 @@ from source.IO.dataset_export.PickleExporter import PickleExporter
 from source.IO.dataset_import.PickleLoader import PickleLoader
 from source.data_model.dataset.Dataset import Dataset
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
-from source.data_model.metadata.Sample import Sample
-from source.data_model.repertoire.RepertoireMetadata import RepertoireMetadata
 from source.data_model.repertoire.SequenceRepertoire import SequenceRepertoire
 from source.util.FilenameHandler import FilenameHandler
 from source.util.PathBuilder import PathBuilder
@@ -40,7 +36,7 @@ class SignalImplanter(Step):
 
         PathBuilder.build(input_params.result_path)
 
-        processed_filenames = []
+        processed_repertoires = []
         simulation_limits = SignalImplanter._prepare_simulation_limits(input_params.simulations,
                                                                        input_params.dataset.get_example_count())
         simulation_index = 0
@@ -52,14 +48,13 @@ class SignalImplanter(Step):
             if simulation_index <= len(simulation_limits) - 1 and index >= simulation_limits[simulation_index]:
                 simulation_index += 1
 
-            filename = SignalImplanter._process_repertoire(index, repertoire, simulation_index, simulation_limits, input_params)
-            processed_filenames.append(filename)
+            processed_repertoire = SignalImplanter._process_repertoire(index, repertoire, simulation_index, simulation_limits, input_params)
+            processed_repertoires.append(processed_repertoire)
 
-            rep = input_params.dataset.get_repertoire(filename=filename)
             for signal in input_params.signals:
-                implanting_metadata[signal.id].append(rep.metadata.custom_params[signal.id])
+                implanting_metadata[signal.id].append(processed_repertoire.metadata[signal.id])
 
-        processed_dataset = RepertoireDataset(filenames=processed_filenames, params=input_params.dataset.params,
+        processed_dataset = RepertoireDataset(repertoires=processed_repertoires, params=input_params.dataset.params,
                                               metadata_file=SignalImplanter._create_metadata_file(input_params.dataset.metadata_file,
                                                                                                   implanting_metadata, input_params))
         PickleExporter.export(processed_dataset, input_params.result_path, FilenameHandler.get_dataset_name(SignalImplanter.__name__))
@@ -75,7 +70,7 @@ class SignalImplanter(Step):
         if metadata_path:
             df = pd.read_csv(metadata_path)
         else:
-            df = pd.DataFrame({"filename": input_params.dataset.get_filenames()})
+            df = pd.DataFrame({"filename": input_params.dataset.get_example_ids()})
 
         new_df = pd.concat([df, new_info_df], axis=1)
         new_df.to_csv(path, index=False)
@@ -84,29 +79,20 @@ class SignalImplanter(Step):
 
     @staticmethod
     def _process_repertoire(index, repertoire, simulation_index, simulation_limits, input_params):
-
         if simulation_index < len(simulation_limits):
-            filename = SignalImplanter._implant_in_repertoire(index, repertoire, simulation_index, input_params)
+            return SignalImplanter._implant_in_repertoire(index, repertoire, simulation_index, input_params)
         else:
-            filename = SignalImplanter._copy_repertoire(index, repertoire, input_params)
-
-        return filename
+            return SignalImplanter._copy_repertoire(index, repertoire, input_params)
 
     @staticmethod
     def _copy_repertoire(index: int, repertoire: SequenceRepertoire, input_params: SignalImplanterParams) -> str:
-        new_repertoire = copy.deepcopy(repertoire)
-        if new_repertoire.metadata is None:
-            new_repertoire.metadata = RepertoireMetadata(sample=Sample(identifier=""))
+        new_repertoire = SequenceRepertoire.build_from_sequence_objects(repertoire.sequences, input_params.result_path, str(index),
+                                                                        repertoire.metadata)
 
         for signal in input_params.signals:
-            new_repertoire.metadata.custom_params[signal.id] = False
+            new_repertoire.metadata[signal.id] = False
 
-        filename = input_params.result_path + "rep" + str(index) + ".pickle"
-
-        with open(filename, "wb") as file:
-            pickle.dump(new_repertoire, file)
-
-        return filename
+        return new_repertoire
 
     @staticmethod
     def _implant_in_repertoire(index, repertoire, simulation_index, input_params) -> str:
@@ -114,20 +100,16 @@ class SignalImplanter(Step):
         for signal in input_params.simulations[simulation_index].signals:
             new_repertoire = signal.implant_to_repertoire(repertoire=new_repertoire,
                                                           repertoire_implanting_rate=
-                                                          input_params.simulations[simulation_index].repertoire_implanting_rate)
+                                                          input_params.simulations[simulation_index].repertoire_implanting_rate,
+                                                          path=input_params.result_path)
 
         for signal in input_params.simulations[simulation_index].signals:
-            new_repertoire.metadata.custom_params[signal.id] = True
+            new_repertoire.metadata[signal.id] = True
         for signal in input_params.signals:
             if signal not in input_params.simulations[simulation_index].signals:
-                new_repertoire.metadata.custom_params[signal.id] = False
+                new_repertoire.metadata[signal.id] = False
 
-        filename = input_params.result_path + "rep" + str(index) + ".pickle"
-
-        with open(filename, "wb") as file:
-            pickle.dump(new_repertoire, file)
-
-        return filename
+        return new_repertoire
 
     @staticmethod
     def _prepare_simulation_limits(simulation: list, repertoire_count: int) -> list:

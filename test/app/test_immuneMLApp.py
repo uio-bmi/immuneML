@@ -1,5 +1,4 @@
 import os
-import pickle
 import shutil
 from unittest import TestCase
 
@@ -10,7 +9,6 @@ from source.app.ImmuneMLApp import ImmuneMLApp
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
-from source.data_model.repertoire.RepertoireMetadata import RepertoireMetadata
 from source.data_model.repertoire.SequenceRepertoire import SequenceRepertoire
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.util.PathBuilder import PathBuilder
@@ -22,22 +20,20 @@ class TestImmuneMLApp(TestCase):
         path = EnvironmentSettings.root_path + "test/tmp/immunemlapp/"
         PathBuilder.build(path)
 
-        rep1 = SequenceRepertoire(sequences=[ReceptorSequence(amino_acid_sequence="AAA", metadata=SequenceMetadata(chain="A")),
-                                             ReceptorSequence(amino_acid_sequence="AAAA", metadata=SequenceMetadata(chain="B")),
-                                             ReceptorSequence(amino_acid_sequence="AAAAA", metadata=SequenceMetadata(chain="B")),
-                                             ReceptorSequence(amino_acid_sequence="AAA", metadata=SequenceMetadata(chain="A"))],
-                                  metadata=RepertoireMetadata(custom_params={"CD": True}))
-        rep2 = SequenceRepertoire(sequences=[ReceptorSequence(amino_acid_sequence="AAA", metadata=SequenceMetadata(chain="B")),
-                                             ReceptorSequence(amino_acid_sequence="AAAA", metadata=SequenceMetadata(chain="A")),
-                                             ReceptorSequence(amino_acid_sequence="AAAA", metadata=SequenceMetadata(chain="B")),
-                                             ReceptorSequence(amino_acid_sequence="AAA", metadata=SequenceMetadata(chain="A"))],
-                                  metadata=RepertoireMetadata(custom_params={"CD": False}))
+        repertoires = []
+        repertoires.append(SequenceRepertoire.build_from_sequence_objects(sequence_objects=
+                                                                          [ReceptorSequence(amino_acid_sequence="AAA", metadata=SequenceMetadata(chain="A"), identifier="1"),
+                                             ReceptorSequence(amino_acid_sequence="AAAA", metadata=SequenceMetadata(chain="B"), identifier="2"),
+                                             ReceptorSequence(amino_acid_sequence="AAAAA", metadata=SequenceMetadata(chain="B"), identifier="3"),
+                                             ReceptorSequence(amino_acid_sequence="AAA", metadata=SequenceMetadata(chain="A"), identifier="4")],
+                                  metadata={"CD": True}, path=path, identifier="1"))
+        repertoires.append(SequenceRepertoire.build_from_sequence_objects(sequence_objects=[ReceptorSequence(amino_acid_sequence="AAA", metadata=SequenceMetadata(chain="B"), identifier="5"),
+                                             ReceptorSequence(amino_acid_sequence="AAAA", metadata=SequenceMetadata(chain="A"), identifier="6"),
+                                             ReceptorSequence(amino_acid_sequence="AAAA", metadata=SequenceMetadata(chain="B"), identifier="7"),
+                                             ReceptorSequence(amino_acid_sequence="AAA", metadata=SequenceMetadata(chain="A"), identifier="8")],
+                                  metadata={"CD": False}, path=path, identifier="2"))
 
-        for index in range(1, 14):
-            with open("{}rep{}.pkl".format(path, index), "wb") as file:
-                pickle.dump(rep1 if index % 2 == 0 else rep2, file)
-
-        dataset = RepertoireDataset(filenames=[path + "rep{}.pkl".format(i) for i in range(1, 14)], params={"CD": [True, False]})
+        dataset = RepertoireDataset(repertoires=[repertoires[i % 2] for i in range(1, 14)], params={"CD": [True, False]})
 
         PickleExporter.export(dataset, path, "dataset.pkl")
 

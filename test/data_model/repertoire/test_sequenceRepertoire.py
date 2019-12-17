@@ -6,12 +6,12 @@ import numpy as np
 
 from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
-from source.data_model.repertoire.SequenceRepertoireV3 import SequenceRepertoireV3
+from source.data_model.repertoire.SequenceRepertoire import SequenceRepertoire
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.util.PathBuilder import PathBuilder
 
 
-class TestSequenceRepertoireV3(TestCase):
+class TestSequenceRepertoire(TestCase):
 
     def create_sequences(self, count):
         return [ReceptorSequence(amino_acid_sequence="AAA",
@@ -23,7 +23,7 @@ class TestSequenceRepertoireV3(TestCase):
 
     def test_sequence_repertoire(self):
 
-        path = EnvironmentSettings.tmp_test_path + "sequencerepertoirev3/"
+        path = EnvironmentSettings.tmp_test_path + "sequencerepertoire/"
         PathBuilder.build(path)
 
         sequences = [ReceptorSequence(amino_acid_sequence="AAA", identifier="1",
@@ -31,10 +31,10 @@ class TestSequenceRepertoireV3(TestCase):
                      ReceptorSequence(amino_acid_sequence="CCC", identifier="2",
                                       metadata=SequenceMetadata(j_gene="J1", custom_params={"cmv": "yes", "coeliac": True}))]
 
-        obj = SequenceRepertoireV3.build_from_sequence_objects(sequences, path, "1", {"cmv": "yes"})
+        obj = SequenceRepertoire.build_from_sequence_objects(sequences, path, "1", {"cmv": "yes"})
 
         self.assertTrue(os.path.isfile(obj._data_filename))
-        self.assertTrue(isinstance(obj, SequenceRepertoireV3))
+        self.assertTrue(isinstance(obj, SequenceRepertoire))
         self.assertTrue(np.array_equal(np.array(["1", "2"]), obj.get_sequence_identifiers()))
         self.assertTrue(np.array_equal(np.array(["AAA", "CCC"]), obj.get_sequence_aas()))
         self.assertTrue(np.array_equal(np.array(["V1", None]), obj.get_v_genes()))
@@ -55,7 +55,7 @@ class TestSequenceRepertoireV3(TestCase):
 
         obj.free_memory()
 
-        self.assertTrue(key in obj.data for key in SequenceRepertoireV3.FIELDS)
-        self.assertTrue(obj.data[key] is None for key in SequenceRepertoireV3.FIELDS)
+        self.assertTrue(key in obj.data for key in SequenceRepertoire.FIELDS)
+        self.assertTrue(obj.data[key] is None for key in SequenceRepertoire.FIELDS)
 
         shutil.rmtree(path)

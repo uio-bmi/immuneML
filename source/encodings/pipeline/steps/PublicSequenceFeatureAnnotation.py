@@ -30,7 +30,7 @@ class PublicSequenceFeatureAnnotation(TransformerMixin):
         return ("encoding_step", self.__class__.__name__)
 
     def _prepare_caching_params(self, dataset):
-        return (("dataset_filenames", tuple(dataset.get_filenames())),
+        return (("example_identifiers", tuple(dataset.get_example_ids())),
                 ("dataset_metadata", dataset.metadata_file),
                 ("encoding", "PipelineEncoder"),
                 ("initial_encoder", self.initial_encoder),
@@ -58,7 +58,7 @@ class PublicSequenceFeatureAnnotation(TransformerMixin):
         dataset = RepertoireDataset(
             params=X.params,
             encoded_data=encoded,
-            filenames=X.get_filenames(),
+            repertoires=X.repertoires,
             identifier=X.identifier,
             metadata_file=X.metadata_file
         )

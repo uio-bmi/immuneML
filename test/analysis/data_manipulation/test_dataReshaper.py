@@ -37,8 +37,7 @@ class TestDataReshaper(TestCase):
         })
     }
 
-    dataset = RepertoireDataset(encoded_data=EncodedData(**encoded_data),
-                                filenames=[filename + ".tsv" for filename in encoded_data["example_ids"]])
+    dataset = RepertoireDataset(encoded_data=EncodedData(**encoded_data))
 
     def test_melt(self):
         result = DataReshaper.reshape(dataset=TestDataReshaper.dataset)

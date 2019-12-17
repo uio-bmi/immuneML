@@ -5,11 +5,17 @@ from unittest import TestCase
 from source.IO.dataset_export.PickleExporter import PickleExporter
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.environment.EnvironmentSettings import EnvironmentSettings
+from source.util.PathBuilder import PathBuilder
+from source.util.RepertoireBuilder import RepertoireBuilder
 
 
 class TestPickleExporter(TestCase):
     def test_export(self):
-        dataset = RepertoireDataset(filenames=["f1.pkl", "f2.pkl"])
+        path = EnvironmentSettings.tmp_test_path + "pickleexporter/"
+        PathBuilder.build(path)
+
+        repertoires, metadata = RepertoireBuilder.build([["AA"], ["CC"]], path)
+        dataset = RepertoireDataset(repertoires=repertoires, metadata_file=metadata)
         PickleExporter.export(dataset, EnvironmentSettings.tmp_test_path + "pickleexporter/", "dataset.pkl")
 
         with open(EnvironmentSettings.tmp_test_path + "pickleexporter/dataset.pkl", "rb") as file:
@@ -18,5 +24,5 @@ class TestPickleExporter(TestCase):
         shutil.rmtree(EnvironmentSettings.tmp_test_path + "pickleexporter/")
 
         self.assertTrue(isinstance(dataset2, RepertoireDataset))
-        self.assertEqual(2, len(dataset2.get_filenames()))
-        self.assertEqual("f1.pkl", dataset2.get_filenames()[0])
+        self.assertEqual(2, len(dataset2.get_data()))
+        self.assertEqual("rep_0", dataset2.get_data()[0].identifier)

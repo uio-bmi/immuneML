@@ -63,5 +63,5 @@ class VDJdbSequenceImport:
                                     region_type="CDR3",
                                     custom_params={VDJdbSequenceImport.CUSTOM_COLUMNS[key]: row[key]
                                                    for key in VDJdbSequenceImport.CUSTOM_COLUMNS})
-        sequence = ReceptorSequence(amino_acid_sequence=row["CDR3"], metadata=metadata)
+        sequence = ReceptorSequence(amino_acid_sequence=row["CDR3"], metadata=metadata, identifier=str(row["complex.id"]))
         return sequence

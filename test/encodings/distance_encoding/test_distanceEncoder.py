@@ -16,10 +16,10 @@ from source.util.RepertoireBuilder import RepertoireBuilder
 class TestDistanceEncoder(TestCase):
 
     def create_dataset(self, path: str) -> RepertoireDataset:
-        filenames, metadata = RepertoireBuilder.build([["A", "B"], ["B", "C"], ["D"], ["E", "F"],
+        repertoires, metadata = RepertoireBuilder.build([["A", "B"], ["B", "C"], ["D"], ["E", "F"],
                                                        ["A", "B"], ["B", "C"], ["D"], ["E", "F"]], path,
                                                       {"l1": [1, 0, 1, 0, 1, 0, 1, 0], "l2": [2, 3, 2, 3, 2, 3, 3, 3]})
-        dataset = RepertoireDataset(filenames=filenames, metadata_file=metadata)
+        dataset = RepertoireDataset(repertoires=repertoires, metadata_file=metadata)
         return dataset
 
     def test_encode(self):

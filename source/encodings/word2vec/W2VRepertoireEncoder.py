@@ -21,7 +21,7 @@ class W2VRepertoireEncoder(Word2VecEncoder):
         for repertoire in dataset.get_data(params["batch_size"]):
 
             for label_name in label_config.get_labels_by_name():
-                label = repertoire.metadata.custom_params[label_name]
+                label = repertoire.metadata[label_name]
                 labels[label_name].append(label)
 
         return np.array([labels[name] for name in labels.keys()])

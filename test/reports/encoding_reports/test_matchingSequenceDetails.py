@@ -18,11 +18,11 @@ from source.util.RepertoireBuilder import RepertoireBuilder
 class TestMatchingSequenceDetails(TestCase):
     def test_generate(self):
         path = EnvironmentSettings.root_path + "test/tmp/encrepmatchingseq/"
-        filenames = RepertoireBuilder.build([["AAA", "CCC"], ["AAC", "ASDA"], ["CCF", "ATC"]], path,
-                                            {"default": [1, 0, 0]})[0]
+        repertoires = RepertoireBuilder.build([["AAA", "CCC"], ["AAC", "ASDA"], ["CCF", "ATC"]], path,
+                                              {"default": [1, 0, 0]})[0]
         ref_seqs = [ReceptorSequence("AAA", metadata=SequenceMetadata(v_gene="v1", j_gene="j1")),
                     ReceptorSequence("CCF", metadata=SequenceMetadata(j_gene="j1", v_gene="v1"))]
-        dataset = RepertoireDataset(filenames=filenames,
+        dataset = RepertoireDataset(repertoires=repertoires,
                                     params={"default": [0, 1]},
                                     encoded_data=EncodedData(
                                                       examples=np.array([[2], [1], [1]]),

@@ -64,7 +64,7 @@ class TestSimulation(TestCase):
 
     def prepare_dataset(self, path):
         PathBuilder.build(path)
-        filenames, metadata = RepertoireBuilder.build(sequences=[["AAA", "CCC", "DDD"], ["AAA", "CCC", "DDD"],
+        repertoires, metadata = RepertoireBuilder.build(sequences=[["AAA", "CCC", "DDD"], ["AAA", "CCC", "DDD"],
                                                                  ["AAA", "CCC", "DDD"], ["AAA", "CCC", "DDD"],
                                                                  ["AAA", "CCC", "DDD"], ["AAA", "CCC", "DDD"],
                                                                  ["AAA", "CCC", "DDD"], ["AAA", "CCC", "DDD"],
@@ -86,7 +86,7 @@ class TestSimulation(TestCase):
                                                               "l2": [0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 1,
                                                                      0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1]})
 
-        dataset = RepertoireDataset(filenames=filenames, metadata_file=metadata, params={"l1": [1, 2], "l2": [0, 1]})
+        dataset = RepertoireDataset(repertoires=repertoires, metadata_file=metadata, params={"l1": [1, 2], "l2": [0, 1]})
         PickleExporter.export(dataset, path, "dataset.pkl")
 
     def test_simulation(self):

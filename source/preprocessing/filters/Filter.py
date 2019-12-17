@@ -14,8 +14,6 @@ class Filter(Preprocessor, ABC):
         if dataset.metadata_file:
             df = pd.read_csv(dataset.metadata_file).iloc[indices_to_keep, :]
             df.reset_index(drop=True, inplace=True)
-            for index, row in df.iterrows():
-                row["filename"] = dataset.get_filenames()[index]
             path = result_path + "/{}_metadata_filtered.csv" \
                 .format(os.path.splitext(os.path.basename(dataset.metadata_file))[0])
             df.to_csv(path)

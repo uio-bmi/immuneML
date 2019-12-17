@@ -39,9 +39,9 @@ class MetadataFilter(Filter):
     @staticmethod
     def process(dataset: RepertoireDataset, params: dict) -> RepertoireDataset:
         processed_dataset = copy.deepcopy(dataset)
-        original_filenames = processed_dataset.get_filenames()
+        original_repertoires = processed_dataset.get_data()
         indices = MetadataFilter.get_matching_indices(processed_dataset, params["criteria"])
-        processed_dataset.set_filenames([original_filenames[i] for i in indices])
+        processed_dataset.repertoires = [original_repertoires[i] for i in indices]
         processed_dataset.metadata_file = MetadataFilter.build_new_metadata(dataset, indices, params["result_path"])
         return processed_dataset
 

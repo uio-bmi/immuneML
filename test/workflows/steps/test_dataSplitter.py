@@ -1,10 +1,10 @@
 import shutil
 from unittest import TestCase
 
-import numpy as np
 import pandas as pd
 
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
+from source.data_model.repertoire.SequenceRepertoire import SequenceRepertoire
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.hyperparameter_optimization.SplitType import SplitType
 from source.util.PathBuilder import PathBuilder
@@ -15,7 +15,14 @@ from source.workflows.steps.DataSplitterParams import DataSplitterParams
 class TestDataSplitter(TestCase):
 
     def test_run(self):
-        dataset = RepertoireDataset(filenames=["file1.pkl", "file2.pkl", "file3.pkl", "file4.pkl", "file5.pkl", "file6.pkl", "file7.pkl", "file8.pkl"])
+        dataset = RepertoireDataset(repertoires=[SequenceRepertoire("0.npy", "", "0"),
+                                                 SequenceRepertoire("0.npy", "", "1"),
+                                                 SequenceRepertoire("0.npy", "", "2"),
+                                                 SequenceRepertoire("0.npy", "", "3"),
+                                                 SequenceRepertoire("0.npy", "", "4"),
+                                                 SequenceRepertoire("0.npy", "", "5"),
+                                                 SequenceRepertoire("0.npy", "", "6"),
+                                                 SequenceRepertoire("0.npy", "", "7")])
 
         path = EnvironmentSettings.root_path + "test/tmp/datasplitter/"
         PathBuilder.build(path)
@@ -38,11 +45,11 @@ class TestDataSplitter(TestCase):
 
         self.assertTrue(isinstance(trains[0], RepertoireDataset))
         self.assertTrue(isinstance(tests[0], RepertoireDataset))
-        self.assertEqual(len(trains[0].get_filenames()), 5)
-        self.assertEqual(len(tests[0].get_filenames()), 3)
+        self.assertEqual(len(trains[0].get_data()), 5)
+        self.assertEqual(len(tests[0].get_data()), 3)
         self.assertEqual(5, len(trains))
         self.assertEqual(5, len(tests))
-        self.assertEqual(5, len(np.unique(trains[0].get_filenames())))
+        self.assertEqual(5, len(trains[0].repertoires))
 
         trains2, tests2 = DataSplitter.run(DataSplitterParams(
             dataset=dataset,
@@ -53,7 +60,7 @@ class TestDataSplitter(TestCase):
             path=path
         ))
 
-        self.assertEqual(trains[0].get_filenames(), trains2[0].get_filenames())
+        self.assertEqual(trains[0].get_repertoire_ids(), trains2[0].get_repertoire_ids())
 
         trains, tests = DataSplitter.run(DataSplitterParams(
             dataset=dataset,
@@ -66,8 +73,8 @@ class TestDataSplitter(TestCase):
 
         self.assertTrue(isinstance(trains[0], RepertoireDataset))
         self.assertTrue(isinstance(tests[0], RepertoireDataset))
-        self.assertEqual(len(trains[0].get_filenames()), 7)
-        self.assertEqual(len(tests[0].get_filenames()), 1)
+        self.assertEqual(len(trains[0].get_data()), 7)
+        self.assertEqual(len(tests[0].get_data()), 1)
         self.assertEqual(8, len(trains))
         self.assertEqual(8, len(tests))
 
@@ -82,8 +89,8 @@ class TestDataSplitter(TestCase):
 
         self.assertTrue(isinstance(trains[0], RepertoireDataset))
         self.assertTrue(isinstance(tests[0], RepertoireDataset))
-        self.assertEqual(len(trains[0].get_filenames()), 6)
-        self.assertEqual(len(tests[0].get_filenames()), 2)
+        self.assertEqual(len(trains[0].get_data()), 6)
+        self.assertEqual(len(tests[0].get_data()), 2)
         self.assertEqual(5, len(trains))
         self.assertEqual(5, len(tests))
 
@@ -100,6 +107,6 @@ class TestDataSplitter(TestCase):
         self.assertTrue(isinstance(tests[0], RepertoireDataset))
         self.assertEqual(10, len(trains))
         self.assertEqual(10, len(tests))
-        self.assertEqual(len(trains[0].get_filenames()) + len(tests[0].get_filenames()), 6)
+        self.assertEqual(len(trains[0].get_data()) + len(tests[0].get_data()), 6)
 
         shutil.rmtree(path)

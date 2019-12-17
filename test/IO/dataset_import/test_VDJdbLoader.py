@@ -60,10 +60,10 @@ class TestVDJdbLoader(TestCase):
         dataset = VDJDBLoader.load(path, {"result_path": path, "metadata_file": path + "metadata.csv"})
 
         self.assertEqual(number_of_repertoires, dataset.get_example_count())
-        self.assertEqual(number_of_repertoires, len(dataset.get_filenames()))
+        self.assertEqual(number_of_repertoires, len(dataset.get_data()))
 
         for repertoire in dataset.get_data(2):
-            self.assertTrue(repertoire.metadata.custom_params["label1"] in {0, 1})
+            self.assertTrue(repertoire.metadata["label1"] in {0, 1})
             self.assertEqual(4, len(repertoire.sequences))
 
         shutil.rmtree(path)

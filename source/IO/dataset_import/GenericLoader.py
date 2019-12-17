@@ -11,7 +11,6 @@ from source.IO.dataset_import.DataLoader import DataLoader
 from source.IO.dataset_import.PickleLoader import PickleLoader
 from source.IO.metadata_import.MetadataImport import MetadataImport
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
-from source.data_model.repertoire.RepertoireMetadata import RepertoireMetadata
 from source.data_model.repertoire.SequenceRepertoire import SequenceRepertoire
 from source.environment.Constants import Constants
 from source.util.PathBuilder import PathBuilder
@@ -93,7 +92,7 @@ class GenericLoader(DataLoader):
 
         return df.apply(self._load_sequence, axis=1, args=(params,)).values
 
-    def _load_repertoire_from_file(self, filepath, params, repertoire_filename, identifier) -> RepertoireMetadata:
+    def _load_repertoire_from_file(self, filepath, params, repertoire_filename, identifier) -> dict:
         df = self._read_preprocess_file(filepath, params)
 
         sequences = self.get_sequences_from_df(df, params)
@@ -140,7 +139,7 @@ class GenericLoader(DataLoader):
     #
     #     return sequence
 
-    def _extract_repertoire_metadata(self, filepath, params, df) -> RepertoireMetadata:
+    def _extract_repertoire_metadata(self, filepath, params, df) -> dict:
         if "metadata" in params:
             metadata = [m for m in params["metadata"] if os.path.basename(m["rep_file"]) == os.path.basename(filepath)][0]["metadata"]
         else:

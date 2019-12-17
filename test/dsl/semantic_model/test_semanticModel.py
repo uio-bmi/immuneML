@@ -25,7 +25,7 @@ class TestSemanticModel(TestCase):
 
         path = EnvironmentSettings.root_path + "test/tmp/smmodel/"
         PathBuilder.build(path)
-        filenames, metadata = RepertoireBuilder.build([["AAA", "CCC"], ["TTTT"], ["AAA", "CCC"], ["TTTT"],
+        repertoires, metadata = RepertoireBuilder.build([["AAA", "CCC"], ["TTTT"], ["AAA", "CCC"], ["TTTT"],
                                                        ["AAA", "CCC"], ["TTTT"], ["AAA", "CCC"], ["TTTT"],
                                                        ["AAA", "CCC"], ["TTTT"], ["AAA", "CCC"], ["TTTT"],
                                                        ["AAA", "CCC"], ["TTTT"], ["AAA", "CCC"], ["TTTT"],
@@ -35,7 +35,7 @@ class TestSemanticModel(TestCase):
                                                        ["AAA", "CCC"], ["TTTT"], ["AAA", "CCC"], ["TTTT"]], path,
                                                       {"default": [1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2,
                                                                    1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2]})
-        dataset = RepertoireDataset(filenames=filenames,
+        dataset = RepertoireDataset(repertoires=repertoires,
                                     params={"default": [1, 2]},
                                     metadata_file=metadata)
 

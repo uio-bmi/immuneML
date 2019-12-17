@@ -22,7 +22,7 @@ class DataSplitter(Step):
 
     @staticmethod
     def _prepare_caching_params(input_params: DataSplitterParams):
-        return (("dataset_filenames", tuple(input_params.dataset.get_filenames())),
+        return (("dataset_ids", tuple(input_params.dataset.get_example_ids())),
                 ("dataset_metadata", input_params.dataset.metadata_file if hasattr(input_params.dataset, "metadata_file") else None),
                 ("dataset_type", input_params.dataset.__class__.__name__),
                 ("split_count", input_params.split_count),

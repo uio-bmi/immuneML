@@ -58,7 +58,7 @@ class MatchingSequenceDetails(EncodingReport):
                     "max_levenshtein_distance": self.max_edit_distance
                 }
                 for label in self.dataset.params.keys():
-                    row["{}".format(label)] = repertoire.metadata.custom_params[label]
+                    row["{}".format(label)] = repertoire.metadata[label]
                 csv_writer.writerow(row)
 
     def _make_matching_report(self):

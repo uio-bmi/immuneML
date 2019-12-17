@@ -18,13 +18,13 @@ class TestSequenceAbundanceEncoder(TestCase):
         path = EnvironmentSettings.tmp_test_path + "abundanceencoder/"
         PathBuilder.build(path)
 
-        filenames, metadata = RepertoireBuilder.build([["GGG", "III", "LLL", "MMM"],
+        repertoires, metadata = RepertoireBuilder.build([["GGG", "III", "LLL", "MMM"],
                                                        ["DDD", "EEE", "FFF", "III", "LLL", "MMM"],
                                                        ["CCC", "FFF", "MMM"],
                                                        ["AAA", "CCC", "EEE", "FFF", "LLL", "MMM"]],
                                                       labels={"l1": [True, True, False, False]}, path=path)
 
-        dataset = RepertoireDataset(filenames=filenames, metadata_file=metadata, identifier="1")
+        dataset = RepertoireDataset(repertoires=repertoires, metadata_file=metadata, identifier="1")
 
         encoder = SequenceAbundanceEncoder.create_encoder(dataset, params={
             "comparison_attributes": ["amino_acid_sequence"],

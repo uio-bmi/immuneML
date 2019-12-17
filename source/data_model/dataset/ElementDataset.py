@@ -15,6 +15,7 @@ class ElementDataset(Dataset):
         self._filenames = sorted(filenames) if filenames is not None else []
         self.element_generator = ElementGenerator(self._filenames)
         self.file_size = file_size
+        self.element_ids = None
 
     def get_data(self, batch_size: int = 1000):
         self._filenames.sort()
@@ -31,6 +32,13 @@ class ElementDataset(Dataset):
 
     def get_example_count(self):
         return self.element_generator.get_element_count()
+
+    def get_example_ids(self):
+        if self.element_ids is None:
+            self.element_ids = []
+            for element in self.get_data():
+                self.element_ids.append(element.identifier)
+        return self.element_ids
 
     def make_subset(self, example_indices, path):
         batch_filenames = self.element_generator.make_subset(example_indices, path)

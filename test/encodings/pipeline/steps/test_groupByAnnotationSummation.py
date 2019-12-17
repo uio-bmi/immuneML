@@ -43,8 +43,8 @@ class TestGroupByAnnotationSummation(TestCase):
         })
     }
 
-    dataset = RepertoireDataset(encoded_data=EncodedData(**encoded_data),
-                                filenames=[filename + ".tsv" for filename in encoded_data["example_ids"]])
+    dataset = RepertoireDataset(encoded_data=EncodedData(**encoded_data))
+    dataset.repertoire_ids = ["1", "2", "3", "4", "5"]
 
     def test_group_repertoires_1(self):
 

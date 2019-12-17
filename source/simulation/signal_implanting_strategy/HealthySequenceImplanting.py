@@ -2,7 +2,6 @@ import copy
 import random
 
 from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
-from source.data_model.repertoire.RepertoireMetadata import RepertoireMetadata
 from source.data_model.repertoire.SequenceRepertoire import SequenceRepertoire
 from source.simulation.implants.ImplantAnnotation import ImplantAnnotation
 from source.simulation.signal_implanting_strategy.SignalImplantingStrategy import SignalImplantingStrategy
@@ -24,38 +23,42 @@ class HealthySequenceImplanting(SignalImplantingStrategy):
         self.sequence_implanting_strategy = sequence_implanting_strategy
         self.sequence_position_weights = sequence_position_weights
 
-    def implant_in_repertoire(self, repertoire: SequenceRepertoire, repertoire_implanting_rate: float, signal) -> SequenceRepertoire:
+    def implant_in_repertoire(self, repertoire: SequenceRepertoire, repertoire_implanting_rate: float, signal, path) -> SequenceRepertoire:
         max_motif_length = self._calculate_max_motif_length(signal)
         sequences_to_be_processed, other_sequences = self._choose_sequences_for_implanting(repertoire,
                                                                                             repertoire_implanting_rate,
                                                                                             max_motif_length)
         processed_sequences = self._implant_in_sequences(sequences_to_be_processed, signal)
         sequences = other_sequences + processed_sequences
-        metadata = self._build_new_metadata(repertoire.metadata)
-        new_repertoire = self._build_new_repertoire(sequences, metadata, signal)
+        metadata = self._build_new_metadata(repertoire.metadata, signal)
+        new_repertoire = self._build_new_repertoire(sequences, metadata, signal, path, repertoire.identifier)
 
         return new_repertoire
 
-    def _build_new_metadata(self, metadata: RepertoireMetadata) -> RepertoireMetadata:
-        new_metadata = copy.deepcopy(metadata) if metadata is not None else RepertoireMetadata()
+    def _build_new_metadata(self, metadata: dict, signal) -> dict:
+        new_metadata = copy.deepcopy(metadata) if metadata is not None else {}
+        new_metadata[signal.id] = True
         return new_metadata
 
     def _calculate_max_motif_length(self, signal):
         max_motif_length = max([motif.get_max_length() for motif in signal.motifs])
         return max_motif_length
 
-    def _build_new_repertoire(self, sequences, repertoire_metadata, signal) -> SequenceRepertoire:
+    def _build_new_repertoire(self, sequences, repertoire_metadata, signal, path, identifier) -> SequenceRepertoire:
         if repertoire_metadata is not None:
             metadata = copy.deepcopy(repertoire_metadata)
         else:
-            metadata = RepertoireMetadata()
+            metadata = {}
 
         # when adding implant to a repertoire, only signal id is stored:
         # more detailed information is available in each receptor_sequence
         # (specific motif and motif instance)
         implant = ImplantAnnotation(signal_id=signal.id)
-        metadata.add_implant(implant)
-        repertoire = SequenceRepertoire(sequences=sequences, metadata=metadata)
+        if "implants" in metadata:
+            metadata["implants"].append(implant)
+        else:
+            metadata["implants"] = [implant]
+        repertoire = SequenceRepertoire.build_from_sequence_objects(sequences, path, identifier, metadata)
 
         return repertoire
 
