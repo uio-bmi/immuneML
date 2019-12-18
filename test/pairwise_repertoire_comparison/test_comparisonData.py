@@ -153,15 +153,15 @@ class TestComparisonData(TestCase):
         unique_items = comparison_data.filter_existing_items([("f", 6), ("g", 7), ("a", 1)], "6")
 
         self.assertEqual(2, len(unique_items))
-        self.assertEqual("f", unique_items[0][0])
-        self.assertEqual("g", unique_items[1][0])
+        self.assertTrue("f" in [unique_items[0][0], unique_items[1][0]])
+        self.assertTrue("g" in [unique_items[0][0], unique_items[1][0]])
 
         comparison_data = self.create_comparison_data(path=path)
         comparison_data.batch_paths = comparison_data.tmp_batch_paths
         unique_items = comparison_data.filter_existing_items([("f", 6), ("g", 7), ("a", 1), ("b", 2), ("c", 3), ("d", 4)], "6")
 
         self.assertEqual(2, len(unique_items))
-        self.assertEqual("f", unique_items[0][0])
-        self.assertEqual("g", unique_items[1][0])
+        self.assertTrue("f" in [unique_items[0][0], unique_items[1][0]])
+        self.assertTrue("g" in [unique_items[0][0], unique_items[1][0]])
 
         shutil.rmtree(path)

@@ -25,8 +25,7 @@ class ComparisonData:
         self.store_tmp_batch({}, 0)
 
     def build_matching_fn(self):
-        return lambda repertoire: [tuple(item.get_attribute(attribute) for attribute in self.comparison_attributes)
-                                   for item in repertoire.sequences]
+        return lambda repertoire: set(zip(*[repertoire.get_attribute(attribute) for attribute in self.comparison_attributes]))
 
     @lru_cache(maxsize=110)
     def get_repertoire_vector(self, identifier: str):
@@ -40,7 +39,6 @@ class ComparisonData:
     def get_item_vector(self, index: int):
         batch_index = int(index / self.batch_size)
         index_in_batch = index - (batch_index * self.batch_size)
-        # return pd.read_csv(self.batch_paths[batch_index], nrows=1, skiprows=index_in_batch - 1).iloc[0].values
         return self.batches[batch_index]["matrix"][index_in_batch]
 
     def get_batches(self, columns: list = None):
@@ -143,16 +141,11 @@ class ComparisonData:
         return new_items
 
     def _match_items_to_batch(self, items, batch):
-        keep = []
-        value = []
-        item_to_update = []
 
-        for item in items:
-            if item in batch:
-                value.append(1)
-                item_to_update.append(item)
-            else:
-                keep.append(item)
+        keep = set(items).difference(batch)
+
+        item_to_update = set(items).intersection(batch)
+        value = np.ones(len(item_to_update), dtype=np.bool_)
 
         return keep, value, item_to_update
 
@@ -167,7 +160,7 @@ class ComparisonData:
 
         self.store_tmp_batch(batch, batch_index)
 
-        return new_items_to_keep
+        return list(new_items_to_keep)
 
     def store_tmp_batch(self, batch: dict, batch_index: int):
 

@@ -1,4 +1,4 @@
 comparison_attributes:
-    - amino_acid_sequence
+    - sequence_aas
 p_value_threshold: 0.05
 pool_size: 4

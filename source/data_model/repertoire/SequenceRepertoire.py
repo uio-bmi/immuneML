@@ -93,25 +93,22 @@ class SequenceRepertoire(DatasetItem):
         self.identifier = identifier
         self.data = None
 
-    def get_attribute(self, name: str):
-        raise NotImplementedError
-
     def _load(self):
         self.data = np.load(self._data_filename, allow_pickle=True)
 
     def get_sequence_aas(self):
-        return self._get_attribute("sequence_aas")
+        return self.get_attribute("sequence_aas")
 
     def get_sequence_identifiers(self):
-        return self._get_attribute("sequence_identifiers")
+        return self.get_attribute("sequence_identifiers")
 
     def get_v_genes(self):
-        return self._get_attribute("v_genes")
+        return self.get_attribute("v_genes")
 
     def get_j_genes(self):
-        return self._get_attribute("j_genes")
+        return self.get_attribute("j_genes")
 
-    def _get_attribute(self, attribute):
+    def get_attribute(self, attribute):
         if self.data is None:
             self._load()
         if attribute in self.data.dtype.names:
@@ -119,6 +116,9 @@ class SequenceRepertoire(DatasetItem):
             return tmp
         else:
             return None
+
+    def get_attributes(self, attributes: list):
+        return {attribute: self.get_attribute(attribute) for attribute in attributes}
 
     def free_memory(self):
         self.data = None
@@ -132,14 +132,14 @@ class SequenceRepertoire(DatasetItem):
 
         for i in range(len(self.get_sequence_identifiers())):
             seq = ReceptorSequence(amino_acid_sequence=self.get_sequence_aas()[i] if self.get_sequence_aas() is not None else None,
-                                   nucleotide_sequence=self._get_attribute("sequences")[i] if self._get_attribute("sequences") is not None else None,
+                                   nucleotide_sequence=self.get_attribute("sequences")[i] if self.get_attribute("sequences") is not None else None,
                                    identifier=self.get_sequence_identifiers()[i] if self.get_sequence_identifiers() is not None else None,
                                    metadata=SequenceMetadata(v_gene=self.get_v_genes()[i] if self.get_v_genes() is not None else None,
                                                              j_gene=self.get_j_genes()[i] if self.get_j_genes() is not None else None,
-                                                             chain=self._get_attribute("chains")[i] if self._get_attribute("chains") is not None else None,
-                                                             count=self._get_attribute("counts")[i] if self._get_attribute("counts") is not None else None,
-                                                             region_type=self._get_attribute("region_types")[i] if self._get_attribute("region_types") is not None else None,
-                                                             custom_params={key: self._get_attribute(key)[i] if self._get_attribute(key) is not None else None
+                                                             chain=self.get_attribute("chains")[i] if self.get_attribute("chains") is not None else None,
+                                                             count=self.get_attribute("counts")[i] if self.get_attribute("counts") is not None else None,
+                                                             region_type=self.get_attribute("region_types")[i] if self.get_attribute("region_types") is not None else None,
+                                                             custom_params={key: self.get_attribute(key)[i] if self.get_attribute(key) is not None else None
                                                                             for key in set(self._fields) - set(SequenceRepertoire.FIELDS)}))
 
             seqs.append(seq)

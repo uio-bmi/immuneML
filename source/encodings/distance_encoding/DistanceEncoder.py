@@ -59,7 +59,7 @@ class DistanceEncoder(DatasetEncoder):
         tmp_labels = tmp_labels.to_dict("list")
         del tmp_labels["donor"]
 
-        return  tmp_labels
+        return tmp_labels
 
     def encode(self, dataset, params: EncoderParams) -> RepertoireDataset:
 

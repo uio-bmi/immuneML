@@ -25,7 +25,7 @@ class TestPairwiseRepertoireComparison(TestCase):
 
         dataset = self.create_dataset(path)
 
-        comparison = PairwiseRepertoireComparison(["amino_acid_sequence"], ["amino_acid_sequence"], path, 4, 4)
+        comparison = PairwiseRepertoireComparison(["sequence_aas"], ["sequence_aas"], path, 4, 4)
 
         # comparison_fn = lambda rep1, rep2, tmp_vector: np.sum(np.logical_and(rep1, rep2)) / np.sum(np.logical_or(rep1, rep2))
         comparison_fn = DistanceMetrics.jaccard

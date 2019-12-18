@@ -1,5 +1,4 @@
 import os
-from multiprocessing.pool import Pool
 from shutil import copyfile
 
 import numpy as np
@@ -77,25 +76,12 @@ class PairwiseRepertoireComparison:
         comparison_result = np.zeros([repertoire_count, repertoire_count])
         repertoire_identifiers = dataset.get_repertoire_ids()
 
-        global global_comp_data
-        global_comp_data = self.comparison_data
-        global comp_fn
-        comp_fn = comparison_fn
-
-        arguments = self.prepare_paralellization_arguments(repertoire_count, repertoire_identifiers, comparison_result)
-
-        with Pool(self.pool_size) as pool:
-            output = pool.starmap(PairwiseRepertoireComparison.helper_fn, arguments, chunksize=int(len(arguments)/self.pool_size))
-
-        del global_comp_data
-        del comp_fn
-
-        counter = 0
         for index1 in range(repertoire_count):
-            for index2 in range(index1+1, repertoire_count):
-                comparison_result[index1, index2] = output[counter]
+            repertoire_vector_1 = self.comparison_data.get_repertoire_vector(repertoire_identifiers[index1])
+            for index2 in range(index1, repertoire_count):
+                repertoire_vector_2 = self.comparison_data.get_repertoire_vector(repertoire_identifiers[index2])
+                comparison_result[index1, index2] = comparison_fn(repertoire_vector_1, repertoire_vector_2)
                 comparison_result[index2, index1] = comparison_result[index1, index2]
-                counter += 1
 
         comparison_df = pd.DataFrame(comparison_result, columns=repertoire_identifiers, index=repertoire_identifiers)
 

@@ -29,7 +29,7 @@ class TestDistanceEncoder(TestCase):
         dataset = self.create_dataset(path)
 
         enc = DistanceEncoder.create_encoder(dataset, {"distance_metric": DistanceMetricType.JACCARD,
-                                                       "attributes_to_match": ["amino_acid_sequence"],
+                                                       "attributes_to_match": ["sequence_aas"],
                                                        "pool_size": 4})
 
         enc.set_context({"dataset": dataset})

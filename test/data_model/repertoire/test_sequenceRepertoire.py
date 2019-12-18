@@ -39,8 +39,8 @@ class TestSequenceRepertoire(TestCase):
         self.assertTrue(np.array_equal(np.array(["AAA", "CCC"]), obj.get_sequence_aas()))
         self.assertTrue(np.array_equal(np.array(["V1", None]), obj.get_v_genes()))
         self.assertTrue(np.array_equal(np.array([None, "J1"]), obj.get_j_genes()))
-        self.assertTrue(np.array_equal(np.array(["no", "yes"]), obj._get_attribute("cmv")))
-        self.assertTrue(np.array_equal(np.array([False, True]), obj._get_attribute("coeliac")))
+        self.assertTrue(np.array_equal(np.array(["no", "yes"]), obj.get_attribute("cmv")))
+        self.assertTrue(np.array_equal(np.array([False, True]), obj.get_attribute("coeliac")))
         self.assertEqual("yes", obj.metadata["cmv"])
         self.assertEqual("1", obj.identifier)
 
