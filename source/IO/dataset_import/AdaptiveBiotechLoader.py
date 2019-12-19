@@ -26,13 +26,14 @@ class AdaptiveBiotechLoader(GenericLoader):
                                 "templates": str,
                                 "frame_type": str})
 
-        df = df.rename(columns={'rearrangement': 'nucleotide', 'v_family': 'v_subgroup', 'j_family': 'j_subgroup'})
+        df = df.rename(columns={'rearrangement': 'sequences', 'amino_acid': 'sequence_aas', "v_gene": "v_genes", "j_gene": "j_genes",
+                                "frame_type": "frame_types", 'v_family': 'v_subgroup', 'j_family': 'j_subgroup'})
 
         df = df.replace(["unresolved", "no data", "na", "unknown", "null", "nan", np.nan], Constants.UNKNOWN)
         if params["remove_out_of_frame"]:
-            df = df[(df["amino_acid"] != Constants.UNKNOWN) & (~df["amino_acid"].str.contains("\*"))]
-        df['nucleotide'] = [y[(84 - 3 * len(x)): 78] for x, y in zip(df['amino_acid'], df['nucleotide'])]
-        df['amino_acid'] = df["amino_acid"].str[1:-1]
+            df = df[(df["sequence_aas"] != Constants.UNKNOWN) & (~df["sequence_aas"].str.contains("\*"))]
+        df['sequences'] = [y[(84 - 3 * len(x)): 78] for x, y in zip(df['sequence_aas'], df['sequences'])]
+        df['sequence_aas'] = df["sequence_aas"].str[1:-1]
 
         df = AdaptiveBiotechLoader.parse_germline(df)
 
@@ -44,17 +45,17 @@ class AdaptiveBiotechLoader(GenericLoader):
             EnvironmentSettings.root_path + "source/IO/dataset_import/conversion/imgt_adaptive_conversion.csv")
         replace_imgt = dict(zip(replace_imgt.Adaptive, replace_imgt.IMGT))
 
-        df[["v_gene", "j_gene"]] = df[["v_gene", "j_gene"]].replace(replace_imgt)
+        df[["v_genes", "j_genes"]] = df[["v_genes", "j_genes"]].replace(replace_imgt)
 
         replace_dict = {"TCRB": "TRB"}
 
         replace_dict = {**replace_dict,
                         **{("0" + str(i)): str(i) for i in range(10)}}
 
-        df[["v_subgroup", "v_gene", "j_subgroup", "j_gene"]] = df[
-            ["v_subgroup", "v_gene", "j_subgroup", "j_gene"]].replace(replace_dict, regex=True)
+        df[["v_subgroup", "v_genes", "j_subgroup", "j_genes"]] = df[
+            ["v_subgroup", "v_genes", "j_subgroup", "j_genes"]].replace(replace_dict, regex=True)
 
-        df["v_allele"] = df['v_gene'].str.cat(df['v_allele'], sep=Constants.ALLELE_DELIMITER)
-        df["j_allele"] = df['j_gene'].str.cat(df['j_allele'], sep=Constants.ALLELE_DELIMITER)
+        df["v_allele"] = df['v_genes'].str.cat(df['v_allele'], sep=Constants.ALLELE_DELIMITER)
+        df["j_allele"] = df['j_genes'].str.cat(df['j_allele'], sep=Constants.ALLELE_DELIMITER)
 
         return df

@@ -39,9 +39,9 @@ rep1.tsv,TRA,1234,no"""
 
         dataset = GenericLoader().load(path, {"result_path": path,
                                               "dataset_id": "t1d_verified",
-                                              "column_mapping": {"amino_acid": "CDR3B AA Sequence",
-                                                                 "v_gene": "TRBV Gene",
-                                                                 "j_gene": "TRBJ Gene",},
+                                              "column_mapping": {"sequence_aas": "CDR3B AA Sequence",
+                                                                 "v_genes": "TRBV Gene",
+                                                                 "j_genes": "TRBJ Gene"},
                                               "additional_columns": ["Antigen Protein", "MHC Class"],
                                               "strip_CF": True,
                                               "metadata_file": path + "metadata.csv"})

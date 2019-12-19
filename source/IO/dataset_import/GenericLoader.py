@@ -50,8 +50,8 @@ class GenericLoader(DataLoader):
     def _build_dtype(self, params, column_mapping):
 
         dtype_default = {
-            "v_subgroup": str, "v_gene": str, "v_allele": str, "j_subgroup": str, "j_gene": str, "j_allele": str,
-            "amino_acid": str, "nucleotide": str, "templates": int, "frame_type": str}
+            "v_subgroup": str, "v_genes": str, "v_allele": str, "j_subgroup": str, "j_genes": str, "j_allele": str,
+            "sequence_aas": str, "sequences": str, "templates": int, "frame_type": str}
 
         dtype = {custom: dtype_default.get(default, None) for default, custom in column_mapping.items()}
 
@@ -80,7 +80,7 @@ class GenericLoader(DataLoader):
         df = df.rename(columns={j: i for i, j in column_mapping.items()})
 
         if params.get("strip_CF", False):
-            df['amino_acid'] = df["amino_acid"].str[1:-1]
+            df['sequence_aas'] = df["sequence_aas"].str[1:-1]
 
         df = df.replace(["unresolved", "no data", "na", "unknown", "null", "nan", np.nan], Constants.UNKNOWN)
 
@@ -97,13 +97,29 @@ class GenericLoader(DataLoader):
     def _load_repertoire_from_file(self, filepath, params, identifier) -> dict:
         df = self._read_preprocess_file(filepath, params)
 
-        sequences = self.get_sequences_from_df(df, params)
+        sequence_lists = self.get_sequence_lists_from_df(df, params)
         metadata = self._extract_repertoire_metadata(filepath, params, df)
 
-        repertoire = SequenceRepertoire.build_from_sequence_objects(sequences, metadata=metadata, identifier=identifier,
-                                                                    path=params["result_path"])
+        repertoire_inputs = {**{"metadata": metadata, "identifier": identifier, "path": params["result_path"]},
+                             **sequence_lists}
+
+        repertoire = SequenceRepertoire.build(**repertoire_inputs)
 
         return repertoire
+
+    def get_sequence_lists_from_df(self, df, params):
+
+        standard_fields = {
+            field: df[field].values if field in df.columns and df[field] is not None else None for field in SequenceRepertoire.FIELDS
+        }
+
+        if "additional_columns" in params:
+            custom_fields = {field: df[field].values if field in df.columns and df[field] is not None else None
+                             for field in params["additional_columns"]}
+        else:
+            custom_fields = {}
+
+        return {**standard_fields, **{"custom_lists": custom_fields}}
 
     def _load_repertoire(self, index, filepath, params):
         identifier = str(params["metadata"][index]["donor"]) if "metadata" in params else str(os.path.basename(filepath).rpartition(".")[0])

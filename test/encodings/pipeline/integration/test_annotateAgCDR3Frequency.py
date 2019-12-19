@@ -68,8 +68,8 @@ reference_rep.tsv,rep1"""
             "dataset_id": "t1d_verified",
             "extension": "tsv",
             "column_mapping": {
-                "amino_acid": "CDR3B AA Sequence",
-                "v_gene": "TRBV Gene"
+                "sequence_aas": "CDR3B AA Sequence",
+                "v_genes": "TRBV Gene"
             },
             "additional_columns": ["Antigen Protein", "MHC Class"],
             "strip_CF": True,

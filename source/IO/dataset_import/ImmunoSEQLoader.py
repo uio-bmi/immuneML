@@ -27,20 +27,21 @@ class ImmunoSEQLoader(GenericLoader):
                                 "jGeneAllele": str,
                                 "sequenceStatus": str})
 
-        df = df.rename(columns={'aminoAcid': 'amino_acid',
+        df = df.rename(columns={'aminoAcid': 'sequence_aas',
+                                'nucleotide': 'sequences',
                                 "sequenceStatus": "frame_type",
                                 "vFamilyName": "v_subgroup",
-                                "vGeneName": "v_gene",
+                                "vGeneName": "v_genes",
                                 "vGeneAllele": "v_allele",
                                 "jFamilyName": "j_subgroup",
-                                "jGeneName": "j_gene",
+                                "jGeneName": "j_genes",
                                 "jGeneAllele": "j_allele",
                                 'count (templates/reads)': 'templates'})
 
         df = df.replace(["unresolved", "no data", "na", "unknown", "null", "nan", np.nan], Constants.UNKNOWN)
 
-        df['nucleotide'] = [y[(84 - 3 * len(x)): 78] for x, y in zip(df['amino_acid'], df['nucleotide'])]
-        df['amino_acid'] = df["amino_acid"].str[1:-1]
+        df['sequences'] = [y[(84 - 3 * len(x)): 78] for x, y in zip(df['sequence_aas'], df['sequences'])]
+        df['sequence_aas'] = df["sequence_aas"].str[1:-1]
 
         df = AdaptiveBiotechLoader.parse_germline(df)
 

@@ -20,8 +20,8 @@ class SequenceRepertoire(DatasetItem):
     def build(cls, sequence_aas: list, sequences: list, v_genes: list, j_genes: list, chains: list, counts: list, region_types: list,
                  custom_lists: dict, sequence_identifiers: list, path: str, metadata=None, identifier: str = None):
 
-        if len(sequence_identifiers) == 0 or any(identifier is None for identifier in sequence_identifiers):
-            sequence_identifiers = list(range(len(sequence_aas))) if len(sequence_aas) > 0 else list(range(len(sequences)))
+        if sequence_identifiers is None or len(sequence_identifiers) == 0 or any(identifier is None for identifier in sequence_identifiers):
+            sequence_identifiers = list(range(len(sequence_aas))) if sequence_aas is not None and len(sequence_aas) > 0 else list(range(len(sequences)))
 
         assert len(sequence_aas) == len(sequence_identifiers) or len(sequences) == len(sequence_identifiers)
         assert all(len(custom_lists[key]) == len(sequence_identifiers) for key in custom_lists)
@@ -33,7 +33,7 @@ class SequenceRepertoire(DatasetItem):
         dtype = [(field, np.object) for field in custom_lists.keys()]
 
         for field in SequenceRepertoire.FIELDS:
-            if eval(field) and not all(el is None for el in eval(field)):
+            if eval(field) is not None and not all(el is None for el in eval(field)):
                 field_list.append(field)
                 values.append(eval(field))
                 dtype.append((field, np.object))
