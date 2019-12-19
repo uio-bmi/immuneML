@@ -124,11 +124,11 @@ class GenericLoader(DataLoader):
     def _load_repertoire(self, index, filepath, params):
         identifier = str(params["metadata"][index]["donor"]) if "metadata" in params else str(os.path.basename(filepath).rpartition(".")[0])
         metadata_filename = f"{params['result_path']}{identifier}_metadata.pickle"
-        data_filename = f"{params['result_path']}{identifier}.npy"
-        if not os.path.exists(metadata_filename) or not os.path.exists(data_filename):
-            repertoire = self._load_repertoire_from_file(filepath, params, identifier)
-        else:
+        data_filename = f"{params['result_path']}{identifier}_data.npy"
+        if os.path.isfile(metadata_filename) and os.path.isfile(data_filename):
             repertoire = SequenceRepertoire(data_filename, metadata_filename, identifier)
+        else:
+            repertoire = self._load_repertoire_from_file(filepath, params, identifier)
 
         return repertoire, repertoire.metadata
 
@@ -167,8 +167,8 @@ class GenericLoader(DataLoader):
         for p in params:
             for key in p.keys():
                 if key in custom_params:
-                    custom_params[key].add(tuple(p[key]))
+                    custom_params[key].add(tuple(p[key]) if isinstance(p[key], list) else p[key])
                 else:
-                    custom_params[key] = {tuple(p[key])}
+                    custom_params[key] = {tuple(p[key]) if isinstance(p[key], list) else p[key]}
 
         return custom_params
