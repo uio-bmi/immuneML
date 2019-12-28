@@ -2,17 +2,15 @@ import json
 from multiprocessing.pool import Pool
 
 import pandas as pd
-
+from rpy2.robjects import pandas2ri
 from rpy2.robjects.packages import STAP
-from rpy2.robjects import r, pandas2ri
-
-from source.util.PathBuilder import PathBuilder
 
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
-from source.environment.EnvironmentSettings import EnvironmentSettings
-from source.reports.data_reports.DataReport import DataReport
 from source.data_model.receptor.receptor_sequence.SequenceFrameType import SequenceFrameType
 from source.data_model.repertoire.SequenceRepertoire import SequenceRepertoire
+from source.environment.EnvironmentSettings import EnvironmentSettings
+from source.reports.data_reports.DataReport import DataReport
+from source.util.PathBuilder import PathBuilder
 
 
 class SequencingDepthOverview(DataReport):
@@ -64,7 +62,7 @@ class SequencingDepthOverview(DataReport):
     def generate_data(self):
 
         with Pool(self.batch_size, maxtasksperchild=1) as pool:
-            data = pool.map(self._compute_repertoire, self.dataset.get_filenames(), chunksize=1)
+            data = pool.map(self._compute_repertoire, self.dataset.repertoires, chunksize=1)
 
         data = pd.concat(data)
         data = data.replace({"in": "In Frame",
@@ -100,17 +98,16 @@ class SequencingDepthOverview(DataReport):
                                             result_path=self.result_path,
                                             result_name=self.result_name)
 
-    def _compute_repertoire(self, filename: str):
-        repertoire = self.dataset.get_repertoire(filename=filename)
+    def _compute_repertoire(self, repertoire):
         result = []
         for frame_type in SequenceFrameType:
             total_reads = self._compute_total_reads(repertoire, frame_type)
             unique_clonotypes = self._compute_unique_clonotypes(repertoire, frame_type)
             result.append({"value": total_reads, "frame_type": frame_type.name.lower(), "feature": "total_reads",
-                           **repertoire.metadata.custom_params, "id": repertoire.identifier})
+                           **repertoire.metadata, "id": repertoire.identifier})
             result.append(
                 {"value": unique_clonotypes, "frame_type": frame_type.name.lower(), "feature": "unique_clonotypes",
-                 **repertoire.metadata.custom_params, "id": repertoire.identifier})
+                 **repertoire.metadata, "id": repertoire.identifier})
         return pd.DataFrame(result)
 
     def _compute_total_reads(self, repertoire: SequenceRepertoire, frame_type: SequenceFrameType):

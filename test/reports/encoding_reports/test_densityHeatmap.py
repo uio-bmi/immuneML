@@ -7,10 +7,11 @@ import numpy as np
 import pandas as pd
 from scipy import sparse
 
+from source.data_model.dataset.RepertoireDataset import RepertoireDataset
+from source.data_model.encoded_data.EncodedData import EncodedData
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.reports.encoding_reports.heatmap.DensityHeatmap import DensityHeatmap
-from source.data_model.encoded_data.EncodedData import EncodedData
-from source.data_model.dataset.RepertoireDataset import RepertoireDataset
+
 
 class TestFeatureHeatmap(TestCase):
 
@@ -48,8 +49,7 @@ class TestFeatureHeatmap(TestCase):
             })
         }
 
-        dataset = RepertoireDataset(encoded_data=EncodedData(**encoded_data),
-                                    filenames=[filename + ".tsv" for filename in encoded_data["example_ids"]])
+        dataset = RepertoireDataset(encoded_data=EncodedData(**encoded_data))
 
         DensityHeatmap(dataset=dataset,
                        scale_features=False,

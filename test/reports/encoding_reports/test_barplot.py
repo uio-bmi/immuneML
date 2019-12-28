@@ -42,8 +42,7 @@ class TestBarplot(TestCase):
             'encoding': "random"
         }
 
-        dataset = RepertoireDataset(encoded_data=EncodedData(**encoded_data),
-                                    filenames=[filename + ".tsv" for filename in encoded_data["example_ids"]])
+        dataset = RepertoireDataset(encoded_data=EncodedData(**encoded_data))
 
         report = Barplot(dataset=dataset,
                                       result_path=path,

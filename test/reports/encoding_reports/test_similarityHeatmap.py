@@ -7,7 +7,6 @@ import numpy as np
 import pandas as pd
 from scipy import sparse
 
-from source.analysis.similarities.SimilarityMeasureType import SimilarityMeasureType
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.encoded_data.EncodedData import EncodedData
 from source.environment.EnvironmentSettings import EnvironmentSettings
@@ -50,8 +49,7 @@ class TestSimilarityHeatmap(TestCase):
             })
         }
 
-        dataset = RepertoireDataset(encoded_data=EncodedData(**encoded_data),
-                                    filenames=[filename + ".tsv" for filename in encoded_data["example_ids"]])
+        dataset = RepertoireDataset(encoded_data=EncodedData(**encoded_data))
 
         SimilarityHeatmap(dataset=dataset,
                           similarity_measure="PEARSON",
