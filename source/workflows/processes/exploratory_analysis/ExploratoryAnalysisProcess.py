@@ -14,16 +14,16 @@ class ExploratoryAnalysisProcess(InstructionProcess):
     executed on the (encoded) dataset.
     """
 
-    def __init__(self, exploratory_analysis_units: list):
-        assert all(isinstance(unit, ExploratoryAnalysisUnit) for unit in exploratory_analysis_units), \
+    def __init__(self, exploratory_analysis_units: dict):
+        assert all(isinstance(unit, ExploratoryAnalysisUnit) for unit in exploratory_analysis_units.values()), \
             "ExploratoryAnalysisProcess: not all elements passed to init method are instances of ExploratoryAnalysisUnit."
 
         self.exploratory_analysis_units = exploratory_analysis_units
 
     def run(self, result_path: str):
-        for index, unit in enumerate(self.exploratory_analysis_units):
+        for index, (key, unit) in enumerate(self.exploratory_analysis_units.items()):
             print("Started analysis {}/{}.".format(index+1, len(self.exploratory_analysis_units)))
-            self.run_unit(unit, result_path + "analysis_{}/".format(index+1))
+            self.run_unit(unit, result_path + "analysis_{}/".format(key))
             print("Finished analysis {}/{}.".format(index+1, len(self.exploratory_analysis_units)))
 
     def run_unit(self, unit: ExploratoryAnalysisUnit, result_path: str):
@@ -47,7 +47,8 @@ class ExploratoryAnalysisProcess(InstructionProcess):
             encoded_dataset = DataEncoder.run(DataEncoderParams(dataset=unit.dataset, encoder=unit.encoder,
                                                                 encoder_params=EncoderParams(result_path=result_path,
                                                                                              label_configuration=unit.label_config,
-                                                                                             filename="encoded_dataset.pkl")))
+                                                                                             filename="encoded_dataset.pkl",
+                                                                                             batch_size=unit.batch_size)))
         else:
             encoded_dataset = unit.dataset
         return encoded_dataset

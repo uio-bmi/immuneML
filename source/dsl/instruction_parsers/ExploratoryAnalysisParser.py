@@ -35,11 +35,11 @@ class ExploratoryAnalysisParser:
     """
 
     def parse(self, instruction: dict, symbol_table: SymbolTable) -> ExploratoryAnalysisProcess:
-        exp_analysis_units = []
-        for analysis in instruction["analyses"]:
+        exp_analysis_units = {}
+        for key, analysis in instruction["analyses"].items():
 
             params = self._prepare_params(analysis, symbol_table)
-            exp_analysis_units.append(ExploratoryAnalysisUnit(**params))
+            exp_analysis_units[key] = ExploratoryAnalysisUnit(**params)
 
         process = ExploratoryAnalysisProcess(exploratory_analysis_units=exp_analysis_units)
         return process
