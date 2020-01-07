@@ -1,0 +1,3 @@
+has_header: False # if data has a header, col_names is ignored.
+col_names: ["sequences", "sequence_aas", "v_genes", "j_genes"] # names of columns to be read in (ignored if has_header is True)
+# if col_names is empty and has_header is False, an error is thrown
