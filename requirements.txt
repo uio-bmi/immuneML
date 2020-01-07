@@ -8,3 +8,4 @@ editdistance==0.5.3
 dask[complete]
 regex
 tzlocal
+airr==1.2.1

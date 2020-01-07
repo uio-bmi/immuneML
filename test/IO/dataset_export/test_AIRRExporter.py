@@ -1,17 +1,16 @@
-import airr
 import shutil
-import pandas as pd
 from unittest import TestCase
+
+import pandas as pd
 
 from source.IO.dataset_export.AIRRExporter import AIRRExporter
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
-from source.data_model.repertoire.SequenceRepertoire import SequenceRepertoire
+from source.data_model.receptor.receptor_sequence.Chain import Chain
 from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
+from source.data_model.repertoire.SequenceRepertoire import SequenceRepertoire
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.util.PathBuilder import PathBuilder
-from source.data_model.receptor.receptor_sequence.Chain import Chain
-from source.util.RepertoireBuilder import RepertoireBuilder
 
 
 class TestAIRRExporter(TestCase):
@@ -65,5 +64,4 @@ class TestAIRRExporter(TestCase):
         self.assertListEqual(list(resulting_data["duplicate_count"]), [5, 15])
         self.assertListEqual(list(resulting_data["custom_test"]), ["cust1", "cust2"])
 
-
-       # shutil.rmtree(EnvironmentSettings.tmp_test_path + "airr_exporter/")
+        shutil.rmtree(EnvironmentSettings.tmp_test_path + "airr_exporter/")
