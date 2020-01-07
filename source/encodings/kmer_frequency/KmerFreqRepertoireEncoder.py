@@ -5,10 +5,12 @@ from multiprocessing.pool import Pool
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.encodings.EncoderParams import EncoderParams
 from source.encodings.kmer_frequency.KmerFrequencyEncoder import KmerFrequencyEncoder
+from source.logging.Logger import log
 
 
 class KmerFreqRepertoireEncoder(KmerFrequencyEncoder):
 
+    @log
     def _encode_new_dataset(self, dataset, params: EncoderParams):
 
         encoded_data = self._encode_data(dataset, params)
@@ -22,12 +24,13 @@ class KmerFreqRepertoireEncoder(KmerFrequencyEncoder):
 
         return encoded_dataset
 
+    @log
     def _encode_examples(self, dataset, params: EncoderParams):
 
         arguments = [(repertoire, params) for repertoire in dataset.repertoires]
 
         with Pool(params["batch_size"]) as pool:
-            chunksize = math.floor(len(dataset.get_data())/params["batch_size"]) + 1
+            chunksize = math.floor(dataset.get_example_count()/params["batch_size"]) + 1
             repertoires = pool.starmap(self._encode_repertoire, arguments, chunksize=chunksize)
 
         encoded_repertoire_list, repertoire_names, labels, feature_annotation_names = zip(*repertoires)
