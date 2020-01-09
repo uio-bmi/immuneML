@@ -3,7 +3,6 @@ import random
 
 from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.data_model.repertoire.SequenceRepertoire import SequenceRepertoire
-from source.simulation.implants.ImplantAnnotation import ImplantAnnotation
 from source.simulation.signal_implanting_strategy.SignalImplantingStrategy import SignalImplantingStrategy
 from source.simulation.signal_implanting_strategy.sequence_implanting.SequenceImplantingStrategy import \
     SequenceImplantingStrategy
@@ -37,7 +36,7 @@ class HealthySequenceImplanting(SignalImplantingStrategy):
 
     def _build_new_metadata(self, metadata: dict, signal) -> dict:
         new_metadata = copy.deepcopy(metadata) if metadata is not None else {}
-        new_metadata[signal.id] = True
+        new_metadata[f"signal_{signal.id}"] = True
         return new_metadata
 
     def _calculate_max_motif_length(self, signal):
@@ -53,11 +52,7 @@ class HealthySequenceImplanting(SignalImplantingStrategy):
         # when adding implant to a repertoire, only signal id is stored:
         # more detailed information is available in each receptor_sequence
         # (specific motif and motif instance)
-        implant = ImplantAnnotation(signal_id=signal.id)
-        if "implants" in metadata:
-            metadata["implants"].append(implant)
-        else:
-            metadata["implants"] = [implant]
+        metadata[f"signal_{signal.id}"] = True
         repertoire = SequenceRepertoire.build_from_sequence_objects(sequences, path, identifier, metadata)
 
         return repertoire

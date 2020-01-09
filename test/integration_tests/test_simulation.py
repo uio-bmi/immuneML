@@ -103,8 +103,8 @@ class TestSimulation(TestCase):
         self.assertTrue(os.path.isfile(path+"result/metadata.csv"))
 
         metadata_df = pd.read_csv(path+"result/metadata.csv")
-        self.assertTrue("signal1" in metadata_df.columns)
-        self.assertEqual(17, sum(metadata_df["signal1"]))
+        self.assertTrue("signal_signal1" in metadata_df.columns)
+        self.assertEqual(17, sum(metadata_df["signal_signal1"]))
 
         shutil.rmtree(path)
 

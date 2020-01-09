@@ -1,3 +1,4 @@
+import copy
 import os
 
 import pandas as pd
@@ -41,7 +42,7 @@ class SignalImplanter(Step):
                                                                        input_params.dataset.get_example_count())
         simulation_index = 0
 
-        implanting_metadata = {signal.id: [] for signal in input_params.signals}
+        implanting_metadata = {f"signal_{signal.id}": [] for signal in input_params.signals}
 
         for index, repertoire in enumerate(input_params.dataset.get_data(input_params.batch_size)):
 
@@ -52,7 +53,7 @@ class SignalImplanter(Step):
             processed_repertoires.append(processed_repertoire)
 
             for signal in input_params.signals:
-                implanting_metadata[signal.id].append(processed_repertoire.metadata[signal.id])
+                implanting_metadata[f"signal_{signal.id}"].append(processed_repertoire.metadata[f"signal_{signal.id}"])
 
         processed_dataset = RepertoireDataset(repertoires=processed_repertoires, params=input_params.dataset.params,
                                               metadata_file=SignalImplanter._create_metadata_file(input_params.dataset.metadata_file,
@@ -86,17 +87,17 @@ class SignalImplanter(Step):
 
     @staticmethod
     def _copy_repertoire(index: int, repertoire: SequenceRepertoire, input_params: SignalImplanterParams) -> str:
-        new_repertoire = SequenceRepertoire.build_from_sequence_objects(repertoire.sequences, input_params.result_path, str(index),
+        new_repertoire = SequenceRepertoire.build_from_sequence_objects(repertoire.sequences, input_params.result_path, repertoire.identifier,
                                                                         repertoire.metadata)
 
         for signal in input_params.signals:
-            new_repertoire.metadata[signal.id] = False
+            new_repertoire.metadata[f"signal_{signal.id}"] = False
 
         return new_repertoire
 
     @staticmethod
     def _implant_in_repertoire(index, repertoire, simulation_index, input_params) -> str:
-        new_repertoire = repertoire
+        new_repertoire = copy.deepcopy(repertoire)
         for signal in input_params.simulations[simulation_index].signals:
             new_repertoire = signal.implant_to_repertoire(repertoire=new_repertoire,
                                                           repertoire_implanting_rate=
@@ -104,10 +105,10 @@ class SignalImplanter(Step):
                                                           path=input_params.result_path)
 
         for signal in input_params.simulations[simulation_index].signals:
-            new_repertoire.metadata[signal.id] = True
+            new_repertoire.metadata[f"signal_{signal.id}"] = True
         for signal in input_params.signals:
             if signal not in input_params.simulations[simulation_index].signals:
-                new_repertoire.metadata[signal.id] = False
+                new_repertoire.metadata[f"signal_{signal.id}"] = False
 
         return new_repertoire
 

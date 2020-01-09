@@ -5,7 +5,9 @@ import numpy as np
 
 from source.data_model.DatasetItem import DatasetItem
 from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
+from source.data_model.receptor.receptor_sequence.SequenceAnnotation import SequenceAnnotation
 from source.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
+from source.simulation.implants.ImplantAnnotation import ImplantAnnotation
 
 
 class SequenceRepertoire(DatasetItem):
@@ -16,9 +18,17 @@ class SequenceRepertoire(DatasetItem):
 
     FIELDS = "sequence_aas,sequences,v_genes,j_genes,chains,counts,region_types,sequence_identifiers".split(",")
 
+    @staticmethod
+    def process_custom_lists(custom_lists):
+        field_list = list(custom_lists.keys())
+        values = [custom_lists[field] for field in custom_lists.keys()]
+        dtype = [(field, np.object) for field in custom_lists.keys()]
+
+        return field_list, values, dtype
+
     @classmethod
     def build(cls, sequence_aas: list, sequences: list, v_genes: list, j_genes: list, chains: list, counts: list, region_types: list,
-                 custom_lists: dict, sequence_identifiers: list, path: str, metadata=None, identifier: str = None):
+                 custom_lists: dict, sequence_identifiers: list, path: str, metadata=None, identifier: str = None, signals: dict = None):
 
         if sequence_identifiers is None or len(sequence_identifiers) == 0 or any(identifier is None for identifier in sequence_identifiers):
             sequence_identifiers = list(range(len(sequence_aas))) if sequence_aas is not None and len(sequence_aas) > 0 else list(range(len(sequences)))
@@ -28,9 +38,15 @@ class SequenceRepertoire(DatasetItem):
 
         data_filename = f"{path}{identifier}_data.npy"
 
-        field_list = list(custom_lists.keys())
-        values = [custom_lists[field] for field in custom_lists.keys()]
-        dtype = [(field, np.object) for field in custom_lists.keys()]
+        field_list, values, dtype = SequenceRepertoire.process_custom_lists(custom_lists)
+
+        if signals:
+            signals_filtered = {signal: signals[signal] for signal in signals if signal not in metadata["field_list"]}
+            field_list_signals, values_signals, dtype_signals = SequenceRepertoire.process_custom_lists(signals_filtered)
+
+            field_list.extend(field_list_signals)
+            values.extend(values_signals)
+            dtype.extend(dtype_signals)
 
         for field in SequenceRepertoire.FIELDS:
             if eval(field) is not None and not all(el is None for el in eval(field)):
@@ -59,6 +75,7 @@ class SequenceRepertoire(DatasetItem):
 
         sequence_aas, sequences, v_genes, j_genes, chains, counts, region_types, sequence_identifiers = [], [], [], [], [], [], [], []
         custom_lists = {key: [] for key in sequence_objects[0].metadata.custom_params} if sequence_objects[0].metadata else {}
+        signals = {key: [] for key in metadata if "signal" in key}
 
         for sequence in sequence_objects:
             sequence_identifiers.append(sequence.identifier)
@@ -70,11 +87,16 @@ class SequenceRepertoire(DatasetItem):
                 chains.append(sequence.metadata.chain)
                 counts.append(sequence.metadata.count)
                 region_types.append(sequence.metadata.region_type)
-                for param in custom_lists.keys():
+                for param in sequence.metadata.custom_params.keys():
                     custom_lists[param].append(sequence.metadata.custom_params[param] if param in sequence.metadata.custom_params else None)
+            for key in signals.keys():
+                if sequence.annotation and sequence.annotation.implants and len(sequence.annotation.implants) > 0:
+                    signals[key].append(vars(sequence.annotation.implants[0]))
+                else:
+                    signals[key].append(None)
 
         return cls.build(sequence_aas, sequences, v_genes, j_genes, chains, counts, region_types, custom_lists,
-                         sequence_identifiers, path, metadata, identifier)
+                         sequence_identifiers, path, metadata, identifier, signals)
 
     def __init__(self, data_filename: str, metadata_filename: str, identifier: str):
 
@@ -131,6 +153,13 @@ class SequenceRepertoire(DatasetItem):
         seqs = []
 
         for i in range(len(self.get_sequence_identifiers())):
+            keys = [key for key in self.data.dtype.names if "signal" in key]
+            implants = []
+            for key in keys:
+                value_dict = self.get_attribute(key)[i]
+                if value_dict:
+                    implants.append(ImplantAnnotation(*value_dict))
+
             seq = ReceptorSequence(amino_acid_sequence=self.get_sequence_aas()[i] if self.get_sequence_aas() is not None else None,
                                    nucleotide_sequence=self.get_attribute("sequences")[i] if self.get_attribute("sequences") is not None else None,
                                    identifier=self.get_sequence_identifiers()[i] if self.get_sequence_identifiers() is not None else None,
@@ -140,7 +169,8 @@ class SequenceRepertoire(DatasetItem):
                                                              count=self.get_attribute("counts")[i] if self.get_attribute("counts") is not None else None,
                                                              region_type=self.get_attribute("region_types")[i] if self.get_attribute("region_types") is not None else None,
                                                              custom_params={key: self.get_attribute(key)[i] if self.get_attribute(key) is not None else None
-                                                                            for key in set(self._fields) - set(SequenceRepertoire.FIELDS)}))
+                                                                            for key in set(self._fields) - set(SequenceRepertoire.FIELDS)}),
+                                   annotation=SequenceAnnotation(implants=implants))
 
             seqs.append(seq)
 

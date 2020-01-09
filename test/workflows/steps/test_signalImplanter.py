@@ -48,11 +48,11 @@ class TestSignalImplanter(TestCase):
         input_params = SignalImplanterParams(dataset=dataset, result_path=path, simulations=simulations, signals=[s1, s2], batch_size=1)
 
         new_dataset = SignalImplanter.run(input_params)
-        reps_with_s2 = sum([rep.metadata[s2.id] is True for rep in new_dataset.get_data(batch_size=10)])
-        reps_with_s1 = sum([rep.metadata[s1.id] is True for rep in new_dataset.get_data(batch_size=10)])
+        reps_with_s2 = sum([rep.metadata[f"signal_{s2.id}"] is True for rep in new_dataset.get_data(batch_size=10)])
+        reps_with_s1 = sum([rep.metadata[f"signal_{s1.id}"] is True for rep in new_dataset.get_data(batch_size=10)])
         self.assertEqual(10, len(new_dataset.get_example_ids()))
-        self.assertTrue(all([s1.id in rep.metadata.keys() for rep in new_dataset.get_data(batch_size=10)]))
-        self.assertTrue(all([s2.id in rep.metadata.keys() for rep in new_dataset.get_data(batch_size=10)]))
+        self.assertTrue(all([f"signal_{s1.id}" in rep.metadata.keys() for rep in new_dataset.get_data(batch_size=10)]))
+        self.assertTrue(all([f"signal_{s2.id}" in rep.metadata.keys() for rep in new_dataset.get_data(batch_size=10)]))
         self.assertTrue(reps_with_s2 == 4)
         self.assertTrue(reps_with_s1 == 2)
 
