@@ -45,12 +45,13 @@ class AIRRExporter(DataExporter):
 
         df["sequence_id"] = df["rearrangement_id"]
 
-        chain_conversion_dict = {Chain.A: "TRA",
-                                 Chain.B: "TRB",
-                                 Chain.H: "IGH",
-                                 Chain.L: "IGL"}
+        if "locus" in df.columns:
+            chain_conversion_dict = {Chain.A: "TRA",
+                                     Chain.B: "TRB",
+                                     Chain.H: "IGH",
+                                     Chain.L: "IGL"}
 
-        df["locus"] = [chain_conversion_dict[chain] for chain in df["locus"]]
+            df["locus"] = [chain_conversion_dict[chain] for chain in df["locus"]]
 
         return df
 
