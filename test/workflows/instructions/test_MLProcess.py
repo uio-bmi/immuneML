@@ -12,7 +12,7 @@ from source.hyperparameter_optimization.config.SplitType import SplitType
 from source.ml_methods.SimpleLogisticRegression import SimpleLogisticRegression
 from source.util.PathBuilder import PathBuilder
 from source.util.RepertoireBuilder import RepertoireBuilder
-from source.workflows.processes.MLProcess import MLProcess
+from source.workflows.instructions.MLProcess import MLProcess
 
 
 class TestMLProcess(TestCase):

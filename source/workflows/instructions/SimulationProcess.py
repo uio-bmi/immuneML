@@ -1,10 +1,10 @@
 from source.data_model.dataset.Dataset import Dataset
-from source.workflows.processes.InstructionProcess import InstructionProcess
+from source.workflows.instructions.Instruction import Instruction
 from source.workflows.steps.SignalImplanter import SignalImplanter
 from source.workflows.steps.SignalImplanterParams import SignalImplanterParams
 
 
-class SimulationProcess(InstructionProcess):
+class SimulationInstruction(Instruction):
     """
     Simulation process implants signals into the given dataset according to given parameters;
     it supports multiple simulation definitions and relies on SignalImplanter to perform the work

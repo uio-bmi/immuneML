@@ -1,12 +1,12 @@
 from source.data_model.dataset.Dataset import Dataset
 from source.encodings.EncoderParams import EncoderParams
-from source.workflows.processes.InstructionProcess import InstructionProcess
-from source.workflows.processes.exploratory_analysis.ExploratoryAnalysisUnit import ExploratoryAnalysisUnit
+from source.workflows.instructions.Instruction import Instruction
+from source.workflows.instructions.exploratory_analysis.ExploratoryAnalysisUnit import ExploratoryAnalysisUnit
 from source.workflows.steps.DataEncoder import DataEncoder
 from source.workflows.steps.DataEncoderParams import DataEncoderParams
 
 
-class ExploratoryAnalysisProcess(InstructionProcess):
+class ExploratoryAnalysisInstruction(Instruction):
     """
     Allows exploratory analysis of different datasets using encodings and reports.
 
@@ -16,7 +16,7 @@ class ExploratoryAnalysisProcess(InstructionProcess):
 
     def __init__(self, exploratory_analysis_units: dict):
         assert all(isinstance(unit, ExploratoryAnalysisUnit) for unit in exploratory_analysis_units.values()), \
-            "ExploratoryAnalysisProcess: not all elements passed to init method are instances of ExploratoryAnalysisUnit."
+            "ExploratoryAnalysisInstruction: not all elements passed to init method are instances of ExploratoryAnalysisUnit."
 
         self.exploratory_analysis_units = exploratory_analysis_units
 

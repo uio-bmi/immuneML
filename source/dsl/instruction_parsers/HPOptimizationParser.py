@@ -10,12 +10,12 @@ from source.hyperparameter_optimization.config.ReportConfig import ReportConfig
 from source.hyperparameter_optimization.config.SplitConfig import SplitConfig
 from source.hyperparameter_optimization.config.SplitType import SplitType
 from source.util.ReflectionHandler import ReflectionHandler
-from source.workflows.processes.HPOptimizationProcess import HPOptimizationProcess
+from source.workflows.instructions.HPOptimizationInstruction import HPOptimizationInstruction
 
 
 class HPOptimizationParser:
 
-    def parse(self, instruction: dict, symbol_table: SymbolTable) -> HPOptimizationProcess:
+    def parse(self, instruction: dict, symbol_table: SymbolTable) -> HPOptimizationInstruction:
         settings = self._parse_settings(instruction, symbol_table)
         assessment = self._parse_split_config(instruction, "assessment", symbol_table)
         selection = self._parse_split_config(instruction, "selection", symbol_table)
@@ -26,12 +26,12 @@ class HPOptimizationParser:
         path = self._prepare_path(instruction)
         context = self._prepare_context(instruction, symbol_table)
 
-        hp_process = HPOptimizationProcess(dataset=dataset, hp_strategy=strategy(settings), hp_settings=settings,
-                                           assessment=assessment, selection=selection, metrics=metrics,
-                                           label_configuration=label_config, path=path, context=context,
-                                           batch_size=instruction["batch_size"])
+        hp_instruction = HPOptimizationInstruction(dataset=dataset, hp_strategy=strategy(settings), hp_settings=settings,
+                                                   assessment=assessment, selection=selection, metrics=metrics,
+                                                   label_configuration=label_config, path=path, context=context,
+                                                   batch_size=instruction["batch_size"])
 
-        return hp_process
+        return hp_instruction
 
     def _prepare_context(self, instruction: dict, symbol_table: SymbolTable):
         return {"dataset": symbol_table.get(instruction["dataset"])}

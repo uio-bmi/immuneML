@@ -4,7 +4,7 @@ from unittest import TestCase
 
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.util.PathBuilder import PathBuilder
-from source.workflows.processes.quickstart import Quickstart
+from source.workflows.instructions.quickstart import Quickstart
 
 
 class TestQuickstart(TestCase):

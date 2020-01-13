@@ -3,10 +3,10 @@ from source.hyperparameter_optimization.config.SplitConfig import SplitConfig
 from source.hyperparameter_optimization.core.HPAssessment import HPAssessment
 from source.hyperparameter_optimization.states.HPOptimizationState import HPOptimizationState
 from source.hyperparameter_optimization.strategy.HPOptimizationStrategy import HPOptimizationStrategy
-from source.workflows.processes.InstructionProcess import InstructionProcess
+from source.workflows.instructions.Instruction import Instruction
 
 
-class HPOptimizationProcess(InstructionProcess):
+class HPOptimizationInstruction(Instruction):
     """
     Class implementing hyper-parameter optimization and nested model training and assessment:
 

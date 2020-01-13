@@ -4,18 +4,18 @@ source.workflows.processes package
 Submodules
 ----------
 
-source.workflows.processes.HPOptimizationProcess module
+source.workflows.processes.HPOptimizationInstruction module
 -------------------------------------------------------
 
-.. automodule:: source.workflows.processes.HPOptimizationProcess
+.. automodule:: source.workflows.processes.HPOptimizationInstruction
     :members:
     :undoc-members:
     :show-inheritance:
 
-source.workflows.processes.InstructionProcess module
+source.workflows.processes.Instruction module
 ----------------------------------------------------
 
-.. automodule:: source.workflows.processes.InstructionProcess
+.. automodule:: source.workflows.processes.Instruction
     :members:
     :undoc-members:
     :show-inheritance:

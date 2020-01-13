@@ -5,7 +5,7 @@ from source.hyperparameter_optimization.core.HPUtil import HPUtil
 from source.hyperparameter_optimization.states.HPOptimizationState import HPOptimizationState
 from source.hyperparameter_optimization.states.HPSelectionState import HPSelectionState
 from source.util.PathBuilder import PathBuilder
-from source.workflows.processes.MLProcess import MLProcess
+from source.workflows.instructions.MLProcess import MLProcess
 
 
 class HPSelection:

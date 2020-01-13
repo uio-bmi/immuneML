@@ -20,7 +20,7 @@ from source.hyperparameter_optimization.config.SplitType import SplitType
 from source.hyperparameter_optimization.strategy.GridSearch import GridSearch
 from source.ml_methods.SimpleLogisticRegression import SimpleLogisticRegression
 from source.util.PathBuilder import PathBuilder
-from source.workflows.processes.HPOptimizationProcess import HPOptimizationProcess
+from source.workflows.instructions.HPOptimizationInstruction import HPOptimizationInstruction
 
 
 class TestSequenceClassification(TestCase):
@@ -68,10 +68,10 @@ class TestSequenceClassification(TestCase):
         lc = LabelConfiguration()
         lc.add_label("l1", [1, 2])
 
-        instruction = HPOptimizationProcess(dataset, GridSearch([hp_setting]), [hp_setting],
-                                            SplitConfig(SplitType.RANDOM, 1, 0.5, reports=ReportConfig()),
-                                            SplitConfig(SplitType.RANDOM, 1, 0.5, reports=ReportConfig()),
-                                            {MetricType.BALANCED_ACCURACY}, lc, path)
+        instruction = HPOptimizationInstruction(dataset, GridSearch([hp_setting]), [hp_setting],
+                                                SplitConfig(SplitType.RANDOM, 1, 0.5, reports=ReportConfig()),
+                                                SplitConfig(SplitType.RANDOM, 1, 0.5, reports=ReportConfig()),
+                                                {MetricType.BALANCED_ACCURACY}, lc, path)
 
         result = instruction.run(result_path=path)
         print(result)

@@ -14,8 +14,8 @@ from source.reports.data_reports.SequenceLengthDistribution import SequenceLengt
 from source.reports.encoding_reports.MatchingSequenceDetails import MatchingSequenceDetails
 from source.util.PathBuilder import PathBuilder
 from source.util.RepertoireBuilder import RepertoireBuilder
-from source.workflows.processes.exploratory_analysis.ExploratoryAnalysisProcess import ExploratoryAnalysisProcess
-from source.workflows.processes.exploratory_analysis.ExploratoryAnalysisUnit import ExploratoryAnalysisUnit
+from source.workflows.instructions.exploratory_analysis.ExploratoryAnalysisProcess import ExploratoryAnalysisInstruction
+from source.workflows.instructions.exploratory_analysis.ExploratoryAnalysisUnit import ExploratoryAnalysisUnit
 
 
 class TestExploratoryAnalysisProcess(TestCase):
@@ -52,7 +52,7 @@ class TestExploratoryAnalysisProcess(TestCase):
                                                                             summary=SequenceMatchingSummaryType.COUNT,
                                                                             reference_sequences=refs))}
 
-        process = ExploratoryAnalysisProcess(units)
+        process = ExploratoryAnalysisInstruction(units)
         process.run(path + "results/")
 
         self.assertTrue(units["named_analysis_1"].batch_size == 16)

@@ -1,10 +1,10 @@
-from source.workflows.processes.InstructionProcess import InstructionProcess
+from source.workflows.instructions.Instruction import Instruction
 
 
 class SemanticModel:
 
     def __init__(self, instructions: list, path):
-        assert all(isinstance(instruction, InstructionProcess) for instruction in instructions), \
+        assert all(isinstance(instruction, Instruction) for instruction in instructions), \
             "SemanticModel: error occurred in parsing: check instruction definitions in the configuration file."
         self.instructions = instructions
         self.path = path

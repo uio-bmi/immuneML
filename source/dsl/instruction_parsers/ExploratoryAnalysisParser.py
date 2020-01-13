@@ -2,8 +2,8 @@ import copy
 
 from source.dsl.SymbolTable import SymbolTable
 from source.environment.LabelConfiguration import LabelConfiguration
-from source.workflows.processes.exploratory_analysis.ExploratoryAnalysisProcess import ExploratoryAnalysisProcess
-from source.workflows.processes.exploratory_analysis.ExploratoryAnalysisUnit import ExploratoryAnalysisUnit
+from source.workflows.instructions.exploratory_analysis.ExploratoryAnalysisProcess import ExploratoryAnalysisInstruction
+from source.workflows.instructions.exploratory_analysis.ExploratoryAnalysisUnit import ExploratoryAnalysisUnit
 
 
 class ExploratoryAnalysisParser:
@@ -15,7 +15,7 @@ class ExploratoryAnalysisParser:
     Each analysis is defined by a dataset identifier, a report identifier and optionally encoding and labels
     and are loaded into ExploratoryAnalysisUnit objects;
 
-    DSL example for ExploratoryAnalysisProcess assuming that d1, r1, r2, e1 are defined previously in definitions section:
+    DSL example for ExploratoryAnalysisInstruction assuming that d1, r1, r2, e1 are defined previously in definitions section:
 
     .. highlight:: yaml
     .. code-block:: yaml
@@ -34,14 +34,14 @@ class ExploratoryAnalysisParser:
 
     """
 
-    def parse(self, instruction: dict, symbol_table: SymbolTable) -> ExploratoryAnalysisProcess:
+    def parse(self, instruction: dict, symbol_table: SymbolTable) -> ExploratoryAnalysisInstruction:
         exp_analysis_units = {}
         for key, analysis in instruction["analyses"].items():
 
             params = self._prepare_params(analysis, symbol_table)
             exp_analysis_units[key] = ExploratoryAnalysisUnit(**params)
 
-        process = ExploratoryAnalysisProcess(exploratory_analysis_units=exp_analysis_units)
+        process = ExploratoryAnalysisInstruction(exploratory_analysis_units=exp_analysis_units)
         return process
 
     def _prepare_params(self, analysis: dict, symbol_table: SymbolTable) -> dict:

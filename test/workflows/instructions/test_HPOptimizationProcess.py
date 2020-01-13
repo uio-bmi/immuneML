@@ -20,7 +20,7 @@ from source.preprocessing.filters.ClonotypeCountFilter import ClonotypeCountFilt
 from source.reports.data_reports.SequenceLengthDistribution import SequenceLengthDistribution
 from source.util.PathBuilder import PathBuilder
 from source.util.RepertoireBuilder import RepertoireBuilder
-from source.workflows.processes.HPOptimizationProcess import HPOptimizationProcess
+from source.workflows.instructions.HPOptimizationInstruction import HPOptimizationInstruction
 
 
 class TestHPOptimizationProcess(TestCase):
@@ -64,10 +64,10 @@ class TestHPOptimizationProcess(TestCase):
         report = SequenceLengthDistribution()
         label_config = LabelConfiguration([Label("l1", [1, 2]), Label("l2", [0, 1])])
 
-        process = HPOptimizationProcess(dataset, GridSearch(hp_settings), hp_settings,
-                                        SplitConfig(SplitType.RANDOM, 1, 0.5, reports=ReportConfig(data_splits=[report])),
-                                        SplitConfig(SplitType.RANDOM, 1, 0.5, reports=ReportConfig(data_splits=[report])),
-                                        {MetricType.BALANCED_ACCURACY}, label_config, path)
+        process = HPOptimizationInstruction(dataset, GridSearch(hp_settings), hp_settings,
+                                            SplitConfig(SplitType.RANDOM, 1, 0.5, reports=ReportConfig(data_splits=[report])),
+                                            SplitConfig(SplitType.RANDOM, 1, 0.5, reports=ReportConfig(data_splits=[report])),
+                                            {MetricType.BALANCED_ACCURACY}, label_config, path)
 
         state = process.run(result_path=path)
 
