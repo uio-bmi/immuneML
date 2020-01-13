@@ -1,5 +1,5 @@
 additional_columns: [] # what additional columns to load from the file: here none
 clone_id_as_identifier: False # if True: clone_id is used, if False: sequence_id is used
-remove_non_productive: True # Remove sequences with 'productive' set to False
+remove_non_productive: False # do not remove sequences with 'productive' set to False
 sequence_type: "CDR3" # which part of the sequence to load by default
 
