@@ -64,6 +64,9 @@ class SimulationParser:
 
     @staticmethod
     def _add_signals_to_implanting(simulation: dict, symbol_table: SymbolTable) -> SymbolTable:
+        assert sum([settings["dataset_implanting_rate"] for settings in simulation["implanting"].values()]) <= 1, \
+            "The total dataset implanting rate can not exceed 1"
+
         for key in simulation["implanting"].keys():
 
             item = Simulation(
