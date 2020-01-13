@@ -22,17 +22,24 @@ class SimulationParser:
                 m1:
                     seed: AAC
                     instantiation: GappedKmer
+                    # probability that when hamming distance is allowed a letter in the seed will be replaced by
+                    # other alphabet letters - alphabet_weights
+                    alphabet_weights:
+                        A: 0.2
+                        C: 0.2
+                        D: 0.4
+                        E: 0.2
+                    # Relative probabilities of choosing each position for hamming distance modification.
+                    # The probabilities will be scaled to sum to one - position_weights
+                    position_weights:
+                        0: 1
+                        1: 0
+                        2: 0
                     params:
                         max_hamming_distance: 1 # max 1 letter can differ at one time
                         min_gap: 0
                         max_gap: 1
-                        # probability that when hamming distance is allowed a letter in the seed will be replaced by
-                        # other alphabet letters - alphabet_weights
-                        alphabet_weights:
-                            A: 0.2
-                            C: 0.2
-                            D: 0.4
-                            E: 0.2
+
             signals:
                 s1:
                     motifs:
@@ -85,7 +92,11 @@ class SimulationParser:
     def _extract_motifs(simulation: dict, symbol_table: SymbolTable) -> SymbolTable:
         for key in simulation["motifs"].keys():
             instantiation_strategy = SimulationParser._get_instantiation_strategy(simulation["motifs"][key])
-            motif = Motif(key, instantiation_strategy, simulation["motifs"][key]["seed"])
+
+            motif = Motif(key, instantiation_strategy,
+                          seed=simulation["motifs"][key]["seed"],
+                          alphabet_weights=simulation["motifs"][key]["alphabet_weights"],
+                          position_weights=simulation["motifs"][key]["position_weights"])
             symbol_table.add(key, SymbolType.MOTIF, motif)
         return symbol_table
 

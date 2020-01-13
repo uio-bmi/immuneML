@@ -13,11 +13,11 @@ class GappedKmerInstantiation(MotifInstantiationStrategy):
     currently works only for single gap in the sequence
     """
 
-    def __init__(self, max_hamming_distance: int = 0, min_gap: int = 0, max_gap: int = 0, alphabet_weights: dict = None):
+    def __init__(self, max_hamming_distance: int = 0, min_gap: int = 0, max_gap: int = 0):
         self._max_hamming_distance = max_hamming_distance
         self._min_gap = min_gap
         self._max_gap = max_gap
-        self._alphabet_weights = alphabet_weights
+
 
     def get_max_gap(self) -> int:
         return self._max_gap
@@ -31,14 +31,18 @@ class GappedKmerInstantiation(MotifInstantiationStrategy):
             allowed_positions.remove(gap_index)
 
         gap_size = np.random.choice(range(self._min_gap, self._max_gap + 1))
+        instance = self._substitute_letters(params["position_weights"],
+                                            params["alphabet_weights"],
+                                            allowed_positions, instance)
         instance = "".join(instance)
 
         return MotifInstance(instance, gap_size)
 
-    def _substitute_letters(self, position_weights, allowed_positions: list, alphabet_weights: dict, instance: list):
+    def _substitute_letters(self, position_weights, alphabet_weights, allowed_positions: list, instance: list):
 
         substitution_count = random.randint(0, self._max_hamming_distance)
-        position_probabilities = self._prepare_probabilities(position_weights)
+        allowed_position_weights = {key: value for key,value in position_weights.items() if key in allowed_positions}
+        position_probabilities = self._prepare_probabilities(allowed_position_weights)
         positions = list(np.random.choice(allowed_positions, size=substitution_count, p=position_probabilities))
 
         while substitution_count > 0:
