@@ -14,9 +14,9 @@ from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.environment.LabelConfiguration import LabelConfiguration
 from source.environment.MetricType import MetricType
 from source.hyperparameter_optimization.HPSetting import HPSetting
-from source.hyperparameter_optimization.ReportConfig import ReportConfig
-from source.hyperparameter_optimization.SplitConfig import SplitConfig
-from source.hyperparameter_optimization.SplitType import SplitType
+from source.hyperparameter_optimization.config.ReportConfig import ReportConfig
+from source.hyperparameter_optimization.config.SplitConfig import SplitConfig
+from source.hyperparameter_optimization.config.SplitType import SplitType
 from source.hyperparameter_optimization.strategy.GridSearch import GridSearch
 from source.ml_methods.SimpleLogisticRegression import SimpleLogisticRegression
 from source.util.PathBuilder import PathBuilder
@@ -72,9 +72,9 @@ class TestReceptorClassification(TestCase):
                                             SplitConfig(SplitType.RANDOM, 1, 0.5, reports=ReportConfig()),
                                             {MetricType.BALANCED_ACCURACY}, lc, path)
 
-        result = instruction.run(result_path=path)
-        print(result)
+        state = instruction.run(result_path=path)
+        print(vars(state))
 
-        self.assertEqual(1.0, result[0]["l1"])
+        self.assertEqual(1.0, state.assessment_states[0].label_states["l1"].optimal_assessment_item.performance)
 
         shutil.rmtree(path)

@@ -8,6 +8,7 @@ from source.encodings.EncoderParams import EncoderParams
 from source.encodings.distance_encoding.DistanceEncoder import DistanceEncoder
 from source.encodings.distance_encoding.DistanceMetricType import DistanceMetricType
 from source.environment.EnvironmentSettings import EnvironmentSettings
+from source.environment.Label import Label
 from source.environment.LabelConfiguration import LabelConfiguration
 from source.util.PathBuilder import PathBuilder
 from source.util.RepertoireBuilder import RepertoireBuilder
@@ -34,8 +35,8 @@ class TestDistanceEncoder(TestCase):
 
         enc.set_context({"dataset": dataset})
         encoded = enc.encode(dataset, EncoderParams(result_path=path,
-                                                    label_configuration=LabelConfiguration({"l1": [0, 1], "l2": [2, 3]}), batch_size=20,
-                                                    filename="dataset.pkl"))
+                                                    label_configuration=LabelConfiguration([Label("l1", [0, 1]), Label("l2", [2, 3])]),
+                                                    batch_size=20, filename="dataset.pkl"))
 
         self.assertEqual(8, encoded.encoded_data.examples.shape[0])
         self.assertEqual(8, encoded.encoded_data.examples.shape[1])

@@ -30,7 +30,9 @@ class TestSimulation(TestCase):
                     "motifs": {
                         "motif1": {
                             "seed": "EEE",
-                            "instantiation": "Identity",
+                            "instantiation": "GappedKmer",
+                            "alphabet_weights": None,
+                            "position_weights": None
                         }
                     },
                     "signals": {

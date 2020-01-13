@@ -1,5 +1,5 @@
-from source.hyperparameter_optimization.ReportConfig import ReportConfig
-from source.hyperparameter_optimization.SplitType import SplitType
+from source.hyperparameter_optimization.config.ReportConfig import ReportConfig
+from source.hyperparameter_optimization.config.SplitType import SplitType
 
 
 class SplitConfig:

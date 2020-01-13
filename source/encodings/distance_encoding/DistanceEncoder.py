@@ -1,4 +1,3 @@
-import copy
 import pickle
 
 import pandas as pd
@@ -67,7 +66,7 @@ class DistanceEncoder(DatasetEncoder):
         distance_matrix = self.build_distance_matrix(dataset, params, train_repertoire_ids)
         labels = self.build_labels(dataset, params)
 
-        encoded_dataset = copy.deepcopy(dataset)
+        encoded_dataset = dataset.clone()
         encoded_dataset.encoded_data = EncodedData(examples=distance_matrix, labels=labels, example_ids=distance_matrix.index.values,
                                                    encoding=DistanceEncoder.__name__)
 

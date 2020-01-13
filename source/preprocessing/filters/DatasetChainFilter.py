@@ -1,5 +1,3 @@
-import copy
-
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.receptor.receptor_sequence.Chain import Chain
 from source.preprocessing.filters.Filter import Filter
@@ -23,7 +21,7 @@ class DatasetChainFilter(Filter):
 
     @staticmethod
     def process(dataset: RepertoireDataset, params: dict) -> RepertoireDataset:
-        processed_dataset = copy.deepcopy(dataset)
+        processed_dataset = dataset.clone()
         PathBuilder.build(params["result_path"])
         repertoires = []
         indices = []

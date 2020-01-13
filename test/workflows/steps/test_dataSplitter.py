@@ -6,7 +6,7 @@ import pandas as pd
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.repertoire.SequenceRepertoire import SequenceRepertoire
 from source.environment.EnvironmentSettings import EnvironmentSettings
-from source.hyperparameter_optimization.SplitType import SplitType
+from source.hyperparameter_optimization.config.SplitType import SplitType
 from source.util.PathBuilder import PathBuilder
 from source.workflows.steps.DataSplitter import DataSplitter
 from source.workflows.steps.DataSplitterParams import DataSplitterParams

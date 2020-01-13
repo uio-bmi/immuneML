@@ -9,9 +9,9 @@ from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.environment.LabelConfiguration import LabelConfiguration
 from source.environment.MetricType import MetricType
 from source.hyperparameter_optimization.HPSetting import HPSetting
-from source.hyperparameter_optimization.ReportConfig import ReportConfig
-from source.hyperparameter_optimization.SplitConfig import SplitConfig
-from source.hyperparameter_optimization.SplitType import SplitType
+from source.hyperparameter_optimization.config.ReportConfig import ReportConfig
+from source.hyperparameter_optimization.config.SplitConfig import SplitConfig
+from source.hyperparameter_optimization.config.SplitType import SplitType
 from source.hyperparameter_optimization.strategy.GridSearch import GridSearch
 from source.ml_methods.SimpleLogisticRegression import SimpleLogisticRegression
 from source.util.PathBuilder import PathBuilder

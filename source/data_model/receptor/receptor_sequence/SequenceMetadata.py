@@ -1,5 +1,4 @@
 # quality: gold
-from source.data_model.metadata.Sample import Sample
 from source.data_model.receptor.receptor_sequence.Chain import Chain
 from source.data_model.receptor.receptor_sequence.SequenceFrameType import SequenceFrameType
 
@@ -28,7 +27,6 @@ class SequenceMetadata:
                  count: int = None,
                  frame_type: str = SequenceFrameType.IN.name,
                  region_type: str = None,
-                 sample: Sample = None,
                  custom_params: dict = None):
         self.v_subgroup = v_subgroup
         self.v_gene = v_gene
@@ -40,5 +38,4 @@ class SequenceMetadata:
         self.count = count
         self.frame_type = frame_type
         self.region_type = region_type  # should be e.g. CDR, CDR3, whole sequence etc
-        self.sample = sample
         self.custom_params = custom_params if custom_params is not None else {}

@@ -1,4 +1,3 @@
-import copy
 import os
 
 import numpy as np
@@ -24,7 +23,7 @@ class PatientRepertoireCollector(Preprocessor):
         repertoires = []
         indices_to_keep = []
 
-        processed_dataset = copy.deepcopy(dataset)
+        processed_dataset = dataset.clone()
         PathBuilder.build(params["result_path"])
 
         for index, repertoire in enumerate(processed_dataset.get_data()):

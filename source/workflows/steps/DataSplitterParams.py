@@ -1,5 +1,5 @@
 from source.data_model.dataset.Dataset import Dataset
-from source.hyperparameter_optimization.SplitType import SplitType
+from source.hyperparameter_optimization.config.SplitType import SplitType
 from source.workflows.steps.StepParams import StepParams
 
 

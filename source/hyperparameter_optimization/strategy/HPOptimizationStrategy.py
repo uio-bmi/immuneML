@@ -1,6 +1,7 @@
 import abc
 
 from source.hyperparameter_optimization.HPSetting import HPSetting
+from source.hyperparameter_optimization.HPSettingResult import HPSettingResult
 
 
 class HPOptimizationStrategy(metaclass=abc.ABCMeta):
@@ -17,7 +18,7 @@ class HPOptimizationStrategy(metaclass=abc.ABCMeta):
         self.search_space_metric = {hp_setting.get_key(): None for hp_setting in hp_settings}
 
     @abc.abstractmethod
-    def get_next_setting(self, hp_setting: HPSetting = None, metric: dict = None):
+    def generate_next_setting(self, hp_setting: HPSetting = None, metric: dict = None):
         """
         generator function which returns the next hyper-parameter setting to be evaluated
         :param hp_setting: previous setting (None if it's the first iteration)
@@ -28,4 +29,12 @@ class HPOptimizationStrategy(metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def get_optimal_hps(self) -> HPSetting:
+        pass
+
+    @abc.abstractmethod
+    def get_all_hps(self) -> HPSettingResult:
+        pass
+
+    @abc.abstractmethod
+    def clone(self):
         pass

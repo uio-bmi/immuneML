@@ -25,3 +25,7 @@ class Dataset:
     @abc.abstractmethod
     def get_example_ids(self):
         pass
+
+    @abc.abstractmethod
+    def clone(self):
+        pass

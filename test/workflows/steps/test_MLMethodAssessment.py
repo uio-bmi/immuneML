@@ -30,14 +30,13 @@ class TestMLMethodAssessment(TestCase):
 
         label_config = LabelConfiguration()
         label_config.add_label("l1", [1, 2, 3])
-        label_config.add_label("l2", [1, 2, 3])
 
         method1 = SVM()
         method1.fit(dataset.encoded_data.examples, dataset.encoded_data.labels, dataset.encoded_data.labels.keys())
 
         res = MLMethodAssessment.run(MLMethodAssessmentParams(
             dataset=dataset,
-            method=method1,
+            method={"l1": method1},
             metrics={MetricType.ACCURACY, MetricType.BALANCED_ACCURACY, MetricType.F1_MACRO},
             predictions_path=EnvironmentSettings.root_path + "test/tmp/mlmethodassessment/fold_predictions.csv",
             label_configuration=label_config,
@@ -48,7 +47,6 @@ class TestMLMethodAssessment(TestCase):
         ))
 
         self.assertTrue("l1" in res)
-        self.assertTrue("l2" in res)
 
         self.assertTrue(os.path.isfile(EnvironmentSettings.root_path + "test/tmp/mlmethodassessment/ml_details.csv"))
 

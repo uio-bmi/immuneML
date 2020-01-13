@@ -1,13 +1,14 @@
 from source.hyperparameter_optimization.HPSetting import HPSetting
+from source.hyperparameter_optimization.HPSettingResult import HPSettingResult
 from source.hyperparameter_optimization.strategy.HPOptimizationStrategy import HPOptimizationStrategy
 
 
 class GridSearch(HPOptimizationStrategy):
 
-    def get_next_setting(self, hp_setting: HPSetting = None, metric_per_label: dict = None) -> HPSetting:
+    def generate_next_setting(self, hp_setting: HPSetting = None, metric: float = None) -> HPSetting:
 
         if hp_setting is not None:
-            self.search_space_metric[hp_setting.get_key()] = metric_per_label
+            self.search_space_metric[hp_setting.get_key()] = metric
 
         keys = [key for key in self.search_space_metric if self.search_space_metric[key] is None]
 
@@ -19,10 +20,13 @@ class GridSearch(HPOptimizationStrategy):
         return next_setting
 
     def get_optimal_hps(self) -> HPSetting:
-        """
-        :return: the hyper-parameter setting which has the highest average performance across all labels
-        """
-        key = max(self.search_space_metric.keys(), key=(lambda k: sum(self.search_space_metric[k][label]
-                                                                      for label in self.search_space_metric[k])
-                                                                  / len(self.search_space_metric[k])))
-        return self.hp_settings[key]
+        optimal_key = max(self.search_space_metric, key=lambda k: self.search_space_metric[k])
+        return self.hp_settings[optimal_key]
+
+    def get_all_hps(self) -> HPSettingResult:
+        optimal_setting = self.get_optimal_hps()
+        res = HPSettingResult(optimal_setting=optimal_setting, all_settings=self.hp_settings)
+        return res
+
+    def clone(self):
+        return GridSearch(hp_settings=self.hp_settings.values())

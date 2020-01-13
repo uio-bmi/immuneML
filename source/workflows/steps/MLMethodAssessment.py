@@ -6,7 +6,6 @@ from sklearn import metrics
 
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.environment.MetricType import MetricType
-from source.ml_methods.MLMethod import MLMethod
 from source.ml_metrics import ml_metrics
 from source.util.PathBuilder import PathBuilder
 from source.workflows.steps.MLMethodAssessmentParams import MLMethodAssessmentParams
@@ -21,9 +20,13 @@ class MLMethodAssessment(Step):
     def run(input_params: MLMethodAssessmentParams = None):
         labels = input_params.label_configuration.get_labels_by_name()
         X = input_params.dataset.encoded_data.examples
-        predicted_y = input_params.method.predict(X, labels)
-        predicted_proba_y = input_params.method.predict_proba(X, labels)
-        true_y = input_params.dataset.encoded_data.labels
+        predicted_y, predicted_proba_y, true_y = {}, {}, {}
+
+        for label in labels:
+            predicted_y[label] = input_params.method[label].predict(X, [label])
+            predicted_proba_y[label] = input_params.method[label].predict_proba(X, [label])
+            true_y[label] = input_params.dataset.encoded_data.labels[label]
+
         example_ids = input_params.dataset.get_example_ids()
 
         MLMethodAssessment._store_predictions(input_params.method,
@@ -51,7 +54,7 @@ class MLMethodAssessment(Step):
 
     @staticmethod
     def _score(metrics_list: list, labels: list, label_config, predicted_y, true_y, ml_details_path: str, run: int,
-               method: MLMethod, dataset: RepertoireDataset):
+               method: dict, dataset: RepertoireDataset):
         results = {}
 
         for metric in metrics_list:
@@ -62,7 +65,7 @@ class MLMethodAssessment(Step):
 
         results["run"] = run
         for label in labels:
-            results["{}_method_params".format(label)] = {**method.get_params(label),
+            results["{}_method_params".format(label)] = {**method[label].get_params(label),
                                                          "feature_names": dataset.encoded_data.feature_names
                                                          if dataset is not None else None}
 
@@ -91,18 +94,22 @@ class MLMethodAssessment(Step):
 
     @staticmethod
     def _store_predictions(method, true_y, predicted_y, predicted_proba_y, labels, predictions_path, summary_path=None,
-                           repertoire_ids: list = None, run: str = None):
+                           example_ids: list = None, run: str = None):
 
         df = pd.DataFrame()
-        df["example_id"] = repertoire_ids
-        df["run"] = [run for i in range(len(repertoire_ids))]
+        df["example_id"] = example_ids
+        df["run"] = [run for i in range(len(example_ids))]
+
         for index, label in enumerate(labels):
+            predicted_y[label] = predicted_y[label][label]
+            if predicted_proba_y is not None and predicted_proba_y[label] is not None:
+                predicted_proba_y[label] = predicted_proba_y[label][label]
             df["{}_true_class".format(label)] = true_y[label]
             df["{}_predicted_class".format(label)] = predicted_y[label]
 
-            classes = method.get_classes_for_label(label)
+            classes = method[label].get_classes_for_label(label)
             for cls_index, cls in enumerate(classes):
-                tmp = predicted_proba_y[label][:, cls_index] if predicted_proba_y is not None else None
+                tmp = predicted_proba_y[label][:, cls_index] if predicted_proba_y is not None and predicted_proba_y[label] is not None else None
                 df["{}_{}_proba".format(label, cls)] = tmp
 
         if predictions_path is not None:

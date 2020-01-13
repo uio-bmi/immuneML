@@ -19,6 +19,10 @@ class RepertoireDataset(Dataset):
         self.repertoire_ids = None
         self.repertoires = repertoires
 
+    def clone(self):
+        return RepertoireDataset(self.params, copy.deepcopy(self.encoded_data), copy.deepcopy(self.repertoires),
+                                 metadata_file=self.metadata_file)
+
     def add_encoded_data(self, encoded_data: EncodedData):
         self.encoded_data = encoded_data
 
@@ -56,7 +60,7 @@ class RepertoireDataset(Dataset):
 
         metadata_file = self._build_new_metadata(example_indices, path + "metadata.csv")
         new_dataset = RepertoireDataset(repertoires=[self.repertoires[i] for i in example_indices], params=copy.deepcopy(self.params),
-                                        metadata_file=metadata_file)
+                                        metadata_file=metadata_file, identifier=str(uuid.uuid1()))
 
         return new_dataset
 

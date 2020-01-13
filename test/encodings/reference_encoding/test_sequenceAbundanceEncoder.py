@@ -7,6 +7,7 @@ from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.encodings.EncoderParams import EncoderParams
 from source.encodings.reference_encoding.SequenceAbundanceEncoder import SequenceAbundanceEncoder
 from source.environment.EnvironmentSettings import EnvironmentSettings
+from source.environment.Label import Label
 from source.environment.LabelConfiguration import LabelConfiguration
 from source.util.PathBuilder import PathBuilder
 from source.util.RepertoireBuilder import RepertoireBuilder
@@ -31,7 +32,7 @@ class TestSequenceAbundanceEncoder(TestCase):
             "p_value_threshold": 0.4, "pool_size": 4
         })
 
-        label_config = LabelConfiguration({"l1": [True, False]})
+        label_config = LabelConfiguration([Label("l1", [True, False])])
 
         encoded_dataset = encoder.encode(dataset, EncoderParams(result_path=path, label_configuration=label_config,
                                                                 filename="encoded.pickle"))

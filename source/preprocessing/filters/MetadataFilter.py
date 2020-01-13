@@ -1,5 +1,3 @@
-import copy
-
 import numpy as np
 import pandas as pd
 
@@ -38,7 +36,7 @@ class MetadataFilter(Filter):
 
     @staticmethod
     def process(dataset: RepertoireDataset, params: dict) -> RepertoireDataset:
-        processed_dataset = copy.deepcopy(dataset)
+        processed_dataset = dataset.clone()
         original_repertoires = processed_dataset.get_data()
         indices = MetadataFilter.get_matching_indices(processed_dataset, params["criteria"])
         processed_dataset.repertoires = [original_repertoires[i] for i in indices]

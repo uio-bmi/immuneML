@@ -8,7 +8,7 @@ from source.encodings.word2vec.model_creator.ModelType import ModelType
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.environment.LabelConfiguration import LabelConfiguration
 from source.environment.MetricType import MetricType
-from source.hyperparameter_optimization.SplitType import SplitType
+from source.hyperparameter_optimization.config.SplitType import SplitType
 from source.ml_methods.SimpleLogisticRegression import SimpleLogisticRegression
 from source.util.PathBuilder import PathBuilder
 from source.util.RepertoireBuilder import RepertoireBuilder
@@ -28,7 +28,6 @@ class TestMLProcess(TestCase):
         dataset = RepertoireDataset(repertoires=repertoires, params={"l1": [0, 1], "l2": [2, 3]}, metadata_file=metadata)
         label_config = LabelConfiguration()
         label_config.add_label("l1", [0, 1])
-        label_config.add_label("l2", [2, 3])
         encoder_params = {
             "k": 3,
             "model_type": ModelType.SEQUENCE,

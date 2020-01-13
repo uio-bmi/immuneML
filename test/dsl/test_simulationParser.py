@@ -15,7 +15,9 @@ class TestSimulationParser(TestCase):
                 "motifs": {
                     "motif1": {
                         "seed": "CAS",
-                        "instantiation": "Identity",
+                        "instantiation": "GappedKmer",
+                        "alphabet_weights": {},
+                        "position_weights": {}
                     }
                 },
                 "signals": {

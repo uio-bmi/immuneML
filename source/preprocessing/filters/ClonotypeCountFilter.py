@@ -1,5 +1,3 @@
-import copy
-
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.preprocessing.filters.Filter import Filter
 
@@ -20,7 +18,7 @@ class ClonotypeCountFilter(Filter):
 
     @staticmethod
     def process(dataset: RepertoireDataset, params: dict) -> RepertoireDataset:
-        processed_dataset = copy.deepcopy(dataset)
+        processed_dataset = dataset.clone()
         repertoires = []
         indices =[]
         for index, repertoire in enumerate(dataset.get_data()):

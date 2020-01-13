@@ -9,7 +9,7 @@ from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.simulation.Simulation import Simulation
 from source.simulation.implants.Motif import Motif
 from source.simulation.implants.Signal import Signal
-from source.simulation.motif_instantiation_strategy.IdentityInstantiation import IdentityInstantiation
+from source.simulation.motif_instantiation_strategy.GappedKmerInstantiation import GappedKmerInstantiation
 from source.simulation.signal_implanting_strategy.HealthySequenceImplanting import HealthySequenceImplanting
 from source.simulation.signal_implanting_strategy.sequence_implanting.GappedMotifImplanting import GappedMotifImplanting
 from source.workflows.steps.SignalImplanter import SignalImplanter
@@ -36,8 +36,8 @@ class TestSignalImplanter(TestCase):
 
         dataset = RepertoireDataset(repertoires=r)
 
-        m1 = Motif(identifier="m1", instantiation_strategy=IdentityInstantiation(), seed="CAS")
-        m2 = Motif(identifier="m2", instantiation_strategy=IdentityInstantiation(), seed="CCC")
+        m1 = Motif(identifier="m1", instantiation_strategy=GappedKmerInstantiation(), seed="CAS")
+        m2 = Motif(identifier="m2", instantiation_strategy=GappedKmerInstantiation(), seed="CCC")
         s1 = Signal(identifier="s1", motifs=[m1], implanting_strategy=HealthySequenceImplanting(GappedMotifImplanting()))
         s2 = Signal(identifier="s2", motifs=[m1, m2],
                     implanting_strategy=HealthySequenceImplanting(GappedMotifImplanting()))

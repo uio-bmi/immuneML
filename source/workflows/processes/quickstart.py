@@ -19,39 +19,35 @@ class Quickstart:
     def create_dataset(self, path):
         PathBuilder.build(path)
 
-        rep1 = SequenceRepertoire.build_from_sequence_objects([ReceptorSequence(amino_acid_sequence="AAA", metadata=SequenceMetadata(chain="B")),
+        sequences1 = [ReceptorSequence(amino_acid_sequence="AAA", metadata=SequenceMetadata(chain="B")),
                                              ReceptorSequence(amino_acid_sequence="AAAA", metadata=SequenceMetadata(chain="B")),
                                              ReceptorSequence(amino_acid_sequence="AAAAA", metadata=SequenceMetadata(chain="B")),
-                                             ReceptorSequence(amino_acid_sequence="AAA", metadata=SequenceMetadata(chain="B"))],
-                                  metadata={"CD": True}, path=path, identifier="1")
-        rep2 = SequenceRepertoire.build_from_sequence_objects([ReceptorSequence(amino_acid_sequence="AAA", metadata=SequenceMetadata(chain="B")),
+                                             ReceptorSequence(amino_acid_sequence="AAA", metadata=SequenceMetadata(chain="B"))]
+        sequences2 = [ReceptorSequence(amino_acid_sequence="AAA", metadata=SequenceMetadata(chain="B")),
                                              ReceptorSequence(amino_acid_sequence="AAAA", metadata=SequenceMetadata(chain="B")),
                                              ReceptorSequence(amino_acid_sequence="AAAA", metadata=SequenceMetadata(chain="B")),
-                                             ReceptorSequence(amino_acid_sequence="AAA", metadata=SequenceMetadata(chain="B"))],
-                                  metadata={"CD": False}, path=path, identifier="2")
-        rep3 = SequenceRepertoire.build_from_sequence_objects([ReceptorSequence(amino_acid_sequence="AAA", metadata=SequenceMetadata(chain="A")),
+                                             ReceptorSequence(amino_acid_sequence="AAA", metadata=SequenceMetadata(chain="B"))]
+        sequences3 = [ReceptorSequence(amino_acid_sequence="AAA", metadata=SequenceMetadata(chain="A")),
                                              ReceptorSequence(amino_acid_sequence="AAAA", metadata=SequenceMetadata(chain="A")),
                                              ReceptorSequence(amino_acid_sequence="AAAA", metadata=SequenceMetadata(chain="A")),
-                                             ReceptorSequence(amino_acid_sequence="AAA", metadata=SequenceMetadata(chain="A"))],
-                                  metadata={"CD": True}, path=path, identifier='3')
-        rep4 = SequenceRepertoire.build_from_sequence_objects([ReceptorSequence(amino_acid_sequence="AAA", metadata=SequenceMetadata(chain="A")),
+                                             ReceptorSequence(amino_acid_sequence="AAA", metadata=SequenceMetadata(chain="A"))]
+        sequences4 = [ReceptorSequence(amino_acid_sequence="AAA", metadata=SequenceMetadata(chain="A")),
                                              ReceptorSequence(amino_acid_sequence="AAAA", metadata=SequenceMetadata(chain="A")),
                                              ReceptorSequence(amino_acid_sequence="AAAAA", metadata=SequenceMetadata(chain="A")),
-                                             ReceptorSequence(amino_acid_sequence="AAA", metadata=SequenceMetadata(chain="A"))],
-                                  metadata={"CD": False}, identifier='4', path=path)
+                                             ReceptorSequence(amino_acid_sequence="AAA", metadata=SequenceMetadata(chain="A"))]
 
         repertoire_count = 100
         repertoires = []
 
         for index in range(1, repertoire_count+1):
                 if index % 4 == 0:
-                    repertoires.append(rep1)
+                    repertoires.append(SequenceRepertoire.build_from_sequence_objects(sequences1, path, str(index), {"CD": True}))
                 elif index % 3 == 0:
-                    repertoires.append(rep3)
+                    repertoires.append(SequenceRepertoire.build_from_sequence_objects(sequences2, path, str(index), {"CD": False}))
                 elif index % 2 == 0:
-                    repertoires.append(rep2)
+                    repertoires.append(SequenceRepertoire.build_from_sequence_objects(sequences3, path, str(index), {"CD": True}))
                 else:
-                    repertoires.append(rep4)
+                    repertoires.append(SequenceRepertoire.build_from_sequence_objects(sequences4, path, str(index), {"CD": False}))
 
         dataset = RepertoireDataset(repertoires=repertoires, params={"CD": [True, False]})
 

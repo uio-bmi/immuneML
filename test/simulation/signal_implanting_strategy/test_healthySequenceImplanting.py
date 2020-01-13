@@ -6,7 +6,7 @@ from source.data_model.repertoire.SequenceRepertoire import SequenceRepertoire
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.simulation.implants.Motif import Motif
 from source.simulation.implants.Signal import Signal
-from source.simulation.motif_instantiation_strategy.IdentityInstantiation import IdentityInstantiation
+from source.simulation.motif_instantiation_strategy.GappedKmerInstantiation import GappedKmerInstantiation
 from source.simulation.signal_implanting_strategy.HealthySequenceImplanting import HealthySequenceImplanting
 from source.simulation.signal_implanting_strategy.sequence_implanting.GappedMotifImplanting import GappedMotifImplanting
 from source.util.PathBuilder import PathBuilder
@@ -21,7 +21,7 @@ class TestHealthySequenceImplanting(TestCase):
                                                                      ReceptorSequence(amino_acid_sequence="TGCDF", identifier="2")],
                                                                     path=path, identifier="1", metadata={})
         implanting = HealthySequenceImplanting(GappedMotifImplanting())
-        signal = Signal(1, [Motif("m1", IdentityInstantiation(), "CCC")], implanting)
+        signal = Signal(1, [Motif("m1", GappedKmerInstantiation(), "CCC")], implanting)
 
         repertoire2 = implanting.implant_in_repertoire(repertoire, 0.5, signal, path)
 
@@ -33,7 +33,7 @@ class TestHealthySequenceImplanting(TestCase):
 
     def test_implant_in_sequence(self):
         implanting = HealthySequenceImplanting(GappedMotifImplanting())
-        signal = Signal(1, [Motif("m1", IdentityInstantiation(), "CCC")], implanting)
+        signal = Signal(1, [Motif("m1", GappedKmerInstantiation(), "CCC")], implanting)
         sequence = ReceptorSequence(amino_acid_sequence="ACDFQ")
         sequence2 = implanting.implant_in_sequence(sequence, signal)
 

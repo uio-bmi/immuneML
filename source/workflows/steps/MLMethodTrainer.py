@@ -8,7 +8,7 @@ class MLMethodTrainer(Step):
 
     @staticmethod
     def run(input_params: MLMethodTrainerParams = None):
-        method = input_params.method
+        method = copy.deepcopy(input_params.method)
 
         if not method.check_if_exists(input_params.result_path):
             method = MLMethodTrainer._fit_method(input_params)

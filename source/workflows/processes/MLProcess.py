@@ -35,7 +35,7 @@ class MLProcess:
         self.label_configuration = label_configuration
         self.encoder = encoder
         self.encoder_params = encoder_params
-        self.method = method
+        self.method = copy.deepcopy(method)
         self.ml_params = ml_params
         self.path = path
         self.cores_for_training = cores
@@ -54,13 +54,14 @@ class MLProcess:
 
     def run(self, run_id: int):
         encoded_train = self._run_encoder(self.train_dataset, True)
-        method = self._train_ml_method(encoded_train)
-        if self.test_dataset.get_example_count() > 0:
-            encoded_test = self._run_encoder(self.test_dataset, False)
-            performance = self._assess_ml_method(method, encoded_test, run_id)
-            self._run_reports(method, encoded_train, encoded_test, self.path + "reports/")
-        else:
-            performance = {}
+        for label in self.label_configuration.get_labels_by_name():
+            method = self._train_ml_method(encoded_train)
+            if self.test_dataset.get_example_count() > 0:
+                encoded_test = self._run_encoder(self.test_dataset, False)
+                performance = self._assess_ml_method({label: method}, encoded_test, run_id)
+                self._run_reports(method, encoded_train, encoded_test, self.path + "reports/")
+            else:
+                performance = {}
         return performance
 
     def _run_reports(self, method: MLMethod, train_dataset: Dataset, test_dataset: RepertoireDataset, path: str):
@@ -72,18 +73,18 @@ class MLProcess:
             tmp_report.result_path = path
             tmp_report.generate_report()
 
-    def _assess_ml_method(self, method: MLMethod, encoded_test_dataset: Dataset, run: int):
-            return MLMethodAssessment.run(MLMethodAssessmentParams(
-                method=method,
-                dataset=encoded_test_dataset,
-                metrics=self.metrics,
-                predictions_path=self.path + "predictions.csv",
-                label_configuration=self.label_configuration,
-                run=run,
-                ml_details_path=self.ml_details_path,
-                all_predictions_path=self.predictions_path,
-                path=self.path
-            ))
+    def _assess_ml_method(self, method: dict, encoded_test_dataset: Dataset, run: int):
+        return MLMethodAssessment.run(MLMethodAssessmentParams(
+            method=method,
+            dataset=encoded_test_dataset,
+            metrics=self.metrics,
+            predictions_path=self.path + "predictions.csv",
+            label_configuration=self.label_configuration,
+            run=run,
+            ml_details_path=self.ml_details_path,
+            all_predictions_path=self.predictions_path,
+            path=self.path
+        ))
 
     def _run_encoder(self, train_dataset: Dataset, learn_model: bool):
         return DataEncoder.run(DataEncoderParams(

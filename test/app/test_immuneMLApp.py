@@ -20,20 +20,20 @@ class TestImmuneMLApp(TestCase):
         path = EnvironmentSettings.root_path + "test/tmp/immunemlapp/"
         PathBuilder.build(path)
 
-        repertoires = []
-        repertoires.append(SequenceRepertoire.build_from_sequence_objects(sequence_objects=
-                                                                          [ReceptorSequence(amino_acid_sequence="AAA", metadata=SequenceMetadata(chain="A"), identifier="1"),
-                                             ReceptorSequence(amino_acid_sequence="AAAA", metadata=SequenceMetadata(chain="B"), identifier="2"),
-                                             ReceptorSequence(amino_acid_sequence="AAAAA", metadata=SequenceMetadata(chain="B"), identifier="3"),
-                                             ReceptorSequence(amino_acid_sequence="AAA", metadata=SequenceMetadata(chain="A"), identifier="4")],
-                                  metadata={"CD": True}, path=path, identifier="1"))
-        repertoires.append(SequenceRepertoire.build_from_sequence_objects(sequence_objects=[ReceptorSequence(amino_acid_sequence="AAA", metadata=SequenceMetadata(chain="B"), identifier="5"),
-                                             ReceptorSequence(amino_acid_sequence="AAAA", metadata=SequenceMetadata(chain="A"), identifier="6"),
-                                             ReceptorSequence(amino_acid_sequence="AAAA", metadata=SequenceMetadata(chain="B"), identifier="7"),
-                                             ReceptorSequence(amino_acid_sequence="AAA", metadata=SequenceMetadata(chain="A"), identifier="8")],
-                                  metadata={"CD": False}, path=path, identifier="2"))
+        sequences1 = [ReceptorSequence(amino_acid_sequence="AAA", metadata=SequenceMetadata(chain="A"), identifier="1"),
+                      ReceptorSequence(amino_acid_sequence="AAAA", metadata=SequenceMetadata(chain="B"), identifier="2"),
+                      ReceptorSequence(amino_acid_sequence="AAAAA", metadata=SequenceMetadata(chain="B"), identifier="3"),
+                      ReceptorSequence(amino_acid_sequence="AAA", metadata=SequenceMetadata(chain="A"), identifier="4")]
+        sequences2 =[ReceptorSequence(amino_acid_sequence="AAA", metadata=SequenceMetadata(chain="B"), identifier="5"),
+                     ReceptorSequence(amino_acid_sequence="AAAA", metadata=SequenceMetadata(chain="A"), identifier="6"),
+                     ReceptorSequence(amino_acid_sequence="AAAA", metadata=SequenceMetadata(chain="B"), identifier="7"),
+                     ReceptorSequence(amino_acid_sequence="AAA", metadata=SequenceMetadata(chain="A"), identifier="8")]
 
-        dataset = RepertoireDataset(repertoires=[repertoires[i % 2] for i in range(1, 14)], params={"CD": [True, False]})
+        dataset = RepertoireDataset(repertoires=[SequenceRepertoire.build_from_sequence_objects(sequences1 if i % 2 == 0 else sequences2,
+                                                                                                path, identifier=str(i),
+                                                                                                metadata={"CD": True if i % 2 == 0 else False})
+                                                 for i in range(1, 14)],
+                                    params={"CD": [True, False]})
 
         PickleExporter.export(dataset, path, "dataset.pkl")
 

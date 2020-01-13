@@ -1,6 +1,5 @@
 # quality: gold
 import abc
-import copy
 import hashlib
 import os
 
@@ -9,6 +8,7 @@ from gensim.models import Word2Vec
 
 from source.IO.dataset_export.PickleExporter import PickleExporter
 from source.caching.CacheHandler import CacheHandler
+from source.data_model.dataset.Dataset import Dataset
 from source.data_model.encoded_data.EncodedData import EncodedData
 from source.encodings.DatasetEncoder import DatasetEncoder
 from source.encodings.EncoderParams import EncoderParams
@@ -71,7 +71,8 @@ class Word2VecEncoder(DatasetEncoder):
         return encoded_dataset
 
     def _prepare_caching_params(self, dataset, params, vectors=None, description: str = ""):
-        return (("dataset_filenames", tuple(dataset.get_example_ids())),
+        return (("dataset_id", dataset.identifier),
+                ("dataset_filenames", tuple(dataset.get_example_ids())),
                 ("dataset_metadata", dataset.metadata_file),
                 ("dataset_type", dataset.__class__.__name__),
                 ("labels", tuple(params["label_configuration"].get_labels_by_name())),
@@ -114,9 +115,9 @@ class Word2VecEncoder(DatasetEncoder):
         encoded_dataset = self._build_encoded_dataset(dataset, scaled_examples, labels, params)
         return encoded_dataset
 
-    def _build_encoded_dataset(self, dataset, scaled_examples, labels, params: EncoderParams):
+    def _build_encoded_dataset(self, dataset: Dataset, scaled_examples, labels, params: EncoderParams):
 
-        encoded_dataset = copy.deepcopy(dataset)
+        encoded_dataset = dataset.clone()
 
         label_names = params["label_configuration"].get_labels_by_name()
         feature_names = [str(i) for i in range(scaled_examples.shape[1])]
