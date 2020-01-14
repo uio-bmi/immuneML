@@ -1,3 +1,4 @@
+import warnings
 from collections import Counter, OrderedDict
 
 import matplotlib.pyplot as plt
@@ -15,8 +16,11 @@ class SequenceLengthDistribution(DataReport):
         self.batch_size = batch_size
 
     def generate(self):
-        normalized_sequence_lengths = self.get_normalized_sequence_lengths()
-        self.plot(normalized_sequence_lengths)
+        if isinstance(self.dataset, RepertoireDataset):
+            normalized_sequence_lengths = self.get_normalized_sequence_lengths()
+            self.plot(normalized_sequence_lengths)
+        else:
+            warnings.warn("SequenceLengthDistribution: report can be generated only from RepertoireDataset. Skipping this report...")
 
     def get_normalized_sequence_lengths(self) -> Counter:
         sequence_lenghts = Counter()
