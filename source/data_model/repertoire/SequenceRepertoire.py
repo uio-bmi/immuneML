@@ -20,10 +20,12 @@ class SequenceRepertoire(DatasetItem):
 
     @staticmethod
     def process_custom_lists(custom_lists):
-        field_list = list(custom_lists.keys())
-        values = [custom_lists[field] for field in custom_lists.keys()]
-        dtype = [(field, np.object) for field in custom_lists.keys()]
-
+        if custom_lists:
+            field_list = list(custom_lists.keys())
+            values = [custom_lists[field] for field in custom_lists.keys()]
+            dtype = [(field, np.object) for field in custom_lists.keys()]
+        else:
+            field_list, values, dtype = [], [], []
         return field_list, values, dtype
 
     @classmethod
@@ -34,7 +36,7 @@ class SequenceRepertoire(DatasetItem):
             sequence_identifiers = list(range(len(sequence_aas))) if sequence_aas is not None and len(sequence_aas) > 0 else list(range(len(sequences)))
 
         assert len(sequence_aas) == len(sequence_identifiers) or len(sequences) == len(sequence_identifiers)
-        assert all(len(custom_lists[key]) == len(sequence_identifiers) for key in custom_lists)
+        assert all(len(custom_lists[key]) == len(sequence_identifiers) for key in custom_lists) if custom_lists else True
 
         data_filename = f"{path}{identifier}_data.npy"
 
