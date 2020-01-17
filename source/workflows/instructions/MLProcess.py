@@ -46,7 +46,7 @@ class MLProcess:
         self.metrics.add(MetricType.BALANCED_ACCURACY)
         self.min_example_count = min_example_count
         self.ml_details_path = "{}ml_details.csv".format(path)
-        self.predictions_path = "{}predictions.csv".format(path)
+        self.predictions_path = "{}all_predictions.csv".format(path)
         self.reports = reports if reports is not None else []
 
     def get_ML_result(self):
@@ -59,6 +59,8 @@ class MLProcess:
             if self.test_dataset.get_example_count() > 0:
                 encoded_test = self._run_encoder(self.test_dataset, False)
                 performance = self._assess_ml_method({label: method}, encoded_test, run_id)
+                method.ml_details_path = self.ml_details_path
+                method.predictions_path = self.path + "predictions.csv"
                 self._run_reports(method, encoded_train, encoded_test, self.path + "reports/")
             else:
                 performance = {}

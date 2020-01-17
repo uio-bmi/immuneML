@@ -13,6 +13,9 @@ class MLMethod(metaclass=abc.ABCMeta):
         Other parameters in addition to repertoires and labels can be included,
         such as label_names, features names etc.
     """
+    def __init__(self):
+        self.ml_details_path = None
+        self.predictions_path = {}
 
     @abc.abstractmethod
     def fit(self, X, y, label_names: list = None, cores_for_training: int = 2):
