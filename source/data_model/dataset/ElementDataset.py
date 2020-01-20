@@ -40,6 +40,6 @@ class ElementDataset(Dataset):
                 self.element_ids.append(element.identifier)
         return self.element_ids
 
-    def make_subset(self, example_indices, path):
-        batch_filenames = self.element_generator.make_subset(example_indices, path)
+    def make_subset(self, example_indices, path, dataset_type: str):
+        batch_filenames = self.element_generator.make_subset(example_indices, path, dataset_type)
         return self.__class__(params=self.params, filenames=batch_filenames, file_size=self.file_size)

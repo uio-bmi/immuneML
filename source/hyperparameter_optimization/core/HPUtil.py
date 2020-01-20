@@ -22,22 +22,20 @@ class HPUtil:
 
     @staticmethod
     def split_data(dataset: Dataset, split_config: SplitConfig, path: str) -> tuple:
+        paths = [f"{path}split_{i+1}/" for i in range(split_config.split_count)]
         params = DataSplitterParams(
             dataset=dataset,
             split_strategy=split_config.split_strategy,
             split_count=split_config.split_count,
             training_percentage=split_config.training_percentage,
             label_to_balance=split_config.label_to_balance,
-            path=path
+            paths=paths
         )
         return DataSplitter.run(params)
 
     @staticmethod
-    def get_average_performance(metrics_per_label, label):
-        if all(label in performance for performance in metrics_per_label):
-            return sum(perf[label] for perf in metrics_per_label) / len(metrics_per_label)
-        else:
-            return metrics_per_label
+    def get_average_performance(performances):
+        return sum(perf for perf in performances) / len(performances)
 
     @staticmethod
     def preprocess_dataset(dataset: Dataset, preproc_sequence: list, path: str) -> Dataset:
@@ -48,12 +46,14 @@ class HPUtil:
         return tmp_dataset
 
     @staticmethod
-    def train_method(state: HPOptimizationState, dataset, hp_setting: HPSetting, path: str) -> MLMethod:
+    def train_method(label: str, dataset, hp_setting: HPSetting, path: str, train_predictions_path, ml_details_path) -> MLMethod:
         method = MLMethodTrainer.run(MLMethodTrainerParams(
             method=copy.deepcopy(hp_setting.ml_method),
             result_path=path + "/ml_method/",
             dataset=dataset,
-            labels=state.label_configuration.get_labels_by_name(),
+            label=label,
+            train_predictions_path=train_predictions_path,
+            ml_details_path=ml_details_path,
             model_selection_cv=hp_setting.ml_params["model_selection_cv"],
             model_selection_n_folds=hp_setting.ml_params["model_selection_n_folds"],
             cores_for_training=-1  # TODO: make it configurable, add cores_for_training
@@ -82,17 +82,15 @@ class HPUtil:
         return encoded_dataset
 
     @staticmethod
-    def assess_performance(state: HPOptimizationState, dataset, run, current_path, hp_setting):
-        method_per_label = {label: state.assessment_states[run].label_states[label].assessment_items[hp_setting].method
-                            for label in state.assessment_states[run].label_states}
+    def assess_performance(state: HPOptimizationState, dataset, split_index, current_path, hp_setting, test_predictions_path: str,
+                           label: str, ml_score_path: str):
         return MLMethodAssessment.run(MLMethodAssessmentParams(
-            method=method_per_label,
+            method=state.assessment_states[split_index].label_states[label].assessment_items[hp_setting].method,
             dataset=dataset,
-            predictions_path="{}predictions.csv".format(current_path),
-            all_predictions_path="{}assessment_{}/all_predictions.csv".format(state.path, state.assessment_config.split_strategy.name),
-            ml_details_path="{}ml_details.csv".format(current_path),
-            run=run,
-            label_configuration=state.label_configuration,
+            predictions_path=test_predictions_path,
+            split_index=split_index,
+            label=label,
             metrics=state.metrics,
-            path=current_path
+            path=current_path,
+            ml_score_path=ml_score_path
         ))

@@ -74,7 +74,8 @@ class ComparisonData:
 
     def find_label_associated_sequence_info(self, dataset: RepertoireDataset, label: str, label_values: list):
 
-        assert len(label_values) == 2, "ComparisonData: Label associated sequences can be inferred only for binary labels."
+        assert label_values is None or len(label_values) == 2, \
+            "ComparisonData: Label associated sequences can be inferred only for binary labels."
 
         repertoire_ids = dataset.get_repertoire_ids()
         metadata = dataset.get_metadata(["donor", label])

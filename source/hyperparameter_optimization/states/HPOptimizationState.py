@@ -26,5 +26,3 @@ class HPOptimizationState:
 
         # computed attributes
         self.assessment_states = []
-        self.optimal_hp_settings = []
-        self.selection_states = []

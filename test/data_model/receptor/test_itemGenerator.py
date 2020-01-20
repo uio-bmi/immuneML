@@ -65,7 +65,7 @@ class TestItemGenerator(TestCase):
 
         indices = [1, 20, 21, 22, 23, 24, 25, 50, 52, 60, 70, 77, 78, 90, 92]
 
-        d2 = d.make_subset(indices, path)
+        d2 = d.make_subset(indices, path, SequenceDataset.TRAIN)
 
         for batch in d2.get_batch(1000):
             for sequence in batch:

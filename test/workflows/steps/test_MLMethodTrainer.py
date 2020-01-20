@@ -1,3 +1,4 @@
+import os
 import shutil
 from unittest import TestCase
 
@@ -30,13 +31,17 @@ class TestMLMethodTrainer(TestCase):
         method = MLMethodTrainer.run(MLMethodTrainerParams(
             result_path=path,
             dataset=dataset,
-            labels=["l1"],
+            label="l1",
             method=method,
             model_selection_n_folds=2,
             model_selection_cv=True,
-            cores_for_training=1
+            cores_for_training=1,
+            train_predictions_path=f"{path}predictions.csv",
+            ml_details_path=f"{path}details.yaml"
         ))
 
         method.predict(np.array([1, 2, 3]).reshape(1, -1), ["l1"])
+        self.assertTrue(os.path.isfile(f"{path}predictions.csv"))
+        self.assertTrue(os.path.isfile(f"{path}details.yaml"))
 
         shutil.rmtree(path)

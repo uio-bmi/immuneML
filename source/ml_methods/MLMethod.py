@@ -30,7 +30,7 @@ class MLMethod(metaclass=abc.ABCMeta):
         pass
 
     @abc.abstractmethod
-    def store(self, dataset, path):
+    def store(self, dataset, path, details_path):
         pass
 
     @abc.abstractmethod

@@ -1,12 +1,12 @@
 import abc
 import hashlib
-import json
 import os
 import pickle
 import warnings
 from collections import Iterable
 
 import numpy as np
+import yaml
 from sklearn.model_selection import RandomizedSearchCV
 from sklearn.utils.validation import check_is_fitted
 
@@ -102,13 +102,18 @@ class SklearnMethod(MLMethod):
 
         return self.models
 
-    def store(self, path, feature_names=None):
+    def store(self, path, feature_names=None, details_path=None):
         PathBuilder.build(path)
         name = FilenameHandler.get_filename(self.__class__.__name__, "pickle")
-        params_name = FilenameHandler.get_filename(self.__class__.__name__, "json")
         with open(path + name, "wb") as file:
             pickle.dump(self.models, file)
-        with open(path + params_name, "w") as file:
+
+        if details_path is None:
+            params_path = path + FilenameHandler.get_filename(self.__class__.__name__, "yaml")
+        else:
+            params_path = details_path
+
+        with open(params_path, "w") as file:
             desc = {}
             for label in self.models.keys():
                 desc[label] = {
@@ -116,7 +121,7 @@ class SklearnMethod(MLMethod):
                     "feature_names": feature_names,
                     "classes": self.models[label].classes_.tolist()
                 }
-            json.dump(desc, file, indent=2)
+            yaml.dump(desc, file)
 
     def load(self, path):
         name = FilenameHandler.get_filename(self.__class__.__name__, "pickle")

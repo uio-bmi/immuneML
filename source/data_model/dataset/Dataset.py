@@ -7,7 +7,7 @@ class Dataset:
     TEST = "test"
 
     @abc.abstractmethod
-    def make_subset(self, example_indices, path):
+    def make_subset(self, example_indices, path, dataset_type: str):
         pass
 
     @abc.abstractmethod

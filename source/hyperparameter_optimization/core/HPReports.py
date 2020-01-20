@@ -20,29 +20,29 @@ class HPReports:
             tmp_report.generate_report()
 
     @staticmethod
-    def run_assessment_reports(state: HPOptimizationState, path: str, run: int):
-        train_val_dataset = state.assessment_states[run].train_val_dataset
-        test_dataset = state.assessment_states[run].test_dataset
+    def run_assessment_reports(state: HPOptimizationState, path: str, split_index: int):
+        train_val_dataset = state.assessment_states[split_index].train_val_dataset
+        test_dataset = state.assessment_states[split_index].test_dataset
 
         for report in state.assessment_config.reports.data_split_reports:
-            HPReports.run_data_report(state, report, train_val_dataset, path + "train/")
-            HPReports.run_data_report(state, report, test_dataset, path + "test/")
+            HPReports.run_data_report(state, report, train_val_dataset, path + "reports/train/")
+            HPReports.run_data_report(state, report, test_dataset, path + "reports/test/")
 
         for report in state.assessment_config.reports.optimal_model_reports:
             for label in state.label_configuration.get_labels_by_name():
-                method = state.assessment_states[run].label_states[label].method
-                HPReports.run_model_report(state, report, train_val_dataset, test_dataset, method, f"{path}label_{label}/")
+                method = state.assessment_states[split_index].label_states[label].optimal_assessment_item.method
+                HPReports.run_model_report(state, report, train_val_dataset, test_dataset, method, f"{path}reports/label_{label}/")
 
     @staticmethod
     def run_selection_reports(state: HPOptimizationState, dataset, train_datasets: list, val_datasets: list, path: str):
 
         for report in state.selection_config.reports.data_split_reports:
             for index in range(len(train_datasets)):
-                HPReports.run_data_report(state, report, train_datasets[index], path + "split_{}/train/".format(index + 1))
-                HPReports.run_data_report(state, report, val_datasets[index], path + "split_{}/test/".format(index + 1))
+                HPReports.run_data_report(state, report, train_datasets[index], path + "split_{}/reports/train/".format(index + 1))
+                HPReports.run_data_report(state, report, val_datasets[index], path + "split_{}/reports/test/".format(index + 1))
 
         for report in state.selection_config.reports.data_reports:
-            HPReports.run_data_report(state, report, dataset, path)
+            HPReports.run_data_report(state, report, dataset, path + "reports/")
 
     @staticmethod
     def run_model_report(state: HPOptimizationState, report: MLReport, train_dataset, test_dataset, method: MLMethod, path: str):

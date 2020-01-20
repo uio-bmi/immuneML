@@ -53,8 +53,8 @@ class DataSplitter(Step):
         return train_datasets, test_datasets
 
     @staticmethod
-    def prepare_path(input_params: DataSplitterParams, split_index: int, dataset_type: str) -> str:
-        path = input_params.path + "data_splits/split_{}/{}/".format(split_index, dataset_type)
+    def prepare_path(input_params: DataSplitterParams, split_index: int) -> str:
+        path = f"{input_params.paths[split_index]}datasets/"
         PathBuilder.build(path)
         return path
 
@@ -87,8 +87,8 @@ class DataSplitter(Step):
 
     @staticmethod
     def make_dataset(dataset: Dataset, indices, input_params: DataSplitterParams, i: int, dataset_type: str):
-        path = DataSplitter.prepare_path(input_params, i, dataset_type)
-        new_dataset = dataset.make_subset(indices, path)
+        path = DataSplitter.prepare_path(input_params, i)
+        new_dataset = dataset.make_subset(indices, path, dataset_type)
         return new_dataset
 
     @staticmethod

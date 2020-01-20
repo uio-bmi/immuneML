@@ -36,21 +36,20 @@ class TestMLMethodAssessment(TestCase):
 
         res = MLMethodAssessment.run(MLMethodAssessmentParams(
             dataset=dataset,
-            method={"l1": method1},
+            method=method1,
             metrics={MetricType.ACCURACY, MetricType.BALANCED_ACCURACY, MetricType.F1_MACRO},
-            predictions_path=EnvironmentSettings.root_path + "test/tmp/mlmethodassessment/fold_predictions.csv",
-            label_configuration=label_config,
-            ml_details_path=EnvironmentSettings.root_path + "test/tmp/mlmethodassessment/ml_details.csv",
-            run=1,
-            all_predictions_path=EnvironmentSettings.root_path + "test/tmp/mlmethodassessment/predictions.csv",
+            predictions_path=EnvironmentSettings.root_path + "test/tmp/mlmethodassessment/predictions.csv",
+            label="l1",
+            ml_score_path=EnvironmentSettings.root_path + "test/tmp/mlmethodassessment/ml_score.csv",
+            split_index=1,
             path=EnvironmentSettings.root_path + "test/tmp/mlmethodassessment/"
         ))
 
-        self.assertTrue("l1" in res)
+        self.assertTrue(isinstance(res, float))
 
-        self.assertTrue(os.path.isfile(EnvironmentSettings.root_path + "test/tmp/mlmethodassessment/ml_details.csv"))
+        self.assertTrue(os.path.isfile(EnvironmentSettings.root_path + "test/tmp/mlmethodassessment/ml_score.csv"))
 
-        df = pd.read_csv(EnvironmentSettings.root_path + "test/tmp/mlmethodassessment/ml_details.csv")
+        df = pd.read_csv(EnvironmentSettings.root_path + "test/tmp/mlmethodassessment/ml_score.csv")
         self.assertTrue(df.shape[0] == 1)
 
         df = pd.read_csv(EnvironmentSettings.root_path + "test/tmp/mlmethodassessment/predictions.csv")

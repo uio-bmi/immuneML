@@ -24,13 +24,14 @@ class TestDataSplitter(TestCase):
                                                  SequenceRepertoire("0.npy", "", "6"),
                                                  SequenceRepertoire("0.npy", "", "7")])
 
-        path = EnvironmentSettings.root_path + "test/tmp/datasplitter/"
-        PathBuilder.build(path)
+        paths = [EnvironmentSettings.root_path + "test/tmp/datasplitter/split_{}".format(i) for i in range(5)]
+        for path in paths:
+            PathBuilder.build(path)
 
         df = pd.DataFrame(data={"key1": [0, 0, 1, 1, 1, 2, 2, 0], "filename": [0, 1, 2, 3, 4, 5, 6, 7]})
-        df.to_csv(path+"metadata.csv")
+        df.to_csv(EnvironmentSettings.root_path + "test/tmp/datasplitter/metadata.csv")
 
-        dataset.metadata_file = path+"metadata.csv"
+        dataset.metadata_file = EnvironmentSettings.root_path + "test/tmp/datasplitter/metadata.csv"
 
         training_percentage = 0.7
 
@@ -40,7 +41,7 @@ class TestDataSplitter(TestCase):
             split_strategy=SplitType.RANDOM,
             split_count=5,
             label_to_balance=None,
-            path=path
+            paths=paths
         ))
 
         self.assertTrue(isinstance(trains[0], RepertoireDataset))
@@ -57,10 +58,14 @@ class TestDataSplitter(TestCase):
             split_strategy=SplitType.RANDOM,
             split_count=5,
             label_to_balance=None,
-            path=path
+            paths=paths
         ))
 
         self.assertEqual(trains[0].get_repertoire_ids(), trains2[0].get_repertoire_ids())
+
+        paths = [EnvironmentSettings.root_path + "test/tmp/datasplitter/split_{}".format(i) for i in range(dataset.get_example_count())]
+        for path in paths:
+            PathBuilder.build(path)
 
         trains, tests = DataSplitter.run(DataSplitterParams(
             dataset=dataset,
@@ -68,7 +73,7 @@ class TestDataSplitter(TestCase):
             split_count=-1,
             label_to_balance=None,
             training_percentage=-1,
-            path=path
+            paths=paths
         ))
 
         self.assertTrue(isinstance(trains[0], RepertoireDataset))
@@ -78,13 +83,17 @@ class TestDataSplitter(TestCase):
         self.assertEqual(8, len(trains))
         self.assertEqual(8, len(tests))
 
+        paths = [EnvironmentSettings.root_path + "test/tmp/datasplitter/split_{}".format(i) for i in range(5)]
+        for path in paths:
+            PathBuilder.build(path)
+
         trains, tests = DataSplitter.run(DataSplitterParams(
             dataset=dataset,
             split_strategy=SplitType.K_FOLD,
             split_count=5,
             label_to_balance=None,
             training_percentage=-1,
-            path=path
+            paths=paths
         ))
 
         self.assertTrue(isinstance(trains[0], RepertoireDataset))
@@ -94,13 +103,17 @@ class TestDataSplitter(TestCase):
         self.assertEqual(5, len(trains))
         self.assertEqual(5, len(tests))
 
+        paths = [EnvironmentSettings.root_path + "test/tmp/datasplitter/split_{}".format(i) for i in range(10)]
+        for path in paths:
+            PathBuilder.build(path)
+
         trains, tests = DataSplitter.run(DataSplitterParams(
             dataset=dataset,
             split_strategy=SplitType.RANDOM_BALANCED,
             training_percentage=training_percentage,
             split_count=10,
             label_to_balance="key1",
-            path=path
+            paths=paths
         ))
 
         self.assertTrue(isinstance(trains[0], RepertoireDataset))
@@ -109,4 +122,4 @@ class TestDataSplitter(TestCase):
         self.assertEqual(10, len(tests))
         self.assertEqual(len(trains[0].get_data()) + len(tests[0].get_data()), 6)
 
-        shutil.rmtree(path)
+        shutil.rmtree(EnvironmentSettings.root_path + "test/tmp/datasplitter/")

@@ -96,14 +96,14 @@ class ElementGenerator:
             for element in batch:
                 yield element
 
-    def make_subset(self, example_indices: list, path: str):
+    def make_subset(self, example_indices: list, path: str, dataset_type: str):
         batch_size = 1000
         elements = []
         file_count = 1
 
         example_indices.sort()
 
-        batch_filenames = self._prepare_batch_filenames(len(example_indices), path)
+        batch_filenames = self._prepare_batch_filenames(len(example_indices), path, dataset_type)
 
         for index, batch in enumerate(self.build_batch_generator(batch_size)):
             extracted_elements = self._extract_elements_from_batch(index, batch_size, batch, example_indices)
@@ -116,10 +116,10 @@ class ElementGenerator:
 
         return batch_filenames
 
-    def _prepare_batch_filenames(self, example_count: int, path: str):
+    def _prepare_batch_filenames(self, example_count: int, path: str, dataset_type: str):
         batch_count = math.ceil(example_count / self.file_size)
         digits_count = len(str(batch_count))
-        filenames = [path + "batch".join(["0" for i in range(digits_count-len(str(index)))]) + str(index) + ".pkl"
+        filenames = [path + f"{dataset_type}_batch".join(["0" for i in range(digits_count-len(str(index)))]) + str(index) + ".pkl"
                      for index in range(digits_count)]
         return filenames
 

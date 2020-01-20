@@ -34,13 +34,14 @@ class TestMLProcess(TestCase):
             "vector_size": 16
         }
         metrics = {MetricType.BALANCED_ACCURACY}
-        proc = MLProcess(train_dataset=dataset, test_dataset=dataset, path=path, label_configuration=label_config,
+        proc = MLProcess(train_dataset=dataset, test_dataset=dataset, path=path, label_config=label_config,
                          encoder=Word2VecEncoder.create_encoder(dataset, encoder_params), encoder_params=encoder_params,
                          method=SimpleLogisticRegression(), metrics=metrics, min_example_count=1,
-                         ml_params={"model_selection_cv": SplitType.LOOCV, "model_selection_n_folds": 3})
+                         ml_params={"model_selection_cv": SplitType.LOOCV, "model_selection_n_folds": 3}, label="l1",
+                         ml_score_path=f"{path}score.csv")
 
         proc.run(1)
 
-        self.assertTrue(os.path.isfile("{}ml_details.csv".format(path)))
+        self.assertTrue(os.path.isfile("{}score.csv".format(path)))
 
         shutil.rmtree(path)

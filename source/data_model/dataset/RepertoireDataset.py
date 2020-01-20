@@ -56,9 +56,9 @@ class RepertoireDataset(Dataset):
         else:
             return None
 
-    def make_subset(self, example_indices, path):
+    def make_subset(self, example_indices, path, dataset_type: str):
 
-        metadata_file = self._build_new_metadata(example_indices, path + "metadata.csv")
+        metadata_file = self._build_new_metadata(example_indices, f"{path}{dataset_type}_metadata.csv")
         new_dataset = RepertoireDataset(repertoires=[self.repertoires[i] for i in example_indices], params=copy.deepcopy(self.params),
                                         metadata_file=metadata_file, identifier=str(uuid.uuid1()))
 
