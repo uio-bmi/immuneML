@@ -61,7 +61,7 @@ class HPSelection:
                                encoder=hp_setting.encoder.create_encoder(train_dataset, hp_setting.encoder_params).set_context(state.context),
                                encoder_params=hp_setting.encoder_params, method=hp_setting.ml_method,
                                ml_params=hp_setting.ml_params, metrics=state.metrics, path=current_path,
-                               reports=[report.set_context(state.context) for report in state.selection_config.reports.model_reports],
+                               reports=[report.set_context(state.context) for key, report in state.selection_config.reports.model_reports.items()],
                                ml_details_path=ml_details_path,
                                ml_score_path=ml_score_path,
                                train_predictions_path=train_predictions_path,

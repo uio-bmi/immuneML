@@ -1,0 +1,1 @@
+coefs_to_plot: [all, nonzero] # what type of coefficients to plot in the report, options in CoefficientPlottingSetting

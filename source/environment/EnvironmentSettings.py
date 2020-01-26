@@ -19,6 +19,7 @@ class EnvironmentSettings:
     tmp_test_path = root_path + "test/tmp/"
     default_analysis_path = root_path + "analysis_runs/"
     cache_path = root_path + "cache/"
+    visualization_path = root_path + "source/visualization/"
     tmp_cache_path = tmp_test_path + "cache/"
     max_sequence_length = 20
     log_level = LogLevel.DEBUG

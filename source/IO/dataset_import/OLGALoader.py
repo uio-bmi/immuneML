@@ -32,6 +32,8 @@ class OLGALoader(GenericLoader):
             df["sequences"] = None
         if not "sequence_aas" in df.columns:
             df["sequence_aas"] = None
+        if not "counts" in df.columns:
+            df["counts"] = 1
 
         df["sequence_identifiers"] = None
 

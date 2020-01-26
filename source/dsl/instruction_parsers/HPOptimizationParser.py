@@ -74,7 +74,7 @@ class HPOptimizationParser:
     def _parse_split_config(self, instruction: dict, key: str, symbol_table: SymbolTable) -> SplitConfig:
 
         if "reports" in instruction[key]:
-            report_config_input = {report_type: [symbol_table.get(report_id) for report_id in instruction[key]["reports"][report_type]]
+            report_config_input = {report_type: {report_id: symbol_table.get(report_id) for report_id in instruction[key]["reports"][report_type]}
                                    for report_type in instruction[key]["reports"]}
         else:
             report_config_input = {}

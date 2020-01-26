@@ -4,20 +4,23 @@ library(ggplot2)
 
 plot_barplot = function(data,
                         x,
+                        y = "value",
+                        xlab=x,
+                        ylab=y,
                         type = "quasirandom",
-                        color = NULL,
+                        errorbar_meaning="se", # choose from: se, sd, ci
+                        color = "NULL",
                         palette = NULL,
-                        facet_rows,
-                        facet_columns,
-                        facet_type,
-                        facet_scales,
-                        facet_switch,
+                        facet_rows = c(),
+                        facet_columns = c(),
+                        facet_type = "wrap", # choose from: "wrap" or "grid"
+                        facet_scales = "free", # choose from: "fixed", "free", "free_x", "free_y"
+                        facet_switch = "NULL",
                         nrow,
                         height,
                         width,
                         result_path,
                         result_name) {
-
   params = as.list(match.call())
   params[[1]] = NULL
   saveRDS(params, file.path(result_path, paste0(result_name, ".rds")))
@@ -37,16 +40,16 @@ plot_barplot = function(data,
 
   summary = Rmisc::summarySE(
     data,
-    measurevar = "value",
+    measurevar = y,
     groupvars = unique(c(facet_columns, facet_rows, x, color)),
     na.rm = TRUE
   )
 
-  plot = ggplot(summary, aes_string(x = x, y = "value", fill = color)) +
+  plot = ggplot(summary, aes_string(x = x, y = y, fill = color)) +
     geom_bar(stat="identity", position="dodge") +
-    geom_errorbar(aes(ymin=value-se, ymax=value+se), size=0.5,
+    geom_errorbar(aes(ymin=summary[[y]]-summary[[errorbar_meaning]], ymax=summary[[y]]+summary[[errorbar_meaning]]), size=0.5,
                          width=.25,position=position_dodge(.9)) +
-    ggexp::theme_ggexp() +
+    ggexp::theme_ggexp() + labs(x = xlab, y=ylab, fill=xlab) +
     palette
 
   plot = ggexp::plot_facets(plot,

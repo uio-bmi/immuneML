@@ -61,6 +61,9 @@ rep2.tsv,2""")
         self.assertEqual(2, dataset.get_example_count())
         for index, rep in enumerate(dataset.get_data()):
             self.assertEqual(3, len(rep.sequences))
+            for sequence in rep.sequences:
+                self.assertEqual(sequence.metadata.count, 1)
+
             if index == 0:
                 self.assertListEqual(["TGTGCCAGCAGTTTATCGCCGGGACTGGCCTACGAGCAGTACTTC",
                                       "TGTGCCAGCAAAGTCAGAATTGCTGCAACTAATGAAAAACTGTTTTTT",
