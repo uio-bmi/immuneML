@@ -1,5 +1,6 @@
 import os
 import pandas as pd
+import warnings
 
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.reports.encoding_reports.EncodingReport import EncodingReport
@@ -64,5 +65,9 @@ class MatchedPairedReference(EncodingReport):
         results_df.to_csv(filename, index=False)
 
     def check_prerequisites(self):
-        assert "MatchedReceptorsRepertoireEncoder" == self.dataset.encoded_data.encoding, "Encoding is not compatible with the report type. " \
-                                                                                          "MatchedPairedReference report will not be created."
+        if "MatchedReceptorsRepertoireEncoder" != self.dataset.encoded_data.encoding:
+            warnings.warn("Encoding is not compatible with the report type. MatchedPairedReference report will not be created.")
+            return False
+        else:
+            return True
+

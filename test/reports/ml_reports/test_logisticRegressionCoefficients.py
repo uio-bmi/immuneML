@@ -8,6 +8,8 @@ from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.ml_methods.SimpleLogisticRegression import SimpleLogisticRegression
 from source.reports.ml_reports.LogisticRegressionCoefficients import LogisticRegressionCoefficients
 from source.util.PathBuilder import PathBuilder
+from source.dsl.report_params_parsers.CoefficientPlottingSetting import CoefficientPlottingSetting
+
 
 class TestLogisticRegressionCoefficients(TestCase):
 
@@ -29,7 +31,10 @@ class TestLogisticRegressionCoefficients(TestCase):
         return dummy_lr
 
     def _create_report(self, path):
-        report = LogisticRegressionCoefficients(**{"coefs_to_plot": ["all", "nonzero", "cutoff", "n_largest"],
+        report = LogisticRegressionCoefficients(**{"coefs_to_plot": [CoefficientPlottingSetting.ALL,
+                                                                     CoefficientPlottingSetting.NONZERO,
+                                                                     CoefficientPlottingSetting.CUTOFF,
+                                                                     CoefficientPlottingSetting.N_LARGEST],
                                                    "cutoff": [10],
                                                    "n_largest": [5]})
 

@@ -1,4 +1,6 @@
 import yaml
+import warnings
+import yaml
 
 import pandas as pd
 from rpy2.robjects import pandas2ri
@@ -42,7 +44,7 @@ class LogisticRegressionCoefficients(MLReport):
                 cutoff_data = plot_data[plot_data["abs_coefficients"] >= cutoff_val]
                 self._plot(cutoff_data,
                            "cutoff_{}_coefficients".format(cutoff_val))
-        
+
         if CoefficientPlottingSetting.N_LARGEST in self._coefs_to_plot:
             for n_val in self._n_largest:
                 n_largest_data = plot_data.nlargest(n=n_val, columns=["abs_coefficients"])
@@ -85,11 +87,20 @@ class LogisticRegressionCoefficients(MLReport):
 
 
     def check_prerequisites(self):
-        assert hasattr(self, "method"), "LogisticRegressionCoefficients can only be executed as a model report. " \
-                                        "LogisticRegressionCoefficients report will not be created."
-        assert hasattr(self, "result_path"), "LogisticRegressionCoefficients requires an output 'result_path' to be set. " \
-                                        "LogisticRegressionCoefficients report will not be created."
-        assert hasattr(self, "ml_details_path"), "LogisticRegressionCoefficients requires an 'ml_details_path' to be set. " \
-                                      "LogisticRegressionCoefficients report will not be created."
-        assert hasattr(self, "label"), "LogisticRegressionCoefficients requires that the relevant 'label' is set. " \
-                                           "LogisticRegressionCoefficients report will not be created."
+        if not hasattr(self, "method"):
+            warnings.warn("LogisticRegressionCoefficients can only be executed as a model report. LogisticRegressionCoefficients report will not be created.")
+            return False
+
+        if not hasattr(self, "result_path"):
+            warnings.warn("LogisticRegressionCoefficients requires an output 'path' to be set. LogisticRegressionCoefficients report will not be created.")
+            return False
+
+        if not hasattr(self, "ml_details_path"):
+            warnings.warn("LogisticRegressionCoefficients requires an 'ml_details_path' to be set. LogisticRegressionCoefficients report will not be created.")
+            return False
+
+        if not hasattr(self, "label"):
+            warnings.warn("LogisticRegressionCoefficients requires that the relevant 'label' is set. LogisticRegressionCoefficients report will not be created.")
+            return False
+
+        return True

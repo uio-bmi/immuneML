@@ -12,11 +12,15 @@ class Report(metaclass=abc.ABCMeta):
         pass
 
     def check_prerequisites(self):
-        pass
+        """
+        Checks prerequisites, and sends warnings if the prerequisites are incorrect.
+        Returns boolean value True if the prerequisites are o.k., and False otherwise.
+        """
+        return True
 
     def set_context(self, context: dict):
         return self
 
     def generate_report(self):
-        self.check_prerequisites()
-        self.generate()
+        if self.check_prerequisites():
+            self.generate()

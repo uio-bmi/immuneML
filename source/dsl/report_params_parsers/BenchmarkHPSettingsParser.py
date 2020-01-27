@@ -16,7 +16,6 @@ class BenchmarkHPSettingsParser:
                 errorbar_meaning: standard_error
 
     """
-    ERRORBAR_DEFAULT = ErrorBarMeaning.STANDARD_ERROR
 
     @staticmethod
     def parse(params: dict):

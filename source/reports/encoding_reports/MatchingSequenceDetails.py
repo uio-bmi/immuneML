@@ -1,4 +1,5 @@
 import csv
+import warnings
 
 from source.analysis.SequenceMatcher import SequenceMatcher
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
@@ -33,8 +34,11 @@ class MatchingSequenceDetails(EncodingReport):
         self._make_matching_report()
 
     def check_prerequisites(self):
-        assert "MatchedReferenceEncoder" == self.dataset.encoded_data.encoding, "Encoding is not compatible with the report type. " \
-                                                                                "MatchingSequenceDetails report will not be created."
+        if "MatchedReferenceEncoder" != self.dataset.encoded_data.encoding:
+            warnings.warn("Encoding is not compatible with the report type. MatchingSequenceDetails report will not be created.")
+            return False
+        else:
+            return True
 
     def _make_overview(self):
         filename = self.result_path + "matching_sequence_overview.tsv"
