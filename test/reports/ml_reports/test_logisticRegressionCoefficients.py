@@ -1,14 +1,16 @@
-from unittest import TestCase
-import yaml
 import os
+import shutil
+from unittest import TestCase
+
 import numpy as np
 import pandas as pd
+import yaml
 
+from source.dsl.report_params_parsers.CoefficientPlottingSetting import CoefficientPlottingSetting
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.ml_methods.SimpleLogisticRegression import SimpleLogisticRegression
 from source.reports.ml_reports.LogisticRegressionCoefficients import LogisticRegressionCoefficients
 from source.util.PathBuilder import PathBuilder
-from source.dsl.report_params_parsers.CoefficientPlottingSetting import CoefficientPlottingSetting
 
 
 class TestLogisticRegressionCoefficients(TestCase):
@@ -67,4 +69,6 @@ class TestLogisticRegressionCoefficients(TestCase):
         self.assertListEqual(list(written_data.columns), ["coefficients", "features"])
         self.assertListEqual(list(written_data["coefficients"]), [i for i in range(20)])
         self.assertListEqual(list(written_data["features"]), [f"feature{i}" for i in range(20)])
+
+        shutil.rmtree(path)
 

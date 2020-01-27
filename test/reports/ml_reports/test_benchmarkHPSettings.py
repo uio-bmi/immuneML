@@ -1,8 +1,11 @@
-from unittest import TestCase
 import os
+import shutil
+from unittest import TestCase
+
 import pandas as pd
 
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
+from source.dsl.report_params_parsers.ErrorBarMeaning import ErrorBarMeaning
 from source.encodings.word2vec.Word2VecEncoder import Word2VecEncoder
 from source.encodings.word2vec.model_creator.ModelType import ModelType
 from source.environment.EnvironmentSettings import EnvironmentSettings
@@ -18,7 +21,6 @@ from source.reports.ml_reports.BenchmarkHPSettings import BenchmarkHPSettings
 from source.util.PathBuilder import PathBuilder
 from source.util.RepertoireBuilder import RepertoireBuilder
 from source.workflows.instructions.HPOptimizationInstruction import HPOptimizationInstruction
-from source.dsl.report_params_parsers.ErrorBarMeaning import ErrorBarMeaning
 
 
 class TestBenchmarkHPSettings(TestCase):
@@ -85,4 +87,6 @@ class TestBenchmarkHPSettings(TestCase):
 
         written_data = pd.read_csv(path + "benchmark_result.csv")
         self.assertEqual(list(written_data.columns), ["fold", "label", "encoding", "ml_method", "performance"])
+
+        shutil.rmtree(path)
 
