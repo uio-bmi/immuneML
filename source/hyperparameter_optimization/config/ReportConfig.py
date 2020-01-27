@@ -1,6 +1,6 @@
 class ReportConfig:
 
-    def __init__(self, data_splits: dict = None, models: dict = None, optimal_models: dict = None, performance: dict = None,
+    def __init__(self, data_splits: dict = None, models: dict = None, optimal_models: dict = None,
                  data: dict = None, hyperparameter: dict = None):
 
         self.data_split_reports = data_splits if data_splits is not None else {}

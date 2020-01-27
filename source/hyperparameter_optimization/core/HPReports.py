@@ -1,11 +1,10 @@
 import copy
 
-from source.hyperparameter_optimization.states.HPOptimizationState import HPOptimizationState
 from source.hyperparameter_optimization.states import HPItem
-from source.ml_methods.MLMethod import MLMethod
+from source.hyperparameter_optimization.states.HPOptimizationState import HPOptimizationState
 from source.reports.data_reports.DataReport import DataReport
 from source.reports.ml_reports.MLReport import MLReport
-from source.util.PathBuilder import PathBuilder
+
 
 class HPReports:
 
@@ -25,7 +24,6 @@ class HPReports:
         for key, report in state.assessment_config.reports.data_split_reports.items():
             HPReports.run_data_report(state, report, train_val_dataset, path + "reports/{}/train/".format(key))
             HPReports.run_data_report(state, report, test_dataset, path + "reports/{}/test/".format(key))
-
 
         for key, report in state.assessment_config.reports.optimal_model_reports.items():
             for label in state.label_configuration.get_labels_by_name():

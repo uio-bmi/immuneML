@@ -134,8 +134,7 @@ class Quickstart:
                         "training_percentage": 0.7,
                         "label_to_balance": None,
                         "reports": {
-                            "data_splits": [],
-                            "performance": []
+                            "data_splits": []
                         }
                     },
                     "selection": {
