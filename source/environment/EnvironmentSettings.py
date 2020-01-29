@@ -23,6 +23,7 @@ class EnvironmentSettings:
     tmp_cache_path = tmp_test_path + "cache/"
     max_sequence_length = 20
     log_level = LogLevel.DEBUG
+    low_memory = True
 
     @staticmethod
     def get_cache_path(cache_type: CacheType = None):

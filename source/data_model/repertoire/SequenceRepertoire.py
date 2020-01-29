@@ -1,5 +1,6 @@
 # quality: gold
 import pickle
+import weakref
 
 import numpy as np
 
@@ -7,6 +8,7 @@ from source.data_model.DatasetItem import DatasetItem
 from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.data_model.receptor.receptor_sequence.SequenceAnnotation import SequenceAnnotation
 from source.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
+from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.simulation.implants.ImplantAnnotation import ImplantAnnotation
 
 
@@ -117,9 +119,6 @@ class SequenceRepertoire(DatasetItem):
         self.identifier = identifier
         self.data = None
 
-    def _load(self):
-        self.data = np.load(self._data_filename, allow_pickle=True)
-
     def get_sequence_aas(self):
         return self.get_attribute("sequence_aas")
 
@@ -132,30 +131,46 @@ class SequenceRepertoire(DatasetItem):
     def get_j_genes(self):
         return self.get_attribute("j_genes")
 
+    def _load_data(self):
+        if self.data is None or (isinstance(self.data, weakref.ref) and self.data() is None):
+            data = np.load(self._data_filename, allow_pickle=True)
+            self.data = weakref.ref(data) if EnvironmentSettings.low_memory else data
+        data = self.data() if EnvironmentSettings.low_memory else self.data
+        return data
+
     def get_attribute(self, attribute):
-        if self.data is None:
-            self._load()
-        if attribute in self.data.dtype.names:
-            tmp = self.data[attribute]
+        data = self._load_data()
+        if attribute in data.dtype.names:
+            tmp = data[attribute]
             return tmp
         else:
             return None
 
     def get_attributes(self, attributes: list):
-        return {attribute: self.get_attribute(attribute) for attribute in attributes}
+        data = self._load_data()
+        result = {attribute: data[attribute] for attribute in attributes}
+        return result
 
     def free_memory(self):
         self.data = None
 
+    def __getstate__(self):
+        state = self.__dict__.copy()
+        del state['data']
+        return state
+
+    def __setstate__(self, state):
+        self.__dict__.update(state)
+        self.data = None
+
     @property
     def sequences(self):
-
-        self._load()
-
         seqs = []
 
+        data = self._load_data()
+
         for i in range(len(self.get_sequence_identifiers())):
-            keys = [key for key in self.data.dtype.names if "signal" in key]
+            keys = [key for key in data.dtype.names if "signal" in key]
             implants = []
             for key in keys:
                 value_dict = self.get_attribute(key)[i]
