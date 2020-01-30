@@ -35,7 +35,10 @@ class HPUtil:
 
     @staticmethod
     def get_average_performance(performances):
-        return sum(perf for perf in performances) / len(performances)
+        if performances is not None and isinstance(performances, list) and len(performances) > 0:
+            return sum(perf for perf in performances) / len(performances)
+        else:
+            return -1
 
     @staticmethod
     def preprocess_dataset(dataset: Dataset, preproc_sequence: list, path: str) -> Dataset:
