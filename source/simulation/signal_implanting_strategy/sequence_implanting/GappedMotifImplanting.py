@@ -1,5 +1,4 @@
 import copy
-import random
 
 import numpy as np
 
@@ -33,8 +32,7 @@ class GappedMotifImplanting(SequenceImplantingStrategy):
     def _choose_implant_position(self, imgt_positions, position_weights):
         imgt_implant_position = np.random.choice(list(position_weights.keys()), size=1,
                                                  p=list(position_weights.values()))
-        possible_indices = np.where(imgt_positions == imgt_implant_position)[0]
-        position = random.choice(possible_indices)
+        position = np.where(imgt_positions == imgt_implant_position)[0][0]
         return position
 
     def _build_new_sequence(self, sequence: ReceptorSequence, position, signal: dict) -> ReceptorSequence:
