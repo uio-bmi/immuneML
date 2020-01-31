@@ -6,6 +6,7 @@ from multiprocessing.pool import Pool
 import numpy as np
 
 from source.caching.CacheHandler import CacheHandler
+from source.caching.CacheObjectType import CacheObjectType
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.encodings.EncoderParams import EncoderParams
 from source.encodings.kmer_frequency.KmerFrequencyEncoder import KmerFrequencyEncoder
@@ -52,7 +53,7 @@ class KmerFreqRepertoireEncoder(KmerFrequencyEncoder):
                                             ("labels", params["label_configuration"].get_labels_by_name()),
                                             ("repertoire_id", repertoire.identifier),
                                             ("repertoire_data",  hashlib.sha256(np.ascontiguousarray(repertoire.get_sequence_aas())).hexdigest())),
-                                           lambda: self._encode_repertoire(repertoire, params))
+                                           lambda: self._encode_repertoire(repertoire, params), CacheObjectType.ENCODING_STEP)
 
     def _encode_repertoire(self, repertoire, params: EncoderParams):
         counts = Counter()
