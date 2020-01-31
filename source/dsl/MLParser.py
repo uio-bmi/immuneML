@@ -3,7 +3,6 @@ from source.dsl.SymbolTable import SymbolTable
 from source.dsl.SymbolType import SymbolType
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.environment.MetricType import MetricType
-from source.ml_methods.MLMethod import MLMethod
 from source.util.ReflectionHandler import ReflectionHandler
 
 
@@ -30,14 +29,10 @@ class MLParser:
         ml_specification[ml_method_id] = {**DefaultParamsLoader.load("ml_methods/", "MLMethod"),
                                        **ml_specification[ml_method_id]}
 
-        return MLParser.create_method_instance(ml_specification, ml_method_id, ml_method_class), {
-            # "metrics": MLParser.map_metrics(ml_specification[ml_method_id]),
-            "model_selection_cv": ml_specification[ml_method_id]["model_selection_cv"],
-            "model_selection_n_folds": ml_specification[ml_method_id]["model_selection_n_folds"],
-            # "min_example_count": ml_specification[ml_method_id]["min_example_count"],
-            # "cores_for_training": ml_specification[ml_method_id]["cores_for_training"],
-            # "batch_size": ml_specification[ml_method_id]["batch_size"],
-        }
+        method, params = MLParser.create_method_instance(ml_specification, ml_method_id, ml_method_class)
+
+        return method, {**params, **{"model_selection_cv": ml_specification[ml_method_id]["model_selection_cv"],
+                                     "model_selection_n_folds": ml_specification[ml_method_id]["model_selection_n_folds"]}}
 
     @staticmethod
     def map_metrics(method_spec: dict):
@@ -45,17 +40,23 @@ class MLParser:
         return metrics
 
     @staticmethod
-    def create_method_instance(ml_specification: dict, ml_method_id: str, ml_method_class) -> MLMethod:
+    def create_method_instance(ml_specification: dict, ml_method_id: str, ml_method_class) -> tuple:
+
+        ml_params = {}
+
         if "params" not in ml_specification[ml_method_id].keys():
             ml_method = ml_method_class()
-        elif any([isinstance(ml_specification[ml_method_id]["params"][key], list)
-                  for key in ml_specification[ml_method_id]["params"].keys()]):
-
-            ml_method = ml_method_class(parameter_grid={key: [ml_specification[ml_method_id]["params"][key]]
-                                                        if not isinstance(ml_specification[ml_method_id]["params"][key], list)
-                                                        else ml_specification[ml_method_id]["params"][key]
-                                                        for key in ml_specification[ml_method_id]["params"].keys()})
         else:
-            ml_method = ml_method_class(parameters=ml_specification[ml_method_id]["params"])
-        return ml_method
+            ml_params = ml_specification[ml_method_id]["params"]
+            if any([isinstance(ml_specification[ml_method_id]["params"][key], list)
+                    for key in ml_specification[ml_method_id]["params"].keys()]):
+
+                ml_method = ml_method_class(parameter_grid={key: [ml_specification[ml_method_id]["params"][key]]
+                                                            if not isinstance(ml_specification[ml_method_id]["params"][key], list)
+                                                            else ml_specification[ml_method_id]["params"][key]
+                                                            for key in ml_specification[ml_method_id]["params"].keys()})
+            else:
+                ml_method = ml_method_class(parameters=ml_specification[ml_method_id]["params"])
+
+        return ml_method, ml_params
 

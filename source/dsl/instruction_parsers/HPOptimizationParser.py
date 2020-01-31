@@ -49,9 +49,7 @@ class HPOptimizationParser:
             s = HPSetting(encoder=symbol_table.get(setting["encoding"]), encoder_name=setting["encoding"],
                           encoder_params=symbol_table.get_config(setting["encoding"])["encoder_params"],
                           ml_method=symbol_table.get(setting["ml_method"]), ml_method_name=setting["ml_method"],
-                          ml_params={"model_selection_cv": symbol_table.get_config(setting["ml_method"])["model_selection_cv"],
-                                     "model_selection_n_folds":
-                                         symbol_table.get_config(setting["ml_method"])["model_selection_n_folds"]},
+                          ml_params=symbol_table.get_config(setting["ml_method"]),
                           preproc_sequence=preprocessing_sequence, preproc_sequence_name=preproc_name)
             settings.append(s)
         return settings
