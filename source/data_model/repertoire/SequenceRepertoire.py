@@ -1,6 +1,8 @@
 # quality: gold
 import pickle
+import shutil
 import weakref
+from uuid import uuid4
 
 import numpy as np
 
@@ -10,6 +12,7 @@ from source.data_model.receptor.receptor_sequence.SequenceAnnotation import Sequ
 from source.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.simulation.implants.ImplantAnnotation import ImplantAnnotation
+from source.util.PathBuilder import PathBuilder
 
 
 class SequenceRepertoire(DatasetItem):
@@ -72,6 +75,26 @@ class SequenceRepertoire(DatasetItem):
         return repertoire
 
     @classmethod
+    def build_like(cls, repertoire, indices_to_keep: list, result_path: str):
+        if indices_to_keep is not None and len(indices_to_keep) > 0:
+            PathBuilder.build(result_path)
+
+            data = repertoire.load_data()
+            data = data[indices_to_keep]
+            identifier = str(uuid4())
+
+            data_filename = f"{result_path}{identifier}_data.npy"
+            np.save(data_filename, data)
+
+            metadata_filename = f"{result_path}{identifier}_metadata.pickle"
+            shutil.copyfile(repertoire.metadata_filename, metadata_filename)
+
+            new_repertoire = SequenceRepertoire(data_filename, metadata_filename, identifier)
+            return new_repertoire
+        else:
+            return None
+
+    @classmethod
     def build_from_sequence_objects(cls, sequence_objects: list, path: str, identifier: str, metadata: dict):
 
         assert all(isinstance(sequence, ReceptorSequence) for sequence in sequence_objects), \
@@ -131,7 +154,10 @@ class SequenceRepertoire(DatasetItem):
     def get_j_genes(self):
         return self.get_attribute("j_genes")
 
-    def _load_data(self):
+    def get_counts(self):
+        return self.get_attribute("counts")
+
+    def load_data(self):
         if self.data is None or (isinstance(self.data, weakref.ref) and self.data() is None):
             data = np.load(self._data_filename, allow_pickle=True)
             self.data = weakref.ref(data) if EnvironmentSettings.low_memory else data
@@ -139,7 +165,7 @@ class SequenceRepertoire(DatasetItem):
         return data
 
     def get_attribute(self, attribute):
-        data = self._load_data()
+        data = self.load_data()
         if attribute in data.dtype.names:
             tmp = data[attribute]
             return tmp
@@ -147,7 +173,7 @@ class SequenceRepertoire(DatasetItem):
             return None
 
     def get_attributes(self, attributes: list):
-        data = self._load_data()
+        data = self.load_data()
         result = {attribute: data[attribute] for attribute in attributes}
         return result
 
@@ -167,7 +193,7 @@ class SequenceRepertoire(DatasetItem):
     def sequences(self):
         seqs = []
 
-        data = self._load_data()
+        data = self.load_data()
 
         for i in range(len(self.get_sequence_identifiers())):
             keys = [key for key in data.dtype.names if "signal" in key]

@@ -63,7 +63,7 @@ rep2.tsv,TRB,1234a,no"""
                                                   "batch_size": 1,
                                                   "region_type": "CDR3",  # can be loaded from metadata if available?
                                                   "metadata_file": path + "metadata.csv",
-                                                  "remove_out_of_frame": True,
+                                                  "keep_only_in_frame": True,
                                                    "columns_to_load": ["rearrangement", "v_family", "v_gene", "v_allele", "j_family",
                                                                        "j_gene", "j_allele", "amino_acid", "templates", "frame_type"]
                                                }
