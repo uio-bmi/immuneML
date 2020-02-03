@@ -1,6 +1,7 @@
+import warnings
+
 import airr
 import numpy as np
-import warnings
 
 from source.IO.dataset_import.GenericLoader import GenericLoader
 from source.environment.Constants import Constants
@@ -69,4 +70,4 @@ class AIRRLoader(GenericLoader):
 
     def _set_na_to_unknown(self, df):
         ''' Sets all types of unknown data values to the universal UNKNOWN constant'''
-        return df.replace(["unresolved", "no data", "na", "unknown", "null", "nan", np.nan], Constants.UNKNOWN)
+        return df.replace({key: Constants.UNKNOWN for key in ["unresolved", "no data", "na", "unknown", "null", "nan", np.nan]})

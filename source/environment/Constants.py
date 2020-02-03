@@ -1,6 +1,6 @@
 class Constants:
 
     FEATURE_DELIMITER = "///"
-    UNKNOWN = "unknown"
+    UNKNOWN = None
     ALLELE_DELIMITER = "*"
     CACHE_TYPE = "cache_type"

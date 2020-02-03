@@ -32,9 +32,9 @@ class AdaptiveBiotechLoader(GenericLoader):
 
         df = df.rename(columns=rename_dict)
 
-        df = df.replace(["unresolved", "no data", "na", "unknown", "null", "nan", np.nan], Constants.UNKNOWN)
-        if params["remove_out_of_frame"]:
-            df = df[(df["sequence_aas"] != Constants.UNKNOWN) & (~df["sequence_aas"].str.contains("\*"))]
+        df = df.replace({key: Constants.UNKNOWN for key in ["unresolved", "no data", "na", "unknown", "null", "nan", np.nan]})
+        if params["keep_only_in_frame"]:
+            df = df[df["frame_types"] == "In"]
 
         if "sequences" in params["columns_to_load"]:
             df['sequences'] = [y[(84 - 3 * len(x)): 78] for x, y in zip(df['sequence_aas'], df['sequences'])]
