@@ -13,9 +13,9 @@ class SequenceClonalCountFilter(Filter):
     Removes sequences with counts below low_count_limit or the ones without count if remove_without_counts is True
     """
 
-    def __init__(self, low_count_limit: int, remove_without_counts: bool, batch_size: int):
+    def __init__(self, low_count_limit: int, remove_without_count: bool, batch_size: int):
         self.low_count_limit = low_count_limit
-        self.remove_without_count = remove_without_counts
+        self.remove_without_count = remove_without_count
         self.batch_size = batch_size
 
     @staticmethod
@@ -50,4 +50,5 @@ class SequenceClonalCountFilter(Filter):
         params = {"result_path": result_path}
         params["low_count_limit"] = self.low_count_limit
         params["remove_without_count"] = self.remove_without_count
+        params["batch_size"] = self.batch_size
         return SequenceClonalCountFilter.process(dataset, params)

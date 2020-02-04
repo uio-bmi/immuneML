@@ -20,14 +20,14 @@ class TestImmuneMLApp(TestCase):
         path = EnvironmentSettings.root_path + "test/tmp/immunemlapp/"
         PathBuilder.build(path)
 
-        sequences1 = [ReceptorSequence(amino_acid_sequence="AAA", metadata=SequenceMetadata(chain="A"), identifier="1"),
-                      ReceptorSequence(amino_acid_sequence="AAAA", metadata=SequenceMetadata(chain="B"), identifier="2"),
-                      ReceptorSequence(amino_acid_sequence="AAAAA", metadata=SequenceMetadata(chain="B"), identifier="3"),
-                      ReceptorSequence(amino_acid_sequence="AAA", metadata=SequenceMetadata(chain="A"), identifier="4")]
-        sequences2 =[ReceptorSequence(amino_acid_sequence="AAA", metadata=SequenceMetadata(chain="B"), identifier="5"),
-                     ReceptorSequence(amino_acid_sequence="AAAA", metadata=SequenceMetadata(chain="A"), identifier="6"),
-                     ReceptorSequence(amino_acid_sequence="AAAA", metadata=SequenceMetadata(chain="B"), identifier="7"),
-                     ReceptorSequence(amino_acid_sequence="AAA", metadata=SequenceMetadata(chain="A"), identifier="8")]
+        sequences1 = [ReceptorSequence(amino_acid_sequence="AAA", metadata=SequenceMetadata(chain="A", count=2), identifier="1"),
+                      ReceptorSequence(amino_acid_sequence="AAAA", metadata=SequenceMetadata(chain="B", count=4), identifier="2"),
+                      ReceptorSequence(amino_acid_sequence="AAAAA", metadata=SequenceMetadata(chain="B", count=3), identifier="3"),
+                      ReceptorSequence(amino_acid_sequence="AAA", metadata=SequenceMetadata(chain="A", count=2), identifier="4")]
+        sequences2 =[ReceptorSequence(amino_acid_sequence="AAA", metadata=SequenceMetadata(chain="B", count=2), identifier="5"),
+                     ReceptorSequence(amino_acid_sequence="AAAA", metadata=SequenceMetadata(chain="A", count=3), identifier="6"),
+                     ReceptorSequence(amino_acid_sequence="AAAA", metadata=SequenceMetadata(chain="B", count=4), identifier="7"),
+                     ReceptorSequence(amino_acid_sequence="AAA", metadata=SequenceMetadata(chain="A", count=2), identifier="8")]
 
         dataset = RepertoireDataset(repertoires=[SequenceRepertoire.build_from_sequence_objects(sequences1 if i % 2 == 0 else sequences2,
                                                                                                 path, identifier=str(i),
@@ -85,7 +85,17 @@ class TestImmuneMLApp(TestCase):
                         {"collect": {
                             "type": "PatientRepertoireCollector",
                             "params": {}
-                        }}
+                        }},
+                        {
+                            "count_filter": {
+                                "type": "SequenceClonalCountFilter",
+                                "params": {
+                                    "remove_without_count": True,
+                                    "low_count_limit": 3,
+                                    "batch_size": 4
+                                }
+                            }
+                        }
                     ]
                 },
                 "reports": {
