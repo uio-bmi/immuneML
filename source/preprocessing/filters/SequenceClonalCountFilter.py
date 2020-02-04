@@ -33,7 +33,8 @@ class SequenceClonalCountFilter(Filter):
     def process_repertoire(repertoire: SequenceRepertoire, params: dict) -> SequenceRepertoire:
 
         counts = repertoire.get_counts()
-        indices_to_keep = np.full(counts.shape[0], False)
+        counts = counts if counts is not None else np.full(repertoire.get_element_count(), None)
+        indices_to_keep = np.full(repertoire.get_element_count(), False)
         if params["remove_without_count"] and params["low_count_limit"] is not None:
             np.greater_equal(counts, params["low_count_limit"], out=indices_to_keep, where=counts != np.full_like(counts, None, order="F"))
         elif params["remove_without_count"]:

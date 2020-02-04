@@ -141,6 +141,7 @@ class SequenceRepertoire(DatasetItem):
         self.metadata_filename = metadata_filename
         self.identifier = identifier
         self.data = None
+        self.element_count = None
 
     def get_sequence_aas(self):
         return self.get_attribute("sequence_aas")
@@ -162,6 +163,7 @@ class SequenceRepertoire(DatasetItem):
             data = np.load(self._data_filename, allow_pickle=True)
             self.data = weakref.ref(data) if EnvironmentSettings.low_memory else data
         data = self.data() if EnvironmentSettings.low_memory else self.data
+        self.element_count = data.shape[0]
         return data
 
     def get_attribute(self, attribute):
@@ -188,6 +190,11 @@ class SequenceRepertoire(DatasetItem):
     def __setstate__(self, state):
         self.__dict__.update(state)
         self.data = None
+
+    def get_element_count(self):
+        if self.element_count is None:
+            self.load_data()
+        return self.element_count
 
     @property
     def sequences(self):

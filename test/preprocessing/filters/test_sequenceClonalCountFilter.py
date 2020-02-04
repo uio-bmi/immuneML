@@ -32,4 +32,14 @@ class TestSequenceClonalCountFilter(TestCase):
                                                                "result_path": path, "batch_size": 4})
         self.assertEqual(3, dataset3.repertoires[2].get_sequence_aas().shape[0])
 
+        dataset = RepertoireDataset(repertoires=RepertoireBuilder.build([["ACF", "ACF", "ACF"],
+                                                                         ["ACF", "ACF"],
+                                                                         ["ACF", "ACF", "ACF", "ACF"]], path)[0])
+
+        dataset4 = SequenceClonalCountFilter.process(dataset, {"low_count_limit": 0, "remove_without_count": True,
+                                                               "result_path": path, "batch_size": 4})
+        self.assertEqual(0, dataset4.repertoires[0].get_sequence_aas().shape[0])
+        self.assertEqual(0, dataset4.repertoires[1].get_sequence_aas().shape[0])
+        self.assertEqual(0, dataset4.repertoires[2].get_sequence_aas().shape[0])
+
         shutil.rmtree(path)
