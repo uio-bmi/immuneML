@@ -36,7 +36,9 @@ class SimulationParser:
                         1: 0
                         2: 0
                     params:
-                        max_hamming_distance: 1 # max 1 letter can differ at one time
+                        hamming_distance_probabilities:
+                            0: 0.5 # Hamming distance of 0 (no change) with probability 0.5
+                            1: 0.5 # Hamming distance of 1 (one letter change) with probability 0.5
                         min_gap: 0
                         max_gap: 1
 
