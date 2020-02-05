@@ -24,7 +24,7 @@ class AdaptiveBiotechLoader(GenericLoader):
             df = df.rename(columns={'j_family': 'j_subgroup'})
 
         rename_dict = {'rearrangement': 'sequences', 'amino_acid': 'sequence_aas', "v_gene": "v_genes", "j_gene": "j_genes",
-                       "frame_type": "frame_types", 'v_family': 'v_subgroup', 'j_family': 'j_subgroup'}
+                       "frame_type": "frame_types", 'v_family': 'v_subgroup', 'j_family': 'j_subgroup', "templates": "counts"}
 
         for key in list(rename_dict.keys()):
             if key not in params["columns_to_load"]:
