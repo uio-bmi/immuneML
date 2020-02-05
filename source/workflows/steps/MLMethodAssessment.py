@@ -1,5 +1,6 @@
 import inspect
 import os
+import warnings
 
 import pandas as pd
 from sklearn import metrics
@@ -79,10 +80,15 @@ class MLMethodAssessment(Step):
         else:
             fn = getattr(ml_metrics, metric.value)
 
-        if "labels" in inspect.signature(fn).parameters.keys():
-            score = fn(true_y, predicted_y, labels=labels)
-        else:
-            score = fn(true_y, predicted_y)
+        try:
+            if "labels" in inspect.signature(fn).parameters.keys():
+                score = fn(true_y, predicted_y, labels=labels)
+            else:
+                score = fn(true_y, predicted_y)
+        except ValueError:
+            warnings.warn(f"MLMethodAssessment: score for metric {metric.name} could not be calculated."
+                          f"\nPredicted values: {predicted_y}\nTrue values: {true_y}", RuntimeWarning)
+            score = None
 
         return score
 

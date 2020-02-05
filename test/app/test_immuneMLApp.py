@@ -145,7 +145,7 @@ class TestImmuneMLApp(TestCase):
                     "labels": ["CD"],
                     "dataset": "d1",
                     "strategy": "GridSearch",
-                    "metrics": ["accuracy"],
+                    "metrics": ["accuracy", "auc"],
                     "reports": ["rep1"],
                     "batch_size": 10
                 }
