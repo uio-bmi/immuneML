@@ -34,15 +34,16 @@ class SequenceClonalCountFilter(Filter):
 
         counts = repertoire.get_counts()
         counts = counts if counts is not None else np.full(repertoire.get_element_count(), None)
+        not_none_indices = counts != None
+        counts[not_none_indices] = counts[not_none_indices].astype(np.int)
         indices_to_keep = np.full(repertoire.get_element_count(), False)
         if params["remove_without_count"] and params["low_count_limit"] is not None:
-            np.greater_equal(counts, params["low_count_limit"], out=indices_to_keep, where=counts != np.full_like(counts, None, order="F"))
+            np.greater_equal(counts, params["low_count_limit"], out=indices_to_keep, where=not_none_indices)
         elif params["remove_without_count"]:
-            indices_to_keep = counts != np.full(counts.shape, None)
+            indices_to_keep = not_none_indices
         elif params["low_count_limit"] is not None:
-            indices_to_keep = counts >= params["low_count_limit"]
-        else:
-            indices_to_keep = []
+            indices_to_keep[np.logical_not(not_none_indices)] = True
+            np.greater_equal(counts, params["low_count_limit"], out=indices_to_keep, where=not_none_indices)
 
         processed_repertoire = SequenceRepertoire.build_like(repertoire, indices_to_keep, params["result_path"])
         return processed_repertoire

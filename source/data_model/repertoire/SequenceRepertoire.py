@@ -18,7 +18,7 @@ from source.util.PathBuilder import PathBuilder
 class SequenceRepertoire(DatasetItem):
     """
     Repertoire object consisting of sequence objects, each sequence attribute is stored as a list across all sequences and can be
-    loaded separately. Internally, this class relies on h5py to store/load the data.
+    loaded separately. Internally, this class relies on numpy to store/load the data.
     """
 
     FIELDS = "sequence_aas,sequences,v_genes,j_genes,chains,counts,region_types,sequence_identifiers".split(",")
