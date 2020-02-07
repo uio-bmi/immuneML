@@ -58,7 +58,7 @@ class MiXCRLoader(DataLoader):
         for index in range(len(filepaths)):
             repertoires.append(MiXCRLoader._load_repertoire(filepaths[index], params, metadata_df.iloc[index]))
 
-        dataset = RepertoireDataset(repertoires=repertoires, metadata_file=params["metadata_file"])
+        dataset = RepertoireDataset(repertoires=repertoires, metadata_file=params["metadata_file"], params={key: metadata_df[key].unique().tolist() for key in metadata_df.columns})
         return dataset
 
     @staticmethod
