@@ -22,7 +22,7 @@ class TestSequenceMatcher(TestCase):
             ReceptorSequence(amino_acid_sequence="CCCCCC", metadata=SequenceMetadata(chain="A", v_gene="V1", j_gene="J2"), identifier="4"),
             ReceptorSequence(amino_acid_sequence="AAAACC", metadata=SequenceMetadata(chain="A", v_gene="V1", j_gene="J2"), identifier="5"),
             ReceptorSequence(amino_acid_sequence="TADQVF", metadata=SequenceMetadata(chain="A", v_gene="V1", j_gene="J3"), identifier="6")],
-            metadata={"CD": True}, path=path, identifier="1")
+            metadata={"CD": True}, path=path)
 
         dataset = RepertoireDataset(repertoires=[repertoire])
         sequences = [ReceptorSequence("AAAACA", metadata=SequenceMetadata(chain="A", v_gene="V1", j_gene="J2"), identifier="1"),
@@ -52,7 +52,7 @@ class TestSequenceMatcher(TestCase):
                                                                                       metadata=SequenceMetadata(chain="A", count=1)),
                                                                      ReceptorSequence(amino_acid_sequence="TADQVF", identifier="4",
                                                                                       metadata=SequenceMetadata(chain="A", count=4))],
-                                                                    metadata={"CD": True}, path=path, identifier="3")
+                                                                    metadata={"CD": True}, path=path)
 
         sequences = [ReceptorSequence("AAAACA", metadata=SequenceMetadata(chain="A")),
                      ReceptorSequence("TADQV", metadata=SequenceMetadata(chain="A"))]

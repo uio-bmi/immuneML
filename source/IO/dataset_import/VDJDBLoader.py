@@ -57,7 +57,7 @@ class VDJDBLoader(DataLoader):
     @staticmethod
     def load_repertoire(index: int, row, result_path: str):
         sequences = VDJdbSequenceImport.import_items(row["filename"])
-        return SequenceRepertoire.build_from_sequence_objects(sequences, result_path, str(index), 
+        return SequenceRepertoire.build_from_sequence_objects(sequences, result_path,
                                                               {key: row[key] for key in row.keys() if key != "filename"})
 
     @staticmethod

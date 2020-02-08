@@ -14,7 +14,7 @@ class TestRepertoireBuilder(TestCase):
         repertoires, metadata = RepertoireBuilder.build([["AAA", "CCC"], ["TTTT"]], path, {"default": [1, 2]})
 
         self.assertEqual(2, len(repertoires))
-        self.assertEqual((2, 3), pd.read_csv(metadata).shape)
+        self.assertEqual((2, 4), pd.read_csv(metadata).shape)
 
         self.assertEqual(2, len(repertoires[0].sequences))
         self.assertTrue(all([isinstance(seq, ReceptorSequence) for seq in repertoires[0].sequences]))
@@ -23,7 +23,7 @@ class TestRepertoireBuilder(TestCase):
         self.assertEqual(1, len(repertoires[1].sequences))
         self.assertTrue(all([isinstance(seq, ReceptorSequence) for seq in repertoires[1].sequences]))
         self.assertEqual(2, repertoires[1].metadata["default"])
-        self.assertEqual("rep_1", repertoires[1].identifier)
+        self.assertEqual("rep_1", repertoires[1].metadata["donor"])
 
         # Testing with custom metadata
         repertoires, metadata = RepertoireBuilder.build([["AAA", "CCC"]], path, seq_metadata=[[{"v_gene": "v5", "j_gene": "j5"}, {"v_gene": "v2", "j_gene": "j2"}]])

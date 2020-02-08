@@ -14,12 +14,12 @@ class TestPatientRepertoireCollector(TestCase):
         path = EnvironmentSettings.root_path + "test/tmp/patientrepertoirecollector/"
         PathBuilder.build(path)
 
-        reps = [SequenceRepertoire.build_from_sequence_objects([ReceptorSequence("AAA", identifier="1")],
-                                                               identifier="patient1", path=path, metadata={}),
-                SequenceRepertoire.build_from_sequence_objects([ReceptorSequence("AAC", identifier="2")],
-                                                               identifier="patient1", path=path, metadata={}),
-                SequenceRepertoire.build_from_sequence_objects([ReceptorSequence("AAC", identifier="3")],
-                                                               identifier="patient3", path=path, metadata={})]
+        reps = [SequenceRepertoire.build_from_sequence_objects([ReceptorSequence("AAA", identifier="1")], path=path,
+                                                               metadata={"donor": "patient1"}),
+                SequenceRepertoire.build_from_sequence_objects([ReceptorSequence("AAC", identifier="2")], path=path,
+                                                               metadata={"donor": "patient1"}),
+                SequenceRepertoire.build_from_sequence_objects([ReceptorSequence("AAC", identifier="3")], path=path,
+                                                               metadata={"donor": "patient3"})]
 
         dataset = RepertoireDataset(repertoires=reps)
 

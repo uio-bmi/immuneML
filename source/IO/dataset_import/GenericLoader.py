@@ -94,13 +94,13 @@ class GenericLoader(DataLoader):
 
         return df.apply(self._load_sequence, axis=1, args=(params,)).values
 
-    def _load_repertoire_from_file(self, filepath, params, identifier) -> dict:
+    def _load_repertoire_from_file(self, filepath, params) -> dict:
         df = self._read_preprocess_file(filepath, params)
 
         sequence_lists = self.get_sequence_lists_from_df(df, params)
         metadata = self._extract_repertoire_metadata(filepath, params, df)
 
-        repertoire_inputs = {**{"metadata": metadata, "identifier": identifier, "path": params["result_path"]},
+        repertoire_inputs = {**{"metadata": metadata, "path": params["result_path"]},
                              **sequence_lists}
 
         repertoire = SequenceRepertoire.build(**repertoire_inputs)
@@ -122,13 +122,8 @@ class GenericLoader(DataLoader):
         return {**standard_fields, **{"custom_lists": custom_fields}}
 
     def _load_repertoire(self, index, filepath, params):
-        identifier = str(params["metadata"][index]["donor"]) if "metadata" in params else str(os.path.basename(filepath).rpartition(".")[0])
-        metadata_filename = f"{params['result_path']}{identifier}_metadata.pickle"
-        data_filename = f"{params['result_path']}{identifier}_data.npy"
-        if os.path.isfile(metadata_filename) and os.path.isfile(data_filename):
-            repertoire = SequenceRepertoire(data_filename, metadata_filename, identifier)
-        else:
-            repertoire = self._load_repertoire_from_file(filepath, params, identifier)
+
+        repertoire = self._load_repertoire_from_file(filepath, params)
 
         return repertoire, repertoire.metadata
 

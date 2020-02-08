@@ -34,7 +34,7 @@ T1D#3 C8	TBD	TRAJ23	TRAV17	CATDAGYNQGGKLIF	TRBV5-1	TRBD2	TRBJ1-3	CASSAGNTIYF	Ins
         with open(path + "metadata.csv", "w") as file:
             file.writelines(
                 """filename,chain,donor,coeliac status (yes/no)
-rep1.tsv,TRA,1234,no"""
+rep1.tsv,TRA,1234e,no"""
             )
 
         dataset = GenericLoader().load(path, {"result_path": path,
@@ -48,7 +48,7 @@ rep1.tsv,TRA,1234,no"""
 
         self.assertEqual(1, dataset.get_example_count())
         for index, rep in enumerate(dataset.get_data()):
-            self.assertEqual("1234", rep.identifier)
+            self.assertEqual("1234e", rep.metadata["donor"])
             self.assertEqual(15, len(rep.sequences))
 
         shutil.rmtree(path)

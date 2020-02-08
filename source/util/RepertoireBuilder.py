@@ -11,7 +11,11 @@ class RepertoireBuilder:
     Helper class for tests: creates repertoires from a list of a list of sequences and stores them in the given path
     """
     @staticmethod
-    def build(sequences: list, path: str, labels: dict = None, seq_metadata: list = None):
+    def build(sequences: list, path: str, labels: dict = None, seq_metadata: list = None, donors: list = None):
+
+        if donors is not None:
+            assert len(donors) == len(sequences)
+
         if seq_metadata is not None:
             assert len(sequences) == len(seq_metadata)
             for index, sequence_list in enumerate(sequences):
@@ -20,11 +24,13 @@ class RepertoireBuilder:
         PathBuilder.build(path)
 
         repertoires = []
-        donors = []
+        if donors is None:
+            donors = []
 
         for rep_index, sequence_list in enumerate(sequences):
             rep_sequences = []
-            donors.append("rep_" + str(rep_index))
+            if len(donors) < len(sequences):
+                donors.append("rep_" + str(rep_index))
             for seq_index, sequence in enumerate(sequence_list):
                 if seq_metadata is None:
                     m = SequenceMetadata(v_gene="v1", j_gene="j1")
@@ -39,10 +45,13 @@ class RepertoireBuilder:
             else:
                 metadata = {}
 
-            repertoire = SequenceRepertoire.build_from_sequence_objects(rep_sequences, path, donors[-1], metadata)
+            metadata = {**metadata, **{"donor": donors[rep_index]}}
+
+            repertoire = SequenceRepertoire.build_from_sequence_objects(rep_sequences, path, metadata)
             repertoires.append(repertoire)
 
-        df = pd.DataFrame({**{"filename": [f"{repertoire.identifier}_data.npy" for repertoire in repertoires], "donor": donors},
+        df = pd.DataFrame({**{"filename": [f"{repertoire.identifier}_data.npy" for repertoire in repertoires], "donor": donors,
+                              "repertoire_identifier": [repertoire.identifier for repertoire in repertoires]},
                            **(labels if labels is not None else {})})
         df.to_csv(path + "metadata.csv", index=False)
 

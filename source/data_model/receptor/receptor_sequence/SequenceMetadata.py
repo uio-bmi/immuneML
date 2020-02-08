@@ -23,7 +23,7 @@ class SequenceMetadata:
     def __init__(self,
                  v_subgroup: str = None, v_gene: str = None, v_allele: str = None,
                  j_subgroup: str = None, j_gene: str = None, j_allele: str = None,
-                 chain: str = None,
+                 chain = None,
                  count: int = None,
                  frame_type: str = SequenceFrameType.IN.name,
                  region_type: str = None,

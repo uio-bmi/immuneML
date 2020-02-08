@@ -35,13 +35,15 @@ class SequenceRepertoire(DatasetItem):
 
     @classmethod
     def build(cls, sequence_aas: list, sequences: list, v_genes: list, j_genes: list, chains: list, counts: list, region_types: list,
-                 custom_lists: dict, sequence_identifiers: list, path: str, metadata=None, identifier: str = None, signals: dict = None):
+                 custom_lists: dict, sequence_identifiers: list, path: str, metadata=None, signals: dict = None):
 
         if sequence_identifiers is None or len(sequence_identifiers) == 0 or any(identifier is None for identifier in sequence_identifiers):
             sequence_identifiers = list(range(len(sequence_aas))) if sequence_aas is not None and len(sequence_aas) > 0 else list(range(len(sequences)))
 
         assert len(sequence_aas) == len(sequence_identifiers) or len(sequences) == len(sequence_identifiers)
         assert all(len(custom_lists[key]) == len(sequence_identifiers) for key in custom_lists) if custom_lists else True
+
+        identifier = uuid4().hex
 
         data_filename = f"{path}{identifier}_data.npy"
 
@@ -81,7 +83,7 @@ class SequenceRepertoire(DatasetItem):
 
             data = repertoire.load_data()
             data = data[indices_to_keep]
-            identifier = str(uuid4())
+            identifier = uuid4().hex
 
             data_filename = f"{result_path}{identifier}_data.npy"
             np.save(data_filename, data)
@@ -95,7 +97,7 @@ class SequenceRepertoire(DatasetItem):
             return None
 
     @classmethod
-    def build_from_sequence_objects(cls, sequence_objects: list, path: str, identifier: str, metadata: dict):
+    def build_from_sequence_objects(cls, sequence_objects: list, path: str, metadata: dict):
 
         assert all(isinstance(sequence, ReceptorSequence) for sequence in sequence_objects), \
             "SequenceRepertoire: all sequences have to be instances of ReceptorSequence class."
@@ -123,7 +125,7 @@ class SequenceRepertoire(DatasetItem):
                     signals[key].append(None)
 
         return cls.build(sequence_aas, sequences, v_genes, j_genes, chains, counts, region_types, custom_lists,
-                         sequence_identifiers, path, metadata, identifier, signals)
+                         sequence_identifiers, path, metadata, signals)
 
     def __init__(self, data_filename: str, metadata_filename: str, identifier: str):
 

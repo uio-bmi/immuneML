@@ -27,13 +27,13 @@ class PatientRepertoireCollector(Preprocessor):
         PathBuilder.build(params["result_path"])
 
         for index, repertoire in enumerate(processed_dataset.get_data()):
-            if repertoire.identifier in rep_map.keys():
-                sequences = np.append(repertoire.sequences, rep_map[repertoire.identifier].sequences)
-                del rep_map[repertoire.identifier]
+            if repertoire.metadata["donor"] in rep_map.keys():
+                sequences = np.append(repertoire.sequences, rep_map[repertoire.metadata["donor"]].sequences)
+                del rep_map[repertoire.metadata["donor"]]
                 repertoires.append(PatientRepertoireCollector.store_repertoire(
                     params["result_path"], repertoire, sequences))
             else:
-                rep_map[repertoire.identifier] = repertoire
+                rep_map[repertoire.metadata["donor"]] = repertoire
                 indices_to_keep.append(index)
 
         for key in rep_map.keys():
@@ -57,5 +57,5 @@ class PatientRepertoireCollector(Preprocessor):
 
     @staticmethod
     def store_repertoire(path, repertoire, sequences):
-        new_repertoire = SequenceRepertoire.build_from_sequence_objects(sequences, path, repertoire.identifier, repertoire.metadata)
+        new_repertoire = SequenceRepertoire.build_from_sequence_objects(sequences, path, repertoire.metadata)
         return new_repertoire

@@ -4,6 +4,8 @@ from unittest import TestCase
 import numpy as np
 import pandas as pd
 
+from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
+from source.data_model.repertoire.SequenceRepertoire import SequenceRepertoire
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.pairwise_repertoire_comparison.ComparisonData import ComparisonData
 from source.util.PathBuilder import PathBuilder
@@ -71,31 +73,34 @@ class TestComparisonData(TestCase):
 
     def test_find_label_associated_sequence_p_values(self):
 
-        comparison_data = ComparisonData(repertoire_ids=["rep_0", "rep_1", "rep_2", "rep_3"],
+        repertoires = [SequenceRepertoire.build_from_sequence_objects([ReceptorSequence()], None, {
+            "l1": val, "donor": donor
+        }) for val, donor in zip([True, True, False, False], ["rep_0", "rep_1", "rep_2", "rep_3"])]
+
+        col_name_index = {repertoires[index].identifier: index for index in range(len(repertoires))}
+
+        comparison_data = ComparisonData(repertoire_ids=[repertoire.identifier for repertoire in repertoires],
                                          comparison_attributes=["amino_acid_sequence"], pool_size=4, path="")
         comparison_data.batches = [{'matrix': np.array([[1., 0., 0., 0.],
                                                         [1., 1., 0., 0.]]),
                                     'row_names': [('GGG',), ('III',)],
-                                    'col_name_index': {'rep_0': 0, 'rep_1': 1, 'rep_2': 2, 'rep_3': 3}},
+                                    'col_name_index': col_name_index},
                                    {'matrix': np.array([[1., 1., 0., 1.],
                                                         [1., 1., 1., 1.]]),
                                     'row_names': [('LLL',), ('MMM',)],
-                                    'col_name_index': {'rep_0': 0, 'rep_1': 1, 'rep_2': 2, 'rep_3': 3}},
+                                    'col_name_index': col_name_index},
                                    {'matrix': np.array([[0., 1., 0., 0.],
                                                         [0., 1., 0., 1.]]),
                                     'row_names': [('DDD',), ('EEE',)],
-                                    'col_name_index': {'rep_0': 0, 'rep_1': 1, 'rep_2': 2, 'rep_3': 3}},
+                                    'col_name_index': col_name_index},
                                    {'matrix': np.array([[0., 1., 1., 1.],
                                                         [0., 0., 1., 1.]]),
                                     'row_names': [('FFF',), ('CCC',)],
-                                    'col_name_index': {'rep_0': 0, 'rep_1': 1, 'rep_2': 2, 'rep_3': 3}},
+                                    'col_name_index': col_name_index},
                                    {'matrix': np.array([[0., 0., 0., 1.]]),
                                     'row_names': [('AAA',)],
-                                    'col_name_index': {'rep_0': 0, 'rep_1': 1, 'rep_2': 2, 'rep_3': 3}}]
-        p_values = comparison_data.find_label_associated_sequence_p_values({"l1": [True, True, False, False],
-                                                                            "donor": ["rep_0", "rep_1", "rep_2", "rep_3"]},
-                                                                           "l1",
-                                                                           ["rep_0", "rep_1", "rep_2", "rep_3"], [True, False])
+                                    'col_name_index':col_name_index}]
+        p_values = comparison_data.find_label_associated_sequence_p_values(repertoires, "l1", [True, False])
 
         self.assertTrue(np.allclose([1., 0.3333333333333334, 1., 1., 1., 1., 1., 0.3333333333333334, 1.], p_values))
 

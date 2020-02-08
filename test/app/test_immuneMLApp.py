@@ -30,8 +30,8 @@ class TestImmuneMLApp(TestCase):
                      ReceptorSequence(amino_acid_sequence="AAA", metadata=SequenceMetadata(chain="A", count=2), identifier="8")]
 
         dataset = RepertoireDataset(repertoires=[SequenceRepertoire.build_from_sequence_objects(sequences1 if i % 2 == 0 else sequences2,
-                                                                                                path, identifier=str(i),
-                                                                                                metadata={"CD": True if i % 2 == 0 else False})
+                                                                                                path,
+                                                                                                metadata={"CD": True if i % 2 == 0 else False, "donor": f"rep{i%12*2}"})
                                                  for i in range(1, 14)],
                                     params={"CD": [True, False]})
 

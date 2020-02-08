@@ -50,13 +50,13 @@ class DistanceEncoder(DatasetEncoder):
 
     def build_labels(self, dataset: RepertoireDataset, params: EncoderParams) -> dict:
 
-        lbl = ["donor"]
+        lbl = ["repertoire_identifier"]
         lbl.extend(params["label_configuration"].get_labels_by_name())
 
         tmp_labels = dataset.get_metadata(lbl, return_df=True)
-        tmp_labels = tmp_labels.iloc[pd.Index(tmp_labels['donor']).get_indexer(dataset.get_repertoire_ids())]
+        tmp_labels = tmp_labels.iloc[pd.Index(tmp_labels['repertoire_identifier']).get_indexer(dataset.get_repertoire_ids())]
         tmp_labels = tmp_labels.to_dict("list")
-        del tmp_labels["donor"]
+        del tmp_labels["repertoire_identifier"]
 
         return tmp_labels
 

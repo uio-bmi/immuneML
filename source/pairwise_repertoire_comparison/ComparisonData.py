@@ -77,18 +77,15 @@ class ComparisonData:
         assert label_values is None or len(label_values) == 2, \
             "ComparisonData: Label associated sequences can be inferred only for binary labels."
 
-        repertoire_ids = dataset.get_repertoire_ids()
-        metadata = dataset.get_metadata(["donor", label])
-
-        sequence_p_values = self.find_label_associated_sequence_p_values(metadata, label, repertoire_ids, label_values)
+        sequence_p_values = self.find_label_associated_sequence_p_values(dataset.repertoires, label, label_values)
 
         return np.array(sequence_p_values)
 
-    def find_label_associated_sequence_p_values(self, metadata, label, repertoire_ids, label_values):
+    def find_label_associated_sequence_p_values(self, repertoires, label, label_values):
         sequence_p_values = []
-        is_first_class = np.array([metadata[label][i] for i in [metadata["donor"].index(id) for id in repertoire_ids]]) == label_values[0]
+        is_first_class = np.array([repertoire.metadata[label] for repertoire in repertoires]) == label_values[0]
 
-        for batch in self.get_batches(repertoire_ids):
+        for batch in self.get_batches([repertoire.identifier for repertoire in repertoires]):
 
             for i in range(batch.shape[0]):
 

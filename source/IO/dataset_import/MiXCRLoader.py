@@ -73,7 +73,7 @@ class MiXCRLoader(DataLoader):
                                               chains=MiXCRLoader._load_chains(df, MiXCRLoader.V_GENES_WITH_SCORE).tolist(),
                                               counts=df[MiXCRLoader.CLONE_COUNT].tolist(),
                                               region_types=params["sequence_type"],
-                                              path=params["result_path"], metadata=metadata.to_dict(), identifier=str(metadata["donor"]),
+                                              path=params["result_path"], metadata=metadata.to_dict(),
                                               custom_lists={}, sequence_identifiers=list(range(df.shape[0])))
 
         return repertoire

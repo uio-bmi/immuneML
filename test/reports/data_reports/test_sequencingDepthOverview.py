@@ -21,8 +21,7 @@ class TestSequencingDepthOverview(TestCase):
 
         repertoires = [SequenceRepertoire.build_from_sequence_objects(self.generate_sequences(),
                                                                       metadata={"disease": random.choice(["t1d", "lupus", "ra", "ms"]),
-                                                                                "week": "week" + str(random.randint(0, 4))}, path=path,
-                                                                      identifier=f"random_rep_{i}")
+                                                                                "week": "week" + str(random.randint(0, 4))}, path=path)
                        for i in range(5)]
 
         dataset = RepertoireDataset(repertoires=repertoires, params={"disease": ["t1d", "lupus", "ra", "ms"],

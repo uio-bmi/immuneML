@@ -24,7 +24,7 @@ class TestSequenceAbundanceEncoding(TestCase):
                                                        ["AAA", "CCC", "EEE", "FFF", "LLL", "MMM"]],
                                                       labels={"l1": [True, True, False, False]}, path=path)
 
-        dataset = RepertoireDataset(repertoires=repertoires, metadata_file=metadata, identifier="1", params={"l1": [True, False]})
+        dataset = RepertoireDataset(repertoires=repertoires, metadata_file=metadata, params={"l1": [True, False]})
         PickleExporter.export(dataset, path, "dataset.pickle")
 
         specs = {

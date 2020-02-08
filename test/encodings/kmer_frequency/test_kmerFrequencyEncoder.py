@@ -26,12 +26,12 @@ class TestKmerFrequencyEncoder(TestCase):
         rep1 = SequenceRepertoire.build_from_sequence_objects([ReceptorSequence("AAA", identifier="1"),
                                                                ReceptorSequence("ATA", identifier="2"),
                                                                ReceptorSequence("ATA", identifier='3')],
-                                                              metadata={"l1": 1, "l2": 2}, path=path, identifier="1")
+                                                              metadata={"l1": 1, "l2": 2, "donor": "1"}, path=path)
 
         rep2 = SequenceRepertoire.build_from_sequence_objects([ReceptorSequence("ATA", identifier="1"),
                                                                ReceptorSequence("TAA", identifier="2"),
                                                                ReceptorSequence("AAC", identifier="3")],
-                                                              metadata={"l1": 0, "l2": 3}, path=path, identifier="2")
+                                                              metadata={"l1": 0, "l2": 3, "donor": "2"}, path=path)
 
         lc = LabelConfiguration()
         lc.add_label("l1", [1, 2])

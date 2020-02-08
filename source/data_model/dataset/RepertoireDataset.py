@@ -14,7 +14,7 @@ class RepertoireDataset(Dataset):
                  repertoires: list = None, identifier: str = None, metadata_file: str = None):
         self.params = params
         self.encoded_data = encoded_data
-        self.identifier = identifier if identifier is not None else uuid.uuid1()
+        self.identifier = identifier if identifier is not None else uuid.uuid4()
         self.metadata_file = metadata_file
         self.repertoire_ids = None
         self.repertoires = repertoires

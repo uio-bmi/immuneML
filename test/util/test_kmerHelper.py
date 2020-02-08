@@ -32,7 +32,7 @@ class TestKmerHelper(TestCase):
 
         rep = SequenceRepertoire.build_from_sequence_objects([ReceptorSequence(amino_acid_sequence="AACT"),
                                   ReceptorSequence(amino_acid_sequence="ACCT"),
-                                  ReceptorSequence(amino_acid_sequence="AACT")], path, '1', {})
+                                  ReceptorSequence(amino_acid_sequence="AACT")], path, {})
 
         sentences = KmerHelper.create_sentences_from_repertoire(rep, 3)
 

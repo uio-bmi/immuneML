@@ -31,7 +31,7 @@ class TestSequenceRepertoire(TestCase):
                      ReceptorSequence(amino_acid_sequence="CCC", identifier="2",
                                       metadata=SequenceMetadata(j_gene="J1", custom_params={"cmv": "yes", "coeliac": True}))]
 
-        obj = SequenceRepertoire.build_from_sequence_objects(sequences, path, "1", {"cmv": "yes"})
+        obj = SequenceRepertoire.build_from_sequence_objects(sequences, path, {"cmv": "yes", 'donor': "1"})
 
         self.assertTrue(os.path.isfile(obj._data_filename))
         self.assertTrue(isinstance(obj, SequenceRepertoire))
@@ -42,7 +42,7 @@ class TestSequenceRepertoire(TestCase):
         self.assertTrue(np.array_equal(np.array(["no", "yes"]), obj.get_attribute("cmv")))
         self.assertTrue(np.array_equal(np.array([False, True]), obj.get_attribute("coeliac")))
         self.assertEqual("yes", obj.metadata["cmv"])
-        self.assertEqual("1", obj.identifier)
+        self.assertEqual("1", obj.metadata["donor"])
 
         rebuilt_sequences = obj.sequences
 

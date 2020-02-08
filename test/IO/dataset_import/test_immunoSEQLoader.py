@@ -39,7 +39,7 @@ AAGAAGCTCCTTCTCAGTGACTCTGGCTTCTATCTCTGTGCCTGGAGTGTACGTCCGGGCGCAGGGTACGAGCAGTACTT
         with open(path + "metadata.csv", "w") as file:
             file.writelines(
             """filename,chain,donor,coeliac status (yes/no)
-rep1.tsv,TRA,1234,no"""
+rep1.tsv,TRA,1234a,no"""
             )
 
         dataset = ImmunoSEQLoader().load(path, {"result_path": path,
@@ -50,7 +50,7 @@ rep1.tsv,TRA,1234,no"""
 
         self.assertEqual(1, dataset.get_example_count())
         for index, rep in enumerate(dataset.get_data()):
-            self.assertEqual("1234", rep.identifier)
+            self.assertEqual("1234a", rep.metadata["donor"])
             self.assertEqual(19, len(rep.sequences))
 
         shutil.rmtree(path)

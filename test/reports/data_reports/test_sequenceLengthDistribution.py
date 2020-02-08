@@ -18,12 +18,12 @@ class TestSequenceLengthDistribution(TestCase):
                                              ReceptorSequence(amino_acid_sequence="AAAA", identifier="2"),
                                              ReceptorSequence(amino_acid_sequence="AAAAA", identifier="3"),
                                              ReceptorSequence(amino_acid_sequence="AAA", identifier="4")],
-                                                              path=path, identifier="1", metadata={})
+                                                              path=path, metadata={})
         rep2 = SequenceRepertoire.build_from_sequence_objects(sequence_objects=[ReceptorSequence(amino_acid_sequence="AAA", identifier="5"),
                                              ReceptorSequence(amino_acid_sequence="AAAA", identifier="6"),
                                              ReceptorSequence(amino_acid_sequence="AAAA", identifier="7"),
                                              ReceptorSequence(amino_acid_sequence="AAA", identifier="8")],
-                                                              path=path, identifier="2", metadata={})
+                                                              path=path, metadata={})
 
         dataset = RepertoireDataset(repertoires=[rep1, rep2])
 

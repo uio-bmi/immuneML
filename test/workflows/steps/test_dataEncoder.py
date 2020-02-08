@@ -20,10 +20,10 @@ class TestDataEncoder(TestCase):
         PathBuilder.build(path)
 
         rep1 = SequenceRepertoire.build_from_sequence_objects([ReceptorSequence("AAA", identifier="1")],
-                                                              metadata={"l1": 1, "l2": 2}, path=path, identifier="1")
+                                                              metadata={"l1": 1, "l2": 2}, path=path)
 
         rep2 = SequenceRepertoire.build_from_sequence_objects([ReceptorSequence("ATA", identifier="2")],
-                                                              metadata={"l1": 0, "l2": 3}, path=path, identifier="2")
+                                                              metadata={"l1": 0, "l2": 3}, path=path)
 
         lc = LabelConfiguration()
         lc.add_label("l1", [1, 2])

@@ -34,13 +34,11 @@ class TestAIRRExporter(TestCase):
                                                                        custom_params={"d_call": "d2",
                                                                                       "custom_test": "cust2"}))]
 
-        repertoire = SequenceRepertoire.build_from_sequence_objects(sequence_objects=sequence_objects, path=path,
-                                                                    identifier="REP1", metadata={})
+        repertoire = SequenceRepertoire.build_from_sequence_objects(sequence_objects=sequence_objects, path=path, metadata={"donor": "REP1"})
         df = pd.DataFrame({"filename": [f"{repertoire.identifier}_data.npy"], "donor": ["1"]})
         df.to_csv(path + "metadata.csv", index=False)
 
         return repertoire, path + "metadata.csv"
-
 
     def test_export(self):
         path = EnvironmentSettings.tmp_test_path + "airr_exporter/"
@@ -51,7 +49,7 @@ class TestAIRRExporter(TestCase):
 
         AIRRExporter.export(dataset, path, "airr_data")
 
-        resulting_data = pd.read_csv(path + "airr_data_REP1.tsv", sep="\t")
+        resulting_data = pd.read_csv(path + f"airr_data_{repertoire.identifier}.tsv", sep="\t")
 
         self.assertListEqual(list(resulting_data["sequence_id"]), ["receptor_1", "receptor_2"])
         self.assertListEqual(list(resulting_data["rearrangement_id"]), ["receptor_1", "receptor_2"])

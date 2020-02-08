@@ -31,7 +31,7 @@ class TestSignalImplanter(TestCase):
                                                                                    ReceptorSequence("ACDEFG", identifier="2"),
                                                                                    ReceptorSequence("ACDEFG", identifier="3"),
                                                                                    ReceptorSequence("ACDEFG", identifier="4")],
-                                                                 path=path, identifier=str(i+1), metadata={})
+                                                                 path=path, metadata={})
             r.append(rep)
 
         dataset = RepertoireDataset(repertoires=r)

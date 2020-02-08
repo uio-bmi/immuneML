@@ -72,11 +72,11 @@ rep2.tsv,TRB,1234a,no"""
         self.assertEqual(2, dataset.get_example_count())
         for index, rep in enumerate(dataset.get_data()):
             if index == 0:
-                self.assertEqual("1234", rep.identifier)
+                self.assertEqual("1234", rep.metadata["donor"])
                 self.assertEqual(8, len(rep.sequences))
                 self.assertEqual(10, rep.sequences[0].metadata.count)
             else:
-                self.assertEqual("1234a", rep.identifier)
+                self.assertEqual("1234a", rep.metadata["donor"])
                 self.assertEqual(11, len(rep.sequences))
                 self.assertEqual(2, rep.sequences[-1].metadata.count)
 

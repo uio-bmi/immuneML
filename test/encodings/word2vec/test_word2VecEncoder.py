@@ -22,11 +22,11 @@ class TestWord2VecEncoder(TestCase):
         sequence1 = ReceptorSequence("CASSVFA", identifier="1")
         sequence2 = ReceptorSequence("CASSCCC", identifier="2")
 
-        metadata1 = {"T1D": "T1D"}
-        rep1 = SequenceRepertoire.build_from_sequence_objects([sequence1, sequence2], test_path, "1", metadata1)
+        metadata1 = {"T1D": "T1D", "donor": "1"}
+        rep1 = SequenceRepertoire.build_from_sequence_objects([sequence1, sequence2], test_path, metadata1)
 
-        metadata2 = {"T1D": "CTL"}
-        rep2 = SequenceRepertoire.build_from_sequence_objects([sequence1], test_path, "2", metadata2)
+        metadata2 = {"T1D": "CTL", "donor": "2"}
+        rep2 = SequenceRepertoire.build_from_sequence_objects([sequence1], test_path, metadata2)
 
         dataset = RepertoireDataset(repertoires=[rep1, rep2])
 

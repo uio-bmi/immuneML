@@ -41,13 +41,13 @@ class Quickstart:
 
         for index in range(1, repertoire_count+1):
                 if index % 4 == 0:
-                    repertoires.append(SequenceRepertoire.build_from_sequence_objects(sequences1, path, str(index), {"CD": True}))
+                    repertoires.append(SequenceRepertoire.build_from_sequence_objects(sequences1, path, {"CD": True}))
                 elif index % 3 == 0:
-                    repertoires.append(SequenceRepertoire.build_from_sequence_objects(sequences2, path, str(index), {"CD": False}))
+                    repertoires.append(SequenceRepertoire.build_from_sequence_objects(sequences2, path, {"CD": False}))
                 elif index % 2 == 0:
-                    repertoires.append(SequenceRepertoire.build_from_sequence_objects(sequences3, path, str(index), {"CD": True}))
+                    repertoires.append(SequenceRepertoire.build_from_sequence_objects(sequences3, path, {"CD": True}))
                 else:
-                    repertoires.append(SequenceRepertoire.build_from_sequence_objects(sequences4, path, str(index), {"CD": False}))
+                    repertoires.append(SequenceRepertoire.build_from_sequence_objects(sequences4, path, {"CD": False}))
 
         dataset = RepertoireDataset(repertoires=repertoires, params={"CD": [True, False]})
 

@@ -34,7 +34,9 @@ class TestMatchedReceptorsEncoder(TestCase):
                                                                     [{**metadata_beta, "count": 10}],
                                                                     [{**metadata_alpha, "count": 5}, {**metadata_alpha, "count": 5}],
                                                                     [{**metadata_beta, "count": 5}, {**metadata_beta, "count": 5}],
-                                                                    [{**metadata_alpha, "count": 1}, {**metadata_alpha, "count": 2}, {**metadata_beta, "count": 1}, {**metadata_beta, "count": 2}]])
+                                                                    [{**metadata_alpha, "count": 1}, {**metadata_alpha, "count": 2},
+                                                                     {**metadata_beta, "count": 1}, {**metadata_beta, "count": 2}]],
+                                                        donors=["donor1", "donor1", "donor2", "donor2", "donor3"])
 
         dataset = RepertoireDataset(repertoires=repertoires)
 

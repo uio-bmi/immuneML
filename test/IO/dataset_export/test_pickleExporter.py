@@ -25,4 +25,4 @@ class TestPickleExporter(TestCase):
 
         self.assertTrue(isinstance(dataset2, RepertoireDataset))
         self.assertEqual(2, len(dataset2.get_data()))
-        self.assertEqual("rep_0", dataset2.get_data()[0].identifier)
+        self.assertEqual("rep_0", dataset2.get_data()[0].metadata["donor"])

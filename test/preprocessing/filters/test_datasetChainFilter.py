@@ -19,9 +19,9 @@ class TestDatasetChainFilter(TestCase):
         PathBuilder.build(path)
 
         rep1 = SequenceRepertoire.build_from_sequence_objects([ReceptorSequence("AAA", metadata=SequenceMetadata(chain="A"),
-                                                                                identifier="1")], path=path, identifier="1", metadata={})
+                                                                                identifier="1")], path=path, metadata={})
         rep2 = SequenceRepertoire.build_from_sequence_objects([ReceptorSequence("AAC", metadata=SequenceMetadata(chain="B"),
-                                                                                identifier="2")], path=path, identifier="2", metadata={})
+                                                                                identifier="2")], path=path, metadata={})
 
         metadata = pd.DataFrame({"CD": [1, 0]})
         metadata.to_csv(path + "metadata.csv")

@@ -87,8 +87,7 @@ class SignalImplanter(Step):
 
     @staticmethod
     def _copy_repertoire(index: int, repertoire: SequenceRepertoire, input_params: SignalImplanterParams) -> str:
-        new_repertoire = SequenceRepertoire.build_from_sequence_objects(repertoire.sequences, input_params.result_path, repertoire.identifier,
-                                                                        repertoire.metadata)
+        new_repertoire = SequenceRepertoire.build_from_sequence_objects(repertoire.sequences, input_params.result_path, repertoire.metadata)
 
         for signal in input_params.signals:
             new_repertoire.metadata[f"signal_{signal.id}"] = False
