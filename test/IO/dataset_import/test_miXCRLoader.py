@@ -87,6 +87,48 @@ class TestMiXCRLoader(TestCase):
                 "aaSeqCDR2": "CAASNTTA",
                 "aaSeqCDR3": "CAASNTTA",
                 "sampleID": 1
+            }, {
+                "patient": "CD12",
+                "dilution": "108'",
+                "cloneCount": 6,
+                "allVHitsWithScore": "TRAV19-1*00(735)",
+                "allJHitsWithScore": "TRAJ12*00(243)",
+                "nSeqCDR1": "CAATGTGA",
+                "nSeqCDR2": "CAATGTGA",
+                "nSeqCDR3": "CAATGTGA",
+                "minQualCDR3": 10,
+                "aaSeqCDR1": "CAASNTTA",
+                "aaSeqCDR2": "CAASNTTA",
+                "aaSeqCDR3": "CAASNTTA",
+                "sampleID": 1
+            }, {
+                "patient": "CD12",
+                "dilution": "108'",
+                "cloneCount": 6,
+                "allVHitsWithScore": "TRAV19-1*00(735)",
+                "allJHitsWithScore": "TRAJ12*00(243)",
+                "nSeqCDR1": "CAATGTGA",
+                "nSeqCDR2": "CAATGTGA",
+                "nSeqCDR3": "CAATGTGA",
+                "minQualCDR3": 10,
+                "aaSeqCDR1": "CAASNTTA",
+                "aaSeqCDR2": "CAASNTTA",
+                "aaSeqCDR3": "CAASNTTA",
+                "sampleID": 1
+            }, {
+                "patient": "CD12",
+                "dilution": "108'",
+                "cloneCount": 6,
+                "allVHitsWithScore": "TRAV19-1*00(735)",
+                "allJHitsWithScore": "TRAJ12*00(243)",
+                "nSeqCDR1": "CAATGTGA",
+                "nSeqCDR2": "CAATGTGA",
+                "nSeqCDR3": "CAATGTGA",
+                "minQualCDR3": 10,
+                "aaSeqCDR1": "CAASNTTA",
+                "aaSeqCDR2": "CAASNTTA",
+                "aaSeqCDR3": "CAASNTTA",
+                "sampleID": 1
             }]
 
             writer.writeheader()
@@ -110,7 +152,8 @@ class TestMiXCRLoader(TestCase):
                 self.assertTrue(repertoire.sequences[0].amino_acid_sequence == "VFAVFA")
                 self.assertTrue(repertoire.sequences[1].metadata.v_gene == "V14-1")
                 self.assertTrue(repertoire.metadata["CD"])
-            else:
+            elif index == 1:
+                self.assertEqual(5, len(repertoire.sequences))
                 self.assertEqual("TGTGCAGCAA", repertoire.sequences[0].nucleotide_sequence)
                 self.assertEqual(6, repertoire.sequences[1].metadata.count)
                 self.assertFalse(repertoire.metadata["CD"])
