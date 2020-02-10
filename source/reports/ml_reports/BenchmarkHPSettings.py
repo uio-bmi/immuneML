@@ -68,12 +68,14 @@ class BenchmarkHPSettings(MLReport):
                           width=8, result_path=self.result_path, result_name="benchmark_result")
 
     def check_prerequisites(self):
+        run_report = True
+
         if not hasattr(self, "hp_optimization_state"):
             warnings.warn("BenchmarkSettings can only be executed as a hyperparameter report. BenchmarkSettings report will not be created.")
-            return False
+            run_report = False
 
         if not hasattr(self, "result_path"):
             warnings.warn("BenchmarkSettings requires an output 'path' to be set. BenchmarkSettings report will not be created.")
-            return False
+            run_report = False
 
-        return True
+        return run_report

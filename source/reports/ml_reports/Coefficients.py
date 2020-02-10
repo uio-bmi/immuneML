@@ -8,13 +8,18 @@ from rpy2.robjects.packages import STAP
 
 from source.dsl.report_params_parsers.CoefficientPlottingSetting import CoefficientPlottingSetting
 from source.environment.EnvironmentSettings import EnvironmentSettings
+from source.ml_methods.RandomForestClassifier import RandomForestClassifier
 from source.reports.ml_reports.MLReport import MLReport
 from source.util.PathBuilder import PathBuilder
 
 
-class LogisticRegressionCoefficients(MLReport):
+class Coefficients(MLReport):
     """
-    A report that outputs the values of the logistic regression coefficients.
+    A report that outputs the coefficients for a given ML method.
+
+    - For Logistic regression: coefficients
+    - For SVM: coefficients
+    - For Random Forest: feature importance
     """
 
     def __init__(self, coefs_to_plot, cutoff, n_largest):
@@ -25,6 +30,8 @@ class LogisticRegressionCoefficients(MLReport):
 
     def generate(self):
         PathBuilder.build(self.result_path)
+
+        self._set_parameters()
 
         plot_data = self._retrieve_plot_data()
         self._write_results_table(plot_data)
@@ -52,12 +59,24 @@ class LogisticRegressionCoefficients(MLReport):
                            "largest_{}_coefficients".format(n_val))
 
 
+    def _set_parameters(self):
+        if isinstance(self.method, RandomForestClassifier):
+            self._param_field = "feature_importances"
+            self._y_axis_title = "Feature importance"
+        else:
+            # SVM, logistic regression, ...
+            self._param_field = "coefficients"
+            self._y_axis_title = "Coefficient value"
+
+
+
     def _write_results_table(self, plotting_data):
         plotting_data.to_csv(self.result_path + "coefficients.csv", index=False)
 
 
     def _retrieve_plot_data(self):
-        coefficients = self.method.get_params(self.label)["coefficients"][0]
+        coefficients = self.method.get_params(self.label)[self._param_field]
+
         feature_names = self._retrieve_feature_names()
 
         return pd.DataFrame({"coefficients": coefficients, "features": feature_names})
@@ -70,37 +89,45 @@ class LogisticRegressionCoefficients(MLReport):
         return params[self.label]["feature_names"]
 
     def _plot(self, plotting_data, output_name):
-        pandas2ri.activate()
 
-        with open(EnvironmentSettings.visualization_path + "Barplot.R") as f:
-            string = f.read()
+        if plotting_data.empty:
+            warnings.warn("Coefficients: empty data subset specified, skipping this plot...")
+        else:
+            try:
+                pandas2ri.activate()
 
-        plot = STAP(string, "plot")
+                with open(EnvironmentSettings.visualization_path + "Barplot.R") as f:
+                    string = f.read()
 
-        plotting_data.loc[:, "empty_facet"] = ""  # Necessary to remove '(all)' label when not using facets
+                plot = STAP(string, "plot")
 
-        plot.plot_barplot(data=plotting_data, x="features", color="NULL", y="coefficients",
-                          ylab="coefficient value", xlab="feature", facet_type="wrap", facet_columns="empty_facet",
-                          facet_scales="free", nrow=1, height=6,
-                          width=8, result_path=self.result_path, result_name=output_name)
+                plotting_data.loc[:, "empty_facet"] = ""  # Necessary to remove '(all)' label when not using facets
 
-
+                plot.plot_barplot(data=plotting_data, x="features", color="NULL", y="coefficients",
+                                  ylab=self._y_axis_title, xlab="feature", facet_type="wrap", facet_columns="empty_facet",
+                                  facet_scales="free", nrow=1, height=6,
+                                  width=8, result_path=self.result_path, result_name=output_name)
+            except Exception as e:
+                warnings.warn(f"Coefficients: the following exception was thrown when attempting to plot the data:\n{e}")
 
     def check_prerequisites(self):
+
+        run_report = True
+
         if not hasattr(self, "method"):
-            warnings.warn("LogisticRegressionCoefficients can only be executed as a model report. LogisticRegressionCoefficients report will not be created.")
-            return False
+            warnings.warn("Coefficients can only be executed as a model report. Coefficients report will not be created.")
+            run_report = False
 
         if not hasattr(self, "result_path"):
-            warnings.warn("LogisticRegressionCoefficients requires an output 'path' to be set. LogisticRegressionCoefficients report will not be created.")
-            return False
+            warnings.warn("Coefficients requires an output 'path' to be set. Coefficients report will not be created.")
+            run_report = False
 
         if not hasattr(self, "ml_details_path"):
-            warnings.warn("LogisticRegressionCoefficients requires an 'ml_details_path' to be set. LogisticRegressionCoefficients report will not be created.")
-            return False
+            warnings.warn("Coefficients requires an 'ml_details_path' to be set. Coefficients report will not be created.")
+            run_report = False
 
         if not hasattr(self, "label"):
-            warnings.warn("LogisticRegressionCoefficients requires that the relevant 'label' is set. LogisticRegressionCoefficients report will not be created.")
-            return False
+            warnings.warn("Coefficients requires that the relevant 'label' is set. Coefficients report will not be created.")
+            run_report = False
 
-        return True
+        return run_report

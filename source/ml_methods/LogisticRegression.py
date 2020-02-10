@@ -5,6 +5,11 @@ from source.ml_methods.SklearnMethod import SklearnMethod
 
 
 class LogisticRegression(SklearnMethod):
+    """
+    Note:
+        - Only the first item in .coef_ is stored in params["coefficients"], as classification of 2 classes results
+            in a .coef_ array of shape [1, n_features]
+    """
 
     def __init__(self, parameter_grid: dict = None, parameters: dict = None):
 
@@ -31,6 +36,6 @@ class LogisticRegression(SklearnMethod):
         params = self.models[label].estimator.get_params(deep=True) \
             if isinstance(self.models[label], RandomizedSearchCV) \
             else self.models[label].get_params(deep=True)
-        params["coefficients"] = self.models[label].coef_.tolist()
+        params["coefficients"] = self.models[label].coef_[0].tolist()
         params["intercept"] = self.models[label].intercept_.tolist()
         return params

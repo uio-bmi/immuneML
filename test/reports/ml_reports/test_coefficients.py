@@ -9,11 +9,11 @@ import yaml
 from source.dsl.report_params_parsers.CoefficientPlottingSetting import CoefficientPlottingSetting
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.ml_methods.SimpleLogisticRegression import SimpleLogisticRegression
-from source.reports.ml_reports.LogisticRegressionCoefficients import LogisticRegressionCoefficients
+from source.reports.ml_reports.Coefficients import Coefficients
 from source.util.PathBuilder import PathBuilder
 
 
-class TestLogisticRegressionCoefficients(TestCase):
+class TestCoefficients(TestCase):
 
     def _create_dummy_lr_model(self, path):
         # dummy logistic regression with 100 observations with 20 features belonging to 2 classes
@@ -33,12 +33,12 @@ class TestLogisticRegressionCoefficients(TestCase):
         return dummy_lr
 
     def _create_report(self, path):
-        report = LogisticRegressionCoefficients(**{"coefs_to_plot": [CoefficientPlottingSetting.ALL,
-                                                                     CoefficientPlottingSetting.NONZERO,
-                                                                     CoefficientPlottingSetting.CUTOFF,
-                                                                     CoefficientPlottingSetting.N_LARGEST],
-                                                   "cutoff": [10],
-                                                   "n_largest": [5]})
+        report = Coefficients(**{"coefs_to_plot": [CoefficientPlottingSetting.ALL,
+                                                   CoefficientPlottingSetting.NONZERO,
+                                                   CoefficientPlottingSetting.CUTOFF,
+                                                   CoefficientPlottingSetting.N_LARGEST],
+                                 "cutoff": [10],
+                                 "n_largest": [5]})
 
         report.method = self._create_dummy_lr_model(path)
         report.ml_details_path = path + "ml_details.yaml"

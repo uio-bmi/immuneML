@@ -42,7 +42,7 @@ class DataSplitter(Step):
         train_datasets, test_datasets = [], []
         indices = np.arange(0, dataset.get_example_count())
 
-        k_fold = KFold(n_splits=splits_count)
+        k_fold = KFold(n_splits=splits_count, shuffle=True)
         for split_index, (train_index, test_index) in enumerate(k_fold.split(indices)):
             train_dataset = DataSplitter.make_dataset(dataset, train_index, input_params, split_index, Dataset.TRAIN)
             train_datasets.append(train_dataset)

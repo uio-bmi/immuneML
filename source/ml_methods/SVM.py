@@ -15,6 +15,8 @@ class SVM(SklearnMethod):
         - regularization term is called alpha with LinearSVC
         - n_iter has to be set to a larger number (e.g. 1000) for the SGDClassifier to achieve the same performance
             as the original implementation of the algorithm
+        - Only the first item in .coef_ is stored in params["coefficients"], as classification of 2 classes results
+            in a .coef_ array of shape [1, n_features]
     """
 
     def __init__(self, parameter_grid: dict = None, parameters: dict = None):
@@ -37,6 +39,6 @@ class SVM(SklearnMethod):
     def get_params(self, label):
         params = self.models[label].estimator.get_params() if isinstance(self.models[label], RandomizedSearchCV) \
             else self.models[label].get_params()
-        params["coefficients"] = self.models[label].coef_.tolist()
+        params["coefficients"] = self.models[label].coef_[0].tolist()
         params["intercept"] = self.models[label].intercept_.tolist()
         return params
