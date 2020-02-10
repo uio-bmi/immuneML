@@ -73,7 +73,10 @@ class TestComparisonData(TestCase):
 
     def test_find_label_associated_sequence_p_values(self):
 
-        repertoires = [SequenceRepertoire.build_from_sequence_objects([ReceptorSequence()], None, {
+        path = EnvironmentSettings.tmp_test_path + "comparisondatafindlabelassocseqpvalues/"
+        PathBuilder.build(path)
+
+        repertoires = [SequenceRepertoire.build_from_sequence_objects([ReceptorSequence()], path, {
             "l1": val, "donor": donor
         }) for val, donor in zip([True, True, False, False], ["rep_0", "rep_1", "rep_2", "rep_3"])]
 
@@ -103,6 +106,8 @@ class TestComparisonData(TestCase):
         p_values = comparison_data.find_label_associated_sequence_p_values(repertoires, "l1", [True, False])
 
         self.assertTrue(np.allclose([1., 0.3333333333333334, 1., 1., 1., 1., 1., 0.3333333333333334, 1.], p_values))
+
+        shutil.rmtree(path)
 
     def test_get_repertoire_vector(self):
         path = EnvironmentSettings.tmp_test_path + "pairwisecomp_comparisondata/"
