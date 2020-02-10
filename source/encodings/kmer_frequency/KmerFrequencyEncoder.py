@@ -91,7 +91,7 @@ class KmerFrequencyEncoder(DatasetEncoder):
                 ("encoding", KmerFrequencyEncoder.__name__),
                 ("learn_model", params["learn_model"]),
                 ("step", step),
-                ("encoding_params", tuple(vars(self))))
+                ("encoding_params", tuple(vars(self).items())))
 
     def _encode_data(self, dataset, params: EncoderParams) -> EncodedData:
         encoded_example_list, example_ids, encoded_labels, feature_annotation_names = CacheHandler.memo_by_params(

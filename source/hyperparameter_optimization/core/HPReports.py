@@ -38,8 +38,6 @@ class HPReports:
                 for assesment_key, assesment_item in state.assessment_states[split_index].label_states[label].assessment_items.items():
                     HPReports.run_model_report(state, report, assesment_item, label, f"{path}reports/{key}/{label}/{assesment_key}/")
 
-
-
     @staticmethod
     def run_selection_reports(state: HPOptimizationState, dataset, train_datasets: list, val_datasets: list, path: str):
 
