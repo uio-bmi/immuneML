@@ -1,3 +1,4 @@
 additional_columns: [] # what additional columns to load from the file: here none
 sequence_type: "CDR3" # which part of the sequence to load by default
 batch_size: 4 # how many repertoires can be loaded at once by default
+CDR3_type: "IMGT" # which CDR3 definition to use - IMGT option means removing first and last amino acid as MiXCR uses IMGT junction as CDR3

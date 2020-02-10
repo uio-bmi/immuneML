@@ -142,10 +142,32 @@ class TestMiXCRLoader(TestCase):
             "result_path": path + "tmp_output/",
             "batch_size": 2,
             "extension": "csv",
+            "CDR3_type": "IMGT",
             "metadata_file": path + "metadata.csv"
         })
 
         self.assertEqual(2, dataset.get_example_count())
+
+        for index, repertoire in enumerate(dataset.get_data()):
+            if index == 0:
+                self.assertTrue(repertoire.sequences[0].amino_acid_sequence == "FAVF")
+                self.assertTrue(repertoire.sequences[1].metadata.v_gene == "V14-1")
+                self.assertTrue(repertoire.metadata["CD"])
+            elif index == 1:
+                self.assertEqual(5, len(repertoire.sequences))
+                self.assertEqual("GCAG", repertoire.sequences[0].nucleotide_sequence)
+                self.assertEqual(6, repertoire.sequences[1].metadata.count)
+                self.assertFalse(repertoire.metadata["CD"])
+
+        dataset = MiXCRLoader().load(path + "tmp_input/", {
+            "additional_columns": ["minQualCDR3"],
+            "sequence_type": "CDR3",
+            "result_path": path + "tmp_output/",
+            "batch_size": 2,
+            "extension": "csv",
+            "metadata_file": path + "metadata.csv",
+            "CDR3_type": "other"
+        })
 
         for index, repertoire in enumerate(dataset.get_data()):
             if index == 0:

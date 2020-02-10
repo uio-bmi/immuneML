@@ -66,8 +66,14 @@ class MiXCRLoader(DataLoader):
         df = pd.read_csv(filepath, delimiter='\t')
         df.dropna(axis=1, how="all", inplace=True)
 
-        repertoire = SequenceRepertoire.build(sequence_aas=df[MiXCRLoader.SEQUENCE_NAME_MAP[params["sequence_type"]]["AA"]].tolist(),
-                                              sequences=df[MiXCRLoader.SEQUENCE_NAME_MAP[params["sequence_type"]]["NT"]].tolist(),
+        sequences_aas = df[MiXCRLoader.SEQUENCE_NAME_MAP[params["sequence_type"]]["AA"]]
+        sequences = df[MiXCRLoader.SEQUENCE_NAME_MAP[params["sequence_type"]]["NT"]]
+        if params["CDR3_type"] == "IMGT":
+            sequences_aas = sequences_aas.str[1:-1]
+            sequences = sequences.str[3:-3]
+
+        repertoire = SequenceRepertoire.build(sequence_aas=sequences_aas.tolist(),
+                                              sequences=sequences.tolist(),
                                               v_genes=MiXCRLoader._load_genes(df, MiXCRLoader.V_GENES_WITH_SCORE).tolist(),
                                               j_genes=MiXCRLoader._load_genes(df, MiXCRLoader.J_GENES_WITH_SCORE).tolist(),
                                               chains=MiXCRLoader._load_chains(df, MiXCRLoader.V_GENES_WITH_SCORE).tolist(),
