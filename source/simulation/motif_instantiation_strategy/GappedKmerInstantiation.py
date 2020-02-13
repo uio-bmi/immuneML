@@ -50,7 +50,7 @@ class GappedKmerInstantiation(MotifInstantiationStrategy):
         if self._hamming_distance_probabilities:
             substitution_count = random.choices(list(self._hamming_distance_probabilities.keys()),
                                                 list(self._hamming_distance_probabilities.values()), k=1)[0]
-            allowed_position_weights = {key: value for key,value in position_weights.items() if key in allowed_positions}
+            allowed_position_weights = {key: value for key, value in position_weights.items() if key in allowed_positions}
             position_probabilities = self._prepare_probabilities(allowed_position_weights)
             positions = list(np.random.choice(allowed_positions, size=substitution_count, p=position_probabilities))
 

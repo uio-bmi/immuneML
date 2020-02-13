@@ -17,7 +17,7 @@ class TestSimulationParser(TestCase):
                         "seed": "CAS",
                         "instantiation": "GappedKmer",
                         "alphabet_weights": {},
-                        "position_weights": {}
+                        "position_weights": {0: 1, 1: 0, 2: 0}
                     }
                 },
                 "signals": {
@@ -43,3 +43,4 @@ class TestSimulationParser(TestCase):
 
         self.assertTrue("implanting" in specs)
         self.assertTrue("signal1" in specs["signals"].keys())
+        self.assertTrue(symbol_table.get("motif1").position_weights == {0: 1, 1: 0, 2: 0})

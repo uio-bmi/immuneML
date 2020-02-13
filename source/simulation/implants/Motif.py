@@ -39,7 +39,7 @@ class Motif:
             for key in additional_keys:
                 weights[key] = remaining_probability
 
-        else:
+        elif weights is None:
             remaining_probability = 1 / len(keys)
             weights = {key: remaining_probability for key in keys}
 
