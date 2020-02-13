@@ -15,6 +15,7 @@ class GappedKmerInstantiation(MotifInstantiationStrategy):
 
     def __init__(self, hamming_distance_probabilities: dict = None, min_gap: int = 0, max_gap: int = 0):
         if hamming_distance_probabilities is not None:
+            hamming_distance_probabilities = {key: float(value) for key, value in hamming_distance_probabilities.items()}
             assert all(isinstance(key, int) for key in hamming_distance_probabilities.keys()) \
                    and all(isinstance(val, float) for val in hamming_distance_probabilities.values()) \
                    and 0.99 <= sum(hamming_distance_probabilities.values()) <= 1, \
@@ -24,7 +25,6 @@ class GappedKmerInstantiation(MotifInstantiationStrategy):
         self._hamming_distance_probabilities = hamming_distance_probabilities
         self._min_gap = min_gap
         self._max_gap = max_gap
-
 
     def get_max_gap(self) -> int:
         return self._max_gap
