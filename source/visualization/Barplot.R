@@ -7,6 +7,7 @@ plot_barplot = function(data,
                         y = "value",
                         xlab=x,
                         ylab=y,
+                        fill_lab=x,
                         type = "quasirandom",
                         errorbar_meaning="se", # choose from: se, sd, ci
                         color = "NULL",
@@ -20,7 +21,8 @@ plot_barplot = function(data,
                         height,
                         width,
                         result_path,
-                        result_name) {
+                        result_name,
+                        ml_benchmark = FALSE) {
   params = as.list(match.call())
   params[[1]] = NULL
   saveRDS(params, file.path(result_path, paste0(result_name, ".rds")))
@@ -49,8 +51,13 @@ plot_barplot = function(data,
     geom_bar(stat="identity", position="dodge") +
     geom_errorbar(aes(ymin=summary[[y]]-summary[[errorbar_meaning]], ymax=summary[[y]]+summary[[errorbar_meaning]]), size=0.5,
                          width=.25,position=position_dodge(.9)) +
-    ggexp::theme_ggexp() + labs(x = xlab, y=ylab, fill=xlab) +
+    ggexp::theme_ggexp() + labs(x = xlab, y=ylab, fill=fill_lab) +
     palette
+
+  if (ml_benchmark){
+    plot = plot + theme(legend.position="bottom", axis.text.x=element_blank(),
+                        axis.ticks.x=element_blank())
+  }
 
   plot = ggexp::plot_facets(plot,
                      facet_rows,
