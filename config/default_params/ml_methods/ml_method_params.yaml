@@ -1,10 +1,2 @@
-assessment_type: random  # use repeated random splitting to train/test to estimate the performance of the method
-metrics: [accuracy] # what metrics to use to assess the performance of the methods
-min_example_count: 2 # minimum number of examples per class for the machine learning method to be executed
 model_selection_cv: false # whether to use cross-validation and random search to estimate the optimal parameters for one split to train/test
 model_selection_n_folds: -1 # number of folds if cross-validation is used for model selection and optimal parameter estimation
-split_count: 5 # if assessment type is repeated random splits, how many times to do the random splitting
-training_percentage: 80 # if assessment type is random split, how much to use for training the model
-cores_for_training: 1
-batch_size: 2
-label_to_balance: None

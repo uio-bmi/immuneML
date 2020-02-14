@@ -52,6 +52,3 @@ class TestMLParser(TestCase):
         self.assertTrue(isinstance(symbol_table.get("LR2"), LogisticRegression))
 
         self.assertEqual("SVM", desc["SVM1"]["type"])
-        self.assertEqual(2, desc["SVM1"]["min_example_count"])
-        self.assertEqual("random", desc["LR1"]["assessment_type"])
-        self.assertEqual(5, desc["LR1"]["split_count"])
