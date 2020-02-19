@@ -17,6 +17,7 @@ plot_barplot = function(data,
                         facet_type = "wrap", # choose from: "wrap" or "grid"
                         facet_scales = "free", # choose from: "fixed", "free", "free_x", "free_y"
                         facet_switch = "NULL",
+                        sort_by_y = FALSE,
                         nrow,
                         height,
                         width,
@@ -47,7 +48,14 @@ plot_barplot = function(data,
     na.rm = TRUE
   )
 
-  plot = ggplot(summary, aes_string(x = x, y = y, fill = color)) +
+  if (sort_by_y){
+    summary$plotting_x = reorder(summary[[x]], -abs(summary[[y]]))
+  } else {
+    summary$plotting_x = summary[[x]]
+  }
+
+
+  plot = ggplot(summary, aes_string(x = "plotting_x", y = y, fill = color)) +
     geom_bar(stat="identity", position="dodge") +
     geom_errorbar(aes(ymin=summary[[y]]-summary[[errorbar_meaning]], ymax=summary[[y]]+summary[[errorbar_meaning]]), size=0.5,
                          width=.25,position=position_dodge(.9)) +

@@ -31,35 +31,34 @@ class Coefficients(MLReport):
     def generate(self):
         PathBuilder.build(self.result_path)
 
-        self._set_parameters()
+        self._set_plotting_parameters()
 
         plot_data = self._retrieve_plot_data()
-        self._write_results_table(plot_data)
+        plot_data["abs_coefficients"] = abs(plot_data["coefficients"])
+        plot_data.sort_values(by="abs_coefficients", inplace=True, ascending=False)
+
+        self._write_results_table(plot_data[["features", "coefficients"]])
+        self._write_settings()
 
         if CoefficientPlottingSetting.ALL in self._coefs_to_plot:
             self._plot(plot_data, "all_coefficients")
 
         if CoefficientPlottingSetting.NONZERO in self._coefs_to_plot:
             nonzero_data = plot_data[plot_data["coefficients"] != 0]
-            self._plot(nonzero_data,
-                       "nonzero_coefficients")
-
-        plot_data["abs_coefficients"] = abs(plot_data["coefficients"])
+            self._plot(nonzero_data, "nonzero_coefficients")
 
         if CoefficientPlottingSetting.CUTOFF in self._coefs_to_plot:
             for cutoff_val in self._cutoff:
                 cutoff_data = plot_data[plot_data["abs_coefficients"] >= cutoff_val]
-                self._plot(cutoff_data,
-                           "cutoff_{}_coefficients".format(cutoff_val))
+                self._plot(cutoff_data, "cutoff_{}_coefficients".format(cutoff_val))
 
         if CoefficientPlottingSetting.N_LARGEST in self._coefs_to_plot:
             for n_val in self._n_largest:
                 n_largest_data = plot_data.nlargest(n=n_val, columns=["abs_coefficients"])
-                self._plot(n_largest_data,
-                           "largest_{}_coefficients".format(n_val))
+                self._plot(n_largest_data, "largest_{}_coefficients".format(n_val))
 
 
-    def _set_parameters(self):
+    def _set_plotting_parameters(self):
         if isinstance(self.method, RandomForestClassifier):
             self._param_field = "feature_importances"
             self._y_axis_title = "Feature importance"
@@ -69,6 +68,12 @@ class Coefficients(MLReport):
             self._y_axis_title = "Coefficient value"
 
 
+    def _write_settings(self):
+        with open(self.result_path + "settings.yaml", "w") as file:
+            yaml.dump({"preprocessing": self.hp_setting.preproc_sequence_name,
+                       "encoder": self.hp_setting.encoder_name,
+                       "ml_method": self.hp_setting.ml_method_name},
+                      file)
 
     def _write_results_table(self, plotting_data):
         plotting_data.to_csv(self.result_path + "coefficients.csv", index=False)
@@ -105,7 +110,7 @@ class Coefficients(MLReport):
 
                 plot.plot_barplot(data=plotting_data, x="features", color="NULL", y="coefficients",
                                   ylab=self._y_axis_title, xlab="feature", facet_type="wrap", facet_columns="empty_facet",
-                                  facet_scales="free", nrow=1, height=6,
+                                  facet_scales="free", nrow=1, height=6, sort_by_y=True,
                                   width=8, result_path=self.result_path, result_name=output_name)
             except Exception as e:
                 warnings.warn(f"Coefficients: the following exception was thrown when attempting to plot the data:\n{e}")

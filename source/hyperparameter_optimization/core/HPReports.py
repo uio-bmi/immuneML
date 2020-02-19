@@ -36,7 +36,11 @@ class HPReports:
         for key, report in state.assessment_config.reports.model_reports.items():
             for label in state.label_configuration.get_labels_by_name():
                 for assesment_key, assesment_item in state.assessment_states[split_index].label_states[label].assessment_items.items():
-                    HPReports.run_model_report(state, report, assesment_item, label, f"{path}reports/{key}/{label}/{assesment_key}/")
+                    report_path = f"{path}reports/{key}/{label}/{assesment_key.encoder_name}/{assesment_key.ml_method_name}/"
+                    if assesment_key.preproc_sequence_name is not None:
+                        report_path += f"{assesment_key.preproc_sequence_name}/"
+
+                    HPReports.run_model_report(state, report, assesment_item, label, report_path)
 
     @staticmethod
     def run_selection_reports(state: HPOptimizationState, dataset, train_datasets: list, val_datasets: list, path: str):
@@ -58,6 +62,7 @@ class HPReports:
         tmp_report.ml_details_path = assesment_item.ml_details_path # Only necessary to retrieve feature names
         tmp_report.label = label
         tmp_report.result_path = path
+        tmp_report.hp_setting = assesment_item.hp_setting
         tmp_report.set_context(state.context)
         tmp_report.generate_report()
 
