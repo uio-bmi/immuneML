@@ -1,6 +1,7 @@
 import warnings
 
 import numpy as np
+import pandas as pd
 import yaml
 
 from source.data_model.dataset.Dataset import Dataset
@@ -42,9 +43,8 @@ class DesignMatrixExporter(EncodingReport):
 
     def export_labels(self):
         if self.dataset.encoded_data.labels is not None:
-            labels = np.array([self.dataset.encoded_data.labels[l] for l in self.dataset.encoded_data.labels]).T
-            np.savetxt(fname=f"{self.result_path}labels.csv", X=labels, delimiter=",",
-                       header=",".join(self.dataset.encoded_data.labels.keys()), comments='')
+            labels_df = pd.DataFrame(self.dataset.encoded_data.labels)
+            labels_df.to_csv(f"{self.result_path}labels.csv", sep=",", index=False)
 
     def check_prerequisites(self):
         if self.dataset.encoded_data is None or self.dataset.encoded_data.examples is None:
