@@ -96,14 +96,14 @@ class ElementGenerator:
             for element in batch:
                 yield element
 
-    def make_subset(self, example_indices: list, path: str, dataset_type: str):
+    def make_subset(self, example_indices: list, path: str, dataset_type: str, dataset_identifier: str):
         batch_size = 1000
         elements = []
         file_count = 1
 
         example_indices.sort()
 
-        batch_filenames = self._prepare_batch_filenames(len(example_indices), path, dataset_type)
+        batch_filenames = self._prepare_batch_filenames(len(example_indices), path, dataset_type, dataset_identifier)
 
         for index, batch in enumerate(self.build_batch_generator(batch_size)):
             extracted_elements = self._extract_elements_from_batch(index, batch_size, batch, example_indices)
@@ -116,11 +116,11 @@ class ElementGenerator:
 
         return batch_filenames
 
-    def _prepare_batch_filenames(self, example_count: int, path: str, dataset_type: str):
+    def _prepare_batch_filenames(self, example_count: int, path: str, dataset_type: str, dataset_identifier: str):
         batch_count = math.ceil(example_count / self.file_size)
-        digits_count = len(str(batch_count))
-        filenames = [path + f"{dataset_type}_batch".join(["0" for i in range(digits_count-len(str(index)))]) + str(index) + ".pkl"
-                     for index in range(digits_count)]
+        digits_count = len(str(batch_count)) + 1
+        filenames = [path + f"{dataset_identifier}_{dataset_type}_batch" + "".join(["0" for i in range(digits_count-len(str(index)))]) + str(index) + ".pkl"
+                     for index in range(batch_count)]
         return filenames
 
     def _store_elements_to_file(self, path, elements):
@@ -129,6 +129,6 @@ class ElementGenerator:
 
     def _extract_elements_from_batch(self, index, batch_size, batch, example_indices):
         upper_limit, lower_limit = (index + 1) * batch_size, index * batch_size
-        batch_indices = [ind for ind in example_indices if lower_limit <= ind <= upper_limit]
+        batch_indices = [ind for ind in example_indices if lower_limit <= ind < upper_limit]
         elements = [batch[i - lower_limit] for i in batch_indices]
         return elements

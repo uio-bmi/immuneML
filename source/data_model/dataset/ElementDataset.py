@@ -30,16 +30,22 @@ class ElementDataset(Dataset):
     def get_filenames(self):
         return self._filenames
 
+    def set_filenames(self, filenames):
+        self._filenames = filenames
+        self.element_generator = ElementGenerator(self._filenames)
+
     def get_example_count(self):
-        return self.element_generator.get_element_count()
+        return len(self.get_example_ids())
 
     def get_example_ids(self):
-        if self.element_ids is None:
+        if self.element_ids is None or (isinstance(self.element_ids, list) and len(self.element_ids) == 0):
             self.element_ids = []
             for element in self.get_data():
                 self.element_ids.append(element.identifier)
         return self.element_ids
 
     def make_subset(self, example_indices, path, dataset_type: str):
-        batch_filenames = self.element_generator.make_subset(example_indices, path, dataset_type)
-        return self.__class__(params=self.params, filenames=batch_filenames, file_size=self.file_size)
+        new_dataset = self.__class__(params=self.params, file_size=self.file_size)
+        batch_filenames = self.element_generator.make_subset(example_indices, path, dataset_type, new_dataset.identifier)
+        new_dataset.set_filenames(batch_filenames)
+        return new_dataset
