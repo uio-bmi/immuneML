@@ -52,7 +52,7 @@ class MLMethodTrainer(Step):
             tmp = train_proba_predictions[input_params.label][:, cls_index] if train_proba_predictions is not None and train_proba_predictions[input_params.label] is not None else None
             df["{}_{}_proba".format(input_params.label, cls)] = tmp
 
-        df.to_csv(input_params.train_predictions_path)
+        df.to_csv(input_params.train_predictions_path, index=False)
 
     @staticmethod
     def _filter_labels(input_params: MLMethodTrainerParams):
