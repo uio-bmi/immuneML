@@ -66,9 +66,9 @@ class TestCoefficients(TestCase):
 
         written_data = pd.read_csv(path + "coefficients.csv")
 
-        self.assertListEqual(list(written_data.columns), ["coefficients", "features"])
-        self.assertListEqual(list(written_data["coefficients"]), [i for i in range(20)])
-        self.assertListEqual(list(written_data["features"]), [f"feature{i}" for i in range(20)])
+        self.assertListEqual(list(written_data.columns), ["features", "coefficients"])
+        self.assertListEqual(list(written_data["coefficients"]), list(reversed([i for i in range(20)])))
+        self.assertListEqual(list(written_data["features"]), list(reversed([f"feature{i}" for i in range(20)])))
 
         shutil.rmtree(path)
 

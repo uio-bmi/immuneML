@@ -22,10 +22,13 @@ class Coefficients(MLReport):
     - For Random Forest: feature importance
     """
 
-    def __init__(self, coefs_to_plot, cutoff, n_largest):
+    def __init__(self, coefs_to_plot, cutoff, n_largest, label = None, ml_details_path = None, hp_setting = None):
         self._coefs_to_plot = coefs_to_plot
         self._cutoff = cutoff
         self._n_largest = n_largest
+        self.label = label
+        self.ml_details_path = ml_details_path
+        self.hp_setting = hp_setting
 
 
     def generate(self):
@@ -69,11 +72,12 @@ class Coefficients(MLReport):
 
 
     def _write_settings(self):
-        with open(self.result_path + "settings.yaml", "w") as file:
-            yaml.dump({"preprocessing": self.hp_setting.preproc_sequence_name,
-                       "encoder": self.hp_setting.encoder_name,
-                       "ml_method": self.hp_setting.ml_method_name},
-                      file)
+        if hasattr(self, "hp_setting"):
+            with open(self.result_path + "settings.yaml", "w") as file:
+                yaml.dump({"preprocessing": self.hp_setting.preproc_sequence_name,
+                           "encoder": self.hp_setting.encoder_name,
+                           "ml_method": self.hp_setting.ml_method_name},
+                          file)
 
     def _write_results_table(self, plotting_data):
         plotting_data.to_csv(self.result_path + "coefficients.csv", index=False)
