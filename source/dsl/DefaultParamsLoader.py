@@ -32,7 +32,7 @@ class DefaultParamsLoader:
 
         if os.path.isfile(filepath):
             with open(filepath, "r") as file:
-                params = yaml.load(file)
+                params = yaml.load(file, Loader=yaml.FullLoader)
         else:
             warnings.warn("DefaultParams: no default parameters were found for {}. Proceeding...".format(class_name))
             params = {}

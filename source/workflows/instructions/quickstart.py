@@ -132,7 +132,6 @@ class Quickstart:
                         "split_strategy": "random",
                         "split_count": 1,
                         "training_percentage": 0.7,
-                        "label_to_balance": None,
                         "reports": {
                             "data_splits": []
                         }
@@ -141,7 +140,6 @@ class Quickstart:
                         "split_strategy": "random",
                         "split_count": 1,
                         "training_percentage": 0.7,
-                        "label_to_balance": None,
                         "reports": {
                             "data_splits": ["rep1"],
                             "models": [],

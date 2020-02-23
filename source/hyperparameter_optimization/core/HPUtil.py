@@ -28,7 +28,6 @@ class HPUtil:
             split_strategy=split_config.split_strategy,
             split_count=split_config.split_count,
             training_percentage=split_config.training_percentage,
-            label_to_balance=split_config.label_to_balance,
             paths=paths
         )
         return DataSplitter.run(params)

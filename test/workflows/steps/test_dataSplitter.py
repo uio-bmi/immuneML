@@ -40,7 +40,6 @@ class TestDataSplitter(TestCase):
             training_percentage=training_percentage,
             split_strategy=SplitType.RANDOM,
             split_count=5,
-            label_to_balance=None,
             paths=paths
         ))
 
@@ -57,7 +56,6 @@ class TestDataSplitter(TestCase):
             training_percentage=training_percentage,
             split_strategy=SplitType.RANDOM,
             split_count=5,
-            label_to_balance=None,
             paths=paths
         ))
 
@@ -71,7 +69,6 @@ class TestDataSplitter(TestCase):
             dataset=dataset,
             split_strategy=SplitType.LOOCV,
             split_count=-1,
-            label_to_balance=None,
             training_percentage=-1,
             paths=paths
         ))
@@ -91,7 +88,6 @@ class TestDataSplitter(TestCase):
             dataset=dataset,
             split_strategy=SplitType.K_FOLD,
             split_count=5,
-            label_to_balance=None,
             training_percentage=-1,
             paths=paths
         ))
@@ -102,24 +98,5 @@ class TestDataSplitter(TestCase):
         self.assertEqual(len(tests[0].get_data()), 2)
         self.assertEqual(5, len(trains))
         self.assertEqual(5, len(tests))
-
-        paths = [EnvironmentSettings.root_path + "test/tmp/datasplitter/split_{}".format(i) for i in range(10)]
-        for path in paths:
-            PathBuilder.build(path)
-
-        trains, tests = DataSplitter.run(DataSplitterParams(
-            dataset=dataset,
-            split_strategy=SplitType.RANDOM_BALANCED,
-            training_percentage=training_percentage,
-            split_count=10,
-            label_to_balance="key1",
-            paths=paths
-        ))
-
-        self.assertTrue(isinstance(trains[0], RepertoireDataset))
-        self.assertTrue(isinstance(tests[0], RepertoireDataset))
-        self.assertEqual(10, len(trains))
-        self.assertEqual(10, len(tests))
-        self.assertEqual(len(trains[0].get_data()) + len(tests[0].get_data()), 6)
 
         shutil.rmtree(EnvironmentSettings.root_path + "test/tmp/datasplitter/")

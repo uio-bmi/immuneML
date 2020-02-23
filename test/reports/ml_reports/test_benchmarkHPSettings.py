@@ -81,7 +81,6 @@ class TestBenchmarkHPSettings(TestCase):
         report.check_prerequisites()
         report.generate()
 
-
         self.assertTrue(os.path.isfile(path + "benchmark_result.csv"))
         self.assertTrue(os.path.isfile(path + "benchmark_result.pdf"))
 

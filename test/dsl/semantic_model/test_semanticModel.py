@@ -46,9 +46,12 @@ class TestSemanticModel(TestCase):
                                  SimpleLogisticRegression(),
                                  {"model_selection_cv": False, "model_selection_n_folds": -1}, [])]
 
+        split_config_assessment = SplitConfig(SplitType.RANDOM, 1, 0.5, ReportConfig())
+        split_config_selection = SplitConfig(SplitType.RANDOM, 1, 0.5, ReportConfig())
+
         instruction = HPOptimizationInstruction(dataset, GridSearch(hp_settings), hp_settings,
-                                                SplitConfig(SplitType.RANDOM, 1, 0.5, "default", ReportConfig()),
-                                                SplitConfig(SplitType.RANDOM, 1, 0.5, "default", ReportConfig()),
+                                                split_config_assessment,
+                                                split_config_selection,
                                                 {MetricType.BALANCED_ACCURACY},
                                                 label_config, path)
         semantic_model = SemanticModel([instruction], path)

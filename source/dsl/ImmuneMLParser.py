@@ -77,7 +77,6 @@ class ImmuneMLParser:
                     split_strategy: random
                     split_count: 1
                     training_percentage: 70
-                    label_to_balance: None
                     reports:
                         data_splits: []
                         performance: []
@@ -100,8 +99,14 @@ class ImmuneMLParser:
 
     @staticmethod
     def parse_yaml_file(file_path, result_path=None):
-        with open(file_path, "r") as file:
-            workflow_specification = yaml.load(file)
+        try:
+            with open(file_path, "r") as file:
+                workflow_specification = yaml.load(file, Loader=yaml.FullLoader)
+        except yaml.YAMLError as exc:
+            print(f"YAML formatting error in the specification file: {exc}. "
+                  f"Validate the specification (use e.g. https://jsonformatter.org/yaml-validator or a desktop or a CLI tool, "
+                  f"and try again.")
+            raise
 
         return ImmuneMLParser.parse(workflow_specification, file_path, result_path)
 

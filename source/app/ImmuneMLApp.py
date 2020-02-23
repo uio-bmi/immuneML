@@ -6,6 +6,7 @@ from source.dsl.ImmuneMLParser import ImmuneMLParser
 from source.dsl.SymbolType import SymbolType
 from source.dsl.semantic_model.SemanticModel import SemanticModel
 from source.environment.Constants import Constants
+from source.util.PathBuilder import PathBuilder
 
 
 class ImmuneMLApp:
@@ -27,6 +28,9 @@ class ImmuneMLApp:
         self.set_logging()
         self.set_cache()
 
+        if self._result_path is not None:
+            PathBuilder.build(self._result_path, warn_if_exists=True)
+
         symbol_table, self._specification_path = ImmuneMLParser.parse_yaml_file(self._specification_path,
                                                                                 self._result_path)
 
@@ -37,7 +41,13 @@ class ImmuneMLApp:
         model.run()
 
 
-if __name__ == "__main__":
-    path = sys.argv[2] if len(sys.argv) == 3 else None
-    app = ImmuneMLApp(sys.argv[1], path)
+def main(argv):
+    assert len(argv) == 3, "ImmuneMLApp: Some of the required parameters are missing. To run immuneML, use the command:\n" \
+                               "python3 path_to_immuneMLApp.py path_to_specification.yaml analysis_result_path/"
+    path = argv[2] if len(argv) == 3 else None
+    app = ImmuneMLApp(argv[1], path)
     app.run()
+
+
+if __name__ == "__main__":
+    main(sys.argv)

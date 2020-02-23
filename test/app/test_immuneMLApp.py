@@ -5,7 +5,7 @@ from unittest import TestCase
 import yaml
 
 from source.IO.dataset_export.PickleExporter import PickleExporter
-from source.app.ImmuneMLApp import ImmuneMLApp
+from source.app import ImmuneMLApp
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
@@ -126,16 +126,11 @@ class TestImmuneMLApp(TestCase):
                         "split_strategy": "random",
                         "split_count": 1,
                         "training_percentage": 0.7,
-                        "label_to_balance": None,
                         "reports": {
                             "data_splits": []
                         }
                     },
                     "selection": {
-                        "split_strategy": "random",
-                        "split_count": 1,
-                        "training_percentage": 0.7,
-                        "label_to_balance": None,
                         "reports": {
                             "data_splits": ["rep1"],
                             "models": [],
@@ -158,7 +153,18 @@ class TestImmuneMLApp(TestCase):
         with open(specs_file, "w") as file:
             yaml.dump(specs, file)
 
-        app = ImmuneMLApp(specs_file, path)
+        app = ImmuneMLApp.ImmuneMLApp(specs_file, path)
         app.run()
+
+        self.assertTrue(os.path.isfile(path+"full_specs.yaml"))
+        with open(path+"full_specs.yaml", "r") as file:
+            full_specs = yaml.load(file, Loader=yaml.FullLoader)
+
+        self.assertTrue("split_strategy" in full_specs["instructions"]["inst1"]["selection"] and full_specs["instructions"]["inst1"]["selection"]["split_strategy"] == "random")
+        self.assertTrue("split_count" in full_specs["instructions"]["inst1"]["selection"] and full_specs["instructions"]["inst1"]["selection"]["split_count"] == 1)
+        self.assertTrue("training_percentage" in full_specs["instructions"]["inst1"]["selection"] and full_specs["instructions"]["inst1"]["selection"]["training_percentage"] == 0.7)
+
+        with self.assertRaises(AssertionError):
+            ImmuneMLApp.main([None, specs_file])
 
         shutil.rmtree(os.path.dirname(dataset_path))

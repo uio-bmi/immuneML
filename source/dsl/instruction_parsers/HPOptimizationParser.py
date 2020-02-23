@@ -1,6 +1,7 @@
 import hashlib
 import os
 
+from source.dsl.DefaultParamsLoader import DefaultParamsLoader
 from source.dsl.SymbolTable import SymbolTable
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.environment.LabelConfiguration import LabelConfiguration
@@ -71,14 +72,17 @@ class HPOptimizationParser:
 
     def _parse_split_config(self, instruction: dict, key: str, symbol_table: SymbolTable) -> SplitConfig:
 
+        default_params = DefaultParamsLoader.load("instructions/", SplitConfig.__name__)
+
         if "reports" in instruction[key]:
             report_config_input = {report_type: {report_id: symbol_table.get(report_id) for report_id in instruction[key]["reports"][report_type]}
                                    for report_type in instruction[key]["reports"]}
         else:
             report_config_input = {}
 
+        instruction[key] = {**default_params, **instruction[key]}
+
         return SplitConfig(split_strategy=SplitType[instruction[key]["split_strategy"].upper()],
                            split_count=int(instruction[key]["split_count"]),
                            training_percentage=float(instruction[key]["training_percentage"]),
-                           label_to_balance=instruction[key]["label_to_balance"],
                            reports=ReportConfig(**report_config_input))

@@ -76,13 +76,11 @@ class TestExploratoryAnalysisDesignMatrixExporter(TestCase):
                         "split_strategy": "random",
                         "split_count": 1,
                         "training_percentage": 0.7,
-                        "label_to_balance": None,
                     },
                     "selection": {
                         "split_strategy": "random",
                         "split_count": 1,
                         "training_percentage": 0.7,
-                        "label_to_balance": None,
                     },
                     "labels": ["cmv"],
                     "dataset": "d1",
