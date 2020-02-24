@@ -103,10 +103,9 @@ class ImmuneMLParser:
             with open(file_path, "r") as file:
                 workflow_specification = yaml.load(file, Loader=yaml.FullLoader)
         except yaml.YAMLError as exc:
-            print(f"YAML formatting error in the specification file: {exc}. "
-                  f"Validate the specification (use e.g. https://jsonformatter.org/yaml-validator or a desktop or a CLI tool, "
-                  f"and try again.")
-            raise
+            print(f"YAML formatting error in the specification file. Validate the specification and try again.\n"
+                  f"Error info: {exc}")
+            raise exc
 
         return ImmuneMLParser.parse(workflow_specification, file_path, result_path)
 

@@ -2,6 +2,7 @@ import shutil
 from unittest import TestCase
 
 import yaml
+from yaml import YAMLError
 
 from source.IO.dataset_export.PickleExporter import PickleExporter
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
@@ -89,13 +90,24 @@ class TestImmuneMLParser(TestCase):
 
         PathBuilder.build(path)
 
-        with open(path + "tmp_yaml_spec.yaml", "w") as file:
+        specs_filename = path + "tmp_yaml_spec.yaml"
+
+        with open(specs_filename, "w") as file:
             yaml.dump(spec, file, default_flow_style=False)
 
-        symbol_table, _ = ImmuneMLParser.parse_yaml_file(path + "tmp_yaml_spec.yaml")
+        symbol_table, _ = ImmuneMLParser.parse_yaml_file(specs_filename)
 
         self.assertTrue(all([symbol_table.contains(key) for key in
                              ["simpleLR", "rep1", "a1", "d1"]]))
         self.assertTrue(isinstance(symbol_table.get("d1"), RepertoireDataset))
+
+        with self.assertRaises(YAMLError):
+            with open(specs_filename, "r") as file:
+                specs_text = file.readlines()
+            specs_text[0] = "        definitions:"
+            with open(specs_filename, "w") as file:
+                file.writelines(specs_text)
+
+            ImmuneMLParser.parse_yaml_file(specs_filename)
 
         shutil.rmtree(path)
