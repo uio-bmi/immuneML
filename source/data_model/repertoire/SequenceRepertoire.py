@@ -35,7 +35,7 @@ class SequenceRepertoire(DatasetItem):
 
     @classmethod
     def build(cls, sequence_aas: list, sequences: list, v_genes: list, j_genes: list, chains: list, counts: list, region_types: list,
-                 custom_lists: dict, sequence_identifiers: list, path: str, metadata=None, signals: dict = None):
+                 custom_lists: dict, sequence_identifiers: list, path: str, metadata=dict(), signals: dict = None):
 
         if sequence_identifiers is None or len(sequence_identifiers) == 0 or any(identifier is None for identifier in sequence_identifiers):
             sequence_identifiers = list(range(len(sequence_aas))) if sequence_aas is not None and len(sequence_aas) > 0 else list(range(len(sequences)))
