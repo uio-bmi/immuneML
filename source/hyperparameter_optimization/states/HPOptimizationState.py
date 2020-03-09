@@ -1,4 +1,5 @@
 from source.environment.LabelConfiguration import LabelConfiguration
+from source.environment.MetricType import MetricType
 from source.hyperparameter_optimization.HPSetting import HPSetting
 from source.hyperparameter_optimization.config.SplitConfig import SplitConfig
 from source.hyperparameter_optimization.strategy.HPOptimizationStrategy import HPOptimizationStrategy
@@ -7,7 +8,7 @@ from source.hyperparameter_optimization.strategy.HPOptimizationStrategy import H
 class HPOptimizationState:
 
     def __init__(self, dataset, hp_strategy: HPOptimizationStrategy, hp_settings: list,
-                 assessment: SplitConfig, selection: SplitConfig, metrics: set,
+                 assessment: SplitConfig, selection: SplitConfig, metrics: set, optimization_metric: MetricType,
                  label_configuration: LabelConfiguration, path: str = None, context: dict = None, batch_size: int = 10):
 
         # initial attributes
@@ -21,6 +22,7 @@ class HPOptimizationState:
         self.batch_size = batch_size
         self.label_configuration = label_configuration
         self.metrics = metrics
+        self.optimization_metric = optimization_metric
         self.assessment_config = assessment
         self.context = context
 

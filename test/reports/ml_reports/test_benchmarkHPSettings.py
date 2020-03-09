@@ -62,7 +62,7 @@ class TestBenchmarkHPSettings(TestCase):
         process = HPOptimizationInstruction(dataset, GridSearch(hp_settings), hp_settings,
                                             SplitConfig(SplitType.RANDOM, 1, 0.5),
                                             SplitConfig(SplitType.RANDOM, 1, 0.5),
-                                            {MetricType.BALANCED_ACCURACY}, label_config, path)
+                                            {MetricType.BALANCED_ACCURACY}, MetricType.BALANCED_ACCURACY, label_config, path)
 
         state = process.run(result_path=path)
 

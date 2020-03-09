@@ -136,7 +136,8 @@ class TestImmuneMLApp(TestCase):
                     "strategy": "GridSearch",
                     "metrics": ["accuracy", "auc"],
                     "reports": ["rep1"],
-                    "batch_size": 10
+                    "batch_size": 10,
+                    "optimization_metric": "accuracy"
                 }
             }
         }

@@ -85,7 +85,8 @@ class TestExploratoryAnalysisDesignMatrixExporter(TestCase):
                     "strategy": "GridSearch",
                     "metrics": ["accuracy"],
                     "batch_size": 4,
-                    "reports": None
+                    "reports": None,
+                    "optimization_metric": "balanced_accuracy"
                 }
             }
         }

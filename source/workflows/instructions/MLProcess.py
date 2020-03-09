@@ -29,9 +29,9 @@ class MLProcess:
 
     def __init__(self, train_dataset: Dataset, test_dataset: Dataset, label: str,
                  encoder: DatasetEncoder, encoder_params: dict, method: MLMethod, ml_params: dict, metrics: set,
-                 path: str, reports: list = None, min_example_count: int = 2, batch_size: int = 2, cores: int = -1,
-                 train_predictions_path: str = None, val_predictions_path: str = None, ml_details_path: str = None,
-                 ml_score_path: str = None, label_config: LabelConfiguration=None,):
+                 optimization_metric: MetricType, path: str, reports: list = None, min_example_count: int = 2,
+                 batch_size: int = 2, cores: int = -1, train_predictions_path: str = None, val_predictions_path: str = None,
+                 ml_details_path: str = None, ml_score_path: str = None, label_config: LabelConfiguration = None):
         self.train_dataset = train_dataset
         self.test_dataset = test_dataset
         self.label = label
@@ -47,6 +47,7 @@ class MLProcess:
             "MLProcess: metrics are not set to be an instance of MetricType."
         self.metrics = metrics
         self.metrics.add(MetricType.BALANCED_ACCURACY)
+        self.optimization_metric = optimization_metric
         self.min_example_count = min_example_count
         self.ml_details_path = ml_details_path
         self.ml_score_path = ml_score_path
@@ -82,6 +83,7 @@ class MLProcess:
             method=method,
             dataset=encoded_test_dataset,
             metrics=self.metrics,
+            optimization_metric=self.optimization_metric,
             label=self.label,
             split_index=run,
             predictions_path=self.val_predictions_path,

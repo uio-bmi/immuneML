@@ -19,7 +19,8 @@ class HPOptimizationParser:
 
     def parse(self, key: str, instruction: dict, symbol_table: SymbolTable) -> HPOptimizationInstruction:
 
-        valid_keys = ["assessment", "selection", "dataset", "strategy", "labels", "metrics", "settings", "batch_size", "type", "reports"]
+        valid_keys = ["assessment", "selection", "dataset", "strategy", "labels", "metrics", "settings", "batch_size", "type", "reports",
+                      "optimization_metric"]
         ParameterValidator.assert_keys(list(instruction.keys()), valid_keys, "HPOptimizationParser", "HPOptimization")
 
         settings = self._parse_settings(instruction, symbol_table)
@@ -29,11 +30,13 @@ class HPOptimizationParser:
         label_config = self._create_label_config(instruction, dataset.params)
         strategy = ReflectionHandler.get_class_by_name(instruction["strategy"], "hyperparameter_optimization/")
         metrics = {MetricType[metric.upper()] for metric in instruction["metrics"]}
+        optimization_metric = MetricType[instruction["optimization_metric"].upper()]
         path = self._prepare_path(instruction)
         context = self._prepare_context(instruction, symbol_table)
 
         hp_instruction = HPOptimizationInstruction(dataset=dataset, hp_strategy=strategy(settings), hp_settings=settings,
                                                    assessment=assessment, selection=selection, metrics=metrics,
+                                                   optimization_metric=optimization_metric,
                                                    label_configuration=label_config, path=path, context=context,
                                                    batch_size=instruction["batch_size"])
 

@@ -12,3 +12,4 @@ class MetricType(Enum):
     PRECISION = "precision_score"
     RECALL = "recall_score"
     AUC = "roc_auc_score"
+    LOG_LOSS = "log_loss"

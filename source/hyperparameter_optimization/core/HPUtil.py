@@ -93,6 +93,7 @@ class HPUtil:
             split_index=split_index,
             label=label,
             metrics=state.metrics,
+            optimization_metric=state.optimization_metric,
             path=current_path,
             ml_score_path=ml_score_path
         ))

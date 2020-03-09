@@ -146,7 +146,8 @@ class Quickstart:
                     "strategy": "GridSearch",
                     "metrics": ["accuracy"],
                     "reports": ["rep1"],
-                    "batch_size": 10
+                    "batch_size": 10,
+                    "optimization_metric": "balanced_accuracy"
                 }
             }
         }

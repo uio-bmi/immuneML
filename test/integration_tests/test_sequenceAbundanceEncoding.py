@@ -75,7 +75,8 @@ class TestSequenceAbundanceEncoding(TestCase):
                     "strategy": "GridSearch",
                     "metrics": ["accuracy"],
                     "batch_size": 2,
-                    "reports": None
+                    "reports": None,
+                    "optimization_metric": "balanced_accuracy"
                 }
             }
         }

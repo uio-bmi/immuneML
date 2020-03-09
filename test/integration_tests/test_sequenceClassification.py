@@ -71,7 +71,7 @@ class TestSequenceClassification(TestCase):
         instruction = HPOptimizationInstruction(dataset, GridSearch([hp_setting]), [hp_setting],
                                                 SplitConfig(SplitType.RANDOM, 1, 0.5, reports=ReportConfig()),
                                                 SplitConfig(SplitType.RANDOM, 1, 0.5, reports=ReportConfig()),
-                                                {MetricType.BALANCED_ACCURACY}, lc, path)
+                                                {MetricType.BALANCED_ACCURACY}, MetricType.BALANCED_ACCURACY, lc, path)
 
         result = instruction.run(result_path=path)
         print(result)

@@ -52,7 +52,7 @@ class TestSemanticModel(TestCase):
         instruction = HPOptimizationInstruction(dataset, GridSearch(hp_settings), hp_settings,
                                                 split_config_assessment,
                                                 split_config_selection,
-                                                {MetricType.BALANCED_ACCURACY},
+                                                {MetricType.BALANCED_ACCURACY}, MetricType.BALANCED_ACCURACY,
                                                 label_config, path)
         semantic_model = SemanticModel([instruction], path)
 

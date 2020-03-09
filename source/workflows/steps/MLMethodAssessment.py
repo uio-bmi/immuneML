@@ -36,25 +36,28 @@ class MLMethodAssessment(Step):
                                               example_ids=example_ids,
                                               split_index=input_params.split_index)
 
-        results = MLMethodAssessment._score(metrics_list=input_params.metrics, label=input_params.label,
-                                            split_index=input_params.split_index, predicted_y=predicted_y, true_y=true_y,
-                                            method=input_params.method, dataset=input_params.dataset,
-                                            ml_score_path=input_params.ml_score_path)
+        results = MLMethodAssessment._score(metrics_list=input_params.metrics, optimization_metric=input_params.optimization_metric,
+                                            label=input_params.label, split_index=input_params.split_index,
+                                            predicted_y=predicted_y, true_y=true_y, method=input_params.method,
+                                            dataset=input_params.dataset, ml_score_path=input_params.ml_score_path)
 
-        summary_metric = MLMethodAssessment._get_summary_metric(results, input_params.label)
+        summary_metric = MLMethodAssessment._get_optimization_metric(results, input_params.label, input_params.optimization_metric)
 
         return summary_metric
 
     @staticmethod
-    def _get_summary_metric(df: pd.DataFrame, label: str) -> float:
-        return df["{}_{}".format(label, MetricType.BALANCED_ACCURACY.name.lower())].iloc[0]
+    def _get_optimization_metric(df: pd.DataFrame, label: str, metric: MetricType) -> float:
+        return df["{}_{}".format(label, metric.name.lower())].iloc[0]
 
     @staticmethod
-    def _score(metrics_list: list, label: str, predicted_y, true_y, ml_score_path: str, split_index: int,
+    def _score(metrics_list: list, optimization_metric: MetricType, label: str, predicted_y, true_y, ml_score_path: str, split_index: int,
                method: MLMethod, dataset: RepertoireDataset):
         results = {}
 
-        for metric in metrics_list:
+        metrics_with_optim_metric = set(metrics_list)
+        metrics_with_optim_metric.add(optimization_metric)
+
+        for metric in list(metrics_with_optim_metric):
             score = MLMethodAssessment._score_for_metric(metric, predicted_y[label], true_y[label],
                                                          method.get_classes_for_label(label))
             results["{}_{}".format(label, metric.name.lower())] = score
