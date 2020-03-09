@@ -9,11 +9,72 @@ from source.simulation.motif_instantiation_strategy.MotifInstantiationStrategy i
 
 class GappedKmerInstantiation(MotifInstantiationStrategy):
     """
-    Creates a motif from the predefined parameters in the constructor and the seed given in the instantiate_motif();
-    currently works only for single gap in the sequence
+    Creates a motif instance from a given seed and additional optional parameters.
+    Currently, at most a single gap can be specified in the sequence.
+
+    Arguments:
+        seed (str): An amino acid sequence that represents the basic motif seed. All implanted motifs correspond
+            to the seed, or a modified version thereof (gaps and/or hamming distance modifications).
+            When the seed contains a gap (denoted with '/'), a gap length is chosen from a uniform
+            random distribution between min_gap and max_gap.
+            To allow for hamming distance modifications, hamming_distance_probabilities must be specified.
+            Additionally, position_weights and alphabet_weights can be specified to allow for more control about
+            the types of modifications that should happen (the position to modify and which amino acid to change
+            it to).
+        instantiation (:py:obj:`~source.simulation.motif_instantiation_strategy.MotifInstantiationStrategy.MotifInstantiationStrategy`):
+            Which strategy to use for implanting the seed. Currently the only available option for this is
+            :py:obj:`~source.simulation.motif_instantiation_strategy.GappedKmerInstantiation.GappedKmerInstantiation`.
+        min_gap (int): The minimum gap length, in case the original seed contains a gap.
+        max_gap (int): The maximum gap length, in case the original seed contains a gap.
+        hamming_distance_probabilities (dict): The probability of modifying the given seed with each
+            number of modifications. The keys represent the number of modifications (hamming distance)
+            between the original seed and the implanted motif, and the values represent the probabilities for
+            the respective number of modifications. For example {0: 0.7, 1: 0.3} means that 30% of the time one position
+            will be modified, and the remaining 70% of the time the motif will remain unmodified with respect
+            to the seed. The values of hamming_distance_probabilities must sum to 1.
+        position_weights (dict): A dictionary containing the relative probabilities of choosing
+            each position for hamming distance modification. The keys represent the position in the seed, where
+            counting starts at 0. If the index of a gap is specified in position_weights, it will be removed. The values
+            represent the relative probabilities for modifying each position when it gets selected for modification.
+            For example {0: 0.6, 1: 0, 2: 0.4} means that when a sequence is selected for a modification (as
+            specified in hamming_distance_probabilities), then 60% of the time the amino acid at index 0 is modified,
+            and the remaining 40% of the time the amino acid at index 2. If the values of position_weights do not sum
+            to 1, the remainder will be redistributed over all positions, including those not specified.
+        alphabet_weights (dict): A dictionary describing the relative probabilities of choosing each amino acid
+            for hamming distance modification. The keys represent the amino acids and the values the relative
+            probabilities for choosing this amino acid. If the values of alphabet_weights do not sum to 1, the remainder
+            will be redistributed over all possible amino acids, including those not specified.
+
+
+    Specification:
+
+        motifs:
+            my_simple_motif: # a simple motif without gaps or hamming distance
+                seed: AAA
+                instantiation: GappedKmer
+
+            my_complex_motif: # a complex motif containing a gap and allowing for hamming distance
+                seed: AA/A
+                instantiation: GappedKmer
+                    min_gap: 1
+                    max_gap: 2
+                    hamming_distance_probabilities:
+                        - 0: 0.7
+                        - 1: 0.3
+                    position_weights: # note that index 2, the position of the gap, is excluded from position_weights
+                        - 0: 1
+                        - 1: 0
+                        - 3: 0
+                    alphabet_weights:
+                        - A: 0.2
+                        - C: 0.2
+                        - D: 0.4
+                        - E: 0.2
+
     """
 
-    def __init__(self, hamming_distance_probabilities: dict = None, min_gap: int = 0, max_gap: int = 0):
+    def __init__(self, hamming_distance_probabilities: dict = None, min_gap: int = 0, max_gap: int = 0,
+                 alphabet_weights: dict = None, position_weights: dict = None):
         if hamming_distance_probabilities is not None:
             hamming_distance_probabilities = {key: float(value) for key, value in hamming_distance_probabilities.items()}
             assert all(isinstance(key, int) for key in hamming_distance_probabilities.keys()) \
@@ -23,13 +84,17 @@ class GappedKmerInstantiation(MotifInstantiationStrategy):
                 "so that the probabilities for all distance possibilities sum to 1."
 
         self._hamming_distance_probabilities = hamming_distance_probabilities
+        self.position_weights = position_weights
+        # if weights are not given for each letter of the alphabet, distribute the remaining probability
+        # equally among letters
+        self.alphabet_weights = self.set_default_weights(alphabet_weights, EnvironmentSettings.get_sequence_alphabet())
         self._min_gap = min_gap
         self._max_gap = max_gap
 
     def get_max_gap(self) -> int:
         return self._max_gap
 
-    def instantiate_motif(self, base, params: dict = None) -> MotifInstance:
+    def instantiate_motif(self, base) -> MotifInstance:
         allowed_positions = list(range(len(base)))
         instance = list(base)
 
@@ -37,9 +102,11 @@ class GappedKmerInstantiation(MotifInstantiationStrategy):
             gap_index = base.index("/")
             allowed_positions.remove(gap_index)
 
+        self.position_weights = self.set_default_weights(self.position_weights, allowed_positions)
+
         gap_size = np.random.choice(range(self._min_gap, self._max_gap + 1))
-        instance = self._substitute_letters(params["position_weights"],
-                                            params["alphabet_weights"],
+        instance = self._substitute_letters(self.position_weights,
+                                            self.alphabet_weights,
                                             allowed_positions, instance)
         instance = "".join(instance)
 
@@ -73,3 +140,17 @@ class GappedKmerInstantiation(MotifInstantiationStrategy):
         keys = self._prepare_keys(weights)
         s = sum([weights[key] for key in keys])
         return [weights[key] / s for key in keys]
+
+    def set_default_weights(self, weights, keys):
+        if weights is not None and len(weights.keys()) < len(keys):
+            remaining_probability = (1 - sum(weights.values())) / (len(keys)-len(weights.keys()))
+            additional_keys = set(keys) - set(weights.keys())
+
+            for key in additional_keys:
+                weights[key] = remaining_probability
+
+        elif weights is None:
+            remaining_probability = 1 / len(keys)
+            weights = {key: remaining_probability for key in keys}
+
+        return weights

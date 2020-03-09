@@ -40,9 +40,9 @@ class TestKmerFrequencyEncoder(TestCase):
         dataset = RepertoireDataset(repertoires=[rep1, rep2])
 
         encoder = KmerFrequencyEncoder.create_encoder(dataset, {
-                "normalization_type": NormalizationType.RELATIVE_FREQUENCY,
-                "reads": ReadsType.UNIQUE,
-                "sequence_encoding": SequenceEncodingType.IDENTITY,
+                "normalization_type": NormalizationType.RELATIVE_FREQUENCY.name,
+                "reads": ReadsType.UNIQUE.name,
+                "sequence_encoding": SequenceEncodingType.IDENTITY.name,
                 "k": 3
             })
 
@@ -56,9 +56,9 @@ class TestKmerFrequencyEncoder(TestCase):
         ))
 
         encoder = KmerFrequencyEncoder.create_encoder(dataset, {
-                "normalization_type": NormalizationType.RELATIVE_FREQUENCY,
-                "reads": ReadsType.UNIQUE,
-                "sequence_encoding": SequenceEncodingType.CONTINUOUS_KMER,
+                "normalization_type": NormalizationType.RELATIVE_FREQUENCY.name,
+                "reads": ReadsType.UNIQUE.name,
+                "sequence_encoding": SequenceEncodingType.CONTINUOUS_KMER.name,
                 "k": 3
             })
 

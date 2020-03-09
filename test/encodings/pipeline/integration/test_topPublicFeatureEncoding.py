@@ -56,25 +56,26 @@ class TestTopPublicFeatureEncoding(TestCase):
         )
 
         encoder = PipelineEncoder.create_encoder(dataset, {
-                    "initial_encoder": KmerFrequencyEncoder,
+                    "initial_encoder": KmerFrequencyEncoder.__name__[:-7],
                     "initial_encoder_params": {
-                        "normalization_type": NormalizationType.NONE,
-                        "reads": ReadsType.UNIQUE,
-                        "sequence_encoding": SequenceEncodingType.IDENTITY,
+                        "normalization_type": NormalizationType.NONE.name,
+                        "reads": ReadsType.UNIQUE.name,
+                        "sequence_encoding": SequenceEncodingType.IDENTITY.name,
                         "metadata_fields_to_include": []
                     },
-                    "steps": [PublicSequenceFeatureAnnotation(result_path=path, filename="encoded_data.pickle"), CriteriaBasedFilter(
-                        **{"axis": AxisType.FEATURES,
-                            "criteria": {
-                                "type": OperationType.TOP_N,
-                                "number": 2,
-                                "value": {
-                                    "type": DataType.COLUMN,
-                                    "name": "public_number_of_repertoires"
-                                }
-                            },
-                        })
-                    ]
+                    "steps": [{"s1": {"type": PublicSequenceFeatureAnnotation.__name__,
+                                      "params": {"result_path": path, "filename": "encoded_data.pickle"}}},
+                              {"s2": {"type": CriteriaBasedFilter.__name__,
+                                      "params": {"axis": AxisType.FEATURES,
+                                                "criteria": {
+                                                    "type": OperationType.TOP_N,
+                                                    "number": 2,
+                                                    "value": {
+                                                        "type": DataType.COLUMN,
+                                                        "name": "public_number_of_repertoires"
+                                                    }
+                                                }},
+                        }}]
                 })
 
         d1 = encoder.encode(

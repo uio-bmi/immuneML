@@ -18,15 +18,12 @@ class MatchedReceptorsRepertoireEncoder(MatchedReceptorsEncoder):
         feature_annotations = self._get_feature_info()
         encoded_repertoires, labels, example_ids = self._encode_repertoires(dataset, params)
 
-       # example_ids = [repertoire.identifier for repertoire in dataset.get_data()] if self.one_file_per_donor \
-       #     else labels["donor"]
-
         encoded_dataset.add_encoded_data(EncodedData(
             # examples contains a np.ndarray with counts
             examples=encoded_repertoires,
             # example_ids contains a list of repertoire identifiers
             example_ids=example_ids,
-            # feature_names contains a list of reference sequence identifiers
+            # feature_names contains a list of reference receptor identifiers
             feature_names=["{id}.{chain}".format(id=row['id'], chain=row['chain']) for index, row in feature_annotations.iterrows()],
             # feature_annotations contains a PD dataframe with sequence and VDJ gene usage per reference receptor
             feature_annotations=feature_annotations,
@@ -45,9 +42,9 @@ class MatchedReceptorsRepertoireEncoder(MatchedReceptorsEncoder):
         # - v gene
         # - j gene
 
-        features = [[] for i in range(0, len(self.reference_sequences) * 2)]
+        features = [[] for i in range(0, len(self.reference_receptors) * 2)]
 
-        for i, receptor in enumerate(self.reference_sequences):
+        for i, receptor in enumerate(self.reference_receptors):
             id = receptor.identifier
             chains = receptor.get_chains()
             first_chain = receptor.get_chain(chains[0])
@@ -64,7 +61,7 @@ class MatchedReceptorsRepertoireEncoder(MatchedReceptorsEncoder):
     def _encode_repertoires(self, dataset: RepertoireDataset, params):
         # Rows = repertoires, Columns = reference chains (two per sequence receptor)
         encoded_repertories = np.zeros((dataset.get_example_count(),
-                                        len(self.reference_sequences) * 2),
+                                        len(self.reference_receptors) * 2),
                                        dtype=int)
         labels = {label: [] for label in params["label_configuration"].get_labels_by_name()}
 
@@ -83,9 +80,9 @@ class MatchedReceptorsRepertoireEncoder(MatchedReceptorsEncoder):
 
     def _match_repertoire_to_receptors(self, repertoire: SequenceRepertoire):
         matcher = SequenceMatcher()
-        matches = np.zeros(len(self.reference_sequences) * 2, dtype=int)
+        matches = np.zeros(len(self.reference_receptors) * 2, dtype=int)
 
-        for i, ref_receptor in enumerate(self.reference_sequences):
+        for i, ref_receptor in enumerate(self.reference_receptors):
             chains = ref_receptor.get_chains()
             first_chain = ref_receptor.get_chain(chains[0])
             second_chain = ref_receptor.get_chain(chains[1])

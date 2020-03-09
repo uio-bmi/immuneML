@@ -1,10 +1,10 @@
 import copy
+import json
 
 import numpy as np
 import pandas as pd
-from rpy2.robjects.packages import STAP
 from rpy2.robjects import pandas2ri
-import json
+from rpy2.robjects.packages import STAP
 
 pandas2ri.activate()
 
@@ -74,6 +74,10 @@ class FeatureHeatmap(EncodingReport):
 
     FEATURE = "feature"
     EXAMPLE = "example"
+
+    @classmethod
+    def build_object(cls, **kwargs):
+        return FeatureHeatmap(**kwargs)
 
     def __init__(self,
                  dataset: RepertoireDataset = None,

@@ -5,6 +5,12 @@ from source.ml_methods.SklearnMethod import SklearnMethod
 
 
 class KNN(SklearnMethod):
+    """
+    KNN wrapper of the KNeighborsClassifier scikit-learn's method.
+
+    For usage and specification, check SklearnMethod class.
+    For valid parameters, see: https://scikit-learn.org/stable/modules/generated/sklearn.neighbors.KNeighborsClassifier.html
+    """
 
     def __init__(self, parameter_grid: dict = None, parameters: dict = None):
         super(KNN, self).__init__()

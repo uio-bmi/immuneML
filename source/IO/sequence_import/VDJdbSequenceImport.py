@@ -1,7 +1,9 @@
 import pandas as pd
 
+from source.data_model.receptor.ReceptorList import ReceptorList
 from source.data_model.receptor.TCABReceptor import TCABReceptor
 from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
+from source.data_model.receptor.receptor_sequence.ReceptorSequenceList import ReceptorSequenceList
 from source.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
 
 
@@ -23,11 +25,11 @@ class VDJdbSequenceImport:
         return sequences
 
     @staticmethod
-    def import_paired_sequences(path) -> list:
+    def import_paired_sequences(path) -> ReceptorList:
         columns = VDJdbSequenceImport.COLUMNS + list(VDJdbSequenceImport.CUSTOM_COLUMNS.keys())
         df = pd.read_csv(path, sep="\t", usecols=columns)
         identifiers = df["complex.id"].unique()
-        receptors = []
+        receptors = ReceptorList()
 
         for identifier in identifiers:
             receptor = VDJdbSequenceImport.import_receptor(df, identifier)
@@ -49,7 +51,7 @@ class VDJdbSequenceImport:
                             metadata=beta.metadata.custom_params)
 
     @staticmethod
-    def import_all_sequences(path) -> list:
+    def import_all_sequences(path) -> ReceptorSequenceList:
         columns = VDJdbSequenceImport.COLUMNS + list(VDJdbSequenceImport.CUSTOM_COLUMNS.keys())
         df = pd.read_csv(path, sep="\t", usecols=columns)
         sequences = df.apply(VDJdbSequenceImport.import_sequence, axis=1).values

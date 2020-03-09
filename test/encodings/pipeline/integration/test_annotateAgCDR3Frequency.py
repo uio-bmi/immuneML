@@ -8,7 +8,6 @@ from source.encodings.kmer_frequency.KmerFrequencyEncoder import KmerFrequencyEn
 from source.encodings.kmer_frequency.ReadsType import ReadsType
 from source.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType import SequenceEncodingType
 from source.encodings.pipeline.PipelineEncoder import PipelineEncoder
-from source.encodings.pipeline.steps.SequenceMatchFeatureAnnotation import SequenceMatchFeatureAnnotation
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.environment.LabelConfiguration import LabelConfiguration
 from source.util.PathBuilder import PathBuilder
@@ -77,9 +76,9 @@ reference_rep.tsv,rep1"""
         }
 
         kmer_freq_params = {
-            "normalization_type": NormalizationType.RELATIVE_FREQUENCY,
-            "reads": ReadsType.UNIQUE,
-            "sequence_encoding": SequenceEncodingType.IDENTITY,
+            "normalization_type": NormalizationType.RELATIVE_FREQUENCY.name,
+            "reads": ReadsType.UNIQUE.name,
+            "sequence_encoding": SequenceEncodingType.IDENTITY.name,
             "metadata_fields_to_include": []
         }
 
@@ -105,9 +104,10 @@ reference_rep.tsv,rep1"""
             )
 
         encoder = PipelineEncoder.create_encoder(dataset, {
-                    "initial_encoder": KmerFrequencyEncoder,
+                    "initial_encoder": KmerFrequencyEncoder.__name__[:-7],
                     "initial_encoder_params": kmer_freq_params,
-                    "steps": [SequenceMatchFeatureAnnotation(**annotate_params, filename="test.pickle", result_path=path)]
+                    "steps": [{'step1': {"type": "SequenceMatchFeatureAnnotation",
+                               "params": {**annotate_params, **{"filename": "test.pickle", "result_path": path}}}}]
                 })
 
         d1 = encoder.encode(

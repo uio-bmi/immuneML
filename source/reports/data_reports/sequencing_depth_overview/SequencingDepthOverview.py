@@ -15,10 +15,11 @@ from source.util.PathBuilder import PathBuilder
 
 class SequencingDepthOverview(DataReport):
     """
-    Report to analyze sequencing depth as quantified by total number of reads per sample and total number of unique
+    This report plots the sequencing depth as quantified by total number of reads per sample and total number of unique
     clonotypes per sample for in-frame, out-of-frame, and sequences containing stop codons.
-    Distributions of each of these variables as well as the relationship between the variables are plotted in this
+    The distributions of each of these variables as well as the relationship between the variables are plotted in this
     report.
+
     @param x: discrete column name from metadata file with which to put on the x-axis and split samples by
     @param color: column name from metadata file to color samples by
     @param facets: metadata attributes to split points by in rows of the resulting plot-matrix
@@ -26,7 +27,14 @@ class SequencingDepthOverview(DataReport):
     form colors: list of colors and breaks: list of values at which each color should be - for example:
     discrete: {"A": "blue", "B": "red", ...}
     continuous: {"colors": ["blue", "white", "red"], "breaks": [-1, 0, 1]}
+
+
+
     """
+
+    @classmethod
+    def build_object(cls, **kwargs):
+        return SequencingDepthOverview(**kwargs)
 
     def __init__(self, dataset: RepertoireDataset = None,
                  x: str = None,

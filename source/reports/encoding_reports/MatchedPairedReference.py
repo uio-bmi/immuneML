@@ -1,6 +1,7 @@
 import os
-import pandas as pd
 import warnings
+
+import pandas as pd
 
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.reports.encoding_reports.EncodingReport import EncodingReport
@@ -9,9 +10,40 @@ from source.util.PathBuilder import PathBuilder
 
 class MatchedPairedReference(EncodingReport):
     """
-    Uses MatchedReceptorsEncoder to encode the dataset, and reports the number of matches between
-    a dataset containing unpaired immune receptor sequences, and a set of paired reference receptors. 
+    Reports the number of matches between a dataset containing unpaired (single chain) immune receptor
+    sequences, and a set of paired reference receptors.
+    :py:obj:`~source.encodings.reference_encoding.MatchedReceptorsEncoder.MatchedReceptorsEncoder`
+    must be used to encode the dataset.
+
+
+    Specification:
+
+        definitions:
+            datasets:
+                unpaired_data:
+                    ...
+            encodings:
+                my_mr_encoding:
+                    MatchedReceptors:
+                        ...
+            reports:
+                my_mr_report:
+                    MatchedPairedReference
+        instructions:
+                instruction_1:
+                    type: ExploratoryAnalysis
+                    analyses:
+                        my_mr_analysis:
+                            dataset: unpaired_data
+                            encoding: my_mr_encoding
+                            report: my_mr_report
+                            labels:
+                                - ...
     """
+
+    @classmethod
+    def build_object(cls, **kwargs):
+        return MatchedPairedReference(**kwargs)
 
     def __init__(self, dataset: RepertoireDataset = None, result_path: str = None):
         self.dataset = dataset

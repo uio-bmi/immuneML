@@ -5,8 +5,8 @@ from rpy2.robjects.packages import STAP
 
 from source.analysis.data_manipulation.DataReshaper import DataReshaper
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
-from source.reports.encoding_reports.EncodingReport import EncodingReport
 from source.environment.EnvironmentSettings import EnvironmentSettings
+from source.reports.encoding_reports.EncodingReport import EncodingReport
 from source.util.PathBuilder import PathBuilder
 
 
@@ -27,6 +27,10 @@ class Barplot(EncodingReport):
     height=6,
     palette={"NR": "yellow"}
     """
+
+    @classmethod
+    def build_object(cls, **kwargs):
+        return Barplot(**kwargs)
 
     def __init__(self, dataset: RepertoireDataset = None, result_path: str = None, result_name: str = None,
                  x: str = None, color: str = "NULL", palette: dict = {},

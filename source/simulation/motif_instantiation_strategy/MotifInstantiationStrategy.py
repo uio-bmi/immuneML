@@ -6,7 +6,7 @@ from source.simulation.implants.MotifInstance import MotifInstance
 class MotifInstantiationStrategy(metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
-    def instantiate_motif(self, base, params: dict = None) -> MotifInstance:
+    def instantiate_motif(self, base) -> MotifInstance:
         pass
 
     @abc.abstractmethod

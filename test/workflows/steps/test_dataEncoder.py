@@ -32,7 +32,7 @@ class TestDataEncoder(TestCase):
         dataset = RepertoireDataset(repertoires=[rep1, rep2])
         encoder = Word2VecEncoder.create_encoder(dataset, {
                     "k": 3,
-                    "model_type": ModelType.SEQUENCE,
+                    "model_type": ModelType.SEQUENCE.name,
                     "vector_size": 6
                 })
 

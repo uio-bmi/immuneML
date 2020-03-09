@@ -16,11 +16,47 @@ from source.util.PathBuilder import PathBuilder
 
 
 class SklearnMethod(MLMethod):
+    """
+    Base class for ML methods imported from scikit-learn. The classes inheriting SklearnMethod acting as wrappers around imported
+    ML methods from scikit-learn have to implement:
+        - the __init__() method,
+        - get_params(label) and
+        - _get_ml_model()
+    Other methods can also be overwritten if needed.
+    The arguments and specification described bellow applied for all classes inheriting SklearnMethod.
+
+    Arguments:
+        parameters: a dictionary of parameters that will be directly passed to the scikit-learn's LogisticRegression class
+            upon calling __init__() method; for detailed list see scikit-learn's documentation of the specific class
+            inheriting SklearnMethod
+        parameter_grid: a dictionary of parameters which all have to be valid arguments for scikit-learn's corresponding class'
+            __init__() method (same as parameters), but unlike parameters argument can contain list of values instead of one value;
+            if this is specified and "model_selection_cv" is True (in the specification) or just if fit_by_cross_validation() is called,
+            a grid search will be performed over these parameters and the optimal model will be kept
+
+    Specification:
+        ml_methods:
+            log_reg:
+                SimpleLogisticRegression: # name of the class inheriting SklearnMethod
+                    max_iter: 1000 # specific parameter value
+                    penalty: l1
+                # if any of the parameters under SimpleLogisticRegression is a list and model_selection_cv is True,
+                # SimpleLogisticRegression will do grid search over the given parameters and return optimal model
+                model_selection_cv: False
+                model_selection_n_folds: -1
+            svm_with_cv:
+                SVM: # name of another class inheriting SklearnMethod
+                    alpha: [10, 100] # search will be performed over these parameters
+                # if any of the parameters under SVM is a list and model_selection_cv is True,
+                # SVM will do grid search over the given parameters and return optimal model
+                model_selection_cv: True
+                model_selection_n_folds: 5
+    """
 
     FIT_CV = "fit_CV"
     FIT = "fit"
 
-    def __init__(self):
+    def __init__(self, parameter_grid: dict = None, parameters: dict = None):
         super(SklearnMethod, self).__init__()
         self.models = {}
         self._parameter_grid = {}
@@ -146,4 +182,8 @@ class SklearnMethod(MLMethod):
 
     @abc.abstractmethod
     def _get_ml_model(self, cores_for_training: int = 2):
+        pass
+
+    @abc.abstractmethod
+    def get_params(self, label):
         pass

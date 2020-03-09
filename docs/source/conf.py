@@ -46,7 +46,10 @@ extensions = [
     'sphinx.ext.mathjax',
     'sphinx.ext.viewcode',
     'sphinx_rtd_theme',
+    'sphinx.ext.napoleon'
 ]
+
+autodoc_mock_imports = ["pandas", "sklearn", "numpy"]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']

@@ -38,7 +38,7 @@ class SignalImplanter(Step):
         PathBuilder.build(input_params.result_path)
 
         processed_repertoires = []
-        simulation_limits = SignalImplanter._prepare_simulation_limits(input_params.simulations,
+        simulation_limits = SignalImplanter._prepare_simulation_limits(input_params.simulation.implantings,
                                                                        input_params.dataset.get_example_count())
         simulation_index = 0
 
@@ -97,16 +97,16 @@ class SignalImplanter(Step):
     @staticmethod
     def _implant_in_repertoire(index, repertoire, simulation_index, input_params) -> str:
         new_repertoire = copy.deepcopy(repertoire)
-        for signal in input_params.simulations[simulation_index].signals:
+        for signal in input_params.simulation.implantings[simulation_index].signals:
             new_repertoire = signal.implant_to_repertoire(repertoire=new_repertoire,
                                                           repertoire_implanting_rate=
-                                                          input_params.simulations[simulation_index].repertoire_implanting_rate,
+                                                          input_params.simulation.implantings[simulation_index].repertoire_implanting_rate,
                                                           path=input_params.result_path)
 
-        for signal in input_params.simulations[simulation_index].signals:
+        for signal in input_params.simulation.implantings[simulation_index].signals:
             new_repertoire.metadata[f"signal_{signal.id}"] = True
         for signal in input_params.signals:
-            if signal not in input_params.simulations[simulation_index].signals:
+            if signal not in input_params.simulation.implantings[simulation_index].signals:
                 new_repertoire.metadata[f"signal_{signal.id}"] = False
 
         return new_repertoire

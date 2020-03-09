@@ -51,7 +51,7 @@ class TestSimilarityHeatmap(TestCase):
 
         dataset = RepertoireDataset(encoded_data=EncodedData(**encoded_data))
 
-        SimilarityHeatmap(dataset=dataset,
+        SimilarityHeatmap.build_object(dataset=dataset,
                           similarity_measure="PEARSON",
                           one_hot_encode_example_annotations=["disease"],
                           example_annotations=["age", "week"],

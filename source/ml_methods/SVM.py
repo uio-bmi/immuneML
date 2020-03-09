@@ -5,18 +5,12 @@ from source.ml_methods.SklearnMethod import SklearnMethod
 
 
 class SVM(SklearnMethod):
-    # TODO: check the use case and add online learning method
-
     """
-    Implements linear SVM using sklearn LinearSVC class:
-    LinearSVC allows for online learning in case of large datasets
+    SVM wrapper of the corresponding scikit-learn's LinearSVC method.
 
-    Notes:
-        - regularization term is called alpha with LinearSVC
-        - n_iter has to be set to a larger number (e.g. 1000) for the SGDClassifier to achieve the same performance
-            as the original implementation of the algorithm
-        - Only the first item in .coef_ is stored in params["coefficients"], as classification of 2 classes results
-            in a .coef_ array of shape [1, n_features]
+    For usage and specification, check SklearnMethod class.
+    For valid parameters, see: https://scikit-learn.org/stable/modules/generated/sklearn.svm.LinearSVC.html
+
     """
 
     def __init__(self, parameter_grid: dict = None, parameters: dict = None):

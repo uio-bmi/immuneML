@@ -30,62 +30,35 @@ class TestImmuneMLParser(TestCase):
                 },
                 "encodings": {
                     "a1": {
-                        "dataset": "d1",
-                        "type": "Word2Vec",
-                        "params": {
+                        "Word2Vec": {
                             "k": 3,
                             "model_type": "sequence",
                             "vector_size": 8,
                         }
+                    },
+                    "a2": {
+                        "Word2Vec"
                     }
                 },
                 "ml_methods": {
                     "simpleLR": {
-                        "assessment_type": "LOOCV",
-                        "type": "SimpleLogisticRegression",
-                        "params": {
+                        "SimpleLogisticRegression":{
                             "penalty": "l1"
                         },
-                        "encoding": "a1",
-                        "labels": ["CD"],
-                        "metrics": ["accuracy", "balanced_accuracy"],
-                        "split_count": 1,
                         "model_selection_cv": False,
                         "model_selection_n_folds": -1,
-                        "min_example_count": 3
+                    },
+                    "simpleLR2": {
+                        "SimpleLogisticRegression"
                     }
                 },
                 "reports": {
                     "rep1": {
-                        "type": "SequenceLengthDistribution",
-                        "params": {
-                            "dataset": "d1",
-                            "batch_size": 3
-                        }
+                        "SequenceLengthDistribution"
                     }
-                },
-                # "simulation": {
-                #     "motifs": {
-                #         "motif1": {
-                #             "seed": "CAS",
-                #             "instantiation": "Identity"
-                #         }
-                #     },
-                #     "signals": {
-                #         "signal1": {
-                #             "motifs": ["motif1"],
-                #             "implanting": "healthy_sequences"
-                #         }
-                #     },
-                #     "implanting": {
-                #         "var1": {
-                #             "signals": ["signal1"],
-                #             "repertoires": 0.4,
-                #             "sequences": 0.01
-                #         }
-                #     }
-                # }
-            }
+                }
+            },
+            "instructions": {}
         }
 
         PathBuilder.build(path)

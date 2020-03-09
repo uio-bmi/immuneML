@@ -16,6 +16,7 @@ class RepertoireDataset(Dataset):
         self.encoded_data = encoded_data
         self.identifier = identifier if identifier is not None else uuid.uuid4()
         self.metadata_file = metadata_file
+        self.metadata_fields = None
         self.repertoire_ids = None
         self.repertoires = repertoires
 
@@ -39,6 +40,12 @@ class RepertoireDataset(Dataset):
 
     def get_example_count(self):
         return len(self.repertoires)
+
+    def get_metadata_fields(self):
+        if self.metadata_fields is None:
+            df = pd.read_csv(self.metadata_file, sep=",", nrows=0)
+            self.metadata_fields = df.columns.values.tolist()
+        return self.metadata_fields
 
     def get_metadata(self, field_names: list, return_df: bool = False):
         df = pd.read_csv(self.metadata_file, sep=",", usecols=field_names)

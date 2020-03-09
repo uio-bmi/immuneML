@@ -3,15 +3,7 @@ import abc
 
 class MLMethod(metaclass=abc.ABCMeta):
     """
-        Base class for wrappers for different ML/DL methods
-        adapted to work with RepertoireDataset objects and use their encoded_data
-        attribute to access the data;
-
-        These classes (MLMethod and subclasses) assume that encoded_data has
-        the following format: {"repertoires" : scipy.sparse.csc_matrix, "labels": np.ndarray}
-
-        Other parameters in addition to repertoires and labels can be included,
-        such as label_names, features names etc.
+        Base class for wrappers for different ML/DL methods.
     """
     def __init__(self):
         self.ml_details_path = None

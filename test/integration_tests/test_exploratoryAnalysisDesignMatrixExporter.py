@@ -3,16 +3,11 @@ import shutil
 from unittest import TestCase
 
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
-from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
-from source.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
 from source.encodings.reference_encoding.ReferenceRepertoireEncoder import ReferenceRepertoireEncoder
 from source.encodings.reference_encoding.SequenceMatchingSummaryType import SequenceMatchingSummaryType
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.environment.LabelConfiguration import LabelConfiguration
-from source.preprocessing.PatientRepertoireCollector import PatientRepertoireCollector
-from source.reports.data_reports.SequenceLengthDistribution import SequenceLengthDistribution
 from source.reports.encoding_reports.DesignMatrixExporter import DesignMatrixExporter
-from source.reports.encoding_reports.MatchingSequenceDetails import MatchingSequenceDetails
 from source.util.PathBuilder import PathBuilder
 from source.util.RepertoireBuilder import RepertoireBuilder
 from source.workflows.instructions.exploratory_analysis.ExploratoryAnalysisProcess import ExploratoryAnalysisInstruction
@@ -41,32 +36,26 @@ class TestExploratoryAnalysisDesignMatrixExporter(TestCase):
         label_config.add_label("l1", [0, 1])
         label_config.add_label("l2", [2, 3])
 
-        refs = [ReceptorSequence("AAAC", metadata=SequenceMetadata(v_gene="v1", j_gene="j1"))]
+        file_content = """complex.id	Gene	CDR3	V	J	Species	MHC A	MHC B	MHC class	Epitope	Epitope gene	Epitope species	Reference	Method	Meta	CDR3fix	Score
+        100a	TRA	AAAC	TRAV12	TRAJ1	HomoSapiens	HLA-A*11:01	B2M	MHCI	AVFDRKSDAK	EBNA4	EBV	                    
+        """
 
-        preproc_sequence = [PatientRepertoireCollector()]
+        with open(path + "refs.tsv", "w") as file:
+            file.writelines(file_content)
 
-        units = {"named_analysis_1": ExploratoryAnalysisUnit(dataset=dataset, report=SequenceLengthDistribution(), batch_size=16),
-                 "named_analysis_2": ExploratoryAnalysisUnit(dataset=dataset, report=SequenceLengthDistribution(), preprocessing_sequence=preproc_sequence),
+        refs = {"path": path + "refs.tsv", "format": "VDJdb"}
 
-                 "named_analysis_3": ExploratoryAnalysisUnit(dataset=dataset, report=MatchingSequenceDetails(max_edit_distance=1, reference_sequences=refs),
-                                         label_config=label_config,
-                                         encoder=ReferenceRepertoireEncoder(max_edit_distance=1,
-                                                                            summary=SequenceMatchingSummaryType.COUNT,
-                                                                            reference_sequences=refs)),
-                 "named_analysis_4": ExploratoryAnalysisUnit(dataset=dataset,
+        units = {"named_analysis_4": ExploratoryAnalysisUnit(dataset=dataset,
                                                              report=DesignMatrixExporter(),
                                                              label_config=label_config,
-                                                             encoder=ReferenceRepertoireEncoder(max_edit_distance=1,
-                                                                                                summary=SequenceMatchingSummaryType.COUNT,
-                                                                                                reference_sequences=refs))
-                 }
+                                                             encoder=ReferenceRepertoireEncoder.create_encoder(dataset,
+                                                                                                               {"max_edit_distance": 1,
+                                                                                                "summary": SequenceMatchingSummaryType.COUNT.name,
+                                                                                                "reference_sequences": refs}))}
 
         process = ExploratoryAnalysisInstruction(units)
         process.run(path + "results/")
 
-        self.assertTrue(units["named_analysis_1"].batch_size == 16)
-        self.assertTrue(os.path.isfile(path + "results/analysis_named_analysis_1/sequence_length_distribution.png"))
-        self.assertTrue(os.path.isfile(path + "results/analysis_named_analysis_2/sequence_length_distribution.png"))
-        self.assertTrue(os.path.isfile(path + "results/analysis_named_analysis_3/matching_sequence_overview.tsv"))
+        self.assertTrue(os.path.isfile(path + "results/analysis_named_analysis_4/design_matrix.csv"))
 
         shutil.rmtree(path)

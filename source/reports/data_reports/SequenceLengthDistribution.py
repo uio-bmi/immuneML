@@ -10,17 +10,45 @@ from source.util.PathBuilder import PathBuilder
 
 
 class SequenceLengthDistribution(DataReport):
+    """
+    Generates a histogram of the lengths of the sequences in a RepertoireDataset.
+
+    Specification:
+
+        definitions:
+            datasets:
+                my_data:
+                    ...
+            reports:
+                my_sld_report:
+                    SequenceLengthDistribution
+        instructions:
+                instruction_1:
+                    type: ExploratoryAnalysis
+                    analyses:
+                        my_sld_analysis:
+                            dataset: unpaired_data
+                            report: my_sld_report
+    """
+
+    @classmethod
+    def build_object(cls, **kwargs):
+        return SequenceLengthDistribution(**kwargs)
 
     def __init__(self, dataset: RepertoireDataset = None, batch_size: int = 1, result_path: str = None):
         DataReport.__init__(self, dataset=dataset, result_path=result_path)
         self.batch_size = batch_size
 
-    def generate(self):
+    def check_prerequisites(self):
         if isinstance(self.dataset, RepertoireDataset):
-            normalized_sequence_lengths = self.get_normalized_sequence_lengths()
-            self.plot(normalized_sequence_lengths)
+            return True
         else:
             warnings.warn("SequenceLengthDistribution: report can be generated only from RepertoireDataset. Skipping this report...")
+            return False
+
+    def generate(self):
+        normalized_sequence_lengths = self.get_normalized_sequence_lengths()
+        self.plot(normalized_sequence_lengths)
 
     def get_normalized_sequence_lengths(self) -> Counter:
         sequence_lenghts = Counter()

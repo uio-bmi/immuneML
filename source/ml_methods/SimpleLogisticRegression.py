@@ -6,9 +6,10 @@ from source.ml_methods.SklearnMethod import SklearnMethod
 
 class SimpleLogisticRegression(SklearnMethod):
     """
-    Note:
-        - Only the first item in .coef_ is stored in params["coefficients"], as classification of 2 classes results
-            in a .coef_ array of shape [1, n_features]
+    Logistic regression wrapper of the corresponding scikit-learn's method.
+
+    For usage and specification, check SklearnMethod class.
+    For valid parameters, see: https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LogisticRegression.html
     """
 
     default_parameters = {"max_iter": 1000, "solver": "saga"}

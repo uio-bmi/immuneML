@@ -6,7 +6,6 @@ from source.data_model.receptor.receptor_sequence.ReceptorSequence import Recept
 from source.data_model.repertoire.SequenceRepertoire import SequenceRepertoire
 from source.encodings.EncoderParams import EncoderParams
 from source.encodings.word2vec.W2VRepertoireEncoder import W2VRepertoireEncoder, Word2VecEncoder
-from source.encodings.word2vec.model_creator.ModelType import ModelType
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.environment.LabelConfiguration import LabelConfiguration
 from source.util.PathBuilder import PathBuilder
@@ -44,7 +43,7 @@ class TestWord2VecEncoder(TestCase):
 
         encoder = Word2VecEncoder.create_encoder(dataset, {
                 "k": 3,
-                "model_type": ModelType.SEQUENCE,
+                "model_type": "sequence",
                 "vector_size": 16
             })
 

@@ -8,8 +8,6 @@ import pandas as pd
 
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.encoded_data.EncodedData import EncodedData
-from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
-from source.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.reports.encoding_reports.MatchingSequenceDetails import MatchingSequenceDetails
 from source.util.RepertoireBuilder import RepertoireBuilder
@@ -20,8 +18,17 @@ class TestMatchingSequenceDetails(TestCase):
         path = EnvironmentSettings.root_path + "test/tmp/encrepmatchingseq/"
         repertoires = RepertoireBuilder.build([["AAA", "CCC"], ["AAC", "ASDA"], ["CCF", "ATC"]], path,
                                               {"default": [1, 0, 0]})[0]
-        ref_seqs = [ReceptorSequence("AAA", metadata=SequenceMetadata(v_gene="v1", j_gene="j1")),
-                    ReceptorSequence("CCF", metadata=SequenceMetadata(j_gene="j1", v_gene="v1"))]
+
+        file_content = """complex.id	Gene	CDR3	V	J	Species	MHC A	MHC B	MHC class	Epitope	Epitope gene	Epitope species	Reference	Method	Meta	CDR3fix	Score
+        100a	TRA	AAA	TRAV1	TRAJ1	HomoSapiens	HLA-A*11:01	B2M	MHCI	AVFDRKSDAK	EBNA4	EBV	                
+        100a	TRA	CCF	TRAV1	TRAJ1	HomoSapiens	HLA-A*11:01	B2M	MHCI	AVFDRKSDAK	EBNA4	EBV	                
+        """
+
+        with open(path + "refs.tsv", "w") as file:
+            file.writelines(file_content)
+
+        references = {"path": path + "refs.tsv", "format": "VDJdb"}
+
         dataset = RepertoireDataset(repertoires=repertoires,
                                     params={"default": [0, 1]},
                                     encoded_data=EncodedData(
@@ -30,10 +37,10 @@ class TestMatchingSequenceDetails(TestCase):
                                                       feature_names=["percentage"]
                                                   ))
 
-        report = MatchingSequenceDetails(**{
+        report = MatchingSequenceDetails.build_object(**{
             "dataset": dataset,
             "result_path": path + "result/",
-            "reference_sequences": ref_seqs,
+            "reference_sequences": references,
             "max_edit_distance": 1
         })
 

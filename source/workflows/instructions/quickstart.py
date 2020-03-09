@@ -68,8 +68,7 @@ class Quickstart:
                 },
                 "encodings": {
                     "e1": {
-                        "type": "Word2Vec",
-                        "params": {
+                        "Word2Vec": {
                             "k": 3,
                             "model_type": "sequence",
                             "vector_size": 8,
@@ -78,8 +77,7 @@ class Quickstart:
                 },
                 "ml_methods": {
                     "simpleLR": {
-                        "type": "SimpleLogisticRegression",
-                        "params": {
+                        "SimpleLogisticRegression": {
                             "penalty": "l1"
                         },
                         "model_selection_cv": False,
@@ -89,16 +87,14 @@ class Quickstart:
                 "preprocessing_sequences": {
                     "seq1": [
                         {"filter_chain_B": {
-                            "type": "DatasetChainFilter",
-                            "params": {
+                            "DatasetChainFilter": {
                                 "keep_chain": "A"
                             }
                         }}
                     ],
                     "seq2": [
                         {"filter_chain_A": {
-                            "type": "DatasetChainFilter",
-                            "params": {
+                            "DatasetChainFilter": {
                                 "keep_chain": "B"
                             }
                         }}
@@ -106,8 +102,7 @@ class Quickstart:
                 },
                 "reports": {
                     "rep1": {
-                        "type": "SequenceLengthDistribution",
-                        "params": {
+                        "SequenceLengthDistribution": {
                             "batch_size": 3
                         }
                     }

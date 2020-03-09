@@ -54,16 +54,14 @@ class TestImmuneMLApp(TestCase):
                 },
                 "encodings": {
                     "e1": {
-                        "type": "Word2Vec",
-                        "params": {
+                        "Word2Vec": {
                             "k": 3,
                             "model_type": "sequence",
                             "vector_size": 8,
                         }
                     },
                     "e2": {
-                        "type": "Word2Vec",
-                        "params": {
+                        "Word2Vec": {
                             "k": 3,
                             "model_type": "sequence",
                             "vector_size": 10,
@@ -72,8 +70,7 @@ class TestImmuneMLApp(TestCase):
                 },
                 "ml_methods": {
                     "simpleLR": {
-                        "type": "SimpleLogisticRegression",
-                        "params": {
+                        "SimpleLogisticRegression": {
                             "penalty": "l1"
                         },
                         "model_selection_cv": False,
@@ -83,13 +80,11 @@ class TestImmuneMLApp(TestCase):
                 "preprocessing_sequences": {
                     "seq1": [
                         {"collect": {
-                            "type": "PatientRepertoireCollector",
-                            "params": {}
+                            "PatientRepertoireCollector": {}
                         }},
                         {
                             "count_filter": {
-                                "type": "SequenceClonalCountFilter",
-                                "params": {
+                                "SequenceClonalCountFilter": {
                                     "remove_without_count": True,
                                     "low_count_limit": 3,
                                     "batch_size": 4
@@ -100,8 +95,7 @@ class TestImmuneMLApp(TestCase):
                 },
                 "reports": {
                     "rep1": {
-                        "type": "SequenceLengthDistribution",
-                        "params": {
+                        "SequenceLengthDistribution": {
                             "batch_size": 3
                         }
                     }

@@ -6,9 +6,9 @@ import numpy as np
 import pandas as pd
 import yaml
 
-from source.dsl.report_params_parsers.CoefficientPlottingSetting import CoefficientPlottingSetting
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.ml_methods.SimpleLogisticRegression import SimpleLogisticRegression
+from source.reports.ml_reports.CoefficientPlottingSetting import CoefficientPlottingSetting
 from source.reports.ml_reports.Coefficients import Coefficients
 from source.util.PathBuilder import PathBuilder
 
@@ -33,10 +33,10 @@ class TestCoefficients(TestCase):
         return dummy_lr
 
     def _create_report(self, path):
-        report = Coefficients(**{"coefs_to_plot": [CoefficientPlottingSetting.ALL,
-                                                   CoefficientPlottingSetting.NONZERO,
-                                                   CoefficientPlottingSetting.CUTOFF,
-                                                   CoefficientPlottingSetting.N_LARGEST],
+        report = Coefficients.build_object(**{"coefs_to_plot": [CoefficientPlottingSetting.ALL.name,
+                                                   CoefficientPlottingSetting.NONZERO.name,
+                                                   CoefficientPlottingSetting.CUTOFF.name,
+                                                   CoefficientPlottingSetting.N_LARGEST.name],
                                  "cutoff": [10],
                                  "n_largest": [5]})
 

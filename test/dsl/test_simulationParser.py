@@ -1,46 +1,35 @@
 from unittest import TestCase
 
-from source.dsl.SimulationParser import SimulationParser
 from source.dsl.SymbolTable import SymbolTable
 from source.dsl.SymbolType import SymbolType
+from source.dsl.definition_parsers.SimulationParser import SimulationParser
 from source.simulation.implants.Motif import Motif
 from source.simulation.implants.Signal import Signal
+from source.simulation.motif_instantiation_strategy.GappedKmerInstantiation import GappedKmerInstantiation
+from source.simulation.sequence_implanting.GappedMotifImplanting import GappedMotifImplanting
+from source.simulation.signal_implanting_strategy.HealthySequenceImplanting import HealthySequenceImplanting
 
 
 class TestSimulationParser(TestCase):
     def test_parse_simulation(self):
 
         simulation = {
-            "simulation": {
-                "motifs": {
-                    "motif1": {
-                        "seed": "CAS",
-                        "instantiation": "GappedKmer",
-                        "alphabet_weights": {},
-                        "position_weights": {0: 1, 1: 0, 2: 0}
-                    }
-                },
-                "signals": {
-                    "signal1": {
-                        "motifs": ["motif1"],
-                        "implanting": "HealthySequences"
-                    }
-                },
-                "implanting": {
-                    "var1": {
-                        "signals": ["signal1"],
-                        "dataset_implanting_rate": 0.5,
-                        "repertoire_implanting_rate": 0.1
-                    }
+            "sim1": {
+                "var1": {
+                    "signals": ["signal1"],
+                    "dataset_implanting_rate": 0.5,
+                    "repertoire_implanting_rate": 0.1
                 }
             }
         }
 
-        symbol_table, specs = SimulationParser.parse_simulation(simulation, SymbolTable())
-        self.assertEqual(1, len(symbol_table.get_by_type(SymbolType.SIGNAL)))
-        self.assertTrue(isinstance(symbol_table.get("motif1"), Motif))
-        self.assertTrue(isinstance(symbol_table.get("signal1"), Signal))
+        symbol_table = SymbolTable()
+        symbol_table.add("motif1", SymbolType.MOTIF, Motif("motif1", GappedKmerInstantiation(position_weights={0: 1}), seed="CAS"))
+        symbol_table.add("signal1", SymbolType.SIGNAL, Signal("signal1", [symbol_table.get("motif1")],
+                                                              HealthySequenceImplanting(GappedMotifImplanting())))
 
-        self.assertTrue("implanting" in specs)
-        self.assertTrue("signal1" in specs["signals"].keys())
-        self.assertTrue(symbol_table.get("motif1").position_weights == {0: 1, 1: 0, 2: 0})
+        symbol_table, specs = SimulationParser.parse_simulations(simulation, symbol_table)
+
+        self.assertTrue(symbol_table.contains("sim1"))
+        sim1 = symbol_table.get("sim1")
+        self.assertEqual(1, len(sim1.implantings))

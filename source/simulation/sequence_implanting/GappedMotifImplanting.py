@@ -7,7 +7,7 @@ from source.data_model.receptor.receptor_sequence.SequenceAnnotation import Sequ
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.simulation.implants.ImplantAnnotation import ImplantAnnotation
 from source.simulation.implants.MotifInstance import MotifInstance
-from source.simulation.signal_implanting_strategy.sequence_implanting.SequenceImplantingStrategy import \
+from source.simulation.sequence_implanting.SequenceImplantingStrategy import \
     SequenceImplantingStrategy
 from source.util.PositionHelper import PositionHelper
 

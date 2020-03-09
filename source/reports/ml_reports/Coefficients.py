@@ -1,34 +1,113 @@
 import warnings
+from numbers import Number
 
 import pandas as pd
 import yaml
 from rpy2.robjects import pandas2ri
 from rpy2.robjects.packages import STAP
 
-from source.dsl.report_params_parsers.CoefficientPlottingSetting import CoefficientPlottingSetting
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.ml_methods.RandomForestClassifier import RandomForestClassifier
+from source.reports.ml_reports.CoefficientPlottingSetting import CoefficientPlottingSetting
+from source.reports.ml_reports.CoefficientPlottingSettingList import CoefficientPlottingSettingList
 from source.reports.ml_reports.MLReport import MLReport
+from source.util.ParameterValidator import ParameterValidator
 from source.util.PathBuilder import PathBuilder
 
 
 class Coefficients(MLReport):
     """
-    A report that outputs the coefficients for a given ML method.
+    A report that plots the coefficients for a given ML method in a barplot. Can be used for Logistic regression,
+    SVM and Random Forest. In the case of Random Forest, the feature importances will be plotted.
 
-    - For Logistic regression: coefficients
-    - For SVM: coefficients
-    - For Random Forest: feature importance
+    When used in HyperParameter optimization, the report can be used for all models and optimal models, both on the
+    the selection and assessment levels.
+
+    Which coefficients should be plotted (for example: only nonzero, above a certain threshold, ...) can be specified.
+    Multiple options can be specified simultaneously. The full set of coefficients will also be exported as a csv file.
+
+    # todo: add example how this can be used from merely 'training a model' (no HP optimization)
+
+    Attributes:
+        coefs_to_plot (list): A list specifying which coefficients should be plotted.
+            For options see :py:obj:`~source.reports.ml_reports.CoefficientPlottingSetting.CoefficientPlottingSetting`.
+        cutoff (list): If 'cutoff' is specified under 'coefs_to_plot', the cutoff values can be specified here.
+            The coefficients which have an absolute value equal to or greater than the cutoff will be plotted.
+        n_largest (list): If 'n_largest' is specified under 'coefs_to_plot', the values for n can be specified here.
+            These should be integer values. The n largest coefficients are determined based on their absolute values.
+
+    Specification:
+
+        definitions:
+            reports:
+                my_coef_report:
+                    Coefficients:
+                        coefs_to_plot:
+                            - all
+                            - nonzero
+                            - cutoff
+                            - n_largest
+                        cutoff:
+                            - 0.1
+                            - 0.01
+                        n_largest:
+                            - 5
+                            - 10
+
+        instructions:
+            instruction_1:
+                type: HPOptimization
+                settings:
+                      ...
+                assessment:
+                    reports:
+                        models:
+                            - my_coef_report
+                        optimal_models:
+                            - my_coef_report
+                    ...
+                selection:
+                    reports:
+                        models:
+                            - my_coef_report
+                        optimal_models:
+                            - my_coef_report
+                    ...
+                ...
+
     """
 
-    def __init__(self, coefs_to_plot, cutoff, n_largest, label=None, ml_details_path = None, hp_setting=None):
+    @classmethod
+    def build_object(cls, **kwargs):
+        location = "Coefficients"
+        coefs_to_plot = kwargs["coefs_to_plot"]
+        cutoff = kwargs["cutoff"]
+        n_largest = kwargs["n_largest"]
+
+        ParameterValidator.assert_all_in_valid_list(coefs_to_plot, [item.name for item in CoefficientPlottingSetting], location,
+                                                    "coefs_to_plot")
+
+        if CoefficientPlottingSetting.CUTOFF in coefs_to_plot:
+            ParameterValidator.assert_all_type_and_value(cutoff, Number, location, "cutoff", min_inclusive=1e-15)
+
+        if CoefficientPlottingSetting.N_LARGEST in coefs_to_plot:
+            ParameterValidator.assert_all_type_and_value(n_largest, int, location, "n_largest", min_inclusive=1)
+
+        coefs = CoefficientPlottingSettingList()
+        for keyword in coefs_to_plot:
+            coefs.append(CoefficientPlottingSetting[keyword.upper()])
+
+        return Coefficients(coefs, cutoff, n_largest)
+
+    def __init__(self, coefs_to_plot: CoefficientPlottingSettingList, cutoff: list, n_largest: list):
         super(Coefficients, self).__init__()
+
         self._coefs_to_plot = coefs_to_plot
         self._cutoff = cutoff
         self._n_largest = n_largest
-        self.label = label
-        self.ml_details_path = ml_details_path
-        self.hp_setting = hp_setting
+        self.label = None
+        self.ml_details_path = None
+        self.hp_setting = None
 
     def generate(self):
         PathBuilder.build(self.result_path)

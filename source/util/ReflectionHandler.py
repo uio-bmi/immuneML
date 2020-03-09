@@ -54,3 +54,16 @@ class ReflectionHandler:
             return True
         else:
             return False
+
+    @staticmethod
+    def discover_classes_by_partial_name(class_name_ending: str, subdirectory: str = ""):
+        filenames = glob.glob(EnvironmentSettings.root_path + "source/**/*{}.py".format(class_name_ending), recursive=True)
+        class_names = [f.rpartition("/")[2][:-3] for f in filenames if subdirectory in f.replace("\\", "/")]
+        return class_names
+
+    @staticmethod
+    def get_classes_by_partial_name(class_name_ending: str, subdirectory: str = ""):
+        filenames = glob.glob(EnvironmentSettings.root_path + "source/**/*{}*.py".format(class_name_ending), recursive=True)
+        filenames = [f for f in filenames if subdirectory in f.replace("\\", "/") and f'{class_name_ending}.py' in f]
+        classes = [ReflectionHandler._import_class(filename, os.path.basename(filename)[:-3]) for filename in filenames]
+        return classes

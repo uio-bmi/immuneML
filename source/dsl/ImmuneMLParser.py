@@ -1,11 +1,12 @@
 # quality: peripheral
 import os
+import re
 
 import yaml
 
-from source.dsl.DefinitionParser import DefinitionParser
 from source.dsl.InstructionParser import InstructionParser
 from source.dsl.SymbolTable import SymbolTable
+from source.dsl.definition_parsers.DefinitionParser import DefinitionParser
 
 
 class ImmuneMLParser:
@@ -28,40 +29,33 @@ class ImmuneMLParser:
                         sequence_type: CDR3
             encodings:
                 e1:
-                    type: KmerFrequency
-                    params:
+                    KmerFrequency
                         k: 3
                 e2:
-                    type: Word2Vec
-                    params:
+                    Word2Vec
                         vector_size: 16
                         context: sequence
             ml_methods:
                 log_reg1:
-                    type: LogisticRegression
-                    params:
+                    LogisticRegression
                         C: 0.001
             reports:
                 r1:
-                    type: SequenceLengthDistribution
+                    SequenceLengthDistribution
             preprocessing_sequences:
                 seq1:
                     - filter_chain_B:
-                        type: DatasetChainFilter
-                        params:
+                        DatasetChainFilter
                             keep_chain: A
                     - filter_clonotype:
-                        type: ClonotypeCountFilter
-                        params:
+                        ClonotypeCountFilter
                             lower_limit: 1000
                 seq2:
                     - filter_clonotype:
-                        type: ClonotypeCountFilter
-                        params:
+                        ClonotypeCountFilter
                             lower_limit: 500
                     - filter_chain_A:
-                        type: DatasetChainFilter
-                        params:
+                        DatasetChainFilter
                             keep_chain: B
         instructions:
             inst1:
@@ -101,13 +95,26 @@ class ImmuneMLParser:
     def parse_yaml_file(file_path, result_path=None):
         try:
             with open(file_path, "r") as file:
-                workflow_specification = yaml.load(file, Loader=yaml.FullLoader)
+                workflow_specification = yaml.safe_load(file)
         except yaml.YAMLError as exc:
             print(f"YAML formatting error in the specification file. Validate the specification and try again.\n"
                   f"Error info: {exc}")
             raise exc
 
-        return ImmuneMLParser.parse(workflow_specification, file_path, result_path)
+        try:
+            symbol_table, path = ImmuneMLParser.parse(workflow_specification, file_path, result_path)
+        except KeyError as key_error:
+            raise Exception(f"ImmuneMLParser: an error occurred during parsing. Missing key was {key_error.args[0]}. "
+                            f"For more details, refer to the log above and check the documentation.") from key_error
+        return symbol_table, path
+
+    @staticmethod
+    def check_keys(specs: dict):
+        for key in specs.keys():
+            assert re.match(r'^[A-Za-z0-9_]+$', key), \
+                f"ImmuneMLParser: the keys in the specification can contain only letters, numbers and underscore. Error with key: {key}"
+            if isinstance(specs[key], dict):
+                ImmuneMLParser.check_keys(specs[key])
 
     @staticmethod
     def parse(workflow_specification: dict, file_path, result_path):

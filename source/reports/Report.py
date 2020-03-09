@@ -7,6 +7,11 @@ class Report(metaclass=abc.ABCMeta):
     generate_report method
     """
 
+    @classmethod
+    @abc.abstractmethod
+    def build_object(cls, **kwargs):
+        pass
+
     @abc.abstractmethod
     def generate(self):
         pass

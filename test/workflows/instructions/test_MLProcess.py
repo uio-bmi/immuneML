@@ -30,7 +30,7 @@ class TestMLProcess(TestCase):
         label_config.add_label("l1", [0, 1])
         encoder_params = {
             "k": 3,
-            "model_type": ModelType.SEQUENCE,
+            "model_type": ModelType.SEQUENCE.name,
             "vector_size": 16
         }
         metrics = {MetricType.BALANCED_ACCURACY}

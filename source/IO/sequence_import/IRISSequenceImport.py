@@ -3,8 +3,10 @@ import operator
 
 import pandas as pd
 
+from source.data_model.receptor.ReceptorList import ReceptorList
 from source.data_model.receptor.TCABReceptor import TCABReceptor
 from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
+from source.data_model.receptor.receptor_sequence.ReceptorSequenceList import ReceptorSequenceList
 from source.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
 from source.environment.Constants import Constants
 
@@ -23,15 +25,16 @@ class IRISSequenceImport:
 
     @staticmethod
     def process_iris_row(row, paired):
-        sequences = []
-
         if paired:
+            sequences = ReceptorList()
+
             alpha_chain = IRISSequenceImport.process_iris_chain(row, "A")
             beta_chain = IRISSequenceImport.process_iris_chain(row, "B")
 
             # Only uses the first alpha/beta chain, dual chains are ignored
             sequences.extend([TCABReceptor(alpha=alpha_chain[0], beta=beta_chain[0], identifier=row["Clonotype ID"])])
         else:
+            sequences = ReceptorSequenceList()
             if row["Chain: TRA (1)"] is not None:
                 sequences.extend(IRISSequenceImport.process_iris_chain(row, "A"))
             if row["Chain: TRB (1)"] is not None:
@@ -41,7 +44,7 @@ class IRISSequenceImport:
 
     @staticmethod
     def process_iris_chain(row, chain):
-        sequences = []
+        sequences = ReceptorSequenceList()
 
         v_genes = set([gene.split(Constants.ALLELE_DELIMITER)[0].replace("TR{}".format(chain), "").replace(chain, "") for gene in
                        row["TR{} - V gene (1)".format(chain)].split(" | ")])

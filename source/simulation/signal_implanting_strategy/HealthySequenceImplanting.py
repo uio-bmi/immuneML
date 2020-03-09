@@ -3,19 +3,42 @@ import random
 
 from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.data_model.repertoire.SequenceRepertoire import SequenceRepertoire
-from source.simulation.signal_implanting_strategy.SignalImplantingStrategy import SignalImplantingStrategy
-from source.simulation.signal_implanting_strategy.sequence_implanting.SequenceImplantingStrategy import \
+from source.simulation.sequence_implanting import \
     SequenceImplantingStrategy
+from source.simulation.signal_implanting_strategy.SignalImplantingStrategy import SignalImplantingStrategy
 
 
 class HealthySequenceImplanting(SignalImplantingStrategy):
     """
-    Class for implanting a signal into a repertoire:
-        - always chooses only sequences in which no signal has been implanted to implant the new signal
-        - sequence_position_weights define the probability that the signal will be implanted at the
-            certain position in the receptor_sequence
-        - if sequence_position_weights are not set, then SequenceImplantingStrategy will make all of the positions
-            equally likely for each receptor_sequence
+    This class represents a :py:obj:`~source.simulation.signal_implanting_strategy.SignalImplantingStrategy.SignalImplantingStrategy`
+    where signals will be implanted in 'healthy sequences', meaning sequences in which no signal has been implanted
+    previously. This ensures that there is only one signal per receptor sequence.
+
+
+    Arguments:
+        sequence_position_weights (dict): A dictionary describing the relative weights for implanting a signal
+            at each given IMGT position in the receptor sequence. If sequence_position_weights are not set,
+            then SequenceImplantingStrategy will make all of the positions equally likely for each receptor sequence.
+
+
+    Specification:
+
+        motifs:
+            my_motif:
+                ...
+
+        signals:
+            my_signal:
+                motifs:
+                    - my_motif
+                    - ...
+                implanting: HealthySequence
+                sequence_position_weights:
+                    - 109: 1
+                    - 110: 2
+                    - 111: 5
+                    - 112: 1
+
     """
 
     def __init__(self, sequence_implanting_strategy: SequenceImplantingStrategy, sequence_position_weights: dict = None):

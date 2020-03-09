@@ -7,11 +7,33 @@ from source.simulation.signal_implanting_strategy.SignalImplantingStrategy impor
 
 class Signal:
     """
-    Class representing the signal that will be implanted;
-    Used in simulation setting;
-    It contains information about:
-        - motifs that can be instantiated and implanted into a receptor_sequence / repertoire
-        - implanting strategy: the way the motif instances will be implanted in sequences/repertoires
+    This class represents the signal that will be implanted during a Simulation.
+    A signal is represented by a list of motifs, and an implanting strategy.
+
+    An signal is associated with a metadata label, which is assigned to a receptor or repertoire.
+    For example antigen-specific/disease-associated (receptor) or diseased (repertoire).
+
+
+    Arguments:
+        motifs (list): A list of the motifs associated with this signal.
+        implanting_strategy (:py:obj:`~source.simulation.signal_implanting_strategy.SignalImplantingStrategy.SignalImplantingStrategy`):
+            The strategy that is used to decide in which sequences the motifs should be implanted, and how.
+            Currently, the only avaible implanting_strategy is :py:obj:`~source.simulation.signal_implanting_strategy.HealthySequenceImplanting.HealthySequenceImplanting`.
+
+
+    Specification:
+
+        motifs:
+            my_motif:
+                ...
+
+        signals:
+            my_signal:
+                motifs:
+                    - my_motif
+                    - ...
+                implanting: HealthySequence
+                ...
     """
     def __init__(self, identifier, motifs: list, implanting_strategy: SignalImplantingStrategy):
 

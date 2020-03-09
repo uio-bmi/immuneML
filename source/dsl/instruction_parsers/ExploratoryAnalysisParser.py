@@ -2,6 +2,7 @@ import copy
 
 from source.dsl.SymbolTable import SymbolTable
 from source.environment.LabelConfiguration import LabelConfiguration
+from source.util.ParameterValidator import ParameterValidator
 from source.workflows.instructions.exploratory_analysis.ExploratoryAnalysisProcess import ExploratoryAnalysisInstruction
 from source.workflows.instructions.exploratory_analysis.ExploratoryAnalysisUnit import ExploratoryAnalysisUnit
 
@@ -34,8 +35,10 @@ class ExploratoryAnalysisParser:
 
     """
 
-    def parse(self, instruction: dict, symbol_table: SymbolTable) -> ExploratoryAnalysisInstruction:
+    def parse(self, key: str, instruction: dict, symbol_table: SymbolTable) -> ExploratoryAnalysisInstruction:
         exp_analysis_units = {}
+
+        ParameterValidator.assert_keys(instruction, ["analyses", "type"], "ExploratoryAnalysisParser", "ExploratoryAnalysis")
         for key, analysis in instruction["analyses"].items():
 
             params = self._prepare_params(analysis, symbol_table)
@@ -45,6 +48,10 @@ class ExploratoryAnalysisParser:
         return process
 
     def _prepare_params(self, analysis: dict, symbol_table: SymbolTable) -> dict:
+
+        valid_keys = ["dataset", "report", "preprocessing_sequence", "labels", "encoding"]
+        ParameterValidator.assert_keys(list(analysis.keys()), valid_keys, "ExploratoryAnalysisParser", "analysis", False)
+
         params = {"dataset": symbol_table.get(analysis["dataset"]), "report": copy.deepcopy(symbol_table.get(analysis["report"]))}
 
         optional_params = self._prepare_optional_params(analysis, symbol_table)

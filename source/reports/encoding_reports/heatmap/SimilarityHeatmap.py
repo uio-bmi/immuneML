@@ -3,8 +3,8 @@ import json
 
 import numpy as np
 import pandas as pd
+from rpy2.robjects import pandas2ri
 from rpy2.robjects.packages import STAP
-from rpy2.robjects import r, pandas2ri
 
 from source.analysis.similarities.RepertoireSimilarityComputer import RepertoireSimilarityComputer
 from source.analysis.similarities.SimilarityMeasureType import SimilarityMeasureType
@@ -41,6 +41,10 @@ class SimilarityHeatmap(EncodingReport):
 
     FEATURE = "feature"
     EXAMPLE = "example"
+
+    @classmethod
+    def build_object(cls, **kwargs):
+        return SimilarityHeatmap(**kwargs)
 
     def __init__(self,
                  dataset: RepertoireDataset = None,

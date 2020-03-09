@@ -5,7 +5,6 @@ from unittest import TestCase
 import pandas as pd
 
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
-from source.dsl.report_params_parsers.ErrorBarMeaning import ErrorBarMeaning
 from source.encodings.word2vec.Word2VecEncoder import Word2VecEncoder
 from source.encodings.word2vec.model_creator.ModelType import ModelType
 from source.environment.EnvironmentSettings import EnvironmentSettings
@@ -20,6 +19,7 @@ from source.ml_methods.SimpleLogisticRegression import SimpleLogisticRegression
 from source.reports.ml_reports.BenchmarkHPSettings import BenchmarkHPSettings
 from source.util.PathBuilder import PathBuilder
 from source.util.RepertoireBuilder import RepertoireBuilder
+from source.visualization.ErrorBarMeaning import ErrorBarMeaning
 from source.workflows.instructions.HPOptimizationInstruction import HPOptimizationInstruction
 
 
@@ -52,7 +52,7 @@ class TestBenchmarkHPSettings(TestCase):
 
         dataset = RepertoireDataset(repertoires=repertoires, metadata_file=metadata,
                                     params={"l1": [1, 2], "l2": [0, 1]})
-        hp_settings = [HPSetting(Word2VecEncoder, {"k": 3, "model_type": ModelType.SEQUENCE, "vector_size": 4},
+        hp_settings = [HPSetting(Word2VecEncoder, {"k": 3, "model_type": ModelType.SEQUENCE.name, "vector_size": 4},
                                  SimpleLogisticRegression(),
                                  {"model_selection_cv": False, "model_selection_n_folds": -1},
                                  [])]
@@ -73,7 +73,6 @@ class TestBenchmarkHPSettings(TestCase):
         PathBuilder.build(path)
 
         report = BenchmarkHPSettings(errorbar_meaning=ErrorBarMeaning.STANDARD_ERROR)
-
 
         report.result_path = path
         report.hp_optimization_state = self._create_state_object(path + "input_data/")

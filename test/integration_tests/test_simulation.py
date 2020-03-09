@@ -20,28 +20,35 @@ class TestSimulation(TestCase):
             "definitions": {
                 "datasets": {
                     "d1": {
-                        "metadata": path + "metadata.csv",
                         "format": 'Pickle',
                         "path": path + "dataset.pkl",
                         "params": {}
                     }
                 },
-                "simulation": {
-                    "motifs": {
-                        "motif1": {
-                            "seed": "EEE",
-                            "instantiation": "GappedKmer",
-                            "alphabet_weights": None,
-                            "position_weights": None
-                        }
+                "motifs": {
+                    "motif1": {
+                        "seed": "EEE",
+                        "instantiation": {
+                            "GappedKmer": {
+                                "max_gap": 1,
+                                "alphabet_weights": None,
+                                "position_weights": None
+                            }
+                        },
                     },
-                    "signals": {
-                        "signal1": {
-                            "motifs": ["motif1"],
-                            "implanting": "HealthySequences"
-                        }
-                    },
-                    "implanting": {
+                    "motif2": {
+                        "seed": "CCC",
+                        "instantiation": {"GappedKmer"}
+                    }
+                },
+                "signals": {
+                    "signal1": {
+                        "motifs": ["motif1"],
+                        "implanting": "HealthySequence"
+                    }
+                },
+                "simulations": {
+                    "sim1": {
                         "var1": {
                             "signals": ["signal1"],
                             "dataset_implanting_rate": 0.5,
@@ -54,7 +61,8 @@ class TestSimulation(TestCase):
                 "inst1": {
                     "type": "Simulation",
                     "dataset": "d1",
-                    "batch_size": 5
+                    "batch_size": 5,
+                    "simulation": "sim1"
                 }
             }
         }

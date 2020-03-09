@@ -2,7 +2,7 @@ from unittest import TestCase
 
 from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.simulation.implants.MotifInstance import MotifInstance
-from source.simulation.signal_implanting_strategy.sequence_implanting.GappedMotifImplanting import GappedMotifImplanting
+from source.simulation.sequence_implanting.GappedMotifImplanting import GappedMotifImplanting
 
 
 class TestGappedMotifImplanting(TestCase):

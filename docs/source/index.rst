@@ -10,15 +10,6 @@ Welcome to ImmuneML's documentation!
    :maxdepth: 2
    :caption: Contents:
 
-   quickstart
-   datamodel
-   input_output
-   simulation_model
-   simulation_strategies
-   encodings
-   ml_models
-   how_to_add_report
-   DSL
    modules
 
 

@@ -51,7 +51,7 @@ class TestFeatureHeatmap(TestCase):
 
         dataset = RepertoireDataset(encoded_data=EncodedData(**encoded_data))
 
-        FeatureHeatmap(dataset=dataset,
+        FeatureHeatmap.build_object(dataset=dataset,
                        scale_features=False,
                        one_hot_encode_example_annotations=["disease"],
                        example_annotations=["age", "week"],

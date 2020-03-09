@@ -58,9 +58,9 @@ class TestSequenceClassification(TestCase):
         os.environ["cache_type"] = "test"
 
         hp_setting = HPSetting(encoder=KmerFrequencyEncoder, encoder_params={
-            "normalization_type": NormalizationType.RELATIVE_FREQUENCY,
-            "reads": ReadsType.UNIQUE,
-            "sequence_encoding": SequenceEncodingType.CONTINUOUS_KMER,
+            "normalization_type": NormalizationType.RELATIVE_FREQUENCY.name,
+            "reads": ReadsType.UNIQUE.name,
+            "sequence_encoding": SequenceEncodingType.CONTINUOUS_KMER.name,
             "k": 3
         }, ml_method=SimpleLogisticRegression(), ml_params={"model_selection_cv": False, "model_selection_n_folds": -1},
                                preproc_sequence=[])

@@ -107,9 +107,9 @@ class TestEmerson2018NatGenEncoding(TestCase):
         }
 
         kmer_freq_params = {
-            "normalization_type": NormalizationType.RELATIVE_FREQUENCY,
-            "reads": ReadsType.UNIQUE,
-            "sequence_encoding": SequenceEncodingType.IDENTITY,
+            "normalization_type": NormalizationType.RELATIVE_FREQUENCY.name,
+            "reads": ReadsType.UNIQUE.name,
+            "sequence_encoding": SequenceEncodingType.IDENTITY.name,
             "metadata_fields_to_include": []
         }
 
@@ -123,10 +123,12 @@ class TestEmerson2018NatGenEncoding(TestCase):
             )
 
         encoder = PipelineEncoder.create_encoder(dataset, {
-                    "initial_encoder": KmerFrequencyEncoder,
+                    "initial_encoder": KmerFrequencyEncoder.__name__[:-7],
                     "initial_encoder_params": kmer_freq_params,
-                    "steps": [FisherExactFeatureAnnotation(**fisher_exact_params, filename="test.pickle", result_path=path),
-                              PresentTotalFeatureTransformation(**transform_params, filename="test.pickle", result_path=path)]
+                    "steps": [{"s1": {"type": FisherExactFeatureAnnotation.__name__,
+                                      "params": {**fisher_exact_params, **{"filename": "test.pickle", "result_path": path}}}},
+                              {"s2": {"type": PresentTotalFeatureTransformation.__name__,
+                                      "params": {**transform_params, **{"filename": "test.pickle", "result_path": path}}}}]
                 })
 
         d1 = encoder.encode(
@@ -140,10 +142,12 @@ class TestEmerson2018NatGenEncoding(TestCase):
         dataset2 = RepertoireDataset(repertoires=[repertoires[num] for num in range(1, 4)])
 
         encoder = PipelineEncoder.create_encoder(dataset, {
-                    "initial_encoder": KmerFrequencyEncoder,
+                    "initial_encoder": KmerFrequencyEncoder.__name__[:-7],
                     "initial_encoder_params": kmer_freq_params,
-                    "steps": [FisherExactFeatureAnnotation(**fisher_exact_params, filename="test.pickle", result_path=path),
-                              PresentTotalFeatureTransformation(**transform_params, filename="test.pickle", result_path=path)]
+                    "steps": [{"s1": {"type": FisherExactFeatureAnnotation.__name__,
+                                      "params": {**fisher_exact_params, **{"filename": "test.pickle", "result_path": path}}}},
+                              {"s2": {"type": PresentTotalFeatureTransformation.__name__,
+                                      "params": {**transform_params, **{"filename": "test.pickle", "result_path": path}}}}]
                 })
 
         d2 = encoder.encode(

@@ -42,3 +42,11 @@ class SymbolTable:
     def get_by_type(self, symbol_type: SymbolType) -> list:
         items = [self._items[key] for key in self._items.keys() if self._items[key].symbol_type == symbol_type]
         return items
+
+    def get_keys_by_type(self, symbol_type: SymbolType) -> list:
+        return [key for key in self._items.keys() if self._items[key].symbol_type == symbol_type]
+
+    def __str__(self):
+        return f"SymbolTable()"
+
+    __repr__ = __str__

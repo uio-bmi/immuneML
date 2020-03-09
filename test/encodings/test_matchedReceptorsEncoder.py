@@ -2,10 +2,7 @@ import shutil
 from unittest import TestCase
 
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
-from source.data_model.receptor.TCABReceptor import TCABReceptor
 from source.data_model.receptor.receptor_sequence.Chain import Chain
-from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
-from source.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
 from source.encodings.EncoderParams import EncoderParams
 from source.encodings.reference_encoding.MatchedReceptorsRepertoireEncoder import MatchedReceptorsRepertoireEncoder
 from source.environment.EnvironmentSettings import EnvironmentSettings
@@ -30,7 +27,7 @@ class TestMatchedReceptorsEncoder(TestCase):
                                                                  ["SSSS", "TTTT"],
                                                                  ["AAAA", "CCCC", "SSSS", "TTTT"]],
                                                       path=path, labels=labels,
-                                                      seq_metadata=[[{**metadata_alpha, "count":10}],
+                                                      seq_metadata=[[{**metadata_alpha, "count": 10}],
                                                                     [{**metadata_beta, "count": 10}],
                                                                     [{**metadata_alpha, "count": 5}, {**metadata_alpha, "count": 5}],
                                                                     [{**metadata_beta, "count": 5}, {**metadata_beta, "count": 5}],
@@ -44,15 +41,20 @@ class TestMatchedReceptorsEncoder(TestCase):
         label_config.add_label("donor", labels["donor"])
         label_config.add_label("label", labels["label"])
 
-        reference_receptors = [TCABReceptor(alpha=ReceptorSequence("AAAA", metadata=SequenceMetadata(**metadata_alpha)),
-                                            beta=ReceptorSequence("SSSS", metadata=SequenceMetadata(**metadata_beta)),
-                                            identifier=str(100)),
-                               TCABReceptor(alpha=ReceptorSequence("CCCC", metadata=SequenceMetadata(**metadata_alpha)),
-                                            beta=ReceptorSequence("TTTT", metadata=SequenceMetadata(**metadata_beta)),
-                                            identifier=str(200))]
+        file_content = """complex.id	Gene	CDR3	V	J	Species	MHC A	MHC B	MHC class	Epitope	Epitope gene	Epitope species	Reference	Method	Meta	CDR3fix	Score
+100a	TRA	AAAA	TRAv1	TRAj1	HomoSapiens	HLA-A*11:01	B2M	MHCI	AVFDRKSDAK	EBNA4	EBV	https://www.10xgenomics.com/resources/application-notes/a-new-way-of-exploring-immunity-linking-highly-multiplexed-antigen-recognition-to-immune-repertoire-and-phenotype/#	{"frequency": "1/11684", "identification": "dextramer-sort", "sequencing": "rna-seq", "singlecell": "yes", "verification": ""}	{"cell.subset": "", "clone.id": "", "donor.MHC": "", "donor.MHC.method": "", "epitope.id": "", "replica.id": "", "samples.found": 1, "structure.id": "", "studies.found": 1, "study.id": "", "subject.cohort": "", "subject.id": "1", "tissue": ""}	{"cdr3": "CASSPPRVYSNGAGLAGVGWRNEQFF", "cdr3_old": "CASSPPRVYSNGAGLAGVGWRNEQFF", "fixNeeded": false, "good": true, "jCanonical": true, "jFixType": "NoFixNeeded", "jId": "TRBJ2-1*01", "jStart": 21, "vCanonical": true, "vEnd": 4, "vFixType": "NoFixNeeded", "vId": "TRBV5-4*01"}	0
+100a	TRB	SSSS	TRBv1	TRBj1	HomoSapiens	HLA-A*03:01	B2M	MHCI	KLGGALQAK	IE1	CMV	https://www.10xgenomics.com/resources/application-notes/a-new-way-of-exploring-immunity-linking-highly-multiplexed-antigen-recognition-to-immune-repertoire-and-phenotype/#	{"frequency": "1/25584", "identification": "dextramer-sort", "sequencing": "rna-seq", "singlecell": "yes", "verification": ""}	{"cell.subset": "", "clone.id": "", "donor.MHC": "", "donor.MHC.method": "", "epitope.id": "", "replica.id": "", "samples.found": 1, "structure.id": "", "studies.found": 1, "study.id": "", "subject.cohort": "", "subject.id": "3", "tissue": ""}	{"cdr3": "CASSWTWDAATLWGQGALGGANVLTF", "cdr3_old": "CASSWTWDAATLWGQGALGGANVLTF", "fixNeeded": false, "good": true, "jCanonical": true, "jFixType": "NoFixNeeded", "jId": "TRBJ2-6*01", "jStart": 19, "vCanonical": true, "vEnd": 4, "vFixType": "NoFixNeeded", "vId": "TRBV5-5*01"}	0
+200a	TRA	CCCC	TRAv1	TRAj1	HomoSapiens	HLA-A*11:01	B2M	MHCI	AVFDRKSDAK	EBNA4	EBV	https://www.10xgenomics.com/resources/application-notes/a-new-way-of-exploring-immunity-linking-highly-multiplexed-antigen-recognition-to-immune-repertoire-and-phenotype/#	{"frequency": "1/11684", "identification": "dextramer-sort", "sequencing": "rna-seq", "singlecell": "yes", "verification": ""}	{"cell.subset": "", "clone.id": "", "donor.MHC": "", "donor.MHC.method": "", "epitope.id": "", "replica.id": "", "samples.found": 1, "structure.id": "", "studies.found": 1, "study.id": "", "subject.cohort": "", "subject.id": "1", "tissue": ""}	{"cdr3": "CAAIYESRGSTLGRLYF", "cdr3_old": "CAAIYESRGSTLGRLYF", "fixNeeded": false, "good": true, "jCanonical": true, "jFixType": "NoFixNeeded", "jId": "TRAJ18*01", "jStart": 7, "oldVEnd": -1, "oldVFixType": "FailedBadSegment", "oldVId": null, "vCanonical": true, "vEnd": 3, "vFixType": "ChangeSegment", "vId": "TRAV13-1*01"}	0
+200a	TRB	TTTT	TRBv1	TRBj1	HomoSapiens	HLA-A*03:01	B2M	MHCI	KLGGALQAK	IE1	CMV	https://www.10xgenomics.com/resources/application-notes/a-new-way-of-exploring-immunity-linking-highly-multiplexed-antigen-recognition-to-immune-repertoire-and-phenotype/#	{"frequency": "1/25584", "identification": "dextramer-sort", "sequencing": "rna-seq", "singlecell": "yes", "verification": ""}	{"cell.subset": "", "clone.id": "", "donor.MHC": "", "donor.MHC.method": "", "epitope.id": "", "replica.id": "", "samples.found": 1, "structure.id": "", "studies.found": 1, "study.id": "", "subject.cohort": "", "subject.id": "3", "tissue": ""}	{"cdr3": "CALRLNNQGGKLIF", "cdr3_old": "CALRLNNQGGKLIF", "fixNeeded": false, "good": true, "jCanonical": true, "jFixType": "NoFixNeeded", "jId": "TRAJ23*01", "jStart": 6, "vCanonical": true, "vEnd": 3, "vFixType": "NoFixNeeded", "vId": "TRAV9-2*01"}	0
+        """
+
+        with open(path + "refs.tsv", "w") as file:
+            file.writelines(file_content)
+
+        reference_receptors = {"path": path + "refs.tsv", "format": "VDJdb"}
 
         encoder = MatchedReceptorsRepertoireEncoder.create_encoder(dataset, {
-            "reference_sequences": reference_receptors,
+            "reference_receptors": reference_receptors,
             "one_file_per_donor": True
         })
 
@@ -63,21 +65,21 @@ class TestMatchedReceptorsEncoder(TestCase):
         ))
 
         # General tests: does the tool run and give the correct output?
-        expected_outcome = [[10, 0, 0, 0],[0, 10, 0, 0],[5, 0, 5, 0], [0, 5, 0, 5], [1, 1, 2, 2]]
+        expected_outcome = [[10, 0, 0, 0], [0, 10, 0, 0], [5, 0, 5, 0], [0, 5, 0, 5], [1, 1, 2, 2]]
         for index, row in enumerate(expected_outcome):
             self.assertListEqual(list(encoded.encoded_data.examples[index]), expected_outcome[index])
 
         self.assertDictEqual(encoded.encoded_data.labels, labels)
-        self.assertListEqual(encoded.encoded_data.feature_names, ["100.alpha", "100.beta", "200.alpha", "200.beta"])
+        self.assertListEqual(encoded.encoded_data.feature_names, ["100a.alpha", "100a.beta", "200a.alpha", "200a.beta"])
 
-        self.assertListEqual(list(encoded.encoded_data.feature_annotations.id), ['100', '100', '200', '200'])
+        self.assertListEqual(list(encoded.encoded_data.feature_annotations.id), ['100a', '100a', '200a', '200a'])
         self.assertListEqual(list(encoded.encoded_data.feature_annotations.chain), ["alpha", "beta", "alpha", "beta"])
         self.assertListEqual(list(encoded.encoded_data.feature_annotations.sequence), ["AAAA", "SSSS", "CCCC", "TTTT"])
         self.assertListEqual(list(encoded.encoded_data.feature_annotations.v_gene), ["v1" for i in range(4)])
         self.assertListEqual(list(encoded.encoded_data.feature_annotations.j_gene), ["j1" for i in range(4)])
 
         encoder = MatchedReceptorsRepertoireEncoder.create_encoder(dataset, {
-            "reference_sequences": reference_receptors,
+            "reference_receptors": reference_receptors,
             "one_file_per_donor": False
         })
 
@@ -102,7 +104,7 @@ class TestMatchedReceptorsEncoder(TestCase):
 
         # If one_file_per_donor is True, the key "donor" does not need to be specified
         encoder = MatchedReceptorsRepertoireEncoder.create_encoder(dataset, {
-            "reference_sequences": reference_receptors,
+            "reference_receptors": reference_receptors,
             "one_file_per_donor": True
         })
 

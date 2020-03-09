@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 
 from source.analysis.criteria_matches.CriteriaMatcher import CriteriaMatcher
+from source.analysis.criteria_matches.CriteriaTypeInstantiator import CriteriaTypeInstantiator
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.preprocessing.filters.Filter import Filter
 
@@ -29,7 +30,12 @@ class MetadataFilter(Filter):
     """
 
     def __init__(self, params: dict):
+
+        assert "criteria" in params.keys(), \
+            "Criteria for which repertoires to keep must be specified"
+
         self.params = params
+        self.params["criteria"] = CriteriaTypeInstantiator.instantiate(params["criteria"])
 
     def process_dataset(self, dataset: RepertoireDataset, result_path: str):
         return MetadataFilter.process(dataset, self.params)

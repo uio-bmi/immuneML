@@ -1,28 +1,80 @@
-import pandas as pd
 import warnings
+
+import pandas as pd
 from rpy2.robjects import pandas2ri
 from rpy2.robjects.packages import STAP
 
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.reports.ml_reports.MLReport import MLReport
+from source.util.ParameterValidator import ParameterValidator
 from source.util.PathBuilder import PathBuilder
-from source.dsl.report_params_parsers.ErrorBarMeaning import ErrorBarMeaning
-
+from source.visualization.ErrorBarMeaning import ErrorBarMeaning
 
 
 class BenchmarkHPSettings(MLReport):
     """
-    Creates a report that compares the performance of all combinations defined in 'settings',
-    taking into account the encoding and ML method (not preprocessing).
+    Report for HyperParameterOptimization: plots the performance for each of the setting combinations
+    as defined under 'settings' in the assessment (outer validation) loop. The performances are grouped by used
+    encoding and ML method (not preprocessing). When multiple data splits are used, the average performance over
+    the data splits is shown with an error bar.
+
+    Attributes:
+        errorbar_meaning (:py:obj:`~source.visualization.ErrorBarMeaning.ErrorBarMeaning`): The value that
+            the error bar should represent. For options see :py:obj:`~source.visualization.ErrorBarMeaning.ErrorBarMeaning`.
+
+
+    Specification:
+
+        definitions:
+            reports:
+                my_hp_report:
+                    BenchmarkHPSettings:
+                        errorbar_meaning: STANDARD_ERROR
+            ...
+            encodings:
+                enc_1:
+                    ...
+                enc_2:
+                    ...
+            ml_methods:
+                ml_1:
+                    ...
+
+        instructions:
+            instruction_1:
+                type: HPOptimization
+                settings:
+                    - encoding: enc_1
+                      ml_method: ml_1
+                    - encoding: enc_2
+                      ml_method: ml_1
+                      ...
+                assessment:
+                    reports:
+                        hyperparameter:
+                            - my_hp_report
+                    ...
+                ...
     """
 
     ERRORBAR_CONVERSION = {ErrorBarMeaning.STANDARD_ERROR: "se",
                            ErrorBarMeaning.STANDARD_DEVIATION: "sd",
                            ErrorBarMeaning.CONFIDENCE_INTERVAL: "ci"}
 
-    def __init__(self, errorbar_meaning):
-        self.errorbar_meaning = errorbar_meaning
+    @classmethod
+    def build_object(cls, **kwargs):
+        ParameterValidator.assert_in_valid_list(kwargs["errorbar_meaning"], [item.name for item in ErrorBarMeaning], "BenchmarkHPSettings",
+                                                "errorbar_meaning")
 
+        errorbar_meaning = ErrorBarMeaning[kwargs["errorbar_meaning"].upper()]
+        return BenchmarkHPSettings(errorbar_meaning)
+
+    def __init__(self, errorbar_meaning: ErrorBarMeaning):
+        super(BenchmarkHPSettings, self).__init__()
+
+        self.errorbar_meaning = errorbar_meaning
+        self.hp_optimization_state = None
+        self.result_path = None
 
     def generate(self):
         PathBuilder.build(self.result_path)
@@ -62,19 +114,19 @@ class BenchmarkHPSettings(MLReport):
         errorbar_meaning_abbr = BenchmarkHPSettings.ERRORBAR_CONVERSION[self.errorbar_meaning]
 
         plot.plot_barplot(data=plotting_data, x="ml_method", color="ml_method", fill_lab="ML method",
-                          y="performance", ylab="Performance (balanced accuracy)", xlab="Implanted signals", errorbar_meaning=errorbar_meaning_abbr,
-                          facet_rows="encoding", facet_columns="label", facet_type="grid",
+                          y="performance", ylab="Performance (balanced accuracy)", xlab="Implanted signals",
+                          errorbar_meaning=errorbar_meaning_abbr, facet_rows="encoding", facet_columns="label", facet_type="grid",
                           facet_scales="free_y", facet_switch="x", nrow="NULL", height=6,
                           width=8, result_path=self.result_path, result_name="benchmark_result", ml_benchmark=True)
 
     def check_prerequisites(self):
         run_report = True
 
-        if not hasattr(self, "hp_optimization_state"):
+        if not hasattr(self, "hp_optimization_state") or self.hp_optimization_state is None:
             warnings.warn("BenchmarkSettings can only be executed as a hyperparameter report. BenchmarkSettings report will not be created.")
             run_report = False
 
-        if not hasattr(self, "result_path"):
+        if not hasattr(self, "result_path") or self.result_path is None:
             warnings.warn("BenchmarkSettings requires an output 'path' to be set. BenchmarkSettings report will not be created.")
             run_report = False
 

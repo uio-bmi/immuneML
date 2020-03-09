@@ -2,6 +2,7 @@ import copy
 from multiprocessing.pool import Pool
 
 import pandas as pd
+
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.receptor.receptor_sequence.Chain import Chain
 from source.data_model.repertoire.SequenceRepertoire import SequenceRepertoire
@@ -38,7 +39,6 @@ class DuplicateSequenceFilter(Filter):
 
         assert self.sequence_of_interest in SequenceRepertoire.FIELDS
         assert self.sequence_to_ignore in SequenceRepertoire.FIELDS
-
 
     @staticmethod
     def process(dataset: RepertoireDataset, params: dict) -> RepertoireDataset:

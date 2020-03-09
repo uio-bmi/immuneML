@@ -43,8 +43,7 @@ class TestExploratoryAnalysisDesignMatrixExporter(TestCase):
                 },
                 "encodings": {
                     "kmer_freq": {
-                        "type": "KmerFrequency",
-                        "params": {
+                        "KmerFrequency": {
                             "k": 3,
                             "sequence_encoding": "continuous_kmer",
                             "normalization_type": "relative_frequency",
@@ -54,8 +53,7 @@ class TestExploratoryAnalysisDesignMatrixExporter(TestCase):
                 },
                 "ml_methods": {
                     "logistic_regression": {
-                        "type": "SimpleLogisticRegression",
-                        "params": {
+                        "SimpleLogisticRegression": {
                             "C": 100,
                             "penalty": "l1"
                         }
@@ -86,7 +84,8 @@ class TestExploratoryAnalysisDesignMatrixExporter(TestCase):
                     "dataset": "d1",
                     "strategy": "GridSearch",
                     "metrics": ["accuracy"],
-                    "batch_size": 4
+                    "batch_size": 4,
+                    "reports": None
                 }
             }
         }

@@ -16,33 +16,63 @@ from source.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType impo
 from source.encodings.preprocessing.FeatureScaler import FeatureScaler
 from source.environment.Constants import Constants
 from source.util.FilenameHandler import FilenameHandler
+from source.util.ParameterValidator import ParameterValidator
 from source.util.PathBuilder import PathBuilder
 from source.util.ReflectionHandler import ReflectionHandler
 
 
 class KmerFrequencyEncoder(DatasetEncoder):
     """
-    Encodes the dataset based on frequency of each unique feature that results from the union of
-    features across sequences in the dataset, based on one of the strategies of class
-    SequenceEncodingStrategy.
+    The KmerFrequencyEncoder class encodes a repertoire by frequencies of k-mers in all of the sequences of that
+    repertoire. A k-mer is a sequence of letters of length k into which an immune receptor sequence can be decomposed.
+    K-mers can be defined in different ways, as determined by the sequence_encoding.
 
-    Configuration parameters are an instance of EncoderParams class:
-    {
-        "model": {
-            "normalization_type": NormalizationType.RELATIVE_FREQUENCY,         # relative frequencies of k-mers or L2
-            "reads": ReadsType.UNIQUE,                                          # unique or all
-            "sequence_encoding": SequenceEncodingType.CONTINUOUS_KMER,          # how to build k-mers
-            "k": 3,                                                             # k-mer length
-            ...
-        },
-        "batch_size": 1,
-        "learn_model": True, # true for training set and false for test set
-        "result_path": "../",
-        "label_configuration": LabelConfiguration(), # labels should be set before encodings is invoked
-    }
 
-    Parallelization is supported based on the value in the batch_size parameter. The same number of processes will be
-    created as the batch_size parameter.
+    Attributes:
+        sequence_encoding (:py:mod:`source.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType`):
+            The type of k-mers that are used. The simplest sequence_encoding is :py:mod:`source.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType.CONTINUOUS_KMER`,
+            which simply uses contiguous subsequences of length k to represent the k-mers.
+            When gapped k-mers are used (:py:mod:`source.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType.GAPPED_KMER`,
+            :py:mod:`source.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType.GAPPED_KMER`), the k-mers may contain
+            gaps with a size between min_gap and max_gap, and the k-mer length is defined as a combination of k_left and k_right.
+            When IMGT k-mers are used (:py:mod:`source.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType.IMGT_CONTINUOUS_KMER`,
+            :py:mod:`source.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType.IMGT_GAPPED_KMER`), IMGT positional information is
+            taken into account (i.e. the same sequence in a different position is considered to be a different k-mer).
+            When the identity representation is used (:py:mod:`source.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType.IDENTITY`),
+            the k-mers just correspond to the original sequences.
+        normalization_type (:py:mod:`source.analysis.data_manipulation.NormalizationType`): The way in which the
+            k-mer frequencies should be normalized.
+        reads (:py:mod:`source.encodings.kmer_frequency.ReadsType`): Reads type signify whether the counts of the sequences
+            in the repertoire will be taken into account. If :py:mod:`source.encodings.kmer_frequency.ReadsType.UNIQUE`,
+            only unique sequences (clonotypes) are encoded, and if :py:mod:`source.encodings.kmer_frequency.ReadsType.ALL`,
+            the sequence 'count' value is taken into account when determining the k-mer frequency.
+        k (int): Length of the k-mer (number of amino acids) when ungapped k-mers are used.
+        k_left (int): When gapped k-mers are used, k_left indicates the length of the k-mer left of the gap.
+        k_right (int): Same as k_left, but k_right determines the length of the k-mer right of the gap
+        min_gap (int): Minimum gap size when gapped k-mers are used.
+        max_gap: (int): Maximum gap size when gapped k-mers are used.
+        metadata_fields_to_include (list): #todo check if it is still necessary
+
+    Specification:
+
+        encodings:
+            my_continuous_kmer:
+                KmerFrequency:
+                    normalization_type: RELATIVE_FREQUENCY
+                    reads: UNIQUE
+                    sequence_encoding: CONTINUOUS_KMER
+                    k: 3
+
+            my_gapped_kmer:
+                KmerFrequency:
+                    normalization_type: RELATIVE_FREQUENCY
+                    reads: UNIQUE
+                    sequence_encoding: GAPPED_KMER
+                    k_left: 2
+                    k_right: 2
+                    min_gap: 1
+                    max_gap: 3
+
     """
 
     STEP_ENCODED = "encoded"
@@ -68,10 +98,32 @@ class KmerFrequencyEncoder(DatasetEncoder):
         self.metadata_fields_to_include = metadata_fields_to_include if metadata_fields_to_include is not None else []
 
     @staticmethod
+    def _prepare_parameters(normalization_type: str, reads: str, sequence_encoding: str, k: int = 0, k_left: int = 0,
+                          k_right: int = 0, min_gap: int = 0, max_gap: int = 0, metadata_fields_to_include: list = None):
+
+        location = KmerFrequencyEncoder.__name__
+
+        ParameterValidator.assert_in_valid_list(normalization_type.upper(), [item.name for item in NormalizationType], location, "normalization_type")
+        ParameterValidator.assert_in_valid_list(reads.upper(), [item.name for item in ReadsType], location, "reads")
+        ParameterValidator.assert_in_valid_list(sequence_encoding.upper(), [item.name for item in SequenceEncodingType], location, "sequence_encoding")
+
+        vars_to_check = {"k": k, "k_left": k_left, "k_right": k_right, "min_gap": min_gap, "max_gap": max_gap}
+        for param in vars_to_check.keys():
+            ParameterValidator.assert_type_and_value(vars_to_check[param], int, location, param, min_inclusive=0)
+
+        return {
+            "normalization_type": NormalizationType[normalization_type.upper()],
+            "reads": ReadsType[reads.upper()],
+            "sequence_encoding": SequenceEncodingType[sequence_encoding.upper()],
+            **vars_to_check
+        }
+
+    @staticmethod
     def create_encoder(dataset=None, params: dict = None):
         try:
+            prepared_params = KmerFrequencyEncoder._prepare_parameters(**params)
             encoder = ReflectionHandler.get_class_by_name(KmerFrequencyEncoder.dataset_mapping[dataset.__class__.__name__],
-                                                          "kmer_frequency/")(**params if params is not None else {})
+                                                          "kmer_frequency/")(**prepared_params)
         except ValueError:
             raise ValueError("{} is not defined for dataset of type {}.".format(KmerFrequencyEncoder.__name__, dataset.__class__.__name__))
         return encoder

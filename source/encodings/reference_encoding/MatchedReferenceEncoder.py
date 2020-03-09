@@ -1,10 +1,13 @@
 import abc
+import os
 
 from source.IO.dataset_export.PickleExporter import PickleExporter
 from source.caching.CacheHandler import CacheHandler
+from source.data_model.receptor.receptor_sequence.ReceptorSequenceList import ReceptorSequenceList
 from source.encodings.DatasetEncoder import DatasetEncoder
 from source.encodings.EncoderParams import EncoderParams
 from source.encodings.reference_encoding.SequenceMatchingSummaryType import SequenceMatchingSummaryType
+from source.util.ParameterValidator import ParameterValidator
 from source.util.ReflectionHandler import ReflectionHandler
 
 
@@ -14,16 +17,41 @@ class MatchedReferenceEncoder(DatasetEncoder):
         "RepertoireDataset": "ReferenceRepertoireEncoder"
     }
 
-    def __init__(self, max_edit_distance: int, summary: SequenceMatchingSummaryType, reference_sequences: list):
+    def __init__(self, max_edit_distance: int, summary: SequenceMatchingSummaryType, reference_sequences: ReceptorSequenceList):
         self.max_edit_distance = max_edit_distance
         self.summary = summary
         self.reference_sequences = reference_sequences
 
     @staticmethod
+    def _prepare_parameters(max_edit_distance: int, summary: str, reference_sequences: dict):
+        location = "MatchedReferenceEncoder"
+
+        ParameterValidator.assert_type_and_value(max_edit_distance, int, location, "max_edit_distance", min_inclusive=0)
+        ParameterValidator.assert_keys(list(reference_sequences.keys()), ["format", "path"], location, "reference_sequences")
+        ParameterValidator.assert_in_valid_list(summary.upper(), [item.name for item in SequenceMatchingSummaryType], location, "summary")
+
+        valid_formats = ReflectionHandler.discover_classes_by_partial_name("SequenceImport", "sequence_import/")
+        ParameterValidator.assert_in_valid_list(f"{reference_sequences['format']}SequenceImport", valid_formats, location,
+                                                "format in reference_sequences")
+
+        assert os.path.isfile(reference_sequences["path"]), f"{location}: the file {reference_sequences['path']} does not exist. " \
+                                                            f"Specify the correct path under reference_sequences."
+
+        sequences = ReflectionHandler.get_class_by_name("{}SequenceImport".format(reference_sequences["format"]))\
+            .import_items(reference_sequences["path"], paired=False)
+
+        return {
+            "max_edit_distance": max_edit_distance,
+            "summary": SequenceMatchingSummaryType[summary.upper()],
+            "reference_sequences": sequences
+        }
+
+    @staticmethod
     def create_encoder(dataset=None, params: dict = None):
         try:
+            prepared_parameters = MatchedReferenceEncoder._prepare_parameters(**params)
             encoder = ReflectionHandler.get_class_by_name(MatchedReferenceEncoder.dataset_mapping[dataset.__class__.__name__],
-                                                          "reference_encoding/")(**params if params is not None else {})
+                                                          "reference_encoding/")(**prepared_parameters)
         except ValueError:
             raise ValueError("{} is not defined for dataset of type {}.".format(MatchedReferenceEncoder.__name__,
                                                                                 dataset.__class__.__name__))

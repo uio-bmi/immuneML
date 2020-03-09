@@ -1,0 +1,87 @@
+from source.dsl.SymbolTable import SymbolTable
+from source.dsl.SymbolType import SymbolType
+from source.logging.Logger import log
+from source.simulation.Implanting import Implanting
+from source.simulation.Simulation import Simulation
+from source.util.ParameterValidator import ParameterValidator
+
+
+class SimulationParser:
+    """
+    Implanting should be defined in the following manner:
+
+    .. highlight:: yaml
+    .. code-block:: yaml
+
+        motifs:
+            m1:
+                seed: AAC # "/" character denotes the gap in the seed if present (e.g. AA/C)
+                instantiation: GappedKmer
+                # probability that when hamming distance is allowed a letter in the seed will be replaced by
+                # other alphabet letters - alphabet_weights
+                alphabet_weights:
+                    A: 0.2
+                    C: 0.2
+                    D: 0.4
+                    E: 0.2
+                # Relative probabilities of choosing each position in the seed for hamming distance modification.
+                # The probabilities will be scaled to sum to one - position_weights
+                position_weights:
+                    0: 1
+                    1: 0
+                    2: 0
+                params:
+                    hamming_distance_probabilities:
+                        0: 0.5 # Hamming distance of 0 (no change) with probability 0.5
+                        1: 0.5 # Hamming distance of 1 (one letter change) with probability 0.5
+                    min_gap: 0
+                    max_gap: 1
+        signals:
+            s1:
+                motifs: # list of all motifs for signal which will be uniformly sampled to get a motif instance for implanting
+                    - m1
+                sequence_position_weights: # likelihood of implanting at IMGT position of receptor sequence
+                    107: 0.5
+                implanting: HealthySequences # choose only sequences with no other signals for to implant one of the motifs
+        simulations: # this will be parsed here
+            sim1: # one Simulation object consists of a dict of Implanting objects
+                i1:
+                    dataset_implanting_rate: 0.5 # percentage of repertoire where the signals will be implanted
+                    repertoire_implanting_rate: 0.01 # percentage of sequences within repertoire where the signals will be implanted
+                    signals:
+                        - s1
+
+    """
+
+    @staticmethod
+    def parse_simulations(simulations: dict, symbol_table: SymbolTable):
+        for key, simulation in simulations.items():
+            symbol_table = SimulationParser._parse_simulation(key, simulation, symbol_table)
+
+        return symbol_table, simulations
+
+    @staticmethod
+    @log
+    def _parse_simulation(key: str, simulation: dict, symbol_table: SymbolTable) -> SymbolTable:
+
+        location = "SimulationParser"
+        valid_implanting_keys = ["dataset_implanting_rate", "repertoire_implanting_rate", "signals"]
+        implantings = []
+
+        for impl_key, implanting in simulation.items():
+
+            ParameterValidator.assert_keys(implanting.keys(), valid_implanting_keys, location, impl_key)
+            ParameterValidator.assert_keys(implanting["signals"], symbol_table.get_keys_by_type(SymbolType.SIGNAL), location, impl_key, False)
+
+            implantings.append(Implanting(
+                dataset_implanting_rate=implanting["dataset_implanting_rate"],
+                repertoire_implanting_rate=implanting["repertoire_implanting_rate"],
+                signals=[symbol_table.get(signal) for signal in implanting["signals"]],
+                name=impl_key))
+
+        assert sum([settings["dataset_implanting_rate"] for settings in simulation.values()]) <= 1, \
+            "The total dataset implanting rate can not exceed 1."
+
+        symbol_table.add(key, SymbolType.SIMULATION, Simulation(implantings))
+
+        return symbol_table

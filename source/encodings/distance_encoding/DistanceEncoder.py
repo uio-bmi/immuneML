@@ -10,15 +10,47 @@ from source.encodings.EncoderParams import EncoderParams
 from source.encodings.distance_encoding.DistanceMetricType import DistanceMetricType
 from source.pairwise_repertoire_comparison.PairwiseRepertoireComparison import PairwiseRepertoireComparison
 from source.util import DistanceMetrics
+from source.util.ParameterValidator import ParameterValidator
 from source.util.PathBuilder import PathBuilder
 from source.util.ReflectionHandler import ReflectionHandler
 
 
 class DistanceEncoder(DatasetEncoder):
+    """
+    Encodes a given RepertoireDataset as distance matrix, where the pairwise distance between each of the repertoires
+    is calculated. The distance is calculated based on the presence/absence of elements defined under attributes_to_match.
+    Thus, if attributes_to_match contains only 'sequence_aas', this means the distance between two repertoires is maximal
+    if they contain the same set of sequence_aas, and the distance is minimal of none of the sequence_aas are shared between
+    two repertoires.
+
+    Attributes:
+        distance_metric (:py:mod:`source.encodings.distance_encoding.DistanceMetricType`): The metric used to calculate the
+            distance between two repertoires. Currently the only available option is :py:mod:`source.encodings.distance_encoding.DistanceMetricType.JACCARD`
+        attributes_to_match: The attributes to consider when determining whether a sequence is present in both repertoires.
+            Only the fields defined under attributes_to_match will be considered, all other fields are ignored.
+        pool_size (int): The pool size used for parallelization. This does not affect the results of the encoding,
+            only the speed.
+
+    Specification:
+
+        encodings:
+            my_distance_enc:
+                Distance:
+                    distance_metric: JACCARD
+                    attributes_to_match:
+                        - sequence_aas
+                        - v_genes
+                        - j_genes
+                        - chains
+                        - region_types
+                    pool_size: 4
+
+
+    """
 
     def __init__(self, distance_metric: DistanceMetricType, attributes_to_match: list, pool_size: int, context: dict = None):
-        self.distance_fn = ReflectionHandler.import_function(distance_metric.value, DistanceMetrics)
         self.distance_metric = distance_metric
+        self.distance_fn = ReflectionHandler.import_function(self.distance_metric.value, DistanceMetrics)
         self.attributes_to_match = attributes_to_match
         self.pool_size = pool_size
         self.context = context
@@ -28,9 +60,22 @@ class DistanceEncoder(DatasetEncoder):
         return self
 
     @staticmethod
+    def _prepare_parameters(distance_metric: str, attributes_to_match: list, pool_size: int, context: dict = None):
+        valid_metrics = [metric.name for metric in DistanceMetricType]
+        ParameterValidator.assert_in_valid_list(distance_metric, valid_metrics, "DistanceEncoder", "distance_metric")
+
+        return {
+            "distance_metric": DistanceMetricType[distance_metric.upper()],
+            "attributes_to_match": attributes_to_match,
+            "pool_size": pool_size,
+            "context": context
+        }
+
+    @staticmethod
     def create_encoder(dataset, params: dict = None):
         if isinstance(dataset, RepertoireDataset):
-            return DistanceEncoder(**params)
+            prepared_params = DistanceEncoder._prepare_parameters(**params)
+            return DistanceEncoder(**prepared_params)
         else:
             raise ValueError("DistanceEncoder is not defined for dataset types which are not RepertoireDataset.")
 

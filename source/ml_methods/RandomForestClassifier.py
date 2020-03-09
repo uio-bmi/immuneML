@@ -5,6 +5,12 @@ from source.ml_methods.SklearnMethod import SklearnMethod
 
 
 class RandomForestClassifier(SklearnMethod):
+    """
+    Random Forest wrapper of the corresponding scikit-learn's method.
+
+    For usage and specification, check SklearnMethod class.
+    For valid parameters, see: https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestClassifier.html
+    """
 
     def __init__(self, parameter_grid: dict = None, parameters: dict = None):
         super(RandomForestClassifier, self).__init__()

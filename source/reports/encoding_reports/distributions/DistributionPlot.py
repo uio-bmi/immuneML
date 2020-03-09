@@ -3,15 +3,14 @@ import json
 from rpy2.robjects import pandas2ri
 from rpy2.robjects.packages import STAP
 
+from source.analysis.data_manipulation.DataReshaper import DataReshaper
+from source.data_model.dataset.RepertoireDataset import RepertoireDataset
+from source.environment.EnvironmentSettings import EnvironmentSettings
+from source.reports.encoding_reports.EncodingReport import EncodingReport
+from source.util.PathBuilder import PathBuilder
 from source.visualization.FacetScalesType import FacetScalesType
 from source.visualization.FacetSwitchType import FacetSwitchType
 from source.visualization.FacetType import FacetType
-
-from source.analysis.data_manipulation.DataReshaper import DataReshaper
-from source.data_model.dataset.RepertoireDataset import RepertoireDataset
-from source.reports.encoding_reports.EncodingReport import EncodingReport
-from source.environment.EnvironmentSettings import EnvironmentSettings
-from source.util.PathBuilder import PathBuilder
 
 
 class DistributionPlot(EncodingReport):
@@ -53,6 +52,11 @@ class DistributionPlot(EncodingReport):
     result_name="test2",
     height=6
     """
+
+    @classmethod
+    def build_object(cls, **kwargs):
+        return DistributionPlot(**kwargs)
+
     def __init__(self, dataset: RepertoireDataset = None, result_path: str = None, result_name: str = None,
                  type: str = "quasirandom", x: str = None, color: str = "NULL", group: str = "NULL", palette: dict = {},
                  facet_rows: list = None, facet_columns: list = None, facet_type: str = "grid",

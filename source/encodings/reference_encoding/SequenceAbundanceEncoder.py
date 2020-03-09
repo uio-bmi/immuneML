@@ -11,14 +11,37 @@ from source.util.PathBuilder import PathBuilder
 
 class SequenceAbundanceEncoder(DatasetEncoder):
     """
-    This encoder represents the repertoires by a vector where:
-        - the first element corresponds to the number / percentage of label-associated clonotypes / reads
-        - the second element is the total number / percentage of unique clonotypes / reads
+    This encoder represents the repertoires as a vector where:
+        - the first element corresponds to the number of label-associated clonotypes
+        - the second element is the total number of unique clonotypes
 
-    To determine what clonotypes (with features defined by comparison_attributes) are label-associated,
-    it performs the supplied statistical test using the given p_value cut-off.
+    To determine what clonotypes (with features defined by comparison_attributes) are label-associated
+    based on a statistical test. The statistical test used is Fisher's exact test (two-sided).
 
-    Reference: Emerson et al 2017
+    Reference: Emerson, Ryan O. et al.
+    ‘Immunosequencing Identifies Signatures of Cytomegalovirus Exposure History and HLA-Mediated Effects on the T Cell Repertoire’.
+    Nature Genetics 49, no. 5 (May 2017): 659–65. https://doi.org/10.1038/ng.3822.
+
+    Arguments:
+        comparison_attributes (list): The attributes to be considered to group receptors into clonotypes.
+            Only the fields specified in comparison_attributes will be considered, all other fields are ignored.
+        p_value_threshold (float): The p value threshold to be used by the statistical test.
+        pool_size (int): The pool size used for parallelization. This does not affect the results of the encoding,
+            only the speed.
+
+    Specification:
+
+        encodings:
+            my_sa_encoding:
+                SequenceAbundance:
+                    comparison_attributes:
+                        - sequence_aas
+                        - v_genes
+                        - j_genes
+                        - chains
+                        - region_types
+                    p_value_threshold: 0.05
+                    pool_size: 4
     """
 
     @staticmethod
@@ -26,7 +49,7 @@ class SequenceAbundanceEncoder(DatasetEncoder):
         assert isinstance(dataset, RepertoireDataset), "SequenceAbundanceEncoder: this encoding only works on repertoire datasets."
         return SequenceAbundanceEncoder(**params)
 
-    def __init__(self, comparison_attributes, p_value_threshold, pool_size: int):
+    def __init__(self, comparison_attributes, p_value_threshold: float, pool_size: int):
         self.comparison_attributes = comparison_attributes
         self.p_value_threshold = p_value_threshold
         self.pool_size = pool_size

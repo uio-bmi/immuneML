@@ -7,75 +7,63 @@ from sklearn.pipeline import make_pipeline
 from source.IO.dataset_export.PickleExporter import PickleExporter
 from source.IO.dataset_import.PickleLoader import PickleLoader
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
+from source.dsl.definition_parsers.EncodingParser import EncodingParser
 from source.encodings.DatasetEncoder import DatasetEncoder
 from source.encodings.EncoderParams import EncoderParams
+from source.util.ReflectionHandler import ReflectionHandler
 
 
 class PipelineEncoder(DatasetEncoder):
     """
-    Encodes the dataset using an initial encoder and then passes it thorough a pipeline of
-    steps to modify this initial encoding. Can be useful for feature selection and feature
+    Encodes the dataset using an initial encoder and then passes it through a pipeline of
+    steps to modify this initial encoding. This can be useful for feature selection and feature
     summarization as well as annotation of biological data onto the initially encoded dataset.
 
-    Configuration parameters are an instance of EncoderParams:
-    {
-        "model": {
-            "initial_encoder": initial_encoder,
-            "initial_encoder_params": initial_encoder_params (can just be a dictionary, will be converted
-            into EncoderParams class later),
-            "steps": steps (details below)
-        },
-        "batch_size": 1,
-        "learn_model": True, # true for training set and false for test set
-        "result_path": "../",
-        "label_configuration": LabelConfiguration(), # labels should be set before encodings is invoked,
-        "model_path": "../",
-        "scaler_path": "../",
-        "vectorizer_path": None
-    }
+    Arguments:
+        initial_encoder (DatasetEncoder):
+        initial_encoder_params (dict):
+        steps (list):
 
-    encoder_params["model"]["steps"] must be in the following format:
-    [
-        {
-            "annotate_sequences":
-                {
-                    "type": "SequenceMatchFeatureAnnotation",
-                    "params":
-                        {
-                            "reference_sequence_path": "reference_sequence_path",
-                            "data_loader_params":
-                            {
-                                "result_path": "result_path",
-                                "dataset_id": "dataset_id",
-                                "additional_columns": ["Antigen Protein"],
-                                "strip_CF": True,
-                                "column_mapping": {
-                                    "amino_acid": "CDR3B AA Sequence",
-                                    "v_gene": "TRBV Gene",
-                                    "j_gene": "TRBJ Gene"
-                                }
-                            },
-                            "sequence_matcher_params":
-                            {
-                                "max_distance": 0,
-                                "metadata_fields_to_match": [],
-                                "same_length": True
-                            },
-                            "data_loader_name": "GenericLoader",
-                            "annotation_prefix": "annotation_prefix"
-                        }
-                },
-        },
-    ...
-    ]
-
-    Some examples of workflows can be seen in the PipelineEncoder integration tests.
+    Specification:
+        initial_encoder: KmerFrequency
+        initial_encoder_params: {k: 3}
+        steps:
+            - annotate_sequences:
+                # type can be the name of any class which inherits TransformerMixin class from scikit-learn
+                # custom immuneML classes which do this are located under encodings/pipeline/steps/
+                type: SequenceMatchFeatureAnnotation
+                params:
+                    reference_sequence_path: reference_sequence_path
+                    data_loader_params:
+                        result_path: ./path/
+                        dataset_id: dataset_id
+                        additional_columns: ["Antigen Protein"]
+                        strip_CF: True
+                        column_mapping:
+                            amino_acid: "CDR3B AA Sequence"
+                            v_gene: "TRBV Gene"
+                            j_gene: "TRBJ Gene"
+                    sequence_matcher_params:
+                        max_distance: 0
+                        metadata_fields_to_match: []
+                        same_length: True
+                    data_loader_name: GenericLoader
+                    annotation_prefix: annotation_prefix
     """
 
     def __init__(self, initial_encoder, initial_encoder_params, steps: list):
-        self.initial_encoder = initial_encoder
-        self.initial_encoder_params = initial_encoder_params
-        self.steps = steps
+        self.initial_encoder, self.initial_encoder_params, _ = EncodingParser.parse_encoder_internal(initial_encoder, initial_encoder_params)
+        self.steps = PipelineEncoder._prepare_steps(steps)
+
+    @staticmethod
+    def _prepare_steps(steps: list):
+        parsed_steps = []
+        for step in steps:
+            for key in step:
+                step_class = ReflectionHandler.get_class_by_name(step[key]["type"])
+                parsed_steps.append(step_class(**step[key].get("params", {})))
+        assert len(steps) == len(parsed_steps), "PipelineParser: Each step accepts only one specification."
+        return parsed_steps
 
     @staticmethod
     def create_encoder(dataset, params: dict = None):

@@ -51,7 +51,7 @@ class TestFeatureHeatmap(TestCase):
 
         dataset = RepertoireDataset(encoded_data=EncodedData(**encoded_data))
 
-        DensityHeatmap(dataset=dataset,
+        DensityHeatmap.build_object(dataset=dataset,
                        scale_features=False,
                        feature_annotations=["antigen"],
                        palette={"week": {"0": "#BE9764"}, "antigen": {"GAD": "cornflowerblue", "INSB": "firebrick"},

@@ -17,29 +17,39 @@ from source.encodings.word2vec.model_creator.KmerPairModelCreator import KmerPai
 from source.encodings.word2vec.model_creator.ModelType import ModelType
 from source.encodings.word2vec.model_creator.SequenceModelCreator import SequenceModelCreator
 from source.util.FilenameHandler import FilenameHandler
+from source.util.ParameterValidator import ParameterValidator
 from source.util.ReflectionHandler import ReflectionHandler
 
 
 class Word2VecEncoder(DatasetEncoder):
     """
-    Encodes the dataset using Word2Vec model.
+
+    Word2VecEncoder learns the vector representations of k-mers in the sequences in a repertoire from the
+    context the k-mers appear in.
     It relies on gensim's implementation of Word2Vec and KmerHelper for k-mer extraction.
 
-    Configuration parameters are an instance of EncoderParams class:
-    {
-        "model": {
-            "k": 3,
-            "model_type": ModelType.SEQUENCE,
-            "vector_size": 16
-        },
-        "batch_size": 1,
-        "learn_model": True, # true for training set and false for test set
-        "result_path": "../",
-        "label_configuration": LabelConfiguration(), # labels should be set before encodings is invoked
-    }
+    Arguments:
+        vector_size (int): The size of the vector to be learnt.
+        model_type (:py:obj:`~source.encodings.word2vec.model_creator.ModelType.ModelType`):  The context which will be
+            used to infer the representation of the sequence.
+            If :py:obj:`~source.encodings.word2vec.model_creator.ModelType.ModelType.SEQUENCE` is used, the context of
+            a k-mer is defined by the sequence it occurs in (e.g. if the sequence is CASTTY and k-mer is AST,
+            then its context consists of k-mers CAS, STT, TTY)
+            If :py:obj:`~source.encodings.word2vec.model_creator.ModelType.ModelType.KMER_PAIR` is used, the context for
+            the k-mer is defined as all the k-mers that within one edit distance (e.g. for k-mer CAS, the context
+            includes CAA, CAC, CAD etc.).
+        k (int): The length of the k-mers used for the encoding.
 
-    NB: In order to use the workers properly and be able to parallelize the training process,
-    it is necessary that Cython is installed on the machine.
+    Specification:
+
+    .. highlight:: yaml
+    .. code-block:: yaml
+
+        Word2Vec:
+            vector_size: 16
+            k: 3
+            model_type: SEQUENCE
+
     """
 
     DESCRIPTION_REPERTOIRES = "repertoires"
@@ -55,10 +65,19 @@ class Word2VecEncoder(DatasetEncoder):
         self.model_type = model_type
 
     @staticmethod
+    def _prepare_parameters(vector_size: int, k: int, model_type: str):
+        location = "Word2VecEncoder"
+        ParameterValidator.assert_type_and_value(vector_size, int, location, "vector_size", min_inclusive=1)
+        ParameterValidator.assert_type_and_value(k, int, location, "k", min_inclusive=1)
+        ParameterValidator.assert_in_valid_list(model_type.upper(), [item.name for item in ModelType], location, "model_type")
+        return {"vector_size": vector_size, "k": k, "model_type": ModelType[model_type.upper()]}
+
+    @staticmethod
     def create_encoder(dataset=None, params: dict = None):
         try:
+            prepared_params = Word2VecEncoder._prepare_parameters(**params)
             encoder = ReflectionHandler.get_class_by_name(
-                Word2VecEncoder.dataset_mapping[dataset.__class__.__name__], "word2vec/")(**params if params is not None else {})
+                Word2VecEncoder.dataset_mapping[dataset.__class__.__name__], "word2vec/")(**prepared_params)
         except ValueError:
             raise ValueError("{} is not defined for dataset of type {}.".format(Word2VecEncoder.__name__,
                                                                                 dataset.__class__.__name__))

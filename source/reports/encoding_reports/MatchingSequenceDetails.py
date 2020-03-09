@@ -4,25 +4,60 @@ import warnings
 from source.analysis.SequenceMatcher import SequenceMatcher
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
+from source.data_model.receptor.receptor_sequence.ReceptorSequenceList import ReceptorSequenceList
 from source.data_model.repertoire.SequenceRepertoire import SequenceRepertoire
 from source.reports.encoding_reports.EncodingReport import EncodingReport
+from source.util.ParameterValidator import ParameterValidator
 from source.util.PathBuilder import PathBuilder
+from source.util.ReflectionHandler import ReflectionHandler
 
 
 class MatchingSequenceDetails(EncodingReport):
     """
-    TODO: write description here
+    Compares the sequences in the repertoires of a given RepertoireDataset to a list of reference sequences,
+    and reports the number of matching sequences.
 
+    The resulting matching_sequence_overview.tsv contains:
+        - repertoire_identifier: the unique identifier of the repertoire
+        - count/percentage/clonal_percentage: # todo fill this in
+        - repertoire_size: the total number of different sequences (i.e. clonotypes) in the repertoire
+        - max_levenshtein_distance: the maximum lehvenstein distance that was used to calculate the matches
+        - Any repertoire labels and their values
+
+    # todo refactor this class: either merge with MatchedPaired classes or remove redundant information from this report
+    # (max edit distance and reference sequences are also present in the encoding)
+
+
+    # todo old stuff, remove
     params:
         - list of reference sequences
         - max Levenshtein distance
         - summary:  * count the number of sequences from the repertoire matched,
                     * get the percentage of sequences from the repertoire matched,
                     * get the percentage of sequences from the repertoire matched with respect to clonal counts
+
     """
 
-    def __init__(self, dataset: RepertoireDataset = None, max_edit_distance: int = None, reference_sequences: list = None,
+    @classmethod
+    def build_object(cls, **kwargs):
+
+        location = "MatchingSequenceDetails"
+
+        if "max_edit_distance" in kwargs:
+            ParameterValidator.assert_type_and_value(kwargs["max_edit_distance"], int, location, "max_edit_distance")
+
+        if "reference_sequences" in kwargs:
+            ParameterValidator.assert_keys(list(kwargs["reference_sequences"].keys()), ["format", "path"], location, "reference_sequences")
+
+            importer = ReflectionHandler.get_class_by_name("{}SequenceImport".format(kwargs["reference_sequences"]["format"]))
+            kwargs["reference_sequences"] = importer.import_items(kwargs["reference_sequences"]["path"]) \
+                if kwargs["reference_sequences"] is not None else None
+
+        return MatchingSequenceDetails(**kwargs)
+
+    def __init__(self, dataset: RepertoireDataset = None, max_edit_distance: int = None, reference_sequences: ReceptorSequenceList = None,
                  result_path: str = None):
+
         self.dataset = dataset
         self.max_edit_distance = max_edit_distance
         self.reference_sequences = reference_sequences
