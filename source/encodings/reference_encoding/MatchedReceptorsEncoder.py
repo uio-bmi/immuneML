@@ -21,17 +21,12 @@ class MatchedReceptorsEncoder(DatasetEncoder):
     Arguments:
         reference_receptors (dict): A dictionary describing the reference dataset file.
             See the :py:mod:`source.IO.sequence_import` for specification details.
-        one_file_per_donor (bool): Boolean value specifying whether one file represents one donor.
-            If True, the matching will be performed per input file. If False, the metadata label
-            "donor" must be specified in the metadata file for the datasets, and the sequences will be
-            aggregated by donor.
 
     Specification:
 
         encodings:
             my_mr_encoding:
                 MatchedReceptors:
-                    one_file_per_donor: False,
                     reference_receptors:
                         path: /path/to/file.txt
                         format: IRIS
@@ -45,17 +40,14 @@ class MatchedReceptorsEncoder(DatasetEncoder):
         "RepertoireDataset": "MatchedReceptorsRepertoireEncoder"
     }
 
-    def __init__(self, reference_receptors: ReceptorList, one_file_per_donor: bool):
-        self.one_file_per_donor = one_file_per_donor
+    def __init__(self, reference_receptors: ReceptorList):
         self.reference_receptors = reference_receptors
 
     @staticmethod
-    def _prepare_parameters(reference_receptors: dict, one_file_per_donor: bool):
+    def _prepare_parameters(reference_receptors: dict):
         location = "MatchedReceptorsEncoder"
 
-        ParameterValidator.assert_type_and_value(one_file_per_donor, bool, location, "one_file_per_donor")
-
-        ParameterValidator.assert_keys(list(reference_receptors.keys()), ["format", "path"], location, "reference_receptors")
+        ParameterValidator.assert_keys(list(reference_receptors.keys()), ["format", "path", "params"], location, "reference_receptors", exclusive=False)
 
         valid_formats = ReflectionHandler.discover_classes_by_partial_name("SequenceImport", "sequence_import/")
         ParameterValidator.assert_in_valid_list(f"{reference_receptors['format']}SequenceImport", valid_formats, location, "format in reference_receptors")
@@ -63,12 +55,17 @@ class MatchedReceptorsEncoder(DatasetEncoder):
         assert os.path.isfile(reference_receptors["path"]), f"{location}: the file {reference_receptors['path']} does not exist. " \
                                                             f"Specify the correct path under reference_receptors."
 
+        seq_import_params = reference_receptors["params"] if "params" in reference_receptors else {}
+        if "paired" in seq_import_params:
+            assert seq_import_params["paired"] == True, f"{location}: paired must be True for SequenceImport"
+        else:
+            seq_import_params["paired"] = True
+
         receptors = ReflectionHandler.get_class_by_name("{}SequenceImport".format(reference_receptors["format"]))\
-            .import_items(reference_receptors["path"], paired=True)
+            .import_items(reference_receptors["path"], **seq_import_params)
 
         return {
-            "reference_receptors": receptors,
-            "one_file_per_donor": one_file_per_donor
+            "reference_receptors": receptors
         }
 
     @staticmethod
@@ -96,8 +93,7 @@ class MatchedReceptorsEncoder(DatasetEncoder):
 
         encoding_params_desc = {"reference_receptors": sorted([chain_a.get_sequence() + chain_a.metadata.v_gene + chain_a.metadata.j_gene + "|" +
                                                                 chain_b.get_sequence() + chain_b.metadata.v_gene + chain_b.metadata.j_gene
-                                                                for chain_a, chain_b in chains]),
-                                "one_file_per_donor": self.one_file_per_donor}
+                                                                for chain_a, chain_b in chains])}
 
         return (("dataset_identifiers", tuple(dataset.get_example_ids())),
                 ("dataset_metadata", dataset.metadata_file),
