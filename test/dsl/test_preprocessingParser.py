@@ -1,7 +1,7 @@
 from unittest import TestCase
 
-from source.dsl.SymbolTable import SymbolTable
 from source.dsl.definition_parsers.PreprocessingParser import PreprocessingParser
+from source.dsl.symbol_table.SymbolTable import SymbolTable
 
 
 class TestPreprocessingParser(TestCase):

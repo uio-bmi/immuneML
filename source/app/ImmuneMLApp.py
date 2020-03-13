@@ -3,8 +3,8 @@ import sys
 
 from source.caching.CacheType import CacheType
 from source.dsl.ImmuneMLParser import ImmuneMLParser
-from source.dsl.SymbolType import SymbolType
 from source.dsl.semantic_model.SemanticModel import SemanticModel
+from source.dsl.symbol_table.SymbolType import SymbolType
 from source.environment.Constants import Constants
 from source.util.PathBuilder import PathBuilder
 

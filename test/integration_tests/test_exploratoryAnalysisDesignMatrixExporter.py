@@ -48,8 +48,8 @@ class TestExploratoryAnalysisDesignMatrixExporter(TestCase):
         units = {"named_analysis_4": ExploratoryAnalysisUnit(dataset=dataset,
                                                              report=DesignMatrixExporter(),
                                                              label_config=label_config,
-                                                             encoder=ReferenceRepertoireEncoder.create_encoder(dataset,
-                                                                                                               {"max_edit_distance": 1,
+                                                             encoder=ReferenceRepertoireEncoder.build_object(dataset,
+                                                                                                             **{"max_edit_distance": 1,
                                                                                                 "summary": SequenceMatchingSummaryType.COUNT.name,
                                                                                                 "reference_sequences": refs}))}
 

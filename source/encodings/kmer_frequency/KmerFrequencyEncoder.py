@@ -119,7 +119,7 @@ class KmerFrequencyEncoder(DatasetEncoder):
         }
 
     @staticmethod
-    def create_encoder(dataset=None, params: dict = None):
+    def build_object(dataset=None, **params):
         try:
             prepared_params = KmerFrequencyEncoder._prepare_parameters(**params)
             encoder = ReflectionHandler.get_class_by_name(KmerFrequencyEncoder.dataset_mapping[dataset.__class__.__name__],

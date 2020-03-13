@@ -5,8 +5,8 @@ from unittest import TestCase
 from helpers.metadata_converter import convert_metadata
 from source.data_model.dataset.ReceptorDataset import ReceptorDataset
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
-from source.dsl.SymbolTable import SymbolTable
 from source.dsl.import_parsers.ImportParser import ImportParser
+from source.dsl.symbol_table.SymbolTable import SymbolTable
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.util.PathBuilder import PathBuilder
 

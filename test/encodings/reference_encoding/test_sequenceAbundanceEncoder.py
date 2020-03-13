@@ -27,7 +27,7 @@ class TestSequenceAbundanceEncoder(TestCase):
 
         dataset = RepertoireDataset(repertoires=repertoires, metadata_file=metadata, identifier="1")
 
-        encoder = SequenceAbundanceEncoder.create_encoder(dataset, params={
+        encoder = SequenceAbundanceEncoder.build_object(dataset, **{
             "comparison_attributes": ["sequence_aas"],
             "p_value_threshold": 0.4, "pool_size": 4
         })

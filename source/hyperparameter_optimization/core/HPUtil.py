@@ -67,7 +67,7 @@ class HPUtil:
                        label_configuration: LabelConfiguration):
         PathBuilder.build(path)
 
-        encoder = hp_setting.encoder.create_encoder(dataset, hp_setting.encoder_params).set_context(context)
+        encoder = hp_setting.encoder.build_object(dataset, **hp_setting.encoder_params).set_context(context)
 
         encoded_dataset = DataEncoder.run(DataEncoderParams(
             dataset=dataset,

@@ -2,9 +2,9 @@ import shutil
 from unittest import TestCase
 
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
-from source.dsl.SymbolTable import SymbolTable
-from source.dsl.SymbolType import SymbolType
 from source.dsl.instruction_parsers.ExploratoryAnalysisParser import ExploratoryAnalysisParser
+from source.dsl.symbol_table.SymbolTable import SymbolTable
+from source.dsl.symbol_table.SymbolType import SymbolType
 from source.encodings.reference_encoding.MatchedReferenceEncoder import MatchedReferenceEncoder
 from source.encodings.reference_encoding.SequenceMatchingSummaryType import SequenceMatchingSummaryType
 from source.environment.EnvironmentSettings import EnvironmentSettings

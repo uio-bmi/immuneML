@@ -58,7 +58,7 @@ class HPSelection:
         ml_process = MLProcess(train_dataset=new_train_dataset, test_dataset=new_val_dataset,
                                label=label, label_config=LabelConfiguration([state.label_configuration.get_label_object(label)]),
                                batch_size=state.batch_size,
-                               encoder=hp_setting.encoder.create_encoder(train_dataset, hp_setting.encoder_params).set_context(state.context),
+                               encoder=hp_setting.encoder.build_object(train_dataset, **hp_setting.encoder_params).set_context(state.context),
                                encoder_params=hp_setting.encoder_params, method=hp_setting.ml_method,
                                ml_params=hp_setting.ml_params, metrics=state.metrics, optimization_metric=state.optimization_metric,
                                path=current_path,

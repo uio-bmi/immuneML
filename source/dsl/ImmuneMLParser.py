@@ -5,8 +5,8 @@ import re
 import yaml
 
 from source.dsl.InstructionParser import InstructionParser
-from source.dsl.SymbolTable import SymbolTable
 from source.dsl.definition_parsers.DefinitionParser import DefinitionParser
+from source.dsl.symbol_table.SymbolTable import SymbolTable
 
 
 class ImmuneMLParser:

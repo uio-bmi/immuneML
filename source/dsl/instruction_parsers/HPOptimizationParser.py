@@ -2,7 +2,7 @@ import hashlib
 import os
 
 from source.dsl.DefaultParamsLoader import DefaultParamsLoader
-from source.dsl.SymbolTable import SymbolTable
+from source.dsl.symbol_table.SymbolTable import SymbolTable
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.environment.LabelConfiguration import LabelConfiguration
 from source.environment.MetricType import MetricType

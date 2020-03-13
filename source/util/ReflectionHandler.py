@@ -47,6 +47,15 @@ class ReflectionHandler:
         return ReflectionHandler._import_class(filename, class_name)
 
     @staticmethod
+    def all_subclasses(cls):
+        subclasses = set(cls.__subclasses__()).union([s for c in cls.__subclasses__() for s in ReflectionHandler.all_subclasses(c)])
+        return subclasses
+
+    @staticmethod
+    def all_nonabstract_subclasses(cls):
+        return [cl for cl in ReflectionHandler.all_subclasses(cls) if not bool(getattr(cl, "__abstractmethods__", False))]
+
+    @staticmethod
     def exists(class_name: str, subdirectory: str = ""):
         filename = glob.glob(EnvironmentSettings.root_path + "source/**/{}.py".format(class_name), recursive=True)
         filename = [f for f in filename if subdirectory in f.replace("\\", "/")]

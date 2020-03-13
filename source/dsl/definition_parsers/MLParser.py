@@ -1,8 +1,10 @@
 from source.dsl.DefaultParamsLoader import DefaultParamsLoader
-from source.dsl.SymbolTable import SymbolTable
-from source.dsl.SymbolType import SymbolType
+from source.dsl.symbol_table.SymbolTable import SymbolTable
+from source.dsl.symbol_table.SymbolType import SymbolType
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.logging.Logger import log
+from source.ml_methods.MLMethod import MLMethod
+from source.util.ParameterValidator import ParameterValidator
 from source.util.ReflectionHandler import ReflectionHandler
 
 
@@ -22,10 +24,15 @@ class MLParser:
     @log
     def _parse_ml_method(ml_method_id: str, ml_specification) -> tuple:
 
-        if type(ml_specification) is set:
-            ml_specification = {param: {} for param in ml_specification}
+        if type(ml_specification) is str:
+            ml_specification = {ml_specification: {}}
 
         ml_method_class_name = [key for key in ml_specification.keys() if key not in ["model_selection_cv", "model_selection_n_folds"]][0]
+
+        classes = ReflectionHandler.get_classes_by_partial_name("", "ml_methods/")
+        valid_classes = ReflectionHandler.all_nonabstract_subclasses(MLMethod)
+        valid_values = [cls.__name__ for cls in valid_classes]
+        ParameterValidator.assert_in_valid_list(ml_method_class_name, valid_values, "MLParser", f"ML method under {ml_method_id}")
 
         ml_method_class = ReflectionHandler.get_class_from_path("{}/../../source/ml_methods/{}.py".format(EnvironmentSettings.root_path,
                                                                                                           ml_method_class_name))

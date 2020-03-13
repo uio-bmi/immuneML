@@ -47,7 +47,7 @@ class MatchedReferenceEncoder(DatasetEncoder):
         }
 
     @staticmethod
-    def create_encoder(dataset=None, params: dict = None):
+    def build_object(dataset=None, **params):
         try:
             prepared_parameters = MatchedReferenceEncoder._prepare_parameters(**params)
             encoder = ReflectionHandler.get_class_by_name(MatchedReferenceEncoder.dataset_mapping[dataset.__class__.__name__],

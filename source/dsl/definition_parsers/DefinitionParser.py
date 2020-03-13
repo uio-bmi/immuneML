@@ -1,4 +1,3 @@
-from source.dsl.SymbolTable import SymbolTable
 from source.dsl.definition_parsers.DefinitionParserOutput import DefinitionParserOutput
 from source.dsl.definition_parsers.EncodingParser import EncodingParser
 from source.dsl.definition_parsers.MLParser import MLParser
@@ -8,6 +7,7 @@ from source.dsl.definition_parsers.ReportParser import ReportParser
 from source.dsl.definition_parsers.SignalParser import SignalParser
 from source.dsl.definition_parsers.SimulationParser import SimulationParser
 from source.dsl.import_parsers.ImportParser import ImportParser
+from source.dsl.symbol_table.SymbolTable import SymbolTable
 
 
 class DefinitionParser:

@@ -7,7 +7,6 @@ from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.data_model.repertoire.SequenceRepertoire import SequenceRepertoire
 from source.encodings.reference_encoding.SequenceMatchingSummaryType import SequenceMatchingSummaryType
-from source.environment.ParallelismManager import ParallelismManager
 
 
 class SequenceMatcher:
@@ -31,6 +30,8 @@ class SequenceMatcher:
         }, ...]
     }
     """
+
+    CORES = 4
 
     def match(self, dataset: RepertoireDataset, reference_sequences: list, max_distance: int, summary_type: SequenceMatchingSummaryType) -> dict:
 
@@ -66,7 +67,7 @@ class SequenceMatcher:
         matched = {"sequences": [], "repertoire": repertoire.identifier, "repertoire_index": index}
         arguments = [(seq, reference_sequences, max_distance) for seq in repertoire.sequences]
 
-        with Pool(ParallelismManager.assign_cores_to_job("stat_analysis")) as pool:
+        with Pool(SequenceMatcher.CORES) as pool:
             matched["sequences"] = pool.starmap(self.match_sequence, arguments)
 
         if summary_type == SequenceMatchingSummaryType.CLONAL_PERCENTAGE:

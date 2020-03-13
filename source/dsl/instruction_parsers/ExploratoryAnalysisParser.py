@@ -1,6 +1,6 @@
 import copy
 
-from source.dsl.SymbolTable import SymbolTable
+from source.dsl.symbol_table.SymbolTable import SymbolTable
 from source.environment.LabelConfiguration import LabelConfiguration
 from source.util.ParameterValidator import ParameterValidator
 from source.workflows.instructions.exploratory_analysis.ExploratoryAnalysisProcess import ExploratoryAnalysisInstruction
@@ -66,7 +66,7 @@ class ExploratoryAnalysisParser:
 
         if all(key in analysis for key in ["encoding", "labels"]):
             params["encoder"] = symbol_table.get(analysis["encoding"]) \
-                .create_encoder(dataset, symbol_table.get_config(analysis["encoding"])["encoder_params"])
+                .build_object(dataset, **symbol_table.get_config(analysis["encoding"])["encoder_params"])
             params["label_config"] = LabelConfiguration()
             for label in analysis["labels"]:
                 params["label_config"].add_label(label, dataset.params[label])

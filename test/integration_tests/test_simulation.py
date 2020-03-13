@@ -33,17 +33,17 @@ class TestSimulation(TestCase):
                                 "max_gap": 1,
                                 "alphabet_weights": None,
                                 "position_weights": None
-                            }
-                        },
+                            },
+                        }
                     },
                     "motif2": {
                         "seed": "CCC",
-                        "instantiation": {"GappedKmer"}
+                        "instantiation": "GappedKmer"
                     }
                 },
                 "signals": {
                     "signal1": {
-                        "motifs": ["motif1"],
+                        "motifs": ["motif1", "motif2"],
                         "implanting": "HealthySequence"
                     }
                 },

@@ -1,5 +1,5 @@
-from source.dsl.SymbolTable import SymbolTable
-from source.dsl.SymbolType import SymbolType
+from source.dsl.symbol_table.SymbolTable import SymbolTable
+from source.dsl.symbol_table.SymbolType import SymbolType
 
 
 class DefinitionParserOutput:

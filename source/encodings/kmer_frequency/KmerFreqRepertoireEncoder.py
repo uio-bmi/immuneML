@@ -36,7 +36,7 @@ class KmerFreqRepertoireEncoder(KmerFrequencyEncoder):
 
         with Pool(params["batch_size"]) as pool:
             chunksize = math.floor(dataset.get_example_count()/params["batch_size"]) + 1
-            repertoires = pool.starmap(self._get_encoded_repertoire, arguments, chunksize=chunksize)
+            repertoires = pool.starmap(self.get_encoded_repertoire, arguments, chunksize=chunksize)
 
         encoded_repertoire_list, repertoire_names, labels, feature_annotation_names = zip(*repertoires)
 
@@ -46,16 +46,16 @@ class KmerFreqRepertoireEncoder(KmerFrequencyEncoder):
 
         return list(encoded_repertoire_list), list(repertoire_names), encoded_labels, feature_annotation_names
 
-    def _get_encoded_repertoire(self, repertoire, params: EncoderParams):
+    def get_encoded_repertoire(self, repertoire, params: EncoderParams):
         params["model"] = vars(self)
 
         return CacheHandler.memo_by_params((("encoding_model", params["model"]),
                                             ("labels", params["label_configuration"].get_labels_by_name()),
                                             ("repertoire_id", repertoire.identifier),
                                             ("repertoire_data",  hashlib.sha256(np.ascontiguousarray(repertoire.get_sequence_aas())).hexdigest())),
-                                           lambda: self._encode_repertoire(repertoire, params), CacheObjectType.ENCODING_STEP)
+                                           lambda: self.encode_repertoire(repertoire, params), CacheObjectType.ENCODING_STEP)
 
-    def _encode_repertoire(self, repertoire, params: EncoderParams):
+    def encode_repertoire(self, repertoire, params: EncoderParams):
         counts = Counter()
         sequence_encoder = self._prepare_sequence_encoder(params)
         feature_names = sequence_encoder.get_feature_names(params)

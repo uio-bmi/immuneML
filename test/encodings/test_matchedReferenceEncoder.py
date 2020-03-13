@@ -30,7 +30,7 @@ class TestMatchedReferenceEncoder(TestCase):
 
         references = {"path": path + "refs.tsv", "format": "VDJdb"}
 
-        encoder = MatchedReferenceEncoder.create_encoder(dataset, {
+        encoder = MatchedReferenceEncoder.build_object(dataset, **{
                 "reference_sequences": references,
                 "max_edit_distance": 2,
                 "summary": SequenceMatchingSummaryType.PERCENTAGE.name

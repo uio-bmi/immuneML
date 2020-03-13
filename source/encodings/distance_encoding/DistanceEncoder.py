@@ -72,7 +72,7 @@ class DistanceEncoder(DatasetEncoder):
         }
 
     @staticmethod
-    def create_encoder(dataset, params: dict = None):
+    def build_object(dataset, **params):
         if isinstance(dataset, RepertoireDataset):
             prepared_params = DistanceEncoder._prepare_parameters(**params)
             return DistanceEncoder(**prepared_params)

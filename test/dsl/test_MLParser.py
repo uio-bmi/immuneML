@@ -1,8 +1,8 @@
 from unittest import TestCase
 
 from source.dsl.ImmuneMLParser import ImmuneMLParser
-from source.dsl.SymbolTable import SymbolTable
 from source.dsl.definition_parsers.MLParser import MLParser
+from source.dsl.symbol_table.SymbolTable import SymbolTable
 from source.ml_methods.SimpleLogisticRegression import SimpleLogisticRegression
 
 
@@ -16,14 +16,17 @@ class TestMLParser(TestCase):
                     "penalty": "l1",
                 }
             },
-            "LR2": {
-                "SimpleLogisticRegression"
-            },
+            "LR2": "SimpleLogisticRegression",
             "SVM1": {
                 "SVM": {
                     "max_iter": [1000, 2000],
                     "penalty": ["l1", "l2"]
                 },
+                "model_selection_cv": False,
+                "model_selection_n_folds": -1
+            },
+            "SVM2": {
+                "SVM": {},
                 "model_selection_cv": False,
                 "model_selection_n_folds": -1
             }

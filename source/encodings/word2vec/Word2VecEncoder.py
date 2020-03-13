@@ -73,7 +73,7 @@ class Word2VecEncoder(DatasetEncoder):
         return {"vector_size": vector_size, "k": k, "model_type": ModelType[model_type.upper()]}
 
     @staticmethod
-    def create_encoder(dataset=None, params: dict = None):
+    def build_object(dataset=None, **params):
         try:
             prepared_params = Word2VecEncoder._prepare_parameters(**params)
             encoder = ReflectionHandler.get_class_by_name(

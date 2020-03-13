@@ -94,7 +94,7 @@ class GenericLoader(DataLoader):
 
         return df.apply(self._load_sequence, axis=1, args=(params,)).values
 
-    def _load_repertoire_from_file(self, filepath, params) -> dict:
+    def load_repertoire_from_file(self, filepath, params) -> SequenceRepertoire:
         df = self._read_preprocess_file(filepath, params)
 
         sequence_lists = self.get_sequence_lists_from_df(df, params)
@@ -123,7 +123,7 @@ class GenericLoader(DataLoader):
 
     def _load_repertoire(self, index, filepath, params):
 
-        repertoire = self._load_repertoire_from_file(filepath, params)
+        repertoire = self.load_repertoire_from_file(filepath, params)
 
         return repertoire, repertoire.metadata
 

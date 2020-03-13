@@ -41,7 +41,7 @@ class TestWord2VecEncoder(TestCase):
             filename="dataset.pkl"
         )
 
-        encoder = Word2VecEncoder.create_encoder(dataset, {
+        encoder = Word2VecEncoder.build_object(dataset, **{
                 "k": 3,
                 "model_type": "sequence",
                 "vector_size": 16

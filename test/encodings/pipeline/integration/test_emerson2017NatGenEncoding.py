@@ -122,7 +122,7 @@ class TestEmerson2018NatGenEncoding(TestCase):
                 model={}
             )
 
-        encoder = PipelineEncoder.create_encoder(dataset, {
+        encoder = PipelineEncoder.build_object(dataset, **{
                     "initial_encoder": KmerFrequencyEncoder.__name__[:-7],
                     "initial_encoder_params": kmer_freq_params,
                     "steps": [{"s1": {"type": FisherExactFeatureAnnotation.__name__,
@@ -141,7 +141,7 @@ class TestEmerson2018NatGenEncoding(TestCase):
 
         dataset2 = RepertoireDataset(repertoires=[repertoires[num] for num in range(1, 4)])
 
-        encoder = PipelineEncoder.create_encoder(dataset, {
+        encoder = PipelineEncoder.build_object(dataset, **{
                     "initial_encoder": KmerFrequencyEncoder.__name__[:-7],
                     "initial_encoder_params": kmer_freq_params,
                     "steps": [{"s1": {"type": FisherExactFeatureAnnotation.__name__,

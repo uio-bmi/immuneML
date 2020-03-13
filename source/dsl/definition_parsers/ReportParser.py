@@ -1,7 +1,8 @@
-from source.dsl.DefaultParamsLoader import DefaultParamsLoader
-from source.dsl.SymbolTable import SymbolTable
-from source.dsl.SymbolType import SymbolType
+from source.dsl.ObjectParser import ObjectParser
+from source.dsl.symbol_table.SymbolTable import SymbolTable
+from source.dsl.symbol_table.SymbolType import SymbolType
 from source.logging.Logger import log
+from source.reports.Report import Report
 from source.util.ReflectionHandler import ReflectionHandler
 
 
@@ -17,14 +18,12 @@ class ReportParser:
     @staticmethod
     @log
     def _parse_report(key: str, params: dict, symbol_table: SymbolTable):
-        # If report is specified without parameters, set to empty parameters
-        if type(params) is set:
-            params = {param: {} for param in params}
+        classes = ReflectionHandler.get_classes_by_partial_name("", "reports/")
+        valid_classes = ReflectionHandler.all_nonabstract_subclasses(Report)
+        valid_values = [cls.__name__ for cls in valid_classes]
+        report_object, params = ObjectParser.parse_object(params, valid_values, "", "reports/", "ReportParser", key, builder=True,
+                                                          return_params_dict=True)
 
-        class_name = list(params.keys())[0]
-        report = ReflectionHandler.get_class_by_name(class_name)
-        user_params = params[class_name]
-        parsed_params = {**DefaultParamsLoader.load("reports/", class_name), **user_params}
-        symbol_table.add(key, SymbolType.REPORT, report.build_object(**parsed_params))
+        symbol_table.add(key, SymbolType.REPORT, report_object)
 
-        return symbol_table, {**params, **parsed_params}
+        return symbol_table, params

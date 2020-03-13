@@ -1,8 +1,8 @@
 from unittest import TestCase
 
-from source.dsl.SymbolTable import SymbolTable
-from source.dsl.SymbolType import SymbolType
 from source.dsl.definition_parsers.SimulationParser import SimulationParser
+from source.dsl.symbol_table.SymbolTable import SymbolTable
+from source.dsl.symbol_table.SymbolType import SymbolType
 from source.simulation.implants.Motif import Motif
 from source.simulation.implants.Signal import Signal
 from source.simulation.motif_instantiation_strategy.GappedKmerInstantiation import GappedKmerInstantiation

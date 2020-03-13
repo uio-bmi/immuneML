@@ -30,7 +30,7 @@ class TestDataEncoder(TestCase):
         lc.add_label("l2", [0, 3])
 
         dataset = RepertoireDataset(repertoires=[rep1, rep2])
-        encoder = Word2VecEncoder.create_encoder(dataset, {
+        encoder = Word2VecEncoder.build_object(dataset, **{
                     "k": 3,
                     "model_type": ModelType.SEQUENCE.name,
                     "vector_size": 6

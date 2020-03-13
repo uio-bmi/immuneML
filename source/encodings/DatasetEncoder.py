@@ -9,7 +9,7 @@ class DatasetEncoder(metaclass=abc.ABCMeta):
 
     @staticmethod
     @abc.abstractmethod
-    def create_encoder(dataset, params: dict = None):
+    def build_object(dataset, **params):
         pass
 
     @abc.abstractmethod

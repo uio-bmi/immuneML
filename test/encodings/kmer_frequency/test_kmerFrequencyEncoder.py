@@ -39,7 +39,7 @@ class TestKmerFrequencyEncoder(TestCase):
 
         dataset = RepertoireDataset(repertoires=[rep1, rep2])
 
-        encoder = KmerFrequencyEncoder.create_encoder(dataset, {
+        encoder = KmerFrequencyEncoder.build_object(dataset, **{
                 "normalization_type": NormalizationType.RELATIVE_FREQUENCY.name,
                 "reads": ReadsType.UNIQUE.name,
                 "sequence_encoding": SequenceEncodingType.IDENTITY.name,
@@ -55,7 +55,7 @@ class TestKmerFrequencyEncoder(TestCase):
             filename="dataset.pkl"
         ))
 
-        encoder = KmerFrequencyEncoder.create_encoder(dataset, {
+        encoder = KmerFrequencyEncoder.build_object(dataset, **{
                 "normalization_type": NormalizationType.RELATIVE_FREQUENCY.name,
                 "reads": ReadsType.UNIQUE.name,
                 "sequence_encoding": SequenceEncodingType.CONTINUOUS_KMER.name,

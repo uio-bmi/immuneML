@@ -66,7 +66,7 @@ class TestImmuneMLApp(TestCase):
                             "model_type": "sequence",
                             "vector_size": 10,
                         }
-                    }
+                    },
                 },
                 "ml_methods": {
                     "simpleLR": {

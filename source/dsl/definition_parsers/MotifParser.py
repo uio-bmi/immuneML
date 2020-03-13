@@ -1,7 +1,6 @@
-import inspect
-
-from source.dsl.SymbolTable import SymbolTable
-from source.dsl.SymbolType import SymbolType
+from source.dsl.ObjectParser import ObjectParser
+from source.dsl.symbol_table.SymbolTable import SymbolTable
+from source.dsl.symbol_table.SymbolType import SymbolType
 from source.logging.Logger import log
 from source.simulation.implants.Motif import Motif
 from source.simulation.motif_instantiation_strategy.MotifInstantiationStrategy import MotifInstantiationStrategy
@@ -25,39 +24,13 @@ class MotifParser:
         return symbol_table, motifs
 
     @staticmethod
-    def _parse_instantiation(key: str, motif_item: dict):
-        classes = ReflectionHandler.get_classes_by_partial_name("Instantiation", "motif_instantiation_strategy/")
-        valid_values = [cls.__name__[:-13] for cls in MotifInstantiationStrategy.__subclasses__()]
-
-        assert len(motif_item["instantiation"]) == 1, \
-            f"MotifParser: More than one parameter passed to instantiation for motif under key {key}. " \
-            f"Only one value can be specified here. Valid options are: {str(valid_values)[1:-1]}"
-
-        if isinstance(motif_item["instantiation"], set):
-            params = {}
-            instantiation_class_name = list(motif_item["instantiation"])[0]
-        else:
-            instantiation_class_name = list(motif_item["instantiation"].keys())[0]
-            params = motif_item["instantiation"][instantiation_class_name]
-
-        ParameterValidator.assert_in_valid_list(instantiation_class_name, valid_values, "MotifParser", "instantiation")
-        instantiation_class = ReflectionHandler.get_class_by_name("{}Instantiation".format(instantiation_class_name))
-
-        return instantiation_class, params
-
-    @staticmethod
     @log
     def _parse_motif(key: str, motif_item: dict) -> Motif:
-        instantiation_class, params = MotifParser._parse_instantiation(key, motif_item)
 
-        try:
-            instantiation_object = instantiation_class(**params)
-            motif = Motif(key, instantiation_object,
-                          seed=motif_item["seed"])
-        except TypeError as err:
-            print(f"MotifParser: invalid parameter {err.args[0]} when specifying parameters in {motif_item['instantiation']} "
-                  f"under motif {key}. Valid parameter names are: "
-                  f"{[name for name in inspect.signature(instantiation_class.__init__).keys()]}")
-            raise err
+        classes = ReflectionHandler.get_classes_by_partial_name("Instantiation", "motif_instantiation_strategy/")
+        valid_values = [cls.__name__[:-13] for cls in MotifInstantiationStrategy.__subclasses__()]
+        instantiation_object = ObjectParser.parse_object(motif_item["instantiation"], valid_values, "Instantiation",
+                                                         "motif_instantiation_strategy", "MotifParser", key)
+        motif = Motif(key, instantiation_object, seed=motif_item["seed"])
 
         return motif

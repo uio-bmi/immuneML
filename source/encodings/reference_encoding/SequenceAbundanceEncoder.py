@@ -45,7 +45,7 @@ class SequenceAbundanceEncoder(DatasetEncoder):
     """
 
     @staticmethod
-    def create_encoder(dataset, params: dict = None):
+    def build_object(dataset, **params):
         assert isinstance(dataset, RepertoireDataset), "SequenceAbundanceEncoder: this encoding only works on repertoire datasets."
         return SequenceAbundanceEncoder(**params)
 

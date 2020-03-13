@@ -66,7 +66,7 @@ class PipelineEncoder(DatasetEncoder):
         return parsed_steps
 
     @staticmethod
-    def create_encoder(dataset, params: dict = None):
+    def build_object(dataset, **params):
         if isinstance(dataset, RepertoireDataset):
             return PipelineEncoder(**params if params is not None else {})
         else:
@@ -95,7 +95,7 @@ class PipelineEncoder(DatasetEncoder):
             filename=params["filename"],
             model=None
         )
-        encoder = self.initial_encoder.create_encoder(dataset, self.initial_encoder_params)
+        encoder = self.initial_encoder.build_object(dataset, **self.initial_encoder_params)
         encoded_dataset = encoder.encode(dataset, initial_params)
         return encoded_dataset
 

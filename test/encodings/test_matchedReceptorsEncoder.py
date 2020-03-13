@@ -53,7 +53,7 @@ class TestMatchedReceptorsEncoder(TestCase):
 
         reference_receptors = {"path": path + "refs.tsv", "format": "VDJdb"}
 
-        encoder = MatchedReceptorsRepertoireEncoder.create_encoder(dataset, {
+        encoder = MatchedReceptorsRepertoireEncoder.build_object(dataset, **{
             "reference_receptors": reference_receptors,
             "one_file_per_donor": True
         })
@@ -78,7 +78,7 @@ class TestMatchedReceptorsEncoder(TestCase):
         self.assertListEqual(list(encoded.encoded_data.feature_annotations.v_gene), ["v1" for i in range(4)])
         self.assertListEqual(list(encoded.encoded_data.feature_annotations.j_gene), ["j1" for i in range(4)])
 
-        encoder = MatchedReceptorsRepertoireEncoder.create_encoder(dataset, {
+        encoder = MatchedReceptorsRepertoireEncoder.build_object(dataset, **{
             "reference_receptors": reference_receptors,
             "one_file_per_donor": False
         })
@@ -103,7 +103,7 @@ class TestMatchedReceptorsEncoder(TestCase):
         self.assertRaises(KeyError, encoder.encode, dataset, params)
 
         # If one_file_per_donor is True, the key "donor" does not need to be specified
-        encoder = MatchedReceptorsRepertoireEncoder.create_encoder(dataset, {
+        encoder = MatchedReceptorsRepertoireEncoder.build_object(dataset, **{
             "reference_receptors": reference_receptors,
             "one_file_per_donor": True
         })

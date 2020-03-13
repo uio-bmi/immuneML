@@ -1,4 +1,4 @@
-from source.dsl.SymbolType import SymbolType
+from source.dsl.symbol_table.SymbolType import SymbolType
 
 
 class SymbolTableEntry:

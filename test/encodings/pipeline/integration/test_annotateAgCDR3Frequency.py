@@ -103,7 +103,7 @@ reference_rep.tsv,rep1"""
                 model={}
             )
 
-        encoder = PipelineEncoder.create_encoder(dataset, {
+        encoder = PipelineEncoder.build_object(dataset, **{
                     "initial_encoder": KmerFrequencyEncoder.__name__[:-7],
                     "initial_encoder_params": kmer_freq_params,
                     "steps": [{'step1': {"type": "SequenceMatchFeatureAnnotation",

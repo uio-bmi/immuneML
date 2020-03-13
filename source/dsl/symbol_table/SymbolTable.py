@@ -1,7 +1,7 @@
 import warnings
 
-from source.dsl.SymbolTableEntry import SymbolTableEntry
-from source.dsl.SymbolType import SymbolType
+from source.dsl.symbol_table.SymbolTableEntry import SymbolTableEntry
+from source.dsl.symbol_table.SymbolType import SymbolType
 
 
 class SymbolTable:

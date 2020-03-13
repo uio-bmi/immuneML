@@ -36,9 +36,7 @@ class TestImmuneMLParser(TestCase):
                             "vector_size": 8,
                         }
                     },
-                    "a2": {
-                        "Word2Vec"
-                    }
+                    "a2": "Word2Vec"
                 },
                 "ml_methods": {
                     "simpleLR": {
@@ -48,14 +46,11 @@ class TestImmuneMLParser(TestCase):
                         "model_selection_cv": False,
                         "model_selection_n_folds": -1,
                     },
-                    "simpleLR2": {
-                        "SimpleLogisticRegression"
-                    }
+                    "simpleLR2": "SimpleLogisticRegression"
                 },
                 "reports": {
-                    "rep1": {
-                        "SequenceLengthDistribution"
-                    }
+                    "rep1": "SequenceLengthDistribution"
+
                 }
             },
             "instructions": {}

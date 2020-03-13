@@ -72,7 +72,7 @@ class MatchedReceptorsEncoder(DatasetEncoder):
         }
 
     @staticmethod
-    def create_encoder(dataset=None, params: dict = None):
+    def build_object(dataset=None, **params):
         try:
             prepared_params = MatchedReceptorsEncoder._prepare_parameters(**params)
             encoder = ReflectionHandler.get_class_by_name(

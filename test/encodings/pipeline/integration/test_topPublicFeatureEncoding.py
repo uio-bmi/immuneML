@@ -55,7 +55,7 @@ class TestTopPublicFeatureEncoding(TestCase):
             params=dataset_params
         )
 
-        encoder = PipelineEncoder.create_encoder(dataset, {
+        encoder = PipelineEncoder.build_object(dataset, **{
                     "initial_encoder": KmerFrequencyEncoder.__name__[:-7],
                     "initial_encoder_params": {
                         "normalization_type": NormalizationType.NONE.name,

@@ -42,7 +42,7 @@ class TestKmerFreqSequenceEncoder(TestCase):
 
         dataset = SequenceDataset(params={"l1": [1, 2]}, filenames=[filename], identifier="d1")
 
-        encoder = KmerFreqSequenceEncoder.create_encoder(dataset, {
+        encoder = KmerFreqSequenceEncoder.build_object(dataset, **{
                 "normalization_type": NormalizationType.RELATIVE_FREQUENCY.name,
                 "reads": ReadsType.UNIQUE.name,
                 "sequence_encoding": SequenceEncodingType.CONTINUOUS_KMER.name,

@@ -53,7 +53,7 @@ class TestExploratoryAnalysisProcess(TestCase):
                  "named_analysis_2": ExploratoryAnalysisUnit(dataset=dataset, report=SequenceLengthDistribution(), preprocessing_sequence=preproc_sequence),
                  "named_analysis_3": ExploratoryAnalysisUnit(dataset=dataset, report=MatchingSequenceDetails.build_object(max_edit_distance=1, reference_sequences=refs_dict),
                                          label_config=label_config,
-                                         encoder=ReferenceRepertoireEncoder.create_encoder(dataset, {"max_edit_distance":1,
+                                         encoder=ReferenceRepertoireEncoder.build_object(dataset, **{"max_edit_distance":1,
                                                                             "summary": SequenceMatchingSummaryType.COUNT.name,
                                                                             "reference_sequences": refs_dict}))}
 
