@@ -24,7 +24,7 @@ class MatchedReceptorsRepertoireEncoder(MatchedReceptorsEncoder):
             # example_ids contains a list of repertoire identifiers
             example_ids=example_ids,
             # feature_names contains a list of reference receptor identifiers
-            feature_names=["{id}.{chain}".format(id=row['id'], chain=row['chain']) for index, row in feature_annotations.iterrows()],
+            feature_names=["{receptor_id}.{chain}".format(receptor_id=row["receptor_id"], chain=row["chain"]) for index, row in feature_annotations.iterrows()],
             # feature_annotations contains a PD dataframe with sequence and VDJ gene usage per reference receptor
             feature_annotations=feature_annotations,
             labels=labels,
@@ -35,26 +35,37 @@ class MatchedReceptorsRepertoireEncoder(MatchedReceptorsEncoder):
         return encoded_dataset
 
     def _get_feature_info(self):
-        # returns a pandas dataframe containing:
-        # - receptor id
-        # - receptor chain
-        # - amino acid sequence
-        # - v gene
-        # - j gene
+        """
+        returns a pandas dataframe containing:
+         - receptor id
+         - receptor chain
+         - amino acid sequence
+         - v gene
+         - j gene
+        """
 
         features = [[] for i in range(0, len(self.reference_receptors) * 2)]
 
         for i, receptor in enumerate(self.reference_receptors):
             id = receptor.identifier
-            chains = receptor.get_chains()
-            first_chain = receptor.get_chain(chains[0])
-            second_chain = receptor.get_chain(chains[1])
+            chain_names = receptor.get_chains()
+            clonotype_id = receptor.metadata["clonotype_id"]
+            first_chain = receptor.get_chain(chain_names[0])
+            second_chain = receptor.get_chain(chain_names[1])
 
-            features[i * 2] = [id, chains[0], first_chain.amino_acid_sequence, first_chain.metadata.v_gene, first_chain.metadata.j_gene]
-            features[i * 2 + 1] = [id, chains[1], second_chain.amino_acid_sequence, second_chain.metadata.v_gene, second_chain.metadata.j_gene]
+            features[i * 2] = [id, clonotype_id, chain_names[0],
+                               first_chain.metadata.custom_params["dual_chain_id"],
+                               first_chain.amino_acid_sequence,
+                               first_chain.metadata.v_gene,
+                               first_chain.metadata.j_gene]
+            features[i * 2 + 1] = [id, clonotype_id, chain_names[1],
+                                   second_chain.metadata.custom_params["dual_chain_id"],
+                                   second_chain.amino_acid_sequence,
+                                   second_chain.metadata.v_gene,
+                                   second_chain.metadata.j_gene]
 
         features = pd.DataFrame(features,
-                                columns=['id', 'chain', 'sequence', 'v_gene', 'j_gene'])
+                                columns=["receptor_id", "clonotype_id", "chain", "dual_chain_id", "sequence", "v_gene", "j_gene"])
 
         return features
 
@@ -71,23 +82,19 @@ class MatchedReceptorsRepertoireEncoder(MatchedReceptorsEncoder):
             for label in params["label_configuration"].get_labels_by_name():
                 labels[label].append(repertoire.metadata[label])
 
-        example_ids = [repertoire.identifier for repertoire in dataset.get_data()]
-
-        if self.one_file_per_donor:
-            return encoded_repertories, labels, example_ids
-        else:
-            return self._collapse_encoding_per_donor(encoded_repertories, labels)
+        return self._collapse_encoding_per_donor(encoded_repertories, labels)
 
     def _match_repertoire_to_receptors(self, repertoire: SequenceRepertoire):
         matcher = SequenceMatcher()
         matches = np.zeros(len(self.reference_receptors) * 2, dtype=int)
+        rep_seqs = repertoire.sequences
 
         for i, ref_receptor in enumerate(self.reference_receptors):
-            chains = ref_receptor.get_chains()
-            first_chain = ref_receptor.get_chain(chains[0])
-            second_chain = ref_receptor.get_chain(chains[1])
+            chain_names = ref_receptor.get_chains()
+            first_chain = ref_receptor.get_chain(chain_names[0])
+            second_chain = ref_receptor.get_chain(chain_names[1])
 
-            for rep_seq in repertoire.sequences:
+            for rep_seq in rep_seqs:
                 # Match with first chain: add to even columns in matches.
                 # Match with second chain: add to odd columns
                 if matcher.matches_sequence(first_chain, rep_seq, 0):
@@ -99,7 +106,7 @@ class MatchedReceptorsRepertoireEncoder(MatchedReceptorsEncoder):
 
     def _collapse_encoding_per_donor(self, encoded_repertories, labels):
         if not "donor" in labels.keys():
-            raise KeyError("When using the option one_file_per_donor = False, the label 'donor' must be specified in metadata")
+            raise KeyError("The label 'donor' must be specified in metadata")
 
         donor_ids = sorted(set(labels["donor"]))
         ids_to_idx = {id: idx for idx, id in enumerate(donor_ids)}
