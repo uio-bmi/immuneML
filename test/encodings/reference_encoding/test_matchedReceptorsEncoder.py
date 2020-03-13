@@ -2,10 +2,7 @@ import shutil
 from unittest import TestCase
 
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
-from source.data_model.receptor.TCABReceptor import TCABReceptor
 from source.data_model.receptor.receptor_sequence.Chain import Chain
-from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
-from source.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
 from source.encodings.EncoderParams import EncoderParams
 from source.encodings.reference_encoding.MatchedReceptorsRepertoireEncoder import MatchedReceptorsRepertoireEncoder
 from source.environment.EnvironmentSettings import EnvironmentSettings
@@ -74,7 +71,7 @@ TCR_AB	200	CCCC	TRAV1		TRAJ1	null	null	null	null	TTTT	TRBV1		TRBJ1	null	null	nul
         dataset, label_config, reference_receptors, labels = self.create_dummy_data(path)
 
 
-        encoder = MatchedReceptorsRepertoireEncoder.create_encoder(dataset, {
+        encoder = MatchedReceptorsRepertoireEncoder.build_object(dataset, **{
             "reference_receptors": reference_receptors,
         })
 

@@ -1,6 +1,7 @@
+import os
 import shutil
 import unittest
-import os
+
 import pandas as pd
 
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
@@ -61,8 +62,7 @@ TCR_AB	400	NONO	TRAV1		TRAJ1	null	null	null	null	NONO	TRBV1		TRBJ1	null	null	nul
 
         reference_receptors = {"path": path + "refs.tsv", "format": "IRIS"}
 
-
-        encoder = MatchedReceptorsRepertoireEncoder.create_encoder(dataset, {
+        encoder = MatchedReceptorsRepertoireEncoder.build_object(dataset, **{
             "reference_receptors": reference_receptors,
         })
 

@@ -20,11 +20,11 @@ class ParameterValidator:
         assert isinstance(value, parameter_type), f"{location}: {value} is not a valid value for parameter {parameter_name}. " \
                                                   f"It has to be of type {parameter_type}, but is now of type {type(value)}."
 
-        if min_inclusive:
+        if min_inclusive is not None:
             assert value >= min_inclusive, f"{location}: {value} is not a valid value for parameter {parameter_name}. " \
                                            f"It has to be greater or equal to {min_inclusive}."
 
-        if max_inclusive:
+        if max_inclusive is not None:
             assert value <= min_inclusive, f"{location}: {value} is not a valid value for parameter {parameter_name}. " \
                                            f"It has to be less or equal to {max_inclusive}."
 
