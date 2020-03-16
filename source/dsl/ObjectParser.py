@@ -60,6 +60,6 @@ class ObjectParser:
         except TypeError as err:
             raise AssertionError(f"{location}: invalid parameter {err.args[0]} when specifying parameters in {specs} "
                                  f"under key {key}. Valid parameter names are: "
-                                 f"{[name for name in inspect.signature(cls.__init__).keys()]}")
+                                 f"{[name for name in inspect.signature(cls.__init__).parameters.keys()]}")
 
         return (obj, params) if return_params_dict else obj
