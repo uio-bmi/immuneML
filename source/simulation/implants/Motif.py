@@ -24,7 +24,14 @@ class Motif:
             my_simple_motif:
                 seed: AAA
                 instantiation: GappedKmer
-                ...
+
+            my_gapped_motif:
+                seed: AA/A
+                instantiation:
+                    GappedKmer:
+                        min_gap: 1
+                        max_gap: 2
+                        ...
 
 
     """

@@ -8,7 +8,7 @@ class KNN(SklearnMethod):
     """
     KNN wrapper of the KNeighborsClassifier scikit-learn's method.
 
-    For usage and specification, check SklearnMethod class.
+    For usage and specification, check :py:obj:`~source.ml_methods.SklearnMethod.SklearnMethod`.
     For valid parameters, see: https://scikit-learn.org/stable/modules/generated/sklearn.neighbors.KNeighborsClassifier.html
     """
 

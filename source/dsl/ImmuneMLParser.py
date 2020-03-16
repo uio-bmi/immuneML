@@ -32,30 +32,31 @@ class ImmuneMLParser:
                     KmerFrequency
                         k: 3
                 e2:
-                    Word2Vec
+                    Word2Vec:
                         vector_size: 16
                         context: sequence
             ml_methods:
                 log_reg1:
-                    LogisticRegression
+                    LogisticRegression:
                         C: 0.001
             reports:
                 r1:
                     SequenceLengthDistribution
+
             preprocessing_sequences:
                 seq1:
                     - filter_chain_B:
-                        DatasetChainFilter
+                        DatasetChainFilter:
                             keep_chain: A
                     - filter_clonotype:
-                        ClonotypeCountFilter
+                        ClonotypeCountFilter:
                             lower_limit: 1000
                 seq2:
                     - filter_clonotype:
-                        ClonotypeCountFilter
+                        ClonotypeCountFilter:
                             lower_limit: 500
                     - filter_chain_A:
-                        DatasetChainFilter
+                        DatasetChainFilter:
                             keep_chain: B
         instructions:
             inst1:

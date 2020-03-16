@@ -29,8 +29,8 @@ class MatchedPairedReference(EncodingReport):
                     MatchedReceptors:
                         ...
             reports:
-                my_mr_report:
-                    MatchedPairedReference
+                my_mr_report: MatchedPairedReference
+
         instructions:
                 instruction_1:
                     type: ExploratoryAnalysis

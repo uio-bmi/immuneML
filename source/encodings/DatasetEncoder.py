@@ -6,6 +6,17 @@ from source.encodings.EncoderParams import EncoderParams
 
 
 class DatasetEncoder(metaclass=abc.ABCMeta):
+    """
+
+    Specification:
+
+        encodings:
+            e1: <encoder_class> # encoding without parameters
+
+            e2:
+                <encoder_class>: # encoding with parameters
+                    parameter: value
+    """
 
     @staticmethod
     @abc.abstractmethod

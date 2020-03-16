@@ -7,15 +7,6 @@ from source.util.ReflectionHandler import ReflectionHandler
 
 
 class EncodingParser:
-    """
-    example:
-
-    encodings:
-        e1:
-            KmerFrequency:
-                k: 3
-                normalization_type: relative_frequency
-    """
 
     @staticmethod
     def parse(encodings: dict, symbol_table: SymbolTable):

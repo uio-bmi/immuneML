@@ -24,8 +24,8 @@ class DesignMatrixExporter(EncodingReport):
                 my_dme_encoding:
                     ...
             reports:
-                my_dme_report:
-                    DesignMatrixExporter
+                my_dme_report: DesignMatrixExporter
+
         instructions:
                 instruction_1:
                     type: ExploratoryAnalysis

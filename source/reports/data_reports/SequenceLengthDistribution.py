@@ -20,8 +20,8 @@ class SequenceLengthDistribution(DataReport):
                 my_data:
                     ...
             reports:
-                my_sld_report:
-                    SequenceLengthDistribution
+                my_sld_report: SequenceLengthDistribution
+
         instructions:
                 instruction_1:
                     type: ExploratoryAnalysis

@@ -45,10 +45,12 @@ class Word2VecEncoder(DatasetEncoder):
     .. highlight:: yaml
     .. code-block:: yaml
 
-        Word2Vec:
-            vector_size: 16
-            k: 3
-            model_type: SEQUENCE
+        encodings:
+            my_w2v:
+                Word2Vec:
+                    vector_size: 16
+                    k: 3
+                    model_type: SEQUENCE
 
     """
 

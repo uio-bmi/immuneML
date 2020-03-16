@@ -9,12 +9,6 @@ from source.util.ReflectionHandler import ReflectionHandler
 
 
 class SignalParser:
-    """
-    s1:
-        implanting: HealthySequences
-        sequence_position_weights:
-            107: 1.
-    """
 
     @staticmethod
     @log
