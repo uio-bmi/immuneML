@@ -40,12 +40,15 @@ class MatchedReceptorsEncoder(DatasetEncoder):
         "RepertoireDataset": "MatchedReceptorsRepertoireEncoder"
     }
 
-    def __init__(self, reference_receptors: ReceptorList):
+    def __init__(self, reference_receptors: ReceptorList, max_edit_distance: int):
         self.reference_receptors = reference_receptors
+        self.max_edit_distance = max_edit_distance
 
     @staticmethod
-    def _prepare_parameters(reference_receptors: dict):
+    def _prepare_parameters(reference_receptors: dict, max_edit_distance: int):
         location = "MatchedReceptorsEncoder"
+
+        ParameterValidator.assert_type_and_value(max_edit_distance, int, location, "max_edit_distance", min_inclusive=0)
 
         ParameterValidator.assert_keys(list(reference_receptors.keys()), ["format", "path", "params"], location, "reference_receptors", exclusive=False)
 
@@ -65,7 +68,8 @@ class MatchedReceptorsEncoder(DatasetEncoder):
             .import_items(reference_receptors["path"], **seq_import_params)
 
         return {
-            "reference_receptors": receptors
+            "reference_receptors": receptors,
+            "max_edit_distance": max_edit_distance
         }
 
     @staticmethod
