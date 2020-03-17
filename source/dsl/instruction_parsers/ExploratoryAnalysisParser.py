@@ -24,9 +24,11 @@ class ExploratoryAnalysisParser:
         instruction_name:
             type: ExploratoryAnalysis
             analyses:
-                -   dataset: d1
+                my_first_analysis:
+                    dataset: d1
                     report: r1
-                -   dataset: d1
+                my_second_analysis:
+                    dataset: d1
                     encoding: e1
                     report: r2
                     labels:
