@@ -13,6 +13,8 @@ from source.util.PathBuilder import PathBuilder
 class Barplot(EncodingReport):
 
     """
+    Note: this version of Barplot is present for historic reasons. Please use FeatureValueBarplot.
+
     Plot barplot with standard error for features in encoded data matrix.
     Refer to documentation of Distributions, for overlapping parameters, the definitions are identical.
 

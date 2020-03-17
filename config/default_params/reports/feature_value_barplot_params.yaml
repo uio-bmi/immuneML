@@ -1,0 +1,4 @@
+errorbar_meaning: STANDARD_ERROR # options in ErrorBarMeaning
+color_grouping_label: None
+row_grouping_label: None
+column_grouping_label: None

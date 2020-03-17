@@ -5,20 +5,20 @@ library(ggplot2)
 plot_barplot = function(data,
                         x,
                         y = "value",
-                        xlab=x,
-                        ylab=y,
-                        fill_lab=x,
+                        x_lab=x,
+                        y_lab=y,
                         type = "quasirandom",
                         errorbar_meaning="se", # choose from: se, sd, ci
                         color = "NULL",
+                        color_lab=color,
                         palette = NULL,
                         facet_rows = c(),
                         facet_columns = c(),
-                        facet_type = "wrap", # choose from: "wrap" or "grid"
+                        facet_type = "grid", # choose from: "wrap" or "grid"
                         facet_scales = "free", # choose from: "fixed", "free", "free_x", "free_y"
                         facet_switch = "NULL",
                         sort_by_y = FALSE,
-                        nrow,
+                        nrow = "NULL",
                         height,
                         width,
                         result_path,
@@ -59,7 +59,7 @@ plot_barplot = function(data,
     geom_bar(stat="identity", position="dodge") +
     geom_errorbar(aes(ymin=summary[[y]]-summary[[errorbar_meaning]], ymax=summary[[y]]+summary[[errorbar_meaning]]), size=0.5,
                          width=.25,position=position_dodge(.9)) +
-    ggexp::theme_ggexp() + labs(x = xlab, y=ylab, fill=fill_lab) +
+    ggexp::theme_ggexp() + labs(x = x_lab, y=y_lab, fill=color_lab) +
     palette
 
   if (ml_benchmark){
@@ -80,6 +80,7 @@ plot_barplot = function(data,
     plot,
     height = height,
     width = width,
-    limitsize = FALSE
+    limitsize = FALSE,
+    units="in"
   )
 }

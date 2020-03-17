@@ -26,7 +26,6 @@ class Coefficients(MLReport):
     Which coefficients should be plotted (for example: only nonzero, above a certain threshold, ...) can be specified.
     Multiple options can be specified simultaneously. The full set of coefficients will also be exported as a csv file.
 
-    # todo: add example how this can be used from merely 'training a model' (no HP optimization)
 
     Attributes:
         coefs_to_plot (list): A list specifying which coefficients should be plotted.
@@ -187,7 +186,7 @@ class Coefficients(MLReport):
                 plotting_data.loc[:, "empty_facet"] = ""  # Necessary to remove '(all)' label when not using facets
 
                 plot.plot_barplot(data=plotting_data, x="features", color="NULL", y="coefficients",
-                                  ylab=self._y_axis_title, xlab="feature", facet_type="wrap", facet_columns="empty_facet",
+                                  y_lab=self._y_axis_title, x_lab="feature", facet_type="wrap", facet_columns="empty_facet",
                                   facet_scales="free", nrow=1, height=6, sort_by_y=True,
                                   width=8, result_path=self.result_path, result_name=output_name)
             except Exception as e:

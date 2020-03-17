@@ -113,8 +113,8 @@ class BenchmarkHPSettings(MLReport):
 
         errorbar_meaning_abbr = BenchmarkHPSettings.ERRORBAR_CONVERSION[self.errorbar_meaning]
 
-        plot.plot_barplot(data=plotting_data, x="ml_method", color="ml_method", fill_lab="ML method",
-                          y="performance", ylab="Performance (balanced accuracy)", xlab="Implanted signals",
+        plot.plot_barplot(data=plotting_data, x="ml_method", color="ml_method", color_lab="ML method",
+                          y="performance", y_lab="Performance (balanced accuracy)", x_lab="Implanted signals",
                           errorbar_meaning=errorbar_meaning_abbr, facet_rows="encoding", facet_columns="label", facet_type="grid",
                           facet_scales="free_y", facet_switch="x", nrow="NULL", height=6,
                           width=8, result_path=self.result_path, result_name="benchmark_result", ml_benchmark=True)
