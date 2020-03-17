@@ -26,8 +26,17 @@ class EnvironmentSettings:
     low_memory = True
 
     @staticmethod
+    def get_cache_type(cache_type: CacheType = None):
+        if cache_type is not None:
+            return cache_type
+        else:
+            if Constants.CACHE_TYPE not in os.environ:
+                os.environ[Constants.CACHE_TYPE] = CacheType.PRODUCTION.name
+            return CacheType[os.environ[Constants.CACHE_TYPE].upper()]
+
+    @staticmethod
     def get_cache_path(cache_type: CacheType = None):
-        cache_type = CacheType[os.environ[Constants.CACHE_TYPE].upper()] if cache_type is None else cache_type
+        cache_type = EnvironmentSettings.get_cache_type(cache_type)
         if cache_type == CacheType.PRODUCTION:
             return EnvironmentSettings.cache_path
         elif cache_type == CacheType.TEST:
