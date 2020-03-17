@@ -16,6 +16,15 @@ from source.workflows.steps.DataEncoderParams import DataEncoderParams
 
 
 def encode_dataset_by_kmer_freq(path_to_dataset_directory: str, result_path: str, metadata_path: str = None):
+    """
+    encodes the repertoire dataset using KmerFrequencyEncoder
+    :param path_to_dataset_directory: path to directory containing all repertoire files with .tsv extension in MiXCR format
+    :param result_path: where to store the results
+    :param metadata_path: csv file with columns "filename", "donor", "disease" which is filled by default if value of argument is None,
+                          otherwise any metadata csv file passed to the function, must include filename and donor columns,
+                          and an arbitrary disease column
+    :return: encoded dataset with encoded data in encoded_dataset.encoded_data.examples
+    """
     if metadata_path is None:
         metadata_path = generate_random_metadata(path_to_dataset_directory, result_path)
 
