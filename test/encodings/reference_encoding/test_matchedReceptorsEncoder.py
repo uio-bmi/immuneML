@@ -67,12 +67,11 @@ TCR_AB	200	CCCC	TRAV1		TRAJ1	null	null	null	null	TTTT	TRBV1		TRBJ1	null	null	nul
     def test__encode_new_dataset(self):
         path = EnvironmentSettings.root_path + "test/tmp/matched_receptors_encoder/"
 
-
         dataset, label_config, reference_receptors, labels = self.create_dummy_data(path)
-
 
         encoder = MatchedReceptorsRepertoireEncoder.build_object(dataset, **{
             "reference_receptors": reference_receptors,
+            "max_edit_distance": 0
         })
 
         encoded = encoder.encode(dataset, EncoderParams(

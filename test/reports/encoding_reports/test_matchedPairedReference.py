@@ -64,6 +64,7 @@ TCR_AB	400	NONO	TRAV1		TRAJ1	null	null	null	null	NONO	TRBV1		TRBJ1	null	null	nul
 
         encoder = MatchedReceptorsRepertoireEncoder.build_object(dataset, **{
             "reference_receptors": reference_receptors,
+            "max_edit_distance": 0
         })
 
         encoded = encoder.encode(dataset, EncoderParams(
@@ -81,11 +82,10 @@ TCR_AB	400	NONO	TRAV1		TRAJ1	null	null	null	null	NONO	TRBV1		TRBJ1	null	null	nul
 
         encoded_data = self.create_encoded_dummy_data(path + "input_data/")
 
-        report = MatchedPairedReference(dataset=encoded_data, result_path = path + "report_results/")
+        report = MatchedPairedReference(dataset=encoded_data, result_path=path + "report_results/")
 
         report.check_prerequisites()
         report.generate()
-
 
         self.assertTrue(os.path.isfile(path+"report_results/complete_match_count_table.csv"))
         self.assertTrue(os.path.isfile(path+"report_results/repertoire_sizes.csv"))
