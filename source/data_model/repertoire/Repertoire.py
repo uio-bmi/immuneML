@@ -261,6 +261,19 @@ class Repertoire(DatasetItem):
 
     @property
     def receptors(self) -> ReceptorList:
+        """
+        A property that creates a list of Receptor objects based on the cell_ids field in the following manner:
+            - all sequences that have the same cell_id are grouped together
+            - they are divided into groups based on the chain
+            - all valid combinations of chains are created and used to make a receptor object - this means that if a cell has
+              two beta (b1 and b2) and one alpha chain (a1), two receptor objects will be created: receptor1 (b1, a1), receptor2 (b2, a1)
+
+        To avoid have multiple receptors in the same cell, use some of the preprocessing classes which could merge/eliminate multiple
+        sequences. See the documentation of the preprocessing module for more information.
+
+        Returns:
+            ReceptorList: a list of objects of Receptor class
+        """
         receptors = ReceptorList()
 
         same_cell_lists = self._prepare_cell_lists()
@@ -272,6 +285,20 @@ class Repertoire(DatasetItem):
 
     @property
     def cells(self) -> CellList:
+        """
+        A property that creates a list of Cell objects based on the cell_ids field in the following manner:
+            - all sequences that have the same cell_id are grouped together
+            - they are divided into groups based on the chain
+            - all valid combinations of chains are created and used to make a receptor object - this means that if a cell has
+              two beta (b1 and b2) and one alpha chain (a1), two receptor objects will be created: receptor1 (b1, a1), receptor2 (b2, a1)
+            - an object of the Cell class is created from all receptors with the same cell_id created as described in the previous steps
+
+        To avoid have multiple receptors in the same cell, use some of the preprocessing classes which could merge/eliminate multiple
+        sequences. See the documentation of the preprocessing module for more information.
+
+        Returns:
+            CellList: a list of objects of Cell class
+        """
         cells = CellList()
         cell_lists = self._prepare_cell_lists()
 
