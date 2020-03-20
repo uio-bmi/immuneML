@@ -2,12 +2,12 @@ source(file.path(here::here(), "source", "visualization", "PaletteUtils.R"))
 
 library(ggplot2)
 
+
 plot_barplot = function(data,
                         x,
                         y = "value",
                         x_lab=x,
                         y_lab=y,
-                        type = "quasirandom",
                         errorbar_meaning="se", # choose from: se, sd, ci
                         color = "NULL",
                         color_lab=color,

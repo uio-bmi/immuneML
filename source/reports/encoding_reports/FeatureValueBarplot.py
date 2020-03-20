@@ -15,12 +15,14 @@ from source.visualization.ErrorBarMeaning import ErrorBarMeaning
 class FeatureValueBarplot(EncodingReport):
     """
     Plots a barplot of the feature values in a given encoded data matrix. Can be used in combination
-    with any encoding. The resulting figure will be a barplot where each bar represents one feature,
-    and the length of the bar represents the feature value. For example, when
-    :py:obj:`~source.encodings.kmer_frequency.KmerFrequencyEncoder.KmerFrequencyEncoder` is used,
-    the features are the k-mers and the feature values are the frequencies per k-mer.
+    with any encoding. When the distribution of feature values is of interest, please consider using
+    :py:obj:`~source.reports.encoding_reports.FeatureValueDistplot.FeatureValueDistplot` instead.
 
-    Optional (metadata) labels can be specified for dividing the error bars into groups. Groups
+    This report creates a barplot where each bar represents one feature, and the length of the bar represents
+    the feature value. For example, when :py:obj:`~source.encodings.kmer_frequency.KmerFrequencyEncoder.KmerFrequencyEncoder`
+    is used, the features are the k-mers and the feature values are the frequencies per k-mer.
+
+    Optional (metadata) labels can be specified for dividing the bars into groups. Groups
     can be visualized with different colors or different row and column facets.
 
 
@@ -106,10 +108,12 @@ class FeatureValueBarplot(EncodingReport):
 
         plot = STAP(string, "plot")
 
+        errorbar_meaning_abbr = FeatureValueBarplot.ERRORBAR_CONVERSION[self.errorbar_meaning]
+
         plot.plot_barplot(data=data_long_format, x="feature", color=self.color,
                   facet_rows=self.facet_rows, facet_columns=self.facet_columns, facet_type="grid",
                   facet_scales="free", height=6,  width=8, result_path=self.result_path,
-                  result_name=self.result_name)
+                  result_name=self.result_name, errorbar_meaning=errorbar_meaning_abbr)
 
     def check_prerequisites(self):
         location = "FeatureValueBarplot"
@@ -119,7 +123,7 @@ class FeatureValueBarplot(EncodingReport):
             warnings.warn(f"{location}: this report can only be created for an encoded RepertoireDataset. {location} report will not be created.")
             run_report = False
         else:
-            legal_labels = self.dataset.encoded_data.labels.keys()
+            legal_labels = list(self.dataset.encoded_data.labels.keys())
 
             for label_param in (self.color, self.facet_rows, self.facet_columns):
                 if label_param is not None:

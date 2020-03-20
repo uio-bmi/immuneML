@@ -15,6 +15,8 @@ from source.visualization.FacetType import FacetType
 
 class DistributionPlot(EncodingReport):
     """
+    Note: this version DistributionPlot Barplot is present for historic reasons. Please use FeatureValueDistplot.
+
     Generate distribution plots (violin plots, boxplots, density, etc.) of multiple feature, faceted/colored/grouped by
     various example- and feature-level metadata
     @param result_name: string indicating resulting figure file name
@@ -58,7 +60,7 @@ class DistributionPlot(EncodingReport):
         return DistributionPlot(**kwargs)
 
     def __init__(self, dataset: RepertoireDataset = None, result_path: str = None, result_name: str = None,
-                 type: str = "quasirandom", x: str = None, color: str = "NULL", group: str = "NULL", palette: dict = {},
+                 type: str = "quasirandom", x: str = None, color: str = "NULL", palette: dict = {},
                  facet_rows: list = None, facet_columns: list = None, facet_type: str = "grid",
                  facet_scales: str = "free", facet_switch: str = "NULL", nrow: int = 3,
                  height: float = 10, width: float = 10):
@@ -69,13 +71,12 @@ class DistributionPlot(EncodingReport):
         self.type = type
         self.x = x
         self.color = color
-        self.group = group
         self.palette = palette
         self.facet_rows = facet_rows if facet_rows is not None else []
         self.facet_columns = facet_columns if facet_columns is not None else []
         self.facet_type = FacetType[facet_type.upper()].name.lower()
         self.facet_scales = FacetScalesType[facet_scales.upper()].name.lower()
-        self.facet_switch = FacetSwitchType[facet_switch.upper()].name.lower()
+        self.facet_switch = FacetSwitchType[facet_switch.upper()].name.lower() if facet_switch != "NULL" else "NULL"
         self.nrow = nrow
         self.height = height
         self.width = width
@@ -95,7 +96,7 @@ class DistributionPlot(EncodingReport):
 
         plot = STAP(string, "plot")
 
-        plot.plot_distributions(data=data, x=self.x, color=self.color, group=self.group, palette=json.dumps(self.palette),
+        plot.plot_distributions(data=data, x=self.x, color=self.color, palette=json.dumps(self.palette),
                   facet_rows=self.facet_rows, facet_columns=self.facet_columns, facet_type=self.facet_type,
                   facet_scales=self.facet_scales, facet_switch=self.facet_switch, nrow=self.nrow, height=self.height,
                   width=self.width, result_path=self.result_path, result_name=self.result_name, type=self.type)
