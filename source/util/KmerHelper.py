@@ -3,7 +3,7 @@ import itertools
 import warnings
 
 from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
-from source.data_model.repertoire.SequenceRepertoire import SequenceRepertoire
+from source.data_model.repertoire.Repertoire import Repertoire
 from source.util.PositionHelper import PositionHelper
 
 
@@ -83,7 +83,7 @@ class KmerHelper:
         return kmers
 
     @staticmethod
-    def create_sentences_from_repertoire(repertoire: SequenceRepertoire, k: int, overlap: bool = True):
+    def create_sentences_from_repertoire(repertoire: Repertoire, k: int, overlap: bool = True):
         sentences = []
         for sequence in repertoire.sequences:
             sentences.append(KmerHelper.create_kmers_from_sequence(sequence=sequence, k=k, overlap=overlap))

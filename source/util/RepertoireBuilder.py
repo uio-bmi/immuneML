@@ -2,7 +2,7 @@ import pandas as pd
 
 from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
-from source.data_model.repertoire.SequenceRepertoire import SequenceRepertoire
+from source.data_model.repertoire.Repertoire import Repertoire
 from source.util.PathBuilder import PathBuilder
 
 
@@ -47,7 +47,7 @@ class RepertoireBuilder:
 
             metadata = {**metadata, **{"donor": donors[rep_index]}}
 
-            repertoire = SequenceRepertoire.build_from_sequence_objects(rep_sequences, path, metadata)
+            repertoire = Repertoire.build_from_sequence_objects(rep_sequences, path, metadata)
             repertoires.append(repertoire)
 
         df = pd.DataFrame({**{"filename": [f"{repertoire.identifier}_data.npy" for repertoire in repertoires], "donor": donors,

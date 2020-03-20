@@ -5,7 +5,7 @@ from source.analysis.SequenceMatcher import SequenceMatcher
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
-from source.data_model.repertoire.SequenceRepertoire import SequenceRepertoire
+from source.data_model.repertoire.Repertoire import Repertoire
 from source.encodings.reference_encoding.SequenceMatchingSummaryType import SequenceMatchingSummaryType
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.util.PathBuilder import PathBuilder
@@ -17,7 +17,7 @@ class TestSequenceMatcher(TestCase):
         path = EnvironmentSettings.root_path + "test/tmp/seqmatch/"
         PathBuilder.build(path)
 
-        repertoire = SequenceRepertoire.build_from_sequence_objects(sequence_objects=[
+        repertoire = Repertoire.build_from_sequence_objects(sequence_objects=[
             ReceptorSequence(amino_acid_sequence="AAAAAA", metadata=SequenceMetadata(chain="A", v_gene="V1", j_gene="J2"), identifier="3"),
             ReceptorSequence(amino_acid_sequence="CCCCCC", metadata=SequenceMetadata(chain="A", v_gene="V1", j_gene="J2"), identifier="4"),
             ReceptorSequence(amino_acid_sequence="AAAACC", metadata=SequenceMetadata(chain="A", v_gene="V1", j_gene="J2"), identifier="5"),
@@ -43,7 +43,7 @@ class TestSequenceMatcher(TestCase):
         path = EnvironmentSettings.root_path + "test/tmp/seqmatchrep/"
         PathBuilder.build(path)
 
-        repertoire = SequenceRepertoire.build_from_sequence_objects(sequence_objects=
+        repertoire = Repertoire.build_from_sequence_objects(sequence_objects=
                                                                     [ReceptorSequence(amino_acid_sequence="AAAAAA", identifier="1",
                                                                                       metadata=SequenceMetadata(chain="A", count=3)),
                                                                      ReceptorSequence(amino_acid_sequence="CCCCCC", identifier="2",
@@ -52,7 +52,7 @@ class TestSequenceMatcher(TestCase):
                                                                                       metadata=SequenceMetadata(chain="A", count=1)),
                                                                      ReceptorSequence(amino_acid_sequence="TADQVF", identifier="4",
                                                                                       metadata=SequenceMetadata(chain="A", count=4))],
-                                                                    metadata={"CD": True}, path=path)
+                                                            metadata={"CD": True}, path=path)
 
         sequences = [ReceptorSequence("AAAACA", metadata=SequenceMetadata(chain="A")),
                      ReceptorSequence("TADQV", metadata=SequenceMetadata(chain="A"))]

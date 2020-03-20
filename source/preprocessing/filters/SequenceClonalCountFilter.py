@@ -4,7 +4,7 @@ from multiprocessing.pool import Pool
 import numpy as np
 
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
-from source.data_model.repertoire.SequenceRepertoire import SequenceRepertoire
+from source.data_model.repertoire.Repertoire import Repertoire
 from source.preprocessing.filters.Filter import Filter
 
 
@@ -30,7 +30,7 @@ class SequenceClonalCountFilter(Filter):
         return processed_dataset
 
     @staticmethod
-    def process_repertoire(repertoire: SequenceRepertoire, params: dict) -> SequenceRepertoire:
+    def process_repertoire(repertoire: Repertoire, params: dict) -> Repertoire:
 
         counts = repertoire.get_counts()
         counts = counts if counts is not None else np.full(repertoire.get_element_count(), None)
@@ -45,7 +45,7 @@ class SequenceClonalCountFilter(Filter):
             indices_to_keep[np.logical_not(not_none_indices)] = True
             np.greater_equal(counts, params["low_count_limit"], out=indices_to_keep, where=not_none_indices)
 
-        processed_repertoire = SequenceRepertoire.build_like(repertoire, indices_to_keep, params["result_path"])
+        processed_repertoire = Repertoire.build_like(repertoire, indices_to_keep, params["result_path"])
         return processed_repertoire
 
     def process_dataset(self, dataset: RepertoireDataset, result_path: str) -> RepertoireDataset:

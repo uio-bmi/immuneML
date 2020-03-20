@@ -13,7 +13,7 @@ from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.data_model.receptor.receptor_sequence.SequenceFrameType import SequenceFrameType
 from source.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
-from source.data_model.repertoire.SequenceRepertoire import SequenceRepertoire
+from source.data_model.repertoire.Repertoire import Repertoire
 from source.environment.Constants import Constants
 from source.util.PathBuilder import PathBuilder
 
@@ -94,7 +94,7 @@ class GenericLoader(DataLoader):
 
         return df.apply(self._load_sequence, axis=1, args=(params,)).values
 
-    def load_repertoire_from_file(self, filepath, params) -> SequenceRepertoire:
+    def load_repertoire_from_file(self, filepath, params) -> Repertoire:
         df = self._read_preprocess_file(filepath, params)
 
         sequence_lists = self.get_sequence_lists_from_df(df, params)
@@ -103,14 +103,14 @@ class GenericLoader(DataLoader):
         repertoire_inputs = {**{"metadata": metadata, "path": params["result_path"]},
                              **sequence_lists}
 
-        repertoire = SequenceRepertoire.build(**repertoire_inputs)
+        repertoire = Repertoire.build(**repertoire_inputs)
 
         return repertoire
 
     def get_sequence_lists_from_df(self, df, params):
 
         standard_fields = {
-            field: df[field].values if field in df.columns and df[field] is not None else None for field in SequenceRepertoire.FIELDS
+            field: df[field].values if field in df.columns and df[field] is not None else None for field in Repertoire.FIELDS
         }
 
         if "additional_columns" in params:

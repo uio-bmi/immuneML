@@ -2,7 +2,7 @@ import shutil
 from unittest import TestCase
 
 from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
-from source.data_model.repertoire.SequenceRepertoire import SequenceRepertoire
+from source.data_model.repertoire.Repertoire import Repertoire
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.simulation.implants.Motif import Motif
 from source.simulation.implants.Signal import Signal
@@ -17,9 +17,9 @@ class TestHealthySequenceImplanting(TestCase):
         path = EnvironmentSettings.tmp_test_path + "healthysequenceimplanting/"
         PathBuilder.build(path)
 
-        repertoire = SequenceRepertoire.build_from_sequence_objects([ReceptorSequence(amino_acid_sequence="ACDFQ", identifier="1"),
-                                                                     ReceptorSequence(amino_acid_sequence="TGCDF", identifier="2")],
-                                                                    path=path, metadata={"donor": "1"})
+        repertoire = Repertoire.build_from_sequence_objects([ReceptorSequence(amino_acid_sequence="ACDFQ", identifier="1"),
+                                                             ReceptorSequence(amino_acid_sequence="TGCDF", identifier="2")],
+                                                            path=path, metadata={"donor": "1"})
         implanting = HealthySequenceImplanting(GappedMotifImplanting())
         signal = Signal(1, [Motif("m1", GappedKmerInstantiation(), "CCC")], implanting)
 

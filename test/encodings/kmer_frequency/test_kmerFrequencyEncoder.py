@@ -6,7 +6,7 @@ import numpy as np
 from source.analysis.data_manipulation.NormalizationType import NormalizationType
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
-from source.data_model.repertoire.SequenceRepertoire import SequenceRepertoire
+from source.data_model.repertoire.Repertoire import Repertoire
 from source.encodings.EncoderParams import EncoderParams
 from source.encodings.kmer_frequency.KmerFrequencyEncoder import KmerFrequencyEncoder
 from source.encodings.kmer_frequency.ReadsType import ReadsType
@@ -23,15 +23,15 @@ class TestKmerFrequencyEncoder(TestCase):
 
         PathBuilder.build(path)
 
-        rep1 = SequenceRepertoire.build_from_sequence_objects([ReceptorSequence("AAA", identifier="1"),
-                                                               ReceptorSequence("ATA", identifier="2"),
-                                                               ReceptorSequence("ATA", identifier='3')],
-                                                              metadata={"l1": 1, "l2": 2, "donor": "1"}, path=path)
+        rep1 = Repertoire.build_from_sequence_objects([ReceptorSequence("AAA", identifier="1"),
+                                                       ReceptorSequence("ATA", identifier="2"),
+                                                       ReceptorSequence("ATA", identifier='3')],
+                                                      metadata={"l1": 1, "l2": 2, "donor": "1"}, path=path)
 
-        rep2 = SequenceRepertoire.build_from_sequence_objects([ReceptorSequence("ATA", identifier="1"),
-                                                               ReceptorSequence("TAA", identifier="2"),
-                                                               ReceptorSequence("AAC", identifier="3")],
-                                                              metadata={"l1": 0, "l2": 3, "donor": "2"}, path=path)
+        rep2 = Repertoire.build_from_sequence_objects([ReceptorSequence("ATA", identifier="1"),
+                                                       ReceptorSequence("TAA", identifier="2"),
+                                                       ReceptorSequence("AAC", identifier="3")],
+                                                      metadata={"l1": 0, "l2": 3, "donor": "2"}, path=path)
 
         lc = LabelConfiguration()
         lc.add_label("l1", [1, 2])

@@ -9,7 +9,7 @@ from source.app import ImmuneMLApp
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
-from source.data_model.repertoire.SequenceRepertoire import SequenceRepertoire
+from source.data_model.repertoire.Repertoire import Repertoire
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.util.PathBuilder import PathBuilder
 
@@ -29,9 +29,9 @@ class TestImmuneMLApp(TestCase):
                      ReceptorSequence(amino_acid_sequence="AAAA", metadata=SequenceMetadata(chain="B", count=4), identifier="7"),
                      ReceptorSequence(amino_acid_sequence="AAA", metadata=SequenceMetadata(chain="A", count=2), identifier="8")]
 
-        dataset = RepertoireDataset(repertoires=[SequenceRepertoire.build_from_sequence_objects(sequences1 if i % 2 == 0 else sequences2,
-                                                                                                path,
-                                                                                                metadata={"CD": True if i % 2 == 0 else False, "donor": f"rep{i%12*2}"})
+        dataset = RepertoireDataset(repertoires=[Repertoire.build_from_sequence_objects(sequences1 if i % 2 == 0 else sequences2,
+                                                                                        path,
+                                                                                        metadata={"CD": True if i % 2 == 0 else False, "donor": f"rep{i%12*2}"})
                                                  for i in range(1, 14)],
                                     params={"CD": [True, False]})
 

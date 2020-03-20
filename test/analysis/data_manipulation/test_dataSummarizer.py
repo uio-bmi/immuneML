@@ -10,7 +10,7 @@ from source.analysis.criteria_matches.OperationType import OperationType
 from source.analysis.data_manipulation.DataSummarizer import DataSummarizer
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.encoded_data.EncodedData import EncodedData
-from source.data_model.repertoire.SequenceRepertoire import SequenceRepertoire
+from source.data_model.repertoire.Repertoire import Repertoire
 
 
 class TestDataSummarizer(TestCase):
@@ -36,9 +36,9 @@ class TestDataSummarizer(TestCase):
         })
     }
 
-    dataset_1 = RepertoireDataset(encoded_data=EncodedData(**encoded_data_1), repertoires=[SequenceRepertoire("1.npy", None, "1"),
-                                                                                           SequenceRepertoire("2.npy", None, "2"),
-                                                                                           SequenceRepertoire("3.npy", None, "3")])
+    dataset_1 = RepertoireDataset(encoded_data=EncodedData(**encoded_data_1), repertoires=[Repertoire("1.npy", None, "1"),
+                                                                                           Repertoire("2.npy", None, "2"),
+                                                                                           Repertoire("3.npy", None, "3")])
 
     encoded_data_2 = {
         'examples': sparse.csr_matrix(np.array([

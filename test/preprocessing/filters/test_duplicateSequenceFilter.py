@@ -3,13 +3,12 @@ from unittest import TestCase
 
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.receptor.receptor_sequence.Chain import Chain
-from source.data_model.repertoire.SequenceRepertoire import SequenceRepertoire
+from source.data_model.repertoire.Repertoire import Repertoire
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.environment.SequenceType import SequenceType
 from source.preprocessing.filters.CountAggregationFunction import CountAggregationFunction
 from source.preprocessing.filters.DuplicateSequenceFilter import DuplicateSequenceFilter
 from source.util.PathBuilder import PathBuilder
-from source.util.RepertoireBuilder import RepertoireBuilder
 
 
 class TestDuplicateSequenceFilter(TestCase):
@@ -17,17 +16,17 @@ class TestDuplicateSequenceFilter(TestCase):
         path = EnvironmentSettings.root_path + "test/tmp/duplicatesequencefilter/"
         PathBuilder.build(path)
 
-        dataset = RepertoireDataset(repertoires=[SequenceRepertoire.build(sequence_aas=["AAA", "AAA", "CCC", "AAA", "CCC", "CCC", "CCC"],
-                                                                          sequences=["ntAAA", "ntBBB", "ntCCC", "ntAAA", "ntCCC", "ntCCC", "ntDDD"],
-                                                                          v_genes=["v1", "v1", "v1", "v1", "v1", "v1", "v1"],
-                                                                          j_genes=["j1", "j1", "j1", "j1", "j1", "j1", "j1"],
-                                                                          chains=[Chain.A, Chain.A, Chain.A, Chain.A, Chain.A, Chain.A, Chain.B],
-                                                                          counts=[10, 20, 30, 5, 20, None, 40],
-                                                                          region_types=["CDR3", "CDR3", "CDR3", "CDR3", "CDR3", "CDR3", "CDR3"],
-                                                                          custom_lists={"custom1": ["yes", "yes", "yes", "no", "no", "no", "no"],
+        dataset = RepertoireDataset(repertoires=[Repertoire.build(sequence_aas=["AAA", "AAA", "CCC", "AAA", "CCC", "CCC", "CCC"],
+                                                                  sequences=["ntAAA", "ntBBB", "ntCCC", "ntAAA", "ntCCC", "ntCCC", "ntDDD"],
+                                                                  v_genes=["v1", "v1", "v1", "v1", "v1", "v1", "v1"],
+                                                                  j_genes=["j1", "j1", "j1", "j1", "j1", "j1", "j1"],
+                                                                  chains=[Chain.A, Chain.A, Chain.A, Chain.A, Chain.A, Chain.A, Chain.B],
+                                                                  counts=[10, 20, 30, 5, 20, None, 40],
+                                                                  region_types=["CDR3", "CDR3", "CDR3", "CDR3", "CDR3", "CDR3", "CDR3"],
+                                                                  custom_lists={"custom1": ["yes", "yes", "yes", "no", "no", "no", "no"],
                                                                                         "custom2": ["yes", "yes", "yes", "no", "no", "no", "no"]},
-                                                                          sequence_identifiers=[1, 2, 3, 4, 5, 6, 7],
-                                                                          path=path)])
+                                                                  sequence_identifiers=[1, 2, 3, 4, 5, 6, 7],
+                                                                  path=path)])
 
         # collapse by amino acids & use sum counts
         dupfilter = DuplicateSequenceFilter(filter_sequence_type=SequenceType.AMINO_ACID,

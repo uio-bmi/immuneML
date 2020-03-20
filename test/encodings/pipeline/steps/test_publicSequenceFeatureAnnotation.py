@@ -7,7 +7,7 @@ from scipy import sparse
 
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.encoded_data.EncodedData import EncodedData
-from source.data_model.repertoire.SequenceRepertoire import SequenceRepertoire
+from source.data_model.repertoire.Repertoire import Repertoire
 from source.encodings.pipeline.steps.PublicSequenceFeatureAnnotation import PublicSequenceFeatureAnnotation
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.util.PathBuilder import PathBuilder
@@ -42,7 +42,7 @@ class TestPublicSequenceFeatureAnnotation(TestCase):
     }
 
     dataset = RepertoireDataset(encoded_data=EncodedData(**encoded_data),
-                                repertoires=[SequenceRepertoire("0.npy", "", identifier) for identifier in encoded_data["example_ids"]])
+                                repertoires=[Repertoire("0.npy", "", identifier) for identifier in encoded_data["example_ids"]])
 
     def test_transform(self):
         path = EnvironmentSettings.root_path + "test/tmp/publicsequencefeatureannotation/"

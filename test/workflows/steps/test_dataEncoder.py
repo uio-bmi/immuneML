@@ -3,7 +3,7 @@ from unittest import TestCase
 
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
-from source.data_model.repertoire.SequenceRepertoire import SequenceRepertoire
+from source.data_model.repertoire.Repertoire import Repertoire
 from source.encodings.EncoderParams import EncoderParams
 from source.encodings.word2vec.Word2VecEncoder import Word2VecEncoder
 from source.encodings.word2vec.model_creator.ModelType import ModelType
@@ -19,11 +19,11 @@ class TestDataEncoder(TestCase):
         path = EnvironmentSettings.root_path + "test/tmp/dataencoder/"
         PathBuilder.build(path)
 
-        rep1 = SequenceRepertoire.build_from_sequence_objects([ReceptorSequence("AAA", identifier="1")],
-                                                              metadata={"l1": 1, "l2": 2}, path=path)
+        rep1 = Repertoire.build_from_sequence_objects([ReceptorSequence("AAA", identifier="1")],
+                                                      metadata={"l1": 1, "l2": 2}, path=path)
 
-        rep2 = SequenceRepertoire.build_from_sequence_objects([ReceptorSequence("ATA", identifier="2")],
-                                                              metadata={"l1": 0, "l2": 3}, path=path)
+        rep2 = Repertoire.build_from_sequence_objects([ReceptorSequence("ATA", identifier="2")],
+                                                      metadata={"l1": 0, "l2": 3}, path=path)
 
         lc = LabelConfiguration()
         lc.add_label("l1", [1, 2])

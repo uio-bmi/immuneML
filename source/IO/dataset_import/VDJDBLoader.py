@@ -9,7 +9,7 @@ from source.data_model.dataset.Dataset import Dataset
 from source.data_model.dataset.ReceptorDataset import ReceptorDataset
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.dataset.SequenceDataset import SequenceDataset
-from source.data_model.repertoire.SequenceRepertoire import SequenceRepertoire
+from source.data_model.repertoire.Repertoire import Repertoire
 from source.util.PathBuilder import PathBuilder
 
 
@@ -57,8 +57,8 @@ class VDJDBLoader(DataLoader):
     @staticmethod
     def load_repertoire(index: int, row, result_path: str):
         sequences = VDJdbSequenceImport.import_items(row["filename"])
-        return SequenceRepertoire.build_from_sequence_objects(sequences, result_path,
-                                                              {key: row[key] for key in row.keys() if key != "filename"})
+        return Repertoire.build_from_sequence_objects(sequences, result_path,
+                                                      {key: row[key] for key in row.keys() if key != "filename"})
 
     @staticmethod
     def load_sequence_dataset(path: str, params: dict) -> Dataset:

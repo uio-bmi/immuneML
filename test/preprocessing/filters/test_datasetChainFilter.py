@@ -6,7 +6,7 @@ import pandas as pd
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
-from source.data_model.repertoire.SequenceRepertoire import SequenceRepertoire
+from source.data_model.repertoire.Repertoire import Repertoire
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.preprocessing.filters.DatasetChainFilter import DatasetChainFilter
 from source.util.PathBuilder import PathBuilder
@@ -18,10 +18,10 @@ class TestDatasetChainFilter(TestCase):
         path = EnvironmentSettings.root_path + "test/tmp/datasetchainfilter/"
         PathBuilder.build(path)
 
-        rep1 = SequenceRepertoire.build_from_sequence_objects([ReceptorSequence("AAA", metadata=SequenceMetadata(chain="A"),
-                                                                                identifier="1")], path=path, metadata={})
-        rep2 = SequenceRepertoire.build_from_sequence_objects([ReceptorSequence("AAC", metadata=SequenceMetadata(chain="B"),
-                                                                                identifier="2")], path=path, metadata={})
+        rep1 = Repertoire.build_from_sequence_objects([ReceptorSequence("AAA", metadata=SequenceMetadata(chain="A"),
+                                                                        identifier="1")], path=path, metadata={})
+        rep2 = Repertoire.build_from_sequence_objects([ReceptorSequence("AAC", metadata=SequenceMetadata(chain="B"),
+                                                                        identifier="2")], path=path, metadata={})
 
         metadata = pd.DataFrame({"CD": [1, 0]})
         metadata.to_csv(path + "metadata.csv")

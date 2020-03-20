@@ -19,7 +19,7 @@ class Implanting:
         dataset_implanting_rate (float): The proportion of repertoires in the RepertoireDataset in which the
             signals should be implanted. When specifying multiple implantings, the sum of all dataset_implanting_rates
             should not exceed 1.
-        repertoire_implanting_rate (float): The proportion of sequences in a SequenceRepertoire where a motif associated
+        repertoire_implanting_rate (float): The proportion of sequences in a Repertoire where a motif associated
             with one of the signals should be implanted.
 
 

@@ -4,10 +4,10 @@ source.data\_model.repertoire package
 Submodules
 ----------
 
-source.data\_model.repertoire.SequenceRepertoire module
+source.data\_model.repertoire.Repertoire module
 -----------------------------------------------
 
-.. automodule:: source.data_model.repertoire.SequenceRepertoire
+.. automodule:: source.data_model.repertoire.Repertoire
     :members:
     :undoc-members:
     :show-inheritance:

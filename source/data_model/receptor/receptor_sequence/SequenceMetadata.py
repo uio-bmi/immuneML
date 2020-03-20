@@ -23,10 +23,11 @@ class SequenceMetadata:
     def __init__(self,
                  v_subgroup: str = None, v_gene: str = None, v_allele: str = None,
                  j_subgroup: str = None, j_gene: str = None, j_allele: str = None,
-                 chain = None,
+                 chain=None,
                  count: int = None,
                  frame_type: str = SequenceFrameType.IN.name,
                  region_type: str = None,
+                 cell_id: str = None,
                  custom_params: dict = None):
         self.v_subgroup = v_subgroup
         self.v_gene = v_gene
@@ -38,4 +39,5 @@ class SequenceMetadata:
         self.count = int(count) if isinstance(count, str) else count
         self.frame_type = frame_type
         self.region_type = region_type  # should be e.g. CDR, CDR3, whole sequence etc
+        self.cell_id = cell_id
         self.custom_params = custom_params if custom_params is not None else {}

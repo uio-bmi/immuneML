@@ -7,7 +7,7 @@ from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.data_model.receptor.receptor_sequence.SequenceFrameType import SequenceFrameType
 from source.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
-from source.data_model.repertoire.SequenceRepertoire import SequenceRepertoire
+from source.data_model.repertoire.Repertoire import Repertoire
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.reports.data_reports.sequencing_depth_overview.SequencingDepthOverview import SequencingDepthOverview
 from source.util.PathBuilder import PathBuilder
@@ -19,8 +19,8 @@ class TestSequencingDepthOverview(TestCase):
         path = EnvironmentSettings.root_path + "test/tmp/datareports/"
         PathBuilder.build(path)
 
-        repertoires = [SequenceRepertoire.build_from_sequence_objects(self.generate_sequences(),
-                                                                      metadata={"disease": random.choice(["t1d", "lupus", "ra", "ms"]),
+        repertoires = [Repertoire.build_from_sequence_objects(self.generate_sequences(),
+                                                              metadata={"disease": random.choice(["t1d", "lupus", "ra", "ms"]),
                                                                                 "week": "week" + str(random.randint(0, 4))}, path=path)
                        for i in range(5)]
 

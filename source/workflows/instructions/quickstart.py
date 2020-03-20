@@ -9,7 +9,7 @@ from source.app.ImmuneMLApp import ImmuneMLApp
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
-from source.data_model.repertoire.SequenceRepertoire import SequenceRepertoire
+from source.data_model.repertoire.Repertoire import Repertoire
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.util.PathBuilder import PathBuilder
 
@@ -41,13 +41,13 @@ class Quickstart:
 
         for index in range(1, repertoire_count+1):
                 if index % 4 == 0:
-                    repertoires.append(SequenceRepertoire.build_from_sequence_objects(sequences1, path, {"CD": True}))
+                    repertoires.append(Repertoire.build_from_sequence_objects(sequences1, path, {"CD": True}))
                 elif index % 3 == 0:
-                    repertoires.append(SequenceRepertoire.build_from_sequence_objects(sequences2, path, {"CD": False}))
+                    repertoires.append(Repertoire.build_from_sequence_objects(sequences2, path, {"CD": False}))
                 elif index % 2 == 0:
-                    repertoires.append(SequenceRepertoire.build_from_sequence_objects(sequences3, path, {"CD": True}))
+                    repertoires.append(Repertoire.build_from_sequence_objects(sequences3, path, {"CD": True}))
                 else:
-                    repertoires.append(SequenceRepertoire.build_from_sequence_objects(sequences4, path, {"CD": False}))
+                    repertoires.append(Repertoire.build_from_sequence_objects(sequences4, path, {"CD": False}))
 
         dataset = RepertoireDataset(repertoires=repertoires, params={"CD": [True, False]})
 

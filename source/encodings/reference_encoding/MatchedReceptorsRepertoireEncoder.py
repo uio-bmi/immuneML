@@ -4,7 +4,7 @@ import pandas as pd
 from source.analysis.SequenceMatcher import SequenceMatcher
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.encoded_data.EncodedData import EncodedData
-from source.data_model.repertoire.SequenceRepertoire import SequenceRepertoire
+from source.data_model.repertoire.Repertoire import Repertoire
 from source.encodings.EncoderParams import EncoderParams
 from source.encodings.reference_encoding.MatchedReceptorsEncoder import MatchedReceptorsEncoder
 
@@ -84,7 +84,7 @@ class MatchedReceptorsRepertoireEncoder(MatchedReceptorsEncoder):
 
         return self._collapse_encoding_per_donor(encoded_repertories, labels)
 
-    def _match_repertoire_to_receptors(self, repertoire: SequenceRepertoire):
+    def _match_repertoire_to_receptors(self, repertoire: Repertoire):
         matcher = SequenceMatcher()
         matches = np.zeros(len(self.reference_receptors) * 2, dtype=int)
         rep_seqs = repertoire.sequences

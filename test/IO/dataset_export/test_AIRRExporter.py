@@ -8,7 +8,7 @@ from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.receptor.receptor_sequence.Chain import Chain
 from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
-from source.data_model.repertoire.SequenceRepertoire import SequenceRepertoire
+from source.data_model.repertoire.Repertoire import Repertoire
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.util.PathBuilder import PathBuilder
 
@@ -34,7 +34,7 @@ class TestAIRRExporter(TestCase):
                                                                        custom_params={"d_call": "d2",
                                                                                       "custom_test": "cust2"}))]
 
-        repertoire = SequenceRepertoire.build_from_sequence_objects(sequence_objects=sequence_objects, path=path, metadata={"donor": "REP1"})
+        repertoire = Repertoire.build_from_sequence_objects(sequence_objects=sequence_objects, path=path, metadata={"donor": "REP1"})
         df = pd.DataFrame({"filename": [f"{repertoire.identifier}_data.npy"], "donor": ["1"]})
         df.to_csv(path + "metadata.csv", index=False)
 

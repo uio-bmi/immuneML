@@ -5,9 +5,9 @@ import pandas as pd
 
 from source.IO.dataset_export.DataExporter import DataExporter
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
-from source.data_model.repertoire.SequenceRepertoire import SequenceRepertoire
-from source.util.PathBuilder import PathBuilder
 from source.data_model.receptor.receptor_sequence.Chain import Chain
+from source.data_model.repertoire.Repertoire import Repertoire
+from source.util.PathBuilder import PathBuilder
 
 
 class AIRRExporter(DataExporter):
@@ -15,8 +15,8 @@ class AIRRExporter(DataExporter):
     Exports a RepertoireDataset of SequenceRepertoires in AIRR format.
 
     Things to note:
-        - one filename_prefix is given, which is combined with the SequenceRepertoire identifiers
-        for the filenames, to create one file per SequenceRepertoire
+        - one filename_prefix is given, which is combined with the Repertoire identifiers
+        for the filenames, to create one file per Repertoire
         - 'counts' is written into the field 'duplicate_counts'
         - 'sequence_identifiers' is written both into the fields 'sequence_id' and 'rearrangement_id'
     '''
@@ -30,7 +30,7 @@ class AIRRExporter(DataExporter):
             airr.dump_rearrangement(df, path + f"{filename_prefix}_{repertoire.identifier}.tsv")
 
     @staticmethod
-    def _repertoire_to_dataframe(repertoire: SequenceRepertoire):
+    def _repertoire_to_dataframe(repertoire: Repertoire):
         # get all fields (including custom fields)
         df = pd.DataFrame({key: repertoire.get_attribute(key) for key in set(repertoire._fields)})
 

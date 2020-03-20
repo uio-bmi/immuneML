@@ -4,7 +4,7 @@ from unittest import TestCase
 
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
-from source.data_model.repertoire.SequenceRepertoire import SequenceRepertoire
+from source.data_model.repertoire.Repertoire import Repertoire
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.simulation.Implanting import Implanting
 from source.simulation.Simulation import Simulation
@@ -28,11 +28,11 @@ class TestSignalImplanter(TestCase):
             os.makedirs(path)
 
         for i in range(10):
-            rep = SequenceRepertoire.build_from_sequence_objects(sequence_objects=[ReceptorSequence("ACDEFG", identifier="1"),
-                                                                                   ReceptorSequence("ACDEFG", identifier="2"),
-                                                                                   ReceptorSequence("ACDEFG", identifier="3"),
-                                                                                   ReceptorSequence("ACDEFG", identifier="4")],
-                                                                 path=path, metadata={})
+            rep = Repertoire.build_from_sequence_objects(sequence_objects=[ReceptorSequence("ACDEFG", identifier="1"),
+                                                                           ReceptorSequence("ACDEFG", identifier="2"),
+                                                                           ReceptorSequence("ACDEFG", identifier="3"),
+                                                                           ReceptorSequence("ACDEFG", identifier="4")],
+                                                         path=path, metadata={})
             r.append(rep)
 
         dataset = RepertoireDataset(repertoires=r)

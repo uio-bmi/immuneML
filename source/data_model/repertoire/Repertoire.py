@@ -7,21 +7,27 @@ from uuid import uuid4
 import numpy as np
 
 from source.data_model.DatasetItem import DatasetItem
+from source.data_model.cell.Cell import Cell
+from source.data_model.cell.CellList import CellList
+from source.data_model.receptor.ReceptorBuilder import ReceptorBuilder
+from source.data_model.receptor.ReceptorList import ReceptorList
 from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
+from source.data_model.receptor.receptor_sequence.ReceptorSequenceList import ReceptorSequenceList
 from source.data_model.receptor.receptor_sequence.SequenceAnnotation import SequenceAnnotation
 from source.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.simulation.implants.ImplantAnnotation import ImplantAnnotation
+from source.util.NumpyHelper import NumpyHelper
 from source.util.PathBuilder import PathBuilder
 
 
-class SequenceRepertoire(DatasetItem):
+class Repertoire(DatasetItem):
     """
     Repertoire object consisting of sequence objects, each sequence attribute is stored as a list across all sequences and can be
     loaded separately. Internally, this class relies on numpy to store/load the data.
     """
 
-    FIELDS = "sequence_aas,sequences,v_genes,j_genes,chains,counts,region_types,sequence_identifiers".split(",")
+    FIELDS = "sequence_aas,sequences,v_genes,j_genes,chains,counts,region_types,sequence_identifiers,cell_ids".split(",")
 
     @staticmethod
     def process_custom_lists(custom_lists):
@@ -35,7 +41,7 @@ class SequenceRepertoire(DatasetItem):
 
     @classmethod
     def build(cls, sequence_aas: list, sequences: list, v_genes: list, j_genes: list, chains: list, counts: list, region_types: list,
-                 custom_lists: dict, sequence_identifiers: list, path: str, metadata=dict(), signals: dict = None):
+              custom_lists: dict, sequence_identifiers: list, path: str, metadata=dict(), signals: dict = None, cell_ids: list = None):
 
         if sequence_identifiers is None or len(sequence_identifiers) == 0 or any(identifier is None for identifier in sequence_identifiers):
             sequence_identifiers = list(range(len(sequence_aas))) if sequence_aas is not None and len(sequence_aas) > 0 else list(range(len(sequences)))
@@ -47,17 +53,17 @@ class SequenceRepertoire(DatasetItem):
 
         data_filename = f"{path}{identifier}_data.npy"
 
-        field_list, values, dtype = SequenceRepertoire.process_custom_lists(custom_lists)
+        field_list, values, dtype = Repertoire.process_custom_lists(custom_lists)
 
         if signals:
             signals_filtered = {signal: signals[signal] for signal in signals if signal not in metadata["field_list"]}
-            field_list_signals, values_signals, dtype_signals = SequenceRepertoire.process_custom_lists(signals_filtered)
+            field_list_signals, values_signals, dtype_signals = Repertoire.process_custom_lists(signals_filtered)
 
             field_list.extend(field_list_signals)
             values.extend(values_signals)
             dtype.extend(dtype_signals)
 
-        for field in SequenceRepertoire.FIELDS:
+        for field in Repertoire.FIELDS:
             if eval(field) is not None and not all(el is None for el in eval(field)):
                 field_list.append(field)
                 values.append(eval(field))
@@ -73,7 +79,7 @@ class SequenceRepertoire(DatasetItem):
         with open(metadata_filename, "wb") as file:
             pickle.dump(metadata, file)
 
-        repertoire = SequenceRepertoire(data_filename, metadata_filename, identifier)
+        repertoire = Repertoire(data_filename, metadata_filename, identifier)
         return repertoire
 
     @classmethod
@@ -91,7 +97,7 @@ class SequenceRepertoire(DatasetItem):
             metadata_filename = f"{result_path}{identifier}_metadata.pickle"
             shutil.copyfile(repertoire.metadata_filename, metadata_filename)
 
-            new_repertoire = SequenceRepertoire(data_filename, metadata_filename, identifier)
+            new_repertoire = Repertoire(data_filename, metadata_filename, identifier)
             return new_repertoire
         else:
             return None
@@ -100,9 +106,9 @@ class SequenceRepertoire(DatasetItem):
     def build_from_sequence_objects(cls, sequence_objects: list, path: str, metadata: dict):
 
         assert all(isinstance(sequence, ReceptorSequence) for sequence in sequence_objects), \
-            "SequenceRepertoire: all sequences have to be instances of ReceptorSequence class."
+            "Repertoire: all sequences have to be instances of ReceptorSequence class."
 
-        sequence_aas, sequences, v_genes, j_genes, chains, counts, region_types, sequence_identifiers = [], [], [], [], [], [], [], []
+        sequence_aas, sequences, v_genes, j_genes, chains, counts, region_types, sequence_identifiers, cell_ids = [], [], [], [], [], [], [], [], []
         custom_lists = {key: [] for key in sequence_objects[0].metadata.custom_params} if sequence_objects[0].metadata else {}
         signals = {key: [] for key in metadata if "signal" in key}
 
@@ -116,6 +122,7 @@ class SequenceRepertoire(DatasetItem):
                 chains.append(sequence.metadata.chain)
                 counts.append(sequence.metadata.count)
                 region_types.append(sequence.metadata.region_type)
+                cell_ids.append(sequence.metadata.cell_id)
                 for param in sequence.metadata.custom_params.keys():
                     custom_lists[param].append(sequence.metadata.custom_params[param] if param in sequence.metadata.custom_params else None)
             for key in signals.keys():
@@ -125,12 +132,12 @@ class SequenceRepertoire(DatasetItem):
                     signals[key].append(None)
 
         return cls.build(sequence_aas, sequences, v_genes, j_genes, chains, counts, region_types, custom_lists,
-                         sequence_identifiers, path, metadata, signals)
+                         sequence_identifiers, path, metadata, signals, cell_ids)
 
     def __init__(self, data_filename: str, metadata_filename: str, identifier: str):
 
         assert ".npy" in data_filename, \
-            "SequenceRepertoire: the file representing the repertoire has to be in numpy binary format. Got {} instead."\
+            "Repertoire: the file representing the repertoire has to be in numpy binary format. Got {} instead."\
                 .format(data_filename.rpartition(".")[1])
 
         self._data_filename = data_filename
@@ -198,32 +205,78 @@ class SequenceRepertoire(DatasetItem):
             self.load_data()
         return self.element_count
 
+    def _make_sequence_object(self, row):
+
+        fields = row.dtype.names
+
+        keys = [key for key in row.dtype.names if "signal" in key]
+        implants = []
+        for key in keys:
+            value_dict = row[key]
+            if value_dict:
+                implants.append(ImplantAnnotation(*value_dict))
+
+        seq = ReceptorSequence(amino_acid_sequence=row["sequence_aas"] if "sequence_aas" in fields else None,
+                               nucleotide_sequence=row["sequences"] if "sequences" in fields else None,
+                               identifier=row["sequence_identifiers"] if "sequence_identifiers" in fields else None,
+                               metadata=SequenceMetadata(v_gene=row["v_genes"] if "v_genes" in fields else None,
+                                                         j_gene=row["j_genes"] if "j_genes" in fields else None,
+                                                         chain=row["chains"] if "chains" in fields else None,
+                                                         count=row["counts"] if "counts" in fields else None,
+                                                         region_type=row["region_types"] if "region_types" in fields else None,
+                                                         cell_id=row["cell_ids"] if "cell_ids" in fields else None,
+                                                         custom_params={key: row[key] if key in fields else None
+                                                                        for key in set(self._fields) - set(Repertoire.FIELDS)}),
+                               annotation=SequenceAnnotation(implants=implants))
+
+        return seq
+
+    def _prepare_cell_lists(self):
+        data = self.load_data()
+
+        assert "cell_ids" in data.dtype.names and data["cell_ids"] is not None, \
+            f"Repertoire: cannot return receptor objects in repertoire {self.identifier} since cell_ids are not specified. " \
+            f"Existing fields are: {str(data.dtype.names)[1:-1]}"
+
+        same_cell_lists = NumpyHelper.group_structured_array_by(data, "cell_ids")
+        return same_cell_lists
+
+    def _make_receptors(self, cell_content):
+        sequences = ReceptorSequenceList()
+        for item in cell_content:
+            sequences.append(self._make_sequence_object(item))
+        return ReceptorBuilder.build_objects(sequences)
+
     @property
-    def sequences(self):
-        seqs = []
+    def sequences(self) -> ReceptorSequenceList:
+        seqs = ReceptorSequenceList()
 
         data = self.load_data()
 
         for i in range(len(self.get_sequence_identifiers())):
-            keys = [key for key in data.dtype.names if "signal" in key]
-            implants = []
-            for key in keys:
-                value_dict = self.get_attribute(key)[i]
-                if value_dict:
-                    implants.append(ImplantAnnotation(*value_dict))
-
-            seq = ReceptorSequence(amino_acid_sequence=self.get_sequence_aas()[i] if self.get_sequence_aas() is not None else None,
-                                   nucleotide_sequence=self.get_attribute("sequences")[i] if self.get_attribute("sequences") is not None else None,
-                                   identifier=self.get_sequence_identifiers()[i] if self.get_sequence_identifiers() is not None else None,
-                                   metadata=SequenceMetadata(v_gene=self.get_v_genes()[i] if self.get_v_genes() is not None else None,
-                                                             j_gene=self.get_j_genes()[i] if self.get_j_genes() is not None else None,
-                                                             chain=self.get_attribute("chains")[i] if self.get_attribute("chains") is not None else None,
-                                                             count=self.get_attribute("counts")[i] if self.get_attribute("counts") is not None else None,
-                                                             region_type=self.get_attribute("region_types")[i] if self.get_attribute("region_types") is not None else None,
-                                                             custom_params={key: self.get_attribute(key)[i] if self.get_attribute(key) is not None else None
-                                                                            for key in set(self._fields) - set(SequenceRepertoire.FIELDS)}),
-                                   annotation=SequenceAnnotation(implants=implants))
-
+            seq = self._make_sequence_object(data[i])
             seqs.append(seq)
 
         return seqs
+
+    @property
+    def receptors(self) -> ReceptorList:
+        receptors = ReceptorList()
+
+        same_cell_lists = self._prepare_cell_lists()
+
+        for cell_content in same_cell_lists:
+            receptors.extend(self._make_receptors(cell_content))
+
+        return receptors
+
+    @property
+    def cells(self) -> CellList:
+        cells = CellList()
+        cell_lists = self._prepare_cell_lists()
+
+        for cell_content in cell_lists:
+            receptors = self._make_receptors(cell_content)
+            cells.append(Cell(receptors))
+
+        return cell_lists

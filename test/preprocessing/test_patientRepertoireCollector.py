@@ -3,7 +3,7 @@ from unittest import TestCase
 
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
-from source.data_model.repertoire.SequenceRepertoire import SequenceRepertoire
+from source.data_model.repertoire.Repertoire import Repertoire
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.preprocessing.PatientRepertoireCollector import PatientRepertoireCollector
 from source.util.PathBuilder import PathBuilder
@@ -14,12 +14,12 @@ class TestPatientRepertoireCollector(TestCase):
         path = EnvironmentSettings.root_path + "test/tmp/patientrepertoirecollector/"
         PathBuilder.build(path)
 
-        reps = [SequenceRepertoire.build_from_sequence_objects([ReceptorSequence("AAA", identifier="1")], path=path,
-                                                               metadata={"donor": "patient1"}),
-                SequenceRepertoire.build_from_sequence_objects([ReceptorSequence("AAC", identifier="2")], path=path,
-                                                               metadata={"donor": "patient1"}),
-                SequenceRepertoire.build_from_sequence_objects([ReceptorSequence("AAC", identifier="3")], path=path,
-                                                               metadata={"donor": "patient3"})]
+        reps = [Repertoire.build_from_sequence_objects([ReceptorSequence("AAA", identifier="1")], path=path,
+                                                       metadata={"donor": "patient1"}),
+                Repertoire.build_from_sequence_objects([ReceptorSequence("AAC", identifier="2")], path=path,
+                                                       metadata={"donor": "patient1"}),
+                Repertoire.build_from_sequence_objects([ReceptorSequence("AAC", identifier="3")], path=path,
+                                                       metadata={"donor": "patient3"})]
 
         dataset = RepertoireDataset(repertoires=reps)
 

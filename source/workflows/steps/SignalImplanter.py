@@ -7,7 +7,7 @@ from source.IO.dataset_export.PickleExporter import PickleExporter
 from source.IO.dataset_import.PickleLoader import PickleLoader
 from source.data_model.dataset.Dataset import Dataset
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
-from source.data_model.repertoire.SequenceRepertoire import SequenceRepertoire
+from source.data_model.repertoire.Repertoire import Repertoire
 from source.util.FilenameHandler import FilenameHandler
 from source.util.PathBuilder import PathBuilder
 from source.workflows.steps.SignalImplanterParams import SignalImplanterParams
@@ -86,8 +86,8 @@ class SignalImplanter(Step):
             return SignalImplanter._copy_repertoire(index, repertoire, input_params)
 
     @staticmethod
-    def _copy_repertoire(index: int, repertoire: SequenceRepertoire, input_params: SignalImplanterParams) -> str:
-        new_repertoire = SequenceRepertoire.build_from_sequence_objects(repertoire.sequences, input_params.result_path, repertoire.metadata)
+    def _copy_repertoire(index: int, repertoire: Repertoire, input_params: SignalImplanterParams) -> str:
+        new_repertoire = Repertoire.build_from_sequence_objects(repertoire.sequences, input_params.result_path, repertoire.metadata)
 
         for signal in input_params.signals:
             new_repertoire.metadata[f"signal_{signal.id}"] = False

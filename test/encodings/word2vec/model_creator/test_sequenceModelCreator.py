@@ -5,7 +5,7 @@ from gensim.models import Word2Vec
 
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
-from source.data_model.repertoire.SequenceRepertoire import SequenceRepertoire
+from source.data_model.repertoire.Repertoire import Repertoire
 from source.encodings.word2vec.model_creator.SequenceModelCreator import SequenceModelCreator
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.util.PathBuilder import PathBuilder
@@ -21,10 +21,10 @@ class TestSequenceModelCreator(TestCase):
         sequence2 = ReceptorSequence("CASSCCC", identifier="2")
 
         metadata1 = {"T1D": "T1D", "donor": "1"}
-        rep1 = SequenceRepertoire.build_from_sequence_objects([sequence1, sequence2], metadata=metadata1, path=test_path)
+        rep1 = Repertoire.build_from_sequence_objects([sequence1, sequence2], metadata=metadata1, path=test_path)
 
         metadata2 = {"T1D": "CTL", "donor": "2"}
-        rep2 = SequenceRepertoire.build_from_sequence_objects([sequence1], metadata=metadata2, path=test_path)
+        rep2 = Repertoire.build_from_sequence_objects([sequence1], metadata=metadata2, path=test_path)
 
         dataset = RepertoireDataset(repertoires=[rep1, rep2])
 

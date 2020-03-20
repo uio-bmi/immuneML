@@ -5,7 +5,7 @@ from source.analysis.SequenceMatcher import SequenceMatcher
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.data_model.receptor.receptor_sequence.ReceptorSequenceList import ReceptorSequenceList
-from source.data_model.repertoire.SequenceRepertoire import SequenceRepertoire
+from source.data_model.repertoire.Repertoire import Repertoire
 from source.reports.encoding_reports.EncodingReport import EncodingReport
 from source.util.ParameterValidator import ParameterValidator
 from source.util.PathBuilder import PathBuilder
@@ -109,7 +109,7 @@ class MatchingSequenceDetails(EncodingReport):
 
         return filenames
 
-    def _make_repertoire_report(self, repertoire: SequenceRepertoire):
+    def _make_repertoire_report(self, repertoire: Repertoire):
 
         filename = self.result_path + "{}_{}.tsv".format(repertoire.identifier,
                                                          list({seq.metadata.chain for seq in repertoire.sequences}))

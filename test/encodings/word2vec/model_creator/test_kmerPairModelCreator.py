@@ -5,7 +5,7 @@ from gensim.models import Word2Vec
 
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
-from source.data_model.repertoire.SequenceRepertoire import SequenceRepertoire
+from source.data_model.repertoire.Repertoire import Repertoire
 from source.encodings.word2vec.model_creator.KmerPairModelCreator import KmerPairModelCreator
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.util.PathBuilder import PathBuilder
@@ -21,10 +21,10 @@ class TestKmerPairModelCreator(TestCase):
         sequence2 = ReceptorSequence("CASSCCC")
 
         metadata1 = {"T1D": "T1D", "donor": "1"}
-        rep1 = SequenceRepertoire.build_from_sequence_objects([sequence1, sequence2], test_path, metadata1)
+        rep1 = Repertoire.build_from_sequence_objects([sequence1, sequence2], test_path, metadata1)
 
         metadata2 = {"T1D": "CTL", "donor": "2"}
-        rep2 = SequenceRepertoire.build_from_sequence_objects([sequence1], test_path, metadata2)
+        rep2 = Repertoire.build_from_sequence_objects([sequence1], test_path, metadata2)
 
         dataset = RepertoireDataset(repertoires=[rep1, rep2])
 

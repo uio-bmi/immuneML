@@ -4,7 +4,7 @@ from collections import Counter, OrderedDict
 import matplotlib.pyplot as plt
 
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
-from source.data_model.repertoire.SequenceRepertoire import SequenceRepertoire
+from source.data_model.repertoire.Repertoire import Repertoire
 from source.reports.data_reports.DataReport import DataReport
 from source.util.PathBuilder import PathBuilder
 
@@ -64,7 +64,7 @@ class SequenceLengthDistribution(DataReport):
 
         return sequence_lenghts
 
-    def count_in_repertoire(self, repertoire: SequenceRepertoire) -> Counter:
+    def count_in_repertoire(self, repertoire: Repertoire) -> Counter:
         c = Counter([len(sequence.get_sequence()) for sequence in repertoire.sequences])
         return c
 

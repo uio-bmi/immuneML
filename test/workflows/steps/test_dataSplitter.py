@@ -4,7 +4,7 @@ from unittest import TestCase
 import pandas as pd
 
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
-from source.data_model.repertoire.SequenceRepertoire import SequenceRepertoire
+from source.data_model.repertoire.Repertoire import Repertoire
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.hyperparameter_optimization.config.SplitType import SplitType
 from source.util.PathBuilder import PathBuilder
@@ -15,14 +15,14 @@ from source.workflows.steps.DataSplitterParams import DataSplitterParams
 class TestDataSplitter(TestCase):
 
     def test_run(self):
-        dataset = RepertoireDataset(repertoires=[SequenceRepertoire("0.npy", "", "0"),
-                                                 SequenceRepertoire("0.npy", "", "1"),
-                                                 SequenceRepertoire("0.npy", "", "2"),
-                                                 SequenceRepertoire("0.npy", "", "3"),
-                                                 SequenceRepertoire("0.npy", "", "4"),
-                                                 SequenceRepertoire("0.npy", "", "5"),
-                                                 SequenceRepertoire("0.npy", "", "6"),
-                                                 SequenceRepertoire("0.npy", "", "7")])
+        dataset = RepertoireDataset(repertoires=[Repertoire("0.npy", "", "0"),
+                                                 Repertoire("0.npy", "", "1"),
+                                                 Repertoire("0.npy", "", "2"),
+                                                 Repertoire("0.npy", "", "3"),
+                                                 Repertoire("0.npy", "", "4"),
+                                                 Repertoire("0.npy", "", "5"),
+                                                 Repertoire("0.npy", "", "6"),
+                                                 Repertoire("0.npy", "", "7")])
 
         paths = [EnvironmentSettings.root_path + "test/tmp/datasplitter/split_{}".format(i) for i in range(5)]
         for path in paths:

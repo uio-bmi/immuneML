@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
-from source.data_model.repertoire.SequenceRepertoire import SequenceRepertoire
+from source.data_model.repertoire.Repertoire import Repertoire
 from source.preprocessing.Preprocessor import Preprocessor
 from source.util.PathBuilder import PathBuilder
 
@@ -57,5 +57,5 @@ class PatientRepertoireCollector(Preprocessor):
 
     @staticmethod
     def store_repertoire(path, repertoire, sequences):
-        new_repertoire = SequenceRepertoire.build_from_sequence_objects(sequences, path, repertoire.metadata)
+        new_repertoire = Repertoire.build_from_sequence_objects(sequences, path, repertoire.metadata)
         return new_repertoire

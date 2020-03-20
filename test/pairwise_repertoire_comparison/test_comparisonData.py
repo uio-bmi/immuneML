@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 
 from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
-from source.data_model.repertoire.SequenceRepertoire import SequenceRepertoire
+from source.data_model.repertoire.Repertoire import Repertoire
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.pairwise_repertoire_comparison.ComparisonData import ComparisonData
 from source.util.PathBuilder import PathBuilder
@@ -76,7 +76,7 @@ class TestComparisonData(TestCase):
         path = EnvironmentSettings.tmp_test_path + "comparisondatafindlabelassocseqpvalues/"
         PathBuilder.build(path)
 
-        repertoires = [SequenceRepertoire.build_from_sequence_objects([ReceptorSequence()], path, {
+        repertoires = [Repertoire.build_from_sequence_objects([ReceptorSequence()], path, {
             "l1": val, "donor": donor
         }) for val, donor in zip([True, True, False, False], ["rep_0", "rep_1", "rep_2", "rep_3"])]
 

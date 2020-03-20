@@ -7,7 +7,7 @@ from rpy2.robjects.packages import STAP
 
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.receptor.receptor_sequence.SequenceFrameType import SequenceFrameType
-from source.data_model.repertoire.SequenceRepertoire import SequenceRepertoire
+from source.data_model.repertoire.Repertoire import Repertoire
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.reports.data_reports.DataReport import DataReport
 from source.util.PathBuilder import PathBuilder
@@ -118,14 +118,14 @@ class SequencingDepthOverview(DataReport):
                  **repertoire.metadata, "id": repertoire.identifier})
         return pd.DataFrame(result)
 
-    def _compute_total_reads(self, repertoire: SequenceRepertoire, frame_type: SequenceFrameType):
+    def _compute_total_reads(self, repertoire: Repertoire, frame_type: SequenceFrameType):
         count = 0
         for sequence in repertoire.sequences:
             if sequence.metadata is not None and sequence.metadata.frame_type.upper() == frame_type.name:
                 count += sequence.metadata.count
         return count
 
-    def _compute_unique_clonotypes(self, repertoire: SequenceRepertoire, frame_type: SequenceFrameType):
+    def _compute_unique_clonotypes(self, repertoire: Repertoire, frame_type: SequenceFrameType):
         count = 0
         for sequence in repertoire.sequences:
             if sequence.metadata is not None and sequence.metadata.frame_type.upper() == frame_type.name:

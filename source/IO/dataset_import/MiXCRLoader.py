@@ -10,7 +10,7 @@ from source.IO.dataset_import.PickleLoader import PickleLoader
 from source.IO.metadata_import.MetadataImport import MetadataImport
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.receptor.receptor_sequence.Chain import Chain
-from source.data_model.repertoire.SequenceRepertoire import SequenceRepertoire
+from source.data_model.repertoire.Repertoire import Repertoire
 from source.util.PathBuilder import PathBuilder
 
 
@@ -62,7 +62,7 @@ class MiXCRLoader(DataLoader):
         return dataset
 
     @staticmethod
-    def _load_repertoire(filepath: str, params: dict, metadata) -> SequenceRepertoire:
+    def _load_repertoire(filepath: str, params: dict, metadata) -> Repertoire:
         df = pd.read_csv(filepath, delimiter='\t')
         df.dropna(axis=1, how="all", inplace=True)
 
@@ -72,15 +72,15 @@ class MiXCRLoader(DataLoader):
             sequences_aas = sequences_aas.str[1:-1]
             sequences = sequences.str[3:-3]
 
-        repertoire = SequenceRepertoire.build(sequence_aas=sequences_aas.tolist(),
-                                              sequences=sequences.tolist(),
-                                              v_genes=MiXCRLoader._load_genes(df, MiXCRLoader.V_GENES_WITH_SCORE).tolist(),
-                                              j_genes=MiXCRLoader._load_genes(df, MiXCRLoader.J_GENES_WITH_SCORE).tolist(),
-                                              chains=MiXCRLoader._load_chains(df, MiXCRLoader.V_GENES_WITH_SCORE).tolist(),
-                                              counts=df[MiXCRLoader.CLONE_COUNT].tolist(),
-                                              region_types=[params["sequence_type"] for i in range(df.shape[0])],
-                                              path=params["result_path"], metadata=metadata.to_dict(),
-                                              custom_lists={}, sequence_identifiers=list(range(df.shape[0])))
+        repertoire = Repertoire.build(sequence_aas=sequences_aas.tolist(),
+                                      sequences=sequences.tolist(),
+                                      v_genes=MiXCRLoader._load_genes(df, MiXCRLoader.V_GENES_WITH_SCORE).tolist(),
+                                      j_genes=MiXCRLoader._load_genes(df, MiXCRLoader.J_GENES_WITH_SCORE).tolist(),
+                                      chains=MiXCRLoader._load_chains(df, MiXCRLoader.V_GENES_WITH_SCORE).tolist(),
+                                      counts=df[MiXCRLoader.CLONE_COUNT].tolist(),
+                                      region_types=[params["sequence_type"] for i in range(df.shape[0])],
+                                      path=params["result_path"], metadata=metadata.to_dict(),
+                                      custom_lists={}, sequence_identifiers=list(range(df.shape[0])))
 
         return repertoire
 
