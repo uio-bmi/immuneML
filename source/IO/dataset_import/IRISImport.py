@@ -3,7 +3,7 @@ from glob import glob
 
 from source.IO.dataset_import.DataImport import DataImport
 from source.IO.dataset_import.DatasetImportParams import DatasetImportParams
-from source.IO.sequence_import.VDJdbSequenceImport import VDJdbSequenceImport
+from source.IO.sequence_import.IRISSequenceImport import IRISSequenceImport
 from source.data_model.dataset.Dataset import Dataset
 from source.data_model.dataset.ReceptorDataset import ReceptorDataset
 from source.data_model.dataset.SequenceDataset import SequenceDataset
@@ -41,7 +41,7 @@ class IRISImport(DataImport):
         dataset_filenames = []
 
         for index, filename in enumerate(filenames):
-            items = VDJdbSequenceImport.import_items(filename, paired=params.paired)
+            items = IRISSequenceImport.import_items(filename, paired=params.paired)
 
             while len(items) > params.file_size or (index == len(filenames)-1 and len(items) > 0):
                 dataset_filenames.append(params.result_path + "batch_{}.pickle".format(file_index))
