@@ -174,7 +174,9 @@ class Quickstart:
         app = ImmuneMLApp(specs_file, result_path)
         app.run()
 
-
-if __name__ == "__main__":
+def main():
     quickstart = Quickstart()
     quickstart.run(sys.argv[1] if len(sys.argv) == 2 else None)
+
+if __name__ == "__main__":
+    main()
