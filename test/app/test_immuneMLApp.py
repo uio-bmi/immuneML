@@ -48,8 +48,10 @@ class TestImmuneMLApp(TestCase):
                 "datasets": {
                     "d1": {
                         "format": "Pickle",
-                        "path": dataset_path,
-                        "result_path": dataset_path
+                        "params": {
+                            "path": dataset_path,
+                            "result_path": dataset_path
+                        }
                     }
                 },
                 "encodings": {

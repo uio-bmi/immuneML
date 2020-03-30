@@ -2,5 +2,5 @@ from enum import Enum
 
 
 class SequenceType(Enum):
-    AMINO_ACID = 1
-    NUCLEOTIDE = 2
+    AMINO_ACID = "amino_acid"
+    NUCLEOTIDE = "nucleotide"

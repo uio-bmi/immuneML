@@ -1,5 +1,14 @@
-additional_columns: [] # what additional columns to load from the file: here none
-clone_id_as_identifier: False # if True: clone_id is used, if False: sequence_id is used
-remove_non_productive: False # do not remove sequences with 'productive' set to False
-sequence_type: "CDR3" # which part of the sequence to load by default
-
+import_productive: True
+import_with_stop_codon: False
+import_out_of_frame: False
+batch_size: 4
+separator: "\t"
+columns_to_load: [sequence_aa, sequence, v_call, j_call, locus, duplicate_count, productive, vj_in_frame, stop_codon]
+column_mapping: # AIRR column names -> immuneML repertoire fields
+  sequence: sequences
+  sequence_aa: sequence_aas
+  v_call: v_genes
+  j_call: j_genes
+  locus: chains
+  duplicate_count: counts
+  sequence_id: sequence_identifiers

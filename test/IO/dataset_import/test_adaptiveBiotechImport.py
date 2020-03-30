@@ -1,13 +1,14 @@
 import shutil
 from unittest import TestCase
 
-from source.IO.dataset_import.AdaptiveBiotechLoader import AdaptiveBiotechLoader
+from source.IO.dataset_import.AdaptiveBiotechImport import AdaptiveBiotechImport
+from source.IO.dataset_import.DatasetImportParams import DatasetImportParams
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.util.PathBuilder import PathBuilder
 
 
-class TestAdaptiveBiotechLoader(TestCase):
-    def test_load(self):
+class TestAdaptiveBiotechImport(TestCase):
+    def test_import_dataset(self):
         path = EnvironmentSettings.root_path + "test/tmp/adaptive/"
 
         rep1text = """rearrangement	amino_acid	frame_type	rearrangement_type	templates	reads	frequency	productive_frequency	cdr3_length	v_family	v_gene	v_allele	d_family	d_gene	d_allele	j_family	j_gene	j_allele	v_deletions	d5_deletions	d3_deletions	j_deletions	n2_insertions	n1_insertions	v_index	n1_index	n2_index	d_index	j_index	v_family_ties	v_gene_ties	v_allele_ties	d_family_ties	d_gene_ties	d_allele_ties	j_family_ties	j_gene_ties	j_allele_ties	sequence_tags	v_shm_count	v_shm_indexes	antibody	sample_name	species	locus	product_subtype	kit_pool	total_templates	productive_templates	outofframe_templates	stop_templates	dj_templates	total_rearrangements	productive_rearrangements	outofframe_rearrangements	stop_rearrangements	dj_rearrangements	total_reads	total_productive_reads	total_outofframe_reads	total_stop_reads	total_dj_reads	productive_clonality	productive_entropy	sample_clonality	sample_entropy	sample_amount_ng	sample_cells_mass_estimate	fraction_productive_of_cells_mass_estimate	sample_cells	fraction_productive_of_cells	max_productive_frequency	max_frequency	counting_method	primer_set	release_date	sample_tags	fraction_productive	order_name	kit_id	total_t_cells
@@ -22,7 +23,9 @@ class TestAdaptiveBiotechLoader(TestCase):
         TCCCTGGAGCTTGGTGACTCTGCTGTGTATTTCTGTGCCAGCAGCCGGGCCAGGGTCTTTGGAAACTATGGCTACACCTTCGGTTCG	CASSRARVFGNYGYTF	In	VDJ	398	10151	0.0025006540475318883	0.0031340993779039664	48	TCRBV03	unresolved		TCRBD01	TCRBD01-01	01	TCRBJ01	TCRBJ01-02	01	4	4	3	2	8	4	33	46	55	50	63		TCRBV03-01,TCRBV03-02								null	null	null	null	HIP00110	Human	TCRB	Deep	null	224859	179411	41463	3983	0	130940	104850	24105	1985	0	4059338	3238889	748535	71914	0	0.100719467	14.9981718	0.1101579	15.1260223	3636.47998	559458	0.3206871650776287	0	0.0	0.0137189021	0.0191940162	v2	Human-TCRB-PD1x	2013-12-13 22:23:05.529	Age:55 Years,Biological Sex:Male,Cohort:Cohort 01,Ethnic Group:Unknown Ethnicity,HLA MHC class I:HLA-A*03,HLA MHC class I:HLA-A*24,HLA MHC class I:HLA-B*07,Inferred CMV status (cross-validation): Inferred CMV -,Inferred CMV status: Inferred CMV -,Inferred HLA type:Inferred HLA-A*03,Inferred HLA type:Inferred HLA-A*24,Inferred HLA type:Inferred HLA-B*07,Racial Group:Unknown racial group,Species:Human,Tissue Source:gDNA,Tissue Source:PBMC,Tissue Source:Peripheral blood lymphocytes (PBL),Tissue Source:T cells,Virus Diseases:Cytomegalovirus -	0.7978822284186979	null	null	0
         ATCCAGCGCACAGAGCAGGGGGACTCGGCCATGTATCTCTGTGCCAGCAGATAAAAGGGGACGGATCGGGAACTGTTTTTTGGCAGT	CASR*KGTDRELFF	Stop	VDJ	394	10125	0.0024942490622855253	null	42	TCRBV07	TCRBV07-09			unresolved		TCRBJ01	TCRBJ01-04	01	6	0	7	12	8	7	39	50	62	57	70			01,03	TCRBD01,TCRBD02	TCRBD01-01,TCRBD02-01					null	null	null	null	HIP00110	Human	TCRB	Deep	null	224859	179411	41463	3983	0	130940	104850	24105	1985	0	4059338	3238889	748535	71914	0	0.100719467	14.9981718	0.1101579	15.1260223	3636.47998	559458	0.3206871650776287	0	0.0	0.0137189021	0.0191940162	v2	Human-TCRB-PD1x	2013-12-13 22:23:05.529	Age:55 Years,Biological Sex:Male,Cohort:Cohort 01,Ethnic Group:Unknown Ethnicity,HLA MHC class I:HLA-A*03,HLA MHC class I:HLA-A*24,HLA MHC class I:HLA-B*07,Inferred CMV status (cross-validation): Inferred CMV -,Inferred CMV status: Inferred CMV -,Inferred HLA type:Inferred HLA-A*03,Inferred HLA type:Inferred HLA-A*24,Inferred HLA type:Inferred HLA-B*07,Racial Group:Unknown racial group,Species:Human,Tissue Source:gDNA,Tissue Source:PBMC,Tissue Source:Peripheral blood lymphocytes (PBL),Tissue Source:T cells,Virus Diseases:Cytomegalovirus -	0.7978822284186979	null	null	0
         GGCTGCTGTCGGCTGCTCCCTCCCAGACATCTGTGTACTTCTGTGCCAGCAGTTATGGGCCGCCAAGGTGAGCAGTTCTTCGGGCCA		Out	VDJ	388	9745	0.0024006377394540685	null	40	TCRBV06	TCRBV06-05	01	TCRBD01	TCRBD01-01	01	TCRBJ02	TCRBJ02-01	01	3	8	0	9	8	1	41	55	60	56	68										null	null	null	Vb 13.1	HIP00110	Human	TCRB	Deep	null	224859	179411	41463	3983	0	130940	104850	24105	1985	0	4059338	3238889	748535	71914	0	0.100719467	14.9981718	0.1101579	15.1260223	3636.47998	559458	0.3206871650776287	0	0.0	0.0137189021	0.0191940162	v2	Human-TCRB-PD1x	2013-12-13 22:23:05.529	Age:55 Years,Biological Sex:Male,Cohort:Cohort 01,Ethnic Group:Unknown Ethnicity,HLA MHC class I:HLA-A*03,HLA MHC class I:HLA-A*24,HLA MHC class I:HLA-B*07,Inferred CMV status (cross-validation): Inferred CMV -,Inferred CMV status: Inferred CMV -,Inferred HLA type:Inferred HLA-A*03,Inferred HLA type:Inferred HLA-A*24,Inferred HLA type:Inferred HLA-B*07,Racial Group:Unknown racial group,Species:Human,Tissue Source:gDNA,Tissue Source:PBMC,Tissue Source:Peripheral blood lymphocytes (PBL),Tissue Source:T cells,Virus Diseases:Cytomegalovirus -	0.7978822284186979	null	null	0
-        CACATCAATTCCCTGGAGCTTGGTGACTCTGCTGTGTATTTCTGTGCCAGCAGCCAAGCAGATAATCAGCCCCAGCATTTTGGTGAT	CASSQADNQPQHF	In	VDJ	363	9277	0.0022853480050195377	0.002864253761089065	39	TCRBV03	unresolved		TCRBD01	TCRBD01-01	01	TCRBJ01	TCRBJ01-05	01	1	4	5	4	2	0	42	-1	61	58	63		TCRBV03-01,TCRBV03-02								null	null	null	null	HIP00110	Human	TCRB	Deep	null	224859	179411	41463	3983	0	130940	104850	24105	1985	0	4059338	3238889	748535	71914	0	0.100719467	14.9981718	0.1101579	15.1260223	3636.47998	559458	0.3206871650776287	0	0.0	0.0137189021	0.0191940162	v2	Human-TCRB-PD1x	2013-12-13 22:23:05.529	Age:55 Years,Biological Sex:Male,Cohort:Cohort 01,Ethnic Group:Unknown Ethnicity,HLA MHC class I:HLA-A*03,HLA MHC class I:HLA-A*24,HLA MHC class I:HLA-B*07,Inferred CMV status (cross-validation): Inferred CMV -,Inferred CMV status: Inferred CMV -,Inferred HLA type:Inferred HLA-A*03,Inferred HLA type:Inferred HLA-A*24,Inferred HLA type:Inferred HLA-B*07,Racial Group:Unknown racial group,Species:Human,Tissue Source:gDNA,Tissue Source:PBMC,Tissue Source:Peripheral blood lymphocytes (PBL),Tissue Source:T cells,Virus Diseases:Cytomegalovirus -	0.7978822284186979	null	null	0"""
+        CACATCAATTCCCTGGAGCTTGGTGACTCTGCTGTGTATTTCTGTGCCAGCAGCCAAGCAGATAATCAGCCCCAGCATTTTGGTGAT	CASSQADNQPQHF	In	VDJ	363	9277	0.0022853480050195377	0.002864253761089065	39	TCRBV03	unresolved		TCRBD01	TCRBD01-01	01	TCRBJ01	TCRBJ01-05	01	1	4	5	4	2	0	42	-1	61	58	63		TCRBV03-01,TCRBV03-02								null	null	null	null	HIP00110	Human	TCRB	Deep	null	224859	179411	41463	3983	0	130940	104850	24105	1985	0	4059338	3238889	748535	71914	0	0.100719467	14.9981718	0.1101579	15.1260223	3636.47998	559458	0.3206871650776287	0	0.0	0.0137189021	0.0191940162	v2	Human-TCRB-PD1x	2013-12-13 22:23:05.529	Age:55 Years,Biological Sex:Male,Cohort:Cohort 01,Ethnic Group:Unknown Ethnicity,HLA MHC class I:HLA-A*03,HLA MHC class I:HLA-A*24,HLA MHC class I:HLA-B*07,Inferred CMV status (cross-validation): Inferred CMV -,Inferred CMV status: Inferred CMV -,Inferred HLA type:Inferred HLA-A*03,Inferred HLA type:Inferred HLA-A*24,Inferred HLA type:Inferred HLA-B*07,Racial Group:Unknown racial group,Species:Human,Tissue Source:gDNA,Tissue Source:PBMC,Tissue Source:Peripheral blood lymphocytes (PBL),Tissue Source:T cells,Virus Diseases:Cytomegalovirus -	0.7978822284186979	null	null	0
+        CACATCAATTCCCTGGAGCTTGGTGACTCTGCTGTGTATTTCTGTGCCAGCAGCCAAGCAGATAATCAGCCCCAGCATTTTGGTGAT	CASSQADNQPQHF	In	VDJ	363	9277	0.0022853480050195377	0.002864253761089065	39	nan	unresolved		TCRAD01	TCRAD01-01	01	TCRAJ01	TCRAJ01-05	01	1	4	5	4	2	0	42	-1	61	58	63		TCRBV03-01,TCRBV03-02								null	null	null	null	HIP00110	Human	TCRB	Deep	null	224859	179411	41463	3983	0	130940	104850	24105	1985	0	4059338	3238889	748535	71914	0	0.100719467	14.9981718	0.1101579	15.1260223	3636.47998	559458	0.3206871650776287	0	0.0	0.0137189021	0.0191940162	v2	Human-TCRB-PD1x	2013-12-13 22:23:05.529	Age:55 Years,Biological Sex:Male,Cohort:Cohort 01,Ethnic Group:Unknown Ethnicity,HLA MHC class I:HLA-A*03,HLA MHC class I:HLA-A*24,HLA MHC class I:HLA-B*07,Inferred CMV status (cross-validation): Inferred CMV -,Inferred CMV status: Inferred CMV -,Inferred HLA type:Inferred HLA-A*03,Inferred HLA type:Inferred HLA-A*24,Inferred HLA type:Inferred HLA-B*07,Racial Group:Unknown racial group,Species:Human,Tissue Source:gDNA,Tissue Source:PBMC,Tissue Source:Peripheral blood lymphocytes (PBL),Tissue Source:T cells,Virus Diseases:Cytomegalovirus -	0.7978822284186979	null	null	0"""
+
 
         rep2text = """rearrangement	amino_acid	bio_identity	templates	frame_type	rearrangement_type	cdr3_length	frequency	productive_frequency	v_resolved	d_resolved	j_resolved	v_family	v_family_ties	v_gene	v_gene_ties	v_allele	v_allele_ties	d_family	d_family_ties	d_gene	d_gene_ties	d_allele	d_allele_ties	j_family	j_family_ties	j_gene	j_gene_ties	j_allele	j_allele_ties
         GCACAGAGCAGGGGGACTCGGCCATGTATCTCTGTGCCAGCAGCTTACTGGTAAACCCCCACTGCTTATGAGCAGTTCTTCGGGCCA	na	X+TCRBV07-09+TCRBJ02-01	170	Out	VDJ	49	0.012084162638612454	na	TCRBV07-09*01	TCRBD02-01	TCRBJ02-01*01	TCRBV07	no data	TCRBV07-09	no data	01	no data	TCRBD02	no data	TCRBD02-01	no data	unknown	01,02	TCRBJ02	no data	TCRBJ02-01	no data	01	no data
@@ -51,29 +54,42 @@ class TestAdaptiveBiotechLoader(TestCase):
 
         with open(path + "metadata.csv", "w") as file:
             file.writelines(
-            """filename,chain,donor,coeliac status (yes/no)
+                """filename,chain,donor,coeliac status (yes/no)
 rep1.tsv,TRA,1234,no
 rep2.tsv,TRB,1234a,no"""
             )
 
-        dataset = AdaptiveBiotechLoader().load(path,
-                                               {
-                                                  "result_path": EnvironmentSettings.root_path + "test/tmp/adaptive/",
-                                                  "dataset_id": "emerson2017",
-                                                  "batch_size": 1,
-                                                  "region_type": "CDR3",  # can be loaded from metadata if available?
-                                                  "metadata_file": path + "metadata.csv",
-                                                  "keep_only_in_frame": True,
-                                                   "columns_to_load": ["rearrangement", "v_family", "v_gene", "v_allele", "j_family",
-                                                                       "j_gene", "j_allele", "amino_acid", "templates", "frame_type"]
-                                               }
-                                               )
+        dataset = AdaptiveBiotechImport.import_dataset(DatasetImportParams(
+            **{
+                "path": path,
+                "result_path": EnvironmentSettings.root_path + "test/tmp/adaptive/",
+                "batch_size": 1,
+                "import_productive": True,
+                "import_with_stop_codon": False,
+                "import_out_of_frame": False,
+                "region_type": "CDR3",
+                "region_definition": "IMGT",
+                "metadata_file": path + "metadata.csv",
+                "columns_to_load": ["rearrangement", "v_family", "v_gene", "v_allele", "j_family",
+                                    "j_gene", "j_allele", "amino_acid", "templates", "frame_type"],
+                "column_mapping": {
+                    "rearrangement": "sequences",  # 'rearrangement' is the adaptive name, which will be mapped to 'sequences' in immuneML
+                    "amino_acid": "sequence_aas",
+                    "v_gene": "v_genes",
+                    "j_gene": "j_genes",
+                    "frame_type": "frame_types",
+                    "v_family": "v_subgroup",
+                    "j_family": "j_subgroup",
+                    "templates": "counts"
+                }
+            })
+        )
 
         self.assertEqual(2, dataset.get_example_count())
         for index, rep in enumerate(dataset.get_data()):
             if index == 0:
                 self.assertEqual("1234", rep.metadata["donor"])
-                self.assertEqual(8, len(rep.sequences))
+                self.assertEqual(9, len(rep.sequences))
                 self.assertEqual(10, rep.sequences[0].metadata.count)
             else:
                 self.assertEqual("1234a", rep.metadata["donor"])

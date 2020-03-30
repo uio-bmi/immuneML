@@ -17,7 +17,7 @@ class MLMethodTrainer(Step):
             method = MLMethodTrainer._fit_method(input_params)
             MLMethodTrainer.store(method, input_params)
         else:
-            method.load(input_params.result_path)
+            method.import_dataset(input_params.result_path)
 
         return method
 

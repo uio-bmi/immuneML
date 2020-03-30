@@ -15,11 +15,11 @@ class Dataset:
         pass
 
     @abc.abstractmethod
-    def get_data(self, batch_size: int):
+    def get_data(self, batch_size: int = 1):
         pass
 
     @abc.abstractmethod
-    def get_batch(self, batch_size: int):
+    def get_batch(self, batch_size: int = 1):
         pass
 
     @abc.abstractmethod

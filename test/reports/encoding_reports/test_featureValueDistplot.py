@@ -10,9 +10,7 @@ from scipy import sparse
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.encoded_data.EncodedData import EncodedData
 from source.environment.EnvironmentSettings import EnvironmentSettings
-from source.reports.encoding_reports.FeatureValueBarplot import FeatureValueBarplot
 from source.reports.encoding_reports.FeatureValueDistplot import FeatureValueDistplot
-from source.reports.encoding_reports.distributions.DistributionPlot import DistributionPlot
 
 
 class TestDistributions(TestCase):
@@ -23,7 +21,6 @@ class TestDistributions(TestCase):
         n_timepoints = 2
         n_examples = n_donors * n_timepoints
         diseased_donors = range(0, 4)
-
 
         donors = [donor for donor in range(n_donors) for timepoint in range(n_timepoints)]
         timepoints = [timepoint for donor in range(n_donors) for timepoint in range(n_timepoints)]
@@ -51,19 +48,17 @@ class TestDistributions(TestCase):
 
         return dataset
 
-
     def test_generate(self):
-
         path = EnvironmentSettings.root_path + "test/tmp/featurevaluedistplot/"
 
         dataset = self._create_dummy_encoded_data(path)
 
         report = FeatureValueDistplot.build_object(**{"dataset": dataset,
-                                                     "result_path": path,
-                                                     "grouping_label": "donor",
-                                                     "color_label": "disease_status",
-                                                     "row_grouping_label": "timepoint",
-                                                     "distribution_plot_type":"SINA"})
+                                                      "result_path": path,
+                                                      "grouping_label": "donor",
+                                                      "color_label": "disease_status",
+                                                      "row_grouping_label": "timepoint",
+                                                      "distribution_plot_type": "SINA"})
 
         report.result_name = "sina"
         report.generate()
@@ -87,6 +82,5 @@ class TestDistributions(TestCase):
 
         report.result_name = "density"
         report.generate()
-
 
         shutil.rmtree(path)

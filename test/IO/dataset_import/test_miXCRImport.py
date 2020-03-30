@@ -2,8 +2,12 @@ import csv
 import shutil
 from unittest import TestCase
 
-from helpers.metadata_converter import convert_metadata
-from source.IO.dataset_import.MiXCRLoader import MiXCRLoader
+import pandas as pd
+
+from source.IO.dataset_import.DatasetImportParams import DatasetImportParams
+from source.IO.dataset_import.MiXCRImport import MiXCRImport
+from source.data_model.receptor.RegionDefinition import RegionDefinition
+from source.data_model.receptor.RegionType import RegionType
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.util.PathBuilder import PathBuilder
 
@@ -12,9 +16,8 @@ class TestMiXCRLoader(TestCase):
     def test_load(self):
         path = EnvironmentSettings.root_path + "test/tmp/mixcr/"
 
-        PathBuilder.build(path + "tmp_input/_CD/")
-        PathBuilder.build(path + "tmp_input/_HC/")
-        with open(path + "tmp_input/_CD/CD1_clones_TRA.csv", "w") as file:
+        PathBuilder.build(path + "tmp_input/")
+        with open(path + "tmp_input/CD1_clones_TRA.csv", "w") as file:
             writer = csv.DictWriter(file,
                                     delimiter="\t",
                                     fieldnames=["patient", "dilution", "cloneCount", "allVHitsWithScore",
@@ -53,7 +56,7 @@ class TestMiXCRLoader(TestCase):
             writer.writeheader()
             writer.writerows(dicts)
 
-        with open(path + "tmp_input/_HC/HC2_clones_TRB.csv", "w") as file:
+        with open(path + "tmp_input/HC2_clones_TRB.csv", "w") as file:
             writer = csv.DictWriter(file,
                                     delimiter="\t",
                                     fieldnames=["patient", "dilution", "cloneCount", "allVHitsWithScore",
@@ -134,47 +137,54 @@ class TestMiXCRLoader(TestCase):
             writer.writeheader()
             writer.writerows(dicts)
 
-        convert_metadata(path + "tmp_input/", path + "metadata.csv", "CD", "HC")
+        metadata = pd.DataFrame({"filename": ["HC2_clones_TRB.csv", "CD1_clones_TRA.csv"], "donor": ["HC2", "CD1"], "CD": [False, True]})
+        metadata.to_csv(path + "metadata.csv")
 
-        dataset = MiXCRLoader().load(path + "tmp_input/", {
-            "additional_columns": ["minQualCDR3"],
-            "sequence_type": "CDR3",
-            "result_path": path + "tmp_output/",
-            "batch_size": 2,
-            "extension": "csv",
-            "CDR3_type": "IMGT",
-            "metadata_file": path + "metadata.csv"
-        })
+        dataset = MiXCRImport.import_dataset(DatasetImportParams(
+            path=path + "tmp_input/",
+            region_type=RegionType.CDR3,
+            result_path=path + "tmp_output/",
+            batch_size=2, separator="\t",
+            region_definition=RegionDefinition.IMGT,
+            metadata_file=path + "metadata.csv",
+            column_mapping={
+                "cloneCount": "counts",
+                "allVHitsWithScore": "v_genes",
+                "allJHitsWithScore": "j_genes"
+            }
+        ))
 
         self.assertEqual(2, dataset.get_example_count())
 
         for index, repertoire in enumerate(dataset.get_data()):
-            if index == 0:
+            if index == 1:
                 self.assertTrue(repertoire.sequences[0].amino_acid_sequence == "FAVF")
                 self.assertTrue(repertoire.sequences[1].metadata.v_gene == "V14-1")
                 self.assertTrue(repertoire.metadata["CD"])
-            elif index == 1:
+            elif index == 0:
                 self.assertEqual(5, len(repertoire.sequences))
                 self.assertEqual("GCAG", repertoire.sequences[0].nucleotide_sequence)
                 self.assertEqual(6, repertoire.sequences[1].metadata.count)
                 self.assertFalse(repertoire.metadata["CD"])
 
-        dataset = MiXCRLoader().load(path + "tmp_input/", {
-            "additional_columns": ["minQualCDR3"],
-            "sequence_type": "CDR3",
-            "result_path": path + "tmp_output/",
-            "batch_size": 2,
-            "extension": "csv",
-            "metadata_file": path + "metadata.csv",
-            "CDR3_type": "other"
-        })
+        dataset = MiXCRImport.import_dataset(DatasetImportParams(path=path + "tmp_input/",
+                                                                 region_type=RegionType.CDR3,
+                                                                 result_path=path + "tmp_output/",
+                                                                 batch_size=2, separator="\t",
+                                                                 metadata_file=path + "metadata.csv",
+                                                                 column_mapping={
+                                                                     "cloneCount": "counts",
+                                                                     "allVHitsWithScore": "v_genes",
+                                                                     "allJHitsWithScore": "j_genes"
+                                                                 }
+                                                                 ))
 
         for index, repertoire in enumerate(dataset.get_data()):
-            if index == 0:
+            if index == 1:
                 self.assertTrue(repertoire.sequences[0].amino_acid_sequence == "VFAVFA")
                 self.assertTrue(repertoire.sequences[1].metadata.v_gene == "V14-1")
                 self.assertTrue(repertoire.metadata["CD"])
-            elif index == 1:
+            elif index == 0:
                 self.assertEqual(5, len(repertoire.sequences))
                 self.assertEqual("TGTGCAGCAA", repertoire.sequences[0].nucleotide_sequence)
                 self.assertEqual(6, repertoire.sequences[1].metadata.count)

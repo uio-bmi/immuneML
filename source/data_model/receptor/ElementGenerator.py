@@ -21,7 +21,7 @@ class ElementGenerator:
 
     def _load_from_file(self, cursor, lines_to_read):
 
-        # TODO: make this abstract and move implementation to specific generator: load from csv not from pickle
+        # TODO: make this abstract and move implementation to specific generator: import_dataset from csv not from pickle
 
         with open(self.file_list[cursor["file_index"]], "rb") as file:
             elements = pickle.load(file)[cursor["line"]:cursor["line"] + lines_to_read]

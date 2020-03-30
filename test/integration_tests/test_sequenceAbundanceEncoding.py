@@ -32,9 +32,8 @@ class TestSequenceAbundanceEncoding(TestCase):
                 "datasets": {
                     "d1": {
                         "format": "Pickle",
-                        "path": path + "dataset.pickle",
                         "params": {
-                            "result_path": path
+                            "path": path + "dataset.pickle",
                         }
                     }
                 },

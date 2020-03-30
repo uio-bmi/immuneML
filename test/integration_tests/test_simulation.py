@@ -21,8 +21,9 @@ class TestSimulation(TestCase):
                 "datasets": {
                     "d1": {
                         "format": 'Pickle',
-                        "path": path + "dataset.pkl",
-                        "params": {}
+                        "params": {
+                            "path": path + "dataset.pkl"
+                        }
                     }
                 },
                 "motifs": {

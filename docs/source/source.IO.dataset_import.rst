@@ -4,18 +4,18 @@ source.IO.dataset\_import package
 Submodules
 ----------
 
-source.IO.dataset\_import.AdaptiveBiotechLoader module
+source.IO.dataset\_import.AdaptiveBiotechImport module
 ------------------------------------------------------
 
-.. automodule:: source.IO.dataset_import.AdaptiveBiotechLoader
+.. automodule:: source.IO.dataset_import.AdaptiveBiotechImport
     :members:
     :undoc-members:
     :show-inheritance:
 
-source.IO.dataset\_import.DataLoader module
+source.IO.dataset\_import.DataImport module
 -------------------------------------------
 
-.. automodule:: source.IO.dataset_import.DataLoader
+.. automodule:: source.IO.dataset_import.DataImport
     :members:
     :undoc-members:
     :show-inheritance:
@@ -28,34 +28,34 @@ source.IO.dataset\_import.DataLoaderType module
     :undoc-members:
     :show-inheritance:
 
-source.IO.dataset\_import.GenericLoader module
+source.IO.dataset\_import.GenericImport module
 ----------------------------------------------
 
-.. automodule:: source.IO.dataset_import.GenericLoader
+.. automodule:: source.IO.dataset_import.GenericImport
     :members:
     :undoc-members:
     :show-inheritance:
 
-source.IO.dataset\_import.ImmunoSEQLoader module
+source.IO.dataset\_import.ImmunoSEQImport module
 ------------------------------------------------
 
-.. automodule:: source.IO.dataset_import.ImmunoSEQLoader
+.. automodule:: source.IO.dataset_import.ImmunoSEQImport
     :members:
     :undoc-members:
     :show-inheritance:
 
-source.IO.dataset\_import.MiXCRLoader module
+source.IO.dataset\_import.MiXCRImport module
 --------------------------------------------
 
-.. automodule:: source.IO.dataset_import.MiXCRLoader
+.. automodule:: source.IO.dataset_import.MiXCRImport
     :members:
     :undoc-members:
     :show-inheritance:
 
-source.IO.dataset\_import.PickleLoader module
+source.IO.dataset\_import.PickleImport module
 ---------------------------------------------
 
-.. automodule:: source.IO.dataset_import.PickleLoader
+.. automodule:: source.IO.dataset_import.PickleImport
     :members:
     :undoc-members:
     :show-inheritance:

@@ -13,7 +13,7 @@ def convert_metadata(path, result_path, disease_name: str, negative_class_name: 
     disease = []
     filenames = []
     for file in files:
-        filename = os.path.basename(file).split(".")[0]
+        filename = os.path.basename(file).split("/")[0]
         donors.append(filename.split('_')[0])
         chains.append(filename.split("_")[-1][-1])
         disease.append(True if disease_name in file and negative_class_name not in file else False)

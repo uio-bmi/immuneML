@@ -1,3 +1,6 @@
-has_header: False # if data has a header, col_names is ignored.
-col_names: ["sequences", "sequence_aas", "v_genes", "j_genes"] # names of columns to be read in (ignored if has_header is True)
-# if col_names is empty and has_header is False, an error is thrown
+import_productive: None # no effect as this info is not available in files created by OLGA
+import_with_stop_codon: None # no effect as this info is not available in files created by OLGA
+import_out_of_frame: None # no effect as this info is not available in files created by OLGA
+separator: "\t"
+columns_to_load: ["sequences", "sequence_aas", "v_genes", "j_genes"] # column names correspond to OLGA output that will be loaded from the file
+column_mapping: None # could be defined if necessary in to format {column_name_in_original_file_1: immuneML_friendly_name_1 for all columns that should be mapped}

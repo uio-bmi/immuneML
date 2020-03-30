@@ -4,7 +4,7 @@ import os
 import pandas as pd
 
 from source.IO.dataset_export.PickleExporter import PickleExporter
-from source.IO.dataset_import.PickleLoader import PickleLoader
+from source.IO.dataset_import.PickleImport import PickleImport
 from source.data_model.dataset.Dataset import Dataset
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.repertoire.Repertoire import Repertoire
@@ -26,7 +26,7 @@ class SignalImplanter(Step):
         path = input_params.result_path + FilenameHandler.get_dataset_name(SignalImplanter.__name__)
 
         if os.path.isfile(path):
-            dataset = PickleLoader.load(path)
+            dataset = PickleImport.import_dataset(path)
         else:
             dataset = SignalImplanter._implant_signals(input_params)
 

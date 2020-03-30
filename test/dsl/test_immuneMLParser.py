@@ -24,8 +24,9 @@ class TestImmuneMLParser(TestCase):
                 "datasets": {
                     "d1": {
                         "format": "Pickle",
-                        "path": path + "dataset.pkl",
-                        "result_path": path
+                        "params": {
+                            "path": path + "dataset.pkl",
+                        }
                     }
                 },
                 "encodings": {

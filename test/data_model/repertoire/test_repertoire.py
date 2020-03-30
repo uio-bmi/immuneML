@@ -28,7 +28,7 @@ class TestRepertoire(TestCase):
 
         obj = Repertoire.build_from_sequence_objects(sequences, path, {"cmv": "yes", 'donor': "1"})
 
-        self.assertTrue(os.path.isfile(obj._data_filename))
+        self.assertTrue(os.path.isfile(obj.data_filename))
         self.assertTrue(isinstance(obj, Repertoire))
         self.assertTrue(np.array_equal(np.array(["1", "2"]), obj.get_sequence_identifiers()))
         self.assertTrue(np.array_equal(np.array(["AAA", "CCC"]), obj.get_sequence_aas()))

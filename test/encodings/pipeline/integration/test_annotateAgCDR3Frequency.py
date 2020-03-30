@@ -3,6 +3,8 @@ from unittest import TestCase
 
 from source.analysis.data_manipulation.NormalizationType import NormalizationType
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
+from source.data_model.receptor.RegionDefinition import RegionDefinition
+from source.data_model.receptor.RegionType import RegionType
 from source.encodings.EncoderParams import EncoderParams
 from source.encodings.kmer_frequency.KmerFrequencyEncoder import KmerFrequencyEncoder
 from source.encodings.kmer_frequency.ReadsType import ReadsType
@@ -64,15 +66,15 @@ reference_rep.tsv,rep1"""
 
         reference_data_loader_params = {
             "result_path": path,
-            "dataset_id": "t1d_verified",
-            "extension": "tsv",
             "column_mapping": {
-                "sequence_aas": "CDR3B AA Sequence",
-                "v_genes": "TRBV Gene"
+                "CDR3B AA Sequence": "sequence_aas",
+                "TRBV Gene": "v_genes"
             },
-            "additional_columns": ["Antigen Protein", "MHC Class"],
-            "strip_CF": True,
-            "metadata_file": path + "metadata.csv"
+            "columns_to_load": ["CDR3B AA Sequence", "TRBV Gene", "Antigen Protein", "MHC Class"],
+            "metadata_file": path + "metadata.csv",
+            "separator": "\t",
+            "region_type": RegionType.CDR3,
+            "region_definition": RegionDefinition.IMGT
         }
 
         kmer_freq_params = {
@@ -84,7 +86,7 @@ reference_rep.tsv,rep1"""
 
         annotate_params = {
             "reference_sequence_path": path,
-            "data_loader_name": "GenericLoader",
+            "data_loader_name": "GenericImport",
             "data_loader_params": reference_data_loader_params,
             "sequence_matcher_params": {
                 "max_distance": 0,

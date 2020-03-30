@@ -6,6 +6,8 @@ from scipy import sparse
 
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.encoded_data.EncodedData import EncodedData
+from source.data_model.receptor.RegionDefinition import RegionDefinition
+from source.data_model.receptor.RegionType import RegionType
 from source.data_model.repertoire.Repertoire import Repertoire
 from source.encodings.pipeline.steps.SequenceMatchFeatureAnnotation import SequenceMatchFeatureAnnotation
 from source.environment.EnvironmentSettings import EnvironmentSettings
@@ -55,12 +57,11 @@ reference_rep.tsv,rep1"""
     path = EnvironmentSettings.root_path + "test/tmp/sequencematchfeatureannotationstep/"
     reference_data_loader_params = {
         "result_path": path,
-        "dataset_id": "t1d_verified",
-        "extension": "tsv",
-        "column_mapping": {"sequence_aas": "CDR3B AA Sequence",
-                           "v_genes": "TRBV Gene"},
-        "additional_columns": ["Antigen Protein", "MHC Class"],
-        "strip_CF": True,
+        "column_mapping": {"CDR3B AA Sequence": "sequence_aas",
+                           "TRBV Gene": "v_genes"},
+        "columns_to_load": ["CDR3B AA Sequence", "TRBV Gene", "Antigen Protein", "MHC Class"],
+        "region_definition": RegionDefinition.IMGT,
+        "region_type": RegionType.CDR3,
         "metadata_file": path + "metadata.csv"
     }
 
@@ -74,7 +75,7 @@ reference_rep.tsv,rep1"""
             file.writelines(TestSequenceMatchFeatureAnnotation.reference_metadata)
 
         step = SequenceMatchFeatureAnnotation(reference_sequence_path=path,
-                                              data_loader_name="GenericLoader",
+                                              data_loader_name="GenericImport",
                                               data_loader_params=TestSequenceMatchFeatureAnnotation.reference_data_loader_params,
                                               sequence_matcher_params={"max_distance": 1,
                                                                        "metadata_fields_to_match": ["v_gene"],
@@ -101,7 +102,7 @@ reference_rep.tsv,rep1"""
             file.writelines(TestSequenceMatchFeatureAnnotation.reference_metadata)
 
         step = SequenceMatchFeatureAnnotation(reference_sequence_path=path,
-                                              data_loader_name="GenericLoader",
+                                              data_loader_name="GenericImport",
                                               data_loader_params=TestSequenceMatchFeatureAnnotation.reference_data_loader_params,
                                               sequence_matcher_params={"max_distance": 1,
                                                                        "metadata_fields_to_match": [],
@@ -128,7 +129,7 @@ reference_rep.tsv,rep1"""
             file.writelines(TestSequenceMatchFeatureAnnotation.reference_metadata)
 
         step = SequenceMatchFeatureAnnotation(reference_sequence_path=path,
-                                              data_loader_name="GenericLoader",
+                                              data_loader_name="GenericImport",
                                               data_loader_params=TestSequenceMatchFeatureAnnotation.reference_data_loader_params,
                                               sequence_matcher_params={"max_distance": 0,
                                                                        "metadata_fields_to_match": [],
@@ -155,7 +156,7 @@ reference_rep.tsv,rep1"""
             file.writelines(TestSequenceMatchFeatureAnnotation.reference_metadata)
 
         step = SequenceMatchFeatureAnnotation(reference_sequence_path=path,
-                                              data_loader_name="GenericLoader",
+                                              data_loader_name="GenericImport",
                                               data_loader_params=TestSequenceMatchFeatureAnnotation.reference_data_loader_params,
                                               sequence_matcher_params={"max_distance": 0,
                                                                        "metadata_fields_to_match": ["v_gene"],

@@ -19,7 +19,7 @@ class ReflectionHandler:
     def get_class_from_path(path: str, class_name: str = None):
         """
         :param path: path to file where class is located
-        :param class_name: class name to load from the file; if None, it is assument that the class name is the same
+        :param class_name: class name to import_dataset from the file; if None, it is assument that the class name is the same
                 as the file name
         :return: class
         """

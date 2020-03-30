@@ -1,16 +1,17 @@
 import shutil
 from unittest import TestCase
 
-import pandas as pd
-
-from source.IO.dataset_import.AIRRLoader import AIRRLoader
+from source.IO.dataset_import.AIRRImport import AIRRImport
+from source.IO.dataset_import.DatasetImportParams import DatasetImportParams
+from source.data_model.receptor.RegionDefinition import RegionDefinition
+from source.data_model.receptor.RegionType import RegionType
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.util.PathBuilder import PathBuilder
 
 
-class TestAIRRLoader(TestCase):
+class TestAIRRImport(TestCase):
 
-    def test_load(self):
+    def test_import_dataset(self):
         file1_content = """rearrangement_id	rearrangement_set_id	sequence_id	sequence	rev_comp	productive	sequence_alignment	germline_alignment	v_call	d_call	j_call	c_call	junction	junction_length	junction_aa	v_score	d_score	j_score	c_score	v_cigar	d_cigar	j_cigar	c_cigar	v_identity	v_evalue	d_identity	d_evalue	j_identity	j_evalue	v_sequence_start	v_sequence_end	v_germline_start	v_germline_end	d_sequence_start	d_sequence_end	d_germline_start	d_germline_end	j_sequence_start	j_sequence_end	j_germline_start	j_germline_end	np1_length	np2_length	duplicate_count
 IVKNQEJ01BVGQ6	1	IVKNQEJ01BVGQ6	GGCCCAGGACTGGTGAAGCCTTCACAGACCCTGTCCCTCACCTGCACTGTCTCTGGTGGCTCCATCAGCAGTGGTGGTTACTACTGGAGCTGGATCCGCCAGCACCCAGGGAAGGGCCTGGAGTGGATTGGGTACATCTATTACAGTGGGAGCACCTACTACAACCCGTCCCTCAAGAGTCGAGTTACCATATCAGTAGACACGTCTAAGAACCAGTTCTCCCTGAAGCTGAGCTCTGTGACTGCCGCGGACACGGCCGTGTATTACTGTGCGAGCGGGGTGGCTGGAACTTTTGACTACTGGGGCCAGGGAACCCTGGTCACTGTCTCCTCA	T	T			IGHV4-31*03	IGHD1-7*01,IGHD6-19*01	IGHJ4*02		TGTGCGAGCGGGGTGGCTGGAACTTTTGACTACTGG	36	CASGVAGTFDYW	430	16.4	75.8		22N1S275=	11N280S8=	6N292S32=1X9=		1	1E-122	1	2.7	0.9762	6E-18	0	275	0	317	279	287	10	18	291	333	5	47	4	4	1247
 IVKNQEJ01AQVWS	1	IVKNQEJ01AQVWS	GGCCCAGGACTGGTGAAGCCTTCACAGACCCTGTCCCTCACCTGCACTGTCTCTGGTGGCTCCATCAGCAGTGGTGGTTACTACTGGAGCTGGATCCGCCAGCACCCAGGGAAGGGCCTGGAGTGGATTGGGTACATCTATTACAGTGGGAGCACCAACTACAACCCCTCCCTCAAGAGTCGAGTCACCATATCAGTAGACACGTCTAAGAACCAGTTCTCCCTGAAGCTGAGCTCTGTGACTGCCGCGGACACGGCCGTGTATTACTGTGCGAGCGGGGTGGCTGGAACTTTTGACTACTGGGGCCAGGGAACCCTGGTCACCGTCTCCTCA	T	T			IGHV4-31*03	IGHD1-7*01,IGHD6-19*01	IGHJ4*02		TGTGCGAGCGGGGTGGCTGGAACTTTTGACTACTGG	36	CASGVAGTFDYW	420	16.4	83.8		22N1S156=1X10=1X17=1X89=	11N280S8=	6N292S42=		0.9891	8E-120	1	2.7	1	2E-20	0	275	0	317	279	287	10	18	291	333	5	47	4	4	4
@@ -38,12 +39,21 @@ IVKNQEJ01AJ44V	1	IVKNQEJ01AJ44V	GGCCCAGGACTGGTGAAGCCTTCGGAGACCCTGTCCCTCACCTGCGCT
 rep1.tsv,1
 rep2.tsv,2""")
 
-        dataset = AIRRLoader().load(path=path, params={"result_path": path,
-                                                       "metadata_file": path + "metadata.csv",
-                                                       "additional_columns": ["junction_length"],
-                                                       "remove_non_productive": True,
-                                                       "clone_id_as_identifier": False,
-                                                       "sequence_type": "CDR3"})
+        columns_to_load = ["sequence", "v_call", "j_call", "duplicate_count", "productive", "junction_length", "sequence_id"]
+        column_mapping = {
+            "sequence": "sequences",
+            "v_call": "v_genes",
+            "j_call": "j_genes",
+            "duplicate_count": "counts",
+            "sequence_id": "sequence_identifiers"
+        }
+
+        dataset = AIRRImport.import_dataset(DatasetImportParams(result_path=path, path=path, metadata_file=path + "metadata.csv",
+                                                                import_out_of_frame=False, import_with_stop_codon=False,
+                                                                import_productive=True, region_type=RegionType.CDR3,
+                                                                region_definition=RegionDefinition.IMGT, batch_size=4,
+                                                                columns_to_load=columns_to_load, column_mapping=column_mapping,
+                                                                separator="\t"))
 
         self.assertEqual(2, dataset.get_example_count())
         for index, rep in enumerate(dataset.get_data()):

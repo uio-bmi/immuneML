@@ -5,7 +5,8 @@ import pickle
 from sklearn.pipeline import make_pipeline
 
 from source.IO.dataset_export.PickleExporter import PickleExporter
-from source.IO.dataset_import.PickleLoader import PickleLoader
+from source.IO.dataset_import.DatasetImportParams import DatasetImportParams
+from source.IO.dataset_import.PickleImport import PickleImport
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.dsl.definition_parsers.EncodingParser import EncodingParser
 from source.encodings.DatasetEncoder import DatasetEncoder
@@ -47,7 +48,7 @@ class PipelineEncoder(DatasetEncoder):
                         max_distance: 0
                         metadata_fields_to_match: []
                         same_length: True
-                    data_loader_name: GenericLoader
+                    data_loader_name: GenericImport
                     annotation_prefix: annotation_prefix
     """
 
@@ -75,7 +76,7 @@ class PipelineEncoder(DatasetEncoder):
     def encode(self, dataset, params: EncoderParams):
         filepath = params["result_path"] + "/" + params["filename"]
         if os.path.isfile(filepath):
-            encoded_dataset = self._run_pipeline(PickleLoader.load(filepath), params)
+            encoded_dataset = self._run_pipeline(PickleImport.import_dataset(DatasetImportParams(path=filepath)), params)
         else:
             encoded_dataset = self._encode_new_dataset(dataset, params)
         return encoded_dataset
@@ -122,7 +123,7 @@ class PipelineEncoder(DatasetEncoder):
         for index, step in enumerate(steps):
             step.result_path = params["result_path"]
             step.filename = params["filename"]
-            step.initial_encoder = self.initial_encoder.__class__.__name__
+            step.initial_encoder = self.initial_encoder.__name__
             step.initial_params = tuple((key, self.initial_encoder_params[key])
                                         for key in self.initial_encoder_params.keys())
             step.previous_steps = self._prepare_previous_steps(steps, index)

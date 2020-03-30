@@ -35,7 +35,7 @@ class RepertoireDataset(Dataset):
 
     def get_repertoire(self, index: int = -1, repertoire_identifier: str = ""):
         assert index != -1 or repertoire_identifier != "", \
-            "RepertoireDataset: cannot load repertoire since the index nor identifier are set."
+            "RepertoireDataset: cannot import_dataset repertoire since the index nor identifier are set."
         return self.repertoires[index] if index != -1 else [rep for rep in self.repertoires if rep.identifier == repertoire_identifier][0]
 
     def get_example_count(self):

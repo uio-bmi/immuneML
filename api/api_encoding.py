@@ -4,7 +4,10 @@ import random
 
 import pandas as pd
 
-from source.IO.dataset_import.MiXCRLoader import MiXCRLoader
+from source.IO.dataset_import.DatasetImportParams import DatasetImportParams
+from source.IO.dataset_import.MiXCRImport import MiXCRImport
+from source.data_model.receptor.RegionDefinition import RegionDefinition
+from source.data_model.receptor.RegionType import RegionType
 from source.encodings.EncoderParams import EncoderParams
 from source.encodings.kmer_frequency.KmerFrequencyEncoder import KmerFrequencyEncoder
 from source.environment.Label import Label
@@ -28,15 +31,15 @@ def encode_dataset_by_kmer_freq(path_to_dataset_directory: str, result_path: str
     if metadata_path is None:
         metadata_path = generate_random_metadata(path_to_dataset_directory, result_path)
 
-    loader = MiXCRLoader()
-    dataset = loader.load(path_to_dataset_directory, {
-        'metadata_file': metadata_path,
-        "sequence_type": "CDR3",  # load in only cdr3
-        "batch_size": 4,  # number of parallel processes for loading the data
-        "result_path": result_path,
-        "extension": "tsv",
-        "CDR3_type": "IMGT"  # which CDR3 definition to use - IMGT here (will remove first and last a.a. compared to IMGT junction)
-    })
+    loader = MiXCRImport()
+    dataset = loader.import_dataset(DatasetImportParams(
+        path=path_to_dataset_directory,
+        metadata_file=metadata_path,
+        region_type=RegionType.CDR3,  # import_dataset in only cdr3
+        batch_size=4,  # number of parallel processes for loading the data
+        result_path=result_path,
+        region_definition=RegionDefinition.IMGT  # which CDR3 definition to use - IMGT here (will remove first and last a.a. compared to IMGT junction)
+    ))
 
     label_name = list(dataset.params.keys())[0]  # label that can be used for ML prediction - by default: "disease" with values True/False
 

@@ -10,6 +10,7 @@ from editdistance import eval
 from sklearn.base import TransformerMixin
 
 from source.IO.dataset_export.PickleExporter import PickleExporter
+from source.IO.dataset_import.DatasetImportParams import DatasetImportParams
 from source.caching.CacheHandler import CacheHandler
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.encoded_data.EncodedData import EncodedData
@@ -33,10 +34,10 @@ class SequenceMatchFeatureAnnotation(TransformerMixin):
     SEQUENCE = "sequence"
 
     def __init__(self, reference_sequence_path, data_loader_params, sequence_matcher_params,
-                 data_loader_name="GenericLoader", annotation_prefix="", result_path=None, filename=None):
+                 data_loader_name="GenericImport", annotation_prefix="", result_path=None, filename=None):
         """
         :param reference_sequence_path: path to sequence dataset containing experimental sequence-level data
-        :param data_loader_params: params for GenericLoader to be used for loading the sequence data
+        :param data_loader_params: params for GenericImport to be used for loading the sequence data
         :param sequence_matcher_params: dict with keys for:
                 - metadata_fields_to_match which specify the values (such as v_gene, etc), which must be identical to be
                 considered a match;
@@ -128,7 +129,7 @@ class SequenceMatchFeatureAnnotation(TransformerMixin):
     def compute_match_annotations(self, X):
         reference_sequences = self.prepare_reference_sequences()
         dataset_sequences = X.encoded_data.feature_annotations
-        sequence_matches= self.match(dataset_sequences, reference_sequences, **self.sequence_matcher_params)
+        sequence_matches = self.match(dataset_sequences, reference_sequences, **self.sequence_matcher_params)
         merge_on = self.sequence_matcher_params["metadata_fields_to_match"] + [self.SEQUENCE]
         match_annotations = pd.merge(dataset_sequences, sequence_matches, how="left", on=merge_on)
         match_annotations.columns = match_annotations.columns.str.replace("^matched_",
@@ -138,7 +139,8 @@ class SequenceMatchFeatureAnnotation(TransformerMixin):
         return match_annotations
 
     def prepare_reference_sequences(self):
-        dataset = self.data_loader.load(path=self.reference_sequence_path, params=self.data_loader_params)
+        dataset = self.data_loader.import_dataset(DatasetImportParams(**{**{"path": self.reference_sequence_path},
+                                                                         **self.data_loader_params}))
         reference_sequences = []
         for repertoire in dataset.get_data():
             reference_sequences.extend(repertoire.sequences)

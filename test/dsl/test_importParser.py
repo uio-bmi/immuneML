@@ -2,7 +2,8 @@ import csv
 import shutil
 from unittest import TestCase
 
-from helpers.metadata_converter import convert_metadata
+import pandas as pd
+
 from source.data_model.dataset.ReceptorDataset import ReceptorDataset
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.dsl.import_parsers.ImportParser import ImportParser
@@ -29,10 +30,10 @@ class TestImportParser(TestCase):
         st, desc = ImportParser.parse({
             "datasets": {
                 "d1": {
-                    "path": path,
                     "format": "VDJDB",
                     "params": {
-                        "result_path": path
+                        "result_path": path,
+                        "path": path
                     }
                 }
             }
@@ -140,20 +141,17 @@ class TestImportParser(TestCase):
             writer.writeheader()
             writer.writerows(dicts)
 
-        convert_metadata(path + "tmp_input/", path + "metadata.csv", "CD", "HC")
-
+        metadata = pd.DataFrame({"filename": ["HC2_clones_TRB.csv", "CD1_clones_TRA.csv"], "donor": ["HC2", "CD1"], "CD": [False, True]})
+        metadata.to_csv(path + "metadata.csv")
         specs = {
             "datasets": {
                 "d1": {
-                    "path": path + "tmp_input/",
                     "format": "MiXCR",
                     "params": {
-                        "sequence_type": "CDR3",
+                        "path": path + "tmp_input/",
                         "result_path": path + "tmp_output/",
-                        "extension": "csv",
                         "metadata_file": path + "metadata.csv",
                         "batch_size": 2,
-                        "additional_columns": []
                     }
                 }
             }

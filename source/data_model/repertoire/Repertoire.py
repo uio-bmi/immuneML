@@ -24,7 +24,7 @@ from source.util.PathBuilder import PathBuilder
 class Repertoire(DatasetItem):
     """
     Repertoire object consisting of sequence objects, each sequence attribute is stored as a list across all sequences and can be
-    loaded separately. Internally, this class relies on numpy to store/load the data.
+    loaded separately. Internally, this class relies on numpy to store/import_dataset the data.
     """
 
     FIELDS = "sequence_aas,sequences,v_genes,j_genes,chains,counts,region_types,sequence_identifiers,cell_ids".split(",")
@@ -39,15 +39,30 @@ class Repertoire(DatasetItem):
             field_list, values, dtype = [], [], []
         return field_list, values, dtype
 
+    @staticmethod
+    def check_count(sequence_aas: list = None, sequences: list = None, custom_lists: dict = None) -> int:
+        sequence_count = len(sequence_aas) if sequence_aas is not None else len(sequences) if sequences is not None else 0
+
+        if sequences is not None and sequence_aas is not None:
+            assert len(sequences) == len(sequence_aas), \
+                f"Repertoire: there is a mismatch between number of nucleotide sequences ({len(sequences)}) and the number of amino acid " \
+                f"sequences ({len(sequence_aas)})."
+
+        assert all(len(custom_lists[key]) == sequence_count for key in custom_lists) if custom_lists else True, \
+            f"Repertoire: there is a mismatch between the number of sequences and the number of attributes listed in " \
+            f"{str(list(custom_lists.keys()))[1:-1]}"
+
+        return sequence_count
+
     @classmethod
-    def build(cls, sequence_aas: list, sequences: list, v_genes: list, j_genes: list, chains: list, counts: list, region_types: list,
-              custom_lists: dict, sequence_identifiers: list, path: str, metadata=dict(), signals: dict = None, cell_ids: list = None):
+    def build(cls, sequence_aas: list = None, sequences: list = None, v_genes: list = None, j_genes: list = None, chains: list = None,
+              counts: list = None, region_types: list = None, custom_lists: dict = None, sequence_identifiers: list = None,
+              path: str = None, metadata=dict(), signals: dict = None, cell_ids: list = None):
+
+        sequence_count = Repertoire.check_count(sequence_aas, sequences, custom_lists)
 
         if sequence_identifiers is None or len(sequence_identifiers) == 0 or any(identifier is None for identifier in sequence_identifiers):
-            sequence_identifiers = list(range(len(sequence_aas))) if sequence_aas is not None and len(sequence_aas) > 0 else list(range(len(sequences)))
-
-        assert len(sequence_aas) == len(sequence_identifiers) or len(sequences) == len(sequence_identifiers)
-        assert all(len(custom_lists[key]) == len(sequence_identifiers) for key in custom_lists) if custom_lists else True
+            sequence_identifiers = list(range(sequence_count))
 
         identifier = uuid4().hex
 
@@ -140,7 +155,7 @@ class Repertoire(DatasetItem):
             "Repertoire: the file representing the repertoire has to be in numpy binary format. Got {} instead."\
                 .format(data_filename.rpartition(".")[1])
 
-        self._data_filename = data_filename
+        self.data_filename = data_filename
 
         if metadata_filename:
             with open(metadata_filename, "rb") as file:
@@ -169,7 +184,7 @@ class Repertoire(DatasetItem):
 
     def load_data(self):
         if self.data is None or (isinstance(self.data, weakref.ref) and self.data() is None):
-            data = np.load(self._data_filename, allow_pickle=True)
+            data = np.load(self.data_filename, allow_pickle=True)
             self.data = weakref.ref(data) if EnvironmentSettings.low_memory else data
         data = self.data() if EnvironmentSettings.low_memory else self.data
         self.element_count = data.shape[0]

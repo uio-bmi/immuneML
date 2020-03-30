@@ -1,3 +1,9 @@
-paired: True # whether to load paired data: if true returns ReceptorDataset, and if false returns SequenceDataset
-recursive: False # whether to search for tsv VDJdb files recursively down the path
+paired: True # whether to import_dataset paired data: if true returns ReceptorDataset, and if false returns SequenceDataset
 file_size: 1000 # number of sequences / receptors per file as stored internally by ImmuneML in ImmuneML format - not visible to users
+column_mapping:
+  V: v_genes
+  J: j_genes
+  CDR3: sequence_aas
+  complex.id: sequence_identifiers
+region_type: CDR3
+separator: "\t"

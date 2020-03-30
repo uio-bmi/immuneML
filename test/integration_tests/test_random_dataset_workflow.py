@@ -22,8 +22,8 @@ class TestExploratoryAnalysisDesignMatrixExporter(TestCase):
                 "datasets": {
                     "d1": {
                         "format": "RandomRepertoireDataset",
-                        "path": path,
                         "params": {
+                            "result_path": path,
                             "repertoire_count": 100,
                             "sequence_count_probabilities": {
                                 10: 0.5,
