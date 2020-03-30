@@ -38,7 +38,14 @@ def encode_dataset_by_kmer_freq(path_to_dataset_directory: str, result_path: str
         region_type=RegionType.CDR3,  # import_dataset in only cdr3
         batch_size=4,  # number of parallel processes for loading the data
         result_path=result_path,
-        region_definition=RegionDefinition.IMGT  # which CDR3 definition to use - IMGT here (will remove first and last a.a. compared to IMGT junction)
+        separator="\t",
+        columns_to_load=["cloneCount", "allVHitsWithScore", "allJHitsWithScore", "aaSeqCDR3", "nSeqCDR3"],
+        column_mapping={
+            "cloneCount": "counts",
+            "allVHitsWithScore": "v_genes",
+            "allJHitsWithScore": "j_genes"
+        },
+        region_definition=RegionDefinition.IMGT  # which CDR3 definition to use - IMGT here (without a.a. compared to IMGT junction)
     ))
 
     label_name = list(dataset.params.keys())[0]  # label that can be used for ML prediction - by default: "disease" with values True/False
