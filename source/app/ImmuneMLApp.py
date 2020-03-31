@@ -1,3 +1,4 @@
+import argparse
 import os
 import sys
 
@@ -7,6 +8,7 @@ from source.dsl.semantic_model.SemanticModel import SemanticModel
 from source.dsl.symbol_table.SymbolType import SymbolType
 from source.environment.Constants import Constants
 from source.util.PathBuilder import PathBuilder
+from source.util.ReflectionHandler import ReflectionHandler
 
 
 class ImmuneMLApp:
@@ -41,13 +43,25 @@ class ImmuneMLApp:
         model.run()
 
 
-def main(argv):
-    assert len(argv) == 3, "ImmuneMLApp: Some of the required parameters are missing. To run immuneML, use the command:\n" \
-                               "python3 path_to_immuneMLApp.py path_to_specification.yaml analysis_result_path/"
-    path = argv[2] if len(argv) == 3 else None
-    app = ImmuneMLApp(argv[1], path)
+def main(namespace: argparse.Namespace):
+    if namespace.tool is None:
+        app = ImmuneMLApp(namespace.yaml_path, namespace.output_dir)
+    else:
+        app_cls = ReflectionHandler.get_class_by_name(namespace.tool, "api/galaxy/")
+        app = app_cls(**vars(namespace))
     app.run()
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+
+    parser = argparse.ArgumentParser(description="immuneML command line tool")
+    parser.add_argument("yaml_path", help="Path to specification YAML file. Always used to define the analysis.")
+    parser.add_argument("output_dir", help="Output directory path.")
+    parser.add_argument("--metadata", help="The path to metadata file for repertoire dataset. "
+                                           "Used if immuneML is called from a Galaxy tool to reformat the metadata with new "
+                                           "Galaxy-dependent paths, otherwise it's ignored.")
+    parser.add_argument("--inputs", type=list, help="List of files with new paths for the repertoire dataset to be used in the analysis."
+                                                    "Used only if immuneML is called from a Galaxy tool to update the metadata.")
+    parser.add_argument("--tool", help="Name of the tool which calls immuneML. This name will be used to invoke appropriate API call, "
+                                       "which will then preprocess the data/specs in tool-dependent way before running standard immuneML.")
+    main(parser.parse_args())

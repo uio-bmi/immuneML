@@ -6,7 +6,7 @@ from unittest import TestCase
 
 import numpy as np
 
-from api.api_encoding import encode_dataset_by_kmer_freq
+from source.api.api_encoding import encode_dataset_by_kmer_freq
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.util.PathBuilder import PathBuilder
 

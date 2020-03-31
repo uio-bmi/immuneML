@@ -161,7 +161,4 @@ class TestImmuneMLApp(TestCase):
         self.assertTrue("split_count" in full_specs["instructions"]["inst1"]["selection"] and full_specs["instructions"]["inst1"]["selection"]["split_count"] == 1)
         self.assertTrue("training_percentage" in full_specs["instructions"]["inst1"]["selection"] and full_specs["instructions"]["inst1"]["selection"]["training_percentage"] == 0.7)
 
-        with self.assertRaises(AssertionError):
-            ImmuneMLApp.main([None, specs_file])
-
         shutil.rmtree(os.path.dirname(dataset_path))
