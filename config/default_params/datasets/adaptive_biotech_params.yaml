@@ -1,6 +1,3 @@
-path: ..
-result_path: ..
-metadata_file: ...
 import_productive: True
 import_with_stop_codon: False
 import_out_of_frame: False
