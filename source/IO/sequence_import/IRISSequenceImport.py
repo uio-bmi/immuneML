@@ -58,7 +58,7 @@ class IRISSequenceImport:
     """
 
     @staticmethod
-    def import_items(path: str, paired: bool = False, all_dual_chains: bool = True, all_genes: bool = True):
+    def import_items(path: str, paired: bool = False, all_dual_chains: bool = True, all_genes: bool = False):
         df = pd.read_csv(path, sep="\t")
         df = df.where((pd.notnull(df)), None)
 
@@ -71,7 +71,7 @@ class IRISSequenceImport:
         return sequences
 
     @staticmethod
-    def process_iris_row(row, paired: bool = False, all_dual_chains: bool = True, all_genes: bool = True):
+    def process_iris_row(row, paired: bool = False, all_dual_chains: bool = True, all_genes: bool = False):
         if paired:
             sequences = ReceptorList()
             if row["Chain: TRA (1)"] is not None and row["Chain: TRB (1)"] is not None:

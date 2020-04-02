@@ -33,7 +33,8 @@ class AIRRImport(DataImport):
     @staticmethod
     def preprocess_repertoire(metadata: dict, params: DatasetImportParams) -> dict:
 
-        df = ImportHelper.load_repertoire_as_dataframe(metadata, params, airr.load_rearrangement)
+        df = ImportHelper.load_repertoire_as_dataframe(metadata, params,
+                                                       alternative_load_func=AIRRImport._load_rearrangement_wrapper)
 
         if params.import_with_stop_codon is False and "stop_codon" in df.columns:
             df = df[~df["stop_codon"]]
@@ -45,3 +46,7 @@ class AIRRImport(DataImport):
             df = df[df["productive"]]
 
         return df
+
+    @staticmethod
+    def _load_rearrangement_wrapper(filename, params):
+        return airr.load_rearrangement(filename)

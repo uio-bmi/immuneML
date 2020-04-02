@@ -20,3 +20,4 @@ class DatasetImportParams:
     region_definition: RegionDefinition = None
     file_size: int = None
     paired: bool = None
+    misc: dict = None

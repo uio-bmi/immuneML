@@ -91,7 +91,7 @@ class ImportHelper:
 
         try:
             if alternative_load_func:
-                df = alternative_load_func(filepath)
+                df = alternative_load_func(filepath, params)
             else:
                 df = pd.read_csv(filepath, sep=params.separator, iterator=False, usecols=params.columns_to_load, dtype=str)
 
