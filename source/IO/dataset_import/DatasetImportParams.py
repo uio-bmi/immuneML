@@ -20,4 +20,12 @@ class DatasetImportParams:
     region_definition: RegionDefinition = None
     file_size: int = None
     paired: bool = None
-    misc: dict = None
+
+    @classmethod
+    def build_object(cls, region_type: str = None, region_definition: str = None, **kwargs):
+        params = {
+            "region_type": RegionType[region_type.upper()] if region_type else None,
+            "region_definition": RegionDefinition[region_definition.upper()] if region_definition else None
+        }
+        params = {**kwargs, **params}
+        return DatasetImportParams(**params)

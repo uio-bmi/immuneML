@@ -73,8 +73,8 @@ reference_rep.tsv,rep1"""
             "columns_to_load": ["CDR3B AA Sequence", "TRBV Gene", "Antigen Protein", "MHC Class"],
             "metadata_file": path + "metadata.csv",
             "separator": "\t",
-            "region_type": RegionType.CDR3,
-            "region_definition": RegionDefinition.IMGT
+            "region_type": RegionType.CDR3.name,
+            "region_definition": RegionDefinition.IMGT.name
         }
 
         kmer_freq_params = {

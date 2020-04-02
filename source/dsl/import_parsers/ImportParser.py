@@ -1,6 +1,3 @@
-from source.IO.dataset_import.DatasetImportParams import DatasetImportParams
-from source.data_model.receptor.RegionDefinition import RegionDefinition
-from source.data_model.receptor.RegionType import RegionType
 from source.dsl.DefaultParamsLoader import DefaultParamsLoader
 from source.dsl.symbol_table.SymbolTable import SymbolTable
 from source.dsl.symbol_table.SymbolType import SymbolType
@@ -53,13 +50,4 @@ class ImportParser:
         if "params" in dataset_specs.keys():
             params = {**params, **dataset_specs["params"]}
         dataset_specs["params"] = params
-
-        if "region_type" in params:
-            params["region_type"] = RegionType[params["region_type"].upper()]
-        if "region_definition" in params:
-            params["region_definition"] = RegionDefinition[params["region_definition"].upper()]
-
-        if dataset_specs["format"] != "RandomRepertoireDataset":
-            return DatasetImportParams(**params)
-        else:
-            return params
+        return params

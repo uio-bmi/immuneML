@@ -2,7 +2,6 @@ import pickle
 import shutil
 from unittest import TestCase
 
-from source.IO.dataset_import.DatasetImportParams import DatasetImportParams
 from source.IO.dataset_import.PickleImport import PickleImport
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.environment.EnvironmentSettings import EnvironmentSettings
@@ -21,7 +20,7 @@ class TestPickleLoader(TestCase):
         with open(path + "dataset.pkl", "wb") as file:
             pickle.dump(dataset, file)
 
-        dataset2 = PickleImport.import_dataset(DatasetImportParams(path=path + "dataset.pkl"))
+        dataset2 = PickleImport.import_dataset({"path": path + "dataset.pkl"})
 
         shutil.rmtree(path)
 

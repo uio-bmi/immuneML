@@ -19,12 +19,13 @@ class PickleImport(DataImport):
     """
 
     @staticmethod
-    def import_dataset(params: DatasetImportParams) -> RepertoireDataset:
-        assert os.path.isfile(params.path), "PickleImport: the dataset file does not exist in the given path: " + params.path
-        with open(params.path, "rb") as file:
+    def import_dataset(params: dict) -> RepertoireDataset:
+        pickle_params = DatasetImportParams.build_object(**params)
+        assert os.path.isfile(pickle_params.path), "PickleImport: the dataset file does not exist in the given path: " + params.path
+        with open(pickle_params.path, "rb") as file:
             dataset = pickle.load(file)
 
-        if params.metadata_file is not None and hasattr(dataset, "metadata_file"):
-            dataset.metadata_file = params.metadata_file
+        if pickle_params.metadata_file is not None and hasattr(dataset, "metadata_file"):
+            dataset.metadata_file = pickle_params.metadata_file
 
         return dataset

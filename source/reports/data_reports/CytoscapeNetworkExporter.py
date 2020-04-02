@@ -1,4 +1,5 @@
 import warnings
+
 import pandas as pd
 
 from source.data_model.dataset.Dataset import Dataset
@@ -58,7 +59,6 @@ class CytoscapeNetworkExporter(DataReport):
                                   "H": "IGH",
                                   "L": "IGL"}
 
-
     @classmethod
     def build_object(cls, **kwargs):
         print(kwargs["additional_attributes"])
@@ -66,24 +66,24 @@ class CytoscapeNetworkExporter(DataReport):
         if kwargs["additional_attributes"] is None:
             kwargs["additional_attributes"] = []
 
-
         ParameterValidator.assert_type_and_value(kwargs["additional_attributes"], list, "CytoscapeNetworkExporter", "additional_attributes")
 
         return CytoscapeNetworkExporter(**kwargs)
 
     def __init__(self, dataset: Dataset = None, result_path: str = None,
-                 chains=("alpha", "beta"), drop_duplicates = True, additional_attributes=[]):
+                 chains=("alpha", "beta"), drop_duplicates=True, additional_attributes=[]):
         self.chains = chains
         self.drop_duplicates = drop_duplicates
         self.additional_attributes = additional_attributes
         DataReport.__init__(self, dataset=dataset, result_path=result_path)
 
-
     def check_prerequisites(self):
         if isinstance(self.dataset, RepertoireDataset) or isinstance(self.dataset, ReceptorDataset):
             return True
         else:
-            warnings.warn("CytoscapeNetworkExporter: report can be generated only from a ReceptorDataset or a RepertoireDataset (with repertoires containing Receptors). Skipping this report...")
+            warnings.warn(
+                "CytoscapeNetworkExporter: report can be generated only from a ReceptorDataset or a RepertoireDataset "
+                "(with repertoires containing Receptors). Skipping this report...")
             return False
 
     def generate(self):
@@ -97,7 +97,6 @@ class CytoscapeNetworkExporter(DataReport):
             result_path = f"{self.result_path}/{self.dataset.identifier}/"
             PathBuilder.build(result_path)
             self.export_receptorlist(receptors, result_path=result_path)
-
 
     def export_receptorlist(self, receptors, result_path):
         export_list = []
@@ -130,7 +129,6 @@ class CytoscapeNetworkExporter(DataReport):
         shared_df = full_df[(full_df.duplicated(["alpha"], keep=False)) | (full_df.duplicated(["beta"], keep=False))]
         shared_df.to_csv(f"{result_path}shared_chains.sif", sep="\t", index=0, header=False)
 
-
     def get_shared_name(self, seq: ReceptorSequence):
         '''Returns a string containing a representation of the given receptor chain, with
         the chain, sequence, v and j genes.
@@ -153,8 +151,10 @@ class CytoscapeNetworkExporter(DataReport):
                 additional_info.append(seq.get_attribute(attr))
             except KeyError:
                 additional_info.append(None)
-                warnings.warn(f"CytoscapeNetworkExporter: additional metadata attribute {attr} was not found for some receptor chain(s), value None was used instead.")
+                warnings.warn(
+                    f"CytoscapeNetworkExporter: additional metadata attribute {attr} was not found for some receptor chain(s), "
+                    f"value None was used instead.")
 
         return [seq.get_sequence(),
-               f"{chain}{v_gene.split('-')[0]}", f"{chain}{v_gene}",
-               f"{chain}{j_gene.split('-')[0]}", f"{chain}{j_gene}"] + additional_info
+                f"{chain}{v_gene.split('-')[0]}", f"{chain}{v_gene}",
+                f"{chain}{j_gene.split('-')[0]}", f"{chain}{j_gene}"] + additional_info

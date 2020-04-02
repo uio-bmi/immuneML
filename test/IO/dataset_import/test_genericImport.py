@@ -1,10 +1,7 @@
 import shutil
 from unittest import TestCase
 
-from source.IO.dataset_import.DatasetImportParams import DatasetImportParams
 from source.IO.dataset_import.GenericImport import GenericImport
-from source.data_model.receptor.RegionDefinition import RegionDefinition
-from source.data_model.receptor.RegionType import RegionType
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.util.PathBuilder import PathBuilder
 
@@ -40,11 +37,11 @@ T1D#3 C8	TBD	TRAJ23	TRAV17	CATDAGYNQGGKLIF	TRBV5-1	TRBD2	TRBJ1-3	CASSAGNTIYF	Ins
 rep1.tsv,TRA,1234e,no"""
             )
 
-        dataset = GenericImport.import_dataset(DatasetImportParams(result_path=path, path=path, region_definition=RegionDefinition.IMGT,
-                                                                   region_type=RegionType.CDR3, separator="\t",
-                                                                   column_mapping={"CDR3B AA Sequence": "sequence_aas",
-                                                                                   "TRBV Gene": "v_genes", "TRBJ Gene": "j_genes"},
-                                                                   metadata_file=path + "metadata.csv", batch_size=4))
+        dataset = GenericImport.import_dataset({"result_path": path, "path": path, "region_definition": "IMGT",
+                                                "region_type": "CDR3", "separator": "\t",
+                                                "column_mapping": {"CDR3B AA Sequence": "sequence_aas",
+                                                                   "TRBV Gene": "v_genes", "TRBJ Gene": "j_genes"},
+                                                "metadata_file": path + "metadata.csv", "batch_size": 4})
 
         self.assertEqual(1, dataset.get_example_count())
         for index, rep in enumerate(dataset.get_data()):

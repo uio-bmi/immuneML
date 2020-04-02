@@ -1,7 +1,6 @@
 file_size: 1000 # number of sequences / receptors per file as stored internally by ImmuneML in ImmuneML format - not visible to users
 paired: True
+import_dual_chains: True
+import_all_gene_combinations: False
+batch_size: 4
 separator: "\t"
-misc:
-  all_dual_chains: True
-  all_genes: False
-# todo separator can not be added here currently because alt. load func doesn't support parameters

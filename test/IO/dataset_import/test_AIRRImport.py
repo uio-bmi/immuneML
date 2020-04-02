@@ -2,9 +2,6 @@ import shutil
 from unittest import TestCase
 
 from source.IO.dataset_import.AIRRImport import AIRRImport
-from source.IO.dataset_import.DatasetImportParams import DatasetImportParams
-from source.data_model.receptor.RegionDefinition import RegionDefinition
-from source.data_model.receptor.RegionType import RegionType
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.util.PathBuilder import PathBuilder
 
@@ -48,12 +45,12 @@ rep2.tsv,2""")
             "sequence_id": "sequence_identifiers"
         }
 
-        dataset = AIRRImport.import_dataset(DatasetImportParams(result_path=path, path=path, metadata_file=path + "metadata.csv",
-                                                                import_out_of_frame=False, import_with_stop_codon=False,
-                                                                import_productive=True, region_type=RegionType.CDR3,
-                                                                region_definition=RegionDefinition.IMGT, batch_size=4,
-                                                                columns_to_load=columns_to_load, column_mapping=column_mapping,
-                                                                separator="\t"))
+        dataset = AIRRImport.import_dataset({"result_path": path, "path": path, "metadata_file": path + "metadata.csv",
+                                             "import_out_of_frame": False, "import_with_stop_codon": False,
+                                             "import_productive": True, "region_type": "CDR3",
+                                             "region_definition": "IMGT", "batch_size": 4,
+                                             "columns_to_load": columns_to_load, "column_mapping": column_mapping,
+                                             "separator": "\t"})
 
         self.assertEqual(2, dataset.get_example_count())
         for index, rep in enumerate(dataset.get_data()):

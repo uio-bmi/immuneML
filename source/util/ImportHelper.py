@@ -71,22 +71,7 @@ class ImportHelper:
         return repertoire
 
     @staticmethod
-    def filter_column_mapping(column_mapping: dict, columns_to_load: list) -> dict:
-
-        new_column_mapping = None
-
-        if column_mapping is not None:
-            new_column_mapping = column_mapping.copy()
-
-            if columns_to_load is not None:
-                for key in list(column_mapping.keys()):
-                    if key not in columns_to_load:
-                        del new_column_mapping[key]
-
-        return new_column_mapping
-
-    @staticmethod
-    def load_repertoire_as_dataframe(metadata: dict, params: DatasetImportParams, alternative_load_func=None):
+    def load_repertoire_as_dataframe(metadata: dict, params, alternative_load_func=None):
         filepath = f"{params.path}{metadata['filename']}"
 
         try:
@@ -95,8 +80,7 @@ class ImportHelper:
             else:
                 df = pd.read_csv(filepath, sep=params.separator, iterator=False, usecols=params.columns_to_load, dtype=str)
 
-            params.column_mapping = ImportHelper.filter_column_mapping(params.column_mapping, params.columns_to_load)
-            if params.column_mapping is not None:
+            if hasattr(params, "column_mapping") and params.column_mapping is not None:
                 df.rename(columns=params.column_mapping, inplace=True)
 
             df = ImportHelper.standardize_none_values(df)

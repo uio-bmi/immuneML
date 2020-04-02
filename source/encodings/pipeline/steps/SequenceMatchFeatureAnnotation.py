@@ -10,7 +10,6 @@ from editdistance import eval
 from sklearn.base import TransformerMixin
 
 from source.IO.dataset_export.PickleExporter import PickleExporter
-from source.IO.dataset_import.DatasetImportParams import DatasetImportParams
 from source.caching.CacheHandler import CacheHandler
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.encoded_data.EncodedData import EncodedData
@@ -139,8 +138,7 @@ class SequenceMatchFeatureAnnotation(TransformerMixin):
         return match_annotations
 
     def prepare_reference_sequences(self):
-        dataset = self.data_loader.import_dataset(DatasetImportParams(**{**{"path": self.reference_sequence_path},
-                                                                         **self.data_loader_params}))
+        dataset = self.data_loader.import_dataset({**{"path": self.reference_sequence_path}, **self.data_loader_params})
         reference_sequences = []
         for repertoire in dataset.get_data():
             reference_sequences.extend(repertoire.sequences)

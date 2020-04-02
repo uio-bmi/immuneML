@@ -29,8 +29,9 @@ class ImmunoSEQImport(DataImport):
     """
 
     @staticmethod
-    def import_dataset(params) -> Dataset:
-        return ImportHelper.import_repertoire_dataset(ImmunoSEQImport.preprocess_repertoire, params)
+    def import_dataset(params: dict) -> Dataset:
+        immunoseq_params = DatasetImportParams.build_object(**params)
+        return ImportHelper.import_repertoire_dataset(ImmunoSEQImport.preprocess_repertoire, immunoseq_params)
 
     @staticmethod
     def preprocess_repertoire(metadata: dict, params: DatasetImportParams):

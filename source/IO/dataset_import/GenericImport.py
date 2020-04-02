@@ -9,8 +9,9 @@ from source.util.ImportHelper import ImportHelper
 class GenericImport(DataImport):
 
     @staticmethod
-    def import_dataset(params: DatasetImportParams) -> RepertoireDataset:
-        dataset = ImportHelper.import_repertoire_dataset(GenericImport.preprocess_repertoire, params)
+    def import_dataset(params: dict) -> RepertoireDataset:
+        generic_params = DatasetImportParams.build_object(**params)
+        dataset = ImportHelper.import_repertoire_dataset(GenericImport.preprocess_repertoire, generic_params)
         return dataset
 
     @staticmethod

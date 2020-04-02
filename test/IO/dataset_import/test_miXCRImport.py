@@ -4,10 +4,7 @@ from unittest import TestCase
 
 import pandas as pd
 
-from source.IO.dataset_import.DatasetImportParams import DatasetImportParams
 from source.IO.dataset_import.MiXCRImport import MiXCRImport
-from source.data_model.receptor.RegionDefinition import RegionDefinition
-from source.data_model.receptor.RegionType import RegionType
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.util.PathBuilder import PathBuilder
 
@@ -140,19 +137,19 @@ class TestMiXCRLoader(TestCase):
         metadata = pd.DataFrame({"filename": ["HC2_clones_TRB.csv", "CD1_clones_TRA.csv"], "donor": ["HC2", "CD1"], "CD": [False, True]})
         metadata.to_csv(path + "metadata.csv")
 
-        dataset = MiXCRImport.import_dataset(DatasetImportParams(
-            path=path + "tmp_input/",
-            region_type=RegionType.CDR3,
-            result_path=path + "tmp_output/",
-            batch_size=2, separator="\t",
-            region_definition=RegionDefinition.IMGT,
-            metadata_file=path + "metadata.csv",
-            column_mapping={
+        dataset = MiXCRImport.import_dataset({
+            "path": path + "tmp_input/",
+            "region_type": "CDR3",
+            "result_path": path + "tmp_output/",
+            "batch_size": 2, "separator": "\t",
+            "region_definition": "IMGT",
+            "metadata_file": path + "metadata.csv",
+            "column_mapping": {
                 "cloneCount": "counts",
                 "allVHitsWithScore": "v_genes",
                 "allJHitsWithScore": "j_genes"
             }
-        ))
+        })
 
         self.assertEqual(2, dataset.get_example_count())
 
@@ -167,17 +164,18 @@ class TestMiXCRLoader(TestCase):
                 self.assertEqual(6, repertoire.sequences[1].metadata.count)
                 self.assertFalse(repertoire.metadata["CD"])
 
-        dataset = MiXCRImport.import_dataset(DatasetImportParams(path=path + "tmp_input/",
-                                                                 region_type=RegionType.CDR3,
-                                                                 result_path=path + "tmp_output/",
-                                                                 batch_size=2, separator="\t",
-                                                                 metadata_file=path + "metadata.csv",
-                                                                 column_mapping={
-                                                                     "cloneCount": "counts",
-                                                                     "allVHitsWithScore": "v_genes",
-                                                                     "allJHitsWithScore": "j_genes"
-                                                                 }
-                                                                 ))
+        dataset = MiXCRImport.import_dataset({
+            "path": path + "tmp_input/",
+            "region_type": "CDR3",
+            "result_path": path + "tmp_output/",
+            "batch_size": 2, "separator": "\t",
+            "metadata_file": path + "metadata.csv",
+            "column_mapping": {
+                "cloneCount": "counts",
+                "allVHitsWithScore": "v_genes",
+                "allJHitsWithScore": "j_genes"
+            }
+        })
 
         for index, repertoire in enumerate(dataset.get_data()):
             if index == 1:

@@ -2,7 +2,6 @@ import shutil
 from unittest import TestCase
 
 from source.IO.dataset_import.AdaptiveBiotechImport import AdaptiveBiotechImport
-from source.IO.dataset_import.DatasetImportParams import DatasetImportParams
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.util.PathBuilder import PathBuilder
 
@@ -59,14 +58,14 @@ rep1.tsv,TRA,1234,no
 rep2.tsv,TRB,1234a,no"""
             )
 
-        dataset = AdaptiveBiotechImport.import_dataset(DatasetImportParams(
-            **{
+        dataset = AdaptiveBiotechImport.import_dataset({
                 "path": path,
                 "result_path": EnvironmentSettings.root_path + "test/tmp/adaptive/",
                 "batch_size": 1,
                 "import_productive": True,
                 "import_with_stop_codon": False,
                 "import_out_of_frame": False,
+                "separator": "\t",
                 "region_type": "CDR3",
                 "region_definition": "IMGT",
                 "metadata_file": path + "metadata.csv",
@@ -83,7 +82,6 @@ rep2.tsv,TRB,1234a,no"""
                     "templates": "counts"
                 }
             })
-        )
 
         self.assertEqual(2, dataset.get_example_count())
         for index, rep in enumerate(dataset.get_data()):

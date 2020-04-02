@@ -60,8 +60,8 @@ reference_rep.tsv,rep1"""
         "column_mapping": {"CDR3B AA Sequence": "sequence_aas",
                            "TRBV Gene": "v_genes"},
         "columns_to_load": ["CDR3B AA Sequence", "TRBV Gene", "Antigen Protein", "MHC Class"],
-        "region_definition": RegionDefinition.IMGT,
-        "region_type": RegionType.CDR3,
+        "region_definition": RegionDefinition.IMGT.name,
+        "region_type": RegionType.CDR3.name,
         "metadata_file": path + "metadata.csv"
     }
 

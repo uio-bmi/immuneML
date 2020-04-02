@@ -1,7 +1,6 @@
 import shutil
 from unittest import TestCase
 
-from source.IO.dataset_import.DatasetImportParams import DatasetImportParams
 from source.IO.dataset_import.OLGAImport import OLGAImport
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.util.PathBuilder import PathBuilder
@@ -36,9 +35,9 @@ rep2.tsv,2""")
 
         PathBuilder.build(path)
         self.write_dummy_files(path)
-        dataset = OLGAImport.import_dataset(DatasetImportParams(result_path=path, metadata_file=path + "metadata.csv",
-                                                                columns_to_load=["sequences", "sequence_aas", "v_genes", "j_genes"],
-                                                                path=path, batch_size=4))
+        dataset = OLGAImport.import_dataset({"result_path": path, "metadata_file": path + "metadata.csv",
+                                             "columns_to_load": ["sequences", "sequence_aas", "v_genes", "j_genes"],
+                                             "path": path, "batch_size": 4})
 
         self.assertEqual(2, dataset.get_example_count())
         for index, rep in enumerate(dataset.get_data()):

@@ -25,12 +25,13 @@ class MiXCRImport(DataImport):
     }
 
     @staticmethod
-    def import_dataset(params: DatasetImportParams) -> RepertoireDataset:
-        if os.path.isfile(params.result_path + "dataset.pkl"):
-            params.path = params.result_path + "dataset.pkl"
-            dataset = PickleImport.import_dataset(params)
+    def import_dataset(params: dict) -> RepertoireDataset:
+        mixcr_params = DatasetImportParams.build_object(**params)
+        if os.path.isfile(mixcr_params.result_path + "dataset.pkl"):
+            params.path = mixcr_params.result_path + "dataset.pkl"
+            dataset = PickleImport.import_dataset(mixcr_params)
         else:
-            dataset = ImportHelper.import_repertoire_dataset(MiXCRImport.preprocess_repertoire, params)
+            dataset = ImportHelper.import_repertoire_dataset(MiXCRImport.preprocess_repertoire, mixcr_params)
         return dataset
 
     @staticmethod

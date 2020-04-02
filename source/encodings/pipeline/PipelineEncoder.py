@@ -5,7 +5,6 @@ import pickle
 from sklearn.pipeline import make_pipeline
 
 from source.IO.dataset_export.PickleExporter import PickleExporter
-from source.IO.dataset_import.DatasetImportParams import DatasetImportParams
 from source.IO.dataset_import.PickleImport import PickleImport
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.dsl.definition_parsers.EncodingParser import EncodingParser
@@ -76,7 +75,7 @@ class PipelineEncoder(DatasetEncoder):
     def encode(self, dataset, params: EncoderParams):
         filepath = params["result_path"] + "/" + params["filename"]
         if os.path.isfile(filepath):
-            encoded_dataset = self._run_pipeline(PickleImport.import_dataset(DatasetImportParams(path=filepath)), params)
+            encoded_dataset = self._run_pipeline(PickleImport.import_dataset({"path": filepath}), params)
         else:
             encoded_dataset = self._encode_new_dataset(dataset, params)
         return encoded_dataset

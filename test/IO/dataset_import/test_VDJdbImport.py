@@ -3,7 +3,6 @@ from unittest import TestCase
 
 import pandas as pd
 
-from source.IO.dataset_import.DatasetImportParams import DatasetImportParams
 from source.IO.dataset_import.VDJDBImport import VDJDBImport
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.util.PathBuilder import PathBuilder
@@ -23,7 +22,7 @@ class TestVDJdbLoader(TestCase):
         with open(path + "receptors.tsv", "w") as file:
             file.writelines(file_content)
 
-        dataset = VDJDBImport.import_dataset(DatasetImportParams(result_path=path, file_size=1, paired=True, path=path))
+        dataset = VDJDBImport.import_dataset({"result_path": path, "file_size": 1, "paired": True, "path": path})
 
         self.assertEqual(2, dataset.get_example_count())
         self.assertEqual(2, len(dataset.get_filenames()))
@@ -48,23 +47,23 @@ class TestVDJdbLoader(TestCase):
         number_of_repertoires = 5
 
         for i in range(number_of_repertoires):
-            with open(path + "receptors_{}.tsv".format(i+1), "w") as file:
+            with open(path + "receptors_{}.tsv".format(i + 1), "w") as file:
                 file.writelines(file_content)
 
         metadata = {
-            "filename": ["receptors_{}.tsv".format(i+1) for i in range(number_of_repertoires)],
+            "filename": ["receptors_{}.tsv".format(i + 1) for i in range(number_of_repertoires)],
             "label1": [i % 2 for i in range(number_of_repertoires)]
         }
 
         pd.DataFrame(metadata).to_csv(path + "metadata.csv")
 
-        dataset = VDJDBImport.import_dataset(DatasetImportParams(result_path=path, metadata_file=path + "metadata.csv", path=path,
-                                                                 column_mapping={
-                                                                     "V": "v_genes",
-                                                                     "J": "j_genes",
-                                                                     "CDR3": "sequence_aas",
-                                                                     "complex.id": "sequence_identifiers"
-                                                                 }, separator="\t"))
+        dataset = VDJDBImport.import_dataset({"result_path": path, "metadata_file": path + "metadata.csv", "path": path,
+                                              "column_mapping": {
+                                                  "V": "v_genes",
+                                                  "J": "j_genes",
+                                                  "CDR3": "sequence_aas",
+                                                  "complex.id": "sequence_identifiers"
+                                              }, "separator": "\t"})
 
         self.assertEqual(number_of_repertoires, dataset.get_example_count())
         self.assertEqual(number_of_repertoires, len(dataset.get_data()))
