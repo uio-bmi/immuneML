@@ -38,7 +38,7 @@ class ImportHelper:
 
         new_metadata_file = ImportHelper.make_new_metadata_file(repertoires, metadata, params.result_path)
 
-        potential_labels = list(set(metadata.columns.tolist()) - {"filename", "donor"})
+        potential_labels = list(set(metadata.columns.tolist()) - {"filename"})
         dataset = RepertoireDataset(params={key: list(set(metadata[key].values.tolist())) for key in potential_labels},
                                     repertoires=repertoires, metadata_file=new_metadata_file)
 
