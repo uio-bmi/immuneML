@@ -5,6 +5,7 @@ from unittest import TestCase
 import pandas as pd
 
 from source.IO.dataset_import.MiXCRImport import MiXCRImport
+from source.data_model.receptor.receptor_sequence.Chain import Chain
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.util.PathBuilder import PathBuilder
 
@@ -24,8 +25,8 @@ class TestMiXCRLoader(TestCase):
                 "patient": "CD12",
                 "dilution": "108'",
                 "cloneCount": 3,
-                "allVHitsWithScore": "V13-1*00(735)",
-                "allJHitsWithScore": "J15*00(243)",
+                "allVHitsWithScore": "TRAV13-1*00(735)",
+                "allJHitsWithScore": "TRAJ15*00(243)",
                 "nSeqCDR1": "TGTGCAGCAA",
                 "nSeqCDR2": "TGTGCAGCAA",
                 "nSeqCDR3": "TGTGCAGCAA",
@@ -38,8 +39,8 @@ class TestMiXCRLoader(TestCase):
                 "patient": "CD12",
                 "dilution": "108'",
                 "cloneCount": 5,
-                "allVHitsWithScore": "V14-1*00(735)",
-                "allJHitsWithScore": "J12*00(243)",
+                "allVHitsWithScore": "TRAV14-1*00(735)",
+                "allJHitsWithScore": "TRAJ12*00(243)",
                 "nSeqCDR1": "CAATGTGA",
                 "nSeqCDR2": "CAATGTGA",
                 "nSeqCDR3": "CAATGTGA",
@@ -154,6 +155,7 @@ class TestMiXCRLoader(TestCase):
         self.assertEqual(2, dataset.get_example_count())
 
         for index, repertoire in enumerate(dataset.get_data()):
+            self.assertTrue(all(sequence.metadata.chain == Chain.A for sequence in repertoire.sequences))
             if index == 1:
                 self.assertTrue(repertoire.sequences[0].amino_acid_sequence == "FAVF")
                 self.assertTrue(repertoire.sequences[1].metadata.v_gene == "V14-1")
@@ -178,6 +180,7 @@ class TestMiXCRLoader(TestCase):
         })
 
         for index, repertoire in enumerate(dataset.get_data()):
+            self.assertTrue(all(sequence.metadata.chain == Chain.A for sequence in repertoire.sequences))
             if index == 1:
                 self.assertTrue(repertoire.sequences[0].amino_acid_sequence == "VFAVFA")
                 self.assertTrue(repertoire.sequences[1].metadata.v_gene == "V14-1")

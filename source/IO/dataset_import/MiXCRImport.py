@@ -61,9 +61,11 @@ class MiXCRImport(DataImport):
         df["sequence_aas"] = sequences_aas
         df["sequences"] = sequences
         if "v_genes" in df.columns:
-            df["v_genes"] = MiXCRImport._load_genes(df, "v_genes")
             df["chains"] = MiXCRImport._load_chains(df, "v_genes").tolist()
+            df["v_genes"] = MiXCRImport._load_genes(df, "v_genes")
         if "j_genes" in df.columns:
+            if "chains" not in df.columns:
+                df["chains"] = MiXCRImport._load_chains(df, "j_genes").tolist()
             df["j_genes"] = MiXCRImport._load_genes(df, "j_genes")
 
         return df
