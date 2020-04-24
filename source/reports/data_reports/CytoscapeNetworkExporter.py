@@ -61,20 +61,23 @@ class CytoscapeNetworkExporter(DataReport):
 
     @classmethod
     def build_object(cls, **kwargs):
-        print(kwargs["additional_attributes"])
+        if kwargs["additional_node_attributes"] is None:
+            kwargs["additional_node_attributes"] = []
+        if kwargs["additional_edge_attributes"] is None:
+            kwargs["additional_edge_attributes"] = []
 
-        if kwargs["additional_attributes"] is None:
-            kwargs["additional_attributes"] = []
-
-        ParameterValidator.assert_type_and_value(kwargs["additional_attributes"], list, "CytoscapeNetworkExporter", "additional_attributes")
+        ParameterValidator.assert_type_and_value(kwargs["additional_node_attributes"], list, "CytoscapeNetworkExporter", "additional_node_attributes")
+        ParameterValidator.assert_type_and_value(kwargs["additional_edge_attributes"], list, "CytoscapeNetworkExporter", "additional_edge_attributes")
 
         return CytoscapeNetworkExporter(**kwargs)
 
     def __init__(self, dataset: Dataset = None, result_path: str = None,
-                 chains=("alpha", "beta"), drop_duplicates=True, additional_attributes=[]):
+                 chains=("alpha", "beta"), drop_duplicates=True,
+                 additional_node_attributes=[], additional_edge_attributes=[]):
         self.chains = chains
         self.drop_duplicates = drop_duplicates
-        self.additional_attributes = additional_attributes
+        self.additional_node_attributes = additional_node_attributes
+        self.additional_edge_attributes = additional_edge_attributes
         DataReport.__init__(self, dataset=dataset, result_path=result_path)
 
     def check_prerequisites(self):
@@ -100,7 +103,8 @@ class CytoscapeNetworkExporter(DataReport):
 
     def export_receptorlist(self, receptors, result_path):
         export_list = []
-        metadata_list = []
+        node_metadata_list = []
+        edge_metadata_list = []
 
         for receptor in receptors:
             first_chain = receptor.get_chain(self.chains[0])
@@ -108,18 +112,21 @@ class CytoscapeNetworkExporter(DataReport):
             first_chain_name = self.get_shared_name(first_chain)
             second_chain_name = self.get_shared_name(second_chain)
 
-            export_list.append([first_chain_name, "(pair)", second_chain_name])
+            export_list.append([first_chain_name, "pair", second_chain_name])
 
-            metadata_list.append([first_chain_name, self.chains[0]] + self.get_formatted_metadata(first_chain))
-            metadata_list.append([second_chain_name, self.chains[1]] + self.get_formatted_metadata(second_chain))
+            node_metadata_list.append([first_chain_name, self.chains[0]] + self.get_formatted_node_metadata(first_chain))
+            node_metadata_list.append([second_chain_name, self.chains[1]] + self.get_formatted_node_metadata(second_chain))
+
+            edge_metadata_list.append([f"{first_chain_name} (pair) {second_chain_name}"] + self.get_formatted_edge_metadata(first_chain, second_chain))
 
         full_df = pd.DataFrame(export_list, columns=[self.chains[0], "relationship", self.chains[1]])
-        meta_df = pd.DataFrame(metadata_list, columns=["shared_name", "chain", "sequence",
-                                                       "v_subgroup", "v_gene",
-                                                       "j_subgroup", "j_gene"] + self.additional_attributes)
+        node_meta_df = pd.DataFrame(node_metadata_list, columns=["shared_name", "chain", "sequence", "v_subgroup", "v_gene", "j_subgroup", "j_gene"] + self.additional_node_attributes)
+        edge_meta_df = pd.DataFrame(edge_metadata_list, columns=["shared_name"] + self.additional_edge_attributes)
 
-        meta_df.drop_duplicates(inplace=True)
-        meta_df.to_csv(f"{result_path}metadata.tsv", sep="\t", index=0, header=True)
+        node_meta_df.drop_duplicates(inplace=True)
+        edge_meta_df.drop_duplicates(inplace=True)
+        node_meta_df.to_csv(f"{result_path}node_metadata.tsv", sep="\t", index=0, header=True)
+        edge_meta_df.to_csv(f"{result_path}edge_metadata.tsv", sep="\t", index=0, header=True)
 
         if self.drop_duplicates:
             full_df.drop_duplicates(inplace=True)
@@ -138,7 +145,7 @@ class CytoscapeNetworkExporter(DataReport):
                f"*v={seq.get_attribute('v_gene')}" \
                f"*j={seq.get_attribute('j_gene')}"
 
-    def get_formatted_metadata(self, seq: ReceptorSequence):
+    def get_formatted_node_metadata(self, seq: ReceptorSequence):
         # sequence, v_gene_subgroup, v_gene, j_gene_subgroup, j_gene
         chain = CytoscapeNetworkExporter.CHAIN_GENE_NAME_CONVERSION[seq.get_attribute('chain').value]
         v_gene = seq.get_attribute('v_gene')
@@ -146,7 +153,7 @@ class CytoscapeNetworkExporter(DataReport):
 
         additional_info = []
 
-        for attr in self.additional_attributes:
+        for attr in self.additional_node_attributes:
             try:
                 additional_info.append(seq.get_attribute(attr))
             except KeyError:
@@ -158,3 +165,21 @@ class CytoscapeNetworkExporter(DataReport):
         return [seq.get_sequence(),
                 f"{chain}{v_gene.split('-')[0]}", f"{chain}{v_gene}",
                 f"{chain}{j_gene.split('-')[0]}", f"{chain}{j_gene}"] + additional_info
+
+    def get_formatted_edge_metadata(self, seq1, seq2):
+        additional_info = []
+
+        for attr in self.additional_edge_attributes:
+            try:
+                info1, info2 = seq1.get_attribute(attr), seq2.get_attribute(attr)
+                if info1 == info2:
+                    additional_info.append(info1)
+                else:
+                    additional_info.append("|".join([info1, info2]))
+            except KeyError:
+                additional_info.append(None)
+                warnings.warn(
+                    f"CytoscapeNetworkExporter: additional metadata attribute {attr} was not found for some receptor, "
+                    f"value None was used instead.")
+
+        return additional_info

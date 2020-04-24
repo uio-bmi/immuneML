@@ -18,13 +18,13 @@ class TestIRISImport(TestCase):
         for i in range(number_of_repertoires):
             with open(path + "receptors_{}.tsv".format(i + 1), "w") as file:
                 file.write(
-                    "Cell type	Clonotype ID	Chain: TRA (1)	TRA - V gene (1)	TRA - D gene (1)	TRA - J gene (1)	Chain: TRA (2)	TRA - V gene (2)	TRA - D gene (2)	TRA - J gene (2)	Chain: TRB (1)	TRB - V gene (1)	TRB - D gene (1)	TRB - J gene (1)	Chain: TRB (2)	TRB - V gene (2)	TRB - D gene (2)	TRB - J gene (2)\n\
-TCR_AB	181	ALPHA	TRAV4*01	null	TRAJ4*01	DUALALPHA	TRAV4*01	null	TRAJ4*01	BETA	TRBV4*01	null	TRBJ4*01	DUALBETA	TRBV4*01	null	TRBJ4*01\n\
-TCR_AB	591	MULTIV	TRAV7-2*01 | TRAV12-3*02	null	TRAJ21*01	null	null	null	null	null	null	null	null	null	null	null	null\n\
-TCR_AB	1051	VVNII	TRAV12-1*01 | TRAV12-1*02	null	TRAJ3*01 | TRAJ4*02	null	null	null	null	null	null	null	null	null	null	null	null\n\
-TCR_AB	1341	LNKLT	TRAV2*01	null	TRAJ10*01	null	null	null	null	null	null	null	null	null	null	null	null\n\
-TCR_AB	1411	AVLY	TRAV8-3*01	null	TRAJ18*01	null	null	null	null	null	null	null	null	null	null	null	null\n\
-TCR_AB	1421	AT	TRAV12-3*01	null	TRAJ17*01	null	null	null	null	null	null	null	null	null	null	null	null")
+                    "Cell type	Clonotype ID	Chain: TRA (1)	TRA - V gene (1)	TRA - D gene (1)	TRA - J gene (1)	Chain: TRA (2)	TRA - V gene (2)	TRA - D gene (2)	TRA - J gene (2)	Chain: TRB (1)	TRB - V gene (1)	TRB - D gene (1)	TRB - J gene (1)	Chain: TRB (2)	TRB - V gene (2)	TRB - D gene (2)	TRB - J gene (2)	extra_col\n\
+TCR_AB	181	ALPHA	TRAV4*01	null	TRAJ4*01	DUALALPHA	TRAV4*01	null	TRAJ4*01	BETA	TRBV4*01	null	TRBJ4*01	DUALBETA	TRBV4*01	null	TRBJ4*01	val1\n\
+TCR_AB	591	MULTIV	TRAV7-2*01 | TRAV12-3*02	null	TRAJ21*01	null	null	null	null	null	null	null	null	null	null	null	null	val2\n\
+TCR_AB	1051	VVNII	TRAV12-1*01 | TRAV12-1*02	null	TRAJ3*01 | TRAJ4*02	null	null	null	null	null	null	null	null	null	null	null	null	val3\n\
+TCR_AB	1341	LNKLT	TRAV2*01	null	TRAJ10*01	null	null	null	null	null	null	null	null	null	null	null	null	val4\n\
+TCR_AB	1411	AVLY	TRAV8-3*01	null	TRAJ18*01	null	null	null	null	null	null	null	null	null	null	null	null	val5\n\
+TCR_AB	1421	AT	TRAV12-3*01	null	TRAJ17*01	null	null	null	null	null	null	null	null	null	null	null	null	val6")
 
         if add_metadata:
             metadata = {
@@ -45,7 +45,8 @@ TCR_AB	1421	AT	TRAV12-3*01	null	TRAJ17*01	null	null	null	null	null	null	null	nul
 
         # case: minimal dataset (all dual chains and all genes = False)
         dataset = IRISImport.import_dataset({"result_path": path, "metadata_file": path + "metadata.csv", "path": path,
-                                             "import_dual_chains": False, "import_all_gene_combinations": False})
+                                             "import_dual_chains": False, "import_all_gene_combinations": False,
+                                             "extra_columns_to_load": ["extra_col"]})
 
         self.assertEqual(number_of_repertoires, dataset.get_example_count())
         self.assertEqual(number_of_repertoires, len(dataset.get_data()))
@@ -67,7 +68,8 @@ TCR_AB	1421	AT	TRAV12-3*01	null	TRAJ17*01	null	null	null	null	null	null	null	nul
         self._create_dummy_data(path, number_of_repertoires=number_of_repertoires, add_metadata=True)
 
         dataset = IRISImport.import_dataset({"result_path": path, "metadata_file": path + "metadata.csv", "path": path,
-                                             "import_dual_chains": True, "import_all_gene_combinations": True})
+                                             "import_dual_chains": True, "import_all_gene_combinations": True,
+                                             "extra_columns_to_load": ["extra_col"]})
 
         self.assertEqual(number_of_repertoires, dataset.get_example_count())
         self.assertEqual(number_of_repertoires, len(dataset.get_data()))

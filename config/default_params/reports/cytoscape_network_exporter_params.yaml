@@ -2,4 +2,5 @@ chains: # Must contain the chains to be exported (2 values),
   - alpha  # for example: alpha, beta (TCABReceptor), gamma, delta (TCGDReceptor), heavy, light (BCReceptor)
   - beta
 drop_duplicates: True # drop duplicate receptor pairs (recommended when using amino acid sequences)
-additional_attributes: NULL
+additional_node_attributes: []
+additional_edge_attributes: []

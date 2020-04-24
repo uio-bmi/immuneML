@@ -50,11 +50,15 @@ class IRISImport(DataImport):
 
         for chain in ("A", "B"):
             for chain_dup in chain_dups_to_process:
-                subframes.append(pd.DataFrame({"cell_ids": df["Clonotype ID"],
+                subframe_dict = {"cell_ids": df["Clonotype ID"],
                                                "sequence_aas": df[f"Chain: TR{chain} ({chain_dup})"],
                                                "v_genes": df[f"TR{chain} - V gene ({chain_dup})"],
                                                "j_genes": df[f"TR{chain} - J gene ({chain_dup})"],
-                                               "chains": Chain(chain).value}))
+                                               "chains": Chain(chain).value}
+                if params.extra_columns_to_load is not None:
+                    for extra_col in params.extra_columns_to_load:
+                        subframe_dict[extra_col] = df[extra_col]
+                subframes.append(pd.DataFrame(subframe_dict))
 
         df = pd.concat(subframes, axis=0)
         df.dropna(subset=["sequence_aas", "v_genes", "j_genes"], inplace=True)
@@ -100,15 +104,20 @@ class IRISImport(DataImport):
 
     @staticmethod
     def load_iris_dataframe(filepath, params):
-        df = pd.read_csv(filepath, sep=params.separator, iterator=False, dtype=str, usecols=["Clonotype ID",
-                                                                                             "Chain: TRA (1)", "TRA - V gene (1)",
-                                                                                             "TRA - J gene (1)",
-                                                                                             "Chain: TRA (2)", "TRA - V gene (2)",
-                                                                                             "TRA - J gene (2)",
-                                                                                             "Chain: TRB (1)", "TRB - V gene (1)",
-                                                                                             "TRB - J gene (1)",
-                                                                                             "Chain: TRB (2)", "TRB - V gene (2)",
-                                                                                             "TRB - J gene (2)"])
+        usecols = ["Clonotype ID",
+                   "Chain: TRA (1)", "TRA - V gene (1)",
+                   "TRA - J gene (1)",
+                   "Chain: TRA (2)", "TRA - V gene (2)",
+                   "TRA - J gene (2)",
+                   "Chain: TRB (1)", "TRB - V gene (1)",
+                   "TRB - J gene (1)",
+                   "Chain: TRB (2)", "TRB - V gene (2)",
+                   "TRB - J gene (2)"]
+
+        if type(params.extra_columns_to_load) is list:
+            usecols = usecols + params.extra_columns_to_load
+
+        df = pd.read_csv(filepath, sep=params.separator, iterator=False, dtype=str, usecols=usecols)
         return df
 
     @staticmethod

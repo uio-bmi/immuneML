@@ -12,6 +12,7 @@ class IRISImportParams:
     import_all_gene_combinations: bool = None
     batch_size: int = 1
     separator: str = None
+    extra_columns_to_load: list = None
 
     @classmethod
     def build_object(cls, **kwargs):

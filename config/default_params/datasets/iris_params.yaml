@@ -4,3 +4,4 @@ import_dual_chains: True
 import_all_gene_combinations: False
 batch_size: 4
 separator: "\t"
+extra_columns_to_load: []
