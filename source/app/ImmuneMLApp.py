@@ -43,7 +43,7 @@ class ImmuneMLApp:
         model.run()
 
 
-def main(namespace: argparse.Namespace):
+def run_immuneML(namespace: argparse.Namespace):
     if namespace.tool is None:
         app = ImmuneMLApp(namespace.yaml_path, namespace.output_dir)
     else:
@@ -52,8 +52,7 @@ def main(namespace: argparse.Namespace):
     app.run()
 
 
-if __name__ == "__main__":
-
+def main():
     parser = argparse.ArgumentParser(description="immuneML command line tool")
     parser.add_argument("yaml_path", help="Path to specification YAML file. Always used to define the analysis.")
     parser.add_argument("output_dir", help="Output directory path.")
@@ -64,4 +63,8 @@ if __name__ == "__main__":
                                                     "Used only if immuneML is called from a Galaxy tool to update the metadata.")
     parser.add_argument("--tool", help="Name of the tool which calls immuneML. This name will be used to invoke appropriate API call, "
                                        "which will then preprocess the data/specs in tool-dependent way before running standard immuneML.")
-    main(parser.parse_args())
+    run_immuneML(parser.parse_args())
+
+
+if __name__ == "__main__":
+    main()
