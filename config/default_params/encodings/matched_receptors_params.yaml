@@ -1,1 +1,7 @@
-max_edit_distance: 0 # max Levenshtein distance
+max_edit_distances: # max Levenshtein distances allowed for different chains
+  alpha: 0
+  beta: 0
+  gamma: 0
+  delta: 0
+  heavy: 0
+  light: 0

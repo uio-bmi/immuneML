@@ -61,11 +61,12 @@ class CytoscapeNetworkExporter(DataReport):
 
     @classmethod
     def build_object(cls, **kwargs):
+
         if kwargs["additional_node_attributes"] is None:
             kwargs["additional_node_attributes"] = []
         if kwargs["additional_edge_attributes"] is None:
             kwargs["additional_edge_attributes"] = []
-
+        
         ParameterValidator.assert_type_and_value(kwargs["additional_node_attributes"], list, "CytoscapeNetworkExporter", "additional_node_attributes")
         ParameterValidator.assert_type_and_value(kwargs["additional_edge_attributes"], list, "CytoscapeNetworkExporter", "additional_edge_attributes")
 

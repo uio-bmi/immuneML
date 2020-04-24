@@ -25,7 +25,7 @@ class TestMiXCRLoader(TestCase):
                 "patient": "CD12",
                 "dilution": "108'",
                 "cloneCount": 3,
-                "allVHitsWithScore": "TRAV13-1*00(735)",
+                "allVHitsWithScore": "TRAV29DV5*00(553.8)",
                 "allJHitsWithScore": "TRAJ15*00(243)",
                 "nSeqCDR1": "TGTGCAGCAA",
                 "nSeqCDR2": "TGTGCAGCAA",
@@ -158,6 +158,7 @@ class TestMiXCRLoader(TestCase):
             self.assertTrue(all(sequence.metadata.chain == Chain.A for sequence in repertoire.sequences))
             if index == 1:
                 self.assertTrue(repertoire.sequences[0].amino_acid_sequence == "FAVF")
+                self.assertTrue(repertoire.sequences[0].metadata.v_gene == "V29/DV5")
                 self.assertTrue(repertoire.sequences[1].metadata.v_gene == "V14-1")
                 self.assertTrue(repertoire.metadata["CD"])
             elif index == 0:
@@ -183,6 +184,7 @@ class TestMiXCRLoader(TestCase):
             self.assertTrue(all(sequence.metadata.chain == Chain.A for sequence in repertoire.sequences))
             if index == 1:
                 self.assertTrue(repertoire.sequences[0].amino_acid_sequence == "VFAVFA")
+                self.assertTrue(repertoire.sequences[0].metadata.v_gene == "V29/DV5")
                 self.assertTrue(repertoire.sequences[1].metadata.v_gene == "V14-1")
                 self.assertTrue(repertoire.metadata["CD"])
             elif index == 0:

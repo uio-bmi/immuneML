@@ -3,7 +3,10 @@ import os
 
 from source.IO.dataset_export.PickleExporter import PickleExporter
 from source.caching.CacheHandler import CacheHandler
+from source.data_model.receptor.BCReceptor import BCReceptor
 from source.data_model.receptor.ReceptorList import ReceptorList
+from source.data_model.receptor.TCABReceptor import TCABReceptor
+from source.data_model.receptor.TCGDReceptor import TCGDReceptor
 from source.encodings.DatasetEncoder import DatasetEncoder
 from source.encodings.EncoderParams import EncoderParams
 from source.util.ParameterValidator import ParameterValidator
@@ -21,6 +24,10 @@ class MatchedReceptorsEncoder(DatasetEncoder):
     Arguments:
         reference_receptors (dict): A dictionary describing the reference dataset file.
             See the :py:mod:`source.IO.sequence_import` for specification details.
+        max_edit_distances (dict): A dictionary specifying the maximum edit distance between a target sequence
+            (from the repertoire) and the reference sequence. A maximum distance can be specified per chain, for example
+            to allow for less strict matching of TCR alpha and BCR light chains. When only an integer is specified,
+            this distance is applied to all possible chains.
 
     Specification:
 
@@ -34,21 +41,31 @@ class MatchedReceptorsEncoder(DatasetEncoder):
                             paired: True
                             all_dual_chains: True
                             all_genes: True
+                    max_edit_distances:
+                        alpha: 1
+                        beta: 0
     """
 
     dataset_mapping = {
         "RepertoireDataset": "MatchedReceptorsRepertoireEncoder"
     }
 
-    def __init__(self, reference_receptors: ReceptorList, max_edit_distance: int):
+    def __init__(self, reference_receptors: ReceptorList, max_edit_distances: dict):
         self.reference_receptors = reference_receptors
-        self.max_edit_distance = max_edit_distance
+        self.max_edit_distances = max_edit_distances
 
     @staticmethod
-    def _prepare_parameters(reference_receptors: dict, max_edit_distance: int):
+    def _prepare_parameters(reference_receptors: dict, max_edit_distances: dict):
         location = "MatchedReceptorsEncoder"
 
-        ParameterValidator.assert_type_and_value(max_edit_distance, int, location, "max_edit_distance", min_inclusive=0)
+        legal_chains = [chain for receptor in (TCABReceptor(), TCGDReceptor(), BCReceptor()) for chain in receptor.get_chains()]
+
+        if type(max_edit_distances) is int:
+            max_edit_distances = {chain: max_edit_distances for chain in legal_chains}
+        elif type(max_edit_distances) is dict:
+            ParameterValidator.assert_keys(max_edit_distances.keys(), legal_chains, location, "max_edit_distances", exclusive=False)
+        else:
+            ParameterValidator.assert_type_and_value(max_edit_distances, dict, location)
 
         ParameterValidator.assert_keys(list(reference_receptors.keys()), ["format", "path", "params"], location, "reference_receptors", exclusive=False)
 
@@ -69,7 +86,7 @@ class MatchedReceptorsEncoder(DatasetEncoder):
 
         return {
             "reference_receptors": receptors,
-            "max_edit_distance": max_edit_distance
+            "max_edit_distances": max_edit_distances
         }
 
     @staticmethod

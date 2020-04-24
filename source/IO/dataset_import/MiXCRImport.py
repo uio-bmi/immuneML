@@ -78,5 +78,7 @@ class MiXCRImport(DataImport):
 
     @staticmethod
     def _load_genes(df: pd.DataFrame, column_name):
-        tmp_df = df.apply(lambda row: row[column_name].split(",")[0].replace("TRB", "").replace("TRA", "").split("*", 1)[0], axis=1)
+        # note: MiXCR omits the '/' for 'TRA.../DV' genes
+        tmp_df = df.apply(lambda row: row[column_name].split(",")[0].replace("TRB", "").replace("TRA", "").replace("DV", "/DV").replace("//", "/").split("*", 1)[0], axis=1)
+
         return tmp_df

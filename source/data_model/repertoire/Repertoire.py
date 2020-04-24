@@ -180,7 +180,10 @@ class Repertoire(DatasetItem):
         return self.get_attribute("j_genes")
 
     def get_counts(self):
-        return self.get_attribute("counts")
+        counts = self.get_attribute("counts")
+        if counts is not None:
+            counts = counts.astype(float).astype(int)
+        return counts
 
     def load_data(self):
         if self.data is None or (isinstance(self.data, weakref.ref) and self.data() is None):

@@ -97,9 +97,9 @@ class MatchedReceptorsRepertoireEncoder(MatchedReceptorsEncoder):
             for rep_seq in rep_seqs:
                 # Match with first chain: add to even columns in matches.
                 # Match with second chain: add to odd columns
-                if matcher.matches_sequence(first_chain, rep_seq, self.max_edit_distance):
+                if matcher.matches_sequence(first_chain, rep_seq, max_distance=self.max_edit_distances[chain_names[0]]):
                     matches[i * 2] += rep_seq.metadata.count
-                if matcher.matches_sequence(second_chain, rep_seq, self.max_edit_distance):
+                if matcher.matches_sequence(second_chain, rep_seq, max_distance=self.max_edit_distances[chain_names[1]]):
                     matches[i * 2 + 1] += rep_seq.metadata.count
 
         return matches

@@ -64,7 +64,7 @@ TCR_AB	400	NONO	TRAV1		TRAJ1	null	null	null	null	NONO	TRBV1		TRBJ1	null	null	nul
 
         encoder = MatchedReceptorsRepertoireEncoder.build_object(dataset, **{
             "reference_receptors": reference_receptors,
-            "max_edit_distance": 0
+            "max_edit_distances": 0
         })
 
         encoded = encoder.encode(dataset, EncoderParams(

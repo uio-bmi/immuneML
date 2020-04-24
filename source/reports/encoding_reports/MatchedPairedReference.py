@@ -110,7 +110,7 @@ class MatchedPairedReference(EncodingReport):
         results_df["n_clones"] = 0
 
         for repertoire in self.dataset.repertoires:
-            rep_counts = repertoire.get_attribute("counts")
+            rep_counts = repertoire.get_counts()
             rep_chains = repertoire.get_attribute("chains")
 
             for chain in all_chains:
