@@ -10,7 +10,7 @@ from source.environment.LabelConfiguration import LabelConfiguration
 from source.reports.encoding_reports.DesignMatrixExporter import DesignMatrixExporter
 from source.util.PathBuilder import PathBuilder
 from source.util.RepertoireBuilder import RepertoireBuilder
-from source.workflows.instructions.exploratory_analysis.ExploratoryAnalysisProcess import ExploratoryAnalysisInstruction
+from source.workflows.instructions.exploratory_analysis.ExploratoryAnalysisInstruction import ExploratoryAnalysisInstruction
 from source.workflows.instructions.exploratory_analysis.ExploratoryAnalysisUnit import ExploratoryAnalysisUnit
 
 

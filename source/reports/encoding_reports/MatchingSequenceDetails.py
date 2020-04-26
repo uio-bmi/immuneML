@@ -6,6 +6,8 @@ from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.data_model.receptor.receptor_sequence.ReceptorSequenceList import ReceptorSequenceList
 from source.data_model.repertoire.Repertoire import Repertoire
+from source.reports.ReportOutput import ReportOutput
+from source.reports.ReportResult import ReportResult
 from source.reports.encoding_reports.EncodingReport import EncodingReport
 from source.util.ParameterValidator import ParameterValidator
 from source.util.PathBuilder import PathBuilder
@@ -56,17 +58,19 @@ class MatchingSequenceDetails(EncodingReport):
         return MatchingSequenceDetails(**kwargs)
 
     def __init__(self, dataset: RepertoireDataset = None, max_edit_distance: int = None, reference_sequences: ReceptorSequenceList = None,
-                 result_path: str = None):
+                 result_path: str = None, name: str = None):
 
         self.dataset = dataset
         self.max_edit_distance = max_edit_distance
         self.reference_sequences = reference_sequences
         self.result_path = result_path
+        self.name = name
 
-    def generate(self):
+    def generate(self) -> ReportResult:
         PathBuilder.build(self.result_path)
-        self._make_overview()
-        self._make_matching_report()
+        overview_file = self._make_overview()
+        filenames = self._make_matching_report()
+        return ReportResult(self.name, output_tables=[ReportOutput(item) for item in [overview_file] + filenames])
 
     def check_prerequisites(self):
         if "MatchedReferenceEncoder" != self.dataset.encoded_data.encoding:

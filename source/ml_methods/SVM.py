@@ -31,8 +31,13 @@ class SVM(SklearnMethod):
         return False
 
     def get_params(self, label):
-        params = self.models[label].estimator.get_params() if isinstance(self.models[label], RandomizedSearchCV) \
-            else self.models[label].get_params()
-        params["coefficients"] = self.models[label].coef_[0].tolist()
-        params["intercept"] = self.models[label].intercept_.tolist()
+        if label is None:
+            tmp_label = list(self.models.keys())[0]
+        else:
+            tmp_label = label
+
+        params = self.models[tmp_label].estimator.get_params() if isinstance(self.models[tmp_label], RandomizedSearchCV) \
+            else self.models[tmp_label].get_params()
+        params["coefficients"] = self.models[tmp_label].coef_[0].tolist()
+        params["intercept"] = self.models[tmp_label].intercept_.tolist()
         return params

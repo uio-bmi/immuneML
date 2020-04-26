@@ -10,8 +10,9 @@ from source.data_model.encoded_data.EncodedData import EncodedData
 
 class RepertoireDataset(Dataset):
 
-    def __init__(self, params: dict = None, encoded_data: EncodedData = None,
-                 repertoires: list = None, identifier: str = None, metadata_file: str = None):
+    def __init__(self, params: dict = None, encoded_data: EncodedData = None, repertoires: list = None, identifier: str = None,
+                 metadata_file: str = None, name: str = None):
+        super().__init__()
         self.params = params
         self.encoded_data = encoded_data
         self.identifier = identifier if identifier is not None else uuid.uuid4()
@@ -19,6 +20,7 @@ class RepertoireDataset(Dataset):
         self.metadata_fields = None
         self.repertoire_ids = None
         self.repertoires = repertoires
+        self.name = name
 
     def clone(self):
         return RepertoireDataset(self.params, copy.deepcopy(self.encoded_data), copy.deepcopy(self.repertoires),

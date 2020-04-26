@@ -59,24 +59,28 @@ class MLProcess:
         return MLResult(self.path)
 
     def run(self, run_id: int):
+        report_results = None
         encoded_train = self._run_encoder(self.train_dataset, True)
         method = self._train_ml_method(encoded_train)
         if self.test_dataset.get_example_count() > 0:
             encoded_test = self._run_encoder(self.test_dataset, False)
             performance = self._assess_ml_method(method, encoded_test, run_id)
-            self._run_reports(method, encoded_train, encoded_test, self.path + "reports/")
+            report_results = self._run_reports(method, encoded_train, encoded_test, self.path + "reports/")
         else:
             performance = None
-        return method, performance
+        return method, performance, report_results
 
     def _run_reports(self, method: MLMethod, train_dataset: Dataset, test_dataset: RepertoireDataset, path: str):
+        report_results = []
         for report in self.reports:
             tmp_report = copy.deepcopy(report)
             tmp_report.method = method
             tmp_report.train_dataset = train_dataset
             tmp_report.test_dataset = test_dataset
             tmp_report.result_path = path
-            tmp_report.generate_report()
+            result = tmp_report.generate_report()
+            report_results.append(result)
+        return report_results
 
     def _assess_ml_method(self, method: MLMethod, encoded_test_dataset: Dataset, run: int):
         return MLMethodAssessment.run(MLMethodAssessmentParams(

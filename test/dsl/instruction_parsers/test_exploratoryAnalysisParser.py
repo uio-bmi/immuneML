@@ -33,7 +33,7 @@ class TestExploratoryAnalysisParser(TestCase):
 
         refs = {"path": path + "refs.tsv", "format": "VDJdb"}
 
-        report2 = MatchingSequenceDetails(max_edit_distance=1, reference_sequences=refs)
+        report2 = MatchingSequenceDetails.build_object(max_edit_distance=1, reference_sequences=refs)
         encoding = MatchedReferenceEncoder
         p1 = [PatientRepertoireCollector()]
 
@@ -58,12 +58,12 @@ class TestExploratoryAnalysisParser(TestCase):
 
         process = ExploratoryAnalysisParser().parse("a", instruction, symbol_table)
 
-        self.assertEqual(2, len(list(process.exploratory_analysis_units.values())))
-        self.assertTrue(isinstance(list(process.exploratory_analysis_units.values())[0].report, SequenceLengthDistribution))
-        self.assertTrue(isinstance(list(process.exploratory_analysis_units.values())[1].report, MatchingSequenceDetails))
-        self.assertTrue(isinstance(list(process.exploratory_analysis_units.values())[1].encoder, MatchedReferenceEncoder))
-        self.assertEqual(1, len(list(process.exploratory_analysis_units.values())[1].encoder.reference_sequences))
-        self.assertEqual("l1", list(process.exploratory_analysis_units.values())[1].label_config.get_labels_by_name()[0])
+        self.assertEqual(2, len(list(process.state.exploratory_analysis_units.values())))
+        self.assertTrue(isinstance(list(process.state.exploratory_analysis_units.values())[0].report, SequenceLengthDistribution))
+        self.assertTrue(isinstance(list(process.state.exploratory_analysis_units.values())[1].report, MatchingSequenceDetails))
+        self.assertTrue(isinstance(list(process.state.exploratory_analysis_units.values())[1].encoder, MatchedReferenceEncoder))
+        self.assertEqual(1, len(list(process.state.exploratory_analysis_units.values())[1].encoder.reference_sequences))
+        self.assertEqual("l1", list(process.state.exploratory_analysis_units.values())[1].label_config.get_labels_by_name()[0])
 
         shutil.rmtree(path)
 

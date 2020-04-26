@@ -8,32 +8,27 @@ from source.IO.dataset_import.PickleImport import PickleImport
 from source.data_model.dataset.Dataset import Dataset
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.repertoire.Repertoire import Repertoire
+from source.simulation.SimulationState import SimulationState
 from source.util.FilenameHandler import FilenameHandler
 from source.util.PathBuilder import PathBuilder
-from source.workflows.steps.SignalImplanterParams import SignalImplanterParams
 from source.workflows.steps.Step import Step
 
 
 class SignalImplanter(Step):
 
     @staticmethod
-    def run(input_params: SignalImplanterParams = None):
-        return SignalImplanter.perform_step(input_params)
-
-    @staticmethod
-    def perform_step(input_params: SignalImplanterParams = None):
-
+    def run(input_params: SimulationState = None):
         path = input_params.result_path + FilenameHandler.get_dataset_name(SignalImplanter.__name__)
 
         if os.path.isfile(path):
-            dataset = PickleImport.import_dataset(path)
+            dataset = PickleImport.import_dataset({"path": path})
         else:
             dataset = SignalImplanter._implant_signals(input_params)
 
         return dataset
 
     @staticmethod
-    def _implant_signals(input_params: SignalImplanterParams = None) -> Dataset:
+    def _implant_signals(input_params: SimulationState = None) -> Dataset:
 
         PathBuilder.build(input_params.result_path)
 
@@ -79,14 +74,14 @@ class SignalImplanter(Step):
         return path
 
     @staticmethod
-    def _process_repertoire(index, repertoire, simulation_index, simulation_limits, input_params):
+    def _process_repertoire(index, repertoire, simulation_index, simulation_limits, input_params) -> Repertoire:
         if simulation_index < len(simulation_limits):
             return SignalImplanter._implant_in_repertoire(index, repertoire, simulation_index, input_params)
         else:
             return SignalImplanter._copy_repertoire(index, repertoire, input_params)
 
     @staticmethod
-    def _copy_repertoire(index: int, repertoire: Repertoire, input_params: SignalImplanterParams) -> str:
+    def _copy_repertoire(index: int, repertoire: Repertoire, input_params: SimulationState) -> Repertoire:
         new_repertoire = Repertoire.build_from_sequence_objects(repertoire.sequences, input_params.result_path, repertoire.metadata)
 
         for signal in input_params.signals:
@@ -95,7 +90,7 @@ class SignalImplanter(Step):
         return new_repertoire
 
     @staticmethod
-    def _implant_in_repertoire(index, repertoire, simulation_index, input_params) -> str:
+    def _implant_in_repertoire(index, repertoire, simulation_index, input_params) -> Repertoire:
         new_repertoire = copy.deepcopy(repertoire)
         for signal in input_params.simulation.implantings[simulation_index].signals:
             new_repertoire = signal.implant_to_repertoire(repertoire=new_repertoire,

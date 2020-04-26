@@ -5,6 +5,8 @@ from rpy2.robjects import pandas2ri
 from rpy2.robjects.packages import STAP
 
 from source.environment.EnvironmentSettings import EnvironmentSettings
+from source.reports.ReportOutput import ReportOutput
+from source.reports.ReportResult import ReportResult
 from source.reports.ml_reports.MLReport import MLReport
 from source.util.ParameterValidator import ParameterValidator
 from source.util.PathBuilder import PathBuilder
@@ -63,25 +65,27 @@ class BenchmarkHPSettings(MLReport):
 
     @classmethod
     def build_object(cls, **kwargs):
-        ParameterValidator.assert_in_valid_list(kwargs["errorbar_meaning"], [item.name for item in ErrorBarMeaning], "BenchmarkHPSettings",
-                                                "errorbar_meaning")
-
+        valid_values = [item.name.lower() for item in ErrorBarMeaning]
+        ParameterValidator.assert_in_valid_list(kwargs["errorbar_meaning"], valid_values, "BenchmarkHPSettings", "errorbar_meaning")
         errorbar_meaning = ErrorBarMeaning[kwargs["errorbar_meaning"].upper()]
-        return BenchmarkHPSettings(errorbar_meaning)
+        return BenchmarkHPSettings(errorbar_meaning, kwargs["name"] if "name" in kwargs else None)
 
-    def __init__(self, errorbar_meaning: ErrorBarMeaning):
+    def __init__(self, errorbar_meaning: ErrorBarMeaning, name: str = None):
         super(BenchmarkHPSettings, self).__init__()
 
         self.errorbar_meaning = errorbar_meaning
         self.hp_optimization_state = None
         self.result_path = None
+        self.name = name
 
-    def generate(self):
+    def generate(self) -> ReportResult:
         PathBuilder.build(self.result_path)
 
         plotting_data = self._retrieve_plotting_data()
-        self._write_results_table(plotting_data)
-        self._plot(plotting_data)
+        result_table = self._write_results_table(plotting_data)
+        plot_result = self._plot(plotting_data)
+
+        return ReportResult(self.name, output_tables=[result_table], output_figures=[plot_result])
 
     def _retrieve_plotting_data(self):
         plotting_data = []
@@ -101,7 +105,9 @@ class BenchmarkHPSettings(MLReport):
         return plotting_data
 
     def _write_results_table(self, plotting_data):
-        plotting_data.to_csv(self.result_path + "benchmark_result.csv", index=False)
+        filepath = self.result_path + "benchmark_result.csv"
+        plotting_data.to_csv(filepath, index=False)
+        return ReportOutput(filepath)
 
     def _plot(self, plotting_data):
         pandas2ri.activate()
@@ -118,6 +124,8 @@ class BenchmarkHPSettings(MLReport):
                           errorbar_meaning=errorbar_meaning_abbr, facet_rows="encoding", facet_columns="label", facet_type="grid",
                           facet_scales="free_y", facet_switch="x", nrow="NULL", height=6,
                           width=8, result_path=self.result_path, result_name="benchmark_result", ml_benchmark=True)
+
+        return ReportOutput(f"{self.result_path}/benchmark_result.pdf")
 
     def check_prerequisites(self):
         run_report = True

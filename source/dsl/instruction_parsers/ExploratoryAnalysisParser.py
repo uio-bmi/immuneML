@@ -3,7 +3,7 @@ import copy
 from source.dsl.symbol_table.SymbolTable import SymbolTable
 from source.environment.LabelConfiguration import LabelConfiguration
 from source.util.ParameterValidator import ParameterValidator
-from source.workflows.instructions.exploratory_analysis.ExploratoryAnalysisProcess import ExploratoryAnalysisInstruction
+from source.workflows.instructions.exploratory_analysis.ExploratoryAnalysisInstruction import ExploratoryAnalysisInstruction
 from source.workflows.instructions.exploratory_analysis.ExploratoryAnalysisUnit import ExploratoryAnalysisUnit
 
 
@@ -46,7 +46,7 @@ class ExploratoryAnalysisParser:
             params = self._prepare_params(analysis, symbol_table)
             exp_analysis_units[key] = ExploratoryAnalysisUnit(**params)
 
-        process = ExploratoryAnalysisInstruction(exploratory_analysis_units=exp_analysis_units)
+        process = ExploratoryAnalysisInstruction(exploratory_analysis_units=exp_analysis_units, name=key)
         return process
 
     def _prepare_params(self, analysis: dict, symbol_table: SymbolTable) -> dict:

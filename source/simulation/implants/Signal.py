@@ -52,4 +52,4 @@ class Signal:
         return processed_repertoire
 
     def __str__(self):
-        return self.id + "; " + ",".join([str(motif) for motif in self.motifs])
+        return "Signal id: " + self.id + "; motifs: " + ", ".join([str(motif) for motif in self.motifs])

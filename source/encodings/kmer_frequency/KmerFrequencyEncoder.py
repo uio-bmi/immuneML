@@ -86,7 +86,8 @@ class KmerFrequencyEncoder(DatasetEncoder):
     }
 
     def __init__(self, normalization_type: NormalizationType, reads: ReadsType, sequence_encoding: SequenceEncodingType, k: int = 0,
-                 k_left: int = 0, k_right: int = 0, min_gap: int = 0, max_gap: int = 0, metadata_fields_to_include: list = None):
+                 k_left: int = 0, k_right: int = 0, min_gap: int = 0, max_gap: int = 0, metadata_fields_to_include: list = None,
+                 name: str = None):
         self.normalization_type = normalization_type
         self.reads = reads
         self.sequence_encoding = sequence_encoding
@@ -96,10 +97,11 @@ class KmerFrequencyEncoder(DatasetEncoder):
         self.min_gap = min_gap
         self.max_gap = max_gap
         self.metadata_fields_to_include = metadata_fields_to_include if metadata_fields_to_include is not None else []
+        self.name = name
 
     @staticmethod
     def _prepare_parameters(normalization_type: str, reads: str, sequence_encoding: str, k: int = 0, k_left: int = 0,
-                          k_right: int = 0, min_gap: int = 0, max_gap: int = 0, metadata_fields_to_include: list = None):
+                          k_right: int = 0, min_gap: int = 0, max_gap: int = 0, metadata_fields_to_include: list = None, name: str = None):
 
         location = KmerFrequencyEncoder.__name__
 
@@ -115,6 +117,7 @@ class KmerFrequencyEncoder(DatasetEncoder):
             "normalization_type": NormalizationType[normalization_type.upper()],
             "reads": ReadsType[reads.upper()],
             "sequence_encoding": SequenceEncodingType[sequence_encoding.upper()],
+            "name": name,
             **vars_to_check
         }
 

@@ -8,6 +8,8 @@ from rpy2.robjects.packages import STAP
 
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.ml_methods.RandomForestClassifier import RandomForestClassifier
+from source.reports.ReportOutput import ReportOutput
+from source.reports.ReportResult import ReportResult
 from source.reports.ml_reports.CoefficientPlottingSetting import CoefficientPlottingSetting
 from source.reports.ml_reports.CoefficientPlottingSettingList import CoefficientPlottingSettingList
 from source.reports.ml_reports.MLReport import MLReport
@@ -82,8 +84,10 @@ class Coefficients(MLReport):
         coefs_to_plot = kwargs["coefs_to_plot"]
         cutoff = kwargs["cutoff"]
         n_largest = kwargs["n_largest"]
+        name = kwargs["name"] if "name" in kwargs else None
 
-        ParameterValidator.assert_all_in_valid_list(coefs_to_plot, [item.name for item in CoefficientPlottingSetting], location,
+        ParameterValidator.assert_all_in_valid_list([coef.upper() for coef in coefs_to_plot],
+                                                    [item.name.upper() for item in CoefficientPlottingSetting], location,
                                                     "coefs_to_plot")
 
         if CoefficientPlottingSetting.CUTOFF in coefs_to_plot:
@@ -96,9 +100,9 @@ class Coefficients(MLReport):
         for keyword in coefs_to_plot:
             coefs.append(CoefficientPlottingSetting[keyword.upper()])
 
-        return Coefficients(coefs, cutoff, n_largest)
+        return Coefficients(coefs, cutoff, n_largest, name)
 
-    def __init__(self, coefs_to_plot: CoefficientPlottingSettingList, cutoff: list, n_largest: list):
+    def __init__(self, coefs_to_plot: CoefficientPlottingSettingList, cutoff: list, n_largest: list, name: str = None):
         super(Coefficients, self).__init__()
 
         self._coefs_to_plot = coefs_to_plot
@@ -107,9 +111,11 @@ class Coefficients(MLReport):
         self.label = None
         self.ml_details_path = None
         self.hp_setting = None
+        self.name = name
 
     def generate(self):
         PathBuilder.build(self.result_path)
+        paths = []
 
         self._set_plotting_parameters()
 
@@ -117,25 +123,32 @@ class Coefficients(MLReport):
         plot_data["abs_coefficients"] = abs(plot_data["coefficients"])
         plot_data.sort_values(by="abs_coefficients", inplace=True, ascending=False)
 
-        self._write_results_table(plot_data[["features", "coefficients"]])
+        result_table_path = self._write_results_table(plot_data[["features", "coefficients"]])
         self._write_settings()
 
         if CoefficientPlottingSetting.ALL in self._coefs_to_plot:
-            self._plot(plot_data, "all_coefficients")
+            plot_path = self._plot(plot_data, "all_coefficients")
+            paths.append(plot_path)
 
         if CoefficientPlottingSetting.NONZERO in self._coefs_to_plot:
             nonzero_data = plot_data[plot_data["coefficients"] != 0]
-            self._plot(nonzero_data, "nonzero_coefficients")
+            plot_path = self._plot(nonzero_data, "nonzero_coefficients")
+            paths.append(plot_path)
 
         if CoefficientPlottingSetting.CUTOFF in self._coefs_to_plot:
             for cutoff_val in self._cutoff:
                 cutoff_data = plot_data[plot_data["abs_coefficients"] >= cutoff_val]
-                self._plot(cutoff_data, "cutoff_{}_coefficients".format(cutoff_val))
+                plot_path = self._plot(cutoff_data, "cutoff_{}_coefficients".format(cutoff_val))
+                paths.append(plot_path)
 
         if CoefficientPlottingSetting.N_LARGEST in self._coefs_to_plot:
             for n_val in self._n_largest:
                 n_largest_data = plot_data.nlargest(n=n_val, columns=["abs_coefficients"])
-                self._plot(n_largest_data, "largest_{}_coefficients".format(n_val))
+                plot_path = self._plot(n_largest_data, "largest_{}_coefficients".format(n_val))
+                paths.append(plot_path)
+
+        return ReportResult(self.name, output_tables=[ReportOutput(result_table_path)], output_figures=[ReportOutput(p)
+                                                                                                        for p in paths if p is not None])
 
     def _set_plotting_parameters(self):
         if isinstance(self.method, RandomForestClassifier):
@@ -155,7 +168,9 @@ class Coefficients(MLReport):
                           file)
 
     def _write_results_table(self, plotting_data):
-        plotting_data.to_csv(self.result_path + "coefficients.csv", index=False)
+        filepath = self.result_path + "coefficients.csv"
+        plotting_data.to_csv(filepath, index=False)
+        return filepath
 
     def _retrieve_plot_data(self):
         coefficients = self.method.get_params(self.label)[self._param_field]
@@ -165,10 +180,8 @@ class Coefficients(MLReport):
         return pd.DataFrame({"coefficients": coefficients, "features": feature_names})
 
     def _retrieve_feature_names(self):
-        with open(self.ml_details_path, "r") as file:
-            params = yaml.load(file)
-
-        return params[self.label]["feature_names"]
+        if self.train_dataset and self.train_dataset.encoded_data:
+            return self.train_dataset.encoded_data.feature_names
 
     def _plot(self, plotting_data, output_name):
 
@@ -189,6 +202,9 @@ class Coefficients(MLReport):
                                   y_lab=self._y_axis_title, x_lab="feature", facet_type="wrap", facet_columns="empty_facet",
                                   facet_scales="free", nrow=1, height=6, sort_by_y=True,
                                   width=8, result_path=self.result_path, result_name=output_name)
+
+                return f"{self.result_path}/{output_name}.pdf"
+
             except Exception as e:
                 warnings.warn(f"Coefficients: the following exception was thrown when attempting to plot the data:\n{e}")
 

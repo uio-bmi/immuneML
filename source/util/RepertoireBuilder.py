@@ -1,6 +1,7 @@
 import pandas as pd
 
 from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
+from source.data_model.receptor.receptor_sequence.ReceptorSequenceList import ReceptorSequenceList
 from source.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
 from source.data_model.repertoire.Repertoire import Repertoire
 from source.util.PathBuilder import PathBuilder
@@ -28,7 +29,7 @@ class RepertoireBuilder:
             donors = []
 
         for rep_index, sequence_list in enumerate(sequences):
-            rep_sequences = []
+            rep_sequences = ReceptorSequenceList()
             if len(donors) < len(sequences):
                 donors.append("rep_" + str(rep_index))
             for seq_index, sequence in enumerate(sequence_list):

@@ -41,3 +41,6 @@ class LabelConfiguration:
 
     def get_label_object(self, label: str) -> Label:
         return self._labels[label]
+
+    def get_label_objects(self):
+        return self._labels.values()

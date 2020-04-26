@@ -24,7 +24,7 @@ class EncodingParser:
         classes = ReflectionHandler.get_classes_by_partial_name("Encoder", class_path)
         valid_encoders = [cls.__name__[:-7] for cls in DatasetEncoder.__subclasses__()]
         encoder = ObjectParser.get_class(specs, valid_encoders, "Encoder", class_path, "EncodingParser", key)
-        params = ObjectParser.get_all_params(specs, class_path, encoder.__name__[:-7])
+        params = ObjectParser.get_all_params(specs, class_path, encoder.__name__[:-7], key)
 
         return encoder, params
 

@@ -61,18 +61,19 @@ class Word2VecEncoder(DatasetEncoder):
         "RepertoireDataset": "W2VRepertoireEncoder"
     }
 
-    def __init__(self, vector_size: int, k: int, model_type: ModelType):
+    def __init__(self, vector_size: int, k: int, model_type: ModelType, name: str = None):
         self.vector_size = vector_size
         self.k = k
         self.model_type = model_type
+        self.name = name
 
     @staticmethod
-    def _prepare_parameters(vector_size: int, k: int, model_type: str):
+    def _prepare_parameters(vector_size: int, k: int, model_type: str, name: str = None):
         location = "Word2VecEncoder"
         ParameterValidator.assert_type_and_value(vector_size, int, location, "vector_size", min_inclusive=1)
         ParameterValidator.assert_type_and_value(k, int, location, "k", min_inclusive=1)
         ParameterValidator.assert_in_valid_list(model_type.upper(), [item.name for item in ModelType], location, "model_type")
-        return {"vector_size": vector_size, "k": k, "model_type": ModelType[model_type.upper()]}
+        return {"vector_size": vector_size, "k": k, "model_type": ModelType[model_type.upper()], "name": name}
 
     @staticmethod
     def build_object(dataset=None, **params):

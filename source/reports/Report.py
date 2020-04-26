@@ -1,5 +1,7 @@
 import abc
 
+from source.reports.ReportResult import ReportResult
+
 
 class Report(metaclass=abc.ABCMeta):
     """
@@ -13,7 +15,7 @@ class Report(metaclass=abc.ABCMeta):
         pass
 
     @abc.abstractmethod
-    def generate(self):
+    def generate(self) -> ReportResult:
         pass
 
     def check_prerequisites(self):
@@ -26,6 +28,6 @@ class Report(metaclass=abc.ABCMeta):
     def set_context(self, context: dict):
         return self
 
-    def generate_report(self):
+    def generate_report(self) -> ReportResult:
         if self.check_prerequisites():
-            self.generate()
+            return self.generate()

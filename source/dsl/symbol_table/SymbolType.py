@@ -12,3 +12,4 @@ class SymbolType(Enum):
     SIMULATION = 6
     PREPROCESSING = 7
     INSTRUCTION = 8
+    OUTPUT = 9

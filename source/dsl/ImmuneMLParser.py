@@ -5,6 +5,7 @@ import re
 import yaml
 
 from source.dsl.InstructionParser import InstructionParser
+from source.dsl.OutputParser import OutputParser
 from source.dsl.definition_parsers.DefinitionParser import DefinitionParser
 from source.dsl.symbol_table.SymbolTable import SymbolTable
 
@@ -89,6 +90,8 @@ class ImmuneMLParser:
                 strategy: GridSearch
                 metrics: [accuracy, f1_micro]
                 reports: None
+        output: # this section can also be omitted, in that case no additional output will be generated (no HTML report)
+            format: HTML # or None
 
     """
 
@@ -124,9 +127,10 @@ class ImmuneMLParser:
 
         def_parser_output, specs_defs = DefinitionParser.parse(workflow_specification, symbol_table)
         symbol_table, specs_instructions = InstructionParser.parse(def_parser_output)
+        app_output = OutputParser.parse(workflow_specification, symbol_table)
 
         path = ImmuneMLParser._output_specs(file_path=file_path, result_path=result_path, definitions=specs_defs,
-                                            instructions=specs_instructions)
+                                            instructions=specs_instructions, output=app_output)
 
         return symbol_table, path
 
@@ -141,10 +145,10 @@ class ImmuneMLParser:
             return result_path + file_name
 
     @staticmethod
-    def _output_specs(file_path=None, result_path=None, definitions: dict = None, instructions: dict = None):
+    def _output_specs(file_path=None, result_path=None, definitions: dict = None, instructions: dict = None, output: dict = None):
         filepath = ImmuneMLParser._get_full_specs_filepath(file_path, result_path)
 
-        result = {"definitions": definitions, "instructions": instructions}
+        result = {"definitions": definitions, "instructions": instructions, "output": output}
         with open(filepath, "w") as file:
             yaml.dump(result, file)
 

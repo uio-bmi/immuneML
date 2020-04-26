@@ -39,15 +39,16 @@ class ImmuneMLApp:
         print("ImmuneML: starting the analysis...")
 
         instructions = symbol_table.get_by_type(SymbolType.INSTRUCTION)
-        model = SemanticModel([instruction.item for instruction in instructions], self._result_path)
-        model.run()
+        output = symbol_table.get("output")
+        model = SemanticModel([instruction.item for instruction in instructions], self._result_path, output)
+        return model.run()
 
 
 def run_immuneML(namespace: argparse.Namespace):
     if namespace.tool is None:
         app = ImmuneMLApp(namespace.yaml_path, namespace.output_dir)
     else:
-        app_cls = ReflectionHandler.get_class_by_name(namespace.tool, "api/galaxy/")
+        app_cls = ReflectionHandler.get_class_by_name(namespace.tool, "api/")
         app = app_cls(**vars(namespace))
     app.run()
 

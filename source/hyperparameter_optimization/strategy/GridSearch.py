@@ -28,5 +28,12 @@ class GridSearch(HPOptimizationStrategy):
         res = HPSettingResult(optimal_setting=optimal_setting, all_settings=self.hp_settings)
         return res
 
+    def get_performance(self, hp_setting: HPSetting):
+        key = hp_setting.get_key()
+        if key in self.search_space_metric:
+            return self.search_space_metric[key]
+        else:
+            return None
+
     def clone(self):
         return GridSearch(hp_settings=self.hp_settings.values())

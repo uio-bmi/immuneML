@@ -10,6 +10,8 @@ class HPAssessmentState:
         self.train_val_dataset = train_val_dataset
         self.test_dataset = test_dataset
         self.path = path
+        self.train_val_data_reports = []
+        self.test_data_reports = []
 
         # computed
         self.label_states = {label: HPLabelState(label, label_configuration.get_auxiliary_labels(label))

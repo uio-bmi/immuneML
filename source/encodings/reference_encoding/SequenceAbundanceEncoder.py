@@ -49,10 +49,11 @@ class SequenceAbundanceEncoder(DatasetEncoder):
         assert isinstance(dataset, RepertoireDataset), "SequenceAbundanceEncoder: this encoding only works on repertoire datasets."
         return SequenceAbundanceEncoder(**params)
 
-    def __init__(self, comparison_attributes, p_value_threshold: float, pool_size: int):
+    def __init__(self, comparison_attributes, p_value_threshold: float, pool_size: int, name: str = None):
         self.comparison_attributes = comparison_attributes
         self.p_value_threshold = p_value_threshold
         self.pool_size = pool_size
+        self.name = name
         self.context = None
 
     def build_comparison_params(self, dataset) -> tuple:

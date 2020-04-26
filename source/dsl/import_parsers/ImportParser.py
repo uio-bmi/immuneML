@@ -35,6 +35,7 @@ class ImportParser:
 
         try:
             dataset = import_cls.import_dataset(params)
+            dataset.name = key
             symbol_table.add(key, SymbolType.DATASET, dataset)
         except KeyError as key_error:
             raise KeyError(f"{key_error}\n\nAn error occurred during parsing of dataset {key}. "

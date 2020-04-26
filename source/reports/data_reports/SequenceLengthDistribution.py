@@ -5,6 +5,8 @@ import matplotlib.pyplot as plt
 
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.repertoire.Repertoire import Repertoire
+from source.reports.ReportOutput import ReportOutput
+from source.reports.ReportResult import ReportResult
 from source.reports.data_reports.DataReport import DataReport
 from source.util.PathBuilder import PathBuilder
 
@@ -35,8 +37,8 @@ class SequenceLengthDistribution(DataReport):
     def build_object(cls, **kwargs):
         return SequenceLengthDistribution(**kwargs)
 
-    def __init__(self, dataset: RepertoireDataset = None, batch_size: int = 1, result_path: str = None):
-        DataReport.__init__(self, dataset=dataset, result_path=result_path)
+    def __init__(self, dataset: RepertoireDataset = None, batch_size: int = 1, result_path: str = None, name: str = None):
+        DataReport.__init__(self, dataset=dataset, result_path=result_path, name=name)
         self.batch_size = batch_size
 
     def check_prerequisites(self):
@@ -46,9 +48,10 @@ class SequenceLengthDistribution(DataReport):
             warnings.warn("SequenceLengthDistribution: report can be generated only from RepertoireDataset. Skipping this report...")
             return False
 
-    def generate(self):
+    def generate(self) -> ReportResult:
         normalized_sequence_lengths = self.get_normalized_sequence_lengths()
-        self.plot(normalized_sequence_lengths)
+        file_path = self.plot(normalized_sequence_lengths)
+        return ReportResult(type(self).__name__, output_figures=[ReportOutput(file_path, "sequence length distribution plot")])
 
     def get_normalized_sequence_lengths(self) -> Counter:
         sequence_lenghts = Counter()
@@ -83,5 +86,7 @@ class SequenceLengthDistribution(DataReport):
 
         PathBuilder.build(self.result_path)
 
-        plt.savefig(self.result_path + "sequence_length_distribution.png", transparent=True)
+        file_path = self.result_path + "sequence_length_distribution.png"
+        plt.savefig(file_path, transparent=True)
+        return file_path
 

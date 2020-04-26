@@ -1,6 +1,8 @@
 from source.data_model.dataset.Dataset import Dataset
 from source.encodings.EncoderParams import EncoderParams
+from source.reports.ReportResult import ReportResult
 from source.workflows.instructions.Instruction import Instruction
+from source.workflows.instructions.exploratory_analysis.ExploratoryAnalysisState import ExploratoryAnalysisState
 from source.workflows.instructions.exploratory_analysis.ExploratoryAnalysisUnit import ExploratoryAnalysisUnit
 from source.workflows.steps.DataEncoder import DataEncoder
 from source.workflows.steps.DataEncoderParams import DataEncoderParams
@@ -14,24 +16,27 @@ class ExploratoryAnalysisInstruction(Instruction):
     executed on the (encoded) dataset.
     """
 
-    def __init__(self, exploratory_analysis_units: dict):
+    def __init__(self, exploratory_analysis_units: dict, name: str = None):
         assert all(isinstance(unit, ExploratoryAnalysisUnit) for unit in exploratory_analysis_units.values()), \
             "ExploratoryAnalysisInstruction: not all elements passed to init method are instances of ExploratoryAnalysisUnit."
-
-        self.exploratory_analysis_units = exploratory_analysis_units
+        self.state = ExploratoryAnalysisState(exploratory_analysis_units, name)
 
     def run(self, result_path: str):
-        for index, (key, unit) in enumerate(self.exploratory_analysis_units.items()):
-            print("Started analysis {}/{}.".format(index+1, len(self.exploratory_analysis_units)))
-            self.run_unit(unit, result_path + "analysis_{}/".format(key))
-            print("Finished analysis {}/{}.".format(index+1, len(self.exploratory_analysis_units)))
+        self.state.result_path = result_path
+        for index, (key, unit) in enumerate(self.state.exploratory_analysis_units.items()):
+            print("Started analysis {}/{}.".format(index+1, len(self.state.exploratory_analysis_units)))
+            report_result = self.run_unit(unit, result_path + "analysis_{}/".format(key))
+            unit.report_result = report_result
+            print("Finished analysis {}/{}.".format(index+1, len(self.state.exploratory_analysis_units)))
+        return self.state
 
-    def run_unit(self, unit: ExploratoryAnalysisUnit, result_path: str):
+    def run_unit(self, unit: ExploratoryAnalysisUnit, result_path: str) -> ReportResult:
         unit.dataset = self.preprocess_dataset(unit, result_path)
         encoded_dataset = self.encode(unit, result_path)
         unit.report.dataset = encoded_dataset
         unit.report.result_path = result_path
-        unit.report.generate_report()
+        report_result = unit.report.generate_report()
+        return report_result
 
     def preprocess_dataset(self, unit: ExploratoryAnalysisUnit, result_path: str) -> Dataset:
         if unit.preprocessing_sequence is not None and len(unit.preprocessing_sequence) > 0:
