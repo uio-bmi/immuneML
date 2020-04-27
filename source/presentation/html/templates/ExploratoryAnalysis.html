@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>immuneML: Exploratory Analysis Overview</title>
+    <style>
+        {{{css_style}}}
+    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+</head>
+<body>
+    <div class="container">
+        {{#analyses}}
+        <div>
+            <h1>Analysis {{name}}</h1>
+            <div class="card">
+                <div class="col-container">
+                    <div class="col">
+                        <h3>Dataset information</h3>
+                        <h4>General information</h4>
+                        <div class="table-container">
+                            <table>
+                            <tr>
+                                <td><b>Name</b></td>
+                                <td>{{dataset_name}}</td>
+                            </tr>
+                            <tr>
+                                <td><b>Type</b></td>
+                                <td>{{dataset_type}}</td>
+                            </tr>
+                            <tr>
+                                <td><b>Example count</b></td>
+                                <td>{{example_count}}</td>
+                            </tr>
+                        </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-container">
+                    <div>
+                        {{#show_encoding_and_labels}}
+                        <h3>Encoding & labels</h3>
+                        {{#show_encoding}}
+                        <h4>Encoding</h4>
+                        <div class="table-container">
+                            <table>
+                            <tr>
+                                <td><b>Encoding Name</b></td>
+                                <td>{{encoding_name}}</td>
+                            </tr>
+                            <tr>
+                                <td><b>Encoding parameters</b></td>
+                                <td>{{encoding_params}}</td>
+                            </tr>
+                        </table>
+                        </div>
+                        {{/show_encoding}}
+                        {{#show_labels}}
+                        <h4>Dataset labels</h4>
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Label name</th>
+                                        <th>Label values (classes)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {{#labels}}
+                                    <tr>
+                                        <td>{{name}}</td>
+                                        <td>{{values}}</td>
+                                    </tr>
+                                    {{/labels}}
+                                </tbody>
+                            </table>
+                        </div>
+                        {{/show_labels}}
+                        {{/show_encoding_and_labels}}
+                    </div>
+                </div>
+                {{#report}}
+                <div>
+                    {{#output_figures}}
+                    <div class="center padded">
+                        <embed src="{{path}}">
+                        {{#name}}<p>{{name}}</p>{{/name}}
+                    </div>
+                    {{/output_figures}}
+                </div>
+                {{/report}}
+            </div>
+        </div>
+        {{/analyses}}
+    </div>
+</body>
+</html>

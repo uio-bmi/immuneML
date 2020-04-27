@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>immuneML: Selection Details</title>
+    <style>
+        {{{css_style}}}
+    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+    <div class="container">
+        <h3>Selection - label {{label}}</h3>
+        <div class="padded">
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th rowspan="2">Hyperparameter settings (preprocessing, encoding, ML method)</th>
+                            <th colspan="{{split_count}}">Performance ({{optimization_metric}})</th>
+                        </tr>
+                        <tr>
+                            {{#splits}}
+                            <th>Split {{split_index}}</th>
+                            {{/splits}}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{#hp_settings}}
+                        <tr>
+                            <td>{{hp_setting}}</td>
+                            {{#hp_splits}}
+                            <td>{{optimization_metric_val}}</td>
+                            {{/hp_splits}}
+                        </tr>
+                        {{/hp_settings}}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>immuneML: Simulation Overview</title>
+    <style>
+        {{{css_style}}}
+    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+</head>
+<body>
+    <div class="container">
+        <div>
+            <h1>Simulation {{name}}</h1>
+            <div class="card">
+                <div class="col-container">
+                    <div class="col">
+                        <h3>Dataset information</h3>
+                        <h4>General information</h4>
+                        <div class="table-container">
+                            <table>
+                            <tr>
+                                <td><b>Name</b></td>
+                                <td>{{dataset_name}}</td>
+                            </tr>
+                            <tr>
+                                <td><b>Type</b></td>
+                                <td>{{dataset_type}}</td>
+                            </tr>
+                            <tr>
+                                <td><b>Example count</b></td>
+                                <td>{{example_count}}</td>
+                            </tr>
+                        </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-container">
+                    <div>
+                        <h3>Simulation details</h3>
+                        {{#implantings}}
+                        <div>
+                            <h5>{{name}}</h5>
+                            <div class="padded-md">Dataset implanting rate: {{dataset_implanting_rate}}</div>
+                            <div class="padded-md">Repertoire implanting rate: {{repertoire_implanting_rate}}</div>
+                            <div class="padded-md">Signals:
+                                {{#signals}}
+                                <div class="padded-md">
+                                    <div>Signal id: {{id}}</div>
+                                    <div class="padded-top">Motifs: </div>
+                                    {{#motifs}}
+                                    <div class="padded-xs">
+                                        <div>Motif id: {{id}}</div>
+                                        <div>Seed: {{seed}}</div>
+                                        <div>Instantiation strategy: {{instantiation_strategy}}</div>
+                                    </div>
+                                    {{/motifs}}
+                                </div>
+                                {{/signals}}
+                            </div>
+                        </div>
+                        {{/implantings}}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -9,6 +9,8 @@ from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.receptor.receptor_sequence.SequenceFrameType import SequenceFrameType
 from source.data_model.repertoire.Repertoire import Repertoire
 from source.environment.EnvironmentSettings import EnvironmentSettings
+from source.reports.ReportOutput import ReportOutput
+from source.reports.ReportResult import ReportResult
 from source.reports.data_reports.DataReport import DataReport
 from source.util.PathBuilder import PathBuilder
 
@@ -28,8 +30,6 @@ class SequencingDepthOverview(DataReport):
     discrete: {"A": "blue", "B": "red", ...}
     continuous: {"colors": ["blue", "white", "red"], "breaks": [-1, 0, 1]}
 
-
-
     """
 
     @classmethod
@@ -39,8 +39,8 @@ class SequencingDepthOverview(DataReport):
     def __init__(self, dataset: RepertoireDataset = None,
                  x: str = None,
                  color: str = None,
-                 facets: list = [],
-                 palette: dict = {},
+                 facets=None,
+                 palette: dict = None,
                  nrow_distributions: int = 2,
                  nrow_scatterplot: int = 1,
                  height_distributions: float = 6.67,
@@ -48,13 +48,15 @@ class SequencingDepthOverview(DataReport):
                  width: float = 10,
                  result_name: str = "sequencing_depth_overview",
                  result_path: str = None,
-                 batch_size: int = 1):
+                 batch_size: int = 1,
+                 name: str = None):
 
-        DataReport.__init__(self, dataset=dataset, result_path=result_path)
+        DataReport.__init__(self, dataset=dataset, result_path=result_path, name=name)
+
         self.x = x
         self.color = color if color is not None else x
-        self.facets = facets
-        self.palette = palette
+        self.facets = facets if facets is not None else []
+        self.palette = palette if palette is not None else {}
         self.nrow_distributions = nrow_distributions
         self.nrow_scatterplot = nrow_scatterplot
         self.height_distributions = height_distributions
@@ -63,9 +65,10 @@ class SequencingDepthOverview(DataReport):
         self.result_name = result_name
         self.batch_size = batch_size
 
-    def generate(self):
+    def generate(self) -> ReportResult:
         data = self.generate_data()
-        self.plot(data)
+        result = self.plot(data)
+        return result
 
     def generate_data(self):
 
@@ -81,7 +84,7 @@ class SequencingDepthOverview(DataReport):
 
         return data
 
-    def plot(self, data):
+    def plot(self, data) -> ReportResult:
 
         pandas2ri.activate()
 
@@ -105,6 +108,8 @@ class SequencingDepthOverview(DataReport):
                                             width=self.width,
                                             result_path=self.result_path,
                                             result_name=self.result_name)
+
+        return ReportResult(self.name, output_figures=[ReportOutput(f"{self.result_path}{self.result_name}")])
 
     def _compute_repertoire(self, repertoire):
         result = []

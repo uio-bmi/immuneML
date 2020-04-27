@@ -6,6 +6,8 @@ import numpy as np
 import pandas as pd
 import yaml
 
+from source.data_model.dataset.Dataset import Dataset
+from source.data_model.encoded_data.EncodedData import EncodedData
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.ml_methods.SimpleLogisticRegression import SimpleLogisticRegression
 from source.reports.ml_reports.CoefficientPlottingSetting import CoefficientPlottingSetting
@@ -44,6 +46,8 @@ class TestCoefficients(TestCase):
         report.ml_details_path = path + "ml_details.yaml"
         report.label = "l1"
         report.result_path = path
+        report.train_dataset = Dataset()
+        report.train_dataset.encoded_data = EncodedData(examples=np.zeros((1, 20)), labels={"A": [1]}, feature_names=[f"feature{i}" for i in range(20)])
 
         return report
 

@@ -1,7 +1,7 @@
 from source.dsl.symbol_table.SymbolTable import SymbolTable
 from source.dsl.symbol_table.SymbolType import SymbolType
 from source.util.ParameterValidator import ParameterValidator
-from source.workflows.instructions.SimulationProcess import SimulationInstruction
+from source.workflows.instructions.SimulationInstruction import SimulationInstruction
 
 
 class SimulationParser:
@@ -76,5 +76,5 @@ class SimulationParser:
         dataset = symbol_table.get(instruction["dataset"])
         batch_size = instruction["batch_size"]
 
-        process = SimulationInstruction(signals=signals, simulation=simulation, dataset=dataset, batch_size=batch_size)
+        process = SimulationInstruction(signals=signals, simulation=simulation, dataset=dataset, batch_size=batch_size, name=key)
         return process

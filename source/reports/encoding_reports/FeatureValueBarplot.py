@@ -5,8 +5,10 @@ from rpy2.robjects.packages import STAP
 
 from source.analysis.data_manipulation.DataReshaper import DataReshaper
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
-from source.reports.encoding_reports.EncodingReport import EncodingReport
 from source.environment.EnvironmentSettings import EnvironmentSettings
+from source.reports.ReportOutput import ReportOutput
+from source.reports.ReportResult import ReportResult
+from source.reports.encoding_reports.EncodingReport import EncodingReport
 from source.util.ParameterValidator import ParameterValidator
 from source.util.PathBuilder import PathBuilder
 from source.visualization.ErrorBarMeaning import ErrorBarMeaning
@@ -80,7 +82,7 @@ class FeatureValueBarplot(EncodingReport):
         return FeatureValueBarplot(**kwargs)
 
     def __init__(self, dataset: RepertoireDataset = None, result_path: str = None, color_grouping_label: str = None,
-                 row_grouping_label: str = None, column_grouping_label: str = None, errorbar_meaning: str = None):
+                 row_grouping_label: str = None, column_grouping_label: str = None, errorbar_meaning: str = None, name: str = None):
         self.dataset = dataset
         self.result_path = result_path
         self.errorbar_meaning = ErrorBarMeaning[errorbar_meaning.upper()]
@@ -88,19 +90,21 @@ class FeatureValueBarplot(EncodingReport):
         self.facet_rows = row_grouping_label if row_grouping_label is not None else []
         self.facet_columns = column_grouping_label if column_grouping_label is not None else []
         self.result_name = "feature_values"
+        self.name = name
 
-
-    def generate(self):
+    def generate(self) -> ReportResult:
         PathBuilder.build(self.result_path)
         data_long_format = DataReshaper.reshape(self.dataset)
-        self._write_results_table(data_long_format)
-        self._plot(data_long_format)
+        table_result = self._write_results_table(data_long_format)
+        figure_result = self._plot(data_long_format)
+        return ReportResult(self.name, [figure_result], [table_result])
 
-    def _write_results_table(self, data):
-        data.to_csv(f"{self.result_path}/{self.result_name}.csv", index=False)
+    def _write_results_table(self, data) -> ReportOutput:
+        table_path = f"{self.result_path}/{self.result_name}.csv"
+        data.to_csv(table_path, index=False)
+        return ReportOutput(table_path, "feature values")
 
-
-    def _plot(self, data_long_format):
+    def _plot(self, data_long_format) -> ReportOutput:
         pandas2ri.activate()
 
         with open(EnvironmentSettings.root_path + "source/visualization/Barplot.R") as f:
@@ -111,16 +115,19 @@ class FeatureValueBarplot(EncodingReport):
         errorbar_meaning_abbr = FeatureValueBarplot.ERRORBAR_CONVERSION[self.errorbar_meaning]
 
         plot.plot_barplot(data=data_long_format, x="feature", color=self.color,
-                  facet_rows=self.facet_rows, facet_columns=self.facet_columns, facet_type="grid",
-                  facet_scales="free", height=6,  width=8, result_path=self.result_path,
-                  result_name=self.result_name, errorbar_meaning=errorbar_meaning_abbr)
+                          facet_rows=self.facet_rows, facet_columns=self.facet_columns, facet_type="grid",
+                          facet_scales="free", height=6, width=8, result_path=self.result_path,
+                          result_name=self.result_name, errorbar_meaning=errorbar_meaning_abbr)
+
+        return ReportOutput(f"{self.result_path}{self.result_name}", "feature bar plot")
 
     def check_prerequisites(self):
         location = "FeatureValueBarplot"
         run_report = True
 
         if self.dataset.encoded_data is None or self.dataset.encoded_data.examples is None:
-            warnings.warn(f"{location}: this report can only be created for an encoded RepertoireDataset. {location} report will not be created.")
+            warnings.warn(
+                f"{location}: this report can only be created for an encoded RepertoireDataset. {location} report will not be created.")
             run_report = False
         else:
             legal_labels = list(self.dataset.encoded_data.labels.keys())
@@ -128,8 +135,8 @@ class FeatureValueBarplot(EncodingReport):
             for label_param in (self.color, self.facet_rows, self.facet_columns):
                 if label_param is not None:
                     if label_param not in legal_labels:
-                        warnings.warn(f"{location}: undefined label '{label_param}'. Legal options are: {legal_labels}. {location} report will not be created.")
+                        warnings.warn(
+                            f"{location}: undefined label '{label_param}'. Legal options are: {legal_labels}. {location} report will not be created.")
                         run_report = False
-
 
         return run_report

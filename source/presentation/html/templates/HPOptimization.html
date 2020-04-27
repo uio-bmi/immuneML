@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>immuneML: Hyperparameter Optimization Overview</title>
+    <style>
+        {{{css_style}}}
+    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+</head>
+<body>
+    <div class="container">
+        <h1>Hyperparameter optimization overview</h1>
+        <details>
+            <summary>Dataset details</summary>
+            <div class="col-container">
+                <div class="col">
+                    <span>General information</span>
+                    <div class="table-container padded-top padded-bottom">
+                        <table>
+                        <tr>
+                            <td><b>Name</b></td>
+                            <td>{{dataset_name}}</td>
+                        </tr>
+                        <tr>
+                            <td><b>Type</b></td>
+                            <td>{{dataset_type}}</td>
+                        </tr>
+                        <tr>
+                            <td><b>Example count</b></td>
+                            <td>{{example_count}}</td>
+                        </tr>
+                    </table>
+                    </div>
+                </div>
+                <div class="col">
+                    <span>Dataset labels</span>
+                    <div class="table-container padded-top padded-bottom">
+                        <table>
+                        <thead>
+                            <tr>
+                                <th>Label name</th>
+                                <th>Label values (classes)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {{#labels}}
+                            <tr>
+                                <td>{{name}}</td>
+                                <td>{{values}}</td>
+                            </tr>
+                            {{/labels}}
+                        </tbody>
+                    </table>
+                    </div>
+                </div>
+            </div>
+        </details>
+        <details>
+            <summary>Hyperparameter optimization parameters</summary>
+            <div class="col-container">
+                <div class="col">
+                    <span>Metrics</span>
+                    <div class="table-container padded-top padded-bottom">
+                        <table>
+                        <tr>
+                            <td>Optimization metric</td>
+                            <td>{{optimization_metric}}</td>
+                        </tr>
+                        <tr>
+                            <td>Other metrics</td>
+                            <td>{{other_metrics}}</td>
+                        </tr>
+                    </table>
+                    </div>
+                </div>
+                <div class="col">
+                    <span>Cross-validation settings</span>
+                    <div class="table-container padded-top padded-bottom">
+                        <table>
+                            <tr>
+                                <td>assessment</td>
+                                <td>{{assessment_desc}}</td>
+                            </tr>
+                            <tr>
+                                <td>selection</td>
+                                <td>{{selection_desc}}</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </details>
+        <div>
+            <h3>Optimization results</h3>
+            {{#hp_per_label}}
+            <h4>{{label}}</h4>
+            <div class="col-container">
+                <div class="table-container">
+                <table>
+                <thead>
+                    <tr>
+                        <th>Split index</th>
+                        <th>Optimal settings (preprocessing, encoding, ML)</th>
+                        <th>Optimization metric ({{optimization_metric}})</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{#assessment_results}}
+                    <tr>
+                        <td><a href="{{split_details_path}}">{{index}}</a></td>
+                        <td><a href="{{split_details_path}}">{{hp_setting}}</a></td>
+                        <td><a href="{{split_details_path}}">{{optimization_metric_val}}</a></td>
+                    </tr>
+                    {{/assessment_results}}
+                </tbody>
+            </table>
+                </div>
+            </div>
+            {{/hp_per_label}}
+        </div>
+        {{#show_hp_reports}}
+        <div id="hyperparameter-reports">
+            <h3>Hyperparameter reports</h3>
+            {{#hp_reports}}
+            {{#output_figures}}
+            <div class="padded center">
+                <embed src="{{path}}">
+                {{#name}}<p>{{name}}</p>{{/name}}
+            </div>
+            {{/output_figures}}
+            {{/hp_reports}}
+        </div>
+        {{/show_hp_reports}}
+        {{#show_dataset_reports}}
+        <h3>Dataset reports</h3>
+        {{#dataset_reports}}
+        {{#output_figures}}
+        <div class="padded center">
+            <embed alt="report" src="{{path}}">
+            <p>{{name}}</p>
+        </div>
+        {{/output_figures}}
+        <div class="padded center">
+            {{#output_tables}}
+            <div>
+                <a href="{{path}}">{{name}}</a>
+            </div>
+            {{/output_tables}}
+            {{#output_text}}
+            <div>
+                <a href="{{path}}">{{name}}</a>
+            </div>
+            {{/output_text}}
+            {{#other_outputs}}
+            <div>
+                <a href="{{path}}">{{name}}</a>
+            </div>
+            {{/other_outputs}}
+        </div>
+        {{/dataset_reports}}
+        {{/show_dataset_reports}}
+    </div>
+</body>
+</html>

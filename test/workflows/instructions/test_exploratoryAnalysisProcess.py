@@ -12,7 +12,7 @@ from source.reports.data_reports.SequenceLengthDistribution import SequenceLengt
 from source.reports.encoding_reports.MatchingSequenceDetails import MatchingSequenceDetails
 from source.util.PathBuilder import PathBuilder
 from source.util.RepertoireBuilder import RepertoireBuilder
-from source.workflows.instructions.exploratory_analysis.ExploratoryAnalysisProcess import ExploratoryAnalysisInstruction
+from source.workflows.instructions.exploratory_analysis.ExploratoryAnalysisInstruction import ExploratoryAnalysisInstruction
 from source.workflows.instructions.exploratory_analysis.ExploratoryAnalysisUnit import ExploratoryAnalysisUnit
 
 
@@ -30,7 +30,6 @@ class TestExploratoryAnalysisProcess(TestCase):
 
         path = EnvironmentSettings.tmp_test_path + "explanalysisproc/"
         PathBuilder.build(path)
-        os.environ["cache_type"] = "test"
 
         dataset = self.create_dataset(path)
 

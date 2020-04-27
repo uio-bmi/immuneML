@@ -1,5 +1,6 @@
 import hashlib
 import os
+from typing import List
 
 from source.dsl.DefaultParamsLoader import DefaultParamsLoader
 from source.dsl.symbol_table.SymbolTable import SymbolTable
@@ -10,6 +11,7 @@ from source.hyperparameter_optimization.HPSetting import HPSetting
 from source.hyperparameter_optimization.config.ReportConfig import ReportConfig
 from source.hyperparameter_optimization.config.SplitConfig import SplitConfig
 from source.hyperparameter_optimization.config.SplitType import SplitType
+from source.reports.data_reports.DataReport import DataReport
 from source.util.ParameterValidator import ParameterValidator
 from source.util.ReflectionHandler import ReflectionHandler
 from source.workflows.instructions.HPOptimizationInstruction import HPOptimizationInstruction
@@ -33,14 +35,21 @@ class HPOptimizationParser:
         optimization_metric = MetricType[instruction["optimization_metric"].upper()]
         path = self._prepare_path(instruction)
         context = self._prepare_context(instruction, symbol_table)
+        data_reports = self._prepare_reports(instruction["reports"], symbol_table)
 
         hp_instruction = HPOptimizationInstruction(dataset=dataset, hp_strategy=strategy(settings), hp_settings=settings,
                                                    assessment=assessment, selection=selection, metrics=metrics,
                                                    optimization_metric=optimization_metric,
                                                    label_configuration=label_config, path=path, context=context,
-                                                   batch_size=instruction["batch_size"])
+                                                   batch_size=instruction["batch_size"], data_reports=data_reports, name=key)
 
         return hp_instruction
+
+    def _prepare_reports(self, reports: list, symbol_table: SymbolTable) -> List[DataReport]:
+        if reports is not None:
+            return [symbol_table.get(report_id) for report_id in reports]
+        else:
+            return []
 
     def _prepare_context(self, instruction: dict, symbol_table: SymbolTable):
         return {"dataset": symbol_table.get(instruction["dataset"])}

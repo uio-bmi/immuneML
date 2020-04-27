@@ -16,18 +16,19 @@ class HPAssessment:
     def run_assessment(state: HPOptimizationState) -> HPOptimizationState:
 
         state = HPAssessment._create_root_path(state)
-        train_val_datasets, test_datasets = HPUtil.split_data(state.dataset, state.assessment_config, state.path)
+        train_val_datasets, test_datasets = HPUtil.split_data(state.dataset, state.assessment, state.path)
 
         for index in range(len(train_val_datasets)):
             state = HPAssessment.run_assessment_split(state, train_val_datasets[index], test_datasets[index], index)
 
         HPReports.run_hyperparameter_reports(state, f"{state.path}hyperparameter_reports/")
+        HPReports.run_data_reports(state, f"{state.path}data_reports/")
 
         return state
 
     @staticmethod
     def _create_root_path(state: HPOptimizationState) -> HPOptimizationState:
-        state.path = f"{state.path}assessment_{state.assessment_config.split_strategy.name.lower()}/"
+        state.path = f"{state.path}assessment_{state.assessment.split_strategy.name.lower()}/"
         return state
 
     @staticmethod

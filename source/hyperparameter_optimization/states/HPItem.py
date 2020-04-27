@@ -11,3 +11,4 @@ class HPItem:
         self.train_dataset = train_dataset
         self.test_dataset = test_dataset
         self.split_index = split_index
+        self.model_report_results = []

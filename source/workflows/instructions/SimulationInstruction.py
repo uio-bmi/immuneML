@@ -1,8 +1,8 @@
-from source.data_model.dataset.Dataset import Dataset
+from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.simulation.Simulation import Simulation
+from source.simulation.SimulationState import SimulationState
 from source.workflows.instructions.Instruction import Instruction
 from source.workflows.steps.SignalImplanter import SignalImplanter
-from source.workflows.steps.SignalImplanterParams import SignalImplanterParams
 
 
 class SimulationInstruction(Instruction):
@@ -45,22 +45,11 @@ class SimulationInstruction(Instruction):
                 batch_size: 5
     """
 
-    def __init__(self, signals: list, simulation: Simulation, dataset: Dataset, path: str = None, batch_size: int = 1):
-        self.signals = signals
-        self.simulation = simulation
-        self.dataset = dataset
-        self.path = path
-        self.batch_size = batch_size
+    def __init__(self, signals: list, simulation: Simulation, dataset: RepertoireDataset, path: str = None, batch_size: int = 1,
+                 name: str = None):
+        self.state = SimulationState(signals, simulation, dataset, path=path, batch_size=batch_size, name=name)
 
     def run(self, result_path: str):
-        self.path = result_path
-        dataset = SignalImplanter.run(SignalImplanterParams(dataset=self.dataset, result_path=self.path,
-                                                            simulation=self.simulation, signals=self.signals,
-                                                            batch_size=self.batch_size))
-
-        return {
-            "repertoires": dataset.get_example_count(),
-            "result_path": dataset.metadata_file,
-            "signals": [str(s) for s in self.signals],
-            "simulations": [str(s) for s in self.simulation.implantings]
-        }
+        self.state.result_path = result_path
+        self.state.resulting_dataset = SignalImplanter.run(self.state)
+        return self.state

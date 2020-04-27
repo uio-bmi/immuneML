@@ -4,17 +4,18 @@ from unittest import TestCase
 
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
+from source.data_model.receptor.receptor_sequence.ReceptorSequenceList import ReceptorSequenceList
 from source.data_model.repertoire.Repertoire import Repertoire
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.simulation.Implanting import Implanting
 from source.simulation.Simulation import Simulation
+from source.simulation.SimulationState import SimulationState
 from source.simulation.implants.Motif import Motif
 from source.simulation.implants.Signal import Signal
 from source.simulation.motif_instantiation_strategy.GappedKmerInstantiation import GappedKmerInstantiation
 from source.simulation.sequence_implanting.GappedMotifImplanting import GappedMotifImplanting
 from source.simulation.signal_implanting_strategy.HealthySequenceImplanting import HealthySequenceImplanting
 from source.workflows.steps.SignalImplanter import SignalImplanter
-from source.workflows.steps.SignalImplanterParams import SignalImplanterParams
 
 
 class TestSignalImplanter(TestCase):
@@ -27,12 +28,14 @@ class TestSignalImplanter(TestCase):
         if not os.path.isdir(path):
             os.makedirs(path)
 
+        sequences = ReceptorSequenceList()
+        sequences.append(ReceptorSequence("ACDEFG", identifier="1"))
+        sequences.append(ReceptorSequence("ACDEFG", identifier="2"))
+        sequences.append(ReceptorSequence("ACDEFG", identifier="3"))
+        sequences.append(ReceptorSequence("ACDEFG", identifier="4"))
+
         for i in range(10):
-            rep = Repertoire.build_from_sequence_objects(sequence_objects=[ReceptorSequence("ACDEFG", identifier="1"),
-                                                                           ReceptorSequence("ACDEFG", identifier="2"),
-                                                                           ReceptorSequence("ACDEFG", identifier="3"),
-                                                                           ReceptorSequence("ACDEFG", identifier="4")],
-                                                         path=path, metadata={})
+            rep = Repertoire.build_from_sequence_objects(sequence_objects=sequences, path=path, metadata={})
             r.append(rep)
 
         dataset = RepertoireDataset(repertoires=r)
@@ -46,7 +49,7 @@ class TestSignalImplanter(TestCase):
         simulation = Simulation([Implanting(dataset_implanting_rate=0.2, repertoire_implanting_rate=0.5, signals=[s1, s2]),
                                  Implanting(dataset_implanting_rate=0.2, repertoire_implanting_rate=0.5, signals=[s2])])
 
-        input_params = SignalImplanterParams(dataset=dataset, result_path=path, simulation=simulation, signals=[s1, s2], batch_size=1)
+        input_params = SimulationState(dataset=dataset, result_path=path, simulation=simulation, signals=[s1, s2], batch_size=1)
 
         new_dataset = SignalImplanter.run(input_params)
         reps_with_s2 = sum([rep.metadata[f"signal_{s2.id}"] is True for rep in new_dataset.get_data(batch_size=10)])

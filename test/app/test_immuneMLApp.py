@@ -1,4 +1,5 @@
 import os
+import random
 import shutil
 from unittest import TestCase
 
@@ -7,11 +8,9 @@ import yaml
 from source.IO.dataset_export.PickleExporter import PickleExporter
 from source.app import ImmuneMLApp
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
-from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
-from source.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
-from source.data_model.repertoire.Repertoire import Repertoire
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.util.PathBuilder import PathBuilder
+from source.util.RepertoireBuilder import RepertoireBuilder
 
 
 class TestImmuneMLApp(TestCase):
@@ -20,21 +19,14 @@ class TestImmuneMLApp(TestCase):
         path = EnvironmentSettings.root_path + "test/tmp/immunemlapp/"
         PathBuilder.build(path)
 
-        sequences1 = [ReceptorSequence(amino_acid_sequence="AAA", metadata=SequenceMetadata(chain="A", count=2), identifier="1"),
-                      ReceptorSequence(amino_acid_sequence="AAAA", metadata=SequenceMetadata(chain="B", count=4), identifier="2"),
-                      ReceptorSequence(amino_acid_sequence="AAAAA", metadata=SequenceMetadata(chain="B", count=3), identifier="3"),
-                      ReceptorSequence(amino_acid_sequence="AAA", metadata=SequenceMetadata(chain="A", count=2), identifier="4")]
-        sequences2 =[ReceptorSequence(amino_acid_sequence="AAA", metadata=SequenceMetadata(chain="B", count=2), identifier="5"),
-                     ReceptorSequence(amino_acid_sequence="AAAA", metadata=SequenceMetadata(chain="A", count=3), identifier="6"),
-                     ReceptorSequence(amino_acid_sequence="AAAA", metadata=SequenceMetadata(chain="B", count=4), identifier="7"),
-                     ReceptorSequence(amino_acid_sequence="AAA", metadata=SequenceMetadata(chain="A", count=2), identifier="8")]
+        repertoire_count = 30
+        repertoires, metadata = RepertoireBuilder.build([["AA", "AAAA", "AAAA", "AAA"] for i in range(repertoire_count)], path,
+                                                        {"CD": [True if i % 2 == 0 else False for i in range(repertoire_count)]},
+                                                        [[{"chain": "A" if i % 2 == 0 else "B", "count": random.randint(2, 5)}
+                                                          for i in range(4)]
+                                                         for j in range(repertoire_count)])
 
-        dataset = RepertoireDataset(repertoires=[Repertoire.build_from_sequence_objects(sequences1 if i % 2 == 0 else sequences2,
-                                                                                        path,
-                                                                                        metadata={"CD": True if i % 2 == 0 else False, "donor": f"rep{i%12*2}"})
-                                                 for i in range(1, 14)],
-                                    params={"CD": [True, False]})
-
+        dataset = RepertoireDataset(repertoires=repertoires, metadata_file=metadata, params={"CD": [True, False]})
         PickleExporter.export(dataset, path, "dataset.pkl")
 
         return path + "dataset.pkl"
@@ -100,6 +92,13 @@ class TestImmuneMLApp(TestCase):
                         "SequenceLengthDistribution": {
                             "batch_size": 3
                         }
+                    },
+                    "rep2": "BenchmarkHPSettings",
+                    "rep3": {
+                        "Coefficients": {
+                            "cutoff": [10],
+                            "n_largest": [5]
+                        }
                     }
                 },
             },
@@ -123,13 +122,17 @@ class TestImmuneMLApp(TestCase):
                         "split_count": 1,
                         "training_percentage": 0.7,
                         "reports": {
-                            "data_splits": []
+                            "data_splits": ["rep1"],
+                            "hyperparameter": ["rep2"]
                         }
                     },
                     "selection": {
+                        "split_strategy": "random",
+                        "split_count": 2,
+                        "training_percentage": 0.7,
                         "reports": {
                             "data_splits": ["rep1"],
-                            "models": [],
+                            "models": ["rep3"],
                             "optimal_models": []
                         }
                     },
@@ -141,6 +144,9 @@ class TestImmuneMLApp(TestCase):
                     "batch_size": 10,
                     "optimization_metric": "accuracy"
                 }
+            },
+            "output": {
+                "format": "HTML"
             }
         }
 
@@ -158,7 +164,7 @@ class TestImmuneMLApp(TestCase):
             full_specs = yaml.load(file, Loader=yaml.FullLoader)
 
         self.assertTrue("split_strategy" in full_specs["instructions"]["inst1"]["selection"] and full_specs["instructions"]["inst1"]["selection"]["split_strategy"] == "random")
-        self.assertTrue("split_count" in full_specs["instructions"]["inst1"]["selection"] and full_specs["instructions"]["inst1"]["selection"]["split_count"] == 1)
+        self.assertTrue("split_count" in full_specs["instructions"]["inst1"]["selection"] and full_specs["instructions"]["inst1"]["selection"]["split_count"] == 2)
         self.assertTrue("training_percentage" in full_specs["instructions"]["inst1"]["selection"] and full_specs["instructions"]["inst1"]["selection"]["training_percentage"] == 0.7)
 
         shutil.rmtree(os.path.dirname(dataset_path))

@@ -39,10 +39,10 @@ class ObjectParser:
         return cls
 
     @staticmethod
-    def get_all_params(specs, class_path, short_class_name):
+    def get_all_params(specs, class_path, short_class_name, key: str = None):
         default_params = DefaultParamsLoader.load(class_path, short_class_name)
         specified_params = ObjectParser.get_params(specs, short_class_name)
-        params = {**default_params, **specified_params}
+        params = {**default_params, **specified_params, "name": key}
         return params
 
     @staticmethod
@@ -53,9 +53,11 @@ class ObjectParser:
         ParameterValidator.assert_in_valid_list(class_name, valid_class_names, location, key)
 
         cls = ReflectionHandler.get_class_by_name(f"{class_name}{class_name_ending}", class_path)
-        params = ObjectParser.get_all_params(specs, class_path, class_name)
+        params = ObjectParser.get_all_params(specs, class_path, class_name, key)
 
         try:
+            if "name" not in inspect.signature(cls.__init__).parameters.keys():
+                del params["name"]
             obj = cls.build_object(**params) if builder else cls(**params)
         except TypeError as err:
             raise AssertionError(f"{location}: invalid parameter {err.args[0]} when specifying parameters in {specs} "

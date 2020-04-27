@@ -1,30 +1,32 @@
+from dataclasses import dataclass, field
+from typing import List, Set
+
+from source.data_model.dataset.Dataset import Dataset
 from source.environment.LabelConfiguration import LabelConfiguration
 from source.environment.MetricType import MetricType
 from source.hyperparameter_optimization.HPSetting import HPSetting
 from source.hyperparameter_optimization.config.SplitConfig import SplitConfig
+from source.hyperparameter_optimization.states.HPAssessmentState import HPAssessmentState
 from source.hyperparameter_optimization.strategy.HPOptimizationStrategy import HPOptimizationStrategy
+from source.reports.ReportResult import ReportResult
+from source.reports.data_reports.DataReport import DataReport
 
 
+@dataclass
 class HPOptimizationState:
-
-    def __init__(self, dataset, hp_strategy: HPOptimizationStrategy, hp_settings: list,
-                 assessment: SplitConfig, selection: SplitConfig, metrics: set, optimization_metric: MetricType,
-                 label_configuration: LabelConfiguration, path: str = None, context: dict = None, batch_size: int = 10):
-
-        # initial attributes
-        self.dataset = dataset
-        self.selection_config = selection
-        self.hp_strategy = hp_strategy
-        assert all(isinstance(hp_setting, HPSetting) for hp_setting in hp_settings), \
-            "HPOptimizationState: object of other type passed in instead of HPSetting."
-        self.hp_settings = hp_settings
-        self.path = path
-        self.batch_size = batch_size
-        self.label_configuration = label_configuration
-        self.metrics = metrics
-        self.optimization_metric = optimization_metric
-        self.assessment_config = assessment
-        self.context = context
-
-        # computed attributes
-        self.assessment_states = []
+    dataset: Dataset
+    hp_strategy: HPOptimizationStrategy
+    hp_settings: List[HPSetting]
+    assessment: SplitConfig
+    selection: SplitConfig
+    metrics: Set[MetricType]
+    optimization_metric: MetricType
+    label_configuration: LabelConfiguration
+    path: str = None
+    context: dict = None
+    batch_size: int = 1
+    data_reports: List[DataReport] = None
+    name: str = None
+    assessment_states: List[HPAssessmentState] = field(default_factory=list)
+    hp_report_results: List[ReportResult] = field(default_factory=list)
+    data_report_results: List[ReportResult] = field(default_factory=list)

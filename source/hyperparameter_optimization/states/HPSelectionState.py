@@ -9,7 +9,15 @@ class HPSelectionState:
         self.path = path
         self.hp_strategy = hp_strategy.clone()
         self.hp_items = {hp_setting: [] for hp_setting in self.hp_strategy.hp_settings}
+        self.train_data_reports = []
+        self.val_data_reports = []
+        self.data_reports = []
 
     @property
     def optimal_hp_setting(self):
         return self.hp_strategy.get_optimal_hps()
+
+    @property
+    def get_optimal_performance(self):
+        optimal_setting = self.optimal_hp_setting
+        return self.hp_strategy.get_optimal_performance(optimal_setting)

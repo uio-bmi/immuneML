@@ -1,3 +1,8 @@
+from typing import List
+
+from source.simulation.implants.Signal import Signal
+
+
 class Implanting:
 
     """
@@ -51,15 +56,15 @@ class Implanting:
                     repertoire_implanting_rate: 0.75
     """
 
-    def __init__(self, dataset_implanting_rate: float, repertoire_implanting_rate: float, signals: list, name: str = ""):
+    def __init__(self, dataset_implanting_rate: float, repertoire_implanting_rate: float, signals: List[Signal], name: str = ""):
         self.dataset_implanting_rate = dataset_implanting_rate
         self.repertoire_implanting_rate = repertoire_implanting_rate
         self.signals = signals
         self.name = name
 
     def __str__(self):
-        return self.name + ": dataset_implanting_rate: {}, " \
-                           "repertoire_implanting_rate: {}, " \
+        return self.name + ":\n dataset_implanting_rate: {}, \n" \
+                           "repertoire_implanting_rate: {}, \n" \
                            "signals: {}".format(self.dataset_implanting_rate,
                                                 self.repertoire_implanting_rate,
-                                                [str(s) for s in self.signals])
+                                                str([str(s) for s in self.signals])[1:-1])

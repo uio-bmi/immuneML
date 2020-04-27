@@ -8,7 +8,8 @@ from source.data_model.receptor.ElementGenerator import ElementGenerator
 class ElementDataset(Dataset):
 
     def __init__(self, params: dict = None, encoded_data: EncodedData = None, filenames: list = None, identifier: str = None,
-                 file_size: int = 1000):
+                 file_size: int = 1000, name: str = None):
+        super().__init__()
         self.params = params
         self.encoded_data = encoded_data
         self.identifier = identifier if identifier is not None else uuid.uuid1()
@@ -16,6 +17,7 @@ class ElementDataset(Dataset):
         self.element_generator = ElementGenerator(self._filenames)
         self.file_size = file_size
         self.element_ids = None
+        self.name = name
 
     def get_data(self, batch_size: int = 1000):
         self._filenames.sort()

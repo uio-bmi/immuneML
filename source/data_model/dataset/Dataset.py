@@ -6,6 +6,11 @@ class Dataset:
     TRAIN = "train"
     TEST = "test"
 
+    def __init__(self):
+        self.encoded_data = None
+        self.name = None
+        self.identifier = None
+
     @abc.abstractmethod
     def make_subset(self, example_indices, path, dataset_type: str):
         pass

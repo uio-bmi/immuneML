@@ -1,19 +1,17 @@
 import warnings
-import json
 
 from rpy2.robjects import pandas2ri
 from rpy2.robjects.packages import STAP
 
 from source.analysis.data_manipulation.DataReshaper import DataReshaper
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
-from source.reports.encoding_reports.EncodingReport import EncodingReport
 from source.environment.EnvironmentSettings import EnvironmentSettings
+from source.reports.ReportOutput import ReportOutput
+from source.reports.ReportResult import ReportResult
+from source.reports.encoding_reports.EncodingReport import EncodingReport
 from source.util.ParameterValidator import ParameterValidator
 from source.util.PathBuilder import PathBuilder
 from source.visualization.DistributionPlotType import DistributionPlotType
-from source.visualization.FacetScalesType import FacetScalesType
-from source.visualization.FacetSwitchType import FacetSwitchType
-from source.visualization.FacetType import FacetType
 
 
 class FeatureValueDistplot(EncodingReport):
@@ -98,12 +96,11 @@ class FeatureValueDistplot(EncodingReport):
                 warnings.warn(f"{location}: illegal color label '{kwargs['color_label']}' has been set to '{kwargs['grouping_label']}'.")
             kwargs["color_label"] = kwargs["grouping_label"]
 
-
         return FeatureValueDistplot(**kwargs)
 
     def __init__(self, dataset: RepertoireDataset = None, result_path: str = None,
                  distribution_plot_type: str = "box", grouping_label: str = None, color_label: str = "NULL",
-                 row_grouping_label: list = None, column_grouping_label: list = None):
+                 row_grouping_label: list = None, column_grouping_label: list = None, name: str = None):
 
         self.dataset = dataset
         self.result_path = result_path
@@ -113,18 +110,20 @@ class FeatureValueDistplot(EncodingReport):
         self.facet_rows = row_grouping_label if row_grouping_label is not None else []
         self.facet_columns = column_grouping_label if column_grouping_label is not None else []
         self.result_name = "feature_values"
+        self.name = name
 
-
-
-    def generate(self):
+    def generate(self) -> ReportResult:
         PathBuilder.build(self.result_path)
         data_long_format = DataReshaper.reshape(self.dataset)
-        self._write_results_table(data_long_format)
-        self._plot(data_long_format)
+        table_result = self._write_results_table(data_long_format)
+        figure_result = self._plot(data_long_format)
+
+        return ReportResult(self.name, [figure_result], [table_result])
 
     def _write_results_table(self, data):
-        data.to_csv(f"{self.result_path}/{self.result_name}.csv", index=False)
-
+        table_path = f"{self.result_path}/{self.result_name}.csv"
+        data.to_csv(table_path, index=False)
+        return ReportOutput(table_path, "feature values")
 
     def _plot(self, data_long_format):
         pandas2ri.activate()
@@ -139,6 +138,7 @@ class FeatureValueDistplot(EncodingReport):
                                 facet_type="wrap", facet_scales="free", height=6, width=8,
                                 result_path=self.result_path, result_name=self.result_name, type=self.type)
 
+        return ReportOutput(f"{self.result_path}{self.result_name}", "feature dist plot")
 
     def check_prerequisites(self):
         location = "FeatureValueDistplot"

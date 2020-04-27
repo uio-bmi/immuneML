@@ -65,6 +65,9 @@ class TestSimulation(TestCase):
                     "batch_size": 5,
                     "simulation": "sim1"
                 }
+            },
+            "output": {
+                "format": "HTML"
             }
         }
 
@@ -109,13 +112,15 @@ class TestSimulation(TestCase):
         PathBuilder.build(path+"result/")
 
         app = ImmuneMLApp(specification_path=specs_path, result_path=path+"result/")
-        app.run()
+        result_path = app.run()
 
         self.assertTrue(os.path.isfile(path+"result/metadata.csv"))
 
         metadata_df = pd.read_csv(path+"result/metadata.csv")
         self.assertTrue("signal_signal1" in metadata_df.columns)
         self.assertEqual(17, sum(metadata_df["signal_signal1"]))
+
+        self.assertTrue(os.path.isfile(result_path))
 
         shutil.rmtree(path)
 
