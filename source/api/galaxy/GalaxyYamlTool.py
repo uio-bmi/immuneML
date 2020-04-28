@@ -15,14 +15,15 @@ class GalaxyYamlTool:
         assert isinstance(output_dir, str) and output_dir != "", f"Galaxy immuneML tool: output_dir is {output_dir}, " \
                                                                  f"expected path to a folder to store the results."
 
-        assert "inputs" not in kwargs or all(os.path.dirname(kwargs["inputs"][0]) == os.path.dirname(elem) for elem in kwargs["inputs"]), \
+        inputs = kwargs["inputs"].split(',')
+        assert "inputs" not in kwargs or all(os.path.dirname(inputs[0]) == os.path.dirname(elem) for elem in inputs), \
             f"Galaxy immuneML tool: not all repertoire files are under the same directory. " \
-            f"Instead, they are in {str(os.path.dirname(elem) for elem in kwargs['inputs'])[1:-1]}."
+            f"Instead, they are in {str(list(os.path.dirname(elem) for elem in inputs))[1:-1]}."
 
         self.yaml_path = yaml_path
         self.result_path = output_dir
-        self.metadata_file = kwargs["metadata_file"] if "metadata_file" in kwargs else None
-        self.files_path = f"{os.path.dirname(kwargs['inputs'][0])}/" if "inputs" in kwargs else None
+        self.metadata_file = kwargs["metadata"] if "metadata" in kwargs else None
+        self.files_path = f"{os.path.dirname(inputs[0])}/" if "inputs" in kwargs else None
 
     def run(self):
         PathBuilder.build(self.result_path)
@@ -38,12 +39,14 @@ class GalaxyYamlTool:
             with open(self.yaml_path, "r") as file:
                 specs_dict = yaml.safe_load(file)
 
-            dataset_keys = specs_dict["definitions"]["datasets"].keys()
+            dataset_keys = list(specs_dict["definitions"]["datasets"].keys())
             assert len(dataset_keys) == 1, "Galaxy immunneML tool: when using immuneML from Galaxy, " \
                                            "multiple datasets are not yet supported."
 
             specs_dict["definitions"]["datasets"][dataset_keys[0]]["params"]["metadata_file"] = self.metadata_file
             specs_dict["definitions"]["datasets"][dataset_keys[0]]["params"]["path"] = self.files_path
+            specs_dict["definitions"]["datasets"][dataset_keys[0]]["params"]["result_path"] = self.result_path + "imported_data/"
+
             specs_dict["output"] = {"format": "HTML"}
 
             with open(self.yaml_path, "w") as file:

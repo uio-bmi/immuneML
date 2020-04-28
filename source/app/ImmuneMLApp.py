@@ -60,8 +60,8 @@ def main():
     parser.add_argument("--metadata", help="The path to metadata file for repertoire dataset. "
                                            "Used if immuneML is called from a Galaxy tool to reformat the metadata with new "
                                            "Galaxy-dependent paths, otherwise it's ignored.")
-    parser.add_argument("--inputs", type=list, help="List of files with new paths for the repertoire dataset to be used in the analysis."
-                                                    "Used only if immuneML is called from a Galaxy tool to update the metadata.")
+    parser.add_argument("--inputs", type=str, help="List of files with new paths for the repertoire dataset to be used in the analysis."
+                                                   "Used only if immuneML is called from a Galaxy tool to update the metadata.")
     parser.add_argument("--tool", help="Name of the tool which calls immuneML. This name will be used to invoke appropriate API call, "
                                        "which will then preprocess the data/specs in tool-dependent way before running standard immuneML.")
     run_immuneML(parser.parse_args())
