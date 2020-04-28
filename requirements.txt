@@ -9,3 +9,4 @@ dask[complete]
 regex
 tzlocal
 airr==1.2.1
+pystache==0.5.4
