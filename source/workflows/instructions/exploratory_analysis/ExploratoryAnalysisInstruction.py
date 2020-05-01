@@ -12,14 +12,14 @@ class ExploratoryAnalysisInstruction(Instruction):
     """
     Allows exploratory analysis of different datasets using encodings and reports.
 
-    Analysis is defined by a list of ExploratoryAnalysisUnit objects that encapsulate a dataset, an encoding and a report to be
-    executed on the (encoded) dataset.
+    Analysis is defined by a dictionary of ExploratoryAnalysisUnit objects that encapsulate a dataset, an encoding [optional]
+    and a report to be executed on the [encoded] dataset.
     """
 
     def __init__(self, exploratory_analysis_units: dict, name: str = None):
         assert all(isinstance(unit, ExploratoryAnalysisUnit) for unit in exploratory_analysis_units.values()), \
             "ExploratoryAnalysisInstruction: not all elements passed to init method are instances of ExploratoryAnalysisUnit."
-        self.state = ExploratoryAnalysisState(exploratory_analysis_units, name)
+        self.state = ExploratoryAnalysisState(exploratory_analysis_units, name=name)
 
     def run(self, result_path: str):
         self.state.result_path = result_path

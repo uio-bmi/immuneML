@@ -19,15 +19,13 @@ from source.workflows.instructions.exploratory_analysis.ExploratoryAnalysisUnit 
 class TestExploratoryAnalysisProcess(TestCase):
 
     def create_dataset(self, path):
-
         repertoires, metadata = RepertoireBuilder.build([["AAA"], ["AAAC"], ["ACA"], ["CAAA"], ["AAAC"], ["AAA"]], path,
-                                            {"l1": [1, 1, 1, 0, 0, 0], "l2": [2, 3, 2, 3, 2, 3]})
+                                                        {"l1": [1, 1, 1, 0, 0, 0], "l2": [2, 3, 2, 3, 2, 3]})
 
         dataset = RepertoireDataset(repertoires=repertoires, params={"l1": [0, 1], "l2": [2, 3]}, metadata_file=metadata)
         return dataset
 
     def test_run(self):
-
         path = EnvironmentSettings.tmp_test_path + "explanalysisproc/"
         PathBuilder.build(path)
 
@@ -49,12 +47,16 @@ class TestExploratoryAnalysisProcess(TestCase):
         preproc_sequence = [PatientRepertoireCollector()]
 
         units = {"named_analysis_1": ExploratoryAnalysisUnit(dataset=dataset, report=SequenceLengthDistribution(), batch_size=16),
-                 "named_analysis_2": ExploratoryAnalysisUnit(dataset=dataset, report=SequenceLengthDistribution(), preprocessing_sequence=preproc_sequence),
-                 "named_analysis_3": ExploratoryAnalysisUnit(dataset=dataset, report=MatchingSequenceDetails.build_object(max_edit_distance=1, reference_sequences=refs_dict),
-                                         label_config=label_config,
-                                         encoder=ReferenceRepertoireEncoder.build_object(dataset, **{"max_edit_distance":1,
-                                                                            "summary": SequenceMatchingSummaryType.COUNT.name,
-                                                                            "reference_sequences": refs_dict}))}
+                 "named_analysis_2": ExploratoryAnalysisUnit(dataset=dataset, report=SequenceLengthDistribution(),
+                                                             preprocessing_sequence=preproc_sequence),
+                 "named_analysis_3": ExploratoryAnalysisUnit(dataset=dataset,
+                                                             report=MatchingSequenceDetails.build_object(max_edit_distance=1,
+                                                                                                         reference_sequences=refs_dict),
+                                                             label_config=label_config,
+                                                             encoder=ReferenceRepertoireEncoder.build_object(dataset,
+                                                                                                             **{"max_edit_distance": 1,
+                                                                                                                "summary": SequenceMatchingSummaryType.COUNT.name,
+                                                                                                                "reference_sequences": refs_dict}))}
 
         process = ExploratoryAnalysisInstruction(units)
         process.run(path + "results/")

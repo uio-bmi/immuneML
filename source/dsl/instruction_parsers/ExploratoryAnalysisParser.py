@@ -41,10 +41,10 @@ class ExploratoryAnalysisParser:
         exp_analysis_units = {}
 
         ParameterValidator.assert_keys(instruction, ["analyses", "type"], "ExploratoryAnalysisParser", "ExploratoryAnalysis")
-        for key, analysis in instruction["analyses"].items():
+        for analysis_key, analysis in instruction["analyses"].items():
 
             params = self._prepare_params(analysis, symbol_table)
-            exp_analysis_units[key] = ExploratoryAnalysisUnit(**params)
+            exp_analysis_units[analysis_key] = ExploratoryAnalysisUnit(**params)
 
         process = ExploratoryAnalysisInstruction(exploratory_analysis_units=exp_analysis_units, name=key)
         return process

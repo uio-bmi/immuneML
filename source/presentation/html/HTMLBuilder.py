@@ -13,7 +13,8 @@ class HTMLBuilder:
     @staticmethod
     def build(states: list, path: str) -> str:
         presentations = HTMLBuilder._collect_all_presentations(states)
-        presentation_html_path = HTMLBuilder._make_document(presentations, path)
+        abs_path = os.path.abspath(path) + '/'
+        presentation_html_path = HTMLBuilder._make_document(presentations, abs_path)
         return presentation_html_path
 
     @staticmethod
@@ -36,7 +37,7 @@ class HTMLBuilder:
 
         for state in states:
             presentation_builder = PresentationFactory.make_presentation_builder(state, PresentationFormat.HTML)
-            presentation_path = presentation_builder.build(state)
+            presentation_path = presentation_builder.build(state, is_index=len(states) == 1)
             instruction_class = type(state).__name__[:-5]
             presentation = InstructionPresentation(presentation_path, instruction_class, state.name)
             presentations.append(presentation)

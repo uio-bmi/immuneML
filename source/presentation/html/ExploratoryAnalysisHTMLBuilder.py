@@ -1,3 +1,5 @@
+import os
+
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.presentation.TemplateParser import TemplateParser
 from source.presentation.html.Util import Util
@@ -14,15 +16,17 @@ class ExploratoryAnalysisHTMLBuilder:
     CSS_PATH = f"{EnvironmentSettings.html_templates_path}css/custom.css"
 
     @staticmethod
-    def build(state: ExploratoryAnalysisState) -> str:
+    def build(state: ExploratoryAnalysisState, is_index: bool = True) -> str:
         """
         Function that builds the HTML files based on the ExploratoryAnalysis state.
         Arguments:
-            state:
+            state: ExploratoryAnalysisState object with details and results of the instruction
+            is_index: bool indicating if the resulting html page will be used as index.html so that paths should be adjusted
         Returns:
              path to the main HTML file (which is located under state.result_path)
         """
-        html_map = ExploratoryAnalysisHTMLBuilder.make_html_map(state)
+        base_path = os.path.abspath(state.result_path) if not is_index else os.path.abspath(state.result_path + "/../")
+        html_map = ExploratoryAnalysisHTMLBuilder.make_html_map(state, base_path)
         result_file = f"{state.result_path}ExploratoryAnalysis.html"
 
         TemplateParser.parse(template_path=f"{EnvironmentSettings.html_templates_path}ExploratoryAnalysis.html",
@@ -31,23 +35,23 @@ class ExploratoryAnalysisHTMLBuilder:
         return result_file
 
     @staticmethod
-    def make_html_map(state: ExploratoryAnalysisState) -> dict:
+    def make_html_map(state: ExploratoryAnalysisState, base_path: str) -> dict:
         html_map = {
             "css_style": Util.get_css_content(ExploratoryAnalysisHTMLBuilder.CSS_PATH),
             "analyses": [{
                 "name": name,
                 "dataset_name": analysis.dataset.name if analysis.dataset.name is not None else analysis.dataset.identifier,
-                "dataset_type": " ".join(StringHelper.camel_case_to_words(type(analysis.dataset).__name__)),
+                "dataset_type": StringHelper.camel_case_to_word_string(type(analysis.dataset).__name__),
                 "example_count": analysis.dataset.get_example_count(),
                 "show_labels": analysis.label_config is not None,
                 "labels": [{"name": label.name, "values": str(label.values)[1:-1]}
                            for label in analysis.label_config.get_label_objects()] if analysis.label_config else None,
-                "encoding_name": " ".join(StringHelper.camel_case_to_words(type(analysis.encoder).__name__)) if analysis.encoder is not None
-                                else None,
+                "encoding_name": StringHelper.camel_case_to_word_string(type(analysis.encoder).__name__) if analysis.encoder is not None
+                else None,
                 "encoding_params": vars(analysis.encoder) if analysis.encoder is not None else None,
                 "show_encoding": analysis.encoder is not None,
                 "show_encoding_and_labels": analysis.encoder is not None and analysis.label_config is not None,
-                "report": Util.to_dict_recursive(analysis.report_result)
+                "report": Util.to_dict_recursive(analysis.report_result, base_path)
             } for name, analysis in state.exploratory_analysis_units.items()]
         }
 

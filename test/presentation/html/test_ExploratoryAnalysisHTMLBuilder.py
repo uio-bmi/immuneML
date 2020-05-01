@@ -63,7 +63,7 @@ class TestExploratoryAnalysisHTMLBuilder(TestCase):
         process = ExploratoryAnalysisInstruction(units)
         res = process.run(path + "results/")
 
-        res_path = ExploratoryAnalysisHTMLBuilder.build(res)
+        res_path = ExploratoryAnalysisHTMLBuilder.build(res, is_index=False)
 
         self.assertTrue(os.path.isfile(res_path))
 

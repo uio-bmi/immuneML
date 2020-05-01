@@ -103,6 +103,15 @@ class TestImmuneMLApp(TestCase):
                 },
             },
             "instructions": {
+                "report_inst": {
+                    "type": "ExploratoryAnalysis",
+                    "analyses": {
+                        "a1": {
+                            "dataset": "d1",
+                            "report": "rep1"
+                        }
+                    }
+                },
                 "inst1": {
                     "type": "HPOptimization",
                     "settings": [
