@@ -13,9 +13,9 @@ from source.util.ReflectionHandler import ReflectionHandler
 
 class ImmuneMLApp:
 
-    def __init__(self, specification_path: str, result_path: str = None):
+    def __init__(self, specification_path: str, result_path: str):
         self._specification_path = specification_path
-        self._result_path = result_path
+        self._result_path = result_path if result_path[-1] == '/' else result_path + '/'
 
     def set_cache(self):
         if Constants.CACHE_TYPE not in os.environ:
