@@ -8,6 +8,9 @@ from source.logging.Logger import log
 
 
 class ComparisonData:
+
+    INVALID_P_VALUE = np.nan
+
     @log
     def __init__(self, repertoire_ids: list, comparison_attributes, pool_size: int, batch_size: int = 10000,
                  path: str = None):
@@ -52,23 +55,19 @@ class ComparisonData:
         else:
             return self.batches[index]
 
-    def calculate_sequence_abundance(self, dataset: RepertoireDataset, label: str, label_values: list, p_value_threshold):
-
+    def get_relevant_sequence_indices(self, dataset: RepertoireDataset, label: str, label_values: list, p_value_threshold: float) -> list:
         sequence_p_values = self.find_label_associated_sequence_info(dataset, label, label_values)
         sequence_p_values_indices = sequence_p_values < p_value_threshold
+        return sequence_p_values_indices
 
-        abundance_matrix = self._build_abundance_matrix(dataset.get_repertoire_ids(), sequence_p_values_indices)
-
-        return abundance_matrix
-
-    def _build_abundance_matrix(self, repertoire_ids, sequence_p_values_indices):
+    def build_abundance_matrix(self, repertoire_ids, sequence_p_values_indices):
         abundance_matrix = np.zeros((len(repertoire_ids), 2))
 
         for index, repertoire_id in enumerate(repertoire_ids):
             repertoire_vector = self.get_repertoire_vector(repertoire_id)
-            relevent_sequence_abundance = np.sum(repertoire_vector[np.logical_and(sequence_p_values_indices, repertoire_vector)])
+            relevant_sequence_abundance = np.sum(repertoire_vector[np.logical_and(sequence_p_values_indices, repertoire_vector)])
             total_sequence_abundance = np.sum(repertoire_vector)
-            abundance_matrix[index] = [relevent_sequence_abundance, total_sequence_abundance]
+            abundance_matrix[index] = [relevant_sequence_abundance, total_sequence_abundance]
 
         return abundance_matrix
 
@@ -89,13 +88,18 @@ class ComparisonData:
 
             for i in range(batch.shape[0]):
 
-                first_class_present = np.sum(batch[i, np.logical_and(batch[i], is_first_class)])
-                second_class_present = np.sum(batch[i, np.logical_and(batch[i], np.logical_not(is_first_class))])
-                first_class_absent = np.sum(np.logical_and(is_first_class, batch[i] == 0))
-                second_class_absent = np.sum(np.logical_and(np.logical_not(is_first_class), batch[i] == 0))
+                if batch[i].sum() > 1:
 
-                sequence_p_values.append(fisher_exact([[first_class_present, second_class_present],
-                                                       [first_class_absent, second_class_absent]])[1])
+                    first_class_present = np.sum(batch[i, np.logical_and(batch[i], is_first_class)])
+                    second_class_present = np.sum(batch[i, np.logical_and(batch[i], np.logical_not(is_first_class))])
+                    first_class_absent = np.sum(np.logical_and(is_first_class, batch[i] == 0))
+                    second_class_absent = np.sum(np.logical_and(np.logical_not(is_first_class), batch[i] == 0))
+
+                    sequence_p_values.append(fisher_exact([[first_class_present, second_class_present],
+                                                           [first_class_absent, second_class_absent]])[1])
+                else:
+
+                    sequence_p_values.append(ComparisonData.INVALID_P_VALUE)
 
         return sequence_p_values
 

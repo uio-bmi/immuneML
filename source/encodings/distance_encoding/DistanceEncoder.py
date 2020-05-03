@@ -1,5 +1,3 @@
-import pickle
-
 import pandas as pd
 
 from source.IO.dataset_export.PickleExporter import PickleExporter
@@ -10,8 +8,8 @@ from source.encodings.EncoderParams import EncoderParams
 from source.encodings.distance_encoding.DistanceMetricType import DistanceMetricType
 from source.pairwise_repertoire_comparison.PairwiseRepertoireComparison import PairwiseRepertoireComparison
 from source.util import DistanceMetrics
+from source.util.EncoderHelper import EncoderHelper
 from source.util.ParameterValidator import ParameterValidator
-from source.util.PathBuilder import PathBuilder
 from source.util.ReflectionHandler import ReflectionHandler
 
 
@@ -107,7 +105,7 @@ class DistanceEncoder(DatasetEncoder):
 
     def encode(self, dataset, params: EncoderParams) -> RepertoireDataset:
 
-        train_repertoire_ids = self.prepare_encoding_params(dataset, params)
+        train_repertoire_ids = EncoderHelper.prepare_training_ids(dataset, params)
         distance_matrix = self.build_distance_matrix(dataset, params, train_repertoire_ids)
         labels = self.build_labels(dataset, params)
 
@@ -118,17 +116,6 @@ class DistanceEncoder(DatasetEncoder):
         self.store(encoded_dataset, params)
 
         return encoded_dataset
-
-    def prepare_encoding_params(self, dataset: RepertoireDataset, params: EncoderParams):
-        PathBuilder.build(params["result_path"])
-        if params["learn_model"]:
-            train_repertoire_ids = dataset.get_repertoire_ids()
-            with open(params["result_path"] + "repertoire_ids.pickle", "wb") as file:
-                pickle.dump(train_repertoire_ids, file)
-        else:
-            with open(params["result_path"] + "repertoire_ids.pickle", "rb") as file:
-                train_repertoire_ids = pickle.load(file)
-        return train_repertoire_ids
 
     def store(self, encoded_dataset, params: EncoderParams):
         PickleExporter.export(encoded_dataset, params["result_path"], params["filename"])

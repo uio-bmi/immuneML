@@ -1,12 +1,13 @@
 import pickle
 
+from source.IO.dataset_export.PickleExporter import PickleExporter
 from source.caching.CacheHandler import CacheHandler
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.encoded_data.EncodedData import EncodedData
 from source.encodings.DatasetEncoder import DatasetEncoder
 from source.encodings.EncoderParams import EncoderParams
 from source.pairwise_repertoire_comparison.ComparisonData import ComparisonData
-from source.util.PathBuilder import PathBuilder
+from source.util.EncoderHelper import EncoderHelper
 
 
 class SequenceAbundanceEncoder(DatasetEncoder):
@@ -44,6 +45,9 @@ class SequenceAbundanceEncoder(DatasetEncoder):
                     pool_size: 4
     """
 
+    RELEVANT_SEQUENCE_ABUNDANCE = "relevant_sequence_abundance"
+    TOTAL_SEQUENCE_ABUNDANCE = "total_sequence_abundance"
+
     @staticmethod
     def build_object(dataset, **params):
         assert isinstance(dataset, RepertoireDataset), "SequenceAbundanceEncoder: this encoding only works on repertoire datasets."
@@ -54,6 +58,7 @@ class SequenceAbundanceEncoder(DatasetEncoder):
         self.p_value_threshold = p_value_threshold
         self.pool_size = pool_size
         self.name = name
+        self.relevant_sequence_indices = None
         self.context = None
 
     def build_comparison_params(self, dataset) -> tuple:
@@ -74,36 +79,35 @@ class SequenceAbundanceEncoder(DatasetEncoder):
         self.context = context
         return self
 
-    def prepare_encoding_params(self, dataset: RepertoireDataset, params: EncoderParams):
-        PathBuilder.build(params["result_path"])
-        if params["learn_model"]:
-            train_repertoire_ids = dataset.get_repertoire_ids()
-            with open(params["result_path"] + "repertoire_ids.pickle", "wb") as file:
-                pickle.dump(train_repertoire_ids, file)
-        else:
-            with open(params["result_path"] + "repertoire_ids.pickle", "rb") as file:
-                train_repertoire_ids = pickle.load(file)
-        return train_repertoire_ids
-
     def _calculate_sequence_abundance(self, dataset: RepertoireDataset, params: EncoderParams, comparison_data: ComparisonData):
 
         labels = params["label_configuration"].get_labels_by_name()
 
-        assert len(labels) == 1, \
-            "SequenceAbundanceEncoder: this encoding works only for single label."
+        assert len(labels) == 1, "SequenceAbundanceEncoder: this encoding works only for single label."
 
-        train_repertoire_ids = self.prepare_encoding_params(dataset, params)
-        examples = comparison_data.calculate_sequence_abundance(dataset, labels[0],
-                                                                params["label_configuration"].get_label_values(labels[0]),
-                                                                self.p_value_threshold)
+        train_repertoire_ids = EncoderHelper.prepare_training_ids(dataset, params)
+        self._prepare_relevant_sequence_indices(dataset, params, comparison_data, labels)
 
-        encoded_dataset = RepertoireDataset(params=dataset.params, encoded_data=EncodedData(examples, dataset.get_metadata([labels[0]]),
-                                                                                            train_repertoire_ids,
-                                                                                            ["relevant_sequence_abundance", "total_sequence_abundance"],
-                                                                                            encoding=SequenceAbundanceEncoder.__name__),
-                                            repertoires=dataset.repertoires)
+        examples = comparison_data.build_abundance_matrix(dataset.get_example_ids(), self.relevant_sequence_indices)
+        feature_names = [SequenceAbundanceEncoder.RELEVANT_SEQUENCE_ABUNDANCE, SequenceAbundanceEncoder.TOTAL_SEQUENCE_ABUNDANCE]
+
+        encoded_dataset = RepertoireDataset(params=dataset.params, repertoires=dataset.repertoires,
+                                            encoded_data=EncodedData(examples, dataset.get_metadata([labels[0]]), train_repertoire_ids,
+                                                                     feature_names, encoding=SequenceAbundanceEncoder.__name__))
 
         return encoded_dataset
+
+    def _prepare_relevant_sequence_indices(self, dataset: RepertoireDataset, params: EncoderParams, comparison_data: ComparisonData,
+                                           labels: list):
+        if params["learn_model"]:
+            label_values = params["label_configuration"].get_label_values(labels[0])
+            relevant_sequence_indices = comparison_data.get_relevant_sequence_indices(dataset, labels[0], label_values, self.p_value_threshold)
+            self.relevant_sequence_indices = relevant_sequence_indices
+            with open(f'{params["result_path"]}relevant_sequence_indices.pickle', "wb") as file:
+                pickle.dump(relevant_sequence_indices, file)
+        else:
+            with open(f'{params["result_path"]}relevant_sequence_indices.pickle', "rb") as file:
+                self.relevant_sequence_indices = pickle.load(file)
 
     def build_comparison_data(self, dataset: RepertoireDataset, params: EncoderParams):
 
@@ -115,4 +119,4 @@ class SequenceAbundanceEncoder(DatasetEncoder):
         return comp_data
 
     def store(self, encoded_dataset, params: EncoderParams):
-        pass
+        PickleExporter.export(encoded_dataset, params["result_path"], params["filename"])

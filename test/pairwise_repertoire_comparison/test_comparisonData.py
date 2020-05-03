@@ -38,7 +38,7 @@ class TestComparisonData(TestCase):
         comparison_data.batch_paths = [path + "b01.csv", path + "b02.csv"]
         return comparison_data
 
-    def test__build_abundance_matrix(self):
+    def test_build_abundance_matrix(self):
         expected_abundance_matrix = np.array([[1, 4], [1, 6], [1, 3], [1, 6]])
 
         comparison_data = ComparisonData(repertoire_ids=["rep_0", "rep_1", "rep_2", "rep_3"],
@@ -67,7 +67,7 @@ class TestComparisonData(TestCase):
         p_value = 0.4
         sequence_p_value_indices = np.array([1., 0.3333333333333334, 1., 1., 1., 1., 1., 0.3333333333333334, 1.]) < p_value
 
-        abundance_matrix = comparison_data._build_abundance_matrix(["rep_0", "rep_1", "rep_2", "rep_3"], sequence_p_value_indices)
+        abundance_matrix = comparison_data.build_abundance_matrix(["rep_0", "rep_1", "rep_2", "rep_3"], sequence_p_value_indices)
 
         self.assertTrue(np.array_equal(expected_abundance_matrix, abundance_matrix))
 
@@ -105,7 +105,8 @@ class TestComparisonData(TestCase):
                                     'col_name_index':col_name_index}]
         p_values = comparison_data.find_label_associated_sequence_p_values(repertoires, "l1", [True, False])
 
-        self.assertTrue(np.allclose([1., 0.3333333333333334, 1., 1., 1., 1., 1., 0.3333333333333334, 1.], p_values))
+        self.assertTrue(np.allclose([np.nan, 0.3333333333333334, 1., 1., np.nan, 1., 1., 0.3333333333333334, np.nan], p_values,
+                                    equal_nan=True))
 
         shutil.rmtree(path)
 
