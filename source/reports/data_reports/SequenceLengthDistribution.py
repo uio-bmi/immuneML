@@ -73,6 +73,7 @@ class SequenceLengthDistribution(DataReport):
 
     def plot(self, normalized_sequence_length):
 
+        figure, ax = plt.subplots()
         plt.style.use('ggplot')
 
         x = OrderedDict(sorted(normalized_sequence_length.items(), key=lambda item: item[0]))
@@ -83,10 +84,11 @@ class SequenceLengthDistribution(DataReport):
         plt.xlabel("Lengths")
         plt.ylabel("Frequency")
         plt.title("Sequence length distribution")
+        plt.box(on=None)
 
         PathBuilder.build(self.result_path)
 
         file_path = self.result_path + "sequence_length_distribution.png"
-        plt.savefig(file_path, transparent=True)
+        figure.savefig(file_path, transparent=True)
         return file_path
 
