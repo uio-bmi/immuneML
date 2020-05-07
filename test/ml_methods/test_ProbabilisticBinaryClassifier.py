@@ -1,11 +1,18 @@
+import os
 from unittest import TestCase
 
 import numpy as np
 
+from source.caching.CacheType import CacheType
+from source.environment.Constants import Constants
 from source.ml_methods.ProbabilisticBinaryClassifier import ProbabilisticBinaryClassifier
 
 
 class TestProbabilisticBinaryClassifier(TestCase):
+
+    def setUp(self) -> None:
+        os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
+
     def test_fit(self):
 
         classifier = ProbabilisticBinaryClassifier(100, 0.1)

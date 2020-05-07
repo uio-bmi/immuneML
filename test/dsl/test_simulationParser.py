@@ -1,8 +1,11 @@
+import os
 from unittest import TestCase
 
+from source.caching.CacheType import CacheType
 from source.dsl.definition_parsers.SimulationParser import SimulationParser
 from source.dsl.symbol_table.SymbolTable import SymbolTable
 from source.dsl.symbol_table.SymbolType import SymbolType
+from source.environment.Constants import Constants
 from source.simulation.implants.Motif import Motif
 from source.simulation.implants.Signal import Signal
 from source.simulation.motif_instantiation_strategy.GappedKmerInstantiation import GappedKmerInstantiation
@@ -11,6 +14,10 @@ from source.simulation.signal_implanting_strategy.HealthySequenceImplanting impo
 
 
 class TestSimulationParser(TestCase):
+
+    def setUp(self) -> None:
+        os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
+
     def test_parse_simulation(self):
 
         simulation = {

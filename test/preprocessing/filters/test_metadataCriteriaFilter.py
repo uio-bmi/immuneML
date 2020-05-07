@@ -1,3 +1,4 @@
+import os
 import shutil
 from unittest import TestCase
 
@@ -5,7 +6,9 @@ import pandas as pd
 
 from source.analysis.criteria_matches.DataType import DataType
 from source.analysis.criteria_matches.OperationType import OperationType
+from source.caching.CacheType import CacheType
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
+from source.environment.Constants import Constants
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.preprocessing.filters.MetadataFilter import MetadataFilter
 from source.util.PathBuilder import PathBuilder
@@ -13,6 +16,10 @@ from source.util.RepertoireBuilder import RepertoireBuilder
 
 
 class TestMetadataFilter(TestCase):
+
+    def setUp(self) -> None:
+        os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
+
     def test_process(self):
         path = EnvironmentSettings.root_path + "test/tmp/clonotypecountfilter/"
         PathBuilder.build(path)

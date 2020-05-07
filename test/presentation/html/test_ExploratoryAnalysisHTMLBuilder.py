@@ -19,6 +19,8 @@ from source.workflows.instructions.exploratory_analysis.ExploratoryAnalysisUnit 
 
 class TestExploratoryAnalysisHTMLBuilder(TestCase):
 
+
+
     def create_dataset(self, path):
 
         repertoires, metadata = RepertoireBuilder.build([["AAA"], ["AAAC"], ["ACA"], ["CAAA"], ["AAAC"], ["AAA"]], path,

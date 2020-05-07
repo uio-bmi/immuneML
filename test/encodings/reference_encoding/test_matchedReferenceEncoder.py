@@ -1,18 +1,25 @@
+import os
 import shutil
 from unittest import TestCase
 
 import numpy as np
 
+from source.caching.CacheType import CacheType
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.encodings.EncoderParams import EncoderParams
 from source.encodings.reference_encoding.MatchedReferenceEncoder import MatchedReferenceEncoder
 from source.encodings.reference_encoding.SequenceMatchingSummaryType import SequenceMatchingSummaryType
+from source.environment.Constants import Constants
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.environment.LabelConfiguration import LabelConfiguration
 from source.util.RepertoireBuilder import RepertoireBuilder
 
 
 class TestMatchedReferenceEncoder(TestCase):
+
+    def setUp(self) -> None:
+        os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
+
     def test__encode_new_dataset(self):
         path = EnvironmentSettings.root_path + "test/tmp/matched_ref_encoder/"
         repertoires, metadata = RepertoireBuilder.build([["AAAA", "AACA"], ["TTTA", "AAAA"]], path, {"default": np.array([1, 2])})

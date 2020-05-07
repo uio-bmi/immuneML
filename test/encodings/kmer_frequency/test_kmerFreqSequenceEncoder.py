@@ -1,3 +1,4 @@
+import os
 import pickle
 import shutil
 from unittest import TestCase
@@ -5,6 +6,7 @@ from unittest import TestCase
 import numpy
 
 from source.analysis.data_manipulation.NormalizationType import NormalizationType
+from source.caching.CacheType import CacheType
 from source.data_model.dataset.SequenceDataset import SequenceDataset
 from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
@@ -12,12 +14,16 @@ from source.encodings.EncoderParams import EncoderParams
 from source.encodings.kmer_frequency.KmerFreqSequenceEncoder import KmerFreqSequenceEncoder
 from source.encodings.kmer_frequency.ReadsType import ReadsType
 from source.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType import SequenceEncodingType
+from source.environment.Constants import Constants
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.environment.LabelConfiguration import LabelConfiguration
 from source.util.PathBuilder import PathBuilder
 
 
 class TestKmerFreqSequenceEncoder(TestCase):
+
+    def setUp(self) -> None:
+        os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
 
     def test(self):
 

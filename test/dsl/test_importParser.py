@@ -1,18 +1,24 @@
 import csv
+import os
 import shutil
 from unittest import TestCase
 
 import pandas as pd
 
+from source.caching.CacheType import CacheType
 from source.data_model.dataset.ReceptorDataset import ReceptorDataset
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.dsl.import_parsers.ImportParser import ImportParser
 from source.dsl.symbol_table.SymbolTable import SymbolTable
+from source.environment.Constants import Constants
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.util.PathBuilder import PathBuilder
 
 
 class TestImportParser(TestCase):
+
+    def setUp(self) -> None:
+        os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
 
     def test_parse_receptor_dataset(self):
         file_content = """complex.id	Gene	CDR3	V	J	Species	MHC A	MHC B	MHC class	Epitope	Epitope gene	Epitope species	Reference	Method	Meta	CDR3fix	Score

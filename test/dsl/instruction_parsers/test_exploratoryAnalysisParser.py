@@ -1,12 +1,15 @@
+import os
 import shutil
 from unittest import TestCase
 
+from source.caching.CacheType import CacheType
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.dsl.instruction_parsers.ExploratoryAnalysisParser import ExploratoryAnalysisParser
 from source.dsl.symbol_table.SymbolTable import SymbolTable
 from source.dsl.symbol_table.SymbolType import SymbolType
 from source.encodings.reference_encoding.MatchedReferenceEncoder import MatchedReferenceEncoder
 from source.encodings.reference_encoding.SequenceMatchingSummaryType import SequenceMatchingSummaryType
+from source.environment.Constants import Constants
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.preprocessing.PatientRepertoireCollector import PatientRepertoireCollector
 from source.reports.data_reports.SequenceLengthDistribution import SequenceLengthDistribution
@@ -16,6 +19,10 @@ from source.util.RepertoireBuilder import RepertoireBuilder
 
 
 class TestExploratoryAnalysisParser(TestCase):
+
+    def setUp(self) -> None:
+        os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
+
     def test_parse(self):
 
         path = EnvironmentSettings.tmp_test_path + "explanalysisparser/"

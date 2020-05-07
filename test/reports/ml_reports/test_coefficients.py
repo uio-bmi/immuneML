@@ -6,8 +6,10 @@ import numpy as np
 import pandas as pd
 import yaml
 
+from source.caching.CacheType import CacheType
 from source.data_model.dataset.Dataset import Dataset
 from source.data_model.encoded_data.EncodedData import EncodedData
+from source.environment.Constants import Constants
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.ml_methods.SimpleLogisticRegression import SimpleLogisticRegression
 from source.reports.ml_reports.CoefficientPlottingSetting import CoefficientPlottingSetting
@@ -16,6 +18,9 @@ from source.util.PathBuilder import PathBuilder
 
 
 class TestCoefficients(TestCase):
+
+    def setUp(self) -> None:
+        os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
 
     def _create_dummy_lr_model(self, path):
         # dummy logistic regression with 100 observations with 20 features belonging to 2 classes

@@ -6,14 +6,20 @@ from unittest import TestCase
 import numpy as np
 import pandas as pd
 
+from source.caching.CacheType import CacheType
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.encoded_data.EncodedData import EncodedData
+from source.environment.Constants import Constants
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.reports.encoding_reports.MatchingSequenceDetails import MatchingSequenceDetails
 from source.util.RepertoireBuilder import RepertoireBuilder
 
 
 class TestMatchingSequenceDetails(TestCase):
+
+    def setUp(self) -> None:
+        os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
+
     def test_generate(self):
         path = EnvironmentSettings.root_path + "test/tmp/encrepmatchingseq/"
         repertoires = RepertoireBuilder.build([["AAA", "CCC"], ["AAC", "ASDA"], ["CCF", "ATC"]], path,

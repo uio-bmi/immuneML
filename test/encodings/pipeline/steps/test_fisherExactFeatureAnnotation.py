@@ -1,3 +1,4 @@
+import os
 import shutil
 from unittest import TestCase
 
@@ -8,10 +9,12 @@ from scipy import sparse
 from source.analysis.criteria_matches.BooleanType import BooleanType
 from source.analysis.criteria_matches.DataType import DataType
 from source.analysis.criteria_matches.OperationType import OperationType
+from source.caching.CacheType import CacheType
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.encoded_data.EncodedData import EncodedData
 from source.data_model.repertoire.Repertoire import Repertoire
 from source.encodings.pipeline.steps.FisherExactFeatureAnnotation import FisherExactFeatureAnnotation
+from source.environment.Constants import Constants
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.util.PathBuilder import PathBuilder
 
@@ -43,6 +46,9 @@ class TestFisherExactFeatureAnnotations(TestCase):
 
     dataset = RepertoireDataset(encoded_data=EncodedData(**encoded_data),
                                 repertoires=[Repertoire("0.npy", "", identifier) for identifier in encoded_data["example_ids"]])
+
+    def setUp(self) -> None:
+        os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
 
     def test_transform(self):
 

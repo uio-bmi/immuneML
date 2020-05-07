@@ -7,11 +7,16 @@ from unittest import TestCase
 import numpy as np
 
 from source.api.api_encoding import encode_dataset_by_kmer_freq
+from source.caching.CacheType import CacheType
+from source.environment.Constants import Constants
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.util.PathBuilder import PathBuilder
 
 
 class TestAPI(TestCase):
+
+    def setUp(self) -> None:
+        os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
 
     def create_initial_dataset(self, data_path, repertoire_count):
         PathBuilder.build(data_path)

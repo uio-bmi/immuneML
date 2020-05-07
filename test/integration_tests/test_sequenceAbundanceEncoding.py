@@ -1,3 +1,4 @@
+import os
 import shutil
 from unittest import TestCase
 
@@ -5,13 +6,18 @@ import yaml
 
 from source.IO.dataset_export.PickleExporter import PickleExporter
 from source.app.ImmuneMLApp import ImmuneMLApp
+from source.caching.CacheType import CacheType
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
+from source.environment.Constants import Constants
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.util.PathBuilder import PathBuilder
 from source.util.RepertoireBuilder import RepertoireBuilder
 
 
 class TestSequenceAbundanceEncoding(TestCase):
+
+    def setUp(self) -> None:
+        os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
 
     def test_encoding(self):
 

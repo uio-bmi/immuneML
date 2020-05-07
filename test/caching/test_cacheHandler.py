@@ -5,10 +5,15 @@ from unittest import TestCase
 
 from source.caching.CacheHandler import CacheHandler
 from source.caching.CacheObjectType import CacheObjectType
+from source.caching.CacheType import CacheType
+from source.environment.Constants import Constants
 from source.environment.EnvironmentSettings import EnvironmentSettings
 
 
 class TestCacheHandler(TestCase):
+
+    def setUp(self) -> None:
+        os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
 
     def test_get(self):
         params = (("k1", 1), ("k2", 2))

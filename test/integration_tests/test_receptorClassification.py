@@ -4,12 +4,14 @@ import shutil
 from unittest import TestCase
 
 from source.analysis.data_manipulation.NormalizationType import NormalizationType
+from source.caching.CacheType import CacheType
 from source.data_model.dataset.ReceptorDataset import ReceptorDataset
 from source.data_model.receptor.TCABReceptor import TCABReceptor
 from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.encodings.kmer_frequency.KmerFrequencyEncoder import KmerFrequencyEncoder
 from source.encodings.kmer_frequency.ReadsType import ReadsType
 from source.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType import SequenceEncodingType
+from source.environment.Constants import Constants
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.environment.LabelConfiguration import LabelConfiguration
 from source.environment.MetricType import MetricType
@@ -24,6 +26,9 @@ from source.workflows.instructions.HPOptimizationInstruction import HPOptimizati
 
 
 class TestReceptorClassification(TestCase):
+
+    def setUp(self) -> None:
+        os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
 
     def create_dataset(self, path, dataset_size: int = 50):
 

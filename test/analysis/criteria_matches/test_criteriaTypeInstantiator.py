@@ -1,10 +1,16 @@
+import os
 from unittest import TestCase
 
 from source.analysis.criteria_matches.BooleanType import BooleanType
 from source.analysis.criteria_matches.CriteriaTypeInstantiator import CriteriaTypeInstantiator
+from source.caching.CacheType import CacheType
+from source.environment.Constants import Constants
 
 
 class TestCriteriaTypeInstantiator(TestCase):
+
+    def setUp(self) -> None:
+        os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
 
     def test_instantiate(self):
 

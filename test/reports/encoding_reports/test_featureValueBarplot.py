@@ -13,7 +13,6 @@ from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.reports.encoding_reports.FeatureValueBarplot import FeatureValueBarplot
 
 
-
 class TestFeatureValueBarplot(TestCase):
 
     def _create_dummy_encoded_data(self, path):
@@ -41,8 +40,6 @@ class TestFeatureValueBarplot(TestCase):
         dataset = RepertoireDataset(encoded_data=EncodedData(**encoded_data))
 
         return dataset
-
-
 
     def test_generate(self):
         path = EnvironmentSettings.root_path + "test/tmp/featurevaluebarplot/"

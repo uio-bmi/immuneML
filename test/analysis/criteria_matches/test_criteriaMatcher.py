@@ -1,3 +1,4 @@
+import os
 from unittest import TestCase
 
 import numpy as np
@@ -7,9 +8,14 @@ from source.analysis.criteria_matches.BooleanType import BooleanType
 from source.analysis.criteria_matches.CriteriaMatcher import CriteriaMatcher
 from source.analysis.criteria_matches.DataType import DataType
 from source.analysis.criteria_matches.OperationType import OperationType
+from source.caching.CacheType import CacheType
+from source.environment.Constants import Constants
 
 
 class TestCriteriaMatcher(TestCase):
+
+    def setUp(self) -> None:
+        os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
 
     def test_match(self):
 

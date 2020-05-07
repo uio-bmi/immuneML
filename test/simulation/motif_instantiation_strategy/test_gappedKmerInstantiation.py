@@ -1,9 +1,16 @@
+import os
 from unittest import TestCase
 
+from source.caching.CacheType import CacheType
+from source.environment.Constants import Constants
 from source.simulation.motif_instantiation_strategy.GappedKmerInstantiation import GappedKmerInstantiation
 
 
 class TestGappedKmerInstantiation(TestCase):
+
+    def setUp(self) -> None:
+        os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
+
     def test_instantiate_motif(self):
 
         alphabet_weights = {"T": 0.5, "F": 0.5, "A": 0, "C": 0,  "D": 0, "E": 0, "G": 0, "H": 0, "K": 0, "I": 0, "L": 0, "M": 0,

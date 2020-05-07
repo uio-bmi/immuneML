@@ -1,12 +1,19 @@
+import os
 from unittest import TestCase
 
+from source.caching.CacheType import CacheType
 from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.encodings.EncoderParams import EncoderParams
 from source.encodings.kmer_frequency.sequence_encoding.IMGTGappedKmerEncoder import IMGTGappedKmerEncoder
+from source.environment.Constants import Constants
 from source.environment.LabelConfiguration import LabelConfiguration
 
 
 class TestIMGTGappedKmerEncoder(TestCase):
+
+    def setUp(self) -> None:
+        os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
+
     def test_encode_sequence(self):
         sequence = ReceptorSequence("AHCDE", None, None)
         kmers = IMGTGappedKmerEncoder.encode_sequence(sequence, EncoderParams(model={"k_left": 1, "max_gap": 1},

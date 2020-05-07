@@ -5,6 +5,7 @@ from source.caching.CacheType import CacheType
 from source.environment.Constants import Constants
 from source.environment.SequenceType import SequenceType
 from source.logging.LogLevel import LogLevel
+from source.util.PathBuilder import PathBuilder
 
 
 class EnvironmentSettings:
@@ -27,17 +28,24 @@ class EnvironmentSettings:
     low_memory = True
 
     @staticmethod
-    def get_cache_type(cache_type: CacheType = None):
-        if cache_type is not None:
-            return cache_type
-        else:
-            if Constants.CACHE_TYPE not in os.environ:
-                os.environ[Constants.CACHE_TYPE] = CacheType.PRODUCTION.name
-            return CacheType[os.environ[Constants.CACHE_TYPE].upper()]
+    def reset_cache_path():
+        EnvironmentSettings.cache_path = EnvironmentSettings.root_path + "cache/"
+
+    @staticmethod
+    def set_cache_path(path: str):
+        EnvironmentSettings.cache_path = path
+        PathBuilder.build(path)
+        print(f"Setting cache path to {path}...")
+
+    @staticmethod
+    def get_cache_type():
+        if Constants.CACHE_TYPE not in os.environ:
+            os.environ[Constants.CACHE_TYPE] = CacheType.PRODUCTION.name
+        return CacheType[os.environ[Constants.CACHE_TYPE].upper()]
 
     @staticmethod
     def get_cache_path(cache_type: CacheType = None):
-        cache_type = EnvironmentSettings.get_cache_type(cache_type)
+        cache_type = EnvironmentSettings.get_cache_type() if cache_type is None else cache_type
         if cache_type == CacheType.PRODUCTION:
             return EnvironmentSettings.cache_path
         elif cache_type == CacheType.TEST:

@@ -1,12 +1,19 @@
+import os
 from unittest import TestCase
 
+from source.caching.CacheType import CacheType
 from source.dsl.ImmuneMLParser import ImmuneMLParser
 from source.dsl.definition_parsers.MLParser import MLParser
 from source.dsl.symbol_table.SymbolTable import SymbolTable
+from source.environment.Constants import Constants
 from source.ml_methods.SimpleLogisticRegression import SimpleLogisticRegression
 
 
 class TestMLParser(TestCase):
+
+    def setUp(self) -> None:
+        os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
+
     def test_parse_ml_methods(self):
 
         params = {

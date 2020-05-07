@@ -20,6 +20,4 @@ class TestQuickstart(TestCase):
         self.assertEqual(2, len(glob(path + "assessment_random/split_1/**/test_predictions.csv", recursive=True)))
         self.assertTrue(os.path.isfile(glob(path + "assessment_random/split_1/**/test_predictions.csv", recursive=True)[0]))
 
-        shutil.rmtree(path)
-
-
+        shutil.rmtree(path, ignore_errors=True)

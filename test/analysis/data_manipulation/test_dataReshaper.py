@@ -1,3 +1,4 @@
+import os
 from unittest import TestCase
 
 import numpy as np
@@ -5,11 +6,16 @@ import pandas as pd
 from scipy import sparse
 
 from source.analysis.data_manipulation.DataReshaper import DataReshaper
+from source.caching.CacheType import CacheType
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.encoded_data.EncodedData import EncodedData
+from source.environment.Constants import Constants
 
 
 class TestDataReshaper(TestCase):
+
+    def setUp(self) -> None:
+        os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
 
     # 5 features, 5 repertoires. Each repertoire has 3 labels. Each feature has 2 annotations.
     encoded_data = {

@@ -4,10 +4,12 @@ import unittest
 
 import pandas as pd
 
+from source.caching.CacheType import CacheType
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.receptor.receptor_sequence.Chain import Chain
 from source.encodings.EncoderParams import EncoderParams
 from source.encodings.reference_encoding.MatchedReceptorsRepertoireEncoder import MatchedReceptorsRepertoireEncoder
+from source.environment.Constants import Constants
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.environment.LabelConfiguration import LabelConfiguration
 from source.reports.encoding_reports.MatchedPairedReference import MatchedPairedReference
@@ -15,6 +17,9 @@ from source.util.RepertoireBuilder import RepertoireBuilder
 
 
 class TestMatchedPairedReference(unittest.TestCase):
+
+    def setUp(self) -> None:
+        os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
 
     def create_encoded_dummy_data(self, path):
 

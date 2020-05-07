@@ -1,13 +1,20 @@
+import os
 import shutil
 from unittest import TestCase
 
 from source.IO.sequence_import.VDJdbSequenceImport import VDJdbSequenceImport
+from source.caching.CacheType import CacheType
 from source.data_model.receptor.receptor_sequence.Chain import Chain
+from source.environment.Constants import Constants
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.util.PathBuilder import PathBuilder
 
 
 class TestSequenceImport(TestCase):
+
+    def setUp(self) -> None:
+        os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
+
     def test_import_all_sequences(self):
         file_content = """complex.id	Gene	CDR3	V	J	Species	MHC A	MHC B	MHC class	Epitope	Epitope gene	Epitope species	Reference	Method	Meta	CDR3fix	Score
 141	TRB	CASSYVGNTGELFF	TRBV6-5*01	TRBJ2-2*01	HomoSapiens	HLA-A*02:01:48	B2M	MHCI	SLLMWITQV	CTAG1B	HomoSapiens	PMID:15837811	{"frequency": "", "identification": "", "sequencing": "", "singlecell": "", "verification": ""}	{"cell.subset": "", "clone.id": "", "donor.MHC": "", "donor.MHC.method": "", "epitope.id": "", "replica.id": "", "samples.found": 1, "structure.id": "2bnq", "studies.found": 1, "study.id": "", "subject.cohort": "", "subject.id": "", "tissue": ""}	{"cdr3": "CASSYVGNTGELFF", "cdr3_old": "CASSYVGNTGELFF", "fixNeeded": false, "good": true, "jCanonical": true, "jFixType": "NoFixNeeded", "jId": "TRBJ2-2*01", "jStart": 7, "vCanonical": true, "vEnd": 5, "vFixType": "NoFixNeeded", "vId": "TRBV6-5*01"}	3

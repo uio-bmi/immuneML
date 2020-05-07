@@ -1,15 +1,18 @@
+import os
 import shutil
 from unittest import TestCase
 
 import pandas as pd
 from scipy import sparse
 
+from source.caching.CacheType import CacheType
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.encoded_data.EncodedData import EncodedData
 from source.data_model.receptor.RegionDefinition import RegionDefinition
 from source.data_model.receptor.RegionType import RegionType
 from source.data_model.repertoire.Repertoire import Repertoire
 from source.encodings.pipeline.steps.SequenceMatchFeatureAnnotation import SequenceMatchFeatureAnnotation
+from source.environment.Constants import Constants
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.util.PathBuilder import PathBuilder
 
@@ -64,6 +67,9 @@ reference_rep.tsv,rep1"""
         "region_type": RegionType.CDR3.name,
         "metadata_file": path + "metadata.csv"
     }
+
+    def setUp(self) -> None:
+        os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
 
     def test_transform_1(self):
 

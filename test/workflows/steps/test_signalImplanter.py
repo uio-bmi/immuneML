@@ -2,10 +2,12 @@ import os
 import shutil
 from unittest import TestCase
 
+from source.caching.CacheType import CacheType
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.data_model.receptor.receptor_sequence.ReceptorSequenceList import ReceptorSequenceList
 from source.data_model.repertoire.Repertoire import Repertoire
+from source.environment.Constants import Constants
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.simulation.Implanting import Implanting
 from source.simulation.Simulation import Simulation
@@ -19,6 +21,10 @@ from source.workflows.steps.SignalImplanter import SignalImplanter
 
 
 class TestSignalImplanter(TestCase):
+
+    def setUp(self) -> None:
+        os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
+
     def test_run(self):
 
         r = []

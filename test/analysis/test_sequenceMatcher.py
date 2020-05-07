@@ -1,17 +1,23 @@
+import os
 import shutil
 from unittest import TestCase
 
 from source.analysis.SequenceMatcher import SequenceMatcher
+from source.caching.CacheType import CacheType
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
 from source.data_model.repertoire.Repertoire import Repertoire
 from source.encodings.reference_encoding.SequenceMatchingSummaryType import SequenceMatchingSummaryType
+from source.environment.Constants import Constants
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.util.PathBuilder import PathBuilder
 
 
 class TestSequenceMatcher(TestCase):
+
+    def setUp(self) -> None:
+        os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
 
     def test_match(self):
         path = EnvironmentSettings.root_path + "test/tmp/seqmatch/"

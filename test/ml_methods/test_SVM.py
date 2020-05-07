@@ -7,12 +7,18 @@ import numpy as np
 from scipy import sparse
 from sklearn.svm import LinearSVC
 
+from source.caching.CacheType import CacheType
+from source.environment.Constants import Constants
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.ml_methods.SVM import SVM
 from source.util.PathBuilder import PathBuilder
 
 
 class TestSVM(TestCase):
+
+    def setUp(self) -> None:
+        os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
+
     def test_fit(self):
         x = np.array([[1, 0, 0], [0, 1, 1], [1, 1, 1], [0, 1, 1]])
         y = {"default": np.array([1, 0, 2, 0])}

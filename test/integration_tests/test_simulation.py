@@ -7,13 +7,18 @@ import yaml
 
 from source.IO.dataset_export.PickleExporter import PickleExporter
 from source.app.ImmuneMLApp import ImmuneMLApp
+from source.caching.CacheType import CacheType
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
+from source.environment.Constants import Constants
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.util.PathBuilder import PathBuilder
 from source.util.RepertoireBuilder import RepertoireBuilder
 
 
 class TestSimulation(TestCase):
+
+    def setUp(self) -> None:
+        os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
 
     def prepare_specs(self, path) -> str:
         specs = {
@@ -122,5 +127,4 @@ class TestSimulation(TestCase):
 
         self.assertTrue(os.path.isfile(result_path))
 
-        shutil.rmtree(path)
-
+        shutil.rmtree(path, ignore_errors=True)

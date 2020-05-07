@@ -1,9 +1,12 @@
+import os
 import shutil
 from unittest import TestCase
 
+from source.caching.CacheType import CacheType
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.receptor.receptor_sequence.Chain import Chain
 from source.data_model.repertoire.Repertoire import Repertoire
+from source.environment.Constants import Constants
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.environment.SequenceType import SequenceType
 from source.preprocessing.filters.CountAggregationFunction import CountAggregationFunction
@@ -12,6 +15,10 @@ from source.util.PathBuilder import PathBuilder
 
 
 class TestDuplicateSequenceFilter(TestCase):
+
+    def setUp(self) -> None:
+        os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
+
     def test_process(self):
         path = EnvironmentSettings.root_path + "test/tmp/duplicatesequencefilter/"
         PathBuilder.build(path)

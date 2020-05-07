@@ -1,10 +1,13 @@
+import os
 import shutil
 from unittest import TestCase
 
 import pandas as pd
 
+from source.caching.CacheType import CacheType
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.repertoire.Repertoire import Repertoire
+from source.environment.Constants import Constants
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.hyperparameter_optimization.config.SplitType import SplitType
 from source.util.PathBuilder import PathBuilder
@@ -13,6 +16,9 @@ from source.workflows.steps.DataSplitterParams import DataSplitterParams
 
 
 class TestDataSplitter(TestCase):
+
+    def setUp(self) -> None:
+        os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
 
     def test_run(self):
         dataset = RepertoireDataset(repertoires=[Repertoire("0.npy", "", "0"),

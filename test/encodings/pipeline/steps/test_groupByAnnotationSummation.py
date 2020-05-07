@@ -1,3 +1,4 @@
+import os
 import shutil
 from unittest import TestCase
 
@@ -7,9 +8,11 @@ from scipy import sparse
 
 from source.analysis.AxisType import AxisType
 from source.analysis.data_manipulation.GroupSummarizationType import GroupSummarizationType
+from source.caching.CacheType import CacheType
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.encoded_data.EncodedData import EncodedData
 from source.encodings.pipeline.steps.GroupDataTransformation import GroupDataTransformation
+from source.environment.Constants import Constants
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.util.PathBuilder import PathBuilder
 
@@ -45,6 +48,9 @@ class TestGroupByAnnotationSummation(TestCase):
 
     dataset = RepertoireDataset(encoded_data=EncodedData(**encoded_data))
     dataset.repertoire_ids = ["1", "2", "3", "4", "5"]
+
+    def setUp(self) -> None:
+        os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
 
     def test_group_repertoires_1(self):
 

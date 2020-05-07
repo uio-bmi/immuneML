@@ -1,12 +1,18 @@
+import os
 from unittest import TestCase
 
-from scipy import sparse
 import numpy as np
+from scipy import sparse
 
 from source.analysis.similarities.RepertoireSimilarityComputer import RepertoireSimilarityComputer
+from source.caching.CacheType import CacheType
+from source.environment.Constants import Constants
+
 
 class TestRepertoireSimilarityComputer(TestCase):
 
+    def setUp(self) -> None:
+        os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
 
     def test_compute_pearson(self):
         a = sparse.csr_matrix(np.array([[0, 1, 1, 3, 4, 1, 5],

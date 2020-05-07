@@ -7,13 +7,18 @@ import yaml
 
 from source.IO.dataset_export.PickleExporter import PickleExporter
 from source.app import ImmuneMLApp
+from source.caching.CacheType import CacheType
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
+from source.environment.Constants import Constants
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.util.PathBuilder import PathBuilder
 from source.util.RepertoireBuilder import RepertoireBuilder
 
 
 class TestImmuneMLApp(TestCase):
+
+    def setUp(self) -> None:
+        os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
 
     def create_dataset(self):
         path = EnvironmentSettings.root_path + "test/tmp/immunemlapp/"
@@ -42,7 +47,7 @@ class TestImmuneMLApp(TestCase):
                         "format": "Pickle",
                         "params": {
                             "path": dataset_path,
-                            "result_path": dataset_path
+                            "result_path": dataset_path + "imported_data/"
                         }
                     }
                 },
@@ -176,4 +181,4 @@ class TestImmuneMLApp(TestCase):
         self.assertTrue("split_count" in full_specs["instructions"]["inst1"]["selection"] and full_specs["instructions"]["inst1"]["selection"]["split_count"] == 2)
         self.assertTrue("training_percentage" in full_specs["instructions"]["inst1"]["selection"] and full_specs["instructions"]["inst1"]["selection"]["training_percentage"] == 0.7)
 
-        shutil.rmtree(os.path.dirname(dataset_path))
+        shutil.rmtree(path, ignore_errors=True)

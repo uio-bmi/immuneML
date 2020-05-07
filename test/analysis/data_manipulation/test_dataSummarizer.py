@@ -1,3 +1,4 @@
+import os
 from unittest import TestCase
 
 import numpy as np
@@ -8,9 +9,11 @@ from source.analysis.criteria_matches.BooleanType import BooleanType
 from source.analysis.criteria_matches.DataType import DataType
 from source.analysis.criteria_matches.OperationType import OperationType
 from source.analysis.data_manipulation.DataSummarizer import DataSummarizer
+from source.caching.CacheType import CacheType
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.encoded_data.EncodedData import EncodedData
 from source.data_model.repertoire.Repertoire import Repertoire
+from source.environment.Constants import Constants
 
 
 class TestDataSummarizer(TestCase):
@@ -64,6 +67,8 @@ class TestDataSummarizer(TestCase):
 
     dataset_2 = RepertoireDataset(encoded_data=EncodedData(**encoded_data_2))
 
+    def setUp(self) -> None:
+        os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
 
     def test_filter_repertoires(self):
 

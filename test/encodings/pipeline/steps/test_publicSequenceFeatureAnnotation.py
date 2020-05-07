@@ -1,3 +1,4 @@
+import os
 import shutil
 from unittest import TestCase
 
@@ -5,10 +6,12 @@ import numpy as np
 import pandas as pd
 from scipy import sparse
 
+from source.caching.CacheType import CacheType
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.encoded_data.EncodedData import EncodedData
 from source.data_model.repertoire.Repertoire import Repertoire
 from source.encodings.pipeline.steps.PublicSequenceFeatureAnnotation import PublicSequenceFeatureAnnotation
+from source.environment.Constants import Constants
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.util.PathBuilder import PathBuilder
 
@@ -43,6 +46,9 @@ class TestPublicSequenceFeatureAnnotation(TestCase):
 
     dataset = RepertoireDataset(encoded_data=EncodedData(**encoded_data),
                                 repertoires=[Repertoire("0.npy", "", identifier) for identifier in encoded_data["example_ids"]])
+
+    def setUp(self) -> None:
+        os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
 
     def test_transform(self):
         path = EnvironmentSettings.root_path + "test/tmp/publicsequencefeatureannotation/"

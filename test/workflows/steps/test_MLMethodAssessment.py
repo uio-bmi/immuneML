@@ -5,8 +5,10 @@ from unittest import TestCase
 import numpy as np
 import pandas as pd
 
+from source.caching.CacheType import CacheType
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.encoded_data.EncodedData import EncodedData
+from source.environment.Constants import Constants
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.environment.LabelConfiguration import LabelConfiguration
 from source.environment.MetricType import MetricType
@@ -18,6 +20,9 @@ from source.workflows.steps.MLMethodAssessmentParams import MLMethodAssessmentPa
 
 
 class TestMLMethodAssessment(TestCase):
+
+    def setUp(self) -> None:
+        os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
 
     def test_run(self):
         path = EnvironmentSettings.root_path + "test/tmp/mlmethodassessment/"

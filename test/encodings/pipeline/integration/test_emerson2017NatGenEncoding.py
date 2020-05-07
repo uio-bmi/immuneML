@@ -1,3 +1,4 @@
+import os
 import shutil
 from unittest import TestCase
 
@@ -7,6 +8,7 @@ from source.analysis.criteria_matches.BooleanType import BooleanType
 from source.analysis.criteria_matches.DataType import DataType
 from source.analysis.criteria_matches.OperationType import OperationType
 from source.analysis.data_manipulation.NormalizationType import NormalizationType
+from source.caching.CacheType import CacheType
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.encodings.EncoderParams import EncoderParams
 from source.encodings.kmer_frequency.KmerFrequencyEncoder import KmerFrequencyEncoder
@@ -15,6 +17,7 @@ from source.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType impo
 from source.encodings.pipeline.PipelineEncoder import PipelineEncoder
 from source.encodings.pipeline.steps.FisherExactFeatureAnnotation import FisherExactFeatureAnnotation
 from source.encodings.pipeline.steps.PresentTotalFeatureTransformation import PresentTotalFeatureTransformation
+from source.environment.Constants import Constants
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.environment.LabelConfiguration import LabelConfiguration
 from source.util.PathBuilder import PathBuilder
@@ -22,6 +25,9 @@ from source.util.RepertoireBuilder import RepertoireBuilder
 
 
 class TestEmerson2018NatGenEncoding(TestCase):
+
+    def setUp(self) -> None:
+        os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
 
     def test_encode(self):
 

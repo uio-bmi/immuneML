@@ -1,5 +1,6 @@
 import argparse
 import os
+import shutil
 import sys
 
 from source.caching.CacheType import CacheType
@@ -7,6 +8,7 @@ from source.dsl.ImmuneMLParser import ImmuneMLParser
 from source.dsl.semantic_model.SemanticModel import SemanticModel
 from source.dsl.symbol_table.SymbolType import SymbolType
 from source.environment.Constants import Constants
+from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.util.PathBuilder import PathBuilder
 from source.util.ReflectionHandler import ReflectionHandler
 
@@ -16,10 +18,16 @@ class ImmuneMLApp:
     def __init__(self, specification_path: str, result_path: str):
         self._specification_path = specification_path
         self._result_path = result_path if result_path[-1] == '/' else result_path + '/'
+        self._cache_path = f"{self._result_path}cache/"
 
     def set_cache(self):
-        if Constants.CACHE_TYPE not in os.environ:
-            os.environ[Constants.CACHE_TYPE] = CacheType.TEST.value
+        os.environ[Constants.CACHE_TYPE] = CacheType.PRODUCTION.value
+        EnvironmentSettings.set_cache_path(self._cache_path)
+
+    def clear_cache(self):
+        shutil.rmtree(self._cache_path, ignore_errors=True)
+        EnvironmentSettings.reset_cache_path()
+        del os.environ[Constants.CACHE_TYPE]
 
     def set_logging(self):
         if "ImmuneML_with_Galaxy" in os.environ and os.environ["ImmuneML_with_Galaxy"]:
@@ -27,11 +35,11 @@ class ImmuneMLApp:
 
     def run(self):
 
-        self.set_logging()
-        self.set_cache()
-
         if self._result_path is not None:
             PathBuilder.build(self._result_path, warn_if_exists=True)
+
+        self.set_logging()
+        self.set_cache()
 
         symbol_table, self._specification_path = ImmuneMLParser.parse_yaml_file(self._specification_path,
                                                                                 self._result_path)
@@ -41,7 +49,10 @@ class ImmuneMLApp:
         instructions = symbol_table.get_by_type(SymbolType.INSTRUCTION)
         output = symbol_table.get("output")
         model = SemanticModel([instruction.item for instruction in instructions], self._result_path, output)
-        return model.run()
+        result = model.run()
+
+        self.clear_cache()
+        return result
 
 
 def run_immuneML(namespace: argparse.Namespace):

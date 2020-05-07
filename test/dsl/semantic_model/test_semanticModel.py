@@ -1,10 +1,13 @@
+import os
 import shutil
 from unittest import TestCase
 
+from source.caching.CacheType import CacheType
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.dsl.semantic_model.SemanticModel import SemanticModel
 from source.encodings.word2vec.Word2VecEncoder import Word2VecEncoder
 from source.encodings.word2vec.model_creator.ModelType import ModelType
+from source.environment.Constants import Constants
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.environment.LabelConfiguration import LabelConfiguration
 from source.environment.MetricType import MetricType
@@ -20,6 +23,9 @@ from source.workflows.instructions.HPOptimizationInstruction import HPOptimizati
 
 
 class TestSemanticModel(TestCase):
+
+    def setUp(self) -> None:
+        os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
 
     def test_run(self):
 

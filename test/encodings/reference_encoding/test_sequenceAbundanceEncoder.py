@@ -1,11 +1,14 @@
+import os
 import shutil
 from unittest import TestCase
 
 import numpy as np
 
+from source.caching.CacheType import CacheType
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.encodings.EncoderParams import EncoderParams
 from source.encodings.reference_encoding.SequenceAbundanceEncoder import SequenceAbundanceEncoder
+from source.environment.Constants import Constants
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.environment.Label import Label
 from source.environment.LabelConfiguration import LabelConfiguration
@@ -14,6 +17,10 @@ from source.util.RepertoireBuilder import RepertoireBuilder
 
 
 class TestSequenceAbundanceEncoder(TestCase):
+
+    def setUp(self) -> None:
+        os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
+
     def test_encode(self):
 
         path = EnvironmentSettings.tmp_test_path + "abundanceencoder/"
