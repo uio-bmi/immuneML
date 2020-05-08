@@ -6,6 +6,7 @@ import pandas as pd
 
 from source.IO.dataset_export.PickleExporter import PickleExporter
 from source.IO.dataset_import.DatasetImportParams import DatasetImportParams
+from source.IO.dataset_import.PickleImport import PickleImport
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.repertoire.Repertoire import Repertoire
 from source.environment.Constants import Constants
@@ -14,6 +15,17 @@ from source.util.PathBuilder import PathBuilder
 
 
 class ImportHelper:
+
+    @staticmethod
+    def import_or_load_imported(params: dict, processed_params, preprocess_repertoire_func):
+
+        if os.path.isfile(processed_params.result_path + "dataset.pkl"):
+            params["path"] = processed_params.result_path + "dataset.pkl"
+            dataset = PickleImport.import_dataset(params)
+        else:
+            dataset = ImportHelper.import_repertoire_dataset(preprocess_repertoire_func, processed_params)
+
+        return dataset
 
     @staticmethod
     def import_repertoire_dataset(preprocess_repertoire_func, params: DatasetImportParams) -> RepertoireDataset:

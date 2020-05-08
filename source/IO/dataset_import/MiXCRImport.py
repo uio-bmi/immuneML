@@ -1,10 +1,7 @@
-import os
-
 import pandas as pd
 
 from source.IO.dataset_import.DataImport import DataImport
 from source.IO.dataset_import.DatasetImportParams import DatasetImportParams
-from source.IO.dataset_import.PickleImport import PickleImport
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.receptor.RegionDefinition import RegionDefinition
 from source.data_model.receptor.RegionType import RegionType
@@ -27,11 +24,7 @@ class MiXCRImport(DataImport):
     @staticmethod
     def import_dataset(params: dict) -> RepertoireDataset:
         mixcr_params = DatasetImportParams.build_object(**params)
-        if os.path.isfile(mixcr_params.result_path + "dataset.pkl"):
-            params["path"] = mixcr_params.result_path + "dataset.pkl"
-            dataset = PickleImport.import_dataset(params)
-        else:
-            dataset = ImportHelper.import_repertoire_dataset(MiXCRImport.preprocess_repertoire, mixcr_params)
+        dataset = ImportHelper.import_or_load_imported(params, mixcr_params, MiXCRImport.preprocess_repertoire)
         return dataset
 
     @staticmethod
