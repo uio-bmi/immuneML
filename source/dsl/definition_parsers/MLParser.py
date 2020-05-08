@@ -1,3 +1,5 @@
+import inspect
+
 from source.dsl.DefaultParamsLoader import DefaultParamsLoader
 from source.dsl.symbol_table.SymbolTable import SymbolTable
 from source.dsl.symbol_table.SymbolType import SymbolType
@@ -57,8 +59,11 @@ class MLParser:
                 ml_method = ml_method_class(parameter_grid={key: [ml_params[key]]
                                                             if not isinstance(ml_params[key], list) else ml_params[key]
                                                             for key in ml_params.keys()})
-            else:
+            elif len(inspect.signature(ml_method_class.__init__).parameters.keys()) == 3 and \
+                    all(arg in inspect.signature(ml_method_class.__init__).parameters.keys() for arg in ["parameters", "parameter_grid"]):
                 ml_method = ml_method_class(parameters=ml_params)
+            else:
+                ml_method = ml_method_class(**ml_params)
 
         return ml_method, ml_params
 
