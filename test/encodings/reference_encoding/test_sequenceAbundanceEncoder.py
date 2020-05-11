@@ -36,7 +36,7 @@ class TestSequenceAbundanceEncoder(TestCase):
 
         encoder = SequenceAbundanceEncoder.build_object(dataset, **{
             "comparison_attributes": ["sequence_aas"],
-            "p_value_threshold": 0.4, "pool_size": 4
+            "p_value_threshold": 0.4, "sequence_batch_size": 4
         })
 
         label_config = LabelConfiguration([Label("l1", [True, False])])

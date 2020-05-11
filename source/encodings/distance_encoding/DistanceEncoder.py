@@ -46,11 +46,11 @@ class DistanceEncoder(DatasetEncoder):
 
     """
 
-    def __init__(self, distance_metric: DistanceMetricType, attributes_to_match: list, pool_size: int, context: dict = None):
+    def __init__(self, distance_metric: DistanceMetricType, attributes_to_match: list, sequence_batch_size: int, context: dict = None):
         self.distance_metric = distance_metric
         self.distance_fn = ReflectionHandler.import_function(self.distance_metric.value, DistanceMetrics)
         self.attributes_to_match = attributes_to_match
-        self.pool_size = pool_size
+        self.sequence_batch_size = sequence_batch_size
         self.context = context
 
     def set_context(self, context: dict):
@@ -58,14 +58,14 @@ class DistanceEncoder(DatasetEncoder):
         return self
 
     @staticmethod
-    def _prepare_parameters(distance_metric: str, attributes_to_match: list, pool_size: int, context: dict = None):
+    def _prepare_parameters(distance_metric: str, attributes_to_match: list, sequence_batch_size: int, context: dict = None):
         valid_metrics = [metric.name for metric in DistanceMetricType]
         ParameterValidator.assert_in_valid_list(distance_metric, valid_metrics, "DistanceEncoder", "distance_metric")
 
         return {
             "distance_metric": DistanceMetricType[distance_metric.upper()],
             "attributes_to_match": attributes_to_match,
-            "pool_size": pool_size,
+            "sequence_batch_size": sequence_batch_size,
             "context": context
         }
 
@@ -79,7 +79,7 @@ class DistanceEncoder(DatasetEncoder):
 
     def build_distance_matrix(self, dataset: RepertoireDataset, params: EncoderParams, train_repertoire_ids: list):
         comparison = PairwiseRepertoireComparison(self.attributes_to_match, self.attributes_to_match, params["result_path"],
-                                                  params["batch_size"], self.pool_size)
+                                                  sequence_batch_size=self.sequence_batch_size)
 
         current_dataset = dataset if self.context is None or "dataset" not in self.context else self.context["dataset"]
 

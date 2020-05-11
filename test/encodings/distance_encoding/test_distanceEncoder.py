@@ -37,12 +37,12 @@ class TestDistanceEncoder(TestCase):
 
         enc = DistanceEncoder.build_object(dataset, **{"distance_metric": DistanceMetricType.JACCARD.name,
                                                        "attributes_to_match": ["sequence_aas"],
-                                                       "pool_size": 4})
+                                                       "sequence_batch_size": 20})
 
         enc.set_context({"dataset": dataset})
         encoded = enc.encode(dataset, EncoderParams(result_path=path,
                                                     label_configuration=LabelConfiguration([Label("l1", [0, 1]), Label("l2", [2, 3])]),
-                                                    batch_size=20, filename="dataset.pkl"))
+                                                    batch_size=4, filename="dataset.pkl"))
 
         self.assertEqual(8, encoded.encoded_data.examples.shape[0])
         self.assertEqual(8, encoded.encoded_data.examples.shape[1])

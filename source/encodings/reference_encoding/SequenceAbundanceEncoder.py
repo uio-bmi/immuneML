@@ -42,7 +42,7 @@ class SequenceAbundanceEncoder(DatasetEncoder):
                         - chains
                         - region_types
                     p_value_threshold: 0.05
-                    pool_size: 4
+                    sequence_batch_size: 100000
     """
 
     RELEVANT_SEQUENCE_ABUNDANCE = "relevant_sequence_abundance"
@@ -53,10 +53,10 @@ class SequenceAbundanceEncoder(DatasetEncoder):
         assert isinstance(dataset, RepertoireDataset), "SequenceAbundanceEncoder: this encoding only works on repertoire datasets."
         return SequenceAbundanceEncoder(**params)
 
-    def __init__(self, comparison_attributes, p_value_threshold: float, pool_size: int, name: str = None):
+    def __init__(self, comparison_attributes, p_value_threshold: float, sequence_batch_size: int, name: str = None):
         self.comparison_attributes = comparison_attributes
         self.p_value_threshold = p_value_threshold
-        self.pool_size = pool_size
+        self.sequence_batch_size = sequence_batch_size
         self.name = name
         self.relevant_sequence_indices = None
         self.context = None
@@ -112,7 +112,7 @@ class SequenceAbundanceEncoder(DatasetEncoder):
     def build_comparison_data(self, dataset: RepertoireDataset, params: EncoderParams):
 
         comp_data = ComparisonData(dataset.get_repertoire_ids(), self.comparison_attributes,
-                                   self.pool_size, params["batch_size"], params["result_path"])
+                                   self.sequence_batch_size, params["result_path"])
 
         comp_data.process_dataset(dataset)
 

@@ -21,7 +21,7 @@ class TestComparisonData(TestCase):
 
     def create_comparison_data(self, path: str):
         comparison_data = ComparisonData(repertoire_ids=["1", "2", "3", "4", "5", "6"], comparison_attributes=["col1", "col2"],
-                                         pool_size=4, batch_size=3, path=path)
+                                         sequence_batch_size=3, path=path)
 
         comparison_data.tmp_batch_paths = [path + "batch_0.csv", path + "batch_1.csv"]
         batch0 = {("a", 1): {"1": 1}, ("b", 2): {"2": 1}, ("c", 3): {"3": 1}}
@@ -48,7 +48,7 @@ class TestComparisonData(TestCase):
         expected_abundance_matrix = np.array([[1, 4], [1, 6], [1, 3], [1, 6]])
 
         comparison_data = ComparisonData(repertoire_ids=["rep_0", "rep_1", "rep_2", "rep_3"],
-                                         comparison_attributes=["amino_acid_sequence"], pool_size=4, batch_size=2, path="")
+                                         comparison_attributes=["amino_acid_sequence"], sequence_batch_size=2, path="")
         comparison_data.batches = [{'matrix': np.array([[1., 0., 0., 0.],
                                                         [1., 1., 0., 0.]]),
                                     'row_names': [('GGG',), ('III',)],
@@ -89,7 +89,7 @@ class TestComparisonData(TestCase):
         col_name_index = {repertoires[index].identifier: index for index in range(len(repertoires))}
 
         comparison_data = ComparisonData(repertoire_ids=[repertoire.identifier for repertoire in repertoires],
-                                         comparison_attributes=["amino_acid_sequence"], pool_size=4, path="")
+                                         comparison_attributes=["amino_acid_sequence"], sequence_batch_size=4, path="")
         comparison_data.batches = [{'matrix': np.array([[1., 0., 0., 0.],
                                                         [1., 1., 0., 0.]]),
                                     'row_names': [('GGG',), ('III',)],

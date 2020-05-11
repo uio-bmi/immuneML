@@ -12,12 +12,10 @@ class ComparisonData:
     INVALID_P_VALUE = np.nan
 
     @log
-    def __init__(self, repertoire_ids: list, comparison_attributes, pool_size: int, batch_size: int = 10000,
-                 path: str = None):
+    def __init__(self, repertoire_ids: list, comparison_attributes, sequence_batch_size: int = 10000, path: str = None):
 
         self.path = path
-        self.batch_size = batch_size
-        self.pool_size = pool_size
+        self.sequence_batch_size = sequence_batch_size
         self.item_count = 0
         self.batch_paths = []
         self.tmp_batch_paths = [self.path + "batch_0.pickle"]
@@ -34,14 +32,14 @@ class ComparisonData:
     def get_repertoire_vector(self, identifier: str):
         repertoire_vector = np.zeros(self.item_count)
         for batch_index, batch in enumerate(self.get_batches(columns=[identifier])):
-            start = batch_index * self.batch_size
+            start = batch_index * self.sequence_batch_size
             end = start + batch.shape[0]
             repertoire_vector[start: end] = batch[:, 0]
         return repertoire_vector
 
     def get_item_vector(self, index: int):
-        batch_index = int(index / self.batch_size)
-        index_in_batch = index - (batch_index * self.batch_size)
+        batch_index = int(index / self.sequence_batch_size)
+        index_in_batch = index - (batch_index * self.sequence_batch_size)
         return self.batches[batch_index]["matrix"][index_in_batch]
 
     def get_batches(self, columns: list = None):
@@ -116,7 +114,7 @@ class ComparisonData:
         for index in range(len(self.tmp_batches)):
 
             batch = self.load_tmp_batch(index)
-            matrix = np.zeros((self.batch_size, len(self.repertoire_ids)), order='F')
+            matrix = np.zeros((self.sequence_batch_size, len(self.repertoire_ids)), order='F')
             row_names = []
 
             for item_index, item in enumerate(batch):
@@ -186,7 +184,7 @@ class ComparisonData:
         last_batch_index = len(self.tmp_batches)-1
         batch = self.load_tmp_batch(last_batch_index)
         item_index = 0
-        while len(batch) < self.batch_size and item_index < len(items):
+        while len(batch) < self.sequence_batch_size and item_index < len(items):
             batch[items[item_index]] = {repertoire_id: 1}
             item_index += 1
 
@@ -197,7 +195,7 @@ class ComparisonData:
         items = items[item_index:]
 
         while len(items) > 0:
-            batch = {item: {repertoire_id: 1} for item in items[:self.batch_size]}
+            batch = {item: {repertoire_id: 1} for item in items[:self.sequence_batch_size]}
             last_batch_index += 1
             self.store_tmp_batch(batch, last_batch_index)
-            items = items[self.batch_size:]
+            items = items[self.sequence_batch_size:]
