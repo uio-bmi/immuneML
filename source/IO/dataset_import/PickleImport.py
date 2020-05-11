@@ -21,7 +21,7 @@ class PickleImport(DataImport):
     @staticmethod
     def import_dataset(params: dict) -> RepertoireDataset:
         pickle_params = DatasetImportParams.build_object(**params)
-        assert os.path.isfile(pickle_params.path), "PickleImport: the dataset file does not exist in the given path: " + params.path
+        assert os.path.isfile(pickle_params.path), "PickleImport: the dataset file does not exist in the given path: " + pickle_params.path
         with open(pickle_params.path, "rb") as file:
             dataset = pickle.load(file)
 
