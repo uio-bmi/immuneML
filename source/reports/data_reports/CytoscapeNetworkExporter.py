@@ -124,7 +124,10 @@ class CytoscapeNetworkExporter(DataReport):
         node_meta_df = pd.DataFrame(node_metadata_list, columns=["shared_name", "chain", "sequence", "v_subgroup", "v_gene", "j_subgroup", "j_gene"] + self.additional_node_attributes)
         edge_meta_df = pd.DataFrame(edge_metadata_list, columns=["shared_name"] + self.additional_edge_attributes)
 
-        node_meta_df.drop_duplicates(inplace=True)
+        node_cols = list(node_meta_df.columns)
+        node_meta_df["n_duplicates"] = 1
+        node_meta_df = node_meta_df.groupby(node_cols, as_index=False)["n_duplicates"].sum()
+
         edge_meta_df.drop_duplicates(inplace=True)
         node_meta_df.to_csv(f"{result_path}node_metadata.tsv", sep="\t", index=0, header=True)
         edge_meta_df.to_csv(f"{result_path}edge_metadata.tsv", sep="\t", index=0, header=True)
