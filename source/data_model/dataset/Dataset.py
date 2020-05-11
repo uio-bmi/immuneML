@@ -10,6 +10,7 @@ class Dataset:
         self.encoded_data = None
         self.name = None
         self.identifier = None
+        self.params = None
 
     @abc.abstractmethod
     def make_subset(self, example_indices, path, dataset_type: str):

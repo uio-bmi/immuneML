@@ -1,7 +1,9 @@
 import hashlib
 import os
+import warnings
 from typing import List
 
+from source.data_model.dataset.Dataset import Dataset
 from source.dsl.DefaultParamsLoader import DefaultParamsLoader
 from source.dsl.symbol_table.SymbolTable import SymbolTable
 from source.environment.EnvironmentSettings import EnvironmentSettings
@@ -29,7 +31,7 @@ class HPOptimizationParser:
         assessment = self._parse_split_config(instruction, "assessment", symbol_table)
         selection = self._parse_split_config(instruction, "selection", symbol_table)
         dataset = symbol_table.get(instruction["dataset"])
-        label_config = self._create_label_config(instruction, dataset.params)
+        label_config = self._create_label_config(instruction, dataset, key)
         strategy = ReflectionHandler.get_class_by_name(instruction["strategy"], "hyperparameter_optimization/")
         metrics = {MetricType[metric.upper()] for metric in instruction["metrics"]}
         optimization_metric = MetricType[instruction["optimization_metric"].upper()]
@@ -84,11 +86,21 @@ class HPOptimizationParser:
 
         return path
 
-    def _create_label_config(self, instruction: dict, dataset_params: dict) -> LabelConfiguration:
+    def _create_label_config(self, instruction: dict, dataset: Dataset, instruction_key: str) -> LabelConfiguration:
         labels = instruction["labels"]
         label_config = LabelConfiguration()
         for label in labels:
-            label_config.add_label(label, dataset_params[label] if dataset_params and label in dataset_params else None)
+            if dataset.params is not None and label in dataset.params:
+                label_values = dataset.params[label]
+            elif hasattr(dataset, "get_metadata"):
+                label_values = list(set(dataset.get_metadata([label])[label]))
+            else:
+                label_values = []
+                warnings.warn(f"HPOptimizationParser: for instruction {instruction_key}, label values could not be recovered for label "
+                              f"{label}, using empty list instead.  This could cause problems with some encodings. "
+                              f"If that might be the case, check if the dataset {dataset.name} has been properly loaded.")
+
+            label_config.add_label(label, label_values)
         return label_config
 
     def _parse_split_config(self, instruction: dict, key: str, symbol_table: SymbolTable) -> SplitConfig:

@@ -1,9 +1,11 @@
 from functools import lru_cache
+from typing import List
 
 import numpy as np
 from scipy.stats import fisher_exact
 
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
+from source.data_model.repertoire.Repertoire import Repertoire
 from source.logging.Logger import log
 
 
@@ -72,13 +74,13 @@ class ComparisonData:
     def find_label_associated_sequence_info(self, dataset: RepertoireDataset, label: str, label_values: list):
 
         assert label_values is None or len(label_values) == 2, \
-            "ComparisonData: Label associated sequences can be inferred only for binary labels."
+            f"ComparisonData: Label associated sequences can be inferred only for binary labels, got {str(label_values)[1:-1]} instead."
 
         sequence_p_values = self.find_label_associated_sequence_p_values(dataset.repertoires, label, label_values)
 
         return np.array(sequence_p_values)
 
-    def find_label_associated_sequence_p_values(self, repertoires, label, label_values):
+    def find_label_associated_sequence_p_values(self, repertoires: List[Repertoire], label: str, label_values: list):
         sequence_p_values = []
         is_first_class = np.array([repertoire.metadata[label] for repertoire in repertoires]) == label_values[0]
 
