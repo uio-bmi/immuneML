@@ -60,12 +60,12 @@ class TestCytoscapeNetworkExporter(TestCase):
                                                     '*a*s=DUPDUP*v=V1-1*j=J1-1\tpair\t*b*s=DFJKHJ*v=V1-1*j=J1-1\n'])
 
         with open(f"{path}receptor_dataset/node_metadata.tsv") as file:
-            self.assertListEqual(file.readlines(), ['shared_name\tchain\tsequence\tv_subgroup\tv_gene\tj_subgroup\tj_gene\tcustom_1\n',
-                                                    '*a*s=DUPDUP*v=V1-1*j=J1-1\talpha\tDUPDUP\tTRAV1\tTRAV1-1\tTRAJ1\tTRAJ1-1\tCUST-0\n',
-                                                    '*b*s=AILUDGYF*v=V1-1*j=J1-1\tbeta\tAILUDGYF\tTRBV1\tTRBV1-1\tTRBJ1\tTRBJ1-1\tCUST-1\n',
-                                                    '*b*s=DFJKHJ*v=V1-1*j=J1-1\tbeta\tDFJKHJ\tTRBV1\tTRBV1-1\tTRBJ1\tTRBJ1-1\tCUST-2\n',
-                                                    '*a*s=DIUYUAG*v=V1-1*j=J1-1\talpha\tDIUYUAG\tTRAV1\tTRAV1-1\tTRAJ1\tTRAJ1-1\tCUST-3\n',
-                                                    '*b*s=CTGTCGH*v=V1-1*j=J1-1\tbeta\tCTGTCGH\tTRBV1\tTRBV1-1\tTRBJ1\tTRBJ1-1\tCUST-4\n'])
+            self.assertEqual(file.readline(), 'shared_name\tchain\tsequence\tv_subgroup\tv_gene\tj_subgroup\tj_gene\tcustom_1\tn_duplicates\n')
+            self.assertListEqual(sorted(file.readlines()), sorted(['*a*s=DUPDUP*v=V1-1*j=J1-1\talpha\tDUPDUP\tTRAV1\tTRAV1-1\tTRAJ1\tTRAJ1-1\tCUST-0\t2\n',
+                                                    '*b*s=AILUDGYF*v=V1-1*j=J1-1\tbeta\tAILUDGYF\tTRBV1\tTRBV1-1\tTRBJ1\tTRBJ1-1\tCUST-1\t1\n',
+                                                    '*b*s=DFJKHJ*v=V1-1*j=J1-1\tbeta\tDFJKHJ\tTRBV1\tTRBV1-1\tTRBJ1\tTRBJ1-1\tCUST-2\t1\n',
+                                                    '*a*s=DIUYUAG*v=V1-1*j=J1-1\talpha\tDIUYUAG\tTRAV1\tTRAV1-1\tTRAJ1\tTRAJ1-1\tCUST-3\t1\n',
+                                                    '*b*s=CTGTCGH*v=V1-1*j=J1-1\tbeta\tCTGTCGH\tTRBV1\tTRBV1-1\tTRBJ1\tTRBJ1-1\tCUST-4\t1\n']))
 
         with open(f"{path}receptor_dataset/edge_metadata.tsv") as file:
             self.assertListEqual(file.readlines(),
@@ -99,13 +99,14 @@ class TestCytoscapeNetworkExporter(TestCase):
                                                     '*a*s=DUPDUP*v=V1-1*j=J1-1\tpair\t*b*s=DFJKHJ*v=V1-1*j=J1-1\n'])
 
         with open(f"{path}repertoire_dataset/node_metadata.tsv") as file:
-            self.assertListEqual(file.readlines(),
-                                 ['shared_name\tchain\tsequence\tv_subgroup\tv_gene\tj_subgroup\tj_gene\tcustom_1\n',
-                                  '*a*s=DUPDUP*v=V1-1*j=J1-1\talpha\tDUPDUP\tTRAV1\tTRAV1-1\tTRAJ1\tTRAJ1-1\tCUST-0\n',
-                                  '*b*s=AILUDGYF*v=V1-1*j=J1-1\tbeta\tAILUDGYF\tTRBV1\tTRBV1-1\tTRBJ1\tTRBJ1-1\tCUST-1\n',
-                                  '*b*s=DFJKHJ*v=V1-1*j=J1-1\tbeta\tDFJKHJ\tTRBV1\tTRBV1-1\tTRBJ1\tTRBJ1-1\tCUST-2\n',
-                                  '*a*s=DIUYUAG*v=V1-1*j=J1-1\talpha\tDIUYUAG\tTRAV1\tTRAV1-1\tTRAJ1\tTRAJ1-1\tCUST-3\n',
-                                  '*b*s=CTGTCGH*v=V1-1*j=J1-1\tbeta\tCTGTCGH\tTRBV1\tTRBV1-1\tTRBJ1\tTRBJ1-1\tCUST-4\n'])
+            self.assertEqual(file.readline(), 'shared_name\tchain\tsequence\tv_subgroup\tv_gene\tj_subgroup\tj_gene\tcustom_1\tn_duplicates\n')
+
+            self.assertListEqual(sorted(file.readlines()),
+                                 sorted(['*a*s=DUPDUP*v=V1-1*j=J1-1\talpha\tDUPDUP\tTRAV1\tTRAV1-1\tTRAJ1\tTRAJ1-1\tCUST-0\t2\n',
+                                  '*b*s=AILUDGYF*v=V1-1*j=J1-1\tbeta\tAILUDGYF\tTRBV1\tTRBV1-1\tTRBJ1\tTRBJ1-1\tCUST-1\t1\n',
+                                  '*b*s=DFJKHJ*v=V1-1*j=J1-1\tbeta\tDFJKHJ\tTRBV1\tTRBV1-1\tTRBJ1\tTRBJ1-1\tCUST-2\t1\n',
+                                  '*a*s=DIUYUAG*v=V1-1*j=J1-1\talpha\tDIUYUAG\tTRAV1\tTRAV1-1\tTRAJ1\tTRAJ1-1\tCUST-3\t1\n',
+                                  '*b*s=CTGTCGH*v=V1-1*j=J1-1\tbeta\tCTGTCGH\tTRBV1\tTRBV1-1\tTRBJ1\tTRBJ1-1\tCUST-4\t1\n']))
 
         with open(f"{path}repertoire_dataset/edge_metadata.tsv") as file:
             self.assertListEqual(file.readlines(),
