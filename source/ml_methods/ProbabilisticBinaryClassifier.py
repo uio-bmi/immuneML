@@ -7,6 +7,7 @@ from typing import Tuple
 import numpy as np
 import yaml
 from scipy.special import beta as beta_func
+from scipy.special import betaln as beta_func_ln
 from scipy.special import digamma, comb
 
 from source.ml_methods.MLMethod import MLMethod
@@ -104,14 +105,8 @@ class ProbabilisticBinaryClassifier(MLMethod):
         k_is, n_is = self._perform_laplace_smoothing(k_is, n_is)
 
         for iteration in range(self.max_iterations):
-            beta_func_value = beta_func(k_is + alpha, n_is - k_is + beta)
 
-            if (beta_func_value <= 0).any():
-                raise RuntimeError(f"ProbabilisticBinaryClassifier: while estimating beta distribution parameters, "
-                                   f"numerical instabilities occurred in iteration {iteration} in beta function. \n"
-                                   f"alpha: {alpha}, beta: {beta}")
-
-            log_likelihood = - N_l * beta_func(alpha, beta) + np.sum(np.log(beta_func_value))
+            log_likelihood = - N_l * beta_func(alpha, beta) + np.sum(beta_func_ln(k_is + alpha, n_is - k_is + beta))
 
             if np.isnan(log_likelihood):
                 raise RuntimeError(f"ProbabilisticBinaryClassifier: while estimating beta distribution parameters, "
