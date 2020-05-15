@@ -9,7 +9,6 @@ from source.hyperparameter_optimization.config.SplitConfig import SplitConfig
 from source.hyperparameter_optimization.states.HPAssessmentState import HPAssessmentState
 from source.hyperparameter_optimization.strategy.HPOptimizationStrategy import HPOptimizationStrategy
 from source.reports.ReportResult import ReportResult
-from source.reports.data_reports.DataReport import DataReport
 
 
 @dataclass
@@ -25,7 +24,7 @@ class HPOptimizationState:
     path: str = None
     context: dict = None
     batch_size: int = 1
-    data_reports: List[DataReport] = None
+    data_reports: dict = None
     name: str = None
     assessment_states: List[HPAssessmentState] = field(default_factory=list)
     hp_report_results: List[ReportResult] = field(default_factory=list)

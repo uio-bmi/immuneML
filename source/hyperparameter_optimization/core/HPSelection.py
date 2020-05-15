@@ -61,17 +61,20 @@ class HPSelection:
                                encoder=hp_setting.encoder.build_object(train_dataset, **hp_setting.encoder_params).set_context(state.context),
                                encoder_params=hp_setting.encoder_params, method=hp_setting.ml_method,
                                ml_params=hp_setting.ml_params, metrics=state.metrics, optimization_metric=state.optimization_metric,
-                               path=current_path,
-                               reports=[report.set_context(state.context) for key, report in state.selection.reports.model_reports.items()],
+                               path=current_path, hp_setting=hp_setting,
+                               ml_reports=state.selection.reports.model_reports.values(),
+                               encoding_reports=state.selection.reports.encoding_reports.values(),
+                               report_context=state.context,
                                ml_details_path=ml_details_path,
                                ml_score_path=ml_score_path,
                                train_predictions_path=train_predictions_path,
                                val_predictions_path=val_predictions_path)
-        method, performance, ml_reports = ml_process.run(split_index)
+        method, performance, ml_reports, encoding_train_reports, encoding_test_reports = ml_process.run(split_index)
 
         hp_item = HPItem(hp_setting=hp_setting, train_dataset=train_dataset, test_dataset=val_dataset, split_index=split_index,
-                         train_predictions_path="", test_predictions_path="", ml_details_path="", performance=performance, method=method)
-        hp_item.model_report_results = ml_reports
+                         train_predictions_path="", test_predictions_path="", ml_details_path="", performance=performance, method=method,
+                         model_report_results=ml_reports, encoding_train_results=encoding_train_reports,
+                         encoding_test_results=encoding_test_reports)
 
         state.assessment_states[assessment_index].label_states[label].selection_state.hp_items[hp_setting.get_key()].append(hp_item)
 

@@ -1,7 +1,8 @@
 class HPItem:
 
     def __init__(self, method=None, performance=None, hp_setting=None, train_predictions_path=None, test_predictions_path=None,
-                 ml_details_path=None, train_dataset=None, test_dataset=None, split_index=None):
+                 ml_details_path=None, train_dataset=None, test_dataset=None, split_index=None, model_report_results=None,
+                 encoding_train_results=None, encoding_test_results=None):
         self.method = method
         self.performance = performance
         self.hp_setting = hp_setting
@@ -11,4 +12,6 @@ class HPItem:
         self.train_dataset = train_dataset
         self.test_dataset = test_dataset
         self.split_index = split_index
-        self.model_report_results = []
+        self.model_report_results = [] if model_report_results is None else model_report_results
+        self.encoding_train_results = [] if encoding_train_results is None else encoding_train_results
+        self.encoding_test_results = [] if encoding_test_results is None else encoding_test_results

@@ -1,13 +1,17 @@
 import copy
+from typing import List, Tuple
 
 from source.data_model.dataset.Dataset import Dataset
-from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.dsl.semantic_model.MLResult import MLResult
 from source.encodings.DatasetEncoder import DatasetEncoder
 from source.encodings.EncoderParams import EncoderParams
 from source.environment.LabelConfiguration import LabelConfiguration
 from source.environment.MetricType import MetricType
+from source.hyperparameter_optimization.HPSetting import HPSetting
 from source.ml_methods.MLMethod import MLMethod
+from source.reports.ReportResult import ReportResult
+from source.reports.ReportUtil import ReportUtil
+from source.reports.ml_reports.MLReport import MLReport
 from source.workflows.steps.DataEncoder import DataEncoder
 from source.workflows.steps.DataEncoderParams import DataEncoderParams
 from source.workflows.steps.MLMethodAssessment import MLMethodAssessment
@@ -29,9 +33,10 @@ class MLProcess:
 
     def __init__(self, train_dataset: Dataset, test_dataset: Dataset, label: str,
                  encoder: DatasetEncoder, encoder_params: dict, method: MLMethod, ml_params: dict, metrics: set,
-                 optimization_metric: MetricType, path: str, reports: list = None, min_example_count: int = 2,
-                 batch_size: int = 2, cores: int = -1, train_predictions_path: str = None, val_predictions_path: str = None,
-                 ml_details_path: str = None, ml_score_path: str = None, label_config: LabelConfiguration = None):
+                 optimization_metric: MetricType, path: str, ml_reports: List[MLReport] = None, encoding_reports: list = None,
+                 min_example_count: int = 2, batch_size: int = 2, cores: int = -1, train_predictions_path: str = None,
+                 val_predictions_path: str = None, ml_details_path: str = None, ml_score_path: str = None,
+                 label_config: LabelConfiguration = None, report_context: dict = None, hp_setting: HPSetting = None):
         self.train_dataset = train_dataset
         self.test_dataset = test_dataset
         self.label = label
@@ -53,34 +58,39 @@ class MLProcess:
         self.ml_score_path = ml_score_path
         self.train_predictions_path = train_predictions_path
         self.val_predictions_path = val_predictions_path
-        self.reports = reports if reports is not None else []
+        self.ml_reports = ml_reports if ml_reports is not None else []
+        self.encoding_reports = encoding_reports if encoding_reports is not None else []
+        self.report_context = report_context
+        self.hp_setting = hp_setting
 
     def get_ML_result(self):
         return MLResult(self.path)
 
-    def run(self, run_id: int):
-        report_results = None
+    def run(self, run_id: int) -> Tuple[MLMethod, float, List[ReportResult], List[ReportResult], List[ReportResult]]:
+
         encoded_train = self._run_encoder(self.train_dataset, True)
+        encoding_results_train = ReportUtil.run_encoding_reports(encoded_train, self.encoding_reports,
+                                                                 f"{self.path}encoding_reports/train/", self.report_context)
+
         method = self._train_ml_method(encoded_train)
+
         if self.test_dataset.get_example_count() > 0:
+
             encoded_test = self._run_encoder(self.test_dataset, False)
             performance = self._assess_ml_method(method, encoded_test, run_id)
-            report_results = self._run_reports(method, encoded_train, encoded_test, self.path + "reports/")
+
+            ml_report_results = ReportUtil.run_ML_reports(train_dataset=encoded_train, test_dataset=encoded_test, method=method,
+                                                          reports=self.ml_reports, path=f"{self.path}ml_reports/",
+                                                          hp_setting=self.hp_setting, label=self.label, context=self.report_context)
+            encoding_results_test = ReportUtil.run_encoding_reports(encoded_test, self.encoding_reports,
+                                                                    f"{self.path}encoding_reports/test/", self.report_context)
+
         else:
             performance = None
-        return method, performance, report_results
+            ml_report_results = []
+            encoding_results_test = []
 
-    def _run_reports(self, method: MLMethod, train_dataset: Dataset, test_dataset: RepertoireDataset, path: str):
-        report_results = []
-        for report in self.reports:
-            tmp_report = copy.deepcopy(report)
-            tmp_report.method = method
-            tmp_report.train_dataset = train_dataset
-            tmp_report.test_dataset = test_dataset
-            tmp_report.result_path = path
-            result = tmp_report.generate_report()
-            report_results.append(result)
-        return report_results
+        return method, performance, ml_report_results, encoding_results_train, encoding_results_test
 
     def _assess_ml_method(self, method: MLMethod, encoded_test_dataset: Dataset, run: int):
         return MLMethodAssessment.run(MLMethodAssessmentParams(

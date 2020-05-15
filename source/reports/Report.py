@@ -9,6 +9,9 @@ class Report(metaclass=abc.ABCMeta):
     generate_report method
     """
 
+    def __init__(self, name: str = None):
+        self.name = name
+
     @classmethod
     @abc.abstractmethod
     def build_object(cls, **kwargs):

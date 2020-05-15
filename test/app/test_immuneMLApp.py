@@ -104,7 +104,8 @@ class TestImmuneMLApp(TestCase):
                             "cutoff": [10],
                             "n_largest": [5]
                         }
-                    }
+                    },
+                    "rep4": "DesignMatrixExporter"
                 },
             },
             "instructions": {
@@ -137,7 +138,8 @@ class TestImmuneMLApp(TestCase):
                         "training_percentage": 0.7,
                         "reports": {
                             "data_splits": ["rep1"],
-                            "hyperparameter": ["rep2"]
+                            "hyperparameter": ["rep2"],
+                            "encoding": ["rep4"]
                         }
                     },
                     "selection": {
@@ -147,7 +149,8 @@ class TestImmuneMLApp(TestCase):
                         "reports": {
                             "data_splits": ["rep1"],
                             "models": ["rep3"],
-                            "optimal_models": []
+                            "optimal_models": [],
+                            "encoding": ["rep4"]
                         }
                     },
                     "labels": ["CD"],

@@ -7,6 +7,7 @@ from source.hyperparameter_optimization.states.HPAssessmentState import HPAssess
 from source.hyperparameter_optimization.states.HPItem import HPItem
 from source.hyperparameter_optimization.states.HPOptimizationState import HPOptimizationState
 from source.ml_methods.MLMethod import MLMethod
+from source.reports.ReportUtil import ReportUtil
 from source.util.PathBuilder import PathBuilder
 
 
@@ -99,6 +100,9 @@ class HPAssessment:
 
         performance = HPUtil.assess_performance(state, encoded_test_dataset, split_index, path, hp_setting, test_predictions_path, label, ml_score_path)
         assessment_item.performance = performance
+
+        ReportUtil.run_encoding_reports(encoded_train_dataset, state.assessment.reports.encoding_reports.values(), f"{path}encoding_reports/train/")
+        ReportUtil.run_encoding_reports(encoded_test_dataset, state.assessment.reports.encoding_reports.values(), f"{path}encoding_reports/test/")
 
         return state
 

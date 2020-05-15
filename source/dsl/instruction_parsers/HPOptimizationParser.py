@@ -1,7 +1,6 @@
 import hashlib
 import os
 import warnings
-from typing import List
 
 from source.data_model.dataset.Dataset import Dataset
 from source.dsl.DefaultParamsLoader import DefaultParamsLoader
@@ -13,7 +12,6 @@ from source.hyperparameter_optimization.HPSetting import HPSetting
 from source.hyperparameter_optimization.config.ReportConfig import ReportConfig
 from source.hyperparameter_optimization.config.SplitConfig import SplitConfig
 from source.hyperparameter_optimization.config.SplitType import SplitType
-from source.reports.data_reports.DataReport import DataReport
 from source.util.ParameterValidator import ParameterValidator
 from source.util.ReflectionHandler import ReflectionHandler
 from source.workflows.instructions.HPOptimizationInstruction import HPOptimizationInstruction
@@ -47,11 +45,11 @@ class HPOptimizationParser:
 
         return hp_instruction
 
-    def _prepare_reports(self, reports: list, symbol_table: SymbolTable) -> List[DataReport]:
+    def _prepare_reports(self, reports: list, symbol_table: SymbolTable) -> dict:
         if reports is not None:
-            return [symbol_table.get(report_id) for report_id in reports]
+            return {report_id: symbol_table.get(report_id) for report_id in reports}
         else:
-            return []
+            return {}
 
     def _prepare_context(self, instruction: dict, symbol_table: SymbolTable):
         return {"dataset": symbol_table.get(instruction["dataset"])}
