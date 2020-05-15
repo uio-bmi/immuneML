@@ -109,7 +109,6 @@ class Coefficients(MLReport):
         self._cutoff = cutoff
         self._n_largest = n_largest
         self.label = None
-        self.ml_details_path = None
         self.hp_setting = None
         self.name = name
 
@@ -218,10 +217,6 @@ class Coefficients(MLReport):
 
         if not hasattr(self, "result_path"):
             warnings.warn("Coefficients requires an output 'path' to be set. Coefficients report will not be created.")
-            run_report = False
-
-        if not hasattr(self, "ml_details_path"):
-            warnings.warn("Coefficients requires an 'ml_details_path' to be set. Coefficients report will not be created.")
             run_report = False
 
         if not hasattr(self, "label"):
