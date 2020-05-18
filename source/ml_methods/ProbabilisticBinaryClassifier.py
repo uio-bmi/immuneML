@@ -299,7 +299,7 @@ class ProbabilisticBinaryClassifier(MLMethod):
             desc = {self.label_name: {
                 **content,
                 "feature_names": feature_names,
-                "classes": self.class_mapping.values()
+                "classes": list(self.class_mapping.values())
             }}
             yaml.dump(desc, file)
 
