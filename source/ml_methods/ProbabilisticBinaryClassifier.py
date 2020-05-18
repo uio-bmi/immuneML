@@ -56,7 +56,7 @@ class ProbabilisticBinaryClassifier(MLMethod):
         self.alpha_1, self.beta_1 = self._find_beta_distribution_parameters(
             X[np.nonzero(np.array(y[self.label_name]) == self.class_mapping[1])], self.N_1)
 
-    def _predict(self, X, label_names: list = None, proba: bool = False):
+    def predict(self, X, label_names: list = None):
         """
         Predict the class assignment for examples in X (where X is validation or test set - examples not seen during training).
 
@@ -67,24 +67,19 @@ class ProbabilisticBinaryClassifier(MLMethod):
             X: design matrix of shape [number of examples x number of features], where number of features is 2
                (the first feature is the number of disease-associated sequences and the second is the total number of sequences per example)
             label_names: name of the label used for classification (e.g. CMV)
-            proba: bool indicating if the function should return class probabilities (proba = True) or just class assignment (proba = False)
 
         Returns:
-            predictions for all examples in X (with or without probabilities)
+            class predictions for all examples in X
         """
         self._check_labels(label_names)
-        predictions = []
+        predictions_list = []
         for example in X:
             k, n = example[0], example[1]
             F = self._compute_log_posterior_odds_ratio(k, n)
             predicted_class = int(F > 0)
-            if proba:
-                posterior_class_probabilities = self._compute_posterior_class_probability(k, n)
-                predictions.append(posterior_class_probabilities)
-            else:
-                predictions.append(self.class_mapping[predicted_class])
+            predictions_list.append(self.class_mapping[predicted_class])
 
-        return {self.label_name: predictions}
+        return {self.label_name: predictions_list}
 
     def _find_beta_distribution_parameters(self, X, N_l: int) -> Tuple[float, float]:
         """
@@ -250,15 +245,33 @@ class ProbabilisticBinaryClassifier(MLMethod):
                + beta_func_ln(k + self.alpha_1, n - k + self.beta_1) \
                - beta_func_ln(k + self.alpha_0, n - k + self.beta_0)
 
-    def predict(self, X, label_names: list = None):
-        return self._predict(X, label_names)
-
     def fit_by_cross_validation(self, X, y, number_of_splits: int = 5, parameter_grid: dict = None, label_names: list = None):
         warnings.warn("ProbabilisticBinaryClassifier: cross-validation on this classifier is not defined: fitting one model instead...")
         self.fit(X, y, label_names)
 
     def predict_proba(self, X, labels):
-        return self._predict(X, labels, True)
+        """
+        Predict the probability of the class for examples in X.
+
+        .. math::
+            \widehat{c} \, (k, n) = \left\{\begin{matrix} 0, & F(k, n) \leq 0\\ 1, & F(k, n) > 0 \end{matrix}\right
+
+        Arguments:
+            X: design matrix of shape [number of examples x number of features], where number of features is 2
+               (the first feature is the number of disease-associated sequences and the second is the total number of sequences per example)
+            labels: name of the label used for classification (e.g. CMV)
+
+        Returns:
+            class probabilities for all examples in X
+        """
+        self._check_labels(labels)
+        class_probabilities = np.zeros((X.shape[0], len(list(self.class_mapping.keys))), dtype=float)
+        for index, example in enumerate(X):
+            k, n = example[0], example[1]
+            posterior_class_probabilities = self._compute_posterior_class_probability(k, n)
+            class_probabilities[index] = posterior_class_probabilities
+
+        return {self.label_name: class_probabilities}
 
     def get_classes_for_label(self, label):
         if label == self.label_name:
@@ -269,7 +282,7 @@ class ProbabilisticBinaryClassifier(MLMethod):
             return None
 
     def _make_class_mapping(self, y, label_names: list):
-        assert len(label_names) == 1, "ProbabilisticBinaryCllassifier: more than one label was specified at the time, but this " \
+        assert len(label_names) == 1, "ProbabilisticBinaryClassifier: more than one label was specified at the time, but this " \
                                       "classifier can handle only binary classification for one label. Try using HPOptimization " \
                                       "instruction which will train different classifiers for all provided labels."
         unique_values = np.unique(y[label_names[0]])
