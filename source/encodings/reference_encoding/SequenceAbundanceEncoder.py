@@ -92,7 +92,7 @@ class SequenceAbundanceEncoder(DatasetEncoder):
         feature_names = [SequenceAbundanceEncoder.RELEVANT_SEQUENCE_ABUNDANCE, SequenceAbundanceEncoder.TOTAL_SEQUENCE_ABUNDANCE]
 
         encoded_dataset = RepertoireDataset(params=dataset.params, repertoires=dataset.repertoires,
-                                            encoded_data=EncodedData(examples, dataset.get_metadata([labels[0]]), train_repertoire_ids,
+                                            encoded_data=EncodedData(examples, dataset.get_metadata([labels[0]]), dataset.get_example_ids(),
                                                                      feature_names, encoding=SequenceAbundanceEncoder.__name__))
 
         return encoded_dataset

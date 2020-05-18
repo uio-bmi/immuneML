@@ -30,7 +30,8 @@ class TestProbabilisticBinaryClassifier(TestCase):
 
         classifier = self.train_classifier()
 
-        predictions = classifier.predict([[6, 7], [1, 6]], ["cmv"])
+        predictions = classifier.predict(np.array([[6, 7], [1, 6]]), ["cmv"])
+        proba_predictions = classifier.predict_proba(np.array([[6, 7], [1, 6]]), ["cmv"])
 
         self.assertEqual([1, 0], predictions["cmv"])
 

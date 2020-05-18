@@ -27,8 +27,18 @@ class TestSequenceAbundanceEncoding(TestCase):
         repertoires, metadata = RepertoireBuilder.build([["GGG", "III", "LLL", "MMM"],
                                                          ["DDD", "EEE", "FFF", "III", "LLL", "MMM"],
                                                          ["CCC", "FFF", "MMM"],
-                                                         ["AAA", "CCC", "EEE", "FFF", "LLL", "MMM"]],
-                                                        labels={"l1": [True, True, False, False]}, path=path)
+                                                         ["AAA", "CCC", "EEE", "FFF", "LLL", "MMM"],
+                                                         ["GGG", "III", "LLL", "MMM"],
+                                                         ["DDD", "EEE", "FFF", "III", "LLL", "MMM"],
+                                                         ["CCC", "FFF", "MMM"],
+                                                         ["AAA", "CCC", "EEE", "FFF", "LLL", "MMM"],
+                                                         ["GGG", "III", "LLL", "MMM"],
+                                                         ["DDD", "EEE", "FFF", "III", "LLL", "MMM"],
+                                                         ["CCC", "FFF", "MMM"],
+                                                         ["AAA", "CCC", "EEE", "FFF", "LLL", "MMM"]
+                                                         ],
+                                                        labels={"l1": [True, True, False, False, True, True,
+                                                                       False, False, True, True, False, False]}, path=path)
 
         dataset = RepertoireDataset(repertoires=repertoires, metadata_file=metadata, params={"l1": [True, False]})
         PickleExporter.export(dataset, path, "dataset.pickle")
@@ -49,9 +59,10 @@ class TestSequenceAbundanceEncoding(TestCase):
                     }
                 },
                 "ml_methods": {
-                    "knn": {
-                        "KNN": {
-                            "n_neighbors": 1
+                    "ml": {
+                        "ProbabilisticBinaryClassifier": {
+                            "max_iterations": 100,
+                            "update_rate": 0.1
                         },
                     }
                 }
@@ -62,7 +73,7 @@ class TestSequenceAbundanceEncoding(TestCase):
                     "settings": [
                         {
                             "encoding": "e1",
-                            "ml_method": "knn"
+                            "ml_method": "ml"
                         }
                     ],
                     "assessment": {

@@ -265,7 +265,7 @@ class ProbabilisticBinaryClassifier(MLMethod):
             class probabilities for all examples in X
         """
         self._check_labels(labels)
-        class_probabilities = np.zeros((X.shape[0], len(list(self.class_mapping.keys))), dtype=float)
+        class_probabilities = np.zeros((X.shape[0], len(list(self.class_mapping.keys()))), dtype=float)
         for index, example in enumerate(X):
             k, n = example[0], example[1]
             posterior_class_probabilities = self._compute_posterior_class_probability(k, n)
