@@ -16,11 +16,13 @@ from source.util.PathBuilder import PathBuilder
 
 class ImportHelper:
 
+    DATASET_NAME = "dataset.pickle"
+
     @staticmethod
     def import_or_load_imported(params: dict, processed_params, preprocess_repertoire_func):
 
-        if os.path.isfile(processed_params.result_path + "dataset.pkl"):
-            params["path"] = processed_params.result_path + "dataset.pkl"
+        if os.path.isfile(processed_params.result_path + ImportHelper.DATASET_NAME):
+            params["path"] = processed_params.result_path + ImportHelper.DATASET_NAME
             dataset = PickleImport.import_dataset(params)
         else:
             dataset = ImportHelper.import_repertoire_dataset(preprocess_repertoire_func, processed_params)
@@ -54,7 +56,7 @@ class ImportHelper:
         dataset = RepertoireDataset(params={key: list(set(metadata[key].values.tolist())) for key in potential_labels},
                                     repertoires=repertoires, metadata_file=new_metadata_file)
 
-        PickleExporter.export(dataset, params.result_path, "dataset.pickle")
+        PickleExporter.export(dataset, params.result_path, ImportHelper.DATASET_NAME)
 
         return dataset
 

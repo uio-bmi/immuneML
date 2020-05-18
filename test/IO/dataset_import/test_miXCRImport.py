@@ -138,10 +138,12 @@ class TestMiXCRLoader(TestCase):
         metadata = pd.DataFrame({"filename": ["HC2_clones_TRB.csv", "CD1_clones_TRA.csv"], "donor": ["HC2", "CD1"], "CD": [False, True]})
         metadata.to_csv(path + "metadata.csv")
 
+        output_path = path + "tmp_output/"
+
         dataset = MiXCRImport.import_dataset({
             "path": path + "tmp_input/",
             "region_type": "CDR3",
-            "result_path": path + "tmp_output/",
+            "result_path": output_path,
             "batch_size": 2, "separator": "\t",
             "region_definition": "IMGT",
             "metadata_file": path + "metadata.csv",
@@ -166,6 +168,8 @@ class TestMiXCRLoader(TestCase):
                 self.assertEqual("GCAG", repertoire.sequences[0].nucleotide_sequence)
                 self.assertEqual(6, repertoire.sequences[1].metadata.count)
                 self.assertFalse(repertoire.metadata["CD"])
+
+        shutil.rmtree(output_path)
 
         dataset = MiXCRImport.import_dataset({
             "path": path + "tmp_input/",
