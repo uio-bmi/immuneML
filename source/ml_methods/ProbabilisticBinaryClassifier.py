@@ -51,8 +51,10 @@ class ProbabilisticBinaryClassifier(MLMethod):
         self.label_name = label_names[0]
         self.N_0 = np.sum(np.array(y[label_names[0]]) == self.class_mapping[0])
         self.N_1 = np.sum(np.array(y[label_names[0]]) == self.class_mapping[1])
-        self.alpha_0, self.beta_0 = self._find_beta_distribution_parameters(X[np.nonzero(np.array(y[self.label_name]) == self.class_mapping[0])], self.N_0)
-        self.alpha_1, self.beta_1 = self._find_beta_distribution_parameters(X[np.nonzero(np.array(y[self.label_name]) == self.class_mapping[1])], self.N_1)
+        self.alpha_0, self.beta_0 = self._find_beta_distribution_parameters(
+            X[np.nonzero(np.array(y[self.label_name]) == self.class_mapping[0])], self.N_0)
+        self.alpha_1, self.beta_1 = self._find_beta_distribution_parameters(
+            X[np.nonzero(np.array(y[self.label_name]) == self.class_mapping[1])], self.N_1)
 
     def _predict(self, X, label_names: list = None, proba: bool = False):
         """
@@ -82,7 +84,7 @@ class ProbabilisticBinaryClassifier(MLMethod):
             else:
                 predictions.append(self.class_mapping[predicted_class])
 
-        return predictions
+        return {self.label_name: predictions}
 
     def _find_beta_distribution_parameters(self, X, N_l: int) -> Tuple[float, float]:
         """
@@ -244,9 +246,9 @@ class ProbabilisticBinaryClassifier(MLMethod):
             log-posterior odds ratio for class assignment
         """
         return np.log(self.N_1 + 1) - np.log(self.N_0 + 1) \
-                + np.log(beta_func(self.alpha_0, self.beta_0)) - np.log(beta_func(self.alpha_1, self.beta_1)) \
-                + np.log(beta_func(k + self.alpha_1, n - k + self.beta_1)) \
-                - np.log(beta_func(k + self.alpha_0, n - k + self.beta_0))
+               + beta_func_ln(self.alpha_0, self.beta_0) - beta_func_ln(self.alpha_1, self.beta_1) \
+               + beta_func_ln(k + self.alpha_1, n - k + self.beta_1) \
+               - beta_func_ln(k + self.alpha_0, n - k + self.beta_0)
 
     def predict(self, X, label_names: list = None):
         return self._predict(X, label_names)

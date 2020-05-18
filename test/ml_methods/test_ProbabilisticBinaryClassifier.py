@@ -32,7 +32,7 @@ class TestProbabilisticBinaryClassifier(TestCase):
 
         predictions = classifier.predict([[6, 7], [1, 6]], ["cmv"])
 
-        self.assertEqual([1, 0], predictions)
+        self.assertEqual([1, 0], predictions["cmv"])
 
     def test_store(self):
 
