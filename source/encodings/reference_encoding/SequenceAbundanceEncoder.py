@@ -1,5 +1,7 @@
 import pickle
 
+import yaml
+
 from source.IO.dataset_export.PickleExporter import PickleExporter
 from source.caching.CacheHandler import CacheHandler
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
@@ -7,7 +9,6 @@ from source.data_model.encoded_data.EncodedData import EncodedData
 from source.encodings.DatasetEncoder import DatasetEncoder
 from source.encodings.EncoderParams import EncoderParams
 from source.pairwise_repertoire_comparison.ComparisonData import ComparisonData
-from source.util.EncoderHelper import EncoderHelper
 
 
 class SequenceAbundanceEncoder(DatasetEncoder):
@@ -85,7 +86,6 @@ class SequenceAbundanceEncoder(DatasetEncoder):
 
         assert len(labels) == 1, "SequenceAbundanceEncoder: this encoding works only for single label."
 
-        train_repertoire_ids = EncoderHelper.prepare_training_ids(dataset, params)
         self._prepare_relevant_sequence_indices(dataset, params, comparison_data, labels)
 
         examples = comparison_data.build_abundance_matrix(dataset.get_example_ids(), self.relevant_sequence_indices)
@@ -105,6 +105,10 @@ class SequenceAbundanceEncoder(DatasetEncoder):
             self.relevant_sequence_indices = relevant_sequence_indices
             with open(f'{params["result_path"]}relevant_sequence_indices.pickle', "wb") as file:
                 pickle.dump(relevant_sequence_indices, file)
+            with open(f'{params["result_path"]}relevant_sequences.yaml', "w") as file:
+                all_sequences = comparison_data.get_item_names()
+                relevant_sequences = all_sequences[relevant_sequence_indices].tolist()
+                yaml.dump(relevant_sequences, file)
         else:
             with open(f'{params["result_path"]}relevant_sequence_indices.pickle', "rb") as file:
                 self.relevant_sequence_indices = pickle.load(file)

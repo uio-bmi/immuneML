@@ -49,8 +49,8 @@ class ProbabilisticBinaryClassifier(MLMethod):
 
         self.class_mapping = self._make_class_mapping(y, label_names)
         self.label_name = label_names[0]
-        self.N_0 = np.sum(np.array(y[label_names[0]]) == self.class_mapping[0])
-        self.N_1 = np.sum(np.array(y[label_names[0]]) == self.class_mapping[1])
+        self.N_0 = int(np.sum(np.array(y[label_names[0]]) == self.class_mapping[0]))
+        self.N_1 = int(np.sum(np.array(y[label_names[0]]) == self.class_mapping[1]))
         self.alpha_0, self.beta_0 = self._find_beta_distribution_parameters(
             X[np.nonzero(np.array(y[self.label_name]) == self.class_mapping[0])], self.N_0)
         self.alpha_1, self.beta_1 = self._find_beta_distribution_parameters(
@@ -289,7 +289,7 @@ class ProbabilisticBinaryClassifier(MLMethod):
         assert unique_values.shape[0] == 2, "ProbabilisticBinaryClassifier: more than two classes were given to binary classifier. " \
                                             "If there are more than two classes, choose some of the other classifiers."
 
-        if 0 in unique_values and 1 in unique_values:
+        if 0 in unique_values and 1 in unique_values and unique_values.dtype != bool:
             mapping = {1: 1, 0: 0}
         elif True in unique_values and False in unique_values:
             mapping = {1: True, 0: False}
@@ -298,8 +298,21 @@ class ProbabilisticBinaryClassifier(MLMethod):
 
         return mapping
 
-    def store(self, path, feature_names=None, details_path=None):
+    def _convert_object_to_dict(self):
         content = vars(self)
+        result = {}
+        for key, value in content.items():
+            if isinstance(value, np.ndarray):
+                result[key] = value.tolist()
+            elif value is None or isinstance(value, str) or isinstance(value, dict):
+                result[key] = value
+            else:
+                result[key] = float(value)
+
+        return result
+
+    def store(self, path, feature_names=None, details_path=None):
+        content = self._convert_object_to_dict()
         PathBuilder.build(path)
         name = FilenameHandler.get_filename(self.__class__.__name__, "pickle")
         with open(path + name, "wb") as file:

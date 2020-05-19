@@ -20,7 +20,7 @@ class TestProbabilisticBinaryClassifier(TestCase):
         classifier = ProbabilisticBinaryClassifier(100, 0.1)
 
         X = np.array([[3, 4], [1, 7], [5, 7], [3, 8]])
-        y = {"cmv": [1, 0, 1, 0]}
+        y = {"cmv": [True, False, True, False]}
 
         classifier.fit(X, y, ["cmv"])
 
@@ -33,7 +33,7 @@ class TestProbabilisticBinaryClassifier(TestCase):
         predictions = classifier.predict(np.array([[6, 7], [1, 6]]), ["cmv"])
         proba_predictions = classifier.predict_proba(np.array([[6, 7], [1, 6]]), ["cmv"])
 
-        self.assertEqual([1, 0], predictions["cmv"])
+        self.assertEqual([True, False], predictions["cmv"])
 
     def test_store(self):
 

@@ -39,6 +39,9 @@ class ComparisonData:
             repertoire_vector[start: end] = batch[:, 0]
         return repertoire_vector
 
+    def get_item_names(self):
+        return np.array([item for items in [batch["row_names"] for batch in self.batches] for item in items])
+
     def get_item_vector(self, index: int):
         batch_index = int(index / self.sequence_batch_size)
         index_in_batch = index - (batch_index * self.sequence_batch_size)
