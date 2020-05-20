@@ -111,8 +111,7 @@ class TestComparisonData(TestCase):
                                     'col_name_index':col_name_index}]
         p_values = comparison_data.find_label_associated_sequence_p_values(repertoires, "l1", [True, False])
 
-        self.assertTrue(np.allclose([np.nan, 0.3333333333333334, 1., 1., np.nan, 1., 1., 0.3333333333333334, np.nan], p_values,
-                                    equal_nan=True))
+        self.assertTrue(np.allclose([2, 0.3333333333333334, 1., 1., 2, 1., 1., 0.3333333333333334, 2], p_values))
 
         shutil.rmtree(path)
 

@@ -91,7 +91,7 @@ class MLMethodAssessment(Step):
         except ValueError:
             warnings.warn(f"MLMethodAssessment: score for metric {metric.name} could not be calculated."
                           f"\nPredicted values: {predicted_y}\nTrue values: {true_y}", RuntimeWarning)
-            score = None
+            score = -1
 
         return score
 

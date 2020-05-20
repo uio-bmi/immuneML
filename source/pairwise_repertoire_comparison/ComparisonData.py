@@ -11,7 +11,7 @@ from source.logging.Logger import log
 
 class ComparisonData:
 
-    INVALID_P_VALUE = np.nan
+    INVALID_P_VALUE = 2
 
     @log
     def __init__(self, repertoire_ids: list, comparison_attributes, sequence_batch_size: int = 10000, path: str = None):
