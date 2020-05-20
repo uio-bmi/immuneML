@@ -69,7 +69,8 @@ class HPHTMLBuilder:
             "optimization_metric": state.optimization_metric.name.lower(),
             "hp_settings": [{
                 "hp_setting": hp_setting,
-                "hp_splits": [{"optimization_metric_val": round(hp_item.performance, HPHTMLBuilder.NUM_DIGITS)} for hp_item in hp_items]
+                "hp_splits": [{"optimization_metric_val": round(hp_item.performance, HPHTMLBuilder.NUM_DIGITS)}
+                              if hp_item.performance is not None else "/" for hp_item in hp_items]
             } for hp_setting, hp_items in selection_state.hp_items.items()]
         }
 
