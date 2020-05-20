@@ -1,6 +1,7 @@
 import hashlib
 import os
 import warnings
+from typing import Tuple
 
 from source.data_model.dataset.Dataset import Dataset
 from source.dsl.DefaultParamsLoader import DefaultParamsLoader
@@ -26,9 +27,10 @@ class HPOptimizationParser:
         ParameterValidator.assert_keys(list(instruction.keys()), valid_keys, "HPOptimizationParser", "HPOptimization")
 
         settings = self._parse_settings(instruction, symbol_table)
+        dataset = symbol_table.get(instruction["dataset"])
         assessment = self._parse_split_config(instruction, "assessment", symbol_table)
         selection = self._parse_split_config(instruction, "selection", symbol_table)
-        dataset = symbol_table.get(instruction["dataset"])
+        assessment, selection = self._update_split_configs(assessment, selection, dataset)
         label_config = self._create_label_config(instruction, dataset, key)
         strategy = ReflectionHandler.get_class_by_name(instruction["strategy"], "hyperparameter_optimization/")
         metrics = {MetricType[metric.upper()] for metric in instruction["metrics"]}
@@ -44,6 +46,21 @@ class HPOptimizationParser:
                                                    batch_size=instruction["batch_size"], data_reports=data_reports, name=key)
 
         return hp_instruction
+
+    def _update_split_configs(self, assessment: SplitConfig, selection: SplitConfig, dataset: Dataset) -> Tuple[SplitConfig, SplitConfig]:
+
+        if assessment.split_strategy == SplitType.LOOCV:
+            assessment.split_count = dataset.get_example_count()
+            train_val_example_count = assessment.split_count - 1
+        elif assessment.split_strategy == SplitType.K_FOLD:
+            train_val_example_count = int(dataset.get_example_count() * (assessment.split_count - 1) / assessment.split_count)
+        else:
+            train_val_example_count = int(dataset.get_example_count() * assessment.training_percentage)
+
+        if selection.split_strategy == SplitType.LOOCV:
+            selection.split_count = train_val_example_count
+
+        return assessment, selection
 
     def _prepare_reports(self, reports: list, symbol_table: SymbolTable) -> dict:
         if reports is not None:
@@ -115,9 +132,12 @@ class HPOptimizationParser:
 
             instruction[key] = {**default_params, **instruction[key]}
 
-            return SplitConfig(split_strategy=SplitType[instruction[key]["split_strategy"].upper()],
+            split_strategy = SplitType[instruction[key]["split_strategy"].upper()]
+            training_percentage = float(instruction[key]["training_percentage"]) if split_strategy == SplitType.RANDOM else -1
+
+            return SplitConfig(split_strategy=split_strategy,
                                split_count=int(instruction[key]["split_count"]),
-                               training_percentage=float(instruction[key]["training_percentage"]),
+                               training_percentage=training_percentage,
                                reports=ReportConfig(**report_config_input))
 
         except KeyError as key_error:
