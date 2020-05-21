@@ -9,11 +9,11 @@ class EncodedData:
         examples: a matrix of example_count x feature_count elements
         feature_names: a list of feature names with feature_count elements
         feature_annotations: a data frame consisting of annotations for each unique feature
-        example_ids: a list of repertoire IDs with repertoire_count elements
+        example_ids: a list of example (repertoire/sequence/receptor) IDs with repertoire_count elements
         labels: a dict of labels where each label is a key and the value is a list of values
-                for the label across repertoires:
+                for the label across examples:
                 {label_name1: [...], label_name2: [...]}
-                Each list associated with a label has to have values for all repertoires
+                Each list associated with a label has to have values for all examples
     """
 
     def __init__(self, examples, labels: dict, example_ids: list = None, feature_names: list = None,
