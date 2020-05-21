@@ -17,6 +17,7 @@ from source.workflows.steps.Step import Step
 class MLMethodAssessment(Step):
 
     fieldnames = ["run", "optimal_method_params", "method", "encoding_params", "encoding", "evaluated_on"]
+    probability_based_metrics = [MetricType.LOG_LOSS]
 
     @staticmethod
     def run(input_params: MLMethodAssessmentParams = None):
@@ -38,8 +39,9 @@ class MLMethodAssessment(Step):
 
         results = MLMethodAssessment._score(metrics_list=input_params.metrics, optimization_metric=input_params.optimization_metric,
                                             label=input_params.label, split_index=input_params.split_index,
-                                            predicted_y=predicted_y, true_y=true_y, method=input_params.method,
-                                            dataset=input_params.dataset, ml_score_path=input_params.ml_score_path)
+                                            predicted_y=predicted_y, predicted_proba_y=predicted_proba_y, true_y=true_y,
+                                            method=input_params.method, dataset=input_params.dataset,
+                                            ml_score_path=input_params.ml_score_path)
 
         summary_metric = MLMethodAssessment._get_optimization_metric(results, input_params.label, input_params.optimization_metric)
 
@@ -50,16 +52,18 @@ class MLMethodAssessment(Step):
         return df["{}_{}".format(label, metric.name.lower())].iloc[0]
 
     @staticmethod
-    def _score(metrics_list: list, optimization_metric: MetricType, label: str, predicted_y, true_y, ml_score_path: str, split_index: int,
-               method: MLMethod, dataset: RepertoireDataset):
+    def _score(metrics_list: list, optimization_metric: MetricType, label: str, predicted_y, predicted_proba_y, true_y, ml_score_path: str,
+               split_index: int, method: MLMethod, dataset: RepertoireDataset):
         results = {}
 
         metrics_with_optim_metric = set(metrics_list)
         metrics_with_optim_metric.add(optimization_metric)
 
         for metric in list(metrics_with_optim_metric):
-            score = MLMethodAssessment._score_for_metric(metric, predicted_y[label], true_y[label],
-                                                         method.get_classes_for_label(label))
+            predicted_proba_y_label = predicted_proba_y[label] if predicted_proba_y is not None else None
+            score = MLMethodAssessment._score_for_metric(metric=metric, predicted_y=predicted_y[label], true_y=true_y[label],
+                                                         labels=method.get_classes_for_label(label),
+                                                         predicted_proba_y=predicted_proba_y_label)
             results["{}_{}".format(label, metric.name.lower())] = score
 
         results["split_index"] = split_index
@@ -77,21 +81,29 @@ class MLMethodAssessment(Step):
         return df
 
     @staticmethod
-    def _score_for_metric(metric: MetricType, predicted_y, true_y, labels):
+    def _score_for_metric(metric: MetricType, predicted_y, predicted_proba_y, true_y, labels):
         if hasattr(metrics, metric.value) and callable(getattr(metrics, metric.value)):
             fn = getattr(metrics, metric.value)
         else:
             fn = getattr(ml_metrics, metric.value)
 
         try:
-            if "labels" in inspect.signature(fn).parameters.keys():
-                score = fn(true_y, predicted_y, labels=labels)
+            if metric in MLMethodAssessment.probability_based_metrics:
+                predictions = predicted_proba_y
+                if predicted_proba_y is None:
+                    warnings.warn(f"MLMethodAssessment: metric {metric} is specified, but the chosen ML method does not output "
+                                  f"class probabilities. Using predicted classes instead...")
+                    predictions = predicted_y
             else:
-                score = fn(true_y, predicted_y)
+                predictions = predicted_y
+            if "labels" in inspect.signature(fn).parameters.keys():
+                score = fn(true_y, predictions, labels=labels)
+            else:
+                score = fn(true_y, predictions)
         except ValueError:
             warnings.warn(f"MLMethodAssessment: score for metric {metric.name} could not be calculated."
                           f"\nPredicted values: {predicted_y}\nTrue values: {true_y}", RuntimeWarning)
-            score = -1
+            score = -1.
 
         return score
 
