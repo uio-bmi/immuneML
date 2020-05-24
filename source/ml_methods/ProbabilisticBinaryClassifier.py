@@ -8,7 +8,8 @@ import numpy as np
 import yaml
 from scipy.special import beta as beta_func
 from scipy.special import betaln as beta_func_ln
-from scipy.special import digamma, comb
+from scipy.special import digamma
+from scipy.stats import betabinom as beta_binomial
 
 from source.ml_methods.MLMethod import MLMethod
 from source.util.FilenameHandler import FilenameHandler
@@ -26,6 +27,8 @@ class ProbabilisticBinaryClassifier(MLMethod):
     ‘Immunosequencing Identifies Signatures of Cytomegalovirus Exposure History and HLA-Mediated Effects on the T Cell Repertoire’.
     Nature Genetics 49, no. 5 (May 2017): 659–65. https://doi.org/10.1038/ng.3822.
     """
+
+    SMALL_POSITIVE_NUMBER = 1e-15
 
     def __init__(self, max_iterations: int, update_rate: float, likelihood_threshold: float = None):
         super().__init__()
@@ -113,8 +116,8 @@ class ProbabilisticBinaryClassifier(MLMethod):
 
             grad_alpha, grad_beta = self._compute_alpha_beta_gradients(N_l, alpha, beta, k_is, n_is)
 
-            alpha = alpha + self.update_rate * grad_alpha
-            beta = beta + self.update_rate * grad_beta
+            alpha = max(alpha + self.update_rate * grad_alpha, ProbabilisticBinaryClassifier.SMALL_POSITIVE_NUMBER)
+            beta = max(beta + self.update_rate * grad_beta, ProbabilisticBinaryClassifier.SMALL_POSITIVE_NUMBER)
 
         return alpha, beta
 
@@ -221,10 +224,10 @@ class ProbabilisticBinaryClassifier(MLMethod):
         Returns:
             a tuple of probabilities for negative class and positive class for given example
         """
-        predicted_probability = comb(n, k) \
-                                * beta_func(k + self.alpha_0, n - k + self.beta_0) / beta_func(self.alpha_0, self.beta_0) \
-                                * (self.N_0 + 1) / (self.N_0 + self.N_1 + 2)
-        return predicted_probability, 1 - predicted_probability
+        predicted_probability_0 = beta_binomial.pmf(k, n, self.alpha_0, self.beta_0) * (self.N_0 + 1) / (self.N_0 + self.N_1 + 2)
+        predicted_probability_1 = beta_binomial.pmf(k, n, self.alpha_1, self.beta_1) * (self.N_1 + 1) / (self.N_0 + self.N_1 + 2)
+
+        return predicted_probability_0, predicted_probability_1
 
     def _compute_log_posterior_odds_ratio(self, k, n):
         """
