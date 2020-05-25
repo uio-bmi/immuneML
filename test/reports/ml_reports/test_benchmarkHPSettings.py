@@ -12,7 +12,7 @@ from source.environment.Constants import Constants
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.environment.Label import Label
 from source.environment.LabelConfiguration import LabelConfiguration
-from source.environment.MetricType import MetricType
+from source.environment.Metric import Metric
 from source.hyperparameter_optimization.HPSetting import HPSetting
 from source.hyperparameter_optimization.config.SplitConfig import SplitConfig
 from source.hyperparameter_optimization.config.SplitType import SplitType
@@ -67,7 +67,7 @@ class TestBenchmarkHPSettings(TestCase):
         process = HPOptimizationInstruction(dataset, GridSearch(hp_settings), hp_settings,
                                             SplitConfig(SplitType.RANDOM, 1, 0.5),
                                             SplitConfig(SplitType.RANDOM, 1, 0.5),
-                                            {MetricType.BALANCED_ACCURACY}, MetricType.BALANCED_ACCURACY, label_config, path)
+                                            {Metric.BALANCED_ACCURACY}, Metric.BALANCED_ACCURACY, label_config, path)
 
         state = process.run(result_path=path)
 

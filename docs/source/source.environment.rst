@@ -36,10 +36,10 @@ source.environment.LabelType module
     :undoc-members:
     :show-inheritance:
 
-source.environment.MetricType module
+source.environment.Metric module
 ------------------------------------
 
-.. automodule:: source.environment.MetricType
+.. automodule:: source.environment.Metric
     :members:
     :undoc-members:
     :show-inheritance:

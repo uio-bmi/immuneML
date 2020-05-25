@@ -6,7 +6,7 @@ from source.dsl.semantic_model.MLResult import MLResult
 from source.encodings.DatasetEncoder import DatasetEncoder
 from source.encodings.EncoderParams import EncoderParams
 from source.environment.LabelConfiguration import LabelConfiguration
-from source.environment.MetricType import MetricType
+from source.environment.Metric import Metric
 from source.hyperparameter_optimization.HPSetting import HPSetting
 from source.ml_methods.MLMethod import MLMethod
 from source.reports.ReportResult import ReportResult
@@ -33,7 +33,7 @@ class MLProcess:
 
     def __init__(self, train_dataset: Dataset, test_dataset: Dataset, label: str,
                  encoder: DatasetEncoder, encoder_params: dict, method: MLMethod, ml_params: dict, metrics: set,
-                 optimization_metric: MetricType, path: str, ml_reports: List[MLReport] = None, encoding_reports: list = None,
+                 optimization_metric: Metric, path: str, ml_reports: List[MLReport] = None, encoding_reports: list = None,
                  min_example_count: int = 2, batch_size: int = 2, cores: int = -1, train_predictions_path: str = None,
                  val_predictions_path: str = None, ml_details_path: str = None, ml_score_path: str = None,
                  label_config: LabelConfiguration = None, report_context: dict = None, hp_setting: HPSetting = None):
@@ -48,10 +48,10 @@ class MLProcess:
         self.path = path
         self.cores_for_training = cores
         self.batch_size = batch_size
-        assert all([isinstance(metric, MetricType) for metric in metrics]), \
-            "MLProcess: metrics are not set to be an instance of MetricType."
+        assert all([isinstance(metric, Metric) for metric in metrics]), \
+            "MLProcess: metrics are not set to be an instance of Metric."
         self.metrics = metrics
-        self.metrics.add(MetricType.BALANCED_ACCURACY)
+        self.metrics.add(Metric.BALANCED_ACCURACY)
         self.optimization_metric = optimization_metric
         self.min_example_count = min_example_count
         self.ml_details_path = ml_details_path

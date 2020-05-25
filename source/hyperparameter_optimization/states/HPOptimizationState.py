@@ -3,7 +3,7 @@ from typing import List, Set
 
 from source.data_model.dataset.Dataset import Dataset
 from source.environment.LabelConfiguration import LabelConfiguration
-from source.environment.MetricType import MetricType
+from source.environment.Metric import Metric
 from source.hyperparameter_optimization.HPSetting import HPSetting
 from source.hyperparameter_optimization.config.SplitConfig import SplitConfig
 from source.hyperparameter_optimization.states.HPAssessmentState import HPAssessmentState
@@ -18,8 +18,8 @@ class HPOptimizationState:
     hp_settings: List[HPSetting]
     assessment: SplitConfig
     selection: SplitConfig
-    metrics: Set[MetricType]
-    optimization_metric: MetricType
+    metrics: Set[Metric]
+    optimization_metric: Metric
     label_configuration: LabelConfiguration
     path: str = None
     context: dict = None

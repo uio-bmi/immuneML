@@ -6,7 +6,7 @@ import pandas as pd
 from sklearn import metrics
 
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
-from source.environment.MetricType import MetricType
+from source.environment.Metric import Metric
 from source.ml_methods.MLMethod import MLMethod
 from source.ml_metrics import ml_metrics
 from source.util.PathBuilder import PathBuilder
@@ -17,7 +17,6 @@ from source.workflows.steps.Step import Step
 class MLMethodAssessment(Step):
 
     fieldnames = ["run", "optimal_method_params", "method", "encoding_params", "encoding", "evaluated_on"]
-    probability_based_metrics = [MetricType.LOG_LOSS]
 
     @staticmethod
     def run(input_params: MLMethodAssessmentParams = None):
@@ -48,11 +47,11 @@ class MLMethodAssessment(Step):
         return summary_metric
 
     @staticmethod
-    def _get_optimization_metric(df: pd.DataFrame, label: str, metric: MetricType) -> float:
+    def _get_optimization_metric(df: pd.DataFrame, label: str, metric: Metric) -> float:
         return df["{}_{}".format(label, metric.name.lower())].iloc[0]
 
     @staticmethod
-    def _score(metrics_list: list, optimization_metric: MetricType, label: str, predicted_y, predicted_proba_y, true_y, ml_score_path: str,
+    def _score(metrics_list: list, optimization_metric: Metric, label: str, predicted_y, predicted_proba_y, true_y, ml_score_path: str,
                split_index: int, method: MLMethod, dataset: RepertoireDataset):
         results = {}
 
@@ -81,14 +80,14 @@ class MLMethodAssessment(Step):
         return df
 
     @staticmethod
-    def _score_for_metric(metric: MetricType, predicted_y, predicted_proba_y, true_y, labels):
+    def _score_for_metric(metric: Metric, predicted_y, predicted_proba_y, true_y, labels):
         if hasattr(metrics, metric.value) and callable(getattr(metrics, metric.value)):
             fn = getattr(metrics, metric.value)
         else:
             fn = getattr(ml_metrics, metric.value)
 
         try:
-            if metric in MLMethodAssessment.probability_based_metrics:
+            if metric in Metric.get_probability_based_metric_types():
                 predictions = predicted_proba_y
                 if predicted_proba_y is None:
                     warnings.warn(f"MLMethodAssessment: metric {metric} is specified, but the chosen ML method does not output "
@@ -100,9 +99,9 @@ class MLMethodAssessment(Step):
                 score = fn(true_y, predictions, labels=labels)
             else:
                 score = fn(true_y, predictions)
-        except ValueError:
+        except ValueError as err:
             warnings.warn(f"MLMethodAssessment: score for metric {metric.name} could not be calculated."
-                          f"\nPredicted values: {predicted_y}\nTrue values: {true_y}", RuntimeWarning)
+                          f"\nPredicted values: {predicted_y}\nTrue values: {true_y}.\nMore details: {err}", RuntimeWarning)
             score = -1.
 
         return score

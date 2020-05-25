@@ -9,7 +9,7 @@ from source.encodings.word2vec.model_creator.ModelType import ModelType
 from source.environment.Constants import Constants
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.environment.LabelConfiguration import LabelConfiguration
-from source.environment.MetricType import MetricType
+from source.environment.Metric import Metric
 from source.hyperparameter_optimization.config.SplitType import SplitType
 from source.ml_methods.SimpleLogisticRegression import SimpleLogisticRegression
 from source.util.PathBuilder import PathBuilder
@@ -39,10 +39,10 @@ class TestMLProcess(TestCase):
             "model_type": ModelType.SEQUENCE.name,
             "vector_size": 16
         }
-        metrics = {MetricType.BALANCED_ACCURACY}
+        metrics = {Metric.BALANCED_ACCURACY}
         proc = MLProcess(train_dataset=dataset, test_dataset=dataset, path=path, label_config=label_config,
                          encoder=Word2VecEncoder.build_object(dataset, **encoder_params), encoder_params=encoder_params,
-                         method=SimpleLogisticRegression(), metrics=metrics, optimization_metric=MetricType.ACCURACY,
+                         method=SimpleLogisticRegression(), metrics=metrics, optimization_metric=Metric.ACCURACY,
                          min_example_count=1,
                          ml_params={"model_selection_cv": SplitType.LOOCV, "model_selection_n_folds": 3}, label="l1",
                          ml_score_path=f"{path}score.csv")

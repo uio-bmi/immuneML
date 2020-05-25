@@ -8,7 +8,7 @@ from source.dsl.DefaultParamsLoader import DefaultParamsLoader
 from source.dsl.symbol_table.SymbolTable import SymbolTable
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.environment.LabelConfiguration import LabelConfiguration
-from source.environment.MetricType import MetricType
+from source.environment.Metric import Metric
 from source.hyperparameter_optimization.HPSetting import HPSetting
 from source.hyperparameter_optimization.config.ReportConfig import ReportConfig
 from source.hyperparameter_optimization.config.SplitConfig import SplitConfig
@@ -33,14 +33,15 @@ class HPOptimizationParser:
         assessment, selection = self._update_split_configs(assessment, selection, dataset)
         label_config = self._create_label_config(instruction, dataset, key)
         strategy = ReflectionHandler.get_class_by_name(instruction["strategy"], "hyperparameter_optimization/")
-        metrics = {MetricType[metric.upper()] for metric in instruction["metrics"]}
-        optimization_metric = MetricType[instruction["optimization_metric"].upper()]
+        metrics = {Metric[metric.upper()] for metric in instruction["metrics"]}
+        optimization_metric = Metric[instruction["optimization_metric"].upper()]
+        metric_search_criterion = Metric.get_search_criterion(optimization_metric)
         path = self._prepare_path(instruction)
         context = self._prepare_context(instruction, symbol_table)
         data_reports = self._prepare_reports(instruction["reports"], symbol_table)
 
-        hp_instruction = HPOptimizationInstruction(dataset=dataset, hp_strategy=strategy(settings), hp_settings=settings,
-                                                   assessment=assessment, selection=selection, metrics=metrics,
+        hp_instruction = HPOptimizationInstruction(dataset=dataset, hp_strategy=strategy(settings, metric_search_criterion),
+                                                   hp_settings=settings, assessment=assessment, selection=selection, metrics=metrics,
                                                    optimization_metric=optimization_metric,
                                                    label_configuration=label_config, path=path, context=context,
                                                    batch_size=instruction["batch_size"], data_reports=data_reports, name=key)

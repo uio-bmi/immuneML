@@ -14,7 +14,7 @@ from source.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType impo
 from source.environment.Constants import Constants
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.environment.LabelConfiguration import LabelConfiguration
-from source.environment.MetricType import MetricType
+from source.environment.Metric import Metric
 from source.hyperparameter_optimization.HPSetting import HPSetting
 from source.hyperparameter_optimization.config.ReportConfig import ReportConfig
 from source.hyperparameter_optimization.config.SplitConfig import SplitConfig
@@ -76,7 +76,7 @@ class TestSequenceClassification(TestCase):
         instruction = HPOptimizationInstruction(dataset, GridSearch([hp_setting]), [hp_setting],
                                                 SplitConfig(SplitType.RANDOM, 1, 0.5, reports=ReportConfig()),
                                                 SplitConfig(SplitType.RANDOM, 1, 0.5, reports=ReportConfig()),
-                                                {MetricType.BALANCED_ACCURACY}, MetricType.BALANCED_ACCURACY, lc, path)
+                                                {Metric.BALANCED_ACCURACY}, Metric.BALANCED_ACCURACY, lc, path)
 
         result = instruction.run(result_path=path)
         print(result)

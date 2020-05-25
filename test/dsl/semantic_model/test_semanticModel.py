@@ -10,7 +10,7 @@ from source.encodings.word2vec.model_creator.ModelType import ModelType
 from source.environment.Constants import Constants
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.environment.LabelConfiguration import LabelConfiguration
-from source.environment.MetricType import MetricType
+from source.environment.Metric import Metric
 from source.hyperparameter_optimization.HPSetting import HPSetting
 from source.hyperparameter_optimization.config.ReportConfig import ReportConfig
 from source.hyperparameter_optimization.config.SplitConfig import SplitConfig
@@ -58,7 +58,7 @@ class TestSemanticModel(TestCase):
         instruction = HPOptimizationInstruction(dataset, GridSearch(hp_settings), hp_settings,
                                                 split_config_assessment,
                                                 split_config_selection,
-                                                {MetricType.BALANCED_ACCURACY}, MetricType.BALANCED_ACCURACY,
+                                                {Metric.BALANCED_ACCURACY}, Metric.BALANCED_ACCURACY,
                                                 label_config, path)
         semantic_model = SemanticModel([instruction], path)
 

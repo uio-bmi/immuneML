@@ -11,7 +11,7 @@ from source.data_model.encoded_data.EncodedData import EncodedData
 from source.environment.Constants import Constants
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.environment.LabelConfiguration import LabelConfiguration
-from source.environment.MetricType import MetricType
+from source.environment.Metric import Metric
 from source.ml_methods.SimpleLogisticRegression import SimpleLogisticRegression
 from source.util.PathBuilder import PathBuilder
 from source.util.RepertoireBuilder import RepertoireBuilder
@@ -42,8 +42,8 @@ class TestMLMethodAssessment(TestCase):
         res = MLMethodAssessment.run(MLMethodAssessmentParams(
             dataset=dataset,
             method=method1,
-            metrics={MetricType.ACCURACY, MetricType.BALANCED_ACCURACY, MetricType.F1_MACRO},
-            optimization_metric=MetricType.LOG_LOSS,
+            metrics={Metric.ACCURACY, Metric.BALANCED_ACCURACY, Metric.F1_MACRO},
+            optimization_metric=Metric.LOG_LOSS,
             predictions_path=EnvironmentSettings.root_path + "test/tmp/mlmethodassessment/predictions.csv",
             label="l1",
             ml_score_path=EnvironmentSettings.root_path + "test/tmp/mlmethodassessment/ml_score.csv",

@@ -13,9 +13,10 @@ class HPOptimizationStrategy(metaclass=abc.ABCMeta):
     obtained on the validation set which it then uses to determine the next step
     """
 
-    def __init__(self, hp_settings: list):
+    def __init__(self, hp_settings: list, search_criterion=max):
         self.hp_settings = {hp_setting.get_key(): hp_setting for hp_setting in hp_settings}
         self.search_space_metric = {hp_setting.get_key(): None for hp_setting in hp_settings}
+        self.search_criterion = search_criterion
 
     @abc.abstractmethod
     def generate_next_setting(self, hp_setting: HPSetting = None, metric: dict = None):
