@@ -3,6 +3,7 @@ import os
 import re
 
 import yaml
+from yaml import MarkedYAMLError
 
 from source.dsl.InstructionParser import InstructionParser
 from source.dsl.OutputParser import OutputParser
@@ -43,7 +44,6 @@ class ImmuneMLParser:
             reports:
                 r1:
                     SequenceLengthDistribution
-
             preprocessing_sequences:
                 seq1:
                     - filter_chain_B:
@@ -89,7 +89,8 @@ class ImmuneMLParser:
                 dataset: d1
                 strategy: GridSearch
                 metrics: [accuracy, f1_micro]
-                reports: None
+                optimization_metric: balanced_accuracy
+                reports: []
         output: # this section can also be omitted, in that case no additional output will be generated (no HTML report)
             format: HTML # or None
 
@@ -101,9 +102,10 @@ class ImmuneMLParser:
             with open(file_path, "r") as file:
                 workflow_specification = yaml.safe_load(file)
         except yaml.YAMLError as exc:
-            print(f"YAML formatting error in the specification file. Validate the specification and try again.\n"
-                  f"Error info: {exc}")
-            raise exc
+            problem_description = "\n--------------------------------------------------------------------------------\n" \
+                                  "There was a YAML formatting error in the supplied specification file. Please validate specification " \
+                                  "(you can use https://jsonformatter.org/yaml-validator) and try again."
+            raise MarkedYAMLError(context=str(exc), problem=problem_description, problem_mark=f"The error was {exc.problem_mark}.")
 
         try:
             symbol_table, path = ImmuneMLParser.parse(workflow_specification, file_path, result_path)
