@@ -278,7 +278,7 @@ class ProbabilisticBinaryClassifier(MLMethod):
 
     def get_classes_for_label(self, label):
         if label == self.label_name:
-            return self.class_mapping.values()
+            return list(self.class_mapping.values())
         else:
             warnings.warn("ProbabilisticBinaryClassifier: in get_classes_for_label() a label was passed in for which "
                           "the classifier was not trained: returning None...", RuntimeWarning)
