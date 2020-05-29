@@ -97,7 +97,7 @@ class ElementGenerator:
                 yield element
 
     def make_subset(self, example_indices: list, path: str, dataset_type: str, dataset_identifier: str):
-        batch_size = 1000
+        batch_size = self.file_size
         elements = []
         file_count = 1
 
@@ -113,6 +113,9 @@ class ElementGenerator:
                 self._store_elements_to_file(batch_filenames[file_count-1], elements[:self.file_size])
                 file_count += 1
                 elements = elements[self.file_size:]
+
+        if len(elements) > 0:
+            self._store_elements_to_file(batch_filenames[file_count - 1], elements)
 
         return batch_filenames
 

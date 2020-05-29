@@ -14,7 +14,7 @@ class ElementDataset(Dataset):
         self.encoded_data = encoded_data
         self.identifier = identifier if identifier is not None else uuid.uuid1()
         self._filenames = sorted(filenames) if filenames is not None else []
-        self.element_generator = ElementGenerator(self._filenames)
+        self.element_generator = ElementGenerator(self._filenames, file_size)
         self.file_size = file_size
         self.element_ids = None
         self.name = name
