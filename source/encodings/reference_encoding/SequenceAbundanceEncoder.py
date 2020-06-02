@@ -1,6 +1,6 @@
 import pickle
 
-import yaml
+import pandas as pd
 
 from source.IO.dataset_export.PickleExporter import PickleExporter
 from source.caching.CacheHandler import CacheHandler
@@ -28,8 +28,6 @@ class SequenceAbundanceEncoder(DatasetEncoder):
         comparison_attributes (list): The attributes to be considered to group receptors into clonotypes.
             Only the fields specified in comparison_attributes will be considered, all other fields are ignored.
         p_value_threshold (float): The p value threshold to be used by the statistical test.
-        pool_size (int): The pool size used for parallelization. This does not affect the results of the encoding,
-            only the speed.
 
     Specification:
 
@@ -105,10 +103,11 @@ class SequenceAbundanceEncoder(DatasetEncoder):
             self.relevant_sequence_indices = relevant_sequence_indices
             with open(f'{params["result_path"]}relevant_sequence_indices.pickle', "wb") as file:
                 pickle.dump(relevant_sequence_indices, file)
-            with open(f'{params["result_path"]}relevant_sequences.yaml', "w") as file:
-                all_sequences = comparison_data.get_item_names()
-                relevant_sequences = all_sequences[relevant_sequence_indices].tolist()
-                yaml.dump(relevant_sequences, file)
+
+            all_sequences = comparison_data.get_item_names()
+            relevant_sequences = all_sequences[relevant_sequence_indices]
+            df = pd.DataFrame(relevant_sequences, columns=self.comparison_attributes)
+            df.to_csv(f'{params["result_path"]}relevant_sequences.csv', sep=',', index=False)
         else:
             with open(f'{params["result_path"]}relevant_sequence_indices.pickle', "rb") as file:
                 self.relevant_sequence_indices = pickle.load(file)
