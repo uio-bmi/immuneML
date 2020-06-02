@@ -98,10 +98,11 @@ class FeatureValueDistplot(EncodingReport):
 
         return FeatureValueDistplot(**kwargs)
 
-    def __init__(self, dataset: RepertoireDataset = None, result_path: str = None,
-                 distribution_plot_type: str = "box", grouping_label: str = None, color_label: str = "NULL",
-                 row_grouping_label: list = None, column_grouping_label: list = None, name: str = None):
+    def __init__(self, dataset: RepertoireDataset = None, result_path: str = None, distribution_plot_type: str = "box",
+                 grouping_label: str = None, color_label: str = "NULL", row_grouping_label: list = None, column_grouping_label: list = None,
+                 name: str = None):
 
+        super().__init__(name)
         self.dataset = dataset
         self.result_path = result_path
         self.type = distribution_plot_type.lower()

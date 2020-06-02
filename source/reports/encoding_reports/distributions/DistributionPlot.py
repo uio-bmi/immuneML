@@ -59,12 +59,12 @@ class DistributionPlot(EncodingReport):
     def build_object(cls, **kwargs):
         return DistributionPlot(**kwargs)
 
-    def __init__(self, dataset: RepertoireDataset = None, result_path: str = None, result_name: str = None,
-                 type: str = "quasirandom", x: str = None, color: str = "NULL", palette: dict = {},
-                 facet_rows: list = None, facet_columns: list = None, facet_type: str = "grid",
-                 facet_scales: str = "free", facet_switch: str = "NULL", nrow: int = 3,
-                 height: float = 10, width: float = 10):
+    def __init__(self, dataset: RepertoireDataset = None, result_path: str = None, result_name: str = None, type: str = "quasirandom",
+                 x: str = None, color: str = "NULL", palette: dict = {}, facet_rows: list = None, facet_columns: list = None,
+                 facet_type: str = "grid", facet_scales: str = "free", facet_switch: str = "NULL", nrow: int = 3, height: float = 10,
+                 width: float = 10):
 
+        super().__init__()
         self.dataset = dataset
         self.result_path = result_path
         self.result_name = result_name

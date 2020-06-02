@@ -56,6 +56,11 @@ class TestSequenceAbundanceEncoding(TestCase):
                 "encodings": {
                     "e1": {
                         "SequenceAbundance": {}
+                    },
+                    "e2": {
+                        "SequenceAbundance": {
+                            "p_value_threshold": 0.001
+                        }
                     }
                 },
                 "ml_methods": {
@@ -64,6 +69,15 @@ class TestSequenceAbundanceEncoding(TestCase):
                             "max_iterations": 100,
                             "update_rate": 0.1
                         },
+                    }
+                },
+                "reports": {
+                    "r1": "SequenceAssociationLikelihood",
+                    "r2": {
+                        "CVFeaturePerformance": {
+                            "feature": "p_value_threshold",
+                            "label": "l1"
+                        }
                     }
                 }
             },
@@ -74,16 +88,24 @@ class TestSequenceAbundanceEncoding(TestCase):
                         {
                             "encoding": "e1",
                             "ml_method": "ml"
+                        },
+                        {
+                            "encoding": "e2",
+                            "ml_method": "ml"
                         }
                     ],
                     "assessment": {
                         "split_strategy": "random",
-                        "split_count": 1,
+                        "split_count": 3,
                         "training_percentage": 0.7,
+                        "reports": {
+                            "optimal_models": ["r1"],
+                            "hyperparameter": ["r2"]
+                        }
                     },
                     "selection": {
                         "split_strategy": "random",
-                        "split_count": 1,
+                        "split_count": 5,
                         "training_percentage": 0.7,
                     },
                     "labels": ["l1"],
