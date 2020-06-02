@@ -38,7 +38,6 @@ class CVFeaturePerformance(Report):
                 report1:
                     CVFeaturePerformance:
                         feature: p_value_threshold
-                        label: CMV
             ml_methods:
                 ml1: ProbabilisticBinaryClassifier
 
@@ -73,7 +72,8 @@ class CVFeaturePerformance(Report):
     def build_object(cls, **kwargs):
         return CVFeaturePerformance(**kwargs)
 
-    def __init__(self, feature: str = None, hp_optimization_state: HPOptimizationState = None, result_path: str = None, label: str = None):
+    def __init__(self, feature: str = None, hp_optimization_state: HPOptimizationState = None, result_path: str = None, label: str = None,
+                 name: str = None):
         super().__init__()
         self.feature = feature
         self.hp_optimization_state = hp_optimization_state
@@ -82,6 +82,7 @@ class CVFeaturePerformance(Report):
         self.relevant_hp_settings = []
         self.feature_values = None
         self.feature_count = None
+        self.name = name
 
     def check_prerequisites(self):
         self._extract_label()

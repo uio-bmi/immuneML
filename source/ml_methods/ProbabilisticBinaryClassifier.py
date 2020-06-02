@@ -289,8 +289,9 @@ class ProbabilisticBinaryClassifier(MLMethod):
                                       "classifier can handle only binary classification for one label. Try using HPOptimization " \
                                       "instruction which will train different classifiers for all provided labels."
         unique_values = np.sort(np.unique(y[label_names[0]]))
-        assert unique_values.shape[0] == 2, "ProbabilisticBinaryClassifier: more than two classes were given to binary classifier. " \
-                                            "If there are more than two classes, choose some of the other classifiers."
+        assert unique_values.shape[0] == 2, f"ProbabilisticBinaryClassifier: there has two be exactly two classes to use this classifier," \
+                                            f" instead got {str(unique_values.tolist())[1:-1]}. For multi-class classification, " \
+                                            f"consider some of the other classifiers."
 
         if 0 in unique_values and 1 in unique_values and unique_values.dtype != bool:
             mapping = {0: 0, 1: 1}

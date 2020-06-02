@@ -73,10 +73,11 @@ class SequenceAssociationLikelihood(MLReport):
         else:
             return True
 
-    def __init__(self, method: MLMethod = None, result_path: str = None, **kwargs):
+    def __init__(self, method: MLMethod = None, result_path: str = None, name: str = None, **kwargs):
         super().__init__()
         self.method = method
         self.result_path = result_path
+        self.name = name
 
     def generate(self) -> ReportResult:
 
