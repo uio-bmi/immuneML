@@ -160,7 +160,7 @@ class Repertoire(DatasetItem):
         if metadata_filename:
             with open(metadata_filename, "rb") as file:
                 self.metadata = pickle.load(file)
-            self._fields = self.metadata["field_list"]
+            self.fields = self.metadata["field_list"]
 
         self.metadata_filename = metadata_filename
         self.identifier = identifier
@@ -244,7 +244,7 @@ class Repertoire(DatasetItem):
                                                          region_type=row["region_types"] if "region_types" in fields else None,
                                                          cell_id=row["cell_ids"] if "cell_ids" in fields else None,
                                                          custom_params={key: row[key] if key in fields else None
-                                                                        for key in set(self._fields) - set(Repertoire.FIELDS)}),
+                                                                        for key in set(self.fields) - set(Repertoire.FIELDS)}),
                                annotation=SequenceAnnotation(implants=implants))
 
         return seq

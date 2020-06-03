@@ -1,3 +1,4 @@
+from source.IO.dataset_export.DataExporter import DataExporter
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.simulation.Simulation import Simulation
 from source.simulation.SimulationState import SimulationState
@@ -43,13 +44,21 @@ class SimulationInstruction(Instruction):
                 dataset: my_dataset
                 simulation: my_simulation
                 batch_size: 5
+                export_format: AIRR
     """
 
     def __init__(self, signals: list, simulation: Simulation, dataset: RepertoireDataset, path: str = None, batch_size: int = 1,
-                 name: str = None):
+                 name: str = None, exporter: DataExporter = None):
         self.state = SimulationState(signals, simulation, dataset, path=path, batch_size=batch_size, name=name)
+        self.exporter = exporter
 
     def run(self, result_path: str):
         self.state.result_path = result_path
         self.state.resulting_dataset = SignalImplanter.run(self.state)
+        self.export_dataset()
         return self.state
+
+    def export_dataset(self):
+        if self.exporter is not None:
+            dataset_format = self.exporter.__name__[:-8]
+            self.exporter.export(self.state.resulting_dataset, f"{self.state.result_path}exported_dataset/", f"dataset.{dataset_format}")

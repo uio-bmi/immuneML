@@ -68,7 +68,8 @@ class TestSimulation(TestCase):
                     "type": "Simulation",
                     "dataset": "d1",
                     "batch_size": 5,
-                    "simulation": "sim1"
+                    "simulation": "sim1",
+                    "export_format": "AIRR"
                 }
             },
             "output": {

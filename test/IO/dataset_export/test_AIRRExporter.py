@@ -47,9 +47,10 @@ class TestAIRRExporter(TestCase):
         repertoire, metadata_path = self.create_dummy_repertoire(path)
         dataset = RepertoireDataset(repertoires=[repertoire], metadata_file=metadata_path)
 
-        AIRRExporter.export(dataset, path, "airr_data")
+        path_exported = f"{path}exported/"
+        AIRRExporter.export(dataset, path_exported)
 
-        resulting_data = pd.read_csv(path + f"airr_data_{repertoire.identifier}.tsv", sep="\t")
+        resulting_data = pd.read_csv(path_exported + f"{repertoire.identifier}.tsv", sep="\t")
 
         self.assertListEqual(list(resulting_data["sequence_id"]), ["receptor_1", "receptor_2"])
         self.assertListEqual(list(resulting_data["rearrangement_id"]), ["receptor_1", "receptor_2"])

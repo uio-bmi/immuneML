@@ -64,6 +64,7 @@ class SimulationParser:
             simulation: sim1
             batch_size: 5 # number of repertoires that can be loaded at the same time
                           # (only affects the speed)
+            export_format: AIRR
 
     """
 

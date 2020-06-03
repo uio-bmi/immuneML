@@ -1,6 +1,8 @@
+from source.IO.dataset_export.DataExporter import DataExporter
 from source.dsl.symbol_table.SymbolTable import SymbolTable
 from source.dsl.symbol_table.SymbolType import SymbolType
 from source.util.ParameterValidator import ParameterValidator
+from source.util.ReflectionHandler import ReflectionHandler
 from source.workflows.instructions.SimulationInstruction import SimulationInstruction
 
 
@@ -64,17 +66,32 @@ class SimulationParser:
             simulation: sim1
             batch_size: 5 # number of repertoires that can be loaded at the same time
                           # (only affects the speed)
+            export_format: AIRR
 
     """
 
     def parse(self, key: str, instruction: dict, symbol_table: SymbolTable) -> SimulationInstruction:
 
-        ParameterValidator.assert_keys(instruction.keys(), ["dataset", "batch_size", "simulation", "type"], "SimulationParser", key)
+        ParameterValidator.assert_keys(instruction.keys(), ["dataset", "batch_size", "simulation", "type", "export_format"],
+                                       "SimulationParser", key)
 
         signals = [signal.item for signal in symbol_table.get_by_type(SymbolType.SIGNAL)]
         simulation = symbol_table.get(instruction["simulation"])
         dataset = symbol_table.get(instruction["dataset"])
         batch_size = instruction["batch_size"]
 
-        process = SimulationInstruction(signals=signals, simulation=simulation, dataset=dataset, batch_size=batch_size, name=key)
+        exporter = self.parse_exporter(instruction)
+
+        process = SimulationInstruction(signals=signals, simulation=simulation, dataset=dataset, batch_size=batch_size, name=key,
+                                        exporter=exporter)
         return process
+
+    def parse_exporter(self, instruction):
+        if instruction["export_format"] is not None:
+            valid_values = [cls.__name__[:-8] for cls in ReflectionHandler.all_nonabstract_subclasses(DataExporter)]
+            ParameterValidator.assert_in_valid_list(instruction["export_format"], valid_values, "SimulationParser", "export_format")
+            exporter = ReflectionHandler.get_class_by_name(f"{instruction['export_format']}Exporter", "dataset_export/")
+        else:
+            exporter = None
+
+        return exporter
