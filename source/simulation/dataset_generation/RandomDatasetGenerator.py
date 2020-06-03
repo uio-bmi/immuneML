@@ -11,7 +11,7 @@ class RandomDatasetGenerator:
     @staticmethod
     def _check_probabilities(probabilities_dict, key_type, dict_name):
         assert isinstance(probabilities_dict, dict) and all(isinstance(key, key_type) for key in probabilities_dict.keys()) \
-               and all(isinstance(key, float) for key in probabilities_dict.values()) and 0.99 <= sum(
+               and all(isinstance(value, float) or value in {0, 1} for value in probabilities_dict.values()) and 0.99 <= sum(
             probabilities_dict.values()) <= 1, f"RandomDatasetGenerator: {dict_name} are not specified "\
                                                f"correctly. They should be a dictionary with probabilities per count " \
                                                f"and sum to 1, but got {probabilities_dict} instead."

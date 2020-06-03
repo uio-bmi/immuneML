@@ -1,3 +1,5 @@
+from typing import Tuple
+
 from source.dsl.DefaultParamsLoader import DefaultParamsLoader
 from source.dsl.symbol_table.SymbolTable import SymbolTable
 from source.dsl.symbol_table.SymbolType import SymbolType
@@ -12,7 +14,7 @@ class ImportParser:
     valid_keys = ["format", "params"]
 
     @staticmethod
-    def parse(workflow_specification: dict, symbol_table: SymbolTable):
+    def parse(workflow_specification: dict, symbol_table: SymbolTable) -> Tuple[SymbolTable, dict]:
         assert ImportParser.keyword in workflow_specification, "ImmuneMLParser: datasets are not defined."
 
         for key in workflow_specification[ImportParser.keyword].keys():

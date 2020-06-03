@@ -97,7 +97,7 @@ class ImmuneMLParser:
     """
 
     @staticmethod
-    def parse_yaml_file(file_path, result_path=None):
+    def parse_yaml_file(file_path, result_path=None, parse_func=None):
         try:
             with open(file_path, "r") as file:
                 workflow_specification = yaml.safe_load(file)
@@ -108,7 +108,10 @@ class ImmuneMLParser:
             raise MarkedYAMLError(context=str(exc), problem=problem_description, problem_mark=f"The error was {exc.problem_mark}.")
 
         try:
-            symbol_table, path = ImmuneMLParser.parse(workflow_specification, file_path, result_path)
+            if parse_func is None:
+                symbol_table, path = ImmuneMLParser.parse(workflow_specification, file_path, result_path)
+            else:
+                symbol_table, path = parse_func(workflow_specification, file_path, result_path)
         except KeyError as key_error:
             raise Exception(f"ImmuneMLParser: an error occurred during parsing. Missing key was {key_error.args[0]}. "
                             f"For more details, refer to the log above and check the documentation.") from key_error

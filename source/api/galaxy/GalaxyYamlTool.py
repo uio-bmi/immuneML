@@ -2,6 +2,7 @@ import os
 
 import yaml
 
+from source.api.galaxy.Util import Util
 from source.app.ImmuneMLApp import ImmuneMLApp
 from source.util.PathBuilder import PathBuilder
 
@@ -9,16 +10,9 @@ from source.util.PathBuilder import PathBuilder
 class GalaxyYamlTool:
 
     def __init__(self, yaml_path, output_dir, **kwargs):
-        assert os.path.isfile(yaml_path), f"Galaxy immuneML tool: path to the analysis specification is not correct, got {yaml_path}, " \
-                                          f"expecting path to YAML file."
+        Util.check_parameters(yaml_path, output_dir, kwargs, "Galaxy immuneML tool")
 
-        assert isinstance(output_dir, str) and output_dir != "", f"Galaxy immuneML tool: output_dir is {output_dir}, " \
-                                                                 f"expected path to a folder to store the results."
-
-        inputs = kwargs["inputs"].split(',')
-        assert "inputs" not in kwargs or all(os.path.dirname(inputs[0]) == os.path.dirname(elem) for elem in inputs), \
-            f"Galaxy immuneML tool: not all repertoire files are under the same directory. " \
-            f"Instead, they are in {str(list(os.path.dirname(elem) for elem in inputs))[1:-1]}."
+        inputs = kwargs["inputs"].split(',') if "inputs" in kwargs else None
 
         self.yaml_path = yaml_path
         self.result_path = output_dir
