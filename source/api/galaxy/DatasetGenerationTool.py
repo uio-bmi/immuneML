@@ -41,5 +41,9 @@ class DatasetGenerationTool:
 
         workflow_specification[keys[0]]["params"]["result_path"] = self.result_path
 
+        workflow_specification[keys[0]]["params"]["metadata_file"] = self.metadata_file
+        workflow_specification[keys[0]]["params"]["path"] = self.files_path
+        workflow_specification[keys[0]]["params"]["result_path"] = self.result_path
+
         symbol_table = SymbolTable()
         return ImportParser.parse({"datasets": workflow_specification}, symbol_table)
