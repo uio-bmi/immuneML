@@ -88,9 +88,11 @@ class SimulationParser:
 
     def parse_exporter(self, instruction):
         if instruction["export_format"] is not None:
+            class_path = "dataset_export/"
+            classes = ReflectionHandler.get_classes_by_partial_name("Exporter", class_path)
             valid_values = [cls.__name__[:-8] for cls in ReflectionHandler.all_nonabstract_subclasses(DataExporter)]
             ParameterValidator.assert_in_valid_list(instruction["export_format"], valid_values, "SimulationParser", "export_format")
-            exporter = ReflectionHandler.get_class_by_name(f"{instruction['export_format']}Exporter", "dataset_export/")
+            exporter = ReflectionHandler.get_class_by_name(f"{instruction['export_format']}Exporter", class_path)
         else:
             exporter = None
 
