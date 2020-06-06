@@ -29,7 +29,11 @@ class SymbolTable:
 
     def get(self, symbol):
         if symbol is not None:
-            return self._items[symbol].item
+            if self.contains(symbol):
+                return self._items[symbol].item
+            else:
+                raise KeyError(f"SymbolTable: item with key {symbol} was not defined previously so it could not be retrieved during "
+                               f"parsing. Please check if an item with key {symbol} was defined in the specification.")
         else:
             return None
 
