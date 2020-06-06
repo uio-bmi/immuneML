@@ -45,7 +45,8 @@ class TestPublicSequenceFeatureAnnotation(TestCase):
     }
 
     dataset = RepertoireDataset(encoded_data=EncodedData(**encoded_data),
-                                repertoires=[Repertoire("0.npy", "", identifier) for identifier in encoded_data["example_ids"]])
+                                repertoires=[Repertoire(EnvironmentSettings.root_path + "test/tmp/publicsequencefeatureannotation/0.npy",
+                                                        "", identifier) for identifier in encoded_data["example_ids"]])
 
     def setUp(self) -> None:
         os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name

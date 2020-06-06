@@ -22,7 +22,6 @@ class TestMatchedPairedReference(unittest.TestCase):
         os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
 
     def create_encoded_dummy_data(self, path):
-
         # Setting up dummy data
         labels = {"donor": ["donor1", "donor1", "donor2", "donor2", "donor3"],
                   "label": ["yes", "yes", "no", "no", "no"]}
@@ -80,8 +79,6 @@ TCR_AB	400	NONO	TRAV1		TRAJ1	null	null	null	null	NONO	TRBV1		TRBJ1	null	null	nul
 
         return encoded
 
-
-
     def test_generate(self):
         path = EnvironmentSettings.root_path + "test/tmp/matched_paired_reference_report/"
 
@@ -92,23 +89,23 @@ TCR_AB	400	NONO	TRAV1		TRAJ1	null	null	null	null	NONO	TRBV1		TRBJ1	null	null	nul
         report.check_prerequisites()
         report.generate()
 
-        self.assertTrue(os.path.isfile(path+"report_results/complete_match_count_table.csv"))
-        self.assertTrue(os.path.isfile(path+"report_results/repertoire_sizes.csv"))
+        self.assertTrue(os.path.isfile(path + "report_results/complete_match_count_table.csv"))
+        self.assertTrue(os.path.isfile(path + "report_results/repertoire_sizes.csv"))
 
         self.assertTrue(os.path.isdir(path + "report_results/paired_matches"))
         self.assertTrue(os.path.isdir(path + "report_results/receptor_info"))
 
-        self.assertTrue(os.path.isfile(path+"report_results/receptor_info/all_chains.csv"))
-        self.assertTrue(os.path.isfile(path+"report_results/receptor_info/all_receptors.csv"))
-        self.assertTrue(os.path.isfile(path+"report_results/receptor_info/unique_alpha_chains.csv"))
-        self.assertTrue(os.path.isfile(path+"report_results/receptor_info/unique_beta_chains.csv"))
-        self.assertTrue(os.path.isfile(path+"report_results/receptor_info/unique_receptors.csv"))
+        self.assertTrue(os.path.isfile(path + "report_results/receptor_info/all_chains.csv"))
+        self.assertTrue(os.path.isfile(path + "report_results/receptor_info/all_receptors.csv"))
+        self.assertTrue(os.path.isfile(path + "report_results/receptor_info/unique_alpha_chains.csv"))
+        self.assertTrue(os.path.isfile(path + "report_results/receptor_info/unique_beta_chains.csv"))
+        self.assertTrue(os.path.isfile(path + "report_results/receptor_info/unique_receptors.csv"))
 
-        chains = pd.read_csv(path+"report_results/receptor_info/all_chains.csv")
-        receptors = pd.read_csv(path+"report_results/receptor_info/all_receptors.csv")
-        unique_alpha_chains = pd.read_csv(path+"report_results/receptor_info/unique_alpha_chains.csv")
-        unique_beta_chains = pd.read_csv(path+"report_results/receptor_info/unique_beta_chains.csv")
-        unique_receptors = pd.read_csv(path+"report_results/receptor_info/unique_receptors.csv")
+        chains = pd.read_csv(path + "report_results/receptor_info/all_chains.csv")
+        receptors = pd.read_csv(path + "report_results/receptor_info/all_receptors.csv")
+        unique_alpha_chains = pd.read_csv(path + "report_results/receptor_info/unique_alpha_chains.csv")
+        unique_beta_chains = pd.read_csv(path + "report_results/receptor_info/unique_beta_chains.csv")
+        unique_receptors = pd.read_csv(path + "report_results/receptor_info/unique_receptors.csv")
 
         self.assertListEqual(list(chains["clonotype_id"]), [100, 100, 200, 200, 300, 300, 400, 400])
         self.assertListEqual(list(receptors["clonotype_id"]), [100, 200, 300, 400])
@@ -120,15 +117,3 @@ TCR_AB	400	NONO	TRAV1		TRAJ1	null	null	null	null	NONO	TRBV1		TRBJ1	null	null	nul
         self.assertListEqual(list(unique_receptors["sequence_beta"]), list(unique_beta_chains["sequence"]))
 
         shutil.rmtree(path)
-
-
-
-
-
-
-
-
-
-
-
-

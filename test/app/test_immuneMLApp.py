@@ -21,7 +21,7 @@ class TestImmuneMLApp(TestCase):
         os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
 
     def create_dataset(self):
-        path = EnvironmentSettings.root_path + "test/tmp/immunemlapp/"
+        path = EnvironmentSettings.root_path + "test/tmp/immunemlapp/initial_dataset/"
         PathBuilder.build(path)
 
         repertoire_count = 30
@@ -31,10 +31,10 @@ class TestImmuneMLApp(TestCase):
                                                           for i in range(4)]
                                                          for j in range(repertoire_count)])
 
-        dataset = RepertoireDataset(repertoires=repertoires, metadata_file=metadata, params={"CD": [True, False]})
-        PickleExporter.export(dataset, path, "dataset.pkl")
+        dataset = RepertoireDataset(repertoires=repertoires, metadata_file=metadata, params={"CD": [True, False]}, name="dataset")
+        PickleExporter.export(dataset, path)
 
-        return path + "dataset.pkl"
+        return path + "dataset.pickle"
 
     def test_run(self):
 
@@ -117,6 +117,11 @@ class TestImmuneMLApp(TestCase):
                             "report": "rep1"
                         }
                     }
+                },
+                "export_instr": {
+                    "type": "DatasetGeneration",
+                    "datasets": ["d1"],
+                    "formats": ["AIRR"]
                 },
                 "inst1": {
                     "type": "HPOptimization",

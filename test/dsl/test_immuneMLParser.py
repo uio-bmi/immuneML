@@ -17,7 +17,7 @@ class TestImmuneMLParser(TestCase):
         path = EnvironmentSettings.root_path + "test/tmp/parser/"
         dataset = RepertoireDataset(repertoires=RepertoireBuilder.build([["AAA", "CCC"], ["TTTT"]], path, {"default": [1, 2]})[0],
                                     params={"default": [1, 2]})
-        PickleExporter.export(dataset, path, "dataset.pkl")
+        PickleExporter.export(dataset, path)
 
         spec = {
             "definitions": {
@@ -25,7 +25,7 @@ class TestImmuneMLParser(TestCase):
                     "d1": {
                         "format": "Pickle",
                         "params": {
-                            "path": path + "dataset.pkl",
+                            "path": path + f"{dataset.name}.pickle",
                         }
                     }
                 },

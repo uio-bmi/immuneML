@@ -27,7 +27,7 @@ class TestSimulation(TestCase):
                     "d1": {
                         "format": 'Pickle',
                         "params": {
-                            "path": path + "dataset.pkl"
+                            "path": path + "dataset1.pickle"
                         }
                     }
                 },
@@ -106,8 +106,8 @@ class TestSimulation(TestCase):
                                                               "l2": [0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 1,
                                                                      0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1]})
 
-        dataset = RepertoireDataset(repertoires=repertoires, metadata_file=metadata, params={"l1": [1, 2], "l2": [0, 1]})
-        PickleExporter.export(dataset, path, "dataset.pkl")
+        dataset = RepertoireDataset(repertoires=repertoires, metadata_file=metadata, params={"l1": [1, 2], "l2": [0, 1]}, name="dataset1")
+        PickleExporter.export(dataset, path)
 
     def test_simulation(self):
 

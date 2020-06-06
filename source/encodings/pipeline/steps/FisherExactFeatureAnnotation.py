@@ -71,7 +71,7 @@ class FisherExactFeatureAnnotation(TransformerMixin):
                 metadata_file=X.metadata_file
             )
             dataset.encoded_data.feature_annotations.to_csv(self.result_path + "/feature_annotations.csv")
-            FisherExactFeatureAnnotation.store(dataset, self.result_path, self.filename)
+            FisherExactFeatureAnnotation.store(dataset, self.result_path)
         else:
             dataset = copy.deepcopy(X)
         return dataset
@@ -133,5 +133,5 @@ class FisherExactFeatureAnnotation(TransformerMixin):
         return results
 
     @staticmethod
-    def store(encoded_dataset: RepertoireDataset, result_path, filename):
-        PickleExporter.export(encoded_dataset, result_path, filename)
+    def store(encoded_dataset: RepertoireDataset, result_path):
+        PickleExporter.export(encoded_dataset, result_path)

@@ -3,7 +3,6 @@ import shutil
 from unittest import TestCase
 
 from source.data_model.dataset.ReceptorDataset import ReceptorDataset
-from source.data_model.dataset.SequenceDataset import SequenceDataset
 from source.data_model.receptor.TCABReceptor import TCABReceptor
 from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.encodings.EncoderParams import EncoderParams
@@ -16,7 +15,6 @@ from source.util.PathBuilder import PathBuilder
 class TestOneHotSequenceEncoder(TestCase):
 
     def _construct_test_dataset(self, path, dataset_size: int = 50):
-
         receptors = [TCABReceptor(alpha=ReceptorSequence(amino_acid_sequence="AAAA"),
                                   beta=ReceptorSequence(amino_acid_sequence="ATA"),
                                   metadata={"l1": 1}, identifier=str("1")),
@@ -35,9 +33,8 @@ class TestOneHotSequenceEncoder(TestCase):
         dataset = ReceptorDataset(params={"l1": [1, 2]}, filenames=[filename], identifier="d1")
         return dataset, lc
 
-
     def test(self):
-        path = EnvironmentSettings.tmp_test_path + "onehot_sequence/"
+        path = EnvironmentSettings.tmp_test_path + "onehot_sequence_1/"
         PathBuilder.build(path)
 
         dataset, lc = self._construct_test_dataset(path)
@@ -46,7 +43,7 @@ class TestOneHotSequenceEncoder(TestCase):
                                                          "distance_to_seq_middle": 6})
 
         encoded_data = encoder.encode(dataset, EncoderParams(
-            result_path=path,
+            result_path=f"{path}encoded/",
             label_configuration=lc,
             batch_size=2,
             learn_model=True,
@@ -60,10 +57,13 @@ class TestOneHotSequenceEncoder(TestCase):
         onehot_t = [0] * 16 + [1] + [0] * 3
         onehot_empty = [0] * 20
 
-        self.assertListEqual([list(item) for item in encoded_data.encoded_data.examples[0,0]], [onehot_a for i in range(4)])
-        self.assertListEqual([list(item) for item in encoded_data.encoded_data.examples[0,1]], [onehot_a, onehot_t, onehot_a, onehot_empty])
+        self.assertListEqual([list(item) for item in encoded_data.encoded_data.examples[0, 0]], [onehot_a for i in range(4)])
+        self.assertListEqual([list(item) for item in encoded_data.encoded_data.examples[0, 1]],
+                             [onehot_a, onehot_t, onehot_a, onehot_empty])
 
-        self.assertListEqual([list(item) for item in encoded_data.encoded_data.examples[1,0]], [onehot_a, onehot_t, onehot_a, onehot_empty])
-        self.assertListEqual([list(item) for item in encoded_data.encoded_data.examples[1,1]], [onehot_a, onehot_t, onehot_t, onehot_empty])
+        self.assertListEqual([list(item) for item in encoded_data.encoded_data.examples[1, 0]],
+                             [onehot_a, onehot_t, onehot_a, onehot_empty])
+        self.assertListEqual([list(item) for item in encoded_data.encoded_data.examples[1, 1]],
+                             [onehot_a, onehot_t, onehot_t, onehot_empty])
 
         shutil.rmtree(path)

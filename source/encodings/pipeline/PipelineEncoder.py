@@ -132,4 +132,4 @@ class PipelineEncoder(DatasetEncoder):
         return tuple(step.to_tuple() for i, step in enumerate(steps) if i < index)
 
     def store(self, encoded_dataset, params: EncoderParams):
-        PickleExporter.export(encoded_dataset, params["result_path"], params["filename"])
+        PickleExporter.export(encoded_dataset, params["result_path"])

@@ -180,7 +180,7 @@ class Word2VecEncoder(DatasetEncoder):
         return model
 
     def store(self, encoded_dataset, params: EncoderParams):
-        PickleExporter.export(encoded_dataset, params["result_path"], params["filename"])
+        PickleExporter.export(encoded_dataset, params["result_path"])
 
     def _exists_model(self, params: EncoderParams) -> bool:
         return os.path.isfile(self._create_model_path(params))

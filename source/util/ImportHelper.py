@@ -56,7 +56,7 @@ class ImportHelper:
         dataset = RepertoireDataset(params={key: list(set(metadata[key].values.tolist())) for key in potential_labels},
                                     repertoires=repertoires, metadata_file=new_metadata_file)
 
-        PickleExporter.export(dataset, params.result_path, ImportHelper.DATASET_NAME)
+        PickleExporter.export(dataset, params.result_path)
 
         return dataset
 

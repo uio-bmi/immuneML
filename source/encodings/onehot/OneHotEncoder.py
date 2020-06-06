@@ -1,6 +1,9 @@
 import abc
 import math
+
 import numpy as np
+from sklearn.preprocessing import OneHotEncoder as SklearnOneHotEncoder
+
 from source.IO.dataset_export.PickleExporter import PickleExporter
 from source.caching.CacheHandler import CacheHandler
 from source.encodings.DatasetEncoder import DatasetEncoder
@@ -9,7 +12,6 @@ from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.environment.SequenceType import SequenceType
 from source.util.ParameterValidator import ParameterValidator
 from source.util.ReflectionHandler import ReflectionHandler
-from sklearn.preprocessing import OneHotEncoder as SklearnOneHotEncoder, LabelEncoder
 
 
 class OneHotEncoder(DatasetEncoder):
@@ -105,7 +107,7 @@ class OneHotEncoder(DatasetEncoder):
 
 
     def store(self, encoded_dataset, params: EncoderParams):
-        PickleExporter.export(encoded_dataset, params["result_path"], params["filename"])
+        PickleExporter.export(encoded_dataset, params["result_path"])
 
     def _encode_sequence_list(self, sequences, pad_n_sequences, pad_sequence_len):
         char_array = np.array(sequences, dtype=str)

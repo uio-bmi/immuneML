@@ -26,8 +26,6 @@ class DistanceEncoder(DatasetEncoder):
             distance between two repertoires. Currently the only available option is :py:mod:`source.encodings.distance_encoding.DistanceMetricType.JACCARD`
         attributes_to_match: The attributes to consider when determining whether a sequence is present in both repertoires.
             Only the fields defined under attributes_to_match will be considered, all other fields are ignored.
-        pool_size (int): The pool size used for parallelization. This does not affect the results of the encoding,
-            only the speed.
 
     Specification:
 
@@ -118,4 +116,4 @@ class DistanceEncoder(DatasetEncoder):
         return encoded_dataset
 
     def store(self, encoded_dataset, params: EncoderParams):
-        PickleExporter.export(encoded_dataset, params["result_path"], params["filename"])
+        PickleExporter.export(encoded_dataset, params["result_path"])

@@ -15,9 +15,10 @@ from source.util.PathBuilder import PathBuilder
 class TestOneHotSequenceEncoder(TestCase):
 
     def _construct_test_dataset(self, path):
-        sequences = [ReceptorSequence(amino_acid_sequence="AAAA", identifier="1", metadata=SequenceMetadata(custom_params={"l1": 1, "l2": 1})),
-                     ReceptorSequence(amino_acid_sequence="ATA", identifier="2", metadata=SequenceMetadata(custom_params={"l1": 2, "l2": 1})),
-                     ReceptorSequence(amino_acid_sequence="ATT", identifier="3", metadata=SequenceMetadata(custom_params={"l1": 1, "l2": 2}))]
+        sequences = [
+            ReceptorSequence(amino_acid_sequence="AAAA", identifier="1", metadata=SequenceMetadata(custom_params={"l1": 1, "l2": 1})),
+            ReceptorSequence(amino_acid_sequence="ATA", identifier="2", metadata=SequenceMetadata(custom_params={"l1": 2, "l2": 1})),
+            ReceptorSequence(amino_acid_sequence="ATT", identifier="3", metadata=SequenceMetadata(custom_params={"l1": 1, "l2": 2}))]
 
         filename = "{}sequences.pkl".format(path)
         with open(filename, "wb") as file:
@@ -31,7 +32,6 @@ class TestOneHotSequenceEncoder(TestCase):
 
         return dataset, lc
 
-
     def test(self):
         path = EnvironmentSettings.tmp_test_path + "onehot_sequence/"
         PathBuilder.build(path)
@@ -42,7 +42,7 @@ class TestOneHotSequenceEncoder(TestCase):
                                                          "distance_to_seq_middle": 6})
 
         encoded_data = encoder.encode(dataset, EncoderParams(
-            result_path=path,
+            result_path=f"{path}encoded/",
             label_configuration=lc,
             batch_size=2,
             learn_model=True,
@@ -61,7 +61,8 @@ class TestOneHotSequenceEncoder(TestCase):
         self.assertListEqual([list(item) for item in encoded_data.encoded_data.examples[2]], [onehot_a, onehot_t, onehot_t, onehot_empty])
 
         self.assertListEqual(encoded_data.encoded_data.example_ids, [receptor.identifier for receptor in dataset.get_data()])
-        self.assertDictEqual(encoded_data.encoded_data.labels, {"l1": [receptor_seq.get_attribute("l1") for receptor_seq in dataset.get_data()],
-                                                   "l2": [receptor_seq.get_attribute("l2") for receptor_seq in dataset.get_data()]})
+        self.assertDictEqual(encoded_data.encoded_data.labels,
+                             {"l1": [receptor_seq.get_attribute("l1") for receptor_seq in dataset.get_data()],
+                              "l2": [receptor_seq.get_attribute("l2") for receptor_seq in dataset.get_data()]})
 
         shutil.rmtree(path)

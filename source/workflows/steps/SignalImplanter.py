@@ -53,7 +53,7 @@ class SignalImplanter(Step):
         processed_dataset = RepertoireDataset(repertoires=processed_repertoires, params=input_params.dataset.params,
                                               metadata_file=SignalImplanter._create_metadata_file(input_params.dataset.metadata_file,
                                                                                                   implanting_metadata, input_params))
-        PickleExporter.export(processed_dataset, input_params.result_path, FilenameHandler.get_dataset_name(SignalImplanter.__name__))
+        PickleExporter.export(processed_dataset, input_params.result_path)
 
         return processed_dataset
 

@@ -41,7 +41,7 @@ class TestSequenceAbundanceEncoding(TestCase):
                                                                        False, False, True, True, False, False]}, path=path)
 
         dataset = RepertoireDataset(repertoires=repertoires, metadata_file=metadata, params={"l1": [True, False]})
-        PickleExporter.export(dataset, path, "dataset.pickle")
+        PickleExporter.export(dataset, path)
 
         specs = {
             "definitions": {
@@ -49,7 +49,7 @@ class TestSequenceAbundanceEncoding(TestCase):
                     "d1": {
                         "format": "Pickle",
                         "params": {
-                            "path": path + "dataset.pickle",
+                            "path": path + f"{dataset.name}.pickle",
                         }
                     }
                 },

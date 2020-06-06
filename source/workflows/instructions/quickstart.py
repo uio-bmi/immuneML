@@ -20,40 +20,40 @@ class Quickstart:
         PathBuilder.build(path)
 
         sequences1 = [ReceptorSequence(amino_acid_sequence="AAA", metadata=SequenceMetadata(chain="B")),
-                                             ReceptorSequence(amino_acid_sequence="AAAA", metadata=SequenceMetadata(chain="B")),
-                                             ReceptorSequence(amino_acid_sequence="AAAAA", metadata=SequenceMetadata(chain="B")),
-                                             ReceptorSequence(amino_acid_sequence="AAA", metadata=SequenceMetadata(chain="B"))]
+                      ReceptorSequence(amino_acid_sequence="AAAA", metadata=SequenceMetadata(chain="B")),
+                      ReceptorSequence(amino_acid_sequence="AAAAA", metadata=SequenceMetadata(chain="B")),
+                      ReceptorSequence(amino_acid_sequence="AAA", metadata=SequenceMetadata(chain="B"))]
         sequences2 = [ReceptorSequence(amino_acid_sequence="AAA", metadata=SequenceMetadata(chain="B")),
-                                             ReceptorSequence(amino_acid_sequence="AAAA", metadata=SequenceMetadata(chain="B")),
-                                             ReceptorSequence(amino_acid_sequence="AAAA", metadata=SequenceMetadata(chain="B")),
-                                             ReceptorSequence(amino_acid_sequence="AAA", metadata=SequenceMetadata(chain="B"))]
+                      ReceptorSequence(amino_acid_sequence="AAAA", metadata=SequenceMetadata(chain="B")),
+                      ReceptorSequence(amino_acid_sequence="AAAA", metadata=SequenceMetadata(chain="B")),
+                      ReceptorSequence(amino_acid_sequence="AAA", metadata=SequenceMetadata(chain="B"))]
         sequences3 = [ReceptorSequence(amino_acid_sequence="AAA", metadata=SequenceMetadata(chain="A")),
-                                             ReceptorSequence(amino_acid_sequence="AAAA", metadata=SequenceMetadata(chain="A")),
-                                             ReceptorSequence(amino_acid_sequence="AAAA", metadata=SequenceMetadata(chain="A")),
-                                             ReceptorSequence(amino_acid_sequence="AAA", metadata=SequenceMetadata(chain="A"))]
+                      ReceptorSequence(amino_acid_sequence="AAAA", metadata=SequenceMetadata(chain="A")),
+                      ReceptorSequence(amino_acid_sequence="AAAA", metadata=SequenceMetadata(chain="A")),
+                      ReceptorSequence(amino_acid_sequence="AAA", metadata=SequenceMetadata(chain="A"))]
         sequences4 = [ReceptorSequence(amino_acid_sequence="AAA", metadata=SequenceMetadata(chain="A")),
-                                             ReceptorSequence(amino_acid_sequence="AAAA", metadata=SequenceMetadata(chain="A")),
-                                             ReceptorSequence(amino_acid_sequence="AAAAA", metadata=SequenceMetadata(chain="A")),
-                                             ReceptorSequence(amino_acid_sequence="AAA", metadata=SequenceMetadata(chain="A"))]
+                      ReceptorSequence(amino_acid_sequence="AAAA", metadata=SequenceMetadata(chain="A")),
+                      ReceptorSequence(amino_acid_sequence="AAAAA", metadata=SequenceMetadata(chain="A")),
+                      ReceptorSequence(amino_acid_sequence="AAA", metadata=SequenceMetadata(chain="A"))]
 
         repertoire_count = 100
         repertoires = []
 
-        for index in range(1, repertoire_count+1):
-                if index % 4 == 0:
-                    repertoires.append(Repertoire.build_from_sequence_objects(sequences1, path, {"CD": True}))
-                elif index % 3 == 0:
-                    repertoires.append(Repertoire.build_from_sequence_objects(sequences2, path, {"CD": False}))
-                elif index % 2 == 0:
-                    repertoires.append(Repertoire.build_from_sequence_objects(sequences3, path, {"CD": True}))
-                else:
-                    repertoires.append(Repertoire.build_from_sequence_objects(sequences4, path, {"CD": False}))
+        for index in range(1, repertoire_count + 1):
+            if index % 4 == 0:
+                repertoires.append(Repertoire.build_from_sequence_objects(sequences1, path, {"CD": True}))
+            elif index % 3 == 0:
+                repertoires.append(Repertoire.build_from_sequence_objects(sequences2, path, {"CD": False}))
+            elif index % 2 == 0:
+                repertoires.append(Repertoire.build_from_sequence_objects(sequences3, path, {"CD": True}))
+            else:
+                repertoires.append(Repertoire.build_from_sequence_objects(sequences4, path, {"CD": False}))
 
-        dataset = RepertoireDataset(repertoires=repertoires, params={"CD": [True, False]})
+        dataset = RepertoireDataset(repertoires=repertoires, params={"CD": [True, False]}, name="test_dataset")
 
-        PickleExporter.export(dataset, path, "dataset.pkl")
+        PickleExporter.export(dataset, path)
 
-        return path + "dataset.pkl"
+        return path + f"{dataset.name}.pickle"
 
     def create_specfication(self, path):
         dataset_path = self.create_dataset(path)
@@ -176,9 +176,11 @@ class Quickstart:
         app = ImmuneMLApp(specs_file, result_path)
         app.run()
 
+
 def main():
     quickstart = Quickstart()
     quickstart.run(sys.argv[1] if len(sys.argv) == 2 else None)
+
 
 if __name__ == "__main__":
     main()

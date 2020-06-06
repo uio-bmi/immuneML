@@ -60,5 +60,4 @@ class SimulationInstruction(Instruction):
 
     def export_dataset(self):
         if self.exporter is not None:
-            dataset_format = self.exporter.__name__[:-8]
-            self.exporter.export(self.state.resulting_dataset, f"{self.state.result_path}exported_dataset/", f"dataset.{dataset_format}")
+            self.exporter.export(self.state.resulting_dataset, f"{self.state.result_path}exported_dataset/")

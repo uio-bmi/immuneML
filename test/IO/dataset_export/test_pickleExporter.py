@@ -23,9 +23,9 @@ class TestPickleExporter(TestCase):
 
         repertoires, metadata = RepertoireBuilder.build([["AA"], ["CC"]], path)
         dataset = RepertoireDataset(repertoires=repertoires, metadata_file=metadata)
-        PickleExporter.export(dataset, EnvironmentSettings.tmp_test_path + "pickleexporter/", "dataset.pkl")
+        PickleExporter.export(dataset, EnvironmentSettings.tmp_test_path + "pickleexporter/")
 
-        with open(EnvironmentSettings.tmp_test_path + "pickleexporter/dataset.pkl", "rb") as file:
+        with open(EnvironmentSettings.tmp_test_path + f"pickleexporter/{dataset.name}.pickle", "rb") as file:
             dataset2 = pickle.load(file)
 
         shutil.rmtree(EnvironmentSettings.tmp_test_path + "pickleexporter/")

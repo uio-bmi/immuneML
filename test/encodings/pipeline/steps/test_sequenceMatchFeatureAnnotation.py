@@ -30,6 +30,8 @@ class TestSequenceMatchFeatureAnnotation(TestCase):
     #             3: match sequence, 0 mismatch: 1 match
     #             4: match v_gene and sequence, 0 mismatch: 0 matches
 
+    path = EnvironmentSettings.root_path + "test/tmp/sequencematchfeatureannotationstep/"
+
     encoded_data = {
         'examples': sparse.rand(5, 5, density=0.2, format='csr'),
         'example_ids': ["A", "B", "C", "D", "E"],
@@ -45,7 +47,8 @@ class TestSequenceMatchFeatureAnnotation(TestCase):
     }
 
     dataset = RepertoireDataset(encoded_data=EncodedData(**encoded_data),
-                                repertoires=[Repertoire("0.npy", "", identifier) for identifier in encoded_data["example_ids"]])
+                                repertoires=[Repertoire(f"{EnvironmentSettings.root_path}test/tmp/sequencematchfeatureannotationstep/0.npy",
+                                                        "", identifier) for identifier in encoded_data["example_ids"]])
 
     # there are only matches to the first 3 sequences in this reference
     reference_rep = """TRBV Gene	CDR3B AA Sequence	Antigen Protein	MHC Class									
@@ -57,7 +60,6 @@ VGENE1	CASSIEGPTGELFF	D Transporter 8	MHC I"""
     reference_metadata = """filename,donor
 reference_rep.tsv,rep1"""
 
-    path = EnvironmentSettings.root_path + "test/tmp/sequencematchfeatureannotationstep/"
     reference_data_loader_params = {
         "result_path": path,
         "column_mapping": {"CDR3B AA Sequence": "sequence_aas",

@@ -1,5 +1,8 @@
 import os
+import shutil
 from copy import copy
+
+from source.util.PathBuilder import PathBuilder
 
 
 class Util:
@@ -33,3 +36,10 @@ class Util:
         common_path = os.path.commonpath([base_path, tmp_path])
         path = path.replace(common_path, ".")
         return path
+
+    @staticmethod
+    def make_downloadable_zip(base_path, tmp_path):
+        filename = "_".join(Util.get_relative_path(base_path, tmp_path).replace(".", "").split("/"))[1:-1]
+        PathBuilder.build(f"{base_path}zip/")
+        zip_file_path = shutil.make_archive(f"{base_path}zip/{filename}", "zip", tmp_path)
+        return Util.get_relative_path(base_path, zip_file_path)

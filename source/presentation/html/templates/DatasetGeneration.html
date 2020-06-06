@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>immuneML: Dataset Generation Overview</title>
+    <style>
+        {{{css_style}}}
+    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+    <div class="container">
+        <div>
+            <h1>Dataset generation: {{name}}</h1>
+            {{#datasets}}
+            <div class="padded">
+                <div><span>Dataset:</span> {{dataset_name}}</div>
+                <div><span>Dataset type:</span> {{dataset_type}}</div>
+                <div><span>Download formats: </span>
+                {{#formats}}
+                    <a href="{{dataset_download_link}}" download>{{format_name}}</a>
+                {{/formats}}
+                </div>
+            </div>
+            {{/datasets}}
+        </div>
+    </div>
+</body>
+</html>

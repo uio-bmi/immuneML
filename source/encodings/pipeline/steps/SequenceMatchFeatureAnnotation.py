@@ -122,7 +122,7 @@ class SequenceMatchFeatureAnnotation(TransformerMixin):
         else:
             dataset = X
         dataset.encoded_data.feature_annotations.to_csv(self.result_path + "/feature_annotations.csv")
-        self.store(dataset, self.result_path, self.filename)
+        self.store(dataset, self.result_path)
         return dataset
 
     def compute_match_annotations(self, X):
@@ -154,8 +154,8 @@ class SequenceMatchFeatureAnnotation(TransformerMixin):
     def match_regex(self, rx, value):
         return bool(rx.match(value))
 
-    def store(self, encoded_dataset: RepertoireDataset, result_path, filename):
-        PickleExporter.export(encoded_dataset, result_path, filename)
+    def store(self, encoded_dataset: RepertoireDataset, result_path):
+        PickleExporter.export(encoded_dataset, result_path)
 
     def filter_query(self, query, reference, max_distance, same_length):
         error_type = "s" if same_length else "e"

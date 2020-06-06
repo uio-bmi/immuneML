@@ -20,7 +20,7 @@ class RepertoireDataset(Dataset):
         self.metadata_fields = None
         self.repertoire_ids = None
         self.repertoires = repertoires
-        self.name = name
+        self.name = name if name is not None else self.identifier
 
     def clone(self):
         return RepertoireDataset(self.params, copy.deepcopy(self.encoded_data), copy.deepcopy(self.repertoires),

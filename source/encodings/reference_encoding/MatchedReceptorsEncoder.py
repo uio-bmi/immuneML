@@ -129,5 +129,5 @@ class MatchedReceptorsEncoder(DatasetEncoder):
         pass
 
     def store(self, encoded_dataset, params: EncoderParams):
-        PickleExporter.export(encoded_dataset, params["result_path"], params["filename"])
+        PickleExporter.export(encoded_dataset, params["result_path"])
 

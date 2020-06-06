@@ -68,7 +68,7 @@ class PublicSequenceFeatureAnnotation(TransformerMixin):
         if not any([self.COLUMNS_PUBLIC in column for column in X.encoded_data.feature_annotations.columns]):
             dataset = self._annotate_public_features(X)
             dataset.encoded_data.feature_annotations.to_csv(self.result_path + "/feature_annotations.csv")
-            self.store(dataset, self.result_path, self.filename)
+            self.store(dataset, self.result_path)
             return dataset
         else:
             return X
@@ -84,5 +84,5 @@ class PublicSequenceFeatureAnnotation(TransformerMixin):
                                            PublicSequenceFeatureAnnotation.PUBLIC_REPERTOIRE_COUNT: sums})
         return public_annotations
 
-    def store(self, encoded_dataset: RepertoireDataset, result_path, filename):
-        PickleExporter.export(encoded_dataset, result_path, filename)
+    def store(self, encoded_dataset: RepertoireDataset, result_path):
+        PickleExporter.export(encoded_dataset, result_path)

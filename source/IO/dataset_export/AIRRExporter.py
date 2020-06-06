@@ -1,5 +1,4 @@
 # quality: gold
-import shutil
 
 import airr
 import pandas as pd
@@ -23,21 +22,28 @@ class AIRRExporter(DataExporter):
     """
 
     @staticmethod
-    def export(dataset: RepertoireDataset, path, filename=None):
+    def export(dataset: RepertoireDataset, path):
         PathBuilder.build(path)
+        repertoire_path = PathBuilder.build(f"{path}repertoires/")
 
         for repertoire in dataset.repertoires:
             df = AIRRExporter._repertoire_to_dataframe(repertoire)
-            airr.dump_rearrangement(df, path + f"{repertoire.identifier}.tsv")
+            airr.dump_rearrangement(df, f"{repertoire_path}{repertoire.identifier}.tsv")
 
-        shutil.copyfile(dataset.metadata_file, f"{path}metadata.csv")
+        AIRRExporter.export_updated_metadata(dataset.metadata_file, path)
+
+    @staticmethod
+    def export_updated_metadata(file_path: str, result_path: str):
+        df = pd.read_csv(file_path)
+        df["filename"] = [f"{item}.tsv" for item in df["repertoire_identifier"].values.tolist()]
+        df.to_csv(f"{result_path}metadata.csv", index=False)
 
     @staticmethod
     def _repertoire_to_dataframe(repertoire: Repertoire):
         # get all fields (including custom fields)
         df = pd.DataFrame({key: repertoire.get_attribute(key) for key in set(repertoire.fields)})
 
-        # rename mandatory fields for airr-compliancy
+        # rename mandatory fields for airr-compliance
         df = df.rename(mapper={"sequences": "sequence",
                                "sequence_aas": "sequence_aa",
                                "sequence_identifiers": "rearrangement_id",
