@@ -15,7 +15,7 @@ class GalaxyYamlTool:
         inputs = kwargs["inputs"].split(',') if "inputs" in kwargs else None
 
         self.yaml_path = yaml_path
-        self.result_path = output_dir
+        self.result_path = output_dir if output_dir[-1] == '/' else f"{output_dir}/"
         self.metadata_file = kwargs["metadata"] if "metadata" in kwargs else None
         self.files_path = f"{os.path.dirname(inputs[0])}/" if "inputs" in kwargs else None
 
