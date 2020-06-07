@@ -2,12 +2,10 @@ import os
 import shutil
 from unittest import TestCase
 
-import numpy as np
-
 from source.caching.CacheType import CacheType
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.encodings.EncoderParams import EncoderParams
-from source.encodings.reference_encoding.SequenceAbundanceEncoder import SequenceAbundanceEncoder
+from source.encodings.filtered_sequence_encoding.SequenceCountEncoder import SequenceCountEncoder
 from source.environment.Constants import Constants
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.environment.Label import Label
@@ -16,14 +14,14 @@ from source.util.PathBuilder import PathBuilder
 from source.util.RepertoireBuilder import RepertoireBuilder
 
 
-class TestSequenceAbundanceEncoder(TestCase):
+class TestEmersonSequenceCountEncoder(TestCase):
 
     def setUp(self) -> None:
         os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
 
     def test_encode(self):
 
-        path = EnvironmentSettings.tmp_test_path + "abundanceencoder/"
+        path = EnvironmentSettings.tmp_test_path + "count_encoder/"
         PathBuilder.build(path)
 
         repertoires, metadata = RepertoireBuilder.build([["GGG", "III", "LLL", "MMM"],
@@ -34,8 +32,8 @@ class TestSequenceAbundanceEncoder(TestCase):
 
         dataset = RepertoireDataset(repertoires=repertoires, metadata_file=metadata, identifier="1")
 
-        encoder = SequenceAbundanceEncoder.build_object(dataset, **{
-            "comparison_attributes": ["sequence_aas", "v_genes"],
+        encoder = SequenceCountEncoder.build_object(dataset, **{
+            "comparison_attributes": ["sequence_aas"],
             "p_value_threshold": 0.4, "sequence_batch_size": 4
         })
 
@@ -44,13 +42,15 @@ class TestSequenceAbundanceEncoder(TestCase):
         encoded_dataset = encoder.encode(dataset, EncoderParams(result_path=path, label_configuration=label_config,
                                                                 filename="encoded.pickle"))
 
-        self.assertTrue(np.array_equal(np.array([[1, 4], [1, 6], [1, 3], [1, 6]]), encoded_dataset.encoded_data.examples))
+        test = encoded_dataset.encoded_data.examples
 
-        encoder.p_value_threshold = 0.05
+        self.assertTrue(test[0, 0] == 1)
+        self.assertTrue(test[1, 0] == 1)
+        self.assertTrue(test[0, 1] == 0)
+        self.assertTrue(test[1, 1] == 0)
+        self.assertTrue(test[3, 1] == 1)
 
-        encoded_dataset = encoder.encode(dataset, EncoderParams(result_path=path, label_configuration=label_config,
-                                                                filename="encoded.pickle"))
-
-        self.assertTrue(np.array_equal(np.array([[0, 4], [0, 6], [0, 3], [0, 6]]), encoded_dataset.encoded_data.examples))
+        self.assertTrue("III" in encoded_dataset.encoded_data.feature_names)
+        self.assertTrue("CCC" in encoded_dataset.encoded_data.feature_names)
 
         shutil.rmtree(path)

@@ -27,18 +27,8 @@ class TestSequenceAbundanceEncoding(TestCase):
         repertoires, metadata = RepertoireBuilder.build([["GGG", "III", "LLL", "MMM"],
                                                          ["DDD", "EEE", "FFF", "III", "LLL", "MMM"],
                                                          ["CCC", "FFF", "MMM"],
-                                                         ["AAA", "CCC", "EEE", "FFF", "LLL", "MMM"],
-                                                         ["GGG", "III", "LLL", "MMM"],
-                                                         ["DDD", "EEE", "FFF", "III", "LLL", "MMM"],
-                                                         ["CCC", "FFF", "MMM"],
-                                                         ["AAA", "CCC", "EEE", "FFF", "LLL", "MMM"],
-                                                         ["GGG", "III", "LLL", "MMM"],
-                                                         ["DDD", "EEE", "FFF", "III", "LLL", "MMM"],
-                                                         ["CCC", "FFF", "MMM"],
-                                                         ["AAA", "CCC", "EEE", "FFF", "LLL", "MMM"]
-                                                         ],
-                                                        labels={"l1": [True, True, False, False, True, True,
-                                                                       False, False, True, True, False, False]}, path=path)
+                                                         ["AAA", "CCC", "EEE", "FFF", "LLL", "MMM"]],
+                                                        labels={"l1": [True, True, False, False]}, path=path)
 
         dataset = RepertoireDataset(repertoires=repertoires, metadata_file=metadata, params={"l1": [True, False]})
         PickleExporter.export(dataset, path)
@@ -56,28 +46,13 @@ class TestSequenceAbundanceEncoding(TestCase):
                 "encodings": {
                     "e1": {
                         "SequenceAbundance": {}
-                    },
-                    "e2": {
-                        "SequenceAbundance": {
-                            "p_value_threshold": 0.001
-                        }
                     }
                 },
                 "ml_methods": {
-                    "ml": {
-                        "ProbabilisticBinaryClassifier": {
-                            "max_iterations": 100,
-                            "update_rate": 0.1
+                    "knn": {
+                        "KNN": {
+                            "n_neighbors": 1
                         },
-                    }
-                },
-                "reports": {
-                    "r1": "SequenceAssociationLikelihood",
-                    "r2": {
-                        "CVFeaturePerformance": {
-                            "feature": "p_value_threshold",
-                            "label": "l1"
-                        }
                     }
                 }
             },
@@ -87,25 +62,17 @@ class TestSequenceAbundanceEncoding(TestCase):
                     "settings": [
                         {
                             "encoding": "e1",
-                            "ml_method": "ml"
-                        },
-                        {
-                            "encoding": "e2",
-                            "ml_method": "ml"
+                            "ml_method": "knn"
                         }
                     ],
                     "assessment": {
                         "split_strategy": "random",
-                        "split_count": 3,
+                        "split_count": 1,
                         "training_percentage": 0.7,
-                        "reports": {
-                            "optimal_models": ["r1"],
-                            "hyperparameter": ["r2"]
-                        }
                     },
                     "selection": {
                         "split_strategy": "random",
-                        "split_count": 5,
+                        "split_count": 1,
                         "training_percentage": 0.7,
                     },
                     "labels": ["l1"],

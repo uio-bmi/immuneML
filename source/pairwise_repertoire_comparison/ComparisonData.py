@@ -1,17 +1,13 @@
 from functools import lru_cache
-from typing import List
 
 import numpy as np
-from scipy.stats import fisher_exact
 
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
-from source.data_model.repertoire.Repertoire import Repertoire
 from source.logging.Logger import log
+from source.pairwise_repertoire_comparison.ComparisonDataBatch import ComparisonDataBatch
 
 
 class ComparisonData:
-
-    INVALID_P_VALUE = 2
 
     @log
     def __init__(self, repertoire_ids: list, comparison_attributes, sequence_batch_size: int = 10000, path: str = None):
@@ -30,6 +26,14 @@ class ComparisonData:
     def build_matching_fn(self):
         return lambda repertoire: set(zip(*[repertoire.get_attribute(attribute) for attribute in self.comparison_attributes]))
 
+    def get_item_names(self):
+        return np.array([item for items in [batch.items for batch in self.batches] for item in items])
+
+    def get_item_vectors(self, repertoire_ids: list = None):
+        for batch in self.get_batches(columns=repertoire_ids):
+            for item_index in range(batch.shape[0]):
+                yield batch[item_index]
+
     @lru_cache(maxsize=110)
     def get_repertoire_vector(self, identifier: str):
         repertoire_vector = np.zeros(self.item_count)
@@ -39,13 +43,10 @@ class ComparisonData:
             repertoire_vector[start: end] = batch[:, 0]
         return repertoire_vector
 
-    def get_item_names(self):
-        return np.array([item for items in [batch["row_names"] for batch in self.batches] for item in items])
-
     def get_item_vector(self, index: int):
         batch_index = int(index / self.sequence_batch_size)
         index_in_batch = index - (batch_index * self.sequence_batch_size)
-        return self.batches[batch_index]["matrix"][index_in_batch]
+        return self.batches[batch_index].matrix[index_in_batch]
 
     def get_batches(self, columns: list = None):
         for index in range(len(self.batches)):
@@ -53,58 +54,10 @@ class ComparisonData:
 
     def get_batch(self, index: int, columns: list = None):
         if columns is not None:
-            column_indices = [self.batches[index]["col_name_index"][col] for col in columns]
-            return self.batches[index]["matrix"][:, column_indices]
+            column_indices = [self.batches[index].repertoire_index_mapping[col] for col in columns]
+            return self.batches[index].matrix[:, column_indices]
         else:
-            return self.batches[index]
-
-    def get_relevant_sequence_indices(self, dataset: RepertoireDataset, label: str, label_values: list, p_value_threshold: float) -> list:
-        sequence_p_values = self.find_label_associated_sequence_info(dataset, label, label_values)
-        sequence_p_values_indices = sequence_p_values < p_value_threshold
-        return sequence_p_values_indices
-
-    def build_abundance_matrix(self, repertoire_ids, sequence_p_values_indices):
-        abundance_matrix = np.zeros((len(repertoire_ids), 2))
-
-        for index, repertoire_id in enumerate(repertoire_ids):
-            repertoire_vector = self.get_repertoire_vector(repertoire_id)
-            relevant_sequence_abundance = np.sum(repertoire_vector[np.logical_and(sequence_p_values_indices, repertoire_vector)])
-            total_sequence_abundance = np.sum(repertoire_vector)
-            abundance_matrix[index] = [relevant_sequence_abundance, total_sequence_abundance]
-
-        return abundance_matrix
-
-    def find_label_associated_sequence_info(self, dataset: RepertoireDataset, label: str, label_values: list):
-
-        assert label_values is None or len(label_values) == 2, \
-            f"ComparisonData: Label associated sequences can be inferred only for binary labels, got {str(label_values)[1:-1]} instead."
-
-        sequence_p_values = self.find_label_associated_sequence_p_values(dataset.repertoires, label, label_values)
-
-        return np.array(sequence_p_values)
-
-    def find_label_associated_sequence_p_values(self, repertoires: List[Repertoire], label: str, label_values: list):
-        sequence_p_values = []
-        is_first_class = np.array([repertoire.metadata[label] for repertoire in repertoires]) == label_values[0]
-
-        for batch in self.get_batches([repertoire.identifier for repertoire in repertoires]):
-
-            for i in range(batch.shape[0]):
-
-                if batch[i].sum() > 1:
-
-                    first_class_present = np.sum(batch[i, np.logical_and(batch[i], is_first_class)])
-                    second_class_present = np.sum(batch[i, np.logical_and(batch[i], np.logical_not(is_first_class))])
-                    first_class_absent = np.sum(np.logical_and(is_first_class, batch[i] == 0))
-                    second_class_absent = np.sum(np.logical_and(np.logical_not(is_first_class), batch[i] == 0))
-
-                    sequence_p_values.append(fisher_exact([[first_class_present, second_class_present],
-                                                           [first_class_absent, second_class_absent]])[1])
-                else:
-
-                    sequence_p_values.append(ComparisonData.INVALID_P_VALUE)
-
-        return sequence_p_values
+            return self.batches[index].matrix
 
     @log
     def process_dataset(self, dataset: RepertoireDataset):
@@ -120,18 +73,18 @@ class ComparisonData:
 
             batch = self.load_tmp_batch(index)
             matrix = np.zeros((self.sequence_batch_size, len(self.repertoire_ids)), order='F')
-            row_names = []
+            items = []
 
             for item_index, item in enumerate(batch):
-                row_names.append(item)
+                items.append(item)
                 for repertoire_index, repertoire_id in enumerate(self.repertoire_ids):
                     if repertoire_id in batch[item]:
                         matrix[item_index][repertoire_index] = batch[item][repertoire_id]
 
-            df = np.array(matrix[:len(row_names)], order='F')
+            df = np.array(matrix[:len(items)], order='F')
+            repertoire_index_mapping = {rep_id: ind for ind, rep_id in enumerate(self.repertoire_ids)}
 
-            self.batches.append({"matrix": df, "row_names": row_names,
-                                 "col_name_index": {rep_id: ind for ind, rep_id in enumerate(self.repertoire_ids)}})
+            self.batches.append(ComparisonDataBatch(matrix=df, items=items, repertoire_index_mapping=repertoire_index_mapping))
 
     @log
     def process_repertoire(self, repertoire, repertoire_id: str, extract_items_fn):

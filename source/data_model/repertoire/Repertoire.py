@@ -118,7 +118,7 @@ class Repertoire(DatasetItem):
             return None
 
     @classmethod
-    def build_from_sequence_objects(cls, sequence_objects: ReceptorSequenceList, path: str, metadata: dict):
+    def build_from_sequence_objects(cls, sequence_objects: list, path: str, metadata: dict):
 
         assert all(isinstance(sequence, ReceptorSequence) for sequence in sequence_objects), \
             "Repertoire: all sequences have to be instances of ReceptorSequence class."

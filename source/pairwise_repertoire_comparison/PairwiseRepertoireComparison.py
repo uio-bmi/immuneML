@@ -10,9 +10,6 @@ from source.logging.Logger import log
 from source.pairwise_repertoire_comparison.ComparisonData import ComparisonData
 from source.util.PathBuilder import PathBuilder
 
-global_comp_data = None
-comp_fn = None
-
 
 class PairwiseRepertoireComparison:
 
@@ -20,8 +17,7 @@ class PairwiseRepertoireComparison:
     def __init__(self, matching_columns: list, item_columns: list, path: str, sequence_batch_size: int):
         self.matching_columns = matching_columns
         self.item_columns = item_columns
-        self.path = path
-        PathBuilder.build(path)
+        self.path = PathBuilder.build(path)
         self.sequence_batch_size = sequence_batch_size
         self.comparison_data = None
         self.comparison_fn = None
@@ -97,13 +93,3 @@ class PairwiseRepertoireComparison:
                 arguments.append((rep1, rep2))
 
         return arguments
-
-    @staticmethod
-    def helper_fn(rep_id1: str, rep_id2: str):
-        print("Comparing repertoires: {} and {}".format(rep_id1, rep_id2))
-        rep1 = global_comp_data.get_repertoire_vector(rep_id1)
-        rep2 = global_comp_data.get_repertoire_vector(rep_id2)
-        res = comp_fn(rep1, rep2)
-        del rep1
-        del rep2
-        return res
