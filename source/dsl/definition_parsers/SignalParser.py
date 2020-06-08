@@ -10,10 +10,15 @@ from source.util.ReflectionHandler import ReflectionHandler
 
 class SignalParser:
 
+    VALID_KEYS = ["motifs", "implanting"]
+
     @staticmethod
     @log
     def parse_signals(signals: dict, symbol_table: SymbolTable):
         for key, signal_spec in signals.items():
+
+            ParameterValidator.assert_keys(signal_spec.keys(), SignalParser.VALID_KEYS, "SignalParser", key, exclusive=False)
+
             implanting_strategy = SignalParser._get_implanting_strategy(key, signal_spec)
 
             ParameterValidator.assert_keys(signal_spec["motifs"], symbol_table.get_keys_by_type(SymbolType.MOTIF), "SignalParser",

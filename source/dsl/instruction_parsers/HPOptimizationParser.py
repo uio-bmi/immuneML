@@ -74,14 +74,19 @@ class HPOptimizationParser:
 
     def _parse_settings(self, instruction: dict, symbol_table: SymbolTable) -> list:
         try:
+
             settings = []
-            for setting in instruction["settings"]:
+            for index, setting in enumerate(instruction["settings"]):
                 if "preprocessing" in setting and symbol_table.contains(setting["preprocessing"]):
                     preprocessing_sequence = symbol_table.get(setting["preprocessing"])
                     preproc_name = setting["preprocessing"]
                 else:
+                    setting["preprocessing"] = []
                     preprocessing_sequence = []
                     preproc_name = None
+
+                ParameterValidator.assert_keys(setting.keys(), ["preprocessing", "ml_method", "encoding"], "HPOptimizationParser",
+                                               f"settings, {index+1}. entry")
 
                 s = HPSetting(encoder=symbol_table.get(setting["encoding"]), encoder_name=setting["encoding"],
                               encoder_params=symbol_table.get_config(setting["encoding"])["encoder_params"],
