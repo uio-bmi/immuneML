@@ -68,11 +68,10 @@ def main():
     parser = argparse.ArgumentParser(description="immuneML command line tool")
     parser.add_argument("yaml_path", help="Path to specification YAML file. Always used to define the analysis.")
     parser.add_argument("output_dir", help="Output directory path.")
-    parser.add_argument("--metadata", help="The path to metadata file for repertoire dataset. "
-                                           "Used if immuneML is called from a Galaxy tool to reformat the metadata with new "
-                                           "Galaxy-dependent paths, otherwise it's ignored.")
-    parser.add_argument("--inputs", type=str, help="List of files with new paths for the repertoire dataset to be used in the analysis."
-                                                   "Used only if immuneML is called from a Galaxy tool to update the metadata.")
+    parser.add_argument("--inputs", type=str, help="List of files to be used in the analysis, including raw repertoire files, metadata"
+                                                   "files, additional files such as reference sequences or other inputs, existing dataset "
+                                                   "files and others. Anything that immuneML can accept in the specification can be listed "
+                                                   "here.")
     parser.add_argument("--tool", help="Name of the tool which calls immuneML. This name will be used to invoke appropriate API call, "
                                        "which will then preprocess the data/specs in tool-dependent way before running standard immuneML.")
     run_immuneML(parser.parse_args())

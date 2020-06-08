@@ -1,4 +1,5 @@
-import os
+from glob import glob
+from typing import List
 
 import yaml
 
@@ -10,14 +11,11 @@ from source.util.PathBuilder import PathBuilder
 class GalaxyYamlTool:
 
     def __init__(self, yaml_path, output_dir, **kwargs):
-        Util.check_parameters(yaml_path, output_dir, kwargs, "Galaxy immuneML tool")
-
-        inputs = kwargs["inputs"].split(',') if "inputs" in kwargs else None
+        Util.check_parameters(yaml_path, output_dir, kwargs, "Galaxy immuneML Tool")
 
         self.yaml_path = yaml_path
         self.result_path = output_dir if output_dir[-1] == '/' else f"{output_dir}/"
-        self.metadata_file = kwargs["metadata"] if "metadata" in kwargs else None
-        self.files_path = f"{os.path.dirname(inputs[0])}/" if "inputs" in kwargs else None
+        self.start_path = "./"
 
     def run(self):
         PathBuilder.build(self.result_path)
@@ -29,19 +27,39 @@ class GalaxyYamlTool:
         return output_file_path
 
     def update_specs(self):
-        if self.metadata_file is not None:
-            with open(self.yaml_path, "r") as file:
-                specs_dict = yaml.safe_load(file)
+        with open(self.yaml_path, "r") as file:
+            specs_dict = yaml.safe_load(file)
 
-            dataset_keys = list(specs_dict["definitions"]["datasets"].keys())
-            assert len(dataset_keys) == 1, "Galaxy immunneML tool: when using immuneML from Galaxy, " \
-                                           "multiple datasets are not yet supported."
+        self.check_paths(specs_dict)
+        specs_dict = self.update_yaml_with_collections(specs_dict)
 
-            specs_dict["definitions"]["datasets"][dataset_keys[0]]["params"]["metadata_file"] = self.metadata_file
-            specs_dict["definitions"]["datasets"][dataset_keys[0]]["params"]["path"] = self.files_path
-            specs_dict["definitions"]["datasets"][dataset_keys[0]]["params"]["result_path"] = self.result_path + "imported_data/"
+        with open(self.yaml_path, "w") as file:
+            yaml.dump(specs_dict, file)
 
-            specs_dict["output"] = {"format": "HTML"}
+    def extract_collection_dataset_paths(self) -> List[str]:
+        dataset_paths = list(glob(f"{self.start_path}**/*.iml_dataset", recursive=True))
+        return dataset_paths
 
-            with open(self.yaml_path, "w") as file:
-                yaml.dump(specs_dict, file)
+    def update_yaml_with_collections(self, specs: dict) -> dict:
+        datasets = specs["definitions"]["datasets"]
+        collection_dataset_paths = self.extract_collection_dataset_paths()
+        for key, item in datasets.items():
+            if isinstance(item, str):
+                dataset_file_path = [p for p in collection_dataset_paths if item in p]
+                assert len(dataset_file_path) == 1, f"Galaxy immuneML Tool: could not find the dataset collection called {item} " \
+                                                    f"specified under key {key}. Please check if the collection was selected properly."
+                datasets[key] = {
+                    "format": "Pickle",
+                    "params": {"path": dataset_file_path[0]}
+                }
+        specs["definitions"]["datasets"] = datasets
+        return specs
+
+    def check_paths(self, specs: dict):
+        for key in specs.keys():
+            if isinstance(specs[key], str):
+                assert "/" not in specs[key] or specs[key] == "./", "Galaxy immuneML Tool: the paths in specification for Galaxy have to " \
+                                                                    f"consist only of the filenames as uploaded to Galaxy history " \
+                                                                    f"beforehand. The problem occurs for the parameter {key}."
+            elif isinstance(specs[key], dict):
+                self.check_paths(specs[key])
