@@ -31,15 +31,15 @@ class ParameterValidator:
     @staticmethod
     def assert_keys(keys, valid_keys, location: str, parameter_name: str, exclusive: bool = True):
         for key in keys:
-            assert key in valid_keys, f"{location}: {key} is not a valid parameter name under {parameter_name}. " \
-                                      f"Valid parameter names are: {str(valid_keys)[1:-1]}."
+            assert key in valid_keys, f"{location}: {key} is not a valid parameter under {parameter_name}. " \
+                                      f"Valid parameters are: {str(valid_keys)[1:-1]}."
 
         if exclusive:
             if len(keys) > len(valid_keys):
-                raise AssertionError(f"{location}: {str(list(set(keys) - set(valid_keys)))[1:-1]} are not valid parameter "
-                                     f"names under {parameter_name}. Valid parameter names are: {str(valid_keys)[1:-1]}. "
-                                     f"Remove invalid names.")
+                raise AssertionError(f"{location}: {str(list(set(keys) - set(valid_keys)))[1:-1]} are not valid parameters "
+                                     f" under {parameter_name}. Valid parameters are: {str(valid_keys)[1:-1]}. "
+                                     f"Remove invalid parameters.")
             elif len(keys) < len(valid_keys):
-                raise AssertionError(f"{location}: Missing names: {str(list(set(valid_keys) - set(keys)))[1:-1]} "
-                                     f"under {parameter_name}. Valid parameter names are: {str(valid_keys)[1:-1]}. "
-                                     f"Add missing names.")
+                raise AssertionError(f"{location}: Missing parameters: {str(list(set(valid_keys) - set(keys)))[1:-1]} "
+                                     f"under {parameter_name}. Valid parameters are: {str(valid_keys)[1:-1]}. "
+                                     f"Please add missing parameters.")

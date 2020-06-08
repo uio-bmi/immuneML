@@ -50,7 +50,8 @@ class TestSimulation(TestCase):
                 "signals": {
                     "signal1": {
                         "motifs": ["motif1", "motif2"],
-                        "implanting": "HealthySequence"
+                        "implanting": "HealthySequence",
+                        "sequence_position_weights": None
                     }
                 },
                 "simulations": {
