@@ -131,6 +131,10 @@ class HPOptimizationParser:
             default_params = DefaultParamsLoader.load("instructions/", SplitConfig.__name__)
 
             if "reports" in instruction[key]:
+                for report_type in instruction[key]["reports"]:
+                    ParameterValidator.assert_type_and_value(instruction[key]["reports"][report_type], list, "HPOptimizationReport",
+                                                             report_type)
+
                 report_config_input = {report_type: {report_id: symbol_table.get(report_id) for report_id in instruction[key]["reports"][report_type]}
                                        for report_type in instruction[key]["reports"]}
             else:

@@ -18,7 +18,7 @@ class ParameterValidator:
     @staticmethod
     def assert_type_and_value(value, parameter_type, location: str, parameter_name: str, min_inclusive=None, max_inclusive=None):
         assert isinstance(value, parameter_type), f"{location}: {value} is not a valid value for parameter {parameter_name}. " \
-                                                  f"It has to be of type {parameter_type}, but is now of type {type(value)}."
+                                                  f"It has to be of type {parameter_type.__name__}, but is now of type {type(value).__name__}."
 
         if min_inclusive is not None:
             assert value >= min_inclusive, f"{location}: {value} is not a valid value for parameter {parameter_name}. " \

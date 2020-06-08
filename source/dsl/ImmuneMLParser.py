@@ -101,6 +101,7 @@ class ImmuneMLParser:
         try:
             with open(file_path, "r") as file:
                 workflow_specification = yaml.safe_load(file)
+                ImmuneMLParser.check_keys(workflow_specification)
         except yaml.YAMLError as exc:
             problem_description = "\n--------------------------------------------------------------------------------\n" \
                                   "There was a YAML formatting error in the supplied specification file. Please validate specification " \
@@ -120,7 +121,8 @@ class ImmuneMLParser:
     @staticmethod
     def check_keys(specs: dict):
         for key in specs.keys():
-            assert re.match(r'^[A-Za-z0-9_]+$', key), \
+            key_to_check = str(key)
+            assert re.match(r'^[A-Za-z0-9_]+$', key_to_check), \
                 f"ImmuneMLParser: the keys in the specification can contain only letters, numbers and underscore. Error with key: {key}"
             if isinstance(specs[key], dict):
                 ImmuneMLParser.check_keys(specs[key])
