@@ -19,7 +19,7 @@ class VDJDBImport(DataImport):
     """
 
     @staticmethod
-    def import_dataset(params: dict) -> Dataset:
+    def import_dataset(params: dict, dataset_name: str) -> Dataset:
         vdjdb_params = DatasetImportParams.build_object(**params)
         if vdjdb_params.metadata_file is not None:
             dataset = VDJDBImport.load_repertoire_dataset(vdjdb_params)

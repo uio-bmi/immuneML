@@ -22,7 +22,7 @@ class TestVDJdbLoader(TestCase):
         with open(path + "receptors.tsv", "w") as file:
             file.writelines(file_content)
 
-        dataset = VDJDBImport.import_dataset({"result_path": path, "file_size": 1, "paired": True, "path": path})
+        dataset = VDJDBImport.import_dataset({"result_path": path, "file_size": 1, "paired": True, "path": path}, "vdjdb_dataset")
 
         self.assertEqual(2, dataset.get_example_count())
         self.assertEqual(2, len(dataset.get_filenames()))
@@ -63,7 +63,7 @@ class TestVDJdbLoader(TestCase):
                                                   "J": "j_genes",
                                                   "CDR3": "sequence_aas",
                                                   "complex.id": "sequence_identifiers"
-                                              }, "separator": "\t"})
+                                              }, "separator": "\t"}, "vdjdb_dataset2")
 
         self.assertEqual(number_of_repertoires, dataset.get_example_count())
         self.assertEqual(number_of_repertoires, len(dataset.get_data()))

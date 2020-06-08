@@ -91,8 +91,7 @@ class TestFisherExactFeatureAnnotations(TestCase):
                     }
                 ]
             },
-            result_path=path,
-            filename="encoded_dataset.pickle"
+            result_path=path
         )
 
         dataset = step.fit_transform(TestFisherExactFeatureAnnotations.dataset)

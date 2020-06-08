@@ -152,7 +152,7 @@ class TestMiXCRLoader(TestCase):
                 "allVHitsWithScore": "v_genes",
                 "allJHitsWithScore": "j_genes"
             }
-        })
+        }, "mixcr_dataset")
 
         self.assertEqual(2, dataset.get_example_count())
 
@@ -182,7 +182,7 @@ class TestMiXCRLoader(TestCase):
                 "allVHitsWithScore": "v_genes",
                 "allJHitsWithScore": "j_genes"
             }
-        })
+        }, "mixcr_dataset")
 
         for index, repertoire in enumerate(dataset.get_data()):
             self.assertTrue(all(sequence.metadata.chain == Chain.A for sequence in repertoire.sequences))

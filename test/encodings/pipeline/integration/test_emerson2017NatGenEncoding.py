@@ -124,7 +124,6 @@ class TestEmerson2018NatGenEncoding(TestCase):
                 label_configuration=lc,
                 batch_size=2,
                 learn_model=True,
-                filename="test.pickle",
                 model={}
             )
 

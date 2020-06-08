@@ -91,7 +91,6 @@ class TestTopPublicFeatureEncoding(TestCase):
                 label_configuration=lc,
                 batch_size=2,
                 learn_model=True,
-                filename="encoded_data.pickle",
                 model={}
             )
         )

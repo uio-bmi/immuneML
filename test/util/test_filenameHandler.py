@@ -10,7 +10,7 @@ class TestFilenameHandler(TestCase):
 
     def test_get_dataset_name(self):
         name = FilenameHandler.get_dataset_name("KmerFrequencyEncoder")
-        self.assertEqual("encoded_dataset.pickle", name)
+        self.assertEqual("encoded_dataset.iml_dataset", name)
 
     def test_model_name(self):
         name = FilenameHandler.get_model_name("Word2VecEncoder")

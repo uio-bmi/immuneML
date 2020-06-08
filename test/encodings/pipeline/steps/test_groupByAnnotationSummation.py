@@ -63,8 +63,7 @@ class TestGroupByAnnotationSummation(TestCase):
         step = GroupDataTransformation(axis=AxisType.REPERTOIRES,
                                        group_summarization_type=GroupSummarizationType.AVERAGE,
                                        group_columns=group_columns,
-                                       result_path=path,
-                                       filename="encoded_dataset.pickle")
+                                       result_path=path)
 
         dataset = step.fit_transform(TestGroupByAnnotationSummation.dataset)
 
@@ -90,8 +89,7 @@ class TestGroupByAnnotationSummation(TestCase):
         step = GroupDataTransformation(axis=AxisType.REPERTOIRES,
                                        group_summarization_type=GroupSummarizationType.AVERAGE,
                                        group_columns=group_columns,
-                                       result_path=path,
-                                       filename="encoded_dataset.pickle")
+                                       result_path=path)
 
         dataset = step.fit_transform(TestGroupByAnnotationSummation.dataset)
 
@@ -116,7 +114,7 @@ class TestGroupByAnnotationSummation(TestCase):
                                        group_summarization_type=GroupSummarizationType.SUM,
                                        group_columns=group_columns,
                                        result_path=path,
-                                       filename="encoded_dataset.pickle")
+                                       filename="encoded_dataset.iml_dataset")
 
         dataset = step.fit_transform(TestGroupByAnnotationSummation.dataset)
 
@@ -142,7 +140,7 @@ class TestGroupByAnnotationSummation(TestCase):
                                        group_summarization_type=GroupSummarizationType.AVERAGE,
                                        group_columns=group_columns,
                                        result_path=path,
-                                       filename="encoded_dataset.pickle")
+                                       filename="encoded_dataset.iml_dataset")
 
         dataset = step.fit_transform(TestGroupByAnnotationSummation.dataset)
 
@@ -166,7 +164,7 @@ class TestGroupByAnnotationSummation(TestCase):
                                        group_summarization_type=GroupSummarizationType.AVERAGE,
                                        group_columns=group_columns,
                                        result_path=path,
-                                       filename="encoded_dataset.pickle")
+                                       filename="encoded_dataset.iml_dataset")
 
         dataset = step.fit_transform(TestGroupByAnnotationSummation.dataset)
 

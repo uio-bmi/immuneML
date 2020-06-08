@@ -50,7 +50,7 @@ rep2.tsv,2""")
                                              "import_productive": True, "region_type": "CDR3",
                                              "region_definition": "IMGT", "batch_size": 4,
                                              "columns_to_load": columns_to_load, "column_mapping": column_mapping,
-                                             "separator": "\t"})
+                                             "separator": "\t"}, "airr_dataset")
 
         self.assertEqual(2, dataset.get_example_count())
         for index, rep in enumerate(dataset.get_data()):

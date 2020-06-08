@@ -41,7 +41,7 @@ rep1.tsv,TRA,1234e,no"""
                                                 "region_type": "CDR3", "separator": "\t",
                                                 "column_mapping": {"CDR3B AA Sequence": "sequence_aas",
                                                                    "TRBV Gene": "v_genes", "TRBJ Gene": "j_genes"},
-                                                "metadata_file": path + "metadata.csv", "batch_size": 4})
+                                                "metadata_file": path + "metadata.csv", "batch_size": 4}, "generic_dataset")
 
         self.assertEqual(1, dataset.get_example_count())
         for index, rep in enumerate(dataset.get_data()):

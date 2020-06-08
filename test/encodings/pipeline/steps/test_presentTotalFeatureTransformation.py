@@ -69,7 +69,7 @@ class TestPresentTotalFeatureTransformation(TestCase):
         step = PresentTotalFeatureTransformation(
             criteria=filter_params,
             result_path=path,
-            filename="encoded_dataset.pickle")
+            filename="encoded_dataset.iml_dataset")
 
         dataset = step.fit_transform(TestPresentTotalFeatureTransformation.dataset)
 

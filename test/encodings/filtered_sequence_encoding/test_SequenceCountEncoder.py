@@ -39,8 +39,7 @@ class TestEmersonSequenceCountEncoder(TestCase):
 
         label_config = LabelConfiguration([Label("l1", [True, False])])
 
-        encoded_dataset = encoder.encode(dataset, EncoderParams(result_path=path, label_configuration=label_config,
-                                                                filename="encoded.pickle"))
+        encoded_dataset = encoder.encode(dataset, EncoderParams(result_path=path, label_configuration=label_config))
 
         test = encoded_dataset.encoded_data.examples
 

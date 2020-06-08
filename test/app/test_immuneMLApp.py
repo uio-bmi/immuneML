@@ -34,7 +34,7 @@ class TestImmuneMLApp(TestCase):
         dataset = RepertoireDataset(repertoires=repertoires, metadata_file=metadata, params={"CD": [True, False]}, name="dataset")
         PickleExporter.export(dataset, path)
 
-        return path + "dataset.pickle"
+        return path + "dataset.iml_dataset"
 
     def test_run(self):
 

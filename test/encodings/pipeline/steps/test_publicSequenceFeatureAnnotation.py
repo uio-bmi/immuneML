@@ -57,7 +57,7 @@ class TestPublicSequenceFeatureAnnotation(TestCase):
 
         step = PublicSequenceFeatureAnnotation(
             result_path=path,
-            filename="encoded_dataset.pickle",
+            filename="encoded_dataset.iml_dataset",
         )
         dataset = step.fit_transform(TestPublicSequenceFeatureAnnotation.dataset)
 

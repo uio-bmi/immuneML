@@ -11,7 +11,7 @@ class OLGAImport(DataImport):
     """
 
     @staticmethod
-    def import_dataset(params: dict) -> RepertoireDataset:
+    def import_dataset(params: dict, dataset_name: str) -> RepertoireDataset:
         olga_params = DatasetImportParams.build_object(**params)
         return ImportHelper.import_repertoire_dataset(OLGAImport.preprocess_repertoire, olga_params)
 

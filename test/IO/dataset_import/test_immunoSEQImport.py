@@ -55,7 +55,7 @@ rep1.tsv,TRA,1234a,no"""
                                                       "vFamilyName": "v_subgroup",
                                                       "jFamilyName": "j_subgroup",
                                                       "count (templates / reads)": "counts"
-                                                  }})
+                                                  }}, "immunoseq_dataset")
 
         self.assertEqual(1, dataset.get_example_count())
         for index, rep in enumerate(dataset.get_data()):

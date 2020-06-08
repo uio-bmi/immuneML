@@ -20,7 +20,7 @@ class TestPickleLoader(TestCase):
         with open(path + "dataset.pkl", "wb") as file:
             pickle.dump(dataset, file)
 
-        dataset2 = PickleImport.import_dataset({"path": path + "dataset.pkl"})
+        dataset2 = PickleImport.import_dataset({"path": path + "dataset.pkl"}, "dataset_name")
 
         shutil.rmtree(path)
 

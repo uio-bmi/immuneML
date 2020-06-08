@@ -37,7 +37,7 @@ rep2.tsv,2""")
         self.write_dummy_files(path)
         dataset = OLGAImport.import_dataset({"result_path": path, "metadata_file": path + "metadata.csv",
                                              "columns_to_load": ["sequences", "sequence_aas", "v_genes", "j_genes"],
-                                             "path": path, "batch_size": 4})
+                                             "path": path, "batch_size": 4}, "olga_dataset")
 
         self.assertEqual(2, dataset.get_example_count())
         for index, rep in enumerate(dataset.get_data()):

@@ -14,12 +14,12 @@ class PickleImport(DataImport):
     examples in the dataset (i.e. repertoires), but relies on Repertoire objects that have been created previously.
 
     Specification:
-        path: path_to_dataset.pickle
+        path: path_to_dataset.iml_dataset
         metadata_file: metadata.csv # if specified, the dataset's metadata will be updated to this without changing Repertoire objects
     """
 
     @staticmethod
-    def import_dataset(params: dict) -> RepertoireDataset:
+    def import_dataset(params: dict, dataset_name: str) -> RepertoireDataset:
         pickle_params = DatasetImportParams.build_object(**params)
         assert os.path.isfile(pickle_params.path), "PickleImport: the dataset file does not exist in the given path: " + pickle_params.path
         with open(pickle_params.path, "rb") as file:

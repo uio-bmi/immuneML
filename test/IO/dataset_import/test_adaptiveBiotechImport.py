@@ -81,7 +81,7 @@ rep2.tsv,TRB,1234a,no"""
                     "j_family": "j_subgroup",
                     "templates": "counts"
                 }
-            })
+            }, "adaptive_dataset")
 
         self.assertEqual(2, dataset.get_example_count())
         for index, rep in enumerate(dataset.get_data()):

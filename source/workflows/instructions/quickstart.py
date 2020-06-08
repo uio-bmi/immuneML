@@ -53,7 +53,7 @@ class Quickstart:
 
         PickleExporter.export(dataset, path)
 
-        return path + f"{dataset.name}.pickle"
+        return path + f"{dataset.name}.iml_dataset"
 
     def create_specfication(self, path):
         dataset_path = self.create_dataset(path)

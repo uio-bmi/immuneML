@@ -39,7 +39,7 @@ class TestSequenceAbundanceEncoding(TestCase):
                     "d1": {
                         "format": "Pickle",
                         "params": {
-                            "path": path + f"{dataset.name}.pickle",
+                            "path": path + f"{dataset.name}.iml_dataset",
                         }
                     }
                 },

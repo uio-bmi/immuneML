@@ -138,7 +138,8 @@ class SequenceMatchFeatureAnnotation(TransformerMixin):
         return match_annotations
 
     def prepare_reference_sequences(self):
-        dataset = self.data_loader.import_dataset({**{"path": self.reference_sequence_path}, **self.data_loader_params})
+        dataset = self.data_loader.import_dataset({**{"path": self.reference_sequence_path},
+                                                   **self.data_loader_params}, "reference_seq_dataset")
         reference_sequences = []
         for repertoire in dataset.get_data():
             reference_sequences.extend(repertoire.sequences)

@@ -89,7 +89,7 @@ reference_rep.tsv,rep1"""
                                                                        "metadata_fields_to_match": ["v_gene"],
                                                                        "same_length": True},
                                               result_path=path,
-                                              filename="encoded_dataset.pickle",
+                                              filename="encoded_dataset.iml_dataset",
                                               annotation_prefix="t1d_")
 
         dataset = step.fit_transform(TestSequenceMatchFeatureAnnotation.dataset)
@@ -116,7 +116,7 @@ reference_rep.tsv,rep1"""
                                                                        "metadata_fields_to_match": [],
                                                                        "same_length": True},
                                               result_path=path,
-                                              filename="encoded_dataset.pickle",
+                                              filename="encoded_dataset.iml_dataset",
                                               annotation_prefix="t1d_")
 
         dataset = step.fit_transform(TestSequenceMatchFeatureAnnotation.dataset)
@@ -143,7 +143,7 @@ reference_rep.tsv,rep1"""
                                                                        "metadata_fields_to_match": [],
                                                                        "same_length": True},
                                               result_path=path,
-                                              filename="encoded_dataset.pickle",
+                                              filename="encoded_dataset.iml_dataset",
                                               annotation_prefix="t1d_")
 
         dataset = step.fit_transform(TestSequenceMatchFeatureAnnotation.dataset)
@@ -170,7 +170,7 @@ reference_rep.tsv,rep1"""
                                                                        "metadata_fields_to_match": ["v_gene"],
                                                                        "same_length": True},
                                               result_path=path,
-                                              filename="encoded_dataset.pickle",
+                                              filename="encoded_dataset.iml_dataset",
                                               annotation_prefix="t1d_")
 
         dataset = step.fit_transform(TestSequenceMatchFeatureAnnotation.dataset)

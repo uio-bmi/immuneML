@@ -27,7 +27,7 @@ class TestSimulation(TestCase):
                     "d1": {
                         "format": 'Pickle',
                         "params": {
-                            "path": path + "dataset1.pickle"
+                            "path": path + "dataset1.iml_dataset"
                         }
                     }
                 },

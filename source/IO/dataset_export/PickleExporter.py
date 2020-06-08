@@ -31,7 +31,7 @@ class PickleExporter(DataExporter):
 
         dataset_name = exported_dataset.name if exported_dataset.name is not None else exported_dataset.identifier
 
-        with open(f"{path}/{dataset_name}.pickle", "wb") as file:
+        with open(f"{path}/{dataset_name}.iml_dataset", "wb") as file:
             pickle.dump(exported_dataset, file, pickle.HIGHEST_PROTOCOL)
 
     @staticmethod

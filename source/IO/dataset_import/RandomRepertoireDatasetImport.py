@@ -6,7 +6,7 @@ from source.simulation.dataset_generation.RandomDatasetGenerator import RandomDa
 class RandomRepertoireDatasetImport(DataImport):
 
     @staticmethod
-    def import_dataset(params: dict) -> RepertoireDataset:
+    def import_dataset(params: dict, dataset_name: str) -> RepertoireDataset:
         """
         Returns randomly generated repertoire dataset according to the parameters;
 

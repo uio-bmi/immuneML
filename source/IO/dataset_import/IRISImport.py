@@ -22,7 +22,7 @@ class IRISImport(DataImport):
     """
 
     @staticmethod
-    def import_dataset(params: dict) -> Dataset:
+    def import_dataset(params: dict, dataset_name: str) -> Dataset:
         if "metadata_file" in params and params["metadata_file"] is not None:
             dataset = IRISImport.load_repertoire_dataset(params)
         else:

@@ -16,13 +16,15 @@ from source.util.PathBuilder import PathBuilder
 
 class ImportHelper:
 
-    DATASET_NAME = "dataset.pickle"
+    DATASET_FORMAT = "iml_dataset"
 
     @staticmethod
-    def import_or_load_imported(params: dict, processed_params, preprocess_repertoire_func):
+    def import_or_load_imported(params: dict, processed_params, dataset_name: str, preprocess_repertoire_func):
 
-        if os.path.isfile(processed_params.result_path + ImportHelper.DATASET_NAME):
-            params["path"] = processed_params.result_path + ImportHelper.DATASET_NAME
+        dataset_file = f"{processed_params.result_path}{dataset_name}.{ImportHelper.DATASET_FORMAT}"
+
+        if os.path.isfile(dataset_file):
+            params["path"] = dataset_file
             dataset = PickleImport.import_dataset(params)
         else:
             dataset = ImportHelper.import_repertoire_dataset(preprocess_repertoire_func, processed_params)
