@@ -4,7 +4,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="immune-ml",
-    version="0.0.51",
+    version="0.0.53",
     description="immuneML is a software platform for machine learning analysis of immune receptor sequences",
     long_description=open("README.md").read(),
     author="Milena Pavlovic",
@@ -19,8 +19,10 @@ setup(
     python_requires='>=3.6',
     packages=find_packages(exclude=["test", "test.*", "performance_tests", "performance_tests.*"]),
     package_data={
-        'source': ['IO/dataset_import/conversion/*.csv', "presentation/html/templates/*.html", "presentation/html/templates/css/*.css"] +
-                  [f"config/default_params/{dir_name.split('/')[-1]}/*.yaml" for dir_name in glob.glob("./source/config/default_params/*")]
+        'source': ['IO/dataset_import/conversion/*.csv', "presentation/html/templates/*.html", "presentation/html/templates/css/*.css",
+                   "visualization/*.R", "visualization/*.r"] +
+                  [f"config/default_params/{dir_name.split('/')[-1]}/*.yaml" for dir_name in
+                   glob.glob("./source/config/default_params/*")]
     },
     entry_points={
         'console_scripts': [
