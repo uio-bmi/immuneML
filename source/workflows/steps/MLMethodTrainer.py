@@ -11,13 +11,9 @@ class MLMethodTrainer(Step):
 
     @staticmethod
     def run(input_params: MLMethodTrainerParams = None):
-        method = copy.deepcopy(input_params.method)
 
-        if not method.check_if_exists(input_params.result_path):
-            method = MLMethodTrainer._fit_method(input_params)
-            MLMethodTrainer.store(method, input_params)
-        else:
-            method.import_dataset(input_params.result_path)
+        method = MLMethodTrainer._fit_method(input_params)
+        MLMethodTrainer.store(method, input_params)
 
         return method
 
@@ -25,7 +21,7 @@ class MLMethodTrainer(Step):
     def _fit_method(input_params: MLMethodTrainerParams):
         X = input_params.dataset.encoded_data.examples
         y = MLMethodTrainer._filter_labels(input_params)
-        method = input_params.method
+        method = copy.deepcopy(input_params.method)
 
         if input_params.model_selection_cv:
             method.fit_by_cross_validation(X=X, y=y,
