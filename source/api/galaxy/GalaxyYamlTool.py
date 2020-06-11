@@ -32,6 +32,7 @@ class GalaxyYamlTool:
 
         self.check_paths(specs_dict)
         specs_dict = self.update_yaml_with_collections(specs_dict)
+        specs_dict = self.update_result_paths(specs_dict)
 
         with open(self.yaml_path, "w") as file:
             yaml.dump(specs_dict, file)
@@ -39,6 +40,12 @@ class GalaxyYamlTool:
     def extract_collection_dataset_paths(self) -> List[str]:
         dataset_paths = list(glob(f"{self.start_path}**/*.iml_dataset", recursive=True))
         return dataset_paths
+
+    def update_result_paths(self, specs: dict) -> dict:
+        for key, item in specs["definitions"]["datasets"].items():
+            if isinstance(item, dict) and 'params' in item.keys() and isinstance(item["params"], dict):
+                item['params']["result_path"] = f"{self.result_path}{key}/"
+        return specs
 
     def update_yaml_with_collections(self, specs: dict) -> dict:
         datasets = specs["definitions"]["datasets"]

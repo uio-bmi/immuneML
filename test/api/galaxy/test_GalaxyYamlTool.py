@@ -18,20 +18,29 @@ class TestGalaxyYamlTool(TestCase):
         dataset_path = f"{path}d1/"
         result_path = f"{path}result/"
 
-        dataset = RandomDatasetGenerator.generate_repertoire_dataset(10, {10: 1}, {12: 1}, {}, f"{path}tmp/")
+        dataset = RandomDatasetGenerator.generate_repertoire_dataset(10, {10: 1}, {12: 1}, {}, dataset_path)
         dataset.name = "d1"
         PickleExporter.export(dataset, dataset_path)
 
         specs = {
             "definitions": {
                 "datasets": {
-                    "new_d1": "d1"
+                    "new_d1": "d1",
+                    "d2": {
+                        "format": "RandomRepertoireDataset",
+                        "params": {
+                            "repertoire_count": 10,
+                            "sequence_length_probabilities": {10: 1},
+                            'sequence_count_probabilities': {10: 1},
+                            'labels': {}
+                        }
+                    }
                 }
             },
             "instructions": {
                 "inst1": {
                     "type": "DatasetGeneration",
-                    "datasets": ["new_d1"],
+                    "datasets": ["new_d1", 'd2'],
                     "formats": ["AIRR"]
                 }
             }
@@ -46,5 +55,7 @@ class TestGalaxyYamlTool(TestCase):
         tool.run()
 
         self.assertTrue(os.path.exists(f"{result_path}inst1/new_d1/AIRR"))
+        self.assertTrue(os.path.exists(f"{result_path}inst1/d2/AIRR"))
+        self.assertTrue(os.path.exists(f"{result_path}d2"))
 
         shutil.rmtree(path)
