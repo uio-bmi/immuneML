@@ -27,7 +27,8 @@ class Repertoire(DatasetItem):
     loaded separately. Internally, this class relies on numpy to store/import_dataset the data.
     """
 
-    FIELDS = "sequence_aas,sequences,v_genes,j_genes,chains,counts,region_types,sequence_identifiers,cell_ids".split(",")
+    FIELDS = "sequence_aas,sequences,v_genes,j_genes,chains,counts,region_types,frame_types,sequence_identifiers," \
+             "cell_ids".split(",")
 
     @staticmethod
     def process_custom_lists(custom_lists):
@@ -55,9 +56,10 @@ class Repertoire(DatasetItem):
         return sequence_count
 
     @classmethod
-    def build(cls, sequence_aas: list = None, sequences: list = None, v_genes: list = None, j_genes: list = None, chains: list = None,
-              counts: list = None, region_types: list = None, custom_lists: dict = None, sequence_identifiers: list = None,
-              path: str = None, metadata=dict(), signals: dict = None, cell_ids: list = None):
+    def build(cls, sequence_aas: list = None, sequences: list = None, v_genes: list = None, j_genes: list = None,
+              chains: list = None, counts: list = None, region_types: list = None, frame_types: list = None,
+              custom_lists: dict = None, sequence_identifiers: list = None, path: str = None, metadata=dict(),
+              signals: dict = None, cell_ids: list = None):
 
         sequence_count = Repertoire.check_count(sequence_aas, sequences, custom_lists)
 
@@ -123,7 +125,7 @@ class Repertoire(DatasetItem):
         assert all(isinstance(sequence, ReceptorSequence) for sequence in sequence_objects), \
             "Repertoire: all sequences have to be instances of ReceptorSequence class."
 
-        sequence_aas, sequences, v_genes, j_genes, chains, counts, region_types, sequence_identifiers, cell_ids = [], [], [], [], [], [], [], [], []
+        sequence_aas, sequences, v_genes, j_genes, chains, counts, region_types, frame_types, sequence_identifiers, cell_ids = [], [], [], [], [], [], [], [], [], []
         custom_lists = {key: [] for key in sequence_objects[0].metadata.custom_params} if sequence_objects[0].metadata else {}
         signals = {key: [] for key in metadata if "signal" in key}
 
@@ -137,6 +139,7 @@ class Repertoire(DatasetItem):
                 chains.append(sequence.metadata.chain)
                 counts.append(sequence.metadata.count)
                 region_types.append(sequence.metadata.region_type)
+                frame_types.append(sequence.metadata.frame_type)
                 cell_ids.append(sequence.metadata.cell_id)
                 for param in sequence.metadata.custom_params.keys():
                     custom_lists[param].append(sequence.metadata.custom_params[param] if param in sequence.metadata.custom_params else None)
@@ -146,8 +149,8 @@ class Repertoire(DatasetItem):
                 else:
                     signals[key].append(None)
 
-        return cls.build(sequence_aas, sequences, v_genes, j_genes, chains, counts, region_types, custom_lists,
-                         sequence_identifiers, path, metadata, signals, cell_ids)
+        return cls.build(sequence_aas, sequences, v_genes, j_genes, chains, counts, region_types, frame_types,
+                         custom_lists, sequence_identifiers, path, metadata, signals, cell_ids)
 
     def __init__(self, data_filename: str, metadata_filename: str, identifier: str):
 
@@ -242,6 +245,7 @@ class Repertoire(DatasetItem):
                                                          chain=row["chains"] if "chains" in fields else None,
                                                          count=row["counts"] if "counts" in fields else None,
                                                          region_type=row["region_types"] if "region_types" in fields else None,
+                                                         frame_type=row["frame_types"] if "frame_types" in fields else "IN",
                                                          cell_id=row["cell_ids"] if "cell_ids" in fields else None,
                                                          custom_params={key: row[key] if key in fields else None
                                                                         for key in set(self.fields) - set(Repertoire.FIELDS)}),

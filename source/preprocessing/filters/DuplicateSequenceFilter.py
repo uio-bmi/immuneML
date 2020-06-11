@@ -60,6 +60,7 @@ class DuplicateSequenceFilter(Filter):
         groupby_fields.remove("counts")
         groupby_fields.remove("sequence_identifiers")
         groupby_fields.remove("cell_ids")
+        groupby_fields.remove("frame_types")
 
         agg_dict = {"counts": params["count_agg"].value,
                     "sequence_identifiers": "first",

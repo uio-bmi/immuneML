@@ -13,7 +13,7 @@ class ReceptorSequence(DatasetItem):
                  nucleotide_sequence: str = None,
                  identifier: str = None,
                  annotation: SequenceAnnotation = None,
-                 metadata: SequenceMetadata = None):
+                 metadata: SequenceMetadata = SequenceMetadata()):
         self.identifier = identifier
         self.amino_acid_sequence = amino_acid_sequence
         self.nucleotide_sequence = nucleotide_sequence

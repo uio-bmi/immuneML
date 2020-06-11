@@ -2,6 +2,7 @@ import shutil
 from unittest import TestCase
 
 from source.IO.dataset_import.AdaptiveBiotechImport import AdaptiveBiotechImport
+from source.data_model.receptor.receptor_sequence.SequenceFrameType import SequenceFrameType
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.util.PathBuilder import PathBuilder
 
@@ -63,8 +64,8 @@ rep2.tsv,TRB,1234a,no"""
                 "result_path": EnvironmentSettings.root_path + "test/tmp/adaptive/",
                 "batch_size": 1,
                 "import_productive": True,
-                "import_with_stop_codon": False,
-                "import_out_of_frame": False,
+                "import_with_stop_codon": True,
+                "import_out_of_frame": True,
                 "separator": "\t",
                 "region_type": "CDR3",
                 "region_definition": "IMGT",
@@ -83,15 +84,17 @@ rep2.tsv,TRB,1234a,no"""
                 }
             }, "adaptive_dataset")
 
+        self.assertEqual(dataset.repertoires[0].sequences[1].metadata.frame_type.upper(), SequenceFrameType.OUT.name)
+
         self.assertEqual(2, dataset.get_example_count())
         for index, rep in enumerate(dataset.get_data()):
             if index == 0:
                 self.assertEqual("1234", rep.metadata["donor"])
-                self.assertEqual(9, len(rep.sequences))
+                self.assertEqual(13, len(rep.sequences))
                 self.assertEqual(10, rep.sequences[0].metadata.count)
             else:
                 self.assertEqual("1234a", rep.metadata["donor"])
-                self.assertEqual(11, len(rep.sequences))
+                self.assertEqual(15, len(rep.sequences))
                 self.assertEqual(2, rep.sequences[-1].metadata.count)
 
         shutil.rmtree(path)
