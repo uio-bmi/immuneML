@@ -43,7 +43,9 @@ class TestDatasetGenerationTool(TestCase):
         tool = DatasetGenerationTool(yaml_path=yaml_path, output_dir=result_path)
         tool.run()
 
-        self.assertTrue(os.path.isfile(f"{result_path}metadata.csv"))
-        self.assertEqual(202, len([name for name in os.listdir(result_path) if os.path.isfile(os.path.join(result_path, name))]))
+        self.assertTrue(os.path.isfile(f"{result_path}result/metadata.csv"))
+        self.assertTrue(os.path.isfile(f"{result_path}result/dataset_name.iml_dataset"))
+        self.assertEqual(200, len([name for name in os.listdir(f"{result_path}result/repertoires/")
+                                   if os.path.isfile(os.path.join(f"{result_path}result/repertoires/", name))]))
 
         shutil.rmtree(path)

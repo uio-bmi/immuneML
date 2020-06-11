@@ -26,6 +26,7 @@ class PickleExporter(DataExporter):
             repertoires_path = PathBuilder.build(f"{path}repertoires/")
             exported_repertoires = PickleExporter._export_repertoires(dataset.repertoires, repertoires_path)
             exported_dataset.repertoires = exported_repertoires
+            exported_dataset.metadata_file = PickleExporter._export_metadata(dataset, path)
         elif isinstance(dataset, SequenceDataset) or isinstance(dataset, ReceptorDataset):
             exported_dataset.set_filenames(PickleExporter._export_receptors(exported_dataset.get_filenames(), path))
 
@@ -33,6 +34,15 @@ class PickleExporter(DataExporter):
 
         with open(f"{path}/{dataset_name}.iml_dataset", "wb") as file:
             pickle.dump(exported_dataset, file, pickle.HIGHEST_PROTOCOL)
+
+    @staticmethod
+    def _export_metadata(dataset, metadata_folder_path):
+        if dataset.metadata_file is None or not os.path.isfile(dataset.metadata_file):
+            return None
+        metadata_file = f"{metadata_folder_path}{os.path.basename(dataset.metadata_file)}"
+        if not os.path.isfile(metadata_file):
+            shutil.copyfile(dataset.metadata_file, metadata_file)
+        return metadata_file
 
     @staticmethod
     def _export_receptors(filenames_old: List[str], path: str) -> List[str]:

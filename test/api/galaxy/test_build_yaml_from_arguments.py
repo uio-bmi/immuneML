@@ -1,12 +1,14 @@
+import shutil
 import unittest
 
 from source.IO.dataset_export.PickleExporter import PickleExporter
+from source.api.galaxy.build_yaml_from_arguments import build_settings_specs, build_ml_methods_specs, get_sequence_enc_type, \
+    build_encodings_specs
+from source.api.galaxy.build_yaml_from_arguments import main as yamlbuilder_main
+from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.dsl.ImmuneMLParser import ImmuneMLParser
 from source.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType import SequenceEncodingType
 from source.environment.EnvironmentSettings import EnvironmentSettings
-from source.api.galaxy.build_yaml_from_arguments import main as yamlbuilder_main
-from source.api.galaxy.build_yaml_from_arguments import build_settings_specs, build_ml_methods_specs, get_sequence_enc_type, build_encodings_specs
-from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.util.PathBuilder import PathBuilder
 from source.util.RepertoireBuilder import RepertoireBuilder
 
@@ -24,7 +26,6 @@ class MyTestCase(unittest.TestCase):
         PickleExporter.export(dataset, path)
 
         return f"{dataset.name}.iml_dataset"
-
 
     def test_main(self):
         path = PathBuilder.build(f"{EnvironmentSettings.tmp_test_path}args_to_yaml/")
@@ -49,14 +50,19 @@ class MyTestCase(unittest.TestCase):
         # Use ImmuneML parser to test whether the yaml file created here is still valid
         ImmuneMLParser.parse_yaml_file(f"{output_dir}/{output_filename}")
 
+        shutil.rmtree(path)
 
     def test_get_sequence_enc_type(self):
-        self.assertEqual(get_sequence_enc_type(sequence_type="complete", position_type=None, gap_type=None), SequenceEncodingType.IDENTITY.value)
-        self.assertEqual(get_sequence_enc_type(sequence_type="subsequence", position_type="positional", gap_type="gapped"), SequenceEncodingType.IMGT_GAPPED_KMER.value)
-        self.assertEqual(get_sequence_enc_type(sequence_type="subsequence", position_type="invariant", gap_type="gapped"), SequenceEncodingType.GAPPED_KMER.value)
-        self.assertEqual(get_sequence_enc_type(sequence_type="subsequence", position_type="positional", gap_type="ungapped"), SequenceEncodingType.IMGT_CONTINUOUS_KMER.value)
-        self.assertEqual(get_sequence_enc_type(sequence_type="subsequence", position_type="invariant", gap_type="ungapped"), SequenceEncodingType.CONTINUOUS_KMER.value)
-
+        self.assertEqual(get_sequence_enc_type(sequence_type="complete", position_type=None, gap_type=None),
+                         SequenceEncodingType.IDENTITY.value)
+        self.assertEqual(get_sequence_enc_type(sequence_type="subsequence", position_type="positional", gap_type="gapped"),
+                         SequenceEncodingType.IMGT_GAPPED_KMER.value)
+        self.assertEqual(get_sequence_enc_type(sequence_type="subsequence", position_type="invariant", gap_type="gapped"),
+                         SequenceEncodingType.GAPPED_KMER.value)
+        self.assertEqual(get_sequence_enc_type(sequence_type="subsequence", position_type="positional", gap_type="ungapped"),
+                         SequenceEncodingType.IMGT_CONTINUOUS_KMER.value)
+        self.assertEqual(get_sequence_enc_type(sequence_type="subsequence", position_type="invariant", gap_type="ungapped"),
+                         SequenceEncodingType.CONTINUOUS_KMER.value)
 
     def test_build_encodings_specs(self):
         args = DummyArguments
@@ -101,10 +107,10 @@ class MyTestCase(unittest.TestCase):
 
         self.assertDictEqual(result, correct)
 
-
     def test_build_settings_specs(self):
         result = build_settings_specs(["a", "b"], ["c", "d"])
-        correct = [{'encoding': 'a', 'ml_method': 'c'}, {'encoding': 'a', 'ml_method': 'd'}, {'encoding': 'b', 'ml_method': 'c'}, {'encoding': 'b', 'ml_method': 'd'}]
+        correct = [{'encoding': 'a', 'ml_method': 'c'}, {'encoding': 'a', 'ml_method': 'd'}, {'encoding': 'b', 'ml_method': 'c'},
+                   {'encoding': 'b', 'ml_method': 'd'}]
 
         self.assertListEqual(result, correct)
 

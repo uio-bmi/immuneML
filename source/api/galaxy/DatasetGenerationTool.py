@@ -10,6 +10,25 @@ from source.util.PathBuilder import PathBuilder
 
 
 class DatasetGenerationTool:
+    """
+    DatasetGenerationTool is an alternative to running ImmuneMLApp directly. It accepts a path to YAML specification and a path to the
+    output directory and generates the dataset according to the given specification. The created dataset will be located under
+    supplied output directory, under results folder. The main dataset file will have the name of the dataset given in the
+    specification and has an extension .iml_dataset.
+
+    This tool is meant to be used as an endpoint for Galaxy tool that will create a Galaxy collection out of a dataset in immuneML format.
+
+    Specification supplied for this tool is a simplified version of the immuneML specification. It contains only the definition for
+    one dataset in the following format (other options under params are possible as in a standard dataset definition in immuneML, with only
+    difference that the files must be in the current working directory, so only file names are given in the specs):
+
+        user_specified_dataset_name:
+            format: AdaptiveBiotech # format in which the immune receptor or repertoire files are
+            params:
+                metadata_file: metadata.csv # metadata filename if the dataset consists of repertoires
+                path: ./ # by default those files will be searched for at the current working directory
+
+    """
 
     def __init__(self, yaml_path, output_dir, **kwargs):
         Util.check_parameters(yaml_path, output_dir, kwargs, "Dataset generation tool")
@@ -26,7 +45,7 @@ class DatasetGenerationTool:
         datasets = symbol_table.get_keys_by_type(SymbolType.DATASET)
         assert len(datasets) == 1, f"Dataset generation tool: {len(datasets)} datasets were defined. Please check the input parameters."
         dataset = symbol_table.get(datasets[0])
-        PickleExporter.export(dataset=dataset, path=self.result_path)
+        PickleExporter.export(dataset=dataset, path=self.result_path + "result/")
         print(f"Dataset {dataset.name} generated.")
 
     def parse_dataset(self, workflow_specification: dict, yaml_path: str, result_path: str):
