@@ -18,8 +18,7 @@ class DatasetGenerationTool:
 
         self.yaml_path = yaml_path
         self.result_path = output_dir if output_dir[-1] == '/' else f"{output_dir}/"
-        self.metadata_file = kwargs["metadata"] if "metadata" in kwargs else None
-        self.files_path = f"{os.path.dirname(inputs[0])}/" if "inputs" in kwargs else None
+        self.files_path = f"{os.path.dirname(inputs[0])}/" if "inputs" in kwargs else "./"
 
     def run(self):
         PathBuilder.build(self.result_path)
@@ -39,9 +38,6 @@ class DatasetGenerationTool:
             f"Dataset generation tool: the format of the specification is not correct. 'params' key missing under '{keys[0]}'." \
             f"Please see the documentation for generating immuneML datasets."
 
-        workflow_specification[keys[0]]["params"]["result_path"] = self.result_path
-
-        workflow_specification[keys[0]]["params"]["metadata_file"] = self.metadata_file
         workflow_specification[keys[0]]["params"]["path"] = self.files_path
         workflow_specification[keys[0]]["params"]["result_path"] = self.result_path
 
