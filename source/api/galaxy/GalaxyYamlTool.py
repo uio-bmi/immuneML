@@ -54,7 +54,8 @@ class GalaxyYamlTool:
             if isinstance(item, str):
                 dataset_file_path = [p for p in collection_dataset_paths if item in p]
                 assert len(dataset_file_path) == 1, f"Galaxy immuneML Tool: could not find the dataset collection called {item} " \
-                                                    f"specified under key {key}. Please check if the collection was selected properly."
+                                                    f"specified under key {key}. Please check if the collection was selected properly. " \
+                                                    f"Discovered paths: {collection_dataset_paths}."
                 datasets[key] = {
                     "format": "Pickle",
                     "params": {"path": dataset_file_path[0]}
