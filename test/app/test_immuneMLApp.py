@@ -21,7 +21,7 @@ class TestImmuneMLApp(TestCase):
         os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
 
     def create_dataset(self):
-        path = EnvironmentSettings.root_path + "test/tmp/immunemlapp/initial_dataset/"
+        path = os.path.relpath(EnvironmentSettings.root_path + "test/tmp/immunemlapp/initial_dataset/") + "/"
         PathBuilder.build(path)
 
         repertoire_count = 30

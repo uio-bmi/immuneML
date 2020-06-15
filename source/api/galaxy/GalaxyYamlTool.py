@@ -7,6 +7,7 @@ import yaml
 from source.IO.dataset_import.PickleImport import PickleImport
 from source.api.galaxy.Util import Util
 from source.app.ImmuneMLApp import ImmuneMLApp
+from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.util.PathBuilder import PathBuilder
 
 
@@ -16,7 +17,7 @@ class GalaxyYamlTool:
         Util.check_parameters(yaml_path, output_dir, kwargs, "Galaxy immuneML Tool")
 
         self.yaml_path = yaml_path
-        self.result_path = output_dir if output_dir[-1] == '/' else f"{output_dir}/"
+        self.result_path = os.path.relpath(output_dir) + "/"
         self.start_path = "./"
 
     def run(self):
@@ -67,7 +68,10 @@ class GalaxyYamlTool:
 
     def _get_metadata_filename(self, dataset_path):
         dataset = PickleImport.import_dataset({"path": dataset_path}, "tmp")
-        return f"{os.path.dirname(dataset_path)}/{os.path.basename(dataset.metadata_file)}"
+        if isinstance(dataset, RepertoireDataset):
+            return f"{os.path.dirname(dataset_path)}/{os.path.basename(dataset.metadata_file)}"
+        else:
+            return None
 
     def check_paths(self, specs: dict):
         for key in specs.keys():

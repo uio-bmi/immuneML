@@ -17,7 +17,7 @@ class ImmuneMLApp:
 
     def __init__(self, specification_path: str, result_path: str):
         self._specification_path = specification_path
-        self._result_path = result_path if result_path[-1] == '/' else result_path + '/'
+        self._result_path = os.path.relpath(result_path) + "/"
         self._cache_path = f"{self._result_path}cache/"
 
     def set_cache(self):

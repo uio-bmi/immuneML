@@ -13,8 +13,8 @@ class HTMLBuilder:
     @staticmethod
     def build(states: list, path: str) -> str:
         presentations = HTMLBuilder._collect_all_presentations(states)
-        abs_path = os.path.abspath(path) + '/'
-        presentation_html_path = HTMLBuilder._make_document(presentations, abs_path)
+        rel_path = os.path.relpath(path) + '/'
+        presentation_html_path = HTMLBuilder._make_document(presentations, rel_path)
         return presentation_html_path
 
     @staticmethod

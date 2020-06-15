@@ -28,7 +28,7 @@ class HPHTMLBuilder:
              path to the main HTML file (index.html which is located under state.result_path)
         """
 
-        base_path = os.path.abspath(state.path + "/../") if is_index else os.path.abspath(state.path) + "/"
+        base_path = os.path.relpath(state.path + "/../") if is_index else os.path.relpath(state.path) + "/"
         html_map = HPHTMLBuilder.make_main_html_map(state, base_path)
         result_file = f"{state.path}HPOptimizationReport.html"
 
@@ -79,8 +79,8 @@ class HPHTMLBuilder:
         return [{"css_style": Util.get_css_content(HPHTMLBuilder.CSS_PATH),
                  "optimization_metric": state.optimization_metric.name.lower(),
                  "split_index": assessment_state.split_index + 1,
-                 "train_metadata_path": assessment_state.train_val_dataset.metadata_file,
-                 "test_metadata_path": assessment_state.test_dataset.metadata_file,
+                 "train_metadata_path": os.path.relpath(assessment_state.train_val_dataset.metadata_file, assessment_state.path),
+                 "test_metadata_path": os.path.relpath(assessment_state.test_dataset.metadata_file, assessment_state.path),
                  "train_data_reports": Util.to_dict_recursive(assessment_state.train_val_data_reports, assessment_state.path),
                  "test_data_reports": Util.to_dict_recursive(assessment_state.test_data_reports, assessment_state.path),
                  "show_data_reports": len(assessment_state.train_val_data_reports) > 0 or len(

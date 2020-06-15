@@ -25,7 +25,7 @@ class ExploratoryAnalysisHTMLBuilder:
         Returns:
              path to the main HTML file (which is located under state.result_path)
         """
-        base_path = os.path.abspath(state.result_path) if not is_index else os.path.abspath(state.result_path + "/../")
+        base_path = os.path.relpath(state.result_path) if not is_index else os.path.relpath(state.result_path + "/../")
         html_map = ExploratoryAnalysisHTMLBuilder.make_html_map(state, base_path)
         result_file = f"{state.result_path}ExploratoryAnalysis.html"
 

@@ -21,7 +21,7 @@ class DatasetGenerationHTMLBuilder:
         Returns:
              path to the main HTML file (which is located under state.result_path)
         """
-        base_path = os.path.abspath(state.result_path) + "/" if not is_index else os.path.abspath(state.result_path + "/../") + "/"
+        base_path = os.path.relpath(state.result_path) + "/" if not is_index else os.path.relpath(state.result_path + "/../") + "/"
         html_map = DatasetGenerationHTMLBuilder.make_html_map(state, base_path)
         result_file = f"{state.result_path}DatasetGeneration.html"
 
@@ -42,7 +42,8 @@ class DatasetGenerationHTMLBuilder:
                     "formats": [
                         {
                             "format_name": format_name,
-                            "dataset_download_link": Util.make_downloadable_zip(base_path, state.paths[dataset.name][format_name])
+                            "dataset_download_link": Util.make_downloadable_zip(base_path,
+                                                                                os.path.relpath(state.paths[dataset.name][format_name]))
                         } for format_name in state.formats
                     ]
                 } for dataset in state.datasets

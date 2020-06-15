@@ -19,8 +19,6 @@ from source.workflows.instructions.exploratory_analysis.ExploratoryAnalysisUnit 
 
 class TestExploratoryAnalysisHTMLBuilder(TestCase):
 
-
-
     def create_dataset(self, path):
 
         repertoires, metadata = RepertoireBuilder.build([["AAA"], ["AAAC"], ["ACA"], ["CAAA"], ["AAAC"], ["AAA"]], path,
@@ -30,7 +28,7 @@ class TestExploratoryAnalysisHTMLBuilder(TestCase):
         return dataset
 
     def test_build(self):
-        path = EnvironmentSettings.tmp_test_path + "ea_html_builder/"
+        path = os.path.relpath(EnvironmentSettings.tmp_test_path + "ea_html_builder") + "/"
         PathBuilder.build(path)
 
         dataset = self.create_dataset(path)

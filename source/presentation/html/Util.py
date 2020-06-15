@@ -42,4 +42,4 @@ class Util:
         filename = "_".join(Util.get_relative_path(base_path, tmp_path).replace(".", "").split("/"))[1:-1]
         PathBuilder.build(f"{base_path}zip/")
         zip_file_path = shutil.make_archive(f"{base_path}zip/{filename}", "zip", tmp_path)
-        return Util.get_relative_path(base_path, zip_file_path)
+        return os.path.relpath(zip_file_path, base_path)
