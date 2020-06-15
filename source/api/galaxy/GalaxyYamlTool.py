@@ -1,8 +1,10 @@
+import os
 from glob import glob
 from typing import List
 
 import yaml
 
+from source.IO.dataset_import.PickleImport import PickleImport
 from source.api.galaxy.Util import Util
 from source.app.ImmuneMLApp import ImmuneMLApp
 from source.util.PathBuilder import PathBuilder
@@ -58,10 +60,14 @@ class GalaxyYamlTool:
                                                     f"Discovered paths: {collection_dataset_paths}."
                 datasets[key] = {
                     "format": "Pickle",
-                    "params": {"path": dataset_file_path[0]}
+                    "params": {"path": dataset_file_path[0], 'metadata_file': self._get_metadata_filename(dataset_file_path[0])}
                 }
         specs["definitions"]["datasets"] = datasets
         return specs
+
+    def _get_metadata_filename(self, dataset_path):
+        dataset = PickleImport.import_dataset({"path": dataset_path}, "tmp")
+        return f"{os.path.dirname(dataset_path)}/{os.path.basename(dataset.metadata_file)}"
 
     def check_paths(self, specs: dict):
         for key in specs.keys():
