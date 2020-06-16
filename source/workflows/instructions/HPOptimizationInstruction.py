@@ -5,6 +5,7 @@ from source.hyperparameter_optimization.config.SplitConfig import SplitConfig
 from source.hyperparameter_optimization.core.HPAssessment import HPAssessment
 from source.hyperparameter_optimization.states.HPOptimizationState import HPOptimizationState
 from source.hyperparameter_optimization.strategy.HPOptimizationStrategy import HPOptimizationStrategy
+from source.util.ReflectionHandler import ReflectionHandler
 from source.workflows.instructions.Instruction import Instruction
 
 
@@ -129,6 +130,10 @@ class HPOptimizationInstruction(Instruction):
     @staticmethod
     def get_documentation():
         doc = str(HPOptimizationInstruction.__doc__)
+        valid_values = str([metric.name.lower() for metric in Metric])[1:-1].replace("'", "`")
+        valid_strategies = str(ReflectionHandler.all_nonabstract_subclass_basic_names(HPOptimizationStrategy, "",
+                                                                                      "hyperparameter_optimization/strategy/"))[1:-1]\
+            .replace("'", "`")
         mapping = {
             "dataset (Dataset)": "dataset",
             "hp_strategy (HPOptimizationStrategy)": "strategy",
@@ -137,7 +142,11 @@ class HPOptimizationInstruction(Instruction):
             "selection (SplitConfig)": "selection",
             "optimization_metric (Metric)": "optimization_metric",
             "label_configuration (LabelConfiguration)": "labels (list)",
-            "data_reports": "reports"
+            "data_reports": "reports",
+            "a list of metrics": f"a list of metrics ({valid_values})",
+            "a metric to use for optimization": f"a metric to use for optimization (one of {valid_values})",
+            "Valid values are objects of any class inheriting :py:obj:`~source.hyperparameter_optimization.strategy."
+            "HPOptimizationStrategy.HPOptimizationStrategy`.": f"Valid values are: {valid_strategies}."
         }
         doc = update_docs_per_mapping(doc, mapping)
         return doc
