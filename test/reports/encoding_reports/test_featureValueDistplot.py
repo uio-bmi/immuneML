@@ -10,6 +10,7 @@ from scipy import sparse
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.encoded_data.EncodedData import EncodedData
 from source.environment.EnvironmentSettings import EnvironmentSettings
+from source.reports.ReportResult import ReportResult
 from source.reports.encoding_reports.FeatureValueDistplot import FeatureValueDistplot
 
 
@@ -61,7 +62,11 @@ class TestDistributions(TestCase):
                                                       "distribution_plot_type": "SINA"})
 
         report.result_name = "sina"
-        report.generate()
+        result = report.generate()
+
+        self.assertIsInstance(result, ReportResult)
+        self.assertEqual(result.output_figures[0].path, path+"sina.pdf")
+        self.assertEqual(result.output_tables[0].path, path+"sina.csv")
 
         # density-like plots (ridge, density) have to work regardless of what 'color_label' is set to
         report = FeatureValueDistplot.build_object(**{"dataset": dataset,
@@ -71,7 +76,11 @@ class TestDistributions(TestCase):
                                                       "distribution_plot_type": "RIDGE"})
 
         report.result_name = "ridge"
-        report.generate()
+        result = report.generate()
+
+        self.assertIsInstance(result, ReportResult)
+        self.assertEqual(result.output_figures[0].path, path + "ridge.pdf")
+        self.assertEqual(result.output_tables[0].path, path + "ridge.csv")
 
         report = FeatureValueDistplot.build_object(**{"dataset": dataset,
                                                       "result_path": path,
@@ -81,6 +90,10 @@ class TestDistributions(TestCase):
                                                       "distribution_plot_type": "DENSITY"})
 
         report.result_name = "density"
-        report.generate()
+        result = report.generate()
+
+        self.assertIsInstance(result, ReportResult)
+        self.assertEqual(result.output_figures[0].path, path + "density.pdf")
+        self.assertEqual(result.output_tables[0].path, path + "density.csv")
 
         shutil.rmtree(path)

@@ -6,6 +6,7 @@ import os
 import pandas as pd
 from gensim.models import Word2Vec
 
+from scripts.specification_util import update_docs_per_mapping
 from source.IO.dataset_export.PickleExporter import PickleExporter
 from source.caching.CacheHandler import CacheHandler
 from source.data_model.dataset.Dataset import Dataset
@@ -30,6 +31,7 @@ class Word2VecEncoder(DatasetEncoder):
 
     Arguments:
         vector_size (int): The size of the vector to be learnt.
+
         model_type (:py:obj:`~source.encodings.word2vec.model_creator.ModelType.ModelType`):  The context which will be
             used to infer the representation of the sequence.
             If :py:obj:`~source.encodings.word2vec.model_creator.ModelType.ModelType.SEQUENCE` is used, the context of
@@ -38,6 +40,8 @@ class Word2VecEncoder(DatasetEncoder):
             If :py:obj:`~source.encodings.word2vec.model_creator.ModelType.ModelType.KMER_PAIR` is used, the context for
             the k-mer is defined as all the k-mers that within one edit distance (e.g. for k-mer CAS, the context
             includes CAA, CAC, CAD etc.).
+            Valid values for this parameter are names of the ModelType enum.
+
         k (int): The length of the k-mers used for the encoding.
 
     Specification:
@@ -187,3 +191,14 @@ class Word2VecEncoder(DatasetEncoder):
 
     def _create_model_path(self, params: EncoderParams):
         return params["result_path"] + "W2V.model"
+
+    @staticmethod
+    def get_documentation():
+        doc = str(Word2VecEncoder.__doc__)
+
+        valid_values = str([model_type.name for model_type in ModelType])[1:-1].replace("'", "`")
+        mapping = {
+            "Valid values for this parameter are names of the ModelType enum.": f"Valid values are {valid_values}."
+        }
+        doc = update_docs_per_mapping(doc, mapping)
+        return doc

@@ -1,8 +1,10 @@
 import pandas as pd
 
+from scripts.specification_util import update_docs_per_mapping
 from source.IO.dataset_export.PickleExporter import PickleExporter
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.encoded_data.EncodedData import EncodedData
+from source.data_model.repertoire.Repertoire import Repertoire
 from source.encodings.DatasetEncoder import DatasetEncoder
 from source.encodings.EncoderParams import EncoderParams
 from source.encodings.distance_encoding.DistanceMetricType import DistanceMetricType
@@ -22,25 +24,29 @@ class DistanceEncoder(DatasetEncoder):
     two repertoires.
 
     Attributes:
+
         distance_metric (:py:mod:`source.encodings.distance_encoding.DistanceMetricType`): The metric used to calculate the
-            distance between two repertoires. Currently the only available option is :py:mod:`source.encodings.distance_encoding.DistanceMetricType.JACCARD`
+            distance between two repertoires. Names of different distance metric types are allowed values in the specification.
+
         attributes_to_match: The attributes to consider when determining whether a sequence is present in both repertoires.
             Only the fields defined under attributes_to_match will be considered, all other fields are ignored.
+            Valid values include any repertoire attribute (sequence, amino acid sequence, V gene etc).
 
     Specification:
 
-        encodings:
-            my_distance_enc:
-                Distance:
-                    distance_metric: JACCARD
-                    attributes_to_match:
-                        - sequence_aas
-                        - v_genes
-                        - j_genes
-                        - chains
-                        - region_types
-                    pool_size: 4
+    .. indent with spaces
+    .. code-block:: yaml
 
+        my_distance_encoder:
+            Distance:
+                distance_metric: JACCARD
+                sequence_batch_size: 1000
+                attributes_to_match:
+                    - sequence_aas
+                    - v_genes
+                    - j_genes
+                    - chains
+                    - region_types
 
     """
 
@@ -117,3 +123,18 @@ class DistanceEncoder(DatasetEncoder):
 
     def store(self, encoded_dataset, params: EncoderParams):
         PickleExporter.export(encoded_dataset, params["result_path"])
+
+    @staticmethod
+    def get_documentation():
+        doc = str(DistanceEncoder.__doc__)
+
+        valid_values = [metric.name for metric in DistanceMetricType]
+        valid_values = str(valid_values)[1:-1].replace("'", "`")
+        valid_field_values = str(Repertoire.FIELDS)[1:-1].replace("'", "`")
+        mapping = {
+            "Names of different distance metric types are allowed values in the specification.": f"Valid values are: {valid_values}.",
+            "Valid values include any repertoire attribute (sequence, amino acid sequence, V gene etc).":
+                f"Valid values are {valid_field_values}."
+        }
+        doc = update_docs_per_mapping(doc, mapping)
+        return doc

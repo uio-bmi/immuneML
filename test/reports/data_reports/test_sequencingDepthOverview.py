@@ -1,3 +1,4 @@
+import os
 import random
 import shutil
 import string
@@ -9,6 +10,7 @@ from source.data_model.receptor.receptor_sequence.SequenceFrameType import Seque
 from source.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
 from source.data_model.repertoire.Repertoire import Repertoire
 from source.environment.EnvironmentSettings import EnvironmentSettings
+from source.reports.ReportResult import ReportResult
 from source.reports.data_reports.sequencing_depth_overview.SequencingDepthOverview import SequencingDepthOverview
 from source.util.PathBuilder import PathBuilder
 
@@ -16,7 +18,7 @@ from source.util.PathBuilder import PathBuilder
 class TestSequencingDepthOverview(TestCase):
     def test_generate(self):
 
-        path = EnvironmentSettings.root_path + "test/tmp/datareports/"
+        path = EnvironmentSettings.root_path + "test/tmp/seq_depth_overview/"
         PathBuilder.build(path)
 
         repertoires = [Repertoire.build_from_sequence_objects(self.generate_sequences(),
@@ -29,7 +31,10 @@ class TestSequencingDepthOverview(TestCase):
 
         report = SequencingDepthOverview(dataset, batch_size=1, x="disease", result_path=path, height_distributions=5,
                                          height_scatterplot=2.5, palette={"lupus": "brown", "t1d": "purple", "ms": "purple"})
-        report.generate()
+        result = report.generate()
+
+        self.assertTrue(isinstance(result, ReportResult))
+        self.assertTrue(os.path.isfile(result.output_figures[0].path))
 
         shutil.rmtree(path)
 

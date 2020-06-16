@@ -21,34 +21,42 @@ class PipelineEncoder(DatasetEncoder):
 
     Arguments:
         initial_encoder (DatasetEncoder):
+
         initial_encoder_params (dict):
+
         steps (list):
 
     Specification:
-        initial_encoder: KmerFrequency
-        initial_encoder_params: {k: 3}
-        steps:
-            - annotate_sequences:
-                # type can be the name of any class which inherits TransformerMixin class from scikit-learn
-                # custom immuneML classes which do this are located under encodings/pipeline/steps/
-                type: SequenceMatchFeatureAnnotation
-                params:
-                    reference_sequence_path: reference_sequence_path
-                    data_loader_params:
-                        result_path: ./path/
-                        dataset_id: dataset_id
-                        additional_columns: ["Antigen Protein"]
-                        strip_CF: True
-                        column_mapping:
-                            amino_acid: "CDR3B AA Sequence"
-                            v_gene: "TRBV Gene"
-                            j_gene: "TRBJ Gene"
-                    sequence_matcher_params:
-                        max_distance: 0
-                        metadata_fields_to_match: []
-                        same_length: True
-                    data_loader_name: GenericImport
-                    annotation_prefix: annotation_prefix
+
+    .. indent with spaces
+    .. code-block:: yaml
+
+        my_pipeline_encoder:
+            initial_encoder: KmerFrequency
+            initial_encoder_params: {k: 3}
+            steps:
+                - annotate_sequences:
+                    # type can be the name of any class which inherits TransformerMixin class from scikit-learn
+                    # custom immuneML classes which do this are located under encodings/pipeline/steps/
+                    type: SequenceMatchFeatureAnnotation
+                    params:
+                        reference_sequence_path: reference_sequence_path
+                        data_loader_params:
+                            result_path: ./path/
+                            dataset_id: dataset_id
+                            additional_columns: ["Antigen Protein"]
+                            strip_CF: True
+                            column_mapping:
+                                amino_acid: "CDR3B AA Sequence"
+                                v_gene: "TRBV Gene"
+                                j_gene: "TRBJ Gene"
+                        sequence_matcher_params:
+                            max_distance: 0
+                            metadata_fields_to_match: []
+                            same_length: True
+                        data_loader_name: GenericImport
+                        annotation_prefix: annotation_prefix
+
     """
 
     def __init__(self, initial_encoder, initial_encoder_params, steps: list):

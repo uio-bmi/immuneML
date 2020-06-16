@@ -40,29 +40,35 @@ class KmerFrequencyEncoder(DatasetEncoder):
             taken into account (i.e. the same sequence in a different position is considered to be a different k-mer).
             When the identity representation is used (:py:mod:`source.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType.IDENTITY`),
             the k-mers just correspond to the original sequences.
+
         normalization_type (:py:mod:`source.analysis.data_manipulation.NormalizationType`): The way in which the
             k-mer frequencies should be normalized.
+
         reads (:py:mod:`source.encodings.kmer_frequency.ReadsType`): Reads type signify whether the counts of the sequences
             in the repertoire will be taken into account. If :py:mod:`source.encodings.kmer_frequency.ReadsType.UNIQUE`,
             only unique sequences (clonotypes) are encoded, and if :py:mod:`source.encodings.kmer_frequency.ReadsType.ALL`,
             the sequence 'count' value is taken into account when determining the k-mer frequency.
         k (int): Length of the k-mer (number of amino acids) when ungapped k-mers are used.
+
         k_left (int): When gapped k-mers are used, k_left indicates the length of the k-mer left of the gap.
+
         k_right (int): Same as k_left, but k_right determines the length of the k-mer right of the gap
+
         min_gap (int): Minimum gap size when gapped k-mers are used.
+
         max_gap: (int): Maximum gap size when gapped k-mers are used.
-        metadata_fields_to_include (list): #todo check if it is still necessary
 
     Specification:
 
-        encodings:
+    .. indent with spaces
+    .. code-block:: yaml
+
             my_continuous_kmer:
                 KmerFrequency:
                     normalization_type: RELATIVE_FREQUENCY
                     reads: UNIQUE
                     sequence_encoding: CONTINUOUS_KMER
                     k: 3
-
             my_gapped_kmer:
                 KmerFrequency:
                     normalization_type: RELATIVE_FREQUENCY

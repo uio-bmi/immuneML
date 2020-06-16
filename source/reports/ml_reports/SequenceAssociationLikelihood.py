@@ -22,43 +22,11 @@ class SequenceAssociationLikelihood(MLReport):
 
     Specification:
 
-        definitions:
-            datasets:
-                my_data:
-                    ...
-            encodings:
-                enc1: SequenceAbundanceEncoder
-            reports:
-                report1: SequenceAssociationLikelihood
-            ml_methods:
-                ml1: ProbabilisticBinaryClassifier
+    .. indent with spaces
+    .. code-block:: yaml
 
-        instructions:
-            instruction_1:
-                type: HPOptimization
-                settings: [{encoding: enc1, ml_method: ml1]
-                dataset: my_data
-                assessment:
-                    split_strategy: random
-                    split_count: 1
-                    training_percentage: 0.7
-                    reports:
-                        optimal_model:
-                            - report1
-                selection:
-                    split_strategy: random
-                    split_count: 1
-                    training_percentage: 0.7
-                    reports:
-                        model:
-                            - report1
-                labels:
-                  - CMV
-                strategy: GridSearch
-                metrics: [accuracy, auc]
-                optimization_metric: accuracy
-                batch_size: 4
-                reports: []
+        my_sequence_assoc_report: SequenceAssociationLikelihood
+
     """
 
     DISTRIBUTION_PERCENTAGE_TO_SHOW = 0.999
@@ -84,8 +52,15 @@ class SequenceAssociationLikelihood(MLReport):
         PathBuilder.build(self.result_path)
 
         upper_limit, lower_limit = self.get_distribution_limits()
-        result_name = "beta_distribution"
+        self.result_name = "beta_distribution"
 
+        report_output_fig = self._safe_plot(upper_limit=upper_limit, lower_limit=lower_limit, output_written=False)
+        output_figures = [] if report_output_fig is None else [report_output_fig]
+
+        return ReportResult(name="Beta distribution priors - probability that a sequence is disease-associated",
+                            output_figures=output_figures)
+
+    def _plot(self, upper_limit, lower_limit):
         pandas2ri.activate()
 
         with open(EnvironmentSettings.root_path + "source/visualization/StatDistributionPlot.R") as f:
@@ -98,11 +73,11 @@ class SequenceAssociationLikelihood(MLReport):
                                                  x_label=f"probability that receptor sequence is {self.method.label_name}-associated",
                                                  label0=f"{self.method.label_name} {self.method.class_mapping[0]}",
                                                  label1=f"{self.method.label_name} {self.method.class_mapping[1]}",
-                                                 upper_limit=upper_limit, lower_limit=lower_limit, result_path=self.result_path,
-                                                 result_name=result_name)
+                                                 upper_limit=upper_limit, lower_limit=lower_limit,
+                                                 result_path=self.result_path,
+                                                 result_name=self.result_name)
 
-        return ReportResult(name="Beta distribution priors - probability that a sequence is disease-associated",
-                            output_figures=[ReportOutput(f"{self.result_path}{result_name}.pdf")])
+        return ReportOutput(f"{self.result_path}{self.result_name}.pdf")
 
     def get_distribution_limits(self) -> Tuple[float, float]:
         lower_limit_0, upper_limit_0 = beta.interval(SequenceAssociationLikelihood.DISTRIBUTION_PERCENTAGE_TO_SHOW,

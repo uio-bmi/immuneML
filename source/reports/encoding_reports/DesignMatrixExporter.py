@@ -15,32 +15,15 @@ from source.util.PathBuilder import PathBuilder
 @dataclass
 class DesignMatrixExporter(EncodingReport):
     """
-    Exports the design matrix and related information of a given encoded Dataset to csv files.
+    Exports the design matrix and related information of a given encoded Dataset to csv files. There are no parameters for this report.
 
 
     Specification:
 
-        definitions:
-            datasets:
-                my_dme_data:
-                    ...
-            encodings:
-                my_dme_encoding:
-                    ...
-            reports:
-                my_dme_report: DesignMatrixExporter
+    .. indent with spaces
+    .. code-block:: yaml
 
-        instructions:
-                instruction_1:
-                    type: ExploratoryAnalysis
-                    analyses:
-                        my_mr_analysis:
-                            dataset: my_dme_data
-                            encoding: my_dme_encoding
-                            report: my_dme_report
-                            labels:
-                                - ...
-
+        my_dme_report: DesignMatrixExporter
 
     """
     dataset: Dataset = None

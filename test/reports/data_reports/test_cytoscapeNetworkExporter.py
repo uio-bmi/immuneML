@@ -1,3 +1,4 @@
+import os
 import pickle
 import shutil
 from unittest import TestCase
@@ -7,6 +8,7 @@ from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.receptor.receptor_sequence.Chain import Chain
 from source.data_model.repertoire.Repertoire import Repertoire
 from source.environment.EnvironmentSettings import EnvironmentSettings
+from source.reports.ReportResult import ReportResult
 from source.reports.data_reports.CytoscapeNetworkExporter import CytoscapeNetworkExporter
 from source.util.PathBuilder import PathBuilder
 
@@ -86,7 +88,14 @@ class TestCytoscapeNetworkExporter(TestCase):
                                        drop_duplicates=True, additional_node_attributes=["custom_1"],
                                        additional_edge_attributes=["custom_2"])
 
-        cne.generate()
+        result = cne.generate()
+
+        self.assertIsInstance(result, ReportResult)
+        self.assertTrue(os.path.isfile(result.output_tables[0].path))
+        self.assertTrue(os.path.isfile(result.output_tables[1].path))
+        self.assertTrue(os.path.isfile(result.output_tables[2].path))
+        self.assertTrue(os.path.isfile(result.output_tables[3].path))
+
 
         with open(f"{path}repertoire_dataset/all_chains.sif") as file:
             self.assertListEqual(file.readlines(), ['*a*s=DUPDUP*v=V1-1*j=J1-1\tpair\t*b*s=AILUDGYF*v=V1-1*j=J1-1\n',

@@ -1,5 +1,7 @@
 # quality: gold
+from scripts.specification_util import update_docs_per_mapping
 from source.simulation.motif_instantiation_strategy.MotifInstantiationStrategy import MotifInstantiationStrategy
+from source.util.ReflectionHandler import ReflectionHandler
 
 
 class Motif:
@@ -12,26 +14,30 @@ class Motif:
 
 
     Arguments:
-        seed (str): An amino acid sequence that represents the basic motif seed. All implanted motifs correspond
-            to the seed, or a modified version thereof, as specified in it's instantiation strategy.
+        seed (str): An amino acid sequence that represents the basic motif seed. All implanted motifs correspond to the seed, or a modified
+            version thereof, as specified in it's instantiation strategy.
         instantiation (:py:obj:`~source.simulation.motif_instantiation_strategy.MotifInstantiationStrategy.MotifInstantiationStrategy`):
-            Which strategy to use for implanting the seed. Currently the only available option for this is
-            :py:obj:`~source.simulation.motif_instantiation_strategy.GappedKmerInstantiation.GappedKmerInstantiation`.
+            Which strategy to use for implanting the seed. It should be one of the classes inheriting MotifInstantiationStrategy.
+            In the specification this can either be one of these values as a string in which case the default parameters will be used.
+            Alternatively, instantiation can be specified with parameters as in the example specification below. For the detailed list of
+            parameters, see the specific instantiation strategies below.
+
 
     Specification:
+
+    .. indent with spaces
+    .. code-block:: yaml
 
         motifs:
             my_simple_motif:
                 seed: AAA
                 instantiation: GappedKmer
-
             my_gapped_motif:
                 seed: AA/A
                 instantiation:
                     GappedKmer:
                         min_gap: 1
                         max_gap: 2
-                        ...
 
 
     """
@@ -55,3 +61,17 @@ class Motif:
 
     def __str__(self):
         return self.id + " - " + self.seed
+
+    @staticmethod
+    def get_documentation():
+        doc = str(Motif.__doc__)
+
+        valid_strategy_values = ReflectionHandler.all_nonabstract_subclass_basic_names(MotifInstantiationStrategy, "Instantiation",
+                                                                                       "motif_instantiation_strategy/")
+        valid_strategy_values = str(valid_strategy_values)[1:-1].replace("'", "`")
+        mapping = {
+            "It should be one of the classes inheriting MotifInstantiationStrategy.": f"Valid values are: {valid_strategy_values}."
+        }
+        doc = update_docs_per_mapping(doc, mapping)
+        return doc
+

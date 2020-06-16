@@ -11,18 +11,33 @@ class AIRRImport(DataImport):
     Imports the data from an AIRR-formatted .tsv files into a RepertoireDataset.
 
     Specification:
-        import_productive: True # whether to import productive sequences or not to import them
-        import_with_stop_codon: False # whether to import sequences with stop codon
-        import_out_of_frame: False # whether to import sequences which are out of frame (where vj_in_frame is False)
-        columns_to_load: [sequence_aa, sequence, v_call, j_call, locus, duplicate_count, productive, vj_in_frame, stop_codon] # to import other columns, add them to this list
-        column_mapping: # AIRR column names -> immuneML repertoire fields
-            sequence: sequences
-            sequence_aa: sequence_aas
-            v_call: v_genes
-            j_call: j_genes
-            locus: chains
-            duplicate_count: counts
-            sequence_id: sequence_identifiers
+
+    .. indent with spaces
+    .. code-block:: yaml
+
+        my_airr_dataset:
+            format: AIRR
+            params:
+                # required parameters:
+                metadata_file: path/to/metadata.csv
+                path: path/to/directory/with/repertoire/files/
+                result_path: path/where/to/store/imported/repertoires/
+                # optional parameters (if not specified the values bellow will be used):
+                import_productive: True # whether to import productive sequences or not to import them
+                import_with_stop_codon: False # whether to import sequences with stop codon
+                import_out_of_frame: False # whether to import sequences which are out of frame (where vj_in_frame is False)
+                columns_to_load: [sequence_aa, sequence, v_call, j_call, locus, duplicate_count, productive, vj_in_frame, stop_codon] # to import other columns, add them to this list
+                column_mapping: # AIRR column names -> immuneML repertoire fields
+                    sequence: sequences
+                    sequence_aa: sequence_aas
+                    v_call: v_genes
+                    j_call: j_genes
+                    locus: chains
+                    duplicate_count: counts
+                    sequence_id: sequence_identifiers
+                batch_size: 4
+                separator: "\\t"
+
     """
 
     @staticmethod

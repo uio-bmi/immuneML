@@ -12,6 +12,9 @@ from source.util.ReflectionHandler import ReflectionHandler
 
 
 class MatchedReferenceEncoder(DatasetEncoder):
+    """
+    Legacy? To be removed?
+    """
 
     dataset_mapping = {
         "RepertoireDataset": "ReferenceRepertoireEncoder"

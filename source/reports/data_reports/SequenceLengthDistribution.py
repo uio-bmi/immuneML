@@ -17,20 +17,11 @@ class SequenceLengthDistribution(DataReport):
 
     Specification:
 
-        definitions:
-            datasets:
-                my_data:
-                    ...
-            reports:
-                my_sld_report: SequenceLengthDistribution
+    .. indent with spaces
+    .. code-block:: yaml
 
-        instructions:
-                instruction_1:
-                    type: ExploratoryAnalysis
-                    analyses:
-                        my_sld_analysis:
-                            dataset: unpaired_data
-                            report: my_sld_report
+        my_sld_report: SequenceLengthDistribution
+
     """
 
     @classmethod
@@ -50,8 +41,9 @@ class SequenceLengthDistribution(DataReport):
 
     def generate(self) -> ReportResult:
         normalized_sequence_lengths = self.get_normalized_sequence_lengths()
-        file_path = self.plot(normalized_sequence_lengths)
-        return ReportResult(type(self).__name__, output_figures=[ReportOutput(file_path, "sequence length distribution plot")])
+        report_output_fig = self._safe_plot(normalized_sequence_lengths=normalized_sequence_lengths, output_written=False)
+        output_figures = None if report_output_fig is None else [report_output_fig]
+        return ReportResult(type(self).__name__, output_figures=output_figures)
 
     def get_normalized_sequence_lengths(self) -> Counter:
         sequence_lenghts = Counter()
@@ -71,12 +63,12 @@ class SequenceLengthDistribution(DataReport):
         c = Counter([len(sequence.get_sequence()) for sequence in repertoire.sequences])
         return c
 
-    def plot(self, normalized_sequence_length):
+    def _plot(self, normalized_sequence_lengths):
 
         figure, ax = plt.subplots()
         plt.style.use('ggplot')
 
-        x = OrderedDict(sorted(normalized_sequence_length.items(), key=lambda item: item[0]))
+        x = OrderedDict(sorted(normalized_sequence_lengths.items(), key=lambda item: item[0]))
 
         plt.bar(list(x.keys()), list(x.values()), alpha=0.45, color="b")
         plt.xticks(list(x.keys()), list(x.keys()))
@@ -90,5 +82,5 @@ class SequenceLengthDistribution(DataReport):
 
         file_path = self.result_path + "sequence_length_distribution.png"
         figure.savefig(file_path, transparent=True)
-        return file_path
+        return ReportOutput(path=file_path, name="sequence length distribution plot")
 

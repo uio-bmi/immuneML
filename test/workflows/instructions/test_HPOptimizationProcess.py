@@ -19,7 +19,7 @@ from source.hyperparameter_optimization.states.HPOptimizationState import HPOpti
 from source.hyperparameter_optimization.strategy.GridSearch import GridSearch
 from source.ml_methods.SVM import SVM
 from source.ml_methods.SimpleLogisticRegression import SimpleLogisticRegression
-from source.preprocessing.filters.ClonotypeCountFilter import ClonotypeCountFilter
+from source.preprocessing.filters.ClonesPerRepertoireFilter import ClonesPerRepertoireFilter
 from source.reports.data_reports.SequenceLengthDistribution import SequenceLengthDistribution
 from source.util.PathBuilder import PathBuilder
 from source.util.RepertoireBuilder import RepertoireBuilder
@@ -64,7 +64,7 @@ class TestHPOptimizationProcess(TestCase):
                                  []),
                        HPSetting(Word2VecEncoder, {"k": 3, "model_type": ModelType.SEQUENCE.name, "vector_size": 6},
                                  SVM(), {"model_selection_cv": False, "model_selection_n_folds": -1},
-                                 [ClonotypeCountFilter(lower_limit=-1, upper_limit=1000)])
+                                 [ClonesPerRepertoireFilter(lower_limit=-1, upper_limit=1000)])
                        ]
 
         report = SequenceLengthDistribution()

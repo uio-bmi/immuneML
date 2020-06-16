@@ -56,7 +56,7 @@ class Barplot(EncodingReport):
 
     def generate(self):
         PathBuilder.build(self.result_path)
-        self._plot()
+        self._safe_plot(output_written=False)
 
     def _plot(self):
 

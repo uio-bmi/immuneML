@@ -11,6 +11,17 @@ class SVM(SklearnMethod):
     For usage and specification, check :py:obj:`~source.ml_methods.SklearnMethod.SklearnMethod`.
     For valid parameters, see: https://scikit-learn.org/stable/modules/generated/sklearn.svm.LinearSVC.html
 
+    Specification:
+
+    .. indent with spaces
+    .. code-block:: yaml
+
+        my_svm: # user-defined method name
+            SVM: # name of the ML method
+                penalty: l1 # use l1 regularization
+        # alternative way to define ML method with default values:
+        my_default_svm: SVM
+
     """
 
     def __init__(self, parameter_grid: dict = None, parameters: dict = None):

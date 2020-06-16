@@ -52,7 +52,19 @@ class ReflectionHandler:
         return subclasses
 
     @staticmethod
-    def all_nonabstract_subclasses(cls):
+    def all_direct_subclasses(cls, drop_part=None, subdirectory=None):
+        if drop_part is not None and subdirectory is not None:
+            classes = ReflectionHandler.get_classes_by_partial_name(drop_part, subdirectory)
+        return [cl for cl in cls.__subclasses__()]
+
+    @staticmethod
+    def all_nonabstract_subclass_basic_names(cls, drop_part: str, subdirectory: str = ""):
+        return [c.__name__.replace(drop_part, "") for c in ReflectionHandler.all_nonabstract_subclasses(cls, drop_part, subdirectory)]
+
+    @staticmethod
+    def all_nonabstract_subclasses(cls, drop_part=None, subdirectory=None):
+        if drop_part is not None and subdirectory is not None:
+            classes = ReflectionHandler.get_classes_by_partial_name(drop_part, subdirectory)
         return [cl for cl in ReflectionHandler.all_subclasses(cls) if not bool(getattr(cl, "__abstractmethods__", False))]
 
     @staticmethod

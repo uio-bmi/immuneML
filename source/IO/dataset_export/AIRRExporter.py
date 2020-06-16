@@ -19,6 +19,7 @@ class AIRRExporter(DataExporter):
         for the filenames, to create one file per Repertoire
         - 'counts' is written into the field 'duplicate_counts'
         - 'sequence_identifiers' is written both into the fields 'sequence_id' and 'rearrangement_id'
+
     """
 
     @staticmethod

@@ -13,9 +13,8 @@ from source.preprocessing.filters.Filter import Filter
 
 class DuplicateSequenceFilter(Filter):
     """
-    Collapses duplicate sequences within each repertoire in the given RepertoireDataset.
-    Duplicate sequences can be defined on the amino acid and nucleotide sequence level.
-    Parameter count_agg determines how the sequence counts of duplicate sequences are aggregated (for example: summing, max/min values)
+    Collapses duplicate nucleotide or amino acid sequences within each repertoire in the given RepertoireDataset.
+    This filter can be applied to Repertoires and RepertoireDatasets.
 
     Sequences are considered duplicates if the following fields are identical:
       - amino acid or nucleotide sequence (whichever is specified)
@@ -24,9 +23,35 @@ class DuplicateSequenceFilter(Filter):
       - chain
       - region type
 
-    For all other fields (the sequence to be ignored, custom lists, sequence identifier) the first occurring value is kept.
+    For all other fields (the non-specified sequence type, custom lists, sequence identifier) only the first occurring
+    value is kept.
     Note that this means the count value of a sequence with a given sequence identifier might not be the same as before
-    removing duplicates, unless CountAggregationFunction.FIRST is used.
+    removing duplicates, unless count_agg = FIRST is used.
+
+    Attributes:
+
+        filter_sequence_type (:py:obj:`~source.environment.SequenceType.SequenceType`): Whether the sequences should be
+            collapsed on the nucleotide or amino acid level.
+        batch_size (int): number of repertoires that can be loaded at the same time (only affects the speed)
+        count_agg (:py:obj:`~source.preprocessing.filters.CountAggregationFunction.CountAggregationFunction`): determines
+            how the sequence counts of duplicate sequences are aggregated (for example: summing, max/min values).
+
+
+    Specification:
+
+    .. indent with spaces
+    .. code-block:: yaml
+
+        preprocessing_sequences:
+            my_preprocessing:
+                - my_filter:
+                    DuplicateSequenceFilter:
+                        # required parameters:
+                        filter_sequence_type: AMINO_ACID
+                        # optional parameters (if not specified the values bellow will be used):
+                        batch_size: 4
+                        count_agg: SUM
+
     """
 
     def __init__(self, filter_sequence_type: SequenceType, batch_size: int, count_agg: CountAggregationFunction):

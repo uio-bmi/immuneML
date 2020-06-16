@@ -18,6 +18,7 @@ from source.hyperparameter_optimization.config.SplitConfig import SplitConfig
 from source.hyperparameter_optimization.config.SplitType import SplitType
 from source.hyperparameter_optimization.strategy.GridSearch import GridSearch
 from source.ml_methods.SimpleLogisticRegression import SimpleLogisticRegression
+from source.reports.ReportResult import ReportResult
 from source.reports.ml_reports.BenchmarkHPSettings import BenchmarkHPSettings
 from source.util.PathBuilder import PathBuilder
 from source.util.RepertoireBuilder import RepertoireBuilder
@@ -83,10 +84,14 @@ class TestBenchmarkHPSettings(TestCase):
         report.hp_optimization_state = self._create_state_object(path + "input_data/")
 
         report.check_prerequisites()
-        report.generate()
+        result = report.generate()
 
         self.assertTrue(os.path.isfile(path + "benchmark_result.csv"))
         self.assertTrue(os.path.isfile(path + "benchmark_result.pdf"))
+
+        self.assertIsInstance(result, ReportResult)
+        self.assertEqual(result.output_figures[0].path, path + "benchmark_result.pdf")
+        self.assertEqual(result.output_tables[0].path, path + "benchmark_result.csv")
 
         written_data = pd.read_csv(path + "benchmark_result.csv")
         self.assertEqual(list(written_data.columns), ["fold", "label", "encoding", "ml_method", "performance"])

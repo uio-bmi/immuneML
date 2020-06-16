@@ -24,27 +24,11 @@ class MatchedPairedReference(EncodingReport):
 
     Specification:
 
-        definitions:
-            datasets:
-                unpaired_data:
-                    ...
-            encodings:
-                my_mr_encoding:
-                    MatchedReceptors:
-                        ...
-            reports:
-                my_mr_report: MatchedPairedReference
+    .. indent with spaces
+    .. code-block:: yaml
 
-        instructions:
-                instruction_1:
-                    type: ExploratoryAnalysis
-                    analyses:
-                        my_mr_analysis:
-                            dataset: unpaired_data
-                            encoding: my_mr_encoding
-                            report: my_mr_report
-                            labels:
-                                - ...
+        my_mr_report: MatchedPairedReference
+
     """
 
     @classmethod
@@ -52,6 +36,7 @@ class MatchedPairedReference(EncodingReport):
         return MatchedPairedReference(**kwargs)
 
     def __init__(self, dataset: RepertoireDataset = None, result_path: str = None, name: str = None):
+        super().__init__(name)
         self.dataset = dataset
         self.result_path = result_path
         self.name = name

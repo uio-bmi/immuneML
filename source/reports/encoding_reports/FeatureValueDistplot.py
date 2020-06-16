@@ -29,6 +29,7 @@ class FeatureValueDistplot(EncodingReport):
 
 
     Attributes:
+
         distribution_plot_type (:py:obj:`~source.visialization.DistributionPlotType.DistributionPlotType`):
             what type of distribution plot should be used to visualize the data. Possible options are:
             LINE: Plots the feature values per group on a vertical line (strip chart).
@@ -37,47 +38,33 @@ class FeatureValueDistplot(EncodingReport):
             SINA: Plots the feature values per group as a sina plot (strip chart with jitter according to density distribution)
             DENSITY: Creates overlapping density plots of the distributions.
             RIDGE: Creates ridge plots of the distribution.
+
         grouping_label (str): The label name used for x-axis grouping of the distributions (when using LINE, BOX,
             VIOLIN or SINA distribution types), or used for plotting the different distribution curves
             (when using DENSITY and RIDGE distribution types).
+
         color_label (str): The label name used to color the data. When plotting distribution curves
             (DENSITY and RIDGE distribution types) the color grouping label is automatically set to the same field
             as the grouping label.
+
         row_grouping_label (str): The label that is used to group distributions into different row facets.
+
         column_grouping_label (str): The label that is used to group distributions into different column facets.
 
 
     Specification:
 
-        definitions:
-            datasets:
-                my_data:
-                    ...
-            encodings:
-                my_encoding:
-                    ...
-            reports:
-                my_fvd_report:
-                    FeatureValueDistplot:
-                        distribution_plot_type: SINA
-                        grouping_label: donor
-                        column_grouping_label: timepoint
-                        row_grouping_label: disease_status
-                        color_label: age_group
+    .. indent with spaces
+    .. code-block:: yaml
 
-        instructions:
-                instruction_1:
-                    type: ExploratoryAnalysis
-                    analyses:
-                        my_fvb_analysis:
-                            dataset: my_data
-                            encoding: my_encoding
-                            report: my_fvd_report
-                            labels:
-                                - donor
-                                - timepoint
-                                - disease_status
-                                - age_group
+        my_fvd_report:
+            FeatureValueDistplot:
+                distribution_plot_type: SINA
+                grouping_label: donor
+                column_grouping_label: timepoint
+                row_grouping_label: disease_status
+                color_label: age_group
+
     """
 
     @classmethod
@@ -117,12 +104,13 @@ class FeatureValueDistplot(EncodingReport):
         PathBuilder.build(self.result_path)
         data_long_format = DataReshaper.reshape(self.dataset)
         table_result = self._write_results_table(data_long_format)
-        figure_result = self._plot(data_long_format)
+        report_output_fig = self._safe_plot(data_long_format=data_long_format)
+        output_figures = None if report_output_fig is None else [report_output_fig]
 
-        return ReportResult(self.name, [figure_result], [table_result])
+        return ReportResult(self.name, output_figures, [table_result])
 
     def _write_results_table(self, data):
-        table_path = f"{self.result_path}/{self.result_name}.csv"
+        table_path = f"{self.result_path}{self.result_name}.csv"
         data.to_csv(table_path, index=False)
         return ReportOutput(table_path, "feature values")
 
@@ -139,7 +127,7 @@ class FeatureValueDistplot(EncodingReport):
                                 facet_type="wrap", facet_scales="free", height=6, width=8,
                                 result_path=self.result_path, result_name=self.result_name, type=self.type)
 
-        return ReportOutput(f"{self.result_path}{self.result_name}", "feature dist plot")
+        return ReportOutput(f"{self.result_path}{self.result_name}.pdf", "feature dist plot")
 
     def check_prerequisites(self):
         location = "FeatureValueDistplot"

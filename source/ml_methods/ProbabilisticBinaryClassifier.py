@@ -26,6 +26,25 @@ class ProbabilisticBinaryClassifier(MLMethod):
     Emerson, Ryan O., William S. DeWitt, Marissa Vignali, Jenna Gravley, Joyce K. Hu, Edward J. Osborne, Cindy Desmarais, et al.
     ‘Immunosequencing Identifies Signatures of Cytomegalovirus Exposure History and HLA-Mediated Effects on the T Cell Repertoire’.
     Nature Genetics 49, no. 5 (May 2017): 659–65. https://doi.org/10.1038/ng.3822.
+
+    Arguments:
+
+        max_iterations (int): maximum number of iterations while optimizing the parameters of the beta distribution (same for both classes)
+
+        update_rate (float): how much the computed gradient should influence the updated value of the parameters of the beta distribution
+
+        likelihood_threshold (float): at which threshold to stop the optimization (default -1e-10)
+
+    Specification:
+
+    .. indent with spaces
+    .. code-block:: yaml
+
+        my_probabilistic_classifier: # user-defined name of the ML method
+            ProbabilisticBinaryClassifier: # method name
+                max_iterations: 1000
+                update_rate: 0.01
+
     """
 
     SMALL_POSITIVE_NUMBER = 1e-15

@@ -7,25 +7,33 @@ from source.util.ImportHelper import ImportHelper
 
 class ImmunoSEQImport(DataImport):
     """
-    Imports data from immunoSEQ format from Adaptive. Very similar to AdaptiveBiotechImport, except that column names in the original files
+    Imports data from immunoSEQ format from Adaptive. Very similar to AdaptiveBiotech format, except that column names in the original files
     are different.
 
     Specification:
-        path: ./data/ # path where to find the repertoire files in the given format
-        result_path: ./result/ # where to store the imported files
-        metadata_file: ./data/metadata.csv # path to metadata file, for more information on the format, see the documentation
-        region_definition: "IMGT" # which CDR3 definition to use - IMGT option means removing first and last amino acid as ImmunoSEQ uses IMGT junction as CDR3
-        separator: '\t'
-        columns_to_load: [nucleotide, aminoAcid, count (templates/reads), vFamilyName, vGeneName, vGeneAllele, jFamilyName, jGeneName, jGeneAllele, sequenceStatus] # columns from the original file that will be imported
-        column_mapping: # immunoSEQ column names -> immuneML repertoire fields
-            nucleotide: sequences # 'nucleotide' is the immunoSEQ name, which will be mapped to 'sequences' in immuneML
-            aminoAcid: sequence_aas
-            vGeneName: v_genes
-            jGeneName: j_genes
-            sequenceStatus: frame_types
-            vFamilyName: v_subgroup
-            jFamilyName: j_subgroup
-            count (templates/reads): counts
+
+    .. indent with spaces
+    .. code-block:: yaml
+
+        my_immunoseq_dataset:
+            format: ImmunoSEQ
+            params:
+                path: ./data/ # path where to find the repertoire files in the given format
+                result_path: ./result/ # where to store the imported files
+                metadata_file: ./data/metadata.csv # path to metadata file, for more information on the format, see the documentation
+                region_definition: "IMGT" # which CDR3 definition to use - IMGT option means removing first and last amino acid as ImmunoSEQ uses IMGT junction as CDR3
+                separator: '\\t'
+                columns_to_load: [nucleotide, aminoAcid, count (templates/reads), vFamilyName, vGeneName, vGeneAllele, jFamilyName, jGeneName, jGeneAllele, sequenceStatus] # columns from the original file that will be imported
+                column_mapping: # immunoSEQ column names -> immuneML repertoire fields
+                    nucleotide: sequences # 'nucleotide' is the immunoSEQ name, which will be mapped to 'sequences' in immuneML
+                    aminoAcid: sequence_aas
+                    vGeneName: v_genes
+                    jGeneName: j_genes
+                    sequenceStatus: frame_types
+                    vFamilyName: v_subgroup
+                    jFamilyName: j_subgroup
+                    count (templates/reads): counts
+
     """
 
     @staticmethod

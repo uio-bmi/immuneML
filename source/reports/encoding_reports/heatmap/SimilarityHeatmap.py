@@ -46,25 +46,13 @@ class SimilarityHeatmap(EncodingReport):
     def build_object(cls, **kwargs):
         return SimilarityHeatmap(**kwargs)
 
-    def __init__(self,
-                 dataset: RepertoireDataset = None,
-                 similarity_measure: str = "jaccard",
-                 example_annotations: list = [],
-                 one_hot_encode_example_annotations: list = [],
-                 palette: dict = {},
-                 cluster: bool = True,
-                 show_dend: bool = True,
-                 show_names: bool = False,
-                 show_legend: list = None,
-                 annotation_position: str = "top",
-                 legend_position: str = "side",
-                 text_size: float = 10,
-                 names_size: float = 7,
-                 height: float = 10,
-                 width: float = 10,
-                 result_name: str = "similarity_heatmap",
-                 result_path: str = None):
+    def __init__(self, dataset: RepertoireDataset = None, similarity_measure: str = "jaccard", example_annotations: list = [],
+                 one_hot_encode_example_annotations: list = [], palette: dict = {}, cluster: bool = True, show_dend: bool = True,
+                 show_names: bool = False, show_legend: list = None, annotation_position: str = "top", legend_position: str = "side",
+                 text_size: float = 10, names_size: float = 7, height: float = 10, width: float = 10,
+                 result_name: str = "similarity_heatmap", result_path: str = None):
 
+        super().__init__()
         self.dataset = dataset
         self.similarity_measure = SimilarityMeasureType[similarity_measure.upper()]
         self.annotations = example_annotations
@@ -88,7 +76,7 @@ class SimilarityHeatmap(EncodingReport):
 
     def generate(self):
         PathBuilder.build(self.result_path)
-        self._plot()
+        self._safe_plot(output_written=False)
 
     def _plot(self):
 

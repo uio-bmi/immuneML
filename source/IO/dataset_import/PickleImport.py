@@ -16,8 +16,16 @@ class PickleImport(DataImport):
     examples in the dataset (i.e. repertoires), but relies on Repertoire objects that have been created previously.
 
     Specification:
-        path: path_to_dataset.iml_dataset
-        metadata_file: metadata.csv # if specified, the dataset's metadata will be updated to this without changing Repertoire objects
+
+    .. indent with spaces
+    .. code-block:: yaml
+
+        my_pickle_dataset: # user-defined dataset name
+            format: Pickle
+            params:
+                path: path_to_dataset.iml_dataset # for datasets already in immuneML format
+                metadata_file: metadata.csv # optional, but if specified, the dataset's metadata will be updated to this without changing Repertoire objects
+
     """
 
     @staticmethod

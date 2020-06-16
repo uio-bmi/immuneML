@@ -17,55 +17,22 @@ from source.util.PathBuilder import PathBuilder
 class CVFeaturePerformance(Report):
     """
     Plots average training vs test performance w.r.t. given encoding parameter which is explicitly set
-    in the feature attribute
+    in the feature attribute. It can be used only in combination with HPOptimization instruction and can be only specified under
+    assessment/reports/hyperparameter under that instruction.
 
     Attributes:
-        feature: name of the encoder parameter w.r.t. which the performance across training and test
-                 will be shown
+        feature: name of the encoder parameter w.r.t. which the performance across training and test will be shown. Possible values depend
+            on the encoder on which it is used.
 
     Specification:
 
-        definitions:
-            datasets:
-                my_data:
-                    ...
-            encodings:
-                enc1: SequenceAbundanceEncoder
-                enc2:
-                    SequenceAbundanceEncoder:
-                        p_value_threshold: 0.01
-            reports:
-                report1:
-                    CVFeaturePerformance:
-                        feature: p_value_threshold
-            ml_methods:
-                ml1: ProbabilisticBinaryClassifier
+    .. indent with spaces
+    .. code-block:: yaml
 
-        instructions:
-            instruction_1:
-                type: HPOptimization
-                settings: [{encoding: enc1, ml_method: ml1]
-                dataset: my_data
-                assessment:
-                    split_strategy: random
-                    split_count: 1
-                    training_percentage: 0.7
-                    reports:
-                        hyperparameter: [r1]
-                selection:
-                    split_strategy: random
-                    split_count: 1
-                    training_percentage: 0.7
-                    reports:
-                        model:
-                            - report1
-                labels:
-                  - CMV
-                strategy: GridSearch
-                metrics: [accuracy, auc]
-                optimization_metric: accuracy
-                batch_size: 4
-                reports: []
+        report1:
+            CVFeaturePerformance:
+                feature: p_value_threshold # parameter value of SequenceAbundance encoder
+
     """
 
     @classmethod
@@ -113,10 +80,20 @@ class CVFeaturePerformance(Report):
     def generate(self) -> ReportResult:
 
         PathBuilder.build(self.result_path)
-        result_name = f"{self.feature}_performance"
+        self.result_name = f"{self.feature}_performance"
 
         training_dataframe, test_dataframe = self._make_plot_dataframes()
         table_results = self._store_dataframes(training_dataframe, test_dataframe)
+
+        report_output_fig = self._safe_plot(training_dataframe=training_dataframe,
+                        test_dataframe=test_dataframe)
+        output_figures = None if report_output_fig is None else [report_output_fig]
+
+        return ReportResult(output_tables=table_results,
+                            output_figures=output_figures)
+
+
+    def _plot(self, training_dataframe, test_dataframe):
         pandas2ri.activate()
 
         with open(EnvironmentSettings.visualization_path + "Scatterplot.R") as f:
@@ -124,11 +101,13 @@ class CVFeaturePerformance(Report):
 
         plot = STAP(string, "plot")
 
-        plot.plot_two_dataframes(df1=training_dataframe, df2=test_dataframe, label1="training", label2="test", x_label=self.feature,
+        plot.plot_two_dataframes(df1=training_dataframe, df2=test_dataframe, label1="training", label2="test",
+                                 x_label=self.feature,
                                  y_label=f"performance ({self.hp_optimization_state.optimization_metric.name.lower()})",
-                                 result_path=self.result_path, result_name=result_name)
+                                 result_path=self.result_path, result_name=self.result_name)
 
-        return ReportResult(output_tables=table_results, output_figures=[ReportOutput(path=f"{self.result_path}{result_name}.pdf")])
+        return ReportOutput(path=f"{self.result_path}{self.result_name}.pdf")
+
 
     def _store_dataframes(self, training_dataframe: pd.DataFrame, test_dataframe: pd.DataFrame) -> List[ReportOutput]:
         train_path = self.result_path + "training_performance.csv"

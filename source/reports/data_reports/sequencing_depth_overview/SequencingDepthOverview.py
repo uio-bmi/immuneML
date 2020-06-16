@@ -67,8 +67,10 @@ class SequencingDepthOverview(DataReport):
 
     def generate(self) -> ReportResult:
         data = self.generate_data()
-        result = self.plot(data)
-        return result
+        report_output_fig = self._safe_plot(data=data, output_written=False)
+        output_figures = [report_output_fig] if report_output_fig is not None else []
+
+        return ReportResult(self.name, output_figures=output_figures)
 
     def generate_data(self):
 
@@ -84,7 +86,7 @@ class SequencingDepthOverview(DataReport):
 
         return data
 
-    def plot(self, data) -> ReportResult:
+    def _plot(self, data) -> ReportResult:
 
         pandas2ri.activate()
 
@@ -108,8 +110,7 @@ class SequencingDepthOverview(DataReport):
                                             width=self.width,
                                             result_path=self.result_path,
                                             result_name=self.result_name)
-
-        return ReportResult(self.name, output_figures=[ReportOutput(f"{self.result_path}{self.result_name}")])
+        return ReportOutput(f"{self.result_path}{self.result_name}.pdf")
 
     def _compute_repertoire(self, repertoire):
         result = []

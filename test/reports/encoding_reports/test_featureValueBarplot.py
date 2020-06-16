@@ -10,6 +10,7 @@ from scipy import sparse
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.encoded_data.EncodedData import EncodedData
 from source.environment.EnvironmentSettings import EnvironmentSettings
+from source.reports.ReportResult import ReportResult
 from source.reports.encoding_reports.FeatureValueBarplot import FeatureValueBarplot
 
 
@@ -55,7 +56,11 @@ class TestFeatureValueBarplot(TestCase):
 
         self.assertTrue(report.check_prerequisites())
 
-        report.generate()
+        result = report.generate()
+
+        self.assertIsInstance(result, ReportResult)
+        self.assertEqual(result.output_figures[0].path, path+"feature_values.pdf")
+        self.assertEqual(result.output_tables[0].path, path+"feature_values.csv")
 
         content = pd.read_csv(f"{path}/feature_values.csv")
         self.assertListEqual(list(content.columns), ["patient", "disease", "timepoint", "example_id", "sequence", "feature", "value"])

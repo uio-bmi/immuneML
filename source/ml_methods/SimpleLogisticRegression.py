@@ -10,6 +10,19 @@ class SimpleLogisticRegression(SklearnMethod):
 
     For usage and specification, check :py:obj:`~source.ml_methods.SklearnMethod.SklearnMethod`.
     For valid parameters, see: https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LogisticRegression.html
+
+    Specification:
+
+    .. indent with spaces
+    .. code-block:: yaml
+
+        my_logistic_regression: # user-defined method name
+            SimpleLogisticRegression: # name of the ML method
+                penalty: l1 # use l1 regularization
+                C: 10 # regularization constant
+        # alternative way to define ML method with default values:
+        my_default_logistic_regression: SimpleLogisticRegression
+
     """
 
     default_parameters = {"max_iter": 1000, "solver": "saga"}

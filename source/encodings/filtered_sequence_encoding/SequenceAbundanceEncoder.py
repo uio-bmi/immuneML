@@ -1,7 +1,9 @@
 import numpy as np
 
+from scripts.specification_util import update_docs_per_mapping
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.encoded_data.EncodedData import EncodedData
+from source.data_model.repertoire.Repertoire import Repertoire
 from source.encodings.DatasetEncoder import DatasetEncoder
 from source.encodings.EncoderParams import EncoderParams
 from source.encodings.filtered_sequence_encoding.SequenceFilterHelper import SequenceFilterHelper
@@ -23,24 +25,31 @@ class SequenceAbundanceEncoder(DatasetEncoder):
     Nature Genetics 49, no. 5 (May 2017): 659–65. https://doi.org/10.1038/ng.3822.
 
     Arguments:
+
         comparison_attributes (list): The attributes to be considered to group receptors into clonotypes.
             Only the fields specified in comparison_attributes will be considered, all other fields are ignored.
+            Valid comparison value can be any repertoire field name.
+
         p_value_threshold (float): The p value threshold to be used by the statistical test.
+
         sequence_batch_size (int): The pool size used for parallelization. This does not affect the results of the encoding,
             only the speed.
 
     Specification:
-        encodings:
-            my_sa_encoding:
-                SequenceAbundance:
-                    comparison_attributes:
-                        - sequence_aas
-                        - v_genes
-                        - j_genes
-                        - chains
-                        - region_types
-                    p_value_threshold: 0.05
-                    sequence_batch_size: 100000
+
+    .. indent with spaces
+    .. code-block:: yaml
+
+        my_sa_encoding:
+            SequenceAbundance:
+                comparison_attributes:
+                    - sequence_aas
+                    - v_genes
+                    - j_genes
+                    - chains
+                    - region_types
+                p_value_threshold: 0.05
+                sequence_batch_size: 100000
     """
 
     RELEVANT_SEQUENCE_ABUNDANCE = "relevant_sequence_abundance"
@@ -110,3 +119,14 @@ class SequenceAbundanceEncoder(DatasetEncoder):
 
     def store(self, encoded_dataset, params: EncoderParams):
         EncoderHelper.store(encoded_dataset, params)
+
+    @staticmethod
+    def get_documentation():
+        doc = str(SequenceAbundanceEncoder.__doc__)
+
+        valid_field_values = str(Repertoire.FIELDS)[1:-1].replace("'", "`")
+        mapping = {
+            "Valid comparison value can be any repertoire field name.": f"Valid values are {valid_field_values}."
+        }
+        doc = update_docs_per_mapping(doc, mapping)
+        return doc

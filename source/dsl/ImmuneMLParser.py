@@ -47,17 +47,17 @@ class ImmuneMLParser:
             preprocessing_sequences:
                 seq1:
                     - filter_chain_B:
-                        DatasetChainFilter:
+                        ChainRepertoireFilter:
                             keep_chain: A
                     - filter_clonotype:
-                        ClonotypeCountFilter:
+                        ClonesPerRepertoireFilter:
                             lower_limit: 1000
                 seq2:
                     - filter_clonotype:
-                        ClonotypeCountFilter:
+                        ClonesPerRepertoireFilter:
                             lower_limit: 500
                     - filter_chain_A:
-                        DatasetChainFilter:
+                        ChainRepertoireFilter:
                             keep_chain: B
         instructions:
             inst1:

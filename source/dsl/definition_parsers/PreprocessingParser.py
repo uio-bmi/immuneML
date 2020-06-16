@@ -22,10 +22,15 @@ class PreprocessingParser:
         sequence = []
 
         for item in preproc_sequence:
-            for step_key in item:
-                class_name = list(item[step_key].keys())[0]
+            for step_key, step in item.items():
+                if isinstance(step, str):
+                    class_name = step
+                    params = {}
+                else:
+                    class_name = list(item[step_key].keys())[0]
+                    params = step[class_name]
                 cls = ReflectionHandler.get_class_by_name(class_name, "preprocessing/")
-                obj = cls(**item[step_key][class_name])
+                obj = cls(**params)
                 sequence.append(obj)
 
         symbol_table.add(key, SymbolType.PREPROCESSING, sequence)

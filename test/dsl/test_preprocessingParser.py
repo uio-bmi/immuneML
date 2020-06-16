@@ -9,14 +9,14 @@ class TestPreprocessingParser(TestCase):
         workflow_specs = {
             "seq1": [
                 {"filter_chain_B": {
-                    "DatasetChainFilter": {
+                    "ChainRepertoireFilter": {
                         "keep_chain": "A"
                     }
                 }}
             ],
             "seq2": [
                 {"filter_chain_A": {
-                    "DatasetChainFilter": {
+                    "ChainRepertoireFilter": {
                         "keep_chain": "B"
                     }
                 }}

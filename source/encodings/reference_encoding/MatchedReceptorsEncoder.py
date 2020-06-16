@@ -22,8 +22,10 @@ class MatchedReceptorsEncoder(DatasetEncoder):
     report.
 
     Arguments:
+
         reference_receptors (dict): A dictionary describing the reference dataset file.
             See the :py:mod:`source.IO.sequence_import` for specification details.
+
         max_edit_distances (dict): A dictionary specifying the maximum edit distance between a target sequence
             (from the repertoire) and the reference sequence. A maximum distance can be specified per chain, for example
             to allow for less strict matching of TCR alpha and BCR light chains. When only an integer is specified,
@@ -31,19 +33,22 @@ class MatchedReceptorsEncoder(DatasetEncoder):
 
     Specification:
 
-        encodings:
-            my_mr_encoding:
-                MatchedReceptors:
-                    reference_receptors:
-                        path: /path/to/file.txt
-                        format: IRIS
-                        params:
-                            paired: True
-                            all_dual_chains: True
-                            all_genes: True
-                    max_edit_distances:
-                        alpha: 1
-                        beta: 0
+    .. indent with spaces
+    .. code-block:: yaml
+
+        my_mr_encoding:
+            MatchedReceptors:
+                reference_receptors:
+                    path: /path/to/file.txt
+                    format: IRIS
+                    params:
+                        paired: True
+                        all_dual_chains: True
+                        all_genes: True
+                max_edit_distances:
+                    alpha: 1
+                    beta: 0
+
     """
 
     dataset_mapping = {

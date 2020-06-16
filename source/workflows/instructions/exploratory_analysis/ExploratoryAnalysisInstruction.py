@@ -13,7 +13,37 @@ class ExploratoryAnalysisInstruction(Instruction):
     Allows exploratory analysis of different datasets using encodings and reports.
 
     Analysis is defined by a dictionary of ExploratoryAnalysisUnit objects that encapsulate a dataset, an encoding [optional]
-    and a report to be executed on the [encoded] dataset.
+    and a report to be executed on the [encoded] dataset. Each analysis in specified under `analyses` is completely independent from all
+    others.
+
+    Arguments:
+
+        exploratory_analysis_units (dict): a dictionary of analyses to perform; keys are the names of the analyses and values are the
+            parameters of the analyses (objects of :py:obj:`~source.workflows.instructions.exploratory_analysis.ExploratoryAnalysisUnit.ExploratoryAnalysisUnit` class).
+            Each of these includes a dataset on which to perform the analysis, report to run, and optionally preprocessing sequence,
+            encoding (if the report needs to be executed on the encoded dataset) and label configuration (if the dataset needs to be
+            encoded, it is also necessary to specify a label for encoding - a label could correspond to an immune event or to genetic
+            information (e.g. HLA).
+
+    Specification:
+
+    .. indent with spaces
+    .. code-block:: yaml
+
+        my_dataset_generation_instruction: # user-defined instruction name
+            type: ExploratoryAnalysis # which instruction to execute
+            analyses: # analyses to perform
+                my_first_analysis: # user-defined name of the analysis
+                    dataset: d1 # dataset to use in the first analysis
+                    report: r1 # which report to generate using the dataset d1
+                my_second_analysis: # user-defined name of another analysis
+                    dataset: d1 # dataset to use in the second analysis - can be the same or different from other analyses
+                    encoding: e1 # encoding to apply on the specified dataset (d1)
+                    report: r2 # which report to generate in the second analysis
+                    labels: # labels present in the dataset d1 which will be included in the encoded data on which report r2 will be run
+                        - celiac # name of the first label as present in the column of dataset's metadata file
+                        - CMV # name of the second label as present in the column of dataset's metadata file
+
     """
 
     def __init__(self, exploratory_analysis_units: dict, name: str = None):

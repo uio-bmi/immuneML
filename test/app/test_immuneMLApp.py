@@ -78,12 +78,10 @@ class TestImmuneMLApp(TestCase):
                 },
                 "preprocessing_sequences": {
                     "seq1": [
-                        {"collect": {
-                            "PatientRepertoireCollector": {}
-                        }},
+                        {"collect": "DonorRepertoireCollector"},
                         {
                             "count_filter": {
-                                "SequenceClonalCountFilter": {
+                                "CountPerSequenceFilter": {
                                     "remove_without_count": True,
                                     "low_count_limit": 3,
                                     "batch_size": 4

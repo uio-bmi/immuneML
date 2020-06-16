@@ -10,6 +10,34 @@ from source.util.ImportHelper import ImportHelper
 
 
 class MiXCRImport(DataImport):
+    """
+    Imports repertoire files into immuneML format from the repertoire tsv files that were generated as
+    results of MiXCR preprocessing.
+
+    Specification:
+
+    .. indent with spaces
+    .. code-block:: yaml
+
+        my_mixcr_dataset:
+            format: MiXCR
+            params:
+                # these parameters have to be always specified:
+                metadata_file: path/to/metadata.csv # csv file with fields filename, donor and arbitrary others which can be used as labels in analysis
+                path: path/to/location/of/repertoire/files/ # all repertoire files need to be in the same folder to be loaded (they will be discovered based on the metadata file)
+                result_path: path/where/to/store/imported/repertoires/ # immuneML imports data to optimized representation to speed up analysis so this defines where to store these new representation files
+                # the following parameter have these default values so these need to be specified only if a different behavior is required
+                region_type: "CDR3" # which part of the sequence to import by default
+                batch_size: 4 # how many repertoires can be processed at once by default
+                region_definition: "IMGT" # which CDR3 definition to use - IMGT option means removing first and last amino acid as MiXCR uses IMGT junction as CDR3
+                separator: "\\t"
+                columns_to_load: [cloneCount, allVHitsWithScore, allJHitsWithScore, aaSeqCDR3, nSeqCDR3]
+                column_mapping: # MiXCR column name -> immuneML repertoire field (where there is no 1-1 mapping, those are omitted here and handled in the code)
+                    cloneCount: counts
+                    allVHitsWithScore: v_genes
+                    allJHitsWithScore: j_genes
+
+    """
 
     SEQUENCE_NAME_MAP = {
         RegionType.CDR3: {"AA": "aaSeqCDR3", "NT": "nSeqCDR3"},
@@ -35,11 +63,15 @@ class MiXCRImport(DataImport):
             - if the region is CDR3, it adapts the sequence to the definition of the CDR3 (IMGT junction vs IMGT CDR3)
             - the chain for each sequence is extracted from the v gene name
             - the genes are loaded from the top score for gene without allele info
+
         Arguments:
+
             metadata: the corresponding row from the metadata file with metadata such as donor info, age, HLA or other info given there
             params: DatasetImportParams object defining what to import and how to do it
+
         Returns:
             data frame corresponding to Repertoire.FIELDS and custom lists which can be used to create a Repertoire object
+
         """
 
         df = ImportHelper.load_repertoire_as_dataframe(metadata, params)

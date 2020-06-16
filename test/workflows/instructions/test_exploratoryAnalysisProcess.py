@@ -9,7 +9,7 @@ from source.encodings.reference_encoding.SequenceMatchingSummaryType import Sequ
 from source.environment.Constants import Constants
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.environment.LabelConfiguration import LabelConfiguration
-from source.preprocessing.PatientRepertoireCollector import PatientRepertoireCollector
+from source.preprocessing.DonorRepertoireCollector import DonorRepertoireCollector
 from source.reports.data_reports.SequenceLengthDistribution import SequenceLengthDistribution
 from source.reports.encoding_reports.MatchingSequenceDetails import MatchingSequenceDetails
 from source.util.PathBuilder import PathBuilder
@@ -49,7 +49,7 @@ class TestExploratoryAnalysisProcess(TestCase):
 
         refs_dict = {"path": path + "refs.tsv", "format": "VDJdb"}
 
-        preproc_sequence = [PatientRepertoireCollector()]
+        preproc_sequence = [DonorRepertoireCollector()]
 
         units = {"named_analysis_1": ExploratoryAnalysisUnit(dataset=dataset, report=SequenceLengthDistribution(), batch_size=16),
                  "named_analysis_2": ExploratoryAnalysisUnit(dataset=dataset, report=SequenceLengthDistribution(),

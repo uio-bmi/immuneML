@@ -21,9 +21,11 @@ class OneHotEncoder(DatasetEncoder):
     1 represents the alphabet character.
 
     Attributes:
+
         use_positional_info (bool): whether to include a feature representing the positional information, where the
             stretch of positions in the middle of the CDR3 (regulated by distance_to_seq_middle) have positional value 1,
             and the beginning and end of the CDR3 (IMGT positions 105, 117) have value 0, with linear scaling in between.
+
         distance_to_seq_middle (int): only applies when use_positional_info is True. This is the distance from the edge
             of the CDR3 sequence (IMGT positions 105 and 117) to the portion of the sequence that is considered 'middle'.
             For example: if distance_to_seq_middle is 6 (default), all IMGT positions in the interval [111, 112)
@@ -33,15 +35,17 @@ class OneHotEncoder(DatasetEncoder):
 
     Specification:
 
-        encodings:
-            one_hot_vanilla:
-                OneHot:
-                    use_positional_info: False
+    .. indent with spaces
+    .. code-block:: yaml
 
-            one_hot_positional:
-                OneHot:
-                    use_positional_info: False
-                    distance_to_seq_middle: 3
+        one_hot_vanilla:
+            OneHot:
+                use_positional_info: False
+
+        one_hot_positional:
+            OneHot:
+                use_positional_info: True
+                distance_to_seq_middle: 3
 
     """
 

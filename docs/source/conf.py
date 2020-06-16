@@ -49,7 +49,7 @@ extensions = [
     'sphinx.ext.napoleon'
 ]
 
-autodoc_mock_imports = ["pandas", "sklearn", "numpy"]
+autodoc_mock_imports = ["pandas", "sklearn", "numpy", "dask"]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']

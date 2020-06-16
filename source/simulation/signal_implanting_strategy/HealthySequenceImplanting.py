@@ -34,10 +34,10 @@ class HealthySequenceImplanting(SignalImplantingStrategy):
                     - ...
                 implanting: HealthySequence
                 sequence_position_weights:
-                    - 109: 1
-                    - 110: 2
-                    - 111: 5
-                    - 112: 1
+                    109: 1
+                    110: 2
+                    111: 5
+                    112: 1
 
     """
 

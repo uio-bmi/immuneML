@@ -12,6 +12,7 @@ from source.data_model.encoded_data.EncodedData import EncodedData
 from source.environment.Constants import Constants
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.ml_methods.SimpleLogisticRegression import SimpleLogisticRegression
+from source.reports.ReportResult import ReportResult
 from source.reports.ml_reports.CoefficientPlottingSetting import CoefficientPlottingSetting
 from source.reports.ml_reports.Coefficients import Coefficients
 from source.util.PathBuilder import PathBuilder
@@ -64,7 +65,14 @@ class TestCoefficients(TestCase):
 
         # Running the report
         report.check_prerequisites()
-        report.generate()
+        result = report.generate()
+
+        self.assertIsInstance(result, ReportResult)
+        self.assertEqual(result.output_tables[0].path, path + "coefficients.csv")
+        self.assertEqual(result.output_figures[0].path, path + "all_coefficients.pdf")
+        self.assertEqual(result.output_figures[1].path, path + "nonzero_coefficients.pdf")
+        self.assertEqual(result.output_figures[2].path, path + "cutoff_10_coefficients.pdf")
+        self.assertEqual(result.output_figures[3].path, path + "largest_5_coefficients.pdf")
 
         # Actual tests
         self.assertTrue(os.path.isfile(path + "coefficients.csv"))

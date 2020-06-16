@@ -1,8 +1,9 @@
 # quality: gold
-
+from scripts.specification_util import update_docs_per_mapping
 from source.data_model.repertoire.Repertoire import Repertoire
 from source.simulation.implants.Motif import Motif
 from source.simulation.signal_implanting_strategy.SignalImplantingStrategy import SignalImplantingStrategy
+from source.util.ReflectionHandler import ReflectionHandler
 
 
 class Signal:
@@ -10,33 +11,38 @@ class Signal:
     This class represents the signal that will be implanted during a Simulation.
     A signal is represented by a list of motifs, and an implanting strategy.
 
-    An signal is associated with a metadata label, which is assigned to a receptor or repertoire.
+    A signal is associated with a metadata label, which is assigned to a receptor or repertoire.
     For example antigen-specific/disease-associated (receptor) or diseased (repertoire).
 
 
-    Arguments:
+    Attributes:
+
         motifs (list): A list of the motifs associated with this signal.
-        implanting_strategy (:py:obj:`~source.simulation.signal_implanting_strategy.SignalImplantingStrategy.SignalImplantingStrategy`):
+
+        implanting (:py:obj:`~source.simulation.signal_implanting_strategy.SignalImplantingStrategy.SignalImplantingStrategy`):
             The strategy that is used to decide in which sequences the motifs should be implanted, and how.
-            Currently, the only avaible implanting_strategy is :py:obj:`~source.simulation.signal_implanting_strategy.HealthySequenceImplanting.HealthySequenceImplanting`.
+
+            Valid values for this argument are class names of different signal implanting strategies.
 
 
     Specification:
 
-        motifs:
-            my_motif:
-                ...
+    .. indent with spaces
+    .. code-block:: yaml
 
         signals:
             my_signal:
                 motifs:
-                    - my_motif
-                    - ...
+                    - my_simple_motif
+                    - my_gapped_motif
                 implanting: HealthySequence
-                ...
-    """
-    def __init__(self, identifier, motifs: list, implanting_strategy: SignalImplantingStrategy):
+                sequence_position_weights:
+                    109: 0.5
+                    110: 0.5
 
+    """
+
+    def __init__(self, identifier, motifs: list, implanting_strategy: SignalImplantingStrategy):
         assert all([isinstance(m, Motif) for m in motifs])
 
         self.id = identifier
@@ -45,11 +51,27 @@ class Signal:
 
     def implant_to_repertoire(self, repertoire: Repertoire, repertoire_implanting_rate: float, path: str) \
             -> Repertoire:
-        processed_repertoire = self.implanting_strategy\
-                                .implant_in_repertoire(repertoire=repertoire,
-                                                       repertoire_implanting_rate=repertoire_implanting_rate,
-                                                       signal=self, path=path)
+        processed_repertoire = self.implanting_strategy \
+            .implant_in_repertoire(repertoire=repertoire,
+                                   repertoire_implanting_rate=repertoire_implanting_rate,
+                                   signal=self, path=path)
         return processed_repertoire
 
     def __str__(self):
         return "Signal id: " + self.id + "; motifs: " + ", ".join([str(motif) for motif in self.motifs])
+
+    @staticmethod
+    def get_documentation():
+        initial_doc = str(Signal.__doc__)
+
+        valid_implanting_values = str(
+            ReflectionHandler.all_nonabstract_subclass_basic_names(SignalImplantingStrategy, 'Implanting', 'signal_implanting_strategy/'))[
+                       1:-1].replace("'", "`")
+
+        docs_mapping = {
+            "Valid values for this argument are class names of different signal implanting strategies.":
+                f"Valid values are: {valid_implanting_values}"
+        }
+
+        doc = update_docs_per_mapping(initial_doc, docs_mapping)
+        return doc

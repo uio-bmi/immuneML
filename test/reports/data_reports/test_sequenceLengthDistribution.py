@@ -42,4 +42,7 @@ class TestSequenceLengthDistribution(TestCase):
         self.assertEqual(0.125, lengths[5])
         self.assertEqual(0.375, lengths[4])
 
+        result = sld.generate()
+        self.assertTrue(os.path.isfile(result.output_figures[0].path))
+
         shutil.rmtree(path)

@@ -4,6 +4,7 @@ import pandas as pd
 from rpy2.robjects import pandas2ri
 from rpy2.robjects.packages import STAP
 
+from scripts.specification_util import update_docs_per_mapping
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.reports.ReportOutput import ReportOutput
 from source.reports.ReportResult import ReportResult
@@ -20,43 +21,23 @@ class BenchmarkHPSettings(MLReport):
     encoding and ML method (not preprocessing). When multiple data splits are used, the average performance over
     the data splits is shown with an error bar.
 
+    This report can be used only with HPOptimization instruction under assessment/reports/hyperparameter.
+
     Attributes:
+
         errorbar_meaning (:py:obj:`~source.visualization.ErrorBarMeaning.ErrorBarMeaning`): The value that
             the error bar should represent. For options see :py:obj:`~source.visualization.ErrorBarMeaning.ErrorBarMeaning`.
 
 
     Specification:
 
-        definitions:
-            reports:
-                my_hp_report:
-                    BenchmarkHPSettings:
-                        errorbar_meaning: STANDARD_ERROR
-            ...
-            encodings:
-                enc_1:
-                    ...
-                enc_2:
-                    ...
-            ml_methods:
-                ml_1:
-                    ...
+    .. indent with spaces
+    .. code-block:: yaml
 
-        instructions:
-            instruction_1:
-                type: HPOptimization
-                settings:
-                    - encoding: enc_1
-                      ml_method: ml_1
-                    - encoding: enc_2
-                      ml_method: ml_1
-                      ...
-                assessment:
-                    reports:
-                        hyperparameter:
-                            - my_hp_report
-                    ...
-                ...
+        my_hp_report:
+            BenchmarkHPSettings:
+                errorbar_meaning: STANDARD_ERROR
+
     """
 
     ERRORBAR_CONVERSION = {ErrorBarMeaning.STANDARD_ERROR: "se",
@@ -83,9 +64,10 @@ class BenchmarkHPSettings(MLReport):
 
         plotting_data = self._retrieve_plotting_data()
         result_table = self._write_results_table(plotting_data)
-        plot_result = self._plot(plotting_data)
+        report_output_fig = self._safe_plot(plotting_data=plotting_data)
+        output_figures = [report_output_fig] if report_output_fig is not None else []
 
-        return ReportResult(self.name, output_tables=[result_table], output_figures=[plot_result])
+        return ReportResult(self.name, output_tables=[result_table], output_figures=output_figures)
 
     def _retrieve_plotting_data(self):
         plotting_data = []
@@ -120,12 +102,13 @@ class BenchmarkHPSettings(MLReport):
         errorbar_meaning_abbr = BenchmarkHPSettings.ERRORBAR_CONVERSION[self.errorbar_meaning]
 
         plot.plot_barplot(data=plotting_data, x="ml_method", color="ml_method", color_lab="ML method",
-                          y="performance", y_lab="Performance (balanced accuracy)", x_lab="Labels",
-                          errorbar_meaning=errorbar_meaning_abbr, facet_rows="encoding", facet_columns="label", facet_type="grid",
-                          facet_scales="free_y", facet_switch="x", nrow="NULL", height=6,
-                          width=8, result_path=self.result_path, result_name="benchmark_result", ml_benchmark=True)
+                              y="performance", y_lab="Performance (balanced accuracy)", x_lab="Labels",
+                              errorbar_meaning=errorbar_meaning_abbr, facet_rows="encoding", facet_columns="label", facet_type="grid",
+                              facet_scales="free_y", facet_switch="x", nrow="NULL", height=6,
+                              width=8, result_path=self.result_path, result_name="benchmark_result", ml_benchmark=True)
 
-        return ReportOutput(f"{self.result_path}/benchmark_result.pdf")
+        return ReportOutput(f"{self.result_path}benchmark_result.pdf")
+
 
     def check_prerequisites(self):
         run_report = True
@@ -139,3 +122,13 @@ class BenchmarkHPSettings(MLReport):
             run_report = False
 
         return run_report
+
+    @staticmethod
+    def get_documentation():
+        doc = str(BenchmarkHPSettings.__doc__)
+        valid_values = str([option.name for option in ErrorBarMeaning])[1:-1].replace("'", "`")
+        mapping = {
+            "For options see :py:obj:`~source.visualization.ErrorBarMeaning.ErrorBarMeaning`.": f"Valid values are: {valid_values}."
+        }
+        doc = update_docs_per_mapping(doc, mapping)
+        return doc

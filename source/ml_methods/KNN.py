@@ -10,6 +10,16 @@ class KNN(SklearnMethod):
 
     For usage and specification, check :py:obj:`~source.ml_methods.SklearnMethod.SklearnMethod`.
     For valid parameters, see: https://scikit-learn.org/stable/modules/generated/sklearn.neighbors.KNeighborsClassifier.html
+
+    Specification:
+
+    .. indent with spaces
+    .. code-block:: yaml
+
+        my_knn_method:
+            KNN:
+                n_neighbors: 5
+
     """
 
     def __init__(self, parameter_grid: dict = None, parameters: dict = None):

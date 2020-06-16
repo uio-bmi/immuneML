@@ -23,6 +23,7 @@ class EnvironmentSettings:
     visualization_path = root_path + "source/visualization/"
     tmp_cache_path = tmp_test_path + "cache/"
     html_templates_path = root_path + "source/presentation/html/templates/"
+    specs_docs_path = root_path + "docs/specs/"
     max_sequence_length = 20
     log_level = LogLevel.DEBUG
     low_memory = True

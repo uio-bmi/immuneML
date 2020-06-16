@@ -40,25 +40,13 @@ class DensityHeatmap(EncodingReport):
     def build_object(cls, **kwargs):
         return DensityHeatmap(**kwargs)
 
-    def __init__(self,
-                 dataset: RepertoireDataset = None,
-                 feature_annotations: list = [],
-                 one_hot_encode_feature_annotations: list = [],
-                 palette: dict = {},
-                 cluster_features: bool = True,
-                 subset_nonzero_features: bool = False,
-                 show_feature_dend: bool = True,
-                 show_feature_names: bool = False,
-                 show_legend_features: list = None,
-                 legend_position: str = "side",
-                 text_size: float = 10,
-                 feature_names_size: float = 7,
-                 scale_features: bool = True,
-                 height: float = 10,
-                 width: float = 10,
-                 result_name: str = "feature_heatmap",
-                 result_path: str = None):
+    def __init__(self, dataset: RepertoireDataset = None, feature_annotations: list = [], one_hot_encode_feature_annotations: list = [],
+                 palette: dict = {}, cluster_features: bool = True, subset_nonzero_features: bool = False, show_feature_dend: bool = True,
+                 show_feature_names: bool = False, show_legend_features: list = None, legend_position: str = "side", text_size: float = 10,
+                 feature_names_size: float = 7, scale_features: bool = True, height: float = 10, width: float = 10,
+                 result_name: str = "feature_heatmap", result_path: str = None):
 
+        super().__init__()
         self.dataset = dataset
         self.feature_annotations = list(set(feature_annotations) - set(one_hot_encode_feature_annotations))
         self.one_hot_encode_feature_annotations = one_hot_encode_feature_annotations
@@ -82,7 +70,7 @@ class DensityHeatmap(EncodingReport):
 
     def generate(self):
         PathBuilder.build(self.result_path)
-        self._plot()
+        self._safe_plot(output_written=False)
 
     def _plot(self):
 

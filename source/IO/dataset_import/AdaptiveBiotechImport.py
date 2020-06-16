@@ -9,6 +9,37 @@ from source.util.ImportHelper import ImportHelper
 
 
 class AdaptiveBiotechImport(DataImport):
+    """
+    Specification:
+
+    .. indent with spaces
+    .. code-block:: yaml
+
+        my_adaptive_dataset:
+            format: AdaptiveBiotech
+            params:
+                # these parameters have to be always specified:
+                metadata_file: path/to/metadata.csv # csv file with fields filename, donor and arbitrary others which can be used as labels in analysis
+                path: path/to/location/of/repertoire/files/ # all repertoire files need to be in the same folder to be loaded (they will be discovered based on the metadata file)
+                result_path: path/where/to/store/imported/repertoires/ # immuneML imports data to optimized representation to speed up analysis so this defines where to store these new representation files
+                # the following are default values so these need to be specified only if a different behavior is required
+                import_productive: True
+                import_with_stop_codon: False
+                import_out_of_frame: False
+                region_definition: "IMGT" # which CDR3 definition to use - IMGT option means removing first and last amino acid as Adaptive uses IMGT junction as CDR3
+                separator: "\\t"
+                columns_to_load: [rearrangement, v_family, v_gene, v_allele, j_family, j_gene, j_allele, amino_acid, templates, frame_type]
+                column_mapping: # adaptive column names -> immuneML repertoire fields
+                    rearrangement: sequences # 'rearrangement' is the adaptive name, which will be mapped to 'sequences' in immuneML
+                    amino_acid: sequence_aas
+                    v_gene: v_genes
+                    j_gene: j_genes
+                    frame_type: frame_types
+                    v_family: v_subgroup
+                    j_family: j_subgroup
+                    templates: counts
+
+    """
 
     @staticmethod
     def import_dataset(params: dict, dataset_name: str) -> RepertoireDataset:

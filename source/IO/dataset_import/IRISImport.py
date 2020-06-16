@@ -19,6 +19,23 @@ class IRISImport(DataImport):
     Imports data from IRIS format into a ReceptorDataset or SequenceDataset depending on the value of "paired" parameter
     (if metadata file is not defined) or to RepertoireDataset (a set of repertoires consisting of a list of receptor sequences) if the
     metadata file is defined.
+
+    Specification:
+
+    .. indent with spaces
+    .. code-block:: yaml
+
+        my_iris_dataset:
+            format: IRIS
+            params:
+                file_size: 1000 # number of sequences / receptors per file as stored internally by ImmuneML in ImmuneML format - not visible to users
+                paired: True
+                import_dual_chains: True
+                import_all_gene_combinations: False
+                batch_size: 4
+                separator: "\\t"
+                extra_columns_to_load: []
+
     """
 
     @staticmethod

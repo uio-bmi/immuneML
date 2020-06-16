@@ -6,6 +6,8 @@ from source.data_model.dataset.Dataset import Dataset
 from source.data_model.dataset.ReceptorDataset import ReceptorDataset
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
+from source.reports.ReportOutput import ReportOutput
+from source.reports.ReportResult import ReportResult
 from source.reports.data_reports.DataReport import DataReport
 from source.util.ParameterValidator import ParameterValidator
 from source.util.PathBuilder import PathBuilder
@@ -16,40 +18,17 @@ class CytoscapeNetworkExporter(DataReport):
     This report exports the Receptor sequences to .sif format, such that they can directly be
     imported as a network in Cytoscape, to visualize chain sharing between the different receptors
     in a dataset.
+
     The Receptor sequences can be provided as a ReceptorDataset, or a RepertoireDataset (containing paired sequence
     information). In the latter case, one .sif file is exported per Repertoire.
 
     Specification:
 
-        definitions:
-            datasets:
-                my_receptor_dataset:
-                    format: ...
-                    params:
-                        path: path/to/receptors/
-                        result_path: path/for/results/
+    .. indent with spaces
+    .. code-block:: yaml
 
-                my_repertoire_dataset:
-                    format: ...
-                    params:
-                        path: path/to/repertoires/
-                        result_path: path/for/results/
-                        metadata_file: path/to/metadata.txt
-                        paired: True
+        my_cyto_export: CytoscapeNetworkExporter
 
-            reports:
-                my_cyto_export: CytoscapeNetworkExporter
-
-        instructions:
-                instruction_1:
-                    type: ExploratoryAnalysis
-                    analyses:
-                        my_analysis_1:
-                            dataset: my_receptor_dataset
-                            report: my_cyto_export
-                        my_analysis_2:
-                            dataset: my_repertoire_dataset
-                            report: my_cyto_export
     """
 
     CHAIN_GENE_NAME_CONVERSION = {"A": "TRA",
@@ -95,12 +74,14 @@ class CytoscapeNetworkExporter(DataReport):
             for repertoire in self.dataset.get_data():
                 result_path = f"{self.result_path}/{repertoire.identifier}/"
                 PathBuilder.build(result_path)
-                self.export_receptorlist(repertoire.receptors, result_path)
+                report_output_tables = self.export_receptorlist(repertoire.receptors, result_path)
         elif isinstance(self.dataset, ReceptorDataset):
             receptors = self.dataset.get_data()
             result_path = f"{self.result_path}/{self.dataset.identifier}/"
             PathBuilder.build(result_path)
-            self.export_receptorlist(receptors, result_path=result_path)
+            report_output_tables = self.export_receptorlist(receptors, result_path=result_path)
+
+        return ReportResult(output_tables = report_output_tables)
 
     def export_receptorlist(self, receptors, result_path):
         export_list = []
@@ -139,6 +120,11 @@ class CytoscapeNetworkExporter(DataReport):
 
         shared_df = full_df[(full_df.duplicated(["alpha"], keep=False)) | (full_df.duplicated(["beta"], keep=False))]
         shared_df.to_csv(f"{result_path}shared_chains.sif", sep="\t", index=0, header=False)
+
+        return [ReportOutput(path=f"{result_path}node_metadata.tsv"),
+                ReportOutput(path=f"{result_path}edge_metadata.tsv"),
+                ReportOutput(path=f"{result_path}all_chains.sif"),
+                ReportOutput(path=f"{result_path}shared_chains.sif")]
 
     def get_shared_name(self, seq: ReceptorSequence):
         '''Returns a string containing a representation of the given receptor chain, with

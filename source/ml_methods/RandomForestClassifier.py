@@ -10,6 +10,17 @@ class RandomForestClassifier(SklearnMethod):
 
     For usage and specification, check :py:obj:`~source.ml_methods.SklearnMethod.SklearnMethod`.
     For valid parameters, see: https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestClassifier.html
+
+    Specification:
+
+    .. indent with spaces
+    .. code-block:: yaml
+
+        my_random_forest_classifier: # user-defined method name
+            RandomForestClassifier: # name of the ML method
+                n_estimators: 20 # number of trees in the forest
+                random_state: 100 # controls the randomness of the boostrapping of examples while building trees
+
     """
 
     def __init__(self, parameter_grid: dict = None, parameters: dict = None):

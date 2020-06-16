@@ -9,7 +9,7 @@ class Implanting:
     When performing a Simulation, one or more implantings can be specified. An implanting represents
     a set of signals which are implanted in a RepertoireDataset with given rates.
 
-    Multiple implantings can be specified in one Simulation. In this case, each implanting will only
+    Multiple implantings can be specified in one simulation. In this case, each implanting will only
     affect its own partition of the dataset, so each repertoire can only receive implanted signals from
     one implanting. This way, implantings can be used to ensure signals do not overlap (one implanting per
     signal), or to ensure signals always occur together (multiple signals per implanting).
@@ -30,30 +30,22 @@ class Implanting:
 
     Specification:
 
-        motifs:
-            my_motif:
-                ...
+    .. indent with spaces
+    .. code-block:: yaml
 
-        signals:
-            my_signal:
-                motifs:
-                    - my_motif
-                    - ...
-                implanting: HealthySequence
-                ...
+        # one simulation with multiple implanting objects, a part of definition section
+        my_simulation:
+            my_implanting_1:
+                signals:
+                    - my_signal
+                dataset_implanting_rate: 0.5
+                repertoire_implanting_rate: 0.25
+            my_implanting_2:
+                signals:
+                    - my_signal
+                dataset_implanting_rate: 0.2
+                repertoire_implanting_rate: 0.75
 
-        simulation:
-            my_simulation:
-                my_implanting_1:
-                    signals:
-                        - my_signal
-                    dataset_implanting_rate: 0.5
-                    repertoire_implanting_rate: 0.25
-                my_implanting_2:
-                    signals:
-                        - my_signal
-                    dataset_implanting_rate: 0.2
-                    repertoire_implanting_rate: 0.75
     """
 
     def __init__(self, dataset_implanting_rate: float, repertoire_implanting_rate: float, signals: List[Signal], name: str = ""):

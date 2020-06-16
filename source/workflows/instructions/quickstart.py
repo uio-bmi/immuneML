@@ -89,14 +89,14 @@ class Quickstart:
                 "preprocessing_sequences": {
                     "seq1": [
                         {"filter_chain_B": {
-                            "DatasetChainFilter": {
+                            "ChainRepertoireFilter": {
                                 "keep_chain": "A"
                             }
                         }}
                     ],
                     "seq2": [
                         {"filter_chain_A": {
-                            "DatasetChainFilter": {
+                            "ChainRepertoireFilter": {
                                 "keep_chain": "B"
                             }
                         }}

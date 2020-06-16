@@ -15,7 +15,7 @@ from source.visualization.FacetType import FacetType
 
 class DistributionPlot(EncodingReport):
     """
-    Note: this version DistributionPlot Barplot is present for historic reasons. Please use FeatureValueDistplot.
+    Note: this version DistributionPlot is present for historic reasons. Please use FeatureValueDistplot.
 
     Generate distribution plots (violin plots, boxplots, density, etc.) of multiple feature, faceted/colored/grouped by
     various example- and feature-level metadata
@@ -83,7 +83,7 @@ class DistributionPlot(EncodingReport):
 
     def generate(self):
         PathBuilder.build(self.result_path)
-        self._plot()
+        self._safe_plot(output_written=False)
 
     def _plot(self):
 

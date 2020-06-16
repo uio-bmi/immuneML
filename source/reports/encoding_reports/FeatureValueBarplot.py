@@ -3,6 +3,7 @@ import warnings
 from rpy2.robjects import pandas2ri
 from rpy2.robjects.packages import STAP
 
+from scripts.specification_util import update_docs_per_mapping
 from source.analysis.data_manipulation.DataReshaper import DataReshaper
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.environment.EnvironmentSettings import EnvironmentSettings
@@ -29,42 +30,29 @@ class FeatureValueBarplot(EncodingReport):
 
 
     Attributes:
+
         color_grouping_label (str): The label that is used to group bars into different colors.
+
         row_grouping_label (str): The label that is used to group bars into different row facets.
+
         column_grouping_label (str): The label that is used to group bars into different column facets.
+
         errorbar_meaning (:py:obj:`~source.visualization.ErrorBarMeaning.ErrorBarMeaning`): The value that
             the error bar should represent. For options see :py:obj:`~source.visualization.ErrorBarMeaning.ErrorBarMeaning`.
 
 
     Specification:
 
-        definitions:
-            datasets:
-                my_data:
-                    ...
-            encodings:
-                my_encoding:
-                    ...
-            reports:
-                my_fvb_report:
-                    FeatureValueBarplot:
-                        column_grouping_label: timepoint
-                        row_grouping_label: disease_status
-                        color_grouping_label: age_group
-                        errorbar_meaning: STANDARD_ERROR
+    .. indent with spaces
+    .. code-block:: yaml
 
-        instructions:
-                instruction_1:
-                    type: ExploratoryAnalysis
-                    analyses:
-                        my_fvb_analysis:
-                            dataset: my_data
-                            encoding: my_encoding
-                            report: my_fvb_report
-                            labels:
-                                - timepoint
-                                - disease_status
-                                - age_group
+        my_fvb_report:
+            FeatureValueBarplot:
+                column_grouping_label: timepoint
+                row_grouping_label: disease_status
+                color_grouping_label: age_group
+                errorbar_meaning: STANDARD_ERROR
+
     """
 
     ERRORBAR_CONVERSION = {ErrorBarMeaning.STANDARD_ERROR: "se",
@@ -96,11 +84,12 @@ class FeatureValueBarplot(EncodingReport):
         PathBuilder.build(self.result_path)
         data_long_format = DataReshaper.reshape(self.dataset)
         table_result = self._write_results_table(data_long_format)
-        figure_result = self._plot(data_long_format)
-        return ReportResult(self.name, [figure_result], [table_result])
+        report_output_fig = self._safe_plot(data_long_format=data_long_format)
+        output_figures = None if report_output_fig is None else [report_output_fig]
+        return ReportResult(self.name, output_figures, [table_result])
 
     def _write_results_table(self, data) -> ReportOutput:
-        table_path = f"{self.result_path}/{self.result_name}.csv"
+        table_path = f"{self.result_path}{self.result_name}.csv"
         data.to_csv(table_path, index=False)
         return ReportOutput(table_path, "feature values")
 
@@ -119,7 +108,7 @@ class FeatureValueBarplot(EncodingReport):
                           facet_scales="free", height=6, width=8, result_path=self.result_path,
                           result_name=self.result_name, errorbar_meaning=errorbar_meaning_abbr)
 
-        return ReportOutput(f"{self.result_path}{self.result_name}", "feature bar plot")
+        return ReportOutput(f"{self.result_path}{self.result_name}.pdf", "feature bar plot")
 
     def check_prerequisites(self):
         location = "FeatureValueBarplot"
@@ -140,3 +129,13 @@ class FeatureValueBarplot(EncodingReport):
                         run_report = False
 
         return run_report
+
+    @staticmethod
+    def get_documentation():
+        doc = str(FeatureValueBarplot.__doc__)
+        valid_values = str([option.name for option in ErrorBarMeaning])[1:-1].replace("'", "`")
+        mapping = {
+            "For options see :py:obj:`~source.visualization.ErrorBarMeaning.ErrorBarMeaning`.": f"Valid values are: {valid_values}."
+        }
+        doc = update_docs_per_mapping(doc, mapping)
+        return doc

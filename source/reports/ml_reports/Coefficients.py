@@ -6,6 +6,7 @@ import yaml
 from rpy2.robjects import pandas2ri
 from rpy2.robjects.packages import STAP
 
+from scripts.specification_util import update_docs_per_mapping
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.ml_methods.RandomForestClassifier import RandomForestClassifier
 from source.reports.ReportOutput import ReportOutput
@@ -30,51 +31,34 @@ class Coefficients(MLReport):
 
 
     Attributes:
+
         coefs_to_plot (list): A list specifying which coefficients should be plotted.
             For options see :py:obj:`~source.reports.ml_reports.CoefficientPlottingSetting.CoefficientPlottingSetting`.
+
         cutoff (list): If 'cutoff' is specified under 'coefs_to_plot', the cutoff values can be specified here.
             The coefficients which have an absolute value equal to or greater than the cutoff will be plotted.
+
         n_largest (list): If 'n_largest' is specified under 'coefs_to_plot', the values for n can be specified here.
             These should be integer values. The n largest coefficients are determined based on their absolute values.
 
     Specification:
 
-        definitions:
-            reports:
-                my_coef_report:
-                    Coefficients:
-                        coefs_to_plot:
-                            - all
-                            - nonzero
-                            - cutoff
-                            - n_largest
-                        cutoff:
-                            - 0.1
-                            - 0.01
-                        n_largest:
-                            - 5
-                            - 10
+    .. indent with spaces
+    .. code-block:: yaml
 
-        instructions:
-            instruction_1:
-                type: HPOptimization
-                settings:
-                      ...
-                assessment:
-                    reports:
-                        models:
-                            - my_coef_report
-                        optimal_models:
-                            - my_coef_report
-                    ...
-                selection:
-                    reports:
-                        models:
-                            - my_coef_report
-                        optimal_models:
-                            - my_coef_report
-                    ...
-                ...
+        my_coef_report:
+            Coefficients:
+                coefs_to_plot:
+                    - all
+                    - nonzero
+                    - cutoff
+                    - n_largest
+                cutoff:
+                    - 0.1
+                    - 0.01
+                n_largest:
+                    - 5
+                    - 10
 
     """
 
@@ -126,28 +110,27 @@ class Coefficients(MLReport):
         self._write_settings()
 
         if CoefficientPlottingSetting.ALL in self._coefs_to_plot:
-            plot_path = self._plot(plot_data, "all_coefficients")
-            paths.append(plot_path)
+            report_output_fig = self._safe_plot(plotting_data=plot_data, output_name="all_coefficients")
+            paths.append(report_output_fig)
 
         if CoefficientPlottingSetting.NONZERO in self._coefs_to_plot:
             nonzero_data = plot_data[plot_data["coefficients"] != 0]
-            plot_path = self._plot(nonzero_data, "nonzero_coefficients")
-            paths.append(plot_path)
+            report_output_fig = self._safe_plot(plotting_data=nonzero_data, output_name="nonzero_coefficients")
+            paths.append(report_output_fig)
 
         if CoefficientPlottingSetting.CUTOFF in self._coefs_to_plot:
             for cutoff_val in self._cutoff:
                 cutoff_data = plot_data[plot_data["abs_coefficients"] >= cutoff_val]
-                plot_path = self._plot(cutoff_data, "cutoff_{}_coefficients".format(cutoff_val))
-                paths.append(plot_path)
+                report_output_fig = self._safe_plot(plotting_data=cutoff_data, output_name="cutoff_{}_coefficients".format(cutoff_val))
+                paths.append(report_output_fig)
 
         if CoefficientPlottingSetting.N_LARGEST in self._coefs_to_plot:
             for n_val in self._n_largest:
                 n_largest_data = plot_data.nlargest(n=n_val, columns=["abs_coefficients"])
-                plot_path = self._plot(n_largest_data, "largest_{}_coefficients".format(n_val))
-                paths.append(plot_path)
+                report_output_fig = self._safe_plot(plotting_data=n_largest_data, output_name="largest_{}_coefficients".format(n_val))
+                paths.append(report_output_fig)
 
-        return ReportResult(self.name, output_tables=[ReportOutput(result_table_path)], output_figures=[ReportOutput(p)
-                                                                                                        for p in paths if p is not None])
+        return ReportResult(self.name, output_tables=[ReportOutput(result_table_path)], output_figures=[p for p in paths if p is not None])
 
     def _set_plotting_parameters(self):
         if isinstance(self.method, RandomForestClassifier):
@@ -183,29 +166,24 @@ class Coefficients(MLReport):
             return self.train_dataset.encoded_data.feature_names
 
     def _plot(self, plotting_data, output_name):
-
         if plotting_data.empty:
             warnings.warn("Coefficients: empty data subset specified, skipping this plot...")
         else:
-            try:
-                pandas2ri.activate()
+            pandas2ri.activate()
 
-                with open(EnvironmentSettings.visualization_path + "Barplot.R") as f:
-                    string = f.read()
+            with open(EnvironmentSettings.visualization_path + "Barplot.R") as f:
+                string = f.read()
 
-                plot = STAP(string, "plot")
+            plot = STAP(string, "plot")
 
-                plotting_data.loc[:, "empty_facet"] = ""  # Necessary to remove '(all)' label when not using facets
+            plotting_data.loc[:, "empty_facet"] = ""  # Necessary to remove '(all)' label when not using facets
 
-                plot.plot_barplot(data=plotting_data, x="features", color="NULL", y="coefficients",
+            plot.plot_barplot(data=plotting_data, x="features", color="NULL", y="coefficients",
                                   y_lab=self._y_axis_title, x_lab="feature", facet_type="wrap", facet_columns="empty_facet",
                                   facet_scales="free", nrow=1, height=6, sort_by_y=True,
                                   width=8, result_path=self.result_path, result_name=output_name)
 
-                return f"{self.result_path}/{output_name}.pdf"
-
-            except Exception as e:
-                warnings.warn(f"Coefficients: the following exception was thrown when attempting to plot the data:\n{e}")
+            return ReportOutput(f"{self.result_path}{output_name}.pdf")
 
     def check_prerequisites(self):
 
@@ -224,3 +202,14 @@ class Coefficients(MLReport):
             run_report = False
 
         return run_report
+
+    @staticmethod
+    def get_documentation():
+        doc = str(Coefficients.__doc__)
+        valid_values = str([option.name for option in CoefficientPlottingSetting])[1:-1].replace("'", "`")
+        mapping = {
+            "For options see :py:obj:`~source.reports.ml_reports.CoefficientPlottingSetting.CoefficientPlottingSetting`.":
+                f"Valid values are: {valid_values}."
+        }
+        doc = update_docs_per_mapping(doc, mapping)
+        return doc
