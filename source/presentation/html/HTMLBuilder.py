@@ -9,6 +9,22 @@ from source.presentation.TemplateParser import TemplateParser
 
 
 class HTMLBuilder:
+    """
+    Outputs HTML results of the analysis. This is currently the only defined format of presentation of results.
+
+    Specification:
+
+    .. indent with spaces
+    .. code-block:: yaml
+
+        definitions:
+            ...
+        instructions:
+            ...
+        output: # the output format
+            format: HTML
+
+    """
 
     @staticmethod
     def build(states: list, path: str) -> str:

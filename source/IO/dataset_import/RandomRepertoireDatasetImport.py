@@ -1,5 +1,6 @@
 from source.IO.dataset_import.DataImport import DataImport
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
+from source.dsl.DefaultParamsLoader import DefaultParamsLoader
 from source.simulation.dataset_generation.RandomDatasetGenerator import RandomDatasetGenerator
 
 
@@ -31,6 +32,7 @@ class RandomRepertoireDatasetImport(DataImport):
 
     @staticmethod
     def import_dataset(params: dict, dataset_name: str) -> RepertoireDataset:
+        merged_params = {**DefaultParamsLoader.load("datasets/", "RandomRepertoireDataset"), **params}
         return RandomDatasetGenerator.generate_repertoire_dataset(repertoire_count=params["repertoire_count"],
                                                                   sequence_count_probabilities=params["sequence_count_probabilities"],
                                                                   sequence_length_probabilities=params["sequence_length_probabilities"],

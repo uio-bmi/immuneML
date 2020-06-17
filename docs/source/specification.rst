@@ -6,12 +6,14 @@ Specification
 
 The YAML specification defines which analysis should be performed by immuneML. It consists of two parts:
 
-  - definitions and
-  - instructions.
+  - definitions,
+  - instructions and
+  - output.
 
-Definitions describe datasets, encodings, ML methods, preprocessing, simulations and other components described in detail below.
-Instructions describe the analysis that will be performed and use datasets, encodings and other definitions to describe on which data the
-analysis will be performed and what are the specific parameters of that analysis.
+Definitions describe datasets, encodings, ML methods, preprocessing, simulations and other components (see details below).
+Instructions describe the analysis that will be performed and use datasets, encodings and other definitions to define on which data the
+analysis will be performed and what are the specific parameters of that analysis. Output defines how to format the presentation of the
+results of the analysis.
 
 The overall structure of the YAML specification is the following:
 
@@ -37,6 +39,8 @@ The overall structure of the YAML specification is the following:
   instructions: # mandatory keyword - at least one instruction has to be specified
     my_instruction_1: # user-defined name of the instruction
       ... # see below for the specification of different instructions
+  output: # how to present the result after running (the only valid option now)
+    format: HTML
 
 For details on each of these components, see the documentation below.
 
@@ -95,3 +99,11 @@ Simulation
 --------------------
 
 .. include:: ../specs/instructions/simulation.rst
+
+Output
+======
+
+HTML
+----
+
+.. include:: ../specs/output/outputs.rst

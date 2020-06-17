@@ -1,0 +1,11 @@
+repertoire_count: 100 # number of repertoires to generate
+sequence_count_probabilities:
+    10: 0.5 # probability that any repertoire would have 10 receptor sequences
+    20: 0.5 # probability that any repertoire would have 20 receptor sequences
+sequence_length_probabilities:
+    10: 0.5 # probability that any sequence in a repertoire is 10 a.a. long
+    12: 0.5 # probability that any sequences in a repertoire is 12 a.a. long
+labels: # labels which can be used for machine learning
+    some_label_name: # the name of the label corresponding to an immune event
+        True: 0.5 # probability that a repertoire is positive w.r.t. the label
+        False: 0.5 # probability that a repertoire is negative w.r.t. the label

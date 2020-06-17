@@ -29,14 +29,6 @@ class TestExploratoryAnalysisDesignMatrixExporter(TestCase):
                         "format": "RandomRepertoireDataset",
                         "params": {
                             "result_path": path,
-                            "repertoire_count": 100,
-                            "sequence_count_probabilities": {
-                                10: 0.5,
-                                12: 0.5
-                            },
-                            "sequence_length_probabilities": {
-                                5: 1.
-                            },
                             "labels": {
                                 "cmv": {
                                     True: 0.5,

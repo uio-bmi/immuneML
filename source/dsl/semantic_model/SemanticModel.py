@@ -30,7 +30,7 @@ class SemanticModel:
             print("Instruction {}/{} has started.".format(index+1, len(self.instructions)))
             result = instruction.run(result_path=self.path)
             instruction_states.append(result)
-            print("Instruction {}/{} has finished. Result: {}".format(index+1, len(self.instructions), result))
+            print("Instruction {}/{} has finished.".format(index+1, len(self.instructions)))
         return instruction_states
 
     def make_report_builder(self):
