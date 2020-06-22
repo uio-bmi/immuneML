@@ -1,5 +1,3 @@
-source(file.path(here::here(), "source", "visualization", "PaletteUtils.R"))
-
 library(ggplot2)
 
 
@@ -35,7 +33,7 @@ plot_barplot = function(data,
   facet_columns = as.character(facet_columns)
   facet_rows = as.character(facet_rows)
 
-  palette = generate_ggplot_palette(data[, color, drop = TRUE], palette)
+  palette = ggexp::generate_palette_ggplot(data[, color, drop = TRUE], palette)
 
   if ("ScaleDiscrete" %in% class(palette)) {
     data[, color] = as.factor(data[, color, drop = TRUE])

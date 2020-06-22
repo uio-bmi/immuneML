@@ -1,6 +1,3 @@
-source(file.path(here::here(), "source", "visualization", "PaletteUtils.R"))
-source(file.path(here::here(), "source", "visualization", "Heatmap.R"))
-
 plot_density_heatmap = function(matrix,
                                 feature_annotations = NULL,
                                 palette = list(),
@@ -37,7 +34,7 @@ plot_density_heatmap = function(matrix,
   if (!is.list(palette))
     palette = rjson::fromJSON(palette)
 
-  col_anno = create_annotation(feature_annotations,
+  col_anno = ggexp:::.create_annotation(feature_annotations,
                                "column",
                                show_legend_features,
                                text_size,
