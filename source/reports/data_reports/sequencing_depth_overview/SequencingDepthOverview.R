@@ -1,5 +1,3 @@
-source(file.path(here::here(), "source", "visualization", "PaletteUtils.R"))
-
 library(magrittr)
 library(ggplot2)
 
@@ -20,7 +18,7 @@ plot_sequencing_depth_overview = function(data,
   if (!is.null(palette)) palette = rjson::fromJSON(palette)
   facets = as.character(facets)
 
-  palette = generate_ggplot_palette(data[, color, drop = TRUE], palette)
+  palette = ggexp::generate_palette_ggplot(data[, color, drop = TRUE], palette)
 
   if ("ScaleDiscrete" %in% class(palette)) {
     data[, color] = as.factor(data[, color, drop = TRUE])
