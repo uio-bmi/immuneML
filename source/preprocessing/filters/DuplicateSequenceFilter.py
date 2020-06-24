@@ -1,5 +1,6 @@
 import copy
 from multiprocessing.pool import Pool
+from scripts.specification_util import update_docs_per_mapping
 
 import pandas as pd
 
@@ -31,11 +32,10 @@ class DuplicateSequenceFilter(Filter):
     Attributes:
 
         filter_sequence_type (:py:obj:`~source.environment.SequenceType.SequenceType`): Whether the sequences should be
-            collapsed on the nucleotide or amino acid level.
+            collapsed on the nucleotide or amino acid level. Valid options are defined by the SequenceType enum.
         batch_size (int): number of repertoires that can be loaded at the same time (only affects the speed)
         count_agg (:py:obj:`~source.preprocessing.filters.CountAggregationFunction.CountAggregationFunction`): determines
-            how the sequence counts of duplicate sequences are aggregated (for example: summing, max/min values).
-
+            how the sequence counts of duplicate sequences are aggregated. Valid options are defined by the CountAggregationFunction enum.
 
     Specification:
 
@@ -123,3 +123,17 @@ class DuplicateSequenceFilter(Filter):
                   "sequence_to_ignore": self.sequence_to_ignore}
 
         return DuplicateSequenceFilter.process(dataset, params)
+
+
+    @staticmethod
+    def get_documentation():
+        doc = str(DuplicateSequenceFilter.__doc__)
+
+        mapping = {
+            "Valid options are defined by the CountAggregationFunction enum.": f"Valid values are: {[e.name for e in CountAggregationFunction]}.",
+            "Valid options are defined by the SequenceType enum.": f"Valid values are: {[e.name for e in SequenceType]}."
+        }
+
+        doc = update_docs_per_mapping(doc, mapping)
+
+        return doc
