@@ -2,6 +2,7 @@
 import pickle
 import shutil
 import weakref
+from typing import List
 from uuid import uuid4
 
 import numpy as np
@@ -270,8 +271,8 @@ class Repertoire(DatasetItem):
         return ReceptorBuilder.build_objects(sequences)
 
     @property
-    def sequences(self) -> ReceptorSequenceList:
-        seqs = ReceptorSequenceList()
+    def sequences(self) -> List[ReceptorSequence]:
+        seqs = []
 
         data = self.load_data()
 

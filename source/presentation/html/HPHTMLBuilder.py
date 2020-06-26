@@ -76,27 +76,42 @@ class HPHTMLBuilder:
 
     @staticmethod
     def make_assessment_indices_list(state: HPOptimizationState, base_path: str):
-        return [{"css_style": Util.get_css_content(HPHTMLBuilder.CSS_PATH),
-                 "optimization_metric": state.optimization_metric.name.lower(),
-                 "split_index": assessment_state.split_index + 1,
-                 "train_metadata_path": os.path.relpath(assessment_state.train_val_dataset.metadata_file, assessment_state.path),
-                 "test_metadata_path": os.path.relpath(assessment_state.test_dataset.metadata_file, assessment_state.path),
-                 "train_data_reports": Util.to_dict_recursive(assessment_state.train_val_data_reports, assessment_state.path),
-                 "test_data_reports": Util.to_dict_recursive(assessment_state.test_data_reports, assessment_state.path),
-                 "show_data_reports": len(assessment_state.train_val_data_reports) > 0 or len(
-                     assessment_state.test_data_reports) > 0,
-                 "labels": [{
-                     "label": label,
-                     "hp_settings": [{
-                         "optimal": key == str(assessment_state.label_states[label].optimal_hp_setting),
-                         "hp_setting": key,
-                         "optimization_metric_val": round(item.performance, HPHTMLBuilder.NUM_DIGITS)
-                     } for key, item in assessment_state.label_states[label].assessment_items.items()],
-                     "selection_path": Util.get_relative_path(assessment_state.path,
-                                                              HPHTMLBuilder.make_selection_split_path(i, state, label))
-                 } for label in state.label_configuration.get_labels_by_name()],
-                 }
-                for i, assessment_state in enumerate(state.assessment_states)]
+
+        assessment_list = []
+
+        for i, assessment_state in enumerate(state.assessment_states):
+
+            assessment_item = {"css_style": Util.get_css_content(HPHTMLBuilder.CSS_PATH),
+                               "optimization_metric": state.optimization_metric.name.lower(),
+                               "split_index": assessment_state.split_index + 1,
+                               "train_data_reports": Util.to_dict_recursive(assessment_state.train_val_data_reports, assessment_state.path),
+                               "test_data_reports": Util.to_dict_recursive(assessment_state.test_data_reports, assessment_state.path),
+                               "show_data_reports": len(assessment_state.train_val_data_reports) > 0 or len(assessment_state.test_data_reports) > 0}
+
+            if hasattr(assessment_state.train_val_dataset, "metadata_file") and assessment_state.train_val_dataset.metadata_file is not None:
+                assessment_item["train_metadata_path"] = os.path.relpath(assessment_state.train_val_dataset.metadata_file, assessment_state.path)
+            else:
+                assessment_item["train_metadata_path"] = None
+
+            if hasattr(assessment_state.test_dataset, "metadata_file") and assessment_state.test_dataset.metadata_file is not None:
+                assessment_item['test_metadata_path'] = os.path.relpath(assessment_state.test_dataset.metadata_file, assessment_state.path)
+            else:
+                assessment_item["test_metadata_path"] = None
+
+            assessment_item["labels"] = [{
+                "label": label,
+                "hp_settings": [{
+                    "optimal": key == str(assessment_state.label_states[label].optimal_hp_setting),
+                    "hp_setting": key,
+                    "optimization_metric_val": round(item.performance, HPHTMLBuilder.NUM_DIGITS)
+                } for key, item in assessment_state.label_states[label].assessment_items.items()],
+                "selection_path": Util.get_relative_path(assessment_state.path,
+                                                         HPHTMLBuilder.make_selection_split_path(i, state, label))
+            } for label in state.label_configuration.get_labels_by_name()]
+
+            assessment_list.append(assessment_item)
+
+        return assessment_list
 
     @staticmethod
     def make_hp_per_label(state: HPOptimizationState, base_path: str):

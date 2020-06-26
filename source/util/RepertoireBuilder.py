@@ -23,6 +23,7 @@ class RepertoireBuilder:
                 assert len(sequence_list) == len(seq_metadata[index])
 
         PathBuilder.build(path)
+        rep_path = PathBuilder.build(path + "repertoires/")
 
         repertoires = []
         if donors is None:
@@ -48,7 +49,7 @@ class RepertoireBuilder:
 
             metadata = {**metadata, **{"donor": donors[rep_index]}}
 
-            repertoire = Repertoire.build_from_sequence_objects(rep_sequences, path, metadata)
+            repertoire = Repertoire.build_from_sequence_objects(rep_sequences, rep_path, metadata)
             repertoires.append(repertoire)
 
         df = pd.DataFrame({**{"filename": [f"{repertoire.identifier}_data.npy" for repertoire in repertoires], "donor": donors,

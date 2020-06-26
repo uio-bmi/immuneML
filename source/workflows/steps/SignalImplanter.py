@@ -16,12 +16,14 @@ from source.workflows.steps.Step import Step
 
 class SignalImplanter(Step):
 
+    DATASET_NAME = "simulated_dataset"
+
     @staticmethod
     def run(input_params: SimulationState = None):
         path = input_params.result_path + FilenameHandler.get_dataset_name(SignalImplanter.__name__)
 
         if os.path.isfile(path):
-            dataset = PickleImport.import_dataset({"path": path})
+            dataset = PickleImport.import_dataset({"path": path}, SignalImplanter.DATASET_NAME)
         else:
             dataset = SignalImplanter._implant_signals(input_params)
 
@@ -31,6 +33,7 @@ class SignalImplanter(Step):
     def _implant_signals(input_params: SimulationState = None) -> Dataset:
 
         PathBuilder.build(input_params.result_path)
+        PathBuilder.build(input_params.result_path + "repertoires/")
 
         processed_repertoires = []
         simulation_limits = SignalImplanter._prepare_simulation_limits(input_params.simulation.implantings,
@@ -82,7 +85,7 @@ class SignalImplanter(Step):
 
     @staticmethod
     def _copy_repertoire(index: int, repertoire: Repertoire, input_params: SimulationState) -> Repertoire:
-        new_repertoire = Repertoire.build_from_sequence_objects(repertoire.sequences, input_params.result_path, repertoire.metadata)
+        new_repertoire = Repertoire.build_from_sequence_objects(repertoire.sequences, input_params.result_path + "repertoires/", repertoire.metadata)
 
         for signal in input_params.signals:
             new_repertoire.metadata[f"signal_{signal.id}"] = False
@@ -96,7 +99,7 @@ class SignalImplanter(Step):
             new_repertoire = signal.implant_to_repertoire(repertoire=new_repertoire,
                                                           repertoire_implanting_rate=
                                                           input_params.simulation.implantings[simulation_index].repertoire_implanting_rate,
-                                                          path=input_params.result_path)
+                                                          path=input_params.result_path + "repertoires/")
 
         for signal in input_params.simulation.implantings[simulation_index].signals:
             new_repertoire.metadata[f"signal_{signal.id}"] = True

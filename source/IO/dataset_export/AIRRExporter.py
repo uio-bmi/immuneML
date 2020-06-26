@@ -7,6 +7,7 @@ from source.IO.dataset_export.DataExporter import DataExporter
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.receptor.receptor_sequence.Chain import Chain
 from source.data_model.repertoire.Repertoire import Repertoire
+from source.environment.Constants import Constants
 from source.util.PathBuilder import PathBuilder
 
 
@@ -31,12 +32,13 @@ class AIRRExporter(DataExporter):
             df = AIRRExporter._repertoire_to_dataframe(repertoire)
             airr.dump_rearrangement(df, f"{repertoire_path}{repertoire.identifier}.tsv")
 
-        AIRRExporter.export_updated_metadata(dataset.metadata_file, path)
+        AIRRExporter.export_updated_metadata(dataset, path)
 
     @staticmethod
-    def export_updated_metadata(file_path: str, result_path: str):
-        df = pd.read_csv(file_path)
-        df["filename"] = [f"{item}.tsv" for item in df["repertoire_identifier"].values.tolist()]
+    def export_updated_metadata(dataset: RepertoireDataset, result_path: str):
+        df = pd.read_csv(dataset.metadata_file, comment=Constants.COMMENT_SIGN)
+        identifiers = df["repertoire_identifier"].values.tolist() if "repertoire_identifier" in df.columns else dataset.get_example_ids()
+        df["filename"] = [f"{item}.tsv" for item in identifiers]
         df.to_csv(f"{result_path}metadata.csv", index=False)
 
     @staticmethod
