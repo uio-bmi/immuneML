@@ -15,17 +15,21 @@ class TestGalaxyYamlTool(TestCase):
     def test_run(self):
 
         path = PathBuilder.build(f"{EnvironmentSettings.tmp_test_path}api_galaxy_yaml_tool/")
-        dataset_path = f"{path}d1/"
         result_path = f"{path}result/"
 
-        dataset = RandomDatasetGenerator.generate_repertoire_dataset(10, {10: 1}, {12: 1}, {}, dataset_path)
+        dataset = RandomDatasetGenerator.generate_repertoire_dataset(10, {10: 1}, {12: 1}, {}, result_path)
         dataset.name = "d1"
-        PickleExporter.export(dataset, dataset_path)
+        PickleExporter.export(dataset, result_path)
 
         specs = {
             "definitions": {
                 "datasets": {
-                    "new_d1": "d1",
+                    "new_d1": {
+                        "format": "Pickle",
+                        "params": {
+                            "metadata_file": f"{result_path}d1_metadata.csv"
+                        }
+                    },
                     "d2": {
                         "format": "RandomRepertoireDataset",
                         "params": {

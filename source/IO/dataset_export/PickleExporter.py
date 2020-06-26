@@ -43,7 +43,7 @@ class PickleExporter(DataExporter):
         if dataset.metadata_file is None or not os.path.isfile(dataset.metadata_file):
             return None
 
-        metadata_file = f"{metadata_folder_path}{os.path.basename(dataset.metadata_file)}"
+        metadata_file = f"{metadata_folder_path}{dataset.name}_metadata.csv"
 
         if not os.path.isfile(metadata_file):
             shutil.copyfile(dataset.metadata_file, metadata_file)

@@ -62,12 +62,12 @@ class PickleImport(DataImport):
     @staticmethod
     def _import_from_metadata(pickle_params,  dataset_name):
         with open(pickle_params.metadata_file, "r") as file:
-            dataset_filename = file.readline().replace(Constants.COMMENT_SIGN, "")
+            dataset_filename = file.readline().replace(Constants.COMMENT_SIGN, "").replace("\n", "")
         pickle_params.path = f"{os.path.dirname(pickle_params.metadata_file)}/{dataset_filename}"
 
         assert os.path.isfile(pickle_params.path), f"PickleImport: dataset file {dataset_filename} specified in " \
-                                                   f"{pickle_params.metadata_file} could not be found, failed to import the dataset " \
-                                                   f"{dataset_name}."
+                                                   f"{pickle_params.metadata_file} could not be found ({pickle_params.path} is not a file), " \
+                                                   f"failed to import the dataset {dataset_name}."
 
         return PickleImport._import_from_path(pickle_params)
 
