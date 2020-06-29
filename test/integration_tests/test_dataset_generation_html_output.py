@@ -42,7 +42,7 @@ class TestDatasetGenerationHTMLOutput(TestCase):
         with open(specs_path, "w") as file:
             yaml.dump(specs, file)
 
-        app = ImmuneMLApp(specs_path, path)
+        app = ImmuneMLApp(specs_path, path + "result/")
         app.run()
 
         shutil.rmtree(path)

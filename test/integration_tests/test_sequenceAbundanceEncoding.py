@@ -90,7 +90,7 @@ class TestSequenceAbundanceEncoding(TestCase):
         with open(specs_file, "w") as file:
             yaml.dump(specs, file)
 
-        app = ImmuneMLApp(specs_file, path)
+        app = ImmuneMLApp(specs_file, path + "result/")
         app.run()
 
         shutil.rmtree(path)

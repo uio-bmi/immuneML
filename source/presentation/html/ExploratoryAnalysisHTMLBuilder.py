@@ -34,7 +34,6 @@ class ExploratoryAnalysisHTMLBuilder:
 
     @staticmethod
     def make_html_map(state: ExploratoryAnalysisState, base_path: str) -> dict:
-        print(f"Base: {base_path}, state: {state.result_path}")
         html_map = {
             "css_style": Util.get_css_content(ExploratoryAnalysisHTMLBuilder.CSS_PATH),
             "full_specs": Util.get_full_specs_path(base_path, state.result_path),

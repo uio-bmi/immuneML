@@ -92,7 +92,7 @@ class TestExploratoryAnalysisDesignMatrixExporter(TestCase):
         with open(specs_filename, "w") as file:
             yaml.dump(specs, file)
 
-        app = ImmuneMLApp(specs_filename, path)
+        app = ImmuneMLApp(specs_filename, path + "result/")
         app.run()
 
         shutil.rmtree(path)

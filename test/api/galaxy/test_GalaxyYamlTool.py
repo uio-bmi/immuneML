@@ -54,12 +54,12 @@ class TestGalaxyYamlTool(TestCase):
         with open(specs_path, "w") as file:
             yaml.dump(specs, file)
 
-        tool = GalaxyYamlTool(specs_path, result_path)
+        tool = GalaxyYamlTool(specs_path, result_path + "result/")
         tool.start_path = path
         tool.run()
 
-        self.assertTrue(os.path.exists(f"{result_path}inst1/new_d1/AIRR"))
-        self.assertTrue(os.path.exists(f"{result_path}inst1/d2/AIRR"))
-        self.assertTrue(os.path.exists(f"{result_path}d2"))
+        self.assertTrue(os.path.exists(f"{result_path}result/inst1/new_d1/AIRR"))
+        self.assertTrue(os.path.exists(f"{result_path}result/inst1/d2/AIRR"))
+        self.assertTrue(os.path.exists(f"{result_path}result/d2"))
 
         shutil.rmtree(path)

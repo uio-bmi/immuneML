@@ -19,6 +19,11 @@ class ImmuneMLApp:
     def __init__(self, specification_path: str, result_path: str):
         self._specification_path = specification_path
         self._result_path = os.path.relpath(result_path) + "/"
+
+        if os.path.isdir(self._result_path) and len(os.listdir(self._result_path)) != 0:
+            raise ValueError(f"Directory {self._result_path} already exists. Please specify a new output directory for the analysis.")
+        PathBuilder.build(self._result_path)
+
         self._cache_path = f"{self._result_path}cache/"
 
     def set_cache(self):
@@ -31,9 +36,6 @@ class ImmuneMLApp:
         del os.environ[Constants.CACHE_TYPE]
 
     def run(self):
-
-        if self._result_path is not None:
-            PathBuilder.build(self._result_path, warn_if_exists=True)
 
         self.set_cache()
 

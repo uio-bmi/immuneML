@@ -176,11 +176,11 @@ class TestImmuneMLApp(TestCase):
         with open(specs_file, "w") as file:
             yaml.dump(specs, file)
 
-        app = ImmuneMLApp.ImmuneMLApp(specs_file, path)
+        app = ImmuneMLApp.ImmuneMLApp(specs_file, path + "results/")
         app.run()
 
-        self.assertTrue(os.path.isfile(path+"full_specs.yaml"))
-        with open(path+"full_specs.yaml", "r") as file:
+        self.assertTrue(os.path.isfile(path + "results/full_specs.yaml"))
+        with open(path + "results/full_specs.yaml", "r") as file:
             full_specs = yaml.load(file, Loader=yaml.FullLoader)
 
         self.assertTrue("split_strategy" in full_specs["instructions"]["inst1"]["selection"] and full_specs["instructions"]["inst1"]["selection"]["split_strategy"] == "random")
