@@ -57,12 +57,14 @@ class OneHotEncoder(DatasetEncoder):
 
     ALPHABET = EnvironmentSettings.get_sequence_alphabet()
 
-    def __init__(self, use_positional_info: bool, distance_to_seq_middle: int):
+    def __init__(self, use_positional_info: bool, distance_to_seq_middle: int, name: str = None):
         self.use_positional_info = use_positional_info
         self.distance_to_seq_middle = distance_to_seq_middle
 
         self.pos_increasing = [1 / self.distance_to_seq_middle * i for i in range(self.distance_to_seq_middle)]
         self.pos_decreasing = self.pos_increasing[::-1]
+
+        self.name = name
 
         if EnvironmentSettings.get_sequence_type() == SequenceType.NUCLEOTIDE:
             self.distance_to_seq_middle = self.distance_to_seq_middle * 3

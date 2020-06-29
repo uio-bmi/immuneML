@@ -1,5 +1,3 @@
-import os
-
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.presentation.TemplateParser import TemplateParser
 from source.presentation.html.Util import Util
@@ -25,7 +23,7 @@ class SimulationHTMLBuilder:
         Returns:
              path to the main HTML file (which is located under state.result_path)
         """
-        base_path = os.path.relpath(state.result_path) + "/" if not is_index else os.path.relpath(state.result_path + "/../")
+        base_path = state.result_path if not is_index else state.result_path + "../"
         html_map = SimulationHTMLBuilder.make_html_map(state, base_path)
         result_file = f"{state.result_path}Simulation.html"
 
@@ -40,6 +38,7 @@ class SimulationHTMLBuilder:
         html_map = {
             "css_style": Util.get_css_content(SimulationHTMLBuilder.CSS_PATH),
             "name": state.name,
+            "full_specs": Util.get_full_specs_path(base_path, state.result_path),
             "dataset_name": state.dataset.name if state.dataset.name is not None else state.dataset.identifier,
             "dataset_type": StringHelper.camel_case_to_word_string(type(state.dataset).__name__),
             "example_count": state.dataset.get_example_count(),

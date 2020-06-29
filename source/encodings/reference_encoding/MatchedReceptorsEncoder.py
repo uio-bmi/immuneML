@@ -55,9 +55,10 @@ class MatchedReceptorsEncoder(DatasetEncoder):
         "RepertoireDataset": "MatchedReceptorsRepertoireEncoder"
     }
 
-    def __init__(self, reference_receptors: ReceptorList, max_edit_distances: dict):
+    def __init__(self, reference_receptors: ReceptorList, max_edit_distances: dict, name: str = None):
         self.reference_receptors = reference_receptors
         self.max_edit_distances = max_edit_distances
+        self.name = name
 
     @staticmethod
     def _prepare_parameters(reference_receptors: dict, max_edit_distances: dict):

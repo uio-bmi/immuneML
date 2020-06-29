@@ -43,3 +43,7 @@ class Util:
         PathBuilder.build(f"{base_path}zip/")
         zip_file_path = shutil.make_archive(f"{base_path}zip/{filename}", "zip", tmp_path)
         return os.path.relpath(zip_file_path, base_path)
+
+    @staticmethod
+    def get_full_specs_path(base_path, state_result_path):
+        return "full_specs.yaml" if base_path != state_result_path else "../full_specs.yaml"

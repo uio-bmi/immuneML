@@ -20,6 +20,7 @@ class SemanticModel:
     def build_reports(self, instruction_states):
         report_builder = self.make_report_builder()
         print("Generating reports...")
+        print(self.path)
         path = report_builder.build(instruction_states, self.path)
         print("Reports are generated.")
         return path

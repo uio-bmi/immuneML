@@ -20,10 +20,11 @@ class MatchedReferenceEncoder(DatasetEncoder):
         "RepertoireDataset": "ReferenceRepertoireEncoder"
     }
 
-    def __init__(self, max_edit_distance: int, summary: SequenceMatchingSummaryType, reference_sequences: ReceptorSequenceList):
+    def __init__(self, max_edit_distance: int, summary: SequenceMatchingSummaryType, reference_sequences: ReceptorSequenceList, name: str = None):
         self.max_edit_distance = max_edit_distance
         self.summary = summary
         self.reference_sequences = reference_sequences
+        self.name = name
 
     @staticmethod
     def _prepare_parameters(max_edit_distance: int, summary: str, reference_sequences: dict):

@@ -1,5 +1,3 @@
-import os
-
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.presentation.TemplateParser import TemplateParser
 from source.presentation.html.Util import Util
@@ -25,7 +23,7 @@ class ExploratoryAnalysisHTMLBuilder:
         Returns:
              path to the main HTML file (which is located under state.result_path)
         """
-        base_path = os.path.relpath(state.result_path) if not is_index else os.path.relpath(state.result_path + "/../")
+        base_path = state.result_path if not is_index else state.result_path + "../"
         html_map = ExploratoryAnalysisHTMLBuilder.make_html_map(state, base_path)
         result_file = f"{state.result_path}ExploratoryAnalysis.html"
 
@@ -36,8 +34,10 @@ class ExploratoryAnalysisHTMLBuilder:
 
     @staticmethod
     def make_html_map(state: ExploratoryAnalysisState, base_path: str) -> dict:
+        print(f"Base: {base_path}, state: {state.result_path}")
         html_map = {
             "css_style": Util.get_css_content(ExploratoryAnalysisHTMLBuilder.CSS_PATH),
+            "full_specs": Util.get_full_specs_path(base_path, state.result_path),
             "analyses": [{
                 "name": name,
                 "dataset_name": analysis.dataset.name if analysis.dataset.name is not None else analysis.dataset.identifier,

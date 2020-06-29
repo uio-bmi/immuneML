@@ -28,7 +28,7 @@ class HPHTMLBuilder:
              path to the main HTML file (index.html which is located under state.result_path)
         """
 
-        base_path = os.path.relpath(state.path + "/../") if is_index else os.path.relpath(state.path) + "/"
+        base_path = state.path + "../" if is_index else state.path
         html_map = HPHTMLBuilder.make_main_html_map(state, base_path)
         result_file = f"{state.path}HPOptimizationReport.html"
 
@@ -129,6 +129,7 @@ class HPHTMLBuilder:
     def make_main_html_map(state: HPOptimizationState, base_path: str) -> dict:
         html_map = {
             "css_style": Util.get_css_content(HPHTMLBuilder.CSS_PATH),
+            "full_specs": Util.get_full_specs_path(base_path, state.path),
             "dataset_name": state.dataset.name if state.dataset.name is not None else state.dataset.identifier,
             "dataset_type": StringHelper.camel_case_to_word_string(type(state.dataset).__name__),
             "example_count": state.dataset.get_example_count(),

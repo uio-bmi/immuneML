@@ -22,15 +22,13 @@ class TestExploratoryAnalysisDesignMatrixExporter(TestCase):
         os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
 
     def create_dataset(self, path):
-
         repertoires, metadata = RepertoireBuilder.build([["AAA"], ["AAAC"], ["ACA"], ["CAAA"], ["AAAC"], ["AAA"]], path,
-                                            {"l1": [1, 1, 1, 0, 0, 0], "l2": [2, 3, 2, 3, 2, 3]})
+                                                        {"l1": [1, 1, 1, 0, 0, 0], "l2": [2, 3, 2, 3, 2, 3]})
 
         dataset = RepertoireDataset(repertoires=repertoires, params={"l1": [0, 1], "l2": [2, 3]}, metadata_file=metadata)
         return dataset
 
     def test_run(self):
-
         path = EnvironmentSettings.tmp_test_path + "explanalysisprocintegration/"
         PathBuilder.build(path)
         os.environ["cache_type"] = "test"
@@ -55,12 +53,12 @@ class TestExploratoryAnalysisDesignMatrixExporter(TestCase):
                                                              label_config=label_config,
                                                              encoder=ReferenceRepertoireEncoder.build_object(dataset,
                                                                                                              **{"max_edit_distance": 1,
-                                                                                                "summary": SequenceMatchingSummaryType.COUNT.name,
-                                                                                                "reference_sequences": refs}))}
+                                                                                                                "summary": SequenceMatchingSummaryType.COUNT.name,
+                                                                                                                "reference_sequences": refs}))}
 
-        process = ExploratoryAnalysisInstruction(units)
+        process = ExploratoryAnalysisInstruction(units, name="exp")
         process.run(path + "results/")
 
-        self.assertTrue(os.path.isfile(path + "results/analysis_named_analysis_4/design_matrix.csv"))
+        self.assertTrue(os.path.isfile(path + "results/exp/analysis_named_analysis_4/design_matrix.csv"))
 
         shutil.rmtree(path)

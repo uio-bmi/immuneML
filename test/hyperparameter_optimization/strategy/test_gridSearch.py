@@ -10,11 +10,11 @@ from source.ml_methods.SimpleLogisticRegression import SimpleLogisticRegression
 class TestGridSearch(TestCase):
     def test_generate_next_setting(self):
 
-        hp_settings = [HPSetting(encoder=KmerFrequencyEncoder, encoder_params={}, ml_method=SimpleLogisticRegression(),
-                                 ml_params={"model_selection_cv": False, "model_selection_n_fold": -1},
+        hp_settings = [HPSetting(encoder=KmerFrequencyEncoder, encoder_params={}, encoder_name="enc1", ml_method=SimpleLogisticRegression(),
+                                 ml_params={"model_selection_cv": False, "model_selection_n_fold": -1}, ml_method_name="ml1",
                                  preproc_sequence=[]),
-                       HPSetting(encoder=Word2VecEncoder, encoder_params={}, ml_method=SimpleLogisticRegression(),
-                                 ml_params={"model_selection_cv": False, "model_selection_n_fold": -1},
+                       HPSetting(encoder=Word2VecEncoder, encoder_params={}, encoder_name="enc2", ml_method=SimpleLogisticRegression(),
+                                 ml_params={"model_selection_cv": False, "model_selection_n_fold": -1}, ml_method_name="ml2",
                                  preproc_sequence=[])]
 
         grid_search = GridSearch(hp_settings)
@@ -27,11 +27,11 @@ class TestGridSearch(TestCase):
         self.assertEqual(Word2VecEncoder, setting2.encoder)
 
     def test_get_optimal_hps(self):
-        hp_settings = [HPSetting(encoder=KmerFrequencyEncoder, encoder_params={}, ml_method=SimpleLogisticRegression(),
-                                 ml_params={"model_selection_cv": False, "model_selection_n_fold": -1},
+        hp_settings = [HPSetting(encoder=KmerFrequencyEncoder, encoder_params={}, encoder_name="e1", ml_method=SimpleLogisticRegression(),
+                                 ml_params={"model_selection_cv": False, "model_selection_n_fold": -1}, ml_method_name="ml1",
                                  preproc_sequence=[]),
-                       HPSetting(encoder=Word2VecEncoder, encoder_params={}, ml_method=SimpleLogisticRegression(),
-                                 ml_params={"model_selection_cv": False, "model_selection_n_fold": -1},
+                       HPSetting(encoder=Word2VecEncoder, encoder_params={}, encoder_name='e2', ml_method=SimpleLogisticRegression(),
+                                 ml_params={"model_selection_cv": False, "model_selection_n_fold": -1}, ml_method_name="ml2",
                                  preproc_sequence=[])]
 
         grid_search = GridSearch(hp_settings)

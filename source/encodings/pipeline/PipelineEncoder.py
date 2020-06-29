@@ -59,9 +59,10 @@ class PipelineEncoder(DatasetEncoder):
 
     """
 
-    def __init__(self, initial_encoder, initial_encoder_params, steps: list):
+    def __init__(self, initial_encoder, initial_encoder_params, steps: list, name: str = None):
         self.initial_encoder, self.initial_encoder_params, _ = EncodingParser.parse_encoder_internal(initial_encoder, initial_encoder_params)
         self.steps = PipelineEncoder._prepare_steps(steps)
+        self.name = name
 
     @staticmethod
     def _prepare_steps(steps: list):

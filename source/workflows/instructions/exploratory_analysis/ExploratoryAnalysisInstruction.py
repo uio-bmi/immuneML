@@ -1,6 +1,7 @@
 from source.data_model.dataset.Dataset import Dataset
 from source.encodings.EncoderParams import EncoderParams
 from source.reports.ReportResult import ReportResult
+from source.util.PathBuilder import PathBuilder
 from source.workflows.instructions.Instruction import Instruction
 from source.workflows.instructions.exploratory_analysis.ExploratoryAnalysisState import ExploratoryAnalysisState
 from source.workflows.instructions.exploratory_analysis.ExploratoryAnalysisUnit import ExploratoryAnalysisUnit
@@ -50,12 +51,14 @@ class ExploratoryAnalysisInstruction(Instruction):
         assert all(isinstance(unit, ExploratoryAnalysisUnit) for unit in exploratory_analysis_units.values()), \
             "ExploratoryAnalysisInstruction: not all elements passed to init method are instances of ExploratoryAnalysisUnit."
         self.state = ExploratoryAnalysisState(exploratory_analysis_units, name=name)
+        self.name = name
 
     def run(self, result_path: str):
-        self.state.result_path = result_path
+        self.state.result_path = result_path + f"{self.name}/"
+        PathBuilder.build(self.state.result_path)
         for index, (key, unit) in enumerate(self.state.exploratory_analysis_units.items()):
             print("Started analysis {}/{}.".format(index+1, len(self.state.exploratory_analysis_units)))
-            report_result = self.run_unit(unit, result_path + "analysis_{}/".format(key))
+            report_result = self.run_unit(unit, self.state.result_path + "analysis_{}/".format(key))
             unit.report_result = report_result
             print("Finished analysis {}/{}.".format(index+1, len(self.state.exploratory_analysis_units)))
         return self.state
