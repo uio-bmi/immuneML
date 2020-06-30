@@ -22,7 +22,9 @@ setup(
         'source': ['IO/dataset_import/conversion/*.csv', "presentation/html/templates/*.html", "presentation/html/templates/css/*.css",
                    "visualization/*.R", "visualization/*.r"] +
                   [f"config/default_params/{dir_name.split('/')[-1]}/*.yaml" for dir_name in
-                   glob.glob("./source/config/default_params/*")]
+                   glob.glob("./source/config/default_params/*")],
+        'datasets': [path.rsplit("datasets/")[1] for path in glob.glob("datasets/**/*.tsv", recursive=True)] +
+                    [path.rsplit("datasets/")[1] for path in glob.glob("datasets/**/*.csv", recursive=True)]
     },
     entry_points={
         'console_scripts': [
