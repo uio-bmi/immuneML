@@ -48,7 +48,6 @@ class Util:
     @staticmethod
     def get_full_specs_path(base_path, state_result_path):
         specs_path = list(glob.glob(f"{base_path}**/full*.yaml", recursive=True))
-        print(f"specs: {specs_path}, base path: {base_path}, state: {state_result_path}")
         if len(specs_path) == 1:
             if base_path == state_result_path:
                 return os.path.relpath(specs_path[0], base_path)
