@@ -84,10 +84,14 @@ class PickleImport(DataImport):
     @staticmethod
     def _discover_repertoire_path(pickle_params, dataset):
         dataset_dir = os.path.dirname(pickle_params.path)
-        if len(list(glob(f"{dataset_dir}/*.npy"))) == len(dataset.repertoires):
-            path = dataset_dir + "/"
-        elif len(list(glob(f"{dataset_dir}/repertoires/*.npy"))) == len(dataset.repertoires):
-            path = dataset_dir + "/repertoires/"
+
+        if dataset_dir != "":
+            dataset_dir = dataset_dir + "/"
+
+        if len(list(glob(f"{dataset_dir}*.npy"))) == len(dataset.repertoires):
+            path = dataset_dir
+        elif len(list(glob(f"{dataset_dir}repertoires/*.npy"))) == len(dataset.repertoires):
+            path = dataset_dir + "repertoires/"
         else:
             path = None
 
