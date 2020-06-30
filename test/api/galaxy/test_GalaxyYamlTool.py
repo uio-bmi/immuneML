@@ -33,19 +33,79 @@ class TestGalaxyYamlTool(TestCase):
                     "d2": {
                         "format": "RandomRepertoireDataset",
                         "params": {
-                            "repertoire_count": 10,
+                            "repertoire_count": 50,
                             "sequence_length_probabilities": {10: 1},
                             'sequence_count_probabilities': {10: 1},
-                            'labels': {}
+                            'labels': {
+                                "CD": {
+                                    True: 0.5,
+                                    False: 0.5
+                                }
+                            }
                         }
                     }
-                }
+                },
+                "encodings": {
+                    "e1": {
+                        "Word2Vec": {
+                            "k": 3,
+                            "model_type": "sequence",
+                            "vector_size": 8,
+                        }
+                    },
+                    "e2": {
+                        "Word2Vec": {
+                            "k": 3,
+                            "model_type": "sequence",
+                            "vector_size": 10,
+                        }
+                    },
+                },
+                "ml_methods": {
+                    "simpleLR": {
+                        "SimpleLogisticRegression": {
+                            "penalty": "l1"
+                        },
+                        "model_selection_cv": False,
+                        "model_selection_n_folds": -1,
+                    }
+                },
             },
             "instructions": {
                 "inst1": {
                     "type": "DatasetGeneration",
                     "datasets": ["new_d1", 'd2'],
                     "formats": ["AIRR"]
+                },
+                "inst2": {
+                    "type": "HPOptimization",
+                    "settings": [
+                        {
+                            "encoding": "e1",
+                            "ml_method": "simpleLR"
+                        },
+                        {
+                            "encoding": "e2",
+                            "ml_method": "simpleLR"
+                        }
+                    ],
+                    "assessment": {
+                        "split_strategy": "random",
+                        "split_count": 1,
+                        "training_percentage": 0.7
+                    },
+                    "selection": {
+                        "split_strategy": "random",
+                        "split_count": 2,
+                        "training_percentage": 0.7
+                    },
+                    "labels": ["CD"],
+                    "dataset": "d2",
+                    "strategy": "GridSearch",
+                    "metrics": ["accuracy", "auc"],
+                    "reports": [],
+                    "batch_size": 10,
+                    "optimization_metric": "accuracy"
                 }
             }
         }

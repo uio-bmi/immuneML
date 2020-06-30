@@ -120,8 +120,7 @@ class HPHTMLBuilder:
               "hp_setting": assessment_state.label_states[label].optimal_assessment_item.hp_setting,
               "optimization_metric_val": round(assessment_state.label_states[label].optimal_assessment_item.performance,
                                                HPHTMLBuilder.NUM_DIGITS),
-              "split_details_path": Util.get_relative_path(base_path,
-                                                           HPHTMLBuilder.make_assessment_split_path(assessment_state.split_index, state))}
+              "split_details_path": os.path.relpath(HPHTMLBuilder.make_assessment_split_path(assessment_state.split_index, state), base_path)}
              for i, assessment_state in enumerate(state.assessment_states)]} for label in
                 state.label_configuration.get_labels_by_name()]
 
