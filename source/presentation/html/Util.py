@@ -1,7 +1,6 @@
 import glob
 import os
 import shutil
-from copy import copy
 
 from source.util.PathBuilder import PathBuilder
 
@@ -16,7 +15,7 @@ class Util:
             elif isinstance(obj, list):
                 return [Util.to_dict_recursive(element, base_path) for element in obj]
             elif isinstance(obj, str) and os.path.isfile(obj):
-                return Util.get_relative_path(base_path, obj)
+                return os.path.relpath(obj, base_path) + "/" if os.path.relpath(obj, base_path) != "" and os.path.isdir(obj) else os.path.relpath(obj, base_path)
             else:
                 return obj if obj is not None else ""
         else:
@@ -32,15 +31,8 @@ class Util:
         return content
 
     @staticmethod
-    def get_relative_path(base_path, tmp_path):
-        path = copy(tmp_path)
-        common_path = os.path.commonpath([base_path, tmp_path])
-        path = path.replace(common_path, ".")
-        return path
-
-    @staticmethod
     def make_downloadable_zip(base_path, tmp_path):
-        filename = "_".join(Util.get_relative_path(base_path, tmp_path).replace(".", "").split("/"))[1:-1]
+        filename = "_".join(os.path.relpath(tmp_path, base_path).replace(".", "").split("/"))[1:-1]
         PathBuilder.build(f"{base_path}zip/")
         zip_file_path = shutil.make_archive(f"{base_path}zip/{filename}", "zip", tmp_path)
         return os.path.relpath(zip_file_path, base_path)

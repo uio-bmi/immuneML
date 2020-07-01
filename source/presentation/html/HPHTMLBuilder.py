@@ -105,8 +105,7 @@ class HPHTMLBuilder:
                     "hp_setting": key,
                     "optimization_metric_val": round(item.performance, HPHTMLBuilder.NUM_DIGITS)
                 } for key, item in assessment_state.label_states[label].assessment_items.items()],
-                "selection_path": Util.get_relative_path(assessment_state.path,
-                                                         HPHTMLBuilder.make_selection_split_path(i, state, label))
+                "selection_path": os.path.relpath(HPHTMLBuilder.make_selection_split_path(i, state, label), assessment_state.path)
             } for label in state.label_configuration.get_labels_by_name()]
 
             assessment_list.append(assessment_item)
