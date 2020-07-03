@@ -42,6 +42,11 @@ The overall structure of the YAML specification is the following:
   output: # how to present the result after running (the only valid option now)
     format: HTML
 
+The logic behind parsing this specification is the following: anything defined under `definitions` is available in the `instructions` part, but
+anything generated from the instructions is not available to other instructions. If output of one instruction (e.g. a generated dataset) needs to be
+used in the other instruction, these two instructions have to be two separate analyses. In the second instruction the generated dataset for instance,
+would then be defined under `definitions`/`datasets` section.
+
 For details on each of these components, see the documentation below.
 
 Definitions
