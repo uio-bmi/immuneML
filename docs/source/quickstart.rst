@@ -20,16 +20,18 @@ example. For more details and more complex analyses, see How to specify an analy
 
 The YAML specification file for our example should include:
 
-1. The definition of the dataset which will be imported from ImmuneML/datasets/cmv_emerson_2017/ (this dataset is automatically available in ImmuneML directory
+1. The definition of the dataset (for more details on options and specification, please see :ref:`Datasets`) which will be imported from ImmuneML/datasets/cmv_emerson_2017/ (this dataset is automatically available in ImmuneML directory
 when you check out the immuneML repository from GitHub,
 
 
 2. Definition of the machine learning approach:
-  a. Encoding: k-mer frequency data representation, where each repertoire is encoded by the frequency of subsequences of amino acids (e.g. from sequence CSVEEQYF, the 3-mers are CSV, SVE, VEE, EEQ, EQY, QYF),
-  b. Machine learning approach: logistic regression (a classification algorithm).
+
+  a. Encoding (for more details on options and specification, please see :ref:`Encodings`): k-mer frequency data representation, where each repertoire is encoded by the frequency of subsequences of amino acids (e.g. from sequence CSVEEQYF, the 3-mers are CSV, SVE, VEE, EEQ, EQY, QYF),
+
+  b. Machine learning approach (for more details on options and specification, please see :ref:`ML methods`): logistic regression (a classification algorithm).
 
 
-3. The instruction describing of what exactly we want to do with the dataset and machine learning approach we defined: in our case, to train the classifier on the dataset of 100 immune repertoires.
+3. The instruction (for more details on options and specification, please see :ref:`Instructions`) describing of what exactly we want to do with the dataset and machine learning approach we defined: in our case, to train the classifier on the dataset of 100 immune repertoires.
 
 Defining components to use for the analysis
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

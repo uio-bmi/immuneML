@@ -2,8 +2,8 @@ Tutorials
 ==========
 
 .. toctree::
-   :maxdepth: 1
-   :caption: Tutorials:
+  :maxdepth: 1
+  :caption: Tutorials:
 
   tutorials/how_to_import_the_data_to_immuneML
   tutorials/how_to_perform_exploratory_analysis

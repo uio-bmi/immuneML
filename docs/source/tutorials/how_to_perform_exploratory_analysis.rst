@@ -4,7 +4,7 @@ How to perform exploratory data analysis
 To explore preprocessing, encodings and/or reports without running a machine learning
 algorithm, the ExploratoryAnalysis instruction should be used. The components in the
 definitions section are defined in the same manner as for all other instructions
-(see: :ref:`How to specify an analysis with DSL`).
+(see: :ref:`How to specify an analysis with YAML`).
 The instruction consists of a list of analyses to be performed. Each analysis should
 contain at least a dataset and a report. Optionally, the analysis can also contain an
 encoding along with the labels. Encoding reports can be run only if encoding and labels

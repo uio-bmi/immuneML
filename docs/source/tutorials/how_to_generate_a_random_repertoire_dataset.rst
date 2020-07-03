@@ -1,12 +1,12 @@
 How to generate a random immune receptor repertoire dataset
-===========================================================
+==============================================================
 
 Random immune receptor datasets (short: random repertoire datasets) can be used to quickly try out some immuneML functionalities, and could also be
 used as a baseline when comparing different machine learning models (benchmarking, see Weber et al., Bioinformatics,
 https://doi.org/10.1093/bioinformatics/btaa158).
 
 Generate random repertoire dataset from YAML together with the rest of the analysis
----------------------------------------------------------------------------------
+------------------------------------------------------------------------------------
 
 To generate a repertoire dataset in YAML consisting of random amino acid sequences, define the desired parameters of the dataset in the datasets
 section. In the same manner as an already existing dataset can be loaded into the platform, for the random dataset it is possible to define its

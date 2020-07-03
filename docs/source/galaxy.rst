@@ -13,8 +13,8 @@ Dataset wrapper or raw files and a specification.
 Galaxy tutorials:
 
 .. toctree::
-   :maxdepth: 1
-   :caption: Galaxy tutorials:
+  :maxdepth: 1
+  :caption: Galaxy tutorials:
 
   galaxy/how_to_make_an_immuneML_dataset_in_galaxy
   galaxy/how_to_run_an_analysis_in_galaxy

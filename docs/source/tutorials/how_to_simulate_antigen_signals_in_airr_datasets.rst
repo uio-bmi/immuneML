@@ -35,7 +35,7 @@ the same receptors in those repertoires. When specifying multiple different impl
 not exceed 1.
 
 An example of a simulation with disease-associated signals is given below. In this example, the healthy individuals are here represented by a
-randomly generated synthetic dataset (see: :ref:`How to generate a random repertoire dataset`). It is also possible to use experimental datasets as a
+randomly generated synthetic dataset (see: :ref:`How to generate a random immune receptor repertoire dataset`). It is also possible to use experimental datasets as a
 baseline for the simulation.
 
 .. highlight:: yaml
@@ -104,6 +104,6 @@ baseline for the simulation.
       type: Simulation
       dataset: my_synthetic_dataset
       simulation: my_simulation
-      export_format: AIRR
+      export_formats: [AIRR, Pickle] # export the simulated dataset to these formats
       batch_size: 5 # number of repertoires that can be loaded at the same time
                     # (only affects the speed)

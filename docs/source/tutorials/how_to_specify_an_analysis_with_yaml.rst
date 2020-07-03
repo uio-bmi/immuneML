@@ -71,7 +71,7 @@ Structure of the analysis specification
 
 The analysis specification consists of three main parts: definitions, instructions and output.
 
-Definitions
+Specifying Definitions
 ^^^^^^^^^^^
 
 Definitions refer to components, which will be used within the instructions. They include:
@@ -147,7 +147,7 @@ An example of sections with defined components is given below:
           dataset_implanting_rate: 0.5
           repertoire_implanting_rate: 0.1
 
-Instructions
+Specifying Instructions
 ^^^^^^^^^^^^
 
 Instructions are defined similarly  to components: a key represents an identifier of
@@ -206,7 +206,7 @@ number of examples, type of the dataset, the details of nested cross-validation,
 metrics used) and results (overview of performance results in nested cross-validation,
 outputs of individual reports). At this point, the HTML output is not customizable.
 
-Running the analysis
+Running the specified analysis
 --------------------
 
 To run an instruction via command line with the given specification (saved as YAML file):
