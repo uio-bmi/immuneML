@@ -70,7 +70,7 @@ class TestSimulation(TestCase):
                     "dataset": "d1",
                     "batch_size": 5,
                     "simulation": "sim1",
-                    "export_format": "AIRR"
+                    "export_formats": ["AIRR", "Pickle"]
                 }
             },
             "output": {
@@ -127,5 +127,6 @@ class TestSimulation(TestCase):
         self.assertEqual(17, sum(metadata_df["signal_signal1"]))
 
         self.assertTrue(os.path.isfile(result_path))
+        self.assertTrue(os.path.isfile(path + "result/exported_dataset/pickle/d1.iml_dataset"))
 
         shutil.rmtree(path, ignore_errors=True)

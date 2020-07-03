@@ -65,13 +65,13 @@ class SimulationParser:
                 simulation: sim1
                 batch_size: 5 # number of repertoires that can be loaded at the same time
                               # (only affects the speed)
-                export_format: AIRR
+                export_formats: [AIRR, Pickle]
 
     """
 
     def parse(self, key: str, instruction: dict, symbol_table: SymbolTable) -> SimulationInstruction:
 
-        ParameterValidator.assert_keys(instruction.keys(), ["dataset", "batch_size", "simulation", "type", "export_format"],
+        ParameterValidator.assert_keys(instruction.keys(), ["dataset", "batch_size", "simulation", "type", "export_formats"],
                                        "SimulationParser", key)
 
         signals = [signal.item for signal in symbol_table.get_by_type(SymbolType.SIGNAL)]
@@ -79,20 +79,20 @@ class SimulationParser:
         dataset = symbol_table.get(instruction["dataset"])
         batch_size = instruction["batch_size"]
 
-        exporter = self.parse_exporter(instruction)
+        exporters = self.parse_exporters(instruction)
 
         process = SimulationInstruction(signals=signals, simulation=simulation, dataset=dataset, batch_size=batch_size, name=key,
-                                        exporter=exporter)
+                                        exporters=exporters)
         return process
 
-    def parse_exporter(self, instruction):
-        if instruction["export_format"] is not None:
+    def parse_exporters(self, instruction):
+        if instruction["export_formats"] is not None:
             class_path = "dataset_export/"
-            classes = ReflectionHandler.get_classes_by_partial_name("Exporter", class_path)
-            valid_values = [cls.__name__[:-8] for cls in ReflectionHandler.all_nonabstract_subclasses(DataExporter)]
-            ParameterValidator.assert_in_valid_list(instruction["export_format"], valid_values, "SimulationParser", "export_format")
-            exporter = ReflectionHandler.get_class_by_name(f"{instruction['export_format']}Exporter", class_path)
+            ParameterValidator.assert_all_in_valid_list(instruction["export_formats"],
+                                                        ReflectionHandler.all_nonabstract_subclass_basic_names(DataExporter, 'Exporter', class_path),
+                                                        location="SimulationParser", parameter_name="export_formats")
+            exporters = [ReflectionHandler.get_class_by_name(f"{item}Exporter", class_path) for item in instruction["export_formats"]]
         else:
-            exporter = None
+            exporters = None
 
-        return exporter
+        return exporters

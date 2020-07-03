@@ -3,7 +3,6 @@ import os
 
 import pandas as pd
 
-from source.IO.dataset_export.PickleExporter import PickleExporter
 from source.IO.dataset_import.PickleImport import PickleImport
 from source.data_model.dataset.Dataset import Dataset
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
@@ -53,11 +52,9 @@ class SignalImplanter(Step):
             for signal in input_params.signals:
                 implanting_metadata[f"signal_{signal.id}"].append(processed_repertoire.metadata[f"signal_{signal.id}"])
 
-        processed_dataset = RepertoireDataset(repertoires=processed_repertoires, params=input_params.dataset.params,
+        processed_dataset = RepertoireDataset(repertoires=processed_repertoires, params=input_params.dataset.params, name=input_params.dataset.name,
                                               metadata_file=SignalImplanter._create_metadata_file(input_params.dataset.metadata_file,
                                                                                                   implanting_metadata, input_params))
-        PickleExporter.export(processed_dataset, input_params.result_path)
-
         return processed_dataset
 
     @staticmethod

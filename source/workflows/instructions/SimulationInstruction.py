@@ -1,3 +1,5 @@
+from typing import List
+
 from scripts.specification_util import update_docs_per_mapping
 from source.IO.dataset_export.DataExporter import DataExporter
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
@@ -34,14 +36,14 @@ class SimulationInstruction(Instruction):
             dataset: my_dataset # which dataset to use for implanting the signals
             simulation: my_simulation # how to implanting the signals - definition of the simulation
             batch_size: 4 # how many parallel processes to use during execution
-            export_format: AIRR # in which format to export the dataset
+            export_formats: [AIRR] # in which formats to export the dataset
 
     """
 
     def __init__(self, signals: list, simulation: Simulation, dataset: RepertoireDataset, path: str = None, batch_size: int = 1,
-                 name: str = None, exporter: DataExporter = None):
+                 name: str = None, exporters: List[DataExporter] = None):
         self.state = SimulationState(signals, simulation, dataset, path=path, batch_size=batch_size, name=name)
-        self.exporter = exporter
+        self.exporters = exporters
 
     def run(self, result_path: str):
         self.state.result_path = result_path
@@ -50,8 +52,10 @@ class SimulationInstruction(Instruction):
         return self.state
 
     def export_dataset(self):
-        if self.exporter is not None:
-            self.exporter.export(self.state.resulting_dataset, f"{self.state.result_path}exported_dataset/")
+        if self.exporters is not None and len(self.exporters) > 0:
+            for exporter in self.exporters:
+                exporter.export(self.state.resulting_dataset,
+                                f"{self.state.result_path}exported_dataset/{exporter.__name__.replace('Exporter', '').lower()}/")
 
     @staticmethod
     def get_documentation():
