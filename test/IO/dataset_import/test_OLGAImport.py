@@ -9,12 +9,10 @@ from source.util.PathBuilder import PathBuilder
 class TestOLGALoader(TestCase):
 
     def write_dummy_files(self, path):
-        file1_content = """sequences	sequence_aas	v_genes	j_genes
-TGTGCCAGCAGTTTATCGCCGGGACTGGCCTACGAGCAGTACTTC	CASSLSPGLAYEQYF	TRBV27	TRBJ2-7
+        file1_content = """TGTGCCAGCAGTTTATCGCCGGGACTGGCCTACGAGCAGTACTTC	CASSLSPGLAYEQYF	TRBV27	TRBJ2-7
 TGTGCCAGCAAAGTCAGAATTGCTGCAACTAATGAAAAACTGTTTTTT	CASKVRIAATNEKLFF	TRBV5-6	TRBJ1-4
 TGCAGTGCCGACTCCAAGAACAGAGGAGCGGGGGGGGAGGCAAGCTCCTACGAGCAGTACTTC	CSADSKNRGAGGEASSYEQYF	TRBV20-1	TRBJ2-7"""
-        file2_content = """sequences	sequence_aas	v_genes	j_genes
-TGTGCCAGCATCGGTGGCGGGACTAGTCTCTCCTACAATGAGCAGTTCTTC	CASIGGGTSLSYNEQFF	TRBV7-9	TRBJ2-1
+        file2_content = """TGTGCCAGCATCGGTGGCGGGACTAGTCTCTCCTACAATGAGCAGTTCTTC	CASIGGGTSLSYNEQFF	TRBV7-9	TRBJ2-1
 TGTGCCAGTATCTGCGGATGTACTAGCACAGATACGCAGTATTTT	CASICGCTSTDTQYF	TRBV19	TRBJ2-3
 TGTGCTAGTGGGAAAAATCGGGACTCTAGTGCAGGCCAAGAGACCCAGTACTTC	CASGKNRDSSAGQETQYF	TRBV12-5	TRBJ2-5"""
 
@@ -36,7 +34,7 @@ rep2.tsv,2""")
         PathBuilder.build(path)
         self.write_dummy_files(path)
         dataset = OLGAImport.import_dataset({"result_path": path, "metadata_file": path + "metadata.csv",
-                                             "columns_to_load": ["sequences", "sequence_aas", "v_genes", "j_genes"],
+                                             "columns_to_load": None,
                                              "path": path, "batch_size": 4}, "olga_dataset")
 
         self.assertEqual(2, dataset.get_example_count())
