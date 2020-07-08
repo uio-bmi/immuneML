@@ -26,7 +26,7 @@ class TestCoefficients(TestCase):
     def _create_dummy_lr_model(self, path):
         # dummy logistic regression with 100 observations with 20 features belonging to 2 classes
         dummy_lr = SimpleLogisticRegression()
-        dummy_lr.fit_by_cross_validation(np.random.rand(100, 20),
+        dummy_lr.fit_by_cross_validation(EncodedData(np.random.rand(100, 20)),
                                          {"l1": [i % 2 for i in range(0, 100)]},
                                          number_of_splits=2,
                                          label_names=["l1"])

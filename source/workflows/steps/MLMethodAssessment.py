@@ -20,7 +20,7 @@ class MLMethodAssessment(Step):
 
     @staticmethod
     def run(input_params: MLMethodAssessmentParams = None):
-        X = input_params.dataset.encoded_data.examples
+        X = input_params.dataset.encoded_data
         predicted_y = input_params.method.predict(X, [input_params.label])
         predicted_proba_y = input_params.method.predict_proba(X, [input_params.label])
         true_y = input_params.dataset.encoded_data.labels

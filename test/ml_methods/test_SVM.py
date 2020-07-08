@@ -4,10 +4,10 @@ import shutil
 from unittest import TestCase
 
 import numpy as np
-from scipy import sparse
 from sklearn.svm import LinearSVC
 
 from source.caching.CacheType import CacheType
+from source.data_model.encoded_data.EncodedData import EncodedData
 from source.environment.Constants import Constants
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.ml_methods.SVM import SVM
@@ -24,24 +24,24 @@ class TestSVM(TestCase):
         y = {"default": np.array([1, 0, 2, 0])}
 
         svm = SVM()
-        svm.fit(sparse.csr_matrix(x), y)
+        svm.fit(EncodedData(x), y)
 
     def test_predict(self):
         x = np.array([[1, 0, 0], [0, 1, 1], [1, 1, 1], [0, 1, 1]])
         y = {"test": np.array([1, 0, 2, 0])}
 
         svm = SVM()
-        svm.fit(sparse.csr_matrix(x), y, ["test"])
+        svm.fit(EncodedData(x), y, ["test"])
 
         test_x = np.array([[0, 1, 0], [1, 0, 0]])
-        y = svm.predict(sparse.csr_matrix(test_x))["test"]
+        y = svm.predict(EncodedData(test_x))["test"]
 
         self.assertTrue(len(y) == 2)
         self.assertTrue(y[0] in [0, 1, 2])
         self.assertTrue(y[1] in [0, 1, 2])
 
     def test_fit_by_cross_validation(self):
-        x = sparse.csr_matrix(np.array([[1, 0, 0], [0, 1, 1], [1, 1, 1], [0, 1, 1], [1, 0, 0], [0, 1, 1], [1, 1, 1], [0, 1, 1]]))
+        x = EncodedData(np.array([[1, 0, 0], [0, 1, 1], [1, 1, 1], [0, 1, 1], [1, 0, 0], [0, 1, 1], [1, 1, 1], [0, 1, 1]]))
         y = {"t1": [1, 0, 2, 0, 1, 0, 2, 0], "t2": [1, 0, 2, 0, 1, 0, 2, 0]}
 
         svm = SVM()
@@ -52,7 +52,7 @@ class TestSVM(TestCase):
         y = {"default": np.array(['a', "b", "c", "a"])}
 
         svm = SVM()
-        svm.fit(sparse.csr_matrix(x), y)
+        svm.fit(EncodedData(x), y)
 
         path = EnvironmentSettings.root_path + "test/tmp/svm/"
 
@@ -71,7 +71,7 @@ class TestSVM(TestCase):
         y = {"default": np.array([1, 0, 2, 0])}
 
         svm = SVM()
-        svm.fit(sparse.csr_matrix(x), y)
+        svm.fit(EncodedData(x), y)
 
         path = EnvironmentSettings.root_path + "test/tmp/svm2/"
         PathBuilder.build(path)

@@ -45,7 +45,7 @@ class TestMLMethodTrainer(TestCase):
             ml_details_path=f"{path}details.yaml"
         ))
 
-        method.predict(np.array([1, 2, 3]).reshape(1, -1), ["l1"])
+        method.predict(EncodedData(np.array([1, 2, 3]).reshape(1, -1)), ["l1"])
         self.assertTrue(os.path.isfile(f"{path}predictions.csv"))
         self.assertTrue(os.path.isfile(f"{path}details.yaml"))
 

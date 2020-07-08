@@ -17,9 +17,9 @@ from source.visualization.ErrorBarMeaning import ErrorBarMeaning
 class BenchmarkHPSettings(MLReport):
     """
     Report for HyperParameterOptimization: plots the performance for each of the setting combinations
-    as defined under 'settings' in the assessment (outer validation) loop. The performances are grouped by used
-    encoding and ML method (not preprocessing). When multiple data splits are used, the average performance over
-    the data splits is shown with an error bar.
+    as defined under 'settings' in the assessment (outer validation) loop.
+    The performances are grouped by label (horizontal panels) encoding (vertical panels) and ML method (bar color).
+    When multiple data splits are used, the average performance over the data splits is shown with an error bar.
 
     This report can be used only with HPOptimization instruction under assessment/reports/hyperparameter.
 
@@ -58,6 +58,8 @@ class BenchmarkHPSettings(MLReport):
         self.hp_optimization_state = None
         self.result_path = None
         self.name = name
+        self.result_name = "benchmark_result"
+        self.vertical_grouping = "encoding"
 
     def generate(self) -> ReportResult:
         PathBuilder.build(self.result_path)
@@ -69,6 +71,12 @@ class BenchmarkHPSettings(MLReport):
 
         return ReportResult(self.name, output_tables=[result_table], output_figures=output_figures)
 
+    def _get_vertical_grouping(self, assessment_item):
+        return assessment_item.hp_setting.encoder_name
+
+    def _get_color_grouping(self, assessment_item):
+        return assessment_item.hp_setting.ml_method_name
+
     def _retrieve_plotting_data(self):
         plotting_data = []
 
@@ -77,17 +85,17 @@ class BenchmarkHPSettings(MLReport):
                 for assessment_key, assessment_item in label_state.assessment_items.items():
                     plotting_data.append([assessment_state.split_index,
                                           label_key,
-                                          assessment_item.hp_setting.encoder_name,
-                                          assessment_item.hp_setting.ml_method_name,
+                                          self._get_vertical_grouping(assessment_item),
+                                          self._get_color_grouping(assessment_item),
                                           assessment_item.performance])
                     # optional: include assessment_item.hp_setting.preproc_sequence_name. for now ignored.
 
-        plotting_data = pd.DataFrame(plotting_data, columns=["fold", "label", "encoding", "ml_method", "performance"])
+        plotting_data = pd.DataFrame(plotting_data, columns=["fold", "label", self.vertical_grouping, "ml_method", "performance"])
 
         return plotting_data
 
     def _write_results_table(self, plotting_data):
-        filepath = self.result_path + "benchmark_result.csv"
+        filepath = f"{self.result_path}{self.result_name}.csv"
         plotting_data.to_csv(filepath, index=False)
         return ReportOutput(filepath)
 
@@ -103,22 +111,22 @@ class BenchmarkHPSettings(MLReport):
 
         plot.plot_barplot(data=plotting_data, x="ml_method", color="ml_method", color_lab="ML method",
                               y="performance", y_lab="Performance (balanced accuracy)", x_lab="Labels",
-                              errorbar_meaning=errorbar_meaning_abbr, facet_rows="encoding", facet_columns="label", facet_type="grid",
+                              errorbar_meaning=errorbar_meaning_abbr, facet_rows=self.vertical_grouping, facet_columns="label", facet_type="grid",
                               facet_scales="free_y", facet_switch="x", nrow="NULL", height=6,
-                              width=8, result_path=self.result_path, result_name="benchmark_result", ml_benchmark=True)
+                              width=8, result_path=self.result_path, result_name=self.result_name, ml_benchmark=True)
 
-        return ReportOutput(f"{self.result_path}benchmark_result.pdf")
+        return ReportOutput(f"{self.result_path}{self.result_name}.pdf")
 
 
     def check_prerequisites(self):
         run_report = True
 
         if not hasattr(self, "hp_optimization_state") or self.hp_optimization_state is None:
-            warnings.warn("BenchmarkSettings can only be executed as a hyperparameter report. BenchmarkSettings report will not be created.")
+            warnings.warn(f"{self.__class__.__name__} can only be executed as a hyperparameter report. BenchmarkHPSettings report will not be created.")
             run_report = False
 
         if not hasattr(self, "result_path") or self.result_path is None:
-            warnings.warn("BenchmarkSettings requires an output 'path' to be set. BenchmarkSettings report will not be created.")
+            warnings.warn(f"{self.__class__.__name__} requires an output 'path' to be set. BenchmarkHPSettings report will not be created.")
             run_report = False
 
         return run_report

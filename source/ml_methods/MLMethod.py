@@ -1,5 +1,7 @@
 import abc
 
+from source.data_model.encoded_data.EncodedData import EncodedData
+
 
 class MLMethod(metaclass=abc.ABCMeta):
     """
@@ -10,15 +12,16 @@ class MLMethod(metaclass=abc.ABCMeta):
         self.predictions_path = {}
 
     @abc.abstractmethod
-    def fit(self, X, y, label_names: list = None, cores_for_training: int = 2):
+    def fit(self, encoded_data: EncodedData, y, label_names: list = None, cores_for_training: int = 2):
         pass
 
     @abc.abstractmethod
-    def predict(self, X, label_names: list = None):
+    def predict(self, encoded_data: EncodedData, label_names: list = None):
         pass
 
     @abc.abstractmethod
-    def fit_by_cross_validation(self, X, y, number_of_splits: int = 5, parameter_grid: dict = None, label_names: list = None):
+    def fit_by_cross_validation(self, encoded_data: EncodedData, y, number_of_splits: int = 5, parameter_grid: dict = None,
+                                label_names: list = None):
         pass
 
     @abc.abstractmethod
@@ -46,5 +49,5 @@ class MLMethod(metaclass=abc.ABCMeta):
         pass
 
     @abc.abstractmethod
-    def predict_proba(self, X, labels):
+    def predict_proba(self, encoded_data: EncodedData, labels):
         pass

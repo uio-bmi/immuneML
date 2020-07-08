@@ -37,7 +37,7 @@ class TestMLMethodAssessment(TestCase):
         label_config.add_label("l1", [1, 3])
 
         method1 = SimpleLogisticRegression()
-        method1.fit(dataset.encoded_data.examples, dataset.encoded_data.labels, dataset.encoded_data.labels.keys())
+        method1.fit(dataset.encoded_data, dataset.encoded_data.labels, dataset.encoded_data.labels.keys())
 
         res = MLMethodAssessment.run(MLMethodAssessmentParams(
             dataset=dataset,

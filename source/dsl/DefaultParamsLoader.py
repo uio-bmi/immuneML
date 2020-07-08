@@ -23,7 +23,7 @@ class DefaultParamsLoader:
         return ''.join([i.title() for i in name.split('_')])
 
     @staticmethod
-    def load(path, class_name):
+    def load(path, class_name, warn_if_missing=True):
         if os.path.isabs(path):
             filepath = path + DefaultParamsLoader._convert_to_snake_case(class_name) + "_params.yaml"
         else:
@@ -34,7 +34,8 @@ class DefaultParamsLoader:
             with open(filepath, "r") as file:
                 params = yaml.load(file, Loader=yaml.FullLoader)
         else:
-            warnings.warn("DefaultParams: no default parameters were found for {}. Proceeding...".format(class_name))
+            if warn_if_missing:
+                warnings.warn("DefaultParams: no default parameters were found for {}. Proceeding...".format(class_name))
             params = {}
 
         return params

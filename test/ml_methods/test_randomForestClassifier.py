@@ -8,6 +8,7 @@ from scipy import sparse
 from sklearn.ensemble import RandomForestClassifier as RFC
 
 from source.caching.CacheType import CacheType
+from source.data_model.encoded_data.EncodedData import EncodedData
 from source.environment.Constants import Constants
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.ml_methods.RandomForestClassifier import RandomForestClassifier
@@ -24,25 +25,25 @@ class TestRandomForestClassifier(TestCase):
         y = {"default": np.array([1, 0, 2, 0])}
 
         rfc = RandomForestClassifier()
-        rfc.fit(sparse.csr_matrix(x), y)
+        rfc.fit(EncodedData(sparse.csr_matrix(x)), y)
 
     def test_predict(self):
         x = np.array([[1, 0, 0], [0, 1, 1], [1, 1, 1], [0, 1, 1]])
         y = {"default": np.array([1, 0, 2, 0])}
 
         rfc = RandomForestClassifier()
-        rfc.fit(sparse.csr_matrix(x), y)
+        rfc.fit(EncodedData(x), y)
 
         test_x = np.array([[0, 1, 0], [1, 0, 0]])
-        y = rfc.predict(sparse.csr_matrix(test_x))["default"]
+        y = rfc.predict(EncodedData(test_x))["default"]
 
         self.assertTrue(len(y) == 2)
         self.assertTrue(y[0] in [0, 1, 2])
         self.assertTrue(y[1] in [0, 1, 2])
 
     def test_fit_by_cross_validation(self):
-        x = sparse.csr_matrix(
-            np.array([[1, 0, 0], [0, 1, 1], [1, 1, 1], [0, 1, 1], [1, 0, 0], [0, 1, 1], [1, 1, 1], [0, 1, 1]]))
+        x = EncodedData(sparse.csr_matrix(
+            np.array([[1, 0, 0], [0, 1, 1], [1, 1, 1], [0, 1, 1], [1, 0, 0], [0, 1, 1], [1, 1, 1], [0, 1, 1]])))
         y = {"t1": [1, 0, 2, 0, 1, 0, 2, 0], "t2": [1, 0, 2, 0, 1, 0, 2, 0]}
 
         rfc = RandomForestClassifier()
@@ -53,7 +54,7 @@ class TestRandomForestClassifier(TestCase):
         y = {"default": np.array([1, 0, 2, 0])}
 
         rfc = RandomForestClassifier()
-        rfc.fit(sparse.csr_matrix(x), y)
+        rfc.fit(EncodedData(x), y)
 
         path = EnvironmentSettings.root_path + "test/tmp/rfc/"
 
@@ -72,7 +73,7 @@ class TestRandomForestClassifier(TestCase):
         y = {"default": np.array([1, 0, 2, 0])}
 
         rfc = RandomForestClassifier()
-        rfc.fit(sparse.csr_matrix(x), y)
+        rfc.fit(EncodedData(x), y)
 
         path = EnvironmentSettings.root_path + "test/tmp/rfc2/"
         PathBuilder.build(path)

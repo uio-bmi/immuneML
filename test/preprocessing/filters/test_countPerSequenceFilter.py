@@ -41,7 +41,11 @@ class TestCountPerSequenceFilter(TestCase):
 
         dataset = RepertoireDataset(repertoires=RepertoireBuilder.build([["ACF", "ACF", "ACF"],
                                                                          ["ACF", "ACF"],
-                                                                         ["ACF", "ACF", "ACF", "ACF"]], path)[0])
+                                                                         ["ACF", "ACF", "ACF", "ACF"]], path,
+                                                                        seq_metadata = [[{"count": None}, {"count": None}, {"count": None}],
+                                                                                        [{"count": None}, {"count": None}],
+                                                                                        [{"count": None}, {"count": None}, {"count": None},
+                                                                                         {"count": None}]])[0])
 
         dataset4 = CountPerSequenceFilter.process(dataset, {"low_count_limit": 0, "remove_without_count": True,
                                                             "result_path": path, "batch_size": 4})

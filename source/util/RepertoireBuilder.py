@@ -35,7 +35,7 @@ class RepertoireBuilder:
                 donors.append("rep_" + str(rep_index))
             for seq_index, sequence in enumerate(sequence_list):
                 if seq_metadata is None:
-                    m = SequenceMetadata(v_gene="v1", j_gene="j1")
+                    m = SequenceMetadata(v_gene="v1", j_gene="j1", count=1)
                 else:
                     m = SequenceMetadata(**seq_metadata[rep_index][seq_index])
 

@@ -11,6 +11,7 @@ from scipy.special import betaln as beta_func_ln
 from scipy.special import digamma
 from scipy.stats import betabinom as beta_binomial
 
+from source.data_model.encoded_data.EncodedData import EncodedData
 from source.ml_methods.MLMethod import MLMethod
 from source.util.FilenameHandler import FilenameHandler
 from source.util.PathBuilder import PathBuilder
@@ -63,7 +64,8 @@ class ProbabilisticBinaryClassifier(MLMethod):
         self.class_mapping = None
         self.label_name = None
 
-    def fit(self, X, y, label_names: list = None, cores_for_training: int = 2):
+    def fit(self, encoded_data: EncodedData, y, label_names: list = None, cores_for_training: int = 2):
+        X = encoded_data.examples
         assert X.shape[1] == 2, "ProbabilisticBinaryClassifier: the shape of the input is not compatible with the classifier. " \
                                 "The classifier is defined when examples are encoded by two counts: the number of successful trials " \
                                 "and the total number of trials. If this is not targeted use-case and the encoding, please consider using " \
@@ -78,7 +80,7 @@ class ProbabilisticBinaryClassifier(MLMethod):
         self.alpha_1, self.beta_1 = self._find_beta_distribution_parameters(
             X[np.nonzero(np.array(y[self.label_name]) == self.class_mapping[1])], self.N_1)
 
-    def predict(self, X, label_names: list = None):
+    def predict(self, encoded_data: EncodedData, label_names: list = None):
         """
         Predict the class assignment for examples in X (where X is validation or test set - examples not seen during training).
 
@@ -86,13 +88,16 @@ class ProbabilisticBinaryClassifier(MLMethod):
             \widehat{c} \, (k, n) = \left\{\begin{matrix} 0, & F(k, n) \leq 0\\ 1, & F(k, n) > 0 \end{matrix}\right
 
         Arguments:
-            X: design matrix of shape [number of examples x number of features], where number of features is 2
-               (the first feature is the number of disease-associated sequences and the second is the total number of sequences per example)
+            encoded_data: EncodedData object with examples attribute which is a design matrix of shape
+                [number of examples x number of features], where number of features is 2
+                (the first feature is the number of disease-associated sequences and the second is the total number of sequences per example)
             label_names: name of the label used for classification (e.g. CMV)
 
         Returns:
             class predictions for all examples in X
+
         """
+        X = encoded_data.examples
         self._check_labels(label_names)
         predictions_list = []
         for example in X:
@@ -267,11 +272,12 @@ class ProbabilisticBinaryClassifier(MLMethod):
                + beta_func_ln(k + self.alpha_1, n - k + self.beta_1) \
                - beta_func_ln(k + self.alpha_0, n - k + self.beta_0)
 
-    def fit_by_cross_validation(self, X, y, number_of_splits: int = 5, parameter_grid: dict = None, label_names: list = None):
+    def fit_by_cross_validation(self, encoded_data: EncodedData, y, number_of_splits: int = 5, parameter_grid: dict = None,
+                                label_names: list = None):
         warnings.warn("ProbabilisticBinaryClassifier: cross-validation on this classifier is not defined: fitting one model instead...")
-        self.fit(X, y, label_names)
+        self.fit(encoded_data, y, label_names)
 
-    def predict_proba(self, X, labels):
+    def predict_proba(self, encoded_data: EncodedData, labels):
         """
         Predict the probability of the class for examples in X.
 
@@ -279,14 +285,16 @@ class ProbabilisticBinaryClassifier(MLMethod):
             \widehat{c} \, (k, n) = \left\{\begin{matrix} 0, & F(k, n) \leq 0\\ 1, & F(k, n) > 0 \end{matrix}\right
 
         Arguments:
-            X: design matrix of shape [number of examples x number of features], where number of features is 2
-               (the first feature is the number of disease-associated sequences and the second is the total number of sequences per example)
+            encoded_data: EncodedData object with examples attribute which is a design matrix of shape, where number of features is 2
+                (the first feature is the number of disease-associated sequences and the second is the total number of sequences
+                per example)
             labels: name of the label used for classification (e.g. CMV)
 
         Returns:
             class probabilities for all examples in X
         """
         self._check_labels(labels)
+        X = encoded_data.examples
         class_probabilities = np.zeros((X.shape[0], len(list(self.class_mapping.keys()))), dtype=float)
         for index, example in enumerate(X):
             k, n = example[0], example[1]

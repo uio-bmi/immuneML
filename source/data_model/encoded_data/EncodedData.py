@@ -16,8 +16,8 @@ class EncodedData:
                 Each list associated with a label has to have values for all examples
     """
 
-    def __init__(self, examples, labels: dict, example_ids: list = None, feature_names: list = None,
-                 feature_annotations: pd.DataFrame = None, encoding: str = None):
+    def __init__(self, examples, labels: dict = None, example_ids: list = None, feature_names: list = None,
+                 feature_annotations: pd.DataFrame = None, encoding: str = None, info: dict = None):
 
         assert feature_names is None or examples.shape[1] == len(feature_names)
         if feature_names is not None:
@@ -26,10 +26,11 @@ class EncodedData:
             for label in labels.values():
                 assert len(label) == len(example_ids), "EncodedData: there are {} labels, but {} examples"\
                     .format(len(label), len(example_ids))
-                assert len(example_ids) == examples.shape[0], "EncodedData: there are {} example ids, but {} examples."\
+                assert examples is None or len(example_ids) == examples.shape[0], "EncodedData: there are {} example ids, but {} examples."\
                     .format(len(example_ids), examples.shape[0])
-        assert len(labels.keys()) > 0
-        assert all(len(labels[key]) == examples.shape[0] for key in labels.keys())
+        assert len(labels.keys()) > 0 if labels is not None else True
+        if examples is not None:
+            assert all(len(labels[key]) == examples.shape[0] for key in labels.keys()) if labels is not None else True
 
         self.examples = examples
         self.labels = labels
@@ -37,3 +38,4 @@ class EncodedData:
         self.feature_names = feature_names
         self.feature_annotations = feature_annotations
         self.encoding = encoding
+        self.info = info

@@ -8,6 +8,7 @@ from scipy import sparse
 from sklearn.neighbors import KNeighborsClassifier
 
 from source.caching.CacheType import CacheType
+from source.data_model.encoded_data.EncodedData import EncodedData
 from source.environment.Constants import Constants
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.ml_methods.KNN import KNN
@@ -24,24 +25,24 @@ class TestKNN(TestCase):
         y = {"test": np.array([1, 0, 2, 0])}
 
         knn = KNN()
-        knn.fit(sparse.csr_matrix(x), y, ["test"])
+        knn.fit(EncodedData(examples=sparse.csr_matrix(x)), y, ["test"])
 
     def test_predict(self):
         x = np.array([[1, 0, 0], [0, 1, 1], [1, 1, 1], [0, 1, 1]])
         y = {"test1": [1, 0, 2, 0], "test2": [1, 0, 2, 0]}
 
         knn = KNN(parameters={"n_neighbors": 2})
-        knn.fit(sparse.csr_matrix(x), y, ["test1", "test2"])
+        knn.fit(EncodedData(sparse.csr_matrix(x)), y, ["test1", "test2"])
 
         test_x = np.array([[0, 1, 0], [1, 0, 0]])
-        y = knn.predict(sparse.csr_matrix(test_x), ["test1", "test2"])
+        y = knn.predict(EncodedData(sparse.csr_matrix(test_x)), ["test1", "test2"])
 
         self.assertTrue(len(y["test1"]) == 2)
         self.assertTrue(y["test1"][0] in [0, 1, 2])
         self.assertTrue(y["test2"][1] in [0, 1, 2])
 
     def test_fit_by_cross_validation(self):
-        x = sparse.csr_matrix(
+        x = EncodedData(
             np.array([[1, 0, 0], [0, 1, 1], [1, 1, 1], [0, 1, 1], [1, 0, 0], [0, 1, 1], [1, 1, 1], [0, 1, 1]]))
         y = {"test1": [1, 0, 2, 0, 1, 0, 2, 0], "test2": [1, 0, 2, 0, 1, 0, 2, 0]}
 
@@ -53,7 +54,7 @@ class TestKNN(TestCase):
         y = {"default": np.array([1, 0, 2, 0])}
 
         knn = KNN()
-        knn.fit(sparse.csr_matrix(x), y)
+        knn.fit(EncodedData(sparse.csr_matrix(x)), y)
 
         path = EnvironmentSettings.root_path + "test/tmp/knn/"
 
@@ -72,7 +73,7 @@ class TestKNN(TestCase):
         y = {"default": np.array([1, 0, 2, 0])}
 
         knn = KNN()
-        knn.fit(sparse.csr_matrix(x), y)
+        knn.fit(EncodedData(sparse.csr_matrix(x)), y)
 
         path = EnvironmentSettings.root_path + "test/tmp/knn2/"
         PathBuilder.build(path)

@@ -4,10 +4,10 @@ import shutil
 from unittest import TestCase
 
 import numpy as np
-from scipy import sparse
 from sklearn.linear_model import LogisticRegression
 
 from source.caching.CacheType import CacheType
+from source.data_model.encoded_data.EncodedData import EncodedData
 from source.environment.Constants import Constants
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.ml_methods.SimpleLogisticRegression import SimpleLogisticRegression
@@ -24,24 +24,24 @@ class TestSimpleLogisticRegression(TestCase):
         y = {"test": np.array([1, 0, 2, 0])}
 
         lr = SimpleLogisticRegression()
-        lr.fit(sparse.csr_matrix(x), y, ["test"])
+        lr.fit(EncodedData(x), y, ["test"])
 
     def test_predict(self):
         x = np.array([[1, 0, 0], [0, 1, 1], [1, 1, 1], [0, 1, 1]])
         y = {"test1": [1, 0, 2, 0], "test2": [1, 0, 2, 0]}
 
         lr = SimpleLogisticRegression()
-        lr.fit(sparse.csr_matrix(x), y, ["test1", "test2"])
+        lr.fit(EncodedData(x), y, ["test1", "test2"])
 
         test_x = np.array([[0, 1, 0], [1, 0, 0]])
-        y = lr.predict(sparse.csr_matrix(test_x), ["test1", "test2"])
+        y = lr.predict(EncodedData(test_x), ["test1", "test2"])
 
         self.assertTrue(len(y["test1"]) == 2)
         self.assertTrue(y["test1"][0] in [0, 1, 2])
         self.assertTrue(y["test2"][1] in [0, 1, 2])
 
     def test_fit_by_cross_validation(self):
-        x = sparse.csr_matrix(
+        x = EncodedData(
             np.array([[1, 0, 0], [0, 1, 1], [1, 1, 1], [0, 1, 1], [1, 0, 0], [0, 1, 1], [1, 1, 1], [0, 1, 1]]))
         y = {"test1": [1, 0, 2, 0, 1, 0, 2, 0], "test2": [1, 0, 2, 0, 1, 0, 2, 0]}
 
@@ -53,7 +53,7 @@ class TestSimpleLogisticRegression(TestCase):
         y = {"default": np.array([1, 0, 2, 0])}
 
         lr = SimpleLogisticRegression()
-        lr.fit(sparse.csr_matrix(x), y)
+        lr.fit(EncodedData(x), y)
 
         path = EnvironmentSettings.root_path + "test/tmp/lr/"
 
@@ -72,7 +72,7 @@ class TestSimpleLogisticRegression(TestCase):
         y = {"default": np.array([1, 0, 2, 0])}
 
         lr = SimpleLogisticRegression()
-        lr.fit(sparse.csr_matrix(x), y)
+        lr.fit(EncodedData(x), y)
 
         path = EnvironmentSettings.root_path + "test/tmp/lr2/"
         PathBuilder.build(path)
