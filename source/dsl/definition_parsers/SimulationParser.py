@@ -36,19 +36,18 @@ class SimulationParser:
                             0: 1
                             1: 0
                             2: 0
-                        params:
-                            hamming_distance_probabilities:
-                                0: 0.5 # Hamming distance of 0 (no change) with probability 0.5
-                                1: 0.5 # Hamming distance of 1 (one letter change) with probability 0.5
-                            min_gap: 0
-                            max_gap: 1
+                        hamming_distance_probabilities:
+                            0: 0.5 # Hamming distance of 0 (no change) with probability 0.5
+                            1: 0.5 # Hamming distance of 1 (one letter change) with probability 0.5
+                        min_gap: 0
+                        max_gap: 1
         signals:
             s1:
                 motifs: # list of all motifs for signal which will be uniformly sampled to get a motif instance for implanting
                     - m1
                 sequence_position_weights: # likelihood of implanting at IMGT position of receptor sequence
                     107: 0.5
-                implanting: HealthySequences # choose only sequences with no other signals for to implant one of the motifs
+                implanting: HealthySequence # choose only sequences with no other signals for to implant one of the motifs
         simulations:
             sim1: # one Simulation object consists of a dict of Implanting objects
                 i1:
@@ -64,7 +63,7 @@ class SimulationParser:
             simulation: sim1
             batch_size: 5 # number of repertoires that can be loaded at the same time
                           # (only affects the speed)
-            export_format: AIRR
+            export_formats: [AIRR, Pickle]
 
     """
 
