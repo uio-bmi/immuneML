@@ -43,7 +43,7 @@ class AIRRImport(DataImport):
     @staticmethod
     def import_dataset(params: dict, dataset_name: str) -> Dataset:
         airr_params = DatasetImportParams.build_object(**params)
-        dataset = ImportHelper.import_repertoire_dataset(AIRRImport.preprocess_repertoire, airr_params)
+        dataset = ImportHelper.import_repertoire_dataset(AIRRImport.preprocess_repertoire, airr_params, dataset_name)
         return dataset
 
     @staticmethod

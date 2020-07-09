@@ -35,7 +35,7 @@ class OLGAImport(DataImport):
     @staticmethod
     def import_dataset(params: dict, dataset_name: str) -> RepertoireDataset:
         olga_params = DatasetImportParams.build_object(**params)
-        return ImportHelper.import_repertoire_dataset(OLGAImport.preprocess_repertoire, olga_params)
+        return ImportHelper.import_repertoire_dataset(OLGAImport.preprocess_repertoire, olga_params, dataset_name)
 
     @staticmethod
     def olga_load_func(filepath, params):

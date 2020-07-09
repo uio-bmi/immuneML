@@ -49,21 +49,21 @@ class VDJDBImport(DataImport):
     def import_dataset(params: dict, dataset_name: str) -> Dataset:
         vdjdb_params = DatasetImportParams.build_object(**params)
         if vdjdb_params.metadata_file is not None:
-            dataset = VDJDBImport.load_repertoire_dataset(vdjdb_params)
+            dataset = VDJDBImport.load_repertoire_dataset(vdjdb_params, dataset_name)
         else:
-            dataset = VDJDBImport.load_sequence_dataset(vdjdb_params)
+            dataset = VDJDBImport.load_sequence_dataset(vdjdb_params, dataset_name)
         return dataset
 
     @staticmethod
-    def load_repertoire_dataset(params: DatasetImportParams) -> Dataset:
-        return ImportHelper.import_repertoire_dataset(VDJDBImport.preprocess_repertoire, params)
+    def load_repertoire_dataset(params: DatasetImportParams, dataset_name: str) -> Dataset:
+        return ImportHelper.import_repertoire_dataset(VDJDBImport.preprocess_repertoire, params, dataset_name)
 
     @staticmethod
     def preprocess_repertoire(metadata: dict, params: DatasetImportParams) -> dict:
         return ImportHelper.load_repertoire_as_dataframe(metadata, params)
 
     @staticmethod
-    def load_sequence_dataset(params: DatasetImportParams) -> Dataset:
+    def load_sequence_dataset(params: DatasetImportParams, dataset_name: str) -> Dataset:
 
         filenames = glob(params.path + "*.tsv")
         file_index = 0
@@ -78,8 +78,8 @@ class VDJDBImport(DataImport):
                 items = items[params.file_size:]
                 file_index += 1
 
-        return ReceptorDataset(filenames=dataset_filenames, file_size=params.file_size) if params.paired \
-            else SequenceDataset(filenames=dataset_filenames, file_size=params.file_size)
+        return ReceptorDataset(filenames=dataset_filenames, file_size=params.file_size, name=dataset_name) if params.paired \
+            else SequenceDataset(filenames=dataset_filenames, file_size=params.file_size, name=dataset_name)
 
     @staticmethod
     def store_items(dataset_filenames: list, items: list, file_size: int):

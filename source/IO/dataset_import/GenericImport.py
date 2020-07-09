@@ -36,7 +36,7 @@ class GenericImport(DataImport):
     @staticmethod
     def import_dataset(params: dict, dataset_name: str) -> RepertoireDataset:
         generic_params = DatasetImportParams.build_object(**params)
-        dataset = ImportHelper.import_repertoire_dataset(GenericImport.preprocess_repertoire, generic_params)
+        dataset = ImportHelper.import_repertoire_dataset(GenericImport.preprocess_repertoire, generic_params, dataset_name)
         return dataset
 
     @staticmethod

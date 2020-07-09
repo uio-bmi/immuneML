@@ -41,15 +41,15 @@ class IRISImport(DataImport):
     @staticmethod
     def import_dataset(params: dict, dataset_name: str) -> Dataset:
         if "metadata_file" in params and params["metadata_file"] is not None:
-            dataset = IRISImport.load_repertoire_dataset(params)
+            dataset = IRISImport.load_repertoire_dataset(params, dataset_name)
         else:
-            dataset = IRISImport.load_sequence_dataset(params)
+            dataset = IRISImport.load_sequence_dataset(params, dataset_name)
         return dataset
 
     @staticmethod
-    def load_repertoire_dataset(params: dict) -> Dataset:
+    def load_repertoire_dataset(params: dict, dataset_name: str) -> Dataset:
         iris_params = IRISImportParams.build_object(**params)
-        return ImportHelper.import_repertoire_dataset(IRISImport.preprocess_repertoire, iris_params)
+        return ImportHelper.import_repertoire_dataset(IRISImport.preprocess_repertoire, iris_params, dataset_name)
 
     @staticmethod
     def _load_gene(identifier):
@@ -138,7 +138,7 @@ class IRISImport(DataImport):
         return df
 
     @staticmethod
-    def load_sequence_dataset(params: dict) -> Dataset:
+    def load_sequence_dataset(params: dict, dataset_name: str) -> Dataset:
 
         iris_params = IRISImportParams.build_object(**params)
 
@@ -157,8 +157,8 @@ class IRISImport(DataImport):
                 items = items[iris_params.file_size:]
                 file_index += 1
 
-        return ReceptorDataset(filenames=dataset_filenames, file_size=iris_params.file_size) if iris_params.paired \
-            else SequenceDataset(filenames=dataset_filenames, file_size=iris_params.file_size)
+        return ReceptorDataset(filenames=dataset_filenames, file_size=iris_params.file_size, name=dataset_name) if iris_params.paired \
+            else SequenceDataset(filenames=dataset_filenames, file_size=iris_params.file_size, name=dataset_name)
 
     @staticmethod
     def store_items(dataset_filenames: list, items: list, file_size: int):

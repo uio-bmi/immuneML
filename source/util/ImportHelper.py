@@ -25,14 +25,14 @@ class ImportHelper:
 
         if os.path.isfile(dataset_file):
             params["path"] = dataset_file
-            dataset = PickleImport.import_dataset(params)
+            dataset = PickleImport.import_dataset(params, dataset_name)
         else:
-            dataset = ImportHelper.import_repertoire_dataset(preprocess_repertoire_func, processed_params)
+            dataset = ImportHelper.import_repertoire_dataset(preprocess_repertoire_func, processed_params, dataset_name)
 
         return dataset
 
     @staticmethod
-    def import_repertoire_dataset(preprocess_repertoire_func, params: DatasetImportParams) -> RepertoireDataset:
+    def import_repertoire_dataset(preprocess_repertoire_func, params: DatasetImportParams, dataset_name: str) -> RepertoireDataset:
         """
         Function to create a dataset from the metadata and a list of repertoire files and exports dataset pickle file
 
@@ -56,7 +56,7 @@ class ImportHelper:
 
         potential_labels = list(set(metadata.columns.tolist()) - {"filename"})
         dataset = RepertoireDataset(params={key: list(set(metadata[key].values.tolist())) for key in potential_labels},
-                                    repertoires=repertoires, metadata_file=new_metadata_file)
+                                    repertoires=repertoires, metadata_file=new_metadata_file, name=dataset_name)
 
         PickleExporter.export(dataset, params.result_path)
 
