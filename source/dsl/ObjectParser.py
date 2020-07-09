@@ -64,4 +64,4 @@ class ObjectParser:
                                  f"under key {key}. Valid parameter names are: "
                                  f"{[name for name in inspect.signature(cls.__init__).parameters.keys()]}")
 
-        return (obj, params) if return_params_dict else obj
+        return (obj, {class_name: params}) if return_params_dict else obj

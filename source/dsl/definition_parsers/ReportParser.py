@@ -18,9 +18,7 @@ class ReportParser:
     @staticmethod
     @log
     def _parse_report(key: str, params: dict, symbol_table: SymbolTable):
-        classes = ReflectionHandler.get_classes_by_partial_name("", "reports/")
-        valid_classes = ReflectionHandler.all_nonabstract_subclasses(Report)
-        valid_values = [cls.__name__ for cls in valid_classes]
+        valid_values = ReflectionHandler.all_nonabstract_subclass_basic_names(Report, "", "reports/")
         report_object, params = ObjectParser.parse_object(params, valid_values, "", "reports/", "ReportParser", key, builder=True,
                                                           return_params_dict=True)
 
