@@ -48,7 +48,7 @@ class TestExploratoryAnalysisParser(TestCase):
             "type": "ExploratoryAnalysis",
             "analyses": {
                 "1": {"dataset": "d1", "report": "r1", "preprocessing_sequence": "p1"},
-                "2": {"dataset": "d1", "report": "r2", "encoding": "e1", "labels": ["l1"]}
+                "2": {"dataset": "d1", "report": "r2", "encoding": "e1", "labels": ["l1"], "batch_size": 32}
             }
         }
 
@@ -71,6 +71,7 @@ class TestExploratoryAnalysisParser(TestCase):
         self.assertTrue(isinstance(list(process.state.exploratory_analysis_units.values())[1].encoder, MatchedReferenceEncoder))
         self.assertEqual(1, len(list(process.state.exploratory_analysis_units.values())[1].encoder.reference_sequences))
         self.assertEqual("l1", list(process.state.exploratory_analysis_units.values())[1].label_config.get_labels_by_name()[0])
+        self.assertEqual(32, process.state.exploratory_analysis_units["2"].batch_size)
 
         shutil.rmtree(path)
 

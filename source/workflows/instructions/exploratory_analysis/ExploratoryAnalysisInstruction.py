@@ -24,7 +24,8 @@ class ExploratoryAnalysisInstruction(Instruction):
             Each of these includes a dataset on which to perform the analysis, report to run, and optionally preprocessing sequence,
             encoding (if the report needs to be executed on the encoded dataset) and label configuration (if the dataset needs to be
             encoded, it is also necessary to specify a label for encoding - a label could correspond to an immune event or to genetic
-            information (e.g. HLA).
+            information (e.g. HLA). The batch size can also be set to encode multiple repertoires in parallel, but this also increases
+            the memory usage, so it must be reasonably set.
 
     Specification:
 
@@ -44,6 +45,7 @@ class ExploratoryAnalysisInstruction(Instruction):
                     labels: # labels present in the dataset d1 which will be included in the encoded data on which report r2 will be run
                         - celiac # name of the first label as present in the column of dataset's metadata file
                         - CMV # name of the second label as present in the column of dataset's metadata file
+                    batch_size: 16
 
     """
 
