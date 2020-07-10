@@ -5,7 +5,6 @@ from unittest import TestCase
 from source.caching.CacheType import CacheType
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
-from source.data_model.receptor.receptor_sequence.ReceptorSequenceList import ReceptorSequenceList
 from source.data_model.repertoire.Repertoire import Repertoire
 from source.environment.Constants import Constants
 from source.environment.EnvironmentSettings import EnvironmentSettings
@@ -34,11 +33,8 @@ class TestSignalImplanter(TestCase):
         if not os.path.isdir(path):
             os.makedirs(path)
 
-        sequences = ReceptorSequenceList()
-        sequences.append(ReceptorSequence("ACDEFG", identifier="1"))
-        sequences.append(ReceptorSequence("ACDEFG", identifier="2"))
-        sequences.append(ReceptorSequence("ACDEFG", identifier="3"))
-        sequences.append(ReceptorSequence("ACDEFG", identifier="4"))
+        sequences = [ReceptorSequence("ACDEFG", identifier="1"), ReceptorSequence("ACDEFG", identifier="2"),
+                     ReceptorSequence("ACDEFG", identifier="3"), ReceptorSequence("ACDEFG", identifier="4")]
 
         for i in range(10):
             rep = Repertoire.build_from_sequence_objects(sequence_objects=sequences, path=path, metadata={})
@@ -65,5 +61,10 @@ class TestSignalImplanter(TestCase):
         self.assertTrue(all([f"signal_{s2.id}" in rep.metadata.keys() for rep in new_dataset.get_data(batch_size=10)]))
         self.assertTrue(reps_with_s2 == 4)
         self.assertTrue(reps_with_s1 == 2)
+
+        self.assertEqual(10, len(new_dataset.get_example_ids()))
+
+        metadata_filenames = new_dataset.get_metadata(["filename"])["filename"]
+        self.assertTrue(all([repertoire.data_filename in metadata_filenames for repertoire in new_dataset.repertoires]))
 
         shutil.rmtree(path)
