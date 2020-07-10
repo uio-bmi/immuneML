@@ -148,13 +148,13 @@ An example of sections with defined components is given below:
           repertoire_implanting_rate: 0.1
 
 Specifying Instructions
-^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^
 
 Instructions are defined similarly  to components: a key represents an identifier of
 the instruction and type denotes the instruction that will be performed. The components,
 which were defined previously will be used here as input to instructions.
 The parameters for the instructions depend on the type of the instruction.
-All instructions are located under “instructions” in the specification file.
+Instruction specification is located under “instructions” in the specification file.
 
 Possible instructions are:
 
@@ -207,7 +207,7 @@ metrics used) and results (overview of performance results in nested cross-valid
 outputs of individual reports). At this point, the HTML output is not customizable.
 
 Running the specified analysis
---------------------
+------------------------------
 
 To run an instruction via command line with the given specification (saved as YAML file):
 

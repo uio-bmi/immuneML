@@ -1,3 +1,5 @@
+import logging
+
 from scripts.DocumentatonFormat import DocumentationFormat
 from scripts.specification_util import write_class_docs
 from source.dsl.definition_parsers.DefinitionParserOutput import DefinitionParserOutput
@@ -26,6 +28,14 @@ class InstructionParser:
         symbol_table = definition_output.symbol_table
 
         if InstructionParser.keyword in specification:
+
+            if len(specification[InstructionParser.keyword].keys()) > 1:
+                logging.warning(f"InstructionParser: multiple instructions were listed in the specification (under keys "
+                                f"{str(list(specification[InstructionParser.keyword].keys()))[1:-1]}). "
+                                "These instructions are independent and results from one instruction are not available to others. "
+                                "If this is the intended behavior, please ignore this warning. If the output of one instruction is needed for the "
+                                "other, please use separate YAML specifications and separate runs to perform the analysis.")
+
             for key in specification[InstructionParser.keyword]:
                 specification[InstructionParser.keyword][key], symbol_table = \
                     InstructionParser.parse_instruction(key, specification[InstructionParser.keyword][key], symbol_table)
