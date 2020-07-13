@@ -58,7 +58,7 @@ class TestDistributions(TestCase):
                                                       "result_path": path,
                                                       "grouping_label": "donor",
                                                       "color_label": "disease_status",
-                                                      "row_grouping_label": "timepoint",
+                                                      "row_grouping_labels": "timepoint",
                                                       "distribution_plot_type": "SINA"})
 
         report.result_name = "sina"
@@ -72,7 +72,7 @@ class TestDistributions(TestCase):
         report = FeatureValueDistplot.build_object(**{"dataset": dataset,
                                                       "result_path": path,
                                                       "grouping_label": "donor",
-                                                      "row_grouping_label": "timepoint",
+                                                      "row_grouping_labels": "timepoint",
                                                       "distribution_plot_type": "RIDGE"})
 
         report.result_name = "ridge"
@@ -86,7 +86,7 @@ class TestDistributions(TestCase):
                                                       "result_path": path,
                                                       "grouping_label": "donor",
                                                       "color_label": "illegal_label",
-                                                      "row_grouping_label": "timepoint",
+                                                      "row_grouping_labels": "timepoint",
                                                       "distribution_plot_type": "DENSITY"})
 
         report.result_name = "density"

@@ -1,4 +1,12 @@
 errorbar_meaning: STANDARD_ERROR # options in ErrorBarMeaning
-color_grouping_label: None
-row_grouping_label: None
-column_grouping_label: None
+grouping_label: feature
+color_grouping_label: "NULL"
+row_grouping_labels: []
+column_grouping_labels: []
+panel_layout_type: GRID # options in PanelLayoutType
+panel_axis_scales_type: FREE # options in PanelAxisScalesType
+panel_label_switch_type: "NULL" # options in PanelLabelSwitchType
+panel_nrow: "NULL"
+panel_ncol: "NULL"
+height: 6
+width: 8
