@@ -50,8 +50,8 @@ class TestFeatureValueBarplot(TestCase):
         report = FeatureValueBarplot.build_object(**{"dataset": dataset,
                                           "result_path": path,
                                           "errorbar_meaning": "STANDARD_ERROR",
-                                          "column_grouping_label": "disease",
-                                          "row_grouping_label": "timepoint",
+                                          "column_grouping_labels": "disease",
+                                          "row_grouping_labels": "timepoint",
                                           "color_grouping_label": "disease"})
 
         self.assertTrue(report.check_prerequisites())
@@ -69,8 +69,8 @@ class TestFeatureValueBarplot(TestCase):
         report = FeatureValueBarplot.build_object(**{"dataset": RepertoireDataset(),
                                             "result_path": path,
                                             "errorbar_meaning": "STANDARD_ERROR",
-                                            "column_grouping_label": None,
-                                            "row_grouping_label": None,
+                                            "column_grouping_labels": None,
+                                            "row_grouping_labels": None,
                                             "color_grouping_label": None})
 
         self.assertFalse(report.check_prerequisites())
