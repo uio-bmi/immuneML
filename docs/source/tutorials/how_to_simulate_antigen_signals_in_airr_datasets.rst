@@ -80,7 +80,7 @@ baseline for the simulation.
               E: 0.2
 
     signals:
-      my_simple_signal:
+      my_signal:
         motifs:
           - my_simple_motif
           - my_complex_motif
