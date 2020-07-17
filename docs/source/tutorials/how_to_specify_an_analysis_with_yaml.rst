@@ -72,7 +72,7 @@ Structure of the analysis specification
 The analysis specification consists of three main parts: definitions, instructions and output.
 
 Specifying Definitions
-^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^
 
 Definitions refer to components, which will be used within the instructions. They include:
 
