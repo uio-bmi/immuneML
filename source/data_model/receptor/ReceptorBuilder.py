@@ -1,8 +1,9 @@
 import itertools
+from typing import List
 
 from source.data_model.receptor.BCReceptor import BCReceptor
 from source.data_model.receptor.ChainPair import ChainPair
-from source.data_model.receptor.ReceptorList import ReceptorList
+from source.data_model.receptor.Receptor import Receptor
 from source.data_model.receptor.TCABReceptor import TCABReceptor
 from source.data_model.receptor.TCGDReceptor import TCGDReceptor
 from source.data_model.receptor.receptor_sequence.Chain import Chain
@@ -24,8 +25,8 @@ class ReceptorBuilder:
             return None
 
     @classmethod
-    def build_objects(cls, sequences: ReceptorSequenceList) -> ReceptorList:
-        receptors = ReceptorList()
+    def build_objects(cls, sequences: ReceptorSequenceList) -> List[Receptor]:
+        receptors = []
         sequences_per_chain = {chain.value: [sequence for sequence in sequences if sequence.metadata.chain.value == chain.value]
                                for chain in Chain}
         for chain_pair in ChainPair:

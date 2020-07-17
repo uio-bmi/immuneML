@@ -38,7 +38,7 @@ class MLParser:
                                                                                                           ml_method_class_name))
 
         ml_specification = {**DefaultParamsLoader.load("ml_methods/", "MLMethod"), **ml_specification}
-        ml_specification[ml_method_class_name] = {**DefaultParamsLoader.load("ml_methods/", ml_method_class_name, warn_if_missing=False),
+        ml_specification[ml_method_class_name] = {**DefaultParamsLoader.load("ml_methods/", ml_method_class_name, log_if_missing=False),
                                                   **ml_specification[ml_method_class_name]}
 
         method, params = MLParser.create_method_instance(ml_specification, ml_method_class)

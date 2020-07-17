@@ -10,8 +10,8 @@ import numpy as np
 from source.data_model.DatasetItem import DatasetItem
 from source.data_model.cell.Cell import Cell
 from source.data_model.cell.CellList import CellList
+from source.data_model.receptor.Receptor import Receptor
 from source.data_model.receptor.ReceptorBuilder import ReceptorBuilder
-from source.data_model.receptor.ReceptorList import ReceptorList
 from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.data_model.receptor.receptor_sequence.ReceptorSequenceList import ReceptorSequenceList
 from source.data_model.receptor.receptor_sequence.SequenceAnnotation import SequenceAnnotation
@@ -284,7 +284,7 @@ class Repertoire(DatasetItem):
         return seqs
 
     @property
-    def receptors(self) -> ReceptorList:
+    def receptors(self) -> List[Receptor]:
         """
         A property that creates a list of Receptor objects based on the cell_ids field in the following manner:
             - all sequences that have the same cell_id are grouped together
@@ -298,7 +298,7 @@ class Repertoire(DatasetItem):
         Returns:
             ReceptorList: a list of objects of Receptor class
         """
-        receptors = ReceptorList()
+        receptors = []
 
         same_cell_lists = self._prepare_cell_lists()
 

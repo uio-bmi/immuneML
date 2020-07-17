@@ -1,10 +1,9 @@
 import functools
-import operator
 import itertools as it
+import operator
 
 import pandas as pd
 
-from source.data_model.receptor.ReceptorList import ReceptorList
 from source.data_model.receptor.TCABReceptor import TCABReceptor
 from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.data_model.receptor.receptor_sequence.ReceptorSequenceList import ReceptorSequenceList
@@ -73,7 +72,7 @@ class IRISSequenceImport:
     @staticmethod
     def process_iris_row(row, paired: bool = False, all_dual_chains: bool = True, all_genes: bool = False):
         if paired:
-            sequences = ReceptorList()
+            sequences = []
             if row["Chain: TRA (1)"] is not None and row["Chain: TRB (1)"] is not None:
                 alpha_seqs = IRISSequenceImport.process_iris_chain(row, "A", 1, all_genes)
                 beta_seqs = IRISSequenceImport.process_iris_chain(row, "B", 1, all_genes)

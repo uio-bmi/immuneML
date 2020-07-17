@@ -1,6 +1,8 @@
+from typing import List
+
 import pandas as pd
 
-from source.data_model.receptor.ReceptorList import ReceptorList
+from source.data_model.receptor.Receptor import Receptor
 from source.data_model.receptor.TCABReceptor import TCABReceptor
 from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.data_model.receptor.receptor_sequence.ReceptorSequenceList import ReceptorSequenceList
@@ -25,11 +27,11 @@ class VDJdbSequenceImport:
         return sequences
 
     @staticmethod
-    def import_paired_sequences(path) -> ReceptorList:
+    def import_paired_sequences(path) -> List[Receptor]:
         columns = VDJdbSequenceImport.COLUMNS + list(VDJdbSequenceImport.CUSTOM_COLUMNS.keys())
         df = pd.read_csv(path, sep="\t", usecols=columns, dtype=str)
         identifiers = df["complex.id"].unique()
-        receptors = ReceptorList()
+        receptors = []
 
         for identifier in identifiers:
             receptor = VDJdbSequenceImport.import_receptor(df, identifier)

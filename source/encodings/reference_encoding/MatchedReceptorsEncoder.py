@@ -1,10 +1,11 @@
 import abc
 import os
+from typing import List
 
 from source.IO.dataset_export.PickleExporter import PickleExporter
 from source.caching.CacheHandler import CacheHandler
 from source.data_model.receptor.BCReceptor import BCReceptor
-from source.data_model.receptor.ReceptorList import ReceptorList
+from source.data_model.receptor.Receptor import Receptor
 from source.data_model.receptor.TCABReceptor import TCABReceptor
 from source.data_model.receptor.TCGDReceptor import TCGDReceptor
 from source.encodings.DatasetEncoder import DatasetEncoder
@@ -55,7 +56,7 @@ class MatchedReceptorsEncoder(DatasetEncoder):
         "RepertoireDataset": "MatchedReceptorsRepertoireEncoder"
     }
 
-    def __init__(self, reference_receptors: ReceptorList, max_edit_distances: dict, name: str = None):
+    def __init__(self, reference_receptors: List[Receptor], max_edit_distances: dict, name: str = None):
         self.reference_receptors = reference_receptors
         self.max_edit_distances = max_edit_distances
         self.name = name
