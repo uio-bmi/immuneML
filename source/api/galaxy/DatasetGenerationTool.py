@@ -50,8 +50,8 @@ class DatasetGenerationTool:
 
     def parse_dataset(self, workflow_specification: dict, yaml_path: str, result_path: str):
         keys = list(workflow_specification.keys())
-        assert len(keys) == 1, f"Dataset generation tool: {len(keys)} keys were specified in the yaml file, but there should be only one," \
-                               f"which will be used as a dataset name. Please see the documentation for generating immuneML datasets."
+        assert len(keys) == 1, f"Dataset generation tool: {len(keys)} keys ({str(keys)[1:-1]}) were specified in the yaml file, but there should be " \
+                               f"only one, which will be used as a dataset name. Please see the documentation for generating immuneML datasets."
 
         assert "params" in workflow_specification[keys[0]], \
             f"Dataset generation tool: the format of the specification is not correct. 'params' key missing under '{keys[0]}'." \

@@ -4,7 +4,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="immune-ml",
-    version="0.0.75",
+    version="0.0.76",
     description="immuneML is a software platform for machine learning analysis of immune receptor sequences",
     long_description=open("README.md").read(),
     author="Milena Pavlovic",
