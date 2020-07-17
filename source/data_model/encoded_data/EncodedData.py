@@ -5,11 +5,16 @@ class EncodedData:
     """
     When a dataset is encoded, it is stored in an object of EncodedData class;
 
-    It consists of:
+    Arguments:
+
         examples: a matrix of example_count x feature_count elements
+
         feature_names: a list of feature names with feature_count elements
+
         feature_annotations: a data frame consisting of annotations for each unique feature
+
         example_ids: a list of example (repertoire/sequence/receptor) IDs with repertoire_count elements
+
         labels: a dict of labels where each label is a key and the value is a list of values
                 for the label across examples:
                 {label_name1: [...], label_name2: [...]}

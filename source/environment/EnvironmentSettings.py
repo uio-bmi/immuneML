@@ -63,14 +63,18 @@ class EnvironmentSettings:
         return EnvironmentSettings.sequence_type
 
     @staticmethod
-    def get_sequence_alphabet():
+    def get_sequence_alphabet(sequence_type: SequenceType = None):
         """
         :return: alphabetically sorted receptor_sequence alphabet
         """
-        if EnvironmentSettings.sequence_type == SequenceType.AMINO_ACID:
+        seq_type = sequence_type if sequence_type is not None else EnvironmentSettings.sequence_type
+        if seq_type == SequenceType.AMINO_ACID:
             alphabet = list("ACDEFGHIKLMNPQRSTVWY")
             alphabet.sort()
-        else:
+        elif seq_type == SequenceType.NUCLEOTIDE:
             alphabet = list("ACGT")
             alphabet.sort()
+        else:
+            raise RuntimeError("EnvironmentSettings: the sequence alphabet cannot be obtained if sequence_type was not set properly. "
+                               f"Expected AMINO_ACID or NUCLEOTIDE, but got {seq_type} instead.")
         return alphabet

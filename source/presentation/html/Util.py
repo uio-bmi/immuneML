@@ -1,6 +1,7 @@
 import glob
 import os
 import shutil
+from enum import Enum
 
 from source.util.PathBuilder import PathBuilder
 
@@ -18,6 +19,8 @@ class Util:
                 return os.path.relpath(obj, base_path) + "/" if os.path.relpath(obj, base_path) != "" and os.path.isdir(obj) else os.path.relpath(obj, base_path)
             else:
                 return obj if obj is not None else ""
+        elif isinstance(obj, Enum):
+            return str(obj)
         else:
             vars_obj = vars(obj)
             return {

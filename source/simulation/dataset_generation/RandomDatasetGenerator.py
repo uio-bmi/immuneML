@@ -1,6 +1,10 @@
+import pickle
 import random
 
+from source.data_model.dataset.ReceptorDataset import ReceptorDataset
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
+from source.data_model.receptor.TCABReceptor import TCABReceptor
+from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.util.PathBuilder import PathBuilder
 from source.util.RepertoireBuilder import RepertoireBuilder
@@ -17,22 +21,30 @@ class RandomDatasetGenerator:
                                                f"and sum to 1, but got {probabilities_dict} instead."
 
     @staticmethod
-    def _check_rep_dataset_generation_params(repertoire_count: int, sequence_count_probabilities: dict, sequence_length_probabilities: dict,
-                                             labels: dict, path: str):
-
-        assert isinstance(repertoire_count, int) and repertoire_count > 0, f"RandomDatasetGenerator: repertoire_count is not specified " \
-                                                                           f"properly. It should be a positive integer, " \
-                                                                           f"got {repertoire_count} instead."
-
-        RandomDatasetGenerator._check_probabilities(sequence_count_probabilities, int, "sequence_count_probabilities")
-        RandomDatasetGenerator._check_probabilities(sequence_length_probabilities, int, "sequence_length_probabilities")
-
+    def _check_labels(labels: dict):
         if labels is not None:
             assert isinstance(labels, dict)
             for label in labels:
                 RandomDatasetGenerator._check_probabilities(labels[label], object, f"labels - {label}")
 
+    @staticmethod
+    def _check_example_count(count, name):
+        assert isinstance(count, int) and count > 0, f"RandomDatasetGenerator: {name} is not specified properly. " \
+                                                     f"It should be a positive integer, got {count} instead."
+
+    @staticmethod
+    def _check_path(path: str):
         assert path is not None, "RandomDatasetGenerator: path cannot be None when generating datasets."
+
+    @staticmethod
+    def _check_rep_dataset_generation_params(repertoire_count: int, sequence_count_probabilities: dict, sequence_length_probabilities: dict,
+                                             labels: dict, path: str):
+
+        RandomDatasetGenerator._check_example_count(repertoire_count, "repertoire_count")
+        RandomDatasetGenerator._check_probabilities(sequence_count_probabilities, int, "sequence_count_probabilities")
+        RandomDatasetGenerator._check_probabilities(sequence_length_probabilities, int, "sequence_length_probabilities")
+        RandomDatasetGenerator._check_labels(labels)
+        RandomDatasetGenerator._check_path(path)
 
     @staticmethod
     def generate_repertoire_dataset(repertoire_count: int, sequence_count_probabilities: dict, sequence_length_probabilities: dict,
@@ -54,8 +66,8 @@ class RandomDatasetGenerator:
             15: 0.2 # 20% of all generated sequences across all repertoires will have length 15
         labels:
             cmv: # label name
-                True: 0.5 # 50% of the repertoires will have label True
-                False: 0.5 # 50% of the repertoires will have label False
+                True: 0.5 # 50% of the repertoires will have class True
+                False: 0.5 # 50% of the repertoires will have class False
             coeliac: # next label with classes that will be assigned to repertoires independently of the previous label or any other parameter
                 1: 0.3 # 30% of the generated repertoires will have class 1
                 0: 0.7 # 70% of the generated repertoires will have class 0
@@ -81,3 +93,63 @@ class RandomDatasetGenerator:
         dataset = RepertoireDataset(params=dataset_params, repertoires=repertoires, metadata_file=metadata)
 
         return dataset
+
+    @staticmethod
+    def _check_receptor_dataset_generation_params(receptor_count: int, chain_1_length_probabilities: dict,
+                                                  chain_2_length_probabilities: dict, labels: dict, path: str):
+
+        RandomDatasetGenerator._check_probabilities(chain_1_length_probabilities, int, 'chain_1_length_probabilities')
+        RandomDatasetGenerator._check_probabilities(chain_2_length_probabilities, int, 'chain_2_length_probabilities')
+        RandomDatasetGenerator._check_example_count(receptor_count, "receptor_count")
+        RandomDatasetGenerator._check_labels(labels)
+        RandomDatasetGenerator._check_path(path)
+
+    @staticmethod
+    def generate_receptor_dataset(receptor_count: int, chain_1_length_probabilities: dict, chain_2_length_probabilities: dict, labels: dict,
+                                  path: str):
+        """
+        Creates receptor_count receptors where the length of sequences in each chain is sampled independently for each sequence from
+        chain_n_length_probabilities distribution. The labels are also randomly assigned to receptors from the distribution given in
+        labels. In this case, labels are multi-class, so each receptor will get one class from each label. This means that negative
+        classes for the labels should be included as well in the specification. chain 1 and 2 in this case refer to alpha and beta
+        chain of a T-cell receptor.
+
+        An example of input parameters is given below:
+
+        receptor_count: 100 # generate 100 receptors
+        chain_1_length_probabilities:
+            14: 0.8 # 80% of all generated sequences for all receptors (for chain 1) will have length 14
+            15: 0.2 # 20% of all generated sequences across all receptors (for chain 1) will have length 15
+        chain_2_length_probabilities:
+            14: 0.8 # 80% of all generated sequences for all receptors (for chain 2) will have length 14
+            15: 0.2 # 20% of all generated sequences across all receptors (for chain 2) will have length 15
+        labels:
+            epitope1: # label name
+                True: 0.5 # 50% of the receptors will have class True
+                False: 0.5 # 50% of the receptors will have class False
+            epitope2: # next label with classes that will be assigned to receptors independently of the previous label or other parameters
+                1: 0.3 # 30% of the generated receptors will have class 1
+                0: 0.7 # 70% of the generated receptors will have class 0
+        """
+        RandomDatasetGenerator._check_receptor_dataset_generation_params(receptor_count, chain_1_length_probabilities,
+                                                                         chain_2_length_probabilities, labels, path)
+
+        alphabet = EnvironmentSettings.get_sequence_alphabet()
+        PathBuilder.build(path)
+
+        get_random_sequence = lambda proba: ReceptorSequence("".join(random.choices(alphabet, k=random.choices(list(proba.keys()),
+                                                                                                               proba.values())[0])))
+
+        receptors = [TCABReceptor(alpha=get_random_sequence(chain_1_length_probabilities),
+                                  beta=get_random_sequence(chain_2_length_probabilities),
+                                  metadata={label: random.choices(list(label_dict.keys()), label_dict.values(), k=1)[0]
+                                            for label, label_dict in labels.items()})
+                     for _ in range(receptor_count)]
+
+        filename = f"{path if path[-1] == '/' else path + '/'}batch01.pickle"
+
+        with open(filename, "wb") as file:
+            pickle.dump(receptors, file)
+
+        return ReceptorDataset(params={label: list(label_dict.keys()) for label, label_dict in labels.items()},
+                               filenames=[filename], file_size=receptor_count)

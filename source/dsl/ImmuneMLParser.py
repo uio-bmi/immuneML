@@ -24,11 +24,12 @@ class ImmuneMLParser:
         definitions:
             datasets:
                 d1:
-                    metadata: "./metadata.csv"
                     format: MiXCR
                     params:
-                        result_path: "./loaded_dataset/"
-                        sequence_type: CDR3
+                        result_path: loaded_dataset/
+                        region_type: CDR3
+                        path: path_to_files/
+                        metadata_file: metadata.csv
             encodings:
                 e1:
                     KmerFrequency
@@ -91,7 +92,7 @@ class ImmuneMLParser:
                 metrics: [accuracy, f1_micro]
                 optimization_metric: balanced_accuracy
                 reports: []
-        output: # this section can also be omitted, in that case no additional output will be generated (no HTML report)
+        output: # this section can also be omitted, in that case output will be automatically HTML
             format: HTML # or None
 
     """

@@ -71,8 +71,7 @@ class PickleExporter(DataExporter):
     def _export_receptors(filenames_old: List[str], path: str) -> List[str]:
         filenames_new = []
         for filename_old in filenames_old:
-            filename_new = f"{path}{os.path.basename(filename_old)}"
-            shutil.copyfile(filename_old, filename_new)
+            filename_new = PickleExporter._copy_if_exists(filename_old, path)
             filenames_new.append(filename_new)
         return filenames_new
 

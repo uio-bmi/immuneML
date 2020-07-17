@@ -13,6 +13,7 @@ from scipy.stats import betabinom as beta_binomial
 
 from source.data_model.encoded_data.EncodedData import EncodedData
 from source.ml_methods.MLMethod import MLMethod
+from source.ml_methods.util.Util import Util
 from source.util.FilenameHandler import FilenameHandler
 from source.util.PathBuilder import PathBuilder
 
@@ -71,7 +72,7 @@ class ProbabilisticBinaryClassifier(MLMethod):
                                 "and the total number of trials. If this is not targeted use-case and the encoding, please consider using " \
                                 "another classifier."
 
-        self.class_mapping = self._make_class_mapping(y, label_names)
+        self.class_mapping = Util.make_binary_class_mapping(y, label_names)
         self.label_name = label_names[0]
         self.N_0 = int(np.sum(np.array(y[label_names[0]]) == self.class_mapping[0]))
         self.N_1 = int(np.sum(np.array(y[label_names[0]]) == self.class_mapping[1]))
@@ -85,15 +86,19 @@ class ProbabilisticBinaryClassifier(MLMethod):
         Predict the class assignment for examples in X (where X is validation or test set - examples not seen during training).
 
         .. math::
+
             \widehat{c} \, (k, n) = \left\{\begin{matrix} 0, & F(k, n) \leq 0\\ 1, & F(k, n) > 0 \end{matrix}\right
 
         Arguments:
+
             encoded_data: EncodedData object with examples attribute which is a design matrix of shape
                 [number of examples x number of features], where number of features is 2
                 (the first feature is the number of disease-associated sequences and the second is the total number of sequences per example)
+
             label_names: name of the label used for classification (e.g. CMV)
 
         Returns:
+
             class predictions for all examples in X
 
         """
@@ -310,24 +315,6 @@ class ProbabilisticBinaryClassifier(MLMethod):
             warnings.warn("ProbabilisticBinaryClassifier: in get_classes_for_label() a label was passed in for which "
                           "the classifier was not trained: returning None...", RuntimeWarning)
             return None
-
-    def _make_class_mapping(self, y, label_names: list):
-        assert len(label_names) == 1, "ProbabilisticBinaryClassifier: more than one label was specified at the time, but this " \
-                                      "classifier can handle only binary classification for one label. Try using HPOptimization " \
-                                      "instruction which will train different classifiers for all provided labels."
-        unique_values = np.sort(np.unique(y[label_names[0]]))
-        assert unique_values.shape[0] == 2, f"ProbabilisticBinaryClassifier: there has two be exactly two classes to use this classifier," \
-                                            f" instead got {str(unique_values.tolist())[1:-1]}. For multi-class classification, " \
-                                            f"consider some of the other classifiers."
-
-        if 0 in unique_values and 1 in unique_values and unique_values.dtype != bool:
-            mapping = {0: 0, 1: 1}
-        elif True in unique_values and False in unique_values:
-            mapping = {0: False, 1: True}
-        else:
-            mapping = {0: unique_values[0], 1: unique_values[1]}
-
-        return mapping
 
     def _convert_object_to_dict(self):
         content = vars(self)

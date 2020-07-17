@@ -1,11 +1,12 @@
+from source.dsl.ObjectParser import ObjectParser
 from source.dsl.symbol_table.SymbolTable import SymbolTable
 from source.dsl.symbol_table.SymbolType import SymbolType
 from source.logging.Logger import log
+from source.preprocessing.Preprocessor import Preprocessor
 from source.util.ReflectionHandler import ReflectionHandler
 
 
 class PreprocessingParser:
-
     keyword = "preprocessing_sequences"
 
     @staticmethod
@@ -21,16 +22,13 @@ class PreprocessingParser:
 
         sequence = []
 
+        valid_preprocessing_classes = ReflectionHandler.all_nonabstract_subclass_basic_names(Preprocessor, "", "preprocessing/")
+
         for item in preproc_sequence:
             for step_key, step in item.items():
-                if isinstance(step, str):
-                    class_name = step
-                    params = {}
-                else:
-                    class_name = list(item[step_key].keys())[0]
-                    params = step[class_name]
-                cls = ReflectionHandler.get_class_by_name(class_name, "preprocessing/")
-                obj = cls(**params)
+                obj, params = ObjectParser.parse_object(step, valid_preprocessing_classes, "", "preprocessing/", "PreprocessingParser",
+                                                        step_key, True, True)
+                step = params
                 sequence.append(obj)
 
         symbol_table.add(key, SymbolType.PREPROCESSING, sequence)

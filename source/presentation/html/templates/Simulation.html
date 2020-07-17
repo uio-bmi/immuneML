@@ -44,17 +44,33 @@
                         <div>
                             <h5>{{name}}</h5>
                             <div class="padded-md">Dataset implanting rate: {{dataset_implanting_rate}}</div>
+                            {{#repertoire_implanting_rate}}
                             <div class="padded-md">Repertoire implanting rate: {{repertoire_implanting_rate}}</div>
+                            {{/repertoire_implanting_rate}}
                             <div class="padded-md">Signals:
                                 {{#signals}}
                                 <div class="padded-md">
                                     <div>Signal id: {{id}}</div>
                                     <div class="padded-top">Motifs: </div>
                                     {{#motifs}}
-                                    <div class="padded-xs">
-                                        <div>Motif id: {{id}}</div>
+                                    <div class="padded-md">
+                                        <div>Motif id: {{identifier}}</div>
+                                        {{#seed}}
                                         <div>Seed: {{seed}}</div>
-                                        <div>Instantiation strategy: {{instantiation_strategy}}</div>
+                                        {{/seed}}
+                                        {{#seed_chain1}}
+                                        <div>Seed chain 1: {{seed_chain1}}</div>
+                                        {{/seed_chain1}}
+                                        {{#seed_chain2}}
+                                        <div>Seed chain 2: {{seed_chain2}}</div>
+                                        {{/seed_chain2}}
+                                        {{#name_chain1}}
+                                        <div>Name chain 1: {{name_chain1}}</div>
+                                        {{/name_chain1}}
+                                        {{#name_chain2}}
+                                        <div>Name chain 2: {{name_chain2}}</div>
+                                        {{/name_chain2}}
+                                        <div>Instantiation: <pre><code>{{instantiation}}</code></pre></div>
                                     </div>
                                     {{/motifs}}
                                 </div>

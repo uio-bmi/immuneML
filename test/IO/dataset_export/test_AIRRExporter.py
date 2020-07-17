@@ -20,7 +20,7 @@ class TestAIRRExporter(TestCase):
                                              identifier="receptor_1",
                                              metadata=SequenceMetadata(v_gene="v1",
                                                                        j_gene="j1",
-                                                                       chain=Chain.TRB,
+                                                                       chain=Chain.BETA,
                                                                        count=5,
                                                                        custom_params={"d_call": "d1",
                                                                                       "custom_test": "cust1"})),
@@ -29,7 +29,7 @@ class TestAIRRExporter(TestCase):
                                              identifier="receptor_2",
                                              metadata=SequenceMetadata(v_gene="v2",
                                                                        j_gene="j2",
-                                                                       chain=Chain.TRA,
+                                                                       chain=Chain.ALPHA,
                                                                        count=15,
                                                                        custom_params={"d_call": "d2",
                                                                                       "custom_test": "cust2"}))]

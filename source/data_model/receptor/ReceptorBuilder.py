@@ -14,12 +14,12 @@ class ReceptorBuilder:
     @classmethod
     def build_object(cls, sequences: dict):
         chains = sorted(list(sequences.keys()))
-        if chains == ChainPair.A_B.value:
-            return TCABReceptor(alpha=sequences[Chain.A.value], beta=sequences[Chain.B.value])
-        elif chains == ChainPair.G_D.value:
-            return TCGDReceptor(gamma=sequences[Chain.G.value], delta=sequences[Chain.D.value])
-        elif chains == ChainPair.L_H.value:
-            return BCReceptor(heavy=sequences[Chain.H.value], light=sequences[Chain.L.value])
+        if chains == ChainPair.ALPHA_BETA.value:
+            return TCABReceptor(alpha=sequences[Chain.ALPHA.value], beta=sequences[Chain.BETA.value])
+        elif chains == ChainPair.GAMMA_DELTA.value:
+            return TCGDReceptor(gamma=sequences[Chain.GAMMA.value], delta=sequences[Chain.DELTA.value])
+        elif chains == ChainPair.LIGHT_HEAVY.value:
+            return BCReceptor(heavy=sequences[Chain.HEAVY.value], light=sequences[Chain.LIGHT.value])
         else:
             return None
 

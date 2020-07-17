@@ -1,3 +1,6 @@
+import copy
+
+from source.data_model.receptor.receptor_sequence.Chain import Chain
 from source.dsl.ObjectParser import ObjectParser
 from source.dsl.symbol_table.SymbolTable import SymbolTable
 from source.dsl.symbol_table.SymbolType import SymbolType
@@ -13,10 +16,10 @@ class MotifParser:
     @staticmethod
     def parse_motifs(motifs: dict, symbol_table: SymbolTable):
 
-        valid_motif_keys = ["seed", "instantiation"]
+        valid_motif_keys = ["seed", "instantiation", "seed_chain1", "seed_chain2", "name_chain1", "name_chain2"]
         for key in motifs.keys():
 
-            ParameterValidator.assert_keys(motifs[key].keys(), valid_motif_keys, "MotifParser", key)
+            ParameterValidator.assert_keys(motifs[key].keys(), valid_motif_keys, "MotifParser", key, exclusive=False)
 
             motif = MotifParser._parse_motif(key, motifs[key])
             symbol_table.add(key, SymbolType.MOTIF, motif)
@@ -27,10 +30,23 @@ class MotifParser:
     @log
     def _parse_motif(key: str, motif_item: dict) -> Motif:
 
-        classes = ReflectionHandler.get_classes_by_partial_name("Instantiation", "motif_instantiation_strategy/")
-        valid_values = [cls.__name__[:-13] for cls in MotifInstantiationStrategy.__subclasses__()]
+        motif_dict = copy.deepcopy(motif_item)
+
+        valid_values = ReflectionHandler.all_nonabstract_subclass_basic_names(MotifInstantiationStrategy, "Instantiation", "motif_instantiation_strategy/")
         instantiation_object = ObjectParser.parse_object(motif_item["instantiation"], valid_values, "Instantiation",
                                                          "motif_instantiation_strategy", "MotifParser", key)
-        motif = Motif(key, instantiation_object, seed=motif_item["seed"])
+        motif_dict["instantiation"] = instantiation_object
+        motif_dict["identifier"] = key
+
+        if "name_chain1" in motif_item:
+            motif_dict["name_chain1"] = Chain[motif_item["name_chain1"].upper()]
+        if "name_chain2" in motif_item:
+            motif_dict["name_chain2"] = Chain[motif_item["name_chain2"].upper()]
+
+        assert "seed" in motif_dict or all(el in motif_dict for el in ["name_chain1", "name_chain2", "seed_chain1", "seed_chain2"]), \
+            "MotifParser: please check the documentation for motif definition. Either parameter `seed` has to be set (for simulation in single " \
+            "chain data) or all of the parameters `name_chain1`, `name_chain2`, `seed_chain1`, `seed_chain2` (for simulation for paired chain data)."
+
+        motif = Motif(**motif_dict)
 
         return motif

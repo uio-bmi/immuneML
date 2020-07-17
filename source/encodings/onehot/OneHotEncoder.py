@@ -70,7 +70,7 @@ class OneHotEncoder(DatasetEncoder):
             self.distance_to_seq_middle = self.distance_to_seq_middle * 3
 
     @staticmethod
-    def _prepare_parameters(use_positional_info, distance_to_seq_middle):
+    def _prepare_parameters(use_positional_info, distance_to_seq_middle, name: str = None):
 
         location = OneHotEncoder.__name__
 
@@ -78,7 +78,8 @@ class OneHotEncoder(DatasetEncoder):
         ParameterValidator.assert_type_and_value(distance_to_seq_middle, int, location, "distance_to_seq_middle", min_inclusive=1)
 
         return {"use_positional_info": use_positional_info,
-                "distance_to_seq_middle": distance_to_seq_middle}
+                "distance_to_seq_middle": distance_to_seq_middle,
+                "name": name}
 
     @staticmethod
     def build_object(dataset=None, **params):
@@ -111,7 +112,6 @@ class OneHotEncoder(DatasetEncoder):
     def _encode_new_dataset(self, dataset, params: EncoderParams):
         pass
 
-
     def store(self, encoded_dataset, params: EncoderParams):
         PickleExporter.export(encoded_dataset, params["result_path"])
 
@@ -127,12 +127,12 @@ class OneHotEncoder(DatasetEncoder):
         encoded_data = np.pad(encoded_data, pad_width=((0, pad_n_sequences - n_sequences), (0, 0)))
         encoded_data = encoded_data.reshape((pad_n_sequences, sequence_len, len(OneHotEncoder.ALPHABET)))
         positional_dims = int(self.use_positional_info) * 3
-        encoded_data = np.pad(encoded_data, pad_width=((0,0), (0, pad_sequence_len - sequence_len), (0, positional_dims)))
+        encoded_data = np.pad(encoded_data, pad_width=((0, 0), (0, pad_sequence_len - sequence_len), (0, positional_dims)))
 
         if self.use_positional_info:
             pos_info = [self._get_imgt_position_weights(len(sequence), pad_length=pad_sequence_len).T for sequence in sequences]
             pos_info = np.stack(pos_info)
-            pos_info = np.pad(pos_info, pad_width=((0, pad_n_sequences - n_sequences),(0,0), (0,0)))
+            pos_info = np.pad(pos_info, pad_width=((0, pad_n_sequences - n_sequences), (0, 0), (0, 0)))
 
             encoded_data[:, :, len(OneHotEncoder.ALPHABET):] = pos_info
 
@@ -171,5 +171,3 @@ class OneHotEncoder(DatasetEncoder):
             start_weights = [1] + self.pos_decreasing[:diff]
 
         return start_weights
-
-

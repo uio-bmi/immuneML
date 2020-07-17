@@ -74,7 +74,7 @@ class MLProcess:
 
         method = self._train_ml_method(encoded_train)
 
-        if self.test_dataset.get_example_count() > 0:
+        if self.test_dataset is not None and self.test_dataset.get_example_count() > 0:
 
             encoded_test = self._run_encoder(self.test_dataset, False)
             performance = self._assess_ml_method(method, encoded_test, run_id)

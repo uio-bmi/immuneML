@@ -58,7 +58,7 @@ class ObjectParser:
         try:
             if "name" not in inspect.signature(cls.__init__).parameters.keys():
                 del params["name"]
-            obj = cls.build_object(**params) if builder else cls(**params)
+            obj = cls.build_object(**params) if builder and hasattr(cls, "build_object") else cls(**params)
         except TypeError as err:
             raise AssertionError(f"{location}: invalid parameter {err.args[0]} when specifying parameters in {specs} "
                                  f"under key {key}. Valid parameter names are: "

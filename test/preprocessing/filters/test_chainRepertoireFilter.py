@@ -35,7 +35,7 @@ class TestChainRepertoireFilter(TestCase):
 
         dataset = RepertoireDataset(repertoires=[rep1, rep2], metadata_file=path + "metadata.csv")
 
-        dataset2 = ChainRepertoireFilter.process(dataset, {"keep_chain": "A", "result_path": path + "results/"})
+        dataset2 = ChainRepertoireFilter.process(dataset, {"keep_chain": "ALPHA", "result_path": path + "results/"})
 
         self.assertEqual(1, len(dataset2.get_data()))
         self.assertEqual(2, len(dataset.get_data()))

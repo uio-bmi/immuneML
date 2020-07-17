@@ -1,4 +1,5 @@
 # quality: gold
+import logging
 
 import airr
 import pandas as pd
@@ -25,14 +26,18 @@ class AIRRExporter(DataExporter):
 
     @staticmethod
     def export(dataset: RepertoireDataset, path):
-        PathBuilder.build(path)
-        repertoire_path = PathBuilder.build(f"{path}repertoires/")
+        if not isinstance(dataset, RepertoireDataset):
+            logging.warning(f"AIRRExporter: dataset {dataset.name} is a {type(dataset).__name__}, but only repertoire dataset export is currently "
+                            f"supported for AIRR format.")
+        else:
+            PathBuilder.build(path)
+            repertoire_path = PathBuilder.build(f"{path}repertoires/")
 
-        for repertoire in dataset.repertoires:
-            df = AIRRExporter._repertoire_to_dataframe(repertoire)
-            airr.dump_rearrangement(df, f"{repertoire_path}{repertoire.identifier}.tsv")
+            for repertoire in dataset.repertoires:
+                df = AIRRExporter._repertoire_to_dataframe(repertoire)
+                airr.dump_rearrangement(df, f"{repertoire_path}{repertoire.identifier}.tsv")
 
-        AIRRExporter.export_updated_metadata(dataset, path)
+            AIRRExporter.export_updated_metadata(dataset, path)
 
     @staticmethod
     def export_updated_metadata(dataset: RepertoireDataset, result_path: str):
@@ -58,10 +63,10 @@ class AIRRExporter(DataExporter):
         df["sequence_id"] = df["rearrangement_id"]
 
         if "locus" in df.columns:
-            chain_conversion_dict = {Chain.A: "TRA",
-                                     Chain.B: "TRB",
-                                     Chain.H: "IGH",
-                                     Chain.L: "IGL"}
+            chain_conversion_dict = {Chain.ALPHA: "TRA",
+                                     Chain.BETA: "TRB",
+                                     Chain.HEAVY: "IGH",
+                                     Chain.LIGHT: "IGL"}
 
             df["locus"] = [chain_conversion_dict[chain] for chain in df["locus"]]
 

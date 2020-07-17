@@ -49,17 +49,17 @@ class GappedKmerInstantiation(MotifInstantiationStrategy):
             min_gap: 1
             max_gap: 2
             hamming_distance_probabilities:
-                - 0: 0.7
-                - 1: 0.3
+                0: 0.7
+                1: 0.3
             position_weights: # note that index 2, the position of the gap, is excluded from position_weights
-                - 0: 1
-                - 1: 0
-                - 3: 0
+                0: 1
+                1: 0
+                3: 0
             alphabet_weights:
-                - A: 0.2
-                - C: 0.2
-                - D: 0.4
-                - E: 0.2
+                A: 0.2
+                C: 0.2
+                D: 0.4
+                E: 0.2
 
     """
 

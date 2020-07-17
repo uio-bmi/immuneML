@@ -4,7 +4,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="immune-ml",
-    version="0.0.76",
+    version="0.0.77",
     description="immuneML is a software platform for machine learning analysis of immune receptor sequences",
     long_description=open("README.md").read(),
     author="Milena Pavlovic",
@@ -14,7 +14,7 @@ setup(
                       "matplotlib==3.1.1", "editdistance==0.5.3", "dask[complete]",
                       "regex", "tzlocal", "airr==1.2.1", "pystache==0.5.4",
                       "torch>=1.3.1", "numpy>=1.18.2", "h5py>=2.9.0", "dill>=0.3.0",
-                      "tqdm>=0.24.2", "tensorboard==1.14.0",
+                      "tqdm>=0.24.2", "tensorboard==1.14.0", "logomaker>=0.8", "plotly>=4.8.2",
                       "requests>=2.21.0", "deeprc@git+https://github.com/ml-jku/DeepRC",
                       "widis-lstm-tools@git+https://github.com/widmi/widis-lstm-tools"],
     classifiers=[

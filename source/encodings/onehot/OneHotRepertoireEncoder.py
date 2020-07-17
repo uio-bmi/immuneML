@@ -13,7 +13,6 @@ from source.encodings.onehot.OneHotEncoder import OneHotEncoder
 from source.environment.EnvironmentSettings import EnvironmentSettings
 
 
-
 class OneHotRepertoireEncoder(OneHotEncoder):
     """
     One-hot encoded repertoire data is represented in a matrix with dimensions:
@@ -55,7 +54,7 @@ class OneHotRepertoireEncoder(OneHotEncoder):
         arguments = [(repertoire, params) for repertoire in dataset.repertoires]
 
         with Pool(params["batch_size"]) as pool:
-            chunksize = math.floor(dataset.get_example_count()/params["batch_size"]) + 1
+            chunksize = math.floor(dataset.get_example_count() / params["batch_size"]) + 1
             repertoires = pool.starmap(self._get_encoded_repertoire, arguments, chunksize=chunksize)
 
         encoded_repertoires, repertoire_names, labels = zip(*repertoires)
@@ -77,7 +76,7 @@ class OneHotRepertoireEncoder(OneHotEncoder):
         return CacheHandler.memo_by_params((("encoding_model", params["model"]),
                                             ("labels", params["label_configuration"].get_labels_by_name()),
                                             ("repertoire_id", repertoire.identifier),
-                                            ("repertoire_data",  hashlib.sha256(np.ascontiguousarray(repertoire.get_sequence_aas())).hexdigest())),
+                                            ("repertoire_data", hashlib.sha256(np.ascontiguousarray(repertoire.get_sequence_aas())).hexdigest())),
                                            lambda: self._encode_repertoire(repertoire, params), CacheObjectType.ENCODING)
 
     def _encode_repertoire(self, repertoire, params: EncoderParams):

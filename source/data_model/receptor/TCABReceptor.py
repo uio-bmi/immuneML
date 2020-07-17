@@ -1,3 +1,5 @@
+from uuid import uuid4
+
 from source.data_model.receptor.Receptor import Receptor
 from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
 
@@ -9,7 +11,7 @@ class TCABReceptor(Receptor):
         self.alpha = alpha
         self.beta = beta
         self.metadata = metadata
-        self.identifier = identifier
+        self.identifier = uuid4().hex if identifier is None else identifier
 
     def get_chains(self):
         return ["alpha", "beta"]

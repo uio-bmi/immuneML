@@ -4,67 +4,23 @@ import sys
 
 import yaml
 
-from source.IO.dataset_export.PickleExporter import PickleExporter
 from source.app.ImmuneMLApp import ImmuneMLApp
-from source.data_model.dataset.RepertoireDataset import RepertoireDataset
-from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
-from source.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
-from source.data_model.repertoire.Repertoire import Repertoire
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.util.PathBuilder import PathBuilder
 
 
 class Quickstart:
 
-    def create_dataset(self, path):
-        PathBuilder.build(path)
-
-        sequences1 = [ReceptorSequence(amino_acid_sequence="AAA", metadata=SequenceMetadata(chain="B")),
-                      ReceptorSequence(amino_acid_sequence="AAAA", metadata=SequenceMetadata(chain="B")),
-                      ReceptorSequence(amino_acid_sequence="AAAAA", metadata=SequenceMetadata(chain="B")),
-                      ReceptorSequence(amino_acid_sequence="AAA", metadata=SequenceMetadata(chain="B"))]
-        sequences2 = [ReceptorSequence(amino_acid_sequence="AAA", metadata=SequenceMetadata(chain="B")),
-                      ReceptorSequence(amino_acid_sequence="AAAA", metadata=SequenceMetadata(chain="B")),
-                      ReceptorSequence(amino_acid_sequence="AAAA", metadata=SequenceMetadata(chain="B")),
-                      ReceptorSequence(amino_acid_sequence="AAA", metadata=SequenceMetadata(chain="B"))]
-        sequences3 = [ReceptorSequence(amino_acid_sequence="AAA", metadata=SequenceMetadata(chain="A")),
-                      ReceptorSequence(amino_acid_sequence="AAAA", metadata=SequenceMetadata(chain="A")),
-                      ReceptorSequence(amino_acid_sequence="AAAA", metadata=SequenceMetadata(chain="A")),
-                      ReceptorSequence(amino_acid_sequence="AAA", metadata=SequenceMetadata(chain="A"))]
-        sequences4 = [ReceptorSequence(amino_acid_sequence="AAA", metadata=SequenceMetadata(chain="A")),
-                      ReceptorSequence(amino_acid_sequence="AAAA", metadata=SequenceMetadata(chain="A")),
-                      ReceptorSequence(amino_acid_sequence="AAAAA", metadata=SequenceMetadata(chain="A")),
-                      ReceptorSequence(amino_acid_sequence="AAA", metadata=SequenceMetadata(chain="A"))]
-
-        repertoire_count = 100
-        repertoires = []
-
-        for index in range(1, repertoire_count + 1):
-            if index % 4 == 0:
-                repertoires.append(Repertoire.build_from_sequence_objects(sequences1, path, {"CD": True}))
-            elif index % 3 == 0:
-                repertoires.append(Repertoire.build_from_sequence_objects(sequences2, path, {"CD": False}))
-            elif index % 2 == 0:
-                repertoires.append(Repertoire.build_from_sequence_objects(sequences3, path, {"CD": True}))
-            else:
-                repertoires.append(Repertoire.build_from_sequence_objects(sequences4, path, {"CD": False}))
-
-        dataset = RepertoireDataset(repertoires=repertoires, params={"CD": [True, False]}, name="test_dataset")
-
-        PickleExporter.export(dataset, path)
-
-        return path + f"{dataset.name}.iml_dataset"
-
     def create_specfication(self, path):
-        dataset_path = self.create_dataset(path)
 
         specs = {
             "definitions": {
                 "datasets": {
                     "d1": {
-                        "format": "Pickle",
+                        "format": "RandomRepertoireDataset",
                         "params": {
-                            "path": dataset_path
+                            "result_path": f'{path}dataset/',
+                            "labels": {"CD": {True: 0.5, False: 0.5}}
                         }
                     }
                 },
@@ -88,18 +44,7 @@ class Quickstart:
                 },
                 "preprocessing_sequences": {
                     "seq1": [
-                        {"filter_chain_B": {
-                            "ChainRepertoireFilter": {
-                                "keep_chain": "A"
-                            }
-                        }}
-                    ],
-                    "seq2": [
-                        {"filter_chain_A": {
-                            "ChainRepertoireFilter": {
-                                "keep_chain": "B"
-                            }
-                        }}
+                        {"remove_duplicates": "DuplicateSequenceFilter"}
                     ]
                 },
                 "reports": {
@@ -120,7 +65,7 @@ class Quickstart:
                             "ml_method": "simpleLR"
                         },
                         {
-                            "preprocessing": "seq2",
+                            "preprocessing": "seq1",
                             "encoding": "e1",
                             "ml_method": "simpleLR"
                         }

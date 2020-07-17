@@ -1,5 +1,8 @@
 # quality: gold
+from typing import List
+
 from scripts.specification_util import update_docs_per_mapping
+from source.data_model.receptor.Receptor import Receptor
 from source.data_model.repertoire.Repertoire import Repertoire
 from source.simulation.implants.Motif import Motif
 from source.simulation.signal_implanting_strategy.SignalImplantingStrategy import SignalImplantingStrategy
@@ -42,9 +45,7 @@ class Signal:
 
     """
 
-    def __init__(self, identifier, motifs: list, implanting_strategy: SignalImplantingStrategy):
-        assert all([isinstance(m, Motif) for m in motifs])
-
+    def __init__(self, identifier, motifs: List[Motif], implanting_strategy: SignalImplantingStrategy):
         self.id = identifier
         self.motifs = motifs
         self.implanting_strategy = implanting_strategy
@@ -56,6 +57,10 @@ class Signal:
                                    repertoire_implanting_rate=repertoire_implanting_rate,
                                    signal=self, path=path)
         return processed_repertoire
+
+    def implant_in_receptor(self, receptor: Receptor) -> Receptor:
+        processed_receptor = self.implanting_strategy.implant_in_receptor(receptor, self)
+        return processed_receptor
 
     def __str__(self):
         return "Signal id: " + self.id + "; motifs: " + ", ".join([str(motif) for motif in self.motifs])

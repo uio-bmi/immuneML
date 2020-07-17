@@ -1,5 +1,5 @@
+import logging
 import os
-import warnings
 
 import yaml
 
@@ -46,7 +46,7 @@ class GalaxyYamlTool:
         for key in specs.keys():
             if isinstance(specs[key], str):
                 if "/" in specs[key] and specs[key] != "./":
-                    warnings.warn("Galaxy immuneML Tool: the paths in specification for Galaxy have to consist only of the filenames "
-                                  f"as uploaded to Galaxy history beforehand. The problem occurs for the parameter {key}.")
+                    logging.warning("Galaxy immuneML Tool: the paths in specification for Galaxy have to consist only of the filenames "
+                                    f"as uploaded to Galaxy history beforehand. The problem occurs for the parameter {key}.")
             elif isinstance(specs[key], dict):
                 self.check_paths(specs[key])

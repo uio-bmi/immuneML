@@ -157,7 +157,7 @@ class TestMiXCRLoader(TestCase):
         self.assertEqual(2, dataset.get_example_count())
 
         for index, repertoire in enumerate(dataset.get_data()):
-            self.assertTrue(all(sequence.metadata.chain == Chain.A for sequence in repertoire.sequences))
+            self.assertTrue(all(sequence.metadata.chain == Chain.ALPHA for sequence in repertoire.sequences))
             if index == 1:
                 self.assertTrue(repertoire.sequences[0].amino_acid_sequence == "FAVF")
                 self.assertTrue(repertoire.sequences[0].metadata.v_gene == "V29/DV5")
@@ -185,7 +185,7 @@ class TestMiXCRLoader(TestCase):
         }, "mixcr_dataset")
 
         for index, repertoire in enumerate(dataset.get_data()):
-            self.assertTrue(all(sequence.metadata.chain == Chain.A for sequence in repertoire.sequences))
+            self.assertTrue(all(sequence.metadata.chain == Chain.ALPHA for sequence in repertoire.sequences))
             if index == 1:
                 self.assertTrue(repertoire.sequences[0].amino_acid_sequence == "VFAVFA")
                 self.assertTrue(repertoire.sequences[0].metadata.v_gene == "V29/DV5")

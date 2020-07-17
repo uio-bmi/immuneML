@@ -5,6 +5,6 @@ from source.data_model.receptor.receptor_sequence.Chain import Chain
 
 class ChainPair(Enum):
 
-    A_B = sorted([Chain.A.value, Chain.B.value])
-    G_D = sorted([Chain.G.value, Chain.D.value])
-    L_H = sorted([Chain.L.value, Chain.H.value])
+    ALPHA_BETA = sorted([Chain.ALPHA.value, Chain.BETA.value])
+    GAMMA_DELTA = sorted([Chain.GAMMA.value, Chain.DELTA.value])
+    LIGHT_HEAVY = sorted([Chain.LIGHT.value, Chain.HEAVY.value])

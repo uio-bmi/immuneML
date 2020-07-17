@@ -1,6 +1,6 @@
+import logging
 import os
 import re
-import warnings
 
 import yaml
 
@@ -35,7 +35,7 @@ class DefaultParamsLoader:
                 params = yaml.load(file, Loader=yaml.FullLoader)
         else:
             if warn_if_missing:
-                warnings.warn("DefaultParams: no default parameters were found for {}. Proceeding...".format(class_name))
+                logging.warning("DefaultParams: no default parameters were found for {}. Proceeding...".format(class_name))
             params = {}
 
         return params

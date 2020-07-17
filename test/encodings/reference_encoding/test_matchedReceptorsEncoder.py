@@ -24,8 +24,8 @@ class TestMatchedReceptorsEncoder(TestCase):
         labels = {"donor": ["donor1", "donor1", "donor2", "donor2", "donor3"],
                   "label": ["yes", "yes", "no", "no", "no"]}
 
-        metadata_alpha = {"v_gene": "V1", "j_gene": "J1", "chain": Chain.A.value}
-        metadata_beta = {"v_gene": "V1", "j_gene": "J1", "chain": Chain.B.value}
+        metadata_alpha = {"v_gene": "V1", "j_gene": "J1", "chain": Chain.ALPHA.value}
+        metadata_beta = {"v_gene": "V1", "j_gene": "J1", "chain": Chain.BETA.value}
 
         repertoires, metadata = RepertoireBuilder.build(sequences=[["AAAA"],
                                                                    ["SSSS"],

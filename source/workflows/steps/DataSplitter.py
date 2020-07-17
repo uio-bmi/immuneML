@@ -78,7 +78,11 @@ class DataSplitter(Step):
             train_dataset = DataSplitter.make_dataset(dataset, train_index, input_params, i, Dataset.TRAIN)
             train_datasets.append(train_dataset)
 
-            test_dataset = DataSplitter.make_dataset(dataset, test_index, input_params, i, Dataset.TEST)
+            if training_percentage < 1.0:
+                test_dataset = DataSplitter.make_dataset(dataset, test_index, input_params, i, Dataset.TEST)
+            else:
+                test_dataset = None
+
             test_datasets.append(test_dataset)
 
         return train_datasets, test_datasets

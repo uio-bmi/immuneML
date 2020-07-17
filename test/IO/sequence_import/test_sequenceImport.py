@@ -37,7 +37,7 @@ class TestSequenceImport(TestCase):
         self.assertEqual("CASSYVGNTGELFF", sequences[0].get_sequence())
         self.assertEqual("J2-2*01", sequences[3].metadata.j_gene)
         self.assertEqual("V6-5*01", sequences[3].metadata.v_gene)
-        self.assertTrue(all([sequence.metadata.chain == Chain.B for sequence in sequences]))
+        self.assertTrue(all([sequence.metadata.chain == Chain.BETA for sequence in sequences]))
 
         shutil.rmtree(path)
 
@@ -61,12 +61,12 @@ class TestSequenceImport(TestCase):
         self.assertTrue(receptor.identifier in ["3050", "15760"] for receptor in receptors)
         self.assertNotEqual(receptors[0].identifier, receptors[1].identifier)
         self.assertEqual("CASSPPRVYSNGAGLAGVGWRNEQFF",
-                         [receptor for receptor in receptors if receptor.identifier == 3050][0].beta.amino_acid_sequence)
+                         [receptor for receptor in receptors if receptor.identifier == "3050"][0].beta.amino_acid_sequence)
         self.assertEqual("CALRLNNQGGKLIF",
-                         [receptor for receptor in receptors if receptor.identifier == 15760][0].alpha.amino_acid_sequence)
+                         [receptor for receptor in receptors if receptor.identifier == "15760"][0].alpha.amino_acid_sequence)
         self.assertEqual("J2-1*01",
-                         [receptor for receptor in receptors if receptor.identifier == 3050][0].beta.metadata.j_gene)
+                         [receptor for receptor in receptors if receptor.identifier == "3050"][0].beta.metadata.j_gene)
         self.assertEqual("V9-2*01",
-                         [receptor for receptor in receptors if receptor.identifier == 15760][0].alpha.metadata.v_gene)
+                         [receptor for receptor in receptors if receptor.identifier == "15760"][0].alpha.metadata.v_gene)
 
         shutil.rmtree(path)

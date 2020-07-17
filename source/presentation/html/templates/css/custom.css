@@ -343,3 +343,8 @@ embed {
         box-shadow: none;
     }
 }
+
+code {
+    max-width: 100%;
+    white-space: pre-wrap;
+}

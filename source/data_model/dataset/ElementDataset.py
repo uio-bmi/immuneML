@@ -1,4 +1,4 @@
-import uuid
+from uuid import uuid4
 
 from source.data_model.dataset.Dataset import Dataset
 from source.data_model.encoded_data.EncodedData import EncodedData
@@ -7,12 +7,15 @@ from source.data_model.receptor.ElementGenerator import ElementGenerator
 
 class ElementDataset(Dataset):
 
+    def clone(self):
+        raise NotImplementedError
+
     def __init__(self, params: dict = None, encoded_data: EncodedData = None, filenames: list = None, identifier: str = None,
                  file_size: int = 1000, name: str = None):
         super().__init__()
         self.params = params
         self.encoded_data = encoded_data
-        self.identifier = identifier if identifier is not None else uuid.uuid1()
+        self.identifier = identifier if identifier is not None else uuid4().hex
         self._filenames = sorted(filenames) if filenames is not None else []
         self.element_generator = ElementGenerator(self._filenames, file_size)
         self.file_size = file_size

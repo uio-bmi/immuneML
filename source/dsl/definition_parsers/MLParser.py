@@ -31,9 +31,7 @@ class MLParser:
 
         ml_method_class_name = [key for key in ml_specification.keys() if key not in ["model_selection_cv", "model_selection_n_folds"]][0]
 
-        classes = ReflectionHandler.get_classes_by_partial_name("", "ml_methods/")
-        valid_classes = ReflectionHandler.all_nonabstract_subclasses(MLMethod)
-        valid_values = [cls.__name__ for cls in valid_classes]
+        valid_values = ReflectionHandler.all_nonabstract_subclass_basic_names(MLMethod, "", "ml_methods/")
         ParameterValidator.assert_in_valid_list(ml_method_class_name, valid_values, "MLParser", f"ML method under {ml_method_id}")
 
         ml_method_class = ReflectionHandler.get_class_from_path("{}/../../source/ml_methods/{}.py".format(EnvironmentSettings.root_path,
@@ -57,13 +55,13 @@ class MLParser:
             ml_method = ml_method_class()
         else:
             ml_params = ml_specification[ml_method_class.__name__]
-            if any([isinstance(ml_params[key], list) for key in ml_params.keys()]):
+            init_method_keys = inspect.signature(ml_method_class.__init__).parameters.keys()
+            if any([isinstance(ml_params[key], list) for key in ml_params.keys()]) and "parameter_grid" in init_method_keys:
 
                 ml_method = ml_method_class(parameter_grid={key: [ml_params[key]]
                                                             if not isinstance(ml_params[key], list) else ml_params[key]
                                                             for key in ml_params.keys()})
-            elif len(inspect.signature(ml_method_class.__init__).parameters.keys()) == 3 and \
-                    all(arg in inspect.signature(ml_method_class.__init__).parameters.keys() for arg in ["parameters", "parameter_grid"]):
+            elif len(init_method_keys) == 3 and all(arg in init_method_keys for arg in ["parameters", "parameter_grid"]):
                 ml_method = ml_method_class(parameters=ml_params)
             else:
                 ml_method = ml_method_class(**ml_params)

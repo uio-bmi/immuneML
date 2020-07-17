@@ -86,7 +86,7 @@ class SequencingDepthOverview(DataReport):
 
         return data
 
-    def _plot(self, data) -> ReportResult:
+    def _plot(self, data) -> ReportOutput:
 
         pandas2ri.activate()
 
@@ -110,7 +110,7 @@ class SequencingDepthOverview(DataReport):
                                             width=self.width,
                                             result_path=self.result_path,
                                             result_name=self.result_name)
-        return ReportOutput(f"{self.result_path}{self.result_name}.pdf")
+        return ReportOutput(path=f"{self.result_path}{self.result_name}.pdf")
 
     def _compute_repertoire(self, repertoire):
         result = []

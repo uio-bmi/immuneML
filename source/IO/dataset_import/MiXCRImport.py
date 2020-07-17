@@ -97,7 +97,7 @@ class MiXCRImport(DataImport):
 
     @staticmethod
     def _load_chains(df: pd.DataFrame, column_name):
-        tmp_df = df.apply(lambda row: Chain[[x for x in [chain.value for chain in Chain] if x in row[column_name]][0]]
+        tmp_df = df.apply(lambda row: Chain.get_chain([x for x in [chain.value for chain in Chain] if x in row[column_name]][0])
                           if len([x for x in [chain.value for chain in Chain] if x in row[column_name]]) > 0 else None, axis=1)
         return tmp_df
 

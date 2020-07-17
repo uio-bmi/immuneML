@@ -59,7 +59,7 @@ class Repertoire(DatasetItem):
     @classmethod
     def build(cls, sequence_aas: list = None, sequences: list = None, v_genes: list = None, j_genes: list = None,
               chains: list = None, counts: list = None, region_types: list = None, frame_types: list = None,
-              custom_lists: dict = None, sequence_identifiers: list = None, path: str = None, metadata=dict(),
+              custom_lists: dict = None, sequence_identifiers: list = None, path: str = None, metadata: dict = None,
               signals: dict = None, cell_ids: list = None):
 
         sequence_count = Repertoire.check_count(sequence_aas, sequences, custom_lists)
@@ -93,6 +93,7 @@ class Repertoire(DatasetItem):
         np.save(data_filename, repertoire_matrix)
 
         metadata_filename = f"{path}{identifier}_metadata.pickle"
+        metadata = {} if metadata is None else metadata
         metadata["field_list"] = field_list
         with open(metadata_filename, "wb") as file:
             pickle.dump(metadata, file)

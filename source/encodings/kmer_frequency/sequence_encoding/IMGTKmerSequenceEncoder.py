@@ -1,4 +1,4 @@
-import warnings
+import logging
 
 from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.data_model.receptor.receptor_sequence.SequenceFrameType import SequenceFrameType
@@ -23,11 +23,11 @@ class IMGTKmerSequenceEncoder(SequenceEncodingStrategy):
         length = len(sequence.get_sequence())
 
         if sequence.metadata is not None and sequence.metadata.frame_type.upper() != SequenceFrameType.IN.name:
-            warnings.warn('Sequence either has out or stop codon. Ignoring sequence.')
+            logging.warning('Sequence either has out or stop codon. Ignoring sequence.')
             return None
 
         if length < k:
-            warnings.warn('Sequence length is less than k. Ignoring sequence')
+            logging.warning('Sequence length is less than k. Ignoring sequence')
             return None
 
         kmers = KmerHelper.create_IMGT_kmers_from_sequence(sequence, k)

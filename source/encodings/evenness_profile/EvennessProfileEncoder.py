@@ -1,7 +1,7 @@
 import abc
 
-import pandas as pd
 import numpy as np
+import pandas as pd
 from scipy import sparse
 
 from source.IO.dataset_export.PickleExporter import PickleExporter
@@ -18,6 +18,7 @@ class EvennessProfileEncoder(DatasetEncoder):
     a given repertoire is defined as follows:
 
     .. math::
+
         ^{\alpha} \mathrm{E}(\mathrm{f})=\frac{\left(\sum_{\mathrm{i}=1}^{\mathrm{n}} \mathrm{f}_{\mathrm{i}}^{\alpha}\right)^{\frac{1}{1-\alpha}}}{\mathrm{n}}
 
     That is, it is the exponential of Renyi entropy at a given alpha divided by the species richness, or number of unique

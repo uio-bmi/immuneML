@@ -46,9 +46,16 @@ class Implanting:
                 dataset_implanting_rate: 0.2
                 repertoire_implanting_rate: 0.75
 
+        # in case of defining implanting for paired chain immune receptor data the simulation with implanting objects would be:
+        my_receptor_simulation:
+            my_receptor_implanting_1: # repertoire_implanting_rate is omitted in this case, as it is not applicable
+                signals:
+                    - my_receptor_signal
+                dataset_implanting_rate: 0.4 # 40% of the receptors will have signal my_receptor_signal implanted and 60% will not
+
     """
 
-    def __init__(self, dataset_implanting_rate: float, repertoire_implanting_rate: float, signals: List[Signal], name: str = ""):
+    def __init__(self, dataset_implanting_rate: float, signals: List[Signal], name: str = "", repertoire_implanting_rate: float = None):
         self.dataset_implanting_rate = dataset_implanting_rate
         self.repertoire_implanting_rate = repertoire_implanting_rate
         self.signals = signals

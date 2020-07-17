@@ -27,7 +27,7 @@ class VDJdbSequenceImport:
     @staticmethod
     def import_paired_sequences(path) -> ReceptorList:
         columns = VDJdbSequenceImport.COLUMNS + list(VDJdbSequenceImport.CUSTOM_COLUMNS.keys())
-        df = pd.read_csv(path, sep="\t", usecols=columns)
+        df = pd.read_csv(path, sep="\t", usecols=columns, dtype=str)
         identifiers = df["complex.id"].unique()
         receptors = ReceptorList()
 
@@ -48,7 +48,7 @@ class VDJdbSequenceImport:
         return TCABReceptor(alpha=alpha,
                             beta=beta,
                             identifier=identifier,
-                            metadata=beta.metadata.custom_params)
+                            metadata={**beta.metadata.custom_params})
 
     @staticmethod
     def import_all_sequences(path) -> ReceptorSequenceList:
@@ -59,9 +59,9 @@ class VDJdbSequenceImport:
 
     @staticmethod
     def import_sequence(row):
-        metadata = SequenceMetadata(v_gene=row["V"][3:] if "V" in row else None,  # remove TRB/A from gene name
-                                    j_gene=row["J"][3:] if "J" in row else None,  # remove TRB/A from gene name
-                                    chain=row["Gene"][-1] if "Gene" in row else None,
+        metadata = SequenceMetadata(v_gene=str(row["V"])[3:] if "V" in row else None,  # remove TRB/A from gene name
+                                    j_gene=str(row["J"])[3:] if "J" in row else None,  # remove TRB/A from gene name
+                                    chain=str(row["Gene"])[-1] if "Gene" in row else None,
                                     region_type="CDR3",
                                     custom_params={VDJdbSequenceImport.CUSTOM_COLUMNS[key]: row[key]
                                                    for key in VDJdbSequenceImport.CUSTOM_COLUMNS})

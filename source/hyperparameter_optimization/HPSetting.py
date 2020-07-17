@@ -19,7 +19,10 @@ class HPSetting:
         self.preproc_sequence_name = preproc_sequence_name
 
     def get_key(self):
-        return f"{self.encoder_name}_{self.ml_method_name}_{self.preproc_sequence_name}"
+        key = f"{self.encoder_name}_{self.ml_method_name}"
+        if self.preproc_sequence is not None and self.preproc_sequence_name is not None:
+            key += f"_{self.preproc_sequence_name}"
+        return key
 
     def __str__(self):
         return self.get_key()

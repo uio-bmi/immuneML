@@ -41,11 +41,12 @@ class HPUtil:
 
     @staticmethod
     def preprocess_dataset(dataset: Dataset, preproc_sequence: list, path: str) -> Dataset:
-        PathBuilder.build(path)
-        tmp_dataset = dataset.clone()
-        for preprocessing in preproc_sequence:
-            tmp_dataset = preprocessing.process_dataset(tmp_dataset, path)
-        return tmp_dataset
+        if dataset is not None:
+            PathBuilder.build(path)
+            tmp_dataset = dataset.clone()
+            for preprocessing in preproc_sequence:
+                tmp_dataset = preprocessing.process_dataset(tmp_dataset, path)
+            return tmp_dataset
 
     @staticmethod
     def train_method(label: str, dataset, hp_setting: HPSetting, path: str, train_predictions_path, ml_details_path) -> MLMethod:

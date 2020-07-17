@@ -29,7 +29,3 @@ class TestDefaultParamsLoader(TestCase):
         self.assertEqual(2, len(loaded.keys()))
 
         shutil.rmtree(path)
-
-        with self.assertWarns(Warning):
-            loaded = DefaultParamsLoader.load(path, "MiXCR")
-        self.assertEqual(0, len(loaded.keys()))

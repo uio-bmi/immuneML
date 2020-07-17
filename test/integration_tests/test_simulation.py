@@ -6,6 +6,7 @@ import pandas as pd
 import yaml
 
 from source.IO.dataset_export.PickleExporter import PickleExporter
+from source.IO.dataset_import.PickleImport import PickleImport
 from source.app.ImmuneMLApp import ImmuneMLApp
 from source.caching.CacheType import CacheType
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
@@ -129,4 +130,87 @@ class TestSimulation(TestCase):
         self.assertTrue(os.path.isfile(result_path))
         self.assertTrue(os.path.isfile(path + "result/exported_dataset/pickle/d1.iml_dataset"))
 
-        shutil.rmtree(path, ignore_errors=True)
+        shutil.rmtree(path)
+
+    def test_simulation_receptors(self):
+        path = PathBuilder.build(EnvironmentSettings.tmp_test_path + "integration_simulation_receptor/")
+        specs = {
+            "definitions": {
+                "datasets": {
+                    "d1": {
+                        "format": "RandomReceptorDataset",
+                        "params": {
+                            "receptor_count": 100,
+                            "chain_1_length_probabilities": {10: 1},
+                            "chain_2_length_probabilities": {10: 1},
+                            "result_path": path + "dataset/",
+                            "labels": {}
+                        }
+                    },
+                },
+                "motifs": {
+                    "motif1": {
+                        "seed_chain1": "CC/C",
+                        "name_chain1": "ALPHA",
+                        "name_chain2": "BETA",
+                        "seed_chain2": "F/FF",
+                        "instantiation": {
+                            "GappedKmer": {
+                                "max_gap": 1,
+                                "alphabet_weights": None,
+                                "position_weights": None
+                            },
+                        }
+                    },
+                    "motif2": {
+                        "seed_chain1": "CCC",
+                        "name_chain1": "ALPHA",
+                        "name_chain2": "BETA",
+                        "seed_chain2": "FFF",
+                        "instantiation": "GappedKmer"
+                    }
+                },
+                "signals": {
+                    "signal1": {
+                        "motifs": ["motif1", "motif2"],
+                        "implanting": "Receptor",
+                        "sequence_position_weights": None
+                    }
+                },
+                "simulations": {
+                    "sim1": {
+                        "var1": {
+                            "signals": ["signal1"],
+                            "dataset_implanting_rate": 0.5
+                        }
+                    }
+                }
+            },
+            "instructions": {
+                "inst1": {
+                    "type": "Simulation",
+                    "dataset": "d1",
+                    "batch_size": 5,
+                    "simulation": "sim1",
+                    "export_formats": ["Pickle"]
+                }
+            },
+            "output": {
+                "format": "HTML"
+            }
+        }
+
+        with open(path + "specs.yaml", "w") as file:
+            yaml.dump(specs, file)
+
+        app = ImmuneMLApp(path + "specs.yaml", path + "result/")
+        result_path = app.run()
+
+        self.assertTrue(os.path.isfile(result_path))
+        self.assertTrue(os.path.isfile(path + "result/exported_dataset/pickle/d1.iml_dataset"))
+        dataset = PickleImport.import_dataset({"path": path + "result/exported_dataset/pickle/d1.iml_dataset"}, "d1")
+
+        self.assertEqual(100, dataset.get_example_count())
+        self.assertEqual(100, len([receptor for receptor in dataset.get_data() if "signal_signal1" in receptor.metadata]))
+
+        shutil.rmtree(path)

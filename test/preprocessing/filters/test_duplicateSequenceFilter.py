@@ -27,11 +27,12 @@ class TestDuplicateSequenceFilter(TestCase):
                                                                   sequences=["ntAAA", "ntBBB", "ntCCC", "ntAAA", "ntCCC", "ntCCC", "ntDDD"],
                                                                   v_genes=["v1", "v1", "v1", "v1", "v1", "v1", "v1"],
                                                                   j_genes=["j1", "j1", "j1", "j1", "j1", "j1", "j1"],
-                                                                  chains=[Chain.A, Chain.A, Chain.A, Chain.A, Chain.A, Chain.A, Chain.B],
+                                                                  chains=[Chain.ALPHA, Chain.ALPHA, Chain.ALPHA, Chain.ALPHA, Chain.ALPHA,
+                                                                          Chain.ALPHA, Chain.BETA],
                                                                   counts=[10, 20, 30, 5, 20, None, 40],
                                                                   region_types=["CDR3", "CDR3", "CDR3", "CDR3", "CDR3", "CDR3", "CDR3"],
                                                                   custom_lists={"custom1": ["yes", "yes", "yes", "no", "no", "no", "no"],
-                                                                                        "custom2": ["yes", "yes", "yes", "no", "no", "no", "no"]},
+                                                                                "custom2": ["yes", "yes", "yes", "no", "no", "no", "no"]},
                                                                   sequence_identifiers=[1, 2, 3, 4, 5, 6, 7],
                                                                   path=path)])
 
@@ -50,7 +51,6 @@ class TestDuplicateSequenceFilter(TestCase):
         self.assertListEqual([1, 3, 7], list(attr["sequence_identifiers"]))
         self.assertListEqual([Chain("A"), Chain("A"), Chain("B")], list(attr["chains"]))
 
-
         # collapse by nucleotides & use min counts
         dupfilter = DuplicateSequenceFilter(filter_sequence_type=SequenceType.NUCLEOTIDE,
                                             count_agg=CountAggregationFunction.MIN, batch_size=4)
@@ -64,6 +64,5 @@ class TestDuplicateSequenceFilter(TestCase):
         self.assertListEqual(["AAA", "AAA", "CCC", "CCC"], list(attr["sequence_aas"]))
         self.assertListEqual(["ntAAA", "ntBBB", "ntCCC", "ntDDD"], list(attr["sequences"]))
         self.assertListEqual([5, 20, 20, 40], list(attr["counts"]))
-
 
         shutil.rmtree(path)

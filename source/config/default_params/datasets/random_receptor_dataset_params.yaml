@@ -1,0 +1,12 @@
+receptor_count: 1000
+chain_1_length_probabilities:
+  10: 0.3
+  13: 0.3
+  14: 0.3
+  17: 0.1
+chain_2_length_probabilities:
+  8: 0.1
+  12: 0.3
+  13: 0.4
+  15: 0.2
+labels: {}

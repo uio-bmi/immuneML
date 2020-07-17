@@ -1,3 +1,5 @@
+import copy
+
 from source.dsl.symbol_table.SymbolTable import SymbolTable
 from source.dsl.symbol_table.SymbolType import SymbolType
 from source.logging.Logger import log
@@ -84,14 +86,14 @@ class SimulationParser:
 
         for impl_key, implanting in simulation.items():
 
-            ParameterValidator.assert_keys(implanting.keys(), valid_implanting_keys, location, impl_key)
+            ParameterValidator.assert_keys(implanting.keys(), valid_implanting_keys, location, impl_key, exclusive=False)
             ParameterValidator.assert_keys(implanting["signals"], symbol_table.get_keys_by_type(SymbolType.SIGNAL), location, impl_key, False)
 
-            implantings.append(Implanting(
-                dataset_implanting_rate=implanting["dataset_implanting_rate"],
-                repertoire_implanting_rate=implanting["repertoire_implanting_rate"],
-                signals=[symbol_table.get(signal) for signal in implanting["signals"]],
-                name=impl_key))
+            implanting_params = copy.deepcopy(implanting)
+            implanting_params["signals"] = [symbol_table.get(signal) for signal in implanting["signals"]]
+            implanting_params["name"] = impl_key
+
+            implantings.append(Implanting(**implanting_params))
 
         assert sum([settings["dataset_implanting_rate"] for settings in simulation.values()]) <= 1, \
             "The total dataset implanting rate can not exceed 1."

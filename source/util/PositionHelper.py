@@ -1,5 +1,5 @@
+import logging
 import math
-import warnings
 
 from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
 
@@ -57,7 +57,6 @@ class PositionHelper:
             valid_position_count = len(imgt_positions) - limit
             position_weights = {imgt_positions[i]: 1.0 / valid_position_count if i < valid_position_count else 0
                                 for i in range(len(imgt_positions))}
-            warnings.warn('Position weights are not defined. '
-                          'Randomly choosing position to implant motif_instance instead.', Warning)
+            logging.warning('Position weights are not defined. Randomly choosing position to implant motif_instance instead.')
 
         return position_weights

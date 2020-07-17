@@ -9,6 +9,7 @@ import pandas as pd
 from source.IO.dataset_import.DataImport import DataImport
 from source.IO.dataset_import.DatasetImportParams import DatasetImportParams
 from source.data_model.dataset.Dataset import Dataset
+from source.data_model.dataset.ElementDataset import ElementDataset
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.environment.Constants import Constants
 
@@ -45,6 +46,8 @@ class PickleImport(DataImport):
 
         if isinstance(dataset, RepertoireDataset):
             dataset = PickleImport._update_repertoire_paths(pickle_params, dataset)
+        else:
+            dataset = PickleImport._update_receptor_paths(pickle_params, dataset)
 
         return dataset
 
@@ -82,11 +85,30 @@ class PickleImport(DataImport):
         return dataset
 
     @staticmethod
-    def _discover_repertoire_path(pickle_params, dataset):
+    def _discover_dataset_dir(pickle_params):
         dataset_dir = os.path.dirname(pickle_params.path)
 
         if dataset_dir != "":
             dataset_dir = dataset_dir + "/"
+
+        return dataset_dir
+
+    @staticmethod
+    def _update_receptor_paths(pickle_params, dataset: ElementDataset):
+        dataset_dir = PickleImport._discover_dataset_dir(pickle_params)
+
+        if len(list(glob(f"{dataset_dir}*.pickle"))) == len(dataset.get_filenames()):
+            path = dataset_dir
+            new_filenames = []
+            for file in dataset.get_filenames():
+                new_filenames.append(f"{path}{os.path.basename(file)}")
+            dataset.set_filenames(new_filenames)
+
+        return dataset
+
+    @staticmethod
+    def _discover_repertoire_path(pickle_params, dataset):
+        dataset_dir = PickleImport._discover_dataset_dir(pickle_params)
 
         if len(list(glob(f"{dataset_dir}*.npy"))) == len(dataset.repertoires):
             path = dataset_dir

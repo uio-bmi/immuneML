@@ -4,23 +4,10 @@ from unittest import TestCase
 
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.logging.LogLevel import LogLevel
-from source.logging.Logger import log, trace
+from source.logging.Logger import trace
 
 
 class TestLog(TestCase):
-    def test_log(self):
-        @log
-        def fn(x, y):
-            return x, y
-
-        output = io.StringIO()
-        stdout = sys.stdout
-        sys.stdout = output
-        fn(1, 2)
-        sys.stdout = stdout
-        out_text = str(output.getvalue())
-        self.assertTrue("Entering: fn with parameters (1, 2)" in out_text)
-        self.assertTrue("Exiting: fn" in out_text)
 
     def test_trace(self):
         @trace

@@ -32,7 +32,7 @@ class ChainRepertoireFilter(Filter):
 
     def process_dataset(self, dataset: RepertoireDataset, result_path: str = None):
         return ChainRepertoireFilter.process(dataset=dataset, params={"keep_chain": self.keep_chain,
-                                                                   "result_path": result_path})
+                                                                      "result_path": result_path})
 
     @staticmethod
     def process(dataset: RepertoireDataset, params: dict) -> RepertoireDataset:
@@ -41,7 +41,7 @@ class ChainRepertoireFilter(Filter):
         repertoires = []
         indices = []
         for index, repertoire in enumerate(dataset.get_data()):
-            if all(sequence.metadata.chain == Chain[params["keep_chain"].upper()] for sequence in repertoire.sequences):
+            if all(sequence.metadata.chain == Chain.get_chain(params["keep_chain"]) for sequence in repertoire.sequences):
                 repertoires.append(repertoire)
                 indices.append(index)
 

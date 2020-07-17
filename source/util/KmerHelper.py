@@ -25,9 +25,7 @@ class KmerHelper:
         positions = PositionHelper.gen_imgt_positions_from_length(len(sequence.get_sequence()))
         sequence_w_pos = list(zip(list(sequence.get_sequence()), positions))
         kmers = KmerHelper.create_kmers_from_string(sequence_w_pos, k)
-        kmers = [(''.join([x[0] for x in kmer]), min([i[1] for i in kmer])
-                 if int(min([i[1] for i in kmer])) is not 112
-                 else max([i[1] for i in kmer if int(i[1]) is 112]))
+        kmers = [(''.join([x[0] for x in kmer]), min([i[1] for i in kmer]) if int(min([i[1] for i in kmer])) != 112 else max([i[1] for i in kmer if int(i[1]) == 112]))
                  for kmer in kmers]
         return kmers
 
@@ -36,13 +34,13 @@ class KmerHelper:
         positions = PositionHelper.gen_imgt_positions_from_length(len(sequence.get_sequence()))
         sequence_w_pos = list(zip(list(sequence.get_sequence()), positions))
         kmers = KmerHelper.create_gapped_kmers_from_string(sequence_w_pos, k_left=k_left, max_gap=max_gap,
-                                                               k_right=k_right, min_gap=min_gap)
+                                                           k_right=k_right, min_gap=min_gap)
         if kmers is not None:
             kmers = [(''.join([x[0] if isinstance(x, tuple) else x for x in kmer]),
                       min([i[1] if isinstance(i, tuple) else 1000 for i in kmer])
-                      if int(min([i[1] if isinstance(i, tuple) else 1000 for i in kmer])) is not 112
+                      if int(min([i[1] if isinstance(i, tuple) else 1000 for i in kmer])) != 112
                       else max([i[1] if isinstance(i, tuple) else 0 for i in kmer if
-                                int(i[1] if isinstance(i, tuple) else 0) is 112]))
+                                int(i[1] if isinstance(i, tuple) else 0) == 112]))
                      for kmer in kmers]
             return kmers
         else:
@@ -102,7 +100,7 @@ class KmerHelper:
 
         for i in range(len(kmer)):
             for letter in alphabet:
-                new_kmer = kmer[0:i] + letter + kmer[i+1:]
+                new_kmer = kmer[0:i] + letter + kmer[i + 1:]
                 pairs.append([kmer, new_kmer])
 
         return pairs
