@@ -33,25 +33,26 @@ class Implanting:
     .. indent with spaces
     .. code-block:: yaml
 
-        # one simulation with multiple implanting objects, a part of definition section
-        my_simulation:
-            my_implanting_1:
-                signals:
-                    - my_signal
-                dataset_implanting_rate: 0.5
-                repertoire_implanting_rate: 0.25
-            my_implanting_2:
-                signals:
-                    - my_signal
-                dataset_implanting_rate: 0.2
-                repertoire_implanting_rate: 0.75
+        simulations: # definitions of simulations should be under key simulations in the definitions part of the specification
+            # one simulation with multiple implanting objects, a part of definition section
+            my_simulation:
+                my_implanting_1:
+                    signals:
+                        - my_signal
+                    dataset_implanting_rate: 0.5
+                    repertoire_implanting_rate: 0.25
+                my_implanting_2:
+                    signals:
+                        - my_signal
+                    dataset_implanting_rate: 0.2
+                    repertoire_implanting_rate: 0.75
 
-        # in case of defining implanting for paired chain immune receptor data the simulation with implanting objects would be:
-        my_receptor_simulation:
-            my_receptor_implanting_1: # repertoire_implanting_rate is omitted in this case, as it is not applicable
-                signals:
-                    - my_receptor_signal
-                dataset_implanting_rate: 0.4 # 40% of the receptors will have signal my_receptor_signal implanted and 60% will not
+            # in case of defining implanting for paired chain immune receptor data the simulation with implanting objects would be:
+            my_receptor_simulation:
+                my_receptor_implanting_1: # repertoire_implanting_rate is omitted in this case, as it is not applicable
+                    signals:
+                        - my_receptor_signal
+                    dataset_implanting_rate: 0.4 # 40% of the receptors will have signal my_receptor_signal implanted and 60% will not
 
     """
 
