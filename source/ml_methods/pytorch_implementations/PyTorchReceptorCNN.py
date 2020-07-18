@@ -7,10 +7,10 @@ from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.environment.SequenceType import SequenceType
 
 
-class ReceptorCNN(nn.Module):
+class PyTorchReceptorCNN(nn.Module):
 
     def __init__(self, kernel_count: int, kernel_size, positional_channels: int, sequence_type: SequenceType, background_probabilities):
-        super(ReceptorCNN, self).__init__()
+        super(PyTorchReceptorCNN, self).__init__()
         self.background_probabilities = background_probabilities
         self.threshold = 0.1
         self.pseudocount = 0.05

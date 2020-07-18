@@ -12,7 +12,7 @@ from source.data_model.encoded_data.EncodedData import EncodedData
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.environment.SequenceType import SequenceType
 from source.ml_methods.MLMethod import MLMethod
-from source.ml_methods.pytorch_implementations.ReceptorCNN import ReceptorCNN as RCNN
+from source.ml_methods.pytorch_implementations.PyTorchReceptorCNN import PyTorchReceptorCNN as RCNN
 from source.ml_methods.util.Util import Util
 from source.util.PathBuilder import PathBuilder
 
