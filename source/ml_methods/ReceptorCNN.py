@@ -143,13 +143,12 @@ class ReceptorCNN(MLMethod):
         iteration = 0
         loss_function = nn.BCEWithLogitsLoss().to(device=self.device)
         optimizer = torch.optim.Adam(self.CNN.parameters(), lr=self.learning_rate, weight_decay=self.l2_weight_decay, eps=1e-4)
-        state = dict(model=self.CNN, optimizer=optimizer, iteration=iteration, best_validation_loss=np.inf)
+        state = dict(model=copy.deepcopy(self.CNN).state_dict(), optimizer=optimizer, iteration=iteration, best_validation_loss=np.inf)
         train_data, validation_data = self._prepare_and_split_data(encoded_data)
 
         logging.info("ReceptorCNN: starting training.")
         while iteration < self.iteration_count:
             for examples, labels, example_ids in self._get_data_batch(train_data, label_names[0]):
-                logging.info(f"ReceptorCNN: training - iteration {iteration}.")
 
                 # Reset gradients
                 optimizer.zero_grad()
@@ -170,9 +169,11 @@ class ReceptorCNN(MLMethod):
 
                 # Calculate scores and loss on training set and validation set
                 if iteration % self.evaluate_at == 0 or iteration == self.iteration_count or iteration == 1:
+                    logging.info(f"ReceptorCNN: training - iteration {iteration}.")
                     state = self._evaluate_state(state, iteration, loss_function, validation_data)
 
                 if iteration >= self.iteration_count:
+                    self.CNN.load_state_dict(state["model"])
                     break
 
         logging.info("ReceptorCNN: finished training.")
@@ -218,9 +219,11 @@ class ReceptorCNN(MLMethod):
 
     def _evaluate_state(self, state, iteration, loss_function, validation_data):
         loss = self._evaluate(loss_function, validation_data)
+        logging.info(f"ReceptorCNN: current validation loss: {loss}")
+
         if loss < state["best_validation_loss"]:
             del state["model"]  # remove old model
-            state["model"] = copy.deepcopy(self.CNN.state_dict())  # save new model to RAM
+            state["model"] = copy.deepcopy(self.CNN).state_dict()  # save new model to RAM
             state["iteration"] = iteration
             state["best_validation_loss"] = loss
             logging.info(f"ReceptorCNN: new best validation loss: {loss}")
@@ -247,9 +250,9 @@ class ReceptorCNN(MLMethod):
     def store(self, path, feature_names=None, details_path=None):
         PathBuilder.build(path)
 
-        torch.save(self.CNN.state_dict(), path + "CNN.pt")
+        torch.save(copy.deepcopy(self.CNN).state_dict(), path + "CNN.pt")
 
-        custom_vars = copy.copy(vars(self))
+        custom_vars = copy.deepcopy(vars(self))
         del custom_vars["CNN"]
         del custom_vars["result_path"]
 
@@ -290,6 +293,6 @@ class ReceptorCNN(MLMethod):
             return self.class_mapping.values()
 
     def get_params(self, label):
-        params = vars(self)
-        params["CNN"] = self.CNN.state_dict()
+        params = copy.deepcopy(vars(self))
+        params["CNN"] = copy.deepcopy(self.CNN).state_dict()
         return params

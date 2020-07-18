@@ -1,4 +1,5 @@
 import argparse
+import logging
 import os
 import shutil
 import sys
@@ -38,6 +39,9 @@ class ImmuneMLApp:
     def run(self):
 
         self.set_cache()
+
+        logger = logging.getLogger()
+        logger.setLevel('INFO')
 
         symbol_table, self._specification_path = ImmuneMLParser.parse_yaml_file(self._specification_path,
                                                                                 self._result_path)

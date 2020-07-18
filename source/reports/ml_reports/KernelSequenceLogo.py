@@ -1,6 +1,7 @@
 import logging
 
 import logomaker
+import matplotlib.pyplot as plt
 import pandas as pd
 
 from source.environment.EnvironmentSettings import EnvironmentSettings
@@ -65,6 +66,7 @@ class KernelSequenceLogo(MLReport):
             logo.style_xticks(fmt='%d', anchor=0)
 
             logo.fig.savefig(logo_path)
+            plt.close(logo.fig)
             figure_outputs.append(ReportOutput(logo_path, kernel_name + f"_{i+1}"))
 
         return figure_outputs, table_outputs
