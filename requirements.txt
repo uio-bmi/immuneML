@@ -17,5 +17,7 @@ dill>=0.3.0
 tqdm>=0.24.2
 tensorboard==1.14.0
 requests>=2.21.0
+plotly>=4.8.2
+logomaker>=0.8
 git+https://github.com/ml-jku/DeepRC
 git+https://github.com/widmi/widis-lstm-tools
