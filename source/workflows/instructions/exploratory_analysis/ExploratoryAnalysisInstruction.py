@@ -57,10 +57,11 @@ class ExploratoryAnalysisInstruction(Instruction):
 
     def run(self, result_path: str):
         self.state.result_path = result_path + f"{self.name}/"
-        PathBuilder.build(self.state.result_path)
         for index, (key, unit) in enumerate(self.state.exploratory_analysis_units.items()):
             print("Started analysis {}/{}.".format(index+1, len(self.state.exploratory_analysis_units)))
-            report_result = self.run_unit(unit, self.state.result_path + "analysis_{}/".format(key))
+            path = self.state.result_path + "analysis_{}/".format(key)
+            PathBuilder.build(path)
+            report_result = self.run_unit(unit, path)
             unit.report_result = report_result
             print("Finished analysis {}/{}.".format(index+1, len(self.state.exploratory_analysis_units)))
         return self.state
