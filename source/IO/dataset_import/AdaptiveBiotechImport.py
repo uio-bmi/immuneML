@@ -52,7 +52,7 @@ class AdaptiveBiotechImport(DataImport):
 
         df = ImportHelper.load_repertoire_as_dataframe(metadata, params)
 
-        frame_type_list = AdaptiveBiotechImport.prepare_frame_type_list(params)
+        frame_type_list = ImportHelper.prepare_frame_type_list(params)
         df = df[df["frame_types"].isin(frame_type_list)]
 
         if params.region_definition == RegionDefinition.IMGT:
@@ -68,14 +68,3 @@ class AdaptiveBiotechImport(DataImport):
         df["region_types"] = RegionType.CDR3.name
 
         return df
-
-    @staticmethod
-    def prepare_frame_type_list(params: DatasetImportParams) -> list:
-        frame_type_list = []
-        if params.import_productive:
-            frame_type_list.append("In")
-        if params.import_out_of_frame:
-            frame_type_list.append("Out")
-        if params.import_with_stop_codon:
-            frame_type_list.append("Stop")
-        return frame_type_list

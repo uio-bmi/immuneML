@@ -28,7 +28,7 @@ class Repertoire(DatasetItem):
     loaded separately. Internally, this class relies on numpy to store/import_dataset the data.
     """
 
-    FIELDS = "sequence_aas,sequences,v_genes,j_genes,chains,counts,region_types,frame_types,sequence_identifiers," \
+    FIELDS = "sequence_aas,sequences,v_genes,j_genes,v_subgroups,j_subgroups,v_alleles,j_alleles,chains,counts,region_types,frame_types,sequence_identifiers," \
              "cell_ids".split(",")
 
     @staticmethod
@@ -58,6 +58,7 @@ class Repertoire(DatasetItem):
 
     @classmethod
     def build(cls, sequence_aas: list = None, sequences: list = None, v_genes: list = None, j_genes: list = None,
+              v_subgroups: list = None, j_subgroups: list = None, v_alleles: list = None, j_alleles: list = None,
               chains: list = None, counts: list = None, region_types: list = None, frame_types: list = None,
               custom_lists: dict = None, sequence_identifiers: list = None, path: str = None, metadata: dict = None,
               signals: dict = None, cell_ids: list = None):
@@ -127,7 +128,7 @@ class Repertoire(DatasetItem):
         assert all(isinstance(sequence, ReceptorSequence) for sequence in sequence_objects), \
             "Repertoire: all sequences have to be instances of ReceptorSequence class."
 
-        sequence_aas, sequences, v_genes, j_genes, chains, counts, region_types, frame_types, sequence_identifiers, cell_ids = [], [], [], [], [], [], [], [], [], []
+        sequence_aas, sequences, v_genes, j_genes, v_subgroups, j_subgroups, v_alleles, j_alleles, chains, counts, region_types, frame_types, sequence_identifiers, cell_ids = [], [], [], [], [], [], [], [], [], [], [], [], [], []
         custom_lists = {key: [] for key in sequence_objects[0].metadata.custom_params} if sequence_objects[0].metadata else {}
         signals = {key: [] for key in metadata if "signal" in key}
 
@@ -138,6 +139,10 @@ class Repertoire(DatasetItem):
             if sequence.metadata:
                 v_genes.append(sequence.metadata.v_gene)
                 j_genes.append(sequence.metadata.j_gene)
+                v_subgroups.append(sequence.metadata.v_subgroup)
+                j_subgroups.append(sequence.metadata.j_subgroup)
+                v_alleles.append(sequence.metadata.v_allele)
+                j_alleles.append(sequence.metadata.j_allele)
                 chains.append(sequence.metadata.chain)
                 counts.append(sequence.metadata.count)
                 region_types.append(sequence.metadata.region_type)
@@ -151,7 +156,7 @@ class Repertoire(DatasetItem):
                 else:
                     signals[key].append(None)
 
-        return cls.build(sequence_aas, sequences, v_genes, j_genes, chains, counts, region_types, frame_types,
+        return cls.build(sequence_aas, sequences, v_genes, j_genes, v_subgroups, j_subgroups, v_alleles, j_alleles, chains, counts, region_types, frame_types,
                          custom_lists, sequence_identifiers, path, metadata, signals, cell_ids)
 
     def __init__(self, data_filename: str, metadata_filename: str, identifier: str):
@@ -244,6 +249,10 @@ class Repertoire(DatasetItem):
                                identifier=row["sequence_identifiers"] if "sequence_identifiers" in fields else None,
                                metadata=SequenceMetadata(v_gene=row["v_genes"] if "v_genes" in fields else None,
                                                          j_gene=row["j_genes"] if "j_genes" in fields else None,
+                                                         v_subgroup=row["v_subgroups"] if "v_subgroups" in fields else None,
+                                                         j_subgroup=row["j_subgroups"] if "j_subgroups" in fields else None,
+                                                         v_allele=row["v_alleles"] if "v_alleles" in fields else None,
+                                                         j_allele=row["j_alleles"] if "j_alleles" in fields else None,
                                                          chain=row["chains"] if "chains" in fields else None,
                                                          count=row["counts"] if "counts" in fields else None,
                                                          region_type=row["region_types"] if "region_types" in fields else None,

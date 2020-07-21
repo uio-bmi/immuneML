@@ -10,8 +10,8 @@ column_mapping: # immunoSEQ column names -> immuneML repertoire fields
   vGeneName: v_genes
   jGeneName: j_genes
   sequenceStatus: frame_types
-  vFamilyName: v_subgroup
-  jFamilyName: j_subgroup
-  vGeneAllele: v_allele
-  jGeneAllele: j_allele
+  vFamilyName: v_subgroups
+  jFamilyName: j_subgroups
+  vGeneAllele: v_alleles
+  jGeneAllele: j_alleles
   count (templates/reads): counts

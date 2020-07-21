@@ -39,12 +39,17 @@ class ImmunoSEQImport(DataImport):
     @staticmethod
     def import_dataset(params: dict, dataset_name: str) -> Dataset:
         immunoseq_params = DatasetImportParams.build_object(**params)
-        return ImportHelper.import_repertoire_dataset(ImmunoSEQImport.preprocess_repertoire, immunoseq_params, dataset_name)
+        dataset = ImportHelper.import_or_load_imported(params, immunoseq_params, dataset_name,
+                                                       ImmunoSEQImport.preprocess_repertoire)
+        return dataset
 
     @staticmethod
     def preprocess_repertoire(metadata: dict, params: DatasetImportParams):
 
         df = ImportHelper.load_repertoire_as_dataframe(metadata, params)
+
+        frame_type_list = ImportHelper.prepare_frame_type_list(params)
+        df = df[df["frame_types"].isin(frame_type_list)]
 
         if params.region_definition == RegionDefinition.IMGT:
             if "sequences" in df.columns and "sequence_aas" in df.columns:
@@ -63,6 +68,7 @@ class ImmunoSEQImport(DataImport):
 
         if region_definition == RegionDefinition.IMGT:
             df['sequences'] = [y[(81 - 3 * len(x)): 81] if x is not None else None for x, y in zip(df['sequence_aas'], df['sequences'])]
+            df['sequence_aas'] = df["sequence_aas"].str[1:-1]
         else:
             df['sequences'] = [y[(84 - 3 * len(x)): 78] if x is not None else None for x, y in zip(df['sequence_aas'], df['sequences'])]
 

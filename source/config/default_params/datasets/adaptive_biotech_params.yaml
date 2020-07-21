@@ -10,6 +10,8 @@ column_mapping: # adaptive column names -> immuneML repertoire fields
   v_gene: v_genes
   j_gene: j_genes
   frame_type: frame_types
-  v_family: v_subgroup
-  j_family: j_subgroup
+  v_family: v_subgroups
+  j_family: j_subgroups
+  v_allele: v_alleles
+  j_allele: j_alleles
   templates: counts

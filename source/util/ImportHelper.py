@@ -118,13 +118,15 @@ class ImportHelper:
 
             df[["v_genes", "j_genes"]] = df[["v_genes", "j_genes"]].replace(gene_name_replacement)
 
-        if all(item in df.columns for item in ["v_subgroup", "v_genes", "j_subgroup", "j_genes"]):
+        if all(item in df.columns for item in ["v_subgroups", "v_genes", "j_subgroups", "j_genes"]):
 
-            df[["v_subgroup", "v_genes", "j_subgroup", "j_genes"]] = df[
-                ["v_subgroup", "v_genes", "j_subgroup", "j_genes"]].replace(germline_value_replacement, regex=True)
+            df[["v_subgroups", "v_genes", "j_subgroups", "j_genes"]] = df[
+                ["v_subgroups", "v_genes", "j_subgroups", "j_genes"]].replace(germline_value_replacement, regex=True)
 
-            df["v_allele"] = df['v_genes'].str.cat(df['v_allele'], sep=Constants.ALLELE_DELIMITER)
-            df["j_allele"] = df['j_genes'].str.cat(df['j_allele'], sep=Constants.ALLELE_DELIMITER)
+        if all(item in df.columns for item in ["v_genes", "j_genes", "v_alleles", "j_alleles"]):
+
+            df["v_alleles"] = df['v_genes'].str.cat(df['v_alleles'], sep=Constants.ALLELE_DELIMITER)
+            df["j_alleles"] = df['j_genes'].str.cat(df['j_alleles'], sep=Constants.ALLELE_DELIMITER)
 
         return df
 
@@ -137,3 +139,14 @@ class ImportHelper:
         germline_value_replacement = {**{"TCRB": "TRB", "TCRA": "TRA"}, **{("0" + str(i)): str(i) for i in range(10)}}
 
         return ImportHelper.parse_germline(dataframe, gene_name_replacement, germline_value_replacement)
+
+    @staticmethod
+    def prepare_frame_type_list(params: DatasetImportParams) -> list:
+        frame_type_list = []
+        if params.import_productive:
+            frame_type_list.append("In")
+        if params.import_out_of_frame:
+            frame_type_list.append("Out")
+        if params.import_with_stop_codon:
+            frame_type_list.append("Stop")
+        return frame_type_list

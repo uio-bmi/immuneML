@@ -83,8 +83,10 @@ rep2.tsv,TRB,1234a,no"""
                     "v_gene": "v_genes",
                     "j_gene": "j_genes",
                     "frame_type": "frame_types",
-                    "v_family": "v_subgroup",
-                    "j_family": "j_subgroup",
+                    "v_family": "v_subgroups",
+                    "j_family": "j_subgroups",
+                    "v_allele": "v_alleles",
+                    "j_allele": "j_alleles",
                     "templates": "counts"
                 }
             }
@@ -101,6 +103,7 @@ rep2.tsv,TRB,1234a,no"""
                 self.assertEqual("1234", rep.metadata["donor"])
                 self.assertEqual(13, len(rep.sequences))
                 self.assertEqual(10, rep.sequences[0].metadata.count)
+                self.assertEqual("TRBV29", rep.sequences[0].metadata.v_subgroup)
             else:
                 self.assertEqual("1234a", rep.metadata["donor"])
                 self.assertEqual(15, len(rep.sequences))

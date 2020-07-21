@@ -44,22 +44,26 @@ rep1.tsv,TRA,1234a,no"""
 
         dataset = ImmunoSEQImport.import_dataset({"result_path": path, "batch_size": 1, "region_type": "CDR3",
                                                   "metadata_file": path + "metadata.csv", "path": path, "separator": '\t',
+                                                  "import_productive": True,
+                                                  "region_definition": "IMGT",
                                                   "column_mapping": {
                                                       "nucleotide": "sequences",
                                                       "aminoAcid": "sequence_aas",
                                                       "vGeneName": "v_genes",
                                                       "jGeneName": "j_genes",
-                                                      "vGeneAllele": "v_allele",
-                                                      "jGeneAllele": "j_allele",
+                                                      "vGeneAllele": "v_alleles",
+                                                      "jGeneAllele": "j_alleles",
                                                       "sequenceStatus": "frame_types",
-                                                      "vFamilyName": "v_subgroup",
-                                                      "jFamilyName": "j_subgroup",
+                                                      "vFamilyName": "v_subgroups",
+                                                      "jFamilyName": "j_subgroups",
                                                       "count (templates / reads)": "counts"
                                                   }}, "immunoseq_dataset")
 
         self.assertEqual(1, dataset.get_example_count())
         for index, rep in enumerate(dataset.get_data()):
             self.assertEqual("1234a", rep.metadata["donor"])
-            self.assertEqual(19, len(rep.sequences))
+            self.assertEqual(18, len(rep.sequences))
+            self.assertEqual("ATSDQLNRWGTGELF", rep.sequences[0].get_sequence())
+            self.assertEqual("TRBV25-1", rep.sequences[2].metadata.v_gene)
 
         shutil.rmtree(path)
