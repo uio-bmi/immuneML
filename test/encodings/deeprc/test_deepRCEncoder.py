@@ -51,7 +51,7 @@ class TestDeepRCEncoder(TestCase):
         self.assertListEqual(list(metadata_content["ID"]), sub_dataset.get_repertoire_ids())
 
         for repertoire in main_dataset.repertoires:
-            rep_path = f"{path}/encoded_data/{repertoire.identifier}.tsv"
+            rep_path = f"{path}/encoded_data/encoding/{repertoire.identifier}.tsv"
             self.assertTrue(os.path.isfile(rep_path))
             repertoire_tsv = pd.read_csv(rep_path, sep="\t")
             self.assertListEqual(list(repertoire_tsv["amino_acid"]), list(repertoire.get_sequence_aas()))

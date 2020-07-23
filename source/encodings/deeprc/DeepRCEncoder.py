@@ -6,8 +6,7 @@ from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.encoded_data.EncodedData import EncodedData
 from source.encodings.DatasetEncoder import DatasetEncoder
 from source.encodings.EncoderParams import EncoderParams
-from source.environment.EnvironmentSettings import EnvironmentSettings
-from source.util.EncoderHelper import EncoderHelper
+from source.util.PathBuilder import PathBuilder
 
 
 class DeepRCEncoder(DatasetEncoder):
@@ -72,10 +71,13 @@ class DeepRCEncoder(DatasetEncoder):
         return metadata_filepath
 
     def encode(self, dataset, params: EncoderParams) -> RepertoireDataset:
-        self.export_repertoire_tsv_files(params["result_path"])
+        result_path = params["result_path"] + "/encoding"
+        PathBuilder.build(result_path)
+
+        self.export_repertoire_tsv_files(result_path)
 
         labels = params["label_configuration"].get_labels_by_name()
-        metadata_filepath = self.export_metadata_file(dataset, labels, params["result_path"])
+        metadata_filepath = self.export_metadata_file(dataset, labels, result_path)
 
         encoded_dataset = dataset.clone()
         encoded_dataset.encoded_data = EncodedData(examples=None, labels=dataset.get_metadata(labels),
