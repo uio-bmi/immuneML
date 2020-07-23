@@ -34,7 +34,6 @@ class DeepRC(MLMethod):
     ‘DeepRC: Immune repertoire classification with attention-based deep massive multiple instance learning’.
     bioRxiv preprint doi: https://doi.org/10.1101/2020.04.12.038158
 
-    DeepRC
 
     Attributes:
         validation_part (float):  the part of the data that will be used for validation, the rest will be used for training.
@@ -152,9 +151,10 @@ class DeepRC(MLMethod):
         n_train_examples = round((1 - self.validation_part) * n_examples)
 
         random_generator = np.random.RandomState()
+        permutation = random_generator.permutation(n_examples)
 
-        train_indices = np.array(random_generator.permutation(n_examples)[:n_train_examples], dtype=np.int)
-        val_indices = np.array(random_generator.permutation(n_examples)[n_train_examples:], dtype=np.int)
+        train_indices = np.array(permutation[:n_train_examples], dtype=np.int)
+        val_indices = np.array(permutation[n_train_examples:], dtype=np.int)
 
         return train_indices, val_indices
 
@@ -162,8 +162,12 @@ class DeepRC(MLMethod):
         """
         Creates a pytorch dataloader using DeepRC's RepertoireDataReaderBinary
 
+        :param hdf5_filepath: the path to the HDF5 file
+        :param pre_loaded_hdf5_file: Optional: It is faster to load the hdf5 file into the RAM as dictionary instead
+            of keeping it on the disk. `pre_loaded_hdf5_file` is the loaded hdf5 file as dictionary.
+            If None, the hdf5 file will be read from the disk and consume less RAM.
         :param indices: indices of the subset of repertoires in the data that will be used for this dataset.
-                If 'None', repertoires will be used.
+                If 'None', all repertoires will be used.
         :param label: the label to be predicted
         :param eval_only: whether the dataloader will only be used for evaluation (no training).
                 if false, sample_n_sequences can be set
@@ -187,12 +191,17 @@ class DeepRC(MLMethod):
         return dataloader
 
     def _set_label_classes(self, y):
-        label_classes = {key: sorted(set(value)) for key, value in y.items()}
+        label_classes = {label: sorted([str(class_name) for class_name in set(classes)]) for label, classes in y.items()}
 
         for label in label_classes.keys():
             n_classes = len(label_classes[label])
             assert n_classes == 2, f"DeepRC: this method assumes there are 2 possible classes per label, " \
                                    f"for label '{label}' {n_classes} classes were found: {label_classes[label]}"
+
+            # If a possible label class is False, make sure it is the second class (so True is the first class)
+            # to prevent error in DeepRC RepertoireDataReaderBinary.__init__()
+            if label_classes[label][0] in ("False", "false"):
+                label_classes[label] = label_classes[label][::-1]
 
         self.label_classes = label_classes
 

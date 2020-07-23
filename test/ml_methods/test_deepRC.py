@@ -72,6 +72,10 @@ class TestDeepRC(TestCase):
         classifier.pytorch_device = torch.device("cpu")
         classifier.training_function = self.dummy_training_function
 
+        train_indices, val_indices = classifier.get_train_val_indices(10)
+        self.assertEqual(len(train_indices) + len(val_indices), 10)
+        self.assertEqual(set(list(train_indices) + list(val_indices)), set(range(10)))
+
 
         # test if 'fit' function saves models
         classifier.fit(encoded_data, y, ["status"])

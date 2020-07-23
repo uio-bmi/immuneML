@@ -25,7 +25,7 @@ class ParameterValidator:
                                            f"It has to be greater or equal to {min_inclusive}."
 
         if max_inclusive is not None:
-            assert value <= min_inclusive, f"{location}: {value} is not a valid value for parameter {parameter_name}. " \
+            assert value <= max_inclusive, f"{location}: {value} is not a valid value for parameter {parameter_name}. " \
                                            f"It has to be less or equal to {max_inclusive}."
 
     @staticmethod
