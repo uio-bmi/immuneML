@@ -3,6 +3,7 @@ import yaml
 import itertools as it
 import os
 import sys
+import glob
 
 from source.encodings.kmer_frequency.ReadsType import ReadsType
 from source.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType import SequenceEncodingType
@@ -63,6 +64,13 @@ def build_settings_specs(enc_names, ml_names):
     return [{"encoding": enc_name, "ml_method": ml_name} for enc_name, ml_name in it.product(enc_names, ml_names)]
 
 
+def discover_dataset_path():
+    dataset = glob.glob("*.iml_dataset")
+
+    assert len(dataset) == 1, "multiple .iml_dataset files were present in the current working directory"
+
+    return dataset[0]
+
 def build_specs(args):
     specs = {
         "definitions": {
@@ -103,8 +111,9 @@ def build_specs(args):
     enc_specs = build_encodings_specs(args)
     ml_specs = build_ml_methods_specs(args.ml_methods)
     settings_specs = build_settings_specs(enc_specs.keys(), ml_specs.keys())
+    dataset_path = discover_dataset_path()
 
-    specs["definitions"]["datasets"]["d1"]["params"]["path"] = args.dataset_path
+    specs["definitions"]["datasets"]["d1"]["params"]["path"] = dataset_path
     specs["definitions"]["encodings"] = enc_specs
     specs["definitions"]["ml_methods"] = ml_specs
     specs["instructions"]["inst1"]["settings"] = settings_specs
@@ -137,7 +146,6 @@ def parse_commandline_arguments(args):
     parser = argparse.ArgumentParser(description="tool for building immuneML Galaxy YAML from arguments")
     parser.add_argument("-o", "--output_path", required=True, help="Output file location (directiory).")
     parser.add_argument("-f", "--file_name", default="specs.yaml", help="Output file name Default name is 'specs.yaml' if not specified.")
-    parser.add_argument("-d", "--dataset_path", required=True, help="Path to the pickled dataset file (.iml_dataset extension)")
     parser.add_argument("-l", "--labels", nargs="+", required=True,
                         help="Which metadata labels should be predicted for the dataset.")
     parser.add_argument("-m", "--ml_methods", nargs="+", choices=ml_method_names, required=True,

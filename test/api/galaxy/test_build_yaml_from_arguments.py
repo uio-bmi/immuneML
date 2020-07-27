@@ -1,5 +1,6 @@
 import shutil
 import unittest
+import os
 
 from source.IO.dataset_export.PickleExporter import PickleExporter
 from source.api.galaxy.build_yaml_from_arguments import build_settings_specs, build_ml_methods_specs, get_sequence_enc_type, \
@@ -36,8 +37,12 @@ class MyTestCase(unittest.TestCase):
         output_dir = f"{path}/output_dir"
         output_filename = "yaml_out.yaml"
 
+        old_wd = os.getcwd()
+
+        os.chdir(data_path)
+
         yamlbuilder_main(["-o", output_dir, "-f", output_filename,
-                          "-d", f"{data_path}/{iml_dataset_name}", "-l", "label",
+                          "-l", "label",
                           "-m", "SimpleLogisticRegression", "-t", "70",
                           "-c", "5", "-s", "subsequence", "subsequence",
                           "-r", "unique", "all",
@@ -49,6 +54,8 @@ class MyTestCase(unittest.TestCase):
 
         # Use ImmuneML parser to test whether the yaml file created here is still valid
         ImmuneMLParser.parse_yaml_file(f"{output_dir}/{output_filename}")
+
+        os.chdir(old_wd)
 
         shutil.rmtree(path)
 
