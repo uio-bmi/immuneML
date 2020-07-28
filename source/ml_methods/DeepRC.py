@@ -1,17 +1,16 @@
 import hashlib
 import os
+import warnings
 
+import h5py
 import numpy as np
+import torch
 import yaml
 from deeprc.deeprc_binary.architectures import DeepRC as DeepRCInternal
 from deeprc.deeprc_binary.dataset_converters import DatasetToHDF5
 from deeprc.deeprc_binary.dataset_readers import RepertoireDataReaderBinary
 from deeprc.deeprc_binary.dataset_readers import no_stack_collate_fn
 from deeprc.deeprc_binary.training import train
-import h5py
-import torch
-import warnings
-
 from sklearn.exceptions import NotFittedError
 from tqdm import tqdm
 
@@ -389,4 +388,5 @@ class DeepRC(MLMethod):
     def check_if_exists(self, path):
         return os.path.isfile(path + FilenameHandler.get_filename(self.__class__.__name__, "pt"))
 
-
+    def get_labels(self):
+        return self.label_classes

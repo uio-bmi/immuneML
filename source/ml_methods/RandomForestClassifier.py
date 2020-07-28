@@ -33,7 +33,7 @@ class RandomForestClassifier(SklearnMethod):
         else:
             self._parameter_grid = {"n_estimators": [10, 50, 100]}
 
-    def _get_ml_model(self, cores_for_training: int = 2):
+    def _get_ml_model(self, cores_for_training: int = 2, X=None):
         default = {"n_jobs": cores_for_training}
         params = {**self._parameters, **default}
         return RFC(**params)

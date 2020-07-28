@@ -388,3 +388,6 @@ class ProbabilisticBinaryClassifier(MLMethod):
         assert len(labels) == 1 and labels[0] == self.label_name, f"ProbabilisticBinaryClassifier: classifier cannot predict the labels " \
                                                                   f"on which it was not trained: " \
                                                                   f"got labels: {labels}, expected: {self.label_name}."
+
+    def get_labels(self):
+        return [self.label_name]

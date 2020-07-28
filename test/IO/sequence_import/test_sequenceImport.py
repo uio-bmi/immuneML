@@ -35,8 +35,8 @@ class TestSequenceImport(TestCase):
 
         self.assertEqual(7, len(sequences))
         self.assertEqual("CASSYVGNTGELFF", sequences[0].get_sequence())
-        self.assertEqual("J2-2*01", sequences[3].metadata.j_gene)
-        self.assertEqual("V6-5*01", sequences[3].metadata.v_gene)
+        self.assertEqual("TRBJ2-2*01", sequences[3].metadata.j_gene)
+        self.assertEqual("TRBV6-5*01", sequences[3].metadata.v_gene)
         self.assertTrue(all([sequence.metadata.chain == Chain.BETA for sequence in sequences]))
 
         shutil.rmtree(path)
@@ -64,9 +64,9 @@ class TestSequenceImport(TestCase):
                          [receptor for receptor in receptors if receptor.identifier == "3050"][0].beta.amino_acid_sequence)
         self.assertEqual("CALRLNNQGGKLIF",
                          [receptor for receptor in receptors if receptor.identifier == "15760"][0].alpha.amino_acid_sequence)
-        self.assertEqual("J2-1*01",
+        self.assertEqual("TRBJ2-1*01",
                          [receptor for receptor in receptors if receptor.identifier == "3050"][0].beta.metadata.j_gene)
-        self.assertEqual("V9-2*01",
+        self.assertEqual("TRAV9-2*01",
                          [receptor for receptor in receptors if receptor.identifier == "15760"][0].alpha.metadata.v_gene)
 
         shutil.rmtree(path)

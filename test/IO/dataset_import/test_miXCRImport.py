@@ -160,8 +160,8 @@ class TestMiXCRLoader(TestCase):
             self.assertTrue(all(sequence.metadata.chain == Chain.ALPHA for sequence in repertoire.sequences))
             if index == 1:
                 self.assertTrue(repertoire.sequences[0].amino_acid_sequence == "FAVF")
-                self.assertTrue(repertoire.sequences[0].metadata.v_gene == "V29/DV5")
-                self.assertTrue(repertoire.sequences[1].metadata.v_gene == "V14-1")
+                self.assertTrue(repertoire.sequences[0].metadata.v_gene == "TRAV29/DV5")
+                self.assertTrue(repertoire.sequences[1].metadata.v_gene == "TRAV14-1")
                 self.assertTrue(repertoire.metadata["CD"])
             elif index == 0:
                 self.assertEqual(5, len(repertoire.sequences))
@@ -188,8 +188,8 @@ class TestMiXCRLoader(TestCase):
             self.assertTrue(all(sequence.metadata.chain == Chain.ALPHA for sequence in repertoire.sequences))
             if index == 1:
                 self.assertTrue(repertoire.sequences[0].amino_acid_sequence == "VFAVFA")
-                self.assertTrue(repertoire.sequences[0].metadata.v_gene == "V29/DV5")
-                self.assertTrue(repertoire.sequences[1].metadata.v_gene == "V14-1")
+                self.assertTrue(repertoire.sequences[0].metadata.v_gene == "TRAV29/DV5")
+                self.assertTrue(repertoire.sequences[1].metadata.v_gene == "TRAV14-1")
                 self.assertTrue(repertoire.metadata["CD"])
             elif index == 0:
                 self.assertEqual(5, len(repertoire.sequences))

@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from source.data_model.dataset.RepertoireDataset import RepertoireDataset
+from source.data_model.dataset.Dataset import Dataset
 from source.simulation.Simulation import Simulation
 
 
@@ -8,9 +8,8 @@ from source.simulation.Simulation import Simulation
 class SimulationState:
     signals: list
     simulation: Simulation
-    dataset: RepertoireDataset
-    resulting_dataset: RepertoireDataset = None
-    path: str = None
+    dataset: Dataset
+    resulting_dataset: Dataset = None
     result_path: str = None
     batch_size: int = 1
     name: str = None

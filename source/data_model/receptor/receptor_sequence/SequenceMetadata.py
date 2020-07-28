@@ -2,6 +2,7 @@
 from source.data_model.receptor.receptor_sequence.Chain import Chain
 from source.data_model.receptor.receptor_sequence.SequenceFrameType import SequenceFrameType
 
+
 class SequenceMetadata:
     """
     class modeling the existing knowledge about a receptor_sequence, should be stored according to
@@ -20,6 +21,7 @@ class SequenceMetadata:
         - sample
         - custom params (dictionary with custom sequence information)
     """
+
     def __init__(self,
                  v_subgroup: str = None, v_gene: str = None, v_allele: str = None,
                  j_subgroup: str = None, j_gene: str = None, j_allele: str = None,

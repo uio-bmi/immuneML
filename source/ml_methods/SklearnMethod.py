@@ -1,9 +1,9 @@
 import abc
 import hashlib
 import os
-import pickle
 import warnings
 
+import dill
 import numpy as np
 import yaml
 from sklearn.model_selection import RandomizedSearchCV
@@ -64,7 +64,7 @@ class SklearnMethod(MLMethod):
         self._parameters = None
 
     def _fit_for_label(self, X, y: np.ndarray, label: str, cores_for_training: int):
-        self.models[label] = self._get_ml_model(cores_for_training)
+        self.models[label] = self._get_ml_model(cores_for_training, X)
         self.models[label].fit(X, y)
 
     def _prepare_caching_params(self, encoded_data: EncodedData, y, type: str, label_names: list = None, number_of_splits: int = -1):
@@ -118,7 +118,8 @@ class SklearnMethod(MLMethod):
                                                 cv=number_of_splits, n_jobs=cores_for_training,
                                                 scoring="balanced_accuracy", refit=True)
         self.models[label].fit(X, y)
-        self.models[label] = self.models[label].best_estimator_  # do not leave RandomSearchCV object to be in models, but use the best estimator instead
+        self.models[label] = self.models[
+            label].best_estimator_  # do not leave RandomSearchCV object to be in models, but use the best estimator instead
 
     def fit_by_cross_validation(self, encoded_data: EncodedData, y, number_of_splits: int = 5, parameter_grid: dict = None,
                                 label_names: list = None, cores_for_training: int = 1):
@@ -143,7 +144,7 @@ class SklearnMethod(MLMethod):
         PathBuilder.build(path)
         name = FilenameHandler.get_filename(self.__class__.__name__, "pickle")
         with open(path + name, "wb") as file:
-            pickle.dump(self.models, file)
+            dill.dump(self.models, file)
 
         if details_path is None:
             params_path = path + FilenameHandler.get_filename(self.__class__.__name__, "yaml")
@@ -164,7 +165,7 @@ class SklearnMethod(MLMethod):
         name = FilenameHandler.get_filename(self.__class__.__name__, "pickle")
         if os.path.isfile(path + name):
             with open(path + name, "rb") as file:
-                self.models = pickle.load(file)
+                self.models = dill.load(file)
         else:
             raise FileNotFoundError(self.__class__.__name__ + " model could not be loaded from " + str(
                 path + name) + ". Check if the path to the " + name + " file is properly set.")
@@ -182,9 +183,12 @@ class SklearnMethod(MLMethod):
         return os.path.isfile(path + FilenameHandler.get_filename(self.__class__.__name__, "pickle"))
 
     @abc.abstractmethod
-    def _get_ml_model(self, cores_for_training: int = 2):
+    def _get_ml_model(self, cores_for_training: int = 2, X=None):
         pass
 
     @abc.abstractmethod
     def get_params(self, label):
         pass
+
+    def get_labels(self):
+        return list(self.models.keys())

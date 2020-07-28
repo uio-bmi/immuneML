@@ -10,4 +10,3 @@ class DataReport(Report, ABC):
         super().__init__(name)
         self.dataset = dataset
         self.result_path = result_path
-        self.name = name

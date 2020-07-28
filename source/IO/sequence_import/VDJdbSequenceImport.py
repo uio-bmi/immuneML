@@ -61,8 +61,8 @@ class VDJdbSequenceImport:
 
     @staticmethod
     def import_sequence(row):
-        metadata = SequenceMetadata(v_gene=str(row["V"])[3:] if "V" in row else None,  # remove TRB/A from gene name
-                                    j_gene=str(row["J"])[3:] if "J" in row else None,  # remove TRB/A from gene name
+        metadata = SequenceMetadata(v_gene=str(row["V"]) if "V" in row else None,
+                                    j_gene=str(row["J"]) if "J" in row else None,
                                     chain=str(row["Gene"])[-1] if "Gene" in row else None,
                                     region_type="CDR3",
                                     custom_params={VDJdbSequenceImport.CUSTOM_COLUMNS[key]: row[key]

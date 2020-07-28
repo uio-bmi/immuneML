@@ -53,7 +53,7 @@ class IRISImport(DataImport):
 
     @staticmethod
     def _load_gene(identifier):
-        return identifier.split("*", 1)[0].replace("TRA", "").replace("TRB", "")
+        return identifier.split("*", 1)[0]
 
     @staticmethod
     def preprocess_repertoire(metadata: dict, params: IRISImportParams) -> dict:

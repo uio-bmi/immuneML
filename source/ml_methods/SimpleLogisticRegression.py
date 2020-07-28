@@ -40,7 +40,7 @@ class SimpleLogisticRegression(SklearnMethod):
                                     "C": [0.001, 0.01, 0.1, 10, 100, 1000],
                                     "class_weight": ["balanced"]}
 
-    def _get_ml_model(self, cores_for_training: int = 2):
+    def _get_ml_model(self, cores_for_training: int = 2, X=None):
         self._parameters["n_jobs"] = cores_for_training
         return LogisticRegression(**self._parameters)
 

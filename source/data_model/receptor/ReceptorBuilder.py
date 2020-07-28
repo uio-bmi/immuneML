@@ -13,14 +13,14 @@ from source.data_model.receptor.receptor_sequence.ReceptorSequenceList import Re
 class ReceptorBuilder:
 
     @classmethod
-    def build_object(cls, sequences: dict):
+    def build_object(cls, sequences: dict, identifier: str = None, metadata: dict = None) -> Receptor:
         chains = sorted(list(sequences.keys()))
-        if chains == ChainPair.ALPHA_BETA.value:
-            return TCABReceptor(alpha=sequences[Chain.ALPHA.value], beta=sequences[Chain.BETA.value])
-        elif chains == ChainPair.GAMMA_DELTA.value:
-            return TCGDReceptor(gamma=sequences[Chain.GAMMA.value], delta=sequences[Chain.DELTA.value])
-        elif chains == ChainPair.LIGHT_HEAVY.value:
-            return BCReceptor(heavy=sequences[Chain.HEAVY.value], light=sequences[Chain.LIGHT.value])
+        if chains == ChainPair.ALPHA_BETA.value or chains == [item.lower() for item in ChainPair.ALPHA_BETA.value]:
+            return TCABReceptor(alpha=sequences[Chain.ALPHA.value], beta=sequences[Chain.BETA.value], identifier=identifier, metadata=metadata)
+        elif chains == ChainPair.GAMMA_DELTA.value or chains == [item.lower() for item in ChainPair.GAMMA_DELTA.value]:
+            return TCGDReceptor(gamma=sequences[Chain.GAMMA.value], delta=sequences[Chain.DELTA.value], identifier=identifier, metadata=metadata)
+        elif chains == ChainPair.LIGHT_HEAVY.value or chains == [item.lower() for item in ChainPair.LIGHT_HEAVY.value]:
+            return BCReceptor(heavy=sequences[Chain.HEAVY.value], light=sequences[Chain.LIGHT.value], identifier=identifier, metadata=metadata)
         else:
             return None
 

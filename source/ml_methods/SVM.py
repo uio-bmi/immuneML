@@ -34,7 +34,7 @@ class SVM(SklearnMethod):
         else:
             self._parameter_grid = {}
 
-    def _get_ml_model(self, cores_for_training: int = 2):
+    def _get_ml_model(self, cores_for_training: int = 2, X=None):
         params = {**self._parameters, **{}}
         return LinearSVC(**params)
 

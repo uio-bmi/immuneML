@@ -39,7 +39,7 @@ class TestReceptorCNN(TestCase):
         self.assertEqual(500, len([pred for pred in predictions["CMV"] if isinstance(pred, bool)]))
 
         predictions_proba = cnn.predict_proba(enc_dataset.encoded_data, ["CMV"])
-        self.assertEqual(500, int(np.sum(predictions_proba["CMV"])))
+        self.assertEqual(500, np.sum(predictions_proba["CMV"]).astype(int))
         self.assertEqual(500, predictions_proba["CMV"].shape[0])
 
         cnn.store(path + "model_storage/")

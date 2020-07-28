@@ -51,3 +51,7 @@ class MLMethod(metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def predict_proba(self, encoded_data: EncodedData, labels):
         pass
+
+    @abc.abstractmethod
+    def get_labels(self):
+        pass

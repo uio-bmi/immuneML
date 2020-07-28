@@ -49,7 +49,7 @@ class TestDuplicateSequenceFilter(TestCase):
         self.assertListEqual(["ntAAA", "ntCCC", "ntDDD"], list(attr["sequences"]))
         self.assertListEqual([35, 50, 40], list(attr["counts"]))
         self.assertListEqual([1, 3, 7], list(attr["sequence_identifiers"]))
-        self.assertListEqual([Chain("A"), Chain("A"), Chain("B")], list(attr["chains"]))
+        self.assertListEqual([Chain.get_chain("A"), Chain.get_chain("A"), Chain.get_chain('B')], list(attr["chains"]))
 
         # collapse by nucleotides & use min counts
         dupfilter = DuplicateSequenceFilter(filter_sequence_type=SequenceType.NUCLEOTIDE,

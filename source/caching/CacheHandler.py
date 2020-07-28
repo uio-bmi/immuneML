@@ -1,4 +1,5 @@
 import hashlib
+import logging
 import os
 import pickle
 
@@ -52,8 +53,14 @@ class CacheHandler:
     @staticmethod
     def add_by_key(cache_key: str, caching_object, object_type: CacheObjectType = CacheObjectType.OTHER, cache_type=None):
         PathBuilder.build(EnvironmentSettings.get_cache_path(cache_type))
-        with open(CacheHandler._build_filename(cache_key=cache_key, object_type=object_type, cache_type=cache_type), "wb") as file:
-            pickle.dump(caching_object, file, protocol=pickle.HIGHEST_PROTOCOL)
+        filename = CacheHandler._build_filename(cache_key=cache_key, object_type=object_type, cache_type=cache_type)
+        try:
+            with open(filename, "wb") as file:
+                pickle.dump(caching_object, file, protocol=pickle.HIGHEST_PROTOCOL)
+        except AttributeError:
+            os.remove(filename)
+            logging.warning(f"CacheHandler: could not cache object of class {type(caching_object).__name__}. Next time this object is needed, "
+                            f"it will be recomputed which will take more time but should not influence results.")
 
     @staticmethod
     def generate_cache_key(params: tuple):

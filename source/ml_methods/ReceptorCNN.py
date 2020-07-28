@@ -296,3 +296,6 @@ class ReceptorCNN(MLMethod):
         params = copy.deepcopy(vars(self))
         params["CNN"] = copy.deepcopy(self.CNN).state_dict()
         return params
+
+    def get_labels(self):
+        return [self.label_name]

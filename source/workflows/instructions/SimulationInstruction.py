@@ -40,9 +40,9 @@ class SimulationInstruction(Instruction):
 
     """
 
-    def __init__(self, signals: list, simulation: Simulation, dataset: RepertoireDataset, path: str = None, batch_size: int = 1,
+    def __init__(self, signals: list, simulation: Simulation, dataset: RepertoireDataset, batch_size: int = 1,
                  name: str = None, exporters: List[DataExporter] = None):
-        self.state = SimulationState(signals, simulation, dataset, path=path, batch_size=batch_size, name=name)
+        self.state = SimulationState(signals, simulation, dataset, batch_size=batch_size, name=name)
         self.exporters = exporters
 
     def run(self, result_path: str):
