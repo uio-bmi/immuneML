@@ -1,6 +1,3 @@
-import os
-from shutil import copyfile
-
 import numpy as np
 import pandas as pd
 
@@ -27,19 +24,6 @@ class PairwiseRepertoireComparison:
 
         comparison_data = ComparisonData(dataset.get_repertoire_ids(), self.matching_columns, self.sequence_batch_size, self.path)
         comparison_data.process_dataset(dataset)
-        comparison_data = self.add_files_to_cache(comparison_data, dataset)
-
-        return comparison_data
-
-    def add_files_to_cache(self, comparison_data: ComparisonData, dataset: RepertoireDataset) -> ComparisonData:
-
-        cache_paths = []
-
-        for index, batch_path in enumerate(comparison_data.batch_paths):
-            cache_paths.append(CacheHandler.get_file_path() + "dataset_{}_batch_{}.csv".format(dataset.identifier, index))
-            copyfile(batch_path, cache_paths[-1])
-
-        comparison_data.batch_paths = cache_paths
 
         return comparison_data
 
@@ -56,12 +40,8 @@ class PairwiseRepertoireComparison:
                                            lambda: self.compare_repertoires(dataset, comparison_fn))
 
     def memo_by_params(self, dataset: RepertoireDataset):
-        # TODO: refactor this to be immune to removing the cache halfway through repertoire comparison
         comparison_data = CacheHandler.memo_by_params(self.prepare_caching_params(dataset), lambda: self.create_comparison_data(dataset))
-        if all(os.path.isfile(path) for path in comparison_data.batch_paths):
-            return comparison_data
-        else:
-            return self.create_comparison_data(dataset)
+        return comparison_data
 
     @log
     def compare_repertoires(self, dataset: RepertoireDataset, comparison_fn):

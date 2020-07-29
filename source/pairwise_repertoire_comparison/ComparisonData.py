@@ -1,3 +1,5 @@
+import os
+import pickle
 from functools import lru_cache
 
 import numpy as np
@@ -5,6 +7,7 @@ import numpy as np
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.logging.Logger import log
 from source.pairwise_repertoire_comparison.ComparisonDataBatch import ComparisonDataBatch
+from source.util.PathBuilder import PathBuilder
 
 
 class ComparisonData:
@@ -12,19 +15,16 @@ class ComparisonData:
     @log
     def __init__(self, repertoire_ids: list, comparison_attributes, sequence_batch_size: int = 10000, path: str = None):
 
-        self.path = path
+        self.path = PathBuilder.build(path)
         self.sequence_batch_size = sequence_batch_size
         self.item_count = 0
-        self.batch_paths = []
-        self.tmp_batch_paths = [self.path + "batch_0.pickle"]
         self.comparison_attributes = comparison_attributes
         self.repertoire_ids = repertoire_ids
         self.batches = []
-        self.tmp_batches = []
-        self.store_tmp_batch({}, 0)
+        self.tmp_batch_paths = []
 
     def build_matching_fn(self):
-        return lambda repertoire: set(zip(*[repertoire.get_attribute(attribute) for attribute in self.comparison_attributes]))
+        return lambda repertoire: list(set(zip(*[repertoire.get_attribute(attribute) for attribute in self.comparison_attributes])))
 
     def get_item_names(self):
         return np.array([item for items in [batch.items for batch in self.batches] for item in items])
@@ -46,18 +46,19 @@ class ComparisonData:
     def get_item_vector(self, index: int):
         batch_index = int(index / self.sequence_batch_size)
         index_in_batch = index - (batch_index * self.sequence_batch_size)
-        return self.batches[batch_index].matrix[index_in_batch]
+        return self.batches[batch_index].get_matrix()[index_in_batch]
 
     def get_batches(self, columns: list = None):
         for index in range(len(self.batches)):
             yield self.get_batch(index, columns)
 
     def get_batch(self, index: int, columns: list = None):
+        batch = self.batches[index].load()
         if columns is not None:
             column_indices = [self.batches[index].repertoire_index_mapping[col] for col in columns]
-            return self.batches[index].matrix[:, column_indices]
+            return batch.get_matrix()[:, column_indices]
         else:
-            return self.batches[index].matrix
+            return batch.get_matrix()
 
     @log
     def process_dataset(self, dataset: RepertoireDataset):
@@ -69,7 +70,7 @@ class ComparisonData:
 
     def merge_tmp_batches_to_matrix(self):
 
-        for index in range(len(self.tmp_batches)):
+        for index in range(len(self.tmp_batch_paths)):
 
             batch = self.load_tmp_batch(index)
             matrix = np.zeros((self.sequence_batch_size, len(self.repertoire_ids)), order='F')
@@ -84,7 +85,11 @@ class ComparisonData:
             df = np.array(matrix[:len(items)], order='F')
             repertoire_index_mapping = {rep_id: ind for ind, rep_id in enumerate(self.repertoire_ids)}
 
-            self.batches.append(ComparisonDataBatch(matrix=df, items=items, repertoire_index_mapping=repertoire_index_mapping))
+            comp_data_batch = ComparisonDataBatch(matrix=df, items=items, repertoire_index_mapping=repertoire_index_mapping, path=self.path,
+                                                  identifier=index)
+            comp_data_batch.store()
+
+            self.batches.append(comp_data_batch)
 
     @log
     def process_repertoire(self, repertoire, repertoire_id: str, extract_items_fn):
@@ -122,33 +127,40 @@ class ComparisonData:
 
     def store_tmp_batch(self, batch: dict, batch_index: int):
 
-        if len(self.tmp_batches) > batch_index:
-            self.tmp_batches[batch_index] = batch
-        elif len(self.tmp_batches) == batch_index:
-            self.tmp_batches.append(batch)
+        if len(self.tmp_batch_paths) > batch_index or len(self.tmp_batch_paths) == batch_index:
+            batch_path = self.path + f'tmp_batch_{batch_index}.pickle'
+            with open(batch_path, 'wb') as file:
+                pickle.dump(batch, file)
+            if len(self.tmp_batch_paths) == batch_index:
+                self.tmp_batch_paths.append(batch_path)
         else:
             raise KeyError("ComparisonData: batch_index: {} does not exist. tmp_batches length: {}"
-                           .format(batch_index, len(self.tmp_batches)))
+                           .format(batch_index, len(self.tmp_batch_paths)))
 
     def get_tmp_batches(self):
-        for i in range(len(self.tmp_batches)):
+        for i in range(len(self.tmp_batch_paths)):
             yield self.load_tmp_batch(i)
 
     def load_tmp_batch(self, batch_index: int) -> dict:
-        batch = self.tmp_batches[batch_index]
+        if len(self.tmp_batch_paths) > 0 and os.path.isfile(self.tmp_batch_paths[batch_index]):
+            with open(self.tmp_batch_paths[batch_index], "rb") as file:
+                batch = pickle.load(file)
+        else:
+            batch = {}
         return batch
 
     def add_items_for_repertoire(self, items: list, repertoire_id: str):
-        last_batch_index = len(self.tmp_batches)-1
+        last_batch_index = len(self.tmp_batch_paths)-1 if len(self.tmp_batch_paths) > 0 else 0
         batch = self.load_tmp_batch(last_batch_index)
+
+        self.item_count += len(items)
+
         item_index = 0
         while len(batch) < self.sequence_batch_size and item_index < len(items):
             batch[items[item_index]] = {repertoire_id: 1}
             item_index += 1
 
         self.store_tmp_batch(batch, last_batch_index)
-
-        self.item_count += len(items)
 
         items = items[item_index:]
 

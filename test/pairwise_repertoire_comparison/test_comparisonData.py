@@ -16,7 +16,7 @@ class TestComparisonData(TestCase):
         comparison_data = ComparisonData(repertoire_ids=["1", "2", "3", "4", "5", "6"], comparison_attributes=["col1", "col2"],
                                          sequence_batch_size=3, path=path)
 
-        comparison_data.tmp_batch_paths = [path + "batch_0.csv", path + "batch_1.csv"]
+        comparison_data.tmp_batch_paths = []
         batch0 = {("a", 1): {"1": 1}, ("b", 2): {"2": 1}, ("c", 3): {"3": 1}}
         comparison_data.store_tmp_batch(batch0, 0)
 
@@ -26,15 +26,18 @@ class TestComparisonData(TestCase):
         comparison_data.item_count = 5
         df1 = pd.DataFrame({"1": [1, 0, 0], "2": [0, 1, 0], "3": [0, 0, 1], "4": [0, 0, 0],
                             "5": [0, 0, 0], "6": [0, 0, 0]})
-        comparison_data.batches.append(ComparisonDataBatch(matrix=df1.values, items=[("a", 1), ("b", 2), ("c", 3)],
-                                                           repertoire_index_mapping={"1": 0, "2": 1, "3": 2, "4": 3, "5": 4, "6": 7}))
-        df1.to_csv(path + "b01.csv", index=False)
+        comp_data_batch = ComparisonDataBatch(matrix=df1.values, items=[("a", 1), ("b", 2), ("c", 3)],
+                                              repertoire_index_mapping={"1": 0, "2": 1, "3": 2, "4": 3, "5": 4, "6": 7},
+                                              path=path, identifier=0)
+        comp_data_batch.store()
+        comparison_data.batches.append(comp_data_batch)
         df2 = pd.DataFrame({"1": [1, 0], "2": [0, 0], "3": [0, 0], "4": [0, 0],
                             "5": [0, 1], "6": [0, 0]})
-        df2.to_csv(path + "b02.csv", index=False)
-        comparison_data.batches.append(ComparisonDataBatch(matrix=df2.values, items=[("d", 4), ("e", 5)],
-                                                           repertoire_index_mapping={"1": 0, "2": 1, "3": 2, "4": 3, "5": 4, "6": 7}))
-        comparison_data.batch_paths = [path + "b01.csv", path + "b02.csv"]
+        comp_data_batch = ComparisonDataBatch(matrix=df2.values, items=[("d", 4), ("e", 5)],
+                                              repertoire_index_mapping={"1": 0, "2": 1, "3": 2, "4": 3, "5": 4, "6": 7},
+                                              path=path, identifier=1)
+        comp_data_batch.store()
+        comparison_data.batches.append(comp_data_batch)
         return comparison_data
 
     def test_get_repertoire_vector(self):
@@ -86,7 +89,6 @@ class TestComparisonData(TestCase):
         PathBuilder.build(path)
 
         comparison_data = self.create_comparison_data(path=path)
-        comparison_data.batch_paths = comparison_data.tmp_batch_paths
         unique_items = comparison_data.filter_existing_items([("f", 6), ("g", 7), ("a", 1)], "6")
 
         self.assertEqual(2, len(unique_items))

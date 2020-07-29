@@ -1,20 +1,66 @@
+import logging
+import os
+import pickle
 from dataclasses import dataclass
 from typing import Dict
 
 import numpy as np
 
+from source.util.PathBuilder import PathBuilder
+
 
 @dataclass
 class ComparisonDataBatch:
     """
-    matrix: array with dimension items x repertoires, where items are defined by comparison attributes specified in ComparisonData
-            class and can include, for instance, receptor sequences or combinations of receptor sequences and V and J gene
-    items: the item names extracted from the repertoires in the dataset on which the repertoires are evaluated (e.g. sequences or
-            combinations of sequences and genes
-    repertoire_index_mapping: a mapping between the repertoire identifier (a string) and a column number for faster access of columns
-            (repertoire vectors w.r.t. given items) in the comparison data matrix where columns correspond to repertoires
+    Arguments:
+
+        matrix: array with dimension items x repertoires, where items are defined by comparison attributes specified in ComparisonData
+                class and can include, for instance, receptor sequences or combinations of receptor sequences and V and J gene
+
+        items: the item names extracted from the repertoires in the dataset on which the repertoires are evaluated (e.g. sequences or
+                combinations of sequences and genes
+
+        repertoire_index_mapping: a mapping between the repertoire identifier (a string) and a column number for faster access of columns
+                (repertoire vectors w.r.t. given items) in the comparison data matrix where columns correspond to repertoires
+
+        path (str): path to directory where comp data is stored
+
+        identifier (int): identifier of the batch
+
     """
 
-    matrix: np.ndarray
     items: list
     repertoire_index_mapping: Dict[str, int]
+    path: str
+    identifier: int
+    matrix: np.ndarray = None
+
+    def store(self):
+        PathBuilder.build(self.path)
+        np.save(self.path + f"{self.identifier}.npy", self.matrix)
+
+        batch_vars = vars(self)
+        del batch_vars["matrix"]
+
+        with open(self.path + f"{self.identifier}.pkl", "wb") as file:
+            pickle.dump(batch_vars, file)
+
+    def load(self):
+        file_path = self.path + f'{self.identifier}.pkl'
+        if os.path.isfile(file_path):
+            with open(file_path, 'rb') as file:
+                batch_vars = pickle.load(file)
+
+            for v in batch_vars:
+                if hasattr(self, v):
+                    setattr(self, v, batch_vars[v])
+        else:
+            logging.warning(f"ComparisonDataBatch: path {file_path} does not exist, returning the same object...")
+
+        return self
+
+    def get_matrix(self):
+        if self.matrix is None:
+            return np.load(self.path + f"{self.identifier}.npy")
+        else:
+            return self.matrix

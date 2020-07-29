@@ -57,28 +57,30 @@ class TestEmersonSequenceAbundanceEncoder(TestCase):
         shutil.rmtree(path)
 
     def test__build_abundance_matrix(self):
+        path = EnvironmentSettings.tmp_test_path + "abundance_encoder_matrix/"
+        PathBuilder.build(path)
         expected_abundance_matrix = np.array([[1, 4], [1, 6], [1, 3], [1, 6]])
 
         comparison_data = ComparisonData(repertoire_ids=["rep_0", "rep_1", "rep_2", "rep_3"],
-                                         comparison_attributes=["sequence_aas"], sequence_batch_size=2, path="")
+                                         comparison_attributes=["sequence_aas"], sequence_batch_size=2, path=path)
         comparison_data.batches = [ComparisonDataBatch(matrix=np.array([[1., 0., 0., 0.],
                                                                         [1., 1., 0., 0.]]),
-                                                       items=[('GGG',), ('III',)],
-                                                       repertoire_index_mapping={'rep_0': 0, 'rep_1': 1, 'rep_2': 2, 'rep_3': 3}),
+                                                       items=[('GGG',), ('III',)], identifier=0,
+                                                       repertoire_index_mapping={'rep_0': 0, 'rep_1': 1, 'rep_2': 2, 'rep_3': 3}, path=path),
                                    ComparisonDataBatch(matrix=np.array([[1., 1., 0., 1.],
                                                                         [1., 1., 1., 1.]]),
-                                                       items=[('LLL',), ('MMM',)],
+                                                       items=[('LLL',), ('MMM',)], identifier=1, path=path,
                                                        repertoire_index_mapping={'rep_0': 0, 'rep_1': 1, 'rep_2': 2, 'rep_3': 3}),
                                    ComparisonDataBatch(matrix=np.array([[0., 1., 0., 0.],
                                                                         [0., 1., 0., 1.]]),
-                                                       items=[('DDD',), ('EEE',)],
+                                                       items=[('DDD',), ('EEE',)], identifier=2, path=path,
                                                        repertoire_index_mapping={'rep_0': 0, 'rep_1': 1, 'rep_2': 2, 'rep_3': 3}),
                                    ComparisonDataBatch(matrix=np.array([[0., 1., 1., 1.],
                                                                         [0., 0., 1., 1.]]),
-                                                       items=[('FFF',), ('CCC',)],
+                                                       items=[('FFF',), ('CCC',)], identifier=3, path=path,
                                                        repertoire_index_mapping={'rep_0': 0, 'rep_1': 1, 'rep_2': 2, 'rep_3': 3}),
                                    ComparisonDataBatch(matrix=np.array([[0., 0., 0., 1.]]),
-                                                       items=[('AAA',)],
+                                                       items=[('AAA',)], identifier=4, path=path,
                                                        repertoire_index_mapping={'rep_0': 0, 'rep_1': 1, 'rep_2': 2, 'rep_3': 3})]
         comparison_data.item_count = 9
 
@@ -94,6 +96,8 @@ class TestEmersonSequenceAbundanceEncoder(TestCase):
 
         self.assertTrue(np.array_equal(expected_abundance_matrix, abundance_matrix))
 
+        shutil.rmtree(path)
+
     def test_find_label_associated_sequence_p_values(self):
         path = EnvironmentSettings.tmp_test_path + "comparison_data_find_label_assocseqpvalues/"
         PathBuilder.build(path)
@@ -105,26 +109,26 @@ class TestEmersonSequenceAbundanceEncoder(TestCase):
         col_name_index = {repertoires[index].identifier: index for index in range(len(repertoires))}
 
         comparison_data = ComparisonData(repertoire_ids=[repertoire.identifier for repertoire in repertoires],
-                                         comparison_attributes=["sequence_aas"], sequence_batch_size=4, path="")
+                                         comparison_attributes=["sequence_aas"], sequence_batch_size=4, path=path)
         comparison_data.batches = [ComparisonDataBatch(**{'matrix': np.array([[1., 0., 0., 0.],
                                                                               [1., 1., 0., 0.]]),
                                                           'items': [('GGG',), ('III',)],
-                                                          'repertoire_index_mapping': col_name_index}),
+                                                          'repertoire_index_mapping': col_name_index, 'path': path, 'identifier': 0}),
                                    ComparisonDataBatch(**{'matrix': np.array([[1., 1., 0., 1.],
                                                                               [1., 1., 1., 1.]]),
                                                           'items': [('LLL',), ('MMM',)],
-                                                          'repertoire_index_mapping': col_name_index}),
+                                                          'repertoire_index_mapping': col_name_index, 'path': path, 'identifier': 1}),
                                    ComparisonDataBatch(**{'matrix': np.array([[0., 1., 0., 0.],
                                                                               [0., 1., 0., 1.]]),
                                                           'items': [('DDD',), ('EEE',)],
-                                                          'repertoire_index_mapping': col_name_index}),
+                                                          'repertoire_index_mapping': col_name_index, 'path': path, 'identifier': 2}),
                                    ComparisonDataBatch(**{'matrix': np.array([[0., 1., 1., 1.],
                                                                               [0., 0., 1., 1.]]),
                                                           'items': [('FFF',), ('CCC',)],
-                                                          'repertoire_index_mapping': col_name_index}),
+                                                          'repertoire_index_mapping': col_name_index, 'path': path, 'identifier': 3}),
                                    ComparisonDataBatch(**{'matrix': np.array([[0., 0., 0., 1.]]),
                                                           'items': [('AAA',)],
-                                                          'repertoire_index_mapping': col_name_index})]
+                                                          'repertoire_index_mapping': col_name_index, 'path': path, 'identifier': 4})]
 
         p_values = SequenceFilterHelper.find_label_associated_sequence_p_values(comparison_data, repertoires, "l1", [True, False])
 
