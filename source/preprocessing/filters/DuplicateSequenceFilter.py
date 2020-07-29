@@ -1,9 +1,9 @@
 import copy
 from multiprocessing.pool import Pool
-from scripts.specification_util import update_docs_per_mapping
 
 import pandas as pd
 
+from scripts.specification_util import update_docs_per_mapping
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.receptor.receptor_sequence.Chain import Chain
 from source.data_model.repertoire.Repertoire import Repertoire
@@ -19,24 +19,25 @@ class DuplicateSequenceFilter(Filter):
     This filter can be applied to Repertoires and RepertoireDatasets.
 
     Sequences are considered duplicates if the following fields are identical:
+
       - amino acid or nucleotide sequence (whichever is specified)
-      - v and j genes (note that the full field including subgroup + gene is used for matching,
-                       i.e. V1 and V1-1 are not considered duplicates)
+      - v and j genes (note that the full field including subgroup + gene is used for matching, i.e. V1 and V1-1 are not considered duplicates)
       - chain
       - region type
 
     For all other fields (the non-specified sequence type, custom lists, sequence identifier) only the first occurring
     value is kept.
+
     Note that this means the count value of a sequence with a given sequence identifier might not be the same as before
     removing duplicates, unless count_agg = FIRST is used.
 
-    Attributes:
+    Arguments:
 
-        filter_sequence_type (:py:obj:`~source.environment.SequenceType.SequenceType`): Whether the sequences should be
-            collapsed on the nucleotide or amino acid level. Valid options are defined by the SequenceType enum.
+        filter_sequence_type (:py:obj:`~source.environment.SequenceType.SequenceType`): Whether the sequences should be collapsed on the nucleotide or amino acid level. Valid options are defined by the SequenceType enum.
+
         batch_size (int): number of repertoires that can be loaded at the same time (only affects the speed)
-        count_agg (:py:obj:`~source.preprocessing.filters.CountAggregationFunction.CountAggregationFunction`): determines
-            how the sequence counts of duplicate sequences are aggregated. Valid options are defined by the CountAggregationFunction enum.
+
+        count_agg (:py:obj:`~source.preprocessing.filters.CountAggregationFunction.CountAggregationFunction`): determines how the sequence counts of duplicate sequences are aggregated. Valid options are defined by the CountAggregationFunction enum.
 
     Specification:
 

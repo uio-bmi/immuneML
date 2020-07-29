@@ -10,12 +10,12 @@ from source.ml_methods.MLMethod import MLMethod
 from source.util.PathBuilder import PathBuilder
 from source.workflows.steps.DataEncoder import DataEncoder
 from source.workflows.steps.DataEncoderParams import DataEncoderParams
-from source.workflows.steps.DataSplitter import DataSplitter
-from source.workflows.steps.DataSplitterParams import DataSplitterParams
 from source.workflows.steps.MLMethodAssessment import MLMethodAssessment
 from source.workflows.steps.MLMethodAssessmentParams import MLMethodAssessmentParams
 from source.workflows.steps.MLMethodTrainer import MLMethodTrainer
 from source.workflows.steps.MLMethodTrainerParams import MLMethodTrainerParams
+from source.workflows.steps.data_splitter.DataSplitter import DataSplitter
+from source.workflows.steps.data_splitter.DataSplitterParams import DataSplitterParams
 
 
 class HPUtil:
@@ -28,7 +28,8 @@ class HPUtil:
             split_strategy=split_config.split_strategy,
             split_count=split_config.split_count,
             training_percentage=split_config.training_percentage,
-            paths=paths
+            paths=paths,
+            split_config=split_config
         )
         return DataSplitter.run(params)
 

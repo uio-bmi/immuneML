@@ -1,45 +1,40 @@
 import warnings
 
+import numpy as np
 
 from source.ml_methods.DeepRC import DeepRC
 from source.reports.ReportOutput import ReportOutput
 from source.reports.ReportResult import ReportResult
 from source.reports.ml_reports.MLReport import MLReport
-import numpy as np
-
 from source.util.ParameterValidator import ParameterValidator
-from source.visualization.integrated_gradients_snippets import compute_contributions
 from source.util.PathBuilder import PathBuilder
+from source.visualization.integrated_gradients_snippets import compute_contributions
 
 
 class DeepRCInterpretation(MLReport):
-    '''
+    """
     This report plots the contributions of (i) input sequences and (ii) kernels to trained DeepRC model with respect to
     the test dataset. Contributions are computed using integrated gradients (IG).
     This report produces two figures:
-        inputs_integrated_gradients: Shows the contributions of the characters within the input sequences (test dataset)
-           that was most important for immune status prediction of the repertoire. IG is only applied to sequences
-           of positive class repertoires.
-        kernel_integrated_gradients: Shows the 1D CNN kernels with the highest contribution over all positions and amino
-            acids.
+        - inputs_integrated_gradients: Shows the contributions of the characters within the input sequences (test dataset) that was most important for immune status prediction of the repertoire. IG is only applied to sequences of positive class repertoires.
+        - kernel_integrated_gradients: Shows the 1D CNN kernels with the highest contribution over all positions and amino acids.
 
     For both inputs and kernels: Larger characters in the extracted motifs indicate higher contribution, with blue
     indicating positive contribution and red indicating negative contribution towards the prediction of the immune status.
     For kernels only: contributions to positional encoding are indicated by < (beginning of sequence),
     ∧ (center of sequence), and > (end of sequence).
 
-
     Reference:
     Michael Widrich, Bernhard Schäfl, Milena Pavlović, Geir Kjetil Sandve, Sepp Hochreiter, Victor Greiff, Günter Klambauer
     ‘DeepRC: Immune repertoire classification with attention-based deep massive multiple instance learning’.
-    bioRxiv preprint doi: https://doi.org/10.1101/2020.04.12.038158
+    bioRxiv preprint doi: `https://doi.org/10.1101/2020.04.12.03815 <https://doi.org/10.1101/2020.04.12.038158>`_
 
 
-    Attributes:
-        n_steps (int): Number of IG steps (more steps -> better path integral -> finer contribution values).
-            50 is usually good enough.
-        threshold (float): Only applies to the plotting of kernels. Contributions are normalized to range [0, 1],
-            and only kernels with normalized contributions above threshold are plotted.
+    Arguments:
+
+        n_steps (int): Number of IG steps (more steps -> better path integral -> finer contribution values). 50 is usually good enough.
+
+        threshold (float): Only applies to the plotting of kernels. Contributions are normalized to range [0, 1], and only kernels with normalized contributions above threshold are plotted.
 
     Specification:
 
@@ -50,7 +45,8 @@ class DeepRCInterpretation(MLReport):
             DeepRCInterpretation:
                 threshold: 0.5
                 n_steps: 50
-    '''
+
+    """
     def __init__(self, n_steps, threshold, name: str = None):
         super(DeepRCInterpretation, self).__init__()
         self.n_steps = n_steps

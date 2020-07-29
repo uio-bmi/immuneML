@@ -31,35 +31,51 @@ class DeepRC(MLMethod):
     Reference:
     Michael Widrich, Bernhard Schäfl, Milena Pavlović, Geir Kjetil Sandve, Sepp Hochreiter, Victor Greiff, Günter Klambauer
     ‘DeepRC: Immune repertoire classification with attention-based deep massive multiple instance learning’.
-    bioRxiv preprint doi: https://doi.org/10.1101/2020.04.12.038158
+    bioRxiv preprint doi: `https://doi.org/10.1101/2020.04.12.038158 <https://doi.org/10.1101/2020.04.12.038158>`_
 
 
-    Attributes:
+    Arguments:
+
         validation_part (float):  the part of the data that will be used for validation, the rest will be used for training.
+
         max_seq_len (int): the maximum sequence length that the DeepRC classifier can handle.
+
         add_positional_information (bool): whether positional information should be included in the input features.
+
         kernel_size (int): the size of the 1D-CNN kernels.
+
         n_kernels (int): the number of 1D-CNN kernels in each layer.
+
         n_additional_convs (int): Number of additional 1D-CNN layers after first layer
+
         n_attention_network_layers (int): Number of attention layers to compute keys
+
         n_attention_network_units (int): Number of units in each attention layer
+
         n_output_network_units (int): Number of units in the output layer
+
         consider_seq_counts (bool): whether the input data should be scaled by the receptor sequence counts.
-        sequence_reduction_fraction (float): Fraction of number of sequences to which to reduce the number of
-            sequences per bag based on attention weights. Has to be in range [0,1].
-        reduction_mb_size (int): Reduction of sequences per bag is performed using minibatches of reduction_mb_size`
-            sequences to compute the attention weights.
+
+        sequence_reduction_fraction (float): Fraction of number of sequences to which to reduce the number of sequences per bag based on attention weights. Has to be in range [0,1].
+
+        reduction_mb_size (int): Reduction of sequences per bag is performed using minibatches of reduction_mb_size` sequences to compute the attention weights.
+
         n_updates (int): Number of updates to train for
+
         n_torch_threads (int):  Number of parallel threads to allow PyTorch
+
         learning_rate (float): Learning rate for adam optimizer
+
         l1_weight_decay (float): l1 weight decay factor. l1 weight penalty will be added to loss, scaled by `l1_weight_decay`
+
         l2_weight_decay (float): l2 weight decay factor. l2 weight penalty will be added to loss, scaled by `l2_weight_decay`
-        evaluate_at (int): Evaluate model on training and validation set every `evaluate_at` updates. This will also
-            check for a new best model for early stopping.
-        sample_n_sequences (int): Optional random sub-sampling of `sample_n_sequences` sequences per repertoire.
-            Number of sequences per repertoire might be smaller than `sample_n_sequences` if repertoire is smaller or
-            random indices have been drawn multiple times. If None, all sequences will be loaded for each repertoire.
+
+        evaluate_at (int): Evaluate model on training and validation set every `evaluate_at` updates. This will also check for a new best model for early stopping.
+
+        sample_n_sequences (int): Optional random sub-sampling of `sample_n_sequences` sequences per repertoire. Number of sequences per repertoire might be smaller than `sample_n_sequences` if repertoire is smaller or random indices have been drawn multiple times. If None, all sequences will be loaded for each repertoire.
+
         training_batch_size (int): Number of repertoires per minibatch during training.
+
         n_workers (int): Number of background processes to use for converting dataset to hdf5 container and trainingset dataloader.
 
 
@@ -74,7 +90,6 @@ class DeepRC(MLMethod):
                 add_positional_information: True
                 kernel_size: 9
                 model_selection_cv: False
-
 
     """
     def __init__(self, validation_part, max_seq_len, add_positional_information, kernel_size, n_kernels,

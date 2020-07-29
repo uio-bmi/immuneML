@@ -9,7 +9,7 @@ class RandomForestClassifier(SklearnMethod):
     Random Forest wrapper of the corresponding scikit-learn's method.
 
     For usage and specification, check :py:obj:`~source.ml_methods.SklearnMethod.SklearnMethod`.
-    For valid parameters, see: https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestClassifier.html
+    For valid parameters, see `scikit-learn documentation <https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestClassifier.html>`_.
 
     Specification:
 

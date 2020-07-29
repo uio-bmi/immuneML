@@ -12,11 +12,9 @@ class MetadataRepertoireFilter(Filter):
     Removes repertoires from a RepertoireDataset based on information stored in the metadata_file.
     Note that this filter filters out repertoires, not individual sequences, and can thus only be applied to RepertoireDatasets.
 
-    Attributes:
+    Arguments:
 
-        criteria (dict): a nested dictionary that specifies the criteria for keeping certain columns.
-            See :py:obj:`~source.analysis.criteria_matches.CriteriaMatcher.CriteriaMatcher` for a more detailed explanation.
-            # todo @Milena add a more detailed description here
+        criteria (dict): a nested dictionary that specifies the criteria for keeping certain columns. See :py:obj:`~source.analysis.criteria_matches.CriteriaMatcher.CriteriaMatcher` for a more detailed explanation.
 
     Specification:
 

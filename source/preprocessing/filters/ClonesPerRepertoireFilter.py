@@ -8,9 +8,10 @@ class ClonesPerRepertoireFilter(Filter):
     lower_limit, or more clonotypes than specified by the upper_limit.
     Note that this filter filters out repertoires, not individual sequences, and can thus only be applied to RepertoireDatasets.
 
-    Attributes:
+    Arguments:
 
         lower_limit (int): The minimal inclusive lower limit for the number of clonotypes allowed in a repertoire.
+
         upper_limit (int): The maximal inclusive upper limit for the number of clonotypes allowed in a repertoire.
 
     When no lower or upper limit is specified, or the value -1 is specified, the limit is ignored.

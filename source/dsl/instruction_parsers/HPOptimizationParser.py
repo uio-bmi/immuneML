@@ -10,6 +10,8 @@ from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.environment.LabelConfiguration import LabelConfiguration
 from source.environment.Metric import Metric
 from source.hyperparameter_optimization.HPSetting import HPSetting
+from source.hyperparameter_optimization.config.LeaveOneOutConfig import LeaveOneOutConfig
+from source.hyperparameter_optimization.config.ManualSplitConfig import ManualSplitConfig
 from source.hyperparameter_optimization.config.ReportConfig import ReportConfig
 from source.hyperparameter_optimization.config.SplitConfig import SplitConfig
 from source.hyperparameter_optimization.config.SplitType import SplitType
@@ -129,17 +131,7 @@ class HPOptimizationParser:
         try:
 
             default_params = DefaultParamsLoader.load("instructions/", SplitConfig.__name__)
-
-            if "reports" in instruction[key]:
-                for report_type in instruction[key]["reports"]:
-                    ParameterValidator.assert_type_and_value(instruction[key]["reports"][report_type], list, "HPOptimizationReport",
-                                                             report_type)
-
-                report_config_input = {report_type: {report_id: symbol_table.get(report_id) for report_id in instruction[key]["reports"][report_type]}
-                                       for report_type in instruction[key]["reports"]}
-            else:
-                report_config_input = {}
-
+            report_config_input = self._prepare_report_config(instruction, key, symbol_table)
             instruction[key] = {**default_params, **instruction[key]}
 
             split_strategy = SplitType[instruction[key]["split_strategy"].upper()]
@@ -148,8 +140,24 @@ class HPOptimizationParser:
             return SplitConfig(split_strategy=split_strategy,
                                split_count=int(instruction[key]["split_count"]),
                                training_percentage=training_percentage,
-                               reports=ReportConfig(**report_config_input))
+                               reports=ReportConfig(**report_config_input),
+                               manual_config=ManualSplitConfig(**instruction[key]["manual_config"]) if "manual_config" in instruction[key] else None,
+                               leave_one_out_config=LeaveOneOutConfig(**instruction[key]["leave_one_out_config"])
+                               if "leave_one_out_config" in instruction[key] else None)
 
         except KeyError as key_error:
             print(f"HPOptimizationParser: parameter {key_error.args[0]} was not defined under {key}.")
             raise key_error
+
+    def _prepare_report_config(self, instruction, key, symbol_table):
+        if "reports" in instruction[key]:
+            for report_type in instruction[key]["reports"]:
+                ParameterValidator.assert_type_and_value(instruction[key]["reports"][report_type], list, "HPOptimizationReport",
+                                                         report_type)
+
+            report_config_input = {report_type: {report_id: symbol_table.get(report_id) for report_id in instruction[key]["reports"][report_type]}
+                                   for report_type in instruction[key]["reports"]}
+        else:
+            report_config_input = {}
+
+        return report_config_input

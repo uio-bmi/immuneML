@@ -5,9 +5,11 @@ from sklearn.model_selection import KFold
 
 from source.caching.CacheHandler import CacheHandler
 from source.data_model.dataset.Dataset import Dataset
-from source.util.PathBuilder import PathBuilder
-from source.workflows.steps.DataSplitterParams import DataSplitterParams
 from source.workflows.steps.Step import Step
+from source.workflows.steps.data_splitter.DataSplitterParams import DataSplitterParams
+from source.workflows.steps.data_splitter.LeaveOneOutSplitter import LeaveOneOutSplitter
+from source.workflows.steps.data_splitter.ManualSplitter import ManualSplitter
+from source.workflows.steps.data_splitter.Util import Util
 
 
 class DataSplitter(Step):
@@ -26,7 +28,15 @@ class DataSplitter(Step):
                 ("dataset_type", input_params.dataset.__class__.__name__),
                 ("split_count", input_params.split_count),
                 ("split_strategy", input_params.split_strategy.name),
-                ("training_percentage", input_params.training_percentage), )
+                ("training_percentage", input_params.training_percentage),)
+
+    @staticmethod
+    def manual_split(input_params: DataSplitterParams):
+        return ManualSplitter.split_dataset(input_params)
+
+    @staticmethod
+    def leave_one_out_stratification_split(input_params: DataSplitterParams):
+        return LeaveOneOutSplitter.split_dataset(input_params)
 
     @staticmethod
     def loocv_split(input_params: DataSplitterParams):
@@ -42,19 +52,13 @@ class DataSplitter(Step):
 
         k_fold = KFold(n_splits=splits_count, shuffle=True)
         for split_index, (train_index, test_index) in enumerate(k_fold.split(indices)):
-            train_dataset = DataSplitter.make_dataset(dataset, train_index, input_params, split_index, Dataset.TRAIN)
+            train_dataset = Util.make_dataset(dataset, train_index, input_params, split_index, Dataset.TRAIN)
             train_datasets.append(train_dataset)
 
-            test_dataset = DataSplitter.make_dataset(dataset, test_index, input_params, split_index, Dataset.TEST)
+            test_dataset = Util.make_dataset(dataset, test_index, input_params, split_index, Dataset.TEST)
             test_datasets.append(test_dataset)
 
         return train_datasets, test_datasets
-
-    @staticmethod
-    def prepare_path(input_params: DataSplitterParams, split_index: int) -> str:
-        path = f"{input_params.paths[split_index]}datasets/"
-        PathBuilder.build(path)
-        return path
 
     @staticmethod
     def random_split(input_params: DataSplitterParams):
@@ -63,7 +67,7 @@ class DataSplitter(Step):
         training_percentage = input_params.training_percentage
 
         if training_percentage > 1:
-            training_percentage = training_percentage/100
+            training_percentage = training_percentage / 100
 
         train_count = int(dataset.get_example_count() * training_percentage)
         train_datasets, test_datasets = [], []
@@ -75,21 +79,14 @@ class DataSplitter(Step):
             train_index = indices[:train_count]
             test_index = indices[train_count:]
 
-            train_dataset = DataSplitter.make_dataset(dataset, train_index, input_params, i, Dataset.TRAIN)
+            train_dataset = Util.make_dataset(dataset, train_index, input_params, i, Dataset.TRAIN)
             train_datasets.append(train_dataset)
 
             if training_percentage < 1.0:
-                test_dataset = DataSplitter.make_dataset(dataset, test_index, input_params, i, Dataset.TEST)
+                test_dataset = Util.make_dataset(dataset, test_index, input_params, i, Dataset.TEST)
             else:
                 test_dataset = None
 
             test_datasets.append(test_dataset)
 
         return train_datasets, test_datasets
-
-    @staticmethod
-    def make_dataset(dataset: Dataset, indices, input_params: DataSplitterParams, i: int, dataset_type: str):
-        path = DataSplitter.prepare_path(input_params, i)
-        new_dataset = dataset.make_subset(indices, path, dataset_type)
-        return new_dataset
-

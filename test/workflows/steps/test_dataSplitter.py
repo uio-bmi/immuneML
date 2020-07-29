@@ -11,8 +11,8 @@ from source.environment.Constants import Constants
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.hyperparameter_optimization.config.SplitType import SplitType
 from source.util.PathBuilder import PathBuilder
-from source.workflows.steps.DataSplitter import DataSplitter
-from source.workflows.steps.DataSplitterParams import DataSplitterParams
+from source.workflows.steps.data_splitter.DataSplitter import DataSplitter
+from source.workflows.steps.data_splitter.DataSplitterParams import DataSplitterParams
 
 
 class TestDataSplitter(TestCase):

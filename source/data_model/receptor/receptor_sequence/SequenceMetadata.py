@@ -6,8 +6,8 @@ from source.data_model.receptor.receptor_sequence.SequenceFrameType import Seque
 class SequenceMetadata:
     """
     class modeling the existing knowledge about a receptor_sequence, should be stored according to
-    IMGT gene nomenclature (human can be found here:
-    http://www.imgt.org/IMGTrepertoire/index.php?section=LocusGenes&repertoire=genetable&species=human&group=TRBV):
+    IMGT gene nomenclature (human can be found `here
+    <http://www.imgt.org/IMGTrepertoire/index.php?section=LocusGenes&repertoire=genetable&species=human&group=TRBV>`_):
         - v subgroup
         - v gene
         - v allele
@@ -20,6 +20,7 @@ class SequenceMetadata:
         - frame_type (e.g. In, Out, Stop)
         - sample
         - custom params (dictionary with custom sequence information)
+
     """
 
     def __init__(self,

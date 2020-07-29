@@ -9,7 +9,7 @@ class SimpleLogisticRegression(SklearnMethod):
     Logistic regression wrapper of the corresponding scikit-learn's method.
 
     For usage and specification, check :py:obj:`~source.ml_methods.SklearnMethod.SklearnMethod`.
-    For valid parameters, see: https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LogisticRegression.html
+    For valid parameters, see `scikit-learn documentation <https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LogisticRegression.html>`_.
 
     Specification:
 

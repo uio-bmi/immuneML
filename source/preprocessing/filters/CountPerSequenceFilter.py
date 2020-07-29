@@ -14,12 +14,13 @@ class CountPerSequenceFilter(Filter):
     value if remove_without_counts is True.
     This filter can be applied to Repertoires and RepertoireDatasets.
 
-    Attributes:
+    Arguments:
 
         low_count_limit (int): The inclusive minimal count value in order to retain a given sequence.
+
         remove_without_count (bool): Whether the sequences without a reported count value should be removed.
-        batch_size (int): number of repertoires that can be loaded at the same time (only affects the speed when applying
-            this filter on a RepertoireDataset)
+
+        batch_size (int): number of repertoires that can be loaded at the same time (only affects the speed when applying this filter on a RepertoireDataset)
 
 
     Specification:

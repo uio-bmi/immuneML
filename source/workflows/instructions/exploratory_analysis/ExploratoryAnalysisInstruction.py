@@ -19,13 +19,13 @@ class ExploratoryAnalysisInstruction(Instruction):
 
     Arguments:
 
-        exploratory_analysis_units (dict): a dictionary of analyses to perform; keys are the names of the analyses and values are the
-            parameters of the analyses (objects of :py:obj:`~source.workflows.instructions.exploratory_analysis.ExploratoryAnalysisUnit.ExploratoryAnalysisUnit` class).
-            Each of these includes a dataset on which to perform the analysis, report to run, and optionally preprocessing sequence,
-            encoding (if the report needs to be executed on the encoded dataset) and label configuration (if the dataset needs to be
-            encoded, it is also necessary to specify a label for encoding - a label could correspond to an immune event or to genetic
-            information (e.g. HLA). The batch size can also be set to encode multiple repertoires in parallel, but this also increases
-            the memory usage, so it must be reasonably set.
+        exploratory_analysis_units (dict): a dictionary of analyses to perform; keys are the names of the analyses and values are the parameters of
+        the analyses (objects of :py:obj:`~source.workflows.instructions.exploratory_analysis.ExploratoryAnalysisUnit.ExploratoryAnalysisUnit`
+        class). Each of these includes a dataset on which to perform the analysis, report to run, and optionally preprocessing sequence,
+        encoding (if the report needs to be executed on the encoded dataset) and label configuration (if the dataset needs to be encoded,
+        it is also necessary to specify a label for encoding - a label could correspond to an immune event or to genetic information (e.g. HLA).
+        The batch size can also be set to encode multiple repertoires in parallel, but this also increases the memory usage, so it must be
+        reasonably set.
 
     Specification:
 

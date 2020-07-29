@@ -11,7 +11,7 @@ class TCRDISTClassifier(SklearnMethod):
     """
     Implementation of a nearest neighbors classifier based on TCR distances as presented in
     Dash P, Fiore-Gartland AJ, Hertz T, et al. Quantifiable predictive features define epitope-specific T cell receptor repertoires.
-    Nature. 2017;547(7661):89-93. doi:10.1038/nature22383.
+    Nature. 2017; 547(7661):89-93. `doi:10.1038/nature22383 <https://www.nature.com/articles/nature22383>`_.
 
     This method is implemented using scikit-learn's KNeighborsClassifier with k determined at runtime from the training dataset size and weights
     linearly scaled to decrease with the distance of examples.

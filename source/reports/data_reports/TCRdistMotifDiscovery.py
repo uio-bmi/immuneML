@@ -22,12 +22,12 @@ class TCRdistMotifDiscovery(EncodingReport):
     distance and then motifs are discovered for each cluster. The report outputs logo plots for the motifs along with the raw data used for plotting
     in csv format.
 
-    For the implementation, TCRdist2 library was used (https://tcrdist2.readthedocs.io/en/latest/index.html). More details on the functionality used
-    for this report are available here: https://tcrdist2.readthedocs.io/en/latest/HotStart.html#discover-motifs.
+    For the implementation, `TCRdist2 <https://tcrdist2.readthedocs.io/en/latest/index.html>`_ library was used. More details on the functionality used
+    for this report are available `here <https://tcrdist2.readthedocs.io/en/latest/HotStart.html#discover-motifs>`_.
 
     Original publication:
     Dash P, Fiore-Gartland AJ, Hertz T, et al. Quantifiable predictive features define epitope-specific T cell receptor repertoires.
-    Nature. 2017;547(7661):89-93. doi:10.1038/nature22383
+    Nature. 2017; 547(7661):89-93. `doi:10.1038/nature22383 <https://www.nature.com/articles/nature22383>`_
 
     Arguments:
 

@@ -8,8 +8,7 @@ class ReportConfig:
 
     Arguments:
 
-        data_splits (dict): reports to be executed when the data is split to training and test (assessment CV loop)
-            or training and validation (selection CV loop) datasets before they are encoded
+        data_splits (dict): reports to be executed when the data is split to training and test (assessment CV loop) or training and validation (selection CV loop) datasets before they are encoded
 
         models (dict): reports to be executed on all trained classifiers
 
@@ -19,8 +18,7 @@ class ReportConfig:
 
         encoding (dict): reports to be executed on the encoded training/test datasets or training/validation datasets
 
-        hyperparameter (dict): reports to be executed after the nested CV has finished to show the overall performance; this parameter can
-            only be specified under assessment key in HPOptimization instruction.
+        hyperparameter (dict): reports to be executed after the nested CV has finished to show the overall performance; this parameter can only be specified under assessment key in HPOptimization instruction.
 
     Specification:
 

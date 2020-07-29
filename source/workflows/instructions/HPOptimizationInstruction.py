@@ -11,10 +11,11 @@ from source.workflows.instructions.Instruction import Instruction
 
 class HPOptimizationInstruction(Instruction):
     """
-    Class implementing hyper-parameter optimization and training and assessing the model through nested cross-validation (CV):
-
+    Class implementing hyper-parameter optimization and training and assessing the model through nested cross-validation (CV).
     The process is defined by two loops:
+
         - the outer loop over defined splits of the dataset for performance assessment
+
         - the inner loop over defined hyper-parameter space and with cross-validation or train & validation split
           to choose the best hyper-parameters.
 
@@ -24,31 +25,21 @@ class HPOptimizationInstruction(Instruction):
 
         dataset (Dataset): dataset to use for training and assessing the classifier
 
-        hp_strategy (HPOptimizationStrategy): how to search different hyperparameters; common options include grid search, random search.
-            Valid values are objects of any class inheriting :py:obj:`~source.hyperparameter_optimization.strategy.HPOptimizationStrategy.HPOptimizationStrategy`.
+        hp_strategy (HPOptimizationStrategy): how to search different hyperparameters; common options include grid search, random search. Valid values are objects of any class inheriting :py:obj:`~source.hyperparameter_optimization.strategy.HPOptimizationStrategy.HPOptimizationStrategy`.
 
-        hp_settings (list): a list of combinations of `preprocessing_sequence`, `encoding` and `ml_method`. `preprocessing_sequence` is optional,
-            while `encoding` and `ml_method` are mandatory. These three options (and their parameters) can be optimized over, choosing the
-            highest performing combination.
+        hp_settings (list): a list of combinations of `preprocessing_sequence`, `encoding` and `ml_method`. `preprocessing_sequence` is optional, while `encoding` and `ml_method` are mandatory. These three options (and their parameters) can be optimized over, choosing the highest performing combination.
 
-        assessment (SplitConfig): description of the outer loop (for assessment) of nested cross-validation. It describes how to split the
-            data, how many splits to make, what percentage to use for training and what reports to execute on those splits. See SplitConfig.
+        assessment (SplitConfig): description of the outer loop (for assessment) of nested cross-validation. It describes how to split the data, how many splits to make, what percentage to use for training and what reports to execute on those splits. See SplitConfig.
 
-        selection (SplitConfig): description of the inner loop (for selection) of nested cross-validation.
-            The same as assessment argument, just to be executed in the inner loop. See SplitConfig.
+        selection (SplitConfig): description of the inner loop (for selection) of nested cross-validation. The same as assessment argument, just to be executed in the inner loop. See SplitConfig.
 
-        metrics (list): a list of metrics to compute for all splits and settings created during the nested cross-validation. These metrics
-            will be computed only for reporting purposes. For choosing the optimal setting, `optimization_metric` will be used.
+        metrics (list): a list of metrics to compute for all splits and settings created during the nested cross-validation. These metrics will be computed only for reporting purposes. For choosing the optimal setting, `optimization_metric` will be used.
 
         optimization_metric (Metric): a metric to use for optimization and assessment in the nested cross-validation.
 
-        label_configuration (LabelConfiguration): a list of labels for which to train the classifiers. The goal of the nested CV is to find
-            the setting which will have best performance in predicting the given label
-            (e.g. if a subject has experienced an immune event or not). Performance and optimal settings will be reported for each
-            label separately.
+        label_configuration (LabelConfiguration): a list of labels for which to train the classifiers. The goal of the nested CV is to find the setting which will have best performance in predicting the given label (e.g. if a subject has experienced an immune event or not). Performance and optimal settings will be reported for each label separately.
 
-        batch_size (int): how many processes should be created at once to speed up the analysis.
-            For personal machines, 4 is usually a good choice.
+        batch_size (int): how many processes should be created at once to speed up the analysis. For personal machines, 4 or 8 is usually a good choice.
 
         data_reports (list): a list of reports to be executed on the whole dataset.
 

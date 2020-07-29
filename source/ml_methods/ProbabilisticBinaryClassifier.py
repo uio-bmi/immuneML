@@ -27,7 +27,7 @@ class ProbabilisticBinaryClassifier(MLMethod):
     ProbabilisticBinaryClassifier is based on the paper (details on the classification can be found in the Online Methods section):
     Emerson, Ryan O., William S. DeWitt, Marissa Vignali, Jenna Gravley, Joyce K. Hu, Edward J. Osborne, Cindy Desmarais, et al.
     ‘Immunosequencing Identifies Signatures of Cytomegalovirus Exposure History and HLA-Mediated Effects on the T Cell Repertoire’.
-    Nature Genetics 49, no. 5 (May 2017): 659–65. https://doi.org/10.1038/ng.3822.
+    Nature Genetics 49, no. 5 (May 2017): 659–65. `doi.org/10.1038/ng.3822 <https://doi.org/10.1038/ng.3822>`_.
 
     Arguments:
 

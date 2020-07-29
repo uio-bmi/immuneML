@@ -13,7 +13,7 @@ class TCRdistEncoder(DatasetEncoder):
     """
     Encodes the given ReceptorDataset as a distance matrix between all receptors, where the distance is computed using TCRdist from the paper:
     Dash P, Fiore-Gartland AJ, Hertz T, et al. Quantifiable predictive features define epitope-specific T cell receptor repertoires.
-    Nature. 2017;547(7661):89-93. doi:10.1038/nature22383
+    Nature. 2017; 547(7661):89-93. `doi:10.1038/nature22383 <https://www.nature.com/articles/nature22383>`_.
 
     Arguments:
 
