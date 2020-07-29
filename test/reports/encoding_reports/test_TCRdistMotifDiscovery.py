@@ -10,7 +10,7 @@ from source.environment.Constants import Constants
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.environment.Label import Label
 from source.environment.LabelConfiguration import LabelConfiguration
-from source.reports.data_reports.TCRdistMotifDiscovery import TCRdistMotifDiscovery
+from source.reports.encoding_reports.TCRdistMotifDiscovery import TCRdistMotifDiscovery
 from source.util.PathBuilder import PathBuilder
 
 

@@ -5,6 +5,7 @@ from source.data_model.dataset.ReceptorDataset import ReceptorDataset
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.receptor.TCABReceptor import TCABReceptor
 from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
+from source.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.util.PathBuilder import PathBuilder
 from source.util.RepertoireBuilder import RepertoireBuilder
@@ -138,13 +139,14 @@ class RandomDatasetGenerator:
         PathBuilder.build(path)
 
         get_random_sequence = lambda proba: ReceptorSequence("".join(random.choices(alphabet, k=random.choices(list(proba.keys()),
-                                                                                                               proba.values())[0])))
+                                                                                                               proba.values())[0])),
+                                                             metadata=SequenceMetadata(count=1))
 
         receptors = [TCABReceptor(alpha=get_random_sequence(chain_1_length_probabilities),
                                   beta=get_random_sequence(chain_2_length_probabilities),
-                                  metadata={label: random.choices(list(label_dict.keys()), label_dict.values(), k=1)[0]
-                                            for label, label_dict in labels.items()})
-                     for _ in range(receptor_count)]
+                                  metadata={**{label: random.choices(list(label_dict.keys()), label_dict.values(), k=1)[0]
+                                            for label, label_dict in labels.items()}, **{"subject": f"subj_{i+1}"}})
+                     for i in range(receptor_count)]
 
         filename = f"{path if path[-1] == '/' else path + '/'}batch01.pickle"
 

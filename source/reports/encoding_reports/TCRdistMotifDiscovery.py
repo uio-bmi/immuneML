@@ -125,3 +125,9 @@ class TCRdistMotifDiscovery(EncodingReport):
         plotting.plot_pwm(StoreIOMotif_instance, create_file=True, my_height=200, my_width=600,
                           output=path)
         return ReportOutput(path, f"motif {cluster_index + 1}-{i + 1} (epitope: {epitope}): {chain_name} chain")
+
+    def check_prerequisites(self):
+        if isinstance(self.dataset, ReceptorDataset):
+            return True
+        else:
+            return False
