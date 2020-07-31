@@ -67,8 +67,8 @@ class TestExploratoryAnalysisProcess(TestCase):
         process.run(path + "results/")
 
         self.assertTrue(units["named_analysis_1"].batch_size == 16)
-        self.assertTrue(os.path.isfile(path + "results/exp/analysis_named_analysis_1/sequence_length_distribution.png"))
-        self.assertTrue(os.path.isfile(path + "results/exp/analysis_named_analysis_2/sequence_length_distribution.png"))
+        self.assertTrue(os.path.isfile(path + "results/exp/analysis_named_analysis_1/sequence_length_distribution.html"))
+        self.assertTrue(os.path.isfile(path + "results/exp/analysis_named_analysis_2/sequence_length_distribution.html"))
         self.assertTrue(os.path.isfile(path + "results/exp/analysis_named_analysis_3/matching_sequence_overview.tsv"))
 
         shutil.rmtree(path)

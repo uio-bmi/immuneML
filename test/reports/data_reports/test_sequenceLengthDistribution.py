@@ -35,12 +35,6 @@ class TestSequenceLengthDistribution(TestCase):
         dataset = RepertoireDataset(repertoires=[rep1, rep2])
 
         sld = SequenceLengthDistribution(dataset, 1, path)
-        lengths = sld.get_normalized_sequence_lengths()
-
-        self.assertTrue(all([key in lengths.keys() for key in [3, 4, 5]]))
-        self.assertEqual(0.5, lengths[3])
-        self.assertEqual(0.125, lengths[5])
-        self.assertEqual(0.375, lengths[4])
 
         result = sld.generate()
         self.assertTrue(os.path.isfile(result.output_figures[0].path))
