@@ -9,7 +9,7 @@ from source.environment.SequenceType import SequenceType
 
 class PyTorchReceptorCNN(nn.Module):
 
-    def __init__(self, kernel_count: int, kernel_size, positional_channels: int, sequence_type: SequenceType, background_probabilities):
+    def __init__(self, kernel_count: int, kernel_size, positional_channels: int, sequence_type: SequenceType, background_probabilities, chain_names):
         super(PyTorchReceptorCNN, self).__init__()
         self.background_probabilities = background_probabilities
         self.threshold = 0.1
@@ -17,25 +17,26 @@ class PyTorchReceptorCNN(nn.Module):
         self.in_channels = len(EnvironmentSettings.get_sequence_alphabet(sequence_type)) + positional_channels
         self.positional_channels = positional_channels
         self.max_information_gain = self.get_max_information_gain()
+        self.chain_names = chain_names
 
-        self.conv_chain_1 = [f"conv_chain_1_kernel_{size}" for size in kernel_size]
-        self.conv_chain_2 = [f"conv_chain_2_kernel_{size}" for size in kernel_size]
+        self.conv_chain_1 = [f"chain_1_kernel_{size}" for size in kernel_size]
+        self.conv_chain_2 = [f"chain_2_kernel_{size}" for size in kernel_size]
 
         for size in kernel_size:
             # chain 1
-            setattr(self, f"conv_chain_1_kernel_{size}", nn.Conv1d(in_channels=self.in_channels, out_channels=kernel_count, kernel_size=size,
-                                                                   bias=True))
-            getattr(self, f"conv_chain_1_kernel_{size}").weight.data.\
-                normal_(0.0, np.sqrt(1 / np.prod(getattr(self, f"conv_chain_1_kernel_{size}").weight.shape)))
+            setattr(self, f"chain_1_kernel_{size}", nn.Conv1d(in_channels=self.in_channels, out_channels=kernel_count, kernel_size=size,
+                                                              bias=True))
+            getattr(self, f"chain_1_kernel_{size}").weight.data. \
+                normal_(0.0, np.sqrt(1 / np.prod(getattr(self, f"chain_1_kernel_{size}").weight.shape)))
 
             # chain 2
-            setattr(self, f"conv_chain_2_kernel_{size}", nn.Conv1d(in_channels=self.in_channels, out_channels=kernel_count, kernel_size=size,
-                                                                   bias=True))
-            getattr(self, f"conv_chain_2_kernel_{size}").weight.data.\
-                normal_(0.0, np.sqrt(1 / np.prod(getattr(self, f"conv_chain_2_kernel_{size}").weight.shape)))
+            setattr(self, f"chain_2_kernel_{size}", nn.Conv1d(in_channels=self.in_channels, out_channels=kernel_count, kernel_size=size,
+                                                              bias=True))
+            getattr(self, f"chain_2_kernel_{size}").weight.data. \
+                normal_(0.0, np.sqrt(1 / np.prod(getattr(self, f"chain_2_kernel_{size}").weight.shape)))
 
-        self.fc = nn.Linear(in_features=kernel_count * len(kernel_size) * 2, out_features=1, bias=True)
-        self.fc.weight.data.normal_(0.0, np.sqrt(1 / np.prod(self.fc.weight.shape)))
+        self.fully_connected = nn.Linear(in_features=kernel_count * len(kernel_size) * 2, out_features=1, bias=True)
+        self.fully_connected.weight.data.normal_(0.0, np.sqrt(1 / np.prod(self.fully_connected.weight.shape)))
 
     def get_max_information_gain(self):
         """
@@ -67,15 +68,15 @@ class PyTorchReceptorCNN(nn.Module):
 
         # creates batch_size x kernel_count representation of chain 1 and chain 2 by applying kernels, followed by relu and global max pooling
         chain_1 = torch.cat([torch.max(relu(conv_kernel(x[:, 0])), dim=2)[0] for conv_kernel in
-                               [getattr(self, name) for name in self.conv_chain_1]], dim=1)
+                             [getattr(self, name) for name in self.conv_chain_1]], dim=1)
         chain_2 = torch.cat([torch.max(relu(conv_kernel(x[:, 0])), dim=2)[0] for conv_kernel in
-                               [getattr(self, name) for name in self.conv_chain_2]], dim=1)
+                             [getattr(self, name) for name in self.conv_chain_2]], dim=1)
 
         # creates a single representation of the receptor from chain representations
         receptor = torch.cat([chain_1, chain_2], dim=1).squeeze()
 
         # predict the class of the receptor through the final fully-connected layer based on the inferred representations
-        predictions = self.fc(receptor).squeeze()
+        predictions = self.fully_connected(receptor).squeeze()
         return predictions
 
     def rescale_weights_for_IGM(self):

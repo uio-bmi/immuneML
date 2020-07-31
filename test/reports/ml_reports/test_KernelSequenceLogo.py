@@ -2,8 +2,10 @@ import os
 import shutil
 from unittest import TestCase
 
+from source.caching.CacheType import CacheType
 from source.encodings.EncoderParams import EncoderParams
 from source.encodings.onehot.OneHotReceptorEncoder import OneHotReceptorEncoder
+from source.environment.Constants import Constants
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.environment.Label import Label
 from source.environment.LabelConfiguration import LabelConfiguration
@@ -14,6 +16,10 @@ from source.util.PathBuilder import PathBuilder
 
 
 class TestKernelSequenceLogo(TestCase):
+
+    def setUp(self) -> None:
+        os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
+
     def test_generate(self):
         path = PathBuilder.build(f"{EnvironmentSettings.tmp_test_path}kernel_sequence_logo/")
         dataset = RandomDatasetGenerator.generate_receptor_dataset(receptor_count=500, chain_1_length_probabilities={4: 1},
@@ -29,13 +35,15 @@ class TestKernelSequenceLogo(TestCase):
         report = KernelSequenceLogo(method=cnn, result_path=path + "logos/")
         report.generate()
 
-        self.assertTrue(os.path.isfile(f"{path}logos/conv_chain_1_kernel_3_1.png"))
-        self.assertTrue(os.path.isfile(f"{path}logos/conv_chain_1_kernel_3_2.png"))
-        self.assertTrue(os.path.isfile(f"{path}logos/conv_chain_2_kernel_3_1.png"))
-        self.assertTrue(os.path.isfile(f"{path}logos/conv_chain_2_kernel_3_2.png"))
-        self.assertTrue(os.path.isfile(f"{path}logos/conv_chain_1_kernel_3_1.csv"))
-        self.assertTrue(os.path.isfile(f"{path}logos/conv_chain_1_kernel_3_2.csv"))
-        self.assertTrue(os.path.isfile(f"{path}logos/conv_chain_2_kernel_3_1.csv"))
-        self.assertTrue(os.path.isfile(f"{path}logos/conv_chain_2_kernel_3_2.csv"))
+        self.assertTrue(os.path.isfile(f"{path}logos/alpha_kernel_3_1.png"))
+        self.assertTrue(os.path.isfile(f"{path}logos/alpha_kernel_3_2.png"))
+        self.assertTrue(os.path.isfile(f"{path}logos/beta_kernel_3_1.png"))
+        self.assertTrue(os.path.isfile(f"{path}logos/beta_kernel_3_2.png"))
+        self.assertTrue(os.path.isfile(f"{path}logos/alpha_kernel_3_1.csv"))
+        self.assertTrue(os.path.isfile(f"{path}logos/alpha_kernel_3_2.csv"))
+        self.assertTrue(os.path.isfile(f"{path}logos/beta_kernel_3_1.csv"))
+        self.assertTrue(os.path.isfile(f"{path}logos/beta_kernel_3_2.csv"))
+        self.assertTrue(os.path.isfile(f"{path}logos/fully_connected_layer_weights.csv"))
+        self.assertTrue(os.path.isfile(f"{path}logos/fully_connected_layer_weights.html"))
 
         shutil.rmtree(path)

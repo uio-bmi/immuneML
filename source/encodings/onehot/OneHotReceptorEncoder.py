@@ -50,7 +50,8 @@ class OneHotReceptorEncoder(OneHotEncoder):
         encoded_data = EncodedData(examples=examples,
                                    labels=labels,
                                    example_ids=example_ids,
-                                   encoding=OneHotEncoder.__name__)
+                                   encoding=OneHotEncoder.__name__,
+                                   info={"chain_names": receptor_objs[0].get_chains() if all(receptor_obj.get_chains() == receptor_objs[0].get_chains() for receptor_obj in receptor_objs) else None})
 
         return encoded_data
 

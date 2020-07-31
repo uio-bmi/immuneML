@@ -108,6 +108,7 @@ class ReceptorCNN(MLMethod):
         self.label_name = None
         self.class_mapping = None
         self.result_path = result_path
+        self.chain_names = None
 
     def predict(self, encoded_data: EncodedData, label_names: list = None):
         predictions_proba = self.predict_proba(encoded_data, label_names)
@@ -133,6 +134,10 @@ class ReceptorCNN(MLMethod):
     def fit(self, encoded_data: EncodedData, y, label_names: list = None, cores_for_training: int = 2):
 
         self._setup_pytorch()
+        if "chain_names" in encoded_data.info and encoded_data.info["chain_names"] is not None and len(encoded_data.info["chain_names"]) == 2:
+            self.chain_names = encoded_data.info["chain_names"]
+        else:
+            self.chain_names = ["chain_1", "chain_2"]
 
         self._make_CNN()
         self.CNN.to(device=self.device)
@@ -280,7 +285,7 @@ class ReceptorCNN(MLMethod):
 
     def _make_CNN(self):
         self.CNN = RCNN(kernel_count=self.kernel_count, kernel_size=self.kernel_size, positional_channels=self.positional_channels,
-                        sequence_type=self.sequence_type, background_probabilities=self.background_probabilities)
+                        sequence_type=self.sequence_type, background_probabilities=self.background_probabilities, chain_names=self.chain_names)
 
     def get_model(self, label_names: list = None):
         return vars(self)
