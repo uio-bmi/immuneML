@@ -6,7 +6,6 @@ from source.data_model.encoded_data.EncodedData import EncodedData
 from source.encodings.DatasetEncoder import DatasetEncoder
 from source.encodings.EncoderParams import EncoderParams
 from source.util.EncoderHelper import EncoderHelper
-from source.util.TCRdistHelper import TCRdistHelper
 
 
 class TCRdistEncoder(DatasetEncoder):
@@ -64,6 +63,8 @@ class TCRdistEncoder(DatasetEncoder):
         return encoded_dataset
 
     def _build_tcr_dist_matrix(self, dataset: ReceptorDataset, labels):
+        from source.util.TCRdistHelper import TCRdistHelper
+
         current_dataset = dataset if self.context is None or "dataset" not in self.context else self.context["dataset"]
         tcr_rep = TCRdistHelper.compute_tcr_dist(current_dataset, labels, self.cores)
         self.distance_matrix = pd.DataFrame(tcr_rep.pw_tcrdist, index=tcr_rep.clone_df.clone_id, columns=tcr_rep.clone_df.clone_id)

@@ -6,14 +6,12 @@ from scipy.cluster.hierarchy import linkage, fcluster
 from scipy.spatial import distance
 from tcrdist import plotting
 from tcrdist.mappers import populate_legacy_fields
-from tcrdist.subset import TCRsubset
 
 from source.data_model.dataset.ReceptorDataset import ReceptorDataset
 from source.reports.ReportOutput import ReportOutput
 from source.reports.ReportResult import ReportResult
 from source.reports.encoding_reports.EncodingReport import EncodingReport
 from source.util.PathBuilder import PathBuilder
-from source.util.TCRdistHelper import TCRdistHelper
 
 
 class TCRdistMotifDiscovery(EncodingReport):
@@ -60,6 +58,8 @@ class TCRdistMotifDiscovery(EncodingReport):
         self.max_cluster_count = max_cluster_count
 
     def generate(self) -> ReportResult:
+        from source.util.TCRdistHelper import TCRdistHelper
+
         PathBuilder.build(self.result_path)
         tcr_rep = TCRdistHelper.compute_tcr_dist(self.dataset, [self.label], self.cores)
         compressed_dmat = distance.squareform(tcr_rep.paired_tcrdist, force="vector")
@@ -94,6 +94,8 @@ class TCRdistMotifDiscovery(EncodingReport):
         return figure_outputs, table_outputs
 
     def _discover_motif_for_epitope(self, clone_df_subset, epitope, tcr_rep, epitopes, cluster_index):
+        from tcrdist.subset import TCRsubset
+
         clone_df_subset = clone_df_subset[clone_df_subset.epitope == epitope].copy()
         dist_a_subset = tcr_rep.dist_a.loc[clone_df_subset.clone_id, clone_df_subset.clone_id].copy()
         dist_b_subset = tcr_rep.dist_b.loc[clone_df_subset.clone_id, clone_df_subset.clone_id].copy()
@@ -110,7 +112,7 @@ class TCRdistMotifDiscovery(EncodingReport):
         table_outputs = [ReportOutput(motif_path, f"motif {cluster_index + 1} - csv data")]
         return figure_outputs, table_outputs
 
-    def _plot_motifs_per_chain(self, motif_df, ts: TCRsubset, cluster_index, epitope) -> List[ReportOutput]:
+    def _plot_motifs_per_chain(self, motif_df, ts, cluster_index, epitope) -> List[ReportOutput]:
         figure_outputs = []
         for i, row in motif_df[motif_df.ab == "A"].iterrows():
             figure_outputs.append(self._plot_motif(ts, row, cluster_index, i, "alpha", epitope))
