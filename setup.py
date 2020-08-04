@@ -17,7 +17,8 @@ setup(
                       "tqdm>=0.24.2", "tensorboard==1.14.0", "logomaker>=0.8", "plotly>=4.8.2", "fishersapi", "hierdiff", "escapejson",
                       "tcrsampler", "pwseqdist==0.1.1", "zipdist",
                       "requests>=2.21.0", "deeprc@git+https://github.com/ml-jku/DeepRC",
-                      "widis-lstm-tools@git+https://github.com/widmi/widis-lstm-tools"],
+                      "widis-lstm-tools@git+https://github.com/widmi/widis-lstm-tools",
+                      "tcrdist2@git+https://github.com/kmayerb/tcrdist2.git@2ca64c2d89865d643cfe9337e6fb873fec41abfb#egg=tcrdist2"],
     classifiers=[
         "Programming Language :: Python :: 3"
     ],
