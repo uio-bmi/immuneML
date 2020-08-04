@@ -10,15 +10,14 @@ setup(
     author="Milena Pavlovic",
     author_email="milenpa@student.matnat.uio.no",
     url="https://github.com/uio-bmi/ImmuneML",
-    install_requires=["rpy2", "pytest==4.3.1", "pandas==0.24.2", "scikit-learn>=0.22.2.post1", "gensim==3.8.1",
-                      "matplotlib==3.1.1", "editdistance==0.5.3", "dask[complete]",
+    install_requires=["rpy2", "pytest>=4.3.1", "pandas==0.24.2", "scikit-learn>=0.22.2.post1", "gensim==3.8.1",
+                      "matplotlib>=3.1.1", "editdistance==0.5.3", "dask[complete]",
                       "regex", "tzlocal", "airr==1.2.1", "pystache==0.5.4",
                       "torch>=1.3.1", "numpy>=1.18.2", "h5py>=2.9.0", "dill>=0.3.0",
                       "tqdm>=0.24.2", "tensorboard==1.14.0", "logomaker>=0.8", "plotly>=4.8.2", "fishersapi", "hierdiff", "escapejson",
                       "tcrsampler", "pwseqdist==0.1.1", "zipdist",
                       "requests>=2.21.0", "deeprc@git+https://github.com/ml-jku/DeepRC",
-                      "widis-lstm-tools@git+https://github.com/widmi/widis-lstm-tools",
-                      "API2@git+https://github.com/kmayerb/tcrdist2.git"],
+                      "widis-lstm-tools@git+https://github.com/widmi/widis-lstm-tools"],
     classifiers=[
         "Programming Language :: Python :: 3"
     ],
