@@ -1,6 +1,7 @@
 from typing import List
 
 import numpy as np
+import torch
 
 
 class Util:
@@ -36,3 +37,8 @@ class Util:
             mapping = {0: unique_values[0], 1: unique_values[1]}
 
         return mapping
+
+    @staticmethod
+    def setup_pytorch(number_of_threads, random_seed):
+        torch.set_num_threads(number_of_threads)
+        torch.manual_seed(random_seed)

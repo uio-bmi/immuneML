@@ -133,7 +133,7 @@ class ReceptorCNN(MLMethod):
 
     def fit(self, encoded_data: EncodedData, y, label_names: list = None, cores_for_training: int = 2):
 
-        self._setup_pytorch()
+        Util.setup_pytorch(self.number_of_threads, self.random_seed)
         if "chain_names" in encoded_data.info and encoded_data.info["chain_names"] is not None and len(encoded_data.info["chain_names"]) == 2:
             self.chain_names = encoded_data.info["chain_names"]
         else:
@@ -182,11 +182,6 @@ class ReceptorCNN(MLMethod):
                     break
 
         logging.info("ReceptorCNN: finished training.")
-
-    def _setup_pytorch(self):
-        torch.set_num_threads(self.number_of_threads)
-        torch.manual_seed(self.random_seed)
-        np.random.seed(self.random_seed)
 
     def _get_data_batch(self, encoded_data: EncodedData, label):
         batch_count = int(math.ceil(len(encoded_data.example_ids) / self.batch_size))

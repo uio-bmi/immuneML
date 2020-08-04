@@ -2,6 +2,7 @@
 
 import abc
 
+from source.IO.dataset_export.PickleExporter import PickleExporter
 from source.encodings.EncoderParams import EncoderParams
 
 
@@ -30,6 +31,5 @@ class DatasetEncoder(metaclass=abc.ABCMeta):
     def set_context(self, context: dict):
         return self
 
-    @abc.abstractmethod
     def store(self, encoded_dataset, params: EncoderParams):
-        pass
+        PickleExporter.export(encoded_dataset, params["result_path"])

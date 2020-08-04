@@ -1,0 +1,8 @@
+iteration_count: 100
+evaluate_at: 15
+use_early_stopping: False
+learning_rate: 0.01
+random_seed: 100
+use_batch_norm: False
+zero_abundance_weight_init: True
+number_of_threads: 8
