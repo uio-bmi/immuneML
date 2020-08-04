@@ -35,20 +35,11 @@ class HPReports:
 
         # ML model reports
         optimal_model_reports = state.assessment.reports.optimal_model_reports.values()
-        model_reports = state.assessment.reports.model_reports.values()
         for label in state.label_configuration.get_labels_by_name():
             opt_assesment_item = state.assessment_states[split_index].label_states[label].optimal_assessment_item
             opt_assesment_item.model_report_results += ReportUtil.run_ML_reports(train_val_dataset, test_dataset, opt_assesment_item.method,
                                                                                  optimal_model_reports, f"{path}reports/{label}/optimal_model/",
                                                                                  opt_assesment_item.hp_setting, label, state.context)
-            for assesment_key, assesment_item in state.assessment_states[split_index].label_states[label].assessment_items.items():
-                report_path = f"{path}reports/{label}/{assesment_key.encoder_name}/{assesment_key.ml_method_name}/"
-                if assesment_key.preproc_sequence_name is not None:
-                    report_path += f"{assesment_key.preproc_sequence_name}/"
-
-                assesment_item.model_report_results += ReportUtil.run_ML_reports(train_val_dataset, test_dataset, assesment_item.method,
-                                                                                 model_reports, report_path, assesment_item.hp_setting,
-                                                                                 label, state.context)
 
     @staticmethod
     def run_selection_reports(state: HPOptimizationState, dataset, train_datasets: list, val_datasets: list, selection_state: HPSelectionState):

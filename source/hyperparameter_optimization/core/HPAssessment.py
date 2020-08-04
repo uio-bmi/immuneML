@@ -104,6 +104,17 @@ class HPAssessment:
         ReportUtil.run_encoding_reports(encoded_train_dataset, state.assessment.reports.encoding_reports.values(), f"{path}encoding_reports/train/")
         ReportUtil.run_encoding_reports(encoded_test_dataset, state.assessment.reports.encoding_reports.values(), f"{path}encoding_reports/test/")
 
+        model_reports = state.assessment.reports.model_reports.values()
+
+        for assesment_key, assesment_item in state.assessment_states[split_index].label_states[label].assessment_items.items():
+            report_path = f"{path}reports/{label}/{assesment_key.ml_method_name}/"
+            if assesment_key.preproc_sequence_name is not None:
+                report_path += f"{assesment_key.preproc_sequence_name}/"
+
+            assesment_item.model_report_results += ReportUtil.run_ML_reports(train_val_dataset, test_dataset, assesment_item.method,
+                                                                             model_reports, report_path, assesment_item.hp_setting,
+                                                                             label, state.context)
+
         return state
 
     @staticmethod
