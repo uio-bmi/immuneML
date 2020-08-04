@@ -4,8 +4,6 @@ from typing import List, Tuple
 import numpy as np
 from scipy.cluster.hierarchy import linkage, fcluster
 from scipy.spatial import distance
-from tcrdist import plotting
-from tcrdist.mappers import populate_legacy_fields
 
 from source.data_model.dataset.ReceptorDataset import ReceptorDataset
 from source.reports.ReportOutput import ReportOutput
@@ -95,6 +93,7 @@ class TCRdistMotifDiscovery(EncodingReport):
 
     def _discover_motif_for_epitope(self, clone_df_subset, epitope, tcr_rep, epitopes, cluster_index):
         from tcrdist.subset import TCRsubset
+        from tcrdist.mappers import populate_legacy_fields
 
         clone_df_subset = clone_df_subset[clone_df_subset.epitope == epitope].copy()
         dist_a_subset = tcr_rep.dist_a.loc[clone_df_subset.clone_id, clone_df_subset.clone_id].copy()
@@ -122,6 +121,8 @@ class TCRdistMotifDiscovery(EncodingReport):
         return figure_outputs
 
     def _plot_motif(self, ts, row, cluster_index, i, chain_name, epitope):
+        from tcrdist import plotting
+
         StoreIOMotif_instance = ts.eval_motif(row)
         path = f"{self.result_path}motif_{cluster_index+1}_{i+1}_{chain_name}_{epitope}.svg"
         plotting.plot_pwm(StoreIOMotif_instance, create_file=True, my_height=200, my_width=600,
