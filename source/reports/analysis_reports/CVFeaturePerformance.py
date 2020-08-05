@@ -3,10 +3,8 @@ from typing import Tuple, List
 
 import numpy as np
 import pandas as pd
-from rpy2.robjects import pandas2ri
-from rpy2.robjects.packages import STAP
+import plotly.graph_objects as go
 
-from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.hyperparameter_optimization.states.HPOptimizationState import HPOptimizationState
 from source.reports.Report import Report
 from source.reports.ReportOutput import ReportOutput
@@ -85,29 +83,25 @@ class CVFeaturePerformance(Report):
         training_dataframe, test_dataframe = self._make_plot_dataframes()
         table_results = self._store_dataframes(training_dataframe, test_dataframe)
 
-        report_output_fig = self._safe_plot(training_dataframe=training_dataframe,
-                        test_dataframe=test_dataframe)
+        report_output_fig = self._plot(training_dataframe=training_dataframe, test_dataframe=test_dataframe)
         output_figures = None if report_output_fig is None else [report_output_fig]
 
         return ReportResult(output_tables=table_results,
                             output_figures=output_figures)
 
-
     def _plot(self, training_dataframe, test_dataframe):
-        pandas2ri.activate()
 
-        with open(EnvironmentSettings.visualization_path + "Scatterplot.R") as f:
-            string = f.read()
+        fig = go.Figure()
+        fig.add_trace(go.Scatter(x=training_dataframe["x"], y=training_dataframe["y"], name="training", mode="markers", marker_color="#A2CD5A"))
+        fig.add_trace(go.Scatter(x=test_dataframe["x"], y=test_dataframe["y"], name="test", mode="markers", marker_color="cornflowerblue"))
+        fig.update_layout(legend_title_text="Data", title="CV performance across feature values", template="plotly_white")
+        fig.update_xaxes(title_text=self.feature)
+        fig.update_yaxes(title_text=f"performance ({self.hp_optimization_state.optimization_metric.name.lower()})")
 
-        plot = STAP(string, "plot")
+        file_path = f"{self.result_path}{self.result_name}.html"
+        fig.write_html(file_path)
 
-        plot.plot_two_dataframes(df1=training_dataframe, df2=test_dataframe, label1="training", label2="test",
-                                 x_label=self.feature,
-                                 y_label=f"performance ({self.hp_optimization_state.optimization_metric.name.lower()})",
-                                 result_path=self.result_path, result_name=self.result_name)
-
-        return ReportOutput(path=f"{self.result_path}{self.result_name}.pdf")
-
+        return ReportOutput(path=file_path)
 
     def _store_dataframes(self, training_dataframe: pd.DataFrame, test_dataframe: pd.DataFrame) -> List[ReportOutput]:
         train_path = self.result_path + "training_performance.csv"
