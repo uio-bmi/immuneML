@@ -44,7 +44,8 @@ class TestDeepRC(TestCase):
 
         return EncodedData(examples=None, labels={"status": status_label},
                     example_ids=rep_ids, encoding=DeepRCEncoder.__name__,
-                    info={"metadata_filepath": metadata_filepath})
+                    info={"metadata_filepath": metadata_filepath,
+                          "max_sequence_length": 30})
 
 
     def dummy_training_function(self, *args, **kwargs):

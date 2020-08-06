@@ -103,4 +103,10 @@ class DeepRCInterpretation(MLReport):
                 f"{self.__class__.__name__} can only be used in combination with the DeepRC ML method. {self.__class__.__name__} report will not be created.")
             run_report = False
 
+        if self.test_dataset.encoded_data is None:
+            warnings.warn(
+                f"{self.__class__.__name__}: test dataset is not encoded and can not be run. "
+                f"{self.__class__.__name__} report will not be created.")
+            run_report = False
+
         return run_report

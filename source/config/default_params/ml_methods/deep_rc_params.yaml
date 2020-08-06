@@ -1,5 +1,4 @@
 validation_part: 0.2 # the part of the data that will be used for validation, the rest will be used for training
-max_seq_len: 30
 add_positional_information: True
 kernel_size: 9
 n_kernels: 32
@@ -11,6 +10,7 @@ consider_seq_counts: False
 sequence_reduction_fraction: 0.1
 reduction_mb_size: 50000
 n_updates: 100000
+evaluate_at: 5000
 n_torch_threads: 3
 learning_rate: 0.0001
 l1_weight_decay: 0
@@ -18,3 +18,5 @@ l2_weight_decay: 0
 sample_n_sequences: 10000
 training_batch_size: 4 # Number of repertoires per minibatch during training.
 n_workers: 4
+pytorch_device_name: cuda:0
+keep_dataset_in_ram: True

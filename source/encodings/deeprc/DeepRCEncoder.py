@@ -33,6 +33,7 @@ class DeepRCEncoder(DatasetEncoder):
     def __init__(self, context: dict = None, name: str = None):
         self.context = context
         self.name = name
+        self.max_sequence_length = 0
 
     def set_context(self, context: dict):
         self.context = context
@@ -61,6 +62,9 @@ class DeepRCEncoder(DatasetEncoder):
                 df = pd.DataFrame({DeepRCEncoder.SEQUENCE_COLUMN: repertoire.get_sequence_aas(), DeepRCEncoder.COUNTS_COLUMN: repertoire.get_counts()})
                 df.to_csv(path_or_buf=filepath, sep=DeepRCEncoder.SEP, index=False)
 
+                max_sequence_length = max(df[DeepRCEncoder.SEQUENCE_COLUMN].str.len())
+                self.max_sequence_length = max(self.max_sequence_length, max_sequence_length)
+
     def export_metadata_file(self, dataset, labels, output_folder):
         metadata_filepath = f"{output_folder}/{dataset.identifier}_metadata.{DeepRCEncoder.EXTENSION}"
         metadata = dataset.get_metadata(labels, return_df=True)
@@ -83,7 +87,8 @@ class DeepRCEncoder(DatasetEncoder):
         encoded_dataset.encoded_data = EncodedData(examples=None, labels=dataset.get_metadata(labels),
                                                    example_ids=dataset.repertoire_ids,
                                                    encoding=DeepRCEncoder.__name__,
-                                                   info={"metadata_filepath": metadata_filepath})
+                                                   info={"metadata_filepath": metadata_filepath,
+                                                         "max_sequence_length": self.max_sequence_length})
 
         self.store(encoded_dataset, params)
 

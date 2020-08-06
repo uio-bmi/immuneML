@@ -106,6 +106,6 @@ class BenchmarkSubseqMethods(BenchmarkHPSettings):
                     if not self._check_valid_assessment_item(assessment_item):
                         warnings.warn(f"{self.__class__.__name__} can only be used on encoder-ML method combinations that use k-mer encoding"
                                       f"with continuous k-mers, or DeepRC. BenchmarkSubseqMethods report will not be created.")
-                    run_report = False
+                        run_report = False
 
         return run_report

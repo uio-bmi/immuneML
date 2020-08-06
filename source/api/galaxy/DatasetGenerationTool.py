@@ -57,7 +57,9 @@ class DatasetGenerationTool:
             f"Dataset generation tool: the format of the specification is not correct. 'params' key missing under '{keys[0]}'." \
             f"Please see the documentation for generating immuneML datasets."
 
-        workflow_specification[keys[0]]["params"]["path"] = self.files_path
+        if workflow_specification[keys[0]]["format"] not in ["RandomRepertoireDataset", "RandomReceptorDataset"]:
+            workflow_specification[keys[0]]["params"]["path"] = self.files_path
+
         workflow_specification[keys[0]]["params"]["result_path"] = self.result_path
 
         symbol_table = SymbolTable()

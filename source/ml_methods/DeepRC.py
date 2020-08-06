@@ -38,8 +38,6 @@ class DeepRC(MLMethod):
 
         validation_part (float):  the part of the data that will be used for validation, the rest will be used for training.
 
-        max_seq_len (int): the maximum sequence length that the DeepRC classifier can handle.
-
         add_positional_information (bool): whether positional information should be included in the input features.
 
         kernel_size (int): the size of the 1D-CNN kernels.
@@ -92,23 +90,26 @@ class DeepRC(MLMethod):
                 model_selection_cv: False
 
     """
-    def __init__(self, validation_part, max_seq_len, add_positional_information, kernel_size, n_kernels,
+    def __init__(self, validation_part, add_positional_information, kernel_size, n_kernels,
                  n_additional_convs, n_attention_network_layers, n_attention_network_units, n_output_network_units,
                  consider_seq_counts, sequence_reduction_fraction, reduction_mb_size, n_updates, n_torch_threads,
-                 learning_rate, l1_weight_decay, l2_weight_decay, sample_n_sequences, training_batch_size, n_workers):
+                 learning_rate, l1_weight_decay, l2_weight_decay, evaluate_at, sample_n_sequences, training_batch_size, n_workers,
+                 keep_dataset_in_ram, pytorch_device_name):
         super(DeepRC, self).__init__()
         self.models = {}
         self.result_path = None
 
+        self.max_seq_len = None
         self.label_classes = None
-        self.keep_dataset_in_ram = True
-        self.pytorch_device = torch.device("cuda:0")
+        self.label_is_bool = None
+        self.keep_dataset_in_ram = keep_dataset_in_ram
+        self.pytorch_device_name = pytorch_device_name
+        self.pytorch_device = torch.device(self.pytorch_device_name)
 
         # ML model setting (not inherited from DeepRC code)
         self.validation_part = validation_part
 
         # DeepRC class settings:
-        self.max_seq_len = max_seq_len
         self.add_positional_information = add_positional_information
         self.n_input_features = 20 + 3 * self.add_positional_information
         self.kernel_size = kernel_size
@@ -122,6 +123,7 @@ class DeepRC(MLMethod):
         self.reduction_mb_size = reduction_mb_size
 
         # train function settings:
+        self.evaluate_at = evaluate_at
         self.n_updates = n_updates
         self.n_torch_threads = n_torch_threads
         self.learning_rate = learning_rate
@@ -205,7 +207,10 @@ class DeepRC(MLMethod):
         return dataloader
 
     def _set_label_classes(self, y):
-        label_classes = {label: sorted([str(class_name) for class_name in set(classes)]) for label, classes in y.items()}
+        label_classes_raw = {label: set(classes) for label, classes in y.items()}
+        self.label_is_bool = {label: label_classes_raw[label] == {True, False} for label in y.keys()}
+
+        label_classes = {label: sorted([str(class_name) for class_name in classes]) for label, classes in label_classes_raw.items()}
 
         for label in label_classes.keys():
             n_classes = len(label_classes[label])
@@ -226,7 +231,6 @@ class DeepRC(MLMethod):
                 ("label_names", str(label_names)),
                 ("type", type),
                 ("validation_part", self.validation_part),
-                ("max_seq_len", self.max_seq_len),
                 ("add_positional_information", self.add_positional_information),
                 ("n_input_features", self.n_input_features),
                 ("kernel_size", self.kernel_size),
@@ -245,7 +249,9 @@ class DeepRC(MLMethod):
                 ("l2_weight_decay", self.l2_weight_decay),
                 ("sample_n_sequences", self.sample_n_sequences),
                 ("training_batch_size", self.training_batch_size),
-                ("n_workers", self.n_workers))
+                ("n_workers", self.n_workers),
+                ("evaluate_at", self.evaluate_at),
+                ("pytorch_device_name", self.pytorch_device_name))
 
     def fit(self, encoded_data: EncodedData, y, label_names: list = None, cores_for_training: int = 2):
         self.models = CacheHandler.memo_by_params(self._prepare_caching_params(encoded_data, y, "fit", label_names),
@@ -259,6 +265,7 @@ class DeepRC(MLMethod):
         pre_loaded_hdf5_file = self._load_dataset_in_ram(hdf5_filepath) if self.keep_dataset_in_ram else None
 
         train_indices, val_indices = self.get_train_val_indices(len(encoded_data.example_ids))
+        self.max_seq_len = encoded_data.info["max_sequence_length"]
 
         for i, label in enumerate(label_names):
             self._fit_for_label(hdf5_filepath, pre_loaded_hdf5_file, train_indices, val_indices, label, cores_for_training)
@@ -286,7 +293,7 @@ class DeepRC(MLMethod):
               validationset_eval_dataloader=val_eval_dataloader, results_directory=self.result_path + "/deeprc_log",
               n_updates=self.n_updates, num_torch_threads=self.n_torch_threads, learning_rate=self.learning_rate,
               l1_weight_decay=self.l1_weight_decay, l2_weight_decay=self.l2_weight_decay,
-              show_progress=False, device=self.pytorch_device)
+              show_progress=False, device=self.pytorch_device, evaluate_at=self.evaluate_at)
 
         self.models[label] = model
 
@@ -320,8 +327,10 @@ class DeepRC(MLMethod):
         for label in label_names:
             classes = self.get_classes_for_label(label)
             pos_class_probs = probabilities[label][:,0]
-            predictions[label] = np.array([classes[0] if probability > 0.5 else classes[1]
-                                           for probability in pos_class_probs], dtype="<U1")
+            predictions[label] = [classes[0] if probability > 0.5 else classes[1] for probability in pos_class_probs]
+
+            if self.label_is_bool[label]:
+                predictions[label] = [pred_class == "True" for pred_class in predictions[label]]
 
         return predictions
 

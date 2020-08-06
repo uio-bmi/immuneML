@@ -156,7 +156,7 @@ def plot_inputs_text(chars, colorgrad, seq_lens, file_location):
     fig = plt.figure(figsize=(int(np.round(max_seq_len/15)), max(int(np.round(n_seqs/5)), 5)))
     # fig = plt.figure(figsize=(int(np.round(max_seq_len)), max(int(np.round(n_seqs)), 5)))
     
-    _ = [([fig.text((char_i+1) / max_seq_len, 0 + (1 - (seq_i / (n_seqs))), chars[seq_i][char_i].decode("utf-8"),
+    _ = [([fig.text((char_i+1) / max_seq_len, 0 + (1 - (seq_i / (n_seqs))) - 0.05, chars[seq_i][char_i].decode("utf-8"),
                     size=char_offset+abs(colorgrad[seq_i][char_i])*char_scale,
                     ha='center', va='center',
                     color='blue' if colorgrad[seq_i][char_i] > 0 else 'red')

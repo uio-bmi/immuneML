@@ -21,3 +21,10 @@ plotly>=4.8.2
 logomaker>=0.8
 git+https://github.com/ml-jku/DeepRC
 git+https://github.com/widmi/widis-lstm-tools
+git+https://github.com/kmayerb/tcrdist2.git
+fishersapi
+hierdiff
+escapejson
+tcrsampler
+pwseqdist==0.1.1
+zipdist
