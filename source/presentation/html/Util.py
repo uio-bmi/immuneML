@@ -56,13 +56,13 @@ class Util:
         table_string = "<table>\n"
         with open(csv_path, "r") as file:
             for index, line in enumerate(file.readlines()):
-                if index == 0:
+                if index == 0 and has_header:
                     table_string += "<thead>\n"
                 table_string += "<tr>\n"
                 for col in line.split(separator):
                     table_string += f"<td>{col}</td>\n"
                 table_string += "</tr>\n"
-                if index == 0:
+                if index == 0 and has_header:
                     table_string += "</thead>\n"
         table_string += "</table>\n"
         return table_string
