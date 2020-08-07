@@ -31,7 +31,6 @@ class DefinitionParser:
 
         specs = workflow_specification["definitions"]
 
-        symbol_table, specs_import = ImportParser.parse(specs, symbol_table)
         symbol_table, specs_motifs = DefinitionParser._call_if_exists("motifs", MotifParser.parse_motifs, specs, symbol_table)
         symbol_table, specs_signals = DefinitionParser._call_if_exists("signals", SignalParser.parse_signals, specs, symbol_table)
         symbol_table, specs_simulation = DefinitionParser._call_if_exists("simulations", SimulationParser.parse_simulations, specs, symbol_table)
@@ -39,6 +38,7 @@ class DefinitionParser:
         symbol_table, specs_encoding = DefinitionParser._call_if_exists("encodings", EncodingParser.parse, specs, symbol_table)
         symbol_table, specs_ml = DefinitionParser._call_if_exists("ml_methods", MLParser.parse, specs, symbol_table)
         symbol_table, specs_report = DefinitionParser._call_if_exists("reports", ReportParser.parse_reports, specs, symbol_table)
+        symbol_table, specs_import = ImportParser.parse(specs, symbol_table)
 
         specs_defs = DefinitionParser.create_specs_defs(specs_import, specs_simulation, specs_preprocessing,
                                                         specs_encoding, specs_ml, specs_report)

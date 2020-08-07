@@ -48,6 +48,7 @@ class CVFeaturePerformance(Report):
         self.feature_values = None
         self.feature_count = None
         self.name = name
+        self.result_name = None
 
     def check_prerequisites(self):
         self._extract_label()
