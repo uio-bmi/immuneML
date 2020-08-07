@@ -67,7 +67,8 @@ def build_settings_specs(enc_names, ml_names):
 def discover_dataset_path():
     dataset = glob.glob("*.iml_dataset")
 
-    assert len(dataset) == 1, "multiple .iml_dataset files were present in the current working directory"
+    assert len(dataset) > 0, "no .iml_dataset file was present in the current working directory"
+    assert len(dataset) < 2, "multiple .iml_dataset files were present in the current working directory"
 
     return dataset[0]
 

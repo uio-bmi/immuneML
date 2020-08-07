@@ -102,9 +102,9 @@ class Motif:
 
     def get_max_length(self):
         if self.seed is not None:
-            return len(self.seed) + self.instantiation.get_max_gap()
+            return len(self.seed.replace("/", "")) + self.instantiation.get_max_gap()
         else:
-            return max(len(self.seed_chain1), len(self.seed_chain2)) + self.instantiation.get_max_gap()
+            return max(len(self.seed_chain1.replace("/", "")), len(self.seed_chain2.replace("/", ""))) + self.instantiation.get_max_gap()
 
     def __str__(self):
         return self.identifier + " - " + \
