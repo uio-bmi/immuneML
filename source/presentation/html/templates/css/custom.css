@@ -57,6 +57,16 @@ p {
   line-height: 1.8;
 }
 
+a {
+    color: #25537b;
+    text-decoration: none;
+    background-color: transparent;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
 .font-light {
   font-weight: 300;
 }
@@ -266,7 +276,7 @@ img {
 }
 
 details {
-    margin: 2em 0;
+    margin: 0.7em 0;
 }
 
 details > summary {
@@ -293,7 +303,6 @@ embed {
 .col-container {
     display: table;
     width: 100%;
-    border-spacing: 20px;
     margin-top: 20px;
     table-layout: fixed;
 }
@@ -329,6 +338,10 @@ embed {
 .table-container{
     width: 100%;
     overflow-x: auto;
+}
+
+.table-container table thead {
+    font-weight: bold;
 }
 
 @media only screen and (max-width: 600px) {

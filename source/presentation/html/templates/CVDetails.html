@@ -48,12 +48,18 @@
         </div>
         {{/labels}}
         <div class="padded">
-            <div class="padded-bottom">
-                <a href="{{train_metadata_path}}">Train and validation metadata</a>
-            </div>
-            <div class="padded-bottom">
-                <a href="{{test_metadata_path}}">Test metadata</a>
-            </div>
+            <details>
+                <summary>Train and validation metadadta (<a href="{{train_metadata_path}}">download link</a>)</summary>
+                <div class="table-container padded">
+                    {{{train_metadata}}}
+                </div>
+            </details>
+            <details>
+                <summary>Test metadata (<a href="{{test_metadata_path}}">download link</a>)</summary>
+                <div class="table-container padded">
+                    {{{test_metadata}}}
+                </div>
+            </details>
         </div>
         {{#show_data_reports}}
         <h3>Data reports</h3>

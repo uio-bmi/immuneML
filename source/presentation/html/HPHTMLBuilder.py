@@ -90,11 +90,13 @@ class HPHTMLBuilder:
 
             if hasattr(assessment_state.train_val_dataset, "metadata_file") and assessment_state.train_val_dataset.metadata_file is not None:
                 assessment_item["train_metadata_path"] = os.path.relpath(assessment_state.train_val_dataset.metadata_file, assessment_state.path)
+                assessment_item["train_metadata"] = Util.get_table_string_from_csv(assessment_state.train_val_dataset.metadata_file)
             else:
                 assessment_item["train_metadata_path"] = None
 
             if hasattr(assessment_state.test_dataset, "metadata_file") and assessment_state.test_dataset.metadata_file is not None:
                 assessment_item['test_metadata_path'] = os.path.relpath(assessment_state.test_dataset.metadata_file, assessment_state.path)
+                assessment_item["test_metadata"] = Util.get_table_string_from_csv(assessment_state.test_dataset.metadata_file)
             else:
                 assessment_item["test_metadata_path"] = None
 
