@@ -1,8 +1,11 @@
+import inspect
+
 from source.dsl.ObjectParser import ObjectParser
 from source.dsl.symbol_table.SymbolTable import SymbolTable
 from source.dsl.symbol_table.SymbolType import SymbolType
 from source.encodings.DatasetEncoder import DatasetEncoder
 from source.logging.Logger import log
+from source.util.ParameterValidator import ParameterValidator
 from source.util.ReflectionHandler import ReflectionHandler
 
 
@@ -21,10 +24,12 @@ class EncodingParser:
     @log
     def parse_encoder(key: str, specs: dict):
         class_path = "encodings"
-        classes = ReflectionHandler.get_classes_by_partial_name("Encoder", class_path)
-        valid_encoders = [cls.__name__[:-7] for cls in DatasetEncoder.__subclasses__()]
+        valid_encoders = ReflectionHandler.all_nonabstract_subclass_basic_names(DatasetEncoder, "Encoder", class_path)
         encoder = ObjectParser.get_class(specs, valid_encoders, "Encoder", class_path, "EncodingParser", key)
         params = ObjectParser.get_all_params(specs, class_path, encoder.__name__[:-7], key)
+
+        required_params = [p for p in list(inspect.signature(encoder.__init__).parameters.keys()) if p != "self"]
+        ParameterValidator.assert_all_in_valid_list(params.keys(), required_params, "EncoderParser", f"{key}/{encoder.__name__.replace('Encoder', '')}")
 
         return encoder, params
 
