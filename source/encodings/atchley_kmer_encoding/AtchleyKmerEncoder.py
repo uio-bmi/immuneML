@@ -127,8 +127,8 @@ class AtchleyKmerEncoder(DatasetEncoder):
             with open(f"{params['result_path']}vectorizer_keys.yaml", "w") as file:
                 yaml.dump(kmer_keys, file)
         else:
-            with open(f"{params['result_path']}vectorizer_keys.yaml", "w") as file:
-                kmer_keys = yaml.load(file)
+            with open(f"{params['result_path']}vectorizer_keys.yaml", "r") as file:
+                kmer_keys = yaml.safe_load(file)
 
         vectorized_examples = [
             np.array([np.array(example[key]) if key in example else np.zeros(self.k * Util.ATCHLEY_FACTOR_COUNT + 1) for key in kmer_keys])
