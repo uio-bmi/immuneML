@@ -59,7 +59,7 @@ class AtchleyKmerEncoder(DatasetEncoder):
         else:
             raise ValueError(f"AtchleyKmerEncoder can only be applied to repertoire dataset, got {type(dataset).__name__} instead.")
 
-    def __init__(self, k: int, skip_first_n_aa: int, skip_last_n_aa: int, abundance: str, normalize_all_features: bool):
+    def __init__(self, k: int, skip_first_n_aa: int, skip_last_n_aa: int, abundance: str, normalize_all_features: bool, name: str = None):
         location = "AtchleyKmerEncoder"
         ParameterValidator.assert_type_and_value(k, int, location, "k", 1)
         ParameterValidator.assert_type_and_value(skip_first_n_aa, int, location, "skip_first_n_aa", 0)
@@ -71,6 +71,7 @@ class AtchleyKmerEncoder(DatasetEncoder):
         self.skip_last_n_aa = skip_last_n_aa
         self.abundance = RelativeAbundanceType[abundance.upper()]
         self.normalize_all_features = normalize_all_features
+        self.name = name
 
     def encode(self, dataset, params: EncoderParams):
 
