@@ -46,7 +46,7 @@ class SimulationInstruction(Instruction):
         self.exporters = exporters
 
     def run(self, result_path: str):
-        self.state.result_path = result_path
+        self.state.result_path = result_path + self.state.name + "/"
         self.state.resulting_dataset = SignalImplanter.run(self.state)
         self.export_dataset()
         return self.state

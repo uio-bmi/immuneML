@@ -121,14 +121,14 @@ class TestSimulation(TestCase):
         app = ImmuneMLApp(specification_path=specs_path, result_path=path + "result/")
         result_path = app.run()
 
-        self.assertTrue(os.path.isfile(path + "result/metadata.csv"))
+        self.assertTrue(os.path.isfile(path + "result/inst1/metadata.csv"))
 
-        metadata_df = pd.read_csv(path + "result/metadata.csv", comment=Constants.COMMENT_SIGN)
+        metadata_df = pd.read_csv(path + "result/inst1/metadata.csv", comment=Constants.COMMENT_SIGN)
         self.assertTrue("signal_signal1" in metadata_df.columns)
         self.assertEqual(17, sum(metadata_df["signal_signal1"]))
 
         self.assertTrue(os.path.isfile(result_path))
-        self.assertTrue(os.path.isfile(path + "result/exported_dataset/pickle/d1.iml_dataset"))
+        self.assertTrue(os.path.isfile(path + "result/inst1/exported_dataset/pickle/d1.iml_dataset"))
 
         shutil.rmtree(path)
 
@@ -207,8 +207,8 @@ class TestSimulation(TestCase):
         result_path = app.run()
 
         self.assertTrue(os.path.isfile(result_path))
-        self.assertTrue(os.path.isfile(path + "result/exported_dataset/pickle/d1.iml_dataset"))
-        dataset = PickleImport.import_dataset({"path": path + "result/exported_dataset/pickle/d1.iml_dataset"}, "d1")
+        self.assertTrue(os.path.isfile(path + "result/inst1/exported_dataset/pickle/d1.iml_dataset"))
+        dataset = PickleImport.import_dataset({"path": path + "result/inst1/exported_dataset/pickle/d1.iml_dataset"}, "d1")
 
         self.assertEqual(100, dataset.get_example_count())
         self.assertEqual(100, len([receptor for receptor in dataset.get_data() if "signal_signal1" in receptor.metadata]))

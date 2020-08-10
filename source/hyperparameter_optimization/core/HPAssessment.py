@@ -29,7 +29,7 @@ class HPAssessment:
 
     @staticmethod
     def _create_root_path(state: HPOptimizationState) -> HPOptimizationState:
-        state.path = f"{state.path}assessment_{state.assessment.split_strategy.name.lower()}/"
+        state.path = f"{state.path}{state.name}/"
         return state
 
     @staticmethod
