@@ -29,6 +29,7 @@ class RandomRepertoireDatasetImport(DataImport):
                     cmv:
                         True: 0.5 # probability of value True for label cmv to be assigned to any repertoire
                         False: 0.5
+
     """
 
     @staticmethod
