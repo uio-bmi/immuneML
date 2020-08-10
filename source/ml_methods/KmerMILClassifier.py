@@ -22,7 +22,9 @@ class KmerMILClassifier(MLMethod):
 
     Arguments:
 
-        iteration_count (int): max number of training iterations threshold (float): threshold at which to stop training if reached
+        iteration_count (int): max number of training iterations
+
+        threshold (float): loss threshold at which to stop training if reached
 
         evaluate_at (int): log model performance every 'evaluate_at' iterations and store the model every 'evaluate_at' iterations if early stopping
         is used
@@ -55,6 +57,7 @@ class KmerMILClassifier(MLMethod):
                 use_batch_norm: False
                 zero_abundance_weight_init: True
                 number_of_threads: 8
+                threshold: 1e-5
 
     """
 
