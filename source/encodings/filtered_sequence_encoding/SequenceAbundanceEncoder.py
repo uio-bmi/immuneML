@@ -78,12 +78,9 @@ class SequenceAbundanceEncoder(DatasetEncoder):
         assert len(labels) == 1, \
             "SequenceAbundanceEncoder: this encoding works only for single label."
 
-        train_repertoire_ids = EncoderHelper.prepare_training_ids(dataset, params)
-        examples = self._calculate_sequence_abundance(dataset, comparison_data, labels[0],
-                                                      params["label_configuration"].get_label_values(labels[0]),
-                                                      self.p_value_threshold)
+        examples = self._calculate_sequence_abundance(dataset, comparison_data, labels[0], params)
 
-        encoded_data = EncodedData(examples, dataset.get_metadata([labels[0]]), train_repertoire_ids,
+        encoded_data = EncodedData(examples, dataset.get_metadata([labels[0]]), dataset.get_repertoire_ids(),
                                    [SequenceAbundanceEncoder.RELEVANT_SEQUENCE_ABUNDANCE,
                                     SequenceAbundanceEncoder.TOTAL_SEQUENCE_ABUNDANCE],
                                    encoding=SequenceAbundanceEncoder.__name__)
@@ -92,10 +89,11 @@ class SequenceAbundanceEncoder(DatasetEncoder):
 
         return encoded_dataset
 
-    def _calculate_sequence_abundance(self, dataset: RepertoireDataset, comparison_data: ComparisonData,
-                                      label: str, label_values: list, p_value_threshold: float):
-        sequence_p_values_indices = SequenceFilterHelper.filter_sequences(dataset, comparison_data, label, label_values,
-                                                                          p_value_threshold)
+    def _calculate_sequence_abundance(self, dataset: RepertoireDataset, comparison_data: ComparisonData, label: str, params: EncoderParams):
+
+        sequence_p_values_indices = SequenceFilterHelper.get_relevant_sequences(dataset=dataset, params=params, comparison_data=comparison_data,
+                                                                                label=label, p_value_threshold=self.p_value_threshold,
+                                                                                comparison_attributes=self.comparison_attributes)
 
         abundance_matrix = self._build_abundance_matrix(comparison_data, dataset.get_repertoire_ids(), sequence_p_values_indices)
 

@@ -57,7 +57,7 @@ class KmerMILClassifier(MLMethod):
                 use_batch_norm: False
                 zero_abundance_weight_init: True
                 number_of_threads: 8
-                threshold: 1e-5
+                threshold: 0.00001
 
     """
 

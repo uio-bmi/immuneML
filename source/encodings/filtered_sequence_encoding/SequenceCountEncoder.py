@@ -72,25 +72,21 @@ class SequenceCountEncoder(DatasetEncoder):
 
         assert len(labels) == 1, f"SequenceCountEncoder: this encoding works only for single label, got {labels} instead."
 
-        train_repertoire_ids = EncoderHelper.prepare_training_ids(dataset, params)
-        encoded_data = self._encode_sequence_count(dataset, comparison_data, labels[0],
-                                                   params["label_configuration"].get_label_values(labels[0]),
-                                                   self.p_value_threshold, train_repertoire_ids)
+        encoded_data = self._encode_sequence_count(dataset, comparison_data, labels[0], params)
 
         encoded_dataset = RepertoireDataset(params=dataset.params, encoded_data=encoded_data, repertoires=dataset.repertoires)
 
         return encoded_dataset
 
-    def _encode_sequence_count(self, dataset: RepertoireDataset, comparison_data: ComparisonData, label: str, label_values: list,
-                               p_value_threshold: float, train_repertoire_ids) -> EncodedData:
-        sequence_p_values_indices = SequenceFilterHelper.filter_sequences(dataset, comparison_data, label, label_values,
-                                                                          p_value_threshold)
+    def _encode_sequence_count(self, dataset: RepertoireDataset, comparison_data: ComparisonData, label: str, params: EncoderParams) -> EncodedData:
+        sequence_p_values_indices = SequenceFilterHelper.get_relevant_sequences(dataset, params, comparison_data, label, self.p_value_threshold,
+                                                                                self.comparison_attributes)
 
         count_matrix = self._build_count_matrix(comparison_data, dataset.get_repertoire_ids(), sequence_p_values_indices)
         feature_names = comparison_data.get_item_names()[sequence_p_values_indices]
 
         encoded_data = EncodedData(count_matrix, dataset.get_metadata([label]),
-                                   train_repertoire_ids,
+                                   dataset.get_repertoire_ids(),
                                    feature_names,
                                    encoding=SequenceCountEncoder.__name__)
 
