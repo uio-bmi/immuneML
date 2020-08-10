@@ -27,7 +27,7 @@ def get_sequence_enc_type(sequence_type, position_type, gap_type):
             else:
                 encoding_type = SequenceEncodingType.CONTINUOUS_KMER
 
-    return encoding_type.value
+    return encoding_type.name
 
 
 def build_encodings_specs(args):
@@ -72,6 +72,9 @@ def discover_dataset_path():
 
     return dataset[0]
 
+# todo add reports
+# todo add params for logreg/knn/etc etc
+
 def build_specs(args):
     specs = {
         "definitions": {
@@ -95,8 +98,8 @@ def build_specs(args):
                 },
                 "selection": {
                     "split_strategy": "random",
-                    "split_count": 1,
-                    "training_percentage": 0.7
+                    "split_count": 1, # not used
+                    "training_percentage": 1,
                 },
                 "labels": [],
                 "dataset": "d1",
@@ -145,8 +148,8 @@ def parse_commandline_arguments(args):
     ml_method_names = [cl.__name__ for cl in ReflectionHandler.all_nonabstract_subclasses(MLMethod)]
 
     parser = argparse.ArgumentParser(description="tool for building immuneML Galaxy YAML from arguments")
-    parser.add_argument("-o", "--output_path", required=True, help="Output file location (directiory).")
-    parser.add_argument("-f", "--file_name", default="specs.yaml", help="Output file name Default name is 'specs.yaml' if not specified.")
+    parser.add_argument("-o", "--output_path", required=True, help="Output location for the generated yaml file (directiory).")
+    parser.add_argument("-f", "--file_name", default="specs.yaml", help="Output file name for the yaml file. Default name is 'specs.yaml' if not specified.")
     parser.add_argument("-l", "--labels", nargs="+", required=True,
                         help="Which metadata labels should be predicted for the dataset.")
     parser.add_argument("-m", "--ml_methods", nargs="+", choices=ml_method_names, required=True,
@@ -181,6 +184,8 @@ def main(args):
 
     with open(output_location, "w") as file:
         yaml.dump(specs, file)
+
+    return output_location
 
 
 if __name__ == "__main__":
