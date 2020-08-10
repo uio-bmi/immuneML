@@ -17,7 +17,7 @@ class RandomDatasetGenerator:
     def _check_probabilities(probabilities_dict, key_type, dict_name):
         assert isinstance(probabilities_dict, dict) and all(isinstance(key, key_type) for key in probabilities_dict.keys()) \
                and all(isinstance(value, float) or value in {0, 1} for value in probabilities_dict.values()) and 0.99 <= sum(
-            probabilities_dict.values()) <= 1, f"RandomDatasetGenerator: {dict_name} are not specified "\
+            probabilities_dict.values()) <= 1, f"RandomDatasetGenerator: {dict_name} are not specified " \
                                                f"correctly. They should be a dictionary with probabilities per count " \
                                                f"and sum to 1, but got {probabilities_dict} instead."
 
@@ -73,7 +73,8 @@ class RandomDatasetGenerator:
                 1: 0.3 # 30% of the generated repertoires will have class 1
                 0: 0.7 # 70% of the generated repertoires will have class 0
         """
-        RandomDatasetGenerator._check_rep_dataset_generation_params(repertoire_count, sequence_count_probabilities, sequence_length_probabilities, labels, path)
+        RandomDatasetGenerator._check_rep_dataset_generation_params(repertoire_count, sequence_count_probabilities, sequence_length_probabilities,
+                                                                    labels, path)
 
         alphabet = EnvironmentSettings.get_sequence_alphabet()
         PathBuilder.build(path)
@@ -138,14 +139,17 @@ class RandomDatasetGenerator:
         alphabet = EnvironmentSettings.get_sequence_alphabet()
         PathBuilder.build(path)
 
-        get_random_sequence = lambda proba: ReceptorSequence("".join(random.choices(alphabet, k=random.choices(list(proba.keys()),
-                                                                                                               proba.values())[0])),
-                                                             metadata=SequenceMetadata(count=1))
+        default_genes = {"A": {"V": "TRAV5", "J": "TRAJ42"}, "B": {"V": "TRBV6-1", "J": "TRBJ2-7"}}
 
-        receptors = [TCABReceptor(alpha=get_random_sequence(chain_1_length_probabilities),
-                                  beta=get_random_sequence(chain_2_length_probabilities),
+        get_random_sequence = lambda proba, chain: ReceptorSequence("".join(random.choices(alphabet, k=random.choices(list(proba.keys()),
+                                                                                                                      proba.values())[0])),
+                                                                    metadata=SequenceMetadata(count=1, v_gene=default_genes[chain]["V"],
+                                                                                              j_gene=default_genes[chain]["J"]))
+
+        receptors = [TCABReceptor(alpha=get_random_sequence(chain_1_length_probabilities, "A"),
+                                  beta=get_random_sequence(chain_2_length_probabilities, "B"),
                                   metadata={**{label: random.choices(list(label_dict.keys()), label_dict.values(), k=1)[0]
-                                            for label, label_dict in labels.items()}, **{"subject": f"subj_{i+1}"}})
+                                               for label, label_dict in labels.items()}, **{"subject": f"subj_{i + 1}"}})
                      for i in range(receptor_count)]
 
         filename = f"{path if path[-1] == '/' else path + '/'}batch01.pickle"
