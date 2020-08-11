@@ -40,7 +40,7 @@ class DefinitionParser:
         symbol_table, specs_report = DefinitionParser._call_if_exists("reports", ReportParser.parse_reports, specs, symbol_table)
         symbol_table, specs_import = ImportParser.parse(specs, symbol_table)
 
-        specs_defs = DefinitionParser.create_specs_defs(specs_import, specs_simulation, specs_preprocessing,
+        specs_defs = DefinitionParser.create_specs_defs(specs_import, specs_simulation, specs_preprocessing, specs_motifs, specs_signals,
                                                         specs_encoding, specs_ml, specs_report)
 
         return DefinitionParserOutput(symbol_table=symbol_table, specification=workflow_specification), specs_defs
@@ -53,11 +53,11 @@ class DefinitionParser:
             return symbol_table, {}
 
     @staticmethod
-    def create_specs_defs(specs_datasets: dict, simulation: dict, preprocessings: dict,
+    def create_specs_defs(specs_datasets: dict, simulation: dict, preprocessings: dict, motifs: dict, signals: dict,
                           encodings: dict, ml_methods: dict, reports: dict):
 
         return {
-            "datasets": specs_datasets, "simulation": simulation, "preprocessings": preprocessings,
+            "datasets": specs_datasets, "simulations": simulation, "preprocessings": preprocessings, "motifs": motifs, "signals": signals,
             "encodings": encodings, "ml_methods": ml_methods, "reports": reports
         }
 
