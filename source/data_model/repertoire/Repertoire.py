@@ -1,4 +1,5 @@
 # quality: gold
+import ast
 import pickle
 import shutil
 import weakref
@@ -151,8 +152,9 @@ class Repertoire(DatasetItem):
                 for param in sequence.metadata.custom_params.keys():
                     custom_lists[param].append(sequence.metadata.custom_params[param] if param in sequence.metadata.custom_params else None)
             for key in signals.keys():
-                if sequence.annotation and sequence.annotation.implants and len(sequence.annotation.implants) > 0:
-                    signals[key].append(vars(sequence.annotation.implants[0]))
+                if sequence.annotation and sequence.annotation.implants and len(sequence.annotation.implants) > 0 \
+                        and "signal_" + sequence.annotation.implants[0].signal_id == key:
+                    signals[key].append(str(sequence.annotation.implants[0]))
                 else:
                     signals[key].append(None)
 
@@ -242,7 +244,7 @@ class Repertoire(DatasetItem):
         for key in keys:
             value_dict = row[key]
             if value_dict:
-                implants.append(ImplantAnnotation(*value_dict))
+                implants.append(ImplantAnnotation(**ast.literal_eval(value_dict)))
 
         seq = ReceptorSequence(amino_acid_sequence=row["sequence_aas"] if "sequence_aas" in fields else None,
                                nucleotide_sequence=row["sequences"] if "sequences" in fields else None,

@@ -94,7 +94,7 @@ class HealthySequenceImplanting(SignalImplantingStrategy):
         for sequence in repertoire.sequences:
             if sequence.annotation is not None and sequence.annotation.implants is not None and len(sequence.annotation.implants) > 0:
                 unusable_sequences.append(sequence)
-            elif len(sequence.get_sequence()) <= max_motif_length:
+            elif len(sequence.get_sequence()) < max_motif_length:
                 unusable_sequences.append(sequence)
             else:
                 unprocessed_sequences.append(sequence)

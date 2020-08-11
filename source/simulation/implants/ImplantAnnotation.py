@@ -8,3 +8,7 @@ class ImplantAnnotation:
         self.motif_id = motif_id
         self.motif_instance = motif_instance
         self.position = position
+
+    def __str__(self):
+        return "{" + f"'signal_id': '{self.signal_id}', 'motif_id': '{self.motif_id}', 'motif_instance': '{str(self.motif_instance)}', " \
+                     f"'position': '{self.position}'" + "}"

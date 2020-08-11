@@ -17,15 +17,16 @@ class GappedMotifImplanting(SequenceImplantingStrategy):
     def implant(self, sequence: ReceptorSequence, signal: dict, sequence_position_weights=None) -> ReceptorSequence:
         motif_instance = signal["motif_instance"]
         imgt_positions = self._build_imgt_positions(sequence, motif_instance)
-        limit = len(motif_instance.instance) - motif_instance.instance.count("/") + motif_instance.gap
+        limit = len(motif_instance.instance) - motif_instance.instance.count("/") + motif_instance.gap - 1
         position_weights = PositionHelper.build_position_weights(sequence_position_weights, imgt_positions, limit)
         implant_position = self._choose_implant_position(imgt_positions, position_weights)
         new_sequence = self._build_new_sequence(sequence, implant_position, signal)
         return new_sequence
 
     def _build_imgt_positions(self, sequence: ReceptorSequence, motif_instance: MotifInstance):
-        assert len(sequence.get_sequence()) > motif_instance.gap + len(motif_instance.instance) - 1, \
-            "The motif instance is longer than receptor_sequence length. Remove the receptor_sequence from the repertoire or reduce max gap length to be able to proceed."
+        assert len(sequence.get_sequence()) >= motif_instance.gap + len(motif_instance.instance) - 1, \
+            "The motif instance is longer than receptor_sequence length. Remove the receptor_sequence from the repertoire or reduce max gap length " \
+            "to be able to proceed. "
         length = len(sequence.get_sequence())
         return PositionHelper.gen_imgt_positions_from_length(length)
 

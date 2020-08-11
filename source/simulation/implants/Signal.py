@@ -45,8 +45,8 @@ class Signal:
 
     """
 
-    def __init__(self, identifier, motifs: List[Motif], implanting_strategy: SignalImplantingStrategy):
-        self.id = identifier
+    def __init__(self, identifier: str, motifs: List[Motif], implanting_strategy: SignalImplantingStrategy):
+        self.id = str(identifier)
         self.motifs = motifs
         self.implanting_strategy = implanting_strategy
 

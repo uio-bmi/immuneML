@@ -34,7 +34,7 @@ class TestSimulation(TestCase):
                 },
                 "motifs": {
                     "motif1": {
-                        "seed": "EEE",
+                        "seed": "E/E",
                         "instantiation": {
                             "GappedKmer": {
                                 "max_gap": 1,
@@ -53,14 +53,19 @@ class TestSimulation(TestCase):
                         "motifs": ["motif1", "motif2"],
                         "implanting": "HealthySequence",
                         "sequence_position_weights": None
+                    },
+                    "signal2": {
+                        "motifs": ["motif1"],
+                        "implanting": "HealthySequence",
+                        "sequence_position_weights": None
                     }
                 },
                 "simulations": {
                     "sim1": {
                         "var1": {
-                            "signals": ["signal1"],
+                            "signals": ["signal1", "signal2"],
                             "dataset_implanting_rate": 0.5,
-                            "repertoire_implanting_rate": 0.33
+                            "repertoire_implanting_rate": 0.5
                         }
                     }
                 },
