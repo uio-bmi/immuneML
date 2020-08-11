@@ -9,8 +9,8 @@ from source.util.KmerHelper import KmerHelper
 
 
 class Util:
-
     ATCHLEY_FACTOR_COUNT = 5
+    ATCHLEY_FACTORS = None
 
     @staticmethod
     def compute_abundance(sequences: np.ndarray, counts: np.ndarray, k: int, abundance: RelativeAbundanceType):
@@ -115,11 +115,13 @@ class Util:
             values of Atchley factors for each amino acid in the sequence
 
         """
-        atchley_factors = pd.read_csv(EnvironmentSettings.root_path + "source/encodings/atchley_kmer_encoding/atchley_factors.csv",
-                                      index_col='amino_acid')
+        if Util.ATCHLEY_FACTORS is None:
+            Util.ATCHLEY_FACTORS = pd.read_csv(EnvironmentSettings.root_path + "source/encodings/atchley_kmer_encoding/atchley_factors.csv",
+                                               index_col='amino_acid')
+
         factors = np.zeros((len(kmers), Util.ATCHLEY_FACTOR_COUNT * k))
         for index, kmer in enumerate(kmers):
-            factors[index] = np.concatenate([atchley_factors.loc[amino_acid].values for amino_acid in kmer])
+            factors[index] = np.concatenate([Util.ATCHLEY_FACTORS.loc[amino_acid].values for amino_acid in kmer])
 
         factors_df = pd.DataFrame(factors, index=kmers)
 

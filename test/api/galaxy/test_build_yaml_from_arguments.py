@@ -1,6 +1,6 @@
+import os
 import shutil
 import unittest
-import os
 
 from source.IO.dataset_export.PickleExporter import PickleExporter
 from source.api.galaxy.build_yaml_from_arguments import build_settings_specs, build_ml_methods_specs, get_sequence_enc_type, \
@@ -57,7 +57,7 @@ class MyTestCase(unittest.TestCase):
 
         os.chdir(old_wd)
 
-        # shutil.rmtree(path)
+        shutil.rmtree(path)
 
     def test_get_sequence_enc_type(self):
         self.assertEqual(get_sequence_enc_type(sequence_type="complete", position_type=None, gap_type=None),

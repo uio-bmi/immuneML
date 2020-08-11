@@ -42,7 +42,7 @@ class TestKmerMILClassifier(TestCase):
         self.assertEqual(repertoire_count, np.rint(np.sum(predictions_proba["l1"])))
         self.assertEqual(repertoire_count, predictions_proba["l1"].shape[0])
 
-        cls.store(path + "model_storage/")
+        cls.store(path + "model_storage/", feature_names=enc_dataset.encoded_data.feature_names)
 
         cls2 = KmerMILClassifier(10, -0.0001, 2, False, 1, 0.01, False, True, 8)
         cls2.load(path + "model_storage/")

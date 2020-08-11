@@ -2,6 +2,7 @@ import copy
 import logging
 
 import numpy as np
+import pandas as pd
 import torch
 import yaml
 from torch.distributions import Normal
@@ -97,7 +98,7 @@ class KmerMILClassifier(MLMethod):
         self._check_encoded_data(encoded_data)
 
         Util.setup_pytorch(self.number_of_threads, self.random_seed)
-        self.input_size = encoded_data.examples.shape[2]
+        self.input_size = encoded_data.examples.shape[1]
 
         self._make_log_reg()
 
@@ -117,7 +118,7 @@ class KmerMILClassifier(MLMethod):
             # compute predictions only for k-mers with max score
             max_logit_indices = self._get_max_logits_indices(encoded_data.examples)
             example_count = encoded_data.examples.shape[0]
-            examples = torch.from_numpy(encoded_data.examples).float()[torch.arange(example_count).long(), max_logit_indices]
+            examples = torch.from_numpy(encoded_data.examples).float()[torch.arange(example_count).long(), :, max_logit_indices]
             logits = self.logistic_regression(examples)
 
             # compute the loss
@@ -143,8 +144,8 @@ class KmerMILClassifier(MLMethod):
 
     def _get_max_logits_indices(self, data):
         with torch.no_grad():
-            logits = self.logistic_regression(torch.from_numpy(data.reshape(data.shape[0] * data.shape[1], -1)).float())
-        logits = torch.reshape(logits, (data.shape[0], data.shape[1]))
+            logits = self.logistic_regression(torch.from_numpy(np.swapaxes(data, 1, 2).reshape(data.shape[0] * data.shape[2], -1)).float())
+        logits = torch.reshape(logits, (data.shape[0], data.shape[2]))
         max_logits_indices = torch.argmax(logits, dim=1)
         return max_logits_indices.long()
 
@@ -161,6 +162,11 @@ class KmerMILClassifier(MLMethod):
         PathBuilder.build(path)
         torch.save(copy.deepcopy(self.logistic_regression).state_dict(), path + "log_reg.pt")
         custom_vars = copy.deepcopy(vars(self))
+
+        coefficients_df = pd.DataFrame(custom_vars["logistic_regression"].linear.weight.detach().numpy(), columns=feature_names)
+        coefficients_df["bias"] = custom_vars["logistic_regression"].linear.bias.detach().numpy()
+        coefficients_df.to_csv(path + "coefficients.csv", index=False)
+
         del custom_vars["result_path"]
         del custom_vars["logistic_regression"]
 
@@ -198,7 +204,7 @@ class KmerMILClassifier(MLMethod):
         example_count = encoded_data.examples.shape[0]
         max_logit_indices = self._get_max_logits_indices(encoded_data.examples)
         with torch.no_grad():
-            data = torch.from_numpy(encoded_data.examples).float()[torch.arange(example_count).long(), max_logit_indices]
+            data = torch.from_numpy(encoded_data.examples).float()[torch.arange(example_count).long(), :, max_logit_indices]
             predictions = torch.sigmoid(self.logistic_regression(data)).numpy()
         return {self.label_name: np.vstack([1 - np.array(predictions), predictions]).T}
 

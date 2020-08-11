@@ -19,7 +19,7 @@ class TestAtchleyKmerEncoder(TestCase):
                                                               "normalize_all_features": False})
         encoded_dataset = encoder.encode(dataset, EncoderParams(path + "result/", LabelConfiguration(labels=[Label("l1")])))
 
-        self.assertEqual((3, 3, 11), encoded_dataset.encoded_data.examples.shape)
-        self.assertEqual(0., encoded_dataset.encoded_data.examples[0, 0, -1])
+        self.assertEqual((3, 11, 3), encoded_dataset.encoded_data.examples.shape)
+        self.assertEqual(0., encoded_dataset.encoded_data.examples[0, -1, 0])
 
         shutil.rmtree(path)

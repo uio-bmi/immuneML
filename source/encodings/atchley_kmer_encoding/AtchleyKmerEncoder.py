@@ -83,10 +83,18 @@ class AtchleyKmerEncoder(DatasetEncoder):
         flattened_vectorized_examples = tmp_examples.reshape(examples.shape[0] * examples.shape[1], -1)
         scaled_examples = FeatureScaler.standard_scale(params["result_path"] + "atchley_factor_normalizer.pickle",
                                                        flattened_vectorized_examples).todense()
-        tmp_examples = np.array(scaled_examples).reshape(examples.shape[0], len(kmer_keys), -1)
 
-        encoded_data = EncodedData(examples=examples, example_ids=dataset.get_example_ids(), feature_names=kmer_keys, labels=labels,
-                                   encoding=AtchleyKmerEncoder.__name__)
+        if self.normalize_all_features:
+            examples = np.array(scaled_examples).reshape(examples.shape[0], len(kmer_keys), -1)
+        else:
+            examples[:, :, :-1] = np.array(scaled_examples).reshape(examples.shape[0], len(kmer_keys), -1)
+
+        # swap axes to get examples x atchley_factors x kmers dimensions
+        examples = np.swapaxes(examples, 1, 2)
+
+        feature_names = [f"atchley_factor_{j}_aa_{i}" for i in range(1, self.k+1) for j in range(1, Util.ATCHLEY_FACTOR_COUNT+1)] + ["abundance"]
+        encoded_data = EncodedData(examples=examples, example_ids=dataset.get_example_ids(), feature_names=feature_names, labels=labels,
+                                   encoding=AtchleyKmerEncoder.__name__, info={"kmer_keys": kmer_keys})
 
         encoded_dataset = dataset.clone()
         encoded_dataset.encoded_data = encoded_data
