@@ -57,19 +57,19 @@ class MyTestCase(unittest.TestCase):
 
         os.chdir(old_wd)
 
-        shutil.rmtree(path)
+        # shutil.rmtree(path)
 
     def test_get_sequence_enc_type(self):
         self.assertEqual(get_sequence_enc_type(sequence_type="complete", position_type=None, gap_type=None),
-                         SequenceEncodingType.IDENTITY.value)
+                         SequenceEncodingType.IDENTITY.name)
         self.assertEqual(get_sequence_enc_type(sequence_type="subsequence", position_type="positional", gap_type="gapped"),
-                         SequenceEncodingType.IMGT_GAPPED_KMER.value)
+                         SequenceEncodingType.IMGT_GAPPED_KMER.name)
         self.assertEqual(get_sequence_enc_type(sequence_type="subsequence", position_type="invariant", gap_type="gapped"),
-                         SequenceEncodingType.GAPPED_KMER.value)
+                         SequenceEncodingType.GAPPED_KMER.name)
         self.assertEqual(get_sequence_enc_type(sequence_type="subsequence", position_type="positional", gap_type="ungapped"),
-                         SequenceEncodingType.IMGT_CONTINUOUS_KMER.value)
+                         SequenceEncodingType.IMGT_CONTINUOUS_KMER.name)
         self.assertEqual(get_sequence_enc_type(sequence_type="subsequence", position_type="invariant", gap_type="ungapped"),
-                         SequenceEncodingType.CONTINUOUS_KMER.value)
+                         SequenceEncodingType.CONTINUOUS_KMER.name)
 
     def test_build_encodings_specs(self):
         args = DummyArguments
@@ -85,32 +85,35 @@ class MyTestCase(unittest.TestCase):
 
         result = build_encodings_specs(DummyArguments)
 
-        correct = {"e1": {"KmerFrequency": {"sequence_encoding": "IdentitySequenceEncoder",
+        correct = {"encoding_1": {"KmerFrequency": {"sequence_encoding": "IDENTITY",
                                             "reads": "unique"}},
-                   "e2": {"KmerFrequency": {"sequence_encoding": "IMGTGappedKmerEncoder",
+                   "encoding_2": {"KmerFrequency": {"sequence_encoding": "IMGT_GAPPED_KMER",
                                             "reads": "unique",
                                             "k_left": 2,
                                             "k_right": 1,
                                             "min_gap": 0,
                                             "max_gap": 5}},
-                   "e3": {"KmerFrequency": {"sequence_encoding": "GappedKmerSequenceEncoder",
+                   "encoding_3": {"KmerFrequency": {"sequence_encoding": "GAPPED_KMER",
                                             "reads": "all",
                                             "k_left": 3,
                                             "k_right": 5,
                                             "min_gap": 5,
                                             "max_gap": 10}},
-                   "e4": {"KmerFrequency": {"sequence_encoding": "IMGTKmerSequenceEncoder",
+                   "encoding_4": {"KmerFrequency": {"sequence_encoding": "IMGT_CONTINUOUS_KMER",
                                             "reads": "all",
                                             "k": 3}},
-                   "e5": {"KmerFrequency": {"sequence_encoding": "KmerSequenceEncoder",
+                   "encoding_5": {"KmerFrequency": {"sequence_encoding": "CONTINUOUS_KMER",
                                             "reads": "all",
                                             "k": 4}}}
 
         self.assertDictEqual(result, correct)
 
     def test_build_ml_methods_specs(self):
-        result = build_ml_methods_specs(["a", "b"])
-        correct = {'ml1': 'a', 'ml2': 'b'}
+        args = DummyArguments
+        args.ml_methods = ["a", "b"]
+        args.neighbors = 0
+        result = build_ml_methods_specs(args)
+        correct = {'a': 'a', 'b': 'b'}
 
         self.assertDictEqual(result, correct)
 

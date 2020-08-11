@@ -47,7 +47,7 @@ class BenchmarkHPSettings(MLReport):
     @classmethod
     def build_object(cls, **kwargs):
         valid_values = [item.name.lower() for item in ErrorBarMeaning]
-        ParameterValidator.assert_in_valid_list(kwargs["errorbar_meaning"], valid_values, "BenchmarkHPSettings", "errorbar_meaning")
+        ParameterValidator.assert_in_valid_list(kwargs["errorbar_meaning"].lower(), valid_values, "BenchmarkHPSettings", "errorbar_meaning")
         errorbar_meaning = ErrorBarMeaning[kwargs["errorbar_meaning"].upper()]
         return BenchmarkHPSettings(errorbar_meaning, kwargs["name"] if "name" in kwargs else None)
 

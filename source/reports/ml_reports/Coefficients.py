@@ -9,6 +9,8 @@ from rpy2.robjects.packages import STAP
 from scripts.specification_util import update_docs_per_mapping
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.ml_methods.RandomForestClassifier import RandomForestClassifier
+from source.ml_methods.SVM import SVM
+from source.ml_methods.SimpleLogisticRegression import SimpleLogisticRegression
 from source.reports.ReportOutput import ReportOutput
 from source.reports.ReportResult import ReportResult
 from source.reports.ml_reports.CoefficientPlottingSetting import CoefficientPlottingSetting
@@ -66,19 +68,24 @@ class Coefficients(MLReport):
     def build_object(cls, **kwargs):
         location = "Coefficients"
         coefs_to_plot = kwargs["coefs_to_plot"]
-        cutoff = kwargs["cutoff"]
-        n_largest = kwargs["n_largest"]
+
         name = kwargs["name"] if "name" in kwargs else None
 
         ParameterValidator.assert_all_in_valid_list([coef.upper() for coef in coefs_to_plot],
                                                     [item.name.upper() for item in CoefficientPlottingSetting], location,
                                                     "coefs_to_plot")
 
-        if CoefficientPlottingSetting.CUTOFF in coefs_to_plot:
+        if CoefficientPlottingSetting.CUTOFF.name in coefs_to_plot:
+            cutoff = kwargs["cutoff"]
             ParameterValidator.assert_all_type_and_value(cutoff, Number, location, "cutoff", min_inclusive=1e-15)
+        else:
+            cutoff = []
 
-        if CoefficientPlottingSetting.N_LARGEST in coefs_to_plot:
+        if CoefficientPlottingSetting.N_LARGEST.name in coefs_to_plot:
+            n_largest = kwargs["n_largest"]
             ParameterValidator.assert_all_type_and_value(n_largest, int, location, "n_largest", min_inclusive=1)
+        else:
+            n_largest = []
 
         coefs = CoefficientPlottingSettingList()
         for keyword in coefs_to_plot:
@@ -191,6 +198,10 @@ class Coefficients(MLReport):
 
         if not hasattr(self, "method"):
             warnings.warn("Coefficients can only be executed as a model report. Coefficients report will not be created.")
+            run_report = False
+
+        if not any([isinstance(self.method, legal_method) for legal_method in (RandomForestClassifier, SimpleLogisticRegression, SVM)]):
+            warnings.warn("Coefficients report can only be created for RandomForestClassifier, SimpleLogisticRegression or SVM. Coefficients report will not be created.")
             run_report = False
 
         if not hasattr(self, "result_path"):

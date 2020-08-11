@@ -8,6 +8,7 @@ import glob
 from source.encodings.kmer_frequency.ReadsType import ReadsType
 from source.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType import SequenceEncodingType
 from source.ml_methods.MLMethod import MLMethod
+from source.reports.ml_reports.CoefficientPlottingSetting import CoefficientPlottingSetting
 from source.util.PathBuilder import PathBuilder
 from source.util.ReflectionHandler import ReflectionHandler
 
@@ -34,7 +35,7 @@ def build_encodings_specs(args):
     encodings = dict()
 
     for i in range(len(args.sequence_type)):
-        enc_name = f"e{i+1}"
+        enc_name = f"encoding_{i+1}"
         enc_spec = dict()
 
         enc_spec["sequence_encoding"] = get_sequence_enc_type(args.sequence_type[i],
@@ -55,9 +56,64 @@ def build_encodings_specs(args):
 
     return encodings
 
+def get_ml_method_spec(ml_method_class, neighbors=None, model_selection_n_folds=3):
+    if ml_method_class == "SimpleLogisticRegression":
+        ml_spec = {
+            "logistic_regression": {
+                "SimpleLogisticRegression": {
+                    "penalty": ["l1", "l2"],
+                    "C": [0.001, 0.01, 0.1, 1, 10, 100, 1000],
+                    "class_weight": ["balanced"]
+                },
+                "model_selection_cv": True,
+                "model_selection_n_folds": model_selection_n_folds
+            }
+        }
+    elif ml_method_class == "RandomForestClassifier":
+        ml_spec = {
+            "random_forest": {
+                "RandomForestClassifier": {
+                    "n_estimators": [10, 50, 100],
+                    "class_weight": ["balanced"]
+                },
+                "model_selection_cv": True,
+                "model_selection_n_folds": model_selection_n_folds
+            }
+        }
+    elif ml_method_class == "SVM":
+        ml_spec = {
+            "support_vector_machine": {
+                "SVM": {
+                    "penalty": ["l1", "l2"],
+                    "class_weight": ["balanced"]
+                },
+                "model_selection_cv": True,
+                "model_selection_n_folds": model_selection_n_folds
+            }
+        }
+    elif  ml_method_class == "KNN":
+        ml_spec = {
+            "k_nearest_neighbors": {
+                "KNN": {
+                    "n_neighbors": neighbors
+                },
+                "model_selection_cv": True,
+                "model_selection_n_folds": model_selection_n_folds
+            }
+        }
+    else:
+        ml_spec = {ml_method_class: ml_method_class}
 
-def build_ml_methods_specs(ml_methods):
-    return {f"ml{i}": method for i, method in enumerate(ml_methods, start=1)}
+    return ml_spec
+
+
+def build_ml_methods_specs(args):
+    ml_methods_spec = dict()
+
+    for method in args.ml_methods:
+        ml_methods_spec.update(get_ml_method_spec(method, args.neighbors))
+
+    return ml_methods_spec
 
 
 def build_settings_specs(enc_names, ml_names):
@@ -72,8 +128,6 @@ def discover_dataset_path():
 
     return dataset[0]
 
-# todo add reports
-# todo add params for logreg/knn/etc etc
 
 def build_specs(args):
     specs = {
@@ -85,7 +139,20 @@ def build_specs(args):
                 }
             },
             "encodings": dict(),
-            "ml_methods": dict()
+            "ml_methods": dict(),
+            "reports": {
+                "coefficients": {
+                    "Coefficients": {
+                        "coefs_to_plot": [CoefficientPlottingSetting.ALL.name,
+                                          CoefficientPlottingSetting.NONZERO.name]
+                    }
+                },
+                "benchmark": {
+                    "BenchmarkHPSettings": {
+                        "errorbar_meaning": "STANDARD_ERROR"
+                    }
+                }
+            }
         },
         "instructions": {
             "inst1": {
@@ -94,7 +161,11 @@ def build_specs(args):
                 "assessment": {
                     "split_strategy": "random",
                     "split_count": None,
-                    "training_percentage": None
+                    "training_percentage": None,
+                    "reports": {
+                        "hyperparameter": ["benchmark"],
+                        "models": ["coefficients"]
+                    }
                 },
                 "selection": {
                     "split_strategy": "random",
@@ -113,7 +184,7 @@ def build_specs(args):
     }
 
     enc_specs = build_encodings_specs(args)
-    ml_specs = build_ml_methods_specs(args.ml_methods)
+    ml_specs = build_ml_methods_specs(args)
     settings_specs = build_settings_specs(enc_specs.keys(), ml_specs.keys())
     dataset_path = discover_dataset_path()
 
@@ -131,6 +202,11 @@ def build_specs(args):
 def check_arguments(args):
     assert 100 >= args.training_percentage >= 10, "training_percentage must range between 10 and 100"
     assert args.split_count >= 1, "The minimal split_count is 1."
+
+    if "KNN" in args.ml_methods:
+        assert len(args.neighbors) > 0, "When using the KNN classifier, the number of neighbors must be specified. "
+        for n in args.neighbors:
+            assert n >= 1, f"The minimal number of neighbors for KNN is 1, found value: {n}"
 
     encoding_err = "When multiple encodings are used, fields must still be of equal length, add 'NA' variables where necessary"
     assert len(args.sequence_type) == len(args.reads), encoding_err
@@ -154,6 +230,8 @@ def parse_commandline_arguments(args):
                         help="Which metadata labels should be predicted for the dataset.")
     parser.add_argument("-m", "--ml_methods", nargs="+", choices=ml_method_names, required=True,
                         help="Which machine learning methods should be applied.")
+    parser.add_argument("-n", "--neighbors", type=int, nargs="+",
+                        help="Number of neighbors for the KNN algorithm if KNN is selected under ml_methods.")
     parser.add_argument("-t", "--training_percentage", type=float, required=True,
                         help="The percentage of data used for training.")
     parser.add_argument("-c", "--split_count", type=int, required=True,
