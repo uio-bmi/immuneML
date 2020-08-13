@@ -113,7 +113,7 @@ class SequenceMatchFeatureAnnotation(TransformerMixin):
         )
 
     def is_annotated(self, X):
-        return (self.annotation_prefix is not "" and any(
+        return (self.annotation_prefix != "" and any(
             [self.annotation_prefix in column for column in X.encoded_data.feature_annotations.columns]))
 
     def _transform(self, X):

@@ -16,16 +16,21 @@ class Implanting:
 
 
     Arguments:
-        signals (list): The list of :py:obj:`~source.simulation.implants.Signal.Signal` objects to be implanted
-            in a subset of the repertoires in of a RepertoireDataset.
-            When multiple signals are specified, this means that all of these signals are implanted in
-            the same repertoires in a RepertoireDataset, although they may not be implanted in the same sequences
-            within those repertoires (this depends on the :py:obj:`~source.simulation.signal_implanting_strategy.SignalImplantingStrategy.SignalImplantingStrategy`).
+
+        signals (list): The list of :py:obj:`~source.simulation.implants.Signal.Signal` objects to be implanted in a subset of the repertoires in of a RepertoireDataset.
+        When multiple signals are specified, this means that all of these signals are implanted in
+        the same repertoires in a RepertoireDataset, although they may not be implanted in the same sequences
+        within those repertoires (this depends on the :py:obj:`~source.simulation.signal_implanting_strategy.SignalImplantingStrategy.SignalImplantingStrategy`).
+
         dataset_implanting_rate (float): The proportion of repertoires in the RepertoireDataset in which the
-            signals should be implanted. When specifying multiple implantings, the sum of all dataset_implanting_rates
-            should not exceed 1.
+        signals should be implanted. When specifying multiple implantings, the sum of all dataset_implanting_rates
+        should not exceed 1.
+
         repertoire_implanting_rate (float): The proportion of sequences in a Repertoire where a motif associated
-            with one of the signals should be implanted.
+        with one of the signals should be implanted.
+
+        is_noise (bool): indicates whether the implanting should be regarded as noise; if it is True, the signals will be implanted as specified, but
+        the repertoire/receptor in question will have negative class.
 
 
     Specification:
