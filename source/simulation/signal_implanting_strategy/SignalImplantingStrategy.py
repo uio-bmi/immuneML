@@ -34,5 +34,5 @@ class SignalImplantingStrategy(metaclass=abc.ABCMeta):
         return new_sequence
 
     @abc.abstractmethod
-    def implant_in_receptor(self, receptor, signal):
+    def implant_in_receptor(self, receptor, signal, is_noise: bool):
         pass

@@ -63,33 +63,47 @@ class SignalImplanter(Step):
         processed_elements = []
         simulation_limits = SignalImplanter._prepare_simulation_limits(simulation_state.simulation.implantings,
                                                                        simulation_state.dataset.get_example_count())
-        simulation_index = 0
+        current_implanting_index = 0
+        current_implanting = simulation_state.simulation.implantings[current_implanting_index]
 
         for index, element in enumerate(simulation_state.dataset.get_data(simulation_state.batch_size)):
 
-            if simulation_index <= len(simulation_limits) - 1 and index >= simulation_limits[simulation_index]:
-                simulation_index += 1
+            if current_implanting is not None and index >= simulation_limits[current_implanting.name]:
+                current_implanting_index += 1
+                if current_implanting_index < len(simulation_limits.keys()):
+                    current_implanting = simulation_state.simulation.implantings[current_implanting_index]
+                else:
+                    current_implanting = None
 
-            processed_element = process_element_func(index, element, simulation_index, simulation_limits, simulation_state)
+            processed_element = process_element_func(index, element, current_implanting, simulation_state)
             processed_elements.append(processed_element)
 
         return processed_elements
 
     @staticmethod
-    def _process_receptor(index, receptor, simulation_index, simulation_limits, simulation_state) -> Receptor:
-        if simulation_index < len(simulation_limits):
-            return simulation_state.signals[0].implant_in_receptor(receptor)
+    def _process_receptor(index, receptor, implanting, simulation_state) -> Receptor:
+        if implanting is not None:
+            new_receptor = simulation_state.signals[0].implant_in_receptor(receptor, implanting.is_noise)
         else:
             new_receptor = receptor.clone()
-            new_receptor.metadata[f"signal_{simulation_state.signals[0].id}"] = False
-            return new_receptor
+            for signal in simulation_state.signals:
+                new_receptor.metadata[f"signal_{signal.id}"] = False
+        return new_receptor
 
     @staticmethod
-    def _process_repertoire(index, repertoire, simulation_index, simulation_limits, simulation_state) -> Repertoire:
-        if simulation_index < len(simulation_limits):
-            return SignalImplanter._implant_in_repertoire(index, repertoire, simulation_index, simulation_state)
+    def _process_repertoire(index, repertoire, current_implanting, simulation_state) -> Repertoire:
+        if current_implanting is not None:
+
+            return SignalImplanter._implant_in_repertoire(index, repertoire, current_implanting, simulation_state)
+
         else:
-            return SignalImplanter._copy_repertoire(index, repertoire, simulation_state)
+            new_repertoire = Repertoire.build_from_sequence_objects(repertoire.sequences, simulation_state.result_path + "repertoires/",
+                                                                    repertoire.metadata)
+
+            for signal in simulation_state.signals:
+                new_repertoire.metadata[f"signal_{signal.id}"] = False
+
+            return new_repertoire
 
     @staticmethod
     def _create_metadata_file(processed_repertoires: List[Repertoire], simulation_state) -> str:
@@ -104,33 +118,28 @@ class SignalImplanter(Step):
         return path
 
     @staticmethod
-    def _copy_repertoire(index: int, repertoire: Repertoire, simulation_state: SimulationState) -> Repertoire:
-        new_repertoire = Repertoire.build_from_sequence_objects(repertoire.sequences, simulation_state.result_path + "repertoires/", repertoire.metadata)
-
-        for signal in simulation_state.signals:
-            new_repertoire.metadata[f"signal_{signal.id}"] = False
-
-        return new_repertoire
-
-    @staticmethod
-    def _implant_in_repertoire(index, repertoire, simulation_index, simulation_state) -> Repertoire:
+    def _implant_in_repertoire(index, repertoire, implanting, simulation_state) -> Repertoire:
         new_repertoire = copy.deepcopy(repertoire)
-        for signal in simulation_state.simulation.implantings[simulation_index].signals:
+        for signal in implanting.signals:
             new_repertoire = signal.implant_to_repertoire(repertoire=new_repertoire,
-                                                          repertoire_implanting_rate=
-                                                          simulation_state.simulation.implantings[simulation_index].repertoire_implanting_rate,
+                                                          repertoire_implanting_rate=implanting.repertoire_implanting_rate,
                                                           path=simulation_state.result_path + "repertoires/")
 
-        for signal in simulation_state.simulation.implantings[simulation_index].signals:
-            new_repertoire.metadata[f"signal_{signal.id}"] = True
+        for signal in implanting.signals:
+            if implanting.is_noise:
+                new_repertoire.metadata[f"signal_{signal.id}"] = False
+            else:
+                new_repertoire.metadata[f"signal_{signal.id}"] = True
         for signal in simulation_state.signals:
-            if signal not in simulation_state.simulation.implantings[simulation_index].signals:
+            if signal not in implanting.signals:
                 new_repertoire.metadata[f"signal_{signal.id}"] = False
 
         return new_repertoire
 
     @staticmethod
-    def _prepare_simulation_limits(simulation: list, element_count: int) -> list:
-        limits = [int(item.dataset_implanting_rate * element_count) for item in simulation]
-        limits = [sum(limits[:i+1]) for i in range(len(limits))]
+    def _prepare_simulation_limits(simulation: list, element_count: int) -> dict:
+        """for each implanting returns the last index of the element in the dataset with that implanting scheme"""
+        limits = {item.name: int(item.dataset_implanting_rate * element_count) for item in simulation}
+        limits = {item_name: sum(list(limits.values())[:i+1]) for i, item_name in enumerate(limits.keys())}
+
         return limits

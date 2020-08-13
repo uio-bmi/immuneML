@@ -1,4 +1,5 @@
 import copy
+import logging
 import random
 
 from source.data_model.repertoire.Repertoire import Repertoire
@@ -88,6 +89,10 @@ class HealthySequenceImplanting(SignalImplantingStrategy):
 
     def _choose_sequences_for_implanting(self, repertoire: Repertoire, repertoire_implanting_rate: float, max_motif_length: int):
         number_of_sequences_to_implant = int(repertoire_implanting_rate * len(repertoire.sequences))
+        if number_of_sequences_to_implant == 0:
+            logging.warning(f"HealthySequenceImplanting: there are {len(repertoire.sequences)} sequences in repertoire {repertoire.identifier} "
+                            f"for the given repertoire implanting rate of {repertoire_implanting_rate}; no motif will be implanted. To implant "
+                            f"motifs, increase 'repertoire_implanting_rate' in the specification.")
         unusable_sequences = []
         unprocessed_sequences = []
 

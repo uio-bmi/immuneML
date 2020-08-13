@@ -52,8 +52,8 @@ class TestSignalImplanter(TestCase):
         s2 = Signal(identifier="s2", motifs=[m1, m2],
                     implanting_strategy=HealthySequenceImplanting(GappedMotifImplanting()))
 
-        simulation = Simulation([Implanting(dataset_implanting_rate=0.2, repertoire_implanting_rate=0.5, signals=[s1, s2]),
-                                 Implanting(dataset_implanting_rate=0.2, repertoire_implanting_rate=0.5, signals=[s2])])
+        simulation = Simulation([Implanting(dataset_implanting_rate=0.2, repertoire_implanting_rate=0.5, signals=[s1, s2], name="i1"),
+                                 Implanting(dataset_implanting_rate=0.2, repertoire_implanting_rate=0.5, signals=[s2], name="i2")])
 
         input_params = SimulationState(dataset=dataset, result_path=path, simulation=simulation, signals=[s1, s2], batch_size=1)
 

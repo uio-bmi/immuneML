@@ -38,7 +38,7 @@ class ReceptorImplanting(SignalImplantingStrategy):
 
     """
 
-    def implant_in_receptor(self, receptor, signal):
+    def implant_in_receptor(self, receptor, signal, is_noise: bool):
         new_receptor = receptor.clone()
 
         motif = random.choice(signal.motifs)
@@ -49,7 +49,7 @@ class ReceptorImplanting(SignalImplantingStrategy):
         setattr(new_receptor, motif.name_chain1.name.lower(), sequence1)
         setattr(new_receptor, motif.name_chain2.name.lower(), sequence2)
 
-        new_receptor.metadata[f"signal_{signal.id}"] = True
+        new_receptor.metadata[f"signal_{signal.id}"] = True if not is_noise else False
 
         return new_receptor
 

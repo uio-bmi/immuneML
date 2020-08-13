@@ -44,7 +44,7 @@ class TestSimulation(TestCase):
                         }
                     },
                     "motif2": {
-                        "seed": "CCC",
+                        "seed": "TTT",
                         "instantiation": "GappedKmer"
                     }
                 },
@@ -65,7 +65,13 @@ class TestSimulation(TestCase):
                         "var1": {
                             "signals": ["signal1", "signal2"],
                             "dataset_implanting_rate": 0.5,
-                            "repertoire_implanting_rate": 0.5
+                            "repertoire_implanting_rate": 0.66
+                        },
+                        "var2": {
+                            "signals": ["signal1", "signal2"],
+                            "dataset_implanting_rate": 0.5,
+                            "is_noise": True,
+                            "repertoire_implanting_rate": 0.4
                         }
                     }
                 },
@@ -187,6 +193,11 @@ class TestSimulation(TestCase):
                         "var1": {
                             "signals": ["signal1"],
                             "dataset_implanting_rate": 0.5
+                        },
+                        "var2": {
+                            "signals": ["signal1"],
+                            "dataset_implanting_rate": 0.5,
+                            "is_noise": True
                         }
                     }
                 }

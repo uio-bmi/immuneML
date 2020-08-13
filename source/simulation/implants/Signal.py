@@ -58,8 +58,8 @@ class Signal:
                                    signal=self, path=path)
         return processed_repertoire
 
-    def implant_in_receptor(self, receptor: Receptor) -> Receptor:
-        processed_receptor = self.implanting_strategy.implant_in_receptor(receptor, self)
+    def implant_in_receptor(self, receptor: Receptor, is_noise: bool) -> Receptor:
+        processed_receptor = self.implanting_strategy.implant_in_receptor(receptor, self, is_noise)
         return processed_receptor
 
     def __str__(self):

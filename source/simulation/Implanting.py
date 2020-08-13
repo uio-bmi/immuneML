@@ -47,6 +47,20 @@ class Implanting:
                     dataset_implanting_rate: 0.2
                     repertoire_implanting_rate: 0.75
 
+            # a simulation where the signals is present in the negative class as well (e.g. wrong labels, or by chance)
+            noisy_simulation:
+                positive_class_implanting:
+                    signals:
+                        - my_signal
+                    dataset_implanting_rate: 0.5
+                    repertoire_implanting_rate: 0.1 # 10% of the repertoire includes the signal in the positive class
+                negative_class_implanting:
+                    signals:
+                        - my_signal
+                    is_noise: True # means that signal will be implanted, but the label will have negative class
+                    dataset_implanting_rate: 0.5
+                    repertoire_implanting_rate: 0.01 # 1% of negative class repertoires has the signal
+
             # in case of defining implanting for paired chain immune receptor data the simulation with implanting objects would be:
             my_receptor_simulation:
                 my_receptor_implanting_1: # repertoire_implanting_rate is omitted in this case, as it is not applicable
@@ -56,10 +70,12 @@ class Implanting:
 
     """
 
-    def __init__(self, dataset_implanting_rate: float, signals: List[Signal], name: str = "", repertoire_implanting_rate: float = None):
+    def __init__(self, dataset_implanting_rate: float, signals: List[Signal], name: str = "", repertoire_implanting_rate: float = None,
+                 is_noise: bool = False):
         self.dataset_implanting_rate = dataset_implanting_rate
         self.repertoire_implanting_rate = repertoire_implanting_rate
         self.signals = signals
+        self.is_noise = is_noise
         self.name = name
 
     def __str__(self):
