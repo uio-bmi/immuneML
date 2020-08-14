@@ -69,17 +69,17 @@ class TestCoefficients(TestCase):
 
         self.assertIsInstance(result, ReportResult)
         self.assertEqual(result.output_tables[0].path, path + "coefficients.csv")
-        self.assertEqual(result.output_figures[0].path, path + "all_coefficients.pdf")
-        self.assertEqual(result.output_figures[1].path, path + "nonzero_coefficients.pdf")
-        self.assertEqual(result.output_figures[2].path, path + "cutoff_10_coefficients.pdf")
-        self.assertEqual(result.output_figures[3].path, path + "largest_5_coefficients.pdf")
+        self.assertEqual(result.output_figures[0].path, path + "all_coefficients.html")
+        self.assertEqual(result.output_figures[1].path, path + "nonzero_coefficients.html")
+        self.assertEqual(result.output_figures[2].path, path + "cutoff_10_coefficients.html")
+        self.assertEqual(result.output_figures[3].path, path + "largest_5_coefficients.html")
 
         # Actual tests
         self.assertTrue(os.path.isfile(path + "coefficients.csv"))
-        self.assertTrue(os.path.isfile(path + "all_coefficients.pdf"))
-        self.assertTrue(os.path.isfile(path + "nonzero_coefficients.pdf"))
-        self.assertTrue(os.path.isfile(path + "cutoff_10_coefficients.pdf"))
-        self.assertTrue(os.path.isfile(path + "largest_5_coefficients.pdf"))
+        self.assertTrue(os.path.isfile(path + "all_coefficients.html"))
+        self.assertTrue(os.path.isfile(path + "nonzero_coefficients.html"))
+        self.assertTrue(os.path.isfile(path + "cutoff_10_coefficients.html"))
+        self.assertTrue(os.path.isfile(path + "largest_5_coefficients.html"))
 
         written_data = pd.read_csv(path + "coefficients.csv")
 

@@ -142,6 +142,7 @@ class TestImmuneMLApp(TestCase):
                         "reports": {
                             "data_splits": ["rep1"],
                             "hyperparameter": ["rep2"],
+                            "models": ["rep3"],
                             "encoding": ["rep4"]
                         }
                     },
@@ -152,7 +153,6 @@ class TestImmuneMLApp(TestCase):
                         "reports": {
                             "data_splits": ["rep1"],
                             "models": ["rep3"],
-                            "optimal_models": [],
                             "encoding": ["rep4"]
                         }
                     },

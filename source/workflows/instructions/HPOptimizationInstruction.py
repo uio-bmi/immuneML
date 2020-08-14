@@ -97,8 +97,8 @@ class HPOptimizationInstruction(Instruction):
                  metrics: set, optimization_metric: Metric, label_configuration: LabelConfiguration, path: str = None,
                  context: dict = None, batch_size: int = 1, data_reports: dict = None, name: str = None):
         self.hp_optimization_state = HPOptimizationState(dataset, hp_strategy, hp_settings, assessment, selection, metrics,
-                                                         optimization_metric, label_configuration, path, context, batch_size, data_reports,
-                                                         name)
+                                                         optimization_metric, label_configuration, path, context, batch_size,
+                                                         data_reports if data_reports is not None else {}, name)
 
     def run(self, result_path: str):
         self.hp_optimization_state.path = result_path

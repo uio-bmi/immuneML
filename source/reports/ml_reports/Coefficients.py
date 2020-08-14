@@ -1,13 +1,14 @@
+import logging
 import warnings
 from numbers import Number
 
 import pandas as pd
+import plotly.express as px
 import yaml
-from rpy2.robjects import pandas2ri
-from rpy2.robjects.packages import STAP
 
 from scripts.specification_util import update_docs_per_mapping
-from source.environment.EnvironmentSettings import EnvironmentSettings
+from source.data_model.dataset.Dataset import Dataset
+from source.ml_methods.MLMethod import MLMethod
 from source.ml_methods.RandomForestClassifier import RandomForestClassifier
 from source.ml_methods.SVM import SVM
 from source.ml_methods.SimpleLogisticRegression import SimpleLogisticRegression
@@ -93,15 +94,15 @@ class Coefficients(MLReport):
 
         return Coefficients(coefs, cutoff, n_largest, name)
 
-    def __init__(self, coefs_to_plot: CoefficientPlottingSettingList, cutoff: list, n_largest: list, name: str = None):
-        super(Coefficients, self).__init__()
+    def __init__(self, coefs_to_plot: CoefficientPlottingSettingList, cutoff: list, n_largest: list, train_dataset: Dataset = None,
+                 test_dataset: Dataset = None, method: MLMethod = None, result_path: str = None, name: str = None):
+        super(Coefficients, self).__init__(train_dataset, test_dataset, method, result_path, name)
 
         self._coefs_to_plot = coefs_to_plot
         self._cutoff = cutoff
         self._n_largest = n_largest
         self.label = None
         self.hp_setting = None
-        self.name = name
 
     def generate(self):
         PathBuilder.build(self.result_path)
@@ -117,24 +118,24 @@ class Coefficients(MLReport):
         self._write_settings()
 
         if CoefficientPlottingSetting.ALL in self._coefs_to_plot:
-            report_output_fig = self._safe_plot(plotting_data=plot_data, output_name="all_coefficients")
+            report_output_fig = self._plot(plotting_data=plot_data, output_name="all_coefficients")
             paths.append(report_output_fig)
 
         if CoefficientPlottingSetting.NONZERO in self._coefs_to_plot:
             nonzero_data = plot_data[plot_data["coefficients"] != 0]
-            report_output_fig = self._safe_plot(plotting_data=nonzero_data, output_name="nonzero_coefficients")
+            report_output_fig = self._plot(plotting_data=nonzero_data, output_name="nonzero_coefficients")
             paths.append(report_output_fig)
 
         if CoefficientPlottingSetting.CUTOFF in self._coefs_to_plot:
             for cutoff_val in self._cutoff:
                 cutoff_data = plot_data[plot_data["abs_coefficients"] >= cutoff_val]
-                report_output_fig = self._safe_plot(plotting_data=cutoff_data, output_name="cutoff_{}_coefficients".format(cutoff_val))
+                report_output_fig = self._plot(plotting_data=cutoff_data, output_name="cutoff_{}_coefficients".format(cutoff_val))
                 paths.append(report_output_fig)
 
         if CoefficientPlottingSetting.N_LARGEST in self._coefs_to_plot:
             for n_val in self._n_largest:
                 n_largest_data = plot_data.nlargest(n=n_val, columns=["abs_coefficients"])
-                report_output_fig = self._safe_plot(plotting_data=n_largest_data, output_name="largest_{}_coefficients".format(n_val))
+                report_output_fig = self._plot(plotting_data=n_largest_data, output_name="largest_{}_coefficients".format(n_val))
                 paths.append(report_output_fig)
 
         return ReportResult(self.name, output_tables=[ReportOutput(result_table_path)], output_figures=[p for p in paths if p is not None])
@@ -176,40 +177,23 @@ class Coefficients(MLReport):
         if plotting_data.empty:
             warnings.warn("Coefficients: empty data subset specified, skipping this plot...")
         else:
-            pandas2ri.activate()
 
-            with open(EnvironmentSettings.visualization_path + "Barplot.R") as f:
-                string = f.read()
+            filename = f"{self.result_path}{output_name}.html"
 
-            plot = STAP(string, "plot")
+            figure = px.bar(plotting_data, x='features', y='coefficients', template='plotly_white',
+                            title=f"{type(self.method).__name__}{' (' + self.method.name + ') - ' if self.method.name is not None else ' - '}"
+                                  f"{' '.join(output_name.split('_'))}")
+            figure.write_html(filename)
 
-            plotting_data.loc[:, "empty_facet"] = ""  # Necessary to remove '(all)' label when not using facets
-
-            plot.plot_barplot(data=plotting_data, x="features", color="NULL", y="coefficients",
-                                  y_lab=self._y_axis_title, x_lab="feature", facet_type="wrap", facet_columns="empty_facet",
-                                  facet_scales="free", nrow=1, height=6, sort_by_y=True,
-                                  width=8, result_path=self.result_path, result_name=output_name)
-
-            return ReportOutput(f"{self.result_path}{output_name}.pdf")
+            return ReportOutput(filename)
 
     def check_prerequisites(self):
 
         run_report = True
 
-        if not hasattr(self, "method"):
-            warnings.warn("Coefficients can only be executed as a model report. Coefficients report will not be created.")
-            run_report = False
-
         if not any([isinstance(self.method, legal_method) for legal_method in (RandomForestClassifier, SimpleLogisticRegression, SVM)]):
-            warnings.warn("Coefficients report can only be created for RandomForestClassifier, SimpleLogisticRegression or SVM. Coefficients report will not be created.")
-            run_report = False
-
-        if not hasattr(self, "result_path"):
-            warnings.warn("Coefficients requires an output 'path' to be set. Coefficients report will not be created.")
-            run_report = False
-
-        if not hasattr(self, "label"):
-            warnings.warn("Coefficients requires that the relevant 'label' is set. Coefficients report will not be created.")
+            logging.warning(f"Coefficients report can only be created for RandomForestClassifier, SimpleLogisticRegression or SVM, but got "
+                            f"{type(self.method).__name__} instead. Coefficients report will not be created.")
             run_report = False
 
         return run_report

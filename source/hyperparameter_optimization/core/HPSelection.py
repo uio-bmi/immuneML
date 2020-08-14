@@ -1,8 +1,6 @@
 from source.environment.LabelConfiguration import LabelConfiguration
 from source.hyperparameter_optimization.HPSetting import HPSetting
-from source.hyperparameter_optimization.core.HPReports import HPReports
 from source.hyperparameter_optimization.core.HPUtil import HPUtil
-from source.hyperparameter_optimization.states.HPItem import HPItem
 from source.hyperparameter_optimization.states.HPOptimizationState import HPOptimizationState
 from source.hyperparameter_optimization.states.HPSelectionState import HPSelectionState
 from source.util.PathBuilder import PathBuilder
@@ -26,7 +24,7 @@ class HPSelection:
                                                               path, label, split_index)
                 hp_setting = selection_state.hp_strategy.generate_next_setting(hp_setting, performance)
 
-            HPReports.run_selection_reports(state, train_val_dataset, train_datasets, val_datasets, selection_state)
+            HPUtil.run_selection_reports(state, train_val_dataset, train_datasets, val_datasets, selection_state)
 
         return state
 
@@ -37,7 +35,7 @@ class HPSelection:
         performances = []
         for index in range(state.selection.split_count):
             performance = HPSelection.run_setting(state, hp_setting, train_datasets[index], val_datasets[index], index + 1,
-                                                  f"{current_path}split_{index+1}/{label}_{hp_setting.get_key()}/",
+                                                  f"{current_path}split_{index + 1}/{label}_{hp_setting.get_key()}/",
                                                   label, assessment_split_index)
             performances.append(performance)
 
@@ -49,36 +47,16 @@ class HPSelection:
     @staticmethod
     def run_setting(state: HPOptimizationState, hp_setting, train_dataset, val_dataset, split_index: int,
                     current_path: str, label: str, assessment_index: int):
-        new_train_dataset = HPUtil.preprocess_dataset(train_dataset, hp_setting.preproc_sequence, current_path + "train/")
-        new_val_dataset = HPUtil.preprocess_dataset(val_dataset, hp_setting.preproc_sequence, current_path + "val/")
 
-        ml_details_path, ml_score_path = f"{current_path}ml_details.yaml", f"{current_path}ml_score.csv"
-        train_predictions_path, val_predictions_path = f"{current_path}train_predictions.csv", f"{current_path}val_predictions.csv"
-
-        ml_process = MLProcess(train_dataset=new_train_dataset, test_dataset=new_val_dataset,
-                               label=label, label_config=LabelConfiguration([state.label_configuration.get_label_object(label)]),
-                               batch_size=state.batch_size,
-                               encoder=hp_setting.encoder.build_object(train_dataset, **hp_setting.encoder_params).set_context(state.context),
-                               encoder_params=hp_setting.encoder_params, method=hp_setting.ml_method,
-                               ml_params=hp_setting.ml_params, metrics=state.metrics, optimization_metric=state.optimization_metric,
-                               path=current_path, hp_setting=hp_setting,
-                               ml_reports=state.selection.reports.model_reports.values(),
-                               encoding_reports=state.selection.reports.encoding_reports.values(),
-                               report_context=state.context,
-                               ml_details_path=ml_details_path,
-                               ml_score_path=ml_score_path,
-                               train_predictions_path=train_predictions_path,
-                               val_predictions_path=val_predictions_path)
-        method, performance, ml_reports, encoding_train_reports, encoding_test_reports = ml_process.run(split_index)
-
-        hp_item = HPItem(hp_setting=hp_setting, train_dataset=train_dataset, test_dataset=val_dataset, split_index=split_index,
-                         train_predictions_path="", test_predictions_path="", ml_details_path="", performance=performance, method=method,
-                         model_report_results=ml_reports, encoding_train_results=encoding_train_reports,
-                         encoding_test_results=encoding_test_reports)
+        hp_item = MLProcess(train_dataset=train_dataset, test_dataset=val_dataset, encoding_reports=state.selection.reports.encoding_reports.values(),
+                            label_config=LabelConfiguration([state.label_configuration.get_label_object(label)]), report_context=state.context,
+                            number_of_processes=state.batch_size, metrics=state.metrics, optimization_metric=state.optimization_metric,
+                            ml_reports=state.selection.reports.model_reports.values(), label=label, path=current_path, hp_setting=hp_setting)\
+            .run(split_index)
 
         state.assessment_states[assessment_index].label_states[label].selection_state.hp_items[hp_setting.get_key()].append(hp_item)
 
-        return performance
+        return hp_item.performance
 
     @staticmethod
     def create_selection_path(state: HPOptimizationState, current_path: str) -> str:

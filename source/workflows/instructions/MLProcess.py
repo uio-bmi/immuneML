@@ -1,23 +1,15 @@
 import copy
-from typing import List, Tuple
+from typing import List
 
 from source.data_model.dataset.Dataset import Dataset
-from source.dsl.semantic_model.MLResult import MLResult
-from source.encodings.DatasetEncoder import DatasetEncoder
-from source.encodings.EncoderParams import EncoderParams
 from source.environment.LabelConfiguration import LabelConfiguration
 from source.environment.Metric import Metric
 from source.hyperparameter_optimization.HPSetting import HPSetting
-from source.ml_methods.MLMethod import MLMethod
-from source.reports.ReportResult import ReportResult
+from source.hyperparameter_optimization.core.HPUtil import HPUtil
+from source.hyperparameter_optimization.states.HPItem import HPItem
 from source.reports.ReportUtil import ReportUtil
 from source.reports.ml_reports.MLReport import MLReport
-from source.workflows.steps.DataEncoder import DataEncoder
-from source.workflows.steps.DataEncoderParams import DataEncoderParams
-from source.workflows.steps.MLMethodAssessment import MLMethodAssessment
-from source.workflows.steps.MLMethodAssessmentParams import MLMethodAssessmentParams
-from source.workflows.steps.MLMethodTrainer import MLMethodTrainer
-from source.workflows.steps.MLMethodTrainerParams import MLMethodTrainerParams
+from source.util.PathBuilder import PathBuilder
 
 
 class MLProcess:
@@ -31,103 +23,73 @@ class MLProcess:
     It performs the task for a given label configuration, and given list of metrics (used only in the assessment step).
     """
 
-    def __init__(self, train_dataset: Dataset, test_dataset: Dataset, label: str,
-                 encoder: DatasetEncoder, encoder_params: dict, method: MLMethod, ml_params: dict, metrics: set,
-                 optimization_metric: Metric, path: str, ml_reports: List[MLReport] = None, encoding_reports: list = None,
-                 min_example_count: int = 2, batch_size: int = 2, cores: int = -1, train_predictions_path: str = None,
-                 val_predictions_path: str = None, ml_details_path: str = None, ml_score_path: str = None,
+    def __init__(self, train_dataset: Dataset, test_dataset: Dataset, label: str, metrics: set, optimization_metric: Metric,
+                 path: str, ml_reports: List[MLReport] = None, encoding_reports: list = None, data_reports: list = None, number_of_processes: int = 2,
                  label_config: LabelConfiguration = None, report_context: dict = None, hp_setting: HPSetting = None):
         self.train_dataset = train_dataset
         self.test_dataset = test_dataset
         self.label = label
         self.label_config = label_config
-        self.encoder = encoder
-        self.encoder_params = encoder_params
-        self.method = copy.deepcopy(method)
-        self.ml_params = ml_params
-        self.path = path
-        self.cores_for_training = cores
-        self.batch_size = batch_size
+        self.method = copy.deepcopy(hp_setting.ml_method)
+        self.path = PathBuilder.build(path)
+        self.number_of_processes = number_of_processes
         assert all([isinstance(metric, Metric) for metric in metrics]), \
             "MLProcess: metrics are not set to be an instance of Metric."
         self.metrics = metrics
         self.metrics.add(Metric.BALANCED_ACCURACY)
         self.optimization_metric = optimization_metric
-        self.min_example_count = min_example_count
-        self.ml_details_path = ml_details_path
-        self.ml_score_path = ml_score_path
-        self.train_predictions_path = train_predictions_path
-        self.val_predictions_path = val_predictions_path
+        self.ml_details_path = f"{path}ml_details.yaml"
+        self.ml_score_path = f"{path}ml_score.csv"
+        self.train_predictions_path = f"{path}train_predictions.csv"
+        self.test_predictions_path = f"{path}test_predictions.csv"
+        self.report_path = PathBuilder.build(f"{path}reports/")
         self.ml_reports = ml_reports if ml_reports is not None else []
         self.encoding_reports = encoding_reports if encoding_reports is not None else []
+        self.data_reports = data_reports if data_reports is not None else []
         self.report_context = report_context
         self.hp_setting = hp_setting
 
-    def get_ML_result(self):
-        return MLResult(self.path)
+    def run(self, split_index: int) -> HPItem:
+        PathBuilder.build(self.path)
 
-    def run(self, run_id: int) -> Tuple[MLMethod, float, List[ReportResult], List[ReportResult], List[ReportResult]]:
+        processed_dataset = HPUtil.preprocess_dataset(self.train_dataset, self.hp_setting.preproc_sequence, f"{self.path}preprocessed_train_dataset/")
 
-        encoded_train = self._run_encoder(self.train_dataset, True)
-        encoding_results_train = ReportUtil.run_encoding_reports(encoded_train, self.encoding_reports,
-                                                                 f"{self.path}encoding_reports/train/", self.report_context)
+        encoded_train_dataset = HPUtil.encode_dataset(processed_dataset, self.hp_setting, f"{self.path}encoded_datasets/", learn_model=True,
+                                                      context=self.report_context, batch_size=self.number_of_processes,
+                                                      label_configuration=self.label_config)
 
-        method = self._train_ml_method(encoded_train)
+        method = HPUtil.train_method(self.label, encoded_train_dataset, self.hp_setting, self.path, self.train_predictions_path, self.ml_details_path)
 
+        encoding_train_results = ReportUtil.run_encoding_reports(encoded_train_dataset, self.encoding_reports, f"{self.report_path}encoding_train/")
+
+        hp_item = self._assess_on_test_dataset(encoded_train_dataset, encoding_train_results, method, split_index)
+
+        return hp_item
+
+    def _assess_on_test_dataset(self, encoded_train_dataset, encoding_train_results, method, split_index) -> HPItem:
         if self.test_dataset is not None and self.test_dataset.get_example_count() > 0:
+            processed_test_dataset = HPUtil.preprocess_dataset(self.test_dataset, self.hp_setting.preproc_sequence,
+                                                               f"{self.path}preprocessed_test_dataset/")
 
-            encoded_test = self._run_encoder(self.test_dataset, False)
-            performance = self._assess_ml_method(method, encoded_test, run_id)
+            encoded_test_dataset = HPUtil.encode_dataset(processed_test_dataset, self.hp_setting, f"{self.path}encoded_datasets/",
+                                                         learn_model=False, context=self.report_context, batch_size=self.number_of_processes,
+                                                         label_configuration=self.label_config)
 
-            ml_report_results = ReportUtil.run_ML_reports(train_dataset=encoded_train, test_dataset=encoded_test, method=method,
-                                                          reports=self.ml_reports, path=f"{self.path}ml_reports/",
-                                                          hp_setting=self.hp_setting, label=self.label, context=self.report_context)
-            encoding_results_test = ReportUtil.run_encoding_reports(encoded_test, self.encoding_reports,
-                                                                    f"{self.path}encoding_reports/test/", self.report_context)
+            performance = HPUtil.assess_performance(method, self.metrics, self.optimization_metric, encoded_test_dataset, split_index, self.path,
+                                                    self.test_predictions_path, self.label, self.ml_score_path)
 
+            encoding_test_results = ReportUtil.run_encoding_reports(encoded_test_dataset, self.encoding_reports, f"{self.report_path}encoding_test/")
+
+            model_report_results = ReportUtil.run_ML_reports(encoded_train_dataset, encoded_test_dataset, method, self.ml_reports,
+                                                             f"{self.report_path}ml_method/", self.hp_setting, self.label, self.report_context)
+
+            hp_item = HPItem(method=method, hp_setting=self.hp_setting, train_predictions_path=self.train_predictions_path,
+                             test_predictions_path=self.test_predictions_path, ml_details_path=self.ml_details_path, train_dataset=self.train_dataset,
+                             test_dataset=self.test_dataset, split_index=split_index, model_report_results=model_report_results,
+                             encoding_train_results=encoding_train_results, encoding_test_results=encoding_test_results, performance=performance)
         else:
-            performance = None
-            ml_report_results = []
-            encoding_results_test = []
+            hp_item = HPItem(method=method, hp_setting=self.hp_setting, train_predictions_path=self.train_predictions_path,
+                             test_predictions_path=None, ml_details_path=self.ml_details_path, train_dataset=self.train_dataset,
+                             split_index=split_index, encoding_train_results=encoding_train_results)
 
-        return method, performance, ml_report_results, encoding_results_train, encoding_results_test
-
-    def _assess_ml_method(self, method: MLMethod, encoded_test_dataset: Dataset, run: int):
-        return MLMethodAssessment.run(MLMethodAssessmentParams(
-            method=method,
-            dataset=encoded_test_dataset,
-            metrics=self.metrics,
-            optimization_metric=self.optimization_metric,
-            label=self.label,
-            split_index=run,
-            predictions_path=self.val_predictions_path,
-            path=self.path,
-            ml_score_path=self.ml_score_path
-        ))
-
-    def _run_encoder(self, train_dataset: Dataset, learn_model: bool):
-        return DataEncoder.run(DataEncoderParams(
-            dataset=train_dataset,
-            encoder=self.encoder,
-            encoder_params=EncoderParams(
-                model=self.encoder_params,
-                result_path=self.path,
-                batch_size=self.batch_size,
-                label_configuration=self.label_config,
-                learn_model=learn_model,
-                filename="train_dataset.pkl" if learn_model else "test_dataset.pkl"
-            )
-        ))
-
-    def _train_ml_method(self, encoded_train_dataset: Dataset) -> MLMethod:
-        return MLMethodTrainer.run(MLMethodTrainerParams(
-            method=self.method,
-            result_path=self.path + "/ml_method/",
-            dataset=encoded_train_dataset,
-            label=self.label,
-            model_selection_cv=self.ml_params["model_selection_cv"],
-            model_selection_n_folds=self.ml_params["model_selection_n_folds"],
-            cores_for_training=self.cores_for_training,
-            train_predictions_path=self.train_predictions_path,
-            ml_details_path=self.ml_details_path
-        ))
+        return hp_item

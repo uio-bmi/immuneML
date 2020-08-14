@@ -24,7 +24,7 @@ class HPOptimizationState:
     path: str = None
     context: dict = None
     batch_size: int = 1
-    data_reports: dict = None
+    data_reports: dict = field(default_factory=dict)
     name: str = None
     assessment_states: List[HPAssessmentState] = field(default_factory=list)
     hp_report_results: List[ReportResult] = field(default_factory=list)

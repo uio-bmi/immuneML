@@ -10,6 +10,7 @@ class MLMethod(metaclass=abc.ABCMeta):
     def __init__(self):
         self.ml_details_path = None
         self.predictions_path = {}
+        self.name = None
 
     @abc.abstractmethod
     def fit(self, encoded_data: EncodedData, y, label_names: list = None, cores_for_training: int = 2):

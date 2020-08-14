@@ -85,7 +85,6 @@ class Quickstart:
                         "reports": {
                             "data_splits": ["rep1"],
                             "models": [],
-                            "optimal_models": []
                         }
                     },
                     "labels": ["CD"],
