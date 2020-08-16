@@ -1,5 +1,6 @@
 import os
 import random
+import shutil
 from unittest import TestCase
 
 import yaml
@@ -107,20 +108,20 @@ class TestImmuneMLApp(TestCase):
                 },
             },
             "instructions": {
-                # "report_inst": {
-                #     "type": "ExploratoryAnalysis",
-                #     "analyses": {
-                #         "a1": {
-                #             "dataset": "d1",
-                #             "report": "rep1"
-                #         }
-                #     }
-                # },
-                # "export_instr": {
-                #     "type": "DatasetGeneration",
-                #     "datasets": ["d1"],
-                #     "formats": ["AIRR"]
-                # },
+                "report_inst": {
+                    "type": "ExploratoryAnalysis",
+                    "analyses": {
+                        "a1": {
+                            "dataset": "d1",
+                            "report": "rep1"
+                        }
+                    }
+                },
+                "export_instr": {
+                    "type": "DatasetGeneration",
+                    "datasets": ["d1"],
+                    "formats": ["AIRR"]
+                },
                 "inst1": {
                     "type": "HPOptimization",
                     "settings": [
@@ -187,4 +188,4 @@ class TestImmuneMLApp(TestCase):
         self.assertTrue("split_count" in full_specs["instructions"]["inst1"]["selection"] and full_specs["instructions"]["inst1"]["selection"]["split_count"] == 2)
         self.assertTrue("training_percentage" in full_specs["instructions"]["inst1"]["selection"] and full_specs["instructions"]["inst1"]["selection"]["training_percentage"] == 0.7)
 
-        # shutil.rmtree(path, ignore_errors=True)
+        shutil.rmtree(path, ignore_errors=True)
