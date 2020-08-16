@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Hyperparameter optimization - CV details</title>
+    <style>
+        {{{css_style}}}
+    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+    <div class="container padded-bottom">
+        <h3>Assessment - split {{split_index}} details (label {{label}}, hyperparameter setting {{hp_setting}})</h3>
+        {{#ml_reports}}
+        <h3>ML reports</h3>
+        {{#ml_reports}}
+        {{#output_figures}}
+        <div class="padded center">
+            <embed alt="report" src="{{path}}">
+            <p>{{name}}</p>
+        </div>
+        {{/output_figures}}
+
+        {{#output_tables}}
+        <a href="{{path}}">Download {{#name}}{{name}} report{{/name}}</a>
+        {{/output_tables}}
+
+        {{/ml_reports}}
+        {{/ml_reports}}
+
+        {{#encoding_train_reports}}
+        <h3>Reports on encoded datasets</h3>
+        <div class="padded-top padded-bottom">
+            <div class="col-container">
+                <div class="col center">
+                    {{#encoding_train_reports}}
+                    {{#output_figures}}
+                    <embed src="{{path}}">
+                    {{#name}}<p>{{name}} (training data)</p>{{/name}}
+                    {{/output_figures}}
+
+                    {{#output_tables}}
+                    <a href="{{path}}">Download {{#name}}{{name}} (training data){{/name}}</a>
+                    {{/output_tables}}
+                    {{/encoding_train_reports}}
+                </div>
+                <div class="col center">
+                    {{#encoding_test_reports}}
+                    {{#output_figures}}
+                    <embed src="{{path}}">
+                    {{#name}}<p>{{name}} (test data)</p>{{/name}}
+                    {{/output_figures}}
+
+                    {{#output_tables}}
+                    <a href="{{path}}">Download {{#name}}{{name}} (test data){{/name}}</a>
+                    {{/output_tables}}
+                    {{/encoding_test_reports}}
+                </div>
+            </div>
+        </div>
+        {{/encoding_train_reports}}
+    </div>
+</body>
+</html>

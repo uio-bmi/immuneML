@@ -16,7 +16,9 @@ class Util:
             elif isinstance(obj, list):
                 return [Util.to_dict_recursive(element, base_path) for element in obj]
             elif isinstance(obj, str) and os.path.isfile(obj):
-                return os.path.relpath(obj, base_path) + "/" if os.path.relpath(obj, base_path) != "" and os.path.isdir(obj) else os.path.relpath(obj, base_path)
+                obj_abs_path = os.path.abspath(obj)
+                base_abs_path = os.path.abspath(base_path)
+                return os.path.relpath(obj_abs_path, base_abs_path)
             else:
                 return obj if obj is not None else ""
         elif isinstance(obj, Enum):
@@ -41,13 +43,10 @@ class Util:
         return os.path.relpath(zip_file_path, base_path)
 
     @staticmethod
-    def get_full_specs_path(base_path, state_result_path):
-        specs_path = list(glob.glob(f"{base_path}**/full*.yaml", recursive=True))
+    def get_full_specs_path(base_path):
+        specs_path = list(glob.glob(f"{base_path}../**/full*.yaml", recursive=True))
         if len(specs_path) == 1:
-            if base_path == state_result_path:
-                return os.path.relpath(specs_path[0], base_path)
-            else:
-                return os.path.relpath(specs_path[0], state_result_path)
+            return os.path.relpath(specs_path[0], base_path)
         else:
             return ""
 

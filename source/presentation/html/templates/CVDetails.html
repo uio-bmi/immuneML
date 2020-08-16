@@ -11,6 +11,20 @@
 <body>
     <div class="container">
         <h3>Assessment - split {{split_index}} details</h3>
+        <div class="padded-top padded-bottom">
+            <details>
+                <summary>Train and validation metadata (<a href="{{train_metadata_path}}">download link</a>)</summary>
+                <div class="table-container padded">
+                    {{{train_metadata}}}
+                </div>
+            </details>
+            <details>
+                <summary>Test metadata (<a href="{{test_metadata_path}}">download link</a>)</summary>
+                <div class="table-container padded">
+                    {{{test_metadata}}}
+                </div>
+            </details>
+        </div>
         {{#labels}}
         <h4>Label {{label}}</h4>
         <div class="padded">
@@ -26,14 +40,18 @@
                         {{#hp_settings}}
                         <tr>
                             <td>
+                                <a href="{{reports_path}}">
                                 {{#optimal}}<b>{{/optimal}}
                                     {{hp_setting}}
                                 {{#optimal}}</b>{{/optimal}}
+                                </a>
                             </td>
                             <td>
+                                <a href="{{reports_path}}">
                                 {{#optimal}}<b>{{/optimal}}
                                     {{optimization_metric_val}}
                                 {{#optimal}}</b>{{/optimal}}
+                                </a>
                             </td>
                         </tr>
                         {{/hp_settings}}
@@ -47,20 +65,6 @@
             </div>
         </div>
         {{/labels}}
-        <div class="padded">
-            <details>
-                <summary>Train and validation metadadta (<a href="{{train_metadata_path}}">download link</a>)</summary>
-                <div class="table-container padded">
-                    {{{train_metadata}}}
-                </div>
-            </details>
-            <details>
-                <summary>Test metadata (<a href="{{test_metadata_path}}">download link</a>)</summary>
-                <div class="table-container padded">
-                    {{{test_metadata}}}
-                </div>
-            </details>
-        </div>
         {{#show_data_reports}}
         <h3>Data reports</h3>
         <div class="padded">
@@ -84,22 +88,6 @@
             </div>
         </div>
         {{/show_data_reports}}
-        {{#show_ml_reports}}
-        <h3>ML reports</h3>
-        {{#ml_reports}}
-        {{#labels}}
-        <h4>Label {{label}}</h4>
-        {{#ml_reports_per_label}}
-        {{#output_figures}}
-        <div class="padded center">
-            <embed alt="report" src="{{path}}">
-            <p>{{name}}</p>
-        </div>
-        {{/output_figures}}
-        {{/ml_reports_per_label}}
-        {{/labels}}
-        {{/ml_reports}}
-        {{/show_ml_reports}}
     </div>
 </body>
 </html>

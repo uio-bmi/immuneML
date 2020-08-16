@@ -1,5 +1,4 @@
 import logging
-import warnings
 from numbers import Number
 
 import pandas as pd
@@ -138,7 +137,8 @@ class Coefficients(MLReport):
                 report_output_fig = self._plot(plotting_data=n_largest_data, output_name="largest_{}_coefficients".format(n_val))
                 paths.append(report_output_fig)
 
-        return ReportResult(self.name, output_tables=[ReportOutput(result_table_path)], output_figures=[p for p in paths if p is not None])
+        return ReportResult(self.name, output_tables=[ReportOutput(result_table_path, "features and coefficients csv")],
+                            output_figures=[p for p in paths if p is not None])
 
     def _set_plotting_parameters(self):
         if isinstance(self.method, RandomForestClassifier):
@@ -175,7 +175,7 @@ class Coefficients(MLReport):
 
     def _plot(self, plotting_data, output_name):
         if plotting_data.empty:
-            warnings.warn("Coefficients: empty data subset specified, skipping this plot...")
+            logging.warning(f"Coefficients: empty data subset specified, skipping {output_name} plot...")
         else:
 
             filename = f"{self.result_path}{output_name}.html"

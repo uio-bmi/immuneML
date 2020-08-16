@@ -26,7 +26,7 @@ class HPUtil:
 
     @staticmethod
     def split_data(dataset: Dataset, split_config: SplitConfig, path: str) -> tuple:
-        paths = [f"{path}split_{i+1}/" for i in range(split_config.split_count)]
+        paths = [f"{path}split_{i + 1}/" for i in range(split_config.split_count)]
         params = DataSplitterParams(
             dataset=dataset,
             split_strategy=split_config.split_strategy,
@@ -120,10 +120,10 @@ class HPUtil:
         path = selection_state.path
         data_split_reports = state.selection.reports.data_split_reports.values()
         for index in range(len(train_datasets)):
-            selection_state.train_data_reports = ReportUtil.run_data_reports(train_datasets[index], data_split_reports,
-                                                                             path + f"split_{index+1}/data_reports_train/", state.context)
-            selection_state.val_data_reports = ReportUtil.run_data_reports(val_datasets[index], data_split_reports,
-                                                                           path + f"split_{index+1}/data_reports_test/", state.context)
+            selection_state.train_data_reports += ReportUtil.run_data_reports(train_datasets[index], data_split_reports,
+                                                                              path + f"split_{index + 1}/data_reports_train/", state.context)
+            selection_state.val_data_reports += ReportUtil.run_data_reports(val_datasets[index], data_split_reports,
+                                                                            path + f"split_{index + 1}/data_reports_test/", state.context)
 
         data_reports = state.selection.reports.data_reports.values()
         selection_state.data_reports = ReportUtil.run_data_reports(dataset, data_reports, f"{path}reports/", state.context)

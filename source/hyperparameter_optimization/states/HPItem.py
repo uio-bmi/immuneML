@@ -1,17 +1,24 @@
+from dataclasses import dataclass, field
+from typing import List
+
+from source.data_model.dataset.Dataset import Dataset
+from source.hyperparameter_optimization.HPSetting import HPSetting
+from source.ml_methods.MLMethod import MLMethod
+from source.reports.ReportResult import ReportResult
+
+
+@dataclass
 class HPItem:
 
-    def __init__(self, method=None, performance=None, hp_setting=None, train_predictions_path=None, test_predictions_path=None,
-                 ml_details_path=None, train_dataset=None, test_dataset=None, split_index=None, model_report_results=None,
-                 encoding_train_results=None, encoding_test_results=None):
-        self.method = method
-        self.performance = performance
-        self.hp_setting = hp_setting
-        self.train_predictions_path = train_predictions_path
-        self.test_predictions_path = test_predictions_path
-        self.ml_details_path = ml_details_path
-        self.train_dataset = train_dataset
-        self.test_dataset = test_dataset
-        self.split_index = split_index
-        self.model_report_results = [] if model_report_results is None else model_report_results
-        self.encoding_train_results = [] if encoding_train_results is None else encoding_train_results
-        self.encoding_test_results = [] if encoding_test_results is None else encoding_test_results
+    method: MLMethod = None
+    performance: float = None
+    hp_setting: HPSetting = None
+    train_predictions_path: str = None
+    test_predictions_path: str = None
+    ml_details_path: str = None
+    train_dataset: Dataset = None
+    test_dataset: Dataset = None
+    split_index: int = None
+    model_report_results: List[ReportResult] = field(default_factory=list)
+    encoding_train_results: List[ReportResult] = field(default_factory=list)
+    encoding_test_results: List[ReportResult] = field(default_factory=list)

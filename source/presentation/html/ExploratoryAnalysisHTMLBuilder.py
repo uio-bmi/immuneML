@@ -1,6 +1,7 @@
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.presentation.TemplateParser import TemplateParser
 from source.presentation.html.Util import Util
+from source.util.PathBuilder import PathBuilder
 from source.util.StringHelper import StringHelper
 from source.workflows.instructions.exploratory_analysis.ExploratoryAnalysisState import ExploratoryAnalysisState
 
@@ -14,18 +15,17 @@ class ExploratoryAnalysisHTMLBuilder:
     CSS_PATH = f"{EnvironmentSettings.html_templates_path}css/custom.css"
 
     @staticmethod
-    def build(state: ExploratoryAnalysisState, is_index: bool = True) -> str:
+    def build(state: ExploratoryAnalysisState) -> str:
         """
         Function that builds the HTML files based on the ExploratoryAnalysis state.
         Arguments:
             state: ExploratoryAnalysisState object with details and results of the instruction
-            is_index: bool indicating if the resulting html page will be used as index.html so that paths should be adjusted
         Returns:
              path to the main HTML file (which is located under state.result_path)
         """
-        base_path = state.result_path if not is_index else state.result_path + "../"
+        base_path = PathBuilder.build(state.result_path + "../HTML_output")
         html_map = ExploratoryAnalysisHTMLBuilder.make_html_map(state, base_path)
-        result_file = f"{state.result_path}ExploratoryAnalysis.html"
+        result_file = f"{base_path}ExploratoryAnalysis_{state.name}.html"
 
         TemplateParser.parse(template_path=f"{EnvironmentSettings.html_templates_path}ExploratoryAnalysis.html",
                              template_map=html_map, result_path=result_file)
@@ -36,7 +36,7 @@ class ExploratoryAnalysisHTMLBuilder:
     def make_html_map(state: ExploratoryAnalysisState, base_path: str) -> dict:
         html_map = {
             "css_style": Util.get_css_content(ExploratoryAnalysisHTMLBuilder.CSS_PATH),
-            "full_specs": Util.get_full_specs_path(base_path, state.result_path),
+            "full_specs": Util.get_full_specs_path(base_path),
             "analyses": [{
                 "name": name,
                 "dataset_name": analysis.dataset.name if analysis.dataset.name is not None else analysis.dataset.identifier,

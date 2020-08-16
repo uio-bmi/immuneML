@@ -3,6 +3,7 @@ import os
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.presentation.TemplateParser import TemplateParser
 from source.presentation.html.Util import Util
+from source.util.PathBuilder import PathBuilder
 from source.util.StringHelper import StringHelper
 from source.workflows.instructions.dataset_generation.DatasetGenerationState import DatasetGenerationState
 
@@ -12,18 +13,17 @@ class DatasetGenerationHTMLBuilder:
     CSS_PATH = f"{EnvironmentSettings.html_templates_path}css/custom.css"
 
     @staticmethod
-    def build(state: DatasetGenerationState, is_index: bool = True) -> str:
+    def build(state: DatasetGenerationState) -> str:
         """
         Function that builds the HTML files based on the Simulation state.
         Arguments:
             state: SimulationState object including all details of the Simulation instruction
-            is_index: bool indicating if the resulting html will be used as index page so that paths should be adjusted
         Returns:
              path to the main HTML file (which is located under state.result_path)
         """
-        base_path = state.result_path if not is_index else state.result_path + "../"
+        base_path = PathBuilder.build(state.result_path + "../HTML_output/")
         html_map = DatasetGenerationHTMLBuilder.make_html_map(state, base_path)
-        result_file = f"{state.result_path}DatasetGeneration.html"
+        result_file = f"{state.result_path}DatasetGeneration_{state.name}.html"
 
         TemplateParser.parse(template_path=f"{EnvironmentSettings.html_templates_path}DatasetGeneration.html",
                              template_map=html_map, result_path=result_file)
@@ -35,7 +35,7 @@ class DatasetGenerationHTMLBuilder:
         html_map = {
             "css_style": Util.get_css_content(DatasetGenerationHTMLBuilder.CSS_PATH),
             "name": state.name,
-            "full_specs": Util.get_full_specs_path(base_path, state.result_path),
+            "full_specs": Util.get_full_specs_path(base_path),
             "datasets": [
                 {
                     "dataset_name": dataset.name,

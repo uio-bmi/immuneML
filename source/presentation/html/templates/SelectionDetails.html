@@ -10,7 +10,7 @@
 </head>
 <body>
     <div class="container">
-        <h3>Selection - label {{label}}</h3>
+        <h2>Selection - label {{label}}</h2>
         <div class="padded">
             <div class="table-container">
                 <table>
@@ -38,6 +38,84 @@
                 </table>
             </div>
         </div>
+        {{#has_data_split_reports}}
+        <h2>Reports on training / validation datasets</h2>
+        <div class="padded">
+            {{#data_split_reports}}
+            <p>Split {{split_index}}</p>
+            <div class="col-container">
+                <div class="col center">
+                    {{#train}}
+                    {{#output_figures}}
+                    <embed src="{{path}}">
+                    {{#name}}<p>{{name}} (training data)</p>{{/name}}
+                    {{/output_figures}}
+                    {{#output_tables}}
+                    <a href="{{path}}">Download {{#name}}{{name}} report{{/name}}</a>
+                    {{/output_tables}}
+                    {{/train}}
+                </div>
+                <div class="col center">
+                    {{#test}}
+                    {{#output_figures}}
+                    <embed src="{{path}}">
+                    {{#name}}<p>{{name}} (test data)</p>{{/name}}
+                    {{/output_figures}}
+                    {{#output_tables}}
+                    <a href="{{path}}">Download {{#name}}{{name}} report{{/name}}</a>
+                    {{/output_tables}}
+                    {{/test}}
+                </div>
+            </div>
+            {{/data_split_reports}}
+        </div>
+        {{/has_data_split_reports}}
+        <h2>Reports per hyperparameter setting</h2>
+        {{#reports_per_setting}}
+        <div class="padded">
+            <h3>Hyperparameter setting: {{hp_setting}}</h3>
+            <hr>
+            {{#reports}}
+            <h4>Split {{split_index}}</h4>
+            {{#encoding_train_reports}}
+            <h5>Reports on encoded training data</h5>
+            {{#output_figures}}
+            <div class="padded center">
+                <embed alt="report" src="{{path}}">
+                <p>{{name}}</p>
+            </div>
+            {{/output_figures}}
+            {{#output_tables}}
+            <a href="{{path}}">Download {{#name}}{{name}} report{{/name}}</a>
+            {{/output_tables}}
+            {{/encoding_train_reports}}
+            {{#encoding_test_reports}}
+            <h5>Reports on encoded validation data</h5>
+            {{#output_figures}}
+            <div class="padded center">
+                <embed alt="report" src="{{path}}">
+                <p>{{name}}</p>
+            </div>
+            {{/output_figures}}
+            {{#output_tables}}
+            <a href="{{path}}">Download {{#name}}{{name}} report{{/name}}</a>
+            {{/output_tables}}
+            {{/encoding_test_reports}}
+            {{#ml_reports}}
+            <h5>Reports on the ML model</h5>
+            {{#output_figures}}
+            <div class="padded center">
+                <embed alt="report" src="{{path}}">
+                <p>{{name}}</p>
+            </div>
+            {{/output_figures}}
+            {{#output_tables}}
+            <a href="{{path}}">Download {{#name}}{{name}} report{{/name}}</a>
+            {{/output_tables}}
+            {{/ml_reports}}
+            {{/reports}}
+        </div>
+        {{/reports_per_setting}}
     </div>
 </body>
 </html>

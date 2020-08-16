@@ -1,6 +1,5 @@
 import os
 import random
-import shutil
 from unittest import TestCase
 
 import yaml
@@ -26,15 +25,16 @@ class TestImmuneMLApp(TestCase):
 
         repertoire_count = 30
         repertoires, metadata = RepertoireBuilder.build([["AA", "AAAA", "AAAA", "AAA"] for i in range(repertoire_count)], path,
-                                                        {"CD": [True if i % 2 == 0 else False for i in range(repertoire_count)]},
+                                                        {"CD": [True if i % 2 == 0 else False for i in range(repertoire_count)],
+                                                         "CMV": [True if i % 2 == 1 else False for i in range(repertoire_count)]},
                                                         [[{"chain": "A" if i % 2 == 0 else "B", "count": random.randint(2, 5)}
                                                           for i in range(4)]
                                                          for j in range(repertoire_count)])
 
-        dataset = RepertoireDataset(repertoires=repertoires, metadata_file=metadata, params={"CD": [True, False]}, name="dataset")
+        dataset = RepertoireDataset(repertoires=repertoires, metadata_file=metadata, params={"CD": [True, False], "CMV": [True, False]}, name="d1")
         PickleExporter.export(dataset, path)
 
-        return path + "dataset.iml_dataset"
+        return path + "d1.iml_dataset"
 
     def test_run(self):
 
@@ -107,20 +107,20 @@ class TestImmuneMLApp(TestCase):
                 },
             },
             "instructions": {
-                "report_inst": {
-                    "type": "ExploratoryAnalysis",
-                    "analyses": {
-                        "a1": {
-                            "dataset": "d1",
-                            "report": "rep1"
-                        }
-                    }
-                },
-                "export_instr": {
-                    "type": "DatasetGeneration",
-                    "datasets": ["d1"],
-                    "formats": ["AIRR"]
-                },
+                # "report_inst": {
+                #     "type": "ExploratoryAnalysis",
+                #     "analyses": {
+                #         "a1": {
+                #             "dataset": "d1",
+                #             "report": "rep1"
+                #         }
+                #     }
+                # },
+                # "export_instr": {
+                #     "type": "DatasetGeneration",
+                #     "datasets": ["d1"],
+                #     "formats": ["AIRR"]
+                # },
                 "inst1": {
                     "type": "HPOptimization",
                     "settings": [
@@ -140,7 +140,7 @@ class TestImmuneMLApp(TestCase):
                         "split_count": 1,
                         "training_percentage": 0.7,
                         "reports": {
-                            "data_splits": ["rep1"],
+                            "data_splits": [],
                             "hyperparameter": ["rep2"],
                             "models": ["rep3"],
                             "encoding": ["rep4"]
@@ -151,12 +151,12 @@ class TestImmuneMLApp(TestCase):
                         "split_count": 2,
                         "training_percentage": 0.7,
                         "reports": {
-                            "data_splits": ["rep1"],
+                            "data_splits": [],
                             "models": ["rep3"],
                             "encoding": ["rep4"]
                         }
                     },
-                    "labels": ["CD"],
+                    "labels": ["CD", "CMV"],
                     "dataset": "d1",
                     "strategy": "GridSearch",
                     "metrics": ["accuracy", "auc"],
@@ -187,4 +187,4 @@ class TestImmuneMLApp(TestCase):
         self.assertTrue("split_count" in full_specs["instructions"]["inst1"]["selection"] and full_specs["instructions"]["inst1"]["selection"]["split_count"] == 2)
         self.assertTrue("training_percentage" in full_specs["instructions"]["inst1"]["selection"] and full_specs["instructions"]["inst1"]["selection"]["training_percentage"] == 0.7)
 
-        shutil.rmtree(path, ignore_errors=True)
+        # shutil.rmtree(path, ignore_errors=True)
