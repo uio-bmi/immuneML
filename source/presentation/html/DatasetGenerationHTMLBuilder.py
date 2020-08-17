@@ -43,7 +43,7 @@ class DatasetGenerationHTMLBuilder:
                     "formats": [
                         {
                             "format_name": format_name,
-                            "dataset_download_link": Util.make_downloadable_zip(base_path,
+                            "dataset_download_link": Util.make_downloadable_zip(state.result_path,
                                                                                 os.path.relpath(state.paths[dataset.name][format_name]))
                         } for format_name in state.formats
                     ]
