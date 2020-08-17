@@ -1,4 +1,3 @@
-import logging
 import os
 
 import yaml
@@ -11,7 +10,7 @@ from source.util.PathBuilder import PathBuilder
 class GalaxyYamlTool:
 
     def __init__(self, yaml_path, output_dir, **kwargs):
-        Util.check_parameters(yaml_path, output_dir, kwargs, "Galaxy immuneML Tool")
+        Util.check_parameters(yaml_path, output_dir, kwargs, "GalaxyYamlTool")
 
         self.yaml_path = yaml_path
         self.result_path = os.path.relpath(output_dir) + "/"
@@ -30,23 +29,6 @@ class GalaxyYamlTool:
         with open(self.yaml_path, "r") as file:
             specs_dict = yaml.safe_load(file)
 
-        self.check_paths(specs_dict)
-        specs_dict = self.update_result_paths(specs_dict)
+        Util.check_paths(specs_dict, 'GalaxyYamlTool')
+        Util.update_result_paths(specs_dict, self.result_path, self.yaml_path)
 
-        with open(self.yaml_path, "w") as file:
-            yaml.dump(specs_dict, file)
-
-    def update_result_paths(self, specs: dict) -> dict:
-        for key, item in specs["definitions"]["datasets"].items():
-            if isinstance(item, dict) and 'params' in item.keys() and isinstance(item["params"], dict):
-                item['params']["result_path"] = f"{self.result_path}{key}/"
-        return specs
-
-    def check_paths(self, specs: dict):
-        for key in specs.keys():
-            if isinstance(specs[key], str):
-                if "/" in specs[key] and specs[key] != "./":
-                    logging.warning("Galaxy immuneML Tool: the paths in specification for Galaxy have to consist only of the filenames "
-                                    f"as uploaded to Galaxy history beforehand. The problem occurs for the parameter {key}.")
-            elif isinstance(specs[key], dict):
-                self.check_paths(specs[key])

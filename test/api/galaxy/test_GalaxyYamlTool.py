@@ -115,7 +115,6 @@ class TestGalaxyYamlTool(TestCase):
             yaml.dump(specs, file)
 
         tool = GalaxyYamlTool(specs_path, result_path + "result/")
-        tool.start_path = path
         tool.run()
 
         self.assertTrue(os.path.exists(f"{result_path}result/inst1/new_d1/AIRR"))
