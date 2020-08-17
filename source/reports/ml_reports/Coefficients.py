@@ -67,22 +67,23 @@ class Coefficients(MLReport):
     @classmethod
     def build_object(cls, **kwargs):
         location = "Coefficients"
-        coefs_to_plot = kwargs["coefs_to_plot"]
+        coefs_to_plot = [coef.upper() for coef in kwargs["coefs_to_plot"]]
 
         name = kwargs["name"] if "name" in kwargs else None
 
-        ParameterValidator.assert_all_in_valid_list([coef.upper() for coef in coefs_to_plot],
-                                                    [item.name.upper() for item in CoefficientPlottingSetting], location,
+        ParameterValidator.assert_all_in_valid_list(coefs_to_plot, [item.name.upper() for item in CoefficientPlottingSetting], location,
                                                     "coefs_to_plot")
 
         if CoefficientPlottingSetting.CUTOFF.name in coefs_to_plot:
             cutoff = kwargs["cutoff"]
+            ParameterValidator.assert_type_and_value(cutoff, list, location, "cutoff")
             ParameterValidator.assert_all_type_and_value(cutoff, Number, location, "cutoff", min_inclusive=1e-15)
         else:
             cutoff = []
 
         if CoefficientPlottingSetting.N_LARGEST.name in coefs_to_plot:
             n_largest = kwargs["n_largest"]
+            ParameterValidator.assert_type_and_value(n_largest, list, location, "n_largest")
             ParameterValidator.assert_all_type_and_value(n_largest, int, location, "n_largest", min_inclusive=1)
         else:
             n_largest = []
