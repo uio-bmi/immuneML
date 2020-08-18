@@ -40,8 +40,7 @@ class ImmuneMLApp:
 
         self.set_cache()
 
-        logger = logging.getLogger()
-        logger.setLevel('INFO')
+        logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 
         symbol_table, self._specification_path = ImmuneMLParser.parse_yaml_file(self._specification_path,
                                                                                 self._result_path)
