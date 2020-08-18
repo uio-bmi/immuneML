@@ -1,3 +1,4 @@
+import logging
 import os
 import pickle
 from functools import lru_cache
@@ -15,7 +16,7 @@ class ComparisonData:
     @log
     def __init__(self, repertoire_ids: list, comparison_attributes, sequence_batch_size: int = 10000, path: str = None):
 
-        self.path = PathBuilder.build(path)
+        self.path = PathBuilder.build(path + "/comparison_data/")
         self.sequence_batch_size = sequence_batch_size
         self.item_count = 0
         self.comparison_attributes = comparison_attributes
@@ -34,7 +35,7 @@ class ComparisonData:
             for item_index in range(batch.shape[0]):
                 yield batch[item_index]
 
-    @lru_cache(maxsize=110)
+    @lru_cache(maxsize=50)
     def get_repertoire_vector(self, identifier: str):
         repertoire_vector = np.zeros(self.item_count)
         for batch_index, batch in enumerate(self.get_batches(columns=[identifier])):
@@ -63,9 +64,11 @@ class ComparisonData:
     @log
     def process_dataset(self, dataset: RepertoireDataset):
         extract_fn = self.build_matching_fn()
+        repertoire_count = dataset.get_example_count()
         for index, repertoire in enumerate(dataset.get_data()):
             self.process_repertoire(repertoire, str(repertoire.identifier), extract_fn)
-            print("Repertoire {} ({}/{}) processed.".format(repertoire.identifier, index+1, len(dataset.get_data())))
+            logging.info("Repertoire {} ({}/{}) processed.".format(repertoire.identifier, index+1, repertoire_count))
+            logging.info(f"Currently, there are {self.item_count} items in the comparison data matrix.")
         self.merge_tmp_batches_to_matrix()
 
     def merge_tmp_batches_to_matrix(self):
@@ -90,6 +93,9 @@ class ComparisonData:
             comp_data_batch.store()
 
             self.batches.append(comp_data_batch)
+
+        for path in self.tmp_batch_paths:
+            os.remove(path)
 
     @log
     def process_repertoire(self, repertoire, repertoire_id: str, extract_items_fn):
