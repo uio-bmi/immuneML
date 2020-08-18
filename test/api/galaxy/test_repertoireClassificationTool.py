@@ -16,7 +16,7 @@ class TestRepertoireClassificationTool(TestCase):
 
     def make_random_dataset(self, path):
         alphabet = EnvironmentSettings.get_sequence_alphabet()
-        sequences = [["".join([rn.choice(alphabet) for i in range(20)]) for i in range(100)] for i in range(10)]
+        sequences = [["".join([rn.choice(alphabet) for i in range(20)]) for i in range(100)] for i in range(20)]
 
         repertoires, metadata = RepertoireBuilder.build(sequences, path, donors=[i % 2 for i in range(len(sequences))])
         dataset = RepertoireDataset(repertoires=repertoires, metadata_file=metadata)
@@ -33,7 +33,7 @@ class TestRepertoireClassificationTool(TestCase):
         self.make_random_dataset(path)
 
         args = ['-o', path, '-l', 'donor', '-m', 'RandomForestClassifier', 'SimpleLogisticRegression', 'SVM', 'KNN',
-                '-n', '2', '3', '4', '-t', '70', '-c', '5', '-s', 'subsequence', '-p', 'invariant', '-g', 'gapped',
+                '-t', '70', '-c', '5', '-s', 'subsequence', '-p', 'invariant', '-g', 'gapped',
                 '-kl', '1', '-kr', '1', '-gi', '0', '-ga', '1', '-r', 'unique']
 
         tool = RepertoireClassificationTool(args=args, output_dir=result_path)

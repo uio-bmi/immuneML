@@ -56,7 +56,7 @@ def build_encodings_specs(args):
 
     return encodings
 
-def get_ml_method_spec(ml_method_class, neighbors=None, model_selection_n_folds=3):
+def get_ml_method_spec(ml_method_class, model_selection_n_folds=5):
     if ml_method_class == "SimpleLogisticRegression":
         ml_spec = {
             "logistic_regression": {
@@ -95,7 +95,7 @@ def get_ml_method_spec(ml_method_class, neighbors=None, model_selection_n_folds=
         ml_spec = {
             "k_nearest_neighbors": {
                 "KNN": {
-                    "n_neighbors": neighbors
+                    "n_neighbors": [3, 5, 10]
                 },
                 "model_selection_cv": True,
                 "model_selection_n_folds": model_selection_n_folds
@@ -111,7 +111,7 @@ def build_ml_methods_specs(args):
     ml_methods_spec = dict()
 
     for method in args.ml_methods:
-        ml_methods_spec.update(get_ml_method_spec(method, args.neighbors))
+        ml_methods_spec.update(get_ml_method_spec(method))
 
     return ml_methods_spec
 
@@ -203,11 +203,6 @@ def check_arguments(args):
     assert 100 >= args.training_percentage >= 10, "training_percentage must range between 10 and 100"
     assert args.split_count >= 1, "The minimal split_count is 1."
 
-    if "KNN" in args.ml_methods:
-        assert len(args.neighbors) > 0, "When using the KNN classifier, the number of neighbors must be specified. "
-        for n in args.neighbors:
-            assert n >= 1, f"The minimal number of neighbors for KNN is 1, found value: {n}"
-
     encoding_err = "When multiple encodings are used, fields must still be of equal length, add 'NA' variables where necessary"
     assert len(args.sequence_type) == len(args.reads), encoding_err
     assert args.position_type is None or len(args.sequence_type) == len(args.position_type), encoding_err
@@ -230,8 +225,6 @@ def parse_commandline_arguments(args):
                         help="Which metadata labels should be predicted for the dataset.")
     parser.add_argument("-m", "--ml_methods", nargs="+", choices=ml_method_names, required=True,
                         help="Which machine learning methods should be applied.")
-    parser.add_argument("-n", "--neighbors", type=int, nargs="+",
-                        help="Number of neighbors for the KNN algorithm if KNN is selected under ml_methods.")
     parser.add_argument("-t", "--training_percentage", type=float, required=True,
                         help="The percentage of data used for training.")
     parser.add_argument("-c", "--split_count", type=int, required=True,
