@@ -1,3 +1,5 @@
+import datetime
+
 from source.data_model.dataset.Dataset import Dataset
 from source.encodings.EncoderParams import EncoderParams
 from source.reports.ReportResult import ReportResult
@@ -58,12 +60,12 @@ class ExploratoryAnalysisInstruction(Instruction):
     def run(self, result_path: str):
         self.state.result_path = result_path + f"{self.name}/"
         for index, (key, unit) in enumerate(self.state.exploratory_analysis_units.items()):
-            print("Started analysis {}/{}.".format(index+1, len(self.state.exploratory_analysis_units)))
+            print("{}: Started analysis {} ({}/{}).".format(datetime.datetime.now(), key, index+1, len(self.state.exploratory_analysis_units)))
             path = self.state.result_path + "analysis_{}/".format(key)
             PathBuilder.build(path)
             report_result = self.run_unit(unit, path)
             unit.report_result = report_result
-            print("Finished analysis {}/{}.".format(index+1, len(self.state.exploratory_analysis_units)))
+            print("{}: Finished analysis {} ({}/{}).\n".format(datetime.datetime.now(), key, index+1, len(self.state.exploratory_analysis_units)))
         return self.state
 
     def run_unit(self, unit: ExploratoryAnalysisUnit, result_path: str) -> ReportResult:

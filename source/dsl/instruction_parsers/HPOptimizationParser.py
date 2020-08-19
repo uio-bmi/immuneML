@@ -88,7 +88,7 @@ class HPOptimizationParser:
                     preproc_name = None
 
                 ParameterValidator.assert_keys(setting.keys(), ["preprocessing", "ml_method", "encoding"], "HPOptimizationParser",
-                                               f"settings, {index+1}. entry")
+                                               f"settings, {index + 1}. entry")
 
                 s = HPSetting(encoder=symbol_table.get(setting["encoding"]), encoder_name=setting["encoding"],
                               encoder_params=symbol_table.get_config(setting["encoding"])["encoder_params"],
@@ -98,8 +98,7 @@ class HPOptimizationParser:
                 settings.append(s)
             return settings
         except KeyError as key_error:
-            print(f"HPOptimizationParser: parameter {key_error.args[0]} was not defined under settings in HPOptimization instruction.")
-            raise key_error
+            raise KeyError(f"HPOptimizationParser: parameter {key_error.args[0]} was not defined under settings in HPOptimization instruction.")
 
     def _prepare_path(self, instruction: dict) -> str:
         if "path" in instruction:
@@ -146,8 +145,7 @@ class HPOptimizationParser:
                                if "leave_one_out_config" in instruction[key] else None)
 
         except KeyError as key_error:
-            print(f"HPOptimizationParser: parameter {key_error.args[0]} was not defined under {key}.")
-            raise key_error
+            raise KeyError(f"HPOptimizationParser: parameter {key_error.args[0]} was not defined under {key}.")
 
     def _prepare_report_config(self, instruction, key, symbol_table):
         if "reports" in instruction[key]:

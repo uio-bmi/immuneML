@@ -1,4 +1,5 @@
 # quality: gold
+import datetime
 import os
 
 from source.caching.CacheType import CacheType
@@ -36,7 +37,7 @@ class EnvironmentSettings:
     def set_cache_path(path: str):
         EnvironmentSettings.cache_path = path
         PathBuilder.build(path)
-        print(f"Setting cache path to {path}...")
+        print(f"{datetime.datetime.now()}: Setting temporary cache path to {path}...")
 
     @staticmethod
     def get_cache_type():

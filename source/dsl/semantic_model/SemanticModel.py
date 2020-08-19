@@ -1,3 +1,5 @@
+import datetime
+
 from source.util.ReflectionHandler import ReflectionHandler
 from source.workflows.instructions.Instruction import Instruction
 
@@ -19,18 +21,18 @@ class SemanticModel:
 
     def build_reports(self, instruction_states):
         report_builder = self.make_report_builder()
-        print("Generating reports...")
+        print(f"{datetime.datetime.now()}: Generating {self.output['format']} reports...")
         path = report_builder.build(instruction_states, self.path)
-        print("Reports are generated.")
+        print(f"{datetime.datetime.now()}: {self.output['format']} reports are generated.")
         return path
 
     def run_instructions(self) -> list:
         instruction_states = []
         for index, instruction in enumerate(self.instructions):
-            print("Instruction {}/{} has started.".format(index+1, len(self.instructions)))
+            print("{}: Instruction {}/{} has started.".format(datetime.datetime.now(), index+1, len(self.instructions)))
             result = instruction.run(result_path=self.path)
             instruction_states.append(result)
-            print("Instruction {}/{} has finished.".format(index+1, len(self.instructions)))
+            print("{}: Instruction {}/{} has finished.".format(datetime.datetime.now(), index+1, len(self.instructions)))
         return instruction_states
 
     def make_report_builder(self):

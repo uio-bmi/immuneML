@@ -16,11 +16,12 @@ Version  Date        Author             Description
 
 """
 import os
+
 import numpy as np
 import torch
+from deeprc.deeprc_binary.architectures import DeepRC
 from matplotlib import pyplot as plt
 from tqdm import tqdm
-from deeprc.deeprc_binary.architectures import DeepRC
 
 
 def compute_contributions(intgrds_set_loader: torch.utils.data.DataLoader, deeprc_model: DeepRC,
@@ -115,12 +116,6 @@ def compute_contributions(intgrds_set_loader: torch.utils.data.DataLoader, deepr
         most_important_inputs_intgrds[i][:] /= abs_max
         most_important_inputs[i] = intgrds_set.inds_to_aa(np.argmax(most_important_inputs[i][:-3], axis=0))
 
-    # print("most important inputs")
-    # print(most_important_inputs)
-    # print("most important inputs intgrds")
-    # print(most_important_inputs_intgrds)
-    # print("most important input lens")
-    # print(most_important_inputs_lens)
     plot_inputs_text(
         chars=most_important_inputs,
         colorgrad=most_important_inputs_intgrds,
@@ -131,20 +126,14 @@ def compute_contributions(intgrds_set_loader: torch.utils.data.DataLoader, deepr
     kernel_contrib = int_grd_kernels.sum(axis=2).sum(axis=1)
     normed_kernel_contrib = kernel_contrib / kernel_contrib.max()
     n_top_kernels = np.sum(normed_kernel_contrib > threshold)
-    # print(f"{n_top_kernels} kernels above threshold of {threshold}!")
-    
+
     top_kernel_inds = normed_kernel_contrib.argsort()[::-1]
     top_kernel_inds = top_kernel_inds[:n_top_kernels]
     top_kernels = int_grd_kernels[top_kernel_inds]
     top_kernels /= kernel_contrib.max()
-    # print("top kernels")
-    # print(top_kernels)
-    # print("charset")
-    # print(intgrds_set.aas)
+
     plot_kernels_text(kernels=top_kernels, charset=intgrds_set.aas,
                       file_location=os.path.join(resdir, filename_kernels))
-    
-    # print('Done!')
 
 
 def plot_inputs_text(chars, colorgrad, seq_lens, file_location):
@@ -160,7 +149,7 @@ def plot_inputs_text(chars, colorgrad, seq_lens, file_location):
                     size=char_offset+abs(colorgrad[seq_i][char_i])*char_scale,
                     ha='center', va='center',
                     color='blue' if colorgrad[seq_i][char_i] > 0 else 'red')
-           for char_i in range(int(seq_lens[seq_i]))], None) #print(f"  plotting {seq_i}/{n_seqs} @{seq_lens[seq_i]}", end='\r')
+           for char_i in range(int(seq_lens[seq_i]))], None)
          for seq_i in range(n_seqs)]
 
     fig.savefig(file_location)

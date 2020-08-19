@@ -1,3 +1,5 @@
+import datetime
+
 from source.data_model.dataset.Dataset import Dataset
 from source.hyperparameter_optimization.HPSetting import HPSetting
 from source.hyperparameter_optimization.core.HPSelection import HPSelection
@@ -36,6 +38,8 @@ class HPAssessment:
     def run_assessment_split(state, train_val_dataset, test_dataset, split_index: int):
         """run inner CV loop (selection) and retrain on the full train_val_dataset after optimal model is chosen"""
 
+        print(f'{datetime.datetime.now()}: Hyperparameter optimization: running outer CV loop: started assessment split {split_index+1}.\n')
+
         current_path = HPAssessment.create_assessment_path(state, split_index)
 
         assessment_state = HPAssessmentState(split_index, train_val_dataset, test_dataset, current_path, state.label_configuration)
@@ -44,6 +48,8 @@ class HPAssessment:
         state = HPSelection.run_selection(state, train_val_dataset, current_path, split_index)
 
         state = HPAssessment.run_assessment_split_per_label(state, split_index)
+
+        print(f'{datetime.datetime.now()}: Hyperparameter optimization: running outer CV loop: finished assessment split {split_index+1}.\n')
 
         return state
 

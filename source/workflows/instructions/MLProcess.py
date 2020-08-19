@@ -1,4 +1,5 @@
 import copy
+import datetime
 from typing import List
 
 from source.data_model.dataset.Dataset import Dataset
@@ -50,6 +51,9 @@ class MLProcess:
         self.hp_setting = hp_setting
 
     def run(self, split_index: int) -> HPItem:
+
+        print(f"{datetime.datetime.now()}: Evaluating hyperparameter setting: {self.hp_setting}...")
+
         PathBuilder.build(self.path)
 
         processed_dataset = HPUtil.preprocess_dataset(self.train_dataset, self.hp_setting.preproc_sequence, f"{self.path}preprocessed_train_dataset/")
@@ -63,6 +67,8 @@ class MLProcess:
         encoding_train_results = ReportUtil.run_encoding_reports(encoded_train_dataset, self.encoding_reports, f"{self.report_path}encoding_train/")
 
         hp_item = self._assess_on_test_dataset(encoded_train_dataset, encoding_train_results, method, split_index)
+
+        print(f"{datetime.datetime.now()}: Completed hyperparameter setting {self.hp_setting}.\n")
 
         return hp_item
 

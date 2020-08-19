@@ -1,4 +1,5 @@
 # quality: peripheral
+import datetime
 import os
 import re
 
@@ -160,5 +161,5 @@ class ImmuneMLParser:
         with open(filepath, "w") as file:
             yaml.dump(result, file)
 
-        print("Full specification is available at {}.".format(filepath))
+        print(f"{datetime.datetime.now()}: Full specification is available at {filepath}.\n")
         return filepath

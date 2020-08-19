@@ -1,3 +1,5 @@
+import datetime
+
 from source.environment.LabelConfiguration import LabelConfiguration
 from source.hyperparameter_optimization.HPSetting import HPSetting
 from source.hyperparameter_optimization.core.HPUtil import HPUtil
@@ -11,10 +13,14 @@ class HPSelection:
 
     @staticmethod
     def run_selection(state: HPOptimizationState, train_val_dataset, current_path: str, split_index: int) -> HPOptimizationState:
+
         path = HPSelection.create_selection_path(state, current_path)
         train_datasets, val_datasets = HPUtil.split_data(train_val_dataset, state.selection, path)
 
         for label in state.label_configuration.get_labels_by_name():
+
+            print(f"{datetime.datetime.now()}: Hyperparameter optimization: running the inner loop of nested CV: selection for label {label}.\n")
+
             selection_state = HPSelectionState(train_datasets, val_datasets, path, state.hp_strategy)
             state.assessment_states[split_index].label_states[label].selection_state = selection_state
 
@@ -25,6 +31,8 @@ class HPSelection:
                 hp_setting = selection_state.hp_strategy.generate_next_setting(hp_setting, performance)
 
             HPUtil.run_selection_reports(state, train_val_dataset, train_datasets, val_datasets, selection_state)
+
+            print(f"{datetime.datetime.now()}: Hyperparameter optimization: running the inner loop of nested CV: completed selection for label {label}.\n")
 
         return state
 

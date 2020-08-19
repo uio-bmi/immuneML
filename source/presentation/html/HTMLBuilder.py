@@ -39,7 +39,6 @@ class HTMLBuilder:
     def _make_document(presentations: List[InstructionPresentation], path: str) -> str:
         result_path = f"{path}/index.html"
         if len(presentations) > 1:
-            print(f"path: {Util.get_full_specs_path(path)}")
             html_map = {"instructions": presentations, "css_path": EnvironmentSettings.html_templates_path + "css/custom.css",
                         "full_specs": Util.get_full_specs_path(path)}
             TemplateParser.parse(template_path=f"{EnvironmentSettings.html_templates_path}index.html",

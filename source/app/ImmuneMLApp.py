@@ -1,8 +1,8 @@
 import argparse
+import datetime
 import logging
 import os
 import shutil
-import sys
 import warnings
 
 from source.caching.CacheType import CacheType
@@ -21,8 +21,6 @@ class ImmuneMLApp:
         self._specification_path = specification_path
         self._result_path = os.path.relpath(result_path) + "/"
 
-        if os.path.isdir(self._result_path) and len(os.listdir(self._result_path)) != 0:
-            raise ValueError(f"Directory {self._result_path} already exists. Please specify a new output directory for the analysis.")
         PathBuilder.build(self._result_path)
 
         self._cache_path = f"{self._result_path}cache/"
@@ -40,12 +38,11 @@ class ImmuneMLApp:
 
         self.set_cache()
 
-        logging.basicConfig(stream=sys.stdout, level=logging.INFO)
+        print(f"{datetime.datetime.now()}: ImmuneML: parsing the specification...\n")
 
-        symbol_table, self._specification_path = ImmuneMLParser.parse_yaml_file(self._specification_path,
-                                                                                self._result_path)
+        symbol_table, self._specification_path = ImmuneMLParser.parse_yaml_file(self._specification_path, self._result_path)
 
-        print("ImmuneML: starting the analysis...")
+        print(f"{datetime.datetime.now()}: ImmuneML: starting the analysis...\n")
 
         instructions = symbol_table.get_by_type(SymbolType.INSTRUCTION)
         output = symbol_table.get("output")
@@ -53,20 +50,27 @@ class ImmuneMLApp:
         result = model.run()
 
         self.clear_cache()
+
+        print(f"{datetime.datetime.now()}: ImmuneML: finished analysis.\n")
+
         return result
 
 
 def run_immuneML(namespace: argparse.Namespace):
 
+    if os.path.isdir(namespace.output_dir) and len(os.listdir(namespace.output_dir)) != 0:
+        raise ValueError(f"Directory {namespace.output_dir} already exists. Please specify a new output directory for the analysis.")
+    PathBuilder.build(namespace.output_dir)
+
+    logging.basicConfig(filename=namespace.output_dir + "/log.txt", level=logging.INFO, format='%(asctime)s %(levelname)s: %(message)s')
+    warnings.showwarning = lambda message, category, filename, lineno, file=None, line=None: logging.warning(message)
+
     if namespace.tool is None:
         app = ImmuneMLApp(namespace.yaml_path, namespace.output_dir)
     else:
-
-        warnings.showwarning = lambda message, category, filename, lineno, file=None, line=None: \
-            sys.stdout.write(warnings.formatwarning(message, category, filename, lineno))
-
         app_cls = ReflectionHandler.get_class_by_name(namespace.tool, "api/")
         app = app_cls(**vars(namespace))
+
     app.run()
 
 

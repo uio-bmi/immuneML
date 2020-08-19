@@ -1,3 +1,4 @@
+import datetime
 from typing import List
 
 from scripts.specification_util import update_docs_per_mapping
@@ -53,7 +54,7 @@ class DatasetGenerationInstruction(Instruction):
                 path = f"{self.result_path}{dataset_name}/{export_format}/"
                 exporter.export(dataset, path)
                 paths[dataset_name][export_format] = path
-                print(f"Exported dataset {dataset_name} in {export_format}.")
+                print(f"{datetime.datetime.now()}: Exported dataset {dataset_name} in {export_format}.")
 
         return DatasetGenerationState(datasets=self.datasets, formats=[exporter.__name__[:-8] for exporter in self.exporters],
                                       paths=paths, result_path=self.result_path, name=self.name)
