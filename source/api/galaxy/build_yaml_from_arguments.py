@@ -120,13 +120,18 @@ def build_settings_specs(enc_names, ml_names):
     return [{"encoding": enc_name, "ml_method": ml_name} for enc_name, ml_name in it.product(enc_names, ml_names)]
 
 
-def discover_dataset_path():
+def discover_dataset_params():
     dataset = glob.glob("*.iml_dataset")
 
     assert len(dataset) > 0, "no .iml_dataset file was present in the current working directory"
     assert len(dataset) < 2, "multiple .iml_dataset files were present in the current working directory"
 
-    return dataset[0]
+    dataset_path = dataset[0]
+
+    dataset_name = dataset_path.rsplit('.iml_dataset', 1)[0]
+
+    return {"path": dataset_path,
+            "metadata_file": f"{dataset_name}_metadata.csv"}
 
 
 def build_specs(args):
@@ -135,7 +140,7 @@ def build_specs(args):
             "datasets": {
                 "d1": {
                     "format": "Pickle",
-                    "params": {"path": None}
+                    "params": None
                 }
             },
             "encodings": dict(),
@@ -186,9 +191,9 @@ def build_specs(args):
     enc_specs = build_encodings_specs(args)
     ml_specs = build_ml_methods_specs(args)
     settings_specs = build_settings_specs(enc_specs.keys(), ml_specs.keys())
-    dataset_path = discover_dataset_path()
+    dataset_params = discover_dataset_params()
 
-    specs["definitions"]["datasets"]["d1"]["params"]["path"] = dataset_path
+    specs["definitions"]["datasets"]["d1"]["params"] = dataset_params
     specs["definitions"]["encodings"] = enc_specs
     specs["definitions"]["ml_methods"] = ml_specs
     specs["instructions"]["inst1"]["settings"] = settings_specs
