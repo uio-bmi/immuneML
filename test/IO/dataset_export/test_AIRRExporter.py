@@ -22,6 +22,7 @@ class TestAIRRExporter(TestCase):
                                                                        j_gene="j1",
                                                                        chain=Chain.BETA,
                                                                        count=5,
+                                                                       region_type="CDR3",
                                                                        custom_params={"d_call": "d1",
                                                                                       "custom_test": "cust1"})),
                             ReceptorSequence(amino_acid_sequence="GGG",
@@ -31,6 +32,7 @@ class TestAIRRExporter(TestCase):
                                                                        j_gene="j2",
                                                                        chain=Chain.ALPHA,
                                                                        count=15,
+                                                                       region_type="CDR3",
                                                                        custom_params={"d_call": "d2",
                                                                                       "custom_test": "cust2"}))]
 
@@ -54,9 +56,8 @@ class TestAIRRExporter(TestCase):
         resulting_data = pd.read_csv(path_exported + f"repertoires/{repertoire.identifier}.tsv", sep="\t")
 
         self.assertListEqual(list(resulting_data["sequence_id"]), ["receptor_1", "receptor_2"])
-        self.assertListEqual(list(resulting_data["rearrangement_id"]), ["receptor_1", "receptor_2"])
-        self.assertListEqual(list(resulting_data["sequence"]), ["GCTGCTGCT", "GGTGGTGGT"])
-        self.assertListEqual(list(resulting_data["sequence_aa"]), ["AAA", "GGG"])
+        self.assertListEqual(list(resulting_data["junction"]), ["TG?GCTGCTGCTT??", "TG?GGTGGTGGTT??"])
+        self.assertListEqual(list(resulting_data["junction_aa"]), ["CAAA?", "CGGG?"])
         self.assertListEqual(list(resulting_data["v_call"]), ["v1", "v2"])
         self.assertListEqual(list(resulting_data["j_call"]), ["j1", "j2"])
         self.assertListEqual(list(resulting_data["d_call"]), ["d1", "d2"])

@@ -51,7 +51,7 @@ class TestImportParser(TestCase):
 
         shutil.rmtree(path)
 
-    def test_parse(self):
+    def  test_parse(self):
         path = EnvironmentSettings.root_path + "test/tmp/parser/"
 
         PathBuilder.build(path + "tmp_input/")
@@ -65,8 +65,8 @@ class TestImportParser(TestCase):
                 "patient": "CD12",
                 "dilution": "108'",
                 "cloneCount": 3,
-                "allVHitsWithScore": "V13-1*00(735)",
-                "allJHitsWithScore": "J15*00(243)",
+                "allVHitsWithScore": "TRAV13-1*00(735)",
+                "allJHitsWithScore": "TRAJ15*00(243)",
                 "nSeqCDR1": "TGTGCAGCAA",
                 "nSeqCDR2": "TGTGCAGCAA",
                 "nSeqCDR3": "TGTGCAGCAA",
@@ -79,8 +79,8 @@ class TestImportParser(TestCase):
                 "patient": "CD12",
                 "dilution": "108'",
                 "cloneCount": 5,
-                "allVHitsWithScore": "V14-1*00(735)",
-                "allJHitsWithScore": "J12*00(243)",
+                "allVHitsWithScore": "TRAV14-1*00(735)",
+                "allJHitsWithScore": "TRAJ12*00(243)",
                 "nSeqCDR1": "CAATGTGA",
                 "nSeqCDR2": "CAATGTGA",
                 "nSeqCDR3": "CAATGTGA",

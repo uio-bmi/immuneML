@@ -1,4 +1,6 @@
 import os
+import pickle
+from glob import glob
 from multiprocessing.pool import Pool
 
 import numpy as np
@@ -7,7 +9,12 @@ import pandas as pd
 from source.IO.dataset_export.PickleExporter import PickleExporter
 from source.IO.dataset_import.DatasetImportParams import DatasetImportParams
 from source.IO.dataset_import.PickleImport import PickleImport
+from source.data_model.dataset.ReceptorDataset import ReceptorDataset
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
+from source.data_model.dataset.SequenceDataset import SequenceDataset
+from source.data_model.receptor.RegionDefinition import RegionDefinition
+from source.data_model.receptor.RegionType import RegionType
+from source.data_model.receptor.receptor_sequence.Chain import Chain
 from source.data_model.repertoire.Repertoire import Repertoire
 from source.environment.Constants import Constants
 from source.environment.EnvironmentSettings import EnvironmentSettings
@@ -112,6 +119,39 @@ class ImportHelper:
         return dataframe.replace({key: Constants.UNKNOWN for key in ["unresolved", "no data", "na", "unknown", "null", "nan", np.nan, ""]})
 
     @staticmethod
+    def import_sequence_dataset(sequence_import_func, params, dataset_name: str, *args, **kwargs):
+        PathBuilder.build(params.result_path)
+
+        filenames = glob(params.path + "*.tsv")
+        file_index = 0
+        dataset_filenames = []
+        items = None
+
+        for index, filename in enumerate(filenames):
+            new_items = sequence_import_func(filename, *args, **kwargs)
+            items = np.append(items, new_items) if items is not None else new_items
+
+            while len(items) > params.file_size or (index == len(filenames) - 1 and len(items) > 0):
+                dataset_filenames.append(params.result_path + "batch_{}.pickle".format(file_index))
+                ImportHelper.store_sequence_items(dataset_filenames, items, params.file_size)
+                items = items[params.file_size:]
+                file_index += 1
+
+        dataset = ReceptorDataset(filenames=dataset_filenames, file_size=params.file_size, name=dataset_name) if params.paired \
+            else SequenceDataset(filenames=dataset_filenames, file_size=params.file_size, name=dataset_name)
+
+        PickleExporter.export(dataset, params.result_path)
+
+        return dataset
+
+    @staticmethod
+    def store_sequence_items(dataset_filenames: list, items: list, file_size: int):
+        with open(dataset_filenames[-1], "wb") as file:
+            pickle.dump(items[:file_size], file)
+
+
+
+    @staticmethod
     def parse_germline(df: pd.DataFrame, gene_name_replacement: dict, germline_value_replacement: dict):
 
         if all(item in df.columns for item in ["v_genes", "j_genes"]):
@@ -150,3 +190,24 @@ class ImportHelper:
         if params.import_with_stop_codon:
             frame_type_list.append("Stop")
         return frame_type_list
+
+    @staticmethod
+    def load_chains_from_genes(df: pd.DataFrame, column_name) -> list:
+        return [Chain.get_chain(chain_str) for chain_str in df[column_name].str[0:3]]
+
+    @staticmethod
+    def junction_to_cdr3(df: pd.DataFrame, region_definition: RegionDefinition, region_type: RegionType):
+        '''
+        If RegionType is CDR3, the leading C and trailing W are removed from the sequence to match the CDR3 definition.
+        This method alters the data in the provided dataframe.
+
+        See :py:obj:`~source.data_model.receptor.RegionDefinition.RegionDefinition` description.
+        '''
+
+        if region_definition == RegionDefinition.IMGT and region_type == RegionType.CDR3:
+            df["sequence_aas"] = df["sequence_aas"].str[1:-1]
+            df["sequences"] = df["sequences"].str[3:-3]
+
+    @staticmethod
+    def strip_alleles(df: pd.DataFrame, column_name):
+        return df[column_name].apply(lambda gene_col: gene_col.rsplit("*", maxsplit=1)[0])

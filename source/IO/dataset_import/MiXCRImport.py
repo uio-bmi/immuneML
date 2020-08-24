@@ -3,9 +3,7 @@ import pandas as pd
 from source.IO.dataset_import.DataImport import DataImport
 from source.IO.dataset_import.DatasetImportParams import DatasetImportParams
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
-from source.data_model.receptor.RegionDefinition import RegionDefinition
 from source.data_model.receptor.RegionType import RegionType
-from source.data_model.receptor.receptor_sequence.Chain import Chain
 from source.util.ImportHelper import ImportHelper
 
 
@@ -76,30 +74,21 @@ class MiXCRImport(DataImport):
 
         df = ImportHelper.load_repertoire_as_dataframe(metadata, params)
 
-        sequences_aas = df[MiXCRImport.SEQUENCE_NAME_MAP[params.region_type]["AA"]]
-        sequences = df[MiXCRImport.SEQUENCE_NAME_MAP[params.region_type]["NT"]]
-        if params.region_definition == RegionDefinition.IMGT and params.region_type == RegionType.CDR3:
-            sequences_aas = sequences_aas.str[1:-1]
-            sequences = sequences.str[3:-3]
-
+        df["sequence_aas"] = df[MiXCRImport.SEQUENCE_NAME_MAP[params.region_type]["AA"]]
+        df["sequences"] = df[MiXCRImport.SEQUENCE_NAME_MAP[params.region_type]["NT"]]
+        ImportHelper.junction_to_cdr3(df, params.region_definition, params.region_type)
         df["region_types"] = params.region_type.name
-        df["sequence_aas"] = sequences_aas
-        df["sequences"] = sequences
+
         if "v_genes" in df.columns:
-            df["chains"] = MiXCRImport._load_chains(df, "v_genes").tolist()
+            df["chains"] = ImportHelper.load_chains_from_genes(df, "v_genes")
             df["v_genes"] = MiXCRImport._load_genes(df, "v_genes")
         if "j_genes" in df.columns:
             if "chains" not in df.columns:
-                df["chains"] = MiXCRImport._load_chains(df, "j_genes").tolist()
+                df["chains"] = ImportHelper.load_chains_from_genes(df, "j_genes")
             df["j_genes"] = MiXCRImport._load_genes(df, "j_genes")
 
         return df
 
-    @staticmethod
-    def _load_chains(df: pd.DataFrame, column_name):
-        tmp_df = df.apply(lambda row: Chain.get_chain([x for x in [chain.value for chain in Chain] if x in row[column_name]][0])
-                          if len([x for x in [chain.value for chain in Chain] if x in row[column_name]]) > 0 else None, axis=1)
-        return tmp_df
 
     @staticmethod
     def _load_genes(df: pd.DataFrame, column_name):

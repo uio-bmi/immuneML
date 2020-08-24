@@ -25,7 +25,7 @@ class AIRRExporter(DataExporter):
     """
 
     @staticmethod
-    def export(dataset: RepertoireDataset, path):
+    def export(dataset: RepertoireDataset, path, region_type="CDR3"):
         if not isinstance(dataset, RepertoireDataset):
             logging.warning(f"AIRRExporter: dataset {dataset.name} is a {type(dataset).__name__}, but only repertoire dataset export is currently "
                             f"supported for AIRR format.")
@@ -34,7 +34,7 @@ class AIRRExporter(DataExporter):
             repertoire_path = PathBuilder.build(f"{path}repertoires/")
 
             for repertoire in dataset.repertoires:
-                df = AIRRExporter._repertoire_to_dataframe(repertoire)
+                df = AIRRExporter._repertoire_to_dataframe(repertoire, region_type)
                 airr.dump_rearrangement(df, f"{repertoire_path}{repertoire.identifier}.tsv")
 
             AIRRExporter.export_updated_metadata(dataset, path)
@@ -47,20 +47,29 @@ class AIRRExporter(DataExporter):
         df.to_csv(f"{result_path}metadata.csv", index=False)
 
     @staticmethod
-    def _repertoire_to_dataframe(repertoire: Repertoire):
+    def _repertoire_to_dataframe(repertoire: Repertoire, region_type):
         # get all fields (including custom fields)
         df = pd.DataFrame({key: repertoire.get_attribute(key) for key in set(repertoire.fields)})
 
         # rename mandatory fields for airr-compliance
-        df = df.rename(mapper={"sequences": "sequence",
-                               "sequence_aas": "sequence_aa",
-                               "sequence_identifiers": "rearrangement_id",
-                               "v_genes": "v_call",
-                               "j_genes": "j_call",
-                               "chains": "locus",
-                               "counts": "duplicate_count"}, axis="columns")
+        mapper = {"sequence_identifiers": "sequence_id",
+                  "v_genes": "v_call",
+                  "j_genes": "j_call",
+                  "chains": "locus",
+                  "counts": "duplicate_count"}
 
-        df["sequence_id"] = df["rearrangement_id"]
+        if region_type == "CDR3":
+            mapper["sequences"] = "junction"
+            mapper["sequence_aas"] = "junction_aa"
+            if "sequences" in df.columns:
+                df["sequences"] = AIRRExporter._process_junctions(df["sequences"])
+            if "sequence_aas" in df.columns:
+                df["sequence_aas"] = AIRRExporter._process_junction_aas(df["sequence_aas"])
+        else:
+            mapper["sequences"] = "sequence"
+            mapper["sequence_aas"] = "sequence_aa"
+
+        df = df.rename(mapper=mapper, axis="columns")
 
         if "locus" in df.columns:
             chain_conversion_dict = {Chain.ALPHA: "TRA",
@@ -73,4 +82,12 @@ class AIRRExporter(DataExporter):
         return df
 
         # other required fields are: rev_comp, productive, d_call, sequence_alignment
-        # germline_alignment, junction, junction_aa, v_cigar, j_cigar, d_cigar
+        # germline_alignment, v_cigar, j_cigar, d_cigar
+
+    @staticmethod
+    def _process_junctions(column):
+        return ["".join(["TG?", value, "T??"]) for value in column]
+
+    @staticmethod
+    def _process_junction_aas(column):
+        return ["".join(["C", value, "?"]) for value in column]

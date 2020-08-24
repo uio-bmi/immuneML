@@ -10,7 +10,7 @@ from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.util.PathBuilder import PathBuilder
 
 
-class TestSequenceImport(TestCase):
+class TestVDJdbSequenceImport(TestCase):
 
     def setUp(self) -> None:
         os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name

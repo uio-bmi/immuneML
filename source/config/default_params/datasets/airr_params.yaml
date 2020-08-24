@@ -4,9 +4,10 @@ import_out_of_frame: False
 batch_size: 4
 separator: "\t"
 columns_to_load: [sequence_aa, sequence, v_call, j_call, locus, duplicate_count, productive, vj_in_frame, stop_codon]
+paired: False
 column_mapping: # AIRR column names -> immuneML repertoire fields
-  sequence: sequences
-  sequence_aa: sequence_aas
+  junction: sequences
+  junction_aa: sequence_aas
   v_call: v_genes
   j_call: j_genes
   locus: chains

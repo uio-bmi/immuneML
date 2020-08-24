@@ -1,15 +1,10 @@
 import pickle
-from glob import glob
 
-from source.IO.dataset_export.PickleExporter import PickleExporter
 from source.IO.dataset_import.DataImport import DataImport
 from source.IO.dataset_import.DatasetImportParams import DatasetImportParams
 from source.IO.sequence_import.VDJdbSequenceImport import VDJdbSequenceImport
 from source.data_model.dataset.Dataset import Dataset
-from source.data_model.dataset.ReceptorDataset import ReceptorDataset
-from source.data_model.dataset.SequenceDataset import SequenceDataset
 from source.util.ImportHelper import ImportHelper
-from source.util.PathBuilder import PathBuilder
 
 
 class VDJDBImport(DataImport):
@@ -66,28 +61,7 @@ class VDJDBImport(DataImport):
 
     @staticmethod
     def load_sequence_dataset(params: DatasetImportParams, dataset_name: str) -> Dataset:
-
-        PathBuilder.build(params.result_path)
-
-        filenames = glob(params.path + "*.tsv")
-        file_index = 0
-        dataset_filenames = []
-
-        for index, filename in enumerate(filenames):
-            items = VDJdbSequenceImport.import_items(filename, paired=params.paired)
-
-            while len(items) > params.file_size or (index == len(filenames)-1 and len(items) > 0):
-                dataset_filenames.append(params.result_path + "batch_{}.pickle".format(file_index))
-                VDJDBImport.store_items(dataset_filenames, items, params.file_size)
-                items = items[params.file_size:]
-                file_index += 1
-
-        dataset = ReceptorDataset(filenames=dataset_filenames, file_size=params.file_size, name=dataset_name) if params.paired \
-            else SequenceDataset(filenames=dataset_filenames, file_size=params.file_size, name=dataset_name)
-
-        PickleExporter.export(dataset, params.result_path)
-
-        return dataset
+        return ImportHelper.import_sequence_dataset(VDJdbSequenceImport.import_items, params, dataset_name, paired=params.paired)
 
     @staticmethod
     def store_items(dataset_filenames: list, items: list, file_size: int):
