@@ -18,7 +18,7 @@ class TestRepertoireClassificationTool(TestCase):
         alphabet = EnvironmentSettings.get_sequence_alphabet()
         sequences = [["".join([rn.choice(alphabet) for i in range(20)]) for i in range(100)] for i in range(20)]
 
-        repertoires, metadata = RepertoireBuilder.build(sequences, path, donors=[i % 2 for i in range(len(sequences))])
+        repertoires, metadata = RepertoireBuilder.build(sequences, path, subject_ids=[i % 2 for i in range(len(sequences))])
         dataset = RepertoireDataset(repertoires=repertoires, metadata_file=metadata)
         PickleExporter.export(dataset, path)
 
@@ -32,7 +32,7 @@ class TestRepertoireClassificationTool(TestCase):
 
         self.make_random_dataset(path)
 
-        args = ['-o', path, '-l', 'donor', '-m', 'RandomForestClassifier', 'SimpleLogisticRegression', 'SVM', 'KNN',
+        args = ['-o', path, '-l', 'subject_id', '-m', 'RandomForestClassifier', 'SimpleLogisticRegression', 'SVM', 'KNN',
                 '-t', '70', '-c', '5', '-s', 'subsequence', '-p', 'invariant', '-g', 'gapped',
                 '-kl', '1', '-kr', '1', '-gi', '0', '-ga', '1', '-r', 'unique']
 

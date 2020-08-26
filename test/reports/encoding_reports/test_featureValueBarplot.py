@@ -17,19 +17,19 @@ from source.reports.encoding_reports.FeatureValueBarplot import FeatureValueBarp
 class TestFeatureValueBarplot(TestCase):
 
     def _create_dummy_encoded_data(self, path):
-        n_donors = 50
+        n_subjects = 50
         n_features = 30
 
         kmers = [''.join(random.choices(string.ascii_uppercase, k=3)) for i in range(n_features)]
 
         encoded_data = {
             'examples': sparse.csr_matrix(
-                np.random.normal(50, 10, n_donors * n_features).reshape((n_donors, n_features))),
-            'example_ids': [''.join(random.choices(string.ascii_uppercase, k=4)) for i in range(n_donors)],
+                np.random.normal(50, 10, n_subjects * n_features).reshape((n_subjects, n_features))),
+            'example_ids': [''.join(random.choices(string.ascii_uppercase, k=4)) for i in range(n_subjects)],
             'labels': {
-                "patient": np.array([i for i in range(n_donors)]),
-                "disease": np.array(["disease 1"] * int(n_donors / 2) + ["disease 2"] * int(n_donors / 2)),
-                "timepoint": np.array(["timepoint 1", "timepoint 2"] * int(n_donors / 2))
+                "patient": np.array([i for i in range(n_subjects)]),
+                "disease": np.array(["disease 1"] * int(n_subjects / 2) + ["disease 2"] * int(n_subjects / 2)),
+                "timepoint": np.array(["timepoint 1", "timepoint 2"] * int(n_subjects / 2))
             },
             'feature_names': kmers,
             'feature_annotations': pd.DataFrame({

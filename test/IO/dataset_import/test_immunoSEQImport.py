@@ -38,7 +38,7 @@ AAGAAGCTCCTTCTCAGTGACTCTGGCTTCTATCTCTGTGCCTGGAGTGTACGTCCGGGCGCAGGGTACGAGCAGTACTT
 
         with open(path + "metadata.csv", "w") as file:
             file.writelines(
-                """filename,chain,donor,coeliac status (yes/no)
+                """filename,chain,subject_id,coeliac status (yes/no)
 rep1.tsv,TRA,1234a,no"""
             )
 
@@ -61,7 +61,7 @@ rep1.tsv,TRA,1234a,no"""
 
         self.assertEqual(1, dataset.get_example_count())
         for index, rep in enumerate(dataset.get_data()):
-            self.assertEqual("1234a", rep.metadata["donor"])
+            self.assertEqual("1234a", rep.metadata["subject_id"])
             self.assertEqual(18, len(rep.sequences))
             self.assertEqual("ATSDQLNRWGTGELF", rep.sequences[0].get_sequence())
             self.assertEqual("TRBV25-1", rep.sequences[2].metadata.v_gene)

@@ -19,7 +19,7 @@ class AdaptiveBiotechImport(DataImport):
             format: AdaptiveBiotech
             params:
                 # these parameters have to be always specified:
-                metadata_file: path/to/metadata.csv # csv file with fields filename, donor and arbitrary others which can be used as labels in analysis
+                metadata_file: path/to/metadata.csv # csv file with fields filename, subject_id and arbitrary others which can be used as labels in analysis
                 path: path/to/location/of/repertoire/files/ # all repertoire files need to be in the same folder to be loaded (they will be discovered based on the metadata file)
                 result_path: path/where/to/store/imported/repertoires/ # immuneML imports data to optimized representation to speed up analysis so this defines where to store these new representation files
                 # the following are default values so these need to be specified only if a different behavior is required

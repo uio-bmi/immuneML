@@ -25,4 +25,4 @@ class TestPickleLoader(TestCase):
         shutil.rmtree(path)
 
         self.assertEqual(2, len(dataset2.get_data()))
-        self.assertEqual("rep_1", dataset2.get_data()[1].metadata["donor"])
+        self.assertEqual("rep_1", dataset2.get_data()[1].metadata["subject_id"])

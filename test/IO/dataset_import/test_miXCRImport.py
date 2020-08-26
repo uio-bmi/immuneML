@@ -135,7 +135,7 @@ class TestMiXCRLoader(TestCase):
             writer.writeheader()
             writer.writerows(dicts)
 
-        metadata = pd.DataFrame({"filename": ["HC2_clones_TRB.csv", "CD1_clones_TRA.csv"], "donor": ["HC2", "CD1"], "CD": [False, True]})
+        metadata = pd.DataFrame({"filename": ["HC2_clones_TRB.csv", "CD1_clones_TRA.csv"], "subject_id": ["HC2", "CD1"], "CD": [False, True]})
         metadata.to_csv(path + "metadata.csv")
 
         output_path = path + "tmp_output/"

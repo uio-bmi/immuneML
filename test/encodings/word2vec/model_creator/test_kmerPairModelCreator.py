@@ -20,10 +20,10 @@ class TestKmerPairModelCreator(TestCase):
         sequence1 = ReceptorSequence("CASSVFA")
         sequence2 = ReceptorSequence("CASSCCC")
 
-        metadata1 = {"T1D": "T1D", "donor": "1"}
+        metadata1 = {"T1D": "T1D", "subject_id": "1"}
         rep1 = Repertoire.build_from_sequence_objects([sequence1, sequence2], test_path, metadata1)
 
-        metadata2 = {"T1D": "CTL", "donor": "2"}
+        metadata2 = {"T1D": "CTL", "subject_id": "2"}
         rep2 = Repertoire.build_from_sequence_objects([sequence1], test_path, metadata2)
 
         dataset = RepertoireDataset(repertoires=[rep1, rep2])

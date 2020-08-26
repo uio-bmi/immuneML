@@ -23,7 +23,7 @@ TGTGCTAGTGGGAAAAATCGGGACTCTAGTGCAGGCCAAGAGACCCAGTACTTC	CASGKNRDSSAGQETQYF	TRBV12
             file.writelines(file2_content)
 
         with open(path + "metadata.csv", "w") as file:
-            file.writelines("""filename,donor
+            file.writelines("""filename,subject_id
 rep1.tsv,1
 rep2.tsv,2""")
 

@@ -18,9 +18,9 @@ class TestCVSplitVariants(TestCase):
         os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
 
     def build_specs(self, path) -> dict:
-        train_metadata_df = pd.DataFrame({"donor": [f"rep_{i}" for i in range(35)]})
+        train_metadata_df = pd.DataFrame({"subject_id": [f"rep_{i}" for i in range(35)]})
         train_metadata_df.to_csv(path + "train.csv")
-        train_metadata_df = pd.DataFrame({"donor": [f"rep_{i}" for i in range(36, 50)]})
+        train_metadata_df = pd.DataFrame({"subject_id": [f"rep_{i}" for i in range(36, 50)]})
         train_metadata_df.to_csv(path + "test.csv")
         return {
             "definitions": {

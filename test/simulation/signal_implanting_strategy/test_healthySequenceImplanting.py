@@ -26,7 +26,7 @@ class TestHealthySequenceImplanting(TestCase):
 
         repertoire = Repertoire.build_from_sequence_objects([ReceptorSequence(amino_acid_sequence="ACDFQ", identifier="1"),
                                                              ReceptorSequence(amino_acid_sequence="TGCDF", identifier="2")],
-                                                            path=path, metadata={"donor": "1"})
+                                                            path=path, metadata={"subject_id": "1"})
         implanting = HealthySequenceImplanting(GappedMotifImplanting())
         signal = Signal(1, [Motif("m1", GappedKmerInstantiation(), "CCC")], implanting)
 

@@ -20,10 +20,10 @@ class TestSequenceModelCreator(TestCase):
         sequence1 = ReceptorSequence("CASSVFA", identifier="1")
         sequence2 = ReceptorSequence("CASSCCC", identifier="2")
 
-        metadata1 = {"T1D": "T1D", "donor": "1"}
+        metadata1 = {"T1D": "T1D", "subject_id": "1"}
         rep1 = Repertoire.build_from_sequence_objects([sequence1, sequence2], metadata=metadata1, path=test_path)
 
-        metadata2 = {"T1D": "CTL", "donor": "2"}
+        metadata2 = {"T1D": "CTL", "subject_id": "2"}
         rep2 = Repertoire.build_from_sequence_objects([sequence1], metadata=metadata2, path=test_path)
 
         dataset = RepertoireDataset(repertoires=[rep1, rep2])

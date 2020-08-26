@@ -7,7 +7,7 @@ from source.encodings.reference_encoding.ReferenceRepertoireEncoder import Refer
 from source.encodings.reference_encoding.SequenceMatchingSummaryType import SequenceMatchingSummaryType
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.environment.LabelConfiguration import LabelConfiguration
-from source.preprocessing.DonorRepertoireCollector import DonorRepertoireCollector
+from source.preprocessing.SubjectRepertoireCollector import SubjectRepertoireCollector
 from source.presentation.html.ExploratoryAnalysisHTMLBuilder import ExploratoryAnalysisHTMLBuilder
 from source.reports.data_reports.SequenceLengthDistribution import SequenceLengthDistribution
 from source.reports.encoding_reports.MatchingSequenceDetails import MatchingSequenceDetails
@@ -46,7 +46,7 @@ class TestExploratoryAnalysisHTMLBuilder(TestCase):
 
         refs_dict = {"path": path + "refs.tsv", "format": "VDJdb"}
 
-        preproc_sequence = [DonorRepertoireCollector()]
+        preproc_sequence = [SubjectRepertoireCollector()]
 
         units = {"named_analysis_1": ExploratoryAnalysisUnit(dataset=dataset, report=SequenceLengthDistribution(), batch_size=16),
                  "named_analysis_2": ExploratoryAnalysisUnit(dataset=dataset, report=SequenceLengthDistribution(),

@@ -57,7 +57,7 @@ class TestAdaptiveBiotechImport(TestCase):
 
         with open(path + "metadata.csv", "w") as file:
             file.writelines(
-                """filename,chain,donor,coeliac status (yes/no)
+                """filename,chain,subject_id,coeliac status (yes/no)
 rep1.tsv,TRA,1234,no
 rep2.tsv,TRB,1234a,no"""
             )
@@ -100,12 +100,12 @@ rep2.tsv,TRB,1234a,no"""
         self.assertEqual(2, dataset.get_example_count())
         for index, rep in enumerate(dataset.get_data()):
             if index == 0:
-                self.assertEqual("1234", rep.metadata["donor"])
+                self.assertEqual("1234", rep.metadata["subject_id"])
                 self.assertEqual(13, len(rep.sequences))
                 self.assertEqual(10, rep.sequences[0].metadata.count)
                 self.assertEqual("TRBV29", rep.sequences[0].metadata.v_subgroup)
             else:
-                self.assertEqual("1234a", rep.metadata["donor"])
+                self.assertEqual("1234a", rep.metadata["subject_id"])
                 self.assertEqual(15, len(rep.sequences))
                 self.assertEqual(2, rep.sequences[-1].metadata.count)
 

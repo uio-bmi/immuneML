@@ -34,10 +34,10 @@ class TestOneHotEncoder(unittest.TestCase):
             [receptors2.append(seq) for seq in [ReceptorSequence("ATA", identifier="1"), ReceptorSequence("TAA", identifier="2")]]
 
         rep1 = Repertoire.build_from_sequence_objects(receptors1,
-                                                      metadata={"l1": 1, "l2": 2, "donor": "1"}, path=path)
+                                                      metadata={"l1": 1, "l2": 2, "subject_id": "1"}, path=path)
 
         rep2 = Repertoire.build_from_sequence_objects(receptors2,
-                                                      metadata={"l1": 0, "l2": 3, "donor": "2"}, path=path)
+                                                      metadata={"l1": 0, "l2": 3, "subject_id": "2"}, path=path)
 
         lc = LabelConfiguration()
         lc.add_label("l1", [1, 2])

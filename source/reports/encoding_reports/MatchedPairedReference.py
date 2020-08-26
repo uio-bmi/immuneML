@@ -98,13 +98,13 @@ class MatchedPairedReference(EncodingReport):
 
     def _write_repertoire_sizes(self):
         """
-        Writes the repertoire sizes (# clones & # reads) per donor, per chain.
+        Writes the repertoire sizes (# clones & # reads) per subject, per chain.
         """
-        all_donors = self.dataset.encoded_data.example_ids
+        all_subjects = self.dataset.encoded_data.example_ids
         all_chains = sorted(set(self.dataset.encoded_data.feature_annotations["chain"]))
 
-        results_df = pd.DataFrame(list(itertools.product(all_donors, all_chains)),
-                                  columns=["donor_id", "chain"])
+        results_df = pd.DataFrame(list(itertools.product(all_subjects, all_chains)),
+                                  columns=["subject_id", "chain"])
         results_df["n_reads"] = 0
         results_df["n_clones"] = 0
 
@@ -115,9 +115,9 @@ class MatchedPairedReference(EncodingReport):
             for chain in all_chains:
                 chain_enum = Chain(chain[0].upper())
                 indices = rep_chains == chain_enum
-                results_df.loc[(results_df.donor_id == repertoire.metadata["donor"]) & (results_df.chain == chain),
+                results_df.loc[(results_df.subject_id == repertoire.metadata["subject_id"]) & (results_df.chain == chain),
                                'n_reads'] += np.sum(rep_counts[indices])
-                results_df.loc[(results_df.donor_id == repertoire.metadata["donor"]) & (results_df.chain == chain),
+                results_df.loc[(results_df.subject_id == repertoire.metadata["subject_id"]) & (results_df.chain == chain),
                                'n_clones'] += len(rep_counts[indices])
 
         results_path = os.path.join(self.result_path, "repertoire_sizes.csv")

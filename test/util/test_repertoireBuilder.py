@@ -23,7 +23,7 @@ class TestRepertoireBuilder(TestCase):
         self.assertEqual(1, len(repertoires[1].sequences))
         self.assertTrue(all([isinstance(seq, ReceptorSequence) for seq in repertoires[1].sequences]))
         self.assertEqual(2, repertoires[1].metadata["default"])
-        self.assertEqual("rep_1", repertoires[1].metadata["donor"])
+        self.assertEqual("rep_1", repertoires[1].metadata["subject_id"])
 
         # Testing with custom metadata
         repertoires, metadata = RepertoireBuilder.build([["AAA", "CCC"]], path, seq_metadata=[[{"v_gene": "v5", "j_gene": "j5"}, {"v_gene": "v2", "j_gene": "j2"}]])

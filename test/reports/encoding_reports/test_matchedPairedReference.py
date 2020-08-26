@@ -23,7 +23,7 @@ class TestMatchedPairedReference(unittest.TestCase):
 
     def create_encoded_dummy_data(self, path):
         # Setting up dummy data
-        labels = {"donor": ["donor1", "donor1", "donor2", "donor2", "donor3"],
+        labels = {"subject_id": ["subject_1", "subject_1", "subject_2", "subject_2", "subject_3"],
                   "label": ["yes", "yes", "no", "no", "no"]}
 
         metadata_alpha = {"v_gene": "V1", "j_gene": "J1", "chain": Chain.ALPHA.value}
@@ -45,12 +45,12 @@ class TestMatchedPairedReference(unittest.TestCase):
                                                                        {**metadata_alpha, "count": 2},
                                                                        {**metadata_beta, "count": 1},
                                                                        {**metadata_beta, "count": 2}]],
-                                                        donors=labels["donor"])
+                                                        subject_ids=labels["subject_id"])
 
         dataset = RepertoireDataset(repertoires=repertoires)
 
         label_config = LabelConfiguration()
-        label_config.add_label("donor", labels["donor"])
+        label_config.add_label("subject_id", labels["subject_id"])
         label_config.add_label("label", labels["label"])
 
         # clonotype 100 with TRA=AAAA, TRB = SSSS; clonotype 200 with TRA=CCCC, TRB = TTTT, adn 300&400 with both=NONO

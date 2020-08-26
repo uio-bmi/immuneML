@@ -31,7 +31,7 @@ class SplitConfig:
 
         manual_config (:py:obj:`~source.hyperparameter_optimization.config.ManualSplitConfig.ManualSplitConfig`): if split strategy is `MANUAL`,
         here the paths to metadata files should be given (fields `train_metadata_path` and `test_metadata_path`). The matching of examples is done
-        using the "donor" field so it has to be present in both the original dataset and the metadata files provided here. Manual splitting to
+        using the "subject_id" field so it has to be present in both the original dataset and the metadata files provided here. Manual splitting to
         train and test dataset is currently supported only for repertoire datasets. If split strategy is anything else, this field has no effect
         and can be omitted.
 

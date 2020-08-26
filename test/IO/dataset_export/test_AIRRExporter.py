@@ -36,8 +36,8 @@ class TestAIRRExporter(TestCase):
                                                                        custom_params={"d_call": "d2",
                                                                                       "custom_test": "cust2"}))]
 
-        repertoire = Repertoire.build_from_sequence_objects(sequence_objects=sequence_objects, path=path, metadata={"donor": "REP1"})
-        df = pd.DataFrame({"filename": [f"{repertoire.identifier}_data.npy"], "donor": ["1"],
+        repertoire = Repertoire.build_from_sequence_objects(sequence_objects=sequence_objects, path=path, metadata={"subject_id": "REP1"})
+        df = pd.DataFrame({"filename": [f"{repertoire.identifier}_data.npy"], "subject_id": ["1"],
                            "repertoire_identifier": [repertoire.identifier]})
         df.to_csv(path + "metadata.csv", index=False)
 

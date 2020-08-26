@@ -21,7 +21,7 @@ class MiXCRImport(DataImport):
             format: MiXCR
             params:
                 # these parameters have to be always specified:
-                metadata_file: path/to/metadata.csv # csv file with fields filename, donor and arbitrary others which can be used as labels in analysis
+                metadata_file: path/to/metadata.csv # csv file with fields filename, subject_id and arbitrary others which can be used as labels in analysis
                 path: path/to/location/of/repertoire/files/ # all repertoire files need to be in the same folder to be loaded (they will be discovered based on the metadata file)
                 result_path: path/where/to/store/imported/repertoires/ # immuneML imports data to optimized representation to speed up analysis so this defines where to store these new representation files
                 # the following parameter have these default values so these need to be specified only if a different behavior is required
@@ -64,7 +64,7 @@ class MiXCRImport(DataImport):
 
         Arguments:
 
-            metadata: the corresponding row from the metadata file with metadata such as donor info, age, HLA or other info given there
+            metadata: the corresponding row from the metadata file with metadata such as subject_id, age, HLA or other info given there
             params: DatasetImportParams object defining what to import and how to do it
 
         Returns:

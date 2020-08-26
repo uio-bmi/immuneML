@@ -34,7 +34,7 @@ class TestPickleExporter(TestCase):
 
         self.assertTrue(isinstance(dataset2, RepertoireDataset))
         self.assertEqual(2, len(dataset2.get_data()))
-        self.assertEqual("rep_0", dataset2.get_data()[0].metadata["donor"])
+        self.assertEqual("rep_0", dataset2.get_data()[0].metadata["subject_id"])
 
     def test_export_receptor_dataset(self):
         path = EnvironmentSettings.tmp_test_path + "pickleexporter_receptor/"

@@ -20,8 +20,8 @@ def encode_dataset_by_kmer_freq(path_to_dataset_directory: str, result_path: str
     encodes the repertoire dataset using KmerFrequencyEncoder
     :param path_to_dataset_directory: path to directory containing all repertoire files with .tsv extension in MiXCR format
     :param result_path: where to store the results
-    :param metadata_path: csv file with columns "filename", "donor", "disease" which is filled by default if value of argument is None,
-                          otherwise any metadata csv file passed to the function, must include filename and donor columns,
+    :param metadata_path: csv file with columns "filename", "subject_id", "disease" which is filled by default if value of argument is None,
+                          otherwise any metadata csv file passed to the function, must include filename and subject_id columns,
                           and an arbitrary disease column
     :return: encoded dataset with encoded data in encoded_dataset.encoded_data.examples
     """
@@ -70,7 +70,7 @@ def generate_random_metadata(path_to_dataset_directory: str, result_path: str):
 
     df = pd.DataFrame({"filename": [os.path.basename(filename) for filename in repertoire_filenames],
                        "disease": [random.choice([True, False]) for i in range(repertoire_count)],
-                       "donor": [str(i) for i in range(1, repertoire_count + 1)]})
+                       "subject_id": [str(i) for i in range(1, repertoire_count + 1)]})
 
     PathBuilder.build(result_path)
     metadata_path = f"{result_path if result_path[:-1] == '/' else result_path+'/'}metadata.csv"

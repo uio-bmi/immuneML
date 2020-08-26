@@ -30,7 +30,7 @@ IVKNQEJ01AJ44V	1	IVKNQEJ01AJ44V	GGCCCAGGACTGGTGAAGCCTTCGGAGACCCTGTCCCTCACCTGCGCT
 
         if add_metadata:
             with open(path + "metadata.csv", "w") as file:
-                file.writelines("""filename,donor
+                file.writelines("""filename,subject_id
 rep1.tsv,1
 rep2.tsv,2""")
 

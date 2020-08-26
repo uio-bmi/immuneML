@@ -97,7 +97,7 @@ class FeatureValueDistplot(EncodingReport):
         my_fvd_report:
             FeatureValueDistplot:
                 distribution_plot_type: SINA
-                grouping_label: donor
+                grouping_label: subject_id
                 column_grouping_labels: timepoint
                 row_grouping_labels: disease_status
                 color_label: age_group

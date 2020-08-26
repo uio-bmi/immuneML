@@ -79,7 +79,7 @@ class TestImmuneMLApp(TestCase):
                 },
                 "preprocessing_sequences": {
                     "seq1": [
-                        {"collect": "DonorRepertoireCollector"},
+                        {"collect": "SubjectRepertoireCollector"},
                         {
                             "count_filter": {
                                 "CountPerSequenceFilter": {

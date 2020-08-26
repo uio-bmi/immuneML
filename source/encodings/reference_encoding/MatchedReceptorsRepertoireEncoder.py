@@ -82,7 +82,7 @@ class MatchedReceptorsRepertoireEncoder(MatchedReceptorsEncoder):
             for label in params["label_configuration"].get_labels_by_name():
                 labels[label].append(repertoire.metadata[label])
 
-        return self._collapse_encoding_per_donor(encoded_repertories, labels)
+        return self._collapse_encoding_per_subject(encoded_repertories, labels)
 
     def _match_repertoire_to_receptors(self, repertoire: Repertoire):
         matcher = SequenceMatcher()
@@ -104,27 +104,27 @@ class MatchedReceptorsRepertoireEncoder(MatchedReceptorsEncoder):
 
         return matches
 
-    def _collapse_encoding_per_donor(self, encoded_repertories, labels):
-        if not "donor" in labels.keys():
-            raise KeyError("The label 'donor' must be specified in metadata")
+    def _collapse_encoding_per_subject(self, encoded_repertories, labels):
+        if not "subject_id" in labels.keys():
+            raise KeyError("The label 'subject_id' must be specified in metadata")
 
-        donor_ids = sorted(set(labels["donor"]))
-        ids_to_idx = {id: idx for idx, id in enumerate(donor_ids)}
+        subject_ids = sorted(set(labels["subject_id"]))
+        ids_to_idx = {id: idx for idx, id in enumerate(subject_ids)}
 
-        encoded_donors = np.zeros((len(donor_ids), encoded_repertories.shape[1]),
+        encoded_subjects = np.zeros((len(subject_ids), encoded_repertories.shape[1]),
                                        dtype=int)
 
         for repertoire_idx in range(0, encoded_repertories.shape[0]):
-            donor_id = labels["donor"][repertoire_idx]
-            encoded_donors[ids_to_idx[donor_id]] += encoded_repertories[repertoire_idx]
+            subject_id = labels["subject_id"][repertoire_idx]
+            encoded_subjects[ids_to_idx[subject_id]] += encoded_repertories[repertoire_idx]
 
-        # Only save the first occurrence of the label (it is assumed labels will be the same within donors)
-        donor_labels = {key: [] for key in labels.keys()}
-        for donor_id in donor_ids:
-            first_occurrence = labels["donor"].index(donor_id)
+        # Only save the first occurrence of the label (it is assumed labels will be the same within subjects)
+        subject_labels = {key: [] for key in labels.keys()}
+        for subject_id in subject_ids:
+            first_occurrence = labels["subject_id"].index(subject_id)
             for key, value_list in labels.items():
-                donor_labels[key].append(value_list[first_occurrence])
+                subject_labels[key].append(value_list[first_occurrence])
 
-        example_ids = donor_labels.pop("donor")
+        example_ids = subject_labels.pop("subject_id")
 
-        return encoded_donors, donor_labels, example_ids
+        return encoded_subjects, subject_labels, example_ids

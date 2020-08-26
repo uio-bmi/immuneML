@@ -13,11 +13,11 @@ class TestRepertoireDataset(TestCase):
         path = EnvironmentSettings.tmp_test_path + "repertoire_dataset/"
         PathBuilder.build(path)
 
-        repertoires, metadata = RepertoireBuilder.build([["AA"], ["BB"]], path, {"l1": [1, 2], "hla": ["A", "B"]}, donors=["d1", "d2"])
+        repertoires, metadata = RepertoireBuilder.build([["AA"], ["BB"]], path, {"l1": [1, 2], "hla": ["A", "B"]}, subject_ids=["d1", "d2"])
         dataset = RepertoireDataset(repertoires=repertoires, metadata_file=metadata)
 
         self.assertTrue("l1" in dataset.get_metadata_fields())
         self.assertTrue("hla" in dataset.get_metadata_fields())
-        self.assertTrue("donor" in dataset.get_metadata_fields())
+        self.assertTrue("subject_id" in dataset.get_metadata_fields())
 
         shutil.rmtree(path)

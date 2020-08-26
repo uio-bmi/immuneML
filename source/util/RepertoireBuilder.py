@@ -12,10 +12,10 @@ class RepertoireBuilder:
     Helper class for tests: creates repertoires from a list of a list of sequences and stores them in the given path
     """
     @staticmethod
-    def build(sequences: list, path: str, labels: dict = None, seq_metadata: list = None, donors: list = None):
+    def build(sequences: list, path: str, labels: dict = None, seq_metadata: list = None, subject_ids: list = None):
 
-        if donors is not None:
-            assert len(donors) == len(sequences)
+        if subject_ids is not None:
+            assert len(subject_ids) == len(sequences)
 
         if seq_metadata is not None:
             assert len(sequences) == len(seq_metadata)
@@ -26,13 +26,13 @@ class RepertoireBuilder:
         rep_path = PathBuilder.build(path + "repertoires/")
 
         repertoires = []
-        if donors is None:
-            donors = []
+        if subject_ids is None:
+            subject_ids = []
 
         for rep_index, sequence_list in enumerate(sequences):
             rep_sequences = ReceptorSequenceList()
-            if len(donors) < len(sequences):
-                donors.append("rep_" + str(rep_index))
+            if len(subject_ids) < len(sequences):
+                subject_ids.append("rep_" + str(rep_index))
             for seq_index, sequence in enumerate(sequence_list):
                 if seq_metadata is None:
                     m = SequenceMetadata(v_gene="TRBV6-1", j_gene="TRBJ2-7", count=1, chain="B")
@@ -47,12 +47,12 @@ class RepertoireBuilder:
             else:
                 metadata = {}
 
-            metadata = {**metadata, **{"donor": donors[rep_index]}}
+            metadata = {**metadata, **{"subject_id": subject_ids[rep_index]}}
 
             repertoire = Repertoire.build_from_sequence_objects(rep_sequences, rep_path, metadata)
             repertoires.append(repertoire)
 
-        df = pd.DataFrame({**{"filename": [f"{repertoire.identifier}_data.npy" for repertoire in repertoires], "donor": donors,
+        df = pd.DataFrame({**{"filename": [f"{repertoire.identifier}_data.npy" for repertoire in repertoires], "subject_id": subject_ids,
                               "repertoire_identifier": [repertoire.identifier for repertoire in repertoires]},
                            **(labels if labels is not None else {})})
         df.to_csv(path + "metadata.csv", index=False)

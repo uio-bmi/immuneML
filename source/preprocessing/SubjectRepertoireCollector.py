@@ -9,10 +9,10 @@ from source.preprocessing.Preprocessor import Preprocessor
 from source.util.PathBuilder import PathBuilder
 
 
-class DonorRepertoireCollector(Preprocessor):
+class SubjectRepertoireCollector(Preprocessor):
     """
-    Merges all the Repertoires in a RepertoireDataset that have the same 'donor' specified in the metadata. The result
-    is a RepertoireDataset with one Repertoire per donor.
+    Merges all the Repertoires in a RepertoireDataset that have the same 'subject_id' specified in the metadata. The result
+    is a RepertoireDataset with one Repertoire per subject.
 
 
     Specification:
@@ -22,14 +22,14 @@ class DonorRepertoireCollector(Preprocessor):
 
         preprocessing_sequences:
             my_preprocessing:
-                - my_filter: DonorRepertoireCollector
+                - my_filter: SubjectRepertoireCollector
     """
 
     def __init__(self, result_path: str = None):
         self.result_path = result_path
 
     def process_dataset(self, dataset: RepertoireDataset, result_path: str = None):
-        return DonorRepertoireCollector.process(dataset, {"result_path": result_path if result_path is not None else self.result_path})
+        return SubjectRepertoireCollector.process(dataset, {"result_path": result_path if result_path is not None else self.result_path})
 
     @staticmethod
     def process(dataset: RepertoireDataset, params: dict) -> RepertoireDataset:
@@ -41,20 +41,20 @@ class DonorRepertoireCollector(Preprocessor):
         PathBuilder.build(params["result_path"])
 
         for index, repertoire in enumerate(processed_dataset.get_data()):
-            if repertoire.metadata["donor"] in rep_map.keys():
-                sequences = np.append(repertoire.sequences, rep_map[repertoire.metadata["donor"]].sequences)
-                del rep_map[repertoire.metadata["donor"]]
-                repertoires.append(DonorRepertoireCollector.store_repertoire(
+            if repertoire.metadata["subject_id"] in rep_map.keys():
+                sequences = np.append(repertoire.sequences, rep_map[repertoire.metadata["subject_id"]].sequences)
+                del rep_map[repertoire.metadata["subject_id"]]
+                repertoires.append(SubjectRepertoireCollector.store_repertoire(
                     params["result_path"], repertoire, sequences))
             else:
-                rep_map[repertoire.metadata["donor"]] = repertoire
+                rep_map[repertoire.metadata["subject_id"]] = repertoire
                 indices_to_keep.append(index)
 
         for key in rep_map.keys():
-            repertoires.append(DonorRepertoireCollector.store_repertoire(params["result_path"], rep_map[key], rep_map[key].sequences))
+            repertoires.append(SubjectRepertoireCollector.store_repertoire(params["result_path"], rep_map[key], rep_map[key].sequences))
 
         processed_dataset.repertoires = repertoires
-        processed_dataset.metadata_file = DonorRepertoireCollector.build_new_metadata(dataset, indices_to_keep, params["result_path"])
+        processed_dataset.metadata_file = SubjectRepertoireCollector.build_new_metadata(dataset, indices_to_keep, params["result_path"])
 
         return processed_dataset
 

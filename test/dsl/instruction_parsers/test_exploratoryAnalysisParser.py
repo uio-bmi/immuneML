@@ -11,7 +11,7 @@ from source.encodings.reference_encoding.MatchedReferenceEncoder import MatchedR
 from source.encodings.reference_encoding.SequenceMatchingSummaryType import SequenceMatchingSummaryType
 from source.environment.Constants import Constants
 from source.environment.EnvironmentSettings import EnvironmentSettings
-from source.preprocessing.DonorRepertoireCollector import DonorRepertoireCollector
+from source.preprocessing.SubjectRepertoireCollector import SubjectRepertoireCollector
 from source.reports.data_reports.SequenceLengthDistribution import SequenceLengthDistribution
 from source.reports.encoding_reports.MatchingSequenceDetails import MatchingSequenceDetails
 from source.util.PathBuilder import PathBuilder
@@ -42,7 +42,7 @@ class TestExploratoryAnalysisParser(TestCase):
 
         report2 = MatchingSequenceDetails.build_object(max_edit_distance=1, reference_sequences=refs)
         encoding = MatchedReferenceEncoder
-        p1 = [DonorRepertoireCollector()]
+        p1 = [SubjectRepertoireCollector()]
 
         instruction = {
             "type": "ExploratoryAnalysis",

@@ -57,7 +57,7 @@ VGENE2	CBBBBBBF	B	MHC II
 VGENE3	CDDDDDDF	C	MHC II									
 VGENE1	CASSIEGPTGELFF	D Transporter 8	MHC I"""
 
-    reference_metadata = """filename,donor
+    reference_metadata = """filename,subject_id
 reference_rep.tsv,rep1"""
 
     reference_data_loader_params = {

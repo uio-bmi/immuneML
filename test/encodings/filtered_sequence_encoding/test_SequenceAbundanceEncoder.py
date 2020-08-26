@@ -103,8 +103,8 @@ class TestEmersonSequenceAbundanceEncoder(TestCase):
         PathBuilder.build(path)
 
         repertoires = [Repertoire.build_from_sequence_objects([ReceptorSequence()], path, {
-            "l1": val, "donor": donor
-        }) for val, donor in zip([True, True, False, False], ["rep_0", "rep_1", "rep_2", "rep_3"])]
+            "l1": val, "subject_id": subject_id
+        }) for val, subject_id in zip([True, True, False, False], ["rep_0", "rep_1", "rep_2", "rep_3"])]
 
         col_name_index = {repertoires[index].identifier: index for index in range(len(repertoires))}
 

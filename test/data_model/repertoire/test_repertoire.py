@@ -26,7 +26,7 @@ class TestRepertoire(TestCase):
                                       metadata=SequenceMetadata(j_gene="J1", cell_id="1", chain=Chain.BETA,
                                                                 custom_params={"cmv": "yes", "coeliac": True}))]
 
-        obj = Repertoire.build_from_sequence_objects(sequences, path, {"cmv": "yes", 'donor': "1"})
+        obj = Repertoire.build_from_sequence_objects(sequences, path, {"cmv": "yes", 'subject_id': "1"})
 
         self.assertTrue(os.path.isfile(obj.data_filename))
         self.assertTrue(isinstance(obj, Repertoire))
@@ -37,7 +37,7 @@ class TestRepertoire(TestCase):
         self.assertTrue(np.array_equal(np.array(["no", "yes"]), obj.get_attribute("cmv")))
         self.assertTrue(np.array_equal(np.array([False, True]), obj.get_attribute("coeliac")))
         self.assertEqual("yes", obj.metadata["cmv"])
-        self.assertEqual("1", obj.metadata["donor"])
+        self.assertEqual("1", obj.metadata["subject_id"])
 
         rebuilt_sequences = obj.sequences
 
@@ -82,7 +82,7 @@ class TestRepertoire(TestCase):
                                                                 custom_params={"cmv": "yes", "coeliac": True}))
                      ]
 
-        obj = Repertoire.build_from_sequence_objects(sequences, path, {"cmv": "yes", 'donor': "1"})
+        obj = Repertoire.build_from_sequence_objects(sequences, path, {"cmv": "yes", 'subject_id': "1"})
         receptors = obj.receptors
 
         self.assertEqual(6, len(receptors))
