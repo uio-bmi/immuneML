@@ -86,8 +86,8 @@ class AIRRExporter(DataExporter):
 
     @staticmethod
     def _process_junctions(column):
-        return ["".join(["TG?", value, "T??"]) for value in column]
+        return ["".join(["TG?", value, "T??"]) if value is not None else None for value in column]
 
     @staticmethod
     def _process_junction_aas(column):
-        return ["".join(["C", value, "?"]) for value in column]
+        return ["".join(["C", value, "?"]) if value is not None else None for value in column]
