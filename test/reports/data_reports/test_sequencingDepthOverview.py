@@ -11,7 +11,7 @@ from source.data_model.receptor.receptor_sequence.SequenceMetadata import Sequen
 from source.data_model.repertoire.Repertoire import Repertoire
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.reports.ReportResult import ReportResult
-from source.reports.data_reports.sequencing_depth_overview.SequencingDepthOverview import SequencingDepthOverview
+from source.reports.data_reports.SequencingDepthOverview import SequencingDepthOverview
 from source.util.PathBuilder import PathBuilder
 
 

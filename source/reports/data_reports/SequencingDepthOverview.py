@@ -22,14 +22,41 @@ class SequencingDepthOverview(DataReport):
     The distributions of each of these variables as well as the relationship between the variables are plotted in this
     report.
 
-    @param x: discrete column name from metadata file with which to put on the x-axis and split samples by
-    @param color: column name from metadata file to color samples by
-    @param facets: metadata attributes to split points by in rows of the resulting plot-matrix
-    @param palette: dictionary of desired color palette - if discrete, in the form value: color, if continuous, in the
-    form colors: list of colors and breaks: list of values at which each color should be - for example:
-    discrete: {"A": "blue", "B": "red", ...}
-    continuous: {"colors": ["blue", "white", "red"], "breaks": [-1, 0, 1]}
 
+    Attributes:
+
+        x (str): discrete column name from metadata file with which to put on the x-axis and split samples by
+
+        color (str): column name from metadata file to color samples by. If no color is specified, x is used.
+
+        facets (list): metadata attributes to split points by in rows of the resulting plot-matrix
+
+        palette (dict): list of colors and breaks: list of values at which each color should be - for example:
+            discrete: {"A": "blue", "B": "red", ...}
+            continuous: {"colors": ["blue", "white", "red"], "breaks": [-1, 0, 1]}
+
+        nrow_distributions (int): The number of rows used for the distribution plot facets.
+
+        nrow_scatterplot (int): The number of rows used for the scatterplot facets.
+
+        height_distributions (float): Heigth (in inches) of the distribution section of the resulting plot
+
+        height_scatterplot (float): Heigth (in inches) of the scatterplot section of the resulting plot
+
+        width (float): Width (in inches) of resulting plot
+
+
+    Specification:
+
+    .. indent with spaces
+    .. code-block:: yaml
+
+        my_seqdepth_report:
+            SequencingDepthOverview:
+                x: disease
+                palette:
+                    disease_1: red
+                    disease_2: green
     """
 
     @classmethod
@@ -90,8 +117,7 @@ class SequencingDepthOverview(DataReport):
 
         pandas2ri.activate()
 
-        with open(
-                EnvironmentSettings.root_path + "source/reports/data_reports/sequencing_depth_overview/SequencingDepthOverview.R") as f:
+        with open(EnvironmentSettings.root_path + "source/visualization/SequencingDepthOverview.R") as f:
             string = f.read()
 
         plot = STAP(string, "plot")
