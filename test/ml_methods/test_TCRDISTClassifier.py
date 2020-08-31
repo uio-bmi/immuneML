@@ -31,7 +31,7 @@ class TestTCRDISTClassifier(TestCase):
 
     def test_fit(self):
         x, y, encoded_data = self._prepare_data()
-        knn = TCRDISTClassifier(percentage=0.75)
+        knn = TCRDISTClassifier(percentage=0.75, n_jobs=4)
         knn.fit(encoded_data, y, ["test"])
         predictions = knn.predict(encoded_data)
         self.assertTrue(np.array_equal(y["test"], predictions["test"]))
@@ -43,7 +43,7 @@ class TestTCRDISTClassifier(TestCase):
     def test_store(self):
         x, y, encoded_data = self._prepare_data()
 
-        cls = TCRDISTClassifier(0.75)
+        cls = TCRDISTClassifier(0.75, n_jobs=4)
         cls.fit(encoded_data, y, label_names=["test"])
 
         path = EnvironmentSettings.root_path + "test/tmp/tcrdist_classifier/"
@@ -61,7 +61,7 @@ class TestTCRDISTClassifier(TestCase):
     def test_load(self):
         x, y, encoded_data = self._prepare_data()
 
-        cls = TCRDISTClassifier(0.75)
+        cls = TCRDISTClassifier(0.75, n_jobs=4)
         cls.fit(encoded_data, y, label_names=["test"])
 
         path = PathBuilder.build(EnvironmentSettings.root_path + "test/tmp/tcrdist_classifier_load/")
@@ -69,7 +69,7 @@ class TestTCRDISTClassifier(TestCase):
         with open(path + "tcrdist_classifier.pickle", "wb") as file:
             dill.dump(cls.get_model(), file)
 
-        cls2 = TCRDISTClassifier(percentage=1.)
+        cls2 = TCRDISTClassifier(percentage=1., n_jobs=4)
         cls2.load(path)
 
         self.assertTrue(isinstance(cls2.get_model()["test"], KNeighborsClassifier))

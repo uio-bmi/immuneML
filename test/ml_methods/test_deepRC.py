@@ -1,12 +1,12 @@
 import os
+import random as rn
 import shutil
-import pandas as pd
 from unittest import TestCase
 
-import random as rn
+import pandas as pd
 import torch
-
 from deeprc.deeprc_binary.architectures import DeepRC as DeepRCInternal
+
 from source.caching.CacheType import CacheType
 from source.data_model.encoded_data.EncodedData import EncodedData
 from source.dsl.DefaultParamsLoader import DefaultParamsLoader
@@ -22,14 +22,14 @@ class TestDeepRC(TestCase):
     def setUp(self) -> None:
         os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
 
-    def get_random_sequence(self, alphabet = "ACDEFGHIKLMNPQRSTVWY"):
+    def get_random_sequence(self, alphabet="ACDEFGHIKLMNPQRSTVWY"):
         return "".join([rn.choice(alphabet) for i in range(rn.choice(range(15, 30)))])
 
     def make_encoded_data(self, path):
         metadata_filepath = f"{path}/metadata.tsv"
 
         rep_ids = [f"REP{i}" for i in range(10)]
-        status_label = [chr((i % 2) + 65) for i in range(10)] # List of alternating strings "A" "B"
+        status_label = [chr((i % 2) + 65) for i in range(10)]  # List of alternating strings "A" "B"
 
         metadata = pd.DataFrame({"ID": rep_ids, "status": status_label})
         metadata.to_csv(sep="\t", index=False, path_or_buf=metadata_filepath)
@@ -43,16 +43,14 @@ class TestDeepRC(TestCase):
             repertoire_data.to_csv(sep="\t", index=False, path_or_buf=f"{path}/{rep_id}.tsv")
 
         return EncodedData(examples=None, labels={"status": status_label},
-                    example_ids=rep_ids, encoding=DeepRCEncoder.__name__,
-                    info={"metadata_filepath": metadata_filepath,
-                          "max_sequence_length": 30})
-
+                           example_ids=rep_ids, encoding=DeepRCEncoder.__name__,
+                           info={"metadata_filepath": metadata_filepath,
+                                 "max_sequence_length": 30})
 
     def dummy_training_function(self, *args, **kwargs):
-        '''The training function (DeepRC.training_function) only works on GPU.
-        To test the rest of the DeepRC class without errors, it is replaced with this dummy function.'''
+        """The training function (DeepRC.training_function) only works on GPU.
+        To test the rest of the DeepRC class without errors, it is replaced with this dummy function."""
         pass
-
 
     def test(self):
         path = EnvironmentSettings.tmp_test_path + "deeprc_classifier/"
@@ -77,7 +75,6 @@ class TestDeepRC(TestCase):
         self.assertEqual(len(train_indices) + len(val_indices), 10)
         self.assertEqual(set(list(train_indices) + list(val_indices)), set(range(10)))
 
-
         # test if 'fit' function saves models
         classifier.fit(encoded_data, y, ["status"])
 
@@ -88,7 +85,6 @@ class TestDeepRC(TestCase):
 
         for model in classifier.models.values():
             self.assertIsInstance(model, DeepRCInternal)
-
 
         # Test storing and loading of models
         self.assertFalse(classifier.check_if_exists(result_path))
@@ -105,4 +101,3 @@ class TestDeepRC(TestCase):
             self.assertIsInstance(model, DeepRCInternal)
 
         shutil.rmtree(path)
-

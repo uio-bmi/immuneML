@@ -34,9 +34,7 @@ class RandomForestClassifier(SklearnMethod):
             self._parameter_grid = {"n_estimators": [10, 50, 100]}
 
     def _get_ml_model(self, cores_for_training: int = 2, X=None):
-        default = {"n_jobs": cores_for_training}
-        params = {**self._parameters, **default}
-        return RFC(**params)
+        return RFC(**self._parameters)
 
     def can_predict_proba(self) -> bool:
         return True

@@ -57,7 +57,8 @@ class TestMLModelTrainingInstruction(TestCase):
                                 "CountPerSequenceFilter": {
                                     "remove_without_count": False,
                                     "low_count_limit": 0,
-                                    "batch_size": 4
+                                    "batch_size": 4,
+                                    "remove_empty_repertoires": True
                                 }
                             }
                         }

@@ -35,8 +35,7 @@ class SVM(SklearnMethod):
             self._parameter_grid = {}
 
     def _get_ml_model(self, cores_for_training: int = 2, X=None):
-        params = {**self._parameters, **{}}
-        return LinearSVC(**params)
+        return LinearSVC(**self._parameters)
 
     def can_predict_proba(self) -> bool:
         return False
