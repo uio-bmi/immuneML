@@ -117,13 +117,12 @@ class SklearnMethod(MLMethod):
             return None
 
     def _fit_for_label_by_cv(self, X, y: np.ndarray, label: str, cores_for_training: int, number_of_splits: int = 5):
-        self.models[label] = RandomizedSearchCV(self._get_ml_model(cores_for_training=cores_for_training),
-                                                param_distributions=self._parameter_grid,
-                                                cv=number_of_splits, n_jobs=cores_for_training,
+        model = self._get_ml_model(cores_for_training=cores_for_training)
+        n_jobs = model.n_jobs if hasattr(model, 'n_jobs') else cores_for_training
+        self.models[label] = RandomizedSearchCV(model, param_distributions=self._parameter_grid, cv=number_of_splits, n_jobs=n_jobs,
                                                 scoring="balanced_accuracy", refit=True)
         self.models[label].fit(X, y)
-        self.models[label] = self.models[
-            label].best_estimator_  # do not leave RandomSearchCV object to be in models, but use the best estimator instead
+        self.models[label] = self.models[label].best_estimator_  # do not leave RandomSearchCV object to be in models, use the best estimator instead
 
     def fit_by_cross_validation(self, encoded_data: EncodedData, y, number_of_splits: int = 5, parameter_grid: dict = None,
                                 label_names: list = None, cores_for_training: int = 1):
@@ -133,13 +132,11 @@ class SklearnMethod(MLMethod):
         if parameter_grid is not None:
             self._parameter_grid = parameter_grid
 
-        self.models = CacheHandler.memo_by_params(self._prepare_caching_params(encoded_data, y, self.FIT_CV, label_names,
-                                                                               number_of_splits),
+        self.models = CacheHandler.memo_by_params(self._prepare_caching_params(encoded_data, y, self.FIT_CV, label_names, number_of_splits),
                                                   lambda: self._fit_by_cross_validation(encoded_data.examples, y, number_of_splits,
                                                                                         label_names, cores_for_training))
 
-    def _fit_by_cross_validation(self, X, y, number_of_splits: int = 5, label_names: list = None,
-                                 cores_for_training: int = 1):
+    def _fit_by_cross_validation(self, X, y, number_of_splits: int = 5, label_names: list = None, cores_for_training: int = 1):
 
         for label in label_names:
             self._fit_for_label_by_cv(X, y[label], label, cores_for_training, number_of_splits)
