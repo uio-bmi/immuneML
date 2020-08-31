@@ -49,6 +49,9 @@ class MetadataRepertoireFilter(Filter):
         indices = MetadataRepertoireFilter.get_matching_indices(processed_dataset, params["criteria"])
         processed_dataset.repertoires = [original_repertoires[i] for i in indices]
         processed_dataset.metadata_file = MetadataRepertoireFilter.build_new_metadata(dataset, indices, params["result_path"])
+
+        Filter.check_dataset_not_empty(processed_dataset, "MetadataRepertoireFilter")
+
         return processed_dataset
 
     @staticmethod

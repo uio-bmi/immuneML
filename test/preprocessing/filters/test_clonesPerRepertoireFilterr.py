@@ -29,4 +29,6 @@ class TestClonesPerRepertoireFilter(TestCase):
         dataset2 = ClonesPerRepertoireFilter.process(dataset, {"upper_limit": 2, "result_path": path})
         self.assertEqual(1, dataset2.get_example_count())
 
+        self.assertRaises(AssertionError, ClonesPerRepertoireFilter.process, dataset, {"lower_limit": 10, "result_path": path})
+
         shutil.rmtree(path)

@@ -47,4 +47,7 @@ class ChainRepertoireFilter(Filter):
 
         processed_dataset.repertoires = repertoires
         processed_dataset.metadata_file = ChainRepertoireFilter.build_new_metadata(processed_dataset, indices, params["result_path"])
+
+        Filter.check_dataset_not_empty(processed_dataset, "ChainRepertoireFilter")
+
         return processed_dataset

@@ -89,6 +89,7 @@ class DuplicateSequenceFilter(Filter):
                                        [(repertoire, params) for repertoire in dataset.repertoires])
 
         processed_dataset.repertoires = repertoires
+
         return processed_dataset
 
     @staticmethod

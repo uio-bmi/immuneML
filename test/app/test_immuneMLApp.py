@@ -84,6 +84,7 @@ class TestImmuneMLApp(TestCase):
                             "count_filter": {
                                 "CountPerSequenceFilter": {
                                     "remove_without_count": True,
+                                    "remove_empty_repertoires": False,
                                     "low_count_limit": 3,
                                     "batch_size": 4
                                 }

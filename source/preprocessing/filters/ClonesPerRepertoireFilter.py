@@ -54,4 +54,7 @@ class ClonesPerRepertoireFilter(Filter):
                 indices.append(index)
         processed_dataset.repertoires = repertoires
         processed_dataset.metadata_file = ClonesPerRepertoireFilter.build_new_metadata(dataset, indices, params["result_path"])
+
+        Filter.check_dataset_not_empty(processed_dataset, "ClonesPerRepertoireFilter")
+
         return processed_dataset

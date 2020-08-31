@@ -46,4 +46,16 @@ class TestMetadataRepertoireFilter(TestCase):
 
         self.assertEqual(1, dataset1.get_example_count())
 
+        self.assertRaises(AssertionError, MetadataRepertoireFilter.process, dataset, {
+            "criteria": {
+                "type": OperationType.GREATER_THAN,
+                "value": {
+                    "type": DataType.COLUMN,
+                    "name": "key2"
+                },
+                "threshold": 10
+            },
+            "result_path": path
+        })
+
         shutil.rmtree(path)
