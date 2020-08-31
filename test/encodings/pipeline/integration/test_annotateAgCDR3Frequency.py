@@ -104,8 +104,7 @@ reference_rep.tsv,rep1"""
 
         encoder_params = EncoderParams(
                 result_path=path,
-                label_configuration=lc,
-                batch_size=2,
+                label_config=lc,
                 learn_model=True,
                 model={}
             )

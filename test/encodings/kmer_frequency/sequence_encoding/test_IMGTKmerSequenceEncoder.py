@@ -18,7 +18,7 @@ class TestIMGTKmerSequenceEncoder(TestCase):
         sequence = ReceptorSequence("CASSPRERATYEQCASSPRERATYEQCASSPRERATYEQ", None, None)
         result = IMGTKmerSequenceEncoder.encode_sequence(sequence, EncoderParams(
                                                                     model={"k": 3},
-                                                                    label_configuration=LabelConfiguration(),
+                                                                    label_config=LabelConfiguration(),
                                                                     result_path=""))
 
         self.assertEqual({'CAS///105', 'ASS///106', 'SSP///107', 'SPR///108', 'PRE///109', 'RER///110', 'ERA///111',
@@ -35,7 +35,7 @@ class TestIMGTKmerSequenceEncoder(TestCase):
         sequence = ReceptorSequence("AHCDE", None, None)
         result = IMGTKmerSequenceEncoder.encode_sequence(sequence, EncoderParams(
                                                                     model={"k": 3},
-                                                                    label_configuration=LabelConfiguration(),
+                                                                    label_config=LabelConfiguration(),
                                                                     result_path=""))
 
         self.assertEqual({'AHC///105', 'HCD///106', 'CDE///107'},
@@ -46,7 +46,7 @@ class TestIMGTKmerSequenceEncoder(TestCase):
             IMGTKmerSequenceEncoder.encode_sequence(
                               sequence,
                               EncoderParams(model={"k": 25},
-                                            label_configuration=LabelConfiguration(),
+                                            label_config=LabelConfiguration(),
                                             result_path="")
             ),
             None

@@ -1,3 +1,5 @@
+import copy
+
 from source.hyperparameter_optimization.HPSetting import HPSetting
 from source.hyperparameter_optimization.HPSettingResult import HPSettingResult
 from source.hyperparameter_optimization.strategy.HPOptimizationStrategy import HPOptimizationStrategy
@@ -17,7 +19,7 @@ class GridSearch(HPOptimizationStrategy):
         else:
             next_setting = None
 
-        return next_setting
+        return copy.deepcopy(next_setting)
 
     def get_optimal_hps(self) -> HPSetting:
         """

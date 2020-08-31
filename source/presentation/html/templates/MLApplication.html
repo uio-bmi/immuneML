@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ML Application</title>
+    <style>
+        {{{css_style}}}
+    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+    <div class="container padded-bottom">
+        <h1>ML model application {{hp_setting}} for label {{label}}</h1>
+        <h3>Dataset details</h3>
+        <div class="col-container">
+            <div class="col">
+                    <span>General information</span>
+                    <div class="table-container padded-top padded-bottom">
+                        <table>
+                        <tr>
+                            <td><b>Name</b></td>
+                            <td>{{dataset_name}}</td>
+                        </tr>
+                        <tr>
+                            <td><b>Type</b></td>
+                        <td>{{dataset_type}}</td>
+                    </tr>
+                    <tr>
+                        <td><b>Example count</b></td>
+                        <td>{{example_count}}</td>
+                    </tr>
+                </table>
+                </div>
+            </div>
+            <div class="col">
+                <span>Dataset labels</span>
+                <div class="table-container padded-top padded-bottom">
+                    <table>
+                    <thead>
+                        <tr>
+                            <th>Label name</th>
+                            <th>Label values (classes)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{#labels}}
+                        <tr>
+                            <td>{{name}}</td>
+                            <td>{{values}}</td>
+                        </tr>
+                        {{/labels}}
+                    </tbody>
+                </table>
+                </div>
+            </div>
+        </div>
+        <h3>Predictions <small>(<a href="{{predictions_download_link}}">download link</a>)</small></h3>
+        <div class="table-container padded">
+            {{{predictions}}}
+        </div>
+    </div>
+</body>
+</html>

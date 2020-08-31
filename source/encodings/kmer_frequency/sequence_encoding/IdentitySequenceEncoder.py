@@ -25,10 +25,10 @@ class IdentitySequenceEncoder(SequenceEncodingStrategy):
             return None
 
         res = []
-        if params["model"].get("sequence", True):
+        if params.model.get("sequence", True):
             res.append(sequence.get_sequence())
 
-        for field in params["model"].get("metadata_fields_to_include", []):
+        for field in params.model.get("metadata_fields_to_include", []):
             if sequence.metadata is None:
                 res.append("unknown")
             else:
@@ -39,8 +39,8 @@ class IdentitySequenceEncoder(SequenceEncodingStrategy):
     @staticmethod
     def get_feature_names(params: EncoderParams):
         res = []
-        if params["model"].get("sequence", True):
+        if params.model.get("sequence", True):
             res.append("sequence")
-        for field in params["model"].get("metadata_fields_to_include", []):
+        for field in params.model.get("metadata_fields_to_include", []):
             res.append(field)
         return res

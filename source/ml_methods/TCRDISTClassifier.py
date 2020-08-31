@@ -57,3 +57,6 @@ class TCRDISTClassifier(SklearnMethod):
 
     def get_params(self, label):
         return {**self.models[label].get_params(deep=True), **copy.deepcopy(vars(self))}
+
+    def can_predict_proba(self) -> bool:
+        return True

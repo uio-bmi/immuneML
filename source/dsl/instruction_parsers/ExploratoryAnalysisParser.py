@@ -37,7 +37,7 @@ class ExploratoryAnalysisParser:
 
     """
 
-    def parse(self, key: str, instruction: dict, symbol_table: SymbolTable) -> ExploratoryAnalysisInstruction:
+    def parse(self, key: str, instruction: dict, symbol_table: SymbolTable, path: str = None) -> ExploratoryAnalysisInstruction:
         exp_analysis_units = {}
 
         ParameterValidator.assert_keys(instruction, ["analyses", "type"], "ExploratoryAnalysisParser", "ExploratoryAnalysis")

@@ -4,7 +4,6 @@ import numpy as np
 import pandas as pd
 from scipy import sparse
 
-from source.IO.dataset_export.PickleExporter import PickleExporter
 from source.caching.CacheHandler import CacheHandler
 from source.data_model.encoded_data.EncodedData import EncodedData
 from source.encodings.DatasetEncoder import DatasetEncoder
@@ -94,9 +93,9 @@ class EvennessProfileEncoder(DatasetEncoder):
         return (("example_identifiers", tuple(dataset.get_example_ids())),
                 ("dataset_metadata", dataset.metadata_file if hasattr(dataset, "metadata_file") else None),
                 ("dataset_type", dataset.__class__.__name__),
-                ("labels", tuple(params["label_configuration"].get_labels_by_name())),
+                ("labels", tuple(params.label_config.get_labels_by_name())),
                 ("encoding", EvennessProfileEncoder.__name__),
-                ("learn_model", params["learn_model"]),
+                ("learn_model", params.learn_model),
                 ("step", step),
                 ("encoding_params", tuple(vars(self).items())))
 
@@ -130,9 +129,6 @@ class EvennessProfileEncoder(DatasetEncoder):
     @abc.abstractmethod
     def _encode_examples(self, dataset, params: EncoderParams):
         pass
-
-    def store(self, encoded_dataset, params: EncoderParams):
-        PickleExporter.export(encoded_dataset, params["result_path"])
 
     def _vectorize_encoded(self, examples: list):
 

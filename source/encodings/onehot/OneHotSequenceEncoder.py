@@ -1,9 +1,8 @@
 
 from source.data_model.dataset.SequenceDataset import SequenceDataset
+from source.data_model.encoded_data.EncodedData import EncodedData
 from source.encodings.EncoderParams import EncoderParams
 from source.encodings.onehot.OneHotEncoder import OneHotEncoder
-from source.data_model.encoded_data.EncodedData import EncodedData
-
 
 
 class OneHotSequenceEncoder(OneHotEncoder):
@@ -29,12 +28,12 @@ class OneHotSequenceEncoder(OneHotEncoder):
         return encoded_dataset
 
     def _encode_data(self, dataset: SequenceDataset, params: EncoderParams):
-        sequence_objs = [obj for obj in dataset.get_data(params["batch_size"])]
+        sequence_objs = [obj for obj in dataset.get_data(params.pool_size)]
 
         sequences = [obj.get_sequence() for obj in sequence_objs]
         example_ids = dataset.get_example_ids()
         max_seq_len = max([len(seq) for seq in sequences])
-        labels = self._get_labels(sequence_objs, params)
+        labels = self._get_labels(sequence_objs, params) if params.encode_labels else None
 
         examples = self._encode_sequence_list(sequences, pad_n_sequences=len(sequence_objs), pad_sequence_len=max_seq_len)
 
@@ -46,7 +45,7 @@ class OneHotSequenceEncoder(OneHotEncoder):
         return encoded_data
 
     def _get_labels(self, sequence_objs, params: EncoderParams):
-        label_names = params["label_configuration"].get_labels_by_name()
+        label_names = params.label_config.get_labels_by_name()
         labels = {name: [None] * len(sequence_objs) for name in label_names}
 
         for idx, sequence in enumerate(sequence_objs):

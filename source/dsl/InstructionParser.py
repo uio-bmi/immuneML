@@ -22,7 +22,7 @@ class InstructionParser:
     keyword = "instructions"
 
     @staticmethod
-    def parse(definition_output: DefinitionParserOutput):
+    def parse(definition_output: DefinitionParserOutput, path):
 
         specification = definition_output.specification
         symbol_table = definition_output.symbol_table
@@ -38,7 +38,7 @@ class InstructionParser:
 
             for key in specification[InstructionParser.keyword]:
                 specification[InstructionParser.keyword][key], symbol_table = \
-                    InstructionParser.parse_instruction(key, specification[InstructionParser.keyword][key], symbol_table)
+                    InstructionParser.parse_instruction(key, specification[InstructionParser.keyword][key], symbol_table, path)
         else:
             specification[InstructionParser.keyword] = {}
 
@@ -46,13 +46,13 @@ class InstructionParser:
 
     @staticmethod
     @log
-    def parse_instruction(key: str, instruction: dict, symbol_table: SymbolTable) -> tuple:
+    def parse_instruction(key: str, instruction: dict, symbol_table: SymbolTable, path) -> tuple:
         # TODO: add check to see if there's type
         valid_instructions = [cls[:-6] for cls in ReflectionHandler.discover_classes_by_partial_name("Parser", "dsl/instruction_parsers/")]
         ParameterValidator.assert_in_valid_list(instruction["type"], valid_instructions, "InstructionParser", "type")
 
         parser = ReflectionHandler.get_class_by_name("{}Parser".format(instruction["type"]), "instruction_parsers/")()
-        instruction_object = parser.parse(key, instruction, symbol_table)
+        instruction_object = parser.parse(key, instruction, symbol_table, path)
 
         symbol_table.add(key, SymbolType.INSTRUCTION, instruction_object)
         return instruction, symbol_table

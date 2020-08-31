@@ -76,7 +76,7 @@ TCR_AB	200	CCCC	TRAV1		TRAJ1	null	null	null	null	TTTT	TRBV1		TRBJ1	null	null	nul
 
         encoded = encoder.encode(dataset, EncoderParams(
             result_path=path,
-            label_configuration=label_config,
+            label_config=label_config,
             filename="dataset.csv"
         ))
 
@@ -98,7 +98,7 @@ TCR_AB	200	CCCC	TRAV1		TRAJ1	null	null	null	null	TTTT	TRBV1		TRBJ1	null	null	nul
         # The label 'subject_id' must be specified, error if not specified
         label_config = LabelConfiguration()
         label_config.add_label("label", labels["label"])
-        params=EncoderParams(result_path=path, label_configuration=label_config, filename="dataset.csv")
+        params=EncoderParams(result_path=path, label_config=label_config, filename="dataset.csv")
 
         self.assertRaises(KeyError, encoder.encode, dataset, params)
 

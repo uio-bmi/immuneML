@@ -19,7 +19,7 @@ class IMGTKmerSequenceEncoder(SequenceEncodingStrategy):
         :param params: EncoderParams (where params["model"]["k"] is used)
         :return: SequenceEncodingResult consisting of features and feature information names
         """
-        k = params["model"]["k"]
+        k = params.model["k"]
         length = len(sequence.get_sequence())
 
         if sequence.metadata is not None and sequence.metadata.frame_type.upper() != SequenceFrameType.IN.name:

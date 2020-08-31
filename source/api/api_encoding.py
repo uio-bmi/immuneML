@@ -53,7 +53,7 @@ def encode_dataset_by_kmer_freq(path_to_dataset_directory: str, result_path: str
         "k": 2,  # k-mer length
         "sequence_encoding": "continuous_kmer"  # split each sequence in repertoire to overlapping k-mers
     }), EncoderParams(result_path=result_path,
-                      label_configuration=LabelConfiguration([Label(label_name, dataset.params[label_name])]))))
+                      label_config=LabelConfiguration([Label(label_name, dataset.params[label_name])]))))
 
     dataset_exporter = DesignMatrixExporter(dataset=encoded_dataset,
                                             result_path=f"{result_path if result_path[:-1] == '/' else result_path+'/'}csv_exported/")

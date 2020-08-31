@@ -5,7 +5,7 @@ import warnings
 import pandas as pd
 from sklearn import metrics
 
-from source.data_model.dataset.RepertoireDataset import RepertoireDataset
+from source.data_model.dataset.Dataset import Dataset
 from source.environment.Metric import Metric
 from source.ml_methods.MLMethod import MLMethod
 from source.ml_metrics import ml_metrics
@@ -52,7 +52,7 @@ class MLMethodAssessment(Step):
 
     @staticmethod
     def _score(metrics_list: list, optimization_metric: Metric, label: str, predicted_y, predicted_proba_y, true_y, ml_score_path: str,
-               split_index: int, method: MLMethod, dataset: RepertoireDataset):
+               split_index: int, method: MLMethod, dataset: Dataset):
         results = {}
 
         metrics_with_optim_metric = set(metrics_list)

@@ -50,6 +50,7 @@ class MLParser:
 
         method, params = MLParser.create_method_instance(ml_specification, ml_method_class)
         ml_specification[ml_method_class_name] = params
+        method.name = ml_method_id
 
         return method, ml_specification
 

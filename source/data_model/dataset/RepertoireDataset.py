@@ -15,7 +15,7 @@ class RepertoireDataset(Dataset):
         super().__init__()
         self.params = params
         self.encoded_data = encoded_data
-        self.identifier = identifier if identifier is not None else uuid.uuid4()
+        self.identifier = identifier if identifier is not None else uuid.uuid4().hex
         self.metadata_file = metadata_file
         self.metadata_fields = None
         self.repertoire_ids = None

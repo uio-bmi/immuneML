@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import Tuple, List
 
 import numpy as np
 import yaml
@@ -72,6 +72,8 @@ class AtchleyKmerEncoder(DatasetEncoder):
         self.abundance = RelativeAbundanceType[abundance.upper()]
         self.normalize_all_features = normalize_all_features
         self.name = name
+        self.normalizer_path = None
+        self.vectorizer_path = None
 
     def encode(self, dataset, params: EncoderParams):
 
@@ -81,8 +83,9 @@ class AtchleyKmerEncoder(DatasetEncoder):
         # normalize to zero mean and unit variance only features coming from Atchley factors
         tmp_examples = examples[:, :, :-1] if not self.normalize_all_features else examples
         flattened_vectorized_examples = tmp_examples.reshape(examples.shape[0] * examples.shape[1], -1)
-        scaled_examples = FeatureScaler.standard_scale(params["result_path"] + "atchley_factor_normalizer.pickle",
-                                                       flattened_vectorized_examples).todense()
+        if self.normalizer_path is None:
+            self.normalizer_path = params.result_path + "atchley_factor_normalizer.pickle"
+        scaled_examples = FeatureScaler.standard_scale(self.normalizer_path, flattened_vectorized_examples).todense()
 
         if self.normalize_all_features:
             examples = np.array(scaled_examples).reshape(examples.shape[0], len(kmer_keys), -1)
@@ -101,13 +104,13 @@ class AtchleyKmerEncoder(DatasetEncoder):
 
         return encoded_dataset
 
-    def _encode_examples(self, dataset, params) -> Tuple[list, set, dict]:
+    def _encode_examples(self, dataset: RepertoireDataset, params: EncoderParams) -> Tuple[list, set, dict]:
 
         remove_aa_func = lambda seqs: [seq[self.skip_first_n_aa:-self.skip_last_n_aa] for seq in seqs]
         examples = []
         keys = set()
 
-        labels = {label: [] for label in params["label_configuration"].get_labels_by_name()}
+        labels = {label: [] for label in params.label_config.get_labels_by_name()} if params.encode_labels else None
 
         for repertoire in dataset.get_data():
             sequences, counts = self._trunc_sequences(repertoire, remove_aa_func)
@@ -122,20 +125,24 @@ class AtchleyKmerEncoder(DatasetEncoder):
 
             examples.append(encoded)
 
-            for label in labels:
-                labels[label].append(repertoire.metadata[label])
+            if labels is not None:
+                for label in labels:
+                    labels[label].append(repertoire.metadata[label])
 
         return examples, keys, labels
 
-    def _vectorize_examples(self, examples, params, keys: set) -> Tuple[np.ndarray, list]:
+    def _vectorize_examples(self, examples, params: EncoderParams, keys: set) -> Tuple[np.ndarray, list]:
 
-        if params["learn_model"] is True:
+        if self.vectorizer_path is None:
+            self.vectorizer_path = f"{params.result_path}vectorizer_keys.yaml"
+
+        if params.learn_model is True:
             kmer_keys = sorted(list(keys))
-            PathBuilder.build(params["result_path"])
-            with open(f"{params['result_path']}vectorizer_keys.yaml", "w") as file:
+            PathBuilder.build(params.result_path)
+            with open(self.vectorizer_path, "w") as file:
                 yaml.dump(kmer_keys, file)
         else:
-            with open(f"{params['result_path']}vectorizer_keys.yaml", "r") as file:
+            with open(self.vectorizer_path, "r") as file:
                 kmer_keys = yaml.safe_load(file)
 
         vectorized_examples = [
@@ -151,6 +158,21 @@ class AtchleyKmerEncoder(DatasetEncoder):
         counts = counts[indices]
         sequences = np.apply_along_axis(remove_aa_func, 0, sequences)
         return sequences, counts
+
+    def get_additional_files(self) -> List[str]:
+        return [self.normalizer_path, self.vectorizer_path]
+
+    @staticmethod
+    def export_encoder(path: str, encoder) -> str:
+        encoder_file = DatasetEncoder.store_encoder(encoder, path + "encoder.pickle")
+        return encoder_file
+
+    @staticmethod
+    def load_encoder(encoder_file: str):
+        encoder = DatasetEncoder.load_encoder(encoder_file)
+        for attribute in ["normalizer_path", "vectorizer_path"]:
+            encoder = DatasetEncoder.load_attribute(encoder, encoder_file, attribute)
+        return encoder
 
     @staticmethod
     def get_documentation():

@@ -2,7 +2,6 @@ import abc
 import os
 from typing import List
 
-from source.IO.dataset_export.PickleExporter import PickleExporter
 from source.caching.CacheHandler import CacheHandler
 from source.data_model.receptor.BCReceptor import BCReceptor
 from source.data_model.receptor.Receptor import Receptor
@@ -72,7 +71,7 @@ class MatchedReceptorsEncoder(DatasetEncoder):
         elif type(max_edit_distances) is dict:
             ParameterValidator.assert_keys(max_edit_distances.keys(), legal_chains, location, "max_edit_distances", exclusive=False)
         else:
-            ParameterValidator.assert_type_and_value(max_edit_distances, dict, location)
+            ParameterValidator.assert_type_and_value(max_edit_distances, dict, location, 'max_edit_distances')
 
         ParameterValidator.assert_keys(list(reference_receptors.keys()), ["format", "path", "params"], location, "reference_receptors", exclusive=False)
 
@@ -84,7 +83,7 @@ class MatchedReceptorsEncoder(DatasetEncoder):
 
         seq_import_params = reference_receptors["params"] if "params" in reference_receptors else {}
         if "paired" in seq_import_params:
-            assert seq_import_params["paired"] == True, f"{location}: paired must be True for SequenceImport"
+            assert seq_import_params["paired"] is True, f"{location}: paired must be True for SequenceImport"
         else:
             seq_import_params["paired"] = True
 
@@ -126,15 +125,11 @@ class MatchedReceptorsEncoder(DatasetEncoder):
         return (("dataset_identifiers", tuple(dataset.get_example_ids())),
                 ("dataset_metadata", dataset.metadata_file),
                 ("dataset_type", dataset.__class__.__name__),
-                ("labels", tuple(params["label_configuration"].get_labels_by_name())),
+                ("labels", tuple(params.label_config.get_labels_by_name())),
                 ("encoding", MatchedReceptorsEncoder.__name__),
-                ("learn_model", params["learn_model"]),
+                ("learn_model", params.learn_model),
                 ("encoding_params", encoding_params_desc), )
 
     @abc.abstractmethod
     def _encode_new_dataset(self, dataset, params: EncoderParams):
         pass
-
-    def store(self, encoded_dataset, params: EncoderParams):
-        PickleExporter.export(encoded_dataset, params["result_path"])
-

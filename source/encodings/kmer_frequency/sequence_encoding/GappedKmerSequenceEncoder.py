@@ -20,10 +20,10 @@ class GappedKmerSequenceEncoder(SequenceEncodingStrategy):
                         "min_gap")
         :return: SequenceEncodingResult
         """
-        k_left = params["model"].get('k_left')
-        k_right = params["model"].get('k_right', k_left)
-        max_gap = params["model"].get('max_gap')
-        min_gap = params["model"].get('min_gap', 0)
+        k_left = params.model.get('k_left')
+        k_right = params.model.get('k_right', k_left)
+        max_gap = params.model.get('max_gap')
+        min_gap = params.model.get('min_gap', 0)
         length = len(sequence.get_sequence())
 
         if sequence.metadata is not None and sequence.metadata.frame_type.upper() != SequenceFrameType.IN.name:

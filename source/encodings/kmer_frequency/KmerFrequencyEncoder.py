@@ -1,10 +1,11 @@
 import abc
+import os
 import pickle
+from typing import List
 
 import pandas as pd
 from sklearn.feature_extraction import DictVectorizer
 
-from source.IO.dataset_export.PickleExporter import PickleExporter
 from source.analysis.data_manipulation.NormalizationType import NormalizationType
 from source.caching.CacheHandler import CacheHandler
 from source.data_model.encoded_data.EncodedData import EncodedData
@@ -104,6 +105,8 @@ class KmerFrequencyEncoder(DatasetEncoder):
         self.max_gap = max_gap
         self.metadata_fields_to_include = metadata_fields_to_include if metadata_fields_to_include is not None else []
         self.name = name
+        self.normalizer_path = None
+        self.vectorizer_path = None
 
     @staticmethod
     def _prepare_parameters(normalization_type: str, reads: str, sequence_encoding: str, k: int = 0, k_left: int = 0,
@@ -145,12 +148,10 @@ class KmerFrequencyEncoder(DatasetEncoder):
         return encoded_dataset
 
     def _prepare_caching_params(self, dataset, params: EncoderParams, step: str = ""):
-        return (("example_identifiers", tuple(dataset.get_example_ids())),
-                ("dataset_metadata", dataset.metadata_file if hasattr(dataset, "metadata_file") else None),
-                ("dataset_type", dataset.__class__.__name__),
-                ("labels", tuple(params["label_configuration"].get_labels_by_name())),
+        return (("dataset_identifier", dataset.identifier),
+                ("labels", tuple(params.label_config.get_labels_by_name())),
                 ("encoding", KmerFrequencyEncoder.__name__),
-                ("learn_model", params["learn_model"]),
+                ("learn_model", params.learn_model),
                 ("step", step),
                 ("encoding_params", tuple(vars(self).items())))
 
@@ -163,11 +164,11 @@ class KmerFrequencyEncoder(DatasetEncoder):
             self._prepare_caching_params(dataset, params, KmerFrequencyEncoder.STEP_VECTORIZED),
             lambda: self._vectorize_encoded(examples=encoded_example_list, params=params))
 
+        if self.normalizer_path is None:
+            self.normalizer_path = params.result_path + "normalizer.pkl"
         normalized_examples = CacheHandler.memo_by_params(
             self._prepare_caching_params(dataset, params, KmerFrequencyEncoder.STEP_NORMALIZED),
-            lambda: FeatureScaler.normalize(params["result_path"] + "normalizer.pkl",
-                                            vectorized_examples,
-                                            self.normalization_type))
+            lambda: FeatureScaler.normalize(self.normalizer_path, vectorized_examples, self.normalization_type))
 
         feature_annotations = self._get_feature_annotations(feature_names, feature_annotation_names)
 
@@ -190,16 +191,19 @@ class KmerFrequencyEncoder(DatasetEncoder):
 
     def _vectorize_encoded(self, examples: list, params: EncoderParams):
 
-        filename = params["result_path"] + FilenameHandler.get_filename(DictVectorizer.__name__, "pickle")
+        if self.vectorizer_path is None:
+            self.vectorizer_path = params.result_path + FilenameHandler.get_filename(DictVectorizer.__name__, "pickle")
 
-        if params["learn_model"]:
+        if params.learn_model:
             vectorizer = DictVectorizer(sparse=True, dtype=float)
             vectorized_examples = vectorizer.fit_transform(examples)
-            PathBuilder.build(params["result_path"])
-            with open(filename, 'wb') as file:
+            PathBuilder.build(params.result_path)
+            with open(self.vectorizer_path, 'wb') as file:
                 pickle.dump(vectorizer, file)
         else:
-            with open(filename, 'rb') as file:
+            if not os.path.isfile(self.vectorizer_path):
+                print(self.vectorizer_path)
+            with open(self.vectorizer_path, 'rb') as file:
                 vectorizer = pickle.load(file)
             vectorized_examples = vectorizer.transform(examples)
 
@@ -216,7 +220,7 @@ class KmerFrequencyEncoder(DatasetEncoder):
         return sequence_encoder
 
     def _encode_sequence(self, sequence: ReceptorSequence, params: EncoderParams, sequence_encoder, counts):
-        params["model"] = vars(self)
+        params.model = vars(self)
         features = sequence_encoder.encode_sequence(sequence, params)
         if features is not None:
             for i in features:
@@ -226,5 +230,17 @@ class KmerFrequencyEncoder(DatasetEncoder):
                     counts[i] += sequence.metadata.count
         return counts
 
-    def store(self, encoded_dataset, params: EncoderParams):
-        PickleExporter.export(encoded_dataset, params["result_path"])
+    def get_additional_files(self) -> List[str]:
+        return [self.normalizer_path, self.vectorizer_path]
+
+    @staticmethod
+    def export_encoder(path: str, encoder) -> str:
+        encoder_file = DatasetEncoder.store_encoder(encoder, path + "encoder.pickle")
+        return encoder_file
+
+    @staticmethod
+    def load_encoder(encoder_file: str):
+        encoder = DatasetEncoder.load_encoder(encoder_file)
+        for attribute in ['normalizer_path', 'vectorizer_path']:
+            encoder = DatasetEncoder.load_attribute(encoder, encoder_file, attribute)
+        return encoder

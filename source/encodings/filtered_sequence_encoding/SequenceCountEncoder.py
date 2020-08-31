@@ -1,6 +1,10 @@
+import os
+from typing import List
+
 import numpy as np
 
 from scripts.specification_util import update_docs_per_mapping
+from source.IO.ml_method.UtilIO import UtilIO
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.encoded_data.EncodedData import EncodedData
 from source.data_model.repertoire.Repertoire import Repertoire
@@ -57,6 +61,8 @@ class SequenceCountEncoder(DatasetEncoder):
         self.relevant_sequence_indices = None
         self.context = None
         self.p_value_threshold = p_value_threshold
+        self.relevant_indices_path = None
+        self.comparison_data = None
 
     @staticmethod
     def build_object(dataset, **params):
@@ -64,28 +70,29 @@ class SequenceCountEncoder(DatasetEncoder):
         return SequenceCountEncoder(**params)
 
     def encode(self, dataset, params: EncoderParams):
-        return SequenceFilterHelper.encode(dataset, self.context, self.comparison_attributes, self.sequence_batch_size,
-                                           params, self._encode_data)
+        self.comparison_data = SequenceFilterHelper.build_comparison_data(dataset, self.context, self.comparison_attributes, params, self.sequence_batch_size)
+        return self._encode_data(dataset, params)
 
-    def _encode_data(self, dataset: RepertoireDataset, params: EncoderParams, comparison_data: ComparisonData):
-        labels = params["label_configuration"].get_labels_by_name()
+    def _encode_data(self, dataset: RepertoireDataset, params: EncoderParams):
+        labels = params.label_config.get_labels_by_name()
 
         assert len(labels) == 1, f"SequenceCountEncoder: this encoding works only for single label, got {labels} instead."
 
-        encoded_data = self._encode_sequence_count(dataset, comparison_data, labels[0], params)
+        encoded_data = self._encode_sequence_count(dataset, self.comparison_data, labels[0], params)
 
         encoded_dataset = RepertoireDataset(params=dataset.params, encoded_data=encoded_data, repertoires=dataset.repertoires)
 
         return encoded_dataset
 
     def _encode_sequence_count(self, dataset: RepertoireDataset, comparison_data: ComparisonData, label: str, params: EncoderParams) -> EncodedData:
-        sequence_p_values_indices = SequenceFilterHelper.get_relevant_sequences(dataset, params, comparison_data, label, self.p_value_threshold,
-                                                                                self.comparison_attributes)
-
+        sequence_p_values_indices, indices_path = SequenceFilterHelper.get_relevant_sequences(dataset, params, comparison_data, label, self.p_value_threshold,
+                                                                                self.comparison_attributes, self.relevant_indices_path)
+        if self.relevant_indices_path is None:
+            self.relevant_indices_path = indices_path
         count_matrix = self._build_count_matrix(comparison_data, dataset.get_repertoire_ids(), sequence_p_values_indices)
         feature_names = comparison_data.get_item_names()[sequence_p_values_indices]
 
-        encoded_data = EncodedData(count_matrix, dataset.get_metadata([label]),
+        encoded_data = EncodedData(count_matrix, dataset.get_metadata([label]) if params.encode_labels else None,
                                    dataset.get_repertoire_ids(),
                                    feature_names,
                                    encoding=SequenceCountEncoder.__name__)
@@ -108,6 +115,22 @@ class SequenceCountEncoder(DatasetEncoder):
 
     def store(self, encoded_dataset, params: EncoderParams):
         EncoderHelper.store(encoded_dataset, params)
+
+    @staticmethod
+    def export_encoder(path: str, encoder) -> str:
+        encoder_file = DatasetEncoder.store_encoder(encoder, path + "encoder.pickle")
+        UtilIO.export_comparison_data(encoder.comparison_data, path)
+        return encoder_file
+
+    def get_additional_files(self) -> List[str]:
+        return [self.relevant_indices_path]
+
+    @staticmethod
+    def load_encoder(encoder_file: str):
+        encoder = DatasetEncoder.load_encoder(encoder_file)
+        encoder.relevant_indices_path = DatasetEncoder.load_attribute(encoder, encoder_file, "relevant_indices_path")
+        encoder.comparison_data = UtilIO.import_comparison_data(os.path.dirname(encoder_file) + '/')
+        return encoder
 
     @staticmethod
     def get_documentation():

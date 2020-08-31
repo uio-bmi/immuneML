@@ -5,6 +5,7 @@ import warnings
 from typing import Tuple
 
 import numpy as np
+import pkg_resources
 import yaml
 from scipy.special import beta as beta_func
 from scipy.special import betaln as beta_func_ln
@@ -64,8 +65,10 @@ class ProbabilisticBinaryClassifier(MLMethod):
         self.likelihood_threshold = likelihood_threshold if likelihood_threshold is not None else -1e-10
         self.class_mapping = None
         self.label_name = None
+        self.feature_names = None
 
     def fit(self, encoded_data: EncodedData, y, label_names: list = None, cores_for_training: int = 2):
+        self.feature_names = encoded_data.feature_names
         X = encoded_data.examples
         assert X.shape[1] == 2, "ProbabilisticBinaryClassifier: the shape of the input is not compatible with the classifier. " \
                                 "The classifier is defined when examples are encoded by two counts: the number of successful trials " \
@@ -391,3 +394,12 @@ class ProbabilisticBinaryClassifier(MLMethod):
 
     def get_labels(self):
         return [self.label_name]
+
+    def get_package_info(self) -> str:
+        return 'immuneML ' + pkg_resources.get_distribution('immuneML').version
+
+    def get_feature_names(self) -> list:
+        return self.feature_names
+
+    def can_predict_proba(self) -> bool:
+        return True

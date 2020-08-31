@@ -73,7 +73,7 @@ TCR_AB	400	NONO	TRAV1		TRAJ1	null	null	null	null	NONO	TRBV1		TRBJ1	null	null	nul
 
         encoded = encoder.encode(dataset, EncoderParams(
             result_path=path,
-            label_configuration=label_config,
+            label_config=label_config,
             filename="dataset.csv"
         ))
 

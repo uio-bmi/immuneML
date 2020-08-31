@@ -1,7 +1,9 @@
+import os
+
 import pandas as pd
 
 from scripts.specification_util import update_docs_per_mapping
-from source.IO.dataset_export.PickleExporter import PickleExporter
+from source.IO.ml_method.UtilIO import UtilIO
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.encoded_data.EncodedData import EncodedData
 from source.data_model.repertoire.Repertoire import Repertoire
@@ -58,6 +60,7 @@ class DistanceEncoder(DatasetEncoder):
         self.sequence_batch_size = sequence_batch_size
         self.context = context
         self.name = name
+        self.comparison = None
 
     def set_context(self, context: dict):
         self.context = context
@@ -84,12 +87,12 @@ class DistanceEncoder(DatasetEncoder):
             raise ValueError("DistanceEncoder is not defined for dataset types which are not RepertoireDataset.")
 
     def build_distance_matrix(self, dataset: RepertoireDataset, params: EncoderParams, train_repertoire_ids: list):
-        comparison = PairwiseRepertoireComparison(self.attributes_to_match, self.attributes_to_match, params["result_path"],
+        self.comparison = PairwiseRepertoireComparison(self.attributes_to_match, self.attributes_to_match, params.result_path,
                                                   sequence_batch_size=self.sequence_batch_size)
 
         current_dataset = dataset if self.context is None or "dataset" not in self.context else self.context["dataset"]
 
-        distance_matrix = comparison.compare(current_dataset, self.distance_fn, self.distance_metric.value)
+        distance_matrix = self.comparison.compare(current_dataset, self.distance_fn, self.distance_metric.value)
 
         repertoire_ids = dataset.get_repertoire_ids()
 
@@ -100,7 +103,7 @@ class DistanceEncoder(DatasetEncoder):
     def build_labels(self, dataset: RepertoireDataset, params: EncoderParams) -> dict:
 
         lbl = ["repertoire_identifier"]
-        lbl.extend(params["label_configuration"].get_labels_by_name())
+        lbl.extend(params.label_config.get_labels_by_name())
 
         tmp_labels = dataset.get_metadata(lbl, return_df=True)
         tmp_labels = tmp_labels.iloc[pd.Index(tmp_labels['repertoire_identifier']).get_indexer(dataset.get_repertoire_ids())]
@@ -113,7 +116,7 @@ class DistanceEncoder(DatasetEncoder):
 
         train_repertoire_ids = EncoderHelper.prepare_training_ids(dataset, params)
         distance_matrix = self.build_distance_matrix(dataset, params, train_repertoire_ids)
-        labels = self.build_labels(dataset, params)
+        labels = self.build_labels(dataset, params) if params.encode_labels else None
 
         encoded_dataset = dataset.clone()
         encoded_dataset.encoded_data = EncodedData(examples=distance_matrix, labels=labels, example_ids=distance_matrix.index.values,
@@ -123,8 +126,16 @@ class DistanceEncoder(DatasetEncoder):
 
         return encoded_dataset
 
-    def store(self, encoded_dataset, params: EncoderParams):
-        PickleExporter.export(encoded_dataset, params["result_path"])
+    @staticmethod
+    def export_encoder(path: str, encoder) -> str:
+        encoder_file = DatasetEncoder.store_encoder(encoder, path + "encoder.pickle")
+        return encoder_file
+
+    @staticmethod
+    def load_encoder(encoder_file: str):
+        encoder = DatasetEncoder.load_encoder(encoder_file)
+        encoder.comparison = UtilIO.import_comparison_data(f"{os.path.dirname(encoder_file)}/")
+        return encoder
 
     @staticmethod
     def get_documentation():

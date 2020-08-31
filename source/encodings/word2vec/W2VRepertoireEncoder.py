@@ -15,10 +15,10 @@ class W2VRepertoireEncoder(Word2VecEncoder):
 
     def _encode_labels(self, dataset, params: EncoderParams):
 
-        label_config = params["label_configuration"]
+        label_config = params.label_config
         labels = {name: [] for name in label_config.get_labels_by_name()}
 
-        for repertoire in dataset.get_data(params["batch_size"]):
+        for repertoire in dataset.get_data():
 
             for label_name in label_config.get_labels_by_name():
                 label = repertoire.metadata[label_name]

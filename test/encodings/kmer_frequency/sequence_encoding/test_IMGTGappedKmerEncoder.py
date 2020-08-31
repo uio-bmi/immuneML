@@ -17,7 +17,7 @@ class TestIMGTGappedKmerEncoder(TestCase):
     def test_encode_sequence(self):
         sequence = ReceptorSequence("AHCDE", None, None)
         kmers = IMGTGappedKmerEncoder.encode_sequence(sequence, EncoderParams(model={"k_left": 1, "max_gap": 1},
-                                                                              label_configuration=LabelConfiguration(),
+                                                                              label_config=LabelConfiguration(),
                                                                               result_path=""))
 
         self.assertEqual({'AH///105', 'HC///106', 'CD///107', 'DE///116', 'A.C///105', 'H.D///106', 'C.E///107'},
@@ -25,7 +25,7 @@ class TestIMGTGappedKmerEncoder(TestCase):
 
         sequence = ReceptorSequence("CASSPRERATYEQCAY", None, None)
         kmers = IMGTGappedKmerEncoder.encode_sequence(sequence, EncoderParams(model={"k_left": 1, "max_gap": 1},
-                                                                              label_configuration=LabelConfiguration(),
+                                                                              label_config=LabelConfiguration(),
                                                                               result_path=""))
 
         self.assertEqual({'CA///105', 'AS///106', 'SS///107', 'SP///108', 'PR///109', 'RE///110', 'ER///111',

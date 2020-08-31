@@ -55,8 +55,7 @@ class TestKmerFrequencyEncoder(TestCase):
 
         d1 = encoder.encode(dataset, EncoderParams(
             result_path=path + "1/",
-            label_configuration=lc,
-            batch_size=2,
+            label_config=lc,
             learn_model=True,
             model={},
             filename="dataset.pkl"
@@ -71,8 +70,8 @@ class TestKmerFrequencyEncoder(TestCase):
 
         d2 = encoder.encode(dataset, EncoderParams(
             result_path=path + "2/",
-            label_configuration=lc,
-            batch_size=2,
+            label_config=lc,
+            pool_size=2,
             learn_model=True,
             model={},
             filename="dataset.csv"

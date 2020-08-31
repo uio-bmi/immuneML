@@ -69,20 +69,24 @@ class MatchedReceptorsRepertoireEncoder(MatchedReceptorsEncoder):
 
         return features
 
-    def _encode_repertoires(self, dataset: RepertoireDataset, params):
+    def _encode_repertoires(self, dataset: RepertoireDataset, params: EncoderParams):
         # Rows = repertoires, Columns = reference chains (two per sequence receptor)
         encoded_repertories = np.zeros((dataset.get_example_count(),
                                         len(self.reference_receptors) * 2),
                                        dtype=int)
-        labels = {label: [] for label in params["label_configuration"].get_labels_by_name()}
+        labels = {label: [] for label in params.label_config.get_labels_by_name()} if params.encode_labels else None
 
         for i, repertoire in enumerate(dataset.get_data()):
             encoded_repertories[i] = self._match_repertoire_to_receptors(repertoire)
 
-            for label in params["label_configuration"].get_labels_by_name():
-                labels[label].append(repertoire.metadata[label])
+            if labels is not None:
+                for label in params.label_config.get_labels_by_name():
+                    labels[label].append(repertoire.metadata[label])
 
-        return self._collapse_encoding_per_subject(encoded_repertories, labels)
+        if labels is not None:
+            return self._collapse_encoding_per_subject(encoded_repertories, labels)
+        else:
+            return encoded_repertories, labels, dataset.get_repertoire_ids()
 
     def _match_repertoire_to_receptors(self, repertoire: Repertoire):
         matcher = SequenceMatcher()

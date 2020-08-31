@@ -27,7 +27,7 @@ class EncodedData:
         assert feature_names is None or examples.shape[1] == len(feature_names)
         if feature_names is not None:
             assert feature_annotations is None or feature_annotations.shape[0] == len(feature_names) == examples.shape[1]
-        if example_ids is not None:
+        if example_ids is not None and labels is not None:
             for label in labels.values():
                 assert len(label) == len(example_ids), "EncodedData: there are {} labels, but {} examples"\
                     .format(len(label), len(example_ids))

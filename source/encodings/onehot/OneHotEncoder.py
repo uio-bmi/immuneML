@@ -102,9 +102,9 @@ class OneHotEncoder(DatasetEncoder):
         return (("example_identifiers", tuple(dataset.get_example_ids())),
                 ("dataset_metadata", dataset.metadata_file if hasattr(dataset, "metadata_file") else None),
                 ("dataset_type", dataset.__class__.__name__),
-                ("labels", tuple(params["label_configuration"].get_labels_by_name())),
+                ("labels", tuple(params.label_config.get_labels_by_name())),
                 ("encoding", OneHotEncoder.__name__),
-                ("learn_model", params["learn_model"]),
+                ("learn_model", params.learn_model),
                 ("step", step),
                 ("encoding_params", tuple(vars(self).items())))
 
@@ -113,7 +113,7 @@ class OneHotEncoder(DatasetEncoder):
         pass
 
     def store(self, encoded_dataset, params: EncoderParams):
-        PickleExporter.export(encoded_dataset, params["result_path"])
+        PickleExporter.export(encoded_dataset, params.result_path)
 
     def _encode_sequence_list(self, sequences, pad_n_sequences, pad_sequence_len):
         char_array = np.array(sequences, dtype=str)

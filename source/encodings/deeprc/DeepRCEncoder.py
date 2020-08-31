@@ -1,7 +1,7 @@
 import os.path
 
 import pandas as pd
-from source.IO.dataset_export.PickleExporter import PickleExporter
+
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.encoded_data.EncodedData import EncodedData
 from source.encodings.DatasetEncoder import DatasetEncoder
@@ -75,16 +75,16 @@ class DeepRCEncoder(DatasetEncoder):
         return metadata_filepath
 
     def encode(self, dataset, params: EncoderParams) -> RepertoireDataset:
-        result_path = params["result_path"] + "/encoding"
+        result_path = params.result_path + "/encoding"
         PathBuilder.build(result_path)
 
         self.export_repertoire_tsv_files(result_path)
 
-        labels = params["label_configuration"].get_labels_by_name()
+        labels = params.label_config.get_labels_by_name()
         metadata_filepath = self.export_metadata_file(dataset, labels, result_path)
 
         encoded_dataset = dataset.clone()
-        encoded_dataset.encoded_data = EncodedData(examples=None, labels=dataset.get_metadata(labels),
+        encoded_dataset.encoded_data = EncodedData(examples=None, labels=dataset.get_metadata(labels) if params.encode_labels else None,
                                                    example_ids=dataset.repertoire_ids,
                                                    encoding=DeepRCEncoder.__name__,
                                                    info={"metadata_filepath": metadata_filepath,
@@ -94,6 +94,7 @@ class DeepRCEncoder(DatasetEncoder):
 
         return encoded_dataset
 
-
-    def store(self, encoded_dataset, params: EncoderParams):
-        PickleExporter.export(encoded_dataset, params["result_path"])
+    @staticmethod
+    def export_encoder(path: str, encoder) -> str:
+        encoder_file = DatasetEncoder.store_encoder(encoder, path + "encoder.pickle")
+        return encoder_file

@@ -32,29 +32,39 @@ class MLProcess:
         self.label = label
         self.label_config = label_config
         self.method = copy.deepcopy(hp_setting.ml_method)
-        self.path = PathBuilder.build(path)
+        self.path = PathBuilder.build(path) if path is not None else None
+        self.ml_details_path = f"{path}ml_details.yaml" if path is not None else None
+        self.ml_score_path = f"{path}ml_score.csv" if path is not None else None
+        self.train_predictions_path = f"{path}train_predictions.csv" if path is not None else None
+        self.test_predictions_path = f"{path}test_predictions.csv" if path is not None else None
+        self.report_path = PathBuilder.build(f"{path}reports/") if path is not None else None
         self.number_of_processes = number_of_processes
         assert all([isinstance(metric, Metric) for metric in metrics]), \
             "MLProcess: metrics are not set to be an instance of Metric."
         self.metrics = metrics
         self.metrics.add(Metric.BALANCED_ACCURACY)
         self.optimization_metric = optimization_metric
-        self.ml_details_path = f"{path}ml_details.yaml"
-        self.ml_score_path = f"{path}ml_score.csv"
-        self.train_predictions_path = f"{path}train_predictions.csv"
-        self.test_predictions_path = f"{path}test_predictions.csv"
-        self.report_path = PathBuilder.build(f"{path}reports/")
         self.ml_reports = ml_reports if ml_reports is not None else []
         self.encoding_reports = encoding_reports if encoding_reports is not None else []
         self.data_reports = data_reports if data_reports is not None else []
         self.report_context = report_context
-        self.hp_setting = hp_setting
+        self.hp_setting = copy.deepcopy(hp_setting)
+
+    def _set_paths(self):
+        if self.path is None:
+            raise RuntimeError("MLProcess: path is not set, stopping execution...")
+        self.ml_details_path = f"{self.path}ml_details.yaml"
+        self.ml_score_path = f"{self.path}ml_score.csv"
+        self.train_predictions_path = f"{self.path}train_predictions.csv"
+        self.test_predictions_path = f"{self.path}test_predictions.csv"
+        self.report_path = PathBuilder.build(f"{self.path}reports/")
 
     def run(self, split_index: int) -> HPItem:
 
         print(f"{datetime.datetime.now()}: Evaluating hyperparameter setting: {self.hp_setting}...")
 
         PathBuilder.build(self.path)
+        self._set_paths()
 
         processed_dataset = HPUtil.preprocess_dataset(self.train_dataset, self.hp_setting.preproc_sequence, f"{self.path}preprocessed_train_dataset/")
 

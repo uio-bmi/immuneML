@@ -45,7 +45,7 @@ class TestMatchedReferenceEncoder(TestCase):
 
         encoded = encoder.encode(dataset, EncoderParams(
             result_path=path,
-            label_configuration=label_config,
+            label_config=label_config,
             model={},
             filename="dataset.csv"
         ))

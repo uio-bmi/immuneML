@@ -37,3 +37,6 @@ class KNN(SklearnMethod):
         else:
             params = self.models[label].get_params(deep=True)
         return params
+
+    def can_predict_proba(self) -> bool:
+        return True

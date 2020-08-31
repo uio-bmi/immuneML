@@ -34,23 +34,23 @@ class KmerFreqRepertoireEncoder(KmerFrequencyEncoder):
 
         arguments = [(repertoire, params) for repertoire in dataset.repertoires]
 
-        with Pool(params["batch_size"]) as pool:
-            chunksize = math.floor(dataset.get_example_count()/params["batch_size"]) + 1
+        with Pool(params.pool_size) as pool:
+            chunksize = math.floor(dataset.get_example_count()/params.pool_size) + 1
             repertoires = pool.starmap(self.get_encoded_repertoire, arguments, chunksize=chunksize)
 
         encoded_repertoire_list, repertoire_names, labels, feature_annotation_names = zip(*repertoires)
 
-        encoded_labels = {k: [dic[k] for dic in labels] for k in labels[0]}
+        encoded_labels = {k: [dic[k] for dic in labels] for k in labels[0]} if params.encode_labels else None
 
         feature_annotation_names = feature_annotation_names[0]
 
         return list(encoded_repertoire_list), list(repertoire_names), encoded_labels, feature_annotation_names
 
     def get_encoded_repertoire(self, repertoire, params: EncoderParams):
-        params["model"] = vars(self)
+        params.model = vars(self)
 
-        return CacheHandler.memo_by_params((("encoding_model", params["model"]),
-                                            ("labels", params["label_configuration"].get_labels_by_name()),
+        return CacheHandler.memo_by_params((("encoding_model", params.model),
+                                            ("labels", params.label_config.get_labels_by_name()),
                                             ("repertoire_id", repertoire.identifier),
                                             ("repertoire_data",  hashlib.sha256(np.ascontiguousarray(repertoire.get_sequence_aas())).hexdigest())),
                                            lambda: self.encode_repertoire(repertoire, params), CacheObjectType.ENCODING_STEP)
@@ -62,12 +62,13 @@ class KmerFreqRepertoireEncoder(KmerFrequencyEncoder):
         for sequence in repertoire.sequences:
             counts = self._encode_sequence(sequence, params, sequence_encoder, counts)
 
-        label_config = params["label_configuration"]
-        labels = dict()
+        label_config = params.label_config
+        labels = dict() if params.encode_labels else None
 
-        for label_name in label_config.get_labels_by_name():
-            label = repertoire.metadata[label_name]
-            labels[label_name] = label
+        if labels is not None:
+            for label_name in label_config.get_labels_by_name():
+                label = repertoire.metadata[label_name]
+                labels[label_name] = label
 
         # TODO: refactor this not to return 4 values but e.g. a dict or split into different functions?
         return counts, repertoire.identifier, labels, feature_names

@@ -121,8 +121,7 @@ class TestEmerson2018NatGenEncoding(TestCase):
 
         params = EncoderParams(
                 result_path=path,
-                label_configuration=lc,
-                batch_size=2,
+                label_config=lc,
                 learn_model=True,
                 model={}
             )
@@ -141,8 +140,8 @@ class TestEmerson2018NatGenEncoding(TestCase):
             params
         )
 
-        params["learn_model"] = False
-        params["filename"] = "test_2.pickle"
+        params.learn_model = False
+        params.filename = "test_2.pickle"
 
         dataset2 = RepertoireDataset(repertoires=[repertoires[num] for num in range(1, 4)])
 

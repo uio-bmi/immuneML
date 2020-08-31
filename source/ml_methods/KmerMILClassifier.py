@@ -3,6 +3,7 @@ import logging
 
 import numpy as np
 import pandas as pd
+import pkg_resources
 import torch
 import yaml
 from torch.distributions import Normal
@@ -79,6 +80,7 @@ class KmerMILClassifier(MLMethod):
         self.class_mapping = None
         self.input_size = 0
         self.result_path = result_path
+        self.feature_names = None
 
     def _make_log_reg(self):
         if self.zero_abundance_weight_init:
@@ -94,7 +96,7 @@ class KmerMILClassifier(MLMethod):
                                                               f"Expected AtchleyKmer encoding, got {encoded_data.encoding} instead. "
 
     def fit(self, encoded_data: EncodedData, y, label_names: list = None, cores_for_training: int = 2):
-
+        self.feature_names = encoded_data.feature_names
         self._check_encoded_data(encoded_data)
 
         Util.setup_pytorch(self.number_of_threads, self.random_seed)
@@ -210,3 +212,12 @@ class KmerMILClassifier(MLMethod):
 
     def get_labels(self):
         return [self.label_name]
+
+    def get_package_info(self) -> str:
+        return 'immuneML ' + pkg_resources.get_distribution('immuneML').version
+
+    def get_feature_names(self) -> list:
+        return self.feature_names
+
+    def can_predict_proba(self) -> bool:
+        return True

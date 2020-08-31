@@ -5,6 +5,7 @@ import warnings
 
 import dill
 import numpy as np
+import pkg_resources
 import yaml
 from sklearn.model_selection import RandomizedSearchCV
 from sklearn.utils.validation import check_is_fitted
@@ -60,8 +61,9 @@ class SklearnMethod(MLMethod):
     def __init__(self, parameter_grid: dict = None, parameters: dict = None):
         super(SklearnMethod, self).__init__()
         self.models = {}
-        self._parameter_grid = {}
-        self._parameters = None
+        self._parameter_grid = parameter_grid
+        self._parameters = parameters
+        self.feature_names = None
 
     def _fit_for_label(self, X, y: np.ndarray, label: str, cores_for_training: int):
         self.models[label] = self._get_ml_model(cores_for_training, X)
@@ -77,6 +79,8 @@ class SklearnMethod(MLMethod):
                 ("parameter_grid", str(self._parameter_grid)),)
 
     def fit(self, encoded_data: EncodedData, y, label_names: list = None, cores_for_training: int = 1):
+
+        self.feature_names = encoded_data.feature_names
         self.models = CacheHandler.memo_by_params(self._prepare_caching_params(encoded_data, y, self.FIT, label_names),
                                                   lambda: self._fit(encoded_data.examples, y, label_names, cores_for_training))
 
@@ -94,7 +98,7 @@ class SklearnMethod(MLMethod):
 
         return self.models
 
-    def _can_predict_proba(self) -> bool:
+    def can_predict_proba(self) -> bool:
         return False
 
     def check_is_fitted(self, labels):
@@ -106,7 +110,7 @@ class SklearnMethod(MLMethod):
         return {label: self.models[label].predict(encoded_data.examples) for label in labels}
 
     def predict_proba(self, encoded_data: EncodedData, labels: list):
-        if self._can_predict_proba():
+        if self.can_predict_proba():
             predictions = {label: self.models[label].predict_proba(encoded_data.examples) for label in labels}
             return predictions
         else:
@@ -123,6 +127,8 @@ class SklearnMethod(MLMethod):
 
     def fit_by_cross_validation(self, encoded_data: EncodedData, y, number_of_splits: int = 5, parameter_grid: dict = None,
                                 label_names: list = None, cores_for_training: int = 1):
+
+        self.feature_names = encoded_data.feature_names
 
         if parameter_grid is not None:
             self._parameter_grid = parameter_grid
@@ -192,3 +198,9 @@ class SklearnMethod(MLMethod):
 
     def get_labels(self):
         return list(self.models.keys())
+
+    def get_package_info(self) -> str:
+        return 'sklearn ' + pkg_resources.get_distribution('sklearn').version
+
+    def get_feature_names(self) -> list:
+        return self.feature_names

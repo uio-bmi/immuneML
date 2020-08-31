@@ -18,17 +18,15 @@ class SequenceFilterHelper:
     INVALID_P_VALUE = 2
 
     @staticmethod
-    def encode(dataset: RepertoireDataset, context: dict, comparison_attributes: list, sequence_batch_size: int, params: EncoderParams,
-               encode_func) -> RepertoireDataset:
+    def build_comparison_data(dataset: RepertoireDataset, context: dict, comparison_attributes: list, params: EncoderParams, sequence_batch_size: int):
 
         current_dataset = EncoderHelper.get_current_dataset(dataset, context)
         comparison_data = CacheHandler.memo_by_params(EncoderHelper.build_comparison_params(current_dataset, comparison_attributes),
                                                       lambda: EncoderHelper.build_comparison_data(current_dataset, params,
                                                                                                   comparison_attributes,
                                                                                                   sequence_batch_size))
-        encoded_dataset = encode_func(dataset, params, comparison_data)
 
-        return encoded_dataset
+        return comparison_data
 
     @staticmethod
     def filter_sequences(dataset: RepertoireDataset, comparison_data: ComparisonData, label: str, label_values: list, p_value_threshold: float):
@@ -64,19 +62,22 @@ class SequenceFilterHelper:
 
     @staticmethod
     def get_relevant_sequences(dataset: RepertoireDataset, params: EncoderParams, comparison_data: ComparisonData, label: str, p_value_threshold,
-                               comparison_attributes: list):
-        if params["learn_model"]:
-            label_values = params["label_configuration"].get_label_values(label)
+                               comparison_attributes: list, sequence_indices_path: str):
+
+        sequence_path = sequence_indices_path if sequence_indices_path is not None else f'{params.result_path}relevant_sequence_indices.pickle'
+
+        if params.learn_model:
+            label_values = params.label_config.get_label_values(label)
             relevant_sequence_indices = SequenceFilterHelper.filter_sequences(dataset, comparison_data, label, label_values, p_value_threshold)
-            with open(f'{params["result_path"]}relevant_sequence_indices.pickle', "wb") as file:
+            with open(sequence_path, "wb") as file:
                 pickle.dump(relevant_sequence_indices, file)
 
             all_sequences = comparison_data.get_item_names()
             relevant_sequences = all_sequences[relevant_sequence_indices]
             df = pd.DataFrame(relevant_sequences, columns=comparison_attributes)
-            df.to_csv(f'{params["result_path"]}relevant_sequences.csv', sep=',', index=False)
+            df.to_csv(f'{params.result_path}relevant_sequences.csv', sep=',', index=False)
         else:
-            with open(f'{params["result_path"]}relevant_sequence_indices.pickle', "rb") as file:
+            with open(sequence_path, "rb") as file:
                 relevant_sequence_indices = pickle.load(file)
 
-        return relevant_sequence_indices
+        return relevant_sequence_indices, sequence_path

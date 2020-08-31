@@ -44,13 +44,13 @@ class TestEmersonSequenceAbundanceEncoder(TestCase):
 
         label_config = LabelConfiguration([Label("l1", [True, False])])
 
-        encoded_dataset = encoder.encode(dataset, EncoderParams(result_path=path, label_configuration=label_config))
+        encoded_dataset = encoder.encode(dataset, EncoderParams(result_path=path, label_config=label_config))
 
         self.assertTrue(np.array_equal(np.array([[1, 4], [1, 6], [1, 3], [1, 6]]), encoded_dataset.encoded_data.examples))
 
         encoder.p_value_threshold = 0.05
 
-        encoded_dataset = encoder.encode(dataset, EncoderParams(result_path=path, label_configuration=label_config))
+        encoded_dataset = encoder.encode(dataset, EncoderParams(result_path=path, label_config=label_config))
 
         self.assertTrue(np.array_equal(np.array([[0, 4], [0, 6], [0, 3], [0, 6]]), encoded_dataset.encoded_data.examples))
 
