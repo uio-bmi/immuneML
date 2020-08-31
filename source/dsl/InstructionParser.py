@@ -15,6 +15,8 @@ from source.workflows.instructions.HPOptimizationInstruction import HPOptimizati
 from source.workflows.instructions.SimulationInstruction import SimulationInstruction
 from source.workflows.instructions.dataset_generation.DatasetGenerationInstruction import DatasetGenerationInstruction
 from source.workflows.instructions.exploratory_analysis.ExploratoryAnalysisInstruction import ExploratoryAnalysisInstruction
+from source.workflows.instructions.ml_model_application.MLApplicationInstruction import MLApplicationInstruction
+from source.workflows.instructions.ml_model_training.MLModelTrainingInstruction import MLModelTrainingInstruction
 
 
 class InstructionParser:
@@ -64,6 +66,18 @@ class InstructionParser:
         InstructionParser.make_expl_analysis_docs(inst_path)
         InstructionParser.make_hp_docs(inst_path)
         InstructionParser.make_simulation_docs(inst_path)
+        InstructionParser.make_ml_model_training_docs(inst_path)
+        InstructionParser.make_ml_application_docs(inst_path)
+
+    @staticmethod
+    def make_ml_application_docs(path):
+        with open(f"{path}ml_application.rst", "w") as file:
+            write_class_docs(DocumentationFormat(MLApplicationInstruction, "", DocumentationFormat.LEVELS[1]), file)
+
+    @staticmethod
+    def make_ml_model_training_docs(path):
+        with open(f"{path}ml_model_training.rst", "w") as file:
+            write_class_docs(DocumentationFormat(MLModelTrainingInstruction, "", DocumentationFormat.LEVELS[1]), file)
 
     @staticmethod
     def make_dataset_generation_docs(path):

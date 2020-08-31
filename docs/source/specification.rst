@@ -110,6 +110,16 @@ Simulation
 
 .. include:: ../specs/instructions/simulation.rst
 
+MLModelTraining
+--------------------
+
+.. include:: ../specs/instructions/ml_model_training.rst
+
+MLApplication
+--------------------
+
+.. include:: ../specs/instructions/ml_application.rst
+
 Output
 ======
 
