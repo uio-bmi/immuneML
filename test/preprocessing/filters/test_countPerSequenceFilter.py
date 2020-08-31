@@ -27,15 +27,15 @@ class TestCountPerSequenceFilter(TestCase):
                                                                                       [{"count": 5}, {"count": 6}, {"count": None},
                                                                                        {"count": 1}]])[0])
 
-        dataset1 = CountPerSequenceFilter.process(dataset, {"low_count_limit": 2, "remove_without_count": True,
+        dataset1 = CountPerSequenceFilter.process(dataset, {"low_count_limit": 2, "remove_without_count": True, "remove_empty_repertoires": False,
                                                             "result_path": path, "batch_size": 4})
         self.assertEqual(2, dataset1.repertoires[0].get_sequence_aas().shape[0])
 
-        dataset2 = CountPerSequenceFilter.process(dataset, {"low_count_limit": 5, "remove_without_count": True,
+        dataset2 = CountPerSequenceFilter.process(dataset, {"low_count_limit": 5, "remove_without_count": True, "remove_empty_repertoires": False,
                                                             "result_path": path, "batch_size": 4})
         self.assertEqual(0, dataset2.repertoires[0].get_sequence_aas().shape[0])
 
-        dataset3 = CountPerSequenceFilter.process(dataset, {"low_count_limit": 0, "remove_without_count": True,
+        dataset3 = CountPerSequenceFilter.process(dataset, {"low_count_limit": 0, "remove_without_count": True, "remove_empty_repertoires": False,
                                                             "result_path": path, "batch_size": 4})
         self.assertEqual(3, dataset3.repertoires[2].get_sequence_aas().shape[0])
 
@@ -47,10 +47,13 @@ class TestCountPerSequenceFilter(TestCase):
                                                                                         [{"count": None}, {"count": None}, {"count": None},
                                                                                          {"count": None}]])[0])
 
-        dataset4 = CountPerSequenceFilter.process(dataset, {"low_count_limit": 0, "remove_without_count": True,
+        dataset4 = CountPerSequenceFilter.process(dataset, {"low_count_limit": 0, "remove_without_count": True, "remove_empty_repertoires": False,
                                                             "result_path": path, "batch_size": 4})
         self.assertEqual(0, dataset4.repertoires[0].get_sequence_aas().shape[0])
         self.assertEqual(0, dataset4.repertoires[1].get_sequence_aas().shape[0])
         self.assertEqual(0, dataset4.repertoires[2].get_sequence_aas().shape[0])
+
+        self.assertRaises(AssertionError, CountPerSequenceFilter.process, dataset, {"low_count_limit": 10, "remove_without_count": True,
+                                                                                    "remove_empty_repertoires": True, "result_path": path, "batch_size": 4})
 
         shutil.rmtree(path)

@@ -12,13 +12,13 @@ class EncoderHelper:
 
     @staticmethod
     def prepare_training_ids(dataset: Dataset, params: EncoderParams):
-        PathBuilder.build(params["result_path"])
-        if params["learn_model"]:
+        PathBuilder.build(params.result_path)
+        if params.learn_model:
             training_ids = dataset.get_example_ids()
-            with open(params["result_path"] + "training_ids.pickle", "wb") as file:
+            with open(params.result_path + "training_ids.pickle", "wb") as file:
                 pickle.dump(training_ids, file)
         else:
-            with open(params["result_path"] + "training_ids.pickle", "rb") as file:
+            with open(params.result_path + "training_ids.pickle", "rb") as file:
                 training_ids = pickle.load(file)
         return training_ids
 
@@ -37,7 +37,7 @@ class EncoderHelper:
                               comparison_attributes, sequence_batch_size):
 
         comp_data = ComparisonData(dataset.get_repertoire_ids(), comparison_attributes,
-                                   sequence_batch_size, params["result_path"])
+                                   sequence_batch_size, params.result_path)
 
         comp_data.process_dataset(dataset)
 
@@ -45,4 +45,4 @@ class EncoderHelper:
 
     @staticmethod
     def store(encoded_dataset, params: EncoderParams):
-        PickleExporter.export(encoded_dataset, params["result_path"], params["filename"])
+        PickleExporter.export(encoded_dataset, params.result_path)

@@ -70,21 +70,20 @@ class HPUtil:
 
     @staticmethod
     def encode_dataset(dataset, hp_setting: HPSetting, path: str, learn_model: bool, context: dict, batch_size: int,
-                       label_configuration: LabelConfiguration):
+                       label_configuration: LabelConfiguration, encode_labels: bool = True):
         PathBuilder.build(path)
-
-        encoder = hp_setting.encoder.build_object(dataset, **hp_setting.encoder_params).set_context(context)
 
         encoded_dataset = DataEncoder.run(DataEncoderParams(
             dataset=dataset,
-            encoder=encoder,
+            encoder=hp_setting.encoder,
             encoder_params=EncoderParams(
                 model=hp_setting.encoder_params,
                 result_path=path,
-                batch_size=batch_size,
-                label_configuration=label_configuration,
+                pool_size=batch_size,
+                label_config=label_configuration,
                 learn_model=learn_model,
-                filename="train_dataset.pkl" if learn_model else "test_dataset.pkl"
+                filename="train_dataset.pkl" if learn_model else "test_dataset.pkl",
+                encode_labels=encode_labels
             )
         ))
         return encoded_dataset

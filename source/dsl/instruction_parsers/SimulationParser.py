@@ -68,7 +68,7 @@ class SimulationParser:
 
     """
 
-    def parse(self, key: str, instruction: dict, symbol_table: SymbolTable) -> SimulationInstruction:
+    def parse(self, key: str, instruction: dict, symbol_table: SymbolTable, path: str = None) -> SimulationInstruction:
 
         ParameterValidator.assert_keys(instruction.keys(), ["dataset", "batch_size", "simulation", "type", "export_formats"],
                                        "SimulationParser", key)

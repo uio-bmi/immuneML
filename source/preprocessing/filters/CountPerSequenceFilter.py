@@ -20,6 +20,9 @@ class CountPerSequenceFilter(Filter):
 
         remove_without_count (bool): Whether the sequences without a reported count value should be removed.
 
+        remove_empty_repertoires (bool): Whether repertoires without sequences should be removed.
+            Only has an effect when remove_without_count is also set to True.
+
         batch_size (int): number of repertoires that can be loaded at the same time (only affects the speed when applying this filter on a RepertoireDataset)
 
 
@@ -33,13 +36,15 @@ class CountPerSequenceFilter(Filter):
                 - my_filter:
                     CountPerSequenceFilter:
                         remove_without_count: True
+                        remove_empty_repertoires: True
                         low_count_limit: 3
                         batch_size: 4
     """
 
-    def __init__(self, low_count_limit: int, remove_without_count: bool, batch_size: int):
+    def __init__(self, low_count_limit: int, remove_without_count: bool, remove_empty_repertoires: bool,  batch_size: int):
         self.low_count_limit = low_count_limit
         self.remove_without_count = remove_without_count
+        self.remove_empty_repertoires = remove_empty_repertoires
         self.batch_size = batch_size
 
     @staticmethod
@@ -50,7 +55,13 @@ class CountPerSequenceFilter(Filter):
             repertoires = pool.starmap(CountPerSequenceFilter.process_repertoire,
                                        [(repertoire, params) for repertoire in dataset.repertoires])
 
+        if params["remove_empty_repertoires"]:
+            repertoires = Filter.remove_empty_repertoires(repertoires)
+
         processed_dataset.repertoires = repertoires
+
+        Filter.check_dataset_not_empty(processed_dataset, "CountPerSequenceFilter")
+
         return processed_dataset
 
     @staticmethod
@@ -70,9 +81,10 @@ class CountPerSequenceFilter(Filter):
             np.greater_equal(counts, params["low_count_limit"], out=indices_to_keep, where=not_none_indices)
 
         processed_repertoire = Repertoire.build_like(repertoire, indices_to_keep, params["result_path"])
+
         return processed_repertoire
 
     def process_dataset(self, dataset: RepertoireDataset, result_path: str) -> RepertoireDataset:
         params = {"result_path": result_path, "low_count_limit": self.low_count_limit, "remove_without_count": self.remove_without_count,
-                  "batch_size": self.batch_size}
+                  "remove_empty_repertoires": self.remove_empty_repertoires, "batch_size": self.batch_size}
         return CountPerSequenceFilter.process(dataset, params)

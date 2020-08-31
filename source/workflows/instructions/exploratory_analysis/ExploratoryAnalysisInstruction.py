@@ -89,9 +89,9 @@ class ExploratoryAnalysisInstruction(Instruction):
         if unit.encoder is not None:
             encoded_dataset = DataEncoder.run(DataEncoderParams(dataset=unit.dataset, encoder=unit.encoder,
                                                                 encoder_params=EncoderParams(result_path=result_path,
-                                                                                             label_configuration=unit.label_config,
+                                                                                             label_config=unit.label_config,
                                                                                              filename="encoded_dataset.pkl",
-                                                                                             batch_size=unit.batch_size)))
+                                                                                             pool_size=unit.batch_size)))
         else:
             encoded_dataset = unit.dataset
         return encoded_dataset

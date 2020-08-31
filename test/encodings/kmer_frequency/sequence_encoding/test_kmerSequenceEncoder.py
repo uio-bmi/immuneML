@@ -10,8 +10,8 @@ class TestKmerSequenceEncoder(TestCase):
     def test_encode_sequence(self):
         seq = ReceptorSequence(amino_acid_sequence="CASSVFRTY")
         result = KmerSequenceEncoder.encode_sequence(seq, EncoderParams(model={"k": 3},
-                                                                        label_configuration=LabelConfiguration(),
-                                                                        result_path=""))
+                                                                        label_config=LabelConfiguration(),
+                                                                        result_path="", pool_size=4))
 
         self.assertTrue("CAS" in result)
         self.assertTrue("ASS" in result)
@@ -25,7 +25,7 @@ class TestKmerSequenceEncoder(TestCase):
         self.assertEqual(
             KmerSequenceEncoder.encode_sequence(
                 ReceptorSequence(amino_acid_sequence="AC"),
-                EncoderParams(model={"k": 3}, label_configuration=LabelConfiguration(), result_path="")
+                EncoderParams(model={"k": 3}, label_config=LabelConfiguration(), result_path="", pool_size=4)
             ),
             None
         )

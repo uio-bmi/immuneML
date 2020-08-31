@@ -38,7 +38,7 @@ class RandomForestClassifier(SklearnMethod):
         params = {**self._parameters, **default}
         return RFC(**params)
 
-    def _can_predict_proba(self) -> bool:
+    def can_predict_proba(self) -> bool:
         return True
 
     def get_params(self, label):

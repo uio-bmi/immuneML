@@ -56,3 +56,15 @@ class MLMethod(metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def get_labels(self):
         pass
+
+    @abc.abstractmethod
+    def get_package_info(self) -> str:
+        pass
+
+    @abc.abstractmethod
+    def get_feature_names(self) -> list:
+        pass
+
+    @abc.abstractmethod
+    def can_predict_proba(self) -> bool:
+        return False

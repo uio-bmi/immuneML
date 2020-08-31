@@ -31,14 +31,14 @@ class OneHotReceptorEncoder(OneHotEncoder):
         return encoded_dataset
 
     def _encode_data(self, dataset: ReceptorDataset, params: EncoderParams):
-        receptor_objs = [receptor for receptor in dataset.get_data(params["batch_size"])]
+        receptor_objs = [receptor for receptor in dataset.get_data()]
         sequences = [[getattr(obj, chain).get_sequence() for chain in obj.get_chains()] for obj in receptor_objs]
         first_chain_seqs, second_chain_seqs = zip(*sequences)
 
         max_seq_len = max(max([len(seq) for seq in first_chain_seqs]), max([len(seq) for seq in second_chain_seqs]))
 
         example_ids = dataset.get_example_ids()
-        labels = self._get_labels(receptor_objs, params)
+        labels = self._get_labels(receptor_objs, params) if params.encode_labels else None
 
         examples_first_chain = self._encode_sequence_list(first_chain_seqs, pad_n_sequences=len(receptor_objs),
                                                           pad_sequence_len=max_seq_len)
@@ -56,7 +56,7 @@ class OneHotReceptorEncoder(OneHotEncoder):
         return encoded_data
 
     def _get_labels(self, receptor_objs, params: EncoderParams):
-        label_names = params["label_configuration"].get_labels_by_name()
+        label_names = params.label_config.get_labels_by_name()
         labels = {name: [None] * len(receptor_objs) for name in label_names}
 
         for idx, receptor in enumerate(receptor_objs):

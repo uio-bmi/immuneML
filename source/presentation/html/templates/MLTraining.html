@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ML Training</title>
+    <style>
+        {{{css_style}}}
+    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+    <div class="container padded-bottom">
+        <h1>ML model training {{hp_setting}}</h1>
+        <div class="padded">
+            <div>The ML models are given here in the zip format. The following files are included: trained source file (pickle file) which can be
+                used outside immuneML if the model is implemented using an external library such as scikit-learn, a YAML file with details on the
+                software used to create the model, software version, immuneML version, as well as the details on encoding the data and the dataset
+                used for training the model.</div>
+            {{#models_per_label}}
+            <div class="padded-bottom padded-top"><a href="{{model_zip_path}}">Download trained model for {{label}} here</a></div>
+            {{/models_per_label}}
+        </div>
+        {{#show_ml_reports}}
+        <h2>ML reports</h2>
+        {{#ml_reports}}
+        <h3>{{label}}</h3>
+        {{#reports}}
+        {{#output_figures}}
+        <div class="padded center">
+            <embed alt="report" src="{{path}}">
+            <p>{{name}}</p>
+        </div>
+        {{/output_figures}}
+
+        {{#output_tables}}
+        <a href="{{path}}">Download {{#name}}{{name}} report{{/name}}</a>
+        {{/output_tables}}
+
+        {{/reports}}
+        {{/ml_reports}}
+        {{/show_ml_reports}}
+
+        {{#show_encoding_reports}}
+        <h2>Reports on the encoded dataset</h2>
+        {{#encoding_reports}}
+        <h3>{{label}}</h3>
+        <div class="padded-top padded-bottom">
+            {{#reports}}
+            {{#output_figures}}
+            <embed src="{{path}}">
+            {{#name}}<p>{{name}} (training data)</p>{{/name}}
+            {{/output_figures}}
+
+            {{#output_tables}}
+            <a href="{{path}}">Download {{#name}}{{name}} (training data){{/name}}</a>
+            {{/output_tables}}
+            {{/reports}}
+        </div>
+        {{/encoding_reports}}
+        {{/show_encoding_reports}}
+    </div>
+</body>
+</html>

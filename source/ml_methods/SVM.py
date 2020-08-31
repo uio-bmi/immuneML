@@ -38,7 +38,7 @@ class SVM(SklearnMethod):
         params = {**self._parameters, **{}}
         return LinearSVC(**params)
 
-    def _can_predict_proba(self) -> bool:
+    def can_predict_proba(self) -> bool:
         return False
 
     def get_params(self, label):

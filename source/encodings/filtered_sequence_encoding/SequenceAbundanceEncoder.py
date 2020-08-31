@@ -1,6 +1,10 @@
+import os
+from typing import List
+
 import numpy as np
 
 from scripts.specification_util import update_docs_per_mapping
+from source.IO.ml_method.UtilIO import UtilIO
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.encoded_data.EncodedData import EncodedData
 from source.data_model.repertoire.Repertoire import Repertoire
@@ -62,6 +66,8 @@ class SequenceAbundanceEncoder(DatasetEncoder):
         self.relevant_sequence_indices = None
         self.context = None
         self.p_value_threshold = p_value_threshold
+        self.relevant_indices_path = None
+        self.comparison_data = None
 
     @staticmethod
     def build_object(dataset, **params):
@@ -69,20 +75,20 @@ class SequenceAbundanceEncoder(DatasetEncoder):
         return SequenceAbundanceEncoder(**params)
 
     def encode(self, dataset, params: EncoderParams):
-        return SequenceFilterHelper.encode(dataset, self.context, self.comparison_attributes, self.sequence_batch_size,
-                                           params, self._encode_data)
+        self.comparison_data = SequenceFilterHelper.build_comparison_data(dataset, self.context, self.comparison_attributes, params,
+                                                                          self.sequence_batch_size)
+        return self._encode_data(dataset, params)
 
-    def _encode_data(self, dataset: RepertoireDataset, params: EncoderParams, comparison_data: ComparisonData):
-        labels = params["label_configuration"].get_labels_by_name()
+    def _encode_data(self, dataset: RepertoireDataset, params: EncoderParams):
+        labels = params.label_config.get_labels_by_name()
 
         assert len(labels) == 1, \
             "SequenceAbundanceEncoder: this encoding works only for single label."
 
-        examples = self._calculate_sequence_abundance(dataset, comparison_data, labels[0], params)
+        examples = self._calculate_sequence_abundance(dataset, self.comparison_data, labels[0], params)
 
-        encoded_data = EncodedData(examples, dataset.get_metadata([labels[0]]), dataset.get_repertoire_ids(),
-                                   [SequenceAbundanceEncoder.RELEVANT_SEQUENCE_ABUNDANCE,
-                                    SequenceAbundanceEncoder.TOTAL_SEQUENCE_ABUNDANCE],
+        encoded_data = EncodedData(examples, dataset.get_metadata([labels[0]]) if params.encode_labels else None, dataset.get_repertoire_ids(),
+                                   [SequenceAbundanceEncoder.RELEVANT_SEQUENCE_ABUNDANCE, SequenceAbundanceEncoder.TOTAL_SEQUENCE_ABUNDANCE],
                                    encoding=SequenceAbundanceEncoder.__name__)
 
         encoded_dataset = RepertoireDataset(params=dataset.params, encoded_data=encoded_data, repertoires=dataset.repertoires)
@@ -90,10 +96,14 @@ class SequenceAbundanceEncoder(DatasetEncoder):
         return encoded_dataset
 
     def _calculate_sequence_abundance(self, dataset: RepertoireDataset, comparison_data: ComparisonData, label: str, params: EncoderParams):
+        sequence_p_values_indices, indices_path = SequenceFilterHelper.get_relevant_sequences(dataset=dataset, params=params,
+                                                                                              comparison_data=comparison_data,
+                                                                                              label=label, p_value_threshold=self.p_value_threshold,
+                                                                                              comparison_attributes=self.comparison_attributes,
+                                                                                              sequence_indices_path=self.relevant_indices_path)
 
-        sequence_p_values_indices = SequenceFilterHelper.get_relevant_sequences(dataset=dataset, params=params, comparison_data=comparison_data,
-                                                                                label=label, p_value_threshold=self.p_value_threshold,
-                                                                                comparison_attributes=self.comparison_attributes)
+        if self.relevant_indices_path is None:
+            self.relevant_indices_path = indices_path
 
         abundance_matrix = self._build_abundance_matrix(comparison_data, dataset.get_repertoire_ids(), sequence_p_values_indices)
 
@@ -117,6 +127,22 @@ class SequenceAbundanceEncoder(DatasetEncoder):
 
     def store(self, encoded_dataset, params: EncoderParams):
         EncoderHelper.store(encoded_dataset, params)
+
+    @staticmethod
+    def export_encoder(path: str, encoder) -> str:
+        encoder_file = DatasetEncoder.store_encoder(encoder, path + "encoder.pickle")
+        UtilIO.export_comparison_data(encoder.comparison_data, path)
+        return encoder_file
+
+    def get_additional_files(self) -> List[str]:
+        return [self.relevant_indices_path]
+
+    @staticmethod
+    def load_encoder(encoder_file: str):
+        encoder = DatasetEncoder.load_encoder(encoder_file)
+        encoder.relevant_indices_path = DatasetEncoder.load_attribute(encoder, encoder_file, "relevant_indices_path")
+        encoder.comparison_data = UtilIO.import_comparison_data(os.path.dirname(encoder_file) + '/')
+        return encoder
 
     @staticmethod
     def get_documentation():

@@ -47,4 +47,6 @@ class TestChainRepertoireFilter(TestCase):
         for rep in dataset2.get_data():
             self.assertEqual("AAA", rep.sequences[0].get_sequence())
 
+        self.assertRaises(AssertionError, ChainRepertoireFilter.process, dataset, {"keep_chain": "GAMMA", "result_path": path + "results/"})
+
         shutil.rmtree(path)

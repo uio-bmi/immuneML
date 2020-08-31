@@ -41,10 +41,9 @@ class TestWord2VecEncoder(TestCase):
 
         config_params = EncoderParams(
             model={},
-            batch_size=1,
             learn_model=True,
             result_path=test_path,
-            label_configuration=label_configuration,
+            label_config=label_configuration,
             filename="dataset.pkl"
         )
 

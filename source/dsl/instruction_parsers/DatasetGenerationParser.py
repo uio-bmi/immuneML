@@ -1,5 +1,3 @@
-from typing import List
-
 from source.IO.dataset_export.DataExporter import DataExporter
 from source.dsl.symbol_table.SymbolTable import SymbolTable
 from source.dsl.symbol_table.SymbolType import SymbolType
@@ -38,14 +36,15 @@ class DatasetGenerationParser:
         formats: # list of formats to export the datasets to
           - AIRR
           - Pickle
+
     """
 
     VALID_KEYS = ["type", "datasets", "formats"]
 
-    def parse(self, key: str, instruction: dict, symbol_table: SymbolTable) -> DatasetGenerationInstruction:
+    def parse(self, key: str, instruction: dict, symbol_table: SymbolTable, path: str = None) -> DatasetGenerationInstruction:
         location = "DatasetGenerationParser"
         ParameterValidator.assert_keys(list(instruction.keys()), DatasetGenerationParser.VALID_KEYS, location, key)
-        valid_formats = DatasetGenerationParser.get_valid_formats()
+        valid_formats = ReflectionHandler.all_nonabstract_subclass_basic_names(DataExporter, "Exporter", 'dataset_export/')
         ParameterValidator.assert_all_in_valid_list(instruction["formats"], valid_formats, location, "formats")
         ParameterValidator.assert_all_in_valid_list(instruction["datasets"], symbol_table.get_keys_by_type(SymbolType.DATASET), location,
                                                     "datasets")
@@ -54,10 +53,3 @@ class DatasetGenerationParser:
                                             exporters=[ReflectionHandler.get_class_by_name(f"{key}Exporter", "dataset_export/")
                                                        for key in instruction["formats"]],
                                             name=key)
-
-    @staticmethod
-    def get_valid_formats() -> List[str]:
-        class_path = "dataset_export/"
-        classes = ReflectionHandler.get_classes_by_partial_name("Exporter", class_path)
-        valid_values = [cls.__name__[:-8] for cls in ReflectionHandler.all_nonabstract_subclasses(DataExporter)]
-        return valid_values

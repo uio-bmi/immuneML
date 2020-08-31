@@ -1,7 +1,6 @@
 import abc
 import os
 
-from source.IO.dataset_export.PickleExporter import PickleExporter
 from source.caching.CacheHandler import CacheHandler
 from source.data_model.receptor.receptor_sequence.ReceptorSequenceList import ReceptorSequenceList
 from source.encodings.DatasetEncoder import DatasetEncoder
@@ -62,6 +61,7 @@ class MatchedReferenceEncoder(DatasetEncoder):
         return encoder
 
     def encode(self, dataset, params: EncoderParams):
+
         cache_key = CacheHandler.generate_cache_key(self._prepare_caching_params(dataset, params))
         encoded_dataset = CacheHandler.memo(cache_key,
                                             lambda: self._encode_new_dataset(dataset, params))
@@ -78,14 +78,11 @@ class MatchedReferenceEncoder(DatasetEncoder):
         return (("dataset_identifiers", tuple(dataset.get_example_ids())),
                 ("dataset_metadata", dataset.metadata_file),
                 ("dataset_type", dataset.__class__.__name__),
-                ("labels", tuple(params["label_configuration"].get_labels_by_name())),
+                ("labels", tuple(params.label_config.get_labels_by_name())),
                 ("encoding", MatchedReferenceEncoder.__name__),
-                ("learn_model", params["learn_model"]),
+                ("learn_model", params.learn_model),
                 ("encoding_params", encoding_params_desc), )
 
     @abc.abstractmethod
     def _encode_new_dataset(self, dataset, params: EncoderParams):
         pass
-
-    def store(self, encoded_dataset, params: EncoderParams):
-        PickleExporter.export(encoded_dataset, params["result_path"])

@@ -36,8 +36,10 @@ class Util:
         return content
 
     @staticmethod
-    def make_downloadable_zip(base_path, tmp_path):
-        filename = "_".join(os.path.relpath(tmp_path, base_path).replace(".", "").split("/"))[1:-1]
+    def make_downloadable_zip(base_path, tmp_path, filename: str = ""):
+        if filename == "":
+            filename = "_".join(os.path.relpath(tmp_path, base_path).replace(".", "").split("/"))[1:-1]
+
         PathBuilder.build(f"{base_path}zip/")
         zip_file_path = shutil.make_archive(f"{base_path}zip/{filename}", "zip", tmp_path)
         return os.path.relpath(zip_file_path, base_path)

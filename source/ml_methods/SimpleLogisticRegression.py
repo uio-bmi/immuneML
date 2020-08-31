@@ -44,7 +44,7 @@ class SimpleLogisticRegression(SklearnMethod):
         self._parameters["n_jobs"] = cores_for_training
         return LogisticRegression(**self._parameters)
 
-    def _can_predict_proba(self) -> bool:
+    def can_predict_proba(self) -> bool:
         return True
 
     def get_params(self, label):

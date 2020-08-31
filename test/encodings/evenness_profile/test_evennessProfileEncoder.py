@@ -49,8 +49,7 @@ class TestEvennessEncoder(TestCase):
 
         d1 = encoder.encode(dataset, EncoderParams(
             result_path=path + "1/",
-            label_configuration=lc,
-            batch_size=2
+            label_config=lc,
         ))
 
         encoder = EvennessProfileEncoder.build_object(dataset, **{
@@ -61,8 +60,8 @@ class TestEvennessEncoder(TestCase):
 
         d2 = encoder.encode(dataset, EncoderParams(
             result_path=path,
-            label_configuration=lc,
-            batch_size=2
+            label_config=lc,
+            pool_size=2
         ))
 
         self.assertAlmostEqual(d1.encoded_data.examples[0, 0], 1)

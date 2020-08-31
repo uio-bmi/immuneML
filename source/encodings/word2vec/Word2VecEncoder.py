@@ -2,12 +2,12 @@
 import abc
 import hashlib
 import os
+from typing import List
 
 import pandas as pd
 from gensim.models import Word2Vec
 
 from scripts.specification_util import update_docs_per_mapping
-from source.IO.dataset_export.PickleExporter import PickleExporter
 from source.caching.CacheHandler import CacheHandler
 from source.data_model.dataset.Dataset import Dataset
 from source.data_model.encoded_data.EncodedData import EncodedData
@@ -69,6 +69,7 @@ class Word2VecEncoder(DatasetEncoder):
         self.vector_size = vector_size
         self.k = k
         self.model_type = model_type
+        self.model_path = None
         self.name = name
 
     @staticmethod
@@ -96,20 +97,20 @@ class Word2VecEncoder(DatasetEncoder):
 
         return encoded_dataset
 
-    def _prepare_caching_params(self, dataset, params, vectors=None, description: str = ""):
+    def _prepare_caching_params(self, dataset, params: EncoderParams, vectors=None, description: str = ""):
         return (("dataset_id", dataset.identifier),
                 ("dataset_filenames", tuple(dataset.get_example_ids())),
                 ("dataset_metadata", dataset.metadata_file),
                 ("dataset_type", dataset.__class__.__name__),
-                ("labels", tuple(params["label_configuration"].get_labels_by_name())),
+                ("labels", tuple(params.label_config.get_labels_by_name())),
                 ("vectors", hashlib.sha256(str(vectors).encode("utf-8")).hexdigest()),
                 ("description", description),
                 ("encoding", Word2VecEncoder.__name__),
-                ("learn_model", params["learn_model"]),
-                ("encoding_params", tuple([(key, params["model"][key]) for key in params["model"].keys()])), )
+                ("learn_model", params.learn_model),
+                ("encoding_params", tuple([(key, params.model[key]) for key in params.model.keys()])), )
 
-    def _encode_new_dataset(self, dataset, params):
-        if params["learn_model"] is True and not self._exists_model(params):
+    def _encode_new_dataset(self, dataset, params: EncoderParams):
+        if params.learn_model is True and not self._exists_model(params):
             model = self._create_model(dataset=dataset, params=params)
         else:
             model = self._load_model(params)
@@ -132,10 +133,13 @@ class Word2VecEncoder(DatasetEncoder):
                                                                             Word2VecEncoder.DESCRIPTION_REPERTOIRES),
                                                lambda: self._encode_examples(dataset, vectors, params))
 
-        labels = CacheHandler.memo_by_params(self._prepare_caching_params(dataset, params, vectors, Word2VecEncoder.DESCRIPTION_LABELS),
-                                             lambda: self._encode_labels(dataset, params))
+        if params.encode_labels:
+            labels = CacheHandler.memo_by_params(self._prepare_caching_params(dataset, params, vectors, Word2VecEncoder.DESCRIPTION_LABELS),
+                                                 lambda: self._encode_labels(dataset, params))
+        else:
+            labels = None
 
-        scaler_filename = params["result_path"] + FilenameHandler.get_filename("standard_scaling", "pkl")
+        scaler_filename = params.result_path + FilenameHandler.get_filename("standard_scaling", "pkl")
         scaled_examples = FeatureScaler.standard_scale(scaler_filename, examples)
 
         encoded_dataset = self._build_encoded_dataset(dataset, scaled_examples, labels, params)
@@ -145,12 +149,12 @@ class Word2VecEncoder(DatasetEncoder):
 
         encoded_dataset = dataset.clone()
 
-        label_names = params["label_configuration"].get_labels_by_name()
+        label_names = params.label_config.get_labels_by_name()
         feature_names = [str(i) for i in range(scaled_examples.shape[1])]
         feature_annotations = pd.DataFrame({"feature": feature_names})
 
         encoded_data = EncodedData(examples=scaled_examples,
-                                   labels={label: labels[i] for i, label in enumerate(label_names)},
+                                   labels={label: labels[i] for i, label in enumerate(label_names)} if labels is not None else None,
                                    example_ids=[example.identifier for example in encoded_dataset.get_data()],
                                    feature_names=feature_names,
                                    feature_annotations=feature_annotations,
@@ -168,7 +172,10 @@ class Word2VecEncoder(DatasetEncoder):
         model = Word2Vec.load(model_path)
         return model
 
-    def _create_model(self, dataset, params):
+    def _create_model(self, dataset, params: EncoderParams):
+
+        if self.model_path is None:
+            self.model_path = self._create_model_path(params)
 
         if self.model_type == ModelType.SEQUENCE:
             model_creator = SequenceModelCreator()
@@ -178,19 +185,33 @@ class Word2VecEncoder(DatasetEncoder):
         model = model_creator.create_model(dataset=dataset,
                                            k=self.k,
                                            vector_size=self.vector_size,
-                                           batch_size=params["batch_size"],
-                                           model_path=self._create_model_path(params))
+                                           batch_size=params.pool_size,
+                                           model_path=self.model_path)
 
         return model
-
-    def store(self, encoded_dataset, params: EncoderParams):
-        PickleExporter.export(encoded_dataset, params["result_path"])
 
     def _exists_model(self, params: EncoderParams) -> bool:
         return os.path.isfile(self._create_model_path(params))
 
     def _create_model_path(self, params: EncoderParams):
-        return params["result_path"] + "W2V.model"
+        if self.model_path is None:
+            return params.result_path + "W2V.model"
+        else:
+            return self.model_path
+
+    def get_additional_files(self) -> List[str]:
+        return [self.model_path]
+
+    @staticmethod
+    def export_encoder(path: str, encoder) -> str:
+        encoder_file = DatasetEncoder.store_encoder(encoder, path + "encoder.pickle")
+        return encoder_file
+
+    @staticmethod
+    def load_encoder(encoder_file: str):
+        encoder = DatasetEncoder.load_encoder(encoder_file)
+        encoder = DatasetEncoder.load_attribute(encoder, encoder_file, "model_path")
+        return encoder
 
     @staticmethod
     def get_documentation():

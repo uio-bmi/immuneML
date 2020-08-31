@@ -4,6 +4,7 @@ import math
 import random
 
 import numpy as np
+import pkg_resources
 import torch
 import yaml
 from torch import nn
@@ -109,6 +110,7 @@ class ReceptorCNN(MLMethod):
         self.class_mapping = None
         self.result_path = result_path
         self.chain_names = None
+        self.feature_names = None
 
     def predict(self, encoded_data: EncodedData, label_names: list = None):
         predictions_proba = self.predict_proba(encoded_data, label_names)
@@ -132,6 +134,8 @@ class ReceptorCNN(MLMethod):
         return {self.label_name: np.vstack([1 - np.array(predictions), predictions]).T}
 
     def fit(self, encoded_data: EncodedData, y, label_names: list = None, cores_for_training: int = 2):
+
+        self.feature_names = encoded_data.feature_names
 
         Util.setup_pytorch(self.number_of_threads, self.random_seed)
         if "chain_names" in encoded_data.info and encoded_data.info["chain_names"] is not None and len(encoded_data.info["chain_names"]) == 2:
@@ -299,3 +303,12 @@ class ReceptorCNN(MLMethod):
 
     def get_labels(self):
         return [self.label_name]
+
+    def get_package_info(self) -> str:
+        return 'immuneML ' + pkg_resources.get_distribution('immuneML').version
+
+    def get_feature_names(self) -> list:
+        return self.feature_names
+
+    def can_predict_proba(self) -> bool:
+        return True

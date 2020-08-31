@@ -59,10 +59,12 @@ class TestHPOptimizationProcess(TestCase):
                                                                      0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1]})
 
         dataset = RepertoireDataset(repertoires=repertoires, metadata_file=metadata, params={"l1": [1, 2], "l2": [0, 1]})
-        hp_settings = [HPSetting(Word2VecEncoder, {"k": 3, "model_type": ModelType.SEQUENCE.name, "vector_size": 4},
+        enc1 = {"k": 3, "model_type": ModelType.SEQUENCE.name, "vector_size": 4}
+        enc2 = {"k": 3, "model_type": ModelType.SEQUENCE.name, "vector_size": 6}
+        hp_settings = [HPSetting(Word2VecEncoder.build_object(dataset, **enc1), enc1,
                                  SimpleLogisticRegression(), {"model_selection_cv": False, "model_selection_n_folds": -1},
                                  []),
-                       HPSetting(Word2VecEncoder, {"k": 3, "model_type": ModelType.SEQUENCE.name, "vector_size": 6},
+                       HPSetting(Word2VecEncoder.build_object(dataset, **enc2), enc2,
                                  SVM(), {"model_selection_cv": False, "model_selection_n_folds": -1},
                                  [ClonesPerRepertoireFilter(lower_limit=-1, upper_limit=1000)])
                        ]

@@ -22,7 +22,7 @@ from source.workflows.instructions.HPOptimizationInstruction import HPOptimizati
 
 class HPOptimizationParser:
 
-    def parse(self, key: str, instruction: dict, symbol_table: SymbolTable) -> HPOptimizationInstruction:
+    def parse(self, key: str, instruction: dict, symbol_table: SymbolTable, path: str = None) -> HPOptimizationInstruction:
 
         valid_keys = ["assessment", "selection", "dataset", "strategy", "labels", "metrics", "settings", "batch_size", "type", "reports",
                       "optimization_metric"]
@@ -90,7 +90,12 @@ class HPOptimizationParser:
                 ParameterValidator.assert_keys(setting.keys(), ["preprocessing", "ml_method", "encoding"], "HPOptimizationParser",
                                                f"settings, {index + 1}. entry")
 
-                s = HPSetting(encoder=symbol_table.get(setting["encoding"]), encoder_name=setting["encoding"],
+                encoder = symbol_table.get(setting["encoding"]).build_object(symbol_table.get(instruction["dataset"]),
+                                                                             **symbol_table.get_config(setting["encoding"])["encoder_params"])\
+                    .set_context({"dataset": symbol_table.get(instruction['dataset'])})
+
+                s = HPSetting(encoder=encoder,
+                              encoder_name=setting["encoding"],
                               encoder_params=symbol_table.get_config(setting["encoding"])["encoder_params"],
                               ml_method=symbol_table.get(setting["ml_method"]), ml_method_name=setting["ml_method"],
                               ml_params=symbol_table.get_config(setting["ml_method"]),

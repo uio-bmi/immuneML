@@ -53,8 +53,8 @@ class OneHotRepertoireEncoder(OneHotEncoder):
 
         arguments = [(repertoire, params) for repertoire in dataset.repertoires]
 
-        with Pool(params["batch_size"]) as pool:
-            chunksize = math.floor(dataset.get_example_count() / params["batch_size"]) + 1
+        with Pool(params.pool_size) as pool:
+            chunksize = math.floor(dataset.get_example_count() / params.pool_size) + 1
             repertoires = pool.starmap(self._get_encoded_repertoire, arguments, chunksize=chunksize)
 
         encoded_repertoires, repertoire_names, labels = zip(*repertoires)
@@ -71,10 +71,10 @@ class OneHotRepertoireEncoder(OneHotEncoder):
         return encoded_data
 
     def _get_encoded_repertoire(self, repertoire, params: EncoderParams):
-        params["model"] = vars(self)
+        params.model = vars(self)
 
-        return CacheHandler.memo_by_params((("encoding_model", params["model"]),
-                                            ("labels", params["label_configuration"].get_labels_by_name()),
+        return CacheHandler.memo_by_params((("encoding_model", params.model),
+                                            ("labels", params.label_config.get_labels_by_name()),
                                             ("repertoire_id", repertoire.identifier),
                                             ("repertoire_data", hashlib.sha256(np.ascontiguousarray(repertoire.get_sequence_aas())).hexdigest())),
                                            lambda: self._encode_repertoire(repertoire, params), CacheObjectType.ENCODING)
@@ -84,12 +84,12 @@ class OneHotRepertoireEncoder(OneHotEncoder):
 
         onehot_encoded = self._encode_sequence_list(sequences, pad_n_sequences=self.max_rep_len, pad_sequence_len=self.max_seq_len)
         example_id = repertoire.identifier
-        labels = self._get_repertoire_labels(repertoire, params)
+        labels = self._get_repertoire_labels(repertoire, params) if params.encode_labels else None
 
         return onehot_encoded, example_id, labels
 
     def _get_repertoire_labels(self, repertoire, params: EncoderParams):
-        label_config = params["label_configuration"]
+        label_config = params.label_config
         labels = dict()
 
         for label_name in label_config.get_labels_by_name():

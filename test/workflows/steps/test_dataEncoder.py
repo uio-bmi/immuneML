@@ -48,8 +48,8 @@ class TestDataEncoder(TestCase):
             encoder=encoder,
             encoder_params=EncoderParams(
                 model={},
-                batch_size=2,
-                label_configuration=lc,
+                pool_size=2,
+                label_config=lc,
                 result_path=path,
                 filename="dataset.csv"
             )

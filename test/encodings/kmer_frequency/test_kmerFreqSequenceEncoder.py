@@ -57,8 +57,8 @@ class TestKmerFreqSequenceEncoder(TestCase):
 
         encoded_dataset = encoder.encode(dataset, EncoderParams(
             result_path=path + "2/",
-            label_configuration=lc,
-            batch_size=2,
+            label_config=lc,
+            pool_size=2,
             learn_model=True,
             model={},
             filename="dataset.csv"

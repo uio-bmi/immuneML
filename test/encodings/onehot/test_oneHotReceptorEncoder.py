@@ -44,8 +44,7 @@ class TestOneHotSequenceEncoder(TestCase):
 
         encoded_data = encoder.encode(dataset, EncoderParams(
             result_path=f"{path}encoded/",
-            label_configuration=lc,
-            batch_size=2,
+            label_config=lc,
             learn_model=True,
             model={},
             filename="dataset.pkl"

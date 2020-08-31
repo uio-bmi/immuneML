@@ -32,14 +32,15 @@ class ReferenceRepertoireEncoder(MatchedReferenceEncoder):
 
     def _encode_repertoires(self, dataset, matched_info, params: EncoderParams):
         encoded_repertories = np.zeros((dataset.get_example_count(), 1), dtype=float)
-        labels = {label: [] for label in params["label_configuration"].get_labels_by_name()}
+        labels = {label: [] for label in params.label_config.get_labels_by_name()} if params.encode_labels else None
 
         for index, repertoire in enumerate(dataset.get_data()):
             assert repertoire.identifier == matched_info["repertoires"][index]["repertoire"], \
                 "MatchedReferenceEncoder: error in SequenceMatcher ordering of repertoires."
             encoded_repertories[index] = matched_info["repertoires"][index][self.summary.name.lower()]
-            for label_index, label in enumerate(params["label_configuration"].get_labels_by_name()):
-                labels[label].append(repertoire.metadata[label])
+            if labels is not None:
+                for label_index, label in enumerate(params.label_config.get_labels_by_name()):
+                    labels[label].append(repertoire.metadata[label])
 
         return np.reshape(encoded_repertories, newshape=(-1, 1)), labels
 

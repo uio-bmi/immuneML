@@ -12,14 +12,14 @@ class TestIdentitySequenceEncoder(TestCase):
         sequence = ReceptorSequence(amino_acid_sequence="AAA", metadata=SequenceMetadata(frame_type="Out"))
         enc = IdentitySequenceEncoder()
         self.assertEqual(enc.encode_sequence(sequence, EncoderParams(model={},
-                                                                     label_configuration=LabelConfiguration(),
+                                                                     label_config=LabelConfiguration(),
                                                                      result_path="")),
                          None)
 
         sequence = ReceptorSequence(amino_acid_sequence="AAA", metadata=SequenceMetadata(frame_type="Stop"))
         enc = IdentitySequenceEncoder()
         self.assertEqual(enc.encode_sequence(sequence, EncoderParams(model={},
-                                                                     label_configuration=LabelConfiguration(),
+                                                                     label_config=LabelConfiguration(),
                                                                      result_path="")),
                          None)
 
@@ -27,5 +27,5 @@ class TestIdentitySequenceEncoder(TestCase):
         enc = IdentitySequenceEncoder()
         self.assertEqual(["AAA"],
                          enc.encode_sequence(sequence, EncoderParams(model={},
-                                                                     label_configuration=LabelConfiguration(),
+                                                                     label_config=LabelConfiguration(),
                                                                      result_path="")))

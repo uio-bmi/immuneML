@@ -1,6 +1,5 @@
 import pandas as pd
 
-from source.IO.dataset_export.PickleExporter import PickleExporter
 from source.data_model.dataset.ReceptorDataset import ReceptorDataset
 from source.data_model.encoded_data.EncodedData import EncodedData
 from source.encodings.DatasetEncoder import DatasetEncoder
@@ -48,11 +47,11 @@ class TCRdistEncoder(DatasetEncoder):
 
     def encode(self, dataset, params: EncoderParams):
         train_receptor_ids = EncoderHelper.prepare_training_ids(dataset, params)
-        if params["learn_model"]:
-            self._build_tcr_dist_matrix(dataset, params["label_configuration"].get_labels_by_name())
+        if params.learn_model:
+            self._build_tcr_dist_matrix(dataset, params.label_config.get_labels_by_name())
 
         distance_matrix = self.distance_matrix.loc[dataset.get_example_ids(), train_receptor_ids]
-        labels = self._build_labels(dataset, params)
+        labels = self._build_labels(dataset, params) if params.encode_labels else None
 
         encoded_dataset = dataset.clone()
         encoded_dataset.encoded_data = EncodedData(examples=distance_matrix, labels=labels, example_ids=distance_matrix.index.values,
@@ -70,11 +69,13 @@ class TCRdistEncoder(DatasetEncoder):
         self.distance_matrix = pd.DataFrame(tcr_rep.pw_tcrdist, index=tcr_rep.clone_df.clone_id, columns=tcr_rep.clone_df.clone_id)
 
     def _build_labels(self, dataset: ReceptorDataset, params: EncoderParams) -> dict:
-        labels = {label: [] for label in params["label_configuration"].get_labels_by_name()}
+        labels = {label: [] for label in params.label_config.get_labels_by_name()}
         for receptor in dataset.get_data():
             for label in labels.keys():
                 labels[label].append(receptor.metadata[label])
         return labels
 
-    def store(self, encoded_dataset, params: EncoderParams):
-        PickleExporter.export(encoded_dataset, params["result_path"])
+    @staticmethod
+    def export_encoder(path: str, encoder) -> str:
+        encoder_file = DatasetEncoder.store_encoder(encoder, path + "encoder.pickle")
+        return encoder_file
