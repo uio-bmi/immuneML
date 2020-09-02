@@ -28,3 +28,4 @@ escapejson
 tcrsampler
 pwseqdist==0.1.1
 zipdist
+numba

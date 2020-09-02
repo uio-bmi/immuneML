@@ -1,4 +1,6 @@
 import logging
+import os
+from glob import glob
 from typing import List, Tuple
 
 import numpy as np
@@ -47,15 +49,21 @@ class TCRdistMotifDiscovery(EncodingReport):
     def build_object(cls, **kwargs):
         return TCRdistMotifDiscovery(**kwargs)
 
-    def __init__(self, dataset: ReceptorDataset, result_path: str = None, name: str = None, cores: int = None, max_cluster_count: int = None):
+    def __init__(self, dataset: ReceptorDataset = None, result_path: str = None, name: str = None, cores: int = None, max_cluster_count: int = None):
         super().__init__(name)
         self.dataset = dataset
-        self.label = list(dataset.encoded_data.labels.keys())[0]
+        self.label = list(dataset.encoded_data.labels.keys())[0] if dataset is not None else None
         self.result_path = result_path
         self.cores = cores
         self.max_cluster_count = max_cluster_count
 
     def generate(self) -> ReportResult:
+        import tcrdist as td
+        if len(list(glob(os.path.dirname(td.__file__) + "/db/alphabeta_db.tsv_files/*.tsv"))) == 0:
+            td.setup_db.install_all_next_gen()
+
+        self.label = list(self.dataset.encoded_data.labels.keys())[0]
+
         from source.util.TCRdistHelper import TCRdistHelper
 
         PathBuilder.build(self.result_path)
