@@ -122,7 +122,9 @@ class ImportHelper:
     def import_sequence_dataset(sequence_import_func, params, dataset_name: str, *args, **kwargs):
         PathBuilder.build(params.result_path)
 
-        filenames = glob(params.path + "*.tsv")
+        filenames = [params.path] if os.path.isfile(params.path) else glob(params.path + "*.tsv")
+        assert len(filenames) >= 1, f"ImportHelper: the dataset {dataset_name} cannot be imported, no files were found under {params.path}."
+
         file_index = 0
         dataset_filenames = []
         items = None
@@ -148,8 +150,6 @@ class ImportHelper:
     def store_sequence_items(dataset_filenames: list, items: list, file_size: int):
         with open(dataset_filenames[-1], "wb") as file:
             pickle.dump(items[:file_size], file)
-
-
 
     @staticmethod
     def parse_germline(df: pd.DataFrame, gene_name_replacement: dict, germline_value_replacement: dict):

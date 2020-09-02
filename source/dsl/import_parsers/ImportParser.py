@@ -1,5 +1,6 @@
 from typing import Tuple
 
+from source.IO.dataset_import.DataImport import DataImport
 from source.dsl.DefaultParamsLoader import DefaultParamsLoader
 from source.dsl.symbol_table.SymbolTable import SymbolTable
 from source.dsl.symbol_table.SymbolType import SymbolType
@@ -29,7 +30,7 @@ class ImportParser:
 
         ParameterValidator.assert_keys(list(dataset_specs.keys()), ImportParser.valid_keys, location, f"datasets:{key}", False)
 
-        valid_formats = [name[:-6] for name in ReflectionHandler.discover_classes_by_partial_name("Import", "IO/dataset_import/")]
+        valid_formats = ReflectionHandler.all_nonabstract_subclass_basic_names(DataImport, "Import", "IO/dataset_import/")
         ParameterValidator.assert_in_valid_list(dataset_specs["format"], valid_formats, location, "format")
 
         import_cls = ReflectionHandler.get_class_by_name("{}Import".format(dataset_specs["format"]))

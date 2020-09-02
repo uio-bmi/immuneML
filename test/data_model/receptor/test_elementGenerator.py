@@ -22,7 +22,7 @@ class TestElementGenerator(TestCase):
                 pickle.dump(receptors[i * 100: (i+1) * 100], file)
 
         receptor_generator = ElementGenerator(file_list)
-        generator = receptor_generator.build_batch_generator(41)
+        generator = receptor_generator.build_batch_generator()
 
         counter = 0
 
@@ -34,7 +34,7 @@ class TestElementGenerator(TestCase):
 
         self.assertEqual(307, counter)
 
-        generator = receptor_generator.build_batch_generator(110)
+        generator = receptor_generator.build_batch_generator()
 
         counter = 0
 

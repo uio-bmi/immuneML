@@ -25,19 +25,18 @@ class ElementDataset(Dataset):
     def get_data(self, batch_size: int = 1000):
         self._filenames.sort()
         self.element_generator.file_list = self._filenames
-        return self.element_generator.build_element_generator(batch_size)
+        return self.element_generator.build_element_generator()
 
     def get_batch(self, batch_size: int = 1000):
         self._filenames.sort()
         self.element_generator.file_list = self._filenames
-        return self.element_generator.build_batch_generator(batch_size)
+        return self.element_generator.build_batch_generator()
 
     def get_filenames(self):
         return self._filenames
 
     def set_filenames(self, filenames):
         self._filenames = filenames
-        self.element_generator = ElementGenerator(self._filenames)
 
     def get_example_count(self):
         return len(self.get_example_ids())
