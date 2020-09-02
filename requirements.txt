@@ -15,7 +15,7 @@ numpy>=1.18.2
 h5py>=2.9.0
 dill>=0.3.0
 tqdm>=0.24.2
-tensorboard==1.14.0
+tensorboard==1.15.0
 requests>=2.21.0
 plotly>=4.8.2
 logomaker>=0.8
