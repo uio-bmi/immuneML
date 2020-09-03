@@ -13,6 +13,9 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+    - uses: r-lib/actions/setup-r@v1
+      with:
+        r-version: '3.6.3'
     - name: Set up Python 3.8
       uses: actions/setup-python@v2
       with:
