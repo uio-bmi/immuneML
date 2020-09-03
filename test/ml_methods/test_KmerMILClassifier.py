@@ -31,7 +31,8 @@ class TestKmerMILClassifier(TestCase):
         enc_dataset = AtchleyKmerEncoder(2, 1, 1, 'relative_abundance', False).encode(dataset, EncoderParams(path + "result/",
                                                                                                              LabelConfiguration(
                                                                                                                  [Label("l1", [True, False])])))
-        cls = KmerMILClassifier(10, -0.0001, 2, False, 1, 0.01, False, True, 8)
+        cls = KmerMILClassifier(iteration_count=10, threshold=-0.0001, evaluate_at=2, use_early_stopping=False, random_seed=1, learning_rate=0.01,
+                                zero_abundance_weight_init=True, number_of_threads=8)
         cls.fit(enc_dataset.encoded_data, enc_dataset.encoded_data.labels, ["l1"])
 
         predictions = cls.predict(enc_dataset.encoded_data, ["l1"])
@@ -44,7 +45,8 @@ class TestKmerMILClassifier(TestCase):
 
         cls.store(path + "model_storage/", feature_names=enc_dataset.encoded_data.feature_names)
 
-        cls2 = KmerMILClassifier(10, -0.0001, 2, False, 1, 0.01, False, True, 8)
+        cls2 = KmerMILClassifier(iteration_count=10, threshold=-0.0001, evaluate_at=2, use_early_stopping=False, random_seed=1, learning_rate=0.01,
+                                 zero_abundance_weight_init=True, number_of_threads=8)
         cls2.load(path + "model_storage/")
 
         cls2_vars = vars(cls2)
@@ -54,7 +56,8 @@ class TestKmerMILClassifier(TestCase):
 
         for item, value in cls_vars.items():
             if not isinstance(value, np.ndarray):
-                self.assertEqual(value, cls2_vars[item])
+                loaded_value = cls2_vars[item]
+                self.assertEqual(value, loaded_value)
 
         model = cls.get_model(["l1"])
         self.assertEqual(vars(cls), model)

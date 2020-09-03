@@ -1,3 +1,4 @@
+import logging
 from typing import Tuple, List
 
 import numpy as np
@@ -111,8 +112,10 @@ class AtchleyKmerEncoder(DatasetEncoder):
         keys = set()
 
         labels = {label: [] for label in params.label_config.get_labels_by_name()} if params.encode_labels else None
+        example_count = dataset.get_example_count()
 
-        for repertoire in dataset.get_data():
+        for index, repertoire in enumerate(dataset.get_data()):
+            logging.info(f"AtchleyKmerEncoder: encoding repertoire {index+1}/{example_count}.")
             sequences, counts = self._trunc_sequences(repertoire, remove_aa_func)
             abundances = Util.compute_abundance(sequences, counts, self.k, self.abundance)
             kmers = list(abundances.keys())

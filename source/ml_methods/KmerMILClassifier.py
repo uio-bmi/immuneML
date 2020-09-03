@@ -6,7 +6,6 @@ import pandas as pd
 import pkg_resources
 import torch
 import yaml
-from torch.distributions import Normal
 
 from source.data_model.encoded_data.EncodedData import EncodedData
 from source.ml_methods.MLMethod import MLMethod
@@ -17,8 +16,10 @@ from source.util.PathBuilder import PathBuilder
 
 class KmerMILClassifier(MLMethod):
     """
-    Repertoire classifier which uses the data encoded by AtchleyKmerEncoder to predict the repertoire label. The original publication: Ostmeyer J,
-    Christley S, Toby IT, Cowell LG. Biophysicochemical motifs in T cell receptor sequences distinguish repertoires from tumor-infiltrating
+    Repertoire classifier which uses the data encoded by AtchleyKmerEncoder to predict the repertoire label.
+
+    The original publication:
+    Ostmeyer J, Christley S, Toby IT, Cowell LG. Biophysicochemical motifs in T cell receptor sequences distinguish repertoires from tumor-infiltrating
     lymphocytes and adjacent healthy tissue. Cancer Res. Published online January 1, 2019:canres.2292.2018. `doi:10.1158/0008-5472.CAN-18-2292
     <https://cancerres.aacrjournals.org/content/79/7/1671>`_ .
 
@@ -37,8 +38,6 @@ class KmerMILClassifier(MLMethod):
 
         random_seed (int): random seed used
 
-        use_batch_norm (bool): whether to use batch normalization
-
         zero_abundance_weight_init (bool): whether to use 0 as initial weight for abundance  term (if not, a random value is sampled from normal
         distribution with mean 0 and variance 1 / total_number_of_features
 
@@ -56,7 +55,6 @@ class KmerMILClassifier(MLMethod):
                 use_early_stopping: False
                 learning_rate: 0.01
                 random_seed: 100
-                use_batch_norm: False
                 zero_abundance_weight_init: True
                 number_of_threads: 8
                 threshold: 0.00001
@@ -64,7 +62,7 @@ class KmerMILClassifier(MLMethod):
     """
 
     def __init__(self, iteration_count: int, threshold: float, evaluate_at: int, use_early_stopping: bool, random_seed: int, learning_rate: float,
-                 use_batch_norm: bool, zero_abundance_weight_init: bool, number_of_threads: int, result_path: str = None):
+                 zero_abundance_weight_init: bool, number_of_threads: int, result_path: str = None):
         super().__init__()
         self.logistic_regression = None
         self.random_seed = random_seed
@@ -73,7 +71,6 @@ class KmerMILClassifier(MLMethod):
         self.evaluate_at = evaluate_at
         self.use_early_stopping = use_early_stopping
         self.learning_rate = learning_rate
-        self.use_batch_norm = use_batch_norm
         self.zero_abundance_weight_init = zero_abundance_weight_init
         self.number_of_threads = number_of_threads
         self.label_name = None
@@ -83,13 +80,8 @@ class KmerMILClassifier(MLMethod):
         self.feature_names = None
 
     def _make_log_reg(self):
-        if self.zero_abundance_weight_init:
-            abundance_weight_init = 0.
-        else:
-            abundance_weight_init = Normal(loc=0, scale=torch.sqrt(1./torch.from_numpy(self.input_size))).sample()[0]
 
-        self.logistic_regression = PyTorchLogisticRegression(in_features=self.input_size, abundance_weight_init=abundance_weight_init,
-                                                             use_batch_norm=self.use_batch_norm)
+        self.logistic_regression = PyTorchLogisticRegression(in_features=self.input_size, zero_abundance_weight_init=self.zero_abundance_weight_init)
 
     def _check_encoded_data(self, encoded_data: EncodedData):
         assert encoded_data.encoding == 'AtchleyKmerEncoder', f"KmerMILClassifier: the encoding is not compatible with the given classifier. " \
@@ -134,7 +126,7 @@ class KmerMILClassifier(MLMethod):
             if iteration % self.evaluate_at == 0 or iteration == self.iteration_count - 1:
                 logging.info(f"KmerMILClassifier: log loss at iteration {iteration+1}/{self.iteration_count}: {loss}.")
                 if state["loss"] < loss and self.use_early_stopping:
-                    state = {"loss": loss, "model": copy.deepcopy(self.logistic_regression)}
+                    state = {"loss": loss.numpy(), "model": copy.deepcopy(self.logistic_regression)}
 
             if loss < self.threshold:
                 break
