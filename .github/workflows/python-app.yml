@@ -27,9 +27,7 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-pip-
     - name: Install R dependencies
-      run: |
-        R -e "install.packages('devtools')"
-        R -e "devtools::install_github('keshav-motwani/ggexp')"
+      run: R -e "install.packages('devtools')" -e "devtools::install_github('keshav-motwani/ggexp')"
     - name: Install Python dependencies
       run: |
         python -m pip install --upgrade pip
