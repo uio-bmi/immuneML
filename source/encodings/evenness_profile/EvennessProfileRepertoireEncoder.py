@@ -10,7 +10,7 @@ from source.caching.CacheObjectType import CacheObjectType
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.encodings.EncoderParams import EncoderParams
 from source.encodings.evenness_profile.EvennessProfileEncoder import EvennessProfileEncoder
-from source.logging.Logger import log
+from source.util.Logger import log
 
 
 class EvennessProfileRepertoireEncoder(EvennessProfileEncoder):

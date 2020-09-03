@@ -3,8 +3,8 @@ import inspect
 from source.dsl.DefaultParamsLoader import DefaultParamsLoader
 from source.dsl.symbol_table.SymbolTable import SymbolTable
 from source.dsl.symbol_table.SymbolType import SymbolType
-from source.logging.Logger import log
 from source.ml_methods.MLMethod import MLMethod
+from source.util.Logger import log
 from source.util.ParameterValidator import ParameterValidator
 from source.util.ReflectionHandler import ReflectionHandler
 

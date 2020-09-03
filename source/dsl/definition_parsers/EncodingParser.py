@@ -4,7 +4,7 @@ from source.dsl.ObjectParser import ObjectParser
 from source.dsl.symbol_table.SymbolTable import SymbolTable
 from source.dsl.symbol_table.SymbolType import SymbolType
 from source.encodings.DatasetEncoder import DatasetEncoder
-from source.logging.Logger import log
+from source.util.Logger import log
 from source.util.ParameterValidator import ParameterValidator
 from source.util.ReflectionHandler import ReflectionHandler
 

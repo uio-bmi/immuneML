@@ -5,7 +5,7 @@ from source.dsl.symbol_table.SymbolType import SymbolType
 from source.environment.LabelConfiguration import LabelConfiguration
 from source.environment.Metric import Metric
 from source.hyperparameter_optimization.HPSetting import HPSetting
-from source.logging.Logger import log
+from source.util.Logger import log
 from source.util.ParameterValidator import ParameterValidator
 from source.workflows.instructions.ml_model_training.MLModelTrainingInstruction import MLModelTrainingInstruction
 

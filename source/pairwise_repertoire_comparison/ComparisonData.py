@@ -6,8 +6,8 @@ from functools import lru_cache
 import numpy as np
 
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
-from source.logging.Logger import log
 from source.pairwise_repertoire_comparison.ComparisonDataBatch import ComparisonDataBatch
+from source.util.Logger import log
 from source.util.PathBuilder import PathBuilder
 
 

@@ -5,7 +5,6 @@ import os
 from source.caching.CacheType import CacheType
 from source.environment.Constants import Constants
 from source.environment.SequenceType import SequenceType
-from source.logging.LogLevel import LogLevel
 from source.util.PathBuilder import PathBuilder
 
 
@@ -26,7 +25,6 @@ class EnvironmentSettings:
     html_templates_path = root_path + "source/presentation/html/templates/"
     specs_docs_path = root_path + "docs/specs/"
     max_sequence_length = 20
-    log_level = LogLevel.DEBUG
     low_memory = True
 
     @staticmethod

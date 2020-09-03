@@ -2,9 +2,9 @@ import copy
 
 from source.dsl.symbol_table.SymbolTable import SymbolTable
 from source.dsl.symbol_table.SymbolType import SymbolType
-from source.logging.Logger import log
 from source.simulation.Implanting import Implanting
 from source.simulation.Simulation import Simulation
+from source.util.Logger import log
 from source.util.ParameterValidator import ParameterValidator
 
 

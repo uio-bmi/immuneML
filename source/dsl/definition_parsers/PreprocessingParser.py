@@ -1,8 +1,8 @@
 from source.dsl.ObjectParser import ObjectParser
 from source.dsl.symbol_table.SymbolTable import SymbolTable
 from source.dsl.symbol_table.SymbolType import SymbolType
-from source.logging.Logger import log
 from source.preprocessing.Preprocessor import Preprocessor
+from source.util.Logger import log
 from source.util.ReflectionHandler import ReflectionHandler
 
 

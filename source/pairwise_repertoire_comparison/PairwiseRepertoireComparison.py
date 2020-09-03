@@ -3,8 +3,8 @@ import pandas as pd
 
 from source.caching.CacheHandler import CacheHandler
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
-from source.logging.Logger import log
 from source.pairwise_repertoire_comparison.ComparisonData import ComparisonData
+from source.util.Logger import log
 from source.util.PathBuilder import PathBuilder
 
 

@@ -1,8 +1,8 @@
 import os
 import shutil
-import pandas as pd
 from unittest import TestCase
 
+import pandas as pd
 
 from source.caching.CacheType import CacheType
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
@@ -41,8 +41,8 @@ class TestDeepRCEncoder(TestCase):
         enc.set_context({"dataset": main_dataset})
 
         encoded = enc.encode(sub_dataset, EncoderParams(result_path=path+"encoded_data/",
-                                                        label_configuration=LabelConfiguration([Label("l1", [0, 1]), Label("l2", [2, 3])]),
-                                                        batch_size=4))
+                                                        label_config=LabelConfiguration([Label("l1", [0, 1]), Label("l2", [2, 3])]),
+                                                        pool_size=4))
 
         self.assertListEqual(encoded.encoded_data.example_ids, sub_dataset.get_repertoire_ids())
         self.assertTrue(os.path.isfile(encoded.encoded_data.info["metadata_filepath"]))
