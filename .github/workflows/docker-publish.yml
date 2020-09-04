@@ -11,26 +11,11 @@ on:
   pull_request:
 
 env:
-  IMAGE_NAME: uiobmi/immuneml
+  IMAGE_NAME: immuneml
 
 jobs:
-  test:
-    runs-on: ubuntu-latest
 
-    steps:
-      - uses: actions/checkout@v2
-
-      - name: Run tests
-        run: |
-          if [ -f docker-compose.test.yml ]; then
-            docker-compose --file docker-compose.test.yml build
-            docker-compose --file docker-compose.test.yml run sut
-          else
-            docker build . --file Dockerfile
-          fi
-
-  push:
-    needs: test
+  build:
 
     runs-on: ubuntu-latest
     if: github.event_name == 'push'
