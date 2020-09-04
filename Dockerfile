@@ -12,7 +12,7 @@ COPY setup.py .
 
 # Installing yum dependencies 
 RUN yum update -y
-RUN yum install -y python3 python3-devel python-numpy python-scipy python-matplotlib ipython ipython-notebook python-pandas python-sympy python-nose git dnf-plugins-core make openssl-devel libcurl-devel libxml2-devel gcc gcc-c++ autoconf automake libtool m4 lvm
+RUN yum install -y python3 python3-devel numpy pandas git dnf-plugins-core make openssl-devel libcurl-devel libxml2-devel gcc gcc-c++ autoconf automake libtool m4 lvm
 
 # Installing R
 RUN dnf install -y epel-release
