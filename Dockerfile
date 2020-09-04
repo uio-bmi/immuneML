@@ -12,12 +12,15 @@ COPY setup.py .
 
 # Installing yum dependencies 
 RUN yum update -y
-RUN yum install -y python3 python3-devel numpy pandas git dnf-plugins-core make openssl-devel libcurl-devel libxml2-devel gcc gcc-c++ autoconf automake libtool m4 lvm
+RUN yum install -y python3 python3-devel git dnf-plugins-core make openssl-devel libcurl-devel libxml2-devel gcc gcc-c++ autoconf automake libtool m4 lvm2
 
 # Installing R
 RUN dnf install -y epel-release
 RUN dnf config-manager --set-enabled PowerTools
 RUN yum install -y R
+
+# Additional Python dependencies
+RUN yum install -y python3-numpy python3-pandas
 
 # Installing R dependencies
 RUN R -e "install.packages('devtools', repos = 'https://cran.uib.no/')" -e "devtools::install_github('keshav-motwani/ggexp'); install.packages('Rmisc', dependencies = TRUE, repos = 'https://cran.uib.no/')"
