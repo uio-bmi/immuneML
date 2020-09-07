@@ -1,14 +1,14 @@
 FROM centos:latest
 
 # Can't just copy '.', because it will copy '.git' folder too, which is ~600MB and we don't need it
-COPY test .
-COPY scripts .
-COPY source .
-COPY helpers .
-COPY docs .
-COPY datasets .
-COPY requirements.txt .
-COPY setup.py .
+COPY test ./immuneML/test/
+COPY scripts ./immuneML/scripts/
+COPY source ./immuneML/source/
+COPY docs ./immuneML/docs/
+COPY datasets ./immuneML/datasets/
+COPY requirements.txt ./immuneML/
+COPY setup.py ./immuneML/
+COPY README.md ./immuneML/
 
 # Installing yum dependencies 
 RUN yum update -y
@@ -19,9 +19,6 @@ RUN dnf install -y epel-release
 RUN dnf config-manager --set-enabled PowerTools
 RUN yum install -y R
 
-# Additional Python dependencies
-RUN yum install -y python3-numpy python3-pandas
-
 # Installing R dependencies
 RUN R -e "install.packages('devtools', repos = 'https://cran.uib.no/')" -e "devtools::install_github('keshav-motwani/ggexp'); install.packages('Rmisc', dependencies = TRUE, repos = 'https://cran.uib.no/')"
 
@@ -29,4 +26,4 @@ RUN R -e "install.packages('devtools', repos = 'https://cran.uib.no/')" -e "devt
 RUN pip3 install wheel setuptools 
 
 # Voila
-RUN pip3 install -e .
+RUN pip3 install ./immuneML/
