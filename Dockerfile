@@ -9,6 +9,7 @@ COPY docs .
 COPY datasets .
 COPY requirements.txt .
 COPY setup.py .
+COPY README.md .
 
 # Installing yum dependencies 
 RUN yum update -y
