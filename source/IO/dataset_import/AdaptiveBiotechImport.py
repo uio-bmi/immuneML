@@ -26,7 +26,7 @@ class AdaptiveBiotechImport(DataImport):
                 import_out_of_frame: False
                 region_definition: "IMGT" # which CDR3 definition to use - IMGT option means removing first and last amino acid as Adaptive uses IMGT junction as CDR3
                 separator: "\\t"
-                columns_to_load: [rearrangement, v_family, v_gene, v_allele, j_family, j_gene, j_allele, amino_acid, templates, frame_type]
+                columns_to_load: [rearrangement, v_family, v_gene, v_allele, j_family, j_gene, j_allele, amino_acid, templates, frame_type, locus]
                 column_mapping: # adaptive column names -> immuneML repertoire fields
                     rearrangement: sequences # 'rearrangement' is the adaptive name, which will be mapped to 'sequences' in immuneML
                     amino_acid: sequence_aas
@@ -36,6 +36,7 @@ class AdaptiveBiotechImport(DataImport):
                     v_family: v_subgroup
                     j_family: j_subgroup
                     templates: counts
+                    locus: chains
 
     """
 
