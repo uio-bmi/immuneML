@@ -33,7 +33,8 @@ class AIRRExporter(DataExporter):
             PathBuilder.build(path)
             repertoire_path = PathBuilder.build(f"{path}repertoires/")
 
-            for repertoire in dataset.repertoires:
+            for index, repertoire in enumerate(dataset.repertoires):
+                print(f"index: {index}")
                 df = AIRRExporter._repertoire_to_dataframe(repertoire, region_type)
                 airr.dump_rearrangement(df, f"{repertoire_path}{repertoire.identifier}.tsv")
 
@@ -75,8 +76,8 @@ class AIRRExporter(DataExporter):
             chain_conversion_dict = {Chain.ALPHA: "TRA",
                                      Chain.BETA: "TRB",
                                      Chain.HEAVY: "IGH",
-                                     Chain.LIGHT: "IGL"}
-
+                                     Chain.LIGHT: "IGL",
+                                     None: ''}
             df["locus"] = [chain_conversion_dict[chain] for chain in df["locus"]]
 
         return df

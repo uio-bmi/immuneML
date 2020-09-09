@@ -1,5 +1,3 @@
-import numpy as np
-
 from source.IO.dataset_import.DataImport import DataImport
 from source.IO.dataset_import.DatasetImportParams import DatasetImportParams
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
@@ -64,7 +62,6 @@ class AdaptiveBiotechImport(DataImport):
 
         df = ImportHelper.parse_adaptive_germline_to_imgt(df)
 
-        df["chains"] = np.where(df["v_genes"].isnull(), df["j_genes"].str[:3], df["v_genes"].str[:3])
         df["region_types"] = RegionType.CDR3.name
 
         return df

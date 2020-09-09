@@ -13,7 +13,7 @@ class Chain(Enum):
     def get_chain(item: str):
         if item in ["TRA", "A", "ALPHA"]:
             return Chain.ALPHA
-        elif item in ["TRB", "B", "BETA"]:
+        elif item in ["TRB", "B", "BETA", "TCRB"]:
             return Chain.BETA
         elif item in ["TRD", "D", "DELTA"]:
             return Chain.DELTA
