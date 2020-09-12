@@ -65,6 +65,7 @@ class SequenceFilterHelper:
                                comparison_attributes: list, sequence_indices_path: str):
 
         sequence_path = sequence_indices_path if sequence_indices_path is not None else f'{params.result_path}relevant_sequence_indices.pickle'
+        sequence_csv_path = None
 
         if params.learn_model:
             label_values = params.label_config.get_label_values(label)
@@ -75,9 +76,10 @@ class SequenceFilterHelper:
             all_sequences = comparison_data.get_item_names()
             relevant_sequences = all_sequences[relevant_sequence_indices]
             df = pd.DataFrame(relevant_sequences, columns=comparison_attributes)
-            df.to_csv(f'{params.result_path}relevant_sequences.csv', sep=',', index=False)
+            sequence_csv_path = f'{params.result_path}relevant_sequences.csv'
+            df.to_csv(sequence_csv_path, sep=',', index=False)
         else:
             with open(sequence_path, "rb") as file:
                 relevant_sequence_indices = pickle.load(file)
 
-        return relevant_sequence_indices, sequence_path
+        return relevant_sequence_indices, sequence_path, sequence_csv_path

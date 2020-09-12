@@ -136,7 +136,7 @@ An example is shown below:
 
   instructions:
     hpoptim_instr:
-      type: HPOptimization
+      type: TrainMLModel
       settings:
         - encoding: my_kmer_enc
           ml_method: my_log_reg
@@ -168,6 +168,6 @@ output that is generated and reports executed during the particular step:
 .. figure:: ../_static/images/hp_optmization_with_outputs.png
   :width: 70%
 
-  Figure 2 - execution flow of the HPOptimizationInstruction along with the information on data and reports generated at each step
+  Figure 2 - execution flow of the TrainMLModelInstruction along with the information on data and reports generated at each step
 
 For implementation detals, see :ref:`Hyperparameter Optimization Details`.

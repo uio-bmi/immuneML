@@ -67,6 +67,7 @@ class SequenceAbundanceEncoder(DatasetEncoder):
         self.context = None
         self.p_value_threshold = p_value_threshold
         self.relevant_indices_path = None
+        self.relevant_sequence_csv_path = None
         self.comparison_data = None
 
     @staticmethod
@@ -96,7 +97,7 @@ class SequenceAbundanceEncoder(DatasetEncoder):
         return encoded_dataset
 
     def _calculate_sequence_abundance(self, dataset: RepertoireDataset, comparison_data: ComparisonData, label: str, params: EncoderParams):
-        sequence_p_values_indices, indices_path = SequenceFilterHelper.get_relevant_sequences(dataset=dataset, params=params,
+        sequence_p_values_indices, indices_path, sequence_csv_path = SequenceFilterHelper.get_relevant_sequences(dataset=dataset, params=params,
                                                                                               comparison_data=comparison_data,
                                                                                               label=label, p_value_threshold=self.p_value_threshold,
                                                                                               comparison_attributes=self.comparison_attributes,
@@ -104,6 +105,9 @@ class SequenceAbundanceEncoder(DatasetEncoder):
 
         if self.relevant_indices_path is None:
             self.relevant_indices_path = indices_path
+
+        if self.relevant_sequence_csv_path is None:
+            self.relevant_sequence_csv_path = sequence_csv_path
 
         abundance_matrix = self._build_abundance_matrix(comparison_data, dataset.get_repertoire_ids(), sequence_p_values_indices)
 

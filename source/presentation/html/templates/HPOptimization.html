@@ -121,6 +121,14 @@
             </div>
             {{/hp_per_label}}
         </div>
+        <h3>Trained models</h3>
+        <div>
+            {{#models_per_label}}
+            <div>
+                <a href="{{{model_path}}}">Download {{label}} model here.</a>
+            </div>
+            {{/models_per_label}}
+        </div>
         {{#show_hp_reports}}
         <div id="hyperparameter-reports">
             <h3>Hyperparameter reports</h3>

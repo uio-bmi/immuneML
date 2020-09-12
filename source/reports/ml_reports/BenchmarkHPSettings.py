@@ -21,7 +21,7 @@ class BenchmarkHPSettings(MLReport):
     The performances are grouped by label (horizontal panels) encoding (vertical panels) and ML method (bar color).
     When multiple data splits are used, the average performance over the data splits is shown with an error bar.
 
-    This report can be used only with HPOptimization instruction under assessment/reports/hyperparameter.
+    This report can be used only with TrainMLModel instruction under assessment/reports/hyperparameter.
 
     Attributes:
 

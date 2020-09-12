@@ -61,7 +61,7 @@ class TestCVSplitVariants(TestCase):
             },
             "instructions": {
                 "train_test_instruction": {
-                    "type": "HPOptimization",
+                    "type": "TrainMLModel",
                     "settings": [
                         {
                             "encoding": "kmer_freq",
@@ -86,7 +86,8 @@ class TestCVSplitVariants(TestCase):
                     "metrics": ["accuracy"],
                     "batch_size": 4,
                     "reports": None,
-                    "optimization_metric": "balanced_accuracy"
+                    "optimization_metric": "balanced_accuracy",
+                    "refit_optimal_model": False
                 }
             }
         }

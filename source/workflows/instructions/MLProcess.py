@@ -102,10 +102,11 @@ class MLProcess:
             hp_item = HPItem(method=method, hp_setting=self.hp_setting, train_predictions_path=self.train_predictions_path,
                              test_predictions_path=self.test_predictions_path, ml_details_path=self.ml_details_path, train_dataset=self.train_dataset,
                              test_dataset=self.test_dataset, split_index=split_index, model_report_results=model_report_results,
-                             encoding_train_results=encoding_train_results, encoding_test_results=encoding_test_results, performance=performance)
+                             encoding_train_results=encoding_train_results, encoding_test_results=encoding_test_results, performance=performance,
+                             encoder=self.hp_setting.encoder)
         else:
             hp_item = HPItem(method=method, hp_setting=self.hp_setting, train_predictions_path=self.train_predictions_path,
                              test_predictions_path=None, ml_details_path=self.ml_details_path, train_dataset=self.train_dataset,
-                             split_index=split_index, encoding_train_results=encoding_train_results)
+                             split_index=split_index, encoding_train_results=encoding_train_results, encoder=self.hp_setting.encoder)
 
         return hp_item

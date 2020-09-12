@@ -63,7 +63,7 @@ class ImmuneMLParser:
                             keep_chain: B
         instructions:
             inst1:
-                type: HPOptimization
+                type: TrainMLModel
                 settings:
                     -   preprocessing: seq1
                         encoding: e1

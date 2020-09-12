@@ -55,7 +55,7 @@ class TestRandomDatasetWorkflow(TestCase):
             },
             "instructions": {
                 "train_test_instruction": {
-                    "type": "HPOptimization",
+                    "type": "TrainMLModel",
                     "settings": [
                         {
                             "encoding": "kmer_freq",
@@ -78,7 +78,8 @@ class TestRandomDatasetWorkflow(TestCase):
                     "metrics": ["accuracy"],
                     "batch_size": 4,
                     "reports": None,
-                    "optimization_metric": "balanced_accuracy"
+                    "optimization_metric": "balanced_accuracy",
+                    "refit_optimal_model": False
                 }
             }
         }
@@ -129,7 +130,7 @@ class TestRandomDatasetWorkflow(TestCase):
             },
             "instructions": {
                 "train_test_instruction": {
-                    "type": "HPOptimization",
+                    "type": "TrainMLModel",
                     "settings": [
                         {
                             "encoding": "kmer_freq",
@@ -152,7 +153,8 @@ class TestRandomDatasetWorkflow(TestCase):
                     "metrics": ["accuracy"],
                     "batch_size": 4,
                     "reports": None,
-                    "optimization_metric": "balanced_accuracy"
+                    "optimization_metric": "balanced_accuracy",
+                    "refit_optimal_model": True
                 }
             }
         }

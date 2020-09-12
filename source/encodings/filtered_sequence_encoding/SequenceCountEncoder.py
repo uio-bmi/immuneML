@@ -62,6 +62,7 @@ class SequenceCountEncoder(DatasetEncoder):
         self.context = None
         self.p_value_threshold = p_value_threshold
         self.relevant_indices_path = None
+        self.relevant_sequence_csv_path = None
         self.comparison_data = None
 
     @staticmethod
@@ -85,10 +86,13 @@ class SequenceCountEncoder(DatasetEncoder):
         return encoded_dataset
 
     def _encode_sequence_count(self, dataset: RepertoireDataset, comparison_data: ComparisonData, label: str, params: EncoderParams) -> EncodedData:
-        sequence_p_values_indices, indices_path = SequenceFilterHelper.get_relevant_sequences(dataset, params, comparison_data, label, self.p_value_threshold,
+        sequence_p_values_indices, indices_path, relevant_sequences_path = SequenceFilterHelper.get_relevant_sequences(dataset, params, comparison_data, label, self.p_value_threshold,
                                                                                 self.comparison_attributes, self.relevant_indices_path)
         if self.relevant_indices_path is None:
             self.relevant_indices_path = indices_path
+        if self.relevant_sequence_csv_path is None:
+            self.relevant_sequence_csv_path = relevant_sequences_path
+
         count_matrix = self._build_count_matrix(comparison_data, dataset.get_repertoire_ids(), sequence_p_values_indices)
         feature_names = comparison_data.get_item_names()[sequence_p_values_indices]
 

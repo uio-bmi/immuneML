@@ -19,7 +19,7 @@ from source.hyperparameter_optimization.strategy.GridSearch import GridSearch
 from source.ml_methods.SimpleLogisticRegression import SimpleLogisticRegression
 from source.util.PathBuilder import PathBuilder
 from source.util.RepertoireBuilder import RepertoireBuilder
-from source.workflows.instructions.HPOptimizationInstruction import HPOptimizationInstruction
+from source.workflows.instructions.TrainMLModelInstruction import TrainMLModelInstruction
 
 
 class TestSemanticModel(TestCase):
@@ -56,11 +56,11 @@ class TestSemanticModel(TestCase):
         split_config_assessment = SplitConfig(SplitType.RANDOM, 1, 0.5, ReportConfig())
         split_config_selection = SplitConfig(SplitType.RANDOM, 1, 0.5, ReportConfig())
 
-        instruction = HPOptimizationInstruction(dataset, GridSearch(hp_settings), hp_settings,
-                                                split_config_assessment,
-                                                split_config_selection,
-                                                {Metric.BALANCED_ACCURACY}, Metric.BALANCED_ACCURACY,
-                                                label_config, path)
+        instruction = TrainMLModelInstruction(dataset, GridSearch(hp_settings), hp_settings,
+                                              split_config_assessment,
+                                              split_config_selection,
+                                              {Metric.BALANCED_ACCURACY}, Metric.BALANCED_ACCURACY,
+                                              label_config, path)
         semantic_model = SemanticModel([instruction], path)
 
         semantic_model.run()

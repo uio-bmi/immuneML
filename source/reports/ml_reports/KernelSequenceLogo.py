@@ -4,6 +4,7 @@ from copy import copy
 import logomaker
 import matplotlib.pyplot as plt
 import pandas as pd
+import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
@@ -83,11 +84,11 @@ class KernelSequenceLogo(MLReport):
     def _plot_fc_figure(self, df, bias):
         fig = make_subplots(rows=1, cols=2, column_widths=[0.8, 0.2], specs=[[{"type": "bar"}, {'type': "table"}]])
         fig.add_trace(go.Bar(x=df["names"], y=df["weights"], name="weights", hovertemplate='Weight for %{x}: %{y:.4f}<extra></extra>',
-                             hoverlabel={"font_color": "white"}), row=1, col=1)
+                             hoverlabel={"font_color": "white"}, marker_color=px.colors.diverging.Tealrose[0]), row=1, col=1)
         table = go.Table(header={"values": ["bias"]}, cells={"values": bias})
         table.cells.format = [[None], ['.3f']]
         fig.add_trace(table, row=1, col=2)
-        fig.update_layout(title=f"Fully-connected layer weights and bias of ReceptorCNN method")
+        fig.update_layout(title=f"Fully-connected layer weights and bias of ReceptorCNN method", template="plotly_white")
         fig.write_html(self.result_path + "fully_connected_layer_weights.html")
 
         return ReportOutput(self.result_path + "fully_connected_layer_weights.html", "fully-connected layer weights")

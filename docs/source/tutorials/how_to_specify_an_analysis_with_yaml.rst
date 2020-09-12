@@ -41,7 +41,7 @@ optimization by nested cross-validation is given below.
             keep_chain: A
   instructions:
     instruction1:
-      type: HPOptimization
+      type: TrainMLModel
       settings:
         -   preprocessing: seq1
             encoding: e1
@@ -170,7 +170,7 @@ An example of the specification for a hyperparameter optimization instruction is
 .. code-block:: yaml
 
   instruction1:
-    type: HPOptimization
+    type: TrainMLModel
     settings:
     - preprocessing: None
       encoding: kmer_freq_encoding

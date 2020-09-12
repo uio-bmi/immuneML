@@ -1,6 +1,11 @@
 class ParameterValidator:
 
     @staticmethod
+    def assert_keys_present(values: list, expected_values: list, location: str, parameter_name: str):
+        for value in expected_values:
+            assert value in values, f"{location}: expected {value} to be set for {parameter_name}, but got {str(values)[1:-1]} instead."
+
+    @staticmethod
     def assert_all_in_valid_list(values: list, valid_values: list, location: str, parameter_name: str):
         for value in values:
             ParameterValidator.assert_in_valid_list(value, valid_values, location, parameter_name)

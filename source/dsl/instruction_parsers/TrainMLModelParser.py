@@ -17,16 +17,17 @@ from source.hyperparameter_optimization.config.SplitConfig import SplitConfig
 from source.hyperparameter_optimization.config.SplitType import SplitType
 from source.util.ParameterValidator import ParameterValidator
 from source.util.ReflectionHandler import ReflectionHandler
-from source.workflows.instructions.HPOptimizationInstruction import HPOptimizationInstruction
+from source.workflows.instructions.TrainMLModelInstruction import TrainMLModelInstruction
 
 
-class HPOptimizationParser:
+class TrainMLModelParser:
 
-    def parse(self, key: str, instruction: dict, symbol_table: SymbolTable, path: str = None) -> HPOptimizationInstruction:
+    def parse(self, key: str, instruction: dict, symbol_table: SymbolTable, path: str = None) -> TrainMLModelInstruction:
 
         valid_keys = ["assessment", "selection", "dataset", "strategy", "labels", "metrics", "settings", "batch_size", "type", "reports",
-                      "optimization_metric"]
-        ParameterValidator.assert_keys(list(instruction.keys()), valid_keys, "HPOptimizationParser", "HPOptimization")
+                      "optimization_metric", 'refit_optimal_model']
+        ParameterValidator.assert_keys(list(instruction.keys()), valid_keys, TrainMLModelParser.__name__, "TrainMLModel")
+        ParameterValidator.assert_type_and_value(instruction['refit_optimal_model'], bool, TrainMLModelParser.__name__, 'refit_optimal_model')
 
         settings = self._parse_settings(instruction, symbol_table)
         dataset = symbol_table.get(instruction["dataset"])
@@ -42,11 +43,11 @@ class HPOptimizationParser:
         context = self._prepare_context(instruction, symbol_table)
         data_reports = self._prepare_reports(instruction["reports"], symbol_table)
 
-        hp_instruction = HPOptimizationInstruction(dataset=dataset, hp_strategy=strategy(settings, metric_search_criterion),
-                                                   hp_settings=settings, assessment=assessment, selection=selection, metrics=metrics,
-                                                   optimization_metric=optimization_metric,
-                                                   label_configuration=label_config, path=path, context=context,
-                                                   batch_size=instruction["batch_size"], data_reports=data_reports, name=key)
+        hp_instruction = TrainMLModelInstruction(dataset=dataset, hp_strategy=strategy(settings, metric_search_criterion),
+                                                 hp_settings=settings, assessment=assessment, selection=selection, metrics=metrics,
+                                                 optimization_metric=optimization_metric, refit_optimal_model=instruction['refit_optimal_model'],
+                                                 label_configuration=label_config, path=path, context=context,
+                                                 batch_size=instruction["batch_size"], data_reports=data_reports, name=key)
 
         return hp_instruction
 
@@ -87,7 +88,7 @@ class HPOptimizationParser:
                     preprocessing_sequence = []
                     preproc_name = None
 
-                ParameterValidator.assert_keys(setting.keys(), ["preprocessing", "ml_method", "encoding"], "HPOptimizationParser",
+                ParameterValidator.assert_keys(setting.keys(), ["preprocessing", "ml_method", "encoding"], TrainMLModelParser.__name__,
                                                f"settings, {index + 1}. entry")
 
                 encoder = symbol_table.get(setting["encoding"]).build_object(symbol_table.get(instruction["dataset"]),
@@ -103,7 +104,7 @@ class HPOptimizationParser:
                 settings.append(s)
             return settings
         except KeyError as key_error:
-            raise KeyError(f"HPOptimizationParser: parameter {key_error.args[0]} was not defined under settings in HPOptimization instruction.")
+            raise KeyError(f"{TrainMLModelParser.__name__}: parameter {key_error.args[0]} was not defined under settings in TrainMLModel instruction.")
 
     def _prepare_path(self, instruction: dict) -> str:
         if "path" in instruction:
@@ -123,7 +124,7 @@ class HPOptimizationParser:
                 label_values = list(set(dataset.get_metadata([label])[label]))
             else:
                 label_values = []
-                warnings.warn(f"HPOptimizationParser: for instruction {instruction_key}, label values could not be recovered for label "
+                warnings.warn(f"{TrainMLModelParser.__name__}: for instruction {instruction_key}, label values could not be recovered for label "
                               f"{label}, using empty list instead.  This could cause problems with some encodings. "
                               f"If that might be the case, check if the dataset {dataset.name} has been properly loaded.")
 
@@ -150,12 +151,12 @@ class HPOptimizationParser:
                                if "leave_one_out_config" in instruction[key] else None)
 
         except KeyError as key_error:
-            raise KeyError(f"HPOptimizationParser: parameter {key_error.args[0]} was not defined under {key}.")
+            raise KeyError(f"{TrainMLModelParser.__name__}: parameter {key_error.args[0]} was not defined under {key}.")
 
     def _prepare_report_config(self, instruction, key, symbol_table):
         if "reports" in instruction[key]:
             for report_type in instruction[key]["reports"]:
-                ParameterValidator.assert_type_and_value(instruction[key]["reports"][report_type], list, "HPOptimizationReport",
+                ParameterValidator.assert_type_and_value(instruction[key]["reports"][report_type], list, "TrainMLModel/Report",
                                                          report_type)
 
             report_config_input = {report_type: {report_id: symbol_table.get(report_id) for report_id in instruction[key]["reports"][report_type]}

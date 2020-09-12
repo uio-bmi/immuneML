@@ -1,6 +1,8 @@
+from datetime import datetime
 from typing import List
 
 import numpy as np
+import pkg_resources
 import torch
 
 
@@ -22,7 +24,7 @@ class Util:
 
         """
         assert len(label_names) == 1, "MLMethod: more than one label was specified at the time, but this " \
-                                      "classifier can handle only binary classification for one label. Try using HPOptimization " \
+                                      "classifier can handle only binary classification for one label. Try using TrainMLModel " \
                                       "instruction which will train different classifiers for all provided labels."
         unique_values = np.sort(np.unique(y[label_names[0]]))
         assert unique_values.shape[0] == 2, f"MLMethod: there has two be exactly two classes to use this classifier," \
@@ -42,3 +44,10 @@ class Util:
     def setup_pytorch(number_of_threads, random_seed):
         torch.set_num_threads(number_of_threads)
         torch.manual_seed(random_seed)
+
+    @staticmethod
+    def get_immuneML_version():
+        try:
+            return 'immuneML ' + pkg_resources.get_distribution('immuneML').version
+        except pkg_resources.DistributionNotFound as err:
+            return f'immuneML-dev-{datetime.now()}'

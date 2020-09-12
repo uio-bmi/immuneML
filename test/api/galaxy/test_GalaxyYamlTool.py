@@ -78,7 +78,7 @@ class TestGalaxyYamlTool(TestCase):
                     "formats": ["AIRR"]
                 },
                 "inst2": {
-                    "type": "HPOptimization",
+                    "type": "TrainMLModel",
                     "settings": [
                         {
                             "encoding": "e1",
@@ -105,7 +105,8 @@ class TestGalaxyYamlTool(TestCase):
                     "metrics": ["accuracy", "auc"],
                     "reports": [],
                     "batch_size": 10,
-                    "optimization_metric": "accuracy"
+                    "optimization_metric": "accuracy",
+                    'refit_optimal_model': False
                 }
             }
         }

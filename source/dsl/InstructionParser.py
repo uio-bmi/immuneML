@@ -11,8 +11,8 @@ from source.util.Logger import log
 from source.util.ParameterValidator import ParameterValidator
 from source.util.PathBuilder import PathBuilder
 from source.util.ReflectionHandler import ReflectionHandler
-from source.workflows.instructions.HPOptimizationInstruction import HPOptimizationInstruction
 from source.workflows.instructions.SimulationInstruction import SimulationInstruction
+from source.workflows.instructions.TrainMLModelInstruction import TrainMLModelInstruction
 from source.workflows.instructions.dataset_generation.DatasetGenerationInstruction import DatasetGenerationInstruction
 from source.workflows.instructions.exploratory_analysis.ExploratoryAnalysisInstruction import ExploratoryAnalysisInstruction
 from source.workflows.instructions.ml_model_application.MLApplicationInstruction import MLApplicationInstruction
@@ -97,6 +97,6 @@ class InstructionParser:
     @staticmethod
     def make_hp_docs(path):
         with open(f"{path}hp.rst", "w") as file:
-            write_class_docs(DocumentationFormat(HPOptimizationInstruction, "", DocumentationFormat.LEVELS[1]), file)
+            write_class_docs(DocumentationFormat(TrainMLModelInstruction, "", DocumentationFormat.LEVELS[1]), file)
             write_class_docs(DocumentationFormat(SplitConfig, "SplitConfig", DocumentationFormat.LEVELS[1]), file)
             write_class_docs(DocumentationFormat(ReportConfig, "ReportConfig", DocumentationFormat.LEVELS[1]), file)

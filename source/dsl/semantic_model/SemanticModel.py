@@ -16,8 +16,8 @@ class SemanticModel:
     def run(self):
         instruction_states = self.run_instructions()
         if self.output is not None:
-            path = self.build_reports(instruction_states)
-            return path
+            self.build_reports(instruction_states)
+        return instruction_states
 
     def build_reports(self, instruction_states):
         report_builder = self.make_report_builder()

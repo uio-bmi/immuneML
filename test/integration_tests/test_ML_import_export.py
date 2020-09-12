@@ -125,15 +125,15 @@ class TestMLIE(TestCase):
         PathBuilder.build(path + "result_export/")
 
         app = ImmuneMLApp(specification_path=specs_path, result_path=path + "result_export/")
-        result_path = app.run()
+        states = app.run()
 
-        self.assertTrue(os.path.isfile(result_path))
+        self.assertTrue(os.path.isfile(path + "result_export/index.html"))
 
         specs_path = self.prepare_import_specs(path)
 
         app = ImmuneMLApp(specs_path, path + 'result_import/')
         result_path = app.run()
 
-        self.assertTrue(os.path.isfile(result_path))
+        self.assertTrue(os.path.isfile(path + "result_import/index.html"))
 
         shutil.rmtree(path)

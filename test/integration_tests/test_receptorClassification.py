@@ -22,7 +22,7 @@ from source.hyperparameter_optimization.config.SplitType import SplitType
 from source.hyperparameter_optimization.strategy.GridSearch import GridSearch
 from source.ml_methods.SimpleLogisticRegression import SimpleLogisticRegression
 from source.util.PathBuilder import PathBuilder
-from source.workflows.instructions.HPOptimizationInstruction import HPOptimizationInstruction
+from source.workflows.instructions.TrainMLModelInstruction import TrainMLModelInstruction
 
 
 class TestReceptorClassification(TestCase):
@@ -75,10 +75,10 @@ class TestReceptorClassification(TestCase):
         lc = LabelConfiguration()
         lc.add_label("l1", [1, 2])
 
-        instruction = HPOptimizationInstruction(dataset, GridSearch([hp_setting]), [hp_setting],
-                                                SplitConfig(SplitType.RANDOM, 1, 0.5, reports=ReportConfig()),
-                                                SplitConfig(SplitType.RANDOM, 1, 0.5, reports=ReportConfig()),
-                                                {Metric.BALANCED_ACCURACY}, Metric.BALANCED_ACCURACY, lc, path)
+        instruction = TrainMLModelInstruction(dataset, GridSearch([hp_setting]), [hp_setting],
+                                              SplitConfig(SplitType.RANDOM, 1, 0.5, reports=ReportConfig()),
+                                              SplitConfig(SplitType.RANDOM, 1, 0.5, reports=ReportConfig()),
+                                              {Metric.BALANCED_ACCURACY}, Metric.BALANCED_ACCURACY, lc, path)
 
         state = instruction.run(result_path=path)
         print(vars(state))

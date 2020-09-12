@@ -57,7 +57,7 @@ class Quickstart:
             },
             "instructions": {
                 "inst1": {
-                    "type": "HPOptimization",
+                    "type": "TrainMLModel",
                     "settings": [
                         {
                             "preprocessing": "seq1",
@@ -93,7 +93,8 @@ class Quickstart:
                     "metrics": ["accuracy"],
                     "reports": ["rep1"],
                     "batch_size": 10,
-                    "optimization_metric": "balanced_accuracy"
+                    "optimization_metric": "balanced_accuracy",
+                    "refit_optimal_model": False
                 }
             }
         }

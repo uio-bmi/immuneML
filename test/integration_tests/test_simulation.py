@@ -130,7 +130,7 @@ class TestSimulation(TestCase):
         PathBuilder.build(path + "result/")
 
         app = ImmuneMLApp(specification_path=specs_path, result_path=path + "result/")
-        result_path = app.run()
+        app.run()
 
         self.assertTrue(os.path.isfile(path + "result/inst1/metadata.csv"))
 
@@ -138,7 +138,7 @@ class TestSimulation(TestCase):
         self.assertTrue("signal_signal1" in metadata_df.columns)
         self.assertEqual(17, sum(metadata_df["signal_signal1"]))
 
-        self.assertTrue(os.path.isfile(result_path))
+        self.assertTrue(os.path.isfile(path+"result/index.html"))
         self.assertTrue(os.path.isfile(path + "result/inst1/exported_dataset/pickle/d1.iml_dataset"))
 
         shutil.rmtree(path)
@@ -220,9 +220,9 @@ class TestSimulation(TestCase):
             yaml.dump(specs, file)
 
         app = ImmuneMLApp(path + "specs.yaml", path + "result/")
-        result_path = app.run()
+        app.run()
 
-        self.assertTrue(os.path.isfile(result_path))
+        self.assertTrue(os.path.isfile(path+"result/index.html"))
         self.assertTrue(os.path.isfile(path + "result/inst1/exported_dataset/pickle/d1.iml_dataset"))
         dataset = PickleImport.import_dataset({"path": path + "result/inst1/exported_dataset/pickle/d1.iml_dataset"}, "d1")
 

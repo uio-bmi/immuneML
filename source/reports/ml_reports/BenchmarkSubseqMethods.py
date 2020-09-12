@@ -20,7 +20,7 @@ class BenchmarkSubseqMethods(BenchmarkHPSettings):
     This report can only be used to plot the results for setting combinations using k-mer encoding with continuous k-mers
     (in combination with any ML method), or DeepRC encoding + ml method.
 
-    This report can only be used with HPOptimization instruction under assessment/reports/hyperparameter.
+    This report can only be used with TrainMLModel instruction under assessment/reports/hyperparameter.
 
     Attributes:
 

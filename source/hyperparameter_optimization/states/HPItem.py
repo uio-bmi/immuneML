@@ -2,6 +2,7 @@ from dataclasses import dataclass, field
 from typing import List
 
 from source.data_model.dataset.Dataset import Dataset
+from source.encodings.DatasetEncoder import DatasetEncoder
 from source.hyperparameter_optimization.HPSetting import HPSetting
 from source.ml_methods.MLMethod import MLMethod
 from source.reports.ReportResult import ReportResult
@@ -11,6 +12,7 @@ from source.reports.ReportResult import ReportResult
 class HPItem:
 
     method: MLMethod = None
+    encoder: DatasetEncoder = None
     performance: float = None
     hp_setting: HPSetting = None
     train_predictions_path: str = None

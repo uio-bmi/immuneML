@@ -5,7 +5,6 @@ import warnings
 from typing import Tuple
 
 import numpy as np
-import pkg_resources
 import yaml
 from scipy.special import beta as beta_func
 from scipy.special import betaln as beta_func_ln
@@ -313,7 +312,7 @@ class ProbabilisticBinaryClassifier(MLMethod):
 
     def get_classes_for_label(self, label):
         if label == self.label_name:
-            return list(self.class_mapping.values())
+            return np.array(list(self.class_mapping.values()))
         else:
             warnings.warn("ProbabilisticBinaryClassifier: in get_classes_for_label() a label was passed in for which "
                           "the classifier was not trained: returning None...", RuntimeWarning)
@@ -325,7 +324,7 @@ class ProbabilisticBinaryClassifier(MLMethod):
         for key, value in content.items():
             if isinstance(value, np.ndarray):
                 result[key] = value.tolist()
-            elif value is None or isinstance(value, str) or isinstance(value, dict):
+            elif value is None or isinstance(value, str) or isinstance(value, dict) or isinstance(value, list):
                 result[key] = value
             else:
                 result[key] = float(value)
@@ -396,7 +395,7 @@ class ProbabilisticBinaryClassifier(MLMethod):
         return [self.label_name]
 
     def get_package_info(self) -> str:
-        return 'immuneML ' + pkg_resources.get_distribution('immuneML').version
+        return Util.get_immuneML_version()
 
     def get_feature_names(self) -> list:
         return self.feature_names

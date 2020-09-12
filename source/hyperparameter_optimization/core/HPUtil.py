@@ -108,7 +108,7 @@ class HPUtil:
         report_results = []
         for key, report in state.assessment.reports.hyperparameter_reports.items():
             tmp_report = copy.deepcopy(report)
-            tmp_report.hp_optimization_state = state
+            tmp_report.state = state
             tmp_report.result_path = f"{path}{key}/"
             report_result = tmp_report.generate_report()
             report_results.append(report_result)

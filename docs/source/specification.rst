@@ -32,7 +32,7 @@ The overall structure of the YAML specification is the following:
         ml_method_class_name: # see below for the specification of different ML methods
           ... # parameters of the method if any (if none are specified, default values are used)
         # the parameters model_selection_cv and model_selection_n_folds can be specified for any ML method used and define if there will be
-        # an internal cross-validation for the given method (if used with HPOptimization instruction, this will result in the third nested CV, but only over method parameters)
+        # an internal cross-validation for the given method (if used with TrainMLModel instruction, this will result in the third nested CV, but only over method parameters)
         model_selection_cv: False # whether to use cross-validation and random search to estimate the optimal parameters for one split to train/test (True/False)
         model_selection_n_folds: -1 # number of folds if cross-validation is used for model selection and optimal parameter estimation
     preprocessing_sequences: # optional keyword - present if preprocessing sequences are used
@@ -100,7 +100,7 @@ ExploratoryAnalysis
 
 .. include:: ../specs/instructions/exploratory_analysis.rst
 
-HPOptimization
+TrainMLModel
 --------------------
 
 .. include:: ../specs/instructions/hp.rst

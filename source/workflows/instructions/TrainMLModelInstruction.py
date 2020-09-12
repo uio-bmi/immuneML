@@ -1,4 +1,7 @@
+from collections import Counter
+
 from scripts.specification_util import update_docs_per_mapping
+from source.IO.ml_method.MLExporter import MLExporter
 from source.environment.LabelConfiguration import LabelConfiguration
 from source.environment.Metric import Metric
 from source.hyperparameter_optimization.config.SplitConfig import SplitConfig
@@ -7,9 +10,10 @@ from source.hyperparameter_optimization.states.HPOptimizationState import HPOpti
 from source.hyperparameter_optimization.strategy.HPOptimizationStrategy import HPOptimizationStrategy
 from source.util.ReflectionHandler import ReflectionHandler
 from source.workflows.instructions.Instruction import Instruction
+from source.workflows.instructions.MLProcess import MLProcess
 
 
-class HPOptimizationInstruction(Instruction):
+class TrainMLModelInstruction(Instruction):
     """
     Class implementing hyper-parameter optimization and training and assessing the model through nested cross-validation (CV).
     The process is defined by two loops:
@@ -43,13 +47,16 @@ class HPOptimizationInstruction(Instruction):
 
         data_reports (list): a list of reports to be executed on the whole dataset.
 
+        refit_optimal_model (bool): if the final combination of preprocessing-encoding-ML model should be refitted on the full dataset thus providing
+        the final model to be exported from instruction; alternatively, train combination from one of the assessment folds will be used
+
     Specification:
 
     .. indent with spaces
     .. code-block:: yaml
 
         my_nested_cv_instruction: # user-defined name of the instruction
-            type: HPOptimization # which instruction should be executed
+            type: TrainMLModel # which instruction should be executed
             settings: # a list of combinations of preprocessing, encoding and ml_method to optimize over
                 - preprocessing: seq1 # preprocessing is optional
                   encoding: e1 # mandatory field
@@ -90,21 +97,40 @@ class HPOptimizationInstruction(Instruction):
                 - rep1
             batch_size: 4 # number of parallel processes to create (could speed up the computation)
             optimization_metric: balanced_accuracy # the metric to use for choosing the optimal model and during training
+            refit_optimal_model: False # use trained model, do not refit on the full dataset
 
     """
 
     def __init__(self, dataset, hp_strategy: HPOptimizationStrategy, hp_settings: list, assessment: SplitConfig, selection: SplitConfig,
                  metrics: set, optimization_metric: Metric, label_configuration: LabelConfiguration, path: str = None,
-                 context: dict = None, batch_size: int = 1, data_reports: dict = None, name: str = None):
-        self.hp_optimization_state = HPOptimizationState(dataset, hp_strategy, hp_settings, assessment, selection, metrics,
-                                                         optimization_metric, label_configuration, path, context, batch_size,
-                                                         data_reports if data_reports is not None else {}, name)
+                 context: dict = None, batch_size: int = 1, data_reports: dict = None, name: str = None, refit_optimal_model: bool = False):
+        self.state = HPOptimizationState(dataset, hp_strategy, hp_settings, assessment, selection, metrics,
+                                         optimization_metric, label_configuration, path, context, batch_size,
+                                         data_reports if data_reports is not None else {}, name, refit_optimal_model)
 
     def run(self, result_path: str):
-        self.hp_optimization_state.path = result_path
-        state = HPAssessment.run_assessment(self.hp_optimization_state)
-        self.print_performances(state)
-        return state
+        self.state.path = result_path
+        self.state = HPAssessment.run_assessment(self.state)
+        self._compute_optimal_hp_item_per_label()
+        self.print_performances(self.state)
+        return self.state
+
+    def _compute_optimal_hp_item_per_label(self):
+        for label in self.state.label_configuration.get_labels_by_name():
+            self._compute_optimal_item(label)
+            zip_path = MLExporter.export_zip(hp_item=self.state.optimal_hp_items[label], path=f"{self.state.path}optimal_{label}/")
+            self.state.optimal_hp_item_paths[label] = zip_path
+
+    def _compute_optimal_item(self, label: str):
+        optimal_hp_settings = [state.label_states[label].optimal_hp_setting for state in self.state.assessment_states]
+        optimal_hp_setting = Counter(optimal_hp_settings).most_common(1)[0][0]
+        if self.state.refit_optimal_model:
+            self.state.optimal_hp_items[label] = MLProcess(self.state.dataset, None, label, self.state.metrics, self.state.optimization_metric,
+                                                           f"{self.state.path}optimal_{label}/", number_of_processes=self.state.batch_size,
+                                                           label_config=self.state.label_configuration, hp_setting=optimal_hp_setting).run(0)
+        else:
+            optimal_assessment_state = self.state.assessment_states[optimal_hp_settings.index(optimal_hp_setting)]
+            self.state.optimal_hp_items[label] = optimal_assessment_state.label_states[label].optimal_assessment_item
 
     def print_performances(self, state: HPOptimizationState):
         print(f"Performances ({state.optimization_metric.name.lower()}) -----------------------------------------------")
@@ -120,7 +146,7 @@ class HPOptimizationInstruction(Instruction):
 
     @staticmethod
     def get_documentation():
-        doc = str(HPOptimizationInstruction.__doc__)
+        doc = str(TrainMLModelInstruction.__doc__)
         valid_values = str([metric.name.lower() for metric in Metric])[1:-1].replace("'", "`")
         valid_strategies = str(ReflectionHandler.all_nonabstract_subclass_basic_names(HPOptimizationStrategy, "",
                                                                                       "hyperparameter_optimization/strategy/"))[1:-1]\

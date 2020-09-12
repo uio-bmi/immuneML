@@ -3,7 +3,7 @@ from scripts.specification_util import update_docs_per_mapping
 
 class ReportConfig:
     """
-    A class encapsulating different report lists which can be executed while performing nested cross-validation (CV) using HPOptimization
+    A class encapsulating different report lists which can be executed while performing nested cross-validation (CV) using TrainMLModel
     instruction. All arguments are optional.
 
     Arguments:
@@ -16,7 +16,8 @@ class ReportConfig:
 
         encoding (dict): reports to be executed on the encoded training/test datasets or training/validation datasets
 
-        hyperparameter (dict): reports to be executed after the nested CV has finished to show the overall performance; this parameter can only be specified under assessment key in HPOptimization instruction.
+        hyperparameter (dict): reports to be executed after the nested CV has finished to show the overall performance; this parameter can only be
+        specified under assessment key in TrainMLModel instruction.
 
     Specification:
 

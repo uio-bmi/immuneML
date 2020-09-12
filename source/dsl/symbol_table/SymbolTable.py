@@ -1,4 +1,5 @@
 import warnings
+from typing import List
 
 from source.dsl.symbol_table.SymbolTableEntry import SymbolTableEntry
 from source.dsl.symbol_table.SymbolType import SymbolType
@@ -43,7 +44,7 @@ class SymbolTable:
     def contains(self, symbol):
         return symbol in self._items
 
-    def get_by_type(self, symbol_type: SymbolType) -> list:
+    def get_by_type(self, symbol_type: SymbolType) -> List[SymbolTableEntry]:
         items = [self._items[key] for key in self._items.keys() if self._items[key].symbol_type == symbol_type]
         return items
 

@@ -50,6 +50,12 @@ extensions = [
     'sphinx.ext.autosectionlabel'
 ]
 
+# mathjax configuration
+mathjax_config = {
+    'extensions': ['tex2jax.js'],
+    'jax': ['input/TeX', 'output/HTML-CSS'],
+}
+
 autodoc_mock_imports = ["pandas", "sklearn", "numpy", "pystache", "dask"]
 
 # Add any paths that contain templates here, relative to this directory.

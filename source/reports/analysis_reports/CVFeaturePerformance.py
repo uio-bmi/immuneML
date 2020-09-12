@@ -3,6 +3,7 @@ from typing import Tuple, List
 
 import numpy as np
 import pandas as pd
+import plotly.express as px
 import plotly.graph_objects as go
 
 from source.hyperparameter_optimization.states.HPOptimizationState import HPOptimizationState
@@ -93,8 +94,8 @@ class CVFeaturePerformance(Report):
     def _plot(self, training_dataframe, test_dataframe):
 
         fig = go.Figure()
-        fig.add_trace(go.Scatter(x=training_dataframe["x"], y=training_dataframe["y"], name="training", mode="markers", marker_color="#A2CD5A"))
-        fig.add_trace(go.Scatter(x=test_dataframe["x"], y=test_dataframe["y"], name="test", mode="markers", marker_color="cornflowerblue"))
+        fig.add_trace(go.Scatter(x=training_dataframe["x"], y=training_dataframe["y"], name="training", mode="markers", marker_color=px.colors.diverging.Tealrose[0]))
+        fig.add_trace(go.Scatter(x=test_dataframe["x"], y=test_dataframe["y"], name="test", mode="markers", marker_color=px.colors.diverging.Tealrose[-1]))
         fig.update_layout(legend_title_text="Data", title="CV performance across feature values", template="plotly_white")
         fig.update_xaxes(title_text=self.feature)
         fig.update_yaxes(title_text=f"performance ({self.hp_optimization_state.optimization_metric.name.lower()})")

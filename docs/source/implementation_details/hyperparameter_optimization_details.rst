@@ -6,10 +6,10 @@ The flow of the hyperparameter optimization is shown in the Figure 1, along with
 .. figure:: ../_static/images/hp_optmization_with_outputs.png
   :width: 70%
 
-  Figure 1 - execution flow of the HPOptimizationInstruction along with the information on data and reports generated at each step
+  Figure 1 - execution flow of the TrainMLModel along with the information on data and reports generated at each step
 
-The code is split into `HPOptimizationInstruction`, `HPAssessment`, `HPSelection`, `HPUtil` and `HPReports` classes. All code related to hyperparameter
-optimization is located in the hyperparameter_optimization package, except HPOptimizationInstruction which is located in the instructions package.
+The code is split into `TrainMLModelInstruction`, `HPAssessment`, `HPSelection`, `HPUtil` and `HPReports` classes. All code related to hyperparameter
+optimization is located in the hyperparameter_optimization package, except TrainMLModelInstruction which is located in the instructions package.
 
 The parameters used to define the hyperparameter optimization, such as dataset, how to split the data, which batch size to use,
 along with intermediary results, such as split data and trained ML models are all kept in the `HPOptimizationState` class instance.

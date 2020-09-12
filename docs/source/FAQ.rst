@@ -29,15 +29,15 @@ There is an issue with the type of entry when specifying a list of inputs, why d
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Please check that the YAML is in valid format. To list different inputs (e.g. a list of reports under assessment/reports/hyperparameter in
-HPOptimization instruction), the correct YAML syntax includes a space between - and the list item.
+TrainMLModel instruction), the correct YAML syntax includes a space between - and the list item.
 
-When running the HPOptimization instruction multiple times, sometimes it fails saying that there is only one class in the data. Why does this happen?
+When running the TrainMLModel instruction multiple times, sometimes it fails saying that there is only one class in the data. Why does this happen?
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Please check the number of examples used for machine learning (e.g. number of repertoires). If there are very few examples, and/or if classes
 are not balanced, it is possible that just by chance, the data from only one class will be in the training set. If that happens, the classifiers
-will not train and an error will be thrown. To fix this, try working with a larger dataset or check how HPOptimization is specified.
-If HPOptimization does nested cross-validation, it might require a bit more data. To perform only cross-validation, under `selection` key, specify
+will not train and an error will be thrown. To fix this, try working with a larger dataset or check how TrainMLModel is specified.
+If TrainMLModel does nested cross-validation, it might require a bit more data. To perform only cross-validation, under `selection` key, specify
 that `split_strategy` is `random` and that `training_percentage` is `1` (to use all data from the inner loop for training). In this way, instead of having
-multiple training/validation/test splits, there will be only training/test splits as specified under key `assessment` in HPOptimization instruction.
+multiple training/validation/test splits, there will be only training/test splits as specified under key `assessment` in TrainMLModel instruction.
 

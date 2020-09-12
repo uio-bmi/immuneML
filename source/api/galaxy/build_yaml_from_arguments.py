@@ -1,9 +1,10 @@
 import argparse
-import yaml
+import glob
 import itertools as it
 import os
 import sys
-import glob
+
+import yaml
 
 from source.encodings.kmer_frequency.ReadsType import ReadsType
 from source.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType import SequenceEncodingType
@@ -161,7 +162,7 @@ def build_specs(args):
         },
         "instructions": {
             "inst1": {
-                "type": "HPOptimization",
+                "type": "TrainMLModel",
                 "settings": [],
                 "assessment": {
                     "split_strategy": "random",
@@ -183,7 +184,8 @@ def build_specs(args):
                 "metrics": ["accuracy", "balanced_accuracy"],
                 "batch_size": 10,
                 "reports": [],
-                "optimization_metric": "balanced_accuracy"
+                "optimization_metric": "balanced_accuracy",
+                'refit_optimal_model': False
             }
         }
     }

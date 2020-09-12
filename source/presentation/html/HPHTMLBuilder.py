@@ -11,7 +11,7 @@ from source.util.StringHelper import StringHelper
 class HPHTMLBuilder:
     """
     A class that will make HTML file(s) out of HPOptimizationState object to show what analysis took place in
-    the HPOptimizationInstruction.
+    the TrainMLModel.
     """
 
     CSS_PATH = f"{EnvironmentSettings.html_templates_path}css/custom.css"
@@ -29,7 +29,7 @@ class HPHTMLBuilder:
 
         base_path = PathBuilder.build(state.path + "../HTML_output/")
         html_map = HPHTMLBuilder.make_main_html_map(state, base_path)
-        result_file = f"{base_path}HPOptimizationReport_{state.name}.html"
+        result_file = f"{base_path}TrainMLModelReport_{state.name}.html"
 
         TemplateParser.parse(template_path=f"{EnvironmentSettings.html_templates_path}HPOptimization.html",
                              template_map=html_map, result_path=result_file)
@@ -175,6 +175,12 @@ class HPHTMLBuilder:
                 state.label_configuration.get_labels_by_name()]
 
     @staticmethod
+    def make_model_per_label(state: HPOptimizationState, base_path: str) -> list:
+        return [{'label': label, 'model_path': os.path.relpath(state.optimal_hp_item_paths[label], base_path)}
+                for label in state.label_configuration.get_labels_by_name()]
+
+
+    @staticmethod
     def make_main_html_map(state: HPOptimizationState, base_path: str) -> dict:
         html_map = {
             "css_style": Util.get_css_content(HPHTMLBuilder.CSS_PATH),
@@ -192,7 +198,8 @@ class HPHTMLBuilder:
             "show_dataset_reports": bool(state.data_report_results),
             "show_hp_reports": bool(state.hp_report_results),
             'hp_reports': Util.to_dict_recursive(state.hp_report_results, base_path) if state.hp_report_results else None,
-            "hp_per_label": HPHTMLBuilder.make_hp_per_label(state)
+            "hp_per_label": HPHTMLBuilder.make_hp_per_label(state),
+            'models_per_label': HPHTMLBuilder.make_model_per_label(state, base_path)
         }
 
         return html_map

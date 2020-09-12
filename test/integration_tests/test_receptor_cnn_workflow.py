@@ -62,7 +62,7 @@ class TestReceptorCNNWorkflow(TestCase):
             },
             "instructions": {
                 "instr1": {
-                    "type": "HPOptimization",
+                    "type": "TrainMLModel",
                     "settings": [
                         {
                             "encoding": "enc1",
@@ -85,7 +85,8 @@ class TestReceptorCNNWorkflow(TestCase):
                     "metrics": ["accuracy"],
                     "batch_size": 4,
                     "reports": None,
-                    "optimization_metric": "balanced_accuracy"
+                    "optimization_metric": "balanced_accuracy",
+                    "refit_optimal_model": False
                 }
             }
         }

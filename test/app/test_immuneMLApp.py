@@ -124,7 +124,7 @@ class TestImmuneMLApp(TestCase):
                     "formats": ["AIRR"]
                 },
                 "inst1": {
-                    "type": "HPOptimization",
+                    "type": "TrainMLModel",
                     "settings": [
                         {
                             "preprocessing": "seq1",
@@ -164,7 +164,8 @@ class TestImmuneMLApp(TestCase):
                     "metrics": ["accuracy", "auc"],
                     "reports": ["rep1"],
                     "batch_size": 10,
-                    "optimization_metric": "accuracy"
+                    "optimization_metric": "accuracy",
+                    'refit_optimal_model': False
                 }
             },
             "output": {

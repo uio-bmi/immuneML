@@ -3,7 +3,6 @@ import logging
 
 import numpy as np
 import pandas as pd
-import pkg_resources
 import torch
 import yaml
 
@@ -206,7 +205,7 @@ class KmerMILClassifier(MLMethod):
         return [self.label_name]
 
     def get_package_info(self) -> str:
-        return 'immuneML ' + pkg_resources.get_distribution('immuneML').version
+        return Util.get_immuneML_version()
 
     def get_feature_names(self) -> list:
         return self.feature_names

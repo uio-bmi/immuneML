@@ -1,6 +1,7 @@
 from typing import Tuple, List
 
 import pandas as pd
+import plotly.express as px
 import plotly.graph_objects as go
 
 from source.data_model.dataset.ReceptorDataset import ReceptorDataset
@@ -50,16 +51,18 @@ class ReceptorDatasetOverview(DataReport):
             x=dfs[0]["length"],
             histnorm='probability density',
             opacity=0.75,
-            name=chains[0]
+            name=chains[0],
+            marker={'color': px.colors.diverging.Tealrose[0]}
         ))
         fig.add_trace(go.Histogram(
             x=dfs[1]["length"],
             histnorm='probability density',
             opacity=0.75,
-            name=chains[1]
+            name=chains[1],
+            marker={'color': px.colors.diverging.Tealrose[-2]}
         ))
         fig.update_layout(title_text="Receptor sequence length distribution per chain", xaxis_title_text="receptor sequence length",
-                          yaxis_title_text="frequency", bargap=0.2, bargroupgap=0.1)
+                          yaxis_title_text="frequency", bargap=0.2, bargroupgap=0.1, template="plotly_white")
 
         image_output, table_outputs = self._store_sequence_distribution_data(fig, dfs, chains)
 

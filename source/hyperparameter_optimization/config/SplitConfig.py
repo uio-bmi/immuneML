@@ -47,7 +47,7 @@ class SplitConfig:
     .. indent with spaces
     .. code-block:: yaml
 
-        # as a part of a HPOptimization instruction, defining the outer (assessment) loop of nested cross-validation:
+        # as a part of a TrainMLModel instruction, defining the outer (assessment) loop of nested cross-validation:
         assessment: # outer loop of nested CV
             split_strategy: random # perform Monte Carlo CV (randomly split the data into train and test)
             split_count: 5 # how many train/test datasets to generate
@@ -60,7 +60,7 @@ class SplitConfig:
                 hyperparameter: # list of reports to execute when nested CV is finished to show overall performance
                     - rep2
 
-        # as a part of a HPOptimization instruction, defining the inner (selection) loop of nested cross-validation:
+        # as a part of a TrainMLModel instruction, defining the inner (selection) loop of nested cross-validation:
         selection: # inner loop of nested CV
             split_strategy: leave_one_out_stratification
             leave_one_out_config: # perform leave-(subject)-out CV

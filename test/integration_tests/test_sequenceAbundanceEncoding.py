@@ -58,7 +58,7 @@ class TestSequenceAbundanceEncoding(TestCase):
             },
             "instructions": {
                 "inst1": {
-                    "type": "HPOptimization",
+                    "type": "TrainMLModel",
                     "settings": [
                         {
                             "encoding": "e1",
@@ -81,7 +81,8 @@ class TestSequenceAbundanceEncoding(TestCase):
                     "metrics": ["accuracy"],
                     "batch_size": 2,
                     "reports": None,
-                    "optimization_metric": "balanced_accuracy"
+                    "optimization_metric": "balanced_accuracy",
+                    "refit_optimal_model": True
                 }
             }
         }

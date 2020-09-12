@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>immuneML: Multiple Dataset Benchmark Overview</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        {{{css_style}}}
+    </style>
+
+</head>
+<body>
+    <div class="container">
+        <h1>Multiple Dataset Benchmark</h1>
+        <div>Results from each instruction are available here:</div>
+        {{#instruction_overviews}}
+        <div class="padded-xs"><a href="{{{path}}}">{{name}}</a></div>
+        {{/instruction_overviews}}
+        {{#show_reports}}
+        <h2>Report results</h2>
+        {{#reports}}
+            {{#output_figures}}
+            <div class="padded-xs center">
+                <embed alt="report" src="{{path}}">
+                <p>{{name}}</p>
+            </div>
+            {{/output_figures}}
+            <div class="padded">
+                {{#output_tables}}
+                <div class="padded-xs">
+                    <a href="{{path}}">{{name}}</a>
+                </div>
+                {{/output_tables}}
+                {{#output_text}}
+                <div class="padded-xs">
+                    <a href="{{path}}">{{name}}</a>
+                </div>
+                {{/output_text}}
+                {{#other_outputs}}
+                <div>
+                    <a href="{{path}}">{{name}}</a>
+                </div>
+                {{/other_outputs}}
+            </div>
+        {{/reports}}
+        {{/show_reports}}
+    </div>
+</body>
+</html>

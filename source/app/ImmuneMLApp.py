@@ -58,15 +58,15 @@ class ImmuneMLApp:
 
 def run_immuneML(namespace: argparse.Namespace):
 
-    if os.path.isdir(namespace.output_dir) and len(os.listdir(namespace.output_dir)) != 0:
-        raise ValueError(f"Directory {namespace.output_dir} already exists. Please specify a new output directory for the analysis.")
-    PathBuilder.build(namespace.output_dir)
+    if os.path.isdir(namespace.result_path) and len(os.listdir(namespace.result_path)) != 0:
+        raise ValueError(f"Directory {namespace.result_path} already exists. Please specify a new output directory for the analysis.")
+    PathBuilder.build(namespace.result_path)
 
-    logging.basicConfig(filename=namespace.output_dir + "/log.txt", level=logging.INFO, format='%(asctime)s %(levelname)s: %(message)s')
+    logging.basicConfig(filename=namespace.result_path + "/log.txt", level=logging.INFO, format='%(asctime)s %(levelname)s: %(message)s')
     warnings.showwarning = lambda message, category, filename, lineno, file=None, line=None: logging.warning(message)
 
     if namespace.tool is None:
-        app = ImmuneMLApp(namespace.yaml_path, namespace.output_dir)
+        app = ImmuneMLApp(namespace.specification_path, namespace.result_path)
     else:
         app_cls = ReflectionHandler.get_class_by_name(namespace.tool, "api/")
         app = app_cls(**vars(namespace))
@@ -76,14 +76,10 @@ def run_immuneML(namespace: argparse.Namespace):
 
 def main():
     parser = argparse.ArgumentParser(description="immuneML command line tool")
-    parser.add_argument("yaml_path", help="Path to specification YAML file. Always used to define the analysis.")
-    parser.add_argument("output_dir", help="Output directory path.")
-    parser.add_argument("--inputs", type=str, help="List of files to be used in the analysis, including raw repertoire files, metadata"
-                                                   "files, additional files such as reference sequences or other inputs, existing dataset "
-                                                   "files and others. Anything that immuneML can accept in the specification can be listed "
-                                                   "here.")
+    parser.add_argument("specification_path", help="Path to specification YAML file. Always used to define the analysis.")
+    parser.add_argument("result_path", help="Output directory path.")
     parser.add_argument("--tool", help="Name of the tool which calls immuneML. This name will be used to invoke appropriate API call, "
-                                       "which will then preprocess the data/specs in tool-dependent way before running standard immuneML.")
+                                       "which will then do additional work in tool-dependent way before running standard immuneML.")
     run_immuneML(parser.parse_args())
 
 

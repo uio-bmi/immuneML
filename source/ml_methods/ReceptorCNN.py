@@ -4,7 +4,6 @@ import math
 import random
 
 import numpy as np
-import pkg_resources
 import torch
 import yaml
 from torch import nn
@@ -294,7 +293,7 @@ class ReceptorCNN(MLMethod):
 
     def get_classes_for_label(self, label):
         if self.label_name == label:
-            return self.class_mapping.values()
+            return np.array(list(self.class_mapping.values()))
 
     def get_params(self, label):
         params = copy.deepcopy(vars(self))
@@ -305,7 +304,7 @@ class ReceptorCNN(MLMethod):
         return [self.label_name]
 
     def get_package_info(self) -> str:
-        return 'immuneML ' + pkg_resources.get_distribution('immuneML').version
+        return Util.get_immuneML_version()
 
     def get_feature_names(self) -> list:
         return self.feature_names

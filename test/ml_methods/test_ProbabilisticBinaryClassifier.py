@@ -40,7 +40,7 @@ class TestProbabilisticBinaryClassifier(TestCase):
         self.assertTrue(proba_predictions["cmv"][0, 1] > proba_predictions["cmv"][0, 0])
         self.assertTrue(proba_predictions["cmv"][1, 0] > proba_predictions["cmv"][1, 1])
         self.assertTrue((proba_predictions["cmv"] <= 1.0).all() and (proba_predictions["cmv"] >= 0.0).all())
-        self.assertTrue(isinstance(labels, list))
+        self.assertTrue(isinstance(labels, np.ndarray))
 
     def test_store(self):
 

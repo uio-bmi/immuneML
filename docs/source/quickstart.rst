@@ -69,7 +69,7 @@ These components can be defined in the following way:
 Specifying the instruction - training an ML classifier
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The instruction that we will use to train a logistic regression classifier is called HPOptimization (hyperparameter optimization).
+The instruction that we will use to train a logistic regression classifier is called TrainMLModel.
 For that instruction, we need to define which dataset we want to use (my_dataset from the specification above), what we want to predict
 (which label we want to use – CMV here), which metric we want to optimize (here: accuracy), how we want to split the data for training,
 validation and testing (here: split to training and test data, where training will include 70 repertoires and test will have 30 repertoires),
@@ -86,7 +86,7 @@ my_train_classifier_instruction):
 
   instructions:
   my_train_classifier_instruction:
-    type: HPOptimization
+    type: TrainMLModel
     dataset: my_dataset # the dataset defined in definitions / datasets
     labels: ["CMV"] # which label to use for prediction - classify CMV here
     optimization_metric: accuracy # for multiple classifiers, which metric to optimize
