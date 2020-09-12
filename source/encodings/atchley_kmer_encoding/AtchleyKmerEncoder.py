@@ -1,10 +1,14 @@
 import logging
+import math
+from multiprocessing import Pool
 from typing import Tuple, List
 
 import numpy as np
 import yaml
 
 from scripts.specification_util import update_docs_per_mapping
+from source.caching.CacheHandler import CacheHandler
+from source.caching.CacheObjectType import CacheObjectType
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.encoded_data.EncodedData import EncodedData
 from source.encodings.DatasetEncoder import DatasetEncoder
@@ -107,32 +111,41 @@ class AtchleyKmerEncoder(DatasetEncoder):
 
     def _encode_examples(self, dataset: RepertoireDataset, params: EncoderParams) -> Tuple[list, set, dict]:
 
-        remove_aa_func = lambda seqs: [seq[self.skip_first_n_aa:-self.skip_last_n_aa] for seq in seqs]
-        examples = []
         keys = set()
-
-        labels = {label: [] for label in params.label_config.get_labels_by_name()} if params.encode_labels else None
         example_count = dataset.get_example_count()
 
-        for index, repertoire in enumerate(dataset.get_data()):
-            logging.info(f"AtchleyKmerEncoder: encoding repertoire {index+1}/{example_count}.")
-            sequences, counts = self._trunc_sequences(repertoire, remove_aa_func)
-            abundances = Util.compute_abundance(sequences, counts, self.k, self.abundance)
-            kmers = list(abundances.keys())
-            atchley_factors_df = Util.get_atchely_factors(kmers, self.k)
-            atchley_factors_df["abundances"] = np.log(list(abundances.values()))
+        arguments = [(repertoire, index, example_count) for index, repertoire in enumerate(dataset.repertoires)]
 
-            encoded = atchley_factors_df.to_dict('index')
-            encoded = {key: list(encoded[key].values()) for key in encoded}
-            keys.update(list(encoded.keys()))
+        with Pool(params.pool_size) as pool:
+            chunksize = math.floor(dataset.get_example_count() / params.pool_size) + 1
+            examples = pool.starmap(self._process_repertoire_cached, arguments, chunksize=chunksize)
 
-            examples.append(encoded)
+        for example in examples:
+            keys.update(list(example.keys()))
 
-            if labels is not None:
-                for label in labels:
-                    labels[label].append(repertoire.metadata[label])
+        labels = dataset.get_metadata(params.label_config.get_labels_by_name()) if params.encode_labels else None
 
         return examples, keys, labels
+
+    def _process_repertoire_cached(self, repertoire, index, example_count):
+        return CacheHandler.memo_by_params((('repertoire', repertoire.identifier), ('encoder', AtchleyKmerEncoder.__name__),
+                                            (self.abundance, self.skip_last_n_aa, self.skip_first_n_aa, self.k)),
+                                           lambda: self._process_repertoire(repertoire, index, example_count), CacheObjectType.ENCODING_STEP)
+
+    def _process_repertoire(self, repertoire, index, example_count):
+        remove_aa_func = lambda seqs: [seq[self.skip_first_n_aa:-self.skip_last_n_aa] for seq in seqs]
+
+        logging.info(f"AtchleyKmerEncoder: encoding repertoire {index + 1}/{example_count}.")
+
+        sequences, counts = self._trunc_sequences(repertoire, remove_aa_func)
+        abundances = Util.compute_abundance(sequences, counts, self.k, self.abundance)
+        kmers = list(abundances.keys())
+        atchley_factors_df = Util.get_atchely_factors(kmers, self.k)
+        atchley_factors_df["abundances"] = np.log(list(abundances.values()))
+
+        encoded = atchley_factors_df.to_dict('index')
+        encoded = {key: list(encoded[key].values()) for key in encoded}
+        return encoded
 
     def _vectorize_examples(self, examples, params: EncoderParams, keys: set) -> Tuple[np.ndarray, list]:
 
@@ -151,7 +164,7 @@ class AtchleyKmerEncoder(DatasetEncoder):
         vectorized_examples = [
             np.array([np.array(example[key]) if key in example else np.zeros(self.k * Util.ATCHLEY_FACTOR_COUNT + 1) for key in kmer_keys])
             for example in examples]
-        return np.array(vectorized_examples), kmer_keys
+        return np.array(vectorized_examples, dtype=np.float32), kmer_keys
 
     def _trunc_sequences(self, repertoire, remove_aa_func):
         sequences = repertoire.get_sequence_aas()

@@ -138,7 +138,7 @@ class KmerMILClassifier(MLMethod):
 
     def _get_max_logits_indices(self, data):
         with torch.no_grad():
-            logits = self.logistic_regression(torch.from_numpy(np.swapaxes(data, 1, 2).reshape(data.shape[0] * data.shape[2], -1)).float())
+            logits = self.logistic_regression(torch.from_numpy(np.swapaxes(data, 1, 2).reshape(data.shape[0] * data.shape[2], -1)))
         logits = torch.reshape(logits, (data.shape[0], data.shape[2]))
         max_logits_indices = torch.argmax(logits, dim=1)
         return max_logits_indices.long()
