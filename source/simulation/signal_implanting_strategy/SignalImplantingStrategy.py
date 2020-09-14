@@ -10,7 +10,7 @@ from source.simulation.sequence_implanting.SequenceImplantingStrategy import Seq
 
 class SignalImplantingStrategy(metaclass=abc.ABCMeta):
 
-    def __init__(self, implanting: SequenceImplantingStrategy, sequence_position_weights: dict = None):
+    def __init__(self, implanting: SequenceImplantingStrategy = None, sequence_position_weights: dict = None):
         self.sequence_implanting_strategy = implanting
         self.sequence_position_weights = sequence_position_weights
 

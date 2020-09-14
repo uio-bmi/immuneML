@@ -114,5 +114,5 @@ class HealthySequenceImplanting(SignalImplantingStrategy):
 
         return sequences_to_be_infected, other_sequences
 
-    def implant_in_receptor(self, receptor, signal):
+    def implant_in_receptor(self, receptor, signal, is_noise: bool):
         raise RuntimeError("HealthySequenceImplanting was called on a receptor object. Check the simulation parameters.")
