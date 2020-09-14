@@ -20,7 +20,7 @@ RUN dnf config-manager --set-enabled PowerTools
 RUN yum install -y R
 
 # Installing R dependencies
-RUN R -e "install.packages('devtools', repos = 'https://cran.uib.no/')" -e "devtools::install_github('keshav-motwani/ggexp'); install.packages('Rmisc', dependencies = TRUE, repos = 'https://cran.uib.no/')"
+RUN R -e "install.packages('devtools', repos = 'https://cran.uib.no/')" -e "devtools::install_github('keshav-motwani/ggexp'); install.packages('Rmisc', dependencies = TRUE, repos = 'https://cran.uib.no/'); install.packages('readr', dependencies = TRUE, repos = 'https://cran.uib.no/')"
 
 # Since we are not using venv's, we must install 'wheel' and 'setuptools' manually
 RUN pip3 install wheel setuptools 
