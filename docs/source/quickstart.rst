@@ -85,25 +85,25 @@ my_train_classifier_instruction):
 .. code-block:: yaml
 
   instructions:
-  my_train_classifier_instruction:
-    type: TrainMLModel
-    dataset: my_dataset # the dataset defined in definitions / datasets
-    labels: ["CMV"] # which label to use for prediction - classify CMV here
-    optimization_metric: accuracy # for multiple classifiers, which metric to optimize
-    metrics: [auc] # compute additional metrics (balanced_accuracy, precision, recall)
-    settings: # which ML settings (encoding/ML combination) to try out
-      - {encoding: kmer_frequency, ml_method: logistic_regression}
-    strategy: GridSearch # how to optimize multiple settings (only one valid option)
-    assessment: # split the data to training and test data
-      split_strategy: random # how to split the data - here: split randomly
-      split_count: 1 # how many times (here once - just to train and test)
-      training_percentage: 0.7 # how much data to use for training (70%)
-    selection: # split the train data to train/validation data
-      split_strategy: random
-      split_count: 1
-      training_percentage: 1 # use all data for training
-    reports: [] # reports to be run on the whole dataset e.g. sequence length distribution (no reports in now)
-    batch_size: 4 # number of repertoires to process at the time (4 here)
+    my_train_classifier_instruction:
+      type: TrainMLModel
+      dataset: my_dataset # the dataset defined in definitions / datasets
+      labels: ["CMV"] # which label to use for prediction - classify CMV here
+      optimization_metric: accuracy # for multiple classifiers, which metric to optimize
+      metrics: [auc] # compute additional metrics (balanced_accuracy, precision, recall)
+      settings: # which ML settings (encoding/ML combination) to try out
+        - {encoding: kmer_frequency, ml_method: logistic_regression}
+      strategy: GridSearch # how to optimize multiple settings (only one valid option)
+      assessment: # split the data to training and test data
+        split_strategy: random # how to split the data - here: split randomly
+        split_count: 1 # how many times (here once - just to train and test)
+        training_percentage: 0.7 # how much data to use for training (70%)
+      selection: # split the train data to train/validation data
+        split_strategy: random
+        split_count: 1
+        training_percentage: 1 # use all data for training
+      reports: [] # reports to be run on the whole dataset e.g. sequence length distribution (no reports in now)
+      batch_size: 4 # number of repertoires to process at the time (4 here)
 
 Running the analysis
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
