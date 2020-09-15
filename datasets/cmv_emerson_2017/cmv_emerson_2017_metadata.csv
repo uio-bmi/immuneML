@@ -1,4 +1,4 @@
-filename,donor,sex,age,CMV
+filename,subject_id,sex,age,CMV
 HIP00110.tsv,HIP00110,Male,55,False
 HIP00169.tsv,HIP00169,Male,41,False
 HIP00594.tsv,HIP00594,Male,21,True
