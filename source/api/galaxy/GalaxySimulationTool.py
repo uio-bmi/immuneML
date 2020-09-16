@@ -85,10 +85,10 @@ class GalaxySimulationTool:
 
     """
 
-    def __init__(self, yaml_path, output_dir, **kwargs):
-        Util.check_parameters(yaml_path, output_dir, kwargs, "Galaxy Simulation Tool")
-        self.yaml_path = yaml_path
-        self.result_path = output_dir if output_dir[-1] == '/' else f"{output_dir}/"
+    def __init__(self, specification_path, result_path, **kwargs):
+        Util.check_parameters(specification_path, result_path, kwargs, "Galaxy Simulation Tool")
+        self.yaml_path = specification_path
+        self.result_path = result_path if result_path[-1] == '/' else f"{result_path}/"
 
     def run(self):
         PathBuilder.build(self.result_path)

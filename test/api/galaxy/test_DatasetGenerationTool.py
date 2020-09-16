@@ -1,10 +1,11 @@
 import os
 import shutil
+from argparse import Namespace
 from unittest import TestCase
 
 import yaml
 
-from source.api.galaxy.DatasetGenerationTool import DatasetGenerationTool
+from source.app.ImmuneMLApp import run_immuneML
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.util.PathBuilder import PathBuilder
 
@@ -40,8 +41,7 @@ class TestDatasetGenerationTool(TestCase):
         PathBuilder.build(path)
         self.prepare_specs(yaml_path)
 
-        tool = DatasetGenerationTool(yaml_path=yaml_path, output_dir=result_path)
-        tool.run()
+        run_immuneML(Namespace(**{"specification_path": yaml_path, "result_path": result_path, 'tool': "DatasetGenerationTool"}))
 
         self.assertTrue(os.path.isfile(f"{result_path}result/dataset_name_metadata.csv"))
         self.assertTrue(os.path.isfile(f"{result_path}result/dataset_name.iml_dataset"))

@@ -1,9 +1,10 @@
 import shutil
+from argparse import Namespace
 from unittest import TestCase
 
 import yaml
 
-from source.api.galaxy.GalaxySimulationTool import GalaxySimulationTool
+from source.app.ImmuneMLApp import run_immuneML
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.util.PathBuilder import PathBuilder
 
@@ -78,7 +79,6 @@ class TestGalaxySimulationTool(TestCase):
         with open(specs_path, "w") as file:
             yaml.dump(specs, file)
 
-        tool = GalaxySimulationTool(specs_path, result_path)
-        tool.run()
+        run_immuneML(Namespace(**{"specification_path": specs_path, "result_path": result_path + 'result/', 'tool': "GalaxySimulationTool"}))
 
         shutil.rmtree(path)

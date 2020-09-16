@@ -1,8 +1,7 @@
 import os
-import shutil
 import random as rn
+import shutil
 from unittest import TestCase
-
 
 from source.IO.dataset_export.PickleExporter import PickleExporter
 from source.api.galaxy.RepertoireClassificationTool import RepertoireClassificationTool
@@ -36,7 +35,7 @@ class TestRepertoireClassificationTool(TestCase):
                 '-t', '70', '-c', '5', '-s', 'subsequence', '-p', 'invariant', '-g', 'gapped',
                 '-kl', '1', '-kr', '1', '-gi', '0', '-ga', '1', '-r', 'unique']
 
-        tool = RepertoireClassificationTool(args=args, output_dir=result_path)
+        tool = RepertoireClassificationTool(args=args, result_path=result_path)
         tool.run()
 
         os.chdir(old_working_dir)
