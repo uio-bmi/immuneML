@@ -1,8 +1,11 @@
+import os
 import shutil
 from unittest import TestCase
 
+from source.caching.CacheType import CacheType
 from source.encodings.EncoderParams import EncoderParams
 from source.encodings.atchley_kmer_encoding.AtchleyKmerEncoder import AtchleyKmerEncoder
+from source.environment.Constants import Constants
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.environment.Label import Label
 from source.environment.LabelConfiguration import LabelConfiguration
@@ -11,6 +14,10 @@ from source.util.PathBuilder import PathBuilder
 
 
 class TestAtchleyKmerEncoder(TestCase):
+
+    def setUp(self) -> None:
+        os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
+
     def test_encode(self):
         path = PathBuilder.build(EnvironmentSettings.tmp_test_path + "atchley_kmer_encoding/")
         dataset = RandomDatasetGenerator.generate_repertoire_dataset(3, {1: 1}, {4: 1}, {"l1": {True: 0.4, False: 0.6}}, path + "dataset/")

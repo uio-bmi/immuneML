@@ -1,11 +1,6 @@
-import logging
-import os
-from glob import glob
 from typing import List, Tuple
 
-import numpy as np
-from scipy.cluster.hierarchy import linkage, fcluster
-from scipy.spatial import distance
+from tcrdist.summarize import _select
 
 from source.data_model.dataset.ReceptorDataset import ReceptorDataset
 from source.reports.ReportOutput import ReportOutput
@@ -31,7 +26,9 @@ class TCRdistMotifDiscovery(EncodingReport):
 
         cores (int): number of processes to use for the computation of the distance and motifs
 
-        max_cluster_count (int): max number of clusters to be extracted for motif discovery
+        positive_class_name (str): the class value (e.g., epitope) used to select only the receptors that are specific to the given epitope so that
+        only those sequences are used to infer motifs; the reference receptors as required by TCRdist will be the ones from the dataset that have
+        different or no epitope specified in their metadata
 
     Specification:
 
@@ -41,7 +38,7 @@ class TCRdistMotifDiscovery(EncodingReport):
         my_tcr_dist_report: # user-defined name
             TCRdistMotifDiscovery:
                 cores: 4
-                max_cluster_count: 20
+                positive_class_name: 'AAA' # the epitope value
 
     """
 
@@ -49,93 +46,67 @@ class TCRdistMotifDiscovery(EncodingReport):
     def build_object(cls, **kwargs):
         return TCRdistMotifDiscovery(**kwargs)
 
-    def __init__(self, dataset: ReceptorDataset = None, result_path: str = None, name: str = None, cores: int = None, max_cluster_count: int = None):
+    def __init__(self, dataset: ReceptorDataset = None, result_path: str = None, name: str = None, cores: int = None, positive_class_name: str = None):
         super().__init__(name)
         self.dataset = dataset
         self.label = list(dataset.encoded_data.labels.keys())[0] if dataset is not None else None
         self.result_path = result_path
         self.cores = cores
-        self.max_cluster_count = max_cluster_count
 
     def generate(self) -> ReportResult:
-        import tcrdist as td
-        if len(list(glob(os.path.dirname(td.__file__) + "/db/alphabeta_db.tsv_files/*.tsv"))) == 0:
-            td.setup_db.install_all_next_gen()
 
         self.label = list(self.dataset.encoded_data.labels.keys())[0]
 
         from source.util.TCRdistHelper import TCRdistHelper
+        from tcrdist.rep_diff import hcluster_diff
 
         PathBuilder.build(self.result_path)
         tcr_rep = TCRdistHelper.compute_tcr_dist(self.dataset, [self.label], self.cores)
-        compressed_dmat = distance.squareform(tcr_rep.paired_tcrdist, force="vector")
-        Z = linkage(compressed_dmat, method="complete")
-        # den = dendrogram(Z, color_threshold=np.inf, no_plot=True)
-        cluster_index = fcluster(Z, t=self.max_cluster_count, criterion="maxclust")
-        tcr_rep.clone_df['cluster_index'] = cluster_index
+        tcr_rep.hcluster_df, tcr_rep.Z = hcluster_diff(clone_df=tcr_rep.clone_df, pwmat=tcr_rep.pw_alpha + tcr_rep.pw_beta, x_cols=[self.label],
+                                                       count_col='count')
 
-        cluster_indices = np.unique(cluster_index)
         figures, tables = [], []
 
-        for value in cluster_indices:
-            figure_outputs, table_outputs = self._discover_motif_in_cluster(cluster_index, value, tcr_rep)
+        for index, row in tcr_rep.hcluster_df.iterrows():
+            figure_outputs, table_outputs = self._discover_motif_in_cluster(tcr_rep, index, row)
             figures.extend(figure_outputs)
             tables.extend(table_outputs)
 
         return ReportResult("TCRdist motif discovery", figures, tables)
 
-    def _discover_motif_in_cluster(self, cluster_indices, cluster_index, tcr_rep) -> Tuple[List[ReportOutput], List[ReportOutput]]:
-        logging.info(f"TCRdistMotifDiscovery: processing cluster {cluster_index} of {max(cluster_indices)}...")
-        criteria = (cluster_indices == cluster_index)
-        clone_df_subset = tcr_rep.clone_df[criteria]
-        epitopes = np.unique(self.dataset.encoded_data.labels[self.label])
+    def _discover_motif_in_cluster(self, tcr_rep, index, row, negative_examples=None) -> Tuple[List[ReportOutput], List[ReportOutput]]:
+        from tcrdist.adpt_funcs import get_centroid_seq
+        from palmotif import compute_pal_motif
+        from palmotif import svg_logo
+
+        dfnode = tcr_rep.clone_df.iloc[row['neighbors_i'], ]
         figure_outputs, table_outputs = [], []
 
-        for epitope in epitopes:
-            logging.info(f"TCRdistMotifDiscovery: processing epitope {epitope}...")
-            figures, tables = self._discover_motif_for_epitope(clone_df_subset, epitope, tcr_rep, epitopes, cluster_index)
-            figure_outputs.extend(figures)
-            table_outputs.extend(tables)
+        for chain in ['a', 'b']:
+
+            if dfnode.shape[0] > 2:
+                centroid, *_ = get_centroid_seq(df=dfnode)
+            else:
+                centroid = dfnode[f'cdr3_{chain}_aa'].to_list()[0]
+
+            motif, stat = compute_pal_motif(seqs=_select(df=tcr_rep.clone_df, iloc_rows=row['neighbors_i'], col=f'cdr3_{chain}_aa'),
+                                            centroid=centroid, refs=negative_examples)
+
+            figure_path = self.result_path + f"motif_{chain}_{index+1}.svg"
+            svg_logo(motif, filename=figure_path)
+
+            motif_data_path = self.result_path + f"motif_{chain}_{index+1}.csv"
+            motif.to_csv(motif_data_path)
+
+            figure_outputs.append(ReportOutput(figure_path, f'Motif {index+1} ({chain} chain)'))
+            table_outputs.append(ReportOutput(motif_data_path, f'motif {index+1} ({chain} chain) csv data'))
+
+            if negative_examples:
+                stat_overview_path = self.result_path + f"motif_{chain}_{index + 1}_stat.csv"
+                stat.to_csv(stat_overview_path)
+                table_outputs.append(ReportOutput(stat_overview_path, f'KL divergence and log-likelihood per position given reference data: cluster {index+1} ({chain} chain) csv data'))
 
         return figure_outputs, table_outputs
-
-    def _discover_motif_for_epitope(self, clone_df_subset, epitope, tcr_rep, epitopes, cluster_index):
-        from tcrdist.subset import TCRsubset
-        from tcrdist.mappers import populate_legacy_fields
-
-        clone_df_subset = clone_df_subset[clone_df_subset.epitope == epitope].copy()
-        dist_a_subset = tcr_rep.dist_a.loc[clone_df_subset.clone_id, clone_df_subset.clone_id].copy()
-        dist_b_subset = tcr_rep.dist_b.loc[clone_df_subset.clone_id, clone_df_subset.clone_id].copy()
-
-        clone_df_subset = populate_legacy_fields(df=clone_df_subset, chains=['alpha', 'beta'])
-
-        ts = TCRsubset(clone_df_subset, organism=self.dataset.params['organism'], epitopes=epitopes, epitope=epitope, chains=["A", "B"],
-                       dist_a=dist_a_subset, dist_b=dist_b_subset)
-
-        motif_df = ts.find_motif()
-        motif_path = f"{self.result_path}motif_{cluster_index + 1}_{epitope}.csv"
-        motif_df.to_csv(motif_path, index=False)
-        figure_outputs = self._plot_motifs_per_chain(motif_df, ts, cluster_index, epitope)
-        table_outputs = [ReportOutput(motif_path, f"motif {cluster_index + 1} - csv data")]
-        return figure_outputs, table_outputs
-
-    def _plot_motifs_per_chain(self, motif_df, ts, cluster_index, epitope) -> List[ReportOutput]:
-        figure_outputs = []
-        for i, row in motif_df[motif_df.ab == "A"].iterrows():
-            figure_outputs.append(self._plot_motif(ts, row, cluster_index, i, "alpha", epitope))
-        for i, row in ts.motif_df[ts.motif_df.ab == "B"].iterrows():
-            figure_outputs.append(self._plot_motif(ts, row, cluster_index, i, "beta", epitope))
-
-        return figure_outputs
-
-    def _plot_motif(self, ts, row, cluster_index, i, chain_name, epitope):
-        from tcrdist import plotting
-
-        StoreIOMotif_instance = ts.eval_motif(row)
-        path = f"{self.result_path}motif_{cluster_index+1}_{i+1}_{chain_name}_{epitope}.svg"
-        plotting.plot_pwm(StoreIOMotif_instance, create_file=True, my_height=200, my_width=600,
-                          output=path)
-        return ReportOutput(path, f"motif {cluster_index + 1}-{i + 1} (epitope: {epitope}): {chain_name} chain")
 
     def check_prerequisites(self):
         if isinstance(self.dataset, ReceptorDataset):

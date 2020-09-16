@@ -8,25 +8,15 @@ from source.data_model.dataset.ReceptorDataset import ReceptorDataset
 class TCRdistHelper:
 
     @staticmethod
-    def compute_tcr_dist(dataset: ReceptorDataset, labels: list, cores: int):
+    def compute_tcr_dist(dataset: ReceptorDataset, labels: list, cores: int) -> TCRrep:
         return CacheHandler.memo_by_params((('dataset_identifier', dataset.identifier), ("type", "TCRrep")),
                                            lambda: TCRdistHelper._compute_tcr_dist(dataset, labels, cores))
 
     @staticmethod
     def _compute_tcr_dist(dataset: ReceptorDataset, labels: list, cores: int):
         df = TCRdistHelper.prepare_tcr_dist_dataframe(dataset, labels)
-        tcr_rep = TCRrep(cell_df=df, chains=['alpha', 'beta'], organism=dataset.params["organism"])
-        tcr_rep.infer_cdrs_from_v_gene(chain='alpha', imgt_aligned=True)
-        tcr_rep.infer_cdrs_from_v_gene(chain='beta', imgt_aligned=True)
-
-        tcr_rep.index_cols = ['clone_id', 'subject', 'epitope', 'v_a_gene', 'j_a_gene', 'v_b_gene', 'j_b_gene',
-                              'cdr3_a_aa', 'cdr3_b_aa', 'cdr1_a_aa', 'cdr2_a_aa', 'pmhc_a_aa', 'cdr1_b_aa', 'cdr2_b_aa', 'pmhc_b_aa']
-
-        if all(col in df.columns for col in ['cdr3_b_nucseq', 'cdr3_a_nucseq']):
-            tcr_rep.index_cols += ['cdr3_b_nucseq', 'cdr3_a_nucseq']
-
-        tcr_rep.deduplicate()
-        tcr_rep._tcrdist_legacy_method_alpha_beta(processes=cores)
+        tcr_rep = TCRrep(cell_df=df, chains=['alpha', 'beta'], organism=dataset.params["organism"], cpus=cores, infer_index_cols=False,
+                         deduplicate=False, index_cols=['clone_id'])
         return tcr_rep
 
     @staticmethod
@@ -60,5 +50,5 @@ class TCRdistHelper:
                                  "cdr3_a_aa": cdr3_a_aa, "v_b_gene": v_b_gene, "j_b_gene": j_b_gene, "cdr3_b_aa": cdr3_b_aa, "clone_id": clone_id,
                                  "cdr3_b_nucseq": cdr3_b_nucseq, "cdr3_a_nucseq": cdr3_a_nucseq})
         else:
-            return pd.DataFrame({ "subject": subject, "epitope": epitope, "count": count, "v_a_gene": v_a_gene, "j_a_gene": j_a_gene,
-                                  "cdr3_a_aa": cdr3_a_aa, "v_b_gene": v_b_gene, "j_b_gene": j_b_gene, "cdr3_b_aa": cdr3_b_aa, "clone_id": clone_id})
+            return pd.DataFrame({"subject": subject, "epitope": epitope, "count": count, "v_a_gene": v_a_gene, "j_a_gene": j_a_gene,
+                                 "cdr3_a_aa": cdr3_a_aa, "v_b_gene": v_b_gene, "j_b_gene": j_b_gene, "cdr3_b_aa": cdr3_b_aa, "clone_id": clone_id})
