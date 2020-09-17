@@ -29,6 +29,8 @@ class Util:
         for key, item in specs["definitions"]["datasets"].items():
             if isinstance(item, dict) and 'params' in item.keys() and isinstance(item["params"], dict):
                 item['params']["result_path"] = f"{result_path}{key}/"
+                if item['format'] not in ['Pickle', 'RandomRepertoireDataset', 'RandomReceptorDataset']:
+                    item['params']['path'] = os.path.dirname(yaml_path) + "/"
 
         with open(yaml_path, "w") as file:
             yaml.dump(specs, file)
