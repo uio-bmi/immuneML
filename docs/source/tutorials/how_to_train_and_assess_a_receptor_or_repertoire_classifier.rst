@@ -132,7 +132,7 @@ An example is shown below:
       model_selection_cv: True
       model_selection_n_folds: 5
     reports:
-      my_hp_benchmark: BenchmarkHPSettings
+      my_report: MLSettingsPerformance
 
   instructions:
     hpoptim_instr:
@@ -148,7 +148,7 @@ An example is shown below:
         training_percentage: 0.7
         reports:
           hyperparameter:
-            - my_hp_benchmark
+            - my_report
       selection:
         split_strategy: random
         split_count: 1
