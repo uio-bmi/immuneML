@@ -2,8 +2,10 @@ import inspect
 import os
 import warnings
 
+import numpy as np
 import pandas as pd
 from sklearn import metrics
+from sklearn.preprocessing import label_binarize
 
 from source.data_model.dataset.Dataset import Dataset
 from source.environment.Metric import Metric
@@ -86,6 +88,11 @@ class MLMethodAssessment(Step):
         else:
             fn = getattr(ml_metrics, metric.value)
 
+        if hasattr(true_y, 'dtype'):
+            if true_y.dtype.type is np.str_:
+                true_y = label_binarize(true_y, classes=labels)
+                predicted_y = label_binarize(predicted_y, classes=labels)
+
         try:
             if metric in Metric.get_probability_based_metric_types():
                 predictions = predicted_proba_y
@@ -95,6 +102,7 @@ class MLMethodAssessment(Step):
                     predictions = predicted_y
             else:
                 predictions = predicted_y
+
             if "labels" in inspect.signature(fn).parameters.keys():
                 score = fn(true_y, predictions, labels=labels)
             else:
