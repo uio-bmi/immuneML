@@ -157,11 +157,7 @@ def build_specs(args):
                                           CoefficientPlottingSetting.NONZERO.name]
                     }
                 },
-                "benchmark": {
-                    "BenchmarkHPSettings": {
-                        "errorbar_meaning": "STANDARD_ERROR"
-                    }
-                }
+                "benchmark": "MLSettingsPerformance"
             }
         },
         "instructions": {

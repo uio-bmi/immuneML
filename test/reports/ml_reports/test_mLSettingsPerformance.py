@@ -19,14 +19,13 @@ from source.hyperparameter_optimization.config.SplitType import SplitType
 from source.hyperparameter_optimization.strategy.GridSearch import GridSearch
 from source.ml_methods.SimpleLogisticRegression import SimpleLogisticRegression
 from source.reports.ReportResult import ReportResult
-from source.reports.ml_reports.BenchmarkHPSettings import BenchmarkHPSettings
+from source.reports.hyperparameter.MLSettingsPerformance import MLSettingsPerformance
 from source.util.PathBuilder import PathBuilder
 from source.util.RepertoireBuilder import RepertoireBuilder
-from source.visualization.ErrorBarMeaning import ErrorBarMeaning
 from source.workflows.instructions.TrainMLModelInstruction import TrainMLModelInstruction
 
 
-class TestBenchmarkHPSettings(TestCase):
+class TestMLSettingsPerformance(TestCase):
 
     def setUp(self) -> None:
         os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
@@ -76,10 +75,10 @@ class TestBenchmarkHPSettings(TestCase):
         return state
 
     def test_generate(self):
-        path = EnvironmentSettings.root_path + "test/tmp/benchmarkhpsettings/"
+        path = EnvironmentSettings.root_path + "test/tmp/mlsettingsperformance/"
         PathBuilder.build(path)
 
-        report = BenchmarkHPSettings(errorbar_meaning=ErrorBarMeaning.STANDARD_ERROR)
+        report = MLSettingsPerformance()
 
         report.result_path = path
         report.state = self._create_state_object(path + "input_data/")
@@ -87,15 +86,75 @@ class TestBenchmarkHPSettings(TestCase):
         report.check_prerequisites()
         result = report.generate()
 
-        self.assertTrue(os.path.isfile(path + "benchmark_result.csv"))
-        self.assertTrue(os.path.isfile(path + "benchmark_result.pdf"))
+        self.assertTrue(os.path.isfile(path + "performance.csv"))
+        self.assertTrue(os.path.isfile(path + "performance.html"))
 
         self.assertIsInstance(result, ReportResult)
-        self.assertEqual(result.output_figures[0].path, path + "benchmark_result.pdf")
-        self.assertEqual(result.output_tables[0].path, path + "benchmark_result.csv")
+        self.assertEqual(result.output_figures[0].path, path + "performance.html")
+        self.assertEqual(result.output_tables[0].path, path + "performance.csv")
 
-        written_data = pd.read_csv(path + "benchmark_result.csv")
+        written_data = pd.read_csv(path + "performance.csv")
         self.assertEqual(list(written_data.columns), ["fold", "label", "encoding", "ml_method", "performance"])
 
         shutil.rmtree(path)
+
+    def test_plot(self):
+        # Does not assert anything, but can be used to manually check if the plot looks like it should
+
+        path = EnvironmentSettings.root_path + "test/tmp/mlsettingsperformance/"
+        PathBuilder.build(path)
+
+        report = MLSettingsPerformance()
+
+        report.result_path = path
+        report.hp_optimization_state = self._create_state_object(path + "input_data/")
+
+        df = pd.DataFrame({"fold": [0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1],
+                      "label": ["l1", "l1", "l1", "l1", "l2", "l2", "l2", "l2", "l1", "l1", "l1", "l1", "l2", "l2", "l2", "l2"],
+                      report.vertical_grouping: ["e1", "e2", "e1", "e2", "e1", "e2", "e1", "e2", "e1", "e2", "e1", "e2", "e1", "e2", "e1", "e2"],
+                      "ml_method": ["ml1", "ml1", "ml2", "ml2", "ml1", "ml1", "ml2", "ml2", "ml1", "ml1", "ml2", "ml2", "ml1", "ml1", "ml2", "ml2"],
+                      "performance": [0.5, 0.8, 0.4, 0.8, 0.9, 0.2, 0.5, 0.6, 0.8, 0.4, 0.8, 0.9, 0.2, 0.5, 0.6, 0.5]})
+
+        report._plot(df)
+
+        shutil.rmtree(path)
+
+
+
+    # def test_new_plotting(self):
+    #     df = pd.DataFrame({"fold": [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1],
+    #                        "label": ["l1", "l1", "l1", "l1", "l2", "l2", "l2", "l2", "l1", "l1", "l1", "l1", "l2", "l2",
+    #                                  "l2", "l2"],
+    #                        "encoding": ["e1", "e2", "e1", "e2", "e1", "e2", "e1", "e2", "e1", "e2", "e1",
+    #                                                   "e2", "e1", "e2", "e1", "e2"],
+    #                        "ml_method": ["ml1", "ml1", "ml2", "ml2", "ml1", "ml1", "ml2", "ml2", "ml1", "ml1", "ml2",
+    #                                      "ml2", "ml1", "ml1", "ml2", "ml2"],
+    #                        "performance": [0.5, 0.8, 0.4, 0.8, 0.9, 0.2, 0.5, 0.6, 0.8, 0.4, 0.8, 0.9, 0.2, 0.5, 0.6,
+    #                                        0.5]})
+    #
+    #
+    #
+    #
+    #     df = df.groupby(["label", "encoding", "ml_method"], as_index=False).agg({"fold": "first", "performance": ['mean', self.std]})
+    #
+    #
+    #     df.columns = df.columns.map(''.join)
+    #
+    #
+    #
+    #     print(df)
+    #
+    #
+    #
+    #     figure = go.Figure()
+    #
+    #     figure = px.bar(df, x="ml_method", y="performancemean", color="ml_method", barmode="relative",
+    #                  facet_row="encoding", facet_col="label", error_y="performancestd",
+    #                  color_discrete_sequence=px.colors.diverging.Tealrose)
+    #
+    #     figure.show()
+    #
+
+
+
 

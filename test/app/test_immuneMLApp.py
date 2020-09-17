@@ -98,7 +98,7 @@ class TestImmuneMLApp(TestCase):
                             "batch_size": 3
                         }
                     },
-                    "rep2": "BenchmarkHPSettings",
+                    "rep2": "MLSettingsPerformance",
                     "rep3": {
                         "Coefficients": {
                             "cutoff": [10],
