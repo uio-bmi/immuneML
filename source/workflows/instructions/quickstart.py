@@ -60,11 +60,7 @@ class Quickstart:
                             "batch_size": 3
                         }
                     },
-                    "hprep": {
-                        "BenchmarkHPSettings": {
-                            "errorbar_meaning": "STANDARD_ERROR"
-                        }
-                    }
+                    "hprep": "MLSettingsPerformance"
                 }
             },
             "instructions": {

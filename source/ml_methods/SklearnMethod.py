@@ -107,7 +107,7 @@ class SklearnMethod(MLMethod):
     def predict(self, encoded_data: EncodedData, label_names: list = None):
         labels = label_names if label_names is not None else self.models.keys()
         self.check_is_fitted(labels)
-        return {label: self.models[label].predict(encoded_data.examples) for label in labels}
+        return {label: np.array(self.models[label].predict(encoded_data.examples)) for label in labels}
 
     def predict_proba(self, encoded_data: EncodedData, labels: list):
         if self.can_predict_proba():

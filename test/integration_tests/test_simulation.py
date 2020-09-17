@@ -141,7 +141,7 @@ class TestSimulation(TestCase):
         self.assertTrue(os.path.isfile(path+"result/index.html"))
         self.assertTrue(os.path.isfile(path + "result/inst1/exported_dataset/pickle/d1.iml_dataset"))
 
-   #     shutil.rmtree(path)
+        shutil.rmtree(path)
 
     def test_simulation_receptors(self):
         path = PathBuilder.build(EnvironmentSettings.tmp_test_path + "integration_simulation_receptor/")

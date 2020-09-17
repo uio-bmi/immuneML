@@ -88,10 +88,9 @@ class MLMethodAssessment(Step):
         else:
             fn = getattr(ml_metrics, metric.value)
 
-        if hasattr(true_y, 'dtype'):
-            if true_y.dtype.type is np.str_:
-                true_y = label_binarize(true_y, classes=labels)
-                predicted_y = label_binarize(predicted_y, classes=labels)
+        if hasattr(true_y, 'dtype') and true_y.dtype.type is np.str_ or isinstance(true_y, list) and any(isinstance(item, str) for item in true_y):
+            true_y = label_binarize(true_y, classes=labels)
+            predicted_y = label_binarize(predicted_y, classes=labels)
 
         try:
             if metric in Metric.get_probability_based_metric_types():

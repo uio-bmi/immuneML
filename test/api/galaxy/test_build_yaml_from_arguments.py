@@ -57,7 +57,7 @@ class MyTestCase(unittest.TestCase):
 
         os.chdir(old_wd)
 
-        # shutil.rmtree(path)
+        shutil.rmtree(path)
 
     def test_get_sequence_enc_type(self):
         self.assertEqual(get_sequence_enc_type(sequence_type="complete", position_type=None, gap_type=None),

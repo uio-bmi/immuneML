@@ -1,6 +1,5 @@
 from source.IO.dataset_import.DataImport import DataImport
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
-from source.dsl.DefaultParamsLoader import DefaultParamsLoader
 from source.simulation.dataset_generation.RandomDatasetGenerator import RandomDatasetGenerator
 from source.util.ParameterValidator import ParameterValidator
 
@@ -34,12 +33,11 @@ class RandomRepertoireDatasetImport(DataImport):
 
     @staticmethod
     def import_dataset(params: dict, dataset_name: str) -> RepertoireDataset:
-        merged_params = {**DefaultParamsLoader.load("datasets/", "RandomRepertoireDataset"), **params}
         valid_keys = ["result_path", "repertoire_count", "sequence_count_probabilities", "sequence_length_probabilities", "labels"]
-        ParameterValidator.assert_all_in_valid_list(params.keys(), valid_keys, "RandomRepertoireDatasetImport", "params")
+        ParameterValidator.assert_all_in_valid_list(list(params.keys()), valid_keys, "RandomRepertoireDatasetImport", "params")
 
-        return RandomDatasetGenerator.generate_repertoire_dataset(repertoire_count=merged_params["repertoire_count"],
-                                                                  sequence_count_probabilities=merged_params["sequence_count_probabilities"],
-                                                                  sequence_length_probabilities=merged_params["sequence_length_probabilities"],
-                                                                  labels=merged_params["labels"],
-                                                                  path=merged_params["result_path"])
+        return RandomDatasetGenerator.generate_repertoire_dataset(repertoire_count=params["repertoire_count"],
+                                                                  sequence_count_probabilities=params["sequence_count_probabilities"],
+                                                                  sequence_length_probabilities=params["sequence_length_probabilities"],
+                                                                  labels=params["labels"],
+                                                                  path=params["result_path"])
