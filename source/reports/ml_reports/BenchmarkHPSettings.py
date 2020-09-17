@@ -55,7 +55,7 @@ class BenchmarkHPSettings(MLReport):
         super(BenchmarkHPSettings, self).__init__()
 
         self.errorbar_meaning = errorbar_meaning
-        self.hp_optimization_state = None
+        self.state = None
         self.result_path = None
         self.name = name
         self.result_name = "benchmark_result"
@@ -80,7 +80,7 @@ class BenchmarkHPSettings(MLReport):
     def _retrieve_plotting_data(self):
         plotting_data = []
 
-        for assessment_state in self.hp_optimization_state.assessment_states:
+        for assessment_state in self.state.assessment_states:
             for label_key, label_state in assessment_state.label_states.items():
                 for assessment_key, assessment_item in label_state.assessment_items.items():
                     plotting_data.append([assessment_state.split_index,
@@ -121,11 +121,11 @@ class BenchmarkHPSettings(MLReport):
     def check_prerequisites(self):
         run_report = True
 
-        if not hasattr(self, "hp_optimization_state") or self.hp_optimization_state is None:
+        if self.state is None:
             warnings.warn(f"{self.__class__.__name__} can only be executed as a hyperparameter report. BenchmarkHPSettings report will not be created.")
             run_report = False
 
-        if not hasattr(self, "result_path") or self.result_path is None:
+        if self.result_path is None:
             warnings.warn(f"{self.__class__.__name__} requires an output 'path' to be set. BenchmarkHPSettings report will not be created.")
             run_report = False
 

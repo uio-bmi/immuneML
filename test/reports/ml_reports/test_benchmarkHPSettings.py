@@ -82,7 +82,7 @@ class TestBenchmarkHPSettings(TestCase):
         report = BenchmarkHPSettings(errorbar_meaning=ErrorBarMeaning.STANDARD_ERROR)
 
         report.result_path = path
-        report.hp_optimization_state = self._create_state_object(path + "input_data/")
+        report.state = self._create_state_object(path + "input_data/")
 
         report.check_prerequisites()
         result = report.generate()

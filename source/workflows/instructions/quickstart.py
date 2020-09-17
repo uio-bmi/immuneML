@@ -31,6 +31,13 @@ class Quickstart:
                             "model_type": "sequence",
                             "vector_size": 8,
                         }
+                    },
+                    "e2": {
+                        "Word2Vec": {
+                            "k": 2,
+                            "model_type": "sequence",
+                            "vector_size": 8,
+                        }
                     }
                 },
                 "ml_methods": {
@@ -52,6 +59,11 @@ class Quickstart:
                         "SequenceLengthDistribution": {
                             "batch_size": 3
                         }
+                    },
+                    "hprep": {
+                        "BenchmarkHPSettings": {
+                            "errorbar_meaning": "STANDARD_ERROR"
+                        }
                     }
                 }
             },
@@ -66,7 +78,7 @@ class Quickstart:
                         },
                         {
                             "preprocessing": "seq1",
-                            "encoding": "e1",
+                            "encoding": "e2",
                             "ml_method": "simpleLR"
                         }
                     ],
@@ -75,7 +87,8 @@ class Quickstart:
                         "split_count": 1,
                         "training_percentage": 0.7,
                         "reports": {
-                            "data_splits": []
+                            "data_splits": [],
+                            'hyperparameter': ["hprep"]
                         }
                     },
                     "selection": {

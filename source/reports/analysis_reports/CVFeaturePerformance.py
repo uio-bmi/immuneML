@@ -38,11 +38,11 @@ class CVFeaturePerformance(Report):
     def build_object(cls, **kwargs):
         return CVFeaturePerformance(**kwargs)
 
-    def __init__(self, feature: str = None, hp_optimization_state: HPOptimizationState = None, result_path: str = None, label: str = None,
+    def __init__(self, feature: str = None, state: HPOptimizationState = None, result_path: str = None, label: str = None,
                  name: str = None):
         super().__init__()
         self.feature = feature
-        self.hp_optimization_state = hp_optimization_state
+        self.state = state
         self.result_path = result_path
         self.label = label
         self.relevant_hp_settings = []
@@ -68,11 +68,11 @@ class CVFeaturePerformance(Report):
         return True
 
     def _extract_label(self):
-        if self.label is None and len(self.hp_optimization_state.label_configuration.get_labels_by_name()) == 1:
-            self.label = self.hp_optimization_state.label_configuration.get_labels_by_name()[0]
+        if self.label is None and len(self.state.label_configuration.get_labels_by_name()) == 1:
+            self.label = self.state.label_configuration.get_labels_by_name()[0]
 
     def _extract_hp_settings(self):
-        self.relevant_hp_settings = [hp_setting for hp_setting in self.hp_optimization_state.hp_settings
+        self.relevant_hp_settings = [hp_setting for hp_setting in self.state.hp_settings
                                      if self.feature in hp_setting.encoder_params]
         self.feature_values = np.unique([hp_setting.encoder_params[self.feature] for hp_setting in self.relevant_hp_settings])
         self.feature_count = len(self.feature_values)
@@ -98,7 +98,7 @@ class CVFeaturePerformance(Report):
         fig.add_trace(go.Scatter(x=test_dataframe["x"], y=test_dataframe["y"], name="test", mode="markers", marker_color=px.colors.diverging.Tealrose[-1]))
         fig.update_layout(legend_title_text="Data", title="CV performance across feature values", template="plotly_white")
         fig.update_xaxes(title_text=self.feature)
-        fig.update_yaxes(title_text=f"performance ({self.hp_optimization_state.optimization_metric.name.lower()})")
+        fig.update_yaxes(title_text=f"performance ({self.state.optimization_metric.name.lower()})")
 
         file_path = f"{self.result_path}{self.result_name}.html"
         fig.write_html(file_path)
@@ -116,12 +116,12 @@ class CVFeaturePerformance(Report):
 
     def _make_plot_dataframes(self) -> Tuple[pd.DataFrame, pd.DataFrame]:
 
-        performance_training = np.zeros((self.feature_count, self.hp_optimization_state.assessment.split_count,
-                                         self.hp_optimization_state.selection.split_count))
-        features_test = np.zeros((self.hp_optimization_state.assessment.split_count, self.feature_count))
-        performance_test = np.zeros((self.hp_optimization_state.assessment.split_count, self.feature_count))
+        performance_training = np.zeros((self.feature_count, self.state.assessment.split_count,
+                                         self.state.selection.split_count))
+        features_test = np.zeros((self.state.assessment.split_count, self.feature_count))
+        performance_test = np.zeros((self.state.assessment.split_count, self.feature_count))
 
-        for assessment_split_index, assessment_state in enumerate(self.hp_optimization_state.assessment_states):
+        for assessment_split_index, assessment_state in enumerate(self.state.assessment_states):
 
             assessment_items = [assessment_state.label_states[self.label].assessment_items[hp_setting]
                                 for hp_setting in self.relevant_hp_settings]

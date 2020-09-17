@@ -51,7 +51,6 @@ class BenchmarkSubseqMethods(BenchmarkHPSettings):
         self.vertical_grouping = "subsequence_size"
         self.result_name = "benchmark_subseq_result"
 
-
     def _get_vertical_grouping(self, assessment_item):
         subseq_size = "N/A"
 
@@ -62,10 +61,8 @@ class BenchmarkSubseqMethods(BenchmarkHPSettings):
 
         return f"k-mer/kernel\nsize {subseq_size}"
 
-
     def _get_color_grouping(self, assessment_item):
         return assessment_item.hp_setting.ml_method.__class__.__name__
-
 
     @staticmethod
     def get_documentation():
@@ -88,19 +85,19 @@ class BenchmarkSubseqMethods(BenchmarkHPSettings):
 
         return is_valid
 
-
     def check_prerequisites(self):
         run_report = True
 
-        if not hasattr(self, "hp_optimization_state") or self.hp_optimization_state is None:
-            warnings.warn(f"{self.__class__.__name__} can only be executed as a hyperparameter report. BenchmarkSubseqMethods report will not be created.")
+        if not hasattr(self, "hp_optimization_state") or self.state is None:
+            warnings.warn(
+                f"{self.__class__.__name__} can only be executed as a hyperparameter report. BenchmarkSubseqMethods report will not be created.")
             run_report = False
 
         if not hasattr(self, "result_path") or self.result_path is None:
             warnings.warn(f"{self.__class__.__name__} requires an output 'path' to be set. BenchmarkSubseqMethods report will not be created.")
             run_report = False
 
-        for assessment_state in self.hp_optimization_state.assessment_states:
+        for assessment_state in self.state.assessment_states:
             for label_state in assessment_state.label_states.values():
                 for assessment_item in label_state.assessment_items.values():
                     if not self._check_valid_assessment_item(assessment_item):

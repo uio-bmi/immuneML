@@ -17,7 +17,7 @@ class TestQuickstart(TestCase):
         quickstart.run(path)
 
         self.assertTrue(os.path.isfile(path + "quickstart/full_specs.yaml"))
-        self.assertEqual(3, len(glob(path + "quickstart/inst1/split_1/**/test_predictions.csv", recursive=True)))
+        self.assertEqual(4, len(glob(path + "quickstart/inst1/split_1/**/test_predictions.csv", recursive=True)))
         self.assertTrue(os.path.isfile(glob(path + "quickstart/inst1/split_1/**/test_predictions.csv", recursive=True)[0]))
 
         shutil.rmtree(path, ignore_errors=True)

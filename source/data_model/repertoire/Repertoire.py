@@ -158,8 +158,10 @@ class Repertoire(DatasetItem):
                 else:
                     signals[key].append(None)
 
-        return cls.build(sequence_aas, sequences, v_genes, j_genes, v_subgroups, j_subgroups, v_alleles, j_alleles, chains, counts, region_types, frame_types,
-                         custom_lists, sequence_identifiers, path, metadata, signals, cell_ids)
+        return cls.build(sequence_aas=sequence_aas, sequences=sequences, v_genes=v_genes, j_genes=j_genes, v_subgroups=v_subgroups,
+                         j_subgroups=j_subgroups, v_alleles=v_alleles, j_alleles=j_alleles, chains=chains, counts=counts, region_types=region_types,
+                         frame_types=frame_types, custom_lists=custom_lists, sequence_identifiers=sequence_identifiers, path=path, metadata=metadata,
+                         signals=signals, cell_ids=cell_ids)
 
     def __init__(self, data_filename: str, metadata_filename: str, identifier: str):
 
