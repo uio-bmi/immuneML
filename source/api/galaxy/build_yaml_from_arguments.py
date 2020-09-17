@@ -134,6 +134,10 @@ def discover_dataset_params():
     return {"path": dataset_path,
             "metadata_file": f"{dataset_name}_metadata.csv"}
 
+def build_labels(labels_str):
+    labels = labels_str.split(",")
+    return [label.strip().strip("'\"") for label in labels]
+
 
 def build_specs(args):
     specs = {
@@ -194,6 +198,7 @@ def build_specs(args):
     ml_specs = build_ml_methods_specs(args)
     settings_specs = build_settings_specs(enc_specs.keys(), ml_specs.keys())
     dataset_params = discover_dataset_params()
+    labels = build_labels(args.labels)
 
     specs["definitions"]["datasets"]["d1"]["params"] = dataset_params
     specs["definitions"]["encodings"] = enc_specs
@@ -201,7 +206,7 @@ def build_specs(args):
     specs["instructions"]["inst1"]["settings"] = settings_specs
     specs["instructions"]["inst1"]["assessment"]["split_count"] = args.split_count
     specs["instructions"]["inst1"]["assessment"]["training_percentage"] = args.training_percentage / 100
-    specs["instructions"]["inst1"]["labels"] = args.labels
+    specs["instructions"]["inst1"]["labels"] = labels
 
     return specs
 
@@ -228,8 +233,8 @@ def parse_commandline_arguments(args):
     parser = argparse.ArgumentParser(description="tool for building immuneML Galaxy YAML from arguments")
     parser.add_argument("-o", "--output_path", required=True, help="Output location for the generated yaml file (directiory).")
     parser.add_argument("-f", "--file_name", default="specs.yaml", help="Output file name for the yaml file. Default name is 'specs.yaml' if not specified.")
-    parser.add_argument("-l", "--labels", nargs="+", required=True,
-                        help="Which metadata labels should be predicted for the dataset.")
+    parser.add_argument("-l", "--labels", required=True,
+                        help="Which metadata labels should be predicted for the dataset (separated by comma).")
     parser.add_argument("-m", "--ml_methods", nargs="+", choices=ml_method_names, required=True,
                         help="Which machine learning methods should be applied.")
     parser.add_argument("-t", "--training_percentage", type=float, required=True,
