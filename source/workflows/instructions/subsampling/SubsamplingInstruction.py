@@ -2,8 +2,11 @@ import random
 import shutil
 from typing import List
 
+from scripts.specification_util import update_docs_per_mapping
+from source.IO.dataset_export.DataExporter import DataExporter
 from source.data_model.dataset.Dataset import Dataset
 from source.util.PathBuilder import PathBuilder
+from source.util.ReflectionHandler import ReflectionHandler
 from source.workflows.instructions.Instruction import Instruction
 from source.workflows.instructions.subsampling.SubsamplingState import SubsamplingState
 
@@ -18,7 +21,7 @@ class SubsamplingInstruction(Instruction):
 
         subsampled_dataset_sizes (list): a list of dataset sizes (number of examples) each subsampled dataset should have
 
-        dataset_export_formats (list): in which formats to export the subsampled datasets
+        dataset_export_formats (list): in which formats to export the subsampled datasets. Valid formats are class names of any non-abstract class inheriting :py:obj:`~source.IO.dataset_export.DataExporter.DataExporter`.
 
     Specification:
 
@@ -70,3 +73,16 @@ class SubsamplingInstruction(Instruction):
             exporter.export(new_dataset, export_path)
             zip_export_path = shutil.make_archive(f"{new_dataset_path}exported_{exporter_name}_{new_dataset.name}", "zip", export_path)
             self.state.subsampled_dataset_paths[new_dataset.name][exporter_name] = zip_export_path
+
+    @staticmethod
+    def get_documentation():
+        doc = str(SubsamplingInstruction.__doc__)
+
+        valid_strategy_values = ReflectionHandler.all_nonabstract_subclass_basic_names(DataExporter, "Exporter", "dataset_export/")
+        valid_strategy_values = str(valid_strategy_values)[1:-1].replace("'", "`")
+        mapping = {
+            "Valid formats are class names of any non-abstract class inheriting "
+            ":py:obj:`~source.IO.dataset_export.DataExporter.DataExporter`.": f"Valid values are: {valid_strategy_values}."
+        }
+        doc = update_docs_per_mapping(doc, mapping)
+        return doc
