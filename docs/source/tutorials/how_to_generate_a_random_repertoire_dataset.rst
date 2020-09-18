@@ -1,18 +1,19 @@
 How to generate a random immune receptor repertoire dataset
 ==============================================================
 
-Random immune receptor datasets (short: random repertoire datasets) can be used to quickly try out some immuneML functionalities, and could also be
+Random immune receptor repertoire datasets (short: random repertoire datasets) can be used to quickly try out some immuneML functionalities, and may also be
 used as a baseline when comparing different machine learning models (benchmarking, see Weber et al., Bioinformatics,
-https://doi.org/10.1093/bioinformatics/btaa158).
+https://doi.org/10.1093/bioinformatics/btaa158). A random repertoire dataset consists of randomly generated amino acid sequences (amino acids are
+chosen from a uniform distribution). The number of repertoires, number of sequences per repertoire, sequence lengths and optional labels can be
+specified by the user.
 
-Generate random repertoire dataset from YAML together with the rest of the analysis
+Specifying a random repertoire dataset as input dataset in the YAML specification
 ------------------------------------------------------------------------------------
 
-To generate a repertoire dataset in YAML consisting of random amino acid sequences, define the desired parameters of the dataset in the datasets
-section. In the same manner as an already existing dataset can be loaded into the platform, for the random dataset it is possible to define its
-parameters and import the random dataset for further analysis.
+Alternatively to loading an existing dataset into immuneML, it is possible to specify a random repertoire dataset as an input dataset in the YAML
+specification. This random repertoire dataset will be generated on the fly when running an immuneML analysis.
 
-DSL specification example under definitions/datasets:
+The parameters for generating a random repertoire dataset are specified under definitions/datasets in the YAML specification:
 
 .. highlight:: yaml
 .. code-block:: yaml
@@ -35,12 +36,12 @@ DSL specification example under definitions/datasets:
             A: 0.5 # the probability that any generated repertoire will have HLA A
             B: 0.5 # the probability that any generated repertoire will have HLA B
 
-Note that all probabilities have to be floating point values and have to sum to 1. All parameters (repertoire_count, sequence_count_probabilities,
-sequence_length_probabilities and labels) have to be specified, though their values can of course be different.
+For the sequence count probabilities, sequence length probabilities and any custom labels multiple values can be specified, together with the
+probability that each value will occur in the repertoire. These probability values must in all cases sum to 1.
 
-Full specification example along with an instruction to export the data in desired formats is given below. For now, the only available formats are
-AIRR and Pickle (as listed below). The generated dataset can then be used for other analyses or machine learning (to try out the example, download
-the YAML file):
+It is also possible to export the generated random repertoire dataset to AIRR or Pickle format. This can be done by exporting the generated dataset
+through the DatasetGeneration instruction. The generated dataset can subsequently be used for other analyses or machine learning. A complete YAML
+specification for random repertoire generation and export is given below:
 
 .. highlight:: yaml
 .. code-block:: yaml
@@ -65,14 +66,12 @@ the YAML file):
       formats: [AIRR, Pickle] # list of formats to export the datasets to
 
 
-Generate random repertoire dataset in the code
+Generate a random repertoire dataset in the code
 ----------------------------------------------
 
-To do the same from the code, use the `RandomDatasetGenerator` class, located in the package simulation.dataset_generation.
-The method `generate_repertoire_dataset()` will create a random repertoire dataset for the given parameters. The parameters are the same as in
-section 1 of this tutorial and include the number of repertoires to generate (repertoire_count), the probability distribution of sequence count
-per repertoire, the probability distribution of sequence lengths, labels with probabilities for any repertoire getting any of the values and the
-path where the resulting dataset will be stored. Here is a code example:
+For developers, it is also possible to generate a random repertoire dataset directly inside the code. To do this, use the RandomDatasetGenerator
+class, located in the package simulation.dataset_generation. The method generate_repertoire_dataset() uses the same parameters as described above,
+and returns a RepertoireDataset object. Here is a code example:
 
 .. highlight:: python
 .. code-block:: python

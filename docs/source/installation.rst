@@ -12,15 +12,15 @@ There are four options to use immuneML:
 
 3. Using immuneML from the immunoHub server (for local users),
 
-4. Using immuneML from Galaxy (no programming experience required, the functionality is available through web interface, see :ref:`immuneML & Galaxy`).
+4. Using immuneML from Galaxy (no programming experience required, the functionality is available through a web interface, see :ref:`immuneML & Galaxy`).
 
-In this section, it will be described how to set up the first two options. Once this is set up, you can look into :ref:`Quickstart` or
+In this section, it will be described how to set up the first two options. Once immuneML has been set up, you can look into :ref:`Quickstart` or
 look into which analyses you can run with immuneML (see :ref:`Tutorials`).
 
 Install immuneML with a package manager
 ---------------------------------------
 
-Steps to install immuneML with Anaconda (version 4.8.3):
+Steps to install immuneML with Anaconda (tested with version 4.8.3):
 
 1. Create a directory for immuneML and navigate to the directory:
 
@@ -41,77 +41,87 @@ Steps to install immuneML with Anaconda (version 4.8.3):
 
   conda activate immuneml_env/
 
-4. Install additional R dependencies from the script provided `here <https://drive.google.com/file/d/1C0m7bjG7OKfWNVQsgYkE-nXCdvD7mO08/view?usp=sharing>`_:
+4. Install additional R dependencies from the script provided `here <https://drive.google.com/file/d/1C0m7bjG7OKfWNVQsgYkE-nXCdvD7mO08/view?usp=sharing>`_
+(note that the immuneML core functionality does not depend on R, it is only necessary to generate certain reports):
 
 .. code-block:: console
 
   sh install_immuneML_R_dependencies.sh
 
-5. Navigate to immuneML_test directory and clone the immuneML repository from GitHub (it will create ImmuneML folder):
+5. Install immuneML from GitHub (it will also automatically install all Python dependencies):
 
 .. code-block:: console
 
-  git clone https://github.com/uio-bmi/ImmuneML.git
+  pip install git+https://github.com/uio-bmi/ImmuneML
 
-6. Install immuneML (it will also automatically install all dependencies):
 
-.. code-block:: console
-
-  python3 -m pip install ./ImmuneML/
-
-7. To validate installation, run:
+7. To validate the installation, run:
 
 .. code-block:: console
 
   immune-ml -h
 
-The output should describe command line arguments and give basic information about the package.
+The output should look like this:
 
-More information on conda environments (how to activate, deactivate environment) is available on `conda site <https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html>`_.
+.. code-block:: console
+
+  usage: immune-ml [-h] [--tool TOOL] specification_path result_path
+
+  immuneML command line tool
+
+  positional arguments:
+    specification_path  Path to specification YAML file. Always used to define
+                        the analysis.
+    result_path         Output directory path.
+
+  optional arguments:
+    -h, --help          show this help message and exit
+    --tool TOOL         Name of the tool which calls immuneML. This name will be
+                        used to invoke appropriate API call, which will then do
+                        additional work in tool-dependent way before running
+                        standard immuneML.
+
+More information on conda environments (how to activate, deactivate environment) is available on `the conda site <https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html>`_.
 
 How to update immuneML if it was already installed
 --------------------------------------------------
 
-To check the existing version, activate the virtual environment where immuneML is installed (step 3 in the previous tutorial) and run the following command:
+To check the existing version of immuneML, activate the virtual environment where immuneML is installed (step 3 in the previous tutorial) and run the following command:
 
 .. code-block:: console
 
   pip show immune-ml
 
-The output of this command includes package name, version and other information.
+If immuneML is already installed, the output of this command includes package name, version and other information.
 
 To update the existing installation (obtained as described before):
 
-1. Navigate to the immuneML repository directory
-
-2. Pull the latest version of the repository from GitHub:
+1. Activate the virtual environment you created:
 
 .. code-block:: console
 
-  git pull origin master
+  conda activate immuneml_env/
 
-3. Activate the virtual environment you created:
-
-.. code-block:: console
-
-  conda activate ../immuneml_env/
-
-4. Install the new version of immuneML using pip from the repository directory:
+2. Install the new version of immuneML using pip:
 
 .. code-block:: console
 
-  python3 -m pip install ./
+  pip install git+https://github.com/uio-bmi/ImmuneML
 
 
 Clone the codebase from GitHub
 -------------------------------
 Prerequisites:
 
-- Python 3.7.6: it might work with other python versions (3.6), but might require additional packages to be manually installed (dataclasses package if running immuneML with Python 3.6). Alternatively, a custom python interpreter can be assigned to the virtual environment (in PyCharm, for development purposes, or in a conda environment).
+- Python 3.7.6: it might work with other python versions (3.6), but might require additional packages to be manually installed (e.g., dataclasses package if running immuneML with Python 3.6). Alternatively, a custom python interpreter can be assigned to the virtual environment (in PyCharm, for development purposes, or in a conda environment).
 
-- R 3.6.3 with libraries ggplot2, here, ggsci, viridis, devtools, BiocManager, Rmisc, patchwork. Additional libraries (which cannot be installed directly with conda) are ComplexHeatmap (can be installed from BiocManager) and ggexp (can be installed with devtool library from the GitHub repository). These libraries are necessary to generate reports. Other functionalities in immuneML (training a model, preprocessing, encoding, importing or exporting the data) are not dependent on R.
+- Optionally R 3.6.x with libraries Rmisc and readr and library ggexp (which cannot be installed directly with conda, but can be installed with
+devtool library from `the GitHub repository <https://github.com/keshav-motwani/ggexp>`_). These libraries are necessary to generate  certain reports (SequenceAssociationLikelihood,
+FeatureValueBarplot, FeatureValueDistplot, SequencingDepthOverview, DensityHeatmap, FeatureHeatmap, SimilarityHeatmap).
 
-Note: for development purposes, it is much more convenient to clone the codebase using PyCharm. To set up the project in PyCharm, see the official JetBrains tutorial for creating a PyCharm project from an existing GitHub repository. Alternatively, the following 5 steps describe how to do the process manually.
+Note: for development purposes, it is much more convenient to clone the codebase using PyCharm. To set up the project in PyCharm, see
+`the official JetBrains tutorial for creating a PyCharm project from an existing GitHub repository <https://www.jetbrains.com/help/pycharm/manage-projects-hosted-on-github.html>`_.
+Alternatively, the following 5 steps describe how to perform the process manually.
 
 Steps:
 
@@ -127,7 +137,7 @@ Steps:
 https://docs.python.org/3/library/venv.html (python virtual environment)
 or use conda instead with python 3.7.
 
-4. From the project folder (ImmuneML folder created when the repository was cloned
+4. From the project folder (immuneML folder created when the repository was cloned
 from GitHub), install the requirements from requirements.txt file:
 
 .. code-block:: console

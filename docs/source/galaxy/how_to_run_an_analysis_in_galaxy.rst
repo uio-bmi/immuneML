@@ -1,7 +1,7 @@
 How to run an analysis in Galaxy
 ================================
 
-To run an analysis in Galaxy, ImmuneML Wrapper tool should be used. This tool can run
+To run an analysis in Galaxy, immuneML Wrapper tool should be used. This tool can run
 any analysis supported by immuneML. For the tool, it is necessary to provide a YAML
 specification file defining the analysis, and a list of input files (if any) or a
 list of Galaxy collections (if any).

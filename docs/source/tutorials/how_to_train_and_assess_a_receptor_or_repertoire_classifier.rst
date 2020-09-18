@@ -1,33 +1,34 @@
-How to train and assess a receptor/repertoire classifier
+How to train and assess a receptor/repertoire-level ML classifier
 ========================================================
 
-ImmuneML provides a rich set of functionality for learning and assessing machine
-learning models (classifiers of receptors or repertoires). It supports both nested
-cross-validation and fixed splits into training, validation and test sets for learning
-parameters and hyper-parameters. Processing and filtering choices for input receptor data,
-as well as encoding choice, can be set up as hyper-parameters for automatic optimization
-and unbiased assessment across such choices. One can set up a single ImmuneML run to train
-models, optimize hyper-parameters and get an unbiased assessment of its performance.
+immuneML provides a rich set of functionality for learning and assessing machine
+learning models (classifiers of receptors or repertoires). To learn the parameters and hyperparameters of the ML model,
+the data needs to be split into training, validation and test sets. For this splitting, both nested cross-validation and fixed splits are supported.
+Processing and filtering choices for input receptor data,
+as well as encoding choice, can be set up as hyperparameters for automatic optimization
+and unbiased assessment across such choices. One can set up a single immuneML run to train
+models, optimize hyperparameters and get an unbiased assessment of its performance.
 The resulting optimized classifier can also afterwards be applied to further datasets.
-This process is shown in Figure 1.
+This process is shown in the figure below.
 
-See :ref:`How to properly train and assess an ML model` to learn more about model training, hyper-parameters and unbiased assessment.
+See :ref:`How to properly train and assess an ML model` to learn more about model training, hyperparameters and unbiased assessment.
 
 .. figure:: ../_static/images/ml_process_overview.png
   :width: 70%
 
-  Figure 1 - overview of the training process of an ML classifier: hyperparameter
+  Overview of the training process of an ML classifier: hyperparameter
   optimization is done on training and validation data and the model performance is
   assessed on test data
 
 The analysis specification consists of (i) defining all elements used for analysis,
 such as the dataset, encodings, preprocessing, ML methods and reports, (ii) defining
-the instruction to be executed. Hyperparameter optimization instructions take as parameters:
+the instruction to be executed. Training ML model instructions take as parameters:
 
 1. A list of hyperparameter settings (preprocessing, encoding, ML method combinations) to be evaluated,
 
 .. highlight:: yaml
 .. code-block:: yaml
+  :linenos:
 
   settings:
     - encoding: my_kmer_enc
@@ -55,6 +56,7 @@ the instruction to be executed. Hyperparameter optimization instructions take as
 
   .. highlight:: yaml
   .. code-block:: yaml
+    :linenos:
 
     assessment:
       split_strategy: random
@@ -82,6 +84,7 @@ the instruction to be executed. Hyperparameter optimization instructions take as
 
   .. highlight:: yaml
   .. code-block:: yaml
+    :linenos:
 
     selection:
       split_strategy: random
@@ -161,13 +164,14 @@ An example is shown below:
       batch_size: 4
       optimization_metric: balanced_accuracy # the metric used for optimization
       reports: []
+      refit_optimal_model: False
 
-The flow of the hyperparameter optimization is shown in the Figure 2, along with the
-output that is generated and reports executed during the particular step:
+The flow of the hyperparameter optimization is shown below, along with the
+output that is generated and reports executed at each step:
 
 .. figure:: ../_static/images/hp_optmization_with_outputs.png
   :width: 70%
 
-  Figure 2 - execution flow of the TrainMLModelInstruction along with the information on data and reports generated at each step
+  Execution flow of the TrainMLModelInstruction along with the information on data and reports generated at each step.
 
 For implementation detals, see :ref:`Hyperparameter Optimization Details`.

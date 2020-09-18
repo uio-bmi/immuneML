@@ -1,20 +1,25 @@
 immuneML & Galaxy
 =================
 
-ImmuneML is integrated with Galaxy through a list of Galaxy tools. These tools include tools for repertoire and receptor classification for immunology
-experts and CLI equivalent tools where the analysis is defined by YAML specification.
+All of immuneMLs functionalities are also available through a Galaxy web interface as a collection of Galaxy tools. We provide a YAML-based Galaxy
+tool that is equivalent to the CLI (command-line interface), as well as repertoire and receptor-level classification tools with an intuitive
+graphical user interface aimed at immunology experts without a machine learning background.
 
-Tools for immunology experts:
+To get started, you will need to add your dataset to Galaxy, which is explained in this tutorial:
 
-1. :ref:`How to classify immune repertoires` - a tool with customized user interface for repertoire classification.
+- :ref:`How to make an immuneML dataset in Galaxy` - a tool that creates a Galaxy collection from a set of repertoire or receptor files and
+corresponding metadata
 
-CLI equivalent tools based on YAML specification:
+Subsequently, immunology experts without machine learning background can follow these instructions:
 
-1. :ref:`How to make an immuneML dataset in Galaxy` - a tool that creates a Galaxy collection from a set of repertoire or receptor files and
-corresponding metadata,
+- :ref:`Classify immune repertoires` (Galaxy tool) - a tool with an easily interpretable user interface for repertoire classification (e.g., immune status prediction).
 
-2. :ref:`How to run an analysis in Galaxy` - a tool that can perform any analysis immuneML supports using a Galaxy collection created in the ImmuneML
-Dataset wrapper or raw files and a specification.
+- Classify immune receptors (Galaxy tool) - coming soon
+
+Alternatively, CLI equivalent tools based on the YAML specification can be run using the following instructions
+
+-  :ref:`How to run an analysis in Galaxy` - a tool that can perform any analysis immuneML supports using a Galaxy collection created in the
+‘Create dataset’ Galaxy tool or raw files and a YAML specification.
 
 
 Galaxy tutorials:

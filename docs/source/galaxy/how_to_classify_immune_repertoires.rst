@@ -1,4 +1,4 @@
-How to classify immune repertoires
+Classify immune repertoires
 =========================================
 
 
@@ -27,7 +27,7 @@ answers to the last two questions.
 .. figure:: ../_static/images/repertoire_classification_overview.png
   :width: 70%
 
-  Figure 2 - An overview of the components of the immuneML repertoire classification tool. ImmuneML reads in repertoire data with labels (+ and -), encodes the
+  Figure 2 - An overview of the components of the immuneML repertoire classification tool. immuneML reads in repertoire data with labels (+ and -), encodes the
   data, trains user-specified ML models and summarizes the performance statistics per ML method.
   Encoding: different forms of encoding are shown; full sequence encoding and position dependent and invariant subsequence encoding.
   The disease-associated sequences or sub-sequences are highlighted with color. The different colors represent independent elements of the disease signal.
