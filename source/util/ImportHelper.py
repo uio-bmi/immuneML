@@ -207,6 +207,7 @@ class ImportHelper:
         if region_definition == RegionDefinition.IMGT and region_type == RegionType.CDR3:
             df["sequence_aas"] = df["sequence_aas"].str[1:-1]
             df["sequences"] = df["sequences"].str[3:-3]
+            df["region_types"] = region_type.name
 
     @staticmethod
     def strip_alleles(df: pd.DataFrame, column_name):

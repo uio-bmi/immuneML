@@ -1,7 +1,7 @@
 import_productive: True
 import_with_stop_codon: False
 import_out_of_frame: False
-region_definition: "IMGT" # which CDR3 definition to use - IMGT option means removing first and last amino acid as ImmunoSEQ uses IMGT junction as CDR3
+region_definition: "IMGT" # which CDR3 definition to use - IMGT option means removing first and last amino acid as ImmunoSEQ uses IMGT junction
 separator: "\t"
 columns_to_load: [nucleotide, aminoAcid, count (templates/reads), vFamilyName, vGeneName, vGeneAllele, jFamilyName, jGeneName, jGeneAllele, sequenceStatus] # columns from the original file that will be imported
 column_mapping: # immunoSEQ column names -> immuneML repertoire fields

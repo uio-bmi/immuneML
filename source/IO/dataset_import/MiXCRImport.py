@@ -77,7 +77,6 @@ class MiXCRImport(DataImport):
         df["sequence_aas"] = df[MiXCRImport.SEQUENCE_NAME_MAP[params.region_type]["AA"]]
         df["sequences"] = df[MiXCRImport.SEQUENCE_NAME_MAP[params.region_type]["NT"]]
         ImportHelper.junction_to_cdr3(df, params.region_definition, params.region_type)
-        df["region_types"] = params.region_type.name
 
         if "v_genes" in df.columns:
             df["chains"] = ImportHelper.load_chains_from_genes(df, "v_genes")
