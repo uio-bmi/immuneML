@@ -2,7 +2,6 @@ import warnings
 
 import pandas as pd
 import plotly.express as px
-import plotly.graph_objects as go
 
 from source.reports.ReportOutput import ReportOutput
 from source.reports.ReportResult import ReportResult
@@ -37,7 +36,6 @@ class MLSettingsPerformance(MLReport):
         super(MLSettingsPerformance, self).__init__()
 
         self.state = None
-        self.hp_optimization_state = None
         self.result_path = None
         self.name = name
         self.result_name = "performance"
@@ -91,10 +89,14 @@ class MLSettingsPerformance(MLReport):
 
         plotting_data.columns = plotting_data.columns.map(''.join)
 
-        figure = go.Figure()
+        metric_name = self.state.optimization_metric.name.replace("_", " ").title()
 
         figure = px.bar(plotting_data, x="ml_method", y="performancemean", color="ml_method", barmode="relative",
                         facet_row=self.vertical_grouping, facet_col="label", error_y="performancestd",
+                        labels={
+                            "performancemean": f"Performance ({metric_name})", # todo test if this is performance
+                            "ml_method": "ML method"
+                        }, template='plotly_white',
                         color_discrete_sequence=px.colors.diverging.Tealrose)
 
         file_path = f"{self.result_path}{self.result_name}.html"

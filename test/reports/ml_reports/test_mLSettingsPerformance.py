@@ -107,7 +107,7 @@ class TestMLSettingsPerformance(TestCase):
         report = MLSettingsPerformance()
 
         report.result_path = path
-        report.hp_optimization_state = self._create_state_object(path + "input_data/")
+        report.state = self._create_state_object(path + "input_data/")
 
         df = pd.DataFrame({"fold": [0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1],
                       "label": ["l1", "l1", "l1", "l1", "l2", "l2", "l2", "l2", "l1", "l1", "l1", "l1", "l2", "l2", "l2", "l2"],
@@ -118,43 +118,4 @@ class TestMLSettingsPerformance(TestCase):
         report._plot(df)
 
         shutil.rmtree(path)
-
-
-
-    # def test_new_plotting(self):
-    #     df = pd.DataFrame({"fold": [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1],
-    #                        "label": ["l1", "l1", "l1", "l1", "l2", "l2", "l2", "l2", "l1", "l1", "l1", "l1", "l2", "l2",
-    #                                  "l2", "l2"],
-    #                        "encoding": ["e1", "e2", "e1", "e2", "e1", "e2", "e1", "e2", "e1", "e2", "e1",
-    #                                                   "e2", "e1", "e2", "e1", "e2"],
-    #                        "ml_method": ["ml1", "ml1", "ml2", "ml2", "ml1", "ml1", "ml2", "ml2", "ml1", "ml1", "ml2",
-    #                                      "ml2", "ml1", "ml1", "ml2", "ml2"],
-    #                        "performance": [0.5, 0.8, 0.4, 0.8, 0.9, 0.2, 0.5, 0.6, 0.8, 0.4, 0.8, 0.9, 0.2, 0.5, 0.6,
-    #                                        0.5]})
-    #
-    #
-    #
-    #
-    #     df = df.groupby(["label", "encoding", "ml_method"], as_index=False).agg({"fold": "first", "performance": ['mean', self.std]})
-    #
-    #
-    #     df.columns = df.columns.map(''.join)
-    #
-    #
-    #
-    #     print(df)
-    #
-    #
-    #
-    #     figure = go.Figure()
-    #
-    #     figure = px.bar(df, x="ml_method", y="performancemean", color="ml_method", barmode="relative",
-    #                  facet_row="encoding", facet_col="label", error_y="performancestd",
-    #                  color_discrete_sequence=px.colors.diverging.Tealrose)
-    #
-    #     figure.show()
-    #
-
-
-
 

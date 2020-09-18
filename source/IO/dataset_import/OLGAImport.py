@@ -23,13 +23,8 @@ class OLGAImport(DataImport):
                 path: path/to/repertoire/files/
                 result_path: path/where/to/store/immuneML/imported/data/
                 # these parameters need to be specified only if different than default behaviour is desired
-                import_productive: null # no effect as this info is not available in files created by OLGA
-                import_with_stop_codon: null # no effect as this info is not available in files created by OLGA
-                import_out_of_frame: null # no effect as this info is not available in files created by OLGA
                 separator: "\\t"
                 columns_to_load: null # OLGA columns are assumed to correspond to: sequences, sequence_aas, v_genes, j_genes
-                column_mapping: null # could be defined if necessary in to format {column_name_in_original_file_1: immuneML_friendly_name_1 for all columns that should be mapped}
-
     """
 
     @staticmethod

@@ -100,7 +100,5 @@ class AIRRSequenceImport:
         df["v_genes"] = ImportHelper.strip_alleles(df, "v_genes")
         df["j_genes"] = ImportHelper.strip_alleles(df, "j_genes")
 
-        df["region_type"] = params["region_type"].name
-
         return df
 
