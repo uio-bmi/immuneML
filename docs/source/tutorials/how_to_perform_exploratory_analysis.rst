@@ -1,5 +1,5 @@
 How to perform an exploratory data analysis
-========================================
+============================================
 
 To explore preprocessing, encodings and/or reports without running a machine learning
 algorithm, the ExploratoryAnalysis instruction should be used. The components in the
