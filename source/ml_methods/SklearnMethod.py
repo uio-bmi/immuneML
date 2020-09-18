@@ -117,9 +117,8 @@ class SklearnMethod(MLMethod):
             return None
 
     def _fit_for_label_by_cv(self, X, y: np.ndarray, label: str, cores_for_training: int, number_of_splits: int = 5):
-        model = self._get_ml_model(cores_for_training=cores_for_training)
-        n_jobs = model.n_jobs if hasattr(model, 'n_jobs') else cores_for_training
-        self.models[label] = RandomizedSearchCV(model, param_distributions=self._parameter_grid, cv=number_of_splits, n_jobs=n_jobs,
+        model = self._get_ml_model()
+        self.models[label] = RandomizedSearchCV(model, param_distributions=self._parameter_grid, cv=number_of_splits, n_jobs=cores_for_training,
                                                 scoring="balanced_accuracy", refit=True)
         self.models[label].fit(X, y)
         self.models[label] = self.models[label].best_estimator_  # do not leave RandomSearchCV object to be in models, use the best estimator instead

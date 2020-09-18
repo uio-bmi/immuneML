@@ -72,7 +72,7 @@ class MLProcess:
                                                       context=self.report_context, batch_size=self.number_of_processes,
                                                       label_configuration=self.label_config)
 
-        method = HPUtil.train_method(self.label, encoded_train_dataset, self.hp_setting, self.path, self.train_predictions_path, self.ml_details_path)
+        method = HPUtil.train_method(self.label, encoded_train_dataset, self.hp_setting, self.path, self.train_predictions_path, self.ml_details_path, self.number_of_processes)
 
         encoding_train_results = ReportUtil.run_encoding_reports(encoded_train_dataset, self.encoding_reports, f"{self.report_path}encoding_train/")
 

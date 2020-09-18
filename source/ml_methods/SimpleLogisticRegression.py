@@ -40,8 +40,10 @@ class SimpleLogisticRegression(SklearnMethod):
                                     "C": [0.001, 0.01, 0.1, 10, 100, 1000],
                                     "class_weight": ["balanced"]}
 
-    def _get_ml_model(self, cores_for_training: int = 2, X=None):
-        return LogisticRegression(**self._parameters)
+    def _get_ml_model(self, cores_for_training: int=2, X=None):
+        params = self._parameters.copy()
+        params["n_jobs"] = cores_for_training
+        return LogisticRegression(**params)
 
     def can_predict_proba(self) -> bool:
         return True

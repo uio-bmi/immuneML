@@ -20,8 +20,6 @@ class TCRDISTClassifier(SklearnMethod):
 
         percentage (float): percentage of nearest neighbors to consider when determining receptor specificity based on known receptors
 
-        n_jobs (int): number of processes to use when running the classifier
-
     Specification:
 
     .. indent with spaces
@@ -30,18 +28,15 @@ class TCRDISTClassifier(SklearnMethod):
         my_tcr_method:
             TCRdistClassifier:
                 percentage: 0.1
-                n_jobs: 4
 
     """
 
-    def __init__(self, percentage: float, n_jobs: int):
+    def __init__(self, percentage: float):
         super().__init__()
 
         ParameterValidator.assert_type_and_value(percentage, float, "TCRdistClassifier", "percentage", min_inclusive=0., max_inclusive=1.)
-        ParameterValidator.assert_type_and_value(n_jobs, int, "TCRdistClassifier", 'n_jobs', 1)
 
         self.percentage = percentage
-        self.n_jobs = n_jobs
         self.k = None
         self.label = None
 
@@ -58,7 +53,7 @@ class TCRDISTClassifier(SklearnMethod):
                     distances[point_dist_i] = point_dist / np.sum(point_dist).astype(float)
 
         # make an object of KNN class with precomputed metric
-        return KNeighborsClassifier(n_neighbors=self.k, weights=weights_func, metric='precomputed', n_jobs=self.n_jobs)
+        return KNeighborsClassifier(n_neighbors=self.k, weights=weights_func, metric='precomputed', n_jobs=cores_for_training)
 
     def get_params(self, label):
         return {**self.models[label].get_params(deep=True), **copy.deepcopy(vars(self))}

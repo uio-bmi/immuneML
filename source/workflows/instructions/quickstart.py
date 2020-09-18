@@ -43,11 +43,11 @@ class Quickstart:
                 "ml_methods": {
                     "simpleLR": {
                         "SimpleLogisticRegression": {
-                            "penalty": "l1"
+                            "C": 30,
+                            "max_iter": 10
                         },
                         "model_selection_cv": False,
-                        "model_selection_n_folds": -1,
-                    }
+                        "model_selection_n_folds": 3}
                 },
                 "preprocessing_sequences": {
                     "seq1": [
@@ -101,7 +101,7 @@ class Quickstart:
                     "strategy": "GridSearch",
                     "metrics": ["accuracy"],
                     "reports": ["rep1"],
-                    "batch_size": 10,
+                    "batch_size": 3,
                     "optimization_metric": "balanced_accuracy",
                     "refit_optimal_model": False
                 }
