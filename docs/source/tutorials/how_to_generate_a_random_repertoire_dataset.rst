@@ -67,7 +67,7 @@ specification for random repertoire generation and export is given below:
 
 
 Generate a random repertoire dataset in the code
-----------------------------------------------
+-------------------------------------------------
 
 For developers, it is also possible to generate a random repertoire dataset directly inside the code. To do this, use the RandomDatasetGenerator
 class, located in the package simulation.dataset_generation. The method generate_repertoire_dataset() uses the same parameters as described above,

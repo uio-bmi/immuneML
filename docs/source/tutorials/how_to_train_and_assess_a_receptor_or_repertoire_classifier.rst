@@ -1,5 +1,5 @@
 How to train and assess a receptor/repertoire-level ML classifier
-========================================================
+==================================================================
 
 immuneML provides a rich set of functionality for learning and assessing machine
 learning models (classifiers of receptors or repertoires). To learn the parameters and hyperparameters of the ML model,

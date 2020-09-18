@@ -90,35 +90,7 @@ Preprocessings
 Instructions
 ============
 
-DatasetGeneration
-------------------
-
-.. include:: ../specs/instructions/dataset_generation.rst
-
-ExploratoryAnalysis
---------------------
-
-.. include:: ../specs/instructions/exploratory_analysis.rst
-
-TrainMLModel
---------------------
-
-.. include:: ../specs/instructions/hp.rst
-
-Simulation
---------------------
-
-.. include:: ../specs/instructions/simulation.rst
-
-MLModelTraining
---------------------
-
-.. include:: ../specs/instructions/ml_model_training.rst
-
-MLApplication
---------------------
-
-.. include:: ../specs/instructions/ml_application.rst
+.. include:: ../specs/instructions/instructions.rst
 
 Output
 ======

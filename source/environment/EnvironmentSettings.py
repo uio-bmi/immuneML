@@ -24,6 +24,7 @@ class EnvironmentSettings:
     tmp_cache_path = tmp_test_path + "cache/"
     html_templates_path = root_path + "source/presentation/html/templates/"
     specs_docs_path = root_path + "docs/specs/"
+    source_docs_path = root_path + "docs/source/"
     max_sequence_length = 20
     low_memory = True
 
