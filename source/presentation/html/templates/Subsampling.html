@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>immuneML: Subsampling Overview</title>
+    <style>
+        {{{css_style}}}
+    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+</head>
+<body>
+    <div class="container">
+        <div>
+            <h1>Subsampling {{name}}</h1>
+            <div>Full specification is available <a href="{{{full_specs}}}">here</a>.</div>
+            <div class="card">
+                <div class="col-container">
+                    <div class="col">
+                        <h3>Dataset information</h3>
+                        <h4>General information</h4>
+                        <div class="table-container">
+                            <table>
+                            <tr>
+                                <td><b>Name</b></td>
+                                <td>{{dataset_name}}</td>
+                            </tr>
+                            <tr>
+                                <td><b>Type</b></td>
+                                <td>{{dataset_type}}</td>
+                            </tr>
+                            <tr>
+                                <td><b>Example count</b></td>
+                                <td>{{example_count}}</td>
+                            </tr>
+                        </table>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <h3>Subsampling results</h3>
+                        {{#subsampled_datasets}}
+                        <div>
+                            <h5>{{sub_dataset_name}}</h5>
+                            <div class="padded-md">Dataset size: {{dataset_size}}</div>
+                            <div class="padded-md">
+                                <div><span>Download formats: </span>
+                                {{#formats}}
+                                    <a href="{{dataset_download_link}}" download>{{format_name}}</a>
+                                {{/formats}}
+                                </div>
+                            </div>
+                        </div>
+                        {{/subsampled_datasets}}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

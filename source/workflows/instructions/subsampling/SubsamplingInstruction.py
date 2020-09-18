@@ -1,0 +1,72 @@
+import random
+import shutil
+from typing import List
+
+from source.data_model.dataset.Dataset import Dataset
+from source.util.PathBuilder import PathBuilder
+from source.workflows.instructions.Instruction import Instruction
+from source.workflows.instructions.subsampling.SubsamplingState import SubsamplingState
+
+
+class SubsamplingInstruction(Instruction):
+    """
+    Subsampling is an instruction that subsamples a given dataset and creates multiple smaller dataset according to the parameters provided.
+
+    Arguments:
+
+        dataset (Dataset): original dataset which will be used as a basis for subsampling
+
+        subsampled_dataset_sizes (list): a list of dataset sizes (number of examples) each subsampled dataset should have
+
+        dataset_export_formats (list): in which formats to export the subsampled datasets
+
+    Specification:
+
+    .. indent with spaces
+    .. code-block:: yaml
+
+        my_subsampling_instruction: # user-defined name of the instruction
+            type: Subsampling # which instruction to execute
+            dataset: my_dataset # original dataset to be subsampled, with e.g., 300 examples
+            subsampled_dataset_sizes: # how large the subsampled datasets should be, one dataset will be created for each list item
+                - 200 # one subsampled dataset with 200 examples (200 repertoires if my_dataset was repertoire dataset)
+                - 100 # the other subsampled dataset will have 100 examples
+            dataset_export_formats: # in which formats to export the subsampled datasets
+                - Pickle
+                - AIRR
+
+    """
+
+    def __init__(self, dataset: Dataset, subsampled_dataset_sizes: List[int], dataset_export_formats: list, result_path: str = None, name: str = None):
+        self.state = SubsamplingState(dataset, subsampled_dataset_sizes, dataset_export_formats, result_path, name)
+
+    def run(self, result_path: str):
+        self.state.result_path = PathBuilder.build(f"{result_path}{self.state.name}/")
+
+        example_indices = list(range(self.state.dataset.get_example_count()))
+
+        for index, dataset_size in enumerate(self.state.subsampled_dataset_sizes):
+
+            new_dataset_name = f"{self.state.dataset.name}_{dataset_size}_subsampled_{index}"
+            new_dataset_path = PathBuilder.build(f"{self.state.result_path}{new_dataset_name}/")
+
+            new_example_indices = random.choices(example_indices, k=dataset_size)
+            new_dataset = self.state.dataset.make_subset(new_example_indices, new_dataset_path, Dataset.SUBSAMPLED)
+            new_dataset.name = new_dataset_name
+
+            self.state.subsampled_datasets.append(new_dataset)
+
+            self.export_dataset(new_dataset, new_dataset_path)
+
+        return self.state
+
+    def export_dataset(self, new_dataset, new_dataset_path):
+
+        self.state.subsampled_dataset_paths[new_dataset.name] = {}
+
+        for exporter in self.state.dataset_exporters:
+            exporter_name = exporter.__name__[:-8].lower()
+            export_path = f"{new_dataset_path}exported/{exporter_name}/"
+            exporter.export(new_dataset, export_path)
+            zip_export_path = shutil.make_archive(f"{new_dataset_path}exported_{exporter_name}_{new_dataset.name}", "zip", export_path)
+            self.state.subsampled_dataset_paths[new_dataset.name][exporter_name] = zip_export_path
