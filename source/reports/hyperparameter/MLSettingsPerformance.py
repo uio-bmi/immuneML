@@ -26,6 +26,7 @@ class MLSettingsPerformance(MLReport):
     .. code-block:: yaml
 
         my_hp_report: MLSettingsPerformance
+
     """
 
     @classmethod
