@@ -24,13 +24,11 @@ class SequenceAnalysisHelper:
             overlap_matrix[index1, index1] = 100
             sequences1 = import_sequences_as_set(hp_items[index1].encoder.relevant_sequence_csv_path)
             if len(sequences1) == 0:
-                overlap_matrix = None
-                break
+                return None
             for index2 in range(index1 + 1, len(hp_items)):
                 sequences2 = import_sequences_as_set(hp_items[index2].encoder.relevant_sequence_csv_path)
                 if len(sequences2) == 0:
-                    overlap_matrix = None
-                    break
+                    return None
                 intersection = sequences1.intersection(sequences2)
                 overlap_matrix[index1, index2] = round(len(intersection) * 100 / min(len(sequences1), len(sequences2)), 2)
                 overlap_matrix[index2, index1] = overlap_matrix[index1, index2]
