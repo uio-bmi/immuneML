@@ -17,9 +17,11 @@ class HPSelection:
         path = HPSelection.create_selection_path(state, current_path)
         train_datasets, val_datasets = HPUtil.split_data(train_val_dataset, state.selection, path)
 
-        for label in state.label_configuration.get_labels_by_name():
+        n_labels = state.label_configuration.get_label_count()
 
-            print(f"{datetime.datetime.now()}: Hyperparameter optimization: running the inner loop of nested CV: selection for label {label}.\n")
+        for idx, label in enumerate(state.label_configuration.get_labels_by_name()):
+
+            print(f"{datetime.datetime.now()}: Hyperparameter optimization: running the inner loop of nested CV: selection for label {label} (label {idx + 1} / {n_labels}).\n")
 
             selection_state = HPSelectionState(train_datasets, val_datasets, path, state.hp_strategy)
             state.assessment_states[split_index].label_states[label].selection_state = selection_state
@@ -32,7 +34,7 @@ class HPSelection:
 
             HPUtil.run_selection_reports(state, train_val_dataset, train_datasets, val_datasets, selection_state)
 
-            print(f"{datetime.datetime.now()}: Hyperparameter optimization: running the inner loop of nested CV: completed selection for label {label}.\n")
+            print(f"{datetime.datetime.now()}: Hyperparameter optimization: running the inner loop of nested CV: completed selection for label {label} (label {idx + 1} / {n_labels}).\n")
 
         return state
 

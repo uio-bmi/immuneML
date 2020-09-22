@@ -1,4 +1,5 @@
 from collections import Counter
+import datetime
 
 from scripts.specification_util import update_docs_per_mapping
 from source.IO.ml_method.MLExporter import MLExporter
@@ -116,18 +117,24 @@ class TrainMLModelInstruction(Instruction):
         return self.state
 
     def _compute_optimal_hp_item_per_label(self):
-        for label in self.state.label_configuration.get_labels_by_name():
-            self._compute_optimal_item(label)
+        n_labels = self.state.label_configuration.get_label_count()
+
+        for idx, label in enumerate(self.state.label_configuration.get_labels_by_name()):
+            self._compute_optimal_item(label, f"(label {idx + 1} / {n_labels})")
             zip_path = MLExporter.export_zip(hp_item=self.state.optimal_hp_items[label], path=f"{self.state.path}optimal_{label}/")
             self.state.optimal_hp_item_paths[label] = zip_path
 
-    def _compute_optimal_item(self, label: str):
+    def _compute_optimal_item(self, label: str, index_repr: str):
         optimal_hp_settings = [state.label_states[label].optimal_hp_setting for state in self.state.assessment_states]
         optimal_hp_setting = Counter(optimal_hp_settings).most_common(1)[0][0]
         if self.state.refit_optimal_model:
+            print(f"{datetime.datetime.now()}: Hyperparameter optimization: retraining optimal model for label {label} {index_repr}.\n")
             self.state.optimal_hp_items[label] = MLProcess(self.state.dataset, None, label, self.state.metrics, self.state.optimization_metric,
                                                            f"{self.state.path}optimal_{label}/", number_of_processes=self.state.batch_size,
                                                            label_config=self.state.label_configuration, hp_setting=optimal_hp_setting).run(0)
+            print(f"{datetime.datetime.now()}: Hyperparameter optimization: finished retraining optimal model for label {label} {index_repr}.\n")
+
+
         else:
             optimal_assessment_state = self.state.assessment_states[optimal_hp_settings.index(optimal_hp_setting)]
             self.state.optimal_hp_items[label] = optimal_assessment_state.label_states[label].optimal_assessment_item
