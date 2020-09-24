@@ -132,7 +132,7 @@ class ReceptorCNN(MLMethod):
 
         return {self.label_name: np.vstack([1 - np.array(predictions), predictions]).T}
 
-    def fit(self, encoded_data: EncodedData, y, label_names: list = None, cores_for_training: int = 2):
+    def fit(self, encoded_data: EncodedData, y, label_names: list = None, cores_for_training: int = -1):
 
         self.feature_names = encoded_data.feature_names
 

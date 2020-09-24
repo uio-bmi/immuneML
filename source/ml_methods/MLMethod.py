@@ -22,7 +22,7 @@ class MLMethod(metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def fit_by_cross_validation(self, encoded_data: EncodedData, y, number_of_splits: int = 5, parameter_grid: dict = None,
-                                label_names: list = None):
+                                label_names: list = None, cores_for_training: int = -1):
         pass
 
     @abc.abstractmethod

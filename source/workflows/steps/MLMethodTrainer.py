@@ -1,4 +1,5 @@
 import copy
+import datetime
 
 import pandas as pd
 
@@ -12,8 +13,12 @@ class MLMethodTrainer(Step):
     @staticmethod
     def run(input_params: MLMethodTrainerParams = None):
 
+        print(f"{datetime.datetime.now()}: ML model training started...")
+
         method = MLMethodTrainer._fit_method(input_params)
         MLMethodTrainer.store(method, input_params)
+
+        print(f"{datetime.datetime.now()}: ML model training finished.")
 
         return method
 

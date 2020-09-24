@@ -54,7 +54,7 @@ class SequenceFilterHelper:
                 second_class_absent = np.sum(np.logical_and(np.logical_not(is_first_class), sequence_vector == 0))
 
                 sequence_p_values.append(fisher_exact([[first_class_present, second_class_present],
-                                                       [first_class_absent, second_class_absent]])[1])
+                                                       [first_class_absent, second_class_absent]], alternative='greater')[1])
             else:
                 sequence_p_values.append(SequenceFilterHelper.INVALID_P_VALUE)
 

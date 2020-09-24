@@ -41,8 +41,8 @@ class ManualSplitter:
         assert len(metadata) == unique_metadata_count, f"DataSplitter: there are {len(metadata)} repertoires, but {unique_metadata_count} " \
                                                        f"unique identifiers. Check the metadata for the original dataset {dataset.name}."
         metadata_df = pd.read_csv(metadata_path)
-        assert "subject_id" in metadata_df, f"DataSplitter: {dataset_type} metadata {os.path.basename(metadata_path)} is missing column 'subject_id' " \
-                                       f"which should be used for matching repertoires when splitting to train and test data."
+        assert "subject_id" in metadata_df, f"DataSplitter: {dataset_type} metadata {os.path.basename(metadata_path)} is missing column " \
+                                            f"'subject_id' which should be used for matching repertoires when splitting to train and test data."
         indices = [i for i in range(len(metadata)) if metadata[i] in metadata_df["subject_id"].values.tolist()]
 
         new_dataset = Util.make_dataset(dataset, indices, input_params, 0, dataset_type)

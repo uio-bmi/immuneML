@@ -38,7 +38,6 @@ class RandomForestClassifier(SklearnMethod):
         params["n_jobs"] = cores_for_training
         return RFC(**params)
 
-
     def can_predict_proba(self) -> bool:
         return True
 

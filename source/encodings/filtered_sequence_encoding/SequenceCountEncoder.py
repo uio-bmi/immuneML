@@ -19,7 +19,7 @@ class SequenceCountEncoder(DatasetEncoder):
     """
     This encoder represents the repertoires as a matrix of sequence counts for label-associated sequences.
     To determine what clonotypes (with features defined by comparison_attributes) are label-associated
-    based on a statistical test. The statistical test used is Fisher's exact test (two-sided).
+    based on a statistical test. The statistical test used is Fisher's exact test (one-sided).
 
     Reference: Emerson, Ryan O. et al.
     ‘Immunosequencing Identifies Signatures of Cytomegalovirus Exposure History and HLA-Mediated Effects on the T Cell Repertoire’.

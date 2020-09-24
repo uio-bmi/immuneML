@@ -93,9 +93,8 @@ class ProbabilisticBinaryClassifier(MLMethod):
 
         Arguments:
 
-            encoded_data: EncodedData object with examples attribute which is a design matrix of shape
-                [number of examples x number of features], where number of features is 2
-                (the first feature is the number of disease-associated sequences and the second is the total number of sequences per example)
+            encoded_data: EncodedData object with examples attribute which is a design matrix of shape [number of examples x number of features], where number of features is 2
+            (the first feature is the number of disease-associated sequences and the second is the total number of sequences per example)
 
             label_names: name of the label used for classification (e.g. CMV)
 
@@ -121,11 +120,14 @@ class ProbabilisticBinaryClassifier(MLMethod):
         It maximizes the following log-likelihood:
 
         .. math::
+
             l_l (\alpha, \beta) = - N_l \, log \, B (\alpha, \beta) + \sum_{i: c_i = l} log \, B(k_i + \alpha, n_i - k_i + \beta), l = 0, 1
 
         Arguments:
+
             X: design matrix of shape [number of examples x number of features], where number of features is 2
                (the first feature is the number of disease-associated sequences and the second is the total number of sequences per example)
+
             N_l: number of examples in the given class
 
         Returns:
@@ -160,16 +162,22 @@ class ProbabilisticBinaryClassifier(MLMethod):
         equal density.
 
         Initial parameter values as per the method of moments:
+
         .. math::
+
             \alpha = \frac{E[X]^2 * (1-E[X])}{V[X]}-E[X]
             \beta = (\frac{E[X](1-E[X])}{V[X]} - 1) * (1 - E[X])
 
         Arguments:
+
             k_is: number of disease-associated sequences per example
+
             n_is: total number of sequences per example
 
         Returns:
+
             initial values of parameters alpha and beta
+
         """
         binomial_proportions_p = k_is / n_is
         mean = binomial_proportions_p.mean()
@@ -186,18 +194,26 @@ class ProbabilisticBinaryClassifier(MLMethod):
         Function computing the gradients of alpha and beta parameters of the beta distribution to maximize log-likelihood:
 
         .. math::
+
             \frac{\partial  l_l}{\partial \alpha} = - N_l (\Psi (\alpha) - \Psi (\alpha + \beta)) + \sum_{i:c_i=l}^{} (\Psi(k_i + \alpha) - \Psi(n_i + k_i + \alpha + \beta))
             \frac{\partial  l_l}{\partial \beta} = - N_l (\Psi(\beta) - \Psi(\alpha + \beta)) + \sum_{i:c_i=l} (\Psi(n_i - k_i + \beta) - \Psi(n_i + k_i + \alpha + \beta))
 
         Arguments:
+
             N_l: number of examples in the current class
+
             alpha: alpha parameter of beta distribution
+
             beta: beta parameter of beta distribution
+
             k_is: array of numbers of disease-associated sequences per training example
+
             n_is: array of total numbers of sequences per training example
 
         Returns:
+
             gradients for alpha and beta
+
         """
         grad_alpha = - N_l * (digamma(alpha) - digamma(alpha + beta)) \
                      + np.sum([digamma(k_is[i] + alpha) - digamma(n_is[i] + k_is[i] + alpha + beta)
@@ -220,15 +236,19 @@ class ProbabilisticBinaryClassifier(MLMethod):
         training dataset:
 
         .. math::
+
             k_i' = k_i + k_{max} / n_{max}
             n_i' = n_i + 1
 
         Arguments:
+
             k_is: array of numbers of disease-associated sequences per training example
             n_is: array of total numbers of sequences per training example
 
         Returns:
+
             Laplace-smoothed values of k_i and n_i
+
         """
         regularizer_index = np.argmax(n_is)  # index of max n
         regularizer_k = k_is[regularizer_index]  # k corresponding to max n
@@ -246,9 +266,11 @@ class ProbabilisticBinaryClassifier(MLMethod):
         For given parameters of beta distributions for both classes, computes the posterior class probabilities:
 
         .. math::
+
             p(c' = x | n', k')= \binom{n'}{k'} \frac{B(k'+\alpha_x, n' - k' + \beta_x)}{B(\alpha_x, \beta_x)} \frac{N_x + 1}{N + 2}, x=0,1
 
         Arguments:
+
             k: number of disease-associated sequences
             n: total number of sequences
 
@@ -265,14 +287,18 @@ class ProbabilisticBinaryClassifier(MLMethod):
         Function computing log-posterior odds ratio for class assignment for new example with parameters k and n:
 
         .. math::
+
             F(k, n) = log \, p (c=1|k,n) - log \, p(c=0|k,n)) = log (N_1 + 1) - log(N_0 + 1) + log \, B(\alpha_0, \beta_0) -  log \, B(\alpha_1, \beta_1) +  log \, B(k + \alpha_1, n - k + \beta_1) -  log \, B(k + \alpha_0, n-k + \beta_0)
 
         Arguments:
+
             k: number of disease-associated sequences
             n: total number of sequences
 
         Returns:
+
             log-posterior odds ratio for class assignment
+
         """
         return np.log(self.N_1 + 1) - np.log(self.N_0 + 1) \
                + beta_func_ln(self.alpha_0, self.beta_0) - beta_func_ln(self.alpha_1, self.beta_1) \
@@ -280,7 +306,7 @@ class ProbabilisticBinaryClassifier(MLMethod):
                - beta_func_ln(k + self.alpha_0, n - k + self.beta_0)
 
     def fit_by_cross_validation(self, encoded_data: EncodedData, y, number_of_splits: int = 5, parameter_grid: dict = None,
-                                label_names: list = None):
+                                label_names: list = None, cores_for_training: int = -1):
         warnings.warn("ProbabilisticBinaryClassifier: cross-validation on this classifier is not defined: fitting one model instead...")
         self.fit(encoded_data, y, label_names)
 
@@ -289,16 +315,20 @@ class ProbabilisticBinaryClassifier(MLMethod):
         Predict the probability of the class for examples in X.
 
         .. math::
+
             \widehat{c} \, (k, n) = \left\{\begin{matrix} 0, & F(k, n) \leq 0\\ 1, & F(k, n) > 0 \end{matrix}\right
 
         Arguments:
+
             encoded_data: EncodedData object with examples attribute which is a design matrix of shape, where number of features is 2
-                (the first feature is the number of disease-associated sequences and the second is the total number of sequences
-                per example)
+            (the first feature is the number of disease-associated sequences and the second is the total number of sequences per example)
+
             labels: name of the label used for classification (e.g. CMV)
 
         Returns:
+
             class probabilities for all examples in X
+
         """
         self._check_labels(labels)
         X = encoded_data.examples

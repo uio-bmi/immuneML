@@ -46,7 +46,7 @@ class TestEmersonSequenceAbundanceEncoder(TestCase):
 
         encoded_dataset = encoder.encode(dataset, EncoderParams(result_path=path, label_config=label_config))
 
-        self.assertTrue(np.array_equal(np.array([[1, 4], [1, 6], [1, 3], [1, 6]]), encoded_dataset.encoded_data.examples))
+        self.assertTrue(np.array_equal(np.array([[1, 4], [1, 6], [0, 3], [0, 6]]), encoded_dataset.encoded_data.examples))
 
         encoder.p_value_threshold = 0.05
 
@@ -132,7 +132,10 @@ class TestEmersonSequenceAbundanceEncoder(TestCase):
 
         p_values = SequenceFilterHelper.find_label_associated_sequence_p_values(comparison_data, repertoires, "l1", [True, False])
 
+        print(p_values)
+
         self.assertTrue(
-            np.allclose([2, 0.3333333333333334, 1., 1., 2, 1., 1., 0.3333333333333334, 2], p_values, equal_nan=True))
+            np.allclose([SequenceFilterHelper.INVALID_P_VALUE, 0.1666666666666667, 0.5000000000000001, 1., SequenceFilterHelper.INVALID_P_VALUE,
+                         0.8333333333333331, 1., 1., 2], p_values, equal_nan=True))
 
         shutil.rmtree(path)
