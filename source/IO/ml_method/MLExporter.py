@@ -1,11 +1,11 @@
 import os
 import pickle
+import shutil
 from typing import List
 
 from source.IO.ml_method.MLMethodConfiguration import MLMethodConfiguration
 from source.hyperparameter_optimization.states.HPItem import HPItem
 from source.preprocessing.Preprocessor import Preprocessor
-from source.presentation.html.Util import Util
 from source.util.PathBuilder import PathBuilder
 
 
@@ -13,10 +13,12 @@ class MLExporter:
 
     @staticmethod
     def export_zip(hp_item: HPItem, path: str) -> str:
-        export_path = MLExporter.export(hp_item, path + "exported/")
+        state_path = os.path.abspath(path) + "/"
+        export_path = MLExporter.export(hp_item, state_path + "exported/")
         filename = f"ml_model_{hp_item.hp_setting.ml_method_name}"
-        model_zip_path = Util.make_downloadable_zip(path, export_path, filename)
-        return model_zip_path
+        model_zip_path = shutil.make_archive(f"{state_path}zip/{filename}", "zip", export_path)
+        abs_zip_path = os.path.abspath(model_zip_path)
+        return abs_zip_path
 
     @staticmethod
     def export(hp_item: HPItem, path: str) -> str:

@@ -34,7 +34,6 @@ class AIRRExporter(DataExporter):
             repertoire_path = PathBuilder.build(f"{path}repertoires/")
 
             for index, repertoire in enumerate(dataset.repertoires):
-                print(f"index: {index}")
                 df = AIRRExporter._repertoire_to_dataframe(repertoire, region_type)
                 airr.dump_rearrangement(df, f"{repertoire_path}{repertoire.identifier}.tsv")
 

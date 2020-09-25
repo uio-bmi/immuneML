@@ -176,9 +176,9 @@ class HPHTMLBuilder:
 
     @staticmethod
     def make_model_per_label(state: HPOptimizationState, base_path: str) -> list:
+        print(base_path)
         return [{'label': label, 'model_path': os.path.relpath(state.optimal_hp_item_paths[label], base_path)}
                 for label in state.label_configuration.get_labels_by_name()]
-
 
     @staticmethod
     def make_main_html_map(state: HPOptimizationState, base_path: str) -> dict:
