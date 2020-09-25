@@ -62,7 +62,7 @@ def get_ml_method_spec(ml_method_class, model_selection_n_folds=5):
         ml_spec = {
             "logistic_regression": {
                 "SimpleLogisticRegression": {
-                    "penalty": ["l2"],
+                    "penalty": ["l1"],
                     "C": [0.01, 0.1, 1, 10, 100],
                     "class_weight": ["balanced"]
                 },
