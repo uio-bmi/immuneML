@@ -37,7 +37,7 @@ class TestEmersonSequenceCountEncoder(TestCase):
             "p_value_threshold": 0.4, "sequence_batch_size": 4
         })
 
-        label_config = LabelConfiguration([Label("l1", [True, False])])
+        label_config = LabelConfiguration([Label("l1", [True, False], positive_class=True)])
 
         encoded_dataset = encoder.encode(dataset, EncoderParams(result_path=path, label_config=label_config))
 

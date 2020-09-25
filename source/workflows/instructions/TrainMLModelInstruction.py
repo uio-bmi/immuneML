@@ -1,5 +1,5 @@
-from collections import Counter
 import datetime
+from collections import Counter
 
 from scripts.specification_util import update_docs_per_mapping
 from source.IO.ml_method.MLExporter import MLExporter
@@ -42,7 +42,11 @@ class TrainMLModelInstruction(Instruction):
 
         optimization_metric (Metric): a metric to use for optimization and assessment in the nested cross-validation.
 
-        label_configuration (LabelConfiguration): a list of labels for which to train the classifiers. The goal of the nested CV is to find the setting which will have best performance in predicting the given label (e.g. if a subject has experienced an immune event or not). Performance and optimal settings will be reported for each label separately.
+        label_configuration (LabelConfiguration): a list of labels for which to train the classifiers. The goal of the nested CV is to find the
+        setting which will have best performance in predicting the given label (e.g., if a subject has experienced an immune event or not).
+        Performance and optimal settings will be reported for each label separately. If a label is binary, instead of specifying only its name, one
+        should explicitly set the name of the positive class as well under parameter `positive_class`. If positive class is not set, one of the label
+        classes will be assumed to be positive.
 
         batch_size (int): how many processes should be created at once to speed up the analysis. For personal machines, 4 or 8 is usually a good choice.
 
@@ -88,7 +92,9 @@ class TrainMLModelInstruction(Instruction):
                     encoding: # list of reports to execute on encoded training/test datasets (again, it is training/validation here)
                         - rep4
             labels: # list of labels to optimize the classifier for, as given in the metadata for the dataset
-                - celiac
+                - celiac:
+                    positive_class: '+' # if it's binary classification, positive class parameter should be set
+                - T1D # this is not binary label, so no need to specify positive class
             dataset: d1 # which dataset to use for the nested CV
             strategy: GridSearch # how to choose the combinations which to test from settings (GridSearch means test all)
             metrics: # list of metrics to compute for all settings, but these do not influence the choice of optimal model

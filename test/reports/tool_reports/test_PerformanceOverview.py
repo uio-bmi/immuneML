@@ -104,7 +104,7 @@ class TestPerformanceOverview(TestCase):
                         "split_count": 1,
                         "training_percentage": 1
                     },
-                    "labels": ["cmv"],
+                    "labels": [{"cmv": {"positive_class": True}}],
                     "datasets": ["d1", "d2"],
                     "strategy": "GridSearch",
                     "metrics": ["accuracy", "auc"],

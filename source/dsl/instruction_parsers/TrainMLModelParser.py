@@ -114,21 +114,36 @@ class TrainMLModelParser:
 
         return path
 
+    def _check_label_format(self, labels: list, instruction_key: str):
+        ParameterValidator.assert_type_and_value(labels, list, TrainMLModelParser.__name__, f'{instruction_key}/labels')
+        assert all(isinstance(label, str) or isinstance(label, dict) for label in labels), \
+            f"{TrainMLModelParser.__name__}: labels under {instruction_key} were not defined properly. The list of labels has to either be a list of " \
+            f"label names, or there can be a parameter 'positive_class' defined under the label name."
+
+        assert all(len(list(label.keys())) == 1 and isinstance(list(label.values())[0], dict) and 'positive_class' in list(label.values())[0]
+                   and len(list(list(label.values())[0].keys())) == 1 for label in [l for l in labels if isinstance(l, dict)]), \
+            f"{TrainMLModelParser.__name__}: labels that are specified by more than label name, can include only one parameter called 'positive_class'."
+
     def _create_label_config(self, instruction: dict, dataset: Dataset, instruction_key: str) -> LabelConfiguration:
         labels = instruction["labels"]
+
+        self._check_label_format(labels, instruction_key)
+
         label_config = LabelConfiguration()
         for label in labels:
-            if dataset.params is not None and label in dataset.params:
-                label_values = dataset.params[label]
+            label_name = label if isinstance(label, str) else list(label.keys())[0]
+            positive_class = label[label_name]['positive_class'] if isinstance(label, dict) else None
+            if dataset.params is not None and label_name in dataset.params:
+                label_values = dataset.params[label_name]
             elif hasattr(dataset, "get_metadata"):
-                label_values = list(set(dataset.get_metadata([label])[label]))
+                label_values = list(set(dataset.get_metadata([label])[label_name]))
             else:
                 label_values = []
                 warnings.warn(f"{TrainMLModelParser.__name__}: for instruction {instruction_key}, label values could not be recovered for label "
                               f"{label}, using empty list instead.  This could cause problems with some encodings. "
                               f"If that might be the case, check if the dataset {dataset.name} has been properly loaded.")
 
-            label_config.add_label(label, label_values)
+            label_config.add_label(label_name, label_values, positive_class=positive_class)
         return label_config
 
     def _parse_split_config(self, instruction: dict, key: str, symbol_table: SymbolTable) -> SplitConfig:

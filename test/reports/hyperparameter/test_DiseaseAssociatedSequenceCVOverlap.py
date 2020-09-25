@@ -93,7 +93,7 @@ class TestDiseaseAssociatedSequenceCVOverlap(TestCase):
                         "split_count": 2,
                         "training_percentage": 0.7,
                     },
-                    "labels": ["l1"],
+                    "labels": [{"l1": {"positive_class": True}}],
                     "dataset": "d1",
                     "strategy": "GridSearch",
                     "metrics": ["accuracy"],
