@@ -2,6 +2,7 @@ import datetime
 
 from source.environment.LabelConfiguration import LabelConfiguration
 from source.hyperparameter_optimization.HPSetting import HPSetting
+from source.hyperparameter_optimization.config.SplitType import SplitType
 from source.hyperparameter_optimization.core.HPUtil import HPUtil
 from source.hyperparameter_optimization.states.HPOptimizationState import HPOptimizationState
 from source.hyperparameter_optimization.states.HPSelectionState import HPSelectionState
@@ -12,9 +13,17 @@ from source.workflows.instructions.MLProcess import MLProcess
 class HPSelection:
 
     @staticmethod
+    def update_split_count(state: HPOptimizationState, train_val_dataset):
+        if state.selection.split_strategy == SplitType.LOOCV:
+            state.selection.split_count = train_val_dataset.get_example_count()
+
+        return state
+
+    @staticmethod
     def run_selection(state: HPOptimizationState, train_val_dataset, current_path: str, split_index: int) -> HPOptimizationState:
 
         path = HPSelection.create_selection_path(state, current_path)
+        state = HPSelection.update_split_count(state, train_val_dataset)
         train_datasets, val_datasets = HPUtil.split_data(train_val_dataset, state.selection, path)
 
         n_labels = state.label_configuration.get_label_count()
