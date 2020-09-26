@@ -1,8 +1,5 @@
 import warnings
 
-from rpy2.robjects import pandas2ri
-from rpy2.robjects.packages import STAP
-
 from scripts.specification_util import update_docs_per_mapping
 from source.analysis.data_manipulation.DataReshaper import DataReshaper
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
@@ -115,19 +112,25 @@ class FeatureValueBarplot(EncodingReport):
         return FeatureValueBarplot(**kwargs)
 
     def __init__(self, dataset: RepertoireDataset = None, result_path: str = None, grouping_label: str = "feature",
-                 color_grouping_label: str = "NULL", errorbar_meaning: str = "se",  row_grouping_labels=[],
-                 column_grouping_labels=[], panel_layout_type: str = "grid", panel_axis_scales_type: str = "free",
-                 panel_label_switch_type: str = "NULL", panel_nrow="NULL", panel_ncol="NULL", height: float = 6,
-                 width: float = 8, x_title: str = "NULL", y_title: str = "NULL", color_title: str = "NULL",
+                 color_grouping_label: str = "NULL", errorbar_meaning: str = "se", row_grouping_labels=None, column_grouping_labels=None,
+                 panel_layout_type: str = "grid", panel_axis_scales_type: str = "free", panel_label_switch_type: str = "NULL", panel_nrow="NULL",
+                 panel_ncol="NULL", height: float = 6, width: float = 8, x_title: str = "NULL", y_title: str = "NULL", color_title: str = "NULL",
                  palette: dict = "NULL", name: str = None):
 
+        super().__init__(name)
         self.dataset = dataset
         self.result_path = result_path
         self.x = grouping_label
         self.color = color_grouping_label
         self.errorbar_meaning = ErrorBarMeaning[errorbar_meaning.upper()]
-        self.facet_rows = [row_grouping_labels] if isinstance(row_grouping_labels, str) else row_grouping_labels
-        self.facet_columns = [column_grouping_labels] if isinstance(column_grouping_labels, str) else column_grouping_labels
+        if row_grouping_labels is None:
+            self.facet_rows = []
+        else:
+            self.facet_rows = [row_grouping_labels] if isinstance(row_grouping_labels, str) else row_grouping_labels
+        if column_grouping_labels is None:
+            self.facet_columns = []
+        else:
+            self.facet_columns = [column_grouping_labels] if isinstance(column_grouping_labels, str) else column_grouping_labels
         self.facet_type = PanelLayoutType[panel_layout_type.upper()].name.lower()
         self.facet_scales = PanelAxisScalesType[panel_axis_scales_type.upper()].name.lower()
         self.facet_switch = PanelLabelSwitchType[panel_label_switch_type.upper()].name.lower()
@@ -156,6 +159,8 @@ class FeatureValueBarplot(EncodingReport):
         return ReportOutput(table_path, "feature values")
 
     def _plot(self, data_long_format) -> ReportOutput:
+        from rpy2.robjects import pandas2ri
+        from rpy2.robjects.packages import STAP
         pandas2ri.activate()
 
         with open(EnvironmentSettings.root_path + "source/visualization/Barplot.R") as f:

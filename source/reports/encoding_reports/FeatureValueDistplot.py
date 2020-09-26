@@ -1,8 +1,5 @@
 import warnings
 
-from rpy2.robjects import pandas2ri
-from rpy2.robjects.packages import STAP
-
 from scripts.specification_util import update_docs_per_mapping
 from source.analysis.data_manipulation.DataReshaper import DataReshaper
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
@@ -133,7 +130,7 @@ class FeatureValueDistplot(EncodingReport):
 
     def __init__(self, dataset: RepertoireDataset = None, result_path: str = None, distribution_plot_type: str = "box",
                  grouping_label: str = None, color_label: str = "NULL", connection_label: str = "NULL",
-                 row_grouping_labels: list = [], column_grouping_labels: list = [], panel_layout_type: str = "grid",
+                 row_grouping_labels: list = None, column_grouping_labels: list = None, panel_layout_type: str = "grid",
                  panel_axis_scales_type: str = "free", panel_label_switch_type: str = "NULL", panel_nrow="NULL",
                  panel_ncol="NULL", height: float = 6, width: float = 8, x_title: str = "NULL", y_title: str = "NULL",
                  color_title: str = "NULL", palette: dict = "NULL", name: str = None):
@@ -145,8 +142,14 @@ class FeatureValueDistplot(EncodingReport):
         self.grouping_label = grouping_label
         self.color = color_label
         self.group = connection_label
-        self.facet_rows = [row_grouping_labels] if isinstance(row_grouping_labels, str) else row_grouping_labels
-        self.facet_columns = [column_grouping_labels] if isinstance(column_grouping_labels, str) else column_grouping_labels
+        if row_grouping_labels is None:
+            self.facet_rows = []
+        else:
+            self.facet_rows = [row_grouping_labels] if isinstance(row_grouping_labels, str) else row_grouping_labels
+        if column_grouping_labels is None:
+            self.facet_columns = []
+        else:
+            self.facet_columns = [column_grouping_labels] if isinstance(column_grouping_labels, str) else column_grouping_labels
         self.facet_type = PanelLayoutType[panel_layout_type.upper()].name.lower()
         self.facet_scales = PanelAxisScalesType[panel_axis_scales_type.upper()].name.lower()
         self.facet_switch = PanelLabelSwitchType[panel_label_switch_type.upper()].name.lower()
@@ -176,6 +179,8 @@ class FeatureValueDistplot(EncodingReport):
         return ReportOutput(table_path, "feature values")
 
     def _plot(self, data_long_format):
+        from rpy2.robjects import pandas2ri
+        from rpy2.robjects.packages import STAP
         pandas2ri.activate()
 
         with open(EnvironmentSettings.root_path + "source/visualization/Distributions.R") as f:

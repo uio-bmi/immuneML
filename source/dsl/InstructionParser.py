@@ -60,7 +60,7 @@ class InstructionParser:
     @staticmethod
     def generate_docs(path):
         inst_path = PathBuilder.build(f"{path}instructions/")
-        instructions = sorted(ReflectionHandler.all_nonabstract_subclasses(Instruction, 'instructions/'), key=lambda x: x.__name__)
+        instructions = sorted(ReflectionHandler.all_nonabstract_subclasses(Instruction, "Instruction", subdirectory='instructions/'), key=lambda x: x.__name__)
 
         inst_paths = {}
 
@@ -74,8 +74,13 @@ class InstructionParser:
 
             inst_paths[instruction_name] = file_path
 
+        print(inst_paths)
+
         with open(f'{inst_path}instructions.rst', 'w') as file:
-            file.writelines("\n".join([f"{key}\n---------------------------\n.. include:: {os.path.relpath(value, EnvironmentSettings.source_docs_path)}\n" for key, value in inst_paths.items()]))
+            for key, item in inst_paths.items():
+                lines = f"{key}\n---------------------------\n.. include:: {os.path.relpath(item, EnvironmentSettings.source_docs_path)}\n"
+                print(lines)
+                file.writelines(lines)
 
     @staticmethod
     def make_docs(instruction, name, path):

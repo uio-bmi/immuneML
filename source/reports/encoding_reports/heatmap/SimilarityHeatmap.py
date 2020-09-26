@@ -3,17 +3,12 @@ import json
 
 import numpy as np
 import pandas as pd
-from rpy2.robjects import pandas2ri
-from rpy2.robjects.packages import STAP
 
 from source.analysis.similarities.RepertoireSimilarityComputer import RepertoireSimilarityComputer
 from source.analysis.similarities.SimilarityMeasureType import SimilarityMeasureType
-
-pandas2ri.activate()
-
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
-from source.reports.encoding_reports.EncodingReport import EncodingReport
 from source.environment.EnvironmentSettings import EnvironmentSettings
+from source.reports.encoding_reports.EncodingReport import EncodingReport
 from source.util.PathBuilder import PathBuilder
 
 
@@ -46,8 +41,8 @@ class SimilarityHeatmap(EncodingReport):
     def build_object(cls, **kwargs):
         return SimilarityHeatmap(**kwargs)
 
-    def __init__(self, dataset: RepertoireDataset = None, similarity_measure: str = "jaccard", example_annotations: list = [],
-                 one_hot_encode_example_annotations: list = [], palette: dict = {}, cluster: bool = True, show_dend: bool = True,
+    def __init__(self, dataset: RepertoireDataset = None, similarity_measure: str = "jaccard", example_annotations: list = None,
+                 one_hot_encode_example_annotations: list = None, palette: dict = None, cluster: bool = True, show_dend: bool = True,
                  show_names: bool = False, show_legend: list = None, annotation_position: str = "top", legend_position: str = "side",
                  text_size: float = 10, names_size: float = 7, height: float = 10, width: float = 10,
                  result_name: str = "similarity_heatmap", result_path: str = None):
@@ -55,9 +50,9 @@ class SimilarityHeatmap(EncodingReport):
         super().__init__()
         self.dataset = dataset
         self.similarity_measure = SimilarityMeasureType[similarity_measure.upper()]
-        self.annotations = example_annotations
-        self.one_hot_encode_annotations = one_hot_encode_example_annotations
-        self.palette = palette
+        self.annotations = example_annotations if example_annotations is not None else []
+        self.one_hot_encode_annotations = one_hot_encode_example_annotations if one_hot_encode_example_annotations is not None else []
+        self.palette = palette if palette is not None else {}
         self.cluster = cluster
         self.show_dend = show_dend
         self.show_names = show_names
@@ -79,6 +74,10 @@ class SimilarityHeatmap(EncodingReport):
         self._safe_plot(output_written=False)
 
     def _plot(self):
+        from rpy2.robjects import pandas2ri
+        from rpy2.robjects.packages import STAP
+
+        pandas2ri.activate()
 
         matrix = self._compute_similarity_matrix()
         example_annotations = self._prepare_annotations(pd.DataFrame(self.dataset.encoded_data.labels))

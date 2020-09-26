@@ -13,7 +13,7 @@ from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.reports.encoding_reports.heatmap.DensityHeatmap import DensityHeatmap
 
 
-class TestFeatureHeatmap(TestCase):
+class TestDensityHeatmap(TestCase):
 
     def get_group(self, index):
         if index < 20:

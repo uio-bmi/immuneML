@@ -2,8 +2,6 @@ import json
 from multiprocessing.pool import Pool
 
 import pandas as pd
-from rpy2.robjects import pandas2ri
-from rpy2.robjects.packages import STAP
 
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.receptor.receptor_sequence.SequenceFrameType import SequenceFrameType
@@ -114,6 +112,8 @@ class SequencingDepthOverview(DataReport):
         return data
 
     def _plot(self, data) -> ReportOutput:
+        from rpy2.robjects import pandas2ri
+        from rpy2.robjects.packages import STAP
 
         pandas2ri.activate()
 
