@@ -9,6 +9,7 @@ import pkg_resources
 import yaml
 from sklearn.model_selection import RandomizedSearchCV
 from sklearn.utils.validation import check_is_fitted
+from sklearn.metrics import SCORERS
 
 from source.caching.CacheHandler import CacheHandler
 from source.data_model.encoded_data.EncodedData import EncodedData
@@ -116,15 +117,21 @@ class SklearnMethod(MLMethod):
         else:
             return None
 
-    def _fit_for_label_by_cv(self, X, y: np.ndarray, label: str, cores_for_training: int, number_of_splits: int = 5):
+    def _fit_for_label_by_cv(self, X, y: np.ndarray, label: str, cores_for_training: int, optimization_metric: str, number_of_splits: int = 5):
         model = self._get_ml_model()
+        scoring = optimization_metric
+
+        if optimization_metric not in SCORERS.keys():
+            scoring = "balanced_accuracy"
+            warnings.warn(f"{self.__class__.__name__}: specified optimization metric ({optimization_metric}) is not defined as a sklearn scoring function, using {scoring} instead... ")
+
         self.models[label] = RandomizedSearchCV(model, param_distributions=self._parameter_grid, cv=number_of_splits, n_jobs=cores_for_training,
-                                                scoring="balanced_accuracy", refit=True)
+                                                scoring=scoring, refit=True)
         self.models[label].fit(X, y)
         self.models[label] = self.models[label].best_estimator_  # do not leave RandomSearchCV object to be in models, use the best estimator instead
 
     def fit_by_cross_validation(self, encoded_data: EncodedData, y, number_of_splits: int = 5, parameter_grid: dict = None,
-                                label_names: list = None, cores_for_training: int = 1):
+                                label_names: list = None, cores_for_training: int = 1, optimization_metric: str = "balanced_accuracy"):
 
         self.feature_names = encoded_data.feature_names
 
@@ -133,12 +140,12 @@ class SklearnMethod(MLMethod):
 
         self.models = CacheHandler.memo_by_params(self._prepare_caching_params(encoded_data, y, self.FIT_CV, label_names, number_of_splits),
                                                   lambda: self._fit_by_cross_validation(encoded_data.examples, y, number_of_splits,
-                                                                                        label_names, cores_for_training))
+                                                                                        label_names, cores_for_training, optimization_metric))
 
-    def _fit_by_cross_validation(self, X, y, number_of_splits: int = 5, label_names: list = None, cores_for_training: int = 1):
+    def _fit_by_cross_validation(self, X, y, number_of_splits: int = 5, label_names: list = None, cores_for_training: int = 1, optimization_metric: str = "balanced_accuracy"):
 
         for label in label_names:
-            self._fit_for_label_by_cv(X, y[label], label, cores_for_training, number_of_splits)
+            self._fit_for_label_by_cv(X, y[label], label, cores_for_training, optimization_metric, number_of_splits)
 
         return self.models
 

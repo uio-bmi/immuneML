@@ -42,7 +42,8 @@ class TestMLMethodTrainer(TestCase):
             model_selection_cv=True,
             cores_for_training=1,
             train_predictions_path=f"{path}predictions.csv",
-            ml_details_path=f"{path}details.yaml"
+            ml_details_path=f"{path}details.yaml",
+            optimization_metric="balanced_accuracy"
         ))
 
         method.predict(EncodedData(np.array([1, 2, 3]).reshape(1, -1)), ["l1"])
