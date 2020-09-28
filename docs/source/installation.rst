@@ -4,15 +4,13 @@ Installing immuneML
 .. toctree::
    :maxdepth: 2
 
-There are four options to use immuneML:
+To get started with immuneML, there are three options:
 
 1. Installing immuneML with a package manager and using it locally (recommended),
 
 2. Cloning the codebase from GitHub repository and running it directly from source code (for development purposes),
 
-3. Using immuneML from the immunoHub server (for local users),
-
-4. Using immuneML from Galaxy (no programming experience required, the functionality is available through a web interface, see :ref:`immuneML & Galaxy`).
+3. Using immuneML from Galaxy (no programming experience required, the functionality is available through a web interface, see :ref:`immuneML & Galaxy`).
 
 In this section, it will be described how to set up the first two options. Once immuneML has been set up, you can look into :ref:`Quickstart` or
 look into which analyses you can run with immuneML (see :ref:`Tutorials`).
@@ -41,21 +39,26 @@ Steps to install immuneML with Anaconda (tested with version 4.8.3):
 
   conda activate immuneml_env/
 
-4. Install additional R dependencies from the script provided `here <https://drive.google.com/file/d/1C0m7bjG7OKfWNVQsgYkE-nXCdvD7mO08/view?usp=sharing>`_
+4. Optionally, install additional R dependencies from the script provided `here <https://drive.google.com/file/d/1C0m7bjG7OKfWNVQsgYkE-nXCdvD7mO08/view?usp=sharing>`_
 (note that the immuneML core functionality does not depend on R, it is only necessary to generate certain reports):
 
 .. code-block:: console
 
   sh install_immuneML_R_dependencies.sh
 
-5. Install immuneML from GitHub (it will also automatically install all Python dependencies):
+5. Install immuneML including Python dependencies from GitHub using pip:
 
 .. code-block:: console
 
-  pip install git+https://github.com/uio-bmi/ImmuneML
+  pip install git+https://github.com/uio-bmi/immuneML
 
+Alternatively, if you want to install immuneML including all R plots, use:
 
-7. To validate the installation, run:
+.. code-block:: console
+
+  pip install git+https://github.com/uio-bmi/immuneML#egg=immuneML[R_plots]
+
+6. To validate the installation, run:
 
 .. code-block:: console
 
@@ -106,7 +109,13 @@ To update the existing installation (obtained as described before):
 
 .. code-block:: console
 
-  pip install git+https://github.com/uio-bmi/ImmuneML
+  pip install git+https://github.com/uio-bmi/immuneML
+
+Alternatively, if you want to install immuneML including all R plots, use:
+
+.. code-block:: console
+
+  pip install git+https://github.com/uio-bmi/immuneML#egg=immuneML[R_plots]
 
 
 Clone the codebase from GitHub
@@ -131,7 +140,7 @@ Steps:
 
 .. code-block:: console
 
-  git clone https://github.com/uio-bmi/ImmuneML.git
+  git clone https://github.com/uio-bmi/immuneML.git
 
 3. Create and activate a virtual environment as described here
 https://docs.python.org/3/library/venv.html (python virtual environment)
@@ -142,7 +151,7 @@ from GitHub), install the requirements from requirements.txt file:
 
 .. code-block:: console
 
-  pip3 install -r requirements.txt
+  pip install -r requirements.txt
 
 To run a sample analysis, from the project folder run:
 
