@@ -52,7 +52,9 @@ Steps to install immuneML with Anaconda (tested with version 4.8.3):
 
   pip install git+https://github.com/uio-bmi/immuneML
 
-If you want to install immuneML including all R plots, use instead:
+Alternatively, if you want to install immuneML including all R plots, use:
+
+.. code-block:: console
 
   pip install git+https://github.com/uio-bmi/immuneML#egg=immuneML[R_plots]
 
@@ -109,7 +111,9 @@ To update the existing installation (obtained as described before):
 
   pip install git+https://github.com/uio-bmi/immuneML
 
-If you want to install immuneML including all R plots, use instead:
+Alternatively, if you want to install immuneML including all R plots, use:
+
+.. code-block:: console
 
   pip install git+https://github.com/uio-bmi/immuneML#egg=immuneML[R_plots]
 
