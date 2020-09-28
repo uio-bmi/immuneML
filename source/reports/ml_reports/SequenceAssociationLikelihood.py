@@ -60,7 +60,6 @@ class SequenceAssociationLikelihood(MLReport):
                             output_figures=output_figures)
 
     def _plot(self, upper_limit, lower_limit):
-
         from rpy2.robjects import pandas2ri
         from rpy2.robjects.packages import STAP
 

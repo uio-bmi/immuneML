@@ -161,6 +161,7 @@ class FeatureValueBarplot(EncodingReport):
     def _plot(self, data_long_format) -> ReportOutput:
         from rpy2.robjects import pandas2ri
         from rpy2.robjects.packages import STAP
+
         pandas2ri.activate()
 
         with open(EnvironmentSettings.root_path + "source/visualization/Barplot.R") as f:
