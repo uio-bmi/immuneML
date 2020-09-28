@@ -48,11 +48,15 @@ the instruction to be executed. Training ML model instructions take as parameter
 
   2.4. Reports to execute:
 
-    2.4.1. Hyperparameter reports: have access to the HPOptimizationState, as explained later in this document,
+    2.4.1. **hyperparameter**: reports to be executed after the nested CV has finished to show the overall performance
 
-    2.4.2. Reports on the data splits to be performed on each training and test dataset created,
+    2.4.2. **models**: reports  to be generated for optimal models per label
 
-    2.4.3. Optimal model reports to be generated from optimal models per label
+    2.4.3. **data**: reports to be executed on the whole dataset before it is split to training and test
+
+    2.4.4. **data_splits**: reports to be executed after the data has been split into training and test
+
+    2.4.5. **encoding**: reports to be executed on the encoded training and test datasets
 
   .. highlight:: yaml
   .. code-block:: yaml
@@ -65,6 +69,14 @@ the instruction to be executed. Training ML model instructions take as parameter
       reports:
         hyperparameter:
           - my_hp_benchmark
+        models:
+          - my_model_report
+        data:
+          - my_data_report
+        data_splits:
+          - my_data_report
+        encoding:
+          - my_encoding_report
 
 3. Selection configuration, including:
 
@@ -76,11 +88,13 @@ the instruction to be executed. Training ML model instructions take as parameter
 
   3.4. Reports to execute:
 
-    3.4.1. Data reports on the whole dataset passed to the inner CV loop,
+    2.4.1. **models**: reports to be executed on all trained classifiers
 
-    3.4.2. Data split reports for each train/validation dataset split,
+    2.4.2. **data**: reports to be executed on the training dataset split before it is split to training and validation
 
-    3.4.3. ML method reports being run on all ML methods during the selection
+    2.4.3. **data_splits**: reports to be executed after the data has been split into training and validation
+
+    2.4.4. **encoding**: reports to be executed on the encoded training and validation datasets
 
   .. highlight:: yaml
   .. code-block:: yaml
@@ -89,7 +103,15 @@ the instruction to be executed. Training ML model instructions take as parameter
     selection:
       split_strategy: random
       split_count: 1
-      reports: {}
+      reports:
+        models:
+          - my_model_report
+        data:
+          - my_data_report
+        data_splits:
+          - my_data_report
+        encoding:
+          - my_encoding_report
       training_percentage: 0.7
 
 4. A list of labels to use for prediction,

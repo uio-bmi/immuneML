@@ -8,7 +8,7 @@ class ReportConfig:
 
     Arguments:
 
-        data_splits (dict): reports to be executed when the data is split to training and test (assessment CV loop) or training and validation (selection CV loop) datasets before they are encoded
+        data_splits (dict): reports to be executed after the data has been split into training and test (assessment CV loop) or training and validation (selection CV loop) datasets before they are encoded
 
         models (dict): reports to be executed on all trained classifiers
 

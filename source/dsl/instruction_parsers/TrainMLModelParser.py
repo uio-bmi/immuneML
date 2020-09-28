@@ -2,6 +2,8 @@ import hashlib
 import os
 import warnings
 from typing import Tuple
+from inspect import signature
+
 
 from source.data_model.dataset.Dataset import Dataset
 from source.dsl.DefaultParamsLoader import DefaultParamsLoader
@@ -31,8 +33,8 @@ class TrainMLModelParser:
 
         settings = self._parse_settings(instruction, symbol_table)
         dataset = symbol_table.get(instruction["dataset"])
-        assessment = self._parse_split_config(instruction, "assessment", symbol_table)
-        selection = self._parse_split_config(instruction, "selection", symbol_table)
+        assessment = self._parse_split_config(key, instruction, "assessment", symbol_table)
+        selection = self._parse_split_config(key, instruction, "selection", symbol_table)
         assessment, selection = self._update_split_configs(assessment, selection, dataset)
         label_config = self._create_label_config(instruction, dataset, key)
         strategy = ReflectionHandler.get_class_by_name(instruction["strategy"], "hyperparameter_optimization/")
@@ -146,36 +148,41 @@ class TrainMLModelParser:
             label_config.add_label(label_name, label_values, positive_class=positive_class)
         return label_config
 
-    def _parse_split_config(self, instruction: dict, key: str, symbol_table: SymbolTable) -> SplitConfig:
+    def _parse_split_config(self, instruction_key, instruction: dict, split_key: str, symbol_table: SymbolTable) -> SplitConfig:
 
         try:
 
             default_params = DefaultParamsLoader.load("instructions/", SplitConfig.__name__)
-            report_config_input = self._prepare_report_config(instruction, key, symbol_table)
-            instruction[key] = {**default_params, **instruction[key]}
+            report_config_input = self._prepare_report_config(instruction_key, instruction, split_key, symbol_table)
+            instruction[split_key] = {**default_params, **instruction[split_key]}
 
-            split_strategy = SplitType[instruction[key]["split_strategy"].upper()]
-            training_percentage = float(instruction[key]["training_percentage"]) if split_strategy == SplitType.RANDOM else -1
+            split_strategy = SplitType[instruction[split_key]["split_strategy"].upper()]
+            training_percentage = float(instruction[split_key]["training_percentage"]) if split_strategy == SplitType.RANDOM else -1
 
             return SplitConfig(split_strategy=split_strategy,
-                               split_count=int(instruction[key]["split_count"]),
+                               split_count=int(instruction[split_key]["split_count"]),
                                training_percentage=training_percentage,
                                reports=ReportConfig(**report_config_input),
-                               manual_config=ManualSplitConfig(**instruction[key]["manual_config"]) if "manual_config" in instruction[key] else None,
-                               leave_one_out_config=LeaveOneOutConfig(**instruction[key]["leave_one_out_config"])
-                               if "leave_one_out_config" in instruction[key] else None)
+                               manual_config=ManualSplitConfig(**instruction[split_key]["manual_config"]) if "manual_config" in instruction[split_key] else None,
+                               leave_one_out_config=LeaveOneOutConfig(**instruction[split_key]["leave_one_out_config"])
+                               if "leave_one_out_config" in instruction[split_key] else None)
 
         except KeyError as key_error:
-            raise KeyError(f"{TrainMLModelParser.__name__}: parameter {key_error.args[0]} was not defined under {key}.")
+            raise KeyError(f"{TrainMLModelParser.__name__}: parameter {key_error.args[0]} was not defined under {split_key}.")
 
-    def _prepare_report_config(self, instruction, key, symbol_table):
-        if "reports" in instruction[key]:
-            for report_type in instruction[key]["reports"]:
-                ParameterValidator.assert_type_and_value(instruction[key]["reports"][report_type], list, "TrainMLModel/Report",
+    def _prepare_report_config(self, instruction_key, instruction, split_key, symbol_table):
+        if "reports" in instruction[split_key]:
+            location = f"{instruction_key}/{split_key}/reports"
+            report_types = list(signature(ReportConfig).parameters.keys())
+            ParameterValidator.assert_all_in_valid_list(instruction[split_key]["reports"].keys(), report_types,
+                                                        location, "reports")
+
+            for report_type in instruction[split_key]["reports"]:
+                ParameterValidator.assert_type_and_value(instruction[split_key]["reports"][report_type], list, f"{location}/{report_type}",
                                                          report_type)
 
-            report_config_input = {report_type: {report_id: symbol_table.get(report_id) for report_id in instruction[key]["reports"][report_type]}
-                                   for report_type in instruction[key]["reports"]}
+            report_config_input = {report_type: {report_id: symbol_table.get(report_id) for report_id in instruction[split_key]["reports"][report_type]}
+                                   for report_type in instruction[split_key]["reports"]}
         else:
             report_config_input = {}
 
