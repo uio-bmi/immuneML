@@ -77,7 +77,7 @@ class MotifSeedRecovery(MLReport):
                         seeds:
                         - AA/A
                         - AAA
-                        hamming_distance": False
+                        hamming_distance: False
                     T1D
                         seeds:
                         - CC/C
