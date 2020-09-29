@@ -27,7 +27,7 @@ def build_specs(args):
 def parse_commandline_arguments(args):
     parser = argparse.ArgumentParser(description="Tool for building immuneML defintion YAML for Galaxy Create Dataset tool")
     parser.add_argument("-r", "--format", required=True, help="The format of the repertoire/receptor dataset")
-    parser.add_argument("-m", "--metadata_file", default="", help="The metadata file when using a repertoire dataset.")
+    parser.add_argument("-m", "--metadata_file", default="", help="The metadata file when using a repertoire dataset. When using a receptor dataset, you may supply an empty string.")
     parser.add_argument("-d", "--dataset_name", default="dataset", help="The name of the created dataset.")
 
     parser.add_argument("-o", "--output_path", required=True, help="Output location for the generated yaml file (directiory).")
