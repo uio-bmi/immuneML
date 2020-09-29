@@ -6,6 +6,7 @@ import pandas as pd
 
 from source.data_model.dataset.Dataset import Dataset
 from source.data_model.encoded_data.EncodedData import EncodedData
+from source.environment.Constants import Constants
 
 
 class RepertoireDataset(Dataset):
@@ -50,7 +51,7 @@ class RepertoireDataset(Dataset):
         return self.metadata_fields
 
     def get_metadata(self, field_names: list, return_df: bool = False):
-        df = pd.read_csv(self.metadata_file, sep=",", usecols=field_names)
+        df = pd.read_csv(self.metadata_file, sep=",", usecols=field_names, comment=Constants.COMMENT_SIGN)
         if return_df:
             return df
         else:

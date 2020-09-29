@@ -61,16 +61,32 @@ class TestMLIE(TestCase):
             },
             "instructions": {
                 "inst1": {
-                    "type": "MLModelTraining",
-                    "dataset": "d1",
-                    "encoding": "e1",
-                    "preprocessing": "seq1",
-                    "ml_model": "simpleLR",
-                    "number_of_processes": 4,
-                    "optimization_metric": "accuracy",
-                    'metrics': ['auc'],
+                    "type": "TrainMLModel",
+                    "settings": [
+                        {
+                            "preprocessing": "seq1",
+                            "encoding": "e1",
+                            "ml_method": "simpleLR"
+                        }
+                    ],
+                    "assessment": {
+                        "split_strategy": "random",
+                        "split_count": 1,
+                        "training_percentage": 0.7
+                    },
+                    "selection": {
+                        "split_strategy": "random",
+                        "split_count": 1,
+                        "training_percentage": 0.7,
+                    },
                     "labels": ["CD"],
-                    'reports': {}
+                    "dataset": "d1",
+                    "strategy": "GridSearch",
+                    "metrics": ["accuracy", "auc"],
+                    "reports": [],
+                    "batch_size": 10,
+                    "optimization_metric": "accuracy",
+                    'refit_optimal_model': False
                 }
             },
             "output": {
@@ -103,7 +119,7 @@ class TestMLIE(TestCase):
                 "inst2": {
                     "type": "MLApplication",
                     "dataset": "d1",
-                    "config_path": path + "result_export/inst1/zip/ml_model_simpleLR_CD.zip",
+                    "config_path": path + "result_export/inst1/optimal_CD/zip/ml_model_simpleLR.zip",
                     "label": "CD",
                     "pool_size": 4
                 }

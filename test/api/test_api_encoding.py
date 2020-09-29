@@ -113,7 +113,7 @@ class TestAPI(TestCase):
 
         encoded_dataset = encode_dataset_by_kmer_freq(path_to_dataset_directory=data_path, result_path=result_path)
 
-        self.assertEqual(repertoire_count, len(glob.glob(f"{result_path}*.npy")))
+        self.assertEqual(repertoire_count, len(glob.glob(f"{result_path}repertoires/*.npy")))
         self.assertTrue(os.path.isfile(f"{result_path}csv_exported/design_matrix.csv"))
         self.assertTrue(os.path.isfile(f"{result_path}csv_exported/encoding_details.yaml"))
         self.assertTrue(os.path.isfile(f"{result_path}csv_exported/labels.csv"))

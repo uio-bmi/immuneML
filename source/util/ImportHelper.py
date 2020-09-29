@@ -53,13 +53,13 @@ class ImportHelper:
         """
         metadata = pd.read_csv(params.metadata_file, ",")
 
-        PathBuilder.build(params.result_path)
+        PathBuilder.build(params.result_path+"repertoires/")
 
         arguments = [(preprocess_repertoire_func, row, params) for index, row in metadata.iterrows()]
         with Pool(params.batch_size) as pool:
             repertoires = pool.starmap(ImportHelper.load_repertoire, arguments)
 
-        new_metadata_file = ImportHelper.make_new_metadata_file(repertoires, metadata, params.result_path)
+        new_metadata_file = ImportHelper.make_new_metadata_file(repertoires, metadata, params.result_path, dataset_name)
 
         potential_labels = list(set(metadata.columns.tolist()) - {"filename"})
         dataset = RepertoireDataset(params={key: list(set(metadata[key].values.tolist())) for key in potential_labels},
@@ -70,12 +70,12 @@ class ImportHelper:
         return dataset
 
     @staticmethod
-    def make_new_metadata_file(repertoires: list, metadata: pd.DataFrame, result_path: str) -> str:
+    def make_new_metadata_file(repertoires: list, metadata: pd.DataFrame, result_path: str, dataset_name: str) -> str:
         new_metadata = metadata.copy()
         new_metadata["filename"] = [os.path.basename(repertoire.data_filename) for repertoire in repertoires]
         new_metadata["identifier"] = [repertoire.identifier for repertoire in repertoires]
 
-        metadata_filename = f"{result_path}metadata.csv"
+        metadata_filename = f"{result_path}{dataset_name}_metadata.csv"
         new_metadata.to_csv(metadata_filename, index=False, sep=",")
 
         return metadata_filename
@@ -88,7 +88,7 @@ class ImportHelper:
         sequence_lists["custom_lists"] = {field: dataframe[field].values.tolist()
                                           for field in list(set(dataframe.columns) - set(Repertoire.FIELDS))}
 
-        repertoire_inputs = {**{"metadata": metadata.to_dict(), "path": params.result_path}, **sequence_lists}
+        repertoire_inputs = {**{"metadata": metadata.to_dict(), "path": params.result_path+"repertoires/"}, **sequence_lists}
         repertoire = Repertoire.build(**repertoire_inputs)
 
         return repertoire
