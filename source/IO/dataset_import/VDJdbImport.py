@@ -23,7 +23,7 @@ class VDJdbImport(DataImport):
     .. code-block:: yaml
 
         my_vdjdb_dataset:
-            format: VDJDB
+            format: VDJdb
             params:
                 # these parameters have to be always specified:
                 metadata_file: path/to/metadata.csv # csv file with fields filename, subject_id and arbitrary others which can be used as labels in analysis

@@ -36,7 +36,7 @@ class TestImportParser(TestCase):
         st, desc = ImportParser.parse({
             "datasets": {
                 "d1": {
-                    "format": "VDJDB",
+                    "format": "VDJdb",
                     "params": {
                         "result_path": path,
                         "path": path
