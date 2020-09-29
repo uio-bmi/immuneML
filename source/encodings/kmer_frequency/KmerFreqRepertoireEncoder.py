@@ -1,9 +1,5 @@
-import hashlib
-import math
 from collections import Counter
 from multiprocessing.pool import Pool
-
-import numpy as np
 
 from source.caching.CacheHandler import CacheHandler
 from source.caching.CacheObjectType import CacheObjectType
@@ -35,8 +31,7 @@ class KmerFreqRepertoireEncoder(KmerFrequencyEncoder):
         arguments = [(repertoire, params) for repertoire in dataset.repertoires]
 
         with Pool(params.pool_size) as pool:
-            chunksize = math.floor(dataset.get_example_count()/params.pool_size) + 1
-            repertoires = pool.starmap(self.get_encoded_repertoire, arguments, chunksize=chunksize)
+            repertoires = pool.starmap(self.get_encoded_repertoire, arguments)
 
         encoded_repertoire_list, repertoire_names, labels, feature_annotation_names = zip(*repertoires)
 
@@ -49,10 +44,9 @@ class KmerFreqRepertoireEncoder(KmerFrequencyEncoder):
     def get_encoded_repertoire(self, repertoire, params: EncoderParams):
         params.model = vars(self)
 
-        return CacheHandler.memo_by_params((("encoding_model", params.model),
+        return CacheHandler.memo_by_params((("encoding_model", params.model), ("type", "kmer_encoding"),
                                             ("labels", params.label_config.get_labels_by_name()),
-                                            ("repertoire_id", repertoire.identifier),
-                                            ("repertoire_data",  hashlib.sha256(np.ascontiguousarray(repertoire.get_sequence_aas())).hexdigest())),
+                                            ("repertoire_id", repertoire.identifier)),
                                            lambda: self.encode_repertoire(repertoire, params), CacheObjectType.ENCODING_STEP)
 
     def encode_repertoire(self, repertoire, params: EncoderParams):
