@@ -8,7 +8,7 @@ immuneML is a software platform for machine learning analysis of immune receptor
 It supports the analyses of experimental B- and T-cell receptor data,
 as well as synthetic data for benchmarking purposes.
 
-In ImmuneML, users can define flexible workflows supporting various
+In immuneML, users can define flexible workflows supporting various
 machine learning libraries (such as scikit-learn or PyTorch), benchmarking of different approaches, numerous reports
 of data characteristics, ML algorithms and their predictions, and
 visualizations of results.
@@ -25,6 +25,6 @@ work with python 3.7 and 3.6, but some additional packages may need to be manual
 3. Create a virtual environment (as described here: https://docs.python.org/3/library/venv.html)
 4. Install the package using pip:
 
-    `pip install git+https://github.com/uio-bmi/ImmuneML`
+    `pip install git+https://github.com/uio-bmi/immuneML`
     
 To try out the platform, see the quickstart guide and the documentation.

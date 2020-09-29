@@ -7,9 +7,9 @@ import dill
 import numpy as np
 import pkg_resources
 import yaml
+from sklearn.metrics import SCORERS
 from sklearn.model_selection import RandomizedSearchCV
 from sklearn.utils.validation import check_is_fitted
-from sklearn.metrics import SCORERS
 
 from source.caching.CacheHandler import CacheHandler
 from source.data_model.encoded_data.EncodedData import EncodedData
@@ -67,8 +67,14 @@ class SklearnMethod(MLMethod):
         self.feature_names = None
 
     def _fit_for_label(self, X, y: np.ndarray, label: str, cores_for_training: int):
+        warnings.simplefilter("ignore")
+        os.environ["PYTHONWARNINGS"] = "ignore"
+
         self.models[label] = self._get_ml_model(cores_for_training, X)
         self.models[label].fit(X, y)
+
+        del os.environ["PYTHONWARNINGS"]
+        warnings.simplefilter("always")
 
     def _prepare_caching_params(self, encoded_data: EncodedData, y, type: str, label_names: list = None, number_of_splits: int = -1):
         return (("encoded_data", hashlib.sha256(str(encoded_data.examples).encode("utf-8")).hexdigest()),
@@ -125,9 +131,16 @@ class SklearnMethod(MLMethod):
             scoring = "balanced_accuracy"
             warnings.warn(f"{self.__class__.__name__}: specified optimization metric ({optimization_metric}) is not defined as a sklearn scoring function, using {scoring} instead... ")
 
+        warnings.simplefilter("ignore")
+        os.environ["PYTHONWARNINGS"] = "ignore"
+
         self.models[label] = RandomizedSearchCV(model, param_distributions=self._parameter_grid, cv=number_of_splits, n_jobs=cores_for_training,
                                                 scoring=scoring, refit=True)
         self.models[label].fit(X, y)
+
+        del os.environ["PYTHONWARNINGS"]
+        warnings.simplefilter("always")
+
         self.models[label] = self.models[label].best_estimator_  # do not leave RandomSearchCV object to be in models, use the best estimator instead
 
     def fit_by_cross_validation(self, encoded_data: EncodedData, y, number_of_splits: int = 5, parameter_grid: dict = None,
