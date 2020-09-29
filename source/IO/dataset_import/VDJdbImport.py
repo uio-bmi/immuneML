@@ -7,7 +7,7 @@ from source.data_model.dataset.Dataset import Dataset
 from source.util.ImportHelper import ImportHelper
 
 
-class VDJDBImport(DataImport):
+class VDJdbImport(DataImport):
     """
     Imports data from VDJdb format into a ReceptorDataset or SequenceDataset depending on the value of "paired" parameter or
     to RepertoireDataset (a set of repertoires consisting of a list of receptor sequences).
@@ -46,14 +46,14 @@ class VDJDBImport(DataImport):
     def import_dataset(params: dict, dataset_name: str) -> Dataset:
         vdjdb_params = DatasetImportParams.build_object(**params)
         if vdjdb_params.metadata_file is not None:
-            dataset = VDJDBImport.load_repertoire_dataset(vdjdb_params, dataset_name)
+            dataset = VDJdbImport.load_repertoire_dataset(vdjdb_params, dataset_name)
         else:
-            dataset = VDJDBImport.load_sequence_dataset(vdjdb_params, dataset_name)
+            dataset = VDJdbImport.load_sequence_dataset(vdjdb_params, dataset_name)
         return dataset
 
     @staticmethod
     def load_repertoire_dataset(params: DatasetImportParams, dataset_name: str) -> Dataset:
-        return ImportHelper.import_repertoire_dataset(VDJDBImport.preprocess_repertoire, params, dataset_name)
+        return ImportHelper.import_repertoire_dataset(VDJdbImport.preprocess_repertoire, params, dataset_name)
 
     @staticmethod
     def preprocess_repertoire(metadata: dict, params: DatasetImportParams) -> dict:

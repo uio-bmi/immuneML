@@ -1,7 +1,7 @@
 import shutil
 from unittest import TestCase
 
-from source.IO.dataset_import.VDJDBImport import VDJDBImport
+from source.IO.dataset_import.VDJdbImport import VDJdbImport
 from source.encodings.EncoderParams import EncoderParams
 from source.encodings.distance_encoding.TCRdistEncoder import TCRdistEncoder
 from source.environment.EnvironmentSettings import EnvironmentSettings
@@ -28,7 +28,7 @@ class TestTCRdistEncoder(TestCase):
         with open(path + "receptors.tsv", "w") as file:
             file.writelines(file_content)
 
-        dataset = VDJDBImport.import_dataset({"result_path": path, "file_size": 1, "paired": True, "path": path}, "vdjdb_dataset")
+        dataset = VDJdbImport.import_dataset({"result_path": path, "file_size": 1, "paired": True, "path": path}, "vdjdb_dataset")
         dataset.params = {"organism": "human"}
 
         encoder = TCRdistEncoder.build_object(dataset, **{"cores": 2})
