@@ -39,7 +39,7 @@ class TestEmersonSequenceAbundanceEncoder(TestCase):
 
         encoder = SequenceAbundanceEncoder.build_object(dataset, **{
             "comparison_attributes": ["sequence_aas"],
-            "p_value_threshold": 0.4, "sequence_batch_size": 4
+            "p_value_threshold": 0.4, "sequence_batch_size": 4, "repertoire_batch_size": 8
         })
 
         label_config = LabelConfiguration([Label("l1", [True, False], positive_class=True)])
@@ -89,7 +89,7 @@ class TestEmersonSequenceAbundanceEncoder(TestCase):
 
         encoder = SequenceAbundanceEncoder.build_object(RepertoireDataset(), **{
             "comparison_attributes": ["sequence_aas"],
-            "p_value_threshold": 0.4, "sequence_batch_size": 4
+            "p_value_threshold": 0.4, "sequence_batch_size": 4, "repertoire_batch_size": 10
         })
 
         abundance_matrix = encoder._build_abundance_matrix(comparison_data, ["rep_0", "rep_1", "rep_2", "rep_3"], sequence_p_value_indices)

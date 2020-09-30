@@ -39,7 +39,7 @@ class HPAssessment:
     def run_assessment_split(state, train_val_dataset, test_dataset, split_index: int, n_splits):
         """run inner CV loop (selection) and retrain on the full train_val_dataset after optimal model is chosen"""
 
-        print(f'{datetime.datetime.now()}: Hyperparameter optimization: running outer CV loop: started split {split_index+1}/{n_splits}.\n')
+        print(f'{datetime.datetime.now()}: Hyperparameter optimization: running outer CV loop: started split {split_index+1}/{n_splits}.\n', flush=True)
 
         current_path = HPAssessment.create_assessment_path(state, split_index)
 
@@ -50,7 +50,7 @@ class HPAssessment:
 
         state = HPAssessment.run_assessment_split_per_label(state, split_index)
 
-        print(f'{datetime.datetime.now()}: Hyperparameter optimization: running outer CV loop: finished split {split_index+1}/{n_splits}.\n')
+        print(f'{datetime.datetime.now()}: Hyperparameter optimization: running outer CV loop: finished split {split_index+1}/{n_splits}.\n', flush=True)
 
         return state
 
@@ -61,7 +61,8 @@ class HPAssessment:
 
         for idx, label in enumerate(state.label_configuration.get_labels_by_name()):
 
-            print(f"{datetime.datetime.now()}: Hyperparameter optimization: running the inner loop of nested CV: retrain models for label {label} (label {idx + 1} / {n_labels}).\n")
+            print(f"{datetime.datetime.now()}: Hyperparameter optimization: running the inner loop of nested CV: "
+                  f"retrain models for label {label} (label {idx + 1} / {n_labels}).\n", flush=True)
 
             path = f"{state.assessment_states[split_index].path}"
 
@@ -76,7 +77,8 @@ class HPAssessment:
                 test_dataset = state.assessment_states[split_index].test_dataset
                 state = HPAssessment.reeval_on_assessment_split(state, train_val_dataset, test_dataset, hp_setting, setting_path, label, split_index)
 
-            print(f"{datetime.datetime.now()}: Hyperparameter optimization: running the inner loop of nested CV: completed retraining models for label {label} (label {idx + 1} / {n_labels}).\n")
+            print(f"{datetime.datetime.now()}: Hyperparameter optimization: running the inner loop of nested CV: completed retraining models "
+                  f"for label {label} (label {idx + 1} / {n_labels}).\n", flush=True)
 
         return state
 

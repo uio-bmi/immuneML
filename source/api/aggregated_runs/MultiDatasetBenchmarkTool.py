@@ -75,23 +75,23 @@ class MultiDatasetBenchmarkTool:
         self.reports = None
 
     def run(self):
-        print("Starting MultiDatasetBenchmarkTool...")
+        print("Starting MultiDatasetBenchmarkTool...", flush=True)
         PathBuilder.build(self.result_path)
         specs = self._split_specs_file()
         self._extract_reports()
         instruction_states = {}
         for index, specs_name in enumerate(specs.keys()):
-            print(f"Running nested cross-validation on dataset {specs_name} ({index+1}/{len(list(specs.keys()))})..")
+            print(f"Running nested cross-validation on dataset {specs_name} ({index+1}/{len(list(specs.keys()))})..", flush=True)
             app = ImmuneMLApp(specification_path=specs[specs_name], result_path=f"{self.result_path}/{specs_name}/")
             instruction_states[specs_name] = app.run()[0]
-            print(f"Finished nested cross-validation on dataset {specs_name} ({index+1}/{len(list(specs.keys()))})..")
+            print(f"Finished nested cross-validation on dataset {specs_name} ({index+1}/{len(list(specs.keys()))})..", flush=True)
 
-        print("Running reports on the results of nested cross-validation on all datasets...")
+        print("Running reports on the results of nested cross-validation on all datasets...", flush=True)
         report_results = self._run_reports(instruction_states)
-        print("Finished reports, now generating HTML output...")
+        print("Finished reports, now generating HTML output...", flush=True)
         MultiDatasetBenchmarkHTMLBuilder.build(report_results, self.result_path,
                                                {specs_name: f"{self.result_path}/{specs_name}/" for specs_name in specs.keys()})
-        print("MultiDatasetBenchmarkTool finished.")
+        print("MultiDatasetBenchmarkTool finished.", flush=True)
 
     def _extract_reports(self):
         with open(self.specification_path, "r") as file:
@@ -170,7 +170,7 @@ class MultiDatasetBenchmarkTool:
     def _run_reports(self, instruction_states: dict):
         report_results = {}
         for index, report in enumerate(self.reports):
-            print(f"Running report {report.name} ({index+1}/{len(self.reports)})...")
+            print(f"Running report {report.name} ({index+1}/{len(self.reports)})...", flush=True)
             report.instruction_states = list(instruction_states.values())
             report.result_path = PathBuilder.build(self.result_path + 'benchmarking_reports/')
             report_result = report.generate_report()

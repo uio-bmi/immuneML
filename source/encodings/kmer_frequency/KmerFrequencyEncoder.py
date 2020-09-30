@@ -1,5 +1,4 @@
 import abc
-import os
 import pickle
 from typing import List
 
@@ -201,8 +200,6 @@ class KmerFrequencyEncoder(DatasetEncoder):
             with open(self.vectorizer_path, 'wb') as file:
                 pickle.dump(vectorizer, file)
         else:
-            if not os.path.isfile(self.vectorizer_path):
-                print(self.vectorizer_path)
             with open(self.vectorizer_path, 'rb') as file:
                 vectorizer = pickle.load(file)
             vectorized_examples = vectorizer.transform(examples)

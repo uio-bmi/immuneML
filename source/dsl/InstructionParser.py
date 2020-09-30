@@ -74,12 +74,9 @@ class InstructionParser:
 
             inst_paths[instruction_name] = file_path
 
-        print(inst_paths)
-
         with open(f'{inst_path}instructions.rst', 'w') as file:
             for key, item in inst_paths.items():
                 lines = f"{key}\n---------------------------\n.. include:: {os.path.relpath(item, EnvironmentSettings.source_docs_path)}\n"
-                print(lines)
                 file.writelines(lines)
 
     @staticmethod

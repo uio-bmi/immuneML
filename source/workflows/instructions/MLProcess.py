@@ -61,7 +61,7 @@ class MLProcess:
 
     def run(self, split_index: int) -> HPItem:
 
-        print(f"{datetime.datetime.now()}: Evaluating hyperparameter setting: {self.hp_setting}...\n")
+        print(f"{datetime.datetime.now()}: Evaluating hyperparameter setting: {self.hp_setting}...\n", flush=True)
 
         PathBuilder.build(self.path)
         self._set_paths()
@@ -78,7 +78,7 @@ class MLProcess:
 
         hp_item = self._assess_on_test_dataset(encoded_train_dataset, encoding_train_results, method, split_index)
 
-        print(f"{datetime.datetime.now()}: Completed hyperparameter setting {self.hp_setting}.\n")
+        print(f"{datetime.datetime.now()}: Completed hyperparameter setting {self.hp_setting}.\n", flush=True)
 
         return hp_item
 

@@ -161,5 +161,5 @@ class ImmuneMLParser:
         with open(filepath, "w") as file:
             yaml.dump(result, file)
 
-        print(f"{datetime.datetime.now()}: Full specification is available at {filepath}.\n")
+        print(f"{datetime.datetime.now()}: Full specification is available at {filepath}.\n", flush=True)
         return filepath

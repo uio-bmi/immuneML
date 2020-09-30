@@ -59,7 +59,7 @@ class RepertoireDataset(Dataset):
 
     def _build_new_metadata(self, indices, path) -> str:
         if self.metadata_file:
-            df = pd.read_csv(self.metadata_file, index_col=0)
+            df = pd.read_csv(self.metadata_file, comment=Constants.COMMENT_SIGN)
             df = df.iloc[indices, :]
             df.to_csv(path)
             return path

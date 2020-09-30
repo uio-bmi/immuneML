@@ -1,9 +1,9 @@
 import pickle
 from typing import List
 
+import fisher
 import numpy as np
 import pandas as pd
-from scipy.stats import fisher_exact
 
 from source.caching.CacheHandler import CacheHandler
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
@@ -51,8 +51,7 @@ class SequenceFilterHelper:
                 first_class_absent = np.sum(np.logical_and(is_first_class, sequence_vector == 0))
                 second_class_absent = np.sum(np.logical_and(np.logical_not(is_first_class), sequence_vector == 0))
 
-                sequence_p_values.append(fisher_exact([[first_class_present, second_class_present],
-                                                       [first_class_absent, second_class_absent]], alternative='greater')[1])
+                sequence_p_values.append(fisher.pvalue(first_class_present, second_class_present, first_class_absent, second_class_absent).right_tail)
             else:
                 sequence_p_values.append(SequenceFilterHelper.INVALID_P_VALUE)
 

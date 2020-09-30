@@ -47,7 +47,7 @@ class DatasetGenerationTool:
         assert len(datasets) == 1, f"Dataset generation tool: {len(datasets)} datasets were defined. Please check the input parameters."
         dataset = symbol_table.get(datasets[0])
         PickleExporter.export(dataset=dataset, path=self.result_path + "result/")
-        print(f"{datetime.datetime.now()}: Dataset {dataset.name} generated.\n")
+        print(f"{datetime.datetime.now()}: Dataset {dataset.name} generated.\n", flush=True)
 
     def parse_dataset(self, workflow_specification: dict, yaml_path: str, result_path: str):
         keys = list(workflow_specification.keys())

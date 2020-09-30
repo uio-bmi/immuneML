@@ -13,12 +13,12 @@ class MLMethodTrainer(Step):
     @staticmethod
     def run(input_params: MLMethodTrainerParams = None):
 
-        print(f"{datetime.datetime.now()}: ML model training started...")
+        print(f"{datetime.datetime.now()}: ML model training started...", flush=True)
 
         method = MLMethodTrainer._fit_method(input_params)
         MLMethodTrainer.store(method, input_params)
 
-        print(f"{datetime.datetime.now()}: ML model training finished.")
+        print(f"{datetime.datetime.now()}: ML model training finished.", flush=True)
 
         return method
 

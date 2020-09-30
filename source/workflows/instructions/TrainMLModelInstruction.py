@@ -134,11 +134,11 @@ class TrainMLModelInstruction(Instruction):
         optimal_hp_settings = [state.label_states[label].optimal_hp_setting for state in self.state.assessment_states]
         optimal_hp_setting = Counter(optimal_hp_settings).most_common(1)[0][0]
         if self.state.refit_optimal_model:
-            print(f"{datetime.datetime.now()}: Hyperparameter optimization: retraining optimal model for label {label} {index_repr}.\n")
+            print(f"{datetime.datetime.now()}: Hyperparameter optimization: retraining optimal model for label {label} {index_repr}.\n", flush=True)
             self.state.optimal_hp_items[label] = MLProcess(self.state.dataset, None, label, self.state.metrics, self.state.optimization_metric,
                                                            f"{self.state.path}optimal_{label}/", number_of_processes=self.state.batch_size,
                                                            label_config=self.state.label_configuration, hp_setting=optimal_hp_setting).run(0)
-            print(f"{datetime.datetime.now()}: Hyperparameter optimization: finished retraining optimal model for label {label} {index_repr}.\n")
+            print(f"{datetime.datetime.now()}: Hyperparameter optimization: finished retraining optimal model for label {label} {index_repr}.\n", flush=True)
 
 
         else:
@@ -146,16 +146,16 @@ class TrainMLModelInstruction(Instruction):
             self.state.optimal_hp_items[label] = optimal_assessment_state.label_states[label].optimal_assessment_item
 
     def print_performances(self, state: HPOptimizationState):
-        print(f"Performances ({state.optimization_metric.name.lower()}) -----------------------------------------------")
+        print(f"Performances ({state.optimization_metric.name.lower()}) -----------------------------------------------", flush=True)
 
         for label in state.label_configuration.get_labels_by_name():
-            print(f"\n\nLabel: {label}")
-            print(f"Performance ({state.optimization_metric.name.lower()}) per assessment split:")
+            print(f"\n\nLabel: {label}", flush=True)
+            print(f"Performance ({state.optimization_metric.name.lower()}) per assessment split:", flush=True)
             for split in range(state.assessment.split_count):
-                print(f"Split {split+1}: {state.assessment_states[split].label_states[label].optimal_assessment_item.performance}")
+                print(f"Split {split+1}: {state.assessment_states[split].label_states[label].optimal_assessment_item.performance}", flush=True)
             print(f"Average performance ({state.optimization_metric.name.lower()}): "
-                  f"{sum([state.assessment_states[split].label_states[label].optimal_assessment_item.performance for split in range(state.assessment.split_count)])/state.assessment.split_count}")
-            print("------------------------------")
+                  f"{sum([state.assessment_states[split].label_states[label].optimal_assessment_item.performance for split in range(state.assessment.split_count)])/state.assessment.split_count}", flush=True)
+            print("------------------------------", flush=True)
 
     @staticmethod
     def get_documentation():
