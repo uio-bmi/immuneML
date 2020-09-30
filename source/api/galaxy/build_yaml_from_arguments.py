@@ -237,7 +237,7 @@ def parse_commandline_arguments(args):
                         help="The percentage of data used for training.")
     parser.add_argument("-c", "--split_count", type=int, required=True,
                         help="The number of times to repeat the training process with a different random split of the data.")
-    parser.add_argument("-s", "--sequence_type", choices=["complete", "subsequence"], required=True, nargs="+",
+    parser.add_argument("-s", "--sequence_type", choices=["complete", "subsequence"], default=["subsequence"], nargs="+",
                         help="Whether complete CDR3 sequences are used, or k-mer subsequences.")
     parser.add_argument("-p", "--position_type", choices=["invariant", "positional"], nargs="+",
                         help="Whether IMGT-positional information is used for k-mers, or the k-mer positions are position-invariant.")
@@ -247,7 +247,7 @@ def parse_commandline_arguments(args):
     parser.add_argument("-kr", "--k_right", type=int, nargs="+", help="Length after gap when k-mers are used.")
     parser.add_argument("-gi", "--min_gap", type=int, nargs="+", help="Minimal gap length when gapped k-mers are used.")
     parser.add_argument("-ga", "--max_gap", type=int, nargs="+", help="Maximal gap length when gapped k-mers are used.")
-    parser.add_argument("-r", "--reads", choices=[ReadsType.UNIQUE.value, ReadsType.ALL.value], nargs="+", required=True,
+    parser.add_argument("-r", "--reads", choices=[ReadsType.UNIQUE.value, ReadsType.ALL.value], nargs="+", default=[ReadsType.UNIQUE.value],
                         help="Whether k-mer counts should be scaled by unique clonotypes or all observed receptor sequences")
 
     return parser.parse_args(args)

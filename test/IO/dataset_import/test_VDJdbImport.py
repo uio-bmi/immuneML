@@ -3,7 +3,7 @@ from unittest import TestCase
 
 import pandas as pd
 
-from source.IO.dataset_import.VDJDBImport import VDJDBImport
+from source.IO.dataset_import.VDJdbImport import VDJdbImport
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.util.PathBuilder import PathBuilder
 
@@ -22,7 +22,7 @@ class TestVDJdbLoader(TestCase):
         with open(path + "receptors.tsv", "w") as file:
             file.writelines(file_content)
 
-        dataset = VDJDBImport.import_dataset({"result_path": path, "file_size": 1, "paired": True, "path": path}, "vdjdb_dataset")
+        dataset = VDJdbImport.import_dataset({"result_path": path, "file_size": 1, "paired": True, "path": path}, "vdjdb_dataset")
 
         self.assertEqual(2, dataset.get_example_count())
         self.assertEqual(2, len(dataset.get_filenames()))
@@ -57,7 +57,7 @@ class TestVDJdbLoader(TestCase):
 
         pd.DataFrame(metadata).to_csv(path + "metadata.csv")
 
-        dataset = VDJDBImport.import_dataset({"result_path": path, "metadata_file": path + "metadata.csv", "path": path,
+        dataset = VDJdbImport.import_dataset({"result_path": path, "metadata_file": path + "metadata.csv", "path": path,
                                               "column_mapping": {
                                                   "V": "v_genes",
                                                   "J": "j_genes",
