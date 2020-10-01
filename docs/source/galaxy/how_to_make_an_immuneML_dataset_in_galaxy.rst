@@ -14,27 +14,9 @@ The tool has three input fields:
 
 3. A list of files to import to a dataset.
 
-YAML specification defines how the dataset should be created from supplied files.
-It has the following format:
-
-.. highlight:: yaml
-.. code-block:: yaml
-
-  d1: # the name of the dataset to create
-    format: RandomRepertoireDataset # format of the dataset
-    params: # import parameters
-      repertoire_count: 100 # number of repertoires to be generated
-      sequence_count_probabilities: # the probabilities have to sum to 1
-        100: 0.5 # the probability that any repertoire will have 100 sequences
-        120: 0.5 # the probability that any repertoire will have 120 sequences
-      sequence_length_probabilities: # the probabilities have to sum to 1
-        12: 0.33 # the probability that any sequence will contain 12 amino acids
-        14: 0.33 # the probability that any sequence will contain 14 amino acids
-        15: 0.33 # the probability that any sequence will contain 15 amino acids
-
-In contrast to the specification used for full immuneML runs, the difference is that
-no result paths are provided as input to the tool, as they are defined by Galaxy.
-The list of all parameters and possible values is provided under :ref:`Datasets` in :ref:`Specification`.
+YAML specification defines how the dataset should be created from supplied files. See :ref:`Specification` for more details on writing a YAML
+specification file, specifically with :ref:`DatasetGeneration` instruction.. For this Galaxy tool, the specification will include only one dataset
+and only one format in which it will be exported.
 
 Metadata file field is used when creating a dataset consisting of immune repertoires
 and describes the metadata information for one repertoire per row. For the format of

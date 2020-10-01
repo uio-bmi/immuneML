@@ -13,19 +13,25 @@ from source.util.PathBuilder import PathBuilder
 class TestDatasetGenerationTool(TestCase):
 
     def prepare_specs(self, path):
-        specs = {
-            "dataset_name": {
-                "format": "RandomRepertoireDataset",
-                "params": {
-                    "repertoire_count": 100,
-                    "sequence_count_probabilities": {
-                        100: 1
-                    },
-                    "sequence_length_probabilities": {
-                        10: 1
-                    },
-                    "labels": {}
-                }
+        specs = {'definitions': {
+                    "datasets": {
+                        "d1": {
+                            "format": "RandomRepertoireDataset",
+                            "params": {
+                                "repertoire_count": 100,
+                                "sequence_count_probabilities": {
+                                    100: 1
+                                },
+                                "sequence_length_probabilities": {
+                                    10: 1
+                                },
+                                "labels": {}
+                            }
+                        }
+                    }
+            },
+            "instructions": {
+                "inst1": {"type": "DatasetGeneration", "formats": ["Pickle"], "datasets": ["d1"]}
             }
         }
 
@@ -43,8 +49,8 @@ class TestDatasetGenerationTool(TestCase):
 
         run_immuneML(Namespace(**{"specification_path": yaml_path, "result_path": result_path, 'tool': "DatasetGenerationTool"}))
 
-        self.assertTrue(os.path.isfile(f"{result_path}result/dataset_name_metadata.csv"))
-        self.assertTrue(os.path.isfile(f"{result_path}result/dataset_name.iml_dataset"))
+        self.assertTrue(os.path.isfile(f"{result_path}result/d1_metadata.csv"))
+        self.assertTrue(os.path.isfile(f"{result_path}result/d1.iml_dataset"))
         self.assertEqual(200, len([name for name in os.listdir(f"{result_path}result/repertoires/")
                                    if os.path.isfile(os.path.join(f"{result_path}result/repertoires/", name))]))
 
