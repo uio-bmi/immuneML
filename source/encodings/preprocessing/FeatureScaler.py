@@ -10,7 +10,7 @@ from source.util.PathBuilder import PathBuilder
 
 class FeatureScaler:
 
-    SKLEARN_NORMALIZATION_TYPES = ["l1", "l2", "max", "binary"]
+    SKLEARN_NORMALIZATION_TYPES = ["l1", "l2", "max"]
 
     @staticmethod
     def standard_scale(scaler_file: str, feature_matrix, with_mean: bool = True):
@@ -48,6 +48,9 @@ class FeatureScaler:
         """
         if normalization_type.name == "NONE":
             normalized_feature_matrix = feature_matrix
+        elif normalization_type.name == "BINARY":
+            normalizer = Binarizer().fit(feature_matrix)
+            normalized_feature_matrix = normalizer.transform(feature_matrix)
         elif normalization_type.value in FeatureScaler.SKLEARN_NORMALIZATION_TYPES:
             normalized_feature_matrix = FeatureScaler._sklearn_normalize(normalizer_filename, feature_matrix, normalization_type)
         else:
@@ -62,12 +65,8 @@ class FeatureScaler:
                 normalizer = pickle.load(file)
                 normalized_feature_matrix = normalizer.transform(feature_matrix)
         else:
-            if normalization_type.value == "binary":
-                normalizer = Binarizer().fit(feature_matrix)
-                normalized_feature_matrix = normalizer.transform(feature_matrix)
-            else:
-                normalizer = Normalizer(norm=normalization_type.value)
-                normalized_feature_matrix = normalizer.fit_transform(feature_matrix)
+            normalizer = Normalizer(norm=normalization_type.value)
+            normalized_feature_matrix = normalizer.fit_transform(feature_matrix)
             PathBuilder.build(os.path.dirname(normalizer_filename))
 
             with open(normalizer_filename, 'wb') as file:
