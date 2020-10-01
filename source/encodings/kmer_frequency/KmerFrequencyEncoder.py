@@ -121,6 +121,10 @@ class KmerFrequencyEncoder(DatasetEncoder):
         for param in vars_to_check.keys():
             ParameterValidator.assert_type_and_value(vars_to_check[param], int, location, param, min_inclusive=0)
 
+        if "gap" in sequence_encoding.lower():
+            assert k_left != 0 and k_right != 0, f"KmerFrequencyEncoder: sequence encoding {sequence_encoding} was chosen, but k_left " \
+                                                 f"({k_left}) or k_right ({k_right}) have to be set and larger than 0."
+
         return {
             "normalization_type": NormalizationType[normalization_type.upper()],
             "reads": ReadsType[reads.upper()],

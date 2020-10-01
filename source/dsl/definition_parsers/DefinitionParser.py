@@ -19,6 +19,7 @@ from source.simulation.Implanting import Implanting
 from source.simulation.implants.Motif import Motif
 from source.simulation.implants.Signal import Signal
 from source.simulation.motif_instantiation_strategy.MotifInstantiationStrategy import MotifInstantiationStrategy
+from source.simulation.signal_implanting_strategy.SignalImplantingStrategy import SignalImplantingStrategy
 from source.util.PathBuilder import PathBuilder
 from source.util.ReflectionHandler import ReflectionHandler
 
@@ -73,15 +74,17 @@ class DefinitionParser:
 
     @staticmethod
     def make_simulation_docs(path):
-        instantiations = ReflectionHandler.all_nonabstract_subclasses(MotifInstantiationStrategy, "Instantiation",
-                                                                      "motif_instantiation_strategy/")
-
+        instantiations = ReflectionHandler.all_nonabstract_subclasses(MotifInstantiationStrategy, "Instantiation", "motif_instantiation_strategy/")
         instantiations = [DocumentationFormat(inst, inst.__name__.replace('Instantiation', ""), DocumentationFormat.LEVELS[2])
                           for inst in instantiations]
 
+        implanting_strategies = ReflectionHandler.all_nonabstract_subclasses(SignalImplantingStrategy, 'Implanting', 'signal_implanting_strategy/')
+        implanting_strategies = [DocumentationFormat(implanting, implanting.__name__.replace('Implanting', ""), DocumentationFormat.LEVELS[2])
+                                 for implanting in implanting_strategies]
+
         classes_to_document = [DocumentationFormat(Motif, Motif.__name__, DocumentationFormat.LEVELS[1])] + instantiations + \
-                              [DocumentationFormat(Signal, Signal.__name__, DocumentationFormat.LEVELS[1]),
-                               DocumentationFormat(Implanting, Implanting.__name__, DocumentationFormat.LEVELS[1])]
+                              [DocumentationFormat(Signal, Signal.__name__, DocumentationFormat.LEVELS[1])] + implanting_strategies + \
+                               [DocumentationFormat(Implanting, Implanting.__name__, DocumentationFormat.LEVELS[1])]
 
         with open(path + "simulation.rst", "w") as file:
             for doc_format in classes_to_document:
