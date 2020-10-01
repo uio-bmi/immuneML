@@ -7,6 +7,8 @@ import numpy as np
 from source.data_model.dataset.Dataset import Dataset
 from source.ml_methods.MLMethod import MLMethod
 from source.ml_methods.RandomForestClassifier import RandomForestClassifier
+from source.ml_methods.SVM import SVM
+from source.ml_methods.SimpleLogisticRegression import SimpleLogisticRegression
 from source.reports.ReportOutput import ReportOutput
 from source.reports.ReportResult import ReportResult
 from source.reports.ml_reports.MLReport import MLReport
@@ -242,6 +244,11 @@ class MotifSeedRecovery(MLReport):
         location = "MotifSeedRecovery"
 
         run_report = True
+
+        if not any([isinstance(self.method, legal_method) for legal_method in (RandomForestClassifier, SimpleLogisticRegression, SVM)]):
+            logging.warning(f"{location} report can only be created for RandomForestClassifier, SimpleLogisticRegression or SVM, but got "
+                            f"{type(self.method).__name__} instead. {location} report will not be created.")
+            run_report = False
 
         if self.label not in self.implanted_motifs_per_label.keys():
             warnings.warn(
