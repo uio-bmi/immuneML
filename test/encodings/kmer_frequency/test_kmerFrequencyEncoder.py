@@ -25,7 +25,6 @@ class TestKmerFrequencyEncoder(TestCase):
         os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
 
     def test_encode(self):
-
         path = EnvironmentSettings.root_path + "test/tmp/kmerfreqenc/"
 
         PathBuilder.build(path)
@@ -77,9 +76,25 @@ class TestKmerFrequencyEncoder(TestCase):
             filename="dataset.csv"
         ))
 
+        encoder3 = KmerFrequencyEncoder.build_object(dataset, **{
+            "normalization_type": NormalizationType.BINARY.name,
+            "reads": ReadsType.UNIQUE.name,
+            "sequence_encoding": SequenceEncodingType.CONTINUOUS_KMER.name,
+            "k": 3
+        })
+
+        d3 = encoder3.encode(dataset, EncoderParams(
+            result_path=path + "3/",
+            label_config=lc,
+            learn_model=True,
+            model={},
+            filename="dataset.pkl"
+        ))
+
         shutil.rmtree(path)
 
         self.assertTrue(isinstance(d1, RepertoireDataset))
         self.assertTrue(isinstance(d2, RepertoireDataset))
         self.assertEqual(0.67, np.round(d2.encoded_data.examples[0, 2], 2))
+        self.assertEqual(0.0, np.round(d3.encoded_data.examples[0, 1], 2))
         self.assertTrue(isinstance(encoder, KmerFrequencyEncoder))
