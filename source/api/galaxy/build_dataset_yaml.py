@@ -8,17 +8,27 @@ from source.util.PathBuilder import PathBuilder
 
 def build_specs(args):
     specs = {
-        args.dataset_name: {
-            "format": args.format,
-            "params": {}
+        "definitions": {
+            "datasets": {
+                args.dataset_name: {
+                    "format": args.format,
+                    "params": {}
+                }
+            },
+        },
+        "instructions": {
+            "my_dataset_generation_instruction": {
+                "type": "DatasetGeneration",
+                "datasets": [args.dataset_name],
+                "formats": ["Pickle"]
+            }
         }
     }
 
     if args.metadata_file == "":
-        specs["dataset"]["params"]["path"] = "./"
+        specs["definitions"]["datasets"][args.dataset_name]["params"]["path"] = "."
     else:
-        specs["dataset"]["params"]["metadata_file"] = args.metadata_file
-
+        specs["definitions"]["datasets"][args.dataset_name]["params"]["metadata_file"] = args.metadata_file
 
     return specs
 
