@@ -61,7 +61,7 @@ class MLProcess:
 
     def run(self, split_index: int) -> HPItem:
 
-        print(f"{datetime.datetime.now()}: Evaluating hyperparameter setting: {self.hp_setting}...\n", flush=True)
+        print(f"{datetime.datetime.now()}: Evaluating hyperparameter setting: {self.hp_setting}...", flush=True)
 
         PathBuilder.build(self.path)
         self._set_paths()
