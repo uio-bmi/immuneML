@@ -2,7 +2,7 @@ import os
 import pickle
 
 from scipy import sparse
-from sklearn.preprocessing import StandardScaler, Normalizer
+from sklearn.preprocessing import StandardScaler, Normalizer, Binarizer
 
 from source.analysis.data_manipulation.NormalizationType import NormalizationType
 from source.util.PathBuilder import PathBuilder
@@ -43,11 +43,14 @@ class FeatureScaler:
         normalize on example level so that the norm type applies
         :param normalizer_filename: where to store the normalizer
         :param feature_matrix: rows -> examples, columns -> features
-        :param normalization_type: l1, l2, max
+        :param normalization_type: l1, l2, max, binary
         :return: normalized feature matrix
         """
         if normalization_type.name == "NONE":
             normalized_feature_matrix = feature_matrix
+        elif normalization_type.name == "BINARY":
+            normalizer = Binarizer().fit(feature_matrix)
+            normalized_feature_matrix = normalizer.transform(feature_matrix)
         elif normalization_type.value in FeatureScaler.SKLEARN_NORMALIZATION_TYPES:
             normalized_feature_matrix = FeatureScaler._sklearn_normalize(normalizer_filename, feature_matrix, normalization_type)
         else:
@@ -64,7 +67,6 @@ class FeatureScaler:
         else:
             normalizer = Normalizer(norm=normalization_type.value)
             normalized_feature_matrix = normalizer.fit_transform(feature_matrix)
-
             PathBuilder.build(os.path.dirname(normalizer_filename))
 
             with open(normalizer_filename, 'wb') as file:
