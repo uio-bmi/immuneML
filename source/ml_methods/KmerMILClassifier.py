@@ -60,8 +60,9 @@ class KmerMILClassifier(MLMethod):
 
     """
 
-    def __init__(self, iteration_count: int, threshold: float, evaluate_at: int, use_early_stopping: bool, random_seed: int, learning_rate: float,
-                 zero_abundance_weight_init: bool, number_of_threads: int, result_path: str = None):
+    def __init__(self, iteration_count: int = None, threshold: float = None, evaluate_at: int = None, use_early_stopping: bool = None,
+                 random_seed: int = None, learning_rate: float = None, zero_abundance_weight_init: bool = None, number_of_threads: int = None,
+                 result_path: str = None):
         super().__init__()
         self.logistic_regression = None
         self.random_seed = random_seed
@@ -146,7 +147,8 @@ class KmerMILClassifier(MLMethod):
         predictions_proba = self.predict_proba(encoded_data, label_names)
         return {self.label_name: [self.class_mapping[val] for val in (predictions_proba[self.label_name][:, 1] > 0.5).tolist()]}
 
-    def fit_by_cross_validation(self, encoded_data: EncodedData, y, number_of_splits: int = 5, parameter_grid: dict = None, label_names: list = None):
+    def fit_by_cross_validation(self, encoded_data: EncodedData, y, number_of_splits: int = 5, parameter_grid: dict = None, label_names: list = None,
+                                cores_for_training: int = -1):
         logging.warning(f"KmerMILClassifier: fitting by cross validation is not implemented internally for the model, fitting without "
                         f"cross-validation instead.")
         self.fit(encoded_data, y, label_names)
@@ -185,7 +187,7 @@ class KmerMILClassifier(MLMethod):
 
     def get_classes_for_label(self, label):
         if self.label_name == label:
-            return self.class_mapping.values()
+            return np.array(list(self.class_mapping.values()))
 
     def get_params(self, label):
         params = copy.deepcopy(vars(self))

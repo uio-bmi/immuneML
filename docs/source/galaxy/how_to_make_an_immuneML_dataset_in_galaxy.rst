@@ -15,8 +15,28 @@ The tool has three input fields:
 3. A list of files to import to a dataset.
 
 YAML specification defines how the dataset should be created from supplied files. See :ref:`Specification` for more details on writing a YAML
-specification file, specifically with :ref:`DatasetGeneration` instruction.. For this Galaxy tool, the specification will include only one dataset
-and only one format in which it will be exported.
+specification file, specifically with :ref:`DatasetGeneration` instruction. For this Galaxy tool, the specification will include only one dataset
+and only one format in which it will be exported. For instance, YAML specification could be the following:
+
+.. indent with spaces
+.. code-block:: yaml
+
+    definitions:
+      datasets:
+        my_dataset: # dataset which to use to create a Galaxy collection
+          format: AdaptiveBiotech
+          params:
+            metadata_file: metadata.csv
+            path: ./
+    instructions:
+      my_dataset_generation_instruction: # user-defined instruction name
+          type: DatasetGeneration # which instruction to execute
+          datasets: # only one dataset can be given here
+              - my_dataset
+          formats:
+          # only one format can be specified here and the dataset in this format will be
+          # available as a Galaxy collection afterwards
+              - AIRR
 
 Metadata file field is used when creating a dataset consisting of immune repertoires
 and describes the metadata information for one repertoire per row. For the format of

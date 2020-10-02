@@ -133,7 +133,12 @@ class AtchleyKmerEncoder(DatasetEncoder):
                                            lambda: self._process_repertoire(repertoire, index, example_count), CacheObjectType.ENCODING_STEP)
 
     def _process_repertoire(self, repertoire, index, example_count):
-        remove_aa_func = lambda seqs: [seq[self.skip_first_n_aa:-self.skip_last_n_aa] for seq in seqs]
+        if self.skip_first_n_aa > 0 and self.skip_last_n_aa > 0:
+            remove_aa_func = lambda seqs: [seq[self.skip_first_n_aa:-self.skip_last_n_aa] for seq in seqs]
+        elif self.skip_last_n_aa > 0:
+            remove_aa_func = lambda seqs: [seq[:-self.skip_last_n_aa] for seq in seqs]
+        else:
+            remove_aa_func = lambda seqs: [seq[self.skip_first_n_aa:] for seq in seqs]
 
         logging.info(f"AtchleyKmerEncoder: encoding repertoire {index + 1}/{example_count}.")
 
@@ -172,7 +177,8 @@ class AtchleyKmerEncoder(DatasetEncoder):
         indices = [i for i in range(sequences.shape[0]) if len(sequences[i]) >= self.skip_first_n_aa + self.skip_last_n_aa + self.k]
         sequences = sequences[indices]
         counts = counts[indices]
-        sequences = np.apply_along_axis(remove_aa_func, 0, sequences)
+        if self.skip_first_n_aa > 0 or self.skip_last_n_aa > 0:
+            sequences = np.apply_along_axis(remove_aa_func, 0, sequences)
         return sequences, counts
 
     def get_additional_files(self) -> List[str]:
