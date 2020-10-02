@@ -6,6 +6,7 @@ import yaml
 
 from source.api.galaxy.Util import Util
 from source.app.ImmuneMLApp import ImmuneMLApp
+from source.util.ParameterValidator import ParameterValidator
 from source.util.PathBuilder import PathBuilder
 
 
@@ -96,7 +97,7 @@ class GalaxySimulationTool:
         app = ImmuneMLApp(self.yaml_path, self.result_path)
         app.run()
 
-        dataset_location = list(glob(self.result_path + "/*/exported_dataset/pickle/"))[0]
+        dataset_location = list(glob(self.result_path + "/*/exported_dataset/*/"))[0]
 
         shutil.copytree(dataset_location, self.result_path + 'result/')
 
@@ -114,9 +115,14 @@ class GalaxySimulationTool:
         instruction_type = specs['instructions'][instruction_name]['type']
         assert instruction_type == 'Simulation', f"GalaxySimulationTool: instruction type has to be 'Simulation', got {instruction_type} instead."
 
-        if 'Pickle' not in specs['instructions'][instruction_name]['export_formats']:
-            specs['instructions'][instruction_name]['export_formats'].append('Pickle')
-            logging.info("GalaxySimulationTool: automatically adding 'Pickle' as export format...")
+        ParameterValidator.assert_keys_present(specs['instructions'][instruction_name].keys(), ["export_formats"], GalaxySimulationTool.__name__,
+                                               f"{instruction_name}/export_formats")
+        ParameterValidator.assert_type_and_value(specs['instructions'][instruction_name]["export_formats"], list, GalaxySimulationTool.__name__,
+                                                 f"{instruction_name}/export_formats")
+
+        assert len(specs['instructions'][instruction_name]["export_formats"]) == 1, \
+            f"{GalaxySimulationTool.__name__}: only one format can be specified under export_formats parameter under " \
+            f"{instruction_name}/export_formats, got {specs['instructions'][instruction_name]['export_formats']} instead."
 
         Util.check_paths(specs, "GalaxySimulationTool")
         Util.update_result_paths(specs, self.result_path, self.yaml_path)
