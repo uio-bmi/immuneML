@@ -56,8 +56,8 @@ class TestAIRRExporter(TestCase):
         resulting_data = pd.read_csv(path_exported + f"repertoires/{repertoire.identifier}.tsv", sep="\t")
 
         self.assertListEqual(list(resulting_data["sequence_id"]), ["receptor_1", "receptor_2"])
-        self.assertListEqual(list(resulting_data["junction"]), ["TG?GCTGCTGCTT??", "TG?GGTGGTGGTT??"])
-        self.assertListEqual(list(resulting_data["junction_aa"]), ["CAAA?", "CGGG?"])
+        self.assertListEqual(list(resulting_data["cdr3"]), ["GCTGCTGCT", "GGTGGTGGT"])
+        self.assertListEqual(list(resulting_data["cdr3_aa"]), ["AAA", "GGG"])
         self.assertListEqual(list(resulting_data["v_call"]), ["v1", "v2"])
         self.assertListEqual(list(resulting_data["j_call"]), ["j1", "j2"])
         self.assertListEqual(list(resulting_data["d_call"]), ["d1", "d2"])
