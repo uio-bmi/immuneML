@@ -1,12 +1,10 @@
-import datetime
-import os
+import shutil
 
-from source.IO.dataset_export.PickleExporter import PickleExporter
+import yaml
+
 from source.api.galaxy.Util import Util
-from source.dsl.ImmuneMLParser import ImmuneMLParser
-from source.dsl.import_parsers.ImportParser import ImportParser
-from source.dsl.symbol_table.SymbolTable import SymbolTable
-from source.dsl.symbol_table.SymbolType import SymbolType
+from source.app.ImmuneMLApp import ImmuneMLApp
+from source.util.ParameterValidator import ParameterValidator
 from source.util.PathBuilder import PathBuilder
 
 
@@ -19,49 +17,62 @@ class DatasetGenerationTool:
 
     This tool is meant to be used as an endpoint for Galaxy tool that will create a Galaxy collection out of a dataset in immuneML format.
 
-    Specification supplied for this tool is a simplified version of the immuneML specification. It contains only the definition for
-    one dataset in the following format (other options under params are possible as in a standard dataset definition in immuneML, with only
-    difference that the files must be in the current working directory, so only file names are given in the specs):
-
-        user_specified_dataset_name:
-            format: AdaptiveBiotech # format in which the immune receptor or repertoire files are
-            params:
-                metadata_file: metadata.csv # metadata filename if the dataset consists of repertoires
-                path: ./ # by default those files will be searched for at the current working directory
+    Specification for this tool is the same as for the `DatasetGenerationInstruction`, except it can create only one dataset with one format at
+    the time.
 
     """
 
     def __init__(self, specification_path, result_path, **kwargs):
         Util.check_parameters(specification_path, result_path, kwargs, "Dataset generation tool")
 
-        inputs = kwargs["inputs"].split(',') if "inputs" in kwargs else None
-
         self.yaml_path = specification_path
         self.result_path = result_path if result_path[-1] == '/' else f"{result_path}/"
-        self.files_path = f"{os.path.dirname(inputs[0])}/" if "inputs" in kwargs else "./"
+        self.files_path = "./"
 
     def run(self):
         PathBuilder.build(self.result_path)
-        symbol_table, output_path = ImmuneMLParser.parse_yaml_file(self.yaml_path, self.result_path, parse_func=self.parse_dataset)
-        datasets = symbol_table.get_keys_by_type(SymbolType.DATASET)
-        assert len(datasets) == 1, f"Dataset generation tool: {len(datasets)} datasets were defined. Please check the input parameters."
-        dataset = symbol_table.get(datasets[0])
-        PickleExporter.export(dataset=dataset, path=self.result_path + "result/")
-        print(f"{datetime.datetime.now()}: Dataset {dataset.name} generated.\n", flush=True)
+        self.update_specs()
+        state = ImmuneMLApp(self.yaml_path, self.result_path).run()[0]
+        shutil.copytree(list(list(state.paths.values())[0].values())[0], self.result_path + "result/")
+        print("Exported dataset.")
 
-    def parse_dataset(self, workflow_specification: dict, yaml_path: str, result_path: str):
-        keys = list(workflow_specification.keys())
-        assert len(keys) == 1, f"Dataset generation tool: {len(keys)} keys ({str(keys)[1:-1]}) were specified in the yaml file, but there should be " \
-                               f"only one, which will be used as a dataset name. Please see the documentation for generating immuneML datasets."
+    def update_specs(self):
+        with open(self.yaml_path, 'r') as file:
+            specs = yaml.safe_load(file)
 
-        assert "params" in workflow_specification[keys[0]], \
-            f"Dataset generation tool: the format of the specification is not correct. 'params' key missing under '{keys[0]}'." \
-            f"Please see the documentation for generating immuneML datasets."
+        ParameterValidator.assert_keys(specs.keys(), ['definitions', 'instructions'], DatasetGenerationTool.__name__, 'YAML specification')
 
-        if workflow_specification[keys[0]]["format"] not in ["RandomRepertoireDataset", "RandomReceptorDataset"]:
-            workflow_specification[keys[0]]["params"]["path"] = self.files_path
+        self._check_dataset(specs)
+        self._check_instruction(specs)
 
-        workflow_specification[keys[0]]["params"]["result_path"] = self.result_path
+        Util.check_paths(specs, DatasetGenerationTool.__name__)
+        Util.update_result_paths(specs, self.result_path, self.yaml_path)
 
-        symbol_table = SymbolTable()
-        return ImportParser.parse({"datasets": workflow_specification}, symbol_table)
+    def _check_dataset(self, specs):
+        ParameterValidator.assert_keys_present(specs["definitions"].keys(), ['datasets'], DatasetGenerationTool.__name__, 'definitions')
+        assert len(specs['definitions']['datasets'].keys()) == 1, \
+            f"{DatasetGenerationTool.__name__}: only one dataset can be defined with this Galaxy tool, got these " \
+            f"instead: {list(specs['definitions']['datasets'].keys())}."
+
+        assert len(specs['instructions'].keys()) == 1, \
+            f"{DatasetGenerationTool.__name__}: only one instruction of type DatasetGeneration can be defined with this Galaxy tool, got these " \
+            f"instructions instead: {list(specs['instructions'].keys())}."
+
+    def _check_instruction(self, specs):
+        instruction_name = list(specs['instructions'].keys())[0]
+
+        ParameterValidator.assert_keys_present(specs['instructions'][instruction_name], ['type'], DatasetGenerationTool.__name__, instruction_name)
+
+        assert specs['instructions'][instruction_name]['type'] == "DatasetGeneration", \
+            f"{DatasetGenerationTool.__name__}: the instruction has to be of type DatasetGeneration, " \
+            f"got {specs['instructions'][instruction_name]['type']} instead."
+
+        for key in ['datasets', 'formats']:
+            ParameterValidator.assert_keys_present(specs['instructions'][instruction_name].keys(), [key], DatasetGenerationTool.__name__,
+                                                   instruction_name)
+            ParameterValidator.assert_type_and_value(specs["instructions"][instruction_name][key], list, DatasetGenerationTool.__name__,
+                                                     f"{instruction_name}/{key}")
+
+            assert len(specs['instructions'][instruction_name][key]) == 1, \
+                f"{DatasetGenerationTool.__name__}: this tool accepts only one item under {key}, got {specs['instructions'][instruction_name][key]} " \
+                f"instead."
