@@ -1,4 +1,5 @@
 import abc
+import os
 import pickle
 from typing import List
 
@@ -232,7 +233,12 @@ class KmerFrequencyEncoder(DatasetEncoder):
         return counts
 
     def get_additional_files(self) -> List[str]:
-        return [self.normalizer_path, self.vectorizer_path]
+        files = []
+        if self.normalizer_path is not None and os.path.isfile(self.normalizer_path):
+            files.append(self.normalizer_path)
+        if self.vectorizer_path is not None and os.path.isfile(self.normalizer_path):
+            files.append(self.vectorizer_path)
+        return files
 
     @staticmethod
     def export_encoder(path: str, encoder) -> str:
