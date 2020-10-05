@@ -9,7 +9,7 @@ from source.util.PathBuilder import PathBuilder
 
 
 class TestVDJdbLoader(TestCase):
-    def test_load(self):
+    def test_load_sequence_dataset(self):
         file_content = """complex.id	Gene	CDR3	V	J	Species	MHC A	MHC B	MHC class	Epitope	Epitope gene	Epitope species	Reference	Method	Meta	CDR3fix	Score
         3050	TRB	CASSPPRVYSNGAGLAGVGWRNEQFF	TRBV5-4*01	TRBJ2-1*01	HomoSapiens	HLA-A*11:01	B2M	MHCI	AVFDRKSDAK	EBNA4	EBV	https://www.10xgenomics.com/resources/application-notes/a-new-way-of-exploring-immunity-linking-highly-multiplexed-antigen-recognition-to-immune-repertoire-and-phenotype/#	{"frequency": "1/11684", "identification": "dextramer-sort", "sequencing": "rna-seq", "singlecell": "yes", "verification": ""}	{"cell.subset": "", "clone.id": "", "donor.MHC": "", "donor.MHC.method": "", "epitope.id": "", "replica.id": "", "samples.found": 1, "structure.id": "", "studies.found": 1, "study.id": "", "subject.cohort": "", "subject.id": "1", "tissue": ""}	{"cdr3": "CASSPPRVYSNGAGLAGVGWRNEQFF", "cdr3_old": "CASSPPRVYSNGAGLAGVGWRNEQFF", "fixNeeded": false, "good": true, "jCanonical": true, "jFixType": "NoFixNeeded", "jId": "TRBJ2-1*01", "jStart": 21, "vCanonical": true, "vEnd": 4, "vFixType": "NoFixNeeded", "vId": "TRBV5-4*01"}	0
         15760	TRB	CASSWTWDAATLWGQGALGGANVLTF	TRBV5-5*01	TRBJ2-6*01	HomoSapiens	HLA-A*03:01	B2M	MHCI	KLGGALQAK	IE1	CMV	https://www.10xgenomics.com/resources/application-notes/a-new-way-of-exploring-immunity-linking-highly-multiplexed-antigen-recognition-to-immune-repertoire-and-phenotype/#	{"frequency": "1/25584", "identification": "dextramer-sort", "sequencing": "rna-seq", "singlecell": "yes", "verification": ""}	{"cell.subset": "", "clone.id": "", "donor.MHC": "", "donor.MHC.method": "", "epitope.id": "", "replica.id": "", "samples.found": 1, "structure.id": "", "studies.found": 1, "study.id": "", "subject.cohort": "", "subject.id": "3", "tissue": ""}	{"cdr3": "CASSWTWDAATLWGQGALGGANVLTF", "cdr3_old": "CASSWTWDAATLWGQGALGGANVLTF", "fixNeeded": false, "good": true, "jCanonical": true, "jFixType": "NoFixNeeded", "jId": "TRBJ2-6*01", "jStart": 19, "vCanonical": true, "vEnd": 4, "vFixType": "NoFixNeeded", "vId": "TRBV5-5*01"}	0
@@ -22,7 +22,7 @@ class TestVDJdbLoader(TestCase):
         with open(path + "receptors.tsv", "w") as file:
             file.writelines(file_content)
 
-        dataset = VDJdbImport.import_dataset({"result_path": path, "file_size": 1, "paired": True, "path": path}, "vdjdb_dataset")
+        dataset = VDJdbImport.import_dataset({"is_repertoire": False, "result_path": path, "paired": True, "path": path, "sequence_file_size": 1}, "vdjdb_dataset")
 
         self.assertEqual(2, dataset.get_example_count())
         self.assertEqual(2, len(dataset.get_filenames()))
@@ -57,7 +57,7 @@ class TestVDJdbLoader(TestCase):
 
         pd.DataFrame(metadata).to_csv(path + "metadata.csv")
 
-        dataset = VDJdbImport.import_dataset({"result_path": path, "metadata_file": path + "metadata.csv", "path": path,
+        dataset = VDJdbImport.import_dataset({"is_repertoire": True, "result_path": path, "metadata_file": path + "metadata.csv", "path": path,
                                               "column_mapping": {
                                                   "V": "v_genes",
                                                   "J": "j_genes",

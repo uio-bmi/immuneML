@@ -31,7 +31,6 @@ class VDJdbImport(DataImport):
                 result_path: path/where/to/store/imported/repertoires/ # immuneML imports data to optimized representation to speed up analysis so this defines where to store these new representation files
                 # the following parameter have these default values so these need to be specified only if a different behavior is required
                 paired: True # whether to import_dataset paired data: if true returns ReceptorDataset, and if false returns SequenceDataset
-                file_size: 1000 # number of sequences / receptors per file as stored internally by ImmuneML in ImmuneML format - not visible to users
                 column_mapping:
                     V: v_genes
                     J: j_genes
@@ -45,7 +44,7 @@ class VDJdbImport(DataImport):
     @staticmethod
     def import_dataset(params: dict, dataset_name: str) -> Dataset:
         vdjdb_params = DatasetImportParams.build_object(**params)
-        if vdjdb_params.metadata_file is not None:
+        if vdjdb_params.is_repertoire:
             dataset = VDJdbImport.load_repertoire_dataset(vdjdb_params, dataset_name)
         else:
             dataset = VDJdbImport.load_sequence_dataset(vdjdb_params, dataset_name)
@@ -63,7 +62,7 @@ class VDJdbImport(DataImport):
     def load_sequence_dataset(params: DatasetImportParams, dataset_name: str) -> Dataset:
         return ImportHelper.import_sequence_dataset(VDJdbSequenceImport.import_items, params, dataset_name, paired=params.paired)
 
-    @staticmethod
-    def store_items(dataset_filenames: list, items: list, file_size: int):
-        with open(dataset_filenames[-1], "wb") as file:
-            pickle.dump(items[:file_size], file)
+    # @staticmethod
+    # def store_items(dataset_filenames: list, items: list, file_size: int):
+    #     with open(dataset_filenames[-1], "wb") as file:
+    #         pickle.dump(items[:file_size], file)

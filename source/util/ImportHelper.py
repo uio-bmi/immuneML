@@ -133,23 +133,23 @@ class ImportHelper:
             new_items = sequence_import_func(filename, *args, **kwargs)
             items = np.append(items, new_items) if items is not None else new_items
 
-            while len(items) > params.file_size or (index == len(filenames) - 1 and len(items) > 0):
+            while len(items) > params.sequence_file_size or (index == len(filenames) - 1 and len(items) > 0):
                 dataset_filenames.append(params.result_path + "batch_{}.pickle".format(file_index))
-                ImportHelper.store_sequence_items(dataset_filenames, items, params.file_size)
-                items = items[params.file_size:]
+                ImportHelper.store_sequence_items(dataset_filenames, items, params.sequence_file_size)
+                items = items[params.sequence_file_size:]
                 file_index += 1
 
-        dataset = ReceptorDataset(filenames=dataset_filenames, file_size=params.file_size, name=dataset_name) if params.paired \
-            else SequenceDataset(filenames=dataset_filenames, file_size=params.file_size, name=dataset_name)
+        dataset = ReceptorDataset(filenames=dataset_filenames, file_size=params.sequence_file_size, name=dataset_name) if params.paired \
+            else SequenceDataset(filenames=dataset_filenames, file_size=params.sequence_file_size, name=dataset_name)
 
         PickleExporter.export(dataset, params.result_path)
 
         return dataset
 
     @staticmethod
-    def store_sequence_items(dataset_filenames: list, items: list, file_size: int):
+    def store_sequence_items(dataset_filenames: list, items: list, sequence_file_size: int):
         with open(dataset_filenames[-1], "wb") as file:
-            pickle.dump(items[:file_size], file)
+            pickle.dump(items[:sequence_file_size], file)
 
     @staticmethod
     def parse_germline(df: pd.DataFrame, gene_name_replacement: dict, germline_value_replacement: dict):
