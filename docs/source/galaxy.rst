@@ -31,3 +31,4 @@ Galaxy tutorials:
   galaxy/how_to_make_an_immuneML_dataset_in_galaxy
   galaxy/how_to_run_an_analysis_in_galaxy
   galaxy/how_to_classify_immune_repertoires
+  galaxy/how_to_classify_immune_receptors
