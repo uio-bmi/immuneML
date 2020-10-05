@@ -1,5 +1,6 @@
 import warnings
 
+from source.encodings.kmer_frequency.KmerFrequencyEncoder import KmerFrequencyEncoder
 from source.ml_methods.DeepRC import DeepRC
 from source.reports.hyperparameter.MLSettingsPerformance import MLSettingsPerformance
 
@@ -58,8 +59,8 @@ class MLSubseqPerformance(MLSettingsPerformance):
 
         if isinstance(assessment_item.hp_setting.ml_method, DeepRC):
             is_valid = True
-        elif assessment_item.hp_setting.encoder.__module__.endswith("KmerFrequencyEncoder"):
-            if assessment_item.hp_setting.encoder_params['sequence_encoding'].lower() in ('continuous_kmer', 'imgt_gapped_kmer'):
+        elif assessment_item.hp_setting.encoder.__class__.__name__ in KmerFrequencyEncoder.dataset_mapping.values():
+            if assessment_item.hp_setting.encoder_params['sequence_encoding'].lower() in ('continuous_kmer', 'imgt_continuous_kmer'):
                 is_valid = True
 
         return is_valid
