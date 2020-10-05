@@ -1,15 +1,16 @@
-Classify immune repertoires
+Train immune repertoire classifiers
 =========================================
 
-
-The purpose of the repertoire classification tool is to train machine learning (ML) models to predict a characteristic per immune repertoire, such as
+This is the documentation for the 'Train immune repertoire classifiers' Galaxy tool.
+The purpose of this tool is to train machine learning (ML) models to predict a characteristic per immune repertoire, such as
 a disease status. One or more ML models are trained to classify repertoires based on the information within the CDR3 sequences. Finally, the performance
 of the different methods is compared.
+Alternatively, if you want to predict a property per immune receptor, such as antigen specificity, check out the ‘Train immune receptor classifiers’ tool instead.
 
 Basic terminology
 -----------------
 
-In the context of ML, the characteristics to predict per repertoire are called labels and the values that these labels can take on are classes.
+In the context of ML, the characteristics to predict per repertoire are called **labels** and the values that these labels can take on are **classes**.
 One could thus have a label named ‘CMV_status’ with possible classes ‘positive’ and ‘negative’. The labels and classes must be present in the metadata
 file, in columns where the header and values correspond to the label and classes respectively.
 
@@ -57,7 +58,7 @@ Finally, it is possible to introduce gaps in the encoding of subsequences (not s
 subsequences separated by a region of varying nucleotide or amino acid length. Thus, the subsequences ‘EDNA’, ‘EDGNA’ and ‘EDGAGAGNA’ may all be
 considered to be part of the same motif: ‘ED’ followed by ‘NA’ with a gap of 0 – 5 amino acids in between.
 
-Note that in any case, the (sub)sequences that are associated with the ‘positive’ class may still be present in the ‘negative’ class, albeit at a lower level.
+Note that in any case, the (sub)sequences that are associated with the ‘positive’ class may still be present in the ‘negative’ class, albeit at a lower rate.
 
 Training a machine learning model
 ----------------------------------

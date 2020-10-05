@@ -185,7 +185,7 @@ def build_specs(args):
                 "batch_size": 10,
                 "reports": [],
                 "optimization_metric": "balanced_accuracy",
-                'refit_optimal_model': False
+                'refit_optimal_model': True
             }
         }
     }
