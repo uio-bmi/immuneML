@@ -12,17 +12,14 @@ corresponding metadata
 
 Subsequently, immunology experts without machine learning background can follow these instructions:
 
-- :ref:`Classify immune repertoires` (Galaxy tool) - a tool with an easily interpretable user interface for repertoire classification (e.g., immune status prediction).
+- :ref:`Train immune repertoire classifiers` (Galaxy tool) - a tool with an easily interpretable user interface for repertoire classification (e.g., immune status prediction).
 
-- Classify immune receptors (Galaxy tool) - coming soon
+- :ref:`Train immune receptor classifiers` (Galaxy tool) - a tool with an easily interpretable user interface for antigen binding prediction
 
 Alternatively, CLI equivalent tools based on the YAML specification can be run using the following instructions
 
--  :ref:`How to run an analysis in Galaxy` - a tool that can perform any analysis immuneML supports using a Galaxy collection created in the
-‘Create dataset’ Galaxy tool or raw files and a YAML specification.
+-  :ref:`How to run an analysis in Galaxy` - a tool that can perform any analysis immuneML supports using a Galaxy collection created in the ‘Create dataset’ Galaxy tool or raw files and a YAML specification.
 
-
-Galaxy tutorials:
 
 .. toctree::
   :maxdepth: 1
