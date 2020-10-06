@@ -28,18 +28,31 @@ class ImportHelper:
 
     DATASET_FORMAT = "iml_dataset"
 
+    # @staticmethod   #t todo deprecated: remove
+    # def import_or_load_dataset(params: dict, processed_params, dataset_name: str, preprocess_repertoire_func):
+    #
+    #     dataset_file = f"{processed_params.result_path}{dataset_name}.{ImportHelper.DATASET_FORMAT}"
+    #
+    #     if os.path.isfile(dataset_file):
+    #         params["path"] = dataset_file
+    #         dataset = PickleImport.import_dataset(params, dataset_name)
+    #     else:
+    #         dataset = ImportHelper.import_repertoire_dataset(preprocess_repertoire_func, processed_params, dataset_name)
+    #
+    #     return dataset
+
     @staticmethod
-    def import_or_load_repertoire_dataset(params: dict, processed_params, dataset_name: str, preprocess_repertoire_func):
+    def load_dataset_if_exists(params: dict, processed_params, dataset_name: str):
 
         dataset_file = f"{processed_params.result_path}{dataset_name}.{ImportHelper.DATASET_FORMAT}"
+        dataset = None
 
         if os.path.isfile(dataset_file):
             params["path"] = dataset_file
             dataset = PickleImport.import_dataset(params, dataset_name)
-        else:
-            dataset = ImportHelper.import_repertoire_dataset(preprocess_repertoire_func, processed_params, dataset_name)
 
         return dataset
+
 
     @staticmethod
     def import_repertoire_dataset(preprocess_repertoire_func, params: DatasetImportParams, dataset_name: str) -> RepertoireDataset:
@@ -121,8 +134,36 @@ class ImportHelper:
     def standardize_none_values(dataframe: pd.DataFrame) -> pd.DataFrame:
         return dataframe.replace({key: Constants.UNKNOWN for key in ["unresolved", "no data", "na", "unknown", "null", "nan", np.nan, ""]})
 
-    @staticmethod
-    def import_sequence_dataset(sequence_import_func, params, dataset_name: str, *args, **kwargs):
+    # @staticmethod # todo old version remove
+    # def import_sequence_dataset(sequence_import_func, params, dataset_name: str, *args, **kwargs):
+    #     PathBuilder.build(params.result_path)
+    #
+    #     filenames = [params.path] if os.path.isfile(params.path) else glob(params.path + "*.tsv")
+    #     assert len(filenames) >= 1, f"ImportHelper: the dataset {dataset_name} cannot be imported, no files were found under {params.path}."
+    #
+    #     file_index = 0
+    #     dataset_filenames = []
+    #     items = None
+    #
+    #     for index, filename in enumerate(filenames):
+    #         new_items = sequence_import_func(filename, *args, **kwargs)
+    #         items = np.append(items, new_items) if items is not None else new_items
+    #
+    #         while len(items) > params.sequence_file_size or (index == len(filenames) - 1 and len(items) > 0):
+    #             dataset_filenames.append(params.result_path + "batch_{}.pickle".format(file_index))
+    #             ImportHelper.store_sequence_items(dataset_filenames, items, params.sequence_file_size)
+    #             items = items[params.sequence_file_size:]
+    #             file_index += 1
+    #
+    #     dataset = ReceptorDataset(filenames=dataset_filenames, file_size=params.sequence_file_size, name=dataset_name) if params.paired \
+    #         else SequenceDataset(filenames=dataset_filenames, file_size=params.sequence_file_size, name=dataset_name)
+    #
+    #     PickleExporter.export(dataset, params.result_path)
+    #
+    #     return dataset
+
+    @staticmethod #
+    def import_sequence_dataset(sequence_import_func, params, dataset_name: str):
         PathBuilder.build(params.result_path)
 
         filenames = [params.path] if os.path.isfile(params.path) else glob(params.path + "*.tsv")
@@ -133,7 +174,7 @@ class ImportHelper:
         items = None
 
         for index, filename in enumerate(filenames):
-            new_items = sequence_import_func(filename, *args, **kwargs)
+            new_items = sequence_import_func(filename, params)
             items = np.append(items, new_items) if items is not None else new_items
 
             while len(items) > params.sequence_file_size or (index == len(filenames) - 1 and len(items) > 0):

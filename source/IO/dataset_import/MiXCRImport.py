@@ -50,7 +50,7 @@ class MiXCRImport(DataImport):
     @staticmethod
     def import_dataset(params: dict, dataset_name: str) -> RepertoireDataset:
         mixcr_params = DatasetImportParams.build_object(**params)
-        dataset = ImportHelper.import_or_load_repertoire_dataset(params, mixcr_params, dataset_name, MiXCRImport.preprocess_repertoire)
+        dataset = ImportHelper.import_or_load_dataset(params, mixcr_params, dataset_name, MiXCRImport.preprocess_repertoire)
         return dataset
 
     @staticmethod
