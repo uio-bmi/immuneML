@@ -8,7 +8,7 @@ class Chain(Enum):
     DELTA = "TRD"
     HEAVY = "IGH"
     LIGHT = "IGL"
-    KAPPA = "K"
+    KAPPA = "IGK"
 
     @staticmethod
     def get_chain(item: str):
