@@ -1,9 +1,8 @@
 import hashlib
 import os
 import warnings
-from typing import Tuple
 from inspect import signature
-
+from typing import Tuple
 
 from source.data_model.dataset.Dataset import Dataset
 from source.dsl.DefaultParamsLoader import DefaultParamsLoader
@@ -143,7 +142,7 @@ class TrainMLModelParser:
             if dataset.params is not None and label_name in dataset.params:
                 label_values = dataset.params[label_name]
             elif hasattr(dataset, "get_metadata"):
-                label_values = list(set(dataset.get_metadata([label])[label_name]))
+                label_values = list(set(dataset.get_metadata([label_name])[label_name]))
             else:
                 label_values = []
                 warnings.warn(f"{TrainMLModelParser.__name__}: for instruction {instruction_key}, label values could not be recovered for label "

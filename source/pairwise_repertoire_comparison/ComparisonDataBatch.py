@@ -39,8 +39,11 @@ class ComparisonDataBatch:
         PathBuilder.build(self.path)
         np.save(self.path + f"{self.identifier}.npy", self.matrix)
 
+        np.save(self.path + f"{self.identifier}_items.npy", self.items)
+
         batch_vars = vars(self)
         del batch_vars["matrix"]
+        del batch_vars["items"]
 
         with open(self.path + f"{self.identifier}.pkl", "wb") as file:
             pickle.dump(batch_vars, file)
@@ -58,6 +61,12 @@ class ComparisonDataBatch:
             logging.warning(f"ComparisonDataBatch: path {file_path} does not exist, returning the same object...")
 
         return self
+
+    def get_items(self):
+        if self.matrix is None:
+            return np.load(self.path + f"{self.identifier}_items.npy")
+        else:
+            return self.items
 
     def get_matrix(self):
         if self.matrix is None:

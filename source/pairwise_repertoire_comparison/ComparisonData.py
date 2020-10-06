@@ -27,7 +27,7 @@ class ComparisonData:
         return lambda repertoire: list(set(zip(*[repertoire.get_attribute(attribute) for attribute in self.comparison_attributes])))
 
     def get_item_names(self):
-        return np.array([item for items in [batch.items for batch in self.batches] for item in items])
+        return np.array([item for items in [batch.get_items() for batch in self.batches] for item in items])
 
     def get_item_vectors(self, repertoire_ids: list = None):
         for batch in self.get_batches(columns=repertoire_ids):
