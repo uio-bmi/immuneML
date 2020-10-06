@@ -70,7 +70,7 @@ mouse_subject0053,PA,1,TRAV6D-6*01,TRAJ53*01,CALGGGSNYKLTF,tgtgctctgggtggaggcagc
                                                             "j_b_gene": "beta_j_gene",
                                                             "clone_id": "identifier"
                                                         },
-                                                        "chains": "ALPHA_BETA",
+                                                        "receptor_chains": "TRA_TRB",
                                                         "region_type": "CDR3",
                                                         "file_size": 50000,
                                                         "organism": "mouse"}, 'd1')

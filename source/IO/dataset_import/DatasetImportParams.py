@@ -21,18 +21,18 @@ class DatasetImportParams:
     import_with_stop_codon: bool = None
     import_out_of_frame: bool = None
     paired: bool = None
-    chains: ChainPair = None
+    receptor_chains: ChainPair = None
     metadata_columns: list = None
     batch_size: int = 1
     sequence_file_size: int = 50000
 
 
     @classmethod
-    def build_object(cls, region_type: str = None, region_definition: str = None, chains: str = None, **kwargs):
+    def build_object(cls, region_type: str = None, region_definition: str = None, receptor_chains: str = None, **kwargs):
         params = {
             "region_type": RegionType[region_type.upper()] if region_type else None,
             "region_definition": RegionDefinition[region_definition.upper()] if region_definition else None,
-            "chains": ChainPair[chains.upper()] if chains else None
+            "receptor_chains": ChainPair[receptor_chains.upper()] if receptor_chains else None
         }
         params = {**kwargs, **params}
         return DatasetImportParams(**params)

@@ -7,10 +7,7 @@ from source.IO.dataset_import.DatasetImportParams import DatasetImportParams
 from source.data_model.dataset.Dataset import Dataset
 from source.data_model.receptor.Receptor import Receptor
 from source.data_model.receptor.TCABReceptor import TCABReceptor
-from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
-from source.data_model.receptor.receptor_sequence.ReceptorSequenceList import ReceptorSequenceList
 from source.data_model.receptor.receptor_sequence.SequenceFrameType import SequenceFrameType
-from source.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
 from source.util.ImportHelper import ImportHelper
 
 
@@ -68,7 +65,7 @@ class VDJdbImport(DataImport):
 
     @staticmethod
     def preprocess_repertoire(metadata: dict, params: DatasetImportParams) -> dict:
-        df = ImportHelper.load_repertoire_as_dataframe(metadata, params)    # todo: preprocessing / improt stop codon / etc???
+        df = ImportHelper.load_repertoire_as_dataframe(metadata, params)
         df = VDJdbImport.preprocess_dataframe(df, params)
         return df
 
@@ -85,53 +82,36 @@ class VDJdbImport(DataImport):
         df = VDJdbImport.preprocess_dataframe(df, params)
 
         if params.paired:
-            sequences = VDJdbImport.import_paired_sequences(path)
+            sequences = VDJdbImport.import_receptors(df, params)
         else:
             sequences = df.apply(ImportHelper.import_sequence, metadata_columns=params.metadata_columns, axis=1).values
 
         return sequences
 
-
     @staticmethod
-    def import_paired_sequences(path) -> List[Receptor]:
-        columns = VDJdbImport.COLUMNS + list(VDJdbImport.CUSTOM_COLUMNS.keys())
-        df = pd.read_csv(path, sep="\t", usecols=columns, dtype=str)
-        identifiers = df["complex.id"].unique()
+    def import_receptors(df, params) -> List[Receptor]:
+        identifiers = df["sequence_identifiers"].unique()
         receptors = []
 
         for identifier in identifiers:
-            receptor = VDJdbImport.import_receptor(df, identifier)
+            receptor = VDJdbImport.import_receptor(df, identifier, params)
             receptors.append(receptor)
 
         return receptors
 
+
     @staticmethod
-    def import_receptor(df, identifier) -> TCABReceptor:
-        alpha_row = df.loc[(df["complex.id"] == identifier) & (df["Gene"] == "TRA")].iloc[0]
-        beta_row = df.loc[(df["complex.id"] == identifier) & (df["Gene"] == "TRB")].iloc[0]
+    def import_receptor(df, identifier, params) -> Receptor:
+        alpha_row = df.loc[(df["sequence_identifiers"] == identifier) & (df["chains"] == "TRA")].iloc[0]
+        beta_row = df.loc[(df["sequence_identifiers"] == identifier) & (df["chains"] == "TRB")].iloc[0]
 
-        alpha = VDJdbImport.import_sequence(alpha_row)
-        beta = VDJdbImport.import_sequence(beta_row)
+        alpha = ImportHelper.import_sequence(alpha_row, metadata_columns=params.metadata_columns)
+        beta = ImportHelper.import_sequence(beta_row, metadata_columns=params.metadata_columns)
 
+
+        # todo fix this part make flexible ab/else...
         return TCABReceptor(alpha=alpha,
                             beta=beta,
                             identifier=identifier,
                             metadata={**beta.metadata.custom_params})
 
-    @staticmethod
-    def import_all_sequences(path) -> ReceptorSequenceList:
-        columns = VDJdbImport.COLUMNS + list(VDJdbImport.CUSTOM_COLUMNS.keys())
-        df = pd.read_csv(path, sep="\t", usecols=columns)
-        sequences = df.apply(VDJdbImport.import_sequence, axis=1).values
-        return sequences
-
-    @staticmethod
-    def import_sequence(row):
-        metadata = SequenceMetadata(v_gene=str(row["V"]) if "V" in row else None,
-                                    j_gene=str(row["J"]) if "J" in row else None,
-                                    chain=str(row["Gene"])[-1] if "Gene" in row else None,
-                                    region_type="CDR3",
-                                    custom_params={VDJdbImport.CUSTOM_COLUMNS[key]: row[key]
-                                                   for key in VDJdbImport.CUSTOM_COLUMNS})
-        sequence = ReceptorSequence(amino_acid_sequence=row["CDR3"], metadata=metadata, identifier=str(row["complex.id"]))
-        return sequence

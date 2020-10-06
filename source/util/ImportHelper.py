@@ -202,6 +202,16 @@ class ImportHelper:
             pickle.dump(items[:sequence_file_size], file)
 
     @staticmethod
+    def parse_adaptive_germline_to_imgt(dataframe):
+        gene_name_replacement = pd.read_csv(
+            EnvironmentSettings.root_path + "source/IO/dataset_import/conversion/imgt_adaptive_conversion.csv")
+        gene_name_replacement = dict(zip(gene_name_replacement.Adaptive, gene_name_replacement.IMGT))
+
+        germline_value_replacement = {**{"TCRB": "TRB", "TCRA": "TRA"}, **{("0" + str(i)): str(i) for i in range(10)}}
+
+        return ImportHelper.parse_germline(dataframe, gene_name_replacement, germline_value_replacement)
+
+    @staticmethod
     def parse_germline(df: pd.DataFrame, gene_name_replacement: dict, germline_value_replacement: dict):
 
         if all(item in df.columns for item in ["v_genes", "j_genes"]):
@@ -219,16 +229,6 @@ class ImportHelper:
             df["j_alleles"] = df['j_genes'].str.cat(df['j_alleles'], sep=Constants.ALLELE_DELIMITER)
 
         return df
-
-    @staticmethod
-    def parse_adaptive_germline_to_imgt(dataframe):
-        gene_name_replacement = pd.read_csv(
-            EnvironmentSettings.root_path + "source/IO/dataset_import/conversion/imgt_adaptive_conversion.csv")
-        gene_name_replacement = dict(zip(gene_name_replacement.Adaptive, gene_name_replacement.IMGT))
-
-        germline_value_replacement = {**{"TCRB": "TRB", "TCRA": "TRA"}, **{("0" + str(i)): str(i) for i in range(10)}}
-
-        return ImportHelper.parse_germline(dataframe, gene_name_replacement, germline_value_replacement)
 
     @staticmethod
     def prepare_frame_type_list(params: DatasetImportParams) -> list:
@@ -267,7 +267,7 @@ class ImportHelper:
         return df[column_name].apply(lambda gene_col: gene_col.rsplit("*", maxsplit=1)[0])
 
     @staticmethod
-    def import_sequence(row, metadata_columns=[]):
+    def import_sequence(row, metadata_columns=[]) -> ReceptorSequence:
         metadata = SequenceMetadata(v_gene=str(row["v_genes"]) if "v_genes" in row else None,
                                     j_gene=str(row["j_genes"]) if "j_genes" in row else None,
                                     chain=row["chains"] if "chains" in row else None,
