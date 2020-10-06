@@ -55,12 +55,12 @@ class ImportHelper:
 
 
     @staticmethod
-    def import_repertoire_dataset(preprocess_repertoire_func, params: DatasetImportParams, dataset_name: str) -> RepertoireDataset:
+    def import_repertoire_dataset(preprocess_repertoire_df_func, params: DatasetImportParams, dataset_name: str) -> RepertoireDataset:
         """
         Function to create a dataset from the metadata and a list of repertoire files and exports dataset pickle file
 
         Arguments:
-            preprocess_repertoire_func: function which should preprocess a repertoire given:
+            preprocess_repertoire_df_func: function which should preprocess a dataframe of sequences given:
                 the metadata row for the repertoire,
                 params object of DatasetImportParams class with path, result path, and other info for import
             params: instance of DatasetImportParams class which includes information on path, columns, result path etc.
@@ -71,7 +71,7 @@ class ImportHelper:
 
         PathBuilder.build(params.result_path+"repertoires/")
 
-        arguments = [(preprocess_repertoire_func, row, params) for index, row in metadata.iterrows()]
+        arguments = [(preprocess_repertoire_df_func, row, params) for index, row in metadata.iterrows()]
         with Pool(params.batch_size) as pool:
             repertoires = pool.starmap(ImportHelper.load_repertoire, arguments)
 
@@ -97,9 +97,9 @@ class ImportHelper:
         return metadata_filename
 
     @staticmethod
-    def load_repertoire(preprocess_repertoire_func, metadata, params: DatasetImportParams):
+    def load_repertoire(preprocess_sequence_df_func, metadata, params: DatasetImportParams):
 
-        dataframe = preprocess_repertoire_func(metadata, params)
+        dataframe = preprocess_sequence_df_func(metadata, params)
         sequence_lists = {field: dataframe[field].values.tolist() for field in Repertoire.FIELDS if field in dataframe.columns}
         sequence_lists["custom_lists"] = {field: dataframe[field].values.tolist()
                                           for field in list(set(dataframe.columns) - set(Repertoire.FIELDS))}
@@ -114,19 +114,25 @@ class ImportHelper:
         filepath = f"{params.path}{metadata['filename']}"
 
         try:
-            if alternative_load_func:
-                df = alternative_load_func(filepath, params)
-            else:
-                df = pd.read_csv(filepath, sep=params.separator, iterator=False, usecols=params.columns_to_load, dtype=str)
-
-            if hasattr(params, "column_mapping") and params.column_mapping is not None:
-                df.rename(columns=params.column_mapping, inplace=True)
-
-            df = ImportHelper.standardize_none_values(df)
+            df = ImportHelper.load_sequence_dataframe(filepath, params, alternative_load_func)
         except Exception as ex:
             raise Exception(f"{ex}\n\nDatasetImport: an error occurred while importing a dataset while parsing the file: {filepath}.\n"
                             f"The parameters used for import are {params}.\nFor technical description of the error, see the log above."
                             f" For details on how to specify the dataset import, see the documentation.")
+
+        return df
+
+    @staticmethod
+    def load_sequence_dataframe(filepath, params, alternative_load_func=None):
+        if alternative_load_func:
+            df = alternative_load_func(filepath, params)
+        else:
+            df = pd.read_csv(filepath, sep=params.separator, iterator=False, usecols=params.columns_to_load, dtype=str)
+
+        if hasattr(params, "column_mapping") and params.column_mapping is not None:
+            df.rename(columns=params.column_mapping, inplace=True)
+
+        df = ImportHelper.standardize_none_values(df)
 
         return df
 
