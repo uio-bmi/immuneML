@@ -1,8 +1,10 @@
 import os
 import pickle
+import warnings
 from glob import glob
 from multiprocessing.pool import Pool
 
+from typing import List
 import numpy as np
 import pandas as pd
 
@@ -12,8 +14,13 @@ from source.IO.dataset_import.PickleImport import PickleImport
 from source.data_model.dataset.ReceptorDataset import ReceptorDataset
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.dataset.SequenceDataset import SequenceDataset
+from source.data_model.receptor.BCReceptor import BCReceptor
+from source.data_model.receptor.ChainPair import ChainPair
+from source.data_model.receptor.Receptor import Receptor
 from source.data_model.receptor.RegionDefinition import RegionDefinition
 from source.data_model.receptor.RegionType import RegionType
+from source.data_model.receptor.TCABReceptor import TCABReceptor
+from source.data_model.receptor.TCGDReceptor import TCGDReceptor
 from source.data_model.receptor.receptor_sequence.Chain import Chain
 from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.data_model.receptor.receptor_sequence.SequenceFrameType import SequenceFrameType
@@ -281,3 +288,58 @@ class ImportHelper:
                                     metadata=metadata)
 
         return sequence
+
+    @staticmethod
+    def import_receptors(df, params) -> List[Receptor]:
+        identifiers = df["sequence_identifiers"].unique()
+        all_receptors = []
+
+        for identifier in identifiers:
+            receptors = ImportHelper.import_receptors_for_id(df, identifier, params)
+            all_receptors.extend(receptors)
+
+        return all_receptors
+
+
+    @staticmethod
+    def import_receptors_for_id(df, identifier, params) -> List[Receptor]:
+        first_row = df.loc[(df["sequence_identifiers"] == identifier) & (df["chains"] == params.receptor_chains.value[0])]
+        second_row = df.loc[(df["sequence_identifiers"] == identifier) & (df["chains"] == params.receptor_chains.value[1])]
+
+        for i, row in enumerate([first_row, second_row]):
+            if row.shape[0] > 1:
+                warnings.warn(f"Multiple {params.receptor_chains.value[i]} chains found for receptor with identifier {identifier}, only the first entry will be loaded")
+            elif row.shape[0] == 0:
+                warnings.warn(f"Missing {params.receptor_chains.value[i]} chain for receptor with identifier {identifier}, this receptor will be omitted.")
+                return []
+
+        # todo: add 'import all' functionality like IRIS import, to handle dual chains (all receptors / all chains / just one / different chain combos??)
+
+        return [ImportHelper.build_receptor_from_rows(first_row.iloc[0], second_row.iloc[0], identifier, params)]
+
+
+    @staticmethod
+    def build_receptor_from_rows(first_row, second_row, identifier, params):
+        first_sequence = ImportHelper.import_sequence(first_row, metadata_columns=params.metadata_columns)
+        second_sequence = ImportHelper.import_sequence(second_row, metadata_columns=params.metadata_columns)
+
+        if params.receptor_chains == ChainPair.TRA_TRB:
+            receptor = TCABReceptor(alpha=first_sequence,
+                                    beta=second_sequence,
+                                    identifier=identifier,
+                                    metadata={**second_sequence.metadata.custom_params})
+        elif params.receptor_chains == ChainPair.TRG_TRD:
+            receptor = TCGDReceptor(gamma=first_sequence,
+                                    delta=second_sequence,
+                                    identifier=identifier,
+                                    metadata={**second_sequence.metadata.custom_params})
+        elif params.receptor_chains == ChainPair.IGH_IGK:
+            receptor = BCReceptor(heavy=first_sequence,
+                                  light=second_sequence,
+                                  identifier=identifier,
+                                  metadata={**first_sequence.metadata.custom_params})
+        else:
+            raise NotImplementedError(f"ImportHelper: {params.receptor_chains} chain pair is not supported.")
+
+        return receptor
+

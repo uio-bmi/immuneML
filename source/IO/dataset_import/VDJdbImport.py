@@ -1,12 +1,9 @@
 import pandas as pd
-from typing import List
 
 
 from source.IO.dataset_import.DataImport import DataImport
 from source.IO.dataset_import.DatasetImportParams import DatasetImportParams
 from source.data_model.dataset.Dataset import Dataset
-from source.data_model.receptor.Receptor import Receptor
-from source.data_model.receptor.TCABReceptor import TCABReceptor
 from source.data_model.receptor.receptor_sequence.SequenceFrameType import SequenceFrameType
 from source.util.ImportHelper import ImportHelper
 
@@ -42,7 +39,7 @@ class VDJdbImport(DataImport):
                     complex.id: sequence_identifiers
                     Gene: chains
                 region_type: CDR3
-                separator: "\\t"
+                separator: "\\t" # todo look at this after refactoring
 
     """
     COLUMNS = ["V", "J", "Gene", "CDR3", "complex.id"]
@@ -82,36 +79,10 @@ class VDJdbImport(DataImport):
         df = VDJdbImport.preprocess_dataframe(df, params)
 
         if params.paired:
-            sequences = VDJdbImport.import_receptors(df, params)
+            sequences = ImportHelper.import_receptors(df, params)
         else:
             sequences = df.apply(ImportHelper.import_sequence, metadata_columns=params.metadata_columns, axis=1).values
 
         return sequences
 
-    @staticmethod
-    def import_receptors(df, params) -> List[Receptor]:
-        identifiers = df["sequence_identifiers"].unique()
-        receptors = []
-
-        for identifier in identifiers:
-            receptor = VDJdbImport.import_receptor(df, identifier, params)
-            receptors.append(receptor)
-
-        return receptors
-
-
-    @staticmethod
-    def import_receptor(df, identifier, params) -> Receptor:
-        alpha_row = df.loc[(df["sequence_identifiers"] == identifier) & (df["chains"] == "TRA")].iloc[0]
-        beta_row = df.loc[(df["sequence_identifiers"] == identifier) & (df["chains"] == "TRB")].iloc[0]
-
-        alpha = ImportHelper.import_sequence(alpha_row, metadata_columns=params.metadata_columns)
-        beta = ImportHelper.import_sequence(beta_row, metadata_columns=params.metadata_columns)
-
-
-        # todo fix this part make flexible ab/else...
-        return TCABReceptor(alpha=alpha,
-                            beta=beta,
-                            identifier=identifier,
-                            metadata={**beta.metadata.custom_params})
 
