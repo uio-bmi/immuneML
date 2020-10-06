@@ -281,7 +281,7 @@ class ImportHelper:
                                     region_type=row["region_type"] if "region_type" in row else None,
                                     count=int(row["counts"]) if "counts" in row else None,
                                     frame_type=row["frame_types"] if "frame_type" in row else None,
-                                    custom_params={custom_col: row[custom_col] for custom_col in metadata_columns if custom_col in row})
+                                    custom_params={custom_col: row[custom_col] for custom_col in metadata_columns if custom_col in row} if metadata_columns is not None else {})
         sequence = ReceptorSequence(amino_acid_sequence=str(row["sequence_aas"]) if "sequence_aas" in row else None,
                                     nucleotide_sequence=str(row["sequences"]) if "sequences" in row else None,
                                     identifier=str(row["sequence_identifiers"]) if "sequence_identifiers" in row else None,
@@ -291,7 +291,7 @@ class ImportHelper:
 
     @staticmethod
     def import_receptors(df, params) -> List[Receptor]:
-        identifiers = df["sequence_identifiers"].unique()
+        identifiers = df["receptor_identifiers"].unique()
         all_receptors = []
 
         for identifier in identifiers:
@@ -303,8 +303,8 @@ class ImportHelper:
 
     @staticmethod
     def import_receptors_for_id(df, identifier, params) -> List[Receptor]:
-        first_row = df.loc[(df["sequence_identifiers"] == identifier) & (df["chains"] == params.receptor_chains.value[0])]
-        second_row = df.loc[(df["sequence_identifiers"] == identifier) & (df["chains"] == params.receptor_chains.value[1])]
+        first_row = df.loc[(df["receptor_identifiers"] == identifier) & (df["chains"] == params.receptor_chains.value[0])]
+        second_row = df.loc[(df["receptor_identifiers"] == identifier) & (df["chains"] == params.receptor_chains.value[1])]
 
         for i, row in enumerate([first_row, second_row]):
             if row.shape[0] > 1:

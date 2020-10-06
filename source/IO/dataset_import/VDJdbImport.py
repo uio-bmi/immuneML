@@ -79,6 +79,7 @@ class VDJdbImport(DataImport):
         df = VDJdbImport.preprocess_dataframe(df, params)
 
         if params.paired:
+            df["receptor_identifiers"] = df["sequence_identifiers"]
             sequences = ImportHelper.import_receptors(df, params)
         else:
             sequences = df.apply(ImportHelper.import_sequence, metadata_columns=params.metadata_columns, axis=1).values

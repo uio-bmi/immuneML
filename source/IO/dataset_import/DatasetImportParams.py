@@ -10,13 +10,12 @@ class DatasetImportParams:
     is_repertoire: bool = True
     path: str = None
     metadata_file: str = None
-    result_path: str = None
+    result_path: str = None  # rename to cache_path?
     columns_to_load: list = None
     separator: str = None
     column_mapping: dict = None
     region_type: RegionType = None
     region_definition: RegionDefinition = None
-    file_size: int = None
     import_productive: bool = None
     import_with_stop_codon: bool = None
     import_out_of_frame: bool = None

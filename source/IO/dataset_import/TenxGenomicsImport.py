@@ -1,9 +1,9 @@
 from source.IO.dataset_import.DataImport import DataImport
 from source.IO.dataset_import.DatasetImportParams import DatasetImportParams
-from source.IO.sequence_import.TenxGenomicsSequenceImport import TenxGenomicsSequenceImport
 from source.data_model.dataset.Dataset import Dataset
+from source.data_model.receptor.receptor_sequence.SequenceFrameType import SequenceFrameType
 from source.util.ImportHelper import ImportHelper
-
+import pandas as pd
 
 class TenxGenomicsImport(DataImport):
     """
@@ -44,33 +44,45 @@ class TenxGenomicsImport(DataImport):
     @staticmethod
     def import_dataset(params: dict, dataset_name: str) -> Dataset:
         tenx_params = DatasetImportParams.build_object(**params)
-        if tenx_params.metadata_file is not None:
-            dataset = TenxGenomicsImport.load_repertoire_dataset(tenx_params, dataset_name)
-        else:
-            dataset = TenxGenomicsImport.load_sequence_dataset(tenx_params, dataset_name)
+
+        dataset = ImportHelper.load_dataset_if_exists(params, tenx_params, dataset_name)
+
+        if dataset is None:
+            if tenx_params.is_repertoire:
+                dataset = ImportHelper.import_repertoire_dataset(TenxGenomicsImport.preprocess_repertoire, tenx_params, dataset_name)
+            else:
+                dataset = ImportHelper.import_sequence_dataset(TenxGenomicsImport.import_items, tenx_params, dataset_name)
         return dataset
-
-
-    @staticmethod
-    def load_repertoire_dataset(params: DatasetImportParams, dataset_name: str) -> Dataset:
-        return ImportHelper.import_repertoire_dataset(TenxGenomicsImport.preprocess_repertoire, params, dataset_name)
-
-    @staticmethod
-    def load_sequence_dataset(params: DatasetImportParams, dataset_name: str) -> Dataset:
-        return ImportHelper.import_sequence_dataset(TenxGenomicsSequenceImport.import_items, params, dataset_name,
-                                                    import_productive=params.import_productive, region_type=params.region_type,
-                                                    region_definition=params.region_definition, column_mapping=params.column_mapping,
-                                                    paired=params.paired)
 
 
     @staticmethod
     def preprocess_repertoire(metadata: dict, params: DatasetImportParams):
         df = ImportHelper.load_repertoire_as_dataframe(metadata, params)
-
-        if params.import_productive:
-            df = df[df.productive == "True"]
-
-        ImportHelper.junction_to_cdr3(df, params.region_definition, params.region_type)
-
+        df = TenxGenomicsImport.preprocess_dataframe(df, params)
         return df
 
+    @staticmethod
+    def preprocess_dataframe(df: pd.DataFrame, params: DatasetImportParams):
+        df["frame_types"] = SequenceFrameType.IN.name # todo we only know productive/unproductive, not specific frame type
+
+        if params.import_productive:
+            df = df[df.productive.eq("True")]
+        else:
+            df.loc[df["productive"].eq("False"), "frame_types"] = SequenceFrameType.OUT.name
+
+        ImportHelper.junction_to_cdr3(df, params.region_definition, params.region_type)
+        return df
+
+
+    @staticmethod
+    def import_items(path, params):
+        df = ImportHelper.load_sequence_dataframe(path, params)
+        df = TenxGenomicsImport.preprocess_dataframe(df, params)
+
+        if params.paired:
+            df["receptor_identifiers"] = df["cell_ids"]
+            sequences = ImportHelper.import_receptors(df, params)
+        else:
+            sequences = df.apply(ImportHelper.import_sequence, axis=1).values
+
+        return sequences

@@ -1,6 +1,4 @@
 import_productive: True # whether to only import productive sequences
-import_with_stop_codon: null # no effect as this info is not available in 10xGenomics files
-import_out_of_frame: null # no effect as this info is not available in 10xGenomics files
 region_type: "CDR3" # which part of the sequence to import by default
 region_definition: "IMGT" # which CDR3 definition to use - IMGT option means removing first and last amino acid as 10xGenomics uses IMGT junction as CDR3
 separator: "," # column separator
