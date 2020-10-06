@@ -169,7 +169,7 @@ class ImportHelper:
     #     return dataset
 
     @staticmethod #
-    def import_sequence_dataset(sequence_import_func, params, dataset_name: str):
+    def import_sequence_dataset(sequence_import_func, params, dataset_name: str, *args, **kwargs): # todo remove args kwargs
         PathBuilder.build(params.result_path)
 
         filenames = [params.path] if os.path.isfile(params.path) else glob(params.path + "*.tsv")
@@ -180,7 +180,7 @@ class ImportHelper:
         items = None
 
         for index, filename in enumerate(filenames):
-            new_items = sequence_import_func(filename, params)
+            new_items = sequence_import_func(filename, params, *args, **kwargs)
             items = np.append(items, new_items) if items is not None else new_items
 
             while len(items) > params.sequence_file_size or (index == len(filenames) - 1 and len(items) > 0):
