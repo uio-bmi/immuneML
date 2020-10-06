@@ -4,6 +4,7 @@ from pandas import DataFrame
 from source.IO.dataset_import.DataImport import DataImport
 from source.IO.dataset_import.DatasetImportParams import DatasetImportParams
 from source.data_model.dataset.Dataset import Dataset
+from source.data_model.receptor.receptor_sequence.SequenceFrameType import SequenceFrameType
 from source.util.ImportHelper import ImportHelper
 
 
@@ -50,7 +51,7 @@ class AIRRImport(DataImport):
             if airr_params.is_repertoire:
                 dataset = ImportHelper.import_repertoire_dataset(AIRRImport.preprocess_repertoire, airr_params, dataset_name)
             else:
-                dataset = ImportHelper.import_sequence_dataset(AIRRImport.import_all_sequences, airr_params, dataset_name)
+                dataset = ImportHelper.import_sequence_dataset(AIRRImport.import_items, airr_params, dataset_name)
 
         return dataset
 
@@ -71,14 +72,15 @@ class AIRRImport(DataImport):
             - if no chain column was specified, the chain is extracted from the v gene name
             - the allele information is removed from the V and J genes
         """
-        if params.import_with_stop_codon is False and "stop_codon" in df.columns:  # todo move to importhelper? this is general??
-            df = df[~df["stop_codon"]]
-        if params.import_out_of_frame is False and "vj_in_frame" in df.columns:
-            df = df[df["vj_in_frame"]]
-        if params.import_productive is False and "productive" in df.columns:
-            df = df[~df["productive"]]
-        if params.import_with_stop_codon is False and params.import_out_of_frame is False:
-            df = df[df["productive"]]
+        df["frame_type"] = SequenceFrameType.OUT.name
+        df.loc[df["productive"], "frame_types"] = SequenceFrameType.IN.name
+        if "vj_in_frame" in df.columns:
+            df.loc[df["vj_in_frame"], "frame_types"] = SequenceFrameType.IN.name
+        if "stop_codon" in df.columns:
+            df.loc[df["stop_codon"], "frame_types"] = SequenceFrameType.STOP.name
+
+        frame_type_list = ImportHelper.prepare_frame_type_list(params)
+        df = df[df["frame_types"].isin(frame_type_list)]
 
         ImportHelper.junction_to_cdr3(df, params.region_definition, params.region_type)
 
@@ -92,7 +94,7 @@ class AIRRImport(DataImport):
 
 
     @staticmethod
-    def import_all_sequences(path, params):
+    def import_items(path, params):
         df = ImportHelper.load_sequence_dataframe(path, params, alternative_load_func=AIRRImport._load_rearrangement_wrapper)
         df = AIRRImport.preprocess_dataframe(df, params)
 

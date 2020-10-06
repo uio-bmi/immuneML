@@ -3,6 +3,11 @@ column_mapping:
   J: j_genes
   CDR3: sequence_aas
   complex.id: sequence_identifiers
+  Gene: chains
+metadata_columns:
+  - "Epitope"
+  - "Epitope gene"
+  - "Epitope species"
 paired: True # whether to import_dataset paired data: if true returns ReceptorDataset, and if false returns SequenceDataset
 region_type: CDR3
 region_definition: IMGT

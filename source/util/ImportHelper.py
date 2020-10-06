@@ -234,11 +234,11 @@ class ImportHelper:
     def prepare_frame_type_list(params: DatasetImportParams) -> list:
         frame_type_list = []
         if params.import_productive:
-            frame_type_list.append("In")
+            frame_type_list.append(SequenceFrameType.IN.name)
         if params.import_out_of_frame:
-            frame_type_list.append("Out")
+            frame_type_list.append(SequenceFrameType.OUT.name)
         if params.import_with_stop_codon:
-            frame_type_list.append("Stop")
+            frame_type_list.append(SequenceFrameType.STOP.name)
         return frame_type_list
 
     @staticmethod
@@ -267,28 +267,17 @@ class ImportHelper:
         return df[column_name].apply(lambda gene_col: gene_col.rsplit("*", maxsplit=1)[0])
 
     @staticmethod
-    def import_sequence(row):
-        if "stop_codon" in row and row["stop_codon"]:
-            frame_type = SequenceFrameType.STOP.name
-        elif row["productive"]:
-            frame_type = SequenceFrameType.IN.name
-        elif "vj_in_frame" in row and row["vj_in_frame"]:
-            frame_type = SequenceFrameType.IN.name
-        else:
-            frame_type = SequenceFrameType.OUT.name
-
+    def import_sequence(row, metadata_columns=[]):
         metadata = SequenceMetadata(v_gene=str(row["v_genes"]) if "v_genes" in row else None,
                                     j_gene=str(row["j_genes"]) if "j_genes" in row else None,
                                     chain=row["chains"] if "chains" in row else None,
                                     region_type=row["region_type"] if "region_type" in row else None,
                                     count=int(row["counts"]) if "counts" in row else None,
-                                    frame_type=frame_type,
-                                    custom_params={"rev_comp": row["rev_comp"]} if "rev_comp" in row else {})
+                                    frame_type=row["frame_types"] if "frame_type" in row else None,
+                                    custom_params={custom_col: row[custom_col] for custom_col in metadata_columns if custom_col in row})
         sequence = ReceptorSequence(amino_acid_sequence=str(row["sequence_aas"]) if "sequence_aas" in row else None,
                                     nucleotide_sequence=str(row["sequences"]) if "sequences" in row else None,
                                     identifier=str(row["sequence_identifiers"]) if "sequence_identifiers" in row else None,
                                     metadata=metadata)
-
-        # todo custom params? epitope etcetera??? --> see VDJdbImport
 
         return sequence

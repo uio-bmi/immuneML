@@ -4,6 +4,7 @@ from unittest import TestCase
 import pandas as pd
 
 from source.IO.dataset_import.VDJdbImport import VDJdbImport
+from source.dsl.DefaultParamsLoader import DefaultParamsLoader
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.util.PathBuilder import PathBuilder
 
@@ -22,15 +23,19 @@ class TestVDJdbLoader(TestCase):
         with open(path + "receptors.tsv", "w") as file:
             file.writelines(file_content)
 
-        dataset = VDJdbImport.import_dataset({"is_repertoire": False, "result_path": path, "paired": False, "path": path, "sequence_file_size": 1}, "vdjdb_seq_dataset")
+        default_params = DefaultParamsLoader.load(EnvironmentSettings.default_params_path + "datasets/", "vdjdb")
+
+        dataset = VDJdbImport.import_dataset({"is_repertoire": False, "result_path": path, "paired": False, "path": path, "sequence_file_size": 1,
+                                              "column_mapping": default_params["column_mapping"], "metadata_columns": default_params["metadata_columns"],
+                                              "separator": "\t"}, "vdjdb_seq_dataset")
 
         self.assertEqual(4, dataset.get_example_count())
         self.assertEqual(4, len(dataset.get_filenames()))
 
         for sequence in dataset.get_data():
-            self.assertTrue(sequence.metadata.custom_params["epitope_species"] in ["EBV", "CMV"])   # todo change this to a common thing between Receptor & Sequence?
-            self.assertTrue(sequence.metadata.custom_params["epitope"] in ["AVFDRKSDAK", "KLGGALQAK"])
-            self.assertTrue(sequence.metadata.custom_params["epitope_gene"] in ["EBNA4", "IE1"])
+            self.assertTrue(sequence.metadata.custom_params["Epitope species"] in ["EBV", "CMV"])   # todo change this to a common thing between Receptor & Sequence?
+            self.assertTrue(sequence.metadata.custom_params["Epitope"] in ["AVFDRKSDAK", "KLGGALQAK"])
+            self.assertTrue(sequence.metadata.custom_params["Epitope gene"] in ["EBNA4", "IE1"])
 
         shutil.rmtree(path)
 
@@ -47,7 +52,12 @@ class TestVDJdbLoader(TestCase):
         with open(path + "receptors.tsv", "w") as file:
             file.writelines(file_content)
 
-        dataset = VDJdbImport.import_dataset({"is_repertoire": False, "result_path": path, "paired": True, "path": path, "sequence_file_size": 1}, "vdjdb_rec_dataset")
+        default_params = DefaultParamsLoader.load(EnvironmentSettings.default_params_path + "datasets/", "vdjdb")
+
+        dataset = VDJdbImport.import_dataset({"is_repertoire": False, "result_path": path, "paired": True, "path": path, "sequence_file_size": 1,
+                                              "column_mapping": default_params["column_mapping"],
+                                              "metadata_columns": default_params["metadata_columns"],
+                                              "separator": "\t"}, "vdjdb_rec_dataset")
 
         self.assertEqual(2, dataset.get_example_count())
         self.assertEqual(2, len(dataset.get_filenames()))
@@ -82,13 +92,11 @@ class TestVDJdbLoader(TestCase):
 
         pd.DataFrame(metadata).to_csv(path + "metadata.csv")
 
+        default_params = DefaultParamsLoader.load(EnvironmentSettings.default_params_path + "datasets/", "vdjdb")
+
         dataset = VDJdbImport.import_dataset({"is_repertoire": True, "result_path": path, "metadata_file": path + "metadata.csv", "path": path,
-                                              "column_mapping": {
-                                                  "V": "v_genes",
-                                                  "J": "j_genes",
-                                                  "CDR3": "sequence_aas",
-                                                  "complex.id": "sequence_identifiers"
-                                              }, "separator": "\t"}, "vdjdb_rep_dataset")
+                                              "column_mapping": default_params["column_mapping"], "separator": "\t"}, "vdjdb_rep_dataset")
+
 
         self.assertEqual(number_of_repertoires, dataset.get_example_count())
         self.assertEqual(number_of_repertoires, len(dataset.get_data()))

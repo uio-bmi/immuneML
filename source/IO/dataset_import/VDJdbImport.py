@@ -9,6 +9,7 @@ from source.data_model.receptor.Receptor import Receptor
 from source.data_model.receptor.TCABReceptor import TCABReceptor
 from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.data_model.receptor.receptor_sequence.ReceptorSequenceList import ReceptorSequenceList
+from source.data_model.receptor.receptor_sequence.SequenceFrameType import SequenceFrameType
 from source.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
 from source.util.ImportHelper import ImportHelper
 
@@ -42,6 +43,7 @@ class VDJdbImport(DataImport):
                     J: j_genes
                     CDR3: sequence_aas
                     complex.id: sequence_identifiers
+                    Gene: chains
                 region_type: CDR3
                 separator: "\\t"
 
@@ -53,34 +55,42 @@ class VDJdbImport(DataImport):
     @staticmethod
     def import_dataset(params: dict, dataset_name: str) -> Dataset:
         vdjdb_params = DatasetImportParams.build_object(**params)
-        if vdjdb_params.is_repertoire:
-            dataset = VDJdbImport.load_repertoire_dataset(vdjdb_params, dataset_name)
-        else:
-            dataset = VDJdbImport.load_sequence_dataset(vdjdb_params, dataset_name)
+
+        dataset = ImportHelper.load_dataset_if_exists(params, vdjdb_params, dataset_name)
+
+        if dataset is None:
+            if vdjdb_params.is_repertoire:
+                dataset = ImportHelper.import_repertoire_dataset(VDJdbImport.preprocess_repertoire, vdjdb_params, dataset_name)
+            else:
+                dataset = ImportHelper.import_sequence_dataset(VDJdbImport.import_items, vdjdb_params, dataset_name)
         return dataset
 
-    @staticmethod
-    def load_repertoire_dataset(params: DatasetImportParams, dataset_name: str) -> Dataset:
-        return ImportHelper.import_repertoire_dataset(VDJdbImport.preprocess_repertoire, params, dataset_name)
 
     @staticmethod
     def preprocess_repertoire(metadata: dict, params: DatasetImportParams) -> dict:
-        return ImportHelper.load_repertoire_as_dataframe(metadata, params)
+        df = ImportHelper.load_repertoire_as_dataframe(metadata, params)    # todo: preprocessing / improt stop codon / etc???
+        df = VDJdbImport.preprocess_dataframe(df, params)
+        return df
+
 
     @staticmethod
-    def load_sequence_dataset(params: DatasetImportParams, dataset_name: str) -> Dataset:
-        return ImportHelper.import_sequence_dataset(VDJdbImport.import_items, params, dataset_name) #, paired=params.paired)
-
+    def preprocess_dataframe(df: pd.DataFrame, params: DatasetImportParams):
+        df["frame_types"] = SequenceFrameType.IN.name
+        return df
 
 
     @staticmethod
     def import_items(path, params: DatasetImportParams):
+        df = ImportHelper.load_sequence_dataframe(path, params)
+        df = VDJdbImport.preprocess_dataframe(df, params)
+
         if params.paired:
             sequences = VDJdbImport.import_paired_sequences(path)
         else:
-            sequences = VDJdbImport.import_all_sequences(path)
+            sequences = df.apply(ImportHelper.import_sequence, metadata_columns=params.metadata_columns, axis=1).values
 
         return sequences
+
 
     @staticmethod
     def import_paired_sequences(path) -> List[Receptor]:

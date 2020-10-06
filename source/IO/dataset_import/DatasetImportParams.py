@@ -22,8 +22,10 @@ class DatasetImportParams:
     import_out_of_frame: bool = None
     paired: bool = None
     chains: ChainPair = None
+    metadata_columns: list = None
     batch_size: int = 1
     sequence_file_size: int = 50000
+
 
     @classmethod
     def build_object(cls, region_type: str = None, region_definition: str = None, chains: str = None, **kwargs):
