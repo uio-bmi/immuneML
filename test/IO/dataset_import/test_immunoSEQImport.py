@@ -2,6 +2,7 @@ import shutil
 from unittest import TestCase
 
 from source.IO.dataset_import.ImmunoSEQImport import ImmunoSEQImport
+from source.dsl.DefaultParamsLoader import DefaultParamsLoader
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.util.PathBuilder import PathBuilder
 
@@ -42,22 +43,13 @@ AAGAAGCTCCTTCTCAGTGACTCTGGCTTCTATCTCTGTGCCTGGAGTGTACGTCCGGGCGCAGGGTACGAGCAGTACTT
 rep1.tsv,TRA,1234a,no"""
             )
 
-        dataset = ImmunoSEQImport.import_dataset({"result_path": path, "batch_size": 1, "region_type": "CDR3",
-                                                  "metadata_file": path + "metadata.csv", "path": path, "separator": '\t',
-                                                  "import_productive": True,
-                                                  "region_definition": "IMGT",
-                                                  "column_mapping": {
-                                                      "nucleotide": "sequences",
-                                                      "aminoAcid": "sequence_aas",
-                                                      "vGeneName": "v_genes",
-                                                      "jGeneName": "j_genes",
-                                                      "vGeneAllele": "v_alleles",
-                                                      "jGeneAllele": "j_alleles",
-                                                      "sequenceStatus": "frame_types",
-                                                      "vFamilyName": "v_subgroups",
-                                                      "jFamilyName": "j_subgroups",
-                                                      "count (templates / reads)": "counts"
-                                                  }}, "immunoseq_dataset")
+        params = DefaultParamsLoader.load(EnvironmentSettings.default_params_path + "datasets/", "immuno_seq")
+        params["is_repertoire"] = True
+        params["result_path"] = path
+        params["metadata_file"] = path + "metadata.csv"
+        params["path"] = path
+
+        dataset = ImmunoSEQImport.import_dataset(params, "immunoseq_dataset")
 
         self.assertEqual(1, dataset.get_example_count())
         for index, rep in enumerate(dataset.get_data()):

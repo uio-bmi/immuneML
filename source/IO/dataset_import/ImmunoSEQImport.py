@@ -2,8 +2,9 @@ from source.IO.dataset_import.DataImport import DataImport
 from source.IO.dataset_import.DatasetImportParams import DatasetImportParams
 from source.data_model.dataset.Dataset import Dataset
 from source.data_model.receptor.RegionDefinition import RegionDefinition
+from source.data_model.receptor.RegionType import RegionType
 from source.util.ImportHelper import ImportHelper
-
+import pandas as pd
 
 class ImmunoSEQImport(DataImport):
     """
@@ -39,19 +40,33 @@ class ImmunoSEQImport(DataImport):
     @staticmethod
     def import_dataset(params: dict, dataset_name: str) -> Dataset:
         immunoseq_params = DatasetImportParams.build_object(**params)
-        dataset = ImportHelper.import_or_load_imported(params, immunoseq_params, dataset_name,
-                                                       ImmunoSEQImport.preprocess_repertoire)
+
+        dataset = ImportHelper.load_dataset_if_exists(params, immunoseq_params, dataset_name)
+        if dataset is None:
+            if immunoseq_params.is_repertoire:
+                ImportHelper.import_repertoire_dataset(ImmunoSEQImport.preprocess_repertoire, immunoseq_params, dataset_name)
+            else:
+                raise NotImplementedError("ImmunoSEQImport sequence import not implemented")
+
         return dataset
+
 
     @staticmethod
     def preprocess_repertoire(metadata: dict, params: DatasetImportParams):
-
         df = ImportHelper.load_repertoire_as_dataframe(metadata, params)
+        df = ImmunoSEQImport.preprocess_dataframe(df, params)
+        return df
+
+
+    @staticmethod
+    def preprocess_dataframe(df: pd.DataFrame, params: DatasetImportParams):
+
+        df["frame_types"] =  df.frame_types.str.upper()
 
         frame_type_list = ImportHelper.prepare_frame_type_list(params)
         df = df[df["frame_types"].isin(frame_type_list)]
 
-        if params.region_definition == RegionDefinition.IMGT:
+        if params.region_definition == RegionDefinition.IMGT and params.region_type == RegionType.CDR3:
             if "sequences" in df.columns and "sequence_aas" in df.columns:
                 df = ImmunoSEQImport.extract_sequence_from_rearrangement(df, params.region_definition)
             elif "sequence_aas" in df.columns:
