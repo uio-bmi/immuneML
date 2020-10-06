@@ -65,13 +65,13 @@ class IRISImport(DataImport):
 
         chain_dups_to_process = ("1", "2") if params.import_dual_chains is True else ("1")
 
-        for chain in ("A", "B"):
+        for chain in ("TRA", "TRB"):
             for chain_dup in chain_dups_to_process:
                 subframe_dict = {"cell_ids": df["Clonotype ID"],
-                                               "sequence_aas": df[f"Chain: TR{chain} ({chain_dup})"],
-                                               "v_genes": df[f"TR{chain} - V gene ({chain_dup})"],
-                                               "j_genes": df[f"TR{chain} - J gene ({chain_dup})"],
-                                               "chains": Chain(chain).value}
+                                               "sequence_aas": df[f"Chain: {chain} ({chain_dup})"],
+                                               "v_genes": df[f"{chain} - V gene ({chain_dup})"],
+                                               "j_genes": df[f"{chain} - J gene ({chain_dup})"],
+                                               "chains": Chain.get_chain(chain).value}
                 if params.extra_columns_to_load is not None:
                     for extra_col in params.extra_columns_to_load:
                         subframe_dict[extra_col] = df[extra_col]

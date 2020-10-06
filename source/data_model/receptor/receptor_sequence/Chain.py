@@ -2,12 +2,12 @@ from enum import Enum
 
 
 class Chain(Enum):
-    ALPHA = "A"
-    BETA = "B"
-    GAMMA = "G"
-    DELTA = "D"
-    HEAVY = "H"
-    LIGHT = "L"
+    ALPHA = "TRA"
+    BETA = "TRB"
+    GAMMA = "TRG"
+    DELTA = "TRD"
+    HEAVY = "IGH"
+    LIGHT = "IGL"
 
     @staticmethod
     def get_chain(item: str):

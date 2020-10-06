@@ -113,7 +113,7 @@ class MatchedPairedReference(EncodingReport):
             rep_chains = repertoire.get_attribute("chains")
 
             for chain in all_chains:
-                chain_enum = Chain(chain[0].upper())
+                chain_enum = Chain.get_chain(chain[0].upper())
                 indices = rep_chains == chain_enum
                 results_df.loc[(results_df.subject_id == repertoire.metadata["subject_id"]) & (results_df.chain == chain),
                                'n_reads'] += np.sum(rep_counts[indices])
