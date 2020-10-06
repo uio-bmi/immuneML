@@ -15,6 +15,9 @@ from source.data_model.dataset.SequenceDataset import SequenceDataset
 from source.data_model.receptor.RegionDefinition import RegionDefinition
 from source.data_model.receptor.RegionType import RegionType
 from source.data_model.receptor.receptor_sequence.Chain import Chain
+from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
+from source.data_model.receptor.receptor_sequence.SequenceFrameType import SequenceFrameType
+from source.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
 from source.data_model.repertoire.Repertoire import Repertoire
 from source.environment.Constants import Constants
 from source.environment.EnvironmentSettings import EnvironmentSettings
@@ -26,7 +29,7 @@ class ImportHelper:
     DATASET_FORMAT = "iml_dataset"
 
     @staticmethod
-    def import_or_load_imported(params: dict, processed_params, dataset_name: str, preprocess_repertoire_func):
+    def import_or_load_repertoire_dataset(params: dict, processed_params, dataset_name: str, preprocess_repertoire_func):
 
         dataset_file = f"{processed_params.result_path}{dataset_name}.{ImportHelper.DATASET_FORMAT}"
 
@@ -211,4 +214,34 @@ class ImportHelper:
 
     @staticmethod
     def strip_alleles(df: pd.DataFrame, column_name):
+        '''
+        Removes alleles (everythin after the '*' character) from a column in the DataFrame
+        '''
         return df[column_name].apply(lambda gene_col: gene_col.rsplit("*", maxsplit=1)[0])
+
+    @staticmethod
+    def import_sequence(row):
+        if "stop_codon" in row and row["stop_codon"]:
+            frame_type = SequenceFrameType.STOP.name
+        elif row["productive"]:
+            frame_type = SequenceFrameType.IN.name
+        elif "vj_in_frame" in row and row["vj_in_frame"]:
+            frame_type = SequenceFrameType.IN.name
+        else:
+            frame_type = SequenceFrameType.OUT.name
+
+        metadata = SequenceMetadata(v_gene=str(row["v_genes"]) if "v_genes" in row else None,
+                                    j_gene=str(row["j_genes"]) if "j_genes" in row else None,
+                                    chain=row["chains"] if "chains" in row else None,
+                                    region_type=row["region_type"] if "region_type" in row else None,
+                                    count=int(row["counts"]) if "counts" in row else None,
+                                    frame_type=frame_type,
+                                    custom_params={"rev_comp": row["rev_comp"]} if "rev_comp" in row else {})
+        sequence = ReceptorSequence(amino_acid_sequence=str(row["sequence_aas"]) if "sequence_aas" in row else None,
+                                    nucleotide_sequence=str(row["sequences"]) if "sequences" in row else None,
+                                    identifier=str(row["sequence_identifiers"]) if "sequence_identifiers" in row else None,
+                                    metadata=metadata)
+
+        # todo custom params? epitope etcetera??? --> see VDJdbImport
+
+        return sequence

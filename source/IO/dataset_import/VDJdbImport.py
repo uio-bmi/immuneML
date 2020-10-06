@@ -61,8 +61,3 @@ class VDJdbImport(DataImport):
     @staticmethod
     def load_sequence_dataset(params: DatasetImportParams, dataset_name: str) -> Dataset:
         return ImportHelper.import_sequence_dataset(VDJdbSequenceImport.import_items, params, dataset_name, paired=params.paired)
-
-    # @staticmethod
-    # def store_items(dataset_filenames: list, items: list, file_size: int):
-    #     with open(dataset_filenames[-1], "wb") as file:
-    #         pickle.dump(items[:file_size], file)

@@ -55,7 +55,7 @@ rep2.tsv,2""")
         self.create_dumy_dataset(path, add_metadata=True)
 
         column_mapping = self.get_column_mapping()
-        params = {"result_path": path, "path": path, "metadata_file": path + "metadata.csv",
+        params = {"is_repertoire": True, "result_path": path, "path": path, "metadata_file": path + "metadata.csv",
                   "import_out_of_frame": False, "import_with_stop_codon": False,
                   "import_productive": True, "region_type": "CDR3",
                   "region_definition": "IMGT", "column_mapping": column_mapping,
@@ -82,11 +82,11 @@ rep2.tsv,2""")
         self.create_dumy_dataset(path, add_metadata=False)
 
         column_mapping = self.get_column_mapping()
-        params = {"result_path": path, "path": path,
+        params = {"is_repertoire": False, "result_path": path, "path": path,
                   "import_out_of_frame": False, "import_with_stop_codon": False,
                   "import_productive": True, "region_type": "CDR3",
                   "region_definition": "IMGT", "column_mapping": column_mapping,
-                  "separator": "\t", "file_size": 1}
+                  "separator": "\t", "sequence_file_size": 1}
 
         dataset = AIRRImport.import_dataset(params, "airr_sequence_dataset")
 

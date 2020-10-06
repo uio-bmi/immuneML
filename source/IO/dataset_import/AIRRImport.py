@@ -1,9 +1,14 @@
 import airr
+from pandas import DataFrame
+
 from source.IO.dataset_import.DataImport import DataImport
 from source.IO.dataset_import.DatasetImportParams import DatasetImportParams
 from source.data_model.dataset.Dataset import Dataset
+from source.data_model.receptor.RegionDefinition import RegionDefinition
+from source.data_model.receptor.RegionType import RegionType
+from source.dsl.DefaultParamsLoader import DefaultParamsLoader
+from source.dsl.import_parsers.ImportParser import ImportParser
 from source.util.ImportHelper import ImportHelper
-from source.IO.sequence_import.AIRRSequenceImport import AIRRSequenceImport
 
 
 class AIRRImport(DataImport):
@@ -42,7 +47,7 @@ class AIRRImport(DataImport):
     @staticmethod
     def import_dataset(params: dict, dataset_name: str) -> Dataset:
         airr_params = DatasetImportParams.build_object(**params)
-        if airr_params.metadata_file is not None:
+        if airr_params.is_repertoire:
             dataset = AIRRImport.load_repertoire_dataset(airr_params, dataset_name)
         else:
             dataset = AIRRImport.load_sequence_dataset(airr_params, dataset_name)
@@ -55,7 +60,7 @@ class AIRRImport(DataImport):
 
     @staticmethod
     def load_sequence_dataset(params: DatasetImportParams, dataset_name: str) -> Dataset:
-        return ImportHelper.import_sequence_dataset(AIRRSequenceImport.import_items, params, dataset_name,
+        return ImportHelper.import_sequence_dataset(AIRRImport.import_items, params, dataset_name,
                                                     import_productive=params.import_productive, import_with_stop_codon=params.import_with_stop_codon,
                                                     import_out_of_frame=params.import_out_of_frame, region_type=params.region_type,
                                                     region_definition=params.region_definition, column_mapping=params.column_mapping,
@@ -68,8 +73,70 @@ class AIRRImport(DataImport):
         df = ImportHelper.load_repertoire_as_dataframe(metadata, params,
                                                        alternative_load_func=AIRRImport._load_rearrangement_wrapper)
 
-        df = AIRRSequenceImport.preprocess_sequence_dataframe(df, vars(params))
+        df = AIRRImport.preprocess_sequence_dataframe(df, vars(params))
         return df
+
+    @staticmethod
+    def preprocess_sequence_dataframe(df: DataFrame, params: dict): # todo move to importhelper? this is general??
+        """
+        Function for preprocessing data from a dataframe containing AIRR data, such that:
+            - productive sequences, sequences with stop codons or out of frame sequences are filtered according to specification
+            - if RegionType is CDR3, the leading C and trailing W are removed from the sequence to match the CDR3 definition
+            - if no chain column was specified, the chain is extracted from the v gene name
+            - the allele information is removed from the V and J genes
+        """
+        if params["import_with_stop_codon"] is False and "stop_codon" in df.columns:
+            df = df[~df["stop_codon"]]
+        if params["import_out_of_frame"] is False and "vj_in_frame" in df.columns:
+            df = df[df["vj_in_frame"]]
+        if params["import_productive"] is False and "productive" in df.columns:
+            df = df[~df["productive"]]
+        if params["import_with_stop_codon"] is False and params["import_out_of_frame"] is False:
+            df = df[df["productive"]]
+
+        ImportHelper.junction_to_cdr3(df, params["region_definition"], params["region_type"])
+
+        if "chains" not in df.columns:
+            df["chains"] = ImportHelper.load_chains_from_genes(df, "v_genes")
+
+        df["v_genes"] = ImportHelper.strip_alleles(df, "v_genes")
+        df["j_genes"] = ImportHelper.strip_alleles(df, "j_genes")
+
+        return df
+
+
+    @staticmethod
+    def import_items(path, import_productive=True, import_with_stop_codon=False, import_out_of_frame=False,
+                     region_type=RegionType.CDR3, region_definition=RegionDefinition.IMGT, column_mapping=None,
+                     paired=False):
+        if column_mapping is None:
+            column_mapping = DefaultParamsLoader.load(ImportParser.keyword, "airr")["column_mapping"]
+
+        params = {"import_productive": import_productive,
+                  "import_with_stop_codon": import_with_stop_codon,
+                  "import_out_of_frame": import_out_of_frame,
+                  "region_type": region_type,
+                  "region_definition": region_definition,
+                  "column_mapping": column_mapping}
+
+        if paired:
+            raise NotImplementedError("AIRRImport: import of paired receptor data has not been implemented.")
+        else:
+            sequences = AIRRImport.import_all_sequences(path, params)
+
+        return sequences
+
+    @staticmethod
+    def import_all_sequences(path, params: dict):
+        df = airr.load_rearrangement(path)
+
+        df.rename(columns=params["column_mapping"], inplace=True)
+
+        df = ImportHelper.standardize_none_values(df)
+        df = AIRRImport.preprocess_sequence_dataframe(df, params)
+        sequences = df.apply(ImportHelper.import_sequence, axis=1).values
+        return sequences
+
 
 
     @staticmethod
