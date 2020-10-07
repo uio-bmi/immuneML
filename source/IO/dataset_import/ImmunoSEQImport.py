@@ -43,13 +43,6 @@ class ImmunoSEQImport(DataImport):
 
 
     @staticmethod
-    def preprocess_repertoire(metadata: dict, params: DatasetImportParams):
-        df = ImportHelper.load_repertoire_as_dataframe(metadata, params)
-        df = ImmunoSEQImport.preprocess_dataframe(df, params)
-        return df
-
-
-    @staticmethod
     def preprocess_dataframe(df: pd.DataFrame, params: DatasetImportParams):
 
         df["frame_types"] = df.frame_types.str.upper()

@@ -43,8 +43,7 @@ class ImportHelper:
         dataset = ImportHelper.load_dataset_if_exists(params, adaptive_params, dataset_name)
         if dataset is None:
             if adaptive_params.is_repertoire:
-                dataset = ImportHelper.import_repertoire_dataset(import_class.preprocess_repertoire, # todo just pass import_class??? (consistent)
-                                                                 adaptive_params, dataset_name)
+                dataset = ImportHelper.import_repertoire_dataset(import_class, adaptive_params, dataset_name)
             else:
                 dataset = ImportHelper.import_sequence_dataset(import_class, adaptive_params, dataset_name)
 
@@ -64,7 +63,7 @@ class ImportHelper:
 
 
     @staticmethod
-    def import_repertoire_dataset(preprocess_repertoire_df_func, params: DatasetImportParams, dataset_name: str) -> RepertoireDataset:
+    def import_repertoire_dataset(import_class, params: DatasetImportParams, dataset_name: str) -> RepertoireDataset:
         """
         Function to create a dataset from the metadata and a list of repertoire files and exports dataset pickle file
 
@@ -80,9 +79,9 @@ class ImportHelper:
 
         PathBuilder.build(params.result_path+"repertoires/")
 
-        arguments = [(preprocess_repertoire_df_func, row, params) for index, row in metadata.iterrows()]
+        arguments = [(import_class, row, params) for index, row in metadata.iterrows()]
         with Pool(params.batch_size) as pool:
-            repertoires = pool.starmap(ImportHelper.load_repertoire, arguments)
+            repertoires = pool.starmap(ImportHelper.load_repertoire_as_object, arguments)
 
         new_metadata_file = ImportHelper.make_new_metadata_file(repertoires, metadata, params.result_path, dataset_name)
 
@@ -106,17 +105,20 @@ class ImportHelper:
         return metadata_filename
 
     @staticmethod
-    def load_repertoire(preprocess_sequence_df_func, metadata, params: DatasetImportParams):
+    def load_repertoire_as_object(import_class, metadata_row, params: DatasetImportParams):
+        alternative_load_func = getattr(import_class, "alternative_load_func", None)
 
-        dataframe = preprocess_sequence_df_func(metadata, params)
+        dataframe = ImportHelper.load_repertoire_as_dataframe(metadata_row, params, alternative_load_func)
+        dataframe = import_class.preprocess_dataframe(dataframe, params)
         sequence_lists = {field: dataframe[field].values.tolist() for field in Repertoire.FIELDS if field in dataframe.columns}
         sequence_lists["custom_lists"] = {field: dataframe[field].values.tolist()
                                           for field in list(set(dataframe.columns) - set(Repertoire.FIELDS))}
 
-        repertoire_inputs = {**{"metadata": metadata.to_dict(), "path": params.result_path+"repertoires/"}, **sequence_lists}
+        repertoire_inputs = {**{"metadata": metadata_row.to_dict(), "path": params.result_path+"repertoires/"}, **sequence_lists}
         repertoire = Repertoire.build(**repertoire_inputs)
 
         return repertoire
+
 
     @staticmethod
     def load_repertoire_as_dataframe(metadata: dict, params, alternative_load_func=None):

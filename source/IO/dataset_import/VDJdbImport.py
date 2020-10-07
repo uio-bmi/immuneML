@@ -52,13 +52,6 @@ class VDJdbImport(DataImport):
 
 
     @staticmethod
-    def preprocess_repertoire(metadata: dict, params: DatasetImportParams) -> dict:
-        df = ImportHelper.load_repertoire_as_dataframe(metadata, params)
-        df = VDJdbImport.preprocess_dataframe(df, params)
-        return df
-
-
-    @staticmethod
     def preprocess_dataframe(df: pd.DataFrame, params: DatasetImportParams):
         df["frame_types"] = SequenceFrameType.IN.name
         return df

@@ -38,11 +38,6 @@ class OLGAImport(DataImport):
         df.columns = ["sequences", "sequence_aas", "v_genes", "j_genes"]
         return df
 
-    @staticmethod
-    def preprocess_repertoire(metadata: dict, params: DatasetImportParams):
-        df = ImportHelper.load_repertoire_as_dataframe(metadata, params, alternative_load_func=OLGAImport.alternative_load_func)
-        df = OLGAImport.preprocess_dataframe(df, params)
-        return df
 
     @staticmethod
     def preprocess_dataframe(df: pd.DataFrame, params: DatasetImportParams):

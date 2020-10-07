@@ -49,12 +49,6 @@ class AdaptiveBiotechImport(DataImport):
 
 
     @staticmethod
-    def preprocess_repertoire(metadata: dict, params: DatasetImportParams):
-        df = ImportHelper.load_repertoire_as_dataframe(metadata, params)
-        df = AdaptiveBiotechImport.preprocess_dataframe(df, params)
-        return df
-
-    @staticmethod
     def preprocess_dataframe(df: pd.DataFrame, params: DatasetImportParams):
         df["frame_types"] = df.frame_types.str.upper()
 
@@ -77,15 +71,7 @@ class AdaptiveBiotechImport(DataImport):
         return df
 
     @staticmethod
-    def import_items(path, params: DatasetImportParams):
-        df = ImportHelper.load_sequence_dataframe(path, params)
-        df = AdaptiveBiotechImport.preprocess_dataframe(df, params)
-
-        if params.paired:
-            raise NotImplementedError("AdaptiveBiotechImport: import of paired receptor ImmunoSEQ data has not been implemented.")
-        else:
-            sequences = df.apply(ImportHelper.import_sequence, metadata_columns=params.metadata_columns, axis=1).values
-
-        return sequences
+    def import_receptors(df, params):
+        raise NotImplementedError("AIRRImport: import of paired receptor AIRR data has not been implemented.")
 
 

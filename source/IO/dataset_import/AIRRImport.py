@@ -47,13 +47,6 @@ class AIRRImport(DataImport):
 
 
     @staticmethod
-    def preprocess_repertoire(metadata: dict, params: DatasetImportParams):
-        df = ImportHelper.load_repertoire_as_dataframe(metadata, params, alternative_load_func=AIRRImport.alternative_load_func)
-        df = AIRRImport.preprocess_dataframe(df, params)
-        return df
-
-
-    @staticmethod
     def preprocess_dataframe(df: DataFrame, params: DatasetImportParams):
         """
         Function for preprocessing data from a dataframe containing AIRR data, such that:
