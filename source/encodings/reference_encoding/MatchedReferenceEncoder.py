@@ -1,11 +1,15 @@
 import abc
 import os
 
+from source.IO.dataset_import.DatasetImportParams import DatasetImportParams
 from source.caching.CacheHandler import CacheHandler
 from source.data_model.receptor.receptor_sequence.ReceptorSequenceList import ReceptorSequenceList
+from source.dsl.DefaultParamsLoader import DefaultParamsLoader
 from source.encodings.DatasetEncoder import DatasetEncoder
 from source.encodings.EncoderParams import EncoderParams
 from source.encodings.reference_encoding.SequenceMatchingSummaryType import SequenceMatchingSummaryType
+from source.environment.EnvironmentSettings import EnvironmentSettings
+from source.util.ImportHelper import ImportHelper
 from source.util.ParameterValidator import ParameterValidator
 from source.util.ReflectionHandler import ReflectionHandler
 
@@ -33,15 +37,26 @@ class MatchedReferenceEncoder(DatasetEncoder):
         ParameterValidator.assert_keys(list(reference_sequences.keys()), ["format", "path"], location, "reference_sequences")
         ParameterValidator.assert_in_valid_list(summary.upper(), [item.name for item in SequenceMatchingSummaryType], location, "summary")
 
-        valid_formats = ReflectionHandler.discover_classes_by_partial_name("SequenceImport", "sequence_import/")
-        ParameterValidator.assert_in_valid_list(f"{reference_sequences['format']}SequenceImport", valid_formats, location,
-                                                "format in reference_sequences")
+        # valid_formats = ReflectionHandler.discover_classes_by_partial_name("SequenceImport", "sequence_import/")
+        # ParameterValidator.assert_in_valid_list(f"{reference_sequences['format']}SequenceImport", valid_formats, location,
+        #                                         "format in reference_sequences")
 
         assert os.path.isfile(reference_sequences["path"]), f"{location}: the file {reference_sequences['path']} does not exist. " \
                                                             f"Specify the correct path under reference_sequences."
 
-        sequences = ReflectionHandler.get_class_by_name("{}SequenceImport".format(reference_sequences["format"]))\
-            .import_items(reference_sequences["path"], paired=False)
+        format_str = reference_sequences["format"]
+
+        import_class = ReflectionHandler.get_class_by_name("{}Import".format(format_str))
+        params = DefaultParamsLoader.load(EnvironmentSettings.default_params_path + "datasets/",
+                                          DefaultParamsLoader._convert_to_snake_case(format_str))
+        params["paired"] = False
+        params["is_repertoire"] = False
+        processed_params = DatasetImportParams.build_object(**params)
+
+        sequences = ImportHelper.import_items(import_class, reference_sequences["path"], processed_params)
+
+        # sequences = ReflectionHandler.get_class_by_name("{}SequenceImport".format(reference_sequences["format"]))\
+        #     .import_items(reference_sequences["path"], paired=False)
 
         return {
             "max_edit_distance": max_edit_distance,
