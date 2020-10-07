@@ -99,7 +99,7 @@ class SequenceCountEncoder(DatasetEncoder):
         encoded_data = EncodedData(count_matrix, dataset.get_metadata([label]) if params.encode_labels else None,
                                    dataset.get_repertoire_ids(),
                                    feature_names,
-                                   encoding=SequenceCountEncoder.__name__)
+                                   encoding=SequenceCountEncoder.__name__, info={'relevant_sequence_path': self.relevant_sequence_csv_path})
 
         return encoded_data
 

@@ -1,9 +1,12 @@
+import os
 import shutil
 from unittest import TestCase
 
 import numpy as np
 import pandas as pd
 
+from source.caching.CacheType import CacheType
+from source.environment.Constants import Constants
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.pairwise_repertoire_comparison.ComparisonData import ComparisonData
 from source.pairwise_repertoire_comparison.ComparisonDataBatch import ComparisonDataBatch
@@ -11,6 +14,9 @@ from source.util.PathBuilder import PathBuilder
 
 
 class TestComparisonData(TestCase):
+
+    def setUp(self) -> None:
+        os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
 
     def create_comparison_data(self, path: str):
         comparison_data = ComparisonData(repertoire_ids=["1", "2", "3", "4", "5", "6"], comparison_attributes=["col1", "col2"],
