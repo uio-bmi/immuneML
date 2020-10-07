@@ -2,19 +2,19 @@ import os
 import shutil
 from unittest import TestCase
 
-from source.IO.dataset_import.GenericReceptorImport import GenericReceptorImport
+from source.IO.dataset_import.SingleLineReceptorImport import SingleLineReceptorImport
 from source.caching.CacheType import CacheType
 from source.environment.Constants import Constants
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.util.PathBuilder import PathBuilder
 
 
-class TestGenericReceptorImport(TestCase):
+class TestSingleLineReceptorImport(TestCase):
 
     def setUp(self) -> None:
         os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
 
-    def test_import_dataset(self):
+    def test_import_repertoire_dataset(self):
         path = PathBuilder.build(EnvironmentSettings.tmp_test_path + "io_generic_receptor/")
         data = """subject,epitope,count,v_a_gene,j_a_gene,cdr3_a_aa,cdr3_a_nucseq,v_b_gene,j_b_gene,cdr3_b_aa,cdr3_b_nucseq,clone_id
 mouse_subject0050,PA,2,TRAV7-3*01,TRAJ33*01,CAVSLDSNYQLIW,tgtgcagtgagcctcgatagcaactatcagttgatctgg,TRBV13-1*01,TRBJ2-3*01,CASSDFDWGGDAETLYF,tgtgccagcagtgatttcgactggggaggggatgcagaaacgctgtatttt,mouse_tcr0072.clone
@@ -348,7 +348,7 @@ mouse_subject0045,PA,1,TRAV16D/DV11*03,TRAJ53*01,CAMRGNSGGSNYKLTF,tgtgctatgagggg
         with open(filename, "w") as file:
             file.writelines(data)
 
-        dataset = GenericReceptorImport.import_dataset({
+        dataset = SingleLineReceptorImport.import_dataset({
             "path": filename,
             "result_path": path + "result/",
             "separator": ",",
@@ -362,7 +362,7 @@ mouse_subject0045,PA,1,TRAV16D/DV11*03,TRAJ53*01,CAMRGNSGGSNYKLTF,tgtgctatgagggg
                 "j_b_gene": "beta_j_gene",
                 "clone_id": "identifier"
             },
-            "chains": "ALPHA_BETA",
+            "chains": "TRA_TRB",
             "region_type": "IMGT_CDR3",
             "file_size": 50000,
             "organism": "mouse"

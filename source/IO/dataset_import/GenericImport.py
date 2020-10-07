@@ -1,7 +1,7 @@
+import pandas as pd
 from source.IO.dataset_import.DataImport import DataImport
 from source.IO.dataset_import.DatasetImportParams import DatasetImportParams
-from source.data_model.dataset.RepertoireDataset import RepertoireDataset
-from source.data_model.receptor.RegionType import RegionType
+from source.data_model.dataset import Dataset
 from source.util.ImportHelper import ImportHelper
 
 
@@ -32,22 +32,17 @@ class GenericImport(DataImport):
     """
 
     @staticmethod
-    def import_dataset(params: dict, dataset_name: str) -> RepertoireDataset:
-        generic_params = DatasetImportParams.build_object(**params)
-        dataset = ImportHelper.import_repertoire_dataset(GenericImport.preprocess_repertoire, generic_params, dataset_name)
-        return dataset
+    def import_dataset(params: dict, dataset_name: str) -> Dataset:
+        return ImportHelper.import_dataset(GenericImport, params, dataset_name)
+
 
     @staticmethod
-    def preprocess_repertoire(metadata: dict, params: DatasetImportParams) -> dict:
-
-        df = ImportHelper.load_repertoire_as_dataframe(metadata, params)
-
-        if params.region_type == RegionType.IMGT_CDR3:
-            if "sequence_aas" in df.columns:
-                df['sequence_aas'] = df["sequence_aas"].str[1:-1]
-            if "sequences" in df.columns:
-                df["sequences"] = df["sequences"].str[1:-1]
-            df["region_types"] = RegionType.IMGT_CDR3.name
-
-
+    def preprocess_dataframe(df: pd.DataFrame, params: DatasetImportParams):
+        ImportHelper.junction_to_cdr3(df, params.region_type)
         return df
+
+    @staticmethod
+    def import_receptors(df, params):
+        df["receptor_identifiers"] = df["sequence_identifiers"]
+        return ImportHelper.import_receptors(df, params)
+

@@ -19,7 +19,7 @@ from source.data_model.receptor.receptor_sequence.SequenceMetadata import Sequen
 from source.util.PathBuilder import PathBuilder
 
 
-class GenericReceptorImport(DataImport):
+class SingleLineReceptorImport(DataImport):
     """
     Imports receptor dataset from a file or a set of files (located in the same directory). For column mapping, it has no default params, so it
     has to be specified manually which columns in the files correspond to which chain, gene, identifier, epitope. All valid immuneML values are given
@@ -62,11 +62,11 @@ class GenericReceptorImport(DataImport):
     @staticmethod
     def import_dataset(params, dataset_name: str) -> ReceptorDataset:
         generic_params = ReceptorDatasetImportParams.build_object(**params)
-        filenames = GenericReceptorImport._extract_filenames(generic_params)
+        filenames = SingleLineReceptorImport._extract_filenames(generic_params)
 
         PathBuilder.build(generic_params.result_path, warn_if_exists=True)
 
-        dataset = GenericReceptorImport._import_from_files(filenames, generic_params)
+        dataset = SingleLineReceptorImport._import_from_files(filenames, generic_params)
         dataset.name = dataset_name
         dataset.params = {"organism": generic_params.organism}
 
@@ -112,16 +112,16 @@ class GenericReceptorImport(DataImport):
         elif os.path.isfile(params.path):
             filenames = [params.path]
         else:
-            raise ValueError(f"GenericReceptorImport: path '{params.path}' given in YAML specification is not a valid path to receptor files. "
+            raise ValueError(f"SingleLineReceptorImport: path '{params.path}' given in YAML specification is not a valid path to receptor files. "
                              f"This parameter can either point to a single file with receptor data or to a directory where a list of receptor data "
                              f"files are stored directly.")
 
-        logging.info(f"GenericReceptorImport: importing from receptor files: \n{str([os.path.basename(file) for file in filenames])[1:-1]}")
+        logging.info(f"SingleLineReceptorImport: importing from receptor files: \n{str([os.path.basename(file) for file in filenames])[1:-1]}")
         return filenames
 
     @staticmethod
     def get_documentation():
-        doc = str(GenericReceptorImport.__doc__)
+        doc = str(SingleLineReceptorImport.__doc__)
 
         valid_chain_names = str([item.name for item in Chain])[1:-1].replace("'", "`")
         valid_chain_pair_names = str([item.name for item in ChainPair])[1:-1].replace("'", "`")

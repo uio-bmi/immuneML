@@ -7,9 +7,7 @@ from source.util.PathBuilder import PathBuilder
 
 
 class TestGenericLoader(TestCase):
-    def test_load(self):
-        path = EnvironmentSettings.root_path + "test/tmp/generic/"
-
+    def make_dummy_dataset(self, path):
         rep1text = """Clone ID	Senior Author	TRAJ Gene	TRAV Gene	CDR3A AA Sequence	TRBV Gene	TRBD Gene	TRBJ Gene	CDR3B AA Sequence	Antigen Protein	Antigen Gene	Antigen Species	Antigen Peptide AA #	Epitope Peptide	MHC Class	HLA Restriction
 1E6	Sewell	TRAJ12	TRAV12-3	CAMRGDSSYKLIF	TRBV12-4	TRBD2	TRBJ2-4	CASSLWEKLAKNIQYF	PPI	INS	Human	12-24	ALWGPDPAAA	MHC I	A*02:01
 4.13	Nepom	TRAJ44	TRAV19	CALSENRGGTASKLTF	TRBV5-1	TRBD1	TRBJ1-1	CASSLVGGPSSEAFF	GAD		Human	555-567		MHC II	DRB1*04:01
@@ -37,7 +35,12 @@ T1D#3 C8	TBD	TRAJ23	TRAV17	CATDAGYNQGGKLIF	TRBV5-1	TRBD2	TRBJ1-3	CASSAGNTIYF	Ins
 rep1.tsv,TRA,1234e,no"""
             )
 
-        dataset = GenericImport.import_dataset({"result_path": path, "path": path,
+    def test_import_repertoire_dataset(self):
+        path = EnvironmentSettings.root_path + "test/tmp/generic/"
+        self.make_dummy_dataset(path)
+
+
+        dataset = GenericImport.import_dataset({"is_repertoire": True, "result_path": path, "path": path,
                                                 "region_type": "IMGT_CDR3", "separator": "\t",
                                                 "column_mapping": {"CDR3B AA Sequence": "sequence_aas",
                                                                    "TRBV Gene": "v_genes", "TRBJ Gene": "j_genes"},
@@ -47,5 +50,32 @@ rep1.tsv,TRA,1234e,no"""
         for index, rep in enumerate(dataset.get_data()):
             self.assertEqual("1234e", rep.metadata["subject_id"])
             self.assertEqual(15, len(rep.sequences))
+
+        repertoire = dataset.get_data()[0]
+        self.assertEqual('ASSLWEKLAKNIQY', repertoire.sequences[0].amino_acid_sequence)
+        self.assertEqual('ASSLVGGPSSEAF', repertoire.sequences[1].amino_acid_sequence)
+        self.assertEqual('ASSSFWGSDTGELF', repertoire.sequences[2].amino_acid_sequence)
+
+        shutil.rmtree(path)
+
+    def test_import_sequence_dataset(self):
+        path = EnvironmentSettings.root_path + "test/tmp/generic/"
+        self.make_dummy_dataset(path)
+
+
+        dataset = GenericImport.import_dataset({"is_repertoire": False, "paired": False,
+                                                "result_path": path, "path": path,
+                                                "region_type": "IMGT_CDR3", "separator": "\t",
+                                                "column_mapping": {"CDR3B AA Sequence": "sequence_aas",
+                                                                   "TRBV Gene": "v_genes", "TRBJ Gene": "j_genes"},
+                                                "metadata_file": path + "metadata.csv", "batch_size": 4}, "generic_dataset")
+
+        self.assertEqual(15, dataset.get_example_count())
+
+        seqs = [sequence for sequence in dataset.get_data()]
+
+        self.assertEqual('ASSLWEKLAKNIQY', seqs[0].amino_acid_sequence)
+        self.assertEqual('ASSLVGGPSSEAF', seqs[1].amino_acid_sequence)
+        self.assertEqual('ASSSFWGSDTGELF', seqs[2].amino_acid_sequence)
 
         shutil.rmtree(path)
