@@ -12,10 +12,10 @@ from source.util.PathBuilder import PathBuilder
 class MLExporter:
 
     @staticmethod
-    def export_zip(hp_item: HPItem, path: str) -> str:
+    def export_zip(hp_item: HPItem, path: str, label: str) -> str:
         state_path = os.path.abspath(path) + "/"
         export_path = MLExporter.export(hp_item, state_path + "exported/")
-        filename = f"ml_model_{hp_item.hp_setting.ml_method_name}"
+        filename = f"ml_model_{label}"
         model_zip_path = shutil.make_archive(f"{state_path}zip/{filename}", "zip", export_path)
         abs_zip_path = os.path.abspath(model_zip_path)
         return abs_zip_path
