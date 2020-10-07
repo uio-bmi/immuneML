@@ -61,7 +61,7 @@ class ImmunoSEQImport(DataImport):
     @staticmethod
     def preprocess_dataframe(df: pd.DataFrame, params: DatasetImportParams):
 
-        df["frame_types"] =  df.frame_types.str.upper()
+        df["frame_types"] = df.frame_types.str.upper()
 
         frame_type_list = ImportHelper.prepare_frame_type_list(params)
         df = df[df["frame_types"].isin(frame_type_list)]

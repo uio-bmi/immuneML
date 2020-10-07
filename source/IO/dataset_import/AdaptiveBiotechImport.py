@@ -1,5 +1,7 @@
+import pandas as pd
 from source.IO.dataset_import.DataImport import DataImport
 from source.IO.dataset_import.DatasetImportParams import DatasetImportParams
+from source.data_model.dataset import Dataset
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.receptor.RegionDefinition import RegionDefinition
 from source.data_model.receptor.RegionType import RegionType
@@ -40,16 +42,31 @@ class AdaptiveBiotechImport(DataImport):
 
     """
 
-    @staticmethod
-    def import_dataset(params: dict, dataset_name: str) -> RepertoireDataset:
-        adaptive_params = DatasetImportParams.build_object(**params)
-        dataset = ImportHelper.import_or_load_repertoire_dataset(params, adaptive_params, dataset_name, AdaptiveBiotechImport.preprocess_repertoire)
-        return dataset
 
     @staticmethod
-    def preprocess_repertoire(metadata: dict, params: DatasetImportParams) -> dict:
+    def import_dataset(params: dict, dataset_name: str) -> Dataset:
+        return ImportHelper.import_dataset(AdaptiveBiotechImport, params, dataset_name)
+        # adaptive_params = DatasetImportParams.build_object(**params)
+        #
+        # dataset = ImportHelper.load_dataset_if_exists(params, adaptive_params, dataset_name)
+        # if dataset is None:
+        #     if adaptive_params.is_repertoire:
+        #         dataset = ImportHelper.import_repertoire_dataset(AdaptiveBiotechImport.preprocess_repertoire, adaptive_params, dataset_name)
+        #     else:
+        #         dataset = ImportHelper.import_sequence_dataset(AdaptiveBiotechImport.import_items, adaptive_params, dataset_name)
+        #
+        # return dataset
 
+
+    @staticmethod
+    def preprocess_repertoire(metadata: dict, params: DatasetImportParams):
         df = ImportHelper.load_repertoire_as_dataframe(metadata, params)
+        df = AdaptiveBiotechImport.preprocess_dataframe(df, params)
+        return df
+
+    @staticmethod
+    def preprocess_dataframe(df: pd.DataFrame, params: DatasetImportParams):
+        df["frame_types"] = df.frame_types.str.upper()
 
         frame_type_list = ImportHelper.prepare_frame_type_list(params)
         df = df[df["frame_types"].isin(frame_type_list)]
@@ -65,4 +82,20 @@ class AdaptiveBiotechImport(DataImport):
 
         df["region_types"] = RegionType.CDR3.name
 
+        df = ImportHelper.standardize_none_values(df)
+
         return df
+
+    @staticmethod
+    def import_items(path, params: DatasetImportParams):
+        df = ImportHelper.load_sequence_dataframe(path, params)
+        df = AdaptiveBiotechImport.preprocess_dataframe(df, params)
+
+        if params.paired:
+            raise NotImplementedError("AdaptiveBiotechImport: import of paired receptor ImmunoSEQ data has not been implemented.")
+        else:
+            sequences = df.apply(ImportHelper.import_sequence, metadata_columns=params.metadata_columns, axis=1).values
+
+        return sequences
+
+

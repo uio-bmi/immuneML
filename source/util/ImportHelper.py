@@ -11,6 +11,7 @@ import pandas as pd
 from source.IO.dataset_export.PickleExporter import PickleExporter
 from source.IO.dataset_import.DatasetImportParams import DatasetImportParams
 from source.IO.dataset_import.PickleImport import PickleImport
+from source.data_model.dataset import Dataset
 from source.data_model.dataset.ReceptorDataset import ReceptorDataset
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.dataset.SequenceDataset import SequenceDataset
@@ -47,6 +48,21 @@ class ImportHelper:
     #         dataset = ImportHelper.import_repertoire_dataset(preprocess_repertoire_func, processed_params, dataset_name)
     #
     #     return dataset
+
+    @staticmethod
+    def import_dataset(import_class, params: dict, dataset_name: str) -> Dataset:
+        adaptive_params = DatasetImportParams.build_object(**params)
+
+        dataset = ImportHelper.load_dataset_if_exists(params, adaptive_params, dataset_name)
+        if dataset is None:
+            if adaptive_params.is_repertoire:
+                dataset = ImportHelper.import_repertoire_dataset(import_class.preprocess_repertoire,
+                                                                 adaptive_params, dataset_name)
+            else:
+                dataset = ImportHelper.import_sequence_dataset(import_class.import_items, adaptive_params,
+                                                               dataset_name)
+
+        return dataset
 
     @staticmethod
     def load_dataset_if_exists(params: dict, processed_params, dataset_name: str):
@@ -275,16 +291,16 @@ class ImportHelper:
 
     @staticmethod
     def import_sequence(row, metadata_columns=[]) -> ReceptorSequence:
-        metadata = SequenceMetadata(v_gene=str(row["v_genes"]) if "v_genes" in row else None,
-                                    j_gene=str(row["j_genes"]) if "j_genes" in row else None,
-                                    chain=row["chains"] if "chains" in row else None,
-                                    region_type=row["region_type"] if "region_type" in row else None,
-                                    count=int(row["counts"]) if "counts" in row else None,
-                                    frame_type=row["frame_types"] if "frame_type" in row else None,
+        metadata = SequenceMetadata(v_gene=str(row["v_genes"]) if "v_genes" in row and row["v_genes"] is not None else None,
+                                    j_gene=str(row["j_genes"]) if "j_genes" in row and row["j_genes"] is not None else None,
+                                    chain=row["chains"] if "chains" in row and row["chains"] is not None else None,
+                                    region_type=row["region_types"] if "region_types" in row and row["region_types"] is not None else None,
+                                    count=int(row["counts"]) if "counts" in row and row["counts"] is not None else None,
+                                    frame_type=row["frame_types"] if "frame_types" in row and row["frame_types"] is not None else None,
                                     custom_params={custom_col: row[custom_col] for custom_col in metadata_columns if custom_col in row} if metadata_columns is not None else {})
-        sequence = ReceptorSequence(amino_acid_sequence=str(row["sequence_aas"]) if "sequence_aas" in row else None,
-                                    nucleotide_sequence=str(row["sequences"]) if "sequences" in row else None,
-                                    identifier=str(row["sequence_identifiers"]) if "sequence_identifiers" in row else None,
+        sequence = ReceptorSequence(amino_acid_sequence=str(row["sequence_aas"]) if "sequence_aas" in row and row["sequence_aas"] is not None else None,
+                                    nucleotide_sequence=str(row["sequences"]) if "sequences" in row and row["sequences"] is not None else None,
+                                    identifier=str(row["sequence_identifiers"]) if "sequence_identifiers" in row and row["sequence_identifiers"] is not None else None,
                                     metadata=metadata)
 
         return sequence
