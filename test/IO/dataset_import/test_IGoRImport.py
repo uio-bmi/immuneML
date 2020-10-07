@@ -45,7 +45,7 @@ rep2.tsv,2""")
                                              "columns_to_load": ["seq_index", "nt_CDR3", "anchors_found", "is_inframe"],
                                              "path": path, "batch_size": 4, "import_out_of_frame": False,
                                              "import_with_stop_codon": False,
-                                             "separator": ",", "region_definition": "IMGT", "region_type": "CDR3",
+                                             "separator": ",", "region_type": "IMGT_CDR3",
                                              "column_mapping": {"nt_CDR3": "sequences",
                                                                 "seq_index": "sequence_identifiers"}}, "igor_dataset")
 
@@ -66,7 +66,7 @@ rep2.tsv,2""")
                                              "columns_to_load": ["seq_index", "nt_CDR3", "anchors_found", "is_inframe"],
                                              "path": path, "batch_size": 4, "import_out_of_frame": False,
                                              "import_with_stop_codon": True,
-                                             "separator": ",", "region_definition": "IMGT", "region_type": "CDR3",
+                                             "separator": ",", "region_type": "IMGT_CDR3",
                                              "column_mapping": {"nt_CDR3": "sequences",
                                                                 "seq_index": "sequence_identifiers"}}, "igor_dataset")
 

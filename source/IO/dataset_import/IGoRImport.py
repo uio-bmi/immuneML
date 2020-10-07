@@ -28,8 +28,7 @@ class IGoRImport(DataImport):
                 import_out_of_frame: False # whether out of frame sequences should be imported
                 separator: "," # column separator of the input file
                 columns_to_load: ["seq_index", "nt_CDR3", "anchors_found", "is_inframe"]
-                region_definition: "IMGT" # which CDR3 definition to use - IMGT option means removing first and last amino acid as IGoR uses IMGT junction
-                region_type: "CDR3"
+                region_type: "IMGT_CDR3"
                 column_mapping: # IGoR column names -> immuneML repertoire fields
                   nt_CDR3: sequences
                   seq_index: sequence_identifiers
@@ -77,7 +76,7 @@ class IGoRImport(DataImport):
             no_stop_codon = ["*" not in seq for seq in df.sequence_aas]
             df = df[no_stop_codon]
 
-        ImportHelper.junction_to_cdr3(df, params.region_definition, params.region_type)
+        ImportHelper.junction_to_cdr3(df, params.region_type)
 
         # chain or at least receptorsequence?
 

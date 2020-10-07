@@ -37,8 +37,8 @@ T1D#3 C8	TBD	TRAJ23	TRAV17	CATDAGYNQGGKLIF	TRBV5-1	TRBD2	TRBJ1-3	CASSAGNTIYF	Ins
 rep1.tsv,TRA,1234e,no"""
             )
 
-        dataset = GenericImport.import_dataset({"result_path": path, "path": path, "region_definition": "IMGT",
-                                                "region_type": "CDR3", "separator": "\t",
+        dataset = GenericImport.import_dataset({"result_path": path, "path": path,
+                                                "region_type": "IMGT_CDR3", "separator": "\t",
                                                 "column_mapping": {"CDR3B AA Sequence": "sequence_aas",
                                                                    "TRBV Gene": "v_genes", "TRBJ Gene": "j_genes"},
                                                 "metadata_file": path + "metadata.csv", "batch_size": 4}, "generic_dataset")

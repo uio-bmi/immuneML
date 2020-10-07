@@ -30,7 +30,7 @@ class TestDuplicateSequenceFilter(TestCase):
                                                                   chains=[Chain.ALPHA, Chain.ALPHA, Chain.ALPHA, Chain.ALPHA, Chain.ALPHA,
                                                                           Chain.ALPHA, Chain.BETA],
                                                                   counts=[10, 20, 30, 5, 20, None, 40],
-                                                                  region_types=["CDR3", "CDR3", "CDR3", "CDR3", "CDR3", "CDR3", "CDR3"],
+                                                                  region_types=["IMGT_CDR3", "IMGT_CDR3", "IMGT_CDR3", "IMGT_CDR3", "IMGT_CDR3", "IMGT_CDR3", "IMGT_CDR3"],
                                                                   custom_lists={"custom1": ["yes", "yes", "yes", "no", "no", "no", "no"],
                                                                                 "custom2": ["yes", "yes", "yes", "no", "no", "no", "no"]},
                                                                   sequence_identifiers=[1, 2, 3, 4, 5, 6, 7],

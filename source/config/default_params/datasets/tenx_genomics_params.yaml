@@ -1,6 +1,5 @@
 import_productive: True # whether to only import productive sequences
-region_type: "CDR3" # which part of the sequence to import by default
-region_definition: "IMGT" # which CDR3 definition to use - IMGT option means removing first and last amino acid as 10xGenomics uses IMGT junction as CDR3
+region_type: "IMGT_CDR3" # which region to use - IMGT_CDR3 option means removing first and last amino acid as 10xGenomics uses IMGT junction as CDR3
 separator: "," # column separator
 columns_to_load: [clonotype_id, consensus_id, length, chain, v_gene, d_gene, j_gene, c_gene, full_length, productive, cdr3, cdr3_nt, reads, umis]
 # paired: False # todo add sequenceimport and then support this paired stuff

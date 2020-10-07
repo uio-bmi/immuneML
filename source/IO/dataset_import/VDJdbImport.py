@@ -42,9 +42,6 @@ class VDJdbImport(DataImport):
                 separator: "\\t" # todo look at this after refactoring
 
     """
-    COLUMNS = ["V", "J", "Gene", "CDR3", "complex.id"]
-    CUSTOM_COLUMNS = {"Epitope": "epitope", "Epitope gene": "epitope_gene", "Epitope species": "epitope_species"}
-
 
     @staticmethod
     def import_dataset(params: dict, dataset_name: str) -> Dataset:

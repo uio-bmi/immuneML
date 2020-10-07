@@ -27,8 +27,7 @@ class TenxGenomicsImport(DataImport):
                 result_path: path/where/to/store/imported/repertoires/
                 # optional parameters (if not specified the values bellow will be used):
                 import_productive: True # whether to only import productive sequences
-                region_type: "CDR3" # which part of the sequence to import by default
-                region_definition: "IMGT" # which CDR3 definition to use - IMGT option means removing first and last amino acid as 10xGenomics uses IMGT junction as CDR3
+                region_type: "IMGT_CDR3" # which part of the sequence to import by default
                 columns_to_load: [clonotype_id, consensus_id, length, chain, v_gene, d_gene, j_gene, c_gene, full_length, productive, cdr3, cdr3_nt, reads, umis]
                     cdr3: sequence_aas
                     cdr3_nt: sequences
@@ -55,7 +54,7 @@ class TenxGenomicsImport(DataImport):
         else:
             df.loc[df["productive"].eq("False"), "frame_types"] = SequenceFrameType.OUT.name
 
-        ImportHelper.junction_to_cdr3(df, params.region_definition, params.region_type)
+        ImportHelper.junction_to_cdr3(df, params.region_type)
         return df
 
 

@@ -66,7 +66,7 @@ class AIRRImport(DataImport):
         frame_type_list = ImportHelper.prepare_frame_type_list(params)
         df = df[df["frame_types"].isin(frame_type_list)]
 
-        ImportHelper.junction_to_cdr3(df, params.region_definition, params.region_type)
+        ImportHelper.junction_to_cdr3(df, params.region_type)
 
         if "chains" not in df.columns:
             df["chains"] = ImportHelper.load_chains_from_genes(df, "v_genes")

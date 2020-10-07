@@ -71,7 +71,7 @@ mouse_subject0053,PA,1,TRAV6D-6*01,TRAJ53*01,CALGGGSNYKLTF,tgtgctctgggtggaggcagc
                                                             "clone_id": "identifier"
                                                         },
                                                         "receptor_chains": "TRA_TRB",
-                                                        "region_type": "CDR3",
+                                                        "region_type": "IMGT_CDR3",
                                                         "file_size": 50000,
                                                         "organism": "mouse"}, 'd1')
 

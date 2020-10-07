@@ -25,9 +25,8 @@ class MiXCRImport(DataImport):
                 path: path/to/location/of/repertoire/files/ # all repertoire files need to be in the same folder to be loaded (they will be discovered based on the metadata file)
                 result_path: path/where/to/store/imported/repertoires/ # immuneML imports data to optimized representation to speed up analysis so this defines where to store these new representation files
                 # the following parameter have these default values so these need to be specified only if a different behavior is required
-                region_type: "CDR3" # which part of the sequence to import by default
+                region_type: "IMGT_CDR3" # which part of the sequence to import by default
                 batch_size: 4 # how many repertoires can be processed at once by default
-                region_definition: "IMGT" # which CDR3 definition to use - IMGT option means removing first and last amino acid as MiXCR uses IMGT junction as CDR3
                 separator: "\\t"
                 columns_to_load: [cloneCount, allVHitsWithScore, allJHitsWithScore, aaSeqCDR3, nSeqCDR3]
                 column_mapping: # MiXCR column name -> immuneML repertoire field (where there is no 1-1 mapping, those are omitted here and handled in the code)
@@ -38,13 +37,13 @@ class MiXCRImport(DataImport):
     """
 
     SEQUENCE_NAME_MAP = {
-        RegionType.CDR3: {"AA": "aaSeqCDR3", "NT": "nSeqCDR3"},
-        RegionType.CDR1: {"AA": "aaSeqCDR1", "NT": "nSeqCDR1"},
-        RegionType.CDR2: {"AA": "aaSeqCDR2", "NT": "nSeqCDR2"},
-        RegionType.FR1:  {"AA": "aaSeqFR1",  "NT": "nSeqFR1"},
-        RegionType.FR2:  {"AA": "aaSeqFR2",  "NT": "nSeqFR2"},
-        RegionType.FR3:  {"AA": "aaSeqFR3",  "NT": "nSeqFR3"},
-        RegionType.FR4:  {"AA": "aaSeqFR4",  "NT": "nSeqFR4"}
+        RegionType.IMGT_CDR3: {"AA": "aaSeqCDR3", "NT": "nSeqCDR3"},
+        RegionType.IMGT_CDR1: {"AA": "aaSeqCDR1", "NT": "nSeqCDR1"},
+        RegionType.IMGT_CDR2: {"AA": "aaSeqCDR2", "NT": "nSeqCDR2"},
+        RegionType.IMGT_FR1:  {"AA": "aaSeqFR1", "NT": "nSeqFR1"},
+        RegionType.IMGT_FR2:  {"AA": "aaSeqFR2", "NT": "nSeqFR2"},
+        RegionType.IMGT_FR3:  {"AA": "aaSeqFR3", "NT": "nSeqFR3"},
+        RegionType.IMGT_FR4:  {"AA": "aaSeqFR4", "NT": "nSeqFR4"}
     }
 
     @staticmethod
@@ -76,7 +75,7 @@ class MiXCRImport(DataImport):
 
         df["sequence_aas"] = df[MiXCRImport.SEQUENCE_NAME_MAP[params.region_type]["AA"]]
         df["sequences"] = df[MiXCRImport.SEQUENCE_NAME_MAP[params.region_type]["NT"]]
-        ImportHelper.junction_to_cdr3(df, params.region_definition, params.region_type)
+        ImportHelper.junction_to_cdr3(df, params.region_type)
 
         if "v_genes" in df.columns:
             df["chains"] = ImportHelper.load_chains_from_genes(df, "v_genes")

@@ -18,7 +18,6 @@ from source.data_model.dataset.SequenceDataset import SequenceDataset
 from source.data_model.receptor.BCReceptor import BCReceptor
 from source.data_model.receptor.ChainPair import ChainPair
 from source.data_model.receptor.Receptor import Receptor
-from source.data_model.receptor.RegionDefinition import RegionDefinition
 from source.data_model.receptor.RegionType import RegionType
 from source.data_model.receptor.TCABReceptor import TCABReceptor
 from source.data_model.receptor.TCGDReceptor import TCGDReceptor
@@ -243,15 +242,13 @@ class ImportHelper:
         return [Chain.get_chain(chain_str) for chain_str in df[column_name].str[0:3]]
 
     @staticmethod
-    def junction_to_cdr3(df: pd.DataFrame, region_definition: RegionDefinition, region_type: RegionType):
+    def junction_to_cdr3(df: pd.DataFrame, region_type: RegionType):
         '''
-        If RegionType is CDR3, the leading C and trailing W are removed from the sequence to match the CDR3 definition.
+        If RegionType is CDR3, the leading C and trailing W are removed from the sequence to match the IMGT CDR3 definition.
         This method alters the data in the provided dataframe.
-
-        See :py:obj:`~source.data_model.receptor.RegionDefinition.RegionDefinition` description.
         '''
 
-        if region_definition == RegionDefinition.IMGT and region_type == RegionType.CDR3:
+        if region_type == RegionType.IMGT_CDR3:
             if "sequence_aas" in df:
                 df["sequence_aas"] = df["sequence_aas"].str[1:-1]
             if "sequences" in df:

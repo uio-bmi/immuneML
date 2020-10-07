@@ -3,7 +3,6 @@ from source.IO.dataset_import.DataImport import DataImport
 from source.IO.dataset_import.DatasetImportParams import DatasetImportParams
 from source.data_model.dataset import Dataset
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
-from source.data_model.receptor.RegionDefinition import RegionDefinition
 from source.data_model.receptor.RegionType import RegionType
 from source.util.ImportHelper import ImportHelper
 
@@ -26,7 +25,6 @@ class AdaptiveBiotechImport(DataImport):
                 import_productive: True
                 import_with_stop_codon: False
                 import_out_of_frame: False
-                region_definition: "IMGT" # which CDR3 definition to use - IMGT option means removing first and last amino acid as Adaptive uses IMGT junction as CDR3
                 separator: "\\t"
                 columns_to_load: [rearrangement, v_family, v_gene, v_allele, j_family, j_gene, j_allele, amino_acid, templates, frame_type, locus]
                 column_mapping: # adaptive column names -> immuneML repertoire fields
@@ -55,17 +53,15 @@ class AdaptiveBiotechImport(DataImport):
         frame_type_list = ImportHelper.prepare_frame_type_list(params)
         df = df[df["frame_types"].isin(frame_type_list)]
 
-        if params.region_definition == RegionDefinition.IMGT:
+        if params.region_type == RegionType.IMGT_CDR3:
             if "sequences" in params.columns_to_load:
                 df['sequences'] = [y[(84 - 3 * len(x)): 78] for x, y in zip(df['sequence_aas'], df['sequences'])]
             df['sequence_aas'] = df["sequence_aas"].str[1:-1]
+            df["region_types"] = RegionType.IMGT_CDR3.name
         elif "sequences" in params.columns_to_load:
-            df['sequences'] = [y[(81 - 3 * len(x)): 81] for x, y in zip(df['sequence_aas'], df['sequences'])]
+            df['sequences'] = [y[(81 - 3 * len(x)): 81] for x, y in zip(df['sequence_aas'], df['sequences'])] # todo check this?
 
         df = ImportHelper.parse_adaptive_germline_to_imgt(df)
-
-        df["region_types"] = RegionType.CDR3.name
-
         df = ImportHelper.standardize_none_values(df)
 
         return df

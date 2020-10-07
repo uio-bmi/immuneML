@@ -142,10 +142,9 @@ class TestMiXCRLoader(TestCase):
 
         dataset = MiXCRImport.import_dataset({
             "path": path + "tmp_input/",
-            "region_type": "CDR3",
+            "region_type": "IMGT_CDR3",
             "result_path": output_path,
             "batch_size": 2, "separator": "\t",
-            "region_definition": "IMGT",
             "metadata_file": path + "metadata.csv",
             "column_mapping": {
                 "cloneCount": "counts",
@@ -173,7 +172,7 @@ class TestMiXCRLoader(TestCase):
 
         dataset = MiXCRImport.import_dataset({
             "path": path + "tmp_input/",
-            "region_type": "CDR3",
+            "region_type": "IMGT_CDR3",
             "result_path": path + "tmp_output/",
             "batch_size": 2, "separator": "\t",
             "metadata_file": path + "metadata.csv",

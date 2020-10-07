@@ -1,8 +1,5 @@
-import_productive: null # no effect as this info is not available in files created by OLGA
-import_with_stop_codon: null # no effect as this info is not available in files created by OLGA
-import_out_of_frame: null # no effect as this info is not available in files created by OLGA
 separator: "\t"
 columns_to_load: null # OLGA columns are assumed to correspond to: sequences, sequence_aas, v_genes, j_genes
 column_mapping: null
 region_definition: IMGT
-region_type: CDR3
+region_type: "IMGT_CDR3" # which region to use - IMGT_CDR3 option means removing first and last amino acid as OLGA uses IMGT junction as CDR3

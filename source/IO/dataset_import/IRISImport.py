@@ -6,7 +6,7 @@ import pandas as pd
 
 from source.IO.dataset_import.DataImport import DataImport
 from source.IO.dataset_import.IRISImportParams import IRISImportParams
-from source.IO.sequence_import.IRISSequenceImport import IRISSequenceImport
+from source.IO.dataset_import.IRISSequenceImport import IRISSequenceImport
 from source.data_model.dataset.Dataset import Dataset
 from source.data_model.dataset.ReceptorDataset import ReceptorDataset
 from source.data_model.dataset.SequenceDataset import SequenceDataset

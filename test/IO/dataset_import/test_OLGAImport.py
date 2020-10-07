@@ -34,7 +34,7 @@ rep2.tsv,2""")
         PathBuilder.build(path)
         self.write_dummy_files(path)
         dataset = OLGAImport.import_dataset({"is_repertoire": True, "result_path": path, "metadata_file": path + "metadata.csv",
-                                             "columns_to_load": None, "separator": "\t", "region_type": "CDR3", "region_definition": "IMGT",
+                                             "columns_to_load": None, "separator": "\t", "region_type": "IMGT_CDR3",
                                              "path": path, "batch_size": 4}, "olga_repertoire_dataset")
 
         self.assertEqual(2, dataset.get_example_count())
@@ -64,7 +64,7 @@ rep2.tsv,2""")
         PathBuilder.build(path)
         self.write_dummy_files(path)
         dataset = OLGAImport.import_dataset({"is_repertoire": False, "paired": False, "result_path": path, "metadata_file": path + "metadata.csv",
-                                             "columns_to_load": None, "separator": "\t", "region_type": "CDR3", "region_definition": "IMGT",
+                                             "columns_to_load": None, "separator": "\t", "region_type": "IMGT_CDR3",
                                              "path": path, "batch_size": 4}, "olga_sequence_dataset")
 
         self.assertEqual(6, dataset.get_example_count())
