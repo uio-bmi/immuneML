@@ -49,32 +49,32 @@ rep2.tsv,2""")
         return column_mapping
 
 
-    # def test_import_repertoire_dataset(self):
-    #     path = EnvironmentSettings.root_path + "test/tmp/ioairr/"
-    #     PathBuilder.build(path)
-    #     self.create_dumy_dataset(path, add_metadata=True)
-    #
-    #     column_mapping = self.get_column_mapping()
-    #     params = {"is_repertoire": True, "result_path": path, "path": path, "metadata_file": path + "metadata.csv",
-    #               "import_out_of_frame": False, "import_with_stop_codon": False,
-    #               "import_productive": True, "region_type": "CDR3",
-    #               "region_definition": "IMGT", "column_mapping": column_mapping,
-    #               "separator": "\t"}
-    #
-    #     dataset = AIRRImport.import_dataset(params, "airr_repertoire_dataset")
-    #
-    #     self.assertEqual(2, dataset.get_example_count())
-    #     for index, rep in enumerate(dataset.get_data()):
-    #         if index == 0:
-    #             self.assertEqual(3, len(rep.sequences))
-    #             self.assertListEqual(["IVKNQEJ01BVGQ6", "IVKNQEJ01AQVWS", "IVKNQEJ01EI5S4"], list(rep.get_sequence_identifiers()))
-    #             self.assertListEqual(['IGHV4-31', 'IGHV4-31', 'IGHV4-31'], list(rep.get_v_genes()))
-    #             self.assertListEqual([36, 36, 36], list(rep.get_attribute("junction_length")))
-    #             self.assertListEqual(["ASGVAGTFDY", "ASGVAGTFDY", "ASGVAGTFDY"], list(rep.get_sequence_aas()))
-    #         else:
-    #             self.assertEqual(2, len(rep.sequences))
-    #
-    #     shutil.rmtree(path)
+    def test_import_repertoire_dataset(self):
+        path = EnvironmentSettings.root_path + "test/tmp/ioairr/"
+        PathBuilder.build(path)
+        self.create_dumy_dataset(path, add_metadata=True)
+
+        column_mapping = self.get_column_mapping()
+        params = {"is_repertoire": True, "result_path": path, "path": path, "metadata_file": path + "metadata.csv",
+                  "import_out_of_frame": False, "import_with_stop_codon": False,
+                  "import_productive": True, "region_type": "CDR3",
+                  "region_definition": "IMGT", "column_mapping": column_mapping,
+                  "separator": "\t"}
+
+        dataset = AIRRImport.import_dataset(params, "airr_repertoire_dataset")
+
+        self.assertEqual(2, dataset.get_example_count())
+        for index, rep in enumerate(dataset.get_data()):
+            if index == 0:
+                self.assertEqual(3, len(rep.sequences))
+                self.assertListEqual(["IVKNQEJ01BVGQ6", "IVKNQEJ01AQVWS", "IVKNQEJ01EI5S4"], list(rep.get_sequence_identifiers()))
+                self.assertListEqual(['IGHV4-31', 'IGHV4-31', 'IGHV4-31'], list(rep.get_v_genes()))
+                self.assertListEqual([36, 36, 36], list(rep.get_attribute("junction_length")))
+                self.assertListEqual(["ASGVAGTFDY", "ASGVAGTFDY", "ASGVAGTFDY"], list(rep.get_sequence_aas()))
+            else:
+                self.assertEqual(2, len(rep.sequences))
+
+        shutil.rmtree(path)
 
     def test_sequence_dataset(self):
         path = EnvironmentSettings.root_path + "test/tmp/ioairr/"

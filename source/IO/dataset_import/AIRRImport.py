@@ -48,7 +48,7 @@ class AIRRImport(DataImport):
 
     @staticmethod
     def preprocess_repertoire(metadata: dict, params: DatasetImportParams):
-        df = ImportHelper.load_repertoire_as_dataframe(metadata, params, alternative_load_func=AIRRImport._load_rearrangement_wrapper)
+        df = ImportHelper.load_repertoire_as_dataframe(metadata, params, alternative_load_func=AIRRImport.alternative_load_func)
         df = AIRRImport.preprocess_dataframe(df, params)
         return df
 
@@ -64,11 +64,11 @@ class AIRRImport(DataImport):
         """
         df["frame_types"] = SequenceFrameType.OUT.name
 
-        df.loc[df["productive"].eq("T"), "frame_types"] = SequenceFrameType.IN.name
+        df.loc[df["productive"], "frame_types"] = SequenceFrameType.IN.name
         if "vj_in_frame" in df.columns:
-            df.loc[df["vj_in_frame"].eq("T"), "frame_types"] = SequenceFrameType.IN.name
+            df.loc[df["vj_in_frame"], "frame_types"] = SequenceFrameType.IN.name
         if "stop_codon" in df.columns:
-            df.loc[df["stop_codon"].eq("T"), "frame_types"] = SequenceFrameType.STOP.name
+            df.loc[df["stop_codon"], "frame_types"] = SequenceFrameType.STOP.name
 
         frame_type_list = ImportHelper.prepare_frame_type_list(params)
         df = df[df["frame_types"].isin(frame_type_list)]
@@ -90,6 +90,6 @@ class AIRRImport(DataImport):
 
 
     @staticmethod
-    def _load_rearrangement_wrapper(filename, params):
+    def alternative_load_func(filename, params):
         return airr.load_rearrangement(filename)
 
