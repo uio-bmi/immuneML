@@ -56,11 +56,10 @@ class ImportHelper:
         dataset = ImportHelper.load_dataset_if_exists(params, adaptive_params, dataset_name)
         if dataset is None:
             if adaptive_params.is_repertoire:
-                dataset = ImportHelper.import_repertoire_dataset(import_class.preprocess_repertoire,
+                dataset = ImportHelper.import_repertoire_dataset(import_class.preprocess_repertoire, # todo just pass import_class??? (consistent)
                                                                  adaptive_params, dataset_name)
             else:
-                dataset = ImportHelper.import_sequence_dataset(import_class.import_items, adaptive_params,
-                                                               dataset_name)
+                dataset = ImportHelper.import_sequence_dataset(import_class, adaptive_params, dataset_name)
 
         return dataset
 
@@ -192,7 +191,7 @@ class ImportHelper:
     #     return dataset
 
     @staticmethod #
-    def import_sequence_dataset(sequence_import_func, params, dataset_name: str, *args, **kwargs): # todo remove args kwargs
+    def import_sequence_dataset(import_class, params, dataset_name: str): # todo remove args kwargs
         PathBuilder.build(params.result_path)
 
         filenames = [params.path] if os.path.isfile(params.path) else glob(params.path + "*.tsv")
@@ -203,7 +202,8 @@ class ImportHelper:
         items = None
 
         for index, filename in enumerate(filenames):
-            new_items = sequence_import_func(filename, params, *args, **kwargs)
+            new_items = ImportHelper.import_items(import_class, filename, params)
+            # new_items = sequence_import_func(filename, params, *args, **kwargs)
             items = np.append(items, new_items) if items is not None else new_items
 
             while len(items) > params.sequence_file_size or (index == len(filenames) - 1 and len(items) > 0):
@@ -218,6 +218,18 @@ class ImportHelper:
         PickleExporter.export(dataset, params.result_path)
 
         return dataset
+
+    @staticmethod
+    def import_items(import_class, path, params: DatasetImportParams):
+        df = ImportHelper.load_sequence_dataframe(path, params)
+        df = import_class.preprocess_dataframe(df, params)
+
+        if params.paired:
+            sequences = import_class.import_receptors(df, params)
+        else:
+            sequences = df.apply(ImportHelper.import_sequence, metadata_columns=params.metadata_columns, axis=1).values
+
+        return sequences
 
     @staticmethod
     def store_sequence_items(dataset_filenames: list, items: list, sequence_file_size: int):

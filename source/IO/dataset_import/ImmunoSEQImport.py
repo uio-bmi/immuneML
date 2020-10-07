@@ -39,16 +39,7 @@ class ImmunoSEQImport(DataImport):
 
     @staticmethod
     def import_dataset(params: dict, dataset_name: str) -> Dataset:
-        immunoseq_params = DatasetImportParams.build_object(**params)
-
-        dataset = ImportHelper.load_dataset_if_exists(params, immunoseq_params, dataset_name)
-        if dataset is None:
-            if immunoseq_params.is_repertoire:
-                dataset = ImportHelper.import_repertoire_dataset(ImmunoSEQImport.preprocess_repertoire, immunoseq_params, dataset_name)
-            else:
-                dataset = ImportHelper.import_sequence_dataset(ImmunoSEQImport.import_items, immunoseq_params, dataset_name)
-
-        return dataset
+        return ImportHelper.import_dataset(ImmunoSEQImport, params, dataset_name)
 
 
     @staticmethod
@@ -90,18 +81,10 @@ class ImmunoSEQImport(DataImport):
         return df
 
 
-
     @staticmethod
-    def import_items(path, params: DatasetImportParams):
-        df = ImportHelper.load_sequence_dataframe(path, params)
-        df = ImmunoSEQImport.preprocess_dataframe(df, params)
+    def import_receptors(df, params):
+        raise NotImplementedError("ImmunoSEQImport: import of paired receptor ImmunoSEQ data has not been implemented.")
 
-        if params.paired:
-            raise NotImplementedError("ImmunoSEQImport: import of paired receptor ImmunoSEQ data has not been implemented.")
-        else:
-            sequences = df.apply(ImportHelper.import_sequence, metadata_columns=params.metadata_columns, axis=1).values
-
-        return sequences
 
 
 

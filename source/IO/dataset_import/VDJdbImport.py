@@ -48,16 +48,7 @@ class VDJdbImport(DataImport):
 
     @staticmethod
     def import_dataset(params: dict, dataset_name: str) -> Dataset:
-        vdjdb_params = DatasetImportParams.build_object(**params)
-
-        dataset = ImportHelper.load_dataset_if_exists(params, vdjdb_params, dataset_name)
-
-        if dataset is None:
-            if vdjdb_params.is_repertoire:
-                dataset = ImportHelper.import_repertoire_dataset(VDJdbImport.preprocess_repertoire, vdjdb_params, dataset_name)
-            else:
-                dataset = ImportHelper.import_sequence_dataset(VDJdbImport.import_items, vdjdb_params, dataset_name)
-        return dataset
+        return ImportHelper.import_dataset(VDJdbImport, params, dataset_name)
 
 
     @staticmethod
@@ -74,16 +65,9 @@ class VDJdbImport(DataImport):
 
 
     @staticmethod
-    def import_items(path, params: DatasetImportParams):
-        df = ImportHelper.load_sequence_dataframe(path, params)
-        df = VDJdbImport.preprocess_dataframe(df, params)
+    def import_receptors(df, params):
+        df["receptor_identifiers"] = df["sequence_identifiers"]
+        return ImportHelper.import_receptors(df, params)
 
-        if params.paired:
-            df["receptor_identifiers"] = df["sequence_identifiers"]
-            sequences = ImportHelper.import_receptors(df, params)
-        else:
-            sequences = df.apply(ImportHelper.import_sequence, metadata_columns=params.metadata_columns, axis=1).values
-
-        return sequences
 
 

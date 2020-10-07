@@ -43,16 +43,7 @@ class TenxGenomicsImport(DataImport):
 
     @staticmethod
     def import_dataset(params: dict, dataset_name: str) -> Dataset:
-        tenx_params = DatasetImportParams.build_object(**params)
-
-        dataset = ImportHelper.load_dataset_if_exists(params, tenx_params, dataset_name)
-
-        if dataset is None:
-            if tenx_params.is_repertoire:
-                dataset = ImportHelper.import_repertoire_dataset(TenxGenomicsImport.preprocess_repertoire, tenx_params, dataset_name)
-            else:
-                dataset = ImportHelper.import_sequence_dataset(TenxGenomicsImport.import_items, tenx_params, dataset_name)
-        return dataset
+        return ImportHelper.import_dataset(TenxGenomicsImport, params, dataset_name)
 
 
     @staticmethod
@@ -75,14 +66,8 @@ class TenxGenomicsImport(DataImport):
 
 
     @staticmethod
-    def import_items(path, params):
-        df = ImportHelper.load_sequence_dataframe(path, params)
-        df = TenxGenomicsImport.preprocess_dataframe(df, params)
+    def import_receptors(df, params):
+        df["receptor_identifiers"] = df["cell_ids"]
+        return ImportHelper.import_receptors(df, params)
 
-        if params.paired:
-            df["receptor_identifiers"] = df["cell_ids"]
-            sequences = ImportHelper.import_receptors(df, params)
-        else:
-            sequences = df.apply(ImportHelper.import_sequence, axis=1).values
 
-        return sequences

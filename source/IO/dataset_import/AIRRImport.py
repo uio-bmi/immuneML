@@ -43,17 +43,7 @@ class AIRRImport(DataImport):
 
     @staticmethod
     def import_dataset(params: dict, dataset_name: str) -> Dataset:
-        airr_params = DatasetImportParams.build_object(**params)
-
-        dataset = ImportHelper.load_dataset_if_exists(params, airr_params, dataset_name)
-
-        if dataset is None:
-            if airr_params.is_repertoire:
-                dataset = ImportHelper.import_repertoire_dataset(AIRRImport.preprocess_repertoire, airr_params, dataset_name)
-            else:
-                dataset = ImportHelper.import_sequence_dataset(AIRRImport.import_items, airr_params, dataset_name)
-
-        return dataset
+        return ImportHelper.import_dataset(AIRRImport, params, dataset_name)
 
 
     @staticmethod
@@ -72,12 +62,13 @@ class AIRRImport(DataImport):
             - if no chain column was specified, the chain is extracted from the v gene name
             - the allele information is removed from the V and J genes
         """
-        df["frame_type"] = SequenceFrameType.OUT.name
-        df.loc[df["productive"], "frame_types"] = SequenceFrameType.IN.name
+        df["frame_types"] = SequenceFrameType.OUT.name
+
+        df.loc[df["productive"].eq("T"), "frame_types"] = SequenceFrameType.IN.name
         if "vj_in_frame" in df.columns:
-            df.loc[df["vj_in_frame"], "frame_types"] = SequenceFrameType.IN.name
+            df.loc[df["vj_in_frame"].eq("T"), "frame_types"] = SequenceFrameType.IN.name
         if "stop_codon" in df.columns:
-            df.loc[df["stop_codon"], "frame_types"] = SequenceFrameType.STOP.name
+            df.loc[df["stop_codon"].eq("T"), "frame_types"] = SequenceFrameType.STOP.name
 
         frame_type_list = ImportHelper.prepare_frame_type_list(params)
         df = df[df["frame_types"].isin(frame_type_list)]
@@ -94,16 +85,8 @@ class AIRRImport(DataImport):
 
 
     @staticmethod
-    def import_items(path, params):
-        df = ImportHelper.load_sequence_dataframe(path, params, alternative_load_func=AIRRImport._load_rearrangement_wrapper)
-        df = AIRRImport.preprocess_dataframe(df, params)
-
-        if params.paired:
-            raise NotImplementedError("AIRRImport: import of paired receptor AIRR data has not been implemented.")
-        else:
-            sequences = df.apply(ImportHelper.import_sequence, axis=1).values
-
-        return sequences
+    def import_receptors(df, params):
+        raise NotImplementedError("AIRRImport: import of paired receptor AIRR data has not been implemented.")
 
 
     @staticmethod

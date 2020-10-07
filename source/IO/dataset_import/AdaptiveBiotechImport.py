@@ -46,16 +46,6 @@ class AdaptiveBiotechImport(DataImport):
     @staticmethod
     def import_dataset(params: dict, dataset_name: str) -> Dataset:
         return ImportHelper.import_dataset(AdaptiveBiotechImport, params, dataset_name)
-        # adaptive_params = DatasetImportParams.build_object(**params)
-        #
-        # dataset = ImportHelper.load_dataset_if_exists(params, adaptive_params, dataset_name)
-        # if dataset is None:
-        #     if adaptive_params.is_repertoire:
-        #         dataset = ImportHelper.import_repertoire_dataset(AdaptiveBiotechImport.preprocess_repertoire, adaptive_params, dataset_name)
-        #     else:
-        #         dataset = ImportHelper.import_sequence_dataset(AdaptiveBiotechImport.import_items, adaptive_params, dataset_name)
-        #
-        # return dataset
 
 
     @staticmethod
