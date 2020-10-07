@@ -28,7 +28,7 @@ class TestTCRdistEncoder(TestCase):
         with open(path + "receptors.tsv", "w") as file:
             file.writelines(file_content)
 
-        dataset = VDJdbImport.import_dataset({"result_path": path, "file_size": 1, "paired": True, "path": path}, "vdjdb_dataset")
+        dataset = VDJdbImport.import_dataset({"is_repertoire": True, "result_path": path, "sequence_file_size": 1, "paired": True, "path": path}, "vdjdb_dataset")
         dataset.params = {"organism": "human"}
 
         encoder = TCRdistEncoder.build_object(dataset, **{"cores": 2})

@@ -9,21 +9,21 @@ from source.environment.LabelConfiguration import LabelConfiguration
 
 class TestIdentitySequenceEncoder(TestCase):
     def test_encode_sequence(self):
-        sequence = ReceptorSequence(amino_acid_sequence="AAA", metadata=SequenceMetadata(frame_type="Out"))
+        sequence = ReceptorSequence(amino_acid_sequence="AAA", metadata=SequenceMetadata(frame_type="OUT"))
         enc = IdentitySequenceEncoder()
         self.assertEqual(enc.encode_sequence(sequence, EncoderParams(model={},
                                                                      label_config=LabelConfiguration(),
                                                                      result_path="")),
                          None)
 
-        sequence = ReceptorSequence(amino_acid_sequence="AAA", metadata=SequenceMetadata(frame_type="Stop"))
+        sequence = ReceptorSequence(amino_acid_sequence="AAA", metadata=SequenceMetadata(frame_type="STOP"))
         enc = IdentitySequenceEncoder()
         self.assertEqual(enc.encode_sequence(sequence, EncoderParams(model={},
                                                                      label_config=LabelConfiguration(),
                                                                      result_path="")),
                          None)
 
-        sequence = ReceptorSequence(amino_acid_sequence="AAA", metadata=SequenceMetadata(frame_type="In"))
+        sequence = ReceptorSequence(amino_acid_sequence="AAA", metadata=SequenceMetadata(frame_type="IN"))
         enc = IdentitySequenceEncoder()
         self.assertEqual(["AAA"],
                          enc.encode_sequence(sequence, EncoderParams(model={},
