@@ -6,194 +6,96 @@ import pandas as pd
 
 from source.IO.dataset_import.MiXCRImport import MiXCRImport
 from source.data_model.receptor.receptor_sequence.Chain import Chain
+from source.dsl.DefaultParamsLoader import DefaultParamsLoader
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.util.PathBuilder import PathBuilder
 
 
 class TestMiXCRLoader(TestCase):
-    def test_load(self):
+    def create_dummy_dataset(self, path, add_metadata):
+        file1_content = """cloneId	cloneCount	cloneFraction	targetSequences	targetQualities	allVHitsWithScore	allDHitsWithScore	allJHitsWithScore	allCHitsWithScore	allVAlignments	allDAlignments	allJAlignments	allCAlignments	nSeqFR1	minQualFR1	nSeqCDR1	minQualCDR1	nSeqFR2	minQualFR2	nSeqCDR2	minQualCDR2	nSeqFR3	minQualFR3	nSeqCDR3	minQualCDR3	nSeqFR4	minQualFR4	aaSeqFR1	aaSeqCDR1	aaSeqFR2	aaSeqCDR2	aaSeqFR3	aaSeqCDR3	aaSeqFR4	refPoints
+0	956023.0	0.17165008499706622	TGTGCTCTAGTAACTGACAGCTGGGGGAAATTGCAGTTT	JJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJ	TRAV6*00(716)		TRAJ24*00(291.3)	TRAC*00(75.5)	615|625|648|0|10||50.0		24|52|83|11|39||140.0												TGTGCTCTAGTAACTGACAGCTGGGGGAAATTGCAGTTT	41								CALVTDSWGKLQF		:::::::::0:-3:10:::::11:-4:39:::
+1	102075.0	0.018327155754699974	TGTGCAGAGGCGTTCCTCGAAATACTGGAGGCTTCAAAACTATCTTT	JJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJ	TRAV13-2*00(657.7)		TRAJ9*00(299.4)	TRAC*00(74.9)	586|595|619|0|9||45.0		21|50|81|18|47||145.0												TGTGCAGAGGCGTTCCTCGAAATACTGGAGGCTTCAAAACTATCTTT	41								CAEAFLEI_GGFKTIF		:::::::::0:-4:9:::::18:-1:47:::
+2	90101.0	0.016177272208221627	TGTGCTCTAAGGATAACTCAGGGCGGATCTGAAAAGCTGGTCTTT	JJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJ	TRAV16*00(606.1)		TRAJ57*00(319.5)	TRAC*00(74.9)	529|540|563|0|11||55.0		19|52|83|12|45||165.0												TGTGCTCTAAGGATAACTCAGGGCGGATCTGAAAAGCTGGTCTTT	41								CALRITQGGSEKLVF		:::::::::0:-3:11:::::12:1:45:::
+3	69706.0	0.012515431976851496	TGCATCCCTAACTTTGGAAATGAGAAATTAACCTTT	JJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJ	TRAV26-2*00(603.6)		TRAJ48*00(299.4)	TRAC*00(75.1)	871|878|906|0|7||35.0		23|52|83|7|36||145.0												TGCATCCCTAACTTTGGAAATGAGAAATTAACCTTT	41								CIPNFGNEKLTF		:::::::::0:-8:7:::::7:-3:36:::
+4	56658.0	0.01017271604947138	TGTGCATCCAGGGGCGGCACTGCCAGTAAACTCACCTTT	JJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJ	TRAV29DV5*00(635.9)		TRAJ44*00(279.5)	TRAC*00(76.3)	609|615|642|0|6||30.0		27|52|83|14|39||125.0												TGTGCATCCAGGGGCGGCACTGCCAGTAAACTCACCTTT	41								CASRGGTASKLTF		:::::::::0:-7:6:::::14:-7:39:::
+5	55692.0	0.009999274634246887	TGTGCAGCAAGCATCCGGTCAGGAACCTACAAATACATCTTT	JJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJ	TRAV23DV6*00(719.1)		TRAJ40*00(274.6)	TRAC*00(75.2)	597|611|630|0|14||70.0		26|50|81|18|42||120.0												TGTGCAGCAAGCATCCGGTCAGGAACCTACAAATACATCTTT	41								CAASIRSGTYKYIF		:::::::::0:1:14:::::18:-6:42:::
+6	43466.0	0.007804145501188235	TGTGCTTATAGGCGGCCTGGGGCTGGGAGTTACCAACTCACTTTC	JJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJ	TRAV38-2DV8*00(643.4)		TRAJ28*00(299.5)	TRAC*00(74.8)	682|694|718|0|12||60.0		26|55|86|16|45||145.0												TGTGCTTATAGGCGGCCTGGGGCTGGGAGTTACCAACTCACTTTC	41								CAYRRPGAGSYQLTF		:::::::::0:-4:12:::::16:-6:45:::
+7	42172.0	0.007571813005017951	TGTGCCGGCTGGGGTCCATCAGGAGGAAGCTACATACCTACATTT	JJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJ	TRAV12-2*00(632.1)		TRAJ6*00(299.6)	TRAC*00(75)	631|638|664|0|7||35.0		22|51|82|16|45||145.0												TGTGCCGGCTGGGGTCCATCAGGAGGAAGCTACATACCTACATTT	41								CAGWGPSGGSYIPTF		:::::::::0:-6:7:::::16:-2:45:::
+8	41647.0	0.007477551366308987	TGTGCTGTGAGTGAAGATAACTATGGTCAGAATTTTGTCTTT	JJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJ	TRAV8-4*00(338.2)		TRAJ26*00(289.5)	TRAC*00(76.5)	556|570|590|0|14||70.0		22|49|80|15|42||135.0												TGTGCTGTGAGTGAAGATAACTATGGTCAGAATTTTGTCTTT	41								CAVSEDNYGQNFVF		:::::::::0:0:14:::::15:-2:42:::
+9	19133.0	0.00343525320651163	TGTGCCGTGAACAGTAGGAGTTACCAGAAAGTTACCTTT	JJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJ	TRAV12-2*00(680.8)		TRAJ13*00(254.6)	TRAC*00(76)	631|644|664|0|13||65.0		32|52|83|19|39||100.0												TGTGCCGTGAACAGTAGGAGTTACCAGAAAGTTACCTTT	41								CAVNSRSYQKVTF		:::::::::0:0:13:::::19:-12:39:::"""
+
+        file2_content = """cloneId	cloneCount	cloneFraction	targetSequences	targetQualities	allVHitsWithScore	allDHitsWithScore	allJHitsWithScore	allCHitsWithScore	allVAlignments	allDAlignments	allJAlignments	allCAlignments	nSeqFR1	minQualFR1	nSeqCDR1	minQualCDR1	nSeqFR2	minQualFR2	nSeqCDR2	minQualCDR2	nSeqFR3	minQualFR3	nSeqCDR3	minQualCDR3	nSeqFR4	minQualFR4	aaSeqFR1	aaSeqCDR1	aaSeqFR2	aaSeqCDR2	aaSeqFR3	aaSeqCDR3	aaSeqFR4	refPoints
+10	13954.0	0.002505384583895013	TGTGCTGTGCTGGAAACCAGTGGCTCTAGGTTGACCTTT	JJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJ	TRAV21*00(631.2)		TRAJ58*00(289.6)	TRAC*00(75.4)	624|633|656|0|9||45.0		25|52|83|12|39||135.0												TGTGCTGTGCTGGAAACCAGTGGCTCTAGGTTGACCTTT	41								CAVLETSGSRLTF		:::::::::0:-3:9:::::12:-5:39:::
+11	12927.0	0.0023209908639824305	TGTGCCGTGAACGATGCAGGCAACATGCTCACCTTT	JJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJ	TRAV12-2*00(684.1)		TRAJ39*00(269.6)	TRAC*00(75.9)	631|643|664|0|12||60.0		29|52|83|13|36||115.0												TGTGCCGTGAACGATGCAGGCAACATGCTCACCTTT	41								CAVNDAGNMLTF		:::::::::0:-1:12:::::13:-9:36:::
+12	9299.0	0.0016695980540088666	TGCATCGTTGGAGATGACAAGATCATCTTT	JJJJJJJJJJJJJJJJJJJJJJJJJJJJJJ	TRAV26-2*00(617.6)		TRAJ30*00(254.6)	TRAC*00(75.3)	871|877|906|0|6||30.0		26|46|77|10|30||100.0												TGCATCGTTGGAGATGACAAGATCATCTTT	41								CIVGDDKIIF		:::::::::0:-9:6:::::10:-6:30:::
+13	8924.0	0.0016022683120738926	TGTGCAGCGGTTTTGTCCTGATTTACTCAAATTCCGGGTATGCACTCAACTTC	JJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJ	TRAV29DV5*00(558.8)		TRAJ41*00(299.4)	TRAC*00(74.9)	609|617|642|0|8||40.0		22|51|82|24|53||145.0												TGTGCAGCGGTTTTGTCCTGATTTACTCAAATTCCGGGTATGCACTCAACTTC	41								CAAVLS*FT_NSGYALNF		:::::::::0:-5:8:::::24:-2:53:::
+14	8589.0	0.0015421204092786489	TGTGCCGTGAGTTCAGGATACAGCACCCTCACCTTT	JJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJ	TRAV12-2*00(678.7)		TRAJ11*00(283.5)	TRAC*00(75.4)	631|641|664|0|10||50.0		20|49|80|7|36|SA23G|129.0												TGTGCCGTGAGTTCAGGATACAGCACCCTCACCTTT	41								CAVSSGYSTLTF		:::::::::0:-3:10:::::7:0:36:::
+15	8200.0	0.001472277023644769	TGTGCAATGAGCCAAAACAAAAATGAGAAATTAACCTTT	JJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJ	TRAV12-3*00(610.2)		TRAJ48*00(249.5)	TRAC*00(76.1)	642|654|675|0|12||60.0		33|52|83|20|39||95.0												TGTGCAATGAGCCAAAACAAAAATGAGAAATTAACCTTT	41								CAMSQNKNEKLTF		:::::::::0:-1:12:::::20:-13:39:::"""
+
+        with open(path + "rep1.tsv", "w") as file:
+            file.writelines(file1_content)
+
+        with open(path + "rep2.tsv", "w") as file:
+            file.writelines(file2_content)
+
+        if add_metadata:
+            with open(path + "metadata.csv", "w") as file:
+                file.writelines("""filename,subject_id
+rep1.tsv,1
+rep2.tsv,2""")
+
+    def test_load_repertoire_dataset(self):
         path = EnvironmentSettings.root_path + "test/tmp/mixcr/"
+        PathBuilder.build(path)
+        self.create_dummy_dataset(path, add_metadata=True)
 
-        PathBuilder.build(path + "tmp_input/")
-        with open(path + "tmp_input/CD1_clones_TRA.csv", "w") as file:
-            writer = csv.DictWriter(file,
-                                    delimiter="\t",
-                                    fieldnames=["patient", "dilution", "cloneCount", "allVHitsWithScore",
-                                                "allJHitsWithScore", "nSeqCDR1", "nSeqCDR2", "nSeqCDR3", "minQualCDR3",
-                                                "aaSeqCDR1", "aaSeqCDR2", "aaSeqCDR3", "sampleID"])
-            dicts = [{
-                "patient": "CD12",
-                "dilution": "108'",
-                "cloneCount": 3,
-                "allVHitsWithScore": "TRAV29DV5*00(553.8)",
-                "allJHitsWithScore": "TRAJ15*00(243)",
-                "nSeqCDR1": "TGTGCAGCAA",
-                "nSeqCDR2": "TGTGCAGCAA",
-                "nSeqCDR3": "TGTGCAGCAA",
-                "minQualCDR3": 10,
-                "aaSeqCDR1": "VFAVFA",
-                "aaSeqCDR2": "VFAVFA",
-                "aaSeqCDR3": "VFAVFA",
-                "sampleID": "2"
-            }, {
-                "patient": "CD12",
-                "dilution": "108'",
-                "cloneCount": 5,
-                "allVHitsWithScore": "TRAV14-1*00(735)",
-                "allJHitsWithScore": "TRAJ12*00(243)",
-                "nSeqCDR1": "CAATGTGA",
-                "nSeqCDR2": "CAATGTGA",
-                "nSeqCDR3": "CAATGTGA",
-                "minQualCDR3": 10,
-                "aaSeqCDR1": "CASCAS",
-                "aaSeqCDR2": "CASCAS",
-                "aaSeqCDR3": "CASCAS",
-                "sampleID": "3"
-            }]
+        params = DefaultParamsLoader.load(EnvironmentSettings.default_params_path + "datasets/", "mixcr")
+        params["is_repertoire"] = True
+        params["result_path"] = path
+        params["path"] = path
+        params["metadata_file"] = path + "metadata.csv"
 
-            writer.writeheader()
-            writer.writerows(dicts)
-
-        with open(path + "tmp_input/HC2_clones_TRB.csv", "w") as file:
-            writer = csv.DictWriter(file,
-                                    delimiter="\t",
-                                    fieldnames=["patient", "dilution", "cloneCount", "allVHitsWithScore",
-                                                "allJHitsWithScore", "nSeqCDR1", "nSeqCDR2", "nSeqCDR3", "minQualCDR3",
-                                                "aaSeqCDR1", "aaSeqCDR2", "aaSeqCDR3", "sampleID"])
-            dicts = [{
-                "patient": "CD12",
-                "dilution": "108'",
-                "cloneCount": 3,
-                "allVHitsWithScore": "TRAV13-1*00(735)",
-                "allJHitsWithScore": "TRAJ15*00(243)",
-                "nSeqCDR1": "TGTGCAGCAA",
-                "nSeqCDR2": "TGTGCAGCAA",
-                "nSeqCDR3": "TGTGCAGCAA",
-                "minQualCDR3": 10,
-                "aaSeqCDR1": "CAASNQA",
-                "aaSeqCDR2": "CAASNQA",
-                "aaSeqCDR3": "CAASNQA",
-                "sampleID": "1"
-            }, {
-                "patient": "CD12",
-                "dilution": "108'",
-                "cloneCount": 6,
-                "allVHitsWithScore": "TRAV19-1*00(735)",
-                "allJHitsWithScore": "TRAJ12*00(243)",
-                "nSeqCDR1": "CAATGTGA",
-                "nSeqCDR2": "CAATGTGA",
-                "nSeqCDR3": "CAATGTGA",
-                "minQualCDR3": 10,
-                "aaSeqCDR1": "CAASNTTA",
-                "aaSeqCDR2": "CAASNTTA",
-                "aaSeqCDR3": "CAASNTTA",
-                "sampleID": 1
-            }, {
-                "patient": "CD12",
-                "dilution": "108'",
-                "cloneCount": 6,
-                "allVHitsWithScore": "TRAV19-1*00(735)",
-                "allJHitsWithScore": "TRAJ12*00(243)",
-                "nSeqCDR1": "CAATGTGA",
-                "nSeqCDR2": "CAATGTGA",
-                "nSeqCDR3": "CAATGTGA",
-                "minQualCDR3": 10,
-                "aaSeqCDR1": "CAASNTTA",
-                "aaSeqCDR2": "CAASNTTA",
-                "aaSeqCDR3": "CAASNTTA",
-                "sampleID": 1
-            }, {
-                "patient": "CD12",
-                "dilution": "108'",
-                "cloneCount": 6,
-                "allVHitsWithScore": "TRAV19-1*00(735)",
-                "allJHitsWithScore": "TRAJ12*00(243)",
-                "nSeqCDR1": "CAATGTGA",
-                "nSeqCDR2": "CAATGTGA",
-                "nSeqCDR3": "CAATGTGA",
-                "minQualCDR3": 10,
-                "aaSeqCDR1": "CAASNTTA",
-                "aaSeqCDR2": "CAASNTTA",
-                "aaSeqCDR3": "CAASNTTA",
-                "sampleID": 1
-            }, {
-                "patient": "CD12",
-                "dilution": "108'",
-                "cloneCount": 6,
-                "allVHitsWithScore": "TRAV19-1*00(735)",
-                "allJHitsWithScore": "TRAJ12*00(243)",
-                "nSeqCDR1": "CAATGTGA",
-                "nSeqCDR2": "CAATGTGA",
-                "nSeqCDR3": "CAATGTGA",
-                "minQualCDR3": 10,
-                "aaSeqCDR1": "CAASNTTA",
-                "aaSeqCDR2": "CAASNTTA",
-                "aaSeqCDR3": "CAASNTTA",
-                "sampleID": 1
-            }]
-
-            writer.writeheader()
-            writer.writerows(dicts)
-
-        metadata = pd.DataFrame({"filename": ["HC2_clones_TRB.csv", "CD1_clones_TRA.csv"], "subject_id": ["HC2", "CD1"], "CD": [False, True]})
-        metadata.to_csv(path + "metadata.csv")
-
-        output_path = path + "tmp_output/"
-
-        dataset = MiXCRImport.import_dataset({
-            "path": path + "tmp_input/",
-            "region_type": "IMGT_CDR3",
-            "result_path": output_path,
-            "batch_size": 2, "separator": "\t",
-            "metadata_file": path + "metadata.csv",
-            "column_mapping": {
-                "cloneCount": "counts",
-                "allVHitsWithScore": "v_genes",
-                "allJHitsWithScore": "j_genes"
-            }
-        }, "mixcr_dataset")
+        dataset = MiXCRImport.import_dataset(params, "mixcr_repertoire_dataset")
 
         self.assertEqual(2, dataset.get_example_count())
-
         for index, repertoire in enumerate(dataset.get_data()):
             self.assertTrue(all(sequence.metadata.chain == Chain.ALPHA for sequence in repertoire.sequences))
-            if index == 1:
-                self.assertTrue(repertoire.sequences[0].amino_acid_sequence == "FAVF")
-                self.assertTrue(repertoire.sequences[0].metadata.v_gene == "TRAV29/DV5")
-                self.assertTrue(repertoire.sequences[1].metadata.v_gene == "TRAV14-1")
-                self.assertTrue(repertoire.metadata["CD"])
-            elif index == 0:
-                self.assertEqual(5, len(repertoire.sequences))
-                self.assertEqual("GCAG", repertoire.sequences[0].nucleotide_sequence)
-                self.assertEqual(6, repertoire.sequences[1].metadata.count)
-                self.assertFalse(repertoire.metadata["CD"])
-
-        shutil.rmtree(output_path)
-
-        dataset = MiXCRImport.import_dataset({
-            "path": path + "tmp_input/",
-            "region_type": "IMGT_CDR3",
-            "result_path": path + "tmp_output/",
-            "batch_size": 2, "separator": "\t",
-            "metadata_file": path + "metadata.csv",
-            "column_mapping": {
-                "cloneCount": "counts",
-                "allVHitsWithScore": "v_genes",
-                "allJHitsWithScore": "j_genes"
-            }
-        }, "mixcr_dataset")
-
-        for index, repertoire in enumerate(dataset.get_data()):
-            self.assertTrue(all(sequence.metadata.chain == Chain.ALPHA for sequence in repertoire.sequences))
-            if index == 1:
-                self.assertTrue(repertoire.sequences[0].amino_acid_sequence == "VFAVFA")
-                self.assertTrue(repertoire.sequences[0].metadata.v_gene == "TRAV29/DV5")
-                self.assertTrue(repertoire.sequences[1].metadata.v_gene == "TRAV14-1")
-                self.assertTrue(repertoire.metadata["CD"])
-            elif index == 0:
-                self.assertEqual(5, len(repertoire.sequences))
-                self.assertEqual("TGTGCAGCAA", repertoire.sequences[0].nucleotide_sequence)
-                self.assertEqual(6, repertoire.sequences[1].metadata.count)
-                self.assertFalse(repertoire.metadata["CD"])
+            if index == 0:
+                self.assertEqual(10, len(repertoire.sequences))
+                self.assertEqual("ALVTDSWGKLQ", repertoire.sequences[0].amino_acid_sequence)
+                self.assertEqual("AEAFLEI_GGFKTI", repertoire.sequences[1].amino_acid_sequence)
+                self.assertEqual("TRAV6", repertoire.sequences[0].metadata.v_gene)
+                self.assertEqual("TRAV13-2", repertoire.sequences[1].metadata.v_gene)
+            elif index == 1:
+                self.assertEqual(6, len(repertoire.sequences))
+                self.assertEqual("GCTGTGCTGGAAACCAGTGGCTCTAGGTTGACC", repertoire.sequences[0].nucleotide_sequence)
 
         shutil.rmtree(path)
+
+
+
+    def test_load_sequence_dataset(self):
+        path = EnvironmentSettings.root_path + "test/tmp/mixcr/"
+        PathBuilder.build(path)
+        self.create_dummy_dataset(path, add_metadata=True)
+
+        params = DefaultParamsLoader.load(EnvironmentSettings.default_params_path + "datasets/", "mixcr")
+        params["is_repertoire"] = False
+        params["paired"] = False
+        params["result_path"] = path
+        params["path"] = path
+
+        dataset = MiXCRImport.import_dataset(params, "mixcr_repertoire_dataset")
+
+        self.assertEqual(16, dataset.get_example_count())
+
+        seqs = [sequence for sequence in dataset.get_data()]
+
+        self.assertEqual("AVLETSGSRLT", seqs[0].amino_acid_sequence)
+        self.assertEqual("AVNDAGNMLT", seqs[1].amino_acid_sequence)
+        self.assertEqual("TRAV21", seqs[0].metadata.v_gene)
+        self.assertEqual("TRAV12-2", seqs[1].metadata.v_gene)
+
+        shutil.rmtree(path)
+

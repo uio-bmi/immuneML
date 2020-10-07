@@ -1,6 +1,5 @@
 import airr
-from pandas import DataFrame
-
+import pandas as pd
 from source.IO.dataset_import.DataImport import DataImport
 from source.IO.dataset_import.DatasetImportParams import DatasetImportParams
 from source.data_model.dataset.Dataset import Dataset
@@ -47,7 +46,7 @@ class AIRRImport(DataImport):
 
 
     @staticmethod
-    def preprocess_dataframe(df: DataFrame, params: DatasetImportParams):
+    def preprocess_dataframe(df: pd.DataFrame, params: DatasetImportParams):
         """
         Function for preprocessing data from a dataframe containing AIRR data, such that:
             - productive sequences, sequences with stop codons or out of frame sequences are filtered according to specification

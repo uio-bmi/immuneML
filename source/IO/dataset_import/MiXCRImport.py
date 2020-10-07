@@ -2,7 +2,7 @@ import pandas as pd
 
 from source.IO.dataset_import.DataImport import DataImport
 from source.IO.dataset_import.DatasetImportParams import DatasetImportParams
-from source.data_model.dataset.RepertoireDataset import RepertoireDataset
+from source.data_model.dataset import Dataset
 from source.data_model.receptor.RegionType import RegionType
 from source.util.ImportHelper import ImportHelper
 
@@ -46,14 +46,21 @@ class MiXCRImport(DataImport):
         RegionType.IMGT_FR4:  {"AA": "aaSeqFR4", "NT": "nSeqFR4"}
     }
 
-    @staticmethod
-    def import_dataset(params: dict, dataset_name: str) -> RepertoireDataset:
-        mixcr_params = DatasetImportParams.build_object(**params)
-        dataset = ImportHelper.import_or_load_dataset(params, mixcr_params, dataset_name, MiXCRImport.preprocess_repertoire)
-        return dataset
+    # @staticmethod
+    # def import_dataset(params: dict, dataset_name: str) -> RepertoireDataset:
+    #     mixcr_params = DatasetImportParams.build_object(**params)
+    #     dataset = ImportHelper.import_or_load_dataset(params, mixcr_params, dataset_name, MiXCRImport.preprocess_repertoire)
+    #     return dataset
+    #
 
     @staticmethod
-    def preprocess_repertoire(metadata: dict, params: DatasetImportParams) -> pd.DataFrame:
+    def import_dataset(params: dict, dataset_name: str) -> Dataset:
+        return ImportHelper.import_dataset(MiXCRImport, params, dataset_name)
+
+
+
+    @staticmethod
+    def preprocess_dataframe(df: pd.DataFrame, params: DatasetImportParams):
         """
         Function for loading the data from one MiXCR file, such that:
             - for the given region (CDR3/full sequence), both nucleotide and amino acid sequence are loaded
@@ -70,12 +77,11 @@ class MiXCRImport(DataImport):
             data frame corresponding to Repertoire.FIELDS and custom lists which can be used to create a Repertoire object
 
         """
-
-        df = ImportHelper.load_repertoire_as_dataframe(metadata, params)
-
         df["sequence_aas"] = df[MiXCRImport.SEQUENCE_NAME_MAP[params.region_type]["AA"]]
         df["sequences"] = df[MiXCRImport.SEQUENCE_NAME_MAP[params.region_type]["NT"]]
         ImportHelper.junction_to_cdr3(df, params.region_type)
+
+        df["counts"] = df["counts"].astype(float).astype(int)
 
         if "v_genes" in df.columns:
             df["chains"] = ImportHelper.load_chains_from_genes(df, "v_genes")
@@ -94,3 +100,7 @@ class MiXCRImport(DataImport):
         tmp_df = df.apply(lambda row: row[column_name].split(",")[0].replace("DV", "/DV").replace("//", "/").split("*", 1)[0], axis=1)
 
         return tmp_df
+
+    @staticmethod
+    def import_receptors(df, params):
+        raise NotImplementedError("MiXCRImport: import of paired receptor MiXCR data has not been implemented.")
