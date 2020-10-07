@@ -3,10 +3,11 @@ from dataclasses import dataclass
 
 @dataclass
 class IRISImportParams:
+    is_repertoire: bool = True
     metadata_file: str = None
     path: str = None
     result_path: str = None
-    file_size: int = None
+    sequence_file_size: int = None
     paired: bool = None
     import_dual_chains: bool = None
     import_all_gene_combinations: bool = None

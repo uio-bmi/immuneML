@@ -12,7 +12,7 @@ class ReceptorDatasetImportParams:
     separator: str = None
     column_mapping: dict = None
     region_type: RegionType = None
-    file_size: int = None
+    sequence_file_size: int = None
     paired: bool = None
     chains: ChainPair = None
     organism: str = None

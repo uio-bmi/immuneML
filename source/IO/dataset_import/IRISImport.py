@@ -40,26 +40,25 @@ class IRISImport(DataImport):
 
     @staticmethod
     def import_dataset(params: dict, dataset_name: str) -> Dataset:
-        if "metadata_file" in params and params["metadata_file"] is not None:
-            dataset = IRISImport.load_repertoire_dataset(params, dataset_name)
-        else:
-            dataset = IRISImport.load_sequence_dataset(params, dataset_name)
+        iris_params = IRISImportParams.build_object(**params)
+
+        dataset = ImportHelper.load_dataset_if_exists(params, iris_params, dataset_name)
+        if dataset is None:
+            if iris_params.is_repertoire:
+                dataset = ImportHelper.import_repertoire_dataset(IRISImport, iris_params, dataset_name)
+            else:
+                dataset = IRISImport.load_sequence_dataset(params, dataset_name)
+
         return dataset
 
-    @staticmethod
-    def load_repertoire_dataset(params: dict, dataset_name: str) -> Dataset:
-        iris_params = IRISImportParams.build_object(**params)
-        return ImportHelper.import_repertoire_dataset(IRISImport.preprocess_repertoire, iris_params, dataset_name)
 
     @staticmethod
     def _load_gene(identifier):
         return identifier.split("*", 1)[0]
 
+
     @staticmethod
-    def preprocess_repertoire(metadata: dict, params: IRISImportParams) -> dict:
-        # todo make compatible with nucleotide sequences (no use case yet)
-        # todo make compatible with gamma/delta and BCR (no use case yet)
-        df = ImportHelper.load_repertoire_as_dataframe(metadata, params, alternative_load_func=IRISImport.load_iris_dataframe)
+    def preprocess_dataframe(df: pd.DataFrame, params):
 
         subframes = []
 
@@ -120,7 +119,7 @@ class IRISImport(DataImport):
         return df
 
     @staticmethod
-    def load_iris_dataframe(filepath, params):
+    def alternative_load_func(filepath, params):
         usecols = ["Clonotype ID",
                    "Chain: TRA (1)", "TRA - V gene (1)",
                    "TRA - J gene (1)",
@@ -151,16 +150,13 @@ class IRISImport(DataImport):
                                                     all_dual_chains=iris_params.import_dual_chains,
                                                     all_genes=iris_params.import_all_gene_combinations)
 
-            while len(items) > iris_params.file_size or (index == len(filenames) - 1 and len(items) > 0):
+            while len(items) > iris_params.sequence_file_size or (index == len(filenames) - 1 and len(items) > 0):
                 dataset_filenames.append(iris_params.result_path + "batch_{}.pickle".format(file_index))
-                IRISImport.store_items(dataset_filenames, items, iris_params.file_size)
-                items = items[iris_params.file_size:]
+                ImportHelper.store_sequence_items(dataset_filenames, items, iris_params.sequence_file_size)
+                items = items[iris_params.sequence_file_size:]
                 file_index += 1
 
-        return ReceptorDataset(filenames=dataset_filenames, file_size=iris_params.file_size, name=dataset_name) if iris_params.paired \
-            else SequenceDataset(filenames=dataset_filenames, file_size=iris_params.file_size, name=dataset_name)
+        return ReceptorDataset(filenames=dataset_filenames, file_size=iris_params.sequence_file_size, name=dataset_name) if iris_params.paired \
+            else SequenceDataset(filenames=dataset_filenames, file_size=iris_params.sequence_file_size, name=dataset_name)
 
-    @staticmethod
-    def store_items(dataset_filenames: list, items: list, file_size: int):
-        with open(dataset_filenames[-1], "wb") as file:
-            pickle.dump(items[:file_size], file)
+

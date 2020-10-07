@@ -364,7 +364,7 @@ mouse_subject0045,PA,1,TRAV16D/DV11*03,TRAJ53*01,CAMRGNSGGSNYKLTF,tgtgctatgagggg
             },
             "chains": "TRA_TRB",
             "region_type": "IMGT_CDR3",
-            "file_size": 50000,
+            "sequence_file_size": 50000,
             "organism": "mouse"
         }, "dataset name 2")
 

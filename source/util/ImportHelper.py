@@ -37,14 +37,14 @@ class ImportHelper:
 
     @staticmethod
     def import_dataset(import_class, params: dict, dataset_name: str) -> Dataset:
-        adaptive_params = DatasetImportParams.build_object(**params)
+        processed_params = DatasetImportParams.build_object(**params)
 
-        dataset = ImportHelper.load_dataset_if_exists(params, adaptive_params, dataset_name)
+        dataset = ImportHelper.load_dataset_if_exists(params, processed_params, dataset_name)
         if dataset is None:
-            if adaptive_params.is_repertoire:
-                dataset = ImportHelper.import_repertoire_dataset(import_class, adaptive_params, dataset_name)
+            if processed_params.is_repertoire:
+                dataset = ImportHelper.import_repertoire_dataset(import_class, processed_params, dataset_name)
             else:
-                dataset = ImportHelper.import_sequence_dataset(import_class, adaptive_params, dataset_name)
+                dataset = ImportHelper.import_sequence_dataset(import_class, processed_params, dataset_name)
 
         return dataset
 

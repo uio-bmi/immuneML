@@ -54,7 +54,7 @@ class SingleLineReceptorImport(DataImport):
                     epitope: epitope # everything other than sequences, V and J gene per chain, and an identifier will be stored in the receptor's metadata
                 chains: ALPHA_BETA # which receptor chains are in the input receptor data file(s)
                 region_type: CDR3
-                file_size: 50000
+                sequence_file_size: 50000
                 organism: mouse # mouse or human
 
     """
@@ -103,7 +103,7 @@ class SingleLineReceptorImport(DataImport):
                                                               if all(item not in key for item in
                                                                      ["v_gene", 'j_gene', "count", "identifier"] + chain_names)}))
 
-        return ReceptorDataset.build(elements, generic_params.file_size, generic_params.result_path)
+        return ReceptorDataset.build(elements, generic_params.sequence_file_size, generic_params.result_path)
 
     @staticmethod
     def _extract_filenames(params: DatasetImportParams) -> List[str]:
