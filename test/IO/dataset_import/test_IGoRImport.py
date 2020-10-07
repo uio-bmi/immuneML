@@ -2,6 +2,7 @@ import shutil
 from unittest import TestCase
 
 from source.IO.dataset_import.IGoRImport import IGoRImport
+from source.dsl.DefaultParamsLoader import DefaultParamsLoader
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.util.PathBuilder import PathBuilder
 
@@ -35,19 +36,21 @@ class TestIGoRImport(TestCase):
 rep1.tsv,1
 rep2.tsv,2""")
 
-    def test_load_file_content(self):
+    def test_load_repertoire(self):
         """Test dataset content with and without a header included in the input file"""
         path = EnvironmentSettings.root_path + "test/tmp/io_igor_load/"
 
         PathBuilder.build(path)
         self.write_dummy_files(path)
-        dataset = IGoRImport.import_dataset({"result_path": path, "metadata_file": path + "metadata.csv",
-                                             "columns_to_load": ["seq_index", "nt_CDR3", "anchors_found", "is_inframe"],
-                                             "path": path, "batch_size": 4, "import_out_of_frame": False,
-                                             "import_with_stop_codon": False,
-                                             "separator": ",", "region_type": "IMGT_CDR3",
-                                             "column_mapping": {"nt_CDR3": "sequences",
-                                                                "seq_index": "sequence_identifiers"}}, "igor_dataset")
+
+        params = DefaultParamsLoader.load(EnvironmentSettings.default_params_path + "datasets/", "igor")
+        params["is_repertoire"] = True
+        params["result_path"] = path
+        params["path"] = path
+        params["metadata_file"] = path + "metadata.csv"
+
+        dataset = IGoRImport.import_dataset(params, "igor_repertoire_dataset")
+
 
         self.assertEqual(2, dataset.get_example_count())
         self.assertEqual(len(dataset.repertoires[0].sequences), 1)
@@ -56,24 +59,53 @@ rep2.tsv,2""")
         self.assertEqual(dataset.repertoires[0].sequences[0].amino_acid_sequence, "ARDRWSTPVLRYFDWWTPPYYYYMDV")
         shutil.rmtree(path)
 
-    def test_load_with_stop_codon(self):
+    def test_load_repertoire_with_stop_codon(self):
         path = EnvironmentSettings.root_path + "test/tmp/io_igor_load/"
 
         PathBuilder.build(path)
         self.write_dummy_files(path)
 
-        dataset_stop_codons = IGoRImport.import_dataset({"result_path": path, "metadata_file": path + "metadata.csv",
-                                             "columns_to_load": ["seq_index", "nt_CDR3", "anchors_found", "is_inframe"],
-                                             "path": path, "batch_size": 4, "import_out_of_frame": False,
-                                             "import_with_stop_codon": True,
-                                             "separator": ",", "region_type": "IMGT_CDR3",
-                                             "column_mapping": {"nt_CDR3": "sequences",
-                                                                "seq_index": "sequence_identifiers"}}, "igor_dataset")
+        params = DefaultParamsLoader.load(EnvironmentSettings.default_params_path + "datasets/", "igor")
+        params["is_repertoire"] = True
+        params["result_path"] = path
+        params["path"] = path
+        params["import_with_stop_codon"] = True
+        params["metadata_file"] = path + "metadata.csv"
+
+        dataset_stop_codons = IGoRImport.import_dataset(params, "igor_dataset_stop")
+
 
         self.assertEqual(2, dataset_stop_codons.get_example_count())
         self.assertEqual(len(dataset_stop_codons.repertoires[0].sequences), 2)
         self.assertEqual(len(dataset_stop_codons.repertoires[1].sequences), 2)
 
         self.assertEqual(dataset_stop_codons.repertoires[0].sequences[0].amino_acid_sequence, "ARVNRHIVVVTAIMTG*NWFDP")
+
+        shutil.rmtree(path)
+
+    def test_load_sequence_dataset(self):
+        """Test dataset content with and without a header included in the input file"""
+        path = EnvironmentSettings.root_path + "test/tmp/io_igor_load/"
+
+        PathBuilder.build(path)
+        self.write_dummy_files(path)
+
+        params = DefaultParamsLoader.load(EnvironmentSettings.default_params_path + "datasets/", "igor")
+        params["is_repertoire"] = False
+        params["paired"] = False
+        params["result_path"] = path
+        params["path"] = path
+        params["import_with_stop_codon"] = True
+
+        dataset = IGoRImport.import_dataset(params, "igor_seq_dataset")
+
+        seqs = [sequence for sequence in dataset.get_data()]
+
+        self.assertEqual(4, dataset.get_example_count())
+
+        self.assertEqual("GCGAGACGTGTCTAGGGAGGATATTGTAGTAGTACCAGCTGCTATGACGGGCGGTCCGGTAGTACTACTTTGACTAC", seqs[0].nucleotide_sequence)
+        self.assertEqual("GCGAGAGGCTTCCATGGAACTACAGTAACTACGTTTGTAGGCTGTAGTACTACATGGACGTC", seqs[1].nucleotide_sequence)
+        self.assertEqual("GCGAGAGTTAATCGGCATATTGTGGTGGTGACTGCTATTATGACCGGGTAAAACTGGTTCGACCCC", seqs[2].nucleotide_sequence)
+        self.assertEqual("GCGAGAGATAGGTGGTCAACCCCAGTATTACGATATTTTGACTGGTGGACCCCGCCCTACTACTACTACATGGACGTC", seqs[3].nucleotide_sequence)
 
         shutil.rmtree(path)

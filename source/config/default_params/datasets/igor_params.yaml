@@ -1,4 +1,3 @@
-import_productive: null # no effect as this info is not available in files created by IGoR
 import_with_stop_codon: False # whether to import sequences with stop codon
 import_out_of_frame: False # whether out of frame sequences should be imported
 separator: ","

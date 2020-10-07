@@ -1,8 +1,8 @@
 from source.IO.dataset_import.DataImport import DataImport
 from source.IO.dataset_import.DatasetImportParams import DatasetImportParams
-from source.data_model.dataset.RepertoireDataset import RepertoireDataset
+from source.data_model.dataset import Dataset
 from source.util.ImportHelper import ImportHelper
-
+import pandas as pd
 
 class IGoRImport(DataImport):
     """
@@ -53,15 +53,14 @@ class IGoRImport(DataImport):
         'TGC':'C', 'TGT':'C', 'TGA':'*', 'TGG':'W',
         }
 
-    @staticmethod
-    def import_dataset(params: dict, dataset_name: str) -> RepertoireDataset:
-        igor_params = DatasetImportParams.build_object(**params)
-        return ImportHelper.import_repertoire_dataset(IGoRImport.preprocess_repertoire, igor_params, dataset_name)
 
     @staticmethod
-    def preprocess_repertoire(metadata: dict, params: DatasetImportParams):
-        df = ImportHelper.load_repertoire_as_dataframe(metadata, params)
+    def import_dataset(params: dict, dataset_name: str) -> Dataset:
+        return ImportHelper.import_dataset(IGoRImport, params, dataset_name)
 
+
+    @staticmethod
+    def preprocess_dataframe(df: pd.DataFrame, params: DatasetImportParams):
         if "counts" not in df.columns:
             df["counts"] = 1
 
