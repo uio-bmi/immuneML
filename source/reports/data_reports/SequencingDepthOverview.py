@@ -153,13 +153,13 @@ class SequencingDepthOverview(DataReport):
     def _compute_total_reads(self, repertoire: Repertoire, frame_type: SequenceFrameType):
         count = 0
         for sequence in repertoire.sequences:
-            if sequence.metadata is not None and sequence.metadata.frame_type.upper() == frame_type.name:
+            if sequence.metadata is not None and sequence.metadata.frame_type == frame_type:
                 count += sequence.metadata.count
         return count
 
     def _compute_unique_clonotypes(self, repertoire: Repertoire, frame_type: SequenceFrameType):
         count = 0
         for sequence in repertoire.sequences:
-            if sequence.metadata is not None and sequence.metadata.frame_type.upper() == frame_type.name:
+            if sequence.metadata is not None and sequence.metadata.frame_type == frame_type:
                 count += 1
         return count

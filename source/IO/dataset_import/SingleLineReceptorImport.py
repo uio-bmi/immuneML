@@ -52,7 +52,7 @@ class SingleLineReceptorImport(DataImport):
                     j_b_gene: beta_j_gene
                     clone_id: identifier
                     epitope: epitope # everything other than sequences, V and J gene per chain, and an identifier will be stored in the receptor's metadata
-                chains: TRA_TRB # which receptor chains are in the input receptor data file(s)
+                receptor_chains: TRA_TRB # which receptor chains are in the input receptor data file(s)
                 region_type: CDR3
                 sequence_file_size: 50000
                 organism: mouse # mouse or human
@@ -84,8 +84,8 @@ class SingleLineReceptorImport(DataImport):
             df.drop_duplicates()
             df.rename(columns=generic_params.column_mapping, inplace=True)
             for index, row in df.iterrows():
-                chain_vals = [ch for ch in generic_params.chains.value]
-                chain_names = [Chain.get_chain(ch).name.lower() for ch in generic_params.chains.value]
+                chain_vals = [ch for ch in generic_params.receptor_chains.value]
+                chain_names = [Chain.get_chain(ch).name.lower() for ch in generic_params.receptor_chains.value]
                 sequences = {chain_vals[i]: ReceptorSequence(amino_acid_sequence=row[
                                      chain_name + "_amino_acid_sequence"] if chain_name + "_amino_acid_sequence" in row else None,
                                                   nucleotide_sequence=row[

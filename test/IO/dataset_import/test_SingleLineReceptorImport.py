@@ -362,7 +362,7 @@ mouse_subject0045,PA,1,TRAV16D/DV11*03,TRAJ53*01,CAMRGNSGGSNYKLTF,tgtgctatgagggg
                 "j_b_gene": "beta_j_gene",
                 "clone_id": "identifier"
             },
-            "chains": "TRA_TRB",
+            "receptor_chains": "TRA_TRB",
             "region_type": "IMGT_CDR3",
             "sequence_file_size": 50000,
             "organism": "mouse"

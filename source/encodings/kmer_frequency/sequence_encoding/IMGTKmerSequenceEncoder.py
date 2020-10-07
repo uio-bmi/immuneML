@@ -22,7 +22,7 @@ class IMGTKmerSequenceEncoder(SequenceEncodingStrategy):
         k = params.model["k"]
         length = len(sequence.get_sequence())
 
-        if sequence.metadata is not None and sequence.metadata.frame_type.upper() != SequenceFrameType.IN.name:
+        if sequence.metadata is not None and sequence.metadata.frame_type != SequenceFrameType.IN:
             logging.warning('Sequence either has out or stop codon. Ignoring sequence.')
             return None
 

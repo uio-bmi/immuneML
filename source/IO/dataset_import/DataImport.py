@@ -13,8 +13,3 @@ class DataImport(metaclass=abc.ABCMeta):
     def import_dataset(params, dataset_name: str) -> Dataset:
         pass
 
-    @staticmethod
-    @abc.abstractmethod
-    def preprocess_dataframe(df: pd.DataFrame, params: DatasetImportParams) -> pd.DataFrame:
-        pass
-

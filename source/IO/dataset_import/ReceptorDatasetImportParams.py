@@ -14,14 +14,14 @@ class ReceptorDatasetImportParams:
     region_type: RegionType = None
     sequence_file_size: int = None
     paired: bool = None
-    chains: ChainPair = None
+    receptor_chains: ChainPair = None
     organism: str = None
 
     @classmethod
-    def build_object(cls, region_type: str = None, chains: str = None, **kwargs):
+    def build_object(cls, region_type: str = None, receptor_chains: str = None, **kwargs):
         params = {
             "region_type": RegionType[region_type.upper()] if region_type else None,
-            "chains": ChainPair[chains.upper()] if chains else None
+            "receptor_chains": ChainPair[receptor_chains.upper()] if receptor_chains else None
         }
         params = {**kwargs, **params}
         return ReceptorDatasetImportParams(**params)
