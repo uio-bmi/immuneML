@@ -1,7 +1,7 @@
 import pandas as pd
 from source.IO.dataset_import.DataImport import DataImport
 from source.IO.dataset_import.DatasetImportParams import DatasetImportParams
-from source.data_model.dataset.RepertoireDataset import RepertoireDataset
+from source.data_model.dataset import Dataset
 from source.util.ImportHelper import ImportHelper
 
 
@@ -28,20 +28,24 @@ class OLGAImport(DataImport):
     """
 
     @staticmethod
-    def import_dataset(params: dict, dataset_name: str) -> RepertoireDataset:
-        olga_params = DatasetImportParams.build_object(**params)
-        return ImportHelper.import_repertoire_dataset(OLGAImport.preprocess_repertoire, olga_params, dataset_name)
+    def import_dataset(params: dict, dataset_name: str) -> Dataset:
+        return ImportHelper.import_dataset(OLGAImport, params, dataset_name)
+
 
     @staticmethod
-    def olga_load_func(filepath, params):
+    def alternative_load_func(filepath, params):
         df = pd.read_csv(filepath, sep=params.separator, iterator=False, dtype=str, header=None)
         df.columns = ["sequences", "sequence_aas", "v_genes", "j_genes"]
         return df
 
     @staticmethod
     def preprocess_repertoire(metadata: dict, params: DatasetImportParams):
-        df = ImportHelper.load_repertoire_as_dataframe(metadata, params, alternative_load_func=OLGAImport.olga_load_func)
+        df = ImportHelper.load_repertoire_as_dataframe(metadata, params, alternative_load_func=OLGAImport.alternative_load_func)
+        df = OLGAImport.preprocess_dataframe(df, params)
+        return df
 
+    @staticmethod
+    def preprocess_dataframe(df: pd.DataFrame, params: DatasetImportParams):
         if "sequences" not in df.columns and "sequence_aas" not in df.columns:
             raise IOError("OLGAImport: Columns should contain at least 'sequences' or 'sequence_aas'.")
 
@@ -49,6 +53,8 @@ class OLGAImport(DataImport):
             df["counts"] = 1
 
         df["sequence_identifiers"] = None
+
+        ImportHelper.junction_to_cdr3(df, params.region_definition, params.region_type)
 
         return df
 
