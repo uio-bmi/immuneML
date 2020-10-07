@@ -52,7 +52,7 @@ class SingleLineReceptorImport(DataImport):
                     j_b_gene: beta_j_gene
                     clone_id: identifier
                     epitope: epitope # everything other than sequences, V and J gene per chain, and an identifier will be stored in the receptor's metadata
-                chains: ALPHA_BETA # which receptor chains are in the input receptor data file(s)
+                chains: TRA_TRB # which receptor chains are in the input receptor data file(s)
                 region_type: CDR3
                 sequence_file_size: 50000
                 organism: mouse # mouse or human
