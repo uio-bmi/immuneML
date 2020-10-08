@@ -121,7 +121,7 @@ class TestImmuneMLApp(TestCase):
                 "export_instr": {
                     "type": "DatasetGeneration",
                     "datasets": ["d1"],
-                    "formats": ["AIRR"]
+                    "export_formats": ["AIRR"]
                 },
                 "inst1": {
                     "type": "TrainMLModel",

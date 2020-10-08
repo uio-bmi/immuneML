@@ -119,7 +119,7 @@ class TestMLIE(TestCase):
                 "inst2": {
                     "type": "MLApplication",
                     "dataset": "d1",
-                    "config_path": path + "result_export/inst1/optimal_CD/zip/ml_model_simpleLR.zip",
+                    "config_path": path + "result_export/inst1/optimal_CD/zip/ml_model_CD.zip",
                     "label": "CD",
                     "pool_size": 4
                 }

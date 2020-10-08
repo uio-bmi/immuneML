@@ -63,7 +63,7 @@ specification for random repertoire generation and export is given below:
     my_dataset_generation_instruction:
       type: DatasetGeneration
       datasets: [d1] # list of datasets to export
-      formats: [AIRR, Pickle] # list of formats to export the datasets to
+      export_formats: [AIRR, Pickle] # list of formats to export the datasets to
 
 
 Generate a random repertoire dataset in the code

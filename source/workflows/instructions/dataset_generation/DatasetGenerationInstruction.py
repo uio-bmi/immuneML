@@ -29,7 +29,7 @@ class DatasetGenerationInstruction(Instruction):
             datasets: # list of datasets to export
                 - my_generated_dataset
                 - my_dataset_from_adaptive
-            formats: # list of formats to export the datasets to
+            export_formats: # list of formats to export the datasets to
                 - AIRR
                 - Pickle
 
