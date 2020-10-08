@@ -23,6 +23,7 @@ class DatasetImportParams:
     metadata_column_mapping: list = None
     batch_size: int = 1
     sequence_file_size: int = 50000
+    organism: str = None
 
 
     @classmethod

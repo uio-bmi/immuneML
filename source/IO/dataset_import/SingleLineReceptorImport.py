@@ -9,7 +9,6 @@ from scripts.specification_util import update_docs_per_mapping
 from source.IO.dataset_export.PickleExporter import PickleExporter
 from source.IO.dataset_import.DataImport import DataImport
 from source.IO.dataset_import.DatasetImportParams import DatasetImportParams
-from source.IO.dataset_import.ReceptorDatasetImportParams import ReceptorDatasetImportParams
 from source.data_model.dataset.ReceptorDataset import ReceptorDataset
 from source.data_model.receptor.ChainPair import ChainPair
 from source.data_model.receptor.ReceptorBuilder import ReceptorBuilder
@@ -61,7 +60,7 @@ class SingleLineReceptorImport(DataImport):
 
     @staticmethod
     def import_dataset(params, dataset_name: str) -> ReceptorDataset:
-        generic_params = ReceptorDatasetImportParams.build_object(**params)
+        generic_params = DatasetImportParams.build_object(**params)
         filenames = SingleLineReceptorImport._extract_filenames(generic_params)
 
         PathBuilder.build(generic_params.result_path, warn_if_exists=True)
@@ -75,7 +74,7 @@ class SingleLineReceptorImport(DataImport):
         return dataset
 
     @staticmethod
-    def _import_from_files(filenames: List[str], generic_params: ReceptorDatasetImportParams) -> ReceptorDataset:
+    def _import_from_files(filenames: List[str], generic_params: DatasetImportParams) -> ReceptorDataset:
         elements = []
 
         for file in filenames:

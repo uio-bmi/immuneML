@@ -2,7 +2,6 @@ import pandas as pd
 from source.IO.dataset_import.DataImport import DataImport
 from source.IO.dataset_import.DatasetImportParams import DatasetImportParams
 from source.data_model.dataset import Dataset
-from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.receptor.RegionType import RegionType
 from source.util.ImportHelper import ImportHelper
 
