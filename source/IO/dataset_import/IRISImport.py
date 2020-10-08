@@ -28,7 +28,7 @@ class IRISImport(DataImport):
         my_iris_dataset:
             format: IRIS
             params:
-                file_size: 1000 # number of sequences / receptors per file as stored internally by ImmuneML in ImmuneML format - not visible to users
+                sequence_file_size: 1000 # number of sequences / receptors per file as stored internally by ImmuneML in ImmuneML format - not visible to users
                 paired: True
                 import_dual_chains: True
                 import_all_gene_combinations: False
@@ -64,7 +64,7 @@ class IRISImport(DataImport):
 
         chain_dups_to_process = ("1", "2") if params.import_dual_chains is True else ("1")
 
-        for chain in ("TRA", "TRB"):
+        for chain in params.receptor_chains.value:
             for chain_dup in chain_dups_to_process:
                 subframe_dict = {"cell_ids": df["Clonotype ID"],
                                                "sequence_aas": df[f"Chain: {chain} ({chain_dup})"],
@@ -120,15 +120,17 @@ class IRISImport(DataImport):
 
     @staticmethod
     def alternative_load_func(filepath, params):
+        first_chain, second_chain = params.receptor_chains.value
+
         usecols = ["Clonotype ID",
-                   "Chain: TRA (1)", "TRA - V gene (1)",
-                   "TRA - J gene (1)",
-                   "Chain: TRA (2)", "TRA - V gene (2)",
-                   "TRA - J gene (2)",
-                   "Chain: TRB (1)", "TRB - V gene (1)",
-                   "TRB - J gene (1)",
-                   "Chain: TRB (2)", "TRB - V gene (2)",
-                   "TRB - J gene (2)"]
+                   f"Chain: {first_chain} (1)", f"{first_chain} - V gene (1)",
+                   f"{first_chain} - J gene (1)",
+                   f"Chain: {first_chain} (2)", f"{first_chain} - V gene (2)",
+                   f"{first_chain} - J gene (2)",
+                   f"Chain: {second_chain} (1)", f"{second_chain} - V gene (1)",
+                   f"{second_chain} - J gene (1)",
+                   f"Chain: {second_chain} (2)", f"{second_chain} - V gene (2)",
+                   f"{second_chain} - J gene (2)"]
 
         if type(params.extra_columns_to_load) is list:
             usecols = usecols + params.extra_columns_to_load

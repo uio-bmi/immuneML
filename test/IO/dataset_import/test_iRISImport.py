@@ -46,7 +46,7 @@ TCR_AB	1421	AT	TRAV12-3*01	null	TRAJ17*01	null	null	null	null	null	null	null	nul
         # case: minimal dataset (all dual chains and all genes = False)
         dataset = IRISImport.import_dataset({"is_repertoire": True, "result_path": path, "metadata_file": path + "metadata.csv", "path": path,
                                              "import_dual_chains": False, "import_all_gene_combinations": False,
-                                             "extra_columns_to_load": ["extra_col"]}, "iris_dataset")
+                                             "extra_columns_to_load": ["extra_col"], "receptor_chains": "TRA_TRB"}, "iris_dataset")
 
         self.assertEqual(number_of_repertoires, dataset.get_example_count())
         self.assertEqual(number_of_repertoires, len(dataset.get_data()))
@@ -69,7 +69,7 @@ TCR_AB	1421	AT	TRAV12-3*01	null	TRAJ17*01	null	null	null	null	null	null	null	nul
 
         dataset = IRISImport.import_dataset({"is_repertoire": True, "result_path": path, "metadata_file": path + "metadata.csv", "path": path,
                                              "import_dual_chains": True, "import_all_gene_combinations": True,
-                                             "extra_columns_to_load": ["extra_col"]}, "dataset_name")
+                                             "extra_columns_to_load": ["extra_col"], "receptor_chains": "TRA_TRB"}, "dataset_name")
 
         self.assertEqual(number_of_repertoires, dataset.get_example_count())
         self.assertEqual(number_of_repertoires, len(dataset.get_data()))
@@ -88,7 +88,8 @@ TCR_AB	1421	AT	TRAV12-3*01	null	TRAJ17*01	null	null	null	null	null	null	null	nul
 
         sequence_dataset = IRISImport.import_dataset({"is_repertoire": False, "result_path": path, "path": path,
                                                       "import_dual_chains": True, "sequence_file_size": 1000,
-                                                      "import_all_gene_combinations": True, "paired": False}, "dataset_name2")
+                                                      "import_all_gene_combinations": True, "paired": False,
+                                                      "receptor_chains": "TRA_TRB"}, "dataset_name2")
 
         self.assertIsInstance(sequence_dataset, SequenceDataset)
 
@@ -106,7 +107,8 @@ TCR_AB	1421	AT	TRAV12-3*01	null	TRAJ17*01	null	null	null	null	null	null	null	nul
 
         receptor_dataset = IRISImport.import_dataset({"is_repertoire": False, "result_path": path, "path": path,
                                                       "import_dual_chains": True, "sequence_file_size": 1000,
-                                                      "import_all_gene_combinations": True, "paired": True}, "dataset_name3")
+                                                      "import_all_gene_combinations": True, "paired": True,
+                                                      "receptor_chains": "TRA_TRB"}, "dataset_name3")
 
         self.assertIsInstance(receptor_dataset, ReceptorDataset)
 
