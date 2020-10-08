@@ -70,6 +70,7 @@ reference_rep.tsv,rep1"""
             file.writelines(reference_metadata)
 
         reference_data_loader_params = {
+            "is_repertoire":  True,
             "result_path": path,
             "column_mapping": {
                 "CDR3B AA Sequence": "sequence_aas",

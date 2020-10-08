@@ -157,6 +157,7 @@ class TestImportParser(TestCase):
                 "d1": {
                     "format": "MiXCR",
                     "params": {
+                        "is_repertoire": True,
                         "path": path + "tmp_input/",
                         "result_path": path + "tmp_output/",
                         "metadata_file": path + "metadata.csv",

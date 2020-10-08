@@ -6,7 +6,7 @@ from source.data_model.receptor.RegionType import RegionType
 
 @dataclass
 class DatasetImportParams:
-    is_repertoire: bool = True
+    is_repertoire: bool = None
     path: str = None
     metadata_file: str = None
     result_path: str = None

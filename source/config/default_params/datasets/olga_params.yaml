@@ -1,3 +1,5 @@
+is_repertoire: True
+paired: False
 separator: "\t"
 columns_to_load: null # OLGA columns are assumed to correspond to: sequences, sequence_aas, v_genes, j_genes
 column_mapping: null

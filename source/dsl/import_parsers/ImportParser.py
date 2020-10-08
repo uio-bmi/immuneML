@@ -1,6 +1,7 @@
 from typing import Tuple
 
 from source.IO.dataset_import.DataImport import DataImport
+from source.data_model.receptor.ChainPair import ChainPair
 from source.dsl.DefaultParamsLoader import DefaultParamsLoader
 from source.dsl.symbol_table.SymbolTable import SymbolTable
 from source.dsl.symbol_table.SymbolType import SymbolType
@@ -35,6 +36,21 @@ class ImportParser:
 
         import_cls = ReflectionHandler.get_class_by_name("{}Import".format(dataset_specs["format"]))
         params = ImportParser._prepare_params(dataset_specs)
+
+        if "is_repertoire" in params:
+            ParameterValidator.assert_type_and_value(params["is_repertoire"], bool, location, "is_repertoire")
+
+            if params["is_repertoire"] == True:
+                assert "metadata_file" in params, f"{location}: Missing parameter: metadata_file under {key}/params/"
+                ParameterValidator.assert_type_and_value(params["metadata_file"], str, location, "metadata_file")
+
+            if params["is_repertoire"] == False:
+                assert "paired" in params, f"{location}: Missing parameter: paired under {key}/params/"
+                ParameterValidator.assert_type_and_value(params["paired"], bool, location, "paired")
+
+                if params["paired"] == True:
+                    assert "receptor_chains" in params, f"{location}: Missing parameter: receptor_chains under {key}/params/"
+                    ParameterValidator.assert_in_valid_list(params["receptor_chains"], ["_".join(cp.value) for cp in ChainPair], location, "receptor_chains")
 
         try:
             dataset = import_cls.import_dataset(params, key)

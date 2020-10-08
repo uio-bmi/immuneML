@@ -30,6 +30,7 @@ def encode_dataset_by_kmer_freq(path_to_dataset_directory: str, result_path: str
 
     loader = MiXCRImport()
     dataset = loader.import_dataset({
+        "is_repertoire": True,
         "path": path_to_dataset_directory,
         "metadata_file": metadata_path,
         "region_type": "IMGT_CDR3",  # import_dataset in only cdr3

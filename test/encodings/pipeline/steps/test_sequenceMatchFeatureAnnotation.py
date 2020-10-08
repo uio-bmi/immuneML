@@ -60,6 +60,7 @@ VGENE1	CASSIEGPTGELFF	D Transporter 8	MHC I"""
 reference_rep.tsv,rep1"""
 
     reference_data_loader_params = {
+        "is_repertoire": True,
         "result_path": path,
         "column_mapping": {"CDR3B AA Sequence": "sequence_aas",
                            "TRBV Gene": "v_genes"},

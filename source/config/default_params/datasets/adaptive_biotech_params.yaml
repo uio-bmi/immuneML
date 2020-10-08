@@ -1,3 +1,5 @@
+is_repertoire: True
+paired: False
 import_productive: True
 import_with_stop_codon: False
 import_out_of_frame: False

@@ -1,3 +1,5 @@
+is_repertoire: True
+paired: False
 region_type: "IMGT_CDR3" # which region to use - IMGT_CDR3 option means removing first and last amino acid as MiXCR uses IMGT junction as CDR3
 separator: "\t"
 columns_to_load: [cloneCount, allVHitsWithScore, allJHitsWithScore, aaSeqCDR3, nSeqCDR3]

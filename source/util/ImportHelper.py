@@ -41,6 +41,10 @@ class ImportHelper:
 
         dataset = ImportHelper.load_dataset_if_exists(params, processed_params, dataset_name)
         if dataset is None:
+            # backwards compatability: if is_repertoire is not specified but the metadata file is
+            if processed_params.is_repertoire is None and processed_params.metadata_file is not None:
+                processed_params.is_repertoire = True
+
             if processed_params.is_repertoire:
                 dataset = ImportHelper.import_repertoire_dataset(import_class, processed_params, dataset_name)
             else:
