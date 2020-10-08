@@ -1,4 +1,5 @@
 import abc
+import logging
 import warnings
 
 from source.reports.ReportResult import ReportResult
@@ -33,8 +34,11 @@ class Report(metaclass=abc.ABCMeta):
         return self
 
     def generate_report(self) -> ReportResult:
-        if self.check_prerequisites():
-            return self.generate()
+        try:
+            if self.check_prerequisites():
+                return self.generate()
+        except Exception as e:
+            logging.warning(f"Report {self.name} encountered an error and could not be generated.")
 
     def _safe_plot(self, output_written=True, **kwargs):
         """

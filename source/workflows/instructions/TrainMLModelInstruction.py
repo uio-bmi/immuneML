@@ -127,7 +127,7 @@ class TrainMLModelInstruction(Instruction):
 
         for idx, label in enumerate(self.state.label_configuration.get_labels_by_name()):
             self._compute_optimal_item(label, f"(label {idx + 1} / {n_labels})")
-            zip_path = MLExporter.export_zip(hp_item=self.state.optimal_hp_items[label], path=f"{self.state.path}optimal_{label}/")
+            zip_path = MLExporter.export_zip(hp_item=self.state.optimal_hp_items[label], path=f"{self.state.path}optimal_{label}/", label=label)
             self.state.optimal_hp_item_paths[label] = zip_path
 
     def _compute_optimal_item(self, label: str, index_repr: str):
