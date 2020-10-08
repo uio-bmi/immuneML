@@ -4,10 +4,10 @@ column_mapping:
   CDR3: sequence_aas
   complex.id: sequence_identifiers
   Gene: chains
-metadata_columns:
-  - "Epitope"
-  - "Epitope gene"
-  - "Epitope species"
+metadata_column_mapping:
+  Epitope: epitope
+  Epitope gene: epitope_gene
+  Epitope species: epitope_species
 paired: True # whether to import_dataset paired data: if true returns ReceptorDataset, and if false returns SequenceDataset
 region_type: "IMGT_CDR3" # which region to use - IMGT_CDR3 option means removing first and last amino acid as VDJdb uses IMGT junction as CDR3
 separator: "\t"

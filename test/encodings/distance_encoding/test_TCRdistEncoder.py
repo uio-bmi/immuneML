@@ -2,6 +2,7 @@ import shutil
 from unittest import TestCase
 
 from source.IO.dataset_import.VDJdbImport import VDJdbImport
+from source.dsl.DefaultParamsLoader import DefaultParamsLoader
 from source.encodings.EncoderParams import EncoderParams
 from source.encodings.distance_encoding.TCRdistEncoder import TCRdistEncoder
 from source.environment.EnvironmentSettings import EnvironmentSettings
@@ -28,7 +29,15 @@ class TestTCRdistEncoder(TestCase):
         with open(path + "receptors.tsv", "w") as file:
             file.writelines(file_content)
 
-        dataset = VDJdbImport.import_dataset({"is_repertoire": True, "result_path": path, "sequence_file_size": 1, "paired": True, "path": path}, "vdjdb_dataset")
+        params = DefaultParamsLoader.load(EnvironmentSettings.default_params_path + "datasets/", "vdjdb")
+        params["is_repertoire"] = False
+        params["paired"] = True
+        params["result_path"] = path
+        params["path"] = path
+        params["sequence_file_size"] = 1
+        params["receptor_chains"] = "TRA_TRB"
+
+        dataset = VDJdbImport.import_dataset(params, "vdjdb_dataset")
         dataset.params = {"organism": "human"}
 
         encoder = TCRdistEncoder.build_object(dataset, **{"cores": 2})

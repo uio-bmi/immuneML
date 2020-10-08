@@ -19,7 +19,7 @@ class DatasetImportParams:
     import_out_of_frame: bool = None
     paired: bool = None
     receptor_chains: ChainPair = None
-    metadata_columns: list = None
+    metadata_column_mapping: list = None
     batch_size: int = 1
     sequence_file_size: int = 50000
 

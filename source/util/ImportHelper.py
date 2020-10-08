@@ -142,6 +142,9 @@ class ImportHelper:
         if hasattr(params, "column_mapping") and params.column_mapping is not None:
             df.rename(columns=params.column_mapping, inplace=True)
 
+        if hasattr(params, "metadata_column_mapping") and params.metadata_column_mapping is not None:
+            df.rename(columns=params.metadata_column_mapping, inplace=True)
+
         df = ImportHelper.standardize_none_values(df)
 
         return df
@@ -188,7 +191,7 @@ class ImportHelper:
         if params.paired:
             sequences = import_class.import_receptors(df, params)
         else:
-            sequences = df.apply(ImportHelper.import_sequence, metadata_columns=params.metadata_columns, axis=1).values
+            sequences = df.apply(ImportHelper.import_sequence, metadata_columns=params.metadata_column_mapping.values(), axis=1).values
 
         return sequences
 
@@ -309,8 +312,8 @@ class ImportHelper:
 
     @staticmethod
     def build_receptor_from_rows(first_row, second_row, identifier, params):
-        first_sequence = ImportHelper.import_sequence(first_row, metadata_columns=params.metadata_columns)
-        second_sequence = ImportHelper.import_sequence(second_row, metadata_columns=params.metadata_columns)
+        first_sequence = ImportHelper.import_sequence(first_row, metadata_columns=params.metadata_column_mapping.values())
+        second_sequence = ImportHelper.import_sequence(second_row, metadata_columns=params.metadata_column_mapping.values())
 
         if params.receptor_chains == ChainPair.TRA_TRB:
             receptor = TCABReceptor(alpha=first_sequence,
