@@ -26,7 +26,8 @@ class TenxGenomicsImport(DataImport):
                 path: path/to/directory/with/repertoire/files/
                 result_path: path/where/to/store/imported/repertoires/
                 # optional parameters (if not specified the values bellow will be used):
-                import_productive: True # whether to only import productive sequences
+                import_productive: True # whether to import productive sequences
+                import_unproductive: False # whether to import unproductive sequences
                 region_type: "IMGT_CDR3" # which part of the sequence to import by default
                 columns_to_load: [clonotype_id, consensus_id, length, chain, v_gene, d_gene, j_gene, c_gene, full_length, productive, cdr3, cdr3_nt, reads, umis]
                     cdr3: sequence_aas
@@ -47,12 +48,16 @@ class TenxGenomicsImport(DataImport):
 
     @staticmethod
     def preprocess_dataframe(df: pd.DataFrame, params: DatasetImportParams):
-        df["frame_types"] = SequenceFrameType.IN.name # todo we only know productive/unproductive, not specific frame type
+        df["frame_types"] = None
+        df.loc[df["productive"].eq("True"), "frame_types"] = SequenceFrameType.IN.name
 
+        allowed_productive_values = []
         if params.import_productive:
-            df = df[df.productive.eq("True")]
-        else:
-            df.loc[df["productive"].eq("False"), "frame_types"] = SequenceFrameType.OUT.name
+            allowed_productive_values.append("True")
+        if params.import_unproductive:
+            allowed_productive_values.append("False")
+
+        df = df[df.productive.isin(allowed_productive_values)]
 
         ImportHelper.junction_to_cdr3(df, params.region_type)
         return df

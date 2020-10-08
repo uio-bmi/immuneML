@@ -22,6 +22,9 @@ class ImmunoSEQImport(DataImport):
                 result_path: ./result/ # where to store the imported files
                 metadata_file: ./data/metadata.csv # path to metadata file, for more information on the format, see the documentation
                 separator: '\\t'
+                import_productive: True
+                import_with_stop_codon: False
+                import_out_of_frame: False
                 columns_to_load: [nucleotide, aminoAcid, count (templates/reads), vFamilyName, vGeneName, vGeneAllele, jFamilyName, jGeneName, jGeneAllele, sequenceStatus] # columns from the original file that will be imported
                 column_mapping: # immunoSEQ column names -> immuneML repertoire fields
                     nucleotide: sequences # 'nucleotide' is the immunoSEQ name, which will be mapped to 'sequences' in immuneML

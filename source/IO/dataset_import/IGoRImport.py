@@ -23,7 +23,6 @@ class IGoRImport(DataImport):
                 path: path/to/directory/with/repertoire/files/
                 result_path: path/where/to/store/imported/repertoires/
                 # optional parameters (if not specified the values bellow will be used):
-                import_missing_anchors: False # if set to False, erroneous sequences, characterized by 0 in the anchors_found columns, are removed
                 import_with_stop_codon: False # whether to import sequences with stop codon
                 import_out_of_frame: False # whether out of frame sequences should be imported
                 separator: "," # column separator of the input file
