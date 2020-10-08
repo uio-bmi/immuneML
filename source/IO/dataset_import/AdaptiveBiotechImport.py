@@ -65,9 +65,3 @@ class AdaptiveBiotechImport(DataImport):
         df = ImportHelper.standardize_none_values(df)
 
         return df
-
-    @staticmethod
-    def import_receptors(df, params):
-        raise NotImplementedError("AIRRImport: import of paired receptor AIRR data has not been implemented.")
-
-

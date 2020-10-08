@@ -77,11 +77,6 @@ class AIRRImport(DataImport):
 
 
     @staticmethod
-    def import_receptors(df, params):
-        raise NotImplementedError("AIRRImport: import of paired receptor AIRR data has not been implemented.")
-
-
-    @staticmethod
     def alternative_load_func(filename, params):
         return airr.load_rearrangement(filename)
 

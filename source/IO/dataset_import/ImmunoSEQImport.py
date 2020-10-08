@@ -71,13 +71,3 @@ class ImmunoSEQImport(DataImport):
             df['sequences'] = [y[(84 - 3 * len(x)): 78] if x is not None else None for x, y in zip(df['sequence_aas'], df['sequences'])]
 
         return df
-
-
-    @staticmethod
-    def import_receptors(df, params):
-        raise NotImplementedError("ImmunoSEQImport: import of paired receptor ImmunoSEQ data has not been implemented.")
-
-
-
-
-

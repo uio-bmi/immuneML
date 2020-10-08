@@ -46,17 +46,10 @@ class MiXCRImport(DataImport):
         RegionType.IMGT_FR4:  {"AA": "aaSeqFR4", "NT": "nSeqFR4"}
     }
 
-    # @staticmethod
-    # def import_dataset(params: dict, dataset_name: str) -> RepertoireDataset:
-    #     mixcr_params = DatasetImportParams.build_object(**params)
-    #     dataset = ImportHelper.import_or_load_dataset(params, mixcr_params, dataset_name, MiXCRImport.preprocess_repertoire)
-    #     return dataset
-    #
 
     @staticmethod
     def import_dataset(params: dict, dataset_name: str) -> Dataset:
         return ImportHelper.import_dataset(MiXCRImport, params, dataset_name)
-
 
 
     @staticmethod
@@ -100,7 +93,3 @@ class MiXCRImport(DataImport):
         tmp_df = df.apply(lambda row: row[column_name].split(",")[0].replace("DV", "/DV").replace("//", "/").split("*", 1)[0], axis=1)
 
         return tmp_df
-
-    @staticmethod
-    def import_receptors(df, params):
-        raise NotImplementedError("MiXCRImport: import of paired receptor MiXCR data has not been implemented.")

@@ -189,7 +189,11 @@ class ImportHelper:
         df = import_class.preprocess_dataframe(df, params)
 
         if params.paired:
-            sequences = import_class.import_receptors(df, params)
+            import_receptor_func = getattr(import_class, "import_receptors", None)
+            if import_receptor_func:
+                sequences = import_receptor_func(df, params)
+            else:
+                raise NotImplementedError(f"{import_class.__name__}: import of paired receptor data has not been implemented.")
         else:
             metadata_columns = params.metadata_column_mapping.values() if params.metadata_column_mapping else None
             sequences = df.apply(ImportHelper.import_sequence, metadata_columns=metadata_columns, axis=1).values
