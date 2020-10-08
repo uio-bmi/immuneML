@@ -9,7 +9,7 @@ class DatasetImportParams:
     is_repertoire: bool = True
     path: str = None
     metadata_file: str = None
-    result_path: str = None  # rename to cache_path?
+    result_path: str = None
     columns_to_load: list = None
     separator: str = None
     column_mapping: dict = None
