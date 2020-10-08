@@ -33,23 +33,23 @@ class DatasetGenerationParser:
         type: DatasetGeneration
         datasets: # list of datasets to export
           - my_generated_dataset
-        formats: # list of formats to export the datasets to
+        export_formats: # list of formats to export the datasets to
           - AIRR
           - Pickle
 
     """
 
-    VALID_KEYS = ["type", "datasets", "formats"]
+    VALID_KEYS = ["type", "datasets", "export_formats"]
 
     def parse(self, key: str, instruction: dict, symbol_table: SymbolTable, path: str = None) -> DatasetGenerationInstruction:
         location = "DatasetGenerationParser"
         ParameterValidator.assert_keys(list(instruction.keys()), DatasetGenerationParser.VALID_KEYS, location, key)
         valid_formats = ReflectionHandler.all_nonabstract_subclass_basic_names(DataExporter, "Exporter", 'dataset_export/')
-        ParameterValidator.assert_all_in_valid_list(instruction["formats"], valid_formats, location, "formats")
+        ParameterValidator.assert_all_in_valid_list(instruction["export_formats"], valid_formats, location, "export_formats")
         ParameterValidator.assert_all_in_valid_list(instruction["datasets"], symbol_table.get_keys_by_type(SymbolType.DATASET), location,
                                                     "datasets")
 
         return DatasetGenerationInstruction(datasets=[symbol_table.get(dataset_key) for dataset_key in instruction["datasets"]],
                                             exporters=[ReflectionHandler.get_class_by_name(f"{key}Exporter", "dataset_export/")
-                                                       for key in instruction["formats"]],
+                                                       for key in instruction["export_formats"]],
                                             name=key)

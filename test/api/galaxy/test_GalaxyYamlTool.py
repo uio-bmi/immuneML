@@ -76,7 +76,7 @@ class TestGalaxyYamlTool(TestCase):
                 "inst1": {
                     "type": "DatasetGeneration",
                     "datasets": ["new_d1", 'd2'],
-                    "formats": ["AIRR"]
+                    "export_formats": ["AIRR"]
                 },
                 "inst2": {
                     "type": "TrainMLModel",

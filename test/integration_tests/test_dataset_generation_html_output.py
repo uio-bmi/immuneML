@@ -34,7 +34,7 @@ class TestDatasetGenerationHTMLOutput(TestCase):
                     }
                 }
             },
-            "instructions": {"instr1": {"type": "DatasetGeneration", "formats": ["Pickle", "AIRR"], "datasets": ["d1"]}},
+            "instructions": {"instr1": {"type": "DatasetGeneration", "export_formats": ["Pickle", "AIRR"], "datasets": ["d1"]}},
             "output": {"format": "HTML"}
         }
 

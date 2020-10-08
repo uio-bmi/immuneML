@@ -33,7 +33,7 @@ and only one format in which it will be exported. For instance, YAML specificati
           type: DatasetGeneration # which instruction to execute
           datasets: # only one dataset can be given here
               - my_dataset
-          formats:
+          export_formats:
           # only one format can be specified here and the dataset in this format will be
           # available as a Galaxy collection afterwards
               - AIRR
