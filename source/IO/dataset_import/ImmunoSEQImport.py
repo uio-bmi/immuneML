@@ -1,7 +1,7 @@
 from source.IO.dataset_import.DataImport import DataImport
 from source.IO.dataset_import.DatasetImportParams import DatasetImportParams
 from source.data_model.dataset.Dataset import Dataset
-from source.data_model.receptor.RegionType import RegionType
+from source.util.AdaptiveImportHelper import AdaptiveImportHelper
 from source.util.ImportHelper import ImportHelper
 import pandas as pd
 
@@ -45,32 +45,4 @@ class ImmunoSEQImport(DataImport):
 
     @staticmethod
     def preprocess_dataframe(df: pd.DataFrame, params: DatasetImportParams):
-
-        df["frame_types"] = df.frame_types.str.upper()
-
-        frame_type_list = ImportHelper.prepare_frame_type_list(params)
-        df = df[df["frame_types"].isin(frame_type_list)]
-
-        if params.region_type == RegionType.IMGT_CDR3:   # todo make one function that checks regiontype???
-            if "sequences" in df.columns and "sequence_aas" in df.columns:
-                df = ImmunoSEQImport.extract_sequence_from_rearrangement(df, params.region_type)
-            elif "sequence_aas" in df.columns:
-                df['sequence_aas'] = df["sequence_aas"].str[1:-1]
-            df["region_types"] = RegionType.IMGT_CDR3.name
-        elif "sequences" in df.columns and "sequence_aas" in df.columns:
-            df = ImmunoSEQImport.extract_sequence_from_rearrangement(df, params.region_type)
-
-        df = ImportHelper.parse_adaptive_germline_to_imgt(df)
-
-        return df
-
-    @staticmethod
-    def extract_sequence_from_rearrangement(df, region_type: RegionType):
-
-        if region_type == RegionType.IMGT_CDR3:
-            df['sequences'] = [y[(81 - 3 * len(x)): 81] if x is not None else None for x, y in zip(df['sequence_aas'], df['sequences'])]
-            df['sequence_aas'] = df["sequence_aas"].str[1:-1]
-        else:
-            df['sequences'] = [y[(84 - 3 * len(x)): 78] if x is not None else None for x, y in zip(df['sequence_aas'], df['sequences'])]
-
-        return df
+        return AdaptiveImportHelper.preprocess_dataframe(df, params)

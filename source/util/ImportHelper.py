@@ -27,7 +27,6 @@ from source.data_model.receptor.receptor_sequence.SequenceFrameType import Seque
 from source.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
 from source.data_model.repertoire.Repertoire import Repertoire
 from source.environment.Constants import Constants
-from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.util.PathBuilder import PathBuilder
 
 
@@ -209,34 +208,6 @@ class ImportHelper:
         with open(dataset_filenames[-1], "wb") as file:
             pickle.dump(items[:sequence_file_size], file)
 
-    @staticmethod
-    def parse_adaptive_germline_to_imgt(dataframe):
-        gene_name_replacement = pd.read_csv(
-            EnvironmentSettings.root_path + "source/IO/dataset_import/conversion/imgt_adaptive_conversion.csv")
-        gene_name_replacement = dict(zip(gene_name_replacement.Adaptive, gene_name_replacement.IMGT))
-
-        germline_value_replacement = {**{"TCRB": "TRB", "TCRA": "TRA"}, **{("0" + str(i)): str(i) for i in range(10)}}
-
-        return ImportHelper.parse_germline(dataframe, gene_name_replacement, germline_value_replacement)
-
-    @staticmethod
-    def parse_germline(df: pd.DataFrame, gene_name_replacement: dict, germline_value_replacement: dict):
-
-        if all(item in df.columns for item in ["v_genes", "j_genes"]):
-
-            df[["v_genes", "j_genes"]] = df[["v_genes", "j_genes"]].replace(gene_name_replacement)
-
-        if all(item in df.columns for item in ["v_subgroups", "v_genes", "j_subgroups", "j_genes"]):
-
-            df[["v_subgroups", "v_genes", "j_subgroups", "j_genes"]] = df[
-                ["v_subgroups", "v_genes", "j_subgroups", "j_genes"]].replace(germline_value_replacement, regex=True)
-
-        if all(item in df.columns for item in ["v_genes", "j_genes", "v_alleles", "j_alleles"]):
-
-            df["v_alleles"] = df['v_genes'].str.cat(df['v_alleles'], sep=Constants.ALLELE_DELIMITER)
-            df["j_alleles"] = df['j_genes'].str.cat(df['j_alleles'], sep=Constants.ALLELE_DELIMITER)
-
-        return df
 
     @staticmethod
     def prepare_frame_type_list(params: DatasetImportParams) -> list:
@@ -314,7 +285,8 @@ class ImportHelper:
                 warnings.warn(f"Missing {params.receptor_chains.value[i]} chain for receptor with identifier {identifier}, this receptor will be omitted.")
                 return []
 
-        # todo: add 'import all' functionality like IRIS import, to handle dual chains (all receptors / all chains / just one / different chain combos??)
+        # todo add options like IRIS import: option to import all dual chains or just the first pair / all V genes when uncertain annotation, etc
+        # todo add possibility to import multiple chain combo's? (BCR heavy-light & heavy-kappa, as seen in 10xGenomics?)
 
         return [ImportHelper.build_receptor_from_rows(first_row.iloc[0], second_row.iloc[0], identifier, params)]
 

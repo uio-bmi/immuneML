@@ -2,7 +2,7 @@ import pandas as pd
 from source.IO.dataset_import.DataImport import DataImport
 from source.IO.dataset_import.DatasetImportParams import DatasetImportParams
 from source.data_model.dataset import Dataset
-from source.data_model.receptor.RegionType import RegionType
+from source.util.AdaptiveImportHelper import AdaptiveImportHelper
 from source.util.ImportHelper import ImportHelper
 
 
@@ -47,20 +47,5 @@ class AdaptiveBiotechImport(DataImport):
 
     @staticmethod
     def preprocess_dataframe(df: pd.DataFrame, params: DatasetImportParams):
-        df["frame_types"] = df.frame_types.str.upper()
+        return AdaptiveImportHelper.preprocess_dataframe(df, params)
 
-        frame_type_list = ImportHelper.prepare_frame_type_list(params)
-        df = df[df["frame_types"].isin(frame_type_list)]
-
-        if params.region_type == RegionType.IMGT_CDR3:
-            if "sequences" in params.columns_to_load:
-                df['sequences'] = [y[(84 - 3 * len(x)): 78] for x, y in zip(df['sequence_aas'], df['sequences'])]
-            df['sequence_aas'] = df["sequence_aas"].str[1:-1]
-            df["region_types"] = RegionType.IMGT_CDR3.name
-        elif "sequences" in params.columns_to_load:
-            df['sequences'] = [y[(81 - 3 * len(x)): 81] for x, y in zip(df['sequence_aas'], df['sequences'])] # todo check this?
-
-        df = ImportHelper.parse_adaptive_germline_to_imgt(df)
-        df = ImportHelper.standardize_none_values(df)
-
-        return df
