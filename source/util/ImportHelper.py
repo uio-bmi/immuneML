@@ -156,6 +156,41 @@ class ImportHelper:
     def standardize_none_values(dataframe: pd.DataFrame) -> pd.DataFrame:
         return dataframe.replace({key: Constants.UNKNOWN for key in ["unresolved", "no data", "na", "unknown", "null", "nan", np.nan, ""]})
 
+    @staticmethod
+    def prepare_frame_type_list(params: DatasetImportParams) -> list:
+        frame_type_list = []
+        if params.import_productive:
+            frame_type_list.append(SequenceFrameType.IN.name)
+        if params.import_out_of_frame:
+            frame_type_list.append(SequenceFrameType.OUT.name)
+        if params.import_with_stop_codon:
+            frame_type_list.append(SequenceFrameType.STOP.name)
+        return frame_type_list
+
+    @staticmethod
+    def load_chains_from_genes(df: pd.DataFrame, column_name) -> list:
+        return [Chain.get_chain(chain_str) for chain_str in df[column_name].str[0:3]]
+
+    @staticmethod
+    def junction_to_cdr3(df: pd.DataFrame, region_type: RegionType):
+        '''
+        If RegionType is CDR3, the leading C and trailing W are removed from the sequence to match the IMGT CDR3 definition.
+        This method alters the data in the provided dataframe.
+        '''
+
+        if region_type == RegionType.IMGT_CDR3:
+            if "sequence_aas" in df:
+                df["sequence_aas"] = df["sequence_aas"].str[1:-1]
+            if "sequences" in df:
+                df["sequences"] = df["sequences"].str[3:-3]
+            df["region_types"] = region_type.name
+
+    @staticmethod
+    def strip_alleles(df: pd.DataFrame, column_name):
+        '''
+        Removes alleles (everythin after the '*' character) from a column in the DataFrame
+        '''
+        return df[column_name].apply(lambda gene_col: gene_col.rsplit("*", maxsplit=1)[0])
 
     @staticmethod #
     def import_sequence_dataset(import_class, params, dataset_name: str): # todo remove args kwargs
@@ -208,43 +243,6 @@ class ImportHelper:
         with open(dataset_filenames[-1], "wb") as file:
             pickle.dump(items[:sequence_file_size], file)
 
-
-    @staticmethod
-    def prepare_frame_type_list(params: DatasetImportParams) -> list:
-        frame_type_list = []
-        if params.import_productive:
-            frame_type_list.append(SequenceFrameType.IN.name)
-        if params.import_out_of_frame:
-            frame_type_list.append(SequenceFrameType.OUT.name)
-        if params.import_with_stop_codon:
-            frame_type_list.append(SequenceFrameType.STOP.name)
-        return frame_type_list
-
-    @staticmethod
-    def load_chains_from_genes(df: pd.DataFrame, column_name) -> list:
-        return [Chain.get_chain(chain_str) for chain_str in df[column_name].str[0:3]]
-
-    @staticmethod
-    def junction_to_cdr3(df: pd.DataFrame, region_type: RegionType):
-        '''
-        If RegionType is CDR3, the leading C and trailing W are removed from the sequence to match the IMGT CDR3 definition.
-        This method alters the data in the provided dataframe.
-        '''
-
-        if region_type == RegionType.IMGT_CDR3:
-            if "sequence_aas" in df:
-                df["sequence_aas"] = df["sequence_aas"].str[1:-1]
-            if "sequences" in df:
-                df["sequences"] = df["sequences"].str[3:-3]
-            df["region_types"] = region_type.name
-
-    @staticmethod
-    def strip_alleles(df: pd.DataFrame, column_name):
-        '''
-        Removes alleles (everythin after the '*' character) from a column in the DataFrame
-        '''
-        return df[column_name].apply(lambda gene_col: gene_col.rsplit("*", maxsplit=1)[0])
-
     @staticmethod
     def import_sequence(row, metadata_columns=[]) -> ReceptorSequence:
         metadata = SequenceMetadata(v_gene=str(row["v_genes"]) if "v_genes" in row and row["v_genes"] is not None else None,
@@ -267,14 +265,13 @@ class ImportHelper:
         all_receptors = []
 
         for identifier in identifiers:
-            receptors = ImportHelper.import_receptors_for_id(df, identifier, params)
+            receptors = ImportHelper.import_receptors_by_id(df, identifier, params)
             all_receptors.extend(receptors)
 
         return all_receptors
 
-
     @staticmethod
-    def import_receptors_for_id(df, identifier, params) -> List[Receptor]:
+    def import_receptors_by_id(df, identifier, params) -> List[Receptor]:
         first_row = df.loc[(df["receptor_identifiers"] == identifier) & (df["chains"] == params.receptor_chains.value[0])]
         second_row = df.loc[(df["receptor_identifiers"] == identifier) & (df["chains"] == params.receptor_chains.value[1])]
 
@@ -289,7 +286,6 @@ class ImportHelper:
         # todo add possibility to import multiple chain combo's? (BCR heavy-light & heavy-kappa, as seen in 10xGenomics?)
 
         return [ImportHelper.build_receptor_from_rows(first_row.iloc[0], second_row.iloc[0], identifier, params)]
-
 
     @staticmethod
     def build_receptor_from_rows(first_row, second_row, identifier, params):
@@ -307,7 +303,7 @@ class ImportHelper:
                                     delta=second_sequence,
                                     identifier=identifier,
                                     metadata={**second_sequence.metadata.custom_params})
-        elif params.receptor_chains == ChainPair.IGH_IGK:
+        elif params.receptor_chains == ChainPair.IGH_IGL:
             receptor = BCReceptor(heavy=first_sequence,
                                   light=second_sequence,
                                   identifier=identifier,
