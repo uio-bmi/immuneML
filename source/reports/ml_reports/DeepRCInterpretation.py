@@ -36,7 +36,7 @@ class DeepRCInterpretation(MLReport):
 
         threshold (float): Only applies to the plotting of kernels. Contributions are normalized to range [0, 1], and only kernels with normalized contributions above threshold are plotted.
 
-    Specification:
+    YAML specification:
 
     .. indent with spaces
     .. code-block:: yaml

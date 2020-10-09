@@ -41,7 +41,7 @@ class SequenceAbundanceEncoder(DatasetEncoder):
         repertoire_batch_size (int): How many repertoires will be loaded at once. This does not affect the result of the encoding, only the speed.
         This value is a trade-off between the number of repertoires that can fit the RAM at the time and loading time from disk.
 
-    Specification:
+    YAML specification:
 
     .. indent with spaces
     .. code-block:: yaml

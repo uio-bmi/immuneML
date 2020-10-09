@@ -16,7 +16,7 @@ class SequenceLengthDistribution(DataReport):
     """
     Generates a histogram of the lengths of the sequences in a RepertoireDataset.
 
-    Specification:
+    YAML specification:
 
     .. indent with spaces
     .. code-block:: yaml

@@ -6,7 +6,7 @@ in this tutorial it will be explained how to define it.
 
 immuneML can import preprocessed immune *receptor* data (both single and paired chain) and preprocessed immune *repertoire* data. Immune receptor data
 can be imported from VDJdb or 10xGenomics, while repertoire can be imported from data coming from Adaptive Biotechnologies, AIRR, MiXCR, OLGA, IGoR
-(for the extensive list, see :ref:`Datasets` under :ref:`Specification`). Importing a dataset in immuneML means that the data will be converted to an
+(for the extensive list, see :ref:`Datasets` under :ref:`YAML specification`). Importing a dataset in immuneML means that the data will be converted to an
 optimized binary format, which will speed up the analysis. All the data to be imported should be stored in a single folder, which must be provided in the
 YAML specification.
 

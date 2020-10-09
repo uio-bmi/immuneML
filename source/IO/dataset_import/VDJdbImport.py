@@ -17,7 +17,7 @@ class VDJdbImport(DataImport):
         metadata_file: path to the metadata file, used only when importing repertoires, for receptor datasets,
             metadata information is located together with the sequence data so there is no need for additional file
 
-    Specification:
+    YAML specification:
 
     .. indent with spaces
     .. code-block:: yaml

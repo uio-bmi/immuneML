@@ -13,7 +13,7 @@ from source.util.PathBuilder import PathBuilder
 class DensityHeatmap(EncodingReport):
 
     """
-    Plot density distribution of each feature in encoded data matrix.
+    Plot density distribution of each feature in the encoded data matrix.
     Refer to documentation of FeatureHeatmap, for overlapping parameters, the definitions are identical.
 
     example:

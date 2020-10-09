@@ -23,7 +23,7 @@ class MatchingSequenceDetails(EncodingReport):
         - repertoire_identifier: the unique identifier of the repertoire
         - count/percentage/clonal_percentage: # todo fill this in
         - repertoire_size: the total number of different sequences (i.e. clonotypes) in the repertoire
-        - max_levenshtein_distance: the maximum lehvenstein distance that was used to calculate the matches
+        - max_levenshtein_distance: the maximum Levenshtein distance that was used to calculate the matches
         - Any repertoire labels and their values
 
     # todo refactor this class: either merge with MatchedPaired classes or remove redundant information from this report

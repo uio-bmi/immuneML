@@ -22,7 +22,7 @@ class CytoscapeNetworkExporter(DataReport):
     The Receptor sequences can be provided as a ReceptorDataset, or a RepertoireDataset (containing paired sequence
     information). In the latter case, one .sif file is exported per Repertoire.
 
-    Specification:
+    YAML specification:
 
     .. indent with spaces
     .. code-block:: yaml

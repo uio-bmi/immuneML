@@ -4,7 +4,7 @@ from source.preprocessing.filters.Filter import Filter
 
 class ClonesPerRepertoireFilter(Filter):
     """
-    Removes all repertoires from the RepertoireDataset which contain fewer clonotypes than specified by the
+    Removes all repertoires from the RepertoireDataset, which contain fewer clonotypes than specified by the
     lower_limit, or more clonotypes than specified by the upper_limit.
     Note that this filter filters out repertoires, not individual sequences, and can thus only be applied to RepertoireDatasets.
 
@@ -17,7 +17,7 @@ class ClonesPerRepertoireFilter(Filter):
     When no lower or upper limit is specified, or the value -1 is specified, the limit is ignored.
 
 
-    Specification:
+    YAML specification:
 
     .. indent with spaces
     .. code-block:: yaml
@@ -28,6 +28,7 @@ class ClonesPerRepertoireFilter(Filter):
                     ClonesPerRepertoireFilter:
                         lower_limit: 100
                         upper_limit: 100000
+
     """
 
     def __init__(self, lower_limit: int = -1, upper_limit: int = -1):

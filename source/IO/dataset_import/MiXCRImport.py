@@ -12,7 +12,7 @@ class MiXCRImport(DataImport):
     Imports repertoire files into immuneML format from the repertoire tsv files that were generated as
     results of MiXCR preprocessing.
 
-    Specification:
+    YAML specification:
 
     .. indent with spaces
     .. code-block:: yaml

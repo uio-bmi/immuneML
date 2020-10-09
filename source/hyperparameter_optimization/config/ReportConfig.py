@@ -19,12 +19,12 @@ class ReportConfig:
         hyperparameter (dict): reports to be executed after the nested CV has finished to show the overall performance; this parameter can only be
         specified under assessment key in TrainMLModel instruction.
 
-    Specification:
+    YAML specification:
 
     .. indent with spaces
     .. code-block:: yaml
 
-        # as a part of a HPOptimization instruction, defining the outer (assessment) loop of nested cross-validation:
+        # as a part of a TrainMLModel instruction, defining the outer (assessment) loop of nested cross-validation:
         assessment: # outer loop of nested CV
             split_strategy: random # perform Monte Carlo CV (randomly split the data into train and test)
             split_count: 5 # how many train/test datasets to generate
@@ -37,7 +37,7 @@ class ReportConfig:
                 hyperparameter: # list of reports to execute when nested CV is finished to show overall performance
                     - my_hyperparameter_report
 
-        # as a part of a HPOptimization instruction, defining the inner (selection) loop of nested cross-validation:
+        # as a part of a TrainMLModel instruction, defining the inner (selection) loop of nested cross-validation:
         selection: # inner loop of nested CV
             split_strategy: random # perform Monte Carlo CV (randomly split the data into train and validation)
             split_count: 5 # how many train/validation datasets to generate

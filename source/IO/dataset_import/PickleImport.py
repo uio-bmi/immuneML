@@ -19,7 +19,7 @@ class PickleImport(DataImport):
     Imports the dataset from the pickle file which has previously been exported from immuneML. It does not perform any processing of
     examples in the dataset (i.e. repertoires), but relies on Repertoire objects that have been created previously.
 
-    Specification:
+    YAML specification:
 
     .. indent with spaces
     .. code-block:: yaml

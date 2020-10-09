@@ -44,7 +44,7 @@ class Word2VecEncoder(DatasetEncoder):
 
         k (int): The length of the k-mers used for the encoding.
 
-    Specification:
+    YAML specification:
 
     .. highlight:: yaml
     .. code-block:: yaml

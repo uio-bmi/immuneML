@@ -1,16 +1,19 @@
 import airr
+
 from source.IO.dataset_import.DataImport import DataImport
 from source.IO.dataset_import.DatasetImportParams import DatasetImportParams
+from source.IO.sequence_import.AIRRSequenceImport import AIRRSequenceImport
 from source.data_model.dataset.Dataset import Dataset
 from source.util.ImportHelper import ImportHelper
-from source.IO.sequence_import.AIRRSequenceImport import AIRRSequenceImport
 
 
 class AIRRImport(DataImport):
     """
     Imports the data from an AIRR-formatted .tsv files into a RepertoireDataset.
 
-    Specification:
+    AIRR rearrangement schema can be found here: https://docs.airr-community.org/en/stable/datarep/rearrangements.html
+
+    YAML specification:
 
     .. indent with spaces
     .. code-block:: yaml

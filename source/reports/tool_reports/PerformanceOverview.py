@@ -28,7 +28,7 @@ class PerformanceOverview(Report):
 
     If the datasets have different number of examples, the baseline PR curve will not be plotted.
 
-    Specification:
+    YAML specification:
 
     .. indent with spaces
     .. code-block:: yaml

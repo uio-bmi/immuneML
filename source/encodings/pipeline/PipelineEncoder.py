@@ -25,7 +25,7 @@ class PipelineEncoder(DatasetEncoder):
 
         steps (list):
 
-    Specification:
+    YAML specification:
 
     .. indent with spaces
     .. code-block:: yaml

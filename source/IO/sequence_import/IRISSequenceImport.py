@@ -43,7 +43,7 @@ class IRISSequenceImport:
             selected from the set.
 
 
-    Specification:
+    YAML specification:
 
         datasets:
             my_dataset:

@@ -18,7 +18,7 @@ class ReceptorImplanting(SignalImplantingStrategy):
         for each receptor sequence.
 
 
-    Specification:
+    YAML specification:
 
     .. indent with spaces
     .. code-block:: yaml

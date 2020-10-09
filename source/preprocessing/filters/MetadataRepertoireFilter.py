@@ -16,7 +16,7 @@ class MetadataRepertoireFilter(Filter):
 
         criteria (dict): a nested dictionary that specifies the criteria for keeping certain columns. See :py:obj:`~source.analysis.criteria_matches.CriteriaMatcher.CriteriaMatcher` for a more detailed explanation.
 
-    Specification:
+    YAML specification:
 
     .. indent with spaces
     .. code-block:: yaml

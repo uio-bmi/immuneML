@@ -25,7 +25,7 @@ class Coefficients(MLReport):
     A report that plots the coefficients for a given ML method in a barplot. Can be used for Logistic regression,
     SVM and Random Forest. In the case of Random Forest, the feature importances will be plotted.
 
-    When used in HyperParameter optimization, the report can be used for all models and optimal models, both on the
+    When used in TrainMLModel instruction, the report can be used for all models and optimal models, both on
     the selection and assessment levels.
 
     Which coefficients should be plotted (for example: only nonzero, above a certain threshold, ...) can be specified.
@@ -43,7 +43,7 @@ class Coefficients(MLReport):
         n_largest (list): If 'n_largest' is specified under 'coefs_to_plot', the values for n can be specified here.
             These should be integer values. The n largest coefficients are determined based on their absolute values.
 
-    Specification:
+    YAML specification:
 
     .. indent with spaces
     .. code-block:: yaml

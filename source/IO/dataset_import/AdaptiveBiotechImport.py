@@ -8,7 +8,7 @@ from source.util.ImportHelper import ImportHelper
 
 class AdaptiveBiotechImport(DataImport):
     """
-    Specification:
+    YAML specification:
 
     .. indent with spaces
     .. code-block:: yaml

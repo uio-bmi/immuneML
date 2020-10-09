@@ -33,7 +33,7 @@ class OneHotEncoder(DatasetEncoder):
             When using nucleotide sequences: note that the distance is measured in (amino acid) IMGT positions.
 
 
-    Specification:
+    YAML specification:
 
     .. indent with spaces
     .. code-block:: yaml

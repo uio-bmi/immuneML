@@ -22,6 +22,11 @@ class ReceptorCNN(MLMethod):
     A CNN which separately detects motifs using CNN kernels in each chain of paired receptor data, combines the kernel activations into a unique
     representation of the receptor and uses this representation to predict the antigen binding.
 
+    .. figure:: _static/images/receptor_cnn_immuneML.png
+        :width: 70%
+
+        The architecture of the CNN for paired-chain receptor data
+
     Requires one-hot encoded data as input (as produced by :py:obj:`~source.encodings.onehot.OneHotEncoder.OneHotEncoder`).
 
     Arguments:
@@ -59,7 +64,7 @@ class ReceptorCNN(MLMethod):
         background_probabilities: used for rescaling the kernel values to produce information gain matrix; represents the background probability of
         each amino acid (without positional information); if not specified, uniform background is assumed
 
-    Specification:
+    YAML specification:
 
     .. indent with spaces
     .. code-block:: yaml

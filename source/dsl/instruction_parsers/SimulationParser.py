@@ -9,7 +9,7 @@ from source.workflows.instructions.SimulationInstruction import SimulationInstru
 class SimulationParser:
     """
 
-    Specification:
+    YAML specification:
 
     .. highlight:: yaml
     .. code-block:: yaml

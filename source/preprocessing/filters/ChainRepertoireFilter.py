@@ -7,7 +7,7 @@ from source.util.PathBuilder import PathBuilder
 class ChainRepertoireFilter(Filter):
     """
     Removes all repertoires from the RepertoireDataset object which contain at least one sequence
-    from chain different than "keep_chain" parameter.
+    with chain different than "keep_chain" parameter.
     Note that this filter filters out repertoires, not individual sequences, and can thus only be applied to RepertoireDatasets.
 
     Attributes:
@@ -15,7 +15,7 @@ class ChainRepertoireFilter(Filter):
         keep_chain (:py:obj:`~source.environment.SequenceType.SequenceType`): Which chain should be kept.
 
 
-    Specification:
+    YAML specification:
 
     .. indent with spaces
     .. code-block:: yaml
@@ -25,6 +25,7 @@ class ChainRepertoireFilter(Filter):
                 - my_filter:
                     ChainRepertoireFilter:
                         keep_chain: TRB
+
     """
 
     def __init__(self, keep_chain: Chain):
