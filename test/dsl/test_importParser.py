@@ -40,13 +40,12 @@ class TestImportParser(TestCase):
                     "params": {
                         "is_repertoire": False,
                         "paired": True,
-                        "result_path": path,
                         "receptor_chains": "TRA_TRB",
                         "path": path
                     }
                 }
             }
-        }, SymbolTable())
+        }, SymbolTable(), path)
 
         dataset = st.get("d1")
         self.assertTrue(isinstance(dataset, ReceptorDataset))
@@ -159,7 +158,6 @@ class TestImportParser(TestCase):
                     "params": {
                         "is_repertoire": True,
                         "path": path + "tmp_input/",
-                        "result_path": path + "tmp_output/",
                         "metadata_file": path + "metadata.csv",
                         "batch_size": 2,
                     }
@@ -167,7 +165,7 @@ class TestImportParser(TestCase):
             }
         }
 
-        st, desc = ImportParser.parse(specs, SymbolTable())
+        st, desc = ImportParser.parse(specs, SymbolTable(), path + "tmp_output/")
         self.assertTrue(isinstance(st.get("d1"), RepertoireDataset))
         self.assertEqual(2, len(st.get("d1").get_data()))
 

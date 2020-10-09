@@ -16,17 +16,17 @@ class ImportParser:
     valid_keys = ["format", "params"]
 
     @staticmethod
-    def parse(workflow_specification: dict, symbol_table: SymbolTable) -> Tuple[SymbolTable, dict]:
+    def parse(workflow_specification: dict, symbol_table: SymbolTable, result_path: str) -> Tuple[SymbolTable, dict]:
         assert ImportParser.keyword in workflow_specification, "ImmuneMLParser: datasets are not defined."
 
         for key in workflow_specification[ImportParser.keyword].keys():
-            symbol_table = ImportParser._parse_dataset(key, workflow_specification[ImportParser.keyword][key], symbol_table)
+            symbol_table = ImportParser._parse_dataset(key, workflow_specification[ImportParser.keyword][key], symbol_table, result_path)
 
         return symbol_table, workflow_specification[ImportParser.keyword]
 
     @staticmethod
     @log
-    def _parse_dataset(key: str, dataset_specs: dict, symbol_table: SymbolTable) -> SymbolTable:
+    def _parse_dataset(key: str, dataset_specs: dict, symbol_table: SymbolTable, result_path: str) -> SymbolTable:
         location = "ImportParser"
 
         ParameterValidator.assert_keys(list(dataset_specs.keys()), ImportParser.valid_keys, location, f"datasets:{key}", False)
@@ -35,7 +35,8 @@ class ImportParser:
         ParameterValidator.assert_in_valid_list(dataset_specs["format"], valid_formats, location, "format")
 
         import_cls = ReflectionHandler.get_class_by_name("{}Import".format(dataset_specs["format"]))
-        params = ImportParser._prepare_params(dataset_specs)
+        params = ImportParser._prepare_params(dataset_specs, result_path, key)
+
 
         if "is_repertoire" in params:
             ParameterValidator.assert_type_and_value(params["is_repertoire"], bool, location, "is_repertoire")
@@ -65,9 +66,11 @@ class ImportParser:
         return symbol_table
 
     @staticmethod
-    def _prepare_params(dataset_specs: dict):
+    def _prepare_params(dataset_specs: dict, result_path: str, dataset_name: str):
         params = DefaultParamsLoader.load(ImportParser.keyword, dataset_specs["format"])
         if "params" in dataset_specs.keys():
             params = {**params, **dataset_specs["params"]}
+        if "result_path" not in params or params["result_path"] is None:
+            params["result_path"] = f"{result_path}{dataset_name}/"
         dataset_specs["params"] = params
         return params
