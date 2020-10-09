@@ -20,7 +20,7 @@ def build_specs(args):
             "my_dataset_generation_instruction": {
                 "type": "DatasetGeneration",
                 "datasets": [args.dataset_name],
-                "formats": ["Pickle"]
+                "export_formats": ["Pickle"]
             }
         }
     }
