@@ -6,12 +6,12 @@ from source.ml_methods.SklearnMethod import SklearnMethod
 
 class RandomForestClassifier(SklearnMethod):
     """
-    Random Forest wrapper of the corresponding scikit-learn's method.
+    Wrapper around the RandomForestClassifier scikit-learn's method.
 
-    For usage and specification, check :py:obj:`~source.ml_methods.SklearnMethod.SklearnMethod`.
+    For usage and YAML specification, check :py:obj:`~source.ml_methods.SklearnMethod.SklearnMethod`.
     For valid parameters, see `scikit-learn documentation <https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestClassifier.html>`_.
 
-    Specification:
+    YAML specification:
 
     .. indent with spaces
     .. code-block:: yaml

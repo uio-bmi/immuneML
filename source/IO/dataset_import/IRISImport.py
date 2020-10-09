@@ -20,7 +20,7 @@ class IRISImport(DataImport):
     (if metadata file is not defined) or to RepertoireDataset (a set of repertoires consisting of a list of receptor sequences) if the
     metadata file is defined.
 
-    Specification:
+    YAML specification:
 
     .. indent with spaces
     .. code-block:: yaml

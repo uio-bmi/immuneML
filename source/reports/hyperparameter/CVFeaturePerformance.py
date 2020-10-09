@@ -15,15 +15,15 @@ from source.util.PathBuilder import PathBuilder
 
 class CVFeaturePerformance(Report):
     """
-    Plots average training vs test performance w.r.t. given encoding parameter which is explicitly set
-    in the feature attribute. It can be used only in combination with HPOptimization instruction and can be only specified under
+    This report plots the average training vs test performance w.r.t. given encoding parameter which is explicitly set
+    in the feature attribute. It can be used only in combination with TrainMLModel instruction and can be only specified under
     assessment/reports/hyperparameter under that instruction.
 
     Attributes:
         feature: name of the encoder parameter w.r.t. which the performance across training and test will be shown. Possible values depend
             on the encoder on which it is used.
 
-    Specification:
+    YAML specification:
 
     .. indent with spaces
     .. code-block:: yaml

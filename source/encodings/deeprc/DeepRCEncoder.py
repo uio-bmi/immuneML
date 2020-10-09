@@ -14,15 +14,16 @@ class DeepRCEncoder(DatasetEncoder):
     DeepRCEncoder should be used in combination with the DeepRC ML method (:py:mod:`source.ml_methods.DeepRC.DeepRC`).
     This encoder writes the data in a RepertoireDataset to .tsv files.
     For each repertoire, one .tsv file is created containing the amino acid sequences and the counts.
-    Additionally one metadata .tsv file is created, which describes the subset of repertoires that is encoded by
+    Additionally, one metadata .tsv file is created, which describes the subset of repertoires that is encoded by
     a given instance of the DeepRCEncoder.
 
-    Specification:
+    YAML specification:
 
     .. indent with spaces
     .. code-block:: yaml
 
         my_deeprc_encoder: DeepRC
+
     """
     ID_COLUMN = "ID"
     SEQUENCE_COLUMN = "amino_acid"

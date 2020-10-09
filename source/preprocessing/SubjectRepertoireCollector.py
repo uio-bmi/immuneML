@@ -15,7 +15,7 @@ class SubjectRepertoireCollector(Preprocessor):
     is a RepertoireDataset with one Repertoire per subject.
 
 
-    Specification:
+    YAML specification:
 
     .. indent with spaces
     .. code-block:: yaml
@@ -23,6 +23,7 @@ class SubjectRepertoireCollector(Preprocessor):
         preprocessing_sequences:
             my_preprocessing:
                 - my_filter: SubjectRepertoireCollector
+
     """
 
     def __init__(self, result_path: str = None):

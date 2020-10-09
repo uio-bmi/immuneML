@@ -15,10 +15,10 @@ For all repertoires in one dataset, a single metadata file should be defined. Th
 
 .. image:: _static/images/metadata.png
 
-The columns filename and subject_id are mandatory. Other columns may be defined by the user. There are no restrictions what those should include,
+The columns filename and subject_id are mandatory. Other columns may be defined by the user. There are no restrictions on what those should include,
 but often other columns will have information on HLA, age, sex, and specific diseases. Any of these columns may be used as a prediction target in
 the downstream analysis. The prediction target is specified by the name of the column in the YAML specification as the value of the label parameter.
-For more information on specification, see :ref:`Specification`.
+For more information on YAML specification, see :ref:`YAML specification`.
 
 When installing all requirements from requirements.txt, there is afterward an error with yaml package (No module named yaml)?
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

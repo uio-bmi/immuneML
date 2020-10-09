@@ -10,7 +10,7 @@ class IGoRImport(DataImport):
     Note that you should run IGoR with the --CDR3 option specified, this tool imports the generated CDR3 files.
     Sequences with missing anchors are not imported.
 
-    Specification:
+    YAML specification:
 
     .. indent with spaces
     .. code-block:: yaml

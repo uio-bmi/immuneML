@@ -23,7 +23,7 @@ class SubsamplingInstruction(Instruction):
 
         dataset_export_formats (list): in which formats to export the subsampled datasets. Valid formats are class names of any non-abstract class inheriting :py:obj:`~source.IO.dataset_export.DataExporter.DataExporter`.
 
-    Specification:
+    YAML specification:
 
     .. indent with spaces
     .. code-block:: yaml

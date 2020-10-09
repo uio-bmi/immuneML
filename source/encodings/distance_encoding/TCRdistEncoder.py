@@ -17,7 +17,7 @@ class TCRdistEncoder(DatasetEncoder):
 
         cores (int): number of processes to use for the computation
 
-    Specification:
+    YAML specification:
 
     .. indent with spaces
     .. code-block:: yaml

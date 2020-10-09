@@ -1,8 +1,8 @@
 import logging
 import warnings
 
-import pandas as pd
 import numpy as np
+import pandas as pd
 
 from source.data_model.dataset.Dataset import Dataset
 from source.ml_methods.MLMethod import MLMethod
@@ -69,7 +69,7 @@ class MotifSeedRecovery(MLReport):
                     When no gapped seeds are used, this value has no effect.
 
 
-    Specification:
+    YAML specification:
 
     .. indent with spaces
     .. code-block:: yaml

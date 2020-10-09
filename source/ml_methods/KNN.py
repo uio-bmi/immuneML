@@ -11,7 +11,7 @@ class KNN(SklearnMethod):
     For usage and specification, check :py:obj:`~source.ml_methods.SklearnMethod.SklearnMethod`.
     For valid parameters, see `scikit-learn documentation <https://scikit-learn.org/stable/modules/generated/sklearn.neighbors.KNeighborsClassifier.html>`_.
 
-    Specification:
+    YAML specification:
 
     .. indent with spaces
     .. code-block:: yaml

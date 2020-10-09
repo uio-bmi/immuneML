@@ -10,7 +10,7 @@ class ImmunoSEQImport(DataImport):
     Imports data from immunoSEQ format from Adaptive. Very similar to AdaptiveBiotech format, except that column names in the original files
     are different.
 
-    Specification:
+    YAML specification:
 
     .. indent with spaces
     .. code-block:: yaml

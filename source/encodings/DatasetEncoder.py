@@ -11,7 +11,7 @@ from source.encodings.EncoderParams import EncoderParams
 class DatasetEncoder(metaclass=abc.ABCMeta):
     """
 
-    Specification:
+    YAML specification:
 
         encodings:
             e1: <encoder_class> # encoding without parameters

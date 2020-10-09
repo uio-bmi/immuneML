@@ -28,7 +28,7 @@ class SingleLineReceptorImport(DataImport):
     Chain names are given in :py:obj:`~source.data_model.receptor.receptor_sequence.Chain.Chain`.
     Chain pairs are given in :py:obj:`~source.data_model.receptor.ChainPair.ChainPair`.
 
-    Specification:
+    YAML specification:
 
     .. indent with spaces
     .. code-block:: yaml
@@ -129,7 +129,7 @@ class SingleLineReceptorImport(DataImport):
             "Chain names are given in :py:obj:`~source.data_model.receptor.receptor_sequence.Chain.Chain`.":
                 f"Valid chain names are: {valid_chain_names}.",
             "Chain pairs are given in :py:obj:`~source.data_model.receptor.ChainPair.ChainPair`.":
-                f"Valid chain names are: {valid_chain_pair_names}."
+                f"Valid chain pairs are: {valid_chain_pair_names}."
         }
         doc = update_docs_per_mapping(doc, mapping)
         return doc

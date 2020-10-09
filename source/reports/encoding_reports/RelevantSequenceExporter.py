@@ -18,7 +18,7 @@ class RelevantSequenceExporter(EncodingReport):
 
     Arguments: there are no arguments for this report.
 
-    Specification:
+    YAML specification:
 
     .. indent with spaces
     .. code-block:: yaml

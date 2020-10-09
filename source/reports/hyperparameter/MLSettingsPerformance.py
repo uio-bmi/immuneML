@@ -11,8 +11,8 @@ from source.util.PathBuilder import PathBuilder
 
 class MLSettingsPerformance(MLReport):
     """
-    Report for HyperParameterOptimization: plots the performance for each of the setting combinations
-    as defined under 'settings' in the assessment (outer validation) loop.
+    Report for TrainMLModel instruction: plots the performance for each of the setting combinations as defined under 'settings' in the
+    assessment (outer validation) loop.
     The performances are grouped by label (horizontal panels) encoding (vertical panels) and ML method (bar color).
     When multiple data splits are used, the average performance over the data splits is shown with an error bar
     representing the standard deviation.
@@ -20,7 +20,7 @@ class MLSettingsPerformance(MLReport):
     This report can be used only with TrainMLModel instruction under assessment/reports/hyperparameter.
 
 
-    Specification:
+    YAML specification:
 
     .. indent with spaces
     .. code-block:: yaml

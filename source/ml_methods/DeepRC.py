@@ -75,10 +75,10 @@ class DeepRC(MLMethod):
 
         training_batch_size (int): Number of repertoires per minibatch during training.
 
-        n_workers (int): Number of background processes to use for converting dataset to hdf5 container and trainingset dataloader.
+        n_workers (int): Number of background processes to use for converting dataset to hdf5 container and training set data loader.
 
 
-    Specification:
+    YAML specification:
 
     .. indent with spaces
     .. code-block:: yaml

@@ -29,15 +29,17 @@ class SklearnMethod(MLMethod):
     The arguments and specification described bellow applied for all classes inheriting SklearnMethod.
 
     Arguments:
-        parameters: a dictionary of parameters that will be directly passed to the scikit-learn's LogisticRegression class
-            upon calling __init__() method; for detailed list see scikit-learn's documentation of the specific class
-            inheriting SklearnMethod
-        parameter_grid: a dictionary of parameters which all have to be valid arguments for scikit-learn's corresponding class'
-            __init__() method (same as parameters), but unlike parameters argument can contain list of values instead of one value;
-            if this is specified and "model_selection_cv" is True (in the specification) or just if fit_by_cross_validation() is called,
-            a grid search will be performed over these parameters and the optimal model will be kept
 
-    Specification:
+        parameters: a dictionary of parameters that will be directly passed to the scikit-learn's LogisticRegression class upon calling __init__()
+        method; for detailed list see scikit-learn's documentation of the specific class inheriting SklearnMethod
+
+        parameter_grid: a dictionary of parameters which all have to be valid arguments for scikit-learn's corresponding class' __init__() method
+        (same as parameters), but unlike parameters argument can contain list of values instead of one value; if this is specified and
+        "model_selection_cv" is True (in the specification) or just if fit_by_cross_validation() is called, a grid search will be performed over
+        these parameters and the optimal model will be kept
+
+    YAML specification:
+
         ml_methods:
             log_reg:
                 SimpleLogisticRegression: # name of the class inheriting SklearnMethod
@@ -54,6 +56,7 @@ class SklearnMethod(MLMethod):
                 # SVM will do grid search over the given parameters and return optimal model
                 model_selection_cv: True
                 model_selection_n_folds: 5
+
     """
 
     FIT_CV = "fit_CV"

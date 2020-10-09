@@ -10,7 +10,7 @@ class GenericImport(DataImport):
     Imports repertoire files into immuneML format. It has the same parameters but no predefined default values,
     so everything needs to be specified manually.
 
-    Specification:
+    YAML specification:
 
     .. indent with spaces
     .. code-block:: yaml

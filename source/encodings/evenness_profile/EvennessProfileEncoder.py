@@ -18,7 +18,7 @@ class EvennessProfileEncoder(DatasetEncoder):
 
     .. math::
 
-        ^{\alpha} \mathrm{E}(\mathrm{f})=\frac{\left(\sum_{\mathrm{i}=1}^{\mathrm{n}} \mathrm{f}_{\mathrm{i}}^{\alpha}\right)^{\frac{1}{1-\alpha}}}{\mathrm{n}}
+        ^{\\alpha} \\mathrm{E}(\\mathrm{f})=\\frac{\\left(\\sum_{\\mathrm{i}=1}^{\\mathrm{n}} \\mathrm{f}_{\\mathrm{i}}^{\\alpha}\\right)^{\\frac{1}{1-\\alpha}}}{\\mathrm{n}}
 
     That is, it is the exponential of Renyi entropy at a given alpha divided by the species richness, or number of unique
     sequences.
@@ -33,9 +33,9 @@ class EvennessProfileEncoder(DatasetEncoder):
         max_alpha (float): maximum alpha value to use
 
         dimension (int): dimension of output evenness profile vector, or the number of alpha values to linearly space
-            between min_alpha and max_alpha
+        between min_alpha and max_alpha
 
-    Specification:
+    YAML specification:
 
     .. indent with spaces
     .. code-block:: yaml

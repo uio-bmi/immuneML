@@ -16,13 +16,13 @@ from source.workflows.instructions.MLProcess import MLProcess
 
 class TrainMLModelInstruction(Instruction):
     """
-    Class implementing hyper-parameter optimization and training and assessing the model through nested cross-validation (CV).
+    Class implementing hyperparameter optimization and training and assessing the model through nested cross-validation (CV).
     The process is defined by two loops:
 
         - the outer loop over defined splits of the dataset for performance assessment
 
-        - the inner loop over defined hyper-parameter space and with cross-validation or train & validation split
-          to choose the best hyper-parameters.
+        - the inner loop over defined hyperparameter space and with cross-validation or train & validation split
+          to choose the best hyperparameters.
 
     Optimal model chosen by the inner loop is then retrained on the whole training dataset in the outer loop.
 
@@ -55,7 +55,7 @@ class TrainMLModelInstruction(Instruction):
         refit_optimal_model (bool): if the final combination of preprocessing-encoding-ML model should be refitted on the full dataset thus providing
         the final model to be exported from instruction; alternatively, train combination from one of the assessment folds will be used
 
-    Specification:
+    YAML specification:
 
     .. indent with spaces
     .. code-block:: yaml

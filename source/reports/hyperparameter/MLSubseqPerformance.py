@@ -21,7 +21,7 @@ class MLSubseqPerformance(MLSettingsPerformance):
     This report can only be used with TrainMLModel instruction under assessment/reports/hyperparameter.
 
 
-    Specification:
+    YAML specification:
 
     .. indent with spaces
     .. code-block:: yaml

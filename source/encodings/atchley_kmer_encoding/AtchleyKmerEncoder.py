@@ -42,7 +42,7 @@ class AtchleyKmerEncoder(DatasetEncoder):
         normalize_all_features (bool): when normalizing features to have 0 mean and unit variance, this parameter indicates if the abundance
         feature should be included in the normalization
 
-    Specification:
+    YAML specification:
 
     .. indent with spaces
     .. code-block:: yaml

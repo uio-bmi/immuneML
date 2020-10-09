@@ -16,7 +16,7 @@ class ExploratoryAnalysisInstruction(Instruction):
     Allows exploratory analysis of different datasets using encodings and reports.
 
     Analysis is defined by a dictionary of ExploratoryAnalysisUnit objects that encapsulate a dataset, an encoding [optional]
-    and a report to be executed on the [encoded] dataset. Each analysis in specified under `analyses` is completely independent from all
+    and a report to be executed on the [encoded] dataset. Each analysis specified under `analyses` is completely independent from all
     others.
 
     Arguments:
@@ -25,11 +25,11 @@ class ExploratoryAnalysisInstruction(Instruction):
         the analyses (objects of :py:obj:`~source.workflows.instructions.exploratory_analysis.ExploratoryAnalysisUnit.ExploratoryAnalysisUnit`
         class). Each of these includes a dataset on which to perform the analysis, report to run, and optionally preprocessing sequence,
         encoding (if the report needs to be executed on the encoded dataset) and label configuration (if the dataset needs to be encoded,
-        it is also necessary to specify a label for encoding - a label could correspond to an immune event or to genetic information (e.g. HLA).
+        it is also necessary to specify a label for encoding - a label could correspond to an immune event or to genetic information (e.g., HLA).
         The batch size can also be set to encode multiple repertoires in parallel, but this also increases the memory usage, so it must be
         reasonably set.
 
-    Specification:
+    YAML specification:
 
     .. indent with spaces
     .. code-block:: yaml

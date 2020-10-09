@@ -30,14 +30,14 @@ class MatchedReceptorsEncoder(DatasetEncoder):
     Arguments:
 
         reference_receptors (dict): A dictionary describing the reference dataset file.
-            See the :py:mod:`source.IO.sequence_import` for specification details.
+            See the :py:mod:`source.IO.sequence_import` for YAML specification details.
 
         max_edit_distances (dict): A dictionary specifying the maximum edit distance between a target sequence
             (from the repertoire) and the reference sequence. A maximum distance can be specified per chain, for example
             to allow for less strict matching of TCR alpha and BCR light chains. When only an integer is specified,
             this distance is applied to all possible chains.
 
-    Specification:
+    YAML specification:
 
     .. indent with spaces
     .. code-block:: yaml

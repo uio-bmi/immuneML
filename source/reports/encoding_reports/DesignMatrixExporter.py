@@ -18,7 +18,7 @@ class DesignMatrixExporter(EncodingReport):
     Exports the design matrix and related information of a given encoded Dataset to csv files. There are no parameters for this report.
 
 
-    Specification:
+    YAML specification:
 
     .. indent with spaces
     .. code-block:: yaml

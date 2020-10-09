@@ -12,7 +12,7 @@ from source.workflows.steps.SignalImplanter import SignalImplanter
 
 class SimulationInstruction(Instruction):
     """
-    A Simulation is an instruction that implants synthetic signals into the given dataset according
+    A simulation is an instruction that implants synthetic signals into the given dataset according
     to given parameters. This results in a new dataset containing modified sequences, and is annotated
     with metadata labels according to the implanted signals.
 
@@ -24,9 +24,9 @@ class SimulationInstruction(Instruction):
 
         batch_size (int): how many parallel processes to use during the analysis (4 is usually a good choice for personal computers).
 
-        exporter: in which format to export the dataset after simulation. Valid formats are class names of any non-abstract class inheriting :py:obj:`~source.IO.dataset_export.DataExporter.DataExporter`.
+        export_formats: in which formats to export the dataset after simulation. Valid formats are class names of any non-abstract class inheriting :py:obj:`~source.IO.dataset_export.DataExporter.DataExporter`.
 
-    Specification:
+    YAML specification:
 
     .. indent with spaces
     .. code-block:: yaml

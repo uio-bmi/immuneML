@@ -37,14 +37,14 @@ class SequencingDepthOverview(DataReport):
 
         nrow_scatterplot (int): The number of rows used for the scatterplot facets.
 
-        height_distributions (float): Heigth (in inches) of the distribution section of the resulting plot
+        height_distributions (float): Height (in inches) of the distribution section of the resulting plot
 
-        height_scatterplot (float): Heigth (in inches) of the scatterplot section of the resulting plot
+        height_scatterplot (float): Height (in inches) of the scatterplot section of the resulting plot
 
         width (float): Width (in inches) of resulting plot
 
 
-    Specification:
+    YAML specification:
 
     .. indent with spaces
     .. code-block:: yaml

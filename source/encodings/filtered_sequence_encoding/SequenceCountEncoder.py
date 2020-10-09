@@ -36,7 +36,7 @@ class SequenceCountEncoder(DatasetEncoder):
         sequence_batch_size (int): The pool size used for parallelization. This does not affect the results of the encoding,
             only the speed.
 
-    Specification:
+    YAML specification:
 
     .. indent with spaces
     .. code-block:: yaml

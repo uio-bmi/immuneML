@@ -28,7 +28,7 @@ class KernelSequenceLogo(MLReport):
 
     Arguments: this report does not take any arguments as input.
 
-    Specification:
+    YAML specification:
 
     .. indent with spaces
     .. code-block:: yaml

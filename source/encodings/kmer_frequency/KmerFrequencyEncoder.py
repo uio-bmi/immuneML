@@ -59,7 +59,7 @@ class KmerFrequencyEncoder(DatasetEncoder):
 
         max_gap: (int): Maximum gap size when gapped k-mers are used.
 
-    Specification:
+    YAML specification:
 
     .. indent with spaces
     .. code-block:: yaml

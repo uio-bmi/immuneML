@@ -13,7 +13,7 @@ class TenxGenomicsImport(DataImport):
     field reads instead, this can be changed in the column_mapping (set reads: counts).
     Furthermore, the 10xGenomics field clonotype_id is used for the immuneML field cell_id.
 
-    Specification:
+    YAML specification:
 
     .. indent with spaces
     .. code-block:: yaml

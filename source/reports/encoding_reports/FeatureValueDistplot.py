@@ -23,7 +23,7 @@ class FeatureValueDistplot(EncodingReport):
     across all examples),  please consider using
     :py:obj:`~source.reports.encoding_reports.FeatureValueBarplot.FeatureValueBarplot` instead.
 
-    This report creates distributon plots of the feature values in a group of features. For example, when
+    This report creates distribution plots of the feature values in a group of features. For example, when
     :py:obj:`~source.encodings.kmer_frequency.KmerFrequencyEncoder.KmerFrequencyEncoder`
     is used, the distribution of the frequency of each k-mer is plotted.
 
@@ -33,7 +33,7 @@ class FeatureValueDistplot(EncodingReport):
     Note that if `grouping_label` is specified as something other than "feature", then "feature" must be also specified
     in either `row_grouping_labels` or `column_grouping_labels`, so that each feature is then plotted in a separate
     panel. This prevents the undesired (and often uninterpretable) case where points across multiple features
-    is plotted in the same overall distribution.
+    are plotted in the same overall distribution.
 
 
     Attributes:
@@ -86,7 +86,7 @@ class FeatureValueDistplot(EncodingReport):
 
         color_title (str): label for color
 
-    Specification:
+    YAML specification:
 
     .. indent with spaces
     .. code-block:: yaml

@@ -18,7 +18,7 @@ class SequenceAssociationLikelihood(MLReport):
 
     Attributes: the report does not take in any arguments.
 
-    Specification:
+    YAML specification:
 
     .. indent with spaces
     .. code-block:: yaml

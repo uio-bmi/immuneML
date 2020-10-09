@@ -8,7 +8,7 @@ class RandomReceptorDatasetImport(DataImport):
     """
     Returns randomly generated receptor dataset according to the parameters;
 
-    Specification:
+    YAML specification:
 
     .. indent with spaces
     .. code-block:: yaml
@@ -39,7 +39,8 @@ class RandomReceptorDatasetImport(DataImport):
         """
         Returns randomly generated receptor dataset according to the parameters;
 
-        Specification:
+        YAML specification:
+
             result_path: path/where/to/store/results/
             receptor_count: 100 # number of random receptors to generate
             chain_1_length_probabilities:

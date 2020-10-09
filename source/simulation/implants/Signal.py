@@ -28,7 +28,7 @@ class Signal:
             Valid values for this argument are class names of different signal implanting strategies.
 
 
-    Specification:
+    YAML specification:
 
     .. indent with spaces
     .. code-block:: yaml

@@ -8,7 +8,7 @@ class RandomRepertoireDatasetImport(DataImport):
     """
     Returns randomly generated repertoire dataset according to the parameters;
 
-    Specification:
+    YAML specification:
 
     .. indent with spaces
     .. code-block:: yaml

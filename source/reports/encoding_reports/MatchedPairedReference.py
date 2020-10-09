@@ -22,7 +22,7 @@ class MatchedPairedReference(EncodingReport):
     must be used to encode the dataset.
 
 
-    Specification:
+    YAML specification:
 
     .. indent with spaces
     .. code-block:: yaml
