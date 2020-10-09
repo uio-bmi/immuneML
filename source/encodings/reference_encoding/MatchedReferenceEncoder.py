@@ -37,10 +37,6 @@ class MatchedReferenceEncoder(DatasetEncoder):
         ParameterValidator.assert_keys(list(reference_sequences.keys()), ["format", "path"], location, "reference_sequences")
         ParameterValidator.assert_in_valid_list(summary.upper(), [item.name for item in SequenceMatchingSummaryType], location, "summary")
 
-        # valid_formats = ReflectionHandler.discover_classes_by_partial_name("SequenceImport", "sequence_import/")
-        # ParameterValidator.assert_in_valid_list(f"{reference_sequences['format']}SequenceImport", valid_formats, location,
-        #                                         "format in reference_sequences")
-
         assert os.path.isfile(reference_sequences["path"]), f"{location}: the file {reference_sequences['path']} does not exist. " \
                                                             f"Specify the correct path under reference_sequences."
 
@@ -54,9 +50,6 @@ class MatchedReferenceEncoder(DatasetEncoder):
         processed_params = DatasetImportParams.build_object(**params)
 
         sequences = ImportHelper.import_items(import_class, reference_sequences["path"], processed_params)
-
-        # sequences = ReflectionHandler.get_class_by_name("{}SequenceImport".format(reference_sequences["format"]))\
-        #     .import_items(reference_sequences["path"], paired=False)
 
         return {
             "max_edit_distance": max_edit_distance,
