@@ -2,7 +2,6 @@ import airr
 import pandas as pd
 from source.IO.dataset_import.DataImport import DataImport
 from source.IO.dataset_import.DatasetImportParams import DatasetImportParams
-from source.IO.sequence_import.AIRRSequenceImport import AIRRSequenceImport
 from source.data_model.dataset.Dataset import Dataset
 from source.data_model.receptor.receptor_sequence.SequenceFrameType import SequenceFrameType
 from source.util.ImportHelper import ImportHelper
