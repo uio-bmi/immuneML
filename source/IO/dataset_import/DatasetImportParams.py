@@ -6,9 +6,11 @@ from source.data_model.receptor.RegionType import RegionType
 
 @dataclass
 class DatasetImportParams:
-    is_repertoire: bool = None
     path: str = None
+    is_repertoire: bool = None
     metadata_file: str = None
+    paired: bool = None
+    receptor_chains: ChainPair = None
     result_path: str = None
     columns_to_load: list = None
     separator: str = None
@@ -18,8 +20,6 @@ class DatasetImportParams:
     import_unproductive: bool = None
     import_with_stop_codon: bool = None
     import_out_of_frame: bool = None
-    paired: bool = None
-    receptor_chains: ChainPair = None
     metadata_column_mapping: list = None
     batch_size: int = 1
     sequence_file_size: int = 50000

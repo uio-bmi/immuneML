@@ -24,7 +24,7 @@ class MiXCRImport(DataImport):
             By default, is_repertoire is set to True.
 
         metadata_file (str): Required for RepertoireDatasets. This parameter specifies the path to the metadata file.
-            This is a csv file with columns filename, subject_id and arbitrary other columns which can be used as labels in analysis.
+            This is a csv file with columns filename, subject_id and arbitrary other columns which can be used as labels in instructions.
             Only the MiXCR files included under the column 'filename' are imported into the RepertoireDataset.
             For setting SequenceDataset metadata, metadata_file is ignored, see metadata_column_mapping instead.
 

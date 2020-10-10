@@ -26,7 +26,7 @@ class VDJdbImport(DataImport):
             ReceptorDataset. By default, is_repertoire is set to True.
 
         metadata_file (str): Required for RepertoireDatasets. This parameter specifies the path to the metadata file.
-            This is a csv file with columns filename, subject_id and arbitrary other columns which can be used as labels in analysis.
+            This is a csv file with columns filename, subject_id and arbitrary other columns which can be used as labels in instructions.
             For setting Sequence- or ReceptorDataset metadata, metadata_file is ignored, see metadata_column_mapping instead.
 
         paired (str): Required for Sequence- or ReceptorDatasets. This parameter determines whether to import a
