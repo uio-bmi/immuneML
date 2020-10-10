@@ -71,6 +71,6 @@ class ImportParser:
         if "params" in dataset_specs.keys():
             params = {**params, **dataset_specs["params"]}
         if "result_path" not in params or params["result_path"] is None:
-            params["result_path"] = f"{result_path}{dataset_name}/"
+            params["result_path"] = f"{result_path}datasets/{dataset_name}/"
         dataset_specs["params"] = params
         return params
