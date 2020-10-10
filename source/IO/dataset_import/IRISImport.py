@@ -16,9 +16,38 @@ from source.util.ImportHelper import ImportHelper
 
 class IRISImport(DataImport):
     """
-    Imports data from IRIS format into a ReceptorDataset or SequenceDataset depending on the value of "paired" parameter
-    (if metadata file is not defined) or to RepertoireDataset (a set of repertoires consisting of a list of receptor sequences) if the
-    metadata file is defined.
+    Imports data in Immune Receptor Information System (IRIS) format into a Repertoire-, Sequence- or ReceptorDataset.
+
+    Arguments:
+        path (str): Required parameter. This is the path to a directory with IRIS files to import.
+
+        is_repertoire (bool): If True, this imports a RepertoireDataset. If False, it imports a SequenceDataset or
+            ReceptorDataset. By default, is_repertoire is set to True.
+
+        metadata_file (str): Required for RepertoireDatasets. This parameter specifies the path to the metadata file.
+            This is a csv file with columns filename, subject_id and arbitrary other columns which can be used as labels in instructions.
+            Sequence- or ReceptorDataset metadata is currently not yet implemented.
+
+        paired (str): Required for Sequence- or ReceptorDatasets. This parameter determines whether to import a
+            SequenceDataset (paired = False) or a ReceptorDataset (paired = True). By default, paired = True.
+
+        receptor_chains (str): Required for ReceptorDatasets. Determines which pair of chains to import for each Receptor.
+            Valid values for receptor_chains are the names of the ChainPair enum.
+
+        import_dual_chains (bool): Whether to import the dual chains, as denoted by the suffix (2) in the Chain, V gene
+            and J gene columns. If this is True and a ReceptorDataset is imported, all possible combinations of chains (up to 4)
+            are imported as individual receptors. By default import_dual_chains is True.
+
+        import_all_gene_combinations (bool):  Whether to import all possible genes when multiple genes are present in the
+            V gene and J gene columns. If this is False, a random gene is chosen. If this is true and a ReceptorDataset
+            is imported, all possible combinations of chains are imported as individual receptors. By default import_all_gene_combinations
+            is False.
+
+        extra_columns_to_load (list): Additional columns that should be loaded, apart from the default columns
+            (Clonotype ID and any Chain, V gene and J gene columns).
+
+        separator (str): Column separator, for IRIS this is by default "\\t".
+
 
     YAML specification:
 
@@ -28,14 +57,18 @@ class IRISImport(DataImport):
         my_iris_dataset:
             format: IRIS
             params:
-                sequence_file_size: 1000 # number of sequences / receptors per file as stored internally by ImmuneML in ImmuneML format - not visible to users
-                paired: True
+                path: path/to/files/
+                is_repertoire: True # whether to import a RepertoireDataset
+                metadata_file: path/to/metadata.csv # metadata file for RepertoireDataset
+                paired: True # whether to import SequenceDataset (False) or ReceptorDataset (True) when is_repertoire = False
+                receptor_chains: TRA_TRB # what chain pair to import for a ReceptorDataset
                 import_dual_chains: True
                 import_all_gene_combinations: False
-                batch_size: 4
-                separator: "\\t"
-                extra_columns_to_load: []
-
+                extra_columns_to_load:
+                - extra_col1
+                - extra_col2
+                # Optional fields with IRIS-specific defaults, only change when different behavior is required:
+                separator: "\\t" # column separator
     """
 
     @staticmethod
