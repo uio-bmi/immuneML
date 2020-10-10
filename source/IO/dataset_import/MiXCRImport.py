@@ -1,16 +1,59 @@
 import pandas as pd
 
+from scripts.specification_util import update_docs_per_mapping
 from source.IO.dataset_import.DataImport import DataImport
 from source.IO.dataset_import.DatasetImportParams import DatasetImportParams
 from source.data_model.dataset import Dataset
 from source.data_model.receptor.RegionType import RegionType
+from source.data_model.repertoire.Repertoire import Repertoire
 from source.util.ImportHelper import ImportHelper
 
 
 class MiXCRImport(DataImport):
     """
-    Imports repertoire files into immuneML format from the repertoire tsv files that were generated as
-    results of MiXCR preprocessing.
+    Imports data in MiXCR format into a Repertoire-, or SequenceDataset.
+    RepertoireDatasets should be used when making predictions per repertoire, such as predicting a disease state.
+    SequenceDatasets should be used when predicting values for for unpaired (single-chain) immune receptors, like
+    antigen specificity.
+
+
+    Arguments:
+        path (str): Required parameter. This is the path to a directory with MiXCR files to import.
+
+        is_repertoire (bool): If True, this imports a RepertoireDataset. If False, it imports a SequenceDataset.
+            By default, is_repertoire is set to True.
+
+        metadata_file (str): Required for RepertoireDatasets. This parameter specifies the path to the metadata file.
+            This is a csv file with columns filename, subject_id and arbitrary other columns which can be used as labels in analysis.
+            Only the MiXCR files included under the column 'filename' are imported into the RepertoireDataset.
+            For setting SequenceDataset metadata, metadata_file is ignored, see metadata_column_mapping instead.
+
+        region_type (str): Which part of the sequence to import. By default, this value is set to IMGT_CDR3. This means the
+            first and last amino acids are removed from the CDR3 sequence, as MiXCR uses IMGT junction as CDR3.
+            Alternatively to importing the CDR3 sequence, other region types can be specified here as well.
+            Valid values for region_type are defined in MiXCRImport.SEQUENCE_NAME_MAP.
+
+        column_mapping (dict): A mapping from MiXCR column names to immuneML's internal data representation.
+            For MiXCR, this is by default set to:
+                cloneCount: counts
+                allVHitsWithScore: v_genes
+                allJHitsWithScore: j_genes
+            The columns that specify the sequences to import are handled by the region_type parameter.
+            A custom column mapping can be specified here if necessary (for example; adding additional data fields if
+            they are present in the MiXCR file, or using alternative column names).
+            Valid immuneML fields that can be specified here are defined by Repertoire.FIELDS
+
+        columns_to_load (list): Specifies which subset of columns must be loaded from the MiXCR file. By default, this is:
+            [cloneCount, allVHitsWithScore, allJHitsWithScore, aaSeqCDR3, nSeqCDR3]
+
+        metadata_column_mapping (dict): Specifies metadata for SequenceDatasets. This should specify a mapping similar
+            to column_mapping where keys are MiXCR column names and values are the names that are internally used in immuneML
+            as metadata fields. These metadata fields can be used as prediction labels for SequenceDatasets.
+            For MiXCR format, there is no default metadata_column_mapping.
+            For setting RepertoireDataset metadata, metadata_column_mapping is ignored, see metadata_file instead.
+
+        separator (str): Column separator, for MiXCR this is by default "\\t".
+
 
     YAML specification:
 
@@ -20,20 +63,25 @@ class MiXCRImport(DataImport):
         my_mixcr_dataset:
             format: MiXCR
             params:
-                # these parameters have to be always specified:
-                metadata_file: path/to/metadata.csv # csv file with fields filename, subject_id and arbitrary others which can be used as labels in analysis
-                path: path/to/location/of/repertoire/files/ # all repertoire files need to be in the same folder to be loaded (they will be discovered based on the metadata file)
-                result_path: path/where/to/store/imported/repertoires/ # immuneML imports data to optimized representation to speed up analysis so this defines where to store these new representation files
-                # the following parameter have these default values so these need to be specified only if a different behavior is required
-                region_type: "IMGT_CDR3" # which part of the sequence to import by default
-                batch_size: 4 # how many repertoires can be processed at once by default
-                separator: "\\t"
-                columns_to_load: [cloneCount, allVHitsWithScore, allJHitsWithScore, aaSeqCDR3, nSeqCDR3]
-                column_mapping: # MiXCR column name -> immuneML repertoire field (where there is no 1-1 mapping, those are omitted here and handled in the code)
+                path: path/to/files/
+                is_repertoire: True # whether to import a RepertoireDataset (True) or a SequenceDataset (False)
+                metadata_file: path/to/metadata.csv # metadata file for RepertoireDataset
+                metadata_column_mapping: # metadata column mapping MiXCR -> immuneML for SequenceDataset
+                    mixcrColumnName1: metadata_label1
+                    mixcrColumnName2: metadata_label2
+                region_type: IMGT_CDR3 # what part of the sequence to import
+                # Optional fields with MiXCR-specific defaults, only change when different behavior is required:
+                separator: "\\t" # column separator
+                columns_to_load: # subset of columns to load, sequence columns are handled by region_type parameter
+                - cloneCount
+                - allVHitsWithScore
+                - allJHitsWithScore
+                - aaSeqCDR3
+                - nSeqCDR3
+                column_mapping: # column mapping MiXCR -> immuneML
                     cloneCount: counts
                     allVHitsWithScore: v_genes
                     allJHitsWithScore: j_genes
-
     """
 
     SEQUENCE_NAME_MAP = {
@@ -93,3 +141,20 @@ class MiXCRImport(DataImport):
         tmp_df = df.apply(lambda row: row[column_name].split(",")[0].replace("DV", "/DV").replace("//", "/").split("*", 1)[0], axis=1)
 
         return tmp_df
+
+
+    @staticmethod
+    def get_documentation():
+        doc = str(MiXCRImport.__doc__)
+
+        region_type_values = str([region_type.name for region_type in MiXCRImport.SEQUENCE_NAME_MAP.keys()])[1:-1].replace("'", "`")
+        repertoire_fields = Repertoire.FIELDS
+        repertoire_fields.remove("region_type")
+
+        mapping = {
+            "Valid values for region_type are defined in MiXCRImport.SEQUENCE_NAME_MAP.": f"Valid values are {region_type_values}.",
+            "Valid immuneML fields that can be specified here are defined by Repertoire.FIELDS": f"Valid immuneML fields that can be specified here are {repertoire_fields}."
+        }
+        doc = update_docs_per_mapping(doc, mapping)
+        return doc
+
