@@ -81,7 +81,7 @@ class AIRRImport(DataImport):
                 path: path/to/files/
                 is_repertoire: True # whether to import a RepertoireDataset (True) or a SequenceDataset (False)
                 metadata_file: path/to/metadata.csv # metadata file for RepertoireDataset
-                metadata_column_mapping: # metadata column mapping AIRR -> immuneML for SequenceDataset
+                metadata_column_mapping: # metadata column mapping AIRR: immuneML for SequenceDataset
                     airr_column_name1: metadata_label1
                     airr_column_name2: metadata_label2
                 import_productive: True # whether to include productive sequences in the dataset
@@ -90,7 +90,7 @@ class AIRRImport(DataImport):
                 # Optional fields with AIRR-specific defaults, only change when different behavior is required:
                 separator: "\\t" # column separator
                 region_type: IMGT_CDR3 # what part of the sequence to import
-                column_mapping: # column mapping AIRR -> immuneML
+                column_mapping: # column mapping AIRR: immuneML
                     junction: sequences
                     junction_aa: sequence_aas
                     v_call: v_genes
