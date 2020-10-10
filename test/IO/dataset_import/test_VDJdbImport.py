@@ -27,12 +27,13 @@ class TestVDJdbLoader(TestCase):
 
         dataset = VDJdbImport.import_dataset({"is_repertoire": False, "result_path": path, "paired": False, "path": path, "sequence_file_size": 1,
                                               "column_mapping": default_params["column_mapping"], "metadata_column_mapping": default_params["metadata_column_mapping"],
-                                              "separator": "\t"}, "vdjdb_seq_dataset")
+                                              "separator": "\t", "region_type": "IMGT_CDR3"}, "vdjdb_seq_dataset")
 
         self.assertEqual(4, dataset.get_example_count())
         self.assertEqual(4, len(dataset.get_filenames()))
 
         for sequence in dataset.get_data():
+            self.assertTrue(sequence.amino_acid_sequence in ["ASSPPRVYSNGAGLAGVGWRNEQF", "ASSWTWDAATLWGQGALGGANVLT", "AAIYESRGSTLGRLY", "ALRLNNQGGKLI"])
             self.assertTrue(sequence.metadata.custom_params["epitope_species"] in ["EBV", "CMV"])   # todo change this to a common thing between Receptor & Sequence?
             self.assertTrue(sequence.metadata.custom_params["epitope"] in ["AVFDRKSDAK", "KLGGALQAK"])
             self.assertTrue(sequence.metadata.custom_params["epitope_gene"] in ["EBNA4", "IE1"])
@@ -55,14 +56,15 @@ class TestVDJdbLoader(TestCase):
         default_params = DefaultParamsLoader.load(EnvironmentSettings.default_params_path + "datasets/", "vdjdb")
 
         dataset = VDJdbImport.import_dataset({"is_repertoire": False, "result_path": path, "paired": True, "path": path, "sequence_file_size": 1,
+                                              "region_type": "IMGT_CDR3", "separator": "\t", "receptor_chains": "TRA_TRB",
                                               "column_mapping": default_params["column_mapping"],
-                                              "metadata_column_mapping": default_params["metadata_column_mapping"],
-                                              "separator": "\t", "receptor_chains": "TRA_TRB"}, "vdjdb_rec_dataset")
+                                              "metadata_column_mapping": default_params["metadata_column_mapping"]}, "vdjdb_rec_dataset")
 
         self.assertEqual(2, dataset.get_example_count())
         self.assertEqual(2, len(dataset.get_filenames()))
 
         for receptor in dataset.get_data(2):
+            self.assertTrue(receptor.alpha.amino_acid_sequence in ["AAIYESRGSTLGRLY", "ALRLNNQGGKLI"])
             self.assertTrue(receptor.metadata["epitope_species"] in ["EBV", "CMV"])
             self.assertTrue(receptor.metadata["epitope"] in ["AVFDRKSDAK", "KLGGALQAK"])
             self.assertTrue(receptor.metadata["epitope_gene"] in ["EBNA4", "IE1"])
@@ -95,7 +97,7 @@ class TestVDJdbLoader(TestCase):
         default_params = DefaultParamsLoader.load(EnvironmentSettings.default_params_path + "datasets/", "vdjdb")
 
         dataset = VDJdbImport.import_dataset({"is_repertoire": True, "result_path": path, "metadata_file": path + "metadata.csv", "path": path,
-                                              "column_mapping": default_params["column_mapping"], "separator": "\t"}, "vdjdb_rep_dataset")
+                                              "column_mapping": default_params["column_mapping"], "separator": "\t", "region_type": "IMGT_CDR3"}, "vdjdb_rep_dataset")
 
 
         self.assertEqual(number_of_repertoires, dataset.get_example_count())
