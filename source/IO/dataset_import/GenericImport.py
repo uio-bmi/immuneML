@@ -68,7 +68,10 @@ class GenericImport(DataImport):
             The label antigen_specificity can now be used throughout immuneML.
             For setting RepertoireDataset metadata, metadata_column_mapping is ignored, see metadata_file instead.
 
-        separator (str): Column separator, for example "\\t" or ",".
+        columns_to_load (list): Optional; specifies which columns to load from the input file. This may be useful if
+            the input files contain many unused columns. If no value is specified, all columns are loaded.
+
+        separator (str): Required parameter. Column separator, for example "\\t" or ",".
 
 
     YAML specification:
@@ -93,6 +96,12 @@ class GenericImport(DataImport):
                     file_column_frequencies: counts
                 metadata_column_mapping: # metadata column mapping file: immuneML
                     file_column_antigen_specificity: antigen_specificity
+                columns_to_load:  # which subset of columns to load from the file
+                    - file_column_amino_acids
+                    - file_column_v_genes
+                    - file_column_j_genes
+                    - file_column_frequencies
+                    - file_column_antigen_specificity
     """
 
     @staticmethod

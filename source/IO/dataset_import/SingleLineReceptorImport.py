@@ -12,6 +12,7 @@ from source.IO.dataset_import.DatasetImportParams import DatasetImportParams
 from source.data_model.dataset.ReceptorDataset import ReceptorDataset
 from source.data_model.receptor.ChainPair import ChainPair
 from source.data_model.receptor.ReceptorBuilder import ReceptorBuilder
+from source.data_model.receptor.RegionType import RegionType
 from source.data_model.receptor.receptor_sequence.Chain import Chain
 from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
@@ -20,42 +21,85 @@ from source.util.PathBuilder import PathBuilder
 
 class SingleLineReceptorImport(DataImport):
     """
-    Imports receptor dataset from a file or a set of files (located in the same directory). For column mapping, it has no default params, so it
-    has to be specified manually which columns in the files correspond to which chain, gene, identifier, epitope. All valid immuneML values are given
-    in the specification example below (mandatory fields are: `alpha_amino_acid_sequence`, `beta_amino_acid_sequence`, `alpha_nucleotide_sequence`,
-    `beta_nucleotide_sequence`, `alpha_v_gene`, `alpha_j_gene`, `beta_v_gene`, `beta_j_gene`, `identifier`). Fields which are not listed here will be
-    stored as metadata in the created receptor objects.
-    Chain names are given in :py:obj:`~source.data_model.receptor.receptor_sequence.Chain.Chain`.
-    Chain pairs are given in :py:obj:`~source.data_model.receptor.ChainPair.ChainPair`.
+    Imports data from a tabular file (where each line contains a pair of immune receptor sequences) into a ReceptorDataset.
+    If you instead want to import a ReceptorDataset from a tabular file that contains one receptor sequence per line,
+    see GenericImport.
+
+
+    Arguments:
+        path (str): Required parameter. This is the path to a directory with files to import.
+
+        receptor_chains (str): Required parameter. Determines which pair of chains to import for each Receptor.
+            Valid values for receptor_chains are the names of the :py:obj:`~source.data_model.receptor.ChainPair.ChainPair` enum.
+
+        region_type (str): Which part of the sequence to import. When IMGT_CDR3 is specified, immuneML assumes the IMGT
+            junction (including leading C and trailing Y/F amino acids) is used in the input file, and the first and last
+            amino acids will be removed from the sequences to retrieve the IMGT CDR3 sequence. Specifying any other value
+            will result in no trimming of the imported sequences.
+            Valid values for region_type are the names of the :py:obj:`~source.data_model.receptor.RegionType.RegionType` enum.
+
+        column_mapping (dict): A mapping where the keys are the column names in the input file, and the values must be
+            mapped to the following fields: <chain>_amino_acid_sequence, <chain>_nucleotide_sequence, <chain>_v_gene,
+            <chain>_j_gene, identifier, epitope.
+            The possible names that can be filled in for <chain> are given in :py:obj:`~source.data_model.receptor.receptor_sequence.Chain.Chain`
+            Any column namme other than the sequence, v/j genes and identifier will be set as metadata fields to the
+            Receptors, and can subsequently be used as labels in immuneML instructions.
+            For TCR alpha-beta receptor import, a column mapping could for example look like this:
+                cdr3_a_aa: alpha_amino_acid_sequence
+                cdr3_b_aa: beta_amino_acid_sequence
+                cdr3_a_nucseq: alpha_nucleotide_sequence
+                cdr3_b_nucseq: beta_nucleotide_sequence
+                v_a_gene: alpha_v_gene
+                v_b_gene: beta_v_gene
+                j_a_gene: alpha_j_gene
+                j_b_gene: beta_j_gene
+                clone_id: identifier
+                epitope: epitope # metadata field
+
+        columns_to_load (list): Optional; specifies which columns to load from the input file. This may be useful if
+            the input files contain many unused columns. If no value is specified, all columns are loaded.
+
+        separator (str): Required parameter. Column separator, for example "\\t" or ",".
+
+        organism (str): The organism that the receptors came from. This will be set as a parameter in the ReceptorDataset
+            object.
+
 
     YAML specification:
 
     .. indent with spaces
     .. code-block:: yaml
 
-        my_receptor_dataset:
-            format: GenericReceptor
+        my_vdjdb_dataset:
+            format: Generic
             params:
-                path: path_to_csv_file.csv # path to a file with receptor data or a path to the directory with multiple receptor data files
-                result_path: resulting_dataset/ # where to store the imported dataset
-                separator: ',' # separator in the original receptor data files
-                columns_to_load: [subject,epitope,count,v_a_gene,j_a_gene,cdr3_a_aa,v_b_gene,j_b_gene,cdr3_b_aa,clone_id] # which columns to load from the original receptor data file
-                column_mapping: # how to rename the columns so that they can be recognized by immuneML in format: original name in receptor file: immuneML name
-                    cdr3_a_aa: alpha_amino_acid_sequence # the sequence in the input receptor file and corresponding chain name in immuneML
+                path: path/to/files/
+                receptor_chains: TRA_TRB # what chain pair to import
+                separator: "\\t" # column separator
+                region_type: IMGT_CDR3 # what part of the sequence to import
+                columns_to_load: # which subset of columns to load from the file
+                - subject
+                - epitope
+                - count
+                - v_a_gene
+                - j_a_gene
+                - cdr3_a_aa
+                - v_b_gene
+                - j_b_gene
+                - cdr3_b_aa
+                - clone_id
+                column_mapping: # column mapping file: immuneML
+                    cdr3_a_aa: alpha_amino_acid_sequence
                     cdr3_b_aa: beta_amino_acid_sequence
                     cdr3_a_nucseq: alpha_nucleotide_sequence
                     cdr3_b_nucseq: beta_nucleotide_sequence
-                    v_a_gene: alpha_v_gene # for genes, chain name is the prefix when importing paired data
+                    v_a_gene: alpha_v_gene
                     v_b_gene: beta_v_gene
                     j_a_gene: alpha_j_gene
                     j_b_gene: beta_j_gene
                     clone_id: identifier
-                    epitope: epitope # everything other than sequences, V and J gene per chain, and an identifier will be stored in the receptor's metadata
-                receptor_chains: TRA_TRB # which receptor chains are in the input receptor data file(s)
-                region_type: CDR3
-                sequence_file_size: 50000
-                organism: mouse # mouse or human
-
+                    epitope: epitope
+                organism: mouse
     """
 
     @staticmethod
@@ -82,6 +126,16 @@ class SingleLineReceptorImport(DataImport):
             df.dropna()
             df.drop_duplicates()
             df.rename(columns=generic_params.column_mapping, inplace=True)
+
+            if "alpha_amino_acid_sequence" in df:
+                df["alpha_amino_acid_sequence"] = df["alpha_amino_acid_sequence"].str[1:-1]
+            if "beta_amino_acid_sequence" in df:
+                df["beta_amino_acid_sequence"] = df["beta_amino_acid_sequence"].str[1:-1]
+            if "alpha_nucleotide_sequence" in df:
+                df["alpha_nucleotide_sequence"] = df["alpha_nucleotide_sequence"].str[3:-3]
+            if "beta_nucleotide_sequence" in df:
+                df["beta_nucleotide_sequence"] = df["beta_nucleotide_sequence"].str[3:-3]
+
             for index, row in df.iterrows():
                 chain_vals = [ch for ch in generic_params.receptor_chains.value]
                 chain_names = [Chain.get_chain(ch).name.lower() for ch in generic_params.receptor_chains.value]
@@ -124,12 +178,16 @@ class SingleLineReceptorImport(DataImport):
 
         valid_chain_names = str([item.name for item in Chain])[1:-1].replace("'", "`")
         valid_chain_pair_names = str([item.name for item in ChainPair])[1:-1].replace("'", "`")
+        region_type_values = str([region_type.name for region_type in RegionType])[1:-1].replace("'", "`")
+
 
         mapping = {
-            "Chain names are given in :py:obj:`~source.data_model.receptor.receptor_sequence.Chain.Chain`.":
-                f"Valid chain names are: {valid_chain_names}.",
-            "Chain pairs are given in :py:obj:`~source.data_model.receptor.ChainPair.ChainPair`.":
-                f"Valid chain pairs are: {valid_chain_pair_names}."
+            "The possible names that can be filled in for <chain> are given in :py:obj:`~source.data_model.receptor.receptor_sequence.Chain.Chain`":
+                f"The possible names that can be filled in for <chain> are: {valid_chain_names}.",
+            "Valid values for receptor_chains are the names of the :py:obj:`~source.data_model.receptor.ChainPair.ChainPair` enum.":
+                f"Valid values for receptor_chains are: {valid_chain_pair_names}.",
+            "Valid values for region_type are the names of the :py:obj:`~source.data_model.receptor.RegionType.RegionType` enum.": f"Valid values are {region_type_values}.",
+
         }
         doc = update_docs_per_mapping(doc, mapping)
         return doc
