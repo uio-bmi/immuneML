@@ -66,7 +66,7 @@ class MiXCRImport(DataImport):
                 path: path/to/files/
                 is_repertoire: True # whether to import a RepertoireDataset (True) or a SequenceDataset (False)
                 metadata_file: path/to/metadata.csv # metadata file for RepertoireDataset
-                metadata_column_mapping: # metadata column mapping MiXCR -> immuneML for SequenceDataset
+                metadata_column_mapping: # metadata column mapping MiXCR: immuneML for SequenceDataset
                     mixcrColumnName1: metadata_label1
                     mixcrColumnName2: metadata_label2
                 region_type: IMGT_CDR3 # what part of the sequence to import
@@ -78,7 +78,7 @@ class MiXCRImport(DataImport):
                 - allJHitsWithScore
                 - aaSeqCDR3
                 - nSeqCDR3
-                column_mapping: # column mapping MiXCR -> immuneML
+                column_mapping: # column mapping MiXCR: immuneML
                     cloneCount: counts
                     allVHitsWithScore: v_genes
                     allJHitsWithScore: j_genes

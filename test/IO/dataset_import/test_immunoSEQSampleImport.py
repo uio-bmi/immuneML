@@ -1,13 +1,13 @@
 import shutil
 from unittest import TestCase
 
-from source.IO.dataset_import.ImmunoSEQImport import ImmunoSEQImport
+from source.IO.dataset_import.ImmunoSEQSampleImport import ImmunoSEQSampleImport
 from source.dsl.DefaultParamsLoader import DefaultParamsLoader
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.util.PathBuilder import PathBuilder
 
 
-class TestImmunoSEQImport(TestCase):
+class TestImmunoSEQSampleImport(TestCase):
     def create_dummy_dataset(self, path):
         rep1text = """nucleotide	aminoAcid	count (templates/reads)	frequencyCount (%)	cdr3Length	vMaxResolved	vFamilyName	vGeneName	vGeneAllele	vFamilyTies	vGeneNameTies	vGeneAlleleTies	dMaxResolved	dFamilyName	dGeneName	dGeneAllele	dFamilyTies	dGeneNameTies	dGeneAlleleTies	jMaxResolved	jFamilyName	jGeneName	jGeneAllele	jFamilyTies	jGeneNameTies	jGeneAlleleTies	vDeletion	n1Insertion	d5Deletion	d3Deletion	n2Insertion	jDeletion	vIndex	n1Index	dIndex	n2Index	jIndex	estimatedNumberGenomes	sequenceStatus	cloneResolved	vOrphon	dOrphon	jOrphon	vFunction	dFunction	jFunction	fractionNucleated	vAlignLength	vAlignSubstitutionCount	vAlignSubstitutionIndexes	vAlignSubstitutionGeneThreePrimeIndexes	vSeqWithMutations
         GCCATCCCCAACCAGACAGCTCTTTACTTCTGTGCCACCAGTGATCAACTTAACCGTTGGGGGACCGGGGAGCTGTTTTTTGGAGAA	CATSDQLNRWGTGELFF	38	0.0017525250196006087	51	TCRBV24	TCRBV24				TCRBV24-01,TCRBV24-or09_02						TCRBD01,TCRBD02	TCRBD01-01,TCRBD02-01		TCRBJ02-02*01	TCRBJ02	TCRBJ02-02	01				3	0	6	1	13	5	30	45	58	-1	63	38	In	VDJ												
@@ -48,13 +48,13 @@ rep1.tsv,TRA,1234a,no"""
         self.create_dummy_dataset(path)
 
 
-        params = DefaultParamsLoader.load(EnvironmentSettings.default_params_path + "datasets/", "immuno_seq")
+        params = DefaultParamsLoader.load(EnvironmentSettings.default_params_path + "datasets/", "ImmunoSEQSample")
         params["is_repertoire"] = True
         params["result_path"] = path
         params["metadata_file"] = path + "metadata.csv"
         params["path"] = path
 
-        dataset = ImmunoSEQImport.import_dataset(params, "immunoseq_dataset")
+        dataset = ImmunoSEQSampleImport.import_dataset(params, "immunoseq_dataset")
 
         self.assertEqual(1, dataset.get_example_count())
         for index, rep in enumerate(dataset.get_data()):
@@ -71,13 +71,13 @@ rep1.tsv,TRA,1234a,no"""
 
         self.create_dummy_dataset(path)
 
-        params = DefaultParamsLoader.load(EnvironmentSettings.default_params_path + "datasets/", "immuno_seq")
+        params = DefaultParamsLoader.load(EnvironmentSettings.default_params_path + "datasets/", "ImmunoSEQSample")
         params["is_repertoire"] = False
         params["paired"] = False
         params["result_path"] = path
         params["path"] = path
 
-        dataset = ImmunoSEQImport.import_dataset(params, "immunoseq_dataset")
+        dataset = ImmunoSEQSampleImport.import_dataset(params, "immunoseq_dataset")
 
         seqs = [sequence for sequence in dataset.get_data()]
 

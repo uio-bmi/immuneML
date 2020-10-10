@@ -2,8 +2,7 @@ import os
 import shutil
 from unittest import TestCase
 
-from source.IO.dataset_import.AdaptiveBiotechImport import AdaptiveBiotechImport
-from source.IO.dataset_import.DatasetImportParams import DatasetImportParams
+from source.IO.dataset_import.ImmunoSEQRearrangementImport import ImmunoSEQRearrangementImport
 from source.data_model.receptor.receptor_sequence.SequenceFrameType import SequenceFrameType
 from source.dsl.DefaultParamsLoader import DefaultParamsLoader
 from source.environment.EnvironmentSettings import EnvironmentSettings
@@ -11,7 +10,7 @@ from source.util.PathBuilder import PathBuilder
 from source.util.ImportHelper import ImportHelper
 
 
-class TestAdaptiveBiotechImport(TestCase):
+class TestImmunoSEQRearrangementImport(TestCase):
     def build_dummy_dataset(self, path):
 
         rep1text = """rearrangement	amino_acid	frame_type	rearrangement_type	templates	reads	frequency	productive_frequency	cdr3_length	v_family	v_gene	v_allele	d_family	d_gene	d_allele	j_family	j_gene	j_allele	v_deletions	d5_deletions	d3_deletions	j_deletions	n2_insertions	n1_insertions	v_index	n1_index	n2_index	d_index	j_index	v_family_ties	v_gene_ties	v_allele_ties	d_family_ties	d_gene_ties	d_allele_ties	j_family_ties	j_gene_ties	j_allele_ties	sequence_tags	v_shm_count	v_shm_indexes	antibody	sample_name	species	locus	product_subtype	kit_pool	total_templates	productive_templates	outofframe_templates	stop_templates	dj_templates	total_rearrangements	productive_rearrangements	outofframe_rearrangements	stop_rearrangements	dj_rearrangements	total_reads	total_productive_reads	total_outofframe_reads	total_stop_reads	total_dj_reads	productive_clonality	productive_entropy	sample_clonality	sample_entropy	sample_amount_ng	sample_cells_mass_estimate	fraction_productive_of_cells_mass_estimate	sample_cells	fraction_productive_of_cells	max_productive_frequency	max_frequency	counting_method	primer_set	release_date	sample_tags	fraction_productive	order_name	kit_id	total_t_cells
@@ -66,7 +65,7 @@ rep2.tsv,TRB,1234a,no"""
         path = EnvironmentSettings.root_path + "test/tmp/adaptive/"
         self.build_dummy_dataset(path)
 
-        params = DefaultParamsLoader.load(EnvironmentSettings.default_params_path + "datasets/", "adaptive_biotech")
+        params = DefaultParamsLoader.load(EnvironmentSettings.default_params_path + "datasets/", "ImmunoSEQRearrangement")
         params["is_repertoire"] = True
         params["result_path"] = path
         params["metadata_file"] = path + "metadata.csv"
@@ -77,7 +76,7 @@ rep2.tsv,TRB,1234a,no"""
 
         dataset_name = "adaptive_dataset_reps"
 
-        dataset = AdaptiveBiotechImport.import_dataset(params, dataset_name)
+        dataset = ImmunoSEQRearrangementImport.import_dataset(params, dataset_name)
 
         self.assertEqual(dataset.repertoires[0].sequences[1].metadata.frame_type, SequenceFrameType.OUT)
 
@@ -104,7 +103,7 @@ rep2.tsv,TRB,1234a,no"""
         path = EnvironmentSettings.root_path + "test/tmp/adaptive/"
         self.build_dummy_dataset(path)
 
-        params = DefaultParamsLoader.load(EnvironmentSettings.default_params_path + "datasets/", "adaptive_biotech")
+        params = DefaultParamsLoader.load(EnvironmentSettings.default_params_path + "datasets/", "ImmunoSEQRearrangement")
         params["is_repertoire"] = False
         params["paired"] = False
         params["result_path"] = path
@@ -115,7 +114,7 @@ rep2.tsv,TRB,1234a,no"""
 
         dataset_name = "adaptive_dataset_seqs"
 
-        dataset = AdaptiveBiotechImport.import_dataset(params, dataset_name)
+        dataset = ImmunoSEQRearrangementImport.import_dataset(params, dataset_name)
 
         self.assertEqual(28, dataset.get_example_count())
 

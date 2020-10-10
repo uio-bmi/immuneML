@@ -83,13 +83,13 @@ class VDJdbImport(DataImport):
                 # Optional fields with VDJdb-specific defaults, only change when different behavior is required:
                 separator: "\\t" # column separator
                 region_type: IMGT_CDR3 # what part of the sequence to import
-                column_mapping: # column mapping VDJdb -> immuneML
+                column_mapping: # column mapping VDJdb: immuneML
                     V: v_genes
                     J: j_genes
                     CDR3: sequence_aas
                     complex.id: sequence_identifiers
                     Gene: chains
-                metadata_column_mapping: # metadata column mapping VDJdb -> immuneML
+                metadata_column_mapping: # metadata column mapping VDJdb: immuneML
                     Epitope: epitope
                     Epitope gene: epitope_gene
                     Epitope species: epitope_species
