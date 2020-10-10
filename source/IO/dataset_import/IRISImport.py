@@ -26,7 +26,7 @@ class IRISImport(DataImport):
 
         metadata_file (str): Required for RepertoireDatasets. This parameter specifies the path to the metadata file.
             This is a csv file with columns filename, subject_id and arbitrary other columns which can be used as labels in instructions.
-            Sequence- or ReceptorDataset metadata is currently not yet implemented.
+            Sequence- or ReceptorDataset metadata is currently not supported.
 
         paired (str): Required for Sequence- or ReceptorDatasets. This parameter determines whether to import a
             SequenceDataset (paired = False) or a ReceptorDataset (paired = True). By default, paired = True.
