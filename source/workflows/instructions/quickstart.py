@@ -19,7 +19,6 @@ class Quickstart:
                     "d1": {
                         "format": "RandomRepertoireDataset",
                         "params": {
-                            "result_path": f'{path}dataset/',
                             "labels": {"CD": {True: 0.5, False: 0.5}}
                         }
                     }

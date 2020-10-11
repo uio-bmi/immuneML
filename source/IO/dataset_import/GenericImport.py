@@ -48,7 +48,7 @@ class GenericImport(DataImport):
             junction (including leading C and trailing Y/F amino acids) is used in the input file, and the first and last
             amino acids will be removed from the sequences to retrieve the IMGT CDR3 sequence. Specifying any other value
             will result in no trimming of the imported sequences.
-            Valid values for region_type are the names of the RegionType enum.
+            Valid values for region_type are the names of the :py:obj:`~source.data_model.receptor.RegionType.RegionType` enum.
 
         column_mapping (dict): Required for all datasets. A mapping where the keys are the column names in the input file,
             and the values correspond to the names used in immuneML's internal data representation.
@@ -130,7 +130,7 @@ class GenericImport(DataImport):
 
         mapping = {
             "Valid values for receptor_chains are the names of the ChainPair enum.": f"Valid values are {chain_pair_values}.",
-            "Valid values for region_type are the names of the RegionType enum.": f"Valid values are {region_type_values}.",
+            "Valid values for region_type are the names of the :py:obj:`~source.data_model.receptor.RegionType.RegionType` enum.": f"Valid values are {region_type_values}.",
             "Valid immuneML fields that can be specified here are defined by Repertoire.FIELDS": f"Valid immuneML fields that can be specified here are {repertoire_fields}."
         }
         doc = update_docs_per_mapping(doc, mapping)

@@ -46,7 +46,7 @@ class AIRRImport(DataImport):
         region_type (str): Which part of the sequence to import. By default, this value is set to IMGT_CDR3. This means the
             first and last amino acids are removed from the CDR3 sequence, as AIRR uses the IMGT junction. Specifying
             any other value will result in no trimming of the imported sequences.
-            Valid values for region_type are the names of the RegionType enum.
+            Valid values for region_type are the names of the :py:obj:`~source.data_model.receptor.RegionType.RegionType` enum.
 
         column_mapping (dict): A mapping from AIRR column names to immuneML's internal data representation.
             For AIRR, this is by default set to:
@@ -153,7 +153,7 @@ class AIRRImport(DataImport):
         repertoire_fields.remove("region_type")
 
         mapping = {
-            "Valid values for region_type are the names of the RegionType enum.": f"Valid values are {region_type_values}.",
+            "Valid values for region_type are the names of the :py:obj:`~source.data_model.receptor.RegionType.RegionType` enum.": f"Valid values are {region_type_values}.",
             "Valid immuneML fields that can be specified here are defined by Repertoire.FIELDS": f"Valid immuneML fields that can be specified here are {repertoire_fields}."
         }
         doc = update_docs_per_mapping(doc, mapping)
