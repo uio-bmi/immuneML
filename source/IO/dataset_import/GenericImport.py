@@ -79,7 +79,7 @@ class GenericImport(DataImport):
     .. indent with spaces
     .. code-block:: yaml
 
-        my_vdjdb_dataset:
+        my_generic_dataset:
             format: Generic
             params:
                 path: path/to/files/
