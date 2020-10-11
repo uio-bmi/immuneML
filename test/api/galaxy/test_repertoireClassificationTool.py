@@ -15,7 +15,7 @@ class TestRepertoireClassificationTool(TestCase):
 
     def make_random_dataset(self, path):
         alphabet = EnvironmentSettings.get_sequence_alphabet()
-        sequences = [["".join([rn.choice(alphabet) for i in range(20)]) for i in range(100)] for i in range(20)]
+        sequences = [["".join([rn.choice(alphabet) for i in range(20)]) for i in range(100)] for i in range(40)]
 
         repertoires, metadata = RepertoireBuilder.build(sequences, path, subject_ids=[i % 2 for i in range(len(sequences))])
         dataset = RepertoireDataset(repertoires=repertoires, metadata_file=metadata)

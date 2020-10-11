@@ -140,7 +140,6 @@ class TrainMLModelInstruction(Instruction):
                                                            label_config=self.state.label_configuration, hp_setting=optimal_hp_setting).run(0)
             print(f"{datetime.datetime.now()}: Hyperparameter optimization: finished retraining optimal model for label {label} {index_repr}.\n", flush=True)
 
-
         else:
             optimal_assessment_state = self.state.assessment_states[optimal_hp_settings.index(optimal_hp_setting)]
             self.state.optimal_hp_items[label] = optimal_assessment_state.label_states[label].optimal_assessment_item
