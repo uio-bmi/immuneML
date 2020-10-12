@@ -19,9 +19,11 @@ class CVFeaturePerformance(Report):
     in the feature attribute. It can be used only in combination with TrainMLModel instruction and can be only specified under
     assessment/reports/hyperparameter under that instruction.
 
-    Attributes:
+
+    Arguments:
         feature: name of the encoder parameter w.r.t. which the performance across training and test will be shown. Possible values depend
-            on the encoder on which it is used.
+        on the encoder on which it is used.
+
 
     YAML specification:
 

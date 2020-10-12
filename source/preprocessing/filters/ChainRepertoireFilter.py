@@ -10,7 +10,7 @@ class ChainRepertoireFilter(Filter):
     with chain different than "keep_chain" parameter.
     Note that this filter filters out repertoires, not individual sequences, and can thus only be applied to RepertoireDatasets.
 
-    Attributes:
+    Arguments:
 
         keep_chain (:py:obj:`~source.environment.SequenceType.SequenceType`): Which chain should be kept.
 

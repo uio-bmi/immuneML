@@ -21,7 +21,7 @@ class SequencingDepthOverview(DataReport):
     report.
 
 
-    Attributes:
+    Arguments:
 
         x (str): discrete column name from metadata file with which to put on the x-axis and split samples by
 
@@ -30,8 +30,8 @@ class SequencingDepthOverview(DataReport):
         facets (list): metadata attributes to split points by in rows of the resulting plot-matrix
 
         palette (dict): list of colors and breaks: list of values at which each color should be - for example:
-            discrete: {"A": "blue", "B": "red", ...}
-            continuous: {"colors": ["blue", "white", "red"], "breaks": [-1, 0, 1]}
+        discrete: {"A": "blue", "B": "red", ...}
+        continuous: {"colors": ["blue", "white", "red"], "breaks": [-1, 0, 1]}
 
         nrow_distributions (int): The number of rows used for the distribution plot facets.
 

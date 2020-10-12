@@ -21,7 +21,7 @@ class OneHotEncoder(DatasetEncoder):
     1 represents the alphabet character.
 
 
-    Attributes:
+    Arguments:
 
         use_positional_info (bool): whether to include a feature representing the positional information, where the
         stretch of positions in the middle of the CDR3 (regulated by distance_to_seq_middle) have positional value 1,

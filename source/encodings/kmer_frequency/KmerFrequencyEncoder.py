@@ -29,7 +29,7 @@ class KmerFrequencyEncoder(DatasetEncoder):
     K-mers can be defined in different ways, as determined by the sequence_encoding.
 
 
-    Attributes:
+    Arguments:
 
         sequence_encoding (:py:mod:`source.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType`):
         The type of k-mers that are used. The simplest sequence_encoding is :py:mod:`source.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType.CONTINUOUS_KMER`,

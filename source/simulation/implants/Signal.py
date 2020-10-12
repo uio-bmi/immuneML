@@ -18,7 +18,7 @@ class Signal:
     For example antigen-specific/disease-associated (receptor) or diseased (repertoire).
 
 
-    Attributes:
+    Arguments:
 
         motifs (list): A list of the motifs associated with this signal.
 

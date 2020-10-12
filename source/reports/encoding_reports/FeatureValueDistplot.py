@@ -36,41 +36,41 @@ class FeatureValueDistplot(EncodingReport):
     are plotted in the same overall distribution.
 
 
-    Attributes:
+    Arguments:
 
         distribution_plot_type (:py:obj:`~source.visialization.DistributionPlotType.DistributionPlotType`):
-            what type of distribution plot should be used to visualize the data. Possible options are:
-            LINE: Plots the feature values per group on a vertical line (strip chart).
-            BOX: Creates boxplots of the feature values per group.
-            VIOLIN: Creates violin plots of the feature values per group.
-            SINA: Plots the feature values per group as a sina plot (strip chart with jitter according to density distribution)
-            DENSITY: Creates overlapping density plots of the distributions.
-            RIDGE: Creates ridge plots of the distribution.
+        what type of distribution plot should be used to visualize the data. Possible options are:
+        - LINE: Plots the feature values per group on a vertical line (strip chart).
+        - BOX: Creates boxplots of the feature values per group.
+        - VIOLIN: Creates violin plots of the feature values per group.
+        - SINA: Plots the feature values per group as a sina plot (strip chart with jitter according to density distribution)
+        - DENSITY: Creates overlapping density plots of the distributions.
+        - RIDGE: Creates ridge plots of the distribution.
 
         grouping_label (str): The label name used for x-axis grouping of the distributions (when using LINE, BOX,
-            VIOLIN or SINA distribution types), or used for plotting the different distribution curves
-            (when using DENSITY and RIDGE distribution types).
+        VIOLIN or SINA distribution types), or used for plotting the different distribution curves
+        (when using DENSITY and RIDGE distribution types).
 
         color_label (str): The label name used to color the data. When plotting distribution curves
-            (DENSITY and RIDGE distribution types) the color grouping label is automatically set to the same field
-            as the grouping label.
+        (DENSITY and RIDGE distribution types) the color grouping label is automatically set to the same field
+        as the grouping label.
 
         connection_label (str): The label name used to connect data points, only if `distribution_plot_type` is LINE.
-            This is often useful in the case where multiple examples from one patient are available, and change over
-            time, for example, is of interest.
+        This is often useful in the case where multiple examples from one patient are available, and change over
+        time, for example, is of interest.
 
         row_grouping_labels (str or list): The label that is used to group distributions into different row facets.
 
         column_grouping_labels (str or list): The label that is used to group distributions into different column facets.
 
         panel_layout_type (:py:obj:`~source.visualization.PanelLayoutType.PanelLayoutType`): Parameter determining how the panels will be
-            displayed. For options see :py:obj:`~source.visualization.PanelLayoutType.PanelLayoutType`.
+        displayed. For options see :py:obj:`~source.visualization.PanelLayoutType.PanelLayoutType`.
 
         panel_axis_scales_type (:py:obj:`~source.visualization.PanelAxisScalesType.PanelAxisScalesType`): Parameter determining how the x-
-            and y-axis scales should vary across panels. For options see :py:obj:`~source.visualization.PanelAxisScalesType.PanelAxisScalesType`.
+        and y-axis scales should vary across panels. For options see :py:obj:`~source.visualization.PanelAxisScalesType.PanelAxisScalesType`.
 
         panel_label_switch_type (:py:obj:`~source.visualization.PanelLabelSwitchType.PanelLabelSwitchType`): Parameter determining
-            placement of labels for each panel in the plot. For options see :py:obj:`~source.visualization.PanelLabelSwitchType.PanelLabelSwitchType`.
+        placement of labels for each panel in the plot. For options see :py:obj:`~source.visualization.PanelLabelSwitchType.PanelLabelSwitchType`.
 
         panel_nrow (int): Number of rows in plot (if panel_layout_type is `wrap`)
 
@@ -85,6 +85,7 @@ class FeatureValueDistplot(EncodingReport):
         y_title (str): y-axis label
 
         color_title (str): label for color
+
 
     YAML specification:
 
