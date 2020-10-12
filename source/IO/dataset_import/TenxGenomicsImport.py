@@ -1,3 +1,5 @@
+import pandas as pd
+
 from scripts.specification_util import update_docs_per_mapping
 from source.IO.dataset_import.DataImport import DataImport
 from source.IO.dataset_import.DatasetImportParams import DatasetImportParams
@@ -7,7 +9,7 @@ from source.data_model.receptor.RegionType import RegionType
 from source.data_model.receptor.receptor_sequence.SequenceFrameType import SequenceFrameType
 from source.data_model.repertoire.Repertoire import Repertoire
 from source.util.ImportHelper import ImportHelper
-import pandas as pd
+
 
 class TenxGenomicsImport(DataImport):
     """
@@ -134,8 +136,8 @@ class TenxGenomicsImport(DataImport):
 
         chain_pair_values = str([chain_pair.name for chain_pair in ChainPair])[1:-1].replace("'", "`")
         region_type_values = str([region_type.name for region_type in RegionType])[1:-1].replace("'", "`")
-        repertoire_fields = Repertoire.FIELDS
-        repertoire_fields.remove("region_type")
+        repertoire_fields = list(Repertoire.FIELDS)
+        repertoire_fields.remove("region_types")
 
         mapping = {
             "Valid values for receptor_chains are the names of the :py:obj:`~source.data_model.receptor.ChainPair.ChainPair` enum.": f"Valid values are {chain_pair_values}.",

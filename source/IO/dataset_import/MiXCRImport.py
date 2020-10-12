@@ -148,8 +148,8 @@ class MiXCRImport(DataImport):
         doc = str(MiXCRImport.__doc__)
 
         region_type_values = str([region_type.name for region_type in MiXCRImport.SEQUENCE_NAME_MAP.keys()])[1:-1].replace("'", "`")
-        repertoire_fields = Repertoire.FIELDS
-        repertoire_fields.remove("region_type")
+        repertoire_fields = list(Repertoire.FIELDS)
+        repertoire_fields.remove("region_types")
 
         mapping = {
             "Valid values for region_type are defined in MiXCRImport.SEQUENCE_NAME_MAP.": f"Valid values are {region_type_values}.",

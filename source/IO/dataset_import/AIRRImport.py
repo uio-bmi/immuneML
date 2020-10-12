@@ -149,8 +149,8 @@ class AIRRImport(DataImport):
         doc = str(AIRRImport.__doc__)
 
         region_type_values = str([region_type.name for region_type in RegionType])[1:-1].replace("'", "`")
-        repertoire_fields = Repertoire.FIELDS
-        repertoire_fields.remove("region_type")
+        repertoire_fields = list(Repertoire.FIELDS)
+        repertoire_fields.remove("region_types")
 
         mapping = {
             "Valid values for region_type are the names of the :py:obj:`~source.data_model.receptor.RegionType.RegionType` enum.": f"Valid values are {region_type_values}.",

@@ -29,8 +29,9 @@ class Repertoire(DatasetItem):
     loaded separately. Internally, this class relies on numpy to store/import_dataset the data.
     """
 
-    FIELDS = "sequence_aas,sequences,v_genes,j_genes,v_subgroups,j_subgroups,v_alleles,j_alleles,chains,counts,region_types,frame_types,sequence_identifiers," \
-             "cell_ids".split(",")
+    FIELDS = tuple(
+        "sequence_aas,sequences,v_genes,j_genes,v_subgroups,j_subgroups,v_alleles,j_alleles,chains,counts,region_types,frame_types,"
+        "sequence_identifiers,cell_ids".split(","))
 
     @staticmethod
     def process_custom_lists(custom_lists):
@@ -166,7 +167,7 @@ class Repertoire(DatasetItem):
     def __init__(self, data_filename: str, metadata_filename: str, identifier: str):
 
         assert ".npy" in data_filename, \
-            "Repertoire: the file representing the repertoire has to be in numpy binary format. Got {} instead."\
+            "Repertoire: the file representing the repertoire has to be in numpy binary format. Got {} instead." \
                 .format(data_filename.rpartition(".")[1])
 
         self.data_filename = data_filename

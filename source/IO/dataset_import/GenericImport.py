@@ -125,8 +125,8 @@ class GenericImport(DataImport):
 
         chain_pair_values = str([chain_pair.name for chain_pair in ChainPair])[1:-1].replace("'", "`")
         region_type_values = str([region_type.name for region_type in RegionType])[1:-1].replace("'", "`")
-        repertoire_fields = Repertoire.FIELDS
-        repertoire_fields.remove("region_type")
+        repertoire_fields = list(Repertoire.FIELDS)
+        repertoire_fields.remove("region_types")
 
         mapping = {
             "Valid values for receptor_chains are the names of the ChainPair enum.": f"Valid values are {chain_pair_values}.",
