@@ -23,9 +23,9 @@ class Signal:
         motifs (list): A list of the motifs associated with this signal.
 
         implanting (:py:obj:`~source.simulation.signal_implanting_strategy.SignalImplantingStrategy.SignalImplantingStrategy`):
-            The strategy that is used to decide in which sequences the motifs should be implanted, and how.
+        The strategy that is used to decide in which sequences the motifs should be implanted, and how.
 
-            Valid values for this argument are class names of different signal implanting strategies.
+        Valid values for this argument are class names of different signal implanting strategies.
 
 
     YAML specification:

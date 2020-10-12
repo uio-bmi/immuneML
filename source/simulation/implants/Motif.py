@@ -20,26 +20,26 @@ class Motif:
     Arguments:
 
         seed (str): An amino acid sequence that represents the basic motif seed. All implanted motifs correspond to the seed, or a modified
-            version thereof, as specified in it's instantiation strategy. If this argument is set, seed_chain1 and seed_chain2 arguments are not used.
+        version thereof, as specified in it's instantiation strategy. If this argument is set, seed_chain1 and seed_chain2 arguments are not used.
 
         instantiation (:py:obj:`~source.simulation.motif_instantiation_strategy.MotifInstantiationStrategy.MotifInstantiationStrategy`):
-            Which strategy to use for implanting the seed. It should be one of the classes inheriting MotifInstantiationStrategy.
-            In the YAML specification this can either be one of these values as a string in which case the default parameters will be used.
-            Alternatively, instantiation can be specified with parameters as in the example YAML specification below. For the detailed list of
-            parameters, see the specific instantiation strategies below.
+        Which strategy to use for implanting the seed. It should be one of the classes inheriting MotifInstantiationStrategy.
+        In the YAML specification this can either be one of these values as a string in which case the default parameters will be used.
+        Alternatively, instantiation can be specified with parameters as in the example YAML specification below. For the detailed list of
+        parameters, see the specific instantiation strategies below.
 
         seed_chain1 (str): in case when representing motifs for paired chain data, it is possible to define a motif seed per chain; if this parameter
-            is set, the generated motif instances will include a motif instance for both chains; for more details on how it works see `seed` argument
-            above. Used only if the seed argument is not set.
+        is set, the generated motif instances will include a motif instance for both chains; for more details on how it works see `seed` argument
+        above. Used only if the seed argument is not set.
 
         seed_chain2 (str): used for paired chain data, for the other receptor chain; for more details on how it works see `seed` argument. This
-            argument is used only if the seed argument is not set.
+        argument is used only if the seed argument is not set.
 
         name_chain1: name of the first chain if paired receptor data are simulated. The value should be an instance of
-            :py:obj:`~source.data_model.receptor.receptor_sequence.Chain.Chain`. This argument is used only if the seed argument is not set.
+        :py:obj:`~source.data_model.receptor.receptor_sequence.Chain.Chain`. This argument is used only if the seed argument is not set.
 
         name_chain2: name of the second chain 2 if paired receptor data are simulated. The value should be an instance of
-            :py:obj:`~source.data_model.receptor.receptor_sequence.Chain.Chain`. This argument is used only if the seed argument is not set.
+        :py:obj:`~source.data_model.receptor.receptor_sequence.Chain.Chain`. This argument is used only if the seed argument is not set.
 
 
     YAML specification:

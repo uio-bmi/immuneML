@@ -30,25 +30,27 @@ class KmerFrequencyEncoder(DatasetEncoder):
 
 
     Attributes:
+
         sequence_encoding (:py:mod:`source.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType`):
-            The type of k-mers that are used. The simplest sequence_encoding is :py:mod:`source.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType.CONTINUOUS_KMER`,
-            which simply uses contiguous subsequences of length k to represent the k-mers.
-            When gapped k-mers are used (:py:mod:`source.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType.GAPPED_KMER`,
-            :py:mod:`source.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType.GAPPED_KMER`), the k-mers may contain
-            gaps with a size between min_gap and max_gap, and the k-mer length is defined as a combination of k_left and k_right.
-            When IMGT k-mers are used (:py:mod:`source.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType.IMGT_CONTINUOUS_KMER`,
-            :py:mod:`source.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType.IMGT_GAPPED_KMER`), IMGT positional information is
-            taken into account (i.e. the same sequence in a different position is considered to be a different k-mer).
-            When the identity representation is used (:py:mod:`source.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType.IDENTITY`),
-            the k-mers just correspond to the original sequences.
+        The type of k-mers that are used. The simplest sequence_encoding is :py:mod:`source.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType.CONTINUOUS_KMER`,
+        which simply uses contiguous subsequences of length k to represent the k-mers.
+        When gapped k-mers are used (:py:mod:`source.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType.GAPPED_KMER`,
+        :py:mod:`source.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType.GAPPED_KMER`), the k-mers may contain
+        gaps with a size between min_gap and max_gap, and the k-mer length is defined as a combination of k_left and k_right.
+        When IMGT k-mers are used (:py:mod:`source.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType.IMGT_CONTINUOUS_KMER`,
+        :py:mod:`source.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType.IMGT_GAPPED_KMER`), IMGT positional information is
+        taken into account (i.e. the same sequence in a different position is considered to be a different k-mer).
+        When the identity representation is used (:py:mod:`source.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType.IDENTITY`),
+        the k-mers just correspond to the original sequences.
 
         normalization_type (:py:mod:`source.analysis.data_manipulation.NormalizationType`): The way in which the
-            k-mer frequencies should be normalized.
+        k-mer frequencies should be normalized.
 
         reads (:py:mod:`source.encodings.kmer_frequency.ReadsType`): Reads type signify whether the counts of the sequences
-            in the repertoire will be taken into account. If :py:mod:`source.encodings.kmer_frequency.ReadsType.UNIQUE`,
-            only unique sequences (clonotypes) are encoded, and if :py:mod:`source.encodings.kmer_frequency.ReadsType.ALL`,
-            the sequence 'count' value is taken into account when determining the k-mer frequency.
+        in the repertoire will be taken into account. If :py:mod:`source.encodings.kmer_frequency.ReadsType.UNIQUE`,
+        only unique sequences (clonotypes) are encoded, and if :py:mod:`source.encodings.kmer_frequency.ReadsType.ALL`,
+        the sequence 'count' value is taken into account when determining the k-mer frequency.
+
         k (int): Length of the k-mer (number of amino acids) when ungapped k-mers are used.
 
         k_left (int): When gapped k-mers are used, k_left indicates the length of the k-mer left of the gap.
@@ -58,6 +60,7 @@ class KmerFrequencyEncoder(DatasetEncoder):
         min_gap (int): Minimum gap size when gapped k-mers are used.
 
         max_gap: (int): Maximum gap size when gapped k-mers are used.
+
 
     YAML specification:
 
