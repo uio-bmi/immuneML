@@ -22,40 +22,45 @@ class IGoRImport(DataImport):
 
 
     Arguments:
+
         path (str): Required parameter. This is the path to a directory with IGoR files to import.
 
         is_repertoire (bool): If True, this imports a RepertoireDataset. If False, it imports a SequenceDataset.
-            By default, is_repertoire is set to True.
+        By default, is_repertoire is set to True.
 
         metadata_file (str): Required for RepertoireDatasets. This parameter specifies the path to the metadata file.
-            This is a csv file with columns filename, subject_id and arbitrary other columns which can be used as labels in instructions.
-            Only the IGoR files included under the column 'filename' are imported into the RepertoireDataset.
-            For setting SequenceDataset metadata, metadata_file is ignored, see metadata_column_mapping instead.
+        This is a csv file with columns filename, subject_id and arbitrary other columns which can be used as labels in instructions.
+        Only the IGoR files included under the column 'filename' are imported into the RepertoireDataset.
+        For setting SequenceDataset metadata, metadata_file is ignored, see metadata_column_mapping instead.
 
         import_with_stop_codon (bool): Whether sequences with stop codons should be included in the imported sequences.
-            By default, import_with_stop_codon is False.
+        By default, import_with_stop_codon is False.
 
         import_out_of_frame (bool): Whether out of frame sequences (with value '0' in column is_inframe) should
-            be included in the imported sequences. By default, import_out_of_frame is False.
+        be included in the imported sequences. By default, import_out_of_frame is False.
 
         region_type (str): Which part of the sequence to import. By default, this value is set to IMGT_CDR3. This means the
-            first and last amino acids are removed from the CDR3 sequence, as IGoR uses the IMGT junction. Specifying
-            any other value will result in importing the sequences as they are.
-            Valid values for region_type are the names of the :py:obj:`~source.data_model.receptor.RegionType.RegionType` enum.
+        first and last amino acids are removed from the CDR3 sequence, as IGoR uses the IMGT junction. Specifying
+        any other value will result in importing the sequences as they are.
+        Valid values for region_type are the names of the :py:obj:`~source.data_model.receptor.RegionType.RegionType` enum.
 
         column_mapping (dict): A mapping from IGoR column names to immuneML's internal data representation.
-            For IGoR, this is by default set to:
+        For IGoR, this is by default set to:
+
+        .. indent with spaces
+        .. code-block:: yaml
                 nt_CDR3: sequences
                 seq_index: sequence_identifiers
-            A custom column mapping can be specified here if necessary (for example; adding additional data fields if
-            they are present in the IGoR file, or using alternative column names).
-            Valid immuneML fields that can be specified here are defined by Repertoire.FIELDS
+
+        A custom column mapping can be specified here if necessary (for example; adding additional data fields if
+        they are present in the IGoR file, or using alternative column names).
+        Valid immuneML fields that can be specified here are defined by Repertoire.FIELDS
 
         metadata_column_mapping (dict): Specifies metadata for SequenceDatasets. This should specify a mapping similar
-            to column_mapping where keys are IGoR column names and values are the names that are internally used in immuneML
-            as metadata fields. These metadata fields can be used as prediction labels for SequenceDatasets.
-            For IGoR format, there is no default metadata_column_mapping.
-            For setting RepertoireDataset metadata, metadata_column_mapping is ignored, see metadata_file instead.
+        to column_mapping where keys are IGoR column names and values are the names that are internally used in immuneML
+        as metadata fields. These metadata fields can be used as prediction labels for SequenceDatasets.
+        For IGoR format, there is no default metadata_column_mapping.
+        For setting RepertoireDataset metadata, metadata_column_mapping is ignored, see metadata_file instead.
 
         separator (str): Column separator, for IGoR this is by default ",".
 

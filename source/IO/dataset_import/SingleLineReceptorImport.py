@@ -27,24 +27,29 @@ class SingleLineReceptorImport(DataImport):
 
 
     Arguments:
+
         path (str): Required parameter. This is the path to a directory with files to import.
 
         receptor_chains (str): Required parameter. Determines which pair of chains to import for each Receptor.
-            Valid values for receptor_chains are the names of the :py:obj:`~source.data_model.receptor.ChainPair.ChainPair` enum.
+        Valid values for receptor_chains are the names of the :py:obj:`~source.data_model.receptor.ChainPair.ChainPair` enum.
 
         region_type (str): Which part of the sequence to import. When IMGT_CDR3 is specified, immuneML assumes the IMGT
-            junction (including leading C and trailing Y/F amino acids) is used in the input file, and the first and last
-            amino acids will be removed from the sequences to retrieve the IMGT CDR3 sequence. Specifying any other value
-            will result in importing the sequences as they are.
-            Valid values for region_type are the names of the :py:obj:`~source.data_model.receptor.RegionType.RegionType` enum.
+        junction (including leading C and trailing Y/F amino acids) is used in the input file, and the first and last
+        amino acids will be removed from the sequences to retrieve the IMGT CDR3 sequence. Specifying any other value
+        will result in importing the sequences as they are.
+        Valid values for region_type are the names of the :py:obj:`~source.data_model.receptor.RegionType.RegionType` enum.
 
         column_mapping (dict): A mapping where the keys are the column names in the input file, and the values must be
-            mapped to the following fields: <chain>_amino_acid_sequence, <chain>_nucleotide_sequence, <chain>_v_gene,
-            <chain>_j_gene, identifier, epitope.
-            The possible names that can be filled in for <chain> are given in :py:obj:`~source.data_model.receptor.receptor_sequence.Chain.Chain`
-            Any column namme other than the sequence, v/j genes and identifier will be set as metadata fields to the
-            Receptors, and can subsequently be used as labels in immuneML instructions.
-            For TCR alpha-beta receptor import, a column mapping could for example look like this:
+        mapped to the following fields: <chain>_amino_acid_sequence, <chain>_nucleotide_sequence, <chain>_v_gene,
+        <chain>_j_gene, identifier, epitope.
+        The possible names that can be filled in for <chain> are given in :py:obj:`~source.data_model.receptor.receptor_sequence.Chain.Chain`
+        Any column namme other than the sequence, v/j genes and identifier will be set as metadata fields to the
+        Receptors, and can subsequently be used as labels in immuneML instructions.
+        For TCR alpha-beta receptor import, a column mapping could for example look like this:
+
+        .. indent with spaces
+        .. code-block:: yaml
+
                 cdr3_a_aa: alpha_amino_acid_sequence
                 cdr3_b_aa: beta_amino_acid_sequence
                 cdr3_a_nucseq: alpha_nucleotide_sequence
@@ -57,12 +62,11 @@ class SingleLineReceptorImport(DataImport):
                 epitope: epitope # metadata field
 
         columns_to_load (list): Optional; specifies which columns to load from the input file. This may be useful if
-            the input files contain many unused columns. If no value is specified, all columns are loaded.
+        the input files contain many unused columns. If no value is specified, all columns are loaded.
 
         separator (str): Required parameter. Column separator, for example "\\t" or ",".
 
-        organism (str): The organism that the receptors came from. This will be set as a parameter in the ReceptorDataset
-            object.
+        organism (str): The organism that the receptors came from. This will be set as a parameter in the ReceptorDataset object.
 
 
     YAML specification:
@@ -70,8 +74,8 @@ class SingleLineReceptorImport(DataImport):
     .. indent with spaces
     .. code-block:: yaml
 
-        my_vdjdb_dataset:
-            format: Generic
+        my_receptor_dataset:
+            format: SingleLineReceptor
             params:
                 path: path/to/files/
                 receptor_chains: TRA_TRB # what chain pair to import
@@ -99,7 +103,7 @@ class SingleLineReceptorImport(DataImport):
                     j_b_gene: beta_j_gene
                     clone_id: identifier
                     epitope: epitope
-                organism: mouse
+                    organism: mouse
     """
 
     @staticmethod
