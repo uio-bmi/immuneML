@@ -22,7 +22,7 @@ class TestAIRRExporter(TestCase):
                                                                        j_gene="j1",
                                                                        chain=Chain.BETA,
                                                                        count=5,
-                                                                       region_type="CDR3",
+                                                                       region_type="IMGT_CDR3",
                                                                        custom_params={"d_call": "d1",
                                                                                       "custom_test": "cust1"})),
                             ReceptorSequence(amino_acid_sequence="GGG",
@@ -32,7 +32,7 @@ class TestAIRRExporter(TestCase):
                                                                        j_gene="j2",
                                                                        chain=Chain.ALPHA,
                                                                        count=15,
-                                                                       region_type="CDR3",
+                                                                       region_type="IMGT_CDR3",
                                                                        custom_params={"d_call": "d2",
                                                                                       "custom_test": "cust2"}))]
 

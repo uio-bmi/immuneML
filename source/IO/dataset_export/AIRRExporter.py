@@ -6,6 +6,7 @@ import pandas as pd
 
 from source.IO.dataset_export.DataExporter import DataExporter
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
+from source.data_model.receptor.RegionType import RegionType
 from source.data_model.receptor.receptor_sequence.Chain import Chain
 from source.data_model.repertoire.Repertoire import Repertoire
 from source.environment.Constants import Constants
@@ -25,7 +26,7 @@ class AIRRExporter(DataExporter):
     """
 
     @staticmethod
-    def export(dataset: RepertoireDataset, path, region_type="CDR3"):
+    def export(dataset: RepertoireDataset, path, region_type=RegionType.IMGT_CDR3):
         if not isinstance(dataset, RepertoireDataset):
             logging.warning(f"AIRRExporter: dataset {dataset.name} is a {type(dataset).__name__}, but only repertoire dataset export is currently "
                             f"supported for AIRR format.")
@@ -58,7 +59,7 @@ class AIRRExporter(DataExporter):
                   "chains": "locus",
                   "counts": "duplicate_count"}
 
-        if region_type == "CDR3":
+        if region_type == RegionType.IMGT_CDR3:
             mapper["sequences"] = "cdr3"
             mapper["sequence_aas"] = "cdr3_aa"
         else:

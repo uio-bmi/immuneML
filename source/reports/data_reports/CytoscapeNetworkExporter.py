@@ -31,13 +31,6 @@ class CytoscapeNetworkExporter(DataReport):
 
     """
 
-    CHAIN_GENE_NAME_CONVERSION = {"A": "TRA",
-                                  "B": "TRB",
-                                  "G": "TRG",
-                                  "D": "TRD",
-                                  "H": "IGH",
-                                  "L": "IGL"}
-
     @classmethod
     def build_object(cls, **kwargs):
 
@@ -137,7 +130,7 @@ class CytoscapeNetworkExporter(DataReport):
 
     def get_formatted_node_metadata(self, seq: ReceptorSequence):
         # sequence, v_gene_subgroup, v_gene, j_gene_subgroup, j_gene
-        chain = CytoscapeNetworkExporter.CHAIN_GENE_NAME_CONVERSION[seq.get_attribute('chain').value]
+        chain = seq.get_attribute('chain').value
         v_gene = seq.get_attribute('v_gene')
         j_gene = seq.get_attribute('j_gene')
 

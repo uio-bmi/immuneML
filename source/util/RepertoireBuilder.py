@@ -35,7 +35,7 @@ class RepertoireBuilder:
                 subject_ids.append("rep_" + str(rep_index))
             for seq_index, sequence in enumerate(sequence_list):
                 if seq_metadata is None:
-                    m = SequenceMetadata(v_gene="TRBV6-1", j_gene="TRBJ2-7", count=1, chain="B", region_type="CDR3")
+                    m = SequenceMetadata(v_gene="TRBV6-1", j_gene="TRBJ2-7", count=1, chain="B", region_type="IMGT_CDR3")
                 else:
                     m = SequenceMetadata(**seq_metadata[rep_index][seq_index])
 

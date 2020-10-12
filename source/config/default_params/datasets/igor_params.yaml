@@ -1,10 +1,9 @@
-import_productive: null # no effect as this info is not available in files created by IGoR
+is_repertoire: True
+paired: False
 import_with_stop_codon: False # whether to import sequences with stop codon
 import_out_of_frame: False # whether out of frame sequences should be imported
 separator: ","
-columns_to_load: ["seq_index", "nt_CDR3", "anchors_found", "is_inframe"]
-region_definition: "IMGT" # which CDR3 definition to use - IMGT option means removing first and last amino acid as IGoR uses IMGT junction
-region_type: "CDR3"
+region_type: "IMGT_CDR3" # which region to use - IMGT_CDR3 option means removing first and last amino acid as IGoR uses IMGT junction as CDR3
 column_mapping: # IGoR column names -> immuneML repertoire fields
   nt_CDR3: sequences
   seq_index: sequence_identifiers

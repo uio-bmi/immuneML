@@ -3,6 +3,6 @@ from enum import Enum
 
 class SequenceFrameType(Enum):
 
-    IN = "In"
-    OUT = "Out"
-    STOP = "Stop"
+    IN = "IN"
+    OUT = "OUT"
+    STOP = "STOP"

@@ -16,19 +16,29 @@ from source.environment.Constants import Constants
 
 class PickleImport(DataImport):
     """
-    Imports the dataset from the pickle file which has previously been exported from immuneML. It does not perform any processing of
-    examples in the dataset (i.e. repertoires), but relies on Repertoire objects that have been created previously.
+    Imports the dataset from the pickle files previously exported by immuneML.
+    PickleImport can import any kind of dataset (RepertoireDataset, SequenceDataset, ReceptorDataset).
+
+
+    Arguments:
+        path (str): The path to the previously created dataset file. This file should have an '.iml_dataset' extension.
+            If the path has not been specified, immuneML attempts to load the dataset from a specified metadata file
+            (only for RepertoireDatasets).
+
+        metadata_file (str): An optional metadata file for a RepertoireDataset. If specified, the RepertoireDataset
+            metadata will be updated to the newly specified metadata without otherwise changing the Repertoire objects
+
 
     YAML specification:
 
     .. indent with spaces
     .. code-block:: yaml
 
-        my_pickle_dataset: # user-defined dataset name
+        my_pickle_dataset:
             format: Pickle
             params:
-                path: path_to_dataset.iml_dataset # for datasets already in immuneML format
-                metadata_file: metadata.csv # optional, but if specified, the dataset's metadata will be updated to this without changing Repertoire objects
+                path: path/to/dataset.iml_dataset
+                metadata_file: path/to/metadata.csv
 
     """
 

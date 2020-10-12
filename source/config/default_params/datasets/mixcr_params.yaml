@@ -1,6 +1,6 @@
-region_type: "CDR3" # which part of the sequence to import by default
-batch_size: 4 # how many repertoires can be processed at once by default
-region_definition: "IMGT" # which CDR3 definition to use - IMGT option means removing first and last amino acid as MiXCR uses IMGT junction as CDR3
+is_repertoire: True
+paired: False
+region_type: "IMGT_CDR3" # which region to use - IMGT_CDR3 option means removing first and last amino acid as MiXCR uses IMGT junction as CDR3
 separator: "\t"
 columns_to_load: [cloneCount, allVHitsWithScore, allJHitsWithScore, aaSeqCDR3, nSeqCDR3]
 column_mapping: # MiXCR column name -> immuneML repertoire field (where there is no 1-1 mapping, those are omitted here and handled in the code)

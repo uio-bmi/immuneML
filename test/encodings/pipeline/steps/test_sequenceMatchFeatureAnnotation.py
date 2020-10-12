@@ -8,7 +8,6 @@ from scipy import sparse
 from source.caching.CacheType import CacheType
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.encoded_data.EncodedData import EncodedData
-from source.data_model.receptor.RegionDefinition import RegionDefinition
 from source.data_model.receptor.RegionType import RegionType
 from source.data_model.repertoire.Repertoire import Repertoire
 from source.encodings.pipeline.steps.SequenceMatchFeatureAnnotation import SequenceMatchFeatureAnnotation
@@ -61,12 +60,12 @@ VGENE1	CASSIEGPTGELFF	D Transporter 8	MHC I"""
 reference_rep.tsv,rep1"""
 
     reference_data_loader_params = {
+        "is_repertoire": True,
         "result_path": path,
         "column_mapping": {"CDR3B AA Sequence": "sequence_aas",
                            "TRBV Gene": "v_genes"},
         "columns_to_load": ["CDR3B AA Sequence", "TRBV Gene", "Antigen Protein", "MHC Class"],
-        "region_definition": RegionDefinition.IMGT.name,
-        "region_type": RegionType.CDR3.name,
+        "region_type": RegionType.IMGT_CDR3.name,
         "metadata_file": path + "metadata.csv"
     }
 

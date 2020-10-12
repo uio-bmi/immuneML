@@ -4,6 +4,7 @@ import os
 import pandas as pd
 
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
+from source.data_model.receptor.RegionType import RegionType
 from source.encodings.filtered_sequence_encoding.SequenceAbundanceEncoder import SequenceAbundanceEncoder
 from source.encodings.filtered_sequence_encoding.SequenceCountEncoder import SequenceCountEncoder
 from source.reports.ReportOutput import ReportOutput
@@ -59,9 +60,9 @@ class RelevantSequenceExporter(EncodingReport):
         columns = df.columns.values.tolist()
         column_mapping = {}
         region_type = self.dataset.get_repertoire(0).get_attribute("region_types")[0]
-        if "sequence_aas" in columns and region_type != "CDR3":
+        if "sequence_aas" in columns and region_type != RegionType.IMGT_CDR3:
             column_mapping["sequence_aas"] = "sequence_aa"
-        if "sequences" in columns and region_type != "CDR3":
+        if "sequences" in columns and region_type != RegionType.IMGT_CDR3:
             column_mapping['sequences'] = "sequence"
 
         return {**RelevantSequenceExporter.COLUMN_MAPPING, **column_mapping}
