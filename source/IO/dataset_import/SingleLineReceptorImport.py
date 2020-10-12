@@ -35,7 +35,7 @@ class SingleLineReceptorImport(DataImport):
         region_type (str): Which part of the sequence to import. When IMGT_CDR3 is specified, immuneML assumes the IMGT
             junction (including leading C and trailing Y/F amino acids) is used in the input file, and the first and last
             amino acids will be removed from the sequences to retrieve the IMGT CDR3 sequence. Specifying any other value
-            will result in no trimming of the imported sequences.
+            will result in importing the sequences as they are.
             Valid values for region_type are the names of the :py:obj:`~source.data_model.receptor.RegionType.RegionType` enum.
 
         column_mapping (dict): A mapping where the keys are the column names in the input file, and the values must be

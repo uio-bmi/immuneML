@@ -39,7 +39,7 @@ class VDJdbImport(DataImport):
 
         region_type (str): Which part of the sequence to import. By default, this value is set to IMGT_CDR3. This means the
             first and last amino acids are removed from the CDR3 sequence, as VDJdb uses IMGT junction as CDR3. Specifying
-            any other value will result in no trimming of the imported sequences.
+            any other value will result in importing the sequences as they are.
             Valid values for region_type are the names of the :py:obj:`~source.data_model.receptor.RegionType.RegionType` enum.
 
         column_mapping (dict): A mapping from VDJdb column names to immuneML's internal data representation.
