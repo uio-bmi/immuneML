@@ -15,7 +15,7 @@ class VDJdbImport(DataImport):
     """
     Imports data in VDJdb format into a Repertoire-, Sequence- or ReceptorDataset.
     RepertoireDatasets should be used when making predictions per repertoire, such as predicting a disease state.
-    SequenceDatasets or ReceptorDatasets should be used when predicting values for for unpaired (single-chain) and paired
+    SequenceDatasets or ReceptorDatasets should be used when predicting values for unpaired (single-chain) and paired
     immune receptors respectively, like antigen specificity.
 
 

@@ -13,7 +13,7 @@ class TenxGenomicsImport(DataImport):
     """
     Imports data from 10xGenomics into a Repertoire-, Sequence- or ReceptorDataset.
     RepertoireDatasets should be used when making predictions per repertoire, such as predicting a disease state.
-    SequenceDatasets or ReceptorDatasets should be used when predicting values for for unpaired (single-chain) and paired
+    SequenceDatasets or ReceptorDatasets should be used when predicting values for unpaired (single-chain) and paired
     immune receptors respectively, like antigen specificity.
 
     The files that should be used as input are named 'Clonotype consensus annotations (CSV)',

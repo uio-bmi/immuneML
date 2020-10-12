@@ -15,7 +15,7 @@ class ImmunoSEQRearrangementImport(DataImport):
     Imports data from Adaptive Biotechnologies immunoSEQ Analyzer rearrangement-level .tsv files into a
     Repertoire-, or SequenceDataset.
     RepertoireDatasets should be used when making predictions per repertoire, such as predicting a disease state.
-    SequenceDatasets should be used when predicting values for for unpaired (single-chain) immune receptors, like
+    SequenceDatasets should be used when predicting values for unpaired (single-chain) immune receptors, like
     antigen specificity.
 
     The format of the files imported by this importer is described here:

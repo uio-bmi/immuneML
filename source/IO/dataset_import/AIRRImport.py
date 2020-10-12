@@ -15,7 +15,7 @@ class AIRRImport(DataImport):
     """
     Imports data in AIRR format into a Repertoire-, or SequenceDataset.
     RepertoireDatasets should be used when making predictions per repertoire, such as predicting a disease state.
-    SequenceDatasets should be used when predicting values for for unpaired (single-chain) immune receptors, like
+    SequenceDatasets should be used when predicting values for unpaired (single-chain) immune receptors, like
     antigen specificity.
 
     AIRR rearrangement schema can be found here: https://docs.airr-community.org/en/stable/datarep/rearrangements.html
