@@ -95,7 +95,7 @@ class MLSettingsPerformance(MLReport):
         figure = px.bar(plotting_data, x="ml_method", y="performancemean", color="ml_method", barmode="relative",
                         facet_row=self.vertical_grouping, facet_col="label", error_y="performancestd",
                         labels={
-                            "performancemean": f"Performance ({metric_name})", # todo test if this is performance
+                            "performancemean": f"Performance<br>({metric_name})",
                             "ml_method": "ML method"
                         }, template='plotly_white',
                         color_discrete_sequence=px.colors.diverging.Tealrose)
