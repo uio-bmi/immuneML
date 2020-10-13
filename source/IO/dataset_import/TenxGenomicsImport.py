@@ -27,30 +27,35 @@ class TenxGenomicsImport(DataImport):
 
 
     Arguments:
+
         path (str): Required parameter. This is the path to a directory with 10xGenomics files to import.
 
         is_repertoire (bool): If True, this imports a RepertoireDataset. If False, it imports a SequenceDataset or
-            ReceptorDataset. By default, is_repertoire is set to True.
+        ReceptorDataset. By default, is_repertoire is set to True.
 
         metadata_file (str): Required for RepertoireDatasets. This parameter specifies the path to the metadata file.
-            This is a csv file with columns filename, subject_id and arbitrary other columns which can be used as labels in instructions.
-            For setting Sequence- or ReceptorDataset metadata, metadata_file is ignored, see metadata_column_mapping instead.
+        This is a csv file with columns filename, subject_id and arbitrary other columns which can be used as labels in instructions.
+        For setting Sequence- or ReceptorDataset metadata, metadata_file is ignored, see metadata_column_mapping instead.
 
         paired (str): Required for Sequence- or ReceptorDatasets. This parameter determines whether to import a
-            SequenceDataset (paired = False) or a ReceptorDataset (paired = True).
-            In a ReceptorDataset, two sequences with chain types specified by receptor_chains are paired together
-            based on the identifier given in the 10xGenomics column named 'clonotype_id'.
+        SequenceDataset (paired = False) or a ReceptorDataset (paired = True).
+        In a ReceptorDataset, two sequences with chain types specified by receptor_chains are paired together
+        based on the identifier given in the 10xGenomics column named 'clonotype_id'.
 
         receptor_chains (str): Required for ReceptorDatasets. Determines which pair of chains to import for each Receptor.
-            Valid values for receptor_chains are the names of the :py:obj:`~source.data_model.receptor.ChainPair.ChainPair` enum.
+        Valid values for receptor_chains are the names of the :py:obj:`~source.data_model.receptor.ChainPair.ChainPair` enum.
 
         region_type (str): Which part of the sequence to import. By default, this value is set to IMGT_CDR3. This means the
-            first and last amino acids are removed from the CDR3 sequence, as 10xGenomics uses IMGT junction as CDR3. Specifying
-            any other value will result in importing the sequences as they are.
-            Valid values for region_type are the names of the :py:obj:`~source.data_model.receptor.RegionType.RegionType` enum.
+        first and last amino acids are removed from the CDR3 sequence, as 10xGenomics uses IMGT junction as CDR3. Specifying
+        any other value will result in importing the sequences as they are.
+        Valid values for region_type are the names of the :py:obj:`~source.data_model.receptor.RegionType.RegionType` enum.
 
         column_mapping (dict): A mapping from 10xGenomics column names to immuneML's internal data representation.
-            For 10xGenomics, this is by default set to:
+        For 10xGenomics, this is by default set to:
+
+        .. indent with spaces
+        .. code-block:: yaml
+
                 cdr3: sequence_aas
                 cdr3_nt: sequences
                 v_gene: v_genes
@@ -59,15 +64,16 @@ class TenxGenomicsImport(DataImport):
                 chain: chains
                 clonotype_id: cell_ids
                 consensus_id: sequence_identifiers
-            A custom column mapping can be specified here if necessary (for example; adding additional data fields if
-            they are present in the 10xGenomics file, or using alternative column names).
-            Valid immuneML fields that can be specified here are defined by Repertoire.FIELDS
+
+        A custom column mapping can be specified here if necessary (for example; adding additional data fields if
+        they are present in the 10xGenomics file, or using alternative column names).
+        Valid immuneML fields that can be specified here are defined by Repertoire.FIELDS
 
         metadata_column_mapping (dict): Specifies metadata for Sequence- and ReceptorDatasets. This should specify a
-            mapping similar to column_mapping where keys are AIRR column names and values are the names that are internally
-            used in immuneML as metadata fields. These metadata fields can be used as prediction labels for Sequence-
-            and ReceptorDatasets. For 10xGenomics format, there is no default metadata_column_mapping.
-            For setting RepertoireDataset metadata, metadata_column_mapping is ignored, see metadata_file instead.
+        mapping similar to column_mapping where keys are 10xGenomics column names and values are the names that are internally
+        used in immuneML as metadata fields. These metadata fields can be used as prediction labels for Sequence-
+        and ReceptorDatasets. For 10xGenomics format, there is no default metadata_column_mapping.
+        For setting RepertoireDataset metadata, metadata_column_mapping is ignored, see metadata_file instead.
 
         separator (str): Column separator, for 10xGenomics this is by default ",".
 
@@ -86,8 +92,8 @@ class TenxGenomicsImport(DataImport):
                 paired: False # whether to import SequenceDataset (False) or ReceptorDataset (True) when is_repertoire = False
                 receptor_chains: TRA_TRB # what chain pair to import for a ReceptorDataset
                 metadata_column_mapping: # metadata column mapping 10xGenomics: immuneML for SequenceDataset
-                    airr_column_name1: metadata_label1
-                    airr_column_name2: metadata_label2
+                    tenx_column_name1: metadata_label1
+                    tenx_column_name2: metadata_label2
                 # Optional fields with 10xGenomics-specific defaults, only change when different behavior is required:
                 separator: "," # column separator
                 region_type: IMGT_CDR3 # what part of the sequence to import

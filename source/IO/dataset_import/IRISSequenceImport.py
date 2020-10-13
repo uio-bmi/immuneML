@@ -14,7 +14,7 @@ from source.environment.Constants import Constants
 class IRISSequenceImport:
     """
     Reads immune receptor data in IRIS format, and reads this into a list of Receptors (paired alpha-beta)
-    or ReceptorSequences (unpaired).
+    or ReceptorSequences (unpaired). To import a dataset in IRIS format, see IRISImport instead.
 
     By default, when dual chain information is present and when multiple possible
     genes are specified for a ReceptorSequence, all possible combinations are read in.
@@ -22,28 +22,34 @@ class IRISSequenceImport:
     Illegal rows containing missing information are skipped without warning.
 
     Note: currenly only works with TCR alpha-beta data
-    # todo generalize to BCR data, and TCR gamma-delta
 
 
     Arguments:
+
         path (str): Path to the IRIS file.
+
         paired (bool): Determines whether the data should be read as paired or unpaired format. When paired is True,
-            the class returns a ReceptorList. When paired is False, it returns a ReceptorSequenceList.
+        the class returns a ReceptorList. When paired is False, it returns a ReceptorSequenceList.
+
         all_dual_chains (bool): Determines whether all dual chain information should be read in. When all_dual_chains
-            is True, both chain (1) and (2) are read in. In combination with paired is True, this means all possible
-            combinations of alpha and beta chains are added to the ReceptorList, and when paired is False all possible
-            single chains are added to the ReceptorSequenceList.
-            When all_dual_chains is False, only chain (1) is read in and (2) is ignored, creating only one entry in the
-            ReceptorList or ReceptorSequenceList per line in the IRIS file.
-            Whether a ReceptorSequence was chain (1) or (2) is stored in the custom_params list named dual_chain_id,
-            and in the case of paired data the information is additionally present in the metadata list clonotype_id.
+        is True, both chain (1) and (2) are read in. In combination with paired is True, this means all possible
+        combinations of alpha and beta chains are added to the ReceptorList, and when paired is False all possible
+        single chains are added to the ReceptorSequenceList.
+        When all_dual_chains is False, only chain (1) is read in and (2) is ignored, creating only one entry in the
+        ReceptorList or ReceptorSequenceList per line in the IRIS file.
+        Whether a ReceptorSequence was chain (1) or (2) is stored in the custom_params list named dual_chain_id,
+        and in the case of paired data the information is additionally present in the metadata list clonotype_id.
+
         all_genes (bool): Determines whether all genes should be read in, when multiple gene options are present
-            (separated by the symbol |). Similarly to all_dual_chains, when all_genes is True, all versions of a given
-            ReceptorSequence are considered. When all_genes is False and multiple genes are present, a random gene is
-            selected from the set.
+        (separated by the symbol |). Similarly to all_dual_chains, when all_genes is True, all versions of a given
+        ReceptorSequence are considered. When all_genes is False and multiple genes are present, a random gene is
+        selected from the set.
 
 
     YAML specification:
+
+    .. indent with spaces
+    .. code-block:: yaml
 
         datasets:
             my_dataset:

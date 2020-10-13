@@ -37,10 +37,11 @@ class FeatureValueBarplot(EncodingReport):
     panel. This prevents the undesired (and often uninterpretable) case where the mean across multiple features
     is plotted.
 
-    Attributes:
+
+    Arguments:
 
         grouping_label (str): The label name used for x-axis grouping of the barplots - defaults to "feature," 
-            meaning each bar represents one feature.
+        meaning each bar represents one feature.
 
         color_grouping_label (str): The label that is used to color each bar, at each level of the grouping_label.
 
@@ -49,16 +50,16 @@ class FeatureValueBarplot(EncodingReport):
         column_grouping_labels (str or list): The label that is used to group bars into different column facets.
 
         errorbar_meaning (:py:obj:`~source.visualization.ErrorBarMeaning.ErrorBarMeaning`): The value that
-            the error bar should represent. For options see :py:obj:`~source.visualization.ErrorBarMeaning.ErrorBarMeaning`.
+        the error bar should represent. For options see :py:obj:`~source.visualization.ErrorBarMeaning.ErrorBarMeaning`.
 
         panel_layout_type (:py:obj:`~source.visualization.PanelLayoutType.PanelLayoutType`): Parameter determining how the panels will be
-            displayed. For options see :py:obj:`~source.visualization.PanelLayoutType.PanelLayoutType`.
+        displayed. For options see :py:obj:`~source.visualization.PanelLayoutType.PanelLayoutType`.
 
         panel_axis_scales_type (:py:obj:`~source.visualization.PanelAxisScalesType.PanelAxisScalesType`): Parameter determining how the x-
-            and y-axis scales should vary across panels. For options see :py:obj:`~source.visualization.PanelAxisScalesType.PanelAxisScalesType`.
+        and y-axis scales should vary across panels. For options see :py:obj:`~source.visualization.PanelAxisScalesType.PanelAxisScalesType`.
             
         panel_label_switch_type (:py:obj:`~source.visualization.PanelLabelSwitchType.PanelLabelSwitchType`): Parameter determining
-            placement of labels for each panel in the plot. For options see :py:obj:`~source.visualization.PanelLabelSwitchType.PanelLabelSwitchType`.
+        placement of labels for each panel in the plot. For options see :py:obj:`~source.visualization.PanelLabelSwitchType.PanelLabelSwitchType`.
 
         panel_nrow (int): Number of rows in plot (if panel_layout_type is `wrap`)
 
@@ -73,6 +74,7 @@ class FeatureValueBarplot(EncodingReport):
         y_title (str): y-axis label
 
         color_title (str): label for color
+
 
     YAML specification:
 

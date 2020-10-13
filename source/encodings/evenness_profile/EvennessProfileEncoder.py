@@ -26,7 +26,7 @@ class EvennessProfileEncoder(DatasetEncoder):
     See Greiff and colleagues' publication "A bioinformatic framework for immune repertoire diversity profiling enables
     detection of immunological status" in Genome Medicine 2015 for more details.
 
-    Attributes:
+    Arguments:
 
         min_alpha (float): minimum alpha value to use
 

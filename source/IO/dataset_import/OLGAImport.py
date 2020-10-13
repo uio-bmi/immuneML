@@ -15,20 +15,21 @@ class OLGAImport(DataImport):
 
 
     Arguments:
+
         path (str): Required parameter. This is the path to a directory with OLGA files to import.
 
         is_repertoire (bool): If True, this imports a RepertoireDataset. If False, it imports a SequenceDataset.
-            By default, is_repertoire is set to True.
+        By default, is_repertoire is set to True.
 
         metadata_file (str): Required for RepertoireDatasets. This parameter specifies the path to the metadata file.
-            This is a csv file with columns filename, subject_id and arbitrary other columns which can be used as labels in instructions.
-            Only the OLGA files included under the column 'filename' are imported into the RepertoireDataset.
-            SequenceDataset metadata is currently not supported.
+        This is a csv file with columns filename, subject_id and arbitrary other columns which can be used as labels in instructions.
+        Only the OLGA files included under the column 'filename' are imported into the RepertoireDataset.
+        SequenceDataset metadata is currently not supported.
 
         region_type (str): Which part of the sequence to import. By default, this value is set to IMGT_CDR3. This means the
-            first and last amino acids are removed from the CDR3 sequence, as OLGA uses the IMGT junction. Specifying
-            any other value will result in importing the sequences as they are.
-            Valid values for region_type are the names of the :py:obj:`~source.data_model.receptor.RegionType.RegionType` enum.
+        first and last amino acids are removed from the CDR3 sequence, as OLGA uses the IMGT junction. Specifying
+        any other value will result in importing the sequences as they are.
+        Valid values for region_type are the names of the :py:obj:`~source.data_model.receptor.RegionType.RegionType` enum.
 
         separator (str): Column separator, for OLGA this is by default "\\t".
 

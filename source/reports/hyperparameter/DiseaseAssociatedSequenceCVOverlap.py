@@ -26,6 +26,7 @@ class DiseaseAssociatedSequenceCVOverlap(Report):
     For details, see Greiff V, Menzel U, Miho E, et al. Systems Analysis Reveals High Genetic and Antigen-Driven Predetermination of Antibody
     Repertoires throughout B Cell Development. Cell Reports. 2017;19(7):1467-1478. doi:10.1016/j.celrep.2017.04.054.
 
+
     Arguments:
 
         compare_in_selection (bool): whether to compute the overlap over the inner loop of the nested CV - the sequence overlap is shown across CV
@@ -33,7 +34,11 @@ class DiseaseAssociatedSequenceCVOverlap(Report):
 
         compare_in_assessment (bool): whether to compute the overlap over the optimal models in the outer loop of the nested CV
 
+
     YAML specification:
+
+    .. indent with spaces
+    .. code-block:: yaml
 
         reports: # the report is defined with all other reports under definitions/reports
             my_overlap_report: DiseaseAssociatedSequenceCVOverlap # report has no parameters

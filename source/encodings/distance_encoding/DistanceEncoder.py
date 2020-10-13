@@ -25,7 +25,7 @@ class DistanceEncoder(DatasetEncoder):
     if they contain the same set of sequence_aas, and the distance is minimal if none of the sequence_aas are shared between
     two repertoires.
 
-    Attributes:
+    Arguments:
 
         distance_metric (:py:mod:`source.encodings.distance_encoding.DistanceMetricType`): The metric used to calculate the
         distance between two repertoires. Names of different distance metric types are allowed values in the specification.
