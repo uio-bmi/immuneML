@@ -154,7 +154,7 @@ def build_specs(args):
                 "coefficients": {
                     "Coefficients": {
                         "coefs_to_plot": [CoefficientPlottingSetting.N_LARGEST.name],
-                        "n_largest": [20]
+                        "n_largest": [25]
                     }
                 },
                 "benchmark": "MLSettingsPerformance"
