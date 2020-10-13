@@ -52,6 +52,7 @@ def parse_commandline_arguments(args):
     parser.add_argument("-m", "--metadata_file", default="", help="The metadata file when using a repertoire dataset. When using a receptor dataset, you may supply an empty string.")
     parser.add_argument("-p", "--paired", choices=["True", "False"], default="False", help="When the data is not repertoire data (metadata file = ''), this specifies whether the data is paired (ReceptorDataset) or unpaired (SequenceDataset)")
     parser.add_argument("-c", "--receptor_chains", choices=["TRA_TRB", "TRG_TRD", "IGH_IGL", "IGH_IGK"], default="TRA_TRB", help="When the data is a ReceptorDataset, this specifies the type of receptor chains that are used.")
+    parser.add_argument("-a", "--metadata_columns", default="", help="The name of metadata columns of a Sequence- or ReceptorDataset.")
     parser.add_argument("-d", "--dataset_name", default="dataset", help="The name of the created dataset.")
 
     parser.add_argument("-o", "--output_path", required=True, help="Output location for the generated yaml file (directiory).")
