@@ -29,20 +29,18 @@ class Coefficients(MLReport):
     the selection and assessment levels.
 
     Which coefficients should be plotted (for example: only nonzero, above a certain threshold, ...) can be specified.
-    Multiple options can be specified simultaneously. The full set of coefficients will also be exported as a csv file.
+    Multiple options can be specified simultaneously. By default the 25 largest coefficients are plotted.
+    The full set of coefficients will also be exported as a csv file.
 
 
     Arguments:
 
-        coefs_to_plot (list): A list specifying which coefficients should be plotted.
-        For options see :py:obj:`~source.reports.ml_reports.CoefficientPlottingSetting.CoefficientPlottingSetting`.
+        coefs_to_plot (list): A list specifying which coefficients should be plotted. For options see :py:obj:`~source.reports.ml_reports.CoefficientPlottingSetting.CoefficientPlottingSetting`.
 
-        cutoff (list): If 'cutoff' is specified under 'coefs_to_plot', the cutoff values can be specified here.
-        The coefficients which have an absolute value equal to or greater than the cutoff will be plotted.
 
-        n_largest (list): If 'n_largest' is specified under 'coefs_to_plot', the values for n can be specified here.
-        These should be integer values. The n largest coefficients are determined based on their absolute values.
+        cutoff (list): If 'cutoff' is specified under 'coefs_to_plot', the cutoff values can be specified here. The coefficients which have an absolute value equal to or greater than the cutoff will be plotted.
 
+        n_largest (list): If 'n_largest' is specified under 'coefs_to_plot', the values for n can be specified here. These should be integer values. The n largest coefficients are determined based on their absolute values.
 
     YAML specification:
 
