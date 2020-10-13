@@ -2,6 +2,7 @@ import shutil
 from unittest import TestCase
 
 from source.IO.dataset_import.TenxGenomicsImport import TenxGenomicsImport
+from source.dsl.DefaultParamsLoader import DefaultParamsLoader
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.util.PathBuilder import PathBuilder
 
@@ -39,16 +40,13 @@ rep2.tsv,2""")
         PathBuilder.build(path)
         self.create_dumy_dataset(path, add_metadata=True)
 
-        params = {"result_path": path, "path": path, "metadata_file": path + "metadata.csv",
-                  "import_productive": True, "batch_size": 4, "separator": ",", "region_type": "CDR3",
-                  "region_definition": "IMGT",
-                  "columns_to_load": ["clonotype_id", "consensus_id", "length", "chain", "v_gene", "d_gene", "j_gene",
-                                      "c_gene", "full_length", "productive", "cdr3", "cdr3_nt", "reads", "umis"],
-                  "column_mapping": {"cdr3": "sequence_aas", "cdr3_nt": "sequences", "v_gene": "v_genes",
-                                     "j_gene": "j_genes", "umis":"counts", "chain": "chains", "clonotype_id":"cell_ids",
-                                     "consensus_id":"sequence_identifiers"}}
+        params = DefaultParamsLoader.load(EnvironmentSettings.default_params_path + "datasets/", "tenx_genomics")
+        params["is_repertoire"] = True
+        params["result_path"] = path
+        params["path"] = path
+        params["metadata_file"] = path + "metadata.csv"
 
-        dataset = TenxGenomicsImport.import_dataset(params, "tenx_dataset")
+        dataset = TenxGenomicsImport.import_dataset(params, "tenx_dataset_repertoire")
 
         self.assertEqual(2, dataset.get_example_count())
 
@@ -65,17 +63,14 @@ rep2.tsv,2""")
         PathBuilder.build(path)
         self.create_dumy_dataset(path, add_metadata=False)
 
-        params = {"result_path": path, "path": path,
-                  "import_productive": True, "batch_size": 4, "separator": ",", "region_type": "CDR3",
-                  "region_definition": "IMGT", "file_size": 1,
-                  "columns_to_load": ["clonotype_id", "consensus_id", "length", "chain", "v_gene", "d_gene", "j_gene",
-                                      "c_gene", "full_length", "productive", "cdr3", "cdr3_nt", "reads", "umis"],
-                  "column_mapping": {"cdr3": "sequence_aas", "cdr3_nt": "sequences", "v_gene": "v_genes",
-                                     "j_gene": "j_genes", "umis": "counts", "chain": "chains",
-                                     "clonotype_id": "cell_ids",
-                                     "consensus_id": "sequence_identifiers"}}
+        params = DefaultParamsLoader.load(EnvironmentSettings.default_params_path + "datasets/", "tenx_genomics")
+        params["is_repertoire"] = False
+        params["paired"] = False
+        params["result_path"] = path
+        params["path"] = path
+        params["sequence_file_size"] = 1
 
-        dataset = TenxGenomicsImport.import_dataset(params, "tenx_dataset")
+        dataset = TenxGenomicsImport.import_dataset(params, "tenx_dataset_sequence")
 
         self.assertEqual(6, dataset.get_example_count())
         self.assertEqual(6, len(dataset.get_filenames()))
@@ -85,3 +80,30 @@ rep2.tsv,2""")
             self.assertTrue(receptorseq.amino_acid_sequence in ["ALSGTGGYKVV", "ASSLYGGPEVF", "AAKGTQVVGQLT", "AIVGNTGKLI", "ASSFATNSDYT", "AVSANSNNRIF"])
 
         shutil.rmtree(path)
+
+
+    def test_import_receptor_dataset(self):
+        path = EnvironmentSettings.root_path + "test/tmp/io_10xGenomics/"
+        PathBuilder.build(path)
+        self.create_dumy_dataset(path, add_metadata=False)
+
+        params = DefaultParamsLoader.load(EnvironmentSettings.default_params_path + "datasets/", "tenx_genomics")
+        params["is_repertoire"] = False
+        params["paired"] = True
+        params["result_path"] = path
+        params["path"] = path
+        params["sequence_file_size"] = 1
+        params["receptor_chains"] = "TRA_TRB"
+
+        dataset = TenxGenomicsImport.import_dataset(params, "tenx_dataset_receptor")
+
+        self.assertEqual(2, dataset.get_example_count())
+        self.assertEqual(2, len(dataset.get_filenames()))
+
+        data = dataset.get_data(1)
+        for receptor in data:
+            self.assertTrue(receptor.alpha.amino_acid_sequence in ["ALSGTGGYKVV", "AIVGNTGKLI"])
+            self.assertTrue(receptor.beta.amino_acid_sequence in ["ASSLYGGPEVF", "ASSFATNSDYT"])
+
+        shutil.rmtree(path)
+

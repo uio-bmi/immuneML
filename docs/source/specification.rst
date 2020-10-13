@@ -1,19 +1,17 @@
-Specification
-#############
+YAML specification
+###################
 
 .. toctree::
    :maxdepth: 2
 
-The YAML specification defines which analysis should be performed by immuneML. It consists of two parts:
+The YAML specification defines which analysis should be performed by immuneML. It consists of three parts:
 
-  - definitions,
-  - instructions and
-  - output.
+  - Definitions - describing how datasets, encodings, ML methods, preprocessing, simulations and other components are defined (i.e., their settings),
+  - Instructions - describing the parameters of the analysis that will be performed and which of the components (defined under `definitions`) will be used for this
+  - Output - describing how to format the results of the analysis (currently, only HTML output is supported).
 
-Definitions describe datasets, encodings, ML methods, preprocessing, simulations and other components (see details below).
-Instructions describe the analysis that will be performed and use datasets, encodings and other definitions to define on which data the
-analysis will be performed and what are the specific parameters of that analysis. Output defines how to format the presentation of the
-results of the analysis.
+The purpose of this page is to list all the YAML specification options. If you are not familiar with the YAML specification and get started, see
+:ref:`How to specify an analysis with YAML`.
 
 The overall structure of the YAML specification is the following:
 
@@ -47,12 +45,6 @@ The overall structure of the YAML specification is the following:
   output: # how to present the result after running (the only valid option now)
     format: HTML
 
-The logic behind parsing this specification is the following: anything defined under `definitions` is available in the `instructions` part, but
-anything generated from the instructions is not available to other instructions. If output of one instruction (e.g. a generated dataset) needs to be
-used in the other instruction, these two instructions have to be two separate analyses. In the second instruction the generated dataset for instance,
-would then be defined under `definitions`/`datasets` section.
-
-For details on each of these components, see the documentation below.
 
 Definitions
 ===========

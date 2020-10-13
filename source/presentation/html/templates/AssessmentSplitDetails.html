@@ -25,8 +25,12 @@
                 </div>
             </details>
         </div>
-        {{#labels}}
         <h4>Label {{label}}</h4>
+        <p>
+            In the table below, the performance of each hyperparameter setting on the test set for this split is shown. All settings were refitted on
+            the dataset which includes all training and validation data for this split. The setting in bold was chosen as the optimal one for this
+            split during selection (inner cross-validation loop).
+        </p>
         <div class="padded">
             <div class="table-container">
                 <table>
@@ -34,37 +38,34 @@
                         <tr>
                             <th>Hyperparameter settings (preprocessing, encoding, ML method)</th>
                             <th>Performance ({{optimization_metric}})</th>
+                            {{#has_reports}}
+                            <th>Reports</th>
+                            {{/has_reports}}
                         </tr>
                     </thead>
                     <tbody>
                         {{#hp_settings}}
                         <tr>
                             <td>
-                                <a href="{{reports_path}}">
                                 {{#optimal}}<b>{{/optimal}}
-                                    {{hp_setting}}
+                                {{hp_setting}}
                                 {{#optimal}}</b>{{/optimal}}
-                                </a>
                             </td>
                             <td>
-                                <a href="{{reports_path}}">
-                                {{#optimal}}<b>{{/optimal}}
-                                    {{optimization_metric_val}}
-                                {{#optimal}}</b>{{/optimal}}
-                                </a>
-                            </td>
+                                {{#optimal}}<b>{{/optimal}}{{optimization_metric_val}}{{#optimal}}</b>{{/optimal}}</td>
+                            {{#has_reports}}
+                            <td><a href="{{reports_path}}">see reports</a></td>
+                            {{/has_reports}}
                         </tr>
                         {{/hp_settings}}
                     </tbody>
                 </table>
             </div>
         </div>
-        <div class="padded">
-            <div>
-                <a href="{{selection_path}}">Selection details</a>
-            </div>
-        </div>
-        {{/labels}}
+        <p>
+            For the performance of each of the settings during the inner loop of cross-validation (used to select the optimal model for the split),
+            see <a href="{{selection_path}}">selection details</a>.
+        </p>
         {{#show_data_reports}}
         <h3>Data reports</h3>
         <div class="padded">

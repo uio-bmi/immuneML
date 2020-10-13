@@ -40,7 +40,7 @@ class GappedKmerInstantiation(MotifInstantiationStrategy):
             will be redistributed over all possible amino acids, including those not specified.
 
 
-    Specification:
+    YAML specification:
 
     .. indent with spaces
     .. code-block:: yaml

@@ -36,7 +36,7 @@ class SequenceCountEncoder(DatasetEncoder):
         sequence_batch_size (int): The pool size used for parallelization. This does not affect the results of the encoding,
             only the speed.
 
-    Specification:
+    YAML specification:
 
     .. indent with spaces
     .. code-block:: yaml
@@ -99,7 +99,7 @@ class SequenceCountEncoder(DatasetEncoder):
         encoded_data = EncodedData(count_matrix, dataset.get_metadata([label]) if params.encode_labels else None,
                                    dataset.get_repertoire_ids(),
                                    feature_names,
-                                   encoding=SequenceCountEncoder.__name__)
+                                   encoding=SequenceCountEncoder.__name__, info={'relevant_sequence_path': self.relevant_sequence_csv_path})
 
         return encoded_data
 

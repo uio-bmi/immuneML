@@ -6,6 +6,7 @@ import pandas as pd
 
 from source.data_model.dataset.Dataset import Dataset
 from source.data_model.encoded_data.EncodedData import EncodedData
+from source.data_model.repertoire.Repertoire import Repertoire
 from source.environment.Constants import Constants
 
 
@@ -36,7 +37,7 @@ class RepertoireDataset(Dataset):
     def get_batch(self, batch_size: int = 1):
         return self.repertoires
 
-    def get_repertoire(self, index: int = -1, repertoire_identifier: str = ""):
+    def get_repertoire(self, index: int = -1, repertoire_identifier: str = "") -> Repertoire:
         assert index != -1 or repertoire_identifier != "", \
             "RepertoireDataset: cannot import_dataset repertoire since the index nor identifier are set."
         return self.repertoires[index] if index != -1 else [rep for rep in self.repertoires if rep.identifier == repertoire_identifier][0]

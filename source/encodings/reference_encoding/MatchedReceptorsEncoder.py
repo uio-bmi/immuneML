@@ -2,13 +2,19 @@ import abc
 import os
 from typing import List
 
+from source.IO.dataset_import.DatasetImportParams import DatasetImportParams
+from source.IO.dataset_import.IRISImportParams import IRISImportParams
+from source.IO.dataset_import.IRISSequenceImport import IRISSequenceImport
 from source.caching.CacheHandler import CacheHandler
 from source.data_model.receptor.BCReceptor import BCReceptor
 from source.data_model.receptor.Receptor import Receptor
 from source.data_model.receptor.TCABReceptor import TCABReceptor
 from source.data_model.receptor.TCGDReceptor import TCGDReceptor
+from source.dsl.DefaultParamsLoader import DefaultParamsLoader
 from source.encodings.DatasetEncoder import DatasetEncoder
 from source.encodings.EncoderParams import EncoderParams
+from source.environment.EnvironmentSettings import EnvironmentSettings
+from source.util.ImportHelper import ImportHelper
 from source.util.ParameterValidator import ParameterValidator
 from source.util.ReflectionHandler import ReflectionHandler
 
@@ -24,14 +30,14 @@ class MatchedReceptorsEncoder(DatasetEncoder):
     Arguments:
 
         reference_receptors (dict): A dictionary describing the reference dataset file.
-            See the :py:mod:`source.IO.sequence_import` for specification details.
+            See the :py:mod:`source.IO.sequence_import` for YAML specification details.
 
         max_edit_distances (dict): A dictionary specifying the maximum edit distance between a target sequence
             (from the repertoire) and the reference sequence. A maximum distance can be specified per chain, for example
             to allow for less strict matching of TCR alpha and BCR light chains. When only an integer is specified,
             this distance is applied to all possible chains.
 
-    Specification:
+    YAML specification:
 
     .. indent with spaces
     .. code-block:: yaml
@@ -75,20 +81,34 @@ class MatchedReceptorsEncoder(DatasetEncoder):
 
         ParameterValidator.assert_keys(list(reference_receptors.keys()), ["format", "path", "params"], location, "reference_receptors", exclusive=False)
 
-        valid_formats = ReflectionHandler.discover_classes_by_partial_name("SequenceImport", "sequence_import/")
-        ParameterValidator.assert_in_valid_list(f"{reference_receptors['format']}SequenceImport", valid_formats, location, "format in reference_receptors")
-
         assert os.path.isfile(reference_receptors["path"]), f"{location}: the file {reference_receptors['path']} does not exist. " \
                                                             f"Specify the correct path under reference_receptors."
 
-        seq_import_params = reference_receptors["params"] if "params" in reference_receptors else {}
-        if "paired" in seq_import_params:
-            assert seq_import_params["paired"] is True, f"{location}: paired must be True for SequenceImport"
-        else:
-            seq_import_params["paired"] = True
+        format_str = reference_receptors["format"]
 
-        receptors = ReflectionHandler.get_class_by_name("{}SequenceImport".format(reference_receptors["format"]))\
-            .import_items(reference_receptors["path"], **seq_import_params)
+        # todo -> refactoring this part to something nicer is currently on another branch, this code is ugly but at least works for now...
+
+        if format_str == "IRIS":
+            seq_import_params = reference_receptors["params"] if "params" in reference_receptors else {}
+
+            if "paired" in seq_import_params:
+                assert seq_import_params["paired"] is True, f"{location}: paired must be True for SequenceImport"
+            else:
+                seq_import_params["paired"] = True
+
+            receptors = IRISSequenceImport.import_items(reference_receptors["path"], **seq_import_params)
+        else:
+            import_class = ReflectionHandler.get_class_by_name("{}Import".format(format_str))
+            params = DefaultParamsLoader.load(EnvironmentSettings.default_params_path + "datasets/",
+                                              DefaultParamsLoader._convert_to_snake_case(format_str))
+            if "params" in reference_receptors:
+                for key, value in reference_receptors["params"].items():
+                    params[key] = value
+            params["paired"] = False
+            params["is_repertoire"] = False
+            processed_params = DatasetImportParams.build_object(**params)
+
+            receptors = ImportHelper.import_items(import_class, reference_receptors["path"], processed_params)
 
         return {
             "reference_receptors": receptors,

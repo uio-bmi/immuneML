@@ -1,8 +1,8 @@
 import logging
 import warnings
 
-import pandas as pd
 import numpy as np
+import pandas as pd
 
 from source.data_model.dataset.Dataset import Dataset
 from source.ml_methods.MLMethod import MLMethod
@@ -65,9 +65,11 @@ class MotifSeedRecovery(MLReport):
                 seeds: a list of motif seeds. The seeds may contain gaps, specified by a '/' symbol.
                 hamming_distance: A boolean value that specifies whether hamming distance was allowed when implanting the
                     motif seeds for a given label. Note that this applies to all seeds for this label.
+                gap_sizes: a list of all the possible gap sizes that were used when implanting a gapped motif seed.
+                    When no gapped seeds are used, this value has no effect.
 
 
-    Specification:
+    YAML specification:
 
     .. indent with spaces
     .. code-block:: yaml
@@ -80,11 +82,18 @@ class MotifSeedRecovery(MLReport):
                         - AA/A
                         - AAA
                         hamming_distance: False
+                        gap_sizes:
+                        - 0
+                        - 1
+                        - 2
                     T1D
                         seeds:
                         - CC/C
                         - CCC
                         hamming_distance: True
+                        gap_sizes:
+                        - 2
+
 
     """
 
@@ -106,13 +115,18 @@ class MotifSeedRecovery(MLReport):
                                                      f"implanted_motifs_per_label/{label}")
 
             ParameterValidator.assert_keys_present(implanted_motifs_per_label[label].keys(),
-                                                   ["hamming_distance", "seeds"],
+                                                   ["hamming_distance", "seeds", "gap_sizes"],
                                                    "MotifSeedRecovery", f"implanted_motifs_per_label/{label}")
             ParameterValidator.assert_type_and_value(implanted_motifs_per_label[label]["hamming_distance"], bool,
                                                      "MotifSeedRecovery", f"implanted_motifs_per_label/{label}/hamming_distance")
-
+            ParameterValidator.assert_type_and_value(implanted_motifs_per_label[label]["gap_sizes"], list,
+                                                     "MotifSeedRecovery",
+                                                     f"implanted_motifs_per_label/{label}/gap_sizes")
             ParameterValidator.assert_type_and_value(implanted_motifs_per_label[label]["seeds"], list,
                                                      "MotifSeedRecovery", f"implanted_motifs_per_label/{label}/seeds")
+            for gap_size in implanted_motifs_per_label[label]["gap_sizes"]:
+                ParameterValidator.assert_type_and_value(gap_size, int, "MotifSeedRecovery",
+                                                         f"implanted_motifs_per_label/{label}/gap_sizes", min_inclusive=0)
             for seed in implanted_motifs_per_label[label]["seeds"]:
                 ParameterValidator.assert_type_and_value(seed, str, "MotifSeedRecovery",
                                                          f"implanted_motifs_per_label/{label}/seeds")
@@ -217,15 +231,39 @@ class MotifSeedRecovery(MLReport):
 
         return int(seed == feature) * len(seed)
 
+
+    def identical_overlap(self, seed, feature):
+        if "/" in seed:
+            exclude_idx_start = seed.index("/")
+            exclude_idx_end = seed.rindex("/")
+            seed = seed[:exclude_idx_start] + seed[exclude_idx_end + 1:]
+            feature = feature[:exclude_idx_start] + feature[exclude_idx_end + 1:]
+
+        while feature.startswith("-"):
+            feature = feature[1:]
+            seed = seed[1:]
+
+        while feature.endswith("-"):
+            feature = feature[:-1]
+            seed = seed[:-1]
+
+        return int(seed == feature) * len(seed)
+
     def max_overlap_sliding(self, seed, feature, overlap_fn):
-        padding = "-" * (len(seed) - 1)
-
-        padded_feature = padding + feature + padding
-
         max_score = 0
-        for start_idx in range(0, len(feature) + len(padding)):
-            feature_slice = padded_feature[start_idx:start_idx + len(seed)]
-            max_score = max(max_score, overlap_fn(seed, feature_slice))
+
+        sizes = self.implanted_motifs_per_label[self.label]["gap_sizes"]
+
+        for gap_size in sizes:
+            gap_adjusted_seed = seed.replace("/", "/" * gap_size)
+
+            padding = "-" * (len(gap_adjusted_seed) - 1)
+
+            padded_feature = padding + feature + padding
+
+            for start_idx in range(0, len(feature) + len(padding)):
+                feature_slice = padded_feature[start_idx:start_idx + len(gap_adjusted_seed)]
+                max_score = max(max_score, overlap_fn(gap_adjusted_seed, feature_slice))
 
         return max_score
 

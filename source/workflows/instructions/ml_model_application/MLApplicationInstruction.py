@@ -15,12 +15,27 @@ class MLApplicationInstruction(Instruction):
 
     The predictions are stored in the predictions.csv in the result path in the following format:
 
-    -----------------------------------------------------------------
-    example_id | cmv             | cmv_true_proba | cmv_false_proba |
-    -----------------------------------------------------------------
-    e1         | True           | 0.8             | 0.2             |
-    e2         | False          | 0.2             | 0.8             |
-    e3         | True           | 0.78            | 0.22            |
+
+    .. list-table::
+        :widths: 25 25 25 25
+        :header-rows: 1
+
+        * - example_id
+          - cmv
+          - cmv_true_proba
+          - cmv_false_proba
+        * - e1
+          - True
+          - 0.8
+          - 0.2
+        * - e2
+          - False
+          - 0.2
+          - 0.8
+        * - e3
+          - True
+          - 0.78
+          - 0.22
 
     Arguments:
 

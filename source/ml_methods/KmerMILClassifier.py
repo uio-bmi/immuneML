@@ -42,7 +42,7 @@ class KmerMILClassifier(MLMethod):
 
         number_of_threads: number of threads to be used for training
 
-    Specification:
+    YAML specification:
 
     .. indent with spaces
     .. code-block:: yaml

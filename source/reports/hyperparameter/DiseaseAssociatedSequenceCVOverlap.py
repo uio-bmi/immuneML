@@ -33,7 +33,7 @@ class DiseaseAssociatedSequenceCVOverlap(Report):
 
         compare_in_assessment (bool): whether to compute the overlap over the optimal models in the outer loop of the nested CV
 
-    Specification:
+    YAML specification:
 
         reports: # the report is defined with all other reports under definitions/reports
             my_overlap_report: DiseaseAssociatedSequenceCVOverlap # report has no parameters

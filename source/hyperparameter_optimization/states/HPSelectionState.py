@@ -16,8 +16,3 @@ class HPSelectionState:
     @property
     def optimal_hp_setting(self):
         return self.hp_strategy.get_optimal_hps()
-
-    @property
-    def get_optimal_performance(self):
-        optimal_setting = self.optimal_hp_setting
-        return self.hp_strategy.get_optimal_performance(optimal_setting)

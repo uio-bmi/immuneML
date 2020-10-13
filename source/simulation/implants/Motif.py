@@ -24,25 +24,25 @@ class Motif:
 
         instantiation (:py:obj:`~source.simulation.motif_instantiation_strategy.MotifInstantiationStrategy.MotifInstantiationStrategy`):
             Which strategy to use for implanting the seed. It should be one of the classes inheriting MotifInstantiationStrategy.
-            In the specification this can either be one of these values as a string in which case the default parameters will be used.
-            Alternatively, instantiation can be specified with parameters as in the example specification below. For the detailed list of
+            In the YAML specification this can either be one of these values as a string in which case the default parameters will be used.
+            Alternatively, instantiation can be specified with parameters as in the example YAML specification below. For the detailed list of
             parameters, see the specific instantiation strategies below.
 
         seed_chain1 (str): in case when representing motifs for paired chain data, it is possible to define a motif seed per chain; if this parameter
             is set, the generated motif instances will include a motif instance for both chains; for more details on how it works see `seed` argument
-            above. Used only if seed argument is not set.
+            above. Used only if the seed argument is not set.
 
         seed_chain2 (str): used for paired chain data, for the other receptor chain; for more details on how it works see `seed` argument. This
-            argument is used only if seed argument is not set.
+            argument is used only if the seed argument is not set.
 
         name_chain1: name of the first chain if paired receptor data are simulated. The value should be an instance of
-            :py:obj:`~source.data_model.receptor.receptor_sequence.Chain.Chain`. This argument is used only if seed argument is not set.
+            :py:obj:`~source.data_model.receptor.receptor_sequence.Chain.Chain`. This argument is used only if the seed argument is not set.
 
         name_chain2: name of the second chain 2 if paired receptor data are simulated. The value should be an instance of
-            :py:obj:`~source.data_model.receptor.receptor_sequence.Chain.Chain`. This argument is used only if seed argument is not set.
+            :py:obj:`~source.data_model.receptor.receptor_sequence.Chain.Chain`. This argument is used only if the seed argument is not set.
 
 
-    Specification:
+    YAML specification:
 
     .. indent with spaces
     .. code-block:: yaml

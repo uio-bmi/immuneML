@@ -6,6 +6,7 @@ import pandas as pd
 
 from source.IO.dataset_export.DataExporter import DataExporter
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
+from source.data_model.receptor.RegionType import RegionType
 from source.data_model.receptor.receptor_sequence.Chain import Chain
 from source.data_model.repertoire.Repertoire import Repertoire
 from source.environment.Constants import Constants
@@ -25,7 +26,7 @@ class AIRRExporter(DataExporter):
     """
 
     @staticmethod
-    def export(dataset: RepertoireDataset, path, region_type="CDR3"):
+    def export(dataset: RepertoireDataset, path, region_type=RegionType.IMGT_CDR3):
         if not isinstance(dataset, RepertoireDataset):
             logging.warning(f"AIRRExporter: dataset {dataset.name} is a {type(dataset).__name__}, but only repertoire dataset export is currently "
                             f"supported for AIRR format.")
@@ -58,13 +59,9 @@ class AIRRExporter(DataExporter):
                   "chains": "locus",
                   "counts": "duplicate_count"}
 
-        if region_type == "CDR3":
-            mapper["sequences"] = "junction"
-            mapper["sequence_aas"] = "junction_aa"
-            if "sequences" in df.columns:
-                df["sequences"] = AIRRExporter._process_junctions(df["sequences"])
-            if "sequence_aas" in df.columns:
-                df["sequence_aas"] = AIRRExporter._process_junction_aas(df["sequence_aas"])
+        if region_type == RegionType.IMGT_CDR3:
+            mapper["sequences"] = "cdr3"
+            mapper["sequence_aas"] = "cdr3_aa"
         else:
             mapper["sequences"] = "sequence"
             mapper["sequence_aas"] = "sequence_aa"
@@ -80,14 +77,3 @@ class AIRRExporter(DataExporter):
             df["locus"] = [chain_conversion_dict[chain] for chain in df["locus"]]
 
         return df
-
-        # other required fields are: rev_comp, productive, d_call, sequence_alignment
-        # germline_alignment, v_cigar, j_cigar, d_cigar
-
-    @staticmethod
-    def _process_junctions(column):
-        return ["".join(["TG?", value, "T??"]) if value is not None else None for value in column]
-
-    @staticmethod
-    def _process_junction_aas(column):
-        return ["".join(["C", value, "?"]) if value is not None else None for value in column]

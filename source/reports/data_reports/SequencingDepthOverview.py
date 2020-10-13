@@ -37,14 +37,14 @@ class SequencingDepthOverview(DataReport):
 
         nrow_scatterplot (int): The number of rows used for the scatterplot facets.
 
-        height_distributions (float): Heigth (in inches) of the distribution section of the resulting plot
+        height_distributions (float): Height (in inches) of the distribution section of the resulting plot
 
-        height_scatterplot (float): Heigth (in inches) of the scatterplot section of the resulting plot
+        height_scatterplot (float): Height (in inches) of the scatterplot section of the resulting plot
 
         width (float): Width (in inches) of resulting plot
 
 
-    Specification:
+    YAML specification:
 
     .. indent with spaces
     .. code-block:: yaml
@@ -153,13 +153,13 @@ class SequencingDepthOverview(DataReport):
     def _compute_total_reads(self, repertoire: Repertoire, frame_type: SequenceFrameType):
         count = 0
         for sequence in repertoire.sequences:
-            if sequence.metadata is not None and sequence.metadata.frame_type.upper() == frame_type.name:
+            if sequence.metadata is not None and sequence.metadata.frame_type == frame_type:
                 count += sequence.metadata.count
         return count
 
     def _compute_unique_clonotypes(self, repertoire: Repertoire, frame_type: SequenceFrameType):
         count = 0
         for sequence in repertoire.sequences:
-            if sequence.metadata is not None and sequence.metadata.frame_type.upper() == frame_type.name:
+            if sequence.metadata is not None and sequence.metadata.frame_type == frame_type:
                 count += 1
         return count

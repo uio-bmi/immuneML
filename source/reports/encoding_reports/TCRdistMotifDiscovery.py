@@ -33,7 +33,7 @@ class TCRdistMotifDiscovery(EncodingReport):
 
         max_cluster_count (int): max number of clusters to be extracted for motif discovery
 
-    Specification:
+    YAML specification:
 
     .. indent with spaces
     .. code-block:: yaml

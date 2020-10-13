@@ -1,9 +1,8 @@
 import hashlib
 import os
 import warnings
-from typing import Tuple
 from inspect import signature
-
+from typing import Tuple
 
 from source.data_model.dataset.Dataset import Dataset
 from source.dsl.DefaultParamsLoader import DefaultParamsLoader
@@ -38,8 +37,8 @@ class TrainMLModelParser:
 
         settings = self._parse_settings(instruction, symbol_table)
         dataset = symbol_table.get(instruction["dataset"])
-        assessment = self._parse_split_config(key, instruction, "assessment", symbol_table)
-        selection = self._parse_split_config(key, instruction, "selection", symbol_table)
+        assessment = self._parse_split_config(key, instruction, "assessment", symbol_table, len(settings))
+        selection = self._parse_split_config(key, instruction, "selection", symbol_table, len(settings))
         assessment, selection = self._update_split_configs(assessment, selection, dataset)
         label_config = self._create_label_config(instruction, dataset, key)
         strategy = ReflectionHandler.get_class_by_name(instruction["strategy"], "hyperparameter_optimization/")
@@ -143,7 +142,7 @@ class TrainMLModelParser:
             if dataset.params is not None and label_name in dataset.params:
                 label_values = dataset.params[label_name]
             elif hasattr(dataset, "get_metadata"):
-                label_values = list(set(dataset.get_metadata([label])[label_name]))
+                label_values = list(set(dataset.get_metadata([label_name])[label_name]))
             else:
                 label_values = []
                 warnings.warn(f"{TrainMLModelParser.__name__}: for instruction {instruction_key}, label values could not be recovered for label "
@@ -153,7 +152,7 @@ class TrainMLModelParser:
             label_config.add_label(label_name, label_values, positive_class=positive_class)
         return label_config
 
-    def _parse_split_config(self, instruction_key, instruction: dict, split_key: str, symbol_table: SymbolTable) -> SplitConfig:
+    def _parse_split_config(self, instruction_key, instruction: dict, split_key: str, symbol_table: SymbolTable, settings_count: int) -> SplitConfig:
 
         try:
 
@@ -163,6 +162,11 @@ class TrainMLModelParser:
 
             split_strategy = SplitType[instruction[split_key]["split_strategy"].upper()]
             training_percentage = float(instruction[split_key]["training_percentage"]) if split_strategy == SplitType.RANDOM else -1
+
+            if split_strategy == SplitType.RANDOM and training_percentage == 1 and settings_count > 1:
+                raise ValueError(f"{TrainMLModelParser.__name__}: all data under {instruction_key}/{split_key} was specified to be used for "
+                                 f"training, but {settings_count} settings were specified for evaluation. Please define a test/validation set by "
+                                 f"reducing the training percentage (e.g., to 0.7) or use only one hyperparameter setting to run the analysis.")
 
             return SplitConfig(split_strategy=split_strategy,
                                split_count=int(instruction[split_key]["split_count"]),

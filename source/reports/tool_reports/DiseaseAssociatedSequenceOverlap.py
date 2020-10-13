@@ -23,7 +23,7 @@ class DiseaseAssociatedSequenceOverlap(Report):
     For details, see Greiff V, Menzel U, Miho E, et al. Systems Analysis Reveals High Genetic and Antigen-Driven Predetermination of Antibody
     Repertoires throughout B Cell Development. Cell Reports. 2017;19(7):1467-1478. doi:10.1016/j.celrep.2017.04.054.
 
-    Specification:
+    YAML specification:
 
     .. indent with spaces
     .. code-block:: yaml

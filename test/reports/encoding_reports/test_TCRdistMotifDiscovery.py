@@ -2,7 +2,7 @@ import os
 import shutil
 from unittest import TestCase
 
-from source.IO.dataset_import.GenericReceptorImport import GenericReceptorImport
+from source.IO.dataset_import.SingleLineReceptorImport import SingleLineReceptorImport
 from source.caching.CacheType import CacheType
 from source.encodings.EncoderParams import EncoderParams
 from source.encodings.distance_encoding.TCRdistEncoder import TCRdistEncoder
@@ -53,7 +53,7 @@ mouse_subject0053,PA,1,TRAV6D-6*01,TRAJ53*01,CALGGGSNYKLTF,tgtgctctgggtggaggcagc
         path = PathBuilder.build(EnvironmentSettings.tmp_test_path + "tcrdist_motif_discovery/")
         dataset_path = self._create_dataset(path)
 
-        dataset = GenericReceptorImport.import_dataset({"path": dataset_path,
+        dataset = SingleLineReceptorImport.import_dataset({"path": dataset_path,
                                                         "result_path": path + "dataset/",
                                                         "separator": ",",
                                                         "columns_to_load": ["subject", "epitope", "count", "v_a_gene", "j_a_gene", "cdr3_a_aa",
@@ -70,9 +70,9 @@ mouse_subject0053,PA,1,TRAV6D-6*01,TRAJ53*01,CALGGGSNYKLTF,tgtgctctgggtggaggcagc
                                                             "j_b_gene": "beta_j_gene",
                                                             "clone_id": "identifier"
                                                         },
-                                                        "chains": "ALPHA_BETA",
-                                                        "region_type": "CDR3",
-                                                        "file_size": 50000,
+                                                        "receptor_chains": "TRA_TRB",
+                                                        "region_type": "IMGT_CDR3",
+                                                        "sequence_file_size": 50000,
                                                         "organism": "mouse"}, 'd1')
 
         dataset = TCRdistEncoder(8).encode(dataset, EncoderParams(f"{path}result/", LabelConfiguration([Label("epitope")])))

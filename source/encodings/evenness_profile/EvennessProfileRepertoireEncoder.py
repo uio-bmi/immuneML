@@ -8,6 +8,7 @@ from source.analysis.entropy_calculations.EntropyCalculator import EntropyCalcul
 from source.caching.CacheHandler import CacheHandler
 from source.caching.CacheObjectType import CacheObjectType
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
+from source.data_model.receptor.receptor_sequence.SequenceFrameType import SequenceFrameType
 from source.encodings.EncoderParams import EncoderParams
 from source.encodings.evenness_profile.EvennessProfileEncoder import EvennessProfileEncoder
 from source.util.Logger import log
@@ -58,7 +59,7 @@ class EvennessProfileRepertoireEncoder(EvennessProfileEncoder):
 
         alphas = np.linspace(start=params.model["min_alpha"], stop=params.model["max_alpha"], num=params.model["dimension"])
 
-        counts = [sequence.metadata.count for sequence in repertoire.sequences if sequence.metadata.frame_type.upper() == "IN"]
+        counts = [sequence.metadata.count for sequence in repertoire.sequences if sequence.metadata.frame_type == SequenceFrameType.IN]
         freqs = np.array(counts)
         freqs = freqs[np.nonzero(freqs)]
 

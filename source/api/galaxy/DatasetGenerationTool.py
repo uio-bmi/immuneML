@@ -6,6 +6,7 @@ from source.api.galaxy.Util import Util
 from source.app.ImmuneMLApp import ImmuneMLApp
 from source.util.ParameterValidator import ParameterValidator
 from source.util.PathBuilder import PathBuilder
+from source.workflows.instructions.dataset_generation.DatasetGenerationInstruction import DatasetGenerationInstruction
 
 
 class DatasetGenerationTool:
@@ -59,16 +60,10 @@ class DatasetGenerationTool:
             f"instructions instead: {list(specs['instructions'].keys())}."
 
     def _check_instruction(self, specs):
-        instruction_name = list(specs['instructions'].keys())[0]
+        instruction_name = Util.check_instruction_type(specs, DatasetGenerationTool.__name__, DatasetGenerationInstruction.__name__[:-11])
 
-        ParameterValidator.assert_keys_present(specs['instructions'][instruction_name], ['type'], DatasetGenerationTool.__name__, instruction_name)
-
-        assert specs['instructions'][instruction_name]['type'] == "DatasetGeneration", \
-            f"{DatasetGenerationTool.__name__}: the instruction has to be of type DatasetGeneration, " \
-            f"got {specs['instructions'][instruction_name]['type']} instead."
-
-        for key in ['datasets', 'formats']:
-            ParameterValidator.assert_keys_present(specs['instructions'][instruction_name].keys(), [key], DatasetGenerationTool.__name__,
+        for key in ['datasets', 'export_formats']:
+            ParameterValidator.assert_keys_present(list(specs['instructions'][instruction_name].keys()), [key], DatasetGenerationTool.__name__,
                                                    instruction_name)
             ParameterValidator.assert_type_and_value(specs["instructions"][instruction_name][key], list, DatasetGenerationTool.__name__,
                                                      f"{instruction_name}/{key}")

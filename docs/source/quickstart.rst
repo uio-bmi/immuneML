@@ -77,7 +77,7 @@ validation and testing (here: split to training and test data, where training wi
 and also which combination of data representation (encoding: here **kmer_frequency** only) and ML method (here: **logistic_regression**) we want to use.
 In principle, we could try out multiple options for both encoding and ML method (e.g., we could also try using SVM as a classifier), but in this
 tutorial we will use only one (logistic regression). There are other options which can be defined for this instruction, but these can have fixed
-values for the purpose of this tutorial. For more details, see YAML specification options under :ref:`Specification`.
+values for the purpose of this tutorial. For more details, see :ref:`YAML specification`.
 
 The YAML specification for the instruction part looks like this (since we want to train a classifier, we call the instruction
 my_train_classifier_instruction):
@@ -134,4 +134,4 @@ The generated dataset should be located under ./generated_dataset/ and the analy
 The results include generated dataset, splits for cross validation, all encoded datasets and trained models, as well as all reports listed (if any).
 The results folder will also contain an index.html file which gives a high-level overview of results and reports.
 
-To create your own analysis, see the tutorials for different use-cases or see the documentation for YAML specification (:ref:`Specification`).
+To create your own analysis, see the tutorials for different use-cases or see the documentation for :ref:`YAML specification`.

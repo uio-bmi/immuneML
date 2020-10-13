@@ -19,7 +19,7 @@ class DatasetGenerationInstruction(Instruction):
 
         formats (list): a list of formats in which to export the datasets. Valid formats are class names of any non-abstract class inheriting :py:obj:`~source.IO.dataset_export.DataExporter.DataExporter`.
 
-    Specification:
+    YAML specification:
 
     .. indent with spaces
     .. code-block:: yaml
@@ -29,7 +29,7 @@ class DatasetGenerationInstruction(Instruction):
             datasets: # list of datasets to export
                 - my_generated_dataset
                 - my_dataset_from_adaptive
-            formats: # list of formats to export the datasets to
+            export_formats: # list of formats to export the datasets to
                 - AIRR
                 - Pickle
 

@@ -5,8 +5,7 @@ from glob import glob
 import yaml
 
 from source.api.galaxy.Util import Util
-from source.app.ImmuneMLApp import ImmuneMLApp
-from source.util.PathBuilder import PathBuilder
+from source.workflows.instructions.SimulationInstruction import SimulationInstruction
 
 
 class GalaxySimulationTool:
@@ -86,37 +85,26 @@ class GalaxySimulationTool:
     """
 
     def __init__(self, specification_path, result_path, **kwargs):
-        Util.check_parameters(specification_path, result_path, kwargs, "Galaxy Simulation Tool")
+        Util.check_parameters(specification_path, result_path, kwargs, GalaxySimulationTool.__name__)
         self.yaml_path = specification_path
         self.result_path = result_path if result_path[-1] == '/' else f"{result_path}/"
 
     def run(self):
-        PathBuilder.build(self.result_path)
         self.prepare_specs()
-        app = ImmuneMLApp(self.yaml_path, self.result_path)
-        app.run()
 
-        dataset_location = list(glob(self.result_path + "/*/exported_dataset/pickle/"))[0]
+        Util.run_tool(self.yaml_path, self.result_path)
 
+        dataset_location = list(glob(self.result_path + "/*/exported_dataset/*/"))[0]
         shutil.copytree(dataset_location, self.result_path + 'result/')
 
-        logging.info("GalaxySimulationTool: immuneML has finished and the signals were implanted in the dataset.")
+        logging.info(f"{GalaxySimulationTool.__name__}: immuneML has finished and the signals were implanted in the dataset.")
 
     def prepare_specs(self):
         with open(self.yaml_path, "r") as file:
             specs = yaml.safe_load(file)
 
-        assert "instructions" in specs, "GalaxySimulationTool: 'instructions' keyword missing from the specification."
-        assert len(list(specs['instructions'].keys())) == 1, f"GalaxySimulationTool: multiple instructions were given " \
-                                                             f"({str(list(specs['instructions'].keys()))[1:-1]}), but only one instruction of type " \
-                                                             f"Simulation should be specified."
-        instruction_name = list(specs['instructions'].keys())[0]
-        instruction_type = specs['instructions'][instruction_name]['type']
-        assert instruction_type == 'Simulation', f"GalaxySimulationTool: instruction type has to be 'Simulation', got {instruction_type} instead."
-
-        if 'Pickle' not in specs['instructions'][instruction_name]['export_formats']:
-            specs['instructions'][instruction_name]['export_formats'].append('Pickle')
-            logging.info("GalaxySimulationTool: automatically adding 'Pickle' as export format...")
+        instruction_name = Util.check_instruction_type(specs, GalaxySimulationTool.__name__, SimulationInstruction.__name__[:-11])
+        Util.check_export_format(specs, GalaxySimulationTool.__name__, instruction_name)
 
         Util.check_paths(specs, "GalaxySimulationTool")
         Util.update_result_paths(specs, self.result_path, self.yaml_path)

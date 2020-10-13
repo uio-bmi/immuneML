@@ -9,15 +9,15 @@ class SplitConfig:
     """
     SplitConfig describes how to split the data for cross-validation. It allows for the following combinations:
 
-        - LOOCV (leave-one-out cross-validation)
+        - loocv (leave-one-out cross-validation)
 
-        - K_FOLD (k-fold cross-validation)
+        - k_fold (k-fold cross-validation)
 
-        - RANDOM (Monte Carlo cross-validation - randomly splitting the dataset to training and test datasets)
+        - random (Monte Carlo cross-validation - randomly splitting the dataset to training and test datasets)
 
-        - MANUAL (train and test dataset are explicitly specified by providing metadata files for the two datasets - currently available only for repertoire datasets)
+        - manual (train and test dataset are explicitly specified by providing metadata files for the two datasets - currently available only for repertoire datasets)
 
-        - LEAVE_ONE_OUT_STRATIFICATION (leave-one-out CV where one refers to a specific parameter, e.g. if subject is known in a receptor dataset, it is possible to have leave-subject-out CV - currently only available for receptor datasets).
+        - leave_one_out_stratification (leave-one-out CV where one refers to a specific parameter, e.g. if subject is known in a receptor dataset, it is possible to have leave-subject-out CV - currently only available for receptor datasets).
 
     Arguments:
 
@@ -42,7 +42,7 @@ class SplitConfig:
         number of examples that can be present in the test dataset. This type of generating train and test datasets is only supported for receptor
         datasets so far. If split strategy is anything else, this field has no effect and can be omitted.
 
-    Specification:
+    YAML specification:
 
     .. indent with spaces
     .. code-block:: yaml

@@ -5,7 +5,6 @@ from unittest import TestCase
 from source.analysis.data_manipulation.NormalizationType import NormalizationType
 from source.caching.CacheType import CacheType
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
-from source.data_model.receptor.RegionDefinition import RegionDefinition
 from source.data_model.receptor.RegionType import RegionType
 from source.encodings.EncoderParams import EncoderParams
 from source.encodings.kmer_frequency.KmerFrequencyEncoder import KmerFrequencyEncoder
@@ -71,6 +70,7 @@ reference_rep.tsv,rep1"""
             file.writelines(reference_metadata)
 
         reference_data_loader_params = {
+            "is_repertoire":  True,
             "result_path": path,
             "column_mapping": {
                 "CDR3B AA Sequence": "sequence_aas",
@@ -79,8 +79,7 @@ reference_rep.tsv,rep1"""
             "columns_to_load": ["CDR3B AA Sequence", "TRBV Gene", "Antigen Protein", "MHC Class"],
             "metadata_file": path + "metadata.csv",
             "separator": "\t",
-            "region_type": RegionType.CDR3.name,
-            "region_definition": RegionDefinition.IMGT.name
+            "region_type": RegionType.IMGT_CDR3.name,
         }
 
         kmer_freq_params = {

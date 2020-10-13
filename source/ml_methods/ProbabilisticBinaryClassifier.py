@@ -37,7 +37,7 @@ class ProbabilisticBinaryClassifier(MLMethod):
 
         likelihood_threshold (float): at which threshold to stop the optimization (default -1e-10)
 
-    Specification:
+    YAML specification:
 
     .. indent with spaces
     .. code-block:: yaml
@@ -89,7 +89,7 @@ class ProbabilisticBinaryClassifier(MLMethod):
 
         .. math::
 
-            \widehat{c} \, (k, n) = \left\{\begin{matrix} 0, & F(k, n) \leq 0\\ 1, & F(k, n) > 0 \end{matrix}\right
+            \\widehat{c} \\, (k, n) = \\left\\{\\begin{matrix} 0, & F(k, n) \\leq 0\\\\ 1, & F(k, n) > 0 \\end{matrix}\\right
 
         Arguments:
 
@@ -121,7 +121,7 @@ class ProbabilisticBinaryClassifier(MLMethod):
 
         .. math::
 
-            l_l (\alpha, \beta) = - N_l \, log \, B (\alpha, \beta) + \sum_{i: c_i = l} log \, B(k_i + \alpha, n_i - k_i + \beta), l = 0, 1
+            l_l (\\alpha, \\beta) = - N_l \\, log \\, B (\\alpha, \\beta) + \\sum_{i: c_i = l} log \\, B(k_i + \\alpha, n_i - k_i + \\beta), l = 0, 1
 
         Arguments:
 
@@ -131,7 +131,9 @@ class ProbabilisticBinaryClassifier(MLMethod):
             N_l: number of examples in the given class
 
         Returns:
+
              estimated values of alpha and beta for the given class
+
         """
         k_is, n_is = X[:, 0], X[:, 1]
         alpha, beta = self._initialize_beta_distribution_parameters(k_is, n_is)
@@ -165,8 +167,8 @@ class ProbabilisticBinaryClassifier(MLMethod):
 
         .. math::
 
-            \alpha = \frac{E[X]^2 * (1-E[X])}{V[X]}-E[X]
-            \beta = (\frac{E[X](1-E[X])}{V[X]} - 1) * (1 - E[X])
+            \\alpha = \\frac{E[X]^2 * (1-E[X])}{V[X]}-E[X]
+            \\beta = (\\frac{E[X](1-E[X])}{V[X]} - 1) * (1 - E[X])
 
         Arguments:
 
@@ -195,8 +197,8 @@ class ProbabilisticBinaryClassifier(MLMethod):
 
         .. math::
 
-            \frac{\partial  l_l}{\partial \alpha} = - N_l (\Psi (\alpha) - \Psi (\alpha + \beta)) + \sum_{i:c_i=l}^{} (\Psi(k_i + \alpha) - \Psi(n_i + k_i + \alpha + \beta))
-            \frac{\partial  l_l}{\partial \beta} = - N_l (\Psi(\beta) - \Psi(\alpha + \beta)) + \sum_{i:c_i=l} (\Psi(n_i - k_i + \beta) - \Psi(n_i + k_i + \alpha + \beta))
+            \\frac{\\partial  l_l}{\\partial \\alpha} = - N_l (\\Psi (\\alpha) - \\Psi (\\alpha + \\beta)) + \\sum_{i:c_i=l}^{} (\\Psi(k_i + \\alpha) - \\Psi(n_i + k_i + \\alpha + \\beta))
+            \\frac{\\partial  l_l}{\\partial \\beta} = - N_l (\\Psi(\\beta) - \\Psi(\\alpha + \\beta)) + \\sum_{i:c_i=l} (\\Psi(n_i - k_i + \\beta) - \\Psi(n_i + k_i + \\alpha + \\beta))
 
         Arguments:
 

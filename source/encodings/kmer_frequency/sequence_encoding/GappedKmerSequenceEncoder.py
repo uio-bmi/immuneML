@@ -26,7 +26,7 @@ class GappedKmerSequenceEncoder(SequenceEncodingStrategy):
         min_gap = params.model.get('min_gap', 0)
         length = len(sequence.get_sequence())
 
-        if sequence.metadata is not None and sequence.metadata.frame_type.upper() != SequenceFrameType.IN.name:
+        if sequence.metadata is not None and sequence.metadata.frame_type != SequenceFrameType.IN:
             warnings.warn('Sequence either has out or stop codon. Ignoring sequence.')
             return None
 

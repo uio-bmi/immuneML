@@ -20,7 +20,7 @@ class FullSequenceImplanting(SignalImplantingStrategy):
 
     Arguments: this signal implanting strategy has no arguments.
 
-    Specification:
+    YAML specification:
 
     .. indent with spaces
     .. code-block:: yaml

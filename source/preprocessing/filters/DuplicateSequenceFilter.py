@@ -39,7 +39,7 @@ class DuplicateSequenceFilter(Filter):
 
         count_agg (:py:obj:`~source.preprocessing.filters.CountAggregationFunction.CountAggregationFunction`): determines how the sequence counts of duplicate sequences are aggregated. Valid options are defined by the CountAggregationFunction enum.
 
-    Specification:
+    YAML specification:
 
     .. indent with spaces
     .. code-block:: yaml
@@ -94,7 +94,7 @@ class DuplicateSequenceFilter(Filter):
 
     @staticmethod
     def _prepare_group_by_field(params, columns):
-        groupby_fields = copy.deepcopy(Repertoire.FIELDS)
+        groupby_fields = copy.deepcopy(list(Repertoire.FIELDS))
         groupby_fields.remove(params["sequence_to_ignore"])
         groupby_fields.remove("counts")
         groupby_fields.remove("sequence_identifiers")

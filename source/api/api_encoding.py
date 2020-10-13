@@ -30,9 +30,10 @@ def encode_dataset_by_kmer_freq(path_to_dataset_directory: str, result_path: str
 
     loader = MiXCRImport()
     dataset = loader.import_dataset({
+        "is_repertoire": True,
         "path": path_to_dataset_directory,
         "metadata_file": metadata_path,
-        "region_type": "CDR3",  # import_dataset in only cdr3
+        "region_type": "IMGT_CDR3",  # import_dataset in only cdr3
         "batch_size": 4,  # number of parallel processes for loading the data
         "result_path": result_path,
         "separator": "\t",
@@ -42,7 +43,6 @@ def encode_dataset_by_kmer_freq(path_to_dataset_directory: str, result_path: str
             "allVHitsWithScore": "v_genes",
             "allJHitsWithScore": "j_genes"
         },
-        "region_definition": "IMGT"  # which CDR3 definition to use - IMGT here (without a.a. compared to IMGT junction)
     }, "mixcr_dataset")
 
     label_name = list(dataset.params.keys())[0]  # label that can be used for ML prediction - by default: "disease" with values True/False

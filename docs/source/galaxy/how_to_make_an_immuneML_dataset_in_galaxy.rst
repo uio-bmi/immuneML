@@ -14,7 +14,7 @@ The tool has three input fields:
 
 3. A list of files to import to a dataset.
 
-YAML specification defines how the dataset should be created from supplied files. See :ref:`Specification` for more details on writing a YAML
+YAML specification defines how the dataset should be created from supplied files. See :ref:`YAML specification` for more details on writing a YAML
 specification file, specifically with :ref:`DatasetGeneration` instruction. For this Galaxy tool, the specification will include only one dataset
 and only one format in which it will be exported. For instance, YAML specification could be the following:
 
@@ -33,7 +33,7 @@ and only one format in which it will be exported. For instance, YAML specificati
           type: DatasetGeneration # which instruction to execute
           datasets: # only one dataset can be given here
               - my_dataset
-          formats:
+          export_formats:
           # only one format can be specified here and the dataset in this format will be
           # available as a Galaxy collection afterwards
               - AIRR

@@ -1,14 +1,18 @@
 import csv
 import warnings
 
+from source.IO.dataset_import.DatasetImportParams import DatasetImportParams
 from source.analysis.SequenceMatcher import SequenceMatcher
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.data_model.receptor.receptor_sequence.ReceptorSequenceList import ReceptorSequenceList
 from source.data_model.repertoire.Repertoire import Repertoire
+from source.dsl.DefaultParamsLoader import DefaultParamsLoader
+from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.reports.ReportOutput import ReportOutput
 from source.reports.ReportResult import ReportResult
 from source.reports.encoding_reports.EncodingReport import EncodingReport
+from source.util.ImportHelper import ImportHelper
 from source.util.ParameterValidator import ParameterValidator
 from source.util.PathBuilder import PathBuilder
 from source.util.ReflectionHandler import ReflectionHandler
@@ -23,7 +27,7 @@ class MatchingSequenceDetails(EncodingReport):
         - repertoire_identifier: the unique identifier of the repertoire
         - count/percentage/clonal_percentage: # todo fill this in
         - repertoire_size: the total number of different sequences (i.e. clonotypes) in the repertoire
-        - max_levenshtein_distance: the maximum lehvenstein distance that was used to calculate the matches
+        - max_levenshtein_distance: the maximum Levenshtein distance that was used to calculate the matches
         - Any repertoire labels and their values
 
     # todo refactor this class: either merge with MatchedPaired classes or remove redundant information from this report
@@ -51,9 +55,16 @@ class MatchingSequenceDetails(EncodingReport):
         if "reference_sequences" in kwargs:
             ParameterValidator.assert_keys(list(kwargs["reference_sequences"].keys()), ["format", "path"], location, "reference_sequences")
 
-            importer = ReflectionHandler.get_class_by_name("{}SequenceImport".format(kwargs["reference_sequences"]["format"]))
-            kwargs["reference_sequences"] = importer.import_items(kwargs["reference_sequences"]["path"]) \
-                if kwargs["reference_sequences"] is not None else None
+            format_str = kwargs["reference_sequences"]["format"]
+
+            import_class = ReflectionHandler.get_class_by_name("{}Import".format(format_str))
+            params = DefaultParamsLoader.load(EnvironmentSettings.default_params_path + "datasets/", DefaultParamsLoader._convert_to_snake_case(format_str))
+            params["paired"] = False
+            params["is_repertoire"] = False
+            processed_params = DatasetImportParams.build_object(**params)
+
+            sequences = ImportHelper.import_items(import_class, kwargs["reference_sequences"]["path"], processed_params)
+            kwargs["reference_sequences"] = sequences
 
         return MatchingSequenceDetails(**kwargs)
 

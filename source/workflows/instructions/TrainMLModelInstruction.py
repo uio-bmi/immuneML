@@ -16,13 +16,13 @@ from source.workflows.instructions.MLProcess import MLProcess
 
 class TrainMLModelInstruction(Instruction):
     """
-    Class implementing hyper-parameter optimization and training and assessing the model through nested cross-validation (CV).
+    Class implementing hyperparameter optimization and training and assessing the model through nested cross-validation (CV).
     The process is defined by two loops:
 
         - the outer loop over defined splits of the dataset for performance assessment
 
-        - the inner loop over defined hyper-parameter space and with cross-validation or train & validation split
-          to choose the best hyper-parameters.
+        - the inner loop over defined hyperparameter space and with cross-validation or train & validation split
+          to choose the best hyperparameters.
 
     Optimal model chosen by the inner loop is then retrained on the whole training dataset in the outer loop.
 
@@ -55,7 +55,7 @@ class TrainMLModelInstruction(Instruction):
         refit_optimal_model (bool): if the final combination of preprocessing-encoding-ML model should be refitted on the full dataset thus providing
         the final model to be exported from instruction; alternatively, train combination from one of the assessment folds will be used
 
-    Specification:
+    YAML specification:
 
     .. indent with spaces
     .. code-block:: yaml
@@ -127,7 +127,7 @@ class TrainMLModelInstruction(Instruction):
 
         for idx, label in enumerate(self.state.label_configuration.get_labels_by_name()):
             self._compute_optimal_item(label, f"(label {idx + 1} / {n_labels})")
-            zip_path = MLExporter.export_zip(hp_item=self.state.optimal_hp_items[label], path=f"{self.state.path}optimal_{label}/")
+            zip_path = MLExporter.export_zip(hp_item=self.state.optimal_hp_items[label], path=f"{self.state.path}optimal_{label}/", label=label)
             self.state.optimal_hp_item_paths[label] = zip_path
 
     def _compute_optimal_item(self, label: str, index_repr: str):
@@ -139,7 +139,6 @@ class TrainMLModelInstruction(Instruction):
                                                            f"{self.state.path}optimal_{label}/", number_of_processes=self.state.batch_size,
                                                            label_config=self.state.label_configuration, hp_setting=optimal_hp_setting).run(0)
             print(f"{datetime.datetime.now()}: Hyperparameter optimization: finished retraining optimal model for label {label} {index_repr}.\n", flush=True)
-
 
         else:
             optimal_assessment_state = self.state.assessment_states[optimal_hp_settings.index(optimal_hp_setting)]

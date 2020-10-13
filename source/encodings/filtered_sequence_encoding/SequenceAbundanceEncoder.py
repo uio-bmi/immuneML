@@ -41,7 +41,7 @@ class SequenceAbundanceEncoder(DatasetEncoder):
         repertoire_batch_size (int): How many repertoires will be loaded at once. This does not affect the result of the encoding, only the speed.
         This value is a trade-off between the number of repertoires that can fit the RAM at the time and loading time from disk.
 
-    Specification:
+    YAML specification:
 
     .. indent with spaces
     .. code-block:: yaml
@@ -95,7 +95,7 @@ class SequenceAbundanceEncoder(DatasetEncoder):
 
         encoded_data = EncodedData(examples, dataset.get_metadata([labels[0]]) if params.encode_labels else None, dataset.get_repertoire_ids(),
                                    [SequenceAbundanceEncoder.RELEVANT_SEQUENCE_ABUNDANCE, SequenceAbundanceEncoder.TOTAL_SEQUENCE_ABUNDANCE],
-                                   encoding=SequenceAbundanceEncoder.__name__)
+                                   encoding=SequenceAbundanceEncoder.__name__, info={'relevant_sequence_path': self.relevant_sequence_csv_path})
 
         encoded_dataset = RepertoireDataset(params=dataset.params, encoded_data=encoded_data, repertoires=dataset.repertoires)
 

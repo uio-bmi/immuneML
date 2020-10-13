@@ -100,7 +100,7 @@ class TestDiseaseAssociatedSequenceOverlap(TestCase):
                     "selection": {
                         "split_strategy": "random",
                         "split_count": 1,
-                        "training_percentage": 1
+                        "training_percentage": 0.7
                     },
                     "labels": [{"cmv": {"positive_class": True}}],
                     "datasets": ["d1", "d2"],

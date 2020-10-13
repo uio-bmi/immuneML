@@ -175,8 +175,8 @@ def build_specs(args):
                 },
                 "selection": {
                     "split_strategy": "random",
-                    "split_count": 1, # not used
-                    "training_percentage": 1,
+                    "split_count": 1,
+                    "training_percentage": 0.7,
                 },
                 "labels": [],
                 "dataset": "d1",
@@ -185,7 +185,7 @@ def build_specs(args):
                 "batch_size": 10,
                 "reports": [],
                 "optimization_metric": "balanced_accuracy",
-                'refit_optimal_model': False
+                'refit_optimal_model': True
             }
         }
     }

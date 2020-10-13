@@ -28,7 +28,7 @@ class DefinitionParser:
     # TODO: remove redundancy from there, make lists and call those automatically instead
 
     @staticmethod
-    def parse(workflow_specification: dict, symbol_table: SymbolTable):
+    def parse(workflow_specification: dict, symbol_table: SymbolTable, result_path: str):
 
         specs = workflow_specification["definitions"]
 
@@ -39,7 +39,7 @@ class DefinitionParser:
         symbol_table, specs_encoding = DefinitionParser._call_if_exists("encodings", EncodingParser.parse, specs, symbol_table)
         symbol_table, specs_ml = DefinitionParser._call_if_exists("ml_methods", MLParser.parse, specs, symbol_table)
         symbol_table, specs_report = DefinitionParser._call_if_exists("reports", ReportParser.parse_reports, specs, symbol_table)
-        symbol_table, specs_import = ImportParser.parse(specs, symbol_table)
+        symbol_table, specs_import = ImportParser.parse(specs, symbol_table, result_path)
 
         specs_defs = DefinitionParser.create_specs_defs(specs_import, specs_simulation, specs_preprocessing, specs_motifs, specs_signals,
                                                         specs_encoding, specs_ml, specs_report)

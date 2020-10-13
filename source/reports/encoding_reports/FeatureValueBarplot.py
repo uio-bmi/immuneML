@@ -23,7 +23,7 @@ class FeatureValueBarplot(EncodingReport):
     with user-defined error bar as done in this report), please consider using
     :py:obj:`~source.reports.encoding_reports.FeatureValueDistplot.FeatureValueDistplot` instead.
 
-    This report creates a barplot where the height of each bar the mean value of a feature in a specific group. By
+    This report creates a barplot where the height of each bar is the mean value of a feature in a specific group. By
     default, all samples are the group, in which case `grouping_label` is "feature", meaning that each bar is the mean
     value of a given feature, and along the x-axis are the different features. For example, when
     :py:obj:`~source.encodings.kmer_frequency.KmerFrequencyEncoder.KmerFrequencyEncoder`
@@ -74,7 +74,7 @@ class FeatureValueBarplot(EncodingReport):
 
         color_title (str): label for color
 
-    Specification:
+    YAML specification:
 
     .. indent with spaces
     .. code-block:: yaml

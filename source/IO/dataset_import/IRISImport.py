@@ -6,7 +6,7 @@ import pandas as pd
 
 from source.IO.dataset_import.DataImport import DataImport
 from source.IO.dataset_import.IRISImportParams import IRISImportParams
-from source.IO.sequence_import.IRISSequenceImport import IRISSequenceImport
+from source.IO.dataset_import.IRISSequenceImport import IRISSequenceImport
 from source.data_model.dataset.Dataset import Dataset
 from source.data_model.dataset.ReceptorDataset import ReceptorDataset
 from source.data_model.dataset.SequenceDataset import SequenceDataset
@@ -16,11 +16,40 @@ from source.util.ImportHelper import ImportHelper
 
 class IRISImport(DataImport):
     """
-    Imports data from IRIS format into a ReceptorDataset or SequenceDataset depending on the value of "paired" parameter
-    (if metadata file is not defined) or to RepertoireDataset (a set of repertoires consisting of a list of receptor sequences) if the
-    metadata file is defined.
+    Imports data in Immune Receptor Information System (IRIS) format into a Repertoire-, Sequence- or ReceptorDataset.
 
-    Specification:
+    Arguments:
+        path (str): Required parameter. This is the path to a directory with IRIS files to import.
+
+        is_repertoire (bool): If True, this imports a RepertoireDataset. If False, it imports a SequenceDataset or
+            ReceptorDataset. By default, is_repertoire is set to True.
+
+        metadata_file (str): Required for RepertoireDatasets. This parameter specifies the path to the metadata file.
+            This is a csv file with columns filename, subject_id and arbitrary other columns which can be used as labels in instructions.
+            Sequence- or ReceptorDataset metadata is currently not supported.
+
+        paired (str): Required for Sequence- or ReceptorDatasets. This parameter determines whether to import a
+            SequenceDataset (paired = False) or a ReceptorDataset (paired = True). By default, paired = True.
+
+        receptor_chains (str): Required for ReceptorDatasets. Determines which pair of chains to import for each Receptor.
+            Valid values for receptor_chains are the names of the ChainPair enum.
+
+        import_dual_chains (bool): Whether to import the dual chains, as denoted by the suffix (2) in the Chain, V gene
+            and J gene columns. If this is True and a ReceptorDataset is imported, all possible combinations of chains (up to 4)
+            are imported as individual receptors. By default import_dual_chains is True.
+
+        import_all_gene_combinations (bool):  Whether to import all possible genes when multiple genes are present in the
+            V gene and J gene columns. If this is False, a random gene is chosen. If this is true and a ReceptorDataset
+            is imported, all possible combinations of chains are imported as individual receptors. By default import_all_gene_combinations
+            is False.
+
+        extra_columns_to_load (list): Additional columns that should be loaded, apart from the default columns
+            (Clonotype ID and any Chain, V gene and J gene columns).
+
+        separator (str): Column separator, for IRIS this is by default "\\t".
+
+
+    YAML specification:
 
     .. indent with spaces
     .. code-block:: yaml
@@ -28,50 +57,53 @@ class IRISImport(DataImport):
         my_iris_dataset:
             format: IRIS
             params:
-                file_size: 1000 # number of sequences / receptors per file as stored internally by ImmuneML in ImmuneML format - not visible to users
-                paired: True
+                path: path/to/files/
+                is_repertoire: True # whether to import a RepertoireDataset
+                metadata_file: path/to/metadata.csv # metadata file for RepertoireDataset
+                paired: True # whether to import SequenceDataset (False) or ReceptorDataset (True) when is_repertoire = False
+                receptor_chains: TRA_TRB # what chain pair to import for a ReceptorDataset
                 import_dual_chains: True
                 import_all_gene_combinations: False
-                batch_size: 4
-                separator: "\\t"
-                extra_columns_to_load: []
-
+                extra_columns_to_load:
+                - extra_col1
+                - extra_col2
+                # Optional fields with IRIS-specific defaults, only change when different behavior is required:
+                separator: "\\t" # column separator
     """
 
     @staticmethod
     def import_dataset(params: dict, dataset_name: str) -> Dataset:
-        if "metadata_file" in params and params["metadata_file"] is not None:
-            dataset = IRISImport.load_repertoire_dataset(params, dataset_name)
-        else:
-            dataset = IRISImport.load_sequence_dataset(params, dataset_name)
+        iris_params = IRISImportParams.build_object(**params)
+
+        dataset = ImportHelper.load_dataset_if_exists(params, iris_params, dataset_name)
+        if dataset is None:
+            if iris_params.is_repertoire:
+                dataset = ImportHelper.import_repertoire_dataset(IRISImport, iris_params, dataset_name)
+            else:
+                dataset = IRISImport.load_sequence_dataset(params, dataset_name)
+
         return dataset
 
-    @staticmethod
-    def load_repertoire_dataset(params: dict, dataset_name: str) -> Dataset:
-        iris_params = IRISImportParams.build_object(**params)
-        return ImportHelper.import_repertoire_dataset(IRISImport.preprocess_repertoire, iris_params, dataset_name)
 
     @staticmethod
     def _load_gene(identifier):
         return identifier.split("*", 1)[0]
 
+
     @staticmethod
-    def preprocess_repertoire(metadata: dict, params: IRISImportParams) -> dict:
-        # todo make compatible with nucleotide sequences (no use case yet)
-        # todo make compatible with gamma/delta and BCR (no use case yet)
-        df = ImportHelper.load_repertoire_as_dataframe(metadata, params, alternative_load_func=IRISImport.load_iris_dataframe)
+    def preprocess_dataframe(df: pd.DataFrame, params):
 
         subframes = []
 
         chain_dups_to_process = ("1", "2") if params.import_dual_chains is True else ("1")
 
-        for chain in ("A", "B"):
+        for chain in params.receptor_chains.value:
             for chain_dup in chain_dups_to_process:
                 subframe_dict = {"cell_ids": df["Clonotype ID"],
-                                               "sequence_aas": df[f"Chain: TR{chain} ({chain_dup})"],
-                                               "v_genes": df[f"TR{chain} - V gene ({chain_dup})"],
-                                               "j_genes": df[f"TR{chain} - J gene ({chain_dup})"],
-                                               "chains": Chain(chain).value}
+                                               "sequence_aas": df[f"Chain: {chain} ({chain_dup})"],
+                                               "v_genes": df[f"{chain} - V gene ({chain_dup})"],
+                                               "j_genes": df[f"{chain} - J gene ({chain_dup})"],
+                                               "chains": Chain.get_chain(chain).value}
                 if params.extra_columns_to_load is not None:
                     for extra_col in params.extra_columns_to_load:
                         subframe_dict[extra_col] = df[extra_col]
@@ -120,16 +152,18 @@ class IRISImport(DataImport):
         return df
 
     @staticmethod
-    def load_iris_dataframe(filepath, params):
+    def alternative_load_func(filepath, params):
+        first_chain, second_chain = params.receptor_chains.value
+
         usecols = ["Clonotype ID",
-                   "Chain: TRA (1)", "TRA - V gene (1)",
-                   "TRA - J gene (1)",
-                   "Chain: TRA (2)", "TRA - V gene (2)",
-                   "TRA - J gene (2)",
-                   "Chain: TRB (1)", "TRB - V gene (1)",
-                   "TRB - J gene (1)",
-                   "Chain: TRB (2)", "TRB - V gene (2)",
-                   "TRB - J gene (2)"]
+                   f"Chain: {first_chain} (1)", f"{first_chain} - V gene (1)",
+                   f"{first_chain} - J gene (1)",
+                   f"Chain: {first_chain} (2)", f"{first_chain} - V gene (2)",
+                   f"{first_chain} - J gene (2)",
+                   f"Chain: {second_chain} (1)", f"{second_chain} - V gene (1)",
+                   f"{second_chain} - J gene (1)",
+                   f"Chain: {second_chain} (2)", f"{second_chain} - V gene (2)",
+                   f"{second_chain} - J gene (2)"]
 
         if type(params.extra_columns_to_load) is list:
             usecols = usecols + params.extra_columns_to_load
@@ -151,16 +185,13 @@ class IRISImport(DataImport):
                                                     all_dual_chains=iris_params.import_dual_chains,
                                                     all_genes=iris_params.import_all_gene_combinations)
 
-            while len(items) > iris_params.file_size or (index == len(filenames) - 1 and len(items) > 0):
+            while len(items) > iris_params.sequence_file_size or (index == len(filenames) - 1 and len(items) > 0):
                 dataset_filenames.append(iris_params.result_path + "batch_{}.pickle".format(file_index))
-                IRISImport.store_items(dataset_filenames, items, iris_params.file_size)
-                items = items[iris_params.file_size:]
+                ImportHelper.store_sequence_items(dataset_filenames, items, iris_params.sequence_file_size)
+                items = items[iris_params.sequence_file_size:]
                 file_index += 1
 
-        return ReceptorDataset(filenames=dataset_filenames, file_size=iris_params.file_size, name=dataset_name) if iris_params.paired \
-            else SequenceDataset(filenames=dataset_filenames, file_size=iris_params.file_size, name=dataset_name)
+        return ReceptorDataset(filenames=dataset_filenames, file_size=iris_params.sequence_file_size, name=dataset_name) if iris_params.paired \
+            else SequenceDataset(filenames=dataset_filenames, file_size=iris_params.sequence_file_size, name=dataset_name)
 
-    @staticmethod
-    def store_items(dataset_filenames: list, items: list, file_size: int):
-        with open(dataset_filenames[-1], "wb") as file:
-            pickle.dump(items[:file_size], file)
+

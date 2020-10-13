@@ -6,9 +6,37 @@ from source.util.ParameterValidator import ParameterValidator
 
 class RandomRepertoireDatasetImport(DataImport):
     """
-    Returns randomly generated repertoire dataset according to the parameters;
+    Returns a RepertoireDataset consisting of randomly generated sequences, which can be used for benchmarking purposes.
+    The sequences consist of uniformly chosen amino acids or nucleotides.
 
-    Specification:
+    Arguments:
+        repertoire_count (int): The number of repertoires the RepertoireDataset should contain.
+
+        sequence_count_probabilities (dict): A mapping where the keys are the number of sequences per repertoire, and
+            the values are the probabilities that any of the repertoires would have that number of sequences.
+            For example, to create a random RepertoireDataset where 40% of the repertoires would have 1000 sequences,
+            and the other 60% would have 1100 sequences, this mapping would need to be specified:
+                1000: 0.4
+                1100: 0.6
+
+        sequence_length_probabilities (dict): A mapping where the keys correspond to different sequence lengths, and
+            the values are the probabilities for choosing each sequence length.
+            For example, to create a random RepertoireDataset where 40% of the sequences would be of length 10, and
+            60% of the sequences would have length 12, this mapping would need to be specified:
+                10: 0.4
+                12: 0.6
+
+        labels (dict): A mapping that specifies randomly chosen labels to be assigned to the Repertoires. One or multiple
+            labels can be specified here. The keys of this mapping are the labels, and the values consist of another mapping
+            between label classes and their probabilities.
+            For example, to create a random RepertoireDataset with the label CMV where 70% of the Repertoires has class
+            cmv_positive and the remaining 30% has class cmv_negative, the following mapping should be specified:
+                CMV:
+                    cmv_positive: 0.7
+                    cmv_negative: 0.3
+
+
+    YAML specification:
 
     .. indent with spaces
     .. code-block:: yaml
@@ -16,7 +44,6 @@ class RandomRepertoireDatasetImport(DataImport):
         my_random_dataset:
             format: RandomRepertoireDataset
             params:
-                result_path: path/where/to/store/results/
                 repertoire_count: 100 # number of random repertoires to generate
                 sequence_count_probabilities:
                     10: 0.5 # probability that any of the repertoires would have 10 receptor sequences
