@@ -1,4 +1,4 @@
-from collections import MutableSequence
+from collections.abc import MutableSequence
 
 from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.util.ParameterValidator import ParameterValidator
