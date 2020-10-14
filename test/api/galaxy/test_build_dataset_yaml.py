@@ -5,6 +5,7 @@ import yaml
 import pandas as pd
 
 from source.api.galaxy.build_dataset_yaml import main as yamlbuilder_main
+from source.api.galaxy.build_dataset_yaml import build_metadata_column_mapping
 from source.data_model.receptor.RegionType import RegionType
 from source.dsl.ImmuneMLParser import ImmuneMLParser
 from source.environment.EnvironmentSettings import EnvironmentSettings
@@ -32,6 +33,11 @@ class MyTestCase(unittest.TestCase):
 
         pd.DataFrame(metadata).to_csv(path + "metadata.csv")
 
+    def test_build_metadata_column_mapping(self):
+        self.assertDictEqual({}, build_metadata_column_mapping("''"))
+        self.assertDictEqual({"a": "a"}, build_metadata_column_mapping("'a',"))
+        self.assertDictEqual({"a": "a", "b": "b"}, build_metadata_column_mapping("'b',a"))
+
     def test_main(self):
 
         path = f"{EnvironmentSettings.tmp_test_path}dataset_yaml/"
@@ -43,21 +49,21 @@ class MyTestCase(unittest.TestCase):
 
         os.chdir(path)
 
-        yamlbuilder_main(["-r", "VDJdb", "-o", path, "-f", "sequence.yaml", "-p", "False"])
-        yamlbuilder_main(["-r", "VDJdb", "-o", path, "-f", "receptor.yaml", "-p", "True", "-c", "TRA_TRB"])
+        yamlbuilder_main(["-r", "VDJdb", "-o", path, "-f", "sequence.yaml", "-p", "False", "-a", "a,b"])
+        yamlbuilder_main(["-r", "VDJdb", "-o", path, "-f", "receptor.yaml", "-p", "True", "-c", "TRG_TRD", "-a", "'c'"])
         yamlbuilder_main(["-r", "VDJdb", "-o", path, "-f", "repertoire.yaml", "-m", "metadata.csv"])
 
         with open(f"{path}/sequence.yaml", "r") as file:
             loaded_receptor = yaml.load(file)
 
             self.assertDictEqual(loaded_receptor["definitions"]["datasets"], {"dataset": {"format": "VDJdb", "params":
-                {"path": "./", "is_repertoire": False, "paired": False, "region_type": RegionType.IMGT_CDR3.name, "result_path": "./"}}})
+                {"path": "./", "is_repertoire": False, "paired": False, "metadata_column_mapping": {"a":"a", "b":"b"}, "region_type": RegionType.IMGT_CDR3.name, "result_path": "./"}}})
 
         with open(f"{path}/receptor.yaml", "r") as file:
             loaded_receptor = yaml.load(file)
 
             self.assertDictEqual(loaded_receptor["definitions"]["datasets"], {"dataset": {"format": "VDJdb", "params":
-                {"path": "./", "is_repertoire": False, "paired": True, "receptor_chains": "TRA_TRB", "region_type": RegionType.IMGT_CDR3.name, "result_path": "./"}}})
+                {"path": "./", "is_repertoire": False, "paired": True, "receptor_chains": "TRG_TRD", "metadata_column_mapping": {"c":"c"}, "region_type": RegionType.IMGT_CDR3.name, "result_path": "./"}}})
 
         with open(f"{path}/repertoire.yaml", "r") as file:
             loaded_receptor = yaml.load(file)

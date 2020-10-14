@@ -3,6 +3,8 @@ import glob
 import itertools as it
 import os
 import sys
+import logging
+import warnings
 
 import yaml
 
@@ -250,12 +252,17 @@ def parse_commandline_arguments(args):
     parser.add_argument("-r", "--reads", choices=[ReadsType.UNIQUE.value, ReadsType.ALL.value], nargs="+", default=[ReadsType.UNIQUE.value],
                         help="Whether k-mer counts should be scaled by unique clonotypes or all observed receptor sequences")
 
+
     return parser.parse_args(args)
 
 
 def main(args):
+    logging.basicConfig(filename="build_yaml_from_args_log.txt", level=logging.INFO, format='%(asctime)s %(levelname)s: %(message)s')
+    warnings.showwarning = lambda message, category, filename, lineno, file=None, line=None: logging.warning(message)
+
     parsed_args = parse_commandline_arguments(args)
     check_arguments(parsed_args)
+
     specs = build_specs(parsed_args)
 
     PathBuilder.build(parsed_args.output_path)

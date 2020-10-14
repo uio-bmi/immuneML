@@ -15,6 +15,7 @@ from source.data_model.dataset import Dataset
 from source.data_model.dataset.ReceptorDataset import ReceptorDataset
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.dataset.SequenceDataset import SequenceDataset
+from source.data_model.receptor.BCKReceptor import BCKReceptor
 from source.data_model.receptor.BCReceptor import BCReceptor
 from source.data_model.receptor.ChainPair import ChainPair
 from source.data_model.receptor.Receptor import Receptor
@@ -306,6 +307,11 @@ class ImportHelper:
         elif params.receptor_chains == ChainPair.IGH_IGL:
             receptor = BCReceptor(heavy=first_sequence,
                                   light=second_sequence,
+                                  identifier=identifier,
+                                  metadata={**first_sequence.metadata.custom_params})
+        elif params.receptor_chains == ChainPair.IGH_IGK:
+            receptor = BCKReceptor(heavy=first_sequence,
+                                  kappa=second_sequence,
                                   identifier=identifier,
                                   metadata={**first_sequence.metadata.custom_params})
         else:
