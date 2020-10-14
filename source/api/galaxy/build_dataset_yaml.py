@@ -7,6 +7,14 @@ from source.data_model.receptor.RegionType import RegionType
 from source.util.PathBuilder import PathBuilder
 
 
+def build_metadata_column_mapping(columns_str):
+    colnames = columns_str.split(",")
+    colnames = [label.strip().strip("'\"") for label in colnames]
+
+    return {colname: colname for colname in colnames if colname != ""}
+
+
+
 def build_specs(args):
     specs = {
         "definitions": {
@@ -38,6 +46,8 @@ def build_specs(args):
         specs["definitions"]["datasets"][args.dataset_name]["params"]["paired"] = paired
         if paired:
             specs["definitions"]["datasets"][args.dataset_name]["params"]["receptor_chains"] = args.receptor_chains
+
+        specs["definitions"]["datasets"][args.dataset_name]["params"]["metadata_column_mapping"] = build_metadata_column_mapping(args.metadata_columns)
     else:
         specs["definitions"]["datasets"][args.dataset_name]["params"]["is_repertoire"] = True
         specs["definitions"]["datasets"][args.dataset_name]["params"]["metadata_file"] = args.metadata_file
