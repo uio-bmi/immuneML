@@ -1,7 +1,9 @@
 import itertools
 from typing import List
+import warnings
 
 from source.data_model.receptor.BCReceptor import BCReceptor
+from source.data_model.receptor.BCKReceptor import BCKReceptor
 from source.data_model.receptor.ChainPair import ChainPair
 from source.data_model.receptor.Receptor import Receptor
 from source.data_model.receptor.TCABReceptor import TCABReceptor
@@ -10,18 +12,22 @@ from source.data_model.receptor.receptor_sequence.Chain import Chain
 from source.data_model.receptor.receptor_sequence.ReceptorSequenceList import ReceptorSequenceList
 
 
+
+
 class ReceptorBuilder:
 
     @classmethod
     def build_object(cls, sequences: dict, identifier: str = None, metadata: dict = None) -> Receptor:
-        chains = sorted(list(sequences.keys()))
-        if chains == ChainPair.TRA_TRB.value or chains == [item.lower() for item in ChainPair.TRA_TRB.value]:
+        if all(chain in ChainPair.TRA_TRB.value for chain in sequences.keys()):
             return TCABReceptor(alpha=sequences[Chain.ALPHA.value], beta=sequences[Chain.BETA.value], identifier=identifier, metadata=metadata)
-        elif chains == ChainPair.TRG_TRD.value or chains == [item.lower() for item in ChainPair.TRG_TRD.value]:
+        elif all(chain in ChainPair.TRG_TRD.value for chain in sequences.keys()):
             return TCGDReceptor(gamma=sequences[Chain.GAMMA.value], delta=sequences[Chain.DELTA.value], identifier=identifier, metadata=metadata)
-        elif chains == ChainPair.IGH_IGL.value or chains == [item.lower() for item in ChainPair.IGH_IGL.value]:
+        elif all(chain in ChainPair.IGH_IGL.value for chain in sequences.keys()):
             return BCReceptor(heavy=sequences[Chain.HEAVY.value], light=sequences[Chain.LIGHT.value], identifier=identifier, metadata=metadata)
+        elif all(chain in ChainPair.IGH_IGK.value for chain in sequences.keys()):
+            return BCKReceptor(heavy=sequences[Chain.HEAVY.value], kappa=sequences[Chain.KAPPA.value], identifier=identifier, metadata=metadata)
         else:
+            warnings.warn(f"ReceptorBuilder: attempt to build receptor with chains {sequences.keys()}, returning None...")
             return None
 
     @classmethod

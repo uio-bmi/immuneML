@@ -44,7 +44,7 @@ class MyTestCase(unittest.TestCase):
         os.chdir(path)
 
         yamlbuilder_main(["-r", "VDJdb", "-o", path, "-f", "sequence.yaml", "-p", "False"])
-        yamlbuilder_main(["-r", "VDJdb", "-o", path, "-f", "receptor.yaml", "-p", "True", "-c", "TRA_TRB"])
+        yamlbuilder_main(["-r", "VDJdb", "-o", path, "-f", "receptor.yaml", "-p", "True", "-c", "TRG_TRD"])
         yamlbuilder_main(["-r", "VDJdb", "-o", path, "-f", "repertoire.yaml", "-m", "metadata.csv"])
 
         with open(f"{path}/sequence.yaml", "r") as file:
@@ -57,7 +57,7 @@ class MyTestCase(unittest.TestCase):
             loaded_receptor = yaml.load(file)
 
             self.assertDictEqual(loaded_receptor["definitions"]["datasets"], {"dataset": {"format": "VDJdb", "params":
-                {"path": "./", "is_repertoire": False, "paired": True, "receptor_chains": "TRA_TRB", "region_type": RegionType.IMGT_CDR3.name, "result_path": "./"}}})
+                {"path": "./", "is_repertoire": False, "paired": True, "receptor_chains": "TRG_TRD", "region_type": RegionType.IMGT_CDR3.name, "result_path": "./"}}})
 
         with open(f"{path}/repertoire.yaml", "r") as file:
             loaded_receptor = yaml.load(file)
