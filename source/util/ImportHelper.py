@@ -28,6 +28,7 @@ from source.data_model.receptor.receptor_sequence.SequenceFrameType import Seque
 from source.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
 from source.data_model.repertoire.Repertoire import Repertoire
 from source.environment.Constants import Constants
+from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.util.PathBuilder import PathBuilder
 
 
@@ -187,15 +188,21 @@ class ImportHelper:
 
     @staticmethod
     def get_sequence_filenames(path, dataset_name):
+        data_file_extensions = ("*.tsv", "*.csv", "*.txt")
+
         if os.path.isfile(path):
             filenames = [path]
         elif os.path.isdir(path):
-            filenames = glob(os.path.join(path, "*"))
+            filenames = []
+
+            for pattern in data_file_extensions:
+                filenames.extend(glob(os.path.join(path, pattern)))
         else:
             raise ValueError(f"ImportHelper: path '{path}' given in YAML specification is not a valid path. "
                              f"This parameter can either point to a single file with immune receptor data or to a directory containing such files.")
 
-        assert len(filenames) >= 1, f"ImportHelper: the dataset {dataset_name} cannot be imported, no files were found under {path}."
+        assert len(filenames) >= 1, f"ImportHelper: the dataset {dataset_name} cannot be imported, no files were found under {path}.\n" \
+                                    f"Note that only files with the following extensions can be imported: {data_file_extensions}"
         return filenames
 
     @staticmethod
