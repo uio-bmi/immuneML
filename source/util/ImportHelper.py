@@ -193,12 +193,24 @@ class ImportHelper:
         '''
         return df[column_name].apply(lambda gene_col: gene_col.rsplit("*", maxsplit=1)[0])
 
-    @staticmethod #
-    def import_sequence_dataset(import_class, params, dataset_name: str): # todo remove args kwargs
+    @staticmethod
+    def get_sequence_filenames(path, dataset_name):
+        if os.path.isfile(path):
+            filenames = [path]
+        elif os.path.isdir(path):
+            filenames = glob(os.path.join(path, "*"))
+        else:
+            raise ValueError(f"ImportHelper: path '{path}' given in YAML specification is not a valid path. "
+                             f"This parameter can either point to a single file with immune receptor data or to a directory containing such files.")
+
+        assert len(filenames) >= 1, f"ImportHelper: the dataset {dataset_name} cannot be imported, no files were found under {path}."
+        return filenames
+
+    @staticmethod
+    def import_sequence_dataset(import_class, params, dataset_name: str):
         PathBuilder.build(params.result_path)
 
-        filenames = [params.path] if os.path.isfile(params.path) else glob(params.path + "*.tsv")
-        assert len(filenames) >= 1, f"ImportHelper: the dataset {dataset_name} cannot be imported, no files were found under {params.path}."
+        filenames = ImportHelper.get_sequence_filenames(params.path, dataset_name)
 
         file_index = 0
         dataset_filenames = []
