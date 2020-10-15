@@ -28,9 +28,10 @@ class TestImportParser(TestCase):
 15760	TRA	CALRLNNQGGKLIF	TRAV9-2*01	TRAJ23*01	HomoSapiens	HLA-A*03:01	B2M	MHCI	KLGGALQAK	IE1	CMV	https://www.10xgenomics.com/resources/application-notes/a-new-way-of-exploring-immunity-linking-highly-multiplexed-antigen-recognition-to-immune-repertoire-and-phenotype/#	{"frequency": "1/25584", "identification": "dextramer-sort", "sequencing": "rna-seq", "singlecell": "yes", "verification": ""}	{"cell.subset": "", "clone.id": "", "donor.MHC": "", "donor.MHC.method": "", "epitope.id": "", "replica.id": "", "samples.found": 1, "structure.id": "", "studies.found": 1, "study.id": "", "subject.cohort": "", "subject.id": "3", "tissue": ""}	{"cdr3": "CALRLNNQGGKLIF", "cdr3_old": "CALRLNNQGGKLIF", "fixNeeded": false, "good": true, "jCanonical": true, "jFixType": "NoFixNeeded", "jId": "TRAJ23*01", "jStart": 6, "vCanonical": true, "vEnd": 3, "vFixType": "NoFixNeeded", "vId": "TRAV9-2*01"}	0
                 """
         path = EnvironmentSettings.root_path + "test/tmp/dslimportparservdj/"
-        PathBuilder.build(path)
+        data_path = EnvironmentSettings.root_path + "test/tmp/dslimportparservdj/receptor_data/"
+        PathBuilder.build(data_path)
 
-        with open(path + "receptors.tsv", "w") as file:
+        with open(data_path + "receptors.tsv", "w") as file:
             file.writelines(file_content)
 
         st, desc = ImportParser.parse({
@@ -41,7 +42,7 @@ class TestImportParser(TestCase):
                         "is_repertoire": False,
                         "paired": True,
                         "receptor_chains": "TRA_TRB",
-                        "path": path
+                        "path": data_path
                     }
                 }
             }
@@ -53,7 +54,7 @@ class TestImportParser(TestCase):
 
         shutil.rmtree(path)
 
-    def  test_parse(self):
+    def test_parse(self):
         path = EnvironmentSettings.root_path + "test/tmp/parser/"
 
         PathBuilder.build(path + "tmp_input/")
