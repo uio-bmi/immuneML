@@ -8,7 +8,7 @@ from source.util.PathBuilder import PathBuilder
 
 
 class TestImmunoSEQSampleImport(TestCase):
-    def create_dummy_dataset(self, path):
+    def create_dummy_dataset(self, path, add_metadata):
         rep1text = """nucleotide	aminoAcid	count (templates/reads)	frequencyCount (%)	cdr3Length	vMaxResolved	vFamilyName	vGeneName	vGeneAllele	vFamilyTies	vGeneNameTies	vGeneAlleleTies	dMaxResolved	dFamilyName	dGeneName	dGeneAllele	dFamilyTies	dGeneNameTies	dGeneAlleleTies	jMaxResolved	jFamilyName	jGeneName	jGeneAllele	jFamilyTies	jGeneNameTies	jGeneAlleleTies	vDeletion	n1Insertion	d5Deletion	d3Deletion	n2Insertion	jDeletion	vIndex	n1Index	dIndex	n2Index	jIndex	estimatedNumberGenomes	sequenceStatus	cloneResolved	vOrphon	dOrphon	jOrphon	vFunction	dFunction	jFunction	fractionNucleated	vAlignLength	vAlignSubstitutionCount	vAlignSubstitutionIndexes	vAlignSubstitutionGeneThreePrimeIndexes	vSeqWithMutations
         GCCATCCCCAACCAGACAGCTCTTTACTTCTGTGCCACCAGTGATCAACTTAACCGTTGGGGGACCGGGGAGCTGTTTTTTGGAGAA	CATSDQLNRWGTGELFF	38	0.0017525250196006087	51	TCRBV24	TCRBV24				TCRBV24-01,TCRBV24-or09_02						TCRBD01,TCRBD02	TCRBD01-01,TCRBD02-01		TCRBJ02-02*01	TCRBJ02	TCRBJ02-02	01				3	0	6	1	13	5	30	45	58	-1	63	38	In	VDJ												
         GGGTTGGAGTCGGCTGCTCCCTCCCAAACATCTGTGTACTTCTGTGCCAGCAAGGACGGCGACACCGGGGAGCTGTTTTTTGGAGAA	CASKDGDTGELFF	48	0.002213715814232348	39	TCRBV06	TCRBV06				TCRBV06-02,TCRBV06-03						TCRBD01,TCRBD02	TCRBD01-01,TCRBD02-01		TCRBJ02-02*01	TCRBJ02	TCRBJ02-02	01				7	4	1	7	1	3	42	52	53	57	61	48	In	VDJ												
@@ -35,17 +35,18 @@ class TestImmunoSEQSampleImport(TestCase):
         with open(path + "rep1.tsv", "w") as file:
             file.writelines(rep1text)
 
-        with open(path + "metadata.csv", "w") as file:
-            file.writelines(
-                """filename,chain,subject_id,coeliac status (yes/no)
+        if add_metadata:
+            with open(path + "metadata.csv", "w") as file:
+                file.writelines(
+                    """filename,chain,subject_id,coeliac status (yes/no)
 rep1.tsv,TRA,1234a,no"""
-            )
+                )
 
 
     def test_import_repertoire_dataset(self):
         path = EnvironmentSettings.root_path + "test/tmp/immunoseq/"
 
-        self.create_dummy_dataset(path)
+        self.create_dummy_dataset(path, True)
 
 
         params = DefaultParamsLoader.load(EnvironmentSettings.default_params_path + "datasets/", "ImmunoSEQSample")
@@ -69,7 +70,7 @@ rep1.tsv,TRA,1234a,no"""
     def test_import_sequence_dataset(self):
         path = EnvironmentSettings.root_path + "test/tmp/immunoseq/"
 
-        self.create_dummy_dataset(path)
+        self.create_dummy_dataset(path, False)
 
         params = DefaultParamsLoader.load(EnvironmentSettings.default_params_path + "datasets/", "ImmunoSEQSample")
         params["is_repertoire"] = False

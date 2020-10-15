@@ -7,7 +7,7 @@ from source.util.PathBuilder import PathBuilder
 
 
 class TestGenericLoader(TestCase):
-    def make_dummy_dataset(self, path):
+    def make_dummy_dataset(self, path, add_metadata):
         rep1text = """Clone ID	Senior Author	TRAJ Gene	TRAV Gene	CDR3A AA Sequence	TRBV Gene	TRBD Gene	TRBJ Gene	CDR3B AA Sequence	Antigen Protein	Antigen Gene	Antigen Species	Antigen Peptide AA #	Epitope Peptide	MHC Class	HLA Restriction
 1E6	Sewell	TRAJ12	TRAV12-3	CAMRGDSSYKLIF	TRBV12-4	TRBD2	TRBJ2-4	CASSLWEKLAKNIQYF	PPI	INS	Human	12-24	ALWGPDPAAA	MHC I	A*02:01
 4.13	Nepom	TRAJ44	TRAV19	CALSENRGGTASKLTF	TRBV5-1	TRBD1	TRBJ1-1	CASSLVGGPSSEAFF	GAD		Human	555-567		MHC II	DRB1*04:01
@@ -29,15 +29,16 @@ T1D#3 C8	TBD	TRAJ23	TRAV17	CATDAGYNQGGKLIF	TRBV5-1	TRBD2	TRBJ1-3	CASSAGNTIYF	Ins
         with open(path + "rep1.tsv", "w") as file:
             file.writelines(rep1text)
 
-        with open(path + "metadata.csv", "w") as file:
-            file.writelines(
-                """filename,chain,subject_id,coeliac status (yes/no)
+        if add_metadata:
+            with open(path + "metadata.csv", "w") as file:
+                file.writelines(
+                    """filename,chain,subject_id,coeliac status (yes/no)
 rep1.tsv,TRA,1234e,no"""
-            )
+                )
 
     def test_import_repertoire_dataset(self):
         path = EnvironmentSettings.root_path + "test/tmp/generic/"
-        self.make_dummy_dataset(path)
+        self.make_dummy_dataset(path, True)
 
 
         dataset = GenericImport.import_dataset({"is_repertoire": True, "result_path": path, "path": path,
@@ -60,7 +61,7 @@ rep1.tsv,TRA,1234e,no"""
 
     def test_import_sequence_dataset(self):
         path = EnvironmentSettings.root_path + "test/tmp/generic/"
-        self.make_dummy_dataset(path)
+        self.make_dummy_dataset(path, False)
 
 
         dataset = GenericImport.import_dataset({"is_repertoire": False, "paired": False,

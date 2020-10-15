@@ -177,7 +177,7 @@ class IRISImport(DataImport):
 
         iris_params = IRISImportParams.build_object(**params)
 
-        filenames = glob(iris_params.path + "*.tsv")
+        filenames = ImportHelper.get_sequence_filenames(iris_params.path, dataset_name)
         file_index = 0
         dataset_filenames = []
 

@@ -78,7 +78,7 @@ rep2.tsv,2""")
     def test_load_sequence_dataset(self):
         path = EnvironmentSettings.root_path + "test/tmp/mixcr/"
         PathBuilder.build(path)
-        self.create_dummy_dataset(path, add_metadata=True)
+        self.create_dummy_dataset(path, add_metadata=False)
 
         params = DefaultParamsLoader.load(EnvironmentSettings.default_params_path + "datasets/", "mixcr")
         params["is_repertoire"] = False
