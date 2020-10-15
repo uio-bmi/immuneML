@@ -111,7 +111,7 @@ class ImportHelper:
     def load_repertoire_as_object(import_class, metadata_row, params: DatasetImportParams):
         alternative_load_func = getattr(import_class, "alternative_load_func", None)
 
-        dataframe = ImportHelper.load_repertoire_as_dataframe(metadata_row, params, alternative_load_func)
+        dataframe = ImportHelper.load_sequence_dataframe(f"{params.path}{metadata_row['filename']}", params, alternative_load_func)
         dataframe = import_class.preprocess_dataframe(dataframe, params)
         sequence_lists = {field: dataframe[field].values.tolist() for field in Repertoire.FIELDS if field in dataframe.columns}
         sequence_lists["custom_lists"] = {field: dataframe[field].values.tolist()
@@ -122,26 +122,18 @@ class ImportHelper:
 
         return repertoire
 
-
-    @staticmethod
-    def load_repertoire_as_dataframe(metadata: dict, params, alternative_load_func=None):
-        filepath = f"{params.path}{metadata['filename']}"
-
-        try:
-            df = ImportHelper.load_sequence_dataframe(filepath, params, alternative_load_func)
-        except Exception as ex:
-            raise Exception(f"{ex}\n\nDatasetImport: an error occurred while importing a dataset while parsing the file: {filepath}.\n"
-                            f"The parameters used for import are {params}.\nFor technical description of the error, see the log above."
-                            f" For details on how to specify the dataset import, see the documentation.")
-
-        return df
-
     @staticmethod
     def load_sequence_dataframe(filepath, params, alternative_load_func=None):
-        if alternative_load_func:
-            df = alternative_load_func(filepath, params)
-        else:
-            df = pd.read_csv(filepath, sep=params.separator, iterator=False, usecols=params.columns_to_load, dtype=str)
+        try:
+            if alternative_load_func:
+                df = alternative_load_func(filepath, params)
+            else:
+                df = pd.read_csv(filepath, sep=params.separator, iterator=False, usecols=params.columns_to_load, dtype=str)
+        except Exception as ex:
+            raise Exception(f"{ex}\n\nImportHelper: an error occurred during dataset import while parsing the input file: {filepath}.\n"
+                            f"Please make sure this is a correct immune receptor data file (not metadata).\n"
+                            f"The parameters used for import are {params}.\nFor technical description of the error, see the log above."
+                            f" For details on how to specify the dataset import, see the documentation.")
 
         if hasattr(params, "column_mapping") and params.column_mapping is not None:
             df.rename(columns=params.column_mapping, inplace=True)
