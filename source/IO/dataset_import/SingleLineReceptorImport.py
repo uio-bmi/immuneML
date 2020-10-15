@@ -111,7 +111,7 @@ class SingleLineReceptorImport(DataImport):
     def import_dataset(params, dataset_name: str) -> ReceptorDataset:
         generic_params = DatasetImportParams.build_object(**params)
 
-        filenames = ImportHelper.get_sequence_filenames(params.path, dataset_name)
+        filenames = ImportHelper.get_sequence_filenames(generic_params.path, dataset_name)
 
         PathBuilder.build(generic_params.result_path, warn_if_exists=True)
 

@@ -8,7 +8,7 @@ from source.util.PathBuilder import PathBuilder
 
 class TestOLGALoader(TestCase):
 
-    def write_dummy_files(self, path):
+    def write_dummy_files(self, path, add_metadata):
         file1_content = """TGTGCCAGCAGTTTATCGCCGGGACTGGCCTACGAGCAGTACTTC	CASSLSPGLAYEQYF	TRBV27	TRBJ2-7
 TGTGCCAGCAAAGTCAGAATTGCTGCAACTAATGAAAAACTGTTTTTT	CASKVRIAATNEKLFF	TRBV5-6	TRBJ1-4
 TGCAGTGCCGACTCCAAGAACAGAGGAGCGGGGGGGGAGGCAAGCTCCTACGAGCAGTACTTC	CSADSKNRGAGGEASSYEQYF	TRBV20-1	TRBJ2-7"""
@@ -22,8 +22,9 @@ TGTGCTAGTGGGAAAAATCGGGACTCTAGTGCAGGCCAAGAGACCCAGTACTTC	CASGKNRDSSAGQETQYF	TRBV12
         with open(path + "rep2.tsv", "w") as file:
             file.writelines(file2_content)
 
-        with open(path + "metadata.csv", "w") as file:
-            file.writelines("""filename,subject_id
+        if add_metadata:
+            with open(path + "metadata.csv", "w") as file:
+                file.writelines("""filename,subject_id
 rep1.tsv,1
 rep2.tsv,2""")
 
@@ -32,7 +33,7 @@ rep2.tsv,2""")
         path = EnvironmentSettings.root_path + "test/tmp/io_olga_load/"
 
         PathBuilder.build(path)
-        self.write_dummy_files(path)
+        self.write_dummy_files(path, True)
         dataset = OLGAImport.import_dataset({"is_repertoire": True, "result_path": path, "metadata_file": path + "metadata.csv",
                                              "columns_to_load": None, "separator": "\t", "region_type": "IMGT_CDR3",
                                              "path": path, "batch_size": 4}, "olga_repertoire_dataset")
@@ -62,7 +63,7 @@ rep2.tsv,2""")
         path = EnvironmentSettings.root_path + "test/tmp/io_olga_load/"
 
         PathBuilder.build(path)
-        self.write_dummy_files(path)
+        self.write_dummy_files(path, False)
         dataset = OLGAImport.import_dataset({"is_repertoire": False, "paired": False, "result_path": path, "metadata_file": path + "metadata.csv",
                                              "columns_to_load": None, "separator": "\t", "region_type": "IMGT_CDR3",
                                              "path": path, "batch_size": 4}, "olga_sequence_dataset")

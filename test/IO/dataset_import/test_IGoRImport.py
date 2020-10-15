@@ -9,7 +9,7 @@ from source.util.PathBuilder import PathBuilder
 
 class TestIGoRImport(TestCase):
 
-    def write_dummy_files(self, path):
+    def write_dummy_files(self, path, add_metadata):
         file1_content = """seq_index,nt_CDR3,anchors_found,is_inframe
 0,TGTGCGAGAGATCCTAGAAGCAGTGGCTGGAGATCAAAACCTACTGG,1,0
 1,TGTGCGAGAGTTAATCGGCATATTGTGGTGGTGACTGCTATTATGACCGGGTAAAACTGGTTCGACCCCTGG,1,1
@@ -31,8 +31,9 @@ class TestIGoRImport(TestCase):
         with open(path + "rep2.tsv", "w") as file:
             file.writelines(file2_content)
 
-        with open(path + "metadata.csv", "w") as file:
-            file.writelines("""filename,subject_id
+        if add_metadata:
+            with open(path + "metadata.csv", "w") as file:
+                file.writelines("""filename,subject_id
 rep1.tsv,1
 rep2.tsv,2""")
 
@@ -41,7 +42,7 @@ rep2.tsv,2""")
         path = EnvironmentSettings.root_path + "test/tmp/io_igor_load/"
 
         PathBuilder.build(path)
-        self.write_dummy_files(path)
+        self.write_dummy_files(path, True)
 
         params = DefaultParamsLoader.load(EnvironmentSettings.default_params_path + "datasets/", "igor")
         params["is_repertoire"] = True
@@ -63,7 +64,7 @@ rep2.tsv,2""")
         path = EnvironmentSettings.root_path + "test/tmp/io_igor_load/"
 
         PathBuilder.build(path)
-        self.write_dummy_files(path)
+        self.write_dummy_files(path, True)
 
         params = DefaultParamsLoader.load(EnvironmentSettings.default_params_path + "datasets/", "igor")
         params["is_repertoire"] = True
@@ -88,7 +89,7 @@ rep2.tsv,2""")
         path = EnvironmentSettings.root_path + "test/tmp/io_igor_load/"
 
         PathBuilder.build(path)
-        self.write_dummy_files(path)
+        self.write_dummy_files(path, False)
 
         params = DefaultParamsLoader.load(EnvironmentSettings.default_params_path + "datasets/", "igor")
         params["is_repertoire"] = False
