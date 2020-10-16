@@ -1,13 +1,17 @@
 import os
+import pickle
 import shutil
 import unittest
 
 from source.IO.dataset_import.GenericImport import GenericImport
 from source.caching.CacheType import CacheType
+from source.data_model.dataset.ReceptorDataset import ReceptorDataset
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.dataset.SequenceDataset import SequenceDataset
+from source.data_model.receptor.TCABReceptor import TCABReceptor
 from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.data_model.receptor.receptor_sequence.ReceptorSequenceList import ReceptorSequenceList
+from source.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
 from source.data_model.repertoire.Repertoire import Repertoire
 from source.encodings.EncoderParams import EncoderParams
 from source.encodings.onehot.OneHotEncoder import OneHotEncoder
@@ -23,7 +27,7 @@ class TestOneHotEncoder(unittest.TestCase):
     def setUp(self) -> None:
         os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
 
-    def _construct_test_dataset(self, path, positional):
+    def _construct_test_repertoiredataset(self, path, positional):
         receptors1 = ReceptorSequenceList()
         receptors2 = ReceptorSequenceList()
 
@@ -56,7 +60,7 @@ class TestOneHotEncoder(unittest.TestCase):
 
         PathBuilder.build(path)
 
-        dataset, lc = self._construct_test_dataset(path, positional=False)
+        dataset, lc = self._construct_test_repertoiredataset(path, positional=False)
 
         encoder = OneHotEncoder.build_object(dataset, **{"use_positional_info": False,
                                                          "distance_to_seq_middle": 6,
@@ -101,7 +105,7 @@ class TestOneHotEncoder(unittest.TestCase):
 
         PathBuilder.build(path)
 
-        dataset, lc = self._construct_test_dataset(path, positional=True)
+        dataset, lc = self._construct_test_repertoiredataset(path, positional=True)
 
         encoder = OneHotEncoder.build_object(dataset, **{"use_positional_info": True,
                                                          "distance_to_seq_middle": 6,
@@ -185,29 +189,46 @@ class TestOneHotEncoder(unittest.TestCase):
         shutil.rmtree(path)
 
 
+    def construct_test_sequencedataset(self, path):
+        sequences = [ReceptorSequence(amino_acid_sequence="AAATTT", identifier="1", metadata=SequenceMetadata(custom_params={"l1": 1})),
+                     ReceptorSequence(amino_acid_sequence="ATATAT", identifier="2", metadata=SequenceMetadata(custom_params={"l1": 2}))]
+
+        PathBuilder.build(path)
+        filename = "{}sequences.pkl".format(path)
+        with open(filename, "wb") as file:
+            pickle.dump(sequences, file)
+
+        lc = LabelConfiguration()
+        lc.add_label("l1", [1, 2])
+
+        return SequenceDataset(params={"l1": [1, 2]}, filenames=[filename], identifier="d1")
+
+
+
+    def construct_test_receptordataset(self, path):
+        receptors = [TCABReceptor(alpha=ReceptorSequence(amino_acid_sequence="AAATTT", identifier="1a"),
+                     beta=ReceptorSequence(amino_acid_sequence="ATATAT", identifier="1b"),
+                     metadata={"l1": 1},
+                     identifier="1"),
+                     TCABReceptor(alpha=ReceptorSequence(amino_acid_sequence="AAAAAA", identifier="2a"),
+                                  beta=ReceptorSequence(amino_acid_sequence="AAAAAA", identifier="2b"),
+                                  metadata={"l1": 2},
+                                  identifier="2")]
+
+        return ReceptorDataset.build(receptors, 10, "{}receptors.pkl".format(path))
+
     def test_sequence_flattened(self):
-        path = EnvironmentSettings.root_path + "test/tmp/onehot_imgt/"
+        path = EnvironmentSettings.root_path + "test/tmp/onehot_seq_flat/"
 
         PathBuilder.build(path)
 
-        file_content = """sequence_aas	is_binding
-AAATTT	1
-ATATAT	0"""
-        path = EnvironmentSettings.root_path + "test/tmp/iovdjdb/"
-        PathBuilder.build(path)
-
-        with open(path + "receptors.tsv", "w") as file:
-            file.writelines(file_content)
-
-        dataset = GenericImport.import_dataset({"is_repertoire": False, "result_path": path, "paired": False, "path": path, "sequence_file_size": 1,
-                                              "column_mapping": None, "metadata_column_mapping": {"is_binding": "is_binding"},
-                                              "separator": "\t", "region_type": "FULL_SEQUENCE"}, "mini_mason_dataset")
+        dataset = self.construct_test_sequencedataset(path)
 
         encoder = OneHotEncoder.build_object(dataset, **{"use_positional_info": False, "distance_to_seq_middle": None, "flatten": True})
 
         encoded_data = encoder.encode(dataset, EncoderParams(
             result_path=path,
-            label_config=LabelConfiguration([Label(name="is_binding", values=["1", "0"], positive_class="1")]),
+            label_config=LabelConfiguration([Label(name="l1", values=[1, 0], positive_class="1")]),
             pool_size=1,
             learn_model=True,
             model={},
@@ -222,5 +243,15 @@ ATATAT	0"""
         self.assertListEqual(list(encoded_data.encoded_data.examples[0]), onehot_a+onehot_a+onehot_a+onehot_t+onehot_t+onehot_t)
         self.assertListEqual(list(encoded_data.encoded_data.examples[1]), onehot_a+onehot_t+onehot_a+onehot_t+onehot_a+onehot_t)
 
+        self.assertListEqual(list(encoded_data.encoded_data.feature_names), [f"{pos}_{char}" for pos in range(6) for char in EnvironmentSettings.get_sequence_alphabet()])
         shutil.rmtree(path)  # todo add test flattened + positional?
+
+    def test_sequence_flattened(self):
+        path = EnvironmentSettings.root_path + "test/tmp/onehot_recep_flat/"
+
+        PathBuilder.build(path)
+
+        dataset = self.construct_test_receptordataset(path)
+
+        pass
 

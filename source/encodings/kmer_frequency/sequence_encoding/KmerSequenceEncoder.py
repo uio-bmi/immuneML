@@ -21,11 +21,12 @@ class KmerSequenceEncoder(SequenceEncodingStrategy):
         k = params.model["k"]
         length = len(sequence.get_sequence())
 
-        if sequence.metadata is not None and sequence.metadata.frame_type != SequenceFrameType.IN:
-            warnings.warn('KmerSequenceEncoder: Sequence either has out or stop codon.')
+        if sequence.metadata is not None and sequence.metadata.frame_type in (SequenceFrameType.STOP, SequenceFrameType.OUT):
+            warnings.warn('KmerSequenceEncoder: Sequence either is out of frame or contains stop codon. Ignoring sequence...')
+            return None
 
         if length < k:
-            warnings.warn('KmerSequenceEncoder: Sequence length is less than k. Ignoring sequence')
+            warnings.warn('KmerSequenceEncoder: Sequence length is less than k. Ignoring sequence...')
             return None
 
         kmers = KmerHelper.create_kmers_from_sequence(sequence, k)
