@@ -9,7 +9,7 @@ from source.encodings.onehot.OneHotEncoder import OneHotEncoder
 class OneHotReceptorEncoder(OneHotEncoder):
     """
     One-hot encoded repertoire data is represented in a matrix with dimensions:
-        [receptors, chains, one_hot_characters, sequence_lengths]
+        [receptors, chains, sequence_lengths, one_hot_characters]
 
     when use_positional_info is true, the last 3 indices in one_hot_characters represents the positional information:
         - start position (high when close to start)
