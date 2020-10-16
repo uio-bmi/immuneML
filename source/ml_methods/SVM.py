@@ -11,6 +11,9 @@ class SVM(SklearnMethod):
     For usage and specification, check :py:obj:`~source.ml_methods.SklearnMethod.SklearnMethod`.
     For valid parameters, see `scikit-learn documentation <https://scikit-learn.org/stable/modules/generated/sklearn.svm.LinearSVC.html>`_.
 
+    If you are interested in plotting the coefficients of the SVM model,
+    consider running the :py:obj:`~source.reports.ml_reports.Coefficients.Coefficients` report.
+
     YAML specification:
 
     .. indent with spaces

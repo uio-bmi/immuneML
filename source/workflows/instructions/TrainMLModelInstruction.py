@@ -26,6 +26,10 @@ class TrainMLModelInstruction(Instruction):
 
     Optimal model chosen by the inner loop is then retrained on the whole training dataset in the outer loop.
 
+    Note: If you are interested in plotting the performance of all combinations of encodings and ML methods on the test set,
+    consider running the MLSettingsPerformance report as hyperparameter report in the assessment loop.
+
+
     Arguments:
 
         dataset (Dataset): dataset to use for training and assessing the classifier
