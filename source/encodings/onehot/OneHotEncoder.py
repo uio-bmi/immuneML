@@ -34,6 +34,9 @@ class OneHotEncoder(DatasetEncoder):
         When using nucleotide sequences: note that the distance is measured in (amino acid) IMGT positions.
 
         flatten (bool): whether to flatten the final onehot matrix to a 2-dimensional matrix [examples, other_dims_combined]
+        This must be set to True when using onehot encoding in combination with scikit-learn ML methods (inheriting :py:obj:`~source.ml_methods.SklearnMethod.SklearnMethod`),
+        such as :py:obj:`~source.ml_methods.SimpleLogisticRegression.SimpleLogisticRegression`,
+        :py:obj:`~source.ml_methods.SVM.SVM`, :py:obj:`~source.ml_methods.RandomForestClassifier.RandomForestClassifier` and :py:obj:`~source.ml_methods.KNN.KNN`.
 
 
     YAML specification:
