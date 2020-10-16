@@ -8,6 +8,7 @@ from source.data_model.receptor.receptor_sequence.SequenceMetadata import Sequen
 from source.encodings.EncoderParams import EncoderParams
 from source.encodings.onehot.OneHotEncoder import OneHotEncoder
 from source.environment.EnvironmentSettings import EnvironmentSettings
+from source.environment.Label import Label
 from source.environment.LabelConfiguration import LabelConfiguration
 from source.util.PathBuilder import PathBuilder
 
@@ -39,7 +40,8 @@ class TestOneHotSequenceEncoder(TestCase):
         dataset, lc = self._construct_test_dataset(path)
 
         encoder = OneHotEncoder.build_object(dataset, **{"use_positional_info": False,
-                                                         "distance_to_seq_middle": 6})
+                                                         "distance_to_seq_middle": None,
+                                                         "flatten": False})
 
         encoded_data = encoder.encode(dataset, EncoderParams(
             result_path=f"{path}encoded/",
@@ -65,3 +67,52 @@ class TestOneHotSequenceEncoder(TestCase):
                               "l2": [receptor_seq.get_attribute("l2") for receptor_seq in dataset.get_data()]})
 
         shutil.rmtree(path)
+
+    def construct_test_flatten_dataset(self, path):
+        sequences = [ReceptorSequence(amino_acid_sequence="AAATTT", identifier="1", metadata=SequenceMetadata(custom_params={"l1": 1})),
+                     ReceptorSequence(amino_acid_sequence="ATATAT", identifier="2", metadata=SequenceMetadata(custom_params={"l1": 2}))]
+
+        PathBuilder.build(path)
+        filename = "{}sequences.pkl".format(path)
+        with open(filename, "wb") as file:
+            pickle.dump(sequences, file)
+
+        lc = LabelConfiguration()
+        lc.add_label("l1", [1, 2])
+
+        return SequenceDataset(params={"l1": [1, 2]}, filenames=[filename], identifier="d1")
+
+
+
+
+    def test_sequence_flattened(self):
+        path = EnvironmentSettings.root_path + "test/tmp/onehot_seq_flat/"
+
+        PathBuilder.build(path)
+
+        dataset = self.construct_test_flatten_dataset(path)
+
+        encoder = OneHotEncoder.build_object(dataset, **{"use_positional_info": False, "distance_to_seq_middle": None, "flatten": True})
+
+        encoded_data = encoder.encode(dataset, EncoderParams(
+            result_path=path,
+            label_config=LabelConfiguration([Label(name="l1", values=[1, 0], positive_class="1")]),
+            pool_size=1,
+            learn_model=True,
+            model={},
+            filename="dataset.pkl"
+        ))
+
+        self.assertTrue(isinstance(encoded_data, SequenceDataset))
+
+        onehot_a = [1.0] + [0.0] * 19
+        onehot_t = [0.0] * 16 + [1.0] + [0] * 3
+
+        self.assertListEqual(list(encoded_data.encoded_data.examples[0]), onehot_a+onehot_a+onehot_a+onehot_t+onehot_t+onehot_t)
+        self.assertListEqual(list(encoded_data.encoded_data.examples[1]), onehot_a+onehot_t+onehot_a+onehot_t+onehot_a+onehot_t)
+
+        self.assertListEqual(list(encoded_data.encoded_data.feature_names), [f"{pos}_{char}" for pos in range(6) for char in EnvironmentSettings.get_sequence_alphabet()])
+        shutil.rmtree(path)
+
+
+
