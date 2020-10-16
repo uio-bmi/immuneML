@@ -3,7 +3,6 @@ import pickle
 import shutil
 import unittest
 
-from source.IO.dataset_import.GenericImport import GenericImport
 from source.caching.CacheType import CacheType
 from source.data_model.dataset.ReceptorDataset import ReceptorDataset
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
@@ -207,9 +206,13 @@ class TestOneHotEncoder(unittest.TestCase):
 
     def construct_test_receptordataset(self, path):
         receptors = [TCABReceptor(alpha=ReceptorSequence(amino_acid_sequence="AAATTT", identifier="1a"),
-                     beta=ReceptorSequence(amino_acid_sequence="ATATAT", identifier="1b"),
-                     metadata={"l1": 1},
-                     identifier="1"),
+                                  beta=ReceptorSequence(amino_acid_sequence="ATATAT", identifier="1b"),
+                                  metadata={"l1": 1},
+                                  identifier="1"),
+                     TCABReceptor(alpha=ReceptorSequence(amino_acid_sequence="AAAAAA", identifier="2a"),
+                                  beta=ReceptorSequence(amino_acid_sequence="AAAAAA", identifier="2b"),
+                                  metadata={"l1": 2},
+                                  identifier="2"),
                      TCABReceptor(alpha=ReceptorSequence(amino_acid_sequence="AAAAAA", identifier="2a"),
                                   beta=ReceptorSequence(amino_acid_sequence="AAAAAA", identifier="2b"),
                                   metadata={"l1": 2},
@@ -244,14 +247,70 @@ class TestOneHotEncoder(unittest.TestCase):
         self.assertListEqual(list(encoded_data.encoded_data.examples[1]), onehot_a+onehot_t+onehot_a+onehot_t+onehot_a+onehot_t)
 
         self.assertListEqual(list(encoded_data.encoded_data.feature_names), [f"{pos}_{char}" for pos in range(6) for char in EnvironmentSettings.get_sequence_alphabet()])
-        shutil.rmtree(path)  # todo add test flattened + positional?
+        shutil.rmtree(path)
 
-    def test_sequence_flattened(self):
+    def test_receptor_flattened(self):
         path = EnvironmentSettings.root_path + "test/tmp/onehot_recep_flat/"
 
         PathBuilder.build(path)
 
         dataset = self.construct_test_receptordataset(path)
 
-        pass
+        encoder = OneHotEncoder.build_object(dataset, **{"use_positional_info": False, "distance_to_seq_middle": None,
+                                                         "flatten": True})
 
+        encoded_data = encoder.encode(dataset, EncoderParams(
+            result_path=path,
+            label_config=LabelConfiguration([Label(name="l1", values=[1, 0], positive_class="1")]),
+            pool_size=1,
+            learn_model=True,
+            model={},
+            filename="dataset.pkl"
+        ))
+
+        self.assertTrue(isinstance(encoded_data, ReceptorDataset))
+
+        onehot_a = [1.0] + [0.0] * 19
+        onehot_t = [0.0] * 16 + [1.0] + [0] * 3
+
+        self.assertListEqual(list(encoded_data.encoded_data.examples[0]), onehot_a+onehot_a+onehot_a+onehot_t+onehot_t+onehot_t+onehot_a+onehot_t+onehot_a+onehot_t+onehot_a+onehot_t)
+        self.assertListEqual(list(encoded_data.encoded_data.examples[1]), onehot_a*12)
+        self.assertListEqual(list(encoded_data.encoded_data.examples[2]), onehot_a*12)
+
+        self.assertListEqual(list(encoded_data.encoded_data.feature_names), [f"{chain}_{pos}_{char}" for chain in ("alpha","beta") for pos in range(6) for char in EnvironmentSettings.get_sequence_alphabet()])
+
+        shutil.rmtree(path)
+
+
+    def test_repertoire_flattened(self):
+        path = EnvironmentSettings.root_path + "test/tmp/onehot_recep_flat/"
+
+        PathBuilder.build(path)
+
+        dataset, lc = self._construct_test_repertoiredataset(path, positional=False)
+
+        encoder = OneHotEncoder.build_object(dataset, **{"use_positional_info": False, "distance_to_seq_middle": None,
+                                                         "flatten": True})
+
+        encoded_data = encoder.encode(dataset, EncoderParams(
+            result_path=path,
+            label_config=lc,
+            pool_size=1,
+            learn_model=True,
+            model={},
+            filename="dataset.pkl"
+        ))
+
+        self.assertTrue(isinstance(encoded_data, RepertoireDataset))
+
+        onehot_a = [1.0] + [0.0] * 19
+        onehot_t = [0.0] * 16 + [1.0] + [0] * 3
+        onehot_empty = [0] * 20
+
+
+        self.assertListEqual(list(encoded_data.encoded_data.examples[0]), onehot_a+onehot_a+onehot_a+onehot_a+onehot_a+onehot_t+onehot_a+onehot_empty+onehot_a+onehot_t+onehot_a+onehot_empty)
+        self.assertListEqual(list(encoded_data.encoded_data.examples[1]), onehot_a+onehot_t+onehot_a+onehot_empty+onehot_t+onehot_a+onehot_a+onehot_empty+onehot_empty+onehot_empty+onehot_empty+onehot_empty)
+
+        self.assertListEqual(list(encoded_data.encoded_data.feature_names), [f"{seq}_{pos}_{char}" for seq in range(3) for pos in range(4) for char in EnvironmentSettings.get_sequence_alphabet()])
+
+        shutil.rmtree(path)
