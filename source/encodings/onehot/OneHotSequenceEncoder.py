@@ -37,12 +37,23 @@ class OneHotSequenceEncoder(OneHotEncoder):
 
         examples = self._encode_sequence_list(sequences, pad_n_sequences=len(sequence_objs), pad_sequence_len=max_seq_len)
 
+        feature_names = self._get_feature_names(max_seq_len)
+
+        if self.flatten:
+            examples = examples.reshape((len(sequence_objs), max_seq_len*len(self.onehot_dimensions)))
+            feature_names = [item for sublist in feature_names for item in sublist]
+
         encoded_data = EncodedData(examples=examples,
                                    labels=labels,
                                    example_ids=example_ids,
+                                   feature_names=feature_names,
                                    encoding=OneHotEncoder.__name__)
 
         return encoded_data
+
+    def _get_feature_names(self, max_seq_len):
+        return [[f"{pos}_{dim}" for dim in self.onehot_dimensions] for pos in range(max_seq_len)]
+
 
     def _get_labels(self, sequence_objs, params: EncoderParams):
         label_names = params.label_config.get_labels_by_name()

@@ -2,8 +2,10 @@ import os
 import shutil
 import unittest
 
+from source.IO.dataset_import.GenericImport import GenericImport
 from source.caching.CacheType import CacheType
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
+from source.data_model.dataset.SequenceDataset import SequenceDataset
 from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.data_model.receptor.receptor_sequence.ReceptorSequenceList import ReceptorSequenceList
 from source.data_model.repertoire.Repertoire import Repertoire
@@ -11,6 +13,7 @@ from source.encodings.EncoderParams import EncoderParams
 from source.encodings.onehot.OneHotEncoder import OneHotEncoder
 from source.environment.Constants import Constants
 from source.environment.EnvironmentSettings import EnvironmentSettings
+from source.environment.Label import Label
 from source.environment.LabelConfiguration import LabelConfiguration
 from source.util.PathBuilder import PathBuilder
 
@@ -56,7 +59,8 @@ class TestOneHotEncoder(unittest.TestCase):
         dataset, lc = self._construct_test_dataset(path, positional=False)
 
         encoder = OneHotEncoder.build_object(dataset, **{"use_positional_info": False,
-                                                         "distance_to_seq_middle": 6})
+                                                         "distance_to_seq_middle": 6,
+                                                         "flatten": False})
 
         encoded_data = encoder.encode(dataset, EncoderParams(
             result_path=path,
@@ -100,7 +104,8 @@ class TestOneHotEncoder(unittest.TestCase):
         dataset, lc = self._construct_test_dataset(path, positional=True)
 
         encoder = OneHotEncoder.build_object(dataset, **{"use_positional_info": True,
-                                                         "distance_to_seq_middle": 6})
+                                                         "distance_to_seq_middle": 6,
+                                                         "flatten": False})
 
         encoded_data = encoder.encode(dataset, EncoderParams(
             result_path=path,
@@ -160,7 +165,8 @@ class TestOneHotEncoder(unittest.TestCase):
         PathBuilder.build(path)
 
         encoder = OneHotEncoder.build_object(RepertoireDataset(), **{"use_positional_info": True,
-                                                                     "distance_to_seq_middle": 4})
+                                                                     "distance_to_seq_middle": 4,
+                                                                     "flatten": False})
 
         # testing positional information for 'middle' (idx = 0) section
         self.assertListEqual(list(encoder._get_imgt_position_weights(9)[1]), [0, 1 / 4, 2 / 4, 3 / 4, 1, 3 / 4, 2 / 4, 1 / 4, 0])
@@ -177,3 +183,44 @@ class TestOneHotEncoder(unittest.TestCase):
         self.assertListEqual(list(encoder._get_imgt_position_weights(3, 6)[2]), [2 / 4, 3 / 4, 1, 0, 0, 0])
 
         shutil.rmtree(path)
+
+
+    def test_sequence_flattened(self):
+        path = EnvironmentSettings.root_path + "test/tmp/onehot_imgt/"
+
+        PathBuilder.build(path)
+
+        file_content = """sequence_aas	is_binding
+AAATTT	1
+ATATAT	0"""
+        path = EnvironmentSettings.root_path + "test/tmp/iovdjdb/"
+        PathBuilder.build(path)
+
+        with open(path + "receptors.tsv", "w") as file:
+            file.writelines(file_content)
+
+        dataset = GenericImport.import_dataset({"is_repertoire": False, "result_path": path, "paired": False, "path": path, "sequence_file_size": 1,
+                                              "column_mapping": None, "metadata_column_mapping": {"is_binding": "is_binding"},
+                                              "separator": "\t", "region_type": "FULL_SEQUENCE"}, "mini_mason_dataset")
+
+        encoder = OneHotEncoder.build_object(dataset, **{"use_positional_info": False, "distance_to_seq_middle": None, "flatten": True})
+
+        encoded_data = encoder.encode(dataset, EncoderParams(
+            result_path=path,
+            label_config=LabelConfiguration([Label(name="is_binding", values=["1", "0"], positive_class="1")]),
+            pool_size=1,
+            learn_model=True,
+            model={},
+            filename="dataset.pkl"
+        ))
+
+        self.assertTrue(isinstance(encoded_data, SequenceDataset))
+
+        onehot_a = [1.0] + [0.0] * 19
+        onehot_t = [0.0] * 16 + [1.0] + [0] * 3
+
+        self.assertListEqual(list(encoded_data.encoded_data.examples[0]), onehot_a+onehot_a+onehot_a+onehot_t+onehot_t+onehot_t)
+        self.assertListEqual(list(encoded_data.encoded_data.examples[1]), onehot_a+onehot_t+onehot_a+onehot_t+onehot_a+onehot_t)
+
+        shutil.rmtree(path)  # todo add test flattened + positional?
+
