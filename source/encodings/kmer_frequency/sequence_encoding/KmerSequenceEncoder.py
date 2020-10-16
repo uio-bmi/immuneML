@@ -22,11 +22,10 @@ class KmerSequenceEncoder(SequenceEncodingStrategy):
         length = len(sequence.get_sequence())
 
         if sequence.metadata is not None and sequence.metadata.frame_type != SequenceFrameType.IN:
-            warnings.warn('Sequence either has out or stop codon. Ignoring sequence.')
-            return None
+            warnings.warn('KmerSequenceEncoder: Sequence either has out or stop codon.')
 
         if length < k:
-            warnings.warn('Sequence length is less than k. Ignoring sequence')
+            warnings.warn('KmerSequenceEncoder: Sequence length is less than k. Ignoring sequence')
             return None
 
         kmers = KmerHelper.create_kmers_from_sequence(sequence, k)
