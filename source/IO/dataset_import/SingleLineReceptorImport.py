@@ -16,6 +16,7 @@ from source.data_model.receptor.RegionType import RegionType
 from source.data_model.receptor.receptor_sequence.Chain import Chain
 from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
+from source.util.ImportHelper import ImportHelper
 from source.util.PathBuilder import PathBuilder
 
 
@@ -109,7 +110,8 @@ class SingleLineReceptorImport(DataImport):
     @staticmethod
     def import_dataset(params, dataset_name: str) -> ReceptorDataset:
         generic_params = DatasetImportParams.build_object(**params)
-        filenames = SingleLineReceptorImport._extract_filenames(generic_params)
+
+        filenames = ImportHelper.get_sequence_filenames(generic_params.path, dataset_name)
 
         PathBuilder.build(generic_params.result_path, warn_if_exists=True)
 
@@ -161,20 +163,6 @@ class SingleLineReceptorImport(DataImport):
                                                                      ["v_gene", 'j_gene', "count", "identifier"] + chain_names)}))
 
         return ReceptorDataset.build(elements, generic_params.sequence_file_size, generic_params.result_path)
-
-    @staticmethod
-    def _extract_filenames(params: DatasetImportParams) -> List[str]:
-        if os.path.isdir(params.path):
-            filenames = list(glob.glob(params.path + "*.tsv" if params.separator == "\t" else "*.csv"))
-        elif os.path.isfile(params.path):
-            filenames = [params.path]
-        else:
-            raise ValueError(f"SingleLineReceptorImport: path '{params.path}' given in YAML specification is not a valid path to receptor files. "
-                             f"This parameter can either point to a single file with receptor data or to a directory where a list of receptor data "
-                             f"files are stored directly.")
-
-        logging.info(f"SingleLineReceptorImport: importing from receptor files: \n{str([os.path.basename(file) for file in filenames])[1:-1]}")
-        return filenames
 
     @staticmethod
     def get_documentation():

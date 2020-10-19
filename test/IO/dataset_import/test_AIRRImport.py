@@ -52,7 +52,7 @@ rep2.tsv,2""")
     def test_import_repertoire_dataset(self):
         path = EnvironmentSettings.root_path + "test/tmp/ioairr/"
         PathBuilder.build(path)
-        self.create_dummy_dataset(path, add_metadata=True)
+        self.create_dummy_dataset(path, True)
 
         column_mapping = self.get_column_mapping()
         params = {"is_repertoire": True, "result_path": path, "path": path, "metadata_file": path + "metadata.csv",
@@ -79,7 +79,7 @@ rep2.tsv,2""")
     def test_sequence_dataset(self):
         path = EnvironmentSettings.root_path + "test/tmp/ioairr/"
         PathBuilder.build(path)
-        self.create_dummy_dataset(path, add_metadata=False)
+        self.create_dummy_dataset(path, False)
 
         column_mapping = self.get_column_mapping()
         params = {"is_repertoire": False, "result_path": path, "path": path,

@@ -11,7 +11,7 @@ from source.util.ImportHelper import ImportHelper
 
 
 class TestImmunoSEQRearrangementImport(TestCase):
-    def build_dummy_dataset(self, path):
+    def build_dummy_dataset(self, path, add_metadata):
 
         rep1text = """rearrangement	amino_acid	frame_type	rearrangement_type	templates	reads	frequency	productive_frequency	cdr3_length	v_family	v_gene	v_allele	d_family	d_gene	d_allele	j_family	j_gene	j_allele	v_deletions	d5_deletions	d3_deletions	j_deletions	n2_insertions	n1_insertions	v_index	n1_index	n2_index	d_index	j_index	v_family_ties	v_gene_ties	v_allele_ties	d_family_ties	d_gene_ties	d_allele_ties	j_family_ties	j_gene_ties	j_allele_ties	sequence_tags	v_shm_count	v_shm_indexes	antibody	sample_name	species	locus	product_subtype	kit_pool	total_templates	productive_templates	outofframe_templates	stop_templates	dj_templates	total_rearrangements	productive_rearrangements	outofframe_rearrangements	stop_rearrangements	dj_rearrangements	total_reads	total_productive_reads	total_outofframe_reads	total_stop_reads	total_dj_reads	productive_clonality	productive_entropy	sample_clonality	sample_entropy	sample_amount_ng	sample_cells_mass_estimate	fraction_productive_of_cells_mass_estimate	sample_cells	fraction_productive_of_cells	max_productive_frequency	max_frequency	counting_method	primer_set	release_date	sample_tags	fraction_productive	order_name	kit_id	total_t_cells
 ACTCTGACTGTGAGCAACATGAGCCCTGAAGACAGCAGCATATATCTCTGCAGCGTTGAAGAATCCTACGAGCAGTACTTCGGGCCG	CSVEESYEQYF	In	VJ	10	311	7.66134773699554E-5	9.602057989637805E-5	33	TCRBV29	TCRBV29-01	01		unresolved		TCRBJ02	TCRBJ02-07	01	0	0	0	1	1	0	48	-1	62	-1	63										null	null	null	Vb 4	HIP00110	Human	TCRB	Deep	null	224859	179411	41463	3983	0	130940	104850	24105	1985	0	4059338	3238889	748535	71914	0	0.100719467	14.9981718	0.1101579	15.1260223	3636.47998	559458	0.3206871650776287	0	0.0	0.0137189021	0.0191940162	v2	Human-TCRB-PD1x	2013-12-13 22:23:05.529	Age:55 Years,Biological Sex:Male,Cohort:Cohort 01,Ethnic Group:Unknown Ethnicity,HLA MHC class I:HLA-A*03,HLA MHC class I:HLA-A*24,HLA MHC class I:HLA-B*07,Inferred CMV status (cross-validation): Inferred CMV -,Inferred CMV status: Inferred CMV -,Inferred HLA type:Inferred HLA-A*03,Inferred HLA type:Inferred HLA-A*24,Inferred HLA type:Inferred HLA-B*07,Racial Group:Unknown racial group,Species:Human,Tissue Source:gDNA,Tissue Source:PBMC,Tissue Source:Peripheral blood lymphocytes (PBL),Tissue Source:T cells,Virus Diseases:Cytomegalovirus -	0.7978822284186979	null	null	0
@@ -54,16 +54,17 @@ ACAGTGACCAGTGCCCATCCTGAAGACAGCAGCTTCTACATCTGCAGTGCTAGATCCACCTTAGAGTACGAGCAGTACTT
         with open(path + "rep2.tsv", "w") as file:
             file.writelines(rep2text)
 
-        with open(path + "metadata.csv", "w") as file:
-            file.writelines(
-                """filename,chain,subject_id,coeliac status (yes/no)
+        if add_metadata:
+            with open(path + "metadata.csv", "w") as file:
+                file.writelines(
+                    """filename,chain,subject_id,coeliac status (yes/no)
 rep1.tsv,TRA,1234,no
 rep2.tsv,TRB,1234a,no"""
             )
 
     def test_repertoire_import(self):
         path = EnvironmentSettings.root_path + "test/tmp/adaptive/"
-        self.build_dummy_dataset(path)
+        self.build_dummy_dataset(path, True)
 
         params = DefaultParamsLoader.load(EnvironmentSettings.default_params_path + "datasets/", "ImmunoSEQRearrangement")
         params["is_repertoire"] = True
@@ -101,7 +102,7 @@ rep2.tsv,TRB,1234a,no"""
 
     def test_sequence_import(self):
         path = EnvironmentSettings.root_path + "test/tmp/adaptive/"
-        self.build_dummy_dataset(path)
+        self.build_dummy_dataset(path, False)
 
         params = DefaultParamsLoader.load(EnvironmentSettings.default_params_path + "datasets/", "ImmunoSEQRearrangement")
         params["is_repertoire"] = False
