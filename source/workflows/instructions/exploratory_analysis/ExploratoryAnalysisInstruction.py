@@ -69,10 +69,10 @@ class ExploratoryAnalysisInstruction(Instruction):
         return self.state
 
     def run_unit(self, unit: ExploratoryAnalysisUnit, result_path: str) -> ReportResult:
-        unit.dataset = self.preprocess_dataset(unit, result_path)
-        encoded_dataset = self.encode(unit, result_path)
+        unit.dataset = self.preprocess_dataset(unit, result_path + "preprocessed_dataset/")
+        encoded_dataset = self.encode(unit, result_path + "encoded_dataset/")
         unit.report.dataset = encoded_dataset
-        unit.report.result_path = result_path
+        unit.report.result_path = result_path + "report/"
         report_result = unit.report.generate_report()
         return report_result
 

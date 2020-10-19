@@ -59,6 +59,6 @@ class TestExploratoryAnalysisDesignMatrixExporter(TestCase):
         process = ExploratoryAnalysisInstruction(units, name="exp")
         process.run(path + "results/")
 
-        self.assertTrue(os.path.isfile(path + "results/exp/analysis_named_analysis_4/design_matrix.csv"))
+        self.assertTrue(os.path.isfile(path + "results/exp/analysis_named_analysis_4/report/design_matrix.csv"))
 
         shutil.rmtree(path)
