@@ -6,6 +6,7 @@ from source.caching.CacheType import CacheType
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.receptor.receptor_sequence.Chain import Chain
 from source.encodings.EncoderParams import EncoderParams
+from source.encodings.reference_encoding.MatchedReceptorsEncoder import MatchedReceptorsEncoder
 from source.encodings.reference_encoding.MatchedReceptorsRepertoireEncoder import MatchedReceptorsRepertoireEncoder
 from source.environment.Constants import Constants
 from source.environment.EnvironmentSettings import EnvironmentSettings
@@ -60,7 +61,7 @@ TCR_AB	200	CCCC	TRAV1		TRAJ1	null	null	null	null	TTTT	TRBV1		TRBJ1	null	null	nul
         with open(path + "refs.tsv", "w") as file:
             file.writelines(file_content)
 
-        reference_receptors = {"path": path + "refs.tsv", "format": "IRIS"}
+        reference_receptors = {"params": {"path": path + "refs.tsv"}, "format": "IRIS"}
 
         return dataset, label_config, reference_receptors, labels
 
@@ -69,8 +70,8 @@ TCR_AB	200	CCCC	TRAV1		TRAJ1	null	null	null	null	TTTT	TRBV1		TRBJ1	null	null	nul
 
         dataset, label_config, reference_receptors, labels = self.create_dummy_data(path)
 
-        encoder = MatchedReceptorsRepertoireEncoder.build_object(dataset, **{
-            "reference_receptors": reference_receptors,
+        encoder = MatchedReceptorsEncoder.build_object(dataset, **{
+            "reference": reference_receptors,
             "max_edit_distances": 0
         })
 
@@ -103,4 +104,3 @@ TCR_AB	200	CCCC	TRAV1		TRAJ1	null	null	null	null	TTTT	TRBV1		TRBJ1	null	null	nul
         self.assertRaises(KeyError, encoder.encode, dataset, params)
 
         shutil.rmtree(path)
-

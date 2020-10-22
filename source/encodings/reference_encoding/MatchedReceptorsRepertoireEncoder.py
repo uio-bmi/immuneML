@@ -28,7 +28,7 @@ class MatchedReceptorsRepertoireEncoder(MatchedReceptorsEncoder):
             # feature_annotations contains a PD dataframe with sequence and VDJ gene usage per reference receptor
             feature_annotations=feature_annotations,
             labels=labels,
-            encoding=MatchedReceptorsRepertoireEncoder.__name__
+            encoding=MatchedReceptorsEncoder.__name__
         ))
 
         self.store(encoded_dataset, params)
@@ -108,6 +108,7 @@ class MatchedReceptorsRepertoireEncoder(MatchedReceptorsEncoder):
 
         return matches
 
+    # todo refactor: this functionality is obsolete due to SubjectRepertoireCollecter
     def _collapse_encoding_per_subject(self, encoded_repertories, labels):
         if not "subject_id" in labels.keys():
             raise KeyError("The label 'subject_id' must be specified in metadata")

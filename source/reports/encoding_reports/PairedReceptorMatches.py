@@ -14,26 +14,21 @@ from source.reports.encoding_reports.EncodingReport import EncodingReport
 from source.util.PathBuilder import PathBuilder
 
 
-class MatchedPairedReference(EncodingReport):
+class PairedReceptorMatches(EncodingReport):
     """
     Reports the number of matches between a dataset containing unpaired (single chain) immune receptor
     sequences, and a set of paired reference receptors.
     :py:obj:`~source.encodings.reference_encoding.MatchedReceptorsEncoder.MatchedReceptorsEncoder`
     must be used to encode the dataset.
-
-
-    YAML specification:
-
+    Specification:
     .. indent with spaces
     .. code-block:: yaml
-
-        my_mr_report: MatchedPairedReference
-
+        my_match_report: PairedReceptorMatches
     """
 
     @classmethod
     def build_object(cls, **kwargs):
-        return MatchedPairedReference(**kwargs)
+        return PairedReceptorMatches(**kwargs)
 
     def __init__(self, dataset: RepertoireDataset = None, result_path: str = None, name: str = None):
         super().__init__(name)
@@ -47,14 +42,14 @@ class MatchedPairedReference(EncodingReport):
         return self._write_reports()
 
     def _write_reports(self) -> ReportResult:
-        all_chains_table = self._write_results_table_all_chains()
+        all_chain_matches_table = self._write_match_table()
         paired_matches_list = self._write_paired_matches()
         receptor_info_list = self._write_receptor_info()
         repertoire_sizes = self._write_repertoire_sizes()
 
-        return ReportResult(self.name, output_tables=[all_chains_table, repertoire_sizes] + paired_matches_list + receptor_info_list)
+        return ReportResult(self.name, output_tables=[all_chain_matches_table, repertoire_sizes] + paired_matches_list + receptor_info_list)
 
-    def _write_results_table_all_chains(self):
+    def _write_match_table(self):
         id_df = pd.DataFrame({"repertoire_id": self.dataset.encoded_data.example_ids})
         label_df = pd.DataFrame(self.dataset.encoded_data.labels)
         matches_df = pd.DataFrame(self.dataset.encoded_data.examples, columns=self.dataset.encoded_data.feature_names)
@@ -62,7 +57,7 @@ class MatchedPairedReference(EncodingReport):
         result_path = os.path.join(self.result_path, "complete_match_count_table.csv")
         id_df.join(label_df).join(matches_df).to_csv(result_path, index=False)
 
-        return ReportOutput(result_path, "all chains table")
+        return ReportOutput(result_path, "All paired matches")
 
     def _write_paired_matches(self) -> List[ReportOutput]:
         report_outputs = []
@@ -159,8 +154,8 @@ class MatchedPairedReference(EncodingReport):
         return [ReportOutput(p) for p in [receptors_path, receptor_chains_path, unique_receptors_path, unique_alpha_path, unique_beta_path]]
 
     def check_prerequisites(self):
-        if "MatchedReceptorsRepertoireEncoder" != self.dataset.encoded_data.encoding:
-            warnings.warn("Encoding is not compatible with the report type. MatchedPairedReference report will not be created.")
+        if "MatchedReceptorsEncoder" != self.dataset.encoded_data.encoding:
+            warnings.warn("Encoding is not compatible with the report type. PairedReceptorMatches report will not be created.")
             return False
         else:
             return True

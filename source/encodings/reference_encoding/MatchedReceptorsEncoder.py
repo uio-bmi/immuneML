@@ -1,20 +1,14 @@
 import abc
-import os
 from typing import List
 
-from source.IO.dataset_import.DatasetImportParams import DatasetImportParams
-from source.IO.dataset_import.IRISImportParams import IRISImportParams
-from source.IO.dataset_import.IRISSequenceImport import IRISSequenceImport
 from source.caching.CacheHandler import CacheHandler
 from source.data_model.receptor.BCReceptor import BCReceptor
 from source.data_model.receptor.Receptor import Receptor
 from source.data_model.receptor.TCABReceptor import TCABReceptor
 from source.data_model.receptor.TCGDReceptor import TCGDReceptor
-from source.dsl.DefaultParamsLoader import DefaultParamsLoader
 from source.encodings.DatasetEncoder import DatasetEncoder
 from source.encodings.EncoderParams import EncoderParams
-from source.environment.EnvironmentSettings import EnvironmentSettings
-from source.util.ImportHelper import ImportHelper
+from source.encodings.reference_encoding.MatchedReferenceUtil import MatchedReferenceUtil
 from source.util.ParameterValidator import ParameterValidator
 from source.util.ReflectionHandler import ReflectionHandler
 
@@ -24,14 +18,14 @@ class MatchedReceptorsEncoder(DatasetEncoder):
     Encodes the dataset based on the matches between a dataset containing unpaired (single chain) data,
     and a paired reference receptor dataset.
     For each paired reference receptor, the frequency of either chain in the dataset is counted.
-    This encoding can be used in combination with the :py:obj:`~source.reports.encoding_reports.MatchedPairedReference.MatchedPairedReference`
+    This encoding can be used in combination with the :py:obj:`~source.reports.encoding_reports.Matches.Matches`
     report.
-
 
     Arguments:
 
-        reference_receptors (dict): A dictionary describing the reference dataset file.
-        See the :py:mod:`source.IO.sequence_import` for YAML specification details.
+        reference (dict): A dictionary describing the reference dataset file.
+        See the :py:mod:`source.IO.sequence_import` for specification details.
+        Must contain paired receptor sequences.
 
         max_edit_distances (dict): A dictionary specifying the maximum edit distance between a target sequence
         (from the repertoire) and the reference sequence. A maximum distance can be specified per chain, for example
@@ -39,14 +33,14 @@ class MatchedReceptorsEncoder(DatasetEncoder):
         this distance is applied to all possible chains.
 
 
-    YAML specification:
+    YAML Specification:
 
     .. indent with spaces
     .. code-block:: yaml
 
         my_mr_encoding:
             MatchedReceptors:
-                reference_receptors:
+                reference:
                     path: /path/to/file.txt
                     format: IRIS
                     params:
@@ -56,7 +50,6 @@ class MatchedReceptorsEncoder(DatasetEncoder):
                 max_edit_distances:
                     alpha: 1
                     beta: 0
-
     """
 
     dataset_mapping = {
@@ -69,7 +62,7 @@ class MatchedReceptorsEncoder(DatasetEncoder):
         self.name = name
 
     @staticmethod
-    def _prepare_parameters(reference_receptors: dict, max_edit_distances: dict):
+    def _prepare_parameters(reference: dict, max_edit_distances: dict, name: str = None):
         location = "MatchedReceptorsEncoder"
 
         legal_chains = [chain for receptor in (TCABReceptor(), TCGDReceptor(), BCReceptor()) for chain in receptor.get_chains()]
@@ -81,40 +74,12 @@ class MatchedReceptorsEncoder(DatasetEncoder):
         else:
             ParameterValidator.assert_type_and_value(max_edit_distances, dict, location, 'max_edit_distances')
 
-        ParameterValidator.assert_keys(list(reference_receptors.keys()), ["format", "path", "params"], location, "reference_receptors", exclusive=False)
-
-        assert os.path.isfile(reference_receptors["path"]), f"{location}: the file {reference_receptors['path']} does not exist. " \
-                                                            f"Specify the correct path under reference_receptors."
-
-        format_str = reference_receptors["format"]
-
-        # todo -> refactoring this part to something nicer is currently on another branch, this code is ugly but at least works for now...
-
-        if format_str == "IRIS":
-            seq_import_params = reference_receptors["params"] if "params" in reference_receptors else {}
-
-            if "paired" in seq_import_params:
-                assert seq_import_params["paired"] is True, f"{location}: paired must be True for SequenceImport"
-            else:
-                seq_import_params["paired"] = True
-
-            receptors = IRISSequenceImport.import_items(reference_receptors["path"], **seq_import_params)
-        else:
-            import_class = ReflectionHandler.get_class_by_name("{}Import".format(format_str))
-            params = DefaultParamsLoader.load(EnvironmentSettings.default_params_path + "datasets/",
-                                              DefaultParamsLoader._convert_to_snake_case(format_str))
-            if "params" in reference_receptors:
-                for key, value in reference_receptors["params"].items():
-                    params[key] = value
-            params["paired"] = False
-            params["is_repertoire"] = False
-            processed_params = DatasetImportParams.build_object(**params)
-
-            receptors = ImportHelper.import_items(import_class, reference_receptors["path"], processed_params)
+        reference_receptors = MatchedReferenceUtil.prepare_reference_parameters(reference, location=location, paired=True)
 
         return {
-            "reference_receptors": receptors,
-            "max_edit_distances": max_edit_distances
+            "reference_receptors": reference_receptors,
+            "max_edit_distances": max_edit_distances,
+            "name": name
         }
 
     @staticmethod
