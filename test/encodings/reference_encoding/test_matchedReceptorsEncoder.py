@@ -81,11 +81,12 @@ TCR_AB	200	CCCC	TRAV1		TRAJ1	null	null	null	null	TTTT	TRBV1		TRBJ1	null	null	nul
             filename="dataset.csv"
         ))
 
-        expected_outcome = [[10, 10, 0, 0], [5, 5, 5, 5], [1, 1, 2, 2]]
+        expected_outcome = [[10, 0, 0, 0],[0, 10, 0, 0],[5, 0, 5, 0], [0, 5, 0, 5], [1, 1, 2, 2]]
         for index, row in enumerate(expected_outcome):
             self.assertListEqual(list(encoded.encoded_data.examples[index]), expected_outcome[index])
 
-        self.assertDictEqual(encoded.encoded_data.labels, {"label": ["yes", "no", "no"]})
+        self.assertDictEqual(encoded.encoded_data.labels, {"label": ["yes", "yes", "no", "no", "no"],
+                                                           "subject_id": ["subject_1", "subject_1", "subject_2", "subject_2", "subject_3"]})
         self.assertListEqual(encoded.encoded_data.feature_names, ["100-A0-B0.alpha", "100-A0-B0.beta", "200-A0-B0.alpha", "200-A0-B0.beta"])
 
         self.assertListEqual(list(encoded.encoded_data.feature_annotations.receptor_id), ["100-A0-B0", "100-A0-B0", "200-A0-B0", "200-A0-B0"])
@@ -94,13 +95,5 @@ TCR_AB	200	CCCC	TRAV1		TRAJ1	null	null	null	null	TTTT	TRBV1		TRBJ1	null	null	nul
         self.assertListEqual(list(encoded.encoded_data.feature_annotations.sequence), ["AAAA", "SSSS", "CCCC", "TTTT"])
         self.assertListEqual(list(encoded.encoded_data.feature_annotations.v_gene), ["V1" for i in range(4)])
         self.assertListEqual(list(encoded.encoded_data.feature_annotations.j_gene), ["J1" for i in range(4)])
-
-
-        # The label 'subject_id' must be specified, error if not specified
-        label_config = LabelConfiguration()
-        label_config.add_label("label", labels["label"])
-        params=EncoderParams(result_path=path, label_config=label_config, filename="dataset.csv")
-
-        self.assertRaises(KeyError, encoder.encode, dataset, params)
 
         shutil.rmtree(path)

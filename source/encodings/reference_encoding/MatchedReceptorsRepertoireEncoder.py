@@ -83,10 +83,7 @@ class MatchedReceptorsRepertoireEncoder(MatchedReceptorsEncoder):
                 for label in params.label_config.get_labels_by_name():
                     labels[label].append(repertoire.metadata[label])
 
-        if labels is not None:
-            return self._collapse_encoding_per_subject(encoded_repertories, labels)
-        else:
-            return encoded_repertories, labels, dataset.get_repertoire_ids()
+        return encoded_repertories, labels, dataset.get_repertoire_ids()
 
     def _match_repertoire_to_receptors(self, repertoire: Repertoire):
         matcher = SequenceMatcher()
@@ -108,28 +105,3 @@ class MatchedReceptorsRepertoireEncoder(MatchedReceptorsEncoder):
 
         return matches
 
-    # todo refactor: this functionality is obsolete due to SubjectRepertoireCollecter
-    def _collapse_encoding_per_subject(self, encoded_repertories, labels):
-        if not "subject_id" in labels.keys():
-            raise KeyError("The label 'subject_id' must be specified in metadata")
-
-        subject_ids = sorted(set(labels["subject_id"]))
-        ids_to_idx = {id: idx for idx, id in enumerate(subject_ids)}
-
-        encoded_subjects = np.zeros((len(subject_ids), encoded_repertories.shape[1]),
-                                       dtype=int)
-
-        for repertoire_idx in range(0, encoded_repertories.shape[0]):
-            subject_id = labels["subject_id"][repertoire_idx]
-            encoded_subjects[ids_to_idx[subject_id]] += encoded_repertories[repertoire_idx]
-
-        # Only save the first occurrence of the label (it is assumed labels will be the same within subjects)
-        subject_labels = {key: [] for key in labels.keys()}
-        for subject_id in subject_ids:
-            first_occurrence = labels["subject_id"].index(subject_id)
-            for key, value_list in labels.items():
-                subject_labels[key].append(value_list[first_occurrence])
-
-        example_ids = subject_labels.pop("subject_id")
-
-        return encoded_subjects, subject_labels, example_ids
