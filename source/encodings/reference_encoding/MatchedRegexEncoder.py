@@ -46,7 +46,8 @@ class MatchedRegexEncoder(DatasetEncoder):
         assert os.path.isfile(motif_filepath), f"MatchedRegexEncoder: the file {motif_filepath} does not exist. " \
                                                f"Specify the correct path under motif_filepath."
 
-        # todo test that correct headers in df
+        file_columns = list(pd.read_csv(motif_filepath, sep="\t", iterator=False, dtype=str, nrows=0).columns)
+        ParameterValidator.assert_all_in_valid_list(file_columns, ["id", "TRAV", "TRBV", "TRA_regex", "TRB_regex"], "MatchedRegexEncoder", "motif_filepath column names")
 
         return {
             "motif_filepath": motif_filepath,
