@@ -30,7 +30,7 @@ class DatasetGenerationInstruction(Instruction):
                 - my_generated_dataset
                 - my_dataset_from_adaptive
             export_formats: # list of formats to export the datasets to
-                - AIRR
+                - AIRR # only supported for RepertoireDatasets
                 - Pickle
 
     """
