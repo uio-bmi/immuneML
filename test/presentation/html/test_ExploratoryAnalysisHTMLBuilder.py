@@ -3,14 +3,11 @@ import shutil
 from unittest import TestCase
 
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
-from source.encodings.reference_encoding.ReferenceRepertoireEncoder import ReferenceRepertoireEncoder
-from source.encodings.reference_encoding.SequenceMatchingSummaryType import SequenceMatchingSummaryType
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.environment.LabelConfiguration import LabelConfiguration
 from source.preprocessing.SubjectRepertoireCollector import SubjectRepertoireCollector
 from source.presentation.html.ExploratoryAnalysisHTMLBuilder import ExploratoryAnalysisHTMLBuilder
 from source.reports.data_reports.SequenceLengthDistribution import SequenceLengthDistribution
-from source.reports.encoding_reports.MatchingSequenceDetails import MatchingSequenceDetails
 from source.util.PathBuilder import PathBuilder
 from source.util.RepertoireBuilder import RepertoireBuilder
 from source.workflows.instructions.exploratory_analysis.ExploratoryAnalysisInstruction import ExploratoryAnalysisInstruction
@@ -50,15 +47,7 @@ class TestExploratoryAnalysisHTMLBuilder(TestCase):
 
         units = {"named_analysis_1": ExploratoryAnalysisUnit(dataset=dataset, report=SequenceLengthDistribution(), batch_size=16),
                  "named_analysis_2": ExploratoryAnalysisUnit(dataset=dataset, report=SequenceLengthDistribution(),
-                                                             preprocessing_sequence=preproc_sequence),
-                 "named_analysis_3": ExploratoryAnalysisUnit(dataset=dataset,
-                                                             report=MatchingSequenceDetails.build_object(max_edit_distance=1,
-                                                                                                         reference_sequences=refs_dict),
-                                                             label_config=label_config,
-                                                             encoder=ReferenceRepertoireEncoder.build_object(dataset,
-                                                                                                             **{"max_edit_distance": 1,
-                                                                                                                "summary": SequenceMatchingSummaryType.COUNT.name,
-                                                                                                                "reference_sequences": refs_dict}))}
+                                                             preprocessing_sequence=preproc_sequence)}
 
         process = ExploratoryAnalysisInstruction(units)
         res = process.run(path + "results/")
