@@ -23,7 +23,6 @@ from source.util.PathBuilder import PathBuilder
 class AIRRExporter(DataExporter):
     """
     Exports a RepertoireDataset of Repertoires in AIRR format.
-    This exporter does not support Sequence- or ReceptorDatasets
 
     Things to note:
         - one filename_prefix is given, which is combined with the Repertoire identifiers
@@ -35,10 +34,6 @@ class AIRRExporter(DataExporter):
 
     @staticmethod
     def export(dataset: Dataset, path, region_type=RegionType.IMGT_CDR3):
-        # if not isinstance(dataset, RepertoireDataset):
-        #     raise ValueError(f"AIRRExporter: dataset {dataset.name} is a {type(dataset).__name__}, but only repertoire dataset export is currently "
-        #                     f"supported for AIRR format.")
-        # else:
         PathBuilder.build(path)
 
         if isinstance(dataset, RepertoireDataset):
