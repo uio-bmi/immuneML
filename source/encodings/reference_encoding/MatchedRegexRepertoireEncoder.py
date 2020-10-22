@@ -5,6 +5,7 @@ import datetime
 
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.encoded_data.EncodedData import EncodedData
+from source.data_model.receptor.receptor_sequence.Chain import Chain
 from source.data_model.repertoire.Repertoire import Repertoire
 from source.encodings.EncoderParams import EncoderParams
 from source.encodings.reference_encoding.MatchedRegexEncoder import MatchedRegexEncoder
@@ -42,18 +43,19 @@ class MatchedRegexRepertoireEncoder(MatchedRegexEncoder):
          - v_gene (if match_v_genes == True)
         only for the motifs for which a regex was specified
         """
-        features = {"receptor_id": [], "chain_id": [], "regex": []}
+        features = {"receptor_id": [], "chain_id": [], "chain": [], "regex": []}
 
         if self.match_v_genes:
             features["v_gene"] = []
 
         for index, row in self.regex_df.iterrows():
-            for chain_type in ("TRA", "TRB"):
+            for chain_type in ("TRA", "TRB"): # todo generalize to other chain types!
                 regex = row[f"{chain_type}_regex"]
 
                 if regex is not None:
                     features["receptor_id"].append(f"{row['id']}")
                     features["chain_id"].append(f"{row['id']}_{chain_type}")
+                    features["chain"].append(Chain.get_chain(chain_type).name.lower())
                     features["regex"].append(regex)
 
                     if self.match_v_genes:

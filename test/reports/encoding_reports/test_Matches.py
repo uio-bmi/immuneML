@@ -11,12 +11,12 @@ from source.data_model.encoded_data.EncodedData import EncodedData
 from source.data_model.receptor.receptor_sequence.Chain import Chain
 from source.encodings.EncoderParams import EncoderParams
 from source.encodings.reference_encoding.MatchedReceptorsEncoder import MatchedReceptorsEncoder
+from source.encodings.reference_encoding.MatchedRegexEncoder import MatchedRegexEncoder
 from source.encodings.reference_encoding.MatchedSequencesEncoder import MatchedSequencesEncoder
 from source.environment.Constants import Constants
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.environment.LabelConfiguration import LabelConfiguration
 from source.reports.encoding_reports.Matches import Matches
-from source.reports.encoding_reports.PairedReceptorMatches import PairedReceptorMatches
 from source.util.RepertoireBuilder import RepertoireBuilder
 
 
@@ -67,18 +67,6 @@ class TestMatches(unittest.TestCase):
             label_config=label_config,
             filename="dataset.csv"
         ))
-            # reference_sequences = {"params": {"path": path + "refs.tsv", "region_type": "FULL_SEQUENCE", "paired": False}, "format": "VDJdb"}
-            #
-            # encoder = MatchedSequencesEncoder.build_object(dataset, **{
-            #     "reference": reference_sequences,
-            #     "max_edit_distance": 0
-            # })
-            #
-            # encoded = encoder.encode(dataset, EncoderParams(
-            #     result_path=path,
-            #     label_config=label_config,
-            #     filename="dataset.csv"
-            # ))
 
         return encoded
 
@@ -200,5 +188,94 @@ class TestMatches(unittest.TestCase):
 
         self.assertListEqual(list(chains["sequence_id"]), [100, 101, 200])
         self.assertListEqual(list(unique_chains["sequence_id"]), [100, 200])
+
+        shutil.rmtree(path)
+
+
+    def create_encoded_matchedregex(self, path):
+        # Setting up dummy data
+        labels = {"subject_id": ["subject_1", "subject_2", "subject_3"],
+                  "label": ["yes", "no", "no"]}
+
+        metadata_alpha = {"v_gene": "V1", "j_gene": "J1", "chain": Chain.ALPHA.value}
+        metadata_beta = {"v_gene": "V1", "j_gene": "J1", "chain": Chain.BETA.value}
+
+        repertoires, metadata = RepertoireBuilder.build(
+            sequences=[["XXAGQXGSSNTGKLIXX", "XXAGQXGSSNTGKLIYY", "XXSAGQGETQYXX"],
+                       ["ASSXRXX"],
+                       ["XXIXXNDYKLSXX", "CCCC", "SSSS", "TTTT"]],
+            path=path, labels=labels,
+            seq_metadata=[[{**metadata_alpha, "count": 10, "v_gene": "TRAV35"},
+                           {**metadata_alpha, "count": 10},
+                           {**metadata_beta, "count": 10, "v_gene": "TRBV29-1"}],
+                          [{**metadata_beta, "count": 10, "v_gene": "TRBV7-3"}],
+                          [{**metadata_alpha, "count": 5, "v_gene": "TRAV26-2"},
+                           {**metadata_alpha, "count": 2},
+                           {**metadata_beta, "count": 1},
+                           {**metadata_beta, "count": 2}]],
+            subject_ids=labels["subject_id"])
+
+        dataset = RepertoireDataset(repertoires=repertoires)
+
+        label_config = LabelConfiguration()
+        label_config.add_label("subject_id", labels["subject_id"])
+        label_config.add_label("label", labels["label"])
+
+        file_content = """id	TRAV	TRBV	TRA_regex	TRB_regex
+1	TRAV35	TRBV29-1	AGQ.GSSNTGKLI	S[APGFTVML]GQGETQY
+2		TRBV7-3		ASS.R.*
+3	TRAV26-1		I..NDYKLS	
+4	TRAV26-2		I..NDYKLS	
+        """
+
+        filepath = path + "reference_motifs.tsv"
+        with open(filepath, "w") as file:
+            file.writelines(file_content)
+
+
+        encoder = MatchedRegexEncoder.build_object(dataset, **{
+            "motif_filepath": filepath,
+            "match_v_genes": False,
+            "sum_counts": True
+        })
+
+        encoded = encoder.encode(dataset, EncoderParams(
+            result_path=path,
+            label_config=label_config,
+            filename="dataset.csv"
+        ))
+
+        return encoded
+
+
+    def test_generate_for_matchedregex(self):
+        path = EnvironmentSettings.root_path + "test/tmp/regex_matches_report/"
+
+        encoded_data = self.create_encoded_matchedregex(path + "input_data/")
+
+        report = Matches(dataset=encoded_data, result_path=path + "report_results/")
+
+        self.assertTrue(report.check_prerequisites())
+        report.generate()
+
+        self.assertTrue(os.path.isfile(path + "report_results/complete_match_count_table.csv"))
+        self.assertTrue(os.path.isfile(path + "report_results/repertoire_sizes.csv"))
+
+        self.assertTrue(os.path.isdir(path + "report_results/paired_matches"))
+        self.assertTrue(os.path.isfile(path + "report_results/paired_matches/example_subject_1_label_yes_subject_id_subject_1.csv"))
+        self.assertTrue(os.path.isfile(path + "report_results/paired_matches/example_subject_2_label_no_subject_id_subject_2.csv"))
+        self.assertTrue(os.path.isfile(path + "report_results/paired_matches/example_subject_3_label_no_subject_id_subject_3.csv"))
+
+
+        matches = pd.read_csv(path + "report_results/complete_match_count_table.csv")
+        subj1_results = pd.read_csv(path + "report_results/paired_matches/example_subject_1_label_yes_subject_id_subject_1.csv")
+
+        self.assertListEqual(list(matches["1_TRA"]), [20, 0, 0])
+        self.assertListEqual(list(matches["1_TRB"]), [10, 0, 0])
+        self.assertListEqual(list(matches["2_TRB"]), [0, 10, 0])
+        self.assertListEqual(list(matches["3_TRA"]), [0, 0, 5])
+
+        self.assertListEqual(list(subj1_results["1_TRA"]), [20])
+        self.assertListEqual(list(subj1_results["1_TRB"]), [10])
 
         shutil.rmtree(path)

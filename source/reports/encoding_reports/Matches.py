@@ -45,29 +45,19 @@ class Matches(EncodingReport):
         return self._write_reports()
 
     def _write_reports(self) -> ReportResult:
-        all_chain_matches_table = self._write_match_table()
+        all_matches_table = self._write_match_table()
         repertoire_sizes = self._write_repertoire_sizes()
 
-        output_tables = [all_chain_matches_table, repertoire_sizes]
+        output_tables = [all_matches_table, repertoire_sizes]
 
-        if self.dataset.encoded_data.encoding == "MatchedReceptorsEncoder":
-            # todo put this in separate function
-            receptor_info_path = os.path.join(self.result_path, "receptor_info")
-            paired_matches_path = os.path.join(self.result_path, "paired_matches")
+        if self.dataset.encoded_data.encoding == "MatchedSequencesEncoder":
+            output_tables += self._write_sequence_info(self.result_path + "/sequence_info")
+        else:
+            # todo only write paired matches if multiple chains are present
+            output_tables += self._write_paired_matches(self.result_path + "/paired_matches")
 
-            receptor_info_list = self._write_receptor_info(receptor_info_path)
-            paired_matches_list = self._write_paired_matches(paired_matches_path)
-
-            output_tables += receptor_info_list + paired_matches_list
-        elif self.dataset.encoded_data.encoding == "MatchedSequencesEncoder":
-            sequence_info_path = os.path.join(self.result_path, "sequence_info")
-
-            sequence_info_list = self._write_sequence_info(sequence_info_path)
-            output_tables += sequence_info_list
-
-        elif self.dataset.encoded_data.encoding == "MatchedRegexEncoder":
-            pass
-
+            if self.dataset.encoded_data.encoding == "MatchedReceptorsEncoder":
+                output_tables += self._write_receptor_info(self.result_path + "/receptor_info")
 
         return ReportResult(self.name, output_tables=output_tables)
 
@@ -79,26 +69,29 @@ class Matches(EncodingReport):
         result_path = os.path.join(self.result_path, "complete_match_count_table.csv")
         id_df.join(label_df).join(matches_df).to_csv(result_path, index=False)
 
-        return ReportOutput(result_path, "All paired matches")
+        return ReportOutput(result_path, "All matches")
 
     def _write_paired_matches(self, paired_matches_path) -> List[ReportOutput]:
         PathBuilder.build(paired_matches_path)
 
         report_outputs = []
-        for i in range(0, len(self.dataset.encoded_data.example_ids)):
+        for i in range(0, len(self.dataset.encoded_data.example_ids)): # todo don't mention subject in the name twice
             filename = "example_{}_".format(self.dataset.encoded_data.example_ids[i])
             filename += "_".join(["{label}_{value}".format(label=label, value=values[i]) for
                                   label, values in self.dataset.encoded_data.labels.items()])
             filename += ".csv"
             filename = os.path.join(paired_matches_path, filename)
 
-            self._write_paired_matches_for_repertoire(self.dataset.encoded_data.examples[i],
-                                                      filename)
+            if self.dataset.encoded_data.encoding == "MatchedReceptorsEncoder":
+                self._write_paired_receptor_matches_for_repertoire(self.dataset.encoded_data.examples[i], filename)
+            elif self.dataset.encoded_data.encoding == "MatchedRegexEncoder":
+                self._write_paired_regex_matches_for_repertoire(self.dataset.encoded_data.examples[i], filename)
+
             report_outputs.append(ReportOutput(filename, f"example {self.dataset.encoded_data.example_ids[i]} paired matches"))
 
         return report_outputs
 
-    def _write_paired_matches_for_repertoire(self, matches, filename):
+    def _write_paired_receptor_matches_for_repertoire(self, matches, filename):
         match_identifiers = []
         match_values = []
 
@@ -111,6 +104,28 @@ class Matches(EncodingReport):
                 match_identifiers.append(self.dataset.encoded_data.feature_names[second_match_idx])
                 match_values.append(matches[first_match_idx])
                 match_values.append(matches[second_match_idx])
+
+        results_df = pd.DataFrame([match_values], columns=match_identifiers)
+        results_df.to_csv(filename, index=False)
+
+    def _write_paired_regex_matches_for_repertoire(self, matches, filename):
+        match_identifiers = []
+        match_values = []
+
+        annotation_df = self.dataset.encoded_data.feature_annotations
+
+        for receptor_id in sorted(set(annotation_df["receptor_id"])):
+            chain_ids = list(annotation_df.loc[annotation_df["receptor_id"] == receptor_id]["chain_id"])
+
+            if len(chain_ids) == 2:
+                first_match_idx = self.dataset.encoded_data.feature_names.index(chain_ids[0])
+                second_match_idx = self.dataset.encoded_data.feature_names.index(chain_ids[1])
+
+                if matches[first_match_idx] > 0 and matches[second_match_idx] > 0:
+                    match_identifiers.append(chain_ids[0])
+                    match_identifiers.append(chain_ids[1])
+                    match_values.append(matches[first_match_idx])
+                    match_values.append(matches[second_match_idx])
 
         results_df = pd.DataFrame([match_values], columns=match_identifiers)
         results_df.to_csv(filename, index=False)

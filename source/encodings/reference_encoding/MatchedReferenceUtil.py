@@ -42,6 +42,8 @@ class MatchedReferenceUtil:
                 params[key] = value
             params["paired"] = paired
 
+            # todo add test paired added, receptor_chains
+
             processed_params = DatasetImportParams.build_object(**params)
 
             receptors = ImportHelper.import_items(import_class, reference_params["params"]["path"], processed_params)
