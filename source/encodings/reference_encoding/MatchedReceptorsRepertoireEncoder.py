@@ -49,23 +49,32 @@ class MatchedReceptorsRepertoireEncoder(MatchedReceptorsEncoder):
         for i, receptor in enumerate(self.reference_receptors):
             id = receptor.identifier
             chain_names = receptor.get_chains()
-            clonotype_id = receptor.metadata["clonotype_id"]
             first_chain = receptor.get_chain(chain_names[0])
             second_chain = receptor.get_chain(chain_names[1])
 
+            clonotype_id = receptor.metadata["clonotype_id"] if "clonotype_id" in receptor.metadata else None
+
+            if first_chain.metadata.custom_params is not None:
+                first_dual_chain_id = first_chain.metadata.custom_params["dual_chain_id"] if "dual_chain_id" in first_chain.metadata.custom_params else None
+
+            if second_chain.metadata.custom_params is not None:
+                second_dual_chain_id = second_chain.metadata.custom_params["dual_chain_id"] if "dual_chain_id" in second_chain.metadata.custom_params else None
+
             features[i * 2] = [id, clonotype_id, chain_names[0],
-                               first_chain.metadata.custom_params["dual_chain_id"],
+                               first_dual_chain_id,
                                first_chain.amino_acid_sequence,
                                first_chain.metadata.v_gene,
                                first_chain.metadata.j_gene]
             features[i * 2 + 1] = [id, clonotype_id, chain_names[1],
-                                   second_chain.metadata.custom_params["dual_chain_id"],
+                                   second_dual_chain_id,
                                    second_chain.amino_acid_sequence,
                                    second_chain.metadata.v_gene,
                                    second_chain.metadata.j_gene]
 
         features = pd.DataFrame(features,
                                 columns=["receptor_id", "clonotype_id", "chain", "dual_chain_id", "sequence", "v_gene", "j_gene"])
+
+        features.dropna(axis="columns", how="all", inplace=True)
 
         return features
 
