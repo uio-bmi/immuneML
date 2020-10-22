@@ -44,7 +44,7 @@ class MatchedReferenceUtil:
 
             processed_params = DatasetImportParams.build_object(**params)
 
-            receptors = ImportHelper.import_items(import_class, reference_params["path"], processed_params)
+            receptors = ImportHelper.import_items(import_class, reference_params["params"]["path"], processed_params)
 
 
 

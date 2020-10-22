@@ -60,12 +60,13 @@ class MatchedSequencesRepertoireEncoder(MatchedSequencesEncoder):
         encoded_repertories = np.zeros((dataset.get_example_count(),
                                         len(self.reference_sequences)),
                                        dtype=int)
-        labels = {label: [] for label in params["label_configuration"].get_labels_by_name()}
+
+        labels = {label: [] for label in params.label_config.get_labels_by_name()} if params.encode_labels else None
 
         for i, repertoire in enumerate(dataset.get_data()):
             encoded_repertories[i] = self._match_repertoire_to_reference(repertoire)
 
-            for label in params["label_configuration"].get_labels_by_name():
+            for label in params.label_config.get_labels_by_name():
                 labels[label].append(repertoire.metadata[label])
 
         return encoded_repertories, labels

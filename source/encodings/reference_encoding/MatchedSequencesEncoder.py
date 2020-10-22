@@ -39,7 +39,7 @@ class MatchedSequencesEncoder(DatasetEncoder):
     """
 
     dataset_mapping = {
-        "RepertoireDataset": "MatchedSequencesEncoder"
+        "RepertoireDataset": "MatchedSequencesRepertoireEncoder"
     }
 
     def __init__(self, max_edit_distance: int, reference_sequences: ReceptorSequenceList, name: str = None):
@@ -52,13 +52,11 @@ class MatchedSequencesEncoder(DatasetEncoder):
         location = "MatchedSequencesEncoder"
 
         ParameterValidator.assert_type_and_value(max_edit_distance, int, location, "max_edit_distance", min_inclusive=0)
-        # ParameterValidator.assert_in_valid_list(summary.upper(), [item.name for item in SequenceMatchingSummaryType], location, "summary")
 
         reference_sequences = MatchedReferenceUtil.prepare_reference_parameters(reference_params=reference, location=location, paired=False)
 
         return {
             "max_edit_distance": max_edit_distance,
-            # "summary": SequenceMatchingSummaryType[summary.upper()],
             "reference_sequences": reference_sequences,
             "name": name
         }
@@ -85,7 +83,6 @@ class MatchedSequencesEncoder(DatasetEncoder):
     def _prepare_caching_params(self, dataset, params: EncoderParams):
 
         encoding_params_desc = {"max_edit_distance": self.max_edit_distance,
-                                # "summary": self.summary,
                                 "reference_sequences": sorted([seq.get_sequence() + seq.metadata.v_gene + seq.metadata.j_gene
                                                                for seq in self.reference_sequences])}
 
