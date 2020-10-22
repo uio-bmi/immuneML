@@ -20,9 +20,6 @@ class Quickstart:
                         "format": "RandomRepertoireDataset",
                         "params": {
                             "labels": {"CD": {True: 0.5, False: 0.5}},
-                            "column_mapping": {
-                                "a": "b"
-                            }
                         }
                     }
                 },
