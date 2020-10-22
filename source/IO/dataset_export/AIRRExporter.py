@@ -118,7 +118,10 @@ class AIRRExporter(DataExporter):
     def _receptors_to_dataframe(receptors: List[Receptor], region_type):
         # for receptor in receptors:
 
-        pass
+        sequences = [(receptor.get_chain(receptor.get_chains()[0]), receptor.get_chain(receptor.get_chains()[1])) for receptor in receptors]
+        sequences = [item for sublist in sequences for item in sublist]
+
+        return AIRRExporter._sequences_to_dataframe(sequences, region_type)
 
     @staticmethod
     def _sequences_to_dataframe(sequences: List[ReceptorSequence], region_type):
