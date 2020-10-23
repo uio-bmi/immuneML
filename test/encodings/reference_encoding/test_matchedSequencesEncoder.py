@@ -48,9 +48,9 @@ class TestMatchedSequencesEncoder(TestCase):
         with open(path + "refs.tsv", "w") as file:
             file.writelines(file_content)
 
-        reference_receptors = {"params": {"path": path + "refs.tsv", "region_type": "FULL_SEQUENCE"}, "format": "VDJdb"}
+        reference_sequences = {"params": {"path": path + "refs.tsv", "region_type": "FULL_SEQUENCE"}, "format": "VDJdb"}
 
-        return dataset, label_config, reference_receptors, labels
+        return dataset, label_config, reference_sequences, labels
 
     def test__encode_new_dataset(self):
         path = EnvironmentSettings.root_path + "test/tmp/matched_receptors_encoder/"
