@@ -22,10 +22,11 @@ class Matches(EncodingReport):
     * :py:obj:`~source.encodings.reference_encoding.MatchedReceptorsEncoder.MatchedReceptorsEncoder`
     * :py:obj:`~source.encodings.reference_encoding.MatchedRegexEncoder.MatchedRegexEncoder`
 
-    The main report result is a table containing all matches, where the rows correspond to the Repertoires, and the
-    columns correspond to the objects to match (regular expressions or receptor sequences).
-    Additional report results are:
 
+    Report results are:
+
+    * A table containing all matches, where the rows correspond to the Repertoires, and the
+      columns correspond to the objects to match (regular expressions or receptor sequences).
     * The repertoire sizes (read frequencies and the number of unique sequences per repertoire), for each of the chains.
       This can be used to calculate the percentage of matched sequences in a repertoire.
     * When using :py:obj:`~source.encodings.reference_encoding.MatchedSequencesEncoder.MatchedSequencesEncoder` or
