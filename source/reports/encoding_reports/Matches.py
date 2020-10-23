@@ -53,8 +53,8 @@ class Matches(EncodingReport):
         if self.dataset.encoded_data.encoding == "MatchedSequencesEncoder":
             output_tables += self._write_sequence_info(self.result_path + "/sequence_info")
         else:
-            # todo only write paired matches if multiple chains are present
-            output_tables += self._write_paired_matches(self.result_path + "/paired_matches")
+            if len(self.dataset.encoded_data.feature_annotations["chain"].unique()) == 2:
+                output_tables += self._write_paired_matches(self.result_path + "/paired_matches")
 
             if self.dataset.encoded_data.encoding == "MatchedReceptorsEncoder":
                 output_tables += self._write_receptor_info(self.result_path + "/receptor_info")
