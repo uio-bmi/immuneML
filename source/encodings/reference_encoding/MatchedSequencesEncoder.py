@@ -54,7 +54,7 @@ class MatchedSequencesEncoder(DatasetEncoder):
 
         ParameterValidator.assert_type_and_value(max_edit_distance, int, location, "max_edit_distance", min_inclusive=0)
 
-        reference_sequences = MatchedReferenceUtil.prepare_reference_parameters(reference_params=reference, location=location, paired=False)
+        reference_sequences = MatchedReferenceUtil.prepare_reference(reference_params=reference, location=location, paired=False)
 
         return {
             "max_edit_distance": max_edit_distance,

@@ -24,7 +24,7 @@ class MatchedReceptorsEncoder(DatasetEncoder):
 
     Arguments:
 
-        reference (dict): A dictionary describing the reference dataset file.
+        reference (dict): A dictionary describing the reference dataset file, specified the same as regular data import.
         See the :py:mod:`source.IO.sequence_import` for specification details.
         Must contain paired receptor sequences.
 
@@ -42,9 +42,9 @@ class MatchedReceptorsEncoder(DatasetEncoder):
         my_mr_encoding:
             MatchedReceptors:
                 reference:
-                    path: /path/to/file.txt
                     format: IRIS
                     params:
+                        path: /path/to/file.txt
                         paired: True
                         all_dual_chains: True
                         all_genes: True
@@ -75,7 +75,7 @@ class MatchedReceptorsEncoder(DatasetEncoder):
         else:
             ParameterValidator.assert_type_and_value(max_edit_distances, dict, location, 'max_edit_distances')
 
-        reference_receptors = MatchedReferenceUtil.prepare_reference_parameters(reference, location=location, paired=True)
+        reference_receptors = MatchedReferenceUtil.prepare_reference(reference, location=location, paired=True)
 
         return {
             "reference_receptors": reference_receptors,
