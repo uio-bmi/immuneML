@@ -19,25 +19,25 @@ class GappedKmerInstantiation(MotifInstantiationStrategy):
         max_gap (int): The maximum gap length, in case the original seed contains a gap.
 
         hamming_distance_probabilities (dict): The probability of modifying the given seed with each
-            number of modifications. The keys represent the number of modifications (hamming distance)
-            between the original seed and the implanted motif, and the values represent the probabilities for
-            the respective number of modifications. For example {0: 0.7, 1: 0.3} means that 30% of the time one position
-            will be modified, and the remaining 70% of the time the motif will remain unmodified with respect
-            to the seed. The values of hamming_distance_probabilities must sum to 1.
+        number of modifications. The keys represent the number of modifications (hamming distance)
+        between the original seed and the implanted motif, and the values represent the probabilities for
+        the respective number of modifications. For example {0: 0.7, 1: 0.3} means that 30% of the time one position
+        will be modified, and the remaining 70% of the time the motif will remain unmodified with respect
+        to the seed. The values of hamming_distance_probabilities must sum to 1.
 
         position_weights (dict): A dictionary containing the relative probabilities of choosing
-            each position for hamming distance modification. The keys represent the position in the seed, where
-            counting starts at 0. If the index of a gap is specified in position_weights, it will be removed. The values
-            represent the relative probabilities for modifying each position when it gets selected for modification.
-            For example {0: 0.6, 1: 0, 2: 0.4} means that when a sequence is selected for a modification (as
-            specified in hamming_distance_probabilities), then 60% of the time the amino acid at index 0 is modified,
-            and the remaining 40% of the time the amino acid at index 2. If the values of position_weights do not sum
-            to 1, the remainder will be redistributed over all positions, including those not specified.
+        each position for hamming distance modification. The keys represent the position in the seed, where
+        counting starts at 0. If the index of a gap is specified in position_weights, it will be removed. The values
+        represent the relative probabilities for modifying each position when it gets selected for modification.
+        For example {0: 0.6, 1: 0, 2: 0.4} means that when a sequence is selected for a modification (as
+        specified in hamming_distance_probabilities), then 60% of the time the amino acid at index 0 is modified,
+        and the remaining 40% of the time the amino acid at index 2. If the values of position_weights do not sum
+        to 1, the remainder will be redistributed over all positions, including those not specified.
 
         alphabet_weights (dict): A dictionary describing the relative probabilities of choosing each amino acid
-            for hamming distance modification. The keys represent the amino acids and the values the relative
-            probabilities for choosing this amino acid. If the values of alphabet_weights do not sum to 1, the remainder
-            will be redistributed over all possible amino acids, including those not specified.
+        for hamming distance modification. The keys represent the amino acids and the values the relative
+        probabilities for choosing this amino acid. If the values of alphabet_weights do not sum to 1, the remainder
+        will be redistributed over all possible amino acids, including those not specified.
 
 
     YAML specification:

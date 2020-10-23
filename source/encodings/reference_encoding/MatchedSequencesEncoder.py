@@ -12,7 +12,8 @@ from source.util.ReflectionHandler import ReflectionHandler
 class MatchedSequencesEncoder(DatasetEncoder):
     """
     Encodes the dataset based on the matches between a RepertoireDataset and a reference sequence dataset.
-    This encoding can be used in combination with the :py:obj:`~source.reports.encoding_reports.SingleChainMatches.SingleChainMatches`
+
+    This encoding should be used in combination with the :py:obj:`~source.reports.encoding_reports.Matches.Matches`
     report.
 
 

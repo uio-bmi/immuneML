@@ -18,7 +18,8 @@ class MatchedReceptorsEncoder(DatasetEncoder):
     Encodes the dataset based on the matches between a dataset containing unpaired (single chain) data,
     and a paired reference receptor dataset.
     For each paired reference receptor, the frequency of either chain in the dataset is counted.
-    This encoding can be used in combination with the :py:obj:`~source.reports.encoding_reports.Matches.Matches`
+
+    This encoding should be used in combination with the :py:obj:`~source.reports.encoding_reports.Matches.Matches`
     report.
 
     Arguments:

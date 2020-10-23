@@ -2,6 +2,8 @@ import abc
 import os
 import pandas as pd
 import numpy as np
+
+from scripts.specification_util import update_docs_per_mapping
 from source.caching.CacheHandler import CacheHandler
 from source.data_model.receptor.receptor_sequence.Chain import Chain
 from source.encodings.DatasetEncoder import DatasetEncoder
@@ -12,13 +14,59 @@ from source.util.ReflectionHandler import ReflectionHandler
 
 class MatchedRegexEncoder(DatasetEncoder):
     """
-    todo fill in
+    Encodes the dataset based on the matches between a RepertoireDataset and a collection of regular expressions.
+    For each regular expression, the number of sequences in the RepertoireDataset containing the expression is counted.
+    This can also be used to count how often a subsequence occurs in a RepertoireDataset.
+
+    The regular expressions are defined per chain, and it is possible to require a V gene match in addition to the
+    CDR3 sequence containing the regular expression.
+
+    This encoding should be used in combination with the :py:obj:`~source.reports.encoding_reports.Matches.Matches`
+    report.
+
+
     Arguments:
-        motif_filepath (str): todo fill in
-        match_v_genes (bool): todo fill in
-    Specification:
+
+        match_v_genes (bool): Whether V gene matches are required. If this is True, a match is only counted if the
+        V gene matches the gene specified in the motif input file. By default match_v_genes is False.
+
+        sum_counts (bool): When counting the number of matches, one can choose to count the number of matching sequences
+        or sum the frequencies of those sequences. If sum_counts is True, the sequence frequencies are summed. Otherwise,
+        if sum_counts is False, the number of matching unique sequences is counted.
+
+        motif_filepath (str): The path to the motif input file. This should be a tab separated file containing a
+        column named 'id' and for every chain that should be matched a column containing the regex (<chain>_regex) and a column containing
+        the V gene (<chain>V) if match_v_genes is True.
+        The chains are specified by their three letter code, see :py:obj:`~source.data_model.receptor.receptor_sequence.Chain.Chain`.
+
+        In the simplest case, when counting the number of occurrences of a given list of k-mers in TRB sequences, the contents of the motif file could look like this:
+
+            ====  ==========
+            id    TRB_regex
+            ====  ==========
+            1     ACG
+            2     EDNA
+            3     DFWG
+            ====  ==========
+
+        It is also possible to test whether paired regular expressions occur in the dataset (for example: regular expressions
+        matching both a TRA chain and a TRB chain) by specifying them on the same line.
+        In a more complex case where both paired and unpaired regular expressions are specified, in addition to matching the V
+        genes, the contents of the motif file could look like this:
+
+            ====  ==========  =======  ==========  ========
+            id    TRA_regex   TRAV     TRB_regex   TRBV
+            ====  ==========  =======  ==========  ========
+            1     AGQ.GSS     TRAV35   S[APL]GQY   TRBV29-1
+            2                          ASS.R.*     TRBV7-3
+            ====  ==========  =======  ==========  ========
+
+
+    YAML Specification:
+
     .. indent with spaces
     .. code-block:: yaml
+
         my_mr_encoding:
             MatchedRegex:
                 motif_filepath: /path/to/file.txt
@@ -119,3 +167,19 @@ class MatchedRegexEncoder(DatasetEncoder):
                 self.feature_count += df[regex_colname].count()
 
         self.regex_df = df
+
+
+    @staticmethod
+    def get_documentation():
+        doc = str(MatchedRegexEncoder.__doc__)
+
+        chain_values = str([region_type.value for region_type in Chain])[1:-1].replace("'", "`")
+
+        mapping = {
+            "The chains are specified by their three letter code, see :py:obj:`~source.data_model.receptor.receptor_sequence.Chain.Chain`.": f"The chains are specified by their three letter code, valid values are: {chain_values}.",
+        }
+        doc = update_docs_per_mapping(doc, mapping)
+        return doc
+
+
+
