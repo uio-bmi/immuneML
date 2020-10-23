@@ -3,6 +3,7 @@ import os
 import pandas as pd
 import numpy as np
 from source.caching.CacheHandler import CacheHandler
+from source.data_model.receptor.receptor_sequence.Chain import Chain
 from source.encodings.DatasetEncoder import DatasetEncoder
 from source.encodings.EncoderParams import EncoderParams
 from source.util.ParameterValidator import ParameterValidator
@@ -29,10 +30,11 @@ class MatchedRegexEncoder(DatasetEncoder):
         "RepertoireDataset": "MatchedRegexRepertoireEncoder"
     }
 
-    def __init__(self, motif_filepath: str, match_v_genes: bool, sum_counts: bool, name: str = None):
+    def __init__(self, motif_filepath: str, match_v_genes: bool, sum_counts: bool, chains: list, name: str = None):
         self.motif_filepath = motif_filepath
         self.match_v_genes = match_v_genes
         self.sum_counts = sum_counts
+        self.chains = chains
         self.regex_df = None
         self.feature_count = None
         self.name = name
@@ -47,12 +49,20 @@ class MatchedRegexEncoder(DatasetEncoder):
                                                f"Specify the correct path under motif_filepath."
 
         file_columns = list(pd.read_csv(motif_filepath, sep="\t", iterator=False, dtype=str, nrows=0).columns)
-        ParameterValidator.assert_all_in_valid_list(file_columns, ["id", "TRAV", "TRBV", "TRA_regex", "TRB_regex"], "MatchedRegexEncoder", "motif_filepath column names")
+
+        ParameterValidator.assert_all_in_valid_list(file_columns, ["id"] + [f"{c.value}V" for c in Chain] + [f"{c.value}_regex" for c in Chain], "MatchedRegexEncoder", "motif_filepath (column names)")
+
+        chains = [colname.split("_")[0] for colname in file_columns if colname.endswith("_regex")]
+        if match_v_genes:
+            for chain in chains:
+                assert f"{chain}V" in file_columns, f"MatchedRegexEncoder: expected column {chain}V to be present in the columns of motif_filepath. " \
+                                                    f"Remove {chain}_regex from columns, or set match_v_genes to False."
 
         return {
             "motif_filepath": motif_filepath,
             "match_v_genes": match_v_genes,
             "sum_counts": sum_counts,
+            "chains": chains,
             "name": name
         }
 
@@ -88,11 +98,12 @@ class MatchedRegexEncoder(DatasetEncoder):
         pass
 
     def _load_regex_df(self):
-        # todo make column mapping more general later (work with BCR as well, etc)
         df = pd.read_csv(self.motif_filepath, sep="\t", iterator=False, dtype=str)
 
         if not self.match_v_genes:
-            df.drop(["TRAV", "TRBV"], axis=1, inplace=True)
+            for v_gene in [f"{c.value}V" for c in Chain]:
+                if v_gene in df.columns:
+                    df.drop(v_gene, axis=1, inplace=True)
 
         colnames_subset = list(df.columns)
         colnames_subset.remove("id")
@@ -100,6 +111,11 @@ class MatchedRegexEncoder(DatasetEncoder):
 
         df.replace({np.NaN: None}, inplace=True)
 
-        self.feature_count = df["TRA_regex"].count() + df["TRB_regex"].count()
+        self.feature_count = 0
+
+        for chain in Chain:
+            regex_colname = f"{chain.value}_regex"
+            if regex_colname in df.columns:
+                self.feature_count += df[regex_colname].count()
 
         self.regex_df = df

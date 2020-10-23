@@ -49,7 +49,7 @@ class MatchedRegexRepertoireEncoder(MatchedRegexEncoder):
             features["v_gene"] = []
 
         for index, row in self.regex_df.iterrows():
-            for chain_type in ("TRA", "TRB"): # todo generalize to other chain types!
+            for chain_type in self.chains: # todo generalize to other chain types!
                 regex = row[f"{chain_type}_regex"]
 
                 if regex is not None:
@@ -92,7 +92,7 @@ class MatchedRegexRepertoireEncoder(MatchedRegexEncoder):
 
 
         for index, row in self.regex_df.iterrows():
-            for chain_type in ("TRA", "TRB"):
+            for chain_type in self.chains:
                 regex = row[f"{chain_type}_regex"]
 
                 if regex is not None:

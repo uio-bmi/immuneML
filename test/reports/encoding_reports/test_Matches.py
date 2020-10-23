@@ -3,11 +3,9 @@ import shutil
 import unittest
 
 import pandas as pd
-import numpy as np
 
 from source.caching.CacheType import CacheType
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
-from source.data_model.encoded_data.EncodedData import EncodedData
 from source.data_model.receptor.receptor_sequence.Chain import Chain
 from source.encodings.EncoderParams import EncoderParams
 from source.encodings.reference_encoding.MatchedReceptorsEncoder import MatchedReceptorsEncoder

@@ -24,18 +24,18 @@ class TestMatchedReceptorsEncoder(TestCase):
         labels = {"subject_id": ["subject_1", "subject_2", "subject_3"],
                   "label": ["yes", "no", "no"]}
 
-        metadata_alpha = {"v_gene": "V1", "j_gene": "J1", "chain": Chain.ALPHA.value}
-        metadata_beta = {"v_gene": "V1", "j_gene": "J1", "chain": Chain.BETA.value}
+        metadata_alpha = {"v_gene": "V1", "j_gene": "J1", "chain": Chain.LIGHT.value}
+        metadata_beta = {"v_gene": "V1", "j_gene": "J1", "chain": Chain.HEAVY.value}
 
         repertoires, metadata = RepertoireBuilder.build(sequences=[["XXAGQXGSSNTGKLIXX", "XXAGQXGSSNTGKLIYY", "XXSAGQGETQYXX"],
                                                                    ["ASSXRXX"],
                                                                    ["XXIXXNDYKLSXX", "CCCC", "SSSS", "TTTT"]],
                                                         path=path, labels=labels,
-                                                        seq_metadata=[[{**metadata_alpha, "count": 10, "v_gene": "TRAV35"},
+                                                        seq_metadata=[[{**metadata_alpha, "count": 10, "v_gene": "IGLV35"},
                                                                        {**metadata_alpha, "count": 10},
-                                                                       {**metadata_beta, "count": 10, "v_gene": "TRBV29-1"}],
-                                                                      [{**metadata_beta, "count": 10, "v_gene": "TRBV7-3"}],
-                                                                      [{**metadata_alpha, "count": 5, "v_gene": "TRAV26-2"},
+                                                                       {**metadata_beta, "count": 10, "v_gene": "IGHV29-1"}],
+                                                                      [{**metadata_beta, "count": 10, "v_gene": "IGHV7-3"}],
+                                                                      [{**metadata_alpha, "count": 5, "v_gene": "IGLV26-2"},
                                                                        {**metadata_alpha, "count": 2},
                                                                        {**metadata_beta, "count": 1},
                                                                        {**metadata_beta, "count": 2}]],
@@ -47,11 +47,11 @@ class TestMatchedReceptorsEncoder(TestCase):
         label_config.add_label("subject_id", labels["subject_id"])
         label_config.add_label("label", labels["label"])
 
-        file_content = """id	TRAV	TRBV	TRA_regex	TRB_regex
-1	TRAV35	TRBV29-1	AGQ.GSSNTGKLI	S[APGFTVML]GQGETQY
-2		TRBV7-3		ASS.R.*
-3	TRAV26-1		I..NDYKLS	
-4	TRAV26-2		I..NDYKLS	
+        file_content = """id	IGLV	IGHV	IGL_regex	IGH_regex
+1	IGLV35	IGHV29-1	AGQ.GSSNTGKLI	S[APGFTVML]GQGETQY
+2		IGHV7-3		ASS.R.*
+3	IGLV26-1		I..NDYKLS	
+4	IGLV26-2		I..NDYKLS	
 """
 
         filepath = path + "reference_motifs.tsv"
@@ -83,7 +83,7 @@ class TestMatchedReceptorsEncoder(TestCase):
         for index, row in enumerate(expected_outcome):
             self.assertListEqual(list(encoded.encoded_data.examples[index]), expected_outcome[index])
 
-        self.assertListEqual(["1_TRA", "1_TRB", "2_TRB", "3_TRA"], encoded.encoded_data.feature_names)
+        self.assertListEqual(["1_IGL", "1_IGH", "2_IGH", "3_IGL"], encoded.encoded_data.feature_names)
         self.assertListEqual(["subject_1", "subject_2", "subject_3"], encoded.encoded_data.example_ids)
 
         shutil.rmtree(path)
@@ -112,7 +112,7 @@ class TestMatchedReceptorsEncoder(TestCase):
         for index, row in enumerate(expected_outcome):
             self.assertListEqual(list(encoded.encoded_data.examples[index]), expected_outcome[index])
 
-        self.assertListEqual(["1_TRA", "1_TRB", "2_TRB", "3_TRA"], encoded.encoded_data.feature_names)
+        self.assertListEqual(["1_IGL", "1_IGH", "2_IGH", "3_IGL"], encoded.encoded_data.feature_names)
         self.assertListEqual(["subject_1", "subject_2", "subject_3"], encoded.encoded_data.example_ids)
 
         shutil.rmtree(path)
@@ -141,7 +141,7 @@ class TestMatchedReceptorsEncoder(TestCase):
         for index, row in enumerate(expected_outcome):
             self.assertListEqual(list(encoded.encoded_data.examples[index]), expected_outcome[index])
 
-        self.assertListEqual(["1_TRA", "1_TRB", "2_TRB", "3_TRA", "4_TRA"], encoded.encoded_data.feature_names)
+        self.assertListEqual(["1_IGL", "1_IGH", "2_IGH", "3_IGL", "4_IGL"], encoded.encoded_data.feature_names)
         self.assertListEqual(["subject_1", "subject_2", "subject_3"], encoded.encoded_data.example_ids)
 
         shutil.rmtree(path)
