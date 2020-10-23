@@ -16,11 +16,23 @@ from source.util.PathBuilder import PathBuilder
 
 class Matches(EncodingReport):
     """
-    # Reports the number of matches between a dataset containing unpaired (single chain) immune receptor
-    # sequences, and a set of paired reference receptors.
-    # :py:obj:`~source.encodings.reference_encoding.MatchedReceptorsEncoder.MatchedReceptorsEncoder`
-    # must be used to encode the dataset.
-    todo rewrite this
+    Reports the number of matches that were found when using one of the following encoders:
+    * :py:obj:`~source.encodings.reference_encoding.MatchedSequencesEncoder.MatchedSequencesEncoder`
+    * :py:obj:`~source.encodings.reference_encoding.MatchedReceptorsEncoder.MatchedReceptorsEncoder`
+    * :py:obj:`~source.encodings.reference_encoding.MatchedRegexEncoder.MatchedRegexEncoder`
+
+    The main report result is a table containing all matches, where the rows correspond to the Repertoires, and the
+    columns correspond to the objects to match (regular expressions or receptor sequences).
+    Additional report results are:
+    * The repertoire sizes (read frequencies and the number of unique sequences per repertoire), for each of the chains.
+      This can be used to calculate the percentage of matched sequences in a repertoire.
+    * When using :py:obj:`~source.encodings.reference_encoding.MatchedSequencesEncoder.MatchedSequencesEncoder` or
+      :py:obj:`~source.encodings.reference_encoding.MatchedReceptorsEncoder.MatchedReceptorsEncoder`, tables describing
+      the chains and receptors (ids, chains, V and J genes and sequences).
+    * When using :py:obj:`~source.encodings.reference_encoding.MatchedReceptorsEncoder.MatchedReceptorsEncoder` or using
+      :py:obj:`~source.encodings.reference_encoding.MatchedRegexEncoder.MatchedRegexEncoder` with chain pairs, tables describing
+      the paired matches (where a match was found in both chains) per repertoire.
+
 
     YAML Specification:
 
