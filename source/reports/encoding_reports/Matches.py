@@ -17,6 +17,7 @@ from source.util.PathBuilder import PathBuilder
 class Matches(EncodingReport):
     """
     Reports the number of matches that were found when using one of the following encoders:
+
     * :py:obj:`~source.encodings.reference_encoding.MatchedSequencesEncoder.MatchedSequencesEncoder`
     * :py:obj:`~source.encodings.reference_encoding.MatchedReceptorsEncoder.MatchedReceptorsEncoder`
     * :py:obj:`~source.encodings.reference_encoding.MatchedRegexEncoder.MatchedRegexEncoder`
@@ -24,6 +25,7 @@ class Matches(EncodingReport):
     The main report result is a table containing all matches, where the rows correspond to the Repertoires, and the
     columns correspond to the objects to match (regular expressions or receptor sequences).
     Additional report results are:
+
     * The repertoire sizes (read frequencies and the number of unique sequences per repertoire), for each of the chains.
       This can be used to calculate the percentage of matched sequences in a repertoire.
     * When using :py:obj:`~source.encodings.reference_encoding.MatchedSequencesEncoder.MatchedSequencesEncoder` or
