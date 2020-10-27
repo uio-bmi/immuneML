@@ -1,5 +1,6 @@
 import pandas as pd
 
+import warnings
 from scripts.specification_util import update_docs_per_mapping
 from source.IO.dataset_import.DataImport import DataImport
 from source.IO.dataset_import.DatasetImportParams import DatasetImportParams
@@ -115,6 +116,16 @@ class VDJdbImport(DataImport):
     def preprocess_dataframe(df: pd.DataFrame, params: DatasetImportParams):
         df["frame_types"] = SequenceFrameType.IN.name
         ImportHelper.junction_to_cdr3(df, params.region_type)
+
+        if not params.is_repertoire and params.paired:
+            n_single_chains = sum(df["sequence_identifiers"] == "0")
+            if n_single_chains > 0:
+                df.drop(df.loc[df["sequence_identifiers"] == "0"].index, inplace=True)
+                warnings.warn(f"VDJdbImport: {n_single_chains} single chains were removed when trying to create a ReceptorDataset.\n"
+                              f"To import all chains as a SequenceDataset, use paired = False")
+
+        # todo in sequence datasets, should all identifiers be unique? should they be made unique here?
+
         return df
 
 
