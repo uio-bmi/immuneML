@@ -27,7 +27,7 @@ class SplitConfig:
 
         training_percentage: if split_strategy is RANDOM, this defines which portion of the original dataset to use for creating the training dataset; for other values of split_strategy, this parameter is not used.
 
-        reports (ReportConfig): defines which reports to execute on which datasets or settings. See ReportConfig for more details.
+        reports (ReportConfig): defines which reports to execute on which datasets or settings. See :py:obj:`~source.hyperparameter_optimization.config.ReportConfig.ReportConfig` for more details.
 
         manual_config (:py:obj:`~source.hyperparameter_optimization.config.ManualSplitConfig.ManualSplitConfig`): if split strategy is `MANUAL`,
         here the paths to metadata files should be given (fields `train_metadata_path` and `test_metadata_path`). The matching of examples is done
