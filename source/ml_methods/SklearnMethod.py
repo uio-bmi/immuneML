@@ -65,19 +65,30 @@ class SklearnMethod(MLMethod):
     def __init__(self, parameter_grid: dict = None, parameters: dict = None):
         super(SklearnMethod, self).__init__()
         self.models = {}
+
+        if parameter_grid is not None and "show_warnings" in parameter_grid:
+            self.show_warnings = parameter_grid.pop("show_warnings")[0]
+        elif parameters is not None and "show_warnings" in parameters:
+            self.show_warnings = parameters.pop("show_warnings")
+        else:
+            self.show_warnings = True
+
         self._parameter_grid = parameter_grid
         self._parameters = parameters
         self.feature_names = None
 
+
     def _fit_for_label(self, X, y: np.ndarray, label: str, cores_for_training: int):
-        warnings.simplefilter("ignore")
-        os.environ["PYTHONWARNINGS"] = "ignore"
+        if not self.show_warnings:
+            warnings.simplefilter("ignore")
+            os.environ["PYTHONWARNINGS"] = "ignore"
 
         self.models[label] = self._get_ml_model(cores_for_training, X)
         self.models[label].fit(X, y)
 
-        del os.environ["PYTHONWARNINGS"]
-        warnings.simplefilter("always")
+        if not self.show_warnings:
+            del os.environ["PYTHONWARNINGS"]
+            warnings.simplefilter("always")
 
     def _prepare_caching_params(self, encoded_data: EncodedData, y, type: str, label_names: list = None, number_of_splits: int = -1):
         return (("encoded_data", hashlib.sha256(str(encoded_data.examples).encode("utf-8")).hexdigest()),
@@ -134,15 +145,17 @@ class SklearnMethod(MLMethod):
             scoring = "balanced_accuracy"
             warnings.warn(f"{self.__class__.__name__}: specified optimization metric ({optimization_metric}) is not defined as a sklearn scoring function, using {scoring} instead... ")
 
-        warnings.simplefilter("ignore")
-        os.environ["PYTHONWARNINGS"] = "ignore"
+        if not self.show_warnings:
+            warnings.simplefilter("ignore")
+            os.environ["PYTHONWARNINGS"] = "ignore"
 
         self.models[label] = RandomizedSearchCV(model, param_distributions=self._parameter_grid, cv=number_of_splits, n_jobs=cores_for_training,
                                                 scoring=scoring, refit=True)
         self.models[label].fit(X, y)
 
-        del os.environ["PYTHONWARNINGS"]
-        warnings.simplefilter("always")
+        if not self.show_warnings:
+            del os.environ["PYTHONWARNINGS"]
+            warnings.simplefilter("always")
 
         self.models[label] = self.models[label].best_estimator_  # do not leave RandomSearchCV object to be in models, use the best estimator instead
 
