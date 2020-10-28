@@ -19,8 +19,6 @@ class OneHotReceptorEncoder(OneHotEncoder):
 
     def _encode_new_dataset(self, dataset, params: EncoderParams):
         encoded_data = self._encode_data(dataset, params)
-        if self.use_positional_info:
-            encoded_data.examples = np.swapaxes(encoded_data.examples, 2, 3)
 
         encoded_dataset = ReceptorDataset(filenames=dataset.get_filenames(),
                                           encoded_data=encoded_data,

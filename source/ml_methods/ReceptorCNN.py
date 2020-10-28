@@ -212,7 +212,8 @@ class ReceptorCNN(MLMethod):
         return train_data, val_data
 
     def _make_encoded_data(self, encoded_data, indices):
-        return EncodedData(examples=torch.from_numpy(encoded_data.examples[indices]).float(),
+        examples = np.swapaxes(encoded_data.examples, 2, 3)
+        return EncodedData(examples=torch.from_numpy(examples[indices]).float(),
                            labels={
                                label: torch.from_numpy(np.array([encoded_data.labels[label][i] for i in indices]) == self.class_mapping[1]).float()
                                for label in encoded_data.labels.keys()},
