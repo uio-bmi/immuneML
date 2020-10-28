@@ -18,8 +18,11 @@ class RandomForestClassifier(SklearnMethod):
 
         my_random_forest_classifier: # user-defined method name
             RandomForestClassifier: # name of the ML method
+                # sklearn parameters (same names as in original sklearn class)
                 n_estimators: 20 # number of trees in the forest
                 random_state: 100 # controls the randomness of the boostrapping of examples while building trees
+                # Additional parameter that determines whether to print convergence warnings
+                show_warnings: True
 
     """
 

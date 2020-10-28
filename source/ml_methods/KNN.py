@@ -18,7 +18,10 @@ class KNN(SklearnMethod):
 
         my_knn_method:
             KNN:
+                # sklearn parameters (same names as in original sklearn class)
                 n_neighbors: 5
+                # Additional parameter that determines whether to print convergence warnings
+                show_warnings: True
 
     """
 

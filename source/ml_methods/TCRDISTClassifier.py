@@ -28,6 +28,7 @@ class TCRDISTClassifier(SklearnMethod):
         my_tcr_method:
             TCRdistClassifier:
                 percentage: 0.1
+                show_warnings: True
 
     """
 

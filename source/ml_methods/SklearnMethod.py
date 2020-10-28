@@ -43,15 +43,21 @@ class SklearnMethod(MLMethod):
         ml_methods:
             log_reg:
                 SimpleLogisticRegression: # name of the class inheriting SklearnMethod
+                    # sklearn parameters (same names as in original sklearn class)
                     max_iter: 1000 # specific parameter value
                     penalty: l1
+                    # Additional parameter that determines whether to print convergence warnings
+                    show_warnings: True
                 # if any of the parameters under SimpleLogisticRegression is a list and model_selection_cv is True,
                 # SimpleLogisticRegression will do grid search over the given parameters and return optimal model
                 model_selection_cv: False
                 model_selection_n_folds: -1
             svm_with_cv:
                 SVM: # name of another class inheriting SklearnMethod
+                    # sklearn parameters (same names as in original sklearn class)
                     alpha: [10, 100] # search will be performed over these parameters
+                    # Additional parameter that determines whether to print convergence warnings
+                    show_warnings: True
                 # if any of the parameters under SVM is a list and model_selection_cv is True,
                 # SVM will do grid search over the given parameters and return optimal model
                 model_selection_cv: True

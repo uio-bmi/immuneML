@@ -18,8 +18,11 @@ class SimpleLogisticRegression(SklearnMethod):
 
         my_logistic_regression: # user-defined method name
             SimpleLogisticRegression: # name of the ML method
+                # sklearn parameters (same names as in original sklearn class)
                 penalty: l1 # use l1 regularization
                 C: 10 # regularization constant
+                # Additional parameter that determines whether to print convergence warnings
+                show_warnings: True
         # alternative way to define ML method with default values:
         my_default_logistic_regression: SimpleLogisticRegression
 

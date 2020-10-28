@@ -18,7 +18,10 @@ class SVM(SklearnMethod):
 
         my_svm: # user-defined method name
             SVM: # name of the ML method
+                # sklearn parameters (same names as in original sklearn class)
                 penalty: l1 # use l1 regularization
+                # Additional parameter that determines whether to print convergence warnings
+                show_warnings: True
         # alternative way to define ML method with default values:
         my_default_svm: SVM
 
