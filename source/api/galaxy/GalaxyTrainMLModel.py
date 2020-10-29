@@ -39,7 +39,9 @@ class GalaxyTrainMLModel:
         with open(self.yaml_path, "r") as file:
             specs = yaml.safe_load(file)
 
-        ParameterValidator.assert_keys_present(specs.keys(), ["definitions", 'instructions'], GalaxyTrainMLModel.__name__, "specification")
+        for key in specs.keys():
+            assert key in ["definitions", "instructions", "output"], f"{GalaxyTrainMLModel.__name__}: {key} is not a valid key in the YAML specification. " \
+                                      f"Valid keys are: 'definitions', 'instructions'."
         ParameterValidator.assert_type_and_value(specs["instructions"], dict, GalaxyTrainMLModel.__name__, "instructions")
 
         assert len(list(specs["instructions"].keys())) == 1, f"{GalaxyTrainMLModel.__name__}: one instruction has to be specified under " \
