@@ -8,7 +8,11 @@ graphical user interface aimed at immunology experts without a machine learning 
 To get started, you will need to add your dataset to Galaxy, which is explained in this tutorial:
 
 - :ref:`How to make an immuneML dataset in Galaxy` - a tool that creates a Galaxy collection from a set of repertoire or receptor files and
-corresponding metadata
+corresponding metadata.
+
+If you do not want to use experimental data and just want to try something out quickly, you can simulate an immune dataset:
+
+- :ref:`Simulate an immune receptor or repertoire dataset` - a tool that creates a simple immune repertoire or receptor dataset for bechmarking or testing purposes.
 
 Subsequently, immunology experts without machine learning background can follow these instructions:
 
@@ -26,6 +30,7 @@ Alternatively, CLI equivalent tools based on the YAML specification can be run u
   :caption: Galaxy tutorials:
 
   galaxy/how_to_make_an_immuneML_dataset_in_galaxy
+  galaxy/how_to_simulate_immune_dataset
   galaxy/how_to_run_an_analysis_in_galaxy
   galaxy/how_to_classify_immune_repertoires
   galaxy/how_to_classify_immune_receptors
