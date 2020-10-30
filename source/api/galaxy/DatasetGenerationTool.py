@@ -41,9 +41,8 @@ class DatasetGenerationTool:
         with open(self.yaml_path, 'r') as file:
             specs = yaml.safe_load(file)
 
-        for key in specs.keys():
-            assert key in ["definitions", "instructions", "output"], f"{DatasetGenerationTool.__name__}: {key} is not a valid key in the YAML specification. " \
-                                      f"Valid keys are: 'definitions', 'instructions'."
+        ParameterValidator.assert_keys_present(specs.keys(), ["definitions", "instructions"], DatasetGenerationTool.__name__, "YAML specification")
+        ParameterValidator.assert_all_in_valid_list(specs.keys(), ["definitions", "instructions", "output"], DatasetGenerationTool.__name__, "YAML specification")
 
         self._check_dataset(specs)
         self._check_instruction(specs)
