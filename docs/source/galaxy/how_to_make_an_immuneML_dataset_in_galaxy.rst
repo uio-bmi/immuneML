@@ -46,9 +46,8 @@ The YAML specification describes how the dataset should be created from the supp
 for more details on writing a YAML specification file. For this tool, one :ref:`Dataset <Datasets>` must be specified
 under definitions, and the :ref:`DatasetGeneration` instruction must be used.
 
-The **path** parameter for the dataset must always be set to the current working directory ('./'), and the DatasetGeneration
-instruction can here only be used with one dataset (as defined under **definitions**) and one export format. Otherwise, the
-specification is written the same as when running immuneML locally.
+The DatasetGeneration instruction can here only be used with one dataset (as defined under **definitions**) and one export format.
+Furthermore, the **path** parameter does not need to be set. Otherwise, the specification is written the same as when running immuneML locally.
 
 A complete YAML specification for a RepertoireDataset could look like this:
 
@@ -60,7 +59,6 @@ A complete YAML specification for a RepertoireDataset could look like this:
         my_repertoire_dataset: # user-defined dataset name
           format: VDJdb
           params:
-            path: ./ # the path must always be the current working directory
             is_repertoire: True # import a RepertoireDataset
             metadata_file: metadata.csv # the metadata file is identified by name
             # other import parameters may be specified here
@@ -84,7 +82,6 @@ Alternatively, for a ReceptorDataset the complete YAML specification may look li
         my_receptor_dataset: # user-defined dataset name
           format: VDJdb
           params:
-            path: ./ # the path must always be the current working directory
             is_repertoire: False
             paired: True # if True, import ReceptorDataset. If False, import SequenceDataset
             receptor_chains: TRA_TRB # choose from TRA_TRB, TRG_TRD, IGH_IGL and IGH_IGK
@@ -132,7 +129,6 @@ parameters need to be specified in subsequent analyses:
         my_analysis_dataset: # user-defined dataset name
           format: AIRR
           params:
-            path: ./
             # the same value for is_repertoire and metadata_file must be used as in the first YAML
             is_repertoire: True
             metadata_file: metadata.csv
