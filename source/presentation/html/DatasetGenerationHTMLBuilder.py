@@ -40,6 +40,7 @@ class DatasetGenerationHTMLBuilder:
                 {
                     "dataset_name": dataset.name,
                     "dataset_type": StringHelper.camel_case_to_word_string(type(dataset).__name__),
+                    "dataset_size": f"{dataset.get_example_count()} {type(dataset).__name__.replace('Dataset', 's').lower()}",
                     "formats": [
                         {
                             "format_name": format_name,

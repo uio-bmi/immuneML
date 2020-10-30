@@ -28,10 +28,11 @@ class TCRDISTClassifier(SklearnMethod):
         my_tcr_method:
             TCRdistClassifier:
                 percentage: 0.1
+                show_warnings: True
 
     """
 
-    def __init__(self, percentage: float):
+    def __init__(self, percentage: float, show_warnings: bool = True):
         super().__init__()
 
         ParameterValidator.assert_type_and_value(percentage, float, "TCRdistClassifier", "percentage", min_inclusive=0., max_inclusive=1.)
@@ -39,6 +40,7 @@ class TCRDISTClassifier(SklearnMethod):
         self.percentage = percentage
         self.k = None
         self.label = None
+        self.show_warnings = show_warnings
 
     def _get_ml_model(self, cores_for_training: int = 2, X=None):
         # compute k (number of nearest neighbors to consider) given the training dataset size (10% in the paper)

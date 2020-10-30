@@ -1,4 +1,5 @@
 is_repertoire: True
+path: ./
 paired: False
 import_productive: True
 import_with_stop_codon: False
