@@ -36,9 +36,9 @@ def build_specs(args):
 
     specs["definitions"]["datasets"][args.dataset_name]["params"]["region_type"] = RegionType.IMGT_CDR3.name
     specs["definitions"]["datasets"][args.dataset_name]["params"]["result_path"] = "./"
+    specs["definitions"]["datasets"][args.dataset_name]["params"]["path"] = "./"
 
     if args.metadata_file == "":
-        specs["definitions"]["datasets"][args.dataset_name]["params"]["path"] = "./"
         specs["definitions"]["datasets"][args.dataset_name]["params"]["is_repertoire"] = False
 
         paired = True if args.paired == "True" else False

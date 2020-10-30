@@ -6,7 +6,7 @@ from source.data_model.receptor.RegionType import RegionType
 
 @dataclass
 class DatasetImportParams:
-    path: str = None
+    path: str = "./"
     is_repertoire: bool = None
     metadata_file: str = None
     paired: bool = None
@@ -30,7 +30,7 @@ class DatasetImportParams:
     def build_object(cls, region_type: str = None, receptor_chains: str = None, **kwargs):
         params = {
             "region_type": RegionType[region_type.upper()] if region_type else None,
-            "receptor_chains": ChainPair[receptor_chains.upper()] if receptor_chains else None
+            "receptor_chains": ChainPair[receptor_chains.upper()] if receptor_chains else None,
         }
         params = {**kwargs, **params}
         return DatasetImportParams(**params)
