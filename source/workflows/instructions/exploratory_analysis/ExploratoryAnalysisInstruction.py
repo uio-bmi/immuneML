@@ -34,7 +34,7 @@ class ExploratoryAnalysisInstruction(Instruction):
     .. indent with spaces
     .. code-block:: yaml
 
-        my_dataset_generation_instruction: # user-defined instruction name
+        my_expl_analysis_instruction: # user-defined instruction name
             type: ExploratoryAnalysis # which instruction to execute
             analyses: # analyses to perform
                 my_first_analysis: # user-defined name of the analysis

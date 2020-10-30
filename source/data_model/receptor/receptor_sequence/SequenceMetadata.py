@@ -17,8 +17,8 @@ class SequenceMetadata:
         - j allele
         - chain
         - count
-        - region_type (e.g. CDR3, CDR1, whole sequence)
-        - frame_type (e.g. In, Out, Stop)
+        - region_type (e.g. IMGT_CDR3, IMGT_CDR1, FULL_SEQUENCE)
+        - frame_type (e.g. IN, OUT, STOP)
         - sample
         - custom params (dictionary with custom sequence information)
 

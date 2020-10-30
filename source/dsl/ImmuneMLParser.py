@@ -28,7 +28,7 @@ class ImmuneMLParser:
                     format: MiXCR
                     params:
                         result_path: loaded_dataset/
-                        region_type: CDR3
+                        region_type: IMGT_CDR3
                         path: path_to_files/
                         metadata_file: metadata.csv
             encodings:

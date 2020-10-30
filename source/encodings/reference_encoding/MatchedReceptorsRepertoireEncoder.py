@@ -28,7 +28,7 @@ class MatchedReceptorsRepertoireEncoder(MatchedReceptorsEncoder):
             # feature_annotations contains a PD dataframe with sequence and VDJ gene usage per reference receptor
             feature_annotations=feature_annotations,
             labels=labels,
-            encoding=MatchedReceptorsRepertoireEncoder.__name__
+            encoding=MatchedReceptorsEncoder.__name__
         ))
 
         self.store(encoded_dataset, params)
@@ -49,23 +49,32 @@ class MatchedReceptorsRepertoireEncoder(MatchedReceptorsEncoder):
         for i, receptor in enumerate(self.reference_receptors):
             id = receptor.identifier
             chain_names = receptor.get_chains()
-            clonotype_id = receptor.metadata["clonotype_id"]
             first_chain = receptor.get_chain(chain_names[0])
             second_chain = receptor.get_chain(chain_names[1])
 
+            clonotype_id = receptor.metadata["clonotype_id"] if "clonotype_id" in receptor.metadata else None
+
+            if first_chain.metadata.custom_params is not None:
+                first_dual_chain_id = first_chain.metadata.custom_params["dual_chain_id"] if "dual_chain_id" in first_chain.metadata.custom_params else None
+
+            if second_chain.metadata.custom_params is not None:
+                second_dual_chain_id = second_chain.metadata.custom_params["dual_chain_id"] if "dual_chain_id" in second_chain.metadata.custom_params else None
+
             features[i * 2] = [id, clonotype_id, chain_names[0],
-                               first_chain.metadata.custom_params["dual_chain_id"],
+                               first_dual_chain_id,
                                first_chain.amino_acid_sequence,
                                first_chain.metadata.v_gene,
                                first_chain.metadata.j_gene]
             features[i * 2 + 1] = [id, clonotype_id, chain_names[1],
-                                   second_chain.metadata.custom_params["dual_chain_id"],
+                                   second_dual_chain_id,
                                    second_chain.amino_acid_sequence,
                                    second_chain.metadata.v_gene,
                                    second_chain.metadata.j_gene]
 
         features = pd.DataFrame(features,
                                 columns=["receptor_id", "clonotype_id", "chain", "dual_chain_id", "sequence", "v_gene", "j_gene"])
+
+        features.dropna(axis="columns", how="all", inplace=True)
 
         return features
 
@@ -83,10 +92,7 @@ class MatchedReceptorsRepertoireEncoder(MatchedReceptorsEncoder):
                 for label in params.label_config.get_labels_by_name():
                     labels[label].append(repertoire.metadata[label])
 
-        if labels is not None:
-            return self._collapse_encoding_per_subject(encoded_repertories, labels)
-        else:
-            return encoded_repertories, labels, dataset.get_repertoire_ids()
+        return encoded_repertories, labels, dataset.get_repertoire_ids()
 
     def _match_repertoire_to_receptors(self, repertoire: Repertoire):
         matcher = SequenceMatcher()
@@ -108,27 +114,3 @@ class MatchedReceptorsRepertoireEncoder(MatchedReceptorsEncoder):
 
         return matches
 
-    def _collapse_encoding_per_subject(self, encoded_repertories, labels):
-        if not "subject_id" in labels.keys():
-            raise KeyError("The label 'subject_id' must be specified in metadata")
-
-        subject_ids = sorted(set(labels["subject_id"]))
-        ids_to_idx = {id: idx for idx, id in enumerate(subject_ids)}
-
-        encoded_subjects = np.zeros((len(subject_ids), encoded_repertories.shape[1]),
-                                       dtype=int)
-
-        for repertoire_idx in range(0, encoded_repertories.shape[0]):
-            subject_id = labels["subject_id"][repertoire_idx]
-            encoded_subjects[ids_to_idx[subject_id]] += encoded_repertories[repertoire_idx]
-
-        # Only save the first occurrence of the label (it is assumed labels will be the same within subjects)
-        subject_labels = {key: [] for key in labels.keys()}
-        for subject_id in subject_ids:
-            first_occurrence = labels["subject_id"].index(subject_id)
-            for key, value_list in labels.items():
-                subject_labels[key].append(value_list[first_occurrence])
-
-        example_ids = subject_labels.pop("subject_id")
-
-        return encoded_subjects, subject_labels, example_ids

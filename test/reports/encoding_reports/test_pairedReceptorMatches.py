@@ -3,20 +3,19 @@ import shutil
 import unittest
 
 import pandas as pd
+import numpy as np
 
 from source.caching.CacheType import CacheType
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
+from source.data_model.encoded_data.EncodedData import EncodedData
 from source.data_model.receptor.receptor_sequence.Chain import Chain
-from source.encodings.EncoderParams import EncoderParams
-from source.encodings.reference_encoding.MatchedReceptorsRepertoireEncoder import MatchedReceptorsRepertoireEncoder
 from source.environment.Constants import Constants
 from source.environment.EnvironmentSettings import EnvironmentSettings
-from source.environment.LabelConfiguration import LabelConfiguration
-from source.reports.encoding_reports.MatchedPairedReference import MatchedPairedReference
+from source.reports.encoding_reports.PairedReceptorMatches import PairedReceptorMatches
 from source.util.RepertoireBuilder import RepertoireBuilder
 
 
-class TestMatchedPairedReference(unittest.TestCase):
+class TestPairedReceptorMatches(unittest.TestCase):
 
     def setUp(self) -> None:
         os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
@@ -49,33 +48,32 @@ class TestMatchedPairedReference(unittest.TestCase):
 
         dataset = RepertoireDataset(repertoires=repertoires)
 
-        label_config = LabelConfiguration()
-        label_config.add_label("subject_id", labels["subject_id"])
-        label_config.add_label("label", labels["label"])
+        feature_annotations_content = """receptor_id	clonotype_id	chain	dual_chain_id	sequence	v_gene	j_gene
+100-A0-B0	100	alpha	1	AAAA	V1	J1
+100-A0-B0	100	beta	1	SSSS	V1	J1
+200-A0-B0	200	alpha	1	CCCC	V1	J1
+200-A0-B0	200	beta	1	TTTT	V1	J1
+300-A0-B0	300	alpha	1	NONO	V1	J1
+300-A0-B0	300	beta	1	NONO	V1	J1
+400-A0-B0	400	alpha	1	NONO	V1	J1
+400-A0-B0	400	beta	1	NONO	V1	J1"""
 
-        # clonotype 100 with TRA=AAAA, TRB = SSSS; clonotype 200 with TRA=CCCC, TRB = TTTT, adn 300&400 with both=NONO
-        file_content = """Cell type	Clonotype ID	Chain: TRA (1)	TRA - V gene (1)	TRA - D gene (1)	TRA - J gene (1)	Chain: TRA (2)	TRA - V gene (2)	TRA - D gene (2)	TRA - J gene (2)	Chain: TRB (1)	TRB - V gene (1)	TRB - D gene (1)	TRB - J gene (1)	Chain: TRB (2)	TRB - V gene (2)	TRB - D gene (2)	TRB - J gene (2)	Cells pr. clonotype	Clonotype (Id)	Clonotype (Name)
-TCR_AB	100	AAAA	TRAV1		TRAJ1	null	null	null	null	SSSS	TRBV1		TRBJ1	null	null	null	null	1	1941533	3ca0cd7f-02fd-40bb-b295-7cd5d419e474(101, 102, 103, 104, 105, 108, 109, 127, 128, 130, 131, 132, 133, 134, 174)Size:1
-TCR_AB	200	CCCC	TRAV1		TRAJ1	null	null	null	null	TTTT	TRBV1		TRBJ1	null	null	null	null	1	1941532	1df22bbc-8113-46b9-8913-da95fcf9a568(101, 102, 103, 104, 105, 108, 109, 127, 128, 130, 131, 132, 133, 134, 174)Size:1
-TCR_AB	300	NONO	TRAV1		TRAJ1	null	null	null	null	NONO	TRBV1		TRBJ1	null	null	null	null	1	1941532	1df22bbc-8113-46b9-8913-da95fcf9a568(101, 102, 103, 104, 105, 108, 109, 127, 128, 130, 131, 132, 133, 134, 174)Size:1
-TCR_AB	400	NONO	TRAV1		TRAJ1	null	null	null	null	NONO	TRBV1		TRBJ1	null	null	null	null	1	1941532	1df22bbc-8113-46b9-8913-da95fcf9a568(101, 102, 103, 104, 105, 108, 109, 127, 128, 130, 131, 132, 133, 134, 174)Size:1
-        """
+        with open(path + "feature_annotations.tsv", "w") as file:
+            file.writelines(feature_annotations_content)
 
-        with open(path + "refs.tsv", "w") as file:
-            file.writelines(file_content)
+        feature_annotations = pd.read_csv(path+"feature_annotations.tsv", sep="\t")
 
-        reference_receptors = {"path": path + "refs.tsv", "format": "IRIS"}
-
-        encoder = MatchedReceptorsRepertoireEncoder.build_object(dataset, **{
-            "reference_receptors": reference_receptors,
-            "max_edit_distances": 0
-        })
-
-        encoded = encoder.encode(dataset, EncoderParams(
-            result_path=path,
-            label_config=label_config,
-            filename="dataset.csv"
-        ))
+        encoded = RepertoireDataset(repertoires=repertoires,
+                                    encoded_data=EncodedData(
+                                        encoding="MatchedReceptorsEncoder",
+                                        example_ids=['donor1', 'donor2', 'donor3'],
+                                        examples=np.array([[10, 10, 0, 0, 0, 0, 0, 0],
+                                                           [5, 5, 5, 5, 0, 0, 0, 0],
+                                                           [1, 1, 2, 2, 0, 0, 0, 0]]),
+                                        labels={"label": ["yes", "no", "no"]},
+                                        feature_names=['100-A0-B0.alpha', '100-A0-B0.beta', '200-A0-B0.alpha', '200-A0-B0.beta', '300-A0-B0.alpha', '300-A0-B0.beta', '400-A0-B0.alpha', '400-A0-B0.beta'],
+                                        feature_annotations=feature_annotations
+                                    ))
 
         return encoded
 
@@ -84,7 +82,7 @@ TCR_AB	400	NONO	TRAV1		TRAJ1	null	null	null	null	NONO	TRBV1		TRBJ1	null	null	nul
 
         encoded_data = self.create_encoded_dummy_data(path + "input_data/")
 
-        report = MatchedPairedReference(dataset=encoded_data, result_path=path + "report_results/")
+        report = PairedReceptorMatches(dataset=encoded_data, result_path=path + "report_results/")
 
         report.check_prerequisites()
         report.generate()

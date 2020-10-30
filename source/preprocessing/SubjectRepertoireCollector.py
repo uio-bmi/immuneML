@@ -5,6 +5,7 @@ import pandas as pd
 
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.repertoire.Repertoire import Repertoire
+from source.environment.Constants import Constants
 from source.preprocessing.Preprocessor import Preprocessor
 from source.util.PathBuilder import PathBuilder
 
@@ -62,7 +63,7 @@ class SubjectRepertoireCollector(Preprocessor):
     @staticmethod
     def build_new_metadata(dataset, indices_to_keep, result_path: str):
         if dataset.metadata_file:
-            df = pd.read_csv(dataset.metadata_file, index_col=0).iloc[indices_to_keep, :]
+            df = pd.read_csv(dataset.metadata_file, index_col=0, comment=Constants.COMMENT_SIGN).iloc[indices_to_keep, :]
             path = result_path + "_{}_collected_repertoires.csv"\
                 .format(os.path.splitext(os.path.basename(dataset.metadata_file))[0])
             df.to_csv(path)
