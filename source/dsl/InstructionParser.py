@@ -66,7 +66,7 @@ class InstructionParser:
 
         for instruction in instructions:
             instruction_name = instruction.__name__[:-11]
-            if hasattr(InstructionParser, f"make_{instruction_name}_docs"):
+            if hasattr(InstructionParser, f"make_{instruction_name.lower()}_docs"):
                 fn = getattr(InstructionParser, f"make_{instruction_name.lower()}_docs")
                 file_path = fn(inst_path)
             else:
