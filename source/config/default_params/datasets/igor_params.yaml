@@ -1,4 +1,5 @@
 is_repertoire: True
+path: ./
 paired: False
 import_with_stop_codon: False # whether to import sequences with stop codon
 import_out_of_frame: False # whether out of frame sequences should be imported
