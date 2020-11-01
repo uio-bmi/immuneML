@@ -47,7 +47,7 @@ class InstructionParser:
     @staticmethod
     @log
     def parse_instruction(key: str, instruction: dict, symbol_table: SymbolTable, path) -> tuple:
-        # TODO: add check to see if there's type
+        ParameterValidator.assert_keys_present(list(instruction.keys()), ["type"], InstructionParser.__name__, key)
         valid_instructions = [cls[:-6] for cls in ReflectionHandler.discover_classes_by_partial_name("Parser", "dsl/instruction_parsers/")]
         ParameterValidator.assert_in_valid_list(instruction["type"], valid_instructions, "InstructionParser", "type")
 

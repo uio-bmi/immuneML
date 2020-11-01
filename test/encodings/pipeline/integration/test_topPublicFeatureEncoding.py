@@ -67,7 +67,7 @@ class TestTopPublicFeatureEncoding(TestCase):
                         "normalization_type": NormalizationType.NONE.name,
                         "reads": ReadsType.UNIQUE.name,
                         "sequence_encoding": SequenceEncodingType.IDENTITY.name,
-                        "metadata_fields_to_include": []
+                        "metadata_fields_to_include": [], "scale_to_unit_variance": False
                     },
                     "steps": [{"s1": {"type": PublicSequenceFeatureAnnotation.__name__,
                                       "params": {"result_path": path, "filename": "encoded_data.pickle"}}},

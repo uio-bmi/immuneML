@@ -38,8 +38,9 @@ class DatasetEncoder(metaclass=abc.ABCMeta):
 
     @staticmethod
     def load_attribute(encoder, encoder_file: str, attribute: str):
-        setattr(encoder, attribute, f"{os.path.dirname(encoder_file)}/{os.path.basename(getattr(encoder, attribute))}")
-        assert os.path.isfile(getattr(encoder, attribute)), f"{type(encoder).__name__}: could not load {attribute} from {getattr(encoder, attribute)}."
+        if encoder_file is not None and encoder_file != '':
+            setattr(encoder, attribute, f"{os.path.dirname(encoder_file)}/{os.path.basename(getattr(encoder, attribute))}")
+            assert os.path.isfile(getattr(encoder, attribute)), f"{type(encoder).__name__}: could not load {attribute} from {getattr(encoder, attribute)}."
         return encoder
 
     @staticmethod

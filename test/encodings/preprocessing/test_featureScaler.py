@@ -28,7 +28,7 @@ class TestFeatureScaler(TestCase):
         PathBuilder.build(path)
 
         feature_matrix = np.array([[4, 1, 2, 2], [1, 3, 9, 3], [5, 7, 5, 1]])
-        norm_feature_matrix = FeatureScaler.normalize(path + "normalizer.pkl", feature_matrix, NormalizationType.L2)
+        norm_feature_matrix = FeatureScaler.normalize(feature_matrix, NormalizationType.L2)
         expected_norm_feature_matrix = np.array([[0.8, 0.2, 0.4, 0.4], [0.1, 0.3, 0.9, 0.3], [0.5, 0.7, 0.5, 0.1]])
 
         np.testing.assert_array_almost_equal(norm_feature_matrix, expected_norm_feature_matrix)

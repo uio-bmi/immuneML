@@ -77,7 +77,7 @@ class AtchleyKmerEncoder(DatasetEncoder):
         self.abundance = RelativeAbundanceType[abundance.upper()]
         self.normalize_all_features = normalize_all_features
         self.name = name
-        self.normalizer_path = None
+        self.scaler_path = None
         self.vectorizer_path = None
 
     def encode(self, dataset, params: EncoderParams):
@@ -88,9 +88,11 @@ class AtchleyKmerEncoder(DatasetEncoder):
         # normalize to zero mean and unit variance only features coming from Atchley factors
         tmp_examples = examples[:, :, :-1] if not self.normalize_all_features else examples
         flattened_vectorized_examples = tmp_examples.reshape(examples.shape[0] * examples.shape[1], -1)
-        if self.normalizer_path is None:
-            self.normalizer_path = params.result_path + "atchley_factor_normalizer.pickle"
-        scaled_examples = FeatureScaler.standard_scale(self.normalizer_path, flattened_vectorized_examples).todense()
+        if self.scaler_path is None:
+            self.scaler_path = params.result_path + "atchley_factor_scaler.pickle"
+        scaled_examples = FeatureScaler.standard_scale(self.scaler_path, flattened_vectorized_examples)
+        if hasattr(scaled_examples, "todense"):
+            scaled_examples = scaled_examples.todense()
 
         if self.normalize_all_features:
             examples = np.array(scaled_examples).reshape(examples.shape[0], len(kmer_keys), -1)
@@ -182,7 +184,7 @@ class AtchleyKmerEncoder(DatasetEncoder):
         return sequences, counts
 
     def get_additional_files(self) -> List[str]:
-        return [self.normalizer_path, self.vectorizer_path]
+        return [self.scaler_path, self.vectorizer_path]
 
     @staticmethod
     def export_encoder(path: str, encoder) -> str:
@@ -192,7 +194,7 @@ class AtchleyKmerEncoder(DatasetEncoder):
     @staticmethod
     def load_encoder(encoder_file: str):
         encoder = DatasetEncoder.load_encoder(encoder_file)
-        for attribute in ["normalizer_path", "vectorizer_path"]:
+        for attribute in ["scaler_path", "vectorizer_path"]:
             encoder = DatasetEncoder.load_attribute(encoder, encoder_file, attribute)
         return encoder
 
