@@ -34,9 +34,9 @@ class TrainMLModelInstruction(Instruction):
 
         hp_settings (list): a list of combinations of `preprocessing_sequence`, `encoding` and `ml_method`. `preprocessing_sequence` is optional, while `encoding` and `ml_method` are mandatory. These three options (and their parameters) can be optimized over, choosing the highest performing combination.
 
-        assessment (SplitConfig): description of the outer loop (for assessment) of nested cross-validation. It describes how to split the data, how many splits to make, what percentage to use for training and what reports to execute on those splits. See SplitConfig.
+        assessment (SplitConfig): description of the outer loop (for assessment) of nested cross-validation. It describes how to split the data, how many splits to make, what percentage to use for training and what reports to execute on those splits. See :ref:`SplitConfig`.
 
-        selection (SplitConfig): description of the inner loop (for selection) of nested cross-validation. The same as assessment argument, just to be executed in the inner loop. See SplitConfig.
+        selection (SplitConfig): description of the inner loop (for selection) of nested cross-validation. The same as assessment argument, just to be executed in the inner loop. See :ref:`SplitConfig`.
 
         metrics (list): a list of metrics to compute for all splits and settings created during the nested cross-validation. These metrics will be computed only for reporting purposes. For choosing the optimal setting, `optimization_metric` will be used.
 

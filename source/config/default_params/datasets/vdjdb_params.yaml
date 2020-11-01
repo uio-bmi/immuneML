@@ -1,4 +1,5 @@
 is_repertoire: True
+path: ./
 column_mapping:
   V: v_genes
   J: j_genes

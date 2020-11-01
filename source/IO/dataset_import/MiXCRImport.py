@@ -19,7 +19,7 @@ class MiXCRImport(DataImport):
 
     Arguments:
 
-        path (str): Required parameter. This is the path to a directory with MiXCR files to import.
+        path (str): This is the path to a directory with MiXCR files to import. By default path is set to the current working directory.
 
         is_repertoire (bool): If True, this imports a RepertoireDataset. If False, it imports a SequenceDataset.
         By default, is_repertoire is set to True.

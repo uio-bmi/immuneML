@@ -24,7 +24,7 @@ class SingleLineReceptorImport(DataImport):
     """
     Imports data from a tabular file (where each line contains a pair of immune receptor sequences) into a ReceptorDataset.
     If you instead want to import a ReceptorDataset from a tabular file that contains one receptor sequence per line,
-    see GenericImport.
+    see :py:obj:`~source.IO.dataset_import.GenericImport.GenericImport`.
 
 
     Arguments:

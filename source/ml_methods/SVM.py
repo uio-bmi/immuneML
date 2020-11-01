@@ -18,21 +18,24 @@ class SVM(SklearnMethod):
 
         my_svm: # user-defined method name
             SVM: # name of the ML method
+                # sklearn parameters (same names as in original sklearn class)
                 penalty: l1 # use l1 regularization
+                # Additional parameter that determines whether to print convergence warnings
+                show_warnings: True
         # alternative way to define ML method with default values:
         my_default_svm: SVM
 
     """
 
     def __init__(self, parameter_grid: dict = None, parameters: dict = None):
-        super(SVM, self).__init__()
-
-        self._parameters = parameters if parameters is not None else {"max_iter": 10000, "multi_class": "crammer_singer"}
+        parameters = parameters if parameters is not None else {"max_iter": 10000, "multi_class": "crammer_singer"}
 
         if parameter_grid is not None:
-            self._parameter_grid = parameter_grid
+            parameter_grid = parameter_grid
         else:
-            self._parameter_grid = {}
+            parameter_grid = {}
+
+        super(SVM, self).__init__(parameter_grid=parameter_grid, parameters=parameters)
 
     def _get_ml_model(self, cores_for_training: int = 2, X=None):
         return LinearSVC(**self._parameters)
