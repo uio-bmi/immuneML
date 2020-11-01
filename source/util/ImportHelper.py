@@ -3,8 +3,8 @@ import pickle
 import warnings
 from glob import glob
 from multiprocessing.pool import Pool
-
 from typing import List
+
 import numpy as np
 import pandas as pd
 
@@ -28,7 +28,6 @@ from source.data_model.receptor.receptor_sequence.SequenceFrameType import Seque
 from source.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
 from source.data_model.repertoire.Repertoire import Repertoire
 from source.environment.Constants import Constants
-from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.util.PathBuilder import PathBuilder
 
 
@@ -228,9 +227,15 @@ class ImportHelper:
         dataset = ReceptorDataset(filenames=dataset_filenames, file_size=params.sequence_file_size, name=dataset_name) if params.paired \
             else SequenceDataset(filenames=dataset_filenames, file_size=params.sequence_file_size, name=dataset_name)
 
+        dataset.params = ImportHelper.get_element_dataset_params(params)
+
         PickleExporter.export(dataset, params.result_path)
 
         return dataset
+
+    @staticmethod
+    def get_element_dataset_params(params):
+        return {'region_type': params.region_type, 'receptor_chains': params.receptor_chains, 'organism': params.organism}
 
     @staticmethod
     def import_items(import_class, path, params: DatasetImportParams):

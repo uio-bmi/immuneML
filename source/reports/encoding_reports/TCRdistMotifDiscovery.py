@@ -104,7 +104,8 @@ class TCRdistMotifDiscovery(EncodingReport):
             if negative_examples:
                 stat_overview_path = self.result_path + f"motif_{chain}_{index + 1}_stat.csv"
                 stat.to_csv(stat_overview_path)
-                table_outputs.append(ReportOutput(stat_overview_path, f'KL divergence and log-likelihood per position given reference data: cluster {index+1} ({chain} chain) csv data'))
+                table_outputs.append(ReportOutput(stat_overview_path, f'KL divergence and log-likelihood per position given reference data: cluster '
+                                                                      f'{index+1} ({chain} chain) csv data'))
 
         return figure_outputs, table_outputs
 

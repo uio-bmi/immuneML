@@ -3,8 +3,8 @@ import shutil
 from unittest import TestCase
 
 from source.IO.dataset_import.VDJdbImport import VDJdbImport
-from source.dsl.DefaultParamsLoader import DefaultParamsLoader
 from source.caching.CacheType import CacheType
+from source.dsl.DefaultParamsLoader import DefaultParamsLoader
 from source.encodings.EncoderParams import EncoderParams
 from source.encodings.distance_encoding.TCRdistEncoder import TCRdistEncoder
 from source.environment.Constants import Constants
@@ -43,9 +43,9 @@ class TestTCRdistEncoder(TestCase):
         params["path"] = path
         params["sequence_file_size"] = 1
         params["receptor_chains"] = "TRA_TRB"
+        params['organism'] = 'human'
 
         dataset = VDJdbImport.import_dataset(params, "vdjdb_dataset")
-        dataset.params = {"organism": "human"}
 
         encoder = TCRdistEncoder.build_object(dataset, **{"cores": 2})
         encoded_dataset = encoder.encode(dataset, EncoderParams(f"{path}result/", LabelConfiguration([Label("epitope")])))

@@ -1,8 +1,11 @@
+import logging
+
 import pandas as pd
 from tcrdist.repertoire import TCRrep
 
 from source.caching.CacheHandler import CacheHandler
 from source.data_model.dataset.ReceptorDataset import ReceptorDataset
+from source.data_model.receptor.RegionType import RegionType
 
 
 class TCRdistHelper:
@@ -14,9 +17,41 @@ class TCRdistHelper:
 
     @staticmethod
     def _compute_tcr_dist(dataset: ReceptorDataset, labels: list, cores: int):
+        """
+        Computes the tcrdist distances by creating a TCRrep object and calling compute_distances() function.
+
+        Parameters `ntrim` and `ctrim` in TCRrep object for CDR3 are adjusted to account for working with IMGT CDR3 definition if IMGT CDR3 was set
+        as region_type for the dataset upon importing. `deduplicate` parameter is set to False as we assume that we work with clones in immuneML,
+        and not individual receptors.
+
+        Args:
+            dataset: receptor dataset for which all pairwise distances between receptors will be computed
+            labels: a list of label names (e.g., specific epitopes) to be used for later classification or reports
+            cores: how many cpus to use for computation
+
+        Returns:
+            an instance of TCRrep object with computed pairwise distances between all receptors in the dataset
+
+        """
         df = TCRdistHelper.prepare_tcr_dist_dataframe(dataset, labels)
-        tcr_rep = TCRrep(cell_df=df, chains=['alpha', 'beta'], organism=dataset.params["organism"], cpus=cores, infer_index_cols=False,
-                         deduplicate=False, index_cols=['clone_id'])
+        tcr_rep = TCRrep(cell_df=df, chains=['alpha', 'beta'], organism=dataset.params["organism"], cpus=cores, deduplicate=False,
+                         compute_distances=False)
+
+        if 'region_type' not in dataset.params:
+            logging.warning(f"{TCRdistHelper.__name__}: Parameter 'region_type' was not set for dataset {dataset.name}, keeping default tcrdist "
+                            f"values for parameters 'ntrim' and 'ctrim'. For more information, see tcrdist3 documentation. To avoid this warning, "
+                            f"set the region type when importing the dataset.")
+        elif dataset.params['region_type'] == RegionType.IMGT_CDR3:
+            tcr_rep.kargs_a['cdr3_a_aa']['ntrim'] = 2
+            tcr_rep.kargs_a['cdr3_a_aa']['ctrim'] = 1
+            tcr_rep.kargs_b['cdr3_b_aa']['ntrim'] = 2
+            tcr_rep.kargs_b['cdr3_b_aa']['ctrim'] = 1
+        elif dataset.params['region_type'] != RegionType.IMGT_JUNCTION:
+            raise RuntimeError(f"{TCRdistHelper.__name__}: TCRdist metric can be computed only if IMGT_CDR3 or IMGT_JUNCTION are used as region "
+                               f"types, but for dataset {dataset.name}, it is set to {dataset.params['region_type']} instead.")
+
+        tcr_rep.compute_distances()
+
         return tcr_rep
 
     @staticmethod

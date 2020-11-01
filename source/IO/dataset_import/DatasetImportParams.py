@@ -25,7 +25,6 @@ class DatasetImportParams:
     sequence_file_size: int = 50000
     organism: str = None
 
-
     @classmethod
     def build_object(cls, region_type: str = None, receptor_chains: str = None, **kwargs):
         params = {

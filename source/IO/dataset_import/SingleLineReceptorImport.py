@@ -1,6 +1,3 @@
-import glob
-import logging
-import os
 from typing import List
 
 import pandas as pd
@@ -117,7 +114,7 @@ class SingleLineReceptorImport(DataImport):
 
         dataset = SingleLineReceptorImport._import_from_files(filenames, generic_params)
         dataset.name = dataset_name
-        dataset.params = {"organism": generic_params.organism}
+        dataset.params = ImportHelper.get_element_dataset_params(generic_params)
 
         PickleExporter.export(dataset, generic_params.result_path)
 
@@ -171,7 +168,6 @@ class SingleLineReceptorImport(DataImport):
         valid_chain_names = str([item.name for item in Chain])[1:-1].replace("'", "`")
         valid_chain_pair_names = str([item.name for item in ChainPair])[1:-1].replace("'", "`")
         region_type_values = str([region_type.name for region_type in RegionType])[1:-1].replace("'", "`")
-
 
         mapping = {
             "The possible names that can be filled in for <chain> are given in :py:obj:`~source.data_model.receptor.receptor_sequence.Chain.Chain`":
