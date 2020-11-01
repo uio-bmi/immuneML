@@ -1,6 +1,7 @@
+import warnings
+
 import pandas as pd
 
-import warnings
 from scripts.specification_util import update_docs_per_mapping
 from source.IO.dataset_import.DataImport import DataImport
 from source.IO.dataset_import.DatasetImportParams import DatasetImportParams
@@ -47,14 +48,14 @@ class VDJdbImport(DataImport):
         column_mapping (dict): A mapping from VDJdb column names to immuneML's internal data representation.
         For VDJdb, this is by default set to:
 
-        .. indent with spaces
-        .. code-block:: yaml
+            .. indent with spaces
+            .. code-block:: yaml
 
-                V: v_genes
-                J: j_genes
-                CDR3: sequence_aas
-                complex.id: sequence_identifiers
-                Gene: chains
+                    V: v_genes
+                    J: j_genes
+                    CDR3: sequence_aas
+                    complex.id: sequence_identifiers
+                    Gene: chains
 
         A custom column mapping can be specified here if necessary (for example; adding additional data fields if
         they are present in the VDJdb file, or using alternative column names).
@@ -65,12 +66,12 @@ class VDJdbImport(DataImport):
         as metadata fields.
         For VDJdb format, this parameter is by default set to:
 
-        .. indent with spaces
-        .. code-block:: yaml
+            .. indent with spaces
+            .. code-block:: yaml
 
-                Epitope: epitope
-                Epitope gene: epitope_gene
-                Epitope species: epitope_species
+                    Epitope: epitope
+                    Epitope gene: epitope_gene
+                    Epitope species: epitope_species
 
         This means that epitope, epitope_gene and epitope_species can be specified as prediction labels for
         Sequence- and ReceptorDatasets. Custom metadata labels can be defined here as well.
@@ -105,12 +106,12 @@ class VDJdbImport(DataImport):
                     Epitope: epitope
                     Epitope gene: epitope_gene
                     Epitope species: epitope_species
+
     """
 
     @staticmethod
     def import_dataset(params: dict, dataset_name: str) -> Dataset:
         return ImportHelper.import_dataset(VDJdbImport, params, dataset_name)
-
 
     @staticmethod
     def preprocess_dataframe(df: pd.DataFrame, params: DatasetImportParams):
@@ -128,7 +129,6 @@ class VDJdbImport(DataImport):
         # todo: should sequence identifiers be made unique?
 
         return df
-
 
     @staticmethod
     def import_receptors(df, params):

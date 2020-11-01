@@ -1,32 +1,57 @@
+import logging
+
 import pandas as pd
 from tcrdist.repertoire import TCRrep
 
 from source.caching.CacheHandler import CacheHandler
 from source.data_model.dataset.ReceptorDataset import ReceptorDataset
+from source.data_model.receptor.RegionType import RegionType
 
 
 class TCRdistHelper:
 
     @staticmethod
-    def compute_tcr_dist(dataset: ReceptorDataset, labels: list, cores: int):
+    def compute_tcr_dist(dataset: ReceptorDataset, labels: list, cores: int) -> TCRrep:
         return CacheHandler.memo_by_params((('dataset_identifier', dataset.identifier), ("type", "TCRrep")),
                                            lambda: TCRdistHelper._compute_tcr_dist(dataset, labels, cores))
 
     @staticmethod
     def _compute_tcr_dist(dataset: ReceptorDataset, labels: list, cores: int):
+        """
+        Computes the tcrdist distances by creating a TCRrep object and calling compute_distances() function.
+
+        Parameters `ntrim` and `ctrim` in TCRrep object for CDR3 are adjusted to account for working with IMGT CDR3 definition if IMGT CDR3 was set
+        as region_type for the dataset upon importing. `deduplicate` parameter is set to False as we assume that we work with clones in immuneML,
+        and not individual receptors.
+
+        Args:
+            dataset: receptor dataset for which all pairwise distances between receptors will be computed
+            labels: a list of label names (e.g., specific epitopes) to be used for later classification or reports
+            cores: how many cpus to use for computation
+
+        Returns:
+            an instance of TCRrep object with computed pairwise distances between all receptors in the dataset
+
+        """
         df = TCRdistHelper.prepare_tcr_dist_dataframe(dataset, labels)
-        tcr_rep = TCRrep(cell_df=df, chains=['alpha', 'beta'], organism=dataset.params["organism"])
-        tcr_rep.infer_cdrs_from_v_gene(chain='alpha', imgt_aligned=True)
-        tcr_rep.infer_cdrs_from_v_gene(chain='beta', imgt_aligned=True)
+        tcr_rep = TCRrep(cell_df=df, chains=['alpha', 'beta'], organism=dataset.params["organism"], cpus=cores, deduplicate=False,
+                         compute_distances=False)
 
-        tcr_rep.index_cols = ['clone_id', 'subject', 'epitope', 'v_a_gene', 'j_a_gene', 'v_b_gene', 'j_b_gene',
-                              'cdr3_a_aa', 'cdr3_b_aa', 'cdr1_a_aa', 'cdr2_a_aa', 'pmhc_a_aa', 'cdr1_b_aa', 'cdr2_b_aa', 'pmhc_b_aa']
+        if 'region_type' not in dataset.params:
+            logging.warning(f"{TCRdistHelper.__name__}: Parameter 'region_type' was not set for dataset {dataset.name}, keeping default tcrdist "
+                            f"values for parameters 'ntrim' and 'ctrim'. For more information, see tcrdist3 documentation. To avoid this warning, "
+                            f"set the region type when importing the dataset.")
+        elif dataset.params['region_type'] == RegionType.IMGT_CDR3:
+            tcr_rep.kargs_a['cdr3_a_aa']['ntrim'] = 2
+            tcr_rep.kargs_a['cdr3_a_aa']['ctrim'] = 1
+            tcr_rep.kargs_b['cdr3_b_aa']['ntrim'] = 2
+            tcr_rep.kargs_b['cdr3_b_aa']['ctrim'] = 1
+        elif dataset.params['region_type'] != RegionType.IMGT_JUNCTION:
+            raise RuntimeError(f"{TCRdistHelper.__name__}: TCRdist metric can be computed only if IMGT_CDR3 or IMGT_JUNCTION are used as region "
+                               f"types, but for dataset {dataset.name}, it is set to {dataset.params['region_type']} instead.")
 
-        if all(col in df.columns for col in ['cdr3_b_nucseq', 'cdr3_a_nucseq']):
-            tcr_rep.index_cols += ['cdr3_b_nucseq', 'cdr3_a_nucseq']
+        tcr_rep.compute_distances()
 
-        tcr_rep.deduplicate()
-        tcr_rep._tcrdist_legacy_method_alpha_beta(processes=cores)
         return tcr_rep
 
     @staticmethod
@@ -60,5 +85,5 @@ class TCRdistHelper:
                                  "cdr3_a_aa": cdr3_a_aa, "v_b_gene": v_b_gene, "j_b_gene": j_b_gene, "cdr3_b_aa": cdr3_b_aa, "clone_id": clone_id,
                                  "cdr3_b_nucseq": cdr3_b_nucseq, "cdr3_a_nucseq": cdr3_a_nucseq})
         else:
-            return pd.DataFrame({ "subject": subject, "epitope": epitope, "count": count, "v_a_gene": v_a_gene, "j_a_gene": j_a_gene,
-                                  "cdr3_a_aa": cdr3_a_aa, "v_b_gene": v_b_gene, "j_b_gene": j_b_gene, "cdr3_b_aa": cdr3_b_aa, "clone_id": clone_id})
+            return pd.DataFrame({"subject": subject, "epitope": epitope, "count": count, "v_a_gene": v_a_gene, "j_a_gene": j_a_gene,
+                                 "cdr3_a_aa": cdr3_a_aa, "v_b_gene": v_b_gene, "j_b_gene": j_b_gene, "cdr3_b_aa": cdr3_b_aa, "clone_id": clone_id})

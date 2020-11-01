@@ -54,30 +54,30 @@ mouse_subject0053,PA,1,TRAV6D-6*01,TRAJ53*01,CALGGGSNYKLTF,tgtgctctgggtggaggcagc
         dataset_path = self._create_dataset(path)
 
         dataset = SingleLineReceptorImport.import_dataset({"path": dataset_path,
-                                                        "result_path": path + "dataset/",
-                                                        "separator": ",",
-                                                        "columns_to_load": ["subject", "epitope", "count", "v_a_gene", "j_a_gene", "cdr3_a_aa",
-                                                                            "v_b_gene", "j_b_gene", "cdr3_b_aa", "clone_id", "cdr3_a_nucseq",
-                                                                                                                             "cdr3_b_nucseq"],
-                                                        "column_mapping": {
-                                                            "cdr3_a_aa": "alpha_amino_acid_sequence",
-                                                            "cdr3_b_aa": "beta_amino_acid_sequence",
-                                                            "cdr3_a_nucseq": "alpha_nucleotide_sequence",
-                                                            "cdr3_b_nucseq": "beta_nucleotide_sequence",
-                                                            "v_a_gene": "alpha_v_gene",
-                                                            "v_b_gene": "beta_v_gene",
-                                                            "j_a_gene": "alpha_j_gene",
-                                                            "j_b_gene": "beta_j_gene",
-                                                            "clone_id": "identifier"
-                                                        },
-                                                        "receptor_chains": "TRA_TRB",
-                                                        "region_type": "IMGT_CDR3",
-                                                        "sequence_file_size": 50000,
-                                                        "organism": "mouse"}, 'd1')
+                                                           "result_path": path + "dataset/",
+                                                           "separator": ",",
+                                                           "columns_to_load": ["subject", "epitope", "count", "v_a_gene", "j_a_gene", "cdr3_a_aa",
+                                                                               "v_b_gene", "j_b_gene", "cdr3_b_aa", "clone_id", "cdr3_a_nucseq",
+                                                                               "cdr3_b_nucseq"],
+                                                           "column_mapping": {
+                                                               "cdr3_a_aa": "alpha_amino_acid_sequence",
+                                                               "cdr3_b_aa": "beta_amino_acid_sequence",
+                                                               "cdr3_a_nucseq": "alpha_nucleotide_sequence",
+                                                               "cdr3_b_nucseq": "beta_nucleotide_sequence",
+                                                               "v_a_gene": "alpha_v_gene",
+                                                               "v_b_gene": "beta_v_gene",
+                                                               "j_a_gene": "alpha_j_gene",
+                                                               "j_b_gene": "beta_j_gene",
+                                                               "clone_id": "identifier"
+                                                           },
+                                                           "receptor_chains": "TRA_TRB",
+                                                           "region_type": "IMGT_CDR3",
+                                                           "sequence_file_size": 50000,
+                                                           "organism": "mouse"}, 'd1')
 
         dataset = TCRdistEncoder(8).encode(dataset, EncoderParams(f"{path}result/", LabelConfiguration([Label("epitope")])))
 
-        report = TCRdistMotifDiscovery(dataset, path + "report/", "report name", 8, 20)
+        report = TCRdistMotifDiscovery(dataset, path + "report/", "report name", 8)
         report.generate_report()
 
         shutil.rmtree(path)

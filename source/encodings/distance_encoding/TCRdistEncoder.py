@@ -66,7 +66,8 @@ class TCRdistEncoder(DatasetEncoder):
 
         current_dataset = dataset if self.context is None or "dataset" not in self.context else self.context["dataset"]
         tcr_rep = TCRdistHelper.compute_tcr_dist(current_dataset, labels, self.cores)
-        self.distance_matrix = pd.DataFrame(tcr_rep.pw_tcrdist, index=tcr_rep.clone_df.clone_id, columns=tcr_rep.clone_df.clone_id)
+        self.distance_matrix = pd.DataFrame(tcr_rep.pw_alpha + tcr_rep.pw_beta, index=tcr_rep.clone_df.clone_id.values,
+                                            columns=tcr_rep.clone_df.clone_id.values)
 
     def _build_labels(self, dataset: ReceptorDataset, params: EncoderParams) -> dict:
         labels = {label: [] for label in params.label_config.get_labels_by_name()}
