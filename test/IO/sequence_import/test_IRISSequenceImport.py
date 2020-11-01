@@ -2,7 +2,7 @@ import os
 import shutil
 from unittest import TestCase
 
-from source.IO.sequence_import.IRISSequenceImport import IRISSequenceImport
+from source.IO.dataset_import.IRISSequenceImport import IRISSequenceImport
 from source.caching.CacheType import CacheType
 from source.data_model.receptor.TCABReceptor import TCABReceptor
 from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence

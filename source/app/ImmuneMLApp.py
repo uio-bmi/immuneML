@@ -38,11 +38,11 @@ class ImmuneMLApp:
 
         self.set_cache()
 
-        print(f"{datetime.datetime.now()}: ImmuneML: parsing the specification...\n")
+        print(f"{datetime.datetime.now()}: ImmuneML: parsing the specification...\n", flush=True)
 
         symbol_table, self._specification_path = ImmuneMLParser.parse_yaml_file(self._specification_path, self._result_path)
 
-        print(f"{datetime.datetime.now()}: ImmuneML: starting the analysis...\n")
+        print(f"{datetime.datetime.now()}: ImmuneML: starting the analysis...\n", flush=True)
 
         instructions = symbol_table.get_by_type(SymbolType.INSTRUCTION)
         output = symbol_table.get("output")
@@ -51,7 +51,7 @@ class ImmuneMLApp:
 
         self.clear_cache()
 
-        print(f"{datetime.datetime.now()}: ImmuneML: finished analysis.\n")
+        print(f"{datetime.datetime.now()}: ImmuneML: finished analysis.\n", flush=True)
 
         return result
 

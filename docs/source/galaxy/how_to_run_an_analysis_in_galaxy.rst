@@ -1,8 +1,8 @@
-How to run an analysis in Galaxy
-================================
+How to run an AIRR ML analysis in Galaxy
+=========================================
 
-To run an analysis in Galaxy, ImmuneML Wrapper tool should be used. This tool can run
-any analysis supported by immuneML. For the tool, it is necessary to provide a YAML
+To run an analysis in Galaxy, `Run immuneML with YAML specification` tool should be used. This tool can run
+any analysis supported by immuneML. To use the tool, it is necessary to provide a YAML
 specification file defining the analysis, and a list of input files (if any) or a
 list of Galaxy collections (if any).
 
@@ -10,12 +10,12 @@ YAML specification describes the task which should be executed. To see the detai
 to write the specification, see :ref:`How to specify an analysis with YAML`. The differences from the specification when running
 immuneML as a command line tool and running it in Galaxy are:
 
-1. The paths to files should only include filenames as all files provided will be
+- When running from Galaxy, the paths to files should only include filenames as all files provided will be
 available in the working directory.
 
-2. If using a Galaxy collection (which was created by immuneML dataset tool) as a dataset,
-in the YAML it should be specified that it is in Pickle format and only the name of the
-metadata file should be provided under params field. The metadata file name can be seen
-in the collection.
+- When using a Galaxy collection (as created by the `Create dataset` tool), as a dataset, the metadata filename can be found in the
+collection, along with other files. This depends on the format the dataset was created in. See :ref:`Datasets` for more information
+on how to specify import parameters of a dataset in different formats (currently, dataset stored as a Galaxy collection will be in
+either Pickle or AIRR format).
 
 To use additional files or Galaxy collections, these files need to be present in the current Galaxy history.

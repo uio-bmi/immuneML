@@ -1,7 +1,5 @@
 from typing import Tuple
 
-from rpy2.robjects import pandas2ri
-from rpy2.robjects.packages import STAP
 from scipy.stats import beta
 
 from source.environment.EnvironmentSettings import EnvironmentSettings
@@ -20,7 +18,7 @@ class SequenceAssociationLikelihood(MLReport):
 
     Attributes: the report does not take in any arguments.
 
-    Specification:
+    YAML specification:
 
     .. indent with spaces
     .. code-block:: yaml
@@ -62,6 +60,9 @@ class SequenceAssociationLikelihood(MLReport):
                             output_figures=output_figures)
 
     def _plot(self, upper_limit, lower_limit):
+        from rpy2.robjects import pandas2ri
+        from rpy2.robjects.packages import STAP
+
         pandas2ri.activate()
 
         with open(EnvironmentSettings.root_path + "source/visualization/StatDistributionPlot.R") as f:

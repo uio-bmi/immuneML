@@ -1,0 +1,15 @@
+is_repertoire: True
+path: ./
+import_productive: True # whether to only import productive sequences
+import_unproductive: False # whether to only import unproductive sequences
+region_type: "IMGT_CDR3" # which region to use - IMGT_CDR3 option means removing first and last amino acid as 10xGenomics uses IMGT junction as CDR3
+separator: "," # column separator
+column_mapping: # 10xGenomics column names -> immuneML repertoire fields
+  cdr3: sequence_aas
+  cdr3_nt: sequences
+  v_gene: v_genes
+  j_gene: j_genes
+  umis: counts
+  chain: chains
+  clonotype_id: cell_ids
+  consensus_id: sequence_identifiers

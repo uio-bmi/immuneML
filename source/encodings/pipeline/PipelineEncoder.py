@@ -18,14 +18,17 @@ class PipelineEncoder(DatasetEncoder):
     steps to modify this initial encoding. This can be useful for feature selection and feature
     summarization as well as annotation of biological data onto the initially encoded dataset.
 
+
     Arguments:
+
         initial_encoder (DatasetEncoder):
 
         initial_encoder_params (dict):
 
         steps (list):
 
-    Specification:
+
+    YAML specification:
 
     .. indent with spaces
     .. code-block:: yaml

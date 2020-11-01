@@ -1,16 +1,13 @@
 import copy
 import json
+from dataclasses import field
 
 import numpy as np
 import pandas as pd
-from rpy2.robjects import pandas2ri
-from rpy2.robjects.packages import STAP
-
-pandas2ri.activate()
 
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
-from source.reports.encoding_reports.EncodingReport import EncodingReport
 from source.environment.EnvironmentSettings import EnvironmentSettings
+from source.reports.encoding_reports.EncodingReport import EncodingReport
 from source.util.PathBuilder import PathBuilder
 
 
@@ -79,8 +76,8 @@ class FeatureHeatmap(EncodingReport):
     def build_object(cls, **kwargs):
         return FeatureHeatmap(**kwargs)
 
-    def __init__(self, dataset: RepertoireDataset = None, feature_annotations: list = [], example_annotations: list = [],
-                 one_hot_encode_feature_annotations: list = [], one_hot_encode_example_annotations: list = [], palette: dict = {},
+    def __init__(self, dataset: RepertoireDataset = None, feature_annotations: list = field(default_factory=list), example_annotations: list = None,
+                 one_hot_encode_feature_annotations: list = None, one_hot_encode_example_annotations: list = None, palette: dict = None,
                  cluster_features: bool = True, cluster_examples: bool = True, subset_nonzero_features: bool = False,
                  show_feature_dend: bool = True, show_example_dend: bool = True, show_feature_names: bool = False,
                  show_example_names: bool = False, show_legend_features: list = None, show_legend_examples: list = None,
@@ -90,11 +87,11 @@ class FeatureHeatmap(EncodingReport):
 
         super().__init__()
         self.dataset = dataset
-        self.feature_annotations = list(set(feature_annotations) - set(one_hot_encode_feature_annotations))
-        self.example_annotations = list(set(example_annotations) - set(one_hot_encode_example_annotations))
-        self.one_hot_encode_feature_annotations = one_hot_encode_feature_annotations
-        self.one_hot_encode_example_annotations = one_hot_encode_example_annotations
-        self.palette = palette
+        self.one_hot_encode_feature_annotations = one_hot_encode_feature_annotations if one_hot_encode_feature_annotations is not None else []
+        self.one_hot_encode_example_annotations = one_hot_encode_example_annotations if one_hot_encode_example_annotations is not None else []
+        self.feature_annotations = list(set(feature_annotations) - set(self.one_hot_encode_feature_annotations)) if feature_annotations is not None else []
+        self.example_annotations = list(set(example_annotations) - set(self.one_hot_encode_example_annotations)) if example_annotations is not None else []
+        self.palette = palette if palette is not None else {}
         self.cluster_features = cluster_features
         self.cluster_examples = cluster_examples
         self.subset_nonzero_features = subset_nonzero_features
@@ -125,12 +122,14 @@ class FeatureHeatmap(EncodingReport):
         self._safe_plot(output_written=False)
 
     def _plot(self):
+        from rpy2.robjects import pandas2ri
+        from rpy2.robjects.packages import STAP
+
+        pandas2ri.activate()
 
         matrix = self._prepare_matrix()
-        feature_annotations = self._prepare_annotations(self.dataset.encoded_data.feature_annotations,
-                                                        FeatureHeatmap.FEATURE)
-        example_annotations = self._prepare_annotations(pd.DataFrame(self.dataset.encoded_data.labels),
-                                                        FeatureHeatmap.EXAMPLE)
+        feature_annotations = self._prepare_annotations(self.dataset.encoded_data.feature_annotations, FeatureHeatmap.FEATURE)
+        example_annotations = self._prepare_annotations(pd.DataFrame(self.dataset.encoded_data.labels), FeatureHeatmap.EXAMPLE)
 
         with open(EnvironmentSettings.root_path + "source/visualization/Heatmap.R") as f:
             string = f.read()

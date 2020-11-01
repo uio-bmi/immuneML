@@ -61,7 +61,7 @@ class MLProcess:
 
     def run(self, split_index: int) -> HPItem:
 
-        print(f"{datetime.datetime.now()}: Evaluating hyperparameter setting: {self.hp_setting}...")
+        print(f"{datetime.datetime.now()}: Evaluating hyperparameter setting: {self.hp_setting}...", flush=True)
 
         PathBuilder.build(self.path)
         self._set_paths()
@@ -72,13 +72,13 @@ class MLProcess:
                                                       context=self.report_context, batch_size=self.number_of_processes,
                                                       label_configuration=self.label_config)
 
-        method = HPUtil.train_method(self.label, encoded_train_dataset, self.hp_setting, self.path, self.train_predictions_path, self.ml_details_path)
+        method = HPUtil.train_method(self.label, encoded_train_dataset, self.hp_setting, self.path, self.train_predictions_path, self.ml_details_path, self.number_of_processes, self.optimization_metric)
 
         encoding_train_results = ReportUtil.run_encoding_reports(encoded_train_dataset, self.encoding_reports, f"{self.report_path}encoding_train/")
 
         hp_item = self._assess_on_test_dataset(encoded_train_dataset, encoding_train_results, method, split_index)
 
-        print(f"{datetime.datetime.now()}: Completed hyperparameter setting {self.hp_setting}.\n")
+        print(f"{datetime.datetime.now()}: Completed hyperparameter setting {self.hp_setting}.\n", flush=True)
 
         return hp_item
 

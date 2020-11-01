@@ -2,10 +2,11 @@ import inspect
 import os
 import warnings
 
+import numpy as np
 import pandas as pd
 from sklearn import metrics
+from sklearn.preprocessing import label_binarize
 
-from source.data_model.dataset.Dataset import Dataset
 from source.environment.Metric import Metric
 from source.ml_methods.MLMethod import MLMethod
 from source.ml_metrics import ml_metrics
@@ -37,9 +38,8 @@ class MLMethodAssessment(Step):
                                               split_index=input_params.split_index)
 
         results = MLMethodAssessment._score(metrics_list=input_params.metrics, optimization_metric=input_params.optimization_metric,
-                                            label=input_params.label, split_index=input_params.split_index,
-                                            predicted_y=predicted_y, predicted_proba_y=predicted_proba_y, true_y=true_y,
-                                            method=input_params.method, dataset=input_params.dataset,
+                                            label=input_params.label, split_index=input_params.split_index, predicted_y=predicted_y,
+                                            predicted_proba_y=predicted_proba_y, true_y=true_y, method=input_params.method,
                                             ml_score_path=input_params.ml_score_path)
 
         summary_metric = MLMethodAssessment._get_optimization_metric(results, input_params.label, input_params.optimization_metric)
@@ -52,7 +52,7 @@ class MLMethodAssessment(Step):
 
     @staticmethod
     def _score(metrics_list: list, optimization_metric: Metric, label: str, predicted_y, predicted_proba_y, true_y, ml_score_path: str,
-               split_index: int, method: MLMethod, dataset: Dataset):
+               split_index: int, method: MLMethod):
         results = {}
 
         metrics_with_optim_metric = set(metrics_list)
@@ -66,9 +66,6 @@ class MLMethodAssessment(Step):
             results["{}_{}".format(label, metric.name.lower())] = score
 
         results["split_index"] = split_index
-        results["{}_method_params".format(label)] = {**method.get_params(label),
-                                                     "feature_names": dataset.encoded_data.feature_names
-                                                     if dataset is not None else None}
 
         df = pd.DataFrame([results])
 
@@ -86,6 +83,10 @@ class MLMethodAssessment(Step):
         else:
             fn = getattr(ml_metrics, metric.value)
 
+        if hasattr(true_y, 'dtype') and true_y.dtype.type is np.str_ or isinstance(true_y, list) and any(isinstance(item, str) for item in true_y):
+            true_y = label_binarize(true_y, classes=labels)
+            predicted_y = label_binarize(predicted_y, classes=labels)
+
         try:
             if metric in Metric.get_probability_based_metric_types():
                 predictions = predicted_proba_y
@@ -95,6 +96,7 @@ class MLMethodAssessment(Step):
                     predictions = predicted_y
             else:
                 predictions = predicted_y
+
             if "labels" in inspect.signature(fn).parameters.keys():
                 score = fn(true_y, predictions, labels=labels)
             else:

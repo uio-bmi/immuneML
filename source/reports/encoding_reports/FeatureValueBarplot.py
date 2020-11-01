@@ -1,8 +1,5 @@
 import warnings
 
-from rpy2.robjects import pandas2ri
-from rpy2.robjects.packages import STAP
-
 from scripts.specification_util import update_docs_per_mapping
 from source.analysis.data_manipulation.DataReshaper import DataReshaper
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
@@ -26,7 +23,7 @@ class FeatureValueBarplot(EncodingReport):
     with user-defined error bar as done in this report), please consider using
     :py:obj:`~source.reports.encoding_reports.FeatureValueDistplot.FeatureValueDistplot` instead.
 
-    This report creates a barplot where the height of each bar the mean value of a feature in a specific group. By
+    This report creates a barplot where the height of each bar is the mean value of a feature in a specific group. By
     default, all samples are the group, in which case `grouping_label` is "feature", meaning that each bar is the mean
     value of a given feature, and along the x-axis are the different features. For example, when
     :py:obj:`~source.encodings.kmer_frequency.KmerFrequencyEncoder.KmerFrequencyEncoder`
@@ -40,10 +37,11 @@ class FeatureValueBarplot(EncodingReport):
     panel. This prevents the undesired (and often uninterpretable) case where the mean across multiple features
     is plotted.
 
-    Attributes:
+
+    Arguments:
 
         grouping_label (str): The label name used for x-axis grouping of the barplots - defaults to "feature," 
-            meaning each bar represents one feature.
+        meaning each bar represents one feature.
 
         color_grouping_label (str): The label that is used to color each bar, at each level of the grouping_label.
 
@@ -52,16 +50,16 @@ class FeatureValueBarplot(EncodingReport):
         column_grouping_labels (str or list): The label that is used to group bars into different column facets.
 
         errorbar_meaning (:py:obj:`~source.visualization.ErrorBarMeaning.ErrorBarMeaning`): The value that
-            the error bar should represent. For options see :py:obj:`~source.visualization.ErrorBarMeaning.ErrorBarMeaning`.
+        the error bar should represent. For options see :py:obj:`~source.visualization.ErrorBarMeaning.ErrorBarMeaning`.
 
         panel_layout_type (:py:obj:`~source.visualization.PanelLayoutType.PanelLayoutType`): Parameter determining how the panels will be
-            displayed. For options see :py:obj:`~source.visualization.PanelLayoutType.PanelLayoutType`.
+        displayed. For options see :py:obj:`~source.visualization.PanelLayoutType.PanelLayoutType`.
 
         panel_axis_scales_type (:py:obj:`~source.visualization.PanelAxisScalesType.PanelAxisScalesType`): Parameter determining how the x-
-            and y-axis scales should vary across panels. For options see :py:obj:`~source.visualization.PanelAxisScalesType.PanelAxisScalesType`.
+        and y-axis scales should vary across panels. For options see :py:obj:`~source.visualization.PanelAxisScalesType.PanelAxisScalesType`.
             
         panel_label_switch_type (:py:obj:`~source.visualization.PanelLabelSwitchType.PanelLabelSwitchType`): Parameter determining
-            placement of labels for each panel in the plot. For options see :py:obj:`~source.visualization.PanelLabelSwitchType.PanelLabelSwitchType`.
+        placement of labels for each panel in the plot. For options see :py:obj:`~source.visualization.PanelLabelSwitchType.PanelLabelSwitchType`.
 
         panel_nrow (int): Number of rows in plot (if panel_layout_type is `wrap`)
 
@@ -77,7 +75,8 @@ class FeatureValueBarplot(EncodingReport):
 
         color_title (str): label for color
 
-    Specification:
+
+    YAML specification:
 
     .. indent with spaces
     .. code-block:: yaml
@@ -115,19 +114,25 @@ class FeatureValueBarplot(EncodingReport):
         return FeatureValueBarplot(**kwargs)
 
     def __init__(self, dataset: RepertoireDataset = None, result_path: str = None, grouping_label: str = "feature",
-                 color_grouping_label: str = "NULL", errorbar_meaning: str = "se",  row_grouping_labels=[],
-                 column_grouping_labels=[], panel_layout_type: str = "grid", panel_axis_scales_type: str = "free",
-                 panel_label_switch_type: str = "NULL", panel_nrow="NULL", panel_ncol="NULL", height: float = 6,
-                 width: float = 8, x_title: str = "NULL", y_title: str = "NULL", color_title: str = "NULL",
+                 color_grouping_label: str = "NULL", errorbar_meaning: str = "se", row_grouping_labels=None, column_grouping_labels=None,
+                 panel_layout_type: str = "grid", panel_axis_scales_type: str = "free", panel_label_switch_type: str = "NULL", panel_nrow="NULL",
+                 panel_ncol="NULL", height: float = 6, width: float = 8, x_title: str = "NULL", y_title: str = "NULL", color_title: str = "NULL",
                  palette: dict = "NULL", name: str = None):
 
+        super().__init__(name)
         self.dataset = dataset
         self.result_path = result_path
         self.x = grouping_label
         self.color = color_grouping_label
         self.errorbar_meaning = ErrorBarMeaning[errorbar_meaning.upper()]
-        self.facet_rows = [row_grouping_labels] if isinstance(row_grouping_labels, str) else row_grouping_labels
-        self.facet_columns = [column_grouping_labels] if isinstance(column_grouping_labels, str) else column_grouping_labels
+        if row_grouping_labels is None:
+            self.facet_rows = []
+        else:
+            self.facet_rows = [row_grouping_labels] if isinstance(row_grouping_labels, str) else row_grouping_labels
+        if column_grouping_labels is None:
+            self.facet_columns = []
+        else:
+            self.facet_columns = [column_grouping_labels] if isinstance(column_grouping_labels, str) else column_grouping_labels
         self.facet_type = PanelLayoutType[panel_layout_type.upper()].name.lower()
         self.facet_scales = PanelAxisScalesType[panel_axis_scales_type.upper()].name.lower()
         self.facet_switch = PanelLabelSwitchType[panel_label_switch_type.upper()].name.lower()
@@ -156,6 +161,9 @@ class FeatureValueBarplot(EncodingReport):
         return ReportOutput(table_path, "feature values")
 
     def _plot(self, data_long_format) -> ReportOutput:
+        from rpy2.robjects import pandas2ri
+        from rpy2.robjects.packages import STAP
+
         pandas2ri.activate()
 
         with open(EnvironmentSettings.root_path + "source/visualization/Barplot.R") as f:

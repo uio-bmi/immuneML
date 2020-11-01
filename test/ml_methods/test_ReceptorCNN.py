@@ -27,7 +27,7 @@ class TestReceptorCNN(TestCase):
         dataset = RandomDatasetGenerator.generate_receptor_dataset(receptor_count=500, chain_1_length_probabilities={4: 1},
                                                                    chain_2_length_probabilities={4: 1},
                                                                    labels={"CMV": {True: 0.5, False: 0.5}}, path=path + "dataset/")
-        enc_dataset = OneHotReceptorEncoder(True, 1, "enc1").encode(dataset, EncoderParams(path + "result/",
+        enc_dataset = OneHotReceptorEncoder(True, 1, False, "enc1").encode(dataset, EncoderParams(path + "result/",
                                                                                            LabelConfiguration([Label("CMV", [True, False])])))
         cnn = ReceptorCNN(kernel_count=2, kernel_size=[3], positional_channels=3, sequence_type="amino_acid", device="cpu",
                           number_of_threads=4, random_seed=1, learning_rate=0.01, iteration_count=10, l1_weight_decay=0.1, evaluate_at=5,

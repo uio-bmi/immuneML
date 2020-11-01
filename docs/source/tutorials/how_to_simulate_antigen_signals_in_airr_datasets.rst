@@ -1,25 +1,26 @@
 How to simulate antigen/disease-associated signals in AIRR datasets
-===================================================================
+=====================================================================
 
-Specification of the Simulation instruction for introducing immune signals
---------------------------------------------------------------------------
+YAML specification of the Simulation instruction for introducing immune signals
+---------------------------------------------------------------------------------
 
-In ImmuneML, it is possible to use repertoires of healthy individuals and implant signals in the repertoires in order to simulate the effect of an
-immune event on the repertoire. To create such simulated data, we need to define a Simulation instruction in the DSL.
+In immuneML, it is possible to implant signals in a repertoire dataset in order to simulate the effect of an immune event on the repertoires. This is
+done using the Simulation instruction in the YAML specification. Any type of repertoire dataset (experimental or simulated) can be used as a starting
+oint for an immune event simulation.
 
-The definition consists of three parts: motif, signal and simulation definitions.
+The YAML definition consists of three components: motif, signal and simulation definitions.
 
 **Motifs** are defined by (i) the seed (sequence of amino acids), (ii) the way they are instantiated from the seed and (iii) a list of parameters for
 the instantiation. For gapped k-mer instantiation, the parameters are Hamming distance probabilities (probability for every distance value is
-explicitly given, the gap positions will not be taken into account), minimal gap (if gap is specified in the seed), maximal gap and alphabet weights
-(probability for each amino acid to replace one of the amino acids in the seed when Hamming distance between the seed and the motif instance is equal
-to or larger than 1). By defining a key before specifying the parameters of the motif, it is possible to define multiple motifs.
+explicitly given, the gap positions will not be taken into account), minimal and maximal gap size (if a gap is specified in the seed) and alphabet weights
+(probability for each amino acid to replace one of the amino acids in the seed when the Hamming distance between the seed and the motif instance is equal
+to or larger than 1). It is possible to define multiple motifs by defining a key before specifying the parameters of the motif.
 
 **Signals** model immune events and represent the labels assigned to the repertoires (the label is signal_my_signal_name for signal called
-`my_signal_name` in the specification and can have value True or False in the repertoire depending whether the signal was implanted in the repertoire
+`my_signal_name` in the YAML specification and can have value True or False in the repertoire depending whether the signal was implanted in the repertoire
 or not). A signal is defined by a list of motifs (only motif keys as given in the previous section are specified in the list), the sequence position
 weights (probabilities to implant a motif instance into a target receptor sequence at the given IMGT position) and implanting (the way receptor
-sequences are chosen for implanting from the repertoire). Implanting and the list of motifs are mandatory fields in the specification.
+sequences are chosen for implanting from the repertoire). Implanting and the list of motifs are mandatory fields in the YAML specification.
 
 **Simulation** defines how the signals will be combined and implanted in the repertoires. Within a simulation, one or more implantings can be specified.
 Each implanting only affects its own partition of the dataset, so each repertoire can only receive implanted signals from one implanting. This way,

@@ -21,7 +21,7 @@ class GLIPH2Exporter(DataReport):
         condition (str): name of the parameter present in the receptor metadata in the dataset; condition can be anything which can be processed in
         GLIPH2, such as tissue type or treatment.
 
-    Specification:
+    YAML specification:
 
     .. indent with spaces
     .. code-block:: yaml

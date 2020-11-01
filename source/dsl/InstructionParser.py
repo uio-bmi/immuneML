@@ -1,22 +1,20 @@
 import logging
+import os
 
 from scripts.DocumentatonFormat import DocumentationFormat
 from scripts.specification_util import write_class_docs
 from source.dsl.definition_parsers.DefinitionParserOutput import DefinitionParserOutput
 from source.dsl.symbol_table.SymbolTable import SymbolTable
 from source.dsl.symbol_table.SymbolType import SymbolType
+from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.hyperparameter_optimization.config.ReportConfig import ReportConfig
 from source.hyperparameter_optimization.config.SplitConfig import SplitConfig
 from source.util.Logger import log
 from source.util.ParameterValidator import ParameterValidator
 from source.util.PathBuilder import PathBuilder
 from source.util.ReflectionHandler import ReflectionHandler
-from source.workflows.instructions.SimulationInstruction import SimulationInstruction
+from source.workflows.instructions.Instruction import Instruction
 from source.workflows.instructions.TrainMLModelInstruction import TrainMLModelInstruction
-from source.workflows.instructions.dataset_generation.DatasetGenerationInstruction import DatasetGenerationInstruction
-from source.workflows.instructions.exploratory_analysis.ExploratoryAnalysisInstruction import ExploratoryAnalysisInstruction
-from source.workflows.instructions.ml_model_application.MLApplicationInstruction import MLApplicationInstruction
-from source.workflows.instructions.ml_model_training.MLModelTrainingInstruction import MLModelTrainingInstruction
 
 
 class InstructionParser:
@@ -49,7 +47,7 @@ class InstructionParser:
     @staticmethod
     @log
     def parse_instruction(key: str, instruction: dict, symbol_table: SymbolTable, path) -> tuple:
-        # TODO: add check to see if there's type
+        ParameterValidator.assert_keys_present(list(instruction.keys()), ["type"], InstructionParser.__name__, key)
         valid_instructions = [cls[:-6] for cls in ReflectionHandler.discover_classes_by_partial_name("Parser", "dsl/instruction_parsers/")]
         ParameterValidator.assert_in_valid_list(instruction["type"], valid_instructions, "InstructionParser", "type")
 
@@ -62,41 +60,35 @@ class InstructionParser:
     @staticmethod
     def generate_docs(path):
         inst_path = PathBuilder.build(f"{path}instructions/")
-        InstructionParser.make_dataset_generation_docs(inst_path)
-        InstructionParser.make_expl_analysis_docs(inst_path)
-        InstructionParser.make_hp_docs(inst_path)
-        InstructionParser.make_simulation_docs(inst_path)
-        InstructionParser.make_ml_model_training_docs(inst_path)
-        InstructionParser.make_ml_application_docs(inst_path)
+        instructions = sorted(ReflectionHandler.all_nonabstract_subclasses(Instruction, "Instruction", subdirectory='instructions/'), key=lambda x: x.__name__)
+
+        inst_paths = {}
+
+        for instruction in instructions:
+            instruction_name = instruction.__name__[:-11]
+            if hasattr(InstructionParser, f"make_{instruction_name.lower()}_docs"):
+                fn = getattr(InstructionParser, f"make_{instruction_name.lower()}_docs")
+                file_path = fn(inst_path)
+            else:
+                file_path = InstructionParser.make_docs(instruction, instruction_name, inst_path)
+
+            inst_paths[instruction_name] = file_path
+
+        with open(f'{inst_path}instructions.rst', 'w') as file:
+            for key, item in inst_paths.items():
+                lines = f"{key}\n---------------------------\n.. include:: {os.path.relpath(item, EnvironmentSettings.source_docs_path)}\n"
+                file.writelines(lines)
 
     @staticmethod
-    def make_ml_application_docs(path):
-        with open(f"{path}ml_application.rst", "w") as file:
-            write_class_docs(DocumentationFormat(MLApplicationInstruction, "", DocumentationFormat.LEVELS[1]), file)
+    def make_docs(instruction, name, path):
+        with open(f"{path}{name}.rst", "w") as file:
+            write_class_docs(DocumentationFormat(instruction, "", DocumentationFormat.LEVELS[1]), file)
+        return f"{path}{name}.rst"
 
     @staticmethod
-    def make_ml_model_training_docs(path):
-        with open(f"{path}ml_model_training.rst", "w") as file:
-            write_class_docs(DocumentationFormat(MLModelTrainingInstruction, "", DocumentationFormat.LEVELS[1]), file)
-
-    @staticmethod
-    def make_dataset_generation_docs(path):
-        with open(f"{path}dataset_generation.rst", "w") as file:
-            write_class_docs(DocumentationFormat(DatasetGenerationInstruction, "", DocumentationFormat.LEVELS[1]), file)
-
-    @staticmethod
-    def make_expl_analysis_docs(path):
-        with open(f"{path}exploratory_analysis.rst", "w") as file:
-            write_class_docs(DocumentationFormat(ExploratoryAnalysisInstruction, "", DocumentationFormat.LEVELS[1]), file)
-
-    @staticmethod
-    def make_simulation_docs(path):
-        with open(f"{path}simulation.rst", "w") as file:
-            write_class_docs(DocumentationFormat(SimulationInstruction, "", DocumentationFormat.LEVELS[1]), file)
-
-    @staticmethod
-    def make_hp_docs(path):
+    def make_trainmlmodel_docs(path):
         with open(f"{path}hp.rst", "w") as file:
             write_class_docs(DocumentationFormat(TrainMLModelInstruction, "", DocumentationFormat.LEVELS[1]), file)
             write_class_docs(DocumentationFormat(SplitConfig, "SplitConfig", DocumentationFormat.LEVELS[1]), file)
             write_class_docs(DocumentationFormat(ReportConfig, "ReportConfig", DocumentationFormat.LEVELS[1]), file)
+        return f"{path}hp.rst"

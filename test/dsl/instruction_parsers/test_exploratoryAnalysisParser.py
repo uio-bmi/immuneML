@@ -7,13 +7,15 @@ from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.dsl.instruction_parsers.ExploratoryAnalysisParser import ExploratoryAnalysisParser
 from source.dsl.symbol_table.SymbolTable import SymbolTable
 from source.dsl.symbol_table.SymbolType import SymbolType
-from source.encodings.reference_encoding.MatchedReferenceEncoder import MatchedReferenceEncoder
+
+from source.encodings.reference_encoding.MatchedSequencesEncoder import MatchedSequencesEncoder
 from source.encodings.reference_encoding.SequenceMatchingSummaryType import SequenceMatchingSummaryType
 from source.environment.Constants import Constants
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.preprocessing.SubjectRepertoireCollector import SubjectRepertoireCollector
 from source.reports.data_reports.SequenceLengthDistribution import SequenceLengthDistribution
-from source.reports.encoding_reports.MatchingSequenceDetails import MatchingSequenceDetails
+
+from source.reports.encoding_reports.Matches import Matches
 from source.util.PathBuilder import PathBuilder
 from source.util.RepertoireBuilder import RepertoireBuilder
 
@@ -32,16 +34,16 @@ class TestExploratoryAnalysisParser(TestCase):
         report1 = SequenceLengthDistribution()
 
         file_content = """complex.id	Gene	CDR3	V	J	Species	MHC A	MHC B	MHC class	Epitope	Epitope gene	Epitope species	Reference	Method	Meta	CDR3fix	Score
-        100a	TRA	AAAC	TRAV12	TRAJ1	HomoSapiens	HLA-A*11:01	B2M	MHCI	AVFDRKSDAK	EBNA4	EBV	                    
+        100a	TRA	AAAC	TRAV12	TRAJ1	HomoSapiens	HLA-A*11:01	B2M	MHCI	AVFDRKSDAK	EBNA4	EBV
         """
 
         with open(path + "refs.tsv", "w") as file:
             file.writelines(file_content)
 
-        refs = {"path": path + "refs.tsv", "format": "VDJdb"}
+        refs = {"params": {"path": path + "refs.tsv", "region_type": "FULL_SEQUENCE"}, "format": "VDJdb"}
 
-        report2 = MatchingSequenceDetails.build_object(max_edit_distance=1, reference_sequences=refs)
-        encoding = MatchedReferenceEncoder
+        report2 = Matches.build_object()
+        encoding = MatchedSequencesEncoder
         p1 = [SubjectRepertoireCollector()]
 
         instruction = {
@@ -58,8 +60,7 @@ class TestExploratoryAnalysisParser(TestCase):
         symbol_table.add("r2", SymbolType.REPORT, report2)
         symbol_table.add("e1", SymbolType.ENCODING, encoding, {"encoder_params": {
             "max_edit_distance": 1,
-            "summary": SequenceMatchingSummaryType.COUNT.name,
-            "reference_sequences": refs
+            "reference": refs
         }})
         symbol_table.add("p1", SymbolType.PREPROCESSING, p1)
 
@@ -67,8 +68,8 @@ class TestExploratoryAnalysisParser(TestCase):
 
         self.assertEqual(2, len(list(process.state.exploratory_analysis_units.values())))
         self.assertTrue(isinstance(list(process.state.exploratory_analysis_units.values())[0].report, SequenceLengthDistribution))
-        self.assertTrue(isinstance(list(process.state.exploratory_analysis_units.values())[1].report, MatchingSequenceDetails))
-        self.assertTrue(isinstance(list(process.state.exploratory_analysis_units.values())[1].encoder, MatchedReferenceEncoder))
+        self.assertTrue(isinstance(list(process.state.exploratory_analysis_units.values())[1].report, Matches))
+        self.assertTrue(isinstance(list(process.state.exploratory_analysis_units.values())[1].encoder, MatchedSequencesEncoder))
         self.assertEqual(1, len(list(process.state.exploratory_analysis_units.values())[1].encoder.reference_sequences))
         self.assertEqual("l1", list(process.state.exploratory_analysis_units.values())[1].label_config.get_labels_by_name()[0])
         self.assertEqual(32, process.state.exploratory_analysis_units["2"].batch_size)

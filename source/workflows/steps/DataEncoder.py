@@ -1,3 +1,5 @@
+import datetime
+
 from source.workflows.steps.DataEncoderParams import DataEncoderParams
 from source.workflows.steps.Step import Step
 from source.workflows.steps.StepParams import StepParams
@@ -14,6 +16,10 @@ class DataEncoder(Step):
         encoder = input_params.encoder
         encoder_params = input_params.encoder_params
 
+        print(f"{datetime.datetime.now()}: Encoding started...")
+
         encoded_dataset = encoder.encode(dataset, encoder_params)
+
+        print(f"{datetime.datetime.now()}: Encoding finished.")
 
         return encoded_dataset

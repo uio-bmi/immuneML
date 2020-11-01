@@ -14,11 +14,16 @@ from source.simulation.signal_implanting_strategy.SignalImplantingStrategy impor
 class FullSequenceImplanting(SignalImplantingStrategy):
     """
     This class represents a :py:obj:`~source.simulation.signal_implanting_strategy.SignalImplantingStrategy.SignalImplantingStrategy`
-    where signals will implanted in the repertoire by replacing `repertoire_implanting_rate` percent of the sequences with sequences
-    generated from the motif's of the signal. Motifs here cannot include gaps, the motif instances are the full sequences and will be
+    where signals will be implanted in the repertoire by replacing `repertoire_implanting_rate` percent of the sequences with sequences
+    generated from the motifs of the signal. Motifs here cannot include gaps and the motif instances are the full sequences and will be
     a part of the repertoire.
 
-    Specification:
+    Arguments: this signal implanting strategy has no arguments.
+
+    YAML specification:
+
+    .. indent with spaces
+    .. code-block:: yaml
 
         motifs:
             my_motif: # cannot include gaps
@@ -28,7 +33,6 @@ class FullSequenceImplanting(SignalImplantingStrategy):
             my_signal:
                 motifs:
                     - my_motif
-                    - ...
                 implanting: FullSequence
 
     """

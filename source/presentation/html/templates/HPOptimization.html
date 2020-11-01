@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>immuneML: Hyperparameter Optimization Overview</title>
+    <title>immuneML: ML Model Training Overview</title>
     <style>
         {{{css_style}}}
     </style>
@@ -11,7 +11,7 @@
 </head>
 <body>
     <div class="container">
-        <h1>Hyperparameter optimization overview</h1>
+        <h1>ML Model Training overview</h1>
         <div>Full specification is available <a href="{{{full_specs}}}">here</a>.</div>
         <details>
             <summary>Dataset details</summary>
@@ -105,14 +105,16 @@
                         <th>Split index</th>
                         <th>Optimal settings (preprocessing, encoding, ML)</th>
                         <th>Optimization metric ({{optimization_metric}})</th>
+                        <th>Details</th>
                     </tr>
                 </thead>
                 <tbody>
                     {{#assessment_results}}
                     <tr>
-                        <td><a href="{{split_details_path}}">{{index}}</a></td>
-                        <td><a href="{{split_details_path}}">{{hp_setting}}</a></td>
-                        <td><a href="{{split_details_path}}">{{optimization_metric_val}}</a></td>
+                        <td>{{index}}</td>
+                        <td>{{hp_setting}}</td>
+                        <td>{{optimization_metric_val}}</td>
+                        <td><a href="{{split_details_path}}">see details</a></td>
                     </tr>
                     {{/assessment_results}}
                 </tbody>
@@ -123,6 +125,11 @@
         </div>
         <h3>Trained models</h3>
         <div>
+            <p>
+                Trained models are available as zip files which can be directly provided as input for the MLApplication instruction and used to encode
+                the data and predict the label on a new dataset. These zip files include trained ML model, encoder and preprocessing that were chosen
+                as optimal for the given label, along with additional files showing the values of each parameter in the model and encoder.
+            </p>
             {{#models_per_label}}
             <div>
                 <a href="{{{model_path}}}">Download {{label}} model here.</a>

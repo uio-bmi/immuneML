@@ -7,6 +7,7 @@ import dill
 import numpy as np
 import pkg_resources
 import yaml
+from sklearn.metrics import SCORERS
 from sklearn.model_selection import RandomizedSearchCV
 from sklearn.utils.validation import check_is_fitted
 
@@ -28,31 +29,40 @@ class SklearnMethod(MLMethod):
     The arguments and specification described bellow applied for all classes inheriting SklearnMethod.
 
     Arguments:
-        parameters: a dictionary of parameters that will be directly passed to the scikit-learn's LogisticRegression class
-            upon calling __init__() method; for detailed list see scikit-learn's documentation of the specific class
-            inheriting SklearnMethod
-        parameter_grid: a dictionary of parameters which all have to be valid arguments for scikit-learn's corresponding class'
-            __init__() method (same as parameters), but unlike parameters argument can contain list of values instead of one value;
-            if this is specified and "model_selection_cv" is True (in the specification) or just if fit_by_cross_validation() is called,
-            a grid search will be performed over these parameters and the optimal model will be kept
 
-    Specification:
+        parameters: a dictionary of parameters that will be directly passed to the scikit-learn's LogisticRegression class upon calling __init__()
+        method; for detailed list see scikit-learn's documentation of the specific class inheriting SklearnMethod
+
+        parameter_grid: a dictionary of parameters which all have to be valid arguments for scikit-learn's corresponding class' __init__() method
+        (same as parameters), but unlike parameters argument can contain list of values instead of one value; if this is specified and
+        "model_selection_cv" is True (in the specification) or just if fit_by_cross_validation() is called, a grid search will be performed over
+        these parameters and the optimal model will be kept
+
+    YAML specification:
+
         ml_methods:
             log_reg:
                 SimpleLogisticRegression: # name of the class inheriting SklearnMethod
+                    # sklearn parameters (same names as in original sklearn class)
                     max_iter: 1000 # specific parameter value
                     penalty: l1
+                    # Additional parameter that determines whether to print convergence warnings
+                    show_warnings: True
                 # if any of the parameters under SimpleLogisticRegression is a list and model_selection_cv is True,
                 # SimpleLogisticRegression will do grid search over the given parameters and return optimal model
                 model_selection_cv: False
                 model_selection_n_folds: -1
             svm_with_cv:
                 SVM: # name of another class inheriting SklearnMethod
+                    # sklearn parameters (same names as in original sklearn class)
                     alpha: [10, 100] # search will be performed over these parameters
+                    # Additional parameter that determines whether to print convergence warnings
+                    show_warnings: True
                 # if any of the parameters under SVM is a list and model_selection_cv is True,
                 # SVM will do grid search over the given parameters and return optimal model
                 model_selection_cv: True
                 model_selection_n_folds: 5
+
     """
 
     FIT_CV = "fit_CV"
@@ -61,13 +71,30 @@ class SklearnMethod(MLMethod):
     def __init__(self, parameter_grid: dict = None, parameters: dict = None):
         super(SklearnMethod, self).__init__()
         self.models = {}
+
+        if parameter_grid is not None and "show_warnings" in parameter_grid:
+            self.show_warnings = parameter_grid.pop("show_warnings")[0]
+        elif parameters is not None and "show_warnings" in parameters:
+            self.show_warnings = parameters.pop("show_warnings")
+        else:
+            self.show_warnings = True
+
         self._parameter_grid = parameter_grid
         self._parameters = parameters
         self.feature_names = None
 
+
     def _fit_for_label(self, X, y: np.ndarray, label: str, cores_for_training: int):
+        if not self.show_warnings:
+            warnings.simplefilter("ignore")
+            os.environ["PYTHONWARNINGS"] = "ignore"
+
         self.models[label] = self._get_ml_model(cores_for_training, X)
         self.models[label].fit(X, y)
+
+        if not self.show_warnings:
+            del os.environ["PYTHONWARNINGS"]
+            warnings.simplefilter("always")
 
     def _prepare_caching_params(self, encoded_data: EncodedData, y, type: str, label_names: list = None, number_of_splits: int = -1):
         return (("encoded_data", hashlib.sha256(str(encoded_data.examples).encode("utf-8")).hexdigest()),
@@ -107,7 +134,7 @@ class SklearnMethod(MLMethod):
     def predict(self, encoded_data: EncodedData, label_names: list = None):
         labels = label_names if label_names is not None else self.models.keys()
         self.check_is_fitted(labels)
-        return {label: self.models[label].predict(encoded_data.examples) for label in labels}
+        return {label: np.array(self.models[label].predict(encoded_data.examples)) for label in labels}
 
     def predict_proba(self, encoded_data: EncodedData, labels: list):
         if self.can_predict_proba():
@@ -116,16 +143,30 @@ class SklearnMethod(MLMethod):
         else:
             return None
 
-    def _fit_for_label_by_cv(self, X, y: np.ndarray, label: str, cores_for_training: int, number_of_splits: int = 5):
-        model = self._get_ml_model(cores_for_training=cores_for_training)
-        n_jobs = model.n_jobs if hasattr(model, 'n_jobs') else cores_for_training
-        self.models[label] = RandomizedSearchCV(model, param_distributions=self._parameter_grid, cv=number_of_splits, n_jobs=n_jobs,
-                                                scoring="balanced_accuracy", refit=True)
+    def _fit_for_label_by_cv(self, X, y: np.ndarray, label: str, cores_for_training: int, optimization_metric: str, number_of_splits: int = 5):
+        model = self._get_ml_model()
+        scoring = optimization_metric
+
+        if optimization_metric not in SCORERS.keys():
+            scoring = "balanced_accuracy"
+            warnings.warn(f"{self.__class__.__name__}: specified optimization metric ({optimization_metric}) is not defined as a sklearn scoring function, using {scoring} instead... ")
+
+        if not self.show_warnings:
+            warnings.simplefilter("ignore")
+            os.environ["PYTHONWARNINGS"] = "ignore"
+
+        self.models[label] = RandomizedSearchCV(model, param_distributions=self._parameter_grid, cv=number_of_splits, n_jobs=cores_for_training,
+                                                scoring=scoring, refit=True)
         self.models[label].fit(X, y)
+
+        if not self.show_warnings:
+            del os.environ["PYTHONWARNINGS"]
+            warnings.simplefilter("always")
+
         self.models[label] = self.models[label].best_estimator_  # do not leave RandomSearchCV object to be in models, use the best estimator instead
 
     def fit_by_cross_validation(self, encoded_data: EncodedData, y, number_of_splits: int = 5, parameter_grid: dict = None,
-                                label_names: list = None, cores_for_training: int = 1):
+                                label_names: list = None, cores_for_training: int = 1, optimization_metric: str = "balanced_accuracy"):
 
         self.feature_names = encoded_data.feature_names
 
@@ -134,12 +175,12 @@ class SklearnMethod(MLMethod):
 
         self.models = CacheHandler.memo_by_params(self._prepare_caching_params(encoded_data, y, self.FIT_CV, label_names, number_of_splits),
                                                   lambda: self._fit_by_cross_validation(encoded_data.examples, y, number_of_splits,
-                                                                                        label_names, cores_for_training))
+                                                                                        label_names, cores_for_training, optimization_metric))
 
-    def _fit_by_cross_validation(self, X, y, number_of_splits: int = 5, label_names: list = None, cores_for_training: int = 1):
+    def _fit_by_cross_validation(self, X, y, number_of_splits: int = 5, label_names: list = None, cores_for_training: int = 1, optimization_metric: str = "balanced_accuracy"):
 
         for label in label_names:
-            self._fit_for_label_by_cv(X, y[label], label, cores_for_training, number_of_splits)
+            self._fit_for_label_by_cv(X, y[label], label, cores_for_training, optimization_metric, number_of_splits)
 
         return self.models
 

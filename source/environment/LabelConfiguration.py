@@ -2,6 +2,7 @@
 import warnings
 
 from source.environment.Label import Label
+from source.util.ParameterValidator import ParameterValidator
 
 
 class LabelConfiguration:
@@ -17,14 +18,17 @@ class LabelConfiguration:
 
         self._labels = {label.name: label for label in labels} if labels is not None else {}
 
-    def add_label(self, label: str, values: list = None, auxiliary_labels: list = None):
+    def add_label(self, label: str, values: list = None, auxiliary_labels: list = None, positive_class=None):
 
         vals = list(values) if values else None
 
         if label in self._labels and self._labels[label] is not None and len(self._labels[label]) > 0:
             warnings.warn("Label " + label + " has already been set. Overriding existing values...", Warning)
 
-        self._labels[label] = Label(label, vals, auxiliary_labels)
+        if positive_class is not None:
+            ParameterValidator.assert_in_valid_list(positive_class, values, Label.__name__, 'positive_class')
+
+        self._labels[label] = Label(label, vals, auxiliary_labels, positive_class)
 
     def get_labels_by_name(self):
         return sorted(list(self._labels.keys()))

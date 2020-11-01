@@ -1,7 +1,8 @@
-file_size: 1000 # number of sequences / receptors per file as stored internally by ImmuneML in ImmuneML format - not visible to users
+is_repertoire: True
+path: ./
+sequence_file_size: 1000 # number of sequences / receptors per file as stored internally by ImmuneML in ImmuneML format - not visible to users
 paired: True
 import_dual_chains: True
 import_all_gene_combinations: False
-batch_size: 4
 separator: "\t"
 extra_columns_to_load: []

@@ -9,7 +9,7 @@ class Implanting:
     When performing a Simulation, one or more implantings can be specified. An implanting represents
     a set of signals which are implanted in a RepertoireDataset with given rates.
 
-    Multiple implantings can be specified in one simulation. In this case, each implanting will only
+    Multiple implantings may be specified in one simulation. In this case, each implanting will only
     affect its own partition of the dataset, so each repertoire can only receive implanted signals from
     one implanting. This way, implantings can be used to ensure signals do not overlap (one implanting per
     signal), or to ensure signals always occur together (multiple signals per implanting).
@@ -17,7 +17,7 @@ class Implanting:
 
     Arguments:
 
-        signals (list): The list of :py:obj:`~source.simulation.implants.Signal.Signal` objects to be implanted in a subset of the repertoires in of a RepertoireDataset.
+        signals (list): The list of :py:obj:`~source.simulation.implants.Signal.Signal` objects to be implanted in a subset of the repertoires in a RepertoireDataset.
         When multiple signals are specified, this means that all of these signals are implanted in
         the same repertoires in a RepertoireDataset, although they may not be implanted in the same sequences
         within those repertoires (this depends on the :py:obj:`~source.simulation.signal_implanting_strategy.SignalImplantingStrategy.SignalImplantingStrategy`).
@@ -33,7 +33,7 @@ class Implanting:
         the repertoire/receptor in question will have negative class.
 
 
-    Specification:
+    YAML specification:
 
     .. indent with spaces
     .. code-block:: yaml

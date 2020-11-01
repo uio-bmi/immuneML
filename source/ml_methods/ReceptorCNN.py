@@ -22,6 +22,11 @@ class ReceptorCNN(MLMethod):
     A CNN which separately detects motifs using CNN kernels in each chain of paired receptor data, combines the kernel activations into a unique
     representation of the receptor and uses this representation to predict the antigen binding.
 
+    .. figure:: _static/images/receptor_cnn_immuneML.png
+        :width: 70%
+
+        The architecture of the CNN for paired-chain receptor data
+
     Requires one-hot encoded data as input (as produced by :py:obj:`~source.encodings.onehot.OneHotEncoder.OneHotEncoder`).
 
     Arguments:
@@ -59,7 +64,7 @@ class ReceptorCNN(MLMethod):
         background_probabilities: used for rescaling the kernel values to produce information gain matrix; represents the background probability of
         each amino acid (without positional information); if not specified, uniform background is assumed
 
-    Specification:
+    YAML specification:
 
     .. indent with spaces
     .. code-block:: yaml
@@ -132,7 +137,7 @@ class ReceptorCNN(MLMethod):
 
         return {self.label_name: np.vstack([1 - np.array(predictions), predictions]).T}
 
-    def fit(self, encoded_data: EncodedData, y, label_names: list = None, cores_for_training: int = 2):
+    def fit(self, encoded_data: EncodedData, y, label_names: list = None, cores_for_training: int = -1):
 
         self.feature_names = encoded_data.feature_names
 
@@ -207,7 +212,8 @@ class ReceptorCNN(MLMethod):
         return train_data, val_data
 
     def _make_encoded_data(self, encoded_data, indices):
-        return EncodedData(examples=torch.from_numpy(encoded_data.examples[indices]).float(),
+        examples = np.swapaxes(encoded_data.examples, 2, 3)
+        return EncodedData(examples=torch.from_numpy(examples[indices]).float(),
                            labels={
                                label: torch.from_numpy(np.array([encoded_data.labels[label][i] for i in indices]) == self.class_mapping[1]).float()
                                for label in encoded_data.labels.keys()},

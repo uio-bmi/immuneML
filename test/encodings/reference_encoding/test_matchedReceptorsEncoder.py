@@ -6,6 +6,7 @@ from source.caching.CacheType import CacheType
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.receptor.receptor_sequence.Chain import Chain
 from source.encodings.EncoderParams import EncoderParams
+from source.encodings.reference_encoding.MatchedReceptorsEncoder import MatchedReceptorsEncoder
 from source.encodings.reference_encoding.MatchedReceptorsRepertoireEncoder import MatchedReceptorsRepertoireEncoder
 from source.environment.Constants import Constants
 from source.environment.EnvironmentSettings import EnvironmentSettings
@@ -60,7 +61,7 @@ TCR_AB	200	CCCC	TRAV1		TRAJ1	null	null	null	null	TTTT	TRBV1		TRBJ1	null	null	nul
         with open(path + "refs.tsv", "w") as file:
             file.writelines(file_content)
 
-        reference_receptors = {"path": path + "refs.tsv", "format": "IRIS"}
+        reference_receptors = {"params": {"path": path + "refs.tsv"}, "format": "IRIS"}
 
         return dataset, label_config, reference_receptors, labels
 
@@ -69,8 +70,8 @@ TCR_AB	200	CCCC	TRAV1		TRAJ1	null	null	null	null	TTTT	TRBV1		TRBJ1	null	null	nul
 
         dataset, label_config, reference_receptors, labels = self.create_dummy_data(path)
 
-        encoder = MatchedReceptorsRepertoireEncoder.build_object(dataset, **{
-            "reference_receptors": reference_receptors,
+        encoder = MatchedReceptorsEncoder.build_object(dataset, **{
+            "reference": reference_receptors,
             "max_edit_distances": 0
         })
 
@@ -80,11 +81,12 @@ TCR_AB	200	CCCC	TRAV1		TRAJ1	null	null	null	null	TTTT	TRBV1		TRBJ1	null	null	nul
             filename="dataset.csv"
         ))
 
-        expected_outcome = [[10, 10, 0, 0], [5, 5, 5, 5], [1, 1, 2, 2]]
+        expected_outcome = [[10, 0, 0, 0],[0, 10, 0, 0],[5, 0, 5, 0], [0, 5, 0, 5], [1, 1, 2, 2]]
         for index, row in enumerate(expected_outcome):
             self.assertListEqual(list(encoded.encoded_data.examples[index]), expected_outcome[index])
 
-        self.assertDictEqual(encoded.encoded_data.labels, {"label": ["yes", "no", "no"]})
+        self.assertDictEqual(encoded.encoded_data.labels, {"label": ["yes", "yes", "no", "no", "no"],
+                                                           "subject_id": ["subject_1", "subject_1", "subject_2", "subject_2", "subject_3"]})
         self.assertListEqual(encoded.encoded_data.feature_names, ["100-A0-B0.alpha", "100-A0-B0.beta", "200-A0-B0.alpha", "200-A0-B0.beta"])
 
         self.assertListEqual(list(encoded.encoded_data.feature_annotations.receptor_id), ["100-A0-B0", "100-A0-B0", "200-A0-B0", "200-A0-B0"])
@@ -94,13 +96,4 @@ TCR_AB	200	CCCC	TRAV1		TRAJ1	null	null	null	null	TTTT	TRBV1		TRBJ1	null	null	nul
         self.assertListEqual(list(encoded.encoded_data.feature_annotations.v_gene), ["V1" for i in range(4)])
         self.assertListEqual(list(encoded.encoded_data.feature_annotations.j_gene), ["J1" for i in range(4)])
 
-
-        # The label 'subject_id' must be specified, error if not specified
-        label_config = LabelConfiguration()
-        label_config.add_label("label", labels["label"])
-        params=EncoderParams(result_path=path, label_config=label_config, filename="dataset.csv")
-
-        self.assertRaises(KeyError, encoder.encode, dataset, params)
-
         shutil.rmtree(path)
-

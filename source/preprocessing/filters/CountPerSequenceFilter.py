@@ -21,12 +21,12 @@ class CountPerSequenceFilter(Filter):
         remove_without_count (bool): Whether the sequences without a reported count value should be removed.
 
         remove_empty_repertoires (bool): Whether repertoires without sequences should be removed.
-            Only has an effect when remove_without_count is also set to True.
+        Only has an effect when remove_without_count is also set to True.
 
         batch_size (int): number of repertoires that can be loaded at the same time (only affects the speed when applying this filter on a RepertoireDataset)
 
 
-    Specification:
+    YAML specification:
 
     .. indent with spaces
     .. code-block:: yaml
@@ -39,6 +39,7 @@ class CountPerSequenceFilter(Filter):
                         remove_empty_repertoires: True
                         low_count_limit: 3
                         batch_size: 4
+
     """
 
     def __init__(self, low_count_limit: int, remove_without_count: bool, remove_empty_repertoires: bool,  batch_size: int):

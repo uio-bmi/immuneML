@@ -1,11 +1,12 @@
 import os
 import shutil
+from argparse import Namespace
 from unittest import TestCase
 
 import yaml
 
 from source.IO.dataset_export.PickleExporter import PickleExporter
-from source.api.galaxy.GalaxyYamlTool import GalaxyYamlTool
+from source.app.ImmuneMLApp import run_immuneML
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.simulation.dataset_generation.RandomDatasetGenerator import RandomDatasetGenerator
 from source.util.PathBuilder import PathBuilder
@@ -75,7 +76,7 @@ class TestGalaxyYamlTool(TestCase):
                 "inst1": {
                     "type": "DatasetGeneration",
                     "datasets": ["new_d1", 'd2'],
-                    "formats": ["AIRR"]
+                    "export_formats": ["AIRR"]
                 },
                 "inst2": {
                     "type": "TrainMLModel",
@@ -115,8 +116,7 @@ class TestGalaxyYamlTool(TestCase):
         with open(specs_path, "w") as file:
             yaml.dump(specs, file)
 
-        tool = GalaxyYamlTool(specs_path, result_path + "result/")
-        tool.run()
+        run_immuneML(Namespace(**{"specification_path": specs_path, "result_path": result_path + 'result/', 'tool': "GalaxyYamlTool"}))
 
         self.assertTrue(os.path.exists(f"{result_path}result/inst1/new_d1/AIRR"))
         self.assertTrue(os.path.exists(f"{result_path}result/inst1/d2/AIRR"))

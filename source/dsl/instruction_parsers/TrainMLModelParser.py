@@ -1,6 +1,7 @@
 import hashlib
 import os
 import warnings
+from inspect import signature
 from typing import Tuple
 
 from source.data_model.dataset.Dataset import Dataset
@@ -26,13 +27,18 @@ class TrainMLModelParser:
 
         valid_keys = ["assessment", "selection", "dataset", "strategy", "labels", "metrics", "settings", "batch_size", "type", "reports",
                       "optimization_metric", 'refit_optimal_model']
+        ParameterValidator.assert_type_and_value(instruction['settings'], list, TrainMLModelParser.__name__, 'settings')
         ParameterValidator.assert_keys(list(instruction.keys()), valid_keys, TrainMLModelParser.__name__, "TrainMLModel")
         ParameterValidator.assert_type_and_value(instruction['refit_optimal_model'], bool, TrainMLModelParser.__name__, 'refit_optimal_model')
+        ParameterValidator.assert_type_and_value(instruction['metrics'], list, TrainMLModelParser.__name__, 'metrics')
+        ParameterValidator.assert_type_and_value(instruction['optimization_metric'], str, TrainMLModelParser.__name__, 'optimization_metric')
+        ParameterValidator.assert_type_and_value(instruction['batch_size'], int, TrainMLModelParser.__name__, 'batch_size')
+        ParameterValidator.assert_type_and_value(instruction['strategy'], str, TrainMLModelParser.__name__, 'strategy')
 
         settings = self._parse_settings(instruction, symbol_table)
         dataset = symbol_table.get(instruction["dataset"])
-        assessment = self._parse_split_config(instruction, "assessment", symbol_table)
-        selection = self._parse_split_config(instruction, "selection", symbol_table)
+        assessment = self._parse_split_config(key, instruction, "assessment", symbol_table, len(settings))
+        selection = self._parse_split_config(key, instruction, "selection", symbol_table, len(settings))
         assessment, selection = self._update_split_configs(assessment, selection, dataset)
         label_config = self._create_label_config(instruction, dataset, key)
         strategy = ReflectionHandler.get_class_by_name(instruction["strategy"], "hyperparameter_optimization/")
@@ -114,53 +120,78 @@ class TrainMLModelParser:
 
         return path
 
+    def _check_label_format(self, labels: list, instruction_key: str):
+        ParameterValidator.assert_type_and_value(labels, list, TrainMLModelParser.__name__, f'{instruction_key}/labels')
+        assert all(isinstance(label, str) or isinstance(label, dict) for label in labels), \
+            f"{TrainMLModelParser.__name__}: labels under {instruction_key} were not defined properly. The list of labels has to either be a list of " \
+            f"label names, or there can be a parameter 'positive_class' defined under the label name."
+
+        assert all(len(list(label.keys())) == 1 and isinstance(list(label.values())[0], dict) and 'positive_class' in list(label.values())[0]
+                   and len(list(list(label.values())[0].keys())) == 1 for label in [l for l in labels if isinstance(l, dict)]), \
+            f"{TrainMLModelParser.__name__}: labels that are specified by more than label name, can include only one parameter called 'positive_class'."
+
     def _create_label_config(self, instruction: dict, dataset: Dataset, instruction_key: str) -> LabelConfiguration:
         labels = instruction["labels"]
+
+        self._check_label_format(labels, instruction_key)
+
         label_config = LabelConfiguration()
         for label in labels:
-            if dataset.params is not None and label in dataset.params:
-                label_values = dataset.params[label]
+            label_name = label if isinstance(label, str) else list(label.keys())[0]
+            positive_class = label[label_name]['positive_class'] if isinstance(label, dict) else None
+            if dataset.params is not None and label_name in dataset.params:
+                label_values = dataset.params[label_name]
             elif hasattr(dataset, "get_metadata"):
-                label_values = list(set(dataset.get_metadata([label])[label]))
+                label_values = list(set(dataset.get_metadata([label_name])[label_name]))
             else:
                 label_values = []
                 warnings.warn(f"{TrainMLModelParser.__name__}: for instruction {instruction_key}, label values could not be recovered for label "
                               f"{label}, using empty list instead.  This could cause problems with some encodings. "
                               f"If that might be the case, check if the dataset {dataset.name} has been properly loaded.")
 
-            label_config.add_label(label, label_values)
+            label_config.add_label(label_name, label_values, positive_class=positive_class)
         return label_config
 
-    def _parse_split_config(self, instruction: dict, key: str, symbol_table: SymbolTable) -> SplitConfig:
+    def _parse_split_config(self, instruction_key, instruction: dict, split_key: str, symbol_table: SymbolTable, settings_count: int) -> SplitConfig:
 
         try:
 
             default_params = DefaultParamsLoader.load("instructions/", SplitConfig.__name__)
-            report_config_input = self._prepare_report_config(instruction, key, symbol_table)
-            instruction[key] = {**default_params, **instruction[key]}
+            report_config_input = self._prepare_report_config(instruction_key, instruction, split_key, symbol_table)
+            instruction[split_key] = {**default_params, **instruction[split_key]}
 
-            split_strategy = SplitType[instruction[key]["split_strategy"].upper()]
-            training_percentage = float(instruction[key]["training_percentage"]) if split_strategy == SplitType.RANDOM else -1
+            split_strategy = SplitType[instruction[split_key]["split_strategy"].upper()]
+            training_percentage = float(instruction[split_key]["training_percentage"]) if split_strategy == SplitType.RANDOM else -1
+
+            if split_strategy == SplitType.RANDOM and training_percentage == 1 and settings_count > 1:
+                raise ValueError(f"{TrainMLModelParser.__name__}: all data under {instruction_key}/{split_key} was specified to be used for "
+                                 f"training, but {settings_count} settings were specified for evaluation. Please define a test/validation set by "
+                                 f"reducing the training percentage (e.g., to 0.7) or use only one hyperparameter setting to run the analysis.")
 
             return SplitConfig(split_strategy=split_strategy,
-                               split_count=int(instruction[key]["split_count"]),
+                               split_count=int(instruction[split_key]["split_count"]),
                                training_percentage=training_percentage,
                                reports=ReportConfig(**report_config_input),
-                               manual_config=ManualSplitConfig(**instruction[key]["manual_config"]) if "manual_config" in instruction[key] else None,
-                               leave_one_out_config=LeaveOneOutConfig(**instruction[key]["leave_one_out_config"])
-                               if "leave_one_out_config" in instruction[key] else None)
+                               manual_config=ManualSplitConfig(**instruction[split_key]["manual_config"]) if "manual_config" in instruction[split_key] else None,
+                               leave_one_out_config=LeaveOneOutConfig(**instruction[split_key]["leave_one_out_config"])
+                               if "leave_one_out_config" in instruction[split_key] else None)
 
         except KeyError as key_error:
-            raise KeyError(f"{TrainMLModelParser.__name__}: parameter {key_error.args[0]} was not defined under {key}.")
+            raise KeyError(f"{TrainMLModelParser.__name__}: parameter {key_error.args[0]} was not defined under {split_key}.")
 
-    def _prepare_report_config(self, instruction, key, symbol_table):
-        if "reports" in instruction[key]:
-            for report_type in instruction[key]["reports"]:
-                ParameterValidator.assert_type_and_value(instruction[key]["reports"][report_type], list, "TrainMLModel/Report",
+    def _prepare_report_config(self, instruction_key, instruction, split_key, symbol_table):
+        if "reports" in instruction[split_key]:
+            location = f"{instruction_key}/{split_key}/reports"
+            report_types = list(signature(ReportConfig).parameters.keys())
+            ParameterValidator.assert_all_in_valid_list(instruction[split_key]["reports"].keys(), report_types,
+                                                        location, "reports")
+
+            for report_type in instruction[split_key]["reports"]:
+                ParameterValidator.assert_type_and_value(instruction[split_key]["reports"][report_type], list, f"{location}/{report_type}",
                                                          report_type)
 
-            report_config_input = {report_type: {report_id: symbol_table.get(report_id) for report_id in instruction[key]["reports"][report_type]}
-                                   for report_type in instruction[key]["reports"]}
+            report_config_input = {report_type: {report_id: symbol_table.get(report_id) for report_id in instruction[split_key]["reports"][report_type]}
+                                   for report_type in instruction[split_key]["reports"]}
         else:
             report_config_input = {}
 

@@ -59,16 +59,27 @@ class OneHotRepertoireEncoder(OneHotEncoder):
 
         encoded_repertoires, repertoire_names, labels = zip(*repertoires)
 
-        encoded_dataset = np.stack(encoded_repertoires, axis=0)
+        examples = np.stack(encoded_repertoires, axis=0)
 
         labels = {k: [dic[k] for dic in labels] for k in labels[0]}
 
-        encoded_data = EncodedData(examples=encoded_dataset,
+        feature_names = self._get_feature_names(self.max_seq_len, self.max_rep_len)
+
+        if self.flatten:
+            examples = examples.reshape(dataset.get_example_count(), self.max_rep_len*self.max_seq_len*len(self.onehot_dimensions))
+            feature_names = [item for sublist in feature_names for subsublist in sublist for item in subsublist]
+
+        encoded_data = EncodedData(examples=examples,
                                    example_ids=repertoire_names,
                                    labels=labels,
+                                   feature_names=feature_names,
                                    encoding=OneHotEncoder.__name__)
 
         return encoded_data
+
+    def _get_feature_names(self, max_seq_len, max_rep_len):
+        return [[[f"{seq}_{pos}_{dim}" for dim in self.onehot_dimensions] for pos in range(max_seq_len)] for seq in range(max_rep_len)]
+
 
     def _get_encoded_repertoire(self, repertoire, params: EncoderParams):
         params.model = vars(self)

@@ -19,6 +19,7 @@ class EncodedData:
                 for the label across examples:
                 {label_name1: [...], label_name2: [...]}
                 Each list associated with a label has to have values for all examples
+
     """
 
     def __init__(self, examples, labels: dict = None, example_ids: list = None, feature_names: list = None,

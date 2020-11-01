@@ -4,9 +4,9 @@ from source.util.PathBuilder import PathBuilder
 
 
 class RepertoireClassificationTool:
-    def __init__(self, args, output_dir):
+    def __init__(self, args, result_path):
         self.args = args
-        self.result_path = output_dir if output_dir[-1] == '/' else f"{output_dir}/"
+        self.result_path = result_path if result_path[-1] == '/' else f"{result_path}/"
 
     def run(self):
         yaml_path = main(self.args)

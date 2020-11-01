@@ -38,6 +38,8 @@ class PickleExporter(DataExporter):
         with open(f"{path}/{dataset_filename}", "wb") as file:
             pickle.dump(exported_dataset, file, pickle.HIGHEST_PROTOCOL)
 
+        return exported_dataset
+
     @staticmethod
     def _export_metadata(dataset, metadata_folder_path, dataset_filename, repertoires_path):
         if dataset.metadata_file is None or not os.path.isfile(dataset.metadata_file):
@@ -50,6 +52,9 @@ class PickleExporter(DataExporter):
 
         PickleExporter._update_repertoire_paths_in_metadata(metadata_file, repertoires_path)
         PickleExporter._add_dataset_to_metadata(metadata_file, dataset_filename)
+
+        if os.path.isfile(f"{metadata_folder_path}metadata.csv"):
+            os.remove(f"{metadata_folder_path}metadata.csv")
 
         return metadata_file
 

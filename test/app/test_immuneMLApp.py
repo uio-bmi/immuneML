@@ -26,7 +26,7 @@ class TestImmuneMLApp(TestCase):
 
         repertoire_count = 30
         repertoires, metadata = RepertoireBuilder.build([["AA", "AAAA", "AAAA", "AAA"] for i in range(repertoire_count)], path,
-                                                        {"CD": [True if i % 2 == 0 else False for i in range(repertoire_count)],
+                                                        {"CD": ['yes' if i % 2 == 0 else 'no' for i in range(repertoire_count)],
                                                          "CMV": [True if i % 2 == 1 else False for i in range(repertoire_count)]},
                                                         [[{"chain": "A" if i % 2 == 0 else "B", "count": random.randint(2, 5)}
                                                           for i in range(4)]
@@ -98,7 +98,7 @@ class TestImmuneMLApp(TestCase):
                             "batch_size": 3
                         }
                     },
-                    "rep2": "BenchmarkHPSettings",
+                    "rep2": "MLSettingsPerformance",
                     "rep3": {
                         "Coefficients": {
                             "cutoff": [10],
@@ -121,7 +121,7 @@ class TestImmuneMLApp(TestCase):
                 "export_instr": {
                     "type": "DatasetGeneration",
                     "datasets": ["d1"],
-                    "formats": ["AIRR"]
+                    "export_formats": ["AIRR"]
                 },
                 "inst1": {
                     "type": "TrainMLModel",
@@ -150,7 +150,7 @@ class TestImmuneMLApp(TestCase):
                     },
                     "selection": {
                         "split_strategy": "random",
-                        "split_count": 2,
+                        "split_count": 1,
                         "training_percentage": 0.7,
                         "reports": {
                             "data_splits": [],
@@ -187,7 +187,7 @@ class TestImmuneMLApp(TestCase):
             full_specs = yaml.load(file, Loader=yaml.FullLoader)
 
         self.assertTrue("split_strategy" in full_specs["instructions"]["inst1"]["selection"] and full_specs["instructions"]["inst1"]["selection"]["split_strategy"] == "random")
-        self.assertTrue("split_count" in full_specs["instructions"]["inst1"]["selection"] and full_specs["instructions"]["inst1"]["selection"]["split_count"] == 2)
+        self.assertTrue("split_count" in full_specs["instructions"]["inst1"]["selection"] and full_specs["instructions"]["inst1"]["selection"]["split_count"] == 1)
         self.assertTrue("training_percentage" in full_specs["instructions"]["inst1"]["selection"] and full_specs["instructions"]["inst1"]["selection"]["training_percentage"] == 0.7)
 
         shutil.rmtree(path, ignore_errors=True)

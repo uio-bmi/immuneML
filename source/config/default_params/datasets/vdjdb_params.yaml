@@ -1,9 +1,14 @@
-paired: True # whether to import_dataset paired data: if true returns ReceptorDataset, and if false returns SequenceDataset
-file_size: 1000 # number of sequences / receptors per file as stored internally by ImmuneML in ImmuneML format - not visible to users
+is_repertoire: True
+path: ./
 column_mapping:
   V: v_genes
   J: j_genes
   CDR3: sequence_aas
   complex.id: sequence_identifiers
-region_type: CDR3
+  Gene: chains
+metadata_column_mapping:
+  Epitope: epitope
+  Epitope gene: epitope_gene
+  Epitope species: epitope_species
+region_type: "IMGT_CDR3" # which region to use - IMGT_CDR3 option means removing first and last amino acid as VDJdb uses IMGT junction as CDR3
 separator: "\t"

@@ -10,7 +10,11 @@
 </head>
 <body>
     <div class="container">
-        <h2>Selection - label {{label}}</h2>
+        <h2>Selection for assessment split {{assessment_split}} - label {{label}}</h2>
+        <p>
+            In the table below, the performance for each hyperparameter setting on each of validation split is shown along with the average performance (if applicable).
+            The hyperparameter setting chosen as optimal (the best average performance) is shown in bold.
+        </p>
         <div class="padded">
             <div class="table-container">
                 <table>
@@ -18,6 +22,9 @@
                         <tr>
                             <th rowspan="2">Hyperparameter settings (preprocessing, encoding, ML method)</th>
                             <th colspan="{{split_count}}">Performance ({{optimization_metric}})</th>
+                            {{#show_average}}
+                            <th rowspan="2">Average</th>
+                            {{/show_average}}
                         </tr>
                         <tr>
                             {{#splits}}
@@ -28,10 +35,21 @@
                     <tbody>
                         {{#hp_settings}}
                         <tr>
-                            <td>{{hp_setting}}</td>
+                            <td>
+                                {{#optimal}}<b>{{/optimal}}
+                                {{hp_setting}}
+                                {{#optimal}}</b>{{/optimal}}
+                            </td>
                             {{#hp_splits}}
                             <td>{{optimization_metric_val}}</td>
                             {{/hp_splits}}
+                            {{#show_average}}
+                            <td>
+                                {{#optimal}}<b>{{/optimal}}
+                                {{average}}
+                                {{#optimal}}</b>{{/optimal}}
+                            </td>
+                            {{/show_average}}
                         </tr>
                         {{/hp_settings}}
                     </tbody>
@@ -70,6 +88,8 @@
             {{/data_split_reports}}
         </div>
         {{/has_data_split_reports}}
+
+        {{#has_reports_per_setting}}
         <h2>Reports per hyperparameter setting</h2>
         {{#reports_per_setting}}
         <div class="padded">
@@ -77,45 +97,50 @@
             <hr>
             {{#reports}}
             <h4>Split {{split_index}}</h4>
-            {{#encoding_train_reports}}
-            <h5>Reports on encoded training data</h5>
-            {{#output_figures}}
-            <div class="padded center">
-                <embed alt="report" src="{{path}}">
-                <p>{{name}}</p>
-            </div>
-            {{/output_figures}}
-            {{#output_tables}}
-            <a href="{{path}}">Download {{#name}}{{name}} report{{/name}}</a>
-            {{/output_tables}}
-            {{/encoding_train_reports}}
-            {{#encoding_test_reports}}
-            <h5>Reports on encoded validation data</h5>
-            {{#output_figures}}
-            <div class="padded center">
-                <embed alt="report" src="{{path}}">
-                <p>{{name}}</p>
-            </div>
-            {{/output_figures}}
-            {{#output_tables}}
-            <a href="{{path}}">Download {{#name}}{{name}} report{{/name}}</a>
-            {{/output_tables}}
-            {{/encoding_test_reports}}
-            {{#ml_reports}}
-            <h5>Reports on the ML model</h5>
-            {{#output_figures}}
-            <div class="padded center">
-                <embed alt="report" src="{{path}}">
-                <p>{{name}}</p>
-            </div>
-            {{/output_figures}}
-            {{#output_tables}}
-            <a href="{{path}}">Download {{#name}}{{name}} report{{/name}}</a>
-            {{/output_tables}}
-            {{/ml_reports}}
+
+                {{#encoding_train_reports}}
+                <h5>Reports on encoded training data</h5>
+                {{#output_figures}}
+                <div class="padded center">
+                    <embed alt="report" src="{{path}}">
+                    <p>{{name}}</p>
+                </div>
+                {{/output_figures}}
+                {{#output_tables}}
+                <a href="{{path}}">Download {{#name}}{{name}} report{{/name}}</a>
+                {{/output_tables}}
+                {{/encoding_train_reports}}
+
+                {{#encoding_test_reports}}
+                <h5>Reports on encoded validation data</h5>
+                {{#output_figures}}
+                <div class="padded center">
+                    <embed alt="report" src="{{path}}">
+                    <p>{{name}}</p>
+                </div>
+                {{/output_figures}}
+                {{#output_tables}}
+                <a href="{{path}}">Download {{#name}}{{name}} report{{/name}}</a>
+                {{/output_tables}}
+                {{/encoding_test_reports}}
+
+                {{#ml_reports}}
+                <h5>Reports on the ML model</h5>
+                {{#output_figures}}
+                <div class="padded center">
+                    <embed alt="report" src="{{path}}">
+                    <p>{{name}}</p>
+                </div>
+                {{/output_figures}}
+                {{#output_tables}}
+                <a href="{{path}}">Download {{#name}}{{name}} report{{/name}}</a>
+                {{/output_tables}}
+                {{/ml_reports}}
+
             {{/reports}}
         </div>
         {{/reports_per_setting}}
+        {{/has_reports_per_setting}}
     </div>
 </body>
 </html>

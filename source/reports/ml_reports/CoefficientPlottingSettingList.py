@@ -1,4 +1,4 @@
-from collections import MutableSequence
+from collections.abc import MutableSequence
 
 from source.reports.ml_reports.CoefficientPlottingSetting import CoefficientPlottingSetting
 from source.util.ParameterValidator import ParameterValidator

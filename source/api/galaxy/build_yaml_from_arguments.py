@@ -3,6 +3,8 @@ import glob
 import itertools as it
 import os
 import sys
+import logging
+import warnings
 
 import yaml
 
@@ -62,8 +64,8 @@ def get_ml_method_spec(ml_method_class, model_selection_n_folds=5):
         ml_spec = {
             "logistic_regression": {
                 "SimpleLogisticRegression": {
-                    "penalty": ["l1", "l2"],
-                    "C": [0.001, 0.01, 0.1, 1, 10, 100, 1000],
+                    "penalty": ["l1"],
+                    "C": [0.01, 0.1, 1, 10, 100],
                     "class_weight": ["balanced"]
                 },
                 "model_selection_cv": True,
@@ -134,6 +136,10 @@ def discover_dataset_params():
     return {"path": dataset_path,
             "metadata_file": f"{dataset_name}_metadata.csv"}
 
+def build_labels(labels_str):
+    labels = labels_str.split(",")
+    return [label.strip().strip("'\"") for label in labels]
+
 
 def build_specs(args):
     specs = {
@@ -149,15 +155,11 @@ def build_specs(args):
             "reports": {
                 "coefficients": {
                     "Coefficients": {
-                        "coefs_to_plot": [CoefficientPlottingSetting.ALL.name,
-                                          CoefficientPlottingSetting.NONZERO.name]
+                        "coefs_to_plot": [CoefficientPlottingSetting.N_LARGEST.name],
+                        "n_largest": [25]
                     }
                 },
-                "benchmark": {
-                    "BenchmarkHPSettings": {
-                        "errorbar_meaning": "STANDARD_ERROR"
-                    }
-                }
+                "benchmark": "MLSettingsPerformance"
             }
         },
         "instructions": {
@@ -175,8 +177,8 @@ def build_specs(args):
                 },
                 "selection": {
                     "split_strategy": "random",
-                    "split_count": 1, # not used
-                    "training_percentage": 1,
+                    "split_count": 1,
+                    "training_percentage": 0.7,
                 },
                 "labels": [],
                 "dataset": "d1",
@@ -185,7 +187,7 @@ def build_specs(args):
                 "batch_size": 10,
                 "reports": [],
                 "optimization_metric": "balanced_accuracy",
-                'refit_optimal_model': False
+                'refit_optimal_model': True
             }
         }
     }
@@ -194,6 +196,7 @@ def build_specs(args):
     ml_specs = build_ml_methods_specs(args)
     settings_specs = build_settings_specs(enc_specs.keys(), ml_specs.keys())
     dataset_params = discover_dataset_params()
+    labels = build_labels(args.labels)
 
     specs["definitions"]["datasets"]["d1"]["params"] = dataset_params
     specs["definitions"]["encodings"] = enc_specs
@@ -201,7 +204,7 @@ def build_specs(args):
     specs["instructions"]["inst1"]["settings"] = settings_specs
     specs["instructions"]["inst1"]["assessment"]["split_count"] = args.split_count
     specs["instructions"]["inst1"]["assessment"]["training_percentage"] = args.training_percentage / 100
-    specs["instructions"]["inst1"]["labels"] = args.labels
+    specs["instructions"]["inst1"]["labels"] = labels
 
     return specs
 
@@ -228,15 +231,15 @@ def parse_commandline_arguments(args):
     parser = argparse.ArgumentParser(description="tool for building immuneML Galaxy YAML from arguments")
     parser.add_argument("-o", "--output_path", required=True, help="Output location for the generated yaml file (directiory).")
     parser.add_argument("-f", "--file_name", default="specs.yaml", help="Output file name for the yaml file. Default name is 'specs.yaml' if not specified.")
-    parser.add_argument("-l", "--labels", nargs="+", required=True,
-                        help="Which metadata labels should be predicted for the dataset.")
+    parser.add_argument("-l", "--labels", required=True,
+                        help="Which metadata labels should be predicted for the dataset (separated by comma).")
     parser.add_argument("-m", "--ml_methods", nargs="+", choices=ml_method_names, required=True,
                         help="Which machine learning methods should be applied.")
     parser.add_argument("-t", "--training_percentage", type=float, required=True,
                         help="The percentage of data used for training.")
     parser.add_argument("-c", "--split_count", type=int, required=True,
                         help="The number of times to repeat the training process with a different random split of the data.")
-    parser.add_argument("-s", "--sequence_type", choices=["complete", "subsequence"], required=True, nargs="+",
+    parser.add_argument("-s", "--sequence_type", choices=["complete", "subsequence"], default=["subsequence"], nargs="+",
                         help="Whether complete CDR3 sequences are used, or k-mer subsequences.")
     parser.add_argument("-p", "--position_type", choices=["invariant", "positional"], nargs="+",
                         help="Whether IMGT-positional information is used for k-mers, or the k-mer positions are position-invariant.")
@@ -246,15 +249,20 @@ def parse_commandline_arguments(args):
     parser.add_argument("-kr", "--k_right", type=int, nargs="+", help="Length after gap when k-mers are used.")
     parser.add_argument("-gi", "--min_gap", type=int, nargs="+", help="Minimal gap length when gapped k-mers are used.")
     parser.add_argument("-ga", "--max_gap", type=int, nargs="+", help="Maximal gap length when gapped k-mers are used.")
-    parser.add_argument("-r", "--reads", choices=[ReadsType.UNIQUE.value, ReadsType.ALL.value], nargs="+", required=True,
+    parser.add_argument("-r", "--reads", choices=[ReadsType.UNIQUE.value, ReadsType.ALL.value], nargs="+", default=[ReadsType.UNIQUE.value],
                         help="Whether k-mer counts should be scaled by unique clonotypes or all observed receptor sequences")
+
 
     return parser.parse_args(args)
 
 
 def main(args):
+    logging.basicConfig(filename="build_yaml_from_args_log.txt", level=logging.INFO, format='%(asctime)s %(levelname)s: %(message)s')
+    warnings.showwarning = lambda message, category, filename, lineno, file=None, line=None: logging.warning(message)
+
     parsed_args = parse_commandline_arguments(args)
     check_arguments(parsed_args)
+
     specs = build_specs(parsed_args)
 
     PathBuilder.build(parsed_args.output_path)

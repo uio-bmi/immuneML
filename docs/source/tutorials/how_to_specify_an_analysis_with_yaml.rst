@@ -1,13 +1,11 @@
 How to specify an analysis with YAML
 ====================================
 
-The domain-specific language (DSL) developed for ImmuneML defines what the analysis YAML
-specification should look like. Depending on the specification, ImmuneML can execute
-different tasks (perform hyperparameter optimization, perform exploratory analyses or
-make simulated immune receptor datasets (i.e., implant signals [e.g., k-mers] into
-existing immune receptor repertoire datasets). For full documentation, see :ref:`Specification`.
-An example of the full specification for performing hyperparameter
-optimization by nested cross-validation is given below.
+The domain-specific language (DSL) developed for immuneML defines what the analysis YAML specification should look like.
+Depending on the specification, immuneML can execute different tasks (perform hyperparameter optimization, perform exploratory
+analyses or make simulated immune receptor datasets (i.e., implant signals [e.g., k-mers] into existing AIRRe datasets). For a full overview of
+all the options that can be specified, see :ref:`YAML specification`.
+An example of the full YAML specification for training an ML model through nested cross-validation is given below.
 
 .. highlight:: yaml
 .. code-block:: yaml
@@ -40,7 +38,7 @@ optimization by nested cross-validation is given below.
           ChainRepertoireFilter:
             keep_chain: A
   instructions:
-    instruction1:
+    my_instruction1:
       type: TrainMLModel
       settings:
         -   preprocessing: seq1
@@ -63,6 +61,7 @@ optimization by nested cross-validation is given below.
       metrics: [accuracy, f1_micro]
       optimization_metric: accuracy
       reports: [r1]
+      refit_optimal_model: False
   output:
     format: HTML
 
@@ -82,15 +81,17 @@ Definitions refer to components, which will be used within the instructions. The
 
 - Encodings: different data representation techniques,
 
-- ML methods: different machine learning methods (e.g. SVM or KNN),
+- ML methods: different machine learning methods (e.g., SVM or KNN),
 
-- Reports: specific analysis to be run on different parts of the data, ML methods or results,
+- Reports: specific analysis to be run on different parts of the data, ML methods or results.
+
+Simulation-specific components (only relevant when running a :ref:`Simulation instruction<How to simulate antigen/disease-associated signals in AIRR datasets>`) are:
 
 - Motifs: parts of the simulation definition defined by a seed and a way to create specific motif instances from the seed,
 
-- Signals: parts of the simulation which can include multiple motifs and correspond to a single label for subsequent classification tasks,
+- Signals: parts of the :ref:`simulation<How to simulate antigen/disease-associated signals in AIRR datasets>` which can include multiple motifs and correspond to a single label for subsequent classification tasks,
 
-- Simulations: define how to combine different signals and how to implant them in the dataset.
+- :ref:`Simulations<How to simulate antigen/disease-associated signals in AIRR datasets>`: define how to combine different signals and how to implant them in the dataset.
 
 Each component is defined using a key (a string) that uniquely identifies it and which
 will be used in the instructions to refer to the component defined in this way.
@@ -104,10 +105,10 @@ as follows:
     format: AdaptiveBiotech
     params:
       path: ./Emerson2017/
-      result_path: ./Emerson2017_ImmuneML/
+      result_path: ./Emerson2017_immuneML/
 
-Components are defined within the respective section denoting their type.
-All component sections are located under `definitions` in the specification file.
+Each definition component (listed above) is defined under its own key.
+All component sections are located under **definitions** in the YAML specification file.
 An example of sections with defined components is given below:
 
 .. highlight:: yaml
@@ -119,7 +120,7 @@ An example of sections with defined components is given below:
         format: AdaptiveBiotech
         params:
           path: ./Emerson2017/
-          result_path: ./Emerson2017_ImmuneML/
+          result_path: ./Emerson2017_immuneML/
     encodings:
       kmer_freq_encoding: KmerFrequency
     ml_methods:
@@ -154,22 +155,27 @@ Instructions are defined similarly  to components: a key represents an identifie
 the instruction and type denotes the instruction that will be performed. The components,
 which were defined previously will be used here as input to instructions.
 The parameters for the instructions depend on the type of the instruction.
-Instruction specification is located under “instructions” in the specification file.
+Instruction YAML specifications are located under **instructions** in the YAML specification file.
 
-Possible instructions are:
+Some of the possible instructions are (see ):
 
-- Hyperparameter optimization
+- Training an ML model
 
 - Exploratory analysis
 
 - Simulation
 
-An example of the specification for a hyperparameter optimization instruction is as follows:
+Anything defined under definitions is available in the instructions part, but anything generated from the instructions is not available to other
+instructions. If the output of one instruction needs to be used in another other instruction, two separate immuneML runs need to be made (e.g,
+running immuneML once with the Simulation instruction to generate a dataset, and subsequently using that dataset as an input to a second immuneML
+run to train a ML model).
+
+An example of the YAML specification for the Training a ML model instruction is as follows:
 
 .. highlight:: yaml
 .. code-block:: yaml
 
-  instruction1:
+  my_instruction: # user-defined instruction key
     type: TrainMLModel
     settings:
     - preprocessing: None
@@ -197,23 +203,22 @@ An example of the specification for a hyperparameter optimization instruction is
 Output - HTML
 ^^^^^^^^^^^^^
 
-The output section of the specification defines the summary output of the execution of
-the immuneML. Currently, only HTML output format is supported. If it is specified,
-then index.html file will be created with links to a separate HTML file for each
-instruction that was listed in the specification. The instruction HTML pages will
-include an overview of the instruction parameters (e.g. information on the dataset,
-number of examples, type of the dataset, the details of nested cross-validation,
-metrics used) and results (overview of performance results in nested cross-validation,
+The output section of the YAML specification defines the summary output of the execution of
+immuneML. Currently, only HTML output format is supported. An index.html file will be created with links to a separate HTML file for each
+instruction that was listed in the YAML specification. The instruction HTML pages will
+include an overview of the instruction parameters (e.g., information on the dataset,
+number of examples (number of repertoires or receptors), type of the dataset, the performance and ML model details of the nested cross-validation,
+metrics used) and results (overview of performance results in the nested cross-validation loops,
 outputs of individual reports). At this point, the HTML output is not customizable.
 
 Running the specified analysis
 ------------------------------
 
-To run an instruction via command line with the given specification (saved as YAML file):
+To run an instruction via command line with the given YAML specification file:
 
 .. code-block:: console
 
-  python3 ImmuneMLApp.py path/to/specification.yaml result/folder/path/
+  immune-ml path/to/specification.yaml result/folder/path/
 
 Alternatively, create an ImmuneMLApp object in a Python script and pass it the path parameter to the constructor before calling its `run()` method as follows:
 

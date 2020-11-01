@@ -1,7 +1,6 @@
 import logging
 import os
 import pickle
-from functools import lru_cache
 
 import numpy as np
 
@@ -28,14 +27,22 @@ class ComparisonData:
         return lambda repertoire: list(set(zip(*[repertoire.get_attribute(attribute) for attribute in self.comparison_attributes])))
 
     def get_item_names(self):
-        return np.array([item for items in [batch.items for batch in self.batches] for item in items])
+        return np.array([item for items in [batch.get_items() for batch in self.batches] for item in items])
 
     def get_item_vectors(self, repertoire_ids: list = None):
         for batch in self.get_batches(columns=repertoire_ids):
             for item_index in range(batch.shape[0]):
                 yield batch[item_index]
 
-    @lru_cache(maxsize=50)
+    def get_repertoire_vectors(self, identifiers: list):
+        repertoire_vectors = {identifier: np.zeros(self.item_count) for identifier in identifiers}
+        for batch_index, batch in enumerate(self.get_batches(columns=identifiers, return_dict=True)):
+            start = batch_index * self.sequence_batch_size
+            for identifier in identifiers:
+                end = start + batch[identifier].shape[0]
+                repertoire_vectors[identifier][start: end] = batch[identifier]
+        return repertoire_vectors
+
     def get_repertoire_vector(self, identifier: str):
         repertoire_vector = np.zeros(self.item_count)
         for batch_index, batch in enumerate(self.get_batches(columns=[identifier])):
@@ -49,15 +56,19 @@ class ComparisonData:
         index_in_batch = index - (batch_index * self.sequence_batch_size)
         return self.batches[batch_index].get_matrix()[index_in_batch]
 
-    def get_batches(self, columns: list = None):
+    def get_batches(self, columns: list = None, return_dict: bool = False):
         for index in range(len(self.batches)):
-            yield self.get_batch(index, columns)
+            yield self.get_batch(index, columns, return_dict)
 
-    def get_batch(self, index: int, columns: list = None):
+    def get_batch(self, index: int, columns: list = None, return_dict: bool = False):
         batch = self.batches[index].load()
-        if columns is not None:
+        if columns is not None and not return_dict:
             column_indices = [self.batches[index].repertoire_index_mapping[col] for col in columns]
             return batch.get_matrix()[:, column_indices]
+        elif columns is not None:
+            column_indices = [self.batches[index].repertoire_index_mapping[col] for col in columns]
+            matrix = batch.get_matrix()
+            return {col: matrix[:, column_indices[i]] for i, col in enumerate(columns)}
         else:
             return batch.get_matrix()
 

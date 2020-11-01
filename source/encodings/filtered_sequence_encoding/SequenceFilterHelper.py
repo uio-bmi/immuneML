@@ -1,14 +1,15 @@
 import pickle
 from typing import List
 
+import fisher
 import numpy as np
 import pandas as pd
-from scipy.stats import fisher_exact
 
 from source.caching.CacheHandler import CacheHandler
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.repertoire.Repertoire import Repertoire
 from source.encodings.EncoderParams import EncoderParams
+from source.environment.Label import Label
 from source.pairwise_repertoire_comparison.ComparisonData import ComparisonData
 from source.util.EncoderHelper import EncoderHelper
 
@@ -29,20 +30,17 @@ class SequenceFilterHelper:
         return comparison_data
 
     @staticmethod
-    def filter_sequences(dataset: RepertoireDataset, comparison_data: ComparisonData, label: str, label_values: list, p_value_threshold: float):
+    def filter_sequences(dataset: RepertoireDataset, comparison_data: ComparisonData, label: Label, p_value_threshold: float):
 
-        assert len(label_values) == 2, \
-            f"ComparisonData: Label associated sequences can be inferred only for binary labels, got {str(label_values)[1:-1]} instead."
-
-        sequence_p_values = SequenceFilterHelper.find_label_associated_sequence_p_values(comparison_data, dataset.repertoires, label, label_values)
+        sequence_p_values = SequenceFilterHelper.find_label_associated_sequence_p_values(comparison_data, dataset.repertoires, label)
 
         return np.array(sequence_p_values) < p_value_threshold
 
     @staticmethod
-    def find_label_associated_sequence_p_values(comparison_data: ComparisonData, repertoires: List[Repertoire], label: str, label_values: list):
+    def find_label_associated_sequence_p_values(comparison_data: ComparisonData, repertoires: List[Repertoire], label: Label):
 
         sequence_p_values = []
-        is_first_class = np.array([repertoire.metadata[label] for repertoire in repertoires]) == label_values[0]
+        is_first_class = np.array([repertoire.metadata[label.name] for repertoire in repertoires]) == label.positive_class
 
         for sequence_vector in comparison_data.get_item_vectors([repertoire.identifier for repertoire in repertoires]):
 
@@ -53,12 +51,20 @@ class SequenceFilterHelper:
                 first_class_absent = np.sum(np.logical_and(is_first_class, sequence_vector == 0))
                 second_class_absent = np.sum(np.logical_and(np.logical_not(is_first_class), sequence_vector == 0))
 
-                sequence_p_values.append(fisher_exact([[first_class_present, second_class_present],
-                                                       [first_class_absent, second_class_absent]])[1])
+                sequence_p_values.append(fisher.pvalue(first_class_present, second_class_present, first_class_absent, second_class_absent).right_tail)
             else:
                 sequence_p_values.append(SequenceFilterHelper.INVALID_P_VALUE)
 
         return sequence_p_values
+
+    @staticmethod
+    def _check_label_object(params: EncoderParams, label: str):
+        label_values = params.label_config.get_label_values(label)
+        assert len(label_values) == 2, f"{SequenceFilterHelper.__name__}: only binary classification (2 classes) is possible when extracting " \
+                                       f"relevant sequences for the label, but got these classes for label {label} instead: {label_values}."
+        assert params.label_config.get_label_object(label).positive_class is not None, \
+            f'{SequenceFilterHelper.__name__}: positive_class parameter was not set for label {label}. It has to be set to determine the ' \
+            f'receptor sequences associated with the positive class.'
 
     @staticmethod
     def get_relevant_sequences(dataset: RepertoireDataset, params: EncoderParams, comparison_data: ComparisonData, label: str, p_value_threshold,
@@ -68,8 +74,9 @@ class SequenceFilterHelper:
         sequence_csv_path = None
 
         if params.learn_model:
-            label_values = params.label_config.get_label_values(label)
-            relevant_sequence_indices = SequenceFilterHelper.filter_sequences(dataset, comparison_data, label, label_values, p_value_threshold)
+            SequenceFilterHelper._check_label_object(params, label)
+            relevant_sequence_indices = SequenceFilterHelper.filter_sequences(dataset, comparison_data, params.label_config.get_label_object(label),
+                                                                              p_value_threshold)
             with open(sequence_path, "wb") as file:
                 pickle.dump(relevant_sequence_indices, file)
 

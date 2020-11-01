@@ -10,7 +10,7 @@ from source.util.ParameterValidator import ParameterValidator
 
 class SimulationParser:
     """
-    Specification:
+    YAML specification:
 
     .. highlight:: yaml
     .. code-block:: yaml

@@ -19,7 +19,6 @@ class Quickstart:
                     "d1": {
                         "format": "RandomRepertoireDataset",
                         "params": {
-                            "result_path": f'{path}dataset/',
                             "labels": {"CD": {True: 0.5, False: 0.5}}
                         }
                     }
@@ -31,16 +30,23 @@ class Quickstart:
                             "model_type": "sequence",
                             "vector_size": 8,
                         }
+                    },
+                    "e2": {
+                        "Word2Vec": {
+                            "k": 2,
+                            "model_type": "sequence",
+                            "vector_size": 8,
+                        }
                     }
                 },
                 "ml_methods": {
                     "simpleLR": {
                         "SimpleLogisticRegression": {
-                            "penalty": "l1"
+                            "C": 30,
+                            "max_iter": 10
                         },
                         "model_selection_cv": False,
-                        "model_selection_n_folds": -1,
-                    }
+                        "model_selection_n_folds": 3}
                 },
                 "preprocessing_sequences": {
                     "seq1": [
@@ -52,7 +58,8 @@ class Quickstart:
                         "SequenceLengthDistribution": {
                             "batch_size": 3
                         }
-                    }
+                    },
+                    "hprep": "MLSettingsPerformance"
                 }
             },
             "instructions": {
@@ -66,7 +73,7 @@ class Quickstart:
                         },
                         {
                             "preprocessing": "seq1",
-                            "encoding": "e1",
+                            "encoding": "e2",
                             "ml_method": "simpleLR"
                         }
                     ],
@@ -75,7 +82,8 @@ class Quickstart:
                         "split_count": 1,
                         "training_percentage": 0.7,
                         "reports": {
-                            "data_splits": []
+                            "data_splits": [],
+                            'hyperparameter': ["hprep"]
                         }
                     },
                     "selection": {
@@ -92,7 +100,7 @@ class Quickstart:
                     "strategy": "GridSearch",
                     "metrics": ["accuracy"],
                     "reports": ["rep1"],
-                    "batch_size": 10,
+                    "batch_size": 3,
                     "optimization_metric": "balanced_accuracy",
                     "refit_optimal_model": False
                 }

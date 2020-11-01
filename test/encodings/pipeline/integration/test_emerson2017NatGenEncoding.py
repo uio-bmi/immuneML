@@ -116,7 +116,7 @@ class TestEmerson2018NatGenEncoding(TestCase):
             "normalization_type": NormalizationType.RELATIVE_FREQUENCY.name,
             "reads": ReadsType.UNIQUE.name,
             "sequence_encoding": SequenceEncodingType.IDENTITY.name,
-            "metadata_fields_to_include": []
+            "metadata_fields_to_include": [], "scale_to_unit_variance": False
         }
 
         params = EncoderParams(

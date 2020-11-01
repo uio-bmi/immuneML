@@ -19,7 +19,7 @@ class SequenceCountEncoder(DatasetEncoder):
     """
     This encoder represents the repertoires as a matrix of sequence counts for label-associated sequences.
     To determine what clonotypes (with features defined by comparison_attributes) are label-associated
-    based on a statistical test. The statistical test used is Fisher's exact test (two-sided).
+    based on a statistical test. The statistical test used is Fisher's exact test (one-sided).
 
     Reference: Emerson, Ryan O. et al.
     ‘Immunosequencing Identifies Signatures of Cytomegalovirus Exposure History and HLA-Mediated Effects on the T Cell Repertoire’.
@@ -36,7 +36,7 @@ class SequenceCountEncoder(DatasetEncoder):
         sequence_batch_size (int): The pool size used for parallelization. This does not affect the results of the encoding,
             only the speed.
 
-    Specification:
+    YAML specification:
 
     .. indent with spaces
     .. code-block:: yaml
@@ -99,7 +99,7 @@ class SequenceCountEncoder(DatasetEncoder):
         encoded_data = EncodedData(count_matrix, dataset.get_metadata([label]) if params.encode_labels else None,
                                    dataset.get_repertoire_ids(),
                                    feature_names,
-                                   encoding=SequenceCountEncoder.__name__)
+                                   encoding=SequenceCountEncoder.__name__, info={'relevant_sequence_path': self.relevant_sequence_csv_path})
 
         return encoded_data
 

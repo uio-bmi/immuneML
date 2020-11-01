@@ -20,20 +20,26 @@ class OneHotEncoder(DatasetEncoder):
     (amino acid or nucleotide) is replaced by a sparse vector with one 1 and the rest zeroes. The position of the
     1 represents the alphabet character.
 
-    Attributes:
+
+    Arguments:
 
         use_positional_info (bool): whether to include a feature representing the positional information, where the
-            stretch of positions in the middle of the CDR3 (regulated by distance_to_seq_middle) have positional value 1,
-            and the beginning and end of the CDR3 (IMGT positions 105, 117) have value 0, with linear scaling in between.
+        stretch of positions in the middle of the CDR3 (regulated by distance_to_seq_middle) have positional value 1,
+        and the beginning and end of the CDR3 (IMGT positions 105, 117) have value 0, with linear scaling in between.
 
         distance_to_seq_middle (int): only applies when use_positional_info is True. This is the distance from the edge
-            of the CDR3 sequence (IMGT positions 105 and 117) to the portion of the sequence that is considered 'middle'.
-            For example: if distance_to_seq_middle is 6 (default), all IMGT positions in the interval [111, 112)
-            receive positional value 1.
-            When using nucleotide sequences: note that the distance is measured in (amino acid) IMGT positions.
+        of the CDR3 sequence (IMGT positions 105 and 117) to the portion of the sequence that is considered 'middle'.
+        For example: if distance_to_seq_middle is 6 (default), all IMGT positions in the interval [111, 112)
+        receive positional value 1.
+        When using nucleotide sequences: note that the distance is measured in (amino acid) IMGT positions.
+
+        flatten (bool): whether to flatten the final onehot matrix to a 2-dimensional matrix [examples, other_dims_combined]
+        This must be set to True when using onehot encoding in combination with scikit-learn ML methods (inheriting :py:obj:`~source.ml_methods.SklearnMethod.SklearnMethod`),
+        such as :py:obj:`~source.ml_methods.SimpleLogisticRegression.SimpleLogisticRegression`,
+        :py:obj:`~source.ml_methods.SVM.SVM`, :py:obj:`~source.ml_methods.RandomForestClassifier.RandomForestClassifier` and :py:obj:`~source.ml_methods.KNN.KNN`.
 
 
-    Specification:
+    YAML specification:
 
     .. indent with spaces
     .. code-block:: yaml
@@ -41,11 +47,13 @@ class OneHotEncoder(DatasetEncoder):
         one_hot_vanilla:
             OneHot:
                 use_positional_info: False
+                flatten: False
 
         one_hot_positional:
             OneHot:
                 use_positional_info: True
                 distance_to_seq_middle: 3
+                flatten: False
 
     """
 
@@ -57,28 +65,40 @@ class OneHotEncoder(DatasetEncoder):
 
     ALPHABET = EnvironmentSettings.get_sequence_alphabet()
 
-    def __init__(self, use_positional_info: bool, distance_to_seq_middle: int, name: str = None):
+    def __init__(self, use_positional_info: bool, distance_to_seq_middle: int, flatten: bool, name: str = None):
         self.use_positional_info = use_positional_info
         self.distance_to_seq_middle = distance_to_seq_middle
+        self.flatten = flatten
 
-        self.pos_increasing = [1 / self.distance_to_seq_middle * i for i in range(self.distance_to_seq_middle)]
-        self.pos_decreasing = self.pos_increasing[::-1]
+        if distance_to_seq_middle:
+            self.pos_increasing = [1 / self.distance_to_seq_middle * i for i in range(self.distance_to_seq_middle)]
+            self.pos_decreasing = self.pos_increasing[::-1]
+        else:
+            self.pos_decreasing = None
 
         self.name = name
 
-        if EnvironmentSettings.get_sequence_type() == SequenceType.NUCLEOTIDE:
+        if EnvironmentSettings.get_sequence_type() == SequenceType.NUCLEOTIDE: # todo check this / explain in docs
             self.distance_to_seq_middle = self.distance_to_seq_middle * 3
 
+        self.onehot_dimensions = self.ALPHABET + ["start", "mid", "end"] if self.use_positional_info else self.ALPHABET # todo test this
+
     @staticmethod
-    def _prepare_parameters(use_positional_info, distance_to_seq_middle, name: str = None):
+    def _prepare_parameters(use_positional_info, distance_to_seq_middle, flatten, name: str = None):
 
         location = OneHotEncoder.__name__
 
         ParameterValidator.assert_type_and_value(use_positional_info, bool, location, "use_positional_info")
-        ParameterValidator.assert_type_and_value(distance_to_seq_middle, int, location, "distance_to_seq_middle", min_inclusive=1)
+        if use_positional_info:
+            ParameterValidator.assert_type_and_value(distance_to_seq_middle, int, location, "distance_to_seq_middle", min_inclusive=1)
+        else:
+            distance_to_seq_middle = None
+
+        ParameterValidator.assert_type_and_value(flatten, bool, location, "flatten")
 
         return {"use_positional_info": use_positional_info,
                 "distance_to_seq_middle": distance_to_seq_middle,
+                "flatten": flatten,
                 "name": name}
 
     @staticmethod

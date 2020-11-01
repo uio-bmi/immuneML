@@ -1,33 +1,34 @@
-How to train and assess a receptor/repertoire classifier
-========================================================
+How to train and assess a receptor/repertoire-level ML classifier
+==================================================================
 
-ImmuneML provides a rich set of functionality for learning and assessing machine
-learning models (classifiers of receptors or repertoires). It supports both nested
-cross-validation and fixed splits into training, validation and test sets for learning
-parameters and hyper-parameters. Processing and filtering choices for input receptor data,
-as well as encoding choice, can be set up as hyper-parameters for automatic optimization
-and unbiased assessment across such choices. One can set up a single ImmuneML run to train
-models, optimize hyper-parameters and get an unbiased assessment of its performance.
+immuneML provides a rich set of functionality for learning and assessing machine
+learning models (classifiers of receptors or repertoires). To learn the parameters and hyperparameters of the ML model,
+the data needs to be split into training, validation and test sets. For this splitting, both nested cross-validation and fixed splits are supported.
+Processing and filtering choices for input receptor data,
+as well as encoding choice, can be set up as hyperparameters for automatic optimization
+and unbiased assessment across such choices. One can set up a single immuneML run to train
+models, optimize hyperparameters and get an unbiased assessment of its performance.
 The resulting optimized classifier can also afterwards be applied to further datasets.
-This process is shown in Figure 1.
+This process is shown in the figure below.
 
-See :ref:`How to properly train and assess an ML model` to learn more about model training, hyper-parameters and unbiased assessment.
+See :ref:`How to properly train and assess an ML model` to learn more about model training, hyperparameters and unbiased assessment.
 
 .. figure:: ../_static/images/ml_process_overview.png
   :width: 70%
 
-  Figure 1 - overview of the training process of an ML classifier: hyperparameter
+  Overview of the training process of an ML classifier: hyperparameter
   optimization is done on training and validation data and the model performance is
   assessed on test data
 
 The analysis specification consists of (i) defining all elements used for analysis,
 such as the dataset, encodings, preprocessing, ML methods and reports, (ii) defining
-the instruction to be executed. Hyperparameter optimization instructions take as parameters:
+the instruction to be executed. Training ML model instructions take as parameters:
 
 1. A list of hyperparameter settings (preprocessing, encoding, ML method combinations) to be evaluated,
 
 .. highlight:: yaml
 .. code-block:: yaml
+  :linenos:
 
   settings:
     - encoding: my_kmer_enc
@@ -47,14 +48,19 @@ the instruction to be executed. Hyperparameter optimization instructions take as
 
   2.4. Reports to execute:
 
-    2.4.1. Hyperparameter reports: have access to the HPOptimizationState, as explained later in this document,
+    2.4.1. **hyperparameter**: reports to be executed after the nested CV has finished to show the overall performance
 
-    2.4.2. Reports on the data splits to be performed on each training and test dataset created,
+    2.4.2. **models**: reports  to be generated for optimal models per label
 
-    2.4.3. Optimal model reports to be generated from optimal models per label
+    2.4.3. **data**: reports to be executed on the whole dataset before it is split to training and test
+
+    2.4.4. **data_splits**: reports to be executed after the data has been split into training and test
+
+    2.4.5. **encoding**: reports to be executed on the encoded training and test datasets
 
   .. highlight:: yaml
   .. code-block:: yaml
+    :linenos:
 
     assessment:
       split_strategy: random
@@ -63,6 +69,14 @@ the instruction to be executed. Hyperparameter optimization instructions take as
       reports:
         hyperparameter:
           - my_hp_benchmark
+        models:
+          - my_model_report
+        data:
+          - my_data_report
+        data_splits:
+          - my_data_report
+        encoding:
+          - my_encoding_report
 
 3. Selection configuration, including:
 
@@ -74,19 +88,30 @@ the instruction to be executed. Hyperparameter optimization instructions take as
 
   3.4. Reports to execute:
 
-    3.4.1. Data reports on the whole dataset passed to the inner CV loop,
+    2.4.1. **models**: reports to be executed on all trained classifiers
 
-    3.4.2. Data split reports for each train/validation dataset split,
+    2.4.2. **data**: reports to be executed on the training dataset split before it is split to training and validation
 
-    3.4.3. ML method reports being run on all ML methods during the selection
+    2.4.3. **data_splits**: reports to be executed after the data has been split into training and validation
+
+    2.4.4. **encoding**: reports to be executed on the encoded training and validation datasets
 
   .. highlight:: yaml
   .. code-block:: yaml
+    :linenos:
 
     selection:
       split_strategy: random
       split_count: 1
-      reports: {}
+      reports:
+        models:
+          - my_model_report
+        data:
+          - my_data_report
+        data_splits:
+          - my_data_report
+        encoding:
+          - my_encoding_report
       training_percentage: 0.7
 
 4. A list of labels to use for prediction,
@@ -132,7 +157,7 @@ An example is shown below:
       model_selection_cv: True
       model_selection_n_folds: 5
     reports:
-      my_hp_benchmark: BenchmarkHPSettings
+      my_report: MLSettingsPerformance
 
   instructions:
     hpoptim_instr:
@@ -148,7 +173,7 @@ An example is shown below:
         training_percentage: 0.7
         reports:
           hyperparameter:
-            - my_hp_benchmark
+            - my_report
       selection:
         split_strategy: random
         split_count: 1
@@ -161,13 +186,14 @@ An example is shown below:
       batch_size: 4
       optimization_metric: balanced_accuracy # the metric used for optimization
       reports: []
+      refit_optimal_model: False
 
-The flow of the hyperparameter optimization is shown in the Figure 2, along with the
-output that is generated and reports executed during the particular step:
+The flow of the hyperparameter optimization is shown below, along with the
+output that is generated and reports executed at each step:
 
 .. figure:: ../_static/images/hp_optmization_with_outputs.png
   :width: 70%
 
-  Figure 2 - execution flow of the TrainMLModelInstruction along with the information on data and reports generated at each step
+  Execution flow of the TrainMLModelInstruction along with the information on data and reports generated at each step.
 
 For implementation detals, see :ref:`Hyperparameter Optimization Details`.

@@ -9,11 +9,11 @@ from source.util.PathBuilder import PathBuilder
 
 class GalaxyYamlTool:
 
-    def __init__(self, yaml_path, output_dir, **kwargs):
-        Util.check_parameters(yaml_path, output_dir, kwargs, "GalaxyYamlTool")
+    def __init__(self, specification_path, result_path, **kwargs):
+        Util.check_parameters(specification_path, result_path, kwargs, "GalaxyYamlTool")
 
-        self.yaml_path = yaml_path
-        self.result_path = os.path.relpath(output_dir) + "/"
+        self.yaml_path = specification_path
+        self.result_path = os.path.relpath(result_path) + "/"
         self.start_path = "./"
 
     def run(self):

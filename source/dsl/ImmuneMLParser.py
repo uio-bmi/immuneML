@@ -28,7 +28,7 @@ class ImmuneMLParser:
                     format: MiXCR
                     params:
                         result_path: loaded_dataset/
-                        region_type: CDR3
+                        region_type: IMGT_CDR3
                         path: path_to_files/
                         metadata_file: metadata.csv
             encodings:
@@ -126,7 +126,7 @@ class ImmuneMLParser:
             key_to_check = str(key)
             assert re.match(r'^[A-Za-z0-9_]+$', key_to_check), \
                 f"ImmuneMLParser: the keys in the specification can contain only letters, numbers and underscore. Error with key: {key}"
-            if isinstance(specs[key], dict):
+            if isinstance(specs[key], dict) and key not in ["column_mapping", "metadata_column_mapping"]:
                 ImmuneMLParser.check_keys(specs[key])
 
     @staticmethod
@@ -134,7 +134,7 @@ class ImmuneMLParser:
 
         symbol_table = SymbolTable()
 
-        def_parser_output, specs_defs = DefinitionParser.parse(workflow_specification, symbol_table)
+        def_parser_output, specs_defs = DefinitionParser.parse(workflow_specification, symbol_table, result_path)
         symbol_table, specs_instructions = InstructionParser.parse(def_parser_output, result_path)
         app_output = OutputParser.parse(workflow_specification, symbol_table)
 
@@ -161,5 +161,5 @@ class ImmuneMLParser:
         with open(filepath, "w") as file:
             yaml.dump(result, file)
 
-        print(f"{datetime.datetime.now()}: Full specification is available at {filepath}.\n")
+        print(f"{datetime.datetime.now()}: Full specification is available at {filepath}.\n", flush=True)
         return filepath

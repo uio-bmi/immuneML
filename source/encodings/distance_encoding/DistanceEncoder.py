@@ -22,19 +22,19 @@ class DistanceEncoder(DatasetEncoder):
     Encodes a given RepertoireDataset as distance matrix, where the pairwise distance between each of the repertoires
     is calculated. The distance is calculated based on the presence/absence of elements defined under attributes_to_match.
     Thus, if attributes_to_match contains only 'sequence_aas', this means the distance between two repertoires is maximal
-    if they contain the same set of sequence_aas, and the distance is minimal of none of the sequence_aas are shared between
+    if they contain the same set of sequence_aas, and the distance is minimal if none of the sequence_aas are shared between
     two repertoires.
 
-    Attributes:
+    Arguments:
 
         distance_metric (:py:mod:`source.encodings.distance_encoding.DistanceMetricType`): The metric used to calculate the
-            distance between two repertoires. Names of different distance metric types are allowed values in the specification.
+        distance between two repertoires. Names of different distance metric types are allowed values in the specification.
 
         attributes_to_match: The attributes to consider when determining whether a sequence is present in both repertoires.
-            Only the fields defined under attributes_to_match will be considered, all other fields are ignored.
-            Valid values include any repertoire attribute (sequence, amino acid sequence, V gene etc).
+        Only the fields defined under attributes_to_match will be considered, all other fields are ignored.
+        Valid values include any repertoire attribute (sequence, amino acid sequence, V gene etc).
 
-    Specification:
+    YAML specification:
 
     .. indent with spaces
     .. code-block:: yaml

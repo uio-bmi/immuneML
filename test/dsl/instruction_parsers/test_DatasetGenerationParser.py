@@ -9,7 +9,7 @@ from source.workflows.instructions.dataset_generation.DatasetGenerationInstructi
 
 class TestDatasetGenerationParser(TestCase):
     def test_parse(self):
-        specs = {"type": "DatasetGeneration", "formats": ["Pickle", "AIRR"], "datasets": ["d1"]}
+        specs = {"type": "DatasetGeneration", "export_formats": ["Pickle", "AIRR"], "datasets": ["d1"]}
 
         symbol_table = SymbolTable()
         symbol_table.add("d1", SymbolType.DATASET, RepertoireDataset())

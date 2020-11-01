@@ -19,7 +19,7 @@ class DatasetGenerationInstruction(Instruction):
 
         formats (list): a list of formats in which to export the datasets. Valid formats are class names of any non-abstract class inheriting :py:obj:`~source.IO.dataset_export.DataExporter.DataExporter`.
 
-    Specification:
+    YAML specification:
 
     .. indent with spaces
     .. code-block:: yaml
@@ -29,7 +29,7 @@ class DatasetGenerationInstruction(Instruction):
             datasets: # list of datasets to export
                 - my_generated_dataset
                 - my_dataset_from_adaptive
-            formats: # list of formats to export the datasets to
+            export_formats: # list of formats to export the datasets to
                 - AIRR
                 - Pickle
 
@@ -54,7 +54,8 @@ class DatasetGenerationInstruction(Instruction):
                 path = f"{self.result_path}{dataset_name}/{export_format}/"
                 exporter.export(dataset, path)
                 paths[dataset_name][export_format] = path
-                print(f"{datetime.datetime.now()}: Exported dataset {dataset_name} in {export_format}.")
+                contains = str(dataset.__class__.__name__).replace("Dataset", "s").lower()
+                print(f"{datetime.datetime.now()}: Exported dataset {dataset_name} containing {dataset.get_example_count()} {contains} in {export_format} format.", flush=True)
 
         return DatasetGenerationState(datasets=self.datasets, formats=[exporter.__name__[:-8] for exporter in self.exporters],
                                       paths=paths, result_path=self.result_path, name=self.name)

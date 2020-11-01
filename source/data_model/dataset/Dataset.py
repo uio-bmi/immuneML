@@ -5,6 +5,7 @@ class Dataset:
 
     TRAIN = "train"
     TEST = "test"
+    SUBSAMPLED = "subsampled"
 
     def __init__(self):
         self.encoded_data = None

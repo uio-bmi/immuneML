@@ -30,7 +30,7 @@ class TCRdistMotifDiscovery(EncodingReport):
         only those sequences are used to infer motifs; the reference receptors as required by TCRdist will be the ones from the dataset that have
         different or no epitope specified in their metadata
 
-    Specification:
+    YAML specification:
 
     .. indent with spaces
     .. code-block:: yaml

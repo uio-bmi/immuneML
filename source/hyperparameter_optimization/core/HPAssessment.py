@@ -19,9 +19,10 @@ class HPAssessment:
 
         state = HPAssessment._create_root_path(state)
         train_val_datasets, test_datasets = HPUtil.split_data(state.dataset, state.assessment, state.path)
+        n_splits = len(train_val_datasets)
 
-        for index in range(len(train_val_datasets)):
-            state = HPAssessment.run_assessment_split(state, train_val_datasets[index], test_datasets[index], index)
+        for index in range(n_splits):
+            state = HPAssessment.run_assessment_split(state, train_val_datasets[index], test_datasets[index], index, n_splits)
 
         state.hp_report_results = HPUtil.run_hyperparameter_reports(state, f"{state.path}hyperparameter_reports/")
         state.data_report_results = ReportUtil.run_data_reports(state.dataset, list(state.data_reports.values()), f"{state.path}data_reports/",
@@ -35,10 +36,10 @@ class HPAssessment:
         return state
 
     @staticmethod
-    def run_assessment_split(state, train_val_dataset, test_dataset, split_index: int):
+    def run_assessment_split(state, train_val_dataset, test_dataset, split_index: int, n_splits):
         """run inner CV loop (selection) and retrain on the full train_val_dataset after optimal model is chosen"""
 
-        print(f'{datetime.datetime.now()}: Hyperparameter optimization: running outer CV loop: started assessment split {split_index+1}.\n')
+        print(f'{datetime.datetime.now()}: Hyperparameter optimization: running outer CV loop: started split {split_index+1}/{n_splits}.\n', flush=True)
 
         current_path = HPAssessment.create_assessment_path(state, split_index)
 
@@ -49,14 +50,19 @@ class HPAssessment:
 
         state = HPAssessment.run_assessment_split_per_label(state, split_index)
 
-        print(f'{datetime.datetime.now()}: Hyperparameter optimization: running outer CV loop: finished assessment split {split_index+1}.\n')
+        print(f'{datetime.datetime.now()}: Hyperparameter optimization: running outer CV loop: finished split {split_index+1}/{n_splits}.\n', flush=True)
 
         return state
 
     @staticmethod
     def run_assessment_split_per_label(state: HPOptimizationState, split_index: int):
         """iterate through labels and hp_settings and retrain all models"""
-        for label in state.label_configuration.get_labels_by_name():
+        n_labels = state.label_configuration.get_label_count()
+
+        for idx, label in enumerate(state.label_configuration.get_labels_by_name()):
+
+            print(f"{datetime.datetime.now()}: Hyperparameter optimization: running the inner loop of nested CV: "
+                  f"retrain models for label {label} (label {idx + 1} / {n_labels}).\n", flush=True)
 
             path = f"{state.assessment_states[split_index].path}"
 
@@ -70,6 +76,9 @@ class HPAssessment:
                 train_val_dataset = state.assessment_states[split_index].train_val_dataset
                 test_dataset = state.assessment_states[split_index].test_dataset
                 state = HPAssessment.reeval_on_assessment_split(state, train_val_dataset, test_dataset, hp_setting, setting_path, label, split_index)
+
+            print(f"{datetime.datetime.now()}: Hyperparameter optimization: running the inner loop of nested CV: completed retraining models "
+                  f"for label {label} (label {idx + 1} / {n_labels}).\n", flush=True)
 
         return state
 

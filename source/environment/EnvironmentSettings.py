@@ -24,6 +24,7 @@ class EnvironmentSettings:
     tmp_cache_path = tmp_test_path + "cache/"
     html_templates_path = root_path + "source/presentation/html/templates/"
     specs_docs_path = root_path + "docs/specs/"
+    source_docs_path = root_path + "docs/source/"
     max_sequence_length = 20
     low_memory = True
 
@@ -35,7 +36,7 @@ class EnvironmentSettings:
     def set_cache_path(path: str):
         EnvironmentSettings.cache_path = path
         PathBuilder.build(path)
-        print(f"{datetime.datetime.now()}: Setting temporary cache path to {path}...")
+        print(f"{datetime.datetime.now()}: Setting temporary cache path to {path}...", flush=True)
 
     @staticmethod
     def get_cache_type():

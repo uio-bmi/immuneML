@@ -21,18 +21,18 @@ class SemanticModel:
 
     def build_reports(self, instruction_states):
         report_builder = self.make_report_builder()
-        print(f"{datetime.datetime.now()}: Generating {self.output['format']} reports...")
+        print(f"{datetime.datetime.now()}: Generating {self.output['format']} reports...", flush=True)
         path = report_builder.build(instruction_states, self.path)
-        print(f"{datetime.datetime.now()}: {self.output['format']} reports are generated.")
+        print(f"{datetime.datetime.now()}: {self.output['format']} reports are generated.", flush=True)
         return path
 
     def run_instructions(self) -> list:
         instruction_states = []
         for index, instruction in enumerate(self.instructions):
-            print("{}: Instruction {}/{} has started.".format(datetime.datetime.now(), index+1, len(self.instructions)))
+            print("{}: Instruction {}/{} has started.".format(datetime.datetime.now(), index+1, len(self.instructions)), flush=True)
             result = instruction.run(result_path=self.path)
             instruction_states.append(result)
-            print("{}: Instruction {}/{} has finished.".format(datetime.datetime.now(), index+1, len(self.instructions)))
+            print("{}: Instruction {}/{} has finished.".format(datetime.datetime.now(), index+1, len(self.instructions)), flush=True)
         return instruction_states
 
     def make_report_builder(self):

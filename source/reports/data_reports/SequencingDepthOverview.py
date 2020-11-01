@@ -2,8 +2,6 @@ import json
 from multiprocessing.pool import Pool
 
 import pandas as pd
-from rpy2.robjects import pandas2ri
-from rpy2.robjects.packages import STAP
 
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.receptor.receptor_sequence.SequenceFrameType import SequenceFrameType
@@ -23,7 +21,7 @@ class SequencingDepthOverview(DataReport):
     report.
 
 
-    Attributes:
+    Arguments:
 
         x (str): discrete column name from metadata file with which to put on the x-axis and split samples by
 
@@ -32,21 +30,21 @@ class SequencingDepthOverview(DataReport):
         facets (list): metadata attributes to split points by in rows of the resulting plot-matrix
 
         palette (dict): list of colors and breaks: list of values at which each color should be - for example:
-            discrete: {"A": "blue", "B": "red", ...}
-            continuous: {"colors": ["blue", "white", "red"], "breaks": [-1, 0, 1]}
+        discrete: {"A": "blue", "B": "red", ...}
+        continuous: {"colors": ["blue", "white", "red"], "breaks": [-1, 0, 1]}
 
         nrow_distributions (int): The number of rows used for the distribution plot facets.
 
         nrow_scatterplot (int): The number of rows used for the scatterplot facets.
 
-        height_distributions (float): Heigth (in inches) of the distribution section of the resulting plot
+        height_distributions (float): Height (in inches) of the distribution section of the resulting plot
 
-        height_scatterplot (float): Heigth (in inches) of the scatterplot section of the resulting plot
+        height_scatterplot (float): Height (in inches) of the scatterplot section of the resulting plot
 
         width (float): Width (in inches) of resulting plot
 
 
-    Specification:
+    YAML specification:
 
     .. indent with spaces
     .. code-block:: yaml
@@ -114,6 +112,8 @@ class SequencingDepthOverview(DataReport):
         return data
 
     def _plot(self, data) -> ReportOutput:
+        from rpy2.robjects import pandas2ri
+        from rpy2.robjects.packages import STAP
 
         pandas2ri.activate()
 
@@ -153,13 +153,13 @@ class SequencingDepthOverview(DataReport):
     def _compute_total_reads(self, repertoire: Repertoire, frame_type: SequenceFrameType):
         count = 0
         for sequence in repertoire.sequences:
-            if sequence.metadata is not None and sequence.metadata.frame_type.upper() == frame_type.name:
+            if sequence.metadata is not None and sequence.metadata.frame_type == frame_type:
                 count += sequence.metadata.count
         return count
 
     def _compute_unique_clonotypes(self, repertoire: Repertoire, frame_type: SequenceFrameType):
         count = 0
         for sequence in repertoire.sequences:
-            if sequence.metadata is not None and sequence.metadata.frame_type.upper() == frame_type.name:
+            if sequence.metadata is not None and sequence.metadata.frame_type == frame_type:
                 count += 1
         return count

@@ -4,7 +4,7 @@ import unittest
 
 from source.IO.dataset_export.PickleExporter import PickleExporter
 from source.api.galaxy.build_yaml_from_arguments import build_settings_specs, build_ml_methods_specs, get_sequence_enc_type, \
-    build_encodings_specs
+    build_encodings_specs, build_labels
 from source.api.galaxy.build_yaml_from_arguments import main as yamlbuilder_main
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.dsl.ImmuneMLParser import ImmuneMLParser
@@ -20,7 +20,7 @@ class DummyArguments:
 
 class MyTestCase(unittest.TestCase):
     def create_dummy_dataset(self, path):
-        repertoires, metadata = RepertoireBuilder.build([["AA"], ["CC"]], path, labels={"label": ["lab1", "lab2"]})
+        repertoires, metadata = RepertoireBuilder.build([["AA"], ["CC"]], path, labels={"label1": ["val1", "val2"], "label2": ["val1", "val2"]})
 
         dataset = RepertoireDataset(repertoires=repertoires, metadata_file=metadata)
         dataset.name = "my_dataset"
@@ -42,7 +42,7 @@ class MyTestCase(unittest.TestCase):
         os.chdir(data_path)
 
         yamlbuilder_main(["-o", output_dir, "-f", output_filename,
-                          "-l", "label",
+                          "-l", "label1,label2",
                           "-m", "SimpleLogisticRegression", "-t", "70",
                           "-c", "5", "-s", "subsequence", "subsequence",
                           "-r", "unique", "all",
@@ -121,6 +121,12 @@ class MyTestCase(unittest.TestCase):
         result = build_settings_specs(["a", "b"], ["c", "d"])
         correct = [{'encoding': 'a', 'ml_method': 'c'}, {'encoding': 'a', 'ml_method': 'd'}, {'encoding': 'b', 'ml_method': 'c'},
                    {'encoding': 'b', 'ml_method': 'd'}]
+
+        self.assertListEqual(result, correct)
+
+    def test_build_labels(self):
+        result = build_labels("'cmv_status, t1d_status\t,cd_status\"'")
+        correct = ["cmv_status", "t1d_status", "cd_status"]
 
         self.assertListEqual(result, correct)
 

@@ -25,10 +25,10 @@ class TestEmersonSequenceCountEncoder(TestCase):
         PathBuilder.build(path)
 
         repertoires, metadata = RepertoireBuilder.build([["GGG", "III", "LLL", "MMM"],
-                                                       ["DDD", "EEE", "FFF", "III", "LLL", "MMM"],
-                                                       ["CCC", "FFF", "MMM"],
-                                                       ["AAA", "CCC", "EEE", "FFF", "LLL", "MMM"]],
-                                                      labels={"l1": [True, True, False, False]}, path=path)
+                                                         ["DDD", "EEE", "FFF", "III", "LLL", "MMM"],
+                                                         ["CCC", "FFF", "MMM"],
+                                                         ["AAA", "CCC", "EEE", "FFF", "LLL", "MMM"]],
+                                                        labels={"l1": [True, True, False, False]}, path=path)
 
         dataset = RepertoireDataset(repertoires=repertoires, metadata_file=metadata, identifier="1")
 
@@ -37,19 +37,17 @@ class TestEmersonSequenceCountEncoder(TestCase):
             "p_value_threshold": 0.4, "sequence_batch_size": 4
         })
 
-        label_config = LabelConfiguration([Label("l1", [True, False])])
+        label_config = LabelConfiguration([Label("l1", [True, False], positive_class=True)])
 
         encoded_dataset = encoder.encode(dataset, EncoderParams(result_path=path, label_config=label_config))
 
         test = encoded_dataset.encoded_data.examples
 
-        self.assertTrue(test[0, 0] == 1)
-        self.assertTrue(test[1, 0] == 1)
-        self.assertTrue(test[0, 1] == 0)
-        self.assertTrue(test[1, 1] == 0)
-        self.assertTrue(test[3, 1] == 1)
+        self.assertTrue(test[0] == 1)
+        self.assertTrue(test[1] == 1)
+        self.assertTrue(test[2] == 0)
+        self.assertTrue(test[3] == 0)
 
         self.assertTrue("III" in encoded_dataset.encoded_data.feature_names)
-        self.assertTrue("CCC" in encoded_dataset.encoded_data.feature_names)
 
         shutil.rmtree(path)

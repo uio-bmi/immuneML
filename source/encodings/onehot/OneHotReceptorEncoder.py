@@ -9,7 +9,7 @@ from source.encodings.onehot.OneHotEncoder import OneHotEncoder
 class OneHotReceptorEncoder(OneHotEncoder):
     """
     One-hot encoded repertoire data is represented in a matrix with dimensions:
-        [receptors, chains, one_hot_characters, sequence_lengths]
+        [receptors, chains, sequence_lengths, one_hot_characters]
 
     when use_positional_info is true, the last 3 indices in one_hot_characters represents the positional information:
         - start position (high when close to start)
@@ -19,8 +19,6 @@ class OneHotReceptorEncoder(OneHotEncoder):
 
     def _encode_new_dataset(self, dataset, params: EncoderParams):
         encoded_data = self._encode_data(dataset, params)
-        if self.use_positional_info:
-            encoded_data.examples = np.swapaxes(encoded_data.examples, 2, 3)
 
         encoded_dataset = ReceptorDataset(filenames=dataset.get_filenames(),
                                           encoded_data=encoded_data,
@@ -47,13 +45,23 @@ class OneHotReceptorEncoder(OneHotEncoder):
 
         examples = np.stack((examples_first_chain, examples_second_chain), axis=1)
 
+        feature_names = self._get_feature_names(max_seq_len, receptor_objs[0].get_chains())
+
+        if self.flatten:
+            examples = examples.reshape((len(receptor_objs), 2*max_seq_len*len(self.onehot_dimensions)))
+            feature_names = [item for sublist in feature_names for subsublist in sublist for item in subsublist]
+
         encoded_data = EncodedData(examples=examples,
                                    labels=labels,
                                    example_ids=example_ids,
+                                   feature_names=feature_names,
                                    encoding=OneHotEncoder.__name__,
                                    info={"chain_names": receptor_objs[0].get_chains() if all(receptor_obj.get_chains() == receptor_objs[0].get_chains() for receptor_obj in receptor_objs) else None})
 
         return encoded_data
+
+    def _get_feature_names(self, max_seq_len, chains):
+        return [[[f"{chain}_{pos}_{dim}" for dim in self.onehot_dimensions] for pos in range(max_seq_len)] for chain in chains]
 
     def _get_labels(self, receptor_objs, params: EncoderParams):
         label_names = params.label_config.get_labels_by_name()

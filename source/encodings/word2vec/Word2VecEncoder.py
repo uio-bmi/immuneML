@@ -29,22 +29,25 @@ class Word2VecEncoder(DatasetEncoder):
     context the k-mers appear in.
     It relies on gensim's implementation of Word2Vec and KmerHelper for k-mer extraction.
 
+
     Arguments:
+
         vector_size (int): The size of the vector to be learnt.
 
         model_type (:py:obj:`~source.encodings.word2vec.model_creator.ModelType.ModelType`):  The context which will be
-            used to infer the representation of the sequence.
-            If :py:obj:`~source.encodings.word2vec.model_creator.ModelType.ModelType.SEQUENCE` is used, the context of
-            a k-mer is defined by the sequence it occurs in (e.g. if the sequence is CASTTY and k-mer is AST,
-            then its context consists of k-mers CAS, STT, TTY)
-            If :py:obj:`~source.encodings.word2vec.model_creator.ModelType.ModelType.KMER_PAIR` is used, the context for
-            the k-mer is defined as all the k-mers that within one edit distance (e.g. for k-mer CAS, the context
-            includes CAA, CAC, CAD etc.).
-            Valid values for this parameter are names of the ModelType enum.
+        used to infer the representation of the sequence.
+        If :py:obj:`~source.encodings.word2vec.model_creator.ModelType.ModelType.SEQUENCE` is used, the context of
+        a k-mer is defined by the sequence it occurs in (e.g. if the sequence is CASTTY and k-mer is AST,
+        then its context consists of k-mers CAS, STT, TTY)
+        If :py:obj:`~source.encodings.word2vec.model_creator.ModelType.ModelType.KMER_PAIR` is used, the context for
+        the k-mer is defined as all the k-mers that within one edit distance (e.g. for k-mer CAS, the context
+        includes CAA, CAC, CAD etc.).
+        Valid values for this parameter are names of the ModelType enum.
 
         k (int): The length of the k-mers used for the encoding.
 
-    Specification:
+
+    YAML specification:
 
     .. highlight:: yaml
     .. code-block:: yaml

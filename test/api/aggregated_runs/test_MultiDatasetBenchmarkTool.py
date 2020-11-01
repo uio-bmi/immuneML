@@ -99,7 +99,7 @@ class TestMultiDatasetBenchmarkTool(TestCase):
                         "split_count": 2,
                         "training_percentage": 0.7
                     },
-                    "labels": ["cmv"],
+                    "labels": [{"cmv": {"positive_class": True}}],
                     "datasets": ["d1", "d2"],
                     "strategy": "GridSearch",
                     "metrics": ["accuracy", "auc"],

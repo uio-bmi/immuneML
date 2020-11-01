@@ -16,7 +16,7 @@ class ExploratoryAnalysisInstruction(Instruction):
     Allows exploratory analysis of different datasets using encodings and reports.
 
     Analysis is defined by a dictionary of ExploratoryAnalysisUnit objects that encapsulate a dataset, an encoding [optional]
-    and a report to be executed on the [encoded] dataset. Each analysis in specified under `analyses` is completely independent from all
+    and a report to be executed on the [encoded] dataset. Each analysis specified under `analyses` is completely independent from all
     others.
 
     Arguments:
@@ -25,16 +25,16 @@ class ExploratoryAnalysisInstruction(Instruction):
         the analyses (objects of :py:obj:`~source.workflows.instructions.exploratory_analysis.ExploratoryAnalysisUnit.ExploratoryAnalysisUnit`
         class). Each of these includes a dataset on which to perform the analysis, report to run, and optionally preprocessing sequence,
         encoding (if the report needs to be executed on the encoded dataset) and label configuration (if the dataset needs to be encoded,
-        it is also necessary to specify a label for encoding - a label could correspond to an immune event or to genetic information (e.g. HLA).
+        it is also necessary to specify a label for encoding - a label could correspond to an immune event or to genetic information (e.g., HLA).
         The batch size can also be set to encode multiple repertoires in parallel, but this also increases the memory usage, so it must be
         reasonably set.
 
-    Specification:
+    YAML specification:
 
     .. indent with spaces
     .. code-block:: yaml
 
-        my_dataset_generation_instruction: # user-defined instruction name
+        my_expl_analysis_instruction: # user-defined instruction name
             type: ExploratoryAnalysis # which instruction to execute
             analyses: # analyses to perform
                 my_first_analysis: # user-defined name of the analysis
@@ -60,19 +60,19 @@ class ExploratoryAnalysisInstruction(Instruction):
     def run(self, result_path: str):
         self.state.result_path = result_path + f"{self.name}/"
         for index, (key, unit) in enumerate(self.state.exploratory_analysis_units.items()):
-            print("{}: Started analysis {} ({}/{}).".format(datetime.datetime.now(), key, index+1, len(self.state.exploratory_analysis_units)))
+            print("{}: Started analysis {} ({}/{}).".format(datetime.datetime.now(), key, index+1, len(self.state.exploratory_analysis_units)), flush=True)
             path = self.state.result_path + "analysis_{}/".format(key)
             PathBuilder.build(path)
             report_result = self.run_unit(unit, path)
             unit.report_result = report_result
-            print("{}: Finished analysis {} ({}/{}).\n".format(datetime.datetime.now(), key, index+1, len(self.state.exploratory_analysis_units)))
+            print("{}: Finished analysis {} ({}/{}).\n".format(datetime.datetime.now(), key, index+1, len(self.state.exploratory_analysis_units)), flush=True)
         return self.state
 
     def run_unit(self, unit: ExploratoryAnalysisUnit, result_path: str) -> ReportResult:
-        unit.dataset = self.preprocess_dataset(unit, result_path)
-        encoded_dataset = self.encode(unit, result_path)
+        unit.dataset = self.preprocess_dataset(unit, result_path + "preprocessed_dataset/")
+        encoded_dataset = self.encode(unit, result_path + "encoded_dataset/")
         unit.report.dataset = encoded_dataset
-        unit.report.result_path = result_path
+        unit.report.result_path = result_path + "report/"
         report_result = unit.report.generate_report()
         return report_result
 

@@ -1,4 +1,5 @@
 # quality: gold
+from source.data_model.receptor.RegionType import RegionType
 from source.data_model.receptor.receptor_sequence.Chain import Chain
 from source.data_model.receptor.receptor_sequence.SequenceFrameType import SequenceFrameType
 
@@ -16,8 +17,8 @@ class SequenceMetadata:
         - j allele
         - chain
         - count
-        - region_type (e.g. CDR3, CDR1, whole sequence)
-        - frame_type (e.g. In, Out, Stop)
+        - region_type (e.g. IMGT_CDR3, IMGT_CDR1, FULL_SEQUENCE)
+        - frame_type (e.g. IN, OUT, STOP)
         - sample
         - custom params (dictionary with custom sequence information)
 
@@ -40,7 +41,7 @@ class SequenceMetadata:
         self.j_allele = j_allele
         self.chain = Chain.get_chain(chain) if chain and isinstance(chain, str) else chain if isinstance(chain, Chain) else None
         self.count = int(float(count)) if isinstance(count, str) else count
-        self.frame_type = frame_type
-        self.region_type = region_type  # should be e.g. CDR, CDR3, whole sequence etc
+        self.frame_type = SequenceFrameType(frame_type) if frame_type and isinstance(frame_type, str) else frame_type if isinstance(frame_type, SequenceFrameType) else None
+        self.region_type = RegionType(region_type) if region_type and isinstance(region_type, str) else region_type if isinstance(region_type, RegionType) else None
         self.cell_id = cell_id
         self.custom_params = custom_params if custom_params is not None else {}

@@ -42,7 +42,7 @@ class AtchleyKmerEncoder(DatasetEncoder):
         normalize_all_features (bool): when normalizing features to have 0 mean and unit variance, this parameter indicates if the abundance
         feature should be included in the normalization
 
-    Specification:
+    YAML specification:
 
     .. indent with spaces
     .. code-block:: yaml
@@ -77,7 +77,7 @@ class AtchleyKmerEncoder(DatasetEncoder):
         self.abundance = RelativeAbundanceType[abundance.upper()]
         self.normalize_all_features = normalize_all_features
         self.name = name
-        self.normalizer_path = None
+        self.scaler_path = None
         self.vectorizer_path = None
 
     def encode(self, dataset, params: EncoderParams):
@@ -88,9 +88,11 @@ class AtchleyKmerEncoder(DatasetEncoder):
         # normalize to zero mean and unit variance only features coming from Atchley factors
         tmp_examples = examples[:, :, :-1] if not self.normalize_all_features else examples
         flattened_vectorized_examples = tmp_examples.reshape(examples.shape[0] * examples.shape[1], -1)
-        if self.normalizer_path is None:
-            self.normalizer_path = params.result_path + "atchley_factor_normalizer.pickle"
-        scaled_examples = FeatureScaler.standard_scale(self.normalizer_path, flattened_vectorized_examples).todense()
+        if self.scaler_path is None:
+            self.scaler_path = params.result_path + "atchley_factor_scaler.pickle"
+        scaled_examples = FeatureScaler.standard_scale(self.scaler_path, flattened_vectorized_examples)
+        if hasattr(scaled_examples, "todense"):
+            scaled_examples = scaled_examples.todense()
 
         if self.normalize_all_features:
             examples = np.array(scaled_examples).reshape(examples.shape[0], len(kmer_keys), -1)
@@ -133,7 +135,12 @@ class AtchleyKmerEncoder(DatasetEncoder):
                                            lambda: self._process_repertoire(repertoire, index, example_count), CacheObjectType.ENCODING_STEP)
 
     def _process_repertoire(self, repertoire, index, example_count):
-        remove_aa_func = lambda seqs: [seq[self.skip_first_n_aa:-self.skip_last_n_aa] for seq in seqs]
+        if self.skip_first_n_aa > 0 and self.skip_last_n_aa > 0:
+            remove_aa_func = lambda seqs: [seq[self.skip_first_n_aa:-self.skip_last_n_aa] for seq in seqs]
+        elif self.skip_last_n_aa > 0:
+            remove_aa_func = lambda seqs: [seq[:-self.skip_last_n_aa] for seq in seqs]
+        else:
+            remove_aa_func = lambda seqs: [seq[self.skip_first_n_aa:] for seq in seqs]
 
         logging.info(f"AtchleyKmerEncoder: encoding repertoire {index + 1}/{example_count}.")
 
@@ -172,11 +179,12 @@ class AtchleyKmerEncoder(DatasetEncoder):
         indices = [i for i in range(sequences.shape[0]) if len(sequences[i]) >= self.skip_first_n_aa + self.skip_last_n_aa + self.k]
         sequences = sequences[indices]
         counts = counts[indices]
-        sequences = np.apply_along_axis(remove_aa_func, 0, sequences)
+        if self.skip_first_n_aa > 0 or self.skip_last_n_aa > 0:
+            sequences = np.apply_along_axis(remove_aa_func, 0, sequences)
         return sequences, counts
 
     def get_additional_files(self) -> List[str]:
-        return [self.normalizer_path, self.vectorizer_path]
+        return [self.scaler_path, self.vectorizer_path]
 
     @staticmethod
     def export_encoder(path: str, encoder) -> str:
@@ -186,7 +194,7 @@ class AtchleyKmerEncoder(DatasetEncoder):
     @staticmethod
     def load_encoder(encoder_file: str):
         encoder = DatasetEncoder.load_encoder(encoder_file)
-        for attribute in ["normalizer_path", "vectorizer_path"]:
+        for attribute in ["scaler_path", "vectorizer_path"]:
             encoder = DatasetEncoder.load_attribute(encoder, encoder_file, attribute)
         return encoder
 

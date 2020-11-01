@@ -19,6 +19,7 @@ from source.simulation.Implanting import Implanting
 from source.simulation.implants.Motif import Motif
 from source.simulation.implants.Signal import Signal
 from source.simulation.motif_instantiation_strategy.MotifInstantiationStrategy import MotifInstantiationStrategy
+from source.simulation.signal_implanting_strategy.SignalImplantingStrategy import SignalImplantingStrategy
 from source.util.PathBuilder import PathBuilder
 from source.util.ReflectionHandler import ReflectionHandler
 
@@ -27,7 +28,7 @@ class DefinitionParser:
     # TODO: remove redundancy from there, make lists and call those automatically instead
 
     @staticmethod
-    def parse(workflow_specification: dict, symbol_table: SymbolTable):
+    def parse(workflow_specification: dict, symbol_table: SymbolTable, result_path: str):
 
         specs = workflow_specification["definitions"]
 
@@ -38,7 +39,7 @@ class DefinitionParser:
         symbol_table, specs_encoding = DefinitionParser._call_if_exists("encodings", EncodingParser.parse, specs, symbol_table)
         symbol_table, specs_ml = DefinitionParser._call_if_exists("ml_methods", MLParser.parse, specs, symbol_table)
         symbol_table, specs_report = DefinitionParser._call_if_exists("reports", ReportParser.parse_reports, specs, symbol_table)
-        symbol_table, specs_import = ImportParser.parse(specs, symbol_table)
+        symbol_table, specs_import = ImportParser.parse(specs, symbol_table, result_path)
 
         specs_defs = DefinitionParser.create_specs_defs(specs_import, specs_simulation, specs_preprocessing, specs_motifs, specs_signals,
                                                         specs_encoding, specs_ml, specs_report)
@@ -73,15 +74,17 @@ class DefinitionParser:
 
     @staticmethod
     def make_simulation_docs(path):
-        instantiations = ReflectionHandler.all_nonabstract_subclasses(MotifInstantiationStrategy, "Instantiation",
-                                                                      "motif_instantiation_strategy/")
-
+        instantiations = ReflectionHandler.all_nonabstract_subclasses(MotifInstantiationStrategy, "Instantiation", "motif_instantiation_strategy/")
         instantiations = [DocumentationFormat(inst, inst.__name__.replace('Instantiation', ""), DocumentationFormat.LEVELS[2])
                           for inst in instantiations]
 
+        implanting_strategies = ReflectionHandler.all_nonabstract_subclasses(SignalImplantingStrategy, 'Implanting', 'signal_implanting_strategy/')
+        implanting_strategies = [DocumentationFormat(implanting, implanting.__name__.replace('Implanting', ""), DocumentationFormat.LEVELS[2])
+                                 for implanting in implanting_strategies]
+
         classes_to_document = [DocumentationFormat(Motif, Motif.__name__, DocumentationFormat.LEVELS[1])] + instantiations + \
-                              [DocumentationFormat(Signal, Signal.__name__, DocumentationFormat.LEVELS[1]),
-                               DocumentationFormat(Implanting, Implanting.__name__, DocumentationFormat.LEVELS[1])]
+                              [DocumentationFormat(Signal, Signal.__name__, DocumentationFormat.LEVELS[1])] + implanting_strategies + \
+                               [DocumentationFormat(Implanting, Implanting.__name__, DocumentationFormat.LEVELS[1])]
 
         with open(path + "simulation.rst", "w") as file:
             for doc_format in classes_to_document:
