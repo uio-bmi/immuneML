@@ -227,6 +227,10 @@ class Matches(EncodingReport):
 
 
     def check_prerequisites(self):
+        if self.dataset.encoded_data is None:
+            warnings.warn(f"No encoding was specified for dataset {self.dataset.identifier}. Please use one of the following encodings: MatchedReceptorsEncoder, MatchedSequencesEncoder, MatchedRegexEncoder. Matches report will not be created.")
+            return False
+
         if self.dataset.encoded_data.encoding not in ("MatchedReceptorsEncoder", "MatchedSequencesEncoder", "MatchedRegexEncoder"):
             warnings.warn(f"Encoding {self.dataset.encoded_data.encoding} is not compatible with this report type. Matches report will not be created.")
             return False
