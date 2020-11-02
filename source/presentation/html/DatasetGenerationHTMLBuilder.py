@@ -23,7 +23,7 @@ class DatasetGenerationHTMLBuilder:
         """
         base_path = PathBuilder.build(state.result_path + "../HTML_output/")
         html_map = DatasetGenerationHTMLBuilder.make_html_map(state, base_path)
-        result_file = f"{state.result_path}DatasetGeneration_{state.name}.html"
+        result_file = f"{base_path}DatasetGeneration_{state.name}.html"
 
         TemplateParser.parse(template_path=f"{EnvironmentSettings.html_templates_path}DatasetGeneration.html",
                              template_map=html_map, result_path=result_file)
@@ -44,8 +44,9 @@ class DatasetGenerationHTMLBuilder:
                     "formats": [
                         {
                             "format_name": format_name,
-                            "dataset_download_link": Util.make_downloadable_zip(state.result_path,
-                                                                                os.path.relpath(state.paths[dataset.name][format_name]))
+                            "dataset_download_link": os.path.relpath(path=Util.make_downloadable_zip(state.result_path,
+                                                                                                     state.paths[dataset.name][format_name]),
+                                                                     start=base_path)
                         } for format_name in state.formats
                     ]
                 } for dataset in state.datasets

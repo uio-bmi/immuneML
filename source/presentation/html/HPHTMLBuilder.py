@@ -213,7 +213,7 @@ class HPHTMLBuilder:
         for label in state.label_configuration.get_labels_by_name():
             mapping.append({
                 "label": label,
-                "model_path": os.path.relpath(state.optimal_hp_item_paths[label], base_path)
+                "model_path": os.path.relpath(path=state.optimal_hp_item_paths[label], start=base_path)
             })
 
         return mapping

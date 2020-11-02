@@ -36,13 +36,13 @@ class Util:
         return content
 
     @staticmethod
-    def make_downloadable_zip(base_path, tmp_path, filename: str = ""):
+    def make_downloadable_zip(base_path, path_to_zip, filename: str = ""):
         if filename == "":
-            filename = "_".join(os.path.relpath(tmp_path, base_path).replace(".", "").split("/"))
+            filename = "_".join(os.path.relpath(path_to_zip, base_path).replace(".", "").split("/"))
 
         PathBuilder.build(f"{base_path}zip/")
-        zip_file_path = shutil.make_archive(f"{base_path}zip/{filename}", "zip", tmp_path)
-        return os.path.relpath(zip_file_path, base_path)
+        zip_file_path = shutil.make_archive(base_name=f"{base_path}zip/{filename}", format="zip", root_dir=path_to_zip)
+        return zip_file_path
 
     @staticmethod
     def get_full_specs_path(base_path):
