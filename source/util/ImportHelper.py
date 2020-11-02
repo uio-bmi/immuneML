@@ -162,7 +162,7 @@ class ImportHelper:
 
     @staticmethod
     def load_chains_from_genes(df: pd.DataFrame, column_name) -> list:
-        return [Chain.get_chain(chain_str) for chain_str in df[column_name].str[0:3]]
+        return [Chain.get_chain(chain_str).value for chain_str in df[column_name].str[0:3]]
 
     @staticmethod
     def junction_to_cdr3(df: pd.DataFrame, region_type: RegionType):

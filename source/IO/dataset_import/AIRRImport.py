@@ -20,6 +20,7 @@ class AIRRImport(DataImport):
 
     AIRR rearrangement schema can be found here: https://docs.airr-community.org/en/stable/datarep/rearrangements.html
 
+    When importing a ReceptorDataset, the airr field cell_id is used to determine the chain pairs.
 
     Arguments:
 
@@ -152,6 +153,10 @@ class AIRRImport(DataImport):
     def alternative_load_func(filename, params):
         return airr.load_rearrangement(filename)
 
+    @staticmethod
+    def import_receptors(df, params):
+        df["receptor_identifiers"] = df["cell_id"]
+        return ImportHelper.import_receptors(df, params)
 
 
     @staticmethod
