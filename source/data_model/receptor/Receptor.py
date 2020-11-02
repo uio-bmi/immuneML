@@ -13,7 +13,7 @@ class Receptor(DatasetItem):
 
     def clone(self):
         copied_element = copy.deepcopy(self)
-        copied_element.identifier = uuid4().hex
+        copied_element.identifier = str(uuid4().hex)
         return copied_element
 
     def get_chain(self, chain: str):

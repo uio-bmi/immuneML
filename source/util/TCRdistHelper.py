@@ -55,6 +55,14 @@ class TCRdistHelper:
         return tcr_rep
 
     @staticmethod
+    def add_default_allele_to_v_gene(v_gene: str):
+        if "*" not in v_gene and "/" not in v_gene:
+            print(f"{v_gene}*01")
+            return f"{v_gene}*01"
+        else:
+            return v_gene
+
+    @staticmethod
     def prepare_tcr_dist_dataframe(dataset: ReceptorDataset, labels: list) -> pd.DataFrame:
         if len(labels) > 1:
             raise NotImplementedError(f"TCRdist: multiple labels specified ({str(labels)[1:-1]}), but only single label binary class "
@@ -70,11 +78,11 @@ class TCRdistHelper:
             count.append(receptor.get_chain("alpha").metadata.count
                          if receptor.get_chain("alpha").metadata.count == receptor.get_chain("beta").metadata.count
                             and receptor.get_chain("beta").metadata.count is not None else 1)
-            v_a_gene.append(receptor.get_chain('alpha').metadata.v_gene)
+            v_a_gene.append(TCRdistHelper.add_default_allele_to_v_gene(receptor.get_chain('alpha').metadata.v_gene))
             j_a_gene.append(receptor.get_chain('alpha').metadata.j_gene)
             cdr3_a_aa.append(receptor.get_chain('alpha').amino_acid_sequence)
             cdr3_a_nucseq.append(receptor.get_chain("alpha").nucleotide_sequence)
-            v_b_gene.append(receptor.get_chain('beta').metadata.v_gene)
+            v_b_gene.append(TCRdistHelper.add_default_allele_to_v_gene(receptor.get_chain('beta').metadata.v_gene))
             j_b_gene.append(receptor.get_chain('beta').metadata.j_gene)
             cdr3_b_aa.append(receptor.get_chain('beta').amino_acid_sequence)
             cdr3_b_nucseq.append(receptor.get_chain("beta").nucleotide_sequence)
