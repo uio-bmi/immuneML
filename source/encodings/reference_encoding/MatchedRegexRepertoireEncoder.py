@@ -1,3 +1,5 @@
+import warnings
+
 import numpy as np
 import pandas as pd
 import re
@@ -101,8 +103,11 @@ class MatchedRegexRepertoireEncoder(MatchedRegexEncoder):
                     for rep_seq in rep_seqs:
                         if rep_seq.metadata.chain.value == chain_type:
                             if self._matches(rep_seq, regex, v_gene):
-                                # todo if count_counts instead of count_clones
-                                matches[match_idx] += 1 if not self.sum_counts else rep_seq.metadata.count
+                                n_matches = 1 if not self.sum_counts else rep_seq.metadata.count
+                                if n_matches is None:
+                                    warnings.warn(f"MatchedRegexRepertoireEncoder: count not defined for sequence with id {rep_seq.identifier} in repertoire {repertoire.identifier}, ignoring sequence...")
+                                    n_matches = 0
+                                matches[match_idx] += n_matches
                     match_idx += 1
 
         return matches
