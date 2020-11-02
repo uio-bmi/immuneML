@@ -20,6 +20,7 @@ class AIRRImport(DataImport):
 
     AIRR rearrangement schema can be found here: https://docs.airr-community.org/en/stable/datarep/rearrangements.html
 
+    When importing a ReceptorDataset, the airr field cell_id is used to determine the chain pairs.
 
     Arguments:
 
@@ -120,18 +121,22 @@ class AIRRImport(DataImport):
             - if no chain column was specified, the chain is extracted from the v gene name
             - the allele information is removed from the V and J genes
         """
-        # todo: support RegionType.FULL_SEQUENCE?
+        # todo support "full_sequence" import through regiontype?
 
-        df["frame_types"] = SequenceFrameType.OUT.name
+        if "productive" in df.columns:
+            df["frame_types"] = SequenceFrameType.OUT.name
+            df.loc[df["productive"], "frame_types"] = SequenceFrameType.IN.name
+        else:
+            df["frame_types"] = None
 
-        df.loc[df["productive"], "frame_types"] = SequenceFrameType.IN.name
         if "vj_in_frame" in df.columns:
             df.loc[df["vj_in_frame"], "frame_types"] = SequenceFrameType.IN.name
         if "stop_codon" in df.columns:
             df.loc[df["stop_codon"], "frame_types"] = SequenceFrameType.STOP.name
 
-        frame_type_list = ImportHelper.prepare_frame_type_list(params)
-        df = df[df["frame_types"].isin(frame_type_list)]
+        if "productive" in df.columns:
+            frame_type_list = ImportHelper.prepare_frame_type_list(params)
+            df = df[df["frame_types"].isin(frame_type_list)]
 
         ImportHelper.junction_to_cdr3(df, params.region_type)
 
@@ -148,6 +153,10 @@ class AIRRImport(DataImport):
     def alternative_load_func(filename, params):
         return airr.load_rearrangement(filename)
 
+    @staticmethod
+    def import_receptors(df, params):
+        df["receptor_identifiers"] = df["cell_id"]
+        return ImportHelper.import_receptors(df, params)
 
 
     @staticmethod

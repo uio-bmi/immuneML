@@ -72,7 +72,8 @@ class TestAIRRExporter(TestCase):
         shutil.rmtree(path)
 
     def create_dummy_receptordataset(self, path):
-        receptors = [TCABReceptor(alpha=ReceptorSequence(amino_acid_sequence="AAATTT", identifier="1a",
+        receptors = [TCABReceptor(identifier="1",
+                                  alpha=ReceptorSequence(amino_acid_sequence="AAATTT", identifier="1a",
                                                          metadata=SequenceMetadata(v_gene="V1", j_gene="J1",
                                                                                    chain=Chain.ALPHA,
                                                                                    custom_params={"d_call": "d1",
@@ -82,7 +83,8 @@ class TestAIRRExporter(TestCase):
                                                                                   chain=Chain.BETA,
                                                                                   custom_params={"d_call": "d1",
                                                                                                  "custom1": "cust1"}))),
-                     TCABReceptor(alpha=ReceptorSequence(amino_acid_sequence="AAAAAA", identifier="2a",
+                     TCABReceptor(identifier="2",
+                                  alpha=ReceptorSequence(amino_acid_sequence="AAAAAA", identifier="2a",
                                                          metadata=SequenceMetadata(v_gene="V1", j_gene="J1",
                                                                                    chain=Chain.ALPHA,
                                                                                    custom_params={"d_call": "d1",
@@ -105,8 +107,9 @@ class TestAIRRExporter(TestCase):
         path_exported = f"{path}exported_receptors/"
         AIRRExporter.export(dataset, path_exported)
 
-        resulting_data = pd.read_csv(path_exported + f"batch1.tsv", sep="\t")
+        resulting_data = pd.read_csv(path_exported + f"batch1.tsv", sep="\t", dtype=str)
 
+        self.assertListEqual(list(resulting_data["cell_id"]), ["1", "1", "2", "2"])
         self.assertListEqual(list(resulting_data["sequence_id"]), ["1a", "1b", "2a", "2b"])
         self.assertListEqual(list(resulting_data["cdr3_aa"]), ["AAATTT", "ATATAT", "AAAAAA", "AAAAAA"])
         self.assertListEqual(list(resulting_data["v_call"]), ["V1", "V1", "V1", "V1"])
