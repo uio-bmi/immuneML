@@ -38,7 +38,7 @@ class Report(metaclass=abc.ABCMeta):
             if self.check_prerequisites():
                 return self.generate()
         except Exception as e:
-            logging.warning(f"Report {self.name} encountered an error and could not be generated.")
+            logging.warning(f"Report {self.name} encountered an error and could not be generated: {e}")
 
     def _safe_plot(self, output_written=True, **kwargs):
         """
