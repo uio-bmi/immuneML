@@ -59,7 +59,9 @@ class ImportParser:
             symbol_table.add(key, SymbolType.DATASET, dataset)
         except KeyError as key_error:
             raise KeyError(f"{key_error}\n\nAn error occurred during parsing of dataset {key}. "
-                           f"Parameter {key_error.args[0]} was not defined in definitions/datasets/{key}/params.")
+                           f"The keyword {key_error.args[0]} was missing. This either means this argument was "
+                           f"not defined under definitions/datasets/{key}/params, or this column was missing from "
+                           f"an input data file. ")
         except Exception as ex:
             raise Exception(f"{ex}\n\nAn error occurred while parsing the dataset {key}. See the log above for more details.")
 
