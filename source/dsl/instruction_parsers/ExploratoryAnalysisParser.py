@@ -1,5 +1,6 @@
 import copy
 
+from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.dsl.symbol_table.SymbolTable import SymbolTable
 from source.environment.LabelConfiguration import LabelConfiguration
 from source.util.ParameterValidator import ParameterValidator
@@ -72,8 +73,6 @@ class ExploratoryAnalysisParser:
             params["label_config"] = LabelConfiguration()
             for label in analysis["labels"]:
                 params["label_config"].add_label(label, dataset.params[label])
-            if "subject_id" not in analysis["labels"]:
-                params["label_config"].add_label("subject_id", dataset.params["subject_id"])
         elif any(key in analysis for key in ["encoding", "labels"]):
             raise KeyError("ExploratoryAnalysisParser: keys for analyses are not properly defined. "
                            "If encoding is defined, labels have to be defined as well and vice versa.")

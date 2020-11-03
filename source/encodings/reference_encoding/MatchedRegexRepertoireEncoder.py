@@ -26,7 +26,7 @@ class MatchedRegexRepertoireEncoder(MatchedRegexEncoder):
 
         encoded_dataset.add_encoded_data(EncodedData(
             examples=encoded_repertoires,
-            example_ids=labels["subject_id"],
+            example_ids=dataset.get_metadata(["subject_id"]),
             feature_names=list(feature_annotations["chain_id"]),
             feature_annotations=feature_annotations,
             labels=labels,
