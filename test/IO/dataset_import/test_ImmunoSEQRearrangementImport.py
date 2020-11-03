@@ -99,6 +99,7 @@ rep2.tsv,TRB,1234a,no"""
 
         self.assertTrue(os.path.isfile(dataset_file))
 
+        EnvironmentSettings.set_sequence_type(SequenceType.AMINO_ACID)
         shutil.rmtree(path)
 
 
@@ -134,4 +135,5 @@ rep2.tsv,TRB,1234a,no"""
 
         self.assertTrue(os.path.isfile(dataset_file))
 
+        EnvironmentSettings.set_sequence_type(SequenceType.AMINO_ACID)
         shutil.rmtree(path)
