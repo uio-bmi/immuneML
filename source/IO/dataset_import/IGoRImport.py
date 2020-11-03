@@ -130,6 +130,7 @@ class IGoRImport(DataImport):
             df = df[no_stop_codon]
 
         ImportHelper.junction_to_cdr3(df, params.region_type)
+        ImportHelper.drop_empty_sequences(df)
 
         # chain or at least receptorsequence?
 

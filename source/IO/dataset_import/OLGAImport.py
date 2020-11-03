@@ -73,6 +73,7 @@ class OLGAImport(DataImport):
         df["sequence_identifiers"] = None
 
         ImportHelper.junction_to_cdr3(df, params.region_type)
+        ImportHelper.drop_empty_sequences(df)
 
         return df
 

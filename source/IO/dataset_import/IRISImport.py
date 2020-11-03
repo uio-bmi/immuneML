@@ -122,6 +122,9 @@ class IRISImport(DataImport):
                 processed_names = [IRISImport._load_gene(rn.choice(raw_v_string.split(" | "))) for raw_v_string in df[gene_column]]
                 df[gene_column] = processed_names
 
+        ImportHelper.drop_empty_sequences(df)
+
+
         return df
 
     @staticmethod

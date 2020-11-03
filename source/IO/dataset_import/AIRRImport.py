@@ -146,6 +146,8 @@ class AIRRImport(DataImport):
         df["v_genes"] = ImportHelper.strip_alleles(df, "v_genes")
         df["j_genes"] = ImportHelper.strip_alleles(df, "j_genes")
 
+        ImportHelper.drop_empty_sequences(df)
+
         return df
 
 
