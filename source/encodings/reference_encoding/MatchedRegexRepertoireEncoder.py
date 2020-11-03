@@ -26,7 +26,7 @@ class MatchedRegexRepertoireEncoder(MatchedRegexEncoder):
 
         encoded_dataset.add_encoded_data(EncodedData(
             examples=encoded_repertoires,
-            example_ids=labels["subject_id"], # todo label subject_id must always be specified? should this automatically be added?
+            example_ids=labels["subject_id"],
             feature_names=list(feature_annotations["chain_id"]),
             feature_annotations=feature_annotations,
             labels=labels,
@@ -51,7 +51,7 @@ class MatchedRegexRepertoireEncoder(MatchedRegexEncoder):
             features["v_gene"] = []
 
         for index, row in self.regex_df.iterrows():
-            for chain_type in self.chains: # todo generalize to other chain types!
+            for chain_type in self.chains:
                 regex = row[f"{chain_type}_regex"]
 
                 if regex is not None:
