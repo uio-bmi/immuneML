@@ -13,5 +13,6 @@ class MLApplicationState:
     label_config: LabelConfiguration
     pool_size: int
     name: str
+    store_encoded_data: bool
     path: str = None
     predictions_path: str = None

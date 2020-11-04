@@ -31,7 +31,6 @@ class MatchedReceptorsRepertoireEncoder(MatchedReceptorsEncoder):
             encoding=MatchedReceptorsEncoder.__name__
         ))
 
-        self.store(encoded_dataset, params)
         return encoded_dataset
 
     def _get_feature_info(self):

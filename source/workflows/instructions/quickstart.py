@@ -102,7 +102,8 @@ class Quickstart:
                     "reports": ["rep1"],
                     "batch_size": 3,
                     "optimization_metric": "balanced_accuracy",
-                    "refit_optimal_model": False
+                    "refit_optimal_model": False,
+                    "store_encoded_data": False
                 }
             }
         }

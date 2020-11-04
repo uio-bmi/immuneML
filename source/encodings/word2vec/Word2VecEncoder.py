@@ -123,8 +123,6 @@ class Word2VecEncoder(DatasetEncoder):
 
         encoded_dataset = self._encode_by_model(dataset, params, vectors)
 
-        self.store(encoded_dataset, params)
-
         return encoded_dataset
 
     @abc.abstractmethod

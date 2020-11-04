@@ -91,8 +91,6 @@ class DeepRCEncoder(DatasetEncoder):
                                                    info={"metadata_filepath": metadata_filepath,
                                                          "max_sequence_length": self.max_sequence_length})
 
-        self.store(encoded_dataset, params)
-
         return encoded_dataset
 
     @staticmethod

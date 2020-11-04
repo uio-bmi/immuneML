@@ -26,7 +26,7 @@ class TrainMLModelParser:
     def parse(self, key: str, instruction: dict, symbol_table: SymbolTable, path: str = None) -> TrainMLModelInstruction:
 
         valid_keys = ["assessment", "selection", "dataset", "strategy", "labels", "metrics", "settings", "batch_size", "type", "reports",
-                      "optimization_metric", 'refit_optimal_model']
+                      "optimization_metric", 'refit_optimal_model', 'store_encoded_data']
         ParameterValidator.assert_type_and_value(instruction['settings'], list, TrainMLModelParser.__name__, 'settings')
         ParameterValidator.assert_keys(list(instruction.keys()), valid_keys, TrainMLModelParser.__name__, "TrainMLModel")
         ParameterValidator.assert_type_and_value(instruction['refit_optimal_model'], bool, TrainMLModelParser.__name__, 'refit_optimal_model')
@@ -34,6 +34,7 @@ class TrainMLModelParser:
         ParameterValidator.assert_type_and_value(instruction['optimization_metric'], str, TrainMLModelParser.__name__, 'optimization_metric')
         ParameterValidator.assert_type_and_value(instruction['batch_size'], int, TrainMLModelParser.__name__, 'batch_size')
         ParameterValidator.assert_type_and_value(instruction['strategy'], str, TrainMLModelParser.__name__, 'strategy')
+        ParameterValidator.assert_type_and_value(instruction['store_encoded_data'], bool, TrainMLModelParser.__name__, 'store_encoded_data')
 
         settings = self._parse_settings(instruction, symbol_table)
         dataset = symbol_table.get(instruction["dataset"])
@@ -53,7 +54,8 @@ class TrainMLModelParser:
                                                  hp_settings=settings, assessment=assessment, selection=selection, metrics=metrics,
                                                  optimization_metric=optimization_metric, refit_optimal_model=instruction['refit_optimal_model'],
                                                  label_configuration=label_config, path=path, context=context,
-                                                 batch_size=instruction["batch_size"], data_reports=data_reports, name=key)
+                                                 store_encoded_data=instruction['store_encoded_data'], batch_size=instruction["batch_size"],
+                                                 data_reports=data_reports, name=key)
 
         return hp_instruction
 

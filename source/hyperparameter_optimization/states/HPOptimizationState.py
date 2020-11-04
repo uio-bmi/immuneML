@@ -28,6 +28,7 @@ class HPOptimizationState:
     data_reports: dict = field(default_factory=dict)
     name: str = None
     refit_optimal_model: bool = None
+    store_encoded_data: bool = None
     optimal_hp_items: Dict[str, HPItem] = field(default_factory=dict)
     optimal_hp_item_paths: Dict[str, str] = field(default_factory=dict)
     assessment_states: List[HPAssessmentState] = field(default_factory=list)

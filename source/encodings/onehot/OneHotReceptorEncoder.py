@@ -24,8 +24,6 @@ class OneHotReceptorEncoder(OneHotEncoder):
                                           encoded_data=encoded_data,
                                           params=dataset.params)
 
-        self.store(encoded_dataset, params)
-
         return encoded_dataset
 
     def _encode_data(self, dataset: ReceptorDataset, params: EncoderParams):

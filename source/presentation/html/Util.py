@@ -3,6 +3,7 @@ import os
 import shutil
 from enum import Enum
 
+from source.reports.ReportResult import ReportResult
 from source.util.PathBuilder import PathBuilder
 
 
@@ -18,7 +19,8 @@ class Util:
             elif isinstance(obj, str) and os.path.isfile(obj):
                 obj_abs_path = os.path.abspath(obj)
                 base_abs_path = os.path.abspath(base_path)
-                return os.path.relpath(obj_abs_path, base_abs_path)
+                res_path = os.path.relpath(obj_abs_path, base_abs_path)
+                return res_path
             else:
                 return obj if obj is not None else ""
         elif isinstance(obj, Enum):
@@ -67,3 +69,18 @@ class Util:
                     table_string += "</thead>\n"
         table_string += "</table>\n"
         return table_string
+
+    @staticmethod
+    def update_paths(report_result: ReportResult, path: str) -> ReportResult:
+        for attribute in vars(report_result):
+            attribute_value = getattr(report_result, attribute)
+            if isinstance(attribute_value, list):
+                for output in attribute_value:
+                    new_filename = os.path.relpath(path=output.path, start=path).replace("..", "").replace("/", "_")
+                    new_filename = new_filename[1:] if new_filename[0] == '_' else new_filename
+                    new_path = path + new_filename
+                    if output.path != new_path:
+                        shutil.copyfile(src=output.path, dst=new_path)
+                        output.path = new_path
+
+        return report_result

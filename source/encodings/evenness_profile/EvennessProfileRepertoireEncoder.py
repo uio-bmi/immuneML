@@ -26,8 +26,6 @@ class EvennessProfileRepertoireEncoder(EvennessProfileEncoder):
                                             params=dataset.params,
                                             metadata_file=dataset.metadata_file)
 
-        self.store(encoded_dataset, params)
-
         return encoded_dataset
 
     @log

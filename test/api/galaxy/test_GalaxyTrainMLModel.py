@@ -89,7 +89,8 @@ class TestGalaxyTrainMLModel(TestCase):
                     "reports": [],
                     "batch_size": 10,
                     "optimization_metric": "accuracy",
-                    'refit_optimal_model': False
+                    'refit_optimal_model': False,
+                    "store_encoded_data": False
                 }
             }
         }

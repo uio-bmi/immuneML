@@ -122,8 +122,6 @@ class DistanceEncoder(DatasetEncoder):
         encoded_dataset.encoded_data = EncodedData(examples=distance_matrix, labels=labels, example_ids=distance_matrix.index.values,
                                                    encoding=DistanceEncoder.__name__)
 
-        self.store(encoded_dataset, params)
-
         return encoded_dataset
 
     @staticmethod

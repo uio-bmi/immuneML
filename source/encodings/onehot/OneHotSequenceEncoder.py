@@ -23,8 +23,6 @@ class OneHotSequenceEncoder(OneHotEncoder):
                                           params=dataset.params,
                                           file_size=dataset.file_size)
 
-        self.store(encoded_dataset, params)
-
         return encoded_dataset
 
     def _encode_data(self, dataset: SequenceDataset, params: EncoderParams):

@@ -86,7 +86,8 @@ class TestMLIE(TestCase):
                     "reports": [],
                     "batch_size": 10,
                     "optimization_metric": "accuracy",
-                    'refit_optimal_model': False
+                    'refit_optimal_model': False,
+                    "store_encoded_data": False
                 }
             },
             "output": {
@@ -121,7 +122,8 @@ class TestMLIE(TestCase):
                     "dataset": "d1",
                     "config_path": path + "result_export/inst1/optimal_CD/zip/ml_model_CD.zip",
                     "label": "CD",
-                    "pool_size": 4
+                    "pool_size": 4,
+                    "store_encoded_data": False
                 }
             },
             "output": {

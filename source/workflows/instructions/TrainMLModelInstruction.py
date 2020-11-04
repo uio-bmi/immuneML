@@ -55,6 +55,9 @@ class TrainMLModelInstruction(Instruction):
         refit_optimal_model (bool): if the final combination of preprocessing-encoding-ML model should be refitted on the full dataset thus providing
         the final model to be exported from instruction; alternatively, train combination from one of the assessment folds will be used
 
+        store_encoded_data (bool): if the encoded datasets should be stored, can be True or False; setting this argument to True might increase the
+        disk usage significantly
+
     YAML specification:
 
     .. indent with spaces
@@ -105,15 +108,16 @@ class TrainMLModelInstruction(Instruction):
             batch_size: 4 # number of parallel processes to create (could speed up the computation)
             optimization_metric: balanced_accuracy # the metric to use for choosing the optimal model and during training
             refit_optimal_model: False # use trained model, do not refit on the full dataset
+            store_encoded_data: True # store encoded datasets in pickle format
 
     """
 
     def __init__(self, dataset, hp_strategy: HPOptimizationStrategy, hp_settings: list, assessment: SplitConfig, selection: SplitConfig,
-                 metrics: set, optimization_metric: Metric, label_configuration: LabelConfiguration, path: str = None,
-                 context: dict = None, batch_size: int = 1, data_reports: dict = None, name: str = None, refit_optimal_model: bool = False):
+                 metrics: set, optimization_metric: Metric, label_configuration: LabelConfiguration, path: str = None, context: dict = None,
+                 batch_size: int = 1, data_reports: dict = None, name: str = None, refit_optimal_model: bool = False, store_encoded_data: bool = None):
         self.state = HPOptimizationState(dataset, hp_strategy, hp_settings, assessment, selection, metrics,
                                          optimization_metric, label_configuration, path, context, batch_size,
-                                         data_reports if data_reports is not None else {}, name, refit_optimal_model)
+                                         data_reports if data_reports is not None else {}, name, refit_optimal_model, store_encoded_data)
 
     def run(self, result_path: str):
         self.state.path = result_path
@@ -137,7 +141,8 @@ class TrainMLModelInstruction(Instruction):
             print(f"{datetime.datetime.now()}: Hyperparameter optimization: retraining optimal model for label {label} {index_repr}.\n", flush=True)
             self.state.optimal_hp_items[label] = MLProcess(self.state.dataset, None, label, self.state.metrics, self.state.optimization_metric,
                                                            f"{self.state.path}optimal_{label}/", number_of_processes=self.state.batch_size,
-                                                           label_config=self.state.label_configuration, hp_setting=optimal_hp_setting).run(0)
+                                                           label_config=self.state.label_configuration, hp_setting=optimal_hp_setting,
+                                                           store_encoded_data=self.state.store_encoded_data).run(0)
             print(f"{datetime.datetime.now()}: Hyperparameter optimization: finished retraining optimal model for label {label} {index_repr}.\n", flush=True)
 
         else:

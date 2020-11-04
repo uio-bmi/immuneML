@@ -2,9 +2,14 @@ import os
 import statistics
 
 from source.environment.EnvironmentSettings import EnvironmentSettings
+from source.hyperparameter_optimization.states.HPAssessmentState import HPAssessmentState
+from source.hyperparameter_optimization.states.HPItem import HPItem
+from source.hyperparameter_optimization.states.HPLabelState import HPLabelState
 from source.hyperparameter_optimization.states.HPOptimizationState import HPOptimizationState
+from source.hyperparameter_optimization.states.HPSelectionState import HPSelectionState
 from source.presentation.TemplateParser import TemplateParser
 from source.presentation.html.Util import Util
+from source.reports.ReportResult import ReportResult
 from source.util.PathBuilder import PathBuilder
 from source.util.StringHelper import StringHelper
 
@@ -29,6 +34,7 @@ class HPHTMLBuilder:
         """
 
         base_path = PathBuilder.build(state.path + "../HTML_output/")
+        state = HPHTMLBuilder.move_reports_recursive(state, base_path)
         html_map = HPHTMLBuilder.make_main_html_map(state, base_path)
         result_file = f"{base_path}TrainMLModelReport_{state.name}.html"
 
@@ -241,3 +247,52 @@ class HPHTMLBuilder:
         }
 
         return html_map
+
+    @staticmethod
+    def move_reports_recursive(obj, path: str):
+
+        for attribute in (vars(obj) if not isinstance(obj, dict) else obj):
+            attribute_value = getattr(obj, attribute) if not isinstance(obj, dict) else obj[attribute]
+            if isinstance(attribute_value, list) and all(isinstance(item, ReportResult) for item in attribute_value):
+                new_attribute_values = []
+                for report_result in attribute_value:
+                    new_attribute_values.append(Util.update_paths(report_result, path))
+                setattr(obj, attribute, new_attribute_values)
+            elif isinstance(attribute_value, list) and all(isinstance(item, HPAssessmentState) for item in attribute_value):
+                obj = HPHTMLBuilder.process_list_recursively(obj, attribute, attribute_value, path)
+            elif isinstance(attribute_value, dict) and all(isinstance(item, HPLabelState) or isinstance(item, HPItem) for item in attribute_value.values()):
+                obj = HPHTMLBuilder.process_dict_recursive(obj, attribute, attribute_value, path)
+            elif isinstance(attribute_value, dict) and all(isinstance(item, list) for item in attribute_value.values()) and all(all(isinstance(item, HPItem) for item in item_list) for item_list in attribute_value.values()):
+                obj = HPHTMLBuilder.process_hp_items(obj, attribute, attribute_value, path)
+            elif isinstance(attribute_value, HPSelectionState):
+                setattr(obj, attribute, HPHTMLBuilder.move_reports_recursive(attribute_value, path))
+
+        return obj
+
+    @staticmethod
+    def process_hp_items(obj, attribute, attribute_value, path):
+        new_attribute_value = {}
+        for hp_setting, hp_item_list in attribute_value.items():
+            new_hp_item_list = []
+            for hp_item in hp_item_list:
+                new_hp_item_list.append(HPHTMLBuilder.move_reports_recursive(hp_item, path))
+            new_attribute_value[hp_setting] = new_hp_item_list
+
+        setattr(obj, attribute, new_attribute_value)
+
+        return obj
+
+    @staticmethod
+    def process_dict_recursive(obj, attribute, attribute_value, path):
+        for key, value in attribute_value.items():
+            attribute_value[key] = HPHTMLBuilder.move_reports_recursive(value, path)
+        setattr(obj, attribute, attribute_value)
+        return obj
+
+    @staticmethod
+    def process_list_recursively(obj, attribute, attribute_value, path):
+        new_attribute_values = []
+        for item in attribute_value:
+            new_attribute_values.append(HPHTMLBuilder.move_reports_recursive(item, path))
+        setattr(obj, attribute, new_attribute_values)
+        return obj

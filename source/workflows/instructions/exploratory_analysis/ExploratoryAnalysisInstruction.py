@@ -91,7 +91,8 @@ class ExploratoryAnalysisInstruction(Instruction):
                                                                 encoder_params=EncoderParams(result_path=result_path,
                                                                                              label_config=unit.label_config,
                                                                                              filename="encoded_dataset.pkl",
-                                                                                             pool_size=unit.batch_size)))
+                                                                                             pool_size=unit.batch_size),
+                                                                store_encoded_data=True))
         else:
             encoded_dataset = unit.dataset
         return encoded_dataset

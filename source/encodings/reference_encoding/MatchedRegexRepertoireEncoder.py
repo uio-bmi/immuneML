@@ -1,7 +1,8 @@
+import datetime
+import re
+
 import numpy as np
 import pandas as pd
-import re
-import datetime
 
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.encoded_data.EncodedData import EncodedData
@@ -31,9 +32,7 @@ class MatchedRegexRepertoireEncoder(MatchedRegexEncoder):
             encoding=MatchedRegexEncoder.__name__
         ))
 
-        self.store(encoded_dataset, params)
         return encoded_dataset
-
 
     def _get_feature_info(self):
         """
@@ -64,7 +63,6 @@ class MatchedRegexRepertoireEncoder(MatchedRegexEncoder):
 
         return pd.DataFrame(features)
 
-
     def _encode_repertoires(self, dataset: RepertoireDataset, params: EncoderParams):
         # Rows = repertoires, Columns = regex matches (one chain per column)
         encoded_repertoires = np.zeros((dataset.get_example_count(),
@@ -90,7 +88,6 @@ class MatchedRegexRepertoireEncoder(MatchedRegexEncoder):
 
         match_idx = 0
 
-
         for index, row in self.regex_df.iterrows():
             for chain_type in self.chains:
                 regex = row[f"{chain_type}_regex"]
@@ -106,7 +103,6 @@ class MatchedRegexRepertoireEncoder(MatchedRegexEncoder):
                     match_idx += 1
 
         return matches
-
 
     def _matches(self, receptor_sequence, regex, v_gene=None):
         if v_gene is not None and receptor_sequence.metadata.v_gene != v_gene:

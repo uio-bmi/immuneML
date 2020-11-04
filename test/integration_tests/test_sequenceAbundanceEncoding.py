@@ -82,7 +82,8 @@ class TestSequenceAbundanceEncoding(TestCase):
                     "batch_size": 2,
                     "reports": None,
                     "optimization_metric": "balanced_accuracy",
-                    "refit_optimal_model": True
+                    "refit_optimal_model": True,
+                    "store_encoded_data": False
                 }
             }
         }

@@ -13,8 +13,6 @@ class KmerFreqReceptorEncoder(KmerFrequencyEncoder):
                                           encoded_data=encoded_data,
                                           params=dataset.params)
 
-        self.store(encoded_dataset, params)
-
         return encoded_dataset
 
     def _encode_examples(self, dataset, params: EncoderParams):

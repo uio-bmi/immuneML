@@ -90,7 +90,8 @@ class HPAssessment:
         assessment_item = MLProcess(train_dataset=train_val_dataset, test_dataset=test_dataset, label=label, metrics=state.metrics,
                                     optimization_metric=state.optimization_metric, path=path, hp_setting=hp_setting, report_context=state.context,
                                     ml_reports=state.assessment.reports.model_reports.values(), number_of_processes=state.batch_size,
-                                    encoding_reports=state.assessment.reports.encoding_reports.values(), label_config=state.label_configuration)\
+                                    encoding_reports=state.assessment.reports.encoding_reports.values(), label_config=state.label_configuration,
+                                    store_encoded_data=state.store_encoded_data)\
             .run(split_index)
 
         state.assessment_states[split_index].label_states[label].assessment_items[hp_setting] = assessment_item

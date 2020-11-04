@@ -32,8 +32,6 @@ class OneHotRepertoireEncoder(OneHotEncoder):
                                             params=dataset.params,
                                             metadata_file=dataset.metadata_file)
 
-        self.store(encoded_dataset, params)
-
         return encoded_dataset
 
     def _set_max_dims(self, dataset):

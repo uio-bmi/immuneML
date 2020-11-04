@@ -27,9 +27,7 @@ class MatchedSequencesRepertoireEncoder(MatchedSequencesEncoder):
             encoding=MatchedSequencesEncoder.__name__
         ))
 
-        self.store(encoded_dataset, params)
         return encoded_dataset
-
 
     def _get_feature_info(self):
         """
@@ -70,7 +68,6 @@ class MatchedSequencesRepertoireEncoder(MatchedSequencesEncoder):
                 labels[label].append(repertoire.metadata[label])
 
         return encoded_repertories, labels
-
 
     def _match_repertoire_to_reference(self, repertoire: Repertoire):
         matcher = SequenceMatcher()

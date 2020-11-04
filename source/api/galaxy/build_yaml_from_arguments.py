@@ -1,9 +1,9 @@
 import argparse
 import glob
 import itertools as it
+import logging
 import os
 import sys
-import logging
 import warnings
 
 import yaml
@@ -187,7 +187,8 @@ def build_specs(args):
                 "batch_size": 10,
                 "reports": [],
                 "optimization_metric": "balanced_accuracy",
-                'refit_optimal_model': True
+                'refit_optimal_model': True,
+                "store_encoded_data": False
             }
         }
     }
