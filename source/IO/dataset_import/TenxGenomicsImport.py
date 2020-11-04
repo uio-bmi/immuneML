@@ -127,6 +127,8 @@ class TenxGenomicsImport(DataImport):
         df = df[df.productive.isin(allowed_productive_values)]
 
         ImportHelper.junction_to_cdr3(df, params.region_type)
+        ImportHelper.drop_empty_sequences(df)
+
         return df
 
 

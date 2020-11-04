@@ -122,6 +122,8 @@ class GenericImport(DataImport):
     @staticmethod
     def preprocess_dataframe(df: pd.DataFrame, params: DatasetImportParams):
         ImportHelper.junction_to_cdr3(df, params.region_type)
+        ImportHelper.drop_empty_sequences(df)
+
         return df
 
     @staticmethod
