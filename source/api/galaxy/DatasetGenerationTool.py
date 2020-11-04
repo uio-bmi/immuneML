@@ -2,6 +2,7 @@ import shutil
 
 import yaml
 
+from source.api.galaxy.GalaxyTool import GalaxyTool
 from source.api.galaxy.Util import Util
 from source.app.ImmuneMLApp import ImmuneMLApp
 from source.util.ParameterValidator import ParameterValidator
@@ -9,7 +10,7 @@ from source.util.PathBuilder import PathBuilder
 from source.workflows.instructions.dataset_generation.DatasetGenerationInstruction import DatasetGenerationInstruction
 
 
-class DatasetGenerationTool:
+class DatasetGenerationTool(GalaxyTool):
     """
     DatasetGenerationTool is an alternative to running ImmuneMLApp directly. It accepts a path to YAML specification and a path to the
     output directory and generates the dataset according to the given specification. The created dataset will be located under
@@ -25,12 +26,9 @@ class DatasetGenerationTool:
 
     def __init__(self, specification_path, result_path, **kwargs):
         Util.check_parameters(specification_path, result_path, kwargs, "Dataset generation tool")
+        super().__init__(specification_path, result_path, **kwargs)
 
-        self.yaml_path = specification_path
-        self.result_path = result_path if result_path[-1] == '/' else f"{result_path}/"
-        self.files_path = "./"
-
-    def run(self):
+    def _run(self):
         PathBuilder.build(self.result_path)
         self.update_specs()
         state = ImmuneMLApp(self.yaml_path, self.result_path).run()[0]

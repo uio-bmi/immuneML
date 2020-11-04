@@ -5,6 +5,7 @@ from glob import glob
 
 import yaml
 
+from source.api.galaxy.GalaxyTool import GalaxyTool
 from source.api.galaxy.Util import Util
 from source.app.ImmuneMLApp import ImmuneMLApp
 from source.util.ParameterValidator import ParameterValidator
@@ -12,15 +13,14 @@ from source.util.PathBuilder import PathBuilder
 from source.workflows.instructions.TrainMLModelInstruction import TrainMLModelInstruction
 
 
-class GalaxyTrainMLModel:
+class GalaxyTrainMLModel(GalaxyTool):
 
     def __init__(self, specification_path, result_path, **kwargs):
         Util.check_parameters(specification_path, result_path, kwargs, GalaxyTrainMLModel.__name__)
-        self.yaml_path = specification_path
-        self.result_path = result_path if result_path[-1] == '/' else f"{result_path}/"
+        super().__init__(specification_path, result_path, **kwargs)
         self.instruction_name = None
 
-    def run(self):
+    def _run(self):
         PathBuilder.build(self.result_path)
         self._prepare_specs()
         app = ImmuneMLApp(self.yaml_path, self.result_path)

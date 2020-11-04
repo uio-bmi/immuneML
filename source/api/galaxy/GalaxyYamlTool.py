@@ -1,22 +1,18 @@
-import os
-
 import yaml
 
+from source.api.galaxy.GalaxyTool import GalaxyTool
 from source.api.galaxy.Util import Util
 from source.app.ImmuneMLApp import ImmuneMLApp
 from source.util.PathBuilder import PathBuilder
 
 
-class GalaxyYamlTool:
+class GalaxyYamlTool(GalaxyTool):
 
     def __init__(self, specification_path, result_path, **kwargs):
         Util.check_parameters(specification_path, result_path, kwargs, "GalaxyYamlTool")
+        super().__init__(specification_path, result_path, **kwargs)
 
-        self.yaml_path = specification_path
-        self.result_path = os.path.relpath(result_path) + "/"
-        self.start_path = "./"
-
-    def run(self):
+    def _run(self):
         PathBuilder.build(self.result_path)
         self.update_specs()
 

@@ -4,11 +4,12 @@ from glob import glob
 
 import yaml
 
+from source.api.galaxy.GalaxyTool import GalaxyTool
 from source.api.galaxy.Util import Util
 from source.workflows.instructions.SimulationInstruction import SimulationInstruction
 
 
-class GalaxySimulationTool:
+class GalaxySimulationTool(GalaxyTool):
 
     """
     GalaxySimulationTool is an alternative to running immuneML with the simulation instruction directly. It accepts a YAML specification file and a
@@ -86,10 +87,9 @@ class GalaxySimulationTool:
 
     def __init__(self, specification_path, result_path, **kwargs):
         Util.check_parameters(specification_path, result_path, kwargs, GalaxySimulationTool.__name__)
-        self.yaml_path = specification_path
-        self.result_path = result_path if result_path[-1] == '/' else f"{result_path}/"
+        super().__init__(specification_path, result_path, **kwargs)
 
-    def run(self):
+    def _run(self):
         self.prepare_specs()
 
         Util.run_tool(self.yaml_path, self.result_path)

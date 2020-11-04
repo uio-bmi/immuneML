@@ -3,23 +3,23 @@ import shutil
 
 import yaml
 
+from source.api.galaxy.GalaxyTool import GalaxyTool
 from source.api.galaxy.Util import Util
 from source.util.ParameterValidator import ParameterValidator
 from source.workflows.instructions.dataset_generation.DatasetGenerationInstruction import DatasetGenerationInstruction
 
 
-class DataSimulationTool:
+class DataSimulationTool(GalaxyTool):
 
     def __init__(self, specification_path, result_path, **kwargs):
         Util.check_parameters(specification_path, result_path, kwargs, DataSimulationTool.__name__)
-        self.yaml_path = specification_path
-        self.result_path = result_path if result_path[-1] == '/' else f"{result_path}/"
+        super().__init__(specification_path, result_path, **kwargs)
         self.expected_instruction = DatasetGenerationInstruction.__name__[:-11]
         self.instruction_name = None
         self.dataset_name = None
         self.export_format = None
 
-    def run(self):
+    def _run(self):
         self.prepare_specs()
         Util.run_tool(self.yaml_path, self.result_path)
 
