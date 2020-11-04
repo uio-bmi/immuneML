@@ -187,6 +187,7 @@ An example is shown below:
       optimization_metric: balanced_accuracy # the metric used for optimization
       reports: []
       refit_optimal_model: False
+      store_encoded_data: False
 
 The flow of the hyperparameter optimization is shown below, along with the
 output that is generated and reports executed at each step:

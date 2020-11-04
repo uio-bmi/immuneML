@@ -62,6 +62,7 @@ An example of the full YAML specification for training an ML model through neste
       optimization_metric: accuracy
       reports: [r1]
       refit_optimal_model: False
+      store_encoded_data: False
   output:
     format: HTML
 
@@ -199,6 +200,8 @@ An example of the YAML specification for the Training a ML model instruction is 
     metrics: [accuracy]
     optimization_metric: accuracy
     reports: []
+    refit_optimal_model: False
+    store_encoded_data: False
 
 Output - HTML
 ^^^^^^^^^^^^^

@@ -106,6 +106,7 @@ my_train_classifier_instruction):
       reports: [] # reports to be run on the whole dataset e.g. sequence length distribution (no reports in now)
       batch_size: 4 # number of repertoires to process at the time (4 here)
       refit_optimal_model: False # should the optimal model be refitting on the full dataset (True/False)
+      store_encoded_data: False # do not store intermediary encoded datasets in internal format
 
 Running the analysis
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
