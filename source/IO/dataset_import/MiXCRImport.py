@@ -138,6 +138,8 @@ class MiXCRImport(DataImport):
                 df["chains"] = ImportHelper.load_chains_from_genes(df, "j_genes")
             df["j_genes"] = MiXCRImport._load_genes(df, "j_genes")
 
+        ImportHelper.drop_empty_sequences(df)
+
         return df
 
 

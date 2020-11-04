@@ -28,6 +28,7 @@ from source.data_model.receptor.receptor_sequence.SequenceFrameType import Seque
 from source.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
 from source.data_model.repertoire.Repertoire import Repertoire
 from source.environment.Constants import Constants
+from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.util.PathBuilder import PathBuilder
 
 
@@ -150,6 +151,16 @@ class ImportHelper:
         return dataframe.replace({key: Constants.UNKNOWN for key in ["unresolved", "no data", "na", "unknown", "null", "nan", np.nan, ""]})
 
     @staticmethod
+    def drop_empty_sequences(dataframe: pd.DataFrame) -> pd.DataFrame:
+        sequence_colname = EnvironmentSettings.get_sequence_type().value
+        sequence_name = EnvironmentSettings.get_sequence_type().name.lower().replace("_", " ")
+
+        n_empty = sum(dataframe[sequence_colname].isnull())
+        if n_empty > 0:
+            dataframe.drop(dataframe.loc[dataframe[sequence_colname].isnull()].index, inplace=True)
+            warnings.warn(f"ImportHelper: {n_empty} sequences were removed from the dataset because they contained an empty {sequence_name} sequence after preprocessing. ")
+
+    @staticmethod
     def prepare_frame_type_list(params: DatasetImportParams) -> list:
         frame_type_list = []
         if params.import_productive:
@@ -162,7 +173,7 @@ class ImportHelper:
 
     @staticmethod
     def load_chains_from_genes(df: pd.DataFrame, column_name) -> list:
-        return [Chain.get_chain(chain_str) for chain_str in df[column_name].str[0:3]]
+        return [Chain.get_chain(chain_str).value for chain_str in df[column_name].str[0:3]]
 
     @staticmethod
     def junction_to_cdr3(df: pd.DataFrame, region_type: RegionType):

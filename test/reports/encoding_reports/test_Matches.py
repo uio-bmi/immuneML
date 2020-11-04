@@ -40,7 +40,7 @@ class TestMatches(unittest.TestCase):
                                                                        {**metadata_beta, "count": 5}]],
                                                         subject_ids=labels["subject_id"])
 
-        dataset = RepertoireDataset(repertoires=repertoires)
+        dataset = RepertoireDataset(repertoires=repertoires, metadata_file=metadata)
 
         label_config = LabelConfiguration()
         label_config.add_label("subject_id", labels["subject_id"])
@@ -129,7 +129,7 @@ class TestMatches(unittest.TestCase):
                                                                        {**metadata_beta, "count": 5}]],
                                                         subject_ids=labels["subject_id"])
 
-        dataset = RepertoireDataset(repertoires=repertoires)
+        dataset = RepertoireDataset(repertoires=repertoires, metadata_file=metadata)
 
         label_config = LabelConfiguration()
         label_config.add_label("subject_id", labels["subject_id"])
@@ -213,7 +213,7 @@ class TestMatches(unittest.TestCase):
                            {**metadata_beta, "count": 2}]],
             subject_ids=labels["subject_id"])
 
-        dataset = RepertoireDataset(repertoires=repertoires)
+        dataset = RepertoireDataset(repertoires=repertoires, metadata_file=metadata)
 
         label_config = LabelConfiguration()
         label_config.add_label("subject_id", labels["subject_id"])

@@ -1,8 +1,9 @@
-import datetime
-import re
+import warnings
 
 import numpy as np
 import pandas as pd
+import re
+import datetime
 
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.encoded_data.EncodedData import EncodedData
@@ -25,7 +26,7 @@ class MatchedRegexRepertoireEncoder(MatchedRegexEncoder):
 
         encoded_dataset.add_encoded_data(EncodedData(
             examples=encoded_repertoires,
-            example_ids=labels["subject_id"], # todo label subject_id must always be specified? should this automatically be added?
+            example_ids=list(dataset.get_metadata(["subject_id"]).values())[0],
             feature_names=list(feature_annotations["chain_id"]),
             feature_annotations=feature_annotations,
             labels=labels,
@@ -48,7 +49,7 @@ class MatchedRegexRepertoireEncoder(MatchedRegexEncoder):
             features["v_gene"] = []
 
         for index, row in self.regex_df.iterrows():
-            for chain_type in self.chains: # todo generalize to other chain types!
+            for chain_type in self.chains:
                 regex = row[f"{chain_type}_regex"]
 
                 if regex is not None:
@@ -98,8 +99,11 @@ class MatchedRegexRepertoireEncoder(MatchedRegexEncoder):
                     for rep_seq in rep_seqs:
                         if rep_seq.metadata.chain.value == chain_type:
                             if self._matches(rep_seq, regex, v_gene):
-                                # todo if count_counts instead of count_clones
-                                matches[match_idx] += 1 if not self.sum_counts else rep_seq.metadata.count
+                                n_matches = 1 if not self.sum_counts else rep_seq.metadata.count
+                                if n_matches is None:
+                                    warnings.warn(f"MatchedRegexRepertoireEncoder: count not defined for sequence with id {rep_seq.identifier} in repertoire {repertoire.identifier}, ignoring sequence...")
+                                    n_matches = 0
+                                matches[match_idx] += n_matches
                     match_idx += 1
 
         return matches

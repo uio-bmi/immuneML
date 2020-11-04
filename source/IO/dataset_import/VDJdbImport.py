@@ -128,6 +128,8 @@ class VDJdbImport(DataImport):
             df.loc[df["sequence_identifiers"] == "0", "sequence_identifiers"] = None
         # todo: should sequence identifiers be made unique?
 
+        ImportHelper.drop_empty_sequences(df)
+
         return df
 
     @staticmethod
