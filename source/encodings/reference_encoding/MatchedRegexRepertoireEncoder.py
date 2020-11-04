@@ -1,9 +1,9 @@
+import datetime
+import re
 import warnings
 
 import numpy as np
 import pandas as pd
-import re
-import datetime
 
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.encoded_data.EncodedData import EncodedData
@@ -97,13 +97,16 @@ class MatchedRegexRepertoireEncoder(MatchedRegexEncoder):
                     v_gene = row[f"{chain_type}V"] if f"{chain_type}V" in row else None
 
                     for rep_seq in rep_seqs:
-                        if rep_seq.metadata.chain.value == chain_type:
-                            if self._matches(rep_seq, regex, v_gene):
-                                n_matches = 1 if not self.sum_counts else rep_seq.metadata.count
-                                if n_matches is None:
-                                    warnings.warn(f"MatchedRegexRepertoireEncoder: count not defined for sequence with id {rep_seq.identifier} in repertoire {repertoire.identifier}, ignoring sequence...")
-                                    n_matches = 0
-                                matches[match_idx] += n_matches
+                        if rep_seq.metadata.chain is not None:
+                            if rep_seq.metadata.chain.value == chain_type:
+                                if self._matches(rep_seq, regex, v_gene):
+                                    n_matches = 1 if not self.sum_counts else rep_seq.metadata.count
+                                    if n_matches is None:
+                                        warnings.warn(f"MatchedRegexRepertoireEncoder: count not defined for sequence with id {rep_seq.identifier} in repertoire {repertoire.identifier}, ignoring sequence...")
+                                        n_matches = 0
+                                    matches[match_idx] += n_matches
+                        else:
+                            warnings.warn(f"{MatchedRegexRepertoireEncoder.__class__.__name__}: chain was not set for sequence {rep_seq.identifier}, skipping the sequence for matching...")
                     match_idx += 1
 
         return matches

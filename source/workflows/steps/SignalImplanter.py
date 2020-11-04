@@ -47,6 +47,10 @@ class SignalImplanter(Step):
         processed_receptors = SignalImplanter._implant_signals(simulation_state, SignalImplanter._process_receptor)
         processed_dataset = ReceptorDataset.build(receptors=processed_receptors, file_size=simulation_state.dataset.file_size,
                                                   name=simulation_state.dataset.name, path=simulation_state.result_path)
+
+        processed_dataset.params = {**(simulation_state.dataset.params if simulation_state.dataset.params is not None else {}),
+                                    **{signal: [True, False] for signal in simulation_state.signals}}
+
         return processed_dataset
 
     @staticmethod
@@ -54,7 +58,9 @@ class SignalImplanter(Step):
 
         PathBuilder.build(simulation_state.result_path + "repertoires/")
         processed_repertoires = SignalImplanter._implant_signals(simulation_state, SignalImplanter._process_repertoire)
-        processed_dataset = RepertoireDataset(repertoires=processed_repertoires, params=simulation_state.dataset.params, name=simulation_state.dataset.name,
+        processed_dataset = RepertoireDataset(repertoires=processed_repertoires, params={**(simulation_state.dataset.params if simulation_state.dataset.params is not None else {}),
+                                                                                         **{signal: [True, False] for signal in simulation_state.signals}},
+                                              name=simulation_state.dataset.name,
                                               metadata_file=SignalImplanter._create_metadata_file(processed_repertoires, simulation_state))
         return processed_dataset
 
