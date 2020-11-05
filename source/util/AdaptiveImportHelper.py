@@ -18,10 +18,10 @@ class AdaptiveImportHelper:
         dataframe["region_types"] = params.region_type.name
 
         if params.region_type == RegionType.IMGT_CDR3:
-            if "sequences" in params.columns_to_load:
+            if "sequences" in dataframe.columns:
                 dataframe['sequences'] = [y[(84 - 3 * len(x)): 78] if x is not None else None for x, y in zip(dataframe['sequence_aas'], dataframe['sequences'])]
             dataframe['sequence_aas'] = dataframe["sequence_aas"].str[1:-1]
-        elif "sequences" in params.columns_to_load:
+        elif "sequences" in dataframe.columns:
             dataframe['sequences'] = [y[(81 - 3 * len(x)): 81] if x is not None else None for x, y in zip(dataframe['sequence_aas'], dataframe['sequences'])]
 
         dataframe = AdaptiveImportHelper.parse_adaptive_germline_to_imgt(dataframe)
