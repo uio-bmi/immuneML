@@ -6,9 +6,8 @@ from source.IO.dataset_import.ImmunoSEQRearrangementImport import ImmunoSEQRearr
 from source.data_model.receptor.receptor_sequence.SequenceFrameType import SequenceFrameType
 from source.dsl.DefaultParamsLoader import DefaultParamsLoader
 from source.environment.EnvironmentSettings import EnvironmentSettings
-from source.environment.SequenceType import SequenceType
-from source.util.PathBuilder import PathBuilder
 from source.util.ImportHelper import ImportHelper
+from source.util.PathBuilder import PathBuilder
 
 
 class TestImmunoSEQRearrangementImport(TestCase):
@@ -66,11 +65,12 @@ rep2.tsv,TRB,1234a,no"""
     def test_repertoire_import(self):
         path = EnvironmentSettings.root_path + "test/tmp/adaptive/"
         self.build_dummy_dataset(path, True)
-        EnvironmentSettings.set_sequence_type(SequenceType.NUCLEOTIDE)
 
         params = DefaultParamsLoader.load(EnvironmentSettings.default_params_path + "datasets/", "ImmunoSEQRearrangement")
         params["is_repertoire"] = True
         params["result_path"] = path
+        params['import_empty_nt_sequences'] = False
+        params['import_empty_aa_sequences'] = True
         params["metadata_file"] = path + "metadata.csv"
         params["path"] = path
         params["import_productive"] = True
@@ -99,15 +99,11 @@ rep2.tsv,TRB,1234a,no"""
 
         self.assertTrue(os.path.isfile(dataset_file))
 
-        EnvironmentSettings.set_sequence_type(SequenceType.AMINO_ACID)
         shutil.rmtree(path)
-
 
     def test_sequence_import(self):
         path = EnvironmentSettings.root_path + "test/tmp/adaptive/"
         self.build_dummy_dataset(path, False)
-
-        EnvironmentSettings.set_sequence_type(SequenceType.NUCLEOTIDE)
 
         params = DefaultParamsLoader.load(EnvironmentSettings.default_params_path + "datasets/", "ImmunoSEQRearrangement")
         params["is_repertoire"] = False
@@ -117,6 +113,8 @@ rep2.tsv,TRB,1234a,no"""
         params["import_productive"] = True
         params["import_with_stop_codon"] = True
         params["import_out_of_frame"] = True
+        params["import_empty_nt_sequences"] = False
+        params["import_empty_aa_sequences"] = True
 
         dataset_name = "adaptive_dataset_seqs"
 
@@ -135,5 +133,4 @@ rep2.tsv,TRB,1234a,no"""
 
         self.assertTrue(os.path.isfile(dataset_file))
 
-        EnvironmentSettings.set_sequence_type(SequenceType.AMINO_ACID)
         shutil.rmtree(path)

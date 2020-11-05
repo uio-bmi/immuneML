@@ -64,7 +64,7 @@ class TestMotifSeedRecovery(TestCase):
         result = report.generate()
 
         self.assertIsInstance(result, ReportResult)
-        self.assertEqual(result.output_tables[0], path + "motif_seed_recovery.csv")
+        self.assertEqual(result.output_tables[0].path, path + "motif_seed_recovery.csv")
         self.assertEqual(result.output_figures[0].path, path + "motif_seed_recovery.html")
 
         # Actual tests

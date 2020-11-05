@@ -76,6 +76,11 @@ class AIRRImport(DataImport):
 
         separator (str): Column separator, for AIRR this is by default "\\t".
 
+        import_empty_nt_sequences (bool): imports sequences which have an empty nucleotide sequence field; can be True or False
+
+        import_empty_aa_sequences (bool): imports sequences which have an empty amino acid sequence field; can be True or False; for analysis on
+        amino acid sequences, this parameter will typically be False (import only non-empty amino acid sequences)
+
 
     YAML specification:
 
@@ -105,12 +110,14 @@ class AIRRImport(DataImport):
                     locus: chains
                     duplicate_count: counts
                     sequence_id: sequence_identifiers
+                import_empty_nt_sequences: True # keep sequences even if the `sequences` column is empty (provided that other fields are as specified here)
+                import_empty_aa_sequences: False # remove all sequences with empty `sequence_aas` column
+
     """
 
     @staticmethod
     def import_dataset(params: dict, dataset_name: str) -> Dataset:
         return ImportHelper.import_dataset(AIRRImport, params, dataset_name)
-
 
     @staticmethod
     def preprocess_dataframe(df: pd.DataFrame, params: DatasetImportParams):
@@ -141,15 +148,14 @@ class AIRRImport(DataImport):
         ImportHelper.junction_to_cdr3(df, params.region_type)
 
         if "chains" not in df.columns:
-            df["chains"] = ImportHelper.load_chains_from_genes(df, "v_genes")
+            df.loc[:, "chains"] = ImportHelper.load_chains_from_genes(df, "v_genes")
 
-        df["v_genes"] = ImportHelper.strip_alleles(df, "v_genes")
-        df["j_genes"] = ImportHelper.strip_alleles(df, "j_genes")
+        df.loc[:, "v_genes"] = ImportHelper.strip_alleles(df, "v_genes")
+        df.loc[:, "j_genes"] = ImportHelper.strip_alleles(df, "j_genes")
 
-        ImportHelper.drop_empty_sequences(df)
+        ImportHelper.drop_empty_sequences(df, params.import_empty_aa_sequences, params.import_empty_nt_sequences)
 
         return df
-
 
     @staticmethod
     def alternative_load_func(filename, params):
@@ -159,7 +165,6 @@ class AIRRImport(DataImport):
     def import_receptors(df, params):
         df["receptor_identifiers"] = df["cell_id"]
         return ImportHelper.import_receptors(df, params)
-
 
     @staticmethod
     def get_documentation():
@@ -175,4 +180,3 @@ class AIRRImport(DataImport):
         }
         doc = update_docs_per_mapping(doc, mapping)
         return doc
-

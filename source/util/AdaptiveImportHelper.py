@@ -26,7 +26,7 @@ class AdaptiveImportHelper:
 
         dataframe = AdaptiveImportHelper.parse_adaptive_germline_to_imgt(dataframe)
         dataframe = ImportHelper.standardize_none_values(dataframe)
-        ImportHelper.drop_empty_sequences(dataframe)
+        ImportHelper.drop_empty_sequences(dataframe, params.import_empty_aa_sequences, params.import_empty_nt_sequences)
 
         return dataframe
 

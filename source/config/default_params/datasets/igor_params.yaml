@@ -8,3 +8,5 @@ region_type: "IMGT_CDR3" # which region to use - IMGT_CDR3 option means removing
 column_mapping: # IGoR column names -> immuneML repertoire fields
   nt_CDR3: sequences
   seq_index: sequence_identifiers
+import_empty_nt_sequences: True # keep sequences even though the nucleotide sequence might be empty
+import_empty_aa_sequences: False # filter out sequences if they don't have sequence_aa set

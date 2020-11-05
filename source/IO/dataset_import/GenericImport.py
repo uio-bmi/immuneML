@@ -83,6 +83,11 @@ class GenericImport(DataImport):
 
         separator (str): Required parameter. Column separator, for example "\\t" or ",".
 
+        import_empty_nt_sequences (bool): imports sequences which have an empty nucleotide sequence field; can be True or False
+
+        import_empty_aa_sequences (bool): imports sequences which have an empty amino acid sequence field; can be True or False; for analysis on
+        amino acid sequences, this parameter will typically be False (import only non-empty amino acid sequences)
+
 
     YAML specification:
 
@@ -112,17 +117,18 @@ class GenericImport(DataImport):
                     - file_column_j_genes
                     - file_column_frequencies
                     - file_column_antigen_specificity
+                import_empty_nt_sequences: True # keep sequences even though the nucleotide sequence might be empty
+                import_empty_aa_sequences: False # filter out sequences if they don't have sequence_aa set
     """
 
     @staticmethod
     def import_dataset(params: dict, dataset_name: str) -> Dataset:
         return ImportHelper.import_dataset(GenericImport, params, dataset_name)
 
-
     @staticmethod
     def preprocess_dataframe(df: pd.DataFrame, params: DatasetImportParams):
         ImportHelper.junction_to_cdr3(df, params.region_type)
-        ImportHelper.drop_empty_sequences(df)
+        ImportHelper.drop_empty_sequences(df, params.import_empty_aa_sequences, params.import_empty_nt_sequences)
 
         return df
 
@@ -147,4 +153,3 @@ class GenericImport(DataImport):
         }
         doc = update_docs_per_mapping(doc, mapping)
         return doc
-

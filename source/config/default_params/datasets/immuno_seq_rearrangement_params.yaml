@@ -19,3 +19,5 @@ column_mapping: # adaptive column names -> immuneML repertoire fields
   j_allele: j_alleles
   templates: counts
   locus: chains
+import_empty_nt_sequences: True # keep sequences even though the nucleotide sequence might be empty
+import_empty_aa_sequences: False # filter out sequences if they don't have sequence_aa set

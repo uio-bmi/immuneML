@@ -40,7 +40,6 @@ rep1.tsv,TRA,1234e,no"""
         path = EnvironmentSettings.root_path + "test/tmp/generic/"
         self.make_dummy_dataset(path, True)
 
-
         dataset = GenericImport.import_dataset({"is_repertoire": True, "result_path": path, "path": path,
                                                 "region_type": "IMGT_CDR3", "separator": "\t",
                                                 "column_mapping": {"CDR3B AA Sequence": "sequence_aas",
@@ -62,7 +61,6 @@ rep1.tsv,TRA,1234e,no"""
     def test_import_sequence_dataset(self):
         path = EnvironmentSettings.root_path + "test/tmp/generic/"
         self.make_dummy_dataset(path, False)
-
 
         dataset = GenericImport.import_dataset({"is_repertoire": False, "paired": False,
                                                 "result_path": path, "path": path,

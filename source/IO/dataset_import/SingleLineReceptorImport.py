@@ -66,6 +66,11 @@ class SingleLineReceptorImport(DataImport):
 
         organism (str): The organism that the receptors came from. This will be set as a parameter in the ReceptorDataset object.
 
+        import_empty_nt_sequences (bool): imports sequences which have an empty nucleotide sequence field; can be True or False
+
+        import_empty_aa_sequences (bool): imports sequences which have an empty amino acid sequence field; can be True or False; for analysis on
+        amino acid sequences, this parameter will typically be False (import only non-empty amino acid sequences)
+
 
     YAML specification:
 
@@ -102,6 +107,9 @@ class SingleLineReceptorImport(DataImport):
                     clone_id: identifier
                     epitope: epitope
                     organism: mouse
+                import_empty_nt_sequences: True # keep sequences even though the nucleotide sequence might be empty
+                import_empty_aa_sequences: False # filter out sequences if they don't have sequence_aa set
+
     """
 
     @staticmethod

@@ -17,6 +17,8 @@ class IRISImportParams:
     batch_size: int = 1
     separator: str = None
     extra_columns_to_load: list = None
+    import_empty_nt_sequences: bool = None
+    import_empty_aa_sequences: bool = None
 
     @classmethod
     def build_object(cls, receptor_chains: str = None, **kwargs):

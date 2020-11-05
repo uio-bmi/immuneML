@@ -28,12 +28,11 @@ from source.data_model.receptor.receptor_sequence.SequenceFrameType import Seque
 from source.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
 from source.data_model.repertoire.Repertoire import Repertoire
 from source.environment.Constants import Constants
-from source.environment.EnvironmentSettings import EnvironmentSettings
+from source.environment.SequenceType import SequenceType
 from source.util.PathBuilder import PathBuilder
 
 
 class ImportHelper:
-
     DATASET_FORMAT = "iml_dataset"
 
     @staticmethod
@@ -42,7 +41,7 @@ class ImportHelper:
 
         dataset = ImportHelper.load_dataset_if_exists(params, processed_params, dataset_name)
         if dataset is None:
-            # backwards compatability: if is_repertoire is not specified but the metadata file is
+            # backwards compatibility: if is_repertoire is not specified but the metadata file is
             if processed_params.is_repertoire is None and processed_params.metadata_file is not None:
                 processed_params.is_repertoire = True
 
@@ -65,23 +64,22 @@ class ImportHelper:
 
         return dataset
 
-
     @staticmethod
     def import_repertoire_dataset(import_class, params: DatasetImportParams, dataset_name: str) -> RepertoireDataset:
         """
         Function to create a dataset from the metadata and a list of repertoire files and exports dataset pickle file
 
         Arguments:
-            preprocess_repertoire_df_func: function which should preprocess a dataframe of sequences given:
-                the metadata row for the repertoire,
-                params object of DatasetImportParams class with path, result path, and other info for import
+            import_class: class to use for import
             params: instance of DatasetImportParams class which includes information on path, columns, result path etc.
+            dataset_name: user-defined name of the dataset
+
         Returns:
             RepertoireDataset object that was created
         """
         metadata = pd.read_csv(params.metadata_file, ",")
 
-        PathBuilder.build(params.result_path+"repertoires/")
+        PathBuilder.build(params.result_path + "repertoires/")
 
         arguments = [(import_class, row, params) for index, row in metadata.iterrows()]
         with Pool(params.batch_size) as pool:
@@ -118,7 +116,7 @@ class ImportHelper:
         sequence_lists["custom_lists"] = {field: dataframe[field].values.tolist()
                                           for field in list(set(dataframe.columns) - set(Repertoire.FIELDS))}
 
-        repertoire_inputs = {**{"metadata": metadata_row.to_dict(), "path": params.result_path+"repertoires/"}, **sequence_lists}
+        repertoire_inputs = {**{"metadata": metadata_row.to_dict(), "path": params.result_path + "repertoires/"}, **sequence_lists}
         repertoire = Repertoire.build(**repertoire_inputs)
 
         return repertoire
@@ -151,14 +149,27 @@ class ImportHelper:
         return dataframe.replace({key: Constants.UNKNOWN for key in ["unresolved", "no data", "na", "unknown", "null", "nan", np.nan, ""]})
 
     @staticmethod
-    def drop_empty_sequences(dataframe: pd.DataFrame) -> pd.DataFrame:
-        sequence_colname = EnvironmentSettings.get_sequence_type().value
-        sequence_name = EnvironmentSettings.get_sequence_type().name.lower().replace("_", " ")
+    def drop_empty_sequences(dataframe: pd.DataFrame, import_empty_aa_sequences: bool, import_empty_nt_sequences: bool) -> pd.DataFrame:
+        sequence_types = []
+        if not import_empty_aa_sequences:
+            sequence_types.append(SequenceType.AMINO_ACID)
+        if not import_empty_nt_sequences:
+            sequence_types.append(SequenceType.NUCLEOTIDE)
 
-        n_empty = sum(dataframe[sequence_colname].isnull())
-        if n_empty > 0:
-            dataframe.drop(dataframe.loc[dataframe[sequence_colname].isnull()].index, inplace=True)
-            warnings.warn(f"ImportHelper: {n_empty} sequences were removed from the dataset because they contained an empty {sequence_name} sequence after preprocessing. ")
+        for sequence_type in sequence_types:
+            sequence_colname = sequence_type.value
+            sequence_name = sequence_type.name.lower().replace("_", " ")
+
+            if sequence_colname in dataframe.columns:
+                n_empty = sum(dataframe[sequence_colname].isnull())
+                if n_empty > 0:
+                    dataframe.drop(dataframe.loc[dataframe[sequence_colname].isnull()].index, inplace=True)
+                    warnings.warn(
+                        f"{ImportHelper.__name__}: {n_empty} sequences were removed from the dataset because they contained an empty {sequence_name} sequence after preprocessing. ")
+            else:
+                warnings.warn(f"{ImportHelper.__name__}: column {sequence_colname} was not set, skipping filtering...")
+
+        return dataframe
 
     @staticmethod
     def prepare_frame_type_list(params: DatasetImportParams) -> list:
@@ -177,23 +188,23 @@ class ImportHelper:
 
     @staticmethod
     def junction_to_cdr3(df: pd.DataFrame, region_type: RegionType):
-        '''
+        """
         If RegionType is CDR3, the leading C and trailing W are removed from the sequence to match the IMGT CDR3 definition.
         This method alters the data in the provided dataframe.
-        '''
+        """
 
         if region_type == RegionType.IMGT_CDR3:
             if "sequence_aas" in df:
-                df["sequence_aas"] = df["sequence_aas"].str[1:-1]
+                df.loc[:, "sequence_aas"] = df["sequence_aas"].str[1:-1]
             if "sequences" in df:
-                df["sequences"] = df["sequences"].str[3:-3]
-            df["region_types"] = region_type.name
+                df.loc[:, "sequences"] = df["sequences"].str[3:-3]
+            df.loc[:, "region_types"] = region_type.name
 
     @staticmethod
     def strip_alleles(df: pd.DataFrame, column_name):
-        '''
+        """
         Removes alleles (everythin after the '*' character) from a column in the DataFrame
-        '''
+        """
         return df[column_name].apply(lambda gene_col: gene_col.rsplit("*", maxsplit=1)[0])
 
     @staticmethod
@@ -272,18 +283,22 @@ class ImportHelper:
             pickle.dump(items[:sequence_file_size], file)
 
     @staticmethod
-    def import_sequence(row, metadata_columns=[]) -> ReceptorSequence:
+    def import_sequence(row, metadata_columns=None) -> ReceptorSequence:
+        if metadata_columns is None:
+            metadata_columns = []
         metadata = SequenceMetadata(v_gene=str(row["v_genes"]) if "v_genes" in row and row["v_genes"] is not None else None,
                                     j_gene=str(row["j_genes"]) if "j_genes" in row and row["j_genes"] is not None else None,
                                     chain=row["chains"] if "chains" in row and row["chains"] is not None else None,
                                     region_type=row["region_types"] if "region_types" in row and row["region_types"] is not None else None,
                                     count=int(row["counts"]) if "counts" in row and row["counts"] is not None else None,
                                     frame_type=row["frame_types"] if "frame_types" in row and row["frame_types"] is not None else None,
-                                    custom_params={custom_col: row[custom_col] for custom_col in metadata_columns if custom_col in row} if metadata_columns is not None else {})
-        sequence = ReceptorSequence(amino_acid_sequence=str(row["sequence_aas"]) if "sequence_aas" in row and row["sequence_aas"] is not None else None,
-                                    nucleotide_sequence=str(row["sequences"]) if "sequences" in row and row["sequences"] is not None else None,
-                                    identifier=str(row["sequence_identifiers"]) if "sequence_identifiers" in row and row["sequence_identifiers"] is not None else None,
-                                    metadata=metadata)
+                                    custom_params={custom_col: row[custom_col] for custom_col in metadata_columns if
+                                                   custom_col in row} if metadata_columns is not None else {})
+        sequence = ReceptorSequence(
+            amino_acid_sequence=str(row["sequence_aas"]) if "sequence_aas" in row and row["sequence_aas"] is not None else None,
+            nucleotide_sequence=str(row["sequences"]) if "sequences" in row and row["sequences"] is not None else None,
+            identifier=str(row["sequence_identifiers"]) if "sequence_identifiers" in row and row["sequence_identifiers"] is not None else None,
+            metadata=metadata)
 
         return sequence
 
@@ -305,9 +320,11 @@ class ImportHelper:
 
         for i, row in enumerate([first_row, second_row]):
             if row.shape[0] > 1:
-                warnings.warn(f"Multiple {params.receptor_chains.value[i]} chains found for receptor with identifier {identifier}, only the first entry will be loaded")
+                warnings.warn(
+                    f"Multiple {params.receptor_chains.value[i]} chains found for receptor with identifier {identifier}, only the first entry will be loaded")
             elif row.shape[0] == 0:
-                warnings.warn(f"Missing {params.receptor_chains.value[i]} chain for receptor with identifier {identifier}, this receptor will be omitted.")
+                warnings.warn(
+                    f"Missing {params.receptor_chains.value[i]} chain for receptor with identifier {identifier}, this receptor will be omitted.")
                 return []
 
         # todo add options like IRIS import: option to import all dual chains or just the first pair / all V genes when uncertain annotation, etc
@@ -338,11 +355,10 @@ class ImportHelper:
                                   metadata={**first_sequence.metadata.custom_params})
         elif params.receptor_chains == ChainPair.IGH_IGK:
             receptor = BCKReceptor(heavy=first_sequence,
-                                  kappa=second_sequence,
-                                  identifier=identifier,
-                                  metadata={**first_sequence.metadata.custom_params})
+                                   kappa=second_sequence,
+                                   identifier=identifier,
+                                   metadata={**first_sequence.metadata.custom_params})
         else:
             raise NotImplementedError(f"ImportHelper: {params.receptor_chains} chain pair is not supported.")
 
         return receptor
-

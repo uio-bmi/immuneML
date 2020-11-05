@@ -47,7 +47,7 @@ class RandomReceptorDatasetImport(DataImport):
     .. code-block:: yaml
 
         my_random_dataset:
-            format: RandomRepertoireDataset
+            format: RandomReceptorDataset
             params:
                 receptor_count: 100 # number of random receptors to generate
                 chain_1_length_probabilities:

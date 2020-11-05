@@ -57,7 +57,6 @@ rep2.tsv,2""")
 
         shutil.rmtree(path)
 
-
     def test_import_sequences(self):
         """Test dataset content with and without a header included in the input file"""
         path = EnvironmentSettings.root_path + "test/tmp/io_olga_load/"

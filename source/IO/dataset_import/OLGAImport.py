@@ -33,6 +33,11 @@ class OLGAImport(DataImport):
 
         separator (str): Column separator, for OLGA this is by default "\\t".
 
+        import_empty_nt_sequences (bool): imports sequences which have an empty nucleotide sequence field; can be True or False
+
+        import_empty_aa_sequences (bool): imports sequences which have an empty amino acid sequence field; can be True or False; for analysis on
+        amino acid sequences, this parameter will typically be False (import only non-empty amino acid sequences)
+
 
     YAML specification:
 
@@ -48,19 +53,20 @@ class OLGAImport(DataImport):
                 # Optional fields with OLGA-specific defaults, only change when different behavior is required:
                 separator: "\\t" # column separator
                 region_type: IMGT_CDR3 # what part of the sequence to import
+                import_empty_nt_sequences: True # keep sequences even though the nucleotide sequence might be empty
+                import_empty_aa_sequences: False # filter out sequences if they don't have sequence_aa set
+
     """
 
     @staticmethod
     def import_dataset(params: dict, dataset_name: str) -> Dataset:
         return ImportHelper.import_dataset(OLGAImport, params, dataset_name)
 
-
     @staticmethod
     def alternative_load_func(filepath, params):
         df = pd.read_csv(filepath, sep=params.separator, iterator=False, dtype=str, header=None)
         df.columns = ["sequences", "sequence_aas", "v_genes", "j_genes"]
         return df
-
 
     @staticmethod
     def preprocess_dataframe(df: pd.DataFrame, params: DatasetImportParams):
@@ -73,10 +79,9 @@ class OLGAImport(DataImport):
         df["sequence_identifiers"] = None
 
         ImportHelper.junction_to_cdr3(df, params.region_type)
-        ImportHelper.drop_empty_sequences(df)
+        ImportHelper.drop_empty_sequences(df, params.import_empty_aa_sequences, params.import_empty_nt_sequences)
 
         return df
-
 
     @staticmethod
     def get_documentation():
@@ -89,4 +94,3 @@ class OLGAImport(DataImport):
         }
         doc = update_docs_per_mapping(doc, mapping)
         return doc
-

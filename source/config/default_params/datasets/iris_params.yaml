@@ -6,3 +6,5 @@ import_dual_chains: True
 import_all_gene_combinations: False
 separator: "\t"
 extra_columns_to_load: []
+import_empty_nt_sequences: True
+import_empty_aa_sequences: False

@@ -256,7 +256,7 @@ class HPHTMLBuilder:
             if isinstance(attribute_value, list) and all(isinstance(item, ReportResult) for item in attribute_value):
                 new_attribute_values = []
                 for report_result in attribute_value:
-                    new_attribute_values.append(Util.update_paths(report_result, path))
+                    new_attribute_values.append(Util.update_report_paths(report_result, path))
                 setattr(obj, attribute, new_attribute_values)
             elif isinstance(attribute_value, list) and all(isinstance(item, HPAssessmentState) for item in attribute_value):
                 obj = HPHTMLBuilder.process_list_recursively(obj, attribute, attribute_value, path)

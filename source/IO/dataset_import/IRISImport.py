@@ -1,6 +1,4 @@
-import pickle
 import random as rn
-from glob import glob
 
 import pandas as pd
 
@@ -49,6 +47,11 @@ class IRISImport(DataImport):
 
         separator (str): Column separator, for IRIS this is by default "\\t".
 
+        import_empty_nt_sequences (bool): imports sequences which have an empty nucleotide sequence field; can be True or False
+
+        import_empty_aa_sequences (bool): imports sequences which have an empty amino acid sequence field; can be True or False; for analysis on
+        amino acid sequences, this parameter will typically be False (import only non-empty amino acid sequences)
+
 
     YAML specification:
 
@@ -70,6 +73,9 @@ class IRISImport(DataImport):
                 - extra_col2
                 # Optional fields with IRIS-specific defaults, only change when different behavior is required:
                 separator: "\\t" # column separator
+                import_empty_nt_sequences: True # keep sequences even though the nucleotide sequence might be empty
+                import_empty_aa_sequences: False # filter out sequences if they don't have sequence_aa set
+
     """
 
     @staticmethod
@@ -85,11 +91,9 @@ class IRISImport(DataImport):
 
         return dataset
 
-
     @staticmethod
     def _load_gene(identifier):
         return identifier.split("*", 1)[0]
-
 
     @staticmethod
     def preprocess_dataframe(df: pd.DataFrame, params):
@@ -101,10 +105,10 @@ class IRISImport(DataImport):
         for chain in params.receptor_chains.value:
             for chain_dup in chain_dups_to_process:
                 subframe_dict = {"cell_ids": df["Clonotype ID"],
-                                               "sequence_aas": df[f"Chain: {chain} ({chain_dup})"],
-                                               "v_genes": df[f"{chain} - V gene ({chain_dup})"],
-                                               "j_genes": df[f"{chain} - J gene ({chain_dup})"],
-                                               "chains": Chain.get_chain(chain).value}
+                                 "sequence_aas": df[f"Chain: {chain} ({chain_dup})"],
+                                 "v_genes": df[f"{chain} - V gene ({chain_dup})"],
+                                 "j_genes": df[f"{chain} - J gene ({chain_dup})"],
+                                 "chains": Chain.get_chain(chain).value}
                 if params.extra_columns_to_load is not None:
                     for extra_col in params.extra_columns_to_load:
                         subframe_dict[extra_col] = df[extra_col]
@@ -122,8 +126,7 @@ class IRISImport(DataImport):
                 processed_names = [IRISImport._load_gene(rn.choice(raw_v_string.split(" | "))) for raw_v_string in df[gene_column]]
                 df[gene_column] = processed_names
 
-        ImportHelper.drop_empty_sequences(df)
-
+        ImportHelper.drop_empty_sequences(df, params.import_empty_aa_sequences, params.import_empty_nt_sequences)
 
         return df
 
@@ -197,5 +200,3 @@ class IRISImport(DataImport):
 
         return ReceptorDataset(filenames=dataset_filenames, file_size=iris_params.sequence_file_size, name=dataset_name) if iris_params.paired \
             else SequenceDataset(filenames=dataset_filenames, file_size=iris_params.sequence_file_size, name=dataset_name)
-
-

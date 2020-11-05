@@ -77,6 +77,11 @@ class TenxGenomicsImport(DataImport):
 
         separator (str): Column separator, for 10xGenomics this is by default ",".
 
+        import_empty_nt_sequences (bool): imports sequences which have an empty nucleotide sequence field; can be True or False
+
+        import_empty_aa_sequences (bool): imports sequences which have an empty amino acid sequence field; can be True or False; for analysis on
+        amino acid sequences, this parameter will typically be False (import only non-empty amino acid sequences)
+
 
     YAML specification:
 
@@ -106,12 +111,14 @@ class TenxGenomicsImport(DataImport):
                     chain: chains
                     clonotype_id: cell_ids
                     consensus_id: sequence_identifiers
+                import_empty_nt_sequences: True # keep sequences even though the nucleotide sequence might be empty
+                import_empty_aa_sequences: False # filter out sequences if they don't have sequence_aa set
+
     """
 
     @staticmethod
     def import_dataset(params: dict, dataset_name: str) -> Dataset:
         return ImportHelper.import_dataset(TenxGenomicsImport, params, dataset_name)
-
 
     @staticmethod
     def preprocess_dataframe(df: pd.DataFrame, params: DatasetImportParams):
@@ -127,16 +134,14 @@ class TenxGenomicsImport(DataImport):
         df = df[df.productive.isin(allowed_productive_values)]
 
         ImportHelper.junction_to_cdr3(df, params.region_type)
-        ImportHelper.drop_empty_sequences(df)
+        ImportHelper.drop_empty_sequences(df, params.import_empty_aa_sequences, params.import_empty_nt_sequences)
 
         return df
-
 
     @staticmethod
     def import_receptors(df, params):
         df["receptor_identifiers"] = df["cell_ids"]
         return ImportHelper.import_receptors(df, params)
-
 
     @staticmethod
     def get_documentation():

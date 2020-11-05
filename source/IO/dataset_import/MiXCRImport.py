@@ -60,6 +60,11 @@ class MiXCRImport(DataImport):
 
         separator (str): Column separator, for MiXCR this is by default "\\t".
 
+        import_empty_nt_sequences (bool): imports sequences which have an empty nucleotide sequence field; can be True or False
+
+        import_empty_aa_sequences (bool): imports sequences which have an empty amino acid sequence field; can be True or False; for analysis on
+        amino acid sequences, this parameter will typically be False (import only non-empty amino acid sequences)
+
 
     YAML specification:
 
@@ -88,23 +93,24 @@ class MiXCRImport(DataImport):
                     cloneCount: counts
                     allVHitsWithScore: v_genes
                     allJHitsWithScore: j_genes
+                import_empty_nt_sequences: True # keep sequences even though the nucleotide sequence might be empty
+                import_empty_aa_sequences: False # filter out sequences if they don't have sequence_aa set
+
     """
 
     SEQUENCE_NAME_MAP = {
         RegionType.IMGT_CDR3: {"AA": "aaSeqCDR3", "NT": "nSeqCDR3"},
         RegionType.IMGT_CDR1: {"AA": "aaSeqCDR1", "NT": "nSeqCDR1"},
         RegionType.IMGT_CDR2: {"AA": "aaSeqCDR2", "NT": "nSeqCDR2"},
-        RegionType.IMGT_FR1:  {"AA": "aaSeqFR1", "NT": "nSeqFR1"},
-        RegionType.IMGT_FR2:  {"AA": "aaSeqFR2", "NT": "nSeqFR2"},
-        RegionType.IMGT_FR3:  {"AA": "aaSeqFR3", "NT": "nSeqFR3"},
-        RegionType.IMGT_FR4:  {"AA": "aaSeqFR4", "NT": "nSeqFR4"}
+        RegionType.IMGT_FR1: {"AA": "aaSeqFR1", "NT": "nSeqFR1"},
+        RegionType.IMGT_FR2: {"AA": "aaSeqFR2", "NT": "nSeqFR2"},
+        RegionType.IMGT_FR3: {"AA": "aaSeqFR3", "NT": "nSeqFR3"},
+        RegionType.IMGT_FR4: {"AA": "aaSeqFR4", "NT": "nSeqFR4"}
     }
-
 
     @staticmethod
     def import_dataset(params: dict, dataset_name: str) -> Dataset:
         return ImportHelper.import_dataset(MiXCRImport, params, dataset_name)
-
 
     @staticmethod
     def preprocess_dataframe(df: pd.DataFrame, params: DatasetImportParams):
@@ -138,10 +144,9 @@ class MiXCRImport(DataImport):
                 df["chains"] = ImportHelper.load_chains_from_genes(df, "j_genes")
             df["j_genes"] = MiXCRImport._load_genes(df, "j_genes")
 
-        ImportHelper.drop_empty_sequences(df)
+        ImportHelper.drop_empty_sequences(df, params.import_empty_aa_sequences, params.import_empty_nt_sequences)
 
         return df
-
 
     @staticmethod
     def _load_genes(df: pd.DataFrame, column_name):
@@ -149,7 +154,6 @@ class MiXCRImport(DataImport):
         tmp_df = df.apply(lambda row: row[column_name].split(",")[0].replace("DV", "/DV").replace("//", "/").split("*", 1)[0], axis=1)
 
         return tmp_df
-
 
     @staticmethod
     def get_documentation():
@@ -165,4 +169,3 @@ class MiXCRImport(DataImport):
         }
         doc = update_docs_per_mapping(doc, mapping)
         return doc
-

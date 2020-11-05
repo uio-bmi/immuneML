@@ -1,8 +1,10 @@
 import glob
+import logging
 import os
 import shutil
 from enum import Enum
 
+from source.reports.ReportOutput import ReportOutput
 from source.reports.ReportResult import ReportResult
 from source.util.PathBuilder import PathBuilder
 
@@ -71,16 +73,20 @@ class Util:
         return table_string
 
     @staticmethod
-    def update_paths(report_result: ReportResult, path: str) -> ReportResult:
+    def update_report_paths(report_result: ReportResult, path: str) -> ReportResult:
         for attribute in vars(report_result):
             attribute_value = getattr(report_result, attribute)
             if isinstance(attribute_value, list):
                 for output in attribute_value:
-                    new_filename = os.path.relpath(path=output.path, start=path).replace("..", "").replace("/", "_")
-                    new_filename = new_filename[1:] if new_filename[0] == '_' else new_filename
-                    new_path = path + new_filename
-                    if output.path != new_path:
-                        shutil.copyfile(src=output.path, dst=new_path)
-                        output.path = new_path
+                    if isinstance(output, ReportOutput):
+                        new_filename = os.path.relpath(path=output.path, start=path).replace("..", "").replace("/", "_")
+                        new_filename = new_filename[1:] if new_filename[0] == '_' else new_filename
+                        new_path = path + new_filename
+                        if output.path != new_path:
+                            shutil.copyfile(src=output.path, dst=new_path)
+                            output.path = new_path
+                    else:
+                        logging.warning(f"HTML util: one of the report outputs was not returned properly from the report {report_result.name}, "
+                                        f"and it will not be moved to HTML output folder.")
 
         return report_result

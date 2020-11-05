@@ -83,6 +83,11 @@ class ImmunoSEQRearrangementImport(DataImport):
 
         separator (str): Column separator, for ImmunoSEQ files this is by default "\\t".
 
+        import_empty_nt_sequences (bool): imports sequences which have an empty nucleotide sequence field; can be True or False
+
+        import_empty_aa_sequences (bool): imports sequences which have an empty amino acid sequence field; can be True or False; for analysis on
+        amino acid sequences, this parameter will typically be False (import only non-empty amino acid sequences)
+
 
     YAML specification:
 
@@ -128,6 +133,9 @@ class ImmunoSEQRearrangementImport(DataImport):
                     j_allele: j_alleles
                     templates: counts
                     locus: chains
+                import_empty_nt_sequences: True # keep sequences even though the nucleotide sequence might be empty
+                import_empty_aa_sequences: False # filter out sequences if they don't have sequence_aa set
+
     """
 
 

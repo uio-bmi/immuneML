@@ -31,8 +31,8 @@ class TestRepertoireClassificationTool(TestCase):
 
         self.make_random_dataset(path)
 
-        args = ['-o', path, '-l', 'subject_id', '-m', 'RandomForestClassifier', 'SimpleLogisticRegression', 'SVM', 'KNN',
-                '-t', '70', '-c', '5', '-s', 'subsequence', '-p', 'invariant', '-g', 'gapped',
+        args = ['-o', path, '-l', 'subject_id', '-m', 'RandomForestClassifier', 'SimpleLogisticRegression',
+                '-t', '70', '-c', '2', '-s', 'subsequence', '-p', 'invariant', '-g', 'gapped',
                 '-kl', '1', '-kr', '1', '-gi', '0', '-ga', '1', '-r', 'unique']
 
         tool = RepertoireClassificationTool(args=args, result_path=result_path)
@@ -42,9 +42,6 @@ class TestRepertoireClassificationTool(TestCase):
 
         self.assertTrue(os.path.exists(f"{result_path}/inst1/split_1/"))
         self.assertTrue(os.path.exists(f"{result_path}/inst1/split_2/"))
-        self.assertTrue(os.path.exists(f"{result_path}/inst1/split_3/"))
-        self.assertTrue(os.path.exists(f"{result_path}/inst1/split_4/"))
-        self.assertTrue(os.path.exists(f"{result_path}/inst1/split_5/"))
         self.assertTrue(os.path.exists(f"{result_path}/inst1/split_1/selection_random/split_1/datasets/"))
 
         shutil.rmtree(path)

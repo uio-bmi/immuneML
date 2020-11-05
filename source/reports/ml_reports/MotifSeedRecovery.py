@@ -161,7 +161,7 @@ class MotifSeedRecovery(MLReport):
     def _write_results_table(self, plotting_data):
         filepath = self.result_path + "motif_seed_recovery.csv"
         plotting_data.to_csv(filepath, index=False)
-        return filepath
+        return ReportOutput(path=filepath, name="motif seed recovery csv")
 
     def _set_plotting_parameters(self):
         if isinstance(self.method, RandomForestClassifier):

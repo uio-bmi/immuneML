@@ -64,6 +64,11 @@ class IGoRImport(DataImport):
 
         separator (str): Column separator, for IGoR this is by default ",".
 
+        import_empty_nt_sequences (bool): imports sequences which have an empty nucleotide sequence field; can be True or False
+
+        import_empty_aa_sequences (bool): imports sequences which have an empty amino acid sequence field; can be True or False; for analysis on
+        amino acid sequences, this parameter will typically be False (import only non-empty amino acid sequences)
+
 
     YAML specification:
 
@@ -87,31 +92,32 @@ class IGoRImport(DataImport):
                 column_mapping: # column mapping IGoR: immuneML
                     nt_CDR3: sequences
                     seq_index: sequence_identifiers
+                import_empty_nt_sequences: True # keep sequences even though the nucleotide sequence might be empty
+                import_empty_aa_sequences: False # filter out sequences if they don't have sequence_aa set
+
     """
     CODON_TABLE = {
-        'ATA':'I', 'ATC':'I', 'ATT':'I', 'ATG':'M',
-        'ACA':'T', 'ACC':'T', 'ACG':'T', 'ACT':'T',
-        'AAC':'N', 'AAT':'N', 'AAA':'K', 'AAG':'K',
-        'AGC':'S', 'AGT':'S', 'AGA':'R', 'AGG':'R',
-        'CTA':'L', 'CTC':'L', 'CTG':'L', 'CTT':'L',
-        'CCA':'P', 'CCC':'P', 'CCG':'P', 'CCT':'P',
-        'CAC':'H', 'CAT':'H', 'CAA':'Q', 'CAG':'Q',
-        'CGA':'R', 'CGC':'R', 'CGG':'R', 'CGT':'R',
-        'GTA':'V', 'GTC':'V', 'GTG':'V', 'GTT':'V',
-        'GCA':'A', 'GCC':'A', 'GCG':'A', 'GCT':'A',
-        'GAC':'D', 'GAT':'D', 'GAA':'E', 'GAG':'E',
-        'GGA':'G', 'GGC':'G', 'GGG':'G', 'GGT':'G',
-        'TCA':'S', 'TCC':'S', 'TCG':'S', 'TCT':'S',
-        'TTC':'F', 'TTT':'F', 'TTA':'L', 'TTG':'L',
-        'TAC':'Y', 'TAT':'Y', 'TAA':'*', 'TAG':'*',
-        'TGC':'C', 'TGT':'C', 'TGA':'*', 'TGG':'W',
-        }
-
+        'ATA': 'I', 'ATC': 'I', 'ATT': 'I', 'ATG': 'M',
+        'ACA': 'T', 'ACC': 'T', 'ACG': 'T', 'ACT': 'T',
+        'AAC': 'N', 'AAT': 'N', 'AAA': 'K', 'AAG': 'K',
+        'AGC': 'S', 'AGT': 'S', 'AGA': 'R', 'AGG': 'R',
+        'CTA': 'L', 'CTC': 'L', 'CTG': 'L', 'CTT': 'L',
+        'CCA': 'P', 'CCC': 'P', 'CCG': 'P', 'CCT': 'P',
+        'CAC': 'H', 'CAT': 'H', 'CAA': 'Q', 'CAG': 'Q',
+        'CGA': 'R', 'CGC': 'R', 'CGG': 'R', 'CGT': 'R',
+        'GTA': 'V', 'GTC': 'V', 'GTG': 'V', 'GTT': 'V',
+        'GCA': 'A', 'GCC': 'A', 'GCG': 'A', 'GCT': 'A',
+        'GAC': 'D', 'GAT': 'D', 'GAA': 'E', 'GAG': 'E',
+        'GGA': 'G', 'GGC': 'G', 'GGG': 'G', 'GGT': 'G',
+        'TCA': 'S', 'TCC': 'S', 'TCG': 'S', 'TCT': 'S',
+        'TTC': 'F', 'TTT': 'F', 'TTA': 'L', 'TTG': 'L',
+        'TAC': 'Y', 'TAT': 'Y', 'TAA': '*', 'TAG': '*',
+        'TGC': 'C', 'TGT': 'C', 'TGA': '*', 'TGG': 'W',
+    }
 
     @staticmethod
     def import_dataset(params: dict, dataset_name: str) -> Dataset:
         return ImportHelper.import_dataset(IGoRImport, params, dataset_name)
-
 
     @staticmethod
     def preprocess_dataframe(df: pd.DataFrame, params: DatasetImportParams):
@@ -130,7 +136,7 @@ class IGoRImport(DataImport):
             df = df[no_stop_codon]
 
         ImportHelper.junction_to_cdr3(df, params.region_type)
-        ImportHelper.drop_empty_sequences(df)
+        ImportHelper.drop_empty_sequences(df, params.import_empty_aa_sequences, params.import_empty_nt_sequences)
 
         # chain or at least receptorsequence?
 
@@ -138,9 +144,9 @@ class IGoRImport(DataImport):
 
     @staticmethod
     def translate_sequence(nt_seq):
-        '''
+        """
         Code inspired by: https://github.com/prestevez/dna2proteins/blob/master/dna2proteins.py
-        '''
+        """
         aa_seq = []
         end = len(nt_seq) - (len(nt_seq) % 3) - 1
         for i in range(0, end, 3):
@@ -151,7 +157,6 @@ class IGoRImport(DataImport):
             else:
                 aa_seq.append("_")
         return "".join(aa_seq)
-
 
     @staticmethod
     def get_documentation():
@@ -167,4 +172,3 @@ class IGoRImport(DataImport):
         }
         doc = update_docs_per_mapping(doc, mapping)
         return doc
-
