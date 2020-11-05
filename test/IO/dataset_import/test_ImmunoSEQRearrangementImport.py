@@ -81,18 +81,18 @@ rep2.tsv,TRB,1234a,no"""
 
         dataset = ImmunoSEQRearrangementImport.import_dataset(params, dataset_name)
 
-        self.assertEqual(dataset.repertoires[0].sequences[1].metadata.frame_type, SequenceFrameType.OUT)
+        self.assertEqual(dataset.repertoires[0].sequences[1].metadata.frame_type, SequenceFrameType.IN)
 
         self.assertEqual(2, dataset.get_example_count())
         for index, rep in enumerate(dataset.get_data()):
             if index == 0:
                 self.assertEqual("1234", rep.metadata["subject_id"])
-                self.assertEqual(13, len(rep.sequences))
+                self.assertEqual(10, len(rep.sequences))
                 self.assertEqual(10, rep.sequences[0].metadata.count)
                 self.assertEqual("TRBV29", rep.sequences[0].metadata.v_subgroup)
             else:
                 self.assertEqual("1234a", rep.metadata["subject_id"])
-                self.assertEqual(15, len(rep.sequences))
+                self.assertEqual(11, len(rep.sequences))
                 self.assertEqual(2, rep.sequences[-1].metadata.count)
 
         dataset_file = f"{path}{dataset_name}.{ImportHelper.DATASET_FORMAT}"
@@ -120,14 +120,14 @@ rep2.tsv,TRB,1234a,no"""
 
         dataset = ImmunoSEQRearrangementImport.import_dataset(params, dataset_name)
 
-        self.assertEqual(28, dataset.get_example_count())
+        self.assertEqual(21, dataset.get_example_count())
 
         seqs = [sequence for sequence in dataset.get_data()]
-        self.assertEqual(None, seqs[0].amino_acid_sequence)
-        self.assertEqual("OUT", seqs[0].metadata.frame_type.name)
-        self.assertEqual("TRBV7-9", seqs[0].metadata.v_gene)
-        self.assertEqual("ASSQADNQPQH", seqs[27].amino_acid_sequence)
-        self.assertEqual("IN", seqs[27].metadata.frame_type.name)
+        self.assertEqual("ASSLPGTNTGELF", seqs[0].amino_acid_sequence)
+        self.assertEqual("IN", seqs[0].metadata.frame_type.name)
+        self.assertEqual('TRBV7-9', seqs[0].metadata.v_gene)
+        self.assertEqual('TRBJ2-2', seqs[0].metadata.j_gene)
+        self.assertEqual('GCCAGCAGCTTACCGGGGACGAACACCGGGGAGCTGTTT', seqs[0].nucleotide_sequence)
 
         dataset_file = f"{path}{dataset_name}.{ImportHelper.DATASET_FORMAT}"
 
