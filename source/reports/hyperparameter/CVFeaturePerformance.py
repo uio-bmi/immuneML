@@ -3,7 +3,6 @@ from typing import Tuple, List
 
 import numpy as np
 import pandas as pd
-import plotly.express as px
 import plotly.graph_objects as go
 
 from source.hyperparameter_optimization.states.HPOptimizationState import HPOptimizationState
@@ -24,6 +23,9 @@ class CVFeaturePerformance(Report):
         feature: name of the encoder parameter w.r.t. which the performance across training and test will be shown. Possible values depend
         on the encoder on which it is used.
 
+        is_feature_axis_categorical (bool): if the x-axis of the plot where features are shown should be categorical; alternatively it is
+        automatically determined based on the feature values
+
 
     YAML specification:
 
@@ -33,6 +35,7 @@ class CVFeaturePerformance(Report):
         report1:
             CVFeaturePerformance:
                 feature: p_value_threshold # parameter value of SequenceAbundance encoder
+                is_feature_axis_categorical: True # show x-axis as categorical
 
     """
 
@@ -41,7 +44,7 @@ class CVFeaturePerformance(Report):
         return CVFeaturePerformance(**kwargs)
 
     def __init__(self, feature: str = None, state: HPOptimizationState = None, result_path: str = None, label: str = None,
-                 name: str = None):
+                 name: str = None, is_feature_axis_categorical: bool = None):
         super().__init__()
         self.feature = feature
         self.state = state
@@ -52,6 +55,7 @@ class CVFeaturePerformance(Report):
         self.feature_count = None
         self.name = name
         self.result_name = None
+        self.is_feature_axis_categorical = is_feature_axis_categorical
 
     def check_prerequisites(self):
         self._extract_label()
@@ -95,12 +99,19 @@ class CVFeaturePerformance(Report):
 
     def _plot(self, training_dataframe, test_dataframe):
 
+        optimization_metric = self.state.optimization_metric.name.lower()
+
         fig = go.Figure()
-        fig.add_trace(go.Scatter(x=training_dataframe["x"], y=training_dataframe["y"], name="training", mode="markers", marker_color=px.colors.diverging.Tealrose[0]))
-        fig.add_trace(go.Scatter(x=test_dataframe["x"], y=test_dataframe["y"], name="test", mode="markers", marker_color=px.colors.diverging.Tealrose[-1]))
-        fig.update_layout(legend_title_text="Data", title="CV performance across feature values", template="plotly_white")
+        fig.add_trace(go.Scatter(x=training_dataframe["x"], y=training_dataframe["y"], name="training", mode="markers", marker_size=11, marker_color="#CC79A7",
+                                 hovertemplate=f"training {optimization_metric}" + ": %{y}<extra></extra>", opacity=0.8))
+        fig.add_trace(go.Scatter(x=test_dataframe["x"], y=test_dataframe["y"], name="test", mode="markers", marker_size=11, marker_color="#009E73",
+                                 hovertemplate=f"test {optimization_metric}" + ": %{y}<extra></extra>", opacity=0.8))
+        fig.update_layout(legend_title_text="Data", title="Performance across feature values", template="plotly_white")
         fig.update_xaxes(title_text=self.feature)
+        if self.is_feature_axis_categorical:
+            fig.update_xaxes(type='category')
         fig.update_yaxes(title_text=f"performance ({self.state.optimization_metric.name.lower()})")
+        fig.update_layout(hovermode="x unified")
 
         file_path = f"{self.result_path}{self.result_name}.html"
         fig.write_html(file_path)
@@ -125,7 +136,7 @@ class CVFeaturePerformance(Report):
 
         for assessment_split_index, assessment_state in enumerate(self.state.assessment_states):
 
-            assessment_items = [assessment_state.label_states[self.label].assessment_items[hp_setting]
+            assessment_items = [assessment_state.label_states[self.label].assessment_items[hp_setting.get_key()]
                                 for hp_setting in self.relevant_hp_settings]
             features_test[assessment_split_index] = [item.hp_setting.encoder_params[self.feature] for item in assessment_items]
             performance_test[assessment_split_index] = [item.performance for item in assessment_items]

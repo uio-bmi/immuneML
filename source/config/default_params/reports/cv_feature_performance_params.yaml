@@ -1,0 +1,1 @@
+is_feature_axis_categorical: False # whether to show x-axis as categorical - if False, type will be determined automatically
