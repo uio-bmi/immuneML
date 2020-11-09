@@ -13,6 +13,7 @@ from source.data_model.cell.Cell import Cell
 from source.data_model.cell.CellList import CellList
 from source.data_model.receptor.Receptor import Receptor
 from source.data_model.receptor.ReceptorBuilder import ReceptorBuilder
+from source.data_model.receptor.receptor_sequence.Chain import Chain
 from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.data_model.receptor.receptor_sequence.ReceptorSequenceList import ReceptorSequenceList
 from source.data_model.receptor.receptor_sequence.SequenceAnnotation import SequenceAnnotation
@@ -197,8 +198,14 @@ class Repertoire(DatasetItem):
     def get_counts(self):
         counts = self.get_attribute("counts")
         if counts is not None:
-            counts = counts.astype(float).astype(int)
+            counts = np.array([int(count) if count is not None else None for count in counts])
         return counts
+
+    def get_chains(self):
+        chains = self.get_attribute("chains")
+        if chains is not None:
+            chains = np.array([Chain.get_chain(chain_str) if chain_str is not None else None for chain_str in chains])
+        return chains
 
     def load_data(self):
         if self.data is None or (isinstance(self.data, weakref.ref) and self.data() is None):

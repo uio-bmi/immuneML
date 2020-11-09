@@ -4,6 +4,7 @@ from unittest import TestCase
 import pandas as pd
 
 from source.IO.dataset_import.VDJdbImport import VDJdbImport
+from source.data_model.receptor.receptor_sequence.Chain import Chain
 from source.dsl.DefaultParamsLoader import DefaultParamsLoader
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.util.PathBuilder import PathBuilder
@@ -109,5 +110,7 @@ class TestVDJdbLoader(TestCase):
         for repertoire in dataset.get_data(2):
             self.assertTrue(repertoire.metadata["label1"] in {0, 1})
             self.assertEqual(4, len(repertoire.sequences))
+            self.assertListEqual([Chain.BETA, Chain.BETA, Chain.ALPHA, Chain.ALPHA], list(repertoire.get_chains()))
+            self.assertEqual(None, repertoire.get_counts())
 
         shutil.rmtree(path)
