@@ -2,6 +2,7 @@ import shutil
 from unittest import TestCase
 
 from source.IO.dataset_import.ImmunoSEQSampleImport import ImmunoSEQSampleImport
+from source.data_model.receptor.receptor_sequence.Chain import Chain
 from source.dsl.DefaultParamsLoader import DefaultParamsLoader
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.util.PathBuilder import PathBuilder
@@ -63,6 +64,8 @@ rep1.tsv,TRA,1234a,no"""
             self.assertEqual(18, len(rep.sequences))
             self.assertEqual("ATSDQLNRWGTGELF", rep.sequences[0].get_sequence())
             self.assertEqual("TRBV25-1", rep.sequences[2].metadata.v_gene)
+            self.assertListEqual([38, 48, 37, 53, 28, 16, 72, 14, 26, 13,  8, 16,  8, 28,  7,  1,  9, 1], list(rep.get_counts()))
+            self.assertListEqual([Chain.BETA for i in range(18)], list(rep.get_chains()))
 
         shutil.rmtree(path)
 

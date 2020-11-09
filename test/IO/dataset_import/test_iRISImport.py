@@ -7,6 +7,7 @@ from source.IO.dataset_import.IRISImport import IRISImport
 from source.data_model.dataset.ReceptorDataset import ReceptorDataset
 from source.data_model.dataset.SequenceDataset import SequenceDataset
 from source.data_model.receptor.TCABReceptor import TCABReceptor
+from source.data_model.receptor.receptor_sequence.Chain import Chain
 from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.util.PathBuilder import PathBuilder
@@ -55,6 +56,8 @@ TCR_AB	1421	AT	TRAV12-3*01	null	TRAJ17*01	null	null	null	null	null	null	null	nul
             self.assertTrue(repertoire.metadata["label1"] in {0, 1})
             self.assertEqual(7, len(repertoire.sequences))  # 6 alpha + 1 beta
             self.assertEqual(1, len(repertoire.receptors))  # 1 alpha/beta pair (dual chain (1))
+            self.assertListEqual([Chain.ALPHA for i in range(6)] + [Chain.BETA], list(repertoire.get_chains()))
+            self.assertEqual(None, repertoire.get_counts())
 
         shutil.rmtree(path)
 

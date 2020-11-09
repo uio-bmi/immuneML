@@ -3,6 +3,7 @@ import shutil
 from unittest import TestCase
 
 from source.IO.dataset_import.ImmunoSEQRearrangementImport import ImmunoSEQRearrangementImport
+from source.data_model.receptor.receptor_sequence.Chain import Chain
 from source.data_model.receptor.receptor_sequence.SequenceFrameType import SequenceFrameType
 from source.dsl.DefaultParamsLoader import DefaultParamsLoader
 from source.environment.EnvironmentSettings import EnvironmentSettings
@@ -82,6 +83,9 @@ rep2.tsv,TRB,1234a,no"""
         dataset = ImmunoSEQRearrangementImport.import_dataset(params, dataset_name)
 
         self.assertEqual(dataset.repertoires[0].sequences[1].metadata.frame_type, SequenceFrameType.IN)
+
+        self.assertListEqual(list(dataset.repertoires[0].get_counts()), [10, 1772, 1763, None, 566, 506, 398, 394, 363, 363])
+        self.assertListEqual(list(dataset.repertoires[0].get_chains()), [Chain.BETA for i in range(10)])
 
         self.assertEqual(2, dataset.get_example_count())
         for index, rep in enumerate(dataset.get_data()):

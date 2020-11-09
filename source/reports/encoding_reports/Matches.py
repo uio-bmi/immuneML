@@ -159,11 +159,10 @@ class Matches(EncodingReport):
 
         for repertoire in self.dataset.repertoires:
             rep_counts = repertoire.get_counts()
-            rep_chains = repertoire.get_attribute("chains")
+            rep_chains = repertoire.get_chains()
 
             for chain in all_chains:
-                chain_enum = Chain.get_chain(chain[0].upper())
-                indices = rep_chains == chain_enum
+                indices = rep_chains == Chain.get_chain(chain.upper())
                 results_df.loc[(results_df.subject_id == repertoire.metadata["subject_id"]) & (results_df.chain == chain),
                                'n_reads'] += np.sum(rep_counts[indices])
                 results_df.loc[(results_df.subject_id == repertoire.metadata["subject_id"]) & (results_df.chain == chain),

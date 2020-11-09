@@ -2,6 +2,7 @@ import shutil
 from unittest import TestCase
 
 from source.IO.dataset_import.AIRRImport import AIRRImport
+from source.data_model.receptor.receptor_sequence.Chain import Chain
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.util.PathBuilder import PathBuilder
 
@@ -71,6 +72,8 @@ rep2.tsv,2""")
                 self.assertListEqual(['IGHV4-31', 'IGHV4-31', 'IGHV4-31'], list(rep.get_v_genes()))
                 self.assertListEqual([36, 36, 36], list(rep.get_attribute("junction_length")))
                 self.assertListEqual(["ASGVAGTFDY", "ASGVAGTFDY", "ASGVAGTFDY"], list(rep.get_sequence_aas()))
+                self.assertListEqual([1247, 4, 2913], list(rep.get_counts()))
+                self.assertListEqual([Chain.HEAVY for i in range(3)], list(rep.get_chains()))
             else:
                 self.assertEqual(2, len(rep.sequences))
 

@@ -28,6 +28,14 @@ class AdaptiveImportHelper:
         dataframe = ImportHelper.standardize_none_values(dataframe)
         ImportHelper.drop_empty_sequences(dataframe, params.import_empty_aa_sequences, params.import_empty_nt_sequences)
 
+        if "chains" in dataframe.columns:
+            dataframe.loc[:, "chains"] = ImportHelper.load_chains(dataframe)
+        else:
+            if "v_subgroups" in dataframe.columns:
+                dataframe.loc[:, "chains"] = ImportHelper.load_chains_from_genes(dataframe, "v_subgroups")
+            else:
+                dataframe.loc[:, "chains"] = ImportHelper.load_chains_from_genes(dataframe, "v_genes")
+
         return dataframe
 
     @staticmethod
