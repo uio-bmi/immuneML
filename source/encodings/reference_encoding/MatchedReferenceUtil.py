@@ -10,9 +10,9 @@ from source.util.ReflectionHandler import ReflectionHandler
 
 
 class MatchedReferenceUtil:
-    '''
+    """
     Utility class for MatchedSequencesEncoder and MatchedReceptorsEncoder
-    '''
+    """
 
     @staticmethod
     def prepare_reference(reference_params: dict, location: str, paired: bool):

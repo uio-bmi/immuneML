@@ -7,6 +7,7 @@ from source.environment.LabelConfiguration import LabelConfiguration
 from source.environment.Metric import Metric
 from source.hyperparameter_optimization.config.SplitConfig import SplitConfig
 from source.hyperparameter_optimization.core.HPAssessment import HPAssessment
+from source.hyperparameter_optimization.core.HPUtil import HPUtil
 from source.hyperparameter_optimization.states.HPOptimizationState import HPOptimizationState
 from source.hyperparameter_optimization.strategy.HPOptimizationStrategy import HPOptimizationStrategy
 from source.util.ReflectionHandler import ReflectionHandler
@@ -123,6 +124,7 @@ class TrainMLModelInstruction(Instruction):
         self.state.path = result_path
         self.state = HPAssessment.run_assessment(self.state)
         self._compute_optimal_hp_item_per_label()
+        self.state.hp_report_results = HPUtil.run_hyperparameter_reports(self.state, f"{self.state.path}hyperparameter_reports/")
         self.print_performances(self.state)
         return self.state
 

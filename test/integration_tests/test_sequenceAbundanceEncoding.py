@@ -2,6 +2,7 @@ import os
 import shutil
 from unittest import TestCase
 
+import pandas as pd
 import yaml
 
 from source.IO.dataset_export.PickleExporter import PickleExporter
@@ -24,11 +25,26 @@ class TestSequenceAbundanceEncoding(TestCase):
         path = EnvironmentSettings.tmp_test_path + "integration_test_emerson_encoding/"
         PathBuilder.build(path)
 
+        ref_path = path + "reference.csv"
+        pd.DataFrame({"sequence_aas": ["GGG", "III", "TTT", "EFEF"]}).to_csv(ref_path, index=False)
+
         repertoires, metadata = RepertoireBuilder.build([["GGG", "III", "LLL", "MMM"],
                                                          ["DDD", "EEE", "FFF", "III", "LLL", "MMM"],
                                                          ["CCC", "FFF", "MMM"],
-                                                         ["AAA", "CCC", "EEE", "FFF", "LLL", "MMM"]],
-                                                        labels={"l1": [True, True, False, False]}, path=path)
+                                                         ["AAA", "CCC", "EEE", "FFF", "LLL", "MMM"],
+                                                         ["GGG", "III", "LLL", "MMM"],
+                                                         ["DDD", "EEE", "FFF", "III", "LLL", "MMM"],
+                                                         ["CCC", "FFF", "MMM"],
+                                                         ["AAA", "CCC", "EEE", "FFF", "LLL", "MMM"],["GGG", "III", "LLL", "MMM"],
+                                                         ["DDD", "EEE", "FFF", "III", "LLL", "MMM"],
+                                                         ["CCC", "FFF", "MMM"],
+                                                         ["AAA", "CCC", "EEE", "FFF", "LLL", "MMM"],["GGG", "III", "LLL", "MMM"],
+                                                         ["DDD", "EEE", "FFF", "III", "LLL", "MMM"],
+                                                         ["CCC", "FFF", "MMM"],
+                                                         ["AAA", "CCC", "EEE", "FFF", "LLL", "MMM"]
+                                                         ],
+                                                        labels={"l1": [True, True, False, False, True, True, False, False, True, True, False, False,
+                                                                       True, True, False, False]}, path=path)
 
         dataset = RepertoireDataset(repertoires=repertoires, metadata_file=metadata, params={"l1": [True, False]})
         PickleExporter.export(dataset, path)
@@ -54,6 +70,9 @@ class TestSequenceAbundanceEncoding(TestCase):
                             "n_neighbors": 1
                         },
                     }
+                },
+                "reports": {
+                    "r1": {"ReferenceSequenceOverlap": {"reference_path": ref_path}}
                 }
             },
             "instructions": {
@@ -69,6 +88,9 @@ class TestSequenceAbundanceEncoding(TestCase):
                         "split_strategy": "random",
                         "split_count": 1,
                         "training_percentage": 0.7,
+                        "reports": {
+                            "hyperparameter": ["r1"]
+                        }
                     },
                     "selection": {
                         "split_strategy": "random",

@@ -24,7 +24,6 @@ class HPAssessment:
         for index in range(n_splits):
             state = HPAssessment.run_assessment_split(state, train_val_datasets[index], test_datasets[index], index, n_splits)
 
-        state.hp_report_results = HPUtil.run_hyperparameter_reports(state, f"{state.path}hyperparameter_reports/")
         state.data_report_results = ReportUtil.run_data_reports(state.dataset, list(state.data_reports.values()), f"{state.path}data_reports/",
                                                                 state.context)
 
