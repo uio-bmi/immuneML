@@ -160,9 +160,7 @@ IVKNQEJ01AIS74	1	IVKNQEJ01AIS74	GGCGCAGGACTGTTGAAGCCTTCACAGACCCTGTCCCTCACCTGCACT
         params["result_path"] = path_exported + "result_path/"
         dataset2 = AIRRImport.import_dataset(params, "airr_repertoire_dataset2")
 
-        for attribute in ["amino_acid_sequence", "nucleotide_sequence", "v_gene", "j_gene", "chain", "frame_type", "region_type", "stop_codon", ""]:
-            print([sequence.get_attribute(attribute) for sequence in dataset1.repertoires[0].sequences])
-            print([sequence.get_attribute(attribute) for sequence in dataset2.repertoires[0].sequences])
+        for attribute in ["amino_acid_sequence", "nucleotide_sequence", "v_gene", "j_gene", "chain", "frame_type", "region_type", "stop_codon"]:
             self.assertListEqual([sequence.get_attribute(attribute) for sequence in dataset1.repertoires[0].sequences],
                                  [sequence.get_attribute(attribute) for sequence in dataset2.repertoires[0].sequences])
 
