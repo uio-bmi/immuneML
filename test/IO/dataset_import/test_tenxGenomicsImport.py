@@ -2,6 +2,7 @@ import shutil
 from unittest import TestCase
 
 from source.IO.dataset_import.TenxGenomicsImport import TenxGenomicsImport
+from source.data_model.receptor.receptor_sequence.Chain import Chain
 from source.dsl.DefaultParamsLoader import DefaultParamsLoader
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.util.PathBuilder import PathBuilder
@@ -54,6 +55,9 @@ rep2.tsv,2""")
         self.assertEqual(len(dataset.repertoires[1].sequences), 4)
 
         self.assertEqual(dataset.repertoires[0].sequences[0].amino_acid_sequence, "ALSGTGGYKVV")
+        self.assertListEqual([Chain.ALPHA, Chain.BETA], list(dataset.repertoires[0].get_chains()))
+        self.assertListEqual([2,4], list(dataset.repertoires[0].get_counts()))
+
         shutil.rmtree(path)
 
 

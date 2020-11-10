@@ -58,6 +58,10 @@ rep2.tsv,2""")
         self.assertEqual(len(dataset.repertoires[1].sequences), 1)
 
         self.assertEqual(dataset.repertoires[0].sequences[0].amino_acid_sequence, "ARDRWSTPVLRYFDWWTPPYYYYMDV")
+
+        self.assertListEqual(list(dataset.repertoires[0].get_counts()), [1])
+        self.assertEqual(dataset.repertoires[0].get_chains(), None)
+
         shutil.rmtree(path)
 
     def test_load_repertoire_with_stop_codon(self):

@@ -36,7 +36,7 @@ class EnvironmentSettings:
     def set_cache_path(path: str):
         EnvironmentSettings.cache_path = path
         PathBuilder.build(path)
-        print(f"{datetime.datetime.now()}: Setting temporary cache path to {path}...", flush=True)
+        print(f"{datetime.datetime.now()}: Setting temporary cache path to {path}", flush=True)
 
     @staticmethod
     def get_cache_type():

@@ -12,13 +12,15 @@ class Chain(Enum):
 
     @staticmethod
     def get_chain(item: str):
-        if item in ["TRA", "A", "ALPHA", "TCRA"]:
+        if type(item) is Chain:
+            return item
+        elif item in ["TRA", "TCRA", "A", "ALPHA", "TCRA"]:
             return Chain.ALPHA
-        elif item in ["TRB", "B", "BETA", "TCRB"]:
+        elif item in ["TRB", "TCRB", "B", "BETA", "TCRB"]:
             return Chain.BETA
-        elif item in ["TRD", "D", "DELTA", "TCRD"]:
+        elif item in ["TRD", "TCRD", "D", "DELTA", "TCRD"]:
             return Chain.DELTA
-        elif item in ["TRG", "G", "GAMMA", "TCRG"]:
+        elif item in ["TRG", "TCRG", "G", "GAMMA", "TCRG"]:
             return Chain.GAMMA
         elif item in ["IGH", "H", "HEAVY"]:
             return Chain.HEAVY

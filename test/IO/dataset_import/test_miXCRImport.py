@@ -67,6 +67,9 @@ rep2.tsv,2""")
                 self.assertEqual("AEAFLEI_GGFKTI", repertoire.sequences[1].amino_acid_sequence)
                 self.assertEqual("TRAV6", repertoire.sequences[0].metadata.v_gene)
                 self.assertEqual("TRAV13-2", repertoire.sequences[1].metadata.v_gene)
+                self.assertListEqual([Chain.ALPHA for i in range(10)], list(repertoire.get_chains()))
+                self.assertListEqual([956023, 102075, 90101, 69706, 56658, 55692, 43466, 42172, 41647, 19133], list(repertoire.get_counts()))
+
             elif index == 1:
                 self.assertEqual(6, len(repertoire.sequences))
                 self.assertEqual("GCTGTGCTGGAAACCAGTGGCTCTAGGTTGACC", repertoire.sequences[0].nucleotide_sequence)
