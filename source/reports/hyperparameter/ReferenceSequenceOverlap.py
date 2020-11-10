@@ -1,5 +1,6 @@
 import logging
 import os
+from collections import Counter
 from typing import Tuple
 
 import matplotlib.pyplot as plt
@@ -160,7 +161,10 @@ class ReferenceSequenceOverlap(Report):
         return list(model_sequences_df[attributes].to_records(index=False))
 
     def _make_venn_diagram(self, count_ref_only: int, count_overlap: int, count_model_only: int, label_reference: str, label_model: str, filename: str):
-        venn2(subsets=(count_ref_only, count_model_only, count_overlap), set_labels=(label_reference, label_model), set_colors=('#72AAA1', '#E5B9AD'),
-              alpha=0.8)
+        subsets = Counter({"01": count_model_only, "10": count_ref_only, "11": count_overlap})
+        diagram = venn2(subsets=subsets, set_labels=(label_reference, label_model), set_colors=('#72AAA1', '#E5B9AD'), alpha=0.8)
+        for index in subsets:
+            if subsets[index] == 0:
+                diagram.get_label_by_id(index).set_text("")
         plt.savefig(filename)
         plt.clf()
