@@ -1,7 +1,9 @@
 import shutil
 from unittest import TestCase
 
+from source.IO.dataset_export.AIRRExporter import AIRRExporter
 from source.IO.dataset_import.AIRRImport import AIRRImport
+from source.data_model.receptor.RegionType import RegionType
 from source.data_model.receptor.receptor_sequence.Chain import Chain
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.util.PathBuilder import PathBuilder
@@ -135,3 +137,34 @@ IVKNQEJ01AIS74	1	IVKNQEJ01AIS74	GGCGCAGGACTGTTGAAGCCTTCACAGACCCTGTCCCTCACCTGCACT
             self.assertTrue(sequence.heavy.amino_acid_sequence in ['ASGVAGTFDY', 'ASGVAGNFLL'])
 
         shutil.rmtree(path)
+
+    def test_import_exported_dataset(self):
+        path = EnvironmentSettings.root_path + "test/tmp/ioairr/"
+        PathBuilder.build(path)
+        self.create_dummy_dataset(path, True)
+
+        column_mapping = self.get_column_mapping()
+        params = {"is_repertoire": True, "result_path": path, "path": path, "metadata_file": path + "metadata.csv",
+                  "import_out_of_frame": False, "import_with_stop_codon": False,
+                  "import_productive": True, "region_type": "IMGT_CDR3",
+                  "column_mapping": column_mapping,
+                  "separator": "\t"}
+
+        dataset1 = AIRRImport.import_dataset(params, "airr_repertoire_dataset1")
+
+        path_exported = f"{path}exported_repertoires/"
+        AIRRExporter.export(dataset1, path_exported, region_type=RegionType.IMGT_CDR3)
+
+        params["path"] = path_exported
+        params["metadata_file"] = path_exported + "metadata.csv"
+        params["result_path"] = path_exported + "result_path/"
+        dataset2 = AIRRImport.import_dataset(params, "airr_repertoire_dataset2")
+
+        for attribute in ["amino_acid_sequence", "nucleotide_sequence", "v_gene", "j_gene", "chain", "frame_type", "region_type", "stop_codon", ""]:
+            print([sequence.get_attribute(attribute) for sequence in dataset1.repertoires[0].sequences])
+            print([sequence.get_attribute(attribute) for sequence in dataset2.repertoires[0].sequences])
+            self.assertListEqual([sequence.get_attribute(attribute) for sequence in dataset1.repertoires[0].sequences],
+                                 [sequence.get_attribute(attribute) for sequence in dataset2.repertoires[0].sequences])
+
+        shutil.rmtree(path)
+

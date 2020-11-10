@@ -38,14 +38,15 @@ class AIRRExporter(DataExporter):
         PathBuilder.build(path)
 
         if isinstance(dataset, RepertoireDataset):
-            repertoire_path = PathBuilder.build(f"{path}repertoires/")
+            repertoire_folder = "repertoires/"
+            repertoire_path = PathBuilder.build(f"{path}{repertoire_folder}")
 
             for index, repertoire in enumerate(dataset.repertoires):
                 df = AIRRExporter._repertoire_to_dataframe(repertoire, region_type)
                 df = AIRRExporter._postprocess_dataframe(df)
                 airr.dump_rearrangement(df, f"{repertoire_path}{repertoire.identifier}.tsv")
 
-            AIRRExporter.export_updated_metadata(dataset, path)
+            AIRRExporter.export_updated_metadata(dataset, path, repertoire_folder)
         else:
 
             index = 1
@@ -79,10 +80,10 @@ class AIRRExporter(DataExporter):
             return "sequence_aa"
 
     @staticmethod
-    def export_updated_metadata(dataset: RepertoireDataset, result_path: str):
+    def export_updated_metadata(dataset: RepertoireDataset, result_path: str, repertoire_folder: str):
         df = pd.read_csv(dataset.metadata_file, comment=Constants.COMMENT_SIGN)
         identifiers = df["repertoire_identifier"].values.tolist() if "repertoire_identifier" in df.columns else dataset.get_example_ids()
-        df["filename"] = [f"{item}.tsv" for item in identifiers]
+        df["filename"] = [f"{repertoire_folder}{item}.tsv" for item in identifiers]
         df.to_csv(f"{result_path}metadata.csv", index=False)
 
     @staticmethod
