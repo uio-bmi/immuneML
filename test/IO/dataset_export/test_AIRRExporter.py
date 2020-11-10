@@ -22,22 +22,24 @@ class TestAIRRExporter(TestCase):
         sequence_objects = [ReceptorSequence(amino_acid_sequence="AAA",
                                              nucleotide_sequence="GCTGCTGCT",
                                              identifier="receptor_1",
-                                             metadata=SequenceMetadata(v_gene="v1",
-                                                                       j_gene="j1",
+                                             metadata=SequenceMetadata(v_gene="TRBV1",
+                                                                       j_gene="TRBJ1",
                                                                        chain=Chain.BETA,
                                                                        count=5,
                                                                        region_type="IMGT_CDR3",
-                                                                       custom_params={"d_call": "d1",
+                                                                       frame_type="IN",
+                                                                       custom_params={"d_call": "TRBD1",
                                                                                       "custom_test": "cust1"})),
                             ReceptorSequence(amino_acid_sequence="GGG",
                                              nucleotide_sequence="GGTGGTGGT",
                                              identifier="receptor_2",
-                                             metadata=SequenceMetadata(v_gene="v2",
-                                                                       j_gene="j2",
+                                             metadata=SequenceMetadata(v_gene="TRAV2",
+                                                                       j_gene="TRAJ2",
                                                                        chain=Chain.ALPHA,
                                                                        count=15,
+                                                                       frame_type=None,
                                                                        region_type="IMGT_CDR3",
-                                                                       custom_params={"d_call": "d2",
+                                                                       custom_params={"d_call": "TRAD2",
                                                                                       "custom_test": "cust2"}))]
 
         repertoire = Repertoire.build_from_sequence_objects(sequence_objects=sequence_objects, path=path, metadata={"subject_id": "REP1"})
@@ -62,37 +64,43 @@ class TestAIRRExporter(TestCase):
         self.assertListEqual(list(resulting_data["sequence_id"]), ["receptor_1", "receptor_2"])
         self.assertListEqual(list(resulting_data["cdr3"]), ["GCTGCTGCT", "GGTGGTGGT"])
         self.assertListEqual(list(resulting_data["cdr3_aa"]), ["AAA", "GGG"])
-        self.assertListEqual(list(resulting_data["v_call"]), ["v1", "v2"])
-        self.assertListEqual(list(resulting_data["j_call"]), ["j1", "j2"])
-        self.assertListEqual(list(resulting_data["d_call"]), ["d1", "d2"])
+        self.assertListEqual(list(resulting_data["v_call"]), ["TRBV1", "TRAV2"])
+        self.assertListEqual(list(resulting_data["j_call"]), ["TRBJ1", "TRAJ2"])
+        self.assertListEqual(list(resulting_data["d_call"]), ["TRBD1", "TRAD2"])
         self.assertListEqual(list(resulting_data["locus"]), ["TRB", "TRA"])
         self.assertListEqual(list(resulting_data["duplicate_count"]), [5, 15])
         self.assertListEqual(list(resulting_data["custom_test"]), ["cust1", "cust2"])
+        self.assertListEqual(list(resulting_data["productive"]), ['T', nan])
+        self.assertListEqual(list(resulting_data["stop_codon"]), ['F', nan])
 
         shutil.rmtree(path)
 
     def create_dummy_receptordataset(self, path):
         receptors = [TCABReceptor(identifier="1",
                                   alpha=ReceptorSequence(amino_acid_sequence="AAATTT", identifier="1a",
-                                                         metadata=SequenceMetadata(v_gene="V1", j_gene="J1",
+                                                         metadata=SequenceMetadata(v_gene="TRAV1", j_gene="TRAJ1",
                                                                                    chain=Chain.ALPHA,
-                                                                                   custom_params={"d_call": "d1",
+                                                                                   frame_type="IN",
+                                                                                   custom_params={"d_call": "TRAD1",
                                                                                                   "custom1": "cust1"})),
                                   beta=ReceptorSequence(amino_acid_sequence="ATATAT", identifier="1b",
-                                                        metadata=SequenceMetadata(v_gene="V1", j_gene="J1",
+                                                        metadata=SequenceMetadata(v_gene="TRBV1", j_gene="TRBJ1",
                                                                                   chain=Chain.BETA,
-                                                                                  custom_params={"d_call": "d1",
+                                                                                  frame_type="IN",
+                                                                                  custom_params={"d_call": "TRBD1",
                                                                                                  "custom1": "cust1"}))),
                      TCABReceptor(identifier="2",
                                   alpha=ReceptorSequence(amino_acid_sequence="AAAAAA", identifier="2a",
-                                                         metadata=SequenceMetadata(v_gene="V1", j_gene="J1",
+                                                         metadata=SequenceMetadata(v_gene="TRAV1", j_gene="TRAJ1",
                                                                                    chain=Chain.ALPHA,
-                                                                                   custom_params={"d_call": "d1",
+                                                                                   frame_type="IN",
+                                                                                   custom_params={"d_call": "TRAD1",
                                                                                                   "custom2": "cust1"})),
                                   beta=ReceptorSequence(amino_acid_sequence="AAAAAA", identifier="2b",
-                                                        metadata=SequenceMetadata(v_gene="V1", j_gene="J1",
+                                                        metadata=SequenceMetadata(v_gene="TRBV1", j_gene="TRBJ1",
                                                                                   chain=Chain.BETA,
-                                                                                  custom_params={"d_call": "d1",
+                                                                                  frame_type="IN",
+                                                                                  custom_params={"d_call": "TRBD1",
                                                                                                  "custom2": "cust1"})))]
 
         return ReceptorDataset.build(receptors, 2, "{}receptors".format(path))
@@ -112,28 +120,31 @@ class TestAIRRExporter(TestCase):
         self.assertListEqual(list(resulting_data["cell_id"]), ["1", "1", "2", "2"])
         self.assertListEqual(list(resulting_data["sequence_id"]), ["1a", "1b", "2a", "2b"])
         self.assertListEqual(list(resulting_data["cdr3_aa"]), ["AAATTT", "ATATAT", "AAAAAA", "AAAAAA"])
-        self.assertListEqual(list(resulting_data["v_call"]), ["V1", "V1", "V1", "V1"])
-        self.assertListEqual(list(resulting_data["j_call"]), ["J1", "J1", "J1", "J1"])
-        self.assertListEqual(list(resulting_data["d_call"]), ["d1", "d1", "d1", "d1"])
+        self.assertListEqual(list(resulting_data["v_call"]), ["TRAV1", "TRBV1", "TRAV1", "TRBV1"])
+        self.assertListEqual(list(resulting_data["j_call"]), ["TRAJ1", "TRBJ1", "TRAJ1", "TRBJ1"])
+        self.assertListEqual(list(resulting_data["d_call"]), ["TRAD1", "TRBD1", "TRAD1", "TRBD1"])
         self.assertListEqual(list(resulting_data["locus"]), ["TRA", "TRB", "TRA", "TRB"])
         self.assertListEqual(list(resulting_data["custom1"]), ["cust1", "cust1", nan, nan])
         self.assertListEqual(list(resulting_data["custom2"]), [nan, nan, "cust1", "cust1"])
+        self.assertListEqual(list(resulting_data["productive"]), ['T', 'T', 'T', 'T'])
+        self.assertListEqual(list(resulting_data["stop_codon"]), ['F', 'F', 'F', 'F'])
+
 
         shutil.rmtree(path)
 
 
     def create_dummy_sequencedataset(self, path):
         sequences = [ReceptorSequence(amino_acid_sequence="AAATTT", identifier="1a",
-                                                         metadata=SequenceMetadata(v_gene="V1", j_gene="J1", chain=Chain.ALPHA,
-                                                                                   custom_params={"d_call": "d1",
+                                                         metadata=SequenceMetadata(v_gene="TRAV1", j_gene="TRAJ1", chain=Chain.ALPHA, frame_type="IN",
+                                                                                   custom_params={"d_call": "TRAD1",
                                                                                                   "custom1": "cust1"})),
                      ReceptorSequence(amino_acid_sequence="ATATAT", identifier="1b",
-                                                        metadata=SequenceMetadata(v_gene="V1", j_gene="J1", chain=Chain.BETA,
-                                                                                  custom_params={"d_call": "d1",
+                                                        metadata=SequenceMetadata(v_gene="TRBV1", j_gene="TRBJ1", chain=Chain.BETA, frame_type="IN",
+                                                                                  custom_params={"d_call": "TRBD1",
                                                                                                  "custom2": "cust1"})),
                      ReceptorSequence(amino_acid_sequence="ATATAT", identifier="2b",
-                                      metadata=SequenceMetadata(v_gene="V1", j_gene="J1", chain=Chain.BETA,
-                                                                custom_params={"d_call": "d1",
+                                      metadata=SequenceMetadata(v_gene="TRBV1", j_gene="TRBJ1", chain=Chain.BETA, frame_type="IN",
+                                                                custom_params={"d_call": "TRBD1",
                                                                                "custom2": "cust1"}))]
 
         return SequenceDataset.build(sequences, 2, "{}sequences".format(path))
@@ -152,20 +163,25 @@ class TestAIRRExporter(TestCase):
 
         self.assertListEqual(list(resulting_data["sequence_id"]), ["1a", "1b"])
         self.assertListEqual(list(resulting_data["cdr3_aa"]), ["AAATTT", "ATATAT"])
-        self.assertListEqual(list(resulting_data["v_call"]), ["V1", "V1"])
-        self.assertListEqual(list(resulting_data["j_call"]), ["J1", "J1"])
-        self.assertListEqual(list(resulting_data["d_call"]), ["d1", "d1"])
+        self.assertListEqual(list(resulting_data["v_call"]), ["TRAV1", "TRBV1"])
+        self.assertListEqual(list(resulting_data["j_call"]), ["TRAJ1", "TRBJ1"])
+        self.assertListEqual(list(resulting_data["d_call"]), ["TRAD1", "TRBD1"])
         self.assertListEqual(list(resulting_data["locus"]), ["TRA", "TRB"])
         self.assertListEqual(list(resulting_data["custom1"]), ["cust1", nan])
         self.assertListEqual(list(resulting_data["custom2"]), [nan, "cust1"])
+        self.assertListEqual(list(resulting_data["productive"]), ['T', 'T'])
+        self.assertListEqual(list(resulting_data["stop_codon"]), ['F', 'F'])
+
 
         resulting_data = pd.read_csv(path_exported + f"batch2.tsv", sep="\t")
         self.assertListEqual(list(resulting_data["sequence_id"]), ["2b"])
         self.assertListEqual(list(resulting_data["cdr3_aa"]), ["ATATAT"])
-        self.assertListEqual(list(resulting_data["v_call"]), ["V1"])
-        self.assertListEqual(list(resulting_data["j_call"]), ["J1"])
-        self.assertListEqual(list(resulting_data["d_call"]), ["d1"])
+        self.assertListEqual(list(resulting_data["v_call"]), ["TRBV1"])
+        self.assertListEqual(list(resulting_data["j_call"]), ["TRBJ1"])
+        self.assertListEqual(list(resulting_data["d_call"]), ["TRBD1"])
         self.assertListEqual(list(resulting_data["locus"]), ["TRB"])
         self.assertListEqual(list(resulting_data["custom2"]), ["cust1"])
+        self.assertListEqual(list(resulting_data["productive"]), ['T'])
+        self.assertListEqual(list(resulting_data["stop_codon"]), ['F'])
 
         shutil.rmtree(path)
