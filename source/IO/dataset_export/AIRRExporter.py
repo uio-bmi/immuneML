@@ -15,6 +15,7 @@ from source.data_model.receptor.Receptor import Receptor
 from source.data_model.receptor.RegionType import RegionType
 from source.data_model.receptor.receptor_sequence.Chain import Chain
 from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
+from source.data_model.receptor.receptor_sequence.SequenceFrameType import SequenceFrameType
 from source.data_model.repertoire.Repertoire import Repertoire
 from source.environment.Constants import Constants
 from source.util.PathBuilder import PathBuilder
@@ -37,13 +38,15 @@ class AIRRExporter(DataExporter):
         PathBuilder.build(path)
 
         if isinstance(dataset, RepertoireDataset):
-            repertoire_path = PathBuilder.build(f"{path}repertoires/")
+            repertoire_folder = "repertoires/"
+            repertoire_path = PathBuilder.build(f"{path}{repertoire_folder}")
 
             for index, repertoire in enumerate(dataset.repertoires):
                 df = AIRRExporter._repertoire_to_dataframe(repertoire, region_type)
+                df = AIRRExporter._postprocess_dataframe(df)
                 airr.dump_rearrangement(df, f"{repertoire_path}{repertoire.identifier}.tsv")
 
-            AIRRExporter.export_updated_metadata(dataset, path)
+            AIRRExporter.export_updated_metadata(dataset, path, repertoire_folder)
         else:
 
             index = 1
@@ -57,6 +60,7 @@ class AIRRExporter(DataExporter):
                 else:
                     df = AIRRExporter._sequences_to_dataframe(batch, region_type)
 
+                df = AIRRExporter._postprocess_dataframe(df)
                 airr.dump_rearrangement(df, filename)
 
                 index += 1
@@ -76,16 +80,16 @@ class AIRRExporter(DataExporter):
             return "sequence_aa"
 
     @staticmethod
-    def export_updated_metadata(dataset: RepertoireDataset, result_path: str):
+    def export_updated_metadata(dataset: RepertoireDataset, result_path: str, repertoire_folder: str):
         df = pd.read_csv(dataset.metadata_file, comment=Constants.COMMENT_SIGN)
         identifiers = df["repertoire_identifier"].values.tolist() if "repertoire_identifier" in df.columns else dataset.get_example_ids()
-        df["filename"] = [f"{item}.tsv" for item in identifiers]
+        df["filename"] = [f"{repertoire_folder}{item}.tsv" for item in identifiers]
         df.to_csv(f"{result_path}metadata.csv", index=False)
 
     @staticmethod
     def _repertoire_to_dataframe(repertoire: Repertoire, region_type):
         # get all fields (including custom fields)
-        df = pd.DataFrame({key: repertoire.get_attribute(key) for key in set(repertoire.fields)})
+        df = pd.DataFrame(repertoire.load_data())
 
         # rename mandatory fields for airr-compliance
         mapper = {"sequence_identifiers": "sequence_id",
@@ -98,14 +102,6 @@ class AIRRExporter(DataExporter):
         mapper["sequence_aas"] = AIRRExporter.get_sequence_aa_field(region_type)
 
         df = df.rename(mapper=mapper, axis="columns")
-
-        if "locus" in df.columns:
-            chain_conversion_dict = {Chain.ALPHA: "TRA",
-                                     Chain.BETA: "TRB",
-                                     Chain.HEAVY: "IGH",
-                                     Chain.LIGHT: "IGL",
-                                     None: ''}
-            df["locus"] = [chain_conversion_dict[chain] for chain in df["locus"]]
 
         return df
 
@@ -126,7 +122,7 @@ class AIRRExporter(DataExporter):
         sequence_aa_field = AIRRExporter.get_sequence_aa_field(region_type)
 
         main_data_dict = {"sequence_id": [], sequence_field: [], sequence_aa_field: []}
-        attributes_dict = {"chain": [], "v_gene": [], "j_gene": [], "count": []}
+        attributes_dict = {"chain": [], "v_gene": [], "j_gene": [], "count": [], "cell_id": [], "frame_type": []}
 
         for i, sequence in enumerate(sequences):
             main_data_dict["sequence_id"].append(sequence.identifier)
@@ -149,6 +145,33 @@ class AIRRExporter(DataExporter):
                     attributes_dict[attribute].append(None)
 
         df = pd.DataFrame({**attributes_dict, **main_data_dict})
-        df.rename(columns={"v_gene": "v_call", "j_gene": "j_call", "chain": "locus", "count": "duplicate_count"}, inplace=True)
+        df.rename(columns={"v_gene": "v_call", "j_gene": "j_call", "chain": "locus", "count": "duplicate_count", "frame_type": "frame_types"}, inplace=True)
 
         return df
+
+    @staticmethod
+    def _postprocess_dataframe(df):
+        if "locus" in df.columns:
+            df["locus"] = [Chain.get_chain(chain).value for chain in df["locus"]]
+
+        if "frame_types" in df.columns:
+            AIRRExporter._enums_to_strings(df, "frame_types")
+
+            df["productive"] = df["frame_types"] == SequenceFrameType.IN.name
+            df.loc[df["frame_types"].isnull(), "productive"] = None
+
+            df["vj_in_frame"] = df["productive"]
+
+            df["stop_codon"] = df["frame_types"] == SequenceFrameType.STOP.name
+            df.loc[df["frame_types"].isnull(), "stop_codon"] = None
+
+            df.drop(columns=["frame_types"])
+
+        if "region_types" in df.columns:
+            df.drop(columns=["region_types"])
+
+        return df
+
+    @staticmethod
+    def _enums_to_strings(df, field):
+        df.loc[:, field] = [field_value.value if isinstance(field_value, Enum) else field_value for field_value in df.loc[:, field]]

@@ -128,24 +128,31 @@ class AIRRImport(DataImport):
             - if no chain column was specified, the chain is extracted from the v gene name
             - the allele information is removed from the V and J genes
         """
-        # todo support "full_sequence" import through regiontype?
-
         if "productive" in df.columns:
             df["frame_types"] = SequenceFrameType.OUT.name
-            df.loc[df["productive"], "frame_types"] = SequenceFrameType.IN.name
+            df.loc[df["productive"] == True, "frame_types"] = SequenceFrameType.IN.name
         else:
             df["frame_types"] = None
 
         if "vj_in_frame" in df.columns:
-            df.loc[df["vj_in_frame"], "frame_types"] = SequenceFrameType.IN.name
+            df.loc[df["vj_in_frame"] == True, "frame_types"] = SequenceFrameType.IN.name
         if "stop_codon" in df.columns:
-            df.loc[df["stop_codon"], "frame_types"] = SequenceFrameType.STOP.name
+            df.loc[df["stop_codon"] == True, "frame_types"] = SequenceFrameType.STOP.name
 
         if "productive" in df.columns:
             frame_type_list = ImportHelper.prepare_frame_type_list(params)
             df = df[df["frame_types"].isin(frame_type_list)]
 
-        ImportHelper.junction_to_cdr3(df, params.region_type)
+        if params.region_type == RegionType.IMGT_CDR3:
+            if "sequence_aas" not in df.columns and "sequences" not in df.columns:
+                if "cdr3" in df.columns:
+                    df.rename(columns={"cdr3": "sequences"}, inplace=True)
+                if "cdr3_aa" in df.columns:
+                    df.rename(columns={"cdr3_aa": "sequence_aas"}, inplace=True)
+                df.loc[:, "region_types"] = params.region_type.name
+            elif "junction" in params.column_mapping or "junction_aa" in params.column_mapping:
+                ImportHelper.junction_to_cdr3(df, params.region_type)
+        # todo else: support "full_sequence" import through regiontype?
 
         if "chains" not in df.columns:
             df.loc[:, "chains"] = ImportHelper.load_chains_from_genes(df, "v_genes")
@@ -159,7 +166,10 @@ class AIRRImport(DataImport):
 
     @staticmethod
     def alternative_load_func(filename, params):
-        return airr.load_rearrangement(filename)
+        df = airr.load_rearrangement(filename)
+        df = ImportHelper.standardize_none_values(df)
+        df.dropna(axis="columns", how="all", inplace=True)
+        return df
 
     @staticmethod
     def import_receptors(df, params):
