@@ -63,8 +63,8 @@ class HTMLBuilder:
                     lines.append(line.split("src=\"")[0] + "src=\"./HTML_output/" + line.split("src=\"")[1])
                 else:
                     lines.append(line)
-                # lines[-1] = lines[-1].replace("""href="../""", """href="./""")
-                # lines[-1] = lines[-1].replace("""src="../""", """src="./""")
+                lines[-1] = lines[-1].replace("""href="../""", """href="./""")
+                lines[-1] = lines[-1].replace("""src="../""", """src="./""")
 
         with open(result_path, "w") as file:
             file.write("\n".join(lines))

@@ -8,7 +8,7 @@ from source.environment.Metric import Metric
 from source.hyperparameter_optimization.config.SplitConfig import SplitConfig
 from source.hyperparameter_optimization.core.HPAssessment import HPAssessment
 from source.hyperparameter_optimization.core.HPUtil import HPUtil
-from source.hyperparameter_optimization.states.HPOptimizationState import HPOptimizationState
+from source.hyperparameter_optimization.states.TrainMLModelState import TrainMLModelState
 from source.hyperparameter_optimization.strategy.HPOptimizationStrategy import HPOptimizationStrategy
 from source.util.ReflectionHandler import ReflectionHandler
 from source.workflows.instructions.Instruction import Instruction
@@ -116,9 +116,9 @@ class TrainMLModelInstruction(Instruction):
     def __init__(self, dataset, hp_strategy: HPOptimizationStrategy, hp_settings: list, assessment: SplitConfig, selection: SplitConfig,
                  metrics: set, optimization_metric: Metric, label_configuration: LabelConfiguration, path: str = None, context: dict = None,
                  batch_size: int = 1, data_reports: dict = None, name: str = None, refit_optimal_model: bool = False, store_encoded_data: bool = None):
-        self.state = HPOptimizationState(dataset, hp_strategy, hp_settings, assessment, selection, metrics,
-                                         optimization_metric, label_configuration, path, context, batch_size,
-                                         data_reports if data_reports is not None else {}, name, refit_optimal_model, store_encoded_data)
+        self.state = TrainMLModelState(dataset, hp_strategy, hp_settings, assessment, selection, metrics,
+                                       optimization_metric, label_configuration, path, context, batch_size,
+                                       data_reports if data_reports is not None else {}, name, refit_optimal_model, store_encoded_data)
 
     def run(self, result_path: str):
         self.state.path = result_path
@@ -151,7 +151,7 @@ class TrainMLModelInstruction(Instruction):
             optimal_assessment_state = self.state.assessment_states[optimal_hp_settings.index(optimal_hp_setting)]
             self.state.optimal_hp_items[label] = optimal_assessment_state.label_states[label].optimal_assessment_item
 
-    def print_performances(self, state: HPOptimizationState):
+    def print_performances(self, state: TrainMLModelState):
         print(f"Performances ({state.optimization_metric.name.lower()}) -----------------------------------------------", flush=True)
 
         for label in state.label_configuration.get_labels_by_name():

@@ -15,7 +15,7 @@ from source.hyperparameter_optimization.HPSetting import HPSetting
 from source.hyperparameter_optimization.config.ReportConfig import ReportConfig
 from source.hyperparameter_optimization.config.SplitConfig import SplitConfig
 from source.hyperparameter_optimization.config.SplitType import SplitType
-from source.hyperparameter_optimization.states.HPOptimizationState import HPOptimizationState
+from source.hyperparameter_optimization.states.TrainMLModelState import TrainMLModelState
 from source.hyperparameter_optimization.strategy.GridSearch import GridSearch
 from source.ml_methods.SVM import SVM
 from source.ml_methods.SimpleLogisticRegression import SimpleLogisticRegression
@@ -79,7 +79,7 @@ class TestHPOptimizationProcess(TestCase):
 
         state = process.run(result_path=path)
 
-        self.assertTrue(isinstance(state, HPOptimizationState))
+        self.assertTrue(isinstance(state, TrainMLModelState))
         self.assertEqual(1, len(state.assessment_states))
         self.assertTrue("l1" in state.assessment_states[0].label_states)
         self.assertTrue("l2" in state.assessment_states[0].label_states)

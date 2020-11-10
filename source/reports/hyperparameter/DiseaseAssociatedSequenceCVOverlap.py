@@ -6,7 +6,7 @@ import plotly.express as px
 
 from source.encodings.filtered_sequence_encoding.SequenceAbundanceEncoder import SequenceAbundanceEncoder
 from source.hyperparameter_optimization.states.HPItem import HPItem
-from source.hyperparameter_optimization.states.HPOptimizationState import HPOptimizationState
+from source.hyperparameter_optimization.states.TrainMLModelState import TrainMLModelState
 from source.reports.Report import Report
 from source.reports.ReportOutput import ReportOutput
 from source.reports.ReportResult import ReportResult
@@ -49,7 +49,7 @@ class DiseaseAssociatedSequenceCVOverlap(Report):
     def build_object(cls, **kwargs):
         return DiseaseAssociatedSequenceCVOverlap(**kwargs)
 
-    def __init__(self, state: HPOptimizationState = None, result_path: str = None, name: str = None, compare_in_selection: bool = False,
+    def __init__(self, state: TrainMLModelState = None, result_path: str = None, name: str = None, compare_in_selection: bool = False,
                  compare_in_assessment: bool = False):
         super().__init__(name)
         self.state = state

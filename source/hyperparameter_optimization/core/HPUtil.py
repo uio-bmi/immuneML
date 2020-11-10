@@ -6,8 +6,8 @@ from source.encodings.EncoderParams import EncoderParams
 from source.environment.LabelConfiguration import LabelConfiguration
 from source.hyperparameter_optimization.HPSetting import HPSetting
 from source.hyperparameter_optimization.config.SplitConfig import SplitConfig
-from source.hyperparameter_optimization.states.HPOptimizationState import HPOptimizationState
 from source.hyperparameter_optimization.states.HPSelectionState import HPSelectionState
+from source.hyperparameter_optimization.states.TrainMLModelState import TrainMLModelState
 from source.ml_methods.MLMethod import MLMethod
 from source.reports.ReportResult import ReportResult
 from source.reports.ReportUtil import ReportUtil
@@ -107,7 +107,7 @@ class HPUtil:
         ))
 
     @staticmethod
-    def run_hyperparameter_reports(state: HPOptimizationState, path: str) -> List[ReportResult]:
+    def run_hyperparameter_reports(state: TrainMLModelState, path: str) -> List[ReportResult]:
         report_results = []
         for key, report in state.assessment.reports.hyperparameter_reports.items():
             tmp_report = copy.deepcopy(report)
@@ -118,7 +118,7 @@ class HPUtil:
         return report_results
 
     @staticmethod
-    def run_selection_reports(state: HPOptimizationState, dataset, train_datasets: list, val_datasets: list, selection_state: HPSelectionState):
+    def run_selection_reports(state: TrainMLModelState, dataset, train_datasets: list, val_datasets: list, selection_state: HPSelectionState):
         path = selection_state.path
         data_split_reports = state.selection.reports.data_split_reports.values()
         for index in range(len(train_datasets)):
