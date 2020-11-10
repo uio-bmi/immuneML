@@ -23,4 +23,4 @@ class Metric(Enum):
 
     @staticmethod
     def get_probability_based_metric_types():
-        return [Metric.LOG_LOSS]
+        return [Metric.LOG_LOSS, Metric.AUC]

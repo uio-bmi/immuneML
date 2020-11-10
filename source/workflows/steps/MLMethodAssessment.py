@@ -1,4 +1,3 @@
-import inspect
 import os
 import warnings
 
@@ -78,10 +77,10 @@ class MLMethodAssessment(Step):
 
     @staticmethod
     def _score_for_metric(metric: Metric, predicted_y, predicted_proba_y, true_y, labels):
-        if hasattr(metrics, metric.value) and callable(getattr(metrics, metric.value)):
-            fn = getattr(metrics, metric.value)
-        else:
+        if hasattr(ml_metrics, metric.value):
             fn = getattr(ml_metrics, metric.value)
+        else:
+            fn = getattr(metrics, metric.value)
 
         if hasattr(true_y, 'dtype') and true_y.dtype.type is np.str_ or isinstance(true_y, list) and any(isinstance(item, str) for item in true_y):
             true_y = label_binarize(true_y, classes=labels)
@@ -97,10 +96,8 @@ class MLMethodAssessment(Step):
             else:
                 predictions = predicted_y
 
-            if "labels" in inspect.signature(fn).parameters.keys():
-                score = fn(true_y, predictions, labels=labels)
-            else:
-                score = fn(true_y, predictions)
+            score = fn(true_y, predictions)
+
         except ValueError as err:
             warnings.warn(f"MLMethodAssessment: score for metric {metric.name} could not be calculated."
                           f"\nPredicted values: {predicted_y}\nTrue values: {true_y}.\nMore details: {err}", RuntimeWarning)
