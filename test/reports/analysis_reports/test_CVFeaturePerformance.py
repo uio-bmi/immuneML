@@ -14,8 +14,8 @@ from source.hyperparameter_optimization.config.SplitType import SplitType
 from source.hyperparameter_optimization.states.HPAssessmentState import HPAssessmentState
 from source.hyperparameter_optimization.states.HPItem import HPItem
 from source.hyperparameter_optimization.states.HPLabelState import HPLabelState
-from source.hyperparameter_optimization.states.HPOptimizationState import HPOptimizationState
 from source.hyperparameter_optimization.states.HPSelectionState import HPSelectionState
+from source.hyperparameter_optimization.states.TrainMLModelState import TrainMLModelState
 from source.hyperparameter_optimization.strategy.GridSearch import GridSearch
 from source.ml_methods.ProbabilisticBinaryClassifier import ProbabilisticBinaryClassifier
 from source.reports.ReportResult import ReportResult
@@ -27,11 +27,11 @@ class TestCVFeaturePerformance(TestCase):
 
         path = EnvironmentSettings.tmp_test_path + "cv_feature_performance/"
 
-        state = HPOptimizationState(assessment=SplitConfig(split_count=5, split_strategy=SplitType.K_FOLD),
-                                    selection=SplitConfig(split_count=10, split_strategy=SplitType.K_FOLD),
-                                    optimization_metric=Metric.ACCURACY,
-                                    label_configuration=LabelConfiguration(labels=[Label(name="CMV", values=[True, False])]),
-                                    hp_settings=[HPSetting(encoder_params={"p_value_threshold": 0.001}, encoder_name="e1",
+        state = TrainMLModelState(assessment=SplitConfig(split_count=5, split_strategy=SplitType.K_FOLD),
+                                  selection=SplitConfig(split_count=10, split_strategy=SplitType.K_FOLD),
+                                  optimization_metric=Metric.ACCURACY,
+                                  label_configuration=LabelConfiguration(labels=[Label(name="CMV", values=[True, False])]),
+                                  hp_settings=[HPSetting(encoder_params={"p_value_threshold": 0.001}, encoder_name="e1",
                                                            encoder=SequenceAbundanceEncoder, preproc_sequence=[], ml_method_name="ml1",
                                                            ml_method=ProbabilisticBinaryClassifier(10, 0.1), ml_params={}),
                                                  HPSetting(encoder_params={"p_value_threshold": 0.01}, encoder_name="e2",

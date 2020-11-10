@@ -5,7 +5,7 @@ from source.hyperparameter_optimization.HPSetting import HPSetting
 from source.hyperparameter_optimization.core.HPSelection import HPSelection
 from source.hyperparameter_optimization.core.HPUtil import HPUtil
 from source.hyperparameter_optimization.states.HPAssessmentState import HPAssessmentState
-from source.hyperparameter_optimization.states.HPOptimizationState import HPOptimizationState
+from source.hyperparameter_optimization.states.TrainMLModelState import TrainMLModelState
 from source.ml_methods.MLMethod import MLMethod
 from source.reports.ReportUtil import ReportUtil
 from source.util.PathBuilder import PathBuilder
@@ -15,7 +15,7 @@ from source.workflows.instructions.MLProcess import MLProcess
 class HPAssessment:
 
     @staticmethod
-    def run_assessment(state: HPOptimizationState) -> HPOptimizationState:
+    def run_assessment(state: TrainMLModelState) -> TrainMLModelState:
 
         state = HPAssessment._create_root_path(state)
         train_val_datasets, test_datasets = HPUtil.split_data(state.dataset, state.assessment, state.path)
@@ -30,7 +30,7 @@ class HPAssessment:
         return state
 
     @staticmethod
-    def _create_root_path(state: HPOptimizationState) -> HPOptimizationState:
+    def _create_root_path(state: TrainMLModelState) -> TrainMLModelState:
         state.path = f"{state.path}{state.name}/"
         return state
 
@@ -54,7 +54,7 @@ class HPAssessment:
         return state
 
     @staticmethod
-    def run_assessment_split_per_label(state: HPOptimizationState, split_index: int):
+    def run_assessment_split_per_label(state: TrainMLModelState, split_index: int):
         """iterate through labels and hp_settings and retrain all models"""
         n_labels = state.label_configuration.get_label_count()
 

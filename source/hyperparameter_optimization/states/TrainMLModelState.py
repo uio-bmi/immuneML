@@ -13,7 +13,7 @@ from source.reports.ReportResult import ReportResult
 
 
 @dataclass
-class HPOptimizationState:
+class TrainMLModelState:
     dataset: Dataset
     hp_strategy: HPOptimizationStrategy
     hp_settings: List[HPSetting]

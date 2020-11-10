@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
 
-from source.hyperparameter_optimization.states.HPOptimizationState import HPOptimizationState
+from source.hyperparameter_optimization.states.TrainMLModelState import TrainMLModelState
 from source.reports.Report import Report
 from source.reports.ReportOutput import ReportOutput
 from source.reports.ReportResult import ReportResult
@@ -43,7 +43,7 @@ class CVFeaturePerformance(Report):
     def build_object(cls, **kwargs):
         return CVFeaturePerformance(**kwargs)
 
-    def __init__(self, feature: str = None, state: HPOptimizationState = None, result_path: str = None, label: str = None,
+    def __init__(self, feature: str = None, state: TrainMLModelState = None, result_path: str = None, label: str = None,
                  name: str = None, is_feature_axis_categorical: bool = None):
         super().__init__()
         self.feature = feature

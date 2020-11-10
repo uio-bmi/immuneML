@@ -4,8 +4,8 @@ from source.environment.LabelConfiguration import LabelConfiguration
 from source.hyperparameter_optimization.HPSetting import HPSetting
 from source.hyperparameter_optimization.config.SplitType import SplitType
 from source.hyperparameter_optimization.core.HPUtil import HPUtil
-from source.hyperparameter_optimization.states.HPOptimizationState import HPOptimizationState
 from source.hyperparameter_optimization.states.HPSelectionState import HPSelectionState
+from source.hyperparameter_optimization.states.TrainMLModelState import TrainMLModelState
 from source.util.PathBuilder import PathBuilder
 from source.workflows.instructions.MLProcess import MLProcess
 
@@ -13,14 +13,14 @@ from source.workflows.instructions.MLProcess import MLProcess
 class HPSelection:
 
     @staticmethod
-    def update_split_count(state: HPOptimizationState, train_val_dataset):
+    def update_split_count(state: TrainMLModelState, train_val_dataset):
         if state.selection.split_strategy == SplitType.LOOCV:
             state.selection.split_count = train_val_dataset.get_example_count()
 
         return state
 
     @staticmethod
-    def run_selection(state: HPOptimizationState, train_val_dataset, current_path: str, split_index: int) -> HPOptimizationState:
+    def run_selection(state: TrainMLModelState, train_val_dataset, current_path: str, split_index: int) -> TrainMLModelState:
 
         path = HPSelection.create_selection_path(state, current_path)
         state = HPSelection.update_split_count(state, train_val_dataset)
@@ -50,7 +50,7 @@ class HPSelection:
         return state
 
     @staticmethod
-    def evaluate_hp_setting(state: HPOptimizationState, hp_setting: HPSetting, train_datasets: list, val_datasets: list,
+    def evaluate_hp_setting(state: TrainMLModelState, hp_setting: HPSetting, train_datasets: list, val_datasets: list,
                             current_path: str, label: str, assessment_split_index: int) -> float:
 
         performances = []
@@ -66,7 +66,7 @@ class HPSelection:
             return -1.
 
     @staticmethod
-    def run_setting(state: HPOptimizationState, hp_setting, train_dataset, val_dataset, split_index: int,
+    def run_setting(state: TrainMLModelState, hp_setting, train_dataset, val_dataset, split_index: int,
                     current_path: str, label: str, assessment_index: int):
 
         hp_item = MLProcess(train_dataset=train_dataset, test_dataset=val_dataset, encoding_reports=state.selection.reports.encoding_reports.values(),
@@ -81,7 +81,7 @@ class HPSelection:
         return hp_item.performance
 
     @staticmethod
-    def create_selection_path(state: HPOptimizationState, current_path: str) -> str:
+    def create_selection_path(state: TrainMLModelState, current_path: str) -> str:
         path = "{}selection_{}/".format(current_path, state.selection.split_strategy.name.lower())
         PathBuilder.build(path)
         return path

@@ -7,7 +7,7 @@ import plotly.graph_objects as go
 from sklearn import metrics
 from sklearn.metrics import precision_recall_curve
 
-from source.hyperparameter_optimization.states.HPOptimizationState import HPOptimizationState
+from source.hyperparameter_optimization.states.TrainMLModelState import TrainMLModelState
 from source.reports.Report import Report
 from source.reports.ReportOutput import ReportOutput
 from source.reports.ReportResult import ReportResult
@@ -44,7 +44,7 @@ class PerformanceOverview(Report):
     def build_object(cls, **kwargs):
         return PerformanceOverview(**kwargs)
 
-    def __init__(self, instruction_states: List[HPOptimizationState] = None, name: str = None, result_path: str = None, positive_class=None):
+    def __init__(self, instruction_states: List[TrainMLModelState] = None, name: str = None, result_path: str = None, positive_class=None):
         super().__init__(name)
         self.instruction_states = instruction_states
         self.result_path = result_path

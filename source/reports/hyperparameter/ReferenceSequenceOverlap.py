@@ -9,7 +9,7 @@ from matplotlib_venn import venn2
 
 from source.encodings.filtered_sequence_encoding.SequenceAbundanceEncoder import SequenceAbundanceEncoder
 from source.encodings.filtered_sequence_encoding.SequenceCountEncoder import SequenceCountEncoder
-from source.hyperparameter_optimization.states.HPOptimizationState import HPOptimizationState
+from source.hyperparameter_optimization.states.TrainMLModelState import TrainMLModelState
 from source.reports.Report import Report
 from source.reports.ReportOutput import ReportOutput
 from source.reports.ReportResult import ReportResult
@@ -68,7 +68,7 @@ class ReferenceSequenceOverlap(Report):
 
         return ReferenceSequenceOverlap(**kwargs)
 
-    def __init__(self, reference_path: str = None, comparison_attributes: list = None, name: str = None, state: HPOptimizationState = None,
+    def __init__(self, reference_path: str = None, comparison_attributes: list = None, name: str = None, state: TrainMLModelState = None,
                  result_path: str = None, label: str = None):
         super().__init__(name)
         self.reference_path = reference_path

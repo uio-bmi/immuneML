@@ -5,8 +5,8 @@ from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.hyperparameter_optimization.states.HPAssessmentState import HPAssessmentState
 from source.hyperparameter_optimization.states.HPItem import HPItem
 from source.hyperparameter_optimization.states.HPLabelState import HPLabelState
-from source.hyperparameter_optimization.states.HPOptimizationState import HPOptimizationState
 from source.hyperparameter_optimization.states.HPSelectionState import HPSelectionState
+from source.hyperparameter_optimization.states.TrainMLModelState import TrainMLModelState
 from source.presentation.TemplateParser import TemplateParser
 from source.presentation.html.Util import Util
 from source.reports.ReportResult import ReportResult
@@ -24,7 +24,7 @@ class HPHTMLBuilder:
     NUM_DIGITS = 2
 
     @staticmethod
-    def build(state: HPOptimizationState = None) -> str:
+    def build(state: TrainMLModelState = None) -> str:
         """
         Function that builds the HTML files based on the HPOptimization state.
         Arguments:
@@ -64,7 +64,7 @@ class HPHTMLBuilder:
         return f"{state_name}_selection_details_{label}_split_{assessment_index + 1}.html"
 
     @staticmethod
-    def make_selection(state: HPOptimizationState, assessment_index: int, label: str, base_path):
+    def make_selection(state: TrainMLModelState, assessment_index: int, label: str, base_path):
         selection_state = state.assessment_states[assessment_index].label_states[label].selection_state
 
         hp_settings = []
@@ -126,7 +126,7 @@ class HPHTMLBuilder:
         return result if len(result) > 0 else None
 
     @staticmethod
-    def make_assessment_pages(state: HPOptimizationState, base_path: str, label: str):
+    def make_assessment_pages(state: TrainMLModelState, base_path: str, label: str):
 
         assessment_list = []
 
@@ -193,7 +193,7 @@ class HPHTMLBuilder:
         return os.path.basename(path)
 
     @staticmethod
-    def make_hp_per_label(state: HPOptimizationState):
+    def make_hp_per_label(state: TrainMLModelState):
         mapping = []
 
         for label in state.label_configuration.get_labels_by_name():
@@ -212,7 +212,7 @@ class HPHTMLBuilder:
         return mapping
 
     @staticmethod
-    def make_model_per_label(state: HPOptimizationState, base_path: str) -> list:
+    def make_model_per_label(state: TrainMLModelState, base_path: str) -> list:
 
         mapping = []
 
@@ -225,7 +225,7 @@ class HPHTMLBuilder:
         return mapping
 
     @staticmethod
-    def make_main_html_map(state: HPOptimizationState, base_path: str) -> dict:
+    def make_main_html_map(state: TrainMLModelState, base_path: str) -> dict:
         html_map = {
             "css_style": Util.get_css_content(HPHTMLBuilder.CSS_PATH),
             "full_specs": Util.get_full_specs_path(base_path),

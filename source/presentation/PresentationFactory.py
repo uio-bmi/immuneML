@@ -1,4 +1,4 @@
-from source.hyperparameter_optimization.states.HPOptimizationState import HPOptimizationState
+from source.hyperparameter_optimization.states.TrainMLModelState import TrainMLModelState
 from source.presentation.PresentationFormat import PresentationFormat
 from source.presentation.html.DatasetGenerationHTMLBuilder import DatasetGenerationHTMLBuilder
 from source.presentation.html.ExploratoryAnalysisHTMLBuilder import ExploratoryAnalysisHTMLBuilder
@@ -17,7 +17,7 @@ class PresentationFactory:
 
     @staticmethod
     def make_presentation_builder(state, presentation_format: PresentationFormat):
-        if isinstance(state, HPOptimizationState) and presentation_format == PresentationFormat.HTML:
+        if isinstance(state, TrainMLModelState) and presentation_format == PresentationFormat.HTML:
             return HPHTMLBuilder
         elif isinstance(state, ExploratoryAnalysisState) and presentation_format == PresentationFormat.HTML:
             return ExploratoryAnalysisHTMLBuilder
