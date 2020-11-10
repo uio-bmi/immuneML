@@ -24,3 +24,4 @@ git+https://github.com/widmi/widis-lstm-tools
 git+https://github.com/kmayerb/tcrdist2.git
 fishersapi
 tcrdist3>=0.1.6
+matplotlib-venn>=0.11.6
