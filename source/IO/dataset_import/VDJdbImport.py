@@ -135,10 +135,13 @@ class VDJdbImport(DataImport):
             df.loc[df["sequence_identifiers"] == "0", "sequence_identifiers"] = None
         # todo: should sequence identifiers be made unique?
 
-        ImportHelper.drop_empty_sequences(df, params.import_empty_aa_sequences, params.import_empty_nt_sequences)
-
         if "chains" not in df.columns:
             df.loc[:, "chains"] = ImportHelper.load_chains_from_genes(df)
+
+        df.loc[:, "v_genes"] = ImportHelper.strip_alleles(df, "v_genes")
+        df.loc[:, "j_genes"] = ImportHelper.strip_alleles(df, "j_genes")
+
+        ImportHelper.drop_empty_sequences(df, params.import_empty_aa_sequences, params.import_empty_nt_sequences)
 
         return df
 
