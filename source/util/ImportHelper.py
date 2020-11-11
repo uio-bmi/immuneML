@@ -187,7 +187,18 @@ class ImportHelper:
         return [Chain.get_chain(chain_str).value if chain_str is not None else None for chain_str in df[column_name]]
 
     @staticmethod
-    def load_chains_from_genes(df: pd.DataFrame, column_name) -> list:
+    def load_chains_from_genes(df: pd.DataFrame) -> list:
+        result = None
+
+        if "v_genes" in df.columns:
+            result = ImportHelper.load_chains_from_column(df, "v_genes")
+        elif "j_genes" in df.columns:
+            result = ImportHelper.load_chains_from_column(df, "j_genes")
+
+        return result
+
+    @staticmethod
+    def load_chains_from_column(df: pd.DataFrame, column_name) -> list:
         return [Chain.get_chain(chain_str).value if chain_str is not None else None for chain_str in df[column_name].str[0:3]]
 
     @staticmethod
@@ -209,7 +220,8 @@ class ImportHelper:
         """
         Removes alleles (everythin after the '*' character) from a column in the DataFrame
         """
-        return df[column_name].apply(lambda gene_col: gene_col.rsplit("*", maxsplit=1)[0])
+        if column_name in df.columns:
+            return df[column_name].apply(lambda gene_col: None if gene_col is None else gene_col.rsplit("*", maxsplit=1)[0])
 
     @staticmethod
     def get_sequence_filenames(path, dataset_name):

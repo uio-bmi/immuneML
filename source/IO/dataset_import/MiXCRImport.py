@@ -136,13 +136,9 @@ class MiXCRImport(DataImport):
 
         df["counts"] = df["counts"].astype(float).astype(int)
 
-        if "v_genes" in df.columns:
-            df["chains"] = ImportHelper.load_chains_from_genes(df, "v_genes")
-            df["v_genes"] = MiXCRImport._load_genes(df, "v_genes")
-        if "j_genes" in df.columns:
-            if "chains" not in df.columns:
-                df["chains"] = ImportHelper.load_chains_from_genes(df, "j_genes")
-            df["j_genes"] = MiXCRImport._load_genes(df, "j_genes")
+        df["v_genes"] = MiXCRImport._load_genes(df, "v_genes")
+        df["j_genes"] = MiXCRImport._load_genes(df, "j_genes")
+        df["chains"] = ImportHelper.load_chains_from_genes(df)
 
         ImportHelper.drop_empty_sequences(df, params.import_empty_aa_sequences, params.import_empty_nt_sequences)
 

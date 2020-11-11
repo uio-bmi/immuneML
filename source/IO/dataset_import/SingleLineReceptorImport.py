@@ -147,9 +147,14 @@ class SingleLineReceptorImport(DataImport):
             if "beta_nucleotide_sequence" in df:
                 df["beta_nucleotide_sequence"] = df["beta_nucleotide_sequence"].str[3:-3]
 
+            chain_vals = [ch for ch in generic_params.receptor_chains.value]
+            chain_names = [Chain.get_chain(ch).name.lower() for ch in generic_params.receptor_chains.value]
+
+            for chain_name in chain_names:
+                df.loc[:, f"{chain_name}_v_gene"] = ImportHelper.strip_alleles(df, f"{chain_name}_v_gene")
+                df.loc[:, f"{chain_name}_j_gene"] = ImportHelper.strip_alleles(df, f"{chain_name}_v_gene")
+
             for index, row in df.iterrows():
-                chain_vals = [ch for ch in generic_params.receptor_chains.value]
-                chain_names = [Chain.get_chain(ch).name.lower() for ch in generic_params.receptor_chains.value]
                 sequences = {chain_vals[i]: ReceptorSequence(amino_acid_sequence=row[
                                      chain_name + "_amino_acid_sequence"] if chain_name + "_amino_acid_sequence" in row else None,
                                                   nucleotide_sequence=row[

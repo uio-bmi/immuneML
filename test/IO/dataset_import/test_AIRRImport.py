@@ -166,3 +166,34 @@ IVKNQEJ01AIS74	1	IVKNQEJ01AIS74	GGCGCAGGACTGTTGAAGCCTTCACAGACCCTGTCCCTCACCTGCACT
 
         shutil.rmtree(path)
 
+
+
+    def test_minimal_dataset(self):
+        # test to make sure import works with minimally specified input
+        path = EnvironmentSettings.root_path + "test/tmp/ioairr/"
+        PathBuilder.build(path)
+        file1_content = """sequence_id	junction_aa
+IVKNQEJ01BVGQ6	CASGVAGTFDYW
+IVKNQEJ01AQVWS	CASGVAGTFDYW
+IVKNQEJ01AOYFZ	CASGVAGNFLLX
+IVKNQEJ01EI5S4	CASGVAGTFDYW"""
+
+        with open(path + "rep1.tsv", "w") as file:
+            file.writelines(file1_content)
+
+        with open(path + "metadata.csv", "w") as file:
+                file.writelines("""filename,subject_id
+rep1.tsv,1""")
+
+        column_mapping = self.get_column_mapping()
+
+        params = {"is_repertoire": True, "result_path": path, "path": path, "metadata_file": path + "metadata.csv",
+                  "import_out_of_frame": False, "import_with_stop_codon": False,
+                  "import_productive": True, "region_type": "IMGT_CDR3",
+                  "column_mapping": column_mapping,
+                  "separator": "\t"}
+
+        AIRRImport.import_dataset(params, "airr_minimal_repertoire_dataset")
+
+        shutil.rmtree(path)
+
