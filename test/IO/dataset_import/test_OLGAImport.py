@@ -2,6 +2,7 @@ import shutil
 from unittest import TestCase
 
 from source.IO.dataset_import.OLGAImport import OLGAImport
+from source.data_model.receptor.receptor_sequence.Chain import Chain
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.util.PathBuilder import PathBuilder
 
@@ -55,7 +56,7 @@ rep2.tsv,2""")
                 self.assertListEqual(["TRBV27", "TRBV5-6", "TRBV20-1"], list(rep.get_v_genes()))
                 self.assertListEqual(["TRBJ2-7", "TRBJ1-4", "TRBJ2-7"], list(rep.get_j_genes()))
                 self.assertListEqual([1,1,1], list(rep.get_counts()))
-                self.assertEqual(None, rep.get_chains())
+                self.assertListEqual([Chain.BETA, Chain.BETA, Chain.BETA], list(rep.get_chains()))
 
         shutil.rmtree(path)
 
