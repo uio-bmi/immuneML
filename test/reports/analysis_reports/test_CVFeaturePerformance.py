@@ -51,10 +51,10 @@ class TestCVFeaturePerformance(TestCase):
         state.assessment_states = [HPAssessmentState(i, None, None, None, state.label_configuration) for i in range(state.assessment.split_count)]
         for assessment_state in state.assessment_states:
             assessment_state.label_states["CMV"] = HPLabelState("CMV", [])
-            assessment_state.label_states["CMV"].assessment_items = {setting.get_key(): HPItem(performance=random.uniform(0.5, 1), hp_setting=setting)
+            assessment_state.label_states["CMV"].assessment_items = {setting.get_key(): HPItem(performance={'accuracy': random.uniform(0.5, 1)}, hp_setting=setting)
                                                                      for setting in state.hp_settings}
             assessment_state.label_states["CMV"].selection_state = HPSelectionState([], [], "", GridSearch(state.hp_settings))
-            assessment_state.label_states["CMV"].selection_state.hp_items = {setting.get_key(): [HPItem(performance=random.uniform(0.5, 1), hp_setting=setting) for _ in range(state.selection.split_count)]
+            assessment_state.label_states["CMV"].selection_state.hp_items = {setting.get_key(): [HPItem(performance={'accuracy': random.uniform(0.5, 1)}, hp_setting=setting) for _ in range(state.selection.split_count)]
                                                                              for setting in state.hp_settings}
 
         report.state = state

@@ -139,11 +139,12 @@ class CVFeaturePerformance(Report):
             assessment_items = [assessment_state.label_states[self.label].assessment_items[hp_setting.get_key()]
                                 for hp_setting in self.relevant_hp_settings]
             features_test[assessment_split_index] = [item.hp_setting.encoder_params[self.feature] for item in assessment_items]
-            performance_test[assessment_split_index] = [item.performance for item in assessment_items]
+            performance_test[assessment_split_index] = [item.performance[self.state.optimization_metric.name.lower()] for item in assessment_items]
 
             for hp_index, hp_setting in enumerate(self.relevant_hp_settings):
                 performance_training[hp_index, assessment_split_index] = \
-                    [item.performance for item in assessment_state.label_states[self.label].selection_state.hp_items[str(hp_setting)]]
+                    [item.performance[self.state.optimization_metric.name.lower()]
+                     for item in assessment_state.label_states[self.label].selection_state.hp_items[str(hp_setting)]]
 
         feature_values = self.feature_values.astype(str)
 

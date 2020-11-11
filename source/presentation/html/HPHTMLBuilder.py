@@ -73,11 +73,12 @@ class HPHTMLBuilder:
         for hp_setting, hp_items in selection_state.hp_items.items():
             hp_settings.append({
                 "hp_setting": hp_setting,
-                "hp_splits": [{"optimization_metric_val": round(hp_item.performance, HPHTMLBuilder.NUM_DIGITS)} if hp_item.performance is not None else "/" for hp_item in hp_items],
+                "hp_splits": [{"optimization_metric_val": round(hp_item.performance[state.optimization_metric.name.lower()], HPHTMLBuilder.NUM_DIGITS)}
+                              if hp_item.performance is not None else "/" for hp_item in hp_items],
                 "optimal": hp_setting == optimal
             })
 
-            performances = [round(hp_item.performance, HPHTMLBuilder.NUM_DIGITS) for hp_item in hp_items if hp_item.performance is not None]
+            performances = [round(hp_item.performance[state.optimization_metric.name.lower()], HPHTMLBuilder.NUM_DIGITS) for hp_item in hp_items if hp_item.performance is not None]
             if len(performances) > 1:
                 hp_settings[-1]["average"] = round(statistics.mean(performances), HPHTMLBuilder.NUM_DIGITS)
                 hp_settings[-1]["show_average"] = True
@@ -159,7 +160,7 @@ class HPHTMLBuilder:
                 assessment_item["hp_settings"].append({
                     "optimal": hp_setting.get_key() == optimal,
                     "hp_setting": hp_setting.get_key(),
-                    "optimization_metric_val": round(item.performance, HPHTMLBuilder.NUM_DIGITS),
+                    "optimization_metric_val": round(item.performance[state.optimization_metric.name.lower()], HPHTMLBuilder.NUM_DIGITS),
                     "reports_path": HPHTMLBuilder.make_assessment_reports(state, i, hp_setting, assessment_state, label, base_path)
                 })
 
@@ -202,7 +203,7 @@ class HPHTMLBuilder:
                 results.append({
                     "index": assessment_state.split_index + 1,
                     "hp_setting": assessment_state.label_states[label].optimal_assessment_item.hp_setting,
-                    "optimization_metric_val": round(assessment_state.label_states[label].optimal_assessment_item.performance,
+                    "optimization_metric_val": round(assessment_state.label_states[label].optimal_assessment_item.performance[state.optimization_metric.name.lower()],
                                                      HPHTMLBuilder.NUM_DIGITS),
                     "split_details_path": HPHTMLBuilder.make_assessment_split_path(assessment_state.split_index, state.name, label)
                 })

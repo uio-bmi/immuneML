@@ -51,8 +51,8 @@ class TestMLMethodAssessment(TestCase):
             path=EnvironmentSettings.root_path + "test/tmp/mlmethodassessment/"
         ))
 
-        self.assertTrue(isinstance(res, float))
-        self.assertTrue(res <= 0.1)
+        self.assertTrue(isinstance(res, dict))
+        self.assertTrue(res[Metric.LOG_LOSS.name.lower()] <= 0.1)
 
         self.assertTrue(os.path.isfile(EnvironmentSettings.root_path + "test/tmp/mlmethodassessment/ml_score.csv"))
 

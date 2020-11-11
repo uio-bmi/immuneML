@@ -3,6 +3,7 @@ import warnings
 import pandas as pd
 import plotly.express as px
 
+from source.hyperparameter_optimization.states.TrainMLModelState import TrainMLModelState
 from source.reports.ReportOutput import ReportOutput
 from source.reports.ReportResult import ReportResult
 from source.reports.ml_reports.MLReport import MLReport
@@ -33,10 +34,10 @@ class MLSettingsPerformance(MLReport):
     def build_object(cls, **kwargs):
         return MLSettingsPerformance(kwargs["name"] if "name" in kwargs else None)
 
-    def __init__(self, name: str = None):
+    def __init__(self, name: str = None, state: TrainMLModelState = None, result_path: str = None):
         super(MLSettingsPerformance, self).__init__()
 
-        self.state = None
+        self.state = state
         self.result_path = None
         self.name = name
         self.result_name = "performance"
@@ -68,7 +69,7 @@ class MLSettingsPerformance(MLReport):
                                           label_key,
                                           self._get_vertical_grouping(assessment_item),
                                           self._get_color_grouping(assessment_item),
-                                          assessment_item.performance])
+                                          assessment_item.performance[self.state.optimization_metric.name.lower()]])
                     # optional: include assessment_item.hp_setting.preproc_sequence_name. for now ignored.
 
         plotting_data = pd.DataFrame(plotting_data, columns=["fold", "label", self.vertical_grouping, "ml_method", "performance"])

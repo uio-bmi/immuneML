@@ -13,7 +13,7 @@ class HPItem:
 
     method: MLMethod = None
     encoder: DatasetEncoder = None
-    performance: float = None
+    performance: dict = None
     hp_setting: HPSetting = None
     train_predictions_path: str = None
     test_predictions_path: str = None

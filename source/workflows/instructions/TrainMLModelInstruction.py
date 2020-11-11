@@ -158,9 +158,9 @@ class TrainMLModelInstruction(Instruction):
             print(f"\n\nLabel: {label}", flush=True)
             print(f"Performance ({state.optimization_metric.name.lower()}) per assessment split:", flush=True)
             for split in range(state.assessment.split_count):
-                print(f"Split {split+1}: {state.assessment_states[split].label_states[label].optimal_assessment_item.performance}", flush=True)
+                print(f"Split {split+1}: {state.assessment_states[split].label_states[label].optimal_assessment_item.performance[state.optimization_metric.name.lower()]}", flush=True)
             print(f"Average performance ({state.optimization_metric.name.lower()}): "
-                  f"{sum([state.assessment_states[split].label_states[label].optimal_assessment_item.performance for split in range(state.assessment.split_count)])/state.assessment.split_count}", flush=True)
+                  f"{sum([state.assessment_states[split].label_states[label].optimal_assessment_item.performance[state.optimization_metric.name.lower()] for split in range(state.assessment.split_count)])/state.assessment.split_count}", flush=True)
             print("------------------------------", flush=True)
 
     @staticmethod

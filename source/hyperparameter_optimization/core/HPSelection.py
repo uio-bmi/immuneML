@@ -78,7 +78,7 @@ class HPSelection:
 
         state.assessment_states[assessment_index].label_states[label].selection_state.hp_items[hp_setting.get_key()].append(hp_item)
 
-        return hp_item.performance
+        return hp_item.performance[state.optimization_metric.name.lower()] if hp_item.performance is not None else None
 
     @staticmethod
     def create_selection_path(state: TrainMLModelState, current_path: str) -> str:

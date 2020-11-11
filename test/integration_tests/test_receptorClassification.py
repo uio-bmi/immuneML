@@ -83,6 +83,6 @@ class TestReceptorClassification(TestCase):
         state = instruction.run(result_path=path)
         print(vars(state))
 
-        self.assertEqual(1.0, state.assessment_states[0].label_states["l1"].optimal_assessment_item.performance)
+        self.assertEqual(1.0, state.assessment_states[0].label_states["l1"].optimal_assessment_item.performance[state.optimization_metric.name.lower()])
 
         shutil.rmtree(path)

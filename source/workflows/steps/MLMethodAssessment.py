@@ -15,7 +15,6 @@ from source.workflows.steps.Step import Step
 
 
 class MLMethodAssessment(Step):
-
     fieldnames = ["run", "optimal_method_params", "method", "encoding_params", "encoding", "evaluated_on"]
 
     @staticmethod
@@ -27,42 +26,39 @@ class MLMethodAssessment(Step):
 
         example_ids = input_params.dataset.get_example_ids()
 
-        MLMethodAssessment._store_predictions(method=input_params.method,
-                                              true_y=true_y,
-                                              predicted_y=predicted_y,
-                                              predicted_proba_y=predicted_proba_y,
-                                              label=input_params.label,
-                                              predictions_path=input_params.predictions_path,
-                                              example_ids=example_ids,
-                                              split_index=input_params.split_index)
+        MLMethodAssessment._store_predictions(method=input_params.method, true_y=true_y, predicted_y=predicted_y, predicted_proba_y=predicted_proba_y,
+                                              label=input_params.label, predictions_path=input_params.predictions_path,
+                                              example_ids=example_ids, split_index=input_params.split_index)
 
-        results = MLMethodAssessment._score(metrics_list=input_params.metrics, optimization_metric=input_params.optimization_metric,
-                                            label=input_params.label, split_index=input_params.split_index, predicted_y=predicted_y,
-                                            predicted_proba_y=predicted_proba_y, true_y=true_y, method=input_params.method,
-                                            ml_score_path=input_params.ml_score_path)
+        scores = MLMethodAssessment._score(metrics_list=input_params.metrics, optimization_metric=input_params.optimization_metric,
+                                           label=input_params.label, split_index=input_params.split_index, predicted_y=predicted_y,
+                                           predicted_proba_y=predicted_proba_y, true_y=true_y, method=input_params.method,
+                                           ml_score_path=input_params.ml_score_path)
 
-        summary_metric = MLMethodAssessment._get_optimization_metric(results, input_params.label, input_params.optimization_metric)
-
-        return summary_metric
+        return scores
 
     @staticmethod
     def _get_optimization_metric(df: pd.DataFrame, label: str, metric: Metric) -> float:
         return df["{}_{}".format(label, metric.name.lower())].iloc[0]
 
     @staticmethod
-    def _score(metrics_list: list, optimization_metric: Metric, label: str, predicted_y, predicted_proba_y, true_y, ml_score_path: str,
+    def _score(metrics_list: set, optimization_metric: Metric, label: str, predicted_y, predicted_proba_y, true_y, ml_score_path: str,
                split_index: int, method: MLMethod):
         results = {}
+        scores = {}
 
         metrics_with_optim_metric = set(metrics_list)
         metrics_with_optim_metric.add(optimization_metric)
 
-        for metric in list(metrics_with_optim_metric):
+        metrics_with_optim_metric = sorted(list(metrics_with_optim_metric), key=lambda metric: metric.name)
+
+        for metric in metrics_with_optim_metric:
             predicted_proba_y_label = predicted_proba_y[label] if predicted_proba_y is not None else None
             score = MLMethodAssessment._score_for_metric(metric=metric, predicted_y=predicted_y[label], true_y=true_y[label],
                                                          labels=method.get_classes_for_label(label),
                                                          predicted_proba_y=predicted_proba_y_label)
             results["{}_{}".format(label, metric.name.lower())] = score
+            scores[metric.name.lower()] = score
 
         results["split_index"] = split_index
 
@@ -73,7 +69,7 @@ class MLMethodAssessment(Step):
         else:
             df.to_csv(ml_score_path, index=False)
 
-        return df
+        return scores
 
     @staticmethod
     def _score_for_metric(metric: Metric, predicted_y, predicted_proba_y, true_y, labels):
