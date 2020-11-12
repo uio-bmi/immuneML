@@ -48,14 +48,14 @@ class MLParser:
         ml_specification[ml_method_class_name] = {**DefaultParamsLoader.load("ml_methods/", ml_method_class_name, log_if_missing=False),
                                                   **ml_specification[ml_method_class_name]}
 
-        method, params = MLParser.create_method_instance(ml_specification, ml_method_class)
+        method, params = MLParser.create_method_instance(ml_specification, ml_method_class, ml_method_id)
         ml_specification[ml_method_class_name] = params
         method.name = ml_method_id
 
         return method, ml_specification
 
     @staticmethod
-    def create_method_instance(ml_specification: dict, ml_method_class) -> tuple:
+    def create_method_instance(ml_specification: dict, ml_method_class, key: str) -> tuple:
 
         ml_params = {}
 
@@ -66,9 +66,12 @@ class MLParser:
             init_method_keys = inspect.signature(ml_method_class.__init__).parameters.keys()
             if any([isinstance(ml_params[key], list) for key in ml_params.keys()]) and "parameter_grid" in init_method_keys:
 
-                ml_method = ml_method_class(parameter_grid={key: [ml_params[key]]
-                                                            if not isinstance(ml_params[key], list) else ml_params[key]
+                ParameterValidator.assert_type_and_value(ml_specification['model_selection_cv'], bool, MLParser.__name__, f'{key}: model_selection_cv', exact_value=True)
+                ParameterValidator.assert_type_and_value(ml_specification['model_selection_n_folds'], int, MLParser.__name__, f'{key}: model_selection_n_folds', 2)
+
+                ml_method = ml_method_class(parameter_grid={key: [ml_params[key]] if not isinstance(ml_params[key], list) else ml_params[key]
                                                             for key in ml_params.keys()})
+
             elif len(init_method_keys) == 3 and all(arg in init_method_keys for arg in ["parameters", "parameter_grid"]):
                 ml_method = ml_method_class(parameters=ml_params)
             else:
