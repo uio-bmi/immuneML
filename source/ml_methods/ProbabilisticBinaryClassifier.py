@@ -269,7 +269,7 @@ class ProbabilisticBinaryClassifier(MLMethod):
 
         .. math::
 
-            p(c' = x | n', k')= \binom{n'}{k'} \frac{B(k'+\alpha_x, n' - k' + \beta_x)}{B(\alpha_x, \beta_x)} \frac{N_x + 1}{N + 2}, x=0,1
+            p(c' = x | n', k')= \\binom{n'}{k'} \\frac{B(k'+\\alpha_x, n' - k' + \\beta_x)}{B(\\alpha_x, \\beta_x)} \\frac{N_x + 1}{N + 2}, x=0,1
 
         Arguments:
 
@@ -277,12 +277,14 @@ class ProbabilisticBinaryClassifier(MLMethod):
             n: total number of sequences
 
         Returns:
-            a tuple of probabilities for negative class and positive class for given example
+            a tuple of probabilities for negative class and positive class for given example, normalized to sum to 1
         """
         predicted_probability_0 = beta_binomial.pmf(k, n, self.alpha_0, self.beta_0) * (self.N_0 + 1) / (self.N_0 + self.N_1 + 2)
         predicted_probability_1 = beta_binomial.pmf(k, n, self.alpha_1, self.beta_1) * (self.N_1 + 1) / (self.N_0 + self.N_1 + 2)
 
-        return predicted_probability_0, predicted_probability_1
+        normalization_const = predicted_probability_0 + predicted_probability_1
+
+        return predicted_probability_0 / normalization_const, predicted_probability_1 / normalization_const
 
     def _compute_log_posterior_odds_ratio(self, k, n):
         """
