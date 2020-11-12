@@ -37,7 +37,7 @@ not exceed 1.
 
 This figure shows how the different concepts in a Simulation relate to each other:
 
-.. image:: _static/images/simulation_implanting.png
+.. image:: ../_static/images/simulation_implanting.png
     :alt: Simulation diagram
 
 An example of a simulation with disease-associated signals is given below. In this example, the healthy individuals are here represented by a
