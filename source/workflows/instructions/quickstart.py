@@ -40,9 +40,12 @@ class Quickstart:
                     }
                 },
                 "ml_methods": {
+                    "knn": "KNN",
+                    "rf": "RandomForestClassifier",
+                    "svm": "SVM",
                     "simpleLR": {
                         "SimpleLogisticRegression": {
-                            "C": 30,
+                            "C": [30,40],
                             "max_iter": 10
                         },
                         "model_selection_cv": False,

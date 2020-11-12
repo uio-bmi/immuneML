@@ -17,20 +17,22 @@ whereas in analysis_2 dataset d1 is encoded first using e1 before running report
   definitions:
     datasets:
       d1:
+        format: AIRR
         params:
-          path: path_to_dataset/dataset.iml_dataset
-        format: Pickle
-
-    reports:
-      r1: SequenceLengthDistribution # a report with default parameters
-      r2: MatchedPairedReference # a report with default parameters
+          metadata_file: /path/to/metadata.csv
+          path: /path/to/data/
 
     encodings:
       e1:
-        MatchedReceptors:
-          reference_sequences:
+        MatchedSequences:
+          reference:
             path: /path/to/file.tsv
             format: VDJdb
+          max_edit_distance: 1
+
+    reports:
+      r1: SequenceLengthDistribution # a report with default parameters
+      r2: Matches # a report with default parameters
 
   instructions:
     instruction_1:

@@ -35,6 +35,11 @@ When multiple signals are specified within one implanting, these signals are imp
 the same receptors in those repertoires. When specifying multiple different implantings, keep in mind that the summed dataset implanting rate can
 not exceed 1.
 
+This figure shows how the different concepts in a Simulation relate to each other:
+
+.. image:: _static/images/simulation_implanting.png
+    :alt: Simulation diagram
+
 An example of a simulation with disease-associated signals is given below. In this example, the healthy individuals are here represented by a
 randomly generated synthetic dataset (see: :ref:`How to generate a random immune receptor repertoire dataset`). It is also possible to use experimental datasets as a
 baseline for the simulation.
@@ -44,7 +49,7 @@ baseline for the simulation.
 
   definitions:
     datasets:
-      my_synthetic_dataset:
+      my_synthetic_dataset: # A synthetic dataset is generated on the fly. Alternatively, data import from files may be specified.
         format: RandomRepertoireDataset
         params:
           repertoire_count: 100

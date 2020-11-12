@@ -13,11 +13,10 @@ An example of the full YAML specification for training an ML model through neste
   definitions:
     datasets:
       d1:
-        format: AdaptiveBiotech
+        format: AIRR
         params:
-          metadata_file: metadata.csv
-          path: path_to_data_folder/
-          result_path: path_to_result_folder/
+          metadata_file: /path/to/metadata.csv
+          path: /path/to/data/
     encodings:
       e1:
         KmerFrequency:
