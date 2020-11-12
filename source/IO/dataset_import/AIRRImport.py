@@ -155,7 +155,7 @@ class AIRRImport(DataImport):
         # todo else: support "full_sequence" import through regiontype?
 
         if "chains" not in df.columns:
-            df.loc[:, "chains"] = ImportHelper.load_chains_from_genes(df, "v_genes")
+            df.loc[:, "chains"] = ImportHelper.load_chains_from_genes(df)
 
         df.loc[:, "v_genes"] = ImportHelper.strip_alleles(df, "v_genes")
         df.loc[:, "j_genes"] = ImportHelper.strip_alleles(df, "j_genes")

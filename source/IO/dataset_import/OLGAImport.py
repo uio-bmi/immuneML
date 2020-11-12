@@ -81,6 +81,9 @@ class OLGAImport(DataImport):
         ImportHelper.junction_to_cdr3(df, params.region_type)
         ImportHelper.drop_empty_sequences(df, params.import_empty_aa_sequences, params.import_empty_nt_sequences)
 
+        if "chains" not in df.columns:
+            df.loc[:, "chains"] = ImportHelper.load_chains_from_genes(df)
+
         return df
 
     @staticmethod

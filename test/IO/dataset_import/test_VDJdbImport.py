@@ -38,6 +38,8 @@ class TestVDJdbLoader(TestCase):
             self.assertTrue(sequence.metadata.custom_params["epitope_species"] in ["EBV", "CMV"])   # todo change this to a common thing between Receptor & Sequence?
             self.assertTrue(sequence.metadata.custom_params["epitope"] in ["AVFDRKSDAK", "KLGGALQAK"])
             self.assertTrue(sequence.metadata.custom_params["epitope_gene"] in ["EBNA4", "IE1"])
+            self.assertTrue(sequence.metadata.v_gene in ["TRBV5-4", "TRBV5-5", "TRAV13-1", "TRAV9-2"])
+            self.assertTrue(sequence.metadata.j_gene in ["TRBJ2-1", "TRBJ2-6", "TRAJ18", "TRAJ23"])
 
         shutil.rmtree(path)
 

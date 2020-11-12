@@ -31,10 +31,11 @@ class AdaptiveImportHelper:
         if "chains" in dataframe.columns:
             dataframe.loc[:, "chains"] = ImportHelper.load_chains(dataframe)
         else:
+            # loading from v_subgroups is preferred as sometimes v_genes is None when v_subgroups is defined
             if "v_subgroups" in dataframe.columns:
-                dataframe.loc[:, "chains"] = ImportHelper.load_chains_from_genes(dataframe, "v_subgroups")
+                dataframe.loc[:, "chains"] = ImportHelper.load_chains_from_column(dataframe, "v_subgroups")
             else:
-                dataframe.loc[:, "chains"] = ImportHelper.load_chains_from_genes(dataframe, "v_genes")
+                dataframe.loc[:, "chains"] = ImportHelper.load_chains_from_genes(dataframe)
 
         return dataframe
 
