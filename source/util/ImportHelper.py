@@ -29,6 +29,7 @@ from source.data_model.receptor.receptor_sequence.SequenceMetadata import Sequen
 from source.data_model.repertoire.Repertoire import Repertoire
 from source.environment.Constants import Constants
 from source.environment.SequenceType import SequenceType
+from source.util.ParameterValidator import ParameterValidator
 from source.util.PathBuilder import PathBuilder
 
 
@@ -79,6 +80,8 @@ class ImportHelper:
         """
         metadata = pd.read_csv(params.metadata_file, ",")
 
+        ParameterValidator.assert_keys_present(metadata.columns.tolist(), ["filename"], ImportHelper.__name__, f'{dataset_name}: params: metadata_file')
+
         PathBuilder.build(params.result_path + "repertoires/")
 
         arguments = [(import_class, row, params) for index, row in metadata.iterrows()]
@@ -108,18 +111,21 @@ class ImportHelper:
 
     @staticmethod
     def load_repertoire_as_object(import_class, metadata_row, params: DatasetImportParams):
-        alternative_load_func = getattr(import_class, "alternative_load_func", None)
+        try:
+            alternative_load_func = getattr(import_class, "alternative_load_func", None)
 
-        dataframe = ImportHelper.load_sequence_dataframe(f"{params.path}{metadata_row['filename']}", params, alternative_load_func)
-        dataframe = import_class.preprocess_dataframe(dataframe, params)
-        sequence_lists = {field: dataframe[field].values.tolist() for field in Repertoire.FIELDS if field in dataframe.columns}
-        sequence_lists["custom_lists"] = {field: dataframe[field].values.tolist()
-                                          for field in list(set(dataframe.columns) - set(Repertoire.FIELDS))}
+            dataframe = ImportHelper.load_sequence_dataframe(f"{params.path}{metadata_row['filename']}", params, alternative_load_func)
+            dataframe = import_class.preprocess_dataframe(dataframe, params)
+            sequence_lists = {field: dataframe[field].values.tolist() for field in Repertoire.FIELDS if field in dataframe.columns}
+            sequence_lists["custom_lists"] = {field: dataframe[field].values.tolist()
+                                              for field in list(set(dataframe.columns) - set(Repertoire.FIELDS))}
 
-        repertoire_inputs = {**{"metadata": metadata_row.to_dict(), "path": params.result_path + "repertoires/"}, **sequence_lists}
-        repertoire = Repertoire.build(**repertoire_inputs)
+            repertoire_inputs = {**{"metadata": metadata_row.to_dict(), "path": params.result_path + "repertoires/"}, **sequence_lists}
+            repertoire = Repertoire.build(**repertoire_inputs)
 
-        return repertoire
+            return repertoire
+        except Exception as exception:
+            raise RuntimeError(f"{ImportHelper.__name__}: error when importing file {metadata_row['filename']}.") from exception
 
     @staticmethod
     def load_sequence_dataframe(filepath, params, alternative_load_func=None):

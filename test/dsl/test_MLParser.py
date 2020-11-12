@@ -29,8 +29,8 @@ class TestMLParser(TestCase):
                     "max_iter": [1000, 2000],
                     "penalty": ["l1", "l2"]
                 },
-                "model_selection_cv": False,
-                "model_selection_n_folds": -1
+                "model_selection_cv": True,
+                "model_selection_n_folds": 5
             },
             "SVM2": {
                 "SVM": {},
