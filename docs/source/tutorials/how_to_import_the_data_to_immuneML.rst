@@ -14,7 +14,12 @@ A broad range of different import formats can be specified, including AIRR, MiXC
 format is not yet supported, any type of tabular file can also be imported using :ref:`Generic` import. When possible, using format-specific
 importers is preferred over Generic import, as they require less options to be set and might take care of automatic reformatting
 of certain fields.
+Alternatively to importing data from files, it is also possible to generate datasets containing random immune receptor sequences on the fly,
+see :ref:`How to generate a random immune receptor repertoire dataset`.
 
+
+Specifying data import from files
+---------------------------------
 
 Data import must be defined as a part of the YAML specification. First, we choose a name which will be used to refer to the dataset in the subsequent analyses:
 
@@ -48,7 +53,7 @@ Here is an incomplete example specification using AIRR format:
 
 
 Specifying params for repertoire dataset import
------------------------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 By default, it is assumed that a RepertoireDataset should be imported. In this case, the path to the **metadata_file**
 must be specified. The metadata file is a .csv file which contains one repertoire (filename) per row, and the metadata
 labels for that repertoire. These metadata labels can be used to train classifiers for.
@@ -77,7 +82,7 @@ A complete specification for importing a RepertoireDataset from AIRR format with
 
 
 Specifying params for receptor or sequence dataset import
----------------------------------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 If you want to import a Sequence- or ReceptorDataset, set the parameter **is_repertoire** to False, and set **paired** to either False (SequenceDataset)
 or True (ReceptorDataset). For Sequence- and ReceptorDatasets, metadata labels must be specified directly as columns in the input files.
