@@ -30,7 +30,7 @@ class SklearnMethod(MLMethod):
 
     Arguments:
 
-        parameters: a dictionary of parameters that will be directly passed to the scikit-learn's LogisticRegression class upon calling __init__()
+        parameters: a dictionary of parameters that will be directly passed to scikit-learn's class upon calling __init__()
         method; for detailed list see scikit-learn's documentation of the specific class inheriting SklearnMethod
 
         parameter_grid: a dictionary of parameters which all have to be valid arguments for scikit-learn's corresponding class' __init__() method
@@ -49,19 +49,19 @@ class SklearnMethod(MLMethod):
                     # Additional parameter that determines whether to print convergence warnings
                     show_warnings: True
                 # if any of the parameters under SimpleLogisticRegression is a list and model_selection_cv is True,
-                # SimpleLogisticRegression will do grid search over the given parameters and return optimal model
-                model_selection_cv: False
-                model_selection_n_folds: -1
+                # a grid search will be done over the given parameters, using the number of folds specified in model_selection_n_folds,
+                # and the optimal model will be selected
+                model_selection_cv: True
+                model_selection_n_folds: 5
             svm_with_cv:
                 SVM: # name of another class inheriting SklearnMethod
                     # sklearn parameters (same names as in original sklearn class)
                     alpha: [10, 100] # search will be performed over these parameters
                     # Additional parameter that determines whether to print convergence warnings
                     show_warnings: True
-                # if any of the parameters under SVM is a list and model_selection_cv is True,
-                # SVM will do grid search over the given parameters and return optimal model
-                model_selection_cv: True
-                model_selection_n_folds: 5
+                # no grid search will be done
+                model_selection_cv: False
+                model_selection_n_folds: -1
 
     """
 
@@ -242,3 +242,36 @@ class SklearnMethod(MLMethod):
 
     def get_feature_names(self) -> list:
         return self.feature_names
+
+    @staticmethod
+    def get_usage_documentation(model_name):
+        return f"""
+    
+    Scikit-learn models can be trained in two modes: 
+    
+    1. Creating a model using a given set of hyperparameters, and relying on the selection and assessment loop in the
+    TrainMLModel instruction to select the optimal model. 
+    
+    2. Passing a range of different hyperparameters to {model_name}, and using a third layer of nested cross-validation 
+    to find the optimal hyperparameters through grid search. In this case, only the {model_name} model with the optimal 
+    hyperparameter settings is further used in the inner selection loop of the TrainMLModel instruction. 
+    
+    By default, mode 1 is used. In order to use mode 2, model_selection_cv and model_selection_n_folds must be set. 
+    
+    
+    Arguments:
+
+        {model_name} (dict): Under this key, hyperparameters can be specified that will be passed to the scikit-learn class.
+        Any scikit-learn hyperparameters can be specified here. In mode 1, a single value must be specified for each of the scikit-learn
+        hyperparameters. In mode 2, it is possible to specify a range of different hyperparameters values in a list. It is also allowed
+        to mix lists and single values in mode 2, in which case the grid search will only be done for the lists, while the
+        single-value hyperparameters will be fixed. 
+        In addition to the scikit-learn hyperparameters, parameter show_warnings (True/False) can be specified here. This determines
+        whether scikit-learn warnings, such as convergence warnings, should be printed. By default show_warnings is True.
+        
+        model_selection_cv (bool): If any of the hyperparameters under {model_name} is a list and model_selection_cv is True, 
+        a grid search will be done over the given hyperparameters, using the number of folds specified in model_selection_n_folds.
+        By default, model_selection_cv is False. 
+        
+        model_selection_n_folds (int): The number of folds that should be used for the cross validation grid search if model_selection_cv is True.
+        """
