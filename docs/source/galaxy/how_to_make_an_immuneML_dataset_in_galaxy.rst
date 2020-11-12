@@ -39,6 +39,18 @@ For RepertoireDatasets, a metadata file must be selected from the history, where
 the names of the columns containing metadata must be specified. The names of the metadata columns are in later
 analyses available as labels for the Sequence- and ReceptorDatasets.
 
+In subsequent YAML-based analyses, the dataset created through the simple interface should be specified like this:
+
+.. indent with spaces
+.. code-block:: yaml
+
+    definitions:
+      datasets:
+        my_analysis_dataset: # user-defined dataset name
+          format: Pickle
+          params:
+            path: dataset.iml_dataset
+
 
 Using the advanced 'Create dataset' interface
 ---------------------------------------------
