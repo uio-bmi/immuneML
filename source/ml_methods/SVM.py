@@ -12,7 +12,7 @@ class SVM(SklearnMethod):
     For valid parameters, see `scikit-learn documentation <https://scikit-learn.org/stable/modules/generated/sklearn.svm.LinearSVC.html>`_.
 
     If you are interested in plotting the coefficients of the SVM model,
-    consider running the :py:obj:`~source.reports.ml_reports.Coefficients.Coefficients` report.
+    consider running the :ref:`Coefficients` report.
 
     YAML specification:
 

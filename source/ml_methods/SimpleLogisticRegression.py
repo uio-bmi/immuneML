@@ -12,7 +12,8 @@ class SimpleLogisticRegression(SklearnMethod):
     For valid parameters, see `scikit-learn documentation <https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LogisticRegression.html>`_.
 
     If you are interested in plotting the coefficients of the logistic regression model,
-    consider running the :py:obj:`~source.reports.ml_reports.Coefficients.Coefficients` report.
+    consider running the :ref:`Coefficients` report.
+
 
     YAML specification:
 

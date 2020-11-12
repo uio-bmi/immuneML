@@ -12,7 +12,7 @@ class RandomForestClassifier(SklearnMethod):
     For valid parameters, see `scikit-learn documentation <https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestClassifier.html>`_.
 
     If you are interested in plotting the coefficients of the random forest classifier model,
-    consider running the :py:obj:`~source.reports.ml_reports.Coefficients.Coefficients` report.
+    consider running the :ref:`Coefficients` report.
 
     YAML specification:
 
