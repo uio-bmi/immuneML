@@ -12,9 +12,14 @@ specification. In most cases, the simple interface will suffice.
 
 immuneML datasets
 -----------------
-The three types of datasets used in immuneML are Repertoire-, Sequence- or ReceptorDatasets. RepertoireDatasets should be used when making
-predictions per repertoire, such as predicting a disease state. SequenceDatasets or ReceptorDatasets should be used when
-predicting values for unpaired (single-chain) and paired immune receptors respectively, like antigen specificity.
+There exist three types of datasets in immuneML:
+
+- **RepertoireDatasets** should be used when making predictions per repertoire, such as predicting a disease state.
+
+- **SequenceDatasets** should be used when predicting values for single immune receptor chains, such as antigen specificity.
+
+- **ReceptorDatasets** are the paired variant of SequenceDatasets, and should be used to make a prediction for each receptor chain pair.
+
 
 In order to use a dataset for training ML classifiers, the metadata, which contains prediction labels, needs to be available.
 For RepertoireDatasets, the metadata is supplied through a metadata file. The metadata file is a .csv file which contains

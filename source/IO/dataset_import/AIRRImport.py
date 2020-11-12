@@ -26,13 +26,18 @@ class AIRRImport(DataImport):
 
         path (str): This is the path to a directory with AIRR files to import. By default path is set to the current working directory.
 
-        is_repertoire (bool): If True, this imports a RepertoireDataset. If False, it imports a SequenceDataset.
-        By default, is_repertoire is set to True.
+        is_repertoire (bool): If True, this imports a RepertoireDataset. If False, it imports a SequenceDataset or
+        ReceptorDataset. By default, is_repertoire is set to True.
 
         metadata_file (str): Required for RepertoireDatasets. This parameter specifies the path to the metadata file.
         This is a csv file with columns filename, subject_id and arbitrary other columns which can be used as labels in instructions.
         Only the AIRR files included under the column 'filename' are imported into the RepertoireDataset.
         For setting SequenceDataset metadata, metadata_file is ignored, see metadata_column_mapping instead.
+
+        paired (str): Required for Sequence- or ReceptorDatasets. This parameter determines whether to import a
+        SequenceDataset (paired = False) or a ReceptorDataset (paired = True).
+        In a ReceptorDataset, two sequences with chain types specified by receptor_chains are paired together
+        based on the identifier given in the AIRR column named 'cell_id'.
 
         import_productive (bool): Whether productive sequences (with value 'T' in column productive) should be included
         in the imported sequences. By default, import_productive is True.

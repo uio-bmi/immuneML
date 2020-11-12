@@ -22,7 +22,7 @@ class GenericImport(DataImport):
 
     For ReceptorDatasets: this importer assumes the two receptor sequences appear on different lines in the file, and can
     be paired together by a common sequence identifier. If you instead want to import a ReceptorDataset from a tabular
-    file that contains both receptor chains on one line, see :py:obj:`~source.IO.dataset_import.SingleLineReceptorImport.SingleLineReceptorImport`.
+    file that contains both receptor chains on one line, see :ref:`SingleLineReceptor` import
 
 
     Arguments:

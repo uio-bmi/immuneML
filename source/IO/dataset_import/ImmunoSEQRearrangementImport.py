@@ -20,7 +20,8 @@ class ImmunoSEQRearrangementImport(DataImport):
 
     The format of the files imported by this importer is described here:
     https://www.adaptivebiotech.com/wp-content/uploads/2019/07/MRK-00342_immunoSEQ_TechNote_DataExport_WEB_REV.pdf
-    Alternatively, to import sample-level .tsv files,  see :py:obj:`~source.IO.dataset_import.ImmunoSEQSampleImport.ImmunoSEQSampleImport`.
+    Alternatively, to import sample-level .tsv files, see :ref:`ImmunoSEQSample` import
+
     The only difference between these two importers is which columns they load from the .tsv files.
 
 
