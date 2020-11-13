@@ -78,7 +78,7 @@ class TestMLSettingsPerformance(TestCase):
         path = EnvironmentSettings.root_path + "test/tmp/mlsettingsperformance/"
         PathBuilder.build(path)
 
-        report = MLSettingsPerformance()
+        report = MLSettingsPerformance(**{"single_axis_labels": False, "label_position": None})
 
         report.result_path = path
         report.state = self._create_state_object(path + "input_data/")
@@ -104,7 +104,7 @@ class TestMLSettingsPerformance(TestCase):
         path = EnvironmentSettings.root_path + "test/tmp/mlsettingsperformance/"
         PathBuilder.build(path)
 
-        report = MLSettingsPerformance()
+        report = MLSettingsPerformance(**{"single_axis_labels": True, "label_position": 0.1})
 
         report.result_path = path
         report.state = self._create_state_object(path + "input_data/")

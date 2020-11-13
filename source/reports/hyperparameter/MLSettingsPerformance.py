@@ -4,9 +4,11 @@ import pandas as pd
 import plotly.express as px
 
 from source.hyperparameter_optimization.states.TrainMLModelState import TrainMLModelState
+from source.reports.PlotlyUtil import PlotlyUtil
 from source.reports.ReportOutput import ReportOutput
 from source.reports.ReportResult import ReportResult
 from source.reports.ml_reports.MLReport import MLReport
+from source.util.ParameterValidator import ParameterValidator
 from source.util.PathBuilder import PathBuilder
 
 
@@ -21,6 +23,16 @@ class MLSettingsPerformance(MLReport):
     This report can be used only with TrainMLModel instruction under assessment/reports/hyperparameter.
 
 
+    Arguments:
+
+        single_axis_labels (bool): whether to use single axis labels. Note that using single axis labels makes the
+        figure unsuited for rescaling, as the label position is given in a fixed distance from the axis. By default,
+        single_axis_labels is False, resulting in standard plotly axis labels.
+
+        label_position (float): if single_axis_labels is True, this should be an integer specifying the axis label
+        position relative to the axis. The default value for label_position is -0.1.
+
+
     YAML specification:
 
     .. indent with spaces
@@ -32,11 +44,25 @@ class MLSettingsPerformance(MLReport):
 
     @classmethod
     def build_object(cls, **kwargs):
-        return MLSettingsPerformance(kwargs["name"] if "name" in kwargs else None)
+        location = "MLSettingsPerformance"
 
-    def __init__(self, name: str = None, state: TrainMLModelState = None, result_path: str = None):
+        single_axis_labels = kwargs["single_axis_labels"]
+        ParameterValidator.assert_type_and_value(single_axis_labels, bool, location, "single_axis_labels")
+
+        if single_axis_labels:
+            label_position = kwargs["label_position"]
+            ParameterValidator.assert_type_and_value(label_position, float, location, "label_position")
+        else:
+            label_position = None
+
+        name = kwargs["name"] if "name" in kwargs else None
+        return MLSettingsPerformance(single_axis_labels, label_position, name)
+
+    def __init__(self, single_axis_labels, label_position, name: str = None, state: TrainMLModelState = None, result_path: str = None):
         super(MLSettingsPerformance, self).__init__()
 
+        self.single_axis_labels = single_axis_labels
+        self.label_position = label_position
         self.state = state
         self.result_path = None
         self.name = name
@@ -93,18 +119,30 @@ class MLSettingsPerformance(MLReport):
 
         metric_name = self.state.optimization_metric.name.replace("_", " ").title()
 
-        figure = px.bar(plotting_data, x="ml_method", y="performancemean", color="ml_method", barmode="relative",
-                        facet_row=self.vertical_grouping, facet_col="label", error_y="performancestd",
-                        labels={
-                            "performancemean": f"Performance<br>({metric_name})",
-                            "ml_method": "ML method"
-                        }, template='plotly_white',
-                        color_discrete_sequence=px.colors.diverging.Tealrose)
+        if self.single_axis_labels:
+            figure = self._plot_single_axis_labels(plotting_data, "ML method", f"Performance ({metric_name})")
+        else:
+            figure = self._plot_rescalable(plotting_data, "ML method", f"Performance<br>({metric_name})")
 
         file_path = f"{self.result_path}{self.result_name}.html"
         figure.write_html(file_path)
 
         return ReportOutput(path=file_path)
+
+    def _plot_rescalable(self, plotting_data, x_label, y_label):
+        return px.bar(plotting_data, x="ml_method", y="performancemean", color="ml_method", barmode="relative",
+                        facet_row=self.vertical_grouping, facet_col="label", error_y="performancestd",
+                        labels={
+                            "performancemean": x_label,
+                            "ml_method": y_label
+                        }, template='plotly_white',
+                        color_discrete_sequence=px.colors.diverging.Tealrose)
+
+
+    def _plot_single_axis_labels(self, plotting_data, x_label, y_label):
+        figure = self._plot_rescalable(plotting_data, x_label, y_label)
+        return PlotlyUtil.add_single_axis_labels(figure, x_label, y_label, self.label_position)
+
 
     def check_prerequisites(self):
         run_report = True
