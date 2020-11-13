@@ -45,7 +45,7 @@ class Quickstart:
                     "svm": "SVM",
                     "simpleLR": {
                         "SimpleLogisticRegression": {
-                            "C": [30,40],
+                            "C": 30,
                             "max_iter": 10
                         },
                         "model_selection_cv": False,
