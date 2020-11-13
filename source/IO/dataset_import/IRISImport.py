@@ -42,15 +42,16 @@ class IRISImport(DataImport):
         is imported, all possible combinations of chains are imported as individual receptors. By default import_all_gene_combinations
         is False.
 
+        import_empty_nt_sequences (bool): imports sequences which have an empty nucleotide sequence field; can be True or False.
+        By default, import_empty_nt_sequences is set to True.
+
+        import_empty_aa_sequences (bool): imports sequences which have an empty amino acid sequence field; can be True or False; for analysis on
+        amino acid sequences, this parameter should be False (import only non-empty amino acid sequences). By default, import_empty_aa_sequences is set to False.
+
         extra_columns_to_load (list): Additional columns that should be loaded, apart from the default columns
         (Clonotype ID and any Chain, V gene and J gene columns).
 
         separator (str): Column separator, for IRIS this is by default "\\t".
-
-        import_empty_nt_sequences (bool): imports sequences which have an empty nucleotide sequence field; can be True or False
-
-        import_empty_aa_sequences (bool): imports sequences which have an empty amino acid sequence field; can be True or False; for analysis on
-        amino acid sequences, this parameter will typically be False (import only non-empty amino acid sequences)
 
 
     YAML specification:
@@ -68,14 +69,13 @@ class IRISImport(DataImport):
                 receptor_chains: TRA_TRB # what chain pair to import for a ReceptorDataset
                 import_dual_chains: True
                 import_all_gene_combinations: False
+                import_empty_nt_sequences: True # keep sequences even though the nucleotide sequence might be empty
+                import_empty_aa_sequences: False # filter out sequences if they don't have sequence_aa set
                 extra_columns_to_load:
                 - extra_col1
                 - extra_col2
                 # Optional fields with IRIS-specific defaults, only change when different behavior is required:
                 separator: "\\t" # column separator
-                import_empty_nt_sequences: True # keep sequences even though the nucleotide sequence might be empty
-                import_empty_aa_sequences: False # filter out sequences if they don't have sequence_aa set
-
     """
 
     @staticmethod

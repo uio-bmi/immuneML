@@ -50,6 +50,12 @@ class AIRRImport(DataImport):
         be included in the imported sequences. This only applies if column vj_in_frame is present. By default,
         import_out_of_frame is False.
 
+        import_empty_nt_sequences (bool): imports sequences which have an empty nucleotide sequence field; can be True or False.
+        By default, import_empty_nt_sequences is set to True.
+
+        import_empty_aa_sequences (bool): imports sequences which have an empty amino acid sequence field; can be True or False; for analysis on
+        amino acid sequences, this parameter should be False (import only non-empty amino acid sequences). By default, import_empty_aa_sequences is set to False.
+
         region_type (str): Which part of the sequence to import. By default, this value is set to IMGT_CDR3. This means the
         first and last amino acids are removed from the CDR3 sequence, as AIRR uses the IMGT junction. Specifying
         any other value will result in importing the sequences as they are.
@@ -81,11 +87,6 @@ class AIRRImport(DataImport):
 
         separator (str): Column separator, for AIRR this is by default "\\t".
 
-        import_empty_nt_sequences (bool): imports sequences which have an empty nucleotide sequence field; can be True or False
-
-        import_empty_aa_sequences (bool): imports sequences which have an empty amino acid sequence field; can be True or False; for analysis on
-        amino acid sequences, this parameter will typically be False (import only non-empty amino acid sequences)
-
 
     YAML specification:
 
@@ -104,6 +105,8 @@ class AIRRImport(DataImport):
                 import_productive: True # whether to include productive sequences in the dataset
                 import_with_stop_codon: False # whether to include sequences with stop codon in the dataset
                 import_out_of_frame: False # whether to include out of frame sequences in the dataset
+                import_empty_nt_sequences: True # keep sequences even if the `sequences` column is empty (provided that other fields are as specified here)
+                import_empty_aa_sequences: False # remove all sequences with empty `sequence_aas` column
                 # Optional fields with AIRR-specific defaults, only change when different behavior is required:
                 separator: "\\t" # column separator
                 region_type: IMGT_CDR3 # what part of the sequence to import
@@ -115,8 +118,6 @@ class AIRRImport(DataImport):
                     locus: chains
                     duplicate_count: counts
                     sequence_id: sequence_identifiers
-                import_empty_nt_sequences: True # keep sequences even if the `sequences` column is empty (provided that other fields are as specified here)
-                import_empty_aa_sequences: False # remove all sequences with empty `sequence_aas` column
 
     """
 

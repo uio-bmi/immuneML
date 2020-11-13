@@ -40,6 +40,12 @@ class VDJdbImport(DataImport):
         receptor_chains (str): Required for ReceptorDatasets. Determines which pair of chains to import for each Receptor.
         Valid values for receptor_chains are the names of the :py:obj:`~source.data_model.receptor.ChainPair.ChainPair` enum.
 
+        import_empty_nt_sequences (bool): imports sequences which have an empty nucleotide sequence field; can be True or False.
+        By default, import_empty_nt_sequences is set to True.
+
+        import_empty_aa_sequences (bool): imports sequences which have an empty amino acid sequence field; can be True or False; for analysis on
+        amino acid sequences, this parameter should be False (import only non-empty amino acid sequences). By default, import_empty_aa_sequences is set to False.
+
         region_type (str): Which part of the sequence to import. By default, this value is set to IMGT_CDR3. This means the
         first and last amino acids are removed from the CDR3 sequence, as VDJdb uses IMGT junction as CDR3. Specifying
         any other value will result in importing the sequences as they are.
@@ -79,11 +85,6 @@ class VDJdbImport(DataImport):
 
         separator (str): Column separator, for VDJdb this is by default "\\t".
 
-        import_empty_nt_sequences (bool): imports sequences which have an empty nucleotide sequence field; can be True or False
-
-        import_empty_aa_sequences (bool): imports sequences which have an empty amino acid sequence field; can be True or False; for analysis on
-        amino acid sequences, this parameter will typically be False (import only non-empty amino acid sequences)
-
 
     YAML specification:
 
@@ -98,6 +99,8 @@ class VDJdbImport(DataImport):
                 metadata_file: path/to/metadata.csv # metadata file for RepertoireDataset
                 paired: False # whether to import SequenceDataset (False) or ReceptorDataset (True) when is_repertoire = False
                 receptor_chains: TRA_TRB # what chain pair to import for a ReceptorDataset
+                import_empty_nt_sequences: True # keep sequences even though the nucleotide sequence might be empty
+                import_empty_aa_sequences: False # filter out sequences if they don't have sequence_aa set
                 # Optional fields with VDJdb-specific defaults, only change when different behavior is required:
                 separator: "\\t" # column separator
                 region_type: IMGT_CDR3 # what part of the sequence to import
@@ -111,8 +114,6 @@ class VDJdbImport(DataImport):
                     Epitope: epitope
                     Epitope gene: epitope_gene
                     Epitope species: epitope_species
-                import_empty_nt_sequences: True # keep sequences even though the nucleotide sequence might be empty
-                import_empty_aa_sequences: False # filter out sequences if they don't have sequence_aa set
 
     """
 

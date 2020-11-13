@@ -39,6 +39,12 @@ class IGoRImport(DataImport):
         import_out_of_frame (bool): Whether out of frame sequences (with value '0' in column is_inframe) should
         be included in the imported sequences. By default, import_out_of_frame is False.
 
+        import_empty_nt_sequences (bool): imports sequences which have an empty nucleotide sequence field; can be True or False.
+        By default, import_empty_nt_sequences is set to True.
+
+        import_empty_aa_sequences (bool): imports sequences which have an empty amino acid sequence field; can be True or False; for analysis on
+        amino acid sequences, this parameter should be False (import only non-empty amino acid sequences). By default, import_empty_aa_sequences is set to False.
+
         region_type (str): Which part of the sequence to import. By default, this value is set to IMGT_CDR3. This means the
         first and last amino acids are removed from the CDR3 sequence, as IGoR uses the IMGT junction. Specifying
         any other value will result in importing the sequences as they are.
@@ -64,11 +70,6 @@ class IGoRImport(DataImport):
 
         separator (str): Column separator, for IGoR this is by default ",".
 
-        import_empty_nt_sequences (bool): imports sequences which have an empty nucleotide sequence field; can be True or False
-
-        import_empty_aa_sequences (bool): imports sequences which have an empty amino acid sequence field; can be True or False; for analysis on
-        amino acid sequences, this parameter will typically be False (import only non-empty amino acid sequences)
-
 
     YAML specification:
 
@@ -86,14 +87,14 @@ class IGoRImport(DataImport):
                     igor_column_name2: metadata_label2
                 import_with_stop_codon: False # whether to include sequences with stop codon in the dataset
                 import_out_of_frame: False # whether to include out of frame sequences in the dataset
+                import_empty_nt_sequences: True # keep sequences even though the nucleotide sequence might be empty
+                import_empty_aa_sequences: False # filter out sequences if they don't have sequence_aa set
                 # Optional fields with IGoR-specific defaults, only change when different behavior is required:
                 separator: "," # column separator
                 region_type: IMGT_CDR3 # what part of the sequence to import
                 column_mapping: # column mapping IGoR: immuneML
                     nt_CDR3: sequences
                     seq_index: sequence_identifiers
-                import_empty_nt_sequences: True # keep sequences even though the nucleotide sequence might be empty
-                import_empty_aa_sequences: False # filter out sequences if they don't have sequence_aa set
 
     """
     CODON_TABLE = {
