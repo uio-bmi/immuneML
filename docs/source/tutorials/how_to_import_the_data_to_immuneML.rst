@@ -91,7 +91,6 @@ The metadata labels are specified through parameter **metadata_column_mapping**,
 the file to the names that will be used internally in immuneML (for example: when specifying **labels** in the :ref:`TrainMLModel` instruction).
 It is recommended that the immuneML-internal names contain only lowercase letters, numbers and underscores.
 
-
 A complete specification for importing a SequenceDataset from AIRR format with default parameters may look like this:
 
 .. indent with spaces
@@ -110,3 +109,31 @@ A complete specification for importing a SequenceDataset from AIRR format with d
             binding: binding # the names could just be the same
             Epitope.gene: epitope_gene # if the column name contains undesired characters, it may be renamed for internal use
           # Other parameters specific to AIRR data may be specified here
+
+
+Importing previously generated immuneML datasets
+------------------------------------------------
+
+When you import a dataset into immuneML for the first time, it is converted to an optimized binary format,
+which speeds up the analysis. The main resulting file has an `.iml_dataset` extension, and may be accompanied
+by several other `.pickle` and `.npy` files. When running immuneML locally, you can by default find these immuneML
+dataset files in the folder 'datasets', which is located in the main output folder of your analysis.
+
+Some instructions (:ref:`Simulation`, :ref:`DatasetGeneration`, :ref:`SubSampling`) also explicitly export immuneML
+datasets when selecting 'Pickle' as the export format.
+
+These `.iml_dataset` files can later be imported easily and with few parameters, and importing from `.iml_dataset` is
+also faster than importing from other data formats. A YAML specification could look like this:
+
+.. indent with spaces
+.. code-block:: yaml
+
+  definitions:
+    datasets:
+      my_dataset:
+        format: Pickle
+        params:
+          path: /path/to/dataset.iml_dataset
+          # specifying a metadata_file is optional, it will update the dataset using this new metadata.
+          metadata_file: path/to/metadata.csv
+
