@@ -4,9 +4,11 @@ import pandas as pd
 import plotly.express as px
 
 from source.hyperparameter_optimization.states.TrainMLModelState import TrainMLModelState
+from source.reports.PlotlyUtil import PlotlyUtil
 from source.reports.ReportOutput import ReportOutput
 from source.reports.ReportResult import ReportResult
 from source.reports.ml_reports.MLReport import MLReport
+from source.util.ParameterValidator import ParameterValidator
 from source.util.PathBuilder import PathBuilder
 
 
@@ -21,6 +23,18 @@ class MLSettingsPerformance(MLReport):
     This report can be used only with TrainMLModel instruction under assessment/reports/hyperparameter.
 
 
+    Arguments:
+
+        single_axis_labels (bool): whether to use single axis labels. Note that using single axis labels makes the
+        figure unsuited for rescaling, as the label position is given in a fixed distance from the axis. By default,
+        single_axis_labels is False, resulting in standard plotly axis labels.
+
+        x_label_position (float): if single_axis_labels is True, this should be an integer specifying the x axis label
+        position relative to the x axis. The default value for label_position is -0.1.
+
+        y_label_position (float): same as x_label_position, but for the y axis.
+
+
     YAML specification:
 
     .. indent with spaces
@@ -32,11 +46,29 @@ class MLSettingsPerformance(MLReport):
 
     @classmethod
     def build_object(cls, **kwargs):
-        return MLSettingsPerformance(kwargs["name"] if "name" in kwargs else None)
+        location = "MLSettingsPerformance"
 
-    def __init__(self, name: str = None, state: TrainMLModelState = None, result_path: str = None):
+        single_axis_labels = kwargs["single_axis_labels"]
+        ParameterValidator.assert_type_and_value(single_axis_labels, bool, location, "single_axis_labels")
+
+        if single_axis_labels:
+            x_label_position = kwargs["x_label_position"]
+            ParameterValidator.assert_type_and_value(x_label_position, float, location, "x_label_position")
+            y_label_position = kwargs["y_label_position"]
+            ParameterValidator.assert_type_and_value(y_label_position, float, location, "y_label_position")
+        else:
+            x_label_position = None
+            y_label_position = None
+
+        name = kwargs["name"] if "name" in kwargs else None
+        return MLSettingsPerformance(single_axis_labels, x_label_position, y_label_position, name)
+
+    def __init__(self, single_axis_labels, x_label_position, y_label_position, name: str = None, state: TrainMLModelState = None, result_path: str = None):
         super(MLSettingsPerformance, self).__init__()
 
+        self.single_axis_labels = single_axis_labels
+        self.x_label_position = x_label_position
+        self.y_label_position = y_label_position
         self.state = state
         self.result_path = None
         self.name = name
@@ -86,25 +118,44 @@ class MLSettingsPerformance(MLReport):
         return x.std(ddof=0)
 
     def _plot(self, plotting_data):
-        plotting_data = plotting_data.groupby(["label",  self.vertical_grouping, "ml_method"], as_index=False).agg(
-            {"fold": "first", "performance": ['mean', self.std]})
-
-        plotting_data.columns = plotting_data.columns.map(''.join)
+        plotting_data = self._preprocess_plotting_data(plotting_data)
 
         metric_name = self.state.optimization_metric.name.replace("_", " ").title()
 
-        figure = px.bar(plotting_data, x="ml_method", y="performancemean", color="ml_method", barmode="relative",
-                        facet_row=self.vertical_grouping, facet_col="label", error_y="performancestd",
-                        labels={
-                            "performancemean": f"Performance<br>({metric_name})",
-                            "ml_method": "ML method"
-                        }, template='plotly_white',
-                        color_discrete_sequence=px.colors.diverging.Tealrose)
+        if self.single_axis_labels:
+            figure = self._plot_single_axis_labels(plotting_data, "ML method", f"Performance ({metric_name})")
+        else:
+            figure = self._plot_rescalable(plotting_data, "ML method", f"Performance<br>({metric_name})")
 
         file_path = f"{self.result_path}{self.result_name}.html"
         figure.write_html(file_path)
 
         return ReportOutput(path=file_path)
+
+    def _preprocess_plotting_data(self, plotting_data):
+        plotting_data = plotting_data.groupby(["label", self.vertical_grouping, "ml_method"], as_index=False).agg(
+            {"fold": "first", "performance": ['mean', self.std]})
+
+        plotting_data.columns = plotting_data.columns.map(''.join)
+
+        return plotting_data
+
+    def _plot_rescalable(self, plotting_data, x_label, y_label):
+        figure = px.bar(plotting_data, x="ml_method", y="performancemean", color="ml_method", barmode="relative",
+                        facet_row=self.vertical_grouping, facet_col="label", error_y="performancestd",
+                        labels={
+                            "performancemean": y_label,
+                            "ml_method": x_label,
+                        }, template='plotly_white',
+                        color_discrete_sequence=px.colors.diverging.Tealrose)
+        figure.update_layout(showlegend=False)
+        return figure
+
+
+    def _plot_single_axis_labels(self, plotting_data, x_label, y_label):
+        figure = self._plot_rescalable(plotting_data, x_label, y_label)
+        return PlotlyUtil.add_single_axis_labels(figure, x_label, y_label, self.x_label_position, self.y_label_position)
+
 
     def check_prerequisites(self):
         run_report = True
