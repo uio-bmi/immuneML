@@ -57,15 +57,16 @@ These three components can be defined in the following way:
   definitions:
     datasets:
       my_dataset:
-        format: AdaptiveBiotech # the dataset is in Adaptive format
+        format: ImmunoSEQRearrangement # the dataset is in ImmunoSEQ rearrangement format
         params:
-          result_path: ./generated_dataset/ # where to store imported files
           metadata_file: immuneML/datasets/cmv_emerson_2017/cmv_emerson_2017_metadata.csv # metadata with CMV status for each repertoire
           path: immuneML/datasets/cmv_emerson_2017/repertoires/ # directory where the repertoire files can be found
     encodings:
       kmer_frequency: KmerFrequency
     ml_methods:
       logistic_regression: SimpleLogisticRegression
+
+
 
 Specifying the instruction: training an ML classifier
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

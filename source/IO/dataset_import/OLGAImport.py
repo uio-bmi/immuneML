@@ -26,17 +26,18 @@ class OLGAImport(DataImport):
         Only the OLGA files included under the column 'filename' are imported into the RepertoireDataset.
         SequenceDataset metadata is currently not supported.
 
+        import_empty_nt_sequences (bool): imports sequences which have an empty nucleotide sequence field; can be True or False.
+        By default, import_empty_nt_sequences is set to True.
+
+        import_empty_aa_sequences (bool): imports sequences which have an empty amino acid sequence field; can be True or False; for analysis on
+        amino acid sequences, this parameter should be False (import only non-empty amino acid sequences). By default, import_empty_aa_sequences is set to False.
+
         region_type (str): Which part of the sequence to import. By default, this value is set to IMGT_CDR3. This means the
         first and last amino acids are removed from the CDR3 sequence, as OLGA uses the IMGT junction. Specifying
         any other value will result in importing the sequences as they are.
         Valid values for region_type are the names of the :py:obj:`~source.data_model.receptor.RegionType.RegionType` enum.
 
         separator (str): Column separator, for OLGA this is by default "\\t".
-
-        import_empty_nt_sequences (bool): imports sequences which have an empty nucleotide sequence field; can be True or False
-
-        import_empty_aa_sequences (bool): imports sequences which have an empty amino acid sequence field; can be True or False; for analysis on
-        amino acid sequences, this parameter will typically be False (import only non-empty amino acid sequences)
 
 
     YAML specification:
@@ -50,12 +51,11 @@ class OLGAImport(DataImport):
                 path: path/to/files/
                 is_repertoire: True # whether to import a RepertoireDataset (True) or a SequenceDataset (False)
                 metadata_file: path/to/metadata.csv # metadata file for RepertoireDataset
+                import_empty_nt_sequences: True # keep sequences even though the nucleotide sequence might be empty
+                import_empty_aa_sequences: False # filter out sequences if they don't have sequence_aa set
                 # Optional fields with OLGA-specific defaults, only change when different behavior is required:
                 separator: "\\t" # column separator
                 region_type: IMGT_CDR3 # what part of the sequence to import
-                import_empty_nt_sequences: True # keep sequences even though the nucleotide sequence might be empty
-                import_empty_aa_sequences: False # filter out sequences if they don't have sequence_aa set
-
     """
 
     @staticmethod

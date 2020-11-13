@@ -29,6 +29,9 @@ class ReceptorCNN(MLMethod):
 
     Requires one-hot encoded data as input (as produced by :py:obj:`~source.encodings.onehot.OneHotEncoder.OneHotEncoder`).
 
+    Note: ReceptorCNN can only be used with ReceptorDatasets, it does not work with SequenceDatasets
+
+
     Arguments:
 
         kernel_count (count): number of kernels that will look for motifs for one chain

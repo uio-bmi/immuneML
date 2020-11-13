@@ -22,10 +22,10 @@ from source.util.PathBuilder import PathBuilder
 
 class Coefficients(MLReport):
     """
-    A report that plots the coefficients for a given ML method in a barplot. Can be used for Logistic regression,
-    SVM and Random Forest. In the case of Random Forest, the feature importances will be plotted.
+    A report that plots the coefficients for a given ML method in a barplot. Can be used for :ref:`SimpleLogisticRegression`,
+    :ref:`SVM` and :ref:`RandomForest`. In the case of RandomForest, the feature importances will be plotted.
 
-    When used in TrainMLModel instruction, the report can be used for all models and optimal models, both on
+    When used in :ref:`TrainMLModel` instruction, the report can be specified under all_models and optimal_models, both on
     the selection and assessment levels.
 
     Which coefficients should be plotted (for example: only nonzero, above a certain threshold, ...) can be specified.

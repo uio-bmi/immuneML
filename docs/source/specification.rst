@@ -46,6 +46,14 @@ The overall structure of the YAML specification is the following:
     format: HTML
 
 
+A diagram of the different dataset types, preprocessing steps, encodings, ML methods and reports, and how they can be
+combined in different analyses is shown below. The solid lines represent components that should be used together, and the
+dashed lines indicate optional combinations.
+
+.. image:: _static/images/analysis_paths.png
+    :alt: Analysis paths
+
+
 Definitions
 ===========
 

@@ -16,7 +16,7 @@ from source.util.PathBuilder import PathBuilder
 class DesignMatrixExporter(EncodingReport):
     """
     Exports the design matrix and related information of a given encoded Dataset to csv files. If the encoded data has more than 2 dimensions
-    (such as for OneHot encoder for the repertoire datasets), the data are instead exported to .npy format and can be imported later outside of
+    (such as when using the OneHot encoder with option Flatten=False), the data are instead exported to .npy format and can be imported later outside of
     immuneML using numpy package and numpy.load() function.
 
     There are no parameters for this report.

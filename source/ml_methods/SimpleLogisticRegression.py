@@ -1,15 +1,21 @@
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import RandomizedSearchCV
 
+from scripts.specification_util import update_docs_per_mapping
 from source.ml_methods.SklearnMethod import SklearnMethod
 
 
 class SimpleLogisticRegression(SklearnMethod):
     """
-    Logistic regression wrapper of the corresponding scikit-learn's method.
+    This is a wrapper of scikit-learn’s LogisticRegression class. Please see the
+    `scikit-learn documentation <https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LogisticRegression.html>`_
+    of LogisticRegression for the parameters.
 
-    For usage and YAML specification, check :py:obj:`~source.ml_methods.SklearnMethod.SklearnMethod`.
-    For valid parameters, see `scikit-learn documentation <https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LogisticRegression.html>`_.
+    Note: if you are interested in plotting the coefficients of the logistic regression model,
+    consider running the :ref:`Coefficients` report.
+
+    For usage instructions, check :py:obj:`~source.ml_methods.SklearnMethod.SklearnMethod`.
+
 
     YAML specification:
 
@@ -19,10 +25,15 @@ class SimpleLogisticRegression(SklearnMethod):
         my_logistic_regression: # user-defined method name
             SimpleLogisticRegression: # name of the ML method
                 # sklearn parameters (same names as in original sklearn class)
-                penalty: l1 # use l1 regularization
-                C: 10 # regularization constant
+                penalty: l1 # always use penalty l1
+                C: [0.01, 0.1, 1, 10, 100] # find the optimal value for C
                 # Additional parameter that determines whether to print convergence warnings
                 show_warnings: True
+            # if any of the parameters under SimpleLogisticRegression is a list and model_selection_cv is True,
+            # a grid search will be done over the given parameters, using the number of folds specified in model_selection_n_folds,
+            # and the optimal model will be selected
+            model_selection_cv: True
+            model_selection_n_folds: 5
         # alternative way to define ML method with default values:
         my_default_logistic_regression: SimpleLogisticRegression
 
@@ -65,3 +76,14 @@ class SimpleLogisticRegression(SklearnMethod):
         params["coefficients"] = self.models[tmp_label].coef_[0].tolist()
         params["intercept"] = self.models[tmp_label].intercept_.tolist()
         return params
+
+    @staticmethod
+    def get_documentation():
+        doc = str(SimpleLogisticRegression.__doc__)
+
+        mapping = {
+            "For usage instructions, check :py:obj:`~source.ml_methods.SklearnMethod.SklearnMethod`.": SklearnMethod.get_usage_documentation("SimpleLogisticRegression"),
+        }
+
+        doc = update_docs_per_mapping(doc, mapping)
+        return doc

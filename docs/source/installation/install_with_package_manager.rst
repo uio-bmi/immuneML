@@ -23,7 +23,7 @@ Steps to install immuneML with Anaconda (tested with version 4.8.3):
   conda activate immuneml_env/
 
 4. Optionally, install additional R dependencies from the script provided `here <https://drive.google.com/file/d/1C0m7bjG7OKfWNVQsgYkE-nXCdvD7mO08/view?usp=sharing>`_
-(note that the immuneML core functionality does not depend on R, it is only necessary to generate certain reports):
+(note that the immuneML core functionality does not depend on R, it is only necessary to generate certain reports. See: :ref:`When should I install immuneML with R dependencies?`):
 
 .. code-block:: console
 

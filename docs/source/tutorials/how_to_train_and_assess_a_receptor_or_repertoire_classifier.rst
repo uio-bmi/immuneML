@@ -128,11 +128,10 @@ An example is shown below:
   definitions:
     datasets:
       simulated_d1:
-        format: AdaptiveBiotech
+        format: AIRR
         params:
-          result_path: /data_volume/immuneml_parsed/
-          metadata_file: /data_volume/metadata.csv
-          columns_to_load: [amino_acid]
+          metadata_file: /path/to/metadata.csv
+          path: /path/to/data/
     encodings:
       my_kmer_enc:
         KmerFrequency:

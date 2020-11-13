@@ -13,11 +13,10 @@ An example of the full YAML specification for training an ML model through neste
   definitions:
     datasets:
       d1:
-        format: AdaptiveBiotech
+        format: AIRR
         params:
-          metadata_file: metadata.csv
-          path: path_to_data_folder/
-          result_path: path_to_result_folder/
+          metadata_file: /path/to/metadata.csv
+          path: /path/to/data/
     encodings:
       e1:
         KmerFrequency:
@@ -78,7 +77,7 @@ Definitions refer to components, which will be used within the instructions. The
 
 - Datasets definitions: specifying where data is located and how it should be imported,
 
-- Preprocessing sequences: defining preprocessing steps to be taken on the dataset,
+- Preprocessing sequences: defining one or more preprocessing steps to be taken on the dataset,
 
 - Encodings: different data representation techniques,
 
@@ -96,42 +95,46 @@ Simulation-specific components (only relevant when running a :ref:`Simulation in
 
 Each component is defined using a key (a string) that uniquely identifies it and which
 will be used in the instructions to refer to the component defined in this way.
-For example, a dataset used in Emerson et al. 2017 (Nature Genetics), may  be defined
-as follows:
+For example, the import of a dataset may be defined as follows:
+
 
 .. highlight:: yaml
 .. code-block:: yaml
 
-  Emerson2017_dataset: # user-defined key (dataset name)
-    format: AdaptiveBiotech
+  my_dataset: # user-defined key (dataset name)
+    format: AIRR
     params:
-      path: ./Emerson2017/
-      result_path: ./Emerson2017_immuneML/
+      path: /path/to/data/
+      metadata_file: /path/to/metadata.csv
+
 
 Each definition component (listed above) is defined under its own key.
 All component sections are located under **definitions** in the YAML specification file.
-An example of sections with defined components is given below:
+An example of sections with defined components is given below. Note that in practice, only a subset
+of the analysis components has to be defined, depending which instruction is used.
 
 .. highlight:: yaml
 .. code-block:: yaml
 
   definitions:
+    # every instruction uses a dataset
     datasets:
-      Emerson2017_dataset:
-        format: AdaptiveBiotech
+      my_dataset:
+        format: AIRR
         params:
-          path: ./Emerson2017/
-          result_path: ./Emerson2017_immuneML/
-    encodings:
-      kmer_freq_encoding: KmerFrequency
-    ml_methods:
-      log_reg: LogisticRegression
+          path: /path/to/data/
+          metadata_file: /path/to/metadata.csv
     preprocessing_sequences:
-      beta_chain_filter:
-        - ChainRepertoireFilter:
-            keep_chain: B
+      my_preprocessing:
+        - beta_chain_filter:
+          ChainRepertoireFilter:
+            keep_chain: TRB
+    encodings:
+      my_kmer_freq_encoding: KmerFrequency
+    ml_methods:
+      my_log_reg: LogisticRegression
     reports:
-      seq_length_distribution: SequenceLengthDistribution
+      my_seq_length_distribution: SequenceLengthDistribution
     motifs:
       simple_motif:
       seed: AAA
@@ -149,6 +152,14 @@ An example of sections with defined components is given below:
           dataset_implanting_rate: 0.5
           repertoire_implanting_rate: 0.1
 
+A diagram of the different dataset types, preprocessing steps, encodings, ML methods and reports, and how they can be
+combined in different analyses is shown below. The solid lines represent components that should be used together, and the
+dashed lines indicate optional combinations.
+
+.. image:: ../_static/images/analysis_paths.png
+    :alt: Analysis paths
+
+
 Specifying Instructions
 ^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -158,15 +169,15 @@ which were defined previously will be used here as input to instructions.
 The parameters for the instructions depend on the type of the instruction.
 Instruction YAML specifications are located under **instructions** in the YAML specification file.
 
-Some of the possible instructions are (see ):
+Some of the possible instructions are (see :ref:`Instructions` for the complete list):
 
-- Training an ML model
+- Training an ML model (:ref:`TrainMLModel`)
 
-- Exploratory analysis
+- Exploratory analysis (:ref:`ExploratoryAnalysis`)
 
-- Simulation
+- Simulation (:ref:`Simulation`)
 
-Anything defined under definitions is available in the instructions part, but anything generated from the instructions is not available to other
+Anything defined under definitions can be referenced in the instructions part, but anything generated from the instructions is not available to other
 instructions. If the output of one instruction needs to be used in another other instruction, two separate immuneML runs need to be made (e.g,
 running immuneML once with the Simulation instruction to generate a dataset, and subsequently using that dataset as an input to a second immuneML
 run to train a ML model).

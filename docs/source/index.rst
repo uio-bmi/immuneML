@@ -3,30 +3,55 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to immuneML's documentation!
-====================================
+Welcome to the immuneML documentation!
+======================================
 
-Welcome to immuneML. To get started with using immuneML, please consult our documentation: :ref:`Installing immuneML`.
+immuneML is a platform for machine learning-based analysis and classification of adaptive immune receptors and
+repertoires. immuneML can be used for:
 
-immuneML is a platform for machine learning-based immune repertoire analysis and classification. It is available as `open source code at github <https://github.com/uio-bmi/ImmuneML>`_,
-as a pip package, as a Docker image, as an Amazon cloud virtual machine image, through a REST API and through a `Galaxy Portal <http://129.240.189.178:8080/>`_.
+- **Training ML models** for repertoire classification (e.g., disease prediction) or receptor sequence
+  classification (e.g., antigen binding prediction). In immuneML, the performance of different machine learning (ML)
+  settings is compared by nested cross-validation. These ML settings consist of data preprocessing steps, encodings
+  and ML models and their hyperparameters.
 
-In short, immuneML is typically run by specifying:
+- **Exploring datasets** by applying preprocessing and encoding, and plotting statistics without training ML models.
 
-- A set of repertoire or receptor files to be analyzed,
+- **Simulating** immune events, such as disease states, into experimental or synthetic repertoire datasets.
+  By implanting known immune signals into a given dataset, a ground truth benchmarking dataset is created. Such a dataset
+  can be used to test the performance of ML settings under known conditions.
 
-- A tabular file describing metadata such as disease classes for the repertoires,
+- **Applying ML models** to new datasets with unknown class labels
 
-- A YAML specification file describing the analysis to be performed.
+The starting point for any immuneML analysis is the YAML specification file. In this file, the settings of the analysis
+components are defined, which are shown in six different colors in the figure below. Additionally, the YAML file
+describes an *instruction*, which corresponds to one of the applications listed above (and some additional instructions).
 
-The most central aspect is the YAML-based specification that allows a very high flexibility in defining analyses.
 
-To become familiar with the YAML-based specification, you can find an example in our :ref:`Quickstart` guide or read about the overall structure and
-possibilities of the analysis specification in :ref:`How to specify an analysis with YAML`. After this, you can consult more detailed :ref:`Tutorials`
-for specific use cases such as training and assessing classifiers,
-generation of synthetic repertoire data, simulating disease-associated signals and performing descriptive analyses.
+.. figure:: _static/images/definitions_instructions_overview.png
+   :alt: immuneML usage overview
 
-To ensure that your file is correctly YAML-formatted, you can write/validate your specification in a local or `online <https://jsonformatter.org/yaml-validator>`_ editor with YAML support.
+   An overview of immuneML usage: analysis components and instructions are specified in a YAML file. Each use case corresponds to a different instruction. The results of the instructions are summarized and presented in an HTML file.
+
+
+To **get started using immuneML right away**, you can check out our `Galaxy Portal <http://immunohub01.hpc.uio.no:8080/>`_.
+Here, we offer the same functionalities as in the command-line interface, and in addition simplified button-based
+interfaces for training classifiers.
+
+If you want to **use immuneML locally**, see :ref:`Installing immuneML`.
+
+To become familiar with the **YAML-based specification**, you can find a concrete example in our :ref:`Quickstart` guide,
+or read about the overall YAML structure and options in :ref:`How to specify an analysis with YAML`.
+
+- Note that the components of the YAML specification are the same in the Galaxy portal and locally,
+  but in Galaxy, datasets must first be converted to immuneML format (see :ref:`How to make an immuneML dataset in Galaxy`).
+
+Once you have a general understanding of the YAML specification, you can take a look at more detailed :ref:`Tutorials` for
+specific use cases (e.g., how to train and assess classifiers, or how to generate synthetic immune repertoire data for benchmarking purposes).
+
+If you are wondering about all the possible **analysis components** and their settings, you can find the complete list and
+documentation under :ref:`YAML specification`.
+
+Our open-source code can be found on `GitHub <https://github.com/uio-bmi/ImmuneML>`_ :)
 
 
 .. toctree::

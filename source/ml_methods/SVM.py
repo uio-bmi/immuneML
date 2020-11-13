@@ -1,15 +1,21 @@
 from sklearn.model_selection import RandomizedSearchCV
 from sklearn.svm import LinearSVC
 
+from scripts.specification_util import update_docs_per_mapping
 from source.ml_methods.SklearnMethod import SklearnMethod
 
 
 class SVM(SklearnMethod):
     """
-    SVM wrapper of the corresponding scikit-learn's LinearSVC method.
+    This is a wrapper of scikit-learn’s LinearSVC class. Please see the
+    `scikit-learn documentation <https://scikit-learn.org/stable/modules/generated/sklearn.svm.LinearSVC.html>`_
+    of LinearSVC for the parameters.
 
-    For usage and specification, check :py:obj:`~source.ml_methods.SklearnMethod.SklearnMethod`.
-    For valid parameters, see `scikit-learn documentation <https://scikit-learn.org/stable/modules/generated/sklearn.svm.LinearSVC.html>`_.
+    Note: if you are interested in plotting the coefficients of the SVM model,
+    consider running the :ref:`Coefficients` report.
+
+    For usage instructions, check :py:obj:`~source.ml_methods.SklearnMethod.SklearnMethod`.
+
 
     YAML specification:
 
@@ -19,9 +25,15 @@ class SVM(SklearnMethod):
         my_svm: # user-defined method name
             SVM: # name of the ML method
                 # sklearn parameters (same names as in original sklearn class)
-                penalty: l1 # use l1 regularization
+                penalty: l1 # always use penalty l1
+                C: [0.01, 0.1, 1, 10, 100] # find the optimal value for C
                 # Additional parameter that determines whether to print convergence warnings
                 show_warnings: True
+            # if any of the parameters under SVM is a list and model_selection_cv is True,
+            # a grid search will be done over the given parameters, using the number of folds specified in model_selection_n_folds,
+            # and the optimal model will be selected
+            model_selection_cv: True
+            model_selection_n_folds: 5
         # alternative way to define ML method with default values:
         my_default_svm: SVM
 
@@ -54,3 +66,14 @@ class SVM(SklearnMethod):
         params["coefficients"] = self.models[tmp_label].coef_[0].tolist()
         params["intercept"] = self.models[tmp_label].intercept_.tolist()
         return params
+
+    @staticmethod
+    def get_documentation():
+        doc = str(SVM.__doc__)
+
+        mapping = {
+            "For usage instructions, check :py:obj:`~source.ml_methods.SklearnMethod.SklearnMethod`.": SklearnMethod.get_usage_documentation("SVM"),
+        }
+
+        doc = update_docs_per_mapping(doc, mapping)
+        return doc

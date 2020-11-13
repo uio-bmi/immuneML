@@ -12,9 +12,14 @@ specification. In most cases, the simple interface will suffice.
 
 immuneML datasets
 -----------------
-The three types of datasets used in immuneML are Repertoire-, Sequence- or ReceptorDatasets. RepertoireDatasets should be used when making
-predictions per repertoire, such as predicting a disease state. SequenceDatasets or ReceptorDatasets should be used when
-predicting values for unpaired (single-chain) and paired immune receptors respectively, like antigen specificity.
+There exist three types of datasets in immuneML:
+
+- **RepertoireDatasets** should be used when making predictions per repertoire, such as predicting a disease state.
+
+- **SequenceDatasets** should be used when predicting values for single immune receptor chains, such as antigen specificity.
+
+- **ReceptorDatasets** are the paired variant of SequenceDatasets, and should be used to make a prediction for each receptor chain pair.
+
 
 In order to use a dataset for training ML classifiers, the metadata, which contains prediction labels, needs to be available.
 For RepertoireDatasets, the metadata is supplied through a metadata file. The metadata file is a .csv file which contains
@@ -33,6 +38,18 @@ In the simple interface the user has to select an input file format, dataset typ
 For RepertoireDatasets, a metadata file must be selected from the history, whereas for Sequence- and ReceptorDatasets
 the names of the columns containing metadata must be specified. The names of the metadata columns are in later
 analyses available as labels for the Sequence- and ReceptorDatasets.
+
+In subsequent YAML-based analyses, the dataset created through the simple interface should be specified like this:
+
+.. indent with spaces
+.. code-block:: yaml
+
+    definitions:
+      datasets:
+        my_analysis_dataset: # user-defined dataset name
+          format: Pickle
+          params:
+            path: dataset.iml_dataset
 
 
 Using the advanced 'Create dataset' interface

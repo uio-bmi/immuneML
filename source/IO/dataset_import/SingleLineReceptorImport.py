@@ -21,7 +21,7 @@ class SingleLineReceptorImport(DataImport):
     """
     Imports data from a tabular file (where each line contains a pair of immune receptor sequences) into a ReceptorDataset.
     If you instead want to import a ReceptorDataset from a tabular file that contains one receptor sequence per line,
-    see :py:obj:`~source.IO.dataset_import.GenericImport.GenericImport`.
+    see :ref:`Generic` import.
 
 
     Arguments:
@@ -30,6 +30,12 @@ class SingleLineReceptorImport(DataImport):
 
         receptor_chains (str): Required parameter. Determines which pair of chains to import for each Receptor.
         Valid values for receptor_chains are the names of the :py:obj:`~source.data_model.receptor.ChainPair.ChainPair` enum.
+
+        import_empty_nt_sequences (bool): imports sequences which have an empty nucleotide sequence field; can be True or False.
+        By default, import_empty_nt_sequences is set to True.
+
+        import_empty_aa_sequences (bool): imports sequences which have an empty amino acid sequence field; can be True or False; for analysis on
+        amino acid sequences, this parameter should be False (import only non-empty amino acid sequences). By default, import_empty_aa_sequences is set to False.
 
         region_type (str): Which part of the sequence to import. When IMGT_CDR3 is specified, immuneML assumes the IMGT
         junction (including leading C and trailing Y/F amino acids) is used in the input file, and the first and last
@@ -66,11 +72,6 @@ class SingleLineReceptorImport(DataImport):
 
         organism (str): The organism that the receptors came from. This will be set as a parameter in the ReceptorDataset object.
 
-        import_empty_nt_sequences (bool): imports sequences which have an empty nucleotide sequence field; can be True or False
-
-        import_empty_aa_sequences (bool): imports sequences which have an empty amino acid sequence field; can be True or False; for analysis on
-        amino acid sequences, this parameter will typically be False (import only non-empty amino acid sequences)
-
 
     YAML specification:
 
@@ -83,6 +84,8 @@ class SingleLineReceptorImport(DataImport):
                 path: path/to/files/
                 receptor_chains: TRA_TRB # what chain pair to import
                 separator: "\\t" # column separator
+                import_empty_nt_sequences: True # keep sequences even though the nucleotide sequence might be empty
+                import_empty_aa_sequences: False # filter out sequences if they don't have sequence_aa set
                 region_type: IMGT_CDR3 # what part of the sequence to import
                 columns_to_load: # which subset of columns to load from the file
                 - subject
@@ -107,8 +110,6 @@ class SingleLineReceptorImport(DataImport):
                     clone_id: identifier
                     epitope: epitope
                     organism: mouse
-                import_empty_nt_sequences: True # keep sequences even though the nucleotide sequence might be empty
-                import_empty_aa_sequences: False # filter out sequences if they don't have sequence_aa set
 
     """
 
