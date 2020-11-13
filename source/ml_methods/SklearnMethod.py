@@ -56,12 +56,11 @@ class SklearnMethod(MLMethod):
             svm_with_cv:
                 SVM: # name of another class inheriting SklearnMethod
                     # sklearn parameters (same names as in original sklearn class)
-                    alpha: [10, 100] # search will be performed over these parameters
+                    alpha: 10
                     # Additional parameter that determines whether to print convergence warnings
                     show_warnings: True
                 # no grid search will be done
                 model_selection_cv: False
-                model_selection_n_folds: -1
 
     """
 
