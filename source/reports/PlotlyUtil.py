@@ -3,7 +3,7 @@ import plotly.graph_objects as go
 class PlotlyUtil:
 
     @staticmethod
-    def add_single_axis_labels(figure, x_label, y_label, label_position):
+    def add_single_axis_labels(figure, x_label, y_label, x_label_position, y_label_position):
         '''
         Takes a multi-facet plotly figure and replaces the repetitive x and y axis labels
         with single axis labels in the form of annotations.
@@ -25,10 +25,10 @@ class PlotlyUtil:
         figure.update_layout(
             # keep the original annotations and add a list of new annotations:
             annotations=list(figure.layout.annotations) +
-                        [go.layout.Annotation(x=label_position, y=0.5, font={"size": 14},
-                                              showarrow=False, text=x_label, textangle=-90, xref="paper",
+                        [go.layout.Annotation(x=y_label_position, y=0.5, font={"size": 14},
+                                              showarrow=False, text=y_label, textangle=-90, xref="paper",
                                               yref="paper")] +
-                        [go.layout.Annotation(x=0.5, y=label_position, font={"size": 15},
-                                              showarrow=False, text=y_label, textangle=-0,
+                        [go.layout.Annotation(x=0.5, y=x_label_position, font={"size": 15},
+                                              showarrow=False, text=x_label, textangle=-0,
                                               xref="paper", yref="paper")])
         return figure
