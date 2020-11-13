@@ -57,7 +57,8 @@ class MLSettingsPerformance(MLReport):
             y_label_position = kwargs["y_label_position"]
             ParameterValidator.assert_type_and_value(y_label_position, float, location, "y_label_position")
         else:
-            label_position = None
+            x_label_position = None
+            y_label_position = None
 
         name = kwargs["name"] if "name" in kwargs else None
         return MLSettingsPerformance(single_axis_labels, x_label_position, y_label_position, name)
