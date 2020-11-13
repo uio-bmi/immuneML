@@ -40,9 +40,6 @@ class Quickstart:
                     }
                 },
                 "ml_methods": {
-                    "knn": "KNN",
-                    "rf": "RandomForestClassifier",
-                    "svm": "SVM",
                     "simpleLR": {
                         "SimpleLogisticRegression": {
                             "C": 30,
