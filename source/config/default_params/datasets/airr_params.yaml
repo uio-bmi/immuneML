@@ -9,8 +9,8 @@ separator: "\t"
 column_mapping: # AIRR column names -> immuneML repertoire fields
   junction: sequences
   junction_aa: sequence_aas
-  v_call: v_genes
-  j_call: j_genes
+  v_call: v_alleles
+  j_call: j_alleles
   locus: chains
   duplicate_count: counts
   sequence_id: sequence_identifiers

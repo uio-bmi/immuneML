@@ -1,11 +1,10 @@
 # quality: gold
-import logging
 import math
 from enum import Enum
+from typing import List
 
 import airr
 import pandas as pd
-from typing import List
 
 from source.IO.dataset_export.DataExporter import DataExporter
 from source.data_model.dataset import Dataset
@@ -91,18 +90,17 @@ class AIRRExporter(DataExporter):
         # get all fields (including custom fields)
         df = pd.DataFrame(repertoire.load_data())
 
-        # rename mandatory fields for airr-compliance
-        mapper = {"sequence_identifiers": "sequence_id",
-                  "v_genes": "v_call",
-                  "j_genes": "j_call",
-                  "chains": "locus",
-                  "counts": "duplicate_count"}
+        for column in ['v_alleles', 'j_alleles', 'v_genes', 'j_genes']:
+            if column not in df.columns:
+                df.loc[:, column] = None
 
-        mapper["sequences"] = AIRRExporter.get_sequence_field(region_type)
-        mapper["sequence_aas"] = AIRRExporter.get_sequence_aa_field(region_type)
+        AIRRExporter.update_gene_columns(df, 'alleles', 'genes')
+
+        # rename mandatory fields for airr-compliance
+        mapper = {"sequence_identifiers": "sequence_id", "v_alleles": "v_call", "j_alleles": "j_call", "chains": "locus", "counts": "duplicate_count",
+                  "sequences": AIRRExporter.get_sequence_field(region_type), "sequence_aas": AIRRExporter.get_sequence_aa_field(region_type)}
 
         df = df.rename(mapper=mapper, axis="columns")
-
         return df
 
     @staticmethod
@@ -122,7 +120,7 @@ class AIRRExporter(DataExporter):
         sequence_aa_field = AIRRExporter.get_sequence_aa_field(region_type)
 
         main_data_dict = {"sequence_id": [], sequence_field: [], sequence_aa_field: []}
-        attributes_dict = {"chain": [], "v_gene": [], "j_gene": [], "count": [], "cell_id": [], "frame_type": []}
+        attributes_dict = {"chain": [], "v_allele": [], 'v_gene': [], "j_allele": [], 'j_gene': [], "count": [], "cell_id": [], "frame_type": []}
 
         for i, sequence in enumerate(sequences):
             main_data_dict["sequence_id"].append(sequence.identifier)
@@ -145,9 +143,18 @@ class AIRRExporter(DataExporter):
                     attributes_dict[attribute].append(None)
 
         df = pd.DataFrame({**attributes_dict, **main_data_dict})
-        df.rename(columns={"v_gene": "v_call", "j_gene": "j_call", "chain": "locus", "count": "duplicate_count", "frame_type": "frame_types"}, inplace=True)
+
+        AIRRExporter.update_gene_columns(df, 'allele', 'gene')
+        df.rename(columns={"v_allele": "v_call", "j_allele": "j_call", "chain": "locus", "count": "duplicate_count", "frame_type": "frame_types"}, inplace=True)
 
         return df
+
+    @staticmethod
+    def update_gene_columns(df, allele_name, gene_name):
+        for index, row in df.iterrows():
+            for gene in ['v', 'j']:
+                if row[f"{gene}_{allele_name}"] is None and row[f"{gene}_{gene_name}"] is not None:
+                    row[f"{gene}_{allele_name}"] = row[f"{gene}_{gene_name}"]
 
     @staticmethod
     def _postprocess_dataframe(df):

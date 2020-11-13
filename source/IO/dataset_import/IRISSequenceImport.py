@@ -119,20 +119,24 @@ class IRISSequenceImport:
     def process_iris_chain(row, chain, dual_chain_id, all_genes):
         sequences = ReceptorSequenceList()
 
-        v_genes = set([gene.split(Constants.ALLELE_DELIMITER)[0].replace("TR{}".format(chain), "").replace(chain, "") for gene in
-                       row["TR{} - V gene (1)".format(chain)].split(" | ")])
-        j_genes = set([gene.split(Constants.ALLELE_DELIMITER)[0].replace("TR{}".format(chain), "").replace(chain, "") for gene in
-                       row["TR{} - J gene (1)".format(chain)].split(" | ")])
+        v_alleles = set([gene.replace("TR{}".format(chain), "").replace(chain, "") for gene in row["TR{} - V gene (1)".format(chain)].split(" | ")])
+        j_alleles = set([gene.replace("TR{}".format(chain), "").replace(chain, "") for gene in row["TR{} - J gene (1)".format(chain)].split(" | ")])
+
+        make_sequence_metadata = lambda v_allele, j_allele, chain, dual_chain_id: \
+            SequenceMetadata(v_gene=v_allele.split(Constants.ALLELE_DELIMITER)[0], v_allele=v_allele, v_subgroup=v_allele.split("-")[0],
+                             j_gene=j_allele.split(Constants.ALLELE_DELIMITER)[0], j_allele=j_allele, j_subgroup=j_allele.split("-")[0], chain=chain,
+                             custom_params={"dual_chain_id": dual_chain_id})
 
         if all_genes:
-            for v_gene in v_genes:
-                    for j_gene in j_genes:
-                        metadata = SequenceMetadata(v_gene=v_gene, j_gene=j_gene, chain=chain, custom_params={"dual_chain_id": dual_chain_id})
-                        sequences.append(ReceptorSequence(amino_acid_sequence=row[f"Chain: TR{chain} ({dual_chain_id})"], metadata=metadata))
+            for v_allele in v_alleles:
+                for j_allele in j_alleles:
+                    metadata = make_sequence_metadata(v_allele, j_allele, chain, dual_chain_id)
+                    sequences.append(ReceptorSequence(amino_acid_sequence=row[f"Chain: TR{chain} ({dual_chain_id})"], metadata=metadata))
         else:
             # select a random v and j gene
-            metadata = SequenceMetadata(v_gene=v_genes.pop(), j_gene=j_genes.pop(), chain=chain,
-                                        custom_params={"dual_chain_id": dual_chain_id})
+            v_allele = v_alleles.pop()
+            j_allele = j_alleles.pop()
+            metadata = make_sequence_metadata(v_allele, j_allele, chain, dual_chain_id)
             sequences.append(ReceptorSequence(amino_acid_sequence=row[f"Chain: TR{chain} ({dual_chain_id})"], metadata=metadata))
 
         return sequences

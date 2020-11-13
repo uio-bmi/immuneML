@@ -140,6 +140,7 @@ class MiXCRImport(DataImport):
         df["j_genes"] = MiXCRImport._load_genes(df, "j_genes")
         df["chains"] = ImportHelper.load_chains_from_genes(df)
 
+        ImportHelper.update_gene_info(df)
         ImportHelper.drop_empty_sequences(df, params.import_empty_aa_sequences, params.import_empty_nt_sequences)
 
         return df
@@ -147,7 +148,7 @@ class MiXCRImport(DataImport):
     @staticmethod
     def _load_genes(df: pd.DataFrame, column_name):
         # note: MiXCR omits the '/' for 'TRA.../DV' genes
-        tmp_df = df.apply(lambda row: row[column_name].split(",")[0].replace("DV", "/DV").replace("//", "/").split("*", 1)[0], axis=1)
+        tmp_df = df.apply(lambda row: row[column_name].split(",")[0].replace("DV", "/DV").replace("//", "/"), axis=1)
 
         return tmp_df
 

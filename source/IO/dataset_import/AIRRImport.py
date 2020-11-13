@@ -58,8 +58,8 @@ class AIRRImport(DataImport):
 
                 junction: sequences
                 junction_aa: sequence_aas
-                v_call: v_genes
-                j_call: j_genes
+                v_call: v_alleles
+                j_call: j_alleles
                 locus: chains
                 duplicate_count: counts
                 sequence_id: sequence_identifiers
@@ -105,8 +105,8 @@ class AIRRImport(DataImport):
                 column_mapping: # column mapping AIRR: immuneML
                     junction: sequences
                     junction_aa: sequence_aas
-                    v_call: v_genes
-                    j_call: j_genes
+                    v_call: v_alleles
+                    j_call: j_alleles
                     locus: chains
                     duplicate_count: counts
                     sequence_id: sequence_identifiers
@@ -157,9 +157,7 @@ class AIRRImport(DataImport):
         if "chains" not in df.columns:
             df.loc[:, "chains"] = ImportHelper.load_chains_from_genes(df)
 
-        df.loc[:, "v_genes"] = ImportHelper.strip_alleles(df, "v_genes")
-        df.loc[:, "j_genes"] = ImportHelper.strip_alleles(df, "j_genes")
-
+        df = ImportHelper.update_gene_info(df)
         ImportHelper.drop_empty_sequences(df, params.import_empty_aa_sequences, params.import_empty_nt_sequences)
 
         return df

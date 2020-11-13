@@ -99,6 +99,18 @@ class ImportHelper:
         return dataset
 
     @staticmethod
+    def update_gene_info(df: pd.DataFrame):
+        for gene in ['v', 'j']:
+            if f"{gene}_genes" in df.columns:
+                df.loc[:, f"{gene}_alleles"] = df[f"{gene}_genes"]
+                df.loc[:, f"{gene}_genes"] = ImportHelper.strip_alleles(df, f"{gene}_genes")
+                if f'{gene}_subgroups' not in df.columns:
+                    df.loc[:, f'{gene}_subgroups'] = [item.split("-")[0] for item in df[f"{gene}_genes"]]
+            elif f"{gene}_alleles" in df.columns and f"{gene}_genes" not in df.columns:
+                df.loc[:, f"{gene}_genes"] = ImportHelper.strip_alleles(df, f"{gene}_alleles")
+        return df
+
+    @staticmethod
     def make_new_metadata_file(repertoires: list, metadata: pd.DataFrame, result_path: str, dataset_name: str) -> str:
         new_metadata = metadata.copy()
         new_metadata["filename"] = [os.path.basename(repertoire.data_filename) for repertoire in repertoires]
@@ -148,6 +160,7 @@ class ImportHelper:
 
         df = ImportHelper.standardize_none_values(df)
 
+
         return df
 
     @staticmethod
@@ -196,10 +209,11 @@ class ImportHelper:
     def load_chains_from_genes(df: pd.DataFrame) -> list:
         result = None
 
-        if "v_genes" in df.columns:
-            result = ImportHelper.load_chains_from_column(df, "v_genes")
-        elif "j_genes" in df.columns:
-            result = ImportHelper.load_chains_from_column(df, "j_genes")
+        columns_with_gene_info = ["v_genes", "j_genes", "v_alleles", "j_alleles"]
+        present_columns = [col for col in columns_with_gene_info if col in df.columns]
+
+        if len(present_columns) > 0:
+            result = ImportHelper.load_chains_from_column(df, present_columns[0])
 
         return result
 
@@ -224,10 +238,10 @@ class ImportHelper:
     @staticmethod
     def strip_alleles(df: pd.DataFrame, column_name):
         """
-        Removes alleles (everythin after the '*' character) from a column in the DataFrame
+        Removes alleles (everything after the '*' character) from a column in the DataFrame
         """
         if column_name in df.columns:
-            return df[column_name].apply(lambda gene_col: None if gene_col is None else gene_col.rsplit("*", maxsplit=1)[0])
+            return df[column_name].apply(lambda gene_col: None if gene_col is None else gene_col.split(Constants.ALLELE_DELIMITER)[0])
 
     @staticmethod
     def get_sequence_filenames(path, dataset_name):
@@ -309,7 +323,9 @@ class ImportHelper:
         if metadata_columns is None:
             metadata_columns = []
         metadata = SequenceMetadata(v_gene=str(row["v_genes"]) if "v_genes" in row and row["v_genes"] is not None else None,
+                                    v_allele=str(row["v_alleles"]) if "v_alleles" in row and row["v_alleles"] is not None else None,
                                     j_gene=str(row["j_genes"]) if "j_genes" in row and row["j_genes"] is not None else None,
+                                    j_allele=str(row["j_alleles"]) if "j_alleles" in row and row["j_alleles"] is not None else None,
                                     chain=row["chains"] if "chains" in row and row["chains"] is not None else None,
                                     region_type=row["region_types"] if "region_types" in row and row["region_types"] is not None else None,
                                     count=int(row["counts"]) if "counts" in row and row["counts"] is not None else None,

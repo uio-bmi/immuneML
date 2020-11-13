@@ -151,8 +151,7 @@ class SingleLineReceptorImport(DataImport):
             chain_names = [Chain.get_chain(ch).name.lower() for ch in generic_params.receptor_chains.value]
 
             for chain_name in chain_names:
-                df.loc[:, f"{chain_name}_v_gene"] = ImportHelper.strip_alleles(df, f"{chain_name}_v_gene")
-                df.loc[:, f"{chain_name}_j_gene"] = ImportHelper.strip_alleles(df, f"{chain_name}_v_gene")
+                df = SingleLineReceptorImport.make_gene_columns(df, ["v", "j"], chain_name)
 
             for index, row in df.iterrows():
                 sequences = {chain_vals[i]: ReceptorSequence(amino_acid_sequence=row[
@@ -160,11 +159,11 @@ class SingleLineReceptorImport(DataImport):
                                                   nucleotide_sequence=row[
                                                       chain_name + "_nucleotide_sequence"] if chain_name + "_nucleotide_sequence" in row else None,
                                                   metadata=SequenceMetadata(
-                                                      v_gene=row[f"{chain_name}_v_gene"],
-                                                      j_gene=row[f"{chain_name}_j_gene"],
-                                                      chain=chain_name,
-                                                      count=row["count"],
-                                                      region_type=generic_params.region_type.value))
+                                                      v_gene=row[f"{chain_name}_v_gene"], v_allele=row[f"{chain_name}_v_allele"],
+                                                      v_subgroup=row[f'{chain_name}_v_subgroup'],
+                                                      j_gene=row[f"{chain_name}_j_gene"], j_allele=row[f"{chain_name}_j_allele"],
+                                                      j_subgroup=row[f'{chain_name}_j_subgroup'],
+                                                      chain=chain_name, count=row["count"], region_type=generic_params.region_type.value))
                              for i, chain_name in enumerate(chain_names)}
 
                 elements.append(ReceptorBuilder.build_object(sequences, row["identifier"],
@@ -173,6 +172,16 @@ class SingleLineReceptorImport(DataImport):
                                                                      ["v_gene", 'j_gene', "count", "identifier"] + chain_names)}))
 
         return ReceptorDataset.build(elements, generic_params.sequence_file_size, generic_params.result_path)
+
+    @staticmethod
+    def make_gene_columns(df: pd.DataFrame, genes: list, chain_name=None):
+        for gene in genes:
+            column_name = f"{gene}_gene" if chain_name is None else f"{chain_name}_{gene}_gene"
+            if column_name in df.columns:
+                df[column_name.replace("gene", "allele")] = df[column_name]
+                df[column_name] = [item.split("*")[0] for item in df[column_name]]
+                df[column_name.replace("gene", "subgroup")] = [item.split("-")[0] for item in df[column_name]]
+        return df
 
     @staticmethod
     def get_documentation():

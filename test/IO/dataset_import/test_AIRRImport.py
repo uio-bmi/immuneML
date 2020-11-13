@@ -37,20 +37,18 @@ IVKNQEJ01AJ44V	1	IVKNQEJ01AJ44V	GGCCCAGGACTGGTGAAGCCTTCGGAGACCCTGTCCCTCACCTGCGCT
 rep1.tsv,1
 rep2.tsv,2""")
 
-
     def get_column_mapping(self):
         column_mapping = {
             "junction": "sequences",
             "junction_aa": "sequence_aas",
-            "v_call": "v_genes",
-            "j_call": "j_genes",
+            "v_call": "v_alleles",
+            "j_call": "j_alleles",
             "locus": "chains",
             "duplicate_count": "counts",
             "sequence_id": "sequence_identifiers"
         }
 
         return column_mapping
-
 
     def test_import_repertoire_dataset(self):
         path = EnvironmentSettings.root_path + "test/tmp/ioairr/"
@@ -105,8 +103,6 @@ rep2.tsv,2""")
         self.assertListEqual(sorted([sequence.metadata.v_gene for sequence in dataset.get_data()]), v_genes)
 
         shutil.rmtree(path)
-
-
 
     def test_receptor_dataset(self):
         path = EnvironmentSettings.root_path + "test/tmp/ioairr/"
@@ -166,8 +162,6 @@ IVKNQEJ01AIS74	1	IVKNQEJ01AIS74	GGCGCAGGACTGTTGAAGCCTTCACAGACCCTGTCCCTCACCTGCACT
 
         shutil.rmtree(path)
 
-
-
     def test_minimal_dataset(self):
         # test to make sure import works with minimally specified input
         path = EnvironmentSettings.root_path + "test/tmp/ioairr/"
@@ -182,7 +176,7 @@ IVKNQEJ01EI5S4	CASGVAGTFDYW"""
             file.writelines(file1_content)
 
         with open(path + "metadata.csv", "w") as file:
-                file.writelines("""filename,subject_id
+            file.writelines("""filename,subject_id
 rep1.tsv,1""")
 
         column_mapping = self.get_column_mapping()
@@ -196,4 +190,3 @@ rep1.tsv,1""")
         AIRRImport.import_dataset(params, "airr_minimal_repertoire_dataset")
 
         shutil.rmtree(path)
-

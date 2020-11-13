@@ -129,11 +129,7 @@ class GenericImport(DataImport):
     def preprocess_dataframe(df: pd.DataFrame, params: DatasetImportParams):
         ImportHelper.junction_to_cdr3(df, params.region_type)
         ImportHelper.drop_empty_sequences(df, params.import_empty_aa_sequences, params.import_empty_nt_sequences)
-
-        if "v_genes" in df.columns:
-            df.loc[:, "v_genes"] = ImportHelper.strip_alleles(df, "v_genes")
-        if "j_genes" in df.columns:
-            df.loc[:, "j_genes"] = ImportHelper.strip_alleles(df, "j_genes")
+        ImportHelper.update_gene_info(df)
 
         return df
 

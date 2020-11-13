@@ -138,11 +138,9 @@ class ImmunoSEQRearrangementImport(DataImport):
 
     """
 
-
     @staticmethod
     def import_dataset(params: dict, dataset_name: str) -> Dataset:
         return ImportHelper.import_dataset(ImmunoSEQRearrangementImport, params, dataset_name)
-
 
     @staticmethod
     def preprocess_dataframe(df: pd.DataFrame, params: DatasetImportParams):

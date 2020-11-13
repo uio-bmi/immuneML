@@ -33,7 +33,7 @@ class TestAIRRExporter(TestCase):
                             ReceptorSequence(amino_acid_sequence="GGG",
                                              nucleotide_sequence="GGTGGTGGT",
                                              identifier="receptor_2",
-                                             metadata=SequenceMetadata(v_gene="TRAV2",
+                                             metadata=SequenceMetadata(v_gene="TRAV2", v_allele="TRAV2*01",
                                                                        j_gene="TRAJ2",
                                                                        chain=Chain.ALPHA,
                                                                        count=15,
@@ -64,7 +64,7 @@ class TestAIRRExporter(TestCase):
         self.assertListEqual(list(resulting_data["sequence_id"]), ["receptor_1", "receptor_2"])
         self.assertListEqual(list(resulting_data["cdr3"]), ["GCTGCTGCT", "GGTGGTGGT"])
         self.assertListEqual(list(resulting_data["cdr3_aa"]), ["AAA", "GGG"])
-        self.assertListEqual(list(resulting_data["v_call"]), ["TRBV1", "TRAV2"])
+        self.assertListEqual(list(resulting_data["v_call"]), ["TRBV1", "TRAV2*01"])
         self.assertListEqual(list(resulting_data["j_call"]), ["TRBJ1", "TRAJ2"])
         self.assertListEqual(list(resulting_data["d_call"]), ["TRBD1", "TRAD2"])
         self.assertListEqual(list(resulting_data["locus"]), ["TRB", "TRA"])
@@ -105,7 +105,6 @@ class TestAIRRExporter(TestCase):
 
         return ReceptorDataset.build(receptors, 2, "{}receptors".format(path))
 
-
     def test_receptor_export(self):
         path = EnvironmentSettings.tmp_test_path + "airr_exporter_receptor/"
         PathBuilder.build(path)
@@ -129,26 +128,23 @@ class TestAIRRExporter(TestCase):
         self.assertListEqual(list(resulting_data["productive"]), ['T', 'T', 'T', 'T'])
         self.assertListEqual(list(resulting_data["stop_codon"]), ['F', 'F', 'F', 'F'])
 
-
         shutil.rmtree(path)
-
 
     def create_dummy_sequencedataset(self, path):
         sequences = [ReceptorSequence(amino_acid_sequence="AAATTT", identifier="1a",
-                                                         metadata=SequenceMetadata(v_gene="TRAV1", j_gene="TRAJ1", chain=Chain.ALPHA, frame_type="IN",
-                                                                                   custom_params={"d_call": "TRAD1",
-                                                                                                  "custom1": "cust1"})),
+                                      metadata=SequenceMetadata(v_gene="TRAV1", j_gene="TRAJ1", chain=Chain.ALPHA, frame_type="IN",
+                                                                custom_params={"d_call": "TRAD1",
+                                                                               "custom1": "cust1"})),
                      ReceptorSequence(amino_acid_sequence="ATATAT", identifier="1b",
-                                                        metadata=SequenceMetadata(v_gene="TRBV1", j_gene="TRBJ1", chain=Chain.BETA, frame_type="IN",
-                                                                                  custom_params={"d_call": "TRBD1",
-                                                                                                 "custom2": "cust1"})),
+                                      metadata=SequenceMetadata(v_gene="TRBV1", j_gene="TRBJ1", chain=Chain.BETA, frame_type="IN",
+                                                                custom_params={"d_call": "TRBD1",
+                                                                               "custom2": "cust1"})),
                      ReceptorSequence(amino_acid_sequence="ATATAT", identifier="2b",
                                       metadata=SequenceMetadata(v_gene="TRBV1", j_gene="TRBJ1", chain=Chain.BETA, frame_type="IN",
                                                                 custom_params={"d_call": "TRBD1",
                                                                                "custom2": "cust1"}))]
 
         return SequenceDataset.build(sequences, 2, "{}sequences".format(path))
-
 
     def test_sequence_export(self):
         path = EnvironmentSettings.tmp_test_path + "airr_exporter_receptor/"
@@ -171,7 +167,6 @@ class TestAIRRExporter(TestCase):
         self.assertListEqual(list(resulting_data["custom2"]), [nan, "cust1"])
         self.assertListEqual(list(resulting_data["productive"]), ['T', 'T'])
         self.assertListEqual(list(resulting_data["stop_codon"]), ['F', 'F'])
-
 
         resulting_data = pd.read_csv(path_exported + f"batch2.tsv", sep="\t")
         self.assertListEqual(list(resulting_data["sequence_id"]), ["2b"])

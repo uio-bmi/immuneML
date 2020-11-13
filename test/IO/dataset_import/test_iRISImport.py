@@ -99,7 +99,7 @@ TCR_AB	1421	AT	TRAV12-3*01	null	TRAJ17*01	null	null	null	null	null	null	null	nul
         for seq in sequence_dataset.get_data():
             self.assertIsInstance(seq, ReceptorSequence)
 
-        self.assertEqual(len(list(sequence_dataset.get_data())), 11)
+        self.assertEqual(13, len(list(sequence_dataset.get_data())))
 
         shutil.rmtree(path)
 
