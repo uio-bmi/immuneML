@@ -27,7 +27,8 @@
         </div>
         <h4>Label {{label}}</h4>
         <p>
-            In the table below, the performance of each hyperparameter setting on the test set for this split is shown. All settings were refitted on
+            In the table below, the performance of each hyperparameter setting on the test set for this split is shown, as measured by the
+            optimization metric used for model selection and model assessment. All settings were refitted on
             the dataset which includes all training and validation data for this split. The setting in bold was chosen as the optimal one for this
             split during selection (inner cross-validation loop).
         </p>
@@ -62,12 +63,21 @@
                 </table>
             </div>
         </div>
-        <p>
+        {{#performances_per_metric}}
+        <p>The performance of different hyperparameter settings on all listed metrics (both the optimization metric and other metrics not used for
+            model selection and assessment) is shown in the table below. This is the performance on the test set for this assessment split when all
+            models have been retrained on training and validation dataset (the same as the previous table).</p>
+        <div class="table-container padded">
+            {{{performances_per_metric}}}
+        </div>
+        {{/performances_per_metric}}
+        <p class="padded-bottom">
             For the performance of each of the settings during the inner loop of cross-validation (used to select the optimal model for the split),
             see <a href="{{selection_path}}">selection details</a>.
         </p>
         {{#show_data_reports}}
         <h3>Data reports</h3>
+        <p>Here the reports on the datasets before preprocessing and encoding are shown.</p>
         <div class="padded">
             <div class="col-container">
                 <div class="col center">

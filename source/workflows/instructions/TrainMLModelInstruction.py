@@ -1,11 +1,14 @@
 import datetime
 from collections import Counter
 
+import pandas as pd
+
 from scripts.specification_util import update_docs_per_mapping
 from source.IO.ml_method.MLExporter import MLExporter
 from source.environment.LabelConfiguration import LabelConfiguration
 from source.environment.Metric import Metric
 from source.hyperparameter_optimization.config.SplitConfig import SplitConfig
+from source.hyperparameter_optimization.config.SplitType import SplitType
 from source.hyperparameter_optimization.core.HPAssessment import HPAssessment
 from source.hyperparameter_optimization.core.HPUtil import HPUtil
 from source.hyperparameter_optimization.states.TrainMLModelState import TrainMLModelState
@@ -130,6 +133,7 @@ class TrainMLModelInstruction(Instruction):
         self._compute_optimal_hp_item_per_label()
         self.state.hp_report_results = HPUtil.run_hyperparameter_reports(self.state, f"{self.state.path}hyperparameter_reports/")
         self.print_performances(self.state)
+        self._export_all_performances_to_csv()
         return self.state
 
     def _compute_optimal_hp_item_per_label(self):
@@ -166,6 +170,47 @@ class TrainMLModelInstruction(Instruction):
             print(f"Average performance ({state.optimization_metric.name.lower()}): "
                   f"{sum([state.assessment_states[split].label_states[label].optimal_assessment_item.performance[state.optimization_metric.name.lower()] for split in range(state.assessment.split_count)])/state.assessment.split_count}", flush=True)
             print("------------------------------", flush=True)
+
+    def _export_all_performances_to_csv(self):
+        self._export_optimal_performances_to_csv()
+        self._export_assessment_performances_to_csv()
+        if not (self.state.selection.training_percentage == 1 and self.state.selection.split_strategy == SplitType.RANDOM):
+            self._export_selection_performance_to_csv()
+
+    def _export_optimal_performances_to_csv(self):
+        for label in self.state.label_configuration.get_labels_by_name():
+            performance = {"hp_setting": [], "split": [], **{metric.name.lower(): [] for metric in self.state.metrics}}
+            for index, assessment_state in enumerate(self.state.assessment_states):
+                performance['split'].append(index+1)
+                performance['hp_setting'].append(assessment_state.label_states[label].optimal_hp_setting.get_key())
+                for metric in self.state.metrics:
+                    performance[metric.name.lower()].append(assessment_state.label_states[label].optimal_assessment_item.performance[metric.name.lower()])
+            pd.DataFrame(performance).to_csv(f"{self.state.path}{label}_optimal_models_performance.csv", index=False)
+
+    def _export_assessment_performances_to_csv(self):
+        for label in self.state.label_configuration.get_labels_by_name():
+            performance = {'hp_setting': [], 'split': [], 'optimal': [], **{metric.name.lower(): [] for metric in self.state.metrics}}
+            for index, assessment_state in enumerate(self.state.assessment_states):
+                for hp_setting, hp_item in assessment_state.label_states[label].assessment_items.items():
+                    performance['hp_setting'].append(hp_setting.get_key())
+                    performance['split'].append(index+1)
+                    performance['optimal'].append(hp_setting == assessment_state.label_states[label].optimal_hp_setting)
+                    for metric in self.state.metrics:
+                        performance[metric.name.lower()].append(hp_item.performance[metric.name.lower()])
+            pd.DataFrame(performance).to_csv(f"{self.state.path}{label}_all_assessment_performances.csv", index=False)
+
+    def _export_selection_performance_to_csv(self):
+        for label in self.state.label_configuration.get_labels_by_name():
+            for index, assessment_state in enumerate(self.state.assessment_states):
+                selection_state = assessment_state.label_states[label].selection_state
+                performance = {'hp_setting': [], 'split': [], **{metric.name.lower(): [] for metric in self.state.metrics}}
+                for hp_setting, hp_item_list in selection_state.hp_items.items():
+                    for i, hp_item in enumerate(hp_item_list):
+                        performance['hp_setting'].append(hp_setting)
+                        performance['split'].append(i+1)
+                        for metric in self.state.metrics:
+                            performance[metric.name.lower()].append(hp_item.performance[metric.name.lower()])
+                pd.DataFrame(performance).to_csv(f"{self.state.path}{label}_assessment_split_{index+1}_selection_performance.csv", index=False)
 
     @staticmethod
     def get_documentation():

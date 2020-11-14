@@ -180,9 +180,11 @@ class Coefficients(MLReport):
 
             filename = f"{self.result_path}{output_name}.html"
 
-            figure = px.bar(plotting_data, x='features', y='coefficients', template='plotly_white', color_continuous_scale=px.colors.sequential.Teal,
+            figure = px.bar(plotting_data, x='features', y='coefficients', template='plotly_white',
                             title=f"{type(self.method).__name__}{' (' + self.method.name + ') - ' if self.method.name is not None else ' - '}"
                                   f"{' '.join(output_name.split('_'))}")
+            figure.update_traces(marker_color=px.colors.sequential.Teal[3])
+
             figure.write_html(filename)
 
             return ReportOutput(filename)

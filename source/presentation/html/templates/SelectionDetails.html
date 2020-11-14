@@ -12,7 +12,8 @@
     <div class="container">
         <h2>Selection for assessment split {{assessment_split}} - label {{label}}</h2>
         <p>
-            In the table below, the performance for each hyperparameter setting on each of validation split is shown along with the average performance (if applicable).
+            In the table below, the performance for each hyperparameter setting (combination of preprocessing (if any), encoding and ML model)
+            on each of validation split is shown along with the average performance for the optimization metric (if applicable).
             The hyperparameter setting chosen as optimal (the best average performance) is shown in bold.
         </p>
         <div class="padded">
@@ -56,8 +57,20 @@
                 </table>
             </div>
         </div>
+        {{#has_other_metrics}}
+        <p>The tables below show the performance for each hyperparameter setting across selection splits for different metrics which were not
+        used for optimization.</p>
+        {{#metrics}}
+        <h4>{{metric}}</h4>
+        <div class="table-container padded">
+            {{{performance}}}
+        </div>
+        {{/metrics}}
+        {{/has_other_metrics}}
         {{#has_data_split_reports}}
         <h2>Reports on training / validation datasets</h2>
+        <p>The reports below are obtained from the datasets after they were split to training and validation datasets for each of the splits,
+        before any preprocessing, encoding or model training.</p>
         <div class="padded">
             {{#data_split_reports}}
             <p>Split {{split_index}}</p>
@@ -91,6 +104,8 @@
 
         {{#has_reports_per_setting}}
         <h2>Reports per hyperparameter setting</h2>
+        <p>The reports below are obtained for each split to training and validation datasets separately, after encoding or training a machine learning model,
+        as noted below.</p>
         {{#reports_per_setting}}
         <div class="padded">
             <h3>Hyperparameter setting: {{hp_setting}}</h3>
