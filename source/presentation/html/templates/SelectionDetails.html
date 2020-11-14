@@ -57,6 +57,12 @@
                 </table>
             </div>
         </div>
+
+        <p class="padded-top">
+            If the selection strategy was set to random (randomly split to training and validation datasets) and training percentage was set
+            to 1 (meaning that all data will be used for training), the performance in the table above will not be computed, since no validation data
+            will be available.
+        </p>
         {{#has_other_metrics}}
         <p>The tables below show the performance for each hyperparameter setting across selection splits for different metrics which were not
         used for optimization.</p>
