@@ -207,6 +207,8 @@ class HPHTMLBuilder:
             "hp_setting": hp_setting_key,
             "label": label,
             "css_style": Util.get_css_content(HPHTMLBuilder.CSS_PATH),
+            "has_encoding_reports": len(hp_item.encoding_train_results) > 0 or len(hp_item.encoding_test_results) > 0,
+            "has_ml_reports": len(hp_item.model_report_results) > 0,
             "encoding_train_reports": Util.to_dict_recursive(hp_item.encoding_train_results, base_path) if len(
                 hp_item.encoding_train_results) > 0 else None,
             "encoding_test_reports": Util.to_dict_recursive(hp_item.encoding_test_results, base_path) if len(

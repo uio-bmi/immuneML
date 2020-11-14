@@ -11,7 +11,7 @@
 <body>
     <div class="container padded-bottom">
         <h3>Assessment - split {{split_index}} details (label {{label}}, hyperparameter setting {{hp_setting}})</h3>
-        {{#ml_reports}}
+        {{#has_ml_reports}}
         <h3>ML reports</h3>
         {{#ml_reports}}
         {{#output_figures}}
@@ -26,9 +26,9 @@
         {{/output_tables}}
 
         {{/ml_reports}}
-        {{/ml_reports}}
+        {{/has_ml_reports}}
 
-        {{#encoding_train_reports}}
+        {{#has_encoding_reports}}
         <h3>Reports on encoded datasets</h3>
         <div class="padded-top padded-bottom">
             <div class="col-container">
@@ -58,7 +58,7 @@
                 </div>
             </div>
         </div>
-        {{/encoding_train_reports}}
+        {{/has_encoding_reports}}
     </div>
 </body>
 </html>
