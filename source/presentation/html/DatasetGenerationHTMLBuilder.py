@@ -1,6 +1,7 @@
 import os
 
 from source.environment.EnvironmentSettings import EnvironmentSettings
+from source.ml_methods.util.Util import Util as MLUtil
 from source.presentation.TemplateParser import TemplateParser
 from source.presentation.html.Util import Util
 from source.util.PathBuilder import PathBuilder
@@ -35,6 +36,7 @@ class DatasetGenerationHTMLBuilder:
         html_map = {
             "css_style": Util.get_css_content(DatasetGenerationHTMLBuilder.CSS_PATH),
             "name": state.name,
+            'immuneML_version': MLUtil.get_immuneML_version(),
             "full_specs": Util.get_full_specs_path(base_path),
             "datasets": [
                 {

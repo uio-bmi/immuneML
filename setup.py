@@ -2,9 +2,11 @@ import glob
 
 from setuptools import setup, find_packages
 
+from source.environment.Constants import Constants
+
 setup(
     name="immune-ml",
-    version="0.0.91",
+    version=Constants.VERSION,
     description="immuneML is a software platform for machine learning analysis of immune receptor sequences",
     long_description=open("README.md").read(),
     author="Milena Pavlovic",

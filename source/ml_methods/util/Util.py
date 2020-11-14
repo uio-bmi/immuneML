@@ -5,6 +5,8 @@ import numpy as np
 import pkg_resources
 import torch
 
+from source.environment.Constants import Constants
+
 
 class Util:
 
@@ -50,4 +52,7 @@ class Util:
         try:
             return 'immuneML ' + pkg_resources.get_distribution('immuneML').version
         except pkg_resources.DistributionNotFound as err:
-            return f'immuneML-dev-{datetime.now()}'
+            try:
+                return 'immuneML ' + Constants.VERSION
+            except Exception as e:
+                return f'immuneML-dev-{datetime.now()}'

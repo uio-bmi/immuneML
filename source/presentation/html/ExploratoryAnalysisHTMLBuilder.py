@@ -1,4 +1,5 @@
 from source.environment.EnvironmentSettings import EnvironmentSettings
+from source.ml_methods.util.Util import Util as MLUtil
 from source.presentation.TemplateParser import TemplateParser
 from source.presentation.html.Util import Util
 from source.util.PathBuilder import PathBuilder
@@ -37,6 +38,7 @@ class ExploratoryAnalysisHTMLBuilder:
         html_map = {
             "css_style": Util.get_css_content(ExploratoryAnalysisHTMLBuilder.CSS_PATH),
             "full_specs": Util.get_full_specs_path(base_path),
+            'immuneML_version': MLUtil.get_immuneML_version(),
             "analyses": [{
                 "name": name,
                 "dataset_name": analysis.dataset.name if analysis.dataset.name is not None else analysis.dataset.identifier,

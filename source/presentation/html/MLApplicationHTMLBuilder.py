@@ -1,6 +1,7 @@
 import os
 
 from source.environment.EnvironmentSettings import EnvironmentSettings
+from source.ml_methods.util.Util import Util as MLUtil
 from source.presentation.TemplateParser import TemplateParser
 from source.presentation.html.Util import Util
 from source.util.PathBuilder import PathBuilder
@@ -25,6 +26,7 @@ class MLApplicationHTMLBuilder:
         return {
             "css_style": Util.get_css_content(MLApplicationHTMLBuilder.CSS_PATH),
             "hp_setting": state.hp_setting.get_key(),
+            'immuneML_version': MLUtil.get_immuneML_version(),
             "label": state.label_config.get_labels_by_name()[0],
             "dataset_name": state.dataset.name,
             "dataset_type": StringHelper.camel_case_to_word_string(type(state.dataset).__name__),

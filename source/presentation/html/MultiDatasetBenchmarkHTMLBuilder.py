@@ -1,6 +1,7 @@
 import os
 
 from source.environment.EnvironmentSettings import EnvironmentSettings
+from source.ml_methods.util.Util import Util as MLUtil
 from source.presentation.TemplateParser import TemplateParser
 from source.presentation.html.Util import Util
 
@@ -24,6 +25,7 @@ class MultiDatasetBenchmarkHTMLBuilder:
         html_map = {
             "css_style": Util.get_css_content(MultiDatasetBenchmarkHTMLBuilder.CSS_PATH),
             "reports": Util.to_dict_recursive(report_results.values(), result_path),
+            'immuneML_version': MLUtil.get_immuneML_version(),
             "show_reports": True,
             "instruction_overviews": [{"name": name, "path": os.path.relpath(path + "index.html", result_path)}
                                       for name, path in instruction_result_paths.items()]

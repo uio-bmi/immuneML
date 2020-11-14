@@ -12,6 +12,7 @@ from source.hyperparameter_optimization.states.HPItem import HPItem
 from source.hyperparameter_optimization.states.HPLabelState import HPLabelState
 from source.hyperparameter_optimization.states.HPSelectionState import HPSelectionState
 from source.hyperparameter_optimization.states.TrainMLModelState import TrainMLModelState
+from source.ml_methods.util.Util import Util as MLUtil
 from source.presentation.TemplateParser import TemplateParser
 from source.presentation.html.Util import Util
 from source.reports.ReportResult import ReportResult
@@ -274,7 +275,8 @@ class HPHTMLBuilder:
             "show_hp_reports": bool(state.hp_report_results),
             'hp_reports': Util.to_dict_recursive(state.hp_report_results, base_path) if state.hp_report_results else None,
             "hp_per_label": HPHTMLBuilder._make_hp_per_label(state),
-            'models_per_label': HPHTMLBuilder._make_model_per_label(state, base_path)
+            'models_per_label': HPHTMLBuilder._make_model_per_label(state, base_path),
+            'immuneML_version': MLUtil.get_immuneML_version()
         }
 
         return html_map

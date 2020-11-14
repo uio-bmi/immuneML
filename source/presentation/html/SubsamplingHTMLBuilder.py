@@ -1,4 +1,5 @@
 from source.environment.EnvironmentSettings import EnvironmentSettings
+from source.ml_methods.util.Util import Util as MLUtil
 from source.presentation.TemplateParser import TemplateParser
 from source.presentation.html.Util import Util
 from source.util.PathBuilder import PathBuilder
@@ -38,6 +39,7 @@ class SubsamplingHTMLBuilder:
         html_map = {
             "css_style": Util.get_css_content(SubsamplingHTMLBuilder.CSS_PATH),
             "name": state.name,
+            'immuneML_version': MLUtil.get_immuneML_version(),
             "full_specs": Util.get_full_specs_path(base_path),
             "dataset_name": state.dataset.name if state.dataset.name is not None else state.dataset.identifier,
             "dataset_type": StringHelper.camel_case_to_word_string(type(state.dataset).__name__),

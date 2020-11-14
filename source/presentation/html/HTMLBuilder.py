@@ -3,6 +3,7 @@ import shutil
 from typing import List
 
 from source.environment.EnvironmentSettings import EnvironmentSettings
+from source.ml_methods.util.Util import Util as MLUtil
 from source.presentation.InstructionPresentation import InstructionPresentation
 from source.presentation.PresentationFactory import PresentationFactory
 from source.presentation.PresentationFormat import PresentationFormat
@@ -40,7 +41,7 @@ class HTMLBuilder:
         result_path = f"{path}/index.html"
         if len(presentations) > 1:
             html_map = {"instructions": presentations, "css_path": EnvironmentSettings.html_templates_path + "css/custom.css",
-                        "full_specs": Util.get_full_specs_path(path)}
+                        "full_specs": Util.get_full_specs_path(path), 'immuneML_version': MLUtil.get_immuneML_version()}
             TemplateParser.parse(template_path=f"{EnvironmentSettings.html_templates_path}index.html",
                                  template_map=html_map, result_path=result_path)
         elif len(presentations) == 1:
