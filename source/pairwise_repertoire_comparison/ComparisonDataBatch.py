@@ -64,12 +64,12 @@ class ComparisonDataBatch:
 
     def get_items(self):
         if self.matrix is None:
-            return np.load(self.path + f"{self.identifier}_items.npy")
+            return np.load(self.path + f"{self.identifier}_items.npy", allow_pickle=True)
         else:
             return self.items
 
     def get_matrix(self):
         if self.matrix is None:
-            return np.load(self.path + f"{self.identifier}.npy")
+            return np.load(self.path + f"{self.identifier}.npy", allow_pickle=True)
         else:
             return self.matrix

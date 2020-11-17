@@ -26,7 +26,7 @@ class TestSequenceAbundanceEncoding(TestCase):
         PathBuilder.build(path)
 
         ref_path = path + "reference.csv"
-        pd.DataFrame({"sequence_aas": ["GGG", "III", "TTT", "EFEF"]}).to_csv(ref_path, index=False)
+        pd.DataFrame({"sequence_aas": ["GGG", "III", "TTT", "EFEF"], "v_alleles": ["TRBV6-1*01", "TRBV6-1*01", "TRBV6-1*01", "TRBV6-1*01"], 'j_alleles': ["TRBJ2-7", "TRBJ2-7", "TRBJ2-7", "TRBJ2-7"]}).to_csv(ref_path, index=False)
 
         repertoires, metadata = RepertoireBuilder.build([["GGG", "III", "LLL", "MMM"],
                                                          ["DDD", "EEE", "FFF", "III", "LLL", "MMM"],
@@ -61,7 +61,9 @@ class TestSequenceAbundanceEncoding(TestCase):
                 },
                 "encodings": {
                     "e1": {
-                        "SequenceAbundance": {}
+                        "SequenceAbundance": {
+                            'comparison_attributes': ["sequence_aas", "v_alleles", "j_alleles"]
+                        }
                     }
                 },
                 "ml_methods": {
@@ -72,7 +74,8 @@ class TestSequenceAbundanceEncoding(TestCase):
                     }
                 },
                 "reports": {
-                    "r1": {"ReferenceSequenceOverlap": {"reference_path": ref_path}}
+                    "r1": {"ReferenceSequenceOverlap": {"reference_path": ref_path,
+                                                        'comparison_attributes': ["sequence_aas", "v_alleles", "j_alleles"]}}
                 }
             },
             "instructions": {

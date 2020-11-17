@@ -62,7 +62,7 @@ class RepertoireDataset(Dataset):
         if self.metadata_file:
             df = pd.read_csv(self.metadata_file, comment=Constants.COMMENT_SIGN)
             df = df.iloc[indices, :]
-            df.to_csv(path)
+            df.to_csv(path, index=False)
             return path
         else:
             return None

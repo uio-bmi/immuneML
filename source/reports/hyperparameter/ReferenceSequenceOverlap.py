@@ -63,8 +63,8 @@ class ReferenceSequenceOverlap(Report):
         reference_sequences_df = pd.read_csv(kwargs['reference_path'])
         attributes = reference_sequences_df.columns.tolist()
 
-        ParameterValidator.assert_keys(attributes, kwargs['comparison_attributes'], ReferenceSequenceOverlap.__name__,
-                                       'columns in file under reference_path')
+        ParameterValidator.assert_keys_present(expected_values=kwargs['comparison_attributes'], values=attributes, location=ReferenceSequenceOverlap.__name__,
+                                               parameter_name='columns in file under reference_path')
 
         return ReferenceSequenceOverlap(**kwargs)
 
@@ -131,11 +131,11 @@ class ReferenceSequenceOverlap(Report):
 
     def _compute_model_overlap(self, figure_filename, df_filename, encoder, name):
 
-        reference_sequences_df = pd.read_csv(self.reference_path)
+        reference_sequences_df = pd.read_csv(self.reference_path, usecols=self.comparison_attributes)
         reference_sequences = list(reference_sequences_df.to_records(index=False))
         attributes = reference_sequences_df.columns.tolist()
 
-        model_sequences = self._extract_from_model(attributes, encoder)
+        model_sequences = self._extract_from_model(encoder)
 
         overlap_sequences = [sequence for sequence in model_sequences if sequence in reference_sequences]
         count_overlap = len(overlap_sequences)
@@ -150,21 +150,21 @@ class ReferenceSequenceOverlap(Report):
 
         return figure, data
 
-    def _extract_from_model(self, attributes, encoder):
+    def _extract_from_model(self, encoder):
 
         model_sequences_df = pd.read_csv(getattr(encoder, "relevant_sequence_csv_path"))
         model_attributes = model_sequences_df.columns.tolist()
-        assert sorted(model_attributes) == sorted(attributes), \
-            f"{ReferenceSequenceOverlap.__name__}: comparison attributes from the report {self.name} ({attributes}) and from the optimal " \
-            f"encoding {type(encoder)} ({model_attributes}) do not match."
+        assert all(attribute in self.comparison_attributes for attribute in model_attributes), \
+            f"{ReferenceSequenceOverlap.__name__}: comparison attributes from the report {self.name} ({self.comparison_attributes}) and from the optimal " \
+            f"encoding {encoder.name} ({model_attributes}) do not match."
 
-        return list(model_sequences_df[attributes].to_records(index=False))
+        return list(model_sequences_df[self.comparison_attributes].to_records(index=False))
 
     def _make_venn_diagram(self, count_ref_only: int, count_overlap: int, count_model_only: int, label_reference: str, label_model: str, filename: str):
         subsets = Counter({"01": count_model_only, "10": count_ref_only, "11": count_overlap})
         diagram = venn2(subsets=subsets, set_labels=(label_reference, label_model), set_colors=('#72AAA1', '#E5B9AD'), alpha=0.8)
         for index in subsets:
-            if subsets[index] == 0:
+            if subsets[index] == 0 and diagram.get_label_by_id(index) is not None:
                 diagram.get_label_by_id(index).set_text("")
         plt.savefig(filename)
         plt.clf()

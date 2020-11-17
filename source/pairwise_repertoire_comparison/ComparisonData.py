@@ -24,7 +24,7 @@ class ComparisonData:
         self.tmp_batch_paths = []
 
     def build_matching_fn(self):
-        return lambda repertoire: list(set(zip(*[repertoire.get_attribute(attribute) for attribute in self.comparison_attributes])))
+        return lambda repertoire: list(set(zip(*[value for value in repertoire.get_attributes(self.comparison_attributes).values() if value is not None])))
 
     def get_item_names(self):
         return np.array([item for items in [batch.get_items() for batch in self.batches] for item in items])

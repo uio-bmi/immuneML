@@ -29,8 +29,13 @@ class GridSearch(HPOptimizationStrategy):
 
         Returns:
             HPSetting object which had the optimal performance based on the metric value in the search space
+
         """
-        optimal_key = self.search_criterion(self.search_space_metric, key=lambda k: self.search_space_metric[k])
+        if len(list(self.search_space_metric.keys())) == 1:
+            optimal_key = list(self.search_space_metric.keys())[0]
+        else:
+            optimal_key = self.search_criterion({key: value for key, value in self.search_space_metric.items() if isinstance(value, float)},
+                                                key=lambda k: self.search_space_metric[k])
         return self.hp_settings[optimal_key]
 
     def get_all_hps(self) -> HPSettingResult:

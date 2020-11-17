@@ -11,18 +11,18 @@ class AdaptiveImportHelper:
 
     @staticmethod
     def preprocess_dataframe(dataframe: pd.DataFrame, params: DatasetImportParams):
-        dataframe["frame_types"] = dataframe.frame_types.str.upper()
+        dataframe.loc[:, "frame_types"] = dataframe.frame_types.str.upper()
 
         frame_type_list = ImportHelper.prepare_frame_type_list(params)
         dataframe = dataframe[dataframe["frame_types"].isin(frame_type_list)]
-        dataframe["region_types"] = params.region_type.name
+        dataframe.loc[:, "region_types"] = params.region_type.name
 
         if params.region_type == RegionType.IMGT_CDR3:
             if "sequences" in dataframe.columns:
-                dataframe['sequences'] = [y[(84 - 3 * len(x)): 78] if x is not None else None for x, y in zip(dataframe['sequence_aas'], dataframe['sequences'])]
-            dataframe['sequence_aas'] = dataframe["sequence_aas"].str[1:-1]
+                dataframe.loc[:, 'sequences'] = [y[(84 - 3 * len(x)): 78] if x is not None else None for x, y in zip(dataframe['sequence_aas'], dataframe['sequences'])]
+            dataframe.loc[:, 'sequence_aas'] = dataframe["sequence_aas"].str[1:-1]
         elif "sequences" in dataframe.columns:
-            dataframe['sequences'] = [y[(81 - 3 * len(x)): 81] if x is not None else None for x, y in zip(dataframe['sequence_aas'], dataframe['sequences'])]
+            dataframe.loc[:, 'sequences'] = [y[(81 - 3 * len(x)): 81] if x is not None else None for x, y in zip(dataframe['sequence_aas'], dataframe['sequences'])]
 
         dataframe = AdaptiveImportHelper.parse_adaptive_germline_to_imgt(dataframe)
         dataframe = ImportHelper.standardize_none_values(dataframe)
@@ -52,15 +52,18 @@ class AdaptiveImportHelper:
     @staticmethod
     def parse_germline(dataframe: pd.DataFrame, gene_name_replacement: dict, germline_value_replacement: dict):
 
-        if all(item in dataframe.columns for item in ["v_genes", "j_genes"]):
-            dataframe[["v_genes", "j_genes"]] = dataframe[["v_genes", "j_genes"]].replace(gene_name_replacement)
+        for column in ["v_genes", "j_genes"]:
+            dataframe.loc[:, column] = dataframe[column].replace(gene_name_replacement)
 
-        if all(item in dataframe.columns for item in ["v_subgroups", "v_genes", "j_subgroups", "j_genes"]):
-            dataframe[["v_subgroups", "v_genes", "j_subgroups", "j_genes"]] = dataframe[
-                ["v_subgroups", "v_genes", "j_subgroups", "j_genes"]].replace(germline_value_replacement, regex=True)
+        for column in ["v_subgroups", "v_genes", "j_subgroups", "j_genes"]:
+            if column in dataframe.columns:
+                dataframe.loc[:, column] = dataframe[column].replace(germline_value_replacement, regex=True)
 
-        if all(item in dataframe.columns for item in ["v_genes", "j_genes", "v_alleles", "j_alleles"]):
-            dataframe["v_alleles"] = dataframe['v_genes'].str.cat(dataframe['v_alleles'], sep=Constants.ALLELE_DELIMITER)
-            dataframe["j_alleles"] = dataframe['j_genes'].str.cat(dataframe['j_alleles'], sep=Constants.ALLELE_DELIMITER)
+        for col_gene, col_allele in [["v_genes", "v_alleles"], ["j_genes", "j_alleles"]]:
+            if col_allele in dataframe.columns and col_gene in dataframe.columns:
+                dataframe.loc[:, col_allele] = dataframe[col_gene].str.cat([Constants.ALLELE_DELIMITER + item.split(Constants.ALLELE_DELIMITER)[-1]
+                                                                     if item is not None and Constants.ALLELE_DELIMITER in item else '' for item in dataframe[col_allele]])
+            elif col_gene in dataframe.columns:
+                dataframe.loc[:, col_allele] = dataframe[col_gene].copy()
 
         return dataframe

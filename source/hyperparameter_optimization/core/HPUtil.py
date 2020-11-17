@@ -3,6 +3,7 @@ from typing import List
 
 from source.data_model.dataset.Dataset import Dataset
 from source.encodings.EncoderParams import EncoderParams
+from source.environment.Constants import Constants
 from source.environment.LabelConfiguration import LabelConfiguration
 from source.hyperparameter_optimization.HPSetting import HPSetting
 from source.hyperparameter_optimization.config.SplitConfig import SplitConfig
@@ -39,10 +40,10 @@ class HPUtil:
 
     @staticmethod
     def get_average_performance(performances):
-        if performances is not None and isinstance(performances, list) and len(performances) > 0:
+        if performances is not None and isinstance(performances, list) and len(performances) > 0 and all(isinstance(perf, float) for perf in performances):
             return sum(perf for perf in performances) / len(performances)
         else:
-            return -1
+            return Constants.NOT_COMPUTED
 
     @staticmethod
     def preprocess_dataset(dataset: Dataset, preproc_sequence: list, path: str) -> Dataset:

@@ -1,5 +1,6 @@
 # quality: gold
 import ast
+import logging
 import pickle
 import shutil
 import weakref
@@ -225,7 +226,12 @@ class Repertoire(DatasetItem):
 
     def get_attributes(self, attributes: list):
         data = self.load_data()
-        result = {attribute: data[attribute] for attribute in attributes}
+        result = {}
+        for attribute in attributes:
+            if attribute in data.dtype.names:
+                result[attribute] = data[attribute]
+            else:
+                logging.warning(f"{Repertoire.__name__}: attribute {attribute} is not present in the repertoire {self.identifier}, skipping...")
         return result
 
     def free_memory(self):

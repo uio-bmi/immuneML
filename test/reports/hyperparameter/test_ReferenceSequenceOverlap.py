@@ -15,11 +15,11 @@ class TestReferenceSequenceOverlap(TestCase):
         path = PathBuilder.build(EnvironmentSettings.tmp_test_path + "ref_sequence_overlap/")
 
         ref_path = path + "reference.csv"
-        pd.DataFrame({"sequence_aas": ["AAA", "ACC", 'TTT', "ACA"], "v_genes": ["V1", "V1", "V1", "V1"]}).to_csv(ref_path, index=False)
+        pd.DataFrame({"sequence_aas": ["AAA", "ACC", 'TTT', "ACA"], "v_genes": ["V1", "V1", "V1", "V1"], "j_genes": ["J1", "J1", "J1", "J1"]}).to_csv(ref_path, index=False)
         model_path = path + "model.csv"
         pd.DataFrame({"sequence_aas": ["AAA", "ACC", "TTT", "ATA", "TAA"], "v_genes": ["V1", "V1", "V1", "V1", "V1"]}).to_csv(model_path, index=False)
 
-        report = ReferenceSequenceOverlap(result_path=path, reference_path=ref_path)
+        report = ReferenceSequenceOverlap(result_path=path, reference_path=ref_path, comparison_attributes=['sequence_aas', 'v_genes'])
 
         class Enc:
             def __init__(self, relevant_sequence_csv_path):
