@@ -1,4 +1,5 @@
 import warnings
+import plotly.express as px
 
 from scripts.specification_util import update_docs_per_mapping
 from source.analysis.data_manipulation.DataReshaper import DataReshaper
@@ -40,40 +41,20 @@ class FeatureValueBarplot(EncodingReport):
 
     Arguments:
 
-        grouping_label (str): The label name used for x-axis grouping of the barplots - defaults to "feature," 
+        grouping_label (str): The label name used for x-axis grouping of the barplots - defaults to "feature",
         meaning each bar represents one feature.
 
         color_grouping_label (str): The label that is used to color each bar, at each level of the grouping_label.
 
-        row_grouping_labels (str or list): The label that is used to group bars into different row facets.
+        row_grouping_label (str): The label that is used to group bars into different row facets.
 
-        column_grouping_labels (str or list): The label that is used to group bars into different column facets.
+        column_grouping_label (str): The label that is used to group bars into different column facets.
 
-        errorbar_meaning (:py:obj:`~source.visualization.ErrorBarMeaning.ErrorBarMeaning`): The value that
-        the error bar should represent. For options see :py:obj:`~source.visualization.ErrorBarMeaning.ErrorBarMeaning`.
-
-        panel_layout_type (:py:obj:`~source.visualization.PanelLayoutType.PanelLayoutType`): Parameter determining how the panels will be
-        displayed. For options see :py:obj:`~source.visualization.PanelLayoutType.PanelLayoutType`.
-
-        panel_axis_scales_type (:py:obj:`~source.visualization.PanelAxisScalesType.PanelAxisScalesType`): Parameter determining how the x-
-        and y-axis scales should vary across panels. For options see :py:obj:`~source.visualization.PanelAxisScalesType.PanelAxisScalesType`.
-            
-        panel_label_switch_type (:py:obj:`~source.visualization.PanelLabelSwitchType.PanelLabelSwitchType`): Parameter determining
-        placement of labels for each panel in the plot. For options see :py:obj:`~source.visualization.PanelLabelSwitchType.PanelLabelSwitchType`.
-
-        panel_nrow (int): Number of rows in plot (if panel_layout_type is `wrap`)
-
-        panel_ncol (int): Number of columns in plot (if panel_layout_type is `wrap`)
-
-        height (float): Height (in inches) of resulting plot
-
-        width (float): Width (in inches) of resulting plot
+        color_title (str): The label that is used to group bars into different colors.
 
         x_title (str): x-axis label
 
         y_title (str): y-axis label
-
-        color_title (str): label for color
 
 
     YAML specification:
@@ -83,10 +64,9 @@ class FeatureValueBarplot(EncodingReport):
 
         my_fvb_report:
             FeatureValueBarplot:
-                column_grouping_labels: timepoint
-                row_grouping_labels: disease_status
+                column_grouping_label: timepoint
+                row_grouping_label: disease_status
                 color_grouping_label: age_group
-                errorbar_meaning: STANDARD_ERROR
 
     """
 
@@ -97,53 +77,22 @@ class FeatureValueBarplot(EncodingReport):
     @classmethod
     def build_object(cls, **kwargs):
         location = "FeatureValueBarplot"
-
-        if "errorbar_meaning" in kwargs:
-            ParameterValidator.assert_in_valid_list(kwargs["errorbar_meaning"], [item.name for item in ErrorBarMeaning],
-                                                    location, "errorbar_meaning")
-        if "panel_layout_type" in kwargs:
-            ParameterValidator.assert_in_valid_list(kwargs["panel_layout_type"], [item.name for item in PanelLayoutType],
-                                                    location, "panel_layout_type")
-        if "panel_axis_scales_type" in kwargs:
-            ParameterValidator.assert_in_valid_list(kwargs["panel_axis_scales_type"], [item.name for item in PanelAxisScalesType],
-                                                    location, "panel_axis_scales_type")
-        if "panel_label_switch_type" in kwargs:
-            ParameterValidator.assert_in_valid_list(kwargs["panel_label_switch_type"], [item.name for item in PanelLabelSwitchType],
-                                                    location, "panel_label_switch_type")
-
         return FeatureValueBarplot(**kwargs)
 
     def __init__(self, dataset: RepertoireDataset = None, result_path: str = None, grouping_label: str = "feature",
-                 color_grouping_label: str = "NULL", errorbar_meaning: str = "se", row_grouping_labels=None, column_grouping_labels=None,
-                 panel_layout_type: str = "grid", panel_axis_scales_type: str = "free", panel_label_switch_type: str = "NULL", panel_nrow="NULL",
-                 panel_ncol="NULL", height: float = 6, width: float = 8, x_title: str = "NULL", y_title: str = "NULL", color_title: str = "NULL",
-                 palette: dict = "NULL", name: str = None):
+                 color_grouping_label: str = None, row_grouping_label=None, column_grouping_label=None,
+                 x_title: str = None, y_title: str = None, name: str = None):
 
         super().__init__(name)
         self.dataset = dataset
         self.result_path = result_path
         self.x = grouping_label
         self.color = color_grouping_label
-        self.errorbar_meaning = ErrorBarMeaning[errorbar_meaning.upper()]
-        if row_grouping_labels is None:
-            self.facet_rows = []
-        else:
-            self.facet_rows = [row_grouping_labels] if isinstance(row_grouping_labels, str) else row_grouping_labels
-        if column_grouping_labels is None:
-            self.facet_columns = []
-        else:
-            self.facet_columns = [column_grouping_labels] if isinstance(column_grouping_labels, str) else column_grouping_labels
-        self.facet_type = PanelLayoutType[panel_layout_type.upper()].name.lower()
-        self.facet_scales = PanelAxisScalesType[panel_axis_scales_type.upper()].name.lower()
-        self.facet_switch = PanelLabelSwitchType[panel_label_switch_type.upper()].name.lower()
-        self.nrow = panel_nrow
-        self.ncol = panel_ncol
-        self.height = height
-        self.width = width
-        self.x_title = x_title
-        self.y_title = y_title
-        self.color_title = color_title
-        self.palette = palette
+        # self.errorbar_meaning = ErrorBarMeaning[errorbar_meaning.upper()]
+        self.facet_row = row_grouping_label
+        self.facet_column = column_grouping_label
+        self.x_title = x_title if x_title is not None else self.x
+        self.y_title = y_title if y_title is not None else "value"
         self.result_name = "feature_values"
         self.name = name
 
@@ -151,7 +100,7 @@ class FeatureValueBarplot(EncodingReport):
         PathBuilder.build(self.result_path)
         data_long_format = DataReshaper.reshape(self.dataset)
         table_result = self._write_results_table(data_long_format)
-        report_output_fig = self._safe_plot(data_long_format=table_result.path)
+        report_output_fig = self._safe_plot(data_long_format=data_long_format)
         output_figures = None if report_output_fig is None else [report_output_fig]
         return ReportResult(self.name, output_figures, [table_result])
 
@@ -160,41 +109,30 @@ class FeatureValueBarplot(EncodingReport):
         data.to_csv(table_path, index=False)
         return ReportOutput(table_path, "feature values")
 
+    def std(self, x):
+        return x.std(ddof=0)
+
     def _plot(self, data_long_format) -> ReportOutput:
-        from rpy2.robjects import pandas2ri
-        from rpy2.robjects.packages import STAP
+        groupby_cols = [self.x, self.color, self.facet_row, self.facet_column]
+        groupby_cols = [i for i in groupby_cols if i]
+        groupby_cols = list(set(groupby_cols))
+        plotting_data = data_long_format.groupby(groupby_cols, as_index=False).agg(
+            {"value": ['mean', self.std]})
 
-        pandas2ri.activate()
+        plotting_data.columns = plotting_data.columns.map(''.join)
 
-        with open(EnvironmentSettings.root_path + "source/visualization/Barplot.R") as f:
-            string = f.read()
+        figure = px.bar(plotting_data, x=self.x, y="valuemean", color=self.color, barmode="relative",
+                        facet_row=self.facet_row, facet_col=self.facet_column, error_y="valuestd",
+                        labels={
+                            "valuemean": self.y_title,
+                            self.x: self.x_title,
+                        }, template='plotly_white',
+                        color_discrete_sequence=px.colors.diverging.Tealrose)
 
-        plot = STAP(string, "plot")
+        file_path = f"{self.result_path}{self.result_name}.html"
+        figure.write_html(file_path)
 
-        errorbar_meaning_abbr = FeatureValueBarplot.ERRORBAR_CONVERSION[self.errorbar_meaning]
-
-        plot.plot_barplot(data=data_long_format,
-                          x=self.x,
-                          y="value",
-                          color=self.color,
-                          errorbar_meaning=errorbar_meaning_abbr,
-                          facet_rows=self.facet_rows,
-                          facet_columns=self.facet_columns,
-                          facet_type=self.facet_type,
-                          facet_scales=self.facet_scales,
-                          facet_switch=self.facet_switch,
-                          nrow=self.nrow,
-                          ncol=self.ncol,
-                          height=self.height,
-                          width=self.width,
-                          x_lab=self.x_title,
-                          y_lab=self.y_title,
-                          color_lab=self.color_title,
-                          palette=self.palette,
-                          result_path=self.result_path,
-                          result_name=self.result_name)
-
-        return ReportOutput(f"{self.result_path}{self.result_name}.pdf", "feature bar plot")
+        return ReportOutput(path=file_path, name="feature bar plot")
 
     def check_prerequisites(self):
         location = "FeatureValueBarplot"
@@ -209,7 +147,7 @@ class FeatureValueBarplot(EncodingReport):
             legal_labels.append("feature")
             legal_labels.append("NULL")
 
-            labels = [self.x, self.color] + self.facet_rows + self.facet_columns
+            labels = [self.x, self.color, self.facet_row, self.facet_column]
 
             for label_param in labels:
                 if label_param is not None:
