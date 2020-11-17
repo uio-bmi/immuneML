@@ -14,11 +14,11 @@ setup(
     url="https://github.com/uio-bmi/ImmuneML",
     install_requires=["pytest>=4.3.1", "pandas>=1.1.1", "scikit-learn>=0.22.2.post1", "gensim==3.8.1", "matplotlib>=3.1.1", "editdistance==0.5.3",
                       "dask[complete]", "regex", "tzlocal", "airr==1.2.1", "pystache==0.5.4", "torch==1.5.1", "numpy>=1.18.2", "h5py>=2.9.0",
-                      "dill>=0.3.0", "tqdm>=0.24.2", "logomaker>=0.8", "plotly>=4.8.2", "fishersapi", "requests>=2.21.0",
-                      "deeprc@git+https://github.com/ml-jku/DeepRC@fec4b4f4b2cd70e00e8de83da169560dec73a419", "matplotlib-venn>=0.11.6",
-                      "widis-lstm-tools@git+https://github.com/widmi/widis-lstm-tools", "tcrdist3>=0.1.6"],
+                      "dill>=0.3.0", "tqdm>=0.24.2", "logomaker>=0.8", "plotly>=4.8.2", "fishersapi", "requests>=2.21.0", "matplotlib-venn>=0.11.6"],
     extras_require={
-        "R_plots":  ["rpy2"]
+        "R_plots":  ["rpy2"],
+        "DeepRC":  ["widis-lstm-tools@git+https://github.com/widmi/widis-lstm-tools", "deeprc@git+https://github.com/ml-jku/DeepRC@fec4b4f4b2cd70e00e8de83da169560dec73a419"],
+        "TCRDist": ["tcrdist3>=0.1.6"],
     },
     classifiers=[
         "Programming Language :: Python :: 3"

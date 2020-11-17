@@ -26,7 +26,7 @@ from source.util.PathBuilder import PathBuilder
 class DeepRC(MLMethod):
     """
     This classifier uses the DeepRC method for repertoire classification. The DeepRC ML method should be used in combination
-    with the DeepRCEncoder (:py:mod:`source.encodings.deeprc.DeepRCEncoder.DeepRCEncoder`).
+    with the DeepRC encoder.
 
 
     Reference:

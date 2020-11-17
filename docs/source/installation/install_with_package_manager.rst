@@ -29,17 +29,20 @@ Steps to install immuneML with Anaconda (tested with version 4.8.3):
 
   sh install_immuneML_R_dependencies.sh
 
-5. Install immuneML including Python dependencies from GitHub using pip:
+5. Install basic immuneML including Python dependencies from GitHub using pip:
 
 .. code-block:: console
 
   pip install git+https://github.com/uio-bmi/immuneML
 
-Alternatively, if you want to install immuneML including all R plots, use:
+Alternatively, if you want to install immuneML including optional extras (R_plots, DeepRC, TCRDist), use:
 
 .. code-block:: console
 
-  pip install git+https://github.com/uio-bmi/immuneML#egg=immuneML[R_plots]
+  pip install git+https://github.com/uio-bmi/immuneML#egg=immuneML[R_plots,DeepRC,TCRDist]
+
+Installing DeepRC and TCRDist dependencies is necessary to use the :ref:`DeepRC` and :ref:`TCRDISTClassifier` ML methods. 
+It is also possible to specify a subset of extras, for example, include only :code:`R_plots`.
 
 6. To validate the installation, run:
 
