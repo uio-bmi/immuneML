@@ -25,6 +25,13 @@ When installing all requirements from requirements.txt, there is afterward an er
 
 This issue might be helpful: https://github.com/yaml/pyyaml/issues/291. Try installing yaml manually with a specific version.
 
+When installing immuneML, I get an error (RuntimeError: autoreconf -fi failed), what should I do?
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Mac users who try to install immuneML with the :code:`TCRDist` extra might receive an error saying :code:`RuntimeError: autoreconf -fi failed`.
+This is due to an issue with the TCRDist dependency parasail. Try installing immuneML without the :code:`TCRDist` extra.
+If you still want to use the TCRDist dependency, `this GitHub issue <https://github.com/jeffdaily/parasail-python/issues/32>`_ might be helpful.
+
+
 When should I install immuneML with R dependencies?
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 In most cases, it is adviced to install immuneML without R dependencies. The immuneML core functionality does not
