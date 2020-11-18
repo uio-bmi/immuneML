@@ -159,7 +159,7 @@ class AIRRExporter(DataExporter):
     @staticmethod
     def _postprocess_dataframe(df):
         if "locus" in df.columns:
-            df["locus"] = [Chain.get_chain(chain).value for chain in df["locus"]]
+            df["locus"] = [Chain.get_chain(chain).value if chain else None for chain in df["locus"]]
 
         if "frame_types" in df.columns:
             AIRRExporter._enums_to_strings(df, "frame_types")

@@ -66,7 +66,8 @@ def get_ml_method_spec(ml_method_class, model_selection_n_folds=5):
                 "SimpleLogisticRegression": {
                     "penalty": ["l1"],
                     "C": [0.01, 0.1, 1, 10, 100],
-                    "class_weight": ["balanced"]
+                    "class_weight": ["balanced"],
+                    "show_warnings": False
                 },
                 "model_selection_cv": True,
                 "model_selection_n_folds": model_selection_n_folds
@@ -77,7 +78,8 @@ def get_ml_method_spec(ml_method_class, model_selection_n_folds=5):
             "random_forest": {
                 "RandomForestClassifier": {
                     "n_estimators": [10, 50, 100],
-                    "class_weight": ["balanced"]
+                    "class_weight": ["balanced"],
+                    "show_warnings": False
                 },
                 "model_selection_cv": True,
                 "model_selection_n_folds": model_selection_n_folds
@@ -87,8 +89,10 @@ def get_ml_method_spec(ml_method_class, model_selection_n_folds=5):
         ml_spec = {
             "support_vector_machine": {
                 "SVM": {
-                    "penalty": ["l1", "l2"],
-                    "class_weight": ["balanced"]
+                    "penalty": ["l1"],
+                    "C": [0.01, 0.1, 1, 10, 100],
+                    "class_weight": ["balanced"],
+                    "show_warnings": False
                 },
                 "model_selection_cv": True,
                 "model_selection_n_folds": model_selection_n_folds
@@ -98,7 +102,8 @@ def get_ml_method_spec(ml_method_class, model_selection_n_folds=5):
         ml_spec = {
             "k_nearest_neighbors": {
                 "KNN": {
-                    "n_neighbors": [3, 5, 10]
+                    "n_neighbors": [3, 5, 10],
+                    "show_warnings": False
                 },
                 "model_selection_cv": True,
                 "model_selection_n_folds": model_selection_n_folds
