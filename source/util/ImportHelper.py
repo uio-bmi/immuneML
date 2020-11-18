@@ -105,7 +105,7 @@ class ImportHelper:
                 df.loc[:, f"{gene}_alleles"] = df[f"{gene}_genes"]
                 df.loc[:, f"{gene}_genes"] = ImportHelper.strip_alleles(df, f"{gene}_genes")
                 if f'{gene}_subgroups' not in df.columns:
-                    df.loc[:, f'{gene}_subgroups'] = [item.split("-")[0] for item in df[f"{gene}_genes"]]
+                    df.loc[:, f'{gene}_subgroups'] = [item.split("-")[0] if item is not None else None for item in df[f"{gene}_genes"]]
             elif f"{gene}_alleles" in df.columns and f"{gene}_genes" not in df.columns:
                 df.loc[:, f"{gene}_genes"] = ImportHelper.strip_alleles(df, f"{gene}_alleles")
         return df
