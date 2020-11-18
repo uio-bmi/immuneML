@@ -43,7 +43,6 @@ Alternatively, if you want to install immuneML including optional extras (:code:
 
 Installing DeepRC and TCRDist dependencies is necessary to use the :ref:`DeepRC` and :ref:`TCRDISTClassifier` ML methods.
 It is also possible to specify a subset of extras, for example, include only :code:`DeepRC`.
-Mac users trying to install the :code:`TCRDist` extra, please see :ref:`this FAQ<When installing immuneML, I get an error (RuntimeError: autoreconf -fi failed), what should I do?>`.
 
 5. To validate the installation, run:
 
@@ -114,7 +113,6 @@ Alternatively, if you want to install immuneML including optional extras (:code:
   pip install git+https://github.com/uio-bmi/immuneML#egg=immuneML[R_plots,DeepRC,TCRDist]
 
 Installing DeepRC and TCRDist dependencies is necessary to use the :ref:`DeepRC` and :ref:`TCRDISTClassifier` ML methods.
-Mac users trying to install the :code:`TCRDist` extra, please see :ref:`this FAQ<When installing immuneML, I get an error (RuntimeError: autoreconf -fi failed), what should I do?>`.
 
 6. To validate the installation, run:
 
@@ -177,4 +175,3 @@ Alternatively, if you want to install immuneML including optional dependencies (
   pip install git+https://github.com/uio-bmi/immuneML#egg=immuneML[R_plots,DeepRC,TCRDist]
 
 Note: when including R_plots, make sure that R dependencies were installed using the steps described in :ref:`Install immuneML with R dependencies` steps 2 - 4.
-Mac users trying to install the :code:`TCRDist` extra, please see :ref:`this FAQ<When installing immuneML, I get an error (RuntimeError: autoreconf -fi failed), what should I do?>`.
