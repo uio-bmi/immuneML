@@ -154,7 +154,7 @@ class RandomDatasetGenerator:
         receptors = [TCABReceptor(alpha=get_random_sequence(chain_1_length_probabilities, "TRA", i),
                                   beta=get_random_sequence(chain_2_length_probabilities, "TRB", i),
                                   metadata={**{label: random.choices(list(label_dict.keys()), label_dict.values(), k=1)[0]
-                                               for label, label_dict in labels.items()}})
+                                               for label, label_dict in labels.items()}, **{"subject": f"subj_{i + 1}"}})
                      for i in range(receptor_count)]
 
         filename = f"{path if path[-1] == '/' else path + '/'}batch01.pickle"
