@@ -18,7 +18,7 @@ setup(
     extras_require={
         "R_plots":  ["rpy2"],
         "DeepRC":  ["widis-lstm-tools@git+https://github.com/widmi/widis-lstm-tools", "deeprc@git+https://github.com/ml-jku/DeepRC@fec4b4f4b2cd70e00e8de83da169560dec73a419"],
-        "TCRDist": ["tcrdist3>=0.1.6"],
+        "TCRDist": ["parasail=1.2", "tcrdist3>=0.1.6"],
     },
     classifiers=[
         "Programming Language :: Python :: 3"
