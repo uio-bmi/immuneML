@@ -139,17 +139,22 @@ class RandomDatasetGenerator:
         alphabet = EnvironmentSettings.get_sequence_alphabet()
         PathBuilder.build(path)
 
-        default_genes = {"A": {"V": "TRAV5", "J": "TRAJ42"}, "B": {"V": "TRBV6-1", "J": "TRBJ2-7"}}
-
-        get_random_sequence = lambda proba, chain: ReceptorSequence("".join(random.choices(alphabet, k=random.choices(list(proba.keys()),
+        get_random_sequence = lambda proba, chain, id: ReceptorSequence("".join(random.choices(alphabet, k=random.choices(list(proba.keys()),
                                                                                                                       proba.values())[0])),
-                                                                    metadata=SequenceMetadata(count=1, v_gene=default_genes[chain]["V"],
-                                                                                              j_gene=default_genes[chain]["J"]))
+                                                                    metadata=SequenceMetadata(count=1,
+                                                                                              v_subgroup=chain+"V1",
+                                                                                              v_gene=chain+"V1-1",
+                                                                                              v_allele=chain+"V1-1*01",
+                                                                                              j_subgroup=chain + "J1",
+                                                                                              j_gene=chain + "J1-1",
+                                                                                              j_allele=chain + "J1-1*01",
+                                                                                              chain=chain,
+                                                                                              cell_id=id))
 
-        receptors = [TCABReceptor(alpha=get_random_sequence(chain_1_length_probabilities, "A"),
-                                  beta=get_random_sequence(chain_2_length_probabilities, "B"),
+        receptors = [TCABReceptor(alpha=get_random_sequence(chain_1_length_probabilities, "TRA", i),
+                                  beta=get_random_sequence(chain_2_length_probabilities, "TRB", i),
                                   metadata={**{label: random.choices(list(label_dict.keys()), label_dict.values(), k=1)[0]
-                                               for label, label_dict in labels.items()}, **{"subject": f"subj_{i + 1}"}})
+                                               for label, label_dict in labels.items()}})
                      for i in range(receptor_count)]
 
         filename = f"{path if path[-1] == '/' else path + '/'}batch01.pickle"
