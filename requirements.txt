@@ -2,7 +2,7 @@ rpy2
 pytest==4.3.1
 pandas==0.24.2
 scikit-learn>=0.22.2.post1
-gensim==3.8.1
+gensim==3.8.3
 matplotlib==3.1.1
 editdistance==0.5.3
 dask[complete]
@@ -23,5 +23,6 @@ git+https://github.com/ml-jku/DeepRC@fec4b4f4b2cd70e00e8de83da169560dec73a419
 git+https://github.com/widmi/widis-lstm-tools
 git+https://github.com/kmayerb/tcrdist2.git
 fishersapi
+parasail==1.2
 tcrdist3>=0.1.6
 matplotlib-venn>=0.11.6
