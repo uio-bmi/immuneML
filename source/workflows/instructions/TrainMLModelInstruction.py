@@ -104,7 +104,7 @@ class TrainMLModelInstruction(Instruction):
                         - rep4
             labels: # list of labels to optimize the classifier for, as given in the metadata for the dataset
                 - celiac:
-                    positive_class: '+' # if it's binary classification, positive class parameter should be set
+                    positive_class: + # if it's binary classification, positive class parameter should be set
                 - T1D # this is not binary label, so no need to specify positive class
             dataset: d1 # which dataset to use for the nested CV
             strategy: GridSearch # how to choose the combinations which to test from settings (GridSearch means test all)
