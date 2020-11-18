@@ -58,7 +58,7 @@ class DefinitionParser:
                           encodings: dict, ml_methods: dict, reports: dict):
 
         return {
-            "datasets": specs_datasets, "simulations": simulation, "preprocessings": preprocessings, "motifs": motifs, "signals": signals,
+            "datasets": specs_datasets, "simulations": simulation, PreprocessingParser.keyword: preprocessings, "motifs": motifs, "signals": signals,
             "encodings": encodings, "ml_methods": ml_methods, "reports": reports
         }
 

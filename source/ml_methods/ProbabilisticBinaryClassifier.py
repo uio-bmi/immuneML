@@ -320,7 +320,7 @@ class ProbabilisticBinaryClassifier(MLMethod):
 
         .. math::
 
-            \widehat{c} \, (k, n) = \left\{\begin{matrix} 0, & F(k, n) \leq 0\\ 1, & F(k, n) > 0 \end{matrix}\right
+            \\widehat{c} \\, (k, n) = '\left\\{\\begin{matrix} 0, & F(k, n) \\leq 0\\ 1, & F(k, n) > 0 \\end{matrix}\\right
 
         Arguments:
 

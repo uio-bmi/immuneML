@@ -29,8 +29,8 @@ class RelevantSequenceExporter(EncodingReport):
     """
 
     COLUMN_MAPPING = {
-        "v_genes": "v_call",
-        "j_genes": "j_call",
+        "v_alleles": "v_call",
+        "j_alleles": "j_call",
         "sequences": "cdr3",
         'sequence_aas': "cdr3_aa"
     }

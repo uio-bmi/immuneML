@@ -98,7 +98,7 @@ class DiseaseAssociatedSequenceCVOverlap(Report):
                             f'no report will be made.')
             return None, None
 
-        row_col_names = [f"{item.hp_setting}_split_{item.split_index}" for item in hp_items]
+        row_col_names = [f"{item.hp_setting}_split_{item.split_index+1}" for item in hp_items]
         table_output = self._export_matrix(overlap_matrix, filename, row_col_names)
         figure_output = self._make_figure(overlap_matrix, filename, row_col_names)
         return table_output, figure_output
@@ -109,7 +109,7 @@ class DiseaseAssociatedSequenceCVOverlap(Report):
         return ReportOutput(data_path, " ".join(filename.split('_') + ['data']))
 
     def _make_figure(self, overlap_matrix, filename, row_col_names) -> ReportOutput:
-        figure = px.imshow(overlap_matrix, x=row_col_names, y=row_col_names, zmin=0, zmax=100, color_continuous_scale=px.colors.diverging.Tealrose,
+        figure = px.imshow(overlap_matrix, x=row_col_names, y=row_col_names, zmin=0, zmax=100, color_continuous_scale=px.colors.sequential.Teal,
                            template='plotly_white')
         figure.update_traces(hovertemplate="Overlap of disease-associated<br>sequences between<br>%{x} and %{y}:<br>%{z}%<extra></extra>")
         figure_path = f"{self.result_path}{filename}.html"

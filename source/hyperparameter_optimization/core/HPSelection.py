@@ -51,7 +51,7 @@ class HPSelection:
 
     @staticmethod
     def evaluate_hp_setting(state: TrainMLModelState, hp_setting: HPSetting, train_datasets: list, val_datasets: list,
-                            current_path: str, label: str, assessment_split_index: int) -> float:
+                            current_path: str, label: str, assessment_split_index: int):
 
         performances = []
         for index in range(state.selection.split_count):
@@ -60,10 +60,7 @@ class HPSelection:
                                                   label, assessment_split_index)
             performances.append(performance)
 
-        if all(performance is not None for performance in performances):
-            return HPUtil.get_average_performance(performances)
-        else:
-            return -1.
+        return HPUtil.get_average_performance(performances)
 
     @staticmethod
     def run_setting(state: TrainMLModelState, hp_setting, train_dataset, val_dataset, split_index: int,

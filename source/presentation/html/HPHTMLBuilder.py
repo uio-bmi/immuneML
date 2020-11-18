@@ -4,6 +4,7 @@ import statistics
 
 import pandas as pd
 
+from source.environment.Constants import Constants
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.environment.Metric import Metric
 from source.hyperparameter_optimization.config.SplitType import SplitType
@@ -79,11 +80,12 @@ class HPHTMLBuilder:
         for hp_setting, hp_items in selection_state.hp_items.items():
             hp_splits = []
             for hp_item in hp_items:
-                if hp_item.performance is not None and hp_item.performance[state.optimization_metric.name.lower()] is not None:
+                if hp_item.performance is not None and hp_item.performance[state.optimization_metric.name.lower()] is not None \
+                        and isinstance(hp_item.performance[state.optimization_metric.name.lower()], float):
                     hp_splits.append(
                         {"optimization_metric_val": round(hp_item.performance[state.optimization_metric.name.lower()], HPHTMLBuilder.NUM_DIGITS)})
                 else:
-                    hp_splits.append({"optimization_metric_val": "not computed"})
+                    hp_splits.append({"optimization_metric_val": Constants.NOT_COMPUTED})
             hp_settings.append({
                 "hp_setting": hp_setting,
                 "hp_splits": hp_splits,
@@ -93,7 +95,7 @@ class HPHTMLBuilder:
             performances = [round(hp_item.performance[state.optimization_metric.name.lower()], HPHTMLBuilder.NUM_DIGITS) for hp_item in hp_items if
                             hp_item.performance is not None and hp_item.performance[state.optimization_metric.name.lower()] is not None]
             if len(performances) > 1:
-                hp_settings[-1]["average"] = round(statistics.mean(performances), HPHTMLBuilder.NUM_DIGITS)
+                hp_settings[-1]["average"] = round(statistics.mean(perf for perf in performances if [isinstance(perf, float)]), HPHTMLBuilder.NUM_DIGITS)
                 hp_settings[-1]["show_average"] = True
             else:
                 hp_settings[-1]["average"] = None
@@ -137,6 +139,9 @@ class HPHTMLBuilder:
         for split_index, hp_item in enumerate(hp_items):
             result.append({
                 "split_index": split_index + 1,
+                "has_encoding_train_reports": len(hp_item.encoding_train_results) > 0,
+                "has_encoding_test_reports": len(hp_item.encoding_test_results) > 0,
+                "has_ml_reports": len(hp_item.model_report_results) > 0,
                 "encoding_train_reports": Util.to_dict_recursive(hp_item.encoding_train_results, base_path) if len(
                     hp_item.encoding_train_results) > 0 else None,
                 "encoding_test_reports": Util.to_dict_recursive(hp_item.encoding_test_results, base_path) if len(
