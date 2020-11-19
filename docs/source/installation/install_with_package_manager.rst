@@ -41,7 +41,7 @@ Alternatively, if you want to install immuneML including optional extras (:code:
 
   pip install git+https://github.com/uio-bmi/immuneML#egg=immuneML[DeepRC,TCRDist]
 
-Installing DeepRC and TCRDist dependencies is necessary to use the :ref:`DeepRC` and :ref:`TCRDISTClassifier` ML methods.
+Installing DeepRC and TCRDist dependencies is necessary to use the :ref:`DeepRC` and :ref:`TCRDISTClassifier` ML methods, and corresponding :ref:`DeepRCInterpretation` and :ref:`TCRDistMotifDiscovery` reports.
 It is also possible to specify a subset of extras, for example, include only :code:`DeepRC`.
 
 5. To validate the installation, run:
@@ -112,7 +112,7 @@ Alternatively, if you want to install immuneML including optional extras (:code:
 
   pip install git+https://github.com/uio-bmi/immuneML#egg=immuneML[R_plots,DeepRC,TCRDist]
 
-Installing DeepRC and TCRDist dependencies is necessary to use the :ref:`DeepRC` and :ref:`TCRDISTClassifier` ML methods.
+Installing DeepRC and TCRDist dependencies is necessary to use the :ref:`DeepRC` and :ref:`TCRDISTClassifier` ML methods, and corresponding :ref:`DeepRCInterpretation` and :ref:`TCRDistMotifDiscovery` reports.
 
 6. To validate the installation, run:
 
