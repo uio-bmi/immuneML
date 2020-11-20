@@ -21,13 +21,15 @@ class ExploratoryAnalysisInstruction(Instruction):
 
     Arguments:
 
-        exploratory_analysis_units (dict): a dictionary of analyses to perform; keys are the names of the analyses and values are the parameters of
-        the analyses (objects of :py:obj:`~source.workflows.instructions.exploratory_analysis.ExploratoryAnalysisUnit.ExploratoryAnalysisUnit`
-        class). Each of these includes a dataset on which to perform the analysis, report to run, and optionally preprocessing sequence,
-        encoding (if the report needs to be executed on the encoded dataset) and label configuration (if the dataset needs to be encoded,
-        it is also necessary to specify a label for encoding - a label could correspond to an immune event or to genetic information (e.g., HLA).
-        The batch size can also be set to encode multiple repertoires in parallel, but this also increases the memory usage, so it must be
-        reasonably set.
+        analyses (dict): a dictionary of analyses to perform. The keys are the names of different analyses, and the values for each
+        of the analyses are:
+
+        - dataset: dataset on which to perform the exploratory analysis
+        - preprocessing_sequence: which preprocessings to use on the dataset, this item is optional and does not have to be specified.
+        - encoding: how to encode the dataset before running the report, this item is optional and does not have to be specified.
+        - labels: if encoding is specified, the relevant labels must be specified here.
+        - report: which report to run on the dataset. Reports specified here may be of the category :ref:`Data reports` or :ref:`Encoding reports`, depending on whether 'encoding' was specified.
+
 
     YAML specification:
 
@@ -47,7 +49,6 @@ class ExploratoryAnalysisInstruction(Instruction):
                     labels: # labels present in the dataset d1 which will be included in the encoded data on which report r2 will be run
                         - celiac # name of the first label as present in the column of dataset's metadata file
                         - CMV # name of the second label as present in the column of dataset's metadata file
-                    batch_size: 16
 
     """
 
