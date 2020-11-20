@@ -134,10 +134,12 @@ class VDJdbImport(DataImport):
                               f"To import all chains as a SequenceDataset, use paired = False")
         else:
             df.loc[df["sequence_identifiers"] == "0", "sequence_identifiers"] = None
-        # todo: should sequence identifiers be made unique?
 
         if "chains" not in df.columns:
             df.loc[:, "chains"] = ImportHelper.load_chains_from_genes(df)
+
+        df["receptor_identifiers"] = df["sequence_identifiers"]
+        df["sequence_identifiers"] = VDJdbImport.get_sequence_identifiers(df["sequence_identifiers"], df["chains"])
 
         ImportHelper.update_gene_info(df)
         ImportHelper.drop_empty_sequences(df, params.import_empty_aa_sequences, params.import_empty_nt_sequences)
@@ -145,8 +147,19 @@ class VDJdbImport(DataImport):
         return df
 
     @staticmethod
+    def get_sequence_identifiers(receptor_identifiers, chains):
+        sequence_identifiers = receptor_identifiers + "_" + chains
+        if sequence_identifiers.is_unique:
+            return sequence_identifiers
+        else:
+            counts = sequence_identifiers.value_counts()
+            for id, count in counts[counts > 1].iteritems():
+                unique_ids = [f"{id}{i}" for i in range(1, count+1)]
+                sequence_identifiers.loc[sequence_identifiers == id] = unique_ids
+        return sequence_identifiers
+
+    @staticmethod
     def import_receptors(df, params):
-        df["receptor_identifiers"] = df["sequence_identifiers"]
         return ImportHelper.import_receptors(df, params)
 
     @staticmethod
