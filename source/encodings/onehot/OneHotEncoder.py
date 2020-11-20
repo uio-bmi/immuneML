@@ -35,8 +35,7 @@ class OneHotEncoder(DatasetEncoder):
 
         flatten (bool): whether to flatten the final onehot matrix to a 2-dimensional matrix [examples, other_dims_combined]
         This must be set to True when using onehot encoding in combination with scikit-learn ML methods (inheriting :py:obj:`~source.ml_methods.SklearnMethod.SklearnMethod`),
-        such as :py:obj:`~source.ml_methods.SimpleLogisticRegression.SimpleLogisticRegression`,
-        :py:obj:`~source.ml_methods.SVM.SVM`, :py:obj:`~source.ml_methods.RandomForestClassifier.RandomForestClassifier` and :py:obj:`~source.ml_methods.KNN.KNN`.
+        such as :ref:`SimpleLogisticRegression`, :ref:`SVM`, :ref:`RandomForestClassifier` and :ref:`KNN`.
 
 
     YAML specification:

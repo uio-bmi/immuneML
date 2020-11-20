@@ -27,7 +27,7 @@ class ReceptorCNN(MLMethod):
 
         The architecture of the CNN for paired-chain receptor data
 
-    Requires one-hot encoded data as input (as produced by :py:obj:`~source.encodings.onehot.OneHotEncoder.OneHotEncoder`).
+    Requires one-hot encoded data as input (as produced by :ref:`OneHot` encoder).
 
     Note: ReceptorCNN can only be used with ReceptorDatasets, it does not work with SequenceDatasets
 

@@ -20,12 +20,10 @@ class FeatureValueDistplot(EncodingReport):
     """
     Plots the distribution of the feature values in a given encoded data matrix. Can be used in combination
     with any encoding. When a summary of the feature values is desired (as opposed to the entire distribution
-    across all examples),  please consider using
-    :py:obj:`~source.reports.encoding_reports.FeatureValueBarplot.FeatureValueBarplot` instead.
+    across all examples),  please consider using :ref:`FeatureValueBarplot` instead.
 
     This report creates distribution plots of the feature values in a group of features. For example, when
-    :py:obj:`~source.encodings.kmer_frequency.KmerFrequencyEncoder.KmerFrequencyEncoder`
-    is used, the distribution of the frequency of each k-mer is plotted.
+    :ref:`KmerFrequency` encoder is used, the distribution of the frequency of each k-mer is plotted.
 
     Optional (metadata) labels can be specified for splitting the distribution according to different groups. Groups
     can be visualized by splitting across the x-axis, different colors, or different row and column facets.

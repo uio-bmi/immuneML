@@ -20,14 +20,12 @@ class FeatureValueBarplot(EncodingReport):
     """
     Plots a barplot of the feature values in a given encoded data matrix, across examples. Can be used in combination
     with any encoding. When the distribution of feature values is of interest (as opposed to showing only the mean
-    with user-defined error bar as done in this report), please consider using
-    :py:obj:`~source.reports.encoding_reports.FeatureValueDistplot.FeatureValueDistplot` instead.
+    with user-defined error bar as done in this report), please consider using :ref:`FeatureValueDistplot` instead.
 
     This report creates a barplot where the height of each bar is the mean value of a feature in a specific group. By
     default, all samples are the group, in which case `grouping_label` is "feature", meaning that each bar is the mean
     value of a given feature, and along the x-axis are the different features. For example, when
-    :py:obj:`~source.encodings.kmer_frequency.KmerFrequencyEncoder.KmerFrequencyEncoder`
-    is used, the features are the k-mers and the feature values are the frequencies per k-mer.
+    :ref:`KmerFrequency` encoder is used, the features are the k-mers and the feature values are the frequencies per k-mer.
 
     Optional (metadata) labels can be specified for dividing the bars into groups to make comparisons. Groups
     can be visualized by splitting them across the x-axis, using different colors or different row and column facets.
