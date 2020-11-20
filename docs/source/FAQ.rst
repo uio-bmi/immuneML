@@ -25,6 +25,7 @@ When installing all requirements from requirements.txt, there is afterward an er
 
 This issue might be helpful: https://github.com/yaml/pyyaml/issues/291. Try installing yaml manually with a specific version.
 
+
 When should I install immuneML with R dependencies?
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 In most cases, it is adviced to install immuneML without R dependencies. The immuneML core functionality does not

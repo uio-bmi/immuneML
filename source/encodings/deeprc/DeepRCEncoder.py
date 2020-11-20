@@ -11,7 +11,7 @@ from source.util.PathBuilder import PathBuilder
 
 class DeepRCEncoder(DatasetEncoder):
     """
-    DeepRCEncoder should be used in combination with the DeepRC ML method (:py:mod:`source.ml_methods.DeepRC.DeepRC`).
+    DeepRCEncoder should be used in combination with the DeepRC ML method (:ref:`DeepRC`).
     This encoder writes the data in a RepertoireDataset to .tsv files.
     For each repertoire, one .tsv file is created containing the amino acid sequences and the counts.
     Additionally, one metadata .tsv file is created, which describes the subset of repertoires that is encoded by
