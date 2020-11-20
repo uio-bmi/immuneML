@@ -10,14 +10,15 @@ from source.hyperparameter_optimization.states.TrainMLModelState import TrainMLM
 from source.reports.Report import Report
 from source.reports.ReportOutput import ReportOutput
 from source.reports.ReportResult import ReportResult
+from source.reports.hyperparameter_reports.HyperparameterReport import HyperparameterReport
 from source.util.PathBuilder import PathBuilder
 from source.util.SequenceAnalysisHelper import SequenceAnalysisHelper
 
 
-class DiseaseAssociatedSequenceCVOverlap(Report):
+class DiseaseAssociatedSequenceCVOverlap(HyperparameterReport):
     """
-    DiseaseAssociatedSequenceCVOverlap report makes one heatmap per label showing the overlap of disease-associated sequences between folds of
-    cross-validation (either inner or outer loop of the nested CV). The overlap is computed by the following equation:
+    DiseaseAssociatedSequenceCVOverlap report makes one heatmap per label showing the overlap of disease-associated sequences produced by :ref:`SequenceAbundance` or :ref:`SequenceCount` encoders
+    between folds of cross-validation (either inner or outer loop of the nested CV). The overlap is computed by the following equation:
 
     .. math::
 

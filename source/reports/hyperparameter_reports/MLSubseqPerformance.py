@@ -2,7 +2,7 @@ import warnings
 
 from source.encodings.kmer_frequency.KmerFrequencyEncoder import KmerFrequencyEncoder
 from source.ml_methods.DeepRC import DeepRC
-from source.reports.hyperparameter.MLSettingsPerformance import MLSettingsPerformance
+from source.reports.hyperparameter_reports.MLSettingsPerformance import MLSettingsPerformance
 
 
 class MLSubseqPerformance(MLSettingsPerformance):

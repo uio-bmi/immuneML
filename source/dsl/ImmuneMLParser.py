@@ -76,16 +76,19 @@ class ImmuneMLParser:
                     split_count: 1
                     training_percentage: 70
                     reports:
+                        data: []
                         data_splits: []
-                        performance: []
-                        optimal_models: []
+                        encoding: []
+                        models: []
+                        hyperparameter: []
                 selection:
                     split_strategy: k-fold
                     split_count: 5
                     reports:
-                        data_splits: [r1]
-                        models: []
                         data: []
+                        data_splits: [r1]
+                        encoding: []
+                        models: []
                 labels:
                     - CD
                 dataset: d1

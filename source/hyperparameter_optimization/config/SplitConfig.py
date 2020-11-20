@@ -53,12 +53,14 @@ class SplitConfig:
             split_count: 5 # how many train/test datasets to generate
             training_percentage: 0.7 # what percentage of the original data should be used for the training set
             reports: # reports to execute on training/test datasets, encoded datasets and trained ML methods
-                data_splits: # list of reports to execute on training/test datasets (before they are encoded)
+                data_splits: # list of data reports to execute on training/test datasets (before they are encoded)
                     - rep1
-                encoding: # list of reports to execute on encoded training/test datasets
-                    - rep4
-                hyperparameter: # list of reports to execute when nested CV is finished to show overall performance
+                encoding: # list of encoding reports to execute on encoded training/test datasets
                     - rep2
+                models: # list of ML model reports to execute on the trained classifiers in the assessment loop
+                    - rep3
+                hyperparameter: # list of hyperparameter reports to execute when nested CV is finished to show overall performance
+                    - rep4
 
         # as a part of a TrainMLModel instruction, defining the inner (selection) loop of nested cross-validation:
         selection: # inner loop of nested CV
@@ -67,12 +69,12 @@ class SplitConfig:
                 parameter: subject # which parameter to use for splitting, must be present in the metadata for each example
                 min_count: 1 # what is the minimum number of examples with unique value of the parameter specified above for the analysis to be valid
             reports: # reports to execute on training/test datasets, encoded datasets and trained ML methods
-                data_splits: # list of reports to execute on training/test datasets (before they are encoded)
+                data_splits: # list of data reports to execute on training/test datasets (before they are encoded)
                     - rep1
-                encoding: # list of reports to execute on encoded training/test datasets
-                    - rep4
-                hyperparameter: # list of reports to execute when nested CV is finished to show overall performance
+                encoding: # list of encoding reports to execute on encoded training/test datasets
                     - rep2
+                encoding: # list of ML model reports to execute the trained classifiers in the selection loop
+                    - rep3
 
     """
 

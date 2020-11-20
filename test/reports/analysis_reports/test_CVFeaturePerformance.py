@@ -19,7 +19,7 @@ from source.hyperparameter_optimization.states.TrainMLModelState import TrainMLM
 from source.hyperparameter_optimization.strategy.GridSearch import GridSearch
 from source.ml_methods.ProbabilisticBinaryClassifier import ProbabilisticBinaryClassifier
 from source.reports.ReportResult import ReportResult
-from source.reports.hyperparameter.CVFeaturePerformance import CVFeaturePerformance
+from source.reports.hyperparameter_reports.CVFeaturePerformance import CVFeaturePerformance
 
 
 class TestCVFeaturePerformance(TestCase):

@@ -58,7 +58,7 @@ class TrainMLModelInstruction(Instruction):
 
         batch_size (int): how many processes should be created at once to speed up the analysis. For personal machines, 4 or 8 is usually a good choice.
 
-        data_reports (list): a list of reports to be executed on the whole dataset.
+        data_reports (list): a list of :ref:`Data reports` to be executed on the whole dataset.
 
         refit_optimal_model (bool): if the final combination of preprocessing-encoding-ML model should be refitted on the full dataset thus providing
         the final model to be exported from instruction; alternatively, train combination from one of the assessment folds will be used
@@ -88,20 +88,21 @@ class TrainMLModelInstruction(Instruction):
                     data_splits: # list of reports to execute on training/test datasets (before they are encoded)
                         - rep1
                     encoding: # list of reports to execute on encoded training/test datasets
-                        - rep4
-                    hyperparameter: # list of reports to execute when nested CV is finished to show overall performance
                         - rep2
+                    models: # list of reports to execute on trained ML methods for each assessment CV split
+                        - rep3
+                    hyperparameter: # list of reports to execute when nested CV is finished to show overall performance
+                        - rep4
             selection: # inner loop of nested CV
                 split_strategy: k_fold # perform k-fold CV
                 split_count: 5 # how many fold to create: here these two parameters mean: do 5-fold CV
                 reports:
                     data_splits: # list of reports to execute on training/test datasets (in the inner loop, so these are actually training and validation datasets)
                         - rep1
-                    models: # list of reports to execute on trained ML methods
-                        - rep3
-                    optimal_models: [] # list of reports to execute on optimal ML methods for each CV split
+                    models: # list of reports to execute on trained ML methods for each selection CV split
+                        - rep2
                     encoding: # list of reports to execute on encoded training/test datasets (again, it is training/validation here)
-                        - rep4
+                        - rep3
             labels: # list of labels to optimize the classifier for, as given in the metadata for the dataset
                 - celiac:
                     positive_class: + # if it's binary classification, positive class parameter should be set

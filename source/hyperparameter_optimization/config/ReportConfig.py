@@ -8,16 +8,16 @@ class ReportConfig:
 
     Arguments:
 
-        data_splits (dict): reports to be executed after the data has been split into training and test (assessment CV loop) or training and validation (selection CV loop) datasets before they are encoded
+        data (dict): :ref:`Data reports` to be executed on the whole dataset before it is split to training/test or training/validation
 
-        models (dict): reports to be executed on all trained classifiers
+        data_splits (dict): :ref:`Data reports` to be executed after the data has been split into training and test (assessment CV loop) or training and validation (selection CV loop) datasets before they are encoded
 
-        data (dict): reports to be executed on the whole dataset before it is split to training/test or training/validation
+        models (dict): :ref:`ML model reports` to be executed on all trained classifiers
 
-        encoding (dict): reports to be executed on the encoded training/test datasets or training/validation datasets
+        encoding (dict): :ref:`Encoding reports` to be executed on the encoded training/test datasets or training/validation datasets
 
-        hyperparameter (dict): reports to be executed after the nested CV has finished to show the overall performance; this parameter can only be
-        specified under assessment key in TrainMLModel instruction.
+        hyperparameter (dict): :ref:`Hyperparameter reports` to be executed after the nested CV has finished to show the overall performance; this parameter can only be
+        specified under the assessment key in TrainMLModel instruction.
 
     YAML specification:
 

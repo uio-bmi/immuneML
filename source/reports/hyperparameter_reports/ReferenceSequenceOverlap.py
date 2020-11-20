@@ -13,13 +13,14 @@ from source.hyperparameter_optimization.states.TrainMLModelState import TrainMLM
 from source.reports.Report import Report
 from source.reports.ReportOutput import ReportOutput
 from source.reports.ReportResult import ReportResult
+from source.reports.hyperparameter_reports.HyperparameterReport import HyperparameterReport
 from source.util.ParameterValidator import ParameterValidator
 from source.util.PathBuilder import PathBuilder
 
 
-class ReferenceSequenceOverlap(Report):
+class ReferenceSequenceOverlap(HyperparameterReport):
     """
-    The ReferenceSequenceOverlap report compares a list of disease-associated sequences produced by SequenceAbundance or SequenceCount encoders to
+    The ReferenceSequenceOverlap report compares a list of disease-associated sequences produced by :ref:`SequenceAbundance` or :ref:`SequenceCount` encoders to
     a list of reference receptor sequences. It outputs a Venn diagram and a list of receptor sequences found both in the encoder and reference.
 
     The report compares the sequences by their sequence content and the additional attributes (such as V or J gene), as specified by the user.

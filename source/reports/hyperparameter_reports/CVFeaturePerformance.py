@@ -9,10 +9,11 @@ from source.hyperparameter_optimization.states.TrainMLModelState import TrainMLM
 from source.reports.Report import Report
 from source.reports.ReportOutput import ReportOutput
 from source.reports.ReportResult import ReportResult
+from source.reports.hyperparameter_reports.HyperparameterReport import HyperparameterReport
 from source.util.PathBuilder import PathBuilder
 
 
-class CVFeaturePerformance(Report):
+class CVFeaturePerformance(HyperparameterReport):
     """
     This report plots the average training vs test performance w.r.t. given encoding parameter which is explicitly set
     in the feature attribute. It can be used only in combination with TrainMLModel instruction and can be only specified under

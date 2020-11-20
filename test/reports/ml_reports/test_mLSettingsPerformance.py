@@ -19,7 +19,7 @@ from source.hyperparameter_optimization.config.SplitType import SplitType
 from source.hyperparameter_optimization.strategy.GridSearch import GridSearch
 from source.ml_methods.SimpleLogisticRegression import SimpleLogisticRegression
 from source.reports.ReportResult import ReportResult
-from source.reports.hyperparameter.MLSettingsPerformance import MLSettingsPerformance
+from source.reports.hyperparameter_reports.MLSettingsPerformance import MLSettingsPerformance
 from source.util.PathBuilder import PathBuilder
 from source.util.RepertoireBuilder import RepertoireBuilder
 from source.workflows.instructions.TrainMLModelInstruction import TrainMLModelInstruction
