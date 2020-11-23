@@ -76,7 +76,7 @@ class TestDeepRC(TestCase):
         self.assertEqual(set(list(train_indices) + list(val_indices)), set(range(10)))
 
         # test if 'fit' function saves models
-        classifier.fit(encoded_data, y, ["status"])
+        classifier.fit(encoded_data, "status")
 
         self.assertListEqual(classifier.get_classes_for_label("status"), ["A", "B"])
 

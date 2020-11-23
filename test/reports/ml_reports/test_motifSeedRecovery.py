@@ -25,10 +25,8 @@ class TestMotifSeedRecovery(TestCase):
     def _create_dummy_lr_model(self, path):
         # dummy logistic regression with 100 observations with 20 features belonging to 2 classes
         dummy_lr = SimpleLogisticRegression()
-        dummy_lr.fit_by_cross_validation(EncodedData(np.random.rand(100, 5)),
-                                         {"l1": [i % 2 for i in range(0, 100)]},
-                                         number_of_splits=2,
-                                         label_names=["l1"])
+        dummy_lr.fit_by_cross_validation(EncodedData(np.random.rand(100, 5), {"l1": [i % 2 for i in range(0, 100)]}), number_of_splits=2,
+                                         label_name="l1")
 
         # Change coefficients to values 1-20
         dummy_lr.models["l1"].coef_ = np.array(list(range(0, 5))).reshape(1, -1)

@@ -33,13 +33,13 @@ class TestKmerMILClassifier(TestCase):
                                                                                                                  [Label("l1", [True, False])])))
         cls = KmerMILClassifier(iteration_count=10, threshold=-0.0001, evaluate_at=2, use_early_stopping=False, random_seed=1, learning_rate=0.01,
                                 zero_abundance_weight_init=True, number_of_threads=8)
-        cls.fit(enc_dataset.encoded_data, enc_dataset.encoded_data.labels, ["l1"])
+        cls.fit(enc_dataset.encoded_data, "l1")
 
-        predictions = cls.predict(enc_dataset.encoded_data, ["l1"])
+        predictions = cls.predict(enc_dataset.encoded_data, "l1")
         self.assertEqual(repertoire_count, len(predictions["l1"]))
         self.assertEqual(repertoire_count, len([pred for pred in predictions["l1"] if isinstance(pred, bool)]))
 
-        predictions_proba = cls.predict_proba(enc_dataset.encoded_data, ["l1"])
+        predictions_proba = cls.predict_proba(enc_dataset.encoded_data, "l1")
         self.assertEqual(repertoire_count, np.rint(np.sum(predictions_proba["l1"])))
         self.assertEqual(repertoire_count, predictions_proba["l1"].shape[0])
 
@@ -59,7 +59,7 @@ class TestKmerMILClassifier(TestCase):
                 loaded_value = cls2_vars[item]
                 self.assertEqual(value, loaded_value)
 
-        model = cls.get_model(["l1"])
+        model = cls.get_model("l1")
         self.assertEqual(vars(cls), model)
 
         shutil.rmtree(path)

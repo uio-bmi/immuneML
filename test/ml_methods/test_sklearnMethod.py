@@ -21,7 +21,7 @@ class TestSklearnMethod(TestCase):
         y = {"default": np.array([1, 0, 2, 0])}
 
         knn = KNN()
-        knn._fit(sparse.csr_matrix(x), y, ['default'])
+        knn._fit(sparse.csr_matrix(x), y, 'default')
 
         path = EnvironmentSettings.root_path + "test/tmp/loadtestsklearn/"
         PathBuilder.build(path)
@@ -45,7 +45,7 @@ class TestSklearnMethod(TestCase):
         y = {"default": np.array(['a', "b", "c", "a"])}
 
         svm = SVM()
-        svm._fit(sparse.csr_matrix(x), y)
+        svm._fit(sparse.csr_matrix(x), y, 'default')
 
         path = EnvironmentSettings.root_path + "test/tmp/storesklearn/"
 

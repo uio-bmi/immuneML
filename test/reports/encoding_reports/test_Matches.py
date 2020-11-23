@@ -53,7 +53,8 @@ class TestMatches(unittest.TestCase):
         with open(path + "refs.tsv", "w") as file:
             file.writelines(file_content)
 
-        reference_receptors = {"params": {"path": path + "refs.tsv", "region_type": "FULL_SEQUENCE", "paired": True, "receptor_chains": "TRA_TRB"}, "format": "VDJdb"}
+        reference_receptors = {"params": {"path": path + "refs.tsv", "region_type": "FULL_SEQUENCE", "paired": True, "receptor_chains": "TRA_TRB"},
+                               "format": "VDJdb"}
 
         encoder = MatchedReceptorsEncoder.build_object(dataset, **{
             "reference": reference_receptors,
@@ -67,7 +68,6 @@ class TestMatches(unittest.TestCase):
         ))
 
         return encoded
-
 
     def test_generate_for_matchedreceptors(self):
         path = EnvironmentSettings.root_path + "test/tmp/matches_for_matchedreceptors/"
@@ -112,7 +112,6 @@ class TestMatches(unittest.TestCase):
 
         shutil.rmtree(path)
 
-
     def create_encoded_matchedsequences(self, path):
         # Setting up dummy data
         labels = {"subject_id": ["subject_1", "subject_2"],
@@ -143,7 +142,6 @@ class TestMatches(unittest.TestCase):
         with open(path + "refs.tsv", "w") as file:
             file.writelines(file_content)
 
-
         reference_sequences = {"params": {"path": path + "refs.tsv", "region_type": "FULL_SEQUENCE", "paired": False}, "format": "VDJdb"}
 
         encoder = MatchedSequencesEncoder.build_object(dataset, **{
@@ -158,7 +156,6 @@ class TestMatches(unittest.TestCase):
         ))
 
         return encoded
-
 
     def test_generate_for_matchedsequences(self):
         path = EnvironmentSettings.root_path + "test/tmp/matches_for_matchedsequences/"
@@ -188,7 +185,6 @@ class TestMatches(unittest.TestCase):
         self.assertListEqual(list(unique_chains["sequence_id"]), [100, 200])
 
         shutil.rmtree(path)
-
 
     def create_encoded_matchedregex(self, path):
         # Setting up dummy data
@@ -230,7 +226,6 @@ class TestMatches(unittest.TestCase):
         with open(filepath, "w") as file:
             file.writelines(file_content)
 
-
         encoder = MatchedRegexEncoder.build_object(dataset, **{
             "motif_filepath": filepath,
             "match_v_genes": False,
@@ -244,7 +239,6 @@ class TestMatches(unittest.TestCase):
         ))
 
         return encoded
-
 
     def test_generate_for_matchedregex(self):
         path = EnvironmentSettings.root_path + "test/tmp/regex_matches_report/"
@@ -263,7 +257,6 @@ class TestMatches(unittest.TestCase):
         self.assertTrue(os.path.isfile(path + "report_results/paired_matches/example_subject_1_label_yes_subject_id_subject_1.csv"))
         self.assertTrue(os.path.isfile(path + "report_results/paired_matches/example_subject_2_label_no_subject_id_subject_2.csv"))
         self.assertTrue(os.path.isfile(path + "report_results/paired_matches/example_subject_3_label_no_subject_id_subject_3.csv"))
-
 
         matches = pd.read_csv(path + "report_results/complete_match_count_table.csv")
         subj1_results = pd.read_csv(path + "report_results/paired_matches/example_subject_1_label_yes_subject_id_subject_1.csv")
