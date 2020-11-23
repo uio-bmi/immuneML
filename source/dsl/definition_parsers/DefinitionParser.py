@@ -16,7 +16,7 @@ from source.ml_methods.MLMethod import MLMethod
 from source.preprocessing.Preprocessor import Preprocessor
 from source.reports.data_reports.DataReport import DataReport
 from source.reports.encoding_reports.EncodingReport import EncodingReport
-from source.reports.hyperparameter_reports.HyperparameterReport import HyperparameterReport
+from source.reports.train_ml_model_reports.TrainMLModelReport import TrainMLModelReport
 from source.reports.ml_reports.MLReport import MLReport
 from source.reports.multidataset_reports.MultiDatasetReport import MultiDatasetReport
 from source.simulation.Implanting import Implanting
@@ -110,7 +110,7 @@ class DefinitionParser:
 
         open(path + filename, "w").close()
 
-        for report_type_class in [DataReport, EncodingReport, MLReport, HyperparameterReport, MultiDatasetReport]:
+        for report_type_class in [DataReport, EncodingReport, MLReport, TrainMLModelReport, MultiDatasetReport]:
             with open(path + filename, "a") as file:
                 doc_format = DocumentationFormat(cls=report_type_class,
                                                  cls_name=f"**{report_type_class.get_title()}**",

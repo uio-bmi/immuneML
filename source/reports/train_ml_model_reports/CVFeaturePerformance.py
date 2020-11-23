@@ -6,14 +6,13 @@ import pandas as pd
 import plotly.graph_objects as go
 
 from source.hyperparameter_optimization.states.TrainMLModelState import TrainMLModelState
-from source.reports.Report import Report
 from source.reports.ReportOutput import ReportOutput
 from source.reports.ReportResult import ReportResult
-from source.reports.hyperparameter_reports.HyperparameterReport import HyperparameterReport
+from source.reports.train_ml_model_reports.TrainMLModelReport import TrainMLModelReport
 from source.util.PathBuilder import PathBuilder
 
 
-class CVFeaturePerformance(HyperparameterReport):
+class CVFeaturePerformance(TrainMLModelReport):
     """
     This report plots the average training vs test performance w.r.t. given encoding parameter which is explicitly set
     in the feature attribute. It can be used only in combination with TrainMLModel instruction and can be only specified under

@@ -10,15 +10,14 @@ from matplotlib_venn import venn2
 from source.encodings.filtered_sequence_encoding.SequenceAbundanceEncoder import SequenceAbundanceEncoder
 from source.encodings.filtered_sequence_encoding.SequenceCountEncoder import SequenceCountEncoder
 from source.hyperparameter_optimization.states.TrainMLModelState import TrainMLModelState
-from source.reports.Report import Report
 from source.reports.ReportOutput import ReportOutput
 from source.reports.ReportResult import ReportResult
-from source.reports.hyperparameter_reports.HyperparameterReport import HyperparameterReport
+from source.reports.train_ml_model_reports.TrainMLModelReport import TrainMLModelReport
 from source.util.ParameterValidator import ParameterValidator
 from source.util.PathBuilder import PathBuilder
 
 
-class ReferenceSequenceOverlap(HyperparameterReport):
+class ReferenceSequenceOverlap(TrainMLModelReport):
     """
     The ReferenceSequenceOverlap report compares a list of disease-associated sequences produced by :ref:`SequenceAbundance` or :ref:`SequenceCount` encoders to
     a list of reference receptor sequences. It outputs a Venn diagram and a list of receptor sequences found both in the encoder and reference.

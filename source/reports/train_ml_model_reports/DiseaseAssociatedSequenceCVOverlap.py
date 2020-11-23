@@ -7,15 +7,14 @@ import plotly.express as px
 from source.encodings.filtered_sequence_encoding.SequenceAbundanceEncoder import SequenceAbundanceEncoder
 from source.hyperparameter_optimization.states.HPItem import HPItem
 from source.hyperparameter_optimization.states.TrainMLModelState import TrainMLModelState
-from source.reports.Report import Report
 from source.reports.ReportOutput import ReportOutput
 from source.reports.ReportResult import ReportResult
-from source.reports.hyperparameter_reports.HyperparameterReport import HyperparameterReport
+from source.reports.train_ml_model_reports.TrainMLModelReport import TrainMLModelReport
 from source.util.PathBuilder import PathBuilder
 from source.util.SequenceAnalysisHelper import SequenceAnalysisHelper
 
 
-class DiseaseAssociatedSequenceCVOverlap(HyperparameterReport):
+class DiseaseAssociatedSequenceCVOverlap(TrainMLModelReport):
     """
     DiseaseAssociatedSequenceCVOverlap report makes one heatmap per label showing the overlap of disease-associated sequences produced by :ref:`SequenceAbundance` or :ref:`SequenceCount` encoders
     between folds of cross-validation (either inner or outer loop of the nested CV). The overlap is computed by the following equation:
