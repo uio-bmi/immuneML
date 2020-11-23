@@ -92,12 +92,12 @@ class MLApplicationInstruction(Instruction):
         label = self.state.label_config.get_labels_by_name()[0]
 
         method = self.state.hp_setting.ml_method
-        predictions = method.predict(dataset.encoded_data, [label])
+        predictions = method.predict(dataset.encoded_data, label)
         predictions_df = pd.DataFrame({"example_id": dataset.get_example_ids(), label: predictions[label]})
 
         if method.can_predict_proba():
             classes = method.get_classes_for_label(label)
-            predictions_proba = method.predict_proba(dataset.encoded_data, [label])[label]
+            predictions_proba = method.predict_proba(dataset.encoded_data, label)[label]
             for cls_index, cls in enumerate(classes):
                 predictions_df[f'{label}_{cls}_proba'] = predictions_proba[:, cls_index]
 

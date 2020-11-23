@@ -119,11 +119,11 @@ class ReceptorCNN(MLMethod):
         self.chain_names = None
         self.feature_names = None
 
-    def predict(self, encoded_data: EncodedData, label_names: list = None):
-        predictions_proba = self.predict_proba(encoded_data, label_names)
+    def predict(self, encoded_data: EncodedData, label_name: str):
+        predictions_proba = self.predict_proba(encoded_data, label_name)
         return {self.label_name: [self.class_mapping[val] for val in (predictions_proba[self.label_name][:, 1] > 0.5).tolist()]}
 
-    def predict_proba(self, encoded_data: EncodedData, labels):
+    def predict_proba(self, encoded_data: EncodedData, label_name: str):
         # set the model to evaluation mode for inference
         self.CNN.eval()
 
@@ -133,14 +133,14 @@ class ReceptorCNN(MLMethod):
         # make predictions
         with torch.no_grad():
             predictions = []
-            for examples, labels, example_ids in self._get_data_batch(encoded_data_pt, labels[0]):
+            for examples, labels, example_ids in self._get_data_batch(encoded_data_pt, label_name):
                 logit_outputs = self.CNN(examples)
                 prediction = torch.sigmoid(logit_outputs)
                 predictions.extend(prediction.numpy())
 
         return {self.label_name: np.vstack([1 - np.array(predictions), predictions]).T}
 
-    def fit(self, encoded_data: EncodedData, y, label_names: list = None, cores_for_training: int = -1):
+    def fit(self, encoded_data: EncodedData, label_name: str, cores_for_training: int = 2):
 
         self.feature_names = encoded_data.feature_names
 
@@ -153,8 +153,10 @@ class ReceptorCNN(MLMethod):
         self._make_CNN()
         self.CNN.to(device=self.device)
 
-        self.class_mapping = Util.make_binary_class_mapping(y, label_names)
-        self.label_name = label_names[0]
+        self.class_mapping = Util.make_binary_class_mapping(encoded_data.labels[label_name], label_name)
+        self.label_name = label_name
+
+        self.CNN.train()
 
         iteration = 0
         loss_function = nn.BCEWithLogitsLoss().to(device=self.device)
@@ -164,7 +166,7 @@ class ReceptorCNN(MLMethod):
 
         logging.info("ReceptorCNN: starting training.")
         while iteration < self.iteration_count:
-            for examples, labels, example_ids in self._get_data_batch(train_data, label_names[0]):
+            for examples, labels, example_ids in self._get_data_batch(train_data, self.label_name):
 
                 # Reset gradients
                 optimizer.zero_grad()
@@ -193,6 +195,11 @@ class ReceptorCNN(MLMethod):
                     break
 
         logging.info("ReceptorCNN: finished training.")
+
+    def fit_by_cross_validation(self, encoded_data: EncodedData, number_of_splits: int = 5, label_name: str = None, cores_for_training: int = -1,
+                                optimization_metric=None):
+        logging.warning(f"{ReceptorCNN.__name__}: cross_validation is not implemented for this method. Using standard fitting instead...")
+        self.fit(encoded_data=encoded_data, label_name=label_name)
 
     def _get_data_batch(self, encoded_data: EncodedData, label):
         batch_count = int(math.ceil(len(encoded_data.example_ids) / self.batch_size))
@@ -255,10 +262,6 @@ class ReceptorCNN(MLMethod):
 
         return loss
 
-    def fit_by_cross_validation(self, encoded_data, y, number_of_splits: int = 5, parameter_grid: dict = None, label_names: list = None):
-        logging.warning("ReceptorCNN: cross_validation is not implemented for this method. Using standard fitting instead...")
-        self.fit(encoded_data=encoded_data, y=y, label_names=label_names)
-
     def store(self, path, feature_names=None, details_path=None):
         PathBuilder.build(path)
 
@@ -309,7 +312,7 @@ class ReceptorCNN(MLMethod):
         params["CNN"] = copy.deepcopy(self.CNN).state_dict()
         return params
 
-    def get_labels(self):
+    def get_label(self):
         return [self.label_name]
 
     def get_package_info(self) -> str:

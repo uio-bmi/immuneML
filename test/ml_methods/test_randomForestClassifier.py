@@ -25,17 +25,17 @@ class TestRandomForestClassifier(TestCase):
         y = {"default": np.array([1, 0, 2, 0])}
 
         rfc = RandomForestClassifier()
-        rfc.fit(EncodedData(sparse.csr_matrix(x)), y)
+        rfc.fit(EncodedData(sparse.csr_matrix(x), y), 'default')
 
     def test_predict(self):
         x = np.array([[1, 0, 0], [0, 1, 1], [1, 1, 1], [0, 1, 1]])
         y = {"default": np.array([1, 0, 2, 0])}
 
         rfc = RandomForestClassifier()
-        rfc.fit(EncodedData(x), y)
+        rfc.fit(EncodedData(x, y), 'default')
 
         test_x = np.array([[0, 1, 0], [1, 0, 0]])
-        y = rfc.predict(EncodedData(test_x))["default"]
+        y = rfc.predict(EncodedData(test_x), 'default')["default"]
 
         self.assertTrue(len(y) == 2)
         self.assertTrue(y[0] in [0, 1, 2])
@@ -43,18 +43,18 @@ class TestRandomForestClassifier(TestCase):
 
     def test_fit_by_cross_validation(self):
         x = EncodedData(sparse.csr_matrix(
-            np.array([[1, 0, 0], [0, 1, 1], [1, 1, 1], [0, 1, 1], [1, 0, 0], [0, 1, 1], [1, 1, 1], [0, 1, 1]])))
-        y = {"t1": [1, 0, 2, 0, 1, 0, 2, 0], "t2": [1, 0, 2, 0, 1, 0, 2, 0]}
+            np.array([[1, 0, 0], [0, 1, 1], [1, 1, 1], [0, 1, 1], [1, 0, 0], [0, 1, 1], [1, 1, 1], [0, 1, 1]])),
+            labels={"t1": [1, 0, 2, 0, 1, 0, 2, 0], "t2": [1, 0, 2, 0, 1, 0, 2, 0]})
 
         rfc = RandomForestClassifier()
-        rfc.fit_by_cross_validation(x, y, number_of_splits=2, label_names=["t1", "t2"])
+        rfc.fit_by_cross_validation(x, number_of_splits=2, label_name="t2")
 
     def test_store(self):
         x = np.array([[1, 0, 0], [0, 1, 1], [1, 1, 1], [0, 1, 1]])
         y = {"default": np.array([1, 0, 2, 0])}
 
         rfc = RandomForestClassifier()
-        rfc.fit(EncodedData(x), y)
+        rfc.fit(EncodedData(x, y), "default")
 
         path = EnvironmentSettings.root_path + "test/tmp/rfc/"
 
@@ -73,7 +73,7 @@ class TestRandomForestClassifier(TestCase):
         y = {"default": np.array([1, 0, 2, 0])}
 
         rfc = RandomForestClassifier()
-        rfc.fit(EncodedData(x), y)
+        rfc.fit(EncodedData(x, y), "default")
 
         path = EnvironmentSettings.root_path + "test/tmp/rfc2/"
         PathBuilder.build(path)

@@ -141,11 +141,11 @@ class DeepRC(MLMethod):
 
         self.feature_names = None
 
-    def _metadata_to_hdf5(self, metadata_filepath, label_names):
+    def _metadata_to_hdf5(self, metadata_filepath, label_name):
         hdf5_filepath = '.'.join(metadata_filepath.split('.')[:-1]) + f".hdf5"
         converter = DatasetToHDF5(metadata_file=metadata_filepath,
                                   id_column=DeepRCEncoder.ID_COLUMN,
-                                  single_class_label_columns=tuple(label_names),
+                                  single_class_label_columns=tuple([label_name]),
                                   sequence_column=DeepRCEncoder.SEQUENCE_COLUMN,
                                   sequence_counts_column=DeepRCEncoder.COUNTS_COLUMN,
                                   column_sep=DeepRCEncoder.SEP,
@@ -225,10 +225,10 @@ class DeepRC(MLMethod):
 
         self.label_classes = label_classes
 
-    def _prepare_caching_params(self, encoded_data: EncodedData, y, type: str, label_names: list = None):
+    def _prepare_caching_params(self, encoded_data: EncodedData, type: str, label_name: str):
         return (("metadata_filepath", encoded_data.info["metadata_filepath"]),
-                ("y", hashlib.sha256(str(y).encode("utf-8")).hexdigest()),
-                ("label_names", str(label_names)),
+                ("y", hashlib.sha256(str(encoded_data.labels[label_name]).encode("utf-8")).hexdigest()),
+                ("label_name", label_name),
                 ("type", type),
                 ("validation_part", self.validation_part),
                 ("add_positional_information", self.add_positional_information),
@@ -253,22 +253,21 @@ class DeepRC(MLMethod):
                 ("evaluate_at", self.evaluate_at),
                 ("pytorch_device_name", self.pytorch_device_name))
 
-    def fit(self, encoded_data: EncodedData, y, label_names: list = None, cores_for_training: int = 2):
+    def fit(self, encoded_data: EncodedData, label_name: str, cores_for_training: int = 2):
         self.feature_names = encoded_data.feature_names
-        self.models = CacheHandler.memo_by_params(self._prepare_caching_params(encoded_data, y, "fit", label_names),
-                                                  lambda: self._fit(encoded_data, y, label_names, cores_for_training))
+        self.models = CacheHandler.memo_by_params(self._prepare_caching_params(encoded_data, "fit", label_name),
+                                                  lambda: self._fit(encoded_data, label_name, cores_for_training))
 
-    def _fit(self, encoded_data: EncodedData, y, label_names: list = None, cores_for_training: int = 2):
-        self._set_label_classes(y)
+    def _fit(self, encoded_data: EncodedData, label_name: str, cores_for_training: int = 2):
+        self._set_label_classes({label_name: encoded_data.labels[label_name]})
 
-        hdf5_filepath = self._metadata_to_hdf5(encoded_data.info["metadata_filepath"], label_names)
+        hdf5_filepath = self._metadata_to_hdf5(encoded_data.info["metadata_filepath"], label_name)
         pre_loaded_hdf5_file = self._load_dataset_in_ram(hdf5_filepath) if self.keep_dataset_in_ram else None
 
         train_indices, val_indices = self.get_train_val_indices(len(encoded_data.example_ids))
         self.max_seq_len = encoded_data.info["max_sequence_length"]
 
-        for i, label in enumerate(label_names):
-            self._fit_for_label(hdf5_filepath, pre_loaded_hdf5_file, train_indices, val_indices, label, cores_for_training)
+        self._fit_for_label(hdf5_filepath, pre_loaded_hdf5_file, train_indices, val_indices, label_name, cores_for_training)
 
         return self.models
 
@@ -297,57 +296,53 @@ class DeepRC(MLMethod):
 
         self.models[label] = model
 
-    def fit_by_cross_validation(self, encoded_data: EncodedData, y, number_of_splits: int = 5, parameter_grid: dict = None,
-                                label_names: list = None):
+    def fit_by_cross_validation(self, encoded_data: EncodedData, number_of_splits: int = 5, label_name: str = None, cores_for_training: int = -1,
+                                optimization_metric=None):
         warnings.warn("DeepRC: cross-validation on this classifier is not defined: fitting one model instead...")
-        self.fit(encoded_data, y, label_names)
+        self.fit(encoded_data, label_name)
 
     def get_classes_for_label(self, label):
         return self.label_classes[label]
 
-    def get_model(self, label_names: list = None):
-        if label_names is None:
+    def get_model(self, label_name: str):
+        if label_name is None:
             return self.models
         else:
-            return {key: self.models[key] for key in self.models.keys() if key in label_names}
+            return {key: self.models[key] for key in self.models.keys() if key == label_name}
 
     def get_params(self, label):
         return {name: param.data.tolist() for name, param in self.models[label].named_parameters()}
 
-    def check_is_fitted(self, labels):
-        for label in labels:
-            if label not in self.models.keys():
-                raise NotFittedError("This DeepRCs instance is not fitted yet. "
-                                     "Call 'fit' with appropriate arguments before using this method.")
+    def check_is_fitted(self, label_name: str):
+        if label_name not in self.models.keys():
+            raise NotFittedError("This DeepRCs instance is not fitted yet. "
+                                 "Call 'fit' with appropriate arguments before using this method.")
 
-    def predict(self, encoded_data: EncodedData, label_names: list = None):
-        probabilities = self.predict_proba(encoded_data, label_names)
+    def predict(self, encoded_data: EncodedData, label_name: str):
+        probabilities = self.predict_proba(encoded_data, label_name)
         predictions = dict()
 
-        for label in label_names:
-            classes = self.get_classes_for_label(label)
-            pos_class_probs = probabilities[label][:, 0]
-            predictions[label] = [classes[0] if probability > 0.5 else classes[1] for probability in pos_class_probs]
+        classes = self.get_classes_for_label(label_name)
+        pos_class_probs = probabilities[label_name][:, 0]
+        predictions[label_name] = [classes[0] if probability > 0.5 else classes[1] for probability in pos_class_probs]
 
-            if self.label_is_bool[label]:
-                predictions[label] = [pred_class == "True" for pred_class in predictions[label]]
+        if self.label_is_bool[label_name]:
+            predictions[label_name] = [pred_class == "True" for pred_class in predictions[label_name]]
 
         return predictions
 
-    def predict_proba(self, encoded_data: EncodedData, label_names):
-        self.check_is_fitted(label_names)
+    def predict_proba(self, encoded_data: EncodedData, label_name: str):
+        self.check_is_fitted(label_name)
 
         probabilities = {}
 
-        hdf5_filepath = self._metadata_to_hdf5(encoded_data.info["metadata_filepath"], label_names)
+        hdf5_filepath = self._metadata_to_hdf5(encoded_data.info["metadata_filepath"], label_name)
         pre_loaded_hdf5_file = self._load_dataset_in_ram(hdf5_filepath) if self.keep_dataset_in_ram else None
 
-        for label in label_names:
-            test_dataloader = self.make_data_loader(hdf5_filepath, pre_loaded_hdf5_file,
-                                                    indices=None, label=label, eval_only=True, is_train=False)
+        test_dataloader = self.make_data_loader(hdf5_filepath, pre_loaded_hdf5_file, indices=None, label=label_name, eval_only=True, is_train=False)
 
-            probs_pos_class = self._model_predict(self.models[label], test_dataloader)
-            probabilities[label] = np.vstack((probs_pos_class, 1 - probs_pos_class)).T
+        probs_pos_class = self._model_predict(self.models[label_name], test_dataloader)
+        probabilities[label_name] = np.vstack((probs_pos_class, 1 - probs_pos_class)).T
 
         return probabilities
 
@@ -412,7 +407,7 @@ class DeepRC(MLMethod):
     def check_if_exists(self, path):
         return os.path.isfile(path + FilenameHandler.get_filename(self.__class__.__name__, "pt"))
 
-    def get_labels(self):
+    def get_label(self):
         return self.label_classes
 
     def get_package_info(self) -> str:

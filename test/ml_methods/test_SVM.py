@@ -24,35 +24,35 @@ class TestSVM(TestCase):
         y = {"default": np.array([1, 0, 2, 0])}
 
         svm = SVM()
-        svm.fit(EncodedData(x), y)
+        svm.fit(EncodedData(x, y), 'default')
 
     def test_predict(self):
         x = np.array([[1, 0, 0], [0, 1, 1], [1, 1, 1], [0, 1, 1]])
         y = {"test": np.array([1, 0, 2, 0])}
 
         svm = SVM()
-        svm.fit(EncodedData(x), y, ["test"])
+        svm.fit(EncodedData(x, y), "test")
 
         test_x = np.array([[0, 1, 0], [1, 0, 0]])
-        y = svm.predict(EncodedData(test_x))["test"]
+        y = svm.predict(EncodedData(test_x), 'test')["test"]
 
         self.assertTrue(len(y) == 2)
         self.assertTrue(y[0] in [0, 1, 2])
         self.assertTrue(y[1] in [0, 1, 2])
 
     def test_fit_by_cross_validation(self):
-        x = EncodedData(np.array([[1, 0, 0], [0, 1, 1], [1, 1, 1], [0, 1, 1], [1, 0, 0], [0, 1, 1], [1, 1, 1], [0, 1, 1]]))
-        y = {"t1": [1, 0, 2, 0, 1, 0, 2, 0], "t2": [1, 0, 2, 0, 1, 0, 2, 0]}
+        x = EncodedData(np.array([[1, 0, 0], [0, 1, 1], [1, 1, 1], [0, 1, 1], [1, 0, 0], [0, 1, 1], [1, 1, 1], [0, 1, 1]]),
+                        {"t1": [1, 0, 2, 0, 1, 0, 2, 0], "t2": [1, 0, 2, 0, 1, 0, 2, 0]})
 
         svm = SVM()
-        svm.fit_by_cross_validation(x, y, number_of_splits=2, label_names=["t1", "t2"])
+        svm.fit_by_cross_validation(x, number_of_splits=2, label_name="t1")
 
     def test_store(self):
         x = np.array([[1, 0, 0], [0, 1, 1], [1, 1, 1], [0, 1, 1]])
         y = {"default": np.array(['a', "b", "c", "a"])}
 
         svm = SVM()
-        svm.fit(EncodedData(x), y)
+        svm.fit(EncodedData(x, y), 'default')
 
         path = EnvironmentSettings.root_path + "test/tmp/svm/"
 
@@ -71,7 +71,7 @@ class TestSVM(TestCase):
         y = {"default": np.array([1, 0, 2, 0])}
 
         svm = SVM()
-        svm.fit(EncodedData(x), y)
+        svm.fit(EncodedData(x, y), 'default')
 
         path = EnvironmentSettings.root_path + "test/tmp/svm2/"
         PathBuilder.build(path)

@@ -32,19 +32,19 @@ class TestTCRDISTClassifier(TestCase):
     def test_fit(self):
         x, y, encoded_data = self._prepare_data()
         knn = TCRDISTClassifier(percentage=0.75)
-        knn.fit(encoded_data, y, ["test"], cores_for_training=4)
-        predictions = knn.predict(encoded_data)
+        knn.fit(encoded_data, "test", cores_for_training=4)
+        predictions = knn.predict(encoded_data, 'test')
         self.assertTrue(np.array_equal(y["test"], predictions["test"]))
 
         encoded_data.examples = np.array([[1.1, 0.1, 0.9, 1.9]])
-        predictions = knn.predict(encoded_data)
+        predictions = knn.predict(encoded_data, 'test')
         self.assertTrue(np.array_equal([0], predictions["test"]))
 
     def test_store(self):
         x, y, encoded_data = self._prepare_data()
 
         cls = TCRDISTClassifier(0.75)
-        cls.fit(encoded_data, y, label_names=["test"], cores_for_training=4)
+        cls.fit(encoded_data, label_name="test", cores_for_training=4)
 
         path = EnvironmentSettings.root_path + "test/tmp/tcrdist_classifier/"
 
@@ -62,7 +62,7 @@ class TestTCRDISTClassifier(TestCase):
         x, y, encoded_data = self._prepare_data()
 
         cls = TCRDISTClassifier(0.75)
-        cls.fit(encoded_data, y, label_names=["test"], cores_for_training=4)
+        cls.fit(encoded_data, label_name="test", cores_for_training=4)
 
         path = PathBuilder.build(EnvironmentSettings.root_path + "test/tmp/tcrdist_classifier_load/")
 

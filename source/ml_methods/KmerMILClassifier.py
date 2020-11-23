@@ -87,7 +87,7 @@ class KmerMILClassifier(MLMethod):
         assert encoded_data.encoding == 'AtchleyKmerEncoder', f"KmerMILClassifier: the encoding is not compatible with the given classifier. " \
                                                               f"Expected AtchleyKmer encoding, got {encoded_data.encoding} instead. "
 
-    def fit(self, encoded_data: EncodedData, y, label_names: list = None, cores_for_training: int = 2):
+    def fit(self, encoded_data: EncodedData, label_name: str, cores_for_training: int = 2):
         self.feature_names = encoded_data.feature_names
         self._check_encoded_data(encoded_data)
 
@@ -96,8 +96,8 @@ class KmerMILClassifier(MLMethod):
 
         self._make_log_reg()
 
-        self.class_mapping = Util.make_binary_class_mapping(y, label_names)
-        self.label_name = label_names[0]
+        self.class_mapping = Util.make_binary_class_mapping(encoded_data.labels[label_name], label_name)
+        self.label_name = label_name
         loss = np.inf
 
         state = {"loss": loss, "model": None}
@@ -116,7 +116,7 @@ class KmerMILClassifier(MLMethod):
             logits = self.logistic_regression(examples)
 
             # compute the loss
-            loss = loss_func(logits, torch.tensor(y[self.label_name]).float())
+            loss = loss_func(logits, torch.tensor(encoded_data.labels[self.label_name]).float())
 
             # perform update
             loss.backward()
@@ -143,15 +143,15 @@ class KmerMILClassifier(MLMethod):
         max_logits_indices = torch.argmax(logits, dim=1)
         return max_logits_indices.long()
 
-    def predict(self, encoded_data: EncodedData, label_names: list = None):
-        predictions_proba = self.predict_proba(encoded_data, label_names)
+    def predict(self, encoded_data: EncodedData, label_name: str):
+        predictions_proba = self.predict_proba(encoded_data, label_name)
         return {self.label_name: [self.class_mapping[val] for val in (predictions_proba[self.label_name][:, 1] > 0.5).tolist()]}
 
-    def fit_by_cross_validation(self, encoded_data: EncodedData, y, number_of_splits: int = 5, parameter_grid: dict = None, label_names: list = None,
-                                cores_for_training: int = -1):
+    def fit_by_cross_validation(self, encoded_data: EncodedData, number_of_splits: int = 5, label_name: str = None, cores_for_training: int = -1,
+                                optimization_metric=None):
         logging.warning(f"KmerMILClassifier: fitting by cross validation is not implemented internally for the model, fitting without "
                         f"cross-validation instead.")
-        self.fit(encoded_data, y, label_names)
+        self.fit(encoded_data, label_name)
 
     def store(self, path, feature_names=None, details_path=None):
         PathBuilder.build(path)
@@ -179,10 +179,10 @@ class KmerMILClassifier(MLMethod):
         self._make_log_reg()
         self.logistic_regression.load_state_dict(torch.load(path + "log_reg.pt"))
 
-    def get_model(self, label_names: list = None):
+    def get_model(self, label_name: str = None):
         return vars(self)
 
-    def check_if_exists(self, path):
+    def check_if_exists(self, path) -> bool:
         return self.logistic_regression is not None
 
     def get_classes_for_label(self, label):
@@ -194,7 +194,7 @@ class KmerMILClassifier(MLMethod):
         params["logistic_regression"] = copy.deepcopy(self.logistic_regression).state_dict()
         return params
 
-    def predict_proba(self, encoded_data: EncodedData, labels):
+    def predict_proba(self, encoded_data: EncodedData, label_name: str):
         self.logistic_regression.eval()
         example_count = encoded_data.examples.shape[0]
         max_logit_indices = self._get_max_logits_indices(encoded_data.examples)
@@ -203,7 +203,7 @@ class KmerMILClassifier(MLMethod):
             predictions = torch.sigmoid(self.logistic_regression(data)).numpy()
         return {self.label_name: np.vstack([1 - np.array(predictions), predictions]).T}
 
-    def get_labels(self):
+    def get_label(self):
         return [self.label_name]
 
     def get_package_info(self) -> str:
