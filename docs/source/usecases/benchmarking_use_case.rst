@@ -4,6 +4,7 @@ Use case 3: Benchmarking ML methods on ground-truth synthetic data
 In this use case, we show that immuneML can be used for benchmarking ML methods and encodings. To do this,
 we first simulate ground-truth synthetic adaptive immune repertoires, then
 implant known disease signals in these repertoires of varying difficulties, and finally perform a benchmarking.
+The YAML specifications in this document are compatible with immuneML version 1.0.0.
 
 
 Generating synthetic immune repertoires with OLGA

@@ -7,13 +7,12 @@ from source.hyperparameter_optimization.states.TrainMLModelState import TrainMLM
 from source.reports.PlotlyUtil import PlotlyUtil
 from source.reports.ReportOutput import ReportOutput
 from source.reports.ReportResult import ReportResult
-from source.reports.hyperparameter_reports.HyperparameterReport import HyperparameterReport
-from source.reports.ml_reports.MLReport import MLReport
+from source.reports.train_ml_model_reports.TrainMLModelReport import TrainMLModelReport
 from source.util.ParameterValidator import ParameterValidator
 from source.util.PathBuilder import PathBuilder
 
 
-class MLSettingsPerformance(HyperparameterReport):
+class MLSettingsPerformance(TrainMLModelReport):
     """
     Report for TrainMLModel instruction: plots the performance for each of the setting combinations as defined under 'settings' in the
     assessment (outer validation) loop.
