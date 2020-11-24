@@ -778,7 +778,7 @@ with simulated signals can be found at :code:`/path/to/simulated_data/olga2000.i
       d1:
         format: Pickle
         params:
-          /path/to/simulated_data/olga2000.iml_dataset
+          path: /path/to/simulated_data/olga2000.iml_dataset
     encodings:
       3mer:
         KmerFrequency:
