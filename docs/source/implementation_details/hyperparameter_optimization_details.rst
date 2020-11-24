@@ -12,8 +12,8 @@ The code is split into `TrainMLModelInstruction`, `HPAssessment`, `HPSelection`,
 optimization is located in the hyperparameter_optimization package, except TrainMLModelInstruction which is located in the instructions package.
 
 The parameters used to define the hyperparameter optimization, such as dataset, how to split the data, which batch size to use,
-along with intermediary results, such as split data and trained ML models are all kept in the `HPOptimizationState` class instance.
-This data class is also passed to specified hyperparameter reports. More details on the HPOptimizationState are shown in Figure 2.
+along with intermediary results, such as split data and trained ML models are all kept in the `TrainMLModelState` class instance.
+This data class is also passed to specified hyperparameter reports. More details on the TrainMLModelState are shown in Figure 2.
 
 .. figure:: ../_static/images/state_hierarchy_hp_optimization.png
   :width: 70%

@@ -27,7 +27,7 @@ An example of the full YAML specification for training an ML model through neste
           model_type: sequence
     ml_methods:
       log_reg1:
-        SimpleLogisticRegression:
+        LogisticRegression:
             C: 0.001
     reports:
       r1: SequenceLengthDistribution

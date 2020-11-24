@@ -64,7 +64,7 @@ These three components can be defined in the following way:
     encodings:
       kmer_frequency: KmerFrequency
     ml_methods:
-      logistic_regression: SimpleLogisticRegression
+      logistic_regression: LogisticRegression
 
 
 

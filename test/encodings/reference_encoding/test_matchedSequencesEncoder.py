@@ -74,9 +74,9 @@ class TestMatchedSequencesEncoder(TestCase):
 
         self.assertDictEqual(encoded.encoded_data.labels, {"label": ["yes", "yes", "no"],
                                                            "subject_id": ["subject_1", "subject_2", "subject_3"]})
-        self.assertListEqual(encoded.encoded_data.feature_names, ["100", "200"])
+        self.assertListEqual(encoded.encoded_data.feature_names, ["100_TRB", "200_TRB"])
 
-        self.assertListEqual(list(encoded.encoded_data.feature_annotations.sequence_id), ["100", "200"])
+        self.assertListEqual(list(encoded.encoded_data.feature_annotations.sequence_id), ["100_TRB", "200_TRB"])
         self.assertListEqual(list(encoded.encoded_data.feature_annotations.chain), ["beta", "beta"])
         self.assertListEqual(list(encoded.encoded_data.feature_annotations.sequence), ["AAAA", "SSSS"])
         self.assertListEqual(list(encoded.encoded_data.feature_annotations.v_gene), ["TRBV1", "TRBV1"])

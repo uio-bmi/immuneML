@@ -8,13 +8,13 @@ from sklearn import metrics
 from sklearn.metrics import precision_recall_curve
 
 from source.hyperparameter_optimization.states.TrainMLModelState import TrainMLModelState
-from source.reports.Report import Report
 from source.reports.ReportOutput import ReportOutput
 from source.reports.ReportResult import ReportResult
+from source.reports.multi_dataset_reports.MultiDatasetReport import MultiDatasetReport
 from source.util.PathBuilder import PathBuilder
 
 
-class PerformanceOverview(Report):
+class PerformanceOverview(MultiDatasetReport):
     """
     PerformanceOverview report creates AUC plot and precision-recall plot for optimal trained models on multiple datasets. The labels on the plots
     are the names of the datasets, so it might be good to have user-friendly names when defining datasets that are still a combination of

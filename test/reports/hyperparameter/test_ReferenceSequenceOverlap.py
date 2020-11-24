@@ -5,7 +5,7 @@ import pandas as pd
 
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.reports.ReportOutput import ReportOutput
-from source.reports.hyperparameter.ReferenceSequenceOverlap import ReferenceSequenceOverlap
+from source.reports.train_ml_model_reports.ReferenceSequenceOverlap import ReferenceSequenceOverlap
 from source.util.PathBuilder import PathBuilder
 
 

@@ -313,12 +313,20 @@ class ProbabilisticBinaryClassifier(MLMethod):
             n: total number of sequences
 
         Returns:
+
             a tuple of probabilities for negative class and positive class for given example, normalized to sum to 1
+
         """
         predicted_probability_0 = beta_binomial.pmf(k, n, self.alpha_0, self.beta_0) * (self.N_0 + 1) / (self.N_0 + self.N_1 + 2)
         predicted_probability_1 = beta_binomial.pmf(k, n, self.alpha_1, self.beta_1) * (self.N_1 + 1) / (self.N_0 + self.N_1 + 2)
 
         normalization_const = predicted_probability_0 + predicted_probability_1
+
+        if np.isnan(normalization_const):
+            raise ValueError(f"{ProbabilisticBinaryClassifier.__name__}: encountered nan in predicted posterior class probabilities."
+                             f"\nprobability of class 0: {predicted_probability_0}\nprobability of class 1: {predicted_probability_1}\n"
+                             f"alpha 0: {self.alpha_0}, beta 0: {self.beta_0}\nalpha 1: {self.alpha_1}, beta 1: {self.beta_1}\n"
+                             f"positive example count: {self.N_1}, negative example count: {self.N_0}")
 
         return predicted_probability_0 / normalization_const, predicted_probability_1 / normalization_const
 

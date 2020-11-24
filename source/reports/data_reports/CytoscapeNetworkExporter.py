@@ -17,7 +17,7 @@ class CytoscapeNetworkExporter(DataReport):
     """
     This report exports the Receptor sequences to .sif format, such that they can directly be
     imported as a network in Cytoscape, to visualize chain sharing between the different receptors
-    in a dataset.
+    in a dataset (for example, for TCRs: how often one alpha chain is shared with multiple beta chains, and vice versa).
 
     The Receptor sequences can be provided as a ReceptorDataset, or a RepertoireDataset (containing paired sequence
     information). In the latter case, one .sif file is exported per Repertoire.

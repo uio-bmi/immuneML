@@ -1,11 +1,11 @@
-from sklearn.linear_model import LogisticRegression
+from sklearn.linear_model import LogisticRegression as SklearnLogisticRegression
 from sklearn.model_selection import RandomizedSearchCV
 
 from scripts.specification_util import update_docs_per_mapping
 from source.ml_methods.SklearnMethod import SklearnMethod
 
 
-class SimpleLogisticRegression(SklearnMethod):
+class LogisticRegression(SklearnMethod):
     """
     This is a wrapper of scikit-learn’s LogisticRegression class. Please see the
     `scikit-learn documentation <https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LogisticRegression.html>`_
@@ -23,19 +23,19 @@ class SimpleLogisticRegression(SklearnMethod):
     .. code-block:: yaml
 
         my_logistic_regression: # user-defined method name
-            SimpleLogisticRegression: # name of the ML method
+            LogisticRegression: # name of the ML method
                 # sklearn parameters (same names as in original sklearn class)
                 penalty: l1 # always use penalty l1
                 C: [0.01, 0.1, 1, 10, 100] # find the optimal value for C
                 # Additional parameter that determines whether to print convergence warnings
                 show_warnings: True
-            # if any of the parameters under SimpleLogisticRegression is a list and model_selection_cv is True,
+            # if any of the parameters under LogisticRegression is a list and model_selection_cv is True,
             # a grid search will be done over the given parameters, using the number of folds specified in model_selection_n_folds,
             # and the optimal model will be selected
             model_selection_cv: True
             model_selection_n_folds: 5
         # alternative way to define ML method with default values:
-        my_default_logistic_regression: SimpleLogisticRegression
+        my_default_logistic_regression: LogisticRegression
 
     """
 
@@ -52,12 +52,12 @@ class SimpleLogisticRegression(SklearnMethod):
                                     "C": [0.001, 0.01, 0.1, 10, 100, 1000],
                                     "class_weight": ["balanced"]}
 
-        super(SimpleLogisticRegression, self).__init__(parameter_grid=parameter_grid, parameters=parameters)
+        super(LogisticRegression, self).__init__(parameter_grid=parameter_grid, parameters=parameters)
 
     def _get_ml_model(self, cores_for_training: int=2, X=None):
         params = self._parameters.copy()
         params["n_jobs"] = cores_for_training
-        return LogisticRegression(**params)
+        return SklearnLogisticRegression(**params)
 
     def can_predict_proba(self) -> bool:
         return True
@@ -76,10 +76,10 @@ class SimpleLogisticRegression(SklearnMethod):
 
     @staticmethod
     def get_documentation():
-        doc = str(SimpleLogisticRegression.__doc__)
+        doc = str(LogisticRegression.__doc__)
 
         mapping = {
-            "For usage instructions, check :py:obj:`~source.ml_methods.SklearnMethod.SklearnMethod`.": SklearnMethod.get_usage_documentation("SimpleLogisticRegression"),
+            "For usage instructions, check :py:obj:`~source.ml_methods.SklearnMethod.SklearnMethod`.": SklearnMethod.get_usage_documentation("LogisticRegression"),
         }
 
         doc = update_docs_per_mapping(doc, mapping)

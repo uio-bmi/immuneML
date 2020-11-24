@@ -19,7 +19,7 @@ class MatchedReceptorsEncoder(DatasetEncoder):
     and a paired reference receptor dataset.
     For each paired reference receptor, the frequency of either chain in the dataset is counted.
 
-    This encoding should be used in combination with the :py:obj:`~source.reports.encoding_reports.Matches.Matches`
+    This encoding should be used in combination with the :ref:`Matches`
     report.
 
     Arguments:

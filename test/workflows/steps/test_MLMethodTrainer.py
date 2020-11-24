@@ -9,7 +9,7 @@ from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.encoded_data.EncodedData import EncodedData
 from source.environment.Constants import Constants
 from source.environment.EnvironmentSettings import EnvironmentSettings
-from source.ml_methods.SimpleLogisticRegression import SimpleLogisticRegression
+from source.ml_methods.LogisticRegression import LogisticRegression
 from source.workflows.steps.MLMethodTrainer import MLMethodTrainer
 from source.workflows.steps.MLMethodTrainerParams import MLMethodTrainerParams
 
@@ -20,7 +20,7 @@ class TestMLMethodTrainer(TestCase):
         os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
 
     def test_run(self):
-        method = SimpleLogisticRegression()
+        method = LogisticRegression()
         dataset = RepertoireDataset()
         dataset.encoded_data = EncodedData(
             examples=np.array([[1, 2, 3], [2, 3, 4], [1, 2, 3], [2, 3, 4], [1, 2, 3], [2, 3, 4]]),
