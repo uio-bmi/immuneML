@@ -4,7 +4,7 @@ import shutil
 from unittest import TestCase
 
 import numpy as np
-from sklearn.linear_model import LogisticRegression
+from sklearn.linear_model import LogisticRegression as SklearnLogisticRegression
 
 from source.caching.CacheType import CacheType
 from source.data_model.encoded_data.EncodedData import EncodedData
@@ -57,12 +57,12 @@ class TestLogisticRegression(TestCase):
         path = EnvironmentSettings.root_path + "test/tmp/lr/"
 
         lr.store(path, ["f1", "f2", "f3"])
-        self.assertTrue(os.path.isfile(path + "simple_logistic_regression.pickle"))
+        self.assertTrue(os.path.isfile(path + "logistic_regression.pickle"))
 
-        with open(path + "simple_logistic_regression.pickle", "rb") as file:
+        with open(path + "logistic_regression.pickle", "rb") as file:
             lr2 = pickle.load(file)
 
-        self.assertTrue(isinstance(lr2["default"], LogisticRegression))
+        self.assertTrue(isinstance(lr2["default"], SklearnLogisticRegression))
 
         shutil.rmtree(path)
 
@@ -76,13 +76,13 @@ class TestLogisticRegression(TestCase):
         path = EnvironmentSettings.root_path + "test/tmp/lr2/"
         PathBuilder.build(path)
 
-        with open(path + "simple_logistic_regression.pickle", "wb") as file:
+        with open(path + "logistic_regression.pickle", "wb") as file:
             pickle.dump(lr.get_model(), file)
 
         lr2 = LogisticRegression()
         lr2.load(path)
 
-        self.assertTrue(isinstance(lr2.get_model()["default"], LogisticRegression))
+        self.assertTrue(isinstance(lr2.get_model()["default"], SklearnLogisticRegression))
 
         shutil.rmtree(path)
 
