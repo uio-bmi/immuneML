@@ -1,6 +1,7 @@
 from scripts.DocumentatonFormat import DocumentationFormat
 from scripts.specification_util import write_class_docs, make_docs
 from source.IO.dataset_import.DataImport import DataImport
+from source.dsl.DefaultParamsLoader import DefaultParamsLoader
 from source.dsl.definition_parsers.DefinitionParserOutput import DefinitionParserOutput
 from source.dsl.definition_parsers.EncodingParser import EncodingParser
 from source.dsl.definition_parsers.MLParser import MLParser
@@ -18,7 +19,7 @@ from source.reports.data_reports.DataReport import DataReport
 from source.reports.encoding_reports.EncodingReport import EncodingReport
 from source.reports.train_ml_model_reports.TrainMLModelReport import TrainMLModelReport
 from source.reports.ml_reports.MLReport import MLReport
-from source.reports.multidataset_reports.MultiDatasetReport import MultiDatasetReport
+from source.reports.multi_dataset_reports.MultiDatasetReport import MultiDatasetReport
 from source.simulation.Implanting import Implanting
 from source.simulation.implants.Motif import Motif
 from source.simulation.implants.Signal import Signal
@@ -117,7 +118,7 @@ class DefinitionParser:
                                                  level_heading=DocumentationFormat.LEVELS[1])
                 write_class_docs(doc_format, file)
 
-            subdir = report_type_class.__name__.lower().replace("report", "_reports")
+            subdir = DefaultParamsLoader._convert_to_snake_case(report_type_class.__name__) + "s"
 
             classes = ReflectionHandler.all_nonabstract_subclasses(report_type_class, "", f"reports/{subdir}/")
             make_docs(path, classes, filename, "", "a")

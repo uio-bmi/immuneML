@@ -10,7 +10,7 @@ from sklearn.metrics import precision_recall_curve
 from source.hyperparameter_optimization.states.TrainMLModelState import TrainMLModelState
 from source.reports.ReportOutput import ReportOutput
 from source.reports.ReportResult import ReportResult
-from source.reports.multidataset_reports.MultiDatasetReport import MultiDatasetReport
+from source.reports.multi_dataset_reports.MultiDatasetReport import MultiDatasetReport
 from source.util.PathBuilder import PathBuilder
 
 
