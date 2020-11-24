@@ -14,7 +14,7 @@ class ReportConfig:
 
         models (dict): :ref:`ML model reports` to be executed on all trained classifiers
 
-        encoding (dict): :ref:`Encoding reports` to be executed on the encoded training/test datasets or training/validation datasets
+        encoding (dict): :ref:`Encoding reports` to be executed on each of the encoded training/test datasets or training/validation datasets
 
         hyperparameter (dict): :ref:`Hyperparameter reports` to be executed after the nested CV has finished to show the overall performance; this parameter can only be
         specified under the assessment key in TrainMLModel instruction.
