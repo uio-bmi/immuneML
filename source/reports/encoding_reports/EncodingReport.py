@@ -1,9 +1,7 @@
-from abc import ABC
-
 from source.reports.Report import Report
 
 
-class EncodingReport(Report, ABC):
+class EncodingReport(Report):
     """
     Encoding reports show some type of features or statistics about an encoded dataset, or may in some cases
     export relevant sequences or tables.

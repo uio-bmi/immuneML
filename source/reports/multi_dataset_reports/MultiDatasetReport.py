@@ -1,9 +1,7 @@
-from abc import ABC
-
 from source.reports.Report import Report
 
 
-class MultiDatasetReport(Report, ABC):
+class MultiDatasetReport(Report):
     """
     Multi dataset reports are special reports that can be specified when running immuneML with the :py:obj:`~source.api.aggregated_runs.MultiDatasetBenchmarkTool.MultiDatasetBenchmarkTool`.
 

@@ -1,11 +1,9 @@
-from abc import ABC
-
 from source.data_model.dataset.Dataset import Dataset
 from source.ml_methods.MLMethod import MLMethod
 from source.reports.Report import Report
 
 
-class MLReport(Report, ABC):
+class MLReport(Report):
     """
     ML model reports show some type of features or statistics about a trained ML model.
 

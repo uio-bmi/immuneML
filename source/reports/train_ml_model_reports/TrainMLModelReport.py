@@ -1,9 +1,7 @@
-from abc import ABC
-
 from source.reports.Report import Report
 
 
-class TrainMLModelReport(Report, ABC):
+class TrainMLModelReport(Report):
     """
     Train ML model reports plot general statistics or export data of multiple models simultaneously when running the :ref:`TrainMLModel` instruction.
 
