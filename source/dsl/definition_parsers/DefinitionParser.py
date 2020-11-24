@@ -17,9 +17,9 @@ from source.ml_methods.MLMethod import MLMethod
 from source.preprocessing.Preprocessor import Preprocessor
 from source.reports.data_reports.DataReport import DataReport
 from source.reports.encoding_reports.EncodingReport import EncodingReport
-from source.reports.train_ml_model_reports.TrainMLModelReport import TrainMLModelReport
 from source.reports.ml_reports.MLReport import MLReport
 from source.reports.multi_dataset_reports.MultiDatasetReport import MultiDatasetReport
+from source.reports.train_ml_model_reports.TrainMLModelReport import TrainMLModelReport
 from source.simulation.Implanting import Implanting
 from source.simulation.implants.Motif import Motif
 from source.simulation.implants.Signal import Signal
@@ -118,7 +118,7 @@ class DefinitionParser:
                                                  level_heading=DocumentationFormat.LEVELS[1])
                 write_class_docs(doc_format, file)
 
-            subdir = DefaultParamsLoader._convert_to_snake_case(report_type_class.__name__) + "s"
+            subdir = DefaultParamsLoader.convert_to_snake_case(report_type_class.__name__) + "s"
 
             classes = ReflectionHandler.all_nonabstract_subclasses(report_type_class, "", f"reports/{subdir}/")
             make_docs(path, classes, filename, "", "a")

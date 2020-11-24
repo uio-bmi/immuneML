@@ -113,8 +113,8 @@ class ImportHelper:
     @staticmethod
     def make_new_metadata_file(repertoires: list, metadata: pd.DataFrame, result_path: str, dataset_name: str) -> str:
         new_metadata = metadata.copy()
-        new_metadata["filename"] = [os.path.basename(repertoire.data_filename) for repertoire in repertoires]
-        new_metadata["identifier"] = [repertoire.identifier for repertoire in repertoires]
+        new_metadata.loc[:, "filename"] = [os.path.basename(repertoire.data_filename) for repertoire in repertoires]
+        new_metadata.loc[:, "identifier"] = [repertoire.identifier for repertoire in repertoires]
 
         metadata_filename = f"{result_path}{dataset_name}_metadata.csv"
         new_metadata.to_csv(metadata_filename, index=False, sep=",")
@@ -159,7 +159,6 @@ class ImportHelper:
             df.rename(columns=params.metadata_column_mapping, inplace=True)
 
         df = ImportHelper.standardize_none_values(df)
-
 
         return df
 

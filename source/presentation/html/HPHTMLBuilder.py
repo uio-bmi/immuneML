@@ -284,10 +284,8 @@ class HPHTMLBuilder:
             "metrics": [{"name": metric.name.lower()} for metric in state.metrics],
             "assessment_desc": state.assessment,
             "selection_desc": state.selection,
-            "dataset_reports": Util.to_dict_recursive(state.data_report_results, base_path) if state.data_report_results else None,
-            "show_dataset_reports": bool(state.data_report_results),
-            "show_hp_reports": bool(state.hp_report_results),
-            'hp_reports': Util.to_dict_recursive(state.hp_report_results, base_path) if state.hp_report_results else None,
+            "show_hp_reports": bool(state.report_results),
+            'hp_reports': Util.to_dict_recursive(state.report_results, base_path) if state.report_results else None,
             "hp_per_label": HPHTMLBuilder._make_hp_per_label(state),
             'models_per_label': HPHTMLBuilder._make_model_per_label(state, base_path),
             'immuneML_version': MLUtil.get_immuneML_version()

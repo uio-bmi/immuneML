@@ -60,7 +60,7 @@
             </div>
         </details>
         <details>
-            <summary>Hyperparameter optimization parameters</summary>
+            <summary>Parameters for training ML model</summary>
             <div class="col-container">
                 <div class="col">
                     <span>Metrics</span>
@@ -150,34 +150,6 @@
             {{/hp_reports}}
         </div>
         {{/show_hp_reports}}
-        {{#show_dataset_reports}}
-        <h3>Dataset reports</h3>
-        {{#dataset_reports}}
-        {{#output_figures}}
-        <div class="padded center">
-            <embed alt="report" src="{{path}}">
-            <p>{{name}}</p>
-        </div>
-        {{/output_figures}}
-        <div class="padded center">
-            {{#output_tables}}
-            <div>
-                <a href="{{path}}">{{name}}</a>
-            </div>
-            {{/output_tables}}
-            {{#output_text}}
-            <div>
-                <a href="{{path}}">{{name}}</a>
-            </div>
-            {{/output_text}}
-            {{#other_outputs}}
-            <div>
-                <a href="{{path}}">{{name}}</a>
-            </div>
-            {{/other_outputs}}
-        </div>
-        {{/dataset_reports}}
-        {{/show_dataset_reports}}
     </div>
 </body>
 </html>

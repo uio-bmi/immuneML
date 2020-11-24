@@ -92,7 +92,6 @@ class TestSequenceAbundanceEncoding(TestCase):
                         "split_count": 1,
                         "training_percentage": 0.7,
                         "reports": {
-                            "hyperparameter": ["r1"]
                         }
                     },
                     "selection": {
@@ -105,7 +104,7 @@ class TestSequenceAbundanceEncoding(TestCase):
                     "strategy": "GridSearch",
                     "metrics": ["accuracy"],
                     "batch_size": 2,
-                    "reports": None,
+                    "reports": ["r1"],
                     "optimization_metric": "balanced_accuracy",
                     "refit_optimal_model": True,
                     "store_encoded_data": False

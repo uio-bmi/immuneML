@@ -110,7 +110,7 @@ class HPUtil:
     @staticmethod
     def run_hyperparameter_reports(state: TrainMLModelState, path: str) -> List[ReportResult]:
         report_results = []
-        for key, report in state.assessment.reports.hyperparameter_reports.items():
+        for key, report in state.reports.items():
             tmp_report = copy.deepcopy(report)
             tmp_report.state = state
             tmp_report.result_path = f"{path}{key}/"

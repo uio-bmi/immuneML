@@ -83,8 +83,7 @@ class Quickstart:
                         "split_count": 1,
                         "training_percentage": 0.7,
                         "reports": {
-                            "data_splits": [],
-                            'hyperparameter': ["hprep"],
+                            "data_splits": ["rep1"],
                             'models': ["coef"]
                         }
                     },
@@ -101,7 +100,7 @@ class Quickstart:
                     "dataset": "d1",
                     "strategy": "GridSearch",
                     "metrics": ["accuracy"],
-                    "reports": ["rep1"],
+                    "reports": ["hprep"],
                     "batch_size": 3,
                     "optimization_metric": "balanced_accuracy",
                     "refit_optimal_model": False,

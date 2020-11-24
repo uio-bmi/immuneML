@@ -85,7 +85,6 @@ class TestDiseaseAssociatedSequenceCVOverlap(TestCase):
                         "split_count": 2,
                         "training_percentage": 0.7,
                         "reports": {
-                            "hyperparameter": ["r1"]
                         }
                     },
                     "selection": {
@@ -98,7 +97,7 @@ class TestDiseaseAssociatedSequenceCVOverlap(TestCase):
                     "strategy": "GridSearch",
                     "metrics": ["accuracy"],
                     "batch_size": 2,
-                    "reports": None,
+                    "reports": ["r1"],
                     "optimization_metric": "balanced_accuracy",
                     "refit_optimal_model": True,
                     "store_encoded_data": False
@@ -113,13 +112,13 @@ class TestDiseaseAssociatedSequenceCVOverlap(TestCase):
         app = ImmuneMLApp(specs_file, path + "result/")
         state = app.run()[0]
 
-        self.assertEqual(1, len(state.hp_report_results))
-        self.assertEqual(3, len(state.hp_report_results[0].output_figures))
-        self.assertEqual(3, len(state.hp_report_results[0].output_tables))
+        self.assertEqual(1, len(state.report_results))
+        self.assertEqual(3, len(state.report_results[0].output_figures))
+        self.assertEqual(3, len(state.report_results[0].output_tables))
 
-        for fig in state.hp_report_results[0].output_figures:
+        for fig in state.report_results[0].output_figures:
             self.assertTrue(os.path.isfile(fig.path))
-        for table in state.hp_report_results[0].output_tables:
+        for table in state.report_results[0].output_tables:
             self.assertTrue(os.path.isfile(table.path))
 
         shutil.rmtree(path)

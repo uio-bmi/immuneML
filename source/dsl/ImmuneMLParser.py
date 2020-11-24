@@ -80,7 +80,6 @@ class ImmuneMLParser:
                         data_splits: []
                         encoding: []
                         models: []
-                        hyperparameter: []
                 selection:
                     split_strategy: k-fold
                     split_count: 5

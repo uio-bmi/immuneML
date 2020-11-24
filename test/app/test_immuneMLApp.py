@@ -143,7 +143,6 @@ class TestImmuneMLApp(TestCase):
                         "training_percentage": 0.7,
                         "reports": {
                             "data_splits": [],
-                            "hyperparameter": ["rep2"],
                             "models": ["rep3"],
                             "encoding": ["rep4"]
                         }
@@ -162,7 +161,7 @@ class TestImmuneMLApp(TestCase):
                     "dataset": "d1",
                     "strategy": "GridSearch",
                     "metrics": ["accuracy", "auc"],
-                    "reports": ["rep1"],
+                    "reports": ["rep2"],
                     "batch_size": 10,
                     "optimization_metric": "accuracy",
                     'refit_optimal_model': False,

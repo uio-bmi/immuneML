@@ -16,9 +16,6 @@ class ReportConfig:
 
         encoding (dict): :ref:`Encoding reports` to be executed on each of the encoded training/test datasets or training/validation datasets
 
-        hyperparameter (dict): :ref:`Hyperparameter reports` to be executed after the nested CV has finished to show the overall performance; this parameter can only be
-        specified under the assessment key in TrainMLModel instruction.
-
     YAML specification:
 
     .. indent with spaces
@@ -34,8 +31,6 @@ class ReportConfig:
                     - my_data_split_report
                 encoding: # list of reports to execute on encoded training/test datasets
                     - my_encoding_report
-                hyperparameter: # list of reports to execute when nested CV is finished to show overall performance
-                    - my_hyperparameter_report
 
         # as a part of a TrainMLModel instruction, defining the inner (selection) loop of nested cross-validation:
         selection: # inner loop of nested CV
@@ -52,13 +47,12 @@ class ReportConfig:
 
     """
 
-    def __init__(self, data_splits: dict = None, models: dict = None, data: dict = None, encoding: dict = None, hyperparameter: dict = None):
+    def __init__(self, data_splits: dict = None, models: dict = None, data: dict = None, encoding: dict = None):
 
         self.data_split_reports = data_splits if data_splits is not None else {}
         self.encoding_reports = encoding if encoding is not None else {}
         self.model_reports = models if models is not None else {}
         self.data_reports = data if data is not None else {}
-        self.hyperparameter_reports = hyperparameter if hyperparameter is not None else {}
 
     @staticmethod
     def get_documentation():
@@ -67,8 +61,7 @@ class ReportConfig:
             "data_splits (dict)": "data_splits",
             "models (dict)": "models",
             "data (dict)": "data",
-            "encoding (dict)": "encoding",
-            "hyperparameter (dict)": "hyperparameter"
+            "encoding (dict)": "encoding"
         }
         doc = update_docs_per_mapping(doc, mapping)
         return doc

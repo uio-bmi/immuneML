@@ -59,8 +59,6 @@ class SplitConfig:
                     - rep2
                 models: # list of ML model reports to execute on the trained classifiers in the assessment loop
                     - rep3
-                hyperparameter: # list of hyperparameter reports to execute when nested CV is finished to show overall performance
-                    - rep4
 
         # as a part of a TrainMLModel instruction, defining the inner (selection) loop of nested cross-validation:
         selection: # inner loop of nested CV

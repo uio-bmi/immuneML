@@ -10,7 +10,6 @@ class MLReport(Report):
     In the :ref:`TrainMLModel` instruction, ML model reports can be specified inside the 'selection' or 'assessment' specification under the key 'reports/models'.
     """
 
-
     def __init__(self, train_dataset: Dataset = None, test_dataset: Dataset = None, method: MLMethod = None,
                  result_path: str = None, name: str = None):
         super().__init__(name)
