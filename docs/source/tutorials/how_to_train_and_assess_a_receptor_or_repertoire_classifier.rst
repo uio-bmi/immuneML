@@ -146,7 +146,7 @@ An example is shown below:
     ml_methods:
       my_svm: SVM
       my_log_reg:
-      SimpleLogisticRegression:
+      LogisticRegression:
         penalty: l1
         C:
           - 1000

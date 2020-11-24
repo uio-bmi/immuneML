@@ -10,11 +10,11 @@ from source.caching.CacheType import CacheType
 from source.data_model.encoded_data.EncodedData import EncodedData
 from source.environment.Constants import Constants
 from source.environment.EnvironmentSettings import EnvironmentSettings
-from source.ml_methods.SimpleLogisticRegression import SimpleLogisticRegression
+from source.ml_methods.LogisticRegression import LogisticRegression
 from source.util.PathBuilder import PathBuilder
 
 
-class TestSimpleLogisticRegression(TestCase):
+class TestLogisticRegression(TestCase):
 
     def setUp(self) -> None:
         os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
@@ -23,14 +23,14 @@ class TestSimpleLogisticRegression(TestCase):
         x = np.array([[1, 0, 0], [0, 1, 1], [1, 1, 1], [0, 1, 1]])
         y = {"test": np.array([1, 0, 2, 0])}
 
-        lr = SimpleLogisticRegression()
+        lr = LogisticRegression()
         lr.fit(EncodedData(x, y), "test")
 
     def test_predict(self):
         x = np.array([[1, 0, 0], [0, 1, 1], [1, 1, 1], [0, 1, 1]])
         y = {"test1": [1, 0, 2, 0], "test2": [1, 0, 2, 0]}
 
-        lr = SimpleLogisticRegression()
+        lr = LogisticRegression()
         lr.fit(EncodedData(x, y), "test2")
 
         test_x = np.array([[0, 1, 0], [1, 0, 0]])
@@ -44,14 +44,14 @@ class TestSimpleLogisticRegression(TestCase):
             np.array([[1, 0, 0], [0, 1, 1], [1, 1, 1], [0, 1, 1], [1, 0, 0], [0, 1, 1], [1, 1, 1], [0, 1, 1]]),
             {"test1": [1, 0, 2, 0, 1, 0, 2, 0], "test2": [1, 0, 2, 0, 1, 0, 2, 0]})
 
-        lr = SimpleLogisticRegression()
+        lr = LogisticRegression()
         lr.fit_by_cross_validation(x, number_of_splits=2, label_name="test2")
 
     def test_store(self):
         x = np.array([[1, 0, 0], [0, 1, 1], [1, 1, 1], [0, 1, 1]])
         y = {"default": np.array([1, 0, 2, 0])}
 
-        lr = SimpleLogisticRegression()
+        lr = LogisticRegression()
         lr.fit(EncodedData(x, y), 'default')
 
         path = EnvironmentSettings.root_path + "test/tmp/lr/"
@@ -70,7 +70,7 @@ class TestSimpleLogisticRegression(TestCase):
         x = np.array([[1, 0, 0], [0, 1, 1], [1, 1, 1], [0, 1, 1]])
         y = {"default": np.array([1, 0, 2, 0])}
 
-        lr = SimpleLogisticRegression()
+        lr = LogisticRegression()
         lr.fit(EncodedData(x, y), 'default')
 
         path = EnvironmentSettings.root_path + "test/tmp/lr2/"
@@ -79,7 +79,7 @@ class TestSimpleLogisticRegression(TestCase):
         with open(path + "simple_logistic_regression.pickle", "wb") as file:
             pickle.dump(lr.get_model(), file)
 
-        lr2 = SimpleLogisticRegression()
+        lr2 = LogisticRegression()
         lr2.load(path)
 
         self.assertTrue(isinstance(lr2.get_model()["default"], LogisticRegression))

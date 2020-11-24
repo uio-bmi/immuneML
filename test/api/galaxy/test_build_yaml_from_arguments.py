@@ -43,7 +43,7 @@ class MyTestCase(unittest.TestCase):
 
         yamlbuilder_main(["-o", output_dir, "-f", output_filename,
                           "-l", "label1,label2",
-                          "-m", "SimpleLogisticRegression", "-t", "70",
+                          "-m", "LogisticRegression", "-t", "70",
                           "-c", "5", "-s", "subsequence", "subsequence",
                           "-r", "unique", "all",
                           "-g", "gapped", "ungapped",

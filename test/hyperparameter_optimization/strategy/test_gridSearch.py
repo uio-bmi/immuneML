@@ -4,16 +4,16 @@ from source.encodings.kmer_frequency.KmerFrequencyEncoder import KmerFrequencyEn
 from source.encodings.word2vec.Word2VecEncoder import Word2VecEncoder
 from source.hyperparameter_optimization.HPSetting import HPSetting
 from source.hyperparameter_optimization.strategy.GridSearch import GridSearch
-from source.ml_methods.SimpleLogisticRegression import SimpleLogisticRegression
+from source.ml_methods.LogisticRegression import LogisticRegression
 
 
 class TestGridSearch(TestCase):
     def test_generate_next_setting(self):
 
-        hp_settings = [HPSetting(encoder=KmerFrequencyEncoder, encoder_params={}, encoder_name="enc1", ml_method=SimpleLogisticRegression(),
+        hp_settings = [HPSetting(encoder=KmerFrequencyEncoder, encoder_params={}, encoder_name="enc1", ml_method=LogisticRegression(),
                                  ml_params={"model_selection_cv": False, "model_selection_n_fold": -1}, ml_method_name="ml1",
                                  preproc_sequence=[]),
-                       HPSetting(encoder=Word2VecEncoder, encoder_params={}, encoder_name="enc2", ml_method=SimpleLogisticRegression(),
+                       HPSetting(encoder=Word2VecEncoder, encoder_params={}, encoder_name="enc2", ml_method=LogisticRegression(),
                                  ml_params={"model_selection_cv": False, "model_selection_n_fold": -1}, ml_method_name="ml2",
                                  preproc_sequence=[])]
 
@@ -27,10 +27,10 @@ class TestGridSearch(TestCase):
         self.assertEqual(Word2VecEncoder, setting2.encoder)
 
     def test_get_optimal_hps(self):
-        hp_settings = [HPSetting(encoder=KmerFrequencyEncoder, encoder_params={}, encoder_name="e1", ml_method=SimpleLogisticRegression(),
+        hp_settings = [HPSetting(encoder=KmerFrequencyEncoder, encoder_params={}, encoder_name="e1", ml_method=LogisticRegression(),
                                  ml_params={"model_selection_cv": False, "model_selection_n_fold": -1}, ml_method_name="ml1",
                                  preproc_sequence=[]),
-                       HPSetting(encoder=Word2VecEncoder, encoder_params={}, encoder_name='e2', ml_method=SimpleLogisticRegression(),
+                       HPSetting(encoder=Word2VecEncoder, encoder_params={}, encoder_name='e2', ml_method=LogisticRegression(),
                                  ml_params={"model_selection_cv": False, "model_selection_n_fold": -1}, ml_method_name="ml2",
                                  preproc_sequence=[])]
 

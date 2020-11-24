@@ -10,7 +10,7 @@ from source.data_model.dataset.Dataset import Dataset
 from source.ml_methods.MLMethod import MLMethod
 from source.ml_methods.RandomForestClassifier import RandomForestClassifier
 from source.ml_methods.SVM import SVM
-from source.ml_methods.SimpleLogisticRegression import SimpleLogisticRegression
+from source.ml_methods.LogisticRegression import LogisticRegression
 from source.reports.ReportOutput import ReportOutput
 from source.reports.ReportResult import ReportResult
 from source.reports.ml_reports.CoefficientPlottingSetting import CoefficientPlottingSetting
@@ -22,7 +22,7 @@ from source.util.PathBuilder import PathBuilder
 
 class Coefficients(MLReport):
     """
-    A report that plots the coefficients for a given ML method in a barplot. Can be used for :ref:`SimpleLogisticRegression`,
+    A report that plots the coefficients for a given ML method in a barplot. Can be used for :ref:`LogisticRegression`,
     :ref:`SVM` and :ref:`RandomForest`. In the case of RandomForest, the feature importances will be plotted.
 
     When used in :ref:`TrainMLModel` instruction, the report can be specified under 'models', both on
@@ -193,8 +193,8 @@ class Coefficients(MLReport):
 
         run_report = True
 
-        if not any([isinstance(self.method, legal_method) for legal_method in (RandomForestClassifier, SimpleLogisticRegression, SVM)]):
-            logging.warning(f"Coefficients report can only be created for RandomForestClassifier, SimpleLogisticRegression or SVM, but got "
+        if not any([isinstance(self.method, legal_method) for legal_method in (RandomForestClassifier, LogisticRegression, SVM)]):
+            logging.warning(f"Coefficients report can only be created for RandomForestClassifier, LogisticRegression or SVM, but got "
                             f"{type(self.method).__name__} instead. Coefficients report will not be created.")
             run_report = False
 

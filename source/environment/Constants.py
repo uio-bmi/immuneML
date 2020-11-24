@@ -1,6 +1,6 @@
 class Constants:
 
-    VERSION = "1.0.0"
+    VERSION = "1.0.1"
 
     FEATURE_DELIMITER = "///"
     UNKNOWN = None

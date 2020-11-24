@@ -41,13 +41,13 @@ class TestImmuneMLParser(TestCase):
                 },
                 "ml_methods": {
                     "simpleLR": {
-                        "SimpleLogisticRegression":{
+                        "LogisticRegression":{
                             "penalty": "l1"
                         },
                         "model_selection_cv": False,
                         "model_selection_n_folds": -1,
                     },
-                    "simpleLR2": "SimpleLogisticRegression"
+                    "simpleLR2": "LogisticRegression"
                 },
                 "reports": {
                     "rep1": "SequenceLengthDistribution"

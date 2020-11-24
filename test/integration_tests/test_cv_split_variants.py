@@ -51,7 +51,7 @@ class TestCVSplitVariants(TestCase):
                 },
                 "ml_methods": {
                     "logistic_regression": {
-                        "SimpleLogisticRegression": {
+                        "LogisticRegression": {
                             "C": 100,
                             "penalty": "l1"
                         }

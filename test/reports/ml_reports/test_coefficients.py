@@ -11,7 +11,7 @@ from source.data_model.dataset.Dataset import Dataset
 from source.data_model.encoded_data.EncodedData import EncodedData
 from source.environment.Constants import Constants
 from source.environment.EnvironmentSettings import EnvironmentSettings
-from source.ml_methods.SimpleLogisticRegression import SimpleLogisticRegression
+from source.ml_methods.LogisticRegression import LogisticRegression
 from source.reports.ReportResult import ReportResult
 from source.reports.ml_reports.CoefficientPlottingSetting import CoefficientPlottingSetting
 from source.reports.ml_reports.Coefficients import Coefficients
@@ -25,7 +25,7 @@ class TestCoefficients(TestCase):
 
     def _create_dummy_lr_model(self, path):
         # dummy logistic regression with 100 observations with 20 features belonging to 2 classes
-        dummy_lr = SimpleLogisticRegression()
+        dummy_lr = LogisticRegression()
         dummy_lr.fit_by_cross_validation(EncodedData(np.random.rand(100, 20), {"l1": [i % 2 for i in range(0, 100)]}),
                                          number_of_splits=2, label_name="l1")
 

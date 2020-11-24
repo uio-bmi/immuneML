@@ -17,7 +17,7 @@ from source.hyperparameter_optimization.HPSetting import HPSetting
 from source.hyperparameter_optimization.config.SplitConfig import SplitConfig
 from source.hyperparameter_optimization.config.SplitType import SplitType
 from source.hyperparameter_optimization.strategy.GridSearch import GridSearch
-from source.ml_methods.SimpleLogisticRegression import SimpleLogisticRegression
+from source.ml_methods.LogisticRegression import LogisticRegression
 from source.reports.ReportResult import ReportResult
 from source.reports.train_ml_model_reports.MLSettingsPerformance import MLSettingsPerformance
 from source.util.PathBuilder import PathBuilder
@@ -59,7 +59,7 @@ class TestMLSettingsPerformance(TestCase):
                                     params={"l1": [1, 2], "l2": [0, 1]})
         enc_params = {"k": 3, "model_type": ModelType.SEQUENCE.name, "vector_size": 4}
         hp_settings = [HPSetting(Word2VecEncoder.build_object(dataset, **enc_params), enc_params,
-                                 SimpleLogisticRegression(),
+                                 LogisticRegression(),
                                  {"model_selection_cv": False, "model_selection_n_folds": -1},
                                  [])]
 

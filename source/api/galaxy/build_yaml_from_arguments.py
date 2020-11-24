@@ -60,10 +60,10 @@ def build_encodings_specs(args):
     return encodings
 
 def get_ml_method_spec(ml_method_class, model_selection_n_folds=5):
-    if ml_method_class == "SimpleLogisticRegression":
+    if ml_method_class == "LogisticRegression" or ml_method_class == "SimpleLogisticRegression":
         ml_spec = {
             "logistic_regression": {
-                "SimpleLogisticRegression": {
+                "LogisticRegression": {
                     "penalty": ["l1"],
                     "C": [0.01, 0.1, 1, 10, 100],
                     "class_weight": ["balanced"],

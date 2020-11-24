@@ -70,7 +70,7 @@ class TestImmuneMLApp(TestCase):
                 },
                 "ml_methods": {
                     "simpleLR": {
-                        "SimpleLogisticRegression": {
+                        "LogisticRegression": {
                             "penalty": "l1"
                         },
                         "model_selection_cv": False,

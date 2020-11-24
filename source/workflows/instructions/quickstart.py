@@ -41,7 +41,7 @@ class Quickstart:
                 },
                 "ml_methods": {
                     "simpleLR": {
-                        "SimpleLogisticRegression": {
+                        "LogisticRegression": {
                             "C": 30,
                             "max_iter": 10
                         },
@@ -59,7 +59,8 @@ class Quickstart:
                             "batch_size": 3
                         }
                     },
-                    "hprep": "MLSettingsPerformance"
+                    "hprep": "MLSettingsPerformance",
+                    "coef": "Coefficients"
                 }
             },
             "instructions": {
@@ -83,7 +84,8 @@ class Quickstart:
                         "training_percentage": 0.7,
                         "reports": {
                             "data_splits": [],
-                            'hyperparameter': ["hprep"]
+                            'hyperparameter': ["hprep"],
+                            'models': ["coef"]
                         }
                     },
                     "selection": {
