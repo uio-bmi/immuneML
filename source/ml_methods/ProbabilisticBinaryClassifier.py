@@ -327,6 +327,10 @@ class ProbabilisticBinaryClassifier(MLMethod):
                              f"\nprobability of class 0: {predicted_probability_0}\nprobability of class 1: {predicted_probability_1}\n"
                              f"alpha 0: {self.alpha_0}, beta 0: {self.beta_0}\nalpha 1: {self.alpha_1}, beta 1: {self.beta_1}\n"
                              f"positive example count: {self.N_1}, negative example count: {self.N_0}")
+        elif normalization_const == 0:
+            warnings.warn(f"{ProbabilisticBinaryClassifier.__name__}: posterior class probabilities for both classes are 0 (k={k}, n={n}). Returning "
+                          f"normalized values to indicate that the example could not be classified, by setting both probabilities to 0.5.", RuntimeWarning)
+            return 0.5, 0.5
 
         return predicted_probability_0 / normalization_const, predicted_probability_1 / normalization_const
 
