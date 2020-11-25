@@ -70,7 +70,7 @@ class MLProcess:
         processed_dataset = HPUtil.preprocess_dataset(self.train_dataset, self.hp_setting.preproc_sequence, f"{self.path}preprocessed_train_dataset/")
 
         encoded_train_dataset = HPUtil.encode_dataset(processed_dataset, self.hp_setting, f"{self.path}encoded_datasets/", learn_model=True,
-                                                      context=self.report_context, batch_size=self.number_of_processes,
+                                                      context=self.report_context, number_of_processes=self.number_of_processes,
                                                       label_configuration=self.label_config, store_encoded_data=self.store_encoded_data)
 
         method = HPUtil.train_method(self.label, encoded_train_dataset, self.hp_setting, self.path, self.train_predictions_path, self.ml_details_path, self.number_of_processes, self.optimization_metric)
@@ -89,7 +89,7 @@ class MLProcess:
                                                                f"{self.path}preprocessed_test_dataset/")
 
             encoded_test_dataset = HPUtil.encode_dataset(processed_test_dataset, self.hp_setting, f"{self.path}encoded_datasets/",
-                                                         learn_model=False, context=self.report_context, batch_size=self.number_of_processes,
+                                                         learn_model=False, context=self.report_context, number_of_processes=self.number_of_processes,
                                                          label_configuration=self.label_config, store_encoded_data=self.store_encoded_data)
 
             performance = HPUtil.assess_performance(method, self.metrics, self.optimization_metric, encoded_test_dataset, split_index, self.path,

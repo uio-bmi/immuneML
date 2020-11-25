@@ -80,7 +80,6 @@ class TestSimulation(TestCase):
                 "inst1": {
                     "type": "Simulation",
                     "dataset": "d1",
-                    "batch_size": 5,
                     "simulation": "sim1",
                     "export_formats": ["AIRR", "Pickle"]
                 }
@@ -206,7 +205,6 @@ class TestSimulation(TestCase):
                 "inst1": {
                     "type": "Simulation",
                     "dataset": "d1",
-                    "batch_size": 5,
                     "simulation": "sim1",
                     "export_formats": ["Pickle"]
                 }

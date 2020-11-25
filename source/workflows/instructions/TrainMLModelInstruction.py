@@ -57,7 +57,7 @@ class TrainMLModelInstruction(Instruction):
         should explicitly set the name of the positive class as well under parameter `positive_class`. If positive class is not set, one of the label
         classes will be assumed to be positive.
 
-        batch_size (int): how many processes should be created at once to speed up the analysis. For personal machines, 4 or 8 is usually a good choice.
+        number_of_processes (int): how many processes should be created at once to speed up the analysis. For personal machines, 4 or 8 is usually a good choice.
 
         reports (list): a list of report names to be executed after the nested CV has finished to show the overall performance or some statistic;
         the reports to be specified here have to be subclasses of py:`source.reports.train_ml_model_reports.TrainMLModelReport.TrainMLModelReport` class.
@@ -114,7 +114,7 @@ class TrainMLModelInstruction(Instruction):
                 - auc
             reports: # list of reports to execute when nested CV is finished to show overall performance
                 - rep4
-            batch_size: 4 # number of parallel processes to create (could speed up the computation)
+            number_of_processes: 4 # number of parallel processes to create (could speed up the computation)
             optimization_metric: balanced_accuracy # the metric to use for choosing the optimal model and during training
             refit_optimal_model: False # use trained model, do not refit on the full dataset
             store_encoded_data: True # store encoded datasets in pickle format
@@ -123,9 +123,9 @@ class TrainMLModelInstruction(Instruction):
 
     def __init__(self, dataset, hp_strategy: HPOptimizationStrategy, hp_settings: list, assessment: SplitConfig, selection: SplitConfig,
                  metrics: set, optimization_metric: Metric, label_configuration: LabelConfiguration, path: str = None, context: dict = None,
-                 batch_size: int = 1, reports: dict = None, name: str = None, refit_optimal_model: bool = False, store_encoded_data: bool = None):
+                 number_of_processes: int = 1, reports: dict = None, name: str = None, refit_optimal_model: bool = False, store_encoded_data: bool = None):
         self.state = TrainMLModelState(dataset, hp_strategy, hp_settings, assessment, selection, metrics,
-                                       optimization_metric, label_configuration, path, context, batch_size,
+                                       optimization_metric, label_configuration, path, context, number_of_processes,
                                        reports if reports is not None else {}, name, refit_optimal_model, store_encoded_data)
 
     def run(self, result_path: str):
@@ -151,7 +151,7 @@ class TrainMLModelInstruction(Instruction):
         if self.state.refit_optimal_model:
             print(f"{datetime.datetime.now()}: TrainMLModel: retraining optimal model for label {label} {index_repr}.\n", flush=True)
             self.state.optimal_hp_items[label] = MLProcess(self.state.dataset, None, label, self.state.metrics, self.state.optimization_metric,
-                                                           f"{self.state.path}optimal_{label}/", number_of_processes=self.state.batch_size,
+                                                           f"{self.state.path}optimal_{label}/", number_of_processes=self.state.number_of_processes,
                                                            label_config=self.state.label_configuration, hp_setting=optimal_hp_setting,
                                                            store_encoded_data=self.state.store_encoded_data).run(0)
             print(f"{datetime.datetime.now()}: TrainMLModel: finished retraining optimal model for label {label} {index_repr}.\n", flush=True)

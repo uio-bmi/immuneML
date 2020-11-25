@@ -24,7 +24,7 @@ class TrainMLModelState:
     label_configuration: LabelConfiguration
     path: str = None
     context: dict = None
-    batch_size: int = 1
+    number_of_processes: int = 1
     reports: dict = field(default_factory=dict)
     name: str = None
     refit_optimal_model: bool = None

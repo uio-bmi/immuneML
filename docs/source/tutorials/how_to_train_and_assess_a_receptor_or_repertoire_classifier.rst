@@ -177,7 +177,7 @@ An example is shown below:
       dataset: simulated_d1
       metrics: [accuracy, auc] # metrics to be computed for all settings
       strategy: GridSearch
-      batch_size: 4
+      number_of_processes: 4
       optimization_metric: balanced_accuracy # the metric used for optimization
       reports: [my_report]
       refit_optimal_model: False

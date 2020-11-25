@@ -11,5 +11,4 @@ class SimulationState:
     dataset: Dataset
     resulting_dataset: Dataset = None
     result_path: str = None
-    batch_size: int = 1
     name: str = None

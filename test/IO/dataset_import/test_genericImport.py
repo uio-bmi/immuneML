@@ -2,7 +2,6 @@ import shutil
 from unittest import TestCase
 
 from source.IO.dataset_import.GenericImport import GenericImport
-from source.data_model.receptor.receptor_sequence.Chain import Chain
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.util.PathBuilder import PathBuilder
 
@@ -45,7 +44,7 @@ rep1.tsv,TRA,1234e,no"""
                                                 "region_type": "IMGT_CDR3", "separator": "\t",
                                                 "column_mapping": {"CDR3B AA Sequence": "sequence_aas",
                                                                    "TRBV Gene": "v_genes", "TRBJ Gene": "j_genes", "Counts": "counts"},
-                                                "metadata_file": path + "metadata.csv", "batch_size": 4}, "generic_dataset")
+                                                "metadata_file": path + "metadata.csv", "number_of_processes": 4}, "generic_dataset")
 
         self.assertEqual(1, dataset.get_example_count())
         for index, rep in enumerate(dataset.get_data()):
@@ -70,7 +69,7 @@ rep1.tsv,TRA,1234e,no"""
                                                 "region_type": "IMGT_CDR3", "separator": "\t",
                                                 "column_mapping": {"CDR3B AA Sequence": "sequence_aas",
                                                                    "TRBV Gene": "v_genes", "TRBJ Gene": "j_genes"},
-                                                "metadata_file": path + "metadata.csv", "batch_size": 4}, "generic_dataset")
+                                                "metadata_file": path + "metadata.csv", "number_of_processes": 4}, "generic_dataset")
 
         self.assertEqual(15, dataset.get_example_count())
 

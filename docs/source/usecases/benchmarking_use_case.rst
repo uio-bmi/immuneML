@@ -747,7 +747,6 @@ the 2000 repertoires and metadata file generated in the previous step are locate
           - label5
   instructions:
     inst1:
-      batch_size: 16
       dataset: olga2000
       export_formats:
       - AIRR
@@ -1000,7 +999,7 @@ with simulated signals can be found at :code:`/path/to/simulated_data/olga2000.i
         ml_method: RF
       store_encoded_data: false
       refit_optimal_model: false
-      batch_size: 32
+      number_of_processes: 32
       strategy: GridSearch
       type: TrainMLModel
   output:

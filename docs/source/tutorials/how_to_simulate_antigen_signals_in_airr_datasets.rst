@@ -111,5 +111,3 @@ baseline for the simulation.
       dataset: my_synthetic_dataset
       simulation: my_simulation
       export_formats: [AIRR, Pickle] # export the simulated dataset to these formats
-      batch_size: 5 # number of repertoires that can be loaded at the same time
-                    # (only affects the speed)

@@ -85,7 +85,7 @@ class ImportHelper:
         PathBuilder.build(params.result_path + "repertoires/")
 
         arguments = [(import_class, row, params) for index, row in metadata.iterrows()]
-        with Pool(params.batch_size) as pool:
+        with Pool(params.number_of_processes) as pool:
             repertoires = pool.starmap(ImportHelper.load_repertoire_as_object, arguments)
 
         new_metadata_file = ImportHelper.make_new_metadata_file(repertoires, metadata, params.result_path, dataset_name)

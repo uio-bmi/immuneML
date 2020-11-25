@@ -101,7 +101,7 @@ class Quickstart:
                     "strategy": "GridSearch",
                     "metrics": ["accuracy"],
                     "reports": ["hprep"],
-                    "batch_size": 3,
+                    "number_of_processes": 3,
                     "optimization_metric": "balanced_accuracy",
                     "refit_optimal_model": False,
                     "store_encoded_data": False

@@ -7,14 +7,11 @@ from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.dsl.instruction_parsers.ExploratoryAnalysisParser import ExploratoryAnalysisParser
 from source.dsl.symbol_table.SymbolTable import SymbolTable
 from source.dsl.symbol_table.SymbolType import SymbolType
-
 from source.encodings.reference_encoding.MatchedSequencesEncoder import MatchedSequencesEncoder
-from source.encodings.reference_encoding.SequenceMatchingSummaryType import SequenceMatchingSummaryType
 from source.environment.Constants import Constants
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.preprocessing.SubjectRepertoireCollector import SubjectRepertoireCollector
 from source.reports.data_reports.SequenceLengthDistribution import SequenceLengthDistribution
-
 from source.reports.encoding_reports.Matches import Matches
 from source.util.PathBuilder import PathBuilder
 from source.util.RepertoireBuilder import RepertoireBuilder
@@ -50,7 +47,7 @@ class TestExploratoryAnalysisParser(TestCase):
             "type": "ExploratoryAnalysis",
             "analyses": {
                 "1": {"dataset": "d1", "report": "r1", "preprocessing_sequence": "p1"},
-                "2": {"dataset": "d1", "report": "r2", "encoding": "e1", "labels": ["l1"], "batch_size": 32}
+                "2": {"dataset": "d1", "report": "r2", "encoding": "e1", "labels": ["l1"], "number_of_processes": 32}
             }
         }
 
@@ -72,7 +69,7 @@ class TestExploratoryAnalysisParser(TestCase):
         self.assertTrue(isinstance(list(process.state.exploratory_analysis_units.values())[1].encoder, MatchedSequencesEncoder))
         self.assertEqual(1, len(list(process.state.exploratory_analysis_units.values())[1].encoder.reference_sequences))
         self.assertEqual("l1", list(process.state.exploratory_analysis_units.values())[1].label_config.get_labels_by_name()[0])
-        self.assertEqual(32, process.state.exploratory_analysis_units["2"].batch_size)
+        self.assertEqual(32, process.state.exploratory_analysis_units["2"].number_of_processes)
 
         shutil.rmtree(path)
 

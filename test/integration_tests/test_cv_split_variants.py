@@ -84,7 +84,7 @@ class TestCVSplitVariants(TestCase):
                     "dataset": "d1",
                     "strategy": "GridSearch",
                     "metrics": ["accuracy"],
-                    "batch_size": 4,
+                    "number_of_processes": 4,
                     "reports": None,
                     "optimization_metric": "balanced_accuracy",
                     "refit_optimal_model": False,

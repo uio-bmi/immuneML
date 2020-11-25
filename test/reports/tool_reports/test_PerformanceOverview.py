@@ -110,7 +110,7 @@ class TestPerformanceOverview(TestCase):
                     "metrics": ["accuracy", "auc"],
                     "reports": [],
                     "benchmark_reports": ["performance_overview"],
-                    "batch_size": 8,
+                    "number_of_processes": 8,
                     "optimization_metric": "accuracy",
                     'refit_optimal_model': False,
                     "store_encoded_data": False

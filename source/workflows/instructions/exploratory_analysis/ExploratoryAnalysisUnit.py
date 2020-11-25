@@ -14,5 +14,5 @@ class ExploratoryAnalysisUnit:
     preprocessing_sequence: list = None
     encoder: DatasetEncoder = None
     label_config: LabelConfiguration = None
-    batch_size: int = 1
+    number_of_processes: int = 1
     report_result: ReportResult = None

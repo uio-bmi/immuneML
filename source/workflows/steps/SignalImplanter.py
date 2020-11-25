@@ -72,7 +72,7 @@ class SignalImplanter(Step):
         current_implanting_index = 0
         current_implanting = simulation_state.simulation.implantings[current_implanting_index]
 
-        for index, element in enumerate(simulation_state.dataset.get_data(simulation_state.batch_size)):
+        for index, element in enumerate(simulation_state.dataset.get_data()):
 
             if current_implanting is not None and index >= simulation_limits[current_implanting.name]:
                 current_implanting_index += 1

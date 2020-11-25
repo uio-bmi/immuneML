@@ -73,7 +73,7 @@ class SequencingDepthOverview(DataReport):
                  width: float = 10,
                  result_name: str = "sequencing_depth_overview",
                  result_path: str = None,
-                 batch_size: int = 1,
+                 number_of_processes: int = 1,
                  name: str = None):
 
         DataReport.__init__(self, dataset=dataset, result_path=result_path, name=name)
@@ -88,7 +88,7 @@ class SequencingDepthOverview(DataReport):
         self.height_scatterplot = height_scatterplot
         self.width = width
         self.result_name = result_name
-        self.batch_size = batch_size
+        self.number_of_processes = number_of_processes
 
     def generate(self) -> ReportResult:
         data = self.generate_data()
@@ -99,7 +99,7 @@ class SequencingDepthOverview(DataReport):
 
     def generate_data(self):
 
-        with Pool(self.batch_size, maxtasksperchild=1) as pool:
+        with Pool(self.number_of_processes, maxtasksperchild=1) as pool:
             data = pool.map(self._compute_repertoire, self.dataset.repertoires, chunksize=1)
 
         data = pd.concat(data)

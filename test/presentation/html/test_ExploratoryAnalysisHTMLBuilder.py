@@ -45,7 +45,7 @@ class TestExploratoryAnalysisHTMLBuilder(TestCase):
 
         preproc_sequence = [SubjectRepertoireCollector()]
 
-        units = {"named_analysis_1": ExploratoryAnalysisUnit(dataset=dataset, report=SequenceLengthDistribution(), batch_size=16),
+        units = {"named_analysis_1": ExploratoryAnalysisUnit(dataset=dataset, report=SequenceLengthDistribution(), number_of_processes=16),
                  "named_analysis_2": ExploratoryAnalysisUnit(dataset=dataset, report=SequenceLengthDistribution(),
                                                              preprocessing_sequence=preproc_sequence)}
 

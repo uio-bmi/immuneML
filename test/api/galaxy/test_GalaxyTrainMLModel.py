@@ -87,7 +87,7 @@ class TestGalaxyTrainMLModel(TestCase):
                     "strategy": "GridSearch",
                     "metrics": ["accuracy", "auc"],
                     "reports": [],
-                    "batch_size": 10,
+                    "number_of_processes": 10,
                     "optimization_metric": "accuracy",
                     'refit_optimal_model': False,
                     "store_encoded_data": False

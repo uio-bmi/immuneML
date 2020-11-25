@@ -105,7 +105,7 @@ class TestMultiDatasetBenchmarkTool(TestCase):
                     "metrics": ["accuracy", "auc"],
                     "reports": [],
                     "benchmark_reports": ["performance_overview", "sequence_overlap"],
-                    "batch_size": 8,
+                    "number_of_processes": 8,
                     "optimization_metric": "accuracy",
                     'refit_optimal_model': False,
                     "store_encoded_data": False

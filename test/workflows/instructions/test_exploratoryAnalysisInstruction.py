@@ -48,14 +48,14 @@ class TestExploratoryAnalysisProcess(TestCase):
 
         preproc_sequence = [SubjectRepertoireCollector()]
 
-        units = {"named_analysis_1": ExploratoryAnalysisUnit(dataset=dataset, report=SequenceLengthDistribution(), batch_size=16),
+        units = {"named_analysis_1": ExploratoryAnalysisUnit(dataset=dataset, report=SequenceLengthDistribution(), number_of_processes=16),
                  "named_analysis_2": ExploratoryAnalysisUnit(dataset=dataset, report=SequenceLengthDistribution(),
                                                              preprocessing_sequence=preproc_sequence)}
 
         process = ExploratoryAnalysisInstruction(units, name="exp")
         process.run(path + "results/")
 
-        self.assertTrue(units["named_analysis_1"].batch_size == 16)
+        self.assertTrue(units["named_analysis_1"].number_of_processes == 16)
         self.assertTrue(os.path.isfile(path + "results/exp/analysis_named_analysis_1/report/sequence_length_distribution.html"))
         self.assertTrue(os.path.isfile(path + "results/exp/analysis_named_analysis_2/report/sequence_length_distribution.html"))
 

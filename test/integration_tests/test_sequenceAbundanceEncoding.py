@@ -103,7 +103,7 @@ class TestSequenceAbundanceEncoding(TestCase):
                     "dataset": "d1",
                     "strategy": "GridSearch",
                     "metrics": ["accuracy"],
-                    "batch_size": 2,
+                    "number_of_processes": 2,
                     "reports": ["r1"],
                     "optimization_metric": "balanced_accuracy",
                     "refit_optimal_model": True,

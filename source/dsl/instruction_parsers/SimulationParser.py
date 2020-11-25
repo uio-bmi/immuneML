@@ -62,26 +62,21 @@ class SimulationParser:
                 type: Simulation
                 dataset: my_dataset
                 simulation: sim1
-                batch_size: 5 # number of repertoires that can be loaded at the same time
-                              # (only affects the speed)
                 export_formats: [AIRR, Pickle]
 
     """
 
     def parse(self, key: str, instruction: dict, symbol_table: SymbolTable, path: str = None) -> SimulationInstruction:
 
-        ParameterValidator.assert_keys(instruction.keys(), ["dataset", "batch_size", "simulation", "type", "export_formats"],
-                                       "SimulationParser", key)
+        ParameterValidator.assert_keys(instruction.keys(), ["dataset", "simulation", "type", "export_formats"], "SimulationParser", key)
 
         signals = [signal.item for signal in symbol_table.get_by_type(SymbolType.SIGNAL)]
         simulation = symbol_table.get(instruction["simulation"])
         dataset = symbol_table.get(instruction["dataset"])
-        batch_size = instruction["batch_size"]
 
         exporters = self.parse_exporters(instruction)
 
-        process = SimulationInstruction(signals=signals, simulation=simulation, dataset=dataset, batch_size=batch_size, name=key,
-                                        exporters=exporters)
+        process = SimulationInstruction(signals=signals, simulation=simulation, dataset=dataset, name=key, exporters=exporters)
         return process
 
     def parse_exporters(self, instruction):

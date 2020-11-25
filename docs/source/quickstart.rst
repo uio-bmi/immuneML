@@ -104,8 +104,8 @@ my_train_classifier_instruction):
         split_strategy: random
         split_count: 1
         training_percentage: 1 # use all data for training
-      reports: [] # reports to be run on the whole dataset e.g. sequence length distribution (no reports in now)
-      batch_size: 4 # number of repertoires to process at the time (4 here)
+      reports: [] # reports to be run on the whole dataset after the nested cv is finished
+      number_of_processes: 4 # number of repertoires to process at the time (4 here)
       refit_optimal_model: False # should the optimal model be refitting on the full dataset (True/False)
       store_encoded_data: False # do not store intermediary encoded datasets in internal format
 
