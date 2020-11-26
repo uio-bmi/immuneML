@@ -37,10 +37,10 @@ class TestSequenceMatchFeatureAnnotation(TestCase):
         'labels': {
             "diabetes": [1, 0, 0, 1, 1],
         },
-        'feature_names': ["VGENE1///AADAAA", "VGENE2///BBBBDB", "VGENE4///DDDDDE", "VGENE6///DDDDDD", "VGENE7///FFFFFF"],
+        'feature_names': ["VGENE1///AADAAA", "VGENE2///NNNNDN", "VGENE4///DDDDDE", "VGENE6///DDDDDD", "VGENE7///FFFFFF"],
         'feature_annotations': pd.DataFrame({
-            "feature": ["VGENE1///AADAAA", "VGENE2///BBBBDB", "VGENE4///DDDDDE", "VGENE6///DDDDDD", "VGENE7///FFFFFF"],
-            "sequence": ["AADAAA", "BBBBDB", "DDDDDE", "DDDDDD", "FFFFFF"],
+            "feature": ["VGENE1///AADAAA", "VGENE2///NNNNDN", "VGENE4///DDDDDE", "VGENE6///DDDDDD", "VGENE7///FFFFFF"],
+            "sequence": ["AADAAA", "NNNNDN", "DDDDDE", "DDDDDD", "FFFFFF"],
             "v_gene": ["VGENE1", "VGENE2", "VGENE4", "VGENE6", "VGENE7"]
         })
     }
@@ -52,7 +52,7 @@ class TestSequenceMatchFeatureAnnotation(TestCase):
     # there are only matches to the first 3 sequences in this reference
     reference_rep = """TRBV Gene	CDR3B AA Sequence	Antigen Protein	MHC Class									
 VGENE1	CAAAAAAF	A	MHC I									
-VGENE2	CBBBBBBF	B	MHC II									
+VGENE2	CNNNNNNF	B	MHC II									
 VGENE3	CDDDDDDF	C	MHC II									
 VGENE1	CASSIEGPTGELFF	D Transporter 8	MHC I"""
 
