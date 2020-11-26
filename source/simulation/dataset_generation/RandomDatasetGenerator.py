@@ -3,6 +3,7 @@ import random
 
 from source.data_model.dataset.ReceptorDataset import ReceptorDataset
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
+from source.data_model.dataset.SequenceDataset import SequenceDataset
 from source.data_model.receptor.TCABReceptor import TCABReceptor
 from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
@@ -220,5 +221,5 @@ class RandomDatasetGenerator:
         with open(filename, "wb") as file:
             pickle.dump(sequences, file)
 
-        return ReceptorDataset(params={label: list(label_dict.keys()) for label, label_dict in labels.items()},
+        return SequenceDataset(params={label: list(label_dict.keys()) for label, label_dict in labels.items()},
                                filenames=[filename], file_size=sequence_count)

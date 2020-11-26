@@ -1,6 +1,8 @@
 import shutil
 from unittest import TestCase
 
+from source.data_model.dataset.ReceptorDataset import ReceptorDataset
+from source.data_model.dataset.SequenceDataset import SequenceDataset
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.simulation.dataset_generation.RandomDatasetGenerator import RandomDatasetGenerator
 
@@ -15,6 +17,8 @@ class TestRandomDatasetGenerator(TestCase):
                                                                      sequence_length_probabilities={4: 0.5, 5: 0.5},
                                                                      labels={"HLA": {"A": 0.5, "B": 0.5}},
                                                                      path=path)
+
+        self.assertEqual(ReceptorDataset, type(dataset))
 
         self.assertEqual(100, dataset.get_example_count())
         for repertoire in dataset.repertoires:
@@ -34,6 +38,7 @@ class TestRandomDatasetGenerator(TestCase):
                                                                    labels={"HLA": {"A": 0.5, "B": 0.5}},
                                                                    path=path)
 
+        self.assertEqual(ReceptorDataset, type(dataset))
 
         self.assertEqual(100, dataset.get_example_count())
         for receptor in dataset.get_data():
@@ -51,8 +56,9 @@ class TestRandomDatasetGenerator(TestCase):
                                                                    labels={"HLA": {"A": 0.5, "B": 0.5}},
                                                                    path=path)
 
-
+        self.assertEqual(SequenceDataset, type(dataset))
         self.assertEqual(100, dataset.get_example_count())
+
         for sequence in dataset.get_data():
             self.assertTrue(len(sequence.amino_acid_sequence) in [4, 5])
             self.assertTrue(sequence.get_attribute("HLA") in ["A", "B"])

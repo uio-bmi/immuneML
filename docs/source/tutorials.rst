@@ -12,7 +12,7 @@ dataset made of random sequences (for example to test out some functionality wit
 The respective tutorials can be found here:
 
   - :ref:`How to import data into immuneML`
-  - :ref:`How to generate a random receptor or repertoire dataset`
+  - :ref:`How to generate a random sequence, receptor or repertoire dataset`
 
 Using the specified dataset, immuneML can be used for various purposes: one can train and assess an ML model for immune repertoire or receptor-level
 classification, perform an exploratory analysis (to run preprocessings, encodings and reports without training a ML model), or simulate immune events
