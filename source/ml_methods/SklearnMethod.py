@@ -220,7 +220,7 @@ class SklearnMethod(MLMethod):
         return list(self.models.keys())
 
     def get_package_info(self) -> str:
-        return 'sklearn ' + pkg_resources.get_distribution('sklearn').version
+        return 'scikit-learn ' + pkg_resources.get_distribution('scikit-learn').version
 
     def get_feature_names(self) -> list:
         return self.feature_names
