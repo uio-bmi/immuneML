@@ -39,11 +39,13 @@ class IGoRImport(DataImport):
         import_out_of_frame (bool): Whether out of frame sequences (with value '0' in column is_inframe) should
         be included in the imported sequences. By default, import_out_of_frame is False.
 
+        import_illegal_characters (bool): Whether to import sequences that contain illegal characters, i.e., characters
+        that do not appear in the sequence alphabet (amino acids including stop codon '*', or nucleotides). When set to false, filtering is only
+        applied to the sequence type of interest (when running immuneML in amino acid mode, only entries with illegal
+        characters in the amino acid sequence are removed). By default import_illegal_characters is False.
+
         import_empty_nt_sequences (bool): imports sequences which have an empty nucleotide sequence field; can be True or False.
         By default, import_empty_nt_sequences is set to True.
-
-        import_empty_aa_sequences (bool): imports sequences which have an empty amino acid sequence field; can be True or False; for analysis on
-        amino acid sequences, this parameter should be False (import only non-empty amino acid sequences). By default, import_empty_aa_sequences is set to False.
 
         region_type (str): Which part of the sequence to import. By default, this value is set to IMGT_CDR3. This means the
         first and last amino acids are removed from the CDR3 sequence, as IGoR uses the IMGT junction. Specifying
@@ -87,8 +89,8 @@ class IGoRImport(DataImport):
                     igor_column_name2: metadata_label2
                 import_with_stop_codon: False # whether to include sequences with stop codon in the dataset
                 import_out_of_frame: False # whether to include out of frame sequences in the dataset
+                import_illegal_characters: False # remove sequences with illegal characters for the sequence_type being used
                 import_empty_nt_sequences: True # keep sequences even though the nucleotide sequence might be empty
-                import_empty_aa_sequences: False # filter out sequences if they don't have sequence_aa set
                 # Optional fields with IGoR-specific defaults, only change when different behavior is required:
                 separator: "," # column separator
                 region_type: IMGT_CDR3 # what part of the sequence to import
@@ -137,7 +139,9 @@ class IGoRImport(DataImport):
             df = df[no_stop_codon]
 
         ImportHelper.junction_to_cdr3(df, params.region_type)
-        ImportHelper.drop_empty_sequences(df, params.import_empty_aa_sequences, params.import_empty_nt_sequences)
+        # note: import_empty_aa_sequences is set to true here; since IGoR doesnt output aa, this parameter is insensible
+        ImportHelper.drop_empty_sequences(df, True, params.import_empty_nt_sequences)
+        ImportHelper.drop_illegal_character_sequences(df, params.import_illegal_characters)
 
         # chain or at least receptorsequence?
 

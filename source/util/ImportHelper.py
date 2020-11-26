@@ -28,6 +28,7 @@ from source.data_model.receptor.receptor_sequence.SequenceFrameType import Seque
 from source.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
 from source.data_model.repertoire.Repertoire import Repertoire
 from source.environment.Constants import Constants
+from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.environment.SequenceType import SequenceType
 from source.util.ParameterValidator import ParameterValidator
 from source.util.PathBuilder import PathBuilder
@@ -181,6 +182,7 @@ class ImportHelper:
             if sequence_colname in dataframe.columns:
                 n_empty = sum(dataframe[sequence_colname].isnull())
                 if n_empty > 0:
+                    idx = dataframe.loc[dataframe[sequence_colname].isnull()].index
                     dataframe.drop(dataframe.loc[dataframe[sequence_colname].isnull()].index, inplace=True)
                     warnings.warn(
                         f"{ImportHelper.__name__}: {n_empty} sequences were removed from the dataset because they contained an empty {sequence_name} sequence after preprocessing. ")
@@ -188,6 +190,27 @@ class ImportHelper:
                 warnings.warn(f"{ImportHelper.__name__}: column {sequence_colname} was not set, skipping filtering...")
 
         return dataframe
+
+    @staticmethod
+    def drop_illegal_character_sequences(dataframe: pd.DataFrame, import_illegal_characters: bool) -> pd.DataFrame:
+        if not import_illegal_characters:
+            sequence_type = EnvironmentSettings.get_sequence_type()
+            legal_alphabet = EnvironmentSettings.get_sequence_alphabet(sequence_type)
+            if sequence_type == SequenceType.AMINO_ACID:
+                legal_alphabet.append(Constants.STOP_CODON)
+
+            is_illegal_seq = [ImportHelper.is_illegal_sequence(sequence, legal_alphabet) for
+                            sequence in dataframe[sequence_type.value]]
+            dataframe.drop(dataframe.loc[is_illegal_seq].index, inplace=True)
+
+        return dataframe
+
+    @staticmethod
+    def is_illegal_sequence(sequence, legal_alphabet) -> bool:
+        if sequence is None:
+            return False
+        else:
+            return not all(character in legal_alphabet for character in sequence)
 
     @staticmethod
     def prepare_frame_type_list(params: DatasetImportParams) -> list:

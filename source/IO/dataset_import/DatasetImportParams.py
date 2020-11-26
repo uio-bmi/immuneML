@@ -20,6 +20,7 @@ class DatasetImportParams:
     import_unproductive: bool = None
     import_with_stop_codon: bool = None
     import_out_of_frame: bool = None
+    import_illegal_characters: bool = None
     metadata_column_mapping: dict = None
     number_of_processes: int = 1
     sequence_file_size: int = 50000
