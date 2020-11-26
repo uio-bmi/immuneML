@@ -12,7 +12,7 @@ setup(
     author="Milena Pavlovic",
     author_email="milenpa@student.matnat.uio.no",
     url="https://github.com/uio-bmi/ImmuneML",
-    install_requires=["pytest>=4.3.1", "pandas>=1.1.1", "scikit-learn>=0.22.2.post1", "gensim==3.8.1", "matplotlib>=3.1.1", "editdistance==0.5.3",
+    install_requires=["pandas>=1.1.1", "scikit-learn>=0.22.2.post1", "gensim==3.8.1", "matplotlib>=3.1.1", "editdistance==0.5.3",
                       "dask[complete]", "regex", "tzlocal", "airr==1.2.1", "pystache==0.5.4", "torch==1.5.1", "numpy>=1.18.2", "h5py>=2.9.0",
                       "dill>=0.3.0", "tqdm>=0.24.2", "logomaker>=0.8", "plotly>=4.8.2", "fishersapi", "requests>=2.21.0", "matplotlib-venn>=0.11.6"],
     extras_require={
