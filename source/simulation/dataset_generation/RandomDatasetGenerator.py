@@ -118,7 +118,7 @@ class RandomDatasetGenerator:
 
         An example of input parameters is given below:
 
-        receptor_count: 100 # generate 100 receptors
+        receptor_count: 100 # generate 100 TRABReceptors
         chain_1_length_probabilities:
             14: 0.8 # 80% of all generated sequences for all receptors (for chain 1) will have length 14
             15: 0.2 # 20% of all generated sequences across all receptors (for chain 1) will have length 15
@@ -164,3 +164,61 @@ class RandomDatasetGenerator:
 
         return ReceptorDataset(params={label: list(label_dict.keys()) for label, label_dict in labels.items()},
                                filenames=[filename], file_size=receptor_count)
+
+
+    @staticmethod
+    def _check_sequence_dataset_generation_params(receptor_count: int, length_probabilities: dict, labels: dict, path: str):
+        RandomDatasetGenerator._check_probabilities(length_probabilities, int, 'length_probabilities')
+        RandomDatasetGenerator._check_example_count(receptor_count, "receptor_count")
+        RandomDatasetGenerator._check_labels(labels)
+        RandomDatasetGenerator._check_path(path)
+
+    @staticmethod
+    def generate_sequence_dataset(sequence_count: int, length_probabilities: dict, labels: dict, path: str):
+        """
+        Creates sequence_count receptor sequences (single chain) where the length of sequences in each chain is sampled independently for each sequence from
+        length_probabilities distribution. The labels are also randomly assigned to sequences from the distribution given in
+        labels. In this case, labels are multi-class, so each sequences will get one class from each label. This means that negative
+        classes for the labels should be included as well in the specification.
+
+        An example of input parameters is given below:
+
+        sequence_count: 100 # generate 100 TRB ReceptorSequences
+        length_probabilities:
+            14: 0.8 # 80% of all generated sequences for all receptors (for chain 1) will have length 14
+            15: 0.2 # 20% of all generated sequences across all receptors (for chain 1) will have length 15
+        labels:
+            epitope1: # label name
+                True: 0.5 # 50% of the receptors will have class True
+                False: 0.5 # 50% of the receptors will have class False
+            epitope2: # next label with classes that will be assigned to receptors independently of the previous label or other parameters
+                1: 0.3 # 30% of the generated receptors will have class 1
+                0: 0.7 # 70% of the generated receptors will have class 0
+        """
+        RandomDatasetGenerator._check_sequence_dataset_generation_params(sequence_count, length_probabilities, labels, path)
+
+        alphabet = EnvironmentSettings.get_sequence_alphabet()
+        PathBuilder.build(path)
+
+        chain = "TRB"
+
+        sequences = [ReceptorSequence("".join(random.choices(alphabet, k=random.choices(list(length_probabilities.keys()), length_probabilities.values())[0])),
+                                      metadata=SequenceMetadata(count=1,
+                                                                v_subgroup=chain + "V1",
+                                                                v_gene=chain + "V1-1",
+                                                                v_allele=chain + "V1-1*01",
+                                                                j_subgroup=chain + "J1",
+                                                                j_gene=chain + "J1-1",
+                                                                j_allele=chain + "J1-1*01",
+                                                                chain=chain,
+                                                                custom_params={**{label: random.choices(list(label_dict.keys()), label_dict.values(), k=1)[0]
+                                                                                for label, label_dict in labels.items()}, **{"subject": f"subj_{i + 1}"}}))
+                     for i in range(sequence_count)]
+
+        filename = f"{path if path[-1] == '/' else path + '/'}batch01.pickle"
+
+        with open(filename, "wb") as file:
+            pickle.dump(sequences, file)
+
+        return ReceptorDataset(params={label: list(label_dict.keys()) for label, label_dict in labels.items()},
+                               filenames=[filename], file_size=sequence_count)
