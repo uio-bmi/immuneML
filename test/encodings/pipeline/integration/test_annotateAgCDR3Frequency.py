@@ -45,7 +45,7 @@ class TestAnnotateAgCDR3Frequency(TestCase):
                     ["ATA", "TAA", "AAC"],
                     ["ATA", "TAA", "AAC"],
                     ["AAA", "ATA", "ATA"],
-                    ["ASKLDFJD", "TAA", "AAC"]
+                    ["ASKLDFD", "TAA", "AAC"]
                 ],
                 root_path,
                 dataset_params
@@ -56,7 +56,7 @@ class TestAnnotateAgCDR3Frequency(TestCase):
         reference_rep = """TRBV Gene	CDR3B AA Sequence	Antigen Protein	MHC Class									
 VGENE1	CAAAF	A	MHC I									
 VGENE2	CATAF	B	MHC II									
-VGENE3	CASKLDFJDF	C	MHC II									
+VGENE3	CASKLDFDF	C	MHC II									
 VGENE1	CASSIEGPTGELFF	D Transporter 8	MHC I"""
 
         reference_metadata = """filename,subject_id
