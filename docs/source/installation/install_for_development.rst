@@ -25,11 +25,13 @@ https://docs.python.org/3/library/venv.html (python virtual environment)
 or use conda instead with python 3.7 or 3.8.
 
 4. From the project folder (immuneML folder created when the repository was cloned
-from GitHub), install the requirements from requirements.txt file:
+from GitHub), install the requirements from the requirements.txt file (this file can be found in the immuneML root folder):
 
 .. code-block:: console
 
   pip install -r requirements.txt
+
+See also this FAQ: :ref:`When installing all requirements from requirements.txt, there is afterward an error with yaml package (No module named yaml)?`.
 
 If you want to install optional requirements (to use R for plotting, DeepRC or TCRdist), install the corresponding requirements files (some or all of them):
 
