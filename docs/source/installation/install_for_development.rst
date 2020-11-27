@@ -4,7 +4,7 @@ Prerequisites:
 
 - Python 3.7 or 3.8: it might work with other python versions (3.6), but might require additional packages to be manually installed (e.g., dataclasses package if running immuneML with Python 3.6). Alternatively, a custom python interpreter can be assigned to the virtual environment (in PyCharm, for development purposes, or in a conda environment).
 
-- Optionally R 3.6.x with libraries Rmisc and readr and library ggexp (which cannot be installed directly with conda, but can be installed with devtool library from `the GitHub repository <https://github.com/keshav-motwani/ggexp>`_). These libraries are necessary to generate  certain reports (SequenceAssociationLikelihood, FeatureValueBarplot, FeatureValueDistplot, SequencingDepthOverview, DensityHeatmap, FeatureHeatmap, SimilarityHeatmap).
+- Optionally R 3.6.x with libraries Rmisc and readr and library ggexp (which cannot be installed directly with conda, but can be installed with devtool library from `the GitHub repository <https://github.com/keshav-motwani/ggexp>`_). See :ref:`When should I install immuneML with R dependencies?`
 
 Note: for development purposes, it is much more convenient to clone the codebase using PyCharm. To set up the project in PyCharm, see
 `the official JetBrains tutorial for creating a PyCharm project from an existing GitHub repository <https://www.jetbrains.com/help/pycharm/manage-projects-hosted-on-github.html>`_.
