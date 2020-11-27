@@ -18,7 +18,7 @@ class TestRandomDatasetGenerator(TestCase):
                                                                      labels={"HLA": {"A": 0.5, "B": 0.5}},
                                                                      path=path)
 
-        self.assertEqual(ReceptorDataset, type(dataset))
+        self.assertEqual(RepertoireDataset, type(dataset))
 
         self.assertEqual(100, dataset.get_example_count())
         for repertoire in dataset.repertoires:
