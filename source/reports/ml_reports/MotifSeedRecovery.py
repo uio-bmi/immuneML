@@ -173,9 +173,9 @@ class MotifSeedRecovery(MLReport):
             self._y_axis_title = "Coefficient value"
 
         if self.implanted_motifs_per_label[self.label]["hamming_distance"]:
-            self._x_axis_title = "Maximum positions overlap between feature and motif seeds\n(hamming distance allowed)"
+            self._x_axis_title = "Positions overlap between feature and motif seeds<br>(hamming distance allowed)"
         else:
-            self._x_axis_title = "Maximum positions overlap between feature and motif seeds"
+            self._x_axis_title = "Positions overlap between feature and motif seeds"
 
     def _retrieve_plot_data(self):
         seeds = self._get_implanted_seeds()
@@ -211,6 +211,7 @@ class MotifSeedRecovery(MLReport):
                 "coefficients": self._y_axis_title
             }, template='plotly_white',
                          color_discrete_sequence=px.colors.diverging.Tealrose)
+            # figure.update_layout(title={"text":self.title, "x":0.5, "font": {"size":14}})
 
             figure.write_html(filename)
 
