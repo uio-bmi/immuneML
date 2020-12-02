@@ -144,7 +144,7 @@ class CVFeaturePerformance(TrainMLModelReport):
             for hp_index, hp_setting in enumerate(self.relevant_hp_settings):
                 performance_training[hp_index, assessment_split_index] = \
                     [item.performance[self.state.optimization_metric.name.lower()]
-                     for item in assessment_state.label_states[self.label].selection_state.hp_items[str(hp_setting)]]
+                     for item in assessment_state.label_states[self.label].selection_state.hp_items[hp_setting.get_key()]]
 
         feature_values = self.feature_values.astype(str)
 

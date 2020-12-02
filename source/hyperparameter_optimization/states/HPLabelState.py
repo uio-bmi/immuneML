@@ -10,7 +10,7 @@ class HPLabelState:
 
     @property
     def optimal_assessment_item(self):
-        return self.assessment_items[self.selection_state.optimal_hp_setting]
+        return self.assessment_items[str(self.selection_state.optimal_hp_setting)]
 
     @property
     def optimal_hp_setting(self):

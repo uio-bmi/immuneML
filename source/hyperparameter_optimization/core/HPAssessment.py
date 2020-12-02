@@ -89,7 +89,7 @@ class HPAssessment:
                                     store_encoded_data=state.store_encoded_data)\
             .run(split_index)
 
-        state.assessment_states[split_index].label_states[label].assessment_items[hp_setting] = assessment_item
+        state.assessment_states[split_index].label_states[label].assessment_items[str(hp_setting)] = assessment_item
 
         return state
 
