@@ -1,8 +1,51 @@
-import glob
+# -*- coding: utf-8 -*-
+# Copyright (c) 2020, immuneML Development Team.
+# Distributed under the LGPLv2.1+ License. See LICENSE for more info.
+"""immune-ML.
 
+This file is part of immne-ML.
+
+immune-ML is free software: you can redistribute it and/or modify
+it under the terms of the GNU Lesser General Public License as published by
+the Free Software Foundation, either version 2.1 of the License, or
+(at your option) any later version.
+
+immune-ML is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Lesser General Public License for more details.
+
+You should have received a copy of the GNU Lesser General Public License
+along with immune-ML. If not, see <http://www.gnu.org/licenses/>
+"""
+import ast
+import glob
+import pathlib
+from codecs import open as openc
 from setuptools import setup, find_packages
 
-from source.environment.Constants import Constants
+FULL_VERSION = '0.9.0.dev0'  # Automatically set by setup_version.py
+
+
+def get_long_description():
+    """Return the contents of README.md as a string."""
+    here = pathlib.Path(__file__).absolute().parent
+    long_description = ''
+    with openc(here.joinpath('README.md'), encoding='utf-8') as fileh:
+        long_description = fileh.read()
+    return long_description
+
+
+def get_version():
+    """Return the version from version.py as a string."""
+    here = pathlib.Path(__file__).absolute().parent
+    filename = here.joinpath('source', 'version.py')
+    with openc(filename, encoding='utf-8') as fileh:
+        for lines in fileh:
+            if lines.startswith('FULL_VERSION ='):
+                version = ast.literal_eval(lines.split('=')[1].strip())
+                return version
+    return FULL_VERSION
 
 
 def import_requirements(filename) -> list:
@@ -13,9 +56,9 @@ def import_requirements(filename) -> list:
 
 setup(
     name="immune-ml",
-    version=Constants.VERSION,
+    version=get_version(),
     description="immuneML is a software platform for machine learning analysis of immune receptor sequences",
-    long_description=open("README.md").read(),
+    long_description=get_long_description(),
     author="Milena Pavlovic",
     author_email="milenpa@student.matnat.uio.no",
     url="https://github.com/uio-bmi/ImmuneML",

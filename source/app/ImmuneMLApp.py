@@ -1,9 +1,22 @@
+#! /usr/bin/env python3
+# -*- coding: utf-8 -*-
+# Copyright (c) 2020, immuneML Development Team.
+# Distributed under the LGPLv2.1+ License. See LICENSE for more info.
+"""immuneML 
+
+This script is a part of the immune-ML library and can be used for
+running simulations from an input script.
+
+"""
 import argparse
 import datetime
 import logging
 import os
 import shutil
+import sys
 import warnings
+from source import __version__ as VERSION
+from source.info import PROGRAM_NAME, URL, CITE, LOGO
 
 from source.caching.CacheType import CacheType
 from source.dsl.ImmuneMLParser import ImmuneMLParser
@@ -13,6 +26,49 @@ from source.environment.Constants import Constants
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.util.PathBuilder import PathBuilder
 from source.util.ReflectionHandler import ReflectionHandler
+
+
+_DATE_FMT = '%d.%m.%Y %H:%M:%S'
+
+
+def hello_world(infile, rundir, outfile):
+    """Print out a politically correct greeting for immune-ML.
+
+    Parameters
+    ----------
+    infile : string
+        String showing the location of the input file.
+    rundir : string
+        String showing the location we are running in.
+    outfile : string
+        The output file
+
+    """
+    timestart = datetime.datetime.now().strftime(_DATE_FMT)
+    pyversion = sys.version.split()[0]
+    print('\n'.join([LOGO]))
+    print(f'{PROGRAM_NAME} version: {VERSION}')
+    print(f'Start of execution: {timestart}')
+    print(f'Python version: {pyversion}')
+    print(f'Running in directory: {rundir}')
+    print(f'Input file: {infile}')
+    print(f'Output file: {outfile}')
+
+
+def bye_bye_world():
+    """Print out the goodbye message for immune-ML."""
+    timeend = datetime.datetime.now().strftime(_DATE_FMT)
+    print()
+    print(f'End of {PROGRAM_NAME}, execution: {timeend}')
+    # display some references:
+    references = ['{} references:'.format(PROGRAM_NAME)]
+    references.append(('-')*len(references[0]))
+    for line in CITE.split('\n'):
+        if line:
+            references.append(line)
+    print('\n'.join(references))
+    print(f'{URL}')
+
 
 
 class ImmuneMLApp:
@@ -38,11 +94,11 @@ class ImmuneMLApp:
 
         self.set_cache()
 
-        print(f"{datetime.datetime.now()}: ImmuneML: parsing the specification...\n", flush=True)
+        print(f"{datetime.datetime.now().strftime(_DATE_FMT)}: ImmuneML: parsing the specification...\n", flush=True)
 
         symbol_table, self._specification_path = ImmuneMLParser.parse_yaml_file(self._specification_path, self._result_path)
 
-        print(f"{datetime.datetime.now()}: ImmuneML: starting the analysis...\n", flush=True)
+        print(f"{datetime.datetime.now().strftime(_DATE_FMT)}: ImmuneML: starting the analysis...\n", flush=True)
 
         instructions = symbol_table.get_by_type(SymbolType.INSTRUCTION)
         output = symbol_table.get("output")
@@ -51,12 +107,13 @@ class ImmuneMLApp:
 
         self.clear_cache()
 
-        print(f"{datetime.datetime.now()}: ImmuneML: finished analysis.\n", flush=True)
+        print(f"{datetime.datetime.now().strftime(_DATE_FMT)}: ImmuneML: finished analysis.\n", flush=True)
 
         return result
 
 
 def run_immuneML(namespace: argparse.Namespace):
+    """Run immune-ML."""
 
     if os.path.isdir(namespace.result_path) and len(os.listdir(namespace.result_path)) != 0:
         raise ValueError(f"Directory {namespace.result_path} already exists. Please specify a new output directory for the analysis.")
@@ -75,13 +132,33 @@ def run_immuneML(namespace: argparse.Namespace):
 
 
 def main():
+    """Execute immune-ML."""
     parser = argparse.ArgumentParser(description="immuneML command line tool")
     parser.add_argument("specification_path", help="Path to specification YAML file. Always used to define the analysis.")
     parser.add_argument("result_path", help="Output directory path.")
     parser.add_argument("--tool", help="Name of the tool which calls immuneML. This name will be used to invoke appropriate API call, "
                                        "which will then do additional work in tool-dependent way before running standard immuneML.")
-    run_immuneML(parser.parse_args())
+    parser.add_argument('-V', '--version', action='version',
+                        version='{} {}'.format(PROGRAM_NAME, VERSION))
 
+    args_dict = vars(parser.parse_args())
+
+    input_file = args_dict['specification_path']
+    output_file = args_dict['result_path']
+    # Store directories:
+    cwd_dir = os.getcwd()
+    input_dir = os.path.dirname(input_file)
+    if not os.path.isdir(input_dir):
+        input_dir = os.getcwd()
+
+    hello_world(input_file, cwd_dir, output_file)
+
+    try:
+        run_immuneML(args_dict)
+    except Exception as error:
+        print('ERROR - execution stopped.')
+    finally:
+        bye_bye_world()
 
 if __name__ == "__main__":
     main()
