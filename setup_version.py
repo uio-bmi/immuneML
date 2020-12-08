@@ -2,7 +2,7 @@
 # Copyright (c) 2020, immune-ML Development Team.
 # Distributed under the LGPLv2.1+ License. See LICENSE for more info.
 """
-immune-ML
+immune-ML.
 
 Copyright (c) 2020, immune-ML Development team.
 

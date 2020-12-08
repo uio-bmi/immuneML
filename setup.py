@@ -49,6 +49,7 @@ def get_version():
 
 
 def import_requirements(filename) -> list:
+    """Import requirements."""
     with open(filename, 'r') as file:
         requirements = file.read().split("\n")
     return requirements
