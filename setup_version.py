@@ -66,7 +66,7 @@ PROGRAM_NAME = 'immune-ML'
 URL = 'https://greifflab.org/software/'
 GIT_URL = 'https://github.com/uio-bmi/ImmuneML'
 CITE = """
-[1] x. yyy, z. kkk, J. mc jounraly journal, 2021
+[1] x. yyy, z. kkk, J. Journaly McJounralFace, 2021
     doi: https://soon.666
 
 """
