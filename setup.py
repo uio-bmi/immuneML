@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2020, immuneML Development Team.
+# Copyright (c) 2020, immune-ML Development Team.
 # Distributed under the LGPLv2.1+ License. See LICENSE for more info.
 """immune-ML.
 
@@ -58,7 +58,7 @@ def import_requirements(filename) -> list:
 setup(
     name="immune-ml",
     version=get_version(),
-    description="immuneML is a software platform for machine learning analysis of immune receptor sequences",
+    description="immune-ML is a software platform for machine learning analysis of immune receptor sequences",
     long_description=get_long_description(),
     author="Milena Pavlovic",
     author_email="milenpa@student.matnat.uio.no",
