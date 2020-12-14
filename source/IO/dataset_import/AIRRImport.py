@@ -50,6 +50,11 @@ class AIRRImport(DataImport):
         be included in the imported sequences. This only applies if column vj_in_frame is present. By default,
         import_out_of_frame is False.
 
+        import_illegal_characters (bool): Whether to import sequences that contain illegal characters, i.e., characters
+        that do not appear in the sequence alphabet (amino acids including stop codon '*', or nucleotides). When set to false, filtering is only
+        applied to the sequence type of interest (when running immuneML in amino acid mode, only entries with illegal
+        characters in the amino acid sequence are removed). By default import_illegal_characters is False.
+
         import_empty_nt_sequences (bool): imports sequences which have an empty nucleotide sequence field; can be True or False.
         By default, import_empty_nt_sequences is set to True.
 
@@ -105,6 +110,7 @@ class AIRRImport(DataImport):
                 import_productive: True # whether to include productive sequences in the dataset
                 import_with_stop_codon: False # whether to include sequences with stop codon in the dataset
                 import_out_of_frame: False # whether to include out of frame sequences in the dataset
+                import_illegal_characters: False # remove sequences with illegal characters for the sequence_type being used
                 import_empty_nt_sequences: True # keep sequences even if the `sequences` column is empty (provided that other fields are as specified here)
                 import_empty_aa_sequences: False # remove all sequences with empty `sequence_aas` column
                 # Optional fields with AIRR-specific defaults, only change when different behavior is required:
@@ -165,6 +171,7 @@ class AIRRImport(DataImport):
 
         df = ImportHelper.update_gene_info(df)
         ImportHelper.drop_empty_sequences(df, params.import_empty_aa_sequences, params.import_empty_nt_sequences)
+        ImportHelper.drop_illegal_character_sequences(df, params.import_illegal_characters)
 
         return df
 

@@ -78,7 +78,7 @@ class DiseaseAssociatedSequenceOverlap(MultiDatasetReport):
         return data_path
 
     def _make_figure(self, overlap_matrix, labels):
-        figure = px.imshow(overlap_matrix, x=labels, y=labels, zmin=0, zmax=100, color_continuous_scale=px.colors.diverging.Tealrose,
+        figure = px.imshow(overlap_matrix, x=labels, y=labels, zmin=0, zmax=100, color_continuous_scale=px.colors.sequential.Teal,
                            template='plotly_white')
         figure.update_traces(hovertemplate="Overlap of disease-associated<br>sequences between datasets<br>%{x} and %{y}:<br>%{z}%<extra></extra>")
         figure_path = self.result_path + "sequence_overlap.html"

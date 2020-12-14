@@ -62,16 +62,16 @@ rep2.tsv,2""")
         for index, repertoire in enumerate(dataset.get_data()):
             self.assertTrue(all(sequence.metadata.chain == Chain.ALPHA for sequence in repertoire.sequences))
             if index == 0:
-                self.assertEqual(10, len(repertoire.sequences))
+                self.assertEqual(9, len(repertoire.sequences))
                 self.assertEqual("ALVTDSWGKLQ", repertoire.sequences[0].amino_acid_sequence)
-                self.assertEqual("AEAFLEI_GGFKTI", repertoire.sequences[1].amino_acid_sequence)
+                self.assertEqual("ALRITQGGSEKLV", repertoire.sequences[1].amino_acid_sequence)
                 self.assertEqual("TRAV6", repertoire.sequences[0].metadata.v_gene)
-                self.assertEqual("TRAV13-2", repertoire.sequences[1].metadata.v_gene)
-                self.assertListEqual([Chain.ALPHA for i in range(10)], list(repertoire.get_chains()))
-                self.assertListEqual([956023, 102075, 90101, 69706, 56658, 55692, 43466, 42172, 41647, 19133], list(repertoire.get_counts()))
+                self.assertEqual("TRAV16", repertoire.sequences[1].metadata.v_gene)
+                self.assertListEqual([Chain.ALPHA for i in range(9)], list(repertoire.get_chains()))
+                self.assertListEqual([956023, 90101, 69706, 56658, 55692, 43466, 42172, 41647, 19133], list(repertoire.get_counts()))
 
             elif index == 1:
-                self.assertEqual(6, len(repertoire.sequences))
+                self.assertEqual(5, len(repertoire.sequences))
                 self.assertEqual("GCTGTGCTGGAAACCAGTGGCTCTAGGTTGACC", repertoire.sequences[0].nucleotide_sequence)
 
         shutil.rmtree(path)
@@ -90,8 +90,6 @@ rep2.tsv,2""")
         params["path"] = path
 
         dataset = MiXCRImport.import_dataset(params, "mixcr_repertoire_dataset")
-
-        self.assertEqual(16, dataset.get_example_count())
 
         seqs = [sequence for sequence in dataset.get_data()]
 

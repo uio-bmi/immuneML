@@ -12,6 +12,11 @@ class HealthySequenceImplanting(SignalImplantingStrategy):
     where signals will be implanted in 'healthy sequences', meaning sequences in which no signal has been implanted
     previously. This ensures that there is only one signal per receptor sequence.
 
+    If for the given number of sequences in the repertoire and repertoire implanting rate, the total number of sequences for implanting turns out to
+    be less than 1 (e.g. for 12000 sequences and repertoire implanting rate 0.00005, it should implant the signal in 0.6 sequences), the signal will
+    not be implanted in that repertoire and a warning with repertoire identifier along with the repertoire implanting rate and number of sequences
+    in the repertoire will be raised.
+
     Arguments:
 
         implanting: name of the implanting strategy, here HealthySequence

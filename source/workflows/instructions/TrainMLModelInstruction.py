@@ -193,7 +193,7 @@ class TrainMLModelInstruction(Instruction):
             performance = {'hp_setting': [], 'split': [], 'optimal': [], **{metric.name.lower(): [] for metric in self.state.metrics}}
             for index, assessment_state in enumerate(self.state.assessment_states):
                 for hp_setting, hp_item in assessment_state.label_states[label].assessment_items.items():
-                    performance['hp_setting'].append(hp_setting.get_key())
+                    performance['hp_setting'].append(str(hp_setting))
                     performance['split'].append(index+1)
                     performance['optimal'].append(hp_setting == assessment_state.label_states[label].optimal_hp_setting)
                     for metric in self.state.metrics:

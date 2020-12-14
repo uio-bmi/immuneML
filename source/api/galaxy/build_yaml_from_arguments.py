@@ -233,7 +233,7 @@ def check_arguments(args):
 
 def parse_commandline_arguments(args):
     ReflectionHandler.get_classes_by_partial_name("", "ml_methods/")
-    ml_method_names = [cl.__name__ for cl in ReflectionHandler.all_nonabstract_subclasses(MLMethod)]
+    ml_method_names = [cl.__name__ for cl in ReflectionHandler.all_nonabstract_subclasses(MLMethod)] + ["SimpleLogisticRegression"]
 
     parser = argparse.ArgumentParser(description="tool for building immuneML Galaxy YAML from arguments")
     parser.add_argument("-o", "--output_path", required=True, help="Output location for the generated yaml file (directiory).")
