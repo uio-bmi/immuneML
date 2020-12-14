@@ -6,13 +6,16 @@ import random
 from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.data_model.repertoire.Repertoire import Repertoire
 from source.simulation.sequence_implanting.SequenceImplantingStrategy import SequenceImplantingStrategy
+from source.simulation.signal_implanting_strategy.ImplantingComputation import ImplantingComputation
 
 
 class SignalImplantingStrategy(metaclass=abc.ABCMeta):
 
-    def __init__(self, implanting: SequenceImplantingStrategy = None, sequence_position_weights: dict = None):
+    def __init__(self, implanting: SequenceImplantingStrategy = None, sequence_position_weights: dict = None,
+                 implanting_computation: ImplantingComputation = None):
         self.sequence_implanting_strategy = implanting
         self.sequence_position_weights = sequence_position_weights
+        self.compute_implanting = implanting_computation
 
     @abc.abstractmethod
     def implant_in_repertoire(self, repertoire: Repertoire, repertoire_implanting_rate: float, signal, path):
