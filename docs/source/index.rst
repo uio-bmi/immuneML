@@ -11,16 +11,16 @@ repertoires. immuneML can be used for:
 
 - **Training ML models** for repertoire classification (e.g., disease prediction) or receptor sequence
   classification (e.g., antigen binding prediction). In immuneML, the performance of different machine learning (ML)
-  settings is compared by nested cross-validation. These ML settings consist of data preprocessing steps, encodings
+  settings can be compared by nested cross-validation. These ML settings consist of data preprocessing steps, encodings
   and ML models and their hyperparameters.
 
-- **Exploring datasets** by applying preprocessing and encoding, and plotting statistics without training ML models.
+- **Exploratory analysis of datasets** by applying preprocessing and encoding, and plotting descriptive statistics without training ML models.
 
 - **Simulating** immune events, such as disease states, into experimental or synthetic repertoire datasets.
   By implanting known immune signals into a given dataset, a ground truth benchmarking dataset is created. Such a dataset
   can be used to test the performance of ML settings under known conditions.
 
-- **Applying ML models** to new datasets with unknown class labels
+- **Applying trained ML models** to new datasets with unknown class labels
 
 The starting point for any immuneML analysis is the YAML specification file. In this file, the settings of the analysis
 components are defined, which are shown in six different colors in the figure below. Additionally, the YAML file
@@ -42,7 +42,7 @@ If you want to **use immuneML locally**, see :ref:`Installing immuneML`.
 To become familiar with the **YAML-based specification**, you can find a concrete example in our :ref:`Quickstart` guide,
 or read about the overall YAML structure and options in :ref:`How to specify an analysis with YAML`.
 
-- Note that the components of the YAML specification are the same in the Galaxy portal and locally,
+- Note that the components of the YAML specification are the same in the Galaxy portal and in the command-line interface,
   but in Galaxy, datasets must first be converted to immuneML format (see :ref:`How to make an immuneML dataset in Galaxy`).
 
 Once you have a general understanding of the YAML specification, you can take a look at more detailed :ref:`Tutorials` for

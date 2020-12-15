@@ -14,14 +14,14 @@ class TestIdentitySequenceEncoder(TestCase):
         self.assertEqual(enc.encode_sequence(sequence, EncoderParams(model={},
                                                                      label_config=LabelConfiguration(),
                                                                      result_path="")),
-                         None)
+                         ["AAA"])
 
         sequence = ReceptorSequence(amino_acid_sequence="AAA", metadata=SequenceMetadata(frame_type="STOP"))
         enc = IdentitySequenceEncoder()
         self.assertEqual(enc.encode_sequence(sequence, EncoderParams(model={},
                                                                      label_config=LabelConfiguration(),
                                                                      result_path="")),
-                         None)
+                         ["AAA"])
 
         sequence = ReceptorSequence(amino_acid_sequence="AAA", metadata=SequenceMetadata(frame_type="IN"))
         enc = IdentitySequenceEncoder()
