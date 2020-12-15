@@ -20,7 +20,7 @@ class MLSettingsPerformance(TrainMLModelReport):
     When multiple data splits are used, the average performance over the data splits is shown with an error bar
     representing the standard deviation.
 
-    This report can be used only with TrainMLModel instruction under assessment/reports/hyperparameter.
+    This report can be used only with TrainMLModel instruction under 'reports'.
 
 
     Arguments:

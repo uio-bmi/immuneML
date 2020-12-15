@@ -60,7 +60,7 @@ class TrainMLModelInstruction(Instruction):
         number_of_processes (int): how many processes should be created at once to speed up the analysis. For personal machines, 4 or 8 is usually a good choice.
 
         reports (list): a list of report names to be executed after the nested CV has finished to show the overall performance or some statistic;
-        the reports to be specified here have to be subclasses of py:`source.reports.train_ml_model_reports.TrainMLModelReport.TrainMLModelReport` class.
+        the reports to be specified here have to be :py:obj:`source.reports.train_ml_model_reports.TrainMLModelReport.TrainMLModelReport` reports.
 
         refit_optimal_model (bool): if the final combination of preprocessing-encoding-ML model should be refitted on the full dataset thus providing
         the final model to be exported from instruction; alternatively, train combination from one of the assessment folds will be used
@@ -233,9 +233,7 @@ class TrainMLModelInstruction(Instruction):
             "a metric to use for optimization": f"a metric to use for optimization (one of {valid_values})",
             "Valid values are objects of any class inheriting :py:obj:`~source.hyperparameter_optimization.strategy."
             "HPOptimizationStrategy.HPOptimizationStrategy`.": f"Valid values are: {valid_strategies}.",
-            "the reports to be specified here have to be subclasses of "
-            "py:`source.reports.train_ml_model_reports.TrainMLModelReport.TrainMLModelReport` class.": f"the reports that can be provided here are "
-                                                                                                       f"listed under ref:`{TrainMLModelReport.get_title()}`."
+            "the reports to be specified here have to be :py:obj:`source.reports.train_ml_model_reports.TrainMLModelReport.TrainMLModelReport` reports.": f"the reports that can be provided here are :ref:`{TrainMLModelReport.get_title()}`."
         }
         doc = update_docs_per_mapping(doc, mapping)
         return doc
