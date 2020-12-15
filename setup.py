@@ -1,22 +1,12 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2020, immune-ML Development Team.
-# Distributed under the LGPLv2.1+ License. See LICENSE for more info.
-"""immune-ML.
+# Copyright (c) 2020, immuneML Development Team.
+# Distributed under the LGPLv3 License. See LICENSE for more info.
+"""immuneML.
 
-This file is part of immne-ML.
+This file is part of immneML.
 
-immune-ML is free software: you can redistribute it and/or modify
-it under the terms of the GNU Lesser General Public License as published by
-the Free Software Foundation, either version 2.1 of the License, or
-(at your option) any later version.
-
-immune-ML is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Lesser General Public License for more details.
-
-You should have received a copy of the GNU Lesser General Public License
-along with immune-ML. If not, see <http://www.gnu.org/licenses/>
+immuneML is free software, please our term and conditions detailed
+in the file LIVENCE.md
 """
 import ast
 import glob
@@ -58,7 +48,7 @@ def import_requirements(filename) -> list:
 setup(
     name="immune-ml",
     version=get_version(),
-    description="immune-ML is a software platform for machine learning analysis of immune receptor sequences",
+    description="immuneML is a software platform for machine learning analysis of immune receptor sequences",
     long_description=get_long_description(),
     author="Milena Pavlovic",
     author_email="milenpa@student.matnat.uio.no",

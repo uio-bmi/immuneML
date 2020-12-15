@@ -1,11 +1,11 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Copyright (c) 2020, immune-ML Development Team.
-# Distributed under the LGPLv2.1+ License. See LICENSE for more info.
-"""immune-ML 
+# Copyright (c) 2020, immuneML Development Team.
+# Distributed under the LGPLv3 License. See LICENSE for more info.
+"""immuneML 
 
-This script is a part of the immune-ML library and can be used for
-running simulations from an input script.
+This script is part of the immuneML library and it is the main
+function to execute immuneML.
 
 """
 import argparse
@@ -32,7 +32,7 @@ _DATE_FMT = '%d.%m.%Y %H:%M:%S'
 
 
 def hello_world(infile, rundir, outfile):
-    """Print out a politically correct greeting for immune-ML.
+    """Print out a politically correct greeting for immuneML.
 
     Parameters
     ----------
@@ -56,7 +56,7 @@ def hello_world(infile, rundir, outfile):
 
 
 def bye_bye_world():
-    """Print out the goodbye message for immune-ML."""
+    """Print out the goodbye message for immuneML."""
     timeend = datetime.datetime.now().strftime(_DATE_FMT)
     print()
     print(f'End of {PROGRAM_NAME}, execution: {timeend}')
@@ -94,11 +94,11 @@ class ImmuneMLApp:
 
         self.set_cache()
 
-        print(f"{datetime.datetime.now().strftime(_DATE_FMT)}: Immune-ML: parsing the specification...\n", flush=True)
+        print(f"{datetime.datetime.now().strftime(_DATE_FMT)}: ImmuneML: parsing the specification...\n", flush=True)
 
         symbol_table, self._specification_path = ImmuneMLParser.parse_yaml_file(self._specification_path, self._result_path)
 
-        print(f"{datetime.datetime.now().strftime(_DATE_FMT)}: Immune-ML: starting the analysis...\n", flush=True)
+        print(f"{datetime.datetime.now().strftime(_DATE_FMT)}: ImmuneML: starting the analysis...\n", flush=True)
 
         instructions = symbol_table.get_by_type(SymbolType.INSTRUCTION)
         output = symbol_table.get("output")
@@ -107,13 +107,13 @@ class ImmuneMLApp:
 
         self.clear_cache()
 
-        print(f"{datetime.datetime.now().strftime(_DATE_FMT)}: Immune-ML: finished analysis.\n", flush=True)
+        print(f"{datetime.datetime.now().strftime(_DATE_FMT)}: ImmuneML: finished analysis.\n", flush=True)
 
         return result
 
 
 def run_immuneML(namespace: argparse.Namespace):
-    """Run immune-ML."""
+    """Run immuneML."""
 
     if os.path.isdir(namespace.result_path) and len(os.listdir(namespace.result_path)) != 0:
         raise ValueError(f"Directory {namespace.result_path} already exists. Please specify a new output directory for the analysis.")
@@ -132,12 +132,12 @@ def run_immuneML(namespace: argparse.Namespace):
 
 
 def main():
-    """Execute immune-ML."""
-    parser = argparse.ArgumentParser(description="immune-ML command line tool")
+    """Execute immuneML."""
+    parser = argparse.ArgumentParser(description="immuneML command line tool")
     parser.add_argument("specification_path", help="Path to specification YAML file. Always used to define the analysis.")
     parser.add_argument("result_path", help="Output directory path.")
-    parser.add_argument("--tool", help="Name of the tool which calls immune-ML. This name will be used to invoke appropriate API call, "
-                                       "which will then do additional work in tool-dependent way before running standard immune-ML.")
+    parser.add_argument("--tool", help="Name of the tool which calls immuneML. This name will be used to invoke appropriate API call, "
+                                       "which will then do additional work in tool-dependent way before running standard immuneML.")
     parser.add_argument('-V', '--version', action='version',
                         version='{} {}'.format(PROGRAM_NAME, VERSION))
 

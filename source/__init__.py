@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) 2020, PyRETIS Development Team.
-# Distributed under the LGPLv2.1+ License. See LICENSE for more info.
-"""immune-ML.
+# Distributed under the LGPLv3 License. See LICENSE for more info.
+"""immuneML.
 
-Copyright (c) 2020, immune-ML Development Team
+Copyright (c) 2020, immuneML Development Team
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -24,13 +24,13 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 
-immune-ML documentation
+immuneML documentation
 -----------------------
 
-The documentation for PyRETIS is available either doc-strings provided
-with the code and from `the PyRETIS homepage <http://www.pyretis.org>`_.
+The documentation for immuneML is available either doc-strings provided
+with the code and from `the immuneML homepage <https://xxx/>`_.
 
-immune-ML sub-packages
+immuneML sub-packages
 ----------------------
 """
 from .version import VERSION as __version__
