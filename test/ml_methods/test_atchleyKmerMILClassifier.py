@@ -11,12 +11,12 @@ from source.environment.Constants import Constants
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.environment.Label import Label
 from source.environment.LabelConfiguration import LabelConfiguration
-from source.ml_methods.KmerMILClassifier import KmerMILClassifier
+from source.ml_methods.AtchleyKmerMILClassifier import AtchleyKmerMILClassifier
 from source.simulation.dataset_generation.RandomDatasetGenerator import RandomDatasetGenerator
 from source.util.PathBuilder import PathBuilder
 
 
-class TestKmerMILClassifier(TestCase):
+class TestAtchleyKmerMILClassifier(TestCase):
 
     def setUp(self) -> None:
         os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
@@ -31,8 +31,8 @@ class TestKmerMILClassifier(TestCase):
         enc_dataset = AtchleyKmerEncoder(2, 1, 1, 'relative_abundance', False).encode(dataset, EncoderParams(path + "result/",
                                                                                                              LabelConfiguration(
                                                                                                                  [Label("l1", [True, False])])))
-        cls = KmerMILClassifier(iteration_count=10, threshold=-0.0001, evaluate_at=2, use_early_stopping=False, random_seed=1, learning_rate=0.01,
-                                zero_abundance_weight_init=True, number_of_threads=8)
+        cls = AtchleyKmerMILClassifier(iteration_count=10, threshold=-0.0001, evaluate_at=2, use_early_stopping=False, random_seed=1, learning_rate=0.01,
+                                       zero_abundance_weight_init=True, number_of_threads=8)
         cls.fit(enc_dataset.encoded_data, "l1")
 
         predictions = cls.predict(enc_dataset.encoded_data, "l1")
@@ -45,8 +45,8 @@ class TestKmerMILClassifier(TestCase):
 
         cls.store(path + "model_storage/", feature_names=enc_dataset.encoded_data.feature_names)
 
-        cls2 = KmerMILClassifier(iteration_count=10, threshold=-0.0001, evaluate_at=2, use_early_stopping=False, random_seed=1, learning_rate=0.01,
-                                 zero_abundance_weight_init=True, number_of_threads=8)
+        cls2 = AtchleyKmerMILClassifier(iteration_count=10, threshold=-0.0001, evaluate_at=2, use_early_stopping=False, random_seed=1, learning_rate=0.01,
+                                        zero_abundance_weight_init=True, number_of_threads=8)
         cls2.load(path + "model_storage/")
 
         cls2_vars = vars(cls2)

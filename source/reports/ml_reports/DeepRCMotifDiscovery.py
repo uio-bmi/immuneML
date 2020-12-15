@@ -11,7 +11,7 @@ from source.util.PathBuilder import PathBuilder
 from source.visualization.integrated_gradients_snippets import compute_contributions
 
 
-class DeepRCInterpretation(MLReport):
+class DeepRCMotifDiscovery(MLReport):
     """
     This report plots the contributions of (i) input sequences and (ii) kernels to trained DeepRC model with respect to
     the test dataset. Contributions are computed using integrated gradients (IG).
@@ -42,13 +42,13 @@ class DeepRCInterpretation(MLReport):
     .. code-block:: yaml
 
         my_deeprc_report:
-            DeepRCInterpretation:
+            DeepRCMotifDiscovery:
                 threshold: 0.5
                 n_steps: 50
 
     """
     def __init__(self, n_steps, threshold, name: str = None):
-        super(DeepRCInterpretation, self).__init__()
+        super(DeepRCMotifDiscovery, self).__init__()
         self.n_steps = n_steps
         self.threshold = threshold
         self.filename_inputs = "inputs_integrated_gradients.pdf"
@@ -57,12 +57,12 @@ class DeepRCInterpretation(MLReport):
 
     @classmethod
     def build_object(cls, **kwargs):
-        location = "DeepRCInterpretation"
+        location = "DeepRCMotifDiscovery"
         name = kwargs["name"] if "name" in kwargs else None
         ParameterValidator.assert_type_and_value(kwargs["n_steps"], int, location, "n_steps", min_inclusive=1)
         ParameterValidator.assert_type_and_value(kwargs["threshold"], float, location, "threshold", min_inclusive=0, max_inclusive=1)
 
-        return DeepRCInterpretation(n_steps=kwargs["n_steps"], threshold=kwargs["threshold"], name=name)
+        return DeepRCMotifDiscovery(n_steps=kwargs["n_steps"], threshold=kwargs["threshold"], name=name)
 
     def generate(self) -> ReportResult:
         PathBuilder.build(self.result_path)

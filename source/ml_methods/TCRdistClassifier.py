@@ -7,7 +7,7 @@ from source.ml_methods.SklearnMethod import SklearnMethod
 from source.util.ParameterValidator import ParameterValidator
 
 
-class TCRDISTClassifier(SklearnMethod):
+class TCRdistClassifier(SklearnMethod):
     """
     Implementation of a nearest neighbors classifier based on TCR distances as presented in
     Dash P, Fiore-Gartland AJ, Hertz T, et al. Quantifiable predictive features define epitope-specific T cell receptor repertoires.
@@ -62,3 +62,7 @@ class TCRDISTClassifier(SklearnMethod):
 
     def can_predict_proba(self) -> bool:
         return True
+
+    def _get_model_filename(self):
+        return "tcrdist_classifier"
+
