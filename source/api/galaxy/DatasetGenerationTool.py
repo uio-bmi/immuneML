@@ -7,7 +7,7 @@ from source.api.galaxy.Util import Util
 from source.app.ImmuneMLApp import ImmuneMLApp
 from source.util.ParameterValidator import ParameterValidator
 from source.util.PathBuilder import PathBuilder
-from source.workflows.instructions.dataset_generation.DatasetGenerationInstruction import DatasetGenerationInstruction
+from source.workflows.instructions.dataset_generation.DatasetExportInstruction import DatasetExportInstruction
 
 
 class DatasetGenerationTool(GalaxyTool):
@@ -19,7 +19,7 @@ class DatasetGenerationTool(GalaxyTool):
 
     This tool is meant to be used as an endpoint for Galaxy tool that will create a Galaxy collection out of a dataset in immuneML format.
 
-    Specification for this tool is the same as for the `DatasetGenerationInstruction`, except it can create only one dataset with one format at
+    Specification for this tool is the same as for the `DatasetExportInstruction`, except it can create only one dataset with one format at
     the time.
 
     """
@@ -55,11 +55,11 @@ class DatasetGenerationTool(GalaxyTool):
             f"instead: {list(specs['definitions']['datasets'].keys())}."
 
         assert len(specs['instructions'].keys()) == 1, \
-            f"{DatasetGenerationTool.__name__}: only one instruction of type DatasetGeneration can be defined with this Galaxy tool, got these " \
+            f"{DatasetGenerationTool.__name__}: only one instruction of type DatasetExport can be defined with this Galaxy tool, got these " \
             f"instructions instead: {list(specs['instructions'].keys())}."
 
     def _check_instruction(self, specs):
-        instruction_name = Util.check_instruction_type(specs, DatasetGenerationTool.__name__, DatasetGenerationInstruction.__name__[:-11])
+        instruction_name = Util.check_instruction_type(specs, DatasetGenerationTool.__name__, DatasetExportInstruction.__name__[:-11])
 
         for key in ['datasets', 'export_formats']:
             ParameterValidator.assert_keys_present(list(specs['instructions'][instruction_name].keys()), [key], DatasetGenerationTool.__name__,

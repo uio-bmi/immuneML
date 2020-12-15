@@ -37,7 +37,7 @@ class TestDataSimulationTool(TestCase):
             }
         },
             "instructions": {
-                "inst1": {"type": "DatasetGeneration", "export_formats": ["Pickle"], "datasets": ["d1"]}
+                "inst1": {"type": "DatasetExport", "export_formats": ["Pickle"], "datasets": ["d1"]}
             }
         }
 

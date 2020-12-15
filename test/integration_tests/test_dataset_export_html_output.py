@@ -8,7 +8,7 @@ from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.util.PathBuilder import PathBuilder
 
 
-class TestDatasetGenerationHTMLOutput(TestCase):
+class TestDatasetExportHTMLOutput(TestCase):
 
     def test(self):
 
@@ -34,7 +34,7 @@ class TestDatasetGenerationHTMLOutput(TestCase):
                     }
                 }
             },
-            "instructions": {"instr1": {"type": "DatasetGeneration", "export_formats": ["Pickle", "AIRR"], "datasets": ["d1"]}},
+            "instructions": {"instr1": {"type": "DatasetExport", "export_formats": ["Pickle", "AIRR"], "datasets": ["d1"]}},
             "output": {"format": "HTML"}
         }
 

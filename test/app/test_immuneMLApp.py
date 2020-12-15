@@ -119,7 +119,7 @@ class TestImmuneMLApp(TestCase):
                     }
                 },
                 "export_instr": {
-                    "type": "DatasetGeneration",
+                    "type": "DatasetExport",
                     "datasets": ["d1"],
                     "export_formats": ["AIRR"]
                 },
