@@ -3,10 +3,10 @@ from source.dsl.symbol_table.SymbolTable import SymbolTable
 from source.dsl.symbol_table.SymbolType import SymbolType
 from source.util.ParameterValidator import ParameterValidator
 from source.util.ReflectionHandler import ReflectionHandler
-from source.workflows.instructions.dataset_generation.DatasetGenerationInstruction import DatasetGenerationInstruction
+from source.workflows.instructions.dataset_generation.DatasetExportInstruction import DatasetExportInstruction
 
 
-class DatasetGenerationParser:
+class DatasetExportParser:
     """
     Specification of instruction with a random datasets:
 
@@ -30,7 +30,7 @@ class DatasetGenerationParser:
                 no: 0.5
     instructions:
       my_instruction1: # instruction name
-        type: DatasetGeneration
+        type: DatasetExport
         datasets: # list of datasets to export
           - my_generated_dataset
         export_formats: # list of formats to export the datasets to
@@ -41,15 +41,15 @@ class DatasetGenerationParser:
 
     VALID_KEYS = ["type", "datasets", "export_formats"]
 
-    def parse(self, key: str, instruction: dict, symbol_table: SymbolTable, path: str = None) -> DatasetGenerationInstruction:
-        location = "DatasetGenerationParser"
-        ParameterValidator.assert_keys(list(instruction.keys()), DatasetGenerationParser.VALID_KEYS, location, key)
+    def parse(self, key: str, instruction: dict, symbol_table: SymbolTable, path: str = None) -> DatasetExportInstruction:
+        location = "DatasetExportParser"
+        ParameterValidator.assert_keys(list(instruction.keys()), DatasetExportParser.VALID_KEYS, location, key)
         valid_formats = ReflectionHandler.all_nonabstract_subclass_basic_names(DataExporter, "Exporter", 'dataset_export/')
         ParameterValidator.assert_all_in_valid_list(instruction["export_formats"], valid_formats, location, "export_formats")
         ParameterValidator.assert_all_in_valid_list(instruction["datasets"], symbol_table.get_keys_by_type(SymbolType.DATASET), location,
                                                     "datasets")
 
-        return DatasetGenerationInstruction(datasets=[symbol_table.get(dataset_key) for dataset_key in instruction["datasets"]],
+        return DatasetExportInstruction(datasets=[symbol_table.get(dataset_key) for dataset_key in instruction["datasets"]],
                                             exporters=[ReflectionHandler.get_class_by_name(f"{key}Exporter", "dataset_export/")
                                                        for key in instruction["export_formats"]],
                                             name=key)

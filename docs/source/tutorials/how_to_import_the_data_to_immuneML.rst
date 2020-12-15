@@ -119,7 +119,7 @@ which speeds up the analysis. The main resulting file has an `.iml_dataset` exte
 by several other `.pickle` and `.npy` files. When running immuneML locally, you can by default find these immuneML
 dataset files in the folder 'datasets', which is located in the main output folder of your analysis.
 
-Some instructions (:ref:`Simulation`, :ref:`DatasetGeneration`, :ref:`SubSampling`) also explicitly export immuneML
+Some instructions (:ref:`Simulation`, :ref:`DatasetExport`, :ref:`SubSampling`) also explicitly export immuneML
 datasets when selecting 'Pickle' as the export format.
 
 These `.iml_dataset` files can later be imported easily and with few parameters, and importing from `.iml_dataset` is

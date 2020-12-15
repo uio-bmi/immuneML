@@ -93,7 +93,7 @@ Exporting a random sequence/receptor/repertoire dataset
 -------------------------------------------------------
 
 It is possible to export the generated random sequence/receptor/repertoire dataset to AIRR or Pickle format. This can be done by exporting the generated dataset
-through the DatasetGeneration instruction. The generated dataset can subsequently be used for other analyses or machine learning. A complete YAML
+through the :ref:`DatasetExport` instruction. The generated dataset can subsequently be used for other analyses or machine learning. A complete YAML
 specification for random repertoire generation and export is given below:
 
 .. highlight:: yaml
@@ -115,7 +115,7 @@ specification for random repertoire generation and export is given below:
             10: 1.0
   instructions:
     my_dataset_generation_instruction:
-      type: DatasetGeneration
+      type: DatasetExport
       datasets: [d1] # list of datasets to export
       export_formats: [AIRR, Pickle] # list of formats to export the datasets to
 

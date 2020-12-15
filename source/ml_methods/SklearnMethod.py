@@ -168,12 +168,12 @@ class SklearnMethod(MLMethod):
 
     def store(self, path, feature_names=None, details_path=None):
         PathBuilder.build(path)
-        name = FilenameHandler.get_filename(self.__class__.__name__, "pickle")
+        name = self._get_model_filename() + ".pickle"
         with open(path + name, "wb") as file:
             dill.dump(self.models, file)
 
         if details_path is None:
-            params_path = path + FilenameHandler.get_filename(self.__class__.__name__, "yaml")
+            params_path = path + self._get_model_filename() + ".yaml"
         else:
             params_path = details_path
 
@@ -187,8 +187,11 @@ class SklearnMethod(MLMethod):
                 }
             yaml.dump(desc, file)
 
+    def _get_model_filename(self):
+        return FilenameHandler.get_filename(self.__class__.__name__, "")
+
     def load(self, path):
-        name = FilenameHandler.get_filename(self.__class__.__name__, "pickle")
+        name = self._get_model_filename() + ".pickle"
         if os.path.isfile(path + name):
             with open(path + name, "rb") as file:
                 self.models = dill.load(file)
@@ -206,7 +209,7 @@ class SklearnMethod(MLMethod):
         return self.models[label].classes_
 
     def check_if_exists(self, path):
-        return os.path.isfile(path + FilenameHandler.get_filename(self.__class__.__name__, "pickle"))
+        return os.path.isfile(path + self._get_model_filename() + ".pickle")
 
     @abc.abstractmethod
     def _get_ml_model(self, cores_for_training: int = 2, X=None):

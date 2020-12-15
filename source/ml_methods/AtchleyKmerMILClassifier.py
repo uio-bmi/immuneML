@@ -13,9 +13,9 @@ from source.ml_methods.util.Util import Util
 from source.util.PathBuilder import PathBuilder
 
 
-class KmerMILClassifier(MLMethod):
+class AtchleyKmerMILClassifier(MLMethod):
     """
-    Repertoire classifier which uses the data encoded by AtchleyKmerEncoder to predict the repertoire label.
+    Repertoire classifier which uses the data encoded by :ref:`AtchleyKmerEncoder` to predict the repertoire label.
 
     The original publication:
     Ostmeyer J, Christley S, Toby IT, Cowell LG. Biophysicochemical motifs in T cell receptor sequences distinguish repertoires from tumor-infiltrating
@@ -48,7 +48,7 @@ class KmerMILClassifier(MLMethod):
     .. code-block:: yaml
 
         my_kmer_mil_classifier:
-            KmerMILClassifier:
+            AtchleyKmerMILClassifier:
                 iteration_count: 100
                 evaluate_at: 15
                 use_early_stopping: False
@@ -84,7 +84,7 @@ class KmerMILClassifier(MLMethod):
         self.logistic_regression = PyTorchLogisticRegression(in_features=self.input_size, zero_abundance_weight_init=self.zero_abundance_weight_init)
 
     def _check_encoded_data(self, encoded_data: EncodedData):
-        assert encoded_data.encoding == 'AtchleyKmerEncoder', f"KmerMILClassifier: the encoding is not compatible with the given classifier. " \
+        assert encoded_data.encoding == 'AtchleyKmerEncoder', f"AtchleyKmerMILClassifier: the encoding is not compatible with the given classifier. " \
                                                               f"Expected AtchleyKmer encoding, got {encoded_data.encoding} instead. "
 
     def fit(self, encoded_data: EncodedData, label_name: str, cores_for_training: int = 2):
@@ -124,14 +124,14 @@ class KmerMILClassifier(MLMethod):
 
             # log current score and keep model for early stopping if specified
             if iteration % self.evaluate_at == 0 or iteration == self.iteration_count - 1:
-                logging.info(f"KmerMILClassifier: log loss at iteration {iteration+1}/{self.iteration_count}: {loss}.")
+                logging.info(f"AtchleyKmerMILClassifier: log loss at iteration {iteration+1}/{self.iteration_count}: {loss}.")
                 if state["loss"] < loss and self.use_early_stopping:
                     state = {"loss": loss.numpy(), "model": copy.deepcopy(self.logistic_regression)}
 
             if loss < self.threshold:
                 break
 
-        logging.warning(f"KmerMILClassifier: the logistic regression model did not converge.")
+        logging.warning(f"AtchleyKmerMILClassifier: the logistic regression model did not converge.")
 
         if loss > state['loss'] and self.use_early_stopping:
             self.logistic_regression.load_state_dict(state["model"])
@@ -149,7 +149,7 @@ class KmerMILClassifier(MLMethod):
 
     def fit_by_cross_validation(self, encoded_data: EncodedData, number_of_splits: int = 5, label_name: str = None, cores_for_training: int = -1,
                                 optimization_metric=None):
-        logging.warning(f"KmerMILClassifier: fitting by cross validation is not implemented internally for the model, fitting without "
+        logging.warning(f"AtchleyKmerMILClassifier: fitting by cross validation is not implemented internally for the model, fitting without "
                         f"cross-validation instead.")
         self.fit(encoded_data, label_name)
 
