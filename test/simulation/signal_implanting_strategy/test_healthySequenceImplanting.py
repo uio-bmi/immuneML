@@ -12,6 +12,7 @@ from source.simulation.implants.Signal import Signal
 from source.simulation.motif_instantiation_strategy.GappedKmerInstantiation import GappedKmerInstantiation
 from source.simulation.sequence_implanting.GappedMotifImplanting import GappedMotifImplanting
 from source.simulation.signal_implanting_strategy.HealthySequenceImplanting import HealthySequenceImplanting
+from source.simulation.signal_implanting_strategy.ImplantingComputation import ImplantingComputation
 from source.util.PathBuilder import PathBuilder
 
 
@@ -27,8 +28,8 @@ class TestHealthySequenceImplanting(TestCase):
         repertoire = Repertoire.build_from_sequence_objects([ReceptorSequence(amino_acid_sequence="ACDFQ", identifier="1"),
                                                              ReceptorSequence(amino_acid_sequence="TGCDF", identifier="2")],
                                                             path=path, metadata={"subject_id": "1"})
-        implanting = HealthySequenceImplanting(GappedMotifImplanting())
-        signal = Signal(1, [Motif("m1", GappedKmerInstantiation(), "CCC")], implanting)
+        implanting = HealthySequenceImplanting(GappedMotifImplanting(), implanting_computation=ImplantingComputation.ROUND)
+        signal = Signal("1", [Motif("m1", GappedKmerInstantiation(), "CCC")], implanting)
 
         repertoire2 = implanting.implant_in_repertoire(repertoire, 0.5, signal, path)
 
@@ -39,8 +40,8 @@ class TestHealthySequenceImplanting(TestCase):
         shutil.rmtree(path)
 
     def test_implant_in_sequence(self):
-        implanting = HealthySequenceImplanting(GappedMotifImplanting())
-        signal = Signal(1, [Motif("m1", GappedKmerInstantiation(), "CCC")], implanting)
+        implanting = HealthySequenceImplanting(GappedMotifImplanting(), implanting_computation=ImplantingComputation.ROUND)
+        signal = Signal("1", [Motif("m1", GappedKmerInstantiation(), "CCC")], implanting)
         sequence = ReceptorSequence(amino_acid_sequence="ACDFQ")
         sequence2 = implanting.implant_in_sequence(sequence, signal)
 

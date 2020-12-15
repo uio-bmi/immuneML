@@ -3,6 +3,8 @@ import logging
 import random
 
 from source.data_model.repertoire.Repertoire import Repertoire
+from source.simulation.sequence_implanting.SequenceImplantingStrategy import SequenceImplantingStrategy
+from source.simulation.signal_implanting_strategy.ImplantingComputation import ImplantingComputation, get_implanting_function
 from source.simulation.signal_implanting_strategy.SignalImplantingStrategy import SignalImplantingStrategy
 
 
@@ -25,6 +27,14 @@ class HealthySequenceImplanting(SignalImplantingStrategy):
         receptor sequence. If sequence_position_weights are not set, then SequenceImplantingStrategy will make all of the positions equally likely
         for each receptor sequence.
 
+        implanting_computation (str): defines how to determine the number of sequences to implant the signal in a repertoire; it relies on
+        repertoire_implanting_rate, but in case where the number of sequences for implanting is not an integer, this option can be useful.
+        If implanting rate is set to 'round', then the number of sequences for implanting in a repertoire will be rounded to the nearest integer value of the
+        product of repertoire implanting rate and the number of sequences in a repertoire (e.g., if the product value is 1.2, the signal will be
+        implanted in one sequence only). If implanting rate is set to 'Poisson', the number of sequences for implanting will be sampled
+        from the Poisson distribution with the value of the lambda parameter being repertoire implanting rate multiplied by the number of sequences
+        in the repertoire.
+
 
     YAML specification:
 
@@ -41,6 +51,7 @@ class HealthySequenceImplanting(SignalImplantingStrategy):
                     - my_motif
                     - ...
                 implanting: HealthySequence
+                implanting_computation: Poisson
                 sequence_position_weights:
                     109: 1
                     110: 2
@@ -48,6 +59,10 @@ class HealthySequenceImplanting(SignalImplantingStrategy):
                     112: 1
 
     """
+    def __init__(self, implanting: SequenceImplantingStrategy = None, sequence_position_weights: dict = None,
+                 implanting_computation: ImplantingComputation = None):
+        super().__init__(implanting, sequence_position_weights)
+        self.compute_implanting = get_implanting_function(implanting_computation)
 
     def implant_in_repertoire(self, repertoire: Repertoire, repertoire_implanting_rate: float, signal, path) -> Repertoire:
         max_motif_length = self._calculate_max_motif_length(signal)
@@ -96,7 +111,7 @@ class HealthySequenceImplanting(SignalImplantingStrategy):
         return sequences
 
     def _choose_sequences_for_implanting(self, repertoire: Repertoire, repertoire_implanting_rate: float, max_motif_length: int):
-        number_of_sequences_to_implant = int(repertoire_implanting_rate * len(repertoire.sequences))
+        number_of_sequences_to_implant = self.compute_implanting(repertoire_implanting_rate * len(repertoire.sequences))
         if number_of_sequences_to_implant == 0:
             logging.warning(f"HealthySequenceImplanting: there are {len(repertoire.sequences)} sequences in repertoire {repertoire.identifier} "
                             f"for the given repertoire implanting rate of {repertoire_implanting_rate}; no motif will be implanted. To implant "
@@ -114,7 +129,8 @@ class HealthySequenceImplanting(SignalImplantingStrategy):
 
         assert number_of_sequences_to_implant <= len(unprocessed_sequences), \
             "HealthySequenceImplanting: there are not enough sequences in the repertoire to provide given repertoire infection rate. " \
-            "Reduce repertoire infection rate to proceed."
+            f"Reduce repertoire infection rate to proceed. Total unprocessed sequences: {len(unprocessed_sequences)}, " \
+            f"number of sequences to implant: {number_of_sequences_to_implant}."
 
         random.shuffle(unprocessed_sequences)
         sequences_to_be_infected = unprocessed_sequences[:number_of_sequences_to_implant]

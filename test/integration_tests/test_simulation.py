@@ -65,13 +65,13 @@ class TestSimulation(TestCase):
                         "var1": {
                             "signals": ["signal1", "signal2"],
                             "dataset_implanting_rate": 0.5,
-                            "repertoire_implanting_rate": 0.66
+                            "repertoire_implanting_rate": 0.33
                         },
                         "var2": {
                             "signals": ["signal1", "signal2"],
                             "dataset_implanting_rate": 0.5,
                             "is_noise": True,
-                            "repertoire_implanting_rate": 0.4
+                            "repertoire_implanting_rate": 0.33
                         }
                     }
                 },

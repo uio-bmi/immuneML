@@ -17,5 +17,6 @@ Simulations of a repertoire and a receptor dataset are shown in the figures belo
 
 The tool takes a YAML specification as input and outputs a dataset collection either in Pickle or AIRR format, which can then be downloaded or used as input
 for other immuneML Galaxy tools.
+
 The YAML specification should use :ref:`RandomSequenceDataset`, :ref:`RandomReceptorDataset` or :ref:`RandomRepertoireDataset` import in combination with the :ref:`DatasetExport` instruction.
 A complete example of a full YAML is shown in this tutorial: :ref:`Exporting a random sequence/receptor/repertoire dataset`.
