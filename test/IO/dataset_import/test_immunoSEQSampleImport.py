@@ -33,11 +33,11 @@ AAGAAGCTCCTTCTCAGTGACTCTGGCTTCTATCTCTGTGCCTGGAGTGTACGTCCGGGCGCAGGGTACGAGCAGTACTT
 
         PathBuilder.build(path)
 
-        with open(path + "rep1.tsv", "w") as file:
+        with open(path / "rep1.tsv", "w") as file:
             file.writelines(rep1text)
 
         if add_metadata:
-            with open(path + "metadata.csv", "w") as file:
+            with open(path / "metadata.csv", "w") as file:
                 file.writelines(
                     """filename,chain,subject_id,coeliac status (yes/no)
 rep1.tsv,TRA,1234a,no"""
@@ -45,15 +45,15 @@ rep1.tsv,TRA,1234a,no"""
 
 
     def test_import_repertoire_dataset(self):
-        path = EnvironmentSettings.root_path + "test/tmp/immunoseq/"
+        path = EnvironmentSettings.root_path / "test/tmp/immunoseq/"
 
         self.create_dummy_dataset(path, True)
 
 
-        params = DefaultParamsLoader.load(EnvironmentSettings.default_params_path + "datasets/", "ImmunoSEQSample")
+        params = DefaultParamsLoader.load(EnvironmentSettings.default_params_path / "datasets/", "ImmunoSEQSample")
         params["is_repertoire"] = True
         params["result_path"] = path
-        params["metadata_file"] = path + "metadata.csv"
+        params["metadata_file"] = path / "metadata.csv"
         params["path"] = path
 
         dataset = ImmunoSEQSampleImport.import_dataset(params, "immunoseq_dataset")
@@ -71,11 +71,11 @@ rep1.tsv,TRA,1234a,no"""
 
 
     def test_import_sequence_dataset(self):
-        path = EnvironmentSettings.root_path + "test/tmp/immunoseq/"
+        path = EnvironmentSettings.root_path / "test/tmp/immunoseq/"
 
         self.create_dummy_dataset(path, False)
 
-        params = DefaultParamsLoader.load(EnvironmentSettings.default_params_path + "datasets/", "ImmunoSEQSample")
+        params = DefaultParamsLoader.load(EnvironmentSettings.default_params_path / "datasets/", "ImmunoSEQSample")
         params["is_repertoire"] = False
         params["paired"] = False
         params["result_path"] = path

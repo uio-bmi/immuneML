@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from source.dsl.symbol_table.SymbolTable import SymbolTable
 from source.dsl.symbol_table.SymbolType import SymbolType
 from source.presentation.html.HTMLBuilder import HTMLBuilder
@@ -19,7 +21,8 @@ class OutputParser:
         return specs["output"]
 
     @staticmethod
-    def generate_docs(path):
-        output_path = PathBuilder.build(f"{path}output/")
-        with open(f"{output_path}outputs.rst", "w") as file:
+    def generate_docs(path: Path):
+        output_path = PathBuilder.build(path / "output")
+        output_path = output_path / "outputs.rst"
+        with output_path.open( "w") as file:
             file.writelines(HTMLBuilder.__doc__)

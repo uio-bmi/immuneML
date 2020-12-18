@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from pathlib import Path
 
 from source.data_model.receptor.ChainPair import ChainPair
 from source.data_model.receptor.RegionType import RegionType
@@ -6,7 +7,7 @@ from source.data_model.receptor.RegionType import RegionType
 
 @dataclass
 class DatasetImportParams:
-    path: str = None
+    path: Path = None
     is_repertoire: bool = None
     metadata_file: str = None
     paired: bool = None

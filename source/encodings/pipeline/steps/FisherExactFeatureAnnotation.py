@@ -2,6 +2,7 @@ import copy
 import math
 import os
 from multiprocessing.pool import Pool
+from pathlib import Path
 
 import pandas as pd
 from sklearn.base import TransformerMixin
@@ -21,7 +22,7 @@ class FisherExactFeatureAnnotation(TransformerMixin):
     feature_annotations dataset. To make it binary, you must specify the positive_criteria, as defined in the CriteriaMatcher class.
     This is a step in the PipelineEncoder.
     """
-    def __init__(self, positive_criteria, result_path=None, filename=None):
+    def __init__(self, positive_criteria, result_path: Path = None, filename=None):
         self.positive_criteria = positive_criteria
         self.result_path = result_path
         self.filename = filename
@@ -70,7 +71,7 @@ class FisherExactFeatureAnnotation(TransformerMixin):
                 identifier=X.identifier,
                 metadata_file=X.metadata_file
             )
-            dataset.encoded_data.feature_annotations.to_csv(self.result_path + "/feature_annotations.csv")
+            dataset.encoded_data.feature_annotations.to_csv(self.result_path / "feature_annotations.csv")
             FisherExactFeatureAnnotation.store(dataset, self.result_path)
         else:
             dataset = copy.deepcopy(X)

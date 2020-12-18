@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.ml_methods.util.Util import Util as MLUtil
 from source.presentation.TemplateParser import TemplateParser
@@ -13,10 +15,10 @@ class ExploratoryAnalysisHTMLBuilder:
     the ExploratoryAnalysisInstruction.
     """
 
-    CSS_PATH = f"{EnvironmentSettings.html_templates_path}css/custom.css"
+    CSS_PATH = EnvironmentSettings.html_templates_path / "css/custom.css"
 
     @staticmethod
-    def build(state: ExploratoryAnalysisState) -> str:
+    def build(state: ExploratoryAnalysisState) -> Path:
         """
         Function that builds the HTML files based on the ExploratoryAnalysis state.
         Arguments:
@@ -24,17 +26,17 @@ class ExploratoryAnalysisHTMLBuilder:
         Returns:
              path to the main HTML file (which is located under state.result_path)
         """
-        base_path = PathBuilder.build(state.result_path + "../HTML_output")
+        base_path = PathBuilder.build(state.result_path / "../HTML_output")
         html_map = ExploratoryAnalysisHTMLBuilder.make_html_map(state, base_path)
-        result_file = f"{base_path}ExploratoryAnalysis_{state.name}.html"
+        result_file = base_path / f"ExploratoryAnalysis_{state.name}.html"
 
-        TemplateParser.parse(template_path=f"{EnvironmentSettings.html_templates_path}ExploratoryAnalysis.html",
+        TemplateParser.parse(template_path=EnvironmentSettings.html_templates_path / "ExploratoryAnalysis.html",
                              template_map=html_map, result_path=result_file)
 
         return result_file
 
     @staticmethod
-    def make_html_map(state: ExploratoryAnalysisState, base_path: str) -> dict:
+    def make_html_map(state: ExploratoryAnalysisState, base_path: Path) -> dict:
         html_map = {
             "css_style": Util.get_css_content(ExploratoryAnalysisHTMLBuilder.CSS_PATH),
             "full_specs": Util.get_full_specs_path(base_path),

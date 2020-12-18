@@ -1,5 +1,5 @@
 import abc
-
+from pathlib import Path
 from source.data_model.encoded_data.EncodedData import EncodedData
 
 
@@ -118,19 +118,19 @@ class MLMethod(metaclass=abc.ABCMeta):
         pass
 
     @abc.abstractmethod
-    def store(self, path: str, feature_names: list = None, details_path: str = None):
+    def store(self, path: Path, feature_names: list = None, details_path: Path = None):
         """
         The store function stores the object on which it is called so that it can be imported later using load function. It typically uses pickle,
         yaml or similar modules to store the information. It can store one or multiple files.
 
         Arguments:
 
-            path (str): path to folder where to store the model
+            path (Path): path to folder where to store the model
 
             feature_names (list): list of feature names in the encoded data; this can be stored as well to make it easier to map linear models to
             specific features as provided by the encoded (e.g., in case of logistic regression, this feature list defines what coefficients refer to)
 
-            details_path (str): path to folder where to store the details of the model. The details can be there to better understand the model but
+            details_path (Path): path to folder where to store the details of the model. The details can be there to better understand the model but
             are not mandatory and are typically not loaded with the model afterwards. This is user-friendly file that can be examined manually by the
             user. It does not have to be created or can be created at the same folder as the path parameters points to. In practice, when used with
             TrainMLModel instruction, this parameter will either be None or have the same value as path parameter.
@@ -143,7 +143,7 @@ class MLMethod(metaclass=abc.ABCMeta):
         pass
 
     @abc.abstractmethod
-    def load(self, path: str):
+    def load(self, path: Path):
         """
         The load function can load the model given the folder where the same class of the model was previously stored using the store function.
         It reads in the parameters of the model and sets the values to the object attributes so that the model can be reused. For instance, this is
@@ -151,7 +151,7 @@ class MLMethod(metaclass=abc.ABCMeta):
 
         Arguments:
 
-            path (str): path to the folder where the model was stored using store() function
+            path (Path): path to the folder where the model was stored using store() function
 
         Returns:
 
@@ -178,14 +178,14 @@ class MLMethod(metaclass=abc.ABCMeta):
         pass
 
     @abc.abstractmethod
-    def check_if_exists(self, path) -> bool:
+    def check_if_exists(self, path: Path) -> bool:
         """
         The check_if_exists function checks if there is a stored model on the given path. Might be useful in the future for implementing checkpoints.
         See SklearnMethod for example usage.
 
         Arguments:
 
-            path (str): path to folder where it should be checked if the model was stored previously
+            path (Path): path to folder where it should be checked if the model was stored previously
 
         Returns:
 

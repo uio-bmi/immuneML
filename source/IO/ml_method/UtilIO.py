@@ -1,5 +1,6 @@
 import pickle
 import shutil
+from pathlib import Path
 
 from source.pairwise_repertoire_comparison.ComparisonData import ComparisonData
 from source.pairwise_repertoire_comparison.PairwiseRepertoireComparison import PairwiseRepertoireComparison
@@ -8,11 +9,12 @@ from source.pairwise_repertoire_comparison.PairwiseRepertoireComparison import P
 class UtilIO:
 
     @staticmethod
-    def export_comparison_data(comp_data: ComparisonData, path: str):
-        shutil.copytree(comp_data.path, f"{path}comp_data/")
+    def export_comparison_data(comp_data: ComparisonData, path: Path):
+        assert False, "test paths"
+        shutil.copytree(comp_data.path, path / "comp_data")
 
-        comp_data_file = f"{path}comparison_data.pickle"
-        with open(comp_data_file, 'wb') as file:
+        comp_data_file = path / "comparison_data.pickle"
+        with comp_data_file.open('wb') as file:
             pickle.dump(comp_data, file)
 
         return comp_data_file

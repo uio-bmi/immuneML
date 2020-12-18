@@ -33,28 +33,28 @@ class TestMiXCRLoader(TestCase):
 14	8589.0	0.0015421204092786489	TGTGCCGTGAGTTCAGGATACAGCACCCTCACCTTT	JJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJ	TRAV12-2*00(678.7)		TRAJ11*00(283.5)	TRAC*00(75.4)	631|641|664|0|10||50.0		20|49|80|7|36|SA23G|129.0												TGTGCCGTGAGTTCAGGATACAGCACCCTCACCTTT	41								CAVSSGYSTLTF		:::::::::0:-3:10:::::7:0:36:::
 15	8200.0	0.001472277023644769	TGTGCAATGAGCCAAAACAAAAATGAGAAATTAACCTTT	JJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJ	TRAV12-3*00(610.2)		TRAJ48*00(249.5)	TRAC*00(76.1)	642|654|675|0|12||60.0		33|52|83|20|39||95.0												TGTGCAATGAGCCAAAACAAAAATGAGAAATTAACCTTT	41								CAMSQNKNEKLTF		:::::::::0:-1:12:::::20:-13:39:::"""
 
-        with open(path + "rep1.tsv", "w") as file:
+        with open(path / "rep1.tsv", "w") as file:
             file.writelines(file1_content)
 
-        with open(path + "rep2.tsv", "w") as file:
+        with open(path / "rep2.tsv", "w") as file:
             file.writelines(file2_content)
 
         if add_metadata:
-            with open(path + "metadata.csv", "w") as file:
+            with open(path / "metadata.csv", "w") as file:
                 file.writelines("""filename,subject_id
 rep1.tsv,1
 rep2.tsv,2""")
 
     def test_load_repertoire_dataset(self):
-        path = EnvironmentSettings.root_path + "test/tmp/mixcr/"
+        path = EnvironmentSettings.root_path / "test/tmp/mixcr/"
         PathBuilder.build(path)
         self.create_dummy_dataset(path, add_metadata=True)
 
-        params = DefaultParamsLoader.load(EnvironmentSettings.default_params_path + "datasets/", "mixcr")
+        params = DefaultParamsLoader.load(EnvironmentSettings.default_params_path / "datasets/", "mixcr")
         params["is_repertoire"] = True
         params["result_path"] = path
         params["path"] = path
-        params["metadata_file"] = path + "metadata.csv"
+        params["metadata_file"] = path / "metadata.csv"
 
         dataset = MiXCRImport.import_dataset(params, "mixcr_repertoire_dataset")
 
@@ -79,11 +79,11 @@ rep2.tsv,2""")
 
 
     def test_load_sequence_dataset(self):
-        path = EnvironmentSettings.root_path + "test/tmp/mixcr/"
+        path = EnvironmentSettings.root_path / "test/tmp/mixcr/"
         PathBuilder.build(path)
         self.create_dummy_dataset(path, add_metadata=False)
 
-        params = DefaultParamsLoader.load(EnvironmentSettings.default_params_path + "datasets/", "mixcr")
+        params = DefaultParamsLoader.load(EnvironmentSettings.default_params_path / "datasets/", "mixcr")
         params["is_repertoire"] = False
         params["paired"] = False
         params["result_path"] = path

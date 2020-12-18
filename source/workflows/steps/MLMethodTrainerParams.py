@@ -1,11 +1,12 @@
 from source.data_model.dataset.Dataset import Dataset
 from source.ml_methods.MLMethod import MLMethod
 from source.workflows.steps.StepParams import StepParams
+from pathlib import Path
 
 
 class MLMethodTrainerParams(StepParams):
 
-    def __init__(self, method: MLMethod, dataset: Dataset, result_path: str, label: str, model_selection_cv: bool,
+    def __init__(self, method: MLMethod, dataset: Dataset, result_path: Path, label: str, model_selection_cv: bool,
                  model_selection_n_folds: int, cores_for_training: int, train_predictions_path: str, ml_details_path: str,
                  optimization_metric: str):
         self.method = method

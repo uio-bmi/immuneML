@@ -37,7 +37,8 @@ class ReflectionHandler:
 
     @staticmethod
     def get_class_by_name(class_name: str, subdirectory: str = ""):
-        filename = glob.glob(EnvironmentSettings.root_path + "source/**/{}.py".format(class_name), recursive=True)
+        folder = EnvironmentSettings.root_path / "source/**/{}.py".format(class_name)
+        filename = glob.glob(str(folder), recursive=True)
         filename = [f for f in filename if subdirectory in f.replace("\\", "/")]
         if len(filename) != 1:
             raise ValueError("ReflectionHandler could not find class named {}. Check spelling and try again."
@@ -69,7 +70,8 @@ class ReflectionHandler:
 
     @staticmethod
     def exists(class_name: str, subdirectory: str = ""):
-        filename = glob.glob(EnvironmentSettings.root_path + "source/**/{}.py".format(class_name), recursive=True)
+        folder = EnvironmentSettings.root_path / "source/**/{}.py".format(class_name)
+        filename = glob.glob(str(folder), recursive=True)
         filename = [f for f in filename if subdirectory in f.replace("\\", "/")]
         if len(filename) == 1:
             return True
@@ -78,13 +80,15 @@ class ReflectionHandler:
 
     @staticmethod
     def discover_classes_by_partial_name(class_name_ending: str, subdirectory: str = ""):
-        filenames = glob.glob(EnvironmentSettings.root_path + "source/**/*{}.py".format(class_name_ending), recursive=True)
+        folder = EnvironmentSettings.root_path / "source/**/*{}.py".format(class_name_ending)
+        filenames = glob.glob(str(folder), recursive=True)
         class_names = [f.rpartition("/")[2][:-3] for f in filenames if subdirectory in f.replace("\\", "/")]
         return class_names
 
     @staticmethod
     def get_classes_by_partial_name(class_name_ending: str, subdirectory: str = ""):
-        filenames = glob.glob(EnvironmentSettings.root_path + "source/**/*{}.py".format(class_name_ending), recursive=True)
+        folder = EnvironmentSettings.root_path / "source/**/*{}.py".format(class_name_ending)
+        filenames = glob.glob(str(folder), recursive=True)
         filenames = [f for f in filenames if subdirectory in f.replace("\\", "/") and f'{class_name_ending}.py' in f]
         classes = [ReflectionHandler._import_class(filename, os.path.basename(filename)[:-3]) for filename in filenames]
         return classes

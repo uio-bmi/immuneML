@@ -3,6 +3,7 @@ import copy
 import uuid
 
 import pandas as pd
+from pathlib import Path
 
 from source.data_model.dataset.Dataset import Dataset
 from source.data_model.encoded_data.EncodedData import EncodedData
@@ -13,7 +14,7 @@ from source.environment.Constants import Constants
 class RepertoireDataset(Dataset):
 
     def __init__(self, params: dict = None, encoded_data: EncodedData = None, repertoires: list = None, identifier: str = None,
-                 metadata_file: str = None, name: str = None):
+                 metadata_file: Path = None, name: str = None):
         super().__init__()
         self.params = params
         self.encoded_data = encoded_data
@@ -58,7 +59,7 @@ class RepertoireDataset(Dataset):
         else:
             return df.to_dict("list")
 
-    def _build_new_metadata(self, indices, path) -> str:
+    def _build_new_metadata(self, indices, path: Path) -> Path:
         if self.metadata_file:
             df = pd.read_csv(self.metadata_file, comment=Constants.COMMENT_SIGN)
             df = df.iloc[indices, :]
@@ -67,9 +68,9 @@ class RepertoireDataset(Dataset):
         else:
             return None
 
-    def make_subset(self, example_indices, path, dataset_type: str):
+    def make_subset(self, example_indices, path: Path, dataset_type: str):
 
-        metadata_file = self._build_new_metadata(example_indices, f"{path}{dataset_type}_metadata.csv")
+        metadata_file = self._build_new_metadata(example_indices, path / f"{dataset_type}_metadata.csv")
         new_dataset = RepertoireDataset(repertoires=[self.repertoires[i] for i in example_indices], params=copy.deepcopy(self.params),
                                         metadata_file=metadata_file, identifier=str(uuid.uuid1()))
 

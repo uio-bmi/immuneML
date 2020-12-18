@@ -29,7 +29,7 @@ class TestSequenceMatchFeatureAnnotation(TestCase):
     #             3: match sequence, 0 mismatch: 1 match
     #             4: match v_gene and sequence, 0 mismatch: 0 matches
 
-    path = EnvironmentSettings.root_path + "test/tmp/sequencematchfeatureannotationstep/"
+    path = EnvironmentSettings.root_path / "test/tmp/sequencematchfeatureannotationstep/"
 
     encoded_data = {
         'examples': sparse.rand(5, 5, density=0.2, format='csr'),
@@ -46,8 +46,8 @@ class TestSequenceMatchFeatureAnnotation(TestCase):
     }
 
     dataset = RepertoireDataset(encoded_data=EncodedData(**encoded_data),
-                                repertoires=[Repertoire(f"{EnvironmentSettings.root_path}test/tmp/sequencematchfeatureannotationstep/0.npy",
-                                                        "", identifier) for identifier in encoded_data["example_ids"]])
+                                repertoires=[Repertoire(EnvironmentSettings.root_path / "test/tmp/sequencematchfeatureannotationstep/0.npy",
+                                                        None, identifier) for identifier in encoded_data["example_ids"]])
 
     # there are only matches to the first 3 sequences in this reference
     reference_rep = """TRBV Gene	CDR3B AA Sequence	Antigen Protein	MHC Class									
@@ -66,7 +66,7 @@ reference_rep.tsv,rep1"""
                            "TRBV Gene": "v_genes"},
         "columns_to_load": ["CDR3B AA Sequence", "TRBV Gene", "Antigen Protein", "MHC Class"],
         "region_type": RegionType.IMGT_CDR3.name,
-        "metadata_file": path + "metadata.csv"
+        "metadata_file": path / "metadata.csv"
     }
 
     def setUp(self) -> None:
@@ -76,9 +76,9 @@ reference_rep.tsv,rep1"""
 
         path = TestSequenceMatchFeatureAnnotation.path
         PathBuilder.build(path)
-        with open(path + "reference_rep.tsv", "w") as file:
+        with open(path / "reference_rep.tsv", "w") as file:
             file.writelines(TestSequenceMatchFeatureAnnotation.reference_rep)
-        with open(path + "metadata.csv", "w") as file:
+        with open(path / "metadata.csv", "w") as file:
             file.writelines(TestSequenceMatchFeatureAnnotation.reference_metadata)
 
         step = SequenceMatchFeatureAnnotation(reference_sequence_path=path,
@@ -103,9 +103,9 @@ reference_rep.tsv,rep1"""
 
         path = TestSequenceMatchFeatureAnnotation.path
         PathBuilder.build(path)
-        with open(path + "reference_rep.tsv", "w") as file:
+        with open(path / "reference_rep.tsv", "w") as file:
             file.writelines(TestSequenceMatchFeatureAnnotation.reference_rep)
-        with open(path + "metadata.csv", "w") as file:
+        with open(path / "metadata.csv", "w") as file:
             file.writelines(TestSequenceMatchFeatureAnnotation.reference_metadata)
 
         step = SequenceMatchFeatureAnnotation(reference_sequence_path=path,
@@ -130,9 +130,9 @@ reference_rep.tsv,rep1"""
 
         path = TestSequenceMatchFeatureAnnotation.path
         PathBuilder.build(path)
-        with open(path + "reference_rep.tsv", "w") as file:
+        with open(path / "reference_rep.tsv", "w") as file:
             file.writelines(TestSequenceMatchFeatureAnnotation.reference_rep)
-        with open(path + "metadata.csv", "w") as file:
+        with open(path / "metadata.csv", "w") as file:
             file.writelines(TestSequenceMatchFeatureAnnotation.reference_metadata)
 
         step = SequenceMatchFeatureAnnotation(reference_sequence_path=path,
@@ -157,9 +157,9 @@ reference_rep.tsv,rep1"""
 
         path = TestSequenceMatchFeatureAnnotation.path
         PathBuilder.build(path)
-        with open(path + "reference_rep.tsv", "w") as file:
+        with open(path / "reference_rep.tsv", "w") as file:
             file.writelines(TestSequenceMatchFeatureAnnotation.reference_rep)
-        with open(path + "metadata.csv", "w") as file:
+        with open(path / "metadata.csv", "w") as file:
             file.writelines(TestSequenceMatchFeatureAnnotation.reference_metadata)
 
         step = SequenceMatchFeatureAnnotation(reference_sequence_path=path,

@@ -1,4 +1,5 @@
 import datetime
+from pathlib import Path
 
 from source.data_model.dataset.Dataset import Dataset
 from source.encodings.EncoderParams import EncoderParams
@@ -58,26 +59,26 @@ class ExploratoryAnalysisInstruction(Instruction):
         self.state = ExploratoryAnalysisState(exploratory_analysis_units, name=name)
         self.name = name
 
-    def run(self, result_path: str):
-        self.state.result_path = result_path + f"{self.name}/"
+    def run(self, result_path: Path):
+        self.state.result_path = result_path / self.name
         for index, (key, unit) in enumerate(self.state.exploratory_analysis_units.items()):
             print("{}: Started analysis {} ({}/{}).".format(datetime.datetime.now(), key, index+1, len(self.state.exploratory_analysis_units)), flush=True)
-            path = self.state.result_path + "analysis_{}/".format(key)
+            path = self.state.result_path / f"analysis_{key}"
             PathBuilder.build(path)
             report_result = self.run_unit(unit, path)
             unit.report_result = report_result
             print("{}: Finished analysis {} ({}/{}).\n".format(datetime.datetime.now(), key, index+1, len(self.state.exploratory_analysis_units)), flush=True)
         return self.state
 
-    def run_unit(self, unit: ExploratoryAnalysisUnit, result_path: str) -> ReportResult:
-        unit.dataset = self.preprocess_dataset(unit, result_path + "preprocessed_dataset/")
-        encoded_dataset = self.encode(unit, result_path + "encoded_dataset/")
+    def run_unit(self, unit: ExploratoryAnalysisUnit, result_path: Path) -> ReportResult:
+        unit.dataset = self.preprocess_dataset(unit, result_path / "preprocessed_dataset")
+        encoded_dataset = self.encode(unit, result_path / "encoded_dataset")
         unit.report.dataset = encoded_dataset
-        unit.report.result_path = result_path + "report/"
+        unit.report.result_path = result_path / "report"
         report_result = unit.report.generate_report()
         return report_result
 
-    def preprocess_dataset(self, unit: ExploratoryAnalysisUnit, result_path: str) -> Dataset:
+    def preprocess_dataset(self, unit: ExploratoryAnalysisUnit, result_path: Path) -> Dataset:
         if unit.preprocessing_sequence is not None and len(unit.preprocessing_sequence) > 0:
             dataset = unit.dataset
             for preprocessing in unit.preprocessing_sequence:
@@ -86,7 +87,7 @@ class ExploratoryAnalysisInstruction(Instruction):
             dataset = unit.dataset
         return dataset
 
-    def encode(self, unit: ExploratoryAnalysisUnit, result_path: str) -> Dataset:
+    def encode(self, unit: ExploratoryAnalysisUnit, result_path: Path) -> Dataset:
         if unit.encoder is not None:
             encoded_dataset = DataEncoder.run(DataEncoderParams(dataset=unit.dataset, encoder=unit.encoder,
                                                                 encoder_params=EncoderParams(result_path=result_path,

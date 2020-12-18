@@ -11,16 +11,16 @@ from source.util.RepertoireBuilder import RepertoireBuilder
 
 class TestPickleLoader(TestCase):
     def test_load(self):
-        path = EnvironmentSettings.root_path + "test/tmp/pathbuilder/"
+        path = EnvironmentSettings.root_path / "test/tmp/pathbuilder/"
         PathBuilder.build(path)
 
         repertoires, metadata = RepertoireBuilder.build([["AA"], ["CC"]], path)
         dataset = RepertoireDataset(repertoires=repertoires, metadata_file=metadata)
 
-        with open(path + "dataset.pkl", "wb") as file:
+        with open(path / "dataset.pkl", "wb") as file:
             pickle.dump(dataset, file)
 
-        dataset2 = PickleImport.import_dataset({"path": path + "dataset.pkl"}, "dataset_name")
+        dataset2 = PickleImport.import_dataset({"path": path / "dataset.pkl"}, "dataset_name")
 
         shutil.rmtree(path)
 

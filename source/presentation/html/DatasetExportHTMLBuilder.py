@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.ml_methods.util.Util import Util as MLUtil
@@ -11,10 +12,10 @@ from source.workflows.instructions.dataset_generation.DatasetExportState import 
 
 class DatasetExportHTMLBuilder:
 
-    CSS_PATH = f"{EnvironmentSettings.html_templates_path}css/custom.css"
+    CSS_PATH = EnvironmentSettings.html_templates_path / "css/custom.css"
 
     @staticmethod
-    def build(state: DatasetExportState) -> str:
+    def build(state: DatasetExportState) -> Path:
         """
         Function that builds the HTML files based on the Simulation state.
         Arguments:
@@ -22,11 +23,11 @@ class DatasetExportHTMLBuilder:
         Returns:
              path to the main HTML file (which is located under state.result_path)
         """
-        base_path = PathBuilder.build(state.result_path + "../HTML_output/")
+        base_path = PathBuilder.build(state.result_path / "../HTML_output/")
         html_map = DatasetExportHTMLBuilder.make_html_map(state, base_path)
-        result_file = f"{base_path}DatasetExport_{state.name}.html"
+        result_file = base_path / f"DatasetExport_{state.name}.html"
 
-        TemplateParser.parse(template_path=f"{EnvironmentSettings.html_templates_path}DatasetExport.html",
+        TemplateParser.parse(template_path=EnvironmentSettings.html_templates_path / "DatasetExport.html",
                              template_map=html_map, result_path=result_file)
 
         return result_file
@@ -46,9 +47,9 @@ class DatasetExportHTMLBuilder:
                     "formats": [
                         {
                             "format_name": format_name,
-                            "dataset_download_link": os.path.relpath(path=Util.make_downloadable_zip(state.result_path,
+                            "dataset_download_link": Path(os.path.relpath(path=Util.make_downloadable_zip(state.result_path,
                                                                                                      state.paths[dataset.name][format_name]),
-                                                                     start=base_path)
+                                                                     start=base_path))
                         } for format_name in state.formats
                     ]
                 } for dataset in state.datasets

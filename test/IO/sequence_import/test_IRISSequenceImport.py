@@ -17,7 +17,7 @@ class TestIRISSequenceImport(TestCase):
         os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
 
     def test_import_sequences(self):
-        path = EnvironmentSettings.tmp_test_path + "importseqsiris/sequences.csv"
+        path = EnvironmentSettings.tmp_test_path / "importseqsiris/sequences.csv"
         PathBuilder.build(os.path.dirname(path))
         with open(path, "w") as file:
             file.write(
@@ -49,7 +49,7 @@ class TestIRISSequenceImport(TestCase):
         shutil.rmtree(os.path.dirname(path))
 
     def test_import_paired_sequences(self):
-        path = EnvironmentSettings.tmp_test_path + "importseqsiris/sequences.csv"
+        path = EnvironmentSettings.tmp_test_path / "importseqsiris/sequences.csv"
         PathBuilder.build(os.path.dirname(path))
 
         with open(path, "w") as file:

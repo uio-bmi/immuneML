@@ -63,7 +63,7 @@ class PickleImport(DataImport):
 
     @staticmethod
     def _import_from_path(pickle_params):
-        with open(pickle_params.path, "rb") as file:
+        with pickle_params.path.open("rb") as file:
             dataset = pickle.load(file)
         if pickle_params.metadata_file is not None and hasattr(dataset, "metadata_file"):
             dataset.metadata_file = pickle_params.metadata_file
@@ -74,7 +74,8 @@ class PickleImport(DataImport):
 
     @staticmethod
     def _import_from_metadata(pickle_params,  dataset_name):
-        with open(pickle_params.metadata_file, "r") as file:
+        assert False, "test this function" # todo test this
+        with pickle_params.metadata_file.open("r") as file:
             dataset_filename = file.readline().replace(Constants.COMMENT_SIGN, "").replace("\n", "")
         pickle_params.path = f"{os.path.dirname(pickle_params.metadata_file)}/{dataset_filename}" \
             if os.path.dirname(pickle_params.metadata_file) != "" else dataset_filename
@@ -90,18 +91,13 @@ class PickleImport(DataImport):
         path = PickleImport._discover_repertoire_path(pickle_params, dataset)
         if path is not None:
             for repertoire in dataset.repertoires:
-                repertoire.data_filename = f"{path}{os.path.basename(repertoire.data_filename)}"
-                repertoire.metadata_filename = f"{path}{os.path.basename(repertoire.metadata_filename)}"
+                repertoire.data_filename = path / repertoire.data_filename.name
+                repertoire.metadata_filename = path / repertoire.metadata_filename.name
         return dataset
 
     @staticmethod
     def _discover_dataset_dir(pickle_params):
-        dataset_dir = os.path.dirname(pickle_params.path)
-
-        if dataset_dir != "":
-            dataset_dir = dataset_dir + "/"
-
-        return dataset_dir
+        return pickle_params.path.parents[0]
 
     @staticmethod
     def _update_receptor_paths(pickle_params, dataset: ElementDataset):

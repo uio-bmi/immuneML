@@ -45,15 +45,15 @@ class TestFisherExactFeatureAnnotations(TestCase):
     }
 
     dataset = RepertoireDataset(encoded_data=EncodedData(**encoded_data),
-                                repertoires=[Repertoire(EnvironmentSettings.root_path + "test/tmp/fisherexactfeatureannotationsstep/0.npy",
-                                                        "", identifier) for identifier in encoded_data["example_ids"]])
+                                repertoires=[Repertoire(EnvironmentSettings.root_path / "test/tmp/fisherexactfeatureannotationsstep/0.npy",
+                                                        None, identifier) for identifier in encoded_data["example_ids"]])
 
     def setUp(self) -> None:
         os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
 
     def test_transform(self):
 
-        path = EnvironmentSettings.root_path + "test/tmp/fisherexactfeatureannotationsstep/"
+        path = EnvironmentSettings.root_path / "test/tmp/fisherexactfeatureannotationsstep/"
         PathBuilder.build(path)
 
         step = FisherExactFeatureAnnotation(

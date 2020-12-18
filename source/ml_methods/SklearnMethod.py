@@ -7,6 +7,8 @@ import dill
 import numpy as np
 import pkg_resources
 import yaml
+from pathlib import Path
+
 from sklearn.metrics import SCORERS
 from sklearn.model_selection import RandomizedSearchCV
 from sklearn.utils.validation import check_is_fitted
@@ -166,18 +168,18 @@ class SklearnMethod(MLMethod):
 
         return self.models
 
-    def store(self, path, feature_names=None, details_path=None):
+    def store(self, path: Path, feature_names=None, details_path: Path = None):
         PathBuilder.build(path)
-        name = self._get_model_filename() + ".pickle"
-        with open(path + name, "wb") as file:
+        file_path = path / f"{self._get_model_filename()}.pickle"
+        with file_path.open("wb") as file:
             dill.dump(self.models, file)
 
         if details_path is None:
-            params_path = path + self._get_model_filename() + ".yaml"
+            params_path = path / f"{self._get_model_filename()}.yaml"
         else:
             params_path = details_path
 
-        with open(params_path, "w") as file:
+        with params_path.open("w") as file:
             desc = {}
             for label in self.models.keys():
                 desc[label] = {
@@ -190,14 +192,15 @@ class SklearnMethod(MLMethod):
     def _get_model_filename(self):
         return FilenameHandler.get_filename(self.__class__.__name__, "")
 
-    def load(self, path):
-        name = self._get_model_filename() + ".pickle"
-        if os.path.isfile(path + name):
-            with open(path + name, "rb") as file:
+    def load(self, path: Path):
+        name = f"{self._get_model_filename()}.pickle"
+        file_path = path / name
+        if file_path.is_file():
+            with file_path.open("rb") as file:
                 self.models = dill.load(file)
         else:
-            raise FileNotFoundError(self.__class__.__name__ + " model could not be loaded from " + str(
-                path + name) + ". Check if the path to the " + name + " file is properly set.")
+            raise FileNotFoundError(f"{self.__class__.__name__} model could not be loaded from {file_path}"
+                                    f". Check if the path to the {name} file is properly set.")
 
     def get_model(self, label_names: list = None):
         if label_names is None:
@@ -208,8 +211,9 @@ class SklearnMethod(MLMethod):
     def get_classes_for_label(self, label):
         return self.models[label].classes_
 
-    def check_if_exists(self, path):
-        return os.path.isfile(path + self._get_model_filename() + ".pickle")
+    def check_if_exists(self, path: Path):
+        file_path = path / f"{self._get_model_filename()}.pickle"
+        return file_path.is_file()
 
     @abc.abstractmethod
     def _get_ml_model(self, cores_for_training: int = 2, X=None):

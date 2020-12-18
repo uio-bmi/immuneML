@@ -1,5 +1,6 @@
 from dataclasses import dataclass, field
 from typing import List, Set, Dict
+from pathlib import Path
 
 from source.data_model.dataset.Dataset import Dataset
 from source.environment.LabelConfiguration import LabelConfiguration
@@ -22,7 +23,7 @@ class TrainMLModelState:
     metrics: Set[Metric]
     optimization_metric: Metric
     label_configuration: LabelConfiguration
-    path: str = None
+    path: Path = None
     context: dict = None
     number_of_processes: int = 1
     reports: dict = field(default_factory=dict)

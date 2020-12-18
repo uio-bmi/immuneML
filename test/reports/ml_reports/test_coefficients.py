@@ -32,7 +32,8 @@ class TestCoefficients(TestCase):
         # Change coefficients to values 1-20
         dummy_lr.models["l1"].coef_ = np.array(list(range(0, 20))).reshape(1, -1)
 
-        with open(path + "ml_details.yaml", "w") as file:
+        file_path = path / "ml_details.yaml"
+        with file_path.open("w") as file:
             yaml.dump({"l1": {"feature_names": [f"feature{i}" for i in range(20)]}},
                       file)
 
@@ -47,7 +48,7 @@ class TestCoefficients(TestCase):
                                  "n_largest": [5]})
 
         report.method = self._create_dummy_lr_model(path)
-        report.ml_details_path = path + "ml_details.yaml"
+        report.ml_details_path = path / "ml_details.yaml"
         report.label = "l1"
         report.result_path = path
         report.train_dataset = Dataset()
@@ -56,7 +57,7 @@ class TestCoefficients(TestCase):
         return report
 
     def test_generate(self):
-        path = EnvironmentSettings.root_path + "test/tmp/logregcoefsreport/"
+        path = EnvironmentSettings.root_path / "test/tmp/logregcoefsreport/"
         PathBuilder.build(path)
 
         report = self._create_report(path)
@@ -66,20 +67,20 @@ class TestCoefficients(TestCase):
         result = report.generate()
 
         self.assertIsInstance(result, ReportResult)
-        self.assertEqual(result.output_tables[0].path, path + "coefficients.csv")
-        self.assertEqual(result.output_figures[0].path, path + "all_coefficients.html")
-        self.assertEqual(result.output_figures[1].path, path + "nonzero_coefficients.html")
-        self.assertEqual(result.output_figures[2].path, path + "cutoff_10_coefficients.html")
-        self.assertEqual(result.output_figures[3].path, path + "largest_5_coefficients.html")
+        self.assertEqual(result.output_tables[0].path, path / "coefficients.csv")
+        self.assertEqual(result.output_figures[0].path, path / "all_coefficients.html")
+        self.assertEqual(result.output_figures[1].path, path / "nonzero_coefficients.html")
+        self.assertEqual(result.output_figures[2].path, path / "cutoff_10_coefficients.html")
+        self.assertEqual(result.output_figures[3].path, path / "largest_5_coefficients.html")
 
         # Actual tests
-        self.assertTrue(os.path.isfile(path + "coefficients.csv"))
-        self.assertTrue(os.path.isfile(path + "all_coefficients.html"))
-        self.assertTrue(os.path.isfile(path + "nonzero_coefficients.html"))
-        self.assertTrue(os.path.isfile(path + "cutoff_10_coefficients.html"))
-        self.assertTrue(os.path.isfile(path + "largest_5_coefficients.html"))
+        self.assertTrue(os.path.isfile(path / "coefficients.csv"))
+        self.assertTrue(os.path.isfile(path / "all_coefficients.html"))
+        self.assertTrue(os.path.isfile(path / "nonzero_coefficients.html"))
+        self.assertTrue(os.path.isfile(path / "cutoff_10_coefficients.html"))
+        self.assertTrue(os.path.isfile(path / "largest_5_coefficients.html"))
 
-        written_data = pd.read_csv(path + "coefficients.csv")
+        written_data = pd.read_csv(path / "coefficients.csv")
 
         self.assertListEqual(list(written_data.columns), ["features", "coefficients"])
         self.assertListEqual(list(written_data["coefficients"]), list(reversed([i for i in range(20)])))

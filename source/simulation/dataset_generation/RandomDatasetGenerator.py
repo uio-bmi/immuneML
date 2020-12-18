@@ -1,5 +1,6 @@
 import pickle
 import random
+from pathlib import Path
 
 from source.data_model.dataset.ReceptorDataset import ReceptorDataset
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
@@ -35,12 +36,12 @@ class RandomDatasetGenerator:
                                                      f"It should be a positive integer, got {count} instead."
 
     @staticmethod
-    def _check_path(path: str):
+    def _check_path(path: Path):
         assert path is not None, "RandomDatasetGenerator: path cannot be None when generating datasets."
 
     @staticmethod
     def _check_rep_dataset_generation_params(repertoire_count: int, sequence_count_probabilities: dict, sequence_length_probabilities: dict,
-                                             labels: dict, path: str):
+                                             labels: dict, path: Path):
 
         RandomDatasetGenerator._check_example_count(repertoire_count, "repertoire_count")
         RandomDatasetGenerator._check_probabilities(sequence_count_probabilities, int, "sequence_count_probabilities")
@@ -50,7 +51,7 @@ class RandomDatasetGenerator:
 
     @staticmethod
     def generate_repertoire_dataset(repertoire_count: int, sequence_count_probabilities: dict, sequence_length_probabilities: dict,
-                                    labels: dict, path: str) -> RepertoireDataset:
+                                    labels: dict, path: Path) -> RepertoireDataset:
         """
         Creates repertoire_count repertoires where the number of sequences per repertoire is sampled from the probability distribution given
         in sequence_count_probabilities. The length of sequences is sampled independently for each sequence from
@@ -99,7 +100,7 @@ class RandomDatasetGenerator:
 
     @staticmethod
     def _check_receptor_dataset_generation_params(receptor_count: int, chain_1_length_probabilities: dict,
-                                                  chain_2_length_probabilities: dict, labels: dict, path: str):
+                                                  chain_2_length_probabilities: dict, labels: dict, path: Path):
 
         RandomDatasetGenerator._check_probabilities(chain_1_length_probabilities, int, 'chain_1_length_probabilities')
         RandomDatasetGenerator._check_probabilities(chain_2_length_probabilities, int, 'chain_2_length_probabilities')
@@ -109,7 +110,7 @@ class RandomDatasetGenerator:
 
     @staticmethod
     def generate_receptor_dataset(receptor_count: int, chain_1_length_probabilities: dict, chain_2_length_probabilities: dict, labels: dict,
-                                  path: str):
+                                  path: Path):
         """
         Creates receptor_count receptors where the length of sequences in each chain is sampled independently for each sequence from
         chain_n_length_probabilities distribution. The labels are also randomly assigned to receptors from the distribution given in
@@ -158,9 +159,9 @@ class RandomDatasetGenerator:
                                                for label, label_dict in labels.items()}, **{"subject": f"subj_{i + 1}"}})
                      for i in range(receptor_count)]
 
-        filename = f"{path if path[-1] == '/' else path + '/'}batch01.pickle"
+        filename = path / "batch01.pickle"
 
-        with open(filename, "wb") as file:
+        with filename.open("wb") as file:
             pickle.dump(receptors, file)
 
         return ReceptorDataset(params={label: list(label_dict.keys()) for label, label_dict in labels.items()},
@@ -168,14 +169,14 @@ class RandomDatasetGenerator:
 
 
     @staticmethod
-    def _check_sequence_dataset_generation_params(receptor_count: int, length_probabilities: dict, labels: dict, path: str):
+    def _check_sequence_dataset_generation_params(receptor_count: int, length_probabilities: dict, labels: dict, path: Path):
         RandomDatasetGenerator._check_probabilities(length_probabilities, int, 'length_probabilities')
         RandomDatasetGenerator._check_example_count(receptor_count, "receptor_count")
         RandomDatasetGenerator._check_labels(labels)
         RandomDatasetGenerator._check_path(path)
 
     @staticmethod
-    def generate_sequence_dataset(sequence_count: int, length_probabilities: dict, labels: dict, path: str):
+    def generate_sequence_dataset(sequence_count: int, length_probabilities: dict, labels: dict, path: Path):
         """
         Creates sequence_count receptor sequences (single chain) where the length of sequences in each chain is sampled independently for each sequence from
         length_probabilities distribution. The labels are also randomly assigned to sequences from the distribution given in
@@ -216,9 +217,9 @@ class RandomDatasetGenerator:
                                                                                 for label, label_dict in labels.items()}, **{"subject": f"subj_{i + 1}"}}))
                      for i in range(sequence_count)]
 
-        filename = f"{path if path[-1] == '/' else path + '/'}batch01.pickle"
+        filename = path / "batch01.pickle"
 
-        with open(filename, "wb") as file:
+        with filename.open("wb") as file:
             pickle.dump(sequences, file)
 
         return SequenceDataset(params={label: list(label_dict.keys()) for label, label_dict in labels.items()},

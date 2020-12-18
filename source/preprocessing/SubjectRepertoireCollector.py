@@ -2,6 +2,7 @@ import os
 
 import numpy as np
 import pandas as pd
+from pathlib import Path
 
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.repertoire.Repertoire import Repertoire
@@ -61,11 +62,10 @@ class SubjectRepertoireCollector(Preprocessor):
         return processed_dataset
 
     @staticmethod
-    def build_new_metadata(dataset, indices_to_keep, result_path: str):
+    def build_new_metadata(dataset, indices_to_keep, result_path: Path):
         if dataset.metadata_file:
             df = pd.read_csv(dataset.metadata_file, index_col=0, comment=Constants.COMMENT_SIGN).iloc[indices_to_keep, :]
-            path = result_path + "_{}_collected_repertoires.csv"\
-                .format(os.path.splitext(os.path.basename(dataset.metadata_file))[0])
+            path = Path(result_path / f"{dataset.metadata_file.stem}_collected_repertoires.csv")
             df.to_csv(path)
         else:
             path = None

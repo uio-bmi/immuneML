@@ -3,6 +3,7 @@ import os
 import statistics
 
 import pandas as pd
+from pathlib import Path
 
 from source.environment.Constants import Constants
 from source.environment.EnvironmentSettings import EnvironmentSettings
@@ -27,11 +28,11 @@ class HPHTMLBuilder:
     the TrainMLModel.
     """
 
-    CSS_PATH = f"{EnvironmentSettings.html_templates_path}css/custom.css"
+    CSS_PATH = EnvironmentSettings.html_templates_path / "css/custom.css"
     NUM_DIGITS = 3
 
     @staticmethod
-    def build(state: TrainMLModelState = None) -> str:
+    def build(state: TrainMLModelState = None) -> Path:
         """
         Function that builds the HTML files based on the HPOptimization state.
         Arguments:
@@ -40,35 +41,35 @@ class HPHTMLBuilder:
              path to the main HTML file (index.html which is located under state.result_path)
         """
 
-        base_path = PathBuilder.build(state.path + "../HTML_output/")
+        base_path = PathBuilder.build(state.path / "../HTML_output/")
         state = HPHTMLBuilder._move_reports_recursive(state, base_path)
         html_map = HPHTMLBuilder._make_main_html_map(state, base_path)
-        result_file = f"{base_path}TrainMLModelReport_{state.name}.html"
+        result_file = base_path / f"TrainMLModelReport_{state.name}.html"
 
-        TemplateParser.parse(template_path=f"{EnvironmentSettings.html_templates_path}HPOptimization.html",
+        TemplateParser.parse(template_path=EnvironmentSettings.html_templates_path / "HPOptimization.html",
                              template_map=html_map, result_path=result_file)
 
         for label in state.label_configuration.get_labels_by_name():
             for index, item in enumerate(HPHTMLBuilder._make_assessment_pages(state, base_path, label)):
-                TemplateParser.parse(template_path=f"{EnvironmentSettings.html_templates_path}AssessmentSplitDetails.html",
+                TemplateParser.parse(template_path=EnvironmentSettings.html_templates_path / "AssessmentSplitDetails.html",
                                      template_map=item,
-                                     result_path=f"{base_path}{HPHTMLBuilder._make_assessment_split_path(index, state.name, label)}")
+                                     result_path=base_path / HPHTMLBuilder._make_assessment_split_path(index, state.name, label))
 
         for label in state.label_configuration.get_labels_by_name():
             for assessment_index in range(state.assessment.split_count):
-                TemplateParser.parse(template_path=f"{EnvironmentSettings.html_templates_path}SelectionDetails.html",
+                TemplateParser.parse(template_path=EnvironmentSettings.html_templates_path / "SelectionDetails.html",
                                      template_map=HPHTMLBuilder._make_selection(state, assessment_index, label, base_path),
-                                     result_path=f"{base_path}{HPHTMLBuilder._make_selection_split_path(assessment_index, label, state.name)}")
+                                     result_path=base_path / HPHTMLBuilder._make_selection_split_path(assessment_index, label, state.name))
 
         return result_file
 
     @staticmethod
-    def _make_assessment_split_path(split_index: int, state_name: str, label: str) -> str:
-        return f"{state_name}_CV_assessment_split_{split_index + 1}_{label}.html"
+    def _make_assessment_split_path(split_index: int, state_name: str, label: str) -> Path:
+        return Path(f"{state_name}_CV_assessment_split_{split_index + 1}_{label}.html")
 
     @staticmethod
-    def _make_selection_split_path(assessment_index: int, label: str, state_name: str):
-        return f"{state_name}_selection_details_{label}_split_{assessment_index + 1}.html"
+    def _make_selection_split_path(assessment_index: int, label: str, state_name: str) -> Path:
+        return Path(f"{state_name}_selection_details_{label}_split_{assessment_index + 1}.html")
 
     @staticmethod
     def _make_selection(state: TrainMLModelState, assessment_index: int, label: str, base_path):
@@ -212,8 +213,8 @@ class HPHTMLBuilder:
         return Util.get_table_string_from_csv_string(s.getvalue(), separator="\t")
 
     @staticmethod
-    def _make_assessment_reports(state, i, hp_setting_key, assessment_state, label, base_path: str):
-        path = f"{base_path}{state.name}_{label}_{hp_setting_key}_assessment_reports_split_{i + 1}.html"
+    def _make_assessment_reports(state, i, hp_setting_key, assessment_state, label, base_path: Path):
+        path = base_path / f"{state.name}_{label}_{hp_setting_key}_assessment_reports_split_{i + 1}.html"
 
         hp_item = assessment_state.label_states[label].assessment_items[hp_setting_key]
         data = {
@@ -232,8 +233,8 @@ class HPHTMLBuilder:
         }
 
         if data["has_ml_reports"] or data["has_encoding_reports"]:
-            TemplateParser.parse(template_path=f"{EnvironmentSettings.html_templates_path}Reports.html", template_map=data, result_path=path)
-            return os.path.basename(path)
+            TemplateParser.parse(template_path=EnvironmentSettings.html_templates_path / "Reports.html", template_map=data, result_path=path)
+            return path.name
         else:
             return None
 
@@ -258,20 +259,20 @@ class HPHTMLBuilder:
         return mapping
 
     @staticmethod
-    def _make_model_per_label(state: TrainMLModelState, base_path: str) -> list:
+    def _make_model_per_label(state: TrainMLModelState, base_path: Path) -> list:
 
         mapping = []
 
         for label in state.label_configuration.get_labels_by_name():
             mapping.append({
                 "label": label,
-                "model_path": os.path.relpath(path=state.optimal_hp_item_paths[label], start=base_path)
+                "model_path": Path(os.path.relpath(path=state.optimal_hp_item_paths[label], start=base_path))
             })
 
         return mapping
 
     @staticmethod
-    def _make_main_html_map(state: TrainMLModelState, base_path: str) -> dict:
+    def _make_main_html_map(state: TrainMLModelState, base_path: Path) -> dict:
         html_map = {
             "css_style": Util.get_css_content(HPHTMLBuilder.CSS_PATH),
             "full_specs": Util.get_full_specs_path(base_path),
@@ -294,8 +295,7 @@ class HPHTMLBuilder:
         return html_map
 
     @staticmethod
-    def _move_reports_recursive(obj, path: str):
-
+    def _move_reports_recursive(obj, path: Path):
         for attribute in (vars(obj) if not isinstance(obj, dict) else obj):
             attribute_value = getattr(obj, attribute) if not isinstance(obj, dict) else obj[attribute]
             if isinstance(attribute_value, list) and all(isinstance(item, ReportResult) for item in attribute_value):
@@ -317,7 +317,7 @@ class HPHTMLBuilder:
         return obj
 
     @staticmethod
-    def _process_hp_items(obj, attribute, attribute_value, path):
+    def _process_hp_items(obj, attribute, attribute_value, path: Path):
         new_attribute_value = {}
         for hp_setting, hp_item_list in attribute_value.items():
             new_hp_item_list = []
@@ -330,14 +330,14 @@ class HPHTMLBuilder:
         return obj
 
     @staticmethod
-    def _process_dict_recursive(obj, attribute, attribute_value, path):
+    def _process_dict_recursive(obj, attribute, attribute_value, path: Path):
         for key, value in attribute_value.items():
             attribute_value[key] = HPHTMLBuilder._move_reports_recursive(value, path)
         setattr(obj, attribute, attribute_value)
         return obj
 
     @staticmethod
-    def _process_list_recursively(obj, attribute, attribute_value, path):
+    def _process_list_recursively(obj, attribute, attribute_value, path: Path):
         new_attribute_values = []
         for item in attribute_value:
             new_attribute_values.append(HPHTMLBuilder._move_reports_recursive(item, path))

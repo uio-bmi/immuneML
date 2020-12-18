@@ -1,4 +1,5 @@
 import datetime
+from pathlib import Path
 
 from source.data_model.dataset.Dataset import Dataset
 from source.hyperparameter_optimization.HPSetting import HPSetting
@@ -27,7 +28,7 @@ class HPAssessment:
 
     @staticmethod
     def _create_root_path(state: TrainMLModelState) -> TrainMLModelState:
-        state.path = f"{state.path}{state.name}/"
+        state.path = state.path / state.name
         return state
 
     @staticmethod
@@ -59,14 +60,14 @@ class HPAssessment:
             print(f"{datetime.datetime.now()}: Training ML model: running the inner loop of nested CV: "
                   f"retrain models for label {label} (label {idx + 1} / {n_labels}).\n", flush=True)
 
-            path = f"{state.assessment_states[split_index].path}"
+            path = state.assessment_states[split_index].path
 
             for index, hp_setting in enumerate(state.hp_settings):
 
                 if hp_setting != state.assessment_states[split_index].label_states[label].optimal_hp_setting:
-                    setting_path = f"{path}{label}_{hp_setting}/"
+                    setting_path = path / f"{label}_{hp_setting}/"
                 else:
-                    setting_path = f"{path}{label}_{hp_setting}_optimal/"
+                    setting_path = path / f"{label}_{hp_setting}_optimal/"
 
                 train_val_dataset = state.assessment_states[split_index].train_val_dataset
                 test_dataset = state.assessment_states[split_index].test_dataset
@@ -78,7 +79,7 @@ class HPAssessment:
         return state
 
     @staticmethod
-    def reeval_on_assessment_split(state, train_val_dataset: Dataset, test_dataset: Dataset, hp_setting: HPSetting, path: str, label: str,
+    def reeval_on_assessment_split(state, train_val_dataset: Dataset, test_dataset: Dataset, hp_setting: HPSetting, path: Path, label: str,
                                    split_index: int) -> MLMethod:
         """retrain model for specific label, assessment split and hp_setting"""
 
@@ -95,6 +96,6 @@ class HPAssessment:
 
     @staticmethod
     def create_assessment_path(state, split_index):
-        current_path = f"{state.path}split_{split_index+1}/"
+        current_path = state.path / f"split_{split_index+1}"
         PathBuilder.build(current_path)
         return current_path

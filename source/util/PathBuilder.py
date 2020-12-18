@@ -3,17 +3,18 @@
 import errno
 import os
 import warnings
+from pathlib import Path
 
 
 class PathBuilder:
 
     @staticmethod
     def build(path, warn_if_exists=False):
+        path = Path(path)
         if warn_if_exists and os.path.isdir(path):
             warnings.warn(f"PathBuilder: directory {path} already exists. Writing in the existing directory...", RuntimeWarning)
         else:
             try:
-                path = path + "/" if path[-1] != "/" else path
                 os.makedirs(path)
             except OSError as e:
                 if e.errno != errno.EEXIST:

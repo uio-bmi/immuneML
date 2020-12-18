@@ -25,14 +25,14 @@ IVKNQEJ01B0TT2	1	IVKNQEJ01B0TT2	GGCCCAGGACTGGTGAAGCCTTCACAGACCCTGTCCCTCACCTGCACT
 IVKNQEJ01AIS74	1	IVKNQEJ01AIS74	GGCGCAGGACTGTTGAAGCCTTCACAGACCCTGTCCCTCACCTGCACTGTCTCTGGTGGCTCCATCAGCAGTGGTGGTTACTACTGGAGCTGGATCCGCCAGCACCCAGGGAAGGGCCTGGAGTGGATTGGGTACATCTATTACAGTGGGAGCACCTACTACAACCCGTCCCTCAAGAGTCGAGTTACCATATCAGTAGACACGTCTAAGAACCAGTTCTCCCTGAAGCTGAGCTCTGTGACTGCCGCGGACACGGCCGTGTATTACTGTGCGAGGCGGGGTGGCTGGTAACTTTTGACTACTGGGGCCAGGGAACCCTGGTCACCGTCTCCTCA	T	F			IGHV4-31*03	IGHD6-19*01	IGHJ4*02		TGTGCGAGGCGGGGTGGCTGGTAACTTTTGACTACTGG	38	CARRGGW*LLTTG	424	20.4	83.8		22N1S3=1X8=1X262=	11N281S10=	6N294S42=		0.9927	9E-121	1	0.17	1	2E-20	0	275	0	317	280	290	10	20	293	335	5	47	5	3	4	F
 IVKNQEJ01AJ44V	1	IVKNQEJ01AJ44V	GGCCCAGGACTGGTGAAGCCTTCGGAGACCCTGTCCCTCACCTGCGCTGTCTATGGTGGGTCCTTCAGTGGTTACTACTGGAGCTGGATCCGCCAGCACCCAGGGAAGGGCCTGGAGTGGATTGGGTACATCTATTACAGTGGGAGCACCTACTACAACCCGTCCCTCAAGAGTCGAGTTACCATATCAGTAGACACGTCTAAGAACCAGTTCTCCCTGAAGCTGAGCTCTGTGACTGCCGCGGACACGGCCGTGTATTACTGTGCGAGCGGGGTGGCTGGAACTTTTGACTACTGGGGCCAGGGAACCCTGGTCACTGTCTCCTCA	T	T			IGHV4-59*06	IGHD1-7*01,IGHD6-19*01	IGHJ4*02		TGTGCGAGCGGGGTGGCTGGAACTTTTGACTACTGG	36	CASGVAGTFDYW	386	16.4	75.8		22N1S45=1X5=2X6=1X3=1X5=1X22=1X4=1X1=1X1=1X165=	11N274S8=	6N286S32=1X9=		0.9625	2E-109	1	2.6	0.9762	5E-18	0	267	0	315	273	281	10	18	285	327	5	47	6	4	12	T"""
 
-        with open(path + "rep1.tsv", "w") as file:
+        with open(path / "rep1.tsv", "w") as file:
             file.writelines(file1_content)
 
-        with open(path + "rep2.tsv", "w") as file:
+        with open(path / "rep2.tsv", "w") as file:
             file.writelines(file2_content)
 
         if add_metadata:
-            with open(path + "metadata.csv", "w") as file:
+            with open(path / "metadata.csv", "w") as file:
                 file.writelines("""filename,subject_id
 rep1.tsv,1
 rep2.tsv,2""")
@@ -51,18 +51,16 @@ rep2.tsv,2""")
         return column_mapping
 
     def test_import_repertoire_dataset(self):
-        path = EnvironmentSettings.root_path + "test/tmp/ioairr/"
+        path = EnvironmentSettings.root_path / "test/tmp/ioairr/"
         PathBuilder.build(path)
         self.create_dummy_dataset(path, True)
 
         column_mapping = self.get_column_mapping()
-        params = {"is_repertoire": True, "result_path": path, "path": path, "metadata_file": path + "metadata.csv",
+        params = {"is_repertoire": True, "result_path": path, "path": path, "metadata_file": path / "metadata.csv",
                   "import_out_of_frame": False, "import_with_stop_codon": False, "import_illegal_characters": False,
                   "import_productive": True, "region_type": "IMGT_CDR3", "import_empty_nt_sequences": True, "import_empty_aa_sequences": False,
                   "column_mapping": column_mapping,
                   "separator": "\t"}
-
-
 
         dataset = AIRRImport.import_dataset(params, "airr_repertoire_dataset")
 
@@ -82,7 +80,7 @@ rep2.tsv,2""")
         shutil.rmtree(path)
 
     def test_sequence_dataset(self):
-        path = EnvironmentSettings.root_path + "test/tmp/ioairr/"
+        path = EnvironmentSettings.root_path / "test/tmp/ioairr/"
         PathBuilder.build(path)
         self.create_dummy_dataset(path, False)
 
@@ -107,7 +105,7 @@ rep2.tsv,2""")
         shutil.rmtree(path)
 
     def test_receptor_dataset(self):
-        path = EnvironmentSettings.root_path + "test/tmp/ioairr/"
+        path = EnvironmentSettings.root_path / "test/tmp/ioairr/"
         PathBuilder.build(path)
         file_content = """rearrangement_id	rearrangement_set_id	sequence_id	sequence	rev_comp	productive	sequence_alignment	germline_alignment	v_call	d_call	j_call	c_call	junction	junction_length	junction_aa	v_score	d_score	j_score	c_score	v_cigar	d_cigar	j_cigar	c_cigar	v_identity	v_evalue	d_identity	d_evalue	j_identity	j_evalue	v_sequence_start	v_sequence_end	v_germline_start	v_germline_end	d_sequence_start	d_sequence_end	d_germline_start	d_germline_end	j_sequence_start	j_sequence_end	j_germline_start	j_germline_end	np1_length	np2_length	duplicate_count	cell_id
 IVKNQEJ01DGRRI	1	IVKNQEJ01DGRRI	GGCCCAGGACTGGTGAAGCCTTCGGAGACCCTGTCCCTCACCTGCGCTGTCTATGGTGGGTCCTTCAGTGGTTACTACTGGAGCTGGATCCGCCAGCCCCCAGGGAAGGGTCTGGAGTGGATTGGGTACATCTATTACAGTGGGAGCACCTACTACAACCCGTCCCTCAAGAGTCGAGTTACCATATCAGTAGACACGTCTAAGAACCAGTTCTCCCTGAAGCTGAGCTCTGTGACTGCCGCGGACACGGCCGTGTATTACTGTGCGAGCGGGGTGGCTGGAACTTTTGACTACTGGGGCCAGGGAACCCTGGTCACCGTCTCCTCA	T	T			IGHV4-34*09	IGHD1-7*01,IGHD6-19*01	IGHJ4*02		TGTGCGAGCGGGGTGGCTGGAACTTTTGACTACTGG	36	CASGVAGTFDYW	389	16.4	83.8		22N1S23=2X85=1X15=1X1=1X3=1X2=1X1=1X5=1X6=1X118=	11N274S8=	6N286S42=		0.9628	2E-110	1	2.6	1	2E-20	0	269	0	317	273	281	10	18	285	327	5	47	4	4	1	1
@@ -115,7 +113,7 @@ IVKNQEJ01APN5N	1	IVKNQEJ01APN5N	GGCCCAGGACTGGTGAAGCCTTCACAGACCCTGTCCCTCACCTGCACT
 IVKNQEJ01B0TT2	1	IVKNQEJ01B0TT2	GGCCCAGGACTGGTGAAGCCTTCACAGACCCTGTCCCTCACCTGCACTGTCTCTGGTGGCTCCATCAGCAGTGGTGGTTACTACTGGAGCTGGATCCGCCAGCACCCAGGGAAGGGCCTGGAGTGGATTGGGTACATCTATTACAGTGGGAGCACCTACTACAACCCGTCCCTCAAGAGTCGAGTTACCATATCAGTAGACACGTCTAAGAACCAGTTCTCCCTGAAGCTGAGCTCTGTGACTGCCGCGGACACGGCCGTGTATTACTGTGCGAGCGGGGTGGCTGGTAACTTTTGACTACTGGGGCCAGGGAACCCTGGTCACTGTCTCCTCA	T	T			IGHV4-31*03	IGHD6-19*01	IGHJ4*02		TGTGCGAGCGGGGTGGCTGGTAACTTTTGACTACTGG	37	CASGVAGNFLLX	430	20.4	75.8		22N1S275=	11N280S10=	6N293S32=1X9=		1	1E-122	1	0.17	0.9762	6E-18	0	275	0	317	279	289	10	20	292	334	5	47	4	3	30	2
 IVKNQEJ01AIS74	1	IVKNQEJ01AIS74	GGCGCAGGACTGTTGAAGCCTTCACAGACCCTGTCCCTCACCTGCACTGTCTCTGGTGGCTCCATCAGCAGTGGTGGTTACTACTGGAGCTGGATCCGCCAGCACCCAGGGAAGGGCCTGGAGTGGATTGGGTACATCTATTACAGTGGGAGCACCTACTACAACCCGTCCCTCAAGAGTCGAGTTACCATATCAGTAGACACGTCTAAGAACCAGTTCTCCCTGAAGCTGAGCTCTGTGACTGCCGCGGACACGGCCGTGTATTACTGTGCGAGGCGGGGTGGCTGGTAACTTTTGACTACTGGGGCCAGGGAACCCTGGTCACCGTCTCCTCA	T	T			IGLV4-31*03	IGLD6-19*01	IGLJ4*02		TGTGCGAGGCGGGGTGGCTGGTAACTTTTGACTACTGG	38	CARRGGWLLTTG	424	20.4	83.8		22N1S3=1X8=1X262=	11N281S10=	6N294S42=		0.9927	9E-121	1	0.17	1	2E-20	0	275	0	317	280	290	10	20	293	335	5	47	5	3	4	2
 """
-        with open(path + "rep1.tsv", "w") as file:
+        with open(path / "rep1.tsv", "w") as file:
             file.writelines(file_content)
 
         column_mapping = self.get_column_mapping()
@@ -137,12 +135,12 @@ IVKNQEJ01AIS74	1	IVKNQEJ01AIS74	GGCGCAGGACTGTTGAAGCCTTCACAGACCCTGTCCCTCACCTGCACT
         shutil.rmtree(path)
 
     def test_import_exported_dataset(self):
-        path = EnvironmentSettings.root_path + "test/tmp/ioairr/"
+        path = EnvironmentSettings.root_path / "test/tmp/ioairr/"
         PathBuilder.build(path)
         self.create_dummy_dataset(path, True)
 
         column_mapping = self.get_column_mapping()
-        params = {"is_repertoire": True, "result_path": path, "path": path, "metadata_file": path + "metadata.csv",
+        params = {"is_repertoire": True, "result_path": path, "path": path, "metadata_file": path / "metadata.csv",
                   "import_out_of_frame": False, "import_with_stop_codon": False,
                   "import_productive": True, "region_type": "IMGT_CDR3", "import_empty_nt_sequences": True, "import_empty_aa_sequences": False,
                   "column_mapping": column_mapping, "import_illegal_characters": False,
@@ -150,12 +148,12 @@ IVKNQEJ01AIS74	1	IVKNQEJ01AIS74	GGCGCAGGACTGTTGAAGCCTTCACAGACCCTGTCCCTCACCTGCACT
 
         dataset1 = AIRRImport.import_dataset(params, "airr_repertoire_dataset1")
 
-        path_exported = f"{path}exported_repertoires/"
+        path_exported = path / "exported_repertoires"
         AIRRExporter.export(dataset1, path_exported, region_type=RegionType.IMGT_CDR3)
 
         params["path"] = path_exported
-        params["metadata_file"] = path_exported + "metadata.csv"
-        params["result_path"] = path_exported + "result_path/"
+        params["metadata_file"] = path_exported / "metadata.csv"
+        params["result_path"] = path_exported / "result_path"
         dataset2 = AIRRImport.import_dataset(params, "airr_repertoire_dataset2")
 
         for attribute in ["amino_acid_sequence", "nucleotide_sequence", "v_gene", "j_gene", "chain", "frame_type", "region_type", "custom_params"]:
@@ -166,7 +164,7 @@ IVKNQEJ01AIS74	1	IVKNQEJ01AIS74	GGCGCAGGACTGTTGAAGCCTTCACAGACCCTGTCCCTCACCTGCACT
 
     def test_minimal_dataset(self):
         # test to make sure import works with minimally specified input
-        path = EnvironmentSettings.root_path + "test/tmp/ioairr/"
+        path = EnvironmentSettings.root_path / "test/tmp/ioairr/"
         PathBuilder.build(path)
         file1_content = """sequence_id	junction_aa
 IVKNQEJ01BVGQ6	CASGVAGTFDYW
@@ -174,16 +172,16 @@ IVKNQEJ01AQVWS	CASGVAGTFDYW
 IVKNQEJ01AOYFZ	CASGVAGNFLLX
 IVKNQEJ01EI5S4	CASGVAGTFDYW"""
 
-        with open(path + "rep1.tsv", "w") as file:
+        with open(path / "rep1.tsv", "w") as file:
             file.writelines(file1_content)
 
-        with open(path + "metadata.csv", "w") as file:
+        with open(path / "metadata.csv", "w") as file:
             file.writelines("""filename,subject_id
 rep1.tsv,1""")
 
         column_mapping = self.get_column_mapping()
 
-        params = {"is_repertoire": True, "result_path": path, "path": path, "metadata_file": path + "metadata.csv",
+        params = {"is_repertoire": True, "result_path": path, "path": path, "metadata_file": path / "metadata.csv",
                   "import_out_of_frame": False, "import_with_stop_codon": False,
                   "import_productive": True, "region_type": "IMGT_CDR3", "import_empty_nt_sequences": True, "import_empty_aa_sequences": False,
                   "column_mapping": column_mapping, "import_illegal_characters": False,

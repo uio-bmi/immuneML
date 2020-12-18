@@ -1,10 +1,10 @@
 # quality: peripheral
 import datetime
-import os
 import re
 
 import yaml
 from yaml import MarkedYAMLError
+from pathlib import Path
 
 from source.dsl.InstructionParser import InstructionParser
 from source.dsl.OutputParser import OutputParser
@@ -101,9 +101,9 @@ class ImmuneMLParser:
     """
 
     @staticmethod
-    def parse_yaml_file(file_path, result_path=None, parse_func=None):
+    def parse_yaml_file(file_path: Path, result_path: Path = None, parse_func=None):
         try:
-            with open(file_path, "r") as file:
+            with file_path.open("r") as file:
                 workflow_specification = yaml.safe_load(file)
                 ImmuneMLParser.check_keys(workflow_specification)
         except yaml.YAMLError as exc:
@@ -146,22 +146,35 @@ class ImmuneMLParser:
         return symbol_table, path
 
     @staticmethod
-    def _get_full_specs_filepath(file_path, result_path):
-        file_name = os.path.basename(file_path).split(".")[0]
-        file_name = "full_{}.yaml".format(file_name)
+    def _get_full_specs_filepath(file_path, result_path) -> Path:
+        file_name = f"full_{file_path.stem}.yaml"
         if result_path is None:
-            folder = os.path.dirname(os.path.abspath(file_path))
-            return folder + "/" + file_name
+            folder = file_path.absolute().parents[0]
+            return folder / file_name
         else:
-            return result_path + file_name
+            return result_path / file_name
 
     @staticmethod
-    def _output_specs(file_path=None, result_path=None, definitions: dict = None, instructions: dict = None, output: dict = None):
+    def _output_specs(file_path=None, result_path=None, definitions: dict = None, instructions: dict = None, output: dict = None) -> Path:
         filepath = ImmuneMLParser._get_full_specs_filepath(file_path, result_path)
 
         result = {"definitions": definitions, "instructions": instructions, "output": output}
-        with open(filepath, "w") as file:
+        result = ImmuneMLParser._paths_to_strings_recursive(result)
+
+        with filepath.open("w") as file:
             yaml.dump(result, file)
 
         print(f"{datetime.datetime.now()}: Full specification is available at {filepath}.\n", flush=True)
         return filepath
+
+    @staticmethod
+    def _paths_to_strings_recursive(specs):
+        if isinstance(specs, Path):
+            return str(specs)
+        elif isinstance(specs, dict):
+            return {key: ImmuneMLParser._paths_to_strings_recursive(value) for key, value in specs.items()}
+        elif isinstance(specs, list):
+            return [ImmuneMLParser._paths_to_strings_recursive(item) for item in specs]
+        else:
+            return specs
+

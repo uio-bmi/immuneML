@@ -1,5 +1,6 @@
 import datetime
 from typing import List
+from pathlib import Path
 
 from scripts.specification_util import update_docs_per_mapping
 from source.IO.dataset_export.DataExporter import DataExporter
@@ -35,15 +36,14 @@ class DatasetExportInstruction(Instruction):
 
     """
 
-    def __init__(self, datasets: List[Dataset], exporters: List[DataExporter], result_path: str = None, name: str = None):
+    def __init__(self, datasets: List[Dataset], exporters: List[DataExporter], result_path: Path = None, name: str = None):
         self.datasets = datasets
         self.exporters = exporters
         self.result_path = result_path
         self.name = name
 
-    def run(self, result_path: str) -> DatasetExportState:
-        self.result_path = result_path if result_path[-1] == '/' else f"{result_path}/"
-        self.result_path = self.result_path + f"{self.name}/"
+    def run(self, result_path: Path) -> DatasetExportState:
+        self.result_path = result_path / self.name
         paths = {}
 
         for dataset in self.datasets:
@@ -51,7 +51,7 @@ class DatasetExportInstruction(Instruction):
             paths[dataset_name] = {}
             for exporter in self.exporters:
                 export_format = exporter.__name__[:-8]
-                path = f"{self.result_path}{dataset_name}/{export_format}/"
+                path = self.result_path / dataset_name / export_format
                 exporter.export(dataset, path)
                 paths[dataset_name][export_format] = path
                 contains = str(dataset.__class__.__name__).replace("Dataset", "s").lower()

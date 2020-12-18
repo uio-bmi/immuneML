@@ -5,6 +5,7 @@ import os
 import pickle
 import shutil
 from typing import List
+from pathlib import Path
 
 import pandas as pd
 
@@ -28,52 +29,54 @@ class PickleExporter(DataExporter):
         dataset_filename = f"{dataset_name}.iml_dataset"
 
         if isinstance(dataset, RepertoireDataset):
-            repertoires_path = PathBuilder.build(f"{path}repertoires/")
+            repertoires_path = PathBuilder.build(path / "repertoires")
             exported_repertoires = PickleExporter._export_repertoires(dataset.repertoires, repertoires_path)
             exported_dataset.repertoires = exported_repertoires
             exported_dataset.metadata_file = PickleExporter._export_metadata(dataset, path, dataset_filename, repertoires_path)
         elif isinstance(dataset, SequenceDataset) or isinstance(dataset, ReceptorDataset):
             exported_dataset.set_filenames(PickleExporter._export_receptors(exported_dataset.get_filenames(), path))
 
-        with open(f"{path}/{dataset_filename}", "wb") as file:
+        file_path = path / dataset_filename
+        with file_path.open("wb") as file:
             pickle.dump(exported_dataset, file, pickle.HIGHEST_PROTOCOL)
 
         return exported_dataset
 
     @staticmethod
     def _export_metadata(dataset, metadata_folder_path, dataset_filename, repertoires_path):
-        if dataset.metadata_file is None or not os.path.isfile(dataset.metadata_file):
+        if dataset.metadata_file is None or not dataset.metadata_file.is_file():
             return None
 
-        metadata_file = f"{metadata_folder_path}{dataset.name}_metadata.csv"
+        metadata_file = metadata_folder_path / f"{dataset.name}_metadata.csv"
 
-        if not os.path.isfile(metadata_file):
+        if not metadata_file.is_file():
             shutil.copyfile(dataset.metadata_file, metadata_file)
 
         PickleExporter._update_repertoire_paths_in_metadata(metadata_file, repertoires_path)
         PickleExporter._add_dataset_to_metadata(metadata_file, dataset_filename)
 
-        if os.path.isfile(f"{metadata_folder_path}metadata.csv"):
-            os.remove(f"{metadata_folder_path}metadata.csv")
+        old_metadata_file = metadata_folder_path / "metadata.csv"
+        if old_metadata_file.is_file():
+            os.remove(old_metadata_file)
 
         return metadata_file
 
     @staticmethod
     def _update_repertoire_paths_in_metadata(metadata_file, repertoires_path):
         metadata = pd.read_csv(metadata_file, comment=Constants.COMMENT_SIGN)
-        path = os.path.relpath(repertoires_path, os.path.dirname(metadata_file))
-        metadata["filename"] = [f"{path}/{os.path.basename(name)}" for name in metadata["filename"].values.tolist()]
+        path = Path(os.path.relpath(repertoires_path, os.path.dirname(metadata_file)))
+        metadata["filename"] = [path / os.path.basename(name) for name in metadata["filename"].values.tolist()]
         metadata.to_csv(metadata_file, index=False)
 
     @staticmethod
     def _add_dataset_to_metadata(metadata_file, dataset_filename):
         metadata = pd.read_csv(metadata_file)
-        with open(metadata_file, "w") as file:
+        with metadata_file.open("w") as file:
             file.writelines([f"{Constants.COMMENT_SIGN}{dataset_filename}\n"])
         metadata.to_csv(metadata_file, mode="a", index=False)
 
     @staticmethod
-    def _export_receptors(filenames_old: List[str], path: str) -> List[str]:
+    def _export_receptors(filenames_old: List[str], path: Path) -> List[str]:
         filenames_new = []
         for filename_old in filenames_old:
             filename_new = PickleExporter._copy_if_exists(filename_old, path)
@@ -81,7 +84,7 @@ class PickleExporter(DataExporter):
         return filenames_new
 
     @staticmethod
-    def _export_repertoires(repertoires: List[Repertoire], repertoires_path: str) -> List[Repertoire]:
+    def _export_repertoires(repertoires: List[Repertoire], repertoires_path: Path) -> List[Repertoire]:
         new_repertoires = []
 
         for repertoire_old in repertoires:
@@ -93,10 +96,10 @@ class PickleExporter(DataExporter):
         return new_repertoires
 
     @staticmethod
-    def _copy_if_exists(old_file, path):
-        if old_file is not None and os.path.isfile(old_file):
-            new_file = f"{path}{os.path.basename(old_file)}"
-            if not os.path.isfile(new_file):
+    def _copy_if_exists(old_file: Path, path: Path):
+        if old_file is not None and old_file.is_file():
+            new_file = path / old_file.name
+            if not new_file.is_file():
                 shutil.copyfile(old_file, new_file)
         else:
             new_file = None

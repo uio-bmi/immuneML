@@ -47,14 +47,14 @@ class TestPresentTotalFeatureTransformation(TestCase):
     }
 
     dataset = RepertoireDataset(encoded_data=EncodedData(**encoded_data),
-                                repertoires=[Repertoire("0.npy", identifier=identifier, metadata_filename="") for identifier
+                                repertoires=[Repertoire("0.npy", identifier=identifier, metadata_filename=None) for identifier
                                              in encoded_data["example_ids"]])
 
     def setUp(self) -> None:
         os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
 
     def test_transform(self):
-        path = EnvironmentSettings.root_path + "test/tmp/presenttotalfeaturetransformation/"
+        path = EnvironmentSettings.root_path / "test/tmp/presenttotalfeaturetransformation/"
         PathBuilder.build(path)
 
         filter_params = {

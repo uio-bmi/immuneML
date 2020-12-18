@@ -43,7 +43,7 @@ class AdaptiveImportHelper:
     @staticmethod
     def parse_adaptive_germline_to_imgt(dataframe):
         gene_name_replacement = pd.read_csv(
-            EnvironmentSettings.root_path + "source/IO/dataset_import/conversion/imgt_adaptive_conversion.csv")
+            EnvironmentSettings.root_path / "source/IO/dataset_import/conversion/imgt_adaptive_conversion.csv")
         gene_name_replacement = dict(zip(gene_name_replacement.Adaptive, gene_name_replacement.IMGT))
 
         germline_value_replacement = {**{"TCRB": "TRB", "TCRA": "TRA"}, **{("0" + str(i)): str(i) for i in range(10)}}

@@ -3,6 +3,7 @@ from unittest import TestCase
 
 import yaml
 from yaml import YAMLError
+from pathlib import Path
 
 from source.IO.dataset_export.PickleExporter import PickleExporter
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
@@ -14,7 +15,7 @@ from source.util.RepertoireBuilder import RepertoireBuilder
 
 class TestImmuneMLParser(TestCase):
     def test_parse_yaml_file(self):
-        path = EnvironmentSettings.root_path + "test/tmp/parser/"
+        path = EnvironmentSettings.root_path / "test/tmp/parser/"
         dataset = RepertoireDataset(repertoires=RepertoireBuilder.build([["AAA", "CCC"], ["TTTT"]], path, {"default": [1, 2]})[0],
                                     params={"default": [1, 2]})
         PickleExporter.export(dataset, path)
@@ -25,7 +26,7 @@ class TestImmuneMLParser(TestCase):
                     "d1": {
                         "format": "Pickle",
                         "params": {
-                            "path": path + f"{dataset.name}.iml_dataset",
+                            "path": str(path / f"{dataset.name}.iml_dataset"),
                         }
                     }
                 },
@@ -59,9 +60,9 @@ class TestImmuneMLParser(TestCase):
 
         PathBuilder.build(path)
 
-        specs_filename = path + "tmp_yaml_spec.yaml"
+        specs_filename = path / "tmp_yaml_spec.yaml"
 
-        with open(specs_filename, "w") as file:
+        with specs_filename.open("w") as file:
             yaml.dump(spec, file, default_flow_style=False)
 
         symbol_table, _ = ImmuneMLParser.parse_yaml_file(specs_filename)
@@ -71,10 +72,10 @@ class TestImmuneMLParser(TestCase):
         self.assertTrue(isinstance(symbol_table.get("d1"), RepertoireDataset))
 
         with self.assertRaises(YAMLError):
-            with open(specs_filename, "r") as file:
+            with specs_filename.open("r") as file:
                 specs_text = file.readlines()
             specs_text[0] = "        definitions:"
-            with open(specs_filename, "w") as file:
+            with specs_filename.open("w") as file:
                 file.writelines(specs_text)
 
             ImmuneMLParser.parse_yaml_file(specs_filename)

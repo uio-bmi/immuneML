@@ -17,26 +17,26 @@ TGCAGTGCCGACTCCAAGAACAGAGGAGCGGGGGGGGAGGCAAGCTCCTACGAGCAGTACTTC	CSADSKNRGAGGEASS
 TGTGCCAGTATCTGCGGATGTACTAGCACAGATACGCAGTATTTT	CASICGCTSTDTQYF	TRBV19	TRBJ2-3
 TGTGCTAGTGGGAAAAATCGGGACTCTAGTGCAGGCCAAGAGACCCAGTACTTC	CASGKNRDSSAGQETQYF	TRBV12-5	TRBJ2-5"""
 
-        with open(path + "rep1.tsv", "w") as file:
+        with open(path / "rep1.tsv", "w") as file:
             file.writelines(file1_content)
 
-        with open(path + "rep2.tsv", "w") as file:
+        with open(path / "rep2.tsv", "w") as file:
             file.writelines(file2_content)
 
         if add_metadata:
-            with open(path + "metadata.csv", "w") as file:
+            with open(path / "metadata.csv", "w") as file:
                 file.writelines("""filename,subject_id
 rep1.tsv,1
 rep2.tsv,2""")
 
     def test_import_repertoire(self):
         """Test dataset content with and without a header included in the input file"""
-        path = EnvironmentSettings.root_path + "test/tmp/io_olga_load/"
+        path = EnvironmentSettings.root_path / "test/tmp/io_olga_load/"
 
         PathBuilder.build(path)
         self.write_dummy_files(path, True)
 
-        dataset = OLGAImport.import_dataset({"is_repertoire": True, "result_path": path, "metadata_file": path + "metadata.csv",
+        dataset = OLGAImport.import_dataset({"is_repertoire": True, "result_path": path, "metadata_file": path / "metadata.csv",
                                              "columns_to_load": None, "separator": "\t", "region_type": "IMGT_CDR3",
                                              "import_empty_nt_sequences": True, "import_empty_aa_sequences": False,
                                              "import_illegal_characters": False,
@@ -65,11 +65,11 @@ rep2.tsv,2""")
 
     def test_import_sequences(self):
         """Test dataset content with and without a header included in the input file"""
-        path = EnvironmentSettings.root_path + "test/tmp/io_olga_load/"
+        path = EnvironmentSettings.root_path / "test/tmp/io_olga_load/"
 
         PathBuilder.build(path)
         self.write_dummy_files(path, False)
-        dataset = OLGAImport.import_dataset({"is_repertoire": False, "paired": False, "result_path": path, "metadata_file": path + "metadata.csv",
+        dataset = OLGAImport.import_dataset({"is_repertoire": False, "paired": False, "result_path": path, "metadata_file": path / "metadata.csv",
                                              "columns_to_load": None, "separator": "\t", "region_type": "IMGT_CDR3",
                                              "import_empty_nt_sequences": True, "import_empty_aa_sequences": False,
                                              "import_illegal_characters": False,

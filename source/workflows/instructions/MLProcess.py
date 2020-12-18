@@ -1,6 +1,7 @@
 import copy
 import datetime
 from typing import List
+from pathlib import Path
 
 from source.data_model.dataset.Dataset import Dataset
 from source.environment.LabelConfiguration import LabelConfiguration
@@ -25,7 +26,7 @@ class MLProcess:
     """
 
     def __init__(self, train_dataset: Dataset, test_dataset: Dataset, label: str, metrics: set, optimization_metric: Metric,
-                 path: str, ml_reports: List[MLReport] = None, encoding_reports: list = None, data_reports: list = None, number_of_processes: int = 2,
+                 path: Path, ml_reports: List[MLReport] = None, encoding_reports: list = None, data_reports: list = None, number_of_processes: int = 2,
                  label_config: LabelConfiguration = None, report_context: dict = None, hp_setting: HPSetting = None, store_encoded_data: bool = None):
         self.train_dataset = train_dataset
         self.test_dataset = test_dataset
@@ -33,11 +34,11 @@ class MLProcess:
         self.label_config = label_config
         self.method = copy.deepcopy(hp_setting.ml_method)
         self.path = PathBuilder.build(path) if path is not None else None
-        self.ml_details_path = f"{path}ml_details.yaml" if path is not None else None
-        self.ml_score_path = f"{path}ml_score.csv" if path is not None else None
-        self.train_predictions_path = f"{path}train_predictions.csv" if path is not None else None
-        self.test_predictions_path = f"{path}test_predictions.csv" if path is not None else None
-        self.report_path = PathBuilder.build(f"{path}reports/") if path is not None else None
+        self.ml_details_path = path / "ml_details.yaml" if path is not None else None
+        self.ml_score_path = path / "ml_score.csv" if path is not None else None
+        self.train_predictions_path = path / "train_predictions.csv" if path is not None else None
+        self.test_predictions_path = path / "test_predictions.csv" if path is not None else None
+        self.report_path = PathBuilder.build(path / "reports") if path is not None else None
         self.number_of_processes = number_of_processes
         assert all([isinstance(metric, Metric) for metric in metrics]), \
             "MLProcess: metrics are not set to be an instance of Metric."
@@ -54,11 +55,11 @@ class MLProcess:
     def _set_paths(self):
         if self.path is None:
             raise RuntimeError("MLProcess: path is not set, stopping execution...")
-        self.ml_details_path = f"{self.path}ml_details.yaml"
-        self.ml_score_path = f"{self.path}ml_score.csv"
-        self.train_predictions_path = f"{self.path}train_predictions.csv"
-        self.test_predictions_path = f"{self.path}test_predictions.csv"
-        self.report_path = PathBuilder.build(f"{self.path}reports/")
+        self.ml_details_path = self.path / "ml_details.yaml"
+        self.ml_score_path = self.path / "ml_score.csv"
+        self.train_predictions_path = self.path / "train_predictions.csv"
+        self.test_predictions_path = self.path / "test_predictions.csv"
+        self.report_path = PathBuilder.build(self.path / "reports")
 
     def run(self, split_index: int) -> HPItem:
 
@@ -67,15 +68,15 @@ class MLProcess:
         PathBuilder.build(self.path)
         self._set_paths()
 
-        processed_dataset = HPUtil.preprocess_dataset(self.train_dataset, self.hp_setting.preproc_sequence, f"{self.path}preprocessed_train_dataset/")
+        processed_dataset = HPUtil.preprocess_dataset(self.train_dataset, self.hp_setting.preproc_sequence, self.path / "preprocessed_train_dataset")
 
-        encoded_train_dataset = HPUtil.encode_dataset(processed_dataset, self.hp_setting, f"{self.path}encoded_datasets/", learn_model=True,
+        encoded_train_dataset = HPUtil.encode_dataset(processed_dataset, self.hp_setting, self.path / "encoded_datasets", learn_model=True,
                                                       context=self.report_context, number_of_processes=self.number_of_processes,
                                                       label_configuration=self.label_config, store_encoded_data=self.store_encoded_data)
 
         method = HPUtil.train_method(self.label, encoded_train_dataset, self.hp_setting, self.path, self.train_predictions_path, self.ml_details_path, self.number_of_processes, self.optimization_metric)
 
-        encoding_train_results = ReportUtil.run_encoding_reports(encoded_train_dataset, self.encoding_reports, f"{self.report_path}encoding_train/")
+        encoding_train_results = ReportUtil.run_encoding_reports(encoded_train_dataset, self.encoding_reports, self.report_path / "encoding_train")
 
         hp_item = self._assess_on_test_dataset(encoded_train_dataset, encoding_train_results, method, split_index)
 
@@ -86,19 +87,19 @@ class MLProcess:
     def _assess_on_test_dataset(self, encoded_train_dataset, encoding_train_results, method, split_index) -> HPItem:
         if self.test_dataset is not None and self.test_dataset.get_example_count() > 0:
             processed_test_dataset = HPUtil.preprocess_dataset(self.test_dataset, self.hp_setting.preproc_sequence,
-                                                               f"{self.path}preprocessed_test_dataset/")
+                                                               self.path / "preprocessed_test_dataset")
 
-            encoded_test_dataset = HPUtil.encode_dataset(processed_test_dataset, self.hp_setting, f"{self.path}encoded_datasets/",
+            encoded_test_dataset = HPUtil.encode_dataset(processed_test_dataset, self.hp_setting, self.path / "encoded_datasets",
                                                          learn_model=False, context=self.report_context, number_of_processes=self.number_of_processes,
                                                          label_configuration=self.label_config, store_encoded_data=self.store_encoded_data)
 
             performance = HPUtil.assess_performance(method, self.metrics, self.optimization_metric, encoded_test_dataset, split_index, self.path,
                                                     self.test_predictions_path, self.label, self.ml_score_path)
 
-            encoding_test_results = ReportUtil.run_encoding_reports(encoded_test_dataset, self.encoding_reports, f"{self.report_path}encoding_test/")
+            encoding_test_results = ReportUtil.run_encoding_reports(encoded_test_dataset, self.encoding_reports, self.report_path / "encoding_test")
 
             model_report_results = ReportUtil.run_ML_reports(encoded_train_dataset, encoded_test_dataset, method, self.ml_reports,
-                                                             f"{self.report_path}ml_method/", self.hp_setting, self.label, self.report_context)
+                                                             self.report_path / "ml_method", self.hp_setting, self.label, self.report_context)
 
             hp_item = HPItem(method=method, hp_setting=self.hp_setting, train_predictions_path=self.train_predictions_path,
                              test_predictions_path=self.test_predictions_path, ml_details_path=self.ml_details_path, train_dataset=self.train_dataset,

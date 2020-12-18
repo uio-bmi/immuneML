@@ -3,6 +3,7 @@ import os
 import re
 
 import yaml
+from pathlib import Path
 
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.util.ReflectionHandler import ReflectionHandler
@@ -25,13 +26,12 @@ class DefaultParamsLoader:
     @staticmethod
     def load(path, class_name, log_if_missing=True):
         if os.path.isabs(path):
-            filepath = path + DefaultParamsLoader.convert_to_snake_case(class_name) + "_params.yaml"
+            filepath = Path(path) / f"{DefaultParamsLoader.convert_to_snake_case(class_name)}_params.yaml"
         else:
-            filepath = EnvironmentSettings.default_params_path + path + ("/" if path[-1] != "/" else "") \
-                       + DefaultParamsLoader.convert_to_snake_case(class_name) + "_params.yaml"
+            filepath = EnvironmentSettings.default_params_path / path / f"{DefaultParamsLoader.convert_to_snake_case(class_name)}_params.yaml"
 
-        if os.path.isfile(filepath):
-            with open(filepath, "r") as file:
+        if filepath.is_file():
+            with filepath.open("r") as file:
                 params = yaml.load(file, Loader=yaml.FullLoader)
         else:
             if log_if_missing:
