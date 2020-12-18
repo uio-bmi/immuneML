@@ -18,7 +18,7 @@ class TCRdistClassifier(SklearnMethod):
 
     Arguments:
 
-        percentage (float): percentage of nearest neighbors to consider when determining receptor specificity based on known receptors
+        percentage (float): percentage of nearest neighbors to consider when determining receptor specificity based on known receptors (between 0 and 1)
 
     YAML specification:
 
