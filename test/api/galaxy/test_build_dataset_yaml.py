@@ -49,7 +49,7 @@ class MyTestCase(unittest.TestCase):
 
         os.chdir(path)
 
-        yamlbuilder_main(["-r", "VDJdb", "-o", path, "-f", "sequence.yaml", "-p", "False", "-a", "a,b"])
+        yamlbuilder_main(["-r", "VDJdb", "-o", path, "-f", "sequence.yaml", "-p", "False", "-a", "a,b", "-i", "False"])
 
         with open(f"{path}/sequence.yaml", "r") as file:
             loaded_receptor = yaml.load(file, Loader=yaml.FullLoader)
@@ -74,7 +74,7 @@ class MyTestCase(unittest.TestCase):
 
         os.chdir(path)
 
-        yamlbuilder_main(["-r", "VDJdb", "-o", path, "-f", "receptor.yaml", "-p", "True", "-c", "TRA_TRB", "-a", "'c'"])
+        yamlbuilder_main(["-r", "VDJdb", "-o", path, "-f", "receptor.yaml", "-p", "True", "-c", "TRA_TRB", "-a", "'c'", "-i", "False"])
 
         with open(f"{path}/receptor.yaml", "r") as file:
             loaded_receptor = yaml.load(file, Loader=yaml.FullLoader)
@@ -99,7 +99,7 @@ class MyTestCase(unittest.TestCase):
 
         os.chdir(path)
 
-        yamlbuilder_main(["-r", "VDJdb", "-o", path, "-f", "repertoire.yaml", "-m", "metadata.csv", "-i"])
+        yamlbuilder_main(["-r", "VDJdb", "-o", path, "-f", "repertoire.yaml", "-m", "metadata.csv", "-i", "True"])
 
         with open(f"{path}/repertoire.yaml", "r") as file:
             loaded_receptor = yaml.load(file, Loader=yaml.FullLoader)
