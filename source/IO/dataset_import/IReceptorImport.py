@@ -38,7 +38,7 @@ class IReceptorImport(DataImport):
 
         path (str): This is the path to a directory **with .zip files** retrieved from the iReceptor Gateway. These .zip
         files should include AIRR tsv files and corresponding metadata json files with matching names (e.g., for my_dataset.tsv
-        the corresponding metadata file is called my_dataset_metadata.json).
+        the corresponding metadata file is called my_dataset-metadata.json).
 
         is_repertoire (bool): If True, this imports a RepertoireDataset. If False, it imports a SequenceDataset or
         ReceptorDataset. By default, is_repertoire is set to True.
@@ -168,7 +168,7 @@ class IReceptorImport(DataImport):
         all_metadata_dfs = []
 
         for airr_filename in glob.glob(f"{unzipped_path}*.tsv"):
-            metadata_filename = f"{unzipped_path}{Path(airr_filename).stem}_metadata.json"
+            metadata_filename = f"{unzipped_path}{Path(airr_filename).stem}-metadata.json"
 
             sub_metadata_df = IReceptorImport._create_metadata_df(metadata_filename)
             IReceptorImport._split_airr_files(airr_filename, sub_metadata_df, base_result_path)
