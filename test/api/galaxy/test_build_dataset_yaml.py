@@ -99,7 +99,7 @@ class MyTestCase(unittest.TestCase):
 
         os.chdir(path)
 
-        yamlbuilder_main(["-r", "VDJdb", "-o", path, "-f", "repertoire.yaml", "-m", "metadata.csv"])
+        yamlbuilder_main(["-r", "VDJdb", "-o", path, "-f", "repertoire.yaml", "-m", "metadata.csv", "-i"])
 
         with open(f"{path}/repertoire.yaml", "r") as file:
             loaded_receptor = yaml.load(file, Loader=yaml.FullLoader)
