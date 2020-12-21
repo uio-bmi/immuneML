@@ -109,7 +109,7 @@ class IReceptorImport(DataImport):
     .. code-block:: yaml
 
         my_airr_dataset:
-            format: AIRR
+            format: IReceptor
             params:
                 path: path/to/zipfiles/
                 is_repertoire: True # whether to import a RepertoireDataset
