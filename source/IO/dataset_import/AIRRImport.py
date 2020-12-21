@@ -13,14 +13,14 @@ from source.util.ImportHelper import ImportHelper
 
 class AIRRImport(DataImport):
     """
-    Imports data in AIRR format into a Repertoire-, or SequenceDataset.
+    Imports data in AIRR format into a Repertoire-, Sequence- or ReceptorDataset.
     RepertoireDatasets should be used when making predictions per repertoire, such as predicting a disease state.
-    SequenceDatasets should be used when predicting values for unpaired (single-chain) immune receptors, like
-    antigen specificity.
+    SequenceDatasets or ReceptorDatasets should be used when predicting values for unpaired (single-chain) and paired
+    immune receptors respectively, like antigen specificity.
 
     AIRR rearrangement schema can be found here: https://docs.airr-community.org/en/stable/datarep/rearrangements.html
 
-    When importing a ReceptorDataset, the airr field cell_id is used to determine the chain pairs.
+    When importing a ReceptorDataset, the AIRR field cell_id is used to determine the chain pairs.
 
     Arguments:
 
@@ -84,9 +84,9 @@ class AIRRImport(DataImport):
         they are present in the AIRR file, or using alternative column names).
         Valid immuneML fields that can be specified here are defined by Repertoire.FIELDS
 
-        metadata_column_mapping (dict): Specifies metadata for SequenceDatasets. This should specify a mapping similar
+        metadata_column_mapping (dict): Specifies metadata for Sequence- and ReceptorDatasets. This should specify a mapping similar
         to column_mapping where keys are AIRR column names and values are the names that are internally used in immuneML
-        as metadata fields. These metadata fields can be used as prediction labels for SequenceDatasets.
+        as metadata fields. These metadata fields can be used as prediction labels for Sequence- and ReceptorDatasets.
         For AIRR format, there is no default metadata_column_mapping.
         For setting RepertoireDataset metadata, metadata_column_mapping is ignored, see metadata_file instead.
 
@@ -102,9 +102,9 @@ class AIRRImport(DataImport):
             format: AIRR
             params:
                 path: path/to/files/
-                is_repertoire: True # whether to import a RepertoireDataset (True) or a SequenceDataset (False)
+                is_repertoire: True # whether to import a RepertoireDataset
                 metadata_file: path/to/metadata.csv # metadata file for RepertoireDataset
-                metadata_column_mapping: # metadata column mapping AIRR: immuneML for SequenceDataset
+                metadata_column_mapping: # metadata column mapping AIRR: immuneML for Sequence- or ReceptorDatasetDataset
                     airr_column_name1: metadata_label1
                     airr_column_name2: metadata_label2
                 import_productive: True # whether to include productive sequences in the dataset
