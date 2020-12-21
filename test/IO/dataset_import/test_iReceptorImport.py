@@ -414,18 +414,24 @@ class TestIReceptorImport(TestCase):
     ]
 }'''
 
+
         with open(path + "airr.tsv", "w") as file:
             file.writelines(airr_tsv_content)
 
         with open(path + "airr-metadata.json", "w") as file:
             file.writelines(metadata_json_content)
 
+        with open(path + "info.txt", "w") as file:
+            file.writelines("some additional info file that should be ignored")
+
         with ZipFile(path + zip_name + ".zip", "w") as zipObj:
             zipObj.write(path + "airr.tsv", "airr.tsv")
             zipObj.write(path + "airr-metadata.json", "airr-metadata.json")
+            zipObj.write(path + "info.txt", "info.txt")
 
         os.remove(path + "airr.tsv")
         os.remove(path + "airr-metadata.json")
+        os.remove(path + "info.txt")
 
         return path + zip_name + ".zip", "w"
 
