@@ -174,6 +174,8 @@ class IReceptorImport(DataImport):
 
         dataset = ImportHelper.import_dataset(AIRRImport, airr_params, dataset_name)
 
+        shutil.rmtree(unzipped_path)
+
         return dataset
 
     @staticmethod
