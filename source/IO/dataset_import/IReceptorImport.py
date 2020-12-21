@@ -207,8 +207,9 @@ class IReceptorImport(DataImport):
             with zipfile.ZipFile(zip_filename, "r") as zip_object:
                 for file in zip_object.filelist:
                     file.filename = f"{Path(zip_filename).stem}_{file.filename}"
-                    if unzip_metadata or not file.filename.endswith("-metadata.json"):
-                        zip_object.extract(file, path=unzipped_path)
+                    if file.filename is not "info.txt":
+                        if unzip_metadata or not file.filename.endswith("-metadata.json"):
+                            zip_object.extract(file, path=unzipped_path)
 
     @staticmethod
     def _get_metadata_row(repertoire, sample, data_processing):
