@@ -11,6 +11,7 @@ from scripts.specification_util import update_docs_per_mapping
 from source.IO.dataset_import.AIRRImport import AIRRImport
 from source.IO.dataset_import.DataImport import DataImport
 from source.data_model.dataset.Dataset import Dataset
+from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.receptor.RegionType import RegionType
 from source.data_model.repertoire.Repertoire import Repertoire
 from source.util.ImportHelper import ImportHelper
@@ -137,12 +138,23 @@ class IReceptorImport(DataImport):
 
     @staticmethod
     def import_dataset(params: dict, dataset_name: str) -> Dataset:
+        if params["is_repertoire"]:
+            dataset = IReceptorImport.import_repertoire_dataset(params, dataset_name)
+        else:
+            dataset = IReceptorImport.import_sequence_dataset(params, dataset_name)
+
+        return dataset
+
+    @staticmethod
+    def import_repertoire_dataset(params: dict, dataset_name: str) -> RepertoireDataset:
         base_result_path = params['result_path'] + "tmp_airr/"
         metadata_file_path = base_result_path + "metadata.csv"
 
-        IReceptorImport._create_airr_dataset(params['path'], base_result_path, metadata_file_path)
+        IReceptorImport._create_airr_repertoiredataset(params['path'], base_result_path, metadata_file_path)
 
-        airr_params = IReceptorImport._get_airr_params(params, base_result_path, metadata_file_path)
+        airr_params = copy.deepcopy(params)
+        airr_params["path"] = base_result_path
+        airr_params["metadata_file"] = metadata_file_path
 
         dataset = ImportHelper.import_dataset(AIRRImport, airr_params, dataset_name)
 
@@ -151,15 +163,21 @@ class IReceptorImport(DataImport):
         return dataset
 
     @staticmethod
-    def _get_airr_params(params, base_result_path, metadata_file_path):
-        airr_params = copy.deepcopy(params)
-        airr_params["path"] = base_result_path
-        airr_params["metadata_file"] = metadata_file_path
+    def import_sequence_dataset(params: dict, dataset_name: str) -> RepertoireDataset:
+        base_result_path = params['result_path'] + "tmp_airr/"
 
-        return airr_params
+        unzipped_path = base_result_path + "tmp_unzipped/"
+        IReceptorImport._unzip_files(params['path'], unzipped_path, unzip_metadata=False)
+
+        airr_params = copy.deepcopy(params)
+        airr_params["path"] = unzipped_path
+
+        dataset = ImportHelper.import_dataset(AIRRImport, airr_params, dataset_name)
+
+        return dataset
 
     @staticmethod
-    def _create_airr_dataset(input_zips_path, base_result_path, metadata_file_path):
+    def _create_airr_repertoiredataset(input_zips_path, base_result_path, metadata_file_path):
         unzipped_path = base_result_path + "tmp_unzipped/"
         PathBuilder.build(base_result_path + IReceptorImport.REPERTOIRES_FOLDER)
 
@@ -182,12 +200,13 @@ class IReceptorImport(DataImport):
 
 
     @staticmethod
-    def _unzip_files(path: str, unzipped_path: str) -> Dataset:
+    def _unzip_files(path: str, unzipped_path: str, unzip_metadata=True) -> Dataset:
         for zip_filename in glob.glob(f"{path}*.zip"):
             with zipfile.ZipFile(zip_filename, "r") as zip_object:
                 for file in zip_object.filelist:
                     file.filename = f"{Path(zip_filename).stem}_{file.filename}"
-                    zip_object.extract(file, path=unzipped_path)
+                    if unzip_metadata or not file.filename.endswith("-metadata.json"):
+                        zip_object.extract(file, path=unzipped_path)
 
     @staticmethod
     def _get_metadata_row(repertoire, sample, data_processing):

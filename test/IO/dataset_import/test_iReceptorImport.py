@@ -7,6 +7,7 @@ import numpy as np
 
 from source.IO.dataset_import.IReceptorImport import IReceptorImport
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
+from source.data_model.dataset.SequenceDataset import SequenceDataset
 from source.dsl.DefaultParamsLoader import DefaultParamsLoader
 from source.environment.Constants import Constants
 from source.environment.EnvironmentSettings import EnvironmentSettings
@@ -431,7 +432,7 @@ class TestIReceptorImport(TestCase):
 
 
     def test_import_repertoire_dataset(self):
-        path = EnvironmentSettings.root_path + "test/tmp/ireceptorimport/"
+        path = EnvironmentSettings.root_path + "test/tmp/ireceptorimport/repertoiredataset/"
         PathBuilder.build(path)
         ireceptor_zip1_path = self.create_dummy_dataset(path, zip_name="first_zip", disease_name="first_disease")
         ireceptor_zip2_path = self.create_dummy_dataset(path, zip_name="second_zip", disease_name="second_disease")
@@ -440,12 +441,12 @@ class TestIReceptorImport(TestCase):
         params["result_path"] = path + "result/"
         params["path"] = path
 
-        dataset = IReceptorImport.import_dataset(params, "ireceptor_dataset")
+        dataset = IReceptorImport.import_dataset(params, "ireceptor_repertoiredataset")
 
         self.assertEqual(6, dataset.get_example_count())
         self.assertEqual(RepertoireDataset, type(dataset))
 
-        metadata_df = pd.read_csv(params["result_path"] + "ireceptor_dataset_metadata.csv",  comment=Constants.COMMENT_SIGN)
+        metadata_df = pd.read_csv(params["result_path"] + "ireceptor_repertoiredataset_metadata.csv",  comment=Constants.COMMENT_SIGN)
 
         self.assertListEqual(list(metadata_df["subject_id"]), ["person1", "person2", "person2", "person1", "person2", "person2"])
         self.assertListEqual(list(metadata_df["repertoire_id"]), ["second_zip_rep1", "second_zip_rep2", "second_zip_rep2", "first_zip_rep1", "first_zip_rep2", "first_zip_rep2"])
@@ -462,5 +463,25 @@ class TestIReceptorImport(TestCase):
         self.assertListEqual(list(metadata_df["COVID-19"]), ["Case", "Control", "Control", "Case", "Control", "Control"])
         self.assertListEqual(list(metadata_df["second_disease"]), [np.nan, "Case", "Case", np.nan, np.nan, np.nan])
         self.assertListEqual(list(metadata_df["first_disease"]), [np.nan,  np.nan, np.nan, np.nan, "Case", "Case"])
+
+        shutil.rmtree(path)
+
+
+    def test_import_sequence_dataset(self):
+        path = EnvironmentSettings.root_path + "test/tmp/ireceptorimport/sequencedataset/"
+        PathBuilder.build(path)
+        ireceptor_zip1_path = self.create_dummy_dataset(path, zip_name="first_zip", disease_name="first_disease")
+        ireceptor_zip2_path = self.create_dummy_dataset(path, zip_name="second_zip", disease_name="second_disease")
+
+        params = DefaultParamsLoader.load(EnvironmentSettings.default_params_path + "datasets/", "i_receptor")
+        params["result_path"] = path + "result/"
+        params["path"] = path
+        params["is_repertoire"] = False
+        params["paired"] = False
+
+        dataset = IReceptorImport.import_dataset(params, "ireceptor_sequencedataset")
+
+        self.assertEqual(26, dataset.get_example_count())
+        self.assertEqual(SequenceDataset, type(dataset))
 
         shutil.rmtree(path)
