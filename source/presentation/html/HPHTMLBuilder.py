@@ -184,8 +184,8 @@ class HPHTMLBuilder:
                 optimal = str(assessment_state.label_states[label].optimal_hp_setting.get_key())
                 reports_path = HPHTMLBuilder._make_assessment_reports(state, i, hp_setting, assessment_state, label, base_path)
                 assessment_item["hp_settings"].append({
-                    "optimal": hp_setting.get_key() == optimal,
-                    "hp_setting": hp_setting.get_key(),
+                    "optimal": str(hp_setting) == optimal,
+                    "hp_setting": str(hp_setting),
                     "optimization_metric_val": round(item.performance[state.optimization_metric.name.lower()], HPHTMLBuilder.NUM_DIGITS),
                     "reports_path": reports_path
                 })
@@ -201,7 +201,7 @@ class HPHTMLBuilder:
     def _extract_assessment_performances_per_metric(state: TrainMLModelState, assessment_state: HPAssessmentState, label: str) -> str:
         performance_metric = {"setting": [], **{metric.name.lower(): [] for metric in state.metrics}}
         for hp_setting, hp_item in assessment_state.label_states[label].assessment_items.items():
-            performance_metric['setting'].append(hp_setting.get_key())
+            performance_metric['setting'].append(str(hp_setting))
             for metric in sorted(state.metrics, key=lambda metric: metric.name.lower()):
                 performance_metric[metric.name.lower()].append(round(hp_item.performance[metric.name.lower()], HPHTMLBuilder.NUM_DIGITS))
 
@@ -284,10 +284,8 @@ class HPHTMLBuilder:
             "metrics": [{"name": metric.name.lower()} for metric in state.metrics],
             "assessment_desc": state.assessment,
             "selection_desc": state.selection,
-            "dataset_reports": Util.to_dict_recursive(state.data_report_results, base_path) if state.data_report_results else None,
-            "show_dataset_reports": bool(state.data_report_results),
-            "show_hp_reports": bool(state.hp_report_results),
-            'hp_reports': Util.to_dict_recursive(state.hp_report_results, base_path) if state.hp_report_results else None,
+            "show_hp_reports": bool(state.report_results),
+            'hp_reports': Util.to_dict_recursive(state.report_results, base_path) if state.report_results else None,
             "hp_per_label": HPHTMLBuilder._make_hp_per_label(state),
             'models_per_label': HPHTMLBuilder._make_model_per_label(state, base_path),
             'immuneML_version': MLUtil.get_immuneML_version()

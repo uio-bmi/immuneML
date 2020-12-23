@@ -70,7 +70,7 @@ class TestImmuneMLApp(TestCase):
                 },
                 "ml_methods": {
                     "simpleLR": {
-                        "SimpleLogisticRegression": {
+                        "LogisticRegression": {
                             "penalty": "l1"
                         },
                         "model_selection_cv": False,
@@ -119,7 +119,7 @@ class TestImmuneMLApp(TestCase):
                     }
                 },
                 "export_instr": {
-                    "type": "DatasetGeneration",
+                    "type": "DatasetExport",
                     "datasets": ["d1"],
                     "export_formats": ["AIRR"]
                 },
@@ -143,7 +143,6 @@ class TestImmuneMLApp(TestCase):
                         "training_percentage": 0.7,
                         "reports": {
                             "data_splits": [],
-                            "hyperparameter": ["rep2"],
                             "models": ["rep3"],
                             "encoding": ["rep4"]
                         }
@@ -162,8 +161,8 @@ class TestImmuneMLApp(TestCase):
                     "dataset": "d1",
                     "strategy": "GridSearch",
                     "metrics": ["accuracy", "auc"],
-                    "reports": ["rep1"],
-                    "batch_size": 10,
+                    "reports": ["rep2"],
+                    "number_of_processes": 10,
                     "optimization_metric": "accuracy",
                     'refit_optimal_model': False,
                     "store_encoded_data": False

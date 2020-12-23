@@ -15,7 +15,7 @@ from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.environment.Label import Label
 from source.environment.LabelConfiguration import LabelConfiguration
 from source.hyperparameter_optimization.HPSetting import HPSetting
-from source.ml_methods.SimpleLogisticRegression import SimpleLogisticRegression
+from source.ml_methods.LogisticRegression import LogisticRegression
 from source.simulation.dataset_generation.RandomDatasetGenerator import RandomDatasetGenerator
 from source.util.PathBuilder import PathBuilder
 from source.workflows.instructions.ml_model_application.MLApplicationInstruction import MLApplicationInstruction
@@ -32,13 +32,13 @@ class TestMLApplicationInstruction(TestCase):
         PathBuilder.build(path)
 
         dataset = RandomDatasetGenerator.generate_repertoire_dataset(50, {5: 1}, {5: 1}, {"l1": {1: 0.5, 2: 0.5}}, path + 'dataset/')
-        ml_method = SimpleLogisticRegression()
+        ml_method = LogisticRegression()
         encoder = KmerFreqRepertoireEncoder(NormalizationType.RELATIVE_FREQUENCY, ReadsType.UNIQUE, SequenceEncodingType.CONTINUOUS_KMER, 3,
                                             scale_to_zero_mean=True, scale_to_unit_variance=True)
         label_config = LabelConfiguration([Label("l1", [1, 2])])
 
         enc_dataset = encoder.encode(dataset, EncoderParams(result_path=path, label_config=label_config, filename="tmp_enc_dataset.pickle", pool_size=4))
-        ml_method.fit(enc_dataset.encoded_data, enc_dataset.encoded_data.labels, ['l1'])
+        ml_method.fit(enc_dataset.encoded_data, 'l1')
 
         hp_setting = HPSetting(encoder, {"normalization_type": "relative_frequency", "reads": "unique", "sequence_encoding": "continuous_kmer",
                                          "k": 3, "scale_to_zero_mean": True, "scale_to_unit_variance": True}, ml_method, {}, [], 'enc1', 'ml1')

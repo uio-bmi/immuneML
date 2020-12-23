@@ -7,7 +7,6 @@ from source.hyperparameter_optimization.core.HPUtil import HPUtil
 from source.hyperparameter_optimization.states.HPAssessmentState import HPAssessmentState
 from source.hyperparameter_optimization.states.TrainMLModelState import TrainMLModelState
 from source.ml_methods.MLMethod import MLMethod
-from source.reports.ReportUtil import ReportUtil
 from source.util.PathBuilder import PathBuilder
 from source.workflows.instructions.MLProcess import MLProcess
 
@@ -24,9 +23,6 @@ class HPAssessment:
         for index in range(n_splits):
             state = HPAssessment.run_assessment_split(state, train_val_datasets[index], test_datasets[index], index, n_splits)
 
-        state.data_report_results = ReportUtil.run_data_reports(state.dataset, list(state.data_reports.values()), f"{state.path}data_reports/",
-                                                                state.context)
-
         return state
 
     @staticmethod
@@ -38,7 +34,7 @@ class HPAssessment:
     def run_assessment_split(state, train_val_dataset, test_dataset, split_index: int, n_splits):
         """run inner CV loop (selection) and retrain on the full train_val_dataset after optimal model is chosen"""
 
-        print(f'{datetime.datetime.now()}: Hyperparameter optimization: running outer CV loop: started split {split_index+1}/{n_splits}.\n', flush=True)
+        print(f'{datetime.datetime.now()}: Training ML model: running outer CV loop: started split {split_index+1}/{n_splits}.\n', flush=True)
 
         current_path = HPAssessment.create_assessment_path(state, split_index)
 
@@ -49,7 +45,7 @@ class HPAssessment:
 
         state = HPAssessment.run_assessment_split_per_label(state, split_index)
 
-        print(f'{datetime.datetime.now()}: Hyperparameter optimization: running outer CV loop: finished split {split_index+1}/{n_splits}.\n', flush=True)
+        print(f'{datetime.datetime.now()}: Training ML model: running outer CV loop: finished split {split_index+1}/{n_splits}.\n', flush=True)
 
         return state
 
@@ -60,7 +56,7 @@ class HPAssessment:
 
         for idx, label in enumerate(state.label_configuration.get_labels_by_name()):
 
-            print(f"{datetime.datetime.now()}: Hyperparameter optimization: running the inner loop of nested CV: "
+            print(f"{datetime.datetime.now()}: Training ML model: running the inner loop of nested CV: "
                   f"retrain models for label {label} (label {idx + 1} / {n_labels}).\n", flush=True)
 
             path = f"{state.assessment_states[split_index].path}"
@@ -76,7 +72,7 @@ class HPAssessment:
                 test_dataset = state.assessment_states[split_index].test_dataset
                 state = HPAssessment.reeval_on_assessment_split(state, train_val_dataset, test_dataset, hp_setting, setting_path, label, split_index)
 
-            print(f"{datetime.datetime.now()}: Hyperparameter optimization: running the inner loop of nested CV: completed retraining models "
+            print(f"{datetime.datetime.now()}: Training ML model: running the inner loop of nested CV: completed retraining models "
                   f"for label {label} (label {idx + 1} / {n_labels}).\n", flush=True)
 
         return state
@@ -88,12 +84,12 @@ class HPAssessment:
 
         assessment_item = MLProcess(train_dataset=train_val_dataset, test_dataset=test_dataset, label=label, metrics=state.metrics,
                                     optimization_metric=state.optimization_metric, path=path, hp_setting=hp_setting, report_context=state.context,
-                                    ml_reports=state.assessment.reports.model_reports.values(), number_of_processes=state.batch_size,
+                                    ml_reports=state.assessment.reports.model_reports.values(), number_of_processes=state.number_of_processes,
                                     encoding_reports=state.assessment.reports.encoding_reports.values(), label_config=state.label_configuration,
                                     store_encoded_data=state.store_encoded_data)\
             .run(split_index)
 
-        state.assessment_states[split_index].label_states[label].assessment_items[hp_setting] = assessment_item
+        state.assessment_states[split_index].label_states[label].assessment_items[str(hp_setting)] = assessment_item
 
         return state
 

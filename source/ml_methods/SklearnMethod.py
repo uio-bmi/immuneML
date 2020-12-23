@@ -42,13 +42,13 @@ class SklearnMethod(MLMethod):
 
         ml_methods:
             log_reg:
-                SimpleLogisticRegression: # name of the class inheriting SklearnMethod
+                LogisticRegression: # name of the class inheriting SklearnMethod
                     # sklearn parameters (same names as in original sklearn class)
                     max_iter: 1000 # specific parameter value
                     penalty: l1
                     # Additional parameter that determines whether to print convergence warnings
                     show_warnings: True
-                # if any of the parameters under SimpleLogisticRegression is a list and model_selection_cv is True,
+                # if any of the parameters under LogisticRegression is a list and model_selection_cv is True,
                 # a grid search will be done over the given parameters, using the number of folds specified in model_selection_n_folds,
                 # and the optimal model will be selected
                 model_selection_cv: True
@@ -82,19 +82,6 @@ class SklearnMethod(MLMethod):
         self._parameters = parameters
         self.feature_names = None
 
-
-    def _fit_for_label(self, X, y: np.ndarray, label: str, cores_for_training: int):
-        if not self.show_warnings:
-            warnings.simplefilter("ignore")
-            os.environ["PYTHONWARNINGS"] = "ignore"
-
-        self.models[label] = self._get_ml_model(cores_for_training, X)
-        self.models[label].fit(X, y)
-
-        if not self.show_warnings:
-            del os.environ["PYTHONWARNINGS"]
-            warnings.simplefilter("always")
-
     def _prepare_caching_params(self, encoded_data: EncodedData, y, type: str, label_names: list = None, number_of_splits: int = -1):
         return (("encoded_data", hashlib.sha256(str(encoded_data.examples).encode("utf-8")).hexdigest()),
                 ("y", hashlib.sha256(str(y).encode("utf-8")).hexdigest()),
@@ -104,93 +91,89 @@ class SklearnMethod(MLMethod):
                 ("parameters", str(self._parameters)),
                 ("parameter_grid", str(self._parameter_grid)),)
 
-    def fit(self, encoded_data: EncodedData, y, label_names: list = None, cores_for_training: int = 1):
+    def fit(self, encoded_data: EncodedData, label_name: str, cores_for_training: int = 2):
 
         self.feature_names = encoded_data.feature_names
-        self.models = CacheHandler.memo_by_params(self._prepare_caching_params(encoded_data, y, self.FIT, label_names),
-                                                  lambda: self._fit(encoded_data.examples, y, label_names, cores_for_training))
+        self.models = CacheHandler.memo_by_params(self._prepare_caching_params(encoded_data, encoded_data.labels[label_name], self.FIT, label_name),
+                                                  lambda: self._fit(encoded_data.examples, encoded_data.labels, label_name, cores_for_training))
 
-    def _fit(self, X, y, label_names: list = None, cores_for_training: int = 1):
+    def predict(self, encoded_data: EncodedData, label_name: str):
+        self.check_is_fitted(label_name)
+        return {label_name: np.array(self.models[label_name].predict(encoded_data.examples))}
 
-        if label_names is not None:
-            for index, label in enumerate(label_names):
-                self._fit_for_label(X, y[label], label, cores_for_training)
+    def predict_proba(self, encoded_data: EncodedData, label_name: str):
+        if self.can_predict_proba():
+            predictions = {label_name: self.models[label_name].predict_proba(encoded_data.examples)}
+            return predictions
         else:
-            warnings.warn(
-                "{}: label names not set, assuming only one and attempting to fit the model with label 'default'..."
-                    .format(self.__class__.__name__),
-                Warning)
-            self._fit_for_label(X, y["default"], "default", cores_for_training)
+            return None
+
+    def _fit(self, X, y, label_name: str, cores_for_training: int = 1):
+        if not self.show_warnings:
+            warnings.simplefilter("ignore")
+            os.environ["PYTHONWARNINGS"] = "ignore"
+
+        self.models[label_name] = self._get_ml_model(cores_for_training, X)
+        self.models[label_name].fit(X, y[label_name])
+
+        if not self.show_warnings:
+            del os.environ["PYTHONWARNINGS"]
+            warnings.simplefilter("always")
 
         return self.models
 
     def can_predict_proba(self) -> bool:
         return False
 
-    def check_is_fitted(self, labels):
-        return all([check_is_fitted(self.models[label], ["estimators_", "coef_", "estimator", "_fit_X"], all_or_any=any) for label in labels])
+    def check_is_fitted(self, label_name):
+        return check_is_fitted(self.models[label_name], ["estimators_", "coef_", "estimator", "_fit_X"], all_or_any=any)
 
-    def predict(self, encoded_data: EncodedData, label_names: list = None):
-        labels = label_names if label_names is not None else self.models.keys()
-        self.check_is_fitted(labels)
-        return {label: np.array(self.models[label].predict(encoded_data.examples)) for label in labels}
+    def fit_by_cross_validation(self, encoded_data: EncodedData, number_of_splits: int = 5, label_name: str = None, cores_for_training: int = -1,
+                                optimization_metric='balanced_accuracy'):
 
-    def predict_proba(self, encoded_data: EncodedData, labels: list):
-        if self.can_predict_proba():
-            predictions = {label: self.models[label].predict_proba(encoded_data.examples) for label in labels}
-            return predictions
-        else:
-            return None
+        self.feature_names = encoded_data.feature_names
 
-    def _fit_for_label_by_cv(self, X, y: np.ndarray, label: str, cores_for_training: int, optimization_metric: str, number_of_splits: int = 5):
+        self.models = CacheHandler.memo_by_params(
+            self._prepare_caching_params(encoded_data, encoded_data.labels, self.FIT_CV, label_name, number_of_splits),
+            lambda: self._fit_by_cross_validation(encoded_data.examples, encoded_data.labels, number_of_splits,
+                                                  label_name, cores_for_training, optimization_metric))
+
+    def _fit_by_cross_validation(self, X, y, number_of_splits: int = 5, label_name: str = None, cores_for_training: int = 1,
+                                 optimization_metric: str = "balanced_accuracy"):
+
         model = self._get_ml_model()
         scoring = optimization_metric
 
         if optimization_metric not in SCORERS.keys():
             scoring = "balanced_accuracy"
-            warnings.warn(f"{self.__class__.__name__}: specified optimization metric ({optimization_metric}) is not defined as a sklearn scoring function, using {scoring} instead... ")
+            warnings.warn(
+                f"{self.__class__.__name__}: specified optimization metric ({optimization_metric}) is not defined as a sklearn scoring function, using {scoring} instead... ")
 
         if not self.show_warnings:
             warnings.simplefilter("ignore")
             os.environ["PYTHONWARNINGS"] = "ignore"
 
-        self.models[label] = RandomizedSearchCV(model, param_distributions=self._parameter_grid, cv=number_of_splits, n_jobs=cores_for_training,
-                                                scoring=scoring, refit=True)
-        self.models[label].fit(X, y)
+        self.models[label_name] = RandomizedSearchCV(model, param_distributions=self._parameter_grid, cv=number_of_splits, n_jobs=cores_for_training,
+                                                     scoring=scoring, refit=True)
+        self.models[label_name].fit(X, y[label_name])
 
         if not self.show_warnings:
             del os.environ["PYTHONWARNINGS"]
             warnings.simplefilter("always")
 
-        self.models[label] = self.models[label].best_estimator_  # do not leave RandomSearchCV object to be in models, use the best estimator instead
-
-    def fit_by_cross_validation(self, encoded_data: EncodedData, y, number_of_splits: int = 5, parameter_grid: dict = None,
-                                label_names: list = None, cores_for_training: int = 1, optimization_metric: str = "balanced_accuracy"):
-
-        self.feature_names = encoded_data.feature_names
-
-        if parameter_grid is not None:
-            self._parameter_grid = parameter_grid
-
-        self.models = CacheHandler.memo_by_params(self._prepare_caching_params(encoded_data, y, self.FIT_CV, label_names, number_of_splits),
-                                                  lambda: self._fit_by_cross_validation(encoded_data.examples, y, number_of_splits,
-                                                                                        label_names, cores_for_training, optimization_metric))
-
-    def _fit_by_cross_validation(self, X, y, number_of_splits: int = 5, label_names: list = None, cores_for_training: int = 1, optimization_metric: str = "balanced_accuracy"):
-
-        for label in label_names:
-            self._fit_for_label_by_cv(X, y[label], label, cores_for_training, optimization_metric, number_of_splits)
+        self.models[label_name] = self.models[
+            label_name].best_estimator_  # do not leave RandomSearchCV object to be in models, use the best estimator instead
 
         return self.models
 
     def store(self, path, feature_names=None, details_path=None):
         PathBuilder.build(path)
-        name = FilenameHandler.get_filename(self.__class__.__name__, "pickle")
+        name = self._get_model_filename() + ".pickle"
         with open(path + name, "wb") as file:
             dill.dump(self.models, file)
 
         if details_path is None:
-            params_path = path + FilenameHandler.get_filename(self.__class__.__name__, "yaml")
+            params_path = path + self._get_model_filename() + ".yaml"
         else:
             params_path = details_path
 
@@ -204,8 +187,11 @@ class SklearnMethod(MLMethod):
                 }
             yaml.dump(desc, file)
 
+    def _get_model_filename(self):
+        return FilenameHandler.get_filename(self.__class__.__name__, "")
+
     def load(self, path):
-        name = FilenameHandler.get_filename(self.__class__.__name__, "pickle")
+        name = self._get_model_filename() + ".pickle"
         if os.path.isfile(path + name):
             with open(path + name, "rb") as file:
                 self.models = dill.load(file)
@@ -223,7 +209,7 @@ class SklearnMethod(MLMethod):
         return self.models[label].classes_
 
     def check_if_exists(self, path):
-        return os.path.isfile(path + FilenameHandler.get_filename(self.__class__.__name__, "pickle"))
+        return os.path.isfile(path + self._get_model_filename() + ".pickle")
 
     @abc.abstractmethod
     def _get_ml_model(self, cores_for_training: int = 2, X=None):
@@ -233,11 +219,11 @@ class SklearnMethod(MLMethod):
     def get_params(self, label):
         pass
 
-    def get_labels(self):
+    def get_label(self):
         return list(self.models.keys())
 
     def get_package_info(self) -> str:
-        return 'sklearn ' + pkg_resources.get_distribution('sklearn').version
+        return 'scikit-learn ' + pkg_resources.get_distribution('scikit-learn').version
 
     def get_feature_names(self) -> list:
         return self.feature_names

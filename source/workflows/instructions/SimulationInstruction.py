@@ -22,8 +22,6 @@ class SimulationInstruction(Instruction):
 
         simulation (Simulation): definition of how to perform the simulation.
 
-        batch_size (int): how many parallel processes to use during the analysis (4 is usually a good choice for personal computers).
-
         export_formats: in which formats to export the dataset after simulation. Valid formats are class names of any non-abstract class inheriting :py:obj:`~source.IO.dataset_export.DataExporter.DataExporter`.
 
     YAML specification:
@@ -35,14 +33,13 @@ class SimulationInstruction(Instruction):
             type: Simulation # which instruction to execute
             dataset: my_dataset # which dataset to use for implanting the signals
             simulation: my_simulation # how to implanting the signals - definition of the simulation
-            batch_size: 4 # how many parallel processes to use during execution
             export_formats: [AIRR] # in which formats to export the dataset
 
     """
 
-    def __init__(self, signals: list, simulation: Simulation, dataset: RepertoireDataset, batch_size: int = 1,
+    def __init__(self, signals: list, simulation: Simulation, dataset: RepertoireDataset,
                  name: str = None, exporters: List[DataExporter] = None):
-        self.state = SimulationState(signals, simulation, dataset, batch_size=batch_size, name=name)
+        self.state = SimulationState(signals, simulation, dataset, name=name)
         self.exporters = exporters
 
     def run(self, result_path: str):

@@ -160,7 +160,7 @@ class TestImportParser(TestCase):
                         "is_repertoire": True,
                         "path": path + "tmp_input/",
                         "metadata_file": path + "metadata.csv",
-                        "batch_size": 2,
+                        "number_of_processes": 2,
                     }
                 }
             }

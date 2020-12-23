@@ -59,7 +59,7 @@ class SignalImplanter(Step):
         PathBuilder.build(simulation_state.result_path + "repertoires/")
         processed_repertoires = SignalImplanter._implant_signals(simulation_state, SignalImplanter._process_repertoire)
         processed_dataset = RepertoireDataset(repertoires=processed_repertoires, params={**(simulation_state.dataset.params if simulation_state.dataset.params is not None else {}),
-                                                                                         **{signal: [True, False] for signal in simulation_state.signals}},
+                                                                                         **{signal.id: [True, False] for signal in simulation_state.signals}},
                                               name=simulation_state.dataset.name,
                                               metadata_file=SignalImplanter._create_metadata_file(processed_repertoires, simulation_state))
         return processed_dataset
@@ -72,7 +72,7 @@ class SignalImplanter(Step):
         current_implanting_index = 0
         current_implanting = simulation_state.simulation.implantings[current_implanting_index]
 
-        for index, element in enumerate(simulation_state.dataset.get_data(simulation_state.batch_size)):
+        for index, element in enumerate(simulation_state.dataset.get_data()):
 
             if current_implanting is not None and index >= simulation_limits[current_implanting.name]:
                 current_implanting_index += 1

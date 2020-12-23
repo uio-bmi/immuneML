@@ -8,7 +8,7 @@ class HPSelectionState:
         self.val_datasets = val_datasets
         self.path = path
         self.hp_strategy = hp_strategy.clone()
-        self.hp_items = {hp_setting: [] for hp_setting in self.hp_strategy.hp_settings}
+        self.hp_items = {str(hp_setting): [] for hp_setting in self.hp_strategy.hp_settings}
         self.train_data_reports = []
         self.val_data_reports = []
         self.data_reports = []

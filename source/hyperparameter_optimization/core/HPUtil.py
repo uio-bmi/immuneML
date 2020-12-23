@@ -72,7 +72,7 @@ class HPUtil:
         return method
 
     @staticmethod
-    def encode_dataset(dataset, hp_setting: HPSetting, path: str, learn_model: bool, context: dict, batch_size: int,
+    def encode_dataset(dataset, hp_setting: HPSetting, path: str, learn_model: bool, context: dict, number_of_processes: int,
                        label_configuration: LabelConfiguration, encode_labels: bool = True, store_encoded_data: bool = False):
         PathBuilder.build(path)
 
@@ -82,7 +82,7 @@ class HPUtil:
             encoder_params=EncoderParams(
                 model=hp_setting.encoder_params,
                 result_path=path,
-                pool_size=batch_size,
+                pool_size=number_of_processes,
                 label_config=label_configuration,
                 learn_model=learn_model,
                 filename="train_dataset.pkl" if learn_model else "test_dataset.pkl",
@@ -110,7 +110,7 @@ class HPUtil:
     @staticmethod
     def run_hyperparameter_reports(state: TrainMLModelState, path: str) -> List[ReportResult]:
         report_results = []
-        for key, report in state.assessment.reports.hyperparameter_reports.items():
+        for key, report in state.reports.items():
             tmp_report = copy.deepcopy(report)
             tmp_report.state = state
             tmp_report.result_path = f"{path}{key}/"

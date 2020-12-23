@@ -64,7 +64,7 @@ These three components can be defined in the following way:
     encodings:
       kmer_frequency: KmerFrequency
     ml_methods:
-      logistic_regression: SimpleLogisticRegression
+      logistic_regression: LogisticRegression
 
 
 
@@ -104,8 +104,8 @@ my_train_classifier_instruction):
         split_strategy: random
         split_count: 1
         training_percentage: 1 # use all data for training
-      reports: [] # reports to be run on the whole dataset e.g. sequence length distribution (no reports in now)
-      batch_size: 4 # number of repertoires to process at the time (4 here)
+      reports: [] # reports to be run on the whole dataset after the nested cv is finished
+      number_of_processes: 4 # number of repertoires to process at the time (4 here)
       refit_optimal_model: False # should the optimal model be refitting on the full dataset (True/False)
       store_encoded_data: False # do not store intermediary encoded datasets in internal format
 
@@ -128,6 +128,58 @@ Once we have defined the analysis with the YAML specification, to run this analy
 If the analysis was completed successfully, the command output should look similar to the log below, where we can see the label used for
 prediction and the average performance on the test set. The average performance is computed as the average over performances for each split
 to train / test data (in this case, there was only one such split).
+
+.. code-block:: console
+  2020-11-26 18:08:49.104479: Setting temporary cache path to quickstart_results/cache/
+  2020-11-26 18:08:49.104546: ImmuneML: parsing the specification...
+
+  2020-11-26 18:08:55.081100: Full specification is available at quickstart_results/full_quickstart_specs.yaml.
+
+  2020-11-26 18:08:55.081157: ImmuneML: starting the analysis...
+
+  2020-11-26 18:08:55.081197: Instruction 1/1 has started.
+  2020-11-26 18:08:55.090090: Training ML model: running outer CV loop: started split 1/1.
+
+  2020-11-26 18:08:55.094198: Hyperparameter optimization: running the inner loop of nested CV: selection for label CMV (label 1 / 1).
+
+  2020-11-26 18:08:55.094887: Evaluating hyperparameter setting: kmer_frequency_logistic_regression...
+  2020-11-26 18:08:55.097098: Encoding started...
+  2020-11-26 18:08:55.569819: Encoding finished.
+  2020-11-26 18:08:55.570056: ML model training started...
+  2020-11-26 18:08:56.031349: ML model training finished.
+  2020-11-26 18:08:56.031410: Completed hyperparameter setting kmer_frequency_logistic_regression.
+
+  2020-11-26 18:08:56.031698: Hyperparameter optimization: running the inner loop of nested CV: completed selection for label CMV (label 1 / 1).
+
+  2020-11-26 18:08:56.031719: Training ML model: running the inner loop of nested CV: retrain models for label CMV (label 1 / 1).
+
+  2020-11-26 18:08:56.032090: Evaluating hyperparameter setting: kmer_frequency_logistic_regression...
+  2020-11-26 18:08:56.034818: Encoding started...
+  2020-11-26 18:08:56.192096: Encoding finished.
+  2020-11-26 18:08:56.192279: ML model training started...
+  2020-11-26 18:08:56.682871: ML model training finished.
+  2020-11-26 18:08:56.683859: Encoding started...
+  2020-11-26 18:08:56.926116: Encoding finished.
+  2020-11-26 18:08:56.939793: Completed hyperparameter setting kmer_frequency_logistic_regression.
+
+  2020-11-26 18:08:56.940184: Training ML model: running the inner loop of nested CV: completed retraining models for label CMV (label 1 / 1).
+
+  2020-11-26 18:08:56.940202: Training ML model: running outer CV loop: finished split 1/1.
+
+  Performances (accuracy) -----------------------------------------------
+
+
+  Label: CMV
+  Performance (accuracy) per assessment split:
+  Split 1: 0.5666666666666667
+  Average performance (accuracy): 0.5666666666666667
+  ------------------------------
+  2020-11-26 18:08:57.264210: Instruction 1/1 has finished.
+  2020-11-26 18:08:57.281673: Generating HTML reports...
+  2020-11-26 18:08:57.359280: HTML reports are generated.
+  2020-11-26 18:08:57.368946: ImmuneML: finished analysis.
+
+
 
 Analysis results
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

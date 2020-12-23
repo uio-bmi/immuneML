@@ -17,7 +17,7 @@ class Implanting:
 
     Arguments:
 
-        signals (list): The list of :py:obj:`~source.simulation.implants.Signal.Signal` objects to be implanted in a subset of the repertoires in a RepertoireDataset.
+        signals (list): The list of :ref:`Signal` objects to be implanted in a subset of the repertoires in a RepertoireDataset.
         When multiple signals are specified, this means that all of these signals are implanted in
         the same repertoires in a RepertoireDataset, although they may not be implanted in the same sequences
         within those repertoires (this depends on the :py:obj:`~source.simulation.signal_implanting_strategy.SignalImplantingStrategy.SignalImplantingStrategy`).

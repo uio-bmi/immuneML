@@ -20,7 +20,7 @@ class KernelSequenceLogo(MLReport):
     """
     A report that plots kernels of a CNN model as sequence logos. It works only with trained ReceptorCNN models which has kernels already normalized
     to represent information gain matrices. Additionally, it also plots the weights in the final fully-connected layer of the network associated with
-    kernel outputs. For more information on how the model works, see :py:obj:`~source.ml_methods.ReceptorCNN.ReceptorCNN`.
+    kernel outputs. For more information on how the model works, see :ref:`ReceptorCNN`.
 
     The kernels are visualized using Logomaker. Original publication: Tareen A, Kinney JB. Logomaker: beautiful sequence logos in Python.
     Bioinformatics. 2020; 36(7):2272-2274. `doi:10.1093/bioinformatics/btz921 <https://academic.oup.com/bioinformatics/article/36/7/2272/5671693>`_.

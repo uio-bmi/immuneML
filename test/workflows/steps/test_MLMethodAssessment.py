@@ -12,7 +12,7 @@ from source.environment.Constants import Constants
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.environment.LabelConfiguration import LabelConfiguration
 from source.environment.Metric import Metric
-from source.ml_methods.SimpleLogisticRegression import SimpleLogisticRegression
+from source.ml_methods.LogisticRegression import LogisticRegression
 from source.util.PathBuilder import PathBuilder
 from source.util.RepertoireBuilder import RepertoireBuilder
 from source.workflows.steps.MLMethodAssessment import MLMethodAssessment
@@ -36,8 +36,8 @@ class TestMLMethodAssessment(TestCase):
         label_config = LabelConfiguration()
         label_config.add_label("l1", [1, 3])
 
-        method1 = SimpleLogisticRegression()
-        method1.fit(dataset.encoded_data, dataset.encoded_data.labels, dataset.encoded_data.labels.keys())
+        method1 = LogisticRegression()
+        method1.fit(dataset.encoded_data, label_name='l1')
 
         res = MLMethodAssessment.run(MLMethodAssessmentParams(
             dataset=dataset,

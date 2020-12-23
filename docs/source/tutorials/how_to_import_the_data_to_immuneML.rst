@@ -15,7 +15,7 @@ format is not yet supported, any type of tabular file can also be imported using
 importers is preferred over Generic import, as they require less options to be set and might take care of automatic reformatting
 of certain fields.
 Alternatively to importing data from files, it is also possible to generate datasets containing random immune receptor sequences on the fly,
-see :ref:`How to generate a random receptor or repertoire dataset`.
+see :ref:`How to generate a random sequence, receptor or repertoire dataset`.
 
 
 Specifying data import from files
@@ -119,7 +119,7 @@ which speeds up the analysis. The main resulting file has an `.iml_dataset` exte
 by several other `.pickle` and `.npy` files. When running immuneML locally, you can by default find these immuneML
 dataset files in the folder 'datasets', which is located in the main output folder of your analysis.
 
-Some instructions (:ref:`Simulation`, :ref:`DatasetGeneration`, :ref:`SubSampling`) also explicitly export immuneML
+Some instructions (:ref:`Simulation`, :ref:`DatasetExport`, :ref:`SubSampling`) also explicitly export immuneML
 datasets when selecting 'Pickle' as the export format.
 
 These `.iml_dataset` files can later be imported easily and with few parameters, and importing from `.iml_dataset` is

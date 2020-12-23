@@ -64,12 +64,12 @@ class MultiDatasetBenchmarkTool:
                     - auc
                 reports: # reports to execute on the dataset (before CV, splitting, encoding etc.)
                     - rep1
-                batch_size: 4 # number of parallel processes to create (could speed up the computation)
+                number_of_processes: 4 # number of parallel processes to create (could speed up the computation)
                 optimization_metric: balanced_accuracy # the metric to use for choosing the optimal model and during training
 
     """
 
-    def __init__(self, specification_path: str, result_path: str):
+    def __init__(self, specification_path: str, result_path: str, **kwargs):
         self.specification_path = specification_path
         self.result_path = result_path
         self.reports = None

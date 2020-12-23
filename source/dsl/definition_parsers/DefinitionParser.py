@@ -1,6 +1,7 @@
 from scripts.DocumentatonFormat import DocumentationFormat
 from scripts.specification_util import write_class_docs, make_docs
 from source.IO.dataset_import.DataImport import DataImport
+from source.dsl.DefaultParamsLoader import DefaultParamsLoader
 from source.dsl.definition_parsers.DefinitionParserOutput import DefinitionParserOutput
 from source.dsl.definition_parsers.EncodingParser import EncodingParser
 from source.dsl.definition_parsers.MLParser import MLParser
@@ -14,7 +15,11 @@ from source.dsl.symbol_table.SymbolTable import SymbolTable
 from source.encodings.DatasetEncoder import DatasetEncoder
 from source.ml_methods.MLMethod import MLMethod
 from source.preprocessing.Preprocessor import Preprocessor
-from source.reports.Report import Report
+from source.reports.data_reports.DataReport import DataReport
+from source.reports.encoding_reports.EncodingReport import EncodingReport
+from source.reports.ml_reports.MLReport import MLReport
+from source.reports.multi_dataset_reports.MultiDatasetReport import MultiDatasetReport
+from source.reports.train_ml_model_reports.TrainMLModelReport import TrainMLModelReport
 from source.simulation.Implanting import Implanting
 from source.simulation.implants.Motif import Motif
 from source.simulation.implants.Signal import Signal
@@ -102,8 +107,21 @@ class DefinitionParser:
 
     @staticmethod
     def make_reports_docs(path):
-        classes = ReflectionHandler.all_nonabstract_subclasses(Report, "", "reports/")
-        make_docs(path, classes, "reports.rst", "")
+        filename = "reports.rst"
+
+        open(path + filename, "w").close()
+
+        for report_type_class in [DataReport, EncodingReport, MLReport, TrainMLModelReport, MultiDatasetReport]:
+            with open(path + filename, "a") as file:
+                doc_format = DocumentationFormat(cls=report_type_class,
+                                                 cls_name=f"**{report_type_class.get_title()}**",
+                                                 level_heading=DocumentationFormat.LEVELS[1])
+                write_class_docs(doc_format, file)
+
+            subdir = DefaultParamsLoader.convert_to_snake_case(report_type_class.__name__) + "s"
+
+            classes = ReflectionHandler.all_nonabstract_subclasses(report_type_class, "", f"reports/{subdir}/")
+            make_docs(path, classes, filename, "", "a")
 
     @staticmethod
     def make_ml_methods_docs(path):

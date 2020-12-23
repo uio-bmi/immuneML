@@ -28,6 +28,7 @@ from source.data_model.receptor.receptor_sequence.SequenceFrameType import Seque
 from source.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
 from source.data_model.repertoire.Repertoire import Repertoire
 from source.environment.Constants import Constants
+from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.environment.SequenceType import SequenceType
 from source.util.ParameterValidator import ParameterValidator
 from source.util.PathBuilder import PathBuilder
@@ -85,7 +86,7 @@ class ImportHelper:
         PathBuilder.build(params.result_path + "repertoires/")
 
         arguments = [(import_class, row, params) for index, row in metadata.iterrows()]
-        with Pool(params.batch_size) as pool:
+        with Pool(params.number_of_processes) as pool:
             repertoires = pool.starmap(ImportHelper.load_repertoire_as_object, arguments)
 
         new_metadata_file = ImportHelper.make_new_metadata_file(repertoires, metadata, params.result_path, dataset_name)
@@ -113,8 +114,8 @@ class ImportHelper:
     @staticmethod
     def make_new_metadata_file(repertoires: list, metadata: pd.DataFrame, result_path: str, dataset_name: str) -> str:
         new_metadata = metadata.copy()
-        new_metadata["filename"] = [os.path.basename(repertoire.data_filename) for repertoire in repertoires]
-        new_metadata["identifier"] = [repertoire.identifier for repertoire in repertoires]
+        new_metadata.loc[:, "filename"] = [os.path.basename(repertoire.data_filename) for repertoire in repertoires]
+        new_metadata.loc[:, "identifier"] = [repertoire.identifier for repertoire in repertoires]
 
         metadata_filename = f"{result_path}{dataset_name}_metadata.csv"
         new_metadata.to_csv(metadata_filename, index=False, sep=",")
@@ -160,7 +161,6 @@ class ImportHelper:
 
         df = ImportHelper.standardize_none_values(df)
 
-
         return df
 
     @staticmethod
@@ -182,6 +182,7 @@ class ImportHelper:
             if sequence_colname in dataframe.columns:
                 n_empty = sum(dataframe[sequence_colname].isnull())
                 if n_empty > 0:
+                    idx = dataframe.loc[dataframe[sequence_colname].isnull()].index
                     dataframe.drop(dataframe.loc[dataframe[sequence_colname].isnull()].index, inplace=True)
                     warnings.warn(
                         f"{ImportHelper.__name__}: {n_empty} sequences were removed from the dataset because they contained an empty {sequence_name} sequence after preprocessing. ")
@@ -189,6 +190,33 @@ class ImportHelper:
                 warnings.warn(f"{ImportHelper.__name__}: column {sequence_colname} was not set, skipping filtering...")
 
         return dataframe
+
+    @staticmethod
+    def drop_illegal_character_sequences(dataframe: pd.DataFrame, import_illegal_characters: bool) -> pd.DataFrame:
+        if not import_illegal_characters:
+            sequence_type = EnvironmentSettings.get_sequence_type()
+            sequence_name = sequence_type.name.lower().replace("_", " ")
+
+            legal_alphabet = EnvironmentSettings.get_sequence_alphabet(sequence_type)
+            if sequence_type == SequenceType.AMINO_ACID:
+                legal_alphabet.append(Constants.STOP_CODON)
+
+            is_illegal_seq = [ImportHelper.is_illegal_sequence(sequence, legal_alphabet) for
+                            sequence in dataframe[sequence_type.value]]
+            n_illegal = sum(is_illegal_seq)
+
+            if n_illegal> 0:
+                dataframe.drop(dataframe.loc[is_illegal_seq].index, inplace=True)
+                warnings.warn(
+                    f"{ImportHelper.__name__}: {n_illegal} sequences were removed from the dataset because their {sequence_name} sequence contained illegal characters. ")
+        return dataframe
+
+    @staticmethod
+    def is_illegal_sequence(sequence, legal_alphabet) -> bool:
+        if sequence is None:
+            return False
+        else:
+            return not all(character in legal_alphabet for character in sequence)
 
     @staticmethod
     def prepare_frame_type_list(params: DatasetImportParams) -> list:

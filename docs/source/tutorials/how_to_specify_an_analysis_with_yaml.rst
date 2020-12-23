@@ -2,7 +2,7 @@ How to specify an analysis with YAML
 ====================================
 
 The domain-specific language (DSL) developed for immuneML defines what the analysis YAML specification should look like.
-Depending on the specification, immuneML can execute different tasks (perform hyperparameter optimization, perform exploratory
+Depending on the specification, immuneML can execute different tasks (train ML models for immune receptor or repertoire classification, perform exploratory
 analyses or make simulated immune receptor datasets (i.e., implant signals [e.g., k-mers] into existing AIRRe datasets). For a full overview of
 all the options that can be specified, see :ref:`YAML specification`.
 An example of the full YAML specification for training an ML model through nested cross-validation is given below.
@@ -27,7 +27,7 @@ An example of the full YAML specification for training an ML model through neste
           model_type: sequence
     ml_methods:
       log_reg1:
-        SimpleLogisticRegression:
+        LogisticRegression:
             C: 0.001
     reports:
       r1: SequenceLengthDistribution

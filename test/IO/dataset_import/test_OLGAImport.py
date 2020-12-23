@@ -35,9 +35,12 @@ rep2.tsv,2""")
 
         PathBuilder.build(path)
         self.write_dummy_files(path, True)
+
         dataset = OLGAImport.import_dataset({"is_repertoire": True, "result_path": path, "metadata_file": path + "metadata.csv",
                                              "columns_to_load": None, "separator": "\t", "region_type": "IMGT_CDR3",
-                                             "path": path, "batch_size": 4}, "olga_repertoire_dataset")
+                                             "import_empty_nt_sequences": True, "import_empty_aa_sequences": False,
+                                             "import_illegal_characters": False,
+                                             "path": path, "number_of_processes": 4}, "olga_repertoire_dataset")
 
         self.assertEqual(2, dataset.get_example_count())
         for index, rep in enumerate(dataset.get_data()):
@@ -68,7 +71,9 @@ rep2.tsv,2""")
         self.write_dummy_files(path, False)
         dataset = OLGAImport.import_dataset({"is_repertoire": False, "paired": False, "result_path": path, "metadata_file": path + "metadata.csv",
                                              "columns_to_load": None, "separator": "\t", "region_type": "IMGT_CDR3",
-                                             "path": path, "batch_size": 4}, "olga_sequence_dataset")
+                                             "import_empty_nt_sequences": True, "import_empty_aa_sequences": False,
+                                             "import_illegal_characters": False,
+                                             "path": path, "number_of_processes": 4}, "olga_sequence_dataset")
 
         self.assertEqual(6, dataset.get_example_count())
 

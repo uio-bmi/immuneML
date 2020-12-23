@@ -18,6 +18,7 @@ from source.simulation.implants.Signal import Signal
 from source.simulation.motif_instantiation_strategy.GappedKmerInstantiation import GappedKmerInstantiation
 from source.simulation.sequence_implanting.GappedMotifImplanting import GappedMotifImplanting
 from source.simulation.signal_implanting_strategy.HealthySequenceImplanting import HealthySequenceImplanting
+from source.simulation.signal_implanting_strategy.ImplantingComputation import ImplantingComputation
 from source.simulation.signal_implanting_strategy.ReceptorImplanting import ReceptorImplanting
 from source.util.PathBuilder import PathBuilder
 from source.workflows.steps.SignalImplanter import SignalImplanter
@@ -48,14 +49,14 @@ class TestSignalImplanter(TestCase):
 
         m1 = Motif(identifier="m1", instantiation=GappedKmerInstantiation(), seed="CAS")
         m2 = Motif(identifier="m2", instantiation=GappedKmerInstantiation(), seed="CCC")
-        s1 = Signal(identifier="s1", motifs=[m1], implanting_strategy=HealthySequenceImplanting(GappedMotifImplanting()))
+        s1 = Signal(identifier="s1", motifs=[m1], implanting_strategy=HealthySequenceImplanting(GappedMotifImplanting(), implanting_computation=ImplantingComputation.ROUND))
         s2 = Signal(identifier="s2", motifs=[m1, m2],
-                    implanting_strategy=HealthySequenceImplanting(GappedMotifImplanting()))
+                    implanting_strategy=HealthySequenceImplanting(GappedMotifImplanting(), implanting_computation=ImplantingComputation.ROUND))
 
         simulation = Simulation([Implanting(dataset_implanting_rate=0.2, repertoire_implanting_rate=0.5, signals=[s1, s2], name="i1"),
                                  Implanting(dataset_implanting_rate=0.2, repertoire_implanting_rate=0.5, signals=[s2], name="i2")])
 
-        input_params = SimulationState(dataset=dataset, result_path=path, simulation=simulation, signals=[s1, s2], batch_size=1)
+        input_params = SimulationState(dataset=dataset, result_path=path, simulation=simulation, signals=[s1, s2])
 
         new_dataset = SignalImplanter.run(input_params)
         reps_with_s2 = sum([rep.metadata[f"signal_{s2.id}"] is True for rep in new_dataset.get_data(batch_size=10)])
@@ -84,7 +85,7 @@ class TestSignalImplanter(TestCase):
 
         simulation = Simulation([Implanting(dataset_implanting_rate=0.5, signals=[signal1])])
 
-        sim_state = SimulationState(dataset=dataset, result_path=path, simulation=simulation, signals=[signal1], batch_size=100)
+        sim_state = SimulationState(dataset=dataset, result_path=path, simulation=simulation, signals=[signal1])
 
         new_dataset = SignalImplanter.run(sim_state)
 

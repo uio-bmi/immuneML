@@ -38,7 +38,7 @@ def build_encodings_specs(args):
     encodings = dict()
 
     for i in range(len(args.sequence_type)):
-        enc_name = f"encoding_{i+1}"
+        enc_name = f"encoding_{i + 1}"
         enc_spec = dict()
 
         enc_spec["sequence_encoding"] = get_sequence_enc_type(args.sequence_type[i],
@@ -59,11 +59,12 @@ def build_encodings_specs(args):
 
     return encodings
 
+
 def get_ml_method_spec(ml_method_class, model_selection_n_folds=5):
-    if ml_method_class == "SimpleLogisticRegression":
+    if ml_method_class == "LogisticRegression" or ml_method_class == "SimpleLogisticRegression":
         ml_spec = {
             "logistic_regression": {
-                "SimpleLogisticRegression": {
+                "LogisticRegression": {
                     "penalty": ["l1"],
                     "C": [0.01, 0.1, 1, 10, 100],
                     "class_weight": ["balanced"],
@@ -98,7 +99,7 @@ def get_ml_method_spec(ml_method_class, model_selection_n_folds=5):
                 "model_selection_n_folds": model_selection_n_folds
             }
         }
-    elif  ml_method_class == "KNN":
+    elif ml_method_class == "KNN":
         ml_spec = {
             "k_nearest_neighbors": {
                 "KNN": {
@@ -141,6 +142,7 @@ def discover_dataset_params():
     return {"path": dataset_path,
             "metadata_file": f"{dataset_name}_metadata.csv"}
 
+
 def build_labels(labels_str):
     labels = labels_str.split(",")
     return [label.strip().strip("'\"") for label in labels]
@@ -176,7 +178,6 @@ def build_specs(args):
                     "split_count": None,
                     "training_percentage": None,
                     "reports": {
-                        "hyperparameter": ["benchmark"],
                         "models": ["coefficients"]
                     }
                 },
@@ -189,8 +190,8 @@ def build_specs(args):
                 "dataset": "d1",
                 "strategy": "GridSearch",
                 "metrics": ["accuracy", "balanced_accuracy"],
-                "batch_size": 10,
-                "reports": [],
+                "number_of_processes": 10,
+                "reports": ["benchmark"],
                 "optimization_metric": "balanced_accuracy",
                 'refit_optimal_model': True,
                 "store_encoded_data": False
@@ -232,11 +233,12 @@ def check_arguments(args):
 
 def parse_commandline_arguments(args):
     ReflectionHandler.get_classes_by_partial_name("", "ml_methods/")
-    ml_method_names = [cl.__name__ for cl in ReflectionHandler.all_nonabstract_subclasses(MLMethod)]
+    ml_method_names = [cl.__name__ for cl in ReflectionHandler.all_nonabstract_subclasses(MLMethod)] + ["SimpleLogisticRegression"]
 
     parser = argparse.ArgumentParser(description="tool for building immuneML Galaxy YAML from arguments")
     parser.add_argument("-o", "--output_path", required=True, help="Output location for the generated yaml file (directiory).")
-    parser.add_argument("-f", "--file_name", default="specs.yaml", help="Output file name for the yaml file. Default name is 'specs.yaml' if not specified.")
+    parser.add_argument("-f", "--file_name", default="specs.yaml",
+                        help="Output file name for the yaml file. Default name is 'specs.yaml' if not specified.")
     parser.add_argument("-l", "--labels", required=True,
                         help="Which metadata labels should be predicted for the dataset (separated by comma).")
     parser.add_argument("-m", "--ml_methods", nargs="+", choices=ml_method_names, required=True,
@@ -257,7 +259,6 @@ def parse_commandline_arguments(args):
     parser.add_argument("-ga", "--max_gap", type=int, nargs="+", help="Maximal gap length when gapped k-mers are used.")
     parser.add_argument("-r", "--reads", choices=[ReadsType.UNIQUE.value, ReadsType.ALL.value], nargs="+", default=[ReadsType.UNIQUE.value],
                         help="Whether k-mer counts should be scaled by unique clonotypes or all observed receptor sequences")
-
 
     return parser.parse_args(args)
 

@@ -13,6 +13,7 @@ from source.hyperparameter_optimization.core.HPAssessment import HPAssessment
 from source.hyperparameter_optimization.core.HPUtil import HPUtil
 from source.hyperparameter_optimization.states.TrainMLModelState import TrainMLModelState
 from source.hyperparameter_optimization.strategy.HPOptimizationStrategy import HPOptimizationStrategy
+from source.reports.train_ml_model_reports.TrainMLModelReport import TrainMLModelReport
 from source.util.ReflectionHandler import ReflectionHandler
 from source.workflows.instructions.Instruction import Instruction
 from source.workflows.instructions.MLProcess import MLProcess
@@ -56,9 +57,10 @@ class TrainMLModelInstruction(Instruction):
         should explicitly set the name of the positive class as well under parameter `positive_class`. If positive class is not set, one of the label
         classes will be assumed to be positive.
 
-        batch_size (int): how many processes should be created at once to speed up the analysis. For personal machines, 4 or 8 is usually a good choice.
+        number_of_processes (int): how many processes should be created at once to speed up the analysis. For personal machines, 4 or 8 is usually a good choice.
 
-        data_reports (list): a list of reports to be executed on the whole dataset.
+        reports (list): a list of report names to be executed after the nested CV has finished to show the overall performance or some statistic;
+        the reports to be specified here have to be :py:obj:`source.reports.train_ml_model_reports.TrainMLModelReport.TrainMLModelReport` reports.
 
         refit_optimal_model (bool): if the final combination of preprocessing-encoding-ML model should be refitted on the full dataset thus providing
         the final model to be exported from instruction; alternatively, train combination from one of the assessment folds will be used
@@ -88,20 +90,19 @@ class TrainMLModelInstruction(Instruction):
                     data_splits: # list of reports to execute on training/test datasets (before they are encoded)
                         - rep1
                     encoding: # list of reports to execute on encoded training/test datasets
-                        - rep4
-                    hyperparameter: # list of reports to execute when nested CV is finished to show overall performance
                         - rep2
+                    models: # list of reports to execute on trained ML methods for each assessment CV split
+                        - rep3
             selection: # inner loop of nested CV
                 split_strategy: k_fold # perform k-fold CV
                 split_count: 5 # how many fold to create: here these two parameters mean: do 5-fold CV
                 reports:
                     data_splits: # list of reports to execute on training/test datasets (in the inner loop, so these are actually training and validation datasets)
                         - rep1
-                    models: # list of reports to execute on trained ML methods
-                        - rep3
-                    optimal_models: [] # list of reports to execute on optimal ML methods for each CV split
+                    models: # list of reports to execute on trained ML methods for each selection CV split
+                        - rep2
                     encoding: # list of reports to execute on encoded training/test datasets (again, it is training/validation here)
-                        - rep4
+                        - rep3
             labels: # list of labels to optimize the classifier for, as given in the metadata for the dataset
                 - celiac:
                     positive_class: + # if it's binary classification, positive class parameter should be set
@@ -111,9 +112,9 @@ class TrainMLModelInstruction(Instruction):
             metrics: # list of metrics to compute for all settings, but these do not influence the choice of optimal model
                 - accuracy
                 - auc
-            reports: # reports to execute on the dataset (before CV, splitting, encoding etc.)
-                - rep1
-            batch_size: 4 # number of parallel processes to create (could speed up the computation)
+            reports: # list of reports to execute when nested CV is finished to show overall performance
+                - rep4
+            number_of_processes: 4 # number of parallel processes to create (could speed up the computation)
             optimization_metric: balanced_accuracy # the metric to use for choosing the optimal model and during training
             refit_optimal_model: False # use trained model, do not refit on the full dataset
             store_encoded_data: True # store encoded datasets in pickle format
@@ -122,16 +123,16 @@ class TrainMLModelInstruction(Instruction):
 
     def __init__(self, dataset, hp_strategy: HPOptimizationStrategy, hp_settings: list, assessment: SplitConfig, selection: SplitConfig,
                  metrics: set, optimization_metric: Metric, label_configuration: LabelConfiguration, path: str = None, context: dict = None,
-                 batch_size: int = 1, data_reports: dict = None, name: str = None, refit_optimal_model: bool = False, store_encoded_data: bool = None):
+                 number_of_processes: int = 1, reports: dict = None, name: str = None, refit_optimal_model: bool = False, store_encoded_data: bool = None):
         self.state = TrainMLModelState(dataset, hp_strategy, hp_settings, assessment, selection, metrics,
-                                       optimization_metric, label_configuration, path, context, batch_size,
-                                       data_reports if data_reports is not None else {}, name, refit_optimal_model, store_encoded_data)
+                                       optimization_metric, label_configuration, path, context, number_of_processes,
+                                       reports if reports is not None else {}, name, refit_optimal_model, store_encoded_data)
 
     def run(self, result_path: str):
         self.state.path = result_path
         self.state = HPAssessment.run_assessment(self.state)
         self._compute_optimal_hp_item_per_label()
-        self.state.hp_report_results = HPUtil.run_hyperparameter_reports(self.state, f"{self.state.path}hyperparameter_reports/")
+        self.state.report_results = HPUtil.run_hyperparameter_reports(self.state, f"{self.state.path}reports/")
         self.print_performances(self.state)
         self._export_all_performances_to_csv()
         return self.state
@@ -148,12 +149,12 @@ class TrainMLModelInstruction(Instruction):
         optimal_hp_settings = [state.label_states[label].optimal_hp_setting for state in self.state.assessment_states]
         optimal_hp_setting = Counter(optimal_hp_settings).most_common(1)[0][0]
         if self.state.refit_optimal_model:
-            print(f"{datetime.datetime.now()}: Hyperparameter optimization: retraining optimal model for label {label} {index_repr}.\n", flush=True)
+            print(f"{datetime.datetime.now()}: TrainMLModel: retraining optimal model for label {label} {index_repr}.\n", flush=True)
             self.state.optimal_hp_items[label] = MLProcess(self.state.dataset, None, label, self.state.metrics, self.state.optimization_metric,
-                                                           f"{self.state.path}optimal_{label}/", number_of_processes=self.state.batch_size,
+                                                           f"{self.state.path}optimal_{label}/", number_of_processes=self.state.number_of_processes,
                                                            label_config=self.state.label_configuration, hp_setting=optimal_hp_setting,
                                                            store_encoded_data=self.state.store_encoded_data).run(0)
-            print(f"{datetime.datetime.now()}: Hyperparameter optimization: finished retraining optimal model for label {label} {index_repr}.\n", flush=True)
+            print(f"{datetime.datetime.now()}: TrainMLModel: finished retraining optimal model for label {label} {index_repr}.\n", flush=True)
 
         else:
             optimal_assessment_state = self.state.assessment_states[optimal_hp_settings.index(optimal_hp_setting)]
@@ -192,7 +193,7 @@ class TrainMLModelInstruction(Instruction):
             performance = {'hp_setting': [], 'split': [], 'optimal': [], **{metric.name.lower(): [] for metric in self.state.metrics}}
             for index, assessment_state in enumerate(self.state.assessment_states):
                 for hp_setting, hp_item in assessment_state.label_states[label].assessment_items.items():
-                    performance['hp_setting'].append(hp_setting.get_key())
+                    performance['hp_setting'].append(str(hp_setting))
                     performance['split'].append(index+1)
                     performance['optimal'].append(hp_setting == assessment_state.label_states[label].optimal_hp_setting)
                     for metric in self.state.metrics:
@@ -231,7 +232,8 @@ class TrainMLModelInstruction(Instruction):
             "a list of metrics": f"a list of metrics ({valid_values})",
             "a metric to use for optimization": f"a metric to use for optimization (one of {valid_values})",
             "Valid values are objects of any class inheriting :py:obj:`~source.hyperparameter_optimization.strategy."
-            "HPOptimizationStrategy.HPOptimizationStrategy`.": f"Valid values are: {valid_strategies}."
+            "HPOptimizationStrategy.HPOptimizationStrategy`.": f"Valid values are: {valid_strategies}.",
+            "the reports to be specified here have to be :py:obj:`source.reports.train_ml_model_reports.TrainMLModelReport.TrainMLModelReport` reports.": f"the reports that can be provided here are :ref:`{TrainMLModelReport.get_title()}`."
         }
         doc = update_docs_per_mapping(doc, mapping)
         return doc

@@ -31,7 +31,7 @@ class TestRepertoireClassificationTool(TestCase):
 
         self.make_random_dataset(path)
 
-        args = ['-o', path, '-l', 'subject_id', '-m', 'RandomForestClassifier', 'SimpleLogisticRegression',
+        args = ['-o', path, '-l', 'subject_id', '-m', 'RandomForestClassifier', 'LogisticRegression',
                 '-t', '70', '-c', '2', '-s', 'subsequence', '-p', 'invariant', '-g', 'gapped',
                 '-kl', '1', '-kr', '1', '-gi', '0', '-ga', '1', '-r', 'unique']
 

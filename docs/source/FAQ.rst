@@ -36,8 +36,6 @@ want to use one of the following reports:
 
 - :ref:`SequenceAssociationLikelihood`
 
-- :ref:`FeatureValueBarplot`
-
 - :ref:`FeatureValueDistplot`
 
 - :ref:`FeatureHeatmap`
@@ -50,7 +48,7 @@ want to use one of the following reports:
 There is an issue with the type of entry when specifying a list of inputs, why does this happen?
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Please check that the YAML is in valid format. To list different inputs (e.g. a list of reports under assessment/reports/hyperparameter in
+Please check that the YAML is in valid format. To list different inputs (e.g. a list of reports under assessment/reports/encoding in
 TrainMLModel instruction), the correct YAML syntax includes a space between - and the list item.
 
 When running the TrainMLModel instruction multiple times, sometimes it fails saying that there is only one class in the data. Why does this happen?

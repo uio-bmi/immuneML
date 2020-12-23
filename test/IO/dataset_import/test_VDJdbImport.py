@@ -29,6 +29,8 @@ class TestVDJdbLoader(TestCase):
 
         dataset = VDJdbImport.import_dataset({"is_repertoire": False, "result_path": path, "paired": False, "path": path, "sequence_file_size": 1,
                                               "column_mapping": default_params["column_mapping"], "metadata_column_mapping": default_params["metadata_column_mapping"],
+                                              "import_empty_nt_sequences": True, "import_empty_aa_sequences": False,
+                                              "import_illegal_characters": False,
                                               "separator": "\t", "region_type": "IMGT_CDR3"}, "vdjdb_seq_dataset")
 
         self.assertEqual(5, dataset.get_example_count())
@@ -66,6 +68,8 @@ class TestVDJdbLoader(TestCase):
         dataset = VDJdbImport.import_dataset({"is_repertoire": False, "result_path": path, "paired": True, "path": path, "sequence_file_size": 1,
                                               "region_type": "IMGT_CDR3", "separator": "\t", "receptor_chains": "TRA_TRB",
                                               "column_mapping": default_params["column_mapping"],
+                                              "import_empty_nt_sequences": True, "import_empty_aa_sequences": False,
+                                              "import_illegal_characters": False,
                                               "metadata_column_mapping": default_params["metadata_column_mapping"]}, "vdjdb_rec_dataset")
 
         self.assertEqual(2, dataset.get_example_count())
@@ -105,6 +109,8 @@ class TestVDJdbLoader(TestCase):
         default_params = DefaultParamsLoader.load(EnvironmentSettings.default_params_path + "datasets/", "vdjdb")
 
         dataset = VDJdbImport.import_dataset({"is_repertoire": True, "result_path": path, "metadata_file": path + "metadata.csv", "path": path,
+                                              "import_empty_nt_sequences": True, "import_empty_aa_sequences": False,
+                                              "import_illegal_characters": False,
                                               "column_mapping": default_params["column_mapping"], "separator": "\t", "region_type": "IMGT_CDR3"}, "vdjdb_rep_dataset")
 
 
@@ -142,6 +148,8 @@ class TestVDJdbLoader(TestCase):
             {"is_repertoire": False, "result_path": path, "paired": True, "path": path, "sequence_file_size": 1,
              "region_type": "IMGT_CDR3", "separator": "\t", "receptor_chains": "TRA_TRB",
              "column_mapping": default_params["column_mapping"],
+             "import_empty_nt_sequences": True, "import_empty_aa_sequences": False,
+             "import_illegal_characters": False,
              "metadata_column_mapping": default_params["metadata_column_mapping"]}, "vdjdb_rec_dataset")
 
         self.assertEqual(2, dataset.get_example_count())

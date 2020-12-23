@@ -23,7 +23,7 @@ class TestProbabilisticBinaryClassifier(TestCase):
         X = np.array([[3, 4], [1, 7], [5, 7], [3, 8]])
         y = {"cmv": [True, False, True, False]}
 
-        classifier.fit(EncodedData(X), y, ["cmv"])
+        classifier.fit(EncodedData(X, y), "cmv")
 
         return classifier
 
@@ -31,8 +31,8 @@ class TestProbabilisticBinaryClassifier(TestCase):
 
         classifier = self.train_classifier()
 
-        predictions = classifier.predict(EncodedData(np.array([[6, 7], [1, 6]])), ["cmv"])
-        proba_predictions = classifier.predict_proba(EncodedData(np.array([[6, 7], [1, 6]])), ["cmv"])
+        predictions = classifier.predict(EncodedData(np.array([[6, 7], [1, 6]])), "cmv")
+        proba_predictions = classifier.predict_proba(EncodedData(np.array([[6, 7], [1, 6]])), "cmv")
 
         labels = classifier.get_classes_for_label("cmv")
 

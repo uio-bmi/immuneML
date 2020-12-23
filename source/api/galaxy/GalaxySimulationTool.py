@@ -78,7 +78,7 @@ class GalaxySimulationTool(GalaxyTool):
                 type: Simulation # which instruction to execute
                 dataset: my_dataset # which dataset to use for implanting the signals
                 simulation: my_simulation # how to implanting the signals - definition of the simulation
-                batch_size: 4 # how many parallel processes to use during execution
+                number_of_processes: 4 # how many parallel processes to use during execution
                 export_formats: [AIRR] # in which formats to export the dataset, Pickle format will be added automatically
         output: # the output format
             format: HTML

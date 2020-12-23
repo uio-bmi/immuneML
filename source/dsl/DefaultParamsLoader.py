@@ -11,7 +11,7 @@ from source.util.ReflectionHandler import ReflectionHandler
 class DefaultParamsLoader:
 
     @staticmethod
-    def _convert_to_snake_case(name):
+    def convert_to_snake_case(name):
         if name not in ["MiXCR", "VDJdb"]:
             s1 = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', name)
             return re.sub('([a-z0-9])([A-Z])', r'\1_\2', s1).lower()
@@ -25,10 +25,10 @@ class DefaultParamsLoader:
     @staticmethod
     def load(path, class_name, log_if_missing=True):
         if os.path.isabs(path):
-            filepath = path + DefaultParamsLoader._convert_to_snake_case(class_name) + "_params.yaml"
+            filepath = path + DefaultParamsLoader.convert_to_snake_case(class_name) + "_params.yaml"
         else:
             filepath = EnvironmentSettings.default_params_path + path + ("/" if path[-1] != "/" else "") \
-                       + DefaultParamsLoader._convert_to_snake_case(class_name) + "_params.yaml"
+                       + DefaultParamsLoader.convert_to_snake_case(class_name) + "_params.yaml"
 
         if os.path.isfile(filepath):
             with open(filepath, "r") as file:

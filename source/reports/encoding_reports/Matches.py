@@ -18,9 +18,9 @@ class Matches(EncodingReport):
     """
     Reports the number of matches that were found when using one of the following encoders:
 
-    * :py:obj:`~source.encodings.reference_encoding.MatchedSequencesEncoder.MatchedSequencesEncoder`
-    * :py:obj:`~source.encodings.reference_encoding.MatchedReceptorsEncoder.MatchedReceptorsEncoder`
-    * :py:obj:`~source.encodings.reference_encoding.MatchedRegexEncoder.MatchedRegexEncoder`
+    * :ref:`MatchedSequences` encoder
+    * :ref:`MatchedReceptors` encoder
+    * :ref:`MatchedRegex` encoder
 
 
     Report results are:
@@ -29,11 +29,11 @@ class Matches(EncodingReport):
       columns correspond to the objects to match (regular expressions or receptor sequences).
     * The repertoire sizes (read frequencies and the number of unique sequences per repertoire), for each of the chains.
       This can be used to calculate the percentage of matched sequences in a repertoire.
-    * When using :py:obj:`~source.encodings.reference_encoding.MatchedSequencesEncoder.MatchedSequencesEncoder` or
-      :py:obj:`~source.encodings.reference_encoding.MatchedReceptorsEncoder.MatchedReceptorsEncoder`, tables describing
+    * When using :ref:`MatchedSequences` encoder or
+      :ref:`MatchedReceptors` encoder, tables describing
       the chains and receptors (ids, chains, V and J genes and sequences).
-    * When using :py:obj:`~source.encodings.reference_encoding.MatchedReceptorsEncoder.MatchedReceptorsEncoder` or using
-      :py:obj:`~source.encodings.reference_encoding.MatchedRegexEncoder.MatchedRegexEncoder` with chain pairs, tables describing
+    * When using :ref:`MatchedReceptors` encoder or using
+      :ref:`MatchedRegex` encoder with chain pairs, tables describing
       the paired matches (where a match was found in both chains) per repertoire.
 
 

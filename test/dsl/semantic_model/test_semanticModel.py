@@ -16,7 +16,7 @@ from source.hyperparameter_optimization.config.ReportConfig import ReportConfig
 from source.hyperparameter_optimization.config.SplitConfig import SplitConfig
 from source.hyperparameter_optimization.config.SplitType import SplitType
 from source.hyperparameter_optimization.strategy.GridSearch import GridSearch
-from source.ml_methods.SimpleLogisticRegression import SimpleLogisticRegression
+from source.ml_methods.LogisticRegression import LogisticRegression
 from source.util.PathBuilder import PathBuilder
 from source.util.RepertoireBuilder import RepertoireBuilder
 from source.workflows.instructions.TrainMLModelInstruction import TrainMLModelInstruction
@@ -50,7 +50,7 @@ class TestSemanticModel(TestCase):
 
         hp_settings = [HPSetting(Word2VecEncoder.build_object(dataset, **{"vector_size": 8, "model_type": ModelType.SEQUENCE.name, "k": 3}),
                                  {"vector_size": 8, "model_type": ModelType.SEQUENCE.name, "k": 3},
-                                 SimpleLogisticRegression(),
+                                 LogisticRegression(),
                                  {"model_selection_cv": False, "model_selection_n_folds": -1}, [])]
 
         split_config_assessment = SplitConfig(SplitType.RANDOM, 1, 0.5, ReportConfig())

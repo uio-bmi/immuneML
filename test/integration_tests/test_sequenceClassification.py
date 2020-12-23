@@ -20,7 +20,7 @@ from source.hyperparameter_optimization.config.ReportConfig import ReportConfig
 from source.hyperparameter_optimization.config.SplitConfig import SplitConfig
 from source.hyperparameter_optimization.config.SplitType import SplitType
 from source.hyperparameter_optimization.strategy.GridSearch import GridSearch
-from source.ml_methods.SimpleLogisticRegression import SimpleLogisticRegression
+from source.ml_methods.LogisticRegression import LogisticRegression
 from source.util.PathBuilder import PathBuilder
 from source.workflows.instructions.TrainMLModelInstruction import TrainMLModelInstruction
 
@@ -69,7 +69,7 @@ class TestSequenceClassification(TestCase):
         }
 
         hp_setting = HPSetting(encoder=KmerFrequencyEncoder.build_object(dataset, **encoder_params), encoder_params=encoder_params,
-                               ml_method=SimpleLogisticRegression(), ml_params={"model_selection_cv": False, "model_selection_n_folds": -1},
+                               ml_method=LogisticRegression(), ml_params={"model_selection_cv": False, "model_selection_n_folds": -1},
                                preproc_sequence=[])
 
         lc = LabelConfiguration()

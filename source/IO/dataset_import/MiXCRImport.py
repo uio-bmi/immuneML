@@ -29,6 +29,11 @@ class MiXCRImport(DataImport):
         Only the MiXCR files included under the column 'filename' are imported into the RepertoireDataset.
         For setting SequenceDataset metadata, metadata_file is ignored, see metadata_column_mapping instead.
 
+        import_illegal_characters (bool): Whether to import sequences that contain illegal characters, i.e., characters
+        that do not appear in the sequence alphabet (amino acids including stop codon '*', or nucleotides). When set to false, filtering is only
+        applied to the sequence type of interest (when running immuneML in amino acid mode, only entries with illegal
+        characters in the amino acid sequence, such as '_', are removed). By default import_illegal_characters is False.
+
         import_empty_nt_sequences (bool): imports sequences which have an empty nucleotide sequence field; can be True or False.
         By default, import_empty_nt_sequences is set to True.
 
@@ -82,6 +87,7 @@ class MiXCRImport(DataImport):
                     mixcrColumnName1: metadata_label1
                     mixcrColumnName2: metadata_label2
                 region_type: IMGT_CDR3 # what part of the sequence to import
+                import_illegal_characters: False # remove sequences with illegal characters for the sequence_type being used
                 import_empty_nt_sequences: True # keep sequences even though the nucleotide sequence might be empty
                 import_empty_aa_sequences: False # filter out sequences if they don't have sequence_aa set
                 # Optional fields with MiXCR-specific defaults, only change when different behavior is required:
@@ -142,6 +148,7 @@ class MiXCRImport(DataImport):
 
         ImportHelper.update_gene_info(df)
         ImportHelper.drop_empty_sequences(df, params.import_empty_aa_sequences, params.import_empty_nt_sequences)
+        ImportHelper.drop_illegal_character_sequences(df, params.import_illegal_characters)
 
         return df
 

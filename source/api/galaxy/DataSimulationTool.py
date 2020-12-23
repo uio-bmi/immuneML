@@ -6,7 +6,7 @@ import yaml
 from source.api.galaxy.GalaxyTool import GalaxyTool
 from source.api.galaxy.Util import Util
 from source.util.ParameterValidator import ParameterValidator
-from source.workflows.instructions.dataset_generation.DatasetGenerationInstruction import DatasetGenerationInstruction
+from source.workflows.instructions.dataset_generation.DatasetExportInstruction import DatasetExportInstruction
 
 
 class DataSimulationTool(GalaxyTool):
@@ -14,7 +14,7 @@ class DataSimulationTool(GalaxyTool):
     def __init__(self, specification_path, result_path, **kwargs):
         Util.check_parameters(specification_path, result_path, kwargs, DataSimulationTool.__name__)
         super().__init__(specification_path, result_path, **kwargs)
-        self.expected_instruction = DatasetGenerationInstruction.__name__[:-11]
+        self.expected_instruction = DatasetExportInstruction.__name__[:-11]
         self.instruction_name = None
         self.dataset_name = None
         self.export_format = None

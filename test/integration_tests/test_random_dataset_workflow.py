@@ -45,7 +45,7 @@ class TestRandomDatasetWorkflow(TestCase):
                 },
                 "ml_methods": {
                     "logistic_regression": {
-                        "SimpleLogisticRegression": {
+                        "LogisticRegression": {
                             "C": 100,
                             "penalty": "l1"
                         }
@@ -76,7 +76,7 @@ class TestRandomDatasetWorkflow(TestCase):
                     "dataset": "d1",
                     "strategy": "GridSearch",
                     "metrics": ["accuracy"],
-                    "batch_size": 4,
+                    "number_of_processes": 4,
                     "reports": None,
                     "optimization_metric": "balanced_accuracy",
                     "refit_optimal_model": False,
@@ -121,7 +121,7 @@ class TestRandomDatasetWorkflow(TestCase):
                 },
                 "ml_methods": {
                     "logistic_regression": {
-                        "SimpleLogisticRegression": {
+                        "LogisticRegression": {
                             "C": 100,
                             "penalty": "l1"
                         }
@@ -152,7 +152,7 @@ class TestRandomDatasetWorkflow(TestCase):
                     "dataset": "d1",
                     "strategy": "GridSearch",
                     "metrics": ["accuracy"],
-                    "batch_size": 4,
+                    "number_of_processes": 4,
                     "reports": None,
                     "optimization_metric": "balanced_accuracy",
                     "refit_optimal_model": True,

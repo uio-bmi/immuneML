@@ -6,7 +6,7 @@ from source.dsl.ImmuneMLParser import ImmuneMLParser
 from source.dsl.definition_parsers.MLParser import MLParser
 from source.dsl.symbol_table.SymbolTable import SymbolTable
 from source.environment.Constants import Constants
-from source.ml_methods.SimpleLogisticRegression import SimpleLogisticRegression
+from source.ml_methods.LogisticRegression import LogisticRegression
 
 
 class TestMLParser(TestCase):
@@ -18,12 +18,12 @@ class TestMLParser(TestCase):
 
         params = {
             "LR1": {
-                "SimpleLogisticRegression": {
+                "LogisticRegression": {
                     "max_iter": 1000,
                     "penalty": "l1",
                 }
             },
-            "LR2": "SimpleLogisticRegression",
+            "LR2": "LogisticRegression",
             "SVM1": {
                 "SVM": {
                     "max_iter": [1000, 2000],
@@ -43,7 +43,7 @@ class TestMLParser(TestCase):
         symbol_table, desc = MLParser.parse(params, symbol_table)
         self.assertTrue(symbol_table.get("SVM1")._parameter_grid is not None and len(symbol_table.get("SVM1")._parameter_grid["max_iter"]) == 2)
         self.assertTrue(symbol_table.get("LR1")._parameters is not None and symbol_table.get("LR1")._parameters["penalty"] == "l1")
-        self.assertTrue(isinstance(symbol_table.get("LR2"), SimpleLogisticRegression))
+        self.assertTrue(isinstance(symbol_table.get("LR2"), LogisticRegression))
 
         self.assertTrue("SVM" in desc["SVM1"].keys())
 

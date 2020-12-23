@@ -48,15 +48,13 @@ the instruction to be executed. Training ML model instructions take as parameter
 
   2.4. Reports to execute:
 
-    2.4.1. **hyperparameter**: reports to be executed after the nested CV has finished to show the overall performance
+    2.4.1. **models**: reports  to be generated for optimal models per label
 
-    2.4.2. **models**: reports  to be generated for optimal models per label
+    2.4.1. **data**: reports to be executed on the whole dataset before it is split to training and test
 
-    2.4.3. **data**: reports to be executed on the whole dataset before it is split to training and test
+    2.4.1. **data_splits**: reports to be executed after the data has been split into training and test
 
-    2.4.4. **data_splits**: reports to be executed after the data has been split into training and test
-
-    2.4.5. **encoding**: reports to be executed on the encoded training and test datasets
+    2.4.1. **encoding**: reports to be executed on the encoded training and test datasets
 
   .. highlight:: yaml
   .. code-block:: yaml
@@ -67,8 +65,6 @@ the instruction to be executed. Training ML model instructions take as parameter
       split_count: 5
       training_percentage: 0.7
       reports:
-        hyperparameter:
-          - my_hp_benchmark
         models:
           - my_model_report
         data:
@@ -120,6 +116,8 @@ the instruction to be executed. Training ML model instructions take as parameter
 
 6. A metric which will be used for evaluation (given under optimization_metric field)
 
+7. A list of reports to be executed after the instruction has finished to show the overall performance (given under the reports field)
+
 An example is shown below:
 
 .. highlight:: yaml
@@ -146,7 +144,7 @@ An example is shown below:
     ml_methods:
       my_svm: SVM
       my_log_reg:
-      SimpleLogisticRegression:
+      LogisticRegression:
         penalty: l1
         C:
           - 1000
@@ -170,9 +168,6 @@ An example is shown below:
         split_strategy: random
         split_count: 5
         training_percentage: 0.7
-        reports:
-          hyperparameter:
-            - my_report
       selection:
         split_strategy: random
         split_count: 1
@@ -182,9 +177,9 @@ An example is shown below:
       dataset: simulated_d1
       metrics: [accuracy, auc] # metrics to be computed for all settings
       strategy: GridSearch
-      batch_size: 4
+      number_of_processes: 4
       optimization_metric: balanced_accuracy # the metric used for optimization
-      reports: []
+      reports: [my_report]
       refit_optimal_model: False
       store_encoded_data: False
 

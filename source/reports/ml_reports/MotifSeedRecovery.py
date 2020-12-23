@@ -8,7 +8,7 @@ from source.data_model.dataset.Dataset import Dataset
 from source.ml_methods.MLMethod import MLMethod
 from source.ml_methods.RandomForestClassifier import RandomForestClassifier
 from source.ml_methods.SVM import SVM
-from source.ml_methods.SimpleLogisticRegression import SimpleLogisticRegression
+from source.ml_methods.LogisticRegression import LogisticRegression
 from source.reports.ReportOutput import ReportOutput
 from source.reports.ReportResult import ReportResult
 from source.reports.ml_reports.MLReport import MLReport
@@ -173,9 +173,9 @@ class MotifSeedRecovery(MLReport):
             self._y_axis_title = "Coefficient value"
 
         if self.implanted_motifs_per_label[self.label]["hamming_distance"]:
-            self._x_axis_title = "Maximum positions overlap between feature and motif seeds\n(hamming distance allowed)"
+            self._x_axis_title = "Positions overlap between feature and motif seeds<br>(hamming distance allowed)"
         else:
-            self._x_axis_title = "Maximum positions overlap between feature and motif seeds"
+            self._x_axis_title = "Positions overlap between feature and motif seeds"
 
     def _retrieve_plot_data(self):
         seeds = self._get_implanted_seeds()
@@ -211,6 +211,7 @@ class MotifSeedRecovery(MLReport):
                 "coefficients": self._y_axis_title
             }, template='plotly_white',
                          color_discrete_sequence=px.colors.diverging.Tealrose)
+            # figure.update_layout(title={"text":self.title, "x":0.5, "font": {"size":14}})
 
             figure.write_html(filename)
 
@@ -287,8 +288,8 @@ class MotifSeedRecovery(MLReport):
 
         run_report = True
 
-        if not any([isinstance(self.method, legal_method) for legal_method in (RandomForestClassifier, SimpleLogisticRegression, SVM)]):
-            logging.warning(f"{location} report can only be created for RandomForestClassifier, SimpleLogisticRegression or SVM, but got "
+        if not any([isinstance(self.method, legal_method) for legal_method in (RandomForestClassifier, LogisticRegression, SVM)]):
+            logging.warning(f"{location} report can only be created for RandomForestClassifier, LogisticRegression or SVM, but got "
                             f"{type(self.method).__name__} instead. {location} report will not be created.")
             run_report = False
 

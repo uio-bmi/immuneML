@@ -34,7 +34,7 @@ def encode_dataset_by_kmer_freq(path_to_dataset_directory: str, result_path: str
         "path": path_to_dataset_directory,
         "metadata_file": metadata_path,
         "region_type": "IMGT_CDR3",  # import_dataset in only cdr3
-        "batch_size": 4,  # number of parallel processes for loading the data
+        "number_of_processes": 4,  # number of parallel processes for loading the data
         "result_path": result_path,
         "separator": "\t",
         "columns_to_load": ["cloneCount", "allVHitsWithScore", "allJHitsWithScore", "aaSeqCDR3", "nSeqCDR3"],

@@ -3,10 +3,10 @@ path: ./
 paired: False
 import_with_stop_codon: False # whether to import sequences with stop codon
 import_out_of_frame: False # whether out of frame sequences should be imported
+import_illegal_characters: False
 separator: ","
 region_type: "IMGT_CDR3" # which region to use - IMGT_CDR3 option means removing first and last amino acid as IGoR uses IMGT junction as CDR3
 column_mapping: # IGoR column names -> immuneML repertoire fields
   nt_CDR3: sequences
   seq_index: sequence_identifiers
 import_empty_nt_sequences: True # keep sequences even though the nucleotide sequence might be empty
-import_empty_aa_sequences: False # filter out sequences if they don't have sequence_aa set

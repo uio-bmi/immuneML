@@ -26,6 +26,11 @@ class OLGAImport(DataImport):
         Only the OLGA files included under the column 'filename' are imported into the RepertoireDataset.
         SequenceDataset metadata is currently not supported.
 
+        import_illegal_characters (bool): Whether to import sequences that contain illegal characters, i.e., characters
+        that do not appear in the sequence alphabet (amino acids including stop codon '*', or nucleotides). When set to false, filtering is only
+        applied to the sequence type of interest (when running immuneML in amino acid mode, only entries with illegal
+        characters in the amino acid sequence are removed). By default import_illegal_characters is False.
+
         import_empty_nt_sequences (bool): imports sequences which have an empty nucleotide sequence field; can be True or False.
         By default, import_empty_nt_sequences is set to True.
 
@@ -51,6 +56,7 @@ class OLGAImport(DataImport):
                 path: path/to/files/
                 is_repertoire: True # whether to import a RepertoireDataset (True) or a SequenceDataset (False)
                 metadata_file: path/to/metadata.csv # metadata file for RepertoireDataset
+                import_illegal_characters: False # remove sequences with illegal characters for the sequence_type being used
                 import_empty_nt_sequences: True # keep sequences even though the nucleotide sequence might be empty
                 import_empty_aa_sequences: False # filter out sequences if they don't have sequence_aa set
                 # Optional fields with OLGA-specific defaults, only change when different behavior is required:
@@ -80,6 +86,7 @@ class OLGAImport(DataImport):
 
         ImportHelper.junction_to_cdr3(df, params.region_type)
         ImportHelper.drop_empty_sequences(df, params.import_empty_aa_sequences, params.import_empty_nt_sequences)
+        ImportHelper.drop_illegal_character_sequences(df, params.import_illegal_characters)
 
         if "chains" not in df.columns:
             df.loc[:, "chains"] = ImportHelper.load_chains_from_genes(df)

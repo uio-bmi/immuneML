@@ -11,6 +11,7 @@ from source.simulation.implants.Signal import Signal
 from source.simulation.motif_instantiation_strategy.GappedKmerInstantiation import GappedKmerInstantiation
 from source.simulation.sequence_implanting.GappedMotifImplanting import GappedMotifImplanting
 from source.simulation.signal_implanting_strategy.HealthySequenceImplanting import HealthySequenceImplanting
+from source.simulation.signal_implanting_strategy.ImplantingComputation import ImplantingComputation
 
 
 class TestSimulationParser(TestCase):
@@ -33,7 +34,7 @@ class TestSimulationParser(TestCase):
         symbol_table = SymbolTable()
         symbol_table.add("motif1", SymbolType.MOTIF, Motif("motif1", GappedKmerInstantiation(position_weights={0: 1}), seed="CAS"))
         symbol_table.add("signal1", SymbolType.SIGNAL, Signal("signal1", [symbol_table.get("motif1")],
-                                                              HealthySequenceImplanting(GappedMotifImplanting())))
+                                                              HealthySequenceImplanting(GappedMotifImplanting(), implanting_computation=ImplantingComputation.ROUND)))
 
         symbol_table, specs = SimulationParser.parse_simulations(simulation, symbol_table)
 

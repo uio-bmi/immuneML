@@ -87,9 +87,11 @@
                     <embed src="{{path}}">
                     {{#name}}<p>{{name}} (training data)</p>{{/name}}
                     {{/output_figures}}
+                    <ul>
                     {{#output_tables}}
-                    <a href="{{path}}">Download {{#name}}{{name}} report{{/name}}</a>
+                    <li href="{{path}}">Download {{#name}}{{name}} report{{/name}}</li>
                     {{/output_tables}}
+                    </ul>
                     {{/train}}
                 </div>
                 <div class="col center">
@@ -98,9 +100,11 @@
                     <embed src="{{path}}">
                     {{#name}}<p>{{name}} (test data)</p>{{/name}}
                     {{/output_figures}}
+                    <ul>
                     {{#output_tables}}
-                    <a href="{{path}}">Download {{#name}}{{name}} report{{/name}}</a>
+                    <li><a href="{{path}}">Download {{#name}}{{name}} report{{/name}}</a></li>
                     {{/output_tables}}
+                    </ul>
                     {{/test}}
                 </div>
             </div>
@@ -119,7 +123,7 @@
             {{#reports}}
             <h4>Split {{split_index}}</h4>
                 {{#has_encoding_train_reports}}
-                <h5>Reports on encoded training data</h5>
+                <h5>Encoded training data reports</h5>
                 {{/has_encoding_train_reports}}
                 {{#encoding_train_reports}}
                 {{#output_figures}}
@@ -128,13 +132,15 @@
                     <p>{{name}}</p>
                 </div>
                 {{/output_figures}}
+                <ul>
                 {{#output_tables}}
-                <a href="{{path}}">Download {{#name}}{{name}} report{{/name}}</a><br>
+                <li><a href="{{path}}">Download {{#name}}{{name}} report{{/name}}</a></li>
                 {{/output_tables}}
+                </ul>
                 {{/encoding_train_reports}}
 
                 {{#has_encoding_test_reports}}
-                <h5>Reports on encoded validation data</h5>
+                <h5>Encoded validation data reports</h5>
                 {{/has_encoding_test_reports}}
                 {{#encoding_test_reports}}
                 {{#output_figures}}
@@ -143,13 +149,15 @@
                     <p>{{name}}</p>
                 </div>
                 {{/output_figures}}
+                <ul>
                 {{#output_tables}}
-                <a href="{{path}}">Download {{#name}}{{name}} report{{/name}}</a>
+                <li><a href="{{path}}">Download {{#name}}{{name}} report{{/name}}</a></li>
                 {{/output_tables}}
+                </ul>
                 {{/encoding_test_reports}}
 
                 {{#has_ml_reports}}
-                <h5>Reports on the ML model</h5>
+                <h5>ML model reports</h5>
                 {{/has_ml_reports}}
                 {{#ml_reports}}
                 {{#output_figures}}
@@ -158,9 +166,11 @@
                     <p>{{name}}</p>
                 </div>
                 {{/output_figures}}
+                <ul>
                 {{#output_tables}}
-                <a href="{{path}}">Download {{#name}}{{name}} report{{/name}}</a>
+                <li><a href="{{path}}">Download {{#name}}{{name}} report{{/name}}</a></li>
                 {{/output_tables}}
+                </ul>
                 {{/ml_reports}}
 
             {{/reports}}

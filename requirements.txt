@@ -1,6 +1,6 @@
-rpy2
 pytest>=4.3.1
 pandas>=1.1.1
+PyYAML>=5.3.1
 scikit-learn>=0.22.2.post1
 gensim==3.8.1
 matplotlib>=3.1.1
@@ -19,9 +19,5 @@ tensorboard==1.14.0
 requests>=2.21.0
 plotly>=4.8.2
 logomaker>=0.8
-git+https://github.com/ml-jku/DeepRC@fec4b4f4b2cd70e00e8de83da169560dec73a419
-git+https://github.com/widmi/widis-lstm-tools
 fishersapi
-parasail==1.2
-tcrdist3>=0.1.6
 matplotlib-venn>=0.11.6

@@ -29,7 +29,7 @@ class TestSequencingDepthOverview(TestCase):
         dataset = RepertoireDataset(repertoires=repertoires, params={"disease": ["t1d", "lupus", "ra", "ms"],
                                                                      "week": ["week0", "week1", "week2", "week3", "week4"]})
 
-        report = SequencingDepthOverview(dataset, batch_size=1, x="disease", result_path=path, height_distributions=5,
+        report = SequencingDepthOverview(dataset, number_of_processes=1, x="disease", result_path=path, height_distributions=5,
                                          height_scatterplot=2.5, palette={"lupus": "brown", "t1d": "purple", "ms": "purple"})
         result = report.generate()
 

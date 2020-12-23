@@ -50,10 +50,10 @@ class SubsamplingInstruction(Instruction):
 
         for index, dataset_size in enumerate(self.state.subsampled_dataset_sizes):
 
-            new_dataset_name = f"{self.state.dataset.name}_{dataset_size}_subsampled_{index}"
+            new_dataset_name = f"{self.state.dataset.name}_{dataset_size}_subsampled_{index+1}"
             new_dataset_path = PathBuilder.build(f"{self.state.result_path}{new_dataset_name}/")
 
-            new_example_indices = random.choices(example_indices, k=dataset_size)
+            new_example_indices = random.sample(example_indices, k=dataset_size)
             new_dataset = self.state.dataset.make_subset(new_example_indices, new_dataset_path, Dataset.SUBSAMPLED)
             new_dataset.name = new_dataset_name
 

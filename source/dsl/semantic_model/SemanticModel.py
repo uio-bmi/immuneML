@@ -6,11 +6,11 @@ from source.workflows.instructions.Instruction import Instruction
 
 class SemanticModel:
 
-    def __init__(self, instructions: list, path, output=None):
+    def __init__(self, instructions: list, result_path, output=None):
         assert all(isinstance(instruction, Instruction) for instruction in instructions), \
             "SemanticModel: error occurred in parsing: check instruction definitions in the configuration file."
         self.instructions = instructions
-        self.path = path
+        self.result_path = result_path
         self.output = output
 
     def run(self):
@@ -22,15 +22,15 @@ class SemanticModel:
     def build_reports(self, instruction_states):
         report_builder = self.make_report_builder()
         print(f"{datetime.datetime.now()}: Generating {self.output['format']} reports...", flush=True)
-        path = report_builder.build(instruction_states, self.path)
+        result_path = report_builder.build(instruction_states, self.result_path)
         print(f"{datetime.datetime.now()}: {self.output['format']} reports are generated.", flush=True)
-        return path
+        return result_path
 
     def run_instructions(self) -> list:
         instruction_states = []
         for index, instruction in enumerate(self.instructions):
             print("{}: Instruction {}/{} has started.".format(datetime.datetime.now(), index+1, len(self.instructions)), flush=True)
-            result = instruction.run(result_path=self.path)
+            result = instruction.run(result_path=self.result_path)
             instruction_states.append(result)
             print("{}: Instruction {}/{} has finished.".format(datetime.datetime.now(), index+1, len(self.instructions)), flush=True)
         return instruction_states

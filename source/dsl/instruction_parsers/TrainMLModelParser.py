@@ -6,6 +6,7 @@ from typing import Tuple
 
 from source.data_model.dataset.Dataset import Dataset
 from source.dsl.DefaultParamsLoader import DefaultParamsLoader
+from source.dsl.definition_parsers.PreprocessingParser import PreprocessingParser
 from source.dsl.symbol_table.SymbolTable import SymbolTable
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.environment.LabelConfiguration import LabelConfiguration
@@ -16,6 +17,7 @@ from source.hyperparameter_optimization.config.ManualSplitConfig import ManualSp
 from source.hyperparameter_optimization.config.ReportConfig import ReportConfig
 from source.hyperparameter_optimization.config.SplitConfig import SplitConfig
 from source.hyperparameter_optimization.config.SplitType import SplitType
+from source.reports.train_ml_model_reports.TrainMLModelReport import TrainMLModelReport
 from source.util.ParameterValidator import ParameterValidator
 from source.util.ReflectionHandler import ReflectionHandler
 from source.workflows.instructions.TrainMLModelInstruction import TrainMLModelInstruction
@@ -25,14 +27,14 @@ class TrainMLModelParser:
 
     def parse(self, key: str, instruction: dict, symbol_table: SymbolTable, path: str = None) -> TrainMLModelInstruction:
 
-        valid_keys = ["assessment", "selection", "dataset", "strategy", "labels", "metrics", "settings", "batch_size", "type", "reports",
+        valid_keys = ["assessment", "selection", "dataset", "strategy", "labels", "metrics", "settings", "number_of_processes", "type", "reports",
                       "optimization_metric", 'refit_optimal_model', 'store_encoded_data']
         ParameterValidator.assert_type_and_value(instruction['settings'], list, TrainMLModelParser.__name__, 'settings')
         ParameterValidator.assert_keys(list(instruction.keys()), valid_keys, TrainMLModelParser.__name__, "TrainMLModel")
         ParameterValidator.assert_type_and_value(instruction['refit_optimal_model'], bool, TrainMLModelParser.__name__, 'refit_optimal_model')
         ParameterValidator.assert_type_and_value(instruction['metrics'], list, TrainMLModelParser.__name__, 'metrics')
         ParameterValidator.assert_type_and_value(instruction['optimization_metric'], str, TrainMLModelParser.__name__, 'optimization_metric')
-        ParameterValidator.assert_type_and_value(instruction['batch_size'], int, TrainMLModelParser.__name__, 'batch_size')
+        ParameterValidator.assert_type_and_value(instruction['number_of_processes'], int, TrainMLModelParser.__name__, 'number_of_processes')
         ParameterValidator.assert_type_and_value(instruction['strategy'], str, TrainMLModelParser.__name__, 'strategy')
         ParameterValidator.assert_type_and_value(instruction['store_encoded_data'], bool, TrainMLModelParser.__name__, 'store_encoded_data')
 
@@ -48,14 +50,14 @@ class TrainMLModelParser:
         metric_search_criterion = Metric.get_search_criterion(optimization_metric)
         path = self._prepare_path(instruction)
         context = self._prepare_context(instruction, symbol_table)
-        data_reports = self._prepare_reports(instruction["reports"], symbol_table)
+        reports = self._prepare_reports(instruction["reports"], symbol_table)
 
         hp_instruction = TrainMLModelInstruction(dataset=dataset, hp_strategy=strategy(settings, metric_search_criterion),
                                                  hp_settings=settings, assessment=assessment, selection=selection, metrics=metrics,
                                                  optimization_metric=optimization_metric, refit_optimal_model=instruction['refit_optimal_model'],
                                                  label_configuration=label_config, path=path, context=context,
-                                                 store_encoded_data=instruction['store_encoded_data'], batch_size=instruction["batch_size"],
-                                                 data_reports=data_reports, name=key)
+                                                 store_encoded_data=instruction['store_encoded_data'],
+                                                 number_of_processes=instruction["number_of_processes"], reports=reports, name=key)
 
         return hp_instruction
 
@@ -76,7 +78,9 @@ class TrainMLModelParser:
 
     def _prepare_reports(self, reports: list, symbol_table: SymbolTable) -> dict:
         if reports is not None:
-            return {report_id: symbol_table.get(report_id) for report_id in reports}
+            report_objects = {report_id: symbol_table.get(report_id) for report_id in reports}
+            ParameterValidator.assert_all_type_and_value(report_objects.values(), TrainMLModelReport, TrainMLModelParser.__name__, 'reports')
+            return report_objects
         else:
             return {}
 
@@ -85,14 +89,20 @@ class TrainMLModelParser:
 
     def _parse_settings(self, instruction: dict, symbol_table: SymbolTable) -> list:
         try:
-
             settings = []
             for index, setting in enumerate(instruction["settings"]):
-                if "preprocessing" in setting and symbol_table.contains(setting["preprocessing"]):
-                    preprocessing_sequence = symbol_table.get(setting["preprocessing"])
-                    preproc_name = setting["preprocessing"]
+                if "preprocessing" in setting:
+                    ParameterValidator.assert_type_and_value(setting["preprocessing"], str, TrainMLModelParser.__name__, f'settings: {index+1}. '
+                                                                                                                         f'element: preprocessing')
+                    if symbol_table.contains(setting["preprocessing"]):
+                        preprocessing_sequence = symbol_table.get(setting["preprocessing"])
+                        preproc_name = setting["preprocessing"]
+                    else:
+                        raise KeyError(f"{TrainMLModelParser.__name__}: preprocessing was set in the TrainMLModel instruction to value "
+                                       f"{setting['preprocessing']}, but no such preprocessing was defined in the specification under "
+                                       f"definitions: {PreprocessingParser.keyword}.")
                 else:
-                    setting["preprocessing"] = []
+                    setting["preprocessing"] = None
                     preprocessing_sequence = []
                     preproc_name = None
 
