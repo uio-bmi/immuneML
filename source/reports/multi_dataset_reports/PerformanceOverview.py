@@ -1,13 +1,13 @@
 import logging
 from typing import List, Tuple
 
-import numpy as np
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 from sklearn import metrics
 from sklearn.metrics import precision_recall_curve
 
+from source.environment.Label import Label
 from source.hyperparameter_optimization.states.TrainMLModelState import TrainMLModelState
 from source.reports.ReportOutput import ReportOutput
 from source.reports.ReportResult import ReportResult
@@ -38,9 +38,7 @@ class PerformanceOverview(MultiDatasetReport):
     .. code-block:: yaml
 
         reports:
-            my_performance_report:
-                PerformanceOverview:
-                    positive_class: True
+            my_performance_report: PerformanceOverview
 
     """
 
@@ -50,11 +48,10 @@ class PerformanceOverview(MultiDatasetReport):
     def build_object(cls, **kwargs):
         return PerformanceOverview(**kwargs)
 
-    def __init__(self, instruction_states: List[TrainMLModelState] = None, name: str = None, result_path: str = None, positive_class=None):
+    def __init__(self, instruction_states: List[TrainMLModelState] = None, name: str = None, result_path: str = None):
         super().__init__(name)
         self.instruction_states = instruction_states
         self.result_path = result_path
-        self.positive_class = positive_class
 
     def generate(self) -> ReportResult:
 
@@ -73,7 +70,7 @@ class PerformanceOverview(MultiDatasetReport):
             f"{PerformanceOverview.__name__}: no test datasets were available to assess the performance of optimal models as they were refitted on " \
             f"the full datasets. No reports will be generated."
 
-        label = self.instruction_states[0].label_configuration.get_labels_by_name()[0]
+        label = self.instruction_states[0].label_configuration.get_label_objects()[0]
 
         optimal_hp_items = [list(state.optimal_hp_items.values())[0] for state in self.instruction_states]
 
@@ -83,7 +80,7 @@ class PerformanceOverview(MultiDatasetReport):
 
         return ReportResult(output_figures=[figure_auc, figure_pr], output_tables=table_aucs + table_pr)
 
-    def plot_roc(self, optimal_hp_items, label, colors) -> Tuple[ReportOutput, List[ReportOutput]]:
+    def plot_roc(self, optimal_hp_items, label: Label, colors) -> Tuple[ReportOutput, List[ReportOutput]]:
         report_data_outputs = []
         figure = go.Figure()
 
@@ -97,8 +94,8 @@ class PerformanceOverview(MultiDatasetReport):
             else:
 
                 df = pd.read_csv(item.test_predictions_path)
-                true_class = df[f"{label}_true_class"].values
-                predicted_class = df[f"{label}_predicted_class"].values
+                true_class = df[f"{label.name}_true_class"].values
+                predicted_class = df[f"{label.name}_{label.positive_class}_proba"].values
                 fpr, tpr, _ = metrics.roc_curve(y_true=true_class, y_score=predicted_class)
                 auc = metrics.roc_auc_score(true_class, predicted_class)
                 name = self.instruction_states[index].dataset.name + f' (AUC = {round(auc, 2)})'
@@ -114,23 +111,15 @@ class PerformanceOverview(MultiDatasetReport):
 
         return ReportOutput(figure_path, 'ROC curve'), report_data_outputs
 
-    def plot_precision_recall(self, optimal_hp_items: list, label, colors):
+    def plot_precision_recall(self, optimal_hp_items: list, label: Label, colors):
         report_data_outputs = []
         figure = go.Figure()
-
-        test_labels = np.array(optimal_hp_items[0].test_dataset.get_metadata([label])[label])
-        y = test_labels[test_labels == self.positive_class].shape[0] / len(test_labels)
-
-        add_baseline = True
 
         for index, item in enumerate(optimal_hp_items):
             df = pd.read_csv(item.test_predictions_path)
 
-            if df.shape[0] != len(test_labels):
-                add_baseline = False
-
-            true_class = df[f"{label}_true_class"].values
-            predicted_proba = df[f"{label}_predicted_class"].values
+            true_class = df[f"{label.name}_true_class"].values
+            predicted_proba = df[f"{label.name}_{label.positive_class}_proba"].values
             precision, recall, _ = precision_recall_curve(y_true=true_class, probas_pred=predicted_proba)
             name = self.instruction_states[index].dataset.name
             figure.add_trace(go.Scatter(x=recall, y=precision, mode='lines', name=name, marker=dict(color=colors[index], line=dict(width=3)),
@@ -139,10 +128,6 @@ class PerformanceOverview(MultiDatasetReport):
             data_path = self.result_path + f"precision_recall_data_{name}.csv"
             pd.DataFrame({"precision": precision, "recall": recall}).to_csv(data_path, index=False)
             report_data_outputs.append(ReportOutput(data_path, f'precision-recall curve data for dataset {name}'))
-
-        if add_baseline:
-            figure.add_trace(go.Scatter(x=[0, 1], y=[y, y], mode='lines', name='baseline', line=dict(color=PerformanceOverview.PLOTLY_BLACK,
-                                                                                                     dash='dash'), hoverinfo="skip"))
 
         figure_path = self.result_path + "precision_recall_curve.html"
         figure.update_layout(template='plotly_white', xaxis_title="recall", yaxis_title="precision")

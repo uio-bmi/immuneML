@@ -26,4 +26,4 @@ RUN R -e "install.packages('devtools', repos = 'https://cran.uib.no/')" -e "devt
 RUN pip3 install wheel setuptools 
 
 # Voila
-RUN pip3 install ./immuneML/
+RUN pip3 install ./immuneML/[all]

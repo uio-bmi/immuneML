@@ -1,5 +1,6 @@
 # quality: gold
 import warnings
+from typing import List
 
 from source.environment.Label import Label
 from source.util.ParameterValidator import ParameterValidator
@@ -46,5 +47,5 @@ class LabelConfiguration:
     def get_label_object(self, label: str) -> Label:
         return self._labels[label]
 
-    def get_label_objects(self):
-        return self._labels.values()
+    def get_label_objects(self) -> List[Label]:
+        return list(self._labels.values())

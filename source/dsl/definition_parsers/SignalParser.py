@@ -1,7 +1,9 @@
+from source.dsl.DefaultParamsLoader import DefaultParamsLoader
 from source.dsl.symbol_table.SymbolTable import SymbolTable
 from source.dsl.symbol_table.SymbolType import SymbolType
 from source.simulation.implants.Signal import Signal
 from source.simulation.sequence_implanting.GappedMotifImplanting import GappedMotifImplanting
+from source.simulation.signal_implanting_strategy.ImplantingComputation import ImplantingComputation
 from source.simulation.signal_implanting_strategy.SignalImplantingStrategy import SignalImplantingStrategy
 from source.util.Logger import log
 from source.util.ParameterValidator import ParameterValidator
@@ -10,14 +12,14 @@ from source.util.ReflectionHandler import ReflectionHandler
 
 class SignalParser:
 
-    VALID_KEYS = ["motifs", "implanting", "sequence_position_weights"]
+    VALID_KEYS = ["motifs", "implanting"]
 
     @staticmethod
     @log
     def parse_signals(signals: dict, symbol_table: SymbolTable):
         for key, signal_spec in signals.items():
 
-            ParameterValidator.assert_keys(signal_spec.keys(), SignalParser.VALID_KEYS, "SignalParser", key)
+            ParameterValidator.assert_keys_present(signal_spec.keys(), SignalParser.VALID_KEYS, "SignalParser", key)
 
             implanting_strategy = SignalParser._get_implanting_strategy(key, signal_spec)
 
@@ -37,10 +39,20 @@ class SignalParser:
                             ReflectionHandler.discover_classes_by_partial_name("Implanting", "simulation/signal_implanting_strategy/")]
         ParameterValidator.assert_in_valid_list(signal["implanting"], valid_strategies, "SignalParser", key)
 
-        if "sequence_position_weights" not in signal:
-            signal["sequence_position_weights"] = None
+        defaults = DefaultParamsLoader.load("signal_implanting_strategy/", f"{signal['implanting']}Implanting")
+        signal = {**defaults, **signal}
+
+        ParameterValidator.assert_keys_present(list(signal.keys()), ["motifs", "implanting", "sequence_position_weights"], SignalParser.__name__, key)
+
+        implanting_comp = None
+        if 'implanting_computation' in signal:
+            implanting_comp = signal['implanting_computation'].lower()
+            ParameterValidator.assert_in_valid_list(implanting_comp, [el.name.lower() for el in ImplantingComputation], SignalParser.__name__,
+                                                    'implanting_computation')
+            implanting_comp = ImplantingComputation[implanting_comp.upper()]
 
         implanting_strategy = ReflectionHandler.get_class_by_name(f"{signal['implanting']}Implanting")(GappedMotifImplanting(),
-                                                                                                       signal["sequence_position_weights"])
+                                                                                                       signal["sequence_position_weights"],
+                                                                                                       implanting_comp)
 
         return implanting_strategy

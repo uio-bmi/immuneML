@@ -1,0 +1,2 @@
+implanting_computation: round # when computing the number of sequences for implanting, round to the nearest int
+sequence_position_weights: null # all positions in the sequence are equally likely to be implanted in

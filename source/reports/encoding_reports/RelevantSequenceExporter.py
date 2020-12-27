@@ -29,8 +29,8 @@ class RelevantSequenceExporter(EncodingReport):
     """
 
     COLUMN_MAPPING = {
-        "v_alleles": "v_call",
-        "j_alleles": "j_call",
+        "v_genes": "v_call",
+        "j_genes": "j_call",
         "sequences": "cdr3",
         'sequence_aas': "cdr3_aa"
     }
@@ -60,9 +60,9 @@ class RelevantSequenceExporter(EncodingReport):
         columns = df.columns.values.tolist()
         column_mapping = {}
         region_type = self.dataset.get_repertoire(0).get_attribute("region_types")[0]
-        if "sequence_aas" in columns and region_type != RegionType.IMGT_CDR3:
+        if "sequence_aas" in columns and (region_type != RegionType.IMGT_CDR3 and region_type != RegionType.IMGT_CDR3.name):
             column_mapping["sequence_aas"] = "sequence_aa"
-        if "sequences" in columns and region_type != RegionType.IMGT_CDR3:
+        if "sequences" in columns and (region_type != RegionType.IMGT_CDR3 and region_type != RegionType.IMGT_CDR3.name):
             column_mapping['sequences'] = "sequence"
 
         return {**RelevantSequenceExporter.COLUMN_MAPPING, **column_mapping}

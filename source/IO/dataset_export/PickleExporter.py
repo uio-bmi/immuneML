@@ -101,6 +101,6 @@ class PickleExporter(DataExporter):
             new_file = path / old_file.name
             if not new_file.is_file():
                 shutil.copyfile(old_file, new_file)
+            return new_file
         else:
-            new_file = None
-        return new_file
+            raise RuntimeError(f"{PickleExporter.__name__}: tried exporting file {old_file}, but it does not exist.")
