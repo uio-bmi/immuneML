@@ -56,9 +56,9 @@ setup(
     install_requires=import_requirements("requirements.txt"),
     extras_require={
         "R_plots":  import_requirements("requirements_R_plots.txt"),
-        "DeepRC":  ["widis-lstm-tools@git+https://github.com/widmi/widis-lstm-tools", "deeprc@git+https://github.com/ml-jku/DeepRC@fec4b4f4b2cd70e00e8de83da169560dec73a419"],
         "TCRDist": import_requirements("requirements_TCRdist.txt"),
     },
+    dependency_links=import_requirements("requirements_DeepRC.txt"),
     classifiers=[
         "Programming Language :: Python :: 3"
     ],
