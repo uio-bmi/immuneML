@@ -15,8 +15,7 @@ from source.util.PathBuilder import PathBuilder
 class CVFeaturePerformance(TrainMLModelReport):
     """
     This report plots the average training vs test performance w.r.t. given encoding parameter which is explicitly set
-    in the feature attribute. It can be used only in combination with TrainMLModel instruction and can be only specified under
-    assessment/reports/hyperparameter under that instruction.
+    in the feature attribute. It can be used only in combination with TrainMLModel instruction and can be only specified under 'reports'
 
 
     Arguments:

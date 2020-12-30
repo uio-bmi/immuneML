@@ -11,11 +11,11 @@ from source.caching.CacheType import CacheType
 from source.data_model.encoded_data.EncodedData import EncodedData
 from source.environment.Constants import Constants
 from source.environment.EnvironmentSettings import EnvironmentSettings
-from source.ml_methods.TCRDISTClassifier import TCRDISTClassifier
+from source.ml_methods.TCRdistClassifier import TCRdistClassifier
 from source.util.PathBuilder import PathBuilder
 
 
-class TestTCRDISTClassifier(TestCase):
+class TestTCRdistClassifier(TestCase):
 
     def setUp(self) -> None:
         os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
@@ -31,7 +31,7 @@ class TestTCRDISTClassifier(TestCase):
 
     def test_fit(self):
         x, y, encoded_data = self._prepare_data()
-        knn = TCRDISTClassifier(percentage=0.75)
+        knn = TCRdistClassifier(percentage=0.75)
         knn.fit(encoded_data, "test", cores_for_training=4)
         predictions = knn.predict(encoded_data, 'test')
         self.assertTrue(np.array_equal(y["test"], predictions["test"]))
@@ -43,7 +43,7 @@ class TestTCRDISTClassifier(TestCase):
     def test_store(self):
         x, y, encoded_data = self._prepare_data()
 
-        cls = TCRDISTClassifier(0.75)
+        cls = TCRdistClassifier(0.75)
         cls.fit(encoded_data, label_name="test", cores_for_training=4)
 
         path = EnvironmentSettings.root_path + "test/tmp/tcrdist_classifier/"
@@ -61,7 +61,7 @@ class TestTCRDISTClassifier(TestCase):
     def test_load(self):
         x, y, encoded_data = self._prepare_data()
 
-        cls = TCRDISTClassifier(0.75)
+        cls = TCRdistClassifier(0.75)
         cls.fit(encoded_data, label_name="test", cores_for_training=4)
 
         path = PathBuilder.build(EnvironmentSettings.root_path + "test/tmp/tcrdist_classifier_load/")
@@ -69,11 +69,11 @@ class TestTCRDISTClassifier(TestCase):
         with open(path + "tcrdist_classifier.pickle", "wb") as file:
             dill.dump(cls.get_model(), file)
 
-        cls2 = TCRDISTClassifier(percentage=1.)
+        cls2 = TCRdistClassifier(percentage=1.)
         cls2.load(path)
 
         self.assertTrue(isinstance(cls2.get_model()["test"], KNeighborsClassifier))
-        self.assertTrue(isinstance(cls2, TCRDISTClassifier))
+        self.assertTrue(isinstance(cls2, TCRdistClassifier))
         self.assertEqual(3, cls2.models['test'].n_neighbors)
 
         shutil.rmtree(path)

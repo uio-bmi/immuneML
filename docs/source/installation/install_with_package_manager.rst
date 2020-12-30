@@ -106,7 +106,14 @@ Install immuneML with R dependencies
 
   pip install git+https://github.com/uio-bmi/immuneML#egg=immuneML[R_plots]
 
-Alternatively, if you want to install immuneML including optional extras (:code:`DeepRC`, :code:`TCRDist`), use:
+Alternatively, if you want to install immuneML including :code:`all` optional extras, use:
+
+.. code-block:: console
+
+  pip install git+https://github.com/uio-bmi/immuneML#egg=immuneML[all]
+
+Or specify the specific extras you want to install (choose from :code:`R_plots`, :code:`DeepRC`, :code:`TCRDist`).
+Note that specifying all these extras is equivalent to specifying :code:`all`:
 
 .. code-block:: console
 
@@ -168,10 +175,18 @@ To update the existing installation (obtained as described before):
 
   pip install git+https://github.com/uio-bmi/immuneML
 
-Alternatively, if you want to install immuneML including optional dependencies (:code:`R_plots`, :code:`DeepRC`, :code:`TCRDist`), use:
+
+Alternatively, if you want to install immuneML including :code:`all` optional extras, use:
+
+.. code-block:: console
+
+  pip install git+https://github.com/uio-bmi/immuneML#egg=immuneML[all]
+
+Or specify the specific extras you want to install (choose from :code:`R_plots`, :code:`DeepRC`, :code:`TCRDist`).
+Note that specifying all these extras is equivalent to specifying :code:`all`:
 
 .. code-block:: console
 
   pip install git+https://github.com/uio-bmi/immuneML#egg=immuneML[R_plots,DeepRC,TCRDist]
 
-Note: when including R_plots, make sure that R dependencies were installed using the steps described in :ref:`Install immuneML with R dependencies` steps 2 - 4.
+When including :code:`R_plots` (or :code:`all`), make sure that R dependencies were installed using the steps described in :ref:`Install immuneML with R dependencies` steps 2 - 4.

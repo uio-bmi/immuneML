@@ -5,7 +5,7 @@ from source.data_model.dataset.Dataset import Dataset
 
 
 @dataclass
-class DatasetGenerationState:
+class DatasetExportState:
     datasets: List[Dataset]
     formats: List[str]
     paths: dict

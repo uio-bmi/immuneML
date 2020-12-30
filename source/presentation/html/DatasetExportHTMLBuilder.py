@@ -6,15 +6,15 @@ from source.presentation.TemplateParser import TemplateParser
 from source.presentation.html.Util import Util
 from source.util.PathBuilder import PathBuilder
 from source.util.StringHelper import StringHelper
-from source.workflows.instructions.dataset_generation.DatasetGenerationState import DatasetGenerationState
+from source.workflows.instructions.dataset_generation.DatasetExportState import DatasetExportState
 
 
-class DatasetGenerationHTMLBuilder:
+class DatasetExportHTMLBuilder:
 
     CSS_PATH = f"{EnvironmentSettings.html_templates_path}css/custom.css"
 
     @staticmethod
-    def build(state: DatasetGenerationState) -> str:
+    def build(state: DatasetExportState) -> str:
         """
         Function that builds the HTML files based on the Simulation state.
         Arguments:
@@ -23,18 +23,18 @@ class DatasetGenerationHTMLBuilder:
              path to the main HTML file (which is located under state.result_path)
         """
         base_path = PathBuilder.build(state.result_path + "../HTML_output/")
-        html_map = DatasetGenerationHTMLBuilder.make_html_map(state, base_path)
-        result_file = f"{base_path}DatasetGeneration_{state.name}.html"
+        html_map = DatasetExportHTMLBuilder.make_html_map(state, base_path)
+        result_file = f"{base_path}DatasetExport_{state.name}.html"
 
-        TemplateParser.parse(template_path=f"{EnvironmentSettings.html_templates_path}DatasetGeneration.html",
+        TemplateParser.parse(template_path=f"{EnvironmentSettings.html_templates_path}DatasetExport.html",
                              template_map=html_map, result_path=result_file)
 
         return result_file
 
     @staticmethod
-    def make_html_map(state: DatasetGenerationState, base_path: str) -> dict:
+    def make_html_map(state: DatasetExportState, base_path: str) -> dict:
         html_map = {
-            "css_style": Util.get_css_content(DatasetGenerationHTMLBuilder.CSS_PATH),
+            "css_style": Util.get_css_content(DatasetExportHTMLBuilder.CSS_PATH),
             "name": state.name,
             'immuneML_version': MLUtil.get_immuneML_version(),
             "full_specs": Util.get_full_specs_path(base_path),

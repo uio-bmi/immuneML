@@ -27,7 +27,7 @@ def build_specs(args):
         },
         "instructions": {
             "my_dataset_generation_instruction": {
-                "type": "DatasetGeneration",
+                "type": "DatasetExport",
                 "datasets": [args.dataset_name],
                 "export_formats": ["Pickle"]
             }
@@ -38,7 +38,10 @@ def build_specs(args):
     specs["definitions"]["datasets"][args.dataset_name]["params"]["result_path"] = "./"
     specs["definitions"]["datasets"][args.dataset_name]["params"]["path"] = "./"
 
-    if args.metadata_file == "":
+    if args.is_repertoire == "True":
+        specs["definitions"]["datasets"][args.dataset_name]["params"]["is_repertoire"] = True
+        specs["definitions"]["datasets"][args.dataset_name]["params"]["metadata_file"] = args.metadata_file
+    else:
         specs["definitions"]["datasets"][args.dataset_name]["params"]["is_repertoire"] = False
 
         paired = True if args.paired == "True" else False
@@ -49,9 +52,6 @@ def build_specs(args):
 
         specs["definitions"]["datasets"][args.dataset_name]["params"]["metadata_column_mapping"] = build_metadata_column_mapping(
             args.metadata_columns)
-    else:
-        specs["definitions"]["datasets"][args.dataset_name]["params"]["is_repertoire"] = True
-        specs["definitions"]["datasets"][args.dataset_name]["params"]["metadata_file"] = args.metadata_file
 
     return specs
 
@@ -61,6 +61,7 @@ def parse_commandline_arguments(args):
     parser.add_argument("-r", "--format", required=True, help="The format of the repertoire/receptor dataset")
     parser.add_argument("-m", "--metadata_file", default="",
                         help="The metadata file when using a repertoire dataset. When using a receptor dataset, you may supply an empty string.")
+    parser.add_argument("-i", "--is_repertoire", choices=["True", "False"], required=True, help="Whether to import a RepertoireDataset")
     parser.add_argument("-p", "--paired", choices=["True", "False"], default="False",
                         help="When the data is not repertoire data (metadata file = ''), this specifies whether the data is paired (ReceptorDataset) or unpaired (SequenceDataset)")
     parser.add_argument("-c", "--receptor_chains", choices=["TRA_TRB", "TRG_TRD", "IGH_IGL", "IGH_IGK"], default="TRA_TRB",

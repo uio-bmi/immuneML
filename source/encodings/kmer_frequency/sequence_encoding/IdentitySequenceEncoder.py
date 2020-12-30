@@ -20,9 +20,6 @@ class IdentitySequenceEncoder(SequenceEncodingStrategy):
                         used)
         :return: list with only single feature
         """
-        if sequence.metadata is not None and sequence.metadata.frame_type != SequenceFrameType.IN:
-            warnings.warn('Sequence either has out or stop codon. Ignoring sequence.')
-            return None
 
         res = []
         if params.model.get("sequence", True):

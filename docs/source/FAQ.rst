@@ -36,8 +36,6 @@ want to use one of the following reports:
 
 - :ref:`SequenceAssociationLikelihood`
 
-- :ref:`FeatureValueBarplot`
-
 - :ref:`FeatureValueDistplot`
 
 - :ref:`FeatureHeatmap`

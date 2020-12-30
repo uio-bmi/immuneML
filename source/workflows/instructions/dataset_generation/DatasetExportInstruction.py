@@ -6,12 +6,12 @@ from source.IO.dataset_export.DataExporter import DataExporter
 from source.data_model.dataset.Dataset import Dataset
 from source.util.ReflectionHandler import ReflectionHandler
 from source.workflows.instructions.Instruction import Instruction
-from source.workflows.instructions.dataset_generation.DatasetGenerationState import DatasetGenerationState
+from source.workflows.instructions.dataset_generation.DatasetExportState import DatasetExportState
 
 
-class DatasetGenerationInstruction(Instruction):
+class DatasetExportInstruction(Instruction):
     """
-    DatasetGeneration instruction takes a list of datasets as input and outputs them in specified formats.
+    DatasetExport instruction takes a list of datasets as input and outputs them in specified formats.
 
     Arguments:
 
@@ -24,8 +24,8 @@ class DatasetGenerationInstruction(Instruction):
     .. indent with spaces
     .. code-block:: yaml
 
-        my_dataset_generation_instruction: # user-defined instruction name
-            type: DatasetGeneration # which instruction to execute
+        my_dataset_export_instruction: # user-defined instruction name
+            type: DatasetExport # which instruction to execute
             datasets: # list of datasets to export
                 - my_generated_dataset
                 - my_dataset_from_adaptive
@@ -41,7 +41,7 @@ class DatasetGenerationInstruction(Instruction):
         self.result_path = result_path
         self.name = name
 
-    def run(self, result_path: str) -> DatasetGenerationState:
+    def run(self, result_path: str) -> DatasetExportState:
         self.result_path = result_path if result_path[-1] == '/' else f"{result_path}/"
         self.result_path = self.result_path + f"{self.name}/"
         paths = {}
@@ -57,12 +57,12 @@ class DatasetGenerationInstruction(Instruction):
                 contains = str(dataset.__class__.__name__).replace("Dataset", "s").lower()
                 print(f"{datetime.datetime.now()}: Exported dataset {dataset_name} containing {dataset.get_example_count()} {contains} in {export_format} format.", flush=True)
 
-        return DatasetGenerationState(datasets=self.datasets, formats=[exporter.__name__[:-8] for exporter in self.exporters],
+        return DatasetExportState(datasets=self.datasets, formats=[exporter.__name__[:-8] for exporter in self.exporters],
                                       paths=paths, result_path=self.result_path, name=self.name)
 
     @staticmethod
     def get_documentation():
-        doc = str(DatasetGenerationInstruction.__doc__)
+        doc = str(DatasetExportInstruction.__doc__)
 
         valid_strategy_values = ReflectionHandler.all_nonabstract_subclass_basic_names(DataExporter, "Exporter", "dataset_export/")
         valid_strategy_values = str(valid_strategy_values)[1:-1].replace("'", "`")

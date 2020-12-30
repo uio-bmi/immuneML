@@ -1,0 +1,19 @@
+is_repertoire: True
+path: ./
+paired: False
+import_productive: True
+import_with_stop_codon: False
+import_out_of_frame: False
+import_illegal_characters: False
+region_type: "IMGT_CDR3" # which region to use - IMGT_CDR3 option means removing first and last amino acid as AIRR uses IMGT junction as CDR3
+separator: "\t"
+column_mapping: # AIRR column names -> immuneML repertoire fields
+  junction: sequences
+  junction_aa: sequence_aas
+  v_call: v_alleles
+  j_call: j_alleles
+  locus: chains
+  duplicate_count: counts
+  sequence_id: sequence_identifiers
+import_empty_nt_sequences: True # keep sequences even though the nucleotide sequence might be empty
+import_empty_aa_sequences: False # filter out sequences if they don't have sequence_aa set
