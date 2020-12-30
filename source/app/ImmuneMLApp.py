@@ -28,9 +28,6 @@ from source.util.PathBuilder import PathBuilder
 from source.util.ReflectionHandler import ReflectionHandler
 
 
-_DATE_FMT = '%d.%m.%Y %H:%M:%S'
-
-
 def hello_world(infile, rundir, outpath):
     """Print out a polite greeting for immuneML.
 
@@ -44,7 +41,7 @@ def hello_world(infile, rundir, outpath):
         The output path.
 
     """
-    timestart = datetime.datetime.now().strftime(_DATE_FMT)
+    timestart = datetime.datetime.now()
     pyversion = sys.version.split()[0]
     print('\n'.join([LOGO]))
     print(f'{PROGRAM_NAME} version: {VERSION}')
@@ -57,7 +54,7 @@ def hello_world(infile, rundir, outpath):
 
 def bye_bye_world():
     """Print out the goodbye message for immuneML."""
-    timeend = datetime.datetime.now().strftime(_DATE_FMT)
+    timeend = datetime.datetime.now()
     print()
     print(f'End of {PROGRAM_NAME}, execution: {timeend}')
     # display some references:
@@ -94,11 +91,11 @@ class ImmuneMLApp:
 
         self.set_cache()
 
-        print(f"{datetime.datetime.now().strftime(_DATE_FMT)}: ImmuneML: parsing the specification...\n", flush=True)
+        print(f"{datetime.datetime.now()}: ImmuneML: parsing the specification...\n", flush=True)
 
         symbol_table, self._specification_path = ImmuneMLParser.parse_yaml_file(self._specification_path, self._result_path)
 
-        print(f"{datetime.datetime.now().strftime(_DATE_FMT)}: ImmuneML: starting the analysis...\n", flush=True)
+        print(f"{datetime.datetime.now()}: ImmuneML: starting the analysis...\n", flush=True)
 
         instructions = symbol_table.get_by_type(SymbolType.INSTRUCTION)
         output = symbol_table.get("output")
@@ -107,7 +104,7 @@ class ImmuneMLApp:
 
         self.clear_cache()
 
-        print(f"{datetime.datetime.now().strftime(_DATE_FMT)}: ImmuneML: finished analysis.\n", flush=True)
+        print(f"{datetime.datetime.now()}: ImmuneML: finished analysis.\n", flush=True)
 
         return result
 
