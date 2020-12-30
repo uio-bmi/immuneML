@@ -14,7 +14,7 @@ import pathlib
 from codecs import open as openc
 from setuptools import setup, find_packages
 
-FULL_VERSION = '0.9.0.dev0'  # Automatically set by setup_version.py
+FULL_VERSION = '1.0.1'  # Automatically set by setup_version.py
 
 
 def get_long_description():

@@ -1,8 +1,8 @@
 {
-    "major": 0,
-    "minor": 9,
-    "micro": 0,
+    "major": 1,
+    "minor": 0,
+    "micro": 1,
     "dev": 0,
-    "release": false,
+    "release": true,
     "min_python": "3.7"
 }
