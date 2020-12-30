@@ -13,6 +13,9 @@ class TCRdistEncoder(DatasetEncoder):
     Dash P, Fiore-Gartland AJ, Hertz T, et al. Quantifiable predictive features define epitope-specific T cell receptor repertoires.
     Nature. 2017; 547(7661):89-93. `doi:10.1038/nature22383 <https://www.nature.com/articles/nature22383>`_.
 
+    For the implementation, `TCRdist3 <https://tcrdist3.readthedocs.io/en/latest/>`_ library was used (source code available
+    `here <https://github.com/kmayerb/tcrdist3>`_).
+
     Arguments:
 
         cores (int): number of processes to use for the computation

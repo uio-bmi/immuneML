@@ -12,9 +12,10 @@ To get started with immuneML, there are four options:
 
 3. Installing immuneML with a package manager and using it locally (:ref:`Install immuneML with a package manager`),
 
-4. Cloning the codebase from GitHub repository and running it directly from source code (for development purposes).
+4. Cloning the codebase from the `GitHub repository <https://github.com/uio-bmi/immuneML/>`_ and running it directly from source code (for development purposes).
 
 Once immuneML has been set up, you can look into :ref:`Quickstart` or look into which analyses you can run with immuneML (see :ref:`Tutorials`).
+
 
 .. toctree::
   :maxdepth: 1

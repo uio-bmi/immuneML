@@ -21,7 +21,7 @@ class MatchedRegexEncoder(DatasetEncoder):
     The regular expressions are defined per chain, and it is possible to require a V gene match in addition to the
     CDR3 sequence containing the regular expression.
 
-    This encoding should be used in combination with the :py:obj:`~source.reports.encoding_reports.Matches.Matches`
+    This encoding should be used in combination with the :ref:`Matches`
     report.
 
 

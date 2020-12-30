@@ -22,7 +22,7 @@ class ReferenceSequenceOverlap(TrainMLModelReport):
     The ReferenceSequenceOverlap report compares a list of disease-associated sequences produced by :ref:`SequenceAbundance` or :ref:`SequenceCount` encoders to
     a list of reference receptor sequences. It outputs a Venn diagram and a list of receptor sequences found both in the encoder and reference.
 
-    The report compares the sequences by their sequence content and the additional attributes (such as V or J gene), as specified by the user.
+    The report compares the sequences by their sequence content and the additional comparison_attributes (such as V or J gene), as specified by the user.
 
     Arguments:
 

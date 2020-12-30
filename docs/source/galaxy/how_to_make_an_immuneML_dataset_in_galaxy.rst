@@ -61,9 +61,9 @@ case of a RepertoireDataset a metadata file.
 
 The YAML specification describes how the dataset should be created from the supplied files. See :ref:`YAML specification`
 for more details on writing a YAML specification file. For this tool, one :ref:`Dataset <Datasets>` must be specified
-under definitions, and the :ref:`DatasetGeneration` instruction must be used.
+under definitions, and the :ref:`DatasetExport` instruction must be used.
 
-The DatasetGeneration instruction can here only be used with one dataset (as defined under **definitions**) and one export format.
+The DatasetExport instruction can here only be used with one dataset (as defined under **definitions**) and one export format.
 Furthermore, the **path** parameter does not need to be set. Otherwise, the specification is written the same as when running immuneML locally.
 
 A complete YAML specification for a RepertoireDataset could look like this:
@@ -81,7 +81,7 @@ A complete YAML specification for a RepertoireDataset could look like this:
             # other import parameters may be specified here
     instructions:
       my_dataset_generation_instruction: # user-defined instruction name
-          type: DatasetGeneration
+          type: DatasetExport
           datasets: # specify the dataset defined above
               - my_repertoire_dataset
           export_formats:
@@ -111,7 +111,7 @@ Alternatively, for a ReceptorDataset the complete YAML specification may look li
             # other import parameters may be specified here
     instructions:
       my_dataset_generation_instruction: # user-defined instruction name
-          type: DatasetGeneration
+          type: DatasetExport
           datasets: # specify the dataset defined above
               - my_receptor_dataset
           export_formats:

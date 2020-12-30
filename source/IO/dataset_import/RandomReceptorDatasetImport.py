@@ -27,10 +27,10 @@ class RandomReceptorDatasetImport(DataImport):
 
         chain_2_length_probabilities (dict): Same as chain_1_length_probabilities, but for chain 2.
 
-        labels (dict): A mapping that specifies randomly chosen labels to be assigned to the Receptors. One or multiple
+        labels (dict): A mapping that specifies randomly chosen labels to be assigned to the receptors. One or multiple
         labels can be specified here. The keys of this mapping are the labels, and the values consist of another mapping
         between label classes and their probabilities.
-        For example, to create a random ReceptorDataset with the label cmv_epitope where 70% of the Receptors has class
+        For example, to create a random ReceptorDataset with the label cmv_epitope where 70% of the receptors has class
         binding and the remaining 30% has class not_binding, the following mapping should be specified:
 
         .. indent with spaces

@@ -22,7 +22,10 @@ from source.util.PathBuilder import PathBuilder
 
 class AtchleyKmerEncoder(DatasetEncoder):
     """
-    Represents a repertoire through Atchley factors and relative abundance of k-mers. For more details, see the original publication: Ostmeyer J,
+    Represents a repertoire through Atchley factors and relative abundance of k-mers. Should be used in combination
+    with the :ref:`AtchleyKmerMILClassifier`.
+
+    For more details, see the original publication: Ostmeyer J,
     Christley S, Toby IT, Cowell LG. Biophysicochemical motifs in T cell receptor sequences distinguish repertoires from tumor-infiltrating
     lymphocytes and adjacent healthy tissue. Cancer Res. Published online January 1, 2019:canres.2292.2018. `doi:10.1158/0008-5472.CAN-18-2292
     <https://cancerres.aacrjournals.org/content/79/7/1671>`_ .

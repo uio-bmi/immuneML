@@ -7,22 +7,22 @@ from source.IO.dataset_export.AIRRExporter import AIRRExporter
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.simulation.dataset_generation.RandomDatasetGenerator import RandomDatasetGenerator
 from source.util.PathBuilder import PathBuilder
-from source.workflows.instructions.dataset_generation.DatasetGenerationInstruction import DatasetGenerationInstruction
-from source.workflows.instructions.dataset_generation.DatasetGenerationState import DatasetGenerationState
+from source.workflows.instructions.dataset_generation.DatasetExportInstruction import DatasetExportInstruction
+from source.workflows.instructions.dataset_generation.DatasetExportState import DatasetExportState
 
 
-class TestDatasetGenerationInstruction(TestCase):
+class TestDatasetExportInstruction(TestCase):
     def test_run(self):
-        path = PathBuilder.build(f"{EnvironmentSettings.tmp_test_path}dataset_generation_instruction/")
+        path = PathBuilder.build(f"{EnvironmentSettings.tmp_test_path}dataset_export_instruction/")
         dataset = RandomDatasetGenerator.generate_repertoire_dataset(10, {10: 1}, {12: 1}, {}, path)
         dataset.name = "d1"
-        instruction = DatasetGenerationInstruction(datasets=[dataset],
+        instruction = DatasetExportInstruction(datasets=[dataset],
                                                    exporters=[AIRRExporter])
 
         result_path = f"{path}generated/"
         state = instruction.run(result_path=result_path)
 
-        self.assertTrue(isinstance(state, DatasetGenerationState))
+        self.assertTrue(isinstance(state, DatasetExportState))
         self.assertEqual(1, len(state.datasets))
         self.assertEqual(1, len(state.formats))
         self.assertEqual("AIRR", state.formats[0])
