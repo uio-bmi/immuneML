@@ -31,8 +31,8 @@ from source.util.ReflectionHandler import ReflectionHandler
 _DATE_FMT = '%d.%m.%Y %H:%M:%S'
 
 
-def hello_world(infile, rundir, outfile):
-    """Print out a politically correct greeting for immuneML.
+def hello_world(infile, rundir, outpath):
+    """Print out a polite greeting for immuneML.
 
     Parameters
     ----------
@@ -40,8 +40,8 @@ def hello_world(infile, rundir, outfile):
         String showing the location of the input file.
     rundir : string
         String showing the location we are running in.
-    outfile : string
-        The output file
+    outpath : string
+        The output path.
 
     """
     timestart = datetime.datetime.now().strftime(_DATE_FMT)
@@ -51,8 +51,8 @@ def hello_world(infile, rundir, outfile):
     print(f'Start of execution: {timestart}')
     print(f'Python version: {pyversion}')
     print(f'Running in directory: {rundir}')
-    print(f'Input file: {infile}')
-    print(f'Output file: {outfile}')
+    print(f'Specification file: {infile}')
+    print(f'Output path: {outpath}')
 
 
 def bye_bye_world():
@@ -144,14 +144,11 @@ def main():
     args_dict = vars(parser.parse_args())
 
     input_file = args_dict['specification_path']
-    output_file = args_dict['result_path']
+    output_path = args_dict['result_path']
     # Store directories:
     cwd_dir = os.getcwd()
-    input_dir = os.path.dirname(input_file)
-    if not os.path.isdir(input_dir):
-        input_dir = os.getcwd()
 
-    hello_world(input_file, cwd_dir, output_file)
+    hello_world(input_file, cwd_dir, output_path)
 
     try:
         run_immuneML(args_dict)
