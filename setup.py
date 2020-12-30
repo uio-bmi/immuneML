@@ -46,7 +46,7 @@ def import_requirements(filename) -> list:
 
 
 setup(
-    name="immune-ml",
+    name="immuneML",
     version=get_version(),
     description="immuneML is a software platform for machine learning analysis of immune receptor sequences",
     long_description=get_long_description(),
@@ -57,8 +57,8 @@ setup(
     extras_require={
         "R_plots":  import_requirements("requirements_R_plots.txt"),
         "TCRDist": import_requirements("requirements_TCRdist.txt"),
+        # "DeepRC": import_requirements("requirements_DeepRC.txt"),  # No longer supported since pip 19
     },
-    dependency_links=import_requirements("requirements_DeepRC.txt"),
     classifiers=[
         "Programming Language :: Python :: 3"
     ],

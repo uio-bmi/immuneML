@@ -14,6 +14,9 @@ COPY README.md ./immuneML/
 RUN yum update -y
 RUN yum install -y python38 python38-devel git dnf-plugins-core make openssl-devel libcurl-devel libxml2-devel gcc gcc-c++ autoconf automake libtool m4 llvm llvm-devel
 
+# Installing the git dependency (no longer supported from pip>19)
+RUN pip3 install -r requirements_DeepRC.txt
+
 # Installing R
 RUN dnf install -y epel-release
 RUN dnf config-manager --set-enabled PowerTools
