@@ -26,7 +26,7 @@ class TestPairwiseRepertoireComparison(TestCase):
 
     def test_compare_repertoires(self):
 
-        path = EnvironmentSettings.tmp_test_path + "pairwise_comparison_reps/"
+        path = EnvironmentSettings.tmp_test_path / "pairwise_comparison_reps/"
         PathBuilder.build(path)
 
         dataset = self.create_dataset(path)

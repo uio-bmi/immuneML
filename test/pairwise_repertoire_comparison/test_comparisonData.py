@@ -47,7 +47,7 @@ class TestComparisonData(TestCase):
         return comparison_data
 
     def test_get_repertoire_vector(self):
-        path = EnvironmentSettings.tmp_test_path + "pairwisecomp_comparisondata/"
+        path = EnvironmentSettings.tmp_test_path / "pairwisecomp_comparisondata/"
         PathBuilder.build(path)
 
         comparison_data = self.create_comparison_data(path=path)
@@ -58,7 +58,7 @@ class TestComparisonData(TestCase):
         shutil.rmtree(path)
 
     def test_get_feature_vector(self):
-        path = EnvironmentSettings.tmp_test_path + "pairwisecomp_comparisondata_item_vector/"
+        path = EnvironmentSettings.tmp_test_path / "pairwisecomp_comparisondata_item_vector/"
         PathBuilder.build(path)
 
         comparison_data = self.create_comparison_data(path=path)
@@ -70,7 +70,7 @@ class TestComparisonData(TestCase):
 
     def test_get_batches(self):
 
-        path = EnvironmentSettings.tmp_test_path + "get_batches_comp_data/"
+        path = EnvironmentSettings.tmp_test_path / "get_batches_comp_data/"
         PathBuilder.build(path)
 
         comparison_data = self.create_comparison_data(path=path)
@@ -91,7 +91,7 @@ class TestComparisonData(TestCase):
 
     def test_filter_existing_items(self):
 
-        path = EnvironmentSettings.tmp_test_path + "comparison_rep_filter_existing/"
+        path = EnvironmentSettings.tmp_test_path / "comparison_rep_filter_existing/"
         PathBuilder.build(path)
 
         comparison_data = self.create_comparison_data(path=path)
