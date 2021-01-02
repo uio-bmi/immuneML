@@ -5,6 +5,7 @@ from typing import Tuple, List
 
 import numpy as np
 import yaml
+from pathlib import Path
 
 from scripts.specification_util import update_docs_per_mapping
 from source.caching.CacheHandler import CacheHandler
@@ -92,7 +93,7 @@ class AtchleyKmerEncoder(DatasetEncoder):
         tmp_examples = examples[:, :, :-1] if not self.normalize_all_features else examples
         flattened_vectorized_examples = tmp_examples.reshape(examples.shape[0] * examples.shape[1], -1)
         if self.scaler_path is None:
-            self.scaler_path = params.result_path + "atchley_factor_scaler.pickle"
+            self.scaler_path = params.result_path / "atchley_factor_scaler.pickle"
         scaled_examples = FeatureScaler.standard_scale(self.scaler_path, flattened_vectorized_examples)
         if hasattr(scaled_examples, "todense"):
             scaled_examples = scaled_examples.todense()
@@ -160,15 +161,15 @@ class AtchleyKmerEncoder(DatasetEncoder):
     def _vectorize_examples(self, examples, params: EncoderParams, keys: set) -> Tuple[np.ndarray, list]:
 
         if self.vectorizer_path is None:
-            self.vectorizer_path = f"{params.result_path}vectorizer_keys.yaml"
+            self.vectorizer_path = params.result_path / "vectorizer_keys.yaml"
 
         if params.learn_model is True:
             kmer_keys = sorted(list(keys))
             PathBuilder.build(params.result_path)
-            with open(self.vectorizer_path, "w") as file:
+            with self.vectorizer_path.open("w") as file:
                 yaml.dump(kmer_keys, file)
         else:
-            with open(self.vectorizer_path, "r") as file:
+            with self.vectorizer_path.open("r") as file:
                 kmer_keys = yaml.safe_load(file)
 
         vectorized_examples = [
@@ -190,12 +191,12 @@ class AtchleyKmerEncoder(DatasetEncoder):
         return [self.scaler_path, self.vectorizer_path]
 
     @staticmethod
-    def export_encoder(path: str, encoder) -> str:
-        encoder_file = DatasetEncoder.store_encoder(encoder, path + "encoder.pickle")
+    def export_encoder(path: Path, encoder) -> Path:
+        encoder_file = DatasetEncoder.store_encoder(encoder, path / "encoder.pickle")
         return encoder_file
 
     @staticmethod
-    def load_encoder(encoder_file: str):
+    def load_encoder(encoder_file: Path):
         encoder = DatasetEncoder.load_encoder(encoder_file)
         for attribute in ["scaler_path", "vectorizer_path"]:
             encoder = DatasetEncoder.load_attribute(encoder, encoder_file, attribute)

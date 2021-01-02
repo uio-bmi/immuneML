@@ -1,5 +1,4 @@
 import copy
-import os
 import pickle
 import warnings
 from typing import Tuple
@@ -10,6 +9,7 @@ from scipy.special import beta as beta_func
 from scipy.special import betaln as beta_func_ln
 from scipy.special import digamma
 from scipy.stats import betabinom as beta_binomial
+from pathlib import Path
 
 from source.data_model.encoded_data.EncodedData import EncodedData
 from source.ml_methods.MLMethod import MLMethod
@@ -378,19 +378,20 @@ class ProbabilisticBinaryClassifier(MLMethod):
 
         return result
 
-    def store(self, path, feature_names=None, details_path=None):
+    def store(self, path: Path, feature_names=None, details_path=None):
         content = self._convert_object_to_dict()
         PathBuilder.build(path)
-        name = FilenameHandler.get_filename(self.__class__.__name__, "pickle")
-        with open(path + name, "wb") as file:
+        file_path = path / FilenameHandler.get_filename(self.__class__.__name__, "pickle")
+
+        with file_path.open("wb") as file:
             pickle.dump(content, file)
 
         if details_path is None:
-            params_path = path + FilenameHandler.get_filename(self.__class__.__name__, "yaml")
+            params_path = path / FilenameHandler.get_filename(self.__class__.__name__, "yaml")
         else:
             params_path = details_path
 
-        with open(params_path, "w") as file:
+        with params_path.open("w") as file:
             desc = {self.label_name: {
                 **content,
                 "feature_names": feature_names,
@@ -398,22 +399,22 @@ class ProbabilisticBinaryClassifier(MLMethod):
             }}
             yaml.dump(desc, file)
 
-    def load(self, path):
+    def load(self, path: Path):
         keys = list(vars(self).keys())
-        name = FilenameHandler.get_filename(self.__class__.__name__, "pickle")
-        if os.path.isfile(path + name):
-            with open(path + name, "rb") as file:
+        file_path = path / FilenameHandler.get_filename(self.__class__.__name__, "pickle")
+        if file_path.is_file():
+            with file_path.open("rb") as file:
                 content = pickle.load(file)
                 assert all(
-                    key in keys for key in content.keys()), f"ProbabilisticBinaryClassifier: error while loading from {path + name}: " \
+                    key in keys for key in content.keys()), f"ProbabilisticBinaryClassifier: error while loading from {file_path}: " \
                                                             f"object attributes from file and from the class do not match.\n" \
                                                             f"Attributes from file: {list(content.keys())}\n" \
                                                             f"Attributes for object of class ProbabilisticBinaryClassifier: {keys}"
                 for key in content:
                     setattr(self, key, content[key])
         else:
-            raise FileNotFoundError(self.__class__.__name__ + " model could not be loaded from " + str(
-                path + name) + ". Check if the path to the " + name + " file is properly set.")
+            raise FileNotFoundError(f"{self.__class__.__name__} model could not be loaded from {file_path}. "
+                                    f"Check if the path to the {file_path.name} file is properly set.")
 
     def get_model(self, label_name: str = None):
         return vars(self)

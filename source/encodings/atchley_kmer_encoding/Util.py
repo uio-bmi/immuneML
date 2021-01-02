@@ -116,7 +116,7 @@ class Util:
 
         """
         if Util.ATCHLEY_FACTORS is None:
-            Util.ATCHLEY_FACTORS = pd.read_csv(EnvironmentSettings.root_path + "source/encodings/atchley_kmer_encoding/atchley_factors.csv",
+            Util.ATCHLEY_FACTORS = pd.read_csv(EnvironmentSettings.root_path / "source/encodings/atchley_kmer_encoding/atchley_factors.csv",
                                                index_col='amino_acid')
 
         factors = np.zeros((len(kmers), Util.ATCHLEY_FACTOR_COUNT * k))

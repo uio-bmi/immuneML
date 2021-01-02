@@ -55,12 +55,13 @@ class TestKNN(TestCase):
         knn = KNN()
         knn.fit(EncodedData(sparse.csr_matrix(x), y), "default")
 
-        path = EnvironmentSettings.root_path + "test/tmp/knn/"
+        path = EnvironmentSettings.root_path / "test/tmp/knn/"
 
         knn.store(path, ["f1", "f2", "f3"])
-        self.assertTrue(os.path.isfile(path + "knn.pickle"))
+        pickle_file_path = path / "knn.pickle"
+        self.assertTrue(os.path.isfile(str(pickle_file_path)))
 
-        with open(path + "knn.pickle", "rb") as file:
+        with pickle_file_path.open("rb") as file:
             knn2 = pickle.load(file)
 
         self.assertTrue(isinstance(knn2["default"], KNeighborsClassifier))
@@ -74,10 +75,11 @@ class TestKNN(TestCase):
         knn = KNN()
         knn.fit(EncodedData(sparse.csr_matrix(x), y), "default")
 
-        path = EnvironmentSettings.root_path + "test/tmp/knn2/"
+        path = EnvironmentSettings.root_path / "test/tmp/knn2/"
         PathBuilder.build(path)
 
-        with open(path + "knn.pickle", "wb") as file:
+        pickle_file_path = path / "knn.pickle"
+        with pickle_file_path.open("wb") as file:
             pickle.dump(knn.get_model(), file)
 
         knn2 = KNN()

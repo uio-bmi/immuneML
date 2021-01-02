@@ -54,6 +54,8 @@ class DatasetEncoder(metaclass=abc.ABCMeta):
         for file in encoder.get_additional_files():
             shutil.copy(file, encoder_dir / file.name)
 
+        return encoder_file
+
     @staticmethod
     def get_additional_files() -> List[str]:
         return []

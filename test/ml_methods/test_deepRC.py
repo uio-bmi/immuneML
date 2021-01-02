@@ -6,6 +6,7 @@ from unittest import TestCase
 import pandas as pd
 import torch
 from deeprc.deeprc_binary.architectures import DeepRC as DeepRCInternal
+from pathlib import Path
 
 from source.caching.CacheType import CacheType
 from source.data_model.encoded_data.EncodedData import EncodedData
@@ -25,8 +26,8 @@ class TestDeepRC(TestCase):
     def get_random_sequence(self, alphabet="ACDEFGHIKLMNPQRSTVWY"):
         return "".join([rn.choice(alphabet) for i in range(rn.choice(range(15, 30)))])
 
-    def make_encoded_data(self, path):
-        metadata_filepath = f"{path}/metadata.tsv"
+    def make_encoded_data(self, path: Path):
+        metadata_filepath = path / f"metadata.tsv"
 
         rep_ids = [f"REP{i}" for i in range(10)]
         status_label = [chr((i % 2) + 65) for i in range(10)]  # List of alternating strings "A" "B"
@@ -40,7 +41,7 @@ class TestDeepRC(TestCase):
             repertoire_data = pd.DataFrame({"amino_acid": repertoire_seqs,
                                             "templates": [rn.choice(range(1, 1000)) for i in range(100)]})
 
-            repertoire_data.to_csv(sep="\t", index=False, path_or_buf=f"{path}/{rep_id}.tsv")
+            repertoire_data.to_csv(sep="\t", index=False, path_or_buf=path / f"{rep_id}.tsv")
 
         return EncodedData(examples=None, labels={"status": status_label},
                            example_ids=rep_ids, encoding=DeepRCEncoder.__name__,
@@ -53,9 +54,9 @@ class TestDeepRC(TestCase):
         pass
 
     def test(self):
-        path = EnvironmentSettings.tmp_test_path + "deeprc_classifier/"
-        data_path = path + "encoded_data/"
-        result_path = path + "result/"
+        path = EnvironmentSettings.tmp_test_path / "deeprc_classifier"
+        data_path = path / "encoded_data"
+        result_path = path / "result"
         PathBuilder.build(data_path)
         PathBuilder.build(result_path)
 

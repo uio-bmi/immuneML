@@ -7,6 +7,7 @@ import numpy as np
 import torch
 import yaml
 from torch import nn
+from pathlib import Path
 
 from source.data_model.encoded_data.EncodedData import EncodedData
 from source.environment.EnvironmentSettings import EnvironmentSettings
@@ -92,7 +93,7 @@ class ReceptorCNN(MLMethod):
     def __init__(self, kernel_count: int = None, kernel_size=None, positional_channels: int = None, sequence_type: str = None, device=None,
                  number_of_threads: int = None, random_seed: int = None, learning_rate: float = None, iteration_count: int = None,
                  l1_weight_decay: float = None, l2_weight_decay: float = None, batch_size: int = None, training_percentage: float = None,
-                 evaluate_at: int = None, background_probabilities=None, result_path=None):
+                 evaluate_at: int = None, background_probabilities=None, result_path:Path=None):
 
         super().__init__()
         self.kernel_count = kernel_count
@@ -262,10 +263,10 @@ class ReceptorCNN(MLMethod):
 
         return loss
 
-    def store(self, path, feature_names=None, details_path=None):
+    def store(self, path:Path, feature_names=None, details_path:Path=None):
         PathBuilder.build(path)
 
-        torch.save(copy.deepcopy(self.CNN).state_dict(), path + "CNN.pt")
+        torch.save(copy.deepcopy(self.CNN).state_dict(), path / "CNN.pt")
 
         custom_vars = copy.deepcopy(vars(self))
         del custom_vars["CNN"]
@@ -275,12 +276,13 @@ class ReceptorCNN(MLMethod):
         custom_vars["kernel_size"] = list(custom_vars["kernel_size"])
         custom_vars["sequence_type"] = custom_vars["sequence_type"].name.lower()
 
-        with open(path + "custom_params.yaml", 'w') as file:
+        params_path = path / "custom_params.yaml"
+        with params_path.open('w') as file:
             yaml.dump(custom_vars, file)
 
     def load(self, path):
-
-        with open(path + "custom_params.yaml", "r") as file:
+        params_path = path / "custom_params.yaml"
+        with params_path.open("r") as file:
             custom_params = yaml.load(file, Loader=yaml.SafeLoader)
 
         for param, value in custom_params.items():
@@ -291,7 +293,7 @@ class ReceptorCNN(MLMethod):
         self.sequence_type = SequenceType[self.sequence_type.upper()]
 
         self._make_CNN()
-        self.CNN.load_state_dict(torch.load(path + "CNN.pt"))
+        self.CNN.load_state_dict(torch.load(path / "CNN.pt"))
 
     def _make_CNN(self):
         self.CNN = RCNN(kernel_count=self.kernel_count, kernel_size=self.kernel_size, positional_channels=self.positional_channels,

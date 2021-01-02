@@ -1,5 +1,4 @@
 import hashlib
-import os
 import warnings
 
 import h5py
@@ -14,6 +13,7 @@ from deeprc.deeprc_binary.dataset_readers import no_stack_collate_fn
 from deeprc.deeprc_binary.training import train
 from sklearn.exceptions import NotFittedError
 from tqdm import tqdm
+from pathlib import Path
 
 from source.caching.CacheHandler import CacheHandler
 from source.data_model.encoded_data.EncodedData import EncodedData
@@ -141,9 +141,9 @@ class DeepRC(MLMethod):
 
         self.feature_names = None
 
-    def _metadata_to_hdf5(self, metadata_filepath, label_name):
-        hdf5_filepath = '.'.join(metadata_filepath.split('.')[:-1]) + f".hdf5"
-        converter = DatasetToHDF5(metadata_file=metadata_filepath,
+    def _metadata_to_hdf5(self, metadata_filepath: Path, label_name):
+        hdf5_filepath = metadata_filepath.parents[0] / f"{metadata_filepath.stem}.hdf5"
+        converter = DatasetToHDF5(metadata_file=str(metadata_filepath),
                                   id_column=DeepRCEncoder.ID_COLUMN,
                                   single_class_label_columns=tuple([label_name]),
                                   sequence_column=DeepRCEncoder.SEQUENCE_COLUMN,
@@ -151,12 +151,12 @@ class DeepRC(MLMethod):
                                   column_sep=DeepRCEncoder.SEP,
                                   filename_extension=f".{DeepRCEncoder.EXTENSION}",
                                   verbose=False)
-        converter.save_data_to_file(output_file=hdf5_filepath, n_workers=self.n_workers)
+        converter.save_data_to_file(output_file=str(hdf5_filepath), n_workers=self.n_workers)
 
         return hdf5_filepath
 
-    def _load_dataset_in_ram(self, hdf5_filepath):
-        with h5py.File(hdf5_filepath, 'r') as hf:
+    def _load_dataset_in_ram(self, hdf5_filepath: Path):
+        with h5py.File(str(hdf5_filepath), 'r') as hf:
             pre_loaded_hdf5_file = dict()
             pre_loaded_hdf5_file['seq_lens'] = hf['sampledata']['seq_lens'][:]
             pre_loaded_hdf5_file['counts_per_sequence'] = hf['sampledata']['counts_per_sequence'][:]
@@ -175,7 +175,7 @@ class DeepRC(MLMethod):
 
         return train_indices, val_indices
 
-    def make_data_loader(self, hdf5_filepath, pre_loaded_hdf5_file, indices, label, eval_only: bool, is_train: bool, n_workers=1):
+    def make_data_loader(self, hdf5_filepath: Path, pre_loaded_hdf5_file, indices, label, eval_only: bool, is_train: bool, n_workers=1):
         """
         Creates a pytorch dataloader using DeepRC's RepertoireDataReaderBinary
 
@@ -196,7 +196,7 @@ class DeepRC(MLMethod):
         training_batch_size = self.training_batch_size if is_train else 1
 
         dataset = RepertoireDataReaderBinary(
-            hdf5_filepath=hdf5_filepath, set_inds=indices,
+            hdf5_filepath=str(hdf5_filepath), set_inds=indices,
             sample_n_sequences=sample_n_sequences, target_label=label,
             true_class_label_value=self.label_classes[label][0],
             pre_loaded_hdf5_file=pre_loaded_hdf5_file,
@@ -226,7 +226,7 @@ class DeepRC(MLMethod):
         self.label_classes = label_classes
 
     def _prepare_caching_params(self, encoded_data: EncodedData, type: str, label_name: str):
-        return (("metadata_filepath", encoded_data.info["metadata_filepath"]),
+        return (("metadata_filepath", str(encoded_data.info["metadata_filepath"])),
                 ("y", hashlib.sha256(str(encoded_data.labels[label_name]).encode("utf-8")).hexdigest()),
                 ("label_name", label_name),
                 ("type", type),
@@ -271,7 +271,7 @@ class DeepRC(MLMethod):
 
         return self.models
 
-    def _fit_for_label(self, hdf5_filepath, pre_loaded_hdf5_file, train_indices, val_indices, label: str, cores_for_training: int):
+    def _fit_for_label(self, hdf5_filepath: Path, pre_loaded_hdf5_file, train_indices, val_indices, label: str, cores_for_training: int):
         train_dataloader = self.make_data_loader(hdf5_filepath, pre_loaded_hdf5_file, train_indices, label, eval_only=False, is_train=True,
                                                  n_workers=self.n_workers)
         train_eval_dataloader = self.make_data_loader(hdf5_filepath, pre_loaded_hdf5_file, train_indices, label, eval_only=True, is_train=True)
@@ -289,7 +289,7 @@ class DeepRC(MLMethod):
                                reduction_mb_size=self.reduction_mb_size, device=self.pytorch_device)
 
         self.training_function(model, trainingset_dataloader=train_dataloader, trainingset_eval_dataloader=train_eval_dataloader,
-                               validationset_eval_dataloader=val_eval_dataloader, results_directory=self.result_path + "/deeprc_log",
+                               validationset_eval_dataloader=val_eval_dataloader, results_directory=self.result_path / "deeprc_log",
                                n_updates=self.n_updates, num_torch_threads=self.n_torch_threads, learning_rate=self.learning_rate,
                                l1_weight_decay=self.l1_weight_decay, l2_weight_decay=self.l2_weight_decay,
                                show_progress=False, device=self.pytorch_device, evaluate_at=self.evaluate_at)
@@ -372,29 +372,29 @@ class DeepRC(MLMethod):
 
         return scoring_predictions
 
-    def load(self, path):
+    def load(self, path: Path):
         name = FilenameHandler.get_filename(self.__class__.__name__, "pt")
-        if os.path.isfile(path + name):
-            self.models = torch.load(path + name)
+        file_path = path  / name
+        if file_path.is_file():
+            self.models = torch.load(file_path)
             for model in self.models.values():
                 model.eval()
         else:
-            raise FileNotFoundError(self.__class__.__name__ + " model could not be loaded from " + str(
-                path + name) + ". Check if the path to the " + name + " file is properly set.")
+            raise FileNotFoundError(f"{self.__class__.__name__} model could not be loaded from {file_path}. "
+                                    f"Check if the path to the {name} file is properly set.")
 
-        pass
 
-    def store(self, path, feature_names=None, details_path=None):
+    def store(self, path, feature_names=None, details_path: Path = None):
         PathBuilder.build(path)
         name = FilenameHandler.get_filename(self.__class__.__name__, "pt")
-        torch.save(self.models, path + name)
+        torch.save(self.models, str(path / name))
 
         if details_path is None:
-            params_path = path + FilenameHandler.get_filename(self.__class__.__name__, "yaml")
+            params_path = path / FilenameHandler.get_filename(self.__class__.__name__, "yaml")
         else:
             params_path = details_path
 
-        with open(params_path, "w") as file:
+        with params_path.open("w") as file:
             desc = {}
             for label in self.models.keys():
                 desc[label] = {
@@ -405,7 +405,9 @@ class DeepRC(MLMethod):
             yaml.dump(desc, file)
 
     def check_if_exists(self, path):
-        return os.path.isfile(path + FilenameHandler.get_filename(self.__class__.__name__, "pt"))
+        file_path = path / FilenameHandler.get_filename(self.__class__.__name__, "pt")
+
+        return file_path.is_file()
 
     def get_label(self):
         return self.label_classes

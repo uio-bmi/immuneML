@@ -2,6 +2,7 @@ import os
 import pickle
 
 from sklearn.preprocessing import StandardScaler, normalize, binarize
+from pathlib import Path
 
 from source.analysis.data_manipulation.NormalizationType import NormalizationType
 from source.util.PathBuilder import PathBuilder
@@ -12,7 +13,7 @@ class FeatureScaler:
     SKLEARN_NORMALIZATION_TYPES = ["l1", "l2", "max"]
 
     @staticmethod
-    def standard_scale(scaler_file: str, design_matrix, with_mean: bool = True):
+    def standard_scale(scaler_file: Path, design_matrix, with_mean: bool = True):
         """
         scale to zero mean and unit variance on feature level
         :param scaler_file: path to scaler file fitted on train set or where the resulting scaler file will be stored
@@ -26,17 +27,18 @@ class FeatureScaler:
         else:
             scaled_design_matrix = design_matrix
 
-        if os.path.isfile(scaler_file):
-            with open(scaler_file, 'rb') as file:
-                scaler = pickle.load(file)
+        if scaler_file.is_file():
+            with scaler_file.open('rb') as file:
+                scaler = pickle.load(file) # todo does this work?
                 scaled_design_matrix = scaler.transform(scaled_design_matrix)
         else:
             scaler = StandardScaler(with_mean=with_mean)
             scaled_design_matrix = scaler.fit_transform(scaled_design_matrix)
 
-            PathBuilder.build(os.path.dirname(scaler_file))
+            directory = scaler_file.parents[0]
+            PathBuilder.build(directory)
 
-            with open(scaler_file, 'wb') as file:
+            with scaler_file.open('wb') as file:
                 pickle.dump(scaler, file)
 
         return scaled_design_matrix

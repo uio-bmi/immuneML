@@ -46,12 +46,12 @@ class TestTCRdistClassifier(TestCase):
         cls = TCRdistClassifier(0.75)
         cls.fit(encoded_data, label_name="test", cores_for_training=4)
 
-        path = EnvironmentSettings.root_path + "test/tmp/tcrdist_classifier/"
+        path = EnvironmentSettings.root_path / "test/tmp/tcrdist_classifier/"
 
         cls.store(path)
-        self.assertTrue(os.path.isfile(path + "tcrdist_classifier.pickle"))
+        self.assertTrue(os.path.isfile(path / "tcrdist_classifier.pickle"))
 
-        with open(path + "tcrdist_classifier.pickle", "rb") as file:
+        with open(path / "tcrdist_classifier.pickle", "rb") as file:
             cls2 = pickle.load(file)
 
         self.assertTrue(isinstance(cls2["test"], KNeighborsClassifier))
@@ -64,9 +64,9 @@ class TestTCRdistClassifier(TestCase):
         cls = TCRdistClassifier(0.75)
         cls.fit(encoded_data, label_name="test", cores_for_training=4)
 
-        path = PathBuilder.build(EnvironmentSettings.root_path + "test/tmp/tcrdist_classifier_load/")
+        path = PathBuilder.build(EnvironmentSettings.root_path / "test/tmp/tcrdist_classifier_load/")
 
-        with open(path + "tcrdist_classifier.pickle", "wb") as file:
+        with open(path / "tcrdist_classifier.pickle", "wb") as file:
             dill.dump(cls.get_model(), file)
 
         cls2 = TCRdistClassifier(percentage=1.)
