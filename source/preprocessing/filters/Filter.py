@@ -17,8 +17,7 @@ class Filter(Preprocessor, ABC):
         if dataset.metadata_file:
             df = pd.read_csv(dataset.metadata_file).iloc[indices_to_keep, :]
             df.reset_index(drop=True, inplace=True)
-            path = result_path + "/{}_metadata_filtered.csv" \
-                .format(os.path.splitext(os.path.basename(dataset.metadata_file))[0])
+            path = result_path / f"{dataset.metadata_file.stem}_metadata_filtered.csv"
             df.to_csv(path)
         else:
             path = None

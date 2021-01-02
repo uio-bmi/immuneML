@@ -20,7 +20,7 @@ class TestDuplicateSequenceFilter(TestCase):
         os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
 
     def test_process(self):
-        path = EnvironmentSettings.root_path + "test/tmp/duplicatesequencefilter/"
+        path = EnvironmentSettings.root_path / "test/tmp/duplicatesequencefilter/"
         PathBuilder.build(path)
 
         dataset = RepertoireDataset(repertoires=[Repertoire.build(sequence_aas=["AAA", "AAA", "CCC", "AAA", "CCC", "CCC", "CCC"],

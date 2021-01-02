@@ -21,16 +21,16 @@ class TestMetadataRepertoireFilter(TestCase):
         os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
 
     def test_process(self):
-        path = EnvironmentSettings.root_path + "test/tmp/metadata_filter/"
+        path = EnvironmentSettings.root_path / "test/tmp/metadata_filter/"
         PathBuilder.build(path)
         dataset = RepertoireDataset(repertoires=RepertoireBuilder.build([["ACF", "ACF", "ACF"],
                                                                        ["ACF", "ACF"],
                                                                        ["ACF", "ACF", "ACF", "ACF"]], path)[0])
 
         df = pd.DataFrame(data={"key1": [0, 1, 2], "key2": [0, 1, 2]})
-        df.to_csv(path+"metadata.csv")
+        df.to_csv(path/"metadata.csv")
 
-        dataset.metadata_file = path+"metadata.csv"
+        dataset.metadata_file = path/"metadata.csv"
 
         dataset1 = MetadataRepertoireFilter.process(dataset, {
             "criteria": {

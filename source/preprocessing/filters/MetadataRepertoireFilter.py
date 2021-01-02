@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+from pathlib import Path
 
 from source.analysis.criteria_matches.CriteriaMatcher import CriteriaMatcher
 from source.analysis.criteria_matches.CriteriaTypeInstantiator import CriteriaTypeInstantiator
@@ -37,7 +38,7 @@ class MetadataRepertoireFilter(Filter):
     def __init__(self, criteria: dict):
         self.criteria = CriteriaTypeInstantiator.instantiate(criteria)
 
-    def process_dataset(self, dataset: RepertoireDataset, result_path: str):
+    def process_dataset(self, dataset: RepertoireDataset, result_path: Path):
         params = {"result_path": result_path, "criteria": self.criteria}
 
         return MetadataRepertoireFilter.process(dataset, params)
