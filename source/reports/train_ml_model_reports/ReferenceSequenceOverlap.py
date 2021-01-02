@@ -6,6 +6,7 @@ from typing import Tuple
 import matplotlib.pyplot as plt
 import pandas as pd
 from matplotlib_venn import venn2
+from pathlib import Path
 
 from source.encodings.filtered_sequence_encoding.SequenceAbundanceEncoder import SequenceAbundanceEncoder
 from source.encodings.filtered_sequence_encoding.SequenceCountEncoder import SequenceCountEncoder
@@ -60,6 +61,8 @@ class ReferenceSequenceOverlap(TrainMLModelReport):
         assert os.path.isfile(kwargs['reference_path']), f"{ReferenceSequenceOverlap.__name__}: 'reference_path' for report {kwargs['name']} is not " \
                                                          f"a valid file path."
 
+        kwargs['reference_path'] = Path(kwargs['reference_path'])
+
         reference_sequences_df = pd.read_csv(kwargs['reference_path'])
         attributes = reference_sequences_df.columns.tolist()
 
@@ -68,7 +71,7 @@ class ReferenceSequenceOverlap(TrainMLModelReport):
 
         return ReferenceSequenceOverlap(**kwargs)
 
-    def __init__(self, reference_path: str = None, comparison_attributes: list = None, name: str = None, state: TrainMLModelState = None,
+    def __init__(self, reference_path: Path = None, comparison_attributes: list = None, name: str = None, state: TrainMLModelState = None,
                  result_path: str = None, label: str = None):
         super().__init__(name)
         self.reference_path = reference_path
@@ -93,8 +96,8 @@ class ReferenceSequenceOverlap(TrainMLModelReport):
         for assessment_state in self.state.assessment_states:
             encoder = assessment_state.label_states[self.label].optimal_assessment_item.encoder
             if check_encoder_class(encoder):
-                figure_filename = f"{self.result_path}assessment_split_{assessment_state.split_index+1}_model_vs_reference_overlap_{self.label}.pdf"
-                df_filename = f"{self.result_path}assessment_split_{assessment_state.split_index+1}_overlap_sequences_{self.label}"
+                figure_filename = self.result_path / f"assessment_split_{assessment_state.split_index+1}_model_vs_reference_overlap_{self.label}.pdf"
+                df_filename = self.result_path / f"assessment_split_{assessment_state.split_index+1}_overlap_sequences_{self.label}"
                 figure, data = self._compute_model_overlap(figure_filename, df_filename, encoder,
                                                            f"overlap sequences between the model for assessment split "
                                                            f"{assessment_state.split_index + 1} and reference list")
@@ -122,8 +125,8 @@ class ReferenceSequenceOverlap(TrainMLModelReport):
 
     def _compute_optimal_model_overlap(self) -> Tuple[ReportOutput, ReportOutput]:
 
-        filename = f"{self.result_path}optimal_model_vs_reference_overlap_{self.label}.pdf"
-        df_filename = f"{self.result_path}overlap_sequences_{self.label}.csv"
+        filename = self.result_path / f"optimal_model_vs_reference_overlap_{self.label}.pdf"
+        df_filename = self.result_path / f"overlap_sequences_{self.label}.csv"
         encoder = self.state.optimal_hp_items[self.label].encoder
 
         return self._compute_model_overlap(filename, df_filename, encoder,
