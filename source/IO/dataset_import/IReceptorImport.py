@@ -147,8 +147,8 @@ class IReceptorImport(DataImport):
 
     @staticmethod
     def import_repertoire_dataset(params: dict, dataset_name: str) -> RepertoireDataset:
-        base_result_path = params['result_path'] + "tmp_airr/"
-        metadata_file_path = base_result_path + "metadata.csv"
+        base_result_path = params['result_path'] / "tmp_airr"
+        metadata_file_path = base_result_path / "metadata.csv"
 
         IReceptorImport._create_airr_repertoiredataset(params['path'], base_result_path, metadata_file_path)
 
@@ -164,9 +164,9 @@ class IReceptorImport(DataImport):
 
     @staticmethod
     def import_sequence_dataset(params: dict, dataset_name: str) -> RepertoireDataset:
-        base_result_path = params['result_path'] + "tmp_airr/"
+        base_result_path = params['result_path'] / "tmp_airr"
 
-        unzipped_path = base_result_path + "tmp_unzipped/"
+        unzipped_path = base_result_path / "tmp_unzipped"
         IReceptorImport._unzip_files(params['path'], unzipped_path, unzip_metadata=False)
 
         airr_params = copy.deepcopy(params)
@@ -179,16 +179,17 @@ class IReceptorImport(DataImport):
         return dataset
 
     @staticmethod
-    def _create_airr_repertoiredataset(input_zips_path, base_result_path, metadata_file_path):
-        unzipped_path = base_result_path + "tmp_unzipped/"
-        PathBuilder.build(base_result_path + IReceptorImport.REPERTOIRES_FOLDER)
+    def _create_airr_repertoiredataset(input_zips_path: Path, base_result_path: Path, metadata_file_path: Path):
+        unzipped_path = base_result_path / "tmp_unzipped/"
+        PathBuilder.build(base_result_path / IReceptorImport.REPERTOIRES_FOLDER)
 
         IReceptorImport._unzip_files(input_zips_path, unzipped_path)
 
         all_metadata_dfs = []
 
-        for airr_filename in glob.glob(f"{unzipped_path}*.tsv"):
-            metadata_filename = f"{unzipped_path}{Path(airr_filename).stem}-metadata.json"
+        for airr_filename_str in glob.glob(str(unzipped_path / "*.tsv")):
+            airr_filename = Path(airr_filename_str)
+            metadata_filename = unzipped_path / f"{airr_filename.stem}-metadata.json"
 
             sub_metadata_df = IReceptorImport._create_metadata_df(metadata_filename)
             IReceptorImport._split_airr_files(airr_filename, sub_metadata_df, base_result_path)
@@ -202,8 +203,8 @@ class IReceptorImport(DataImport):
 
 
     @staticmethod
-    def _unzip_files(path: str, unzipped_path: str, unzip_metadata=True) -> Dataset:
-        for zip_filename in glob.glob(f"{path}*.zip"):
+    def _unzip_files(path: Path, unzipped_path: Path, unzip_metadata=True) -> Dataset:
+        for zip_filename in glob.glob(str(path / "*.zip")):
             with zipfile.ZipFile(zip_filename, "r") as zip_object:
                 for file in zip_object.filelist:
                     file.filename = f"{Path(zip_filename).stem}_{file.filename}"
@@ -305,7 +306,7 @@ class IReceptorImport(DataImport):
         return metadata_df
 
     @staticmethod
-    def _split_airr_files(airr_file, metadata_df, result_path):
+    def _split_airr_files(airr_file: Path, metadata_df: pd.DataFrame, result_path: Path):
         airr_df = airr.load_rearrangement(airr_file)
 
         for filename, repertoire_id, sample_processing_id, data_processing_id in metadata_df[
@@ -315,7 +316,7 @@ class IReceptorImport(DataImport):
                 subset = subset[subset["sample_processing_id"] == sample_processing_id]
             if "data_processing_id" in airr_df.columns:
                 subset = subset[subset["data_processing_id"] == data_processing_id]
-            subset.to_csv(result_path + filename, index=False, sep="\t")
+            subset.to_csv(result_path / filename, index=False, sep="\t")
 
 
     @staticmethod
