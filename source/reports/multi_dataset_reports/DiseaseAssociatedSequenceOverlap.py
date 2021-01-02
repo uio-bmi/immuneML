@@ -2,6 +2,7 @@ from typing import List
 
 import pandas as pd
 import plotly.express as px
+from pathlib import Path
 
 from source.hyperparameter_optimization.states.TrainMLModelState import TrainMLModelState
 from source.reports.ReportOutput import ReportOutput
@@ -41,14 +42,14 @@ class DiseaseAssociatedSequenceOverlap(MultiDatasetReport):
     def build_object(cls, **kwargs):
         return DiseaseAssociatedSequenceOverlap(**kwargs)
 
-    def __init__(self, instruction_states: List[TrainMLModelState] = None, name: str = None, result_path: str = None):
+    def __init__(self, instruction_states: List[TrainMLModelState] = None, name: str = None, result_path: Path = None):
         super().__init__(name)
         self.instruction_states = instruction_states
         self.result_path = result_path
         self.label = None
 
     def generate(self) -> ReportResult:
-        self.result_path = PathBuilder.build(f"{self.result_path}/{self.name}/")
+        self.result_path = PathBuilder.build(self.result_path / self.name)
         self._extract_label()
 
         hp_items = [state.optimal_hp_items[self.label] for state in self.instruction_states]
@@ -73,7 +74,7 @@ class DiseaseAssociatedSequenceOverlap(MultiDatasetReport):
         self.label = list(all_labels)[0]
 
     def _export_matrix(self, overlap_matrix, labels):
-        data_path = self.result_path + "sequence_overlap.csv"
+        data_path = self.result_path / "sequence_overlap.csv"
         pd.DataFrame(overlap_matrix, columns=labels, index=labels).to_csv(data_path)
         return data_path
 
@@ -81,7 +82,7 @@ class DiseaseAssociatedSequenceOverlap(MultiDatasetReport):
         figure = px.imshow(overlap_matrix, x=labels, y=labels, zmin=0, zmax=100, color_continuous_scale=px.colors.sequential.Teal,
                            template='plotly_white')
         figure.update_traces(hovertemplate="Overlap of disease-associated<br>sequences between datasets<br>%{x} and %{y}:<br>%{z}%<extra></extra>")
-        figure_path = self.result_path + "sequence_overlap.html"
-        figure.write_html(figure_path)
+        figure_path = self.result_path / "sequence_overlap.html"
+        figure.write_html(str(figure_path))
         return figure_path
 

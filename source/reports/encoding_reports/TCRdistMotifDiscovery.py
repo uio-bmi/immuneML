@@ -1,6 +1,7 @@
 from typing import List, Tuple
 
 from tcrdist.summarize import _select
+from pathlib import Path
 
 from source.data_model.dataset.ReceptorDataset import ReceptorDataset
 from source.reports.ReportOutput import ReportOutput
@@ -47,7 +48,7 @@ class TCRdistMotifDiscovery(EncodingReport):
     def build_object(cls, **kwargs):
         return TCRdistMotifDiscovery(**kwargs)
 
-    def __init__(self, dataset: ReceptorDataset = None, result_path: str = None, name: str = None, cores: int = None, positive_class_name: str = None):
+    def __init__(self, dataset: ReceptorDataset = None, result_path: Path = None, name: str = None, cores: int = None, positive_class_name: str = None):
         super().__init__(name)
         self.dataset = dataset
         self.label = list(dataset.encoded_data.labels.keys())[0] if dataset is not None else None
@@ -93,17 +94,17 @@ class TCRdistMotifDiscovery(EncodingReport):
             motif, stat = compute_pal_motif(seqs=_select(df=tcr_rep.clone_df, iloc_rows=row['neighbors_i'], col=f'cdr3_{chain}_aa'),
                                             centroid=centroid, refs=negative_examples)
 
-            figure_path = self.result_path + f"motif_{chain}_{index+1}.svg"
+            figure_path = self.result_path / f"motif_{chain}_{index+1}.svg"
             svg_logo(motif, filename=figure_path)
 
-            motif_data_path = self.result_path + f"motif_{chain}_{index+1}.csv"
+            motif_data_path = self.result_path / f"motif_{chain}_{index+1}.csv"
             motif.to_csv(motif_data_path)
 
             figure_outputs.append(ReportOutput(figure_path, f'Motif {index+1} ({chain} chain)'))
             table_outputs.append(ReportOutput(motif_data_path, f'motif {index+1} ({chain} chain) csv data'))
 
             if negative_examples:
-                stat_overview_path = self.result_path + f"motif_{chain}_{index + 1}_stat.csv"
+                stat_overview_path = self.result_path / f"motif_{chain}_{index + 1}_stat.csv"
                 stat.to_csv(stat_overview_path)
                 table_outputs.append(ReportOutput(stat_overview_path, f'KL divergence and log-likelihood per position given reference data: cluster '
                                                                       f'{index+1} ({chain} chain) csv data'))

@@ -29,7 +29,7 @@ class TestSimilarityHeatmap(TestCase):
 
     def test_generate(self):
 
-        path = EnvironmentSettings.root_path + "test/tmp/similarityheatmap/"
+        path = EnvironmentSettings.root_path / "test/tmp/similarityheatmap/"
 
         sequences = [''.join(random.choices(string.ascii_uppercase, k=12)) for i in range(30)]
 

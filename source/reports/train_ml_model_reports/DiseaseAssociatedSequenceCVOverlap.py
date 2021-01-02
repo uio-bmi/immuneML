@@ -3,6 +3,7 @@ from typing import List, Tuple
 
 import pandas as pd
 import plotly.express as px
+from pathlib import Path
 
 from source.encodings.filtered_sequence_encoding.SequenceAbundanceEncoder import SequenceAbundanceEncoder
 from source.hyperparameter_optimization.states.HPItem import HPItem
@@ -49,7 +50,7 @@ class DiseaseAssociatedSequenceCVOverlap(TrainMLModelReport):
     def build_object(cls, **kwargs):
         return DiseaseAssociatedSequenceCVOverlap(**kwargs)
 
-    def __init__(self, state: TrainMLModelState = None, result_path: str = None, name: str = None, compare_in_selection: bool = False,
+    def __init__(self, state: TrainMLModelState = None, result_path: Path = None, name: str = None, compare_in_selection: bool = False,
                  compare_in_assessment: bool = False):
         super().__init__(name)
         self.state = state
@@ -104,7 +105,7 @@ class DiseaseAssociatedSequenceCVOverlap(TrainMLModelReport):
         return table_output, figure_output
 
     def _export_matrix(self, overlap_matrix, filename, row_col_names) -> ReportOutput:
-        data_path = f"{self.result_path}{filename}.csv"
+        data_path = self.result_path / f"{filename}.csv"
         pd.DataFrame(overlap_matrix, columns=row_col_names, index=row_col_names).to_csv(data_path)
         return ReportOutput(data_path, " ".join(filename.split('_') + ['data']))
 
@@ -112,6 +113,6 @@ class DiseaseAssociatedSequenceCVOverlap(TrainMLModelReport):
         figure = px.imshow(overlap_matrix, x=row_col_names, y=row_col_names, zmin=0, zmax=100, color_continuous_scale=px.colors.sequential.Teal,
                            template='plotly_white')
         figure.update_traces(hovertemplate="Overlap of disease-associated<br>sequences between<br>%{x} and %{y}:<br>%{z}%<extra></extra>")
-        figure_path = f"{self.result_path}{filename}.html"
-        figure.write_html(figure_path)
+        figure_path = self.result_path / f"{filename}.html"
+        figure.write_html(str(figure_path))
         return ReportOutput(figure_path, " ".join(filename.split('_')))

@@ -43,7 +43,7 @@ class TestFeatureValueBarplot(TestCase):
         return dataset
 
     def test_generate(self):
-        path = EnvironmentSettings.root_path + "test/tmp/featurevaluebarplot/"
+        path = EnvironmentSettings.root_path / "test/tmp/featurevaluebarplot/"
 
         dataset = self._create_dummy_encoded_data(path)
 
@@ -58,10 +58,10 @@ class TestFeatureValueBarplot(TestCase):
         result = report.generate()
 
         self.assertIsInstance(result, ReportResult)
-        self.assertEqual(result.output_figures[0].path, path+"feature_values.html")
-        self.assertEqual(result.output_tables[0].path, path+"feature_values.csv")
+        self.assertEqual(result.output_figures[0].path, path / "feature_values.html")
+        self.assertEqual(result.output_tables[0].path, path / "feature_values.csv")
 
-        content = pd.read_csv(f"{path}/feature_values.csv")
+        content = pd.read_csv(path / "feature_values.csv")
         self.assertListEqual(list(content.columns), ["patient", "disease", "timepoint", "example_id", "sequence", "feature", "value"])
 
         # report should succeed to build but check_prerequisites should be false when data is not encoded

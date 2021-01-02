@@ -1,4 +1,5 @@
 import warnings
+from pathlib import Path
 
 from scripts.specification_util import update_docs_per_mapping
 from source.analysis.data_manipulation.DataReshaper import DataReshaper
@@ -127,7 +128,7 @@ class FeatureValueDistplot(EncodingReport):
 
         return FeatureValueDistplot(**kwargs)
 
-    def __init__(self, dataset: RepertoireDataset = None, result_path: str = None, distribution_plot_type: str = "box",
+    def __init__(self, dataset: RepertoireDataset = None, result_path: Path = None, distribution_plot_type: str = "box",
                  grouping_label: str = None, color_label: str = "NULL", connection_label: str = "NULL",
                  row_grouping_labels: list = None, column_grouping_labels: list = None, panel_layout_type: str = "grid",
                  panel_axis_scales_type: str = "free", panel_label_switch_type: str = "NULL", panel_nrow="NULL",
@@ -173,7 +174,7 @@ class FeatureValueDistplot(EncodingReport):
         return ReportResult(self.name, output_figures, [table_result])
 
     def _write_results_table(self, data):
-        table_path = f"{self.result_path}{self.result_name}.csv"
+        table_path = self.result_path / f"{self.result_name}.csv"
         data.to_csv(table_path, index=False)
         return ReportOutput(table_path, "feature values")
 
@@ -183,12 +184,13 @@ class FeatureValueDistplot(EncodingReport):
 
         pandas2ri.activate()
 
-        with open(EnvironmentSettings.root_path + "source/visualization/Distributions.R") as f:
+        r_file_path = EnvironmentSettings.root_path / "source/visualization/Distributions.R"
+        with r_file_path.open() as f:
             string = f.read()
 
         plot = STAP(string, "plot")
 
-        plot.plot_distribution(data=data_long_format,
+        plot.plot_distribution(data=str(data_long_format),
                                x=self.grouping_label,
                                y="value",
                                color=self.color,
@@ -207,10 +209,10 @@ class FeatureValueDistplot(EncodingReport):
                                y_lab=self.y_title,
                                color_lab=self.color_title,
                                palette=self.palette,
-                               result_path=self.result_path,
+                               result_path=str(self.result_path),
                                result_name=self.result_name)
 
-        return ReportOutput(f"{self.result_path}{self.result_name}.pdf", "feature dist plot")
+        return ReportOutput(self.result_path / f"{self.result_name}.pdf", "feature dist plot")
 
     def check_prerequisites(self):
         location = "FeatureValueDistplot"

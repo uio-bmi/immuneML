@@ -25,7 +25,7 @@ from source.reports.train_ml_model_reports.CVFeaturePerformance import CVFeature
 class TestCVFeaturePerformance(TestCase):
     def test_generate(self):
 
-        path = EnvironmentSettings.tmp_test_path + "cv_feature_performance/"
+        path = EnvironmentSettings.tmp_test_path / "cv_feature_performance/"
 
         state = TrainMLModelState(assessment=SplitConfig(split_count=5, split_strategy=SplitType.K_FOLD),
                                   selection=SplitConfig(split_count=10, split_strategy=SplitType.K_FOLD),

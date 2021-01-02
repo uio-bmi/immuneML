@@ -75,25 +75,25 @@ class TestMLSettingsPerformance(TestCase):
         return state
 
     def test_generate(self):
-        path = EnvironmentSettings.root_path + "test/tmp/mlsettingsperformance/"
+        path = EnvironmentSettings.root_path / "test/tmp/mlsettingsperformance/"
         PathBuilder.build(path)
 
         report = MLSettingsPerformance(**{"single_axis_labels": False, "x_label_position": None, "y_label_position": None})
 
         report.result_path = path
-        report.state = self._create_state_object(path + "input_data/")
+        report.state = self._create_state_object(path / "input_data/")
 
         report.check_prerequisites()
         result = report.generate()
 
-        self.assertTrue(os.path.isfile(path + "performance.csv"))
-        self.assertTrue(os.path.isfile(path + "performance.html"))
+        self.assertTrue(os.path.isfile(path / "performance.csv"))
+        self.assertTrue(os.path.isfile(path / "performance.html"))
 
         self.assertIsInstance(result, ReportResult)
-        self.assertEqual(result.output_figures[0].path, path + "performance.html")
-        self.assertEqual(result.output_tables[0].path, path + "performance.csv")
+        self.assertEqual(result.output_figures[0].path, path / "performance.html")
+        self.assertEqual(result.output_tables[0].path, path / "performance.csv")
 
-        written_data = pd.read_csv(path + "performance.csv")
+        written_data = pd.read_csv(path / "performance.csv")
         self.assertEqual(list(written_data.columns), ["fold", "label", "encoding", "ml_method", "performance"])
 
         shutil.rmtree(path)
@@ -101,13 +101,13 @@ class TestMLSettingsPerformance(TestCase):
     def test_plot(self):
         # Does not assert anything, but can be used to manually check if the plot looks like it should
 
-        path = EnvironmentSettings.root_path + "test/tmp/mlsettingsperformance/"
+        path = EnvironmentSettings.root_path / "test/tmp/mlsettingsperformance/"
         PathBuilder.build(path)
 
         report = MLSettingsPerformance(**{"single_axis_labels": True, "x_label_position": -0.12, "y_label_position": -0.08})
 
         report.result_path = path
-        report.state = self._create_state_object(path + "input_data/")
+        report.state = self._create_state_object(path / "input_data/")
 
         df = pd.DataFrame({"fold": [0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1],
                       "label": ["l1", "l1", "l1", "l1", "l2", "l2", "l2", "l2", "l1", "l1", "l1", "l1", "l2", "l2", "l2", "l2"],

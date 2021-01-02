@@ -50,7 +50,7 @@ class TestDistributions(TestCase):
         return dataset
 
     def test_generate(self):
-        path = EnvironmentSettings.root_path + "test/tmp/featurevaluedistplot/"
+        path = EnvironmentSettings.root_path / "test/tmp/featurevaluedistplot/"
 
         dataset = self._create_dummy_encoded_data(path)
 
@@ -65,8 +65,8 @@ class TestDistributions(TestCase):
         result = report.generate()
 
         self.assertIsInstance(result, ReportResult)
-        self.assertEqual(result.output_figures[0].path, path+"sina.pdf")
-        self.assertEqual(result.output_tables[0].path, path+"sina.csv")
+        self.assertEqual(result.output_figures[0].path, path/"sina.pdf")
+        self.assertEqual(result.output_tables[0].path, path/"sina.csv")
 
         # density-like plots (ridge, density) have to work regardless of what 'color_label' is set to
         report = FeatureValueDistplot.build_object(**{"dataset": dataset,
@@ -79,8 +79,8 @@ class TestDistributions(TestCase):
         result = report.generate()
 
         self.assertIsInstance(result, ReportResult)
-        self.assertEqual(result.output_figures[0].path, path + "ridge.pdf")
-        self.assertEqual(result.output_tables[0].path, path + "ridge.csv")
+        self.assertEqual(result.output_figures[0].path, path / "ridge.pdf")
+        self.assertEqual(result.output_tables[0].path, path / "ridge.csv")
 
         report = FeatureValueDistplot.build_object(**{"dataset": dataset,
                                                       "result_path": path,
@@ -93,7 +93,7 @@ class TestDistributions(TestCase):
         result = report.generate()
 
         self.assertIsInstance(result, ReportResult)
-        self.assertEqual(result.output_figures[0].path, path + "density.pdf")
-        self.assertEqual(result.output_tables[0].path, path + "density.csv")
+        self.assertEqual(result.output_figures[0].path, path / "density.pdf")
+        self.assertEqual(result.output_tables[0].path, path / "density.csv")
 
         shutil.rmtree(path)

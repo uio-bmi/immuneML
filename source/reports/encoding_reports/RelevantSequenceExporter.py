@@ -2,6 +2,7 @@ import logging
 import os
 
 import pandas as pd
+from pathlib import Path
 
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.receptor.RegionType import RegionType
@@ -35,7 +36,7 @@ class RelevantSequenceExporter(EncodingReport):
         'sequence_aas': "cdr3_aa"
     }
 
-    def __init__(self, dataset: RepertoireDataset = None, result_path: str = None, name: str = None):
+    def __init__(self, dataset: RepertoireDataset = None, result_path: Path = None, name: str = None):
         super().__init__(name)
         self.dataset = dataset
         self.result_path = result_path
@@ -51,7 +52,7 @@ class RelevantSequenceExporter(EncodingReport):
         df.rename(columns=column_mapping, inplace=True)
 
         PathBuilder.build(self.result_path)
-        filename = f"{self.result_path}relevant_sequences.csv"
+        filename = self.result_path / "relevant_sequences.csv"
         df.to_csv(filename, index=False)
 
         return ReportResult(self.name, output_tables=[ReportOutput(filename, "relevant sequences")])

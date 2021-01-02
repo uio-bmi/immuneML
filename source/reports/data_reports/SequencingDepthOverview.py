@@ -2,6 +2,7 @@ import json
 from multiprocessing.pool import Pool
 
 import pandas as pd
+from pathlib import Path
 
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.receptor.receptor_sequence.SequenceFrameType import SequenceFrameType
@@ -72,7 +73,7 @@ class SequencingDepthOverview(DataReport):
                  height_scatterplot: float = 3.33,
                  width: float = 10,
                  result_name: str = "sequencing_depth_overview",
-                 result_path: str = None,
+                 result_path: Path = None,
                  number_of_processes: int = 1,
                  name: str = None):
 
@@ -117,7 +118,8 @@ class SequencingDepthOverview(DataReport):
 
         pandas2ri.activate()
 
-        with open(EnvironmentSettings.root_path + "source/visualization/SequencingDepthOverview.R") as f:
+        r_file_path = EnvironmentSettings.root_path / "source/visualization/SequencingDepthOverview.R"
+        with r_file_path.open() as f:
             string = f.read()
 
         plot = STAP(string, "plot")
@@ -134,9 +136,10 @@ class SequencingDepthOverview(DataReport):
                                             height_distributions=self.height_distributions,
                                             height_scatterplot=self.height_scatterplot,
                                             width=self.width,
-                                            result_path=self.result_path,
+                                            result_path=str(self.result_path),
                                             result_name=self.result_name)
-        return ReportOutput(path=f"{self.result_path}{self.result_name}.pdf")
+
+        return ReportOutput(path=self.result_path / f"{self.result_name}.pdf")
 
     def _compute_repertoire(self, repertoire):
         result = []

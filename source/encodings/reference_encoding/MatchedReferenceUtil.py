@@ -35,7 +35,7 @@ class MatchedReferenceUtil:
             receptors = IRISSequenceImport.import_items(**seq_import_params)
         else:
             import_class = ReflectionHandler.get_class_by_name("{}Import".format(format_str))
-            params = DefaultParamsLoader.load(EnvironmentSettings.default_params_path + "datasets/",
+            params = DefaultParamsLoader.load(EnvironmentSettings.default_params_path / "datasets",
                                               DefaultParamsLoader.convert_to_snake_case(format_str))
             for key, value in seq_import_params.items():
                 params[key] = value

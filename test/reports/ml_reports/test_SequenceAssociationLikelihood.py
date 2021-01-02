@@ -16,7 +16,7 @@ class TestSequenceAssociationLikelihood(TestCase):
 
     def test_generate(self):
 
-        path = EnvironmentSettings.tmp_test_path + "sequence_assoc_likelihood/"
+        path = EnvironmentSettings.tmp_test_path / "sequence_assoc_likelihood/"
 
         classifier = ProbabilisticBinaryClassifier(10, 0.1)
         classifier.alpha_0 = 26.7

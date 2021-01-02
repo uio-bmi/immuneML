@@ -29,7 +29,7 @@ class TestFeatureHeatmap(TestCase):
 
     def test_generate(self):
 
-        path = EnvironmentSettings.root_path + "test/tmp/featureheatmap/"
+        path = EnvironmentSettings.root_path / "test/tmp/featureheatmap/"
 
         sequences = [''.join(random.choices(string.ascii_uppercase, k=12)) for i in range(30)]
 

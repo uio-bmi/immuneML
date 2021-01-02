@@ -18,7 +18,7 @@ from source.util.PathBuilder import PathBuilder
 class TestSequencingDepthOverview(TestCase):
     def test_generate(self):
 
-        path = EnvironmentSettings.root_path + "test/tmp/seq_depth_overview/"
+        path = EnvironmentSettings.root_path / "test/tmp/seq_depth_overview/"
         PathBuilder.build(path)
 
         repertoires = [Repertoire.build_from_sequence_objects(self.generate_sequences(),

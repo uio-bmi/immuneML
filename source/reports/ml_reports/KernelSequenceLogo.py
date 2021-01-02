@@ -64,20 +64,20 @@ class KernelSequenceLogo(MLReport):
         for i in range(self.method.kernel_count):
             kernel = getattr(self.method.CNN, kernel_name)
             kernel_df = pd.DataFrame(kernel.weight[i].detach().numpy().T[:, :len(sequence_alphabet)], columns=sequence_alphabet)
-            kernel_csv_path = self.result_path + friendly_kernel_name + f"_{i + 1}.csv"
+            kernel_csv_path = self.result_path / f"{friendly_kernel_name}_{i + 1}.csv"
             kernel_df.to_csv(kernel_csv_path, index=False)
             table_outputs.append(ReportOutput(kernel_csv_path, friendly_kernel_name + f"_{i + 1}"))
 
             logo = logomaker.Logo(kernel_df, shade_below=0.5, fade_below=0.5, font_name='Arial Rounded MT Bold', vpad=0.05, vsep=0.01)
-            logo_path = self.result_path + friendly_kernel_name + f"_{i + 1}.png"
+            logo_path = self.result_path / f"{friendly_kernel_name}_{i + 1}.png"
 
             logo.style_spines(visible=False)
             logo.style_spines(spines=('left', 'bottom'), visible=True)
             logo.style_xticks(fmt='%d', anchor=0)
 
-            logo.fig.savefig(logo_path)
+            logo.fig.savefig(str(logo_path))
             plt.close(logo.fig)
-            figure_outputs.append(ReportOutput(logo_path, friendly_kernel_name + f"_{i + 1}"))
+            figure_outputs.append(ReportOutput(logo_path, f"{friendly_kernel_name}_{i + 1}"))
 
         return figure_outputs, table_outputs
 
@@ -89,15 +89,15 @@ class KernelSequenceLogo(MLReport):
         table.cells.format = [[None], ['.3f']]
         fig.add_trace(table, row=1, col=2)
         fig.update_layout(title=f"Fully-connected layer weights and bias of ReceptorCNN method", template="plotly_white")
-        fig.write_html(self.result_path + "fully_connected_layer_weights.html")
+        fig.write_html(str(self.result_path / "fully_connected_layer_weights.html"))
 
-        return ReportOutput(self.result_path + "fully_connected_layer_weights.html", "fully-connected layer weights")
+        return ReportOutput(self.result_path / "fully_connected_layer_weights.html", "fully-connected layer weights")
 
     def _store_fc_table(self, df, bias):
         df.append({"weights": bias, "names": "bias"}, ignore_index=True)
-        df.to_csv(self.result_path + "fully_connected_layer_weights.csv", index=False)
+        df.to_csv(self.result_path / "fully_connected_layer_weights.csv", index=False)
 
-        return ReportOutput(self.result_path + "fully_connected_layer_weights.csv", "fully-connected layer weights")
+        return ReportOutput(self.result_path / "fully_connected_layer_weights.csv", "fully-connected layer weights")
 
     def _plot_fc_layer(self):
         weights = self.method.CNN.fully_connected.weight.detach().numpy()[0]

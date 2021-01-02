@@ -1,15 +1,14 @@
 import warnings
 import plotly.express as px
+from pathlib import Path
 
 from scripts.specification_util import update_docs_per_mapping
 from source.analysis.data_manipulation.DataReshaper import DataReshaper
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
-from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.reports.ReportOutput import ReportOutput
 from source.reports.ReportResult import ReportResult
 from source.reports.encoding_reports.EncodingReport import EncodingReport
 from source.util.DocEnumHelper import DocEnumHelper
-from source.util.ParameterValidator import ParameterValidator
 from source.util.PathBuilder import PathBuilder
 from source.visualization.ErrorBarMeaning import ErrorBarMeaning
 from source.visualization.PanelAxisScalesType import PanelAxisScalesType
@@ -77,7 +76,7 @@ class FeatureValueBarplot(EncodingReport):
         location = "FeatureValueBarplot"
         return FeatureValueBarplot(**kwargs)
 
-    def __init__(self, dataset: RepertoireDataset = None, result_path: str = None, grouping_label: str = "feature",
+    def __init__(self, dataset: RepertoireDataset = None, result_path: Path = None, grouping_label: str = "feature",
                  color_grouping_label: str = None, row_grouping_label=None, column_grouping_label=None,
                  x_title: str = None, y_title: str = None, name: str = None):
 
@@ -103,7 +102,7 @@ class FeatureValueBarplot(EncodingReport):
         return ReportResult(self.name, output_figures, [table_result])
 
     def _write_results_table(self, data) -> ReportOutput:
-        table_path = f"{self.result_path}{self.result_name}.csv"
+        table_path = self.result_path / f"{self.result_name}.csv"
         data.to_csv(table_path, index=False)
         return ReportOutput(table_path, "feature values")
 
@@ -127,8 +126,8 @@ class FeatureValueBarplot(EncodingReport):
                         }, template='plotly_white',
                         color_discrete_sequence=px.colors.diverging.Tealrose)
 
-        file_path = f"{self.result_path}{self.result_name}.html"
-        figure.write_html(file_path)
+        file_path = self.result_path / f"{self.result_name}.html"
+        figure.write_html(str(file_path))
 
         return ReportOutput(path=file_path, name="feature bar plot")
 

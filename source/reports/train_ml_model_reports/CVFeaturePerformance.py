@@ -4,6 +4,7 @@ from typing import Tuple, List
 import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
+from pathlib import Path
 
 from source.hyperparameter_optimization.states.TrainMLModelState import TrainMLModelState
 from source.reports.ReportOutput import ReportOutput
@@ -42,7 +43,7 @@ class CVFeaturePerformance(TrainMLModelReport):
     def build_object(cls, **kwargs):
         return CVFeaturePerformance(**kwargs)
 
-    def __init__(self, feature: str = None, state: TrainMLModelState = None, result_path: str = None, label: str = None,
+    def __init__(self, feature: str = None, state: TrainMLModelState = None, result_path: Path = None, label: str = None,
                  name: str = None, is_feature_axis_categorical: bool = None):
         super().__init__()
         self.feature = feature
@@ -112,14 +113,14 @@ class CVFeaturePerformance(TrainMLModelReport):
         fig.update_yaxes(title_text=f"performance ({self.state.optimization_metric.name.lower()})")
         fig.update_layout(hovermode="x unified")
 
-        file_path = f"{self.result_path}{self.result_name}.html"
-        fig.write_html(file_path)
+        file_path = self.result_path / f"{self.result_name}.html"
+        fig.write_html(str(file_path))
 
         return ReportOutput(path=file_path)
 
     def _store_dataframes(self, training_dataframe: pd.DataFrame, test_dataframe: pd.DataFrame) -> List[ReportOutput]:
-        train_path = self.result_path + "training_performance.csv"
-        test_path = self.result_path + "test_performance.csv"
+        train_path = self.result_path / "training_performance.csv"
+        test_path = self.result_path / "test_performance.csv"
         training_dataframe.to_csv(train_path, index=False)
         test_dataframe.to_csv(test_path, index=False)
 

@@ -371,7 +371,7 @@ class ProbabilisticBinaryClassifier(MLMethod):
         for key, value in content.items():
             if isinstance(value, np.ndarray):
                 result[key] = value.tolist()
-            elif value is None or isinstance(value, str) or isinstance(value, dict) or isinstance(value, list):
+            elif value is None or isinstance(value, str) or isinstance(value, dict) or isinstance(value, list) or isinstance(value, Path):
                 result[key] = value
             else:
                 result[key] = float(value)

@@ -3,6 +3,7 @@ import json
 
 import numpy as np
 import pandas as pd
+from pathlib import Path
 
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.environment.EnvironmentSettings import EnvironmentSettings
@@ -40,7 +41,7 @@ class DensityHeatmap(EncodingReport):
                  palette: dict = None, cluster_features: bool = True, subset_nonzero_features: bool = False, show_feature_dend: bool = True,
                  show_feature_names: bool = False, show_legend_features: list = None, legend_position: str = "side", text_size: float = 10,
                  feature_names_size: float = 7, scale_features: bool = True, height: float = 10, width: float = 10,
-                 result_name: str = "feature_heatmap", result_path: str = None):
+                 result_name: str = "feature_heatmap", result_path: Path = None):
 
         super().__init__()
         self.dataset = dataset
@@ -78,7 +79,8 @@ class DensityHeatmap(EncodingReport):
         feature_annotations = self._prepare_annotations(self.dataset.encoded_data.feature_annotations,
                                                         DensityHeatmap.FEATURE)
 
-        with open(EnvironmentSettings.root_path + "source/visualization/DensityHeatmap.R") as f:
+        r_file_path = EnvironmentSettings.root_path / "source/visualization/DensityHeatmap.R"
+        with r_file_path.open() as f:
             string = f.read()
 
         plot = STAP(string, "plot")
@@ -97,7 +99,7 @@ class DensityHeatmap(EncodingReport):
                                   scale_features=self.scale_features,
                                   height=self.height,
                                   width=self.width,
-                                  result_path=self.result_path,
+                                  result_path=str(self.result_path),
                                   result_name=self.result_name)
 
     def _prepare_matrix(self):

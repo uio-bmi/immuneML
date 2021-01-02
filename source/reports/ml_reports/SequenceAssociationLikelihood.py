@@ -1,6 +1,7 @@
 from typing import Tuple
 
 from scipy.stats import beta
+from pathlib import Path
 
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.ml_methods.MLMethod import MLMethod
@@ -39,7 +40,7 @@ class SequenceAssociationLikelihood(MLReport):
         else:
             return True
 
-    def __init__(self, method: MLMethod = None, result_path: str = None, name: str = None, **kwargs):
+    def __init__(self, method: MLMethod = None, result_path: Path = None, name: str = None, **kwargs):
         super().__init__()
         self.method = method
         self.result_path = result_path
@@ -65,7 +66,8 @@ class SequenceAssociationLikelihood(MLReport):
 
         pandas2ri.activate()
 
-        with open(EnvironmentSettings.root_path + "source/visualization/StatDistributionPlot.R") as f:
+        r_file_path = EnvironmentSettings.root_path / "source/visualization/StatDistributionPlot.R"
+        with r_file_path.open() as f:
             string = f.read()
 
         plot = STAP(string, "plot")
@@ -76,10 +78,10 @@ class SequenceAssociationLikelihood(MLReport):
                                                  label0=f"{self.method.label_name} {self.method.class_mapping[0]}",
                                                  label1=f"{self.method.label_name} {self.method.class_mapping[1]}",
                                                  upper_limit=upper_limit, lower_limit=lower_limit,
-                                                 result_path=self.result_path,
+                                                 result_path=str(self.result_path),
                                                  result_name=self.result_name)
 
-        return ReportOutput(f"{self.result_path}{self.result_name}.pdf")
+        return ReportOutput(self.result_path / f"{self.result_name}.pdf")
 
     def get_distribution_limits(self) -> Tuple[float, float]:
         lower_limit_0, upper_limit_0 = beta.interval(SequenceAssociationLikelihood.DISTRIBUTION_PERCENTAGE_TO_SHOW,

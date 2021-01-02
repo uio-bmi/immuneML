@@ -29,7 +29,7 @@ class TestDensityHeatmap(TestCase):
 
     def test_generate(self):
 
-        path = EnvironmentSettings.root_path + "test/tmp/densityheatmap/"
+        path = EnvironmentSettings.root_path / "test/tmp/densityheatmap/"
 
         sequences = [''.join(random.choices(string.ascii_uppercase, k=12)) for i in range(30)]
 

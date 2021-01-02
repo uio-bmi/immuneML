@@ -4,6 +4,7 @@ from typing import List
 import fisher
 import numpy as np
 import pandas as pd
+from pathlib import Path
 
 from source.caching.CacheHandler import CacheHandler
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
@@ -68,25 +69,25 @@ class SequenceFilterHelper:
 
     @staticmethod
     def get_relevant_sequences(dataset: RepertoireDataset, params: EncoderParams, comparison_data: ComparisonData, label: str, p_value_threshold,
-                               comparison_attributes: list, sequence_indices_path: str):
+                               comparison_attributes: list, sequence_indices_path: Path):
 
-        sequence_path = sequence_indices_path if sequence_indices_path is not None else f'{params.result_path}relevant_sequence_indices.pickle'
+        sequence_path = sequence_indices_path if sequence_indices_path is not None else params.result_path / 'relevant_sequence_indices.pickle'
         sequence_csv_path = None
 
         if params.learn_model:
             SequenceFilterHelper._check_label_object(params, label)
             relevant_sequence_indices = SequenceFilterHelper.filter_sequences(dataset, comparison_data, params.label_config.get_label_object(label),
                                                                               p_value_threshold)
-            with open(sequence_path, "wb") as file:
+            with sequence_path.open("wb") as file:
                 pickle.dump(relevant_sequence_indices, file)
 
             all_sequences = comparison_data.get_item_names()
             relevant_sequences = all_sequences[relevant_sequence_indices]
             df = pd.DataFrame(relevant_sequences, columns=comparison_attributes)
-            sequence_csv_path = f'{params.result_path}relevant_sequences.csv'
+            sequence_csv_path = params.result_path / 'relevant_sequences.csv'
             df.to_csv(sequence_csv_path, sep=',', index=False)
         else:
-            with open(sequence_path, "rb") as file:
+            with sequence_path.open("rb") as file:
                 relevant_sequence_indices = pickle.load(file)
 
         return relevant_sequence_indices, sequence_path, sequence_csv_path

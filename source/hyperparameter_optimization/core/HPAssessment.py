@@ -28,7 +28,8 @@ class HPAssessment:
 
     @staticmethod
     def _create_root_path(state: TrainMLModelState) -> TrainMLModelState:
-        state.path = state.path / state.name
+        name = state.name if state.name is not None else "state"
+        state.path = state.path / name
         return state
 
     @staticmethod

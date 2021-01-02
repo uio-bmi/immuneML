@@ -21,7 +21,7 @@ class EncodingParser:
         return symbol_table, encodings
 
     @staticmethod
-    @log
+    # @log
     def parse_encoder(key: str, specs: dict):
         class_path = "encodings"
         valid_encoders = ReflectionHandler.all_nonabstract_subclass_basic_names(DatasetEncoder, "Encoder", class_path)

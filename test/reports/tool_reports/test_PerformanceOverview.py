@@ -3,6 +3,7 @@ import shutil
 from unittest import TestCase
 
 import yaml
+from pathlib import Path
 
 from source.api.aggregated_runs.MultiDatasetBenchmarkTool import MultiDatasetBenchmarkTool
 from source.environment.EnvironmentSettings import EnvironmentSettings
@@ -11,20 +12,20 @@ from source.util.PathBuilder import PathBuilder
 
 class TestPerformanceOverview(TestCase):
     def test_run(self):
-        path = PathBuilder.build(EnvironmentSettings.tmp_test_path + "performance_overview/")
+        path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "performance_overview/")
         specs_file = self._prepare_specs(path)
 
-        tool = MultiDatasetBenchmarkTool(specs_file, path + "result/")
+        tool = MultiDatasetBenchmarkTool(specs_file, path / "result/")
         tool.run()
 
-        self.assertTrue(os.path.isfile(path + "result/benchmarking_reports/performance_overview/precision_recall_data_d1.csv"))
-        self.assertTrue(os.path.isfile(path + "result/benchmarking_reports/performance_overview/precision_recall_data_d2.csv"))
-        self.assertTrue(os.path.isfile(path + "result/benchmarking_reports/performance_overview/precision_recall_curve.html"))
-        self.assertTrue(os.path.isfile(path + "result/benchmarking_reports/performance_overview/roc_curve.html"))
+        self.assertTrue(os.path.isfile(path / "result/benchmarking_reports/performance_overview/precision_recall_data_d1.csv"))
+        self.assertTrue(os.path.isfile(path / "result/benchmarking_reports/performance_overview/precision_recall_data_d2.csv"))
+        self.assertTrue(os.path.isfile(path / "result/benchmarking_reports/performance_overview/precision_recall_curve.html"))
+        self.assertTrue(os.path.isfile(path / "result/benchmarking_reports/performance_overview/roc_curve.html"))
 
         shutil.rmtree(path)
 
-    def _prepare_specs(self, path) -> str:
+    def _prepare_specs(self, path) -> Path:
         specs = {
             "definitions": {
                 "datasets": {
@@ -34,7 +35,7 @@ class TestPerformanceOverview(TestCase):
                             "repertoire_count": 50,
                             "sequence_count_probabilities": {50: 1},
                             "sequence_length_probabilities": {2: 1},
-                            "result_path": path + "d1/",
+                            "result_path": str(Path(path / "d1")),
                             "labels": {
                                 "cmv": {
                                     True: 0.5,
@@ -49,7 +50,7 @@ class TestPerformanceOverview(TestCase):
                             "repertoire_count": 50,
                             "sequence_count_probabilities": {50: 1},
                             "sequence_length_probabilities": {2: 1},
-                            "result_path": path + "d2/",
+                            "result_path": str(Path(path / "d2")),
                             "labels": {
                                 "cmv": {
                                     True: 0.5,
@@ -121,7 +122,7 @@ class TestPerformanceOverview(TestCase):
             }
         }
 
-        specs_file = path + "specs.yaml"
+        specs_file = path / "specs.yaml"
         with open(specs_file, 'w') as file:
             yaml.dump(specs, file)
 

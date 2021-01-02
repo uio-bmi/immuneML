@@ -4,6 +4,7 @@ from dataclasses import field
 
 import numpy as np
 import pandas as pd
+from pathlib import Path
 
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.environment.EnvironmentSettings import EnvironmentSettings
@@ -15,6 +16,7 @@ class FeatureHeatmap(EncodingReport):
 
     """
     Generate annotated heatmap of encoded data matrix
+
     @param feature_annotations: list of column names to annotate from encoded_dataset.encoded_data.feature_annotations -
     this varies based on the encoding performed, so these column names should be chosen correctly
     @param example_annotations: list of keys to annotate from encoded_dataset.encoded_data.labels - these are added to
@@ -83,7 +85,7 @@ class FeatureHeatmap(EncodingReport):
                  show_example_names: bool = False, show_legend_features: list = None, show_legend_examples: list = None,
                  legend_position: str = "side", text_size: float = 10, feature_names_size: float = 7, example_names_size: float = 7,
                  scale_features: bool = True, height: float = 10, width: float = 10, result_name: str = "feature_heatmap",
-                 result_path: str = None):
+                 result_path: Path = None):
 
         super().__init__()
         self.dataset = dataset
@@ -131,7 +133,8 @@ class FeatureHeatmap(EncodingReport):
         feature_annotations = self._prepare_annotations(self.dataset.encoded_data.feature_annotations, FeatureHeatmap.FEATURE)
         example_annotations = self._prepare_annotations(pd.DataFrame(self.dataset.encoded_data.labels), FeatureHeatmap.EXAMPLE)
 
-        with open(EnvironmentSettings.root_path + "source/visualization/Heatmap.R") as f:
+        r_file_path = EnvironmentSettings.root_path / "source/visualization/Heatmap.R"
+        with r_file_path.open() as f:
             string = f.read()
 
         plot = STAP(string, "plot")

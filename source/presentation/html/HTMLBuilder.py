@@ -55,7 +55,6 @@ class HTMLBuilder:
 
     @staticmethod
     def _update_paths(result_path: Path):
-        assert False, "test paths in this function" # todo update paths
         with result_path.open('r') as file:
 
             lines = []
@@ -66,7 +65,7 @@ class HTMLBuilder:
                     lines.append(line.split("src=\"")[0] + "src=\"./HTML_output/" + line.split("src=\"")[1])
                 else:
                     lines.append(line)
-                lines[-1] = lines[-1].replace("""href="../""", """href="./""")
+                lines[-1] = lines[-1].replace("""href="../""", """href="./""") # todo test paths on windows
                 lines[-1] = lines[-1].replace("""src="../""", """src="./""")
 
         with result_path.open("w") as file:

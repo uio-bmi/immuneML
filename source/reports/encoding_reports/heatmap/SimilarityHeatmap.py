@@ -3,6 +3,7 @@ import json
 
 import numpy as np
 import pandas as pd
+from pathlib import Path
 
 from source.analysis.similarities.RepertoireSimilarityComputer import RepertoireSimilarityComputer
 from source.analysis.similarities.SimilarityMeasureType import SimilarityMeasureType
@@ -45,7 +46,7 @@ class SimilarityHeatmap(EncodingReport):
                  one_hot_encode_example_annotations: list = None, palette: dict = None, cluster: bool = True, show_dend: bool = True,
                  show_names: bool = False, show_legend: list = None, annotation_position: str = "top", legend_position: str = "side",
                  text_size: float = 10, names_size: float = 7, height: float = 10, width: float = 10,
-                 result_name: str = "similarity_heatmap", result_path: str = None):
+                 result_name: str = "similarity_heatmap", result_path: Path = None):
 
         super().__init__()
         self.dataset = dataset
@@ -84,7 +85,8 @@ class SimilarityHeatmap(EncodingReport):
         if self.show_legend is None:
             self.show_legend = self.annotations
 
-        with open(EnvironmentSettings.root_path + "source/visualization/Heatmap.R") as f:
+        r_file_path = EnvironmentSettings.root_path / "source/visualization/Heatmap.R"
+        with r_file_path.open() as f:
             string = f.read()
 
         plot = STAP(string, "plot")
@@ -129,7 +131,7 @@ class SimilarityHeatmap(EncodingReport):
                           scale_rows=False,
                           height=self.height,
                           width=self.width,
-                          result_path=self.result_path,
+                          result_path=str(self.result_path),
                           result_name=self.result_name)
 
     def _prepare_annotations(self, data):
