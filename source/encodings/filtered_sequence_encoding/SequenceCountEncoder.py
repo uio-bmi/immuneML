@@ -2,6 +2,7 @@ import os
 from typing import List
 
 import numpy as np
+from pathlib import Path
 
 from scripts.specification_util import update_docs_per_mapping
 from source.IO.ml_method.UtilIO import UtilIO
@@ -121,8 +122,8 @@ class SequenceCountEncoder(DatasetEncoder):
         EncoderHelper.store(encoded_dataset, params)
 
     @staticmethod
-    def export_encoder(path: str, encoder) -> str:
-        encoder_file = DatasetEncoder.store_encoder(encoder, path + "encoder.pickle")
+    def export_encoder(path: Path, encoder) -> Path:
+        encoder_file = DatasetEncoder.store_encoder(encoder, path / "encoder.pickle")
         UtilIO.export_comparison_data(encoder.comparison_data, path)
         return encoder_file
 

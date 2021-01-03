@@ -19,12 +19,12 @@ class TestAtchleyKmerEncoder(TestCase):
         os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
 
     def test_encode(self):
-        path = PathBuilder.build(EnvironmentSettings.tmp_test_path + "atchley_kmer_encoding/")
-        dataset = RandomDatasetGenerator.generate_repertoire_dataset(3, {1: 1}, {4: 1}, {"l1": {True: 0.4, False: 0.6}}, path + "dataset/")
+        path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "atchley_kmer_encoding/")
+        dataset = RandomDatasetGenerator.generate_repertoire_dataset(3, {1: 1}, {4: 1}, {"l1": {True: 0.4, False: 0.6}}, path / "dataset")
 
         encoder = AtchleyKmerEncoder.build_object(dataset, **{"k": 2, "skip_first_n_aa": 1, "skip_last_n_aa": 1, "abundance": "RELATIVE_ABUNDANCE",
                                                               "normalize_all_features": False})
-        encoded_dataset = encoder.encode(dataset, EncoderParams(path + "result/", LabelConfiguration(labels=[Label("l1")])))
+        encoded_dataset = encoder.encode(dataset, EncoderParams(path / "result", LabelConfiguration(labels=[Label("l1")])))
 
         self.assertEqual((3, 11, 3), encoded_dataset.encoded_data.examples.shape)
         self.assertEqual(0., encoded_dataset.encoded_data.examples[0, -1, 0])

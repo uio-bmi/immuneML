@@ -145,7 +145,7 @@ class SequenceAbundanceEncoder(DatasetEncoder):
         EncoderHelper.store(encoded_dataset, params)
 
     @staticmethod
-    def export_encoder(path: Path, encoder) -> str:
+    def export_encoder(path: Path, encoder) -> Path:
         encoder_file = DatasetEncoder.store_encoder(encoder, path / "encoder.pickle")
         UtilIO.export_comparison_data(encoder.comparison_data, path)
         return encoder_file
@@ -158,6 +158,7 @@ class SequenceAbundanceEncoder(DatasetEncoder):
         encoder = DatasetEncoder.load_encoder(encoder_file)
         encoder.relevant_indices_path = DatasetEncoder.load_attribute(encoder, encoder_file, "relevant_indices_path")
         encoder.comparison_data = UtilIO.import_comparison_data(os.path.dirname(encoder_file) + '/')
+        assert False, "update above paths"
         return encoder
 
     @staticmethod

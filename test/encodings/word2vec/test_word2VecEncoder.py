@@ -21,7 +21,7 @@ class TestWord2VecEncoder(TestCase):
 
     def test_encode(self):
 
-        test_path = EnvironmentSettings.root_path + "test/tmp/w2v/"
+        test_path = EnvironmentSettings.root_path / "test/tmp/w2v/"
 
         PathBuilder.build(test_path)
 

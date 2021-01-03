@@ -22,7 +22,7 @@ class TestAPI(TestCase):
         PathBuilder.build(data_path)
 
         for repertoire_index in range(1, repertoire_count + 1):
-            with open(f"{data_path}rep_{repertoire_index}.tsv", "w") as file:
+            with open(data_path / f"rep_{repertoire_index}.tsv", "w") as file:
                 writer = csv.DictWriter(file,
                                         delimiter="\t",
                                         fieldnames=["patient", "dilution", "cloneCount", "allVHitsWithScore",
@@ -104,19 +104,19 @@ class TestAPI(TestCase):
                 writer.writerows(dicts)
 
     def test_encode_dataset_by_kmer_freq(self):
-        path = f"{EnvironmentSettings.tmp_test_path}testapi/"
-        data_path = f"{path}data/"
-        result_path = f"{path}result/"
+        path = EnvironmentSettings.tmp_test_path / "testapi"
+        data_path = path / "data"
+        result_path = path / "result"
         repertoire_count = 10
 
         self.create_initial_dataset(data_path, repertoire_count)
 
-        encoded_dataset = encode_dataset_by_kmer_freq(path_to_dataset_directory=data_path, result_path=result_path)
+        encoded_dataset = encode_dataset_by_kmer_freq(path_to_dataset_directory=str(data_path), result_path=str(result_path))
 
-        self.assertEqual(repertoire_count, len(glob.glob(f"{result_path}repertoires/*.npy")))
-        self.assertTrue(os.path.isfile(f"{result_path}csv_exported/design_matrix.csv"))
-        self.assertTrue(os.path.isfile(f"{result_path}csv_exported/encoding_details.yaml"))
-        self.assertTrue(os.path.isfile(f"{result_path}csv_exported/labels.csv"))
+        self.assertEqual(repertoire_count, len(glob.glob(str(result_path / "repertoires/*.npy"))))
+        self.assertTrue(os.path.isfile(result_path / "csv_exported/design_matrix.csv"))
+        self.assertTrue(os.path.isfile(result_path / "csv_exported/encoding_details.yaml"))
+        self.assertTrue(os.path.isfile(result_path / "csv_exported/labels.csv"))
         self.assertEqual(repertoire_count, encoded_dataset.get_example_count())
 
         self.assertEqual(np.greater_equal(encoded_dataset.encoded_data.examples.todense(), 0).sum(),

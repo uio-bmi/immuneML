@@ -60,7 +60,8 @@ class ExploratoryAnalysisInstruction(Instruction):
         self.name = name
 
     def run(self, result_path: Path):
-        self.state.result_path = result_path / self.name
+        name = self.name if self.name is not None else "exploratory_analysis"
+        self.state.result_path = result_path / name
         for index, (key, unit) in enumerate(self.state.exploratory_analysis_units.items()):
             print("{}: Started analysis {} ({}/{}).".format(datetime.datetime.now(), key, index+1, len(self.state.exploratory_analysis_units)), flush=True)
             path = self.state.result_path / f"analysis_{key}"

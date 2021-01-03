@@ -8,6 +8,7 @@ from source.dsl.symbol_table.SymbolTable import SymbolTable
 from source.dsl.symbol_table.SymbolType import SymbolType
 from source.util.Logger import log
 from source.util.ParameterValidator import ParameterValidator
+from source.util.PathBuilder import PathBuilder
 from source.util.ReflectionHandler import ReflectionHandler
 
 
@@ -73,9 +74,11 @@ class ImportParser:
         if "params" in dataset_specs.keys():
             params = {**params, **dataset_specs["params"]}
         if "result_path" not in params or params["result_path"] is None:
-            params["result_path"] = result_path / "datasets" / dataset_name
+            params["result_path"] = Path(result_path) / "datasets" / dataset_name
         else:
             params["result_path"] = Path(params["result_path"])
+        PathBuilder.build(params["result_path"])
+
         if "path" in params:
             params["path"] = Path(params["path"])
         dataset_specs["params"] = params

@@ -11,11 +11,11 @@ from source.util.PathBuilder import PathBuilder
 
 class TestFeatureScaler(TestCase):
     def test_standard_scale(self):
-        path = EnvironmentSettings.tmp_test_path + "featurescaler/"
+        path = EnvironmentSettings.tmp_test_path / "featurescaler/"
         PathBuilder.build(path)
 
         feature_matrix = np.array([[0, 2, 3], [0, 0.1, 1], [0, -2, 1]])
-        scaled_feature_matrix = FeatureScaler.standard_scale(path + "scaler.pkl", feature_matrix)
+        scaled_feature_matrix = FeatureScaler.standard_scale(path / "scaler.pkl", feature_matrix)
 
         self.assertEqual((3, 3), scaled_feature_matrix.shape)
         self.assertTrue(all(scaled_feature_matrix[i, 0] == 0 for i in range(3)))
@@ -24,7 +24,7 @@ class TestFeatureScaler(TestCase):
         shutil.rmtree(path)
 
     def test_normalize(self):
-        path = EnvironmentSettings.tmp_test_path + "featurescalernormalize/"
+        path = EnvironmentSettings.tmp_test_path / "featurescalernormalize/"
         PathBuilder.build(path)
 
         feature_matrix = np.array([[4, 1, 2, 2], [1, 3, 9, 3], [5, 7, 5, 1]])

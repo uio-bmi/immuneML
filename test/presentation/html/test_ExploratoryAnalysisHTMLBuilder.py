@@ -25,7 +25,7 @@ class TestExploratoryAnalysisHTMLBuilder(TestCase):
         return dataset
 
     def test_build(self):
-        path = os.path.relpath(EnvironmentSettings.tmp_test_path + "ea_html_builder") + "/"
+        path = EnvironmentSettings.tmp_test_path / "ea_html_builder"
         PathBuilder.build(path)
 
         dataset = self.create_dataset(path)
@@ -38,10 +38,10 @@ class TestExploratoryAnalysisHTMLBuilder(TestCase):
                 100a	TRA	AAAC	TRAV12	TRAJ1	HomoSapiens	HLA-A*11:01	B2M	MHCI	AVFDRKSDAK	EBNA4	EBV	                    
                 """
 
-        with open(path + "refs.tsv", "w") as file:
+        with open(path / "refs.tsv", "w") as file:
             file.writelines(file_content)
 
-        refs_dict = {"path": path + "refs.tsv", "format": "VDJdb"}
+        refs_dict = {"path": path / "refs.tsv", "format": "VDJdb"}
 
         preproc_sequence = [SubjectRepertoireCollector()]
 
@@ -50,7 +50,7 @@ class TestExploratoryAnalysisHTMLBuilder(TestCase):
                                                              preprocessing_sequence=preproc_sequence)}
 
         process = ExploratoryAnalysisInstruction(units)
-        res = process.run(path + "results/")
+        res = process.run(path / "results/")
 
         res_path = ExploratoryAnalysisHTMLBuilder.build(res)
 

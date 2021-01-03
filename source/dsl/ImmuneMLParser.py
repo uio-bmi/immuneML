@@ -10,6 +10,7 @@ from source.dsl.InstructionParser import InstructionParser
 from source.dsl.OutputParser import OutputParser
 from source.dsl.definition_parsers.DefinitionParser import DefinitionParser
 from source.dsl.symbol_table.SymbolTable import SymbolTable
+from source.util.PathBuilder import PathBuilder
 
 
 class ImmuneMLParser:

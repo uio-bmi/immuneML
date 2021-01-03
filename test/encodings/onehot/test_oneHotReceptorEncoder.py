@@ -24,18 +24,15 @@ class TestOneHotSequenceEncoder(TestCase):
                                   metadata={"l1": 2}, identifier=str("2"))]
 
         PathBuilder.build(path)
-        filename = "{}receptors.pkl".format(path)
-        with open(filename, "wb") as file:
-            pickle.dump(receptors, file)
 
         lc = LabelConfiguration()
         lc.add_label("l1", [1, 2])
 
-        dataset = ReceptorDataset(params={"l1": [1, 2]}, filenames=[filename], identifier="d1")
+        dataset = ReceptorDataset.build(receptors, 2, path)
         return dataset, lc
 
     def test(self):
-        path = EnvironmentSettings.tmp_test_path + "onehot_sequence_1/"
+        path = EnvironmentSettings.tmp_test_path / "onehot_sequence_1/"
         PathBuilder.build(path)
 
         dataset, lc = self._construct_test_dataset(path)
@@ -45,7 +42,7 @@ class TestOneHotSequenceEncoder(TestCase):
                                                          "flatten": False})
 
         encoded_data = encoder.encode(dataset, EncoderParams(
-            result_path=f"{path}encoded/",
+            result_path=path / "encoded",
             label_config=lc,
             learn_model=True,
             model={},
@@ -83,10 +80,10 @@ class TestOneHotSequenceEncoder(TestCase):
                                   metadata={"l1": 2},
                                   identifier="2")]
 
-        return ReceptorDataset.build(receptors, 10, "{}receptors.pkl".format(path))
+        return ReceptorDataset.build(receptors, 10, path)
 
     def test_receptor_flattened(self):
-        path = EnvironmentSettings.root_path + "test/tmp/onehot_recep_flat/"
+        path = EnvironmentSettings.root_path / "test/tmp/onehot_recep_flat/"
 
         PathBuilder.build(path)
 

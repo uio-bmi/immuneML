@@ -1,6 +1,8 @@
 import numpy as np
 import pandas as pd
 
+from pathlib import Path
+
 from source.caching.CacheHandler import CacheHandler
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.pairwise_repertoire_comparison.ComparisonData import ComparisonData
@@ -11,7 +13,7 @@ from source.util.PathBuilder import PathBuilder
 class PairwiseRepertoireComparison:
 
     @log
-    def __init__(self, matching_columns: list, item_columns: list, path: str, sequence_batch_size: int):
+    def __init__(self, matching_columns: list, item_columns: list, path: Path, sequence_batch_size: int):
         self.matching_columns = matching_columns
         self.item_columns = item_columns
         self.path = PathBuilder.build(path)

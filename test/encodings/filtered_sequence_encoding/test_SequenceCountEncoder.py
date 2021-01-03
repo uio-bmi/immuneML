@@ -21,7 +21,7 @@ class TestEmersonSequenceCountEncoder(TestCase):
 
     def test_encode(self):
 
-        path = EnvironmentSettings.tmp_test_path + "count_encoder/"
+        path = EnvironmentSettings.tmp_test_path / "count_encoder/"
         PathBuilder.build(path)
 
         repertoires, metadata = RepertoireBuilder.build([["GGG", "III", "LLL", "MMM"],

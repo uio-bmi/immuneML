@@ -4,6 +4,8 @@ import sys
 
 import yaml
 
+from pathlib import Path
+
 from source.data_model.receptor.RegionType import RegionType
 from source.util.PathBuilder import PathBuilder
 
@@ -81,12 +83,12 @@ def main(args):
     specs = build_specs(parsed_args)
 
     PathBuilder.build(parsed_args.output_path)
-    output_location = os.path.join(parsed_args.output_path, parsed_args.file_name)
+    output_location = Path(parsed_args.output_path) / parsed_args.file_name
 
-    with open(output_location, "w") as file:
+    with output_location.open("w") as file:
         yaml.dump(specs, file)
 
-    return output_location
+    return str(output_location)
 
 
 if __name__ == "__main__":

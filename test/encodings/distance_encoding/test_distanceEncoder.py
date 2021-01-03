@@ -30,7 +30,7 @@ class TestDistanceEncoder(TestCase):
         return dataset
 
     def test_encode(self):
-        path = EnvironmentSettings.tmp_test_path + "distance_encoder/"
+        path = EnvironmentSettings.tmp_test_path / "distance_encoder/"
         PathBuilder.build(path)
 
         dataset = self.create_dataset(path)

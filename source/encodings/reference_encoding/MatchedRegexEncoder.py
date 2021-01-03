@@ -2,6 +2,7 @@ import abc
 import os
 import pandas as pd
 import numpy as np
+from pathlib import Path
 
 from scripts.specification_util import update_docs_per_mapping
 from source.caching.CacheHandler import CacheHandler
@@ -78,7 +79,7 @@ class MatchedRegexEncoder(DatasetEncoder):
         "RepertoireDataset": "MatchedRegexRepertoireEncoder"
     }
 
-    def __init__(self, motif_filepath: str, match_v_genes: bool, sum_counts: bool, chains: list, name: str = None):
+    def __init__(self, motif_filepath: Path, match_v_genes: bool, sum_counts: bool, chains: list, name: str = None):
         self.motif_filepath = motif_filepath
         self.match_v_genes = match_v_genes
         self.sum_counts = sum_counts
@@ -107,7 +108,7 @@ class MatchedRegexEncoder(DatasetEncoder):
                                                     f"Remove {chain}_regex from columns, or set match_v_genes to False."
 
         return {
-            "motif_filepath": motif_filepath,
+            "motif_filepath": Path(motif_filepath),
             "match_v_genes": match_v_genes,
             "sum_counts": sum_counts,
             "chains": chains,

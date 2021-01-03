@@ -21,20 +21,16 @@ class TestOneHotSequenceEncoder(TestCase):
             ReceptorSequence(amino_acid_sequence="ATA", identifier="2", metadata=SequenceMetadata(custom_params={"l1": 2, "l2": 1})),
             ReceptorSequence(amino_acid_sequence="ATT", identifier="3", metadata=SequenceMetadata(custom_params={"l1": 1, "l2": 2}))]
 
-        filename = "{}sequences.pkl".format(path)
-        with open(filename, "wb") as file:
-            pickle.dump(sequences, file)
-
         lc = LabelConfiguration()
         lc.add_label("l1", [1, 2])
         lc.add_label("l2", [1, 2])
 
-        dataset = SequenceDataset(params={"l1": [1, 2]}, filenames=[filename], identifier="d1")
+        dataset = SequenceDataset.build(sequences=sequences, file_size=10, path=path)
 
         return dataset, lc
 
     def test(self):
-        path = EnvironmentSettings.tmp_test_path + "onehot_sequence/"
+        path = EnvironmentSettings.tmp_test_path / "onehot_sequence/"
         PathBuilder.build(path)
 
         dataset, lc = self._construct_test_dataset(path)
@@ -44,7 +40,7 @@ class TestOneHotSequenceEncoder(TestCase):
                                                          "flatten": False})
 
         encoded_data = encoder.encode(dataset, EncoderParams(
-            result_path=f"{path}encoded/",
+            result_path=path / "encoded/",
             label_config=lc,
             learn_model=True,
             model={},
@@ -73,20 +69,12 @@ class TestOneHotSequenceEncoder(TestCase):
                      ReceptorSequence(amino_acid_sequence="ATATAT", identifier="2", metadata=SequenceMetadata(custom_params={"l1": 2}))]
 
         PathBuilder.build(path)
-        filename = "{}sequences.pkl".format(path)
-        with open(filename, "wb") as file:
-            pickle.dump(sequences, file)
 
-        lc = LabelConfiguration()
-        lc.add_label("l1", [1, 2])
-
-        return SequenceDataset(params={"l1": [1, 2]}, filenames=[filename], identifier="d1")
-
-
+        return SequenceDataset.build(sequences=sequences, file_size=10, path=path)
 
 
     def test_sequence_flattened(self):
-        path = EnvironmentSettings.root_path + "test/tmp/onehot_seq_flat/"
+        path = EnvironmentSettings.root_path / "test/tmp/onehot_seq_flat/"
 
         PathBuilder.build(path)
 

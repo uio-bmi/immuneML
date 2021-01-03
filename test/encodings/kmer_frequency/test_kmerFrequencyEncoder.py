@@ -25,7 +25,7 @@ class TestKmerFrequencyEncoder(TestCase):
         os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
 
     def test_encode(self):
-        path = EnvironmentSettings.root_path + "test/tmp/kmerfreqenc/"
+        path = EnvironmentSettings.root_path / "test/tmp/kmerfreqenc/"
 
         PathBuilder.build(path)
 
@@ -53,7 +53,7 @@ class TestKmerFrequencyEncoder(TestCase):
             })
 
         d1 = encoder.encode(dataset, EncoderParams(
-            result_path=path + "1/",
+            result_path=path / "1/",
             label_config=lc,
             learn_model=True,
             model={},
@@ -68,7 +68,7 @@ class TestKmerFrequencyEncoder(TestCase):
             })
 
         d2 = encoder.encode(dataset, EncoderParams(
-            result_path=path + "2/",
+            result_path=path / "2/",
             label_config=lc,
             pool_size=2,
             learn_model=True,
@@ -84,7 +84,7 @@ class TestKmerFrequencyEncoder(TestCase):
         })
 
         d3 = encoder3.encode(dataset, EncoderParams(
-            result_path=path + "3/",
+            result_path=path / "3/",
             label_config=lc,
             learn_model=True,
             model={},

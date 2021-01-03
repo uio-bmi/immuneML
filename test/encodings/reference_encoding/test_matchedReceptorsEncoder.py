@@ -58,15 +58,15 @@ TCR_AB	100	AAAA	TRAV1		TRAJ1	null	null	null	null	SSSS	TRBV1		TRBJ1	null	null	nul
 TCR_AB	200	CCCC	TRAV1		TRAJ1	null	null	null	null	TTTT	TRBV1		TRBJ1	null	null	null	null	1	1941532	1df22bbc-8113-46b9-8913-da95fcf9a568(101, 102, 103, 104, 105, 108, 109, 127, 128, 130, 131, 132, 133, 134, 174)Size:1
 """
 
-        with open(path + "refs.tsv", "w") as file:
+        with open(path / "refs.tsv", "w") as file:
             file.writelines(file_content)
 
-        reference_receptors = {"params": {"path": path + "refs.tsv"}, "format": "IRIS"}
+        reference_receptors = {"params": {"path": path / "refs.tsv"}, "format": "IRIS"}
 
         return dataset, label_config, reference_receptors, labels
 
     def test__encode_new_dataset(self):
-        path = EnvironmentSettings.root_path + "test/tmp/matched_receptors_encoder/"
+        path = EnvironmentSettings.root_path / "test/tmp/matched_receptors_encoder/"
 
         dataset, label_config, reference_receptors, labels = self.create_dummy_data(path)
 
