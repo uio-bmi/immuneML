@@ -24,7 +24,7 @@ class TestExploratoryAnalysisParser(TestCase):
 
     def test_parse(self):
 
-        path = EnvironmentSettings.tmp_test_path + "explanalysisparser/"
+        path = EnvironmentSettings.tmp_test_path / "explanalysisparser/"
         PathBuilder.build(path)
 
         dataset = self.prepare_dataset(path)
@@ -34,10 +34,10 @@ class TestExploratoryAnalysisParser(TestCase):
         100a	TRA	AAAC	TRAV12	TRAJ1	HomoSapiens	HLA-A*11:01	B2M	MHCI	AVFDRKSDAK	EBNA4	EBV
         """
 
-        with open(path + "refs.tsv", "w") as file:
+        with open(path / "refs.tsv", "w") as file:
             file.writelines(file_content)
 
-        refs = {"params": {"path": path + "refs.tsv", "region_type": "FULL_SEQUENCE"}, "format": "VDJdb"}
+        refs = {"params": {"path": path / "refs.tsv", "region_type": "FULL_SEQUENCE"}, "format": "VDJdb"}
 
         report2 = Matches.build_object()
         encoding = MatchedSequencesEncoder

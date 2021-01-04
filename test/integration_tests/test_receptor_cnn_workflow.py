@@ -17,7 +17,7 @@ class TestReceptorCNNWorkflow(TestCase):
         os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
 
     def test(self):
-        path = PathBuilder.build(EnvironmentSettings.tmp_test_path + "integration_receptor_cnn_workflow/")
+        path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "integration_receptor_cnn_workflow/")
 
         specs = {
             "definitions": {
@@ -25,7 +25,7 @@ class TestReceptorCNNWorkflow(TestCase):
                     "d1": {
                         "format": "RandomReceptorDataset",
                         "params": {
-                            "result_path": path + "generated_dataset/",
+                            "result_path": str(path / "generated_dataset/"),
                             "receptor_count": 500,
                             "chain_1_length_probabilities": {
                                 5: 1.
@@ -92,10 +92,10 @@ class TestReceptorCNNWorkflow(TestCase):
             }
         }
 
-        with open(path + "specs.yaml", "w") as file:
+        with open(path / "specs.yaml", "w") as file:
             yaml.dump(specs, file)
 
-        app = ImmuneMLApp(path + "specs.yaml", path + 'result/')
+        app = ImmuneMLApp(path / "specs.yaml", path / 'result/')
         app.run()
 
         shutil.rmtree(path)

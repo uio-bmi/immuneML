@@ -47,9 +47,8 @@ class DatasetExportHTMLBuilder:
                     "formats": [
                         {
                             "format_name": format_name,
-                            "dataset_download_link": Path(os.path.relpath(path=Util.make_downloadable_zip(state.result_path,
-                                                                                                     state.paths[dataset.name][format_name]),
-                                                                     start=base_path))
+                            "dataset_download_link": os.path.relpath(path=Util.make_downloadable_zip(state.result_path, state.paths[dataset.name][format_name]),
+                                                                     start=base_path)
                         } for format_name in state.formats
                     ]
                 } for dataset in state.datasets

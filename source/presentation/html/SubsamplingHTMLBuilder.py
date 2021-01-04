@@ -13,7 +13,7 @@ class SubsamplingHTMLBuilder:
     the SubsamplingInstruction.
     """
 
-    CSS_PATH = f"{EnvironmentSettings.html_templates_path}css/custom.css"
+    CSS_PATH = EnvironmentSettings.html_templates_path / "css/custom.css"
 
     @staticmethod
     def build(state: SubsamplingState) -> str:
@@ -24,11 +24,11 @@ class SubsamplingHTMLBuilder:
         Returns:
              path to the main HTML file (which is located under state.result_path)
         """
-        base_path = PathBuilder.build(state.result_path + "../HTML_output/")
+        base_path = PathBuilder.build(state.result_path / "../HTML_output/")
         html_map = SubsamplingHTMLBuilder.make_html_map(state, base_path)
-        result_file = f"{base_path}Subsampling_{state.name}.html"
+        result_file = base_path / f"Subsampling_{state.name}.html"
 
-        TemplateParser.parse(template_path=f"{EnvironmentSettings.html_templates_path}Subsampling.html",
+        TemplateParser.parse(template_path=EnvironmentSettings.html_templates_path / "Subsampling.html",
                              template_map=html_map, result_path=result_file)
 
         return result_file

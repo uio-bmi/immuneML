@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from pathlib import Path
 
 from source.data_model.dataset.Dataset import Dataset
 from source.environment.LabelConfiguration import LabelConfiguration
@@ -14,5 +15,5 @@ class MLApplicationState:
     pool_size: int
     name: str
     store_encoded_data: bool
-    path: str = None
-    predictions_path: str = None
+    path: Path = None
+    predictions_path: Path = None

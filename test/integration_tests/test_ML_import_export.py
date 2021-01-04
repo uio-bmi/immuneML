@@ -23,7 +23,7 @@ class TestMLIE(TestCase):
                     "d1": {
                         "format": 'RandomRepertoireDataset',
                         "params": {
-                            "result_path": path + "dataset/",
+                            "result_path": str(path / "dataset/"),
                             "repertoire_count": 30,
                             "sequence_length_probabilities": {3: 1},
                             "sequence_count_probabilities": {3: 1},
@@ -95,10 +95,10 @@ class TestMLIE(TestCase):
             }
         }
 
-        with open(path + "specs_export.yaml", "w") as file:
+        with open(path / "specs_export.yaml", "w") as file:
             yaml.dump(specs, file)
 
-        return path + "specs_export.yaml"
+        return path / "specs_export.yaml"
 
     def prepare_import_specs(self, path: str) -> str:
         specs = {
@@ -107,7 +107,7 @@ class TestMLIE(TestCase):
                     "d1": {
                         "format": 'RandomRepertoireDataset',
                         "params": {
-                            "result_path": path + "dataset/",
+                            "result_path": str(path / "dataset/"),
                             "repertoire_count": 30,
                             "sequence_length_probabilities": {3: 1},
                             "sequence_count_probabilities": {3: 1},
@@ -120,7 +120,7 @@ class TestMLIE(TestCase):
                 "inst2": {
                     "type": "MLApplication",
                     "dataset": "d1",
-                    "config_path": path + "result_export/inst1/optimal_CD/zip/ml_model_CD.zip",
+                    "config_path": str(path / "result_export/inst1/optimal_CD/zip/ml_model_CD.zip"),
                     "label": "CD",
                     "pool_size": 4,
                     "store_encoded_data": False
@@ -131,27 +131,27 @@ class TestMLIE(TestCase):
             }
         }
 
-        with open(path + "specs_import.yaml", "w") as file:
+        with open(path / "specs_import.yaml", "w") as file:
             yaml.dump(specs, file)
 
-        return path + "specs_import.yaml"
+        return path / "specs_import.yaml"
 
     def test_ml(self):
-        path = PathBuilder.build(EnvironmentSettings.tmp_test_path + "integration_ml/")
+        path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "integration_ml/")
         specs_path = self.prepare_specs(path)
 
-        PathBuilder.build(path + "result_export/")
+        PathBuilder.build(path / "result_export/")
 
-        app = ImmuneMLApp(specification_path=specs_path, result_path=path + "result_export/")
+        app = ImmuneMLApp(specification_path=specs_path, result_path=path / "result_export/")
         states = app.run()
 
-        self.assertTrue(os.path.isfile(path + "result_export/index.html"))
+        self.assertTrue(os.path.isfile(path / "result_export/index.html"))
 
         specs_path = self.prepare_import_specs(path)
 
-        app = ImmuneMLApp(specs_path, path + 'result_import/')
+        app = ImmuneMLApp(specs_path, path / 'result_import/')
         result_path = app.run()
 
-        self.assertTrue(os.path.isfile(path + "result_import/index.html"))
+        self.assertTrue(os.path.isfile(path / "result_import/index.html"))
 
-        shutil.rmtree(path)
+        # shutil.rmtree(path)

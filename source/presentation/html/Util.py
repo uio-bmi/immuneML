@@ -44,6 +44,7 @@ class Util:
 
     @staticmethod
     def make_downloadable_zip(base_path: Path, path_to_zip: Path, filename: str = "") -> Path:
+        assert False, "check paths"
         if filename == "":
             filename = Path("_".join(os.path.relpath(path_to_zip, base_path).replace(".", "").split("/")))
 

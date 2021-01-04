@@ -44,7 +44,7 @@ class TestReceptorClassification(TestCase):
                 receptors.append(TCABReceptor(alpha=seq2, beta=seq2, metadata={"l1": 2}, identifier=str(i)))
 
         PathBuilder.build(path)
-        filename = "{}receptors.pkl".format(path)
+        filename = path / "receptors.pkl"
         with open(filename, "wb") as file:
             pickle.dump(receptors, file)
 
@@ -56,7 +56,7 @@ class TestReceptorClassification(TestCase):
 
     def test(self):
 
-        path = EnvironmentSettings.tmp_test_path + "integration_receptor_classification/"
+        path = EnvironmentSettings.tmp_test_path / "integration_receptor_classification/"
         dataset = self.create_dataset(path)
 
         os.environ["cache_type"] = "test"

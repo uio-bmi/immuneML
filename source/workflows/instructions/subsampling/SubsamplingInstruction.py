@@ -1,6 +1,7 @@
 import random
 import shutil
 from typing import List
+from pathlib import Path
 
 from scripts.specification_util import update_docs_per_mapping
 from source.IO.dataset_export.DataExporter import DataExporter
@@ -40,18 +41,18 @@ class SubsamplingInstruction(Instruction):
 
     """
 
-    def __init__(self, dataset: Dataset, subsampled_dataset_sizes: List[int], dataset_export_formats: list, result_path: str = None, name: str = None):
+    def __init__(self, dataset: Dataset, subsampled_dataset_sizes: List[int], dataset_export_formats: list, result_path: Path = None, name: str = None):
         self.state = SubsamplingState(dataset, subsampled_dataset_sizes, dataset_export_formats, result_path, name)
 
-    def run(self, result_path: str):
-        self.state.result_path = PathBuilder.build(f"{result_path}{self.state.name}/")
+    def run(self, result_path: Path):
+        self.state.result_path = PathBuilder.build(result_path / self.state.name)
 
         example_indices = list(range(self.state.dataset.get_example_count()))
 
         for index, dataset_size in enumerate(self.state.subsampled_dataset_sizes):
 
             new_dataset_name = f"{self.state.dataset.name}_{dataset_size}_subsampled_{index+1}"
-            new_dataset_path = PathBuilder.build(f"{self.state.result_path}{new_dataset_name}/")
+            new_dataset_path = PathBuilder.build(self.state.result_path / new_dataset_name)
 
             new_example_indices = random.sample(example_indices, k=dataset_size)
             new_dataset = self.state.dataset.make_subset(new_example_indices, new_dataset_path, Dataset.SUBSAMPLED)
@@ -69,9 +70,9 @@ class SubsamplingInstruction(Instruction):
 
         for exporter in self.state.dataset_exporters:
             exporter_name = exporter.__name__[:-8].lower()
-            export_path = f"{new_dataset_path}exported/{exporter_name}/"
+            export_path = new_dataset_path / f"exported/{exporter_name}/"
             exporter.export(new_dataset, export_path)
-            zip_export_path = shutil.make_archive(f"{new_dataset_path}exported_{exporter_name}_{new_dataset.name}", "zip", export_path)
+            zip_export_path = shutil.make_archive(new_dataset_path / f"exported_{exporter_name}_{new_dataset.name}", "zip", export_path)
             self.state.subsampled_dataset_paths[new_dataset.name][exporter_name] = zip_export_path
 
     @staticmethod

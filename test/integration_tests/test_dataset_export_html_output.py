@@ -12,8 +12,8 @@ class TestDatasetExportHTMLOutput(TestCase):
 
     def test(self):
 
-        path = PathBuilder.build(EnvironmentSettings.tmp_test_path + "integration_dataset_gen_html/")
-        dataset_path = f"{path}initial_dataset/"
+        path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "integration_dataset_gen_html/")
+        dataset_path = path / "initial_dataset/"
 
         specs = {
             "definitions": {
@@ -29,7 +29,7 @@ class TestDatasetExportHTMLOutput(TestCase):
                                 12: 1
                             },
                             "labels": {},
-                            "result_path": dataset_path
+                            "result_path": str(dataset_path)
                         }
                     }
                 }
@@ -38,11 +38,11 @@ class TestDatasetExportHTMLOutput(TestCase):
             "output": {"format": "HTML"}
         }
 
-        specs_path = f"{path}specs.yaml"
+        specs_path = path / "specs.yaml"
         with open(specs_path, "w") as file:
             yaml.dump(specs, file)
 
-        app = ImmuneMLApp(specs_path, path + "result/")
+        app = ImmuneMLApp(specs_path, path / "result/")
         app.run()
 
         shutil.rmtree(path)

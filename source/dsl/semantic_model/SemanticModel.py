@@ -1,4 +1,5 @@
 import datetime
+from pathlib import Path
 
 from source.util.ReflectionHandler import ReflectionHandler
 from source.workflows.instructions.Instruction import Instruction
@@ -6,7 +7,7 @@ from source.workflows.instructions.Instruction import Instruction
 
 class SemanticModel:
 
-    def __init__(self, instructions: list, result_path, output=None):
+    def __init__(self, instructions: list, result_path: Path, output=None):
         assert all(isinstance(instruction, Instruction) for instruction in instructions), \
             "SemanticModel: error occurred in parsing: check instruction definitions in the configuration file."
         self.instructions = instructions

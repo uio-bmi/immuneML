@@ -19,9 +19,9 @@ class TestCVSplitVariants(TestCase):
 
     def build_specs(self, path) -> dict:
         train_metadata_df = pd.DataFrame({"subject_id": [f"rep_{i}" for i in range(35)]})
-        train_metadata_df.to_csv(path + "train.csv")
+        train_metadata_df.to_csv(path / "train.csv")
         train_metadata_df = pd.DataFrame({"subject_id": [f"rep_{i}" for i in range(36, 50)]})
-        train_metadata_df.to_csv(path + "test.csv")
+        train_metadata_df.to_csv(path / "test.csv")
         return {
             "definitions": {
                 "datasets": {
@@ -29,7 +29,7 @@ class TestCVSplitVariants(TestCase):
                         "format": "RandomRepertoireDataset",
                         "params": {
                             "repertoire_count": 50,
-                            "result_path": path,
+                            "result_path": str(path),
                             "labels": {
                                 "cmv": {
                                     True: 0.5,
@@ -76,8 +76,8 @@ class TestCVSplitVariants(TestCase):
                     "assessment": {
                         "split_strategy": "manual",
                         "manual_config": {
-                            "train_metadata_path": path + "train.csv",
-                            'test_metadata_path': path + "test.csv"
+                            "train_metadata_path": str(path / "train.csv"),
+                            'test_metadata_path': str(path / "test.csv")
                         }
                     },
                     "labels": ["cmv"],
@@ -95,14 +95,14 @@ class TestCVSplitVariants(TestCase):
 
     def test_dataset_generation(self):
 
-        path = PathBuilder.build(EnvironmentSettings.tmp_test_path + "cv_split_variant/")
+        path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "cv_split_variant/")
         repertoire_specs = self.build_specs(path)
 
-        specs_filename = f"{path}specs.yaml"
+        specs_filename = path / "specs.yaml"
         with open(specs_filename, "w") as file:
             yaml.dump(repertoire_specs, file)
 
-        app = ImmuneMLApp(specs_filename, path + "result/")
+        app = ImmuneMLApp(specs_filename, path / "result/")
         app.run()
 
         shutil.rmtree(path)

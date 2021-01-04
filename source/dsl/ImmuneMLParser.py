@@ -162,6 +162,7 @@ class ImmuneMLParser:
         result = {"definitions": definitions, "instructions": instructions, "output": output}
         result = ImmuneMLParser._paths_to_strings_recursive(result)
 
+        PathBuilder.build(filepath.parent)
         with filepath.open("w") as file:
             yaml.dump(result, file)
 

@@ -20,18 +20,20 @@ class MLImport:
 
     @staticmethod
     def import_preprocessing_sequence(config: MLMethodConfiguration, config_dir) -> List[Preprocessor]:
-        if os.path.isfile(config_dir + config.preprocessing_file):
-            with open(config_dir + config.preprocessing_file, "rb") as file:
+        file_path = config_dir / config.preprocessing_file
+
+        if file_path.is_file():
+            with file_path.open("rb") as file:
                 preprocessing_sequence = pickle.load(file)
         else:
             preprocessing_sequence = []
         return preprocessing_sequence
 
     @staticmethod
-    def import_hp_setting(config_dir: str) -> Tuple[HPSetting, Label]:
+    def import_hp_setting(config_dir: Path) -> Tuple[HPSetting, Label]:
 
         config = MLMethodConfiguration()
-        config.load(f'{config_dir}ml_config.yaml')
+        config.load(config_dir / 'ml_config.yaml')
 
         ml_method = ReflectionHandler.get_class_by_name(config.ml_method, 'ml_methods/')()
         ml_method.load(config_dir)
