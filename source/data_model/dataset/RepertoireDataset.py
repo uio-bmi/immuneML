@@ -59,6 +59,9 @@ class RepertoireDataset(Dataset):
         else:
             return df.to_dict("list")
 
+    def get_filenames(self):
+        return [Path(filename) for filename in self.get_metadata(["filename"])["filename"]]
+
     def _build_new_metadata(self, indices, path: Path) -> Path:
         if self.metadata_file:
             df = pd.read_csv(self.metadata_file, comment=Constants.COMMENT_SIGN)

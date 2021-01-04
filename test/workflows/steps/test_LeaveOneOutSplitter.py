@@ -16,18 +16,18 @@ from source.workflows.steps.data_splitter.LeaveOneOutSplitter import LeaveOneOut
 
 class TestLeaveOneOutSplitter(TestCase):
     def test_split_dataset(self):
-        path = PathBuilder.build(EnvironmentSettings.tmp_test_path + "leave_one_out_splitter/")
+        path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "leave_one_out_splitter/")
         receptors = []
         for i in range(10):
             receptors.append(TCABReceptor(ReceptorSequence(), ReceptorSequence(), {"subject": i % 3}))
 
-        filename = path + "batch1.pickle"
+        filename = path / "batch1.pickle"
         with open(filename, "wb") as file:
             pickle.dump(receptors, file)
 
         dataset = ReceptorDataset(filenames=[filename])
 
-        params = DataSplitterParams(dataset, SplitType.LEAVE_ONE_OUT_STRATIFICATION, 3, paths=[path + f"result_{i}/" for i in range(1, 4)],
+        params = DataSplitterParams(dataset, SplitType.LEAVE_ONE_OUT_STRATIFICATION, 3, paths=[path / f"result_{i}/" for i in range(1, 4)],
                                     split_config=SplitConfig(SplitType.LEAVE_ONE_OUT_STRATIFICATION, split_count=3,
                                                              leave_one_out_config=LeaveOneOutConfig("subject", 1)))
         train_datasets, test_datasets = LeaveOneOutSplitter.split_dataset(params)

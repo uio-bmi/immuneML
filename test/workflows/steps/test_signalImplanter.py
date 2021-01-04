@@ -33,7 +33,7 @@ class TestSignalImplanter(TestCase):
 
         r = []
 
-        path = EnvironmentSettings.root_path + "test/tmp/signalImplanter/"
+        path = EnvironmentSettings.root_path / "test/tmp/signalImplanter/"
 
         if not os.path.isdir(path):
             os.makedirs(path)
@@ -69,16 +69,16 @@ class TestSignalImplanter(TestCase):
 
         self.assertEqual(10, len(new_dataset.get_example_ids()))
 
-        metadata_filenames = new_dataset.get_metadata(["filename"])["filename"]
+        metadata_filenames = new_dataset.get_filenames()
         self.assertTrue(all([repertoire.data_filename in metadata_filenames for repertoire in new_dataset.repertoires]))
 
         shutil.rmtree(path)
 
     def test_run_with_receptors(self):
 
-        path = PathBuilder.build(EnvironmentSettings.root_path + "test/tmp/signalImplanter_receptor/")
+        path = PathBuilder.build(EnvironmentSettings.root_path / "test/tmp/signalImplanter_receptor/")
 
-        dataset = RandomDatasetGenerator.generate_receptor_dataset(100, {10: 1}, {12: 1}, {}, path + "dataset/")
+        dataset = RandomDatasetGenerator.generate_receptor_dataset(100, {10: 1}, {12: 1}, {}, path / "dataset/")
         motif1 = Motif(identifier="motif1", instantiation=GappedKmerInstantiation(), seed_chain1="AAA", name_chain1=Chain.ALPHA, seed_chain2="CCC",
                        name_chain2=Chain.BETA)
         signal1 = Signal(identifier="signal1", motifs=[motif1], implanting_strategy=ReceptorImplanting(GappedMotifImplanting()))
