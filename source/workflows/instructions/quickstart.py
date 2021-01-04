@@ -109,7 +109,7 @@ class Quickstart:
             }
         }
 
-        specs_file = path + "specs.yaml"
+        specs_file = path / "specs.yaml"
         with open(specs_file, "w") as file:
             yaml.dump(specs, file)
 
@@ -117,7 +117,7 @@ class Quickstart:
 
     def build_path(self, path: str = None):
         if path is None:
-            path = EnvironmentSettings.root_path + "quickstart/"
+            path = EnvironmentSettings.root_path / "quickstart/"
             if os.path.isdir(path):
                 shutil.rmtree(path)
             PathBuilder.build(path)
@@ -128,7 +128,7 @@ class Quickstart:
         result_path = self.build_path(result_path)
         specs_file = self.create_specfication(result_path)
 
-        app = ImmuneMLApp(specs_file, result_path + "quickstart/")
+        app = ImmuneMLApp(specs_file, result_path / "quickstart/")
         app.run()
 
 

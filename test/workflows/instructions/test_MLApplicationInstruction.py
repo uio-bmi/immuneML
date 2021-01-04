@@ -28,10 +28,10 @@ class TestMLApplicationInstruction(TestCase):
 
     def test_run(self):
 
-        path = EnvironmentSettings.tmp_test_path + "mlapplicationtest/"
+        path = EnvironmentSettings.tmp_test_path / "mlapplicationtest/"
         PathBuilder.build(path)
 
-        dataset = RandomDatasetGenerator.generate_repertoire_dataset(50, {5: 1}, {5: 1}, {"l1": {1: 0.5, 2: 0.5}}, path + 'dataset/')
+        dataset = RandomDatasetGenerator.generate_repertoire_dataset(50, {5: 1}, {5: 1}, {"l1": {1: 0.5, 2: 0.5}}, path / 'dataset/')
         ml_method = LogisticRegression()
         encoder = KmerFreqRepertoireEncoder(NormalizationType.RELATIVE_FREQUENCY, ReadsType.UNIQUE, SequenceEncodingType.CONTINUOUS_KMER, 3,
                                             scale_to_zero_mean=True, scale_to_unit_variance=True)
@@ -43,14 +43,14 @@ class TestMLApplicationInstruction(TestCase):
         hp_setting = HPSetting(encoder, {"normalization_type": "relative_frequency", "reads": "unique", "sequence_encoding": "continuous_kmer",
                                          "k": 3, "scale_to_zero_mean": True, "scale_to_unit_variance": True}, ml_method, {}, [], 'enc1', 'ml1')
 
-        PathBuilder.build(path+'result/instr1/')
-        shutil.copy(path+'dict_vectorizer.pickle', path+'result/instr1/dict_vectorizer.pickle')
-        shutil.copy(path+'scaler.pickle', path+'result/instr1/scaler.pickle')
+        PathBuilder.build(path / 'result/instr1/')
+        shutil.copy(path / 'dict_vectorizer.pickle', path / 'result/instr1/dict_vectorizer.pickle')
+        shutil.copy(path / 'scaler.pickle', path / 'result/instr1/scaler.pickle')
 
         ml_app = MLApplicationInstruction(dataset, label_config, hp_setting, 4, "instr1", False)
-        ml_app.run(path + 'result/')
+        ml_app.run(path / 'result/')
 
-        predictions_path = path + "result/instr1/predictions.csv"
+        predictions_path = path / "result/instr1/predictions.csv"
         self.assertTrue(os.path.isfile(predictions_path))
 
         df = pd.read_csv(predictions_path)
