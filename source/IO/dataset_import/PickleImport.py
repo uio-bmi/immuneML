@@ -101,11 +101,11 @@ class PickleImport(DataImport):
     def _update_receptor_paths(pickle_params, dataset: ElementDataset):
         dataset_dir = PickleImport._discover_dataset_dir(pickle_params)
 
-        if len(list(glob(f"{dataset_dir}*.pickle"))) == len(dataset.get_filenames()):
+        if len(list(dataset_dir.glob("*.pickle"))) == len(dataset.get_filenames()):
             path = dataset_dir
             new_filenames = []
             for file in dataset.get_filenames():
-                new_filenames.append(f"{path}{os.path.basename(file)}")
+                new_filenames.append(path / file.name)
             dataset.set_filenames(new_filenames)
 
         return dataset
@@ -114,10 +114,10 @@ class PickleImport(DataImport):
     def _discover_repertoire_path(pickle_params, dataset):
         dataset_dir = PickleImport._discover_dataset_dir(pickle_params)
 
-        if len(list(glob(f"{dataset_dir}*.npy"))) == len(dataset.repertoires):
+        if len(list(dataset_dir.glob("*.npy"))) == len(dataset.repertoires):
             path = dataset_dir
-        elif len(list(glob(f"{dataset_dir}repertoires/*.npy"))) == len(dataset.repertoires):
-            path = dataset_dir + "repertoires/"
+        elif len(list(dataset_dir.glob("repertoires/*.npy"))) == len(dataset.repertoires):
+            path = dataset_dir / "repertoires/"
         else:
             path = None
 

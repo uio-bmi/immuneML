@@ -10,7 +10,6 @@ class UtilIO:
 
     @staticmethod
     def export_comparison_data(comp_data: ComparisonData, path: Path):
-        assert False, "test paths"
         shutil.copytree(comp_data.path, path / "comp_data")
 
         comp_data_file = path / "comparison_data.pickle"
@@ -21,7 +20,6 @@ class UtilIO:
 
     @staticmethod
     def import_comparison_data(path: Path) -> ComparisonData:
-        assert False, "test paths"
         comp_data_path = path / "comp_data"
 
         comp_data_file = path / "comparison_data.pickle"

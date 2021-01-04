@@ -65,7 +65,8 @@ class InstructionParser:
 
         inst_paths = {}
 
-        assert False, "todo here: check if path correct"
+        assert False, "test paths"
+
         for instruction in instructions:
             instruction_name = instruction.__name__[:-11]
             if hasattr(InstructionParser, f"make_{instruction_name.lower()}_docs"):
