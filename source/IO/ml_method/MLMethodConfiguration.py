@@ -29,7 +29,7 @@ class MLMethodConfiguration:
     software_used: str = None
 
     def store(self, path: Path):
-        PathBuilder.build(path.parents[0])
+        PathBuilder.build(path.parent)
         with path.open("w") as file:
             yaml.dump(self.__dict__, file)
 

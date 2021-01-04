@@ -50,7 +50,7 @@ class DatasetEncoder(metaclass=abc.ABCMeta):
         with encoder_file.open("wb") as file:
             pickle.dump(encoder, file)
 
-        encoder_dir = encoder_file.parents[0]
+        encoder_dir = encoder_file.parent
         for file in encoder.get_additional_files():
             shutil.copy(file, encoder_dir / file.name)
 

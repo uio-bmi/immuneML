@@ -150,7 +150,7 @@ class ImmuneMLParser:
     def _get_full_specs_filepath(file_path, result_path) -> Path:
         file_name = f"full_{file_path.stem}.yaml"
         if result_path is None:
-            folder = file_path.absolute().parents[0]
+            folder = file_path.absolute().parent
             return folder / file_name
         else:
             return result_path / file_name

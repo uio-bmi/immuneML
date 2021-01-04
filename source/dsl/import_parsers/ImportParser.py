@@ -77,7 +77,6 @@ class ImportParser:
             params["result_path"] = Path(result_path) / "datasets" / dataset_name
         else:
             params["result_path"] = Path(params["result_path"])
-        PathBuilder.build(params["result_path"])
 
         if "path" in params:
             params["path"] = Path(params["path"])

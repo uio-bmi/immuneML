@@ -131,7 +131,7 @@ class DistanceEncoder(DatasetEncoder):
     @staticmethod
     def load_encoder(encoder_file: Path):
         encoder = DatasetEncoder.load_encoder(encoder_file)
-        encoder.comparison = UtilIO.import_comparison_data(encoder_file.parents[0])
+        encoder.comparison = UtilIO.import_comparison_data(encoder_file.parent)
         return encoder
 
     @staticmethod

@@ -65,7 +65,7 @@ class TestImmuneMLParser(TestCase):
         with specs_filename.open("w") as file:
             yaml.dump(spec, file, default_flow_style=False)
 
-        symbol_table, _ = ImmuneMLParser.parse_yaml_file(specs_filename)
+        symbol_table, _ = ImmuneMLParser.parse_yaml_file(specs_filename, result_path=path)
 
         self.assertTrue(all([symbol_table.contains(key) for key in
                              ["simpleLR", "rep1", "a1", "d1"]]))
@@ -78,6 +78,6 @@ class TestImmuneMLParser(TestCase):
             with specs_filename.open("w") as file:
                 file.writelines(specs_text)
 
-            ImmuneMLParser.parse_yaml_file(specs_filename)
+            ImmuneMLParser.parse_yaml_file(specs_filename, result_path=path)
 
         shutil.rmtree(path)

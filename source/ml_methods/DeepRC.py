@@ -142,7 +142,7 @@ class DeepRC(MLMethod):
         self.feature_names = None
 
     def _metadata_to_hdf5(self, metadata_filepath: Path, label_name):
-        hdf5_filepath = metadata_filepath.parents[0] / f"{metadata_filepath.stem}.hdf5"
+        hdf5_filepath = metadata_filepath.parent / f"{metadata_filepath.stem}.hdf5"
         converter = DatasetToHDF5(metadata_file=str(metadata_filepath),
                                   id_column=DeepRCEncoder.ID_COLUMN,
                                   single_class_label_columns=tuple([label_name]),

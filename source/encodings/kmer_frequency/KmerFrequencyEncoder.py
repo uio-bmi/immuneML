@@ -252,7 +252,7 @@ class KmerFrequencyEncoder(DatasetEncoder):
 
     def _prepare_sequence_encoder(self, params: EncoderParams):
         class_name = self.sequence_encoding.value
-        sequence_encoder = ReflectionHandler.get_class_by_name(class_name, "encodings")
+        sequence_encoder = ReflectionHandler.get_class_by_name(class_name, "encodings/")
         return sequence_encoder
 
     def _encode_sequence(self, sequence: ReceptorSequence, params: EncoderParams, sequence_encoder, counts):

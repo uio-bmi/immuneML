@@ -134,7 +134,7 @@ class SequenceCountEncoder(DatasetEncoder):
     def load_encoder(encoder_file: Path):
         encoder = DatasetEncoder.load_encoder(encoder_file)
         encoder.relevant_indices_path = DatasetEncoder.load_attribute(encoder, encoder_file, "relevant_indices_path")
-        encoder.comparison_data = UtilIO.import_comparison_data(encoder_file.parents[0])
+        encoder.comparison_data = UtilIO.import_comparison_data(encoder_file.parent)
         return encoder
 
     @staticmethod

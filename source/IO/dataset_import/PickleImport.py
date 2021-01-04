@@ -76,7 +76,7 @@ class PickleImport(DataImport):
     def _import_from_metadata(pickle_params,  dataset_name):
         with pickle_params.metadata_file.open("r") as file:
             dataset_filename = file.readline().replace(Constants.COMMENT_SIGN, "").replace("\n", "")
-        pickle_params.path = pickle_params.metadata_file.parents[0] / dataset_filename
+        pickle_params.path = pickle_params.metadata_file.parent / dataset_filename
 
         assert pickle_params.path.is_file(), f"PickleImport: dataset file {dataset_filename} specified in " \
                                                    f"{pickle_params.metadata_file} could not be found ({pickle_params.path} is not a file), " \
@@ -95,7 +95,7 @@ class PickleImport(DataImport):
 
     @staticmethod
     def _discover_dataset_dir(pickle_params):
-        return pickle_params.path.parents[0]
+        return pickle_params.path.parent
 
     @staticmethod
     def _update_receptor_paths(pickle_params, dataset: ElementDataset):

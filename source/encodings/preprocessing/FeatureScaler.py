@@ -35,7 +35,7 @@ class FeatureScaler:
             scaler = StandardScaler(with_mean=with_mean)
             scaled_design_matrix = scaler.fit_transform(scaled_design_matrix)
 
-            directory = scaler_file.parents[0]
+            directory = scaler_file.parent
             PathBuilder.build(directory)
 
             with scaler_file.open('wb') as file:

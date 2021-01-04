@@ -15,10 +15,10 @@ class TestDefaultParamsLoader(TestCase):
             "b": True
         }
 
-        path = EnvironmentSettings.tmp_test_path + "defaultparamsloader/"
+        path = EnvironmentSettings.tmp_test_path / "defaultparamsloader/"
         PathBuilder.build(path)
 
-        with open(path + "mixcr_params.yaml", "w") as file:
+        with open(path / "mixcr_params.yaml", "w") as file:
             yaml.dump(params, file)
 
         loaded = DefaultParamsLoader.load(path, "MiXCR")
