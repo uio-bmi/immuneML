@@ -12,8 +12,8 @@ from source.util.PathBuilder import PathBuilder
 class TestGalaxySimulationTool(TestCase):
     def test_run(self):
 
-        path = PathBuilder.build(f"{EnvironmentSettings.tmp_test_path}api_galaxy_simulation_tool/")
-        result_path = f"{path}result/"
+        path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "api_galaxy_simulation_tool/")
+        result_path = path / "result"
 
         specs = {
             "definitions": {
@@ -74,10 +74,10 @@ class TestGalaxySimulationTool(TestCase):
             }
         }
 
-        specs_path = f"{path}specs.yaml"
+        specs_path = path / "specs.yaml"
         with open(specs_path, "w") as file:
             yaml.dump(specs, file)
 
-        run_immuneML(Namespace(**{"specification_path": specs_path, "result_path": result_path + 'result/', 'tool': "GalaxySimulationTool"}))
+        run_immuneML(Namespace(**{"specification_path": str(specs_path), "result_path": str(result_path / 'result/'), 'tool': "GalaxySimulationTool"}))
 
         shutil.rmtree(path)

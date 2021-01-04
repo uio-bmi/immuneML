@@ -2,6 +2,7 @@ import copy
 import math
 import random
 from typing import List
+from pathlib import Path
 
 from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.data_model.receptor.receptor_sequence.SequenceAnnotation import SequenceAnnotation
@@ -37,7 +38,7 @@ class FullSequenceImplanting(SignalImplantingStrategy):
 
     """
 
-    def implant_in_repertoire(self, repertoire: Repertoire, repertoire_implanting_rate: float, signal, path):
+    def implant_in_repertoire(self, repertoire: Repertoire, repertoire_implanting_rate: float, signal, path: Path):
 
         assert all("/" not in motif.seed for motif in signal.motifs), \
             f'FullSequenceImplanting: motifs cannot include gaps. Check motifs {[motif.identifier for motif in signal.motifs]}.'

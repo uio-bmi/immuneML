@@ -2,6 +2,8 @@ import copy
 import logging
 import random
 
+from pathlib import Path
+
 from source.data_model.repertoire.Repertoire import Repertoire
 from source.simulation.sequence_implanting.SequenceImplantingStrategy import SequenceImplantingStrategy
 from source.simulation.signal_implanting_strategy.ImplantingComputation import ImplantingComputation, get_implanting_function
@@ -64,7 +66,7 @@ class HealthySequenceImplanting(SignalImplantingStrategy):
         super().__init__(implanting, sequence_position_weights)
         self.compute_implanting = get_implanting_function(implanting_computation)
 
-    def implant_in_repertoire(self, repertoire: Repertoire, repertoire_implanting_rate: float, signal, path) -> Repertoire:
+    def implant_in_repertoire(self, repertoire: Repertoire, repertoire_implanting_rate: float, signal, path: Path) -> Repertoire:
         max_motif_length = self._calculate_max_motif_length(signal)
         sequences_to_be_processed, other_sequences = self._choose_sequences_for_implanting(repertoire,
                                                                                            repertoire_implanting_rate,
@@ -85,7 +87,7 @@ class HealthySequenceImplanting(SignalImplantingStrategy):
         max_motif_length = max([motif.get_max_length() for motif in signal.motifs])
         return max_motif_length
 
-    def _build_new_repertoire(self, sequences, repertoire_metadata, signal, path) -> Repertoire:
+    def _build_new_repertoire(self, sequences, repertoire_metadata, signal, path: Path) -> Repertoire:
         if repertoire_metadata is not None:
             metadata = copy.deepcopy(repertoire_metadata)
         else:

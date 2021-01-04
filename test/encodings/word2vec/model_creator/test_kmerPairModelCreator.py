@@ -13,7 +13,7 @@ from source.util.PathBuilder import PathBuilder
 
 class TestKmerPairModelCreator(TestCase):
     def test_create_model(self):
-        test_path = EnvironmentSettings.root_path + "test/tmp/w2v_test_tmp/"
+        test_path = EnvironmentSettings.root_path / "test/tmp/w2v_test_tmp/"
 
         PathBuilder.build(test_path)
 
@@ -29,7 +29,7 @@ class TestKmerPairModelCreator(TestCase):
         dataset = RepertoireDataset(repertoires=[rep1, rep2])
 
         model_creator = KmerPairModelCreator()
-        model = model_creator.create_model(dataset=dataset, k=2, vector_size=16, batch_size=1, model_path=test_path+"model.model")
+        model = model_creator.create_model(dataset=dataset, k=2, vector_size=16, batch_size=1, model_path=test_path/"model.model")
 
         self.assertTrue(isinstance(model, Word2Vec))
         self.assertTrue("CA" in model.wv.vocab)

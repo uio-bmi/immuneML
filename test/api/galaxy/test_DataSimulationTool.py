@@ -13,11 +13,11 @@ from source.util.PathBuilder import PathBuilder
 class TestDataSimulationTool(TestCase):
     def test_run(self):
 
-        path = EnvironmentSettings.tmp_test_path + "galaxy_api_dataset_simulation/"
+        path = EnvironmentSettings.tmp_test_path / "galaxy_api_dataset_simulation/"
         PathBuilder.build(path)
 
-        yaml_path = f"{path}specs.yaml"
-        result_path = f"{path}results/"
+        yaml_path = path / "specs.yaml"
+        result_path = path / "results/"
 
         specs = {'definitions': {
             "datasets": {
@@ -46,11 +46,11 @@ class TestDataSimulationTool(TestCase):
 
         PathBuilder.build(path)
 
-        run_immuneML(Namespace(**{"specification_path": yaml_path, "result_path": result_path, 'tool': "DataSimulationTool"}))
+        run_immuneML(Namespace(**{"specification_path": str(yaml_path), "result_path": str(result_path), 'tool': "DataSimulationTool"}))
 
-        self.assertTrue(os.path.isfile(f"{result_path}result/d1_metadata.csv"))
-        self.assertTrue(os.path.isfile(f"{result_path}result/d1.iml_dataset"))
-        self.assertEqual(200, len([name for name in os.listdir(f"{result_path}result/repertoires/")
-                                   if os.path.isfile(os.path.join(f"{result_path}result/repertoires/", name))]))
+        self.assertTrue(os.path.isfile(result_path / "result/d1_metadata.csv"))
+        self.assertTrue(os.path.isfile(result_path / "result/d1.iml_dataset"))
+        self.assertEqual(200, len([name for name in os.listdir(result_path / "result/repertoires/")
+                                   if os.path.isfile(os.path.join(result_path / "result/repertoires/", name))]))
 
         shutil.rmtree(path)

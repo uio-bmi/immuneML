@@ -22,10 +22,10 @@ class TestSequenceAbundanceEncoding(TestCase):
 
     def test_encoding(self):
 
-        path = EnvironmentSettings.tmp_test_path + "integration_test_emerson_encoding/"
+        path = EnvironmentSettings.tmp_test_path / "integration_test_emerson_encoding/"
         PathBuilder.build(path)
 
-        ref_path = path + "reference.csv"
+        ref_path = path / "reference.csv"
         pd.DataFrame({"sequence_aas": ["GGG", "III", "TTT", "EFEF"], "v_alleles": ["TRBV6-1*01", "TRBV6-1*01", "TRBV6-1*01", "TRBV6-1*01"], 'j_alleles': ["TRBJ2-7", "TRBJ2-7", "TRBJ2-7", "TRBJ2-7"]}).to_csv(ref_path, index=False)
 
         repertoires, metadata = RepertoireBuilder.build([["GGG", "III", "LLL", "MMM"],
@@ -55,7 +55,7 @@ class TestSequenceAbundanceEncoding(TestCase):
                     "d1": {
                         "format": "Pickle",
                         "params": {
-                            "path": path + f"{dataset.name}.iml_dataset",
+                            "path": str(path / f"{dataset.name}.iml_dataset"),
                         }
                     }
                 },
@@ -74,7 +74,7 @@ class TestSequenceAbundanceEncoding(TestCase):
                     }
                 },
                 "reports": {
-                    "r1": {"ReferenceSequenceOverlap": {"reference_path": ref_path,
+                    "r1": {"ReferenceSequenceOverlap": {"reference_path": str(ref_path),
                                                         'comparison_attributes': ["sequence_aas", "v_alleles", "j_alleles"]}}
                 }
             },
@@ -112,11 +112,11 @@ class TestSequenceAbundanceEncoding(TestCase):
             }
         }
 
-        specs_file = path + "specs.yaml"
+        specs_file = path / "specs.yaml"
         with open(specs_file, "w") as file:
             yaml.dump(specs, file)
 
-        app = ImmuneMLApp(specs_file, path + "result/")
+        app = ImmuneMLApp(specs_file, path / "result")
         app.run()
 
         shutil.rmtree(path)

@@ -34,7 +34,7 @@ class AIRRExporter(DataExporter):
     """
 
     @staticmethod
-    def export(dataset: Dataset, path, region_type=RegionType.IMGT_CDR3):
+    def export(dataset: Dataset, path: Path, region_type=RegionType.IMGT_CDR3):
         PathBuilder.build(path)
 
         if isinstance(dataset, RepertoireDataset):

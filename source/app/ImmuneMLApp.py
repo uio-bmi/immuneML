@@ -62,7 +62,7 @@ def run_immuneML(namespace: argparse.Namespace):
         raise ValueError(f"Directory {namespace.result_path} already exists. Please specify a new output directory for the analysis.")
     PathBuilder.build(namespace.result_path)
 
-    logging.basicConfig(filename=namespace.result_path / "log.txt", level=logging.INFO, format='%(asctime)s %(levelname)s: %(message)s')
+    logging.basicConfig(filename=Path(namespace.result_path) / "log.txt", level=logging.INFO, format='%(asctime)s %(levelname)s: %(message)s')
     warnings.showwarning = lambda message, category, filename, lineno, file=None, line=None: logging.warning(message)
 
     if namespace.tool is None:

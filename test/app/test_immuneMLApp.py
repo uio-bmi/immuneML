@@ -48,7 +48,7 @@ class TestImmuneMLApp(TestCase):
                         "format": "Pickle",
                         "params": {
                             "path": str(dataset_path),
-                            "result_path": str(dataset_path / "imported_data/")
+                            "result_path": str(dataset_path.parents[0] / "imported_data/")
                         }
                     }
                 },

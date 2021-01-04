@@ -44,7 +44,7 @@ class ImportParser:
 
             if params["is_repertoire"] == True:
                 assert "metadata_file" in params, f"{location}: Missing parameter: metadata_file under {key}/params/"
-                ParameterValidator.assert_type_and_value(params["metadata_file"], str, location, "metadata_file")
+                ParameterValidator.assert_type_and_value(params["metadata_file"], Path, location, "metadata_file")
 
             if params["is_repertoire"] == False:
                 assert "paired" in params, f"{location}: Missing parameter: paired under {key}/params/"
@@ -81,5 +81,7 @@ class ImportParser:
 
         if "path" in params:
             params["path"] = Path(params["path"])
+        if "metadata_file" in params:
+            params["metadata_file"] = Path(params["metadata_file"])
         dataset_specs["params"] = params
         return params

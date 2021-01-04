@@ -1,7 +1,7 @@
 import logging
 import os
 import shutil
-from glob import glob
+from pathlib import Path
 
 import yaml
 
@@ -15,7 +15,7 @@ from source.workflows.instructions.TrainMLModelInstruction import TrainMLModelIn
 
 class GalaxyTrainMLModel(GalaxyTool):
 
-    def __init__(self, specification_path, result_path, **kwargs):
+    def __init__(self, specification_path: str, result_path: str, **kwargs):
         Util.check_parameters(specification_path, result_path, kwargs, GalaxyTrainMLModel.__name__)
         super().__init__(specification_path, result_path, **kwargs)
         self.instruction_name = None
@@ -26,17 +26,17 @@ class GalaxyTrainMLModel(GalaxyTool):
         app = ImmuneMLApp(self.yaml_path, self.result_path)
         app.run()
 
-        model_locations = list(glob(self.result_path + f"/{self.instruction_name}/optimal_*/zip/*.zip"))
+        model_locations = list(self.result_path.glob(f"{self.instruction_name}/optimal_*/zip/*.zip"))
 
-        model_export_path = PathBuilder.build(self.result_path + 'exported_models/')
+        model_export_path = PathBuilder.build(self.result_path / 'exported_models/')
 
         for model_location in model_locations:
-            shutil.copyfile(model_location, model_export_path + os.path.basename(model_location))
+            shutil.copyfile(model_location, model_export_path / model_location.name)
 
         logging.info(f"{GalaxyTrainMLModel.__name__}: immuneML has finished and the trained models were exported.")
 
     def _prepare_specs(self):
-        with open(self.yaml_path, "r") as file:
+        with self.yaml_path.open("r") as file:
             specs = yaml.safe_load(file)
 
         ParameterValidator.assert_keys_present(specs.keys(), ["definitions", "instructions"], GalaxyTrainMLModel.__name__, "YAML specification")

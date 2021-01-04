@@ -1,4 +1,5 @@
 from typing import List
+from pathlib import Path
 
 from scripts.specification_util import update_docs_per_mapping
 from source.IO.dataset_export.DataExporter import DataExporter
@@ -42,8 +43,8 @@ class SimulationInstruction(Instruction):
         self.state = SimulationState(signals, simulation, dataset, name=name)
         self.exporters = exporters
 
-    def run(self, result_path: str):
-        self.state.result_path = result_path + self.state.name + "/"
+    def run(self, result_path: Path):
+        self.state.result_path = result_path / self.state.name
         self.state.resulting_dataset = SignalImplanter.run(self.state)
         self.export_dataset()
         return self.state
@@ -52,7 +53,7 @@ class SimulationInstruction(Instruction):
         if self.exporters is not None and len(self.exporters) > 0:
             for exporter in self.exporters:
                 exporter.export(self.state.resulting_dataset,
-                                f"{self.state.result_path}exported_dataset/{exporter.__name__.replace('Exporter', '').lower()}/")
+                                self.state.result_path / f"exported_dataset/{exporter.__name__.replace('Exporter', '').lower()}/")
 
     @staticmethod
     def get_documentation():

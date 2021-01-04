@@ -22,7 +22,7 @@ from source.util.PathBuilder import PathBuilder
 class PickleExporter(DataExporter):
 
     @staticmethod
-    def export(dataset: Dataset, path):
+    def export(dataset: Dataset, path: Path):
         PathBuilder.build(path)
         exported_dataset = copy.deepcopy(dataset)
         dataset_name = exported_dataset.name if exported_dataset.name is not None else exported_dataset.identifier
@@ -43,7 +43,7 @@ class PickleExporter(DataExporter):
         return exported_dataset
 
     @staticmethod
-    def _export_metadata(dataset, metadata_folder_path, dataset_filename, repertoires_path):
+    def _export_metadata(dataset, metadata_folder_path: Path, dataset_filename, repertoires_path):
         if dataset.metadata_file is None or not dataset.metadata_file.is_file():
             return None
 
@@ -62,14 +62,14 @@ class PickleExporter(DataExporter):
         return metadata_file
 
     @staticmethod
-    def _update_repertoire_paths_in_metadata(metadata_file, repertoires_path):
+    def _update_repertoire_paths_in_metadata(metadata_file: Path, repertoires_path: Path):
         metadata = pd.read_csv(metadata_file, comment=Constants.COMMENT_SIGN)
         path = Path(os.path.relpath(repertoires_path, os.path.dirname(metadata_file)))
         metadata["filename"] = [path / os.path.basename(name) for name in metadata["filename"].values.tolist()]
         metadata.to_csv(metadata_file, index=False)
 
     @staticmethod
-    def _add_dataset_to_metadata(metadata_file, dataset_filename):
+    def _add_dataset_to_metadata(metadata_file: Path, dataset_filename: str):
         metadata = pd.read_csv(metadata_file)
         with metadata_file.open("w") as file:
             file.writelines([f"{Constants.COMMENT_SIGN}{dataset_filename}\n"])

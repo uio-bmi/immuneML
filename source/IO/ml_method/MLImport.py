@@ -1,6 +1,7 @@
 import os
 import pickle
 from typing import List, Tuple
+from pathlib import Path
 
 from source.IO.ml_method.MLMethodConfiguration import MLMethodConfiguration
 from source.environment.Label import Label
@@ -12,9 +13,9 @@ from source.util.ReflectionHandler import ReflectionHandler
 class MLImport:
 
     @staticmethod
-    def import_encoder(config: MLMethodConfiguration, config_dir: str):
+    def import_encoder(config: MLMethodConfiguration, config_dir: Path):
         encoder_class = ReflectionHandler.get_class_by_name(config.encoding_class)
-        encoder = encoder_class.load_encoder(config_dir + config.encoding_file)
+        encoder = encoder_class.load_encoder(config_dir / config.encoding_file)
         return encoder
 
     @staticmethod

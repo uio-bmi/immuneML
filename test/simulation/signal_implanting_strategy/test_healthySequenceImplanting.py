@@ -22,7 +22,7 @@ class TestHealthySequenceImplanting(TestCase):
         os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
 
     def test_implant_in_repertoire(self):
-        path = EnvironmentSettings.tmp_test_path + "healthysequenceimplanting/"
+        path = EnvironmentSettings.tmp_test_path / "healthysequenceimplanting/"
         PathBuilder.build(path)
 
         repertoire = Repertoire.build_from_sequence_objects([ReceptorSequence(amino_acid_sequence="ACDFQ", identifier="1"),

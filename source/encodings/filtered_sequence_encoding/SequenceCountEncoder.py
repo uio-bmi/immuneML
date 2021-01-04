@@ -127,14 +127,14 @@ class SequenceCountEncoder(DatasetEncoder):
         UtilIO.export_comparison_data(encoder.comparison_data, path)
         return encoder_file
 
-    def get_additional_files(self) -> List[str]:
+    def get_additional_files(self) -> List[Path]:
         return [self.relevant_indices_path]
 
     @staticmethod
-    def load_encoder(encoder_file: str):
+    def load_encoder(encoder_file: Path):
         encoder = DatasetEncoder.load_encoder(encoder_file)
         encoder.relevant_indices_path = DatasetEncoder.load_attribute(encoder, encoder_file, "relevant_indices_path")
-        encoder.comparison_data = UtilIO.import_comparison_data(os.path.dirname(encoder_file) + '/')
+        encoder.comparison_data = UtilIO.import_comparison_data(encoder_file.parents[0])
         return encoder
 
     @staticmethod

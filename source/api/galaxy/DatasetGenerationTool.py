@@ -1,6 +1,7 @@
 import shutil
 
 import yaml
+from pathlib import Path
 
 from source.api.galaxy.GalaxyTool import GalaxyTool
 from source.api.galaxy.Util import Util
@@ -24,7 +25,7 @@ class DatasetGenerationTool(GalaxyTool):
 
     """
 
-    def __init__(self, specification_path, result_path, **kwargs):
+    def __init__(self, specification_path: str, result_path: str, **kwargs):
         Util.check_parameters(specification_path, result_path, kwargs, "Dataset generation tool")
         super().__init__(specification_path, result_path, **kwargs)
 
@@ -32,11 +33,11 @@ class DatasetGenerationTool(GalaxyTool):
         PathBuilder.build(self.result_path)
         self.update_specs()
         state = ImmuneMLApp(self.yaml_path, self.result_path).run()[0]
-        shutil.copytree(list(list(state.paths.values())[0].values())[0], self.result_path + "result/")
+        shutil.copytree(list(list(state.paths.values())[0].values())[0], self.result_path / "result")
         print("Exported dataset.")
 
     def update_specs(self):
-        with open(self.yaml_path, 'r') as file:
+        with self.yaml_path.open('r') as file:
             specs = yaml.safe_load(file)
 
         ParameterValidator.assert_keys_present(specs.keys(), ["definitions", "instructions"], DatasetGenerationTool.__name__, "YAML specification")

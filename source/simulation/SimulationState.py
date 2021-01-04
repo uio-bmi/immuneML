@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-
+from pathlib import Path
 from source.data_model.dataset.Dataset import Dataset
 from source.simulation.Simulation import Simulation
 
@@ -10,5 +10,5 @@ class SimulationState:
     simulation: Simulation
     dataset: Dataset
     resulting_dataset: Dataset = None
-    result_path: str = None
+    result_path: Path = None
     name: str = None

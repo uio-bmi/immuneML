@@ -12,7 +12,7 @@ from source.util.PathBuilder import PathBuilder
 
 class TestFullSequenceImplanting(TestCase):
     def test_implant_in_repertoire(self):
-        path = PathBuilder.build(f"{EnvironmentSettings.tmp_test_path}full_seq_implanting/")
+        path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "full_seq_implanting/")
         signal = Signal("sig1", [Motif("motif1", GappedKmerInstantiation(max_gap=0), "AAAA")], FullSequenceImplanting())
 
         repertoire = Repertoire.build(["CCCC", "CCCC", "CCCC"], path=path)

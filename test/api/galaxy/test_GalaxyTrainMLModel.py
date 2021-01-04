@@ -12,8 +12,8 @@ from source.util.PathBuilder import PathBuilder
 
 class TestGalaxyTrainMLModel(TestCase):
     def test_run(self):
-        path = PathBuilder.build(f"{EnvironmentSettings.tmp_test_path}api_galaxy_trainmlmodel_tool/")
-        result_path = f"{path}result/"
+        path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "api_galaxy_trainmlmodel_tool/")
+        result_path = path / "result/"
 
         specs = {
             "definitions": {
@@ -95,13 +95,13 @@ class TestGalaxyTrainMLModel(TestCase):
             }
         }
 
-        specs_path = f"{path}specs.yaml"
+        specs_path = path / "specs.yaml"
         with open(specs_path, "w") as file:
             yaml.dump(specs, file)
 
-        run_immuneML(Namespace(**{"specification_path": specs_path, "result_path": result_path, 'tool': "GalaxyTrainMLModel"}))
+        run_immuneML(Namespace(**{"specification_path": str(specs_path), "result_path": str(result_path), 'tool': "GalaxyTrainMLModel"}))
 
-        self.assertTrue(os.path.exists(f"{result_path}exported_models/ml_model_CD.zip"))
-        self.assertTrue(os.path.exists(f"{result_path}index.html"))
+        self.assertTrue(os.path.exists(result_path / "exported_models/ml_model_CD.zip"))
+        self.assertTrue(os.path.exists(result_path / "index.html"))
 
         shutil.rmtree(path)

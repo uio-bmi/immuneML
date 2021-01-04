@@ -39,19 +39,19 @@ class TestDatasetGenerationTool(TestCase):
             yaml.dump(specs, file)
 
     def test_run(self):
-        path = EnvironmentSettings.tmp_test_path + "galaxy_api_dataset_generation/"
+        path = EnvironmentSettings.tmp_test_path / "galaxy_api_dataset_generation/"
         PathBuilder.build(path)
-        yaml_path = f"{path}specs.yaml"
-        result_path = f"{path}results/"
+        yaml_path = path / "specs.yaml"
+        result_path = path / "results/"
 
         PathBuilder.build(path)
         self.prepare_specs(yaml_path)
 
-        run_immuneML(Namespace(**{"specification_path": yaml_path, "result_path": result_path, 'tool': "DatasetGenerationTool"}))
+        run_immuneML(Namespace(**{"specification_path": str(yaml_path), "result_path": str(result_path), 'tool': "DatasetGenerationTool"}))
 
-        self.assertTrue(os.path.isfile(f"{result_path}result/d1_metadata.csv"))
-        self.assertTrue(os.path.isfile(f"{result_path}result/d1.iml_dataset"))
-        self.assertEqual(200, len([name for name in os.listdir(f"{result_path}result/repertoires/")
-                                   if os.path.isfile(os.path.join(f"{result_path}result/repertoires/", name))]))
+        self.assertTrue(os.path.isfile(result_path / "result/d1_metadata.csv"))
+        self.assertTrue(os.path.isfile(result_path / "result/d1.iml_dataset"))
+        self.assertEqual(200, len([name for name in os.listdir(result_path / "result/repertoires/")
+                                   if os.path.isfile(os.path.join(result_path / "result/repertoires/", name))]))
 
         shutil.rmtree(path)
