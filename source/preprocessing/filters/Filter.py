@@ -1,19 +1,17 @@
-import os
 from abc import ABC
 
 import pandas as pd
+from pathlib import Path
 
 from source.data_model.dataset.Dataset import Dataset
-from source.data_model.dataset.ReceptorDataset import ReceptorDataset
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
-from source.data_model.dataset.SequenceDataset import SequenceDataset
 from source.preprocessing.Preprocessor import Preprocessor
 
 
 class Filter(Preprocessor, ABC):
 
     @staticmethod
-    def build_new_metadata(dataset: RepertoireDataset, indices_to_keep: list, result_path: str):
+    def build_new_metadata(dataset: RepertoireDataset, indices_to_keep: list, result_path: Path):
         if dataset.metadata_file:
             df = pd.read_csv(dataset.metadata_file).iloc[indices_to_keep, :]
             df.reset_index(drop=True, inplace=True)

@@ -21,7 +21,7 @@ class TestCacheHandler(TestCase):
         object_type = CacheObjectType.OTHER
 
         h = hashlib.sha256(str(params).encode('utf-8')).hexdigest()
-        filename = "{}{}/{}.pickle".format(EnvironmentSettings.get_cache_path(), CacheObjectType.OTHER.name.lower(), h)
+        filename = EnvironmentSettings.get_cache_path() / "{}/{}.pickle".format(CacheObjectType.OTHER.name.lower(), h)
         with open(filename, "wb") as file:
             pickle.dump(obj, file)
 
@@ -82,6 +82,6 @@ class TestCacheHandler(TestCase):
         cache_key = "a123"
         obj = CacheHandler.memo(cache_key, fn, CacheObjectType.ENCODING)
         self.assertEqual("abc", obj)
-        self.assertTrue(os.path.isfile(f"{EnvironmentSettings.get_cache_path()}encoding/{cache_key}.pickle"))
+        self.assertTrue(os.path.isfile(EnvironmentSettings.get_cache_path() / f"encoding/{cache_key}.pickle"))
 
         os.remove(CacheHandler._build_filename(cache_key, CacheObjectType.ENCODING))
