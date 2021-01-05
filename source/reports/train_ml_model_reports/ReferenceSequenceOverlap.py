@@ -1,5 +1,4 @@
 import logging
-import os
 from collections import Counter
 from typing import Tuple
 
@@ -58,10 +57,10 @@ class ReferenceSequenceOverlap(TrainMLModelReport):
         ParameterValidator.assert_keys(kwargs.keys(), ['reference_path', 'comparison_attributes', 'name', 'label'], ReferenceSequenceOverlap.__name__,
                                        f"reports: {kwargs['name'] if 'name' in kwargs else ''}")
 
-        assert os.path.isfile(kwargs['reference_path']), f"{ReferenceSequenceOverlap.__name__}: 'reference_path' for report {kwargs['name']} is not " \
-                                                         f"a valid file path."
-
         kwargs['reference_path'] = Path(kwargs['reference_path'])
+
+        assert kwargs['reference_path'].is_file(), f"{ReferenceSequenceOverlap.__name__}: 'reference_path' for report {kwargs['name']} is not " \
+                                                         f"a valid file path."
 
         reference_sequences_df = pd.read_csv(kwargs['reference_path'])
         attributes = reference_sequences_df.columns.tolist()

@@ -1,4 +1,3 @@
-import os
 import pickle
 from typing import List, Tuple
 from pathlib import Path

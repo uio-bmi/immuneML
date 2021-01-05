@@ -1,4 +1,3 @@
-import glob
 import zipfile
 import airr
 import json
@@ -187,8 +186,7 @@ class IReceptorImport(DataImport):
 
         all_metadata_dfs = []
 
-        for airr_filename_str in glob.glob(str(unzipped_path / "*.tsv")):
-            airr_filename = Path(airr_filename_str)
+        for airr_filename in unzipped_path.glob("*.tsv"):
             metadata_filename = unzipped_path / f"{airr_filename.stem}-metadata.json"
 
             sub_metadata_df = IReceptorImport._create_metadata_df(metadata_filename)
@@ -204,10 +202,10 @@ class IReceptorImport(DataImport):
 
     @staticmethod
     def _unzip_files(path: Path, unzipped_path: Path, unzip_metadata=True) -> Dataset:
-        for zip_filename in glob.glob(str(path / "*.zip")):
+        for zip_filename in path.glob("*.zip"):
             with zipfile.ZipFile(zip_filename, "r") as zip_object:
                 for file in zip_object.filelist:
-                    file.filename = f"{Path(zip_filename).stem}_{file.filename}"
+                    file.filename = f"{zip_filename.stem}_{file.filename}"
                     if not file.filename.endswith("info.txt"):
                         if unzip_metadata or not file.filename.endswith("-metadata.json"):
                             zip_object.extract(file, path=unzipped_path)

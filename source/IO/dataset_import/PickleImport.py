@@ -1,9 +1,6 @@
 # quality: gold
 
-import os
 import pickle
-from glob import glob
-
 import pandas as pd
 
 from source.IO.dataset_import.DataImport import DataImport
@@ -67,7 +64,6 @@ class PickleImport(DataImport):
             dataset = pickle.load(file)
         if pickle_params.metadata_file is not None and hasattr(dataset, "metadata_file"):
             dataset.metadata_file = pickle_params.metadata_file
-        if hasattr(dataset, "metadata_file") and dataset.metadata_file is not None:
             metadata = pd.read_csv(dataset.metadata_file, comment=Constants.COMMENT_SIGN)
             metadata.to_csv(dataset.metadata_file, index=False)
         return dataset

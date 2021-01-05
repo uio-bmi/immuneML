@@ -1,7 +1,5 @@
-import os
 import pickle
 import warnings
-from glob import glob
 from multiprocessing.pool import Pool
 from typing import List
 from pathlib import Path
@@ -283,9 +281,7 @@ class ImportHelper:
             filenames = []
 
             for pattern in data_file_extensions:
-                filenames.extend(glob(os.path.join(path, pattern)))
-
-            filenames = [Path(filename) for filename in filenames]
+                filenames.extend(list(path.glob(pattern)))
         else:
             raise ValueError(f"ImportHelper: path '{path}' given in YAML specification is not a valid path. "
                              f"This parameter can either point to a single file with immune receptor data or to a directory containing such files.")

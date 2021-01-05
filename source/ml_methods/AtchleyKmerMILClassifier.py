@@ -156,7 +156,7 @@ class AtchleyKmerMILClassifier(MLMethod):
 
     def store(self, path: Path, feature_names=None, details_path: Path = None):
         PathBuilder.build(path)
-        torch.save(copy.deepcopy(self.logistic_regression).state_dict(), path / "log_reg.pt")
+        torch.save(copy.deepcopy(self.logistic_regression).state_dict(), str(path / "log_reg.pt"))
         custom_vars = copy.deepcopy(vars(self))
 
         coefficients_df = pd.DataFrame(custom_vars["logistic_regression"].linear.weight.detach().numpy(), columns=feature_names)
@@ -180,7 +180,7 @@ class AtchleyKmerMILClassifier(MLMethod):
                 setattr(self, param, value)
 
         self._make_log_reg()
-        self.logistic_regression.load_state_dict(torch.load(path / "log_reg.pt"))
+        self.logistic_regression.load_state_dict(torch.load(str(path / "log_reg.pt")))
 
     def get_model(self, label_name: str = None):
         return vars(self)

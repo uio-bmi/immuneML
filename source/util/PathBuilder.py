@@ -11,7 +11,7 @@ class PathBuilder:
     @staticmethod
     def build(path, warn_if_exists=False):
         path = Path(path)
-        if warn_if_exists and os.path.isdir(path):
+        if warn_if_exists and path.is_dir():
             warnings.warn(f"PathBuilder: directory {path} already exists. Writing in the existing directory...", RuntimeWarning)
         else:
             try:

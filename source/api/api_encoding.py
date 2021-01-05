@@ -1,5 +1,3 @@
-import glob
-import os
 import random
 
 import pandas as pd
@@ -70,10 +68,11 @@ def encode_dataset_by_kmer_freq(path_to_dataset_directory: str, result_path: str
 
 def generate_random_metadata(path_to_dataset_directory: Path, result_path: Path):
 
-    repertoire_filenames = list(glob.glob(str(path_to_dataset_directory / "*")))
+    repertoire_filenames = list(path_to_dataset_directory.glob("*"))
+
     repertoire_count = len(repertoire_filenames)
 
-    df = pd.DataFrame({"filename": [Path(filename).name for filename in repertoire_filenames],
+    df = pd.DataFrame({"filename": [filename.name for filename in repertoire_filenames],
                        "disease": [random.choice([True, False]) for i in range(repertoire_count)],
                        "subject_id": [str(i) for i in range(1, repertoire_count + 1)]})
 

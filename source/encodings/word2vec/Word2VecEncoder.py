@@ -193,9 +193,9 @@ class Word2VecEncoder(DatasetEncoder):
         return model
 
     def _exists_model(self, params: EncoderParams) -> bool:
-        return os.path.isfile(self._create_model_path(params))
+        return self._create_model_path(params).is_file()
 
-    def _create_model_path(self, params: EncoderParams):
+    def _create_model_path(self, params: EncoderParams) -> Path:
         if self.model_path is None:
             return params.result_path / "W2V.model"
         else:

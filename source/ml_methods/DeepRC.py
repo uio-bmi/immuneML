@@ -376,7 +376,7 @@ class DeepRC(MLMethod):
         name = FilenameHandler.get_filename(self.__class__.__name__, "pt")
         file_path = path  / name
         if file_path.is_file():
-            self.models = torch.load(file_path)
+            self.models = torch.load(str(file_path))
             for model in self.models.values():
                 model.eval()
         else:

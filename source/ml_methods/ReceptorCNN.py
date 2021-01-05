@@ -266,7 +266,7 @@ class ReceptorCNN(MLMethod):
     def store(self, path:Path, feature_names=None, details_path:Path=None):
         PathBuilder.build(path)
 
-        torch.save(copy.deepcopy(self.CNN).state_dict(), path / "CNN.pt")
+        torch.save(copy.deepcopy(self.CNN).state_dict(), str(path / "CNN.pt"))
 
         custom_vars = copy.deepcopy(vars(self))
         del custom_vars["CNN"]
@@ -293,7 +293,7 @@ class ReceptorCNN(MLMethod):
         self.sequence_type = SequenceType[self.sequence_type.upper()]
 
         self._make_CNN()
-        self.CNN.load_state_dict(torch.load(path / "CNN.pt"))
+        self.CNN.load_state_dict(torch.load(str(path / "CNN.pt")))
 
     def _make_CNN(self):
         self.CNN = RCNN(kernel_count=self.kernel_count, kernel_size=self.kernel_size, positional_channels=self.positional_channels,

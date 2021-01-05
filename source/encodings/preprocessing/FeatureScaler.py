@@ -1,4 +1,3 @@
-import os
 import pickle
 
 from sklearn.preprocessing import StandardScaler, normalize, binarize

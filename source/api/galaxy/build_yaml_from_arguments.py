@@ -2,7 +2,6 @@ import argparse
 import glob
 import itertools as it
 import logging
-import os
 import sys
 import warnings
 
