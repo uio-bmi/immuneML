@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from source.data_model.dataset.Dataset import Dataset
 from source.reports.Report import Report
 
@@ -12,7 +14,7 @@ class DataReport(Report):
     Alternatively, when running the :ref:`ExploratoryAnalysis` instruction, data reports can be specified under 'reports'.
     """
 
-    def __init__(self, dataset: Dataset = None, result_path: str = None, name: str = None):
+    def __init__(self, dataset: Dataset = None, result_path: Path = None, name: str = None):
         super().__init__(name)
         self.dataset = dataset
         self.result_path = result_path

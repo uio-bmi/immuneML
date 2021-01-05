@@ -3,6 +3,7 @@ import itertools as it
 import operator
 
 import pandas as pd
+from pathlib import Path
 
 from source.data_model.receptor.TCABReceptor import TCABReceptor
 from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
@@ -70,7 +71,7 @@ class IRISSequenceImport:
     """
 
     @staticmethod
-    def import_items(path: str, paired: bool = False, all_dual_chains: bool = True, all_genes: bool = False):
+    def import_items(path: Path, paired: bool = False, all_dual_chains: bool = True, all_genes: bool = False):
         df = pd.read_csv(path, sep="\t")
         df = df.where((pd.notnull(df)), None)
 

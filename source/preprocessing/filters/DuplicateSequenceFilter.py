@@ -2,6 +2,7 @@ import copy
 from multiprocessing.pool import Pool
 
 import pandas as pd
+from pathlib import Path
 
 from scripts.specification_util import update_docs_per_mapping
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
@@ -156,7 +157,7 @@ class DuplicateSequenceFilter(Filter):
 
         return processed_repertoire
 
-    def process_dataset(self, dataset: RepertoireDataset, result_path: str) -> RepertoireDataset:
+    def process_dataset(self, dataset: RepertoireDataset, result_path: Path) -> RepertoireDataset:
         params = {"result_path": result_path, "filter_sequence_type": self.filter_sequence_type, "count_agg": self.count_agg,
                   "batch_size": self.batch_size, "sequence_of_interest": self.sequence_of_interest,
                   "sequence_to_ignore": self.sequence_to_ignore}

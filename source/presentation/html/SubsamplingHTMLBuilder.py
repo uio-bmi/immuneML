@@ -1,3 +1,4 @@
+from pathlib import Path
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.ml_methods.util.Util import Util as MLUtil
 from source.presentation.TemplateParser import TemplateParser
@@ -34,8 +35,7 @@ class SubsamplingHTMLBuilder:
         return result_file
 
     @staticmethod
-    def make_html_map(state: SubsamplingState, base_path: str) -> dict:
-
+    def make_html_map(state: SubsamplingState, base_path: Path) -> dict:
         html_map = {
             "css_style": Util.get_css_content(SubsamplingHTMLBuilder.CSS_PATH),
             "name": state.name,

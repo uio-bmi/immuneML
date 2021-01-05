@@ -94,7 +94,8 @@ class MatchedRegexEncoder(DatasetEncoder):
         ParameterValidator.assert_type_and_value(match_v_genes, bool, "MatchedRegexEncoder", "match_v_genes")
         ParameterValidator.assert_type_and_value(sum_counts, bool, "MatchedRegexEncoder", "sum_counts")
 
-        assert os.path.isfile(motif_filepath), f"MatchedRegexEncoder: the file {motif_filepath} does not exist. " \
+        motif_filepath = Path(motif_filepath)
+        assert motif_filepath.is_file(), f"MatchedRegexEncoder: the file {motif_filepath} does not exist. " \
                                                f"Specify the correct path under motif_filepath."
 
         file_columns = list(pd.read_csv(motif_filepath, sep="\t", iterator=False, dtype=str, nrows=0).columns)
@@ -108,7 +109,7 @@ class MatchedRegexEncoder(DatasetEncoder):
                                                     f"Remove {chain}_regex from columns, or set match_v_genes to False."
 
         return {
-            "motif_filepath": Path(motif_filepath),
+            "motif_filepath": motif_filepath,
             "match_v_genes": match_v_genes,
             "sum_counts": sum_counts,
             "chains": chains,

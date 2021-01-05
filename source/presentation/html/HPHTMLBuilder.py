@@ -153,8 +153,7 @@ class HPHTMLBuilder:
         return result if len(result) > 0 else None
 
     @staticmethod
-    def _make_assessment_pages(state: TrainMLModelState, base_path: str, label: str):
-
+    def _make_assessment_pages(state: TrainMLModelState, base_path: Path, label: str):
         assessment_list = []
 
         for i, assessment_state in enumerate(state.assessment_states):

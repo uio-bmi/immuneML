@@ -28,10 +28,10 @@ class SubjectRepertoireCollector(Preprocessor):
 
     """
 
-    def __init__(self, result_path: str = None):
+    def __init__(self, result_path: Path = None):
         self.result_path = result_path
 
-    def process_dataset(self, dataset: RepertoireDataset, result_path: str = None):
+    def process_dataset(self, dataset: RepertoireDataset, result_path: Path = None):
         return SubjectRepertoireCollector.process(dataset, {"result_path": result_path if result_path is not None else self.result_path})
 
     @staticmethod

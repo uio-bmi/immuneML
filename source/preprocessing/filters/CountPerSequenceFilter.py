@@ -2,6 +2,7 @@ import copy
 from multiprocessing.pool import Pool
 
 import numpy as np
+from pathlib import Path
 
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.repertoire.Repertoire import Repertoire
@@ -85,7 +86,7 @@ class CountPerSequenceFilter(Filter):
 
         return processed_repertoire
 
-    def process_dataset(self, dataset: RepertoireDataset, result_path: str) -> RepertoireDataset:
+    def process_dataset(self, dataset: RepertoireDataset, result_path: Path) -> RepertoireDataset:
         params = {"result_path": result_path, "low_count_limit": self.low_count_limit, "remove_without_count": self.remove_without_count,
                   "remove_empty_repertoires": self.remove_empty_repertoires, "batch_size": self.batch_size}
         return CountPerSequenceFilter.process(dataset, params)

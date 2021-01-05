@@ -3,6 +3,7 @@ import shutil
 import sys
 
 import yaml
+from pathlib import Path
 
 from source.app.ImmuneMLApp import ImmuneMLApp
 from source.environment.EnvironmentSettings import EnvironmentSettings
@@ -11,7 +12,7 @@ from source.util.PathBuilder import PathBuilder
 
 class Quickstart:
 
-    def create_specfication(self, path):
+    def create_specfication(self, path: Path):
 
         specs = {
             "definitions": {
@@ -110,7 +111,7 @@ class Quickstart:
         }
 
         specs_file = path / "specs.yaml"
-        with open(specs_file, "w") as file:
+        with specs_file.open("w") as file:
             yaml.dump(specs, file)
 
         return specs_file
@@ -121,6 +122,8 @@ class Quickstart:
             if os.path.isdir(path):
                 shutil.rmtree(path)
             PathBuilder.build(path)
+        else:
+            path = Path(path)
         return path
 
     def run(self, result_path: str):

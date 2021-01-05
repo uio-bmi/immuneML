@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from source.IO.dataset_export.DataExporter import DataExporter
 from source.dsl.symbol_table.SymbolTable import SymbolTable
 from source.dsl.symbol_table.SymbolType import SymbolType
@@ -66,8 +68,7 @@ class SimulationParser:
 
     """
 
-    def parse(self, key: str, instruction: dict, symbol_table: SymbolTable, path: str = None) -> SimulationInstruction:
-
+    def parse(self, key: str, instruction: dict, symbol_table: SymbolTable, path: Path = None) -> SimulationInstruction:
         ParameterValidator.assert_keys(instruction.keys(), ["dataset", "simulation", "type", "export_formats"], "SimulationParser", key)
 
         signals = [signal.item for signal in symbol_table.get_by_type(SymbolType.SIGNAL)]

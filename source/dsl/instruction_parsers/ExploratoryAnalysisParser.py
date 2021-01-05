@@ -1,5 +1,7 @@
 import copy
 
+from pathlib import Path
+
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.dsl.symbol_table.SymbolTable import SymbolTable
 from source.environment.LabelConfiguration import LabelConfiguration
@@ -38,7 +40,7 @@ class ExploratoryAnalysisParser:
 
     """
 
-    def parse(self, key: str, instruction: dict, symbol_table: SymbolTable, path: str = None) -> ExploratoryAnalysisInstruction:
+    def parse(self, key: str, instruction: dict, symbol_table: SymbolTable, path: Path = None) -> ExploratoryAnalysisInstruction:
         exp_analysis_units = {}
 
         ParameterValidator.assert_keys(instruction, ["analyses", "type"], "ExploratoryAnalysisParser", "ExploratoryAnalysis")
