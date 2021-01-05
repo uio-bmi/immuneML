@@ -172,7 +172,7 @@ class ImmuneMLParser:
     @staticmethod
     def _paths_to_strings_recursive(specs):
         if isinstance(specs, Path):
-            return str(specs)
+            return specs.as_posix()
         elif isinstance(specs, dict):
             return {key: ImmuneMLParser._paths_to_strings_recursive(value) for key, value in specs.items()}
         elif isinstance(specs, list):
