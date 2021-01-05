@@ -12,7 +12,7 @@ class DatasetImportParams:
     metadata_file: Path = None
     paired: bool = None
     receptor_chains: ChainPair = None
-    result_path: str = None
+    result_path: Path = None
     columns_to_load: list = None
     separator: str = None
     column_mapping: dict = None
@@ -30,10 +30,11 @@ class DatasetImportParams:
     import_empty_aa_sequences: bool = None
 
     @classmethod
-    def build_object(cls, path: Path = None, metadata_file: Path = None, region_type: str = None, receptor_chains: str = None, **kwargs):
+    def build_object(cls, path: Path = None, metadata_file: Path = None, result_path: Path = None, region_type: str = None, receptor_chains: str = None, **kwargs):
         params = {
             "path": Path(path) if path is not None else None,
             "metadata_file": Path(metadata_file) if metadata_file is not None else None,
+            "result_path": Path(result_path) if result_path is not None else None,
             "region_type": RegionType[region_type.upper()] if region_type else None,
             "receptor_chains": ChainPair[receptor_chains.upper()] if receptor_chains else None,
         }

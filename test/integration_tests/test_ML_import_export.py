@@ -154,4 +154,4 @@ class TestMLIE(TestCase):
 
         self.assertTrue(os.path.isfile(path / "result_import/index.html"))
 
-        # shutil.rmtree(path)
+        shutil.rmtree(path)

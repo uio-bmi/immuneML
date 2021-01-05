@@ -7,7 +7,7 @@ from pathlib import Path
 class MLMethodTrainerParams(StepParams):
 
     def __init__(self, method: MLMethod, dataset: Dataset, result_path: Path, label: str, model_selection_cv: bool,
-                 model_selection_n_folds: int, cores_for_training: int, train_predictions_path: str, ml_details_path: str,
+                 model_selection_n_folds: int, cores_for_training: int, train_predictions_path: Path, ml_details_path: Path,
                  optimization_metric: str):
         self.method = method
         self.result_path = result_path

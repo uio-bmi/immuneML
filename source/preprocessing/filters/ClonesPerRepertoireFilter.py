@@ -1,6 +1,6 @@
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.preprocessing.filters.Filter import Filter
-
+from pathlib import Path
 
 class ClonesPerRepertoireFilter(Filter):
     """
@@ -35,7 +35,7 @@ class ClonesPerRepertoireFilter(Filter):
         self.lower_limit = lower_limit
         self.upper_limit = upper_limit
 
-    def process_dataset(self, dataset: RepertoireDataset, result_path: str = None):
+    def process_dataset(self, dataset: RepertoireDataset, result_path: Path = None):
         params = {"result_path": result_path}
         if self.lower_limit > -1:
             params["lower_limit"] = self.lower_limit

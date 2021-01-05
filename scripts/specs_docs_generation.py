@@ -1,12 +1,15 @@
 import sys
 
+from pathlib import Path
+
 from source.dsl.InstructionParser import InstructionParser
 from source.dsl.OutputParser import OutputParser
 from source.dsl.definition_parsers.DefinitionParser import DefinitionParser
 from source.environment.EnvironmentSettings import EnvironmentSettings
 
-
 def generate_docs(docs_path: str):
+    docs_path = Path(docs_path)
+
     DefinitionParser.generate_docs(docs_path)
     InstructionParser.generate_docs(docs_path)
     OutputParser.generate_docs(docs_path)

@@ -46,7 +46,7 @@ class InstructionParser:
         return symbol_table, specification[InstructionParser.keyword]
 
     @staticmethod
-    #@log
+    @log
     def parse_instruction(key: str, instruction: dict, symbol_table: SymbolTable, path) -> tuple:
         ParameterValidator.assert_keys_present(list(instruction.keys()), ["type"], InstructionParser.__name__, key)
         valid_instructions = [cls[:-6] for cls in ReflectionHandler.discover_classes_by_partial_name("Parser", "dsl/instruction_parsers/")]
@@ -64,8 +64,6 @@ class InstructionParser:
         instructions = sorted(ReflectionHandler.all_nonabstract_subclasses(Instruction, "Instruction", subdirectory='instructions/'), key=lambda x: x.__name__)
 
         inst_paths = {}
-
-        assert False, "test paths"
 
         for instruction in instructions:
             instruction_name = instruction.__name__[:-11]

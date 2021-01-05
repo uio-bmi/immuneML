@@ -66,5 +66,7 @@ class TestPairwiseRepertoireComparison(TestCase):
         self.assertEqual(comparison_data.item_count, imported_comparison_data.item_count)
         self.assertEqual(comparison_data.item_count, imported_comparison_data.item_count)
 
+        shutil.rmtree(path)
+
 
 
