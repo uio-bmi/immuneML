@@ -1,6 +1,5 @@
-import glob
-
 from setuptools import setup, find_packages
+from pathlib import Path
 
 from source.environment.Constants import Constants
 
@@ -32,12 +31,14 @@ setup(
     python_requires='>=3.7',
     packages=find_packages(exclude=["test", "test.*", "performance_tests", "performance_tests.*"]),
     package_data={
-        'source': ['IO/dataset_import/conversion/*.csv', "presentation/html/templates/*.html", "presentation/html/templates/css/*.css",
-                   "visualization/*.R", "visualization/*.r", 'encodings/atchley_kmer_encoding/*.csv'] +
-                  [f"config/default_params/{dir_name.split('/')[-1]}/*.yaml" for dir_name in
-                   glob.glob("./source/config/default_params/*")],
-        'datasets': [path.rsplit("datasets/")[1] for path in glob.glob("datasets/**/*.tsv", recursive=True)] +
-                    [path.rsplit("datasets/")[1] for path in glob.glob("datasets/**/*.csv", recursive=True)]
+        'source': [str(Path('IO/dataset_import/conversion/*.csv')),
+                   str(Path("presentation/html/templates/*.html")),
+                   str(Path("presentation/html/templates/css/*.css")),
+                   str(Path("visualization/*.R")),
+                   str(Path("visualization/*.r")),
+                   str(Path('encodings/atchley_kmer_encoding/*.csv'))] +
+                  [str(Path("config/default_params/") / dir.name / "*.yaml") for dir in Path("./source/config/default_params/").glob("*")],
+        'datasets': [str(p.relative_to("datasets")) for pattern in ["**/*.tsv", "**/*.csv"] for p in Path("datasets").glob(pattern)]
     },
     entry_points={
         'console_scripts': [
