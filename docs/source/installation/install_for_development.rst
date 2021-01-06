@@ -6,7 +6,9 @@ Prerequisites:
 
 - Optionally R 3.6.x with libraries Rmisc and readr and library ggexp (which cannot be installed directly with conda, but can be installed with devtool library from `the GitHub repository <https://github.com/keshav-motwani/ggexp>`_). See :ref:`When should I install immuneML with R dependencies?`
 
-Note: for development purposes, it is much more convenient to clone the codebase using PyCharm. To set up the project in PyCharm, see
+- Under windows, the Microsoft Visual C++ 14.0 or greater is required to install from requirements.txt.
+
+Note: for development purposes, it is most convenient to clone the codebase using PyCharm. To set up the project in PyCharm, see
 `the official JetBrains tutorial for creating a PyCharm project from an existing GitHub repository <https://www.jetbrains.com/help/pycharm/manage-projects-hosted-on-github.html>`_.
 Alternatively, the following 5 steps describe how to perform the process manually.
 
@@ -31,7 +33,11 @@ from GitHub), install the requirements from the requirements.txt file (this file
 
   pip install -r requirements.txt
 
-See also this FAQ: :ref:`When installing all requirements from requirements.txt, there is afterward an error with yaml package (No module named yaml)?`.
+See also these FAQs:
+
+- :ref:`When installing all requirements from requirements.txt, there is afterward an error with yaml package (No module named yaml)?`
+
+- :ref:`As a Windows user, I get an error when installing PyTorch (could not find a version that satisfies the requirement torch==1.5.1)`
 
 If you want to install optional requirements (to use R for plotting, DeepRC or TCRdist), install the corresponding requirements files (some or all of them):
 

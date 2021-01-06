@@ -26,6 +26,11 @@ When installing all requirements from requirements.txt, there is afterward an er
 This issue might be helpful: https://github.com/yaml/pyyaml/issues/291. Try installing yaml manually with a specific version.
 
 
+As a Windows user, I get an error when installing PyTorch (could not find a version that satisfies the requirement torch==1.5.1)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Windows users may experience errors when installing PyTorch via pip. We recommend installing torch v1.5.1 manually as described in `the PyTorch documentation <https://pytorch.org/get-started/previous-versions/>`_.
+
 When should I install immuneML with R dependencies?
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 In most cases, it is adviced to install immuneML without R dependencies. The immuneML core functionality does not
