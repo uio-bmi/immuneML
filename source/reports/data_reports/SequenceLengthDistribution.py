@@ -40,22 +40,22 @@ class SequenceLengthDistribution(DataReport):
             warnings.warn("SequenceLengthDistribution: report can be generated only from RepertoireDataset. Skipping this report...")
             return False
 
-    def generate(self) -> ReportResult:
-        sequence_lengths = self.get_sequence_lengths()
+    def _generate(self) -> ReportResult:
+        sequence_lengths = self._get_sequence_lengths()
         report_output_fig = self._plot(sequence_lengths=sequence_lengths)
         output_figures = None if report_output_fig is None else [report_output_fig]
         return ReportResult(type(self).__name__, output_figures=output_figures)
 
-    def get_sequence_lengths(self) -> Counter:
+    def _get_sequence_lengths(self) -> Counter:
         sequence_lenghts = Counter()
 
         for repertoire in self.dataset.get_data(self.batch_size):
-            seq_lengths = self.count_in_repertoire(repertoire)
+            seq_lengths = self._count_in_repertoire(repertoire)
             sequence_lenghts += seq_lengths
 
         return sequence_lenghts
 
-    def count_in_repertoire(self, repertoire: Repertoire) -> Counter:
+    def _count_in_repertoire(self, repertoire: Repertoire) -> Counter:
         c = Counter([len(sequence.get_sequence()) for sequence in repertoire.sequences])
         return c
 

@@ -53,7 +53,6 @@ class MLSubseqPerformance(MLSettingsPerformance):
     def _get_color_grouping(self, assessment_item):
         return assessment_item.hp_setting.ml_method.__class__.__name__
 
-
     def _check_valid_assessment_item(self, assessment_item):
         is_valid = False
 
@@ -69,7 +68,8 @@ class MLSubseqPerformance(MLSettingsPerformance):
         run_report = True
 
         if self.state is None:
-            warnings.warn(f"{self.__class__.__name__} can only be executed as a hyperparameter report. MLSubseqPerformance report will not be created.")
+            warnings.warn(
+                f"{self.__class__.__name__} can only be executed as a hyperparameter report. MLSubseqPerformance report will not be created.")
             run_report = False
 
         if self.result_path is None:

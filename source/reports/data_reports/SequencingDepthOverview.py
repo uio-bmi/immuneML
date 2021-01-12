@@ -90,14 +90,14 @@ class SequencingDepthOverview(DataReport):
         self.result_name = result_name
         self.number_of_processes = number_of_processes
 
-    def generate(self) -> ReportResult:
-        data = self.generate_data()
+    def _generate(self) -> ReportResult:
+        data = self._generate_data()
         report_output_fig = self._safe_plot(data=data, output_written=False)
         output_figures = [report_output_fig] if report_output_fig is not None else []
 
         return ReportResult(self.name, output_figures=output_figures)
 
-    def generate_data(self):
+    def _generate_data(self):
 
         with Pool(self.number_of_processes, maxtasksperchild=1) as pool:
             data = pool.map(self._compute_repertoire, self.dataset.repertoires, chunksize=1)

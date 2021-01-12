@@ -53,7 +53,7 @@ class PerformanceOverview(MultiDatasetReport):
         self.instruction_states = instruction_states
         self.result_path = result_path
 
-    def generate(self) -> ReportResult:
+    def _generate(self) -> ReportResult:
 
         self.result_path = PathBuilder.build(self.result_path + f'{self.name}/')
 

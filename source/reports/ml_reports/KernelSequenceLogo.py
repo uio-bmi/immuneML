@@ -41,7 +41,7 @@ class KernelSequenceLogo(MLReport):
     def build_object(cls, **kwargs):
         return KernelSequenceLogo(**kwargs)
 
-    def generate(self) -> ReportResult:
+    def _generate(self) -> ReportResult:
         PathBuilder.build(self.result_path)
         report_result = ReportResult()
         sequence_alphabet = EnvironmentSettings.get_sequence_alphabet(self.method.sequence_type)
@@ -124,8 +124,8 @@ class KernelSequenceLogo(MLReport):
             logging.warning("KernelSequenceLogo: ML method is None, skipping report.")
             run_report = False
         elif not isinstance(self.method, ReceptorCNN):
-            logging.warning(f"KernelSequenceLogo: ML method is not instance of ReceptorCNN class, but of {type(self.method).__name__}, "
-                            f"skipping report.")
+            logging.info(f"KernelSequenceLogo: ML method is not instance of ReceptorCNN class, but of {type(self.method).__name__}, "
+                         f"skipping report.")
             run_report = False
 
         return run_report

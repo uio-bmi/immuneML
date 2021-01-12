@@ -11,7 +11,7 @@ from source.data_model.receptor.RegionType import RegionType
 class TCRdistHelper:
 
     @staticmethod
-    def compute_tcr_dist(dataset: ReceptorDataset, labels: list, cores: int) -> TCRrep:
+    def compute_tcr_dist(dataset: ReceptorDataset, labels: list, cores: int = 1) -> TCRrep:
         return CacheHandler.memo_by_params((('dataset_identifier', dataset.identifier), ("type", "TCRrep")),
                                            lambda: TCRdistHelper._compute_tcr_dist(dataset, labels, cores))
 
@@ -56,7 +56,7 @@ class TCRdistHelper:
 
     @staticmethod
     def add_default_allele_to_v_gene(v_gene: str):
-        if v_gene is not None and "*" not in v_gene and "/" not in v_gene:
+        if v_gene is not None and "*" not in v_gene:
             return f"{v_gene}*01"
         else:
             return v_gene

@@ -83,8 +83,7 @@ class TestMLSettingsPerformance(TestCase):
         report.result_path = path
         report.state = self._create_state_object(path + "input_data/")
 
-        report.check_prerequisites()
-        result = report.generate()
+        result = report.generate_report()
 
         self.assertTrue(os.path.isfile(path + "performance.csv"))
         self.assertTrue(os.path.isfile(path + "performance.html"))
