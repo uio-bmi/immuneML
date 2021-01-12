@@ -310,14 +310,29 @@ class ImportHelper:
                 items = items[params.sequence_file_size:]
                 file_index += 1
 
-        dataset = ReceptorDataset(filenames=dataset_filenames, file_size=params.sequence_file_size, name=dataset_name) if params.paired \
-            else SequenceDataset(filenames=dataset_filenames, file_size=params.sequence_file_size, name=dataset_name)
+        dataset_params = ImportHelper._extract_sequence_dataset_params(items, params)
+
+        init_kwargs = {"filenames": dataset_filenames, "file_size": params.sequence_file_size, "name": dataset_name, "params": dataset_params}
+
+        dataset = ReceptorDataset(**init_kwargs) if params.paired else SequenceDataset(**init_kwargs)
 
         dataset.params = ImportHelper.get_element_dataset_params(params)
 
         PickleExporter.export(dataset, params.result_path)
 
         return dataset
+
+    @staticmethod
+    def _extract_sequence_dataset_params(items, params) -> dict:
+        result = {}
+        for index, item in enumerate(items):
+            metadata = item.metadata if params.paired else item.metadata.custom_params if item.metadata is not None else {}
+            for key in metadata:
+                if key in result:
+                    result[key].add(metadata[key])
+                else:
+                    result[key] = {metadata[key]}
+        return result
 
     @staticmethod
     def get_element_dataset_params(params):
