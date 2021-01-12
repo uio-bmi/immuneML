@@ -27,7 +27,12 @@
         {{#reports}}
         {{#output_figures}}
         <div class="padded center">
-            <embed alt="report" src="{{path}}">
+            {{#is_embed}}
+            <embed src="{{path}}">
+            {{/is_embed}}
+            {{^is_embed}}
+            <img src="{{path}}">
+            {{/is_embed}}
             <p>{{name}}</p>
         </div>
         {{/output_figures}}
@@ -47,7 +52,12 @@
         <div class="padded-top padded-bottom">
             {{#reports}}
             {{#output_figures}}
+            {{#is_embed}}
             <embed src="{{path}}">
+            {{/is_embed}}
+            {{^is_embed}}
+            <img src="{{path}}">
+            {{/is_embed}}
             {{#name}}<p>{{name}} (training data)</p>{{/name}}
             {{/output_figures}}
 

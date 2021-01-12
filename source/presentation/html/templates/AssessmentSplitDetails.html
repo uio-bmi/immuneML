@@ -11,6 +11,7 @@
 <body>
     <div class="container">
         <h3>Assessment - split {{split_index}} details</h3>
+        {{#train_metadata_path}}
         <div class="padded-top padded-bottom">
             <details>
                 <summary>Train and validation metadata (<a href="{{train_metadata_path}}">download link</a>)</summary>
@@ -25,6 +26,7 @@
                 </div>
             </details>
         </div>
+        {{/train_metadata_path}}
         <h4>Label {{label}}</h4>
         <p>
             In the table below, the performance of each hyperparameter setting on the test set for this split is shown, as measured by the
@@ -76,14 +78,19 @@
             see <a href="{{selection_path}}">selection details</a>.
         </p>
         {{#show_data_reports}}
-        <h3>Data reports</h3>
+        <h3>Data reports on training and test datasets</h3>
         <p>Here the reports on the datasets before preprocessing and encoding are shown.</p>
         <div class="padded">
-            <div class="col-container">
+            <div class="row">
                 <div class="col center">
                     {{#train_data_reports}}
                     {{#output_figures}}
+                    {{#is_embed}}
                     <embed src="{{path}}">
+                    {{/is_embed}}
+                    {{^is_embed}}
+                    <img src="{{path}}">
+                    {{/is_embed}}
                     {{#name}}<p>{{name}} (training data)</p>{{/name}}
                     {{/output_figures}}
                     {{/train_data_reports}}
@@ -91,7 +98,12 @@
                 <div class="col center">
                     {{#test_data_reports}}
                     {{#output_figures}}
+                    {{#is_embed}}
                     <embed src="{{path}}">
+                    {{/is_embed}}
+                    {{^is_embed}}
+                    <img src="{{path}}">
+                    {{/is_embed}}
                     {{#name}}<p>{{name}} (test data)</p>{{/name}}
                     {{/output_figures}}
                     {{/test_data_reports}}

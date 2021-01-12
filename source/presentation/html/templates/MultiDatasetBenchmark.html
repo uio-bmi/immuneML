@@ -22,7 +22,12 @@
         {{#reports}}
             {{#output_figures}}
             <div class="padded-xs center">
-                <embed alt="report" src="{{path}}">
+                {{#is_embed}}
+                <embed src="{{path}}">
+                {{/is_embed}}
+                {{^is_embed}}
+                <img src="{{path}}">
+                {{/is_embed}}
                 <p>{{name}}</p>
             </div>
             {{/output_figures}}

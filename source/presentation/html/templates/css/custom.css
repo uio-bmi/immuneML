@@ -301,15 +301,15 @@ embed {
     height: 500px;
 }
 
-.col-container {
-    display: table;
-    width: 100%;
-    margin-top: 20px;
-    table-layout: fixed;
+.grid-container {
+    display: grid;
+  grid-template-columns: 1fr 1fr;
 }
 
-.col {
-    display: table-cell;
+@media screen and (max-width: 600px) {
+  .column {
+    width: 100%;
+  }
 }
 
 .padded {
