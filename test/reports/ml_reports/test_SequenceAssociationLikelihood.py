@@ -27,8 +27,11 @@ class TestSequenceAssociationLikelihood(TestCase):
         classifier.label_name = "CMV"
 
         report = SequenceAssociationLikelihood(method=classifier, result_path=path)
+        report.result_name = "beta_distribution"
 
-        report_result = report.generate_report()
+        report_output = report._plot(lower_limit=4.5769675615349e-06, upper_limit=0.0002688483192468949)
+
+        report_result = report._generate()
 
         self.assertEqual(1, len(report_result.output_figures))
         self.assertTrue(os.path.isfile(report_result.output_figures[0].path))
