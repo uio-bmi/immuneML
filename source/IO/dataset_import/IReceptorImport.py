@@ -203,14 +203,20 @@ class IReceptorImport(DataImport):
 
     @staticmethod
     def _unzip_files(path: str, unzipped_path: str, unzip_metadata=True) -> Dataset:
+        print("unzipped path")
+        print(unzipped_path)
         print("printing glob")
         print(glob.glob(f"{path}*"))
         for zip_filename in glob.glob(f"{path}*.zip"):
             print("zip filename")
-            print("zip_filename")
+            print(zip_filename)
             with zipfile.ZipFile(zip_filename, "r") as zip_object:
                 for file in zip_object.filelist:
+                    print("filename before")
+                    print(file.filename)
+                    print("filename after")
                     file.filename = f"{Path(zip_filename).stem}_{file.filename}"
+                    print(file.filename)
                     if not file.filename.endswith("info.txt"):
                         if unzip_metadata or not file.filename.endswith("-metadata.json"):
                             zip_object.extract(file, path=unzipped_path)
