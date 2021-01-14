@@ -37,9 +37,9 @@ class IReceptorImport(DataImport):
 
     Arguments:
 
-        path (str): This is the path to a directory **with .zip files** retrieved from the iReceptor Gateway. Each .zip
-        file should include a folder containing AIRR tsv files and corresponding metadata json files with matching names (e.g., for my_dataset.tsv
-        the corresponding metadata file is called my_dataset-metadata.json).
+        path (str): This is the path to a directory **with .zip files** retrieved from the iReceptor Gateway. These .zip
+        files should include AIRR files (with .tsv extension) and corresponding metadata.json files with matching names (e.g., for my_dataset.tsv
+        the corresponding metadata file is called my_dataset-metadata.json). The zip files must use the .zip extension.
 
         is_repertoire (bool): If True, this imports a RepertoireDataset. If False, it imports a SequenceDataset or
         ReceptorDataset. By default, is_repertoire is set to True.
@@ -217,9 +217,8 @@ class IReceptorImport(DataImport):
                     print("filename after")
                     file.filename = f"{Path(zip_filename).stem}_{file.filename}"
                     print(file.filename)
-                    if not file.filename.endswith("info.txt"):
-                        if unzip_metadata or not file.filename.endswith("-metadata.json"):
-                            zip_object.extract(file, path=unzipped_path)
+                    if file.filename.endswith(".tsv") or (file.filename.endswith("-metadata.json") and unzip_metadata):
+                        zip_object.extract(file, path=unzipped_path)
 
         print("printing glob")
         print(glob.glob(f"{path}*"))
@@ -308,13 +307,16 @@ class IReceptorImport(DataImport):
                 for current_diagnosis_label in label_sorted_diagnoses.keys():
                     if current_diagnosis_label == disease_diagnosis_label:
                         metadata_df.loc[metadata_df["repertoire_id"] == repertoire_id, corrected_label] = \
-                        label_sorted_diagnoses[current_diagnosis_label]["study_group_description"]
+                        IReceptorImport._safe_get_field(label_sorted_diagnoses, [current_diagnosis_label, "study_group_description"])
+
                         metadata_df.loc[metadata_df["repertoire_id"] == repertoire_id, f"{corrected_label}_length"] = \
-                        label_sorted_diagnoses[current_diagnosis_label]["disease_length"]
+                        IReceptorImport._safe_get_field(label_sorted_diagnoses, [current_diagnosis_label, "disease_length"])
+
                         metadata_df.loc[metadata_df["repertoire_id"] == repertoire_id, f"{corrected_label}_stage"] = \
-                        label_sorted_diagnoses[current_diagnosis_label]["disease_stage"]
+                        IReceptorImport._safe_get_field(label_sorted_diagnoses, [current_diagnosis_label, "disease_stage"])
+
                         metadata_df.loc[metadata_df["repertoire_id"] == repertoire_id, f"{corrected_label}_immunogen"] = \
-                        label_sorted_diagnoses[current_diagnosis_label]["immunogen"]
+                        IReceptorImport._safe_get_field(label_sorted_diagnoses, [current_diagnosis_label, "immunogen"])
 
         metadata_df.dropna(axis=1, how="all", inplace=True)
 
@@ -337,10 +339,11 @@ class IReceptorImport(DataImport):
         for filename, repertoire_id, sample_processing_id, data_processing_id in metadata_df[
             ["filename", "repertoire_id", "sample_processing_id", "data_processing_id"]].itertuples(index=False):
             subset = airr_df[airr_df["repertoire_id"] == repertoire_id]
-            if "sample_processing_id" in airr_df.columns:
-                subset = subset[subset["sample_processing_id"] == sample_processing_id]
-            if "data_processing_id" in airr_df.columns:
-                subset = subset[subset["data_processing_id"] == data_processing_id]
+
+            if "sample_processing_id" in subset.columns and any(subset["sample_processing_id"].str.len() > 0):
+                subset = subset[subset["sample_processing_id"].str == str(sample_processing_id)]
+            if "data_processing_id" in subset.columns and any(subset["data_processing_id"].str.len() > 0):
+                subset = subset[subset["data_processing_id"].str == str(data_processing_id)]
             subset.to_csv(result_path + filename, index=False, sep="\t")
 
 
