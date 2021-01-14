@@ -74,14 +74,14 @@
         {{/metrics}}
         {{/has_other_metrics}}
         {{#has_data_split_reports}}
-        <h2>Reports on training / validation datasets</h2>
+        <h2>Reports on training and validation datasets</h2>
         <p>The reports below are obtained from the datasets after they were split to training and validation datasets for each of the splits,
         before any preprocessing, encoding or model training.</p>
         <div class="padded">
             {{#data_split_reports}}
             <p>Split {{split_index}}</p>
-            <div class="col-container">
-                <div class="col center">
+            <div class="grid-container">
+                <div class="center">
                     {{#train}}
                     {{#output_figures}}
                     {{#is_embed}}
@@ -99,7 +99,7 @@
                     </ul>
                     {{/train}}
                 </div>
-                <div class="col center">
+                <div class="center">
                     {{#test}}
                     {{#output_figures}}
                     {{#is_embed}}

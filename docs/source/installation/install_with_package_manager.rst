@@ -21,7 +21,7 @@ Install immuneML without R dependencies
 
 .. code-block:: console
 
-  conda create --prefix immuneml_env/ python=3.7.6
+  conda create --prefix immuneml_env/ python=3.8
 
 3. Activate the created environment:
 
