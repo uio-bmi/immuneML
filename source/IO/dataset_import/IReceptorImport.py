@@ -203,6 +203,8 @@ class IReceptorImport(DataImport):
 
     @staticmethod
     def _unzip_files(path: str, unzipped_path: str, unzip_metadata=True) -> Dataset:
+        print("printing glob")
+        print(glob.glob(f"{path}*"))
         for zip_filename in glob.glob(f"{path}*.zip"):
             with zipfile.ZipFile(zip_filename, "r") as zip_object:
                 for file in zip_object.filelist:
