@@ -220,8 +220,11 @@ class IReceptorImport(DataImport):
                     if not file.filename.endswith("info.txt"):
                         if unzip_metadata or not file.filename.endswith("-metadata.json"):
                             zip_object.extract(file, path=unzipped_path)
+
         print("printing glob")
         print(glob.glob(f"{path}*"))
+        print("print unzipped glob")
+        print(glob.glob(f"{unzipped_path}*"))
 
     @staticmethod
     def _safe_get_field(dict, nested_fields):
