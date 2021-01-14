@@ -1,6 +1,6 @@
 FROM centos:latest
 
-# Can't just copy '.', because it will copy '.git' folder too, which is ~600MB and we don't need it
+# Copy files
 COPY . immuneML
 
 # Configurinig yum
