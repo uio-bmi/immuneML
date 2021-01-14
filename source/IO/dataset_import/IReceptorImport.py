@@ -191,7 +191,9 @@ class IReceptorImport(DataImport):
             metadata_filename = f"{unzipped_path}{Path(airr_filename).stem}-metadata.json"
 
             sub_metadata_df = IReceptorImport._create_metadata_df(metadata_filename)
-            IReceptorImport._split_airr_files(airr_filename, sub_metadata_df, base_result_path)
+            files_written = IReceptorImport._split_airr_files(airr_filename, sub_metadata_df, base_result_path)
+            sub_metadata_df = sub_metadata_df[files_written]
+
             all_metadata_dfs.append(sub_metadata_df)
 
         metadata_df = pd.concat(all_metadata_dfs, join="outer", ignore_index=True)
@@ -203,27 +205,12 @@ class IReceptorImport(DataImport):
 
     @staticmethod
     def _unzip_files(path: str, unzipped_path: str, unzip_metadata=True) -> Dataset:
-        print("unzipped path")
-        print(unzipped_path)
-        print("printing glob")
-        print(glob.glob(f"{path}*"))
         for zip_filename in glob.glob(f"{path}*.zip"):
-            print("zip filename")
-            print(zip_filename)
             with zipfile.ZipFile(zip_filename, "r") as zip_object:
                 for file in zip_object.filelist:
-                    print("filename before")
-                    print(file.filename)
-                    print("filename after")
                     file.filename = f"{Path(zip_filename).stem}_{file.filename}"
-                    print(file.filename)
                     if file.filename.endswith(".tsv") or (file.filename.endswith("-metadata.json") and unzip_metadata):
                         zip_object.extract(file, path=unzipped_path)
-
-        print("printing glob")
-        print(glob.glob(f"{path}*"))
-        print("print unzipped glob")
-        print(glob.glob(f"{unzipped_path}*"))
 
     @staticmethod
     def _safe_get_field(dict, nested_fields):
@@ -288,7 +275,7 @@ class IReceptorImport(DataImport):
     @staticmethod
     def _add_diagnosis_columns(metadata_df, metadata_dict):
         unique_diseases = set(
-            [diagnosis["disease_diagnosis"]["label"] for repertoire in metadata_dict["Repertoire"] for diagnosis in
+            [str(diagnosis["disease_diagnosis"]["label"]) for repertoire in metadata_dict["Repertoire"] for diagnosis in
              repertoire['subject']['diagnosis']])
 
         id_sorted_repertoires = {repertoire["repertoire_id"]: repertoire for repertoire in metadata_dict["Repertoire"]}
@@ -301,8 +288,8 @@ class IReceptorImport(DataImport):
             metadata_df[f"{corrected_label}_immunogen"] = None
 
             for repertoire_id in metadata_df["repertoire_id"].unique():
-                label_sorted_diagnoses = {diagnosis["disease_diagnosis"]["label"]: diagnosis for diagnosis in
-                                          id_sorted_repertoires[repertoire_id]["subject"]["diagnosis"]}
+                label_sorted_diagnoses = {str(diagnosis["disease_diagnosis"]["label"]): diagnosis for diagnosis in
+                                            id_sorted_repertoires[repertoire_id]["subject"]["diagnosis"]}
 
                 for current_diagnosis_label in label_sorted_diagnoses.keys():
                     if current_diagnosis_label == disease_diagnosis_label:
@@ -335,16 +322,25 @@ class IReceptorImport(DataImport):
     @staticmethod
     def _split_airr_files(airr_file, metadata_df, result_path):
         airr_df = airr.load_rearrangement(airr_file)
+        files_written = []
 
         for filename, repertoire_id, sample_processing_id, data_processing_id in metadata_df[
             ["filename", "repertoire_id", "sample_processing_id", "data_processing_id"]].itertuples(index=False):
+
             subset = airr_df[airr_df["repertoire_id"] == repertoire_id]
 
             if "sample_processing_id" in subset.columns and any(subset["sample_processing_id"].str.len() > 0):
-                subset = subset[subset["sample_processing_id"].str == str(sample_processing_id)]
+                subset = subset[subset["sample_processing_id"] == str(sample_processing_id)]
             if "data_processing_id" in subset.columns and any(subset["data_processing_id"].str.len() > 0):
-                subset = subset[subset["data_processing_id"].str == str(data_processing_id)]
-            subset.to_csv(result_path + filename, index=False, sep="\t")
+                subset = subset[subset["data_processing_id"] == str(data_processing_id)]
+
+            if subset.empty:
+                files_written.append(False)
+            else:
+                subset.to_csv(result_path + filename, index=False, sep="\t")
+                files_written.append(True)
+
+        return files_written
 
 
     @staticmethod
