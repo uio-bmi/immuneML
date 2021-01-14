@@ -10,13 +10,17 @@ COPY requirements.txt ./immuneML/
 COPY setup.py ./immuneML/
 COPY README.md ./immuneML/
 
-# Installing yum dependencies 
+# Enabling PowerTools
 RUN yum update -y
-RUN yum install -y python38 python38-devel git dnf-plugins-core make openssl-devel libcurl-devel libxml2-devel gcc gcc-c++ autoconf automake libtool m4 llvm llvm-devel
+RUN yum groupinstall -y 'Development Tools'
+RUN dnf install -y epel-release
+RUN yum install -y dnf-plugins-core
+RUN dnf config-manager --set-enabled powertools
+
+# Installing yum dependencies 
+RUN yum install -y python38 python38-devel git libgit2 libgit2-devel make openssl-devel libcurl-devel libxml2-devel gcc gcc-c++ autoconf automake libtool m4 llvm llvm-devel cairo cairo-devel cairomm-devel libXt-devel
 
 # Installing R
-RUN dnf install -y epel-release
-RUN dnf config-manager --set-enabled PowerTools
 RUN yum install -y R
 
 # Installing R dependencies
