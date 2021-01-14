@@ -37,8 +37,8 @@ class IReceptorImport(DataImport):
 
     Arguments:
 
-        path (str): This is the path to a directory **with .zip files** retrieved from the iReceptor Gateway. These .zip
-        files should include AIRR tsv files and corresponding metadata json files with matching names (e.g., for my_dataset.tsv
+        path (str): This is the path to a directory **with .zip files** retrieved from the iReceptor Gateway. Each .zip
+        file should include a folder containing AIRR tsv files and corresponding metadata json files with matching names (e.g., for my_dataset.tsv
         the corresponding metadata file is called my_dataset-metadata.json).
 
         is_repertoire (bool): If True, this imports a RepertoireDataset. If False, it imports a SequenceDataset or
@@ -212,29 +212,40 @@ class IReceptorImport(DataImport):
                             zip_object.extract(file, path=unzipped_path)
 
     @staticmethod
+    def _safe_get_field(dict, nested_fields):
+        try:
+            result = dict
+            for field_name in nested_fields:
+                result = result[field_name]
+        except KeyError:
+            result = None
+
+        return result
+
+    @staticmethod
     def _get_metadata_row(repertoire, sample, data_processing):
         repertoire_id = repertoire['repertoire_id']
         sample_processing_id = sample['sample_processing_id']
         data_processing_id = data_processing['data_processing_id']
         filename = f"{IReceptorImport.REPERTOIRES_FOLDER}{repertoire_id}_{sample_processing_id}_{data_processing_id}.tsv".replace(" ", "-")
         subject_id = repertoire["subject"]["subject_id"]
-        study_id = repertoire["study"]["study_id"]
 
-        species_label = repertoire["subject"]["species"]["label"]
-        organism_label = repertoire["subject"]["organism"]["label"]
-        sex = repertoire["subject"]["sex"]
-        age_min = repertoire["subject"]["age_min"]
-        age_max = repertoire["subject"]["age_max"]
-        age_event = repertoire["subject"]["age_event"]
-        ancestry_population = repertoire["subject"]["ancestry_population"]
-        ethnicity = repertoire["subject"]["ethnicity"]
-        race = repertoire["subject"]["race"]
-        strain_name = repertoire["subject"]["strain_name"]
+        study_id = IReceptorImport._safe_get_field(repertoire, ["study", "study_id"])
+        species_label = IReceptorImport._safe_get_field(repertoire, ["subject", "species", "label"])
+        organism_label = IReceptorImport._safe_get_field(repertoire, ["subject", "organism", "label"])
+        sex = IReceptorImport._safe_get_field(repertoire, ["subject", "sex"])
+        age_min = IReceptorImport._safe_get_field(repertoire, ["subject", "age_min"])
+        age_max = IReceptorImport._safe_get_field(repertoire, ["subject", "age_max"])
+        age_event = IReceptorImport._safe_get_field(repertoire, ["subject", "age_event"])
+        ancestry_population = IReceptorImport._safe_get_field(repertoire, ["subject", "ancestry_population"])
+        ethnicity = IReceptorImport._safe_get_field(repertoire, ["subject", "ethnicity"])
+        race = IReceptorImport._safe_get_field(repertoire, ["subject", "race"])
+        strain_name = IReceptorImport._safe_get_field(repertoire, ["subject", "strain_name"])
 
-        tissue_label = sample["tissue"]["label"]
-        disease_state_sample = sample["disease_state_sample"]
-        collection_time_point_relative = sample["collection_time_point_relative"]
-        collection_time_point_reference = sample["collection_time_point_reference"]
+        tissue_label = IReceptorImport._safe_get_field(sample, ["tissue", "label"])
+        disease_state_sample = IReceptorImport._safe_get_field(sample, ["disease_state_sample"])
+        collection_time_point_relative = IReceptorImport._safe_get_field(sample, ["collection_time_point_relative"])
+        collection_time_point_reference = IReceptorImport._safe_get_field(sample, ["collection_time_point_reference"])
 
         return (filename, subject_id, repertoire_id, sample_processing_id, data_processing_id, study_id, species_label,
                 organism_label, sex, age_min, age_max, age_event, ancestry_population, ethnicity,
