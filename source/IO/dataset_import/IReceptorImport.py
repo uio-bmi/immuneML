@@ -205,6 +205,7 @@ class IReceptorImport(DataImport):
     def _unzip_files(path: str, unzipped_path: str, unzip_metadata=True) -> Dataset:
         print("printing glob")
         print(glob.glob(f"{path}*"))
+        print(glob.glob(f"{path}/iReceptor Plus Gateway/*"))
         for zip_filename in glob.glob(f"{path}*.zip"):
             with zipfile.ZipFile(zip_filename, "r") as zip_object:
                 for file in zip_object.filelist:
