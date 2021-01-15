@@ -39,15 +39,16 @@ class TestMotifSeedRecovery(TestCase):
 
     def _create_report(self, path):
         report = MotifSeedRecovery.build_object(**{"implanted_motifs_per_label": {
-                "l1": {"seeds": ["AAA", "A/AA"],
-                       "hamming_distance": False,
-                       "gap_sizes": [1]}}})
+            "l1": {"seeds": ["AAA", "A/AA"],
+                   "hamming_distance": False,
+                   "gap_sizes": [1]}}})
 
         report.method = self._create_dummy_lr_model(path)
         report.label = "l1"
         report.result_path = path
         report.train_dataset = Dataset()
-        report.train_dataset.encoded_data = EncodedData(examples=np.zeros((1, 5)), labels={"l1": [1]}, feature_names=["AAA", "AAC", "CKJ", "KSA", "AKJ"])
+        report.train_dataset.encoded_data = EncodedData(examples=np.zeros((1, 5)), labels={"l1": [1]}, encoding="KmerFrequencyEncoder",
+                                                        feature_names=["AAA", "AAC", "CKJ", "KSA", "AKJ"])
 
         return report
 
@@ -58,8 +59,7 @@ class TestMotifSeedRecovery(TestCase):
         report = self._create_report(path)
 
         # Running the report
-        report.check_prerequisites()
-        result = report.generate()
+        result = report.generate_report()
 
         self.assertIsInstance(result, ReportResult)
         self.assertEqual(result.output_tables[0].path, path + "motif_seed_recovery.csv")
@@ -97,7 +97,6 @@ class TestMotifSeedRecovery(TestCase):
 
         self.assertEqual(report.hamming_overlap(seed="AA/A", feature="AAxA"), 3)
         self.assertEqual(report.hamming_overlap(seed="AA/A", feature="AAxx"), 2)
-
 
         self.assertEqual(report.max_overlap_sliding(seed="AAA", feature="xAAAx", overlap_fn=report.identical_overlap), 3)
         self.assertEqual(report.max_overlap_sliding(seed="AAA", feature="xAAxx", overlap_fn=report.identical_overlap), 0)

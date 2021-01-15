@@ -46,6 +46,8 @@ class TestSubsamplingWorkflow(TestCase):
         }
 
     def test_subsampling(self):
+        import faulthandler
+        faulthandler.enable()
 
         path = PathBuilder.build(EnvironmentSettings.tmp_test_path + "subsampling_workflow/")
         repertoire_specs = self.build_specs(path)

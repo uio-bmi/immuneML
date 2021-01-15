@@ -87,7 +87,12 @@
                 <div>
                     {{#output_figures}}
                     <div class="center padded">
+                        {{#is_embed}}
                         <embed src="{{path}}">
+                        {{/is_embed}}
+                        {{^is_embed}}
+                        <img src="{{path}}">
+                        {{/is_embed}}
                         {{#name}}<p>{{name}}</p>{{/name}}
                     </div>
                     {{/output_figures}}

@@ -63,7 +63,8 @@ class ReferenceSequenceOverlap(TrainMLModelReport):
         reference_sequences_df = pd.read_csv(kwargs['reference_path'])
         attributes = reference_sequences_df.columns.tolist()
 
-        ParameterValidator.assert_keys_present(expected_values=kwargs['comparison_attributes'], values=attributes, location=ReferenceSequenceOverlap.__name__,
+        ParameterValidator.assert_keys_present(expected_values=kwargs['comparison_attributes'], values=attributes,
+                                               location=ReferenceSequenceOverlap.__name__,
                                                parameter_name='columns in file under reference_path')
 
         return ReferenceSequenceOverlap(**kwargs)
@@ -77,24 +78,22 @@ class ReferenceSequenceOverlap(TrainMLModelReport):
         self.result_path = result_path
         self.label = label
 
-    def generate(self) -> ReportResult:
+    def _generate(self) -> ReportResult:
 
         figures, tables = [], []
 
         PathBuilder.build(self.result_path)
 
-        check_encoder_class = lambda encoder: any(isinstance(encoder, cls) for cls in [SequenceAbundanceEncoder, SequenceCountEncoder])
-
-        if check_encoder_class(self.state.optimal_hp_items[self.label].encoder):
+        if ReferenceSequenceOverlap._check_encoder_class(self.state.optimal_hp_items[self.label].encoder):
             figure, data = self._compute_optimal_model_overlap()
             figures.append(figure)
             tables.append(data)
 
         for assessment_state in self.state.assessment_states:
             encoder = assessment_state.label_states[self.label].optimal_assessment_item.encoder
-            if check_encoder_class(encoder):
-                figure_filename = f"{self.result_path}assessment_split_{assessment_state.split_index+1}_model_vs_reference_overlap_{self.label}.pdf"
-                df_filename = f"{self.result_path}assessment_split_{assessment_state.split_index+1}_overlap_sequences_{self.label}"
+            if ReferenceSequenceOverlap._check_encoder_class(encoder):
+                figure_filename = f"{self.result_path}assessment_split_{assessment_state.split_index + 1}_model_vs_reference_overlap_{self.label}.pdf"
+                df_filename = f"{self.result_path}assessment_split_{assessment_state.split_index + 1}_overlap_sequences_{self.label}"
                 figure, data = self._compute_model_overlap(figure_filename, df_filename, encoder,
                                                            f"overlap sequences between the model for assessment split "
                                                            f"{assessment_state.split_index + 1} and reference list")
@@ -102,6 +101,10 @@ class ReferenceSequenceOverlap(TrainMLModelReport):
                 tables.append(data)
 
         return ReportResult(self.name, output_figures=figures, output_tables=tables)
+
+    @staticmethod
+    def _check_encoder_class(encoder):
+        return any(isinstance(encoder, cls) for cls in [SequenceAbundanceEncoder, SequenceCountEncoder])
 
     def check_prerequisites(self):
 
@@ -160,7 +163,8 @@ class ReferenceSequenceOverlap(TrainMLModelReport):
 
         return list(model_sequences_df[self.comparison_attributes].to_records(index=False))
 
-    def _make_venn_diagram(self, count_ref_only: int, count_overlap: int, count_model_only: int, label_reference: str, label_model: str, filename: str):
+    def _make_venn_diagram(self, count_ref_only: int, count_overlap: int, count_model_only: int, label_reference: str, label_model: str,
+                           filename: str):
         subsets = Counter({"01": count_model_only, "10": count_ref_only, "11": count_overlap})
         diagram = venn2(subsets=subsets, set_labels=(label_reference, label_model), set_colors=('#72AAA1', '#E5B9AD'), alpha=0.8)
         for index in subsets:

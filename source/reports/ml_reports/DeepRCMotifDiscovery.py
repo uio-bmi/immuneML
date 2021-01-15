@@ -47,6 +47,7 @@ class DeepRCMotifDiscovery(MLReport):
                 n_steps: 50
 
     """
+
     def __init__(self, n_steps, threshold, name: str = None):
         super(DeepRCMotifDiscovery, self).__init__()
         self.n_steps = n_steps
@@ -64,14 +65,12 @@ class DeepRCMotifDiscovery(MLReport):
 
         return DeepRCMotifDiscovery(n_steps=kwargs["n_steps"], threshold=kwargs["threshold"], name=name)
 
-    def generate(self) -> ReportResult:
+    def _generate(self) -> ReportResult:
         PathBuilder.build(self.result_path)
 
         test_metadata_filepath = self.test_dataset.encoded_data.info['metadata_filepath']
         label_names = [self.label]
-        hdf5_filepath = self.method._metadata_to_hdf5(test_metadata_filepath,
-                                                      label_names)
-
+        hdf5_filepath = self.method._metadata_to_hdf5(test_metadata_filepath, label_names)
 
         n_examples_test = len(self.test_dataset.encoded_data.example_ids)
         indices = np.array(range(n_examples_test))
@@ -82,14 +81,13 @@ class DeepRCMotifDiscovery(MLReport):
 
         model = self.method.get_model(self.label)[self.label]
 
-        compute_contributions(intgrds_set_loader = dataloader, deeprc_model=model, n_steps=self.n_steps,
-                              threshold=self.threshold, resdir = self.result_path, filename_inputs=self.filename_inputs,
+        compute_contributions(intgrds_set_loader=dataloader, deeprc_model=model, n_steps=self.n_steps,
+                              threshold=self.threshold, resdir=self.result_path, filename_inputs=self.filename_inputs,
                               filename_kernels=self.filename_kernels)
 
         return ReportResult(self.name,
                             output_figures=[ReportOutput(self.filename_inputs),
                                             ReportOutput(self.filename_kernels)])
-
 
     def check_prerequisites(self):
         run_report = True

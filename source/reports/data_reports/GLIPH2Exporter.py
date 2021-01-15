@@ -40,16 +40,16 @@ class GLIPH2Exporter(DataReport):
         super().__init__(dataset, result_path, name)
         self.condition = condition
 
-    def generate(self) -> ReportResult:
+    def _generate(self) -> ReportResult:
         PathBuilder.build(self.result_path)
         alpha_chains, beta_chains, trbv, trbj, subject_condition, count = [], [], [], [], [], []
-        for receptor in self.dataset.get_data():
+        for index, receptor in enumerate(self.dataset.get_data()):
             alpha_chains.append(receptor.get_chain("alpha").amino_acid_sequence)
             beta_chains.append(receptor.get_chain("beta").amino_acid_sequence)
             trbv.append(receptor.get_chain("beta").metadata.v_gene)
             trbj.append(receptor.get_chain("beta").metadata.j_gene)
-            subject_condition.append(f"{receptor.metadata['subject']}:{receptor.metadata[self.condition]}")
-            count.append(receptor.get_chain("beta").metadata.count)
+            subject_condition.append(f"{getattr(receptor.metadata, 'subject', str(index))}:{receptor.metadata[self.condition]}")
+            count.append(receptor.get_chain("beta").metadata.count if receptor.get_chain('beta').metadata is not None else 1)
 
         df = pd.DataFrame({"CDR3b": beta_chains, "TRBV": trbv, "TRBJ": trbj, "CDR3a": alpha_chains, "subject:condition": subject_condition,
                            "count": count})

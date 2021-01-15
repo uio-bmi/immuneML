@@ -75,7 +75,7 @@ class MLSettingsPerformance(TrainMLModelReport):
         self.result_name = "performance"
         self.vertical_grouping = "encoding"
 
-    def generate(self) -> ReportResult:
+    def _generate(self) -> ReportResult:
         PathBuilder.build(self.result_path)
 
         plotting_data = self._retrieve_plotting_data()
@@ -151,11 +151,9 @@ class MLSettingsPerformance(TrainMLModelReport):
         figure.update_layout(showlegend=False)
         return figure
 
-
     def _plot_single_axis_labels(self, plotting_data, x_label, y_label):
         figure = self._plot_rescalable(plotting_data, x_label, y_label)
         return PlotlyUtil.add_single_axis_labels(figure, x_label, y_label, self.x_label_position, self.y_label_position)
-
 
     def check_prerequisites(self):
         run_report = True

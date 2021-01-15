@@ -1,15 +1,14 @@
 import warnings
+
 import plotly.express as px
 
 from scripts.specification_util import update_docs_per_mapping
 from source.analysis.data_manipulation.DataReshaper import DataReshaper
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
-from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.reports.ReportOutput import ReportOutput
 from source.reports.ReportResult import ReportResult
 from source.reports.encoding_reports.EncodingReport import EncodingReport
 from source.util.DocEnumHelper import DocEnumHelper
-from source.util.ParameterValidator import ParameterValidator
 from source.util.PathBuilder import PathBuilder
 from source.visualization.ErrorBarMeaning import ErrorBarMeaning
 from source.visualization.PanelAxisScalesType import PanelAxisScalesType
@@ -94,7 +93,7 @@ class FeatureValueBarplot(EncodingReport):
         self.result_name = "feature_values"
         self.name = name
 
-    def generate(self) -> ReportResult:
+    def _generate(self) -> ReportResult:
         PathBuilder.build(self.result_path)
         data_long_format = DataReshaper.reshape(self.dataset)
         table_result = self._write_results_table(data_long_format)

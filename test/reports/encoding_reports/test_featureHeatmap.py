@@ -52,19 +52,19 @@ class TestFeatureHeatmap(TestCase):
         dataset = RepertoireDataset(encoded_data=EncodedData(**encoded_data))
 
         FeatureHeatmap.build_object(dataset=dataset,
-                       scale_features=False,
-                       one_hot_encode_example_annotations=["disease"],
-                       example_annotations=["age", "week"],
-                       feature_annotations=["antigen"],
-                       palette={"week": {"0": "#BE9764"}, "antigen": {"GAD": "cornflowerblue", "INSB": "firebrick"},
-                                "age": {"colors": ["blue", "white", "red"], "breaks": [0, 20, 100]}},
-                       result_path=path,
-                       show_feature_names=True,
-                       feature_names_size=7,
-                       show_example_names=True,
-                       example_names_size=1,
-                       text_size=9,
-                       height=6,
-                       width=6).generate()
+                                    scale_features=False,
+                                    one_hot_encode_example_annotations=["disease"],
+                                    example_annotations=["age", "week"],
+                                    feature_annotations=["antigen"],
+                                    palette={"week": {"0": "#BE9764"}, "antigen": {"GAD": "cornflowerblue", "INSB": "firebrick"},
+                                             "age": {"colors": ["blue", "white", "red"], "breaks": [0, 20, 100]}},
+                                    result_path=path,
+                                    show_feature_names=True,
+                                    feature_names_size=7,
+                                    show_example_names=True,
+                                    example_names_size=1,
+                                    text_size=9,
+                                    height=6,
+                                    width=6).generate_report()
 
         shutil.rmtree(path)

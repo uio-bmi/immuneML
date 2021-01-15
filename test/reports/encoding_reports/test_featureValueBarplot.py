@@ -1,3 +1,4 @@
+import os
 import random
 import shutil
 import string
@@ -7,14 +8,19 @@ import numpy as np
 import pandas as pd
 from scipy import sparse
 
+from source.caching.CacheType import CacheType
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.encoded_data.EncodedData import EncodedData
+from source.environment.Constants import Constants
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.reports.ReportResult import ReportResult
 from source.reports.encoding_reports.FeatureValueBarplot import FeatureValueBarplot
 
 
 class TestFeatureValueBarplot(TestCase):
+
+    def setUp(self) -> None:
+        os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
 
     def _create_dummy_encoded_data(self, path):
         n_subjects = 50
@@ -48,28 +54,28 @@ class TestFeatureValueBarplot(TestCase):
         dataset = self._create_dummy_encoded_data(path)
 
         report = FeatureValueBarplot.build_object(**{"dataset": dataset,
-                                          "result_path": path,
-                                          "column_grouping_label": "disease",
-                                          "row_grouping_label": "timepoint",
-                                          "color_grouping_label": "disease"})
+                                                     "result_path": path,
+                                                     "column_grouping_label": "disease",
+                                                     "row_grouping_label": "timepoint",
+                                                     "color_grouping_label": "disease"})
 
         self.assertTrue(report.check_prerequisites())
 
-        result = report.generate()
+        result = report.generate_report()
 
         self.assertIsInstance(result, ReportResult)
-        self.assertEqual(result.output_figures[0].path, path+"feature_values.html")
-        self.assertEqual(result.output_tables[0].path, path+"feature_values.csv")
+        self.assertEqual(result.output_figures[0].path, path + "feature_values.html")
+        self.assertEqual(result.output_tables[0].path, path + "feature_values.csv")
 
         content = pd.read_csv(f"{path}/feature_values.csv")
         self.assertListEqual(list(content.columns), ["patient", "disease", "timepoint", "example_id", "sequence", "feature", "value"])
 
         # report should succeed to build but check_prerequisites should be false when data is not encoded
         report = FeatureValueBarplot.build_object(**{"dataset": RepertoireDataset(),
-                                            "result_path": path,
-                                            "column_grouping_label": None,
-                                            "row_grouping_label": None,
-                                            "color_grouping_label": None})
+                                                     "result_path": path,
+                                                     "column_grouping_label": None,
+                                                     "row_grouping_label": None,
+                                                     "color_grouping_label": None})
 
         self.assertFalse(report.check_prerequisites())
 

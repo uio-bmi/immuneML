@@ -143,7 +143,12 @@
             {{#hp_reports}}
             {{#output_figures}}
             <div class="padded center">
+                {{#is_embed}}
                 <embed src="{{path}}">
+                {{/is_embed}}
+                {{^is_embed}}
+                <img src="{{path}}">
+                {{/is_embed}}
                 {{#name}}<p>{{name}}</p>{{/name}}
             </div>
             {{/output_figures}}

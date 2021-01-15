@@ -29,9 +29,15 @@ class Util:
             return str(obj)
         else:
             vars_obj = vars(obj)
-            return {
+            result = {
                 attribute_name: Util.to_dict_recursive(vars_obj[attribute_name], base_path) for attribute_name in vars_obj.keys()
             }
+            if isinstance(obj, ReportOutput):
+                if ".svg" in getattr(obj, "path", ""):
+                    result['is_embed'] = False
+                else:
+                    result['is_embed'] = True
+            return result
 
     @staticmethod
     def get_css_content(css_path: str):

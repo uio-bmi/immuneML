@@ -31,7 +31,7 @@ class TestSequencingDepthOverview(TestCase):
 
         report = SequencingDepthOverview(dataset, number_of_processes=1, x="disease", result_path=path, height_distributions=5,
                                          height_scatterplot=2.5, palette={"lupus": "brown", "t1d": "purple", "ms": "purple"})
-        result = report.generate()
+        result = report.generate_report()
 
         self.assertTrue(isinstance(result, ReportResult))
         self.assertTrue(os.path.isfile(result.output_figures[0].path))

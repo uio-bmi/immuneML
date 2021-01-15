@@ -82,7 +82,7 @@ class CVFeaturePerformance(TrainMLModelReport):
         self.feature_values = np.unique([hp_setting.encoder_params[self.feature] for hp_setting in self.relevant_hp_settings])
         self.feature_count = len(self.feature_values)
 
-    def generate(self) -> ReportResult:
+    def _generate(self) -> ReportResult:
 
         PathBuilder.build(self.result_path)
         self.result_name = f"{self.feature}_performance"

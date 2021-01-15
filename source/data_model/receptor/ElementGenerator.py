@@ -56,6 +56,10 @@ class ElementGenerator:
                 yield element
 
     def make_subset(self, example_indices: list, path: str, dataset_type: str, dataset_identifier: str):
+        if example_indices is None or len(example_indices) == 0:
+            raise RuntimeError(f"{ElementGenerator.__name__}: no examples were specified to create the dataset subset. "
+                               f"Dataset type was {dataset_type}, dataset identifier: {dataset_identifier}.")
+
         batch_size = self.file_size
         elements = []
         file_count = 1
