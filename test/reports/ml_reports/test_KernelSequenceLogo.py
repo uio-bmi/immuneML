@@ -33,7 +33,7 @@ class TestKernelSequenceLogo(TestCase):
         cnn.fit(enc_dataset.encoded_data, "CMV")
 
         report = KernelSequenceLogo(method=cnn, result_path=path / "logos/")
-        report.generate()
+        report.generate_report()
 
         self.assertTrue(os.path.isfile(path / "logos/alpha_kernel_3_1.png"))
         self.assertTrue(os.path.isfile(path / "logos/alpha_kernel_3_2.png"))

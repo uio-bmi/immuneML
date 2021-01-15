@@ -56,7 +56,7 @@ class Matches(EncodingReport):
         self.result_path = result_path
         self.name = name
 
-    def generate(self) -> ReportResult:
+    def _generate(self) -> ReportResult:
         PathBuilder.build(self.result_path)
         return self._write_reports()
 
@@ -224,7 +224,6 @@ class Matches(EncodingReport):
         unique_chains.to_csv(unique_chains_path, index=False)
 
         return [ReportOutput(p) for p in [chains_path, unique_chains_path]]
-
 
     def check_prerequisites(self):
         if self.dataset.encoded_data is None or self.dataset.encoded_data.examples is None:

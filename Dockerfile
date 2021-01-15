@@ -1,22 +1,21 @@
 FROM centos:latest
 
-# Can't just copy '.', because it will copy '.git' folder too, which is ~600MB and we don't need it
-COPY test ./immuneML/test/
-COPY scripts ./immuneML/scripts/
-COPY source ./immuneML/source/
-COPY docs ./immuneML/docs/
-COPY datasets ./immuneML/datasets/
-COPY requirements.txt ./immuneML/
-COPY setup.py ./immuneML/
-COPY README.md ./immuneML/
+# Copy files
+COPY . immuneML
+
+# Configurinig yum
+RUN yum update -y
+RUN yum groupinstall -y 'Development Tools'
+RUN yum install -y dnf-plugins-core
+
+# Enabling PowerTools
+RUN dnf install -y epel-release
+RUN dnf config-manager --set-enabled powertools
 
 # Installing yum dependencies 
-RUN yum update -y
-RUN yum install -y python38 python38-devel git dnf-plugins-core make openssl-devel libcurl-devel libxml2-devel gcc gcc-c++ autoconf automake libtool m4 llvm llvm-devel
+RUN yum install -y python38 python38-devel git libgit2 libgit2-devel make openssl-devel libcurl-devel libxml2-devel gcc gcc-c++ autoconf automake libtool m4 llvm llvm-devel cairo cairo-devel cairomm-devel libXt-devel
 
 # Installing R
-RUN dnf install -y epel-release
-RUN dnf config-manager --set-enabled PowerTools
 RUN yum install -y R
 
 # Installing R dependencies

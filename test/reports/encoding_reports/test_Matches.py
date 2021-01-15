@@ -77,7 +77,7 @@ class TestMatches(unittest.TestCase):
         report = Matches(dataset=encoded_data, result_path=path / "report_results/")
 
         self.assertTrue(report.check_prerequisites())
-        report.generate()
+        report.generate_report()
 
         self.assertTrue(os.path.isfile(path / "report_results/complete_match_count_table.csv"))
         self.assertTrue(os.path.isfile(path / "report_results/repertoire_sizes.csv"))
@@ -165,7 +165,7 @@ class TestMatches(unittest.TestCase):
         report = Matches(dataset=encoded_data, result_path=path / "report_results/")
 
         self.assertTrue(report.check_prerequisites())
-        report.generate()
+        report.generate_report()
 
         self.assertTrue(os.path.isfile(path / "report_results/complete_match_count_table.csv"))
         self.assertTrue(os.path.isfile(path / "report_results/repertoire_sizes.csv"))
@@ -248,7 +248,7 @@ class TestMatches(unittest.TestCase):
         report = Matches(dataset=encoded_data, result_path=path / "report_results/")
 
         self.assertTrue(report.check_prerequisites())
-        report.generate()
+        report.generate_report()
 
         self.assertTrue(os.path.isfile(path / "report_results/complete_match_count_table.csv"))
         self.assertTrue(os.path.isfile(path / "report_results/repertoire_sizes.csv"))

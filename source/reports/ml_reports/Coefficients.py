@@ -8,10 +8,10 @@ from pathlib import Path
 
 from scripts.specification_util import update_docs_per_mapping
 from source.data_model.dataset.Dataset import Dataset
+from source.ml_methods.LogisticRegression import LogisticRegression
 from source.ml_methods.MLMethod import MLMethod
 from source.ml_methods.RandomForestClassifier import RandomForestClassifier
 from source.ml_methods.SVM import SVM
-from source.ml_methods.LogisticRegression import LogisticRegression
 from source.reports.ReportOutput import ReportOutput
 from source.reports.ReportResult import ReportResult
 from source.reports.ml_reports.CoefficientPlottingSetting import CoefficientPlottingSetting
@@ -104,7 +104,7 @@ class Coefficients(MLReport):
         self.label = None
         self.hp_setting = None
 
-    def generate(self):
+    def _generate(self):
         PathBuilder.build(self.result_path)
         paths = []
 

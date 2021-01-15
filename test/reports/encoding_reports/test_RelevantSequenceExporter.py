@@ -26,9 +26,9 @@ class TestRelevantSequenceExporter(TestCase):
         df.to_csv(path / 'sequences.csv', index=False)
 
         dataset = RandomDatasetGenerator.generate_repertoire_dataset(2, {2: 1}, {4: 1}, {}, path / "data")
-        dataset.encoded_data = EncodedData(examples=None, info={'relevant_sequence_path': path / 'sequences.csv'})
+        dataset.encoded_data = EncodedData(examples=None, info={'relevant_sequence_path': path / 'sequences.csv'}, encoding="SequenceAbundanceEncoder")
 
-        report_result = RelevantSequenceExporter(dataset, path / "result", 'somename').generate()
+        report_result = RelevantSequenceExporter(dataset, path / "result", 'somename').generate_report()
 
         self.assertEqual(1, len(report_result.output_tables))
         self.assertTrue(os.path.isfile(report_result.output_tables[0].path))

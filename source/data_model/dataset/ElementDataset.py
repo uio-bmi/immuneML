@@ -11,7 +11,7 @@ class ElementDataset(Dataset):
         raise NotImplementedError
 
     def __init__(self, params: dict = None, encoded_data: EncodedData = None, filenames: list = None, identifier: str = None,
-                 file_size: int = 1000, name: str = None):
+                 file_size: int = 50000, name: str = None):
         super().__init__()
         self.params = params
         self.encoded_data = encoded_data

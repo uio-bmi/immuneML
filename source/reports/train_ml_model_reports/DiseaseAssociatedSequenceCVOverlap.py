@@ -58,7 +58,7 @@ class DiseaseAssociatedSequenceCVOverlap(TrainMLModelReport):
         self.compare_in_selection = compare_in_selection
         self.compare_in_assessment = compare_in_assessment
 
-    def generate(self) -> ReportResult:
+    def _generate(self) -> ReportResult:
         PathBuilder.build(self.result_path)
 
         tables, figures = [], []

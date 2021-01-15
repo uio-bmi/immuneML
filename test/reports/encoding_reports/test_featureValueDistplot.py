@@ -1,3 +1,4 @@
+import os
 import random
 import shutil
 import string
@@ -7,14 +8,19 @@ import numpy as np
 import pandas as pd
 from scipy import sparse
 
+from source.caching.CacheType import CacheType
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.encoded_data.EncodedData import EncodedData
+from source.environment.Constants import Constants
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.reports.ReportResult import ReportResult
 from source.reports.encoding_reports.FeatureValueDistplot import FeatureValueDistplot
 
 
 class TestDistributions(TestCase):
+
+    def setUp(self) -> None:
+        os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
 
     def _create_dummy_encoded_data(self, path):
         n_subjects = 8
@@ -62,7 +68,7 @@ class TestDistributions(TestCase):
                                                       "distribution_plot_type": "SINA"})
 
         report.result_name = "sina"
-        result = report.generate()
+        result = report.generate_report()
 
         self.assertIsInstance(result, ReportResult)
         self.assertEqual(result.output_figures[0].path, path/"sina.pdf")
@@ -76,7 +82,7 @@ class TestDistributions(TestCase):
                                                       "distribution_plot_type": "RIDGE"})
 
         report.result_name = "ridge"
-        result = report.generate()
+        result = report.generate_report()
 
         self.assertIsInstance(result, ReportResult)
         self.assertEqual(result.output_figures[0].path, path / "ridge.pdf")
@@ -90,7 +96,7 @@ class TestDistributions(TestCase):
                                                       "distribution_plot_type": "DENSITY"})
 
         report.result_name = "density"
-        result = report.generate()
+        result = report.generate_report()
 
         self.assertIsInstance(result, ReportResult)
         self.assertEqual(result.output_figures[0].path, path / "density.pdf")

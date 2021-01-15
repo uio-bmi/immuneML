@@ -39,7 +39,7 @@ class CytoscapeNetworkExporter(DataReport):
             kwargs["additional_node_attributes"] = []
         if kwargs["additional_edge_attributes"] is None:
             kwargs["additional_edge_attributes"] = []
-        
+
         ParameterValidator.assert_type_and_value(kwargs["additional_node_attributes"], list, "CytoscapeNetworkExporter", "additional_node_attributes")
         ParameterValidator.assert_type_and_value(kwargs["additional_edge_attributes"], list, "CytoscapeNetworkExporter", "additional_edge_attributes")
 
@@ -63,7 +63,10 @@ class CytoscapeNetworkExporter(DataReport):
                 "(with repertoires containing Receptors). Skipping this report...")
             return False
 
-    def generate(self):
+    def _generate(self):
+
+        report_output_tables = []
+
         if isinstance(self.dataset, RepertoireDataset):
             for repertoire in self.dataset.get_data():
                 result_path = self.result_path / repertoire.identifier
@@ -75,7 +78,7 @@ class CytoscapeNetworkExporter(DataReport):
             PathBuilder.build(result_path)
             report_output_tables = self.export_receptorlist(receptors, result_path=result_path)
 
-        return ReportResult(output_tables = report_output_tables)
+        return ReportResult(output_tables=report_output_tables)
 
     def export_receptorlist(self, receptors, result_path: Path):
         export_list = []
@@ -93,10 +96,12 @@ class CytoscapeNetworkExporter(DataReport):
             node_metadata_list.append([first_chain_name, self.chains[0]] + self.get_formatted_node_metadata(first_chain))
             node_metadata_list.append([second_chain_name, self.chains[1]] + self.get_formatted_node_metadata(second_chain))
 
-            edge_metadata_list.append([f"{first_chain_name} (pair) {second_chain_name}"] + self.get_formatted_edge_metadata(first_chain, second_chain))
+            edge_metadata_list.append(
+                [f"{first_chain_name} (pair) {second_chain_name}"] + self.get_formatted_edge_metadata(first_chain, second_chain))
 
         full_df = pd.DataFrame(export_list, columns=[self.chains[0], "relationship", self.chains[1]])
-        node_meta_df = pd.DataFrame(node_metadata_list, columns=["shared_name", "chain", "sequence", "v_subgroup", "v_gene", "j_subgroup", "j_gene"] + self.additional_node_attributes)
+        node_meta_df = pd.DataFrame(node_metadata_list, columns=["shared_name", "chain", "sequence", "v_subgroup", "v_gene", "j_subgroup",
+                                                                 "j_gene"] + self.additional_node_attributes)
         edge_meta_df = pd.DataFrame(edge_metadata_list, columns=["shared_name"] + self.additional_edge_attributes)
 
         node_cols = list(node_meta_df.columns)
@@ -121,9 +126,8 @@ class CytoscapeNetworkExporter(DataReport):
                 ReportOutput(path=result_path / "shared_chains.sif")]
 
     def get_shared_name(self, seq: ReceptorSequence):
-        '''Returns a string containing a representation of the given receptor chain, with
-        the chain, sequence, v and j genes.
-        For example: *a*s=AMREGPEHSGYALN*v=V7-3*j=J41'''
+        """Returns a string containing a representation of the given receptor chain, with the chain, sequence, v and j genes.
+        For example: *a*s=AMREGPEHSGYALN*v=V7-3*j=J41"""
         return f"*{seq.get_attribute('chain').value.lower()}" \
                f"*s={seq.get_sequence()}" \
                f"*v={seq.get_attribute('v_gene')}" \

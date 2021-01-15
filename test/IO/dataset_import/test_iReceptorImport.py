@@ -497,3 +497,10 @@ class TestIReceptorImport(TestCase):
         self.assertEqual(SequenceDataset, type(dataset))
 
         shutil.rmtree(base_path)
+
+    def test_safe_get_field(self):
+        dict = {"field1": {"field2": {"field3": "field4"}}}
+
+        self.assertEqual(IReceptorImport._safe_get_field(dict, ["field1", "field2", "field3"]), "field4")
+        self.assertEqual(IReceptorImport._safe_get_field(dict, ["field4"]), None)
+        self.assertDictEqual(IReceptorImport._safe_get_field(dict, ["field1", "field2"]), {"field3": "field4"})

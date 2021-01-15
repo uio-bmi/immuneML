@@ -5,7 +5,6 @@ scikit-learn>=0.22.2.post1
 gensim==3.8.1
 matplotlib>=3.1.1
 editdistance==0.5.3
-dask[complete]
 regex
 tzlocal
 airr==1.2.1

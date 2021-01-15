@@ -41,18 +41,19 @@ class TestCoefficients(TestCase):
 
     def _create_report(self, path):
         report = Coefficients.build_object(**{"coefs_to_plot": [CoefficientPlottingSetting.ALL.name,
-                                                   CoefficientPlottingSetting.NONZERO.name,
-                                                   CoefficientPlottingSetting.CUTOFF.name,
-                                                   CoefficientPlottingSetting.N_LARGEST.name],
-                                 "cutoff": [10],
-                                 "n_largest": [5]})
+                                                                CoefficientPlottingSetting.NONZERO.name,
+                                                                CoefficientPlottingSetting.CUTOFF.name,
+                                                                CoefficientPlottingSetting.N_LARGEST.name],
+                                              "cutoff": [10],
+                                              "n_largest": [5]})
 
         report.method = self._create_dummy_lr_model(path)
         report.ml_details_path = path / "ml_details.yaml"
         report.label = "l1"
         report.result_path = path
         report.train_dataset = Dataset()
-        report.train_dataset.encoded_data = EncodedData(examples=np.zeros((1, 20)), labels={"A": [1]}, feature_names=[f"feature{i}" for i in range(20)])
+        report.train_dataset.encoded_data = EncodedData(examples=np.zeros((1, 20)), labels={"A": [1]},
+                                                        feature_names=[f"feature{i}" for i in range(20)])
 
         return report
 
@@ -63,8 +64,7 @@ class TestCoefficients(TestCase):
         report = self._create_report(path)
 
         # Running the report
-        report.check_prerequisites()
-        result = report.generate()
+        result = report.generate_report()
 
         self.assertIsInstance(result, ReportResult)
         self.assertEqual(result.output_tables[0].path, path / "coefficients.csv")
@@ -87,4 +87,3 @@ class TestCoefficients(TestCase):
         self.assertListEqual(list(written_data["features"]), list(reversed([f"feature{i}" for i in range(20)])))
 
         shutil.rmtree(path)
-

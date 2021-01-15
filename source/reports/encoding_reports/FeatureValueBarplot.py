@@ -1,4 +1,5 @@
 import warnings
+
 import plotly.express as px
 from pathlib import Path
 
@@ -93,7 +94,7 @@ class FeatureValueBarplot(EncodingReport):
         self.result_name = "feature_values"
         self.name = name
 
-    def generate(self) -> ReportResult:
+    def _generate(self) -> ReportResult:
         PathBuilder.build(self.result_path)
         data_long_format = DataReshaper.reshape(self.dataset)
         table_result = self._write_results_table(data_long_format)

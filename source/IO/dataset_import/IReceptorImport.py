@@ -37,8 +37,8 @@ class IReceptorImport(DataImport):
     Arguments:
 
         path (str): This is the path to a directory **with .zip files** retrieved from the iReceptor Gateway. These .zip
-        files should include AIRR tsv files and corresponding metadata json files with matching names (e.g., for my_dataset.tsv
-        the corresponding metadata file is called my_dataset-metadata.json).
+        files should include AIRR files (with .tsv extension) and corresponding metadata.json files with matching names (e.g., for my_dataset.tsv
+        the corresponding metadata file is called my_dataset-metadata.json). The zip files must use the .zip extension.
 
         is_repertoire (bool): If True, this imports a RepertoireDataset. If False, it imports a SequenceDataset or
         ReceptorDataset. By default, is_repertoire is set to True.
@@ -190,7 +190,9 @@ class IReceptorImport(DataImport):
             metadata_filename = unzipped_path / f"{airr_filename.stem}-metadata.json"
 
             sub_metadata_df = IReceptorImport._create_metadata_df(metadata_filename)
-            IReceptorImport._split_airr_files(airr_filename, sub_metadata_df, base_result_path)
+            files_written = IReceptorImport._split_airr_files(airr_filename, sub_metadata_df, base_result_path)
+            sub_metadata_df = sub_metadata_df[files_written]
+
             all_metadata_dfs.append(sub_metadata_df)
 
         metadata_df = pd.concat(all_metadata_dfs, join="outer", ignore_index=True)
@@ -206,9 +208,19 @@ class IReceptorImport(DataImport):
             with zipfile.ZipFile(zip_filename, "r") as zip_object:
                 for file in zip_object.filelist:
                     file.filename = f"{zip_filename.stem}_{file.filename}"
-                    if not file.filename.endswith("info.txt"):
-                        if unzip_metadata or not file.filename.endswith("-metadata.json"):
-                            zip_object.extract(file, path=unzipped_path)
+                    if file.filename.endswith(".tsv") or (file.filename.endswith("-metadata.json") and unzip_metadata):
+                        zip_object.extract(file, path=unzipped_path)
+
+    @staticmethod
+    def _safe_get_field(dict, nested_fields):
+        try:
+            result = dict
+            for field_name in nested_fields:
+                result = result[field_name]
+        except KeyError:
+            result = None
+
+        return result
 
     @staticmethod
     def _get_metadata_row(repertoire, sample, data_processing):
@@ -217,23 +229,23 @@ class IReceptorImport(DataImport):
         data_processing_id = data_processing['data_processing_id']
         filename = f"{IReceptorImport.REPERTOIRES_FOLDER}{repertoire_id}_{sample_processing_id}_{data_processing_id}.tsv".replace(" ", "-")
         subject_id = repertoire["subject"]["subject_id"]
-        study_id = repertoire["study"]["study_id"]
 
-        species_label = repertoire["subject"]["species"]["label"]
-        organism_label = repertoire["subject"]["organism"]["label"]
-        sex = repertoire["subject"]["sex"]
-        age_min = repertoire["subject"]["age_min"]
-        age_max = repertoire["subject"]["age_max"]
-        age_event = repertoire["subject"]["age_event"]
-        ancestry_population = repertoire["subject"]["ancestry_population"]
-        ethnicity = repertoire["subject"]["ethnicity"]
-        race = repertoire["subject"]["race"]
-        strain_name = repertoire["subject"]["strain_name"]
+        study_id = IReceptorImport._safe_get_field(repertoire, ["study", "study_id"])
+        species_label = IReceptorImport._safe_get_field(repertoire, ["subject", "species", "label"])
+        organism_label = IReceptorImport._safe_get_field(repertoire, ["subject", "organism", "label"])
+        sex = IReceptorImport._safe_get_field(repertoire, ["subject", "sex"])
+        age_min = IReceptorImport._safe_get_field(repertoire, ["subject", "age_min"])
+        age_max = IReceptorImport._safe_get_field(repertoire, ["subject", "age_max"])
+        age_event = IReceptorImport._safe_get_field(repertoire, ["subject", "age_event"])
+        ancestry_population = IReceptorImport._safe_get_field(repertoire, ["subject", "ancestry_population"])
+        ethnicity = IReceptorImport._safe_get_field(repertoire, ["subject", "ethnicity"])
+        race = IReceptorImport._safe_get_field(repertoire, ["subject", "race"])
+        strain_name = IReceptorImport._safe_get_field(repertoire, ["subject", "strain_name"])
 
-        tissue_label = sample["tissue"]["label"]
-        disease_state_sample = sample["disease_state_sample"]
-        collection_time_point_relative = sample["collection_time_point_relative"]
-        collection_time_point_reference = sample["collection_time_point_reference"]
+        tissue_label = IReceptorImport._safe_get_field(sample, ["tissue", "label"])
+        disease_state_sample = IReceptorImport._safe_get_field(sample, ["disease_state_sample"])
+        collection_time_point_relative = IReceptorImport._safe_get_field(sample, ["collection_time_point_relative"])
+        collection_time_point_reference = IReceptorImport._safe_get_field(sample, ["collection_time_point_reference"])
 
         return (filename, subject_id, repertoire_id, sample_processing_id, data_processing_id, study_id, species_label,
                 organism_label, sex, age_min, age_max, age_event, ancestry_population, ethnicity,
@@ -262,7 +274,7 @@ class IReceptorImport(DataImport):
     @staticmethod
     def _add_diagnosis_columns(metadata_df, metadata_dict):
         unique_diseases = set(
-            [diagnosis["disease_diagnosis"]["label"] for repertoire in metadata_dict["Repertoire"] for diagnosis in
+            [str(diagnosis["disease_diagnosis"]["label"]) for repertoire in metadata_dict["Repertoire"] for diagnosis in
              repertoire['subject']['diagnosis']])
 
         id_sorted_repertoires = {repertoire["repertoire_id"]: repertoire for repertoire in metadata_dict["Repertoire"]}
@@ -275,19 +287,22 @@ class IReceptorImport(DataImport):
             metadata_df[f"{corrected_label}_immunogen"] = None
 
             for repertoire_id in metadata_df["repertoire_id"].unique():
-                label_sorted_diagnoses = {diagnosis["disease_diagnosis"]["label"]: diagnosis for diagnosis in
-                                          id_sorted_repertoires[repertoire_id]["subject"]["diagnosis"]}
+                label_sorted_diagnoses = {str(diagnosis["disease_diagnosis"]["label"]): diagnosis for diagnosis in
+                                            id_sorted_repertoires[repertoire_id]["subject"]["diagnosis"]}
 
                 for current_diagnosis_label in label_sorted_diagnoses.keys():
                     if current_diagnosis_label == disease_diagnosis_label:
                         metadata_df.loc[metadata_df["repertoire_id"] == repertoire_id, corrected_label] = \
-                        label_sorted_diagnoses[current_diagnosis_label]["study_group_description"]
+                        IReceptorImport._safe_get_field(label_sorted_diagnoses, [current_diagnosis_label, "study_group_description"])
+
                         metadata_df.loc[metadata_df["repertoire_id"] == repertoire_id, f"{corrected_label}_length"] = \
-                        label_sorted_diagnoses[current_diagnosis_label]["disease_length"]
+                        IReceptorImport._safe_get_field(label_sorted_diagnoses, [current_diagnosis_label, "disease_length"])
+
                         metadata_df.loc[metadata_df["repertoire_id"] == repertoire_id, f"{corrected_label}_stage"] = \
-                        label_sorted_diagnoses[current_diagnosis_label]["disease_stage"]
+                        IReceptorImport._safe_get_field(label_sorted_diagnoses, [current_diagnosis_label, "disease_stage"])
+
                         metadata_df.loc[metadata_df["repertoire_id"] == repertoire_id, f"{corrected_label}_immunogen"] = \
-                        label_sorted_diagnoses[current_diagnosis_label]["immunogen"]
+                        IReceptorImport._safe_get_field(label_sorted_diagnoses, [current_diagnosis_label, "immunogen"])
 
         metadata_df.dropna(axis=1, how="all", inplace=True)
 
@@ -306,15 +321,25 @@ class IReceptorImport(DataImport):
     @staticmethod
     def _split_airr_files(airr_file: Path, metadata_df: pd.DataFrame, result_path: Path):
         airr_df = airr.load_rearrangement(airr_file)
+        files_written = []
 
         for filename, repertoire_id, sample_processing_id, data_processing_id in metadata_df[
             ["filename", "repertoire_id", "sample_processing_id", "data_processing_id"]].itertuples(index=False):
+
             subset = airr_df[airr_df["repertoire_id"] == repertoire_id]
-            if "sample_processing_id" in airr_df.columns:
-                subset = subset[subset["sample_processing_id"] == sample_processing_id]
-            if "data_processing_id" in airr_df.columns:
-                subset = subset[subset["data_processing_id"] == data_processing_id]
-            subset.to_csv(result_path / filename, index=False, sep="\t")
+
+            if "sample_processing_id" in subset.columns and any(subset["sample_processing_id"].str.len() > 0):
+                subset = subset[subset["sample_processing_id"] == str(sample_processing_id)]
+            if "data_processing_id" in subset.columns and any(subset["data_processing_id"].str.len() > 0):
+                subset = subset[subset["data_processing_id"] == str(data_processing_id)]
+
+            if subset.empty:
+                files_written.append(False)
+            else:
+                subset.to_csv(result_path / filename, index=False, sep="\t")
+                files_written.append(True)
+
+        return files_written
 
 
     @staticmethod

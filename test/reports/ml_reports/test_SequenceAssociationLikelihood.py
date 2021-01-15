@@ -28,7 +28,7 @@ class TestSequenceAssociationLikelihood(TestCase):
 
         report = SequenceAssociationLikelihood(method=classifier, result_path=path)
 
-        report_result = report.generate_report()
+        report_result = report._generate()
 
         self.assertEqual(1, len(report_result.output_figures))
         self.assertTrue(os.path.isfile(report_result.output_figures[0].path))

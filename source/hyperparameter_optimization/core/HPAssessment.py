@@ -8,6 +8,7 @@ from source.hyperparameter_optimization.core.HPUtil import HPUtil
 from source.hyperparameter_optimization.states.HPAssessmentState import HPAssessmentState
 from source.hyperparameter_optimization.states.TrainMLModelState import TrainMLModelState
 from source.ml_methods.MLMethod import MLMethod
+from source.reports.ReportUtil import ReportUtil
 from source.util.PathBuilder import PathBuilder
 from source.workflows.instructions.MLProcess import MLProcess
 
@@ -36,7 +37,7 @@ class HPAssessment:
     def run_assessment_split(state, train_val_dataset, test_dataset, split_index: int, n_splits):
         """run inner CV loop (selection) and retrain on the full train_val_dataset after optimal model is chosen"""
 
-        print(f'{datetime.datetime.now()}: Training ML model: running outer CV loop: started split {split_index+1}/{n_splits}.\n', flush=True)
+        print(f'{datetime.datetime.now()}: Training ML model: running outer CV loop: started split {split_index + 1}/{n_splits}.\n', flush=True)
 
         current_path = HPAssessment.create_assessment_path(state, split_index)
 
@@ -44,10 +45,14 @@ class HPAssessment:
         state.assessment_states.append(assessment_state)
 
         state = HPSelection.run_selection(state, train_val_dataset, current_path, split_index)
-
         state = HPAssessment.run_assessment_split_per_label(state, split_index)
 
-        print(f'{datetime.datetime.now()}: Training ML model: running outer CV loop: finished split {split_index+1}/{n_splits}.\n', flush=True)
+        assessment_state.train_val_data_reports = ReportUtil.run_data_reports(train_val_dataset, state.assessment.reports.data_split_reports.values(),
+                                                                              current_path / "data_report_train", state.context)
+        assessment_state.test_data_reports = ReportUtil.run_data_reports(test_dataset, state.assessment.reports.data_split_reports.values(),
+                                                                         current_path / "data_report_test", state.context)
+
+        print(f'{datetime.datetime.now()}: Training ML model: running outer CV loop: finished split {split_index + 1}/{n_splits}.\n', flush=True)
 
         return state
 
@@ -88,7 +93,7 @@ class HPAssessment:
                                     optimization_metric=state.optimization_metric, path=path, hp_setting=hp_setting, report_context=state.context,
                                     ml_reports=state.assessment.reports.model_reports.values(), number_of_processes=state.number_of_processes,
                                     encoding_reports=state.assessment.reports.encoding_reports.values(), label_config=state.label_configuration,
-                                    store_encoded_data=state.store_encoded_data)\
+                                    store_encoded_data=state.store_encoded_data) \
             .run(split_index)
 
         state.assessment_states[split_index].label_states[label].assessment_items[str(hp_setting)] = assessment_item
@@ -97,6 +102,6 @@ class HPAssessment:
 
     @staticmethod
     def create_assessment_path(state, split_index):
-        current_path = state.path / f"split_{split_index+1}"
+        current_path = state.path / f"split_{split_index + 1}"
         PathBuilder.build(current_path)
         return current_path

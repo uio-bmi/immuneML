@@ -47,7 +47,7 @@ class SequenceAssociationLikelihood(MLReport):
         self.name = name
         self.result_name = None
 
-    def generate(self) -> ReportResult:
+    def _generate(self) -> ReportResult:
 
         PathBuilder.build(self.result_path)
 

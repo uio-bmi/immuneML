@@ -13,9 +13,11 @@ class DefaultParamsLoader:
 
     @staticmethod
     def convert_to_snake_case(name):
-        if name not in ["MiXCR", "VDJdb"]:
+        if name not in ["MiXCR", "VDJdb", "TCRdistMotifDiscovery"]:
             s1 = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', name)
             return re.sub('([a-z0-9])([A-Z])', r'\1_\2', s1).lower()
+        elif name in ["TCRdistMotifDiscovery"]:
+            return re.sub('([a-z])([A-Z])', r'\1_\2', name).lower()
         else:
             return name.lower()
 

@@ -22,7 +22,7 @@ class ReceptorDatasetOverview(DataReport):
     def build_object(cls, **kwargs):
         return ReceptorDatasetOverview(**kwargs)
 
-    def generate(self) -> ReportResult:
+    def _generate(self) -> ReportResult:
         PathBuilder.build(self.result_path)
         figure, tables = self._generate_sequence_length_distribution_plots()
         return ReportResult(name=self.name, output_figures=[figure], output_tables=tables)

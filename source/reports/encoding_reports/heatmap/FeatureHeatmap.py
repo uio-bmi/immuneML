@@ -119,7 +119,7 @@ class FeatureHeatmap(EncodingReport):
         if self.show_legend_examples is None:
             self.show_legend_examples = copy.deepcopy(self.example_annotations)
 
-    def generate(self):
+    def _generate(self):
         PathBuilder.build(self.result_path)
         self._safe_plot(output_written=False)
 

@@ -80,7 +80,8 @@ class ImportHelper:
         """
         metadata = pd.read_csv(params.metadata_file, ",")
 
-        ParameterValidator.assert_keys_present(metadata.columns.tolist(), ["filename"], ImportHelper.__name__, f'{dataset_name}: params: metadata_file')
+        ParameterValidator.assert_keys_present(metadata.columns.tolist(), ["filename"], ImportHelper.__name__,
+                                               f'{dataset_name}: params: metadata_file')
 
         PathBuilder.build(params.result_path / "repertoires/")
 
@@ -202,10 +203,10 @@ class ImportHelper:
                 legal_alphabet.append(Constants.STOP_CODON)
 
             is_illegal_seq = [ImportHelper.is_illegal_sequence(sequence, legal_alphabet) for
-                            sequence in dataframe[sequence_type.value]]
+                              sequence in dataframe[sequence_type.value]]
             n_illegal = sum(is_illegal_seq)
 
-            if n_illegal> 0:
+            if n_illegal > 0:
                 dataframe.drop(dataframe.loc[is_illegal_seq].index, inplace=True)
                 warnings.warn(
                     f"{ImportHelper.__name__}: {n_illegal} sequences were removed from the dataset because their {sequence_name} sequence contained illegal characters. ")
@@ -298,11 +299,13 @@ class ImportHelper:
 
         file_index = 0
         dataset_filenames = []
+        dataset_params = {}
         items = None
 
         for index, filename in enumerate(filenames):
             new_items = ImportHelper.import_items(import_class, filename, params)
             items = np.append(items, new_items) if items is not None else new_items
+            dataset_params = ImportHelper.extract_sequence_dataset_params(items, params)
 
             while len(items) > params.sequence_file_size or (index == len(filenames) - 1 and len(items) > 0):
                 dataset_filenames.append(params.result_path / "batch_{}.pickle".format(file_index))
@@ -310,18 +313,28 @@ class ImportHelper:
                 items = items[params.sequence_file_size:]
                 file_index += 1
 
-        dataset = ReceptorDataset(filenames=dataset_filenames, file_size=params.sequence_file_size, name=dataset_name) if params.paired \
-            else SequenceDataset(filenames=dataset_filenames, file_size=params.sequence_file_size, name=dataset_name)
+        init_kwargs = {"filenames": dataset_filenames, "file_size": params.sequence_file_size, "name": dataset_name, "params": dataset_params}
 
-        dataset.params = ImportHelper.get_element_dataset_params(params)
+        dataset = ReceptorDataset(**init_kwargs) if params.paired else SequenceDataset(**init_kwargs)
 
         PickleExporter.export(dataset, params.result_path)
 
         return dataset
 
     @staticmethod
-    def get_element_dataset_params(params):
-        return {'region_type': params.region_type, 'receptor_chains': params.receptor_chains, 'organism': params.organism}
+    def extract_sequence_dataset_params(items=None, params=None) -> dict:
+        result = {}
+        if params is not None:
+            result = {'region_type': params.region_type, 'receptor_chains': params.receptor_chains, 'organism': params.organism}
+        if items is not None:
+            for index, item in enumerate(items):
+                metadata = item.metadata if params.paired else item.metadata.custom_params if item.metadata is not None else {}
+                for key in metadata:
+                    if key in result and isinstance(result[key], set):
+                        result[key].add(metadata[key])
+                    elif key not in result:
+                        result[key] = {metadata[key]}
+        return result
 
     @staticmethod
     def import_items(import_class, path, params: DatasetImportParams):

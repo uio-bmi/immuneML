@@ -46,7 +46,7 @@ TCR_AB	1421	AT	TRAV12-3*01	null	TRAJ17*01	null	null	null	null	null	null	null	nul
 
         # case: minimal dataset (all dual chains and all genes = False)
         dataset = IRISImport.import_dataset({"is_repertoire": True, "result_path": path, "metadata_file": path / "metadata.csv", "path": path,
-                                             "import_dual_chains": False, "import_all_gene_combinations": False,
+                                             "import_dual_chains": False, "import_all_gene_combinations": False, "separator": "\t",
                                              "extra_columns_to_load": ["extra_col"], "receptor_chains": "TRA_TRB"}, "iris_dataset")
 
         self.assertEqual(number_of_repertoires, dataset.get_example_count())
@@ -71,7 +71,7 @@ TCR_AB	1421	AT	TRAV12-3*01	null	TRAJ17*01	null	null	null	null	null	null	null	nul
         self._create_dummy_data(path, number_of_repertoires=number_of_repertoires, add_metadata=True)
 
         dataset = IRISImport.import_dataset({"is_repertoire": True, "result_path": path, "metadata_file": path / "metadata.csv", "path": path,
-                                             "import_dual_chains": True, "import_all_gene_combinations": True,
+                                             "import_dual_chains": True, "import_all_gene_combinations": True, "separator": "\t",
                                              "extra_columns_to_load": ["extra_col"], "receptor_chains": "TRA_TRB"}, "dataset_name")
 
         self.assertEqual(number_of_repertoires, dataset.get_example_count())
@@ -89,7 +89,7 @@ TCR_AB	1421	AT	TRAV12-3*01	null	TRAJ17*01	null	null	null	null	null	null	null	nul
         PathBuilder.build(path)
         self._create_dummy_data(path, number_of_repertoires=1, add_metadata=False)
 
-        sequence_dataset = IRISImport.import_dataset({"is_repertoire": False, "result_path": path, "path": path,
+        sequence_dataset = IRISImport.import_dataset({"is_repertoire": False, "result_path": path, "path": path, "separator": "\t",
                                                       "import_dual_chains": True, "sequence_file_size": 1000,
                                                       "import_all_gene_combinations": True, "paired": False,
                                                       "receptor_chains": "TRA_TRB"}, "dataset_name2")
@@ -108,7 +108,7 @@ TCR_AB	1421	AT	TRAV12-3*01	null	TRAJ17*01	null	null	null	null	null	null	null	nul
         PathBuilder.build(path)
         self._create_dummy_data(path, number_of_repertoires=1, add_metadata=False)
 
-        receptor_dataset = IRISImport.import_dataset({"is_repertoire": False, "result_path": path, "path": path,
+        receptor_dataset = IRISImport.import_dataset({"is_repertoire": False, "result_path": path, "path": path, "separator": "\t",
                                                       "import_dual_chains": True, "sequence_file_size": 1000,
                                                       "import_all_gene_combinations": True, "paired": True,
                                                       "receptor_chains": "TRA_TRB"}, "dataset_name3")

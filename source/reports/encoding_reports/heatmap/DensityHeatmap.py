@@ -65,7 +65,7 @@ class DensityHeatmap(EncodingReport):
         if self.show_legend_features is None:
             self.show_legend_features = copy.deepcopy(self.feature_annotations)
 
-    def generate(self):
+    def _generate(self):
         PathBuilder.build(self.result_path)
         self._safe_plot(output_written=False)
 

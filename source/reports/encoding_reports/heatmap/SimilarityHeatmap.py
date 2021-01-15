@@ -70,7 +70,7 @@ class SimilarityHeatmap(EncodingReport):
         if self.show_legend is None:
             self.show_legend = copy.deepcopy(self.annotations)
 
-    def generate(self):
+    def _generate(self):
         PathBuilder.build(self.result_path)
         self._safe_plot(output_written=False)
 

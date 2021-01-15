@@ -4,6 +4,8 @@ import os
 import pickle
 from pathlib import Path
 
+import dill
+
 from source.caching.CacheObjectType import CacheObjectType
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.util.PathBuilder import PathBuilder
@@ -20,14 +22,7 @@ class CacheHandler:
     @staticmethod
     def get(params: tuple, object_type, cache_type=None):
         h = CacheHandler._hash(params)
-        filename = CacheHandler._build_filename(h, object_type, cache_type)
-
-        obj = None
-        if filename.is_file():
-            with filename.open("rb") as file:
-                obj = pickle.load(file)
-
-        return obj
+        return CacheHandler.get_by_key(h, object_type, cache_type)
 
     @staticmethod
     def get_by_key(cache_key: str, object_type, cache_type=None):
@@ -35,7 +30,7 @@ class CacheHandler:
         obj = None
         if filename.is_file():
             with filename.open("rb") as file:
-                obj = pickle.load(file)
+                obj = dill.load(file)
         return obj
 
     @staticmethod
@@ -50,7 +45,7 @@ class CacheHandler:
         h = CacheHandler.generate_cache_key(params)
         filename = CacheHandler._build_filename(cache_key=h, object_type=object_type, cache_type=cache_type)
         with filename.open("wb") as file:
-            pickle.dump(caching_object, file, protocol=pickle.HIGHEST_PROTOCOL)
+            dill.dump(caching_object, file, protocol=pickle.HIGHEST_PROTOCOL)
 
     @staticmethod
     def add_by_key(cache_key: str, caching_object, object_type: CacheObjectType = CacheObjectType.OTHER, cache_type=None):
@@ -58,11 +53,12 @@ class CacheHandler:
         filename = CacheHandler._build_filename(cache_key=cache_key, object_type=object_type, cache_type=cache_type)
         try:
             with filename.open("wb") as file:
-                pickle.dump(caching_object, file, protocol=pickle.HIGHEST_PROTOCOL)
+                dill.dump(caching_object, file, protocol=pickle.HIGHEST_PROTOCOL)
         except AttributeError:
             os.remove(filename)
-            logging.warning(f"CacheHandler: could not cache object of class {type(caching_object).__name__}. Next time this object is needed, "
-                            f"it will be recomputed which will take more time but should not influence results.")
+            logging.warning(f"CacheHandler: could not cache object of class {type(caching_object).__name__} with key {cache_key}. "
+                            f"Object: {caching_object}\n"
+                            f"Next time this object is needed, it will be recomputed which will take more time but should not influence results.")
 
     @staticmethod
     def generate_cache_key(params: tuple):

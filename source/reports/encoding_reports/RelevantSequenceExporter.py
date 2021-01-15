@@ -45,7 +45,7 @@ class RelevantSequenceExporter(EncodingReport):
     def build_object(cls, **kwargs):
         return RelevantSequenceExporter(**kwargs)
 
-    def generate(self) -> ReportResult:
+    def _generate(self) -> ReportResult:
 
         df = pd.read_csv(self.dataset.encoded_data.info["relevant_sequence_path"])
         column_mapping = self._compute_column_mapping(df)
@@ -70,7 +70,7 @@ class RelevantSequenceExporter(EncodingReport):
 
     def check_prerequisites(self):
         valid_encodings = [SequenceAbundanceEncoder.__name__, SequenceCountEncoder.__name__]
-        if self.dataset.encoded_data is None or self.dataset.encoded_data.examples is None:
+        if self.dataset.encoded_data is None or self.dataset.encoded_data.info is None:
             logging.warning("RelevantSequenceExporter: the dataset is not encoded, skipping this report...")
             return False
         elif self.dataset.encoded_data.encoding not in valid_encodings:

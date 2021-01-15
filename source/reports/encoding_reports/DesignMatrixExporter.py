@@ -39,29 +39,29 @@ class DesignMatrixExporter(EncodingReport):
     def build_object(cls, **kwargs):
         return DesignMatrixExporter(**kwargs)
 
-    def generate(self) -> ReportResult:
+    def _generate(self) -> ReportResult:
 
         PathBuilder.build(self.result_path)
 
-        matrix_result = self.export_matrix()
-        details_result = self.export_details()
-        label_result = self.export_labels()
+        matrix_result = self._export_matrix()
+        details_result = self._export_details()
+        label_result = self._export_labels()
 
         return ReportResult(self.name, output_tables=[matrix_result], output_text=[details_result, label_result])
 
-    def export_matrix(self) -> ReportOutput:
-        data = self.get_data()
-        file_path = self.save_to_file(data, self.result_path / "design_matrix")
+    def _export_matrix(self) -> ReportOutput:
+        data = self._get_data()
+        file_path = self._save_to_file(data, self.result_path / "design_matrix")
         return ReportOutput(file_path, "design matrix")
 
-    def get_data(self) -> np.ndarray:
+    def _get_data(self) -> np.ndarray:
         if not isinstance(self.dataset.encoded_data.examples, np.ndarray):
             data = self.dataset.encoded_data.examples.toarray()
         else:
             data = self.dataset.encoded_data.examples
         return data
 
-    def save_to_file(self, data: np.ndarray, file_path: Path) -> Path:
+    def _save_to_file(self, data: np.ndarray, file_path: Path) -> Path:
         if len(data.shape) <= 2:
             file_path = file_path.with_suffix(".csv")
             np.savetxt(fname=str(file_path), X=data, delimiter=",", comments='', header=",".join(self.dataset.encoded_data.feature_names))
@@ -70,7 +70,7 @@ class DesignMatrixExporter(EncodingReport):
             np.save(file_path, data)
         return file_path
 
-    def export_details(self) -> ReportOutput:
+    def _export_details(self) -> ReportOutput:
         file_path = self.result_path / "encoding_details.yaml"
         with file_path.open("w") as file:
             details = {
@@ -83,7 +83,7 @@ class DesignMatrixExporter(EncodingReport):
 
         return ReportOutput(file_path, "encoding details")
 
-    def export_labels(self) -> ReportOutput:
+    def _export_labels(self) -> ReportOutput:
         if self.dataset.encoded_data.labels is not None:
             labels_df = pd.DataFrame(self.dataset.encoded_data.labels)
             file_path = self.result_path / "labels.csv"

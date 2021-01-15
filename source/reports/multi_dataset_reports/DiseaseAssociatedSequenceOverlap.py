@@ -48,7 +48,7 @@ class DiseaseAssociatedSequenceOverlap(MultiDatasetReport):
         self.result_path = result_path
         self.label = None
 
-    def generate(self) -> ReportResult:
+    def _generate(self) -> ReportResult:
         self.result_path = PathBuilder.build(self.result_path / self.name)
         self._extract_label()
 

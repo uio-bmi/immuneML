@@ -2,7 +2,7 @@ Set up immuneML for development
 ----------------------------------
 Prerequisites:
 
-- Python 3.7 or 3.8: it might work with other python versions (3.6), but might require additional packages to be manually installed (e.g., dataclasses package if running immuneML with Python 3.6). Alternatively, a custom python interpreter can be assigned to the virtual environment (in PyCharm, for development purposes, or in a conda environment).
+- Python 3.8: it might work with other python versions (3.7 or 3.6), but might require additional packages to be manually installed (e.g., dataclasses package if running immuneML with Python 3.6). Alternatively, a custom python interpreter can be assigned to the virtual environment (in PyCharm, for development purposes, or in a conda environment).
 
 - Optionally R 3.6.x with libraries Rmisc and readr and library ggexp (which cannot be installed directly with conda, but can be installed with devtool library from `the GitHub repository <https://github.com/keshav-motwani/ggexp>`_). See :ref:`When should I install immuneML with R dependencies?`
 
@@ -24,7 +24,7 @@ Steps:
 
 3. Create and activate a virtual environment as described here
 https://docs.python.org/3/library/venv.html (python virtual environment)
-or use conda instead with python 3.7 or 3.8.
+or use conda instead with python 3.8.
 
 4. From the project folder (immuneML folder created when the repository was cloned
 from GitHub), install the requirements from the requirements.txt file (this file can be found in the immuneML root folder):

@@ -36,7 +36,7 @@ class TestSequenceLengthDistribution(TestCase):
 
         sld = SequenceLengthDistribution(dataset, 1, path)
 
-        result = sld.generate()
+        result = sld.generate_report()
         self.assertTrue(os.path.isfile(result.output_figures[0].path))
 
         shutil.rmtree(path)

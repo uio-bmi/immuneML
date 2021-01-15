@@ -123,7 +123,7 @@ class SingleLineReceptorImport(DataImport):
 
         dataset = SingleLineReceptorImport._import_from_files(filenames, generic_params)
         dataset.name = dataset_name
-        dataset.params = ImportHelper.get_element_dataset_params(generic_params)
+        dataset.params = ImportHelper.extract_sequence_dataset_params(params=generic_params)
 
         PickleExporter.export(dataset, generic_params.result_path)
 

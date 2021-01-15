@@ -6,10 +6,10 @@ import pandas as pd
 from pathlib import Path
 
 from source.data_model.dataset.Dataset import Dataset
+from source.ml_methods.LogisticRegression import LogisticRegression
 from source.ml_methods.MLMethod import MLMethod
 from source.ml_methods.RandomForestClassifier import RandomForestClassifier
 from source.ml_methods.SVM import SVM
-from source.ml_methods.LogisticRegression import LogisticRegression
 from source.reports.ReportOutput import ReportOutput
 from source.reports.ReportResult import ReportResult
 from source.reports.ml_reports.MLReport import MLReport
@@ -147,7 +147,7 @@ class MotifSeedRecovery(MLReport):
         self._y_axis_title = None
         self._x_axis_title = None
 
-    def generate(self):
+    def _generate(self):
         PathBuilder.build(self.result_path)
 
         self._set_plotting_parameters()

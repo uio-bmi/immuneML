@@ -52,16 +52,13 @@ class TestSimilarityHeatmap(TestCase):
         dataset = RepertoireDataset(encoded_data=EncodedData(**encoded_data))
 
         SimilarityHeatmap.build_object(dataset=dataset,
-                          similarity_measure="PEARSON",
-                          one_hot_encode_example_annotations=["disease"],
-                          example_annotations=["age", "week"],
-                          palette={"week": {"4": ["white"]}, "age": {"colors": ["cornflowerblue", "white", "firebrick"], "breaks": [40, 50, 60]}},
-                          annotation_position="left",
-                          show_names=True,
-                          names_size=0.5,
-                          height=5,
-                          width=6.7,
-                          text_size=6,
-                          result_path=path).generate()
+                                       similarity_measure="PEARSON",
+                                       one_hot_encode_example_annotations=["disease"],
+                                       example_annotations=["age", "week"],
+                                       palette={"week": {"4": ["white"]},
+                                                "age": {"colors": ["cornflowerblue", "white", "firebrick"], "breaks": [40, 50, 60]}},
+                                       annotation_position="left",
+                                       show_names=True, names_size=0.5, height=5, width=6.7, text_size=6,
+                                       result_path=path).generate_report()
 
         shutil.rmtree(path)
