@@ -1,5 +1,4 @@
 import json
-from multiprocessing.pool import Pool
 
 import pandas as pd
 
@@ -99,8 +98,9 @@ class SequencingDepthOverview(DataReport):
 
     def _generate_data(self):
 
-        with Pool(self.number_of_processes, maxtasksperchild=1) as pool:
-            data = pool.map(self._compute_repertoire, self.dataset.repertoires, chunksize=1)
+        data = []
+        for repertoire in self.dataset.repertoires:
+            data.append(self._compute_repertoire(repertoire))
 
         data = pd.concat(data)
         data = data.replace({"in": "In Frame",
