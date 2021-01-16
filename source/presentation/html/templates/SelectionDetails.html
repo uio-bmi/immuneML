@@ -80,10 +80,10 @@
         <div class="padded">
             {{#data_split_reports}}
             <p>Split {{split_index}}</p>
+            {{#train}}
             <div class="grid-container">
-                <div class="center">
-                    {{#train}}
-                    {{#output_figures}}
+                {{#output_figures}}
+                <div class="">
                     {{#is_embed}}
                     <embed src="{{path}}">
                     {{/is_embed}}
@@ -91,33 +91,35 @@
                     <img src="{{path}}">
                     {{/is_embed}}
                     {{#name}}<p>{{name}} (training data)</p>{{/name}}
-                    {{/output_figures}}
-                    <ul>
-                    {{#output_tables}}
-                        <li><a href="{{path}}">Download {{#name}}{{name}} report{{/name}}</a></li>
-                    {{/output_tables}}
-                    </ul>
-                    {{/train}}
                 </div>
-                <div class="center">
-                    {{#test}}
-                    {{#output_figures}}
+                {{/output_figures}}
+            </div>
+            <ul>
+            {{#output_tables}}
+                <li><a href="{{path}}">Download {{#name}}{{name}} report{{/name}} (training data)</a></li>
+            {{/output_tables}}
+            </ul>
+            {{/train}}
+            {{#test}}
+            <div class="grid-container">
+                {{#output_figures}}
+                <div class="">
                     {{#is_embed}}
                     <embed src="{{path}}">
                     {{/is_embed}}
                     {{^is_embed}}
                     <img src="{{path}}">
                     {{/is_embed}}
-                    {{#name}}<p>{{name}} (test data)</p>{{/name}}
-                    {{/output_figures}}
-                    <ul>
-                    {{#output_tables}}
-                    <li><a href="{{path}}">Download {{#name}}{{name}} report{{/name}}</a></li>
-                    {{/output_tables}}
-                    </ul>
-                    {{/test}}
+                    {{#name}}<p>{{name}} (validation data)</p>{{/name}}
                 </div>
+                {{/output_figures}}
             </div>
+            <ul>
+            {{#output_tables}}
+            <li><a href="{{path}}">Download {{#name}}{{name}} report{{/name}} (validation data)</a></li>
+            {{/output_tables}}
+            </ul>
+            {{/test}}
             {{/data_split_reports}}
         </div>
         {{/has_data_split_reports}}
@@ -180,8 +182,9 @@
                 <h5>ML model reports</h5>
                 {{/has_ml_reports}}
                 {{#ml_reports}}
+                <div class="grid-container">
                 {{#output_figures}}
-                <div class="padded center">
+                <div class="">
                     {{#is_embed}}
                     <embed src="{{path}}">
                     {{/is_embed}}
@@ -191,6 +194,7 @@
                     <p>{{name}}</p>
                 </div>
                 {{/output_figures}}
+                </div>
                 <ul>
                 {{#output_tables}}
                 <li><a href="{{path}}">Download {{#name}}{{name}} report{{/name}}</a></li>

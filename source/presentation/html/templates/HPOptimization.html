@@ -16,8 +16,8 @@
         <div class="padded-bottom padded-top">immuneML version: {{immuneML_version}}</div>
         <details>
             <summary>Dataset details</summary>
-            <div class="col-container">
-                <div class="col">
+            <div class="grid-container">
+                <div class="">
                     <span>General information</span>
                     <div class="table-container padded-top padded-bottom">
                         <table>
@@ -36,7 +36,7 @@
                     </table>
                     </div>
                 </div>
-                <div class="col">
+                <div class="">
                     <span>Dataset labels</span>
                     <div class="table-container padded-top padded-bottom">
                         <table>
@@ -61,8 +61,8 @@
         </details>
         <details>
             <summary>Parameters for training ML model</summary>
-            <div class="col-container">
-                <div class="col">
+            <div class="grid-container">
+                <div class="">
                     <span>Metrics</span>
                     <div class="table-container padded-top padded-bottom">
                         <table>
@@ -77,7 +77,7 @@
                     </table>
                     </div>
                 </div>
-                <div class="col">
+                <div class="">
                     <span>Cross-validation settings</span>
                     <div class="table-container padded-top padded-bottom">
                         <table>
@@ -98,8 +98,7 @@
             <h3>Optimization results</h3>
             {{#hp_per_label}}
             <h4>{{label}}</h4>
-            <div class="col-container">
-                <div class="table-container">
+            <div class="table-container">
                 <table>
                 <thead>
                     <tr>
@@ -119,8 +118,7 @@
                     </tr>
                     {{/assessment_results}}
                 </tbody>
-            </table>
-                </div>
+                </table>
             </div>
             {{/hp_per_label}}
         </div>
@@ -140,18 +138,22 @@
         {{#show_hp_reports}}
         <div id="hyperparameter-reports">
             <h3>Hyperparameter reports</h3>
+            <p>Hyperparameter reports are executed on the trained models and have access to assessment and selection data (both the outer and the inner
+                loop of nested cross-validation) and typically show trends in the models, over different splits to training, validation or test datasets.</p>
             {{#hp_reports}}
+            <div class="grid-container">
             {{#output_figures}}
-            <div class="padded center">
-                {{#is_embed}}
-                <embed src="{{path}}">
-                {{/is_embed}}
-                {{^is_embed}}
-                <img src="{{path}}">
-                {{/is_embed}}
-                {{#name}}<p>{{name}}</p>{{/name}}
-            </div>
+                <div>
+                    {{#is_embed}}
+                    <embed src="{{path}}">
+                    {{/is_embed}}
+                    {{^is_embed}}
+                    <img src="{{path}}">
+                    {{/is_embed}}
+                    {{#name}}<p>{{name}}</p>{{/name}}
+                </div>
             {{/output_figures}}
+            </div>
             {{/hp_reports}}
         </div>
         {{/show_hp_reports}}

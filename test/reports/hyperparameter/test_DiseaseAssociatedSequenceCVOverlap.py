@@ -82,15 +82,15 @@ class TestDiseaseAssociatedSequenceCVOverlap(TestCase):
                     ],
                     "assessment": {
                         "split_strategy": "random",
-                        "split_count": 2,
-                        "training_percentage": 0.7,
+                        "split_count": 1,
+                        "training_percentage": 0.5,
                         "reports": {
                         }
                     },
                     "selection": {
                         "split_strategy": "random",
-                        "split_count": 2,
-                        "training_percentage": 0.7,
+                        "split_count": 1,
+                        "training_percentage": 0.5,
                     },
                     "labels": [{"l1": {"positive_class": True}}],
                     "dataset": "d1",
@@ -113,8 +113,8 @@ class TestDiseaseAssociatedSequenceCVOverlap(TestCase):
         state = app.run()[0]
 
         self.assertEqual(1, len(state.report_results))
-        self.assertEqual(3, len(state.report_results[0].output_figures))
-        self.assertEqual(3, len(state.report_results[0].output_tables))
+        self.assertTrue(len(state.report_results[0].output_figures) > 0)
+        self.assertTrue(len(state.report_results[0].output_tables) > 0)
 
         for fig in state.report_results[0].output_figures:
             self.assertTrue(os.path.isfile(fig.path))

@@ -81,8 +81,8 @@
         <h3>Data reports on training and test datasets</h3>
         <p>Here the reports on the datasets before preprocessing and encoding are shown.</p>
         <div class="padded">
-            <div class="row">
-                <div class="col center">
+            <div class="grid-container">
+                <div class="">
                     {{#train_data_reports}}
                     {{#output_figures}}
                     {{#is_embed}}
@@ -93,9 +93,14 @@
                     {{/is_embed}}
                     {{#name}}<p>{{name}} (training data)</p>{{/name}}
                     {{/output_figures}}
+                    <ul>
+                    {{#output_tables}}
+                    <li><a href="{{path}}">Download {{#name}}{{name}} report{{/name}} (training data)</a></li>
+                    {{/output_tables}}
+                    </ul>
                     {{/train_data_reports}}
                 </div>
-                <div class="col center">
+                <div class="">
                     {{#test_data_reports}}
                     {{#output_figures}}
                     {{#is_embed}}
@@ -106,6 +111,11 @@
                     {{/is_embed}}
                     {{#name}}<p>{{name}} (test data)</p>{{/name}}
                     {{/output_figures}}
+                    <ul>
+                    {{#output_tables}}
+                    <li><a href="{{path}}">Download {{#name}}{{name}} report{{/name}} (test data)</a></li>
+                    {{/output_tables}}
+                    </ul>
                     {{/test_data_reports}}
                 </div>
             </div>
