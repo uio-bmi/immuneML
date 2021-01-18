@@ -7,6 +7,7 @@ import yaml
 
 from scripts.specification_util import update_docs_per_mapping
 from source.data_model.dataset.Dataset import Dataset
+from source.hyperparameter_optimization import HPSetting
 from source.ml_methods.LogisticRegression import LogisticRegression
 from source.ml_methods.MLMethod import MLMethod
 from source.ml_methods.RandomForestClassifier import RandomForestClassifier
@@ -94,14 +95,13 @@ class Coefficients(MLReport):
         return Coefficients(coefs, cutoff, n_largest, name)
 
     def __init__(self, coefs_to_plot: CoefficientPlottingSettingList, cutoff: list, n_largest: list, train_dataset: Dataset = None,
-                 test_dataset: Dataset = None, method: MLMethod = None, result_path: str = None, name: str = None):
-        super(Coefficients, self).__init__(train_dataset, test_dataset, method, result_path, name)
+                 test_dataset: Dataset = None, method: MLMethod = None, result_path: str = None, name: str = None, hp_setting: HPSetting = None):
+        super(Coefficients, self).__init__(train_dataset, test_dataset, method, result_path, name, hp_setting)
 
         self._coefs_to_plot = coefs_to_plot
         self._cutoff = cutoff
         self._n_largest = n_largest
         self.label = None
-        self.hp_setting = None
 
     def _generate(self):
         PathBuilder.build(self.result_path)

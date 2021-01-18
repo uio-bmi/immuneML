@@ -16,17 +16,20 @@
 #
 import os
 import sys
+
+from source.environment import Constants
+
 sys.path.insert(0, os.path.abspath('../..'))
 
 
 # -- Project information -----------------------------------------------------
 
 project = 'immuneML'
-copyright = '2020, Authors'
-author = 'Authors'
+copyright = '2021, Milena Pavlovic, Lonneke Scheffer, Keshav Motwani, Victor Greiff, Geir Kjetil Sandve'
+author = 'Milena Pavlovic, Lonneke Scheffer, Keshav Motwani, Victor Greiff, Geir Kjetil Sandve'
 
 # The short X.Y version
-version = ''
+version = Constants.Constants.VERSION
 # The full version, including alpha/beta/rc tags
 release = ''
 
@@ -47,7 +50,7 @@ extensions = [
     'sphinx.ext.viewcode',
     'sphinx_rtd_theme',
     'sphinx.ext.napoleon',
-    'sphinx.ext.autosectionlabel'
+    'sphinx.ext.autosectionlabel',
 ]
 
 # mathjax configuration
@@ -56,7 +59,7 @@ mathjax_config = {
     'jax': ['input/TeX', 'output/HTML-CSS'],
 }
 
-autodoc_mock_imports = ["pandas", "sklearn", "numpy", "pystache", "dask"]
+autodoc_mock_imports = ["pandas", "sklearn", "numpy", "pystache"]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
