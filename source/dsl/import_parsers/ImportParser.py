@@ -1,6 +1,7 @@
 from typing import Tuple
 
 from source.IO.dataset_import.DataImport import DataImport
+from source.IO.dataset_import.IReceptorImport import IReceptorImport
 from source.data_model.receptor.ChainPair import ChainPair
 from source.dsl.DefaultParamsLoader import DefaultParamsLoader
 from source.dsl.symbol_table.SymbolTable import SymbolTable
@@ -42,8 +43,9 @@ class ImportParser:
             ParameterValidator.assert_type_and_value(params["is_repertoire"], bool, location, "is_repertoire")
 
             if params["is_repertoire"] == True:
-                assert "metadata_file" in params, f"{location}: Missing parameter: metadata_file under {key}/params/"
-                ParameterValidator.assert_type_and_value(params["metadata_file"], str, location, "metadata_file")
+                if import_cls != IReceptorImport:
+                    assert "metadata_file" in params, f"{location}: Missing parameter: metadata_file under {key}/params/"
+                    ParameterValidator.assert_type_and_value(params["metadata_file"], str, location, "metadata_file")
 
             if params["is_repertoire"] == False:
                 assert "paired" in params, f"{location}: Missing parameter: paired under {key}/params/"
