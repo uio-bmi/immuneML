@@ -11,12 +11,15 @@ from source.data_model.encoded_data.EncodedData import EncodedData
 from source.data_model.dataset.Dataset import Dataset
 
 
-class TestCoefficients(unittest.TestCase):
+class TestROCCurve(unittest.TestCase):
 
     def _create_dummy_lr_model(self, path):
         dummy_lr = LogisticRegression()
-        dummy_lr.fit_by_cross_validation(EncodedData(np.random.rand(100, 20), {"l1": [i % 2 for i in range(0, 100)]}),
-                                         number_of_splits=2, label_name="l1")
+        encoded_tr = EncodedData(np.random.rand(100, 20),
+                                 {"l1": [i % 2 for i in range(0, 100)]})
+
+        dummy_lr.fit_by_cross_validation(encoded_tr, number_of_splits=2,
+                                         label_name="l1")
         return dummy_lr
 
     def _create_report(self, path):
@@ -26,7 +29,10 @@ class TestCoefficients(unittest.TestCase):
         report.label = "l1"
         report.result_path = path
         report.test_dataset = Dataset()
-        report.test_dataset.encoded_data = EncodedData(np.random.rand(100, 20), {"l1": [i % 2 for i in range(0, 100)]})
+        encoded_te = EncodedData(np.random.rand(100, 20),
+                                 {"l1": [i % 2 for i in range(0, 100)]})
+
+        report.test_dataset.encoded_data = encoded_te
 
         return report
 
@@ -45,6 +51,7 @@ class TestCoefficients(unittest.TestCase):
         self.assertEqual(os.path.isfile(f"{path}{'testcase'}.html"), True)
 
         shutil.rmtree(path)
+
 
 if __name__ == '__main__':
     unittest.main()

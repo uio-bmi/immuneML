@@ -1,15 +1,28 @@
 from source.reports.ReportOutput import ReportOutput
 from source.reports.ReportResult import ReportResult
 from source.reports.ml_reports.MLReport import MLReport
+from source.util.PathBuilder import PathBuilder
 from sklearn.metrics import roc_curve, auc
 
 import warnings
 import plotly.graph_objs as go
-import os
 import numpy as np
 
 
 class ROCCurve(MLReport):
+    """
+    A report that plots the ROC-curve for a binary classifier.
+
+
+    YAML specification:
+
+    .. indent with spaces
+    .. code-block:: yaml
+
+    reports:
+      my_roc_report: ROCCurve
+
+    """
 
     def __init__(self, name: str = None):
         super().__init__()
@@ -40,13 +53,15 @@ class ROCCurve(MLReport):
 
         fig = go.Figure(data=[trace1, trace2], layout=layout)
 
-        os.makedirs(self.result_path)
+        PathBuilder.build(self.result_path)
         path_htm = f"{self.result_path}{self.name}.html"
         path_csv = f"{self.result_path}{self.name}.csv"
         csv_result = np.concatenate((fpr.reshape(1, -1), tpr.reshape(1, -1)))
         fig.write_html(path_htm)
         np.savetxt(path_csv, csv_result)
-        return ReportResult(self.name, output_figures=[ReportOutput(path_htm)])
+        return ReportResult(self.name,
+                            output_figures=[ReportOutput(path_htm)],
+                            output_tables=[ReportOutput(path_csv)])
 
     def check_prerequisites(self):
         if not hasattr(self, "result_path") or self.result_path is None:
