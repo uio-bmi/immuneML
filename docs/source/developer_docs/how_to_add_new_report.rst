@@ -5,10 +5,8 @@ In immuneML, it is possible to automatically generate a report describing some a
 
   #. Data report – reports examining some aspect of the dataset (such as sequence length distribution, gene usage)
   #. Encoding report – shows some aspect of the encoded dataset (such as the feature values of an encoded dataset),
-  #. ML model report – shows the characteristics of an inferred machine learning model (such as coefficient values for logistic regression or kernel
-  visualization for CNN)
-  #. Train ML model report – show statistics of multiple trained ML models in the TrainMLModelInstruction (such as comparing performance statistics
-  between models, or performance w.r.t. an encoding parameter)
+  #. ML model report – shows the characteristics of an inferred machine learning model (such as coefficient values for logistic regression or kernel visualization for CNN)
+  #. Train ML model report – show statistics of multiple trained ML models in the TrainMLModelInstruction (such as comparing performance statistics between models, or performance w.r.t. an encoding parameter)
   #. Multi dataset report –  show statistics when running immuneML with the MultiDatasetBenchmarkTool
 
 These types of reports are modeled by the following classes:
@@ -69,12 +67,11 @@ which has the following responsibilities:
 
   - It should create the report results, for example, compute the data or create the plots that should be returned by the report.
   - It should write the report results to the folder given at the variable result_path.
-  - It should return a ReportResult object, which contains lists of ReportOutput objects. These ReportOutput objects simply contain the path to a
-figure, table, text, or another type of result. One report can have multiple outputs, as long as they are all accessible through the ReportResult.
-This will be later used to format the summary of the results in the HTML output file.
+  - It should return a ReportResult object, which contains lists of ReportOutput objects. These ReportOutput objects simply contain the path to a figure, table, text, or another type of result. One report can have multiple outputs, as long as they are all accessible through the ReportResult. This will be later used to format the summary of the results in the HTML output file.
   - When the main result of the report is a plot, it is good practice to also make the raw data available to the user, for example as a csv file.
-The preferred method for plotting data is through `plotly <https://plotly.com/python/>`_, as it creates interactive and rescalable plots that
-display nicely in the HTML output file.
+
+The preferred method for plotting data is through `plotly <https://plotly.com/python/>`_, as it creates interactive and rescalable plots in HTML format [recommended] that
+display nicely in the HTML output file. Alternatively, plots can also be in pdf, png, jpg and svg format.
 
 The second abstract method to be implemented is `build_object()`. This method can take in any custom parameters and should return an instance of the
 report object. The parameters of the method `build_object()` can be directly specified in the YAML specification, nested under the report type, for example:
