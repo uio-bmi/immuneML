@@ -8,8 +8,6 @@ import plotly.graph_objs as go
 import os
 import numpy as np
 
-# ToDo: add unit test
-
 
 class ROCCurve(MLReport):
 
@@ -53,8 +51,8 @@ class ROCCurve(MLReport):
     def check_prerequisites(self):
         if not hasattr(self, "result_path") or self.result_path is None:
             warnings.warn(f"{self.__class__.__name__} requires an output"
-                f" 'path' to be set. {self.__class__.__name__}"
-                f" report will not be created.")
+                          f" 'path' to be set. {self.__class__.__name__}"
+                          f" report will not be created.")
             return False
 
         if self.test_dataset.encoded_data is None:
