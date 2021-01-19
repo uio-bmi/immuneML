@@ -11,7 +11,7 @@ class LabelConfiguration:
     Class that encapsulates labels and transformers for the labels.
     Supports two types of labels: CLASSIFICATION and REGRESSION (as defined in LabelType class)
     """
-    # TODO: add label config object to dataset.params
+
     def __init__(self, labels: list = None):
 
         assert labels is None or all(isinstance(label, Label) for label in labels), \

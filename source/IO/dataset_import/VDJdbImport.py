@@ -1,3 +1,4 @@
+import json
 import warnings
 
 import pandas as pd
@@ -123,6 +124,10 @@ class VDJdbImport(DataImport):
 
     """
 
+    KEY_MAPPING = {
+        "subject.id": "subject_id"
+    }
+
     @staticmethod
     def import_dataset(params: dict, dataset_name: str) -> Dataset:
         return ImportHelper.import_dataset(VDJdbImport, params, dataset_name)
@@ -150,6 +155,34 @@ class VDJdbImport(DataImport):
         ImportHelper.update_gene_info(df)
         ImportHelper.drop_empty_sequences(df, params.import_empty_aa_sequences, params.import_empty_nt_sequences)
         ImportHelper.drop_illegal_character_sequences(df, params.import_illegal_characters)
+        df = VDJdbImport.extract_meta_columns(df, params)
+
+        return df
+
+    @staticmethod
+    def extract_meta_columns(df: pd.DataFrame, params) -> pd.DataFrame:
+        """
+        extracts values from meta columns in VDJdb format to separate columns in the data frame, using VDJdbImport.KEY_MAPPING
+
+        Note: the KEY_MAPPING values cannot be manually set, but correspond to the standard names as defined by the AIRR Community
+
+        Args:
+            df: data frame of from file[s] in VDJdb which have already been preprocessed
+            params: parameters from importing dataset which includes the information on metadata column mapping
+
+        Returns:
+            the data frame with additional columns where the metadata (if present) were extracted
+        """
+        for key, new_key in VDJdbImport.KEY_MAPPING.items():
+            df.loc[:, new_key] = ""
+        meta_name = params.metadata_column_mapping["Meta"] if params.metadata_column_mapping is not None and "Meta" in params.metadata_column_mapping else "Meta"
+        if meta_name in df.columns:
+            for index, row in df.iterrows():
+                if isinstance(row[meta_name], str):
+                    meta = json.loads(row[meta_name])
+                    for key, new_key in VDJdbImport.KEY_MAPPING.items():
+                        if key in meta:
+                            row[new_key] = meta[key]
 
         return df
 

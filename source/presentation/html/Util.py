@@ -33,7 +33,7 @@ class Util:
                 attribute_name: Util.to_dict_recursive(vars_obj[attribute_name], base_path) for attribute_name in vars_obj.keys()
             }
             if isinstance(obj, ReportOutput):
-                if getattr(obj, "path", "").suffix == ".svg":
+                if any([ext == getattr(obj, "path", "").suffix for ext in ['.svg', '.jpg', '.png']]):
                     result['is_embed'] = False
                 else:
                     result['is_embed'] = True

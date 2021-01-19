@@ -14,18 +14,19 @@
         {{#has_ml_reports}}
         <h3>ML reports</h3>
         {{#ml_reports}}
-        {{#output_figures}}
-        <div class="padded center">
-            {{#is_embed}}
-            <embed src="{{path}}">
-            {{/is_embed}}
-            {{^is_embed}}
-            <img src="{{path}}">
-            {{/is_embed}}
-            <p>{{name}}</p>
+        <div class="grid-container">
+            {{#output_figures}}
+            <div class="">
+                {{#is_embed}}
+                <embed src="{{path}}">
+                {{/is_embed}}
+                {{^is_embed}}
+                <img src="{{path}}">
+                {{/is_embed}}
+                <p>{{name}}</p>
+            </div>
+            {{/output_figures}}
         </div>
-        {{/output_figures}}
-
         <ul>
         {{#output_tables}}
         <li><a href="{{path}}">Download {{#name}}{{name}} report{{/name}}</a></li>
@@ -38,7 +39,7 @@
         {{#has_encoding_reports}}
         <h3>Reports on encoded datasets</h3>
         <div class="grid-container padded-top padded-bottom">
-            <div class="center">
+            <div class="">
                 {{#encoding_train_reports}}
                 {{#output_figures}}
                 {{#is_embed}}
@@ -57,7 +58,7 @@
                 </ul>
                 {{/encoding_train_reports}}
             </div>
-            <div class="center">
+            <div class="">
                 {{#encoding_test_reports}}
                 {{#output_figures}}
                 {{#is_embed}}

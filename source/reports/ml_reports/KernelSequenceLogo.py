@@ -88,7 +88,7 @@ class KernelSequenceLogo(MLReport):
         table = go.Table(header={"values": ["bias"]}, cells={"values": bias})
         table.cells.format = [[None], ['.3f']]
         fig.add_trace(table, row=1, col=2)
-        fig.update_layout(title=f"Fully-connected layer weights and bias of ReceptorCNN method", template="plotly_white")
+        fig.update_layout(template="plotly_white")
         fig.write_html(str(self.result_path / "fully_connected_layer_weights.html"))
 
         return ReportOutput(self.result_path / "fully_connected_layer_weights.html", "fully-connected layer weights")

@@ -49,7 +49,7 @@ class GLIPH2Exporter(DataReport):
             beta_chains.append(receptor.get_chain("beta").amino_acid_sequence)
             trbv.append(receptor.get_chain("beta").metadata.v_gene)
             trbj.append(receptor.get_chain("beta").metadata.j_gene)
-            subject_condition.append(f"{getattr(receptor.metadata, 'subject', str(index))}:{receptor.metadata[self.condition]}")
+            subject_condition.append(f"{getattr(receptor.metadata, 'subject_id', str(index))}:{receptor.metadata[self.condition]}")
             count.append(receptor.get_chain("beta").metadata.count if receptor.get_chain('beta').metadata is not None else 1)
 
         df = pd.DataFrame({"CDR3b": beta_chains, "TRBV": trbv, "TRBJ": trbj, "CDR3a": alpha_chains, "subject:condition": subject_condition,
