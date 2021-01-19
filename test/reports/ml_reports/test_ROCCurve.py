@@ -37,18 +37,18 @@ class TestROCCurve(unittest.TestCase):
         return report
 
     def test_generate(self):
-        path = EnvironmentSettings.root_path + "test/tmp/roccurve/"
+        path = EnvironmentSettings.root_path / "test/tmp/roccurve/"
 
         report = self._create_report(path)
 
         # Running the report
         preq = report.check_prerequisites()
-        result = report.generate()
+        result = report._generate()
 
         self.assertIsInstance(result, ReportResult)
         self.assertEqual(preq, True)
-        self.assertEqual(os.path.isfile(f"{path}{'testcase'}.csv"), True)
-        self.assertEqual(os.path.isfile(f"{path}{'testcase'}.html"), True)
+        self.assertEqual(os.path.isfile(path / "testcase.csv"), True)
+        self.assertEqual(os.path.isfile(path / "testcase.html"), True)
 
         shutil.rmtree(path)
 
