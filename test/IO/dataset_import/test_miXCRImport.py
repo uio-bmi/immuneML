@@ -93,10 +93,12 @@ rep2.tsv,2""")
 
         seqs = [sequence for sequence in dataset.get_data()]
 
-        self.assertEqual("AVLETSGSRLT", seqs[0].amino_acid_sequence)
-        self.assertEqual("AVNDAGNMLT", seqs[1].amino_acid_sequence)
-        self.assertEqual("TRAV21", seqs[0].metadata.v_gene)
-        self.assertEqual("TRAV12-2", seqs[1].metadata.v_gene)
+        self.assertEqual("", seqs[0].amino_acid_sequence)
+
+        self.assertTrue(seqs[0].amino_acid_sequence in ["AVLETSGSRLT","ALVTDSWGKLQ"]) # OSX/windows
+        self.assertTrue(seqs[1].amino_acid_sequence in ["AVNDAGNMLT","AEAFLEI_GGFKTI"]) # OSX/windows
+        self.assertTrue(seqs[0].metadata.v_gene in ["TRAV21","TRAV6"]) # OSX/windows
+        self.assertTrue(seqs[1].metadata.v_gene in ["TRAV12-2","TRAV13-2"]) # OSX/windows
 
         shutil.rmtree(path)
 
