@@ -31,7 +31,7 @@ class SequenceLengthDistribution(DataReport):
         return SequenceLengthDistribution(**kwargs)
 
     def __init__(self, dataset: RepertoireDataset = None, batch_size: int = 1, result_path: Path = None, name: str = None):
-        DataReport.__init__(self, dataset=dataset, result_path=result_path, name=name)
+        super().__init__(dataset=dataset, result_path=result_path, name=name)
         self.batch_size = batch_size
 
     def check_prerequisites(self):

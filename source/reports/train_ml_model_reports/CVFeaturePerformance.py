@@ -45,7 +45,7 @@ class CVFeaturePerformance(TrainMLModelReport):
 
     def __init__(self, feature: str = None, state: TrainMLModelState = None, result_path: Path = None, label: str = None,
                  name: str = None, is_feature_axis_categorical: bool = None):
-        super().__init__()
+        super().__init__(name)
         self.feature = feature
         self.state = state
         self.result_path = result_path

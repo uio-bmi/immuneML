@@ -76,7 +76,7 @@ class SequencingDepthOverview(DataReport):
                  number_of_processes: int = 1,
                  name: str = None):
 
-        DataReport.__init__(self, dataset=dataset, result_path=result_path, name=name)
+        super().__init__(dataset=dataset, result_path=result_path, name=name)
 
         self.x = x
         self.color = color if color is not None else x

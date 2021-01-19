@@ -17,7 +17,8 @@ class ReportUtil:
     @staticmethod
     def _make_new_report(report: Report, path: Path, context: dict):
         tmp_report = copy.deepcopy(report)
-        tmp_report.result_path = path / report.name if report.name is not None else ''
+        report_name = report.name if report.name is not None else 'report_result'
+        tmp_report.result_path = path / report_name
         tmp_report.set_context(context)
         return tmp_report
 

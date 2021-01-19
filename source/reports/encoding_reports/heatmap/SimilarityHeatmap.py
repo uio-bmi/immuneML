@@ -46,9 +46,9 @@ class SimilarityHeatmap(EncodingReport):
                  one_hot_encode_example_annotations: list = None, palette: dict = None, cluster: bool = True, show_dend: bool = True,
                  show_names: bool = False, show_legend: list = None, annotation_position: str = "top", legend_position: str = "side",
                  text_size: float = 10, names_size: float = 7, height: float = 10, width: float = 10,
-                 result_name: str = "similarity_heatmap", result_path: Path = None):
+                 result_name: str = "similarity_heatmap", result_path: Path = None, name: str = None):
 
-        super().__init__()
+        super().__init__(name)
         self.dataset = dataset
         self.similarity_measure = SimilarityMeasureType[similarity_measure.upper()]
         self.annotations = example_annotations if example_annotations is not None else []

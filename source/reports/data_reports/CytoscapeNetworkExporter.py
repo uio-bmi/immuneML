@@ -47,12 +47,12 @@ class CytoscapeNetworkExporter(DataReport):
 
     def __init__(self, dataset: Dataset = None, result_path: Path = None,
                  chains=("alpha", "beta"), drop_duplicates=True,
-                 additional_node_attributes=[], additional_edge_attributes=[]):
+                 additional_node_attributes=[], additional_edge_attributes=[], name: str = None,):
+        super().__init__(dataset=dataset, result_path=result_path, name=name)
         self.chains = chains
         self.drop_duplicates = drop_duplicates
         self.additional_node_attributes = additional_node_attributes
         self.additional_edge_attributes = additional_edge_attributes
-        DataReport.__init__(self, dataset=dataset, result_path=result_path)
 
     def check_prerequisites(self):
         if isinstance(self.dataset, RepertoireDataset) or isinstance(self.dataset, ReceptorDataset):

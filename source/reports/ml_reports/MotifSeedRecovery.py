@@ -140,7 +140,7 @@ class MotifSeedRecovery(MLReport):
 
     def __init__(self, implanted_motifs_per_label, train_dataset: Dataset = None,
                  test_dataset: Dataset = None, method: MLMethod = None, result_path: Path = None, name: str = None):
-        super(MotifSeedRecovery, self).__init__(train_dataset, test_dataset, method, result_path, name)
+        super().__init__(train_dataset, test_dataset, method, result_path, name)
         self.implanted_motifs_per_label = implanted_motifs_per_label
         self.label = None
         self._param_field = None

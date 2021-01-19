@@ -97,7 +97,7 @@ class Coefficients(MLReport):
 
     def __init__(self, coefs_to_plot: CoefficientPlottingSettingList, cutoff: list, n_largest: list, train_dataset: Dataset = None,
                  test_dataset: Dataset = None, method: MLMethod = None, result_path: Path = None, name: str = None, hp_setting: HPSetting = None):
-        super(Coefficients, self).__init__(train_dataset, test_dataset, method, result_path, name, hp_setting)
+        super().__init__(train_dataset, test_dataset, method, result_path, name, hp_setting)
 
         self._coefs_to_plot = coefs_to_plot
         self._cutoff = cutoff

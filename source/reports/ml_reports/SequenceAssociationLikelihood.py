@@ -41,7 +41,7 @@ class SequenceAssociationLikelihood(MLReport):
             return True
 
     def __init__(self, method: MLMethod = None, result_path: Path = None, name: str = None, **kwargs):
-        super().__init__()
+        super().__init__(method=method, result_path=result_path, name=name)
         self.method = method
         self.result_path = result_path
         self.name = name

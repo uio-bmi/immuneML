@@ -65,7 +65,7 @@ class MLSettingsPerformance(TrainMLModelReport):
         return MLSettingsPerformance(single_axis_labels, x_label_position, y_label_position, name)
 
     def __init__(self, single_axis_labels, x_label_position, y_label_position, name: str = None, state: TrainMLModelState = None, result_path: Path = None):
-        super(MLSettingsPerformance, self).__init__()
+        super(MLSettingsPerformance, self).__init__(name)
 
         self.single_axis_labels = single_axis_labels
         self.x_label_position = x_label_position

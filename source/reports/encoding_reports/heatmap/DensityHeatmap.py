@@ -41,9 +41,9 @@ class DensityHeatmap(EncodingReport):
                  palette: dict = None, cluster_features: bool = True, subset_nonzero_features: bool = False, show_feature_dend: bool = True,
                  show_feature_names: bool = False, show_legend_features: list = None, legend_position: str = "side", text_size: float = 10,
                  feature_names_size: float = 7, scale_features: bool = True, height: float = 10, width: float = 10,
-                 result_name: str = "feature_heatmap", result_path: Path = None):
+                 result_name: str = "feature_heatmap", result_path: Path = None, name: str = None):
 
-        super().__init__()
+        super().__init__(name)
         self.dataset = dataset
         self.one_hot_encode_feature_annotations = one_hot_encode_feature_annotations if one_hot_encode_feature_annotations is not None else []
         self.feature_annotations = list(set(feature_annotations) - set(self.one_hot_encode_feature_annotations)) if feature_annotations is not None else []
