@@ -30,8 +30,8 @@ class TestReflectionHandler(TestCase):
 
     def test_discover_classes_by_partial_name(self):
         classes = ReflectionHandler.discover_classes_by_partial_name("Implanting", "simulation/signal_implanting_strategy/")
-        self.assertListEqual(['HealthySequenceImplanting', 'ReceptorImplanting', 'FullSequenceImplanting'], classes)
+        self.assertListEqual(sorted(['HealthySequenceImplanting', 'ReceptorImplanting', 'FullSequenceImplanting']), sorted(classes))
 
     def test_get_classes_by_partial_name(self):
         classes = ReflectionHandler.get_classes_by_partial_name("Implanting", "simulation/signal_implanting_strategy/")
-        self.assertListEqual([HealthySequenceImplanting, ReceptorImplanting, FullSequenceImplanting], classes)
+        self.assertListEqual(sorted([HealthySequenceImplanting, ReceptorImplanting, FullSequenceImplanting]), sorted(classes))
