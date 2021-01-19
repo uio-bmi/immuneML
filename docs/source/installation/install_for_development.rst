@@ -4,8 +4,6 @@ Prerequisites:
 
 - Python 3.8: it might work with other python versions (3.7 or 3.6), but might require additional packages to be manually installed (e.g., dataclasses package if running immuneML with Python 3.6). Alternatively, a custom python interpreter can be assigned to the virtual environment (in PyCharm, for development purposes, or in a conda environment).
 
-- Optionally R 3.6.x with libraries Rmisc and readr and library ggexp (which cannot be installed directly with conda, but can be installed with devtool library from `the GitHub repository <https://github.com/keshav-motwani/ggexp>`_). See :ref:`When should I install immuneML with R dependencies?`
-
 - Under windows, the Microsoft Visual C++ 14.0 or greater is required to install from requirements.txt.
 
 Note: for development purposes, it is most convenient to clone the codebase using PyCharm. To set up the project in PyCharm, see
@@ -39,11 +37,10 @@ See also these FAQs:
 
 - :ref:`As a Windows user, I get an error when installing PyTorch (could not find a version that satisfies the requirement torch==1.5.1)`
 
-If you want to install optional requirements (to use R for plotting, DeepRC or TCRdist), install the corresponding requirements files (some or all of them):
+If you want to install optional requirements (DeepRC or TCRdist), install the corresponding requirements files (some or all of them):
 
 .. code-block:: console
 
-  pip install -r requirements_R_plots.txt
   pip install -r requirements_DeepRC.txt
   pip install -r requirements_TCRdist.txt
 
