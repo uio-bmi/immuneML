@@ -93,7 +93,7 @@ class Coefficients(MLReport):
         for keyword in coefs_to_plot:
             coefs.append(CoefficientPlottingSetting[keyword.upper()])
 
-        return Coefficients(coefs, cutoff, n_largest, name)
+        return Coefficients(coefs_to_plot=coefs, cutoff=cutoff, n_largest=n_largest, name=name)
 
     def __init__(self, coefs_to_plot: CoefficientPlottingSettingList, cutoff: list, n_largest: list, train_dataset: Dataset = None,
                  test_dataset: Dataset = None, method: MLMethod = None, result_path: Path = None, name: str = None, hp_setting: HPSetting = None):
