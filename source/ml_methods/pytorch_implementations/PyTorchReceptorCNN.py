@@ -45,14 +45,14 @@ class PyTorchReceptorCNN(nn.Module):
 
         .. math::
 
-            KL(p||q) = \sum_n p_n \, log_2 \, \frac{p_n}{q_n}
-                = \sum_n p_n \, log_2 \, p_n - \sum_n p_n \, log_2 \, q_n
-                = \sum_n p_n \, log_2 \, p_n - log_2 \, q_n
+            KL(p||q) = \\sum_n p_n \\, log_2 \\, \\frac{p_n}{q_n}
+                = \\sum_n p_n \\, log_2 \\, p_n - \\sum_n p_n \\, log_2 \\, q_n
+                = \\sum_n p_n \\, log_2 \\, p_n - log_2 \\, q_n
 
-            log_2 \, q_n < 0 (1)
-            \sum_n p_n \, log_2 \, p_n < 0  (2)
+            log_2 \\, q_n < 0 (1)
+            \\sum_n p_n \\, log_2 \\, p_n < 0  (2)
 
-            (1) \wedge (2) \Rightarrow max(KL(p||q)) = - log_2 \, q_n
+            (1) \\wedge (2) \\Rightarrow max(KL(p||q)) = - log_2 \\, q_n
 
         Returns:
 
