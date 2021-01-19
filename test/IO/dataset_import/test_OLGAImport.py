@@ -78,12 +78,19 @@ rep2.tsv,2""")
         self.assertEqual(6, dataset.get_example_count())
 
         seqs = [sequence for sequence in dataset.get_data()]
-        self.assertEqual("GCCAGCATCGGTGGCGGGACTAGTCTCTCCTACAATGAGCAGTTC", seqs[0].nucleotide_sequence)
-        self.assertEqual("GCCAGTATCTGCGGATGTACTAGCACAGATACGCAGTAT", seqs[1].nucleotide_sequence)
-        self.assertEqual("GCTAGTGGGAAAAATCGGGACTCTAGTGCAGGCCAAGAGACCCAGTAC", seqs[2].nucleotide_sequence)
-        self.assertEqual("ASSLSPGLAYEQY", seqs[3].amino_acid_sequence)
-        self.assertEqual("ASKVRIAATNEKLF", seqs[4].amino_acid_sequence)
-        self.assertEqual("SADSKNRGAGGEASSYEQY", seqs[5].amino_acid_sequence)
+        self.assertListEqual(sorted(["GCCAGCAGTTTATCGCCGGGACTGGCCTACGAGCAGTAC",
+                                     "GCCAGCAAAGTCAGAATTGCTGCAACTAATGAAAAACTGTTT",
+                                     "AGTGCCGACTCCAAGAACAGAGGAGCGGGGGGGGAGGCAAGCTCCTACGAGCAGTAC",
+                                     "GCCAGCATCGGTGGCGGGACTAGTCTCTCCTACAATGAGCAGTTC",
+                                     "GCCAGTATCTGCGGATGTACTAGCACAGATACGCAGTAT",
+                                     "GCTAGTGGGAAAAATCGGGACTCTAGTGCAGGCCAAGAGACCCAGTAC"]), sorted([seq.nucleotide_sequence for seq in seqs]))
+
+        self.assertListEqual(sorted(["ASSLSPGLAYEQY",
+                                     "ASKVRIAATNEKLF",
+                                     "SADSKNRGAGGEASSYEQY",
+                                     "ASIGGGTSLSYNEQF",
+                                     "ASICGCTSTDTQY",
+                                     "ASGKNRDSSAGQETQY"]), sorted([seq.amino_acid_sequence for seq in seqs]))
 
         shutil.rmtree(path)
 

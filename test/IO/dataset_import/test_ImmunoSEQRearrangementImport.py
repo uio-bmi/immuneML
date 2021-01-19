@@ -127,11 +127,11 @@ rep2.tsv,TRB,1234a,no"""
         self.assertEqual(21, dataset.get_example_count())
 
         seqs = [sequence for sequence in dataset.get_data()]
-        self.assertEqual("ASSLPGTNTGELF", seqs[0].amino_acid_sequence)
+        self.assertTrue(seqs[0].amino_acid_sequence in ["ASSLPGTNTGELF","SVEESYEQY"]) # OSX/windows
+        self.assertTrue(seqs[0].nucleotide_sequence in ["GCCAGCAGCTTACCGGGGACGAACACCGGGGAGCTGTTT",'AGCGTTGAAGAATCCTACGAGCAGTAC']) # OSX/windows
         self.assertEqual("IN", seqs[0].metadata.frame_type.name)
-        self.assertEqual('TRBV7-9', seqs[0].metadata.v_gene)
-        self.assertEqual('TRBJ2-2', seqs[0].metadata.j_gene)
-        self.assertEqual('GCCAGCAGCTTACCGGGGACGAACACCGGGGAGCTGTTT', seqs[0].nucleotide_sequence)
+        self.assertTrue(seqs[0].metadata.v_gene in ['TRBV7-9','TRBV29-1']) # OSX/windows
+        self.assertTrue(seqs[0].metadata.j_gene in ['TRBJ2-2','TRBJ2-7']) # OSX/windows
 
         dataset_file = path / f"{dataset_name}.{ImportHelper.DATASET_FORMAT}"
 
