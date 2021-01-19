@@ -58,7 +58,7 @@ class ROCCurve(MLReport):
         path_csv = f"{self.result_path}{self.name}.csv"
         csv_result = np.concatenate((fpr.reshape(1, -1), tpr.reshape(1, -1)))
         fig.write_html(path_htm)
-        np.savetxt(path_csv, csv_result)
+        np.savetxt(path_csv, csv_result, header="fpr,tpr")
         return ReportResult(self.name,
                             output_figures=[ReportOutput(path_htm)],
                             output_tables=[ReportOutput(path_csv)])
