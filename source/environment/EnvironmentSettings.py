@@ -20,7 +20,6 @@ class EnvironmentSettings:
     tmp_test_path = root_path + "test/tmp/"
     default_analysis_path = root_path + "analysis_runs/"
     cache_path = root_path + "cache/"
-    visualization_path = root_path + "source/visualization/"
     tmp_cache_path = tmp_test_path + "cache/"
     html_templates_path = root_path + "source/presentation/html/templates/"
     specs_docs_path = root_path + "docs/specs/"

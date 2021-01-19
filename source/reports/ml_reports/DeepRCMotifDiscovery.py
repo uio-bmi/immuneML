@@ -8,7 +8,6 @@ from source.reports.ReportResult import ReportResult
 from source.reports.ml_reports.MLReport import MLReport
 from source.util.ParameterValidator import ParameterValidator
 from source.util.PathBuilder import PathBuilder
-from source.visualization.integrated_gradients_snippets import compute_contributions
 
 
 class DeepRCMotifDiscovery(MLReport):
