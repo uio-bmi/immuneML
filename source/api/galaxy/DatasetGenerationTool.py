@@ -25,18 +25,18 @@ class DatasetGenerationTool(GalaxyTool):
 
     """
 
-    def __init__(self, specification_path: str, result_path: str, **kwargs):
+    def __init__(self, specification_path, result_path, **kwargs):
         Util.check_parameters(specification_path, result_path, kwargs, "Dataset generation tool")
         super().__init__(specification_path, result_path, **kwargs)
 
     def _run(self):
         PathBuilder.build(self.result_path)
-        self.update_specs()
+        self._update_specs()
         state = ImmuneMLApp(self.yaml_path, self.result_path).run()[0]
-        shutil.copytree(list(list(state.paths.values())[0].values())[0], self.result_path / "result")
+        shutil.copytree(list(list(state.paths.values())[0].values())[0], self.result_path + "result/")
         print("Exported dataset.")
 
-    def update_specs(self):
+    def _update_specs(self):
         with self.yaml_path.open('r') as file:
             specs = yaml.safe_load(file)
 

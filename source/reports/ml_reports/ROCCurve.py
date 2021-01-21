@@ -1,17 +1,18 @@
+import warnings
+
+import numpy as np
+import plotly.graph_objs as go
+from sklearn.metrics import roc_curve, auc
+
 from source.reports.ReportOutput import ReportOutput
 from source.reports.ReportResult import ReportResult
 from source.reports.ml_reports.MLReport import MLReport
 from source.util.PathBuilder import PathBuilder
-from sklearn.metrics import roc_curve, auc
-
-import warnings
-import plotly.graph_objs as go
-import numpy as np
 
 
 class ROCCurve(MLReport):
     """
-    A report that plots the ROC-curve for a binary classifier.
+    A report that plots the ROC curve for a binary classifier.
 
 
     YAML specification:
@@ -19,8 +20,8 @@ class ROCCurve(MLReport):
     .. indent with spaces
     .. code-block:: yaml
 
-    reports:
-      my_roc_report: ROCCurve
+        reports:
+          my_roc_report: ROCCurve
 
     """
 
