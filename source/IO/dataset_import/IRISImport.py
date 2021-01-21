@@ -193,7 +193,7 @@ class IRISImport(DataImport):
                                                     all_genes=iris_params.import_all_gene_combinations)
 
             while len(items) > iris_params.sequence_file_size or (index == len(filenames) - 1 and len(items) > 0):
-                dataset_filenames.append(iris_params.result_path + "batch_{}.pickle".format(file_index))
+                dataset_filenames.append(iris_params.result_path / "batch_{}.pickle".format(file_index))
                 ImportHelper.store_sequence_items(dataset_filenames, items, iris_params.sequence_file_size)
                 items = items[iris_params.sequence_file_size:]
                 file_index += 1

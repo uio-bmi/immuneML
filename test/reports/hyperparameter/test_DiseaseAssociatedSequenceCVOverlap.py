@@ -21,7 +21,7 @@ class TestDiseaseAssociatedSequenceCVOverlap(TestCase):
 
     def test_generate(self):
 
-        path = EnvironmentSettings.tmp_test_path + "disease_assoc_seq_cv/"
+        path = EnvironmentSettings.tmp_test_path / "disease_assoc_seq_cv/"
         PathBuilder.build(path)
 
         repertoires, metadata = RepertoireBuilder.build([["GGG", "III", "LLL", "MMM"],
@@ -44,7 +44,7 @@ class TestDiseaseAssociatedSequenceCVOverlap(TestCase):
                     "d1": {
                         "format": "Pickle",
                         "params": {
-                            "path": path + f"{dataset.name}.iml_dataset",
+                            "path": str(path / f"{dataset.name}.iml_dataset"),
                         }
                     }
                 },
@@ -105,11 +105,11 @@ class TestDiseaseAssociatedSequenceCVOverlap(TestCase):
             }
         }
 
-        specs_file = path + "specs.yaml"
+        specs_file = path / "specs.yaml"
         with open(specs_file, "w") as file:
             yaml.dump(specs, file)
 
-        app = ImmuneMLApp(specs_file, path + "result/")
+        app = ImmuneMLApp(specs_file, path / "result/")
         state = app.run()[0]
 
         self.assertEqual(1, len(state.report_results))

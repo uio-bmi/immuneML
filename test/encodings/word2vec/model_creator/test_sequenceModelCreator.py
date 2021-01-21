@@ -13,7 +13,7 @@ from source.util.PathBuilder import PathBuilder
 
 class TestSequenceModelCreator(TestCase):
     def test_create_model(self):
-        test_path = EnvironmentSettings.root_path + "test/tmp/w2vseqmc/"
+        test_path = EnvironmentSettings.root_path / "test/tmp/w2vseqmc/"
 
         PathBuilder.build(test_path)
 
@@ -29,7 +29,7 @@ class TestSequenceModelCreator(TestCase):
         dataset = RepertoireDataset(repertoires=[rep1, rep2])
 
         model_creator = SequenceModelCreator()
-        model = model_creator.create_model(dataset=dataset, k=2, vector_size=16, batch_size=2, model_path=test_path + "model.model")
+        model = model_creator.create_model(dataset=dataset, k=2, vector_size=16, batch_size=2, model_path=test_path / "model.model")
 
         self.assertTrue(isinstance(model, Word2Vec))
         self.assertTrue("CA" in model.wv.vocab)

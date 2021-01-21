@@ -48,7 +48,7 @@ class DeepRCMotifDiscovery(MLReport):
     """
 
     def __init__(self, n_steps, threshold, name: str = None):
-        super(DeepRCMotifDiscovery, self).__init__()
+        super().__init__(name=name)
         self.n_steps = n_steps
         self.threshold = threshold
         self.filename_inputs = "inputs_integrated_gradients.pdf"

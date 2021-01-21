@@ -23,15 +23,15 @@ class TestSklearnMethod(TestCase):
         knn = KNN()
         knn._fit(sparse.csr_matrix(x), y, 'default')
 
-        path = EnvironmentSettings.root_path + "test/tmp/loadtestsklearn/"
+        path = EnvironmentSettings.root_path / "test/tmp/loadtestsklearn/"
         PathBuilder.build(path)
 
-        with open(path + "knn.pickle", "wb") as file:
+        with open(path / "knn.pickle", "wb") as file:
             pickle.dump(knn.models, file)
 
         config = MLMethodConfiguration()
         config.labels_with_values = {"default": [0, 1, 2]}
-        config.store(path + "config.json")
+        config.store(path / "config.json")
 
         knn2 = KNN()
         knn2.load(path)
@@ -47,12 +47,12 @@ class TestSklearnMethod(TestCase):
         svm = SVM()
         svm._fit(sparse.csr_matrix(x), y, 'default')
 
-        path = EnvironmentSettings.root_path + "test/tmp/storesklearn/"
+        path = EnvironmentSettings.root_path / "test/tmp/storesklearn/"
 
         svm.store(path)
-        self.assertTrue(os.path.isfile(path + "svm.pickle"))
+        self.assertTrue(os.path.isfile(path / "svm.pickle"))
 
-        with open(path + "svm.pickle", "rb") as file:
+        with open(path / "svm.pickle", "rb") as file:
             svm2 = pickle.load(file)
 
         self.assertTrue(isinstance(svm2['default'], LinearSVC))

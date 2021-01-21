@@ -54,14 +54,14 @@ class TestMatchedReceptorsEncoder(TestCase):
 4	IGLV26-2		I..NDYKLS	
 """
 
-        filepath = path + "reference_motifs.tsv"
+        filepath = path / "reference_motifs.tsv"
         with open(filepath, "w") as file:
             file.writelines(file_content)
 
         return dataset, label_config, filepath, labels
 
     def test_encode_no_v(self):
-        path = EnvironmentSettings.root_path + "test/tmp/regex_matches_encoder/"
+        path = EnvironmentSettings.root_path / "test/tmp/regex_matches_encoder/"
 
         dataset, label_config, motif_filepath, labels = self.create_dummy_data(path)
 
@@ -90,7 +90,7 @@ class TestMatchedReceptorsEncoder(TestCase):
 
 
     def test_encode_no_v_no_count(self):
-        path = EnvironmentSettings.root_path + "test/tmp/regex_matches_encoder/"
+        path = EnvironmentSettings.root_path / "test/tmp/regex_matches_encoder/"
 
         dataset, label_config, motif_filepath, labels = self.create_dummy_data(path)
 
@@ -119,7 +119,7 @@ class TestMatchedReceptorsEncoder(TestCase):
 
 
     def test_encode_with_v(self):
-        path = EnvironmentSettings.root_path + "test/tmp/regex_matches_encoder/"
+        path = EnvironmentSettings.root_path / "test/tmp/regex_matches_encoder/"
 
         dataset, label_config, motif_filepath, labels = self.create_dummy_data(path)
 

@@ -1,5 +1,6 @@
 # quality: gold
 from typing import List
+from pathlib import Path
 
 from scripts.specification_util import update_docs_per_mapping
 from source.data_model.receptor.Receptor import Receptor
@@ -50,7 +51,7 @@ class Signal:
         self.motifs = motifs
         self.implanting_strategy = implanting_strategy
 
-    def implant_to_repertoire(self, repertoire: Repertoire, repertoire_implanting_rate: float, path: str) \
+    def implant_to_repertoire(self, repertoire: Repertoire, repertoire_implanting_rate: float, path: Path) \
             -> Repertoire:
         processed_repertoire = self.implanting_strategy \
             .implant_in_repertoire(repertoire=repertoire,

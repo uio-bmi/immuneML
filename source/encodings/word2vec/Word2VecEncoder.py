@@ -3,6 +3,7 @@ import abc
 import hashlib
 import os
 from typing import List
+from pathlib import Path
 
 import pandas as pd
 from gensim.models import Word2Vec
@@ -140,7 +141,7 @@ class Word2VecEncoder(DatasetEncoder):
         else:
             labels = None
 
-        scaler_filename = params.result_path + FilenameHandler.get_filename("standard_scaling", "pkl")
+        scaler_filename = params.result_path / FilenameHandler.get_filename("standard_scaling", "pkl")
         scaled_examples = FeatureScaler.standard_scale(scaler_filename, examples)
 
         encoded_dataset = self._build_encoded_dataset(dataset, scaled_examples, labels, params)
@@ -170,7 +171,7 @@ class Word2VecEncoder(DatasetEncoder):
 
     def _load_model(self, params):
         model_path = self._create_model_path(params)
-        model = Word2Vec.load(model_path)
+        model = Word2Vec.load(str(model_path))
         return model
 
     def _create_model(self, dataset, params: EncoderParams):
@@ -192,11 +193,11 @@ class Word2VecEncoder(DatasetEncoder):
         return model
 
     def _exists_model(self, params: EncoderParams) -> bool:
-        return os.path.isfile(self._create_model_path(params))
+        return self._create_model_path(params).is_file()
 
-    def _create_model_path(self, params: EncoderParams):
+    def _create_model_path(self, params: EncoderParams) -> Path:
         if self.model_path is None:
-            return params.result_path + "W2V.model"
+            return params.result_path / "W2V.model"
         else:
             return self.model_path
 
@@ -204,12 +205,12 @@ class Word2VecEncoder(DatasetEncoder):
         return [self.model_path]
 
     @staticmethod
-    def export_encoder(path: str, encoder) -> str:
-        encoder_file = DatasetEncoder.store_encoder(encoder, path + "encoder.pickle")
+    def export_encoder(path: Path, encoder) -> str:
+        encoder_file = DatasetEncoder.store_encoder(encoder, path / "encoder.pickle")
         return encoder_file
 
     @staticmethod
-    def load_encoder(encoder_file: str):
+    def load_encoder(encoder_file: Path):
         encoder = DatasetEncoder.load_encoder(encoder_file)
         encoder = DatasetEncoder.load_attribute(encoder, encoder_file, "model_path")
         return encoder

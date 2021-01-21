@@ -5,6 +5,7 @@ from typing import List
 
 import numpy as np
 import pandas as pd
+from pathlib import Path
 
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.receptor.receptor_sequence.Chain import Chain
@@ -49,14 +50,14 @@ class Matches(EncodingReport):
     def build_object(cls, **kwargs):
         return Matches(**kwargs)
 
-    def __init__(self, dataset: RepertoireDataset = None, result_path: str = None, name: str = None):
+    def __init__(self, dataset: RepertoireDataset = None, result_path: Path = None, name: str = None):
         super().__init__(name)
         self.dataset = dataset
         self.result_path = result_path
         self.name = name
 
     def _generate(self) -> ReportResult:
-        PathBuilder.build(os.path.join(self.result_path))
+        PathBuilder.build(self.result_path)
         return self._write_reports()
 
     def _write_reports(self) -> ReportResult:
@@ -66,13 +67,13 @@ class Matches(EncodingReport):
         output_tables = [all_matches_table, repertoire_sizes]
 
         if self.dataset.encoded_data.encoding == "MatchedSequencesEncoder":
-            output_tables += self._write_sequence_info(self.result_path + "/sequence_info")
+            output_tables += self._write_sequence_info(self.result_path / "sequence_info")
         else:
             if len(self.dataset.encoded_data.feature_annotations["chain"].unique()) == 2:
-                output_tables += self._write_paired_matches(self.result_path + "/paired_matches")
+                output_tables += self._write_paired_matches(self.result_path / "paired_matches")
 
             if self.dataset.encoded_data.encoding == "MatchedReceptorsEncoder":
-                output_tables += self._write_receptor_info(self.result_path + "/receptor_info")
+                output_tables += self._write_receptor_info(self.result_path / "receptor_info")
 
         return ReportResult(self.name, output_tables=output_tables)
 
@@ -81,28 +82,28 @@ class Matches(EncodingReport):
         label_df = pd.DataFrame(self.dataset.encoded_data.labels)
         matches_df = pd.DataFrame(self.dataset.encoded_data.examples, columns=self.dataset.encoded_data.feature_names)
 
-        result_path = os.path.join(self.result_path, "complete_match_count_table.csv")
+        result_path = self.result_path / "complete_match_count_table.csv"
         id_df.join(label_df).join(matches_df).to_csv(result_path, index=False)
 
         return ReportOutput(result_path, "All matches")
 
-    def _write_paired_matches(self, paired_matches_path) -> List[ReportOutput]:
+    def _write_paired_matches(self, paired_matches_path: Path) -> List[ReportOutput]:
         PathBuilder.build(paired_matches_path)
 
         report_outputs = []
         for i in range(0, len(self.dataset.encoded_data.example_ids)): # todo don't mention subject in the name twice
-            filename = "example_{}_".format(self.dataset.encoded_data.example_ids[i])
-            filename += "_".join(["{label}_{value}".format(label=label, value=values[i]) for
+            file_name = "example_{}_".format(self.dataset.encoded_data.example_ids[i])
+            file_name += "_".join(["{label}_{value}".format(label=label, value=values[i]) for
                                   label, values in self.dataset.encoded_data.labels.items()])
-            filename += ".csv"
-            filename = os.path.join(paired_matches_path, filename)
+            file_name += ".csv"
+            file_path = paired_matches_path / file_name
 
             if self.dataset.encoded_data.encoding == "MatchedReceptorsEncoder":
-                self._write_paired_receptor_matches_for_repertoire(self.dataset.encoded_data.examples[i], filename)
+                self._write_paired_receptor_matches_for_repertoire(self.dataset.encoded_data.examples[i], file_path)
             elif self.dataset.encoded_data.encoding == "MatchedRegexEncoder":
-                self._write_paired_regex_matches_for_repertoire(self.dataset.encoded_data.examples[i], filename)
+                self._write_paired_regex_matches_for_repertoire(self.dataset.encoded_data.examples[i], file_path)
 
-            report_outputs.append(ReportOutput(filename, f"example {self.dataset.encoded_data.example_ids[i]} paired matches"))
+            report_outputs.append(ReportOutput(file_path, f"example {self.dataset.encoded_data.example_ids[i]} paired matches"))
 
         return report_outputs
 
@@ -168,7 +169,7 @@ class Matches(EncodingReport):
                 results_df.loc[(results_df.subject_id == repertoire.metadata["subject_id"]) & (results_df.chain == chain),
                                'n_clones'] += len(rep_counts[indices])
 
-        results_path = os.path.join(self.result_path, "repertoire_sizes.csv")
+        results_path = self.result_path / "repertoire_sizes.csv"
         results_df.to_csv(results_path, index=False)
 
         return ReportOutput(results_path, "repertoire sizes")
@@ -198,15 +199,15 @@ class Matches(EncodingReport):
         unique_receptors = receptors.drop_duplicates(subset=[f"sequence_{chain_types[0]}", f"v_gene_{chain_types[0]}", f"j_gene_{chain_types[0]}",
                                                              f"sequence_{chain_types[1]}", f"v_gene_{chain_types[1]}", f"j_gene_{chain_types[1]}"])
 
-        receptor_chains_path = os.path.join(receptor_info_path, "all_chains.csv")
+        receptor_chains_path = receptor_info_path / "all_chains.csv"
         receptor_chains.to_csv(receptor_chains_path, index=False)
-        receptors_path = os.path.join(receptor_info_path, "all_receptors.csv")
+        receptors_path = receptor_info_path / "all_receptors.csv"
         receptors.to_csv(receptors_path, index=False)
-        unique_chain1_path = os.path.join(receptor_info_path, f"unique_{chain_types[0]}_chains.csv")
+        unique_chain1_path = receptor_info_path / f"unique_{chain_types[0]}_chains.csv"
         unique_alpha_chains.to_csv(unique_chain1_path, index=False)
-        unique_chain2_path = os.path.join(receptor_info_path, f"unique_{chain_types[1]}_chains.csv")
+        unique_chain2_path = receptor_info_path / f"unique_{chain_types[1]}_chains.csv"
         unique_beta_chains.to_csv(unique_chain2_path, index=False)
-        unique_receptors_path = os.path.join(receptor_info_path, "unique_receptors.csv")
+        unique_receptors_path = receptor_info_path / "unique_receptors.csv"
         unique_receptors.to_csv(unique_receptors_path, index=False)
 
         return [ReportOutput(p) for p in [receptors_path, receptor_chains_path, unique_receptors_path, unique_chain1_path, unique_chain2_path]]
@@ -217,9 +218,9 @@ class Matches(EncodingReport):
         chains = self.dataset.encoded_data.feature_annotations
         unique_chains = chains.drop_duplicates(subset=["sequence", "v_gene", "j_gene"])
 
-        chains_path = os.path.join(sequence_info_path, "all_chains.csv")
+        chains_path = sequence_info_path / "all_chains.csv"
         chains.to_csv(chains_path, index=False)
-        unique_chains_path = os.path.join(sequence_info_path, "unique_chains.csv")
+        unique_chains_path = sequence_info_path / "unique_chains.csv"
         unique_chains.to_csv(unique_chains_path, index=False)
 
         return [ReportOutput(p) for p in [chains_path, unique_chains_path]]

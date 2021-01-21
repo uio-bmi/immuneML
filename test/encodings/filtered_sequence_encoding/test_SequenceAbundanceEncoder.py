@@ -26,7 +26,7 @@ class TestEmersonSequenceAbundanceEncoder(TestCase):
         os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
 
     def test_encode(self):
-        path = EnvironmentSettings.tmp_test_path + "abundance_encoder/"
+        path = EnvironmentSettings.tmp_test_path / "abundance_encoder/"
         PathBuilder.build(path)
 
         repertoires, metadata = RepertoireBuilder.build([["GGG", "III", "LLL", "MMM"],
@@ -57,7 +57,7 @@ class TestEmersonSequenceAbundanceEncoder(TestCase):
         shutil.rmtree(path)
 
     def test__build_abundance_matrix(self):
-        path = EnvironmentSettings.tmp_test_path + "abundance_encoder_matrix/"
+        path = EnvironmentSettings.tmp_test_path / "abundance_encoder_matrix/"
         PathBuilder.build(path)
         expected_abundance_matrix = np.array([[1, 4], [1, 6], [1, 3], [1, 6]])
 
@@ -99,7 +99,7 @@ class TestEmersonSequenceAbundanceEncoder(TestCase):
         shutil.rmtree(path)
 
     def test_find_label_associated_sequence_p_values(self):
-        path = EnvironmentSettings.tmp_test_path + "comparison_data_find_label_assocseqpvalues/"
+        path = EnvironmentSettings.tmp_test_path / "comparison_data_find_label_assocseqpvalues/"
         PathBuilder.build(path)
 
         repertoires = [Repertoire.build_from_sequence_objects([ReceptorSequence()], path, {

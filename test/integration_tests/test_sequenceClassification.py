@@ -45,7 +45,7 @@ class TestSequenceClassification(TestCase):
                                                   metadata=SequenceMetadata(custom_params={"l1": 2})))
 
         PathBuilder.build(path)
-        filename = "{}sequences.pkl".format(path)
+        filename = path / "sequences.pkl"
         with open(filename, "wb") as file:
             pickle.dump(sequences, file)
 
@@ -57,7 +57,7 @@ class TestSequenceClassification(TestCase):
 
     def test(self):
 
-        path = EnvironmentSettings.tmp_test_path + "integration_sequence_classification/"
+        path = EnvironmentSettings.tmp_test_path / "integration_sequence_classification/"
         dataset = self.create_dataset(path)
 
         os.environ["cache_type"] = "test"

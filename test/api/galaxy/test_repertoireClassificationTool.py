@@ -22,8 +22,8 @@ class TestRepertoireClassificationTool(TestCase):
         PickleExporter.export(dataset, path)
 
     def test_run(self):
-        path = EnvironmentSettings.tmp_test_path + "galaxy_repertoire_classification/"
-        result_path = path + "result/"
+        path = EnvironmentSettings.tmp_test_path / "galaxy_repertoire_classification/"
+        result_path = path / "result/"
         PathBuilder.build(result_path)
 
         old_working_dir = os.getcwd()
@@ -31,7 +31,7 @@ class TestRepertoireClassificationTool(TestCase):
 
         self.make_random_dataset(path)
 
-        args = ['-o', path, '-l', 'subject_id', '-m', 'RandomForestClassifier', 'LogisticRegression',
+        args = ['-o', str(path), '-l', 'subject_id', '-m', 'RandomForestClassifier', 'LogisticRegression',
                 '-t', '70', '-c', '2', '-s', 'subsequence', '-p', 'invariant', '-g', 'gapped',
                 '-kl', '1', '-kr', '1', '-gi', '0', '-ga', '1', '-r', 'unique']
 
@@ -40,8 +40,8 @@ class TestRepertoireClassificationTool(TestCase):
 
         os.chdir(old_working_dir)
 
-        self.assertTrue(os.path.exists(f"{result_path}/inst1/split_1/"))
-        self.assertTrue(os.path.exists(f"{result_path}/inst1/split_2/"))
-        self.assertTrue(os.path.exists(f"{result_path}/inst1/split_1/selection_random/split_1/datasets/"))
+        self.assertTrue(os.path.exists(result_path / "inst1/split_1/"))
+        self.assertTrue(os.path.exists(result_path / "inst1/split_2/"))
+        self.assertTrue(os.path.exists(result_path / "inst1/split_1/selection_random/split_1/datasets/"))
 
         shutil.rmtree(path)

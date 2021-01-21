@@ -1,11 +1,12 @@
 from dataclasses import dataclass
+from pathlib import Path
 
 from source.environment.LabelConfiguration import LabelConfiguration
 
 
 @dataclass
 class EncoderParams:
-    result_path: str
+    result_path: Path
     label_config: LabelConfiguration
     filename: str = ""
     pool_size: int = 4

@@ -25,7 +25,7 @@ class TestMLMethodAssessment(TestCase):
         os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
 
     def test_run(self):
-        path = EnvironmentSettings.root_path + "test/tmp/mlmethodassessment/"
+        path = EnvironmentSettings.root_path / "test/tmp/mlmethodassessment/"
         PathBuilder.build(path)
         dataset = RepertoireDataset(repertoires=RepertoireBuilder.build([["AA"], ["CC"], ["AA"], ["CC"], ["AA"], ["CC"], ["AA"], ["CC"], ["AA"], ["CC"], ["AA"], ["CC"]], path)[0])
         dataset.encoded_data = EncodedData(
@@ -44,22 +44,22 @@ class TestMLMethodAssessment(TestCase):
             method=method1,
             metrics={Metric.ACCURACY, Metric.BALANCED_ACCURACY, Metric.F1_MACRO},
             optimization_metric=Metric.LOG_LOSS,
-            predictions_path=EnvironmentSettings.root_path + "test/tmp/mlmethodassessment/predictions.csv",
+            predictions_path=EnvironmentSettings.root_path / "test/tmp/mlmethodassessment/predictions.csv",
             label="l1",
-            ml_score_path=EnvironmentSettings.root_path + "test/tmp/mlmethodassessment/ml_score.csv",
+            ml_score_path=EnvironmentSettings.root_path / "test/tmp/mlmethodassessment/ml_score.csv",
             split_index=1,
-            path=EnvironmentSettings.root_path + "test/tmp/mlmethodassessment/"
+            path=EnvironmentSettings.root_path / "test/tmp/mlmethodassessment/"
         ))
 
         self.assertTrue(isinstance(res, dict))
         self.assertTrue(res[Metric.LOG_LOSS.name.lower()] <= 0.1)
 
-        self.assertTrue(os.path.isfile(EnvironmentSettings.root_path + "test/tmp/mlmethodassessment/ml_score.csv"))
+        self.assertTrue(os.path.isfile(EnvironmentSettings.root_path / "test/tmp/mlmethodassessment/ml_score.csv"))
 
-        df = pd.read_csv(EnvironmentSettings.root_path + "test/tmp/mlmethodassessment/ml_score.csv")
+        df = pd.read_csv(EnvironmentSettings.root_path / "test/tmp/mlmethodassessment/ml_score.csv")
         self.assertTrue(df.shape[0] == 1)
 
-        df = pd.read_csv(EnvironmentSettings.root_path + "test/tmp/mlmethodassessment/predictions.csv")
+        df = pd.read_csv(EnvironmentSettings.root_path / "test/tmp/mlmethodassessment/predictions.csv")
         self.assertEqual(12, df.shape[0])
 
-        shutil.rmtree(EnvironmentSettings.root_path + "test/tmp/mlmethodassessment/")
+        shutil.rmtree(EnvironmentSettings.root_path / "test/tmp/mlmethodassessment/")

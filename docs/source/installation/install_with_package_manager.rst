@@ -41,6 +41,8 @@ Alternatively, if you want to install immuneML including optional extras (:code:
 Installing DeepRC and TCRDist dependencies is necessary to use the :ref:`DeepRC` and :ref:`TCRDISTClassifier` ML methods, and corresponding :ref:`DeepRCInterpretation` and :ref:`TCRDistMotifDiscovery` reports.
 It is also possible to specify a subset of extras, for example, include only :code:`DeepRC`.
 
+Windows users, see this FAQ: :ref:`As a Windows user, I get an error when installing PyTorch (could not find a version that satisfies the requirement torch==1.5.1)`.
+
 5. To validate the installation, run:
 
 .. code-block:: console

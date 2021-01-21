@@ -3,6 +3,7 @@ import os
 import pickle
 from dataclasses import dataclass
 from typing import Dict
+from pathlib import Path
 
 import numpy as np
 
@@ -23,7 +24,7 @@ class ComparisonDataBatch:
         repertoire_index_mapping: a mapping between the repertoire identifier (a string) and a column number for faster access of columns
                 (repertoire vectors w.r.t. given items) in the comparison data matrix where columns correspond to repertoires
 
-        path (str): path to directory where comp data is stored
+        path (Path): path to directory where comp data is stored
 
         identifier (int): identifier of the batch
 
@@ -31,27 +32,28 @@ class ComparisonDataBatch:
 
     items: list
     repertoire_index_mapping: Dict[str, int]
-    path: str
+    path: Path
     identifier: int
     matrix: np.ndarray = None
 
     def store(self):
         PathBuilder.build(self.path)
-        np.save(self.path + f"{self.identifier}.npy", self.matrix)
+        np.save(self.path / f"{self.identifier}.npy", self.matrix)
 
-        np.save(self.path + f"{self.identifier}_items.npy", self.items)
+        np.save(self.path / f"{self.identifier}_items.npy", self.items)
 
         batch_vars = vars(self)
         del batch_vars["matrix"]
         del batch_vars["items"]
 
-        with open(self.path + f"{self.identifier}.pkl", "wb") as file:
+        pkl_path = self.path / f"{self.identifier}.pkl"
+        with pkl_path.open("wb") as file:
             pickle.dump(batch_vars, file)
 
     def load(self):
-        file_path = self.path + f'{self.identifier}.pkl'
-        if os.path.isfile(file_path):
-            with open(file_path, 'rb') as file:
+        file_path = self.path / f'{self.identifier}.pkl'
+        if file_path.is_file():
+            with file_path.open('rb') as file:
                 batch_vars = pickle.load(file)
 
             for v in batch_vars:
@@ -64,12 +66,12 @@ class ComparisonDataBatch:
 
     def get_items(self):
         if self.matrix is None:
-            return np.load(self.path + f"{self.identifier}_items.npy", allow_pickle=True)
+            return np.load(self.path / f"{self.identifier}_items.npy", allow_pickle=True)
         else:
             return self.items
 
     def get_matrix(self):
         if self.matrix is None:
-            return np.load(self.path + f"{self.identifier}.npy", allow_pickle=True)
+            return np.load(self.path / f"{self.identifier}.npy", allow_pickle=True)
         else:
             return self.matrix

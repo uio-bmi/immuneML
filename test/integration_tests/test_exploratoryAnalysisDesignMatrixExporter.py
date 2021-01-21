@@ -28,7 +28,7 @@ class TestExploratoryAnalysisDesignMatrixExporter(TestCase):
         return dataset
 
     def test_run(self):
-        path = EnvironmentSettings.tmp_test_path + "explanalysisprocintegration/"
+        path = EnvironmentSettings.tmp_test_path / "explanalysisprocintegration/"
         PathBuilder.build(path)
         os.environ["cache_type"] = "test"
 
@@ -42,10 +42,10 @@ class TestExploratoryAnalysisDesignMatrixExporter(TestCase):
         100a	TRA	AAAC	TRAV12	TRAJ1	HomoSapiens	HLA-A*11:01	B2M	MHCI	AVFDRKSDAK	EBNA4	EBV
         """
 
-        with open(path + "refs.tsv", "w") as file:
+        with open(path / "refs.tsv", "w") as file:
             file.writelines(file_content)
 
-        refs = {"params": {"path": path + "refs.tsv", "region_type": "FULL_SEQUENCE"}, "format": "VDJdb"}
+        refs = {"params": {"path": path / "refs.tsv", "region_type": "FULL_SEQUENCE"}, "format": "VDJdb"}
 
         units = {"named_analysis_4": ExploratoryAnalysisUnit(dataset=dataset,
                                                              report=DesignMatrixExporter(),
@@ -55,8 +55,8 @@ class TestExploratoryAnalysisDesignMatrixExporter(TestCase):
                                                                                                                 "reference": refs}))}
 
         process = ExploratoryAnalysisInstruction(units, name="exp")
-        process.run(path + "results/")
+        process.run(path / "results/")
 
-        self.assertTrue(os.path.isfile(path + "results/exp/analysis_named_analysis_4/report/design_matrix.csv"))
+        self.assertTrue(os.path.isfile(path / "results/exp/analysis_named_analysis_4/report/design_matrix.csv"))
 
         shutil.rmtree(path)

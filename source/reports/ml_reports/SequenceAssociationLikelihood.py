@@ -3,6 +3,7 @@ from typing import Tuple
 import numpy as np
 import plotly.graph_objects as go
 from scipy.stats import beta
+from pathlib import Path
 
 from source.ml_methods.MLMethod import MLMethod
 from source.ml_methods.ProbabilisticBinaryClassifier import ProbabilisticBinaryClassifier
@@ -41,8 +42,8 @@ class SequenceAssociationLikelihood(MLReport):
         else:
             return True
 
-    def __init__(self, method: MLMethod = None, result_path: str = None, name: str = None, **kwargs):
-        super().__init__()
+    def __init__(self, method: MLMethod = None, result_path: Path = None, name: str = None, **kwargs):
+        super().__init__(method=method, result_path=result_path, name=name)
         self.method = method
         self.result_path = result_path
         self.name = name
@@ -74,9 +75,11 @@ class SequenceAssociationLikelihood(MLReport):
         figure.update_layout(template="plotly_white", xaxis_title=f"probability that receptor sequence is {self.method.label_name}-associated",
                              yaxis_title="probability density function", xaxis={'tickformat': '.2e'}, yaxis={'tickformat': '.2e'})
 
-        figure.write_html(f"{self.result_path}{self.result_name}.html")
+        output_path = self.result_path / f"{self.result_name}.html"
 
-        return ReportOutput(f"{self.result_path}{self.result_name}.html")
+        figure.write_html(str(output_path))
+
+        return ReportOutput(output_path)
 
     def get_distribution_limits(self) -> Tuple[float, float]:
         lower_limit_0, upper_limit_0 = beta.interval(SequenceAssociationLikelihood.DISTRIBUTION_PERCENTAGE_TO_SHOW,

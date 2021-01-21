@@ -1,4 +1,5 @@
 import pandas as pd
+from pathlib import Path
 
 from source.data_model.dataset.ReceptorDataset import ReceptorDataset
 from source.reports.ReportOutput import ReportOutput
@@ -36,7 +37,7 @@ class GLIPH2Exporter(DataReport):
     def build_object(cls, **kwargs):
         return GLIPH2Exporter(**kwargs)
 
-    def __init__(self, dataset: ReceptorDataset = None, result_path: str = None, name: str = None, condition: str = None):
+    def __init__(self, dataset: ReceptorDataset = None, result_path: Path = None, name: str = None, condition: str = None):
         super().__init__(dataset, result_path, name)
         self.condition = condition
 
@@ -53,7 +54,7 @@ class GLIPH2Exporter(DataReport):
 
         df = pd.DataFrame({"CDR3b": beta_chains, "TRBV": trbv, "TRBJ": trbj, "CDR3a": alpha_chains, "subject:condition": subject_condition,
                            "count": count})
-        file_path = self.result_path + "exported_data.tsv"
+        file_path = self.result_path / "exported_data.tsv"
         df.to_csv(file_path, sep="\t", index=False)
 
         return ReportResult(self.name, output_tables=[ReportOutput(file_path, "exported data in GLIPH2 format")])

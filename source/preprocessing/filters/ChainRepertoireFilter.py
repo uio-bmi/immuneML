@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.receptor.receptor_sequence.Chain import Chain
 from source.preprocessing.filters.Filter import Filter
@@ -31,7 +33,7 @@ class ChainRepertoireFilter(Filter):
     def __init__(self, keep_chain: Chain):
         self.keep_chain = keep_chain
 
-    def process_dataset(self, dataset: RepertoireDataset, result_path: str = None):
+    def process_dataset(self, dataset: RepertoireDataset, result_path: Path = None):
         return ChainRepertoireFilter.process(dataset=dataset, params={"keep_chain": self.keep_chain,
                                                                       "result_path": result_path})
 

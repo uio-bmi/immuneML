@@ -23,7 +23,7 @@ class TestDataEncoder(TestCase):
         os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
 
     def test_run(self):
-        path = EnvironmentSettings.root_path + "test/tmp/dataencoder/"
+        path = EnvironmentSettings.root_path / "test/tmp/dataencoder/"
         PathBuilder.build(path)
 
         rep1 = Repertoire.build_from_sequence_objects([ReceptorSequence("AAA", identifier="1")],

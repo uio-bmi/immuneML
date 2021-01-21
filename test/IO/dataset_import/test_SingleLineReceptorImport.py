@@ -15,7 +15,7 @@ class TestSingleLineReceptorImport(TestCase):
         os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
 
     def test_import_repertoire_dataset(self):
-        path = PathBuilder.build(EnvironmentSettings.tmp_test_path + "io_generic_receptor/")
+        path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "io_generic_receptor/")
         data = """subject,epitope,count,v_a_gene,j_a_gene,cdr3_a_aa,cdr3_a_nucseq,v_b_gene,j_b_gene,cdr3_b_aa,cdr3_b_nucseq,clone_id
 mouse_subject0050,PA,2,TRAV7-3*01,TRAJ33*01,CAVSLDSNYQLIW,tgtgcagtgagcctcgatagcaactatcagttgatctgg,TRBV13-1*01,TRBJ2-3*01,CASSDFDWGGDAETLYF,tgtgccagcagtgatttcgactggggaggggatgcagaaacgctgtatttt,mouse_tcr0072.clone
 mouse_subject0050,PA,6,TRAV6D-6*01,TRAJ56*01,CALGDRATGGNNKLTF,tgtgctctgggtgacagggctactggaggcaataataagctgactttt,TRBV29*01,TRBJ1-1*01,CASSPDRGEVFF,tgtgctagcagtccggacaggggtgaagtcttcttt,mouse_tcr0096.clone
@@ -343,14 +343,14 @@ mouse_subject0045,PA,1,TRAV6D-6*01,TRAJ22*01,CALGSGGSWQLIF,tgtgctctggggtccgggggc
 mouse_subject0045,PA,1,TRAV16D/DV11*03,TRAJ53*01,CAMRGNSGGSNYKLTF,tgtgctatgagggggaacagtggaggcagcaattacaaactgacattt,TRBV29*01,TRBJ1-1*01,CASSLFPTEVFF,tgtgctagcagtttattccccacagaagtcttcttt,mouse_tcr2100.clone
 """
 
-        filename = path + 'data.csv'
+        filename = path / 'data.csv'
 
         with open(filename, "w") as file:
             file.writelines(data)
 
         dataset = SingleLineReceptorImport.import_dataset({
             "path": filename,
-            "result_path": path + "result/",
+            "result_path": path / "result/",
             "separator": ",",
             "columns_to_load": ["subject", "epitope", "count", "v_a_gene", "j_a_gene", "cdr3_a_aa", "v_b_gene", "j_b_gene", "cdr3_b_aa", "clone_id"],
             "column_mapping": {
@@ -370,8 +370,8 @@ mouse_subject0045,PA,1,TRAV16D/DV11*03,TRAJ53*01,CAMRGNSGGSNYKLTF,tgtgctatgagggg
 
         self.assertEqual(324, dataset.get_example_count())
         self.assertTrue(all(item.identifier is not None for item in dataset.get_data()))
-        self.assertTrue(os.path.isfile(path + "result/batch1.pickle"))
-        self.assertTrue(os.path.isfile(path + "result/dataset name 2.iml_dataset"))
+        self.assertTrue(os.path.isfile(path / "result/batch1.pickle"))
+        self.assertTrue(os.path.isfile(path / "result/dataset name 2.iml_dataset"))
         self.assertEqual("mouse", dataset.params["organism"])
 
         shutil.rmtree(path)

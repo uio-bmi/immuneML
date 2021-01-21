@@ -31,7 +31,7 @@ class TestMLMethodTrainer(TestCase):
             feature_names=["f1", "f2", "f3"]
         )
 
-        path = EnvironmentSettings.root_path + "test/tmp/mlmethodtrainer/"
+        path = EnvironmentSettings.root_path / "test/tmp/mlmethodtrainer/"
 
         method = MLMethodTrainer.run(MLMethodTrainerParams(
             result_path=path,
@@ -41,13 +41,13 @@ class TestMLMethodTrainer(TestCase):
             model_selection_n_folds=2,
             model_selection_cv=True,
             cores_for_training=1,
-            train_predictions_path=f"{path}predictions.csv",
-            ml_details_path=f"{path}details.yaml",
+            train_predictions_path=path / "predictions.csv",
+            ml_details_path=path / "details.yaml",
             optimization_metric="balanced_accuracy"
         ))
 
         method.predict(EncodedData(np.array([1, 2, 3]).reshape(1, -1)), "l1")
-        self.assertTrue(os.path.isfile(f"{path}predictions.csv"))
-        self.assertTrue(os.path.isfile(f"{path}details.yaml"))
+        self.assertTrue(os.path.isfile(path / "predictions.csv"))
+        self.assertTrue(os.path.isfile(path / "details.yaml"))
 
         shutil.rmtree(path)

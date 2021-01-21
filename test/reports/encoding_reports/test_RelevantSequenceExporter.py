@@ -19,16 +19,16 @@ class TestRelevantSequenceExporter(TestCase):
         os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
 
     def test_generate(self):
-        path = EnvironmentSettings.tmp_test_path + "relevant_sequence_exporter/"
+        path = EnvironmentSettings.tmp_test_path / "relevant_sequence_exporter/"
         PathBuilder.build(path)
 
         df = pd.DataFrame({"v_genes": ["TRBV1-1", "TRBV1-1"], 'j_genes': ["TRBJ1-1", "TRBJ1-2"], "sequence_aas": ['ACCF', "EEFG"]})
-        df.to_csv(path + 'sequences.csv', index=False)
+        df.to_csv(path / 'sequences.csv', index=False)
 
-        dataset = RandomDatasetGenerator.generate_repertoire_dataset(2, {2: 1}, {4: 1}, {}, path + "data/")
-        dataset.encoded_data = EncodedData(examples=None, info={'relevant_sequence_path': path + 'sequences.csv'}, encoding="SequenceAbundanceEncoder")
+        dataset = RandomDatasetGenerator.generate_repertoire_dataset(2, {2: 1}, {4: 1}, {}, path / "data")
+        dataset.encoded_data = EncodedData(examples=None, info={'relevant_sequence_path': path / 'sequences.csv'}, encoding="SequenceAbundanceEncoder")
 
-        report_result = RelevantSequenceExporter(dataset, path+"result/", 'somename').generate_report()
+        report_result = RelevantSequenceExporter(dataset, path / "result", 'somename').generate_report()
 
         self.assertEqual(1, len(report_result.output_tables))
         self.assertTrue(os.path.isfile(report_result.output_tables[0].path))

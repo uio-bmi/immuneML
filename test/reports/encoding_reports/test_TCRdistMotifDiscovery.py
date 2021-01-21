@@ -10,7 +10,7 @@ from source.environment.Constants import Constants
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.environment.Label import Label
 from source.environment.LabelConfiguration import LabelConfiguration
-from source.reports.encoding_reports.TCRdistMotifDiscovery import TCRdistMotifDiscovery
+from source.reports.ml_reports.TCRdistMotifDiscovery import TCRdistMotifDiscovery
 from source.util.PathBuilder import PathBuilder
 
 
@@ -42,7 +42,7 @@ mouse_subject0007,PA,3,TRAV21/DV12*01,TRAJ56*01,CILRVGATGGNNKLTF,tgtatcctgagagta
 mouse_subject0007,PA,1,TRAV6D-6*01,TRAJ33*01,CALGAGSNYQLIW,tgtgctctgggggccggtagcaactatcagttgatctgg,TRBV29*01,TRBJ1-1*01,CASSSGQEVFF,tgtgctagcagttcgggacaggaagtcttcttt,mouse_tcr0449.clone
 mouse_subject0053,PA,1,TRAV6D-6*01,TRAJ53*01,CALGGGSNYKLTF,tgtgctctgggtggaggcagcaattacaaactgacattt,TRBV29*01,TRBJ2-7*01,CASSGGGEQYF,tgtgctagcagtggggggggcgaacagtacttc,mouse_tcr0110.clone
 """
-        filename = path + 'data.csv'
+        filename = path / 'data.csv'
 
         with open(filename, "w") as file:
             file.writelines(data)
@@ -50,11 +50,11 @@ mouse_subject0053,PA,1,TRAV6D-6*01,TRAJ53*01,CALGGGSNYKLTF,tgtgctctgggtggaggcagc
         return filename
 
     def test_generate(self):
-        path = PathBuilder.build(EnvironmentSettings.tmp_test_path + "tcrdist_motif_discovery/")
+        path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "tcrdist_motif_discovery/")
         dataset_path = self._create_dataset(path)
 
         dataset = SingleLineReceptorImport.import_dataset({"path": dataset_path,
-                                                           "result_path": path + "dataset/",
+                                                           "result_path": path / "dataset/",
                                                            "separator": ",",
                                                            "columns_to_load": ["subject", "epitope", "count", "v_a_gene", "j_a_gene", "cdr3_a_aa",
                                                                                "v_b_gene", "j_b_gene", "cdr3_b_aa", "clone_id", "cdr3_a_nucseq",
@@ -75,9 +75,9 @@ mouse_subject0053,PA,1,TRAV6D-6*01,TRAJ53*01,CALGGGSNYKLTF,tgtgctctgggtggaggcagc
                                                            "sequence_file_size": 50000,
                                                            "organism": "mouse"}, 'd1')
 
-        dataset = TCRdistEncoder(8).encode(dataset, EncoderParams(f"{path}result/", LabelConfiguration([Label("epitope")])))
+        dataset = TCRdistEncoder(8).encode(dataset, EncoderParams(path / "result", LabelConfiguration([Label("epitope")])))
 
-        report = TCRdistMotifDiscovery(dataset, path + "report/", "report name", 8)
+        report = TCRdistMotifDiscovery(dataset, path / "report", "report name", 8)
         report.generate_report()
 
         shutil.rmtree(path)

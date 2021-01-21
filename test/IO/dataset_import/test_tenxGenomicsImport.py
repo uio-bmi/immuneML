@@ -23,29 +23,29 @@ clonotype103,clonotype103_consensus_1,572,TRA,TRAV13D-2,None,TRAJ37,TRAC,True,Tr
 clonotype103,clonotype103_consensus_2,753,TRB,TRBV3,None,TRBJ1-2,TRBC1,True,True,CASSFATNSDYTF,TGTGCCAGCAGCTTCGCAACAAACTCCGACTACACCTTC,52713,28
 clonotype104,clonotype104_consensus_1,680,TRA,TRAV3D-3,None,TRAJ31,TRAC,True,True,CAVSANSNNRIFF,TGCGCAGTCAGTGCGAATAGCAATAACAGAATCTTCTTT,31289,6"""
 
-        with open(path + "rep1.tsv", "w") as file:
+        with open(path / "rep1.tsv", "w") as file:
             file.writelines(file1_content)
 
-        with open(path + "rep2.tsv", "w") as file:
+        with open(path / "rep2.tsv", "w") as file:
             file.writelines(file2_content)
 
         if add_metadata:
-            with open(path + "metadata.csv", "w") as file:
+            with open(path / "metadata.csv", "w") as file:
                 file.writelines("""filename,subject_id
 rep1.tsv,1
 rep2.tsv,2""")
 
 
     def test_import_repertoire_dataset(self):
-        path = EnvironmentSettings.root_path + "test/tmp/io_10xGenomics/"
+        path = EnvironmentSettings.root_path / "test/tmp/io_10xGenomics/"
         PathBuilder.build(path)
         self.create_dumy_dataset(path, add_metadata=True)
 
-        params = DefaultParamsLoader.load(EnvironmentSettings.default_params_path + "datasets/", "tenx_genomics")
+        params = DefaultParamsLoader.load(EnvironmentSettings.default_params_path / "datasets/", "tenx_genomics")
         params["is_repertoire"] = True
         params["result_path"] = path
         params["path"] = path
-        params["metadata_file"] = path + "metadata.csv"
+        params["metadata_file"] = path / "metadata.csv"
 
         dataset = TenxGenomicsImport.import_dataset(params, "tenx_dataset_repertoire")
 
@@ -63,11 +63,11 @@ rep2.tsv,2""")
 
 
     def test_import_sequence_dataset(self):
-        path = EnvironmentSettings.root_path + "test/tmp/io_10xGenomics/"
+        path = EnvironmentSettings.root_path / "test/tmp/io_10xGenomics/"
         PathBuilder.build(path)
         self.create_dumy_dataset(path, add_metadata=False)
 
-        params = DefaultParamsLoader.load(EnvironmentSettings.default_params_path + "datasets/", "tenx_genomics")
+        params = DefaultParamsLoader.load(EnvironmentSettings.default_params_path / "datasets/", "tenx_genomics")
         params["is_repertoire"] = False
         params["paired"] = False
         params["result_path"] = path
@@ -87,11 +87,11 @@ rep2.tsv,2""")
 
 
     def test_import_receptor_dataset(self):
-        path = EnvironmentSettings.root_path + "test/tmp/io_10xGenomics/"
+        path = EnvironmentSettings.root_path / "test/tmp/io_10xGenomics/"
         PathBuilder.build(path)
         self.create_dumy_dataset(path, add_metadata=False)
 
-        params = DefaultParamsLoader.load(EnvironmentSettings.default_params_path + "datasets/", "tenx_genomics")
+        params = DefaultParamsLoader.load(EnvironmentSettings.default_params_path / "datasets/", "tenx_genomics")
         params["is_repertoire"] = False
         params["paired"] = True
         params["result_path"] = path

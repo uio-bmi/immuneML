@@ -1,4 +1,5 @@
 import datetime
+from pathlib import Path
 
 from source.environment.LabelConfiguration import LabelConfiguration
 from source.hyperparameter_optimization.HPSetting import HPSetting
@@ -20,7 +21,7 @@ class HPSelection:
         return state
 
     @staticmethod
-    def run_selection(state: TrainMLModelState, train_val_dataset, current_path: str, split_index: int) -> TrainMLModelState:
+    def run_selection(state: TrainMLModelState, train_val_dataset, current_path: Path, split_index: int) -> TrainMLModelState:
 
         path = HPSelection.create_selection_path(state, current_path)
         state = HPSelection.update_split_count(state, train_val_dataset)
@@ -51,12 +52,12 @@ class HPSelection:
 
     @staticmethod
     def evaluate_hp_setting(state: TrainMLModelState, hp_setting: HPSetting, train_datasets: list, val_datasets: list,
-                            current_path: str, label: str, assessment_split_index: int):
+                            current_path: Path, label: str, assessment_split_index: int):
 
         performances = []
         for index in range(state.selection.split_count):
             performance = HPSelection.run_setting(state, hp_setting, train_datasets[index], val_datasets[index], index + 1,
-                                                  f"{current_path}split_{index + 1}/{label}_{hp_setting.get_key()}/",
+                                                  current_path / f"split_{index + 1}" / f"{label}_{hp_setting.get_key()}",
                                                   label, assessment_split_index)
             performances.append(performance)
 
@@ -64,7 +65,7 @@ class HPSelection:
 
     @staticmethod
     def run_setting(state: TrainMLModelState, hp_setting, train_dataset, val_dataset, split_index: int,
-                    current_path: str, label: str, assessment_index: int):
+                    current_path: Path, label: str, assessment_index: int):
 
         hp_item = MLProcess(train_dataset=train_dataset, test_dataset=val_dataset, encoding_reports=state.selection.reports.encoding_reports.values(),
                             label_config=LabelConfiguration([state.label_configuration.get_label_object(label)]), report_context=state.context,
@@ -78,7 +79,7 @@ class HPSelection:
         return hp_item.performance[state.optimization_metric.name.lower()] if hp_item.performance is not None else None
 
     @staticmethod
-    def create_selection_path(state: TrainMLModelState, current_path: str) -> str:
-        path = "{}selection_{}/".format(current_path, state.selection.split_strategy.name.lower())
+    def create_selection_path(state: TrainMLModelState, current_path: Path) -> str:
+        path = current_path / f"selection_{state.selection.split_strategy.name.lower()}"
         PathBuilder.build(path)
         return path

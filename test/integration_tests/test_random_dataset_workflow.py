@@ -23,7 +23,7 @@ class TestRandomDatasetWorkflow(TestCase):
                     "d1": {
                         "format": "RandomRepertoireDataset",
                         "params": {
-                            "result_path": path,
+                            "result_path": str(path),
                             "labels": {
                                 "cmv": {
                                     True: 0.5,
@@ -92,7 +92,7 @@ class TestRandomDatasetWorkflow(TestCase):
                     "d1": {
                         "format": "RandomReceptorDataset",
                         "params": {
-                            "result_path": path,
+                            "result_path": str(path),
                             "receptor_count": 500,
                             "chain_1_length_probabilities": {
                                 5: 1.
@@ -163,7 +163,7 @@ class TestRandomDatasetWorkflow(TestCase):
 
     def test_dataset_generation(self):
 
-        path = EnvironmentSettings.tmp_test_path + "random_dataset_workflow/"
+        path = EnvironmentSettings.tmp_test_path / "random_dataset_workflow/"
 
         repertoire_specs = self.build_repertoire_specs(path)
         self.run_example(repertoire_specs, path)
@@ -175,11 +175,11 @@ class TestRandomDatasetWorkflow(TestCase):
 
         PathBuilder.build(path)
 
-        specs_filename = f"{path}specs.yaml"
+        specs_filename = path / "specs.yaml"
         with open(specs_filename, "w") as file:
             yaml.dump(specs, file)
 
-        app = ImmuneMLApp(specs_filename, path + "result/")
+        app = ImmuneMLApp(specs_filename, path / "result/")
         app.run()
 
         shutil.rmtree(path)

@@ -1,6 +1,7 @@
 import warnings
 
 import pandas as pd
+from pathlib import Path
 
 from source.data_model.dataset.Dataset import Dataset
 from source.data_model.dataset.ReceptorDataset import ReceptorDataset
@@ -44,14 +45,14 @@ class CytoscapeNetworkExporter(DataReport):
 
         return CytoscapeNetworkExporter(**kwargs)
 
-    def __init__(self, dataset: Dataset = None, result_path: str = None,
+    def __init__(self, dataset: Dataset = None, result_path: Path = None,
                  chains=("alpha", "beta"), drop_duplicates=True,
-                 additional_node_attributes=[], additional_edge_attributes=[]):
+                 additional_node_attributes=[], additional_edge_attributes=[], name: str = None,):
+        super().__init__(dataset=dataset, result_path=result_path, name=name)
         self.chains = chains
         self.drop_duplicates = drop_duplicates
         self.additional_node_attributes = additional_node_attributes
         self.additional_edge_attributes = additional_edge_attributes
-        DataReport.__init__(self, dataset=dataset, result_path=result_path)
 
     def check_prerequisites(self):
         if isinstance(self.dataset, RepertoireDataset) or isinstance(self.dataset, ReceptorDataset):
@@ -68,18 +69,18 @@ class CytoscapeNetworkExporter(DataReport):
 
         if isinstance(self.dataset, RepertoireDataset):
             for repertoire in self.dataset.get_data():
-                result_path = f"{self.result_path}/{repertoire.identifier}/"
+                result_path = self.result_path / repertoire.identifier
                 PathBuilder.build(result_path)
                 report_output_tables = self.export_receptorlist(repertoire.receptors, result_path)
         elif isinstance(self.dataset, ReceptorDataset):
             receptors = self.dataset.get_data()
-            result_path = f"{self.result_path}/{self.dataset.identifier}/"
+            result_path = self.result_path / self.dataset.identifier
             PathBuilder.build(result_path)
             report_output_tables = self.export_receptorlist(receptors, result_path=result_path)
 
         return ReportResult(output_tables=report_output_tables)
 
-    def export_receptorlist(self, receptors, result_path):
+    def export_receptorlist(self, receptors, result_path: Path):
         export_list = []
         node_metadata_list = []
         edge_metadata_list = []
@@ -108,21 +109,21 @@ class CytoscapeNetworkExporter(DataReport):
         node_meta_df = node_meta_df.groupby(node_cols, as_index=False)["n_duplicates"].sum()
 
         edge_meta_df.drop_duplicates(inplace=True)
-        node_meta_df.to_csv(f"{result_path}node_metadata.tsv", sep="\t", index=0, header=True)
-        edge_meta_df.to_csv(f"{result_path}edge_metadata.tsv", sep="\t", index=0, header=True)
+        node_meta_df.to_csv(result_path / "node_metadata.tsv", sep="\t", index=0, header=True)
+        edge_meta_df.to_csv(result_path / "edge_metadata.tsv", sep="\t", index=0, header=True)
 
         if self.drop_duplicates:
             full_df.drop_duplicates(inplace=True)
 
-        full_df.to_csv(f"{result_path}all_chains.sif", sep="\t", index=0, header=False)
+        full_df.to_csv(result_path / "all_chains.sif", sep="\t", index=0, header=False)
 
         shared_df = full_df[(full_df.duplicated(["alpha"], keep=False)) | (full_df.duplicated(["beta"], keep=False))]
-        shared_df.to_csv(f"{result_path}shared_chains.sif", sep="\t", index=0, header=False)
+        shared_df.to_csv(result_path / "shared_chains.sif", sep="\t", index=0, header=False)
 
-        return [ReportOutput(path=f"{result_path}node_metadata.tsv"),
-                ReportOutput(path=f"{result_path}edge_metadata.tsv"),
-                ReportOutput(path=f"{result_path}all_chains.sif"),
-                ReportOutput(path=f"{result_path}shared_chains.sif")]
+        return [ReportOutput(path=result_path / "node_metadata.tsv"),
+                ReportOutput(path=result_path / "edge_metadata.tsv"),
+                ReportOutput(path=result_path / "all_chains.sif"),
+                ReportOutput(path=result_path / "shared_chains.sif")]
 
     def get_shared_name(self, seq: ReceptorSequence):
         """Returns a string containing a representation of the given receptor chain, with the chain, sequence, v and j genes.

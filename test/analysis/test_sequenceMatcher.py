@@ -20,7 +20,7 @@ class TestSequenceMatcher(TestCase):
         os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
 
     def test_match(self):
-        path = EnvironmentSettings.root_path + "test/tmp/seqmatch/"
+        path = EnvironmentSettings.root_path / "test/tmp/seqmatch/"
         PathBuilder.build(path)
 
         repertoire = Repertoire.build_from_sequence_objects(sequence_objects=[
@@ -46,7 +46,7 @@ class TestSequenceMatcher(TestCase):
 
     def test_match_repertoire(self):
 
-        path = EnvironmentSettings.root_path + "test/tmp/seqmatchrep/"
+        path = EnvironmentSettings.root_path / "test/tmp/seqmatchrep/"
         PathBuilder.build(path)
 
         repertoire = Repertoire.build_from_sequence_objects(sequence_objects=

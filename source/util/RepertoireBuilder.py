@@ -1,4 +1,5 @@
 import pandas as pd
+from pathlib import Path
 
 from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.data_model.receptor.receptor_sequence.ReceptorSequenceList import ReceptorSequenceList
@@ -12,7 +13,7 @@ class RepertoireBuilder:
     Helper class for tests: creates repertoires from a list of a list of sequences and stores them in the given path
     """
     @staticmethod
-    def build(sequences: list, path: str, labels: dict = None, seq_metadata: list = None, subject_ids: list = None):
+    def build(sequences: list, path: Path, labels: dict = None, seq_metadata: list = None, subject_ids: list = None):
 
         if subject_ids is not None:
             assert len(subject_ids) == len(sequences)
@@ -23,7 +24,7 @@ class RepertoireBuilder:
                 assert len(sequence_list) == len(seq_metadata[index])
 
         PathBuilder.build(path)
-        rep_path = PathBuilder.build(path + "repertoires/")
+        rep_path = PathBuilder.build(path / "repertoires")
 
         repertoires = []
         if subject_ids is None:
@@ -55,6 +56,6 @@ class RepertoireBuilder:
         df = pd.DataFrame({**{"filename": [f"{repertoire.identifier}_data.npy" for repertoire in repertoires], "subject_id": subject_ids,
                               "repertoire_identifier": [repertoire.identifier for repertoire in repertoires]},
                            **(labels if labels is not None else {})})
-        df.to_csv(path + "metadata.csv", index=False)
+        df.to_csv(path / "metadata.csv", index=False)
 
-        return repertoires, path + "metadata.csv"
+        return repertoires, path / "metadata.csv"

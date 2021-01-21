@@ -10,7 +10,7 @@ from source.util.RepertoireBuilder import RepertoireBuilder
 class TestRepertoireDataset(TestCase):
     def test_get_metadata_fields(self):
 
-        path = EnvironmentSettings.tmp_test_path + "repertoire_dataset/"
+        path = EnvironmentSettings.tmp_test_path / "repertoire_dataset/"
         PathBuilder.build(path)
 
         repertoires, metadata = RepertoireBuilder.build([["AA"], ["BB"]], path, {"l1": [1, 2], "hla": ["A", "B"]}, subject_ids=["d1", "d2"])

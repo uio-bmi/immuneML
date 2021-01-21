@@ -3,6 +3,7 @@ import os
 import pickle
 
 import numpy as np
+from pathlib import Path
 
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.pairwise_repertoire_comparison.ComparisonDataBatch import ComparisonDataBatch
@@ -13,9 +14,9 @@ from source.util.PathBuilder import PathBuilder
 class ComparisonData:
 
     @log
-    def __init__(self, repertoire_ids: list, comparison_attributes, sequence_batch_size: int = 10000, path: str = None):
+    def __init__(self, repertoire_ids: list, comparison_attributes, sequence_batch_size: int = 10000, path: Path = None):
 
-        self.path = PathBuilder.build(path + "/comparison_data/")
+        self.path = PathBuilder.build(path / "comparison_data")
         self.sequence_batch_size = sequence_batch_size
         self.item_count = 0
         self.comparison_attributes = comparison_attributes
@@ -145,8 +146,8 @@ class ComparisonData:
     def store_tmp_batch(self, batch: dict, batch_index: int):
 
         if len(self.tmp_batch_paths) > batch_index or len(self.tmp_batch_paths) == batch_index:
-            batch_path = self.path + f'tmp_batch_{batch_index}.pickle'
-            with open(batch_path, 'wb') as file:
+            batch_path = self.path / f'tmp_batch_{batch_index}.pickle'
+            with batch_path.open('wb') as file:
                 pickle.dump(batch, file)
             if len(self.tmp_batch_paths) == batch_index:
                 self.tmp_batch_paths.append(batch_path)
@@ -159,8 +160,8 @@ class ComparisonData:
             yield self.load_tmp_batch(i)
 
     def load_tmp_batch(self, batch_index: int) -> dict:
-        if len(self.tmp_batch_paths) > 0 and os.path.isfile(self.tmp_batch_paths[batch_index]):
-            with open(self.tmp_batch_paths[batch_index], "rb") as file:
+        if len(self.tmp_batch_paths) > 0 and self.tmp_batch_paths[batch_index].is_file():
+            with self.tmp_batch_paths[batch_index].open("rb") as file:
                 batch = pickle.load(file)
         else:
             batch = {}

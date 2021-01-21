@@ -2,7 +2,7 @@ import os
 import random
 import shutil
 from unittest import TestCase
-
+from pathlib import Path
 import yaml
 
 from source.IO.dataset_export.PickleExporter import PickleExporter
@@ -21,7 +21,7 @@ class TestImmuneMLApp(TestCase):
         os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
 
     def create_dataset(self):
-        path = os.path.relpath(EnvironmentSettings.root_path + "test/tmp/immunemlapp/initial_dataset/") + "/"
+        path = Path(os.path.relpath(EnvironmentSettings.root_path / "test/tmp/immunemlapp/initial_dataset"))
         PathBuilder.build(path)
 
         repertoire_count = 30
@@ -35,7 +35,7 @@ class TestImmuneMLApp(TestCase):
         dataset = RepertoireDataset(repertoires=repertoires, metadata_file=metadata, params={"CD": [True, False], "CMV": [True, False]}, name="d1")
         PickleExporter.export(dataset, path)
 
-        return path + "d1.iml_dataset"
+        return path / "d1.iml_dataset"
 
     def test_run(self):
 
@@ -47,8 +47,8 @@ class TestImmuneMLApp(TestCase):
                     "d1": {
                         "format": "Pickle",
                         "params": {
-                            "path": dataset_path,
-                            "result_path": dataset_path + "imported_data/"
+                            "path": str(dataset_path),
+                            "result_path": str(dataset_path.parents[0] / "imported_data/")
                         }
                     }
                 },
@@ -173,17 +173,19 @@ class TestImmuneMLApp(TestCase):
             }
         }
 
-        path = EnvironmentSettings.root_path + "test/tmp/immunemlapp/"
+        path = EnvironmentSettings.root_path / "test/tmp/immunemlapp/"
         PathBuilder.build(path)
-        specs_file = path + "specs.yaml"
-        with open(specs_file, "w") as file:
+        specs_file = path / "specs.yaml"
+        with specs_file.open("w") as file:
             yaml.dump(specs, file)
 
-        app = ImmuneMLApp.ImmuneMLApp(specs_file, path + "results/")
+        app = ImmuneMLApp.ImmuneMLApp(specs_file, path / "results")
         app.run()
 
-        self.assertTrue(os.path.isfile(path + "results/full_specs.yaml"))
-        with open(path + "results/full_specs.yaml", "r") as file:
+        full_specs_path = path / "results/full_specs.yaml"
+
+        self.assertTrue(os.path.isfile(full_specs_path))
+        with full_specs_path.open("r") as file:
             full_specs = yaml.load(file, Loader=yaml.FullLoader)
 
         self.assertTrue("split_strategy" in full_specs["instructions"]["inst1"]["selection"] and full_specs["instructions"]["inst1"]["selection"]["split_strategy"] == "random")

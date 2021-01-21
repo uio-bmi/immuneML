@@ -37,9 +37,9 @@ class TestKmerFreqSequenceEncoder(TestCase):
                      ReceptorSequence(amino_acid_sequence="ACACAC", identifier="8", metadata=SequenceMetadata(custom_params={"l1": 2})),
                      ReceptorSequence(amino_acid_sequence="CCCAAA", identifier="9", metadata=SequenceMetadata(custom_params={"l1": 1}))]
 
-        path = EnvironmentSettings.tmp_test_path + "kmrefreqseqfacencoder/"
+        path = EnvironmentSettings.tmp_test_path / "kmrefreqseqfacencoder/"
         PathBuilder.build(path)
-        filename = "{}sequences.pkl".format(path)
+        filename = path / "sequences.pkl"
         with open(filename, "wb") as file:
             pickle.dump(sequences, file)
 
@@ -56,7 +56,7 @@ class TestKmerFreqSequenceEncoder(TestCase):
             })
 
         encoded_dataset = encoder.encode(dataset, EncoderParams(
-            result_path=path + "2/",
+            result_path=path / "2/",
             label_config=lc,
             pool_size=2,
             learn_model=True,

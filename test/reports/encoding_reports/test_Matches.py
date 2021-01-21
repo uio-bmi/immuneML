@@ -50,10 +50,10 @@ class TestMatches(unittest.TestCase):
 100	TRA	AAAA	TRAV1	TRAJ1	HomoSapiens	HLA-A*11:01	B2M	MHCI	AVFDRKSDAK	EBNA4	EBV	https://www.10xgenomics.com/resources/application-notes/a-new-way-of-exploring-immunity-linking-highly-multiplexed-antigen-recognition-to-immune-repertoire-and-phenotype/#	{"frequency": "1/11684", "identification": "dextramer-sort", "sequencing": "rna-seq", "singlecell": "yes", "verification": ""}	{"cell.subset": "", "clone.id": "", "donor.MHC": "", "donor.MHC.method": "", "epitope.id": "", "replica.id": "", "samples.found": 1, "structure.id": "", "studies.found": 1, "study.id": "", "subject.cohort": "", "subject.id": "1", "tissue": ""}	{"cdr3": "CASSPPRVYSNGAGLAGVGWRNEQFF", "cdr3_old": "CASSPPRVYSNGAGLAGVGWRNEQFF", "fixNeeded": false, "good": true, "jCanonical": true, "jFixType": "NoFixNeeded", "jId": "TRBJ2-1*01", "jStart": 21, "vCanonical": true, "vEnd": 4, "vFixType": "NoFixNeeded", "vId": "TRBV5-4*01"}	0
 100	TRB	TTTT	TRBV1	TRBJ1	HomoSapiens	HLA-A*03:01	B2M	MHCI	KLGGALQAK	IE1	CMV	https://www.10xgenomics.com/resources/application-notes/a-new-way-of-exploring-immunity-linking-highly-multiplexed-antigen-recognition-to-immune-repertoire-and-phenotype/#	{"frequency": "1/25584", "identification": "dextramer-sort", "sequencing": "rna-seq", "singlecell": "yes", "verification": ""}	{"cell.subset": "", "clone.id": "", "donor.MHC": "", "donor.MHC.method": "", "epitope.id": "", "replica.id": "", "samples.found": 1, "structure.id": "", "studies.found": 1, "study.id": "", "subject.cohort": "", "subject.id": "3", "tissue": ""}	{"cdr3": "CASSWTWDAATLWGQGALGGANVLTF", "cdr3_old": "CASSWTWDAATLWGQGALGGANVLTF", "fixNeeded": false, "good": true, "jCanonical": true, "jFixType": "NoFixNeeded", "jId": "TRBJ2-6*01", "jStart": 19, "vCanonical": true, "vEnd": 4, "vFixType": "NoFixNeeded", "vId": "TRBV5-5*01"}	0"""
 
-        with open(path + "refs.tsv", "w") as file:
+        with open(path / "refs.tsv", "w") as file:
             file.writelines(file_content)
 
-        reference_receptors = {"params": {"path": path + "refs.tsv", "region_type": "FULL_SEQUENCE", "paired": True, "receptor_chains": "TRA_TRB"},
+        reference_receptors = {"params": {"path": path / "refs.tsv", "region_type": "FULL_SEQUENCE", "paired": True, "receptor_chains": "TRA_TRB"},
                                "format": "VDJdb"}
 
         encoder = MatchedReceptorsEncoder.build_object(dataset, **{
@@ -70,33 +70,33 @@ class TestMatches(unittest.TestCase):
         return encoded
 
     def test_generate_for_matchedreceptors(self):
-        path = EnvironmentSettings.root_path + "test/tmp/matches_for_matchedreceptors/"
+        path = EnvironmentSettings.root_path / "test/tmp/matches_for_matchedreceptors/"
 
         encoded_data = self.create_encoded_matchedreceptors(path)
 
-        report = Matches(dataset=encoded_data, result_path=path + "report_results/")
+        report = Matches(dataset=encoded_data, result_path=path / "report_results/")
 
         self.assertTrue(report.check_prerequisites())
         report.generate_report()
 
-        self.assertTrue(os.path.isfile(path + "report_results/complete_match_count_table.csv"))
-        self.assertTrue(os.path.isfile(path + "report_results/repertoire_sizes.csv"))
+        self.assertTrue(os.path.isfile(path / "report_results/complete_match_count_table.csv"))
+        self.assertTrue(os.path.isfile(path / "report_results/repertoire_sizes.csv"))
 
-        self.assertTrue(os.path.isdir(path + "report_results/paired_matches"))
-        self.assertTrue(os.path.isdir(path + "report_results/receptor_info"))
+        self.assertTrue(os.path.isdir(path / "report_results/paired_matches"))
+        self.assertTrue(os.path.isdir(path / "report_results/receptor_info"))
 
-        self.assertTrue(os.path.isfile(path + "report_results/receptor_info/all_chains.csv"))
-        self.assertTrue(os.path.isfile(path + "report_results/receptor_info/all_receptors.csv"))
-        self.assertTrue(os.path.isfile(path + "report_results/receptor_info/unique_alpha_chains.csv"))
-        self.assertTrue(os.path.isfile(path + "report_results/receptor_info/unique_beta_chains.csv"))
-        self.assertTrue(os.path.isfile(path + "report_results/receptor_info/unique_receptors.csv"))
+        self.assertTrue(os.path.isfile(path / "report_results/receptor_info/all_chains.csv"))
+        self.assertTrue(os.path.isfile(path / "report_results/receptor_info/all_receptors.csv"))
+        self.assertTrue(os.path.isfile(path / "report_results/receptor_info/unique_alpha_chains.csv"))
+        self.assertTrue(os.path.isfile(path / "report_results/receptor_info/unique_beta_chains.csv"))
+        self.assertTrue(os.path.isfile(path / "report_results/receptor_info/unique_receptors.csv"))
 
-        matches = pd.read_csv(path + "report_results/complete_match_count_table.csv")
-        chains = pd.read_csv(path + "report_results/receptor_info/all_chains.csv")
-        receptors = pd.read_csv(path + "report_results/receptor_info/all_receptors.csv")
-        unique_alpha_chains = pd.read_csv(path + "report_results/receptor_info/unique_alpha_chains.csv")
-        unique_beta_chains = pd.read_csv(path + "report_results/receptor_info/unique_beta_chains.csv")
-        unique_receptors = pd.read_csv(path + "report_results/receptor_info/unique_receptors.csv")
+        matches = pd.read_csv(path / "report_results/complete_match_count_table.csv")
+        chains = pd.read_csv(path / "report_results/receptor_info/all_chains.csv")
+        receptors = pd.read_csv(path / "report_results/receptor_info/all_receptors.csv")
+        unique_alpha_chains = pd.read_csv(path / "report_results/receptor_info/unique_alpha_chains.csv")
+        unique_beta_chains = pd.read_csv(path / "report_results/receptor_info/unique_beta_chains.csv")
+        unique_receptors = pd.read_csv(path / "report_results/receptor_info/unique_receptors.csv")
 
         self.assertListEqual(list(matches["100.alpha"]), [10, 0])
         self.assertListEqual(list(matches["100.beta"]), [10, 5])
@@ -139,10 +139,10 @@ class TestMatches(unittest.TestCase):
 101	TRB	AAAA	TRBV1	TRBJ1	HomoSapiens	HLA-A*11:01	B2M	MHCI	AVFDRKSDAK	EBNA4	EBV	https://www.10xgenomics.com/resources/application-notes/a-new-way-of-exploring-immunity-linking-highly-multiplexed-antigen-recognition-to-immune-repertoire-and-phenotype/#	{"frequency": "1/11684", "identification": "dextramer-sort", "sequencing": "rna-seq", "singlecell": "yes", "verification": ""}	{"cell.subset": "", "clone.id": "", "donor.MHC": "", "donor.MHC.method": "", "epitope.id": "", "replica.id": "", "samples.found": 1, "structure.id": "", "studies.found": 1, "study.id": "", "subject.cohort": "", "subject.id": "1", "tissue": ""}	{"cdr3": "CASSPPRVYSNGAGLAGVGWRNEQFF", "cdr3_old": "CASSPPRVYSNGAGLAGVGWRNEQFF", "fixNeeded": false, "good": true, "jCanonical": true, "jFixType": "NoFixNeeded", "jId": "TRBJ2-1*01", "jStart": 21, "vCanonical": true, "vEnd": 4, "vFixType": "NoFixNeeded", "vId": "TRBV5-4*01"}	0
 200	TRB	TTTT	TRBV1	TRBJ1	HomoSapiens	HLA-A*03:01	B2M	MHCI	KLGGALQAK	IE1	CMV	https://www.10xgenomics.com/resources/application-notes/a-new-way-of-exploring-immunity-linking-highly-multiplexed-antigen-recognition-to-immune-repertoire-and-phenotype/#	{"frequency": "1/25584", "identification": "dextramer-sort", "sequencing": "rna-seq", "singlecell": "yes", "verification": ""}	{"cell.subset": "", "clone.id": "", "donor.MHC": "", "donor.MHC.method": "", "epitope.id": "", "replica.id": "", "samples.found": 1, "structure.id": "", "studies.found": 1, "study.id": "", "subject.cohort": "", "subject.id": "3", "tissue": ""}	{"cdr3": "CASSWTWDAATLWGQGALGGANVLTF", "cdr3_old": "CASSWTWDAATLWGQGALGGANVLTF", "fixNeeded": false, "good": true, "jCanonical": true, "jFixType": "NoFixNeeded", "jId": "TRBJ2-6*01", "jStart": 19, "vCanonical": true, "vEnd": 4, "vFixType": "NoFixNeeded", "vId": "TRBV5-5*01"}	0"""
 
-        with open(path + "refs.tsv", "w") as file:
+        with open(path / "refs.tsv", "w") as file:
             file.writelines(file_content)
 
-        reference_sequences = {"params": {"path": path + "refs.tsv", "region_type": "FULL_SEQUENCE", "paired": False}, "format": "VDJdb"}
+        reference_sequences = {"params": {"path": path / "refs.tsv", "region_type": "FULL_SEQUENCE", "paired": False}, "format": "VDJdb"}
 
         encoder = MatchedSequencesEncoder.build_object(dataset, **{
             "reference": reference_sequences,
@@ -158,24 +158,24 @@ class TestMatches(unittest.TestCase):
         return encoded
 
     def test_generate_for_matchedsequences(self):
-        path = EnvironmentSettings.root_path + "test/tmp/matches_for_matchedsequences/"
+        path = EnvironmentSettings.root_path / "test/tmp/matches_for_matchedsequences/"
 
         encoded_data = self.create_encoded_matchedsequences(path)
 
-        report = Matches(dataset=encoded_data, result_path=path + "report_results/")
+        report = Matches(dataset=encoded_data, result_path=path / "report_results/")
 
         self.assertTrue(report.check_prerequisites())
         report.generate_report()
 
-        self.assertTrue(os.path.isfile(path + "report_results/complete_match_count_table.csv"))
-        self.assertTrue(os.path.isfile(path + "report_results/repertoire_sizes.csv"))
+        self.assertTrue(os.path.isfile(path / "report_results/complete_match_count_table.csv"))
+        self.assertTrue(os.path.isfile(path / "report_results/repertoire_sizes.csv"))
 
-        self.assertTrue(os.path.isfile(path + "report_results/sequence_info/all_chains.csv"))
-        self.assertTrue(os.path.isfile(path + "report_results/sequence_info/unique_chains.csv"))
+        self.assertTrue(os.path.isfile(path / "report_results/sequence_info/all_chains.csv"))
+        self.assertTrue(os.path.isfile(path / "report_results/sequence_info/unique_chains.csv"))
 
-        matches = pd.read_csv(path + "report_results/complete_match_count_table.csv")
-        chains = pd.read_csv(path + "report_results/sequence_info/all_chains.csv")
-        unique_chains = pd.read_csv(path + "report_results/sequence_info/unique_chains.csv")
+        matches = pd.read_csv(path / "report_results/complete_match_count_table.csv")
+        chains = pd.read_csv(path / "report_results/sequence_info/all_chains.csv")
+        unique_chains = pd.read_csv(path / "report_results/sequence_info/unique_chains.csv")
 
         self.assertListEqual(list(matches["100_TRB"]), [10, 0])
         self.assertListEqual(list(matches["101_TRB"]), [10, 0])
@@ -222,7 +222,7 @@ class TestMatches(unittest.TestCase):
 4	TRAV26-2		I..NDYKLS	
         """
 
-        filepath = path + "reference_motifs.tsv"
+        filepath = path / "reference_motifs.tsv"
         with open(filepath, "w") as file:
             file.writelines(file_content)
 
@@ -241,25 +241,25 @@ class TestMatches(unittest.TestCase):
         return encoded
 
     def test_generate_for_matchedregex(self):
-        path = EnvironmentSettings.root_path + "test/tmp/regex_matches_report/"
+        path = EnvironmentSettings.root_path / "test/tmp/regex_matches_report/"
 
-        encoded_data = self.create_encoded_matchedregex(path + "input_data/")
+        encoded_data = self.create_encoded_matchedregex(path / "input_data/")
 
-        report = Matches(dataset=encoded_data, result_path=path + "report_results/")
+        report = Matches(dataset=encoded_data, result_path=path / "report_results/")
 
         self.assertTrue(report.check_prerequisites())
         report.generate_report()
 
-        self.assertTrue(os.path.isfile(path + "report_results/complete_match_count_table.csv"))
-        self.assertTrue(os.path.isfile(path + "report_results/repertoire_sizes.csv"))
+        self.assertTrue(os.path.isfile(path / "report_results/complete_match_count_table.csv"))
+        self.assertTrue(os.path.isfile(path / "report_results/repertoire_sizes.csv"))
 
-        self.assertTrue(os.path.isdir(path + "report_results/paired_matches"))
-        self.assertTrue(os.path.isfile(path + "report_results/paired_matches/example_subject_1_label_yes_subject_id_subject_1.csv"))
-        self.assertTrue(os.path.isfile(path + "report_results/paired_matches/example_subject_2_label_no_subject_id_subject_2.csv"))
-        self.assertTrue(os.path.isfile(path + "report_results/paired_matches/example_subject_3_label_no_subject_id_subject_3.csv"))
+        self.assertTrue(os.path.isdir(path / "report_results/paired_matches"))
+        self.assertTrue(os.path.isfile(path / "report_results/paired_matches/example_subject_1_label_yes_subject_id_subject_1.csv"))
+        self.assertTrue(os.path.isfile(path / "report_results/paired_matches/example_subject_2_label_no_subject_id_subject_2.csv"))
+        self.assertTrue(os.path.isfile(path / "report_results/paired_matches/example_subject_3_label_no_subject_id_subject_3.csv"))
 
-        matches = pd.read_csv(path + "report_results/complete_match_count_table.csv")
-        subj1_results = pd.read_csv(path + "report_results/paired_matches/example_subject_1_label_yes_subject_id_subject_1.csv")
+        matches = pd.read_csv(path / "report_results/complete_match_count_table.csv")
+        subj1_results = pd.read_csv(path / "report_results/paired_matches/example_subject_1_label_yes_subject_id_subject_1.csv")
 
         self.assertListEqual(list(matches["1_TRA"]), [20, 0, 0])
         self.assertListEqual(list(matches["1_TRB"]), [10, 0, 0])

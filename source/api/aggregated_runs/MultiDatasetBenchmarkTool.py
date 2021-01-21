@@ -1,6 +1,7 @@
 import copy
 
 import yaml
+from pathlib import Path
 
 from source.app.ImmuneMLApp import ImmuneMLApp
 from source.dsl.definition_parsers.ReportParser import ReportParser
@@ -69,7 +70,7 @@ class MultiDatasetBenchmarkTool:
 
     """
 
-    def __init__(self, specification_path: str, result_path: str, **kwargs):
+    def __init__(self, specification_path: Path, result_path: Path, **kwargs):
         self.specification_path = specification_path
         self.result_path = result_path
         self.reports = None
@@ -82,7 +83,7 @@ class MultiDatasetBenchmarkTool:
         instruction_states = {}
         for index, specs_name in enumerate(specs.keys()):
             print(f"Running nested cross-validation on dataset {specs_name} ({index+1}/{len(list(specs.keys()))})..", flush=True)
-            app = ImmuneMLApp(specification_path=specs[specs_name], result_path=f"{self.result_path}/{specs_name}/")
+            app = ImmuneMLApp(specification_path=specs[specs_name], result_path=self.result_path / specs_name)
             instruction_states[specs_name] = app.run()[0]
             print(f"Finished nested cross-validation on dataset {specs_name} ({index+1}/{len(list(specs.keys()))})..", flush=True)
 
@@ -90,11 +91,11 @@ class MultiDatasetBenchmarkTool:
         report_results = self._run_reports(instruction_states)
         print("Finished reports, now generating HTML output...", flush=True)
         MultiDatasetBenchmarkHTMLBuilder.build(report_results, self.result_path,
-                                               {specs_name: f"{self.result_path}/{specs_name}/" for specs_name in specs.keys()})
+                                               {specs_name: self.result_path / specs_name for specs_name in specs.keys()})
         print("MultiDatasetBenchmarkTool finished.", flush=True)
 
     def _extract_reports(self):
-        with open(self.specification_path, "r") as file:
+        with self.specification_path.open("r") as file:
             workflow_specification = yaml.safe_load(file)
 
         report_keys = list(workflow_specification['instructions'].values())[0]['benchmark_reports']
@@ -107,7 +108,7 @@ class MultiDatasetBenchmarkTool:
         self.reports = [entry.item for entry in symbol_table.get_by_type(SymbolType.REPORT)]
 
     def _split_specs_file(self) -> dict:
-        with open(self.specification_path, "r") as file:
+        with self.specification_path.open("r") as file:
             workflow_specification = yaml.safe_load(file)
 
         self._check_specs(workflow_specification)
@@ -123,8 +124,8 @@ class MultiDatasetBenchmarkTool:
             del new_specs['instructions'][instruction_name]['datasets']
             del new_specs['instructions'][instruction_name]['benchmark_reports']
             new_specs['instructions'][instruction_name]['dataset'] = dataset_name
-            new_specs_file = self.result_path + f"specs_{dataset_name}.yaml"
-            with open(new_specs_file, 'w') as file:
+            new_specs_file = self.result_path / f"specs_{dataset_name}.yaml"
+            with new_specs_file.open('w') as file:
                 yaml.dump(new_specs, file)
             specs_files[dataset_name] = new_specs_file
 
@@ -172,7 +173,7 @@ class MultiDatasetBenchmarkTool:
         for index, report in enumerate(self.reports):
             print(f"Running report {report.name} ({index+1}/{len(self.reports)})...", flush=True)
             report.instruction_states = list(instruction_states.values())
-            report.result_path = PathBuilder.build(self.result_path + 'benchmarking_reports/')
+            report.result_path = PathBuilder.build(self.result_path / 'benchmarking_reports/')
             report_result = report.generate_report()
             report_results[report.name] = report_result
 

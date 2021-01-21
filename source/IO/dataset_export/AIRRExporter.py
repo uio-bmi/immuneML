@@ -2,6 +2,7 @@
 import math
 from enum import Enum
 from typing import List
+from pathlib import Path
 
 import airr
 import pandas as pd
@@ -33,17 +34,18 @@ class AIRRExporter(DataExporter):
     """
 
     @staticmethod
-    def export(dataset: Dataset, path, region_type=RegionType.IMGT_CDR3):
+    def export(dataset: Dataset, path: Path, region_type=RegionType.IMGT_CDR3):
         PathBuilder.build(path)
 
         if isinstance(dataset, RepertoireDataset):
             repertoire_folder = "repertoires/"
-            repertoire_path = PathBuilder.build(f"{path}{repertoire_folder}")
+            repertoire_path = PathBuilder.build(path / repertoire_folder)
 
             for index, repertoire in enumerate(dataset.repertoires):
                 df = AIRRExporter._repertoire_to_dataframe(repertoire, region_type)
                 df = AIRRExporter._postprocess_dataframe(df)
-                airr.dump_rearrangement(df, f"{repertoire_path}{repertoire.identifier}.tsv")
+                output_file = repertoire_path / f"{repertoire.identifier}.tsv"
+                airr.dump_rearrangement(df, str(output_file))
 
             AIRRExporter.export_updated_metadata(dataset, path, repertoire_folder)
         else:
@@ -52,7 +54,7 @@ class AIRRExporter(DataExporter):
             file_count = math.ceil(dataset.get_example_count() / dataset.file_size)
 
             for batch in dataset.get_batch():
-                filename = f"{path}batch{''.join(['0' for i in range(1, len(str(file_count)) - len(str(index)) + 1)])}{index}.tsv"
+                filename = path / f"batch{''.join(['0' for i in range(1, len(str(file_count)) - len(str(index)) + 1)])}{index}.tsv"
 
                 if isinstance(dataset, ReceptorDataset):
                     df = AIRRExporter._receptors_to_dataframe(batch, region_type)
@@ -79,11 +81,11 @@ class AIRRExporter(DataExporter):
             return "sequence_aa"
 
     @staticmethod
-    def export_updated_metadata(dataset: RepertoireDataset, result_path: str, repertoire_folder: str):
+    def export_updated_metadata(dataset: RepertoireDataset, result_path: Path, repertoire_folder: str):
         df = pd.read_csv(dataset.metadata_file, comment=Constants.COMMENT_SIGN)
         identifiers = df["repertoire_identifier"].values.tolist() if "repertoire_identifier" in df.columns else dataset.get_example_ids()
-        df["filename"] = [f"{repertoire_folder}{item}.tsv" for item in identifiers]
-        df.to_csv(f"{result_path}metadata.csv", index=False)
+        df["filename"] = [str(Path(repertoire_folder) / f"{item}.tsv") for item in identifiers]
+        df.to_csv(result_path / "metadata.csv", index=False)
 
     @staticmethod
     def _repertoire_to_dataframe(repertoire: Repertoire, region_type):

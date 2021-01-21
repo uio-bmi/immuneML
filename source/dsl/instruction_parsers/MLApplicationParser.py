@@ -1,6 +1,7 @@
 import os
 import shutil
 from typing import Tuple
+from pathlib import Path
 
 from source.IO.ml_method.MLImport import MLImport
 from source.dsl.symbol_table.SymbolTable import SymbolTable
@@ -30,7 +31,7 @@ class MLApplicationParser:
 
     """
 
-    def parse(self, key: str, instruction: dict, symbol_table: SymbolTable, path: str) -> MLApplicationInstruction:
+    def parse(self, key: str, instruction: dict, symbol_table: SymbolTable, path: Path) -> MLApplicationInstruction:
         location = MLApplicationParser.__name__
         ParameterValidator.assert_keys(instruction.keys(), ['type', 'dataset', 'label', 'pool_size', 'config_path', 'store_encoded_data'], location, key)
         ParameterValidator.assert_in_valid_list(instruction['dataset'], symbol_table.get_keys_by_type(SymbolType.DATASET), location, f"{key}: dataset")
@@ -47,12 +48,12 @@ class MLApplicationParser:
 
         return instruction
 
-    def _parse_hp_setting(self, instruction: dict, path: str, key: str) -> Tuple[HPSetting, Label]:
+    def _parse_hp_setting(self, instruction: dict, path: Path, key: str) -> Tuple[HPSetting, Label]:
 
         assert os.path.isfile(instruction['config_path']), f'MLApplicationParser: {instruction["config_path"]} is not file path.'
         assert '.zip' in instruction['config_path'], f'MLApplicationParser: {instruction["config_path"]} is not a zip file.'
 
-        config_dir = PathBuilder.build(f"{path}/unpacked_{key}/")
+        config_dir = PathBuilder.build(path / f"unpacked_{key}/")
         shutil.unpack_archive(instruction['config_path'], config_dir, 'zip')
 
         hp_setting, label = MLImport.import_hp_setting(config_dir)

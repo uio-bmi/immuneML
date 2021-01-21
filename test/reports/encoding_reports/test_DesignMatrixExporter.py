@@ -21,22 +21,22 @@ class TestDesignMatrixExporter(TestCase):
                                                              feature_names=["f1", "f2", "f3", "f4"],
                                                              encoding="test_encoding"))
 
-        path = EnvironmentSettings.tmp_test_path + "designmatrrixexporterreport/"
+        path = EnvironmentSettings.tmp_test_path / "designmatrrixexporterreport/"
 
         report = DesignMatrixExporter(dataset, path)
         report.generate_report()
 
-        self.assertTrue(os.path.isfile(f"{path}design_matrix.csv"))
-        self.assertTrue(os.path.isfile(f"{path}labels.csv"))
-        self.assertTrue(os.path.isfile(f"{path}encoding_details.yaml"))
+        self.assertTrue(os.path.isfile(path / "design_matrix.csv"))
+        self.assertTrue(os.path.isfile(path / "labels.csv"))
+        self.assertTrue(os.path.isfile(path / "encoding_details.yaml"))
 
-        matrix = pd.read_csv(f"{path}design_matrix.csv", sep=",").values
+        matrix = pd.read_csv(path / "design_matrix.csv", sep=",").values
         self.assertTrue(np.array_equal(matrix, np.arange(12).reshape(3, 4)))
 
-        labels = pd.read_csv(f"{path}labels.csv", sep=",").values
+        labels = pd.read_csv(path / "labels.csv", sep=",").values
         self.assertTrue(np.array_equal(labels, np.array([[1, 0], [0, 0], [1, 1]])))
 
-        with open(f"{path}encoding_details.yaml", "r") as file:
+        with open(path / "encoding_details.yaml", "r") as file:
             loaded = yaml.load(file)
 
         self.assertTrue("feature_names" in loaded)

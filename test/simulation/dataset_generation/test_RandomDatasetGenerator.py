@@ -11,7 +11,7 @@ from source.simulation.dataset_generation.RandomDatasetGenerator import RandomDa
 class TestRandomDatasetGenerator(TestCase):
     def test_generate_repertoire_dataset(self):
 
-        path = f"{EnvironmentSettings.tmp_test_path}random_repertoire_dataset_generation/"
+        path = EnvironmentSettings.tmp_test_path / "random_repertoire_dataset_generation/"
 
         dataset = RandomDatasetGenerator.generate_repertoire_dataset(repertoire_count=100,
                                                                      sequence_count_probabilities={5: 0.5, 6: 0.5},
@@ -31,7 +31,7 @@ class TestRandomDatasetGenerator(TestCase):
 
     def test_generate_receptor_dataset(self):
 
-        path = f"{EnvironmentSettings.tmp_test_path}random_receptor_dataset_generation/"
+        path = EnvironmentSettings.tmp_test_path / "random_receptor_dataset_generation/"
 
         dataset = RandomDatasetGenerator.generate_receptor_dataset(receptor_count=100,
                                                                    chain_1_length_probabilities={4: 0.5, 5: 0.5},
@@ -50,7 +50,7 @@ class TestRandomDatasetGenerator(TestCase):
 
     def test_generate_sequence_dataset(self):
 
-        path = f"{EnvironmentSettings.tmp_test_path}random_sequence_dataset_generation/"
+        path = EnvironmentSettings.tmp_test_path / "random_sequence_dataset_generation/"
 
         dataset = RandomDatasetGenerator.generate_sequence_dataset(sequence_count=100,
                                                                    length_probabilities={4: 0.5, 5: 0.5},

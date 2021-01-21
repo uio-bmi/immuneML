@@ -28,7 +28,7 @@ class TestSimulation(TestCase):
                     "d1": {
                         "format": 'Pickle',
                         "params": {
-                            "path": path + "dataset1.iml_dataset"
+                            "path": str(path / "dataset1.iml_dataset")
                         }
                     }
                 },
@@ -89,10 +89,10 @@ class TestSimulation(TestCase):
             }
         }
 
-        with open(path + "specs.yaml", "w") as file:
+        with open(path / "specs.yaml", "w") as file:
             yaml.dump(specs, file)
 
-        return path + "specs.yaml"
+        return path / "specs.yaml"
 
     def prepare_dataset(self, path):
         PathBuilder.build(path)
@@ -122,28 +122,28 @@ class TestSimulation(TestCase):
         PickleExporter.export(dataset, path)
 
     def test_simulation(self):
-        path = EnvironmentSettings.tmp_test_path + "integration_simulation/"
+        path = EnvironmentSettings.tmp_test_path / "integration_simulation/"
         self.prepare_dataset(path)
         specs_path = self.prepare_specs(path)
 
-        PathBuilder.build(path + "result/")
+        PathBuilder.build(path / "result/")
 
-        app = ImmuneMLApp(specification_path=specs_path, result_path=path + "result/")
+        app = ImmuneMLApp(specification_path=specs_path, result_path=path / "result/")
         app.run()
 
-        self.assertTrue(os.path.isfile(path + "result/inst1/metadata.csv"))
+        self.assertTrue(os.path.isfile(path / "result/inst1/metadata.csv"))
 
-        metadata_df = pd.read_csv(path + "result/inst1/metadata.csv", comment=Constants.COMMENT_SIGN)
+        metadata_df = pd.read_csv(path / "result/inst1/metadata.csv", comment=Constants.COMMENT_SIGN)
         self.assertTrue("signal_signal1" in metadata_df.columns)
         self.assertEqual(17, sum(metadata_df["signal_signal1"]))
 
-        self.assertTrue(os.path.isfile(path+"result/index.html"))
-        self.assertTrue(os.path.isfile(path + "result/inst1/exported_dataset/pickle/d1.iml_dataset"))
+        self.assertTrue(os.path.isfile(path / "result/index.html"))
+        self.assertTrue(os.path.isfile(path / "result/inst1/exported_dataset/pickle/d1.iml_dataset"))
 
         shutil.rmtree(path)
 
     def test_simulation_receptors(self):
-        path = PathBuilder.build(EnvironmentSettings.tmp_test_path + "integration_simulation_receptor/")
+        path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "integration_simulation_receptor/")
         specs = {
             "definitions": {
                 "datasets": {
@@ -153,7 +153,7 @@ class TestSimulation(TestCase):
                             "receptor_count": 100,
                             "chain_1_length_probabilities": {10: 1},
                             "chain_2_length_probabilities": {10: 1},
-                            "result_path": path + "dataset/",
+                            "result_path": str(path / "dataset/"),
                             "labels": {}
                         }
                     },
@@ -214,15 +214,15 @@ class TestSimulation(TestCase):
             }
         }
 
-        with open(path + "specs.yaml", "w") as file:
+        with open(path / "specs.yaml", "w") as file:
             yaml.dump(specs, file)
 
-        app = ImmuneMLApp(path + "specs.yaml", path + "result/")
+        app = ImmuneMLApp(path / "specs.yaml", path / "result/")
         app.run()
 
-        self.assertTrue(os.path.isfile(path+"result/index.html"))
-        self.assertTrue(os.path.isfile(path + "result/inst1/exported_dataset/pickle/d1.iml_dataset"))
-        dataset = PickleImport.import_dataset({"path": path + "result/inst1/exported_dataset/pickle/d1.iml_dataset"}, "d1")
+        self.assertTrue(os.path.isfile(path / "result/index.html"))
+        self.assertTrue(os.path.isfile(path / "result/inst1/exported_dataset/pickle/d1.iml_dataset"))
+        dataset = PickleImport.import_dataset({"path": path / "result/inst1/exported_dataset/pickle/d1.iml_dataset"}, "d1")
 
         self.assertEqual(100, dataset.get_example_count())
         self.assertEqual(100, len([receptor for receptor in dataset.get_data() if "signal_signal1" in receptor.metadata]))

@@ -4,6 +4,7 @@ from numbers import Number
 import pandas as pd
 import plotly.express as px
 import yaml
+from pathlib import Path
 
 from scripts.specification_util import update_docs_per_mapping
 from source.data_model.dataset.Dataset import Dataset
@@ -92,11 +93,11 @@ class Coefficients(MLReport):
         for keyword in coefs_to_plot:
             coefs.append(CoefficientPlottingSetting[keyword.upper()])
 
-        return Coefficients(coefs, cutoff, n_largest, name)
+        return Coefficients(coefs_to_plot=coefs, cutoff=cutoff, n_largest=n_largest, name=name)
 
     def __init__(self, coefs_to_plot: CoefficientPlottingSettingList, cutoff: list, n_largest: list, train_dataset: Dataset = None,
-                 test_dataset: Dataset = None, method: MLMethod = None, result_path: str = None, name: str = None, hp_setting: HPSetting = None):
-        super(Coefficients, self).__init__(train_dataset, test_dataset, method, result_path, name, hp_setting)
+                 test_dataset: Dataset = None, method: MLMethod = None, result_path: Path = None, name: str = None, hp_setting: HPSetting = None):
+        super().__init__(train_dataset, test_dataset, method, result_path, name, hp_setting)
 
         self._coefs_to_plot = coefs_to_plot
         self._cutoff = cutoff
@@ -151,14 +152,15 @@ class Coefficients(MLReport):
 
     def _write_settings(self):
         if self.hp_setting is not None:
-            with open(self.result_path + "settings.yaml", "w") as file:
+            file_path = self.result_path / "settings.yaml"
+            with file_path.open("w") as file:
                 yaml.dump({"preprocessing": self.hp_setting.preproc_sequence_name,
                            "encoder": self.hp_setting.encoder_name,
                            "ml_method": self.hp_setting.ml_method_name},
                           file)
 
     def _write_results_table(self, plotting_data):
-        filepath = self.result_path + "coefficients.csv"
+        filepath = self.result_path / "coefficients.csv"
         plotting_data.to_csv(filepath, index=False)
         return filepath
 
@@ -178,14 +180,15 @@ class Coefficients(MLReport):
             logging.warning(f"Coefficients: empty data subset specified, skipping {output_name} plot...")
         else:
 
-            filename = f"{self.result_path}{output_name}.html"
+            filename = self.result_path / f"{output_name}.html"
 
             figure = px.bar(plotting_data, x='features', y='coefficients', template='plotly_white',
                             title=f"{type(self.method).__name__}{' (' + self.method.name + ') - ' if self.method.name is not None else ' - '}"
                                   f"{' '.join(output_name.split('_'))}")
             figure.update_traces(marker_color=px.colors.sequential.Teal[3])
 
-            figure.write_html(filename)
+            with filename.open("w") as file:
+                figure.write_html(file)
 
             return ReportOutput(filename)
 

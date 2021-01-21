@@ -16,7 +16,7 @@ class TestRepertoire(TestCase):
 
     def test_repertoire(self):
 
-        path = EnvironmentSettings.tmp_test_path + "sequencerepertoire/"
+        path = EnvironmentSettings.tmp_test_path / "sequencerepertoire/"
         PathBuilder.build(path)
 
         sequences = [ReceptorSequence(amino_acid_sequence="AAA", identifier="1",
@@ -56,7 +56,7 @@ class TestRepertoire(TestCase):
         shutil.rmtree(path)
 
     def test_receptor(self):
-        path = EnvironmentSettings.tmp_test_path + "receptortestingpathrepertoire/"
+        path = EnvironmentSettings.tmp_test_path / "receptortestingpathrepertoire/"
         PathBuilder.build(path)
 
         sequences = [ReceptorSequence(amino_acid_sequence="AAA", identifier="1",

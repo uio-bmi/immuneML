@@ -2,6 +2,7 @@ import warnings
 
 import pandas as pd
 import plotly.express as px
+from pathlib import Path
 
 from source.hyperparameter_optimization.states.TrainMLModelState import TrainMLModelState
 from source.reports.PlotlyUtil import PlotlyUtil
@@ -63,8 +64,8 @@ class MLSettingsPerformance(TrainMLModelReport):
         name = kwargs["name"] if "name" in kwargs else None
         return MLSettingsPerformance(single_axis_labels, x_label_position, y_label_position, name)
 
-    def __init__(self, single_axis_labels, x_label_position, y_label_position, name: str = None, state: TrainMLModelState = None, result_path: str = None):
-        super(MLSettingsPerformance, self).__init__()
+    def __init__(self, single_axis_labels, x_label_position, y_label_position, name: str = None, state: TrainMLModelState = None, result_path: Path = None):
+        super().__init__(name)
 
         self.single_axis_labels = single_axis_labels
         self.x_label_position = x_label_position
@@ -110,7 +111,7 @@ class MLSettingsPerformance(TrainMLModelReport):
         return plotting_data
 
     def _write_results_table(self, plotting_data):
-        filepath = f"{self.result_path}{self.result_name}.csv"
+        filepath = self.result_path / f"{self.result_name}.csv"
         plotting_data.to_csv(filepath, index=False)
         return ReportOutput(filepath)
 
@@ -127,8 +128,8 @@ class MLSettingsPerformance(TrainMLModelReport):
         else:
             figure = self._plot_rescalable(plotting_data, "ML method", f"Performance<br>({metric_name})")
 
-        file_path = f"{self.result_path}{self.result_name}.html"
-        figure.write_html(file_path)
+        file_path = self.result_path / f"{self.result_name}.html"
+        figure.write_html(str(file_path))
 
         return ReportOutput(path=file_path)
 

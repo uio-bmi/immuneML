@@ -31,7 +31,7 @@ class TestMotifSeedRecovery(TestCase):
         # Change coefficients to values 1-20
         dummy_lr.models["l1"].coef_ = np.array(list(range(0, 5))).reshape(1, -1)
 
-        with open(path + "ml_details.yaml", "w") as file:
+        with open(path  / "ml_details.yaml", "w") as file:
             yaml.dump({"l1": {"feature_names": ["AAA", "AAC", "CKJ", "KSA", "AKJ"]}},
                       file)
 
@@ -53,7 +53,7 @@ class TestMotifSeedRecovery(TestCase):
         return report
 
     def test_generate(self):
-        path = EnvironmentSettings.root_path + "test/tmp/motifseedrecovery/"
+        path = EnvironmentSettings.root_path  / "test/tmp/motifseedrecovery/"
         PathBuilder.build(path)
 
         report = self._create_report(path)
@@ -62,14 +62,14 @@ class TestMotifSeedRecovery(TestCase):
         result = report.generate_report()
 
         self.assertIsInstance(result, ReportResult)
-        self.assertEqual(result.output_tables[0].path, path + "motif_seed_recovery.csv")
-        self.assertEqual(result.output_figures[0].path, path + "motif_seed_recovery.html")
+        self.assertEqual(result.output_tables[0].path, path / "motif_seed_recovery.csv")
+        self.assertEqual(result.output_figures[0].path, path / "motif_seed_recovery.html")
 
         # Actual tests
-        self.assertTrue(os.path.isfile(path + "motif_seed_recovery.csv"))
-        self.assertTrue(os.path.isfile(path + "motif_seed_recovery.html"))
+        self.assertTrue(os.path.isfile(path / "motif_seed_recovery.csv"))
+        self.assertTrue(os.path.isfile(path / "motif_seed_recovery.html"))
 
-        written_data = pd.read_csv(path + "motif_seed_recovery.csv")
+        written_data = pd.read_csv(path / "motif_seed_recovery.csv")
 
         self.assertListEqual(list(written_data.columns), ["features", "max_seed_overlap", "coefficients"])
         self.assertListEqual(list(written_data["coefficients"]), [i for i in range(5)])

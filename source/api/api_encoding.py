@@ -1,8 +1,7 @@
-import glob
-import os
 import random
 
 import pandas as pd
+from pathlib import Path
 
 from source.IO.dataset_import.MiXCRImport import MiXCRImport
 from source.encodings.EncoderParams import EncoderParams
@@ -25,8 +24,13 @@ def encode_dataset_by_kmer_freq(path_to_dataset_directory: str, result_path: str
                           and an arbitrary disease column
     :return: encoded dataset with encoded data in encoded_dataset.encoded_data.examples
     """
+    path_to_dataset_directory = Path(path_to_dataset_directory)
+    result_path = Path(result_path)
+
     if metadata_path is None:
         metadata_path = generate_random_metadata(path_to_dataset_directory, result_path)
+    else:
+        metadata_path = Path(metadata_path)
 
     loader = MiXCRImport()
     dataset = loader.import_dataset({
@@ -56,24 +60,24 @@ def encode_dataset_by_kmer_freq(path_to_dataset_directory: str, result_path: str
                       label_config=LabelConfiguration([Label(label_name, dataset.params[label_name])])), False))
 
     dataset_exporter = DesignMatrixExporter(dataset=encoded_dataset,
-                                            result_path=f"{result_path if result_path[:-1] == '/' else result_path+'/'}csv_exported/")
+                                            result_path=result_path / "csv_exported")
     dataset_exporter.generate_report()
 
     return encoded_dataset
 
 
-def generate_random_metadata(path_to_dataset_directory: str, result_path: str):
+def generate_random_metadata(path_to_dataset_directory: Path, result_path: Path):
 
-    path_to_dataset_directory = path_to_dataset_directory if path_to_dataset_directory[:-1] == '/' else f"{path_to_dataset_directory}/"
-    repertoire_filenames = list(glob.glob(f"{path_to_dataset_directory}*"))
+    repertoire_filenames = list(path_to_dataset_directory.glob("*"))
+
     repertoire_count = len(repertoire_filenames)
 
-    df = pd.DataFrame({"filename": [os.path.basename(filename) for filename in repertoire_filenames],
+    df = pd.DataFrame({"filename": [filename.name for filename in repertoire_filenames],
                        "disease": [random.choice([True, False]) for i in range(repertoire_count)],
                        "subject_id": [str(i) for i in range(1, repertoire_count + 1)]})
 
     PathBuilder.build(result_path)
-    metadata_path = f"{result_path if result_path[:-1] == '/' else result_path+'/'}metadata.csv"
+    metadata_path = result_path / "metadata.csv"
     df.to_csv(metadata_path, index=None)
 
     return metadata_path

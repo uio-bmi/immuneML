@@ -1,6 +1,6 @@
 import math
 import pickle
-
+from pathlib import Path
 
 class ElementGenerator:
 
@@ -11,7 +11,7 @@ class ElementGenerator:
 
     def _load_batch(self, current_file: int):
 
-        with open(self.file_list[current_file], "rb") as file:
+        with self.file_list[current_file].open("rb") as file:
             elements = pickle.load(file)
 
         return elements
@@ -21,7 +21,7 @@ class ElementGenerator:
         # TODO: make this abstract and move implementation to specific generator: count elements in file for new format
 
         if self.file_lengths[file_index] == -1:
-            with open(self.file_list[file_index], "rb") as file:
+            with self.file_list[file_index].open("rb") as file:
                 count = len(pickle.load(file))
             self.file_lengths[file_index] = count
 
@@ -55,11 +55,10 @@ class ElementGenerator:
             for element in batch:
                 yield element
 
-    def make_subset(self, example_indices: list, path: str, dataset_type: str, dataset_identifier: str):
+    def make_subset(self, example_indices: list, path: Path, dataset_type: str, dataset_identifier: str):
         if example_indices is None or len(example_indices) == 0:
             raise RuntimeError(f"{ElementGenerator.__name__}: no examples were specified to create the dataset subset. "
                                f"Dataset type was {dataset_type}, dataset identifier: {dataset_identifier}.")
-
         batch_size = self.file_size
         elements = []
         file_count = 1
@@ -82,15 +81,15 @@ class ElementGenerator:
 
         return batch_filenames
 
-    def _prepare_batch_filenames(self, example_count: int, path: str, dataset_type: str, dataset_identifier: str):
+    def _prepare_batch_filenames(self, example_count: int, path: Path, dataset_type: str, dataset_identifier: str):
         batch_count = math.ceil(example_count / self.file_size)
         digits_count = len(str(batch_count)) + 1
-        filenames = [path + f"{dataset_identifier}_{dataset_type}_batch" + "".join(["0" for i in range(digits_count-len(str(index)))]) + str(index) + ".pkl"
+        filenames = [path / f"{dataset_identifier}_{dataset_type}_batch{''.join(['0' for i in range(digits_count-len(str(index)))])}{index}.pkl"
                      for index in range(batch_count)]
         return filenames
 
     def _store_elements_to_file(self, path, elements):
-        with open(path, "wb") as file:
+        with path.open("wb") as file:
             pickle.dump(elements, file)
 
     def _extract_elements_from_batch(self, index, batch_size, batch, example_indices):

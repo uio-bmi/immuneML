@@ -22,12 +22,12 @@ class TestReceptorCNN(TestCase):
         os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
 
     def test_fit(self):
-        path = PathBuilder.build(EnvironmentSettings.tmp_test_path + "cnn/")
+        path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "cnn")
 
         dataset = RandomDatasetGenerator.generate_receptor_dataset(receptor_count=500, chain_1_length_probabilities={4: 1},
                                                                    chain_2_length_probabilities={4: 1},
-                                                                   labels={"CMV": {True: 0.5, False: 0.5}}, path=path + "dataset/")
-        enc_dataset = OneHotReceptorEncoder(True, 1, False, "enc1").encode(dataset, EncoderParams(path + "result/",
+                                                                   labels={"CMV": {True: 0.5, False: 0.5}}, path=path / "dataset")
+        enc_dataset = OneHotReceptorEncoder(True, 1, False, "enc1").encode(dataset, EncoderParams(path / "result",
                                                                                            LabelConfiguration([Label("CMV", [True, False])])))
         cnn = ReceptorCNN(kernel_count=2, kernel_size=[3], positional_channels=3, sequence_type="amino_acid", device="cpu",
                           number_of_threads=4, random_seed=1, learning_rate=0.01, iteration_count=10, l1_weight_decay=0.1, evaluate_at=5,
@@ -42,10 +42,10 @@ class TestReceptorCNN(TestCase):
         self.assertEqual(500, np.rint(np.sum(predictions_proba["CMV"])))
         self.assertEqual(500, predictions_proba["CMV"].shape[0])
 
-        cnn.store(path + "model_storage/")
+        cnn.store(path / "model_storage")
 
         cnn2 = ReceptorCNN(sequence_type="amino_acid")
-        cnn2.load(path + "model_storage/")
+        cnn2.load(path / "model_storage")
 
         cnn2_vars = vars(cnn2)
         del cnn2_vars["CNN"]

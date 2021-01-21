@@ -1,6 +1,7 @@
 # quality: gold
 import datetime
 import os
+from pathlib import Path
 
 from source.caching.CacheType import CacheType
 from source.environment.Constants import Constants
@@ -15,25 +16,25 @@ class EnvironmentSettings:
     """
 
     sequence_type = SequenceType.AMINO_ACID
-    root_path = os.path.normpath(os.path.dirname(os.path.abspath(__file__)) + "/../../") + "/"
-    default_params_path = root_path + "source/config/default_params/"
-    tmp_test_path = root_path + "test/tmp/"
-    default_analysis_path = root_path + "analysis_runs/"
-    cache_path = root_path + "cache/"
-    tmp_cache_path = tmp_test_path + "cache/"
-    html_templates_path = root_path + "source/presentation/html/templates/"
-    specs_docs_path = root_path + "docs/specs/"
-    source_docs_path = root_path + "docs/source/"
+    root_path = Path(os.path.normpath(os.path.dirname(os.path.abspath(__file__)) + "/../../") + "/")
+    default_params_path = root_path / "source/config/default_params"
+    tmp_test_path = root_path / "test/tmp"
+    default_analysis_path = root_path / "analysis_runs"
+    cache_path = root_path / "cache"
+    tmp_cache_path = tmp_test_path / "cache"
+    html_templates_path = root_path / "source/presentation/html/templates"
+    specs_docs_path = root_path / "docs/specs"
+    source_docs_path = root_path / "docs/source"
     max_sequence_length = 20
     low_memory = True
 
     @staticmethod
     def reset_cache_path():
-        EnvironmentSettings.cache_path = EnvironmentSettings.root_path + "cache/"
+        EnvironmentSettings.cache_path = EnvironmentSettings.root_path / "cache"
 
     @staticmethod
-    def set_cache_path(path: str):
-        EnvironmentSettings.cache_path = path
+    def set_cache_path(path: Path):
+        EnvironmentSettings.cache_path = Path(path)
         PathBuilder.build(path)
         print(f"{datetime.datetime.now()}: Setting temporary cache path to {path}", flush=True)
 

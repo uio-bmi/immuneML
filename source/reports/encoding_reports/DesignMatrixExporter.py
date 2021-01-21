@@ -4,6 +4,7 @@ from dataclasses import dataclass
 import numpy as np
 import pandas as pd
 import yaml
+from pathlib import Path
 
 from source.data_model.dataset.Dataset import Dataset
 from source.reports.ReportOutput import ReportOutput
@@ -31,7 +32,7 @@ class DesignMatrixExporter(EncodingReport):
 
     """
     dataset: Dataset = None
-    result_path: str = None
+    result_path: Path = None
     name: str = None
 
     @classmethod
@@ -50,7 +51,7 @@ class DesignMatrixExporter(EncodingReport):
 
     def _export_matrix(self) -> ReportOutput:
         data = self._get_data()
-        file_path = self._save_to_file(data, f"{self.result_path}design_matrix")
+        file_path = self._save_to_file(data, self.result_path / "design_matrix")
         return ReportOutput(file_path, "design matrix")
 
     def _get_data(self) -> np.ndarray:
@@ -60,18 +61,18 @@ class DesignMatrixExporter(EncodingReport):
             data = self.dataset.encoded_data.examples
         return data
 
-    def _save_to_file(self, data: np.ndarray, file_path) -> str:
+    def _save_to_file(self, data: np.ndarray, file_path: Path) -> Path:
         if len(data.shape) <= 2:
-            file_path = file_path + ".csv"
-            np.savetxt(fname=file_path, X=data, delimiter=",", comments='', header=",".join(self.dataset.encoded_data.feature_names))
+            file_path = file_path.with_suffix(".csv")
+            np.savetxt(fname=str(file_path), X=data, delimiter=",", comments='', header=",".join(self.dataset.encoded_data.feature_names))
         else:
-            file_path = file_path + ".npy"
+            file_path = file_path.with_suffix(".npy")
             np.save(file_path, data)
         return file_path
 
     def _export_details(self) -> ReportOutput:
-        file_path = f"{self.result_path}encoding_details.yaml"
-        with open(file_path, "w") as file:
+        file_path = self.result_path / "encoding_details.yaml"
+        with file_path.open("w") as file:
             details = {
                 "feature_names": self.dataset.encoded_data.feature_names,
                 "encoding": self.dataset.encoded_data.encoding,
@@ -85,7 +86,7 @@ class DesignMatrixExporter(EncodingReport):
     def _export_labels(self) -> ReportOutput:
         if self.dataset.encoded_data.labels is not None:
             labels_df = pd.DataFrame(self.dataset.encoded_data.labels)
-            file_path = f"{self.result_path}labels.csv"
+            file_path = self.result_path / "labels.csv"
             labels_df.to_csv(file_path, sep=",", index=False)
             return ReportOutput(file_path, "exported labels")
 

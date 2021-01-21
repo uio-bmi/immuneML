@@ -1,5 +1,5 @@
-import os
 from dataclasses import dataclass
+from pathlib import Path
 
 import yaml
 
@@ -27,12 +27,12 @@ class MLMethodConfiguration:
     train_dataset_name: str = None
     software_used: str = None
 
-    def store(self, path: str):
-        PathBuilder.build(os.path.dirname(path))
-        with open(path, "w") as file:
+    def store(self, path: Path):
+        PathBuilder.build(path.parent)
+        with path.open("w") as file:
             yaml.dump(self.__dict__, file)
 
-    def load(self, path: str):
-        with open(path, 'r') as file:
+    def load(self, path: Path):
+        with path.open('r') as file:
             obj = yaml.load(file)
         self.__init__(**obj)

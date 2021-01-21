@@ -2,6 +2,7 @@ import logging
 import shutil
 
 import yaml
+from pathlib import Path
 
 from source.api.galaxy.GalaxyTool import GalaxyTool
 from source.api.galaxy.Util import Util
@@ -11,7 +12,7 @@ from source.workflows.instructions.dataset_generation.DatasetExportInstruction i
 
 class DataSimulationTool(GalaxyTool):
 
-    def __init__(self, specification_path, result_path, **kwargs):
+    def __init__(self, specification_path: str, result_path: str, **kwargs):
         Util.check_parameters(specification_path, result_path, kwargs, DataSimulationTool.__name__)
         super().__init__(specification_path, result_path, **kwargs)
         self.expected_instruction = DatasetExportInstruction.__name__[:-11]
@@ -23,13 +24,13 @@ class DataSimulationTool(GalaxyTool):
         self.prepare_specs()
         Util.run_tool(self.yaml_path, self.result_path)
 
-        dataset_location = f"{self.result_path}/{self.instruction_name}/{self.dataset_name}/{self.export_format}/"
-        shutil.copytree(dataset_location, self.result_path + 'result/')
+        dataset_location = self.result_path / f"{self.instruction_name}/{self.dataset_name}/{self.export_format}/"
+        shutil.copytree(dataset_location, self.result_path / 'result/')
 
         logging.info(f"{DataSimulationTool.__name__}: immuneML has finished and the dataset was created.")
 
     def prepare_specs(self):
-        with open(self.yaml_path, "r") as file:
+        with self.yaml_path.open("r") as file:
             specs = yaml.safe_load(file)
 
         self.instruction_name = Util.check_instruction_type(specs, DataSimulationTool.__name__, self.expected_instruction)

@@ -1,4 +1,5 @@
 import yaml
+from pathlib import Path
 
 from source.api.galaxy.GalaxyTool import GalaxyTool
 from source.api.galaxy.Util import Util
@@ -8,7 +9,7 @@ from source.util.PathBuilder import PathBuilder
 
 class GalaxyYamlTool(GalaxyTool):
 
-    def __init__(self, specification_path, result_path, **kwargs):
+    def __init__(self, specification_path: str, result_path: str, **kwargs):
         Util.check_parameters(specification_path, result_path, kwargs, "GalaxyYamlTool")
         super().__init__(specification_path, result_path, **kwargs)
 
@@ -22,7 +23,7 @@ class GalaxyYamlTool(GalaxyTool):
         return output_file_path
 
     def update_specs(self):
-        with open(self.yaml_path, "r") as file:
+        with self.yaml_path.open("r") as file:
             specs_dict = yaml.safe_load(file)
 
         Util.check_paths(specs_dict, 'GalaxyYamlTool')

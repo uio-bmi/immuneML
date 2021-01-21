@@ -17,7 +17,7 @@ class TestIRISImport(TestCase):
     def _create_dummy_data(self, path, number_of_repertoires, add_metadata):
 
         for i in range(number_of_repertoires):
-            with open(path + "receptors_{}.tsv".format(i + 1), "w") as file:
+            with open(path / "receptors_{}.tsv".format(i + 1), "w") as file:
                 file.write(
                     "Cell type	Clonotype ID	Chain: TRA (1)	TRA - V gene (1)	TRA - D gene (1)	TRA - J gene (1)	Chain: TRA (2)	TRA - V gene (2)	TRA - D gene (2)	TRA - J gene (2)	Chain: TRB (1)	TRB - V gene (1)	TRB - D gene (1)	TRB - J gene (1)	Chain: TRB (2)	TRB - V gene (2)	TRB - D gene (2)	TRB - J gene (2)	extra_col\n\
 TCR_AB	181	ALPHA	TRAV4*01	null	TRAJ4*01	DUALALPHA	TRAV4*01	null	TRAJ4*01	BETA	TRBV4*01	null	TRBJ4*01	DUALBETA	TRBV4*01	null	TRBJ4*01	val1\n\
@@ -33,19 +33,19 @@ TCR_AB	1421	AT	TRAV12-3*01	null	TRAJ17*01	null	null	null	null	null	null	null	nul
                 "label1": [i % 2 for i in range(number_of_repertoires)]
             }
 
-            pd.DataFrame(metadata).to_csv(path + "metadata.csv")
+            pd.DataFrame(metadata).to_csv(path / "metadata.csv")
 
     def test_load_repertoire_dataset_minimal(self):
         # loading with minimal data (no dual genes, no duplicate V/J segments)
 
         number_of_repertoires = 5
 
-        path = EnvironmentSettings.tmp_test_path + "importseqsiris_mini/"
+        path = EnvironmentSettings.tmp_test_path / "importseqsiris_mini/"
         PathBuilder.build(path)
         self._create_dummy_data(path, number_of_repertoires=number_of_repertoires, add_metadata=True)
 
         # case: minimal dataset (all dual chains and all genes = False)
-        dataset = IRISImport.import_dataset({"is_repertoire": True, "result_path": path, "metadata_file": path + "metadata.csv", "path": path,
+        dataset = IRISImport.import_dataset({"is_repertoire": True, "result_path": path, "metadata_file": path / "metadata.csv", "path": path,
                                              "import_dual_chains": False, "import_all_gene_combinations": False, "separator": "\t",
                                              "extra_columns_to_load": ["extra_col"], "receptor_chains": "TRA_TRB"}, "iris_dataset")
 
@@ -66,11 +66,11 @@ TCR_AB	1421	AT	TRAV12-3*01	null	TRAJ17*01	null	null	null	null	null	null	null	nul
 
         number_of_repertoires = 5
 
-        path = EnvironmentSettings.tmp_test_path + "importseqsiris_maxi/"
+        path = EnvironmentSettings.tmp_test_path / "importseqsiris_maxi/"
         PathBuilder.build(path)
         self._create_dummy_data(path, number_of_repertoires=number_of_repertoires, add_metadata=True)
 
-        dataset = IRISImport.import_dataset({"is_repertoire": True, "result_path": path, "metadata_file": path + "metadata.csv", "path": path,
+        dataset = IRISImport.import_dataset({"is_repertoire": True, "result_path": path, "metadata_file": path / "metadata.csv", "path": path,
                                              "import_dual_chains": True, "import_all_gene_combinations": True, "separator": "\t",
                                              "extra_columns_to_load": ["extra_col"], "receptor_chains": "TRA_TRB"}, "dataset_name")
 
@@ -85,7 +85,7 @@ TCR_AB	1421	AT	TRAV12-3*01	null	TRAJ17*01	null	null	null	null	null	null	null	nul
         shutil.rmtree(path)
 
     def test_load_sequence_dataset_unpaired(self):
-        path = EnvironmentSettings.tmp_test_path + "importseqsiris_sequencedataset/"
+        path = EnvironmentSettings.tmp_test_path / "importseqsiris_sequencedataset/"
         PathBuilder.build(path)
         self._create_dummy_data(path, number_of_repertoires=1, add_metadata=False)
 
@@ -104,7 +104,7 @@ TCR_AB	1421	AT	TRAV12-3*01	null	TRAJ17*01	null	null	null	null	null	null	null	nul
         shutil.rmtree(path)
 
     def test_load_sequence_dataset_paired(self):
-        path = EnvironmentSettings.tmp_test_path + "importseqsiris_sequencedataset/"
+        path = EnvironmentSettings.tmp_test_path / "importseqsiris_sequencedataset/"
         PathBuilder.build(path)
         self._create_dummy_data(path, number_of_repertoires=1, add_metadata=False)
 

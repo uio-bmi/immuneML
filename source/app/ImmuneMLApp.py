@@ -4,6 +4,7 @@ import logging
 import os
 import shutil
 import warnings
+from pathlib import Path
 
 from source.caching.CacheType import CacheType
 from source.dsl.ImmuneMLParser import ImmuneMLParser
@@ -18,12 +19,12 @@ from source.util.ReflectionHandler import ReflectionHandler
 class ImmuneMLApp:
 
     def __init__(self, specification_path: str, result_path: str):
-        self._specification_path = specification_path
-        self._result_path = os.path.relpath(result_path) + "/"
+        self._specification_path = Path(specification_path)
+        self._result_path = Path(os.path.relpath(result_path))
 
         PathBuilder.build(self._result_path)
 
-        self._cache_path = f"{self._result_path}cache/"
+        self._cache_path = self._result_path / "cache"
 
     def set_cache(self):
         os.environ[Constants.CACHE_TYPE] = CacheType.PRODUCTION.value
@@ -57,12 +58,11 @@ class ImmuneMLApp:
 
 
 def run_immuneML(namespace: argparse.Namespace):
-
     if os.path.isdir(namespace.result_path) and len(os.listdir(namespace.result_path)) != 0:
         raise ValueError(f"Directory {namespace.result_path} already exists. Please specify a new output directory for the analysis.")
     PathBuilder.build(namespace.result_path)
 
-    logging.basicConfig(filename=namespace.result_path + "/log.txt", level=logging.INFO, format='%(asctime)s %(levelname)s: %(message)s')
+    logging.basicConfig(filename=Path(namespace.result_path) / "log.txt", level=logging.INFO, format='%(asctime)s %(levelname)s: %(message)s')
     warnings.showwarning = lambda message, category, filename, lineno, file=None, line=None: logging.warning(message)
 
     if namespace.tool is None:
@@ -80,7 +80,11 @@ def main():
     parser.add_argument("result_path", help="Output directory path.")
     parser.add_argument("--tool", help="Name of the tool which calls immuneML. This name will be used to invoke appropriate API call, "
                                        "which will then do additional work in tool-dependent way before running standard immuneML.")
-    run_immuneML(parser.parse_args())
+    namespace = parser.parse_args()
+    namespace.specification_path = Path(namespace.specification_path)
+    namespace.result_path = Path(namespace.result_path)
+
+    run_immuneML(namespace)
 
 
 if __name__ == "__main__":

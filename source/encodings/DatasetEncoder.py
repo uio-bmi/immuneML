@@ -1,8 +1,8 @@
 import abc
-import os
 import pickle
 import shutil
 from typing import List
+from pathlib import Path
 
 from source.IO.dataset_export.PickleExporter import PickleExporter
 from source.encodings.EncoderParams import EncoderParams
@@ -31,26 +31,29 @@ class DatasetEncoder(metaclass=abc.ABCMeta):
         pass
 
     @staticmethod
-    def load_encoder(encoder_file: str):
-        with open(encoder_file, "rb") as file:
+    def load_encoder(encoder_file: Path):
+        with encoder_file.open("rb") as file:
             encoder = pickle.load(file)
         return encoder
 
     @staticmethod
-    def load_attribute(encoder, encoder_file: str, attribute: str):
-        if encoder_file is not None and encoder_file != '':
-            setattr(encoder, attribute, f"{os.path.dirname(encoder_file)}/{os.path.basename(getattr(encoder, attribute))}")
-            assert os.path.isfile(getattr(encoder, attribute)), f"{type(encoder).__name__}: could not load {attribute} from {getattr(encoder, attribute)}."
+    def load_attribute(encoder, encoder_file: Path, attribute: str):
+        if encoder_file is not None:
+            file_path = encoder_file.parent / getattr(encoder, attribute).name
+            setattr(encoder, attribute, file_path)
+            assert getattr(encoder, attribute).is_file(), f"{type(encoder).__name__}: could not load {attribute} from {getattr(encoder, attribute)}."
         return encoder
 
     @staticmethod
-    def store_encoder(encoder, encoder_file: str):
-        with open(encoder_file, "wb") as file:
+    def store_encoder(encoder, encoder_file: Path):
+        with encoder_file.open("wb") as file:
             pickle.dump(encoder, file)
 
-        encoder_dir = f"{os.path.dirname(encoder_file)}/"
+        encoder_dir = encoder_file.parent
         for file in encoder.get_additional_files():
-            shutil.copy(file, f"{encoder_dir}{os.path.basename(file)}")
+            shutil.copy(file, encoder_dir / file.name)
+
+        return encoder_file
 
     @staticmethod
     def get_additional_files() -> List[str]:

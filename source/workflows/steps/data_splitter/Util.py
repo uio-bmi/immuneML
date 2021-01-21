@@ -7,7 +7,7 @@ class Util:
 
     @staticmethod
     def prepare_path(input_params: DataSplitterParams, split_index: int) -> str:
-        path = f"{input_params.paths[split_index]}datasets/"
+        path = input_params.paths[split_index] / "datasets"
         PathBuilder.build(path)
         return path
 

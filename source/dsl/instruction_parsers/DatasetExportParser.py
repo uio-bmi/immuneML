@@ -1,3 +1,4 @@
+from pathlib import Path
 from source.IO.dataset_export.DataExporter import DataExporter
 from source.dsl.symbol_table.SymbolTable import SymbolTable
 from source.dsl.symbol_table.SymbolType import SymbolType
@@ -41,7 +42,7 @@ class DatasetExportParser:
 
     VALID_KEYS = ["type", "datasets", "export_formats"]
 
-    def parse(self, key: str, instruction: dict, symbol_table: SymbolTable, path: str = None) -> DatasetExportInstruction:
+    def parse(self, key: str, instruction: dict, symbol_table: SymbolTable, path: Path = None) -> DatasetExportInstruction:
         location = "DatasetExportParser"
         ParameterValidator.assert_keys(list(instruction.keys()), DatasetExportParser.VALID_KEYS, location, key)
         valid_formats = ReflectionHandler.all_nonabstract_subclass_basic_names(DataExporter, "Exporter", 'dataset_export/')

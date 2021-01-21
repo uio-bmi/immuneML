@@ -1,9 +1,6 @@
 # quality: gold
 
-import os
 import pickle
-from glob import glob
-
 import pandas as pd
 
 from source.IO.dataset_import.DataImport import DataImport
@@ -63,23 +60,21 @@ class PickleImport(DataImport):
 
     @staticmethod
     def _import_from_path(pickle_params):
-        with open(pickle_params.path, "rb") as file:
+        with pickle_params.path.open("rb") as file:
             dataset = pickle.load(file)
         if pickle_params.metadata_file is not None and hasattr(dataset, "metadata_file"):
             dataset.metadata_file = pickle_params.metadata_file
-        if hasattr(dataset, "metadata_file") and dataset.metadata_file is not None:
             metadata = pd.read_csv(dataset.metadata_file, comment=Constants.COMMENT_SIGN)
             metadata.to_csv(dataset.metadata_file, index=False)
         return dataset
 
     @staticmethod
     def _import_from_metadata(pickle_params,  dataset_name):
-        with open(pickle_params.metadata_file, "r") as file:
+        with pickle_params.metadata_file.open("r") as file:
             dataset_filename = file.readline().replace(Constants.COMMENT_SIGN, "").replace("\n", "")
-        pickle_params.path = f"{os.path.dirname(pickle_params.metadata_file)}/{dataset_filename}" \
-            if os.path.dirname(pickle_params.metadata_file) != "" else dataset_filename
+        pickle_params.path = pickle_params.metadata_file.parent / dataset_filename
 
-        assert os.path.isfile(pickle_params.path), f"PickleImport: dataset file {dataset_filename} specified in " \
+        assert pickle_params.path.is_file(), f"PickleImport: dataset file {dataset_filename} specified in " \
                                                    f"{pickle_params.metadata_file} could not be found ({pickle_params.path} is not a file), " \
                                                    f"failed to import the dataset {dataset_name}."
 
@@ -90,28 +85,23 @@ class PickleImport(DataImport):
         path = PickleImport._discover_repertoire_path(pickle_params, dataset)
         if path is not None:
             for repertoire in dataset.repertoires:
-                repertoire.data_filename = f"{path}{os.path.basename(repertoire.data_filename)}"
-                repertoire.metadata_filename = f"{path}{os.path.basename(repertoire.metadata_filename)}"
+                repertoire.data_filename = path / repertoire.data_filename.name
+                repertoire.metadata_filename = path / repertoire.metadata_filename.name
         return dataset
 
     @staticmethod
     def _discover_dataset_dir(pickle_params):
-        dataset_dir = os.path.dirname(pickle_params.path)
-
-        if dataset_dir != "":
-            dataset_dir = dataset_dir + "/"
-
-        return dataset_dir
+        return pickle_params.path.parent
 
     @staticmethod
     def _update_receptor_paths(pickle_params, dataset: ElementDataset):
         dataset_dir = PickleImport._discover_dataset_dir(pickle_params)
 
-        if len(list(glob(f"{dataset_dir}*.pickle"))) == len(dataset.get_filenames()):
+        if len(list(dataset_dir.glob("*.pickle"))) == len(dataset.get_filenames()):
             path = dataset_dir
             new_filenames = []
             for file in dataset.get_filenames():
-                new_filenames.append(f"{path}{os.path.basename(file)}")
+                new_filenames.append(path / file.name)
             dataset.set_filenames(new_filenames)
 
         return dataset
@@ -120,10 +110,10 @@ class PickleImport(DataImport):
     def _discover_repertoire_path(pickle_params, dataset):
         dataset_dir = PickleImport._discover_dataset_dir(pickle_params)
 
-        if len(list(glob(f"{dataset_dir}*.npy"))) == len(dataset.repertoires):
+        if len(list(dataset_dir.glob("*.npy"))) == len(dataset.repertoires):
             path = dataset_dir
-        elif len(list(glob(f"{dataset_dir}repertoires/*.npy"))) == len(dataset.repertoires):
-            path = dataset_dir + "repertoires/"
+        elif len(list(dataset_dir.glob("repertoires/*.npy"))) == len(dataset.repertoires):
+            path = dataset_dir / "repertoires/"
         else:
             path = None
 

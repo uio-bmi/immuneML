@@ -1,5 +1,7 @@
 import pandas as pd
 
+from pathlib import Path
+
 from source.data_model.dataset.ReceptorDataset import ReceptorDataset
 from source.data_model.encoded_data.EncodedData import EncodedData
 from source.encodings.DatasetEncoder import DatasetEncoder
@@ -78,6 +80,6 @@ class TCRdistEncoder(DatasetEncoder):
         return labels
 
     @staticmethod
-    def export_encoder(path: str, encoder) -> str:
-        encoder_file = DatasetEncoder.store_encoder(encoder, path + "encoder.pickle")
+    def export_encoder(path: Path, encoder) -> str:
+        encoder_file = DatasetEncoder.store_encoder(encoder, path / "encoder.pickle")
         return encoder_file

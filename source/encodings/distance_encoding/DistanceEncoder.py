@@ -1,6 +1,5 @@
-import os
-
 import pandas as pd
+from pathlib import Path
 
 from scripts.specification_util import update_docs_per_mapping
 from source.IO.ml_method.UtilIO import UtilIO
@@ -125,14 +124,14 @@ class DistanceEncoder(DatasetEncoder):
         return encoded_dataset
 
     @staticmethod
-    def export_encoder(path: str, encoder) -> str:
-        encoder_file = DatasetEncoder.store_encoder(encoder, path + "encoder.pickle")
+    def export_encoder(path: Path, encoder) -> Path:
+        encoder_file = DatasetEncoder.store_encoder(encoder, path / "encoder.pickle")
         return encoder_file
 
     @staticmethod
-    def load_encoder(encoder_file: str):
+    def load_encoder(encoder_file: Path):
         encoder = DatasetEncoder.load_encoder(encoder_file)
-        encoder.comparison = UtilIO.import_comparison_data(f"{os.path.dirname(encoder_file)}/")
+        encoder.comparison = UtilIO.import_comparison_data(encoder_file.parent)
         return encoder
 
     @staticmethod

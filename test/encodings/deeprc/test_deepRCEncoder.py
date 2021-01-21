@@ -3,6 +3,7 @@ import shutil
 from unittest import TestCase
 
 import pandas as pd
+from pathlib import Path
 
 from source.caching.CacheType import CacheType
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
@@ -21,7 +22,7 @@ class TestDeepRCEncoder(TestCase):
     def setUp(self) -> None:
         os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
 
-    def create_datasets(self, path: str):
+    def create_datasets(self, path: Path):
         repertoires, metadata = RepertoireBuilder.build([["A", "B"], ["B", "C"], ["D"], ["E", "F"]], path,
                                                       {"l1": [1, 0, 1, 0], "l2": [2, 3, 2, 3]})
 
@@ -30,9 +31,9 @@ class TestDeepRCEncoder(TestCase):
         return main_dataset, sub_dataset
 
     def test_encode(self):
-        path = EnvironmentSettings.tmp_test_path + "deeprc_encoder/"
+        path = EnvironmentSettings.tmp_test_path / "deeprc_encoder/"
         PathBuilder.build(path)
-        PathBuilder.build(path+"encoded_data/")
+        PathBuilder.build(path / "encoded_data/")
 
         main_dataset, sub_dataset = self.create_datasets(path)
 
@@ -40,7 +41,7 @@ class TestDeepRCEncoder(TestCase):
 
         enc.set_context({"dataset": main_dataset})
 
-        encoded = enc.encode(sub_dataset, EncoderParams(result_path=path+"encoded_data/",
+        encoded = enc.encode(sub_dataset, EncoderParams(result_path=path / "encoded_data/",
                                                         label_config=LabelConfiguration([Label("l1", [0, 1]), Label("l2", [2, 3])]),
                                                         pool_size=4))
 
@@ -51,7 +52,7 @@ class TestDeepRCEncoder(TestCase):
         self.assertListEqual(list(metadata_content["ID"]), sub_dataset.get_repertoire_ids())
 
         for repertoire in main_dataset.repertoires:
-            rep_path = f"{path}/encoded_data/encoding/{repertoire.identifier}.tsv"
+            rep_path = path / f"encoded_data/encoding/{repertoire.identifier}.tsv"
             self.assertTrue(os.path.isfile(rep_path))
             repertoire_tsv = pd.read_csv(rep_path, sep="\t")
             self.assertListEqual(list(repertoire_tsv["amino_acid"]), list(repertoire.get_sequence_aas()))

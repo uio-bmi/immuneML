@@ -1,5 +1,6 @@
 import logging
 import os
+from pathlib import Path
 
 from scripts.DocumentatonFormat import DocumentationFormat
 from scripts.specification_util import write_class_docs
@@ -58,8 +59,8 @@ class InstructionParser:
         return instruction, symbol_table
 
     @staticmethod
-    def generate_docs(path):
-        inst_path = PathBuilder.build(f"{path}instructions/")
+    def generate_docs(path: Path):
+        inst_path = PathBuilder.build(path / "instructions")
         instructions = sorted(ReflectionHandler.all_nonabstract_subclasses(Instruction, "Instruction", subdirectory='instructions/'), key=lambda x: x.__name__)
 
         inst_paths = {}
@@ -74,21 +75,25 @@ class InstructionParser:
 
             inst_paths[instruction_name] = file_path
 
-        with open(f'{inst_path}instructions.rst', 'w') as file:
+        inst_file_path = inst_path / "instructions.rst"
+        with inst_file_path.open('w') as file:
             for key, item in inst_paths.items():
                 lines = f"{key}\n---------------------------\n.. include:: {os.path.relpath(item, EnvironmentSettings.source_docs_path)}\n"
                 file.writelines(lines)
 
     @staticmethod
-    def make_docs(instruction, name, path):
-        with open(f"{path}{name}.rst", "w") as file:
+    def make_docs(instruction, name, path: Path):
+        file_path = path / f"{name}.rst"
+
+        with file_path.open("w") as file:
             write_class_docs(DocumentationFormat(instruction, "", DocumentationFormat.LEVELS[1]), file)
-        return f"{path}{name}.rst"
+        return file_path
 
     @staticmethod
     def make_trainmlmodel_docs(path):
-        with open(f"{path}hp.rst", "w") as file:
+        file_path = path / "hp.rst"
+        with file_path.open("w") as file:
             write_class_docs(DocumentationFormat(TrainMLModelInstruction, "", DocumentationFormat.LEVELS[1]), file)
             write_class_docs(DocumentationFormat(SplitConfig, "SplitConfig", DocumentationFormat.LEVELS[1]), file)
             write_class_docs(DocumentationFormat(ReportConfig, "ReportConfig", DocumentationFormat.LEVELS[1]), file)
-        return f"{path}hp.rst"
+        return file_path

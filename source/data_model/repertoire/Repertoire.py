@@ -6,6 +6,7 @@ import shutil
 import weakref
 from typing import List
 from uuid import uuid4
+from pathlib import Path
 
 import numpy as np
 
@@ -64,7 +65,7 @@ class Repertoire(DatasetItem):
     def build(cls, sequence_aas: list = None, sequences: list = None, v_genes: list = None, j_genes: list = None,
               v_subgroups: list = None, j_subgroups: list = None, v_alleles: list = None, j_alleles: list = None,
               chains: list = None, counts: list = None, region_types: list = None, frame_types: list = None,
-              custom_lists: dict = None, sequence_identifiers: list = None, path: str = None, metadata: dict = None,
+              custom_lists: dict = None, sequence_identifiers: list = None, path: Path = None, metadata: dict = None,
               signals: dict = None, cell_ids: list = None):
 
         sequence_count = Repertoire.check_count(sequence_aas, sequences, custom_lists)
@@ -74,7 +75,7 @@ class Repertoire(DatasetItem):
 
         identifier = uuid4().hex
 
-        data_filename = f"{path}{identifier}_data.npy"
+        data_filename = path / f"{identifier}_data.npy"
 
         field_list, values, dtype = Repertoire.process_custom_lists(custom_lists)
 
@@ -97,17 +98,17 @@ class Repertoire(DatasetItem):
         repertoire_matrix = np.array(list(map(tuple, zip(*values))), order='F', dtype=dtype)
         np.save(data_filename, repertoire_matrix)
 
-        metadata_filename = f"{path}{identifier}_metadata.pickle"
+        metadata_filename = path / f"{identifier}_metadata.pickle"
         metadata = {} if metadata is None else metadata
         metadata["field_list"] = field_list
-        with open(metadata_filename, "wb") as file:
+        with metadata_filename.open("wb") as file:
             pickle.dump(metadata, file)
 
         repertoire = Repertoire(data_filename, metadata_filename, identifier)
         return repertoire
 
     @classmethod
-    def build_like(cls, repertoire, indices_to_keep: list, result_path: str):
+    def build_like(cls, repertoire, indices_to_keep: list, result_path: Path):
         if indices_to_keep is not None and len(indices_to_keep) > 0:
             PathBuilder.build(result_path)
 
@@ -115,10 +116,10 @@ class Repertoire(DatasetItem):
             data = data[indices_to_keep]
             identifier = uuid4().hex
 
-            data_filename = f"{result_path}{identifier}_data.npy"
+            data_filename = result_path / f"{identifier}_data.npy"
             np.save(data_filename, data)
 
-            metadata_filename = f"{result_path}{identifier}_metadata.pickle"
+            metadata_filename = result_path / f"{identifier}_metadata.pickle"
             shutil.copyfile(repertoire.metadata_filename, metadata_filename)
 
             new_repertoire = Repertoire(data_filename, metadata_filename, identifier)
@@ -127,7 +128,7 @@ class Repertoire(DatasetItem):
             return None
 
     @classmethod
-    def build_from_sequence_objects(cls, sequence_objects: list, path: str, metadata: dict):
+    def build_from_sequence_objects(cls, sequence_objects: list, path: Path, metadata: dict):
 
         assert all(isinstance(sequence, ReceptorSequence) for sequence in sequence_objects), \
             "Repertoire: all sequences have to be instances of ReceptorSequence class."
@@ -166,16 +167,17 @@ class Repertoire(DatasetItem):
                          frame_types=frame_types, custom_lists=custom_lists, sequence_identifiers=sequence_identifiers, path=path, metadata=metadata,
                          signals=signals, cell_ids=cell_ids)
 
-    def __init__(self, data_filename: str, metadata_filename: str, identifier: str):
+    def __init__(self, data_filename: Path, metadata_filename: Path, identifier: str):
+        data_filename = Path(data_filename)
+        metadata_filename = Path(metadata_filename) if metadata_filename is not None else None
 
-        assert ".npy" in data_filename, \
-            "Repertoire: the file representing the repertoire has to be in numpy binary format. Got {} instead." \
-                .format(data_filename.rpartition(".")[1])
+        assert data_filename.suffix == ".npy", \
+            f"Repertoire: the file representing the repertoire has to be in numpy binary format. Got {data_filename.suffix} instead."
 
         self.data_filename = data_filename
 
         if metadata_filename:
-            with open(metadata_filename, "rb") as file:
+            with metadata_filename.open("rb") as file:
                 self.metadata = pickle.load(file)
             self.fields = self.metadata["field_list"]
 

@@ -54,11 +54,11 @@ class ROCCurve(MLReport):
         fig = go.Figure(data=[trace1, trace2], layout=layout)
 
         PathBuilder.build(self.result_path)
-        path_htm = f"{self.result_path}{self.name}.html"
-        path_csv = f"{self.result_path}{self.name}.csv"
+        path_htm = self.result_path / f"{self.name}.html"
+        path_csv = self.result_path / f"{self.name}.csv"
         csv_result = np.concatenate((fpr.reshape(1, -1), tpr.reshape(1, -1)))
-        fig.write_html(path_htm)
-        np.savetxt(path_csv, csv_result, header="fpr,tpr")
+        fig.write_html(str(path_htm))
+        np.savetxt(str(path_csv), csv_result, header="fpr,tpr")
         return ReportResult(self.name,
                             output_figures=[ReportOutput(path_htm)],
                             output_tables=[ReportOutput(path_csv)])

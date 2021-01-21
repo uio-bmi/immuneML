@@ -45,21 +45,21 @@ class TestAIRRExporter(TestCase):
         repertoire = Repertoire.build_from_sequence_objects(sequence_objects=sequence_objects, path=path, metadata={"subject_id": "REP1"})
         df = pd.DataFrame({"filename": [f"{repertoire.identifier}_data.npy"], "subject_id": ["1"],
                            "repertoire_identifier": [repertoire.identifier]})
-        df.to_csv(path + "metadata.csv", index=False)
+        df.to_csv(path / "metadata.csv", index=False)
 
-        return repertoire, path + "metadata.csv"
+        return repertoire, path / "metadata.csv"
 
     def test_repertoire_export(self):
-        path = EnvironmentSettings.tmp_test_path + "airr_exporter_repertoire/"
+        path = EnvironmentSettings.tmp_test_path / "airr_exporter_repertoire/"
         PathBuilder.build(path)
 
         repertoire, metadata_path = self.create_dummy_repertoire(path)
         dataset = RepertoireDataset(repertoires=[repertoire], metadata_file=metadata_path)
 
-        path_exported = f"{path}exported/"
+        path_exported = path / "exported"
         AIRRExporter.export(dataset, path_exported)
 
-        resulting_data = pd.read_csv(path_exported + f"repertoires/{repertoire.identifier}.tsv", sep="\t")
+        resulting_data = pd.read_csv(path_exported / f"repertoires/{repertoire.identifier}.tsv", sep="\t")
 
         self.assertListEqual(list(resulting_data["sequence_id"]), ["receptor_1", "receptor_2"])
         self.assertListEqual(list(resulting_data["cdr3"]), ["GCTGCTGCT", "GGTGGTGGT"])
@@ -103,18 +103,20 @@ class TestAIRRExporter(TestCase):
                                                                                   custom_params={"d_call": "TRBD1",
                                                                                                  "custom2": "cust1"})))]
 
-        return ReceptorDataset.build(receptors, 2, "{}receptors".format(path))
+        receptors_path = path / "receptors"
+        PathBuilder.build(receptors_path)
+        return ReceptorDataset.build(receptors, 2, receptors_path)
 
     def test_receptor_export(self):
-        path = EnvironmentSettings.tmp_test_path + "airr_exporter_receptor/"
+        path = EnvironmentSettings.tmp_test_path / "airr_exporter_receptor/"
         PathBuilder.build(path)
 
         dataset = self.create_dummy_receptordataset(path)
 
-        path_exported = f"{path}exported_receptors/"
+        path_exported = path / "exported_receptors"
         AIRRExporter.export(dataset, path_exported)
 
-        resulting_data = pd.read_csv(path_exported + f"batch1.tsv", sep="\t", dtype=str)
+        resulting_data = pd.read_csv(path_exported / "batch1.tsv", sep="\t", dtype=str)
 
         self.assertListEqual(list(resulting_data["cell_id"]), ["1", "1", "2", "2"])
         self.assertListEqual(list(resulting_data["sequence_id"]), ["1a", "1b", "2a", "2b"])
@@ -143,19 +145,20 @@ class TestAIRRExporter(TestCase):
                                       metadata=SequenceMetadata(v_gene="TRBV1", j_gene="TRBJ1", chain=Chain.BETA, frame_type="IN",
                                                                 custom_params={"d_call": "TRBD1",
                                                                                "custom2": "cust1"}))]
-
-        return SequenceDataset.build(sequences, 2, "{}sequences".format(path))
+        sequences_path = path / "sequences"
+        PathBuilder.build(sequences_path)
+        return SequenceDataset.build(sequences, 2, sequences_path)
 
     def test_sequence_export(self):
-        path = EnvironmentSettings.tmp_test_path + "airr_exporter_receptor/"
+        path = EnvironmentSettings.tmp_test_path / "airr_exporter_receptor/"
         PathBuilder.build(path)
 
         dataset = self.create_dummy_sequencedataset(path)
 
-        path_exported = f"{path}exported_sequences/"
+        path_exported = path / "exported_sequences"
         AIRRExporter.export(dataset, path_exported)
 
-        resulting_data = pd.read_csv(path_exported + f"batch1.tsv", sep="\t")
+        resulting_data = pd.read_csv(path_exported / "batch1.tsv", sep="\t")
 
         self.assertListEqual(list(resulting_data["sequence_id"]), ["1a", "1b"])
         self.assertListEqual(list(resulting_data["cdr3_aa"]), ["AAATTT", "ATATAT"])
@@ -168,7 +171,7 @@ class TestAIRRExporter(TestCase):
         self.assertListEqual(list(resulting_data["productive"]), ['T', 'T'])
         self.assertListEqual(list(resulting_data["stop_codon"]), ['F', 'F'])
 
-        resulting_data = pd.read_csv(path_exported + f"batch2.tsv", sep="\t")
+        resulting_data = pd.read_csv(path_exported / "batch2.tsv", sep="\t")
         self.assertListEqual(list(resulting_data["sequence_id"]), ["2b"])
         self.assertListEqual(list(resulting_data["cdr3_aa"]), ["ATATAT"])
         self.assertListEqual(list(resulting_data["v_call"]), ["TRBV1"])

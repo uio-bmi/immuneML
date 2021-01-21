@@ -6,6 +6,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 from sklearn import metrics
 from sklearn.metrics import precision_recall_curve
+from pathlib import Path
 
 from source.environment.Label import Label
 from source.hyperparameter_optimization.states.TrainMLModelState import TrainMLModelState
@@ -48,14 +49,14 @@ class PerformanceOverview(MultiDatasetReport):
     def build_object(cls, **kwargs):
         return PerformanceOverview(**kwargs)
 
-    def __init__(self, instruction_states: List[TrainMLModelState] = None, name: str = None, result_path: str = None):
+    def __init__(self, instruction_states: List[TrainMLModelState] = None, name: str = None, result_path: Path = None):
         super().__init__(name)
         self.instruction_states = instruction_states
         self.result_path = result_path
 
     def _generate(self) -> ReportResult:
 
-        self.result_path = PathBuilder.build(self.result_path + f'{self.name}/')
+        self.result_path = PathBuilder.build(self.result_path / self.name)
 
         assert all(self.instruction_states[0].label_configuration.get_labels_by_name() == state.label_configuration.get_labels_by_name() and
                    self.instruction_states[0].label_configuration.get_label_values(
@@ -101,13 +102,13 @@ class PerformanceOverview(MultiDatasetReport):
                 name = self.instruction_states[index].dataset.name + f' (AUC = {round(auc, 2)})'
                 figure.add_trace(go.Scatter(x=fpr, y=tpr, mode='lines', name=name, marker=dict(color=colors[index], line=dict(width=3)), hoverinfo="skip"))
 
-                data_path = self.result_path + f"roc_curve_data_{name}.csv"
+                data_path = self.result_path / f"roc_curve_data_{name}.csv"
                 pd.DataFrame({"FPR": fpr, "TPR": tpr}).to_csv(data_path, index=False)
                 report_data_outputs.append(ReportOutput(data_path, f'ROC curve data for dataset {name} (csv)'))
 
-        figure_path = self.result_path + "roc_curve.html"
+        figure_path = self.result_path / "roc_curve.html"
         figure.update_layout(template='plotly_white', xaxis_title='false positive rate', yaxis_title='true positive rate')
-        figure.write_html(figure_path)
+        figure.write_html(str(figure_path))
 
         return ReportOutput(figure_path, 'ROC curve'), report_data_outputs
 
@@ -125,12 +126,12 @@ class PerformanceOverview(MultiDatasetReport):
             figure.add_trace(go.Scatter(x=recall, y=precision, mode='lines', name=name, marker=dict(color=colors[index], line=dict(width=3)),
                                         hoverinfo="skip"))
 
-            data_path = self.result_path + f"precision_recall_data_{name}.csv"
+            data_path = self.result_path / f"precision_recall_data_{name}.csv"
             pd.DataFrame({"precision": precision, "recall": recall}).to_csv(data_path, index=False)
             report_data_outputs.append(ReportOutput(data_path, f'precision-recall curve data for dataset {name}'))
 
-        figure_path = self.result_path + "precision_recall_curve.html"
+        figure_path = self.result_path / "precision_recall_curve.html"
         figure.update_layout(template='plotly_white', xaxis_title="recall", yaxis_title="precision")
-        figure.write_html(figure_path)
+        figure.write_html(str(figure_path))
 
         return ReportOutput(figure_path, 'precision-recall curve'), report_data_outputs

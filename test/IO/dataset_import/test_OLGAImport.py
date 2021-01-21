@@ -17,26 +17,26 @@ TGCAGTGCCGACTCCAAGAACAGAGGAGCGGGGGGGGAGGCAAGCTCCTACGAGCAGTACTTC	CSADSKNRGAGGEASS
 TGTGCCAGTATCTGCGGATGTACTAGCACAGATACGCAGTATTTT	CASICGCTSTDTQYF	TRBV19	TRBJ2-3
 TGTGCTAGTGGGAAAAATCGGGACTCTAGTGCAGGCCAAGAGACCCAGTACTTC	CASGKNRDSSAGQETQYF	TRBV12-5	TRBJ2-5"""
 
-        with open(path + "rep1.tsv", "w") as file:
+        with open(path / "rep1.tsv", "w") as file:
             file.writelines(file1_content)
 
-        with open(path + "rep2.tsv", "w") as file:
+        with open(path / "rep2.tsv", "w") as file:
             file.writelines(file2_content)
 
         if add_metadata:
-            with open(path + "metadata.csv", "w") as file:
+            with open(path / "metadata.csv", "w") as file:
                 file.writelines("""filename,subject_id
 rep1.tsv,1
 rep2.tsv,2""")
 
     def test_import_repertoire(self):
         """Test dataset content with and without a header included in the input file"""
-        path = EnvironmentSettings.root_path + "test/tmp/io_olga_load/"
+        path = EnvironmentSettings.root_path / "test/tmp/io_olga_load/"
 
         PathBuilder.build(path)
         self.write_dummy_files(path, True)
 
-        dataset = OLGAImport.import_dataset({"is_repertoire": True, "result_path": path, "metadata_file": path + "metadata.csv",
+        dataset = OLGAImport.import_dataset({"is_repertoire": True, "result_path": path, "metadata_file": path / "metadata.csv",
                                              "columns_to_load": None, "separator": "\t", "region_type": "IMGT_CDR3",
                                              "import_empty_nt_sequences": True, "import_empty_aa_sequences": False,
                                              "import_illegal_characters": False,
@@ -65,11 +65,11 @@ rep2.tsv,2""")
 
     def test_import_sequences(self):
         """Test dataset content with and without a header included in the input file"""
-        path = EnvironmentSettings.root_path + "test/tmp/io_olga_load/"
+        path = EnvironmentSettings.root_path / "test/tmp/io_olga_load/"
 
         PathBuilder.build(path)
         self.write_dummy_files(path, False)
-        dataset = OLGAImport.import_dataset({"is_repertoire": False, "paired": False, "result_path": path, "metadata_file": path + "metadata.csv",
+        dataset = OLGAImport.import_dataset({"is_repertoire": False, "paired": False, "result_path": path, "metadata_file": path / "metadata.csv",
                                              "columns_to_load": None, "separator": "\t", "region_type": "IMGT_CDR3",
                                              "import_empty_nt_sequences": True, "import_empty_aa_sequences": False,
                                              "import_illegal_characters": False,
@@ -78,12 +78,19 @@ rep2.tsv,2""")
         self.assertEqual(6, dataset.get_example_count())
 
         seqs = [sequence for sequence in dataset.get_data()]
-        self.assertEqual("GCCAGCATCGGTGGCGGGACTAGTCTCTCCTACAATGAGCAGTTC", seqs[0].nucleotide_sequence)
-        self.assertEqual("GCCAGTATCTGCGGATGTACTAGCACAGATACGCAGTAT", seqs[1].nucleotide_sequence)
-        self.assertEqual("GCTAGTGGGAAAAATCGGGACTCTAGTGCAGGCCAAGAGACCCAGTAC", seqs[2].nucleotide_sequence)
-        self.assertEqual("ASSLSPGLAYEQY", seqs[3].amino_acid_sequence)
-        self.assertEqual("ASKVRIAATNEKLF", seqs[4].amino_acid_sequence)
-        self.assertEqual("SADSKNRGAGGEASSYEQY", seqs[5].amino_acid_sequence)
+        self.assertListEqual(sorted(["GCCAGCAGTTTATCGCCGGGACTGGCCTACGAGCAGTAC",
+                                     "GCCAGCAAAGTCAGAATTGCTGCAACTAATGAAAAACTGTTT",
+                                     "AGTGCCGACTCCAAGAACAGAGGAGCGGGGGGGGAGGCAAGCTCCTACGAGCAGTAC",
+                                     "GCCAGCATCGGTGGCGGGACTAGTCTCTCCTACAATGAGCAGTTC",
+                                     "GCCAGTATCTGCGGATGTACTAGCACAGATACGCAGTAT",
+                                     "GCTAGTGGGAAAAATCGGGACTCTAGTGCAGGCCAAGAGACCCAGTAC"]), sorted([seq.nucleotide_sequence for seq in seqs]))
+
+        self.assertListEqual(sorted(["ASSLSPGLAYEQY",
+                                     "ASKVRIAATNEKLF",
+                                     "SADSKNRGAGGEASSYEQY",
+                                     "ASIGGGTSLSYNEQF",
+                                     "ASICGCTSTDTQY",
+                                     "ASGKNRDSSAGQETQY"]), sorted([seq.amino_acid_sequence for seq in seqs]))
 
         shutil.rmtree(path)
 

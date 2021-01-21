@@ -3,6 +3,7 @@ from typing import Tuple, List
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
+from pathlib import Path
 
 from source.data_model.dataset.ReceptorDataset import ReceptorDataset
 from source.reports.ReportOutput import ReportOutput
@@ -13,7 +14,7 @@ from source.util.PathBuilder import PathBuilder
 
 class ReceptorDatasetOverview(DataReport):
 
-    def __init__(self, batch_size: int, dataset: ReceptorDataset = None, result_path: str = None, name: str = None):
+    def __init__(self, batch_size: int, dataset: ReceptorDataset = None, result_path: Path = None, name: str = None):
         super().__init__(dataset, result_path, name)
         self.batch_size = batch_size
 
@@ -69,9 +70,9 @@ class ReceptorDatasetOverview(DataReport):
         return image_output, table_outputs
 
     def _store_sequence_distribution_data(self, fig, dfs, chains):
-        fig.write_html(self.result_path + "sequence_length_distribution.html")
-        image_output = ReportOutput(self.result_path + "sequence_length_distribution.html", name="sequence length distribution per chain")
-        table_outputs = [ReportOutput(self.result_path + f"sequence_length_distribution_chain_{chains[index]}.csv") for index in range(len(chains))]
+        fig.write_html(str(self.result_path / "sequence_length_distribution.html"))
+        image_output = ReportOutput(self.result_path / "sequence_length_distribution.html", name="sequence length distribution per chain")
+        table_outputs = [ReportOutput(self.result_path / f"sequence_length_distribution_chain_{chains[index]}.csv") for index in range(len(chains))]
         for index, df in enumerate(dfs):
             df.to_csv(table_outputs[index].path, index=False)
 

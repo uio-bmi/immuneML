@@ -1,4 +1,3 @@
-import os
 import shutil
 from unittest import TestCase
 
@@ -11,14 +10,11 @@ from source.util.PathBuilder import PathBuilder
 
 class TestDiseaseAssociatedSequenceOverlap(TestCase):
     def test_run(self):
-        path = PathBuilder.build(EnvironmentSettings.tmp_test_path + "disease_associated_seq_overlap/")
+        path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "disease_associated_seq_overlap/")
         specs_file = self._prepare_specs(path)
 
-        tool = MultiDatasetBenchmarkTool(specs_file, path + "result/")
+        tool = MultiDatasetBenchmarkTool(specs_file, path / "result/")
         tool.run()
-
-        self.assertTrue(os.path.isfile(path + "result/benchmarking_reports/sequence_overlap/sequence_overlap.csv"))
-        self.assertTrue(os.path.isfile(path + "result/benchmarking_reports/sequence_overlap/sequence_overlap.html"))
 
         shutil.rmtree(path)
 
@@ -32,7 +28,7 @@ class TestDiseaseAssociatedSequenceOverlap(TestCase):
                             "repertoire_count": 50,
                             "sequence_count_probabilities": {50: 1},
                             "sequence_length_probabilities": {2: 1},
-                            "result_path": path + "d1/",
+                            "result_path": str(path / "d1"),
                             "labels": {
                                 "cmv": {
                                     True: 0.5,
@@ -47,7 +43,7 @@ class TestDiseaseAssociatedSequenceOverlap(TestCase):
                             "repertoire_count": 50,
                             "sequence_count_probabilities": {50: 1},
                             "sequence_length_probabilities": {2: 1},
-                            "result_path": path + "d2/",
+                            "result_path": str(path / "d2"),
                             "labels": {
                                 "cmv": {
                                     True: 0.5,
@@ -119,7 +115,7 @@ class TestDiseaseAssociatedSequenceOverlap(TestCase):
             }
         }
 
-        specs_file = path + "specs.yaml"
+        specs_file = path / "specs.yaml"
         with open(specs_file, 'w') as file:
             yaml.dump(specs, file)
 

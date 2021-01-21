@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from source.IO.dataset_export.DataExporter import DataExporter
 from source.dsl.symbol_table.SymbolTable import SymbolTable
 from source.dsl.symbol_table.SymbolType import SymbolType
@@ -8,8 +10,7 @@ from source.workflows.instructions.subsampling.SubsamplingInstruction import Sub
 
 class SubsamplingParser:
 
-    def parse(self, key: str, instruction: dict, symbol_table: SymbolTable, path: str = None) -> SubsamplingInstruction:
-
+    def parse(self, key: str, instruction: dict, symbol_table: SymbolTable, path: Path = None) -> SubsamplingInstruction:
         valid_keys = ["type", "dataset", "subsampled_dataset_sizes", "dataset_export_formats"]
         ParameterValidator.assert_keys(instruction.keys(), valid_keys, SubsamplingParser.__name__, key)
 

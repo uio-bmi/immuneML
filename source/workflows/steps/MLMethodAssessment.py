@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 from sklearn import metrics
 from sklearn.preprocessing import label_binarize
+from pathlib import Path
 
 from source.environment.Metric import Metric
 from source.ml_methods.MLMethod import MLMethod
@@ -42,7 +43,7 @@ class MLMethodAssessment(Step):
         return df["{}_{}".format(label, metric.name.lower())].iloc[0]
 
     @staticmethod
-    def _score(metrics_list: set, optimization_metric: Metric, label: str, predicted_y, predicted_proba_y, true_y, ml_score_path: str,
+    def _score(metrics_list: set, optimization_metric: Metric, label: str, predicted_y, predicted_proba_y, true_y, ml_score_path: Path,
                split_index: int, method: MLMethod):
         results = {}
         scores = {}
@@ -64,7 +65,7 @@ class MLMethodAssessment(Step):
 
         df = pd.DataFrame([results])
 
-        if os.path.isfile(ml_score_path) and os.path.getsize(ml_score_path) > 0:
+        if ml_score_path.is_file() and os.path.getsize(ml_score_path) > 0:
             df.to_csv(ml_score_path, mode='a', header=False, index=False)
         else:
             df.to_csv(ml_score_path, index=False)

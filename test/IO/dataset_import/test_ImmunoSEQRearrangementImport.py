@@ -49,14 +49,14 @@ ACAGTGACCAGTGCCCATCCTGAAGACAGCAGCTTCTACATCTGCAGTGCTAGATCCACCTTAGAGTACGAGCAGTACTT
 
         PathBuilder.build(path)
 
-        with open(path + "rep1.tsv", "w") as file:
+        with open(path / "rep1.tsv", "w") as file:
             file.writelines(rep1text)
 
-        with open(path + "rep2.tsv", "w") as file:
+        with open(path / "rep2.tsv", "w") as file:
             file.writelines(rep2text)
 
         if add_metadata:
-            with open(path + "metadata.csv", "w") as file:
+            with open(path / "metadata.csv", "w") as file:
                 file.writelines(
                     """filename,chain,subject_id,coeliac status (yes/no)
 rep1.tsv,TRA,1234,no
@@ -64,15 +64,15 @@ rep2.tsv,TRB,1234a,no"""
             )
 
     def test_repertoire_import(self):
-        path = EnvironmentSettings.root_path + "test/tmp/adaptive/"
+        path = EnvironmentSettings.root_path / "test/tmp/adaptive/"
         self.build_dummy_dataset(path, True)
 
-        params = DefaultParamsLoader.load(EnvironmentSettings.default_params_path + "datasets/", "ImmunoSEQRearrangement")
+        params = DefaultParamsLoader.load(EnvironmentSettings.default_params_path / "datasets/", "ImmunoSEQRearrangement")
         params["is_repertoire"] = True
         params["result_path"] = path
         params['import_empty_nt_sequences'] = False
         params['import_empty_aa_sequences'] = True
-        params["metadata_file"] = path + "metadata.csv"
+        params["metadata_file"] = path / "metadata.csv"
         params["path"] = path
         params["import_productive"] = True
         params["import_with_stop_codon"] = True
@@ -99,17 +99,17 @@ rep2.tsv,TRB,1234a,no"""
                 self.assertEqual(11, len(rep.sequences))
                 self.assertEqual(2, rep.sequences[-1].metadata.count)
 
-        dataset_file = f"{path}{dataset_name}.{ImportHelper.DATASET_FORMAT}"
+        dataset_file = path / f"{dataset_name}.{ImportHelper.DATASET_FORMAT}"
 
-        self.assertTrue(os.path.isfile(dataset_file))
+        self.assertTrue(dataset_file.is_file())
 
         shutil.rmtree(path)
 
     def test_sequence_import(self):
-        path = EnvironmentSettings.root_path + "test/tmp/adaptive/"
+        path = EnvironmentSettings.root_path / "test/tmp/adaptive/"
         self.build_dummy_dataset(path, False)
 
-        params = DefaultParamsLoader.load(EnvironmentSettings.default_params_path + "datasets/", "ImmunoSEQRearrangement")
+        params = DefaultParamsLoader.load(EnvironmentSettings.default_params_path / "datasets/", "ImmunoSEQRearrangement")
         params["is_repertoire"] = False
         params["paired"] = False
         params["result_path"] = path
@@ -127,14 +127,14 @@ rep2.tsv,TRB,1234a,no"""
         self.assertEqual(21, dataset.get_example_count())
 
         seqs = [sequence for sequence in dataset.get_data()]
-        self.assertEqual("ASSLPGTNTGELF", seqs[0].amino_acid_sequence)
+        self.assertTrue(seqs[0].amino_acid_sequence in ["ASSLPGTNTGELF","SVEESYEQY"]) # OSX/windows
+        self.assertTrue(seqs[0].nucleotide_sequence in ["GCCAGCAGCTTACCGGGGACGAACACCGGGGAGCTGTTT",'AGCGTTGAAGAATCCTACGAGCAGTAC']) # OSX/windows
         self.assertEqual("IN", seqs[0].metadata.frame_type.name)
-        self.assertEqual('TRBV7-9', seqs[0].metadata.v_gene)
-        self.assertEqual('TRBJ2-2', seqs[0].metadata.j_gene)
-        self.assertEqual('GCCAGCAGCTTACCGGGGACGAACACCGGGGAGCTGTTT', seqs[0].nucleotide_sequence)
+        self.assertTrue(seqs[0].metadata.v_gene in ['TRBV7-9','TRBV29-1']) # OSX/windows
+        self.assertTrue(seqs[0].metadata.j_gene in ['TRBJ2-2','TRBJ2-7']) # OSX/windows
 
-        dataset_file = f"{path}{dataset_name}.{ImportHelper.DATASET_FORMAT}"
+        dataset_file = path / f"{dataset_name}.{ImportHelper.DATASET_FORMAT}"
 
-        self.assertTrue(os.path.isfile(dataset_file))
+        self.assertTrue(dataset_file.is_file())
 
         shutil.rmtree(path)

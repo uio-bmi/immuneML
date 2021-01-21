@@ -1,5 +1,6 @@
 from dataclasses import dataclass, field
 from typing import List
+from pathlib import Path
 
 from source.data_model.dataset.Dataset import Dataset
 from source.encodings.DatasetEncoder import DatasetEncoder
@@ -15,9 +16,9 @@ class HPItem:
     encoder: DatasetEncoder = None
     performance: dict = None
     hp_setting: HPSetting = None
-    train_predictions_path: str = None
-    test_predictions_path: str = None
-    ml_details_path: str = None
+    train_predictions_path: Path = None
+    test_predictions_path: Path = None
+    ml_details_path: Path = None
     train_dataset: Dataset = None
     test_dataset: Dataset = None
     split_index: int = None

@@ -54,12 +54,12 @@ class TestLogisticRegression(TestCase):
         lr = LogisticRegression()
         lr.fit(EncodedData(x, y), 'default')
 
-        path = EnvironmentSettings.root_path + "test/tmp/lr/"
+        path = EnvironmentSettings.root_path / "test/tmp/lr/"
 
         lr.store(path, ["f1", "f2", "f3"])
-        self.assertTrue(os.path.isfile(path + "logistic_regression.pickle"))
+        self.assertTrue(os.path.isfile(path / "logistic_regression.pickle"))
 
-        with open(path + "logistic_regression.pickle", "rb") as file:
+        with open(path / "logistic_regression.pickle", "rb") as file:
             lr2 = pickle.load(file)
 
         self.assertTrue(isinstance(lr2["default"], SklearnLogisticRegression))
@@ -73,10 +73,10 @@ class TestLogisticRegression(TestCase):
         lr = LogisticRegression()
         lr.fit(EncodedData(x, y), 'default')
 
-        path = EnvironmentSettings.root_path + "test/tmp/lr2/"
+        path = EnvironmentSettings.root_path / "test/tmp/lr2/"
         PathBuilder.build(path)
 
-        with open(path + "logistic_regression.pickle", "wb") as file:
+        with open(path / "logistic_regression.pickle", "wb") as file:
             pickle.dump(lr.get_model(), file)
 
         lr2 = LogisticRegression()

@@ -1,3 +1,4 @@
+from pathlib import Path
 from scripts.DocumentatonFormat import DocumentationFormat
 
 
@@ -16,10 +17,12 @@ def write_class_docs(doc_format: DocumentationFormat, file):
         file.writelines(doc_format.cls.__doc__)
 
 
-def make_docs(path, classes, filename, drop_name_part, file_open_mode="w"):
+def make_docs(path: Path, classes, filename, drop_name_part, file_open_mode="w"):
     classes.sort(key=lambda cls: cls.__name__)
     classes_to_document = [DocumentationFormat(cls, cls.__name__.replace(drop_name_part, ""), DocumentationFormat.LEVELS[1])
                            for cls in classes]
-    with open(path + filename, file_open_mode) as file:
+
+    file_path = path / filename
+    with file_path.open(file_open_mode) as file:
         for doc_format in classes_to_document:
             write_class_docs(doc_format, file)

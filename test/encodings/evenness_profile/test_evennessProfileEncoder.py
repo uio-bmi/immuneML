@@ -21,7 +21,7 @@ class TestEvennessEncoder(TestCase):
         os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
 
     def test_encode(self):
-        path = EnvironmentSettings.root_path + "test/tmp/evennessenc/"
+        path = EnvironmentSettings.root_path / "test/tmp/evennessenc/"
 
         PathBuilder.build(path)
 
@@ -48,7 +48,7 @@ class TestEvennessEncoder(TestCase):
         })
 
         d1 = encoder.encode(dataset, EncoderParams(
-            result_path=path + "1/",
+            result_path=path / "1/",
             label_config=lc,
         ))
 

@@ -33,7 +33,7 @@ class TestHPOptimizationProcess(TestCase):
 
     def test_run(self):
 
-        path = EnvironmentSettings.tmp_test_path + "hpoptimproc/"
+        path = EnvironmentSettings.tmp_test_path / "hpoptimproc/"
         PathBuilder.build(path)
 
         repertoires, metadata = RepertoireBuilder.build(sequences=[["AAA", "CCC", "DDD"], ["AAA", "CCC", "DDD"],

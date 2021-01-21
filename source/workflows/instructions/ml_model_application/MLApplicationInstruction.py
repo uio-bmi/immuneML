@@ -1,4 +1,5 @@
 import pandas as pd
+from pathlib import Path
 
 from source.data_model.dataset.Dataset import Dataset
 from source.environment.LabelConfiguration import LabelConfiguration
@@ -71,8 +72,8 @@ class MLApplicationInstruction(Instruction):
         self.state = MLApplicationState(dataset=dataset, hp_setting=hp_setting, label_config=label_configuration, pool_size=pool_size, name=name,
                                         store_encoded_data=store_encoded_data)
 
-    def run(self, result_path: str):
-        self.state.path = PathBuilder.build(f"{result_path}/{self.state.name}/")
+    def run(self, result_path: Path):
+        self.state.path = PathBuilder.build(result_path / self.state.name)
 
         dataset = self.state.dataset
 
@@ -101,5 +102,5 @@ class MLApplicationInstruction(Instruction):
             for cls_index, cls in enumerate(classes):
                 predictions_df[f'{label}_{cls}_proba'] = predictions_proba[:, cls_index]
 
-        self.state.predictions_path = self.state.path + "predictions.csv"
+        self.state.predictions_path = self.state.path / "predictions.csv"
         predictions_df.to_csv(self.state.predictions_path, index=False)

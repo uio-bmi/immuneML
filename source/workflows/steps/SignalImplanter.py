@@ -1,5 +1,4 @@
 import copy
-import os
 from typing import List
 
 import pandas as pd
@@ -22,9 +21,9 @@ class SignalImplanter(Step):
 
     @staticmethod
     def run(simulation_state: SimulationState = None):
-        path = simulation_state.result_path + FilenameHandler.get_dataset_name(SignalImplanter.__name__)
+        path = simulation_state.result_path / FilenameHandler.get_dataset_name(SignalImplanter.__name__)
 
-        if os.path.isfile(path):
+        if path.is_file():
             dataset = PickleImport.import_dataset({"path": path}, SignalImplanter.DATASET_NAME)
         else:
             dataset = SignalImplanter._implant_signals_in_dataset(simulation_state)
@@ -56,7 +55,7 @@ class SignalImplanter(Step):
     @staticmethod
     def _implant_signals_in_repertoires(simulation_state: SimulationState = None) -> Dataset:
 
-        PathBuilder.build(simulation_state.result_path + "repertoires/")
+        PathBuilder.build(simulation_state.result_path / "repertoires")
         processed_repertoires = SignalImplanter._implant_signals(simulation_state, SignalImplanter._process_repertoire)
         processed_dataset = RepertoireDataset(repertoires=processed_repertoires, params={**(simulation_state.dataset.params if simulation_state.dataset.params is not None else {}),
                                                                                          **{signal.id: [True, False] for signal in simulation_state.signals}},
@@ -103,7 +102,7 @@ class SignalImplanter(Step):
             return SignalImplanter._implant_in_repertoire(index, repertoire, current_implanting, simulation_state)
 
         else:
-            new_repertoire = Repertoire.build_from_sequence_objects(repertoire.sequences, simulation_state.result_path + "repertoires/",
+            new_repertoire = Repertoire.build_from_sequence_objects(repertoire.sequences, simulation_state.result_path / "repertoires",
                                                                     repertoire.metadata)
 
             for signal in simulation_state.signals:
@@ -114,7 +113,7 @@ class SignalImplanter(Step):
     @staticmethod
     def _create_metadata_file(processed_repertoires: List[Repertoire], simulation_state) -> str:
 
-        path = simulation_state.result_path + "metadata.csv"
+        path = simulation_state.result_path / "metadata.csv"
 
         new_df = pd.DataFrame([repertoire.metadata for repertoire in processed_repertoires])
         new_df.drop('field_list', axis=1, inplace=True)
@@ -129,7 +128,7 @@ class SignalImplanter(Step):
         for signal in implanting.signals:
             new_repertoire = signal.implant_to_repertoire(repertoire=new_repertoire,
                                                           repertoire_implanting_rate=implanting.repertoire_implanting_rate,
-                                                          path=simulation_state.result_path + "repertoires/")
+                                                          path=simulation_state.result_path / "repertoires/")
 
         for signal in implanting.signals:
             if implanting.is_noise:

@@ -1,22 +1,16 @@
 import os
-import pickle
 import shutil
 import unittest
 
 from source.caching.CacheType import CacheType
-from source.data_model.dataset.ReceptorDataset import ReceptorDataset
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
-from source.data_model.dataset.SequenceDataset import SequenceDataset
-from source.data_model.receptor.TCABReceptor import TCABReceptor
 from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.data_model.receptor.receptor_sequence.ReceptorSequenceList import ReceptorSequenceList
-from source.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
 from source.data_model.repertoire.Repertoire import Repertoire
 from source.encodings.EncoderParams import EncoderParams
 from source.encodings.onehot.OneHotEncoder import OneHotEncoder
 from source.environment.Constants import Constants
 from source.environment.EnvironmentSettings import EnvironmentSettings
-from source.environment.Label import Label
 from source.environment.LabelConfiguration import LabelConfiguration
 from source.util.PathBuilder import PathBuilder
 
@@ -55,7 +49,7 @@ class TestOneHotEncoder(unittest.TestCase):
 
     def test_not_positional(self):
 
-        path = EnvironmentSettings.root_path + "test/tmp/onehot_vanilla/"
+        path = EnvironmentSettings.root_path / "test/tmp/onehot_vanilla/"
 
         PathBuilder.build(path)
 
@@ -100,7 +94,7 @@ class TestOneHotEncoder(unittest.TestCase):
 
     def test_positional(self):
 
-        path = EnvironmentSettings.root_path + "test/tmp/onehot_positional/"
+        path = EnvironmentSettings.root_path / "test/tmp/onehot_positional/"
 
         PathBuilder.build(path)
 
@@ -163,7 +157,7 @@ class TestOneHotEncoder(unittest.TestCase):
         shutil.rmtree(path)
 
     def test_imgt_weights(self):
-        path = EnvironmentSettings.root_path + "test/tmp/onehot_imgt/"
+        path = EnvironmentSettings.root_path / "test/tmp/onehot_imgt/"
 
         PathBuilder.build(path)
 
@@ -189,7 +183,7 @@ class TestOneHotEncoder(unittest.TestCase):
 
 
     def test_repertoire_flattened(self):
-        path = EnvironmentSettings.root_path + "test/tmp/onehot_recep_flat/"
+        path = EnvironmentSettings.root_path / "test/tmp/onehot_recep_flat/"
 
         PathBuilder.build(path)
 

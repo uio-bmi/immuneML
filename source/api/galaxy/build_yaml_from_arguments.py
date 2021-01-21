@@ -2,11 +2,12 @@ import argparse
 import glob
 import itertools as it
 import logging
-import os
 import sys
 import warnings
 
 import yaml
+from pathlib import Path
+
 
 from source.encodings.kmer_frequency.ReadsType import ReadsType
 from source.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType import SequenceEncodingType
@@ -273,9 +274,9 @@ def main(args):
     specs = build_specs(parsed_args)
 
     PathBuilder.build(parsed_args.output_path)
-    output_location = os.path.join(parsed_args.output_path, parsed_args.file_name)
+    output_location = Path(parsed_args.output_path) / parsed_args.file_name
 
-    with open(output_location, "w") as file:
+    with output_location.open("w") as file:
         yaml.dump(specs, file)
 
     return output_location

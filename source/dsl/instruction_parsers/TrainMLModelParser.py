@@ -1,8 +1,8 @@
 import hashlib
-import os
 import warnings
 from inspect import signature
 from typing import Tuple
+from pathlib import Path
 
 from source.data_model.dataset.Dataset import Dataset
 from source.dsl.DefaultParamsLoader import DefaultParamsLoader
@@ -25,7 +25,7 @@ from source.workflows.instructions.TrainMLModelInstruction import TrainMLModelIn
 
 class TrainMLModelParser:
 
-    def parse(self, key: str, instruction: dict, symbol_table: SymbolTable, path: str = None) -> TrainMLModelInstruction:
+    def parse(self, key: str, instruction: dict, symbol_table: SymbolTable, path: Path = None) -> TrainMLModelInstruction:
 
         valid_keys = ["assessment", "selection", "dataset", "strategy", "labels", "metrics", "settings", "number_of_processes", "type", "reports",
                       "optimization_metric", 'refit_optimal_model', 'store_encoded_data']
@@ -124,11 +124,11 @@ class TrainMLModelParser:
         except KeyError as key_error:
             raise KeyError(f"{TrainMLModelParser.__name__}: parameter {key_error.args[0]} was not defined under settings in TrainMLModel instruction.")
 
-    def _prepare_path(self, instruction: dict) -> str:
+    def _prepare_path(self, instruction: dict) -> Path:
         if "path" in instruction:
-            path = os.path.abspath(instruction["path"])
+            path = Path(instruction["path"]).absolute()
         else:
-            path = EnvironmentSettings.default_analysis_path + hashlib.md5(str(instruction).encode()).hexdigest()
+            path = EnvironmentSettings.default_analysis_path / hashlib.md5(str(instruction).encode()).hexdigest()
 
         return path
 

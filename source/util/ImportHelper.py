@@ -1,9 +1,8 @@
-import os
 import pickle
 import warnings
-from glob import glob
 from multiprocessing.pool import Pool
 from typing import List
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -57,10 +56,10 @@ class ImportHelper:
     @staticmethod
     def load_dataset_if_exists(params: dict, processed_params, dataset_name: str):
 
-        dataset_file = f"{processed_params.result_path}{dataset_name}.{ImportHelper.DATASET_FORMAT}"
+        dataset_file = processed_params.result_path / f"{dataset_name}.{ImportHelper.DATASET_FORMAT}"
         dataset = None
 
-        if os.path.isfile(dataset_file):
+        if dataset_file.is_file():
             params["path"] = dataset_file
             dataset = PickleImport.import_dataset(params, dataset_name)
 
@@ -84,7 +83,7 @@ class ImportHelper:
         ParameterValidator.assert_keys_present(metadata.columns.tolist(), ["filename"], ImportHelper.__name__,
                                                f'{dataset_name}: params: metadata_file')
 
-        PathBuilder.build(params.result_path + "repertoires/")
+        PathBuilder.build(params.result_path / "repertoires/")
 
         arguments = [(import_class, row, params) for index, row in metadata.iterrows()]
         with Pool(params.number_of_processes) as pool:
@@ -113,28 +112,29 @@ class ImportHelper:
         return df
 
     @staticmethod
-    def make_new_metadata_file(repertoires: list, metadata: pd.DataFrame, result_path: str, dataset_name: str) -> str:
+    def make_new_metadata_file(repertoires: list, metadata: pd.DataFrame, result_path: Path, dataset_name: str) -> str:
         new_metadata = metadata.copy()
-        new_metadata.loc[:, "filename"] = [os.path.basename(repertoire.data_filename) for repertoire in repertoires]
+        new_metadata.loc[:, "filename"] = [repertoire.data_filename.name for repertoire in repertoires]
         new_metadata.loc[:, "identifier"] = [repertoire.identifier for repertoire in repertoires]
 
-        metadata_filename = f"{result_path}{dataset_name}_metadata.csv"
+        metadata_filename = result_path / f"{dataset_name}_metadata.csv"
         new_metadata.to_csv(metadata_filename, index=False, sep=",")
 
         return metadata_filename
 
     @staticmethod
     def load_repertoire_as_object(import_class, metadata_row, params: DatasetImportParams):
+        alternative_load_func = getattr(import_class, "alternative_load_func", None)
         try:
             alternative_load_func = getattr(import_class, "alternative_load_func", None)
 
-            dataframe = ImportHelper.load_sequence_dataframe(f"{params.path}{metadata_row['filename']}", params, alternative_load_func)
+            dataframe = ImportHelper.load_sequence_dataframe(params.path / f"{metadata_row['filename']}", params, alternative_load_func)
             dataframe = import_class.preprocess_dataframe(dataframe, params)
             sequence_lists = {field: dataframe[field].values.tolist() for field in Repertoire.FIELDS if field in dataframe.columns}
             sequence_lists["custom_lists"] = {field: dataframe[field].values.tolist()
                                               for field in list(set(dataframe.columns) - set(Repertoire.FIELDS))}
 
-            repertoire_inputs = {**{"metadata": metadata_row.to_dict(), "path": params.result_path + "repertoires/"}, **sequence_lists}
+            repertoire_inputs = {**{"metadata": metadata_row.to_dict(), "path": params.result_path / "repertoires/"}, **sequence_lists}
             repertoire = Repertoire.build(**repertoire_inputs)
 
             return repertoire
@@ -273,16 +273,16 @@ class ImportHelper:
             return df[column_name].apply(lambda gene_col: None if gene_col is None else gene_col.split(Constants.ALLELE_DELIMITER)[0])
 
     @staticmethod
-    def get_sequence_filenames(path, dataset_name):
+    def get_sequence_filenames(path: Path, dataset_name: str):
         data_file_extensions = ("*.tsv", "*.csv", "*.txt")
 
-        if os.path.isfile(path):
+        if path.is_file():
             filenames = [path]
-        elif os.path.isdir(path):
+        elif path.is_dir():
             filenames = []
 
             for pattern in data_file_extensions:
-                filenames.extend(glob(os.path.join(path, pattern)))
+                filenames.extend(list(path.glob(pattern)))
         else:
             raise ValueError(f"ImportHelper: path '{path}' given in YAML specification is not a valid path. "
                              f"This parameter can either point to a single file with immune receptor data or to a directory containing such files.")
@@ -308,7 +308,7 @@ class ImportHelper:
             dataset_params = ImportHelper.extract_sequence_dataset_params(items, params)
 
             while len(items) > params.sequence_file_size or (index == len(filenames) - 1 and len(items) > 0):
-                dataset_filenames.append(params.result_path + "batch_{}.pickle".format(file_index))
+                dataset_filenames.append(params.result_path / "batch_{}.pickle".format(file_index))
                 ImportHelper.store_sequence_items(dataset_filenames, items, params.sequence_file_size)
                 items = items[params.sequence_file_size:]
                 file_index += 1
@@ -356,7 +356,7 @@ class ImportHelper:
 
     @staticmethod
     def store_sequence_items(dataset_filenames: list, items: list, sequence_file_size: int):
-        with open(dataset_filenames[-1], "wb") as file:
+        with dataset_filenames[-1].open("wb") as file:
             pickle.dump(items[:sequence_file_size], file)
 
     @staticmethod

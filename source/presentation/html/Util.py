@@ -1,8 +1,8 @@
-import glob
 import logging
 import os
 import shutil
 from enum import Enum
+from pathlib import Path
 
 from source.reports.ReportOutput import ReportOutput
 from source.reports.ReportResult import ReportResult
@@ -12,17 +12,17 @@ from source.util.PathBuilder import PathBuilder
 class Util:
 
     @staticmethod
-    def to_dict_recursive(obj, base_path):
+    def to_dict_recursive(obj, base_path: Path):
         if not hasattr(obj, "__dict__"):
-            if hasattr(obj, "name"):
-                return obj.name
-            elif isinstance(obj, list):
-                return [Util.to_dict_recursive(element, base_path) for element in obj]
-            elif isinstance(obj, str) and os.path.isfile(obj):
+            if (isinstance(obj, Path) or isinstance(obj, str)) and os.path.isfile(obj):
                 obj_abs_path = os.path.abspath(obj)
                 base_abs_path = os.path.abspath(base_path)
                 res_path = os.path.relpath(obj_abs_path, base_abs_path)
                 return res_path
+            elif hasattr(obj, "name"):
+                return obj.name
+            elif isinstance(obj, list):
+                return [Util.to_dict_recursive(element, base_path) for element in obj]
             else:
                 return obj if obj is not None else ""
         elif isinstance(obj, Enum):
@@ -33,34 +33,37 @@ class Util:
                 attribute_name: Util.to_dict_recursive(vars_obj[attribute_name], base_path) for attribute_name in vars_obj.keys()
             }
             if isinstance(obj, ReportOutput):
-                if any([ext in getattr(obj, "path", "") for ext in ['.svg', '.jpg', '.png']]):
+                if any([ext == getattr(obj, "path", "").suffix for ext in ['.svg', '.jpg', '.png']]):
                     result['is_embed'] = False
                 else:
                     result['is_embed'] = True
             return result
 
     @staticmethod
-    def get_css_content(css_path: str):
-        with open(css_path, "rb") as file:
+    def get_css_content(css_path: Path):
+        with css_path.open("rb") as file:
             content = file.read()
         return content
 
     @staticmethod
-    def make_downloadable_zip(base_path, path_to_zip, filename: str = ""):
+    def make_downloadable_zip(base_path: Path, path_to_zip: Path, filename: str = "") -> str:
         if filename == "":
-            filename = "_".join(os.path.relpath(path_to_zip, base_path).replace(".", "").split("/"))
+            filename = "_".join(Path(os.path.relpath(path_to_zip, base_path).replace(".", "")).parts)
 
-        PathBuilder.build(f"{base_path}zip/")
-        zip_file_path = shutil.make_archive(base_name=f"{base_path}zip/{filename}", format="zip", root_dir=path_to_zip)
+        PathBuilder.build(base_path / "zip")
+        zip_file_path = shutil.make_archive(base_name=base_path / f"zip/{filename}", format="zip", root_dir=path_to_zip)
         return zip_file_path
 
     @staticmethod
-    def get_full_specs_path(base_path):
-        specs_path = list(glob.glob(f"{base_path}/../**/full*.yaml", recursive=True))
+    def get_full_specs_path(base_path) -> str:
+        specs_path = list(base_path.glob("../**/full*.yaml"))
+
         if len(specs_path) == 1:
-            return os.path.relpath(specs_path[0], base_path)
+            path_str = os.path.relpath(specs_path[0], base_path)
         else:
-            return ""
+            path_str = ""
+
+        return path_str
 
     @staticmethod
     def get_table_string_from_csv_string(csv_string: str, separator: str = ",", has_header: bool = True) -> str:
@@ -78,21 +81,21 @@ class Util:
         return table_string
 
     @staticmethod
-    def get_table_string_from_csv(csv_path: str, separator: str = ",", has_header: bool = True) -> str:
-        with open(csv_path, "r") as file:
+    def get_table_string_from_csv(csv_path: Path, separator: str = ",", has_header: bool = True) -> str:
+        with csv_path.open("r") as file:
             table_string = Util.get_table_string_from_csv_string(file.read())
         return table_string
 
     @staticmethod
-    def update_report_paths(report_result: ReportResult, path: str) -> ReportResult:
+    def update_report_paths(report_result: ReportResult, path: Path) -> ReportResult:
         for attribute in vars(report_result):
             attribute_value = getattr(report_result, attribute)
             if isinstance(attribute_value, list):
                 for output in attribute_value:
                     if isinstance(output, ReportOutput):
-                        new_filename = os.path.relpath(path=output.path, start=path).replace("..", "").replace("/", "_")
-                        new_filename = new_filename[1:] if new_filename[0] == '_' else new_filename
-                        new_path = path + new_filename
+                        new_filename = "_".join([part for part in Path(os.path.relpath(path=output.path, start=path)).parts if part != ".."])
+                        new_path = path / new_filename
+
                         if output.path != new_path:
                             shutil.copyfile(src=output.path, dst=new_path)
                             output.path = new_path

@@ -1,10 +1,10 @@
 import abc
-import os
 import pickle
 from typing import List
 
 import pandas as pd
 from sklearn.feature_extraction import DictVectorizer
+from pathlib import Path
 
 from source.analysis.data_manipulation.NormalizationType import NormalizationType
 from source.caching.CacheHandler import CacheHandler
@@ -210,7 +210,7 @@ class KmerFrequencyEncoder(DatasetEncoder):
         return encoded_data
 
     def scale_normalized(self, params, dataset, normalized_examples):
-        self.scaler_path = params.result_path + 'scaler.pickle' if self.scaler_path is None else self.scaler_path
+        self.scaler_path = params.result_path / 'scaler.pickle' if self.scaler_path is None else self.scaler_path
 
         examples = CacheHandler.memo_by_params(
             self._prepare_caching_params(dataset, params, step=KmerFrequencyEncoder.STEP_SCALED),
@@ -229,16 +229,16 @@ class KmerFrequencyEncoder(DatasetEncoder):
     def _vectorize_encoded(self, examples: list, params: EncoderParams):
 
         if self.vectorizer_path is None:
-            self.vectorizer_path = params.result_path + FilenameHandler.get_filename(DictVectorizer.__name__, "pickle")
+            self.vectorizer_path = params.result_path / FilenameHandler.get_filename(DictVectorizer.__name__, "pickle")
 
         if params.learn_model:
             vectorizer = DictVectorizer(sparse=True, dtype=float)
             vectorized_examples = vectorizer.fit_transform(examples)
             PathBuilder.build(params.result_path)
-            with open(self.vectorizer_path, 'wb') as file:
+            with self.vectorizer_path.open('wb') as file:
                 pickle.dump(vectorizer, file)
         else:
-            with open(self.vectorizer_path, 'rb') as file:
+            with self.vectorizer_path.open('rb') as file:
                 vectorizer = pickle.load(file)
             vectorized_examples = vectorizer.transform(examples)
 
@@ -251,7 +251,7 @@ class KmerFrequencyEncoder(DatasetEncoder):
 
     def _prepare_sequence_encoder(self, params: EncoderParams):
         class_name = self.sequence_encoding.value
-        sequence_encoder = ReflectionHandler.get_class_by_name(class_name, "encodings")
+        sequence_encoder = ReflectionHandler.get_class_by_name(class_name, "encodings/")
         return sequence_encoder
 
     def _encode_sequence(self, sequence: ReceptorSequence, params: EncoderParams, sequence_encoder, counts):
@@ -267,19 +267,19 @@ class KmerFrequencyEncoder(DatasetEncoder):
 
     def get_additional_files(self) -> List[str]:
         files = []
-        if self.scaler_path is not None and os.path.isfile(self.scaler_path):
+        if self.scaler_path is not None and self.scaler_path.is_file():
             files.append(self.scaler_path)
-        if self.vectorizer_path is not None and os.path.isfile(self.vectorizer_path):
+        if self.vectorizer_path is not None and self.vectorizer_path.is_file():
             files.append(self.vectorizer_path)
         return files
 
     @staticmethod
-    def export_encoder(path: str, encoder) -> str:
-        encoder_file = DatasetEncoder.store_encoder(encoder, path + "encoder.pickle")
+    def export_encoder(path: Path, encoder) -> Path:
+        encoder_file = DatasetEncoder.store_encoder(encoder, path / "encoder.pickle")
         return encoder_file
 
     @staticmethod
-    def load_encoder(encoder_file: str):
+    def load_encoder(encoder_file: Path):
         encoder = DatasetEncoder.load_encoder(encoder_file)
         for attribute in ['scaler_path', 'vectorizer_path']:
             encoder = DatasetEncoder.load_attribute(encoder, encoder_file, attribute)

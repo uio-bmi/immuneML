@@ -4,6 +4,7 @@ from zipfile import ZipFile
 import os
 import pandas as pd
 import numpy as np
+from pathlib import Path
 
 from source.IO.dataset_import.IReceptorImport import IReceptorImport
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
@@ -414,38 +415,41 @@ class TestIReceptorImport(TestCase):
     ]
 }'''
 
-
-        with open(path + "airr.tsv", "w") as file:
+        tsv_path = path / "airr.tsv"
+        with tsv_path.open("w") as file:
             file.writelines(airr_tsv_content)
 
-        with open(path + "airr-metadata.json", "w") as file:
+        metadata_path = path / "airr-metadata.json"
+        with metadata_path.open("w") as file:
             file.writelines(metadata_json_content)
 
-        with open(path + "info.txt", "w") as file:
+        info_path = path / "info.txt"
+        with info_path.open("w") as file:
             file.writelines("some additional info file that should be ignored")
 
-        with ZipFile(path + zip_name + ".zip", "w") as zipObj:
-            zipObj.write(path + "airr.tsv", "airr.tsv")
-            zipObj.write(path + "airr-metadata.json", "airr-metadata.json")
-            zipObj.write(path + "info.txt", "info.txt")
+        zip_path = path / f"{zip_name}.zip"
+        with ZipFile(zip_path, "w") as zipObj:
+            zipObj.write(tsv_path, "airr.tsv")
+            zipObj.write(metadata_path, "airr-metadata.json")
+            zipObj.write(info_path, "info.txt")
 
-        os.remove(path + "airr.tsv")
-        os.remove(path + "airr-metadata.json")
-        os.remove(path + "info.txt")
+        os.remove(tsv_path)
+        os.remove(metadata_path)
+        os.remove(info_path)
 
-        return path + zip_name + ".zip", "w"
+        return zip_path
 
 
 
     def test_import_repertoire_dataset(self):
-        base_path = EnvironmentSettings.root_path + "test/tmp/ireceptorimport/"
-        path = base_path + "repertoiredataset/"
+        base_path = EnvironmentSettings.root_path / "test/tmp/ireceptorimport/"
+        path = base_path / "repertoiredataset/"
         PathBuilder.build(path)
         ireceptor_zip1_path = self.create_dummy_dataset(path, zip_name="first_zip", disease_name="first_disease")
         ireceptor_zip2_path = self.create_dummy_dataset(path, zip_name="second_zip", disease_name="second_disease")
 
-        params = DefaultParamsLoader.load(EnvironmentSettings.default_params_path + "datasets/", "i_receptor")
-        params["result_path"] = path + "result/"
+        params = DefaultParamsLoader.load(EnvironmentSettings.default_params_path / "datasets", "i_receptor")
+        params["result_path"] = path / "result"
         params["path"] = path
 
         dataset = IReceptorImport.import_dataset(params, "ireceptor_repertoiredataset")
@@ -453,7 +457,7 @@ class TestIReceptorImport(TestCase):
         self.assertEqual(6, dataset.get_example_count())
         self.assertEqual(RepertoireDataset, type(dataset))
 
-        metadata_df = pd.read_csv(params["result_path"] + "ireceptor_repertoiredataset_metadata.csv",  comment=Constants.COMMENT_SIGN)
+        metadata_df = pd.read_csv(params["result_path"] / "ireceptor_repertoiredataset_metadata.csv",  comment=Constants.COMMENT_SIGN)
 
         self.assertListEqual(list(metadata_df["subject_id"]), ["person1", "person2", "person2", "person1", "person2", "person2"])
         self.assertListEqual(list(metadata_df["repertoire_id"]), ["second_zip_rep1", "second_zip_rep2", "second_zip_rep2", "first_zip_rep1", "first_zip_rep2", "first_zip_rep2"])
@@ -475,14 +479,14 @@ class TestIReceptorImport(TestCase):
 
 
     def test_import_sequence_dataset(self):
-        base_path = EnvironmentSettings.root_path + "test/tmp/ireceptorimport/"
-        path = base_path + "sequencedataset/"
+        base_path = EnvironmentSettings.root_path / "test/tmp/ireceptorimport/"
+        path = base_path / "sequencedataset/"
         PathBuilder.build(path)
         ireceptor_zip1_path = self.create_dummy_dataset(path, zip_name="first_zip", disease_name="first_disease")
         ireceptor_zip2_path = self.create_dummy_dataset(path, zip_name="second_zip", disease_name="second_disease")
 
-        params = DefaultParamsLoader.load(EnvironmentSettings.default_params_path + "datasets/", "i_receptor")
-        params["result_path"] = path + "result/"
+        params = DefaultParamsLoader.load(EnvironmentSettings.default_params_path / "datasets", "i_receptor")
+        params["result_path"] = path / "result"
         params["path"] = path
         params["is_repertoire"] = False
         params["paired"] = False

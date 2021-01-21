@@ -56,12 +56,12 @@ class TestRandomForestClassifier(TestCase):
         rfc = RandomForestClassifier()
         rfc.fit(EncodedData(x, y), "default")
 
-        path = EnvironmentSettings.root_path + "test/tmp/rfc/"
+        path = EnvironmentSettings.root_path / "test/tmp/rfc/"
 
         rfc.store(path)
-        self.assertTrue(os.path.isfile(path + "random_forest_classifier.pickle"))
+        self.assertTrue(os.path.isfile(path /  "random_forest_classifier.pickle"))
 
-        with open(path + "random_forest_classifier.pickle", "rb") as file:
+        with open(path / "random_forest_classifier.pickle", "rb") as file:
             rfc2 = pickle.load(file)
 
         self.assertTrue(isinstance(rfc2["default"], RFC))
@@ -75,10 +75,10 @@ class TestRandomForestClassifier(TestCase):
         rfc = RandomForestClassifier()
         rfc.fit(EncodedData(x, y), "default")
 
-        path = EnvironmentSettings.root_path + "test/tmp/rfc2/"
+        path = EnvironmentSettings.root_path / "test/tmp/rfc2/"
         PathBuilder.build(path)
 
-        with open(path + "random_forest_classifier.pickle", "wb") as file:
+        with open(path / "random_forest_classifier.pickle", "wb") as file:
             pickle.dump(rfc.get_model(), file)
 
         rfc2 = RandomForestClassifier()

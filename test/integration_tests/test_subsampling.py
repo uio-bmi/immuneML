@@ -24,7 +24,7 @@ class TestSubsamplingWorkflow(TestCase):
                         "format": "RandomRepertoireDataset",
                         "params": {
                             "repertoire_count": 50,
-                            "result_path": path,
+                            "result_path": str(path),
                             "labels": {
                                 "cmv": {
                                     True: 0.5,
@@ -49,14 +49,14 @@ class TestSubsamplingWorkflow(TestCase):
         import faulthandler
         faulthandler.enable()
 
-        path = PathBuilder.build(EnvironmentSettings.tmp_test_path + "subsampling_workflow/")
+        path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "subsampling_workflow/")
         repertoire_specs = self.build_specs(path)
 
-        specs_filename = f"{path}specs.yaml"
+        specs_filename = path / "specs.yaml"
         with open(specs_filename, "w") as file:
             yaml.dump(repertoire_specs, file)
 
-        app = ImmuneMLApp(specs_filename, path + "result/")
+        app = ImmuneMLApp(specs_filename, path / "result/")
         app.run()
 
         shutil.rmtree(path)

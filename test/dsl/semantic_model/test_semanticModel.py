@@ -29,7 +29,7 @@ class TestSemanticModel(TestCase):
 
     def test_run(self):
 
-        path = EnvironmentSettings.root_path + "test/tmp/smmodel/"
+        path = EnvironmentSettings.root_path / "test/tmp/smmodel/"
         PathBuilder.build(path)
         repertoires, metadata = RepertoireBuilder.build([["AAA", "CCC"], ["TTTT"], ["AAA", "CCC"], ["TTTT"],
                                                        ["AAA", "CCC"], ["TTTT"], ["AAA", "CCC"], ["TTTT"],

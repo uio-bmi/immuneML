@@ -5,7 +5,7 @@ from source.util.PathBuilder import PathBuilder
 
 
 class RepertoireClassificationTool(GalaxyTool):
-    def __init__(self, args, result_path):
+    def __init__(self, args, result_path: str):
         self.args = args
         super().__init__(None, result_path)
 

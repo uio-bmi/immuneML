@@ -1,6 +1,6 @@
-import os.path
 
 import pandas as pd
+from pathlib import Path
 
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.encoded_data.EncodedData import EncodedData
@@ -53,13 +53,13 @@ class DeepRCEncoder(DatasetEncoder):
         else:
             raise ValueError("DeepRCEncoder is not defined for dataset types which are not RepertoireDataset.")
 
-    def export_repertoire_tsv_files(self, output_folder):
+    def export_repertoire_tsv_files(self, output_folder: Path):
         repertoires = self.context["dataset"].repertoires
 
         for repertoire in repertoires:
-            filepath = f"{output_folder}/{repertoire.identifier}.{DeepRCEncoder.EXTENSION}"
+            filepath = output_folder / f"{repertoire.identifier}.{DeepRCEncoder.EXTENSION}"
 
-            if not os.path.isfile(filepath):
+            if not filepath.is_file():
                 df = pd.DataFrame({DeepRCEncoder.SEQUENCE_COLUMN: repertoire.get_sequence_aas(), DeepRCEncoder.COUNTS_COLUMN: repertoire.get_counts()})
                 df.to_csv(path_or_buf=filepath, sep=DeepRCEncoder.SEP, index=False)
 
@@ -67,7 +67,7 @@ class DeepRCEncoder(DatasetEncoder):
                 self.max_sequence_length = max(self.max_sequence_length, max_sequence_length)
 
     def export_metadata_file(self, dataset, labels, output_folder):
-        metadata_filepath = f"{output_folder}/{dataset.identifier}_metadata.{DeepRCEncoder.EXTENSION}"
+        metadata_filepath = output_folder / f"{dataset.identifier}_metadata.{DeepRCEncoder.EXTENSION}"
         metadata = dataset.get_metadata(labels, return_df=True)
         metadata[DeepRCEncoder.ID_COLUMN] = dataset.get_repertoire_ids()
 
@@ -76,7 +76,7 @@ class DeepRCEncoder(DatasetEncoder):
         return metadata_filepath
 
     def encode(self, dataset, params: EncoderParams) -> RepertoireDataset:
-        result_path = params.result_path + "/encoding"
+        result_path = params.result_path / "encoding"
         PathBuilder.build(result_path)
 
         self.export_repertoire_tsv_files(result_path)
@@ -94,6 +94,6 @@ class DeepRCEncoder(DatasetEncoder):
         return encoded_dataset
 
     @staticmethod
-    def export_encoder(path: str, encoder) -> str:
-        encoder_file = DatasetEncoder.store_encoder(encoder, path + "encoder.pickle")
+    def export_encoder(path: Path, encoder) -> Path:
+        encoder_file = DatasetEncoder.store_encoder(encoder, path / "encoder.pickle")
         return encoder_file

@@ -1,3 +1,4 @@
+from pathlib import Path
 from scripts.DocumentatonFormat import DocumentationFormat
 from scripts.specification_util import write_class_docs, make_docs
 from source.IO.dataset_import.DataImport import DataImport
@@ -33,7 +34,7 @@ class DefinitionParser:
     # TODO: remove redundancy from there, make lists and call those automatically instead
 
     @staticmethod
-    def parse(workflow_specification: dict, symbol_table: SymbolTable, result_path: str):
+    def parse(workflow_specification: dict, symbol_table: SymbolTable, result_path: Path):
 
         specs = workflow_specification["definitions"]
 
@@ -68,8 +69,8 @@ class DefinitionParser:
         }
 
     @staticmethod
-    def generate_docs(path):
-        def_path = PathBuilder.build(f"{path}definitions/")
+    def generate_docs(path: Path):
+        def_path = PathBuilder.build(path / "definitions")
         DefinitionParser.make_dataset_docs(def_path)
         DefinitionParser.make_simulation_docs(def_path)
         DefinitionParser.make_encodings_docs(def_path)
@@ -78,7 +79,7 @@ class DefinitionParser:
         DefinitionParser.make_preprocessing_docs(def_path)
 
     @staticmethod
-    def make_simulation_docs(path):
+    def make_simulation_docs(path: Path):
         instantiations = ReflectionHandler.all_nonabstract_subclasses(MotifInstantiationStrategy, "Instantiation", "motif_instantiation_strategy/")
         instantiations = [DocumentationFormat(inst, inst.__name__.replace('Instantiation', ""), DocumentationFormat.LEVELS[2])
                           for inst in instantiations]
@@ -91,28 +92,31 @@ class DefinitionParser:
                               [DocumentationFormat(Signal, Signal.__name__, DocumentationFormat.LEVELS[1])] + implanting_strategies + \
                                [DocumentationFormat(Implanting, Implanting.__name__, DocumentationFormat.LEVELS[1])]
 
-        with open(path + "simulation.rst", "w") as file:
+        file_path = path / "simulation.rst"
+        with file_path.open("w") as file:
             for doc_format in classes_to_document:
                 write_class_docs(doc_format, file)
 
     @staticmethod
-    def make_dataset_docs(path):
+    def make_dataset_docs(path: Path):
         import_classes = ReflectionHandler.all_nonabstract_subclasses(DataImport, "Import", "dataset_import/")
         make_docs(path, import_classes, "datasets.rst", "Import")
 
     @staticmethod
-    def make_encodings_docs(path):
+    def make_encodings_docs(path: Path):
         enc_classes = ReflectionHandler.all_direct_subclasses(DatasetEncoder, "Encoder", "encodings/")
         make_docs(path, enc_classes, "encodings.rst", "Encoder")
 
     @staticmethod
-    def make_reports_docs(path):
+    def make_reports_docs(path: Path):
         filename = "reports.rst"
+        file_path = path / filename
 
-        open(path + filename, "w").close()
+        with file_path.open("w") as file:
+            pass
 
         for report_type_class in [DataReport, EncodingReport, MLReport, TrainMLModelReport, MultiDatasetReport]:
-            with open(path + filename, "a") as file:
+            with file_path.open("a") as file:
                 doc_format = DocumentationFormat(cls=report_type_class,
                                                  cls_name=f"**{report_type_class.get_title()}**",
                                                  level_heading=DocumentationFormat.LEVELS[1])
@@ -124,11 +128,11 @@ class DefinitionParser:
             make_docs(path, classes, filename, "", "a")
 
     @staticmethod
-    def make_ml_methods_docs(path):
+    def make_ml_methods_docs(path: Path):
         classes = ReflectionHandler.all_nonabstract_subclasses(MLMethod, "", "ml_methods/")
         make_docs(path, classes, "ml_methods.rst", "")
 
     @staticmethod
-    def make_preprocessing_docs(path):
+    def make_preprocessing_docs(path: Path):
         classes = ReflectionHandler.all_nonabstract_subclasses(Preprocessor, "", "preprocessing/")
         make_docs(path, classes, "preprocessings.rst", "")

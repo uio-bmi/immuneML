@@ -28,7 +28,7 @@ class TestExploratoryAnalysisProcess(TestCase):
         return dataset
 
     def test_run(self):
-        path = EnvironmentSettings.tmp_test_path + "explanalysisproc/"
+        path = EnvironmentSettings.tmp_test_path / "explanalysisproc/"
         PathBuilder.build(path)
 
         dataset = self.create_dataset(path)
@@ -41,10 +41,10 @@ class TestExploratoryAnalysisProcess(TestCase):
         100a	TRA	AAAC	TRAV12	TRAJ1	HomoSapiens	HLA-A*11:01	B2M	MHCI	AVFDRKSDAK	EBNA4	EBV	                    
         """
 
-        with open(path + "refs.tsv", "w") as file:
+        with open(path / "refs.tsv", "w") as file:
             file.writelines(file_content)
 
-        refs_dict = {"path": path + "refs.tsv", "format": "VDJdb"}
+        refs_dict = {"path": path / "refs.tsv", "format": "VDJdb"}
 
         preproc_sequence = [SubjectRepertoireCollector()]
 
@@ -53,10 +53,10 @@ class TestExploratoryAnalysisProcess(TestCase):
                                                              preprocessing_sequence=preproc_sequence)}
 
         process = ExploratoryAnalysisInstruction(units, name="exp")
-        process.run(path + "results/")
+        process.run(path / "results/")
 
         self.assertTrue(units["named_analysis_1"].number_of_processes == 16)
-        self.assertTrue(os.path.isfile(path + "results/exp/analysis_named_analysis_1/report/sequence_length_distribution.html"))
-        self.assertTrue(os.path.isfile(path + "results/exp/analysis_named_analysis_2/report/sequence_length_distribution.html"))
+        self.assertTrue(os.path.isfile(path / "results/exp/analysis_named_analysis_1/report/sequence_length_distribution.html"))
+        self.assertTrue(os.path.isfile(path / "results/exp/analysis_named_analysis_2/report/sequence_length_distribution.html"))
 
         shutil.rmtree(path)

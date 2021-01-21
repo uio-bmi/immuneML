@@ -2,6 +2,7 @@
 
 import abc
 import random
+from pathlib import Path
 
 from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
 from source.data_model.repertoire.Repertoire import Repertoire
@@ -18,7 +19,7 @@ class SignalImplantingStrategy(metaclass=abc.ABCMeta):
         self.compute_implanting = implanting_computation
 
     @abc.abstractmethod
-    def implant_in_repertoire(self, repertoire: Repertoire, repertoire_implanting_rate: float, signal, path):
+    def implant_in_repertoire(self, repertoire: Repertoire, repertoire_implanting_rate: float, signal, path: Path):
         pass
 
     def implant_in_sequence(self, sequence: ReceptorSequence, signal, motif=None, chain=None) -> ReceptorSequence:

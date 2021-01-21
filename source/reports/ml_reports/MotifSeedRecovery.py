@@ -3,6 +3,7 @@ import warnings
 
 import numpy as np
 import pandas as pd
+from pathlib import Path
 
 from source.data_model.dataset.Dataset import Dataset
 from source.ml_methods.LogisticRegression import LogisticRegression
@@ -138,8 +139,8 @@ class MotifSeedRecovery(MLReport):
         return MotifSeedRecovery(implanted_motifs_per_label)
 
     def __init__(self, implanted_motifs_per_label, train_dataset: Dataset = None,
-                 test_dataset: Dataset = None, method: MLMethod = None, result_path: str = None, name: str = None):
-        super(MotifSeedRecovery, self).__init__(train_dataset, test_dataset, method, result_path, name)
+                 test_dataset: Dataset = None, method: MLMethod = None, result_path: Path = None, name: str = None):
+        super().__init__(train_dataset, test_dataset, method, result_path, name)
         self.implanted_motifs_per_label = implanted_motifs_per_label
         self.label = None
         self._param_field = None
@@ -159,7 +160,7 @@ class MotifSeedRecovery(MLReport):
                             output_figures=[report_output_fig])
 
     def _write_results_table(self, plotting_data):
-        filepath = self.result_path + "motif_seed_recovery.csv"
+        filepath = self.result_path / "motif_seed_recovery.csv"
         plotting_data.to_csv(filepath, index=False)
         return ReportOutput(path=filepath, name="motif seed recovery csv")
 
@@ -203,7 +204,7 @@ class MotifSeedRecovery(MLReport):
             logging.warning(f"Coefficients: empty data subset specified, skipping {output_name} plot...")
         else:
 
-            filename = f"{self.result_path}{output_name}.html"
+            filename = self.result_path / f"{output_name}.html"
 
             import plotly.express as px
             figure = px.box(plotting_data, x="max_seed_overlap", y="coefficients", labels={
@@ -213,7 +214,7 @@ class MotifSeedRecovery(MLReport):
                          color_discrete_sequence=px.colors.diverging.Tealrose)
             # figure.update_layout(title={"text":self.title, "x":0.5, "font": {"size":14}})
 
-            figure.write_html(filename)
+            figure.write_html(str(filename))
 
             return ReportOutput(filename, f"Overlap between implanted motif seeds and features versus {self._y_axis_title.lower()}")
 

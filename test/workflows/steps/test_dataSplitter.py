@@ -21,23 +21,23 @@ class TestDataSplitter(TestCase):
         os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
 
     def test_run(self):
-        dataset = RepertoireDataset(repertoires=[Repertoire("0.npy", "", "0"),
-                                                 Repertoire("0.npy", "", "1"),
-                                                 Repertoire("0.npy", "", "2"),
-                                                 Repertoire("0.npy", "", "3"),
-                                                 Repertoire("0.npy", "", "4"),
-                                                 Repertoire("0.npy", "", "5"),
-                                                 Repertoire("0.npy", "", "6"),
-                                                 Repertoire("0.npy", "", "7")])
+        dataset = RepertoireDataset(repertoires=[Repertoire("0.npy", None, "0"),
+                                                 Repertoire("0.npy", None, "1"),
+                                                 Repertoire("0.npy", None, "2"),
+                                                 Repertoire("0.npy", None, "3"),
+                                                 Repertoire("0.npy", None, "4"),
+                                                 Repertoire("0.npy", None, "5"),
+                                                 Repertoire("0.npy", None, "6"),
+                                                 Repertoire("0.npy", None, "7")])
 
-        paths = [EnvironmentSettings.root_path + "test/tmp/datasplitter/split_{}".format(i) for i in range(5)]
+        paths = [EnvironmentSettings.root_path / "test/tmp/datasplitter/split_{}".format(i) for i in range(5)]
         for path in paths:
             PathBuilder.build(path)
 
         df = pd.DataFrame(data={"key1": [0, 0, 1, 1, 1, 2, 2, 0], "filename": [0, 1, 2, 3, 4, 5, 6, 7]})
-        df.to_csv(EnvironmentSettings.root_path + "test/tmp/datasplitter/metadata.csv")
+        df.to_csv(EnvironmentSettings.root_path / "test/tmp/datasplitter/metadata.csv")
 
-        dataset.metadata_file = EnvironmentSettings.root_path + "test/tmp/datasplitter/metadata.csv"
+        dataset.metadata_file = EnvironmentSettings.root_path / "test/tmp/datasplitter/metadata.csv"
 
         training_percentage = 0.7
 
@@ -67,7 +67,7 @@ class TestDataSplitter(TestCase):
 
         self.assertEqual(trains[0].get_repertoire_ids(), trains2[0].get_repertoire_ids())
 
-        paths = [EnvironmentSettings.root_path + "test/tmp/datasplitter/split_{}".format(i) for i in range(dataset.get_example_count())]
+        paths = [EnvironmentSettings.root_path / "test/tmp/datasplitter/split_{}".format(i) for i in range(dataset.get_example_count())]
         for path in paths:
             PathBuilder.build(path)
 
@@ -86,7 +86,7 @@ class TestDataSplitter(TestCase):
         self.assertEqual(8, len(trains))
         self.assertEqual(8, len(tests))
 
-        paths = [EnvironmentSettings.root_path + "test/tmp/datasplitter/split_{}".format(i) for i in range(5)]
+        paths = [EnvironmentSettings.root_path / "test/tmp/datasplitter/split_{}".format(i) for i in range(5)]
         for path in paths:
             PathBuilder.build(path)
 
@@ -105,4 +105,4 @@ class TestDataSplitter(TestCase):
         self.assertEqual(5, len(trains))
         self.assertEqual(5, len(tests))
 
-        shutil.rmtree(EnvironmentSettings.root_path + "test/tmp/datasplitter/")
+        shutil.rmtree(EnvironmentSettings.root_path / "test/tmp/datasplitter/")

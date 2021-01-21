@@ -20,7 +20,7 @@ repertoires. immuneML can be used for:
   By implanting known immune signals into a given dataset, a ground truth benchmarking dataset is created. Such a dataset
   can be used to test the performance of ML settings under known conditions.
 
-- **Applying trained ML models** to new datasets with unknown class labels
+- **Applying trained ML models** to new datasets with unknown class labels.
 
 The starting point for any immuneML analysis is the YAML specification file. In this file, the settings of the analysis
 components are defined, which are shown in six different colors in the figure below. Additionally, the YAML file

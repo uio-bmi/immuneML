@@ -29,19 +29,19 @@ class MyTestCase(unittest.TestCase):
         return f"{dataset.name}.iml_dataset"
 
     def test_main(self):
-        path = PathBuilder.build(f"{EnvironmentSettings.tmp_test_path}args_to_yaml/")
-        data_path = path + "/dummy_pickle_data/"
+        path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "args_to_yaml")
+        data_path = path / "dummy_pickle_data"
 
         iml_dataset_name = self.create_dummy_dataset(data_path)
 
-        output_dir = f"{path}/output_dir"
+        output_dir = path / "output_dir"
         output_filename = "yaml_out.yaml"
 
         old_wd = os.getcwd()
 
         os.chdir(data_path)
 
-        yamlbuilder_main(["-o", output_dir, "-f", output_filename,
+        yamlbuilder_main(["-o", str(output_dir), "-f", output_filename,
                           "-l", "label1,label2",
                           "-m", "LogisticRegression", "-t", "70",
                           "-c", "5", "-s", "subsequence", "subsequence",
@@ -53,7 +53,7 @@ class MyTestCase(unittest.TestCase):
                           "-k", "0", "3"])
 
         # Use ImmuneML parser to test whether the yaml file created here is still valid
-        ImmuneMLParser.parse_yaml_file(f"{output_dir}/{output_filename}")
+        ImmuneMLParser.parse_yaml_file(output_dir / output_filename, path / "result_path")
 
         os.chdir(old_wd)
 

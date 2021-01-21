@@ -1,7 +1,7 @@
 import abc
-import os
 import pandas as pd
 import numpy as np
+from pathlib import Path
 
 from scripts.specification_util import update_docs_per_mapping
 from source.caching.CacheHandler import CacheHandler
@@ -78,7 +78,7 @@ class MatchedRegexEncoder(DatasetEncoder):
         "RepertoireDataset": "MatchedRegexRepertoireEncoder"
     }
 
-    def __init__(self, motif_filepath: str, match_v_genes: bool, sum_counts: bool, chains: list, name: str = None):
+    def __init__(self, motif_filepath: Path, match_v_genes: bool, sum_counts: bool, chains: list, name: str = None):
         self.motif_filepath = motif_filepath
         self.match_v_genes = match_v_genes
         self.sum_counts = sum_counts
@@ -93,7 +93,8 @@ class MatchedRegexEncoder(DatasetEncoder):
         ParameterValidator.assert_type_and_value(match_v_genes, bool, "MatchedRegexEncoder", "match_v_genes")
         ParameterValidator.assert_type_and_value(sum_counts, bool, "MatchedRegexEncoder", "sum_counts")
 
-        assert os.path.isfile(motif_filepath), f"MatchedRegexEncoder: the file {motif_filepath} does not exist. " \
+        motif_filepath = Path(motif_filepath)
+        assert motif_filepath.is_file(), f"MatchedRegexEncoder: the file {motif_filepath} does not exist. " \
                                                f"Specify the correct path under motif_filepath."
 
         file_columns = list(pd.read_csv(motif_filepath, sep="\t", iterator=False, dtype=str, nrows=0).columns)

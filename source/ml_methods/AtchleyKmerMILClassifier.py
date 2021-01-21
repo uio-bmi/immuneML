@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 import torch
 import yaml
+from pathlib import Path
 
 from source.data_model.encoded_data.EncodedData import EncodedData
 from source.ml_methods.MLMethod import MLMethod
@@ -62,7 +63,7 @@ class AtchleyKmerMILClassifier(MLMethod):
 
     def __init__(self, iteration_count: int = None, threshold: float = None, evaluate_at: int = None, use_early_stopping: bool = None,
                  random_seed: int = None, learning_rate: float = None, zero_abundance_weight_init: bool = None, number_of_threads: int = None,
-                 result_path: str = None):
+                 result_path: Path = None):
         super().__init__()
         self.logistic_regression = None
         self.random_seed = random_seed
@@ -153,23 +154,25 @@ class AtchleyKmerMILClassifier(MLMethod):
                         f"cross-validation instead.")
         self.fit(encoded_data, label_name)
 
-    def store(self, path, feature_names=None, details_path=None):
+    def store(self, path: Path, feature_names=None, details_path: Path = None):
         PathBuilder.build(path)
-        torch.save(copy.deepcopy(self.logistic_regression).state_dict(), path + "log_reg.pt")
+        torch.save(copy.deepcopy(self.logistic_regression).state_dict(), str(path / "log_reg.pt"))
         custom_vars = copy.deepcopy(vars(self))
 
         coefficients_df = pd.DataFrame(custom_vars["logistic_regression"].linear.weight.detach().numpy(), columns=feature_names)
         coefficients_df["bias"] = custom_vars["logistic_regression"].linear.bias.detach().numpy()
-        coefficients_df.to_csv(path + "coefficients.csv", index=False)
+        coefficients_df.to_csv(path / "coefficients.csv", index=False)
 
         del custom_vars["result_path"]
         del custom_vars["logistic_regression"]
 
-        with open(path + "custom_params.yaml", 'w') as file:
+        params_path = path / "custom_params.yaml"
+        with params_path.open('w') as file:
             yaml.dump(custom_vars, file)
 
     def load(self, path):
-        with open(path + "custom_params.yaml", "r") as file:
+        params_path = path / "custom_params.yaml"
+        with params_path.open("r") as file:
             custom_params = yaml.load(file, Loader=yaml.SafeLoader)
 
         for param, value in custom_params.items():
@@ -177,7 +180,7 @@ class AtchleyKmerMILClassifier(MLMethod):
                 setattr(self, param, value)
 
         self._make_log_reg()
-        self.logistic_regression.load_state_dict(torch.load(path + "log_reg.pt"))
+        self.logistic_regression.load_state_dict(torch.load(str(path / "log_reg.pt")))
 
     def get_model(self, label_name: str = None):
         return vars(self)

@@ -32,11 +32,11 @@ class DatasetGenerationTool(GalaxyTool):
         PathBuilder.build(self.result_path)
         self._update_specs()
         state = ImmuneMLApp(self.yaml_path, self.result_path).run()[0]
-        shutil.copytree(list(list(state.paths.values())[0].values())[0], self.result_path + "result/")
+        shutil.copytree(list(list(state.paths.values())[0].values())[0], self.result_path / "result/")
         print("Exported dataset.")
 
     def _update_specs(self):
-        with open(self.yaml_path, 'r') as file:
+        with self.yaml_path.open('r') as file:
             specs = yaml.safe_load(file)
 
         ParameterValidator.assert_keys_present(specs.keys(), ["definitions", "instructions"], DatasetGenerationTool.__name__, "YAML specification")

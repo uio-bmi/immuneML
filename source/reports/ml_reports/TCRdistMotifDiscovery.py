@@ -2,6 +2,7 @@ import logging
 from typing import List, Tuple
 
 from tcrdist.summarize import _select, member_summ
+from pathlib import Path
 
 from source.data_model.dataset.ReceptorDataset import ReceptorDataset
 from source.data_model.receptor.receptor_sequence.Chain import Chain
@@ -65,7 +66,7 @@ class TCRdistMotifDiscovery(MLReport):
     def build_object(cls, **kwargs):
         return TCRdistMotifDiscovery(**kwargs)
 
-    def __init__(self, train_dataset: ReceptorDataset = None, test_dataset: ReceptorDataset = None, method: MLMethod = None, result_path: str = None,
+    def __init__(self, train_dataset: ReceptorDataset = None, test_dataset: ReceptorDataset = None, method: MLMethod = None, result_path: Path = None,
                  name: str = None, cores: int = None, context: dict = None, positive_class_name=None, min_cluster_size: int = None,
                  use_reference_sequences: bool = None):
         super().__init__(train_dataset, test_dataset, method, result_path, name)
@@ -128,10 +129,10 @@ class TCRdistMotifDiscovery(MLReport):
             motif, stat = compute_pal_motif(seqs=_select(df=tcr_rep.clone_df, iloc_rows=row['neighbors_i'], col=f'cdr3_{chain}_aa'),
                                             centroid=centroid, refs=negative_examples[chain] if self.use_reference_sequences else None)
 
-            figure_path = self.result_path + f"motif_{chain}_{index + 1}.svg"
+            figure_path = self.result_path / f"motif_{chain}_{index + 1}.svg"
             svg_logo(motif, filename=figure_path)
 
-            motif_data_path = self.result_path + f"motif_{chain}_{index + 1}.csv"
+            motif_data_path = self.result_path / f"motif_{chain}_{index + 1}.csv"
             motif.to_csv(motif_data_path)
 
             figure_outputs.append(ReportOutput(figure_path, f'Motif {index + 1} ({Chain.get_chain(chain.upper()).name.lower()} chain)'))

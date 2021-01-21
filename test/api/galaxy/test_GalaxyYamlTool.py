@@ -15,8 +15,8 @@ from source.util.PathBuilder import PathBuilder
 class TestGalaxyYamlTool(TestCase):
     def test_run(self):
 
-        path = PathBuilder.build(f"{EnvironmentSettings.tmp_test_path}api_galaxy_yaml_tool/")
-        result_path = f"{path}result/"
+        path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "api_galaxy_yaml_tool/")
+        result_path = path / "result/"
 
         dataset = RandomDatasetGenerator.generate_repertoire_dataset(10, {10: 1}, {12: 1}, {}, result_path)
         dataset.name = "d1"
@@ -28,7 +28,7 @@ class TestGalaxyYamlTool(TestCase):
                     "new_d1": {
                         "format": "Pickle",
                         "params": {
-                            "metadata_file": f"{result_path}d1_metadata.csv"
+                            "metadata_file": str(result_path / "d1_metadata.csv")
                         }
                     },
                     "d2": {
@@ -113,14 +113,14 @@ class TestGalaxyYamlTool(TestCase):
             }
         }
 
-        specs_path = f"{path}specs.yaml"
+        specs_path = path / "specs.yaml"
         with open(specs_path, "w") as file:
             yaml.dump(specs, file)
 
-        run_immuneML(Namespace(**{"specification_path": specs_path, "result_path": result_path + 'result/', 'tool': "GalaxyYamlTool"}))
+        run_immuneML(Namespace(**{"specification_path": str(specs_path), "result_path": str(result_path / 'result/'), 'tool': "GalaxyYamlTool"}))
 
-        self.assertTrue(os.path.exists(f"{result_path}result/inst1/new_d1/AIRR"))
-        self.assertTrue(os.path.exists(f"{result_path}result/inst1/d2/AIRR"))
-        self.assertTrue(os.path.exists(f"{result_path}result/d2"))
+        self.assertTrue(os.path.exists(result_path / "result/inst1/new_d1/AIRR"))
+        self.assertTrue(os.path.exists(result_path / "result/inst1/d2/AIRR"))
+        self.assertTrue(os.path.exists(result_path / "result/d2"))
 
         shutil.rmtree(path)

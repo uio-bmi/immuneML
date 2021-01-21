@@ -1,4 +1,5 @@
 from typing import Tuple
+from pathlib import Path
 
 from source.IO.dataset_import.DataImport import DataImport
 from source.IO.dataset_import.IReceptorImport import IReceptorImport
@@ -8,6 +9,7 @@ from source.dsl.symbol_table.SymbolTable import SymbolTable
 from source.dsl.symbol_table.SymbolType import SymbolType
 from source.util.Logger import log
 from source.util.ParameterValidator import ParameterValidator
+from source.util.PathBuilder import PathBuilder
 from source.util.ReflectionHandler import ReflectionHandler
 
 
@@ -17,7 +19,7 @@ class ImportParser:
     valid_keys = ["format", "params"]
 
     @staticmethod
-    def parse(workflow_specification: dict, symbol_table: SymbolTable, result_path: str) -> Tuple[SymbolTable, dict]:
+    def parse(workflow_specification: dict, symbol_table: SymbolTable, result_path: Path) -> Tuple[SymbolTable, dict]:
         assert ImportParser.keyword in workflow_specification, "ImmuneMLParser: datasets are not defined."
 
         for key in workflow_specification[ImportParser.keyword].keys():
@@ -27,7 +29,7 @@ class ImportParser:
 
     @staticmethod
     @log
-    def _parse_dataset(key: str, dataset_specs: dict, symbol_table: SymbolTable, result_path: str) -> SymbolTable:
+    def _parse_dataset(key: str, dataset_specs: dict, symbol_table: SymbolTable, result_path: Path) -> SymbolTable:
         location = "ImportParser"
 
         ParameterValidator.assert_keys(list(dataset_specs.keys()), ImportParser.valid_keys, location, f"datasets:{key}", False)
@@ -38,14 +40,13 @@ class ImportParser:
         import_cls = ReflectionHandler.get_class_by_name("{}Import".format(dataset_specs["format"]))
         params = ImportParser._prepare_params(dataset_specs, result_path, key)
 
-
         if "is_repertoire" in params:
             ParameterValidator.assert_type_and_value(params["is_repertoire"], bool, location, "is_repertoire")
 
             if params["is_repertoire"] == True:
                 if import_cls != IReceptorImport:
                     assert "metadata_file" in params, f"{location}: Missing parameter: metadata_file under {key}/params/"
-                    ParameterValidator.assert_type_and_value(params["metadata_file"], str, location, "metadata_file")
+                    ParameterValidator.assert_type_and_value(params["metadata_file"], Path, location, "metadata_file")
 
             if params["is_repertoire"] == False:
                 assert "paired" in params, f"{location}: Missing parameter: paired under {key}/params/"
@@ -70,11 +71,18 @@ class ImportParser:
         return symbol_table
 
     @staticmethod
-    def _prepare_params(dataset_specs: dict, result_path: str, dataset_name: str):
+    def _prepare_params(dataset_specs: dict, result_path: Path, dataset_name: str):
         params = DefaultParamsLoader.load(ImportParser.keyword, dataset_specs["format"])
         if "params" in dataset_specs.keys():
             params = {**params, **dataset_specs["params"]}
         if "result_path" not in params or params["result_path"] is None:
-            params["result_path"] = f"{result_path}datasets/{dataset_name}/"
+            params["result_path"] = Path(result_path) / "datasets" / dataset_name
+        else:
+            params["result_path"] = Path(params["result_path"])
+
+        if "path" in params:
+            params["path"] = Path(params["path"])
+        if "metadata_file" in params:
+            params["metadata_file"] = Path(params["metadata_file"])
         dataset_specs["params"] = params
         return params

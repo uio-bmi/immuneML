@@ -1,6 +1,7 @@
 import os
 import shutil
 from typing import List
+from pathlib import Path
 
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.ml_methods.util.Util import Util as MLUtil
@@ -30,19 +31,19 @@ class HTMLBuilder:
     """
 
     @staticmethod
-    def build(states: list, path: str) -> str:
-        rel_path = os.path.relpath(path)
+    def build(states: list, path: Path) -> Path:
+        rel_path = Path(os.path.relpath(path))
         presentations = HTMLBuilder._collect_all_presentations(states, rel_path)
         presentation_html_path = HTMLBuilder._make_document(presentations, rel_path)
         return presentation_html_path
 
     @staticmethod
-    def _make_document(presentations: List[InstructionPresentation], path: str) -> str:
-        result_path = f"{path}/index.html"
+    def _make_document(presentations: List[InstructionPresentation], path: Path) -> Path:
+        result_path = path / "index.html"
         if len(presentations) > 1:
-            html_map = {"instructions": presentations, "css_path": EnvironmentSettings.html_templates_path + "css/custom.css",
+            html_map = {"instructions": presentations, "css_path": EnvironmentSettings.html_templates_path / "css/custom.css",
                         "full_specs": Util.get_full_specs_path(path), 'immuneML_version': MLUtil.get_immuneML_version()}
-            TemplateParser.parse(template_path=f"{EnvironmentSettings.html_templates_path}index.html",
+            TemplateParser.parse(template_path=EnvironmentSettings.html_templates_path / "index.html",
                                  template_map=html_map, result_path=result_path)
         elif len(presentations) == 1:
             shutil.copyfile(presentations[0].path, result_path)
@@ -53,8 +54,8 @@ class HTMLBuilder:
         return result_path
 
     @staticmethod
-    def _update_paths(result_path):
-        with open(result_path, 'r') as file:
+    def _update_paths(result_path: Path):
+        with result_path.open('r') as file:
 
             lines = []
             for line in file.readlines():
@@ -67,19 +68,19 @@ class HTMLBuilder:
                 lines[-1] = lines[-1].replace("""href="../""", """href="./""")
                 lines[-1] = lines[-1].replace("""src="../""", """src="./""")
 
-        with open(result_path, "w") as file:
+        with result_path.open("w") as file:
             file.write("\n".join(lines))
 
     @staticmethod
-    def _collect_all_presentations(states: list, rel_path: str) -> List[InstructionPresentation]:
+    def _collect_all_presentations(states: list, rel_path: Path) -> List[InstructionPresentation]:
         presentations = []
-        path = rel_path + 'HTML_output/'
+        path = rel_path / 'HTML_output'
 
         for state in states:
             presentation_builder = PresentationFactory.make_presentation_builder(state, PresentationFormat.HTML)
             presentation_path = presentation_builder.build(state)
             if len(states) > 1:
-                presentation_path = os.path.relpath(presentation_path, path)
+                presentation_path = Path(os.path.relpath(presentation_path, path))
             instruction_class = type(state).__name__[:-5]
             presentation = InstructionPresentation(presentation_path, instruction_class, state.name)
             presentations.append(presentation)

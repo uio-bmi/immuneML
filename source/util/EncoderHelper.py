@@ -15,10 +15,12 @@ class EncoderHelper:
         PathBuilder.build(params.result_path)
         if params.learn_model:
             training_ids = dataset.get_example_ids()
-            with open(params.result_path + "training_ids.pickle", "wb") as file:
+            training_ids_path = params.result_path / "training_ids.pickle"
+            with training_ids_path.open("wb") as file:
                 pickle.dump(training_ids, file)
         else:
-            with open(params.result_path + "training_ids.pickle", "rb") as file:
+            training_ids_path = params.result_path / "training_ids.pickle"
+            with training_ids_path.open("rb") as file:
                 training_ids = pickle.load(file)
         return training_ids
 

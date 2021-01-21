@@ -1,6 +1,5 @@
 import logging
 import shutil
-from glob import glob
 
 import yaml
 
@@ -85,7 +84,7 @@ class GalaxySimulationTool(GalaxyTool):
 
     """
 
-    def __init__(self, specification_path, result_path, **kwargs):
+    def __init__(self, specification_path: str, result_path: str, **kwargs):
         Util.check_parameters(specification_path, result_path, kwargs, GalaxySimulationTool.__name__)
         super().__init__(specification_path, result_path, **kwargs)
 
@@ -94,13 +93,13 @@ class GalaxySimulationTool(GalaxyTool):
 
         Util.run_tool(self.yaml_path, self.result_path)
 
-        dataset_location = list(glob(self.result_path + "/*/exported_dataset/*/"))[0]
-        shutil.copytree(dataset_location, self.result_path + 'result/')
+        dataset_location = list(self.result_path.glob("*/exported_dataset/*/"))[0]
+        shutil.copytree(dataset_location, self.result_path / 'result/')
 
         logging.info(f"{GalaxySimulationTool.__name__}: immuneML has finished and the signals were implanted in the dataset.")
 
     def prepare_specs(self):
-        with open(self.yaml_path, "r") as file:
+        with self.yaml_path.open("r") as file:
             specs = yaml.safe_load(file)
 
         instruction_name = Util.check_instruction_type(specs, GalaxySimulationTool.__name__, SimulationInstruction.__name__[:-11])

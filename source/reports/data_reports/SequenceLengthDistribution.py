@@ -3,6 +3,7 @@ from collections import Counter
 
 import pandas as pd
 import plotly.express as px
+from pathlib import Path
 
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.data_model.repertoire.Repertoire import Repertoire
@@ -29,8 +30,8 @@ class SequenceLengthDistribution(DataReport):
     def build_object(cls, **kwargs):
         return SequenceLengthDistribution(**kwargs)
 
-    def __init__(self, dataset: RepertoireDataset = None, batch_size: int = 1, result_path: str = None, name: str = None):
-        DataReport.__init__(self, dataset=dataset, result_path=result_path, name=name)
+    def __init__(self, dataset: RepertoireDataset = None, batch_size: int = 1, result_path: Path = None, name: str = None):
+        super().__init__(dataset=dataset, result_path=result_path, name=name)
         self.batch_size = batch_size
 
     def check_prerequisites(self):
@@ -69,7 +70,7 @@ class SequenceLengthDistribution(DataReport):
         figure.update_traces(marker_color=px.colors.diverging.Tealrose[0])
         PathBuilder.build(self.result_path)
 
-        file_path = self.result_path + "sequence_length_distribution.html"
-        figure.write_html(file_path)
+        file_path = self.result_path / "sequence_length_distribution.html"
+        figure.write_html(str(file_path))
         return ReportOutput(path=file_path, name="sequence length distribution plot")
 

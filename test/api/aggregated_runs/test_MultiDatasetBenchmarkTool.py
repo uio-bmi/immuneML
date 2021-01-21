@@ -2,6 +2,7 @@ import shutil
 from unittest import TestCase
 
 import yaml
+from pathlib import Path
 
 from source.api.aggregated_runs.MultiDatasetBenchmarkTool import MultiDatasetBenchmarkTool
 from source.environment.EnvironmentSettings import EnvironmentSettings
@@ -10,15 +11,15 @@ from source.util.PathBuilder import PathBuilder
 
 class TestMultiDatasetBenchmarkTool(TestCase):
     def test_run(self):
-        path = PathBuilder.build(EnvironmentSettings.tmp_test_path + "multi_dataset_benchmark/")
+        path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "multi_dataset_benchmark/")
         specs_file = self._prepare_specs(path)
 
-        tool = MultiDatasetBenchmarkTool(specs_file, path+"result/")
+        tool = MultiDatasetBenchmarkTool(specs_file, path/"result/")
         tool.run()
 
         shutil.rmtree(path)
 
-    def _prepare_specs(self, path) -> str:
+    def _prepare_specs(self, path) -> Path:
         specs = {
             "definitions": {
                 "datasets": {
@@ -28,7 +29,7 @@ class TestMultiDatasetBenchmarkTool(TestCase):
                             "repertoire_count": 100,
                             "sequence_count_probabilities": {50: 1},
                             "sequence_length_probabilities": {2: 1},
-                            "result_path": path + "d1/",
+                            "result_path": str(path / "d1"),
                             "labels": {
                                 "cmv": {
                                     True: 0.5,
@@ -43,7 +44,7 @@ class TestMultiDatasetBenchmarkTool(TestCase):
                             "repertoire_count": 100,
                             "sequence_count_probabilities": {50: 1},
                             "sequence_length_probabilities": {2: 1},
-                            "result_path": path + "d2/",
+                            "result_path": str(path / "d2"),
                             "labels": {
                                 "cmv": {
                                     True: 0.5,
@@ -116,7 +117,7 @@ class TestMultiDatasetBenchmarkTool(TestCase):
             }
         }
 
-        specs_file = path + "specs.yaml"
+        specs_file = path / "specs.yaml"
         with open(specs_file, 'w') as file:
             yaml.dump(specs, file)
 

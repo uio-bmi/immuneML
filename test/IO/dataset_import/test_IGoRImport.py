@@ -25,30 +25,30 @@ class TestIGoRImport(TestCase):
 4,TGTGCGAGAGGCTTCCATGGAACTACAGTAACTACGTTTGTAGGCTGTAGTACTACATGGACGTCTGG,1,1
 5,TGTGCACACAGACCTTGGCCGGGTGAGTATTACGATTTTTGGAGTGGTTATTAGGCCTTTTTGACTACTGG,1,0"""
 
-        with open(path + "rep1.tsv", "w") as file:
+        with open(path / "rep1.tsv", "w") as file:
             file.writelines(file1_content)
 
-        with open(path + "rep2.tsv", "w") as file:
+        with open(path / "rep2.tsv", "w") as file:
             file.writelines(file2_content)
 
         if add_metadata:
-            with open(path + "metadata.csv", "w") as file:
+            with open(path / "metadata.csv", "w") as file:
                 file.writelines("""filename,subject_id
 rep1.tsv,1
 rep2.tsv,2""")
 
     def test_load_repertoire(self):
         """Test dataset content with and without a header included in the input file"""
-        path = EnvironmentSettings.root_path + "test/tmp/io_igor_load/"
+        path = EnvironmentSettings.root_path / "test/tmp/io_igor_load/"
 
         PathBuilder.build(path)
         self.write_dummy_files(path, True)
 
-        params = DefaultParamsLoader.load(EnvironmentSettings.default_params_path + "datasets/", "igor")
+        params = DefaultParamsLoader.load(EnvironmentSettings.default_params_path / "datasets/", "igor")
         params["is_repertoire"] = True
         params["result_path"] = path
         params["path"] = path
-        params["metadata_file"] = path + "metadata.csv"
+        params["metadata_file"] = path / "metadata.csv"
 
         dataset = IGoRImport.import_dataset(params, "igor_repertoire_dataset")
 
@@ -65,17 +65,17 @@ rep2.tsv,2""")
         shutil.rmtree(path)
 
     def test_load_repertoire_with_stop_codon(self):
-        path = EnvironmentSettings.root_path + "test/tmp/io_igor_load/"
+        path = EnvironmentSettings.root_path / "test/tmp/io_igor_load/"
 
         PathBuilder.build(path)
         self.write_dummy_files(path, True)
 
-        params = DefaultParamsLoader.load(EnvironmentSettings.default_params_path + "datasets/", "igor")
+        params = DefaultParamsLoader.load(EnvironmentSettings.default_params_path / "datasets/", "igor")
         params["is_repertoire"] = True
         params["result_path"] = path
         params["path"] = path
         params["import_with_stop_codon"] = True
-        params["metadata_file"] = path + "metadata.csv"
+        params["metadata_file"] = path / "metadata.csv"
 
         dataset_stop_codons = IGoRImport.import_dataset(params, "igor_dataset_stop")
 
@@ -90,12 +90,12 @@ rep2.tsv,2""")
 
     def test_load_sequence_dataset(self):
         """Test dataset content with and without a header included in the input file"""
-        path = EnvironmentSettings.root_path + "test/tmp/io_igor_load/"
+        path = EnvironmentSettings.root_path / "test/tmp/io_igor_load/"
 
         PathBuilder.build(path)
         self.write_dummy_files(path, False)
 
-        params = DefaultParamsLoader.load(EnvironmentSettings.default_params_path + "datasets/", "igor")
+        params = DefaultParamsLoader.load(EnvironmentSettings.default_params_path / "datasets/", "igor")
         params["is_repertoire"] = False
         params["paired"] = False
         params["result_path"] = path
@@ -108,9 +108,10 @@ rep2.tsv,2""")
 
         self.assertEqual(4, dataset.get_example_count())
 
-        self.assertEqual("GCGAGACGTGTCTAGGGAGGATATTGTAGTAGTACCAGCTGCTATGACGGGCGGTCCGGTAGTACTACTTTGACTAC", seqs[0].nucleotide_sequence)
-        self.assertEqual("GCGAGAGGCTTCCATGGAACTACAGTAACTACGTTTGTAGGCTGTAGTACTACATGGACGTC", seqs[1].nucleotide_sequence)
-        self.assertEqual("GCGAGAGTTAATCGGCATATTGTGGTGGTGACTGCTATTATGACCGGGTAAAACTGGTTCGACCCC", seqs[2].nucleotide_sequence)
-        self.assertEqual("GCGAGAGATAGGTGGTCAACCCCAGTATTACGATATTTTGACTGGTGGACCCCGCCCTACTACTACTACATGGACGTC", seqs[3].nucleotide_sequence)
+        self.assertListEqual(sorted(["GCGAGACGTGTCTAGGGAGGATATTGTAGTAGTACCAGCTGCTATGACGGGCGGTCCGGTAGTACTACTTTGACTAC",
+                              "GCGAGAGGCTTCCATGGAACTACAGTAACTACGTTTGTAGGCTGTAGTACTACATGGACGTC",
+                              "GCGAGAGTTAATCGGCATATTGTGGTGGTGACTGCTATTATGACCGGGTAAAACTGGTTCGACCCC",
+                              "GCGAGAGATAGGTGGTCAACCCCAGTATTACGATATTTTGACTGGTGGACCCCGCCCTACTACTACTACATGGACGTC"]),
+                             sorted([seq.nucleotide_sequence for seq in seqs]))
 
         shutil.rmtree(path)

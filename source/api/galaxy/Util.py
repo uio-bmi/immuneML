@@ -11,7 +11,7 @@ from source.util.PathBuilder import PathBuilder
 class Util:
 
     @staticmethod
-    def check_parameters(yaml_path, output_dir, kwargs, location):
+    def check_parameters(yaml_path: str, output_dir: str, kwargs, location):
         assert os.path.isfile(yaml_path), f"{location}: path to the specification is not correct, got {yaml_path}, " \
                                           f"expecting path to a YAML file."
 
@@ -32,11 +32,11 @@ class Util:
     def update_result_paths(specs: dict, result_path: str, yaml_path: str):
         for key, item in specs["definitions"]["datasets"].items():
             if isinstance(item, dict) and 'params' in item.keys() and isinstance(item["params"], dict):
-                item['params']["result_path"] = f"{result_path}{key}/"
+                item['params']["result_path"] = str(result_path / key)
                 if item['format'] not in ['Pickle', 'RandomRepertoireDataset', 'RandomReceptorDataset']:
-                    item['params']['path'] = os.path.dirname(yaml_path) + "/"
+                    item['params']['path'] = str(yaml_path.parent)
 
-        with open(yaml_path, "w") as file:
+        with yaml_path.open("w") as file:
             yaml.dump(specs, file)
 
     @staticmethod

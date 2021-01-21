@@ -28,7 +28,7 @@ class TestCytoscapeNetworkExporter(TestCase):
                                            path=path)
 
         if dataset_type == "receptor":
-            receptordataset_filename = f"{path}/receptors.pkl"
+            receptordataset_filename = path / "receptors.pkl"
             with open(receptordataset_filename, "wb") as file:
                 pickle.dump(test_repertoire.receptors, file)
 
@@ -41,10 +41,10 @@ class TestCytoscapeNetworkExporter(TestCase):
         return dataset
 
     def test_receptor_dataset(self):
-        path = EnvironmentSettings.root_path + "test/tmp/cytoscape_export/"
+        path = EnvironmentSettings.root_path / "test/tmp/cytoscape_export/"
         PathBuilder.build(path)
 
-        receptor_dataset = self._create_dummy_data(f"{path}/data/", dataset_type="receptor")
+        receptor_dataset = self._create_dummy_data(path / "data", dataset_type="receptor")
 
         cne = CytoscapeNetworkExporter(receptor_dataset, path, chains=("alpha", "beta"),
                                        drop_duplicates=True, additional_node_attributes=["custom_1"],
@@ -52,16 +52,16 @@ class TestCytoscapeNetworkExporter(TestCase):
 
         cne._generate()
 
-        with open(f"{path}receptor_dataset/all_chains.sif") as file:
+        with open(path / "receptor_dataset/all_chains.sif") as file:
             self.assertListEqual(file.readlines(), ['*tra*s=DUPDUP*v=V1-1*j=J1-1\tpair\t*trb*s=AILUDGYF*v=V1-1*j=J1-1\n',
                                                     '*tra*s=DUPDUP*v=V1-1*j=J1-1\tpair\t*trb*s=DFJKHJ*v=V1-1*j=J1-1\n',
                                                     '*tra*s=DIUYUAG*v=V1-1*j=J1-1\tpair\t*trb*s=CTGTCGH*v=V1-1*j=J1-1\n'])
 
-        with open(f"{path}receptor_dataset/shared_chains.sif") as file:
+        with open(path / "receptor_dataset/shared_chains.sif") as file:
             self.assertListEqual(file.readlines(), ['*tra*s=DUPDUP*v=V1-1*j=J1-1\tpair\t*trb*s=AILUDGYF*v=V1-1*j=J1-1\n',
                                                     '*tra*s=DUPDUP*v=V1-1*j=J1-1\tpair\t*trb*s=DFJKHJ*v=V1-1*j=J1-1\n'])
 
-        with open(f"{path}receptor_dataset/node_metadata.tsv") as file:
+        with open(path / "receptor_dataset/node_metadata.tsv") as file:
             self.assertEqual(file.readline(), 'shared_name\tchain\tsequence\tv_subgroup\tv_gene\tj_subgroup\tj_gene\tcustom_1\tn_duplicates\n')
             self.assertListEqual(sorted(file.readlines()),
                                  sorted(['*tra*s=DUPDUP*v=V1-1*j=J1-1\talpha\tDUPDUP\tTRAV1\tTRAV1-1\tTRAJ1\tTRAJ1-1\tCUST-0\t2\n',
@@ -70,7 +70,7 @@ class TestCytoscapeNetworkExporter(TestCase):
                                          '*tra*s=DIUYUAG*v=V1-1*j=J1-1\talpha\tDIUYUAG\tTRAV1\tTRAV1-1\tTRAJ1\tTRAJ1-1\tCUST-3\t1\n',
                                          '*trb*s=CTGTCGH*v=V1-1*j=J1-1\tbeta\tCTGTCGH\tTRBV1\tTRBV1-1\tTRBJ1\tTRBJ1-1\tCUST-4\t1\n']))
 
-        with open(f"{path}receptor_dataset/edge_metadata.tsv") as file:
+        with open(path / "receptor_dataset/edge_metadata.tsv") as file:
             self.assertListEqual(file.readlines(),
                                  ['shared_name\tcustom_2\n',
                                   '*tra*s=DUPDUP*v=V1-1*j=J1-1 (pair) *trb*s=AILUDGYF*v=V1-1*j=J1-1\tCUST-A\n',
@@ -80,10 +80,10 @@ class TestCytoscapeNetworkExporter(TestCase):
         shutil.rmtree(path)
 
     def test_repertoire_dataset(self):
-        path = EnvironmentSettings.root_path + "test/tmp/cytoscape_export/"
+        path = EnvironmentSettings.root_path / "test/tmp/cytoscape_export/"
         PathBuilder.build(path)
 
-        repertoire_dataset = self._create_dummy_data(f"{path}/data/", dataset_type="repertoire")
+        repertoire_dataset = self._create_dummy_data(path / "data", dataset_type="repertoire")
 
         cne = CytoscapeNetworkExporter(repertoire_dataset, path, chains=("alpha", "beta"),
                                        drop_duplicates=True, additional_node_attributes=["custom_1"],
@@ -97,17 +97,17 @@ class TestCytoscapeNetworkExporter(TestCase):
         self.assertTrue(os.path.isfile(result.output_tables[2].path))
         self.assertTrue(os.path.isfile(result.output_tables[3].path))
 
-        with open(f"{path}repertoire_dataset/all_chains.sif") as file:
+        with open(path / "repertoire_dataset/all_chains.sif") as file:
             self.assertListEqual(file.readlines(), ['*tra*s=DUPDUP*v=V1-1*j=J1-1\tpair\t*trb*s=AILUDGYF*v=V1-1*j=J1-1\n',
                                                     '*tra*s=DUPDUP*v=V1-1*j=J1-1\tpair\t*trb*s=DFJKHJ*v=V1-1*j=J1-1\n',
                                                     '*tra*s=DIUYUAG*v=V1-1*j=J1-1\tpair\t*trb*s=CTGTCGH*v=V1-1*j=J1-1\n']
                                  )
 
-        with open(f"{path}repertoire_dataset/shared_chains.sif") as file:
+        with open(path / "repertoire_dataset/shared_chains.sif") as file:
             self.assertListEqual(file.readlines(), ['*tra*s=DUPDUP*v=V1-1*j=J1-1\tpair\t*trb*s=AILUDGYF*v=V1-1*j=J1-1\n',
                                                     '*tra*s=DUPDUP*v=V1-1*j=J1-1\tpair\t*trb*s=DFJKHJ*v=V1-1*j=J1-1\n'])
 
-        with open(f"{path}repertoire_dataset/node_metadata.tsv") as file:
+        with open(path / "repertoire_dataset/node_metadata.tsv") as file:
             self.assertEqual(file.readline(), 'shared_name\tchain\tsequence\tv_subgroup\tv_gene\tj_subgroup\tj_gene\tcustom_1\tn_duplicates\n')
 
             self.assertListEqual(sorted(file.readlines()),
@@ -117,7 +117,7 @@ class TestCytoscapeNetworkExporter(TestCase):
                                          '*tra*s=DIUYUAG*v=V1-1*j=J1-1\talpha\tDIUYUAG\tTRAV1\tTRAV1-1\tTRAJ1\tTRAJ1-1\tCUST-3\t1\n',
                                          '*trb*s=CTGTCGH*v=V1-1*j=J1-1\tbeta\tCTGTCGH\tTRBV1\tTRBV1-1\tTRBJ1\tTRBJ1-1\tCUST-4\t1\n']))
 
-        with open(f"{path}repertoire_dataset/edge_metadata.tsv") as file:
+        with open(path / "repertoire_dataset/edge_metadata.tsv") as file:
             self.assertListEqual(file.readlines(),
                                  ['shared_name\tcustom_2\n',
                                   '*tra*s=DUPDUP*v=V1-1*j=J1-1 (pair) *trb*s=AILUDGYF*v=V1-1*j=J1-1\tCUST-A\n',

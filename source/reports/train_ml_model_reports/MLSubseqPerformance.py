@@ -35,7 +35,7 @@ class MLSubseqPerformance(MLSettingsPerformance):
         return MLSubseqPerformance(kwargs["name"] if "name" in kwargs else None)
 
     def __init__(self, name: str = None):
-        super(MLSubseqPerformance, self).__init__(name)
+        super().__init__(name)
         self.vertical_grouping = "subsequence_size"
         self.result_name = "subseq_performance"
         self.state = None

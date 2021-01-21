@@ -48,7 +48,6 @@ class ObjectParser:
     @staticmethod
     def parse_object(specs, valid_class_names: list, class_name_ending: str, class_path: str, location: str, key: str,
                      builder: bool = False, return_params_dict: bool = False):
-
         class_name = ObjectParser.get_class_name(specs, valid_class_names, class_name_ending, location, key)
         ParameterValidator.assert_in_valid_list(class_name, valid_class_names, location, key)
 

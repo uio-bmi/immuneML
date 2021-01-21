@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 
 from source.environment.EnvironmentSettings import EnvironmentSettings
 from source.ml_methods.util.Util import Util as MLUtil
@@ -10,19 +11,19 @@ from source.workflows.instructions.ml_model_application.MLApplicationState impor
 
 
 class MLApplicationHTMLBuilder:
-    CSS_PATH = f"{EnvironmentSettings.html_templates_path}css/custom.css"
+    CSS_PATH = EnvironmentSettings.html_templates_path / "css/custom.css"
 
     @staticmethod
     def build(state: MLApplicationState = None) -> str:
-        base_path = PathBuilder.build(state.path + "../HTML_output/")
+        base_path = PathBuilder.build(state.path / "../HTML_output/")
         html_map = MLApplicationHTMLBuilder.make_html_map(state, base_path)
-        result_file = f"{base_path}MLModelTraining_{state.name}.html"
-        TemplateParser.parse(template_path=f"{EnvironmentSettings.html_templates_path}MLApplication.html",
+        result_file = base_path / "MLModelTraining_{state.name}.html"
+        TemplateParser.parse(template_path=EnvironmentSettings.html_templates_path / "MLApplication.html",
                              template_map=html_map, result_path=result_file)
         return result_file
 
     @staticmethod
-    def make_html_map(state: MLApplicationState, base_path: str) -> dict:
+    def make_html_map(state: MLApplicationState, base_path: Path) -> dict:
         return {
             "css_style": Util.get_css_content(MLApplicationHTMLBuilder.CSS_PATH),
             "hp_setting": state.hp_setting.get_key(),

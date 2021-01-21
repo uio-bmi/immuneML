@@ -2,6 +2,7 @@ import hashlib
 import logging
 import os
 import pickle
+from pathlib import Path
 
 import dill
 
@@ -14,7 +15,7 @@ class CacheHandler:
 
     @staticmethod
     def get_file_path(cache_type=None):
-        file_path = EnvironmentSettings.get_cache_path(cache_type) + "files/"
+        file_path = EnvironmentSettings.get_cache_path(cache_type) / "files"
         PathBuilder.build(file_path)
         return file_path
 
@@ -27,22 +28,23 @@ class CacheHandler:
     def get_by_key(cache_key: str, object_type, cache_type=None):
         filename = CacheHandler._build_filename(cache_key, object_type, cache_type)
         obj = None
-        if os.path.isfile(filename):
-            with open(filename, "rb") as file:
+        if filename.is_file():
+            with filename.open("rb") as file:
                 obj = dill.load(file)
         return obj
 
     @staticmethod
-    def _build_filename(cache_key: str, object_type: CacheObjectType, cache_type=None):
-        path = f"{EnvironmentSettings.get_cache_path(cache_type)}{object_type.name.lower()}/"
+    def _build_filename(cache_key: str, object_type: CacheObjectType, cache_type=None) -> Path:
+        path = EnvironmentSettings.get_cache_path(cache_type) / object_type.name.lower()
         PathBuilder.build(path)
-        return "{}{}.pickle".format(path, cache_key)
+        return path / f"{cache_key}.pickle"
 
     @staticmethod
     def add(params: tuple, caching_object, object_type: CacheObjectType = CacheObjectType.OTHER, cache_type=None):
         PathBuilder.build(EnvironmentSettings.get_cache_path(cache_type))
         h = CacheHandler.generate_cache_key(params)
-        with open(CacheHandler._build_filename(cache_key=h, object_type=object_type, cache_type=cache_type), "wb") as file:
+        filename = CacheHandler._build_filename(cache_key=h, object_type=object_type, cache_type=cache_type)
+        with filename.open("wb") as file:
             dill.dump(caching_object, file, protocol=pickle.HIGHEST_PROTOCOL)
 
     @staticmethod
@@ -50,7 +52,7 @@ class CacheHandler:
         PathBuilder.build(EnvironmentSettings.get_cache_path(cache_type))
         filename = CacheHandler._build_filename(cache_key=cache_key, object_type=object_type, cache_type=cache_type)
         try:
-            with open(filename, "wb") as file:
+            with filename.open("wb") as file:
                 dill.dump(caching_object, file, protocol=pickle.HIGHEST_PROTOCOL)
         except AttributeError:
             os.remove(filename)
