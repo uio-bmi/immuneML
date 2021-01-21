@@ -1,8 +1,5 @@
-import csv
 import shutil
 from unittest import TestCase
-
-import pandas as pd
 
 from source.IO.dataset_import.MiXCRImport import MiXCRImport
 from source.data_model.receptor.receptor_sequence.Chain import Chain
@@ -63,19 +60,18 @@ rep2.tsv,2""")
             self.assertTrue(all(sequence.metadata.chain == Chain.ALPHA for sequence in repertoire.sequences))
             if index == 0:
                 self.assertEqual(9, len(repertoire.sequences))
-                self.assertTrue(repertoire.sequences[0].amino_acid_sequence in ["ALVTDSWGKLQ", "AVLETSGSRLT"]) # OSX/windows
-                self.assertTrue(repertoire.sequences[0].metadata.v_gene in ["TRAV6", "TRAV21"]) # OSX/windows
+                self.assertTrue(repertoire.sequences[0].amino_acid_sequence in ["ALVTDSWGKLQ", "AVLETSGSRLT"])  # OSX/windows
+                self.assertTrue(repertoire.sequences[0].metadata.v_gene in ["TRAV6", "TRAV21"])  # OSX/windows
 
                 self.assertListEqual([Chain.ALPHA for i in range(9)], list(repertoire.get_chains()))
                 self.assertListEqual(sorted([956023, 90101, 69706, 56658, 55692, 43466, 42172, 41647, 19133]), sorted(list(repertoire.get_counts())))
 
             elif index == 1:
                 self.assertEqual(5, len(repertoire.sequences))
-                self.assertTrue(repertoire.sequences[0].nucleotide_sequence in ["GCTGTGCTGGAAACCAGTGGCTCTAGGTTGACC", "GCTCTAGTAACTGACAGCTGGGGGAAATTGCAG"]) # OSX/windows
+                self.assertTrue(repertoire.sequences[0].nucleotide_sequence in ["GCTGTGCTGGAAACCAGTGGCTCTAGGTTGACC",
+                                                                                "GCTCTAGTAACTGACAGCTGGGGGAAATTGCAG"])  # OSX/windows
 
         shutil.rmtree(path)
-
-
 
     def test_load_sequence_dataset(self):
         path = EnvironmentSettings.root_path / "test/tmp/mixcr/"
@@ -92,8 +88,7 @@ rep2.tsv,2""")
 
         seqs = [sequence for sequence in dataset.get_data()]
 
-        self.assertTrue(seqs[0].amino_acid_sequence in ["AVLETSGSRLT","ALVTDSWGKLQ"]) # OSX/windows
-        self.assertTrue(seqs[0].metadata.v_gene in ["TRAV21","TRAV6"]) # OSX/windows
+        self.assertTrue(seqs[0].amino_acid_sequence in ["AVLETSGSRLT", "ALVTDSWGKLQ"])  # OSX/windows
+        self.assertTrue(seqs[0].metadata.v_gene in ["TRAV21", "TRAV6"])  # OSX/windows
 
         shutil.rmtree(path)
-

@@ -1,7 +1,7 @@
 import pickle
+from pathlib import Path
 
 from sklearn.preprocessing import StandardScaler, normalize, binarize
-from pathlib import Path
 
 from source.analysis.data_manipulation.NormalizationType import NormalizationType
 from source.util.PathBuilder import PathBuilder
@@ -28,7 +28,7 @@ class FeatureScaler:
 
         if scaler_file.is_file():
             with scaler_file.open('rb') as file:
-                scaler = pickle.load(file) # todo does this work?
+                scaler = pickle.load(file)
                 scaled_design_matrix = scaler.transform(scaled_design_matrix)
         else:
             scaler = StandardScaler(with_mean=with_mean)

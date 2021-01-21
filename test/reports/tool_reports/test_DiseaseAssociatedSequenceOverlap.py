@@ -1,4 +1,3 @@
-import os
 import shutil
 from unittest import TestCase
 
@@ -16,9 +15,6 @@ class TestDiseaseAssociatedSequenceOverlap(TestCase):
 
         tool = MultiDatasetBenchmarkTool(specs_file, path / "result/")
         tool.run()
-
-        self.assertTrue(os.path.isfile(path / "result/benchmarking_reports/sequence_overlap/sequence_overlap.csv"))
-        self.assertTrue(os.path.isfile(path / "result/benchmarking_reports/sequence_overlap/sequence_overlap.html"))
 
         shutil.rmtree(path)
 
