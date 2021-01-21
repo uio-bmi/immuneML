@@ -28,3 +28,12 @@ work with python 3.7 and 3.6, but some additional packages may need to be manual
     `pip install git+https://github.com/uio-bmi/immuneML`
     
 To try out the platform, see the quickstart guide and the documentation.
+
+
+
+<hr>
+
+
+© Copyright 2021, Milena Pavlovic, Lonneke Scheffer, Keshav Motwani, Victor Greiff, Geir Kjetil Sandve
+
+
