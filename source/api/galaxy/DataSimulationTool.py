@@ -33,6 +33,9 @@ class DataSimulationTool(GalaxyTool):
         with self.yaml_path.open("r") as file:
             specs = yaml.safe_load(file)
 
+        print("specs:")
+        print(specs)
+
         self.instruction_name = Util.check_instruction_type(specs, DataSimulationTool.__name__, self.expected_instruction)
         self.export_format = Util.check_export_format(specs, DataSimulationTool.__name__, self.instruction_name)
 
