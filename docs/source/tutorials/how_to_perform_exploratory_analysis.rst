@@ -26,8 +26,6 @@ whereas in my_analysis_2 dataset my_dataset is encoded first using my_regex_matc
       my_regex_matches:
         MatchedRegex:
           motif_filepath: path/to/regex_file.tsv
-          match_v_genes: False
-          sum_counts: False
 
     reports:
       my_seq_lengths: SequenceLengthDistribution # reports without parameters

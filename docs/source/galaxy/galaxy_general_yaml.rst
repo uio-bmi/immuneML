@@ -37,8 +37,6 @@ The following YAML specification shows an example of how to run the ExploratoryA
       my_regex_matches:
         MatchedRegex:
           motif_filepath: regex_file.tsv # this file must be selected from the galaxy history as an 'additional file'
-          match_v_genes: False
-          sum_counts: False
 
     reports:
       my_seq_lengths: SequenceLengthDistribution # reports without parameters
