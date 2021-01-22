@@ -24,11 +24,13 @@ from source.util.PathBuilder import PathBuilder
 class AIRRExporter(DataExporter):
     """
     Exports a RepertoireDataset of Repertoires in AIRR format.
+
     Things to note:
         - one filename_prefix is given, which is combined with the Repertoire identifiers
         for the filenames, to create one file per Repertoire
         - 'counts' is written into the field 'duplicate_counts'
         - 'sequence_identifiers' is written both into the fields 'sequence_id' and 'rearrangement_id'
+
     """
 
     @staticmethod
