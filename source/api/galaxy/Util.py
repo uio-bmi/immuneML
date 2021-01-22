@@ -16,11 +16,6 @@ class Util:
         assert os.path.isfile(yaml_path), f"{location}: path to the specification is not correct, got {yaml_path}, " \
                                           f"expecting path to a YAML file."
 
-        print(yaml_path)
-        print(type(yaml_path))
-        print(output_dir)
-        print(type(output_dir))
-
         assert isinstance(output_dir, Path), f"{location}: output_dir is {output_dir}, expected path to a folder to store the results."
 
     @staticmethod

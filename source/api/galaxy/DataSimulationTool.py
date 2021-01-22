@@ -13,6 +13,9 @@ from source.workflows.instructions.dataset_generation.DatasetExportInstruction i
 class DataSimulationTool(GalaxyTool):
 
     def __init__(self, specification_path: str, result_path: str, **kwargs):
+        print("in dataset simulation tool types of paths")
+        print(type(specification_path))
+        print(type(result_path))
         Util.check_parameters(specification_path, result_path, kwargs, DataSimulationTool.__name__)
         super().__init__(specification_path, result_path, **kwargs)
         self.expected_instruction = DatasetExportInstruction.__name__[:-11]
