@@ -1,20 +1,69 @@
 How to run any AIRR ML analysis in Galaxy
 =========================================
 
-To run an analysis in Galaxy, `Run immuneML with YAML specification` tool should be used. This tool can run
-any analysis supported by immuneML. To use the tool, it is necessary to provide a YAML
-specification file defining the analysis, and a list of input files (if any) or a
-list of Galaxy collections (if any).
+To be able to run any possible YAML-based immuneML analysis in Galaxy, the tool 'Run immuneML with YAML specification' should be used.
+It is typically recommended to use the analysis-specific Galaxy tools for :ref:`creating datasets <How to make an immuneML dataset in Galaxy>`,
+:ref:`simulating synthetic data <How to simulate an AIRR dataset in Galaxy>`,
+:ref:`implanting synthetic immune signals <How to simulate immune events into an existing AIRR dataset in Galaxy>` or
+:ref:`training <How to train ML models in Galaxy>` and :ref:`applying <How to apply previously trained ML models to a new AIRR dataset in Galaxy>` ML models instead of this tool.
+These other tools are able to export the relevant output files to Galaxy history elements.
 
-YAML specification describes the task which should be executed. To see the details on how
-to write the specification, see :ref:`How to specify an analysis with YAML`. The differences from the specification when running
-immuneML as a command line tool and running it in Galaxy are:
+However, when you want to run the :ref:`ExploratoryAnalysis` instruction, or other analyses that do not have a corresponding Galaxy tool, this generic tool can be used.
 
-- When running from Galaxy, the paths to files should only include filenames as all files provided will be available in the working directory.
 
-- When using a Galaxy collection (as created by the `Create dataset` tool), as a dataset, the metadata filename can be found in the
-  collection, along with other files. This depends on the format the dataset was created in. See :ref:`Datasets` for more information
-  on how to specify import parameters of a dataset in different formats (currently, dataset stored as a Galaxy collection will be in
-  either Pickle or AIRR format).
+Creating the YAML specification
+---------------------------------------------
 
-To use additional files or Galaxy collections, these files need to be present in the current Galaxy history.
+This Galaxy tool takes as input an immuneML dataset from the Galaxy history, optional additional files, and a YAML specification file.
+To see the details on how to write the YAML specification, see :ref:`How to specify an analysis with YAML`.
+
+When writing an analysis specification for Galaxy, it can be assumed that all selected files are present in the current working directory. A path
+to an additional file thus consists only of the filename.
+
+The following YAML specification shows an example of how to run the ExploratoryAnalysis instruction inside Galaxy:
+
+
+.. highlight:: yaml
+.. code-block:: yaml
+
+  definitions:
+    datasets:
+      dataset: # user-defined dataset name
+        format: Pickle # the default format used by the 'Create dataset' galaxy tool is Pickle
+        params:
+          path: dataset.iml_dataset # specify the dataset name, the default name used by
+                                    # the 'Create dataset' galaxy tool is dataset.iml_dataset
+
+    encodings:
+      my_regex_matches:
+        MatchedRegex:
+          motif_filepath: regex_file.tsv # this file must be selected from the galaxy history as an 'additional file'
+
+    reports:
+      my_seq_lengths: SequenceLengthDistribution # a report with default parameters
+      my_matches: Matches
+
+  instructions:
+    instruction_1:
+      type: ExploratoryAnalysis
+      analyses:
+        my_analysis_1: # user-defined analysis name
+          dataset: my_dataset
+          report: my_seq_lengths
+        my_analysis_2:
+          dataset: my_dataset
+          encoding: my_regex_matches
+          report: my_matches
+          labels:
+              - disease
+
+Where the file regex_file.tsv must be a tab-separated file, which may contain the following lines:
+
+====  ==========
+id    TRB_regex
+====  ==========
+1     ACG
+2     EDNA
+3     DFWG
+====  ==========
+
