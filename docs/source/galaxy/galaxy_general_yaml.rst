@@ -33,7 +33,6 @@ The following YAML specification shows an example of how to run the ExploratoryA
         params:
           path: dataset.iml_dataset # specify the dataset name, the default name used by
                                     # the 'Create dataset' galaxy tool is dataset.iml_dataset
-
     encodings:
       my_regex_matches:
         MatchedRegex:
@@ -42,11 +41,11 @@ The following YAML specification shows an example of how to run the ExploratoryA
           sum_counts: False
 
     reports:
-      my_seq_lengths: SequenceLengthDistribution # a report with default parameters
+      my_seq_lengths: SequenceLengthDistribution # reports without parameters
       my_matches: Matches
 
   instructions:
-    instruction_1:
+    my_instruction: # user-defined instruction name
       type: ExploratoryAnalysis
       analyses:
         my_analysis_1: # user-defined analysis name
@@ -56,9 +55,6 @@ The following YAML specification shows an example of how to run the ExploratoryA
           dataset: dataset
           encoding: my_regex_matches
           report: my_matches
-          labels:
-              - disease
-
 
 Where the file regex_file.tsv must be a tab-separated file, which may contain the following lines:
 

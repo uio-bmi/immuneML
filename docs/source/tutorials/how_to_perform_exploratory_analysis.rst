@@ -25,25 +25,25 @@ whereas in my_analysis_2 dataset my_dataset is encoded first using my_regex_matc
     encodings:
       my_regex_matches:
         MatchedRegex:
-          motif_filepath: /path/to/file.tsv
+          motif_filepath: path/to/regex_file.tsv
+          match_v_genes: False
+          sum_counts: False
 
     reports:
-      my_seq_lengths: SequenceLengthDistribution # a report with default parameters
+      my_seq_lengths: SequenceLengthDistribution # reports without parameters
       my_matches: Matches
 
   instructions:
-    instruction_1:
+    my_instruction: # user-defined instruction name
       type: ExploratoryAnalysis
       analyses:
-        my_analysis_1: # this user-defined name of the analysis is later used as a folder name in results
+        my_analysis_1: # user-defined analysis name
           dataset: my_dataset
           report: my_seq_lengths
         my_analysis_2:
           dataset: my_dataset
           encoding: my_regex_matches
           report: my_matches
-          labels:
-              - disease
 
 Where the file regex_file.tsv must be a tab-separated file, which may contain the following lines:
 
