@@ -23,11 +23,12 @@ Synthetic immune signals (representing antigen binding or disease) can be implan
 
 Once an immuneML dataset has been created in Galaxy, immunology experts without machine learning background can follow these instructions:
 
-- :ref:`How to train immune repertoire classifiers using the simple Galaxy interface`
+- :ref:`How to train immune repertoire classifiers using the easy Galaxy interface`
 
-- :ref:`How to train immune receptor classifiers using the simple Galaxy interface`
+- :ref:`How to train immune receptor classifiers using the easy Galaxy interface`
 
-Alternatively, CLI equivalent tools based on the YAML specification can be run using the following instructions
+
+Alternatively, CLI equivalent tools based on the YAML specification can be run using the following instructions:
 
 - :ref:`How to train ML models in Galaxy`
 

@@ -1,21 +1,75 @@
 How to simulate an AIRR dataset in Galaxy
 ===================================================================
 
-This tool allows you to quickly make a dataset which could be used for benchmarking machine learning methods or encodings,
-or testing out other functionalities. The tool generates a SequenceDataset, ReceptorDataset or RepertoireDataset consisting of random CDR3 sequences. The sequences are
-made of randomly chosen amino acids and there is no underlying structure in the sequences. You can control how many sequences, receptors or repertoires to
-generate and the length of the receptor sequences. Additionally, you can define labels with possible values which will be randomly assigned to the
-sequences, receptors or repertoires.
+The Galaxy tool 'Simulate immune receptor/repertoire dataset' allows you to quickly make a dummy dataset.
+The tool generates a SequenceDataset, ReceptorDataset or RepertoireDataset consisting of random CDR3 sequences, which could be used for benchmarking machine learning methods or encodings,
+or testing out other functionalities.
+The amino acids in the sequences are chosen from a uniform random distribution, and there is no underlying structure in the sequences.
 
-Simulations of a repertoire and a receptor dataset are shown in the figures below.
+You can control:
 
-.. figure:: ../_static/images/simulate_immune_repertoire_dataset.png
-  :width: 70%
+- The amount of sequences in the dataset, and in the case of a RepertoireDataset, the amount of repertoires
 
-.. figure:: ../_static/images/simulate_immune_receptor_dataset.png
-  :width: 70%
+- The length of the generated sequences
 
-The tool takes a YAML specification as input and outputs a dataset collection either in Pickle or AIRR format, which can then be downloaded or used as input
-for other immuneML Galaxy tools.
+- Labels, which can be used as a target when training ML models
+
+Note that since these labels are randomly assigned, they do not bear any meaning and it is not possible train a ML model with high classification accuracy on this data.
+Meaningful labels can be added by :ref:`simulating immune events into an existing AIRR dataset <How to simulate immune events into an existing AIRR dataset in Galaxy>`.
+
+
+
+Creating the YAML specification
+---------------------------------------------
+
+To run this tool, the user should provide a YAML specification describing the analysis.
 The YAML specification should use :ref:`RandomSequenceDataset`, :ref:`RandomReceptorDataset` or :ref:`RandomRepertoireDataset` import in combination with the :ref:`DatasetExport` instruction.
-A complete example of a full YAML is shown in this tutorial: :ref:`Exporting a random sequence/receptor/repertoire dataset`.
+A complete example of a full YAML specification for generating a RandomRepertoireDataset is shown here:
+
+
+.. highlight:: yaml
+.. code-block:: yaml
+
+  definitions:
+    datasets:
+      my_random_dataset:
+        format: RandomRepertoireDataset # alternatively, choose RandomSequenceDataset or RandomReceptorDataset (note they have different params)
+        params:
+          labels: # metadata that can be used as labels, can also be empty
+            HLA: # user-defined label name
+              A: 0.6 # user-defined label values, the probabilities must sum to 1
+              B: 0.4
+          repertoire_count: 100
+          sequence_count_probabilities: # the probabilities of finding each number of sequences in a repertoire, must sum to 1
+            10000: 0.5
+            12000: 0.5
+          sequence_length_probabilities: # the probabilities of finding each sequence length in a repertoire, must sum to 1
+            12: 0.25
+            13: 0.25
+            14: 0.25
+            15: 0.25
+    instructions:
+      my_dataset_export_instruction: # user-defined instruction name
+          type: DatasetExport
+          datasets: # specify the dataset defined above
+            - my_random_dataset
+          export_formats:
+          # only one format can be specified here and the dataset in this format will be
+          # available as a Galaxy collection afterwards
+            - Pickle # Can be AIRR (human-readable) or Pickle (recommended for further Galaxy-analysis)
+
+
+
+
+
+..
+    Simulations of a repertoire and a receptor dataset are shown in the figures below.
+
+    .. figure:: ../_static/images/simulate_immune_repertoire_dataset.png
+      :width: 70%
+
+    .. figure:: ../_static/images/simulate_immune_receptor_dataset.png
+      :width: 70%
+
+
+

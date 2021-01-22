@@ -114,7 +114,7 @@ specification for random repertoire generation and export is given below:
           sequence_length_probabilities:
             10: 1.0
   instructions:
-    my_dataset_generation_instruction:
+    my_dataset_export_instruction:
       type: DatasetExport
       datasets: [d1] # list of datasets to export
       export_formats: [AIRR, Pickle] # list of formats to export the datasets to

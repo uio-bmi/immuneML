@@ -84,14 +84,14 @@ A complete YAML specification for a RepertoireDataset could look like this:
             metadata_file: metadata.csv # the metadata file is identified by name
             # other import parameters may be specified here
     instructions:
-      my_dataset_generation_instruction: # user-defined instruction name
+      my_dataset_export_instruction: # user-defined instruction name
           type: DatasetExport
           datasets: # specify the dataset defined above
               - my_repertoire_dataset
           export_formats:
           # only one format can be specified here and the dataset in this format will be
           # available as a Galaxy collection afterwards
-              - Pickle # Can be AIRR (human-readable) or Pickle (recommended)
+              - Pickle # Can be AIRR (human-readable) or Pickle (recommended for further Galaxy-analysis)
 
 Alternatively, for a ReceptorDataset the complete YAML specification may look like this:
 
@@ -114,14 +114,14 @@ Alternatively, for a ReceptorDataset the complete YAML specification may look li
               Epitope species: epitope_species
             # other import parameters may be specified here
     instructions:
-      my_dataset_generation_instruction: # user-defined instruction name
+      my_dataset_export_instruction: # user-defined instruction name
           type: DatasetExport
           datasets: # specify the dataset defined above
               - my_receptor_dataset
           export_formats:
           # only one format can be specified here and the dataset in this format will be
           # available as a Galaxy collection afterwards
-              - Pickle # Can be AIRR (human-readable) or Pickle (recommended)
+              - Pickle # Can be AIRR (human-readable) or Pickle (recommended for further Galaxy-analysis)
 
 Note that the export format specified here will determine how dataset import should be defined in the subsequent
 YAML specifications for other immuneML Galaxy tools ('Run immuneML with YAML specification' and 'Simulate events in an immune
