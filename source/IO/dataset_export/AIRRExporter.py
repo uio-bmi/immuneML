@@ -135,14 +135,32 @@ class AIRRExporter(DataExporter):
                     if custom_param not in attributes_dict:
                         attributes_dict[custom_param] = [None for i in range(i)]
 
+            # add implanted signals of this receptor sequence to attributes dict
+            if sequence.annotation is not None and sequence.annotation.implants is not None and len(sequence.annotation.implants) > 0:
+                for implant_annotation in sequence.annotation.implants:
+                    if implant_annotation.signal_id not in attributes_dict:
+                        attributes_dict[implant_annotation.signal_id] = [None for i in range(i)]
+
             for attribute in attributes_dict.keys():
                 try:
+                    # get general attributes
                     attr_value = sequence.get_attribute(attribute)
                     if isinstance(attr_value, Enum):
                         attr_value = attr_value.value
                     attributes_dict[attribute].append(attr_value)
                 except KeyError:
-                    attributes_dict[attribute].append(None)
+                    try:
+                        # get implants
+                        all_implants = []
+                        for implant_annotation in sequence.annotation.implants:
+                            if attribute == implant_annotation.signal_id:
+                                all_implants.append(str(implant_annotation))
+                        if all_implants:
+                            attributes_dict[attribute].append("|".join(all_implants))
+                        else:
+                            attributes_dict[attribute].append(None)
+                    except AttributeError: # todo except other kind of error?
+                        attributes_dict[attribute].append(None)
 
         df = pd.DataFrame({**attributes_dict, **main_data_dict})
 
