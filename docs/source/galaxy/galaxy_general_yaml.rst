@@ -38,6 +38,8 @@ The following YAML specification shows an example of how to run the ExploratoryA
       my_regex_matches:
         MatchedRegex:
           motif_filepath: regex_file.tsv # this file must be selected from the galaxy history as an 'additional file'
+          match_v_genes: False
+          sum_counts: False
 
     reports:
       my_seq_lengths: SequenceLengthDistribution # a report with default parameters
@@ -48,14 +50,15 @@ The following YAML specification shows an example of how to run the ExploratoryA
       type: ExploratoryAnalysis
       analyses:
         my_analysis_1: # user-defined analysis name
-          dataset: my_dataset
+          dataset: dataset
           report: my_seq_lengths
         my_analysis_2:
-          dataset: my_dataset
+          dataset: dataset
           encoding: my_regex_matches
           report: my_matches
           labels:
               - disease
+
 
 Where the file regex_file.tsv must be a tab-separated file, which may contain the following lines:
 
