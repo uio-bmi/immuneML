@@ -24,13 +24,11 @@ from source.util.PathBuilder import PathBuilder
 class AIRRExporter(DataExporter):
     """
     Exports a RepertoireDataset of Repertoires in AIRR format.
-
     Things to note:
         - one filename_prefix is given, which is combined with the Repertoire identifiers
         for the filenames, to create one file per Repertoire
         - 'counts' is written into the field 'duplicate_counts'
         - 'sequence_identifiers' is written both into the fields 'sequence_id' and 'rearrangement_id'
-
     """
 
     @staticmethod
@@ -135,32 +133,14 @@ class AIRRExporter(DataExporter):
                     if custom_param not in attributes_dict:
                         attributes_dict[custom_param] = [None for i in range(i)]
 
-            # add implanted signals of this receptor sequence to attributes dict
-            if sequence.annotation is not None and sequence.annotation.implants is not None and len(sequence.annotation.implants) > 0:
-                for implant_annotation in sequence.annotation.implants:
-                    if implant_annotation.signal_id not in attributes_dict:
-                        attributes_dict[implant_annotation.signal_id] = [None for i in range(i)]
-
             for attribute in attributes_dict.keys():
                 try:
-                    # get general attributes
                     attr_value = sequence.get_attribute(attribute)
                     if isinstance(attr_value, Enum):
                         attr_value = attr_value.value
                     attributes_dict[attribute].append(attr_value)
                 except KeyError:
-                    try:
-                        # get implants
-                        all_implants = []
-                        for implant_annotation in sequence.annotation.implants:
-                            if attribute == implant_annotation.signal_id:
-                                all_implants.append(str(implant_annotation))
-                        if all_implants:
-                            attributes_dict[attribute].append("|".join(all_implants))
-                        else:
-                            attributes_dict[attribute].append(None)
-                    except AttributeError: # todo except other kind of error?
-                        attributes_dict[attribute].append(None)
+                    attributes_dict[attribute].append(None)
 
         df = pd.DataFrame({**attributes_dict, **main_data_dict})
 
