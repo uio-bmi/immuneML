@@ -1,7 +1,6 @@
 import logging
 from typing import List, Tuple
 
-from tcrdist.summarize import _select, member_summ
 from pathlib import Path
 
 from source.data_model.dataset.ReceptorDataset import ReceptorDataset
@@ -83,6 +82,7 @@ class TCRdistMotifDiscovery(MLReport):
 
         from source.util.TCRdistHelper import TCRdistHelper
         from tcrdist.rep_diff import hcluster_diff
+        from tcrdist.summarize import member_summ
 
         PathBuilder.build(self.result_path)
 
@@ -111,6 +111,8 @@ class TCRdistMotifDiscovery(MLReport):
 
     def _discover_motif_in_cluster(self, tcr_rep, index, row, negative_examples=None) -> Tuple[List[ReportOutput], List[ReportOutput]]:
         from tcrdist.adpt_funcs import get_centroid_seq
+        from tcrdist.summarize import _select
+
         from palmotif import compute_pal_motif
         from palmotif import svg_logo
 

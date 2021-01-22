@@ -1,5 +1,6 @@
-from setuptools import setup, find_packages
 from pathlib import Path
+
+from setuptools import setup, find_packages
 
 from source.environment.Constants import Constants
 
@@ -13,7 +14,7 @@ def import_requirements(filename) -> list:
 setup(
     name="immuneML",
     version=Constants.VERSION,
-    description="immuneML is a software platform for machine learning analysis of immune receptor sequences",
+    description="immuneML is a software platform for machine learning analysis of immune receptor repertoires.",
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",
     author="Milena Pavlovic",
@@ -21,9 +22,7 @@ setup(
     url="https://github.com/uio-bmi/immuneML",
     install_requires=import_requirements("requirements.txt"),
     extras_require={
-        "DeepRC":  ["widis-lstm-tools@git+https://github.com/widmi/widis-lstm-tools", "deeprc@git+https://github.com/ml-jku/DeepRC@fec4b4f4b2cd70e00e8de83da169560dec73a419"],
-        "TCRDist": import_requirements("requirements_TCRdist.txt"),
-        "all": ["widis-lstm-tools@git+https://github.com/widmi/widis-lstm-tools", "deeprc@git+https://github.com/ml-jku/DeepRC@fec4b4f4b2cd70e00e8de83da169560dec73a419", "parasail==1.2", "tcrdist3>=0.1.6"],
+        "TCRDist": import_requirements("requirements_TCRdist.txt")
     },
     classifiers=[
         "Programming Language :: Python :: 3"
