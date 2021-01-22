@@ -32,7 +32,7 @@ class MatchedRegexEncoder(DatasetEncoder):
 
         sum_counts (bool): When counting the number of matches, one can choose to count the number of matching sequences
         or sum the frequencies of those sequences. If sum_counts is True, the sequence frequencies are summed. Otherwise,
-        if sum_counts is False, the number of matching unique sequences is counted.
+        if sum_counts is False, the number of matching unique sequences is counted. By default sum_counts is False.
 
         motif_filepath (str): The path to the motif input file. This should be a tab separated file containing a
         column named 'id' and for every chain that should be matched a column containing the regex (<chain>_regex) and a column containing
