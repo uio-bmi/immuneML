@@ -2,6 +2,7 @@ import logging
 import os
 
 import yaml
+from pathlib import Path
 
 from source.app.ImmuneMLApp import ImmuneMLApp
 from source.util.ParameterValidator import ParameterValidator
@@ -11,11 +12,14 @@ from source.util.PathBuilder import PathBuilder
 class Util:
 
     @staticmethod
-    def check_parameters(yaml_path: str, output_dir: str, kwargs, location):
+    def check_parameters(yaml_path: str, output_dir: Path, kwargs, location):
         assert os.path.isfile(yaml_path), f"{location}: path to the specification is not correct, got {yaml_path}, " \
                                           f"expecting path to a YAML file."
 
-        assert isinstance(output_dir, str) and output_dir != "", f"{location}: output_dir is {output_dir}, " \
+        print(yaml_path)
+        print(type(yaml_path))
+
+        assert isinstance(output_dir, str), f"{location}: output_dir is {output_dir}, " \
                                                                  f"expected path to a folder to store the results."
 
     @staticmethod
