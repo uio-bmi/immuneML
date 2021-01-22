@@ -7,7 +7,7 @@ class Implanting:
 
     """
     When performing a Simulation, one or more implantings can be specified. An implanting represents
-    a set of signals which are implanted in a RepertoireDataset or ReceptorDataset with given rates.
+    a set of signals which are implanted in a RepertoireDataset with given rates.
 
     Multiple implantings may be specified in one simulation. In this case, each implanting will only
     affect its own partition of the dataset, so each repertoire can only receive implanted signals from
