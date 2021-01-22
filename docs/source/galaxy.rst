@@ -7,34 +7,49 @@ graphical user interface aimed at immunology experts without a machine learning 
 
 To get started, you will need to add your dataset to Galaxy, which is explained in this tutorial:
 
-- :ref:`How to make an immuneML dataset in Galaxy` - how to use the 'Create dataset' tool to add an immuneML Galaxy dataset to the Galaxy history
+- :ref:`How to make an immuneML dataset in Galaxy`
 
 Remote datasets may be fetched from VDJdb or the iReceptor Plus Gateway, see:
 
-- :ref:`How to import remote datasets into immuneML` - how to work with data from remote sources, and import this data as an immuneML Galaxy dataset.
+- :ref:`How to import remote AIRR datasets in Galaxy`
 
 If you do not want to use experimental data and just want to try something out quickly, you can simulate an immune dataset:
 
-- :ref:`Simulate an immune receptor or repertoire dataset` - create a simple immune repertoire or receptor dataset for testing or benchmarking purposes.
+- :ref:`How to simulate an AIRR dataset in Galaxy`
 
-Subsequently, immunology experts without machine learning background can follow these instructions:
+Synthetic immune signals (representing antigen binding or disease) can be implanted in an existing dataset:
 
-- :ref:`Train immune repertoire classifiers` (Galaxy tool) - a tool with an easily interpretable user interface for repertoire classification (e.g., immune status prediction).
+- :ref:`How to simulate immune events into an existing AIRR dataset in Galaxy`
 
-- :ref:`Train immune receptor classifiers` (Galaxy tool) - a tool with an easily interpretable user interface for receptor classification (e.g., antigen binding prediction).
+Once an immuneML dataset has been created in Galaxy, immunology experts without machine learning background can follow these instructions:
+
+- :ref:`How to train immune repertoire classifiers using the simple Galaxy interface`
+
+- :ref:`How to train immune receptor classifiers using the simple Galaxy interface`
 
 Alternatively, CLI equivalent tools based on the YAML specification can be run using the following instructions
 
-- :ref:`How to run an analysis in Galaxy` - a tool that can perform any analysis immuneML supports using a Galaxy collection created in the ‘Create dataset’ Galaxy tool or raw files and a YAML specification.
+- :ref:`How to train ML models in Galaxy`
 
+- :ref:`How to apply previously trained ML models to a new AIRR dataset in Galaxy`
+
+- :ref:`How to run any AIRR ML analysis in Galaxy`
 
 .. toctree::
   :maxdepth: 1
-  :caption: Galaxy tutorials:
+  :caption: Dataset tutorials:
 
-  galaxy/how_to_make_an_immuneML_dataset_in_galaxy
-  galaxy/how_to_import_remote_data.rst
-  galaxy/how_to_simulate_immune_dataset
-  galaxy/how_to_run_an_analysis_in_galaxy
-  galaxy/how_to_classify_immune_repertoires
-  galaxy/how_to_classify_immune_receptors
+  galaxy/galaxy_dataset
+  galaxy/galaxy_import_remote_data
+  galaxy/galaxy_simulate_dataset
+  galaxy/galaxy_simulate_signals
+
+.. toctree::
+  :maxdepth: 1
+  :caption: Analysis tutorials:
+
+  galaxy/galaxy_simple_repertoires
+  galaxy/galaxy_simple_receptors
+  galaxy/galaxy_train_ml_models
+  galaxy/galaxy_apply_ml_models
+  galaxy/galaxy_general_yaml

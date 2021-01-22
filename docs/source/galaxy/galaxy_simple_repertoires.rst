@@ -1,5 +1,5 @@
-Train immune repertoire classifiers
-=========================================
+How to train immune repertoire classifiers using the simple Galaxy interface
+=============================================================================
 
 This page provides the documentation for the Galaxy tool 'Train immune repertoire classifiers'.
 The purpose of this tool is to train machine learning (ML) models to predict a characteristic per immune repertoire, such as
@@ -34,7 +34,7 @@ answers to the last two questions in the graphical user interface.
   The disease-associated sequences or sub-sequences are highlighted with color. The different colors represent independent elements of the disease signal.
   Each color represents one (sub)sequence, and position dependent subsequences can only have the same color when they occur in the same position,
   although different colors (i.e., nucleotide or amino acid sequences) may occur in the same position.
-  Training: the training and validation data is used to train ML models and find the optimal hyper-parameters through 5-fold cross-validation.
+  Training: the training and validation data is used to train ML models and find the optimal hyperparameters through 5-fold cross-validation.
   The test set is left out and is used to obtain a fair estimate of the model performance.
 
 Encoding
@@ -68,7 +68,7 @@ Different ML methods require different procedures for training. In addition to t
 do not directly change the predictions of a model, but they control the learning process (for example: the learning speed).
 
 The immune repertoires are divided into sets with different purposes: the training and validation sets are used for finding the optimal parameters
-and hyper-parameters respectively. The test set is held out, and is only used to estimate the performance of a trained model.
+and hyperparameters respectively. The test set is held out, and is only used to estimate the performance of a trained model.
 
 In this tool, a range of plausible hyperparameters have been predefined for each ML method. The optimal hyperparameters are found by splitting the
 training/validation data into 5 equal portions, where 4 portions are used to train the ML model (with different hyperparameters) and the remaining
@@ -82,8 +82,8 @@ More analysis options
 ----------------------
 
 A limited selection of immuneML options is available through this tool. If you wish to have full control of the analysis, consider using the tool described under
-:ref:`How to run an AIRR ML analysis in Galaxy`. This tool provides other encodings and machine learning methods to choose from, as well as
+:ref:`How to run any AIRR ML analysis in Galaxy`. This tool provides other encodings and machine learning methods to choose from, as well as
 data preprocessing and settings for hyperparameter optimization. The interface of the YAML-based tool expects more independence and knowledge about
-machine learning from the user. Information about how to specify an analysis with YAML can be found in the :ref:`How to specify an analysis with YAML`.
+machine learning from the user. See also :ref:`How to specify an analysis with YAML`.
 
 

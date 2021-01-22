@@ -4,7 +4,7 @@ How to make an immuneML dataset in Galaxy
 The ‘Create dataset’ Galaxy tool allows users to import data from various formats and create immuneML datasets in Galaxy.
 Before creating a dataset, the relevant data files must first be uploaded to the Galaxy interface. This can be done either
 by uploading files from your local computer (use the 'Upload file' tool under the 'Get local data' menu), or by fetching
-remote data from the iReceptor Plus Gateway or VDJdb (see :ref:`How to import remote datasets into immuneML`).
+remote data from the iReceptor Plus Gateway or VDJdb (see :ref:`How to import remote AIRR datasets in Galaxy`).
 
 The imported immuneML dataset is stored in a Galaxy collection, which will appear as a history item on the right side of the screen.
 Such Galaxy collections can later be selected as input to other tools.

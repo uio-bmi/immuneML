@@ -1,4 +1,4 @@
-Use case 3: Benchmarking ML methods on ground-truth synthetic data
+Manuscript use case 3: Benchmarking ML methods on ground-truth synthetic data
 ==============================================================================
 
 In this use case, we show that immuneML can be used for benchmarking ML methods and encodings. To do this,

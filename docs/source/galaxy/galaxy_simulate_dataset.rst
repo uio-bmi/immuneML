@@ -1,5 +1,5 @@
-Simulate an immune receptor or repertoire dataset
-===================================================
+How to simulate an AIRR dataset in Galaxy
+===================================================================
 
 This tool allows you to quickly make a dataset which could be used for benchmarking machine learning methods or encodings,
 or testing out other functionalities. The tool generates a SequenceDataset, ReceptorDataset or RepertoireDataset consisting of random CDR3 sequences. The sequences are

@@ -1,4 +1,4 @@
-How to import remote datasets into immuneML
+How to import remote AIRR datasets in Galaxy
 ===========================================================
 The immuneML Galaxy web interface integrates with the iReceptor Gateway and VDJdb such that data can automatically be sent to the Galaxy history,
 and subsequently an immuneML dataset can be generated through the 'Create dataset' tool.

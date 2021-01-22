@@ -1,4 +1,4 @@
-How to run an AIRR ML analysis in Galaxy
+How to run any AIRR ML analysis in Galaxy
 =========================================
 
 To run an analysis in Galaxy, `Run immuneML with YAML specification` tool should be used. This tool can run

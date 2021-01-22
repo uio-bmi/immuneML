@@ -75,7 +75,7 @@ Specifying Definitions
 
 Definitions refer to components, which will be used within the instructions. They include:
 
-- Datasets definitions: specifying where data is located and how it should be imported,
+- Datasets definitions: specifying where data is located and how it should be imported (see :ref:`How to import data into immuneML` for more details),
 
 - Preprocessing sequences: defining one or more preprocessing steps to be taken on the dataset,
 
@@ -89,9 +89,9 @@ Simulation-specific components (only relevant when running a :ref:`Simulation in
 
 - Motifs: parts of the simulation definition defined by a seed and a way to create specific motif instances from the seed,
 
-- Signals: parts of the :ref:`simulation<How to simulate antigen/disease-associated signals in AIRR datasets>` which can include multiple motifs and correspond to a single label for subsequent classification tasks,
+- Signals: parts of the simulation which can include multiple motifs and correspond to a single label for subsequent classification tasks,
 
-- :ref:`Simulations<How to simulate antigen/disease-associated signals in AIRR datasets>`: define how to combine different signals and how to implant them in the dataset.
+- Simulations: define how to combine different signals and how to implant them in the dataset.
 
 Each component is defined using a key (a string) that uniquely identifies it and which
 will be used in the instructions to refer to the component defined in this way.
