@@ -13,10 +13,11 @@ class Util:
 
     @staticmethod
     def check_parameters(yaml_path: Path, output_dir: Path, kwargs, location):
-        assert os.path.isfile(yaml_path), f"{location}: path to the specification is not correct, got {yaml_path}, " \
-                                          f"expecting path to a YAML file."
+        assert isinstance(yaml_path, Path), f"{location}: yaml_path is {output_dir}, expected Path object."
+        assert isinstance(output_dir, Path), f"{location}: output_dir is {output_dir}, expected Path object pointing to a folder to store the results."
 
-        assert isinstance(output_dir, Path), f"{location}: output_dir is {output_dir}, expected path to a folder to store the results."
+        assert yaml_path.is_file(), f"{location}: path to the specification is not correct, got {yaml_path}, expecting path to a YAML file."
+
 
     @staticmethod
     def check_paths(specs: dict, tool_name: str):
