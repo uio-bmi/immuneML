@@ -1,7 +1,6 @@
 import logging
 
 import pandas as pd
-from tcrdist.repertoire import TCRrep
 
 from source.caching.CacheHandler import CacheHandler
 from source.data_model.dataset.ReceptorDataset import ReceptorDataset
@@ -11,7 +10,7 @@ from source.data_model.receptor.RegionType import RegionType
 class TCRdistHelper:
 
     @staticmethod
-    def compute_tcr_dist(dataset: ReceptorDataset, labels: list, cores: int = 1) -> TCRrep:
+    def compute_tcr_dist(dataset: ReceptorDataset, labels: list, cores: int = 1):
         return CacheHandler.memo_by_params((('dataset_identifier', dataset.identifier), ("type", "TCRrep")),
                                            lambda: TCRdistHelper._compute_tcr_dist(dataset, labels, cores))
 
@@ -33,6 +32,8 @@ class TCRdistHelper:
             an instance of TCRrep object with computed pairwise distances between all receptors in the dataset
 
         """
+        from tcrdist.repertoire import TCRrep
+
         df = TCRdistHelper.prepare_tcr_dist_dataframe(dataset, labels)
         tcr_rep = TCRrep(cell_df=df, chains=['alpha', 'beta'], organism=dataset.params["organism"], cpus=cores, deduplicate=False,
                          compute_distances=False)
