@@ -41,6 +41,9 @@ class Util:
 
     @staticmethod
     def check_instruction_type(specs: dict, tool_name, expected_instruction) -> str:
+        print(list(specs.keys()))
+        print(list(specs))
+
         ParameterValidator.assert_keys_present(list(specs.keys()), ['definitions', 'instructions'], tool_name, "YAML specification")
         assert len(list(specs['instructions'].keys())) == 1, f"{tool_name}: multiple instructions were given " \
                                                              f"({str(list(specs['instructions'].keys()))[1:-1]}), but only one instruction of type " \
