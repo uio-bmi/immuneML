@@ -47,7 +47,7 @@ class TestDatasetGenerationTool(TestCase):
         PathBuilder.build(path)
         self.prepare_specs(yaml_path)
 
-        run_immuneML(Namespace(**{"specification_path": str(yaml_path), "result_path": str(result_path), 'tool': "DatasetGenerationTool"}))
+        run_immuneML(Namespace(**{"specification_path": yaml_path, "result_path": result_path, 'tool': "DatasetGenerationTool"}))
 
         self.assertTrue(os.path.isfile(result_path / "result/d1_metadata.csv"))
         self.assertTrue(os.path.isfile(result_path / "result/d1.iml_dataset"))
