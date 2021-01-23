@@ -1,7 +1,9 @@
 # quality: gold
 
+import logging
 import pickle
 import pandas as pd
+from pathlib import Path
 
 from source.IO.dataset_import.DataImport import DataImport
 from source.IO.dataset_import.DatasetImportParams import DatasetImportParams
@@ -63,7 +65,18 @@ class PickleImport(DataImport):
         with pickle_params.path.open("rb") as file:
             dataset = pickle.load(file)
         if pickle_params.metadata_file is not None and hasattr(dataset, "metadata_file"):
-            dataset.metadata_file = pickle_params.metadata_file
+            if pickle_params.metadata_file.is_file():
+                dataset.metadata_file = pickle_params.metadata_file
+            else:
+                metadata_file = Path(pickle_params.metadata_file.name)
+                if metadata_file.is_file():
+                    dataset.metadata_file = metadata_file
+                    logging.warning(f"PickleImport: metadata file could not be found at {pickle_params.metadata_file}, "
+                                    f"using {metadata_file} instead.")
+                else:
+                    raise FileNotFoundError(f"PickleImport: the metadata file could not be found at {pickle_params.metadata_file}"
+                                            f"or at {metadata_file}. Please update the path to the metadata file.")
+
             metadata = pd.read_csv(dataset.metadata_file, comment=Constants.COMMENT_SIGN)
             metadata.to_csv(dataset.metadata_file, index=False)
         return dataset

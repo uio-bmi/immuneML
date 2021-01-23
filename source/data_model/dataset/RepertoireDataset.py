@@ -4,7 +4,6 @@ import uuid
 
 import pandas as pd
 from pathlib import Path
-import os
 
 from source.data_model.dataset.Dataset import Dataset
 from source.data_model.encoded_data.EncodedData import EncodedData
@@ -47,26 +46,14 @@ class RepertoireDataset(Dataset):
     def get_example_count(self):
         return len(self.repertoires)
 
-    def get_metadata_file(self):
-        if self.metadata_file is None:
-            return None
-        elif self.metadata_file.is_file():
-            return self.metadata_file
-        else:
-            cwd_metadata_file = Path(self.metadata_file.name)
-            if cwd_metadata_file.is_file():
-                return cwd_metadata_file
-
     def get_metadata_fields(self):
         if self.metadata_fields is None:
-            metadata_file = self.get_metadata_file()
-            df = pd.read_csv(metadata_file, sep=",", nrows=0)
+            df = pd.read_csv(self.metadata_file, sep=",", nrows=0)
             self.metadata_fields = df.columns.values.tolist()
         return self.metadata_fields
 
     def get_metadata(self, field_names: list, return_df: bool = False):
-        metadata_file = self.get_metadata_file()
-        df = pd.read_csv(metadata_file, sep=",", usecols=field_names, comment=Constants.COMMENT_SIGN)
+        df = pd.read_csv(self.metadata_file, sep=",", usecols=field_names, comment=Constants.COMMENT_SIGN)
         if return_df:
             return df
         else:
@@ -76,9 +63,7 @@ class RepertoireDataset(Dataset):
         return [Path(filename) for filename in self.get_metadata(["filename"])["filename"]]
 
     def _build_new_metadata(self, indices, path: Path) -> Path:
-        metadata_file = self.get_metadata_file()
-
-        if metadata_file:
+        if self.metadata_file:
             df = pd.read_csv(self.metadata_file, comment=Constants.COMMENT_SIGN)
             df = df.iloc[indices, :]
             df.to_csv(path, index=False)
