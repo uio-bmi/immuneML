@@ -34,8 +34,6 @@ class EncodedData:
                     .format(len(label), len(example_ids))
                 assert examples is None or len(example_ids) == examples.shape[0], "EncodedData: there are {} example ids, but {} examples."\
                     .format(len(example_ids), examples.shape[0])
-        if encoding not in ["MatchedReceptorsEncoder", "MatchedSequencesEncoder", "MatchedRegexEncoder"]:
-            assert len(labels.keys()) > 0 if labels is not None else True
         if examples is not None:
             assert all(len(labels[key]) == examples.shape[0] for key in labels.keys()) if labels is not None else True
 

@@ -90,9 +90,6 @@ class ExploratoryAnalysisParser:
                 for label in analysis["labels"]:
                     label_values = self._get_label_values(label, dataset)
                     params["label_config"].add_label(label, label_values)
-            elif symbol_table.get(analysis["encoding"]) not in [MatchedSequencesEncoder, MatchedReceptorsEncoder, MatchedRegexEncoder]:
-                raise KeyError("ExploratoryAnalysisParser: keys for analyses are not properly defined. "
-                               "If an ML encoding is defined, labels have to be defined as well and vice versa.")
 
         if "preprocessing_sequence" in analysis:
             params["preprocessing_sequence"] = symbol_table.get(analysis["preprocessing_sequence"])
