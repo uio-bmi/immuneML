@@ -65,15 +65,25 @@ class PickleImport(DataImport):
         with pickle_params.path.open("rb") as file:
             dataset = pickle.load(file)
         if pickle_params.metadata_file is not None and hasattr(dataset, "metadata_file"):
+            print("orignal metadata")
+            print(pickle_params.metadata_file)
             if pickle_params.metadata_file.is_file():
+                print("is file")
+
                 dataset.metadata_file = pickle_params.metadata_file
             else:
+                print("is not file")
                 metadata_file = Path(pickle_params.metadata_file.name)
+
+                print("metadata_file.name")
+                print(metadata_file)
                 if metadata_file.is_file():
+                    print("but this is a file")
                     dataset.metadata_file = metadata_file
                     logging.warning(f"PickleImport: metadata file could not be found at {pickle_params.metadata_file}, "
                                     f"using {metadata_file} instead.")
                 else:
+                    print("is also no file")
                     raise FileNotFoundError(f"PickleImport: the metadata file could not be found at {pickle_params.metadata_file}"
                                             f"or at {metadata_file}. Please update the path to the metadata file.")
 
