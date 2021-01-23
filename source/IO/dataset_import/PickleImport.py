@@ -65,35 +65,26 @@ class PickleImport(DataImport):
 
         return dataset
 
+
     @staticmethod
     def _import_from_path(pickle_params):
         with pickle_params.path.open("rb") as file:
             dataset = pickle.load(file)
-        if pickle_params.metadata_file is not None and hasattr(dataset, "metadata_file"):
-            print("orignal metadata")
-            print(pickle_params.metadata_file)
-            if pickle_params.metadata_file.is_file():
-                print("is file")
-
+        if hasattr(dataset, "metadata_file"):
+            if pickle_params.metadata_file is not None:
                 dataset.metadata_file = pickle_params.metadata_file
+                metadata = pd.read_csv(dataset.metadata_file, comment=Constants.COMMENT_SIGN)
+                metadata.to_csv(dataset.metadata_file, index=False)
             else:
-                print("is not file")
-                metadata_file = Path(pickle_params.metadata_file.name)
-
-                print("metadata_file.name")
-                print(metadata_file)
-                if metadata_file.is_file():
-                    print("but this is a file")
-                    dataset.metadata_file = metadata_file
-                    logging.warning(f"PickleImport: metadata file could not be found at {pickle_params.metadata_file}, "
-                                    f"using {metadata_file} instead.")
-                else:
-                    print("is also no file")
-                    raise FileNotFoundError(f"PickleImport: the metadata file could not be found at {pickle_params.metadata_file}"
-                                            f"or at {metadata_file}. Please update the path to the metadata file.")
-
-            metadata = pd.read_csv(dataset.metadata_file, comment=Constants.COMMENT_SIGN)
-            metadata.to_csv(dataset.metadata_file, index=False)
+                if not dataset.metadata_file.is_file():
+                    new_metadata_file = Path(dataset.metadata_file.name)
+                    if new_metadata_file.is_file():
+                        dataset.metadata_file = new_metadata_file
+                        logging.warning(f"PickleImport: metadata file could not be found at {pickle_params.metadata_file}, "
+                                        f"using {new_metadata_file} instead.")
+                    else:
+                        raise FileNotFoundError(f"PickleImport: the metadata file could not be found at {pickle_params.metadata_file}"
+                                                f"or at {new_metadata_file}. Please update the path to the metadata file.")
         return dataset
 
     @staticmethod
