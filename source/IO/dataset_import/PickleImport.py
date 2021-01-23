@@ -76,7 +76,7 @@ class PickleImport(DataImport):
                 metadata = pd.read_csv(dataset.metadata_file, comment=Constants.COMMENT_SIGN)
                 metadata.to_csv(dataset.metadata_file, index=False)
             else:
-                if not dataset.metadata_file.is_file():
+                if dataset.metadata_file is not None and not dataset.metadata_file.is_file():
                     new_metadata_file = Path(dataset.metadata_file.name)
                     if new_metadata_file.is_file():
                         dataset.metadata_file = new_metadata_file
