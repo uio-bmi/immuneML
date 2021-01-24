@@ -1,10 +1,10 @@
 import warnings
 from dataclasses import dataclass
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
 import yaml
-from pathlib import Path
 
 from source.data_model.dataset.Dataset import Dataset
 from source.reports.ReportOutput import ReportOutput
@@ -20,8 +20,7 @@ class DesignMatrixExporter(EncodingReport):
     (such as when using the OneHot encoder with option Flatten=False), the data are instead exported to .npy format and can be imported later outside of
     immuneML using numpy package and numpy.load() function.
 
-    There are no parameters for this report.
-
+    There are no input arguments for this report.
 
     YAML specification:
 

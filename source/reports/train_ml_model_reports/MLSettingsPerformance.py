@@ -1,8 +1,8 @@
 import warnings
+from pathlib import Path
 
 import pandas as pd
 import plotly.express as px
-from pathlib import Path
 
 from source.hyperparameter_optimization.states.TrainMLModelState import TrainMLModelState
 from source.reports.PlotlyUtil import PlotlyUtil
@@ -15,8 +15,9 @@ from source.util.PathBuilder import PathBuilder
 
 class MLSettingsPerformance(TrainMLModelReport):
     """
-    Report for TrainMLModel instruction: plots the performance for each of the setting combinations as defined under 'settings' in the
+    Report for TrainMLModel instruction that plots the performance for each of the setting combinations as defined under 'settings' in the
     assessment (outer validation) loop.
+
     The performances are grouped by label (horizontal panels) encoding (vertical panels) and ML method (bar color).
     When multiple data splits are used, the average performance over the data splits is shown with an error bar
     representing the standard deviation.

@@ -1,10 +1,10 @@
 import logging
 from numbers import Number
+from pathlib import Path
 
 import pandas as pd
 import plotly.express as px
 import yaml
-from pathlib import Path
 
 from scripts.specification_util import update_docs_per_mapping
 from source.data_model.dataset.Dataset import Dataset
@@ -38,7 +38,6 @@ class Coefficients(MLReport):
     Arguments:
 
         coefs_to_plot (list): A list specifying which coefficients should be plotted. For options see :py:obj:`~source.reports.ml_reports.CoefficientPlottingSetting.CoefficientPlottingSetting`.
-
 
         cutoff (list): If 'cutoff' is specified under 'coefs_to_plot', the cutoff values can be specified here. The coefficients which have an absolute value equal to or greater than the cutoff will be plotted.
 
