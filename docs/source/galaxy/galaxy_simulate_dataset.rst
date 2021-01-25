@@ -1,7 +1,7 @@
 How to simulate an AIRR dataset in Galaxy
 ===================================================================
 
-The Galaxy tool `Simulate immune receptor/repertoire dataset <https://galaxy.immuneml.uio.no/root?tool_id=immuneml_simulate_dataset>`_ allows you to quickly make a dummy dataset.
+The Galaxy tool `Simulate a synthetic immune receptor or repertoire dataset <https://galaxy.immuneml.uio.no/root?tool_id=immuneml_simulate_dataset>`_ allows you to quickly make a dummy dataset.
 The tool generates a SequenceDataset, ReceptorDataset or RepertoireDataset consisting of random CDR3 sequences, which could be used for benchmarking machine learning methods or encodings,
 or testing out other functionalities.
 The amino acids in the sequences are chosen from a uniform random distribution, and there is no underlying structure in the sequences.

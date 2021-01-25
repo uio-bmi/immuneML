@@ -26,7 +26,7 @@ appropriate encoding is chosen based on the answers to the last two questions.
 .. figure:: ../_static/images/receptor_classification_overview.png
   :width: 70%
 
-  Figure 2 - An overview of the components of the immuneML receptor classification tool.
+  An overview of the components of the immuneML receptor classification tool.
   ImmuneML reads in receptor data with labels (+ and -), encodes the data, trains user-specified ML models and summarizes
   the performance statistics per ML method.
   Encoding: position dependent and invariant encoding are shown. The specificity-associated subsequences are highlighted
