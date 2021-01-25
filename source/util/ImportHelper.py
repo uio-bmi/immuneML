@@ -112,7 +112,7 @@ class ImportHelper:
         return df
 
     @staticmethod
-    def make_new_metadata_file(repertoires: list, metadata: pd.DataFrame, result_path: Path, dataset_name: str) -> str:
+    def make_new_metadata_file(repertoires: list, metadata: pd.DataFrame, result_path: Path, dataset_name: str) -> Path:
         new_metadata = metadata.copy()
         new_metadata.loc[:, "filename"] = [repertoire.data_filename.name for repertoire in repertoires]
         new_metadata.loc[:, "identifier"] = [repertoire.identifier for repertoire in repertoires]

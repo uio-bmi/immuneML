@@ -4,6 +4,9 @@ from pathlib import Path
 
 from source.data_model.dataset.RepertoireDataset import RepertoireDataset
 from source.dsl.symbol_table.SymbolTable import SymbolTable
+from source.encodings.reference_encoding.MatchedReceptorsEncoder import MatchedReceptorsEncoder
+from source.encodings.reference_encoding.MatchedRegexEncoder import MatchedRegexEncoder
+from source.encodings.reference_encoding.MatchedSequencesEncoder import MatchedSequencesEncoder
 from source.environment.LabelConfiguration import LabelConfiguration
 from source.util.ParameterValidator import ParameterValidator
 from source.workflows.instructions.exploratory_analysis.ExploratoryAnalysisInstruction import ExploratoryAnalysisInstruction
@@ -78,16 +81,15 @@ class ExploratoryAnalysisParser:
         params = {}
         dataset = symbol_table.get(analysis["dataset"])
 
-        if all(key in analysis for key in ["encoding", "labels"]):
-            params["encoder"] = symbol_table.get(analysis["encoding"]) \
-                .build_object(dataset, **symbol_table.get_config(analysis["encoding"])["encoder_params"])
+
+        if "encoding" in analysis:
+            params["encoder"] = symbol_table.get(analysis["encoding"]).build_object(dataset, **symbol_table.get_config(analysis["encoding"])["encoder_params"])
             params["label_config"] = LabelConfiguration()
-            for label in analysis["labels"]:
-                label_values = self._get_label_values(label, dataset)
-                params["label_config"].add_label(label, label_values)
-        elif any(key in analysis for key in ["encoding", "labels"]):
-            raise KeyError("ExploratoryAnalysisParser: keys for analyses are not properly defined. "
-                           "If encoding is defined, labels have to be defined as well and vice versa.")
+
+            if "labels" in analysis:
+                for label in analysis["labels"]:
+                    label_values = self._get_label_values(label, dataset)
+                    params["label_config"].add_label(label, label_values)
 
         if "preprocessing_sequence" in analysis:
             params["preprocessing_sequence"] = symbol_table.get(analysis["preprocessing_sequence"])

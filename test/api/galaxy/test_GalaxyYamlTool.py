@@ -117,7 +117,7 @@ class TestGalaxyYamlTool(TestCase):
         with open(specs_path, "w") as file:
             yaml.dump(specs, file)
 
-        run_immuneML(Namespace(**{"specification_path": str(specs_path), "result_path": str(result_path / 'result/'), 'tool': "GalaxyYamlTool"}))
+        run_immuneML(Namespace(**{"specification_path": specs_path, "result_path": result_path / 'result/', 'tool': "GalaxyYamlTool"}))
 
         self.assertTrue(os.path.exists(result_path / "result/inst1/new_d1/AIRR"))
         self.assertTrue(os.path.exists(result_path / "result/inst1/d2/AIRR"))

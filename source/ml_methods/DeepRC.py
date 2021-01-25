@@ -6,11 +6,6 @@ import numpy as np
 import pkg_resources
 import torch
 import yaml
-from deeprc.deeprc_binary.architectures import DeepRC as DeepRCInternal
-from deeprc.deeprc_binary.dataset_converters import DatasetToHDF5
-from deeprc.deeprc_binary.dataset_readers import RepertoireDataReaderBinary
-from deeprc.deeprc_binary.dataset_readers import no_stack_collate_fn
-from deeprc.deeprc_binary.training import train
 from sklearn.exceptions import NotFittedError
 from tqdm import tqdm
 from pathlib import Path
@@ -98,6 +93,10 @@ class DeepRC(MLMethod):
                  learning_rate, l1_weight_decay, l2_weight_decay, evaluate_at, sample_n_sequences, training_batch_size, n_workers,
                  keep_dataset_in_ram, pytorch_device_name):
         super(DeepRC, self).__init__()
+
+        from deeprc.deeprc_binary.training import train
+        self.training_function = train
+
         self.models = {}
         self.result_path = None
 
@@ -137,11 +136,12 @@ class DeepRC(MLMethod):
         self.training_batch_size = training_batch_size
         self.n_workers = n_workers
 
-        self.training_function = train
-
         self.feature_names = None
 
+
     def _metadata_to_hdf5(self, metadata_filepath: Path, label_name):
+        from deeprc.deeprc_binary.dataset_converters import DatasetToHDF5
+
         hdf5_filepath = metadata_filepath.parent / f"{metadata_filepath.stem}.hdf5"
         converter = DatasetToHDF5(metadata_file=str(metadata_filepath),
                                   id_column=DeepRCEncoder.ID_COLUMN,
@@ -192,6 +192,9 @@ class DeepRC(MLMethod):
         :param n_workers: the number of workers used in torch.utils.data.DataLoader
         :return: a Pytorch dataloader
         """
+        from deeprc.deeprc_binary.dataset_readers import RepertoireDataReaderBinary
+        from deeprc.deeprc_binary.dataset_readers import no_stack_collate_fn
+
         sample_n_sequences = None if eval_only else self.sample_n_sequences
         training_batch_size = self.training_batch_size if is_train else 1
 
@@ -272,6 +275,8 @@ class DeepRC(MLMethod):
         return self.models
 
     def _fit_for_label(self, hdf5_filepath: Path, pre_loaded_hdf5_file, train_indices, val_indices, label: str, cores_for_training: int):
+        from deeprc.deeprc_binary.architectures import DeepRC as DeepRCInternal
+
         train_dataloader = self.make_data_loader(hdf5_filepath, pre_loaded_hdf5_file, train_indices, label, eval_only=False, is_train=True,
                                                  n_workers=self.n_workers)
         train_eval_dataloader = self.make_data_loader(hdf5_filepath, pre_loaded_hdf5_file, train_indices, label, eval_only=True, is_train=True)
