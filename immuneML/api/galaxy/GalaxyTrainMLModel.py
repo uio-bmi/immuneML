@@ -39,7 +39,8 @@ class GalaxyTrainMLModel(GalaxyTool):
             specs = yaml.safe_load(file)
 
         ParameterValidator.assert_keys_present(specs.keys(), ["definitions", "instructions"], GalaxyTrainMLModel.__name__, "YAML specification")
-        ParameterValidator.assert_all_in_valid_list(specs.keys(), ["definitions", "instructions", "output"], GalaxyTrainMLModel.__name__, "YAML specification")
+        ParameterValidator.assert_all_in_valid_list(specs.keys(), ["definitions", "instructions", "output"], GalaxyTrainMLModel.__name__,
+                                                    "YAML specification")
 
         ParameterValidator.assert_type_and_value(specs["instructions"], dict, GalaxyTrainMLModel.__name__, "instructions")
 
@@ -48,14 +49,17 @@ class GalaxyTrainMLModel(GalaxyTool):
 
         self.instruction_name = list(specs["instructions"].keys())[0]
 
-        ParameterValidator.assert_type_and_value(specs['instructions'][self.instruction_name], dict, GalaxyTrainMLModel.__name__, self.instruction_name)
-        ParameterValidator.assert_keys_present(specs['instructions'][self.instruction_name].keys(), ['type'], GalaxyTrainMLModel.__name__, self.instruction_name)
+        ParameterValidator.assert_type_and_value(specs['instructions'][self.instruction_name], dict, GalaxyTrainMLModel.__name__,
+                                                 self.instruction_name)
+        ParameterValidator.assert_keys_present(specs['instructions'][self.instruction_name].keys(), ['type'], GalaxyTrainMLModel.__name__,
+                                               self.instruction_name)
 
         assert specs['instructions'][self.instruction_name]['type'] == TrainMLModelInstruction.__name__[:-11], \
             f"{GalaxyTrainMLModel.__name__}: instruction `type` under {self.instruction_name} has to be {TrainMLModelInstruction.__name__[:-11]} " \
             f"for this tool."
 
-        assert len(specs['instructions'][self.instruction_name]['labels']) == 1, f"{GalaxyTrainMLModel.__name__}: one label has to be specified under " \
-                                                                                f"`labels`, got the following instead: {specs['instructions'][self.instruction_name]['labels']}."
+        assert len(
+            specs['instructions'][self.instruction_name]['labels']) == 1, f"{GalaxyTrainMLModel.__name__}: one label has to be specified under " \
+                                                                          f"`labels`, got the following instead: {specs['instructions'][self.instruction_name]['labels']}."
         Util.check_paths(specs, GalaxyTrainMLModel.__name__)
         Util.update_result_paths(specs, self.result_path, self.yaml_path)
