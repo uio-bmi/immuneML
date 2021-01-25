@@ -13,9 +13,7 @@ class ReceptorImplanting(SignalImplantingStrategy):
 
         implanting: name of the implanting strategy, here Receptor
 
-        sequence_position_weights (dict): A dictionary describing the relative weights for implanting a signal at each given IMGT position in the
-            receptor sequence. If sequence_position_weights are not set, then SequenceImplantingStrategy will make all of the positions equally likely
-            for each receptor sequence.
+        sequence_position_weights (dict): A dictionary describing the relative weights for implanting a signal at each given IMGT position in the receptor sequence. If sequence_position_weights are not set, then SequenceImplantingStrategy will make all of the positions equally likely for each receptor sequence.
 
 
     YAML specification:
