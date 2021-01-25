@@ -5,7 +5,7 @@ In this use case, we show how the study by Emerson and colleagues on CMV status 
 can be replicated within immuneML. Additionally, we test the approach on datasets subsampled from the original study (to include randomly chosen 400,
 200, 100 and 50 subjects) and estimate the performance of the approach when fewer examples are available.
 
-The dataset was download from Adaptive Biotechnologies' `website <https://clients.adaptivebiotech.com/pub/Emerson-2017-NatGen>`_.
+The dataset was downloaded from Adaptive Biotechnologies' `website <https://clients.adaptivebiotech.com/pub/Emerson-2017-NatGen>`_.
 Out of the 786 subjects (cohort 1: 666, cohort 2: 120), we removed 103 subjects from cohort 1 (1 with missing repertoire data, 25 with unknown CMV
 status, 3 with negative template counts for some of the sequences and the rest with no template count information). The metadata files for cohorts 1 and 2
 with the list of subjects used in the downstream analysis is available at this link.
@@ -24,8 +24,8 @@ The statistical model `ProbabilisticBinaryClassifier` relies on `SequenceAbundan
 and {:math:`\alpha_1`, :math:`\beta_1`}) to describe beta-distributed prior for CMV-negative and CMV-positive subjects. These parameters are then used
 to create log-posterior odds ratio for class assignment for new subjects.
 
-To find the optimal p-value threshold we used 10-fold cross-validation on the cohort 1 and choose the one minimizing the cross-entropy loss (also
-called logarithmic loss). We then test the performance of the optimal model (optimal p-value and the classifier fitted on resulting data representation)
+To find the optimal p-value threshold we used 10-fold cross-validation on the cohort 1 and chose the one minimizing the cross-entropy loss (also
+called logarithmic loss). We then tested the performance of the optimal model (optimal p-value and the classifier fitted on resulting data representation)
 on the cohort 2 (as it was done in the original study).
 
 The full YAML specification:
