@@ -1,11 +1,12 @@
-How to train immune repertoire classifiers using the easy Galaxy interface
+How to train immune repertoire classifiers using the simplified Galaxy interface
 =============================================================================
 
-This page provides the documentation for the Galaxy tool `Train immune repertoire classifiers (easy interface) <https://galaxy.immuneml.uio.no/root?tool_id=novice_immuneml_interface>`_.
+This page provides the documentation for the Galaxy tool `Train immune repertoire classifiers (simplified interface) <https://galaxy.immuneml.uio.no/root?tool_id=novice_immuneml_interface>`_.
 The purpose of this tool is to train machine learning (ML) models to predict a characteristic per immune repertoire, such as
 a disease status. One or more ML models are trained to classify repertoires based on the information within the sets of CDR3 sequences. Finally, the performance
 of the different methods is compared.
-Alternatively, if you want to predict a property per immune receptor, such as antigen specificity, check out the ‘Train immune receptor classifiers’ tool instead.
+Alternatively, if you want to predict a property per immune receptor, such as antigen specificity, check out the
+`Train immune receptor classifiers (simplified interface) <https://galaxy.immuneml.uio.no/root?tool_id=immuneml_train_classifiers>`_ tool instead.
 
 Basic terminology
 -----------------
@@ -78,14 +79,6 @@ is also referred to as 5-fold cross-validation.
 
 The whole process may be repeated multiple times with different randomly selected repertoires in the test set, to see how robust the performance is.
 
-More analysis options
-----------------------
-
-A limited selection of immuneML options is available through this tool. If you wish to have full control of the analysis, consider using the tool described under
-:ref:`How to train ML models in Galaxy`. This tool provides other encodings and machine learning methods to choose from, as well as
-data preprocessing and settings for hyperparameter optimization. The interface of the YAML-based tool expects more independence and knowledge about
-machine learning from the user. See also :ref:`How to specify an analysis with YAML`.
-
 
 Tool output
 ---------------------------------------------
@@ -103,4 +96,14 @@ This Galaxy tool will produce the following history elements:
 
 - Optimal ML model: a .zip file containing the raw files for the optimal trained ML model file for the given label.
   This .zip file can subsequently be used as an input when :ref:`applying previously trained ML models to a new AIRR dataset in Galaxy <How to apply previously trained ML models to a new AIRR dataset in Galaxy>`
+
+
+More analysis options
+----------------------
+
+A limited selection of immuneML options is available through this tool. If you wish to have full control of the analysis, consider using the tool described under
+:ref:`How to train ML models in Galaxy`. This tool provides other encodings and machine learning methods to choose from, as well as
+data preprocessing and settings for hyperparameter optimization. The interface of the YAML-based tool expects more independence and knowledge about
+machine learning from the user. See also :ref:`How to specify an analysis with YAML`.
+
 
