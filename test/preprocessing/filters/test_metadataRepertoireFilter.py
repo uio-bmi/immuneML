@@ -4,15 +4,15 @@ from unittest import TestCase
 
 import pandas as pd
 
-from source.analysis.criteria_matches.DataType import DataType
-from source.analysis.criteria_matches.OperationType import OperationType
-from source.caching.CacheType import CacheType
-from source.data_model.dataset.RepertoireDataset import RepertoireDataset
-from source.environment.Constants import Constants
-from source.environment.EnvironmentSettings import EnvironmentSettings
-from source.preprocessing.filters.MetadataRepertoireFilter import MetadataRepertoireFilter
-from source.util.PathBuilder import PathBuilder
-from source.util.RepertoireBuilder import RepertoireBuilder
+from immuneML.analysis.criteria_matches.DataType import DataType
+from immuneML.analysis.criteria_matches.OperationType import OperationType
+from immuneML.caching.CacheType import CacheType
+from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
+from immuneML.environment.Constants import Constants
+from immuneML.environment.EnvironmentSettings import EnvironmentSettings
+from immuneML.preprocessing.filters.MetadataRepertoireFilter import MetadataRepertoireFilter
+from immuneML.util.PathBuilder import PathBuilder
+from immuneML.util.RepertoireBuilder import RepertoireBuilder
 
 
 class TestMetadataRepertoireFilter(TestCase):

@@ -2,16 +2,16 @@ import pickle
 import shutil
 from unittest import TestCase
 
-from source.data_model.dataset.ReceptorDataset import ReceptorDataset
-from source.data_model.receptor.TCABReceptor import TCABReceptor
-from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
-from source.environment.EnvironmentSettings import EnvironmentSettings
-from source.hyperparameter_optimization.config.LeaveOneOutConfig import LeaveOneOutConfig
-from source.hyperparameter_optimization.config.SplitConfig import SplitConfig
-from source.hyperparameter_optimization.config.SplitType import SplitType
-from source.util.PathBuilder import PathBuilder
-from source.workflows.steps.data_splitter.DataSplitterParams import DataSplitterParams
-from source.workflows.steps.data_splitter.LeaveOneOutSplitter import LeaveOneOutSplitter
+from immuneML.data_model.dataset.ReceptorDataset import ReceptorDataset
+from immuneML.data_model.receptor.TCABReceptor import TCABReceptor
+from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
+from immuneML.environment.EnvironmentSettings import EnvironmentSettings
+from immuneML.hyperparameter_optimization.config.LeaveOneOutConfig import LeaveOneOutConfig
+from immuneML.hyperparameter_optimization.config.SplitConfig import SplitConfig
+from immuneML.hyperparameter_optimization.config.SplitType import SplitType
+from immuneML.util.PathBuilder import PathBuilder
+from immuneML.workflows.steps.data_splitter.DataSplitterParams import DataSplitterParams
+from immuneML.workflows.steps.data_splitter.LeaveOneOutSplitter import LeaveOneOutSplitter
 
 
 class TestLeaveOneOutSplitter(TestCase):

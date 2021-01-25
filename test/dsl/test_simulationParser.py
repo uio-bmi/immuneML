@@ -1,17 +1,17 @@
 import os
 from unittest import TestCase
 
-from source.caching.CacheType import CacheType
-from source.dsl.definition_parsers.SimulationParser import SimulationParser
-from source.dsl.symbol_table.SymbolTable import SymbolTable
-from source.dsl.symbol_table.SymbolType import SymbolType
-from source.environment.Constants import Constants
-from source.simulation.implants.Motif import Motif
-from source.simulation.implants.Signal import Signal
-from source.simulation.motif_instantiation_strategy.GappedKmerInstantiation import GappedKmerInstantiation
-from source.simulation.sequence_implanting.GappedMotifImplanting import GappedMotifImplanting
-from source.simulation.signal_implanting_strategy.HealthySequenceImplanting import HealthySequenceImplanting
-from source.simulation.signal_implanting_strategy.ImplantingComputation import ImplantingComputation
+from immuneML.caching.CacheType import CacheType
+from immuneML.dsl.definition_parsers.SimulationParser import SimulationParser
+from immuneML.dsl.symbol_table.SymbolTable import SymbolTable
+from immuneML.dsl.symbol_table.SymbolType import SymbolType
+from immuneML.environment.Constants import Constants
+from immuneML.simulation.implants.Motif import Motif
+from immuneML.simulation.implants.Signal import Signal
+from immuneML.simulation.motif_instantiation_strategy.GappedKmerInstantiation import GappedKmerInstantiation
+from immuneML.simulation.sequence_implanting.GappedMotifImplanting import GappedMotifImplanting
+from immuneML.simulation.signal_implanting_strategy.HealthySequenceImplanting import HealthySequenceImplanting
+from immuneML.simulation.signal_implanting_strategy.ImplantingComputation import ImplantingComputation
 
 
 class TestSimulationParser(TestCase):

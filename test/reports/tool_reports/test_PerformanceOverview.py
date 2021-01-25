@@ -1,13 +1,13 @@
 import os
 import shutil
+from pathlib import Path
 from unittest import TestCase
 
 import yaml
-from pathlib import Path
 
-from source.api.aggregated_runs.MultiDatasetBenchmarkTool import MultiDatasetBenchmarkTool
-from source.environment.EnvironmentSettings import EnvironmentSettings
-from source.util.PathBuilder import PathBuilder
+from immuneML.api.aggregated_runs.MultiDatasetBenchmarkTool import MultiDatasetBenchmarkTool
+from immuneML.environment.EnvironmentSettings import EnvironmentSettings
+from immuneML.util.PathBuilder import PathBuilder
 
 
 class TestPerformanceOverview(TestCase):

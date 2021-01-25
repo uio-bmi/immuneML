@@ -1,8 +1,8 @@
 from unittest import TestCase
 
-from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
-from source.environment.EnvironmentSettings import EnvironmentSettings
-from source.environment.SequenceType import SequenceType
+from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
+from immuneML.environment.EnvironmentSettings import EnvironmentSettings
+from immuneML.environment.SequenceType import SequenceType
 
 
 class TestSequence(TestCase):

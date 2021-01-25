@@ -5,12 +5,12 @@ import unittest
 import pandas as pd
 import yaml
 
-from source.api.galaxy.build_dataset_yaml import build_metadata_column_mapping
-from source.api.galaxy.build_dataset_yaml import main as yamlbuilder_main
-from source.data_model.receptor.RegionType import RegionType
-from source.dsl.ImmuneMLParser import ImmuneMLParser
-from source.environment.EnvironmentSettings import EnvironmentSettings
-from source.util.PathBuilder import PathBuilder
+from immuneML.api.galaxy.build_dataset_yaml import build_metadata_column_mapping
+from immuneML.api.galaxy.build_dataset_yaml import main as yamlbuilder_main
+from immuneML.data_model.receptor.RegionType import RegionType
+from immuneML.dsl.ImmuneMLParser import ImmuneMLParser
+from immuneML.environment.EnvironmentSettings import EnvironmentSettings
+from immuneML.util.PathBuilder import PathBuilder
 
 
 class MyTestCase(unittest.TestCase):

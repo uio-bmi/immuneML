@@ -2,24 +2,24 @@ import os
 import shutil
 from unittest import TestCase
 
-from source.caching.CacheType import CacheType
-from source.data_model.dataset.RepertoireDataset import RepertoireDataset
-from source.dsl.semantic_model.SemanticModel import SemanticModel
-from source.encodings.word2vec.Word2VecEncoder import Word2VecEncoder
-from source.encodings.word2vec.model_creator.ModelType import ModelType
-from source.environment.Constants import Constants
-from source.environment.EnvironmentSettings import EnvironmentSettings
-from source.environment.LabelConfiguration import LabelConfiguration
-from source.environment.Metric import Metric
-from source.hyperparameter_optimization.HPSetting import HPSetting
-from source.hyperparameter_optimization.config.ReportConfig import ReportConfig
-from source.hyperparameter_optimization.config.SplitConfig import SplitConfig
-from source.hyperparameter_optimization.config.SplitType import SplitType
-from source.hyperparameter_optimization.strategy.GridSearch import GridSearch
-from source.ml_methods.LogisticRegression import LogisticRegression
-from source.util.PathBuilder import PathBuilder
-from source.util.RepertoireBuilder import RepertoireBuilder
-from source.workflows.instructions.TrainMLModelInstruction import TrainMLModelInstruction
+from immuneML.caching.CacheType import CacheType
+from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
+from immuneML.dsl.semantic_model.SemanticModel import SemanticModel
+from immuneML.encodings.word2vec.Word2VecEncoder import Word2VecEncoder
+from immuneML.encodings.word2vec.model_creator.ModelType import ModelType
+from immuneML.environment.Constants import Constants
+from immuneML.environment.EnvironmentSettings import EnvironmentSettings
+from immuneML.environment.LabelConfiguration import LabelConfiguration
+from immuneML.environment.Metric import Metric
+from immuneML.hyperparameter_optimization.HPSetting import HPSetting
+from immuneML.hyperparameter_optimization.config.ReportConfig import ReportConfig
+from immuneML.hyperparameter_optimization.config.SplitConfig import SplitConfig
+from immuneML.hyperparameter_optimization.config.SplitType import SplitType
+from immuneML.hyperparameter_optimization.strategy.GridSearch import GridSearch
+from immuneML.ml_methods.LogisticRegression import LogisticRegression
+from immuneML.util.PathBuilder import PathBuilder
+from immuneML.util.RepertoireBuilder import RepertoireBuilder
+from immuneML.workflows.instructions.TrainMLModelInstruction import TrainMLModelInstruction
 
 
 class TestSemanticModel(TestCase):

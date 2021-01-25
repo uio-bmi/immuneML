@@ -1,9 +1,8 @@
-import glob
 import os
 import shutil
 from unittest import TestCase
 
-from source.util.PathBuilder import PathBuilder
+from immuneML.util.PathBuilder import PathBuilder
 
 
 class TestPathBuilder(TestCase):

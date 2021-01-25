@@ -4,13 +4,13 @@ from unittest import TestCase
 
 import pandas as pd
 
-from source.caching.CacheType import CacheType
-from source.data_model.encoded_data.EncodedData import EncodedData
-from source.environment.Constants import Constants
-from source.environment.EnvironmentSettings import EnvironmentSettings
-from source.reports.encoding_reports.RelevantSequenceExporter import RelevantSequenceExporter
-from source.simulation.dataset_generation.RandomDatasetGenerator import RandomDatasetGenerator
-from source.util.PathBuilder import PathBuilder
+from immuneML.caching.CacheType import CacheType
+from immuneML.data_model.encoded_data.EncodedData import EncodedData
+from immuneML.environment.Constants import Constants
+from immuneML.environment.EnvironmentSettings import EnvironmentSettings
+from immuneML.reports.encoding_reports.RelevantSequenceExporter import RelevantSequenceExporter
+from immuneML.simulation.dataset_generation.RandomDatasetGenerator import RandomDatasetGenerator
+from immuneML.util.PathBuilder import PathBuilder
 
 
 class TestRelevantSequenceExporter(TestCase):

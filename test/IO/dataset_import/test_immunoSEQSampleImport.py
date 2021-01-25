@@ -1,11 +1,11 @@
 import shutil
 from unittest import TestCase
 
-from source.IO.dataset_import.ImmunoSEQSampleImport import ImmunoSEQSampleImport
-from source.data_model.receptor.receptor_sequence.Chain import Chain
-from source.dsl.DefaultParamsLoader import DefaultParamsLoader
-from source.environment.EnvironmentSettings import EnvironmentSettings
-from source.util.PathBuilder import PathBuilder
+from immuneML.IO.dataset_import.ImmunoSEQSampleImport import ImmunoSEQSampleImport
+from immuneML.data_model.receptor.receptor_sequence.Chain import Chain
+from immuneML.dsl.DefaultParamsLoader import DefaultParamsLoader
+from immuneML.environment.EnvironmentSettings import EnvironmentSettings
+from immuneML.util.PathBuilder import PathBuilder
 
 
 class TestImmunoSEQSampleImport(TestCase):

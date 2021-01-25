@@ -4,12 +4,12 @@ from unittest import TestCase
 import numpy as np
 import pandas as pd
 
-from source.analysis.criteria_matches.BooleanType import BooleanType
-from source.analysis.criteria_matches.CriteriaMatcher import CriteriaMatcher
-from source.analysis.criteria_matches.DataType import DataType
-from source.analysis.criteria_matches.OperationType import OperationType
-from source.caching.CacheType import CacheType
-from source.environment.Constants import Constants
+from immuneML.analysis.criteria_matches.BooleanType import BooleanType
+from immuneML.analysis.criteria_matches.CriteriaMatcher import CriteriaMatcher
+from immuneML.analysis.criteria_matches.DataType import DataType
+from immuneML.analysis.criteria_matches.OperationType import OperationType
+from immuneML.caching.CacheType import CacheType
+from immuneML.environment.Constants import Constants
 
 
 class TestCriteriaMatcher(TestCase):

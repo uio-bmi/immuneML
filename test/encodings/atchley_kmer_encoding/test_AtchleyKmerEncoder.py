@@ -2,15 +2,15 @@ import os
 import shutil
 from unittest import TestCase
 
-from source.caching.CacheType import CacheType
-from source.encodings.EncoderParams import EncoderParams
-from source.encodings.atchley_kmer_encoding.AtchleyKmerEncoder import AtchleyKmerEncoder
-from source.environment.Constants import Constants
-from source.environment.EnvironmentSettings import EnvironmentSettings
-from source.environment.Label import Label
-from source.environment.LabelConfiguration import LabelConfiguration
-from source.simulation.dataset_generation.RandomDatasetGenerator import RandomDatasetGenerator
-from source.util.PathBuilder import PathBuilder
+from immuneML.caching.CacheType import CacheType
+from immuneML.encodings.EncoderParams import EncoderParams
+from immuneML.encodings.atchley_kmer_encoding.AtchleyKmerEncoder import AtchleyKmerEncoder
+from immuneML.environment.Constants import Constants
+from immuneML.environment.EnvironmentSettings import EnvironmentSettings
+from immuneML.environment.Label import Label
+from immuneML.environment.LabelConfiguration import LabelConfiguration
+from immuneML.simulation.dataset_generation.RandomDatasetGenerator import RandomDatasetGenerator
+from immuneML.util.PathBuilder import PathBuilder
 
 
 class TestAtchleyKmerEncoder(TestCase):

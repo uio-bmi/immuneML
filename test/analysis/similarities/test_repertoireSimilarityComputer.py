@@ -4,9 +4,9 @@ from unittest import TestCase
 import numpy as np
 from scipy import sparse
 
-from source.analysis.similarities.RepertoireSimilarityComputer import RepertoireSimilarityComputer
-from source.caching.CacheType import CacheType
-from source.environment.Constants import Constants
+from immuneML.analysis.similarities.RepertoireSimilarityComputer import RepertoireSimilarityComputer
+from immuneML.caching.CacheType import CacheType
+from immuneML.environment.Constants import Constants
 
 
 class TestRepertoireSimilarityComputer(TestCase):

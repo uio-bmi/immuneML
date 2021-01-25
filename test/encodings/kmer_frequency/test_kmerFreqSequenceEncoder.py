@@ -5,19 +5,19 @@ from unittest import TestCase
 
 import numpy
 
-from source.analysis.data_manipulation.NormalizationType import NormalizationType
-from source.caching.CacheType import CacheType
-from source.data_model.dataset.SequenceDataset import SequenceDataset
-from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
-from source.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
-from source.encodings.EncoderParams import EncoderParams
-from source.encodings.kmer_frequency.KmerFreqSequenceEncoder import KmerFreqSequenceEncoder
-from source.encodings.kmer_frequency.ReadsType import ReadsType
-from source.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType import SequenceEncodingType
-from source.environment.Constants import Constants
-from source.environment.EnvironmentSettings import EnvironmentSettings
-from source.environment.LabelConfiguration import LabelConfiguration
-from source.util.PathBuilder import PathBuilder
+from immuneML.analysis.data_manipulation.NormalizationType import NormalizationType
+from immuneML.caching.CacheType import CacheType
+from immuneML.data_model.dataset.SequenceDataset import SequenceDataset
+from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
+from immuneML.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
+from immuneML.encodings.EncoderParams import EncoderParams
+from immuneML.encodings.kmer_frequency.KmerFreqSequenceEncoder import KmerFreqSequenceEncoder
+from immuneML.encodings.kmer_frequency.ReadsType import ReadsType
+from immuneML.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType import SequenceEncodingType
+from immuneML.environment.Constants import Constants
+from immuneML.environment.EnvironmentSettings import EnvironmentSettings
+from immuneML.environment.LabelConfiguration import LabelConfiguration
+from immuneML.util.PathBuilder import PathBuilder
 
 
 class TestKmerFreqSequenceEncoder(TestCase):

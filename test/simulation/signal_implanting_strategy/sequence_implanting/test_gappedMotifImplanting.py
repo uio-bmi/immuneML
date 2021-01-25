@@ -1,8 +1,8 @@
 from unittest import TestCase
 
-from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
-from source.simulation.implants.MotifInstance import MotifInstance
-from source.simulation.sequence_implanting.GappedMotifImplanting import GappedMotifImplanting
+from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
+from immuneML.simulation.implants.MotifInstance import MotifInstance
+from immuneML.simulation.sequence_implanting.GappedMotifImplanting import GappedMotifImplanting
 
 
 class TestGappedMotifImplanting(TestCase):

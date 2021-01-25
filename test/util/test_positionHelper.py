@@ -1,7 +1,6 @@
-import math
 from unittest import TestCase
 
-from source.util.PositionHelper import PositionHelper
+from immuneML.util.PositionHelper import PositionHelper
 
 
 class TestPositionHelper(TestCase):

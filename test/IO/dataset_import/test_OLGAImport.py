@@ -1,10 +1,10 @@
 import shutil
 from unittest import TestCase
 
-from source.IO.dataset_import.OLGAImport import OLGAImport
-from source.data_model.receptor.receptor_sequence.Chain import Chain
-from source.environment.EnvironmentSettings import EnvironmentSettings
-from source.util.PathBuilder import PathBuilder
+from immuneML.IO.dataset_import.OLGAImport import OLGAImport
+from immuneML.data_model.receptor.receptor_sequence.Chain import Chain
+from immuneML.environment.EnvironmentSettings import EnvironmentSettings
+from immuneML.util.PathBuilder import PathBuilder
 
 
 class TestOLGALoader(TestCase):

@@ -1,11 +1,11 @@
 import sys
-
 from pathlib import Path
 
-from source.dsl.InstructionParser import InstructionParser
-from source.dsl.OutputParser import OutputParser
-from source.dsl.definition_parsers.DefinitionParser import DefinitionParser
-from source.environment.EnvironmentSettings import EnvironmentSettings
+from immuneML.dsl.InstructionParser import InstructionParser
+from immuneML.dsl.OutputParser import OutputParser
+from immuneML.dsl.definition_parsers.DefinitionParser import DefinitionParser
+from immuneML.environment.EnvironmentSettings import EnvironmentSettings
+
 
 def generate_docs(docs_path: str):
     docs_path = Path(docs_path)

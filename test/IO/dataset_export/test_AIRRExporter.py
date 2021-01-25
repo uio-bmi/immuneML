@@ -4,17 +4,17 @@ from unittest import TestCase
 import pandas as pd
 from numpy import nan
 
-from source.IO.dataset_export.AIRRExporter import AIRRExporter
-from source.data_model.dataset.ReceptorDataset import ReceptorDataset
-from source.data_model.dataset.RepertoireDataset import RepertoireDataset
-from source.data_model.dataset.SequenceDataset import SequenceDataset
-from source.data_model.receptor.TCABReceptor import TCABReceptor
-from source.data_model.receptor.receptor_sequence.Chain import Chain
-from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
-from source.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
-from source.data_model.repertoire.Repertoire import Repertoire
-from source.environment.EnvironmentSettings import EnvironmentSettings
-from source.util.PathBuilder import PathBuilder
+from immuneML.IO.dataset_export.AIRRExporter import AIRRExporter
+from immuneML.data_model.dataset.ReceptorDataset import ReceptorDataset
+from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
+from immuneML.data_model.dataset.SequenceDataset import SequenceDataset
+from immuneML.data_model.receptor.TCABReceptor import TCABReceptor
+from immuneML.data_model.receptor.receptor_sequence.Chain import Chain
+from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
+from immuneML.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
+from immuneML.data_model.repertoire.Repertoire import Repertoire
+from immuneML.environment.EnvironmentSettings import EnvironmentSettings
+from immuneML.util.PathBuilder import PathBuilder
 
 
 class TestAIRRExporter(TestCase):

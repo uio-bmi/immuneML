@@ -3,11 +3,11 @@ import os
 import pickle
 from unittest import TestCase
 
-from source.caching.CacheHandler import CacheHandler
-from source.caching.CacheObjectType import CacheObjectType
-from source.caching.CacheType import CacheType
-from source.environment.Constants import Constants
-from source.environment.EnvironmentSettings import EnvironmentSettings
+from immuneML.caching.CacheHandler import CacheHandler
+from immuneML.caching.CacheObjectType import CacheObjectType
+from immuneML.caching.CacheType import CacheType
+from immuneML.environment.Constants import Constants
+from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 
 
 class TestCacheHandler(TestCase):

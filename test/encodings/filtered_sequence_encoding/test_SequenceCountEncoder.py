@@ -2,16 +2,16 @@ import os
 import shutil
 from unittest import TestCase
 
-from source.caching.CacheType import CacheType
-from source.data_model.dataset.RepertoireDataset import RepertoireDataset
-from source.encodings.EncoderParams import EncoderParams
-from source.encodings.filtered_sequence_encoding.SequenceCountEncoder import SequenceCountEncoder
-from source.environment.Constants import Constants
-from source.environment.EnvironmentSettings import EnvironmentSettings
-from source.environment.Label import Label
-from source.environment.LabelConfiguration import LabelConfiguration
-from source.util.PathBuilder import PathBuilder
-from source.util.RepertoireBuilder import RepertoireBuilder
+from immuneML.caching.CacheType import CacheType
+from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
+from immuneML.encodings.EncoderParams import EncoderParams
+from immuneML.encodings.filtered_sequence_encoding.SequenceCountEncoder import SequenceCountEncoder
+from immuneML.environment.Constants import Constants
+from immuneML.environment.EnvironmentSettings import EnvironmentSettings
+from immuneML.environment.Label import Label
+from immuneML.environment.LabelConfiguration import LabelConfiguration
+from immuneML.util.PathBuilder import PathBuilder
+from immuneML.util.RepertoireBuilder import RepertoireBuilder
 
 
 class TestEmersonSequenceCountEncoder(TestCase):

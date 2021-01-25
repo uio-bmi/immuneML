@@ -3,10 +3,10 @@ from unittest import TestCase
 
 import numpy as np
 
-from source.analysis.data_manipulation.NormalizationType import NormalizationType
-from source.encodings.preprocessing.FeatureScaler import FeatureScaler
-from source.environment.EnvironmentSettings import EnvironmentSettings
-from source.util.PathBuilder import PathBuilder
+from immuneML.analysis.data_manipulation.NormalizationType import NormalizationType
+from immuneML.encodings.preprocessing.FeatureScaler import FeatureScaler
+from immuneML.environment.EnvironmentSettings import EnvironmentSettings
+from immuneML.util.PathBuilder import PathBuilder
 
 
 class TestFeatureScaler(TestCase):

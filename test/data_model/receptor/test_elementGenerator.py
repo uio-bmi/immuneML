@@ -2,12 +2,12 @@ import pickle
 import shutil
 from unittest import TestCase
 
-from source.data_model.dataset.SequenceDataset import SequenceDataset
-from source.data_model.receptor.BCReceptor import BCReceptor
-from source.data_model.receptor.ElementGenerator import ElementGenerator
-from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
-from source.environment.EnvironmentSettings import EnvironmentSettings
-from source.util.PathBuilder import PathBuilder
+from immuneML.data_model.dataset.SequenceDataset import SequenceDataset
+from immuneML.data_model.receptor.BCReceptor import BCReceptor
+from immuneML.data_model.receptor.ElementGenerator import ElementGenerator
+from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
+from immuneML.environment.EnvironmentSettings import EnvironmentSettings
+from immuneML.util.PathBuilder import PathBuilder
 
 
 class TestElementGenerator(TestCase):

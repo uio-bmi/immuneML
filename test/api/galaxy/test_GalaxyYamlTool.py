@@ -5,11 +5,11 @@ from unittest import TestCase
 
 import yaml
 
-from source.IO.dataset_export.PickleExporter import PickleExporter
-from source.app.ImmuneMLApp import run_immuneML
-from source.environment.EnvironmentSettings import EnvironmentSettings
-from source.simulation.dataset_generation.RandomDatasetGenerator import RandomDatasetGenerator
-from source.util.PathBuilder import PathBuilder
+from immuneML.IO.dataset_export.PickleExporter import PickleExporter
+from immuneML.app.ImmuneMLApp import run_immuneML
+from immuneML.environment.EnvironmentSettings import EnvironmentSettings
+from immuneML.simulation.dataset_generation.RandomDatasetGenerator import RandomDatasetGenerator
+from immuneML.util.PathBuilder import PathBuilder
 
 
 class TestGalaxyYamlTool(TestCase):

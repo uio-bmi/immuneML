@@ -3,11 +3,11 @@ from unittest import TestCase
 
 import pandas as pd
 
-from source.IO.dataset_import.VDJdbImport import VDJdbImport
-from source.data_model.receptor.receptor_sequence.Chain import Chain
-from source.dsl.DefaultParamsLoader import DefaultParamsLoader
-from source.environment.EnvironmentSettings import EnvironmentSettings
-from source.util.PathBuilder import PathBuilder
+from immuneML.IO.dataset_import.VDJdbImport import VDJdbImport
+from immuneML.data_model.receptor.receptor_sequence.Chain import Chain
+from immuneML.dsl.DefaultParamsLoader import DefaultParamsLoader
+from immuneML.environment.EnvironmentSettings import EnvironmentSettings
+from immuneML.util.PathBuilder import PathBuilder
 
 
 class TestVDJdbLoader(TestCase):

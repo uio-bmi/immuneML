@@ -5,9 +5,9 @@ from unittest import TestCase
 
 import yaml
 
-from source.app.ImmuneMLApp import run_immuneML
-from source.environment.EnvironmentSettings import EnvironmentSettings
-from source.util.PathBuilder import PathBuilder
+from immuneML.app.ImmuneMLApp import run_immuneML
+from immuneML.environment.EnvironmentSettings import EnvironmentSettings
+from immuneML.util.PathBuilder import PathBuilder
 
 
 class TestDataSimulationTool(TestCase):

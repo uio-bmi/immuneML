@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from source.util.FilenameHandler import FilenameHandler
+from immuneML.util.FilenameHandler import FilenameHandler
 
 
 class TestFilenameHandler(TestCase):

@@ -17,7 +17,7 @@
 import os
 import sys
 
-from source.environment import Constants
+from immuneML.environment import Constants
 
 sys.path.insert(0, os.path.abspath('../..'))
 

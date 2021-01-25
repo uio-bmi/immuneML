@@ -1,9 +1,9 @@
 import shutil
 from unittest import TestCase
 
-from source.IO.dataset_import.GenericImport import GenericImport
-from source.environment.EnvironmentSettings import EnvironmentSettings
-from source.util.PathBuilder import PathBuilder
+from immuneML.IO.dataset_import.GenericImport import GenericImport
+from immuneML.environment.EnvironmentSettings import EnvironmentSettings
+from immuneML.util.PathBuilder import PathBuilder
 
 
 class TestGenericLoader(TestCase):

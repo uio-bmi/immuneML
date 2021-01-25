@@ -2,16 +2,16 @@ import os
 import shutil
 from unittest import TestCase
 
-from source.analysis.SequenceMatcher import SequenceMatcher
-from source.caching.CacheType import CacheType
-from source.data_model.dataset.RepertoireDataset import RepertoireDataset
-from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
-from source.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
-from source.data_model.repertoire.Repertoire import Repertoire
-from source.encodings.reference_encoding.SequenceMatchingSummaryType import SequenceMatchingSummaryType
-from source.environment.Constants import Constants
-from source.environment.EnvironmentSettings import EnvironmentSettings
-from source.util.PathBuilder import PathBuilder
+from immuneML.analysis.SequenceMatcher import SequenceMatcher
+from immuneML.caching.CacheType import CacheType
+from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
+from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
+from immuneML.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
+from immuneML.data_model.repertoire.Repertoire import Repertoire
+from immuneML.encodings.reference_encoding.SequenceMatchingSummaryType import SequenceMatchingSummaryType
+from immuneML.environment.Constants import Constants
+from immuneML.environment.EnvironmentSettings import EnvironmentSettings
+from immuneML.util.PathBuilder import PathBuilder
 
 
 class TestSequenceMatcher(TestCase):
