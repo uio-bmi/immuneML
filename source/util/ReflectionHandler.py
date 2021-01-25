@@ -17,10 +17,13 @@ class ReflectionHandler:
     @staticmethod
     def get_class_from_path(path, class_name: str = None):
         """
-        :param path: path (str or pathlib.Path) to file where class is located
-        :param class_name: class name to import_dataset from the file; if None, it is assument that the class name is the same
-                as the file name
-        :return: class
+        Args:
+
+            path (str or pathlib.Path): path to file where the class is located
+            class_name (str): class name to import_dataset from the file; if None, it is assumed that the class name is the same as the file name
+
+        Returns:
+             class
         """
         path = Path(path)
         if class_name is None:

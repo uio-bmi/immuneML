@@ -1,5 +1,6 @@
 import abc
 from pathlib import Path
+
 from source.data_model.encoded_data.EncodedData import EncodedData
 
 
@@ -36,16 +37,16 @@ class MLMethod(metaclass=abc.ABCMeta):
         Arguments:
 
             encoded_data (EncodedData): an instance of EncodedData class which includes encoded examples (repertoires, receptors or sequences), their
-            labels, names of the features and other additional information. Most often, only examples and labels will be used. Examples are either a
-            dense numpy matrix or a sparse matrix, where columns correspond to features and rows correspond to examples. There are a few encodings
-            which make multidimensional outputs that do not follow this pattern, but they are tailored to specific ML methods which require such input
-            (for instance, one hot encoding and ReceptorCNN method).
+                labels, names of the features and other additional information. Most often, only examples and labels will be used. Examples are either a
+                dense numpy matrix or a sparse matrix, where columns correspond to features and rows correspond to examples. There are a few encodings
+                which make multidimensional outputs that do not follow this pattern, but they are tailored to specific ML methods which require such input
+                (for instance, one hot encoding and ReceptorCNN method).
 
             label_name (str): name of the label for which the classifier will be created. immuneML also supports multi-label classification, but it is
-            handled outside MLMethod class by creating an MLMethod instance for each label. This means that each MLMethod should handle only one label.
+                handled outside MLMethod class by creating an MLMethod instance for each label. This means that each MLMethod should handle only one label.
 
             cores_for_training (int): if parallelization is available in the MLMethod (and the availability depends on the specific classifier), this
-            is the number of processes that will be creating when fitting the model to speed up the computation.
+                is the number of processes that will be creating when fitting the model to speed up the computation.
 
         Returns:
 
@@ -62,13 +63,13 @@ class MLMethod(metaclass=abc.ABCMeta):
         Arguments:
 
             encoded_data (EncodedData): an instance of EncodedData class which includes encoded examples (repertoires, receptors or sequences), their
-            labels, names of the features and other additional information. Most often, only examples and labels will be used. Examples are either a
-            dense numpy matrix or a sparse matrix, where columns correspond to features and rows correspond to examples. There are a few encodings
-            which make multidimensional outputs that do not follow this pattern, but they are tailored to specific ML methods which require such input
-            (for instance, one hot encoding and ReceptorCNN method).
+                labels, names of the features and other additional information. Most often, only examples and labels will be used. Examples are either a
+                dense numpy matrix or a sparse matrix, where columns correspond to features and rows correspond to examples. There are a few encodings
+                which make multidimensional outputs that do not follow this pattern, but they are tailored to specific ML methods which require such input
+                (for instance, one hot encoding and ReceptorCNN method).
 
             label_name (str): name of the label for which the classifier will be created. immuneML also supports multi-label classification, but it is
-            handled outside MLMethod class by creating an MLMethod instance for each label. This means that each MLMethod should handle only one label.
+                handled outside MLMethod class by creating an MLMethod instance for each label. This means that each MLMethod should handle only one label.
 
         Returns:
 
@@ -92,23 +93,23 @@ class MLMethod(metaclass=abc.ABCMeta):
         Arguments:
 
             encoded_data (EncodedData): an instance of EncodedData class which includes encoded examples (repertoires, receptors or sequences), their
-            labels, names of the features and other additional information. Most often, only examples and labels will be used. Examples are either a
-            dense numpy matrix or a sparse matrix, where columns correspond to features and rows correspond to examples. There are a few encodings
-            which make multidimensional outputs that do not follow this pattern, but they are tailored to specific ML methods which require such input
-            (for instance, one hot encoding and ReceptorCNN method).
+                labels, names of the features and other additional information. Most often, only examples and labels will be used. Examples are either a
+                dense numpy matrix or a sparse matrix, where columns correspond to features and rows correspond to examples. There are a few encodings
+                which make multidimensional outputs that do not follow this pattern, but they are tailored to specific ML methods which require such input
+                (for instance, one hot encoding and ReceptorCNN method).
 
             number_of_splits (int): number of splits for the cross-validation to be performed for selection the best hyperparameters of the ML model;
-            note that if this is used in combination with nested cross-validation in TrainMLModel instruction, it can result in very few examples in
-            each split depending on the orginal dataset size and the nested cross-validation setup.
+                note that if this is used in combination with nested cross-validation in TrainMLModel instruction, it can result in very few examples in
+                each split depending on the orginal dataset size and the nested cross-validation setup.
 
             label_name (str): name of the label for which the classifier will be created. immuneML also supports multi-label classification, but it is
-            handled outside MLMethod class by creating an MLMethod instance for each label. This means that each MLMethod should handle only one label.
+                handled outside MLMethod class by creating an MLMethod instance for each label. This means that each MLMethod should handle only one label.
 
             cores_for_training (int): number of processes to be used during the cross-validation for model selection
 
             optimization_metric (str): the name of the optimization metric to be used to select the best model during cross-validation; when used with
-            TrainMLModel instruction which is almost exclusively the case when the immuneML is run from the specification, this maps to the
-            optimization metric in the instruction.
+                TrainMLModel instruction which is almost exclusively the case when the immuneML is run from the specification, this maps to the
+                optimization metric in the instruction.
 
         Returns:
 
@@ -128,12 +129,12 @@ class MLMethod(metaclass=abc.ABCMeta):
             path (Path): path to folder where to store the model
 
             feature_names (list): list of feature names in the encoded data; this can be stored as well to make it easier to map linear models to
-            specific features as provided by the encoded (e.g., in case of logistic regression, this feature list defines what coefficients refer to)
+                specific features as provided by the encoded (e.g., in case of logistic regression, this feature list defines what coefficients refer to)
 
             details_path (Path): path to folder where to store the details of the model. The details can be there to better understand the model but
-            are not mandatory and are typically not loaded with the model afterwards. This is user-friendly file that can be examined manually by the
-            user. It does not have to be created or can be created at the same folder as the path parameters points to. In practice, when used with
-            TrainMLModel instruction, this parameter will either be None or have the same value as path parameter.
+                are not mandatory and are typically not loaded with the model afterwards. This is user-friendly file that can be examined manually by the
+                user. It does not have to be created or can be created at the same folder as the path parameters points to. In practice, when used with
+                TrainMLModel instruction, this parameter will either be None or have the same value as path parameter.
 
         Returns:
 
@@ -168,7 +169,7 @@ class MLMethod(metaclass=abc.ABCMeta):
         Arguments:
 
             label_name (str): the name of the label for which the model was trained. It is useful to check if the label_name and the model label
-            match.
+                match.
 
         Returns:
 
@@ -220,20 +221,19 @@ class MLMethod(metaclass=abc.ABCMeta):
         Arguments:
 
             encoded_data (EncodedData): an object of EncodedData class where the examples attribute should be used to make predictions. examples
-            attribute includes encoded examples in matrix format (numpy 2D array or a sparse matrix depending on the encoding). EncodedData object
-            provided here can include labels (in model assessment scenario) or not (when predicting the class probabilities on new data which has not
-            been labels), so the labels attribute of the EncodedData object should NOT be used in this function, even if it is set.
+                attribute includes encoded examples in matrix format (numpy 2D array or a sparse matrix depending on the encoding). EncodedData object
+                provided here can include labels (in model assessment scenario) or not (when predicting the class probabilities on new data which has not
+                been labels), so the labels attribute of the EncodedData object should NOT be used in this function, even if it is set.
 
             label_name (str): the name of the label for which the prediction should be made. It can be used to check if it matches the label that the
-            model has been trained for and if not, an exception should be thrown. It is often an AssertionError as this can be checked before any
-            prediction is made, but could also be a RuntimeError. It both cases, it should include a user-friendly message.
+                model has been trained for and if not, an exception should be thrown. It is often an AssertionError as this can be checked before any
+                prediction is made, but could also be a RuntimeError. It both cases, it should include a user-friendly message.
 
         Returns:
 
             a dictionary where the key is the label name and the value a 2D numpy array with class probabilities of dimension
-            [number_of_examples x number_of_classes_for_label], for instance for label CMV where the class can be either True or False and there are
-            3 examples to predict the class probabilities for:
-            {CMV: [[0.2, 0.8], [0.55, 0.45], [0.98, 0.02]]}
+                [number_of_examples x number_of_classes_for_label], for instance for label CMV where the class can be either True or False and there are
+                3 examples to predict the class probabilities for: {CMV: [[0.2, 0.8], [0.55, 0.45], [0.98, 0.02]]}
 
         """
         pass

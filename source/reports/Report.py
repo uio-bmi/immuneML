@@ -28,7 +28,7 @@ class Report(metaclass=abc.ABCMeta):
         Args:
 
             **kwargs: keyword arguments that will be provided by users in the specification (if immuneML is used as a command line tool) or in the
-             dictionary when calling the method from the code, and which should be used to create the report object
+                dictionary when calling the method from the code, and which should be used to create the report object
 
         Returns:
 
@@ -60,7 +60,8 @@ class Report(metaclass=abc.ABCMeta):
         cannot be run, the information on this will be logged and the report skipped in the specific situation. No error will be raised. See
         subclasses of the class :py:obj:`~source.workflows.instructions.Instruction.Instruction` for more information on how the reports are executed.
 
-        Returns boolean value True if the prerequisites are o.k., and False otherwise.
+        Returns:
+             boolean value True if the prerequisites are o.k., and False otherwise.
         """
         return True
 
