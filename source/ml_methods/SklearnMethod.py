@@ -2,13 +2,12 @@ import abc
 import hashlib
 import os
 import warnings
+from pathlib import Path
 
 import dill
 import numpy as np
 import pkg_resources
 import yaml
-from pathlib import Path
-
 from sklearn.metrics import SCORERS
 from sklearn.model_selection import RandomizedSearchCV
 from sklearn.utils.validation import check_is_fitted
@@ -33,12 +32,12 @@ class SklearnMethod(MLMethod):
     Arguments:
 
         parameters: a dictionary of parameters that will be directly passed to scikit-learn's class upon calling __init__()
-        method; for detailed list see scikit-learn's documentation of the specific class inheriting SklearnMethod
+            method; for detailed list see scikit-learn's documentation of the specific class inheriting SklearnMethod
 
         parameter_grid: a dictionary of parameters which all have to be valid arguments for scikit-learn's corresponding class' __init__() method
-        (same as parameters), but unlike parameters argument can contain list of values instead of one value; if this is specified and
-        "model_selection_cv" is True (in the specification) or just if fit_by_cross_validation() is called, a grid search will be performed over
-        these parameters and the optimal model will be kept
+            (same as parameters), but unlike parameters argument can contain list of values instead of one value; if this is specified and
+            "model_selection_cv" is True (in the specification) or just if fit_by_cross_validation() is called, a grid search will be performed over
+            these parameters and the optimal model will be kept
 
     YAML specification:
 

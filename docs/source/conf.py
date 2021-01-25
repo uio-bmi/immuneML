@@ -59,6 +59,13 @@ mathjax_config = {
     'jax': ['input/TeX', 'output/HTML-CSS'],
 }
 
+# napoleon configuration
+napoleon_google_docstring = True
+napoleon_numpy_docstring = False
+napoleon_include_init_with_doc = True
+
+# autodoc
+
 autodoc_mock_imports = ["pandas", "sklearn", "numpy", "pystache"]
 
 # Add any paths that contain templates here, relative to this directory.

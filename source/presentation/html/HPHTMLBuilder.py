@@ -1,9 +1,9 @@
 import io
 import os
 import statistics
+from pathlib import Path
 
 import pandas as pd
-from pathlib import Path
 
 from source.environment.Constants import Constants
 from source.environment.EnvironmentSettings import EnvironmentSettings
@@ -24,8 +24,7 @@ from source.util.StringHelper import StringHelper
 
 class HPHTMLBuilder:
     """
-    A class that will make HTML file(s) out of HPOptimizationState object to show what analysis took place in
-    the TrainMLModel.
+    A class that will make HTML file(s) out of TrainMLModelState object to show what analysis took place in the TrainMLModel.
     """
 
     CSS_PATH = EnvironmentSettings.html_templates_path / "css/custom.css"
