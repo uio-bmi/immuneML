@@ -3,14 +3,13 @@ from unittest import TestCase
 
 import yaml
 from yaml import YAMLError
-from pathlib import Path
 
-from source.IO.dataset_export.PickleExporter import PickleExporter
-from source.data_model.dataset.RepertoireDataset import RepertoireDataset
-from source.dsl.ImmuneMLParser import ImmuneMLParser
-from source.environment.EnvironmentSettings import EnvironmentSettings
-from source.util.PathBuilder import PathBuilder
-from source.util.RepertoireBuilder import RepertoireBuilder
+from immuneML.IO.dataset_export.PickleExporter import PickleExporter
+from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
+from immuneML.dsl.ImmuneMLParser import ImmuneMLParser
+from immuneML.environment.EnvironmentSettings import EnvironmentSettings
+from immuneML.util.PathBuilder import PathBuilder
+from immuneML.util.RepertoireBuilder import RepertoireBuilder
 
 
 class TestImmuneMLParser(TestCase):

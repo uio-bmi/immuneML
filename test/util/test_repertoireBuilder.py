@@ -3,9 +3,9 @@ from unittest import TestCase
 
 import pandas as pd
 
-from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
-from source.environment.EnvironmentSettings import EnvironmentSettings
-from source.util.RepertoireBuilder import RepertoireBuilder
+from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
+from immuneML.environment.EnvironmentSettings import EnvironmentSettings
+from immuneML.util.RepertoireBuilder import RepertoireBuilder
 
 
 class TestRepertoireBuilder(TestCase):

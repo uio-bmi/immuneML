@@ -3,9 +3,9 @@ import shutil
 from glob import glob
 from unittest import TestCase
 
-from source.environment.EnvironmentSettings import EnvironmentSettings
-from source.util.PathBuilder import PathBuilder
-from source.workflows.instructions.quickstart import Quickstart
+from immuneML.environment.EnvironmentSettings import EnvironmentSettings
+from immuneML.util.PathBuilder import PathBuilder
+from immuneML.workflows.instructions.quickstart import Quickstart
 
 
 class TestQuickstart(TestCase):

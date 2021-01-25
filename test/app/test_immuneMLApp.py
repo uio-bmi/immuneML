@@ -1,18 +1,19 @@
 import os
 import random
 import shutil
-from unittest import TestCase
 from pathlib import Path
+from unittest import TestCase
+
 import yaml
 
-from source.IO.dataset_export.PickleExporter import PickleExporter
-from source.app import ImmuneMLApp
-from source.caching.CacheType import CacheType
-from source.data_model.dataset.RepertoireDataset import RepertoireDataset
-from source.environment.Constants import Constants
-from source.environment.EnvironmentSettings import EnvironmentSettings
-from source.util.PathBuilder import PathBuilder
-from source.util.RepertoireBuilder import RepertoireBuilder
+from immuneML.IO.dataset_export.PickleExporter import PickleExporter
+from immuneML.app import ImmuneMLApp
+from immuneML.caching.CacheType import CacheType
+from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
+from immuneML.environment.Constants import Constants
+from immuneML.environment.EnvironmentSettings import EnvironmentSettings
+from immuneML.util.PathBuilder import PathBuilder
+from immuneML.util.RepertoireBuilder import RepertoireBuilder
 
 
 class TestImmuneMLApp(TestCase):

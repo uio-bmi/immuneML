@@ -4,11 +4,11 @@ from unittest import TestCase
 
 import yaml
 
-from source.app.ImmuneMLApp import ImmuneMLApp
-from source.caching.CacheType import CacheType
-from source.environment.Constants import Constants
-from source.environment.EnvironmentSettings import EnvironmentSettings
-from source.util.PathBuilder import PathBuilder
+from immuneML.app.ImmuneMLApp import ImmuneMLApp
+from immuneML.caching.CacheType import CacheType
+from immuneML.environment.Constants import Constants
+from immuneML.environment.EnvironmentSettings import EnvironmentSettings
+from immuneML.util.PathBuilder import PathBuilder
 
 
 class TestReceptorCNNWorkflow(TestCase):

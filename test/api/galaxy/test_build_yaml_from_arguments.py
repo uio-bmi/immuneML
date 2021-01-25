@@ -2,16 +2,16 @@ import os
 import shutil
 import unittest
 
-from source.IO.dataset_export.PickleExporter import PickleExporter
-from source.api.galaxy.build_yaml_from_arguments import build_settings_specs, build_ml_methods_specs, get_sequence_enc_type, \
+from immuneML.IO.dataset_export.PickleExporter import PickleExporter
+from immuneML.api.galaxy.build_yaml_from_arguments import build_settings_specs, build_ml_methods_specs, get_sequence_enc_type, \
     build_encodings_specs, build_labels
-from source.api.galaxy.build_yaml_from_arguments import main as yamlbuilder_main
-from source.data_model.dataset.RepertoireDataset import RepertoireDataset
-from source.dsl.ImmuneMLParser import ImmuneMLParser
-from source.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType import SequenceEncodingType
-from source.environment.EnvironmentSettings import EnvironmentSettings
-from source.util.PathBuilder import PathBuilder
-from source.util.RepertoireBuilder import RepertoireBuilder
+from immuneML.api.galaxy.build_yaml_from_arguments import main as yamlbuilder_main
+from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
+from immuneML.dsl.ImmuneMLParser import ImmuneMLParser
+from immuneML.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType import SequenceEncodingType
+from immuneML.environment.EnvironmentSettings import EnvironmentSettings
+from immuneML.util.PathBuilder import PathBuilder
+from immuneML.util.RepertoireBuilder import RepertoireBuilder
 
 
 class DummyArguments:

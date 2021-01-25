@@ -1,18 +1,18 @@
+import os
 import shutil
 from unittest import TestCase
 from zipfile import ZipFile
-import os
-import pandas as pd
-import numpy as np
-from pathlib import Path
 
-from source.IO.dataset_import.IReceptorImport import IReceptorImport
-from source.data_model.dataset.RepertoireDataset import RepertoireDataset
-from source.data_model.dataset.SequenceDataset import SequenceDataset
-from source.dsl.DefaultParamsLoader import DefaultParamsLoader
-from source.environment.Constants import Constants
-from source.environment.EnvironmentSettings import EnvironmentSettings
-from source.util.PathBuilder import PathBuilder
+import numpy as np
+import pandas as pd
+
+from immuneML.IO.dataset_import.IReceptorImport import IReceptorImport
+from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
+from immuneML.data_model.dataset.SequenceDataset import SequenceDataset
+from immuneML.dsl.DefaultParamsLoader import DefaultParamsLoader
+from immuneML.environment.Constants import Constants
+from immuneML.environment.EnvironmentSettings import EnvironmentSettings
+from immuneML.util.PathBuilder import PathBuilder
 
 
 class TestIReceptorImport(TestCase):

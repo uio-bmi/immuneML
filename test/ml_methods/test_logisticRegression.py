@@ -6,12 +6,12 @@ from unittest import TestCase
 import numpy as np
 from sklearn.linear_model import LogisticRegression as SklearnLogisticRegression
 
-from source.caching.CacheType import CacheType
-from source.data_model.encoded_data.EncodedData import EncodedData
-from source.environment.Constants import Constants
-from source.environment.EnvironmentSettings import EnvironmentSettings
-from source.ml_methods.LogisticRegression import LogisticRegression
-from source.util.PathBuilder import PathBuilder
+from immuneML.caching.CacheType import CacheType
+from immuneML.data_model.encoded_data.EncodedData import EncodedData
+from immuneML.environment.Constants import Constants
+from immuneML.environment.EnvironmentSettings import EnvironmentSettings
+from immuneML.ml_methods.LogisticRegression import LogisticRegression
+from immuneML.util.PathBuilder import PathBuilder
 
 
 class TestLogisticRegression(TestCase):

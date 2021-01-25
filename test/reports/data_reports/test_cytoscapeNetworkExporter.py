@@ -3,14 +3,14 @@ import pickle
 import shutil
 from unittest import TestCase
 
-from source.data_model.dataset.ReceptorDataset import ReceptorDataset
-from source.data_model.dataset.RepertoireDataset import RepertoireDataset
-from source.data_model.receptor.receptor_sequence.Chain import Chain
-from source.data_model.repertoire.Repertoire import Repertoire
-from source.environment.EnvironmentSettings import EnvironmentSettings
-from source.reports.ReportResult import ReportResult
-from source.reports.data_reports.CytoscapeNetworkExporter import CytoscapeNetworkExporter
-from source.util.PathBuilder import PathBuilder
+from immuneML.data_model.dataset.ReceptorDataset import ReceptorDataset
+from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
+from immuneML.data_model.receptor.receptor_sequence.Chain import Chain
+from immuneML.data_model.repertoire.Repertoire import Repertoire
+from immuneML.environment.EnvironmentSettings import EnvironmentSettings
+from immuneML.reports.ReportResult import ReportResult
+from immuneML.reports.data_reports.CytoscapeNetworkExporter import CytoscapeNetworkExporter
+from immuneML.util.PathBuilder import PathBuilder
 
 
 class TestCytoscapeNetworkExporter(TestCase):

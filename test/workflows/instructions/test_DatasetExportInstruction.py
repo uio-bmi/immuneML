@@ -3,12 +3,12 @@ import shutil
 from glob import glob
 from unittest import TestCase
 
-from source.IO.dataset_export.AIRRExporter import AIRRExporter
-from source.environment.EnvironmentSettings import EnvironmentSettings
-from source.simulation.dataset_generation.RandomDatasetGenerator import RandomDatasetGenerator
-from source.util.PathBuilder import PathBuilder
-from source.workflows.instructions.dataset_generation.DatasetExportInstruction import DatasetExportInstruction
-from source.workflows.instructions.dataset_generation.DatasetExportState import DatasetExportState
+from immuneML.IO.dataset_export.AIRRExporter import AIRRExporter
+from immuneML.environment.EnvironmentSettings import EnvironmentSettings
+from immuneML.simulation.dataset_generation.RandomDatasetGenerator import RandomDatasetGenerator
+from immuneML.util.PathBuilder import PathBuilder
+from immuneML.workflows.instructions.dataset_generation.DatasetExportInstruction import DatasetExportInstruction
+from immuneML.workflows.instructions.dataset_generation.DatasetExportState import DatasetExportState
 
 
 class TestDatasetExportInstruction(TestCase):

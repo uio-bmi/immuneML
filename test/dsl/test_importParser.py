@@ -5,14 +5,14 @@ from unittest import TestCase
 
 import pandas as pd
 
-from source.caching.CacheType import CacheType
-from source.data_model.dataset.ReceptorDataset import ReceptorDataset
-from source.data_model.dataset.RepertoireDataset import RepertoireDataset
-from source.dsl.import_parsers.ImportParser import ImportParser
-from source.dsl.symbol_table.SymbolTable import SymbolTable
-from source.environment.Constants import Constants
-from source.environment.EnvironmentSettings import EnvironmentSettings
-from source.util.PathBuilder import PathBuilder
+from immuneML.caching.CacheType import CacheType
+from immuneML.data_model.dataset.ReceptorDataset import ReceptorDataset
+from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
+from immuneML.dsl.import_parsers.ImportParser import ImportParser
+from immuneML.dsl.symbol_table.SymbolTable import SymbolTable
+from immuneML.environment.Constants import Constants
+from immuneML.environment.EnvironmentSettings import EnvironmentSettings
+from immuneML.util.PathBuilder import PathBuilder
 
 
 class TestImportParser(TestCase):

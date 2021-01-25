@@ -1,12 +1,12 @@
 import shutil
 from unittest import TestCase
 
-from source.IO.dataset_export.AIRRExporter import AIRRExporter
-from source.IO.dataset_import.AIRRImport import AIRRImport
-from source.data_model.receptor.RegionType import RegionType
-from source.data_model.receptor.receptor_sequence.Chain import Chain
-from source.environment.EnvironmentSettings import EnvironmentSettings
-from source.util.PathBuilder import PathBuilder
+from immuneML.IO.dataset_export.AIRRExporter import AIRRExporter
+from immuneML.IO.dataset_import.AIRRImport import AIRRImport
+from immuneML.data_model.receptor.RegionType import RegionType
+from immuneML.data_model.receptor.receptor_sequence.Chain import Chain
+from immuneML.environment.EnvironmentSettings import EnvironmentSettings
+from immuneML.util.PathBuilder import PathBuilder
 
 
 class TestAIRRImport(TestCase):

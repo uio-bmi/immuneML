@@ -7,12 +7,12 @@ import dill
 import numpy as np
 from sklearn.neighbors import KNeighborsClassifier
 
-from source.caching.CacheType import CacheType
-from source.data_model.encoded_data.EncodedData import EncodedData
-from source.environment.Constants import Constants
-from source.environment.EnvironmentSettings import EnvironmentSettings
-from source.ml_methods.TCRdistClassifier import TCRdistClassifier
-from source.util.PathBuilder import PathBuilder
+from immuneML.caching.CacheType import CacheType
+from immuneML.data_model.encoded_data.EncodedData import EncodedData
+from immuneML.environment.Constants import Constants
+from immuneML.environment.EnvironmentSettings import EnvironmentSettings
+from immuneML.ml_methods.TCRdistClassifier import TCRdistClassifier
+from immuneML.util.PathBuilder import PathBuilder
 
 
 class TestTCRdistClassifier(TestCase):

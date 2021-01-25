@@ -5,18 +5,18 @@ from unittest import TestCase
 import numpy as np
 import pandas as pd
 
-from source.caching.CacheType import CacheType
-from source.data_model.dataset.RepertoireDataset import RepertoireDataset
-from source.data_model.encoded_data.EncodedData import EncodedData
-from source.environment.Constants import Constants
-from source.environment.EnvironmentSettings import EnvironmentSettings
-from source.environment.LabelConfiguration import LabelConfiguration
-from source.environment.Metric import Metric
-from source.ml_methods.LogisticRegression import LogisticRegression
-from source.util.PathBuilder import PathBuilder
-from source.util.RepertoireBuilder import RepertoireBuilder
-from source.workflows.steps.MLMethodAssessment import MLMethodAssessment
-from source.workflows.steps.MLMethodAssessmentParams import MLMethodAssessmentParams
+from immuneML.caching.CacheType import CacheType
+from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
+from immuneML.data_model.encoded_data.EncodedData import EncodedData
+from immuneML.environment.Constants import Constants
+from immuneML.environment.EnvironmentSettings import EnvironmentSettings
+from immuneML.environment.LabelConfiguration import LabelConfiguration
+from immuneML.environment.Metric import Metric
+from immuneML.ml_methods.LogisticRegression import LogisticRegression
+from immuneML.util.PathBuilder import PathBuilder
+from immuneML.util.RepertoireBuilder import RepertoireBuilder
+from immuneML.workflows.steps.MLMethodAssessment import MLMethodAssessment
+from immuneML.workflows.steps.MLMethodAssessmentParams import MLMethodAssessmentParams
 
 
 class TestMLMethodAssessment(TestCase):

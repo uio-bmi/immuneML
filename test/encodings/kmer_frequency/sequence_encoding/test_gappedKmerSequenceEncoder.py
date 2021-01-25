@@ -1,9 +1,9 @@
 from unittest import TestCase
 
-from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
-from source.encodings.EncoderParams import EncoderParams
-from source.encodings.kmer_frequency.sequence_encoding.GappedKmerSequenceEncoder import GappedKmerSequenceEncoder
-from source.environment.LabelConfiguration import LabelConfiguration
+from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
+from immuneML.encodings.EncoderParams import EncoderParams
+from immuneML.encodings.kmer_frequency.sequence_encoding.GappedKmerSequenceEncoder import GappedKmerSequenceEncoder
+from immuneML.environment.LabelConfiguration import LabelConfiguration
 
 
 class TestGappedKmerSequenceEncoder(TestCase):

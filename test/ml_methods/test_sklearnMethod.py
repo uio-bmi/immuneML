@@ -8,11 +8,11 @@ from scipy import sparse
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.svm import LinearSVC
 
-from source.IO.ml_method.MLMethodConfiguration import MLMethodConfiguration
-from source.environment.EnvironmentSettings import EnvironmentSettings
-from source.ml_methods.KNN import KNN
-from source.ml_methods.SVM import SVM
-from source.util.PathBuilder import PathBuilder
+from immuneML.IO.ml_method.MLMethodConfiguration import MLMethodConfiguration
+from immuneML.environment.EnvironmentSettings import EnvironmentSettings
+from immuneML.ml_methods.KNN import KNN
+from immuneML.ml_methods.SVM import SVM
+from immuneML.util.PathBuilder import PathBuilder
 
 
 class TestSklearnMethod(TestCase):

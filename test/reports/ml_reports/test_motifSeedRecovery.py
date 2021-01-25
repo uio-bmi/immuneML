@@ -6,15 +6,15 @@ import numpy as np
 import pandas as pd
 import yaml
 
-from source.caching.CacheType import CacheType
-from source.data_model.dataset.Dataset import Dataset
-from source.data_model.encoded_data.EncodedData import EncodedData
-from source.environment.Constants import Constants
-from source.environment.EnvironmentSettings import EnvironmentSettings
-from source.ml_methods.LogisticRegression import LogisticRegression
-from source.reports.ReportResult import ReportResult
-from source.reports.ml_reports.MotifSeedRecovery import MotifSeedRecovery
-from source.util.PathBuilder import PathBuilder
+from immuneML.caching.CacheType import CacheType
+from immuneML.data_model.dataset.Dataset import Dataset
+from immuneML.data_model.encoded_data.EncodedData import EncodedData
+from immuneML.environment.Constants import Constants
+from immuneML.environment.EnvironmentSettings import EnvironmentSettings
+from immuneML.ml_methods.LogisticRegression import LogisticRegression
+from immuneML.reports.ReportResult import ReportResult
+from immuneML.reports.ml_reports.MotifSeedRecovery import MotifSeedRecovery
+from immuneML.util.PathBuilder import PathBuilder
 
 
 class TestMotifSeedRecovery(TestCase):

@@ -2,13 +2,13 @@ import os
 import shutil
 from unittest import TestCase
 
-from source.IO.dataset_import.IRISSequenceImport import IRISSequenceImport
-from source.caching.CacheType import CacheType
-from source.data_model.receptor.TCABReceptor import TCABReceptor
-from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
-from source.environment.Constants import Constants
-from source.environment.EnvironmentSettings import EnvironmentSettings
-from source.util.PathBuilder import PathBuilder
+from immuneML.IO.dataset_import.IRISSequenceImport import IRISSequenceImport
+from immuneML.caching.CacheType import CacheType
+from immuneML.data_model.receptor.TCABReceptor import TCABReceptor
+from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
+from immuneML.environment.Constants import Constants
+from immuneML.environment.EnvironmentSettings import EnvironmentSettings
+from immuneML.util.PathBuilder import PathBuilder
 
 
 class TestIRISSequenceImport(TestCase):

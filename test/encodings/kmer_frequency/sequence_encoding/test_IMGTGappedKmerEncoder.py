@@ -1,12 +1,12 @@
 import os
 from unittest import TestCase
 
-from source.caching.CacheType import CacheType
-from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
-from source.encodings.EncoderParams import EncoderParams
-from source.encodings.kmer_frequency.sequence_encoding.IMGTGappedKmerEncoder import IMGTGappedKmerEncoder
-from source.environment.Constants import Constants
-from source.environment.LabelConfiguration import LabelConfiguration
+from immuneML.caching.CacheType import CacheType
+from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
+from immuneML.encodings.EncoderParams import EncoderParams
+from immuneML.encodings.kmer_frequency.sequence_encoding.IMGTGappedKmerEncoder import IMGTGappedKmerEncoder
+from immuneML.environment.Constants import Constants
+from immuneML.environment.LabelConfiguration import LabelConfiguration
 
 
 class TestIMGTGappedKmerEncoder(TestCase):

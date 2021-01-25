@@ -11,13 +11,13 @@ In immuneML, it is possible to automatically generate a report describing some a
 
 These types of reports are modeled by the following classes:
 
-  #. :py:obj:`source.reports.data_reports.DataReport.DataReport`
-  #. :py:obj:`source.reports.encoding_reports.EncodingReport.EncodingReport`
-  #. :py:obj:`source.reports.ml_reports.MLReport.MLReport`
-  #. :py:obj:`source.reports.train_ml_model_reports.TrainMLModelReport.TrainMLModelReport`
-  #. :py:obj:`source.reports.multi_dataset_reports.MultiDatasetReport.MultiDatasetReport`
+  #. :py:obj:`immuneML.reports.data_reports.DataReport.DataReport`
+  #. :py:obj:`immuneML.reports.encoding_reports.EncodingReport.EncodingReport`
+  #. :py:obj:`immuneML.reports.ml_reports.MLReport.MLReport`
+  #. :py:obj:`immuneML.reports.train_ml_model_reports.TrainMLModelReport.TrainMLModelReport`
+  #. :py:obj:`immuneML.reports.multi_dataset_reports.MultiDatasetReport.MultiDatasetReport`
 
-The existing reports can be found in the package `source.reports`. These can be specified in the YAML by specifying the name and optional parameters
+The existing reports can be found in the package `immuneML.reports`. These can be specified in the YAML by specifying the name and optional parameters
 (see: :ref:`How to specify an analysis with YAML`).
 
 This guide describes how to add a new custom report to immuneML.
@@ -49,9 +49,9 @@ the :ref:`TrainMLModel`. An MLReport has the following attributes:
   #. test_dataset: similar to train_dataset, but containing the test data
   #. method: the MLMethod object containing trained classifiers for each of the labels.
   #. label: the label that the report is executed for (the same report may be executed several times when training classifiers for multiple labels), can be used to retrieve relevant information from the MLMethod object.
-  #. hp_setting: the :py:obj:`source.hyperparameter_optimization.HPSetting.HPSetting` object, containing all information about which preprocessing, encoding, and ML methods were used up to this point. This parameter can usually be ignored unless specific information from previous analysis steps is needed.
+  #. hp_setting: the :py:obj:`immuneML.hyperparameter_optimization.HPSetting.HPSetting` object, containing all information about which preprocessing, encoding, and ML methods were used up to this point. This parameter can usually be ignored unless specific information from previous analysis steps is needed.
 
-In contrast, `TrainMLModelReport` is used to compare several [optimal] ML models. This report has access to the attribute state: a :py:obj:`source.hyperparameter_optimization.states.TrainMLModelState.TrainMLModelState`
+In contrast, `TrainMLModelReport` is used to compare several [optimal] ML models. This report has access to the attribute state: a :py:obj:`immuneML.hyperparameter_optimization.states.TrainMLModelState.TrainMLModelState`
 object, containing information that has been collected through the execution of the TrainMLModelInstruction. This includes all datasets, trained
 models, labels, internal state objects for selection and assessment loops (nested cross-validation), optimal models, and more.
 
@@ -62,7 +62,7 @@ TrainMLModelState objects.
 Implementing the report
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
-The new report should inherit the appropriate report type and be placed in the respective package (under `source.reports`, choose `data_reports`,
+The new report should inherit the appropriate report type and be placed in the respective package (under `immuneML.reports`, choose `data_reports`,
 `encoding_reports`, `ml_reports`, `train_ml_model_reports`, or `multidataset_reports`). The abstract method `generate()` must be implemented,
 which has the following responsibilities:
 
@@ -84,7 +84,7 @@ report object. The parameters of the method `build_object()` can be directly spe
 
 
 Inside the `build_object()` method, you can check if the correct parameters are specified and raise an exception when the user input is incorrect
-(for example using the :py:obj:`source.util.ParameterValidator.ParameterValidator` utility class). Furthermore, it is possible to resolve more
+(for example using the :py:obj:`immuneML.util.ParameterValidator.ParameterValidator` utility class). Furthermore, it is possible to resolve more
 complex input parameters, such as loading reference sequences from an external input file, before passing them to the `__init__()` method of the report.
 
 It is important to consider whether the method `check_prerequisites()` should be implemented. This method should return a boolean value describing
@@ -99,14 +99,14 @@ during execution, as this might cause lost results. Situations to consider are:
 
 .. note::
 
-  Please see the :py:obj:`source.reports.Report.Report` class for the detailed description of the methods to be implemented.
+  Please see the :py:obj:`immuneML.reports.Report.Report` class for the detailed description of the methods to be implemented.
 
 Unit testing the new report
 ----------------------------
 
 For each report, a unit test should be added under the correct package inside test.reports. Here, the `generate()` method of the new report should be
 tested, as well as other relevant methods, to ensure that the report output is correct. When building tests for reports, a useful class is
-:py:obj:`source.simulation.dataset_generation.RandomDatasetGenerator.RandomDatasetGenerator`, which can create a dataset with random sequences.
+:py:obj:`immuneML.simulation.dataset_generation.RandomDatasetGenerator.RandomDatasetGenerator`, which can create a dataset with random sequences.
 
 Adding documentation for the new report
 -----------------------------------------

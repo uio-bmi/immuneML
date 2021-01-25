@@ -5,11 +5,11 @@ import numpy as np
 import pandas as pd
 from scipy import sparse
 
-from source.analysis.data_manipulation.DataReshaper import DataReshaper
-from source.caching.CacheType import CacheType
-from source.data_model.dataset.RepertoireDataset import RepertoireDataset
-from source.data_model.encoded_data.EncodedData import EncodedData
-from source.environment.Constants import Constants
+from immuneML.analysis.data_manipulation.DataReshaper import DataReshaper
+from immuneML.caching.CacheType import CacheType
+from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
+from immuneML.data_model.encoded_data.EncodedData import EncodedData
+from immuneML.environment.Constants import Constants
 
 
 class TestDataReshaper(TestCase):

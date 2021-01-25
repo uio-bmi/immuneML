@@ -2,15 +2,15 @@ import os
 import shutil
 from unittest import TestCase
 
-from source.caching.CacheType import CacheType
-from source.data_model.dataset.RepertoireDataset import RepertoireDataset
-from source.data_model.receptor.receptor_sequence.Chain import Chain
-from source.encodings.EncoderParams import EncoderParams
-from source.encodings.reference_encoding.MatchedRegexEncoder import MatchedRegexEncoder
-from source.environment.Constants import Constants
-from source.environment.EnvironmentSettings import EnvironmentSettings
-from source.environment.LabelConfiguration import LabelConfiguration
-from source.util.RepertoireBuilder import RepertoireBuilder
+from immuneML.caching.CacheType import CacheType
+from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
+from immuneML.data_model.receptor.receptor_sequence.Chain import Chain
+from immuneML.encodings.EncoderParams import EncoderParams
+from immuneML.encodings.reference_encoding.MatchedRegexEncoder import MatchedRegexEncoder
+from immuneML.environment.Constants import Constants
+from immuneML.environment.EnvironmentSettings import EnvironmentSettings
+from immuneML.environment.LabelConfiguration import LabelConfiguration
+from immuneML.util.RepertoireBuilder import RepertoireBuilder
 
 
 class TestMatchedReceptorsEncoder(TestCase):

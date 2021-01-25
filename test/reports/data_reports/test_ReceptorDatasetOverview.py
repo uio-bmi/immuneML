@@ -2,11 +2,11 @@ import os
 import shutil
 from unittest import TestCase
 
-from source.environment.EnvironmentSettings import EnvironmentSettings
-from source.reports.ReportResult import ReportResult
-from source.reports.data_reports.ReceptorDatasetOverview import ReceptorDatasetOverview
-from source.simulation.dataset_generation.RandomDatasetGenerator import RandomDatasetGenerator
-from source.util.PathBuilder import PathBuilder
+from immuneML.environment.EnvironmentSettings import EnvironmentSettings
+from immuneML.reports.ReportResult import ReportResult
+from immuneML.reports.data_reports.ReceptorDatasetOverview import ReceptorDatasetOverview
+from immuneML.simulation.dataset_generation.RandomDatasetGenerator import RandomDatasetGenerator
+from immuneML.util.PathBuilder import PathBuilder
 
 
 class TestReceptorDatasetOverview(TestCase):

@@ -2,18 +2,18 @@ import os
 import shutil
 from unittest import TestCase
 
-from source.caching.CacheType import CacheType
-from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
-from source.data_model.repertoire.Repertoire import Repertoire
-from source.environment.Constants import Constants
-from source.environment.EnvironmentSettings import EnvironmentSettings
-from source.simulation.implants.Motif import Motif
-from source.simulation.implants.Signal import Signal
-from source.simulation.motif_instantiation_strategy.GappedKmerInstantiation import GappedKmerInstantiation
-from source.simulation.sequence_implanting.GappedMotifImplanting import GappedMotifImplanting
-from source.simulation.signal_implanting_strategy.HealthySequenceImplanting import HealthySequenceImplanting
-from source.simulation.signal_implanting_strategy.ImplantingComputation import ImplantingComputation
-from source.util.PathBuilder import PathBuilder
+from immuneML.caching.CacheType import CacheType
+from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
+from immuneML.data_model.repertoire.Repertoire import Repertoire
+from immuneML.environment.Constants import Constants
+from immuneML.environment.EnvironmentSettings import EnvironmentSettings
+from immuneML.simulation.implants.Motif import Motif
+from immuneML.simulation.implants.Signal import Signal
+from immuneML.simulation.motif_instantiation_strategy.GappedKmerInstantiation import GappedKmerInstantiation
+from immuneML.simulation.sequence_implanting.GappedMotifImplanting import GappedMotifImplanting
+from immuneML.simulation.signal_implanting_strategy.HealthySequenceImplanting import HealthySequenceImplanting
+from immuneML.simulation.signal_implanting_strategy.ImplantingComputation import ImplantingComputation
+from immuneML.util.PathBuilder import PathBuilder
 
 
 class TestHealthySequenceImplanting(TestCase):

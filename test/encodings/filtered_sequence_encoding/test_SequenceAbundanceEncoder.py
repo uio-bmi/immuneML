@@ -4,21 +4,21 @@ from unittest import TestCase
 
 import numpy as np
 
-from source.caching.CacheType import CacheType
-from source.data_model.dataset.RepertoireDataset import RepertoireDataset
-from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
-from source.data_model.repertoire.Repertoire import Repertoire
-from source.encodings.EncoderParams import EncoderParams
-from source.encodings.filtered_sequence_encoding.SequenceAbundanceEncoder import SequenceAbundanceEncoder
-from source.encodings.filtered_sequence_encoding.SequenceFilterHelper import SequenceFilterHelper
-from source.environment.Constants import Constants
-from source.environment.EnvironmentSettings import EnvironmentSettings
-from source.environment.Label import Label
-from source.environment.LabelConfiguration import LabelConfiguration
-from source.pairwise_repertoire_comparison.ComparisonData import ComparisonData
-from source.pairwise_repertoire_comparison.ComparisonDataBatch import ComparisonDataBatch
-from source.util.PathBuilder import PathBuilder
-from source.util.RepertoireBuilder import RepertoireBuilder
+from immuneML.caching.CacheType import CacheType
+from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
+from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
+from immuneML.data_model.repertoire.Repertoire import Repertoire
+from immuneML.encodings.EncoderParams import EncoderParams
+from immuneML.encodings.filtered_sequence_encoding.SequenceAbundanceEncoder import SequenceAbundanceEncoder
+from immuneML.encodings.filtered_sequence_encoding.SequenceFilterHelper import SequenceFilterHelper
+from immuneML.environment.Constants import Constants
+from immuneML.environment.EnvironmentSettings import EnvironmentSettings
+from immuneML.environment.Label import Label
+from immuneML.environment.LabelConfiguration import LabelConfiguration
+from immuneML.pairwise_repertoire_comparison.ComparisonData import ComparisonData
+from immuneML.pairwise_repertoire_comparison.ComparisonDataBatch import ComparisonDataBatch
+from immuneML.util.PathBuilder import PathBuilder
+from immuneML.util.RepertoireBuilder import RepertoireBuilder
 
 
 class TestEmersonSequenceAbundanceEncoder(TestCase):

@@ -4,10 +4,10 @@ from unittest import TestCase
 
 import pandas as pd
 
-from source.environment.EnvironmentSettings import EnvironmentSettings
-from source.reports.data_reports.GLIPH2Exporter import GLIPH2Exporter
-from source.simulation.dataset_generation.RandomDatasetGenerator import RandomDatasetGenerator
-from source.util.PathBuilder import PathBuilder
+from immuneML.environment.EnvironmentSettings import EnvironmentSettings
+from immuneML.reports.data_reports.GLIPH2Exporter import GLIPH2Exporter
+from immuneML.simulation.dataset_generation.RandomDatasetGenerator import RandomDatasetGenerator
+from immuneML.util.PathBuilder import PathBuilder
 
 
 class TestGLIPH2Exporter(TestCase):

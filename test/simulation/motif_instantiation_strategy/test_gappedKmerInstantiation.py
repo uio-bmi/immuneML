@@ -1,9 +1,9 @@
 import os
 from unittest import TestCase
 
-from source.caching.CacheType import CacheType
-from source.environment.Constants import Constants
-from source.simulation.motif_instantiation_strategy.GappedKmerInstantiation import GappedKmerInstantiation
+from immuneML.caching.CacheType import CacheType
+from immuneML.environment.Constants import Constants
+from immuneML.simulation.motif_instantiation_strategy.GappedKmerInstantiation import GappedKmerInstantiation
 
 
 class TestGappedKmerInstantiation(TestCase):

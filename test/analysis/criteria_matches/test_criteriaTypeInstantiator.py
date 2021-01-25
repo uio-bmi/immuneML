@@ -1,10 +1,10 @@
 import os
 from unittest import TestCase
 
-from source.analysis.criteria_matches.BooleanType import BooleanType
-from source.analysis.criteria_matches.CriteriaTypeInstantiator import CriteriaTypeInstantiator
-from source.caching.CacheType import CacheType
-from source.environment.Constants import Constants
+from immuneML.analysis.criteria_matches.BooleanType import BooleanType
+from immuneML.analysis.criteria_matches.CriteriaTypeInstantiator import CriteriaTypeInstantiator
+from immuneML.caching.CacheType import CacheType
+from immuneML.environment.Constants import Constants
 
 
 class TestCriteriaTypeInstantiator(TestCase):

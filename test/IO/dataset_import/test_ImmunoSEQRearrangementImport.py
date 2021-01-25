@@ -1,14 +1,13 @@
-import os
 import shutil
 from unittest import TestCase
 
-from source.IO.dataset_import.ImmunoSEQRearrangementImport import ImmunoSEQRearrangementImport
-from source.data_model.receptor.receptor_sequence.Chain import Chain
-from source.data_model.receptor.receptor_sequence.SequenceFrameType import SequenceFrameType
-from source.dsl.DefaultParamsLoader import DefaultParamsLoader
-from source.environment.EnvironmentSettings import EnvironmentSettings
-from source.util.ImportHelper import ImportHelper
-from source.util.PathBuilder import PathBuilder
+from immuneML.IO.dataset_import.ImmunoSEQRearrangementImport import ImmunoSEQRearrangementImport
+from immuneML.data_model.receptor.receptor_sequence.Chain import Chain
+from immuneML.data_model.receptor.receptor_sequence.SequenceFrameType import SequenceFrameType
+from immuneML.dsl.DefaultParamsLoader import DefaultParamsLoader
+from immuneML.environment.EnvironmentSettings import EnvironmentSettings
+from immuneML.util.ImportHelper import ImportHelper
+from immuneML.util.PathBuilder import PathBuilder
 
 
 class TestImmunoSEQRearrangementImport(TestCase):

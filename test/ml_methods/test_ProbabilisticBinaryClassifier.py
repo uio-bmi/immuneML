@@ -4,12 +4,12 @@ from unittest import TestCase
 
 import numpy as np
 
-from source.caching.CacheType import CacheType
-from source.data_model.encoded_data.EncodedData import EncodedData
-from source.environment.Constants import Constants
-from source.environment.EnvironmentSettings import EnvironmentSettings
-from source.ml_methods.ProbabilisticBinaryClassifier import ProbabilisticBinaryClassifier
-from source.util.PathBuilder import PathBuilder
+from immuneML.caching.CacheType import CacheType
+from immuneML.data_model.encoded_data.EncodedData import EncodedData
+from immuneML.environment.Constants import Constants
+from immuneML.environment.EnvironmentSettings import EnvironmentSettings
+from immuneML.ml_methods.ProbabilisticBinaryClassifier import ProbabilisticBinaryClassifier
+from immuneML.util.PathBuilder import PathBuilder
 
 
 class TestProbabilisticBinaryClassifier(TestCase):

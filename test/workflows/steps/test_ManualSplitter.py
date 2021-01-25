@@ -4,14 +4,14 @@ from unittest import TestCase
 
 import pandas as pd
 
-from source.environment.EnvironmentSettings import EnvironmentSettings
-from source.hyperparameter_optimization.config.ManualSplitConfig import ManualSplitConfig
-from source.hyperparameter_optimization.config.SplitConfig import SplitConfig
-from source.hyperparameter_optimization.config.SplitType import SplitType
-from source.simulation.dataset_generation.RandomDatasetGenerator import RandomDatasetGenerator
-from source.util.PathBuilder import PathBuilder
-from source.workflows.steps.data_splitter.DataSplitterParams import DataSplitterParams
-from source.workflows.steps.data_splitter.ManualSplitter import ManualSplitter
+from immuneML.environment.EnvironmentSettings import EnvironmentSettings
+from immuneML.hyperparameter_optimization.config.ManualSplitConfig import ManualSplitConfig
+from immuneML.hyperparameter_optimization.config.SplitConfig import SplitConfig
+from immuneML.hyperparameter_optimization.config.SplitType import SplitType
+from immuneML.simulation.dataset_generation.RandomDatasetGenerator import RandomDatasetGenerator
+from immuneML.util.PathBuilder import PathBuilder
+from immuneML.workflows.steps.data_splitter.DataSplitterParams import DataSplitterParams
+from immuneML.workflows.steps.data_splitter.ManualSplitter import ManualSplitter
 
 
 class TestManualSplitter(TestCase):

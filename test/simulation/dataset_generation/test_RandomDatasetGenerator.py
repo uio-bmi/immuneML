@@ -1,11 +1,11 @@
 import shutil
 from unittest import TestCase
 
-from source.data_model.dataset.ReceptorDataset import ReceptorDataset
-from source.data_model.dataset.RepertoireDataset import RepertoireDataset
-from source.data_model.dataset.SequenceDataset import SequenceDataset
-from source.environment.EnvironmentSettings import EnvironmentSettings
-from source.simulation.dataset_generation.RandomDatasetGenerator import RandomDatasetGenerator
+from immuneML.data_model.dataset.ReceptorDataset import ReceptorDataset
+from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
+from immuneML.data_model.dataset.SequenceDataset import SequenceDataset
+from immuneML.environment.EnvironmentSettings import EnvironmentSettings
+from immuneML.simulation.dataset_generation.RandomDatasetGenerator import RandomDatasetGenerator
 
 
 class TestRandomDatasetGenerator(TestCase):

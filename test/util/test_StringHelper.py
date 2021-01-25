@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from source.util.StringHelper import StringHelper
+from immuneML.util.StringHelper import StringHelper
 
 
 class TestStringHelper(TestCase):
