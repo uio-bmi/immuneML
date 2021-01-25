@@ -155,3 +155,18 @@ parameters need to be specified in subsequent analyses:
             metadata_file: metadata.csv
             # other import parameters may be specified here
 
+
+
+Tool output
+---------------------------------------------
+This Galaxy tool will produce the following history elements:
+
+- Dataset Generation Archive: a .zip file containing the complete output folder as it was produced by immuneML. This folder
+  contains the output of the DatasetExport instruction including raw data files.
+  Furthermore, the folder contains the complete YAML specification file for the immuneML run, the HTML output and a log file.
+
+- Results of dataset generation: a HTML page describing general characteristics of the dataset, including the name of the dataset
+  (this name should be specified when importing the dataset later in immuneML), the dataset type and size, and a link to download
+  the raw data files.
+
+- Created dataset: Galaxy collection containing all relevant files for the new dataset.

@@ -28,7 +28,8 @@ This figure shows how the different concepts in a Simulation relate to each othe
    :width: 800
 
 
-
+When writing an analysis specification for Galaxy, it can be assumed that all selected files are present in the current working directory. A path
+to an additional file thus consists only of the filename.
 A complete YAML specification for immune event simulation in Galaxy is show here:
 
 .. highlight:: yaml
@@ -95,3 +96,19 @@ A complete YAML specification for immune event simulation in Galaxy is show here
       # only one format can be specified here and the dataset in this format will be
       # available as a Galaxy collection afterwards
         - Pickle # Can be AIRR (human-readable) or Pickle (recommended for further Galaxy-analysis)
+
+
+
+Tool output
+---------------------------------------------
+This Galaxy tool will produce the following history elements:
+
+- Dataset Simulation Overview Archive: a .zip file containing the complete output folder as it was produced by immuneML. This folder
+  contains the output of the Simulation instruction including all raw data files.
+  Furthermore, the folder contains the complete YAML specification file for the immuneML run, the HTML output and a log file.
+
+- Dataset Simulation Overview: a HTML page describing general characteristics of the dataset, including the name of the dataset
+  (this name should be specified when importing the dataset later in immuneML), the dataset type and size, and the details of the
+  simulated immune signals.
+
+- Dataset with simulated immune events: Galaxy collection containing all relevant files for the new dataset.
