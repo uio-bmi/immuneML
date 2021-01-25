@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import yaml
 
 from immuneML.api.galaxy.GalaxyTool import GalaxyTool
@@ -8,7 +10,7 @@ from immuneML.util.PathBuilder import PathBuilder
 
 class GalaxyYamlTool(GalaxyTool):
 
-    def __init__(self, specification_path: str, result_path: str, **kwargs):
+    def __init__(self, specification_path: Path, result_path: Path, **kwargs):
         Util.check_parameters(specification_path, result_path, kwargs, "GalaxyYamlTool")
         super().__init__(specification_path, result_path, **kwargs)
 

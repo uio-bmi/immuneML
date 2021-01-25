@@ -47,7 +47,8 @@ class TestExploratoryAnalysisParser(TestCase):
             "type": "ExploratoryAnalysis",
             "analyses": {
                 "1": {"dataset": "d1", "report": "r1", "preprocessing_sequence": "p1"},
-                "2": {"dataset": "d1", "report": "r2", "encoding": "e1", "labels": ["l1"], "number_of_processes": 32}
+                "2": {"dataset": "d1", "report": "r2", "encoding": "e1", "number_of_processes": 32},
+                "3": {"dataset": "d1", "report": "r2", "encoding": "e1", "labels": ["l1"], "number_of_processes": 32}
             }
         }
 
@@ -63,12 +64,18 @@ class TestExploratoryAnalysisParser(TestCase):
 
         process = ExploratoryAnalysisParser().parse("a", instruction, symbol_table)
 
-        self.assertEqual(2, len(list(process.state.exploratory_analysis_units.values())))
+        self.assertEqual(3, len(list(process.state.exploratory_analysis_units.values())))
         self.assertTrue(isinstance(list(process.state.exploratory_analysis_units.values())[0].report, SequenceLengthDistribution))
+
+        # testing matches with and without labels
         self.assertTrue(isinstance(list(process.state.exploratory_analysis_units.values())[1].report, Matches))
         self.assertTrue(isinstance(list(process.state.exploratory_analysis_units.values())[1].encoder, MatchedSequencesEncoder))
         self.assertEqual(1, len(list(process.state.exploratory_analysis_units.values())[1].encoder.reference_sequences))
-        self.assertEqual("l1", list(process.state.exploratory_analysis_units.values())[1].label_config.get_labels_by_name()[0])
+
+        self.assertTrue(isinstance(list(process.state.exploratory_analysis_units.values())[2].report, Matches))
+        self.assertTrue(isinstance(list(process.state.exploratory_analysis_units.values())[2].encoder, MatchedSequencesEncoder))
+        self.assertEqual(1, len(list(process.state.exploratory_analysis_units.values())[2].encoder.reference_sequences))
+        self.assertEqual("l1", list(process.state.exploratory_analysis_units.values())[2].label_config.get_labels_by_name()[0])
         self.assertEqual(32, process.state.exploratory_analysis_units["2"].number_of_processes)
 
         shutil.rmtree(path)

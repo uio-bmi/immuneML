@@ -77,16 +77,15 @@ class ExploratoryAnalysisParser:
         params = {}
         dataset = symbol_table.get(analysis["dataset"])
 
-        if all(key in analysis for key in ["encoding", "labels"]):
-            params["encoder"] = symbol_table.get(analysis["encoding"]) \
-                .build_object(dataset, **symbol_table.get_config(analysis["encoding"])["encoder_params"])
+
+        if "encoding" in analysis:
+            params["encoder"] = symbol_table.get(analysis["encoding"]).build_object(dataset, **symbol_table.get_config(analysis["encoding"])["encoder_params"])
             params["label_config"] = LabelConfiguration()
-            for label in analysis["labels"]:
-                label_values = self._get_label_values(label, dataset)
-                params["label_config"].add_label(label, label_values)
-        elif any(key in analysis for key in ["encoding", "labels"]):
-            raise KeyError("ExploratoryAnalysisParser: keys for analyses are not properly defined. "
-                           "If encoding is defined, labels have to be defined as well and vice versa.")
+
+            if "labels" in analysis:
+                for label in analysis["labels"]:
+                    label_values = self._get_label_values(label, dataset)
+                    params["label_config"].add_label(label, label_values)
 
         if "preprocessing_sequence" in analysis:
             params["preprocessing_sequence"] = symbol_table.get(analysis["preprocessing_sequence"])

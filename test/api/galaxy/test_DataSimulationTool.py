@@ -46,7 +46,7 @@ class TestDataSimulationTool(TestCase):
 
         PathBuilder.build(path)
 
-        run_immuneML(Namespace(**{"specification_path": str(yaml_path), "result_path": str(result_path), 'tool': "DataSimulationTool"}))
+        run_immuneML(Namespace(**{"specification_path": yaml_path, "result_path": result_path, 'tool': "DataSimulationTool"}))
 
         self.assertTrue(os.path.isfile(result_path / "result/d1_metadata.csv"))
         self.assertTrue(os.path.isfile(result_path / "result/d1.iml_dataset"))

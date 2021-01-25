@@ -1,5 +1,6 @@
 import logging
 import shutil
+from pathlib import Path
 
 import yaml
 
@@ -11,7 +12,7 @@ from immuneML.workflows.instructions.dataset_generation.DatasetExportInstruction
 
 class DataSimulationTool(GalaxyTool):
 
-    def __init__(self, specification_path: str, result_path: str, **kwargs):
+    def __init__(self, specification_path: Path, result_path: Path, **kwargs):
         Util.check_parameters(specification_path, result_path, kwargs, DataSimulationTool.__name__)
         super().__init__(specification_path, result_path, **kwargs)
         self.expected_instruction = DatasetExportInstruction.__name__[:-11]

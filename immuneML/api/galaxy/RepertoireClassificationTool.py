@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from immuneML.api.galaxy.GalaxyTool import GalaxyTool
 from immuneML.api.galaxy.build_yaml_from_arguments import main
 from immuneML.app.ImmuneMLApp import ImmuneMLApp
@@ -5,7 +7,7 @@ from immuneML.util.PathBuilder import PathBuilder
 
 
 class RepertoireClassificationTool(GalaxyTool):
-    def __init__(self, args, result_path: str):
+    def __init__(self, args, result_path: Path):
         self.args = args
         super().__init__(None, result_path)
 

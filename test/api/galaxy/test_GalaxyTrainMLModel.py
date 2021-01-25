@@ -99,7 +99,7 @@ class TestGalaxyTrainMLModel(TestCase):
         with open(specs_path, "w") as file:
             yaml.dump(specs, file)
 
-        run_immuneML(Namespace(**{"specification_path": str(specs_path), "result_path": str(result_path), 'tool': "GalaxyTrainMLModel"}))
+        run_immuneML(Namespace(**{"specification_path": specs_path, "result_path": result_path, 'tool': "GalaxyTrainMLModel"}))
 
         self.assertTrue(os.path.exists(result_path / "exported_models/ml_model_CD.zip"))
         self.assertTrue(os.path.exists(result_path / "index.html"))
