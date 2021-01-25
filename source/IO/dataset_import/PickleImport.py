@@ -45,14 +45,9 @@ class PickleImport(DataImport):
     def import_dataset(params: dict, dataset_name: str) -> Dataset:
         pickle_params = DatasetImportParams.build_object(**params)
 
-        print("in pickle import")
-
         if pickle_params.path is not None:
-            print("pickle_params.path is not None")
             dataset = PickleImport._import_from_path(pickle_params)
         elif pickle_params.metadata_file is not None:
-            print("pickle_params.path is None")
-            print("pickle_params.metadata_file is not None")
             dataset = PickleImport._import_from_metadata(pickle_params, dataset_name)
         else:
             raise ValueError(f"PickleImport: no path nor metadata file were defined under key {dataset_name}. At least one of these has "
