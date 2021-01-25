@@ -35,7 +35,7 @@ setup(
                      str(Path("presentation/html/templates/*.html")),
                      str(Path("presentation/html/templates/css/*.css")),
                      str(Path('encodings/atchley_kmer_encoding/*.csv'))] +
-                    [str(Path("config/default_params/") / dir.name / "*.yaml") for dir in Path("./source/config/default_params/").glob("*")],
+                    [str(Path("config/default_params/") / dir.name / "*.yaml") for dir in Path("./immuneML/config/default_params/").glob("*")],
     },
     entry_points={
         'console_scripts': [
