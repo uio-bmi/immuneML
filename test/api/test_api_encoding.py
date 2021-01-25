@@ -6,11 +6,11 @@ from unittest import TestCase
 
 import numpy as np
 
-from source.api.api_encoding import encode_dataset_by_kmer_freq
-from source.caching.CacheType import CacheType
-from source.environment.Constants import Constants
-from source.environment.EnvironmentSettings import EnvironmentSettings
-from source.util.PathBuilder import PathBuilder
+from immuneML.api.api_encoding import encode_dataset_by_kmer_freq
+from immuneML.caching.CacheType import CacheType
+from immuneML.environment.Constants import Constants
+from immuneML.environment.EnvironmentSettings import EnvironmentSettings
+from immuneML.util.PathBuilder import PathBuilder
 
 
 class TestAPI(TestCase):

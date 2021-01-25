@@ -2,26 +2,26 @@ import os
 import shutil
 from unittest import TestCase
 
-from source.caching.CacheType import CacheType
-from source.data_model.dataset.RepertoireDataset import RepertoireDataset
-from source.data_model.receptor.receptor_sequence.Chain import Chain
-from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
-from source.data_model.repertoire.Repertoire import Repertoire
-from source.environment.Constants import Constants
-from source.environment.EnvironmentSettings import EnvironmentSettings
-from source.simulation.Implanting import Implanting
-from source.simulation.Simulation import Simulation
-from source.simulation.SimulationState import SimulationState
-from source.simulation.dataset_generation.RandomDatasetGenerator import RandomDatasetGenerator
-from source.simulation.implants.Motif import Motif
-from source.simulation.implants.Signal import Signal
-from source.simulation.motif_instantiation_strategy.GappedKmerInstantiation import GappedKmerInstantiation
-from source.simulation.sequence_implanting.GappedMotifImplanting import GappedMotifImplanting
-from source.simulation.signal_implanting_strategy.HealthySequenceImplanting import HealthySequenceImplanting
-from source.simulation.signal_implanting_strategy.ImplantingComputation import ImplantingComputation
-from source.simulation.signal_implanting_strategy.ReceptorImplanting import ReceptorImplanting
-from source.util.PathBuilder import PathBuilder
-from source.workflows.steps.SignalImplanter import SignalImplanter
+from immuneML.caching.CacheType import CacheType
+from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
+from immuneML.data_model.receptor.receptor_sequence.Chain import Chain
+from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
+from immuneML.data_model.repertoire.Repertoire import Repertoire
+from immuneML.environment.Constants import Constants
+from immuneML.environment.EnvironmentSettings import EnvironmentSettings
+from immuneML.simulation.Implanting import Implanting
+from immuneML.simulation.Simulation import Simulation
+from immuneML.simulation.SimulationState import SimulationState
+from immuneML.simulation.dataset_generation.RandomDatasetGenerator import RandomDatasetGenerator
+from immuneML.simulation.implants.Motif import Motif
+from immuneML.simulation.implants.Signal import Signal
+from immuneML.simulation.motif_instantiation_strategy.GappedKmerInstantiation import GappedKmerInstantiation
+from immuneML.simulation.sequence_implanting.GappedMotifImplanting import GappedMotifImplanting
+from immuneML.simulation.signal_implanting_strategy.HealthySequenceImplanting import HealthySequenceImplanting
+from immuneML.simulation.signal_implanting_strategy.ImplantingComputation import ImplantingComputation
+from immuneML.simulation.signal_implanting_strategy.ReceptorImplanting import ReceptorImplanting
+from immuneML.util.PathBuilder import PathBuilder
+from immuneML.workflows.steps.SignalImplanter import SignalImplanter
 
 
 class TestSignalImplanter(TestCase):

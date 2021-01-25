@@ -5,12 +5,12 @@ from unittest import TestCase
 import numpy as np
 import pandas as pd
 
-from source.caching.CacheType import CacheType
-from source.environment.Constants import Constants
-from source.environment.EnvironmentSettings import EnvironmentSettings
-from source.pairwise_repertoire_comparison.ComparisonData import ComparisonData
-from source.pairwise_repertoire_comparison.ComparisonDataBatch import ComparisonDataBatch
-from source.util.PathBuilder import PathBuilder
+from immuneML.caching.CacheType import CacheType
+from immuneML.environment.Constants import Constants
+from immuneML.environment.EnvironmentSettings import EnvironmentSettings
+from immuneML.pairwise_repertoire_comparison.ComparisonData import ComparisonData
+from immuneML.pairwise_repertoire_comparison.ComparisonDataBatch import ComparisonDataBatch
+from immuneML.util.PathBuilder import PathBuilder
 
 
 class TestComparisonData(TestCase):

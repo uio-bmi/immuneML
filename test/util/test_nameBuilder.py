@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from source.util.NameBuilder import NameBuilder
+from immuneML.util.NameBuilder import NameBuilder
 
 
 class TestNameBuilder(TestCase):

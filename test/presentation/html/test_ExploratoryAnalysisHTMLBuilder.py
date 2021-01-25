@@ -2,16 +2,16 @@ import os
 import shutil
 from unittest import TestCase
 
-from source.data_model.dataset.RepertoireDataset import RepertoireDataset
-from source.environment.EnvironmentSettings import EnvironmentSettings
-from source.environment.LabelConfiguration import LabelConfiguration
-from source.preprocessing.SubjectRepertoireCollector import SubjectRepertoireCollector
-from source.presentation.html.ExploratoryAnalysisHTMLBuilder import ExploratoryAnalysisHTMLBuilder
-from source.reports.data_reports.SequenceLengthDistribution import SequenceLengthDistribution
-from source.util.PathBuilder import PathBuilder
-from source.util.RepertoireBuilder import RepertoireBuilder
-from source.workflows.instructions.exploratory_analysis.ExploratoryAnalysisInstruction import ExploratoryAnalysisInstruction
-from source.workflows.instructions.exploratory_analysis.ExploratoryAnalysisUnit import ExploratoryAnalysisUnit
+from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
+from immuneML.environment.EnvironmentSettings import EnvironmentSettings
+from immuneML.environment.LabelConfiguration import LabelConfiguration
+from immuneML.preprocessing.SubjectRepertoireCollector import SubjectRepertoireCollector
+from immuneML.presentation.html.ExploratoryAnalysisHTMLBuilder import ExploratoryAnalysisHTMLBuilder
+from immuneML.reports.data_reports.SequenceLengthDistribution import SequenceLengthDistribution
+from immuneML.util.PathBuilder import PathBuilder
+from immuneML.util.RepertoireBuilder import RepertoireBuilder
+from immuneML.workflows.instructions.exploratory_analysis.ExploratoryAnalysisInstruction import ExploratoryAnalysisInstruction
+from immuneML.workflows.instructions.exploratory_analysis.ExploratoryAnalysisUnit import ExploratoryAnalysisUnit
 
 
 class TestExploratoryAnalysisHTMLBuilder(TestCase):

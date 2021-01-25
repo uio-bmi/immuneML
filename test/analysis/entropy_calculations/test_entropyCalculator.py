@@ -3,9 +3,9 @@ from unittest import TestCase
 
 import numpy as np
 
-from source.analysis.entropy_calculations.EntropyCalculator import EntropyCalculator
-from source.caching.CacheType import CacheType
-from source.environment.Constants import Constants
+from immuneML.analysis.entropy_calculations.EntropyCalculator import EntropyCalculator
+from immuneML.caching.CacheType import CacheType
+from immuneML.environment.Constants import Constants
 
 
 class TestEvennessCalculator(TestCase):

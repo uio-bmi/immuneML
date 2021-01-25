@@ -1,7 +1,7 @@
 from unittest import TestCase
 
-from source.dsl.definition_parsers.PreprocessingParser import PreprocessingParser
-from source.dsl.symbol_table.SymbolTable import SymbolTable
+from immuneML.dsl.definition_parsers.PreprocessingParser import PreprocessingParser
+from immuneML.dsl.symbol_table.SymbolTable import SymbolTable
 
 
 class TestPreprocessingParser(TestCase):

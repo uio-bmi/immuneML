@@ -1,12 +1,12 @@
 import os
 from unittest import TestCase
 
-from source.caching.CacheType import CacheType
-from source.dsl.ImmuneMLParser import ImmuneMLParser
-from source.dsl.definition_parsers.MLParser import MLParser
-from source.dsl.symbol_table.SymbolTable import SymbolTable
-from source.environment.Constants import Constants
-from source.ml_methods.LogisticRegression import LogisticRegression
+from immuneML.caching.CacheType import CacheType
+from immuneML.dsl.ImmuneMLParser import ImmuneMLParser
+from immuneML.dsl.definition_parsers.MLParser import MLParser
+from immuneML.dsl.symbol_table.SymbolTable import SymbolTable
+from immuneML.environment.Constants import Constants
+from immuneML.ml_methods.LogisticRegression import LogisticRegression
 
 
 class TestMLParser(TestCase):

@@ -1,17 +1,17 @@
 from unittest import TestCase
 
-from source.environment.EnvironmentSettings import EnvironmentSettings
-from source.simulation.signal_implanting_strategy.FullSequenceImplanting import FullSequenceImplanting
-from source.simulation.signal_implanting_strategy.HealthySequenceImplanting import HealthySequenceImplanting
-from source.simulation.signal_implanting_strategy.ReceptorImplanting import ReceptorImplanting
-from source.util.KmerHelper import KmerHelper
-from source.util.ReflectionHandler import ReflectionHandler
+from immuneML.environment.EnvironmentSettings import EnvironmentSettings
+from immuneML.simulation.signal_implanting_strategy.FullSequenceImplanting import FullSequenceImplanting
+from immuneML.simulation.signal_implanting_strategy.HealthySequenceImplanting import HealthySequenceImplanting
+from immuneML.simulation.signal_implanting_strategy.ReceptorImplanting import ReceptorImplanting
+from immuneML.util.KmerHelper import KmerHelper
+from immuneML.util.ReflectionHandler import ReflectionHandler
 
 
 class TestReflectionHandler(TestCase):
     def test_get_class_from_path(self):
 
-        filepath = EnvironmentSettings.root_path / "/source/util/KmerHelper.py"
+        filepath = EnvironmentSettings.root_path / "/immuneML/util/KmerHelper.py"
 
         cls = ReflectionHandler.get_class_from_path(filepath, "KmerHelper")
         self.assertEqual(KmerHelper, cls)

@@ -1,10 +1,10 @@
 import shutil
 from unittest import TestCase
 
-from source.data_model.dataset.RepertoireDataset import RepertoireDataset
-from source.environment.EnvironmentSettings import EnvironmentSettings
-from source.util.PathBuilder import PathBuilder
-from source.util.RepertoireBuilder import RepertoireBuilder
+from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
+from immuneML.environment.EnvironmentSettings import EnvironmentSettings
+from immuneML.util.PathBuilder import PathBuilder
+from immuneML.util.RepertoireBuilder import RepertoireBuilder
 
 
 class TestRepertoireDataset(TestCase):

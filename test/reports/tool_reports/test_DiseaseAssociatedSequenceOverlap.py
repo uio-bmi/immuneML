@@ -3,9 +3,9 @@ from unittest import TestCase
 
 import yaml
 
-from source.api.aggregated_runs.MultiDatasetBenchmarkTool import MultiDatasetBenchmarkTool
-from source.environment.EnvironmentSettings import EnvironmentSettings
-from source.util.PathBuilder import PathBuilder
+from immuneML.api.aggregated_runs.MultiDatasetBenchmarkTool import MultiDatasetBenchmarkTool
+from immuneML.environment.EnvironmentSettings import EnvironmentSettings
+from immuneML.util.PathBuilder import PathBuilder
 
 
 class TestDiseaseAssociatedSequenceOverlap(TestCase):

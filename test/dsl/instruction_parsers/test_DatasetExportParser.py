@@ -1,10 +1,10 @@
 from unittest import TestCase
 
-from source.data_model.dataset.RepertoireDataset import RepertoireDataset
-from source.dsl.instruction_parsers.DatasetExportParser import DatasetExportParser
-from source.dsl.symbol_table.SymbolTable import SymbolTable
-from source.dsl.symbol_table.SymbolType import SymbolType
-from source.workflows.instructions.dataset_generation.DatasetExportInstruction import DatasetExportInstruction
+from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
+from immuneML.dsl.instruction_parsers.DatasetExportParser import DatasetExportParser
+from immuneML.dsl.symbol_table.SymbolTable import SymbolTable
+from immuneML.dsl.symbol_table.SymbolType import SymbolType
+from immuneML.workflows.instructions.dataset_generation.DatasetExportInstruction import DatasetExportInstruction
 
 
 class TestDatasetExportParser(TestCase):

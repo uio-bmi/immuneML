@@ -1,16 +1,15 @@
-import pickle
 import shutil
 from unittest import TestCase
 
-from source.data_model.dataset.ReceptorDataset import ReceptorDataset
-from source.data_model.receptor.TCABReceptor import TCABReceptor
-from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
-from source.encodings.EncoderParams import EncoderParams
-from source.encodings.onehot.OneHotEncoder import OneHotEncoder
-from source.environment.EnvironmentSettings import EnvironmentSettings
-from source.environment.Label import Label
-from source.environment.LabelConfiguration import LabelConfiguration
-from source.util.PathBuilder import PathBuilder
+from immuneML.data_model.dataset.ReceptorDataset import ReceptorDataset
+from immuneML.data_model.receptor.TCABReceptor import TCABReceptor
+from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
+from immuneML.encodings.EncoderParams import EncoderParams
+from immuneML.encodings.onehot.OneHotEncoder import OneHotEncoder
+from immuneML.environment.EnvironmentSettings import EnvironmentSettings
+from immuneML.environment.Label import Label
+from immuneML.environment.LabelConfiguration import LabelConfiguration
+from immuneML.util.PathBuilder import PathBuilder
 
 
 class TestOneHotSequenceEncoder(TestCase):

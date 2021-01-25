@@ -1,8 +1,8 @@
 from unittest import TestCase
 
-from source.dsl.definition_parsers.ReportParser import ReportParser
-from source.dsl.symbol_table.SymbolTable import SymbolTable
-from source.reports.data_reports.SequenceLengthDistribution import SequenceLengthDistribution
+from immuneML.dsl.definition_parsers.ReportParser import ReportParser
+from immuneML.dsl.symbol_table.SymbolTable import SymbolTable
+from immuneML.reports.data_reports.SequenceLengthDistribution import SequenceLengthDistribution
 
 
 class TestReportParser(TestCase):

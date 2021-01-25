@@ -1,12 +1,12 @@
 import shutil
 from unittest import TestCase
 
-from source.dsl.instruction_parsers.SubsamplingParser import SubsamplingParser
-from source.dsl.symbol_table.SymbolTable import SymbolTable
-from source.dsl.symbol_table.SymbolType import SymbolType
-from source.environment.EnvironmentSettings import EnvironmentSettings
-from source.simulation.dataset_generation.RandomDatasetGenerator import RandomDatasetGenerator
-from source.util.PathBuilder import PathBuilder
+from immuneML.dsl.instruction_parsers.SubsamplingParser import SubsamplingParser
+from immuneML.dsl.symbol_table.SymbolTable import SymbolTable
+from immuneML.dsl.symbol_table.SymbolType import SymbolType
+from immuneML.environment.EnvironmentSettings import EnvironmentSettings
+from immuneML.simulation.dataset_generation.RandomDatasetGenerator import RandomDatasetGenerator
+from immuneML.util.PathBuilder import PathBuilder
 
 
 class TestSubsamplingParser(TestCase):

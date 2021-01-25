@@ -2,11 +2,11 @@ import os
 import shutil
 from unittest import TestCase
 
-from source.IO.dataset_import.SingleLineReceptorImport import SingleLineReceptorImport
-from source.caching.CacheType import CacheType
-from source.environment.Constants import Constants
-from source.environment.EnvironmentSettings import EnvironmentSettings
-from source.util.PathBuilder import PathBuilder
+from immuneML.IO.dataset_import.SingleLineReceptorImport import SingleLineReceptorImport
+from immuneML.caching.CacheType import CacheType
+from immuneML.environment.Constants import Constants
+from immuneML.environment.EnvironmentSettings import EnvironmentSettings
+from immuneML.util.PathBuilder import PathBuilder
 
 
 class TestSingleLineReceptorImport(TestCase):

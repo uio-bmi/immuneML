@@ -4,21 +4,21 @@ from unittest import TestCase
 
 import pandas as pd
 
-from source.analysis.data_manipulation.NormalizationType import NormalizationType
-from source.caching.CacheType import CacheType
-from source.encodings.EncoderParams import EncoderParams
-from source.encodings.kmer_frequency.KmerFreqRepertoireEncoder import KmerFreqRepertoireEncoder
-from source.encodings.kmer_frequency.ReadsType import ReadsType
-from source.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType import SequenceEncodingType
-from source.environment.Constants import Constants
-from source.environment.EnvironmentSettings import EnvironmentSettings
-from source.environment.Label import Label
-from source.environment.LabelConfiguration import LabelConfiguration
-from source.hyperparameter_optimization.HPSetting import HPSetting
-from source.ml_methods.LogisticRegression import LogisticRegression
-from source.simulation.dataset_generation.RandomDatasetGenerator import RandomDatasetGenerator
-from source.util.PathBuilder import PathBuilder
-from source.workflows.instructions.ml_model_application.MLApplicationInstruction import MLApplicationInstruction
+from immuneML.analysis.data_manipulation.NormalizationType import NormalizationType
+from immuneML.caching.CacheType import CacheType
+from immuneML.encodings.EncoderParams import EncoderParams
+from immuneML.encodings.kmer_frequency.KmerFreqRepertoireEncoder import KmerFreqRepertoireEncoder
+from immuneML.encodings.kmer_frequency.ReadsType import ReadsType
+from immuneML.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType import SequenceEncodingType
+from immuneML.environment.Constants import Constants
+from immuneML.environment.EnvironmentSettings import EnvironmentSettings
+from immuneML.environment.Label import Label
+from immuneML.environment.LabelConfiguration import LabelConfiguration
+from immuneML.hyperparameter_optimization.HPSetting import HPSetting
+from immuneML.ml_methods.LogisticRegression import LogisticRegression
+from immuneML.simulation.dataset_generation.RandomDatasetGenerator import RandomDatasetGenerator
+from immuneML.util.PathBuilder import PathBuilder
+from immuneML.workflows.instructions.ml_model_application.MLApplicationInstruction import MLApplicationInstruction
 
 
 class TestMLApplicationInstruction(TestCase):

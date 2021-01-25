@@ -2,16 +2,16 @@ import os
 import shutil
 from unittest import TestCase
 
-from source.IO.dataset_import.SingleLineReceptorImport import SingleLineReceptorImport
-from source.caching.CacheType import CacheType
-from source.encodings.EncoderParams import EncoderParams
-from source.encodings.distance_encoding.TCRdistEncoder import TCRdistEncoder
-from source.environment.Constants import Constants
-from source.environment.EnvironmentSettings import EnvironmentSettings
-from source.environment.Label import Label
-from source.environment.LabelConfiguration import LabelConfiguration
-from source.reports.ml_reports.TCRdistMotifDiscovery import TCRdistMotifDiscovery
-from source.util.PathBuilder import PathBuilder
+from immuneML.IO.dataset_import.SingleLineReceptorImport import SingleLineReceptorImport
+from immuneML.caching.CacheType import CacheType
+from immuneML.encodings.EncoderParams import EncoderParams
+from immuneML.encodings.distance_encoding.TCRdistEncoder import TCRdistEncoder
+from immuneML.environment.Constants import Constants
+from immuneML.environment.EnvironmentSettings import EnvironmentSettings
+from immuneML.environment.Label import Label
+from immuneML.environment.LabelConfiguration import LabelConfiguration
+from immuneML.reports.ml_reports.TCRdistMotifDiscovery import TCRdistMotifDiscovery
+from immuneML.util.PathBuilder import PathBuilder
 
 
 class TestTCRdistMotifDiscovery(TestCase):

@@ -2,14 +2,14 @@ import os
 import shutil
 from unittest import TestCase
 
-from source.caching.CacheType import CacheType
-from source.data_model.dataset.RepertoireDataset import RepertoireDataset
-from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
-from source.data_model.repertoire.Repertoire import Repertoire
-from source.environment.Constants import Constants
-from source.environment.EnvironmentSettings import EnvironmentSettings
-from source.reports.data_reports.SequenceLengthDistribution import SequenceLengthDistribution
-from source.util.PathBuilder import PathBuilder
+from immuneML.caching.CacheType import CacheType
+from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
+from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
+from immuneML.data_model.repertoire.Repertoire import Repertoire
+from immuneML.environment.Constants import Constants
+from immuneML.environment.EnvironmentSettings import EnvironmentSettings
+from immuneML.reports.data_reports.SequenceLengthDistribution import SequenceLengthDistribution
+from immuneML.util.PathBuilder import PathBuilder
 
 
 class TestSequenceLengthDistribution(TestCase):

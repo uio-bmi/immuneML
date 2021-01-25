@@ -5,15 +5,15 @@ import numpy as np
 import pandas as pd
 from scipy import sparse
 
-from source.analysis.criteria_matches.BooleanType import BooleanType
-from source.analysis.criteria_matches.DataType import DataType
-from source.analysis.criteria_matches.OperationType import OperationType
-from source.analysis.data_manipulation.DataSummarizer import DataSummarizer
-from source.caching.CacheType import CacheType
-from source.data_model.dataset.RepertoireDataset import RepertoireDataset
-from source.data_model.encoded_data.EncodedData import EncodedData
-from source.data_model.repertoire.Repertoire import Repertoire
-from source.environment.Constants import Constants
+from immuneML.analysis.criteria_matches.BooleanType import BooleanType
+from immuneML.analysis.criteria_matches.DataType import DataType
+from immuneML.analysis.criteria_matches.OperationType import OperationType
+from immuneML.analysis.data_manipulation.DataSummarizer import DataSummarizer
+from immuneML.caching.CacheType import CacheType
+from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
+from immuneML.data_model.encoded_data.EncodedData import EncodedData
+from immuneML.data_model.repertoire.Repertoire import Repertoire
+from immuneML.environment.Constants import Constants
 
 
 class TestDataSummarizer(TestCase):

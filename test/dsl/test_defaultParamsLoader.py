@@ -3,9 +3,9 @@ from unittest import TestCase
 
 import yaml
 
-from source.dsl.DefaultParamsLoader import DefaultParamsLoader
-from source.environment.EnvironmentSettings import EnvironmentSettings
-from source.util.PathBuilder import PathBuilder
+from immuneML.dsl.DefaultParamsLoader import DefaultParamsLoader
+from immuneML.environment.EnvironmentSettings import EnvironmentSettings
+from immuneML.util.PathBuilder import PathBuilder
 
 
 class TestDefaultParamsLoader(TestCase):

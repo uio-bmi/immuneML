@@ -3,23 +3,23 @@ import random
 import shutil
 from unittest import TestCase
 
-from source.encodings.filtered_sequence_encoding.SequenceAbundanceEncoder import SequenceAbundanceEncoder
-from source.environment.EnvironmentSettings import EnvironmentSettings
-from source.environment.Label import Label
-from source.environment.LabelConfiguration import LabelConfiguration
-from source.environment.Metric import Metric
-from source.hyperparameter_optimization.HPSetting import HPSetting
-from source.hyperparameter_optimization.config.SplitConfig import SplitConfig
-from source.hyperparameter_optimization.config.SplitType import SplitType
-from source.hyperparameter_optimization.states.HPAssessmentState import HPAssessmentState
-from source.hyperparameter_optimization.states.HPItem import HPItem
-from source.hyperparameter_optimization.states.HPLabelState import HPLabelState
-from source.hyperparameter_optimization.states.HPSelectionState import HPSelectionState
-from source.hyperparameter_optimization.states.TrainMLModelState import TrainMLModelState
-from source.hyperparameter_optimization.strategy.GridSearch import GridSearch
-from source.ml_methods.ProbabilisticBinaryClassifier import ProbabilisticBinaryClassifier
-from source.reports.ReportResult import ReportResult
-from source.reports.train_ml_model_reports.CVFeaturePerformance import CVFeaturePerformance
+from immuneML.encodings.filtered_sequence_encoding.SequenceAbundanceEncoder import SequenceAbundanceEncoder
+from immuneML.environment.EnvironmentSettings import EnvironmentSettings
+from immuneML.environment.Label import Label
+from immuneML.environment.LabelConfiguration import LabelConfiguration
+from immuneML.environment.Metric import Metric
+from immuneML.hyperparameter_optimization.HPSetting import HPSetting
+from immuneML.hyperparameter_optimization.config.SplitConfig import SplitConfig
+from immuneML.hyperparameter_optimization.config.SplitType import SplitType
+from immuneML.hyperparameter_optimization.states.HPAssessmentState import HPAssessmentState
+from immuneML.hyperparameter_optimization.states.HPItem import HPItem
+from immuneML.hyperparameter_optimization.states.HPLabelState import HPLabelState
+from immuneML.hyperparameter_optimization.states.HPSelectionState import HPSelectionState
+from immuneML.hyperparameter_optimization.states.TrainMLModelState import TrainMLModelState
+from immuneML.hyperparameter_optimization.strategy.GridSearch import GridSearch
+from immuneML.ml_methods.ProbabilisticBinaryClassifier import ProbabilisticBinaryClassifier
+from immuneML.reports.ReportResult import ReportResult
+from immuneML.reports.train_ml_model_reports.CVFeaturePerformance import CVFeaturePerformance
 
 
 class TestCVFeaturePerformance(TestCase):

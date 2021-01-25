@@ -3,26 +3,26 @@ import pickle
 import shutil
 from unittest import TestCase
 
-from source.analysis.data_manipulation.NormalizationType import NormalizationType
-from source.caching.CacheType import CacheType
-from source.data_model.dataset.ReceptorDataset import ReceptorDataset
-from source.data_model.receptor.TCABReceptor import TCABReceptor
-from source.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
-from source.encodings.kmer_frequency.KmerFrequencyEncoder import KmerFrequencyEncoder
-from source.encodings.kmer_frequency.ReadsType import ReadsType
-from source.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType import SequenceEncodingType
-from source.environment.Constants import Constants
-from source.environment.EnvironmentSettings import EnvironmentSettings
-from source.environment.LabelConfiguration import LabelConfiguration
-from source.environment.Metric import Metric
-from source.hyperparameter_optimization.HPSetting import HPSetting
-from source.hyperparameter_optimization.config.ReportConfig import ReportConfig
-from source.hyperparameter_optimization.config.SplitConfig import SplitConfig
-from source.hyperparameter_optimization.config.SplitType import SplitType
-from source.hyperparameter_optimization.strategy.GridSearch import GridSearch
-from source.ml_methods.LogisticRegression import LogisticRegression
-from source.util.PathBuilder import PathBuilder
-from source.workflows.instructions.TrainMLModelInstruction import TrainMLModelInstruction
+from immuneML.analysis.data_manipulation.NormalizationType import NormalizationType
+from immuneML.caching.CacheType import CacheType
+from immuneML.data_model.dataset.ReceptorDataset import ReceptorDataset
+from immuneML.data_model.receptor.TCABReceptor import TCABReceptor
+from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
+from immuneML.encodings.kmer_frequency.KmerFrequencyEncoder import KmerFrequencyEncoder
+from immuneML.encodings.kmer_frequency.ReadsType import ReadsType
+from immuneML.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType import SequenceEncodingType
+from immuneML.environment.Constants import Constants
+from immuneML.environment.EnvironmentSettings import EnvironmentSettings
+from immuneML.environment.LabelConfiguration import LabelConfiguration
+from immuneML.environment.Metric import Metric
+from immuneML.hyperparameter_optimization.HPSetting import HPSetting
+from immuneML.hyperparameter_optimization.config.ReportConfig import ReportConfig
+from immuneML.hyperparameter_optimization.config.SplitConfig import SplitConfig
+from immuneML.hyperparameter_optimization.config.SplitType import SplitType
+from immuneML.hyperparameter_optimization.strategy.GridSearch import GridSearch
+from immuneML.ml_methods.LogisticRegression import LogisticRegression
+from immuneML.util.PathBuilder import PathBuilder
+from immuneML.workflows.instructions.TrainMLModelInstruction import TrainMLModelInstruction
 
 
 class TestReceptorClassification(TestCase):

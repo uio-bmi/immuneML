@@ -3,10 +3,10 @@ from unittest import TestCase
 
 import pandas as pd
 
-from source.environment.EnvironmentSettings import EnvironmentSettings
-from source.reports.ReportOutput import ReportOutput
-from source.reports.train_ml_model_reports.ReferenceSequenceOverlap import ReferenceSequenceOverlap
-from source.util.PathBuilder import PathBuilder
+from immuneML.environment.EnvironmentSettings import EnvironmentSettings
+from immuneML.reports.ReportOutput import ReportOutput
+from immuneML.reports.train_ml_model_reports.ReferenceSequenceOverlap import ReferenceSequenceOverlap
+from immuneML.util.PathBuilder import PathBuilder
 
 
 class TestReferenceSequenceOverlap(TestCase):

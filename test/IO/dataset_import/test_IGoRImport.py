@@ -1,10 +1,10 @@
 import shutil
 from unittest import TestCase
 
-from source.IO.dataset_import.IGoRImport import IGoRImport
-from source.dsl.DefaultParamsLoader import DefaultParamsLoader
-from source.environment.EnvironmentSettings import EnvironmentSettings
-from source.util.PathBuilder import PathBuilder
+from immuneML.IO.dataset_import.IGoRImport import IGoRImport
+from immuneML.dsl.DefaultParamsLoader import DefaultParamsLoader
+from immuneML.environment.EnvironmentSettings import EnvironmentSettings
+from immuneML.util.PathBuilder import PathBuilder
 
 
 class TestIGoRImport(TestCase):

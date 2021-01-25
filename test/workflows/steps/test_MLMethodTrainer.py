@@ -4,14 +4,14 @@ from unittest import TestCase
 
 import numpy as np
 
-from source.caching.CacheType import CacheType
-from source.data_model.dataset.RepertoireDataset import RepertoireDataset
-from source.data_model.encoded_data.EncodedData import EncodedData
-from source.environment.Constants import Constants
-from source.environment.EnvironmentSettings import EnvironmentSettings
-from source.ml_methods.LogisticRegression import LogisticRegression
-from source.workflows.steps.MLMethodTrainer import MLMethodTrainer
-from source.workflows.steps.MLMethodTrainerParams import MLMethodTrainerParams
+from immuneML.caching.CacheType import CacheType
+from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
+from immuneML.data_model.encoded_data.EncodedData import EncodedData
+from immuneML.environment.Constants import Constants
+from immuneML.environment.EnvironmentSettings import EnvironmentSettings
+from immuneML.ml_methods.LogisticRegression import LogisticRegression
+from immuneML.workflows.steps.MLMethodTrainer import MLMethodTrainer
+from immuneML.workflows.steps.MLMethodTrainerParams import MLMethodTrainerParams
 
 
 class TestMLMethodTrainer(TestCase):

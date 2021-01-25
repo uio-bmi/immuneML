@@ -1,13 +1,13 @@
 import shutil
 from unittest import TestCase
 
-from source.data_model.repertoire.Repertoire import Repertoire
-from source.environment.EnvironmentSettings import EnvironmentSettings
-from source.simulation.implants.Motif import Motif
-from source.simulation.implants.Signal import Signal
-from source.simulation.motif_instantiation_strategy.GappedKmerInstantiation import GappedKmerInstantiation
-from source.simulation.signal_implanting_strategy.FullSequenceImplanting import FullSequenceImplanting
-from source.util.PathBuilder import PathBuilder
+from immuneML.data_model.repertoire.Repertoire import Repertoire
+from immuneML.environment.EnvironmentSettings import EnvironmentSettings
+from immuneML.simulation.implants.Motif import Motif
+from immuneML.simulation.implants.Signal import Signal
+from immuneML.simulation.motif_instantiation_strategy.GappedKmerInstantiation import GappedKmerInstantiation
+from immuneML.simulation.signal_implanting_strategy.FullSequenceImplanting import FullSequenceImplanting
+from immuneML.util.PathBuilder import PathBuilder
 
 
 class TestFullSequenceImplanting(TestCase):
