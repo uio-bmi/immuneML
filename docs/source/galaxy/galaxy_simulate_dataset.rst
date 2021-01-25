@@ -31,7 +31,7 @@ A complete example of a full YAML specification for generating a RandomRepertoir
 
   definitions:
     datasets:
-      my_random_dataset:
+      dataset: #user-defined dataset name
         format: RandomRepertoireDataset # alternatively, choose RandomSequenceDataset or RandomReceptorDataset (note they have different params)
         params:
           labels: # metadata that can be used as labels, can also be empty
@@ -47,15 +47,15 @@ A complete example of a full YAML specification for generating a RandomRepertoir
             13: 0.25
             14: 0.25
             15: 0.25
-    instructions:
-      my_dataset_export_instruction: # user-defined instruction name
-          type: DatasetExport
-          datasets: # specify the dataset defined above
-            - my_random_dataset
-          export_formats:
-          # only one format can be specified here and the dataset in this format will be
-          # available as a Galaxy collection afterwards
-            - Pickle # Can be AIRR (human-readable) or Pickle (recommended for further Galaxy-analysis)
+  instructions:
+    my_dataset_export_instruction: # user-defined instruction name
+      type: DatasetExport
+      datasets: # specify the dataset defined above
+      - dataset
+      export_formats:
+      # only one format can be specified here and the dataset in this format will be
+      # available as a Galaxy collection afterwards
+      - Pickle # Can be AIRR (human-readable) or Pickle (recommended for further Galaxy-analysis)
 
 
 
