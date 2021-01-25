@@ -4,12 +4,12 @@ import shutil
 import yaml
 from pathlib import Path
 
-from source.api.galaxy.GalaxyTool import GalaxyTool
-from source.api.galaxy.Util import Util
-from source.app.ImmuneMLApp import ImmuneMLApp
-from source.util.ParameterValidator import ParameterValidator
-from source.util.PathBuilder import PathBuilder
-from source.workflows.instructions.TrainMLModelInstruction import TrainMLModelInstruction
+from immuneML.api.galaxy.GalaxyTool import GalaxyTool
+from immuneML.api.galaxy.Util import Util
+from immuneML.app.ImmuneMLApp import ImmuneMLApp
+from immuneML.util.ParameterValidator import ParameterValidator
+from immuneML.util.PathBuilder import PathBuilder
+from immuneML.workflows.instructions.TrainMLModelInstruction import TrainMLModelInstruction
 
 
 class GalaxyTrainMLModel(GalaxyTool):
