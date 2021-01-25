@@ -1,11 +1,10 @@
 How to apply previously trained ML models to a new AIRR dataset in Galaxy
 =========================================================================
 
-After having trained ML models to a given dataset, these models can be applied to a new dataset using the Galaxy tool 'Apply machine learning models to new data'.
+After having trained ML models to a given dataset, these models can be applied to a new dataset using the Galaxy tool `Apply machine learning models to new data <https://galaxy.immuneml.uio.no/root?tool_id=immuneml_apply_ml_model>`_.
 If you instead want to train new ML models, see the tutorials for training ML models for
 :ref:`receptor <How to train immune receptor classifiers using the easy Galaxy interface>` and :ref:`repertoire <How to train immune repertoire classifiers using the easy Galaxy interface>`
 classification using the easy Galaxy interfaces, or the more versatile :ref:`YAML-based tool for training ML models <How to train ML models in Galaxy>`.
-
 
 Creating the YAML specification
 ---------------------------------------------
