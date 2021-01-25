@@ -7,7 +7,7 @@ from abc import ABCMeta
 
 class GalaxyTool(metaclass=ABCMeta):
 
-    def __init__(self, specification_path: str, result_path: str, **kwargs):
+    def __init__(self, specification_path: Path, result_path: Path, **kwargs):
         self.yaml_path = Path(specification_path) if specification_path is not None else None
         self.result_path = Path(os.path.relpath(result_path)) if result_path is not None else None
 

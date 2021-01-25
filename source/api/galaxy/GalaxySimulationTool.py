@@ -2,6 +2,7 @@ import logging
 import shutil
 
 import yaml
+from pathlib import Path
 
 from source.api.galaxy.GalaxyTool import GalaxyTool
 from source.api.galaxy.Util import Util
@@ -84,7 +85,7 @@ class GalaxySimulationTool(GalaxyTool):
 
     """
 
-    def __init__(self, specification_path: str, result_path: str, **kwargs):
+    def __init__(self, specification_path: Path, result_path: Path, **kwargs):
         Util.check_parameters(specification_path, result_path, kwargs, GalaxySimulationTool.__name__)
         super().__init__(specification_path, result_path, **kwargs)
 

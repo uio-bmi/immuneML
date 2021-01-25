@@ -1,6 +1,7 @@
 import shutil
 
 import yaml
+from pathlib import Path
 
 from source.api.galaxy.GalaxyTool import GalaxyTool
 from source.api.galaxy.Util import Util
@@ -24,7 +25,7 @@ class DatasetGenerationTool(GalaxyTool):
 
     """
 
-    def __init__(self, specification_path, result_path, **kwargs):
+    def __init__(self, specification_path: Path, result_path: Path, **kwargs):
         Util.check_parameters(specification_path, result_path, kwargs, "Dataset generation tool")
         super().__init__(specification_path, result_path, **kwargs)
 

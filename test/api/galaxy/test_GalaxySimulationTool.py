@@ -78,6 +78,6 @@ class TestGalaxySimulationTool(TestCase):
         with open(specs_path, "w") as file:
             yaml.dump(specs, file)
 
-        run_immuneML(Namespace(**{"specification_path": str(specs_path), "result_path": str(result_path / 'result/'), 'tool': "GalaxySimulationTool"}))
+        run_immuneML(Namespace(**{"specification_path": specs_path, "result_path": result_path / 'result/', 'tool': "GalaxySimulationTool"}))
 
         shutil.rmtree(path)
