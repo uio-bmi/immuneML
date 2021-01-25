@@ -55,5 +55,7 @@ class GalaxyTrainMLModel(GalaxyTool):
             f"{GalaxyTrainMLModel.__name__}: instruction `type` under {self.instruction_name} has to be {TrainMLModelInstruction.__name__[:-11]} " \
             f"for this tool."
 
+        assert len(specs['instructions'][self.instruction_name]['labels']) == 1, f"{GalaxyTrainMLModel.__name__}: one label has to be specified under " \
+                                                                                f"`labels`, got the following instead: {specs['instructions'][self.instruction_name]['labels']}."
         Util.check_paths(specs, GalaxyTrainMLModel.__name__)
         Util.update_result_paths(specs, self.result_path, self.yaml_path)
