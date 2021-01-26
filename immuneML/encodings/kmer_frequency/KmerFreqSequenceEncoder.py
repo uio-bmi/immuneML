@@ -24,7 +24,7 @@ class KmerFreqSequenceEncoder(KmerFrequencyEncoder):
         label_config = params.label_config
         labels = {label: [] for label in label_config.get_labels_by_name()} if params.encode_labels else None
 
-        sequence_encoder = self._prepare_sequence_encoder(params)
+        sequence_encoder = self._prepare_sequence_encoder()
         feature_names = sequence_encoder.get_feature_names(params)
         for sequence in dataset.get_data(params.pool_size):
             counts = self._encode_sequence(sequence, params, sequence_encoder, Counter())

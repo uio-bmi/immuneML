@@ -249,7 +249,7 @@ class KmerFrequencyEncoder(DatasetEncoder):
         feature_annotations[feature_annotation_names] = feature_annotations['feature'].str.split(Constants.FEATURE_DELIMITER, expand=True)
         return feature_annotations
 
-    def _prepare_sequence_encoder(self, params: EncoderParams):
+    def _prepare_sequence_encoder(self):
         class_name = self.sequence_encoding.value
         sequence_encoder = ReflectionHandler.get_class_by_name(class_name, "encodings/")
         return sequence_encoder
