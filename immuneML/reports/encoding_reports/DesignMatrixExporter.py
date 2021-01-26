@@ -1,10 +1,12 @@
 import warnings
 from dataclasses import dataclass
 from pathlib import Path
-
+import h5py
 import numpy as np
+import os
 import pandas as pd
 import yaml
+import zipfile
 
 from immuneML.data_model.dataset.Dataset import Dataset
 from immuneML.reports.ReportOutput import ReportOutput
@@ -16,11 +18,15 @@ from immuneML.util.PathBuilder import PathBuilder
 @dataclass
 class DesignMatrixExporter(EncodingReport):
     """
-    Exports the design matrix and related information of a given encoded Dataset to csv files. If the encoded data has more than 2 dimensions
-    (such as when using the OneHot encoder with option Flatten=False), the data are instead exported to .npy format and can be imported later outside of
-    immuneML using numpy package and numpy.load() function.
+    Exports the design matrix and related information of a given encoded Dataset to csv files.
+    If the encoded data has more than 2 dimensions (such as when using the OneHot encoder with option Flatten=False),
+    the data are then exported to different formats to facilitate
+    their import with external software.
 
-    There are no parameters for this report.
+    Args:
+
+        format_file (str): the format and extension of the file to store the design matrix. The supported formats are:
+        npy, csv, hdf5 and npy.zip, csv.zip, hdf5.zip.
 
 
     YAML specification:
@@ -29,18 +35,26 @@ class DesignMatrixExporter(EncodingReport):
     .. code-block:: yaml
 
         my_dme_report: DesignMatrixExporter
+            DesignMatrixExporter:
+                format: .npy/.csv/.hdf5/.npy.zip/.cvs.zip/.hdf5.zip
 
     """
     dataset: Dataset = None
     result_path: Path = None
+    format_file: str = None
     name: str = None
+
+    def __init__(self, dataset, result_path, name="design_matrix", format_file='csv'):
+        self.dataset = dataset
+        self.result_path = result_path
+        self.name = name
+        self.format = format_file
 
     @classmethod
     def build_object(cls, **kwargs):
         return DesignMatrixExporter(**kwargs)
 
     def _generate(self) -> ReportResult:
-
         PathBuilder.build(self.result_path)
 
         matrix_result = self._export_matrix()
@@ -51,7 +65,28 @@ class DesignMatrixExporter(EncodingReport):
 
     def _export_matrix(self) -> ReportOutput:
         data = self._get_data()
-        file_path = self._save_to_file(data, self.result_path / "design_matrix")
+        file_path = self.result_path / "design_matrix"
+
+        assert self.format.endswith(("hdf5", "hdf5.zip", "csv", "csv.zip", "npy", "npy.zip")), \
+            f'Output format {self.format} not recognised for the Encoding Report'
+
+        if self.format.endswith(("hdf5", "hdf5.zip")):
+            file_path = file_path.with_suffix(".hdf5")
+            with h5py.File(file_path, 'w') as hf_object:
+                hf_object.create_dataset(str(file_path), data=data)
+        elif self.format.endswith(("csv", "csv.zip")):
+            file_path = file_path.with_suffix(".csv")
+            np.savetxt(fname=str(file_path), X=data, delimiter=",", comments='',
+                       header=",".join(self.dataset.encoded_data.feature_names))
+        else:
+            file_path = file_path.with_suffix(".npy")
+            np.save(str(file_path), data)
+        
+        if self.format.endswith(".zip"):
+            file_path_zip = str(file_path) + ".zip"
+            with zipfile.ZipFile(file_path_zip, 'w') as zipped_file:
+                zipped_file.write(file_path_zip, compress_type=zipfile.ZIP_DEFLATED)
+            os.remove(str(file_path))
         return ReportOutput(file_path, "design matrix")
 
     def _get_data(self) -> np.ndarray:
@@ -60,15 +95,6 @@ class DesignMatrixExporter(EncodingReport):
         else:
             data = self.dataset.encoded_data.examples
         return data
-
-    def _save_to_file(self, data: np.ndarray, file_path: Path) -> Path:
-        if len(data.shape) <= 2:
-            file_path = file_path.with_suffix(".csv")
-            np.savetxt(fname=str(file_path), X=data, delimiter=",", comments='', header=",".join(self.dataset.encoded_data.feature_names))
-        else:
-            file_path = file_path.with_suffix(".npy")
-            np.save(file_path, data)
-        return file_path
 
     def _export_details(self) -> ReportOutput:
         file_path = self.result_path / "encoding_details.yaml"
@@ -96,4 +122,3 @@ class DesignMatrixExporter(EncodingReport):
             return False
         else:
             return True
-
