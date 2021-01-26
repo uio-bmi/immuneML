@@ -36,19 +36,16 @@ class DesignMatrixExporter(EncodingReport):
 
         my_dme_report: DesignMatrixExporter
             DesignMatrixExporter:
-                format: .npy/.csv/.hdf5/.npy.zip/.cvs.zip/.hdf5.zip
+                format_file: .npy/.csv/.hdf5/.npy.zip/.cvs.zip/.hdf5.zip
 
     """
-    dataset: Dataset = None
-    result_path: Path = None
-    format_file: str = None
-    name: str = None
 
-    def __init__(self, dataset, result_path, name="design_matrix", format_file='csv'):
+    def __init__(self, dataset = None, result_path = None,
+                 name: str = None, format_file: str = 'csv'):
+        super().__init__(name)
+        self.format = format_file
         self.dataset = dataset
         self.result_path = result_path
-        self.name = name
-        self.format = format_file
 
     @classmethod
     def build_object(cls, **kwargs):
@@ -64,16 +61,21 @@ class DesignMatrixExporter(EncodingReport):
         return ReportResult(self.name, output_tables=[matrix_result], output_text=[details_result, label_result])
 
     def _export_matrix(self) -> ReportOutput:
+        """Create a file for the design matrix in the desired format."""
+        
         data = self._get_data()
         file_path = self.result_path / "design_matrix"
 
+        # Check that the requested extension is supported.
         assert self.format.endswith(("hdf5", "hdf5.zip", "csv", "csv.zip", "npy", "npy.zip")), \
             f'Output format {self.format} not recognised for the Encoding Report'
 
+        # Use h5py to create a hdf5 file.
         if self.format.endswith(("hdf5", "hdf5.zip")):
             file_path = file_path.with_suffix(".hdf5")
             with h5py.File(file_path, 'w') as hf_object:
                 hf_object.create_dataset(str(file_path), data=data)
+        # Use numpy to create a csv ord npy file.
         elif self.format.endswith(("csv", "csv.zip")):
             file_path = file_path.with_suffix(".csv")
             np.savetxt(fname=str(file_path), X=data, delimiter=",", comments='',
@@ -82,6 +84,7 @@ class DesignMatrixExporter(EncodingReport):
             file_path = file_path.with_suffix(".npy")
             np.save(str(file_path), data)
         
+        # If requested, compress the file into a .zip.
         if self.format.endswith(".zip"):
             file_path_zip = str(file_path) + ".zip"
             with zipfile.ZipFile(file_path_zip, 'w') as zipped_file:
