@@ -3,6 +3,7 @@ import datetime
 import logging
 import os
 import shutil
+import sys
 import warnings
 from pathlib import Path
 
@@ -14,6 +15,45 @@ from immuneML.environment.Constants import Constants
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.util.PathBuilder import PathBuilder
 from immuneML.util.ReflectionHandler import ReflectionHandler
+from immuneML.info import PROGRAM_NAME, URL, CITE, LOGO, VERSION
+
+
+def hello_world(infile, rundir, outpath):
+    """Print out a polite greeting for immuneML.
+
+    Parameters
+    ----------
+    infile : string
+        String showing the location of the input file.
+    rundir : string
+        String showing the location we are running in.
+    outpath : string
+        The output path.
+    """
+    timestart = datetime.datetime.now()
+    pyversion = sys.version.split()[0]
+    print('\n'.join([LOGO]))
+    print(f'{PROGRAM_NAME} version: {VERSION}')
+    print(f'Start of execution: {timestart}')
+    print(f'Python version: {pyversion}')
+    print(f'Running in directory: {rundir}')
+    print(f'Specification file: {infile}')
+    print(f'Output path: {outpath}')
+
+
+def bye_bye_world():
+    """Print out the goodbye message for immuneML."""
+    timeend = datetime.datetime.now()
+    print()
+    print(f'End of {PROGRAM_NAME}, execution: {timeend}')
+    # display some references:
+    references = ['{} references:'.format(PROGRAM_NAME)]
+    references.append(('-')*len(references[0]))
+    for line in CITE.split('\n'):
+        if line:
+            references.append(line)
+    print('\n'.join(references))
+    print(f'{URL}')
 
 
 class ImmuneMLApp:
@@ -75,17 +115,24 @@ def run_immuneML(namespace: argparse.Namespace):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="immuneML command line tool")
+    parser = argparse.ArgumentParser(description=f"{PROGRAM_NAME} command line tool")
     parser.add_argument("specification_path", help="Path to specification YAML file. Always used to define the analysis.")
     parser.add_argument("result_path", help="Output directory path.")
-    parser.add_argument("--tool", help="Name of the tool which calls immuneML. This name will be used to invoke appropriate API call, "
-                                       "which will then do additional work in tool-dependent way before running standard immuneML.")
+    parser.add_argument("--tool", help=f"Name of the tool which calls {PROGRAM_NAME}. This name will be used to invoke appropriate API call, "
+                                       f"which will then do additional work in tool-dependent way before running standard {PROGRAM_NAME}.")
+    parser.add_argument("-V", help="Print version", action='version',
+                        version=f"{PROGRAM_NAME} {VERSION}")
+
     namespace = parser.parse_args()
     namespace.specification_path = Path(namespace.specification_path)
     namespace.result_path = Path(namespace.result_path)
+    cwd_dir = os.getcwd()
+
+    hello_world(namespace.specification_path, cwd_dir, namespace.result_path)
 
     run_immuneML(namespace)
-
+   
+    # bye_bye_world()  # To activate once the paper is accepted.
 
 if __name__ == "__main__":
     main()
