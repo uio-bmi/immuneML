@@ -24,7 +24,7 @@ class DesignMatrixExporter(EncodingReport):
     the data are then exported to different formats to facilitate
     their import with external software.
 
-    Args:
+    Arguments:
 
         format_file (str): the format and extension of the file to store the design matrix. The supported formats are:
         npy, csv, hdf5 and npy.zip, csv.zip, hdf5.zip.
@@ -37,7 +37,13 @@ class DesignMatrixExporter(EncodingReport):
 
         my_dme_report: DesignMatrixExporter
             DesignMatrixExporter:
-                format_file: csv # alternatively, use one {npy, csv, hdf5, npy.zip, cvs.zip, hdf5.zip} 
+                format_file:
+                    - csv
+                    - npy
+                    - hdf5
+                    - csv.zip
+                    - npy.zip
+                    - hdf5.zip
 
     """
     @classmethod
@@ -65,30 +71,32 @@ class DesignMatrixExporter(EncodingReport):
         
         data = self._get_data()
         file_path = self.result_path / "design_matrix"
+        ext = os.path.splitext(self.format)[0]
+        file_path = file_path.with_suffix('.' + ext)
 
         # Use h5py to create a hdf5 file.
-        if self.format.endswith(("hdf5", "hdf5.zip")):
-            file_path = file_path.with_suffix(".hdf5")
-            with h5py.File(file_path, 'w') as hf_object:
+        if ext == "hdf5": 
+            with h5py.File(str(file_path), 'w') as hf_object:
                 hf_object.create_dataset(str(file_path), data=data)
         # Use numpy to create a csv or npy file.
-        elif len(data.shape) <= 2 and self.format.endswith(("csv", "csv.zip")):
-            file_path = file_path.with_suffix(".csv")
+        elif len(data.shape) <= 2 and ext == "csv": 
             np.savetxt(fname=str(file_path), X=data, delimiter=",", comments='',
                        header=",".join(self.dataset.encoded_data.feature_names))
         else:
-            if not self.format.endswith(("npy", "npy.zip")):
+            if ext != "npy":
                 logging.info('The selected Report format is not compatible, '
                              '.npy is used instead')
-            file_path = file_path.with_suffix(".npy")
+                file_path = file_path.with_suffix(".npy")
+                ext = "npy"
             np.save(str(file_path), data)
         
         # If requested, compress the file into a .zip.
         if self.format.endswith(".zip"):
-            file_path_zip = str(file_path) + ".zip"
-            with zipfile.ZipFile(file_path_zip, 'w') as zipped_file:
-                zipped_file.write(file_path_zip, compress_type=zipfile.ZIP_DEFLATED)
-            os.remove(str(file_path))
+            file_path_zip = file_path.with_suffix('.' + ext + '.zip')
+            with zipfile.ZipFile(str(file_path_zip), 'w') as zipped_file:
+                zipped_file.write(str(file_path), compress_type=zipfile.ZIP_DEFLATED)
+            os.remove(str(file_path)) 
+            file_path = file_path_zip
         return ReportOutput(file_path, "design matrix")
 
     def _get_data(self) -> np.ndarray:

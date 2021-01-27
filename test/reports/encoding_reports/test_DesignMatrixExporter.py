@@ -60,7 +60,7 @@ class TestDesignMatrixExporter(TestCase):
         path = EnvironmentSettings.tmp_test_path / "designmatrrixexporterreport/"
 
         report = DesignMatrixExporter(dataset=dataset, result_path=path,
-                                      name="design_matrix", format_file='.csv')
+                                      name="design_matrix", format_file='csv')
         report.generate_report()
         self.assertTrue(os.path.isfile(path / "design_matrix.csv"))
         report.format = 'csv.zip'
@@ -83,7 +83,6 @@ class TestDesignMatrixExporter(TestCase):
         shutil.rmtree(path)
 
         report.format = 'banana'
-
         report.generate_report()
         self.assertTrue(os.path.isfile(path / "design_matrix.npy"))
         shutil.rmtree(path)
