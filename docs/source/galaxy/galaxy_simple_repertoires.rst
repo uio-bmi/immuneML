@@ -84,19 +84,18 @@ Tool output
 ---------------------------------------------
 This Galaxy tool will produce the following history elements:
 
-- Repertoire Classification Archive: a .zip file containing the complete output folder as it was produced by immuneML. This folder
+- Summary: repertoire classification: a HTML page that allows you to browse through all results, including prediction accuracies on
+  the various data splits and plots showing the performance of classifiers and learned parameters.
+
+- Archive: repertoire classification : a .zip file containing the complete output folder as it was produced by immuneML. This folder
   contains the output of the TrainMLModel instruction including all trained models and their predictions, and report results.
   Furthermore, the folder contains the complete YAML specification file for the immuneML run, the HTML output and a log file.
 
-- Results of repertoire classification: a HTML page that allows you to browse through all results, including prediction accuracies on
-  the various data splits and plots showing the performance of classifiers and learned parameters.
-
-- Generated YAML file: the YAML specification file that was used by immuneML internally to run the analysis. This file can be
-  downloaded, altered, and run again by immuneML using the :ref:`YAML-based Galaxy tool <How to train ML models in Galaxy>`.
-
-- Optimal ML model: a .zip file containing the raw files for the optimal trained ML model file for the given label.
+- optimal_ml_settings.zip: a .zip file containing the raw files for the optimal trained ML settings (ML model, encoding).
   This .zip file can subsequently be used as an input when :ref:`applying previously trained ML models to a new AIRR dataset in Galaxy <How to apply previously trained ML models to a new AIRR dataset in Galaxy>`
 
+- repertoire_classification.yaml: the YAML specification file that was used by immuneML internally to run the analysis. This file can be
+  downloaded, altered, and run again by immuneML using the :ref:`YAML-based Galaxy tool <How to train ML models in Galaxy>`.
 
 More analysis options
 ----------------------

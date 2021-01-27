@@ -44,29 +44,30 @@ class KmerFrequencyEncoder(DatasetEncoder):
         the k-mers just correspond to the original sequences.
 
         normalization_type (:py:mod:`immuneML.analysis.data_manipulation.NormalizationType`): The way in which the
-        k-mer frequencies should be normalized.
+        k-mer frequencies should be normalized. The default value for normalization_type is l2.
 
         reads (:py:mod:`immuneML.encodings.kmer_frequency.ReadsType`): Reads type signify whether the counts of the sequences
         in the repertoire will be taken into account. If :py:mod:`immuneML.encodings.kmer_frequency.ReadsType.UNIQUE`,
         only unique sequences (clonotypes) are encoded, and if :py:mod:`immuneML.encodings.kmer_frequency.ReadsType.ALL`,
         the sequence 'count' value is taken into account when determining the k-mer frequency.
+        The default value for reads is unique.
 
-        k (int): Length of the k-mer (number of amino acids) when ungapped k-mers are used.
+        k (int): Length of the k-mer (number of amino acids) when ungapped k-mers are used. The default value for k is 3.
 
-        k_left (int): When gapped k-mers are used, k_left indicates the length of the k-mer left of the gap.
+        k_left (int): When gapped k-mers are used, k_left indicates the length of the k-mer left of the gap. The default value for k_left is 1.
 
-        k_right (int): Same as k_left, but k_right determines the length of the k-mer right of the gap
+        k_right (int): Same as k_left, but k_right determines the length of the k-mer right of the gap. The default value for k_right is 1.
 
-        min_gap (int): Minimum gap size when gapped k-mers are used.
+        min_gap (int): Minimum gap size when gapped k-mers are used. The default value for min_gap is 0.
 
-        max_gap: (int): Maximum gap size when gapped k-mers are used.
+        max_gap: (int): Maximum gap size when gapped k-mers are used. The default value for max_gap is 0.
 
         scale_to_unit_variance (bool): whether to scale the design matrix after normalization to have unit variance per feature. Setting this argument
-        to True might improve the subsequent classifier's performance depending on the type of the classifier.
+        to True might improve the subsequent classifier's performance depending on the type of the classifier. The default value for scale_to_unit_variance is true.
 
         scale_to_zero_mean (bool): whether to scale the design matrix after normalization to have zero mean per feature. Setting this argument to True
         might improve the subsequent classifier's performance depending on the type of the classifier. However, if the original design matrix was
-        sparse, setting this argument to True will destroy the sparsity and will increase the memory consumption.
+        sparse, setting this argument to True will destroy the sparsity and will increase the memory consumption. The default value for scale_to_zero_mean is false.
 
 
     YAML specification:

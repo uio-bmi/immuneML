@@ -30,11 +30,11 @@ A complete YAML specification for applying ML models to a new dataset is shown h
           params:
             path: dataset.iml_dataset # specify the dataset name, the default name used by
                                       # the 'Create dataset' galaxy tool is dataset.iml_dataset
-
-    instruction_name:
+    instructions:
+      instruction_name:
         type: MLApplication
         dataset: dataset
-        config_path: optimal_ml_model.zip # the name of the ML model
+        config_path: optimal_ml_settings.zip # the name of the ML model
         label: disease # the label
         pool_size: 1000
         store_encoded_data: False
@@ -44,8 +44,9 @@ Tool output
 ---------------------------------------------
 This Galaxy tool will produce the following history elements:
 
-- ML Model Application Archive: a .zip file containing the complete output folder as it was produced by immuneML. This folder
+- Summary: ML application: a HTML page that allows you to browse through all results, including ...
+
+- Archive: ML model application: a .zip file containing the complete output folder as it was produced by immuneML. This folder
   contains the output of the MLApplication instruction including ....
   Furthermore, the folder contains the complete YAML specification file for the immuneML run, the HTML output and a log file.
 
-- Results of ML application: a HTML page that allows you to browse through all results, including ...

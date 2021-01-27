@@ -86,7 +86,7 @@ A complete YAML specification for training ML models is shown here:
           split_count: 3
           split_strategy: random
           training_percentage: 0.7
-        selection:  # parameters in the assessment (inner) cross-validation loop
+        selection:  # parameters in the selection (inner) cross-validation loop
           split_count: 1
           split_strategy: random
           training_percentage: 0.7
@@ -94,26 +94,26 @@ A complete YAML specification for training ML models is shown here:
         reports: # train ML model reports to run
         - my_benchmark
 
-        strategy: GridSearch
-        optimization_metric: balanced_accuracy
-        metrics:
+        optimization_metric: balanced_accuracy # the metric to optimize during nested cross-validation
+        metrics: # other metrics to compute
         - accuracy
-        - balanced_accuracy
-        number_of_processes: 10
-        refit_optimal_model: true
-        store_encoded_data: false
+        - auc
+        strategy: GridSearch # strategy for hyperparameter optimization, GridSearch is currently the only available option
+        refit_optimal_model: true # whether to retrain the model on the whole dataset after optimizing hyperparameters
+        number_of_processes: 10 # processes for parallelization
+        store_encoded_data: false # whether to store intermediate encoded data files (increases disk usage)
 
 
 Tool output
 ---------------------------------------------
 This Galaxy tool will produce the following history elements:
 
-- ML Model Training Archive: a .zip file containing the complete output folder as it was produced by immuneML. This folder
+- Summary: ML model training: a HTML page that allows you to browse through all results, including prediction accuracies on
+  the various data splits and report results.
+
+- Archive: ML model training: a .zip file containing the complete output folder as it was produced by immuneML. This folder
   contains the output of the TrainMLModel instruction including all trained models and their predictions, and report results.
   Furthermore, the folder contains the complete YAML specification file for the immuneML run, the HTML output and a log file.
 
-- Results of ML model training: a HTML page that allows you to browse through all results, including prediction accuracies on
-  the various data splits and report results.
-
-- Optimal ML model: a .zip file containing the raw files for the optimal trained ML model file for the given label.
-  This .zip file can subsequently be used as an input when :ref:`applying previously trained ML models to a new AIRR dataset in Galaxy <How to apply previously trained ML models to a new AIRR dataset in Galaxy>`
+- optimal_ml_settings.zip: a .zip file containing the raw files for the optimal trained ML settings (ML model, encoding, and
+  optionally preprocessing steps). This .zip file can subsequently be used as an input when :ref:`applying previously trained ML models to a new AIRR dataset in Galaxy <How to apply previously trained ML models to a new AIRR dataset in Galaxy>`

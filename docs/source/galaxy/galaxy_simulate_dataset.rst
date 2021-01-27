@@ -40,8 +40,8 @@ A complete example of a full YAML specification for generating a RandomRepertoir
               B: 0.4
           repertoire_count: 100
           sequence_count_probabilities: # the probabilities of finding each number of sequences in a repertoire, must sum to 1
-            10000: 0.5
-            12000: 0.5
+            1000: 0.5
+            1200: 0.5
           sequence_length_probabilities: # the probabilities of finding each sequence length in a repertoire, must sum to 1
             12: 0.25
             13: 0.25
@@ -76,12 +76,12 @@ Tool output
 ---------------------------------------------
 This Galaxy tool will produce the following history elements:
 
-- Dataset Simulation Overview Archive: a .zip file containing the complete output folder as it was produced by immuneML. This folder
-  contains the output of the DatasetExport instruction including raw data files.
-  Furthermore, the folder contains the complete YAML specification file for the immuneML run, the HTML output and a log file.
-
-- Dataset Simulation Overview: a HTML page describing general characteristics of the dataset, including the name of the dataset
+- Summary: dataset simulation: a HTML page describing general characteristics of the dataset, including the name of the dataset
   (this name should be specified when importing the dataset later in immuneML), the dataset type and size, and a link to download
   the raw data files.
 
-- Simulated dataset: Galaxy collection containing all relevant files for the new dataset.
+- Archive: dataset simulation: a .zip file containing the complete output folder as it was produced by immuneML. This folder
+  contains the output of the DatasetExport instruction including raw data files.
+  Furthermore, the folder contains the complete YAML specification file for the immuneML run, the HTML output and a log file.
+
+- Simulated immuneML dataset: Galaxy collection containing all relevant files for the new dataset.

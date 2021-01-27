@@ -68,8 +68,9 @@ Tool output
 ---------------------------------------------
 This Galaxy tool will produce the following history elements:
 
+- Summary: immuneML analysis: a HTML page that allows you to browse through all results.
+
 - ImmuneML Analysis Archive: a .zip file containing the complete output folder as it was produced by immuneML. This folder
   contains the output of the instruction that was used, including all raw data files.
   Furthermore, the folder contains the complete YAML specification file for the immuneML run, the HTML output and a log file.
 
-- Results of immuneML analysis: a HTML page that allows you to browse through all results.

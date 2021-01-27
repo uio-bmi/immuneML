@@ -103,12 +103,12 @@ Tool output
 ---------------------------------------------
 This Galaxy tool will produce the following history elements:
 
-- Dataset Simulation Overview Archive: a .zip file containing the complete output folder as it was produced by immuneML. This folder
-  contains the output of the Simulation instruction including all raw data files.
-  Furthermore, the folder contains the complete YAML specification file for the immuneML run, the HTML output and a log file.
-
-- Dataset Simulation Overview: a HTML page describing general characteristics of the dataset, including the name of the dataset
+- Summary: immune signal simulation: a HTML page describing general characteristics of the dataset, including the name of the dataset
   (this name should be specified when importing the dataset later in immuneML), the dataset type and size, and the details of the
   simulated immune signals.
 
-- Dataset with simulated immune events: Galaxy collection containing all relevant files for the new dataset.
+- Archive: immune signal simulation: a .zip file containing the complete output folder as it was produced by immuneML. This folder
+  contains the output of the Simulation instruction including all raw data files.
+  Furthermore, the folder contains the complete YAML specification file for the immuneML run, the HTML output and a log file.
+
+- immuneML dataset with simulated immune events: Galaxy collection containing all relevant files for the new dataset.
