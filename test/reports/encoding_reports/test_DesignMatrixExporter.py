@@ -80,3 +80,11 @@ class TestDesignMatrixExporter(TestCase):
         report.format = 'hdf5.zip'
         report._export_matrix()
         self.assertTrue(os.path.isfile(path / "design_matrix.hdf5.zip"))
+        shutil.rmtree(path)
+
+        report.format = 'banana'
+
+        report.generate_report()
+        self.assertTrue(os.path.isfile(path / "design_matrix.npy"))
+        shutil.rmtree(path)
+ 

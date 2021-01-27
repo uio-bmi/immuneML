@@ -1,6 +1,7 @@
 import warnings
 from dataclasses import dataclass
 from pathlib import Path
+import logging 
 import h5py
 import numpy as np
 import os
@@ -36,9 +37,12 @@ class DesignMatrixExporter(EncodingReport):
 
         my_dme_report: DesignMatrixExporter
             DesignMatrixExporter:
-                format_file: .npy/.csv/.hdf5/.npy.zip/.cvs.zip/.hdf5.zip
+                format_file: csv # alternatively, use one {npy, csv, hdf5, npy.zip, cvs.zip, hdf5.zip} 
 
     """
+    @classmethod
+    def build_object(cls, **kwargs):
+        return DesignMatrixExporter(**kwargs)
 
     def __init__(self, dataset = None, result_path = None,
                  name: str = None, format_file: str = 'csv'):
@@ -46,10 +50,6 @@ class DesignMatrixExporter(EncodingReport):
         self.format = format_file
         self.dataset = dataset
         self.result_path = result_path
-
-    @classmethod
-    def build_object(cls, **kwargs):
-        return DesignMatrixExporter(**kwargs)
 
     def _generate(self) -> ReportResult:
         PathBuilder.build(self.result_path)
@@ -66,21 +66,20 @@ class DesignMatrixExporter(EncodingReport):
         data = self._get_data()
         file_path = self.result_path / "design_matrix"
 
-        # Check that the requested extension is supported.
-        assert self.format.endswith(("hdf5", "hdf5.zip", "csv", "csv.zip", "npy", "npy.zip")), \
-            f'Output format {self.format} not recognised for the Encoding Report'
-
         # Use h5py to create a hdf5 file.
         if self.format.endswith(("hdf5", "hdf5.zip")):
             file_path = file_path.with_suffix(".hdf5")
             with h5py.File(file_path, 'w') as hf_object:
                 hf_object.create_dataset(str(file_path), data=data)
-        # Use numpy to create a csv ord npy file.
-        elif self.format.endswith(("csv", "csv.zip")):
+        # Use numpy to create a csv or npy file.
+        elif len(data.shape) <= 2 and self.format.endswith(("csv", "csv.zip")):
             file_path = file_path.with_suffix(".csv")
             np.savetxt(fname=str(file_path), X=data, delimiter=",", comments='',
                        header=",".join(self.dataset.encoded_data.feature_names))
         else:
+            if not self.format.endswith(("npy", "npy.zip")):
+                logging.info('The selected Report format is not compatible, '
+                             '.npy is used instead')
             file_path = file_path.with_suffix(".npy")
             np.save(str(file_path), data)
         
