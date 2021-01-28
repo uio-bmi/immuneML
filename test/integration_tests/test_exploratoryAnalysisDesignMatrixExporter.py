@@ -48,7 +48,7 @@ class TestExploratoryAnalysisDesignMatrixExporter(TestCase):
         refs = {"params": {"path": path / "refs.tsv", "region_type": "FULL_SEQUENCE"}, "format": "VDJdb"}
 
         units = {"named_analysis_4": ExploratoryAnalysisUnit(dataset=dataset,
-                                                             report=DesignMatrixExporter(),
+                                                             report=DesignMatrixExporter(name='report', file_format='csv'),
                                                              label_config=label_config,
                                                              encoder=MatchedSequencesRepertoireEncoder.build_object(dataset,
                                                                                                              **{"max_edit_distance": 1,
