@@ -29,17 +29,16 @@
         {{/train_metadata_path}}
         <h4>Label {{label}}</h4>
         <p>
-            In the table below, the performance of each hyperparameter setting on the test set for this split is shown, as measured by the
-            optimization metric used for model selection and model assessment. All settings were refitted on
-            the dataset which includes all training and validation data for this split. The setting in bold was chosen as the optimal one for this
-            split during selection (inner cross-validation loop).
+            In the table below, the performance of the optimal hyperparameter setting on the test set for this split is shown, as measured by the
+            optimization metric used for model selection and model assessment. This hyperparameter setting was chosen to be the optimal one in the
+            inner cross-validation (i.e., during the selection) for this assessment split.
         </p>
         <div class="padded">
             <div class="table-container">
                 <table>
                     <thead>
                         <tr>
-                            <th>Hyperparameter settings (preprocessing, encoding, ML method)</th>
+                            <th>Optimal hyperparameter settings <br>(preprocessing, encoding, ML method)</th>
                             <th>Performance ({{optimization_metric}})</th>
                             {{#has_reports}}
                             <th>Reports</th>
@@ -48,6 +47,7 @@
                     </thead>
                     <tbody>
                         {{#hp_settings}}
+                        {{#optimal}}
                         <tr>
                             <td>
                                 {{#optimal}}<b>{{/optimal}}
@@ -60,11 +60,49 @@
                             <td><a href="{{reports_path}}">see reports</a></td>
                             {{/has_reports}}
                         </tr>
+                        {{/optimal}}
                         {{/hp_settings}}
                     </tbody>
                 </table>
             </div>
         </div>
+        {{#show_non_optimal}}
+        <p>
+            In the table below, the performance of the other hyperparameter settings on the test set for this split are shown, as measured by the
+            optimization metric used for model selection and model assessment. These settings were not chosen as the optimal ones during the selection
+            for this assessment split.
+        </p>
+        <div class="padded">
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Hyperparameter settings <br>(preprocessing, encoding, ML method)</th>
+                            <th>Performance ({{optimization_metric}})</th>
+                            {{#has_reports}}
+                            <th>Reports</th>
+                            {{/has_reports}}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{#hp_settings}}
+                        {{^optimal}}
+                        <tr>
+                            <td>
+                                {{hp_setting}}
+                            </td>
+                            <td>{{optimization_metric_val}}</td>
+                            {{#has_reports}}
+                            <td><a href="{{reports_path}}">see reports</a></td>
+                            {{/has_reports}}
+                        </tr>
+                        {{/optimal}}
+                        {{/hp_settings}}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {{/show_non_optimal}}
         {{#performances_per_metric}}
         <p>The performance of different hyperparameter settings on all listed metrics (both the optimization metric and other metrics not used for
             model selection and assessment) is shown in the table below. This is the performance on the test set for this assessment split when all

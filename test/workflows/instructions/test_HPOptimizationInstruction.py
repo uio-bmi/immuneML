@@ -58,7 +58,7 @@ class TestHPOptimizationProcess(TestCase):
                                                               "l2": [0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 1,
                                                                      0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1]})
 
-        dataset = RepertoireDataset(repertoires=repertoires, metadata_file=metadata, params={"l1": [1, 2], "l2": [0, 1]})
+        dataset = RepertoireDataset(repertoires=repertoires, metadata_file=metadata, labels={"l1": [1, 2], "l2": [0, 1]})
         enc1 = {"k": 3, "model_type": ModelType.SEQUENCE.name, "vector_size": 4}
         enc2 = {"k": 3, "model_type": ModelType.SEQUENCE.name, "vector_size": 6}
         hp_settings = [HPSetting(Word2VecEncoder.build_object(dataset, **enc1), enc1,

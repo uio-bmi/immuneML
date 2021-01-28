@@ -102,9 +102,9 @@ class TCRdistMotifDiscovery(MLReport):
                 tables.extend(table_outputs)
 
         res_summary = member_summ(res_df=tcr_rep.hcluster_df, clone_df=tcr_rep.clone_df, addl_cols=['epitope'])
-        res_summary.to_csv(self.result_path + "tcrdist_summary.csv")
+        res_summary.to_csv(self.result_path / "tcrdist_summary.csv")
 
-        tables.append(ReportOutput(path=self.result_path + "tcrdist_summary.csv", name="TCRdist summary (csv)"))
+        tables.append(ReportOutput(path=self.result_path / "tcrdist_summary.csv", name="TCRdist summary (csv)"))
 
         return ReportResult("TCRdist motif discovery", figures, tables)
 
