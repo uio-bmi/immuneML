@@ -60,7 +60,7 @@ def encode_dataset_by_kmer_freq(path_to_dataset_directory: str, result_path: str
                       label_config=LabelConfiguration([Label(label_name, dataset.labels[label_name])])), False))
 
     dataset_exporter = DesignMatrixExporter(dataset=encoded_dataset,
-                                            result_path=result_path / "csv_exported")
+                                            result_path=result_path / "csv_exported", file_format='csv')
     dataset_exporter.generate_report()
 
     return encoded_dataset

@@ -24,7 +24,7 @@ class TestDesignMatrixExporter(TestCase):
 
         path = EnvironmentSettings.tmp_test_path / "designmatrrixexporterreport/"
 
-        report = DesignMatrixExporter(dataset, path)
+        report = DesignMatrixExporter(dataset, path, name='report', file_format='csv')
         report.generate_report()
         self.assertTrue(os.path.isfile(path / "design_matrix.csv"))
 
@@ -60,30 +60,27 @@ class TestDesignMatrixExporter(TestCase):
         path = EnvironmentSettings.tmp_test_path / "designmatrrixexporterreport/"
 
         report = DesignMatrixExporter(dataset=dataset, result_path=path,
-                                      name="design_matrix", format_file='csv')
+                                      name="design_matrix", file_format='csv')
         report.generate_report()
         self.assertTrue(os.path.isfile(path / "design_matrix.csv"))
-        report.format = 'csv.zip'
+        report.file_format = 'csv.zip'
         report._export_matrix()
         self.assertTrue(os.path.isfile(path / "design_matrix.csv.zip"))
 
-        report.format = 'npy'
+        report.file_format = 'npy'
         report._export_matrix()
         self.assertTrue(os.path.isfile(path / "design_matrix.npy"))
-        report.format = 'npy.zip'
+        report.file_format = 'npy.zip'
         report._export_matrix()
         self.assertTrue(os.path.isfile(path / "design_matrix.npy.zip"))
 
-        report.format = 'hdf5'
+        report.file_format = 'hdf5'
         report._export_matrix()
         self.assertTrue(os.path.isfile(path / "design_matrix.hdf5"))
-        report.format = 'hdf5.zip'
+        report.file_format = 'hdf5.zip'
         report._export_matrix()
         self.assertTrue(os.path.isfile(path / "design_matrix.hdf5.zip"))
         shutil.rmtree(path)
 
-        report.format = 'banana'
-        report.generate_report()
-        self.assertTrue(os.path.isfile(path / "design_matrix.npy"))
-        shutil.rmtree(path)
- 
+        with self.assertRaises(AssertionError):
+            DesignMatrixExporter.build_object(**{'file_format': "random"})

@@ -1,18 +1,20 @@
+import logging
+import os
 import warnings
+import zipfile
 from dataclasses import dataclass
 from pathlib import Path
-import logging 
+
 import h5py
 import numpy as np
-import os
 import pandas as pd
 import yaml
-import zipfile
 
 from immuneML.data_model.dataset.Dataset import Dataset
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.encoding_reports.EncodingReport import EncodingReport
+from immuneML.util.ParameterValidator import ParameterValidator
 from immuneML.util.PathBuilder import PathBuilder
 
 
@@ -26,8 +28,8 @@ class DesignMatrixExporter(EncodingReport):
 
     Arguments:
 
-        format_file (str): the format and extension of the file to store the design matrix. The supported formats are:
-        npy, csv, hdf5 and npy.zip, csv.zip, hdf5.zip.
+        file_format (str): the format and extension of the file to store the design matrix. The supported formats are:
+        npy, csv, hdf5, npy.zip, csv.zip or hdf5.zip.
 
 
     YAML specification:
@@ -37,25 +39,20 @@ class DesignMatrixExporter(EncodingReport):
 
         my_dme_report: DesignMatrixExporter
             DesignMatrixExporter:
-                format_file:
-                    - csv
-                    - npy
-                    - hdf5
-                    - csv.zip
-                    - npy.zip
-                    - hdf5.zip
+                file_format: csv
 
     """
+    dataset: Dataset = None
+    result_path: Path = None
+    name: str = None
+    file_format: str = None
+
     @classmethod
     def build_object(cls, **kwargs):
-        return DesignMatrixExporter(**kwargs)
+        ParameterValidator.assert_keys_present(list(kwargs.keys()), ['file_format', 'name'], DesignMatrixExporter.__name__, DesignMatrixExporter.__name__)
+        ParameterValidator.assert_in_valid_list(kwargs['file_format'], ['npy', 'csv', 'npy.zip', 'csv.zip', 'hdf5.zip'], DesignMatrixExporter.__name__, 'file_format')
 
-    def __init__(self, dataset = None, result_path = None,
-                 name: str = None, format_file: str = 'csv'):
-        super().__init__(name)
-        self.format = format_file
-        self.dataset = dataset
-        self.result_path = result_path
+        return DesignMatrixExporter(**kwargs)
 
     def _generate(self) -> ReportResult:
         PathBuilder.build(self.result_path)
@@ -71,7 +68,7 @@ class DesignMatrixExporter(EncodingReport):
         
         data = self._get_data()
         file_path = self.result_path / "design_matrix"
-        ext = os.path.splitext(self.format)[0]
+        ext = os.path.splitext(self.file_format)[0]
         file_path = file_path.with_suffix('.' + ext)
 
         # Use h5py to create a hdf5 file.
@@ -91,7 +88,7 @@ class DesignMatrixExporter(EncodingReport):
             np.save(str(file_path), data)
         
         # If requested, compress the file into a .zip.
-        if self.format.endswith(".zip"):
+        if self.file_format.endswith(".zip"):
             file_path_zip = file_path.with_suffix('.' + ext + '.zip')
             with zipfile.ZipFile(str(file_path_zip), 'w') as zipped_file:
                 zipped_file.write(str(file_path), compress_type=zipfile.ZIP_DEFLATED)
