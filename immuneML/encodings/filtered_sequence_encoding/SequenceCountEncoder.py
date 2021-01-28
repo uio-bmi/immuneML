@@ -71,7 +71,8 @@ class SequenceCountEncoder(DatasetEncoder):
         return SequenceCountEncoder(**params)
 
     def encode(self, dataset, params: EncoderParams):
-        self.comparison_data = SequenceFilterHelper.build_comparison_data(dataset, self.context, self.comparison_attributes, params, self.sequence_batch_size)
+        self.comparison_data = SequenceFilterHelper.build_comparison_data(dataset, self.context, self.comparison_attributes, params,
+                                                                          self.sequence_batch_size)
         return self._encode_data(dataset, params)
 
     def _encode_data(self, dataset: RepertoireDataset, params: EncoderParams):
@@ -81,13 +82,16 @@ class SequenceCountEncoder(DatasetEncoder):
 
         encoded_data = self._encode_sequence_count(dataset, self.comparison_data, labels[0], params)
 
-        encoded_dataset = RepertoireDataset(params=dataset.params, encoded_data=encoded_data, repertoires=dataset.repertoires)
+        encoded_dataset = RepertoireDataset(labels=dataset.labels, encoded_data=encoded_data, repertoires=dataset.repertoires)
 
         return encoded_dataset
 
     def _encode_sequence_count(self, dataset: RepertoireDataset, comparison_data: ComparisonData, label: str, params: EncoderParams) -> EncodedData:
-        sequence_p_values_indices, indices_path, relevant_sequences_path = SequenceFilterHelper.get_relevant_sequences(dataset, params, comparison_data, label, self.p_value_threshold,
-                                                                                self.comparison_attributes, self.relevant_indices_path)
+        sequence_p_values_indices, indices_path, relevant_sequences_path = SequenceFilterHelper.get_relevant_sequences(dataset, params,
+                                                                                                                       comparison_data, label,
+                                                                                                                       self.p_value_threshold,
+                                                                                                                       self.comparison_attributes,
+                                                                                                                       self.relevant_indices_path)
         if self.relevant_indices_path is None:
             self.relevant_indices_path = indices_path
         if self.relevant_sequence_csv_path is None:

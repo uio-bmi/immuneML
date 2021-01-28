@@ -56,7 +56,7 @@ class TestMLSettingsPerformance(TestCase):
                                                                    0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1]})
 
         dataset = RepertoireDataset(repertoires=repertoires, metadata_file=metadata,
-                                    params={"l1": [1, 2], "l2": [0, 1]})
+                                    labels={"l1": [1, 2], "l2": [0, 1]})
         enc_params = {"k": 3, "model_type": ModelType.SEQUENCE.name, "vector_size": 4}
         hp_settings = [HPSetting(Word2VecEncoder.build_object(dataset, **enc_params), enc_params,
                                  LogisticRegression(),

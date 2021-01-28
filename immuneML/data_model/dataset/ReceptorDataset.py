@@ -23,19 +23,5 @@ class ReceptorDataset(ElementDataset):
 
         return ReceptorDataset(filenames=file_names, file_size=file_size, name=name)
 
-    def get_label_names(self):
-        if self.labels is None:
-            for receptor in self.get_data():
-                if self.labels is None:
-                    if receptor.metadata is not None:
-                        self.labels = set(receptor.metadata.keys())
-                    else:
-                        self.labels = set()
-                        return self.labels
-                else:
-                    self.labels.intersection(receptor.metadata.keys())
-
-        return self.labels
-
     def clone(self):
-        return ReceptorDataset(self.params, copy.deepcopy(self.encoded_data), copy.deepcopy(self._filenames), file_size=self.file_size)
+        return ReceptorDataset(self.labels, copy.deepcopy(self.encoded_data), copy.deepcopy(self._filenames), file_size=self.file_size)

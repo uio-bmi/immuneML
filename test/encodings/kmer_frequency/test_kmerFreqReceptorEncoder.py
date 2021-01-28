@@ -41,7 +41,7 @@ class TestKmerFreqReceptorEncoder(TestCase):
         lc = LabelConfiguration()
         lc.add_label("l1", [1, 2])
 
-        dataset = ReceptorDataset(params={"l1": [1, 2]}, filenames=[filename], identifier="d1")
+        dataset = ReceptorDataset(labels={"l1": [1, 2]}, filenames=[filename], identifier="d1")
 
         encoder = KmerFreqReceptorEncoder.build_object(dataset, **{
                 "normalization_type": NormalizationType.RELATIVE_FREQUENCY.name,

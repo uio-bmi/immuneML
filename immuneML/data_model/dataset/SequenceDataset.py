@@ -23,15 +23,5 @@ class SequenceDataset(ElementDataset):
 
         return SequenceDataset(filenames=file_names, file_size=file_size, name=name)
 
-    def get_label_names(self):
-        if self.labels is None:
-            for sequence in self.get_data():
-                if self.labels is None:
-                    self.labels = set(sequence.metadata.custom_params.keys())
-                else:
-                    self.labels.intersection(sequence.metadata.custom_params.keys())
-
-        return self.labels
-
     def clone(self):
-        return SequenceDataset(self.params, copy.deepcopy(self.encoded_data), copy.deepcopy(self._filenames), file_size=self.file_size)
+        return SequenceDataset(self.labels, copy.deepcopy(self.encoded_data), copy.deepcopy(self._filenames), file_size=self.file_size)
