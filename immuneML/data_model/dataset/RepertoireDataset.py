@@ -52,6 +52,14 @@ class RepertoireDataset(Dataset):
             self.metadata_fields = df.columns.values.tolist()
         return self.metadata_fields
 
+    def get_label_names(self):
+        all_metadata_fields = set(self.get_metadata_fields())
+        for non_label in ["subject_id", "filename", "repertoire_identifier"]:
+            if non_label in all_metadata_fields:
+                all_metadata_fields.remove(non_label)
+
+        return all_metadata_fields
+
     def get_metadata(self, field_names: list, return_df: bool = False):
         df = pd.read_csv(self.metadata_file, sep=",", usecols=field_names, comment=Constants.COMMENT_SIGN)
         if return_df:

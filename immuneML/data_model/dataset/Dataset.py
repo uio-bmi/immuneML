@@ -34,5 +34,9 @@ class Dataset:
         pass
 
     @abc.abstractmethod
+    def get_label_names(self):
+        pass
+
+    @abc.abstractmethod
     def clone(self):
         pass

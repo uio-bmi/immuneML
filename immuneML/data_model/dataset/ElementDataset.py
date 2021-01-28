@@ -21,6 +21,7 @@ class ElementDataset(Dataset):
         self.file_size = file_size
         self.element_ids = None
         self.name = name
+        self.labels = None
 
     def get_data(self, batch_size: int = 1000):
         self._filenames.sort()
