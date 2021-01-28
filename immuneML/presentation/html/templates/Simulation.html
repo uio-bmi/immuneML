@@ -31,10 +31,27 @@
                                 <td>{{dataset_type}}</td>
                             </tr>
                             <tr>
-                                <td><b>Example count</b></td>
-                                <td>{{example_count}}</td>
+                                <td><b>Dataset size</b></td>
+                                <td>{{dataset_size}}</td>
                             </tr>
                         </table>
+                        </div>
+                        <h4>Dataset labels</h4>
+                        The following labels may be used for classification:
+                        <div>
+                            <ul>
+                            {{#labels}}
+                                <li>{{label_name}}</li>
+                            {{/labels}}
+                            </ul>
+                        </div>
+                        <h4>Download formats</h4>
+                        <div>
+                            <ul>
+                            {{#formats}}
+                                <li><a href="{{dataset_download_link}}" download>{{format_name}}</a></li>
+                            {{/formats}}
+                            </ul>
                         </div>
                     </div>
                 </div>

@@ -42,7 +42,7 @@ class TestSemanticModel(TestCase):
                                                       {"default": [1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2,
                                                                    1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2]})
         dataset = RepertoireDataset(repertoires=repertoires,
-                                    params={"default": [1, 2]},
+                                    labels={"default": [1, 2]},
                                     metadata_file=metadata)
 
         label_config = LabelConfiguration()

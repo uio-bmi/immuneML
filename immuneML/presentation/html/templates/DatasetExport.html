@@ -16,13 +16,44 @@
             <div class="padded-bottom padded-top">immuneML version: {{immuneML_version}}</div>
             {{#datasets}}
             <div class="padded">
-                <div><span>Dataset:</span> {{dataset_name}}</div>
-                <div><span>Dataset type:</span> {{dataset_type}}</div>
-                <div><span>Dataset size:</span> {{dataset_size}}</div>
-                <div><span>Download formats: </span>
-                {{#formats}}
-                    <a href="{{dataset_download_link}}" download>{{format_name}}</a>
-                {{/formats}}
+                <div class="col-container">
+                    <div class="col">
+                        <h3>Dataset information</h3>
+                        <h4>General information</h4>
+                        <div class="table-container">
+                            <table>
+                            <tr>
+                                <td><b>Name</b></td>
+                                <td>{{dataset_name}}</td>
+                            </tr>
+                            <tr>
+                                <td><b>Type</b></td>
+                                <td>{{dataset_type}}</td>
+                            </tr>
+                            <tr>
+                                <td><b>Dataset size</b></td>
+                                <td>{{dataset_size}}</td>
+                            </tr>
+                        </table>
+                        </div>
+                        <h4>Dataset labels</h4>
+                        The following labels may be used for classification:
+                        <div>
+                            <ul>
+                            {{#labels}}
+                                <li>{{label_name}}</li>
+                            {{/labels}}
+                            </ul>
+                        </div>
+                        <h4>Download formats</h4>
+                        <div>
+                            <ul>
+                            {{#formats}}
+                                <li><a href="{{dataset_download_link}}" download>{{format_name}}</a></li>
+                            {{/formats}}
+                            </ul>
+                        </div>
+                    </div>
                 </div>
             </div>
             {{/datasets}}

@@ -49,7 +49,7 @@ def encode_dataset_by_kmer_freq(path_to_dataset_directory: str, result_path: str
         },
     }, "mixcr_dataset")
 
-    label_name = list(dataset.params.keys())[0]  # label that can be used for ML prediction - by default: "disease" with values True/False
+    label_name = list(dataset.labels.keys())[0]  # label that can be used for ML prediction - by default: "disease" with values True/False
 
     encoded_dataset = DataEncoder.run(DataEncoderParams(dataset, KmerFrequencyEncoder.build_object(dataset, **{
         "normalization_type": "relative_frequency",  # encode repertoire by the relative frequency of k-mers in repertoire
@@ -57,7 +57,7 @@ def encode_dataset_by_kmer_freq(path_to_dataset_directory: str, result_path: str
         "k": 2,  # k-mer length
         "sequence_encoding": "continuous_kmer"  # split each sequence in repertoire to overlapping k-mers
     }), EncoderParams(result_path=result_path,
-                      label_config=LabelConfiguration([Label(label_name, dataset.params[label_name])])), False))
+                      label_config=LabelConfiguration([Label(label_name, dataset.labels[label_name])])), False))
 
     dataset_exporter = DesignMatrixExporter(dataset=encoded_dataset,
                                             result_path=result_path / "csv_exported")

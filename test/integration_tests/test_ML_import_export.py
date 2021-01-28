@@ -1,5 +1,6 @@
 import os
 import shutil
+from pathlib import Path
 from unittest import TestCase
 
 import yaml
@@ -100,7 +101,7 @@ class TestMLIE(TestCase):
 
         return path / "specs_export.yaml"
 
-    def prepare_import_specs(self, path: str) -> str:
+    def prepare_import_specs(self, path: Path) -> Path:
         specs = {
             "definitions": {
                 "datasets": {
@@ -131,7 +132,7 @@ class TestMLIE(TestCase):
             }
         }
 
-        with open(path / "specs_import.yaml", "w") as file:
+        with (path / "specs_import.yaml").open("w") as file:
             yaml.dump(specs, file)
 
         return path / "specs_import.yaml"
@@ -142,14 +143,14 @@ class TestMLIE(TestCase):
 
         PathBuilder.build(path / "result_export/")
 
-        app = ImmuneMLApp(specification_path=specs_path, result_path=path / "result_export/")
+        app = ImmuneMLApp(specification_path=Path(specs_path), result_path=path / "result_export/")
         states = app.run()
 
         self.assertTrue(os.path.isfile(path / "result_export/index.html"))
 
         specs_path = self.prepare_import_specs(path)
 
-        app = ImmuneMLApp(specs_path, path / 'result_import/')
+        app = ImmuneMLApp(Path(specs_path), path / 'result_import/')
         result_path = app.run()
 
         self.assertTrue(os.path.isfile(path / "result_import/index.html"))

@@ -189,6 +189,7 @@ class HPHTMLBuilder:
                     "optimization_metric_val": round(item.performance[state.optimization_metric.name.lower()], HPHTMLBuilder.NUM_DIGITS),
                     "reports_path": reports_path
                 })
+            assessment_item["show_non_optimal"] = len(assessment_item["hp_settings"]) > 1
 
             assessment_item["selection_path"] = HPHTMLBuilder._make_selection_split_path(i, label, state.name)
             assessment_item['performances_per_metric'] = HPHTMLBuilder._extract_assessment_performances_per_metric(state, assessment_state, label)
@@ -278,6 +279,7 @@ class HPHTMLBuilder:
             "dataset_name": state.dataset.name if state.dataset.name is not None else state.dataset.identifier,
             "dataset_type": StringHelper.camel_case_to_word_string(type(state.dataset).__name__),
             "example_count": state.dataset.get_example_count(),
+            "dataset_size": f"{state.dataset.get_example_count()} {type(state.dataset).__name__.replace('Dataset', 's').lower()}",
             "labels": [{"name": label.name, "values": str(label.values)[1:-1]} for label in state.label_configuration.get_label_objects()],
             "optimization_metric": state.optimization_metric.name.lower(),
             "other_metrics": str([metric.name.lower() for metric in state.metrics])[1:-1].replace("'", ""),
