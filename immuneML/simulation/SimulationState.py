@@ -11,8 +11,8 @@ class SimulationState:
     signals: list
     simulation: Simulation
     dataset: Dataset
-    formats: List[str]
-    paths: dict
+    formats: List[str] = None
+    paths: dict = None
     resulting_dataset: Dataset = None
     result_path: Path = None
     name: str = None

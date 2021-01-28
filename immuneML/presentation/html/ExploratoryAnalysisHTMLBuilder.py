@@ -54,7 +54,6 @@ class ExploratoryAnalysisHTMLBuilder:
                 else None,
                 "encoding_params": vars(analysis.encoder) if analysis.encoder is not None else None,
                 "show_encoding": analysis.encoder is not None,
-                # "show_encoding_and_labels": analysis.encoder is not None and analysis.label_config is not None,
                 "report": Util.to_dict_recursive(analysis.report_result, base_path)
             } for name, analysis in state.exploratory_analysis_units.items()]
         }

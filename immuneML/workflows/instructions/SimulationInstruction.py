@@ -41,7 +41,7 @@ class SimulationInstruction(Instruction):
     def __init__(self, signals: list, simulation: Simulation, dataset: RepertoireDataset,
                  name: str = None, exporters: List[DataExporter] = None):
         self.exporters = exporters
-        self.state = SimulationState(signals, simulation, dataset, name=name, formats=[exporter.__name__[:-8] for exporter in self.exporters], paths={})
+        self.state = SimulationState(signals, simulation, dataset, name=name)
 
     def run(self, result_path: Path):
         self.state.result_path = result_path / self.state.name
@@ -52,6 +52,7 @@ class SimulationInstruction(Instruction):
     def export_dataset(self):
         dataset_name = self.state.resulting_dataset.name if self.state.resulting_dataset.name is not None else self.state.resulting_dataset.identifier
         paths = {dataset_name: {}}
+        formats = []
 
         if self.exporters is not None and len(self.exporters) > 0:
             for exporter in self.exporters:
@@ -60,8 +61,10 @@ class SimulationInstruction(Instruction):
                 exporter.export(self.state.resulting_dataset,
                                 path)
                 paths[dataset_name][export_format] = path
+                formats.append(export_format)
 
         self.state.paths = paths
+        self.state.formats = formats
 
     @staticmethod
     def get_documentation():
