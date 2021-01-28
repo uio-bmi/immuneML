@@ -189,6 +189,7 @@ class HPHTMLBuilder:
                     "optimization_metric_val": round(item.performance[state.optimization_metric.name.lower()], HPHTMLBuilder.NUM_DIGITS),
                     "reports_path": reports_path
                 })
+            assessment_item["show_non_optimal"] = len(assessment_item["hp_settings"]) > 1
 
             assessment_item["selection_path"] = HPHTMLBuilder._make_selection_split_path(i, label, state.name)
             assessment_item['performances_per_metric'] = HPHTMLBuilder._extract_assessment_performances_per_metric(state, assessment_state, label)

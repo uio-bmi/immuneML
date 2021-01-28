@@ -66,6 +66,7 @@
                 </table>
             </div>
         </div>
+        {{#show_non_optimal}}
         <p>
             In the table below, the performance of the other hyperparameter settings on the test set for this split are shown, as measured by the
             optimization metric used for model selection and model assessment. These settings were not chosen as the optimal ones during the selection
@@ -101,6 +102,7 @@
                 </table>
             </div>
         </div>
+        {{/show_non_optimal}}
         {{#performances_per_metric}}
         <p>The performance of different hyperparameter settings on all listed metrics (both the optimization metric and other metrics not used for
             model selection and assessment) is shown in the table below. This is the performance on the test set for this assessment split when all
