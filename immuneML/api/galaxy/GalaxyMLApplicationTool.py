@@ -31,10 +31,10 @@ class GalaxyMLApplicationTool(GalaxyTool):
 
         instruction_name = Util.check_instruction_type(specs, GalaxyMLApplicationTool.__name__, MLApplicationInstruction.__name__[:-11])
 
-        ParameterValidator.assert_keys_present(list(specs['instruction'][instruction_name].keys()), ["dataset", "config_path", "label"],
+        ParameterValidator.assert_keys_present(list(specs['instructions'][instruction_name].keys()), ["dataset", "config_path", "label"],
                                                GalaxyMLApplicationTool.__name__, instruction_name)
 
-        assert os.path.isfile(specs['instruction'][instruction_name]['config_path']), \
+        assert os.path.isfile(specs['instructions'][instruction_name]['config_path']), \
             f"{GalaxyMLApplicationTool.__name__}: file specified under 'config_path' parameter " \
-            f"({specs['instruction'][instruction_name]['config_path']}) is not available. Please check if it was correctly uploaded or if the file" \
+            f"({specs['instructions'][instruction_name]['config_path']}) is not available. Please check if it was correctly uploaded or if the file" \
             f" name is correct."
