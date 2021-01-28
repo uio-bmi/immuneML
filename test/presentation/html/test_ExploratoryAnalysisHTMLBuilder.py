@@ -4,6 +4,7 @@ from unittest import TestCase
 
 from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
+from immuneML.environment.Label import Label
 from immuneML.environment.LabelConfiguration import LabelConfiguration
 from immuneML.preprocessing.SubjectRepertoireCollector import SubjectRepertoireCollector
 from immuneML.presentation.html.ExploratoryAnalysisHTMLBuilder import ExploratoryAnalysisHTMLBuilder
@@ -47,7 +48,8 @@ class TestExploratoryAnalysisHTMLBuilder(TestCase):
 
         units = {"named_analysis_1": ExploratoryAnalysisUnit(dataset=dataset, report=SequenceLengthDistribution(), number_of_processes=16),
                  "named_analysis_2": ExploratoryAnalysisUnit(dataset=dataset, report=SequenceLengthDistribution(),
-                                                             preprocessing_sequence=preproc_sequence)}
+                                                             preprocessing_sequence=preproc_sequence,
+                                                             label_config=LabelConfiguration(labels=[Label(name="test_label", values=["val1", "val2"], positive_class="val1")]))}
 
         process = ExploratoryAnalysisInstruction(units)
         res = process.run(path / "results/")

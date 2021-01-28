@@ -46,6 +46,7 @@ class ExploratoryAnalysisHTMLBuilder:
                 "dataset_name": analysis.dataset.name if analysis.dataset.name is not None else analysis.dataset.identifier,
                 "dataset_type": StringHelper.camel_case_to_word_string(type(analysis.dataset).__name__),
                 "example_count": analysis.dataset.get_example_count(),
+                "dataset_size": f"{analysis.dataset.get_example_count()} {type(analysis.dataset).__name__.replace('Dataset', 's').lower()}",
                 "show_labels": analysis.label_config is not None,
                 "labels": [{"name": label.name, "values": str(label.values)[1:-1]}
                            for label in analysis.label_config.get_label_objects()] if analysis.label_config else None,
@@ -53,7 +54,7 @@ class ExploratoryAnalysisHTMLBuilder:
                 else None,
                 "encoding_params": vars(analysis.encoder) if analysis.encoder is not None else None,
                 "show_encoding": analysis.encoder is not None,
-                "show_encoding_and_labels": analysis.encoder is not None and analysis.label_config is not None,
+                # "show_encoding_and_labels": analysis.encoder is not None and analysis.label_config is not None,
                 "report": Util.to_dict_recursive(analysis.report_result, base_path)
             } for name, analysis in state.exploratory_analysis_units.items()]
         }

@@ -46,14 +46,14 @@ class RepertoireDataset(Dataset):
     def get_example_count(self):
         return len(self.repertoires)
 
-    def get_metadata_fields(self):
-        if self.metadata_fields is None:
-            df = pd.read_csv(self.metadata_file, sep=",", nrows=0)
+    def get_metadata_fields(self, refresh=False):
+        if self.metadata_fields is None or refresh:
+            df = pd.read_csv(self.metadata_file, sep=",", nrows=0, comment=Constants.COMMENT_SIGN)
             self.metadata_fields = df.columns.values.tolist()
         return self.metadata_fields
 
-    def get_label_names(self):
-        all_metadata_fields = set(self.get_metadata_fields())
+    def get_label_names(self, refresh=False):
+        all_metadata_fields = set(self.get_metadata_fields(refresh))
         for non_label in ["subject_id", "filename", "repertoire_identifier"]:
             if non_label in all_metadata_fields:
                 all_metadata_fields.remove(non_label)
