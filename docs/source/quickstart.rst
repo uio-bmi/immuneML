@@ -26,7 +26,7 @@ These history elements can be used as input for the next tool, creating a multi-
 Step 1: importing the dataset to a Galaxy history
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The Quickstart test dataset is available through `this Galaxy history <https://galaxy.immuneml.uio.no/u/immuneml/h/quickstart>`_.
+The Quickstart test dataset is available through `this Galaxy history <https://galaxy.immuneml.uio.no/u/immuneml/h/quickstart-dataset>`_.
 
 This history contains the following items:
 
@@ -92,8 +92,8 @@ The complete YAML specification for this analysis looks like this:
 
       encodings:
         my_kmer_frequency: # user-defined encoding name
-          KmerFrequency: # encoding type
-            k: 3        # encoding parameters
+          KmerFrequency:   # encoding type
+            k: 3           # encoding parameters
 
       ml_methods:
         my_logistic_regression: LogisticRegression # user-defined ML model name: ML model type (no user-specified parameters)
@@ -107,7 +107,7 @@ The complete YAML specification for this analysis looks like this:
 
         dataset: my_dataset # use the same dataset name as in definitions
         labels:
-        - signal_disease  # use a label available in the metadata.csv file
+        - signal_disease    # use a label available in the metadata.csv file
 
         settings: # which combinations of ML settings to run
         - encoding: my_kmer_frequency
@@ -117,8 +117,8 @@ The complete YAML specification for this analysis looks like this:
           reports:  # plot the coefficients for the trained model
             models:
             - my_coefficients
-          split_strategy: random # how to split the data - here: split randomly
-          split_count: 1 # how many times (here once - just to train and test)
+          split_strategy: random   # how to split the data - here: split randomly
+          split_count: 1           # how many times (here once - just to train and test)
           training_percentage: 0.7 # use 70% of the data for training
 
         selection: # parameters in the selection (inner) cross-validation loop
@@ -134,10 +134,10 @@ The complete YAML specification for this analysis looks like this:
 
         strategy: GridSearch # strategy for hyperparameter optimization, GridSearch is currently the only available option
 
-        reports: [] # optional train ML model reports to run
-        number_of_processes: 4 # processes for parallelization
+        reports: []                # optional train ML model reports to run
+        number_of_processes: 4     # processes for parallelization
         refit_optimal_model: false # whether to retrain the model on the whole dataset after optimizing hyperparameters
-        store_encoded_data: false # whether to store intermediate encoded data files (increases disk usage)
+        store_encoded_data: false  # whether to store intermediate encoded data files (increases disk usage)
 
 After the YAML specification has been saved to a file (for example: quickstart.yaml), it can be uploaded to Galaxy, and
 the file will appear as a new history element.
@@ -159,18 +159,42 @@ Select the YAML specification and previously created dataset from the history, a
 Step 4: understanding the results
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+After running the Galaxy tool for training ML models, three new items will appear in the Galaxy history.
+
+.. image:: _static/images/galaxy_train_ml_model_results.png
+   :alt: import button Galaxy
+   :width: 250
+
+One of the history items contains a summary of the results; a HTML page displaying a summary of the analysis, the performance of the optimized ML model (click 'see details' to navigate further),
+and the report that plots the 25 top coefficients of the trained logistic regression model. Notice how the coefficients with the highest
+values are associated with the k-mers 'VLE' and 'LEQ', which overlap with the implanted disease signal 'VLEQ'.
+
+
+.. image:: _static/images/logistic_regression_coefficients.png
+   :alt: import button Galaxy
+   :width: 600
+
+Another history item is a .zip file containing the configuration of the optimal ML settings, including settings for the encoding
+and machine learning method. Using immuneML, these optimal ML settings can subsequently be applied to a new repertoire dataset with unknown disease labels.
+
+Finally, one of the history items contains a downloadable archive of the complete immuneML ouput. This archive contains the above-mentioned
+HTML pages and trained ML models, as well as all ML model predictions, raw report results, the complete YAML specification file for the analysis and a
+log file.
 
 
 Getting started using the command-line interface
 -------------------------------------------------
 
+This tutorial assumes that immuneML is already installed locally (see :ref:`Installing immuneML`).
+We recommend :ref:`installing immuneML using a package manager <Install immuneML with a package manager>`.
 
 
-todo: refer to installing immuneML locally
 
 Step 1: downloading the dataset
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+The dataset used in this tutorial can be downloaded from the NIRD Research Data Archive `(DOI ....) <https://doi.org/...>`_,
+and consists of the following files:
 
 - A metadata.csv file, which describes which of the 100 repertoires contain the disease signal named 'signal_disease'.
 
@@ -226,8 +250,8 @@ The complete YAML specification for this analysis looks like this:
 
       encodings:
         my_kmer_frequency: # user-defined encoding name
-          KmerFrequency: # encoding type
-            k: 3        # encoding parameters
+          KmerFrequency:   # encoding type
+            k: 3           # encoding parameters
 
       ml_methods:
         my_logistic_regression: LogisticRegression # user-defined ML model name: ML model type (no user-specified parameters)
@@ -241,7 +265,7 @@ The complete YAML specification for this analysis looks like this:
 
         dataset: my_dataset # use the same dataset name as in definitions
         labels:
-        - signal_disease  # use a label available in the metadata.csv file
+        - signal_disease    # use a label available in the metadata.csv file
 
         settings: # which combinations of ML settings to run
         - encoding: my_kmer_frequency
@@ -251,8 +275,8 @@ The complete YAML specification for this analysis looks like this:
           reports:  # plot the coefficients for the trained model
             models:
             - my_coefficients
-          split_strategy: random # how to split the data - here: split randomly
-          split_count: 1 # how many times (here once - just to train and test)
+          split_strategy: random   # how to split the data - here: split randomly
+          split_count: 1           # how many times (here once - just to train and test)
           training_percentage: 0.7 # use 70% of the data for training
 
         selection: # parameters in the selection (inner) cross-validation loop
@@ -268,18 +292,43 @@ The complete YAML specification for this analysis looks like this:
 
         strategy: GridSearch # strategy for hyperparameter optimization, GridSearch is currently the only available option
 
-        reports: [] # optional train ML model reports to run
-        number_of_processes: 4 # processes for parallelization
+        reports: []                # optional train ML model reports to run
+        number_of_processes: 4     # processes for parallelization
         refit_optimal_model: false # whether to retrain the model on the whole dataset after optimizing hyperparameters
-        store_encoded_data: false # whether to store intermediate encoded data files (increases disk usage)
+        store_encoded_data: false  # whether to store intermediate encoded data files (increases disk usage)
 
-After the YAML specification has been saved to a file (for example: quickstart.yaml), ...
 
 Step 3: running the analysis
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
+Once the YAML specification has been saved to a file (for example: quickstart.yaml), the analysis can be run using the following steps:
+
+#. Activate the virtual environment where immuneML is available (as described in the installation manual).
+
+#. Navigate to the directory where quickstart_specs.yaml was saved.
+
+#. Run the following command:
+
+.. code-block:: console
+    immune-ml quickstart_specs.yaml ./quickstart_results/
+
+
 Step 4: understanding the results
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+The results folder contains a multitude of files and folders, which can most easily be navigated by opening ./quickstart_results/index.html in a browser.
+This HTML page displays a summary of the analysis, the performance of the optimized ML model (click 'see details' to navigate further), and the report that plots the 25 top coefficients of
+the trained logistic regression model. Notice how the coefficients with the highest values are associated with the k-mers 'VLE' and 'LEQ', which overlap with the implanted disease signal 'VLEQ'.
+
+.. image:: _static/images/logistic_regression_coefficients.png
+   :alt: import button Galaxy
+   :width: 600
+
+In the folder ./quickstart_results/exported_models/ a .zip file can be found containing the configuration of the optimal ML settings, including settings for the encoding
+and machine learning method. Using immuneML, these optimal ML settings can subsequently be applied to a new repertoire dataset with unknown disease labels.
+
+The folder ./quickstart_results/my_training_instruction/ contains all raw exported results of the TrainMLModel instruction including all ML model predictions and raw report results.
+
+Finally, ./quickstart_results/ contains the complete YAML specification file for the analysis and a log file.
 
