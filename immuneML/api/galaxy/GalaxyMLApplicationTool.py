@@ -22,7 +22,7 @@ class GalaxyMLApplicationTool(GalaxyTool):
         PathBuilder.build(self.result_path)
         self._check_specs()
         state = ImmuneMLApp(self.yaml_path, self.result_path).run()[0]
-        shutil.copytree(list(list(state.paths.values())[0].values())[0], self.result_path / "result/")
+        shutil.copy(state.predictions_path, self.result_path / "result/predictions.csv")
         print("Applied ML model to the dataset, predictions are available.")
 
     def _check_specs(self):
