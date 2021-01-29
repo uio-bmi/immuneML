@@ -35,7 +35,7 @@ class TestDiseaseAssociatedSequenceCVOverlap(TestCase):
                                                         labels={"l1": [True, False, True, False, True, False, True, False,
                                                                        True, False, True, False, True, False]}, path=path)
 
-        dataset = RepertoireDataset(repertoires=repertoires, metadata_file=metadata, params={"l1": [True, False]})
+        dataset = RepertoireDataset(repertoires=repertoires, metadata_file=metadata, labels={"l1": [True, False]})
         PickleExporter.export(dataset, path)
 
         specs = {

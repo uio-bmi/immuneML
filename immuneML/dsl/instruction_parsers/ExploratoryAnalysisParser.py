@@ -66,8 +66,8 @@ class ExploratoryAnalysisParser:
     def _get_label_values(self, label, dataset):
         if isinstance(dataset, RepertoireDataset):
             values = list(set(dataset.get_metadata([label])[label]))
-        elif label in dataset.params:
-            values = dataset.params[label]
+        elif label in dataset.labels:
+            values = dataset.labels[label]
         else:
             values = []
         return values

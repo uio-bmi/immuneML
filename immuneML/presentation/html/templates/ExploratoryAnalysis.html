@@ -11,12 +11,12 @@
 </head>
 <body>
     <div class="container">
-        <h2>Analyses</h2>
+        <h1>Analyses</h1>
         <div>Full specification is available <a href="{{{full_specs}}}">here</a>.</div>
         <div class="padded-bottom padded-top">immuneML version: {{immuneML_version}}</div>
         {{#analyses}}
         <div>
-            <h1>Analysis {{name}}</h1>
+            <h2>Analysis {{name}}</h2>
             <div class="card">
                 <div class="col-container">
                     <div class="col">
@@ -33,8 +33,8 @@
                                 <td>{{dataset_type}}</td>
                             </tr>
                             <tr>
-                                <td><b>Example count</b></td>
-                                <td>{{example_count}}</td>
+                                <td><b>Dataset size</b></td>
+                                <td>{{dataset_size}}</td>
                             </tr>
                         </table>
                         </div>
@@ -42,10 +42,8 @@
                 </div>
                 <div class="col-container">
                     <div>
-                        {{#show_encoding_and_labels}}
-                        <h3>Encoding & labels</h3>
                         {{#show_encoding}}
-                        <h4>Encoding</h4>
+                        <h3>Encoding</h3>
                         <div class="table-container">
                             <table>
                             <tr>
@@ -60,7 +58,7 @@
                         </div>
                         {{/show_encoding}}
                         {{#show_labels}}
-                        <h4>Dataset labels</h4>
+                        <h3>Analysis labels</h3>
                         <div class="table-container">
                             <table>
                                 <thead>
@@ -80,7 +78,6 @@
                             </table>
                         </div>
                         {{/show_labels}}
-                        {{/show_encoding_and_labels}}
                     </div>
                 </div>
                 {{#report}}

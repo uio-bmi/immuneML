@@ -36,18 +36,32 @@
                             </tr>
                         </table>
                         </div>
+                        <h4>Dataset labels</h4>
+                        The following labels may be used for classification:
+                        <div>
+                            <ul>
+                            {{#labels}}
+                                <li>{{label_name}}</li>
+                            {{/labels}}
+                            </ul>
+                        </div>
                     </div>
                     <div class="col">
                         <h3>Subsampling results</h3>
                         {{#subsampled_datasets}}
                         <div>
-                            <h5>{{sub_dataset_name}}</h5>
-                            <div class="padded-md">Dataset size: {{dataset_size}}</div>
-                            <div class="padded-md">
+                            <h5>Subsampled dataset {{sub_dataset_iter}}:</h5>
+                            <div class="padded-left">Dataset name: {{sub_dataset_name}}</div>
+                            <div class="padded-left">Dataset size: {{dataset_size}}</div>
+                            <div class="padded-left">
                                 <div><span>Download formats: </span>
-                                {{#formats}}
-                                    <a href="{{dataset_download_link}}" download>{{format_name}}</a>
-                                {{/formats}}
+                                    <div>
+                                        <ul>
+                                        {{#formats}}
+                                            <li><a href="{{dataset_download_link}}" download>{{format_name}}</a></li>
+                                        {{/formats}}
+                                        </ul>
+                                    </div>
                                 </div>
                             </div>
                         </div>

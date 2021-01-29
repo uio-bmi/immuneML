@@ -44,6 +44,7 @@ class DatasetExportHTMLBuilder:
                     "dataset_name": dataset.name,
                     "dataset_type": StringHelper.camel_case_to_word_string(type(dataset).__name__),
                     "dataset_size": f"{dataset.get_example_count()} {type(dataset).__name__.replace('Dataset', 's').lower()}",
+                    "labels": [{"label_name": label} for label in dataset.get_label_names()],
                     "formats": [
                         {
                             "format_name": format_name,

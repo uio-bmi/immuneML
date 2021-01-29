@@ -23,6 +23,5 @@ class SequenceDataset(ElementDataset):
 
         return SequenceDataset(filenames=file_names, file_size=file_size, name=name)
 
-
     def clone(self):
-        return SequenceDataset(self.params, copy.deepcopy(self.encoded_data), copy.deepcopy(self._filenames), file_size=self.file_size)
+        return SequenceDataset(self.labels, copy.deepcopy(self.encoded_data), copy.deepcopy(self._filenames), file_size=self.file_size)

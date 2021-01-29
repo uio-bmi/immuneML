@@ -12,7 +12,7 @@ from immuneML.encodings.reference_encoding.MatchedReceptorsEncoder import Matche
 class MatchedReceptorsRepertoireEncoder(MatchedReceptorsEncoder):
 
     def _encode_new_dataset(self, dataset, params: EncoderParams):
-        encoded_dataset = RepertoireDataset(repertoires=dataset.repertoires, params=dataset.params,
+        encoded_dataset = RepertoireDataset(repertoires=dataset.repertoires, labels=dataset.labels,
                                             metadata_file=dataset.metadata_file)
 
         feature_annotations = self._get_feature_info()

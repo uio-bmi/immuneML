@@ -16,7 +16,7 @@ class TestImmuneMLParser(TestCase):
     def test_parse_yaml_file(self):
         path = EnvironmentSettings.root_path / "test/tmp/parser/"
         dataset = RepertoireDataset(repertoires=RepertoireBuilder.build([["AAA", "CCC"], ["TTTT"]], path, {"default": [1, 2]})[0],
-                                    params={"default": [1, 2]})
+                                    labels={"default": [1, 2]})
         PickleExporter.export(dataset, path)
 
         spec = {

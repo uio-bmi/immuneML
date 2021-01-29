@@ -92,7 +92,7 @@ class ImportHelper:
         new_metadata_file = ImportHelper.make_new_metadata_file(repertoires, metadata, params.result_path, dataset_name)
 
         potential_labels = list(set(metadata.columns.tolist()) - {"filename"})
-        dataset = RepertoireDataset(params={key: list(set(metadata[key].values.tolist())) for key in potential_labels},
+        dataset = RepertoireDataset(labels={key: list(set(metadata[key].values.tolist())) for key in potential_labels},
                                     repertoires=repertoires, metadata_file=new_metadata_file, name=dataset_name)
 
         PickleExporter.export(dataset, params.result_path)
@@ -313,7 +313,7 @@ class ImportHelper:
                 items = items[params.sequence_file_size:]
                 file_index += 1
 
-        init_kwargs = {"filenames": dataset_filenames, "file_size": params.sequence_file_size, "name": dataset_name, "params": dataset_params}
+        init_kwargs = {"filenames": dataset_filenames, "file_size": params.sequence_file_size, "name": dataset_name, "labels": dataset_params}
 
         dataset = ReceptorDataset(**init_kwargs) if params.paired else SequenceDataset(**init_kwargs)
 

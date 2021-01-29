@@ -94,7 +94,7 @@ class RandomDatasetGenerator:
             dataset_params = None
 
         repertoires, metadata = RepertoireBuilder.build(sequences=sequences, path=path, labels=processed_labels)
-        dataset = RepertoireDataset(params=dataset_params, repertoires=repertoires, metadata_file=metadata)
+        dataset = RepertoireDataset(labels=dataset_params, repertoires=repertoires, metadata_file=metadata)
 
         return dataset
 
@@ -142,16 +142,16 @@ class RandomDatasetGenerator:
         PathBuilder.build(path)
 
         get_random_sequence = lambda proba, chain, id: ReceptorSequence("".join(random.choices(alphabet, k=random.choices(list(proba.keys()),
-                                                                                                                      proba.values())[0])),
-                                                                    metadata=SequenceMetadata(count=1,
-                                                                                              v_subgroup=chain+"V1",
-                                                                                              v_gene=chain+"V1-1",
-                                                                                              v_allele=chain+"V1-1*01",
-                                                                                              j_subgroup=chain + "J1",
-                                                                                              j_gene=chain + "J1-1",
-                                                                                              j_allele=chain + "J1-1*01",
-                                                                                              chain=chain,
-                                                                                              cell_id=id))
+                                                                                                                          proba.values())[0])),
+                                                                        metadata=SequenceMetadata(count=1,
+                                                                                                  v_subgroup=chain + "V1",
+                                                                                                  v_gene=chain + "V1-1",
+                                                                                                  v_allele=chain + "V1-1*01",
+                                                                                                  j_subgroup=chain + "J1",
+                                                                                                  j_gene=chain + "J1-1",
+                                                                                                  j_allele=chain + "J1-1*01",
+                                                                                                  chain=chain,
+                                                                                                  cell_id=id))
 
         receptors = [TCABReceptor(alpha=get_random_sequence(chain_1_length_probabilities, "TRA", i),
                                   beta=get_random_sequence(chain_2_length_probabilities, "TRB", i),
@@ -164,9 +164,8 @@ class RandomDatasetGenerator:
         with filename.open("wb") as file:
             pickle.dump(receptors, file)
 
-        return ReceptorDataset(params={label: list(label_dict.keys()) for label, label_dict in labels.items()},
+        return ReceptorDataset(labels={label: list(label_dict.keys()) for label, label_dict in labels.items()},
                                filenames=[filename], file_size=receptor_count)
-
 
     @staticmethod
     def _check_sequence_dataset_generation_params(receptor_count: int, length_probabilities: dict, labels: dict, path: Path):
@@ -204,23 +203,24 @@ class RandomDatasetGenerator:
 
         chain = "TRB"
 
-        sequences = [ReceptorSequence("".join(random.choices(alphabet, k=random.choices(list(length_probabilities.keys()), length_probabilities.values())[0])),
-                                      metadata=SequenceMetadata(count=1,
-                                                                v_subgroup=chain + "V1",
-                                                                v_gene=chain + "V1-1",
-                                                                v_allele=chain + "V1-1*01",
-                                                                j_subgroup=chain + "J1",
-                                                                j_gene=chain + "J1-1",
-                                                                j_allele=chain + "J1-1*01",
-                                                                chain=chain,
-                                                                custom_params={**{label: random.choices(list(label_dict.keys()), label_dict.values(), k=1)[0]
-                                                                                for label, label_dict in labels.items()}, **{"subject": f"subj_{i + 1}"}}))
-                     for i in range(sequence_count)]
+        sequences = [
+            ReceptorSequence("".join(random.choices(alphabet, k=random.choices(list(length_probabilities.keys()), length_probabilities.values())[0])),
+                             metadata=SequenceMetadata(count=1,
+                                                       v_subgroup=chain + "V1",
+                                                       v_gene=chain + "V1-1",
+                                                       v_allele=chain + "V1-1*01",
+                                                       j_subgroup=chain + "J1",
+                                                       j_gene=chain + "J1-1",
+                                                       j_allele=chain + "J1-1*01",
+                                                       chain=chain,
+                                                       custom_params={**{label: random.choices(list(label_dict.keys()), label_dict.values(), k=1)[0]
+                                                                         for label, label_dict in labels.items()}, **{"subject": f"subj_{i + 1}"}}))
+            for i in range(sequence_count)]
 
         filename = path / "batch01.pickle"
 
         with filename.open("wb") as file:
             pickle.dump(sequences, file)
 
-        return SequenceDataset(params={label: list(label_dict.keys()) for label, label_dict in labels.items()},
+        return SequenceDataset(labels={label: list(label_dict.keys()) for label, label_dict in labels.items()},
                                filenames=[filename], file_size=sequence_count)
