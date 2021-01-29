@@ -194,12 +194,11 @@ Step 1: downloading the dataset
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The dataset used in this tutorial can be downloaded from the NIRD Research Data Archive `(DOI ....) <https://doi.org/...>`_,
-and consists of the following files:
+and download the following files:
 
-- A metadata.csv file, which describes which of the 100 repertoires contain the disease signal named 'signal_disease'.
+- The metadata.csv file, which describes which of the 100 repertoires contain the disease signal named 'signal_disease'.
 
-- 100 repertoire .tsv files in AIRR format.
-
+- The 100 repertoire_<somenumber>.tsv, which are synthethic immune repertoire files in AIRR format.
 
 
 Step 2: writing the YAML specification
