@@ -1,4 +1,5 @@
 import warnings
+from pathlib import Path
 
 import plotly.express as px
 
@@ -41,8 +42,6 @@ class FeatureValueBarplot(EncodingReport):
 
         column_grouping_label (str): The label that is used to group bars into different column facets.
 
-        color_title (str): The label that is used to group bars into different colors.
-
         x_title (str): x-axis label
 
         y_title (str): y-axis label
@@ -63,11 +62,9 @@ class FeatureValueBarplot(EncodingReport):
 
     @classmethod
     def build_object(cls, **kwargs):
-        location = "FeatureValueBarplot"
         return FeatureValueBarplot(**kwargs)
 
-
-    def __init__(self, dataset: RepertoireDataset = None, result_path: str = None, grouping_label: str = "feature",
+    def __init__(self, dataset: RepertoireDataset = None, result_path: Path = None, grouping_label: str = "feature",
                  color_grouping_label: str = None, row_grouping_label=None, column_grouping_label=None,
                  x_title: str = None, y_title: str = None, name: str = None):
         super().__init__(name)
@@ -82,7 +79,6 @@ class FeatureValueBarplot(EncodingReport):
         self.result_name = "feature_values"
         self.name = name
 
-
     def _generate(self) -> ReportResult:
         PathBuilder.build(self.result_path)
         data_long_format = DataReshaper.reshape(self.dataset)
@@ -91,16 +87,13 @@ class FeatureValueBarplot(EncodingReport):
         output_figures = None if report_output_fig is None else [report_output_fig]
         return ReportResult(self.name, output_figures, [table_result])
 
-
     def _write_results_table(self, data) -> ReportOutput:
         table_path = self.result_path / f"{self.result_name}.csv"
         data.to_csv(table_path, index=False)
         return ReportOutput(table_path, "feature values")
 
-
     def std(self, x):
         return x.std(ddof=0)
-
 
     def _plot(self, data_long_format) -> ReportOutput:
         groupby_cols = [self.x, self.color, self.facet_row, self.facet_column]
@@ -124,7 +117,6 @@ class FeatureValueBarplot(EncodingReport):
         figure.write_html(str(file_path))
 
         return ReportOutput(path=file_path, name="feature bar plot")
-
 
     def check_prerequisites(self):
         location = "FeatureValueBarplot"
@@ -157,4 +149,3 @@ class FeatureValueBarplot(EncodingReport):
                 run_report = False
 
         return run_report
-

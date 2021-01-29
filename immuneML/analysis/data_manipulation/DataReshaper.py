@@ -7,7 +7,7 @@ class DataReshaper:
     def reshape(dataset):
         """
         Takes a 2D matrix of values from the encoded data and reshapes it to long format,
-        retaining the column and row annotations. This is for ease of use in plotting with ggplot.
+        retaining the column and row annotations. This is for ease of use in plotting the data.
         It is suggested that some sort of filtering is done first, otherwise the memory usage may explode, as
         the resulting data frame is of shape
         (matrix.shape[0] * matrix.shape[1], labels.shape[0] + feature_annotations.shape[1] + 1)

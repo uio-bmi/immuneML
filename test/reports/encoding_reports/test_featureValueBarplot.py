@@ -48,7 +48,6 @@ class TestFeatureValueBarplot(TestCase):
 
         return dataset
 
-
     def test_generate(self):
         path = EnvironmentSettings.root_path / "test/tmp/featurevaluebarplot/"
 

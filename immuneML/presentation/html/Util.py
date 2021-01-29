@@ -16,7 +16,7 @@ class Util:
         if not hasattr(obj, "__dict__"):
             if (isinstance(obj, Path) or isinstance(obj, str)) and os.path.isfile(obj):
                 obj_abs_path = os.path.abspath(obj)
-                base_abs_path = os.path.abspath(base_path)
+                base_abs_path = os.path.abspath(str(base_path))
                 res_path = os.path.relpath(obj_abs_path, base_abs_path)
                 return res_path
             elif hasattr(obj, "name"):
@@ -48,10 +48,10 @@ class Util:
     @staticmethod
     def make_downloadable_zip(base_path: Path, path_to_zip: Path, filename: str = "") -> str:
         if filename == "":
-            filename = "_".join(Path(os.path.relpath(path_to_zip, base_path).replace(".", "")).parts)
+            filename = "_".join(Path(os.path.relpath(str(path_to_zip), str(base_path)).replace(".", "")).parts)
 
         PathBuilder.build(base_path / "zip")
-        zip_file_path = shutil.make_archive(base_name=base_path / f"zip/{filename}", format="zip", root_dir=path_to_zip)
+        zip_file_path = shutil.make_archive(base_name=base_path / f"zip/{filename}", format="zip", root_dir=str(path_to_zip))
         return zip_file_path
 
     @staticmethod
@@ -93,11 +93,11 @@ class Util:
             if isinstance(attribute_value, list):
                 for output in attribute_value:
                     if isinstance(output, ReportOutput):
-                        new_filename = "_".join([part for part in Path(os.path.relpath(path=output.path, start=path)).parts if part != ".."])
+                        new_filename = "_".join([part for part in Path(os.path.relpath(path=str(output.path), start=str(path))).parts if part != ".."])
                         new_path = path / new_filename
 
                         if output.path != new_path:
-                            shutil.copyfile(src=output.path, dst=new_path)
+                            shutil.copyfile(src=str(output.path), dst=new_path)
                             output.path = new_path
                     else:
                         logging.warning(f"HTML util: one of the report outputs was not returned properly from the report {report_result.name}, "

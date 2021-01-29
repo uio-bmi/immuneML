@@ -168,7 +168,7 @@ class HPHTMLBuilder:
                                "show_data_reports": len(assessment_state.train_val_data_reports) > 0 or len(assessment_state.test_data_reports) > 0}
 
             if hasattr(assessment_state.train_val_dataset, "metadata_file") and assessment_state.train_val_dataset.metadata_file is not None:
-                assessment_item["train_metadata_path"] = os.path.relpath(assessment_state.train_val_dataset.metadata_file, base_path)
+                assessment_item["train_metadata_path"] = os.path.relpath(str(assessment_state.train_val_dataset.metadata_file), str(base_path))
                 assessment_item["train_metadata"] = Util.get_table_string_from_csv(assessment_state.train_val_dataset.metadata_file)
             else:
                 assessment_item["train_metadata_path"] = None
