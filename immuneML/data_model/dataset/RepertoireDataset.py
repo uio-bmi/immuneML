@@ -50,7 +50,7 @@ class RepertoireDataset(Dataset):
 
     def get_label_names(self, refresh=False):
         all_metadata_fields = set(self.get_metadata_fields(refresh))
-        for non_label in ["subject_id", "filename", "repertoire_identifier"]:
+        for non_label in ["subject_id", "filename", "repertoire_identifier", "identifier"]:
             if non_label in all_metadata_fields:
                 all_metadata_fields.remove(non_label)
 
