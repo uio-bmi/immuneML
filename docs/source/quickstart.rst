@@ -170,8 +170,8 @@ and the report that plots the 25 top coefficients of the trained logistic regres
 values are associated with the k-mers 'VLE' and 'LEQ', which overlap with the implanted disease signal 'VLEQ'.
 
 
-.. image:: _static/images/logistic_regression_coefficients.png
-   :alt: import button Galaxy
+.. image:: _static/images/reports/coefficients_logistic_regression.png
+   :alt: coefficients report
    :width: 600
 
 Another history item is a .zip file containing the configuration of the optimal ML settings, including settings for the encoding
@@ -320,8 +320,8 @@ The results folder contains a multitude of files and folders, which can most eas
 This HTML page displays a summary of the analysis, the performance of the optimized ML model (click 'see details' to navigate further), and the report that plots the 25 top coefficients of
 the trained logistic regression model. Notice how the coefficients with the highest values are associated with the k-mers 'VLE' and 'LEQ', which overlap with the implanted disease signal 'VLEQ'.
 
-.. image:: _static/images/logistic_regression_coefficients.png
-   :alt: import button Galaxy
+.. image:: _static/images/reports/coefficients_logistic_regression.png
+   :alt: Coefficients report
    :width: 600
 
 In the folder ./quickstart_results/exported_models/ a .zip file can be found containing the configuration of the optimal ML settings, including settings for the encoding
