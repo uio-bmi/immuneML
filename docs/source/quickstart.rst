@@ -34,8 +34,7 @@ This history contains the following items:
 
 - 100 repertoire .tsv files in AIRR format.
 
-- Created dataset: an immuneML Galaxy dataset made using the above-mentioned files.
-  The files contained in this dataset are in an optimized binary (Pickle) format.
+- immuneML dataset: a galaxy collection made using the above-mentioned files.
 
 Individual files can be inspected by clicking the eyeball icons.
 To import the complete history, click the + icon in the right upper corner.
@@ -59,7 +58,7 @@ The YAML specification consists of:
 
 - :code:`definitions` describing the analysis components.
 
-  - :code:`datasets`: since we are using Galaxy, we will import the binary Pickle files directly.
+  - :code:`datasets`: our data is in :ref:`AIRR` format, we need to provide the name of the metadata file.
 
   - :code:`encodings`: the data will be represented through a :ref:`k-mer frequency encoding <KmerFrequency>`.
     This means each repertoire is represented based on the frequency of subsequences of length k.
@@ -86,9 +85,10 @@ The complete YAML specification for this analysis looks like this:
     definitions:
       datasets:
         my_dataset: # user-defined dataset name
-          format: Pickle
+          format: AIRR
           params:
-            path: dataset.iml_dataset # this is the default dataset name used in Galaxy
+            is_repertoire: true # we are importing a repertoire dataset
+            metadata_file: metadata.csv
 
       encodings:
         my_kmer_frequency: # user-defined encoding name

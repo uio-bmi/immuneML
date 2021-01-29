@@ -1,17 +1,22 @@
 How to make an immuneML dataset in Galaxy
 =========================================
 
-The `Create dataset <https://galaxy.immuneml.uio.no/root?tool_id=immune_ml_dataset>`_ Galaxy tool allows users to import data from various formats and create immuneML datasets in Galaxy.
+In Galaxy, an immuneML dataset is simply a Galaxy collection containing all relevant files (including an optional metadata file).
+The `Create dataset <https://galaxy.immuneml.uio.no/root?tool_id=immune_ml_dataset>`_ Galaxy tool allows users to import data
+from various formats and create immuneML datasets in Galaxy. These datasets are in an optimized binary (Pickle) format, which
+reduces the time needed to read the data into immuneML.
+
 Before creating a dataset, the relevant data files must first be uploaded to the Galaxy interface. This can be done either
 by uploading files from your local computer (use the 'Upload file' tool under the 'Get local data' menu), or by fetching
 remote data from the iReceptor Plus Gateway or VDJdb (see :ref:`How to import remote AIRR datasets in Galaxy`).
 
-The imported immuneML dataset is stored in a Galaxy collection, which will appear as a history item on the right side of the screen.
-Such Galaxy collections can later be selected as input to other tools.
+The imported immuneML dataset will appear as a history item on the right side of the screen, and can later be selected as input to other tools.
 
-The tool has a simple and an advanced interface. The simple interface is fully button-based, and relies
+The tool has a :ref:`simple <Using the simple 'Create dataset' interface>` and an
+:ref:`advanced <Using the advanced 'Create dataset' interface>` interface. The simple interface is fully button-based, and relies
 on default settings for importing datasets. The advanced interface gives full control over import settings through a YAML
 specification. In most cases, the simple interface will suffice.
+If your dataset contains more than 100 files, you may want to consider :ref:`making a Galaxy collection directly from files <Making a Galaxy collection directly from files>`.
 
 
 immuneML datasets
@@ -156,6 +161,27 @@ parameters need to be specified in subsequent analyses:
             # other import parameters may be specified here
 
 
+Making a Galaxy collection directly from files
+----------------------------------------------
+When a dataset contains many files, it may be time consuming to select all files in the 'Create dataset' tool.
+Alternatively, it is possible to directly create a Galaxy collection from files in the history, using the following steps:
+
+#. If you are currently using a Galaxy history containing any items, create a new Galaxy history (click the '+' icon in the right upper corner).
+
+#. Upload all the files relevant for the dataset, this includes the metadata file in case of a RepertoireDataset.
+
+#. Click 'operations on multiple datasets' (checkbox icon above the Galaxy history). Checkboxes should now appear in front of the history items.
+
+#. Click 'All' to select all history items.
+
+#. Click 'For all selected...' > 'Build Dataset List' and enter a name for your dataset.
+
+# Click the 'operations on multiple datasets' button again in order to go back to the normal menu.
+
+The newest item in your history should now contain a Galaxy collection with all dataset files. Note that a difference between
+this method and the above-described methods is that your new dataset is not in Pickle format. Thus, when writing the YAML
+specification for the next immuneML Galaxy tool, you should specify the import parameters for your data format.
+Furthermore, this method does not automatically create a summary page describing the dataset and its available labels.
 
 Tool output
 ---------------------------------------------

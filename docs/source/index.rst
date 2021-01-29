@@ -41,7 +41,7 @@ Here, we offer the same functionalities as in the command-line interface, and in
 
 To become familiar with the **YAML-based specification**, you can find a concrete example in our :ref:`Quickstart` guide, or read about the overall YAML structure and options in :ref:`How to specify an analysis with YAML`.
 
-- YAML specifications are equivalent between teh Galaxy and command-line interfaces. However, in Galaxy datasets must first be converted to immuneML format (see :ref:`How to make an immuneML dataset in Galaxy`).
+- YAML specifications are equivalent between the Galaxy and command-line interfaces. However, in Galaxy datasets must first be converted to a dataset collection (see :ref:`How to make an immuneML dataset in Galaxy`).
 
 We offer :ref:`Tutorials` for specific use cases (e.g., how to train and assess classifiers, or how to generate synthetic immune repertoire data for benchmarking purposes), and under :ref:`immuneML & Galaxy` you will find tutorials using Galaxy as a starting point.
 
