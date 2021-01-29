@@ -50,8 +50,8 @@ def build_specs(args):
         if paired:
             specs["definitions"]["datasets"][args.dataset_name]["params"]["receptor_chains"] = args.receptor_chains
 
-        specs["definitions"]["datasets"][args.dataset_name]["params"]["metadata_column_mapping"] = build_metadata_column_mapping(
-            args.metadata_columns)
+        if args.metadata_columns != "":
+            specs["definitions"]["datasets"][args.dataset_name]["params"]["metadata_column_mapping"] = build_metadata_column_mapping(args.metadata_columns)
 
     return specs
 
