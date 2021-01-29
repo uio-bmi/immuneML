@@ -8,6 +8,9 @@ of the different methods is compared.
 Alternatively, if you want to predict a property per immune receptor, such as antigen specificity, check out the
 `Train immune receptor classifiers (simplified interface) <https://galaxy.immuneml.uio.no/root?tool_id=immuneml_train_classifiers>`_ tool instead.
 
+An example Galaxy history showing how to use this tool `can be found here <https://galaxy.immuneml.uio.no/u/immuneml/h/repertoire-classification-simplified-interface>`_.
+
+
 Basic terminology
 -----------------
 

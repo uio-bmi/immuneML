@@ -8,6 +8,8 @@ This is a YAML-based Galaxy tool, if you prefer a button-based interface that as
 :ref:`receptor <How to train immune receptor classifiers using the easy Galaxy interface>` and :ref:`repertoire <How to train immune repertoire classifiers using the easy Galaxy interface>`
 classification using the easy Galaxy interfaces.
 
+An example Galaxy history showing how to use this tool `can be found here <https://galaxy.immuneml.uio.no/u/immuneml/h/train-machine-learning-models>`_.
+
 
 Creating the YAML specification
 ---------------------------------------------
@@ -71,7 +73,7 @@ A complete YAML specification for training ML models is shown here:
 
         dataset: dataset # select the dataset defined above
         labels:          # only one label can be specified here
-        - disease
+        - signal_disease
 
         settings:        # which combinations of ML settings to run
         - encoding: my_3mer_encoding

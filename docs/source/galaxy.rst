@@ -1,7 +1,7 @@
 immuneML & Galaxy
 =================
 
-All of immuneMLs functionalities are also available through a Galaxy web interface as a collection of Galaxy tools. We provide a YAML-based Galaxy
+All of immuneMLs functionalities are also available through `a Galaxy web interface <https://galaxy.immuneml.uio.no>`_ as a collection of Galaxy tools. We provide a YAML-based Galaxy
 tool that is equivalent to the CLI (command-line interface), as well as repertoire and receptor-level classification tools with an intuitive
 graphical user interface aimed at immunology experts without a machine learning background.
 

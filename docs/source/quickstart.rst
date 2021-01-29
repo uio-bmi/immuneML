@@ -22,6 +22,7 @@ You may choose to register a user account or perform the analysis as an anonymou
 Different functionalities are available as Galaxy tools (left menu), and the analysis results appear in the Galaxy history (right list).
 These history elements can be used as input for the next tool, creating a multi-step analysis workflow.
 
+For reference, a Galaxy history showing the complete results of the Quickstart analysis `can be found here <https://galaxy.immuneml.uio.no/u/immuneml/h/quickstart-complete>`_.
 
 Step 1: importing the dataset to a Galaxy history
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

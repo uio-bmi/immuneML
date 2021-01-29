@@ -8,6 +8,8 @@ Any type of repertoire dataset (experimental or simulated) can be used as a star
 
 If you instead want to simulate a synthetic dataset from scratch, start by :ref:`simulating an AIRR dataset in Galaxy <How to simulate an AIRR dataset in Galaxy>`.
 
+An example Galaxy history showing how to use this tool `can be found here <https://galaxy.immuneml.uio.no/u/immuneml/h/simulate-signals>`_.
+
 Creating the YAML specification
 ---------------------------------------------
 

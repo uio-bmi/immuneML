@@ -19,6 +19,13 @@ specification. In most cases, the simple interface will suffice.
 If your dataset contains more than 100 files, you may want to consider :ref:`making a Galaxy collection directly from files <Making a Galaxy collection directly from files>`.
 
 
+See also the following example Galaxy histories, showing how to run the tool:
+
+- `Create Repertoire dataset <https://galaxy.immuneml.uio.no/u/immuneml/h/create-repertoire-dataset>`_.
+
+- `Create Receptor and Sequence dataset <https://galaxy.immuneml.uio.no/u/immuneml/h/create-receptor-sequence-dataset>`_.
+
+
 immuneML datasets
 -----------------
 There exist three types of datasets in immuneML:

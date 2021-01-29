@@ -12,6 +12,8 @@ We strongly recommend to:
 How to import data from the iReceptor Gateway into an immuneML RepertoireDataset
 --------------------------------------------------------------------------------
 
+See `this example Galaxy history <https://galaxy.immuneml.uio.no/u/immuneml/h/create-ireceptor-dataset>`_ showing how to make a dataset from the iReceptor Gateway into an immuneML dataset.
+
 Retrieving the dataset
 ^^^^^^^^^^^^^^^^^^^^^^
 Under 'Get Remote Data', use the iReceptor Plus Gateway tool to search for and download the desired dataset.
@@ -60,6 +62,9 @@ from multiple sample_processing_id's together into repertoires), this can be don
 
 How to import data from VDJdb into an immuneML Receptor- or SequenceDataset
 ---------------------------------------------------------------------------
+
+See `this example Galaxy history <https://galaxy.immuneml.uio.no/u/immuneml/h/create-vdjdb-dataset>`_ showing how to retrieve data from VDJdb and turn it into an immuneML sequence or receptor dataset.
+
 
 Retrieving the dataset
 ^^^^^^^^^^^^^^^^^^^^^^

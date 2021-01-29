@@ -10,6 +10,8 @@ These other tools are able to export the relevant output files to Galaxy history
 
 However, when you want to run the :ref:`ExploratoryAnalysis` instruction, or other analyses that do not have a corresponding Galaxy tool, this generic tool can be used.
 
+An example Galaxy history showing how to use this tool `can be found here <https://galaxy.immuneml.uio.no/u/immuneml/h/exploratory-analysis>`_.
+
 
 Creating the YAML specification
 ---------------------------------------------

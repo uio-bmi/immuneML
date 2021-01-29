@@ -9,6 +9,7 @@ Alternatively, if you want to predict a property per immune repertoire, such as 
 `Train immune repertoire classifiers (simplified interface) <https://galaxy.immuneml.uio.no/root?tool_id=novice_immuneml_interface>`_ tool instead.
 
 
+An example Galaxy history showing how to use this tool `can be found here <https://galaxy.immuneml.uio.no/u/immuneml/h/receptor-classification-simplified-interface>`_.
 
 Basic terminology
 -----------------

@@ -17,6 +17,7 @@ You can control:
 Note that since these labels are randomly assigned, they do not bear any meaning and it is not possible train a ML model with high classification accuracy on this data.
 Meaningful labels can be added by :ref:`simulating immune events into an existing AIRR dataset <How to simulate immune events into an existing AIRR dataset in Galaxy>`.
 
+An example Galaxy history showing how to use this tool `can be found here <https://galaxy.immuneml.uio.no/u/immuneml/h/simulate-dataset>`_.
 
 Creating the YAML specification
 ---------------------------------------------
