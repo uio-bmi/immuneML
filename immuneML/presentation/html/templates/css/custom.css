@@ -153,6 +153,10 @@ ul > li {
     padding-bottom: 1em;
 }
 
+.padded-left {
+    padding-left: 2em;
+}
+
 .padded-md {
     padding: 0.75em 2em;
 }

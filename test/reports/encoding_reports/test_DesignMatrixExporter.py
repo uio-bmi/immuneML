@@ -14,6 +14,7 @@ from immuneML.reports.encoding_reports.DesignMatrixExporter import DesignMatrixE
 
 
 class TestDesignMatrixExporter(TestCase):
+
     def test_generate(self):
         dataset = RepertoireDataset(encoded_data=EncodedData(examples=csr_matrix(np.arange(12).reshape(3, 4)),
                                                              labels={"l1": [1, 0, 1], "l2": [0, 0, 1]},
@@ -23,10 +24,10 @@ class TestDesignMatrixExporter(TestCase):
 
         path = EnvironmentSettings.tmp_test_path / "designmatrrixexporterreport/"
 
-        report = DesignMatrixExporter(dataset, path)
+        report = DesignMatrixExporter(dataset, path, name='report', file_format='csv')
         report.generate_report()
-
         self.assertTrue(os.path.isfile(path / "design_matrix.csv"))
+
         self.assertTrue(os.path.isfile(path / "labels.csv"))
         self.assertTrue(os.path.isfile(path / "encoding_details.yaml"))
 
@@ -48,3 +49,38 @@ class TestDesignMatrixExporter(TestCase):
         self.assertEqual("test_encoding", loaded["encoding"])
 
         shutil.rmtree(path)
+
+    def test_exporter(self):
+        dataset = RepertoireDataset(encoded_data=EncodedData(examples=csr_matrix(np.arange(12).reshape(3, 4)),
+                                                             labels={"l1": [1, 0, 1], "l2": [0, 0, 1]},
+                                                             example_ids=[0, 1, 2],
+                                                             feature_names=["f1", "f2", "f3", "f4"],
+                                                             encoding="test_encoding"))
+
+        path = EnvironmentSettings.tmp_test_path / "designmatrrixexporterreport/"
+
+        report = DesignMatrixExporter(dataset=dataset, result_path=path,
+                                      name="design_matrix", file_format='csv')
+        report.generate_report()
+        self.assertTrue(os.path.isfile(path / "design_matrix.csv"))
+        report.file_format = 'csv.zip'
+        report._export_matrix()
+        self.assertTrue(os.path.isfile(path / "design_matrix.csv.zip"))
+
+        report.file_format = 'npy'
+        report._export_matrix()
+        self.assertTrue(os.path.isfile(path / "design_matrix.npy"))
+        report.file_format = 'npy.zip'
+        report._export_matrix()
+        self.assertTrue(os.path.isfile(path / "design_matrix.npy.zip"))
+
+        report.file_format = 'hdf5'
+        report._export_matrix()
+        self.assertTrue(os.path.isfile(path / "design_matrix.hdf5"))
+        report.file_format = 'hdf5.zip'
+        report._export_matrix()
+        self.assertTrue(os.path.isfile(path / "design_matrix.hdf5.zip"))
+        shutil.rmtree(path)
+
+        with self.assertRaises(AssertionError):
+            DesignMatrixExporter.build_object(**{'file_format': "random"})

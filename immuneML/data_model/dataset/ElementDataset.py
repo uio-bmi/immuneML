@@ -7,13 +7,10 @@ from immuneML.data_model.receptor.ElementGenerator import ElementGenerator
 
 class ElementDataset(Dataset):
 
-    def clone(self):
-        raise NotImplementedError
-
-    def __init__(self, params: dict = None, encoded_data: EncodedData = None, filenames: list = None, identifier: str = None,
+    def __init__(self, labels: dict = None, encoded_data: EncodedData = None, filenames: list = None, identifier: str = None,
                  file_size: int = 50000, name: str = None):
         super().__init__()
-        self.params = params
+        self.labels = labels
         self.encoded_data = encoded_data
         self.identifier = identifier if identifier is not None else uuid4().hex
         self._filenames = sorted(filenames) if filenames is not None else []
@@ -49,7 +46,13 @@ class ElementDataset(Dataset):
         return self.element_ids
 
     def make_subset(self, example_indices, path, dataset_type: str):
-        new_dataset = self.__class__(params=self.params, file_size=self.file_size)
+        new_dataset = self.__class__(labels=self.labels, file_size=self.file_size)
         batch_filenames = self.element_generator.make_subset(example_indices, path, dataset_type, new_dataset.identifier)
         new_dataset.set_filenames(batch_filenames)
         return new_dataset
+
+    def get_label_names(self):
+        return list(self.labels.keys())
+
+    def clone(self):
+        raise NotImplementedError

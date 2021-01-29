@@ -80,20 +80,14 @@ class HPHTMLBuilder:
         for hp_setting, hp_items in selection_state.hp_items.items():
             hp_splits = []
             for hp_item in hp_items:
-                if hp_item.performance is not None and hp_item.performance[state.optimization_metric.name.lower()] is not None \
-                        and isinstance(hp_item.performance[state.optimization_metric.name.lower()], float):
-                    hp_splits.append(
-                        {"optimization_metric_val": round(hp_item.performance[state.optimization_metric.name.lower()], HPHTMLBuilder.NUM_DIGITS)})
-                else:
-                    hp_splits.append({"optimization_metric_val": Constants.NOT_COMPUTED})
+                hp_splits.append(HPHTMLBuilder._print_metric(hp_item.performance, state.optimization_metric))
             hp_settings.append({
                 "hp_setting": hp_setting,
                 "hp_splits": hp_splits,
                 "optimal": hp_setting == optimal
             })
 
-            performances = [round(hp_item.performance[state.optimization_metric.name.lower()], HPHTMLBuilder.NUM_DIGITS) for hp_item in hp_items if
-                            hp_item.performance is not None and hp_item.performance[state.optimization_metric.name.lower()] is not None]
+            performances = [HPHTMLBuilder._print_metric(hp_item.performance, state.optimization_metric) for hp_item in hp_items]
             if len(performances) > 1:
                 hp_settings[-1]["average"] = round(statistics.mean(perf for perf in performances if [isinstance(perf, float)]), HPHTMLBuilder.NUM_DIGITS)
                 hp_settings[-1]["show_average"] = True
@@ -167,7 +161,7 @@ class HPHTMLBuilder:
                                "show_data_reports": len(assessment_state.train_val_data_reports) > 0 or len(assessment_state.test_data_reports) > 0}
 
             if hasattr(assessment_state.train_val_dataset, "metadata_file") and assessment_state.train_val_dataset.metadata_file is not None:
-                assessment_item["train_metadata_path"] = os.path.relpath(assessment_state.train_val_dataset.metadata_file, base_path)
+                assessment_item["train_metadata_path"] = os.path.relpath(str(assessment_state.train_val_dataset.metadata_file), str(base_path))
                 assessment_item["train_metadata"] = Util.get_table_string_from_csv(assessment_state.train_val_dataset.metadata_file)
             else:
                 assessment_item["train_metadata_path"] = None
@@ -185,9 +179,10 @@ class HPHTMLBuilder:
                 assessment_item["hp_settings"].append({
                     "optimal": str(hp_setting) == optimal,
                     "hp_setting": str(hp_setting),
-                    "optimization_metric_val": round(item.performance[state.optimization_metric.name.lower()], HPHTMLBuilder.NUM_DIGITS),
+                    "optimization_metric_val": HPHTMLBuilder._print_metric(item.performance, state.optimization_metric),
                     "reports_path": reports_path
                 })
+            assessment_item["show_non_optimal"] = len(assessment_item["hp_settings"]) > 1
 
             assessment_item["selection_path"] = HPHTMLBuilder._make_selection_split_path(i, label, state.name)
             assessment_item['performances_per_metric'] = HPHTMLBuilder._extract_assessment_performances_per_metric(state, assessment_state, label)
@@ -202,12 +197,11 @@ class HPHTMLBuilder:
         for hp_setting, hp_item in assessment_state.label_states[label].assessment_items.items():
             performance_metric['setting'].append(str(hp_setting))
             for metric in sorted(state.metrics, key=lambda metric: metric.name.lower()):
-                performance_metric[metric.name.lower()].append(round(hp_item.performance[metric.name.lower()], HPHTMLBuilder.NUM_DIGITS))
+                performance_metric[metric.name.lower()].append(HPHTMLBuilder._print_metric(hp_item.performance, metric))
 
         s = io.StringIO()
-        pd.DataFrame(performance_metric).rename(columns={"setting": 'Hyperparameter settings (preprocessing, encoding, ML method)'}).to_csv(s,
-                                                                                                                                            sep="\t",
-                                                                                                                                            index=False)
+        pd.DataFrame(performance_metric).rename(columns={"setting": 'Hyperparameter settings (preprocessing, encoding, ML method)'})\
+            .to_csv(s, sep="\t", index=False)
         return Util.get_table_string_from_csv_string(s.getvalue(), separator="\t")
 
     @staticmethod
@@ -246,15 +240,24 @@ class HPHTMLBuilder:
                 results.append({
                     "index": assessment_state.split_index + 1,
                     "hp_setting": assessment_state.label_states[label].optimal_assessment_item.hp_setting,
-                    "optimization_metric_val": round(
-                        assessment_state.label_states[label].optimal_assessment_item.performance[state.optimization_metric.name.lower()],
-                        HPHTMLBuilder.NUM_DIGITS),
+                    "optimization_metric_val": HPHTMLBuilder._print_metric(assessment_state.label_states[label].optimal_assessment_item.performance,
+                                                                           state.optimization_metric),
                     "split_details_path": HPHTMLBuilder._make_assessment_split_path(assessment_state.split_index, state.name, label)
                 })
 
             mapping.append({"label": label, "assessment_results": results})
 
         return mapping
+
+    @staticmethod
+    def _print_metric(performance: dict, metric: Metric):
+        if performance is not None and metric.name.lower() in performance:
+            if isinstance(performance[metric.name.lower()], float):
+                return round(performance[metric.name.lower()], HPHTMLBuilder.NUM_DIGITS)
+            else:
+                return performance[metric.name.lower()]
+        else:
+            return Constants.NOT_COMPUTED
 
     @staticmethod
     def _make_model_per_label(state: TrainMLModelState, base_path: Path) -> list:
@@ -264,7 +267,7 @@ class HPHTMLBuilder:
         for label in state.label_configuration.get_labels_by_name():
             mapping.append({
                 "label": label,
-                "model_path": Path(os.path.relpath(path=state.optimal_hp_item_paths[label], start=base_path))
+                "model_path": Path(os.path.relpath(path=str(state.optimal_hp_item_paths[label]), start=str(base_path)))
             })
 
         return mapping
@@ -277,6 +280,7 @@ class HPHTMLBuilder:
             "dataset_name": state.dataset.name if state.dataset.name is not None else state.dataset.identifier,
             "dataset_type": StringHelper.camel_case_to_word_string(type(state.dataset).__name__),
             "example_count": state.dataset.get_example_count(),
+            "dataset_size": f"{state.dataset.get_example_count()} {type(state.dataset).__name__.replace('Dataset', 's').lower()}",
             "labels": [{"name": label.name, "values": str(label.values)[1:-1]} for label in state.label_configuration.get_label_objects()],
             "optimization_metric": state.optimization_metric.name.lower(),
             "other_metrics": str([metric.name.lower() for metric in state.metrics])[1:-1].replace("'", ""),
@@ -348,7 +352,7 @@ class HPHTMLBuilder:
         for hp_setting, hp_item_list in selection_state.hp_items.items():
             performance['setting'].append(str(hp_setting))
             for index, hp_item in enumerate(hp_item_list):
-                performance[f'split {index + 1}'].append(round(hp_item.performance[metric.name.lower()], HPHTMLBuilder.NUM_DIGITS))
+                performance[f'split {index + 1}'].append(HPHTMLBuilder._print_metric(hp_item.performance, metric))
 
         s = io.StringIO()
         pd.DataFrame(performance).rename(columns={"setting": 'Hyperparameter settings (preprocessing, encoding, ML method)'}).to_csv(s, sep="\t",

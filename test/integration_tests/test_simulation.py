@@ -1,5 +1,6 @@
 import os
 import shutil
+from pathlib import Path
 from unittest import TestCase
 
 import pandas as pd
@@ -21,7 +22,7 @@ class TestSimulation(TestCase):
     def setUp(self) -> None:
         os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
 
-    def prepare_specs(self, path) -> str:
+    def prepare_specs(self, path) -> Path:
         specs = {
             "definitions": {
                 "datasets": {
@@ -118,7 +119,7 @@ class TestSimulation(TestCase):
                                                                 "l2": [0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 1,
                                                                        0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1]})
 
-        dataset = RepertoireDataset(repertoires=repertoires, metadata_file=metadata, params={"l1": [1, 2], "l2": [0, 1]}, name="dataset1")
+        dataset = RepertoireDataset(repertoires=repertoires, metadata_file=metadata, labels={"l1": [1, 2], "l2": [0, 1]}, name="dataset1")
         PickleExporter.export(dataset, path)
 
     def test_simulation(self):

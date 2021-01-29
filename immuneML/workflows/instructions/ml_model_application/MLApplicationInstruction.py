@@ -47,7 +47,7 @@ class MLApplicationInstruction(Instruction):
 
         config_path: path to the zip file exported from MLModelTraining instruction (which includes train ML model, encoder, preprocessing etc.)
 
-        pool_size (int): number of processes to use for prediction
+        number_of_processes (int): number of processes to use for prediction
 
         store_encoded_data (bool): whether encoded dataset should be stored on disk; can be True or False; setting this argument to True might
         increase the disk space usage
@@ -61,16 +61,16 @@ class MLApplicationInstruction(Instruction):
             type: MLApplication
             dataset: d1
             config_path: ./config.zip
-            pool_size: 1000
+            number_of_processes: 4
             label: CD
             store_encoded_data: False
 
     """
 
-    def __init__(self, dataset: Dataset, label_configuration: LabelConfiguration, hp_setting: HPSetting, pool_size: int, name: str,
+    def __init__(self, dataset: Dataset, label_configuration: LabelConfiguration, hp_setting: HPSetting, number_of_processes: int, name: str,
                  store_encoded_data: bool):
 
-        self.state = MLApplicationState(dataset=dataset, hp_setting=hp_setting, label_config=label_configuration, pool_size=pool_size, name=name,
+        self.state = MLApplicationState(dataset=dataset, hp_setting=hp_setting, label_config=label_configuration, pool_size=number_of_processes, name=name,
                                         store_encoded_data=store_encoded_data)
 
     def run(self, result_path: Path):
