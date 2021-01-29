@@ -23,19 +23,46 @@ class OneHotEncoder(DatasetEncoder):
 
     Arguments:
 
-        use_positional_info (bool): whether to include a feature representing the positional information, where the
-            stretch of positions in the middle of the CDR3 (regulated by distance_to_seq_middle) have positional value 1,
-            and the beginning and end of the CDR3 (IMGT positions 105, 117) have value 0, with linear scaling in between.
+        use_positional_info (bool): whether to include features representing the positional information.
+        If True, three additional feature vectors will be added, representing the sequence start, sequence middle
+        and sequence end. The values in these features are scaled between 0 and 1. A graphical representation of
+        the values of these vectors is given below.
+
+        .. code-block:: console
+
+              Value of sequence start:         Value of sequence middle:        Value of sequence end:
+
+            1 \                              1    /‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾\         1                          /
+               \                                 /                   \                                  /
+                \                               /                     \                                /
+            0    \_____________________      0 /                       \      0  _____________________/
+              <----sequence length---->        <----sequence length---->         <----sequence length---->
+
 
         distance_to_seq_middle (int): only applies when use_positional_info is True. This is the distance from the edge
-            of the CDR3 sequence (IMGT positions 105 and 117) to the portion of the sequence that is considered 'middle'.
-            For example: if distance_to_seq_middle is 6 (default), all IMGT positions in the interval [111, 112)
-            receive positional value 1.
-            When using nucleotide sequences: note that the distance is measured in (amino acid) IMGT positions.
+        of the CDR3 sequence (IMGT positions 105 and 117) to the portion of the sequence that is considered 'middle'.
+        For example: if distance_to_seq_middle is 6 (default), all IMGT positions in the interval [111, 112)
+        receive positional value 1.
+        When using nucleotide sequences: note that the distance is measured in (amino acid) IMGT positions.
+        If the complete sequence length is smaller than 2 * distance_to_seq_middle, the maximum value of the
+        'start' and 'end' vectors will not reach 0, and the maximum value of the 'middle' vector will not reach 1.
+        A graphical representation of teh positional vectors with a too short sequence is given below:
+
+
+        .. code-block:: console
+
+            Value of sequence start         Value of sequence middle        Value of sequence end:
+            with very short sequence:       with very short sequence:       with very short sequence:
+
+                 1 \                               1                                 1    /
+                    \                                                                    /
+                     \                                /\                                /
+                 0                                 0 /  \                            0
+                   <->                               <-->                               <->
 
         flatten (bool): whether to flatten the final onehot matrix to a 2-dimensional matrix [examples, other_dims_combined]
-            This must be set to True when using onehot encoding in combination with scikit-learn ML methods (inheriting :py:obj:`~source.ml_methods.SklearnMethod.SklearnMethod`),
-            such as :ref:`LogisticRegression`, :ref:`SVM`, :ref:`RandomForestClassifier` and :ref:`KNN`.
+        This must be set to True when using onehot encoding in combination with scikit-learn ML methods (inheriting :py:obj:`~source.ml_methods.SklearnMethod.SklearnMethod`),
+        such as :ref:`LogisticRegression`, :ref:`SVM`, :ref:`RandomForestClassifier` and :ref:`KNN`.
 
 
     YAML specification:
