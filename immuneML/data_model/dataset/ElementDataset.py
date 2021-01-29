@@ -52,7 +52,7 @@ class ElementDataset(Dataset):
         return new_dataset
 
     def get_label_names(self):
-        return list(self.labels.keys())
+        return [label for label in list(self.labels.keys()) if label not in ['region_type', 'receptor_chains', 'organism']]
 
     def clone(self):
         raise NotImplementedError
