@@ -46,7 +46,7 @@ class TestKmerFreqSequenceEncoder(TestCase):
         lc = LabelConfiguration()
         lc.add_label("l1", [1, 2])
 
-        dataset = SequenceDataset(params={"l1": [1, 2]}, filenames=[filename], identifier="d2")
+        dataset = SequenceDataset(labels={"l1": [1, 2]}, filenames=[filename], identifier="d2")
 
         encoder = KmerFreqSequenceEncoder.build_object(dataset, **{
                 "normalization_type": NormalizationType.RELATIVE_FREQUENCY.name,

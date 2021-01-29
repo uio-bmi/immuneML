@@ -32,6 +32,7 @@ class MLApplicationHTMLBuilder:
             "dataset_name": state.dataset.name,
             "dataset_type": StringHelper.camel_case_to_word_string(type(state.dataset).__name__),
             "example_count": state.dataset.get_example_count(),
+            "dataset_size": f"{state.dataset.get_example_count()} {type(state.dataset).__name__.replace('Dataset', 's').lower()}",
             "labels": [{"name": label, "values": str(state.label_config.get_label_values(label))[1:-1]}
                        for label in state.label_config.get_labels_by_name()],
             "predictions": Util.get_table_string_from_csv(state.predictions_path),

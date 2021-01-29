@@ -23,7 +23,7 @@ class EvennessProfileRepertoireEncoder(EvennessProfileEncoder):
 
         encoded_dataset = RepertoireDataset(repertoires=dataset.repertoires,
                                             encoded_data=encoded_data,
-                                            params=dataset.params,
+                                            labels=dataset.labels,
                                             metadata_file=dataset.metadata_file)
 
         return encoded_dataset

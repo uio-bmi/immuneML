@@ -52,7 +52,7 @@ class TestSequenceClassification(TestCase):
         lc = LabelConfiguration()
         lc.add_label("l1", [1, 2])
 
-        dataset = SequenceDataset(params={"l1": [1, 2]}, filenames=[filename], identifier="d1")
+        dataset = SequenceDataset(labels={"l1": [1, 2]}, filenames=[filename], identifier="d1")
         return dataset
 
     def test(self):

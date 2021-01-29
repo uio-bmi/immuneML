@@ -22,7 +22,7 @@ class OneHotReceptorEncoder(OneHotEncoder):
 
         encoded_dataset = ReceptorDataset(filenames=dataset.get_filenames(),
                                           encoded_data=encoded_data,
-                                          params=dataset.params)
+                                          labels=dataset.labels)
 
         return encoded_dataset
 

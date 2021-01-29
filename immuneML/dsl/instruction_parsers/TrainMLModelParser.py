@@ -151,8 +151,8 @@ class TrainMLModelParser:
         for label in labels:
             label_name = label if isinstance(label, str) else list(label.keys())[0]
             positive_class = label[label_name]['positive_class'] if isinstance(label, dict) else None
-            if dataset.params is not None and label_name in dataset.params:
-                label_values = dataset.params[label_name]
+            if dataset.labels is not None and label_name in dataset.labels:
+                label_values = dataset.labels[label_name]
             elif hasattr(dataset, "get_metadata"):
                 label_values = list(set(dataset.get_metadata([label_name])[label_name]))
             else:

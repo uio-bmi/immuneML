@@ -13,20 +13,16 @@ from immuneML.environment.Constants import Constants
 
 class RepertoireDataset(Dataset):
 
-    def __init__(self, params: dict = None, encoded_data: EncodedData = None, repertoires: list = None, identifier: str = None,
+    def __init__(self, labels: dict = None, encoded_data: EncodedData = None, repertoires: list = None, identifier: str = None,
                  metadata_file: Path = None, name: str = None):
-        super().__init__()
-        self.params = params
-        self.encoded_data = encoded_data
-        self.identifier = identifier if identifier is not None else uuid.uuid4().hex
+        super().__init__(encoded_data, name, identifier if identifier is not None else uuid.uuid4().hex, labels)
         self.metadata_file = metadata_file
         self.metadata_fields = None
         self.repertoire_ids = None
         self.repertoires = repertoires
-        self.name = name if name is not None else self.identifier
 
     def clone(self):
-        return RepertoireDataset(self.params, copy.deepcopy(self.encoded_data), copy.deepcopy(self.repertoires),
+        return RepertoireDataset(self.labels, copy.deepcopy(self.encoded_data), copy.deepcopy(self.repertoires),
                                  metadata_file=self.metadata_file)
 
     def add_encoded_data(self, encoded_data: EncodedData):
@@ -46,11 +42,19 @@ class RepertoireDataset(Dataset):
     def get_example_count(self):
         return len(self.repertoires)
 
-    def get_metadata_fields(self):
-        if self.metadata_fields is None:
-            df = pd.read_csv(self.metadata_file, sep=",", nrows=0)
+    def get_metadata_fields(self, refresh=False):
+        if self.metadata_fields is None or refresh:
+            df = pd.read_csv(self.metadata_file, sep=",", nrows=0, comment=Constants.COMMENT_SIGN)
             self.metadata_fields = df.columns.values.tolist()
         return self.metadata_fields
+
+    def get_label_names(self, refresh=False):
+        all_metadata_fields = set(self.get_metadata_fields(refresh))
+        for non_label in ["subject_id", "filename", "repertoire_identifier"]:
+            if non_label in all_metadata_fields:
+                all_metadata_fields.remove(non_label)
+
+        return all_metadata_fields
 
     def get_metadata(self, field_names: list, return_df: bool = False):
         df = pd.read_csv(self.metadata_file, sep=",", usecols=field_names, comment=Constants.COMMENT_SIGN)
@@ -74,7 +78,7 @@ class RepertoireDataset(Dataset):
     def make_subset(self, example_indices, path: Path, dataset_type: str):
 
         metadata_file = self._build_new_metadata(example_indices, path / f"{dataset_type}_metadata.csv")
-        new_dataset = RepertoireDataset(repertoires=[self.repertoires[i] for i in example_indices], params=copy.deepcopy(self.params),
+        new_dataset = RepertoireDataset(repertoires=[self.repertoires[i] for i in example_indices], labels=copy.deepcopy(self.labels),
                                         metadata_file=metadata_file, identifier=str(uuid.uuid1()))
 
         return new_dataset

@@ -24,4 +24,4 @@ class ReceptorDataset(ElementDataset):
         return ReceptorDataset(filenames=file_names, file_size=file_size, name=name)
 
     def clone(self):
-        return ReceptorDataset(self.params, copy.deepcopy(self.encoded_data), copy.deepcopy(self._filenames), file_size=self.file_size)
+        return ReceptorDataset(self.labels, copy.deepcopy(self.encoded_data), copy.deepcopy(self._filenames), file_size=self.file_size)

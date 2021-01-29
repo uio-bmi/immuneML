@@ -18,7 +18,7 @@ class MatchedRegexRepertoireEncoder(MatchedRegexEncoder):
     def _encode_new_dataset(self, dataset, params: EncoderParams):
         self._load_regex_df()
 
-        encoded_dataset = RepertoireDataset(repertoires=dataset.repertoires, params=dataset.params,
+        encoded_dataset = RepertoireDataset(repertoires=dataset.repertoires, labels=dataset.labels,
                                             metadata_file=dataset.metadata_file)
 
         feature_annotations = self._get_feature_info()
