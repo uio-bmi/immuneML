@@ -1,8 +1,6 @@
 import sys
 from pathlib import Path
 
-sys.path.append("/Users/lonneke/PycharmProjects/ImmuneML/")
-
 from immuneML.dsl.InstructionParser import InstructionParser
 from immuneML.dsl.OutputParser import OutputParser
 from immuneML.dsl.definition_parsers.DefinitionParser import DefinitionParser
