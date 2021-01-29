@@ -24,7 +24,7 @@ The analysis specification consists of (i) defining all elements used for analys
 such as the dataset, encodings, preprocessing, ML methods and reports, (ii) defining
 the instruction to be executed. Training ML model instructions take as parameters:
 
-1. A list of hyperparameter settings (preprocessing, encoding, ML method combinations) to be evaluated,
+1. A list of hyperparameter :code:`settings` (:code:`encoding`, :code:`ml_method` and optional :code:`preprocessing` combinations) to be evaluated,
 
 .. highlight:: yaml
 .. code-block:: yaml
@@ -37,24 +37,23 @@ the instruction to be executed. Training ML model instructions take as parameter
       encoding: my_kmer_enc
       ml_method: my_svm
 
-2. Assessment configuration, including:
+2. :code:`assessment` configuration, including:
 
-  2.1. How to split the data in the outer cross-validation loop,
+  2.1. What :code:`split_strategy` to use to split the data in the outer cross-validation loop,
 
-  2.2. How many combinations of training/test datasets to generate based on the given
-  splitting strategy,
+  2.2. How many combinations of training/test datasets to generate based on the given splitting strategy (:code:`split_count`),
 
-  2.3. What percentage of data to use for the training dataset (if splitting to training and test is random),
+  2.3. What percentage of data to use for the training dataset (if splitting to training and test is random, :code:`training_percentage`),
 
-  2.4. Reports to execute:
+  2.4. :code:`reports` to execute:
 
-    2.4.1. **models**: reports  to be generated for optimal models per label
+    2.4.1. :code:`models`: reports  to be generated for optimal models per label
 
-    2.4.1. **data**: reports to be executed on the whole dataset before it is split to training and test
+    2.4.1. :code:`data`: reports to be executed on the whole dataset before it is split to training and test
 
-    2.4.1. **data_splits**: reports to be executed after the data has been split into training and test
+    2.4.1. :code:`data_splits`: reports to be executed after the data has been split into training and test
 
-    2.4.1. **encoding**: reports to be executed on the encoded training and test datasets
+    2.4.1. :code:`encoding`: reports to be executed on the encoded training and test datasets
 
   .. highlight:: yaml
   .. code-block:: yaml
@@ -74,23 +73,23 @@ the instruction to be executed. Training ML model instructions take as parameter
         encoding:
           - my_encoding_report
 
-3. Selection configuration, including:
+3. :code:`selection` configuration, including:
 
-  3.1. How to split the data in the inner cross-validation loop,
+  3.1. What :code:`split_strategy` to use to split the data in the inner cross-validation loop,
 
-  3.2. How many combinations of train/test datasets to generate based on the strategy,
+  3.2. How many combinations of training/test datasets to generate based on the given splitting strategy (:code:`split_count`),
 
-  3.3. What percentage of data to use for the training dataset (the remaining will be used for validation),
+  3.3. What percentage of data to use for the training dataset (if splitting to training and test is random, :code:`training_percentage`),
 
-  3.4. Reports to execute:
+  3.4. :code:`reports` to execute:
 
-    2.4.1. **models**: reports to be executed on all trained classifiers
+    3.4.1. :code:`models`: reports to be executed on all trained classifiers
 
-    2.4.2. **data**: reports to be executed on the training dataset split before it is split to training and validation
+    3.4.2. :code:`data`: reports to be executed on the training dataset split before it is split to training and validation
 
-    2.4.3. **data_splits**: reports to be executed after the data has been split into training and validation
+    3.4.3. :code:`data_splits`: reports to be executed after the data has been split into training and validation
 
-    2.4.4. **encoding**: reports to be executed on the encoded training and validation datasets
+    3.4.4. :code:`encoding`: reports to be executed on the encoded training and validation datasets
 
   .. highlight:: yaml
   .. code-block:: yaml
@@ -110,13 +109,13 @@ the instruction to be executed. Training ML model instructions take as parameter
           - my_encoding_report
       training_percentage: 0.7
 
-4. A list of labels to use for prediction,
+4. A list of :code:`labels` to use for prediction,
 
-5. A list of metrics for evaluation (e.g., accuracy, balanced accuracy, f1_weighted…),
+5. A list of :code:`metrics` for evaluation (e.g., :code:`accuracy`, :code:`balanced_accuracy`, :code:`f1_weighted`, ...),
 
-6. A metric which will be used for evaluation (given under optimization_metric field)
+6. A metric which will be used for evaluation (given under :code:`optimization_metric` field)
 
-7. A list of reports to be executed after the instruction has finished to show the overall performance (given under the reports field)
+7. A list of :code:`reports` to be executed after the instruction has finished to show the overall performance
 
 An example is shown below:
 

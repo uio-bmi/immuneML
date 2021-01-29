@@ -33,10 +33,10 @@ Data import must be defined as a part of the YAML specification. First, we choos
 
 The name is defined by the user. It can consist of letters, numbers and underscores.
 
-Under the dataset name key, the **format** of the data must be specified, as well as additional parameters under a key named **params**.
-Under **format**, any of the formats listed under :ref:`Datasets` may be filled in. Under **params**, the parameter **path** is always
+Under the dataset name key, the :code:`format` of the data must be specified, as well as additional parameters under a key named :code:`params`.
+Under :coda:`format`, any of the formats listed under :ref:`Datasets` may be filled in. Under :code:`params`, the parameter :code:`path` is always
 required when importing data from files. All the files must be stored in a single folder, and this folder must set through the
-parameter **path**.
+parameter :code:`path`.
 
 Here is an incomplete example specification using AIRR format:
 
@@ -54,13 +54,13 @@ Here is an incomplete example specification using AIRR format:
 
 Specifying params for repertoire dataset import
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-By default, it is assumed that a RepertoireDataset should be imported. In this case, the path to the **metadata_file**
+By default, it is assumed that a RepertoireDataset should be imported. In this case, the path to the :code:`metadata_file`
 must be specified. The metadata file is a .csv file which contains one repertoire (filename) per row, and the metadata
 labels for that repertoire. These metadata labels can be used to train classifiers for.
 For more details on structuring the metadata file, see :ref:`What should the metadata file look like?`.
 Note that only the Repertoire files that are present in the metadata file will be imported.
 
-Other parameters that are specific to the format may be specified under **params** as well, and are explained in more detail for each format
+Other parameters that are specific to the format may be specified under :code:`params` as well, and are explained in more detail for each format
 under :ref:`Datasets`.
 
 A complete specification for importing a RepertoireDataset from AIRR format with default parameters may look like this:
@@ -84,11 +84,11 @@ A complete specification for importing a RepertoireDataset from AIRR format with
 Specifying params for receptor or sequence dataset import
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-If you want to import a Sequence- or ReceptorDataset, set the parameter **is_repertoire** to False, and set **paired** to either False (SequenceDataset)
+If you want to import a Sequence- or ReceptorDataset, set the parameter :code:`is_repertoire` to False, and set :code:`paired` to either False (SequenceDataset)
 or True (ReceptorDataset). For Sequence- and ReceptorDatasets, metadata labels must be specified directly as columns in the input files.
 These metadata labels can be used to train classifiers for. For example, a column 'binding' can be added, which may have values 'true' and 'false'.
-The metadata labels are specified through parameter **metadata_column_mapping**, which is a mapping from the names of the columns in
-the file to the names that will be used internally in immuneML (for example: when specifying **labels** in the :ref:`TrainMLModel` instruction).
+The metadata labels are specified through parameter :code:`metadata_column_mapping`, which is a mapping from the names of the columns in
+the file to the names that will be used internally in immuneML (for example: when specifying :code:`labels` in the :ref:`TrainMLModel` instruction).
 It is recommended that the immuneML-internal names contain only lowercase letters, numbers and underscores.
 
 A complete specification for importing a SequenceDataset from AIRR format with default parameters may look like this:
