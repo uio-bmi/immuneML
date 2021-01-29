@@ -2,14 +2,16 @@ class NameBuilder:
 
     @staticmethod
     def build_name_from_dict(dictionary: dict, level=0):
+        """ Creates a name from dictionary which includes all of its parameters and handles nested dictionaries up to depth of 10 inclusively
 
-        """ Creates a name from dictionary which includes all of its parameters;
-            Handles nested dictionaries up to depth of 10 inclusively
-            Keyword arguments:
-            :param dictionary - dictionary to create the name from
-            :param level - controls recursion level, user should keep default
-            :return name
+            Arguments:
+                dictionary (dict): dictionary to create the name from
+                level (int): controls recursion level, user should keep default
+
+            Returns:
+                name (str)
         """
+
 
         if level > 10:
             raise Exception("Too many nested dicts for serialization in NameBuilder!")

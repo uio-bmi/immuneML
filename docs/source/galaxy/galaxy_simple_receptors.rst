@@ -1,11 +1,15 @@
-Train immune receptor classifiers
-=========================================
+How to train immune receptor classifiers using the simplified Galaxy interface
+===============================================================================
 
-This is the documentation for the 'Train immune receptor classifiers' Galaxy tool.
+This is the documentation for the Galaxy tool `Train immune receptor classifiers (simplified interface) <https://galaxy.immuneml.uio.no/root?tool_id=immuneml_train_classifiers>`_.
 The purpose of this tool is to train machine learning (ML) models to predict a characteristic per immune receptor, such as
 antigen specificity. One or more ML models are trained to classify receptors based on the information within the CDR3 sequences. Finally, the performance
 of the different methods is compared.
-Alternatively, if you want to predict a property per immune repertoire, such as disease status, check out the ‘Train immune repertoire classifiers’ tool instead.
+Alternatively, if you want to predict a property per immune repertoire, such as disease status, check out the
+`Train immune repertoire classifiers (simplified interface) <https://galaxy.immuneml.uio.no/root?tool_id=novice_immuneml_interface>`_ tool instead.
+
+
+An example Galaxy history showing how to use this tool `can be found here <https://galaxy.immuneml.uio.no/u/immuneml/h/receptor-classification-simplified-interface>`_.
 
 Basic terminology
 -----------------
@@ -23,14 +27,14 @@ appropriate encoding is chosen based on the answers to the last two questions.
 .. figure:: ../_static/images/receptor_classification_overview.png
   :width: 70%
 
-  Figure 2 - An overview of the components of the immuneML receptor classification tool.
+  An overview of the components of the immuneML receptor classification tool.
   ImmuneML reads in receptor data with labels (+ and -), encodes the data, trains user-specified ML models and summarizes
   the performance statistics per ML method.
   Encoding: position dependent and invariant encoding are shown. The specificity-associated subsequences are highlighted
   with color. The different colors represent independent elements of the antigen specificity signal. Each color represents
   one subsequence, and position dependent subsequences can only have the same color when they occur in the same position,
   although different colors (i.e., nucleotide or amino acid sequences) may occur in the same position.
-  Training: the training and validation data is used to train ML models and find the optimal hyper-parameters through
+  Training: the training and validation data is used to train ML models and find the optimal hyperparameters through
   5-fold cross-validation. The test set is left out and is used to obtain a fair estimate of the model performance.
 
 
@@ -59,26 +63,43 @@ Training a machine learning model
 ----------------------------------
 
 Training an ML model means optimizing the **parameters** for the model with the goal of predicting the correct class of an (unseen) immune receptor.
-Different ML methods require different procedures for training. In addition to the model parameters there are the **hyper-parameters**, these
-hyper-parameters do not directly change the predictions of a model, but they control the learning process (for example: the learning speed).
+Different ML methods require different procedures for training. In addition to the model parameters there are the **hyperparameters**, these
+hyperparameters do not directly change the predictions of a model, but they control the learning process (for example: the learning speed).
 
 The immune receptors are divided into sets with different purposes: the training and validation sets are used for finding the optimal parameters
-and hyper-parameters respectively. The test set is held out, and is only used to estimate the performance of a trained model.
+and hyperparameters respectively. The test set is held out, and is only used to estimate the performance of a trained model.
 
-In this tool, a range of plausible hyper-parameters have been predefined for each ML method. The optimal hyper-parameters are found by splitting the
-training/validation data into 5 equal portions, where 4 portions are used to train the ML model (with different hyper-parameters) and the remaining
-portion is used to validate the performance of these hyper-parameter settings. This is repeated 5 times such that each portion has been used for
-validation once. With the best hyper-parameters found in the 5 repetitions, a final model is trained using all 5 portions of the data. This procedure
+In this tool, a range of plausible hyperparameters have been predefined for each ML method. The optimal hyperparameters are found by splitting the
+training/validation data into 5 equal portions, where 4 portions are used to train the ML model (with different hyperparameters) and the remaining
+portion is used to validate the performance of these hyperparameters settings. This is repeated 5 times such that each portion has been used for
+validation once. With the best hyperparameters found in the 5 repetitions, a final model is trained using all 5 portions of the data. This procedure
 is also referred to as 5-fold cross-validation.
 
 The whole process may be repeated multiple times with different randomly selected repertoires in the test set, to see how robust the performance is.
+
+
+Tool output
+---------------------------------------------
+This Galaxy tool will produce the following history elements:
+
+- Summary: receptor classification: a HTML page that allows you to browse through all results, including prediction accuracies on
+  the various data splits and plots showing the performance of classifiers and learned parameters.
+
+- Archive: receptor classification : a .zip file containing the complete output folder as it was produced by immuneML. This folder
+  contains the output of the TrainMLModel instruction including all trained models and their predictions, and report results.
+  Furthermore, the folder contains the complete YAML specification file for the immuneML run, the HTML output and a log file.
+
+- optimal_ml_settings.zip: a .zip file containing the raw files for the optimal trained ML settings (ML model, encoding).
+  This .zip file can subsequently be used as an input when :ref:`applying previously trained ML models to a new AIRR dataset in Galaxy <How to apply previously trained ML models to a new AIRR dataset in Galaxy>`
+
+- receptor_classification.yaml: the YAML specification file that was used by immuneML internally to run the analysis. This file can be
+  downloaded, altered, and run again by immuneML using the :ref:`YAML-based Galaxy tool <How to train ML models in Galaxy>`.
+
 
 More analysis options
 ----------------------
 
 A limited selection of immuneML options is available through this tool. If you want full control of the analysis, consider using the tool described under
-:ref:`How to run an analysis in Galaxy`. This tool provides other encodings and machine learning methods to choose from, as well as
-data preprocessing and settings for hyper-parameter optimization. The interface of the YAML-based tool expects more independence and knowledge about
-machine learning from the user. Information about how to specify an analysis with YAML can be found in the :ref:`How to specify an analysis with YAML`.
-
-
+:ref:`How to train ML models in Galaxy`. This tool provides other encodings and machine learning methods to choose from, as well as
+data preprocessing and settings for hyperparameters optimization. The interface of the YAML-based tool expects more independence and knowledge about
+machine learning from the user. See also :ref:`How to specify an analysis with YAML`.

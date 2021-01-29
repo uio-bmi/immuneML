@@ -7,7 +7,9 @@ Welcome to the immuneML documentation!
 ======================================
 
 immuneML is a platform for machine learning-based analysis and classification of adaptive immune receptors and
-repertoires. immuneML can be used for:
+repertoires. To **get started using immuneML right away**, check out our :ref:`Quickstart` tutorial.
+
+immuneML can be used for:
 
 - **Training ML models** for repertoire classification (e.g., disease prediction) or receptor sequence
   classification (e.g., antigen binding prediction). In immuneML, the performance of different machine learning (ML)
@@ -32,23 +34,18 @@ describes an *instruction*, which corresponds to one of the applications listed 
 
    An overview of immuneML usage: analysis components and instructions are specified in a YAML file. Each use case corresponds to a different instruction. The results of the instructions are summarized and presented in an HTML file.
 
-
-To **get started using immuneML right away**, you can check out our `Galaxy Portal <http://immunohub01.hpc.uio.no:8080/>`_.
-Here, we offer the same functionalities as in the command-line interface, and in addition simplified button-based
-interfaces for training classifiers.
-
 If you want to **use immuneML locally**, see :ref:`Installing immuneML`.
 
-To become familiar with the **YAML-based specification**, you can find a concrete example in our :ref:`Quickstart` guide,
-or read about the overall YAML structure and options in :ref:`How to specify an analysis with YAML`.
+Alternatively, to **run immuneML in a web browser**, go to our `Galaxy Portal <https://galaxy.immuneml.uio.no/>`_.
+Here, we offer the same functionalities as in the command-line interface, and in addition simplified button-based interfaces for training classifiers.
 
-- Note that the components of the YAML specification are the same in the Galaxy portal and in the command-line interface,
-  but in Galaxy, datasets must first be converted to immuneML format (see :ref:`How to make an immuneML dataset in Galaxy`).
+To become familiar with the **YAML-based specification**, you can find a concrete example in our :ref:`Quickstart` guide, or read about the overall YAML structure and options in :ref:`How to specify an analysis with YAML`.
 
-Once you have a general understanding of the YAML specification, you can take a look at more detailed :ref:`Tutorials` for
-specific use cases (e.g., how to train and assess classifiers, or how to generate synthetic immune repertoire data for benchmarking purposes).
+- YAML specifications are equivalent between the Galaxy and command-line interfaces. However, in Galaxy datasets must first be converted to a dataset collection (see :ref:`How to make an immuneML dataset in Galaxy`).
 
-If you are wondering about all the possible **analysis components** and their settings, you can find the complete list and
+We offer :ref:`Tutorials` for specific use cases (e.g., how to train and assess classifiers, or how to generate synthetic immune repertoire data for benchmarking purposes), and under :ref:`immuneML & Galaxy` you will find tutorials using Galaxy as a starting point.
+
+If you are wondering about all the possible **analysis components** and their options, you can find the complete list and
 documentation under :ref:`YAML specification`.
 
 Our open-source code can be found on `GitHub <https://github.com/uio-bmi/ImmuneML>`_ :)

@@ -94,6 +94,8 @@ Adding the new method to immuneML
 Once the core functionality of the new ML method has been tested, it can be integrated into immuneML. For methods based on scikit-learn, read how to
 do this under :ref:`Adding a method based on scikit-learn`. For other methods, see :ref:`Adding native methods`.
 
+.. include:: ./dev_docs_util.rst
+
 Adding a method based on scikit-learn
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 

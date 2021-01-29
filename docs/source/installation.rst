@@ -6,7 +6,7 @@ Installing immuneML
 
 To get started with immuneML, there are four options:
 
-1. Using immuneML from Galaxy (no programming experience required, the functionality is available through a web interface, see :ref:`immuneML & Galaxy`).
+1. Using `immuneML through Galaxy <https://galaxy.immuneml.uio.no>`_ (no installation or programming experience required, see :ref:`immuneML & Galaxy`).
 
 2. Using immuneML with Docker (:ref:`Setting up immuneML with Docker`)
 

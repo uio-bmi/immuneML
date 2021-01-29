@@ -24,8 +24,7 @@ from immuneML.util.StringHelper import StringHelper
 
 class HPHTMLBuilder:
     """
-    A class that will make HTML file(s) out of HPOptimizationState object to show what analysis took place in
-    the TrainMLModel.
+    A class that will make HTML file(s) out of TrainMLModelState object to show what analysis took place in the TrainMLModel.
     """
 
     CSS_PATH = EnvironmentSettings.html_templates_path / "css/custom.css"

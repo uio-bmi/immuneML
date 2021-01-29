@@ -28,6 +28,8 @@ It is not necessary to implement the encoding for all dataset types, since some 
 if such a combination is specified (i.e., if the method `build_object(dataset: Dataset, params)` receives an illegal dataset type), the encoder class
 should raise an error and the process will be terminated.
 
+.. include:: ./dev_docs_util.rst
+
 Implementing the encode() method in a new encoder class
 ---------------------------------------------------------
 

@@ -6,44 +6,50 @@ algorithm, the ExploratoryAnalysis instruction should be used. The components in
 definitions section are defined in the same manner as for all other instructions
 (see: :ref:`How to specify an analysis with YAML`).
 The instruction consists of a list of analyses to be performed. Each analysis should
-contain at least a dataset and a report. Optionally, the analysis may also contain an
-encoding along with the labels. Encoding reports can be run only if encoding and labels
-are defined. In the example below, analysis_1 runs report r1 directly on dataset d1,
-whereas in analysis_2 dataset d1 is encoded first using e1 before running report r2.
+contain at least a :code:`dataset` and a :code:`report`. Optionally, the analysis may also contain an
+:code:`encoding` along with :code:`labels` if applicable.
+In the example below, *my_analysis_1* runs report *my_seq_lengths* directly on dataset *my_dataset*,
+whereas in *my_analysis_2* dataset *my_dataset* is encoded first *using my_regex_matches* before running *report my_matches*.
 
 .. highlight:: yaml
 .. code-block:: yaml
 
   definitions:
     datasets:
-      d1:
+      my_dataset: # user-defined dataset name
         format: AIRR
         params:
           metadata_file: /path/to/metadata.csv
           path: /path/to/data/
 
     encodings:
-      e1:
-        MatchedSequences:
-          reference:
-            path: /path/to/file.tsv
-            format: VDJdb
-          max_edit_distance: 1
+      my_regex_matches:
+        MatchedRegex:
+          motif_filepath: path/to/regex_file.tsv
 
     reports:
-      r1: SequenceLengthDistribution # a report with default parameters
-      r2: Matches # a report with default parameters
+      my_seq_lengths: SequenceLengthDistribution # reports without parameters
+      my_matches: Matches
 
   instructions:
-    instruction_1:
+    my_instruction: # user-defined instruction name
       type: ExploratoryAnalysis
       analyses:
-        analysis_1: # this user-defined name of the analysis is later used as a folder name in results
-          dataset: d1
-          report: r1
-        analysis_2:
-          dataset: d1
-          encoding: e1
-          report: r2
-          labels:
-              - disease
+        my_analysis_1: # user-defined analysis name
+          dataset: my_dataset
+          report: my_seq_lengths
+        my_analysis_2:
+          dataset: my_dataset
+          encoding: my_regex_matches
+          report: my_matches
+
+Where the file regex_file.tsv must be a tab-separated file, which may contain the following lines:
+
+====  ==========
+id    TRB_regex
+====  ==========
+1     ACG
+2     EDNA
+3     DFWG
+====  ==========
+

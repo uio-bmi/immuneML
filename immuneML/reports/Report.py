@@ -10,6 +10,7 @@ class Report(metaclass=abc.ABCMeta):
     from parameters and generate() the report once all properties are set (in immuneML this will be taken care of by the instructions). If there are
     any prerequisites needed to run the report (e.g., check if all parameter values are properly set), the check_prerequisites function should be
     overwritten to reflect that and determine if everything is set before generate() is run. See specific functions for more details.
+
     """
 
     def __init__(self, name: str = None):
@@ -23,11 +24,16 @@ class Report(metaclass=abc.ABCMeta):
         the report, the parameters provided here will be provided in parsing time, while the other necessary parameters (e.g., subset of the data from
         which the report should be created) will be provided at runtime. For more details, see specific direct subclasses of this class, describing
         different types of reports.
+
         Args:
+
             **kwargs: keyword arguments that will be provided by users in the specification (if immuneML is used as a command line tool) or in the
              dictionary when calling the method from the code, and which should be used to create the report object
+
         Returns:
+
             the object of the appropriate report class
+
         """
         pass
 
@@ -37,9 +43,12 @@ class Report(metaclass=abc.ABCMeta):
         The function that needs to be implemented by the Report subclasses which actually creates the report (figures, tables, text files), depending
         on the specific aim of the report. After checking all prerequisites (e.g., if all parameters were set properly), generate_report() will call
         this function and return its result.
+
         Returns:
+
             ReportResult object which encapsulates all outputs (figure, table, and text files) so that they can be conveniently linked to in the
             final output of instructions
+
         """
         pass
 
@@ -50,7 +59,9 @@ class Report(metaclass=abc.ABCMeta):
         determine whether to call generate_report() in the specific situation. Each report subclass has its own set of prerequisites. If the report
         cannot be run, the information on this will be logged and the report skipped in the specific situation. No error will be raised. See
         subclasses of the class :py:obj:`~immuneML.workflows.instructions.Instruction.Instruction` for more information on how the reports are executed.
-        Returns boolean value True if the prerequisites are o.k., and False otherwise.
+
+        Returns:
+             boolean value True if the prerequisites are o.k., and False otherwise.
         """
         return True
 
@@ -61,12 +72,18 @@ class Report(metaclass=abc.ABCMeta):
         between all repertoires based on the sequence content, it is possible to store the full dataset in the context, compute the distances on the
         full dataset and then only extract the distances need for the current dataset in the later calls (e.g., when training dataset is passed as
         input). Only some reports will need this functionality.
+
         Warning: It is very important to be careful when using the context to avoid leaking the information between training and test datasets.
+
         Args:
+
             context (dict): a dictionary where the values are variables that are typically only available on the top-level of the instruction, and
-            which are used to precompute results in order to speed up subsequent generation of the same report on subsets of those values.
+                which are used to precompute results in order to speed up subsequent generation of the same report on subsets of those values.
+
         Returns:
+
             self - so that it can be chained with the other function calls
+
         """
         return self
 
@@ -74,9 +91,12 @@ class Report(metaclass=abc.ABCMeta):
         """
         Generates a report of the given class if the prerequisites are satisfied. It handles all exceptions so that if there is an error while
         generating a report, the execution of the rest of the code (e.g., more time-expensive parts, like instructions) is not influenced.
+
         Returns:
+
             ReportResult object which encapsulates all outputs (figure, table, and text files) so that they can be conveniently linked to in the
             final output of instructions
+
         """
         try:
             if self.check_prerequisites():
@@ -90,11 +110,17 @@ class Report(metaclass=abc.ABCMeta):
         A wrapper around the function _plot() which catches any error that may be thrown by this function (e.g. errors in R),
         and shows an informative warning message instead. This is to prevent immuneML from crashing when the analysis has been
         completed but only a figure could not be plotted.
+
         Args:
+
             output_written: indicates whether the output was written to a file, this changes the error message.
+
             kwargs: passed to _plot()
+
         Returns:
+
             the results of _plot(), typically a ReportOutput object
+
         """
         warning_mssg = f"{self.__class__.__name__}: an error occurred when attempting to plot the data. \n"
         if output_written:

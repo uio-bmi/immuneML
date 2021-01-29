@@ -4,11 +4,11 @@ YAML specification
 .. toctree::
    :maxdepth: 2
 
-The YAML specification defines which analysis should be performed by immuneML. It consists of three parts:
+The YAML specification defines which analysis should be performed by immuneML. It is defined under three main keywords:
 
-  - Definitions - describing how datasets, encodings, ML methods, preprocessing, simulations and other components are defined (i.e., their settings),
-  - Instructions - describing the parameters of the analysis that will be performed and which of the components (defined under `definitions`) will be used for this
-  - Output - describing how to format the results of the analysis (currently, only HTML output is supported).
+  - :code:`definitions` - describing the settings of :code:`datasets`, :code:`encodings`, :code:`ml_methods`, :code:`preprocessing_sequences`, :code:`reports`, :code:`simulations` and other components,
+  - :code:`instructions` - describing the parameters of the analysis that will be performed and which of the analysis components (defined under :code:`definitions`) will be used for this
+  - :code:`output` - describing how to format the results of the analysis (currently, only HTML output is supported).
 
 The purpose of this page is to list all the YAML specification options. If you are not familiar with the YAML specification and get started, see
 :ref:`How to specify an analysis with YAML`.

@@ -34,10 +34,11 @@ If the report will be used to analyze a Dataset (such as a RepertoireDataset), e
 report is the DataReport, which should typically be used when summarizing some qualities of a Dataset. This Dataset can be found in the report
 attribute dataset.
 
-Use the EncodingReport when it is necessary to access the encoded_data attribute of a Dataset. This report should be used when the data
+Use the EncodingReport when it is necessary to access the encoded_data attribute of a `Dataset`. The encoded_data attribute is an instance of a
+:py:obj:`source.data_model.encoded_data.EncodedData.EncodedData` class. This report should be used when the data
 representation first needs to be changed before running the report, either through an existing or a custom encoding (see:
 :ref:`How to add a new encoding`). For example, the :ref:`Matches` report represents a RepertoireDataset based on matches to a given reference
-dataset, and must first be encoded using a MatchedSequencesEncoder, MatchedReceptorsEncoder or MatchedRegexEncoder.
+dataset, and must first be encoded using a :ref:`MatchedSequences`, :ref:`MatchedReceptors` or :ref:`MatchedRegex`.
 
 When the results of an experiment with a machine learning method should be analyzed, an MLReport or TrainMLModelReport should be used. These reports
 are a bit more advanced and require more understanding of the TrainMLModelInstruction. The MLReport should be used when plotting statistics or
@@ -94,6 +95,8 @@ during execution, as this might cause lost results. Situations to consider are:
   - When implementing an EncodingReport, use this function to check that the data has been encoded and that the correct encoder has been used.
   - Similarly, when creating an MLReport or TrainMLModelReport, check that the appropriate ML methods have been used.
 
+.. include:: ./dev_docs_util.rst
+
 .. note::
 
   Please see the :py:obj:`immuneML.reports.Report.Report` class for the detailed description of the methods to be implemented.
@@ -104,6 +107,68 @@ Unit testing the new report
 For each report, a unit test should be added under the correct package inside test.reports. Here, the `generate()` method of the new report should be
 tested, as well as other relevant methods, to ensure that the report output is correct. When building tests for reports, a useful class is
 :py:obj:`immuneML.simulation.dataset_generation.RandomDatasetGenerator.RandomDatasetGenerator`, which can create a dataset with random sequences.
+
+Adding documentation for the new report
+-----------------------------------------
+
+After implementing the desired functionality, the documentation for the report should be added, so that the users of immuneML have sufficient information when deciding to use the report. It should be added to the docstring and consist of the following components:
+
+  #. A short description of what the report is meant for.
+  #. Optional extended description, including any references or specific cases that should bee considered.
+  #. List of arguments the report takes as input. If the report does not take any arguments other than the ones provided by the immuneML in runtime depending on the report type (such as training and test dataset or trained method), there should be only a short statement that the report does not take input arguments.
+  #. An example of how the report can be specified in YAML.
+
+Here is an example of a documentation for the :ref:`DesignMatrixExporter` report that has no input arguments which can be provided by the user in the YAML
+specification (the encoded dataset to be exported will be provided by immuneML at runtime):
+
+.. code-block:: text
+
+  Exports the design matrix and related information of a given encoded Dataset to csv files. If the encoded data has more than 2 dimensions
+  (such as when using the OneHot encoder with option Flatten=False), the data are instead exported to .npy format and can be imported later outside of
+  immuneML using numpy package and numpy.load() function.
+
+  There are no input arguments for this report.
+
+  YAML specification:
+
+  .. code-block:: yaml
+
+      my_dme_report: DesignMatrixExporter
+
+Here is an example of documentation for the :ref:`MLSettingsPerformance` report with user-defined input arguments:
+
+.. code-block:: text
+
+  Report for TrainMLModel instruction that plots the performance for each of the setting combinations as defined under 'settings' in the
+  assessment (outer validation) loop.
+
+  The performances are grouped by label (horizontal panels) encoding (vertical panels) and ML method (bar color).
+  When multiple data splits are used, the average performance over the data splits is shown with an error bar
+  representing the standard deviation.
+
+  This report can be used only with TrainMLModel instruction under 'reports'.
+
+
+  Arguments:
+
+      single_axis_labels (bool): whether to use single axis labels. Note that using single axis labels makes the
+      figure unsuited for rescaling, as the label position is given in a fixed distance from the axis. By default,
+      single_axis_labels is False, resulting in standard plotly axis labels.
+
+      x_label_position (float): if single_axis_labels is True, this should be an integer specifying the x axis label
+      position relative to the x axis. The default value for label_position is -0.1.
+
+      y_label_position (float): same as x_label_position, but for the y axis.
+
+  YAML specification:
+
+    .. indent with spaces
+    .. code-block:: yaml
+
+        my_hp_report: MLSettingsPerformance
+
+
+When the docstrings are defined in this way, the documentation generated from them can be used directly on the documentation website.
 
 Test run of the report: specifying the new report in YAML
 -----------------------------------------------------------

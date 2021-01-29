@@ -73,25 +73,25 @@ The analysis specification consists of three main parts: definitions, instructio
 Specifying Definitions
 ^^^^^^^^^^^^^^^^^^^^^^
 
-Definitions refer to components, which will be used within the instructions. They include:
+:code:`definitions refer to components, which will be used within the instructions. They include:
 
-- Datasets definitions: specifying where data is located and how it should be imported,
+- :code:`datasets`: specifying where data is located, what format the data is in, and how it should be imported (see :ref:`How to import data into immuneML` for more details),
 
-- Preprocessing sequences: defining one or more preprocessing steps to be taken on the dataset,
+- :code:`preprocessing_sequences`: defining one or more preprocessing steps to be taken on the dataset (this is optional),
 
-- Encodings: different data representation techniques,
+- :code:`encodings`: different data representations,
 
-- ML methods: different machine learning methods (e.g., SVM or KNN),
+- :code:`ml_methods`: different machine learning methods (e.g., SVM or KNN),
 
-- Reports: specific analysis to be run on different parts of the data, ML methods or results.
+- :code:`reports`: specific plots or statistics to apply to the raw or encoded data, ML methods or results.
 
 Simulation-specific components (only relevant when running a :ref:`Simulation instruction<How to simulate antigen/disease-associated signals in AIRR datasets>`) are:
 
-- Motifs: parts of the simulation definition defined by a seed and a way to create specific motif instances from the seed,
+- :code:`motifs`: parts of the simulation definition defined by a seed and a way to create specific motif instances from the seed,
 
-- Signals: parts of the :ref:`simulation<How to simulate antigen/disease-associated signals in AIRR datasets>` which can include multiple motifs and correspond to a single label for subsequent classification tasks,
+- :code:`signals`: parts of the simulation which can include multiple motifs and correspond to a single label for subsequent classification tasks,
 
-- :ref:`Simulations<How to simulate antigen/disease-associated signals in AIRR datasets>`: define how to combine different signals and how to implant them in the dataset.
+- :code:`simulations`: define how to combine different signals and how to implant them in the dataset.
 
 Each component is defined using a key (a string) that uniquely identifies it and which
 will be used in the instructions to refer to the component defined in this way.
@@ -101,11 +101,12 @@ For example, the import of a dataset may be defined as follows:
 .. highlight:: yaml
 .. code-block:: yaml
 
-  my_dataset: # user-defined key (dataset name)
-    format: AIRR
-    params:
-      path: /path/to/data/
-      metadata_file: /path/to/metadata.csv
+  datasets:
+    my_dataset: # user-defined key (dataset name)
+      format: AIRR
+      params:
+        path: /path/to/data/
+        metadata_file: /path/to/metadata.csv
 
 
 Each definition component (listed above) is defined under its own key.
@@ -234,7 +235,7 @@ To run an instruction via command line with the given YAML specification file:
 
   immune-ml path/to/specification.yaml result/folder/path/
 
-Alternatively, create an ImmuneMLApp object in a Python script and pass it the path parameter to the constructor before calling its `run()` method as follows:
+Alternatively, create an ImmuneMLApp object in a Python script and pass it the path parameter to the constructor before calling its :code:`run()` method as follows:
 
 .. highlight:: python
 .. code-block:: python

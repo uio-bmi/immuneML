@@ -1,11 +1,15 @@
-Train immune repertoire classifiers
-=========================================
+How to train immune repertoire classifiers using the simplified Galaxy interface
+=============================================================================
 
-This page provides the documentation for the Galaxy tool 'Train immune repertoire classifiers'.
+This page provides the documentation for the Galaxy tool `Train immune repertoire classifiers (simplified interface) <https://galaxy.immuneml.uio.no/root?tool_id=novice_immuneml_interface>`_.
 The purpose of this tool is to train machine learning (ML) models to predict a characteristic per immune repertoire, such as
 a disease status. One or more ML models are trained to classify repertoires based on the information within the sets of CDR3 sequences. Finally, the performance
 of the different methods is compared.
-Alternatively, if you want to predict a property per immune receptor, such as antigen specificity, check out the ‘Train immune receptor classifiers’ tool instead.
+Alternatively, if you want to predict a property per immune receptor, such as antigen specificity, check out the
+`Train immune receptor classifiers (simplified interface) <https://galaxy.immuneml.uio.no/root?tool_id=immuneml_train_classifiers>`_ tool instead.
+
+An example Galaxy history showing how to use this tool `can be found here <https://galaxy.immuneml.uio.no/u/immuneml/h/repertoire-classification-simplified-interface>`_.
+
 
 Basic terminology
 -----------------
@@ -34,7 +38,7 @@ answers to the last two questions in the graphical user interface.
   The disease-associated sequences or sub-sequences are highlighted with color. The different colors represent independent elements of the disease signal.
   Each color represents one (sub)sequence, and position dependent subsequences can only have the same color when they occur in the same position,
   although different colors (i.e., nucleotide or amino acid sequences) may occur in the same position.
-  Training: the training and validation data is used to train ML models and find the optimal hyper-parameters through 5-fold cross-validation.
+  Training: the training and validation data is used to train ML models and find the optimal hyperparameters through 5-fold cross-validation.
   The test set is left out and is used to obtain a fair estimate of the model performance.
 
 Encoding
@@ -68,7 +72,7 @@ Different ML methods require different procedures for training. In addition to t
 do not directly change the predictions of a model, but they control the learning process (for example: the learning speed).
 
 The immune repertoires are divided into sets with different purposes: the training and validation sets are used for finding the optimal parameters
-and hyper-parameters respectively. The test set is held out, and is only used to estimate the performance of a trained model.
+and hyperparameters respectively. The test set is held out, and is only used to estimate the performance of a trained model.
 
 In this tool, a range of plausible hyperparameters have been predefined for each ML method. The optimal hyperparameters are found by splitting the
 training/validation data into 5 equal portions, where 4 portions are used to train the ML model (with different hyperparameters) and the remaining
@@ -78,12 +82,30 @@ is also referred to as 5-fold cross-validation.
 
 The whole process may be repeated multiple times with different randomly selected repertoires in the test set, to see how robust the performance is.
 
+
+Tool output
+---------------------------------------------
+This Galaxy tool will produce the following history elements:
+
+- Summary: repertoire classification: a HTML page that allows you to browse through all results, including prediction accuracies on
+  the various data splits and plots showing the performance of classifiers and learned parameters.
+
+- Archive: repertoire classification : a .zip file containing the complete output folder as it was produced by immuneML. This folder
+  contains the output of the TrainMLModel instruction including all trained models and their predictions, and report results.
+  Furthermore, the folder contains the complete YAML specification file for the immuneML run, the HTML output and a log file.
+
+- optimal_ml_settings.zip: a .zip file containing the raw files for the optimal trained ML settings (ML model, encoding).
+  This .zip file can subsequently be used as an input when :ref:`applying previously trained ML models to a new AIRR dataset in Galaxy <How to apply previously trained ML models to a new AIRR dataset in Galaxy>`
+
+- repertoire_classification.yaml: the YAML specification file that was used by immuneML internally to run the analysis. This file can be
+  downloaded, altered, and run again by immuneML using the :ref:`YAML-based Galaxy tool <How to train ML models in Galaxy>`.
+
 More analysis options
 ----------------------
 
 A limited selection of immuneML options is available through this tool. If you wish to have full control of the analysis, consider using the tool described under
-:ref:`How to run an AIRR ML analysis in Galaxy`. This tool provides other encodings and machine learning methods to choose from, as well as
+:ref:`How to train ML models in Galaxy`. This tool provides other encodings and machine learning methods to choose from, as well as
 data preprocessing and settings for hyperparameter optimization. The interface of the YAML-based tool expects more independence and knowledge about
-machine learning from the user. Information about how to specify an analysis with YAML can be found in the :ref:`How to specify an analysis with YAML`.
+machine learning from the user. See also :ref:`How to specify an analysis with YAML`.
 
 
