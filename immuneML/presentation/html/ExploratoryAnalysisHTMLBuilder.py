@@ -47,15 +47,20 @@ class ExploratoryAnalysisHTMLBuilder:
                 "dataset_type": StringHelper.camel_case_to_word_string(type(analysis.dataset).__name__),
                 "example_count": analysis.dataset.get_example_count(),
                 "dataset_size": f"{analysis.dataset.get_example_count()} {type(analysis.dataset).__name__.replace('Dataset', 's').lower()}",
-                "show_labels": analysis.label_config is not None,
+                "show_labels": analysis.label_config is not None and len(analysis.label_config.get_labels_by_name()) > 0,
                 "labels": [{"name": label.name, "values": str(label.values)[1:-1]}
                            for label in analysis.label_config.get_label_objects()] if analysis.label_config else None,
+                "encoding_key": analysis.encoder.name if analysis.encoder is not None else None,
                 "encoding_name": StringHelper.camel_case_to_word_string(type(analysis.encoder).__name__) if analysis.encoder is not None
                 else None,
-                "encoding_params": vars(analysis.encoder) if analysis.encoder is not None else None,
+                "encoding_params": [{"param_name": key, "param_value": value} for key, value in vars(analysis.encoder).items()] if analysis.encoder is not None else None,
                 "show_encoding": analysis.encoder is not None,
                 "report": Util.to_dict_recursive(analysis.report_result, base_path)
             } for name, analysis in state.exploratory_analysis_units.items()]
         }
+
+        for analysis in html_map["analyses"]:
+            analysis["show_tables"] = len(analysis["report"]["output_tables"]) > 0
+
 
         return html_map
