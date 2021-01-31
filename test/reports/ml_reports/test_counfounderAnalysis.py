@@ -3,18 +3,27 @@ import shutil
 from unittest import TestCase
 
 import numpy as np
-import pandas as pd
 import yaml
 
 from immuneML.caching.CacheType import CacheType
-from immuneML.data_model.dataset.RepertoireDataset  import RepertoireDataset
+from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
 from immuneML.data_model.encoded_data.EncodedData import EncodedData
 from immuneML.environment.Constants import Constants
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.ml_methods.LogisticRegression import LogisticRegression
-from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.ml_reports.ConfounderAnalysis import ConfounderAnalysis
+from immuneML.simulation.Implanting import Implanting
+from immuneML.simulation.Simulation import Simulation
+from immuneML.simulation.SimulationState import SimulationState
+from immuneML.simulation.dataset_generation.RandomDatasetGenerator import RandomDatasetGenerator
+from immuneML.simulation.implants.Motif import Motif
+from immuneML.simulation.implants.Signal import Signal
+from immuneML.simulation.motif_instantiation_strategy.GappedKmerInstantiation import GappedKmerInstantiation
+from immuneML.simulation.sequence_implanting.GappedMotifImplanting import GappedMotifImplanting
+from immuneML.simulation.signal_implanting_strategy.HealthySequenceImplanting import HealthySequenceImplanting
+from immuneML.simulation.signal_implanting_strategy.ImplantingComputation import ImplantingComputation
 from immuneML.util.PathBuilder import PathBuilder
+from immuneML.workflows.steps.SignalImplanter import SignalImplanter
 
 
 class TestConfounderAnalysis(TestCase):
@@ -35,6 +44,33 @@ class TestConfounderAnalysis(TestCase):
 
         return dummy_lr
 
+    def _make_dataset(self, path, size) -> RepertoireDataset:
+
+        random_dataset = RandomDatasetGenerator.generate_repertoire_dataset(repertoire_count=size, sequence_count_probabilities={100: 1.},
+                                                                            sequence_length_probabilities={5: 1.}, labels={}, path=path)
+
+        signals = [Signal(identifier="disease", motifs=[Motif(identifier="m1", instantiation=GappedKmerInstantiation(), seed="AAA")],
+                          implanting_strategy=HealthySequenceImplanting(implanting_computation=ImplantingComputation.ROUND,
+                                                                        implanting=GappedMotifImplanting())),
+                   Signal(identifier="HLA", motifs=[Motif(identifier="m2", instantiation=GappedKmerInstantiation(), seed="CCC")],
+                          implanting_strategy=HealthySequenceImplanting(implanting_computation=ImplantingComputation.ROUND,
+                                                                        implanting=GappedMotifImplanting())),
+                   Signal(identifier="age", motifs=[Motif(identifier="m3", instantiation=GappedKmerInstantiation(), seed="GGG")],
+                          implanting_strategy=HealthySequenceImplanting(implanting_computation=ImplantingComputation.ROUND,
+                                                                        implanting=GappedMotifImplanting()))]
+
+        simulation = Simulation([Implanting(dataset_implanting_rate=0.2, signals=signals, name='i1', repertoire_implanting_rate=0.25),
+                                 Implanting(dataset_implanting_rate=0.2, signals=[signals[0], signals[1]], name='i2', repertoire_implanting_rate=0.25),
+                                 Implanting(dataset_implanting_rate=0.1, signals=[signals[0]], name='i3', repertoire_implanting_rate=0.25),
+                                 Implanting(dataset_implanting_rate=0.2, signals=[signals[2]], name='i4', repertoire_implanting_rate=0.25),
+                                 Implanting(dataset_implanting_rate=0.1, signals=[signals[1]], name='i5', repertoire_implanting_rate=0.25)
+                                 ])
+
+        dataset = SignalImplanter.run(SimulationState(signals=signals, dataset=random_dataset, formats=['Pickle'], result_path=path,
+                                                      name='my_synthetic_dataset', simulation=simulation))
+
+        return dataset
+
     def _create_report(self, path):
         # todo add HLA
         report = ConfounderAnalysis.build_object(**{"additional_labels": ["signal_age"]})
@@ -47,19 +83,22 @@ class TestConfounderAnalysis(TestCase):
         report.ml_details_path = path / "ml_details.yaml"
         report.label = "signal_disease"
         report.result_path = path
-        report.train_dataset = RepertoireDataset()
+        report.train_dataset = self._make_dataset(path / "train", size=100)
         report.train_dataset.encoded_data = encoded_data
-        report.test_dataset = RepertoireDataset()
+        report.test_dataset = self._make_dataset(path / "test", size=40)
         report.test_dataset.encoded_data = encoded_data
 
         return report
 
     def test_generate(self):
-        path = EnvironmentSettings.root_path / "test/tmp/logregconfreport/"
+        path = EnvironmentSettings.tmp_test_path / "confounder_report/"
         PathBuilder.build(path)
 
         report = self._create_report(path)
 
         # Running the report
         result = report.generate_report()
-        return report
+
+        # test results here ...
+
+        shutil.rmtree(path)
