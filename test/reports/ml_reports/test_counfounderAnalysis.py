@@ -1,14 +1,9 @@
 import os
-import shutil
 from unittest import TestCase
-
-import numpy as np
-import yaml
 
 from immuneML.analysis.data_manipulation.NormalizationType import NormalizationType
 from immuneML.caching.CacheType import CacheType
 from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
-from immuneML.data_model.encoded_data.EncodedData import EncodedData
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.encodings.kmer_frequency.KmerFrequencyEncoder import KmerFrequencyEncoder
 from immuneML.encodings.kmer_frequency.ReadsType import ReadsType
@@ -77,7 +72,7 @@ class TestConfounderAnalysis(TestCase):
 
         return dataset
 
-    def _encode_dataset(self, dataset, path):
+    def _encode_dataset(self, dataset, path, learn_model: bool = True):
         encoder = KmerFrequencyEncoder.build_object(dataset, **{
             "normalization_type": NormalizationType.RELATIVE_FREQUENCY.name,
             "reads": ReadsType.UNIQUE.name,
@@ -89,7 +84,7 @@ class TestConfounderAnalysis(TestCase):
         encoded_dataset = encoder.encode(dataset, EncoderParams(
             result_path=path / "encoded",
             label_config=lc,
-            learn_model=True,
+            learn_model=learn_model,
             model={}
         ))
         return encoded_dataset
@@ -104,11 +99,9 @@ class TestConfounderAnalysis(TestCase):
         report.ml_details_path = path / "ml_details.yaml"
         report.label = "signal_disease"
         report.result_path = path
-        report.train_dataset = self._make_dataset(path / "train", size=100)
-        report.train_dataset.encoded_data = self._encode_dataset(report.train_dataset, path / "train").encoded_data
-        report.test_dataset = self._make_dataset(path / "test", size=40)
-        report.test_dataset.encoded_data = self._encode_dataset(report.test_dataset, path / "test").encoded_data
-        report.method = self._create_dummy_lr_model(path, report.test_dataset.encoded_data)
+        report.train_dataset = self._encode_dataset(self._make_dataset(path / "train", size=100), path)
+        report.test_dataset = self._encode_dataset(self._make_dataset(path / "test", size=40), path, learn_model=False)
+        report.method = self._create_dummy_lr_model(path, report.train_dataset.encoded_data)
 
         return report
 
@@ -119,8 +112,8 @@ class TestConfounderAnalysis(TestCase):
         report = self._create_report(path)
 
         # Running the report
-        result = report.generate_report()
+        result = report._generate()
 
         # test results here ...
 
-        #shutil.rmtree(path)
+        # shutil.rmtree(path)

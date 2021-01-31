@@ -1,8 +1,8 @@
 from pathlib import Path
-from typing import List
-import plotly.express as px
+
 import numpy as np
 import pandas as pd
+import plotly.express as px
 
 from immuneML.data_model.dataset.Dataset import Dataset
 from immuneML.hyperparameter_optimization.HPSetting import HPSetting
@@ -80,8 +80,7 @@ class ConfounderAnalysis(MLReport):
                         title=f"{output_name}")
         figure.update_traces(marker_color=px.colors.sequential.Teal[3])
 
-        with filename.open("w") as file:
-            figure.write_html(file)
+        figure.write_html(str(filename))
 
         return ReportOutput(filename)
 
