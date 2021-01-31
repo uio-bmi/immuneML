@@ -21,16 +21,17 @@ class ConfounderAnalysis(MLReport):
     @classmethod
     def build_object(cls, **kwargs):
         # add checks?
-        additional_labels = kwargs["additional_labels"]
+        # additional_labels = kwargs["additional_labels"]
 
-        return ConfounderAnalysis(additional_labels=additional_labels)
+        # return ConfounderAnalysis(additional_labels=additional_labels)
+        return ConfounderAnalysis(**kwargs)
 
-    def __init__(self, additional_labels: List[str], train_dataset: Dataset = None, test_dataset: Dataset = None,
+    def __init__(self, train_dataset: Dataset = None, test_dataset: Dataset = None,
                  method: MLMethod = None,
                  result_path: Path = None, name: str = None, hp_setting: HPSetting = None, label=None):
         super().__init__(train_dataset, test_dataset, method, result_path, name, hp_setting, label)
 
-        self._additional_labels = additional_labels
+        # self._additional_labels = additional_labels
 
     def _generate(self) -> ReportResult:
         PathBuilder.build(self.result_path)
@@ -38,27 +39,35 @@ class ConfounderAnalysis(MLReport):
 
         # make predictions
         predictions = self.method.predict(self.test_dataset.encoded_data, self.label)  # label = disease
-        additional_labels = self.test_dataset.get_metadata(
-            self._additional_labels)  # labels: ["signal_HLA", "signal_age"]
-        true_labels = {"age": additional_labels['signal_age'],
-                       self.label: self.test_dataset.encoded_data.labels[self.label],
-                       "hla": additional_labels['signal_HLA']}
 
-        fp_inds = np.nonzero(np.greater(predictions, true_labels[self.label]))
-        age_inds = true_labels["age"][fp_inds]
+        # additional_labels = self.test_dataset.get_metadata(
+        #     self._additional_labels)  # labels: ["signal_HLA", "signal_age"]
+        # true_labels = {"age": additional_labels['signal_age'],
+        #                self.label: self.test_dataset.encoded_data.labels[self.label],
+        #                "hla": additional_labels['signal_HLA']}
+        true_labels = self.test_dataset.get_metadata(["signal_disease", "signal_HLA", "signal_age"])
+
+        print("predictions done")
+        print(true_labels[self.label])
+        print(predictions["signal_disease"])
+        print("signal age", true_labels["signal_age"])
+
+        fp_inds = np.nonzero(np.greater(predictions[self.label], true_labels[self.label]))[0].tolist()
+        print("fp_inds",fp_inds)
+        age_inds = np.array(true_labels["signal_age"])[fp_inds]
         fp_age = np.count_nonzero(age_inds)
         # todo adapt later to non-binary confounders
         plotting_data_age = pd.DataFrame(
-            {"coefficients": [len(age_inds) - fp_age, fp_age], "age": [False, True]})
+            {"fps": [len(age_inds) - fp_age, fp_age], "age": [False, True]})
         report_output_fig = self._plot(plotting_data=plotting_data_age, output_name="FP_age")
         paths.append(report_output_fig)
 
-        fn_inds = np.nonzero(np.less(predictions, true_labels[self.label]))
-        age_inds = true_labels["age"][fn_inds]
+        fn_inds = np.nonzero(np.less(predictions[self.label], true_labels[self.label]))[0].tolist()
+        age_inds = np.array(true_labels["signal_age"])[fn_inds]
         fn_age = np.count_nonzero(age_inds)
         # todo adapt later to non-binary confounders
         plotting_data_age = pd.DataFrame(
-            {"coefficients": [len(age_inds) - fn_age, fn_age], "age": [False, True]})
+            {"fps": [len(age_inds) - fn_age, fn_age], "age": [False, True]})
         report_output_fig = self._plot(plotting_data=plotting_data_age, output_name="FN_age")
         paths.append(report_output_fig)
 

@@ -5,11 +5,17 @@ from unittest import TestCase
 import numpy as np
 import yaml
 
+from immuneML.analysis.data_manipulation.NormalizationType import NormalizationType
 from immuneML.caching.CacheType import CacheType
 from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
 from immuneML.data_model.encoded_data.EncodedData import EncodedData
+from immuneML.encodings.EncoderParams import EncoderParams
+from immuneML.encodings.kmer_frequency.KmerFrequencyEncoder import KmerFrequencyEncoder
+from immuneML.encodings.kmer_frequency.ReadsType import ReadsType
+from immuneML.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType import SequenceEncodingType
 from immuneML.environment.Constants import Constants
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
+from immuneML.environment.LabelConfiguration import LabelConfiguration
 from immuneML.ml_methods.LogisticRegression import LogisticRegression
 from immuneML.reports.ml_reports.ConfounderAnalysis import ConfounderAnalysis
 from immuneML.simulation.Implanting import Implanting
@@ -37,10 +43,10 @@ class TestConfounderAnalysis(TestCase):
         dummy_lr.fit_by_cross_validation(encoded_data,
                                          number_of_splits=2, label_name="signal_disease")
 
-        file_path = path / "ml_details.yaml"
-        with file_path.open("w") as file:
-            yaml.dump({"signal_disease": {"feature_names": ["feat1", "feat2", "signal_age"]}},
-                      file)
+        # file_path = path / "ml_details.yaml"
+        # with file_path.open("w") as file:
+        #     yaml.dump({"signal_disease": {"feature_names": ["feat1", "feat2", "signal_age"]}},
+        #               file)
 
         return dummy_lr
 
@@ -71,22 +77,38 @@ class TestConfounderAnalysis(TestCase):
 
         return dataset
 
+    def _encode_dataset(self, dataset, path):
+        encoder = KmerFrequencyEncoder.build_object(dataset, **{
+            "normalization_type": NormalizationType.RELATIVE_FREQUENCY.name,
+            "reads": ReadsType.UNIQUE.name,
+            "sequence_encoding": SequenceEncodingType.CONTINUOUS_KMER.name,
+            "k": 3
+        })  # encodes the repertoire by frequency of 3-mers
+        lc = LabelConfiguration()
+        lc.add_label("signal_disease", [True, False])
+        encoded_dataset = encoder.encode(dataset, EncoderParams(
+            result_path=path / "encoded",
+            label_config=lc,
+            learn_model=True,
+            model={}
+        ))
+        return encoded_dataset
+
     def _create_report(self, path):
-        # todo add HLA
-        report = ConfounderAnalysis.build_object(**{"additional_labels": ["signal_age"]})
+        report = ConfounderAnalysis.build_object()
 
-        encoded_data = EncodedData(examples=np.hstack((np.random.randn(100,2), np.random.choice([0, 1], size=(100,1), p=[1. / 3, 2. / 3]))),
-                                   labels={"signal_disease": list(np.random.choice([0, 1], size=(100,), p=[1. / 3, 2. / 3]))},
-                                   feature_names=["feat1", "feat2", "signal_age"])
+        # encoded_data = EncodedData(examples=np.hstack((np.random.randn(40,2), np.random.choice([0, 1], size=(40,1), p=[1. / 3, 2. / 3]))),
+        #                            labels={"signal_disease": list(np.random.choice([0, 1], size=(40,), p=[2. / 3, 1. / 3]))},
+        #                            feature_names=["feat1", "feat2", "signal_age"])
 
-        report.method = self._create_dummy_lr_model(path, encoded_data)
         report.ml_details_path = path / "ml_details.yaml"
         report.label = "signal_disease"
         report.result_path = path
         report.train_dataset = self._make_dataset(path / "train", size=100)
-        report.train_dataset.encoded_data = encoded_data
+        report.train_dataset.encoded_data = self._encode_dataset(report.train_dataset, path / "train").encoded_data
         report.test_dataset = self._make_dataset(path / "test", size=40)
-        report.test_dataset.encoded_data = encoded_data
+        report.test_dataset.encoded_data = self._encode_dataset(report.test_dataset, path / "test").encoded_data
+        report.method = self._create_dummy_lr_model(path, report.test_dataset.encoded_data)
 
         return report
 
@@ -101,4 +123,4 @@ class TestConfounderAnalysis(TestCase):
 
         # test results here ...
 
-        shutil.rmtree(path)
+        #shutil.rmtree(path)
