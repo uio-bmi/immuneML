@@ -43,8 +43,6 @@ class MLApplicationInstruction(Instruction):
 
         dataset: dataset for which examples need to be classified
 
-        label: name of the label that should be predicted (e.g., CMV, celiac_disease)
-
         config_path: path to the zip file exported from MLModelTraining instruction (which includes train ML model, encoder, preprocessing etc.)
 
         number_of_processes (int): number of processes to use for prediction

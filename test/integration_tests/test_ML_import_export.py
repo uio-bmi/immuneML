@@ -122,7 +122,6 @@ class TestMLIE(TestCase):
                     "type": "MLApplication",
                     "dataset": "d1",
                     "config_path": str(path / "result_export/inst1/optimal_CD/zip/ml_model_CD.zip"),
-                    "label": "CD",
                     "number_of_processes": 4,
                     "store_encoded_data": False
                 }

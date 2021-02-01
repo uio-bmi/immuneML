@@ -32,7 +32,7 @@ class GalaxyMLApplicationTool(GalaxyTool):
 
         instruction_name = Util.check_instruction_type(specs, GalaxyMLApplicationTool.__name__, MLApplicationInstruction.__name__[:-11])
 
-        ParameterValidator.assert_keys_present(list(specs['instructions'][instruction_name].keys()), ["dataset", "config_path", "label"],
+        ParameterValidator.assert_keys_present(list(specs['instructions'][instruction_name].keys()), ["dataset", "config_path"],
                                                GalaxyMLApplicationTool.__name__, instruction_name)
 
         assert os.path.isfile(specs['instructions'][instruction_name]['config_path']), \
