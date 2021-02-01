@@ -82,7 +82,7 @@ class CountPerSequenceFilter(Filter):
             indices_to_keep[np.logical_not(not_none_indices)] = True
             np.greater_equal(counts, params["low_count_limit"], out=indices_to_keep, where=not_none_indices)
 
-        processed_repertoire = Repertoire.build_like(repertoire, indices_to_keep, params["result_path"])
+        processed_repertoire = Repertoire.build_like(repertoire, indices_to_keep, params["result_path"], filename_base=f"{repertoire.data_filename.stem}_filtered")
 
         return processed_repertoire
 
