@@ -66,7 +66,7 @@ class Repertoire(DatasetItem):
               v_subgroups: list = None, j_subgroups: list = None, v_alleles: list = None, j_alleles: list = None,
               chains: list = None, counts: list = None, region_types: list = None, frame_types: list = None,
               custom_lists: dict = None, sequence_identifiers: list = None, path: Path = None, metadata: dict = None,
-              signals: dict = None, cell_ids: list = None):
+              signals: dict = None, cell_ids: list = None, filename_base: str = None):
 
         sequence_count = Repertoire.check_count(sequence_aas, sequences, custom_lists)
 
@@ -75,7 +75,9 @@ class Repertoire(DatasetItem):
 
         identifier = uuid4().hex
 
-        data_filename = path / f"{identifier}_data.npy"
+        filename_base = filename_base if filename_base is not None else identifier
+
+        data_filename = path / f"{filename_base}.npy"
 
         field_list, values, dtype = Repertoire.process_custom_lists(custom_lists)
 
@@ -98,7 +100,7 @@ class Repertoire(DatasetItem):
         repertoire_matrix = np.array(list(map(tuple, zip(*values))), order='F', dtype=dtype)
         np.save(data_filename, repertoire_matrix)
 
-        metadata_filename = path / f"{identifier}_metadata.pickle"
+        metadata_filename = path / f"{filename_base}_metadata.pickle"
         metadata = {} if metadata is None else metadata
         metadata["field_list"] = field_list
         with metadata_filename.open("wb") as file:
@@ -108,18 +110,19 @@ class Repertoire(DatasetItem):
         return repertoire
 
     @classmethod
-    def build_like(cls, repertoire, indices_to_keep: list, result_path: Path):
+    def build_like(cls, repertoire, indices_to_keep: list, result_path: Path, filename_base: str = None):
         if indices_to_keep is not None and len(indices_to_keep) > 0:
             PathBuilder.build(result_path)
 
             data = repertoire.load_data()
             data = data[indices_to_keep]
             identifier = uuid4().hex
+            filename_base = filename_base if filename_base is not None else identifier
 
-            data_filename = result_path / f"{identifier}_data.npy"
+            data_filename = result_path / f"{filename_base}.npy"
             np.save(data_filename, data)
 
-            metadata_filename = result_path / f"{identifier}_metadata.pickle"
+            metadata_filename = result_path / f"{filename_base}_metadata.pickle"
             shutil.copyfile(repertoire.metadata_filename, metadata_filename)
 
             new_repertoire = Repertoire(data_filename, metadata_filename, identifier)
