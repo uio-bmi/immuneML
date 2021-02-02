@@ -3,6 +3,7 @@ from pathlib import Path
 import pandas as pd
 
 from immuneML.data_model.dataset.Dataset import Dataset
+from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
 from immuneML.environment.LabelConfiguration import LabelConfiguration
 from immuneML.hyperparameter_optimization.HPSetting import HPSetting
 from immuneML.hyperparameter_optimization.core.HPUtil import HPUtil
@@ -94,6 +95,9 @@ class MLApplicationInstruction(Instruction):
         method = self.state.hp_setting.ml_method
         predictions = method.predict(dataset.encoded_data, label)
         predictions_df = pd.DataFrame({"example_id": dataset.get_example_ids(), label: predictions[label]})
+
+        if type(dataset) == RepertoireDataset:
+            predictions_df.insert(0, 'repertoire_file', [repertoire.data_filename.name for repertoire in dataset.get_data()])
 
         if method.can_predict_proba():
             classes = method.get_classes_for_label(label)
