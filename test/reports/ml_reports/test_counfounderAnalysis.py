@@ -32,11 +32,11 @@ class TestConfounderAnalysis(TestCase):
     def setUp(self) -> None:
         os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
 
-    def _create_dummy_lr_model(self, path, encoded_data):
+    def _create_dummy_lr_model(self, path, encoded_data, label):
         # dummy logistic regression with 100 observations with 3 features belonging to 2 classes
         dummy_lr = LogisticRegression()
         dummy_lr.fit_by_cross_validation(encoded_data,
-                                         number_of_splits=2, label_name="signal_disease")
+                                         number_of_splits=2, label_name=label)
 
         # file_path = path / "ml_details.yaml"
         # with file_path.open("w") as file:
@@ -90,14 +90,15 @@ class TestConfounderAnalysis(TestCase):
         return encoded_dataset
 
     def _create_report(self, path):
-        report = ConfounderAnalysis.build_object(additional_labels="signal_age")
+        # report = ConfounderAnalysis.build_object(metadata_labels=["signal_age", "signal_HLA"])
+        report = ConfounderAnalysis.build_object(metadata_labels=["signal_age", 1])
 
         report.ml_details_path = path / "ml_details.yaml"
         report.label = "signal_disease"
         report.result_path = path
         report.train_dataset = self._encode_dataset(self._make_dataset(path / "train", size=100), path)
         report.test_dataset = self._encode_dataset(self._make_dataset(path / "test", size=40), path, learn_model=False)
-        report.method = self._create_dummy_lr_model(path, report.train_dataset.encoded_data)
+        report.method = self._create_dummy_lr_model(path, report.train_dataset.encoded_data, report.label)
 
         return report
 
