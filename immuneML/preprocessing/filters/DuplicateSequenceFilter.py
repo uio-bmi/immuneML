@@ -153,7 +153,8 @@ class DuplicateSequenceFilter(Filter):
                                                 custom_lists={key: list(no_duplicates[key]) for key in custom_lists},
                                                 sequence_identifiers=list(no_duplicates["sequence_identifiers"]),
                                                 metadata=copy.deepcopy(repertoire.metadata),
-                                                path=params["result_path"])
+                                                path=params["result_path"],
+                                                filename_base=f"{repertoire.data_filename.stem}_filtered")
 
         return processed_repertoire
 

@@ -44,7 +44,7 @@ class AIRRExporter(DataExporter):
             for index, repertoire in enumerate(dataset.repertoires):
                 df = AIRRExporter._repertoire_to_dataframe(repertoire, region_type)
                 df = AIRRExporter._postprocess_dataframe(df)
-                output_file = repertoire_path / f"{repertoire.identifier}.tsv"
+                output_file = repertoire_path / f"{repertoire.data_filename.stem}.tsv"
                 airr.dump_rearrangement(df, str(output_file))
 
             AIRRExporter.export_updated_metadata(dataset, path, repertoire_folder)
@@ -84,7 +84,7 @@ class AIRRExporter(DataExporter):
     def export_updated_metadata(dataset: RepertoireDataset, result_path: Path, repertoire_folder: str):
         df = pd.read_csv(dataset.metadata_file, comment=Constants.COMMENT_SIGN)
         identifiers = df["repertoire_identifier"].values.tolist() if "repertoire_identifier" in df.columns else dataset.get_example_ids()
-        df["filename"] = [str(Path(repertoire_folder) / f"{item}.tsv") for item in identifiers]
+        df["filename"] =[str(Path(repertoire_folder) / f"{repertoire.data_filename.stem}.tsv") for repertoire in dataset.get_data()]
         df.to_csv(result_path / "metadata.csv", index=False)
 
     @staticmethod
