@@ -62,8 +62,8 @@ TrainMLModelState objects.
 Implementing the report
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
-The new report should inherit the appropriate report type and be placed in the respective package (under `immuneML.reports`, choose `data_reports`,
-`encoding_reports`, `ml_reports`, `train_ml_model_reports`, or `multidataset_reports`). The abstract method `generate()` must be implemented,
+The new report should inherit the appropriate report type and be placed in the respective package (under :code:`immuneML.reports`, choose :code:`data_reports`,
+:code:`encoding_reports`, :code:`ml_reports`, :code:`train_ml_model_reports`, or :code:`multidataset_reports`). The abstract method `generate()` must be implemented,
 which has the following responsibilities:
 
   - It should create the report results, for example, compute the data or create the plots that should be returned by the report.
@@ -83,13 +83,13 @@ report object. The parameters of the method `build_object()` can be directly spe
     custom_parameter: “value”
 
 
-Inside the `build_object()` method, you can check if the correct parameters are specified and raise an exception when the user input is incorrect
+Inside the :code:`build_object()` method, you can check if the correct parameters are specified and raise an exception when the user input is incorrect
 (for example using the :py:obj:`immuneML.util.ParameterValidator.ParameterValidator` utility class). Furthermore, it is possible to resolve more
-complex input parameters, such as loading reference sequences from an external input file, before passing them to the `__init__()` method of the report.
+complex input parameters, such as loading reference sequences from an external input file, before passing them to the :code:`__init__()` method of the report.
 
-It is important to consider whether the method `check_prerequisites()` should be implemented. This method should return a boolean value describing
+It is important to consider whether the method :code:`check_prerequisites()` should be implemented. This method should return a boolean value describing
 whether the prerequisites are met, and print a warning message to the user when this condition is false. The report will only be generated when
-`check_prerequisites()` returns true. This method should not be used to raise exceptions. Instead, it is used to prevent exceptions from happening
+:code:`check_prerequisites()` returns true. This method should not be used to raise exceptions. Instead, it is used to prevent exceptions from happening
 during execution, as this might cause lost results. Situations to consider are:
 
   - When implementing an EncodingReport, use this function to check that the data has been encoded and that the correct encoder has been used.
@@ -104,7 +104,7 @@ during execution, as this might cause lost results. Situations to consider are:
 Unit testing the new report
 ----------------------------
 
-For each report, a unit test should be added under the correct package inside test.reports. Here, the `generate()` method of the new report should be
+For each report, a unit test should be added under the correct package inside test.reports. Here, the :code:`generate()` method of the new report should be
 tested, as well as other relevant methods, to ensure that the report output is correct. When building tests for reports, a useful class is
 :py:obj:`immuneML.simulation.dataset_generation.RandomDatasetGenerator.RandomDatasetGenerator`, which can create a dataset with random sequences.
 
@@ -174,15 +174,15 @@ Test run of the report: specifying the new report in YAML
 -----------------------------------------------------------
 
 Custom reports may be defined in the YAML specification under the key ‘definitions’ the same way as any other reports. The easiest way to test run
-`DataReports` and `EncodingReports` is through the `ExploratoryAnalysis` instruction. They may also be specified in the `TrainMLModelInstruction`
-instruction in the ‘selection’ and ‘assessment’ loop under ‘reports:data_splits’ and ‘reports:encoding’ respectively.
+:ref:`Data reports` and :ref:`Encoding reports` is through the :ref:`ExploratoryAnalysis` instruction. They may also be specified in the :ref:`TrainMLModel`
+instruction in the :code:`selection` and :code:`assessment` loop under :code:`reports:data_splits` and :code:`reports:encoding` respectively.
 
-`MLReports` and `TrainMLModelReports` can only be run through the `TrainMLModelInstruction` instruction. `MLReports` can be specified inside both the
-‘selection’ and ‘assessment’ loop under ‘reports/models’. `TrainMLModelReports` must be specified under ‘reports’.
+:ref:`ML model reports` and :ref:`Train ML model reports` can only be run through the :ref:`TrainMLModel` instruction. :ref:`ML reports` can be specified inside both the
+:code:`selection` and :code:`assessment` loop under :code:`reports:models`. :ref:`Train ML model reports` must be specified under :code:`reports`.
 
-Finally, `MultiDatasetReports` multi dataset reports can be specified under 'benchmark_reports’ when running the `MultiDatasetBenchmarkTool`.
+Finally, :ref:`Multi dataset reports` can be specified under :code:`benchmark_reports` when running the :ref:`MultiDatasetBenchmarkTool`.
 
-The following specification shows the places where `DataReports`, `EncodingReports`, `MLReports`, and `TrainMLModelReports` can be specified:
+The following specification shows the places where :ref:`Data reports`, :ref:`Encoding reports`, :ref:`ML reports`, and :ref:`Train ML model reports` can be specified:
 
 .. code-block:: yaml
 

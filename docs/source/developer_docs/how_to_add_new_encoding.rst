@@ -15,7 +15,7 @@ repertoires, :py:obj:`source.data_model.dataset.SequenceDataset.SequenceDataset`
 receptor sequences and :py:obj:`source.data_model.dataset.ReceptorDataset.ReceptorDataset` for paired sequences. We need to deal with encoding separately for each dataset type.
 
 When an encoding only makes sense for one possible dataset type, for example RepertoireDataset, the new encoder class can simply inherit
-DatasetEncoder and implement its abstract methods, and the `build_object(dataset:Dataset, params)` method should return an instance of the class
+DatasetEncoder and implement its abstract methods, and the :code:`build_object(dataset:Dataset, params)` method should return an instance of the class
 itself when a correct dataset is given. An example of this is the :py:obj:`source.encodings.filtered_sequence_encoding.SequenceAbundanceEncoder.SequenceAbundanceEncoder`.
 
 Alternatively, when an encoding can be generalized for multiple dataset types, encoder classes are organized in the following manner:
@@ -25,7 +25,7 @@ Alternatively, when an encoding can be generalized for multiple dataset types, e
   #. Each encoder class has to implement the function encode(dataset, params) which returns a dataset object with encoded data parameter set.
 
 It is not necessary to implement the encoding for all dataset types, since some encodings might not make sense for some dataset types. In that case,
-if such a combination is specified (i.e., if the method `build_object(dataset: Dataset, params)` receives an illegal dataset type), the encoder class
+if such a combination is specified (i.e., if the method :code:`build_object(dataset: Dataset, params)` receives an illegal dataset type), the encoder class
 should raise an error and the process will be terminated.
 
 .. include:: ./dev_docs_util.rst
@@ -38,8 +38,8 @@ The encode() method is called by immuneML to encode a new dataset. This method s
 stored (such as vectorizer files, normalization, etc.), a :py:obj:`source.environment.LabelConfiguration.LabelConfiguration` object containing the
 labels that were specified for the analysis, and more.
 
-The `encode()` method should return a new dataset object, which is a copy of the original input dataset, but with an added `encoded_data` attribute.
-The `encoded_data` attribute should contain an :py:obj:`source.data_model.encoded_data.EncodedData.EncodedData` object, which is created with the
+The :code:`encode()` method should return a new dataset object, which is a copy of the original input dataset, but with an added :code:`encoded_data` attribute.
+The :code:`encoded_data` attribute should contain an :py:obj:`source.data_model.encoded_data.EncodedData.EncodedData` object, which is created with the
 following arguments:
 
   - examples: a design matrix where the rows are repertoires, receptors or sequences, and the columns the encoding-specific features
@@ -53,13 +53,13 @@ following arguments:
   must correspond to the number of features.
   - info: an optional dictionary that may be used to store any additional information that is relevant (for example paths to additional output files).
 
-The `examples` attribute of the `EncodedData` objects will be directly passed to the ML models for training. Other attributes are used for reports and
+The :code:`examples` attribute of the :code:`EncodedData` objects will be directly passed to the ML models for training. Other attributes are used for reports and
 interpretability.
 
 Unit testing
 -------------
 
-To add a test for the new encoding, create a package under `test.encodings` with the same name as the package created for adding the encoder class.
+To add a test for the new encoding, create a package under :code:`test.encodings` with the same name as the package created for adding the encoder class.
 Implement a test method that ensures the encoder functions correctly for each relevant dataset type. A useful class here is
 :py:obj:`source.simulation.dataset_generation.RandomDatasetGenerator.RandomDatasetGenerator`, which can create a dataset with random sequences.
 

@@ -79,7 +79,7 @@ Combining multiple datasets
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 It is possible to collect multiple VDJdb files into one immuneML dataset, for example when combining one file with sequences binding
 to a given epitope, and a second file with sequences that do not bind. In this case, make sure that each of the files has a unique
-name in the history, as duplicate names will be ignored by the 'Create dataset' tool.
+name in the history, as duplicate names will be ignored by the `Create dataset <https://galaxy.immuneml.uio.no/root?tool_id=immune_ml_dataset>`_ tool.
 The names of  history elements can be altered by clicking their 'Edit attributes' button (pencil icon).
 
 

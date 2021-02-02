@@ -16,7 +16,7 @@ from immuneML.util.ReflectionHandler import ReflectionHandler
 
 class OneHotEncoder(DatasetEncoder):
     """
-    Performs one-hot encoding on the sequences in a dataset. In one-hot encoding, each alphabet character
+    One-hot encoding for repertoires, sequences or receptors. In one-hot encoding, each alphabet character
     (amino acid or nucleotide) is replaced by a sparse vector with one 1 and the rest zeroes. The position of the
     1 represents the alphabet character.
 
