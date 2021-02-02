@@ -63,8 +63,8 @@ class ConfounderAnalysis(MLReport):
         for add_label in list([self._additional_labels]):
             print("label ", add_label)
             report_output_fig = self._metrics(add_label, predictions, true_labels)
-            paths.append(report_output_fig)
-
+            paths.extend(report_output_fig)
+        print(paths)
         return ReportResult(name=self.name, output_figures=[ReportOutput(self.result_path / "report.html", "")])
 
     def _plot(self, plotting_data, output_name, metric, add_label):
@@ -81,7 +81,7 @@ class ConfounderAnalysis(MLReport):
     def _metrics(self, add_label, predictions, true_labels):
         # print("label ", add_label)
         # print("self.label ", self.label)
-
+        figures = []
         for metric in ["FP", "FN"]:
             print("metric", metric)
             if metric == "FP":
@@ -94,6 +94,9 @@ class ConfounderAnalysis(MLReport):
             # todo adapt later to non-binary confounders
             plotting_data_age = pd.DataFrame(
                 {f"{metric}": [len(label_inds) - metric_age, metric_age], f"{add_label}": [False, True]})
+            print("col name ", plotting_data_age.columns[0])
             report_output_fig = self._plot(plotting_data=plotting_data_age, output_name=f"{metric}_{add_label}", metric=metric, add_label=add_label)
 
-            return report_output_fig
+            figures.append(report_output_fig)
+
+        return figures

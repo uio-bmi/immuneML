@@ -86,4 +86,4 @@ class TestCoefficients(TestCase):
         self.assertListEqual(list(written_data["coefficients"]), list(reversed([i for i in range(20)])))
         self.assertListEqual(list(written_data["features"]), list(reversed([f"feature{i}" for i in range(20)])))
 
-        shutil.rmtree(path)
+        #shutil.rmtree(path)
