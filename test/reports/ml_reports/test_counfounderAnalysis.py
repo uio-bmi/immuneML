@@ -90,11 +90,7 @@ class TestConfounderAnalysis(TestCase):
         return encoded_dataset
 
     def _create_report(self, path):
-        report = ConfounderAnalysis.build_object()
-
-        # encoded_data = EncodedData(examples=np.hstack((np.random.randn(40,2), np.random.choice([0, 1], size=(40,1), p=[1. / 3, 2. / 3]))),
-        #                            labels={"signal_disease": list(np.random.choice([0, 1], size=(40,), p=[2. / 3, 1. / 3]))},
-        #                            feature_names=["feat1", "feat2", "signal_age"])
+        report = ConfounderAnalysis.build_object(additional_labels="signal_age")
 
         report.ml_details_path = path / "ml_details.yaml"
         report.label = "signal_disease"
