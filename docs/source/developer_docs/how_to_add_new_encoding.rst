@@ -1,8 +1,8 @@
 How to add a new encoding
 ===========================
 
-To add a new encoder to immuneML, add a new package to source.encodings and create a new class there, which inherits
-:py:obj:`source.encodings.DatasetEncoder.DatasetEncoder`. The name of the
+To add a new encoder to immuneML, add a new package to immuneML.encodings and create a new class there, which inherits
+:py:obj:`immuneML.encodings.DatasetEncoder.DatasetEncoder`. The name of the
 class should be descriptive and user-friendly, and has to end with ‘Encoder’. The name prefix (everything before ‘Encoder’) will be the name that the
 user should specify in the YAML specification (e.g., for an encoder called ‘SequenceAbundanceEncoder’, the name referenced in the specification will
 be ‘SequenceAbundance’).
@@ -10,13 +10,13 @@ be ‘SequenceAbundance’).
 Encoders for different dataset types
 -------------------------------------
 
-Inside immuneML, three different types of datasets are considered: :py:obj:`source.data_model.dataset.RepertoireDataset.RepertoireDataset` for immune
-repertoires, :py:obj:`source.data_model.dataset.SequenceDataset.SequenceDataset` for single-chain immune
-receptor sequences and :py:obj:`source.data_model.dataset.ReceptorDataset.ReceptorDataset` for paired sequences. We need to deal with encoding separately for each dataset type.
+Inside immuneML, three different types of datasets are considered: :py:obj:`immuneML.data_model.dataset.RepertoireDataset.RepertoireDataset` for immune
+repertoires, :py:obj:`immuneML.data_model.dataset.SequenceDataset.SequenceDataset` for single-chain immune
+receptor sequences and :py:obj:`immuneML.data_model.dataset.ReceptorDataset.ReceptorDataset` for paired sequences. We need to deal with encoding separately for each dataset type.
 
 When an encoding only makes sense for one possible dataset type, for example RepertoireDataset, the new encoder class can simply inherit
 DatasetEncoder and implement its abstract methods, and the :code:`build_object(dataset:Dataset, params)` method should return an instance of the class
-itself when a correct dataset is given. An example of this is the :py:obj:`source.encodings.filtered_sequence_encoding.SequenceAbundanceEncoder.SequenceAbundanceEncoder`.
+itself when a correct dataset is given. An example of this is the :py:obj:`immuneML.encodings.filtered_sequence_encoding.SequenceAbundanceEncoder.SequenceAbundanceEncoder`.
 
 Alternatively, when an encoding can be generalized for multiple dataset types, encoder classes are organized in the following manner:
   #. A base encoder class implements the method build_object(dataset: Dataset, params), which returns the correct dataset type-specific encoder.
@@ -34,12 +34,12 @@ Implementing the encode() method in a new encoder class
 ---------------------------------------------------------
 
 The encode() method is called by immuneML to encode a new dataset. This method should be called with two arguments: a dataset and params
-(an :py:obj:`source.encodings.EncoderParams.EncoderParams` object). The EncoderParams objects contains useful information such as the path where optional files with intermediate data can be
-stored (such as vectorizer files, normalization, etc.), a :py:obj:`source.environment.LabelConfiguration.LabelConfiguration` object containing the
+(an :py:obj:`immuneML.encodings.EncoderParams.EncoderParams` object). The EncoderParams objects contains useful information such as the path where optional files with intermediate data can be
+stored (such as vectorizer files, normalization, etc.), a :py:obj:`immuneML.environment.LabelConfiguration.LabelConfiguration` object containing the
 labels that were specified for the analysis, and more.
 
 The :code:`encode()` method should return a new dataset object, which is a copy of the original input dataset, but with an added :code:`encoded_data` attribute.
-The :code:`encoded_data` attribute should contain an :py:obj:`source.data_model.encoded_data.EncodedData.EncodedData` object, which is created with the
+The :code:`encoded_data` attribute should contain an :py:obj:`immuneML.data_model.encoded_data.EncodedData.EncodedData` object, which is created with the
 following arguments:
 
   - examples: a design matrix where the rows are repertoires, receptors or sequences, and the columns the encoding-specific features
@@ -61,7 +61,7 @@ Unit testing
 
 To add a test for the new encoding, create a package under :code:`test.encodings` with the same name as the package created for adding the encoder class.
 Implement a test method that ensures the encoder functions correctly for each relevant dataset type. A useful class here is
-:py:obj:`source.simulation.dataset_generation.RandomDatasetGenerator.RandomDatasetGenerator`, which can create a dataset with random sequences.
+:py:obj:`immuneML.simulation.dataset_generation.RandomDatasetGenerator.RandomDatasetGenerator`, which can create a dataset with random sequences.
 
 Adding class documentation
 ---------------------------
@@ -74,10 +74,10 @@ Class documentation should be added as a docstring to the base encoder class. Th
 
 The class docstrings are used to automatically generate the documentation for the encoder. If an encoder should always be used in combination with a
 specific report or ML method, it is possible to refer to these classes by name and create a link to the documentation of that class. For example,
-the documentation of :py:obj:`source.encodings.reference_encoding.MatchedReceptorsEncoder.MatchedReceptorsEncoder` states ‘This encoding should be
+the documentation of :py:obj:`immuneML.encodings.reference_encoding.MatchedReceptorsEncoder.MatchedReceptorsEncoder` states ‘This encoding should be
 used in combination with the :ref:`Matches` report’.
 
-This is the example of documentation for :py:obj:`source.encodings.filtered_sequence_encoding.SequenceAbundanceEncoder.SequenceAbundanceEncoder`:
+This is the example of documentation for :py:obj:`immuneML.encodings.filtered_sequence_encoding.SequenceAbundanceEncoder.SequenceAbundanceEncoder`:
 
 .. code-block:: RST
 
