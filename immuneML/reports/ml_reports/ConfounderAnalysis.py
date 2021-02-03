@@ -41,7 +41,6 @@ class ConfounderAnalysis(MLReport):
         super().__init__(train_dataset, test_dataset, method, result_path, name, hp_setting, label)
 
         self.metadata_labels = metadata_labels
-        print(type(self.metadata_labels))
 
     def _generate(self) -> ReportResult:
         PathBuilder.build(self.result_path)
@@ -49,9 +48,9 @@ class ConfounderAnalysis(MLReport):
 
         # make predictions
         predictions = self.method.predict(self.test_dataset.encoded_data, self.label)[self.label]  # label = disease
-        print(predictions)
+
         true_labels = self.test_dataset.get_metadata(self.metadata_labels + [self.label])
-        print(true_labels[self.label])
+
         for add_label in self.metadata_labels:
             for metric in ["FP", "FN"]:
 
@@ -76,16 +75,16 @@ class ConfounderAnalysis(MLReport):
 
     @staticmethod
     def _metrics(metric, label, add_label, predictions, true_labels):
-        # indices of samples at which misclassification happens
+        # indices of samples at which misclassification occured
         if metric == "FP":
             metric_inds = np.nonzero(np.greater(predictions, true_labels[label]))[0].tolist()
         else:
             metric_inds = np.nonzero(np.less(predictions, true_labels[label]))[0].tolist()
 
-        # indices of misclassification with respect to the confounder
+        # indices of misclassification with respect to the metadata label
         label_inds = np.array(true_labels[add_label])[metric_inds]
 
-        # number of misclassifications at Val_1 = TRUE of the confounder
+        # number of misclassifications at Val_1 = TRUE of the metadata label
         metric_val = np.count_nonzero(label_inds)
 
         plotting_data = pd.DataFrame(
