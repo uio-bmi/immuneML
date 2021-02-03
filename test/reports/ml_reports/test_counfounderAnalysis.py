@@ -90,8 +90,7 @@ class TestConfounderAnalysis(TestCase):
         return encoded_dataset
 
     def _create_report(self, path):
-        # report = ConfounderAnalysis.build_object(metadata_labels=["signal_age", "signal_HLA"])
-        report = ConfounderAnalysis.build_object(metadata_labels=["signal_age", 1])
+        report = ConfounderAnalysis.build_object(metadata_labels=["signal_age", "signal_HLA"])
 
         report.ml_details_path = path / "ml_details.yaml"
         report.label = "signal_disease"

@@ -61,6 +61,7 @@ class ConfounderAnalysis(MLReport):
                 paths.append(report_output_fig)
 
         return ReportResult(name=self.name, output_figures=[ReportOutput(self.result_path / "report.html", "")])
+        # return ReportResult(self.name, output_figures=[p for p in paths if p is not None])
 
     def _plot(self, plotting_data, output_name, metric, add_label):
         filename = self.result_path / f"{output_name}.html"
