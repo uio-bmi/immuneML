@@ -8,7 +8,7 @@ This is a YAML-based Galaxy tool, if you prefer a button-based interface that as
 :ref:`receptor <How to train immune receptor classifiers using the easy Galaxy interface>` and :ref:`repertoire <How to train immune repertoire classifiers using the easy Galaxy interface>`
 classification using the easy Galaxy interfaces.
 
-An example Galaxy history showing how to use this tool `can be found here <https://galaxy.immuneml.uio.no/u/immuneml/h/train-machine-learning-models>`_.
+An example Galaxy history showing how to use this tool `can be found here <https://galaxy.immuneml.uio.no/u/immuneml/h/ml-model-training>`_.
 
 
 Creating the YAML specification

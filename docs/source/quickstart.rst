@@ -41,7 +41,7 @@ Individual files can be inspected by clicking the eyeball icons.
 To import the complete history, click the + icon in the right upper corner.
 
 
-.. image:: _static/images/import_galaxy_history.png
+.. image:: _static/images/galaxy/import_galaxy_history.png
    :alt: import button Galaxy
    :width: 250
 
@@ -143,7 +143,7 @@ The complete YAML specification for this analysis looks like this:
 After the YAML specification has been saved to a file (for example: quickstart.yaml), it can be uploaded to Galaxy, and
 the file will appear as a new history element.
 
-.. image:: _static/images/galaxy_upload_data.png
+.. image:: _static/images/galaxy/galaxy_upload_data.png
    :alt: upload data Galaxy
    :width: 250
 
@@ -153,8 +153,8 @@ Step 3: running the analysis
 Next, the `Train machine learning models <https://galaxy.immuneml.uio.no/root?tool_id=immuneml_train_ml_model>`_ Galaxy tool should be used.
 Select the YAML specification and previously created dataset from the history, and no additional files.
 
-.. image:: _static/images/galaxy_train_ml_model.png
-   :alt: upload data Galaxy
+.. image:: _static/images/galaxy/galaxy_train_ml_model.png
+   :alt: train ML model tool
    :width: 500
 
 Step 4: understanding the results
@@ -162,8 +162,8 @@ Step 4: understanding the results
 
 After running the Galaxy tool for training ML models, three new items will appear in the Galaxy history.
 
-.. image:: _static/images/galaxy_train_ml_model_results.png
-   :alt: import button Galaxy
+.. image:: _static/images/galaxy/galaxy_train_ml_model_results.png
+   :alt: history elements
    :width: 250
 
 One of the history items contains a summary of the results; a HTML page displaying a summary of the analysis, the performance of the optimized ML model (click 'see details' to navigate further),

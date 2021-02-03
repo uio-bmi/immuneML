@@ -24,8 +24,8 @@ from immuneML.util.ReflectionHandler import ReflectionHandler
 
 class KmerFrequencyEncoder(DatasetEncoder):
     """
-    The KmerFrequencyEncoder class encodes a repertoire by frequencies of k-mers in all of the sequences of that
-    repertoire. A k-mer is a sequence of letters of length k into which an immune receptor sequence can be decomposed.
+    The KmerFrequencyEncoder class encodes a repertoire, sequence or receptor by frequencies of k-mers it contains.
+    A k-mer is a sequence of letters of length k into which an immune receptor sequence can be decomposed.
     K-mers can be defined in different ways, as determined by the sequence_encoding.
 
 

@@ -183,7 +183,7 @@ Alternatively, it is possible to directly create a Galaxy collection from files 
 
 #. Click 'For all selected...' > 'Build Dataset List' and enter a name for your dataset.
 
-# Click the 'operations on multiple datasets' button again in order to go back to the normal menu.
+#. Click the 'operations on multiple datasets' button again in order to go back to the normal menu.
 
 The newest item in your history should now contain a Galaxy collection with all dataset files. Note that a difference between
 this method and the above-described methods is that your new dataset is not in Pickle format. Thus, when writing the YAML
@@ -203,3 +203,4 @@ This Galaxy tool will produce the following history elements:
   Furthermore, the folder contains the complete YAML specification file for the immuneML run, the HTML output and a log file.
 
 - immuneML dataset: Galaxy collection containing all relevant files for the new dataset.
+

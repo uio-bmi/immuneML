@@ -6,7 +6,7 @@ If you instead want to train new ML models, see the tutorials for training ML mo
 :ref:`receptor <How to train immune receptor classifiers using the easy Galaxy interface>` and :ref:`repertoire <How to train immune repertoire classifiers using the easy Galaxy interface>`
 classification using the easy Galaxy interfaces, or the more versatile :ref:`YAML-based tool for training ML models <How to train ML models in Galaxy>`.
 
-An example Galaxy history showing how to use this tool `can be found here <https://galaxy.immuneml.uio.no/u/immuneml/h/apply-machine-learning-models>`_.
+An example Galaxy history showing how to use this tool `can be found here <https://galaxy.immuneml.uio.no/u/immuneml/h/ml-model-application>`_.
 
 
 Creating the YAML specification
@@ -38,7 +38,6 @@ A complete YAML specification for applying ML models to a new dataset is shown h
         type: MLApplication
         dataset: dataset
         config_path: optimal_ml_settings.zip # the name of the ML model
-        label: disease # the label
         number_of_processes: 4
         store_encoded_data: False
 
@@ -47,9 +46,9 @@ Tool output
 ---------------------------------------------
 This Galaxy tool will produce the following history elements:
 
-- Summary: ML application: a HTML page that allows you to browse through all results, including ...
+- Summary: ML model application: a HTML page that allows you to browse through all results, including predictions made on the new dataset.
 
 - Archive: ML model application: a .zip file containing the complete output folder as it was produced by immuneML. This folder
-  contains the output of the MLApplication instruction including ....
+  contains the output of the MLApplication instruction such as the predictions on the new dataset.
   Furthermore, the folder contains the complete YAML specification file for the immuneML run, the HTML output and a log file.
 
