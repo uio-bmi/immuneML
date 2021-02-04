@@ -3,6 +3,8 @@ from typing import List
 import numpy as np
 import pandas as pd
 import plotly.express as px
+from plotly.subplots import make_subplots
+import plotly.graph_objects as go
 
 from immuneML.data_model.dataset.Dataset import Dataset
 from immuneML.hyperparameter_optimization.HPSetting import HPSetting
@@ -51,31 +53,33 @@ class ConfounderAnalysis(MLReport):
 
         true_labels = self.test_dataset.get_metadata(self.metadata_labels + [self.label])
 
-        for add_label in self.metadata_labels:
-            for metric in ["FP", "FN"]:
+        plot = make_subplots(rows=len(self.metadata_labels), cols=2)
+        for label_index, meta_label in enumerate(self.metadata_labels):
+            for metric_index, metric in enumerate(["FP", "FN"]):
+                output_name = metric + "_" + meta_label
 
-                plotting_data = self._metrics(metric=metric, label=self.label, add_label=add_label, predictions=predictions, true_labels=true_labels)
+                plotting_data = self._metrics(metric=metric, label=self.label, meta_label=meta_label,
+                                              predictions=predictions, true_labels=true_labels)
 
-                report_output_fig = self._plot(plotting_data=plotting_data, output_name=f"{metric}_{add_label}",
-                                               metric=metric, add_label=add_label)
-                paths.append(report_output_fig)
+                plot.add_trace(go.Bar(x=plotting_data[meta_label], y=plotting_data[metric]), row=label_index + 1,
+                               col=metric_index + 1)
 
-        return ReportResult(name=self.name, output_figures=[ReportOutput(self.result_path / "report.html", "")])
-        # return ReportResult(self.name, output_figures=[p for p in paths if p is not None])
+                plot.update_xaxes(title_text=f"{meta_label}", row=label_index + 1,
+                                  col=metric_index + 1)
 
-    def _plot(self, plotting_data, output_name, metric, add_label):
+                plot.update_yaxes(title_text=f"{metric}", row=label_index + 1,
+                                  col=metric_index + 1)
+
+        plot.update_traces(marker_color=px.colors.sequential.Teal[3], showlegend=False)
         filename = self.result_path / f"{output_name}.html"
+        plot.write_html(str(filename))
+        report_output_fig = ReportOutput(filename)
+        paths.append(report_output_fig)
 
-        figure = px.bar(plotting_data, x=f"{add_label}", y=f"{metric}", template='plotly_white',
-                        title=f"{output_name}")
-        figure.update_traces(marker_color=px.colors.sequential.Teal[3])
-
-        figure.write_html(str(filename))
-
-        return ReportOutput(filename)
+        return ReportResult(name=self.name, output_figures=paths)
 
     @staticmethod
-    def _metrics(metric, label, add_label, predictions, true_labels):
+    def _metrics(metric, label, meta_label, predictions, true_labels):
         # indices of samples at which misclassification occured
         if metric == "FP":
             metric_inds = np.nonzero(np.greater(predictions, true_labels[label]))[0].tolist()
@@ -83,12 +87,12 @@ class ConfounderAnalysis(MLReport):
             metric_inds = np.nonzero(np.less(predictions, true_labels[label]))[0].tolist()
 
         # indices of misclassification with respect to the metadata label
-        label_inds = np.array(true_labels[add_label])[metric_inds]
+        label_inds = np.array(true_labels[meta_label])[metric_inds]
 
         # number of misclassifications at Val_1 = TRUE of the metadata label
         metric_val = np.count_nonzero(label_inds)
 
         plotting_data = pd.DataFrame(
-            {f"{metric}": [len(label_inds) - metric_val, metric_val], f"{add_label}": [False, True]})
+            {f"{metric}": [len(label_inds) - metric_val, metric_val], f"{meta_label}": [False, True]})
 
         return plotting_data
