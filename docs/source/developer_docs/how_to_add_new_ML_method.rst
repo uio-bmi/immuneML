@@ -20,7 +20,7 @@ does not have a disease, but also the stages of a disease, see Figure below).
 The ML models in the immuneML support one label. If multiple labels are specified, for instance during training the models and optimizing
 hyperparameters, a separate model will be fitted to each label.
 
-The necessary functionalities are represented as abstract functions in MLMethod class (:py:obj:`~source.ml_methods.MLMethod.MLMethod`).
+The necessary functionalities are represented as abstract functions in MLMethod class (:py:obj:`~immuneML.ml_methods.MLMethod.MLMethod`).
 To create a new ML method class, inherit MLMethod and implement all abstract functions.
 
 Testing the ML method outside immuneML with a sample design matrix
@@ -29,7 +29,7 @@ Testing the ML method outside immuneML with a sample design matrix
 When implementing a new ML method, it can be useful to test the method with a small sample design matrix before integrating it into the immuneML
 codebase. Example design matrices for any encoding can be exported to .csv format with the DesignMatrixExporter report and the ExploratoryAnalysis
 instruction. To quickly generate some random sample data, RandomRepertoireDataset or RandomReceptorDataset may be specified as import formats.
-Alternatively, you can import your own data. A full yaml specification for exporting a sample design matrix for a 3-mer encoding may look like this:
+Alternatively, you can import your own data. A full YAML specification for exporting a sample design matrix for a 3-mer encoding may look like this:
 
 .. indent with spaces
 .. code-block:: yaml
@@ -72,6 +72,13 @@ Alternatively, you can import your own data. A full yaml specification for expor
   Note that for design matrices beyond 2 dimensions (such as OneHotEncoder with flatten = False), the matrix is exported as a .npy file instead of a
   .csv file.
 
+To generate the design matrix, save the YAML specification to specs.yaml and and run immuneML providing the path to the saved file and a path to the
+output directory:
+
+.. code-block:: console
+
+  immune-ml specs.yaml output_dir/
+
 The resulting design matrix can be found in my_instruction/analysis_my_analysis/report/design_matrix.csv, and the true classes for each repertoire
 can be found in labels.csv. In immuneML, the design matrix is passed to the ML method as an EncodedData object, and the labels as a numpy ndarray.
 The EncodedData object has attribute examples which contains the design matrix, and feature_names and example_ids which contain the row and column
@@ -86,7 +93,7 @@ way: given a dataset and encoding parameters, the specific encoder object create
 with class assignment for each example), feature_names (if available for the encoding, a list of feature names for each column in the examples).
 This object will be provided as input to the corresponding functions of the new ML method class.
 
-To load the data encoded as described above into an EncodedData object, the function :py:obj:`source.dev_util.util.load_encoded_data` can be used.
+To load the data encoded as described above into an EncodedData object, the function :py:obj:`immuneML.dev_util.util.load_encoded_data` can be used.
 
 Adding the new method to immuneML
 -----------------------------------
@@ -112,6 +119,12 @@ will be added:
 Example scikit-learn-based SVM implementation:
 
 .. code-block:: python
+
+  from sklearn.model_selection import RandomizedSearchCV
+  from sklearn.svm import LinearSVC
+
+  from immuneML.ml_methods.SklearnMethod import SklearnMethod
+
 
   class SVM(SklearnMethod):
 

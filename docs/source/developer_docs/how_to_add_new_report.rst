@@ -35,7 +35,7 @@ report is the DataReport, which should typically be used when summarizing some q
 attribute dataset.
 
 Use the EncodingReport when it is necessary to access the encoded_data attribute of a `Dataset`. The encoded_data attribute is an instance of a
-:py:obj:`source.data_model.encoded_data.EncodedData.EncodedData` class. This report should be used when the data
+:py:obj:`immuneML.data_model.encoded_data.EncodedData.EncodedData` class. This report should be used when the data
 representation first needs to be changed before running the report, either through an existing or a custom encoding (see:
 :ref:`How to add a new encoding`). For example, the :ref:`Matches` report represents a RepertoireDataset based on matches to a given reference
 dataset, and must first be encoded using a :ref:`MatchedSequences`, :ref:`MatchedReceptors` or :ref:`MatchedRegex`.

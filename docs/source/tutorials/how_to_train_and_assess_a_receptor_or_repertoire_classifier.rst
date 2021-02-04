@@ -143,15 +143,15 @@ An example is shown below:
     ml_methods:
       my_svm: SVM
       my_log_reg:
-      LogisticRegression:
-        penalty: l1
-        C:
-          - 1000
-          - 100
-          - 0.01
-          - 0.001
-      model_selection_cv: True
-      model_selection_n_folds: 5
+        LogisticRegression:
+          penalty: l1
+          C:
+            - 1000
+            - 100
+            - 0.01
+            - 0.001
+        model_selection_cv: True
+        model_selection_n_folds: 5
     reports:
       my_report: MLSettingsPerformance
 

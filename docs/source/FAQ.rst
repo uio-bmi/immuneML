@@ -25,10 +25,11 @@ When installing all requirements from requirements.txt, there is afterward an er
 
 This issue might be helpful: https://github.com/yaml/pyyaml/issues/291. Try installing yaml manually with a specific version.
 
-As a Windows user, I get an error when installing PyTorch (could not find a version that satisfies the requirement torch==1.5.1)
+I get an error when installing PyTorch (could not find a version that satisfies the requirement torch==1.5.1)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Windows users may experience errors when installing PyTorch via pip. We recommend installing torch v1.5.1 manually as described in `the PyTorch documentation <https://pytorch.org/get-started/previous-versions/>`_.
+With some Python versions, users may experience errors when installing PyTorch via pip. In that case, we recommend installing torch v1.5.1 manually
+as described in `the PyTorch documentation <https://pytorch.org/get-started/previous-versions/>`_.
 
 There is an issue with the type of entry when specifying a list of inputs, why does this happen?
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

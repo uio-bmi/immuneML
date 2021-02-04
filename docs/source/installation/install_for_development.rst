@@ -54,4 +54,4 @@ To run a sample analysis, from the project folder run:
 
 .. code-block:: console
 
-  python3 source/workflows/instructions/quickstart.py
+  python3 immuneML/workflows/instructions/quickstart.py
