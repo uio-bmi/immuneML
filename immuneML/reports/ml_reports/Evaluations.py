@@ -21,7 +21,7 @@ import plotly.graph_objs as go
 
 class Evaluations(MLReport):
     """
-    A report that plots the evaluation metrics for the performance given machine learning model and testing dataset.
+    A report that plots the evaluation metrics for the performance given machine learning model and training dataset.
     The available metrics are accuracy, balanced_accuracy, confusion_matrix, f1_micro, f1_macro, f1_weighted, precision,
     recall, auc and log_loss (see :ref:`Metrics`).
 
@@ -70,10 +70,10 @@ class Evaluations(MLReport):
 
     def _generate(self) -> ReportResult:
         
-        X = self.test_dataset.encoded_data
+        X = self.train_dataset.encoded_data
         predicted_y = self.method.predict(X, self.label)[self.label]
         predicted_proba_y = self.method.predict_proba(X, self.label)[self.label]
-        true_y = self.test_dataset.encoded_data.labels[self.label]
+        true_y = self.train_dataset.encoded_data.labels[self.label]
         classes = self.method.get_classes_for_label(self.label)
 
         PathBuilder.build(self.result_path)
@@ -201,9 +201,9 @@ class Evaluations(MLReport):
                           f" report will not be created.")
             return False
 
-        if self.test_dataset and self.test_dataset.encoded_data is None:
+        if self.train_dataset is None or self.train_dataset.encoded_data is None:
             warnings.warn(
-                f"{self.__class__.__name__}: test dataset is"
+                f"{self.__class__.__name__}: train dataset is"
                 f" not encoded and can not be run."
                 f"{self.__class__.__name__} report will not be created.")
             return False
@@ -213,5 +213,6 @@ class Evaluations(MLReport):
                 f"{self.__class__.__name__}: method is"
                 f" not defined and can not be run."
                 f"{self.__class__.__name__} report will not be created.")
+            return False
 
         return True

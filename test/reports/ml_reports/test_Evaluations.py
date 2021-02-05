@@ -26,20 +26,16 @@ class TestEvaluation(unittest.TestCase):
 
         dummy_lr.fit_by_cross_validation(encoded_tr, number_of_splits=2,
                                          label_name="l1")
-        return dummy_lr
+        return dummy_lr, encoded_tr
 
     def _create_report(self, path):
 
         report = Evaluations.build_object(name='testcase')
 
-        report.method = self._create_dummy_lr_model()
+        report.train_dataset = Dataset()
+        report.method, report.train_dataset.encoded_data = self._create_dummy_lr_model()
         report.label = "l1"
         report.result_path = path
-        report.test_dataset = Dataset()
-        encoded_te = EncodedData(np.random.rand(100, 20),
-                                 {"l1": [i % 2 for i in range(0, 100)]})
-
-        report.test_dataset.encoded_data = encoded_te
 
         return report
 
