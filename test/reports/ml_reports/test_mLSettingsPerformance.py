@@ -66,8 +66,8 @@ class TestMLSettingsPerformance(TestCase):
         label_config = LabelConfiguration([Label("l1", [1, 2]), Label("l2", [0, 1])])
 
         process = TrainMLModelInstruction(dataset, GridSearch(hp_settings), hp_settings,
-                                          SplitConfig(SplitType.RANDOM, 1, 0.5),
-                                          SplitConfig(SplitType.RANDOM, 1, 0.5),
+                                          SplitConfig(SplitType.RANDOM, 1, 0.7),
+                                          SplitConfig(SplitType.RANDOM, 1, 0.7),
                                           {Metric.BALANCED_ACCURACY}, Metric.BALANCED_ACCURACY, label_config, path)
 
         state = process.run(result_path=path)
