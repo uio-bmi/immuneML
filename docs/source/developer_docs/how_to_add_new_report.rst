@@ -202,7 +202,7 @@ The following specification shows the places where :ref:`Data reports`, :ref:`En
         MyNewEncodingReport:
          parameter: value
       my_ml_report: MyNewMLReport # ml model report
-      my_trainml_report: MyNewMLModelReport # ml report
+      my_trainml_report: MyNewTrainMLModelReport # train ml model report
 
     datasets:
       d1:
