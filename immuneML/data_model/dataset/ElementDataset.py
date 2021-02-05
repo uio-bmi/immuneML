@@ -6,6 +6,10 @@ from immuneML.data_model.receptor.ElementGenerator import ElementGenerator
 
 
 class ElementDataset(Dataset):
+    """
+    This is the base class for ReceptorDataset and SequenceDataset which implements all the functionality for both classes. The only difference between
+    these two classes is whether paired or single chain data is stored.
+    """
 
     def __init__(self, labels: dict = None, encoded_data: EncodedData = None, filenames: list = None, identifier: str = None,
                  file_size: int = 50000, name: str = None):
@@ -19,12 +23,12 @@ class ElementDataset(Dataset):
         self.element_ids = None
         self.name = name
 
-    def get_data(self, batch_size: int = 1000):
+    def get_data(self, batch_size: int = 10000):
         self._filenames.sort()
         self.element_generator.file_list = self._filenames
         return self.element_generator.build_element_generator()
 
-    def get_batch(self, batch_size: int = 1000):
+    def get_batch(self, batch_size: int = 10000):
         self._filenames.sort()
         self.element_generator.file_list = self._filenames
         return self.element_generator.build_batch_generator()
@@ -46,12 +50,26 @@ class ElementDataset(Dataset):
         return self.element_ids
 
     def make_subset(self, example_indices, path, dataset_type: str):
+        """
+        Creates a new dataset object with only those examples (receptors or receptor sequences) available which were given by index in example_indices argument.
+
+        Args:
+            example_indices (list): a list of indices of examples (receptors or receptor sequences) to use in the new dataset
+            path (Path): a path where to store the newly created dataset
+            dataset_type (str): a type of the dataset used as a part of the name of the resulting dataset; the values are defined as constants in :py:obj:`immuneML.data_model.dataset.Dataset.Dataset`
+
+        Returns:
+
+            a new dataset object (ReceptorDataset or SequenceDataset, as the original dataset) which includes only the examples specified under example_indices
+
+        """
         new_dataset = self.__class__(labels=self.labels, file_size=self.file_size)
         batch_filenames = self.element_generator.make_subset(example_indices, path, dataset_type, new_dataset.identifier)
         new_dataset.set_filenames(batch_filenames)
         return new_dataset
 
     def get_label_names(self):
+        """Returns the list of metadata fields which can be used as labels"""
         return [label for label in list(self.labels.keys()) if label not in ['region_type', 'receptor_chains', 'organism']]
 
     def clone(self):
