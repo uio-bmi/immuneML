@@ -19,7 +19,8 @@ class ImportParser:
 
     @staticmethod
     def parse(workflow_specification: dict, symbol_table: SymbolTable, result_path: Path) -> Tuple[SymbolTable, dict]:
-        assert ImportParser.keyword in workflow_specification, "ImmuneMLParser: datasets are not defined."
+        assert ImportParser.keyword in workflow_specification and isinstance(workflow_specification[ImportParser.keyword], dict), \
+            "ImmuneMLParser: datasets are not defined."
 
         for key in workflow_specification[ImportParser.keyword].keys():
             symbol_table = ImportParser._parse_dataset(key, workflow_specification[ImportParser.keyword][key], symbol_table, result_path)
