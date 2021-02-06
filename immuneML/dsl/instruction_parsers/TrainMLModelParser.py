@@ -37,6 +37,8 @@ class TrainMLModelParser:
         ParameterValidator.assert_type_and_value(instruction['number_of_processes'], int, TrainMLModelParser.__name__, 'number_of_processes')
         ParameterValidator.assert_type_and_value(instruction['strategy'], str, TrainMLModelParser.__name__, 'strategy')
         ParameterValidator.assert_type_and_value(instruction['store_encoded_data'], bool, TrainMLModelParser.__name__, 'store_encoded_data')
+        if instruction["reports"] is not None:
+            ParameterValidator.assert_type_and_value(instruction['reports'], list, TrainMLModelParser.__name__, 'reports')
 
         settings = self._parse_settings(instruction, symbol_table)
         dataset = symbol_table.get(instruction["dataset"])
