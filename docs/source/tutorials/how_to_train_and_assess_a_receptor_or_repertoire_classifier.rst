@@ -1,5 +1,5 @@
-How to train and assess a receptor/repertoire-level ML classifier
-==================================================================
+How to train and assess a receptor or repertoire-level ML classifier
+====================================================================
 
 immuneML provides a rich set of functionality for training and assessing machine
 learning models to classify of receptors or repertoires. To learn the parameters and hyperparameters of the ML model,
@@ -127,8 +127,8 @@ An example is shown below:
       simulated_d1:
         format: AIRR
         params:
-          metadata_file: /path/to/metadata.csv
-          path: /path/to/data/
+          metadata_file: path/to/metadata.csv
+          path: path/to/data/
     encodings:
       my_kmer_enc:
         KmerFrequency:

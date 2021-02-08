@@ -57,7 +57,7 @@ beginning and end of the CDR3 sequence are not broken.
 
 
 The following YAML specification represents how the immune signals were implanted in the 2000 repertoires, given that
-the 2000 repertoires and metadata file generated in the previous step are located at :code:`/path/to/olga_data/`.
+the 2000 repertoires and metadata file generated in the previous step are located at :code:`path/to/olga_data/`.
 
 .. highlight:: yaml
 .. code-block:: yaml
@@ -69,8 +69,8 @@ the 2000 repertoires and metadata file generated in the previous step are locate
         format: OLGA
         params:
           is_repertoire: true
-          path: /path/to/olga_data/
-          metadata_file: /path/to/olga_data/metadata.csv
+          path: path/to/olga_data/
+          metadata_file: path/to/olga_data/metadata.csv
     motifs:
       label1_motif1:
         instantiation: GappedKmer
@@ -768,7 +768,7 @@ Because we use a ground truth benchmarking dataset where the true implanted sign
 recovered by the ML methods overlap with the k-mers that we originally implanted.
 
 The YAML specification below shows the settings that were used for the benchmarking. We assume that the dataset
-with simulated signals can be found at :code:`/path/to/simulated_data/olga2000.iml_dataset`.
+with simulated signals can be found at :code:`path/to/simulated_data/olga2000.iml_dataset`.
 Alternatively, you may want to use the AIRR files (airr.zip) that were produced in the original use case, which can be downloaded
 from the NIRD research data archive (DOI: `10.11582/2021.00005 <https://doi.org/10.11582/2021.00005>`_).
 In this case, uncomment the lines for AIRR import and remove the lines for Pickle import.

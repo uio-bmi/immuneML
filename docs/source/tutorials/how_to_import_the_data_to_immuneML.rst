@@ -48,7 +48,7 @@ Here is an incomplete example specification using AIRR format:
       my_dataset: # this is the name of the dataset we will use in the YAML specification
         format: AIRR
         params:
-          path: /path/to/data/
+          path: path/to/data/
           ... # other import parameters will be specified here
 
 
@@ -74,8 +74,8 @@ A complete specification for importing a RepertoireDataset from AIRR format with
         format: AIRR
         params:
           # required parameters
-          path: /path/to/data/
-          metadata_file: /path/to/metadata.csv
+          path: path/to/data/
+          metadata_file: path/to/metadata.csv
           # is_repertoire is by default True, and may be omitted
           is_repertoire: True
           # Other parameters specific to AIRR data may be specified here
@@ -102,7 +102,7 @@ A complete specification for importing a SequenceDataset from AIRR format with d
         format: AIRR
         params:
           # required parameters
-          path: /path/to/data/
+          path: path/to/data/
           is_repertoire: False
           paired: False # must be true for ReceptorDatasets and False for SequenceDatasets
           metadata_column_mapping: # metadata column mapping AIRR: immuneML
@@ -133,7 +133,7 @@ also faster than importing from other data formats. A YAML specification could l
       my_dataset:
         format: Pickle
         params:
-          path: /path/to/dataset.iml_dataset
+          path: path/to/dataset.iml_dataset
           # specifying a metadata_file is optional, it will update the dataset using this new metadata.
           metadata_file: path/to/metadata.csv
 

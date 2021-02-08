@@ -22,8 +22,8 @@ In the example below, two analyses are done:
       my_dataset: # user-defined dataset name
         format: AIRR
         params:
-          metadata_file: /path/to/metadata.csv
-          path: /path/to/data/
+          metadata_file: path/to/metadata.csv
+          path: path/to/data/
 
     encodings:
       my_regex_matches:

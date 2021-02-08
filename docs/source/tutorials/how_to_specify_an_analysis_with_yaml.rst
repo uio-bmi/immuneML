@@ -52,13 +52,13 @@ The import of two datasets may be defined as follows:
       my_dataset_1: # user-defined key for the first dataset
         format: AIRR
         params:
-          path: /path/to/first/data/
-          metadata_file: /path/to/first/metadata.csv
+          path: path/to/first/data/
+          metadata_file: path/to/first/metadata.csv
       my_dataset_2: # user-defined key for the second dataset
         format: AIRR
         params:
-          path: /path/to/second/data/
-          metadata_file: /path/to/second/metadata.csv
+          path: path/to/second/data/
+          metadata_file: path/to/second/metadata.csv
 
 Where the imported datasets can under :code:`instructions` be referenced using the keys :ref:`my_dataset_1` and :ref:`my_dataset_2`.
 
@@ -72,8 +72,8 @@ An example of a full :code:`definitions` section which may be used for a machine
       my_dataset:
         format: AIRR
         params:
-          path: /path/to/data/
-          metadata_file: /path/to/metadata.csv
+          path: path/to/data/
+          metadata_file: path/to/metadata.csv
     preprocessing_sequences:
       my_preprocessing:
         - my_beta_chain_filter:
@@ -100,8 +100,8 @@ Whereas a :code:`definitions` section used for Simulation contains different com
       my_dataset:
         format: AIRR
         params:
-          path: /path/to/data/
-          metadata_file: /path/to/metadata.csv
+          path: path/to/data/
+          metadata_file: path/to/metadata.csv
     motifs:
       my_simple_motif:
         seed: AAA
@@ -208,8 +208,8 @@ An example of a complete YAML specification for training an ML model through nes
       d1:
         format: AIRR
         params:
-          metadata_file: /path/to/metadata.csv
-          path: /path/to/data/
+          metadata_file: path/to/metadata.csv
+          path: path/to/data/
     preprocessing_sequences:
       my_preprocessing:
         - my_beta_chain_filter:
