@@ -54,7 +54,7 @@ class InstructionParser:
         return symbol_table, specification[InstructionParser.keyword]
 
     @staticmethod
-    # @log
+    @log
     def parse_instruction(key: str, instruction: dict, symbol_table: SymbolTable, path) -> tuple:
 
         ParameterValidator.assert_keys_present(list(instruction.keys()), ["type"], InstructionParser.__name__, key)
