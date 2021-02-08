@@ -17,7 +17,7 @@ from immuneML.util.SequenceAnalysisHelper import SequenceAnalysisHelper
 
 class DiseaseAssociatedSequenceCVOverlap(TrainMLModelReport):
     """
-    DiseaseAssociatedSequenceCVOverlap report makes one heatmap per label showing the overlap of disease-associated sequences produced by :ref:`SequenceAbundance` or :ref:`SequenceCount` encoders
+    DiseaseAssociatedSequenceCVOverlap report makes one heatmap per label showing the overlap of disease-associated sequences produced by the :ref:`SequenceAbundance` encoder
     between folds of cross-validation (either inner or outer loop of the nested CV). The overlap is computed by the following equation:
 
     .. math::
