@@ -1,10 +1,12 @@
 Manuscript use case 3: Benchmarking ML methods on ground-truth synthetic data
 ==============================================================================
-
 In this use case, we show that immuneML can be used for benchmarking ML methods and encodings. To do this,
 we first simulate ground-truth synthetic adaptive immune repertoires, then
 implant known disease signals in these repertoires of varying difficulties, and finally perform a benchmarking.
-The YAML specifications in this document are compatible with immuneML version 1.0.1.
+The complete collection of original files used in this use case can be found in the NIRD research data archive (DOI: `10.11582/2021.00005 <https://doi.org/10.11582/2021.00005>`_).
+Note that the YAML specifications in the original dataset were compatible with immuneML version 0.0.91.
+
+This documentation page contains the YAML specifications for equivalent analyses with the latest immuneML version (tested with version 1.1.3).
 
 
 Generating synthetic immune repertoires with OLGA
@@ -767,6 +769,9 @@ recovered by the ML methods overlap with the k-mers that we originally implanted
 
 The YAML specification below shows the settings that were used for the benchmarking. We assume that the dataset
 with simulated signals can be found at :code:`/path/to/simulated_data/olga2000.iml_dataset`.
+Alternatively, you may want to use the AIRR files (airr.zip) that were produced in the original use case, which can be downloaded
+from the NIRD research data archive (DOI: `10.11582/2021.00005 <https://doi.org/10.11582/2021.00005>`_).
+In this case, uncomment the lines for AIRR import and remove the lines for Pickle import.
 
 
 .. highlight:: yaml
@@ -777,7 +782,13 @@ with simulated signals can be found at :code:`/path/to/simulated_data/olga2000.i
       d1:
         format: Pickle
         params:
-          path: /path/to/simulated_data/olga2000.iml_dataset
+          path: path/to/simulated_data/olga2000.iml_dataset
+      #d1:
+        #format: AIRR
+        #params:
+          #is_repertoire: true
+          #path: path/to/airr/repertoires/
+          #metadata_file: path/to/airr/metadata.csv
     encodings:
       3mer:
         KmerFrequency:
@@ -968,8 +979,6 @@ with simulated signals can be found at :code:`/path/to/simulated_data/olga2000.i
       - signal_label5
       assessment:
         reports:
-          hyperparameter:
-          - hp_report
           models:
           - coefs
           - seeds
@@ -997,6 +1006,8 @@ with simulated signals can be found at :code:`/path/to/simulated_data/olga2000.i
         ml_method: LR
       - encoding: 4mer
         ml_method: RF
+      reports:
+      - hp_report
       store_encoded_data: false
       refit_optimal_model: false
       number_of_processes: 32

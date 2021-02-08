@@ -189,7 +189,17 @@ Getting started using the command-line interface
 This tutorial assumes that immuneML is already installed locally (see :ref:`Installing immuneML`).
 We recommend :ref:`installing immuneML using a package manager <Install immuneML with a package manager>`.
 
+Step 0: test run immuneML
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+This is an optional step.
+To quickly test out whether immuneML is able to run, try running the quickstart command:
+
+.. code-block:: console
+    immune-ml-quickstart ./quickstart_results/
+
+This will run a simple machine learning analysis on random data.
+If the tool does not fail or crash, this means immuneML is working correctly.
 
 Step 1: downloading the dataset
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

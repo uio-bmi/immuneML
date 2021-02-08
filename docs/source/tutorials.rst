@@ -19,6 +19,7 @@ classification, perform an exploratory analysis (to run preprocessings, encoding
 by implanting sequence motifs in the dataset. See the tutorials below:
 
   - :ref:`How to train and assess a receptor/repertoire-level ML classifier`
+  - :ref:`How to apply previously trained ML models to a new dataset`
   - :ref:`How to perform an exploratory data analysis`
   - :ref:`How to simulate antigen/disease-associated signals in AIRR datasets`
 
@@ -30,7 +31,7 @@ by implanting sequence motifs in the dataset. See the tutorials below:
   tutorials/how_to_import_the_data_to_immuneML
   tutorials/how_to_generate_a_random_repertoire_dataset
   tutorials/how_to_train_and_assess_a_receptor_or_repertoire_classifier
+  tutorials/how_to_apply_to_new_data
   tutorials/how_to_perform_exploratory_analysis
   tutorials/how_to_simulate_antigen_signals_in_airr_datasets
-  tutorials/how_to_apply_to_new_data
   tutorials/motif_recovery

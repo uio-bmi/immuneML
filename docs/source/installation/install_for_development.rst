@@ -3,12 +3,15 @@ Set up immuneML for development
 Prerequisites:
 
 - Python 3.8: it might work with other python versions (3.7 or 3.6), but might require additional packages to be manually installed (e.g., dataclasses package if running immuneML with Python 3.6). Alternatively, a custom python interpreter can be assigned to the virtual environment (in PyCharm, for development purposes, or in a conda environment).
+  At the time of writing this,
 
 - Under windows, the Microsoft Visual C++ 14.0 or greater is required to install from requirements.txt.
 
 Note: for development purposes, it is most convenient to clone the codebase using PyCharm. To set up the project in PyCharm, see
 `the official JetBrains tutorial for creating a PyCharm project from an existing GitHub repository <https://www.jetbrains.com/help/pycharm/manage-projects-hosted-on-github.html>`_.
-Alternatively, the following 5 steps describe how to perform the process manually.
+At the time of writing this, `PyCharm fails to create virtual environments with Python version 3.9 <https://github.com/coursera-dl/coursera-dl/issues/778>`_, using version 3.8 works.
+
+Alternatively to using PyCharm, the following 5 steps describe how to perform the process manually.
 
 Steps:
 
@@ -35,7 +38,7 @@ See also these FAQs:
 
 - :ref:`When installing all requirements from requirements.txt, there is afterward an error with yaml package (No module named yaml)?`
 
-- :ref:`As a Windows user, I get an error when installing PyTorch (could not find a version that satisfies the requirement torch==1.5.1)`
+- :ref:`I get an error when installing PyTorch (could not find a version that satisfies the requirement torch==1.5.1)`
 
 If you want to install optional requirements (DeepRC or TCRdist), install the corresponding requirements files (some or all of them):
 

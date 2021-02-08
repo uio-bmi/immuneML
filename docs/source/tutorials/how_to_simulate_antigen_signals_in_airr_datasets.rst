@@ -16,8 +16,8 @@ The YAML definition consists of three components: motif, signal and simulation d
   (probability for each amino acid to replace one of the amino acids in the seed when the Hamming distance between the seed and the motif instance is equal
   to or larger than 1). It is possible to define multiple motifs by defining a key before specifying the parameters of the motif.
 
-- :code:`signals` (see: :ref:`Signal`) model immune events and represent the labels assigned to the repertoires (the label is signal_my_signal_name for signal called
-  `my_signal_name` in the YAML specification and can have value True or False in the repertoire depending whether the signal was implanted in the repertoire
+- :code:`signals` (see: :ref:`Signal`) model immune events and represent the labels assigned to the repertoires (the label is 'signal_my_signal_name' for signal called
+  :code:`my_signal_name` in the YAML specification, and can have value True or False in the repertoire depending whether the signal was implanted in the repertoire
   or not). A signal is defined by a list of motifs (only motif keys as given in the previous section are specified in the list), the sequence position
   weights (probabilities to implant a motif instance into a target receptor sequence at the given IMGT position) and implanting (the way receptor
   sequences are chosen for implanting from the repertoire). Implanting and the list of motifs are mandatory fields in the YAML specification.
@@ -27,14 +27,13 @@ The YAML definition consists of three components: motif, signal and simulation d
   implantings can be used to ensure signals do not overlap (one implanting per signal), or to ensure signals always occur together (multiple signals
   per implanting).
 
-For each implanting, it is necessary to define dataset implanting rate (the percentage of repertoires in the dataset which will contain the listed
-signals), repertoire implanting rate (the percentage of receptor sequences in the repertoire which will contain the listed signals) and a list of
-signals for which this applies.
+  For each implanting, it is necessary to define:
 
-When multiple signals are specified within one implanting, these signals are implanted in the same repertoires. However, they are not implanted within
-the same receptors in those repertoires. When specifying multiple different implantings, keep in mind that the summed dataset implanting rate can
-not exceed 1.
-
+  - A :code:`dataset_implanting_rate`: the percentage of repertoires in the dataset which will contain the listed signals
+  - A :code:`repertoire_implanting_rate`: the percentage of receptor sequences in the repertoire which will contain the listed signals
+  - A list of :code:`signals` for which this applies. When multiple signals are specified within one implanting, these signals are
+    implanted in the same repertoires. However, they are not implanted within the same receptors in those repertoires.
+    When specifying multiple different implantings, keep in mind that the summed :code:`dataset_implanting_rate` can not exceed 1.
 
 
 This figure shows how the different concepts in a Simulation relate to each other:
@@ -65,6 +64,7 @@ baseline for the simulation.
             14: 0.33
             15: 0.33
           labels: {}
+
     motifs:
       my_simple_motif: # a simple motif without gaps or hamming distance
         seed: AAA

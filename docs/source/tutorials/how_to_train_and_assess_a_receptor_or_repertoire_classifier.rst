@@ -1,8 +1,8 @@
 How to train and assess a receptor/repertoire-level ML classifier
 ==================================================================
 
-immuneML provides a rich set of functionality for learning and assessing machine
-learning models (classifiers of receptors or repertoires). To learn the parameters and hyperparameters of the ML model,
+immuneML provides a rich set of functionality for training and assessing machine
+learning models to classify of receptors or repertoires. To learn the parameters and hyperparameters of the ML model,
 the data needs to be split into training, validation and test sets. For this splitting, both nested cross-validation and fixed splits are supported.
 Processing and filtering choices for input receptor data,
 as well as encoding choice, can be set up as hyperparameters for automatic optimization
@@ -156,7 +156,7 @@ An example is shown below:
       my_report: MLSettingsPerformance
 
   instructions:
-    hpoptim_instr:
+    my_training_instruction:
       type: TrainMLModel
       settings:
         - encoding: my_kmer_enc
@@ -182,12 +182,16 @@ An example is shown below:
       refit_optimal_model: False
       store_encoded_data: False
 
-The flow of the hyperparameter optimization is shown below, along with the
-output that is generated and reports executed at each step:
 
-.. figure:: ../_static/images/hp_optmization_with_outputs.png
-  :width: 70%
+..
+  left out, too detailed:
 
-  Execution flow of the TrainMLModelInstruction along with the information on data and reports generated at each step.
+    The flow of the hyperparameter optimization is shown below, along with the
+    output that is generated and reports executed at each step:
 
-For implementation detals, see :ref:`Hyperparameter Optimization Details`.
+    .. figure:: ../_static/images/hp_optmization_with_outputs.png
+      :width: 70%
+
+      Execution flow of the TrainMLModelInstruction along with the information on data and reports generated at each step.
+
+    For implementation detals, see :ref:`Hyperparameter Optimization Details`.
