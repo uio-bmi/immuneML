@@ -123,7 +123,7 @@ class Quickstart:
                 shutil.rmtree(path)
             PathBuilder.build(path)
         else:
-            path = Path(path)
+            path = PathBuilder.build(path)
         return path
 
     def run(self, result_path: str):

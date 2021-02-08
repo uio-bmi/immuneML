@@ -23,6 +23,8 @@ class DeepRC(MLMethod):
     This classifier uses the DeepRC method for repertoire classification. The DeepRC ML method should be used in combination
     with the DeepRC encoder.
 
+    Important note: to be able to run DeepRC, you must have access to a GPU. DeepRC does not work on a CPU.
+
 
     Reference:
     Michael Widrich, Bernhard Schäfl, Milena Pavlović, Geir Kjetil Sandve, Sepp Hochreiter, Victor Greiff, Günter Klambauer
@@ -72,6 +74,7 @@ class DeepRC(MLMethod):
 
         n_workers (int): Number of background processes to use for converting dataset to hdf5 container and training set data loader.
 
+        pytorch_device_name (str): The name of the pytorch device to use. This name will be passed to  torch.device(self.pytorch_device_name). The default value is cuda:0
 
     YAML specification:
 
@@ -83,7 +86,6 @@ class DeepRC(MLMethod):
                 validation_part: 0.2
                 add_positional_information: True
                 kernel_size: 9
-                model_selection_cv: False
 
     """
 
