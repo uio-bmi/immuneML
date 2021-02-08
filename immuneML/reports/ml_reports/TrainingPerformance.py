@@ -19,7 +19,7 @@ import numpy as np
 import pandas as pd
 import plotly.graph_objs as go
 
-class Evaluations(MLReport):
+class TrainingPerformance(MLReport):
     """
     A report that plots the evaluation metrics for the performance given machine learning model and training dataset.
     The available metrics are accuracy, balanced_accuracy, confusion_matrix, f1_micro, f1_macro, f1_weighted, precision,
@@ -27,15 +27,15 @@ class Evaluations(MLReport):
 
     Arguments:
 
-        metrics (list): A list of evaluation metrics to compute. See :ref:`Metrics` for available options.
+        metrics (list): A list of metrics used to evaluate traning performance. See :ref:`Metrics` for available options.
 
     YAML specification:
 
     .. indent with spaces
     .. code-block:: yaml
 
-        my_eval_report:
-            Evaluations: 
+        my_performance_report:
+            TrainingPerformance: 
                 metrics:
                     - accuracy
                     - balanced_accuracy
@@ -52,7 +52,7 @@ class Evaluations(MLReport):
 
     @classmethod
     def build_object(cls, **kwargs):
-        location = "Evaluations"        
+        location = "TrainingPerformance"        
         valid_metrics = [m.name for m in Metric]
 
         name = kwargs["name"] if "name" in kwargs else None
@@ -61,7 +61,7 @@ class Evaluations(MLReport):
         
         ParameterValidator.assert_all_in_valid_list(metrics, valid_metrics, location, 'metrics')
 
-        return Evaluations(metrics, name=name)
+        return TrainingPerformance(metrics, name=name)
 
     def __init__(self, metrics_set: set, train_dataset: Dataset = None, test_dataset: Dataset = None, method: MLMethod = None,
                  result_path: Path = None, name: str = None, hp_setting: HPSetting = None):
@@ -85,7 +85,7 @@ class Evaluations(MLReport):
         }
 
         for metric in self.metrics_set:
-            _score = Evaluations._compute_score(
+            _score = TrainingPerformance._compute_score(
                 Metric[metric],
                 predicted_y,
                 predicted_proba_y,
@@ -121,7 +121,7 @@ class Evaluations(MLReport):
             if metric in Metric.get_probability_based_metric_types():
                 predictions = predicted_proba_y
                 if predicted_proba_y is None:
-                    warnings.warn(f"EvaluationsReport: metric {metric} is specified, but the chosen ML method does not output "
+                    warnings.warn(f"TrainingPerformance: metric {metric} is specified, but the chosen ML method does not output "
                                   f"class probabilities. Using predicted classes instead...")
                     predictions = predicted_y
             else:
@@ -130,7 +130,7 @@ class Evaluations(MLReport):
             score = fn(true_y, predictions)
 
         except ValueError as err:
-            warnings.warn(f"EvaluationsReport: score for metric {metric.name} could not be calculated."
+            warnings.warn(f"TrainingPerformance: score for metric {metric.name} could not be calculated."
                           f"\nPredicted values: {predicted_y}\nTrue values: {true_y}.\nMore details: {err}", RuntimeWarning)
             score = "not computed"
 
@@ -150,8 +150,8 @@ class Evaluations(MLReport):
         fig = go.Figure(data=[trace], layout=layout)
         fig.write_html(str(path_html))
 
-        output['tables'].append(ReportOutput(path_csv, "Evaluation table"))
-        output['figures'].append(ReportOutput(path_html, "Evaluation html"))
+        output['tables'].append(ReportOutput(path_csv, "TrainingPerformance table"))
+        output['figures'].append(ReportOutput(path_html, "TrainingPerformance html"))
 
         return
 
@@ -159,13 +159,13 @@ class Evaluations(MLReport):
         path_csv = self.result_path / f"{self.name}_{metric.lower()}.csv"
         path_html = self.result_path / f"{self.name}_{metric.lower()}.html"
         
-
+        z_flip = np.flipud(z)
 
         hovertext = []
         for yi, yy in enumerate(y):
             hovertext.append(list())
             for xi, xx in enumerate(x):
-                hovertext[-1].append(f"{xlabel}: {xx}<br />{ylabel}: {yy}<br />{zlabel}: {z[yi][xi]}")
+                hovertext[-1].append(f"{xlabel}: {xx}<br />{ylabel}: {yy}<br />{zlabel}: {z_flip[yi][xi]}")
 
         layout = go.Layout(
             title=f'Evaluation: {metric} ({self.label})',
@@ -173,7 +173,7 @@ class Evaluations(MLReport):
             yaxis=dict(title=ylabel)
         )
         trace = go.Heatmap(
-            z=z,
+            z=z_flip,
             x=x,
             y=y,
             hoverongaps = False,
@@ -189,8 +189,8 @@ class Evaluations(MLReport):
         z_df.index = f'{ylabel} (' +  pd.Index(map(str, y)) + ')'
         z_df.to_csv(path_csv)   
         
-        output['tables'].append(ReportOutput(path_csv, f"Evaluation table ({metric.lower()})"))
-        output['figures'].append(ReportOutput(path_html, f"Evaluation html ({metric.lower()})"))
+        output['tables'].append(ReportOutput(path_csv, f"TrainingPerformance table ({metric.lower()})"))
+        output['figures'].append(ReportOutput(path_html, f"TrainingPerformance html ({metric.lower()})"))
         
         return
 
