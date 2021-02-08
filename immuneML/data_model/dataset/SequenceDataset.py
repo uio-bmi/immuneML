@@ -9,6 +9,8 @@ from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import Rece
 
 
 class SequenceDataset(ElementDataset):
+    """A dataset class for sequence datasets (single chain). All the functionality is implemented in ElementDataset class, except creating a new
+    dataset. """
 
     @classmethod
     def build(cls, sequences: List[ReceptorSequence], file_size: int, path: Path, name: str = None):

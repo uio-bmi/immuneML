@@ -1,0 +1,2 @@
+number_of_processes: 4
+store_encoded_data: False # store encoded dataset in pickle format

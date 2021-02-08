@@ -43,12 +43,14 @@ class RepertoireDataset(Dataset):
         return len(self.repertoires)
 
     def get_metadata_fields(self, refresh=False):
+        """Returns the list of metadata fields, includes also the fields that will typically not be used as labels, like filename or identifier"""
         if self.metadata_fields is None or refresh:
             df = pd.read_csv(self.metadata_file, sep=",", nrows=0, comment=Constants.COMMENT_SIGN)
             self.metadata_fields = df.columns.values.tolist()
         return self.metadata_fields
 
     def get_label_names(self, refresh=False):
+        """Returns the list of metadata fields which can be used as labels; if refresh=True, it reloads the fields from disk"""
         all_metadata_fields = set(self.get_metadata_fields(refresh))
         for non_label in ["subject_id", "filename", "repertoire_identifier", "identifier"]:
             if non_label in all_metadata_fields:
@@ -57,6 +59,19 @@ class RepertoireDataset(Dataset):
         return all_metadata_fields
 
     def get_metadata(self, field_names: list, return_df: bool = False):
+        """
+        A function to get the metadata of the repertoires. It can be useful in encodings or reports when the repertoire information needed is not
+        present only in the label chosen for the ML model (e.g., disease), but also other information (e.g., age, HLA).
+
+        Args:
+            field_names (list): list of the metadata fields to return; the fields must be present in the metadata files. To find fields available, use :py:obj:`immuneML.data_model.dataset.RepertoireDataset.RepertoireDataset.get_label_names` function.
+            return_df (bool): determines if the results should be returned as a dataframe where each column corresponds to a field or as a dictionary
+
+        Returns:
+
+            a dictionary where keys are fields names and values are lists of field values for each repertoire; alternatively returns the same information in dataframe format
+
+        """
         df = pd.read_csv(self.metadata_file, sep=",", usecols=field_names, comment=Constants.COMMENT_SIGN)
         if return_df:
             return df
@@ -64,6 +79,7 @@ class RepertoireDataset(Dataset):
             return df.to_dict("list")
 
     def get_filenames(self):
+        """Returns the paths to files in which repertoire information is stored"""
         return [Path(filename) for filename in self.get_metadata(["filename"])["filename"]]
 
     def _build_new_metadata(self, indices, path: Path) -> Path:
@@ -76,6 +92,19 @@ class RepertoireDataset(Dataset):
             return None
 
     def make_subset(self, example_indices, path: Path, dataset_type: str):
+        """
+        Creates a new dataset object with only those examples (repertoires) available which were given by index in example_indices argument.
+
+        Args:
+            example_indices (list): a list of indices of examples (repertoires) to use in the new dataset
+            path (Path): a path where to store the newly created dataset
+            dataset_type (str): a type of the dataset used as a part of the name of the resulting dataset; the values are defined as constants in :py:obj:`immuneML.data_model.dataset.Dataset.Dataset`
+
+        Returns:
+
+            a new RepertoireDataset object which includes only the repertoires specified under example_indices
+
+        """
 
         metadata_file = self._build_new_metadata(example_indices, path / f"{dataset_type}_metadata.csv")
         new_dataset = RepertoireDataset(repertoires=[self.repertoires[i] for i in example_indices], labels=copy.deepcopy(self.labels),
@@ -84,9 +113,11 @@ class RepertoireDataset(Dataset):
         return new_dataset
 
     def get_repertoire_ids(self) -> list:
+        """Returns a list of repertoire identifiers, same as get_example_ids()"""
         if self.repertoire_ids is None:
             self.repertoire_ids = [str(repertoire.identifier) for repertoire in self.repertoires]
         return self.repertoire_ids
 
     def get_example_ids(self):
+        """Returns a list of example identifiers"""
         return self.get_repertoire_ids()

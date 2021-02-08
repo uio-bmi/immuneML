@@ -74,6 +74,15 @@ which has the following responsibilities:
 The preferred method for plotting data is through `plotly <https://plotly.com/python/>`_, as it creates interactive and rescalable plots in HTML format [recommended] that
 display nicely in the HTML output file. Alternatively, plots can also be in pdf, png, jpg and svg format.
 
+.. note::
+
+    When plotting data with `plotly <https://plotly.com/python/>`_, we recommend using the following color schemes for consistency:
+    plotly.colors.sequential.Teal, plotly.colors.sequential.Viridis, or plotly.colors.diverging.Tealrose.
+    Additionally, in the most of immuneML plots, 'plotly_white' theme is used for the background.
+
+    For the overview of color schemes, visit `this link <https://plotly.com/python/builtin-colorscales/>`_.
+    For plotly themes, visit `this link <https://plotly.com/python/templates/>`_.
+
 The second abstract method to be implemented is `build_object()`. This method can take in any custom parameters and should return an instance of the
 report object. The parameters of the method `build_object()` can be directly specified in the YAML specification, nested under the report type, for example:
 
@@ -193,7 +202,7 @@ The following specification shows the places where :ref:`Data reports`, :ref:`En
         MyNewEncodingReport:
          parameter: value
       my_ml_report: MyNewMLReport # ml model report
-      my_trainml_report: MyNewMLModelReport # ml report
+      my_trainml_report: MyNewTrainMLModelReport # train ml model report
 
     datasets:
       d1:

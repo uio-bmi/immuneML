@@ -2,6 +2,7 @@ import logging
 import os
 from pathlib import Path
 
+from immuneML.dsl.DefaultParamsLoader import DefaultParamsLoader
 from immuneML.dsl.definition_parsers.DefinitionParserOutput import DefinitionParserOutput
 from immuneML.dsl.symbol_table.SymbolTable import SymbolTable
 from immuneML.dsl.symbol_table.SymbolType import SymbolType
@@ -29,7 +30,6 @@ class InstructionParser:
         symbol_table = definition_output.symbol_table
 
         if InstructionParser.keyword in specification:
-
             if len(specification[InstructionParser.keyword].keys()) > 1:
                 logging.warning(f"InstructionParser: multiple instructions were listed in the specification (under keys "
                                 f"{str(list(specification[InstructionParser.keyword].keys()))[1:-1]}). "
@@ -52,6 +52,8 @@ class InstructionParser:
         valid_instructions = [cls[:-6] for cls in ReflectionHandler.discover_classes_by_partial_name("Parser", "dsl/instruction_parsers/")]
         ParameterValidator.assert_in_valid_list(instruction["type"], valid_instructions, "InstructionParser", "type")
 
+        default_params = DefaultParamsLoader.load("instructions/", instruction["type"])
+        instruction = {**default_params, **instruction}
         parser = ReflectionHandler.get_class_by_name("{}Parser".format(instruction["type"]), "instruction_parsers/")()
         instruction_object = parser.parse(key, instruction, symbol_table, path)
 

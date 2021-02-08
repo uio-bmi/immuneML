@@ -88,11 +88,14 @@ class SignalImplanter(Step):
     @staticmethod
     def _process_receptor(index, receptor, implanting, simulation_state) -> Receptor:
         if implanting is not None:
-            new_receptor = simulation_state.signals[0].implant_in_receptor(receptor, implanting.is_noise)
+            new_receptor = receptor
+            for signal in implanting.signals:
+                new_receptor = signal.implant_in_receptor(new_receptor, implanting.is_noise)
         else:
             new_receptor = receptor.clone()
-            for signal in simulation_state.signals:
-                new_receptor.metadata[f"signal_{signal.id}"] = False
+        for signal in simulation_state.signals:
+            if signal.id not in new_receptor.metadata:
+                new_receptor.metadata[signal.id] = False
         return new_receptor
 
     @staticmethod
@@ -106,7 +109,7 @@ class SignalImplanter(Step):
                                                                     repertoire.metadata)
 
             for signal in simulation_state.signals:
-                new_repertoire.metadata[f"signal_{signal.id}"] = False
+                new_repertoire.metadata[f"{signal.id}"] = False
 
             return new_repertoire
 
@@ -132,12 +135,12 @@ class SignalImplanter(Step):
 
         for signal in implanting.signals:
             if implanting.is_noise:
-                new_repertoire.metadata[f"signal_{signal.id}"] = False
+                new_repertoire.metadata[f"{signal.id}"] = False
             else:
-                new_repertoire.metadata[f"signal_{signal.id}"] = True
+                new_repertoire.metadata[f"{signal.id}"] = True
         for signal in simulation_state.signals:
             if signal not in implanting.signals:
-                new_repertoire.metadata[f"signal_{signal.id}"] = False
+                new_repertoire.metadata[f"{signal.id}"] = False
 
         return new_repertoire
 

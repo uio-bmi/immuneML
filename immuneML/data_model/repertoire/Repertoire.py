@@ -98,7 +98,7 @@ class Repertoire(DatasetItem):
         dtype = np.dtype(dtype)
 
         repertoire_matrix = np.array(list(map(tuple, zip(*values))), order='F', dtype=dtype)
-        np.save(data_filename, repertoire_matrix)
+        np.save(str(data_filename), repertoire_matrix)
 
         metadata_filename = path / f"{filename_base}_metadata.pickle"
         metadata = {} if metadata is None else metadata
@@ -120,7 +120,7 @@ class Repertoire(DatasetItem):
             filename_base = filename_base if filename_base is not None else identifier
 
             data_filename = result_path / f"{filename_base}.npy"
-            np.save(data_filename, data)
+            np.save(str(data_filename), data)
 
             metadata_filename = result_path / f"{filename_base}_metadata.pickle"
             shutil.copyfile(repertoire.metadata_filename, metadata_filename)
@@ -138,9 +138,9 @@ class Repertoire(DatasetItem):
 
         sequence_aas, sequences, v_genes, j_genes, v_subgroups, j_subgroups, v_alleles, j_alleles, chains, counts, region_types, frame_types, sequence_identifiers, cell_ids = [], [], [], [], [], [], [], [], [], [], [], [], [], []
         custom_lists = {key: [] for key in sequence_objects[0].metadata.custom_params} if sequence_objects[0].metadata else {}
-        signals = {key: [] for key in metadata if "signal" in key}
+        signals = {}
 
-        for sequence in sequence_objects:
+        for index, sequence in enumerate(sequence_objects):
             sequence_identifiers.append(sequence.identifier)
             sequence_aas.append(sequence.amino_acid_sequence)
             sequences.append(sequence.nucleotide_sequence)
@@ -158,12 +158,12 @@ class Repertoire(DatasetItem):
                 cell_ids.append(sequence.metadata.cell_id)
                 for param in sequence.metadata.custom_params.keys():
                     custom_lists[param].append(sequence.metadata.custom_params[param] if param in sequence.metadata.custom_params else None)
-            for key in signals.keys():
-                if sequence.annotation and sequence.annotation.implants and len(sequence.annotation.implants) > 0 \
-                        and "signal_" + sequence.annotation.implants[0].signal_id == key:
-                    signals[key].append(str(sequence.annotation.implants[0]))
-                else:
-                    signals[key].append(None)
+            if sequence.annotation and sequence.annotation.implants and len(sequence.annotation.implants) > 0:
+                for implant in sequence.annotation.implants:
+                    if implant.signal_id in signals:
+                        signals[implant.signal_id].append(str(implant))
+                    else:
+                        signals[implant.signal_id] = [None for _ in range(index)] + [str(implant)]
 
         return cls.build(sequence_aas=sequence_aas, sequences=sequences, v_genes=v_genes, j_genes=j_genes, v_subgroups=v_subgroups,
                          j_subgroups=j_subgroups, v_alleles=v_alleles, j_alleles=j_alleles, chains=chains, counts=counts, region_types=region_types,
@@ -256,16 +256,20 @@ class Repertoire(DatasetItem):
             self.load_data()
         return self.element_count
 
-    def _make_sequence_object(self, row):
+    def _make_sequence_object(self, row, load_implants: bool = False):
 
         fields = row.dtype.names
 
-        keys = [key for key in row.dtype.names if "signal" in key]
         implants = []
-        for key in keys:
-            value_dict = row[key]
-            if value_dict:
-                implants.append(ImplantAnnotation(**ast.literal_eval(value_dict)))
+        if load_implants:
+            keys = [key for key in row.dtype.names if key not in Repertoire.FIELDS]
+            for key in keys:
+                value_dict = row[key]
+                if value_dict:
+                    try:
+                        implants.append(ImplantAnnotation(**ast.literal_eval(value_dict)))
+                    except (SyntaxError, ValueError, TypeError) as e:
+                        pass
 
         seq = ReceptorSequence(amino_acid_sequence=row["sequence_aas"] if "sequence_aas" in fields else None,
                                nucleotide_sequence=row["sequences"] if "sequences" in fields else None,
@@ -303,17 +307,29 @@ class Repertoire(DatasetItem):
             sequences.append(self._make_sequence_object(item))
         return ReceptorBuilder.build_objects(sequences)
 
-    @property
-    def sequences(self) -> List[ReceptorSequence]:
+    def get_sequence_objects(self, load_implants: bool = False) -> List[ReceptorSequence]:
+        """
+        Lazily loads sequences from disk to reduce RAM consumption
+
+        Args:
+            load_implants: whether implants should be parsed to objects and converted to ImplantAnnotations; if True, might slow down the loading
+
+        Returns:
+            a list of ReceptorSequence objects
+        """
         seqs = []
 
         data = self.load_data()
 
         for i in range(len(self.get_sequence_identifiers())):
-            seq = self._make_sequence_object(data[i])
+            seq = self._make_sequence_object(data[i], load_implants)
             seqs.append(seq)
 
         return seqs
+
+    @property
+    def sequences(self):
+        return self.get_sequence_objects(False)
 
     @property
     def receptors(self) -> List[Receptor]:
