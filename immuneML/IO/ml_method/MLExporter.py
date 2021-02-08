@@ -16,7 +16,7 @@ class MLExporter:
     def export_zip(hp_item: HPItem, path: Path, label: str) -> str:
         state_path = path.absolute()
         export_path = MLExporter.export(hp_item, state_path / "exported")
-        filename = f"ml_model_{label}"
+        filename = f"ml_settings_{label}"
         abs_zip_path = Path(shutil.make_archive(state_path / "zip" / filename, "zip", export_path)).absolute()
         return abs_zip_path
 
