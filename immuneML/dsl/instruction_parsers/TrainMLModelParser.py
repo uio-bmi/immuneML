@@ -94,7 +94,7 @@ class TrainMLModelParser:
         try:
             settings = []
             for index, setting in enumerate(instruction["settings"]):
-                if "preprocessing" in setting:
+                if "preprocessing" in setting and setting["preprocessing"] is not None:
                     ParameterValidator.assert_type_and_value(setting["preprocessing"], str, TrainMLModelParser.__name__, f'settings: {index+1}. '
                                                                                                                          f'element: preprocessing')
                     if symbol_table.contains(setting["preprocessing"]):
