@@ -78,6 +78,7 @@ class TrainMLModelParser:
 
     def _prepare_reports(self, reports: list, symbol_table: SymbolTable) -> dict:
         if reports is not None:
+            ParameterValidator.assert_type_and_value(reports, list, TrainMLModelParser.__name__, "reports")
             report_objects = {report_id: symbol_table.get(report_id) for report_id in reports}
             ParameterValidator.assert_all_type_and_value(report_objects.values(), TrainMLModelReport, TrainMLModelParser.__name__, 'reports')
             return report_objects
