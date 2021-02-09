@@ -26,8 +26,7 @@ class MLExporter:
         preproc_filename = MLExporter._store_preprocessing_sequence(hp_item.hp_setting.preproc_sequence, path).name
         encoder_filename = MLExporter._store_encoder(hp_item.hp_setting.encoder, path).name
 
-        hp_item.method.store(path, hp_item.method.get_feature_names())
-        labels_with_values = {label: hp_item.method.get_classes_for_label(label).tolist() for label in hp_item.method.get_label()}
+        labels_with_values = {label: list(hp_item.method.get_classes_for_label(label)) for label in hp_item.method.get_label()}
 
         method_config = MLMethodConfiguration(labels_with_values=labels_with_values, software_used=hp_item.method.get_package_info(),
                                               encoding_name=hp_item.hp_setting.encoder_name, encoding_parameters=hp_item.hp_setting.encoder_params,
