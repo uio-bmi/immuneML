@@ -21,7 +21,7 @@ by implanting sequence motifs in the dataset. See the tutorials below:
   - :ref:`How to train and assess a receptor or repertoire-level ML classifier`
   - :ref:`How to apply previously trained ML models to a new dataset`
   - :ref:`How to perform an exploratory data analysis`
-  - :ref:`How to simulate antigen/disease-associated signals in AIRR datasets`
+  - :ref:`How to simulate antigen or disease-associated signals in AIRR datasets`
 
 .. toctree::
   :maxdepth: 1

@@ -19,6 +19,7 @@ To train ML models in immuneML, the :ref:`TrainMLModel` instruction should be us
 and in addition it is possible to include :ref:`Preprocessings` in the hyperparameter optimization. :ref:`Reports` may be specified to export
 plots and statistics in order to gain more insight into the dataset or the process of training ML models.
 Constructing a YAML for training ML models is described in more detail in the tutorial :ref:`How to train and assess a receptor or repertoire-level ML classifier`.
+Note that on Galaxy, the ML methods DeepRC and TCRdistClassifier are **not** available.
 
 When writing an analysis specification for Galaxy, it can be assumed that all selected files are present in the current working directory. A path
 to an additional file thus consists only of the filename. Note that in Galaxy, it is only possible to train ML models for one label at a time.

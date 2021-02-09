@@ -27,7 +27,7 @@ Specifying Definitions
 
 - :code:`reports`: specific plots or statistics to apply to the raw or encoded data, ML methods or results.
 
-Simulation-specific components (only relevant when running a :ref:`Simulation instruction<How to simulate antigen/disease-associated signals in AIRR datasets>`) are:
+Simulation-specific components (only relevant when running a :ref:`Simulation instruction<How to simulate antigen or disease-associated signals in AIRR datasets>`) are:
 
 - :code:`motifs`: parts of the simulation definition defined by a seed and a way to create specific motif instances from the seed,
 
@@ -62,7 +62,8 @@ The import of two datasets may be defined as follows:
 
 Where the imported datasets can under :code:`instructions` be referenced using the keys :ref:`my_dataset_1` and :ref:`my_dataset_2`.
 
-An example of a full :code:`definitions` section which may be used for a machine learning task is given here:
+An example of a full :code:`definitions` section which may be used for a machine learning task is given below.
+See also :ref:`How to train and assess a receptor or repertoire-level ML classifier` for more details.
 
 .. highlight:: yaml
 .. code-block:: yaml
@@ -90,7 +91,8 @@ An example of a full :code:`definitions` section which may be used for a machine
     reports:
       my_seq_length_distribution: SequenceLengthDistribution
 
-Whereas a :code:`definitions` section used for Simulation contains different components:
+The :code:`definitions` section used for Simulation contains different components, as shown in the example below.
+See also :ref:`How to simulate antigen or disease-associated signals in AIRR datasets` for more details.
 
 .. highlight:: yaml
 .. code-block:: yaml
@@ -195,8 +197,8 @@ The :code:`output` section may be omitted from the YAML, but if included, it sho
     format: HTML
 
 
-Putting parts together
-^^^^^^^^^^^^^^^^^^^^^^
+Putting all parts together
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 An example of a complete YAML specification for training an ML model through nested cross-validation is given here:
 

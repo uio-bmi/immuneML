@@ -10,10 +10,10 @@ The first step of any immuneML analysis is to import the dataset that will be us
 - **ReceptorDatasets** are the paired variant of SequenceDatasets, and should be used to make a prediction for each receptor chain pair.
 
 A broad range of different import formats can be specified, including AIRR, MiXCR, VDJdb, ImmunoSEQ (Adaptive Biotechnologies),
-10xGenomics, OLGA and IGoR (for the extensive list, see :ref:`Datasets`). If you are using a custom format, or your preferred
-format is not yet supported, any type of tabular file can also be imported using :ref:`Generic` import. When possible, using format-specific
-importers is preferred over Generic import, as they require less options to be set and might take care of automatic reformatting
-of certain fields.
+10xGenomics, OLGA and IGoR. For the complete list of supported data formats, and extensive documentation see :ref:`Datasets`.
+If you are using a custom format, or your preferred format is not yet supported, any type of tabular file can also be imported
+using :ref:`Generic` import. When possible, using format-specific importers is preferred over Generic import, as they require
+less options to be set and might take care of automatic reformatting of certain fields.
 Alternatively to importing data from files, it is also possible to generate datasets containing random immune receptor sequences on the fly,
 see :ref:`How to generate a random sequence, receptor or repertoire dataset`.
 

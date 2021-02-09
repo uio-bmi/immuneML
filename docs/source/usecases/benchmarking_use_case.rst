@@ -39,7 +39,7 @@ Simulating immune signals into the immune repertoires
 -----------------------------------------------------
 
 Next, five different immune signals are implanted in the 2000 immune repertoires.
-To read about immune signal simulation in more detail, see :ref:`How to simulate antigen/disease-associated signals in AIRR datasets`.
+To read about immune signal simulation in more detail, see :ref:`How to simulate antigen or disease-associated signals in AIRR datasets`.
 
 The implanted immune signals are of increasing complexity:
 
