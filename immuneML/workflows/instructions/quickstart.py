@@ -20,8 +20,8 @@ class Quickstart:
                     "d1": {
                         "format": "AIRR",
                         "params": {
-                            "path": str(path / "../synthetic_dataset/result/my_simulation_instruction/exported_dataset/airr/"),
-                            "metadata_file": str(path / "../synthetic_dataset/result/my_simulation_instruction/exported_dataset/airr/metadata.csv")
+                            "path": str(path / "../synthetic_dataset/result/simulation_instruction/exported_dataset/airr/"),
+                            "metadata_file": str(path / "../synthetic_dataset/result/simulation_instruction/exported_dataset/airr/metadata.csv")
                         }
                     }
                 },
@@ -56,7 +56,7 @@ class Quickstart:
                 }
             },
             "instructions": {
-                "inst1": {
+                "machine_learning_instruction": {
                     "type": "TrainMLModel",
                     "settings": [
                         {
@@ -131,7 +131,7 @@ class Quickstart:
                 "simulations": {"my_simulation": {"my_implantng": {"signals": ["my_signal"], "dataset_implanting_rate": 0.5,
                                                                    "repertoire_implanting_rate": 0.1}}}
             },
-            "instructions": {"my_simulation_instruction": {"type": "Simulation", "dataset": "my_synthetic_dataset", "simulation": "my_simulation",
+            "instructions": {"simulation_instruction": {"type": "Simulation", "dataset": "my_synthetic_dataset", "simulation": "my_simulation",
                                                            "export_formats": ["AIRR"]}}
         }
 
@@ -151,8 +151,8 @@ class Quickstart:
         self._simulate_dataset_with_signals(result_path / "synthetic_dataset")
 
         print("immuneML quickstart: training a machine learning model...")
-        specs_file = self.create_specfication(result_path / "quickstart")
-        app = ImmuneMLApp(specs_file, result_path / "quickstart/result")
+        specs_file = self.create_specfication(result_path / "machine_learning_analysis")
+        app = ImmuneMLApp(specs_file, result_path / "machine_learning_analysis/result")
         app.run()
 
         print("immuneML quickstart: finished training a machine learning model.")
