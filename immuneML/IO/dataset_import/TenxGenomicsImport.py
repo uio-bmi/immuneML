@@ -13,7 +13,7 @@ from scripts.specification_util import update_docs_per_mapping
 
 class TenxGenomicsImport(DataImport):
     """
-    Imports data from 10xGenomics into a Repertoire-, Sequence- or ReceptorDataset.
+    Imports data from the 10x Genomics Cell Ranger analysis pipeline into a Repertoire-, Sequence- or ReceptorDataset.
     RepertoireDatasets should be used when making predictions per repertoire, such as predicting a disease state.
     SequenceDatasets or ReceptorDatasets should be used when predicting values for unpaired (single-chain) and paired
     immune receptors respectively, like antigen specificity.
@@ -21,7 +21,7 @@ class TenxGenomicsImport(DataImport):
     The files that should be used as input are named 'Clonotype consensus annotations (CSV)',
     as described here: https://support.10xgenomics.com/single-cell-vdj/software/pipelines/latest/output/annotation#consensus
 
-    Note: by default the 10xGenomics field 'umis' is used to define the immuneML field counts. If you want to use the 10xGenomics
+    Note: by default the 10xGenomics field 'umis' is used to define the immuneML field counts. If you want to use the 10x Genomics
     field reads instead, this can be changed in the column_mapping (set reads: counts).
     Furthermore, the 10xGenomics field clonotype_id is used for the immuneML field cell_id.
 

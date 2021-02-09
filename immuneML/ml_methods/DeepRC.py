@@ -16,6 +16,7 @@ from immuneML.encodings.deeprc.DeepRCEncoder import DeepRCEncoder
 from immuneML.ml_methods.MLMethod import MLMethod
 from immuneML.util.FilenameHandler import FilenameHandler
 from immuneML.util.PathBuilder import PathBuilder
+from immuneML.ml_methods.util.Util import Util
 
 
 class DeepRC(MLMethod):
@@ -23,8 +24,7 @@ class DeepRC(MLMethod):
     This classifier uses the DeepRC method for repertoire classification. The DeepRC ML method should be used in combination
     with the DeepRC encoder.
 
-    Important note: to be able to run DeepRC, you must have access to a GPU. DeepRC does not work on a CPU.
-
+    Important note: DeepRC uses PyTorch functionalities that depend on GPU. Therefore, DeepRC does not work on a CPU.
 
     Reference:
     Michael Widrich, Bernhard Schäfl, Milena Pavlović, Geir Kjetil Sandve, Sepp Hochreiter, Victor Greiff, Günter Klambauer
@@ -420,7 +420,7 @@ class DeepRC(MLMethod):
         return self.label_classes
 
     def get_package_info(self) -> str:
-        return 'immuneML ' + pkg_resources.get_distribution('immuneML').version + '; deepRC ' + pkg_resources.get_distribution('DeepRC').version
+        return 'immuneML ' + Util.get_immuneML_version() + '; deepRC ' + pkg_resources.get_distribution('DeepRC').version
 
     def get_feature_names(self) -> list:
         return self.feature_names
