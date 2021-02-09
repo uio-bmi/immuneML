@@ -62,5 +62,4 @@ class ExploratoryAnalysisHTMLBuilder:
         for analysis in html_map["analyses"]:
             analysis["show_tables"] = len(analysis["report"]["output_tables"]) > 0
 
-
         return html_map
