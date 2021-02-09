@@ -51,7 +51,7 @@ class RepertoireBuilder:
 
             metadata = {**metadata, **{"subject_id": subject_ids[rep_index]}}
 
-            repertoire = Repertoire.build_from_sequence_objects(rep_sequences, rep_path, metadata, filename_base=subject_ids[rep_index])
+            repertoire = Repertoire.build_from_sequence_objects(rep_sequences, rep_path, metadata, filename_base=f"rep_{rep_index}")
             repertoires.append(repertoire)
 
         df = pd.DataFrame({**{"filename": [repertoire.data_filename for repertoire in repertoires],
