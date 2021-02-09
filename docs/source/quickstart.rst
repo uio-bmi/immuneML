@@ -197,6 +197,7 @@ This is an optional step.
 To quickly test out whether immuneML is able to run, try running the quickstart command:
 
 .. code-block:: console
+
     immune-ml-quickstart ./quickstart_results/
 
 This will generate a synthetic dataset and run a simple machine machine learning analysis on the generated data.
@@ -207,7 +208,7 @@ analyses. The index.html files can be used to navigate through all the results t
 Step 1: downloading the dataset
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-An archive containing the dataset used in this tutorial can be downloaded here: :download:`quickstart.zip <../_static/files/quickstart.zip>`
+An archive containing the dataset used in this tutorial can be downloaded here: :download:`quickstart.zip <_static/files/quickstart.zip>`.
 It contains the following files:
 
 - The metadata.csv file, which describes which of the 100 repertoires contain the disease signal named 'signal_disease'.

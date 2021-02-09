@@ -116,6 +116,7 @@ The output should look like this:
 2. To quickly test out whether immuneML is able to run, try running the quickstart command:
 
 .. code-block:: console
+
     immune-ml-quickstart ./quickstart_results/
 
 This will generate a synthetic dataset and run a simple machine machine learning analysis on the generated data.
