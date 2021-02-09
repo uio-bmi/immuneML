@@ -25,7 +25,7 @@ When installing all requirements from requirements.txt, there is afterward an er
 
 This issue might be helpful: https://github.com/yaml/pyyaml/issues/291. Try installing yaml manually with a specific version.
 
-I get an error when installing PyTorch (could not find a version that satisfies the requirement torch==1.5.1)
+I get an error when installing PyTorch (could not find a version that satisfies the requirement torch)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Depending on the Python version and virtual environment, users may experience errors when installing PyTorch via pip.

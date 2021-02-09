@@ -38,7 +38,7 @@ See also these FAQs:
 
 - :ref:`When installing all requirements from requirements.txt, there is afterward an error with yaml package (No module named yaml)?`
 
-- :ref:`I get an error when installing PyTorch (could not find a version that satisfies the requirement torch==1.5.1)`
+- :ref:`I get an error when installing PyTorch (could not find a version that satisfies the requirement torch)`
 
 If you want to install optional requirements (DeepRC or TCRdist), install the corresponding requirements files (some or all of them):
 
