@@ -61,7 +61,7 @@ class DesignMatrixExporter(EncodingReport):
         details_result = self._export_details()
         label_result = self._export_labels()
 
-        return ReportResult(self.name, output_tables=[matrix_result], output_text=[details_result, label_result])
+        return ReportResult(self.name, output_tables=[matrix_result, label_result], output_text=[details_result])
 
     def _export_matrix(self) -> ReportOutput:
         """Create a file for the design matrix in the desired format."""

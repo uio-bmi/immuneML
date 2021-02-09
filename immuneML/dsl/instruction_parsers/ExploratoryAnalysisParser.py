@@ -77,7 +77,6 @@ class ExploratoryAnalysisParser:
         params = {}
         dataset = symbol_table.get(analysis["dataset"])
 
-
         if "encoding" in analysis:
             params["encoder"] = symbol_table.get(analysis["encoding"]).build_object(dataset, **symbol_table.get_config(analysis["encoding"])["encoder_params"])
             params["label_config"] = LabelConfiguration()

@@ -18,6 +18,7 @@ from immuneML.encodings.word2vec.model_creator.ModelType import ModelType
 from immuneML.encodings.word2vec.model_creator.SequenceModelCreator import SequenceModelCreator
 from immuneML.util.FilenameHandler import FilenameHandler
 from immuneML.util.ParameterValidator import ParameterValidator
+from immuneML.util.PathBuilder import PathBuilder
 from immuneML.util.ReflectionHandler import ReflectionHandler
 from scripts.specification_util import update_docs_per_mapping
 
@@ -110,7 +111,7 @@ class Word2VecEncoder(DatasetEncoder):
                 ("description", description),
                 ("encoding", Word2VecEncoder.__name__),
                 ("learn_model", params.learn_model),
-                ("encoding_params", tuple([(key, params.model[key]) for key in params.model.keys()])), )
+                ("encoding_params", tuple([(key, getattr(self, key)) for key in vars(self)])), )
 
     def _encode_new_dataset(self, dataset, params: EncoderParams):
         if params.learn_model is True and not self._exists_model(params):
@@ -183,6 +184,7 @@ class Word2VecEncoder(DatasetEncoder):
         else:
             model_creator = KmerPairModelCreator()
 
+        PathBuilder.build(self.model_path.parent)
         model = model_creator.create_model(dataset=dataset,
                                            k=self.k,
                                            vector_size=self.vector_size,
