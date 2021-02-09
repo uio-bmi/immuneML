@@ -29,9 +29,11 @@ I get an error when installing PyTorch (could not find a version that satisfies 
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Depending on the Python version and virtual environment, users may experience errors when installing PyTorch via pip.
-The most common reason for this problem is if Python 3.9. We recommend trying to use Python version 3.7 or 3.8 in a conda
-virtual environment.
-If this does not resolve the problem, try installing torch v1.5.1 manually using one of the commands described in `the PyTorch documentation <https://pytorch.org/get-started/previous-versions/>`_,
+The most common reason for this problem is that the Python version is too new to be compatible with the torch package.
+Currently, the `torch package on pypi <https://pypi.org/project/torch/>`_ is only supported up to Python version 3.7.
+We recommend trying to use Python version 3.7 or version 3.8 in a conda virtual environment.
+
+If this does not resolve the problem, try installing torch manually using one of the commands described in `the PyTorch documentation <https://pytorch.org/get-started/previous-versions/>`_,
 and afterwards try to install immuneML again.
 
 
