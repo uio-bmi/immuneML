@@ -104,3 +104,10 @@ class TestDeepRC(TestCase):
             self.assertIsInstance(model, DeepRCInternal)
 
         shutil.rmtree(path)
+
+    def test_get_package_info(self):
+        params = DefaultParamsLoader.load("ml_methods/", "DeepRC")
+
+        classifier = DeepRC(**params)
+
+        classifier.get_package_info()
