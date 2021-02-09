@@ -16,8 +16,8 @@ class TestQuickstart(TestCase):
         quickstart = Quickstart()
         quickstart.run(path)
 
-        self.assertTrue(os.path.isfile(path / "quickstart/result/full_specs.yaml"))
-        self.assertEqual(4, len(glob(str(path / "quickstart/result/inst1/split_1/**/test_predictions.csv"), recursive=True)))
-        self.assertTrue(os.path.isfile(glob(str(path / "quickstart/result/inst1/split_1/**/test_predictions.csv"), recursive=True)[0]))
+        self.assertTrue(os.path.isfile(path / "machine_learning_analysis/result/full_specs.yaml"))
+        self.assertEqual(4, len(glob(str(path / "machine_learning_analysis/result/machine_learning_instruction/split_1/**/test_predictions.csv"), recursive=True)))
+        self.assertTrue(os.path.isfile(glob(str(path / "machine_learning_analysis/result/machine_learning_instruction/split_1/**/test_predictions.csv"), recursive=True)[0]))
 
         shutil.rmtree(path, ignore_errors=True)
