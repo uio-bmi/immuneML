@@ -140,8 +140,9 @@ The complete YAML specification for this analysis looks like this:
         refit_optimal_model: false # whether to retrain the model on the whole dataset after optimizing hyperparameters
         store_encoded_data: false  # whether to store intermediate encoded data files (increases disk usage)
 
-After the YAML specification has been saved to a file (for example: quickstart.yaml), it can be uploaded to Galaxy, and
-the file will appear as a new history element.
+Save the YAML specification to a local file (for example: quickstart.yaml), and upload it to Galaxy.
+The file will appear as a new history element.
+
 
 .. image:: _static/images/galaxy/galaxy_upload_data.png
    :alt: upload data Galaxy
@@ -204,8 +205,8 @@ If the tool does not fail or crash, this means immuneML is working correctly.
 Step 1: downloading the dataset
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The dataset used in this tutorial can be downloaded from the NIRD Research Data Archive `(DOI ....) <https://doi.org/...>`_,
-and download the following files:
+An archive containing the dataset used in this tutorial can be downloaded here: :download:`quickstart.zip <../_static/files/quickstart.zip>`
+It contains the following files:
 
 - The metadata.csv file, which describes which of the 100 repertoires contain the disease signal named 'signal_disease'.
 
