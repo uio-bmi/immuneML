@@ -1,0 +1,2 @@
+git+https://github.com/ml-jku/DeepRC@fec4b4f4b2cd70e00e8de83da169560dec73a419
+git+https://github.com/widmi/widis-lstm-tools

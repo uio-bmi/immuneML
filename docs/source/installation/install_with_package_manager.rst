@@ -30,58 +30,25 @@ Install immuneML
 
 .. code-block:: console
 
-  pip install git+https://github.com/uio-bmi/immuneML
+  pip install immuneML
 
-Alternatively, if you want to install immuneML including optional extras (:code:`DeepRC`, :code:`TCRDist`), use:
+Alternatively, if you want to use the :ref:`TCRDISTClassifier` ML method and corresponding :ref:`TCRDistMotifDiscovery` report, include the optional extra :code:`TCRdist`:
 
 .. code-block:: console
 
-  pip install git+https://github.com/uio-bmi/immuneML#egg=immuneML[DeepRC,TCRDist]
-
-Installing DeepRC and TCRDist dependencies is necessary to use the :ref:`DeepRC` and :ref:`TCRDISTClassifier` ML methods, and corresponding :ref:`DeepRCMotifDiscovery` and :ref:`TCRDistMotifDiscovery` reports.
-It is also possible to specify a subset of extras, for example, include only :code:`DeepRC`.
+  pip install immuneML[TCRdist]
 
 See also this FAQ: :ref:`I get an error when installing PyTorch (could not find a version that satisfies the requirement torch)`
 
-
-How to update immuneML if it was already installed
---------------------------------------------------
-
-To check the existing version of immuneML, activate the virtual environment where immuneML is installed (step 3 in the previous tutorial) and run the following command:
-
-.. code-block:: console
-
-  pip show immune-ml
-
-If immuneML is already installed, the output of this command includes package name, version and other information.
-
-To update the existing installation (obtained as described before):
-
-1. Activate the virtual environment you created:
+5. Optionally, if you want to use the :ref:`DeepRC` ML method and and corresponding :ref:`DeepRCMotifDiscovery` report, you
+have to install DeepRC dependencies using the :download:`requirements_DeepRC.txt <../_static/files/requirements_DeepRC.txt>` file.
+Important note: DeepRC uses PyTorch functionalities that depend on GPU. Therefore, DeepRC does not work on a CPU.
+To install the DeepRC dependencies, run:
 
 .. code-block:: console
 
-  conda activate immuneml_env/
+  pip install -r requirements_DeepRC.txt
 
-2. Install the new version of immuneML using pip:
-
-.. code-block:: console
-
-  pip install git+https://github.com/uio-bmi/immuneML
-
-
-Alternatively, if you want to install immuneML including :code:`all` optional extras, use:
-
-.. code-block:: console
-
-  pip install git+https://github.com/uio-bmi/immuneML#egg=immuneML[all]
-
-Or specify the specific extras you want to install (choose from :code:`DeepRC`, :code:`TCRDist`).
-Note that specifying all these extras is equivalent to specifying :code:`all`:
-
-.. code-block:: console
-
-  pip install git+https://github.com/uio-bmi/immuneML#egg=immuneML[DeepRC,TCRDist]
 
 
 Testing immuneML
