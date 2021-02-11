@@ -103,7 +103,7 @@ def get_ml_method_spec(ml_method_class, model_selection_n_folds=5):
         ml_spec = {
             "k_nearest_neighbors": {
                 "KNN": {
-                    "n_neighbors": [3, 5, 10],
+                    "n_neighbors": [3, 5, 7],
                     "show_warnings": False
                 },
                 "model_selection_cv": True,
