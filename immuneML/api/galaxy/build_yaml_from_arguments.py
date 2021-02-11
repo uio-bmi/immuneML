@@ -189,10 +189,10 @@ def build_specs(args):
                 "labels": [],
                 "dataset": "d1",
                 "strategy": "GridSearch",
-                "metrics": ["accuracy", "balanced_accuracy"],
+                "metrics": [],
                 "number_of_processes": 10,
                 "reports": ["benchmark"],
-                "optimization_metric": "balanced_accuracy",
+                "optimization_metric": "accuracy",
                 'refit_optimal_model': True,
                 "store_encoded_data": False
             }

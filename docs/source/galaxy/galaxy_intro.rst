@@ -3,6 +3,8 @@ Introduction to Galaxy
 
 Galaxy is an open, web-based platform allowing accessible, reproducible and transparent research.
 The immuneML Galaxy instance can be found at https://galaxy.immuneml.uio.no.
+This introduction covers all essential information needed for users of the immuneML Galaxy instance.
+If you want to learn even more about Galaxy, see the official `Galaxy introduction page <https://galaxyproject.org/learn/>`_.
 
 The interface is divided into three sections. In the tool panel on the left, you will find various Galaxy tools.
 Once clicked, these tools will be opened in the tool panel in the middle of the screen. The tool panel is a graphical
@@ -13,7 +15,7 @@ other tools.
 
 Uploading data to Galaxy
 ------------------------
-To upload files to your Galaxy history, you can either use the '' upload button or select the Galaxy tool **Upload file**
+To upload files to your Galaxy history, you can either use the upload button (arrow up) or select the Galaxy tool **Upload file**
 located under **Get local data**. Here, you can select files from your local machine, or directly paste in content.
 Note that when uploading a .zip or other type of compressed file, it may be necessary to manually select the 'file type'.
 

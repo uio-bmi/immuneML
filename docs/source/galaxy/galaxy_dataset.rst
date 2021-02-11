@@ -12,50 +12,50 @@ remote data from the iReceptor Plus Gateway or VDJdb (see :ref:`How to import re
 
 The imported immuneML dataset will appear as a history item on the right side of the screen, and can later be selected as input to other tools.
 
-The tool has a :ref:`simple <Using the simple 'Create dataset' interface>` and an
-:ref:`advanced <Using the advanced 'Create dataset' interface>` interface. The simple interface is fully button-based, and relies
+The tool has a :ref:`simplified <Using the simplified 'Create dataset' interface>` and an
+:ref:`advanced <Using the advanced 'Create dataset' interface>` interface. The simplified interface is fully button-based, and relies
 on default settings for importing datasets. The advanced interface gives full control over import settings through a YAML
-specification. In most cases, the simple interface will suffice.
-If your dataset contains more than 100 files, you may want to consider :ref:`making a Galaxy collection directly from files <Making a Galaxy collection directly from files>`.
+specification. In most cases, the simplified interface will suffice.
+If your history contains more than 100 files, you may want to consider :ref:`making a Galaxy collection directly from files <Making a Galaxy collection directly from files>`.
 
 
 See also the following example Galaxy histories, showing how to run the tool:
 
-- `Create Repertoire dataset <https://galaxy.immuneml.uio.no/u/immuneml/h/create-repertoire-dataset>`_.
+- `Create repertoire dataset <https://galaxy.immuneml.uio.no/u/immuneml/h/create-repertoire-dataset>`_.
 
-- `Create Receptor and Sequence dataset <https://galaxy.immuneml.uio.no/u/immuneml/h/create-receptor-sequence-dataset>`_.
+- `Create receptor and sequence dataset <https://galaxy.immuneml.uio.no/u/immuneml/h/create-receptor-and-sequence-dataset>`_.
 
 
 immuneML datasets
 -----------------
 There exist three types of datasets in immuneML:
 
-- **RepertoireDatasets** should be used when making predictions per repertoire, such as predicting a disease state.
+- **Repertoire datasets** should be used when making predictions per repertoire, such as predicting a disease state.
 
-- **SequenceDatasets** should be used when predicting values for single immune receptor chains, such as antigen specificity.
+- **Sequence datasets** should be used when predicting values for single immune receptor chains, such as antigen specificity.
 
-- **ReceptorDatasets** are the paired variant of SequenceDatasets, and should be used to make a prediction for each receptor chain pair.
+- **Receptor datasets** are the paired variant of sequence datasets, and should be used to make a prediction for each receptor chain pair.
 
 
-In order to use a dataset for training ML classifiers, the metadata, which contains prediction labels, needs to be available.
-For RepertoireDatasets, the metadata is supplied through a metadata file. The metadata file is a .csv file which contains
+In order to use a dataset for training ML classifiers, the metadata, which contains prediction :code:`labels`, needs to be available.
+For repertoire datasets, the metadata is supplied through a metadata file. The metadata file is a .csv file which contains
 one repertoire (filename) per row, and the metadata labels for that repertoire. For more details on structuring the metadata file, see
-:ref:`What should the metadata file look like?`. Note that only the Repertoire files that are present in the metadata file
+:ref:`What should the metadata file look like?`. Note that only the repertoire files that are present in the metadata file
 will be imported.
-For Sequence- and ReceptorDatasets the metadata should be available in the columns of the sequence data files. For example,
+For sequence and receptor datasets the metadata should be available in the columns of the sequence data files. For example,
 VDJdb files contain columns named 'Epitope', 'Epitope gene' and 'Epitope species'. These columns can be specified to serve
 as metadata columns.
 
 
-Using the simple 'Create dataset' interface
--------------------------------------------
+Using the simplified 'Create dataset' interface
+-----------------------------------------------
 
-In the simple interface the user has to select an input file format, dataset type and a list of data files to use.
-For RepertoireDatasets, a metadata file must be selected from the history, whereas for Sequence- and ReceptorDatasets
+In the simplified interface the user has to select an input file format, dataset type and a list of data files to use.
+For repertoire datasets, a metadata file must be selected from the history, whereas for sequence- and receptor datasets
 the names of the columns containing metadata must be specified. The names of the metadata columns are in later
-analyses available as labels for the Sequence- and ReceptorDatasets.
+analyses available as labels for the sequence and receptor datasets.
 
-In subsequent YAML-based analyses, the dataset created through the simple interface should be specified like this:
+In subsequent YAML-based analyses, the dataset created through the simplified interface should be specified like this:
 
 .. indent with spaces
 .. code-block:: yaml
@@ -73,16 +73,16 @@ Using the advanced 'Create dataset' interface
 
 When using the advanced interface of the 'Create dataset' tool, a YAML specification and a list of files must be filled in.
 The list of selected files should contain all data files to be imported, and additionally in the
-case of a RepertoireDataset a metadata file.
+case of a repertoire dataset a metadata file.
 
 The YAML specification describes how the dataset should be created from the supplied files. See :ref:`YAML specification`
 for more details on writing a YAML specification file. For this tool, one :ref:`Dataset <Datasets>` must be specified
 under definitions, and the :ref:`DatasetExport` instruction must be used.
 
-The DatasetExport instruction can here only be used with one dataset (as defined under **definitions**) and one export format.
-Furthermore, the **path** parameter does not need to be set. Otherwise, the specification is written the same as when running immuneML locally.
+The DatasetExport instruction can here only be used with one dataset (as defined under :code:`definitions`) and one export format.
+Furthermore, the :code:`path` parameter does not need to be set. Other than this, the specification is written the same as when running immuneML locally.
 
-A complete YAML specification for a RepertoireDataset could look like this:
+A complete YAML specification for a repertoire dataset could look like this:
 
 .. indent with spaces
 .. code-block:: yaml
@@ -92,7 +92,7 @@ A complete YAML specification for a RepertoireDataset could look like this:
         my_repertoire_dataset: # user-defined dataset name
           format: VDJdb
           params:
-            is_repertoire: True # import a RepertoireDataset
+            is_repertoire: True # import a repertoire dataset
             metadata_file: metadata.csv # the metadata file is identified by name
             # other import parameters may be specified here
     instructions:
@@ -105,7 +105,7 @@ A complete YAML specification for a RepertoireDataset could look like this:
           # available as a Galaxy collection afterwards
               - Pickle # Can be AIRR (human-readable) or Pickle (recommended for further Galaxy-analysis)
 
-Alternatively, for a ReceptorDataset the complete YAML specification may look like this:
+Alternatively, for a receptor dataset the complete YAML specification may look like this:
 
 .. indent with spaces
 .. code-block:: yaml
@@ -116,7 +116,7 @@ Alternatively, for a ReceptorDataset the complete YAML specification may look li
           format: VDJdb
           params:
             is_repertoire: False
-            paired: True # if True, import ReceptorDataset. If False, import SequenceDataset
+            paired: True # if True, import receptor dataset. If False, import sequence dataset
             receptor_chains: TRA_TRB # choose from TRA_TRB, TRG_TRD, IGH_IGL and IGH_IGK
             metadata_column_mapping: # VDJdb name: immuneML name
               # import VDJdb columns Epitope, Epitope gene and Epitope species, and save them
@@ -175,7 +175,7 @@ Alternatively, it is possible to directly create a Galaxy collection from files 
 
 #. If you are currently using a Galaxy history containing any items, create a new Galaxy history (click the '+' icon in the right upper corner).
 
-#. Upload all the files relevant for the dataset, this includes the metadata file in case of a RepertoireDataset.
+#. Upload all the files relevant for the dataset, this includes the metadata file in case of a repertoire dataset.
 
 #. Click 'operations on multiple datasets' (checkbox icon above the Galaxy history). Checkboxes should now appear in front of the history items.
 
