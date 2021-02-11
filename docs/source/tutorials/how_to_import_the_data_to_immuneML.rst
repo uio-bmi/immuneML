@@ -10,10 +10,10 @@ The first step of any immuneML analysis is to import the dataset that will be us
 - **ReceptorDatasets** are the paired variant of SequenceDatasets, and should be used to make a prediction for each receptor chain pair.
 
 A broad range of different import formats can be specified, including AIRR, MiXCR, VDJdb, ImmunoSEQ (Adaptive Biotechnologies),
-10xGenomics, OLGA and IGoR (for the extensive list, see :ref:`Datasets`). If you are using a custom format, or your preferred
-format is not yet supported, any type of tabular file can also be imported using :ref:`Generic` import. When possible, using format-specific
-importers is preferred over Generic import, as they require less options to be set and might take care of automatic reformatting
-of certain fields.
+10xGenomics, OLGA and IGoR. For the complete list of supported data formats, and extensive documentation see :ref:`Datasets`.
+If you are using a custom format, or your preferred format is not yet supported, any type of tabular file can also be imported
+using :ref:`Generic` import. When possible, using format-specific importers is preferred over Generic import, as they require
+less options to be set and might take care of automatic reformatting of certain fields.
 Alternatively to importing data from files, it is also possible to generate datasets containing random immune receptor sequences on the fly,
 see :ref:`How to generate a random sequence, receptor or repertoire dataset`.
 
@@ -34,7 +34,7 @@ Data import must be defined as a part of the YAML specification. First, we choos
 The name is defined by the user. It can consist of letters, numbers and underscores.
 
 Under the dataset name key, the :code:`format` of the data must be specified, as well as additional parameters under a key named :code:`params`.
-Under :coda:`format`, any of the formats listed under :ref:`Datasets` may be filled in. Under :code:`params`, the parameter :code:`path` is always
+Under :code:`format`, any of the formats listed under :ref:`Datasets` may be filled in. Under :code:`params`, the parameter :code:`path` is always
 required when importing data from files. All the files must be stored in a single folder, and this folder must set through the
 parameter :code:`path`.
 
@@ -48,7 +48,7 @@ Here is an incomplete example specification using AIRR format:
       my_dataset: # this is the name of the dataset we will use in the YAML specification
         format: AIRR
         params:
-          path: /path/to/data/
+          path: path/to/data/
           ... # other import parameters will be specified here
 
 
@@ -74,8 +74,8 @@ A complete specification for importing a RepertoireDataset from AIRR format with
         format: AIRR
         params:
           # required parameters
-          path: /path/to/data/
-          metadata_file: /path/to/metadata.csv
+          path: path/to/data/
+          metadata_file: path/to/metadata.csv
           # is_repertoire is by default True, and may be omitted
           is_repertoire: True
           # Other parameters specific to AIRR data may be specified here
@@ -102,7 +102,7 @@ A complete specification for importing a SequenceDataset from AIRR format with d
         format: AIRR
         params:
           # required parameters
-          path: /path/to/data/
+          path: path/to/data/
           is_repertoire: False
           paired: False # must be true for ReceptorDatasets and False for SequenceDatasets
           metadata_column_mapping: # metadata column mapping AIRR: immuneML
@@ -119,7 +119,7 @@ which speeds up the analysis. The main resulting file has an `.iml_dataset` exte
 by several other `.pickle` and `.npy` files. When running immuneML locally, you can by default find these immuneML
 dataset files in the folder 'datasets', which is located in the main output folder of your analysis.
 
-Some instructions (:ref:`Simulation`, :ref:`DatasetExport`, :ref:`SubSampling`) also explicitly export immuneML
+Some instructions (:ref:`Simulation`, :ref:`DatasetExport`, :ref:`SubSampling`) also explicitly export binarized immuneML
 datasets when selecting 'Pickle' as the export format.
 
 These `.iml_dataset` files can later be imported easily and with few parameters, and importing from `.iml_dataset` is
@@ -133,7 +133,7 @@ also faster than importing from other data formats. A YAML specification could l
       my_dataset:
         format: Pickle
         params:
-          path: /path/to/dataset.iml_dataset
+          path: path/to/dataset.iml_dataset
           # specifying a metadata_file is optional, it will update the dataset using this new metadata.
           metadata_file: path/to/metadata.csv
 

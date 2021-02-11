@@ -61,7 +61,6 @@ class MLApplicationInstruction(Instruction):
             dataset: d1
             config_path: ./config.zip
             number_of_processes: 4
-            label: CD
             store_encoded_data: False
 
     """

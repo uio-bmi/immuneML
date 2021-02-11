@@ -44,7 +44,7 @@ class MatchedReceptorsEncoder(DatasetEncoder):
                 reference:
                     format: IRIS
                     params:
-                        path: /path/to/file.txt
+                        path: path/to/file.txt
                         paired: True
                         all_dual_chains: True
                         all_genes: True

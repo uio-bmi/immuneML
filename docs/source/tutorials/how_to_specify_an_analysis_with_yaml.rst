@@ -1,79 +1,21 @@
 How to specify an analysis with YAML
 ====================================
 
-The domain-specific language (DSL) developed for immuneML defines what the analysis YAML specification should look like.
-Depending on the specification, immuneML can execute different tasks (train ML models for immune receptor or repertoire classification, perform exploratory
-analyses or make simulated immune receptor datasets (i.e., implant signals [e.g., k-mers] into existing AIRRe datasets). For a full overview of
-all the options that can be specified, see :ref:`YAML specification`.
-An example of the full YAML specification for training an ML model through nested cross-validation is given below.
+Analyses in immuneML are specified through a YAML specification file with a fixed structure.
+Depending on the specification, immuneML can execute different tasks, such as training ML models for receptor or repertoire
+classification, simulate data or perform exploratory analyses.
+For all the options that can be specified, see :ref:`YAML specification`.
 
-.. highlight:: yaml
-.. code-block:: yaml
-
-  definitions:
-    datasets:
-      d1:
-        format: AIRR
-        params:
-          metadata_file: /path/to/metadata.csv
-          path: /path/to/data/
-    encodings:
-      e1:
-        KmerFrequency:
-          k: 3
-      e2:
-        Word2Vec:
-          vector_size: 16
-          model_type: sequence
-    ml_methods:
-      log_reg1:
-        LogisticRegression:
-            C: 0.001
-    reports:
-      r1: SequenceLengthDistribution
-    preprocessing_sequences:
-      seq1:
-        - filter_chain_B:
-          ChainRepertoireFilter:
-            keep_chain: A
-  instructions:
-    my_instruction1:
-      type: TrainMLModel
-      settings:
-        -   preprocessing: seq1
-            encoding: e1
-            ml_method: log_reg1
-        -   encoding: e2
-            ml_method: log_reg1
-      assessment:
-        split_strategy: random
-        split_count: 1
-        training_percentage: 70
-      selection:
-        split_strategy: k_fold
-        split_count: 5
-        reports:
-          data_splits: [r1]
-      labels: [CD]
-      dataset: d1
-      strategy: GridSearch
-      metrics: [accuracy, f1_micro]
-      optimization_metric: accuracy
-      reports: [r1]
-      refit_optimal_model: False
-      store_encoded_data: False
-  output:
-    format: HTML
 
 Structure of the analysis specification
 ---------------------------------------
 
-The analysis specification consists of three main parts: definitions, instructions and output.
+The analysis specification consists of three main parts: :code:`definitions`, :code:`instructions` and :code:`output`.
 
 Specifying Definitions
 ^^^^^^^^^^^^^^^^^^^^^^
 
-:code:`definitions refer to components, which will be used within the instructions. They include:
+:code:`definitions` refer to components, which will be used within the instructions. They include:
 
 - :code:`datasets`: specifying where data is located, what format the data is in, and how it should be imported (see :ref:`How to import data into immuneML` for more details),
 
@@ -85,7 +27,7 @@ Specifying Definitions
 
 - :code:`reports`: specific plots or statistics to apply to the raw or encoded data, ML methods or results.
 
-Simulation-specific components (only relevant when running a :ref:`Simulation instruction<How to simulate antigen/disease-associated signals in AIRR datasets>`) are:
+Simulation-specific components (only relevant when running a :ref:`Simulation instruction<How to simulate antigen or disease-associated signals in AIRR datasets>`) are:
 
 - :code:`motifs`: parts of the simulation definition defined by a seed and a way to create specific motif instances from the seed,
 
@@ -93,68 +35,94 @@ Simulation-specific components (only relevant when running a :ref:`Simulation in
 
 - :code:`simulations`: define how to combine different signals and how to implant them in the dataset.
 
-Each component is defined using a key (a string) that uniquely identifies it and which
-will be used in the instructions to refer to the component defined in this way.
-For example, the import of a dataset may be defined as follows:
 
+Under definitions, each analysis sub-component is defined using a user-specifiable key.
+In the examples below, we will use the prefix 'my_' to identify these keys, but in practice it is possible
+to specify any kind of name here. These keys are unique names that identify the settings for a component, and they are
+later on referenced in the instructions (for example: to specify which of the imported datasets to use in a given instruction).
+All other keys in the YAML
 
-.. highlight:: yaml
-.. code-block:: yaml
-
-  datasets:
-    my_dataset: # user-defined key (dataset name)
-      format: AIRR
-      params:
-        path: /path/to/data/
-        metadata_file: /path/to/metadata.csv
-
-
-Each definition component (listed above) is defined under its own key.
-All component sections are located under **definitions** in the YAML specification file.
-An example of sections with defined components is given below. Note that in practice, only a subset
-of the analysis components has to be defined, depending which instruction is used.
+The import of two datasets may be defined as follows:
 
 .. highlight:: yaml
 .. code-block:: yaml
 
   definitions:
-    # every instruction uses a dataset
     datasets:
+      my_dataset_1: # user-defined key for the first dataset
+        format: AIRR
+        params:
+          path: path/to/first/data/
+          metadata_file: path/to/first/metadata.csv
+      my_dataset_2: # user-defined key for the second dataset
+        format: AIRR
+        params:
+          path: path/to/second/data/
+          metadata_file: path/to/second/metadata.csv
+
+Where the imported datasets can under :code:`instructions` be referenced using the keys :ref:`my_dataset_1` and :ref:`my_dataset_2`.
+
+An example of a full :code:`definitions` section which may be used for a machine learning task is given below.
+See also :ref:`How to train and assess a receptor or repertoire-level ML classifier` for more details.
+
+.. highlight:: yaml
+.. code-block:: yaml
+
+  definitions:
+    datasets: # every instruction uses a dataset
       my_dataset:
         format: AIRR
         params:
-          path: /path/to/data/
-          metadata_file: /path/to/metadata.csv
+          path: path/to/data/
+          metadata_file: path/to/metadata.csv
     preprocessing_sequences:
       my_preprocessing:
-        - beta_chain_filter:
-          ChainRepertoireFilter:
-            keep_chain: TRB
-    encodings:
-      my_kmer_freq_encoding: KmerFrequency
+        - my_beta_chain_filter:
+            ChainRepertoireFilter:
+              keep_chain: TRB
     ml_methods:
       my_log_reg: LogisticRegression
+      my_svm: SVM
+    encodings:
+      my_kmer_freq_encoding_1: KmerFrequency # KmerFrequency with default parameters
+      my_kmer_freq_encoding_2: # KmerFrequency with user-defined parameters
+        KmerFrequency:
+          k: 5
     reports:
       my_seq_length_distribution: SequenceLengthDistribution
+
+The :code:`definitions` section used for Simulation contains different components, as shown in the example below.
+See also :ref:`How to simulate antigen or disease-associated signals in AIRR datasets` for more details.
+
+.. highlight:: yaml
+.. code-block:: yaml
+
+  definitions:
+    datasets: # every instruction uses a dataset
+      my_dataset:
+        format: AIRR
+        params:
+          path: path/to/data/
+          metadata_file: path/to/metadata.csv
     motifs:
-      simple_motif:
-      seed: AAA
-      instantiation: GappedKmer
+      my_simple_motif:
+        seed: AAA
+        instantiation: GappedKmer
     signals:
-      simple_signal:
+      my_simple_signal:
         motifs:
-          - simple_motif
+          - my_simple_motif
         implanting: HealthySequence
-    simulation:
+    simulations:
       my_simulation:
         my_implanting:
           signals:
-            - simple_signal
+            - my_simple_signal
           dataset_implanting_rate: 0.5
           repertoire_implanting_rate: 0.1
 
-A diagram of the different dataset types, preprocessing steps, encodings, ML methods and reports, and how they can be
-combined in different analyses is shown below. The solid lines represent components that should be used together, and the
+A diagram of all the different dataset types, preprocessing steps, encodings, ML methods and reports, and how they can be
+combined in different analyses is shown below. The solid lines represent components that are intended to be used together, and the
 dashed lines indicate optional combinations.
 
 .. image:: ../_static/images/analysis_paths.png
@@ -164,67 +132,132 @@ dashed lines indicate optional combinations.
 Specifying Instructions
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-Instructions are defined similarly  to components: a key represents an identifier of
-the instruction and type denotes the instruction that will be performed. The components,
-which were defined previously will be used here as input to instructions.
-The parameters for the instructions depend on the type of the instruction.
-Instruction YAML specifications are located under **instructions** in the YAML specification file.
 
-Some of the possible instructions are (see :ref:`Instructions` for the complete list):
+Similarly to analysis components, :code:`instructions` are defined under a user-specifiable key.
+Under this key, you should define the instruction :code:`type`, which defines the type
+of analysis that will be done. All other settings are instruction-specific.
 
-- Training an ML model (:ref:`TrainMLModel`)
+Some of the possible instruction types are (see :ref:`Instructions` for the complete list):
 
-- Exploratory analysis (:ref:`ExploratoryAnalysis`)
+- :ref:`TrainMLModel`
 
-- Simulation (:ref:`Simulation`)
+- :ref:`ExploratoryAnalysis`
 
-Anything defined under definitions can be referenced in the instructions part, but anything generated from the instructions is not available to other
-instructions. If the output of one instruction needs to be used in another other instruction, two separate immuneML runs need to be made (e.g,
-running immuneML once with the Simulation instruction to generate a dataset, and subsequently using that dataset as an input to a second immuneML
+- :ref:`Simulation`
+
+The components defined under definitions can be referenced inside the instruction, but anything generated from the
+instructions is not available to other instructions. If the output of one instruction needs to be used in another
+other instruction, two separate immuneML runs need to be made (e.g, running immuneML once with the Simulation
+instruction to generate a dataset, and subsequently using that dataset as an input to a second immuneML
 run to train a ML model).
 
-An example of the YAML specification for the Training a ML model instruction is as follows:
+An example of the YAML specification for the TrainMLModel instruction is as follows:
 
 .. highlight:: yaml
 .. code-block:: yaml
 
-  my_instruction: # user-defined instruction key
-    type: TrainMLModel
-    settings:
-    - preprocessing: None
-      encoding: kmer_freq_encoding
-      ml_method: log_reg
-    - preprocessing: beta_chain_filter
-      encoding: kmer_freq_encoding
-      ml_method: log_reg
-    assessment:
-      split_strategy: random
-      split_count: 1
-      training_percentage: 70
-      reports:
-        data_splits: [seq_length_distribution]
-    selection:
-      split_strategy: k_fold
-      split_count: 5
-    labels: [CMV]
-    dataset: Emerson2017_dataset
-    strategy: GridSearch
-    metrics: [accuracy]
-    optimization_metric: accuracy
-    reports: []
-    refit_optimal_model: False
-    store_encoded_data: False
+  instructions:
+    my_instruction: # user-defined instruction key
+      type: TrainMLModel
+      dataset: my_dataset # reference dataset from definitions
+      settings: # settings are made up of preprocessing (optional), ml_method and encoding
+      - encoding: my_kmer_freq_encoding_1
+        ml_method: my_log_reg
+      - preprocessing: my_preprocessing
+        encoding: my_kmer_freq_encoding_2
+        ml_method: my_svm
+      assessment:
+        split_strategy: random
+        split_count: 1
+        training_percentage: 70
+        reports:
+          data_splits: [my_seq_length_distribution]
+      selection:
+        split_strategy: k_fold
+        split_count: 5
+      labels: [disease]
+      strategy: GridSearch
+      metrics: [accuracy]
+      optimization_metric: accuracy
+      reports: null # no reports
+      refit_optimal_model: False
+      store_encoded_data: False
+      number_of_processes: 4
 
-Output - HTML
-^^^^^^^^^^^^^
+Specifying output
+^^^^^^^^^^^^^^^^^
 
-The output section of the YAML specification defines the summary output of the execution of
-immuneML. Currently, only HTML output format is supported. An index.html file will be created with links to a separate HTML file for each
-instruction that was listed in the YAML specification. The instruction HTML pages will
-include an overview of the instruction parameters (e.g., information on the dataset,
-number of examples (number of repertoires or receptors), type of the dataset, the performance and ML model details of the nested cross-validation,
-metrics used) and results (overview of performance results in the nested cross-validation loops,
-outputs of individual reports). At this point, the HTML output is not customizable.
+The third and final section of the YAML specification is :code:`output`, which currently only supports one :code:`format`: :code:`HTML`.
+The :code:`output` section may be omitted from the YAML, but if included, it should look like this:
+
+.. highlight:: yaml
+.. code-block:: yaml
+
+  output:
+    format: HTML
+
+
+Putting all parts together
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+An example of a complete YAML specification for training an ML model through nested cross-validation is given here:
+
+.. highlight:: yaml
+.. code-block:: yaml
+
+  definitions:
+    datasets:
+      d1:
+        format: AIRR
+        params:
+          metadata_file: path/to/metadata.csv
+          path: path/to/data/
+    preprocessing_sequences:
+      my_preprocessing:
+        - my_beta_chain_filter:
+            ChainRepertoireFilter:
+              keep_chain: TRB
+    ml_methods:
+      my_log_reg: LogisticRegression
+      my_svm: SVM
+    encodings:
+      my_kmer_freq_encoding_1: KmerFrequency # KmerFrequency with default parameters
+      my_kmer_freq_encoding_2: # KmerFrequency with user-defined parameters
+        KmerFrequency:
+          k: 5
+    reports:
+      my_seq_length_distribution: SequenceLengthDistribution
+  instructions:
+    my_instruction: # user-defined instruction key
+      type: TrainMLModel
+      dataset: my_dataset # reference dataset from definitions
+      settings: # settings are made up of preprocessing (optional), ml_method and encoding
+      - encoding: my_kmer_freq_encoding_1
+        ml_method: my_log_reg
+      - preprocessing: my_preprocessing
+        encoding: my_kmer_freq_encoding_2
+        ml_method: my_svm
+      assessment:
+        split_strategy: random
+        split_count: 1
+        training_percentage: 70
+        reports:
+          data_splits: [my_seq_length_distribution]
+      selection:
+        split_strategy: k_fold
+        split_count: 5
+      labels: [disease]
+      strategy: GridSearch
+      metrics: [accuracy]
+      optimization_metric: accuracy
+      reports: null # no reports
+      refit_optimal_model: False
+      store_encoded_data: False
+      number_of_processes: 4
+  output:
+    format: HTML
+
+
 
 Running the specified analysis
 ------------------------------

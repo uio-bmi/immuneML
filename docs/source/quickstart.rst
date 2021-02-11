@@ -140,8 +140,9 @@ The complete YAML specification for this analysis looks like this:
         refit_optimal_model: false # whether to retrain the model on the whole dataset after optimizing hyperparameters
         store_encoded_data: false  # whether to store intermediate encoded data files (increases disk usage)
 
-After the YAML specification has been saved to a file (for example: quickstart.yaml), it can be uploaded to Galaxy, and
-the file will appear as a new history element.
+Save the YAML specification to a local file (for example: quickstart.yaml), and upload it to Galaxy.
+The file will appear as a new history element.
+
 
 .. image:: _static/images/galaxy/galaxy_upload_data.png
    :alt: upload data Galaxy
@@ -189,13 +190,26 @@ Getting started using the command-line interface
 This tutorial assumes that immuneML is already installed locally (see :ref:`Installing immuneML`).
 We recommend :ref:`installing immuneML using a package manager <Install immuneML with a package manager>`.
 
+Step 0: test run immuneML
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+This is an optional step.
+To quickly test out whether immuneML is able to run, try running the quickstart command:
+
+.. code-block:: console
+
+    immune-ml-quickstart ./quickstart_results/
+
+This will generate a synthetic dataset and run a simple machine machine learning analysis on the generated data.
+The results folder will contain two sub-folders: one for the generated dataset and one for the results of the machine
+learning analysis. The files named specs.yaml are the input files for immuneML that describe the above-mentioned
+analyses. The index.html files can be used to navigate through all the results that were produced.
 
 Step 1: downloading the dataset
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The dataset used in this tutorial can be downloaded from the NIRD Research Data Archive `(DOI ....) <https://doi.org/...>`_,
-and download the following files:
+An archive containing the dataset used in this tutorial can be downloaded here: :download:`quickstart.zip <_static/files/quickstart.zip>`.
+It contains the following files:
 
 - The metadata.csv file, which describes which of the 100 repertoires contain the disease signal named 'signal_disease'.
 

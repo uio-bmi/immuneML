@@ -10,6 +10,9 @@ class ReportParser:
 
     @staticmethod
     def parse_reports(reports: dict, symbol_table: SymbolTable):
+        if reports is None or len(reports) == 0:
+            reports = {}
+
         for rep_id in reports.keys():
             symbol_table, reports[rep_id] = ReportParser._parse_report(rep_id, reports[rep_id], symbol_table)
 

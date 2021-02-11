@@ -25,11 +25,17 @@ When installing all requirements from requirements.txt, there is afterward an er
 
 This issue might be helpful: https://github.com/yaml/pyyaml/issues/291. Try installing yaml manually with a specific version.
 
-I get an error when installing PyTorch (could not find a version that satisfies the requirement torch==1.5.1)
+I get an error when installing PyTorch (could not find a version that satisfies the requirement torch)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-With some Python versions, users may experience errors when installing PyTorch via pip. In that case, we recommend installing torch v1.5.1 manually
-as described in `the PyTorch documentation <https://pytorch.org/get-started/previous-versions/>`_.
+Depending on the Python version and virtual environment, users may experience errors when installing PyTorch via pip.
+The most common reason for this problem is that the Python version is too new to be compatible with the torch package.
+Currently, the `torch package on pypi <https://pypi.org/project/torch/>`_ is only supported up to Python version 3.7.
+We recommend trying to use Python version 3.7 or version 3.8 in a conda virtual environment.
+
+If this does not resolve the problem, try installing torch manually using one of the commands described in `the PyTorch documentation <https://pytorch.org/get-started/previous-versions/>`_,
+and afterwards try to install immuneML again.
+
 
 There is an issue with the type of entry when specifying a list of inputs, why does this happen?
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -47,3 +53,6 @@ If TrainMLModel does nested cross-validation, it might require a bit more data. 
 that `split_strategy` is `random` and that `training_percentage` is `1` (to use all data from the inner loop for training). In this way, instead of having
 multiple training/validation/test splits, there will be only training/test splits as specified under key `assessment` in TrainMLModel instruction.
 
+When running DeepRC I get TypeError: can't concat str to bytes, how can I solve this?
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+This error occurs when h5py version 3 or higher is used. Try using version 2.10.0 or lower.

@@ -16,6 +16,7 @@ from immuneML.encodings.deeprc.DeepRCEncoder import DeepRCEncoder
 from immuneML.ml_methods.MLMethod import MLMethod
 from immuneML.util.FilenameHandler import FilenameHandler
 from immuneML.util.PathBuilder import PathBuilder
+from immuneML.ml_methods.util.Util import Util
 
 
 class DeepRC(MLMethod):
@@ -23,6 +24,7 @@ class DeepRC(MLMethod):
     This classifier uses the DeepRC method for repertoire classification. The DeepRC ML method should be used in combination
     with the DeepRC encoder.
 
+    Important note: DeepRC uses PyTorch functionalities that depend on GPU. Therefore, DeepRC does not work on a CPU.
 
     Reference:
     Michael Widrich, Bernhard Schäfl, Milena Pavlović, Geir Kjetil Sandve, Sepp Hochreiter, Victor Greiff, Günter Klambauer
@@ -72,6 +74,7 @@ class DeepRC(MLMethod):
 
         n_workers (int): Number of background processes to use for converting dataset to hdf5 container and training set data loader.
 
+        pytorch_device_name (str): The name of the pytorch device to use. This name will be passed to  torch.device(self.pytorch_device_name). The default value is cuda:0
 
     YAML specification:
 
@@ -83,7 +86,6 @@ class DeepRC(MLMethod):
                 validation_part: 0.2
                 add_positional_information: True
                 kernel_size: 9
-                model_selection_cv: False
 
     """
 
@@ -418,7 +420,7 @@ class DeepRC(MLMethod):
         return self.label_classes
 
     def get_package_info(self) -> str:
-        return 'immuneML ' + pkg_resources.get_distribution('immuneML').version + '; deepRC ' + pkg_resources.get_distribution('DeepRC').version
+        return 'immuneML ' + Util.get_immuneML_version() + '; deepRC ' + pkg_resources.get_distribution('DeepRC').version
 
     def get_feature_names(self) -> list:
         return self.feature_names

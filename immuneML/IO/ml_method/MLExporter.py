@@ -16,7 +16,7 @@ class MLExporter:
     def export_zip(hp_item: HPItem, path: Path, label: str) -> str:
         state_path = path.absolute()
         export_path = MLExporter.export(hp_item, state_path / "exported")
-        filename = f"ml_model_{label}"
+        filename = f"ml_settings_{label}"
         abs_zip_path = Path(shutil.make_archive(state_path / "zip" / filename, "zip", export_path)).absolute()
         return abs_zip_path
 
@@ -27,7 +27,8 @@ class MLExporter:
         encoder_filename = MLExporter._store_encoder(hp_item.hp_setting.encoder, path).name
 
         hp_item.method.store(path, hp_item.method.get_feature_names())
-        labels_with_values = {label: hp_item.method.get_classes_for_label(label).tolist() for label in hp_item.method.get_label()}
+        labels_with_values = {label: hp_item.method.get_classes_for_label(label) for label in hp_item.method.get_label()}
+        labels_with_values = {label: value.tolist() if hasattr(value, 'tolist') else list(value) for label, value in labels_with_values.items()}
 
         method_config = MLMethodConfiguration(labels_with_values=labels_with_values, software_used=hp_item.method.get_package_info(),
                                               encoding_name=hp_item.hp_setting.encoder_name, encoding_parameters=hp_item.hp_setting.encoder_params,

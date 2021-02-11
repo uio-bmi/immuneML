@@ -20,7 +20,7 @@ The parameters for generating a random repertoire dataset are specified under de
 .. code-block:: yaml
 
   datasets:
-    d1:
+    my_dataset:
       format: RandomRepertoireDataset
       params:
         repertoire_count: 100 # number of repertoires to be generated
@@ -50,7 +50,7 @@ in the settings.
 .. code-block:: yaml
 
   datasets:
-    d1:
+    my_dataset:
       format: RandomSequenceDataset
       params:
         sequence_count: 100 # number of receptors to be generated
@@ -73,7 +73,7 @@ Finally, a random receptor dataset can be specified as follows:
 .. code-block:: yaml
 
   datasets:
-    d1:
+    my_dataset:
       format: RandomReceptorDataset
       params:
         receptor_count: 100 # number of receptors to be generated
@@ -101,7 +101,7 @@ specification for random repertoire generation and export is given below:
 
   definitions:
     datasets:
-      d1:
+      my_dataset:
         # this is the definition for a random repertoire dataset,
         # alternatively, the definition of a random sequence/receptor dataset can be specified
         format: RandomRepertoireDataset
@@ -116,7 +116,7 @@ specification for random repertoire generation and export is given below:
   instructions:
     my_dataset_export_instruction:
       type: DatasetExport
-      datasets: [d1] # list of datasets to export
+      datasets: [my_dataset] # list of datasets to export
       export_formats: [AIRR, Pickle] # list of formats to export the datasets to
 
 
