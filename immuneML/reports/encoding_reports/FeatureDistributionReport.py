@@ -144,7 +144,7 @@ class FeatureDistributionReport(EncodingReport):
             warnings.warn(
                 f"{location}: this report can only be created for an encoded RepertoireDataset. {location} report will not be created.")
             run_report = False
-        if len(self.dataset.encoded_data.examples.shape) != 2:
+        elif len(self.dataset.encoded_data.examples.shape) != 2:
             warnings.warn(
                 f"{location}: this report can only be created for a 2-dimensional encoded RepertoireDataset. {location} report will not be created.")
             run_report = False
