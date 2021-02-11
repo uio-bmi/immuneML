@@ -1,9 +1,8 @@
 import warnings
-
 from pathlib import Path
+
 import numpy as np
 import torch
-from deeprc.deeprc_binary.architectures import DeepRC as DeepRCInternal
 from matplotlib import pyplot as plt
 from tqdm import tqdm
 
@@ -88,15 +87,14 @@ class DeepRCMotifDiscovery(MLReport):
         path_kernels = self.result_path / self.filename_kernels
 
         self.compute_contributions(intgrds_set_loader=dataloader, deeprc_model=model, n_steps=self.n_steps,
-                              threshold=self.threshold, path_inputs=path_inputs,
+                                   threshold=self.threshold, path_inputs=path_inputs,
                                    path_kernels=self.result_path / self.filename_kernels)
 
         return ReportResult(self.name,
                             output_figures=[ReportOutput(path_inputs, "Integrated Gradients over the inputs to DeepRC"),
                                             ReportOutput(path_kernels, "Integrated Gradients over the kernels of DeepRC")])
 
-
-    def compute_contributions(self, intgrds_set_loader: torch.utils.data.DataLoader, deeprc_model: DeepRCInternal,
+    def compute_contributions(self, intgrds_set_loader: torch.utils.data.DataLoader, deeprc_model,
                               n_steps: int = 50, threshold: float = 0.5, path_inputs: Path = Path("inputs_integrated_gradients.pdf"),
                               path_kernels: Path = Path("kernel_integrated_gradients.pdf")):
         """ Compute and plot contributions of sequences and motifs to trained DeepRC model, given a dataset.
@@ -167,8 +165,8 @@ class DeepRCMotifDiscovery(MLReport):
                 # prediction = torch.sigmoid(logit_outputs)
                 logit_outputs.backward()
                 int_grd_kernels[:] += (
-                            original_kernel_values * active_kernels.grad.to(device='cpu', dtype=torch.float32)
-                            / n_steps / len(intgrds_set_loader)).detach().data.cpu().numpy()
+                    original_kernel_values * active_kernels.grad.to(device='cpu', dtype=torch.float32)
+                    / n_steps / len(intgrds_set_loader)).detach().data.cpu().numpy()
 
             # Integrated gradients for inputs
             with torch.no_grad():
@@ -183,9 +181,9 @@ class DeepRCMotifDiscovery(MLReport):
                 i.retain_grad()
                 logit_outputs = deeprc_model(i, n_sequences)
                 int_grd_inputs[:] += (
-                            inputs_cpu * torch.autograd.grad(logit_outputs, i, retain_graph=True)[0].to(device='cpu',
-                                                                                                        dtype=torch.float32)
-                            / n_steps).detach().data.cpu().numpy()
+                    inputs_cpu * torch.autograd.grad(logit_outputs, i, retain_graph=True)[0].to(device='cpu',
+                                                                                                dtype=torch.float32)
+                    / n_steps).detach().data.cpu().numpy()
             most_important_input_ind = np.argmax(np.sum(np.sum(int_grd_inputs, 1), 1))
             most_important_inputs_intgrds.append(int_grd_inputs[most_important_input_ind, :, :].sum(axis=0))
             most_important_inputs.append(inputs_cpu[most_important_input_ind].detach().cpu().numpy())
