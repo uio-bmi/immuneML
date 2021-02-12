@@ -127,12 +127,7 @@ Make sure to change :code:`path/to/repertoires/` and :code:`path/to/metadata.csv
         - precision
         - recall
 
-        strategy: GridSearch # strategy for hyperparameter optimization, GridSearch is currently the only available option
-
-        reports: []                # optional train ML model reports to run
-        number_of_processes: 4     # processes for parallelization
-        refit_optimal_model: false # whether to retrain the model on the whole dataset after optimizing hyperparameters
-        store_encoded_data: false  # whether to store intermediate encoded data files (increases disk usage)
+        number_of_processes: 4 # processes for parallelization
 
 
 Step 3: running the analysis

@@ -134,12 +134,7 @@ The complete YAML specification for this analysis looks like this and can be dow
         - precision
         - recall
 
-        strategy: GridSearch # strategy for hyperparameter optimization, GridSearch is currently the only available option
-
-        reports: []                # optional train ML model reports to run
-        number_of_processes: 4     # processes for parallelization
-        refit_optimal_model: false # whether to retrain the model on the whole dataset after optimizing hyperparameters
-        store_encoded_data: false  # whether to store intermediate encoded data files (increases disk usage)
+        number_of_processes: 4 # processes for parallelization
 
 Save the YAML specification to a local file (for example: quickstart.yaml), and upload it to Galaxy.
 The file will appear as a new history element.

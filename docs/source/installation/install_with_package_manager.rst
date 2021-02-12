@@ -41,7 +41,7 @@ Alternatively, if you want to use the :ref:`TCRDISTClassifier` ML method and cor
 See also this FAQ: :ref:`I get an error when installing PyTorch (could not find a version that satisfies the requirement torch)`
 
 5. Optionally, if you want to use the :ref:`DeepRC` ML method and and corresponding :ref:`DeepRCMotifDiscovery` report, you
-have to install DeepRC dependencies using the :download:`requirements_DeepRC.txt <../_static/files/requirements_DeepRC.txt>` file.
+have to install DeepRC dependencies using the :download:`requirements_DeepRC.txt <https://raw.githubusercontent.com/uio-bmi/immuneML/master/requirements_DeepRC.txt>` file.
 Important note: DeepRC uses PyTorch functionalities that depend on GPU. Therefore, DeepRC does not work on a CPU.
 To install the DeepRC dependencies, run:
 
