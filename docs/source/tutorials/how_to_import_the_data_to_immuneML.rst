@@ -4,6 +4,7 @@ How to import data into immuneML
 The first step of any immuneML analysis is to import the dataset that will be used. There exist three types of datasets in immuneML:
 
 - **repertoire datasets** should be used when making predictions per repertoire, such as predicting a disease state.
+  When importing a repertoire dataset, you should create a :ref:`metadata file <What should the metadata file look like?>`.
 
 - **sequence datasets** should be used when predicting values for single immune receptor chains, such as antigen specificity.
 
@@ -14,12 +15,31 @@ A broad range of different import formats can be specified, including AIRR, MiXC
 If you are using a custom format, or your preferred format is not yet supported, any type of tabular file can also be imported
 using :ref:`Generic` import. When possible, using format-specific importers is preferred over Generic import, as they require
 less options to be set and might take care of automatic reformatting of certain fields.
+
 Alternatively to importing data from files, it is also possible to generate datasets containing random immune receptor sequences on the fly,
 see :ref:`How to generate a random sequence, receptor or repertoire dataset`.
 
 
-Specifying data import from files
----------------------------------
+What should the metadata file look like?
+------------------------------------------
+
+The metadata file is a simple .csv file describing metadata fields for a repertoire dataset.
+Metadata files are only used for repertoire datasets, for receptor and sequence datasets the metadata information should be defined as additional
+columns in the same file that contains the sequences.
+
+In case of repertoire datasets, each repertoire is represented by one file in the given format (e.g., AIRR/MiXCR/Adaptive).
+For all repertoires in one dataset, a single metadata file should be defined containing the following columns:
+
+.. image:: ../_static/images/metadata.png
+
+The columns :code:`filename` and :code:`subject_id` are mandatory. Other columns may be defined by the user.
+There are no restrictions as to what type of information these columns should represent, but typically they will represent
+diseases, HLA, age or sex. These columns can be used as a prediction target (also known as :code:`labels`) when training ML models.
+When writing a :ref:`YAML specification`, the :code:`labels` are defined by using the same name as the user-defined column(s) in the metadata file.
+
+
+YAML specification for importing data from files
+-------------------------------------------------
 
 Data import must be defined as a part of the YAML specification. First, we choose a name which will be used to refer to the dataset in the subsequent analyses:
 
@@ -50,6 +70,8 @@ Here is an incomplete example specification using AIRR format:
         params:
           path: path/to/data/
           ... # other import parameters will be specified here
+
+
 
 
 Specifying params for repertoire dataset import
