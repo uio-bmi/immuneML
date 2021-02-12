@@ -13,9 +13,8 @@ The following three sections describe how to replicate these three use cases:
 
 ..
     immuneML supports import from multiple different data formats and export into AIRR-C format (MIAIRR standard), which enables post analysis by AIRR-compliant third-party tools.
-    To see how immuneML can be used in combination with other tools, see the following examples:
 
-
+To see how immuneML can be used in combination with other tools, see the following examples:
 
 #. :ref:`Integration use case: post-analysis of sequences with Immcantation`
 
@@ -30,7 +29,6 @@ The following three sections describe how to replicate these three use cases:
   usecases/extendability_use_case
   usecases/benchmarking_use_case
   usecases/immcantation_use_case
-  usecases/ireceptor_use_case
   usecases/immunarch_use_case
 
 

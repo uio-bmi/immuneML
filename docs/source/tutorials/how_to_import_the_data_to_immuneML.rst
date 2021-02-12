@@ -3,11 +3,11 @@ How to import data into immuneML
 
 The first step of any immuneML analysis is to import the dataset that will be used. There exist three types of datasets in immuneML:
 
-- **RepertoireDatasets** should be used when making predictions per repertoire, such as predicting a disease state.
+- **repertoire datasets** should be used when making predictions per repertoire, such as predicting a disease state.
 
-- **SequenceDatasets** should be used when predicting values for single immune receptor chains, such as antigen specificity.
+- **sequence datasets** should be used when predicting values for single immune receptor chains, such as antigen specificity.
 
-- **ReceptorDatasets** are the paired variant of SequenceDatasets, and should be used to make a prediction for each receptor chain pair.
+- **receptor datasets** are the paired variant of sequence datasets, and should be used to make a prediction for each receptor chain pair.
 
 A broad range of different import formats can be specified, including AIRR, MiXCR, VDJdb, ImmunoSEQ (Adaptive Biotechnologies),
 10xGenomics, OLGA and IGoR. For the complete list of supported data formats, and extensive documentation see :ref:`Datasets`.
@@ -54,16 +54,16 @@ Here is an incomplete example specification using AIRR format:
 
 Specifying params for repertoire dataset import
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-By default, it is assumed that a RepertoireDataset should be imported. In this case, the path to the :code:`metadata_file`
+By default, it is assumed that a repertoire dataset should be imported. In this case, the path to the :code:`metadata_file`
 must be specified. The metadata file is a .csv file which contains one repertoire (filename) per row, and the metadata
-labels for that repertoire. These metadata labels can be used to train classifiers for.
+labels for that repertoire. These metadata labels can be used as a prediction target when training ML models.
 For more details on structuring the metadata file, see :ref:`What should the metadata file look like?`.
-Note that only the Repertoire files that are present in the metadata file will be imported.
+Note that only the repertoire files that are present in the metadata file will be imported.
 
 Other parameters that are specific to the format may be specified under :code:`params` as well, and are explained in more detail for each format
 under :ref:`Datasets`.
 
-A complete specification for importing a RepertoireDataset from AIRR format with default parameters may look like this:
+A complete specification for importing a repertoire dataset from AIRR format with default parameters may look like this:
 
 .. indent with spaces
 .. code-block:: yaml
@@ -84,14 +84,14 @@ A complete specification for importing a RepertoireDataset from AIRR format with
 Specifying params for receptor or sequence dataset import
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-If you want to import a Sequence- or ReceptorDataset, set the parameter :code:`is_repertoire` to False, and set :code:`paired` to either False (SequenceDataset)
-or True (ReceptorDataset). For Sequence- and ReceptorDatasets, metadata labels must be specified directly as columns in the input files.
-These metadata labels can be used to train classifiers for. For example, a column 'binding' can be added, which may have values 'true' and 'false'.
+If you want to import a sequence or receptor dataset, set the parameter :code:`is_repertoire` to False, and set :code:`paired` to either False (sequence dataset)
+or True (receptor dataset). For sequence and receptor dataset, metadata labels must be specified directly as columns in the input files.
+These metadata labels can be used as a prediction target when training ML models. For example, a column 'binding' can be added, which may have values 'true' and 'false'.
 The metadata labels are specified through parameter :code:`metadata_column_mapping`, which is a mapping from the names of the columns in
 the file to the names that will be used internally in immuneML (for example: when specifying :code:`labels` in the :ref:`TrainMLModel` instruction).
 It is recommended that the immuneML-internal names contain only lowercase letters, numbers and underscores.
 
-A complete specification for importing a SequenceDataset from AIRR format with default parameters may look like this:
+A complete specification for importing a sequence dataset from AIRR format with default parameters may look like this:
 
 .. indent with spaces
 .. code-block:: yaml
@@ -104,7 +104,7 @@ A complete specification for importing a SequenceDataset from AIRR format with d
           # required parameters
           path: path/to/data/
           is_repertoire: False
-          paired: False # must be true for ReceptorDatasets and False for SequenceDatasets
+          paired: False # must be true for receptor dataset and False for sequence datasets
           metadata_column_mapping: # metadata column mapping AIRR: immuneML
             binding: binding # the names could just be the same
             Epitope.gene: epitope_gene # if the column name contains undesired characters, it may be renamed for internal use
