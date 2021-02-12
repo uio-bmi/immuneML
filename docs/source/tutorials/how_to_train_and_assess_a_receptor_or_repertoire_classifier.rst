@@ -26,7 +26,7 @@ This process is shown in the figure below:
   assessed on test data
 
 
-YAML specification of the TrainMLModel
+YAML specification of TrainMLModel
 ------------------------------------------------------------------
 
 Definitions section
@@ -38,7 +38,7 @@ and :code:`reports` may be defined. For detailed descriptions of how the paramet
 please refer to the :ref:`YAML specification` documentation. Under :ref:`Definitions` each analysis component is documented
 and settings are described.
 
-An example of the definitions section is given here:
+An example of the definitions section using a repertoire dataset is given here:
 
 
 .. highlight:: yaml
@@ -49,7 +49,7 @@ An example of the definitions section is given here:
       my_dataset:
         format: AIRR
         params:
-          path: path/to/data/
+          path: path/to/repertoires/
           metadata_file: path/to/metadata.csv
 
     preprocessing_sequences:
@@ -102,6 +102,8 @@ Firstly, we should give our instruction a unique name and set the :code:`type`:
 
 
 Furthermore, we should define which :code:`dataset` to train the models on, and which :code:`labels` to predict.
+The labels are defined based on the metadata file (repertoire datasets) or metadata column mapping (sequence or receptor datasets),
+see :ref:`How to import data into immuneML` for details.
 In most cases there will only be one label, but it is possible to specify multiple labels in order to train
 multiple different classifiers.
 
@@ -219,7 +221,7 @@ An example of the complete YAML specification is shown here:
       my_dataset:
         format: AIRR
         params:
-          path: path/to/data/
+          path: path/to/repertoires/
           metadata_file: path/to/metadata.csv
 
     preprocessing_sequences:
@@ -303,3 +305,65 @@ An example of the complete YAML specification is shown here:
       store_encoded_data: False
 
 
+Example datasets
+------------------------------------------------------------------
+Below you will find example datasets that can be used to test out the :ref:`TrainMLModel` instruction.
+
+Repertoire dataset
+^^^^^^^^^^^^^^^^^^^^^^^
+An example dataset for testing out repertoire classification in immuneML is the Quickstart dataset: :download:`quickstart_data.zip <../_static/files/quickstart_data.zip>`
+This is a dataset in AIRR format and can be imported as follows:
+
+.. highlight:: yaml
+.. code-block:: yaml
+
+  definitions:
+    datasets: # every instruction uses a dataset
+      my_dataset:
+        format: AIRR
+        params:
+          path: path/to/repertoires/
+          metadata_file: path/to/metadata.csv
+
+Sequence dataset
+^^^^^^^^^^^^^^^^^^^^^^^
+An example dataset for sequence classification can be downloaded here: :download:`sequences.tsv <../_static/files/sequences.tsv>`.
+To import this dataset, use the following YAML snippet:
+
+.. highlight:: yaml
+.. code-block:: yaml
+
+  definitions:
+    datasets: # every instruction uses a dataset
+      my_dataset:
+        format: AIRR
+        params:
+          path: path/to/sequences.tsv
+          is_repertoire: false
+          paired: false
+          metadata_column_mapping:
+            epitope: epitope
+
+For this dataset, the :code:`label` can be used for prediction is 'epitope'.
+
+
+Receptor dataset
+^^^^^^^^^^^^^^^^^^^^^^^
+An example dataset for receptor classification can be downloaded here: :download:`sequences.tsv <../_static/files/sequences.tsv>`
+
+.. highlight:: yaml
+.. code-block:: yaml
+
+  definitions:
+    datasets: # every instruction uses a dataset
+      my_dataset:
+        format: AIRR
+        params:
+          path: path/to/sequences.tsv
+          is_repertoire: false
+          paired: true
+          receptor_chains: TRA_TRB
+          metadata_column_mapping:
+            epitope: epitope
+
+For this dataset, the :code:`label` can be used for prediction is 'epitope'.

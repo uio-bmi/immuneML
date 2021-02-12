@@ -1,25 +1,11 @@
-FAQ
-===
+Troubleshooting
+===============
 
 .. toctree::
    :maxdepth: 2
 
-What should the metadata file look like?
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-The metadata file is a simple .csv file describing metadata fields for a repertoire dataset.
-Metadata files are only used for repertoire datasets, for receptor and sequence datasets the metadata information should be defined as additional
-columns in the same file that contains the sequences.
-
-In case of repertoire datasets, each repertoire is represented by one file in the given format (e.g., AIRR/MiXCR/Adaptive).
-For all repertoires in one dataset, a single metadata file should be defined containing the following columns:
-
-.. image:: _static/images/metadata.png
-
-The columns :code:`filename` and :code:`subject_id` are mandatory. Other columns may be defined by the user.
-There are no restrictions as to what type of information these columns should represent, but typically they will represent
-diseases, HLA, age or sex. These columns can be used as a prediction target (also known as :code:`labels`) when training ML models.
-When writing a :ref:`YAML specification`, the :code:`labels` are defined by using the same name as the user-defined column(s) in the metadata file.
+Installation issues
+-------------------
 
 When installing all requirements from requirements.txt, there is afterward an error with yaml package (No module named yaml)?
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -37,6 +23,9 @@ We recommend trying to use Python version 3.7 or version 3.8 in a conda virtual 
 If this does not resolve the problem, try installing torch manually using one of the commands described in `the PyTorch documentation <https://pytorch.org/get-started/previous-versions/>`_,
 and afterwards try to install immuneML again.
 
+
+Runtime issues
+--------------
 
 There is an issue with the type of entry when specifying a list of inputs, why does this happen?
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
