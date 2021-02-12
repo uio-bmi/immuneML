@@ -35,9 +35,9 @@ from GitHub), install the requirements from the requirements.txt file (this file
 
   pip install -r requirements.txt
 
-See also these FAQs:
+See also these troubleshooting issues:
 
-- :ref:`When installing all requirements from requirements.txt, there is afterward an error with yaml package (No module named yaml)?`
+- :ref:`When installing all requirements from requirements.txt, there is afterward an error with yaml package (No module named yaml)`
 
 - :ref:`I get an error when installing PyTorch (could not find a version that satisfies the requirement torch)`
 

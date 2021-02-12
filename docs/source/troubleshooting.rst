@@ -7,7 +7,7 @@ Troubleshooting
 Installation issues
 -------------------
 
-When installing all requirements from requirements.txt, there is afterward an error with yaml package (No module named yaml)?
+When installing all requirements from requirements.txt, there is afterward an error with yaml package (No module named yaml)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This issue might be helpful: https://github.com/yaml/pyyaml/issues/291. Try installing yaml manually with a specific version.
@@ -27,12 +27,6 @@ and afterwards try to install immuneML again.
 Runtime issues
 --------------
 
-There is an issue with the type of entry when specifying a list of inputs, why does this happen?
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Please check that the YAML is in valid format. To list different inputs (e.g. a list of reports under assessment/reports/encoding in
-TrainMLModel instruction), the correct YAML syntax includes a space between - and the list item.
-
 When running the TrainMLModel instruction multiple times, sometimes it fails saying that there is only one class in the data. Why does this happen?
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -43,7 +37,7 @@ If TrainMLModel does nested cross-validation, it might require a bit more data. 
 that `split_strategy` is `random` and that `training_percentage` is `1` (to use all data from the inner loop for training). In this way, instead of having
 multiple training/validation/test splits, there will be only training/test splits as specified under key `assessment` in TrainMLModel instruction.
 
-I get an error when importing an immuneML dataset in Pickle format, why does this happen?
+I get an error when importing an immuneML dataset in Pickle format
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 immuneML Pickle files are not guaranteed to be compatible between different immuneML (sub)versions.
 
@@ -75,7 +69,6 @@ An example YAML specification looks like this:
     export_formats:
         - AIRR
 
-
-When running DeepRC I get TypeError: can't concat str to bytes, how can I solve this?
+When running DeepRC I get TypeError: can't concat str to bytes
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 This error occurs when h5py version 3 or higher is used. Try using version 2.10.0 or lower.
