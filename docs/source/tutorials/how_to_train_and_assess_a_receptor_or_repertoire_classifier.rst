@@ -150,13 +150,13 @@ The parameters that should be defined under :code:`selection` and :code:`assessm
 documentation.
 Optionally, it is possible to specify various types of :code:`reports` here (for more details see :ref:`ReportConfig`):
 
-- :code:`models`: :ref:`ML model reports` which will be applied to all compatible models in the given loop.
+- :code:`models`: `ML model reports <https://docs.immuneml.uio.no/specification.html#ml-model-reports>`_ which will be applied to all compatible models in the given loop.
 
-- :code:`encoding`: :ref:`Encoding reports` which will be applied to the encoded data of a given split (all data or training+validation data)
+- :code:`encoding`: `Encoding reports <https://docs.immuneml.uio.no/specification.html#encoding-reports>`_ which will be applied to the encoded data of a given split (all data or training+validation data)
 
-- :code:`data`: :ref:`Data reports` which will be applied to the complete dataset of a given split (all data or training+validation data)
+- :code:`data`: `Data reports <https://docs.immuneml.uio.no/specification.html#data-reports>`_ which will be applied to the complete dataset of a given split (all data or training+validation data)
 
-- :code:`data_splits`: :ref:`Data reports` which will be applied to the data splits (training/validation or training+validation/test splits)
+- :code:`data_splits`: `Data reports <https://docs.immuneml.uio.no/specification.html#data-reports>`_ which will be applied to the data splits (training/validation or training+validation/test splits)
 
 The following example shows a piece of the YAML specification when two different splitting strategies are
 used for both loops:
