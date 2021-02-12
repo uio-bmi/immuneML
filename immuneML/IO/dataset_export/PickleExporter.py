@@ -40,6 +40,10 @@ class PickleExporter(DataExporter):
         with file_path.open("wb") as file:
             pickle.dump(exported_dataset, file, pickle.HIGHEST_PROTOCOL)
 
+        version_path = path / "info.txt"
+        with version_path.open("w") as file:
+            file.writelines(f"immuneML version: {Constants.VERSION}")
+
         return exported_dataset
 
     @staticmethod

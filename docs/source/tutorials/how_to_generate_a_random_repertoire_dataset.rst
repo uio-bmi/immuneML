@@ -117,7 +117,8 @@ specification for random repertoire generation and export is given below:
     my_dataset_export_instruction:
       type: DatasetExport
       datasets: [my_dataset] # list of datasets to export
-      export_formats: [AIRR, Pickle] # list of formats to export the datasets to
+      export_formats: [AIRR, Pickle] # list of formats to export the datasets to.
+                                     # Important note: Pickle files might not be compatible between different immuneML (sub)versions.
 
 
 Generating random sequence/receptor/repertoire datasets in the code

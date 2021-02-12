@@ -67,6 +67,11 @@ In subsequent YAML-based analyses, the dataset created through the simplified in
           params:
             path: dataset.iml_dataset
 
+Note: if an immuneML dataset history element suddenly gives you errors when you use it as an input to other tools
+(while it used to work before), it could be due to an immuneML version update.
+To solve this problem, try to rerun the 'Create dataset' tool with the same input files (for example by clicking :ref:`the
+'Run this job again' button <History items>`), and use the new immuneML dataset history element.
+
 
 Using the advanced 'Create dataset' interface
 ---------------------------------------------
@@ -166,6 +171,12 @@ parameters need to be specified in subsequent analyses:
             is_repertoire: True
             metadata_file: metadata.csv
             # other import parameters may be specified here
+
+
+Note: if you used the 'Pickle' export format and your immuneML dataset history element suddenly gives you errors when
+you use it as an input to other tools (while it used to work before), it could be due to an immuneML version update.
+To solve this problem, try to rerun the 'Create dataset' tool with the same input files (for example by clicking :ref:`the
+'Run this job again' button <History items>`), and use the new immuneML dataset history element.
 
 
 Making a Galaxy collection directly from files

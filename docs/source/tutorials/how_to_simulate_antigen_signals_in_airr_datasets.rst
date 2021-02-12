@@ -115,6 +115,7 @@ baseline for the simulation.
       dataset: my_synthetic_dataset
       simulation: my_simulation
       export_formats: [AIRR, Pickle] # export the simulated dataset to these formats
+                                     # Important note: Pickle files might not be compatible between different immuneML (sub)versions.
 
 
 ..
