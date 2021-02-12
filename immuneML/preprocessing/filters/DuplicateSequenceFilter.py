@@ -83,6 +83,8 @@ class DuplicateSequenceFilter(Filter):
 
     @staticmethod
     def process(dataset: RepertoireDataset, params: dict) -> RepertoireDataset:
+        Preprocessor.check_dataset_type(dataset, [RepertoireDataset], "DuplicateSequenceFilter")
+
         processed_dataset = copy.deepcopy(dataset)
 
         with Pool(params["batch_size"]) as pool:

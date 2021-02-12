@@ -6,6 +6,7 @@ import pandas as pd
 from immuneML.analysis.criteria_matches.CriteriaMatcher import CriteriaMatcher
 from immuneML.analysis.criteria_matches.CriteriaTypeInstantiator import CriteriaTypeInstantiator
 from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
+from immuneML.preprocessing.Preprocessor import Preprocessor
 from immuneML.preprocessing.filters.Filter import Filter
 
 
@@ -46,6 +47,8 @@ class MetadataRepertoireFilter(Filter):
 
     @staticmethod
     def process(dataset: RepertoireDataset, params: dict) -> RepertoireDataset:
+        Preprocessor.check_dataset_type(dataset, [RepertoireDataset], "MetadataRepertoireFilter")
+
         processed_dataset = dataset.clone()
         original_repertoires = processed_dataset.get_data()
         indices = MetadataRepertoireFilter.get_matching_indices(processed_dataset, params["criteria"])

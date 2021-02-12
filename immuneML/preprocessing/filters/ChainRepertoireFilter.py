@@ -2,6 +2,7 @@ from pathlib import Path
 
 from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
 from immuneML.data_model.receptor.receptor_sequence.Chain import Chain
+from immuneML.preprocessing.Preprocessor import Preprocessor
 from immuneML.preprocessing.filters.Filter import Filter
 from immuneML.util.PathBuilder import PathBuilder
 
@@ -39,6 +40,7 @@ class ChainRepertoireFilter(Filter):
 
     @staticmethod
     def process(dataset: RepertoireDataset, params: dict) -> RepertoireDataset:
+        Preprocessor.check_dataset_type(dataset, [RepertoireDataset], "ChainRepertoireFilter")
         processed_dataset = dataset.clone()
         PathBuilder.build(params["result_path"])
         repertoires = []
