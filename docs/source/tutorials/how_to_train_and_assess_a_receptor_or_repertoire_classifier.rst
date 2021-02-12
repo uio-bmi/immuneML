@@ -77,7 +77,7 @@ An example of the definitions section using a repertoire dataset is given here:
     encodings:
       my_kmer_freq_encoding:
         KmerFrequency:
-          k: 5
+          k: 3
 
     reports:
       my_coefficients: Coefficients
@@ -118,8 +118,8 @@ multiple different classifiers.
 
 
 In the :code:`settings` section the different combinations of ML settings must be specified. They consist of
-an :code:`encoding`, an :code:`ml_method` and optional :code:`preprocessing`, which should be referenced by
-the names that were used to defined them under :code:`definitions`.
+an :code:`encoding`, an :code:`ml_method` and optional :code:`preprocessing` (only available for repertoire datasets),
+which should be referenced by the names that were used to defined them under :code:`definitions`.
 
 Not every combination of encodings and ML methods is valid. For all the valid options, see the figure in the :ref:`YAML specification` documentation.
 An example of the settings section of the instruction is:
@@ -132,7 +132,7 @@ An example of the settings section of the instruction is:
       ml_method: my_log_reg           # my_log_reg and my_svm, with and without my_preprocessing
     - encoding: my_kmer_freq_encoding
       ml_method: my_svm
-    - preprocessing: my_preprocessing
+    - preprocessing: my_preprocessing # preprocessing can only be defined for repertoire datasets
       encoding: my_kmer_freq_encoding
       ml_method: my_log_reg
     - preprocessing: my_preprocessing
@@ -249,7 +249,7 @@ An example of the complete YAML specification is shown here:
     encodings:
       my_kmer_freq_encoding:
         KmerFrequency:
-          k: 5
+          k: 3
 
     reports:
       my_coefficients: Coefficients
@@ -270,7 +270,7 @@ An example of the complete YAML specification is shown here:
           ml_method: my_log_reg           # my_log_reg and my_svm, with and without my_preprocessing
         - encoding: my_kmer_freq_encoding
           ml_method: my_svm
-        - preprocessing: my_preprocessing
+        - preprocessing: my_preprocessing # preprocessing can only be defined for repertoire datasets
           encoding: my_kmer_freq_encoding
           ml_method: my_log_reg
         - preprocessing: my_preprocessing
@@ -325,9 +325,12 @@ This is a dataset in AIRR format and can be imported as follows:
           path: path/to/repertoires/
           metadata_file: path/to/metadata.csv
 
+For this dataset, the :code:`label` that can be used for prediction is 'signal_disease'.
+
+
 Sequence dataset
 ^^^^^^^^^^^^^^^^^^^^^^^
-An example dataset for sequence classification can be downloaded here: :download:`sequences.tsv <../_static/files/sequences.tsv>`.
+An example dataset for sequence classification of epitope GILGFVFTL can be downloaded here: :download:`sequences.tsv <../_static/files/sequences.tsv>`.
 To import this dataset, use the following YAML snippet:
 
 .. highlight:: yaml
@@ -344,12 +347,13 @@ To import this dataset, use the following YAML snippet:
           metadata_column_mapping:
             epitope: epitope
 
-For this dataset, the :code:`label` can be used for prediction is 'epitope'.
+For this dataset, the :code:`label` that can be used for prediction is 'epitope'.
 
 
 Receptor dataset
 ^^^^^^^^^^^^^^^^^^^^^^^
-An example dataset for receptor classification can be downloaded here: :download:`sequences.tsv <../_static/files/sequences.tsv>`
+An example dataset for receptor classification of epitope GILGFVFTL can be downloaded here: :download:`receptors.tsv <../_static/files/receptors.tsv>`
+To import this dataset, use the following YAML snippet:
 
 .. highlight:: yaml
 .. code-block:: yaml
@@ -359,11 +363,11 @@ An example dataset for receptor classification can be downloaded here: :download
       my_dataset:
         format: AIRR
         params:
-          path: path/to/sequences.tsv
+          path: path/to/receptors.tsv
           is_repertoire: false
           paired: true
           receptor_chains: TRA_TRB
           metadata_column_mapping:
             epitope: epitope
 
-For this dataset, the :code:`label` can be used for prediction is 'epitope'.
+For this dataset, the :code:`label` that can be used for prediction is 'epitope'.
