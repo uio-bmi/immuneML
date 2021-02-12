@@ -1,27 +1,13 @@
-FAQ
-===
+Troubleshooting
+===============
 
 .. toctree::
    :maxdepth: 2
 
-What should the metadata file look like?
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Installation issues
+-------------------
 
-The metadata file is a simple .csv file describing metadata fields for a repertoire dataset.
-Metadata files are only used for repertoire datasets, for receptor and sequence datasets the metadata information should be defined as additional
-columns in the same file that contains the sequences.
-
-In case of repertoire datasets, each repertoire is represented by one file in the given format (e.g., AIRR/MiXCR/Adaptive).
-For all repertoires in one dataset, a single metadata file should be defined containing the following columns:
-
-.. image:: _static/images/metadata.png
-
-The columns :code:`filename` and :code:`subject_id` are mandatory. Other columns may be defined by the user.
-There are no restrictions as to what type of information these columns should represent, but typically they will represent
-diseases, HLA, age or sex. These columns can be used as a prediction target (also known as :code:`labels`) when training ML models.
-When writing a :ref:`YAML specification`, the :code:`labels` are defined by using the same name as the user-defined column(s) in the metadata file.
-
-When installing all requirements from requirements.txt, there is afterward an error with yaml package (No module named yaml)?
+When installing all requirements from requirements.txt, there is afterward an error with yaml package (No module named yaml)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This issue might be helpful: https://github.com/yaml/pyyaml/issues/291. Try installing yaml manually with a specific version.
@@ -38,22 +24,51 @@ If this does not resolve the problem, try installing torch manually using one of
 and afterwards try to install immuneML again.
 
 
-There is an issue with the type of entry when specifying a list of inputs, why does this happen?
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Please check that the YAML is in valid format. To list different inputs (e.g. a list of reports under assessment/reports/encoding in
-TrainMLModel instruction), the correct YAML syntax includes a space between - and the list item.
+Runtime issues
+--------------
 
 When running the TrainMLModel instruction multiple times, sometimes it fails saying that there is only one class in the data. Why does this happen?
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Please check the number of examples used for machine learning (e.g. number of repertoires). If there are very few examples, and/or if classes
+Please check the number of examples used for machine learning (e.g. number of repertoires or receptors). If there are very few examples, and/or if classes
 are not balanced, it is possible that just by chance, the data from only one class will be in the training set. If that happens, the classifiers
 will not train and an error will be thrown. To fix this, try working with a larger dataset or check how TrainMLModel is specified.
 If TrainMLModel does nested cross-validation, it might require a bit more data. To perform only cross-validation, under `selection` key, specify
 that `split_strategy` is `random` and that `training_percentage` is `1` (to use all data from the inner loop for training). In this way, instead of having
 multiple training/validation/test splits, there will be only training/test splits as specified under key `assessment` in TrainMLModel instruction.
 
-When running DeepRC I get TypeError: can't concat str to bytes, how can I solve this?
+I get an error when importing an immuneML dataset in Pickle format
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+immuneML Pickle files are not guaranteed to be compatible between different immuneML (sub)versions.
+
+In the folder where your Pickle dataset was exported, you can find a file named info.txt, which shows the
+immuneML version that was used to export the given dataset. If you install the same immuneML version as displayed
+in this file, you should be able to import the Pickle dataset.
+
+If you want to use your dataset with a different version of immuneML, try to load the dataset using the version that
+was originally used to generate it and export the dataset to AIRR format. The exported AIRR dataset can subsequently
+be imported in a different version of immuneML.
+
+Converting a Pickle dataset to AIRR format can be done using the :ref:`DatasetExport` instruction.
+An example YAML specification looks like this:
+
+.. highlight:: yaml
+.. code-block:: yaml
+
+  definitions:
+    datasets:
+      my_dataset:
+        format: Pickle
+        params:
+          path: path/to/dataset.iml_dataset # change the path to the location of the .iml_dataset file
+  instructions:
+    my_dataset_export_instruction:
+      type: DatasetExport
+      datasets:
+      - my_dataset
+    export_formats:
+        - AIRR
+
+When running DeepRC I get TypeError: can't concat str to bytes
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 This error occurs when h5py version 3 or higher is used. Try using version 2.10.0 or lower.

@@ -183,15 +183,18 @@ Test run of the report: specifying the new report in YAML
 -----------------------------------------------------------
 
 Custom reports may be defined in the YAML specification under the key ‘definitions’ the same way as any other reports. The easiest way to test run
-:ref:`Data reports` and :ref:`Encoding reports` is through the :ref:`ExploratoryAnalysis` instruction. They may also be specified in the :ref:`TrainMLModel`
+`Data reports <https://docs.immuneml.uio.no/specification.html#data-reports>`_ and `Encoding reports <https://docs.immuneml.uio.no/specification.html#encoding-reports>`_ is through the :ref:`ExploratoryAnalysis` instruction. They may also be specified in the :ref:`TrainMLModel`
 instruction in the :code:`selection` and :code:`assessment` loop under :code:`reports:data_splits` and :code:`reports:encoding` respectively.
 
-:ref:`ML model reports` and :ref:`Train ML model reports` can only be run through the :ref:`TrainMLModel` instruction. :ref:`ML reports` can be specified inside both the
+`ML model reports <https://docs.immuneml.uio.no/specification.html#ml-model-reports>`_ and `Train ML model reports <https://docs.immuneml.uio.no/specification.html#train-ml-model-reports>`_ can only be run through the :ref:`TrainMLModel` instruction. :ref:`ML reports` can be specified inside both the
 :code:`selection` and :code:`assessment` loop under :code:`reports:models`. :ref:`Train ML model reports` must be specified under :code:`reports`.
 
 Finally, :ref:`Multi dataset reports` can be specified under :code:`benchmark_reports` when running the :ref:`MultiDatasetBenchmarkTool`.
 
-The following specification shows the places where :ref:`Data reports`, :ref:`Encoding reports`, :ref:`ML reports`, and :ref:`Train ML model reports` can be specified:
+The following specification shows the places where `Data reports <https://docs.immuneml.uio.no/specification.html#data-reports>`_,
+`Encoding reports <https://docs.immuneml.uio.no/specification.html#encoding-reports>`_ ,
+`ML model reports <https://docs.immuneml.uio.no/specification.html#ml-model-reports>`_,
+and `Train ML model reports <https://docs.immuneml.uio.no/specification.html#train-ml-model-reports>`_ can be specified:
 
 .. code-block:: yaml
 

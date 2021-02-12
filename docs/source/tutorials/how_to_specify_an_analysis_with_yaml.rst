@@ -37,30 +37,36 @@ Simulation-specific components (only relevant when running a :ref:`Simulation in
 
 
 Under definitions, each analysis sub-component is defined using a user-specifiable key.
-In the examples below, we will use the prefix 'my_' to identify these keys, but in practice it is possible
+In the examples below, we will use the prefix 'my\_' to identify these keys, but in practice it is possible
 to specify any kind of name here. These keys are unique names that identify the settings for a component, and they are
-later on referenced in the instructions (for example: to specify which of the imported datasets to use in a given instruction).
-All other keys in the YAML
+later on referenced in the :ref:`instructions <Specifying Instructions>`
+(for example: to specify which of the imported datasets to use in a given instruction).
 
-The import of two datasets may be defined as follows:
+
+The :ref:`import of two datasets <How to import data into immuneML>` may be defined as follows:
 
 .. highlight:: yaml
 .. code-block:: yaml
 
   definitions:
     datasets:
-      my_dataset_1: # user-defined key for the first dataset
-        format: AIRR
+      my_repertoire_dataset: # user-defined key for the first dataset
+        format: AIRR         # import of a repertoire dataset
         params:
           path: path/to/first/data/
           metadata_file: path/to/first/metadata.csv
-      my_dataset_2: # user-defined key for the second dataset
-        format: AIRR
+      my_receptor_dataset: # user-defined key for the second dataset
+        format: AIRR       # import of a receptor dataset
         params:
           path: path/to/second/data/
-          metadata_file: path/to/second/metadata.csv
+          is_repertoire: false
+          paired: true
+          receptor_chains: TRA_TRB
+          metadata_column_mapping:          # map column names of the file to label names
+            epitope_column_name: my_epitope # my_epitope can be used as label
 
-Where the imported datasets can under :code:`instructions` be referenced using the keys :ref:`my_dataset_1` and :ref:`my_dataset_2`.
+Where the imported datasets can under :code:`instructions` be referenced using the keys :ref:`my_repertoire_dataset` and :ref:`my_receptor_dataset`.
+Note that in practice, most analyses use just one dataset.
 
 An example of a full :code:`definitions` section which may be used for a machine learning task is given below.
 See also :ref:`How to train and assess a receptor or repertoire-level ML classifier` for more details.
@@ -151,7 +157,8 @@ other instruction, two separate immuneML runs need to be made (e.g, running immu
 instruction to generate a dataset, and subsequently using that dataset as an input to a second immuneML
 run to train a ML model).
 
-An example of the YAML specification for the TrainMLModel instruction is as follows:
+An example of the YAML specification for the TrainMLModel instruction is shown below.
+See the tutorial :ref:`How to train and assess a receptor or repertoire-level ML classifier` for more explanation behind all settings.
 
 .. highlight:: yaml
 .. code-block:: yaml
@@ -160,6 +167,7 @@ An example of the YAML specification for the TrainMLModel instruction is as foll
     my_instruction: # user-defined instruction key
       type: TrainMLModel
       dataset: my_dataset # reference dataset from definitions
+      labels: [disease]
       settings: # settings are made up of preprocessing (optional), ml_method and encoding
       - encoding: my_kmer_freq_encoding_1
         ml_method: my_log_reg
@@ -175,7 +183,6 @@ An example of the YAML specification for the TrainMLModel instruction is as foll
       selection:
         split_strategy: k_fold
         split_count: 5
-      labels: [disease]
       strategy: GridSearch
       metrics: [accuracy]
       optimization_metric: accuracy
@@ -231,6 +238,7 @@ An example of a complete YAML specification for training an ML model through nes
     my_instruction: # user-defined instruction key
       type: TrainMLModel
       dataset: my_dataset # reference dataset from definitions
+      labels: [disease]
       settings: # settings are made up of preprocessing (optional), ml_method and encoding
       - encoding: my_kmer_freq_encoding_1
         ml_method: my_log_reg
@@ -246,7 +254,6 @@ An example of a complete YAML specification for training an ML model through nes
       selection:
         split_strategy: k_fold
         split_count: 5
-      labels: [disease]
       strategy: GridSearch
       metrics: [accuracy]
       optimization_metric: accuracy

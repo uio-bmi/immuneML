@@ -26,7 +26,7 @@ This process is shown in the figure below:
   assessed on test data
 
 
-YAML specification of the TrainMLModel
+YAML specification of TrainMLModel
 ------------------------------------------------------------------
 
 Definitions section
@@ -38,7 +38,7 @@ and :code:`reports` may be defined. For detailed descriptions of how the paramet
 please refer to the :ref:`YAML specification` documentation. Under :ref:`Definitions` each analysis component is documented
 and settings are described.
 
-An example of the definitions section is given here:
+An example of the definitions section using a repertoire dataset is given here:
 
 
 .. highlight:: yaml
@@ -49,7 +49,7 @@ An example of the definitions section is given here:
       my_dataset:
         format: AIRR
         params:
-          path: path/to/data/
+          path: path/to/repertoires/
           metadata_file: path/to/metadata.csv
 
     preprocessing_sequences:
@@ -77,7 +77,7 @@ An example of the definitions section is given here:
     encodings:
       my_kmer_freq_encoding:
         KmerFrequency:
-          k: 5
+          k: 3
 
     reports:
       my_coefficients: Coefficients
@@ -102,6 +102,8 @@ Firstly, we should give our instruction a unique name and set the :code:`type`:
 
 
 Furthermore, we should define which :code:`dataset` to train the models on, and which :code:`labels` to predict.
+The labels are defined based on the metadata file (repertoire datasets) or metadata column mapping (sequence or receptor datasets),
+see :ref:`How to import data into immuneML` for details.
 In most cases there will only be one label, but it is possible to specify multiple labels in order to train
 multiple different classifiers.
 
@@ -116,8 +118,8 @@ multiple different classifiers.
 
 
 In the :code:`settings` section the different combinations of ML settings must be specified. They consist of
-an :code:`encoding`, an :code:`ml_method` and optional :code:`preprocessing`, which should be referenced by
-the names that were used to defined them under :code:`definitions`.
+an :code:`encoding`, an :code:`ml_method` and optional :code:`preprocessing` (only available for repertoire datasets),
+which should be referenced by the names that were used to defined them under :code:`definitions`.
 
 Not every combination of encodings and ML methods is valid. For all the valid options, see the figure in the :ref:`YAML specification` documentation.
 An example of the settings section of the instruction is:
@@ -130,7 +132,7 @@ An example of the settings section of the instruction is:
       ml_method: my_log_reg           # my_log_reg and my_svm, with and without my_preprocessing
     - encoding: my_kmer_freq_encoding
       ml_method: my_svm
-    - preprocessing: my_preprocessing
+    - preprocessing: my_preprocessing # preprocessing can only be defined for repertoire datasets
       encoding: my_kmer_freq_encoding
       ml_method: my_log_reg
     - preprocessing: my_preprocessing
@@ -148,13 +150,13 @@ The parameters that should be defined under :code:`selection` and :code:`assessm
 documentation.
 Optionally, it is possible to specify various types of :code:`reports` here (for more details see :ref:`ReportConfig`):
 
-- :code:`models`: :ref:`ML model reports` which will be applied to all compatible models in the given loop.
+- :code:`models`: `ML model reports <https://docs.immuneml.uio.no/specification.html#ml-model-reports>`_ which will be applied to all compatible models in the given loop.
 
-- :code:`encoding`: :ref:`Encoding reports` which will be applied to the encoded data of a given split (all data or training+validation data)
+- :code:`encoding`: `Encoding reports <https://docs.immuneml.uio.no/specification.html#encoding-reports>`_ which will be applied to the encoded data of a given split (all data or training+validation data)
 
-- :code:`data`: :ref:`Data reports` which will be applied to the complete dataset of a given split (all data or training+validation data)
+- :code:`data`: `Data reports <https://docs.immuneml.uio.no/specification.html#data-reports>`_ which will be applied to the complete dataset of a given split (all data or training+validation data)
 
-- :code:`data_splits`: :ref:`Data reports` which will be applied to the data splits (training/validation or training+validation/test splits)
+- :code:`data_splits`: `Data reports <https://docs.immuneml.uio.no/specification.html#data-reports>`_ which will be applied to the data splits (training/validation or training+validation/test splits)
 
 The following example shows a piece of the YAML specification when two different splitting strategies are
 used for both loops:
@@ -219,7 +221,7 @@ An example of the complete YAML specification is shown here:
       my_dataset:
         format: AIRR
         params:
-          path: path/to/data/
+          path: path/to/repertoires/
           metadata_file: path/to/metadata.csv
 
     preprocessing_sequences:
@@ -247,7 +249,7 @@ An example of the complete YAML specification is shown here:
     encodings:
       my_kmer_freq_encoding:
         KmerFrequency:
-          k: 5
+          k: 3
 
     reports:
       my_coefficients: Coefficients
@@ -268,7 +270,7 @@ An example of the complete YAML specification is shown here:
           ml_method: my_log_reg           # my_log_reg and my_svm, with and without my_preprocessing
         - encoding: my_kmer_freq_encoding
           ml_method: my_svm
-        - preprocessing: my_preprocessing
+        - preprocessing: my_preprocessing # preprocessing can only be defined for repertoire datasets
           encoding: my_kmer_freq_encoding
           ml_method: my_log_reg
         - preprocessing: my_preprocessing
@@ -303,3 +305,69 @@ An example of the complete YAML specification is shown here:
       store_encoded_data: False
 
 
+Example datasets
+------------------------------------------------------------------
+Below you will find example datasets that can be used to test out the :ref:`TrainMLModel` instruction.
+
+Repertoire dataset
+^^^^^^^^^^^^^^^^^^^^^^^
+An example dataset for testing out repertoire classification in immuneML is the Quickstart dataset: :download:`quickstart_data.zip <../_static/files/quickstart_data.zip>`
+This is a dataset in AIRR format and can be imported as follows:
+
+.. highlight:: yaml
+.. code-block:: yaml
+
+  definitions:
+    datasets: # every instruction uses a dataset
+      my_dataset:
+        format: AIRR
+        params:
+          path: path/to/repertoires/
+          metadata_file: path/to/metadata.csv
+
+For this dataset, the :code:`label` that can be used for prediction is 'signal_disease'.
+
+
+Sequence dataset
+^^^^^^^^^^^^^^^^^^^^^^^
+An example dataset for sequence classification of epitope GILGFVFTL can be downloaded here: :download:`sequences.tsv <../_static/files/sequences.tsv>`.
+To import this dataset, use the following YAML snippet:
+
+.. highlight:: yaml
+.. code-block:: yaml
+
+  definitions:
+    datasets: # every instruction uses a dataset
+      my_dataset:
+        format: AIRR
+        params:
+          path: path/to/sequences.tsv
+          is_repertoire: false
+          paired: false
+          metadata_column_mapping:
+            epitope: epitope
+
+For this dataset, the :code:`label` that can be used for prediction is 'epitope'.
+
+
+Receptor dataset
+^^^^^^^^^^^^^^^^^^^^^^^
+An example dataset for receptor classification of epitope GILGFVFTL can be downloaded here: :download:`receptors.tsv <../_static/files/receptors.tsv>`
+To import this dataset, use the following YAML snippet:
+
+.. highlight:: yaml
+.. code-block:: yaml
+
+  definitions:
+    datasets: # every instruction uses a dataset
+      my_dataset:
+        format: AIRR
+        params:
+          path: path/to/receptors.tsv
+          is_repertoire: false
+          paired: true
+          receptor_chains: TRA_TRB
+          metadata_column_mapping:
+            epitope: epitope
+
+For this dataset, the :code:`label` that can be used for prediction is 'epitope'.

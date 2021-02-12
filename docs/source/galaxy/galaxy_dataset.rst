@@ -39,9 +39,9 @@ There exist three types of datasets in immuneML:
 
 In order to use a dataset for training ML classifiers, the metadata, which contains prediction :code:`labels`, needs to be available.
 For repertoire datasets, the metadata is supplied through a metadata file. The metadata file is a .csv file which contains
-one repertoire (filename) per row, and the metadata labels for that repertoire. For more details on structuring the metadata file, see
-:ref:`What should the metadata file look like?`. Note that only the repertoire files that are present in the metadata file
-will be imported.
+one repertoire (filename) per row, and the metadata labels for that repertoire. (see: :ref:`What should the metadata file look like?`).
+Note that only the repertoire files that are present in the metadata file will be imported.
+
 For sequence and receptor datasets the metadata should be available in the columns of the sequence data files. For example,
 VDJdb files contain columns named 'Epitope', 'Epitope gene' and 'Epitope species'. These columns can be specified to serve
 as metadata columns.
@@ -66,6 +66,11 @@ In subsequent YAML-based analyses, the dataset created through the simplified in
           format: Pickle
           params:
             path: dataset.iml_dataset
+
+Note: if an immuneML dataset history element suddenly gives you errors when you use it as an input to other tools
+(while it used to work before), it could be due to an immuneML version update.
+To solve this problem, try to rerun the 'Create dataset' tool with the same input files (for example by clicking :ref:`the
+'Run this job again' button <History items>`), and use the new immuneML dataset history element.
 
 
 Using the advanced 'Create dataset' interface
@@ -166,6 +171,12 @@ parameters need to be specified in subsequent analyses:
             is_repertoire: True
             metadata_file: metadata.csv
             # other import parameters may be specified here
+
+
+Note: if you used the 'Pickle' export format and your immuneML dataset history element suddenly gives you errors when
+you use it as an input to other tools (while it used to work before), it could be due to an immuneML version update.
+To solve this problem, try to rerun the 'Create dataset' tool with the same input files (for example by clicking :ref:`the
+'Run this job again' button <History items>`), and use the new immuneML dataset history element.
 
 
 Making a Galaxy collection directly from files
