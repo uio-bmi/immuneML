@@ -64,9 +64,9 @@ The items in the history show three buttons:
 
 When clicking on the history item outside of these three buttons, the item expands and shows more options.
 
-.. image:: ../_static/images/galaxy/galaxy_train_ml_model_expanded.png
+.. image:: ../_static/images/galaxy/galaxy_train_ml_model_expanded_buttons.png
    :alt: expanded history item
-   :width: 250
+   :width: 300
 
 Some options that you might be likely to use are:
 
