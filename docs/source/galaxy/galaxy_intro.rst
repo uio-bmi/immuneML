@@ -120,7 +120,7 @@ To create a Galaxy collection, follow these steps:
 
 #. Click 'All' to select all history items, or select just those files you want to include.
 
-#. Click 'For all selected...' > 'Build Dataset List' and enter a name for your dataset. Your collection should now appear as a new item in the history.
+#. Click 'For all selected...' > 'Build Dataset List' and enter a name for your collection. Your collection should now appear as a new item in the history.
 
 #. Click the 'operations on multiple datasets' button again in order to go back to the normal menu.
 
