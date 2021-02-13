@@ -25,19 +25,20 @@ Step 1: importing the dataset to a Galaxy history
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Every immuneML analysis takes a dataset as input. For the Quickstart tutorial, an example dataset has been prepared and is
-available through `this Galaxy history <https://galaxy.immuneml.uio.no/u/immuneml/h/quickstart-dataset>`_.
+available through `this Galaxy history <https://galaxy.immuneml.uio.no/u/immuneml/h/quickstart-data>`_.
 Alternatively, the tutorial :ref:`How to make an immuneML dataset in Galaxy` describes in detail
 how to make an immuneML dataset using your own data.
 
 This Quickstart dataset Galaxy history contains the following items:
 
+- 100 repertoire .tsv files in AIRR format.
+
+- A Collection of repertoires. This history element collects the 100 above-mentioned repertoire files in a Galaxy collection.
+  To read how to make your own Galaxy collection, see :ref:`Creating a Galaxy collection of files`.
+
 - A metadata.csv file. The metadata file describes which of the 100 repertoires are diseased and healthy, under the
   column named 'signal_disease' which contains the values True and False.
   For details about the metadata file, see :ref:`What should the metadata file look like?`.
-
-- 100 repertoire .tsv files in AIRR format.
-
-- immuneML dataset: a galaxy collection made using the above-mentioned files.
 
 Individual files can be inspected by clicking the eyeball icons.
 To import the complete history, click the + icon in the right upper corner.
@@ -46,8 +47,31 @@ To import the complete history, click the + icon in the right upper corner.
    :alt: import button Galaxy
    :width: 250
 
+Step 2: creating an immuneML Galaxy dataset
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Use the `Create dataset <https://galaxy.immuneml.uio.no/root?tool_id=immune_ml_dataset>`_ Galaxy tool to make an
+immuneML dataset out of the files in the Galaxy history.
+Using the simplified interface, select 'repertoire dataset' and 'AIRR' data format, and select the metadata.csv file as metadata file.
+All repertoire files should be selected under 'Data files'. By default, the menu will allow you to select all txt-like files
+that are present in the Galaxy history. With smaller datasets, you can simply select all individual repertoire
+or receptor files here. Since this is a larger dataset, we will instead select the collection of repertoire files.
+Click the 'Dataset collections' button (folder icon), the menu will now only show the collections in the Galaxy history.
+Select the collection of repertoires so it becomes highlighted.
 
-Step 2: writing the YAML specification
+.. image:: ../_static/images/galaxy/create_dataset_from_collection.png
+   :alt: create dataset from collection
+   :width: 500
+
+Three new items will appear in the Galaxy history. In 'Summary: dataset generation' you can find details about the newly
+generated dataset, including the name of the dataset, the dataset type and size, and a download link.
+
+The next item, 'Archive: dataset generation' contains an archive of the output folder produced by immuneML.
+
+Finally, 'immuneML dataset' is a new Galaxy collection containing all relevant files for the dataset.
+This history item should be selected as an input in subsequent tools.
+
+
+Step 3: writing the YAML specification
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Any immuneML analysis is described by a YAML specification file.
 This file contains nested key-value pairs. Mandatory keywords with a specific meaning are marked like :code:`this`
@@ -87,10 +111,9 @@ The complete YAML specification for this analysis looks like this and can be dow
     definitions:
       datasets:
         my_dataset: # user-defined dataset name
-          format: AIRR
+          format: Pickle
           params:
-            is_repertoire: true # we are importing a repertoire dataset
-            metadata_file: metadata.csv
+            path: dataset.iml_dataset # 'dataset' is the default name given by the Create dataset tool
 
       encodings:
         my_kmer_frequency: # user-defined encoding name
@@ -144,7 +167,7 @@ The file will appear as a new history element.
    :alt: upload data Galaxy
    :width: 250
 
-Step 3: running the analysis
+Step 4: running the analysis
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Next, the `Train machine learning models <https://galaxy.immuneml.uio.no/root?tool_id=immuneml_train_ml_model>`_ Galaxy tool should be used.
@@ -154,7 +177,7 @@ Select the YAML specification and previously created dataset from the history, a
    :alt: train ML model tool
    :width: 500
 
-Step 4: understanding the results
+Step 5: understanding the results
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 After running the Galaxy tool for training ML models, three new items will appear in the Galaxy history.

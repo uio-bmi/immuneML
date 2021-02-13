@@ -16,7 +16,8 @@ The tool has a :ref:`simplified <Using the simplified 'Create dataset' interface
 :ref:`advanced <Using the advanced 'Create dataset' interface>` interface. The simplified interface is fully button-based, and relies
 on default settings for importing datasets. The advanced interface gives full control over import settings through a YAML
 specification. In most cases, the simplified interface will suffice.
-If your history contains more than 100 files, you may want to consider :ref:`making a Galaxy collection directly from files <Making a Galaxy collection directly from files>`.
+
+If your history contains more than 100 files, you may want to consider using a Galaxy collection as input :ref:`using a Galaxy collection as input <Using a Galaxy collection as input>`.
 
 
 See also the following example Galaxy histories, showing how to run the tool:
@@ -54,6 +55,7 @@ In the simplified interface the user has to select an input file format, dataset
 For repertoire datasets, a metadata file must be selected from the history, whereas for sequence- and receptor datasets
 the names of the columns containing metadata must be specified. The names of the metadata columns are in later
 analyses available as labels for the sequence and receptor datasets.
+
 
 In subsequent YAML-based analyses, the dataset created through the simplified interface should be specified like this:
 
@@ -178,28 +180,16 @@ you use it as an input to other tools (while it used to work before), it could b
 To solve this problem, try to rerun the 'Create dataset' tool with the same input files (for example by clicking :ref:`the
 'Run this job again' button <History items>`), and use the new immuneML dataset history element.
 
-
-Making a Galaxy collection directly from files
+Using a Galaxy collection as input
 ----------------------------------------------
-When a dataset contains many files, it may be time consuming to select all files in the 'Create dataset' tool.
-Alternatively, it is possible to directly create a Galaxy collection from files in the history, using the following steps:
+Under 'Data files' (simplified interface) or 'Data and metadata files' (advanced interface), it is possible to select
+a Galaxy collection instead of selection many files manually. See :ref:`Creating a Galaxy collection of files` for details.
+Click the 'Dataset collections' button (folder icon), to toggle the selection menu so that it shows Galaxy collections in the history.
 
-#. If you are currently using a Galaxy history containing any items, create a new Galaxy history (click the '+' icon in the right upper corner).
+.. image:: ../_static/images/galaxy/create_dataset_from_collection.png
+   :alt: create dataset from collection
+   :width: 500
 
-#. Upload all the files relevant for the dataset, this includes the metadata file in case of a repertoire dataset.
-
-#. Click 'operations on multiple datasets' (checkbox icon above the Galaxy history). Checkboxes should now appear in front of the history items.
-
-#. Click 'All' to select all history items.
-
-#. Click 'For all selected...' > 'Build Dataset List' and enter a name for your dataset.
-
-#. Click the 'operations on multiple datasets' button again in order to go back to the normal menu.
-
-The newest item in your history should now contain a Galaxy collection with all dataset files. Note that a difference between
-this method and the above-described methods is that your new dataset is not in Pickle format. Thus, when writing the YAML
-specification for the next immuneML Galaxy tool, you should specify the import parameters for your data format.
-Furthermore, this method does not automatically create a summary page describing the dataset and its available labels.
 
 Tool output
 ---------------------------------------------
