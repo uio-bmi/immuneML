@@ -105,6 +105,27 @@ Look for the tool named **Editor**. You can now edit the file as you want, and b
 item will be generated containing the edited file.
 
 
+Creating a Galaxy collection of files
+-------------------------------------
+When working with many files in Galaxy, it can be inconvenient to have to click on all the files that you want to use
+as input to a tool (for example, when using the `Create dataset <https://galaxy.immuneml.uio.no/root?tool_id=immune_ml_dataset>`_ tool).
+A solution to this is `Galaxy collections <https://training.galaxyproject.org/archive/2019-12-01/topics/galaxy-data-manipulation/tutorials/collections/tutorial.html>`_,
+which are containers for multiple data files.
+
+To create a Galaxy collection, follow these steps:
+
+#. Upload or import all the files that you want in your collection to the Galaxy history.
+
+#. Click 'operations on multiple datasets' (checkbox icon above the Galaxy history). Checkboxes should now appear in front of the history items.
+
+#. Click 'All' to select all history items, or select just those files you want to include.
+
+#. Click 'For all selected...' > 'Build Dataset List' and enter a name for your collection. Your collection should now appear as a new item in the history.
+
+#. Click the 'operations on multiple datasets' button again in order to go back to the normal menu.
+
+
+
 Reporting bugs in Galaxy
 ------------------------
 If a tool run fails and you suspect this might be due to a bug, it is possible to send an automatic bug report.

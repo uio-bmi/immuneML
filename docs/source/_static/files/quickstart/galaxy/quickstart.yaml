@@ -1,10 +1,9 @@
 definitions:
   datasets:
     my_dataset: # user-defined dataset name
-      format: AIRR
+      format: Pickle
       params:
-        is_repertoire: true # we are importing a repertoire dataset
-        metadata_file: metadata.csv
+        path: dataset.iml_dataset # 'dataset' is the default name given by the Create dataset tool
 
   encodings:
     my_kmer_frequency: # user-defined encoding name
