@@ -38,11 +38,6 @@ class TestConfounderAnalysis(TestCase):
         dummy_lr.fit_by_cross_validation(encoded_data,
                                          number_of_splits=2, label_name=label)
 
-        # file_path = path / "ml_details.yaml"
-        # with file_path.open("w") as file:
-        #     yaml.dump({"signal_disease": {"feature_names": ["feat1", "feat2", "signal_age"]}},
-        #               file)
-
         return dummy_lr
 
     def _make_dataset(self, path, size) -> RepertoireDataset:
@@ -102,7 +97,7 @@ class TestConfounderAnalysis(TestCase):
         return report
 
     def test_generate(self):
-        path = EnvironmentSettings.tmp_test_path / "confounder_report2/"
+        path = EnvironmentSettings.tmp_test_path / "confounder_report/"
         PathBuilder.build(path)
 
         report = self._create_report(path)
