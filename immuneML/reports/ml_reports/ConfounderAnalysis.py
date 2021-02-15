@@ -52,10 +52,11 @@ class ConfounderAnalysis(MLReport):
         predictions = self.method.predict(self.test_dataset.encoded_data, self.label)[self.label]  # label = disease
 
         true_labels = self.test_dataset.get_metadata(self.metadata_labels + [self.label])
+        metrics = ["FP", "FN"]
 
         plot = make_subplots(rows=len(self.metadata_labels), cols=2)
         for label_index, meta_label in enumerate(self.metadata_labels):
-            for metric_index, metric in enumerate(["FP", "FN"]):
+            for metric_index, metric in enumerate(metrics):
                 output_name = metric + "_" + meta_label
 
                 plotting_data = self._metrics(metric=metric, label=self.label, meta_label=meta_label,
