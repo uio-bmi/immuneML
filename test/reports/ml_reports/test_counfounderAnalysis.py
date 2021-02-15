@@ -102,7 +102,7 @@ class TestConfounderAnalysis(TestCase):
         return report
 
     def test_generate(self):
-        path = EnvironmentSettings.tmp_test_path / "confounder_report/"
+        path = EnvironmentSettings.tmp_test_path / "confounder_report2/"
         PathBuilder.build(path)
 
         report = self._create_report(path)

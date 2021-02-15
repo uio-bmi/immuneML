@@ -65,7 +65,7 @@ class ConfounderAnalysis(MLReport):
                                col=metric_index + 1)
 
                 plot.update_xaxes(title_text=f"{meta_label}", row=label_index + 1,
-                                  col=metric_index + 1)
+                                  col=metric_index + 1, type='category')
 
                 plot.update_yaxes(title_text=f"{metric}", row=label_index + 1,
                                   col=metric_index + 1)
@@ -86,13 +86,18 @@ class ConfounderAnalysis(MLReport):
         else:
             metric_inds = np.nonzero(np.less(predictions, true_labels[label]))[0].tolist()
 
+        metadata_values = true_labels[meta_label]
         # indices of misclassification with respect to the metadata label
-        label_inds = np.array(true_labels[meta_label])[metric_inds]
+        label_inds = np.array(metadata_values)[metric_inds]
 
-        # number of misclassifications at Val_1 = TRUE of the metadata label
-        metric_val = np.count_nonzero(label_inds)
+        metric_vals = []
+        unique_levels = np.unique(metadata_values).tolist()
+
+        # number of metric occurences at each metadata level
+        for val in unique_levels:
+            metric_vals.append(np.count_nonzero(label_inds == val))
 
         plotting_data = pd.DataFrame(
-            {f"{metric}": [len(label_inds) - metric_val, metric_val], f"{meta_label}": [False, True]})
+            {f"{metric}": metric_vals, f"{meta_label}": unique_levels})
 
         return plotting_data
