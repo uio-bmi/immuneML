@@ -44,13 +44,29 @@ previously created history item, such as an uploaded file or created dataset.
    :alt: train ML model tool
    :width: 500
 
-The tool will produce one or multiple history items. If a tool run is successful, the produced history items will show
+The tool will produce one or multiple history items. Initially, the history items will
+be gray while Galaxy is waiting for the run to start. While the tool is running, the history
+items are yellow. Depending on the complexity of the task, this may take a while.
+
+.. image:: ../_static/images/galaxy/galaxy_train_ml_model_results_gray.png
+   :alt: waiting for Galaxy
+   :width: 250
+
+.. image:: ../_static/images/galaxy/galaxy_train_ml_model_results_yellow.png
+   :alt: running Galaxy
+   :width: 250
+
+If a tool run is successful, the produced history items will show
 up green, and when errors occurred the item will be red.
+See also: :ref:`Viewing errors and reporting bugs in Galaxy`.
 
 .. image:: ../_static/images/galaxy/galaxy_train_ml_model_results.png
    :alt: successful Galaxy run
    :width: 250
 
+.. image:: ../_static/images/galaxy/galaxy_train_ml_model_results_red.png
+   :alt: failed Galaxy run
+   :width: 250
 
 History items
 ------------------------
@@ -99,7 +115,8 @@ through their Galaxy user e-mail.
 Editing files in Galaxy
 ------------------------
 Since immuneML analyses are specified in a yaml file, you might at some point want to edit this yaml file either to
-make changes to the analysis or correct errors.
+make changes to the analysis or correct errors. Note: this functionality is only available to users who are logged in,
+not anonymous users.
 To edit a file in Galaxy, click on the history item to expand it, then click 'Visualize this data' (barchart icon).
 Look for the tool named **Editor**. You can now edit the file as you want, and by clicking 'export' a new history
 item will be generated containing the edited file.
@@ -126,10 +143,10 @@ To create a Galaxy collection, follow these steps:
 
 
 
-Reporting bugs in Galaxy
-------------------------
+Viewing errors and reporting bugs in Galaxy
+--------------------------------------------
 If a tool run fails and you suspect this might be due to a bug, it is possible to send an automatic bug report.
-Open the failed history item and click 'View or report this error' (bug icon). This will show you the error that
+Open the failed history item by clicking on it, and then click 'View or report this error' (bug icon). This will show you the error that
 made the run fail. Typically, the last few lines show a message printed directly by immuneML explaining the error
 (for example when an incorrect input file is provided).
 If you still think you have encountered a bug, please write in the textbox what you attempted to do and what behavior
