@@ -1,8 +1,10 @@
+import logging
 from datetime import datetime
 
 import numpy as np
 import pkg_resources
 import torch
+from sklearn.preprocessing import label_binarize
 
 from immuneML.environment.Constants import Constants
 
@@ -10,15 +12,49 @@ from immuneML.environment.Constants import Constants
 class Util:
 
     @staticmethod
-    def make_binary_class_mapping(y, label_name: str) -> dict:
+    def map_to_old_class_values(y, class_mapping: dict):
+        try:
+            old_class_type = np.array(list(class_mapping.values())).dtype
+            mapped_y = np.copy(y).astype(np.object)
+            for i in range(mapped_y.shape[0]):
+                mapped_y[i] = class_mapping[y[i]]
+            return mapped_y.astype(old_class_type)
+        except Exception as e:
+            logging.exception("MLMethod util: error occurred when predicting the class assignment due to mismatch of class types.\n"
+                              f"Classes: {y}\nMapping:{class_mapping}")
+            raise e
+
+    @staticmethod
+    def map_to_new_class_values(y, class_mapping: dict):
+        try:
+            mapped_y = np.copy(y).astype(np.object)
+            switched_mapping = {value: key for key, value in class_mapping.items()}
+            new_class_type = np.array(list(switched_mapping.values())).dtype
+            for i in range(mapped_y.shape[0]):
+                mapped_y[i] = switched_mapping[y[i]]
+            return mapped_y.astype(new_class_type)
+        except Exception as e:
+            logging.exception(f"MLMethod util: error occurred when fitting the model due to mismatch of class types.\n"
+                              f"Classes: {y}\nMapping:{class_mapping}")
+            raise e
+
+    @staticmethod
+    def make_class_mapping(y) -> dict:
+        """Creates a class mapping from a list of classes which can be strings, numbers of booleans; maps to same name in multi-class settings"""
+        classes = np.unique(y)
+        if classes.shape[0] == 2:
+            return Util.make_binary_class_mapping(y)
+        else:
+            return {cls: cls for cls in classes}
+
+    @staticmethod
+    def make_binary_class_mapping(y) -> dict:
         """
         Creates binary class mapping from a list of classes which can be strings, numbers or boolean values
 
         Arguments:
 
             y: list of classes per example, as supplied to fit() method of the classifier; it should include all classes that will appear in the data
-
-            label_name: the name of the label for which the classes are supplied
 
         Returns:
              mapping dictionary where 0 and 1 are always the keys and the values are original class names which were mapped for these values
@@ -37,6 +73,15 @@ class Util:
             mapping = {0: unique_values[0], 1: unique_values[1]}
 
         return mapping
+
+    @staticmethod
+    def binarize_labels(true_y, predicted_y, labels):
+        """Binarizes the predictions in place using scikit-learn's label_binarize() method"""
+        if hasattr(true_y, 'dtype') and true_y.dtype.type is np.str_ or isinstance(true_y, list) and any(isinstance(item, str) for item in true_y):
+            true_y = label_binarize(true_y, classes=labels)
+            predicted_y = label_binarize(predicted_y, classes=labels)
+
+        return true_y, predicted_y
 
     @staticmethod
     def setup_pytorch(number_of_threads, random_seed):

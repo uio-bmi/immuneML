@@ -39,7 +39,6 @@ class TCRdistClassifier(SklearnMethod):
 
         self.percentage = percentage
         self.k = None
-        self.label = None
         self.show_warnings = show_warnings
 
     def _get_ml_model(self, cores_for_training: int = 2, X=None):
@@ -57,8 +56,8 @@ class TCRdistClassifier(SklearnMethod):
         # make an object of KNN class with precomputed metric
         return KNeighborsClassifier(n_neighbors=self.k, weights=weights_func, metric='precomputed', n_jobs=cores_for_training)
 
-    def get_params(self, label):
-        return {**self.models[label].get_params(deep=True), **copy.deepcopy(vars(self))}
+    def get_params(self):
+        return {**self.model.get_params(deep=True), **copy.deepcopy(vars(self))}
 
     def can_predict_proba(self) -> bool:
         return True

@@ -146,15 +146,12 @@
             {{#hp_reports}}
             <div class="grid-container">
             {{#output_figures}}
-                <div>
-                    {{#is_embed}}
-                    <embed src="{{path}}">
-                    {{/is_embed}}
-                    {{^is_embed}}
-                    <img src="{{path}}">
-                    {{/is_embed}}
-                    {{#name}}<p>{{name}}</p>{{/name}}
-                </div>
+                {{#is_embed}}
+                <div class="grid-item-full-width"><embed src="{{path}}">{{#name}}<p>{{name}}</p>{{/name}}</div>
+                {{/is_embed}}
+                {{^is_embed}}
+                <div><img src="{{path}}">{{#name}}<p>{{name}}</p>{{/name}}</div>
+                {{/is_embed}}
             {{/output_figures}}
             </div>
             {{/hp_reports}}

@@ -1,6 +1,11 @@
-from pathlib import Path
 import warnings
-import yaml
+from pathlib import Path
+
+import numpy as np
+import pandas as pd
+import plotly.graph_objs as go
+from sklearn import metrics as sklearn_metrics
+from sklearn.preprocessing import label_binarize
 
 from immuneML.data_model.dataset.Dataset import Dataset
 from immuneML.environment.Metric import Metric
@@ -12,12 +17,7 @@ from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.ml_reports.MLReport import MLReport
 from immuneML.util.ParameterValidator import ParameterValidator
 from immuneML.util.PathBuilder import PathBuilder
-from sklearn import metrics as sklearn_metrics
-from sklearn.preprocessing import label_binarize
 
-import numpy as np
-import pandas as pd
-import plotly.graph_objs as go
 
 class TrainingPerformance(MLReport):
     """
@@ -74,7 +74,7 @@ class TrainingPerformance(MLReport):
         predicted_y = self.method.predict(X, self.label)[self.label]
         predicted_proba_y = self.method.predict_proba(X, self.label)[self.label]
         true_y = self.train_dataset.encoded_data.labels[self.label]
-        classes = self.method.get_classes_for_label(self.label)
+        classes = self.method.get_classes()
 
         PathBuilder.build(self.result_path)
 

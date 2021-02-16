@@ -29,9 +29,9 @@ class TestMotifSeedRecovery(TestCase):
                                          label_name="l1")
 
         # Change coefficients to values 1-20
-        dummy_lr.models["l1"].coef_ = np.array(list(range(0, 5))).reshape(1, -1)
+        dummy_lr.model.coef_ = np.array(list(range(0, 5))).reshape(1, -1)
 
-        with open(path  / "ml_details.yaml", "w") as file:
+        with open(path / "ml_details.yaml", "w") as file:
             yaml.dump({"l1": {"feature_names": ["AAA", "AAC", "CKJ", "KSA", "AKJ"]}},
                       file)
 

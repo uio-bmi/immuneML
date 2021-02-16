@@ -164,7 +164,7 @@ class Coefficients(MLReport):
         return filepath
 
     def _retrieve_plot_data(self):
-        coefficients = self.method.get_params(self.label)[self._param_field]
+        coefficients = self.method.get_params()[self._param_field]
 
         feature_names = self._retrieve_feature_names()
 
