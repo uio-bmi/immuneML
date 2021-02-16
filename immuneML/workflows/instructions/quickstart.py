@@ -1,6 +1,8 @@
+import logging
 import os
 import shutil
 import sys
+import warnings
 from pathlib import Path
 
 import yaml
@@ -132,7 +134,7 @@ class Quickstart:
                                                                    "repertoire_implanting_rate": 0.1}}}
             },
             "instructions": {"simulation_instruction": {"type": "Simulation", "dataset": "my_synthetic_dataset", "simulation": "my_simulation",
-                                                           "export_formats": ["AIRR"]}}
+                                                        "export_formats": ["AIRR"]}}
         }
 
         specs_file = path / "simulation_specs.yaml"
@@ -147,6 +149,9 @@ class Quickstart:
     def run(self, result_path: str):
 
         result_path = self.build_path(result_path)
+
+        logging.basicConfig(filename=Path(result_path) / "log.txt", level=logging.ERROR, format='%(asctime)s %(levelname)s: %(message)s')
+        warnings.showwarning = lambda message, category, filename, lineno, file=None, line=None: logging.warning(message)
 
         self._simulate_dataset_with_signals(result_path / "synthetic_dataset")
 
