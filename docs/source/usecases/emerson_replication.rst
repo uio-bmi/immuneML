@@ -10,6 +10,10 @@ Out of the 786 subjects (cohort 1: 666, cohort 2: 120), we removed 103 subjects 
 status, 3 with negative template counts for some of the sequences and the rest with no template count information). The metadata files for cohorts 1 and 2
 with the list of subjects used in the downstream analysis is available at this link.
 
+The complete collection of original files used in this use case can be found in the NIRD research data archive (DOI: `10.11582/2021.00008 <https://doi.org/10.11582/2021.00008>`_).
+Note that the YAML specifications in the original dataset were compatible with immuneML version 1.0.1.
+This documentation page contains the YAML specifications for equivalent analyses with the latest immuneML version.
+
 Replication of the CMV status predictions study
 -------------------------------------------------
 
