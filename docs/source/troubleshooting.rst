@@ -40,10 +40,11 @@ multiple training/validation/test splits, there will be only training/test split
 I get an error when importing an immuneML dataset in Pickle format
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 immuneML Pickle files are not guaranteed to be compatible between different immuneML (sub)versions.
+Furthermore, the pickle protocol in Python 3.8 is 5, whereas in Python 3.7 it is 4 (immuneML always uses the highest protocol).
 
 In the folder where your Pickle dataset was exported, you can find a file named info.txt, which shows the
-immuneML version that was used to export the given dataset. If you install the same immuneML version as displayed
-in this file, you should be able to import the Pickle dataset.
+immuneML version, Python version and pickle protocol that were used to export the given dataset.
+If you install the same Python and immuneML version as displayed in this file, you should be able to import the Pickle dataset.
 
 If you want to use your dataset with a different version of immuneML, try to load the dataset using the version that
 was originally used to generate it and export the dataset to AIRR format. The exported AIRR dataset can subsequently

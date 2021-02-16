@@ -8,6 +8,10 @@ logistic regression model on 3-mer frequencies. We also show the motifs extracte
 This use-case description includes the description of the datasets, how to add a CNN model, how to compare CNN with other models and finally, how to
 extract motifs from models.
 
+The complete collection of original files used in this use case can be found in the NIRD research data archive (DOI: `10.11582/2021.00009 <https://doi.org/10.11582/2021.00009>`_).
+Note that the YAML specifications in the original dataset were compatible with immuneML version 1.1.1.
+This documentation page contains the YAML specifications for equivalent analyses with the latest immuneML version (last tested with version 1.1.4).
+
 Preparing the datasets
 -----------------------
 
