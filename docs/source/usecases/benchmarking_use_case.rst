@@ -11,7 +11,7 @@ This documentation page contains the YAML specifications for equivalent analyses
 
 Generating synthetic immune repertoires with OLGA
 -------------------------------------------------
-We start by generating 2000 repertoires each containing 100000 sequences using OLGA.
+We start by generating 2000 repertoires each containing 100000 amino acid sequences using OLGA.
 When OLGA is installed (see: `OLGA GitHub page <https://github.com/statbiophys/OLGA>`_), the following piece of bash code can be used for this purpose:
 
 .. highlight:: bash

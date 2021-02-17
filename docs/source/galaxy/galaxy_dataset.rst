@@ -4,7 +4,8 @@ How to make an immuneML dataset in Galaxy
 In Galaxy, an immuneML dataset is simply a Galaxy collection containing all relevant files (including an optional metadata file).
 The `Create dataset <https://galaxy.immuneml.uio.no/root?tool_id=immune_ml_dataset>`_ Galaxy tool allows users to import data
 from various formats and create immuneML datasets in Galaxy. These datasets are in an optimized binary (Pickle) format, which
-reduces the time needed to read the data into immuneML.
+reduces the time needed to read the data into immuneML, and ensures that you can quickly import the dataset into Galaxy tools
+without having to repeatedly specify the import parameters.
 
 Before creating a dataset, the relevant data files must first be uploaded to the Galaxy interface. This can be done either
 by uploading files from your local computer (use the 'Upload file' tool under the 'Get local data' menu), or by fetching
@@ -182,9 +183,14 @@ To solve this problem, try to rerun the 'Create dataset' tool with the same inpu
 
 Using a Galaxy collection as input
 ----------------------------------------------
-Under 'Data files' (simplified interface) or 'Data and metadata files' (advanced interface), it is possible to select
-a Galaxy collection instead of selection many files manually. See :ref:`Creating a Galaxy collection of files` for details.
-Click the 'Dataset collections' button (folder icon), to toggle the selection menu so that it shows Galaxy collections in the history.
+When your dataset contains many files, it can be cumbersome to have to click on all the files that should be imported.
+Alternatively, it is possible to :ref:`create a Galaxy collection of files <Creating a Galaxy collection of files>` and
+import this collection.
+
+By default, the field 'Data files' (simplified interface) or 'Data and metadata files' (advanced interface)
+will show all txt-like files (such as repertoire or receptor files) that are present in the history.
+By clicking the 'Dataset collections' button (folder icon), the menu will instead only show the collections in the history.
+One or more collections can now be selected.
 
 .. image:: ../_static/images/galaxy/create_dataset_from_collection.png
    :alt: create dataset from collection
