@@ -54,6 +54,7 @@ class TestFeatureDistribution(TestCase):
         report = FeatureDistribution.build_object(**{"dataset": dataset,
                                                      "result_path": path,
                                                      "mode": "sparse",
+                                                     "color_grouping_label": "patient",
                                                      "grouping_label": "feature"})
 
         self.assertTrue(report.check_prerequisites())
