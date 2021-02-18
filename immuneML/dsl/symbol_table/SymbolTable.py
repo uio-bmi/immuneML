@@ -34,7 +34,8 @@ class SymbolTable:
                 return self._items[symbol].item
             else:
                 raise KeyError(f"SymbolTable: item with key {symbol} was not defined previously so it could not be retrieved during "
-                               f"parsing. Please check if an item with key {symbol} was defined in the specification.")
+                               f"parsing. Please check if an item with key {symbol} was defined in the specification. "
+                               f"If it was present, check if its parent keys were correctly defined. ")
         else:
             return None
 

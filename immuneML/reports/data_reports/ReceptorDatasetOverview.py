@@ -13,6 +13,22 @@ from immuneML.util.PathBuilder import PathBuilder
 
 
 class ReceptorDatasetOverview(DataReport):
+    """
+    This report plots the length distribution per chain for a receptor (paired-chain) dataset.
+
+    Arguments:
+
+        batch_size (int): how many receptors to load at once; 50 000 by default
+
+    YAML specification:
+
+    .. indent with spaces
+    .. code-block:: yaml
+
+        reports:
+            my_receptor_overview_report: ReceptorDatasetOverview
+
+    """
 
     def __init__(self, batch_size: int, dataset: ReceptorDataset = None, result_path: Path = None, name: str = None):
         super().__init__(dataset, result_path, name)

@@ -43,19 +43,28 @@
                 <div class="col-container">
                     <div>
                         {{#show_encoding}}
-                        <h3>Encoding</h3>
+                        <h3>Encoding {{encoding_key}}</h3>
+                        <h4>{{encoding_name}}</h4>
+
                         <div class="table-container">
                             <table>
-                            <tr>
-                                <td><b>Encoding Name</b></td>
-                                <td>{{encoding_name}}</td>
-                            </tr>
-                            <tr>
-                                <td><b>Encoding parameters</b></td>
-                                <td>{{encoding_params}}</td>
-                            </tr>
-                        </table>
+                                <thead>
+                                    <tr>
+                                        <th>Parameter</th>
+                                        <th>Value</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {{#encoding_params}}
+                                    <tr>
+                                        <td>{{param_name}}</td>
+                                        <td>{{param_value}}</td>
+                                    </tr>
+                                    {{/encoding_params}}
+                                </tbody>
+                            </table>
                         </div>
+
                         {{/show_encoding}}
                         {{#show_labels}}
                         <h3>Analysis labels</h3>
@@ -81,18 +90,32 @@
                     </div>
                 </div>
                 {{#report}}
+                <h3>Report {{name}}</h3>
                 <div>
                     {{#output_figures}}
                     <div class="center padded">
+                        {{#name}}<p>{{name}}</p>{{/name}}
                         {{#is_embed}}
                         <embed src="{{path}}">
                         {{/is_embed}}
                         {{^is_embed}}
                         <img src="{{path}}">
                         {{/is_embed}}
-                        {{#name}}<p>{{name}}</p>{{/name}}
                     </div>
                     {{/output_figures}}
+
+                    {{#show_tables}}
+                    Downloadable tables:
+                    {{#output_tables}}
+                    <div>
+                        <ul>
+                        {{#is_download_link}}
+                        <li><a href="{{download_link}}" download>{{file_name}}</a></li>
+                        {{/is_download_link}}
+                        </ul>
+                    </div>
+                    {{/output_tables}}
+                    {{/show_tables}}
                 </div>
                 {{/report}}
             </div>

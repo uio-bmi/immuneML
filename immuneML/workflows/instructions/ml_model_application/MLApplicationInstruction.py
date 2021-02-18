@@ -3,6 +3,7 @@ from pathlib import Path
 import pandas as pd
 
 from immuneML.data_model.dataset.Dataset import Dataset
+from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
 from immuneML.environment.LabelConfiguration import LabelConfiguration
 from immuneML.hyperparameter_optimization.HPSetting import HPSetting
 from immuneML.hyperparameter_optimization.core.HPUtil import HPUtil
@@ -43,8 +44,6 @@ class MLApplicationInstruction(Instruction):
 
         dataset: dataset for which examples need to be classified
 
-        label: name of the label that should be predicted (e.g., CMV, celiac_disease)
-
         config_path: path to the zip file exported from MLModelTraining instruction (which includes train ML model, encoder, preprocessing etc.)
 
         number_of_processes (int): number of processes to use for prediction
@@ -62,7 +61,6 @@ class MLApplicationInstruction(Instruction):
             dataset: d1
             config_path: ./config.zip
             number_of_processes: 4
-            label: CD
             store_encoded_data: False
 
     """
@@ -97,8 +95,11 @@ class MLApplicationInstruction(Instruction):
         predictions = method.predict(dataset.encoded_data, label)
         predictions_df = pd.DataFrame({"example_id": dataset.get_example_ids(), label: predictions[label]})
 
+        if type(dataset) == RepertoireDataset:
+            predictions_df.insert(0, 'repertoire_file', [repertoire.data_filename.name for repertoire in dataset.get_data()])
+
         if method.can_predict_proba():
-            classes = method.get_classes_for_label(label)
+            classes = method.get_classes()
             predictions_proba = method.predict_proba(dataset.encoded_data, label)[label]
             for cls_index, cls in enumerate(classes):
                 predictions_df[f'{label}_{cls}_proba'] = predictions_proba[:, cls_index]

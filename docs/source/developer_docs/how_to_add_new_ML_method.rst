@@ -20,7 +20,7 @@ does not have a disease, but also the stages of a disease, see Figure below).
 The ML models in the immuneML support one label. If multiple labels are specified, for instance during training the models and optimizing
 hyperparameters, a separate model will be fitted to each label.
 
-The necessary functionalities are represented as abstract functions in MLMethod class (:py:obj:`~source.ml_methods.MLMethod.MLMethod`).
+The necessary functionalities are represented as abstract functions in MLMethod class (:py:obj:`~immuneML.ml_methods.MLMethod.MLMethod`).
 To create a new ML method class, inherit MLMethod and implement all abstract functions.
 
 Testing the ML method outside immuneML with a sample design matrix
@@ -29,7 +29,7 @@ Testing the ML method outside immuneML with a sample design matrix
 When implementing a new ML method, it can be useful to test the method with a small sample design matrix before integrating it into the immuneML
 codebase. Example design matrices for any encoding can be exported to .csv format with the DesignMatrixExporter report and the ExploratoryAnalysis
 instruction. To quickly generate some random sample data, RandomRepertoireDataset or RandomReceptorDataset may be specified as import formats.
-Alternatively, you can import your own data. A full yaml specification for exporting a sample design matrix for a 3-mer encoding may look like this:
+Alternatively, you can import your own data. A full YAML specification for exporting a sample design matrix for a 3-mer encoding may look like this:
 
 .. indent with spaces
 .. code-block:: yaml
@@ -72,6 +72,13 @@ Alternatively, you can import your own data. A full yaml specification for expor
   Note that for design matrices beyond 2 dimensions (such as OneHotEncoder with flatten = False), the matrix is exported as a .npy file instead of a
   .csv file.
 
+To generate the design matrix, save the YAML specification to specs.yaml and and run immuneML providing the path to the saved file and a path to the
+output directory:
+
+.. code-block:: console
+
+  immune-ml specs.yaml output_dir/
+
 The resulting design matrix can be found in my_instruction/analysis_my_analysis/report/design_matrix.csv, and the true classes for each repertoire
 can be found in labels.csv. In immuneML, the design matrix is passed to the ML method as an EncodedData object, and the labels as a numpy ndarray.
 The EncodedData object has attribute examples which contains the design matrix, and feature_names and example_ids which contain the row and column
@@ -86,7 +93,7 @@ way: given a dataset and encoding parameters, the specific encoder object create
 with class assignment for each example), feature_names (if available for the encoding, a list of feature names for each column in the examples).
 This object will be provided as input to the corresponding functions of the new ML method class.
 
-To load the data encoded as described above into an EncodedData object, the function :py:obj:`source.dev_util.util.load_encoded_data` can be used.
+To load the data encoded as described above into an EncodedData object, the function :py:obj:`immuneML.dev_util.util.load_encoded_data` can be used.
 
 Adding the new method to immuneML
 -----------------------------------
@@ -113,7 +120,13 @@ Example scikit-learn-based SVM implementation:
 
 .. code-block:: python
 
-  class SVM(SklearnMethod):
+  from sklearn.model_selection import RandomizedSearchCV
+  from sklearn.svm import LinearSVC
+
+  from immuneML.ml_methods.SklearnMethod import SklearnMethod
+
+
+  class MySVM(SklearnMethod):
 
     def __init__(self, parameter_grid: dict = None, parameters: dict = None):
        super(SVM, self).__init__()
@@ -163,19 +176,19 @@ To use ML method from specification, it is necessary to define:
 
 The cross-validation performs the grid search over the parameters if any of the parameters is specified as a list of potential values.
 
-An example specification for logistic regression without cross-validation (log_reg), logistic regression with cross-validation (log_reg_cv) would be:
+An example specification for support vector machine without cross-validation (my_svm), and support vector machine with cross-validation (my_svm_cv) would be:
 
 .. indent with spaces
 .. code-block:: yaml
 
   ml_methods:
-    log_reg: # the name of the method which will be used in the specification to refer to the method
-      SimpleLogisticRegression: # class name of the method
+    my_svm: # the name of the method which will be used in the specification to refer to the method
+      MySVM: # class name of the method
         penalty: l1 # parameters of the model
       model_selection_cv: False # should there be a grid search and cross-validation - not here
       model_selection_n_folds: -1 # no number of folds for cross-validation as it is not used here
-    log_reg_cv: # the name of the next method
-      SimpleLogisticRegression: # class name of the method
+    my_svm_cv: # the name of the next method
+      MySVM: # class name of the method
         penalty:	# parameter of the model
           - l1 # value of the parameter to test
           - l2 # another value of the parameter to test
@@ -188,3 +201,65 @@ selection on this level. Also, if no parameters of the model are specified (such
 During parsing, the parameters of the model will be assigned to “parameters” attribute of the ML method object if none of the parameters is a list of
 possible values. Otherwise, the parameters will be assigned to the parameter_grid parameter which will be later used for grid search and
 cross-validation.
+
+Full specification that trains the added ML method on the simulated data would look like this:
+
+.. indent with spaces
+.. code-block:: yaml
+
+    definitions:
+      datasets:
+        my_simulated_data:
+          format: RandomRepertoireDataset
+          params:
+            repertoire_count: 50 # a dataset with 50 repertoires
+            sequence_count_probabilities: # each repertoire has 10 sequences
+              10: 1
+            sequence_length_probabilities: # each sequence has length 15
+              15: 1
+            labels:
+              my_label: # half of the repertoires has my_label = true, the rest has false
+                false: 0.5
+                true: 0.5
+      encodings:
+        my_3mer_encoding:
+          KmerFrequency:
+            k: 3
+      ml_methods:
+        my_svm: # the name of the method which will be used in the specification to refer to the method
+          MySVM: # class name of the method
+            C: 10 # parameters of the model
+          model_selection_cv: False # should there be a grid search and cross-validation - not here
+          model_selection_n_folds: -1 # no number of folds for cross-validation as it is not used here
+        my_svm_cv: # the name of the next method
+          MySVM: # class name of the method
+            penalty:	# parameter of the model
+              - l1 # value of the parameter to test
+              - l2 # another value of the parameter to test
+          model_selection_cv: True # perform cross-validation and grid search
+          model_selection_n_folds: 5 # do 5-fold cross-validation
+    instructions:
+      train_new_ml_methods_inst:
+        type: TrainMLModel
+        dataset: my_simulated_data
+        assessment: # outer cross-validation loop splitting the data into training and test datasets
+          split_strategy: random
+          split_count: 1
+          training_percentage: 0.7
+        selection: # inner cross-validation loop splitting the training data into training and validation datasets
+          split_strategy: random
+          split_count: 1
+          training_percentage: 0.7
+        labels: [my_label]
+        optimization_metric: balanced_accuracy
+        settings:
+          - encoding: my_3mer_encoding
+            ml_method: my_svm
+          - encoding: my_3mer_encoding
+            ml_method: my_svm_cv # this method will do a third level of cross-validation to select optimal penalty as described above
+
+To run this from the root directory of the project, save the specification to specs.yaml and run the following:
+
+.. code-block:: console
+
+  python3 immuneML/app/ImmuneML.py specs.yaml output_dir/

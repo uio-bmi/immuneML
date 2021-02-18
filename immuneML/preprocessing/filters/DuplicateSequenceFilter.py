@@ -11,7 +11,9 @@ from immuneML.environment.SequenceType import SequenceType
 from immuneML.preprocessing.filters.CountAggregationFunction import CountAggregationFunction
 from immuneML.preprocessing.filters.Filter import Filter
 from immuneML.util.ParameterValidator import ParameterValidator
+from immuneML.preprocessing.Preprocessor import Preprocessor
 from scripts.specification_util import update_docs_per_mapping
+
 
 
 class DuplicateSequenceFilter(Filter):
@@ -83,6 +85,8 @@ class DuplicateSequenceFilter(Filter):
 
     @staticmethod
     def process(dataset: RepertoireDataset, params: dict) -> RepertoireDataset:
+        Preprocessor.check_dataset_type(dataset, [RepertoireDataset], "DuplicateSequenceFilter")
+
         processed_dataset = copy.deepcopy(dataset)
 
         with Pool(params["batch_size"]) as pool:
@@ -153,7 +157,8 @@ class DuplicateSequenceFilter(Filter):
                                                 custom_lists={key: list(no_duplicates[key]) for key in custom_lists},
                                                 sequence_identifiers=list(no_duplicates["sequence_identifiers"]),
                                                 metadata=copy.deepcopy(repertoire.metadata),
-                                                path=params["result_path"])
+                                                path=params["result_path"],
+                                                filename_base=f"{repertoire.data_filename.stem}_filtered")
 
         return processed_repertoire
 

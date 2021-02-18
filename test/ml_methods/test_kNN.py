@@ -64,7 +64,7 @@ class TestKNN(TestCase):
         with pickle_file_path.open("rb") as file:
             knn2 = pickle.load(file)
 
-        self.assertTrue(isinstance(knn2["default"], KNeighborsClassifier))
+        self.assertTrue(isinstance(knn2, KNeighborsClassifier))
 
         shutil.rmtree(path)
 
@@ -85,7 +85,7 @@ class TestKNN(TestCase):
         knn2 = KNN()
         knn2.load(path)
 
-        self.assertTrue(isinstance(knn2.get_model()["default"], KNeighborsClassifier))
+        self.assertTrue(isinstance(knn2.get_model(), KNeighborsClassifier))
 
         shutil.rmtree(path)
 

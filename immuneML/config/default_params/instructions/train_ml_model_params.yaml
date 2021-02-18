@@ -1,0 +1,14 @@
+reports: [] # by default there are no TrainMLModel reports to be run after the nested CV is finished
+strategy: GridSearch # try out every option under settings
+number_of_processes: 4 # number of processes to use for parallel parts of the code
+refit_optimal_model: False # do not refit optimal model on the full dataset after the optimal model was determined by nested CV
+store_encoded_data: False # do not store encoded data as pickle files
+metrics: [] # no additional metrics set by default
+assessment: # outer loop of nested CV
+  split_strategy: random # perform Monte Carlo CV (randomly split the data into train and test)
+  split_count: 1 # how many train/test datasets to generate
+  training_percentage: 0.7 # what percentage of the original data should be used for the training set
+selection: # inner loop of nested CV
+  split_strategy: random # perform random split to train and validation datasets
+  split_count: 1 # how many fold to create
+  training_percentage: 0.7

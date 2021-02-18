@@ -22,7 +22,7 @@ class SubsamplingInstruction(Instruction):
 
         subsampled_dataset_sizes (list): a list of dataset sizes (number of examples) each subsampled dataset should have
 
-        dataset_export_formats (list): in which formats to export the subsampled datasets. Valid formats are class names of any non-abstract class inheriting :py:obj:`~immuneML.IO.dataset_export.DataExporter.DataExporter`.
+        dataset_export_formats (list): in which formats to export the subsampled datasets. Valid formats are class names of any non-abstract class inheriting :py:obj:`~immuneML.IO.dataset_export.DataExporter.DataExporter`. Important note: Pickle files might not be compatible between different immuneML (sub)versions.
 
     YAML specification:
 

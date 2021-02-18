@@ -9,6 +9,7 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.svm import LinearSVC
 
 from immuneML.IO.ml_method.MLMethodConfiguration import MLMethodConfiguration
+from immuneML.data_model.encoded_data.EncodedData import EncodedData
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.ml_methods.KNN import KNN
 from immuneML.ml_methods.SVM import SVM
@@ -21,13 +22,13 @@ class TestSklearnMethod(TestCase):
         y = {"default": np.array([1, 0, 2, 0])}
 
         knn = KNN()
-        knn._fit(sparse.csr_matrix(x), y, 'default')
+        knn.fit(EncodedData(examples=sparse.csr_matrix(x), labels=y), "default")
 
         path = EnvironmentSettings.root_path / "test/tmp/loadtestsklearn/"
         PathBuilder.build(path)
 
         with open(path / "knn.pickle", "wb") as file:
-            pickle.dump(knn.models, file)
+            pickle.dump(knn.model, file)
 
         config = MLMethodConfiguration()
         config.labels_with_values = {"default": [0, 1, 2]}
@@ -36,7 +37,7 @@ class TestSklearnMethod(TestCase):
         knn2 = KNN()
         knn2.load(path)
 
-        self.assertTrue(isinstance(knn2.models["default"], KNeighborsClassifier))
+        self.assertTrue(isinstance(knn2.model, KNeighborsClassifier))
 
         shutil.rmtree(path)
 
@@ -45,7 +46,7 @@ class TestSklearnMethod(TestCase):
         y = {"default": np.array(['a', "b", "c", "a"])}
 
         svm = SVM()
-        svm._fit(sparse.csr_matrix(x), y, 'default')
+        svm._fit(sparse.csr_matrix(x), y["default"])
 
         path = EnvironmentSettings.root_path / "test/tmp/storesklearn/"
 
@@ -55,6 +56,6 @@ class TestSklearnMethod(TestCase):
         with open(path / "svm.pickle", "rb") as file:
             svm2 = pickle.load(file)
 
-        self.assertTrue(isinstance(svm2['default'], LinearSVC))
+        self.assertTrue(isinstance(svm2, LinearSVC))
 
         shutil.rmtree(path)

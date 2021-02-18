@@ -18,5 +18,8 @@ RUN yum install -y python38 python38-devel git libgit2 libgit2-devel make openss
 # Since we are not using venv's, we must install 'wheel' and 'setuptools' manually
 RUN pip3 install wheel setuptools 
 
-# Voila
-RUN pip3 install ./immuneML/[all]
+# manually install DeepRC dependencies (they are listed separately as they are not available on PyPI yet)
+RUN pip3 install -r ./immuneML/requirements_DeepRC.txt
+
+# Voila: install immuneML
+RUN pip3 install ./immuneML/[TCRdist]

@@ -104,7 +104,7 @@ class MotifSeedRecovery(MLReport):
 
     @classmethod
     def build_object(cls, **kwargs):
-        ParameterValidator.assert_keys_present(kwargs.keys(),
+        ParameterValidator.assert_keys_present(list(kwargs.keys()),
                                                ["implanted_motifs_per_label"],
                                                "MotifSeedRecovery", "MotifSeedRecovery report")
 
@@ -184,7 +184,7 @@ class MotifSeedRecovery(MLReport):
         features = self._retrieve_feature_names()
 
         plot_df = self.calculate_seed_overlap(seeds, features, overlap_fn)
-        plot_df["coefficients"] = self.method.get_params(self.label)[self._param_field]
+        plot_df["coefficients"] = self.method.get_params()[self._param_field]
         return plot_df
 
     def _get_implanted_seeds(self):
@@ -220,23 +220,6 @@ class MotifSeedRecovery(MLReport):
 
     def hamming_overlap(self, seed, feature):
         return sum(np.array(list(seed)) == np.array(list(feature)))
-
-    def identical_overlap(self, seed, feature):
-        if "/" in seed:
-            exclude_idx = seed.index("/")
-            seed = seed[:exclude_idx] + seed[exclude_idx + 1:]
-            feature = feature[:exclude_idx] + feature[exclude_idx + 1:]
-
-        while feature.startswith("-"):
-            feature = feature[1:]
-            seed = seed[1:]
-
-        while feature.endswith("-"):
-            feature = feature[:-1]
-            seed = seed[:-1]
-
-        return int(seed == feature) * len(seed)
-
 
     def identical_overlap(self, seed, feature):
         if "/" in seed:

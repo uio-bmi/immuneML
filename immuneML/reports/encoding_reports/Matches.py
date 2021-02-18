@@ -102,7 +102,7 @@ class Matches(EncodingReport):
             elif self.dataset.encoded_data.encoding == "MatchedRegexEncoder":
                 self._write_paired_regex_matches_for_repertoire(self.dataset.encoded_data.examples[i], file_path)
 
-            report_outputs.append(ReportOutput(file_path, f"example {self.dataset.encoded_data.example_ids[i]} paired matches"))
+            report_outputs.append(ReportOutput(file_path, f"Example {self.dataset.encoded_data.example_ids[i]} paired matches"))
 
         return report_outputs
 
@@ -171,7 +171,7 @@ class Matches(EncodingReport):
         results_path = self.result_path / "repertoire_sizes.csv"
         results_df.to_csv(results_path, index=False)
 
-        return ReportOutput(results_path, "repertoire sizes")
+        return ReportOutput(results_path, "Repertoire sizes")
 
     def _write_receptor_info(self, receptor_info_path) -> List[ReportOutput]:
         PathBuilder.build(receptor_info_path)
@@ -209,7 +209,11 @@ class Matches(EncodingReport):
         unique_receptors_path = receptor_info_path / "unique_receptors.csv"
         unique_receptors.to_csv(unique_receptors_path, index=False)
 
-        return [ReportOutput(p) for p in [receptors_path, receptor_chains_path, unique_receptors_path, unique_chain1_path, unique_chain2_path]]
+        return [ReportOutput(path=path, name=name) for path, name in [(receptors_path, "All receptors info"),
+                                                                      (receptor_chains_path, "All receptor chains info"),
+                                                                      (unique_receptors_path, "Unique receptors info"),
+                                                                      (unique_chain1_path, "Unique chain 1 info"),
+                                                                      (unique_chain2_path, "Unique chain 2 info")]]
 
     def _write_sequence_info(self, sequence_info_path) -> List[ReportOutput]:
         PathBuilder.build(sequence_info_path)
@@ -222,7 +226,7 @@ class Matches(EncodingReport):
         unique_chains_path = sequence_info_path / "unique_chains.csv"
         unique_chains.to_csv(unique_chains_path, index=False)
 
-        return [ReportOutput(p) for p in [chains_path, unique_chains_path]]
+        return [ReportOutput(path=path, name=name) for path, name in [(chains_path, "All chains info"), (unique_chains_path, "Unique chains info")]]
 
     def check_prerequisites(self):
         if self.dataset.encoded_data is None or self.dataset.encoded_data.examples is None:

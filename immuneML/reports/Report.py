@@ -98,12 +98,12 @@ class Report(metaclass=abc.ABCMeta):
             final output of instructions
 
         """
-        try:
-            if self.check_prerequisites():
-                return self._generate()
-        except Exception as e:
-            logging.exception(f"An exception occurred while generating report {self.name}. See the details below:")
-            logging.warning(f"Report {self.name} encountered an error and could not be generated: {e}.")
+        # try:
+        if self.check_prerequisites():
+            return self._generate()
+        # except Exception as e:
+        #     logging.exception(f"An exception occurred while generating report {self.name}. See the details below:")
+        #     logging.warning(f"Report {self.name} encountered an error and could not be generated: {e}.")
 
     def _safe_plot(self, output_written=True, **kwargs):
         """

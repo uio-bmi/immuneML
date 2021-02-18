@@ -61,7 +61,7 @@ Our open-source code can be found on `GitHub <https://github.com/uio-bmi/ImmuneM
    galaxy
    specification
    usecases
-   FAQ
+   troubleshooting
    developer_docs
 
 

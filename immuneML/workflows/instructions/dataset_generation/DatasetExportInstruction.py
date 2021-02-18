@@ -18,7 +18,7 @@ class DatasetExportInstruction(Instruction):
 
         datasets (list): a list of datasets to export in all given formats
 
-        formats (list): a list of formats in which to export the datasets. Valid formats are class names of any non-abstract class inheriting :py:obj:`~immuneML.IO.dataset_export.DataExporter.DataExporter`.
+        formats (list): a list of formats in which to export the datasets. Valid formats are class names of any non-abstract class inheriting :py:obj:`~immuneML.IO.dataset_export.DataExporter.DataExporter`. Important note: Pickle files might not be compatible between different immuneML (sub)versions.
 
     YAML specification:
 

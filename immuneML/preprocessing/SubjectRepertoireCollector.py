@@ -7,6 +7,7 @@ from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
 from immuneML.data_model.repertoire.Repertoire import Repertoire
 from immuneML.environment.Constants import Constants
 from immuneML.preprocessing.Preprocessor import Preprocessor
+from immuneML.preprocessing.filters import Filter
 from immuneML.util.PathBuilder import PathBuilder
 
 
@@ -35,6 +36,8 @@ class SubjectRepertoireCollector(Preprocessor):
 
     @staticmethod
     def process(dataset: RepertoireDataset, params: dict) -> RepertoireDataset:
+        Preprocessor.check_dataset_type(dataset, [RepertoireDataset], "SubjectRepertoireCollector")
+
         rep_map = {}
         repertoires = []
         indices_to_keep = []

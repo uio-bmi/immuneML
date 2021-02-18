@@ -5,7 +5,11 @@ All of immuneMLs functionalities are also available through `a Galaxy web interf
 tool that is equivalent to the CLI (command-line interface), as well as repertoire and receptor-level classification tools with an intuitive
 graphical user interface aimed at immunology experts without a machine learning background.
 
-To get started, you will need to add your dataset to Galaxy, which is explained in this tutorial:
+If you are unfamiliar with Galaxy, you may want to start here:
+
+- :ref:`Introduction to Galaxy`
+
+To get started using immuneML in Galaxy, you will need to add your dataset to Galaxy, which is explained in this tutorial:
 
 - :ref:`How to make an immuneML dataset in Galaxy`
 
@@ -23,9 +27,9 @@ Synthetic immune signals (representing antigen binding or disease) can be implan
 
 Once an immuneML dataset has been created in Galaxy, immunology experts without machine learning background can follow these instructions:
 
-- :ref:`How to train immune repertoire classifiers using the easy Galaxy interface`
+- :ref:`How to train immune repertoire classifiers using the simplified Galaxy interface`
 
-- :ref:`How to train immune receptor classifiers using the easy Galaxy interface`
+- :ref:`How to train immune receptor classifiers using the simplified Galaxy interface`
 
 
 Alternatively, CLI equivalent tools based on the YAML specification can be run using the following instructions:
@@ -35,6 +39,12 @@ Alternatively, CLI equivalent tools based on the YAML specification can be run u
 - :ref:`How to apply previously trained ML models to a new AIRR dataset in Galaxy`
 
 - :ref:`How to run any AIRR ML analysis in Galaxy`
+
+.. toctree::
+  :maxdepth: 1
+  :caption: Galaxy tutorials:
+
+  galaxy/galaxy_intro
 
 .. toctree::
   :maxdepth: 1

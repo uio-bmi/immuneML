@@ -51,10 +51,11 @@ class RepertoireBuilder:
 
             metadata = {**metadata, **{"subject_id": subject_ids[rep_index]}}
 
-            repertoire = Repertoire.build_from_sequence_objects(rep_sequences, rep_path, metadata)
+            repertoire = Repertoire.build_from_sequence_objects(rep_sequences, rep_path, metadata, filename_base=f"rep_{rep_index}")
             repertoires.append(repertoire)
 
-        df = pd.DataFrame({**{"filename": [f"{repertoire.identifier}_data.npy" for repertoire in repertoires], "subject_id": subject_ids,
+        df = pd.DataFrame({**{"filename": [repertoire.data_filename for repertoire in repertoires],
+                              "subject_id": subject_ids,
                               "repertoire_identifier": [repertoire.identifier for repertoire in repertoires]},
                            **(labels if labels is not None else {})})
         df.to_csv(path / "metadata.csv", index=False)

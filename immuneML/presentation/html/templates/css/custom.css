@@ -122,7 +122,7 @@ details > table {
 
 embed {
     width: 100%;
-    min-height: 500px;
+    min-height: 650px;
 }
 
 .grid-container {
@@ -130,6 +130,10 @@ embed {
     grid-template-columns: 1fr 1fr;
     grid-gap: 10px;
     text-align: center;
+}
+
+.grid-item-full-width {
+    grid-column: span 2;
 }
 
 ul > li {

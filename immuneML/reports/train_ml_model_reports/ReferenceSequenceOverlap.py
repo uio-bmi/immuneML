@@ -8,7 +8,6 @@ import pandas as pd
 from matplotlib_venn import venn2
 
 from immuneML.encodings.filtered_sequence_encoding.SequenceAbundanceEncoder import SequenceAbundanceEncoder
-from immuneML.encodings.filtered_sequence_encoding.SequenceCountEncoder import SequenceCountEncoder
 from immuneML.hyperparameter_optimization.states.TrainMLModelState import TrainMLModelState
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
@@ -19,7 +18,7 @@ from immuneML.util.PathBuilder import PathBuilder
 
 class ReferenceSequenceOverlap(TrainMLModelReport):
     """
-    The ReferenceSequenceOverlap report compares a list of disease-associated sequences produced by :ref:`SequenceAbundance` or :ref:`SequenceCount` encoders to
+    The ReferenceSequenceOverlap report compares a list of disease-associated sequences produced by the :ref:`SequenceAbundance` encoder to
     a list of reference receptor sequences. It outputs a Venn diagram and a list of receptor sequences found both in the encoder and reference.
 
     The report compares the sequences by their sequence content and the additional comparison_attributes (such as V or J gene), as specified by the user.
@@ -106,7 +105,7 @@ class ReferenceSequenceOverlap(TrainMLModelReport):
 
     @staticmethod
     def _check_encoder_class(encoder):
-        return any(isinstance(encoder, cls) for cls in [SequenceAbundanceEncoder, SequenceCountEncoder])
+        return any(isinstance(encoder, cls) for cls in [SequenceAbundanceEncoder])
 
     def check_prerequisites(self):
 

@@ -30,7 +30,7 @@ class TestReceptorClassification(TestCase):
     def setUp(self) -> None:
         os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
 
-    def create_dataset(self, path, dataset_size: int = 50):
+    def create_dataset(self, path, dataset_size: int = 100):
 
         receptors = []
 

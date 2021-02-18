@@ -87,13 +87,14 @@ class HPHTMLBuilder:
                 "optimal": hp_setting == optimal
             })
 
-            performances = [HPHTMLBuilder._print_metric(hp_item.performance, state.optimization_metric) for hp_item in hp_items]
-            if len(performances) > 1:
-                hp_settings[-1]["average"] = round(statistics.mean(perf for perf in performances if [isinstance(perf, float)]), HPHTMLBuilder.NUM_DIGITS)
+            if len(hp_splits) > 1:
+                hp_settings[-1]["average"] = round(statistics.mean(perf for perf in hp_splits if [isinstance(perf, float)]), HPHTMLBuilder.NUM_DIGITS)
                 hp_settings[-1]["show_average"] = True
             else:
                 hp_settings[-1]["average"] = None
                 hp_settings[-1]["show_average"] = False
+
+            hp_settings[-1]["hp_splits"] = [{"optimization_metric_val": val} for val in hp_settings[-1]["hp_splits"]]
 
         has_other_metrics = len([metric for metric in state.metrics if metric != state.optimization_metric]) > 0 and \
                             not (state.selection.split_strategy == SplitType.RANDOM and state.selection.training_percentage == 1)

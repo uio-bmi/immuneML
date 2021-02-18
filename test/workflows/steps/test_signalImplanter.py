@@ -33,7 +33,7 @@ class TestSignalImplanter(TestCase):
 
         r = []
 
-        path = EnvironmentSettings.root_path / "test/tmp/signalImplanter/"
+        path = EnvironmentSettings.tmp_test_path / "signalImplanter/"
 
         if not os.path.isdir(path):
             os.makedirs(path)
@@ -56,14 +56,14 @@ class TestSignalImplanter(TestCase):
         simulation = Simulation([Implanting(dataset_implanting_rate=0.2, repertoire_implanting_rate=0.5, signals=[s1, s2], name="i1"),
                                  Implanting(dataset_implanting_rate=0.2, repertoire_implanting_rate=0.5, signals=[s2], name="i2")])
 
-        input_params = SimulationState(dataset=dataset, result_path=path, simulation=simulation, signals=[s1, s2], formats="Pickle")
+        input_params = SimulationState(dataset=dataset, result_path=path, simulation=simulation, signals=[s1, s2], formats=["Pickle"])
 
         new_dataset = SignalImplanter.run(input_params)
-        reps_with_s2 = sum([rep.metadata[f"signal_{s2.id}"] is True for rep in new_dataset.get_data(batch_size=10)])
-        reps_with_s1 = sum([rep.metadata[f"signal_{s1.id}"] is True for rep in new_dataset.get_data(batch_size=10)])
+        reps_with_s2 = sum([rep.metadata[s2.id] is True for rep in new_dataset.get_data(batch_size=10)])
+        reps_with_s1 = sum([rep.metadata[s1.id] is True for rep in new_dataset.get_data(batch_size=10)])
         self.assertEqual(10, len(new_dataset.get_example_ids()))
-        self.assertTrue(all([f"signal_{s1.id}" in rep.metadata.keys() for rep in new_dataset.get_data(batch_size=10)]))
-        self.assertTrue(all([f"signal_{s2.id}" in rep.metadata.keys() for rep in new_dataset.get_data(batch_size=10)]))
+        self.assertTrue(all([s1.id in rep.metadata.keys() for rep in new_dataset.get_data(batch_size=10)]))
+        self.assertTrue(all([s2.id in rep.metadata.keys() for rep in new_dataset.get_data(batch_size=10)]))
         self.assertTrue(reps_with_s2 == 4)
         self.assertTrue(reps_with_s1 == 2)
 
@@ -85,11 +85,11 @@ class TestSignalImplanter(TestCase):
 
         simulation = Simulation([Implanting(dataset_implanting_rate=0.5, signals=[signal1])])
 
-        sim_state = SimulationState(dataset=dataset, result_path=path, simulation=simulation, signals=[signal1], formats="Pickle")
+        sim_state = SimulationState(dataset=dataset, result_path=path, simulation=simulation, signals=[signal1], formats=["Pickle"])
 
         new_dataset = SignalImplanter.run(sim_state)
 
         self.assertEqual(100, new_dataset.get_example_count())
-        self.assertEqual(50, len([receptor for receptor in new_dataset.get_data(40) if receptor.metadata["signal_signal1"] is True]))
+        self.assertEqual(50, len([receptor for receptor in new_dataset.get_data(40) if receptor.metadata["signal1"] is True]))
 
         shutil.rmtree(path)

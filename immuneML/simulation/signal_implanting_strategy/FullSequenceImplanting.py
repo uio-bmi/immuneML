@@ -50,7 +50,7 @@ class FullSequenceImplanting(SignalImplantingStrategy):
             f"to have the given repertoire implanting rate ({repertoire_implanting_rate}). Please consider increasing the repertoire implanting rate."
         new_sequences = self._create_new_sequences(sequences, new_sequence_count, signal)
         metadata = copy.deepcopy(repertoire.metadata)
-        metadata[f"signal_{signal.id}"] = True
+        metadata[signal.id] = True
 
         return Repertoire.build_from_sequence_objects(new_sequences, path, metadata)
 

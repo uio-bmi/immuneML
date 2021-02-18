@@ -33,10 +33,9 @@ class MLApplicationParser:
 
     def parse(self, key: str, instruction: dict, symbol_table: SymbolTable, path: Path) -> MLApplicationInstruction:
         location = MLApplicationParser.__name__
-        ParameterValidator.assert_keys(instruction.keys(), ['type', 'dataset', 'label', 'number_of_processes', 'config_path', 'store_encoded_data'], location, key)
+        ParameterValidator.assert_keys(instruction.keys(), ['type', 'dataset', 'number_of_processes', 'config_path', 'store_encoded_data'], location, key)
         ParameterValidator.assert_in_valid_list(instruction['dataset'], symbol_table.get_keys_by_type(SymbolType.DATASET), location, f"{key}: dataset")
         ParameterValidator.assert_type_and_value(instruction['number_of_processes'], int, location, f"{key}: number_of_processes", min_inclusive=1)
-        ParameterValidator.assert_type_and_value(instruction['label'], str, location, f'{key}: label')
         ParameterValidator.assert_type_and_value(instruction['config_path'], str, location, f'{key}: config_path')
         ParameterValidator.assert_type_and_value(instruction['store_encoded_data'], bool, location, f'{key}: store_encoded_data')
 

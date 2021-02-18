@@ -23,7 +23,8 @@ def load_encoded_data(labels_path: str, encoding_details_path: str, design_matri
 
     """
     # read the data from these files
-    examples = pd.read_csv(design_matrix_path).values if ".csv" in design_matrix_path[:-4] else np.load(design_matrix_path, allow_pickle=True)
+    # TODO: support H5py
+    examples = pd.read_csv(design_matrix_path).values if design_matrix_path.endswith(".csv") else np.load(design_matrix_path, allow_pickle=True)
     labels = pd.read_csv(labels_path).to_dict('list')
 
     with open(encoding_details_path, "r") as file:

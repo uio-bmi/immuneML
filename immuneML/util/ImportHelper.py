@@ -128,13 +128,17 @@ class ImportHelper:
         try:
             alternative_load_func = getattr(import_class, "alternative_load_func", None)
 
-            dataframe = ImportHelper.load_sequence_dataframe(params.path / f"{metadata_row['filename']}", params, alternative_load_func)
+            filename = params.path / f"{metadata_row['filename']}"
+
+            dataframe = ImportHelper.load_sequence_dataframe(filename, params, alternative_load_func)
             dataframe = import_class.preprocess_dataframe(dataframe, params)
             sequence_lists = {field: dataframe[field].values.tolist() for field in Repertoire.FIELDS if field in dataframe.columns}
             sequence_lists["custom_lists"] = {field: dataframe[field].values.tolist()
                                               for field in list(set(dataframe.columns) - set(Repertoire.FIELDS))}
 
-            repertoire_inputs = {**{"metadata": metadata_row.to_dict(), "path": params.result_path / "repertoires/"}, **sequence_lists}
+            repertoire_inputs = {**{"metadata": metadata_row.to_dict(),
+                                    "path": params.result_path / "repertoires/",
+                                    "filename_base": filename.stem}, **sequence_lists}
             repertoire = Repertoire.build(**repertoire_inputs)
 
             return repertoire
