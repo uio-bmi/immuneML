@@ -1,7 +1,8 @@
 Install immuneML with a package manager
 =========================================
 
-This manual shows how to install immuneML with `Anaconda <https://docs.anaconda.com/anaconda/install/>`_ (tested with version 4.8.3).
+This manual shows how to `install immuneML with pip <https://pypi.org/project/immuneML/>` in an
+`Anaconda <https://docs.anaconda.com/anaconda/install/>`_ virtual environment.
 
 
 Install immuneML
@@ -14,7 +15,9 @@ Install immuneML
   mkdir immuneML/
   cd immuneML/
 
-2. Create a virtual environment using conda. immuneML has been tested extensively with Python versions 3.7 and 3.8, but not 3.9. To create a conda virtual environment with Python version 3.8, use:
+2. Create a virtual environment using conda. immuneML has been tested extensively with Python versions 3.7 and 3.8, but not 3.9.
+   immuneML depends on PyTorch, which fails to install with Python 3.9.
+   To create a conda virtual environment with Python version 3.8, use:
 
 .. code-block:: console
 
