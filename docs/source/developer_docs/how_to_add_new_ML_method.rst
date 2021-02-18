@@ -126,7 +126,7 @@ Example scikit-learn-based SVM implementation:
   from immuneML.ml_methods.SklearnMethod import SklearnMethod
 
 
-  class SVM(SklearnMethod):
+  class MySVM(SklearnMethod):
 
     def __init__(self, parameter_grid: dict = None, parameters: dict = None):
        super(SVM, self).__init__()
@@ -176,19 +176,19 @@ To use ML method from specification, it is necessary to define:
 
 The cross-validation performs the grid search over the parameters if any of the parameters is specified as a list of potential values.
 
-An example specification for logistic regression without cross-validation (log_reg), logistic regression with cross-validation (log_reg_cv) would be:
+An example specification for support vector machine without cross-validation (my_svm), and support vector machine with cross-validation (my_svm_cv) would be:
 
 .. indent with spaces
 .. code-block:: yaml
 
   ml_methods:
-    log_reg: # the name of the method which will be used in the specification to refer to the method
-      SimpleLogisticRegression: # class name of the method
+    my_svm: # the name of the method which will be used in the specification to refer to the method
+      MySVM: # class name of the method
         penalty: l1 # parameters of the model
       model_selection_cv: False # should there be a grid search and cross-validation - not here
       model_selection_n_folds: -1 # no number of folds for cross-validation as it is not used here
-    log_reg_cv: # the name of the next method
-      SimpleLogisticRegression: # class name of the method
+    my_svm_cv: # the name of the next method
+      MySVM: # class name of the method
         penalty:	# parameter of the model
           - l1 # value of the parameter to test
           - l2 # another value of the parameter to test
@@ -201,3 +201,65 @@ selection on this level. Also, if no parameters of the model are specified (such
 During parsing, the parameters of the model will be assigned to “parameters” attribute of the ML method object if none of the parameters is a list of
 possible values. Otherwise, the parameters will be assigned to the parameter_grid parameter which will be later used for grid search and
 cross-validation.
+
+Full specification that trains the added ML method on the simulated data would look like this:
+
+.. indent with spaces
+.. code-block:: yaml
+
+    definitions:
+      datasets:
+        my_simulated_data:
+          format: RandomRepertoireDataset
+          params:
+            repertoire_count: 50 # a dataset with 50 repertoires
+            sequence_count_probabilities: # each repertoire has 10 sequences
+              10: 1
+            sequence_length_probabilities: # each sequence has length 15
+              15: 1
+            labels:
+              my_label: # half of the repertoires has my_label = true, the rest has false
+                false: 0.5
+                true: 0.5
+      encodings:
+        my_3mer_encoding:
+          KmerFrequency:
+            k: 3
+      ml_methods:
+        my_svm: # the name of the method which will be used in the specification to refer to the method
+          MySVM: # class name of the method
+            C: 10 # parameters of the model
+          model_selection_cv: False # should there be a grid search and cross-validation - not here
+          model_selection_n_folds: -1 # no number of folds for cross-validation as it is not used here
+        my_svm_cv: # the name of the next method
+          MySVM: # class name of the method
+            penalty:	# parameter of the model
+              - l1 # value of the parameter to test
+              - l2 # another value of the parameter to test
+          model_selection_cv: True # perform cross-validation and grid search
+          model_selection_n_folds: 5 # do 5-fold cross-validation
+    instructions:
+      train_new_ml_methods_inst:
+        type: TrainMLModel
+        dataset: my_simulated_data
+        assessment: # outer cross-validation loop splitting the data into training and test datasets
+          split_strategy: random
+          split_count: 1
+          training_percentage: 0.7
+        selection: # inner cross-validation loop splitting the training data into training and validation datasets
+          split_strategy: random
+          split_count: 1
+          training_percentage: 0.7
+        labels: [my_label]
+        optimization_metric: balanced_accuracy
+        settings:
+          - encoding: my_3mer_encoding
+            ml_method: my_svm
+          - encoding: my_3mer_encoding
+            ml_method: my_svm_cv # this method will do a third level of cross-validation to select optimal penalty as described above
+
+To run this from the root directory of the project, save the specification to specs.yaml and run the following:
+
+.. code-block:: console
+
+  python3 immuneML/app/ImmuneML.py specs.yaml output_dir/

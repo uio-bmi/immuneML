@@ -50,7 +50,7 @@ class LogisticRegression(SklearnMethod):
 
         super(LogisticRegression, self).__init__(parameter_grid=parameter_grid, parameters=parameters)
 
-    def _get_ml_model(self, cores_for_training: int=2, X=None):
+    def _get_ml_model(self, cores_for_training: int = 2, X=None):
         params = self._parameters.copy()
         params["n_jobs"] = cores_for_training
         return SklearnLogisticRegression(**params)
@@ -69,7 +69,8 @@ class LogisticRegression(SklearnMethod):
         doc = str(LogisticRegression.__doc__)
 
         mapping = {
-            "For usage instructions, check :py:obj:`~immuneML.ml_methods.SklearnMethod.SklearnMethod`.": SklearnMethod.get_usage_documentation("LogisticRegression"),
+            "For usage instructions, check :py:obj:`~immuneML.ml_methods.SklearnMethod.SklearnMethod`.": SklearnMethod.get_usage_documentation(
+                "LogisticRegression"),
         }
 
         doc = update_docs_per_mapping(doc, mapping)

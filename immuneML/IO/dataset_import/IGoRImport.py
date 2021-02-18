@@ -57,8 +57,9 @@ class IGoRImport(DataImport):
 
         .. indent with spaces
         .. code-block:: yaml
-                nt_CDR3: sequences
-                seq_index: sequence_identifiers
+
+            nt_CDR3: sequences
+            seq_index: sequence_identifiers
 
         A custom column mapping can be specified here if necessary (for example; adding additional data fields if
         they are present in the IGoR file, or using alternative column names).
