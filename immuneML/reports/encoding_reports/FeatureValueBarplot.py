@@ -15,7 +15,7 @@ class FeatureValueBarplot(EncodingReport):
     """
     Plots a barplot of the feature values in a given encoded data matrix, across examples. Can be used in combination
     with any encoding. When the distribution of feature values is of interest (as opposed to showing only the mean
-    with user-defined error bar as done in this report), please consider using :ref:`FeatureValueDistplot` instead.
+    with user-defined error bar as done in this report), please consider using :ref:`FeatureDistribution` instead.
 
     This report creates a barplot where the height of each bar is the mean value of a feature in a specific group. By
     default, all samples are the group, in which case `grouping_label` is "feature", meaning that each bar is the mean

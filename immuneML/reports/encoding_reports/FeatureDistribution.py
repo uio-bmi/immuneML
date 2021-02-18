@@ -20,11 +20,15 @@ class FeatureDistribution(EncodingReport):
     passing the data to the boxplots. If mode is set to 'auto', then it will automatically 
     set to 'sparse' if the density of the matrix is below 0.01
 
+    When only the mean feature values are of interest, please consider using :ref:`FeatureValueBarplot` instead.
+
 
     Arguments:
 
         grouping_label (str): The label name used for x-axis grouping of the barplots - defaults to "feature",
         meaning each bar represents one feature.
+
+        color_grouping_label (str): The label that is used to color each bar, at each level of the grouping_label.
 
         mode (str): either 'normal', 'sparse' or 'auto' (default)
 
@@ -48,13 +52,14 @@ class FeatureDistribution(EncodingReport):
     def build_object(cls, **kwargs):
         return FeatureDistribution(**kwargs)
 
-    def __init__(self, dataset: RepertoireDataset = None, result_path: Path = None, grouping_label: str = "feature",
-                 mode: str = 'auto',
-                 x_title: str = None, y_title: str = None, name: str = None):
+    def __init__(self, dataset: RepertoireDataset = None, result_path: Path = None,
+                 grouping_label: str = "feature", color_grouping_label: str = None,
+                 mode: str = 'auto', x_title: str = None, y_title: str = None, name: str = None):
         super().__init__(name)
         self.dataset = dataset
         self.result_path = result_path
         self.x = grouping_label
+        self.color = color_grouping_label
         self.mode = mode
         self.x_title = x_title if x_title is not None else self.x
         self.y_title = y_title if y_title is not None else "value"
@@ -94,8 +99,10 @@ class FeatureDistribution(EncodingReport):
 
 
     def _plot_sparse(self, data_long_format) -> ReportOutput:
-        data_long_format_filtered = data_long_format.loc[data_long_format.value != 0, [self.x, "value"]]
-        total_counts = data_long_format_filtered.groupby(self.x, as_index=False).agg(
+        columns_to_filter = [self.x, self.color, "value"] if self.color is not None else [self.x, "value"]
+        data_long_format_filtered = data_long_format.loc[data_long_format.value != 0, columns_to_filter]
+        columns_to_filter.remove("value")
+        total_counts = data_long_format_filtered.groupby(columns_to_filter, as_index=False).agg(
             {"value": 'sum'})
         data_long_format_filtered = data_long_format_filtered.merge(total_counts,
                                                                     on=self.x,
@@ -106,7 +113,7 @@ class FeatureDistribution(EncodingReport):
                                                              .reset_index(drop=True)
 
         
-        figure = px.box(data_long_format_filtered, x=self.x, y="value",
+        figure = px.box(data_long_format_filtered, x=self.x, y="value", color=self.color,
                         labels={
                             "valuemean": self.y_title,
                             self.x: self.x_title,
@@ -120,9 +127,7 @@ class FeatureDistribution(EncodingReport):
         return ReportOutput(path=file_path, name="feature boxplots")
     
     def _plot_normal(self, data_long_format) -> ReportOutput:
-        data_long_format = data_long_format.sort_values(by=self.x)\
-                                           .reset_index(drop=True)
-        figure = px.box(data_long_format, x=self.x, y="value",
+        figure = px.box(data_long_format, x=self.x, y="value", color=self.color,
                         labels={
                             "valuemean": self.y_title,
                             self.x: self.x_title,
