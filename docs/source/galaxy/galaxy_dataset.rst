@@ -205,9 +205,9 @@ This Galaxy tool will produce the following history elements:
   (this name should be specified when importing the dataset later in immuneML), the dataset type and size, and a link to download
   the raw data files.
 
-- Archive: dataset generation: a .zip file containing the complete output folder as it was produced by immuneML. This folder
-  contains the output of the DatasetExport instruction including raw data files.
-  Furthermore, the folder contains the complete YAML specification file for the immuneML run, the HTML output and a log file.
+- create_dataset.yaml: the YAML specification file that was used by immuneML to create the dataset.
+  This file can be downloaded and altered (for example to export files in AIRR format, or use non-standard import parameters),
+  and run again using the 'Advanced' interface.
 
-- immuneML dataset: Galaxy collection containing all relevant files for the new dataset.
+- immuneML dataset: a Galaxy collection containing the immuneML dataset in Pickle format.
 

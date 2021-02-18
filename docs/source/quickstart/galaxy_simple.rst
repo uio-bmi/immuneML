@@ -156,4 +156,4 @@ See also the tutorial :ref:`How to specify an analysis with YAML` to understand 
 Other tutorials for how to use each of the (YAML-based) immuneML Galaxy tools can be found under :ref:`immuneML & Galaxy`.
 
 The Galaxy interface is intended to make it easy for users to try out immuneML quickly, but for large-scale analyses,
-please :ref:`install immuneML <Installing immuneML>` locally.
+please :ref:`install immuneML <Installing immuneML>` locally or on a private server.
