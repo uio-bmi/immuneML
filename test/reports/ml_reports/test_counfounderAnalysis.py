@@ -75,7 +75,7 @@ class TestConfounderAnalysis(TestCase):
             "k": 3
         })  # encodes the repertoire by frequency of 3-mers
         lc = LabelConfiguration()
-        lc.add_label("signal_disease", [True, False])
+        lc.add_label("disease", [True, False])
         encoded_dataset = encoder.encode(dataset, EncoderParams(
             result_path=path / "encoded",
             label_config=lc,
@@ -85,10 +85,10 @@ class TestConfounderAnalysis(TestCase):
         return encoded_dataset
 
     def _create_report(self, path):
-        report = ConfounderAnalysis.build_object(metadata_labels=["signal_age", "signal_HLA"])
+        report = ConfounderAnalysis.build_object(metadata_labels=["age", "HLA"])
 
         report.ml_details_path = path / "ml_details.yaml"
-        report.label = "signal_disease"
+        report.label = "disease"
         report.result_path = path
         report.train_dataset = self._encode_dataset(self._make_dataset(path / "train", size=100), path)
         report.test_dataset = self._encode_dataset(self._make_dataset(path / "test", size=40), path, learn_model=False)

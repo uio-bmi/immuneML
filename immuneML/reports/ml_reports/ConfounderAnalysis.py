@@ -17,8 +17,9 @@ from immuneML.util.PathBuilder import PathBuilder
 
 class ConfounderAnalysis(MLReport):
     """
-    A report that plots the distributions of the false positives and the false negatives made by a given ML method in a barplot.
-    These metrics are ploted separately with respect to each of the metadata features specified by the user.
+    A report that plots the distributions of the false positives and the false negatives with respect to each of
+    the metadata features specified by the user. This allows checking whether a given machine learning model makes more
+    misclassifications for some values of a metadata feature than for the others.
 
     Arguments:
 
@@ -69,7 +70,7 @@ class ConfounderAnalysis(MLReport):
                                   col=metric_index + 1, type='category')
 
                 plot.update_yaxes(title_text=f"{metric}", row=label_index + 1,
-                                  col=metric_index + 1)
+                                  col=metric_index + 1, rangemode="nonnegative", tick0=0, dtick=1)
 
         plot.update_traces(marker_color=px.colors.sequential.Teal[3], showlegend=False)
         filename = self.result_path / f"{output_name}.html"
