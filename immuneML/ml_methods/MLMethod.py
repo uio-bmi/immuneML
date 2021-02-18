@@ -21,12 +21,10 @@ class MLMethod(metaclass=abc.ABCMeta):
 
     Note that when providing class probabilities the classes should have a specific (constant) order, and in case of binary classification, they
     should be ordered so that the negative class comes first and the positive one comes second. For this handling classes, see
-    py:`immuneML.ml_methods.util.Util.Util.make_binary_class_mapping` method that will automatically create class mapping for binary classification.
+    py:`immuneML.ml_methods.util.Util.Util.make_class_mapping` method that will automatically create class mapping for classification.
 
     """
     def __init__(self):
-        self.ml_details_path = None
-        self.predictions_path = {}
         self.name = None
 
     @abc.abstractmethod
@@ -162,7 +160,7 @@ class MLMethod(metaclass=abc.ABCMeta):
         pass
 
     @abc.abstractmethod
-    def get_model(self, label_name: str) -> dict:
+    def get_model(self) -> dict:
         """
         The get_model function returns the parameters of the model. This is usually used to show the parameters of the model in a user-friendly way.
 
@@ -196,15 +194,14 @@ class MLMethod(metaclass=abc.ABCMeta):
         pass
 
     @abc.abstractmethod
-    def get_classes_for_label(self, label_name: str):
-        """The get_classes_for_label function returns a list of classes for the given label_name."""
+    def get_classes(self) -> list:
+        """The get_classes function returns a list of classes for which the method was trained."""
         pass
 
     @abc.abstractmethod
-    def get_params(self, label_name: str):
+    def get_params(self):
         """
-        Returns the parameters of the model, similar to get_model function, except it does not include any additional info other than model
-        coefficients for the given label_name.
+        Returns the parameters of the model, similar to get_model function.
         """
         pass
 
@@ -267,3 +264,8 @@ class MLMethod(metaclass=abc.ABCMeta):
         Returns whether the ML model can be used to predict class probabilities or class assignment only.
         """
         return False
+
+    @abc.abstractmethod
+    def get_class_mapping(self) -> dict:
+        """Returns a dictionary containing the mapping between label values and values internally used in the classifier"""
+        pass

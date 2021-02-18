@@ -1,5 +1,4 @@
 from sklearn.ensemble import RandomForestClassifier as RFC
-from sklearn.model_selection import RandomizedSearchCV
 
 from immuneML.ml_methods.SklearnMethod import SklearnMethod
 from scripts.specification_util import update_docs_per_mapping
@@ -57,11 +56,9 @@ class RandomForestClassifier(SklearnMethod):
     def can_predict_proba(self) -> bool:
         return True
 
-    def get_params(self, label):
-        params = self.models[label].estimator.get_params(deep=True) \
-            if isinstance(self.models[label], RandomizedSearchCV) \
-            else self.models[label].get_params(deep=True)
-        params["feature_importances"] = self.models[label].feature_importances_.tolist()
+    def get_params(self):
+        params = self.model.get_params(deep=True)
+        params["feature_importances"] = self.model.feature_importances_.tolist()
         return params
 
     @staticmethod

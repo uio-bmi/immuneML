@@ -48,7 +48,7 @@ class MLMethodTrainer(Step):
                            f"{input_params.label}_predicted_class": train_predictions[input_params.label],
                            f"{input_params.label}_true_class": input_params.dataset.encoded_data.labels[input_params.label]})
 
-        classes = method.get_classes_for_label(input_params.label)
+        classes = method.get_classes()
         for cls_index, cls in enumerate(classes):
             tmp = train_proba_predictions[input_params.label][:, cls_index] if train_proba_predictions is not None and train_proba_predictions[input_params.label] is not None else None
             df["{}_{}_proba".format(input_params.label, cls)] = tmp

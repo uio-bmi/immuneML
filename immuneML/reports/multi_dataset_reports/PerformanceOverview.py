@@ -8,6 +8,7 @@ import plotly.graph_objects as go
 from sklearn import metrics
 from sklearn.metrics import precision_recall_curve
 
+from immuneML.environment.Constants import Constants
 from immuneML.environment.Label import Label
 from immuneML.hyperparameter_optimization.states.TrainMLModelState import TrainMLModelState
 from immuneML.reports.ReportOutput import ReportOutput
@@ -42,8 +43,6 @@ class PerformanceOverview(MultiDatasetReport):
             my_performance_report: PerformanceOverview
 
     """
-
-    PLOTLY_BLACK = "#2A3F5E"
 
     @classmethod
     def build_object(cls, **kwargs):
@@ -85,7 +84,7 @@ class PerformanceOverview(MultiDatasetReport):
         report_data_outputs = []
         figure = go.Figure()
 
-        figure.add_trace(go.Scatter(x=[0, 1], y=[0, 1], mode='lines', name='baseline', line=dict(color=PerformanceOverview.PLOTLY_BLACK, dash='dash'),
+        figure.add_trace(go.Scatter(x=[0, 1], y=[0, 1], mode='lines', name='baseline', line=dict(color=Constants.PLOTLY_BLACK, dash='dash'),
                                     hoverinfo="skip"))
 
         for index, item in enumerate(optimal_hp_items):

@@ -70,7 +70,7 @@ class MatchedRegexEncoder(DatasetEncoder):
 
         my_mr_encoding:
             MatchedRegex:
-                motif_filepath: /path/to/file.txt
+                motif_filepath: path/to/file.txt
                 match_v_genes: True
                 sum_counts: False
     """

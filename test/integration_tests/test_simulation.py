@@ -135,8 +135,8 @@ class TestSimulation(TestCase):
         self.assertTrue(os.path.isfile(path / "result/inst1/metadata.csv"))
 
         metadata_df = pd.read_csv(path / "result/inst1/metadata.csv", comment=Constants.COMMENT_SIGN)
-        self.assertTrue("signal_signal1" in metadata_df.columns)
-        self.assertEqual(17, sum(metadata_df["signal_signal1"]))
+        self.assertTrue("signal1" in metadata_df.columns)
+        self.assertEqual(17, sum(metadata_df["signal1"]))
 
         self.assertTrue(os.path.isfile(path / "result/index.html"))
         self.assertTrue(os.path.isfile(path / "result/inst1/exported_dataset/pickle/d1.iml_dataset"))
@@ -186,6 +186,11 @@ class TestSimulation(TestCase):
                         "motifs": ["motif1", "motif2"],
                         "implanting": "Receptor",
                         "sequence_position_weights": None
+                    },
+                    "signal2": {
+                        "motifs": ["motif1"],
+                        "implanting": "Receptor",
+                        "sequence_position_weights": None
                     }
                 },
                 "simulations": {
@@ -195,9 +200,8 @@ class TestSimulation(TestCase):
                             "dataset_implanting_rate": 0.5
                         },
                         "var2": {
-                            "signals": ["signal1"],
-                            "dataset_implanting_rate": 0.5,
-                            "is_noise": True
+                            "signals": ["signal2"],
+                            "dataset_implanting_rate": 0.5
                         }
                     }
                 }
@@ -226,6 +230,9 @@ class TestSimulation(TestCase):
         dataset = PickleImport.import_dataset({"path": path / "result/inst1/exported_dataset/pickle/d1.iml_dataset"}, "d1")
 
         self.assertEqual(100, dataset.get_example_count())
-        self.assertEqual(100, len([receptor for receptor in dataset.get_data() if "signal_signal1" in receptor.metadata]))
+        self.assertEqual(100, len([receptor for receptor in dataset.get_data() if "signal1" in receptor.metadata]))
+        self.assertEqual(50, len([receptor for receptor in dataset.get_data() if receptor.metadata["signal1"]]))
+        self.assertEqual(100, len([receptor for receptor in dataset.get_data() if "signal2" in receptor.metadata]))
+        self.assertEqual(50, len([receptor for receptor in dataset.get_data() if receptor.metadata["signal2"]]))
 
         shutil.rmtree(path)

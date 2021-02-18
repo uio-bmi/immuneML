@@ -32,3 +32,4 @@ class Filter(Preprocessor, ABC):
     @staticmethod
     def check_dataset_not_empty(processed_dataset: Dataset, location="Filter"):
         assert processed_dataset.get_example_count() > 0, f"{location}: {type(processed_dataset).__name__} ended up empty after filtering. Please adjust filter settings."
+

@@ -2,6 +2,7 @@ import logging
 import os
 from pathlib import Path
 
+from immuneML.dsl.DefaultParamsLoader import DefaultParamsLoader
 from immuneML.dsl.definition_parsers.DefinitionParserOutput import DefinitionParserOutput
 from immuneML.dsl.symbol_table.SymbolTable import SymbolTable
 from immuneML.dsl.symbol_table.SymbolType import SymbolType
@@ -29,7 +30,6 @@ class InstructionParser:
         symbol_table = definition_output.symbol_table
 
         if InstructionParser.keyword in specification:
-
             if len(specification[InstructionParser.keyword].keys()) > 1:
                 logging.warning(f"InstructionParser: multiple instructions were listed in the specification (under keys "
                                 f"{str(list(specification[InstructionParser.keyword].keys()))[1:-1]}). "
@@ -38,6 +38,14 @@ class InstructionParser:
                                 "other, please use separate YAML specifications and separate runs to perform the analysis.")
 
             for key in specification[InstructionParser.keyword]:
+                assert type(specification[InstructionParser.keyword][key]) == dict, f"InstructionParser: instructions are incorrectly defined. Please make sure each instruction is defined under a unique keyword, like this:\n" \
+                                                                                    f"instructions:\n" \
+                                                                                    f"  my_instruction:\n" \
+                                                                                    f"    type: InstructionType\n" \
+                                                                                    f"    ... other parameters\n\n" \
+                                                                                    f"Found keyword '{key}' containing '{specification[InstructionParser.keyword][key]}', which is a {type(specification[InstructionParser.keyword][key]).__name__}, " \
+                                                                                    f"expected a dictionary instead."
+
                 specification[InstructionParser.keyword][key], symbol_table = \
                     InstructionParser.parse_instruction(key, specification[InstructionParser.keyword][key], symbol_table, path)
         else:
@@ -48,10 +56,13 @@ class InstructionParser:
     @staticmethod
     @log
     def parse_instruction(key: str, instruction: dict, symbol_table: SymbolTable, path) -> tuple:
+
         ParameterValidator.assert_keys_present(list(instruction.keys()), ["type"], InstructionParser.__name__, key)
         valid_instructions = [cls[:-6] for cls in ReflectionHandler.discover_classes_by_partial_name("Parser", "dsl/instruction_parsers/")]
         ParameterValidator.assert_in_valid_list(instruction["type"], valid_instructions, "InstructionParser", "type")
 
+        default_params = DefaultParamsLoader.load("instructions/", instruction["type"])
+        instruction = {**default_params, **instruction}
         parser = ReflectionHandler.get_class_by_name("{}Parser".format(instruction["type"]), "instruction_parsers/")()
         instruction_object = parser.parse(key, instruction, symbol_table, path)
 

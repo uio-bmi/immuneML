@@ -30,7 +30,6 @@ class TestExploratoryAnalysisDesignMatrixExporter(TestCase):
     def test_run(self):
         path = EnvironmentSettings.tmp_test_path / "explanalysisprocintegration/"
         PathBuilder.build(path)
-        os.environ["cache_type"] = "test"
 
         dataset = self.create_dataset(path)
 

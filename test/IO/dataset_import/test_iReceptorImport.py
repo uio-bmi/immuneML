@@ -459,21 +459,29 @@ class TestIReceptorImport(TestCase):
 
         metadata_df = pd.read_csv(params["result_path"] / "ireceptor_repertoiredataset_metadata.csv",  comment=Constants.COMMENT_SIGN)
 
-        self.assertListEqual(list(metadata_df["subject_id"]), ["person1", "person2", "person2", "person1", "person2", "person2"])
-        self.assertListEqual(list(metadata_df["repertoire_id"]), ["second_zip_rep1", "second_zip_rep2", "second_zip_rep2", "first_zip_rep1", "first_zip_rep2", "first_zip_rep2"])
-        self.assertListEqual(list(metadata_df["sample_processing_id"]), ["samp1", "samp1", "samp2", "samp1", "samp1", "samp2"])
-        self.assertListEqual(list(metadata_df["study_id"]), ["PRJCA002413" for i in range(6)])
-        self.assertListEqual(list(metadata_df["species_label"]), ["Homo sapiens" for i in range(6)])
-        self.assertListEqual(list(metadata_df["sex"]), ["male" for i in range(6)])
-        self.assertListEqual(list(metadata_df["age_min"]), [30 for i in range(6)])
-        self.assertListEqual(list(metadata_df["age_max"]), [80 for i in range(6)])
-        self.assertListEqual(list(metadata_df["age_event"]), ["Sample Collection" for i in range(6)])
-        self.assertListEqual(list(metadata_df["tissue_label"]), ["peripheral blood" for i in range(6)])
-        self.assertListEqual(list(metadata_df["collection_time_point_relative"]), ["More than 14 days" for i in range(6)])
-        self.assertListEqual(list(metadata_df["collection_time_point_reference"]), ["First negative COVID-19 test" for i in range(6)])
-        self.assertListEqual(list(metadata_df["COVID-19"]), ["Case", "Control", "Control", "Case", "Control", "Control"])
-        self.assertListEqual(list(metadata_df["second_disease"]), [np.nan, "Case", "Case", np.nan, np.nan, np.nan])
-        self.assertListEqual(list(metadata_df["first_disease"]), [np.nan,  np.nan, np.nan, np.nan, "Case", "Case"])
+        valid_metadata = '''
+subject_id	repertoire_id	sample_processing_id	data_processing_id	study_id	species_label	sex	age_min	age_max	age_event	tissue_label	collection_time_point_relative	collection_time_point_reference	COVID-19	COVID-19_stage	second_disease	first_disease
+person1	first_zip_rep1	samp1	5faf101103b9977a150a9eaa	PRJCA002413	Homo sapiens	male	30	80	Sample Collection	peripheral blood	More than 14 days	First negative COVID-19 test	Case	COVID_late_recovery		
+person2	first_zip_rep2	samp1	5faf101103b9977a150a9eaa	PRJCA002413	Homo sapiens	male	30	80	Sample Collection	peripheral blood	More than 14 days	First negative COVID-19 test	Control	COVID_late_recovery		Case
+person2	first_zip_rep2	samp2	5faf101103b9977a150a9eaa	PRJCA002413	Homo sapiens	male	30	80	Sample Collection	peripheral blood	More than 14 days	First negative COVID-19 test	Control	COVID_late_recovery		Case
+person1	second_zip_rep1	samp1	5faf101103b9977a150a9eaa	PRJCA002413	Homo sapiens	male	30	80	Sample Collection	peripheral blood	More than 14 days	First negative COVID-19 test	Case	COVID_late_recovery		
+person2	second_zip_rep2	samp1	5faf101103b9977a150a9eaa	PRJCA002413	Homo sapiens	male	30	80	Sample Collection	peripheral blood	More than 14 days	First negative COVID-19 test	Control	COVID_late_recovery	Case	
+person2	second_zip_rep2	samp2	5faf101103b9977a150a9eaa	PRJCA002413	Homo sapiens	male	30	80	Sample Collection	peripheral blood	More than 14 days	First negative COVID-19 test	Control	COVID_late_recovery	Case	'''
+
+        valid_metadata_path = path / "valid_metadata.tsv"
+        with valid_metadata_path.open("w") as file:
+            file.writelines(valid_metadata)
+
+        valid_metadata_df = pd.read_csv(valid_metadata_path, sep="\t")
+
+        metadata_df_subset = metadata_df.drop(["filename", "identifier"], axis=1)
+
+        valid_metadata_df.sort_values("repertoire_id", axis=0, inplace=True)
+        valid_metadata_df.sort_index(axis=1, inplace=True)
+        metadata_df_subset.sort_values("repertoire_id", axis=0, inplace=True)
+        metadata_df_subset.sort_index(axis=1, inplace=True)
+
+        pd.testing.assert_frame_equal(valid_metadata_df.reset_index(drop=True), metadata_df_subset.reset_index(drop=True))
 
         shutil.rmtree(base_path)
 

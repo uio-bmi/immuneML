@@ -31,7 +31,7 @@ class MatchedSequencesEncoder(DatasetEncoder):
         my_ms_encoding:
             MatchedSequences:
                 reference:
-                    path: /path/to/file.txt
+                    path: path/to/file.txt
                     format: VDJDB
                 max_edit_distance: 1
     """

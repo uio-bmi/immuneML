@@ -14,7 +14,7 @@ from immuneML.util.SequenceAnalysisHelper import SequenceAnalysisHelper
 
 class DiseaseAssociatedSequenceOverlap(MultiDatasetReport):
     """
-    DiseaseAssociatedSequenceOverlap report makes a heatmap showing the overlap of disease-associated sequences produced by :ref:`SequenceAbundance` or :ref:`SequenceCount` encoders
+    DiseaseAssociatedSequenceOverlap report makes a heatmap showing the overlap of disease-associated sequences produced by :ref:`SequenceAbundance` encoders
     between multiple datasets of different sizes (different number of repertoires per dataset).
 
     This plot can be used only with MultiDatasetBenchmarkTool

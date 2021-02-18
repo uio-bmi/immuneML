@@ -54,7 +54,7 @@ class TestTCRdistClassifier(TestCase):
         with open(path / "tcrdist_classifier.pickle", "rb") as file:
             cls2 = pickle.load(file)
 
-        self.assertTrue(isinstance(cls2["test"], KNeighborsClassifier))
+        self.assertTrue(isinstance(cls2, KNeighborsClassifier))
 
         shutil.rmtree(path)
 
@@ -72,8 +72,8 @@ class TestTCRdistClassifier(TestCase):
         cls2 = TCRdistClassifier(percentage=1.)
         cls2.load(path)
 
-        self.assertTrue(isinstance(cls2.get_model()["test"], KNeighborsClassifier))
+        self.assertTrue(isinstance(cls2.get_model(), KNeighborsClassifier))
         self.assertTrue(isinstance(cls2, TCRdistClassifier))
-        self.assertEqual(3, cls2.models['test'].n_neighbors)
+        self.assertEqual(3, cls2.model.n_neighbors)
 
         shutil.rmtree(path)

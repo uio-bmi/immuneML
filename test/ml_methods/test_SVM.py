@@ -62,7 +62,7 @@ class TestSVM(TestCase):
         with open(path / "svm.pickle", "rb") as file:
             svm2 = pickle.load(file)
 
-        self.assertTrue(isinstance(svm2["default"], LinearSVC))
+        self.assertTrue(isinstance(svm2, LinearSVC))
 
         shutil.rmtree(path)
 
@@ -82,6 +82,6 @@ class TestSVM(TestCase):
         svm2 = SVM()
         svm2.load(path)
 
-        self.assertTrue(isinstance(svm2.get_model()["default"], LinearSVC))
+        self.assertTrue(isinstance(svm2.get_model(), LinearSVC))
 
         shutil.rmtree(path)

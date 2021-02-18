@@ -19,9 +19,14 @@ class ObjectParser:
         else:
             raise AssertionError(f"{location}: Incorrect specification under key {key}.\n"
                                  f"Please choose one of the following:\n"
-                                 f"(1) To specify an option without parameters, simply specify the option as a single value.\n"
-                                 f"(2) To specify an option with parameter values, specify a single option as a key containing "
-                                 f"key-value pairs.\n Valid options are: {str(valid_class_names)[1:-1]}. \n"
+                                 f"(1) To specify an analysis component without parameters, simply specify the component as a single value, e.g;\n"
+                                 f"my_component: ComponentName\n"
+                                 f"\n"
+                                 f"(2) To specify an analysis component with parameter values, specify it as a key containing "
+                                 f"key-value pairs, e.g;\n"
+                                 f"my_component: ComponentName\n"
+                                 f"  parameter: value\n"
+                                 f"\nMake sure the indentation is correct. Valid options are: {str(valid_class_names)[1:-1]}. \n"
                                  f"For more information and details on how to specify parameters, please refer to the documentation.")
         return class_name
 

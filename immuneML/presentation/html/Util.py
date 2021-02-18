@@ -3,6 +3,7 @@ import os
 import shutil
 from enum import Enum
 from pathlib import Path
+import numpy as np
 
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
@@ -33,10 +34,20 @@ class Util:
                 attribute_name: Util.to_dict_recursive(vars_obj[attribute_name], base_path) for attribute_name in vars_obj.keys()
             }
             if isinstance(obj, ReportOutput):
-                if any([ext == getattr(obj, "path", "").suffix for ext in ['.svg', '.jpg', '.png']]):
-                    result['is_embed'] = False
+                path = getattr(obj, "path")
+
+                if path is not None:
+                    result['is_download_link'] = True
+                    result['download_link'] = os.path.relpath(path=getattr(obj, "path"), start=base_path)
+                    result['file_name'] = getattr(obj, "name")
+
+                    if any([ext == path.suffix for ext in ['.svg', '.jpg', '.png']]):
+                        result['is_embed'] = False
+                    else:
+                        result['is_embed'] = True
                 else:
-                    result['is_embed'] = True
+                    result['is_download_link'] = False
+
             return result
 
     @staticmethod

@@ -2,13 +2,12 @@ import os
 import warnings
 from pathlib import Path
 
-import numpy as np
 import pandas as pd
 from sklearn import metrics
-from sklearn.preprocessing import label_binarize
 
 from immuneML.environment.Metric import Metric
 from immuneML.ml_methods.MLMethod import MLMethod
+from immuneML.ml_methods.util.Util import Util
 from immuneML.ml_metrics import ml_metrics
 from immuneML.util.PathBuilder import PathBuilder
 from immuneML.workflows.steps.MLMethodAssessmentParams import MLMethodAssessmentParams
@@ -56,7 +55,7 @@ class MLMethodAssessment(Step):
         for metric in metrics_with_optim_metric:
             predicted_proba_y_label = predicted_proba_y[label] if predicted_proba_y is not None else None
             score = MLMethodAssessment._score_for_metric(metric=metric, predicted_y=predicted_y[label], true_y=true_y[label],
-                                                         labels=method.get_classes_for_label(label),
+                                                         labels=method.get_classes(),
                                                          predicted_proba_y=predicted_proba_y_label)
             results["{}_{}".format(label, metric.name.lower())] = score
             scores[metric.name.lower()] = score
@@ -79,9 +78,7 @@ class MLMethodAssessment(Step):
         else:
             fn = getattr(metrics, metric.value)
 
-        if hasattr(true_y, 'dtype') and true_y.dtype.type is np.str_ or isinstance(true_y, list) and any(isinstance(item, str) for item in true_y):
-            true_y = label_binarize(true_y, classes=labels)
-            predicted_y = label_binarize(predicted_y, classes=labels)
+        true_y, predicted_y = Util.binarize_labels(true_y=true_y, predicted_y=predicted_y, labels=labels)
 
         try:
             if metric in Metric.get_probability_based_metric_types():
@@ -103,7 +100,7 @@ class MLMethodAssessment(Step):
         return score
 
     @staticmethod
-    def _store_predictions(method, true_y, predicted_y, predicted_proba_y, label, predictions_path, summary_path=None,
+    def _store_predictions(method: MLMethod, true_y, predicted_y, predicted_proba_y, label: str, predictions_path, summary_path=None,
                            example_ids: list = None, split_index: int = None):
 
         df = pd.DataFrame()
@@ -113,7 +110,7 @@ class MLMethodAssessment(Step):
         df["{}_true_class".format(label)] = true_y[label]
         df["{}_predicted_class".format(label)] = predicted_y[label]
 
-        classes = method.get_classes_for_label(label)
+        classes = method.get_classes()
         for cls_index, cls in enumerate(classes):
             tmp = predicted_proba_y[label][:, cls_index] if predicted_proba_y is not None and predicted_proba_y[label] is not None else None
             df["{}_{}_proba".format(label, cls)] = tmp

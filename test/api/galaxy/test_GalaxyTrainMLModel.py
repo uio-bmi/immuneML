@@ -101,7 +101,7 @@ class TestGalaxyTrainMLModel(TestCase):
 
         run_immuneML(Namespace(**{"specification_path": specs_path, "result_path": result_path, 'tool': "GalaxyTrainMLModel"}))
 
-        self.assertTrue(os.path.exists(result_path / "exported_models/ml_model_CD.zip"))
+        self.assertTrue(os.path.exists(result_path / "exported_models/ml_settings_CD.zip"))
         self.assertTrue(os.path.exists(result_path / "index.html"))
 
         shutil.rmtree(path)

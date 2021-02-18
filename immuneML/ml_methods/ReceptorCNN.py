@@ -154,7 +154,7 @@ class ReceptorCNN(MLMethod):
         self._make_CNN()
         self.CNN.to(device=self.device)
 
-        self.class_mapping = Util.make_binary_class_mapping(encoded_data.labels[label_name], label_name)
+        self.class_mapping = Util.make_binary_class_mapping(encoded_data.labels[label_name])
         self.label_name = label_name
 
         self.CNN.train()
@@ -305,17 +305,21 @@ class ReceptorCNN(MLMethod):
     def check_if_exists(self, path):
         return self.CNN is not None
 
-    def get_classes_for_label(self, label):
+    def get_classes_for_label(self, label) -> np.ndarray:
         if self.label_name == label:
             return np.array(list(self.class_mapping.values()))
 
-    def get_params(self, label):
+    def get_class_mapping_for_label(self, label) -> dict:
+        if self.label_name == label:
+            return self.class_mapping
+
+    def get_params(self):
         params = copy.deepcopy(vars(self))
         params["CNN"] = copy.deepcopy(self.CNN).state_dict()
         return params
 
     def get_label(self):
-        return [self.label_name]
+        return self.label_name
 
     def get_package_info(self) -> str:
         return Util.get_immuneML_version()
@@ -325,3 +329,9 @@ class ReceptorCNN(MLMethod):
 
     def can_predict_proba(self) -> bool:
         return True
+
+    def get_classes(self) -> list:
+        return list(self.class_mapping.values())
+
+    def get_class_mapping(self) -> dict:
+        return self.class_mapping

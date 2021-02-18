@@ -18,6 +18,7 @@ from scripts.specification_util import update_docs_per_mapping
 class SequenceAbundanceEncoder(DatasetEncoder):
     """
     This encoder represents the repertoires as vectors where:
+
     - the first element corresponds to the number of label-associated clonotypes
     - the second element is the total number of unique clonotypes
 

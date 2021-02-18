@@ -8,7 +8,7 @@ This is a YAML-based Galaxy tool, if you prefer a button-based interface that as
 :ref:`receptor <How to train immune receptor classifiers using the easy Galaxy interface>` and :ref:`repertoire <How to train immune repertoire classifiers using the easy Galaxy interface>`
 classification using the easy Galaxy interfaces.
 
-An example Galaxy history showing how to use this tool `can be found here <https://galaxy.immuneml.uio.no/u/immuneml/h/train-machine-learning-models>`_.
+An example Galaxy history showing how to use this tool `can be found here <https://galaxy.immuneml.uio.no/u/immuneml/h/ml-model-training>`_.
 
 
 Creating the YAML specification
@@ -18,7 +18,8 @@ This Galaxy tool takes as input an immuneML dataset from the Galaxy history, opt
 To train ML models in immuneML, the :ref:`TrainMLModel` instruction should be used. One or more :ref:`ML methods` and :ref:`Encodings` must be used,
 and in addition it is possible to include :ref:`Preprocessings` in the hyperparameter optimization. :ref:`Reports` may be specified to export
 plots and statistics in order to gain more insight into the dataset or the process of training ML models.
-Constructing a YAML for training ML models is described in more detail in the tutorial :ref:`How to train and assess a receptor/repertoire-level ML classifier`.
+Constructing a YAML for training ML models is described in more detail in the tutorial :ref:`How to train and assess a receptor or repertoire-level ML classifier`.
+Note that on Galaxy, the ML methods DeepRC and TCRdistClassifier are **not** available.
 
 When writing an analysis specification for Galaxy, it can be assumed that all selected files are present in the current working directory. A path
 to an additional file thus consists only of the filename. Note that in Galaxy, it is only possible to train ML models for one label at a time.

@@ -6,6 +6,7 @@ import numpy as np
 
 from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
 from immuneML.data_model.repertoire.Repertoire import Repertoire
+from immuneML.preprocessing.Preprocessor import Preprocessor
 from immuneML.preprocessing.filters.Filter import Filter
 
 
@@ -51,6 +52,8 @@ class CountPerSequenceFilter(Filter):
 
     @staticmethod
     def process(dataset: RepertoireDataset, params: dict) -> RepertoireDataset:
+        Preprocessor.check_dataset_type(dataset, [RepertoireDataset], "CountPerSequenceFilter")
+
         processed_dataset = copy.deepcopy(dataset)
 
         with Pool(params["batch_size"]) as pool:
@@ -82,7 +85,7 @@ class CountPerSequenceFilter(Filter):
             indices_to_keep[np.logical_not(not_none_indices)] = True
             np.greater_equal(counts, params["low_count_limit"], out=indices_to_keep, where=not_none_indices)
 
-        processed_repertoire = Repertoire.build_like(repertoire, indices_to_keep, params["result_path"])
+        processed_repertoire = Repertoire.build_like(repertoire, indices_to_keep, params["result_path"], filename_base=f"{repertoire.data_filename.stem}_filtered")
 
         return processed_repertoire
 
