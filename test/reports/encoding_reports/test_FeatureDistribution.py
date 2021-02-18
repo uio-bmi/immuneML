@@ -14,10 +14,10 @@ from immuneML.data_model.encoded_data.EncodedData import EncodedData
 from immuneML.environment.Constants import Constants
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.reports.ReportResult import ReportResult
-from immuneML.reports.encoding_reports.FeatureDistributionReport import FeatureDistributionReport
+from immuneML.reports.encoding_reports.FeatureDistribution import FeatureDistribution
 
 
-class TestFeatureDistributionReport(TestCase):
+class TestFeatureDistribution(TestCase):
 
     def setUp(self) -> None:
         os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
@@ -47,11 +47,11 @@ class TestFeatureDistributionReport(TestCase):
         return dataset
 
     def test_generate(self):
-        path = EnvironmentSettings.root_path / "test/tmp/featurevaluebarplot/"
+        path = EnvironmentSettings.root_path / "test/tmp/featuredistribution/"
 
         dataset = self._create_dummy_encoded_data(path)
 
-        report = FeatureDistributionReport.build_object(**{"dataset": dataset,
+        report = FeatureDistribution.build_object(**{"dataset": dataset,
                                                      "result_path": path,
                                                      "mode": "sparse",
                                                      "grouping_label": "feature"})
@@ -70,7 +70,7 @@ class TestFeatureDistributionReport(TestCase):
                              ["patient", "example_id", "sequence", "feature", "value"])
 
         # report should succeed to build but check_prerequisites should be false when data is not encoded
-        report = FeatureDistributionReport.build_object(**{"dataset": RepertoireDataset(),
+        report = FeatureDistribution.build_object(**{"dataset": RepertoireDataset(),
                                                      "result_path": path,
                                                      "grouping_label": None})
 

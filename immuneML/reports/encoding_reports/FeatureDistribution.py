@@ -12,7 +12,7 @@ from immuneML.util.PathBuilder import PathBuilder
 
 
 
-class FeatureDistributionReport(EncodingReport):
+class FeatureDistribution(EncodingReport):
     """
     Plots a boxplot for each feature of the encoded dataset in one of the two modes:
     in the 'normal' mode there are normal boxplots corresponding to each column of the 
@@ -39,14 +39,14 @@ class FeatureDistributionReport(EncodingReport):
     .. code-block:: yaml
 
         my_fdistr_report:
-            FeatureDistributionReport:
+            FeatureDistribution:
                 mode: sparse
 
     """
 
     @classmethod
     def build_object(cls, **kwargs):
-        return FeatureDistributionReport(**kwargs)
+        return FeatureDistribution(**kwargs)
 
     def __init__(self, dataset: RepertoireDataset = None, result_path: Path = None, grouping_label: str = "feature",
                  mode: str = 'auto',
@@ -137,7 +137,7 @@ class FeatureDistributionReport(EncodingReport):
 
     
     def check_prerequisites(self):
-        location = "FeatureDistributionReport"
+        location = "FeatureDistribution"
         run_report = True
 
         if self.dataset.encoded_data is None or self.dataset.encoded_data.examples is None:
