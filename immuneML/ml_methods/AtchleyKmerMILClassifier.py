@@ -97,7 +97,7 @@ class AtchleyKmerMILClassifier(MLMethod):
 
         self._make_log_reg()
 
-        self.class_mapping = Util.make_binary_class_mapping(encoded_data.labels[label_name], label_name)
+        self.class_mapping = Util.make_binary_class_mapping(encoded_data.labels[label_name])
         self.label_name = label_name
         loss = np.inf
 
@@ -192,7 +192,11 @@ class AtchleyKmerMILClassifier(MLMethod):
         if self.label_name == label:
             return np.array(list(self.class_mapping.values()))
 
-    def get_params(self, label):
+    def get_class_mapping_for_label(self, label) -> dict:
+        if self.label_name == label:
+            return self.class_mapping
+
+    def get_params(self):
         params = copy.deepcopy(vars(self))
         params["logistic_regression"] = copy.deepcopy(self.logistic_regression).state_dict()
         return params
@@ -217,3 +221,9 @@ class AtchleyKmerMILClassifier(MLMethod):
 
     def can_predict_proba(self) -> bool:
         return True
+
+    def get_classes(self) -> list:
+        return list(self.class_mapping.values())
+
+    def get_class_mapping(self) -> dict:
+        return self.class_mapping

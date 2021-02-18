@@ -19,6 +19,8 @@ class PickleImport(DataImport):
     Imports the dataset from the pickle files previously exported by immuneML.
     PickleImport can import any kind of dataset (RepertoireDataset, SequenceDataset, ReceptorDataset).
 
+    Important note: Pickle files might not be compatible between different immuneML (sub)versions.
+
 
     Arguments:
 

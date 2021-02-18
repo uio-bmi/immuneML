@@ -1,6 +1,7 @@
 # quality: gold
 
 import copy
+import platform
 import os
 import pickle
 import shutil
@@ -39,6 +40,12 @@ class PickleExporter(DataExporter):
         file_path = path / dataset_filename
         with file_path.open("wb") as file:
             pickle.dump(exported_dataset, file, pickle.HIGHEST_PROTOCOL)
+
+        version_path = path / "info.txt"
+        with version_path.open("w") as file:
+            file.writelines(f"immuneML version: {Constants.VERSION}\n" 
+                            f"Python version: {platform.python_version()}\n" 
+                            f"Pickle protocol: {pickle.HIGHEST_PROTOCOL}")
 
         return exported_dataset
 

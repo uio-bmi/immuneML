@@ -11,17 +11,20 @@ class KmerSequenceEncoder(SequenceEncodingStrategy):
     @staticmethod
     def encode_sequence(sequence: ReceptorSequence, params: EncoderParams):
         """
-        creates overlapping continuous k-mers and IMGT position pairs from a sequence as features for use in
-        KmerFrequencyEncoder object of type EncoderParams, same object as passed into KmerFrequencyEncoder.
-        :param sequence: ReceptorSequence
-        :param params: EncoderParams (where params["model"]["k"] is used)
-        :return: SequenceEncodingResult
+        Encodes a receptor sequence into a sequence of k-mers
+
+        Args:
+            sequence: ReceptorSequence object
+            params: EncoderParams object with information on k-mer length
+
+        Returns:
+
         """
         k = params.model["k"]
         length = len(sequence.get_sequence())
 
         if length < k:
-            logging.warning('KmerSequenceEncoder: Sequence length is less than k. Ignoring sequence...')
+            logging.warning(f'KmerSequenceEncoder: Sequence length {length} is less than {k}. Ignoring sequence...')
             return None
 
         kmers = KmerHelper.create_kmers_from_sequence(sequence, k)

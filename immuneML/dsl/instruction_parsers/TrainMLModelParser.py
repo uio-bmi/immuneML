@@ -80,6 +80,7 @@ class TrainMLModelParser:
 
     def _prepare_reports(self, reports: list, symbol_table: SymbolTable) -> dict:
         if reports is not None:
+            ParameterValidator.assert_type_and_value(reports, list, TrainMLModelParser.__name__, "reports")
             report_objects = {report_id: symbol_table.get(report_id) for report_id in reports}
             ParameterValidator.assert_all_type_and_value(report_objects.values(), TrainMLModelReport, TrainMLModelParser.__name__, 'reports')
             return report_objects
@@ -93,7 +94,7 @@ class TrainMLModelParser:
         try:
             settings = []
             for index, setting in enumerate(instruction["settings"]):
-                if "preprocessing" in setting:
+                if "preprocessing" in setting and setting["preprocessing"] is not None:
                     ParameterValidator.assert_type_and_value(setting["preprocessing"], str, TrainMLModelParser.__name__, f'settings: {index+1}. '
                                                                                                                          f'element: preprocessing')
                     if symbol_table.contains(setting["preprocessing"]):

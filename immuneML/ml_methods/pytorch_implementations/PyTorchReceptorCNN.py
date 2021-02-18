@@ -8,6 +8,10 @@ from immuneML.environment.SequenceType import SequenceType
 
 
 class PyTorchReceptorCNN(nn.Module):
+    """
+    This class implements the ReceptorCNN using PyTorch. This is one specific implementation of the architecture proposed in
+    :py:obj:`immuneML.ml_methods.ReceptorCNN.ReceptorCNN`.
+    """
 
     def __init__(self, kernel_count: int, kernel_size, positional_channels: int, sequence_type: SequenceType, background_probabilities, chain_names):
         super(PyTorchReceptorCNN, self).__init__()
@@ -49,8 +53,9 @@ class PyTorchReceptorCNN(nn.Module):
                 = \\sum_n p_n \\, log_2 \\, p_n - \\sum_n p_n \\, log_2 \\, q_n
                 = \\sum_n p_n \\, log_2 \\, p_n - log_2 \\, q_n
 
-            log_2 \\, q_n < 0 (1)
-            \\sum_n p_n \\, log_2 \\, p_n < 0  (2)
+            log_2 \\, q_n < 0 \\, \\, \\,  (1)
+
+            \\sum_n p_n \\, log_2 \\, p_n < 0 \\, \\, \\,  (2)
 
             (1) \\wedge (2) \\Rightarrow max(KL(p||q)) = - log_2 \\, q_n
 
@@ -65,6 +70,17 @@ class PyTorchReceptorCNN(nn.Module):
             raise NotImplementedError("ReceptorCNN: non-uniform background probabilities are currently not supported.")
 
     def forward(self, x):
+        """
+        Implements the forward pass through the network by applying kernels to the one-hot encoded receptors, followed by ReLU activation and max
+        pooling. The obtained output is then concatenated to get the receptor representation. A fully-connected layer is then applied to the
+        representation to predict the class assignment.
+
+        Args:
+            x: input data consisting of one-hot encoded immune receptors with optional positional information
+
+        Returns:
+            predictions of class assignment
+        """
 
         # creates batch_size x kernel_count representation of chain 1 and chain 2 by applying kernels, followed by relu and global max pooling
         chain_1 = torch.cat([torch.max(relu(conv_kernel(x[:, 0])), dim=2)[0] for conv_kernel in
@@ -80,6 +96,7 @@ class PyTorchReceptorCNN(nn.Module):
         return predictions
 
     def rescale_weights_for_IGM(self):
+        """Rescales the weights in the kernels to represent information gain matrices."""
         for name in self.conv_chain_1 + self.conv_chain_2:
             value = getattr(self, name)
             value.weight = self._rescale_chain(value.weight)

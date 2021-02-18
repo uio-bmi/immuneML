@@ -74,7 +74,7 @@ class ProbabilisticBinaryClassifier(MLMethod):
                                 "and the total number of trials. If this is not targeted use-case and the encoding, please consider using " \
                                 "another classifier."
 
-        self.class_mapping = Util.make_binary_class_mapping(encoded_data.labels[label_name], label_name)
+        self.class_mapping = Util.make_binary_class_mapping(encoded_data.labels[label_name])
         self.label_name = label_name
         self.N_0 = int(np.sum(np.array(encoded_data.labels[label_name]) == self.class_mapping[0]))
         self.N_1 = int(np.sum(np.array(encoded_data.labels[label_name]) == self.class_mapping[1]))
@@ -419,13 +419,8 @@ class ProbabilisticBinaryClassifier(MLMethod):
     def get_model(self, label_name: str = None):
         return vars(self)
 
-    def get_params(self, label):
-        if label == self.label_name:
-            return vars(self)
-        else:
-            warnings.warn("ProbabilisticBinaryClassifier: in get_params() a label was passed in for which "
-                          "the classifier was not trained: returning None...", RuntimeWarning)
-            return None
+    def get_params(self):
+        return vars(self)
 
     def check_if_exists(self, path):
         vals = vars(self).values()
@@ -439,7 +434,7 @@ class ProbabilisticBinaryClassifier(MLMethod):
                                               f"on which it was not trained: got: {label_name}, expected: {self.label_name}."
 
     def get_label(self):
-        return [self.label_name]
+        return self.label_name
 
     def get_package_info(self) -> str:
         return Util.get_immuneML_version()
@@ -449,3 +444,9 @@ class ProbabilisticBinaryClassifier(MLMethod):
 
     def can_predict_proba(self) -> bool:
         return True
+
+    def get_classes(self) -> list:
+        return list(self.class_mapping.values())
+
+    def get_class_mapping(self) -> dict:
+        return self.class_mapping

@@ -1,5 +1,4 @@
 from sklearn.linear_model import LogisticRegression as SklearnLogisticRegression
-from sklearn.model_selection import RandomizedSearchCV
 
 from immuneML.ml_methods.SklearnMethod import SklearnMethod
 from scripts.specification_util import update_docs_per_mapping
@@ -47,14 +46,11 @@ class LogisticRegression(SklearnMethod):
         if parameter_grid is not None:
             parameter_grid = parameter_grid
         else:
-            parameter_grid = {"max_iter": [1000],
-                                    "penalty": ["l1", "l2"],
-                                    "C": [0.001, 0.01, 0.1, 10, 100, 1000],
-                                    "class_weight": ["balanced"]}
+            parameter_grid = {"max_iter": [1000]}
 
         super(LogisticRegression, self).__init__(parameter_grid=parameter_grid, parameters=parameters)
 
-    def _get_ml_model(self, cores_for_training: int=2, X=None):
+    def _get_ml_model(self, cores_for_training: int = 2, X=None):
         params = self._parameters.copy()
         params["n_jobs"] = cores_for_training
         return SklearnLogisticRegression(**params)
@@ -62,16 +58,10 @@ class LogisticRegression(SklearnMethod):
     def can_predict_proba(self) -> bool:
         return True
 
-    def get_params(self, label):
-        if label is None:
-            tmp_label = list(self.models.keys())[0]
-        else:
-            tmp_label = label
-
-        params = self.models[tmp_label].estimator.get_params() if isinstance(self.models[tmp_label], RandomizedSearchCV) \
-            else self.models[tmp_label].get_params()
-        params["coefficients"] = self.models[tmp_label].coef_[0].tolist()
-        params["intercept"] = self.models[tmp_label].intercept_.tolist()
+    def get_params(self):
+        params = self.model.get_params()
+        params["coefficients"] = self.model.coef_[0].tolist()
+        params["intercept"] = self.model.intercept_.tolist()
         return params
 
     @staticmethod
@@ -79,7 +69,8 @@ class LogisticRegression(SklearnMethod):
         doc = str(LogisticRegression.__doc__)
 
         mapping = {
-            "For usage instructions, check :py:obj:`~immuneML.ml_methods.SklearnMethod.SklearnMethod`.": SklearnMethod.get_usage_documentation("LogisticRegression"),
+            "For usage instructions, check :py:obj:`~immuneML.ml_methods.SklearnMethod.SklearnMethod`.": SklearnMethod.get_usage_documentation(
+                "LogisticRegression"),
         }
 
         doc = update_docs_per_mapping(doc, mapping)

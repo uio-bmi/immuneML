@@ -62,7 +62,7 @@ class TestLogisticRegression(TestCase):
         with open(path / "logistic_regression.pickle", "rb") as file:
             lr2 = pickle.load(file)
 
-        self.assertTrue(isinstance(lr2["default"], SklearnLogisticRegression))
+        self.assertTrue(isinstance(lr2, SklearnLogisticRegression))
 
         shutil.rmtree(path)
 
@@ -82,7 +82,7 @@ class TestLogisticRegression(TestCase):
         lr2 = LogisticRegression()
         lr2.load(path)
 
-        self.assertTrue(isinstance(lr2.get_model()["default"], SklearnLogisticRegression))
+        self.assertTrue(isinstance(lr2.get_model(), SklearnLogisticRegression))
 
         shutil.rmtree(path)
 

@@ -1,6 +1,8 @@
+import logging
 import os
 import shutil
 import sys
+import warnings
 from pathlib import Path
 
 import yaml
@@ -20,8 +22,8 @@ class Quickstart:
                     "d1": {
                         "format": "AIRR",
                         "params": {
-                            "path": str(path / "../synthetic_dataset/result/my_simulation_instruction/exported_dataset/airr/"),
-                            "metadata_file": str(path / "../synthetic_dataset/result/my_simulation_instruction/exported_dataset/airr/metadata.csv")
+                            "path": str(path / "../synthetic_dataset/result/simulation_instruction/exported_dataset/airr/"),
+                            "metadata_file": str(path / "../synthetic_dataset/result/simulation_instruction/exported_dataset/airr/metadata.csv")
                         }
                     }
                 },
@@ -56,7 +58,7 @@ class Quickstart:
                 }
             },
             "instructions": {
-                "inst1": {
+                "machine_learning_instruction": {
                     "type": "TrainMLModel",
                     "settings": [
                         {
@@ -112,7 +114,7 @@ class Quickstart:
                 shutil.rmtree(path)
             PathBuilder.build(path)
         else:
-            path = Path(path)
+            path = PathBuilder.build(path)
         return path
 
     def _simulate_dataset_with_signals(self, path: Path):
@@ -131,8 +133,8 @@ class Quickstart:
                 "simulations": {"my_simulation": {"my_implantng": {"signals": ["my_signal"], "dataset_implanting_rate": 0.5,
                                                                    "repertoire_implanting_rate": 0.1}}}
             },
-            "instructions": {"my_simulation_instruction": {"type": "Simulation", "dataset": "my_synthetic_dataset", "simulation": "my_simulation",
-                                                           "export_formats": ["AIRR"]}}
+            "instructions": {"simulation_instruction": {"type": "Simulation", "dataset": "my_synthetic_dataset", "simulation": "my_simulation",
+                                                        "export_formats": ["AIRR"]}}
         }
 
         specs_file = path / "simulation_specs.yaml"
@@ -148,11 +150,14 @@ class Quickstart:
 
         result_path = self.build_path(result_path)
 
+        logging.basicConfig(filename=Path(result_path) / "log.txt", level=logging.ERROR, format='%(asctime)s %(levelname)s: %(message)s')
+        warnings.showwarning = lambda message, category, filename, lineno, file=None, line=None: logging.warning(message)
+
         self._simulate_dataset_with_signals(result_path / "synthetic_dataset")
 
         print("immuneML quickstart: training a machine learning model...")
-        specs_file = self.create_specfication(result_path / "quickstart")
-        app = ImmuneMLApp(specs_file, result_path / "quickstart/result")
+        specs_file = self.create_specfication(result_path / "machine_learning_analysis")
+        app = ImmuneMLApp(specs_file, result_path / "machine_learning_analysis/result")
         app.run()
 
         print("immuneML quickstart: finished training a machine learning model.")

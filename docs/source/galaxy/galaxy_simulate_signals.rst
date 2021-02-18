@@ -16,7 +16,7 @@ Creating the YAML specification
 The Galaxy tool takes in an immuneML dataset from the history and a YAML specification.
 
 In the YAML specification, the :ref:`Simulation` instruction must be used. Additionally, the elements
-motifs, signals and simulations must be defined in the definitions section of the YAML specification.
+:code:`motifs`, :code:`signals` and :code:`simulations` must be defined in the :code:`definitions` section of the YAML specification.
 A :ref:`motif <Motif>` describes a short amino acid sequence (motif seed) which may be implanted into an immune receptor sequence with small modifications.
 A :ref:`signal <Signal>` is a group of motifs, and may for example represent a disease. A simulation consists of :ref:`implantings <Implanting>`, which each represent
 one or more signals. This can be used to simulate confounding factors (signals occurring together), or ensure signals do not overlap between repertoires.

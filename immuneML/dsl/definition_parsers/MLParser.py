@@ -66,7 +66,10 @@ class MLParser:
             init_method_keys = inspect.signature(ml_method_class.__init__).parameters.keys()
             if any([isinstance(ml_params[key], list) for key in ml_params.keys()]) and "parameter_grid" in init_method_keys:
 
-                ParameterValidator.assert_type_and_value(ml_specification['model_selection_cv'], bool, MLParser.__name__, f'{key}: model_selection_cv', exact_value=True)
+                ParameterValidator.assert_type_and_value(ml_specification['model_selection_cv'], bool, MLParser.__name__, f'{key}: model_selection_cv')
+                assert ml_specification['model_selection_cv'] == True, f"MLParser: when running ML method {key} with a list of inputs, model_selection_cv must be True! " \
+                                                                       f"Set the parameters for {key} to single values (not lists) or set model_selection_cv to True and model_selection_n_folds to >= 2"
+
                 ParameterValidator.assert_type_and_value(ml_specification['model_selection_n_folds'], int, MLParser.__name__, f'{key}: model_selection_n_folds', 2)
 
                 ml_method = ml_method_class(parameter_grid={key: [ml_params[key]] if not isinstance(ml_params[key], list) else ml_params[key]

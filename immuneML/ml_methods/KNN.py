@@ -1,4 +1,3 @@
-from sklearn.model_selection import RandomizedSearchCV
 from sklearn.neighbors import KNeighborsClassifier
 
 from immuneML.ml_methods.SklearnMethod import SklearnMethod
@@ -47,12 +46,8 @@ class KNN(SklearnMethod):
         params["n_jobs"] = cores_for_training
         return KNeighborsClassifier(**params)
 
-    def get_params(self, label):
-        if isinstance(self.models[label], RandomizedSearchCV):
-            params = self.models[label].estimator.get_params(deep=True)
-        else:
-            params = self.models[label].get_params(deep=True)
-        return params
+    def get_params(self):
+        return self.model.get_params(deep=True)
 
     def can_predict_proba(self) -> bool:
         return True

@@ -14,7 +14,7 @@ Install immuneML
   mkdir immuneML/
   cd immuneML/
 
-2. Create a virtual environment using conda:
+2. Create a virtual environment using conda. immuneML has been tested extensively with Python versions 3.7 and 3.8, but not 3.9. To create a conda virtual environment with Python version 3.8, use:
 
 .. code-block:: console
 
@@ -30,20 +30,31 @@ Install immuneML
 
 .. code-block:: console
 
-  pip install git+https://github.com/uio-bmi/immuneML
+  pip install immuneML
 
-Alternatively, if you want to install immuneML including optional extras (:code:`DeepRC`, :code:`TCRDist`), use:
+Alternatively, if you want to use the :ref:`TCRDISTClassifier` ML method and corresponding :ref:`TCRDistMotifDiscovery` report, include the optional extra :code:`TCRdist`:
 
 .. code-block:: console
 
-  pip install git+https://github.com/uio-bmi/immuneML#egg=immuneML[DeepRC,TCRDist]
+  pip install immuneML[TCRdist]
 
-Installing DeepRC and TCRDist dependencies is necessary to use the :ref:`DeepRC` and :ref:`TCRDISTClassifier` ML methods, and corresponding :ref:`DeepRCMotifDiscovery` and :ref:`TCRDistMotifDiscovery` reports.
-It is also possible to specify a subset of extras, for example, include only :code:`DeepRC`.
+See also this FAQ: :ref:`I get an error when installing PyTorch (could not find a version that satisfies the requirement torch)`
 
-Windows users, see this FAQ: :ref:`As a Windows user, I get an error when installing PyTorch (could not find a version that satisfies the requirement torch==1.5.1)`.
+5. Optionally, if you want to use the :ref:`DeepRC` ML method and and corresponding :ref:`DeepRCMotifDiscovery` report, you
+have to install DeepRC dependencies using the :download:`requirements_DeepRC.txt <https://raw.githubusercontent.com/uio-bmi/immuneML/master/requirements_DeepRC.txt>` file.
+Important note: DeepRC uses PyTorch functionalities that depend on GPU. Therefore, DeepRC does not work on a CPU.
+To install the DeepRC dependencies, run:
 
-5. To validate the installation, run:
+.. code-block:: console
+
+  pip install -r requirements_DeepRC.txt
+
+
+
+Testing immuneML
+-----------------
+
+1. To validate the installation, run:
 
 .. code-block:: console
 
@@ -69,43 +80,13 @@ The output should look like this:
                         additional work in tool-dependent way before running
                         standard immuneML.
 
-
-How to update immuneML if it was already installed
---------------------------------------------------
-
-To check the existing version of immuneML, activate the virtual environment where immuneML is installed (step 3 in the previous tutorial) and run the following command:
+2. To quickly test out whether immuneML is able to run, try running the quickstart command:
 
 .. code-block:: console
 
-  pip show immune-ml
+    immune-ml-quickstart ./quickstart_results/
 
-If immuneML is already installed, the output of this command includes package name, version and other information.
-
-To update the existing installation (obtained as described before):
-
-1. Activate the virtual environment you created:
-
-.. code-block:: console
-
-  conda activate immuneml_env/
-
-2. Install the new version of immuneML using pip:
-
-.. code-block:: console
-
-  pip install git+https://github.com/uio-bmi/immuneML
-
-
-Alternatively, if you want to install immuneML including :code:`all` optional extras, use:
-
-.. code-block:: console
-
-  pip install git+https://github.com/uio-bmi/immuneML#egg=immuneML[all]
-
-Or specify the specific extras you want to install (choose from :code:`DeepRC`, :code:`TCRDist`).
-Note that specifying all these extras is equivalent to specifying :code:`all`:
-
-.. code-block:: console
-
-  pip install git+https://github.com/uio-bmi/immuneML#egg=immuneML[DeepRC,TCRDist]
-
+This will generate a synthetic dataset and run a simple machine machine learning analysis on the generated data.
+The results folder will contain two sub-folders: one for the generated dataset and one for the results of the machine
+learning analysis. The files named specs.yaml are the input files for immuneML that describe how to generate the dataset
+and how to do the machine learning analysis. The index.html files can be used to navigate through all the results that were produced.

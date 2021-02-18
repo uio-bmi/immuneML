@@ -59,7 +59,7 @@ class IRISSequenceImport:
 
         datasets:
             my_dataset:
-                path: /path/to/file.txt
+                path: path/to/file.txt
                 format: IRIS
                 params:
                     paired: True

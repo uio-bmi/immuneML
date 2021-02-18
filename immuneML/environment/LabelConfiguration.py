@@ -27,6 +27,8 @@ class LabelConfiguration:
             warnings.warn("Label " + label + " has already been set. Overriding existing values...", Warning)
 
         if positive_class is not None:
+            if all(isinstance(val, str) for val in values) and not isinstance(positive_class, str):
+                positive_class = str(positive_class)
             ParameterValidator.assert_in_valid_list(positive_class, values, Label.__name__, 'positive_class')
 
         self._labels[label] = Label(label, vals, auxiliary_labels, positive_class)

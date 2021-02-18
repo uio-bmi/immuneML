@@ -61,7 +61,6 @@ class MLApplicationInstruction(Instruction):
             dataset: d1
             config_path: ./config.zip
             number_of_processes: 4
-            label: CD
             store_encoded_data: False
 
     """
@@ -100,7 +99,7 @@ class MLApplicationInstruction(Instruction):
             predictions_df.insert(0, 'repertoire_file', [repertoire.data_filename.name for repertoire in dataset.get_data()])
 
         if method.can_predict_proba():
-            classes = method.get_classes_for_label(label)
+            classes = method.get_classes()
             predictions_proba = method.predict_proba(dataset.encoded_data, label)[label]
             for cls_index, cls in enumerate(classes):
                 predictions_df[f'{label}_{cls}_proba'] = predictions_proba[:, cls_index]

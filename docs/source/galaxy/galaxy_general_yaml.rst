@@ -56,7 +56,7 @@ The following YAML specification shows an example of how to run the ExploratoryA
           encoding: my_regex_matches
           report: my_matches
 
-Where the file regex_file.tsv must be a tab-separated file, which may for example contain the following lines:
+Where the file :download:`regex_file.tsv <../_static/files/regex_file.tsv>` must be a tab-separated file, which may contain the following contents:
 
 ====  ==========
 id    TRB_regex
