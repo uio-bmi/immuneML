@@ -26,12 +26,12 @@ class ReceptorSequence(DatasetItem):
     def set_annotation(self, annotation: SequenceAnnotation):
         self.annotation = annotation
 
-    def get_sequence(self):
-        """
-        :return: receptor_sequence (nucleotide/amino acid) that corresponds to preset
-        receptor_sequence type from EnvironmentSettings class
-        """
-        if EnvironmentSettings.get_sequence_type() == SequenceType.AMINO_ACID:
+    def get_sequence(self, sequence_type: SequenceType = None):
+        """Returns receptor_sequence (nucleotide/amino acid) that corresponds to provided sequence type or preset receptor_sequence type from
+        EnvironmentSettings class if no type is provided"""
+
+        sequence_type_ = EnvironmentSettings.get_sequence_type() if sequence_type is None else sequence_type
+        if sequence_type_ == SequenceType.AMINO_ACID:
             return self.amino_acid_sequence
         else:
             return self.nucleotide_sequence

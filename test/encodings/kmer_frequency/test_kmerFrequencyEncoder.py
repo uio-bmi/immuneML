@@ -16,6 +16,7 @@ from immuneML.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType im
 from immuneML.environment.Constants import Constants
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.environment.LabelConfiguration import LabelConfiguration
+from immuneML.environment.SequenceType import SequenceType
 from immuneML.util.PathBuilder import PathBuilder
 
 
@@ -29,14 +30,14 @@ class TestKmerFrequencyEncoder(TestCase):
 
         PathBuilder.build(path)
 
-        rep1 = Repertoire.build_from_sequence_objects([ReceptorSequence("AAA", identifier="1"),
-                                                       ReceptorSequence("ATA", identifier="2"),
-                                                       ReceptorSequence("ATA", identifier='3')],
+        rep1 = Repertoire.build_from_sequence_objects([ReceptorSequence("AAA", nucleotide_sequence="AAA", identifier="1"),
+                                                       ReceptorSequence("ATA", nucleotide_sequence="ATA", identifier="2"),
+                                                       ReceptorSequence("ATA", nucleotide_sequence="ATA", identifier='3')],
                                                       metadata={"l1": 1, "l2": 2, "subject_id": "1"}, path=path)
 
-        rep2 = Repertoire.build_from_sequence_objects([ReceptorSequence("ATA", identifier="1"),
-                                                       ReceptorSequence("TAA", identifier="2"),
-                                                       ReceptorSequence("AAC", identifier="3")],
+        rep2 = Repertoire.build_from_sequence_objects([ReceptorSequence("ATA", nucleotide_sequence="ATA", identifier="1"),
+                                                       ReceptorSequence("TAA", nucleotide_sequence="TAA", identifier="2"),
+                                                       ReceptorSequence("AAC", nucleotide_sequence="AAC", identifier="3")],
                                                       metadata={"l1": 0, "l2": 3, "subject_id": "2"}, path=path)
 
         lc = LabelConfiguration()
@@ -49,6 +50,7 @@ class TestKmerFrequencyEncoder(TestCase):
                 "normalization_type": NormalizationType.RELATIVE_FREQUENCY.name,
                 "reads": ReadsType.UNIQUE.name,
                 "sequence_encoding": SequenceEncodingType.IDENTITY.name,
+                "sequence_type": SequenceType.AMINO_ACID.name,
                 "k": 3
             })
 
@@ -64,6 +66,7 @@ class TestKmerFrequencyEncoder(TestCase):
                 "normalization_type": NormalizationType.RELATIVE_FREQUENCY.name,
                 "reads": ReadsType.UNIQUE.name,
                 "sequence_encoding": SequenceEncodingType.CONTINUOUS_KMER.name,
+                "sequence_type": SequenceType.AMINO_ACID.name,
                 "k": 3
             })
 
@@ -80,6 +83,7 @@ class TestKmerFrequencyEncoder(TestCase):
             "normalization_type": NormalizationType.BINARY.name,
             "reads": ReadsType.UNIQUE.name,
             "sequence_encoding": SequenceEncodingType.CONTINUOUS_KMER.name,
+            "sequence_type": SequenceType.NUCLEOTIDE.name,
             "k": 3
         })
 

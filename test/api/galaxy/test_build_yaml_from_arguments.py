@@ -86,25 +86,25 @@ class MyTestCase(unittest.TestCase):
         result = build_encodings_specs(DummyArguments)
 
         correct = {"encoding_1": {"KmerFrequency": {"sequence_encoding": "IDENTITY",
-                                            "reads": "unique"}},
+                                                    "reads": "unique"}},
                    "encoding_2": {"KmerFrequency": {"sequence_encoding": "IMGT_GAPPED_KMER",
-                                            "reads": "unique",
-                                            "k_left": 2,
-                                            "k_right": 1,
-                                            "min_gap": 0,
-                                            "max_gap": 5}},
+                                                    "reads": "unique",
+                                                    "k_left": 2,
+                                                    "k_right": 1,
+                                                    "min_gap": 0,
+                                                    "max_gap": 5}},
                    "encoding_3": {"KmerFrequency": {"sequence_encoding": "GAPPED_KMER",
-                                            "reads": "all",
-                                            "k_left": 3,
-                                            "k_right": 5,
-                                            "min_gap": 5,
-                                            "max_gap": 10}},
+                                                    "reads": "all",
+                                                    "k_left": 3,
+                                                    "k_right": 5,
+                                                    "min_gap": 5,
+                                                    "max_gap": 10}},
                    "encoding_4": {"KmerFrequency": {"sequence_encoding": "IMGT_CONTINUOUS_KMER",
-                                            "reads": "all",
-                                            "k": 3}},
+                                                    "reads": "all",
+                                                    "k": 3}},
                    "encoding_5": {"KmerFrequency": {"sequence_encoding": "CONTINUOUS_KMER",
-                                            "reads": "all",
-                                            "k": 4}}}
+                                                    "reads": "all",
+                                                    "k": 4}}}
 
         self.assertDictEqual(result, correct)
 

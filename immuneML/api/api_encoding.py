@@ -57,6 +57,7 @@ def encode_dataset_by_kmer_freq(path_to_dataset_directory: str, result_path: str
         "normalization_type": "relative_frequency",  # encode repertoire by the relative frequency of k-mers in repertoire
         "reads": "unique",  # count each sequence only once, do not use clonal count
         "k": 2,  # k-mer length
+        "sequence_type": "amino_acid",
         "sequence_encoding": "continuous_kmer"  # split each sequence in repertoire to overlapping k-mers
     }), EncoderParams(result_path=result_path,
                       label_config=LabelConfiguration([Label(label_name, dataset.labels[label_name])])), False))

@@ -16,6 +16,7 @@ from immuneML.encodings.kmer_frequency.ReadsType import ReadsType
 from immuneML.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType import SequenceEncodingType
 from immuneML.encodings.preprocessing.FeatureScaler import FeatureScaler
 from immuneML.environment.Constants import Constants
+from immuneML.environment.SequenceType import SequenceType
 from immuneML.util.FilenameHandler import FilenameHandler
 from immuneML.util.ParameterValidator import ParameterValidator
 from immuneML.util.PathBuilder import PathBuilder
@@ -62,6 +63,10 @@ class KmerFrequencyEncoder(DatasetEncoder):
 
         max_gap: (int): Maximum gap size when gapped k-mers are used. The default value for max_gap is 0.
 
+        sequence_type (:py:mod:`immuneML.environment.SequenceType.SequenceType`): Whether to work with nucleotide or amino acid sequences. Amino acid
+        sequences are the default. To work with either sequence type, the sequences of the desired type should be included in the datasets, e.g.,
+        listed under 'columns_to_load' parameter. By default, both types will be included if available. Valid values are: AMINO_ACID and NUCLEOTIDE.
+
         scale_to_unit_variance (bool): whether to scale the design matrix after normalization to have unit variance per feature. Setting this argument
         to True might improve the subsequent classifier's performance depending on the type of the classifier. The default value for scale_to_unit_variance is true.
 
@@ -80,6 +85,7 @@ class KmerFrequencyEncoder(DatasetEncoder):
                     normalization_type: RELATIVE_FREQUENCY
                     reads: UNIQUE
                     sequence_encoding: CONTINUOUS_KMER
+                    sequence_type: NUCLEOTIDE
                     k: 3
                     scale_to_unit_variance: True
                     scale_to_zero_mean: True
@@ -88,6 +94,7 @@ class KmerFrequencyEncoder(DatasetEncoder):
                     normalization_type: RELATIVE_FREQUENCY
                     reads: UNIQUE
                     sequence_encoding: GAPPED_KMER
+                    sequence_type: AMINO_ACID
                     k_left: 2
                     k_right: 2
                     min_gap: 1
@@ -110,10 +117,11 @@ class KmerFrequencyEncoder(DatasetEncoder):
 
     def __init__(self, normalization_type: NormalizationType, reads: ReadsType, sequence_encoding: SequenceEncodingType, k: int = 0,
                  k_left: int = 0, k_right: int = 0, min_gap: int = 0, max_gap: int = 0, metadata_fields_to_include: list = None,
-                 name: str = None, scale_to_unit_variance: bool = False, scale_to_zero_mean: bool = False):
+                 name: str = None, scale_to_unit_variance: bool = False, scale_to_zero_mean: bool = False, sequence_type: SequenceType = None):
         self.normalization_type = normalization_type
         self.reads = reads
         self.sequence_encoding = sequence_encoding
+        self.sequence_type = sequence_type
         self.k = k
         self.k_left = k_left
         self.k_right = k_right
@@ -129,7 +137,7 @@ class KmerFrequencyEncoder(DatasetEncoder):
     @staticmethod
     def _prepare_parameters(normalization_type: str, reads: str, sequence_encoding: str, k: int = 0, k_left: int = 0,
                             k_right: int = 0, min_gap: int = 0, max_gap: int = 0, metadata_fields_to_include: list = None, name: str = None,
-                            scale_to_unit_variance: bool = False, scale_to_zero_mean: bool = False):
+                            scale_to_unit_variance: bool = False, scale_to_zero_mean: bool = False, sequence_type: str = None):
 
         location = KmerFrequencyEncoder.__name__
 
@@ -138,6 +146,12 @@ class KmerFrequencyEncoder(DatasetEncoder):
         ParameterValidator.assert_in_valid_list(sequence_encoding.upper(), [item.name for item in SequenceEncodingType], location, "sequence_encoding")
         ParameterValidator.assert_type_and_value(scale_to_zero_mean, bool, location, "scale_to_zero_mean")
         ParameterValidator.assert_type_and_value(scale_to_unit_variance, bool, location, "scale_to_unit_variance")
+        ParameterValidator.assert_type_and_value(sequence_type, str, location, 'sequence_type')
+        ParameterValidator.assert_in_valid_list(sequence_type.upper(), [st.name for st in SequenceType], location, 'sequence_type')
+
+        if "IMGT" in sequence_encoding.upper():
+            assert sequence_type.upper() == SequenceType.AMINO_ACID.name, f"{location}: for IMGT-based k-mer frequency encoding (here: " \
+                                                                     f"{sequence_encoding.upper()}), sequence type has to be 'amino_acid'."
 
         vars_to_check = {"k": k, "k_left": k_left, "k_right": k_right, "min_gap": min_gap, "max_gap": max_gap}
         for param in vars_to_check.keys():
@@ -153,6 +167,7 @@ class KmerFrequencyEncoder(DatasetEncoder):
             "sequence_encoding": SequenceEncodingType[sequence_encoding.upper()],
             "name": name,
             "scale_to_zero_mean": scale_to_zero_mean, "scale_to_unit_variance": scale_to_unit_variance,
+            'sequence_type': SequenceType[sequence_type.upper()],
             **vars_to_check
         }
 
