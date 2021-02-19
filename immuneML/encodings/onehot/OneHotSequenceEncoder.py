@@ -28,7 +28,7 @@ class OneHotSequenceEncoder(OneHotEncoder):
     def _encode_data(self, dataset: SequenceDataset, params: EncoderParams):
         sequence_objs = [obj for obj in dataset.get_data(params.pool_size)]
 
-        sequences = [obj.get_sequence() for obj in sequence_objs]
+        sequences = [obj.get_sequence(self.sequence_type) for obj in sequence_objs]
         example_ids = dataset.get_example_ids()
         max_seq_len = max([len(seq) for seq in sequences])
         labels = self._get_labels(sequence_objs, params) if params.encode_labels else None

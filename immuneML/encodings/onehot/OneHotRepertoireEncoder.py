@@ -10,7 +10,6 @@ from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
 from immuneML.data_model.encoded_data.EncodedData import EncodedData
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.encodings.onehot.OneHotEncoder import OneHotEncoder
-from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 
 
 class OneHotRepertoireEncoder(OneHotEncoder):
@@ -39,7 +38,7 @@ class OneHotRepertoireEncoder(OneHotEncoder):
         max_seq_len = 0
 
         for repertoire in dataset.repertoires:
-            sequences = repertoire.get_attribute(EnvironmentSettings.get_sequence_type().value)
+            sequences = repertoire.get_attribute(self.sequence_type.value)
             max_rep_len = max(len(sequences), max_rep_len)
             max_seq_len = max(max([len(seq) for seq in sequences]), max_seq_len)
 
@@ -64,7 +63,7 @@ class OneHotRepertoireEncoder(OneHotEncoder):
         feature_names = self._get_feature_names(self.max_seq_len, self.max_rep_len)
 
         if self.flatten:
-            examples = examples.reshape(dataset.get_example_count(), self.max_rep_len*self.max_seq_len*len(self.onehot_dimensions))
+            examples = examples.reshape(dataset.get_example_count(), self.max_rep_len * self.max_seq_len * len(self.onehot_dimensions))
             feature_names = [item for sublist in feature_names for subsublist in sublist for item in subsublist]
 
         encoded_data = EncodedData(examples=examples,
@@ -78,18 +77,17 @@ class OneHotRepertoireEncoder(OneHotEncoder):
     def _get_feature_names(self, max_seq_len, max_rep_len):
         return [[[f"{seq}_{pos}_{dim}" for dim in self.onehot_dimensions] for pos in range(max_seq_len)] for seq in range(max_rep_len)]
 
-
     def _get_encoded_repertoire(self, repertoire, params: EncoderParams):
         params.model = vars(self)
 
         return CacheHandler.memo_by_params((("encoding_model", params.model),
                                             ("labels", params.label_config.get_labels_by_name()),
                                             ("repertoire_id", repertoire.identifier),
-                                            ("repertoire_data", hashlib.sha256(np.ascontiguousarray(repertoire.get_sequence_aas())).hexdigest())),
+                                            ("repertoire_data", hashlib.sha256(np.ascontiguousarray(repertoire.get_attribute(self.sequence_type.value))).hexdigest())),
                                            lambda: self._encode_repertoire(repertoire, params), CacheObjectType.ENCODING)
 
     def _encode_repertoire(self, repertoire, params: EncoderParams):
-        sequences = repertoire.get_attribute(EnvironmentSettings.get_sequence_type().value)
+        sequences = repertoire.get_attribute(self.sequence_type.value)
 
         onehot_encoded = self._encode_sequence_list(sequences, pad_n_sequences=self.max_rep_len, pad_sequence_len=self.max_seq_len)
         example_id = repertoire.identifier

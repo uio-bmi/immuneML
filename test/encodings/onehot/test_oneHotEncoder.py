@@ -5,7 +5,6 @@ import unittest
 from immuneML.caching.CacheType import CacheType
 from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
 from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
-from immuneML.data_model.receptor.receptor_sequence.ReceptorSequenceList import ReceptorSequenceList
 from immuneML.data_model.repertoire.Repertoire import Repertoire
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.encodings.onehot.OneHotEncoder import OneHotEncoder
@@ -21,23 +20,20 @@ class TestOneHotEncoder(unittest.TestCase):
         os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
 
     def _construct_test_repertoiredataset(self, path, positional):
-        receptors1 = ReceptorSequenceList()
-        receptors2 = ReceptorSequenceList()
 
         if positional:
-            [receptors1.append(seq) for seq in
-             [ReceptorSequence("AAAAAAAAAAAAAAAAA", identifier="1"), ReceptorSequence("AAAAAAAAAAAAAAAAA", identifier="1")]]
-            [receptors2.append(seq) for seq in [ReceptorSequence("TTTTTTTTTTTTT", identifier="1")]]
+            receptors1 = [ReceptorSequence("AAAAAAAAAAAAAAAAA", nucleotide_sequence="AAAAAAAAAAAAAAAAA", identifier="1"),
+                          ReceptorSequence("AAAAAAAAAAAAAAAAA", nucleotide_sequence="AAAAAAAAAAAAAAAAA", identifier="1")]
+            receptors2 = [ReceptorSequence("TTTTTTTTTTTTT", nucleotide_sequence='TTTTTTTTTTTTT', identifier="1")]
         else:
-            [receptors1.append(seq) for seq in
-             [ReceptorSequence("AAAA", identifier="1"), ReceptorSequence("ATA", identifier="2"), ReceptorSequence("ATA", identifier='3')]]
-            [receptors2.append(seq) for seq in [ReceptorSequence("ATA", identifier="1"), ReceptorSequence("TAA", identifier="2")]]
+            receptors1 = [ReceptorSequence("AAAA", nucleotide_sequence="AAAA", identifier="1"),
+                          ReceptorSequence("ATA", nucleotide_sequence="ATA", identifier="2"),
+                          ReceptorSequence("ATA", nucleotide_sequence="ATA", identifier='3')]
+            receptors2 = [ReceptorSequence("ATA", nucleotide_sequence="ATA", identifier="1"),
+                          ReceptorSequence("TAA", nucleotide_sequence="TAA", identifier="2")]
 
-        rep1 = Repertoire.build_from_sequence_objects(receptors1,
-                                                      metadata={"l1": 1, "l2": 2, "subject_id": "1"}, path=path)
-
-        rep2 = Repertoire.build_from_sequence_objects(receptors2,
-                                                      metadata={"l1": 0, "l2": 3, "subject_id": "2"}, path=path)
+        rep1 = Repertoire.build_from_sequence_objects(receptors1, metadata={"l1": 1, "l2": 2, "subject_id": "1"}, path=path)
+        rep2 = Repertoire.build_from_sequence_objects(receptors2, metadata={"l1": 0, "l2": 3, "subject_id": "2"}, path=path)
 
         lc = LabelConfiguration()
         lc.add_label("l1", [1, 2])
@@ -55,9 +51,8 @@ class TestOneHotEncoder(unittest.TestCase):
 
         dataset, lc = self._construct_test_repertoiredataset(path, positional=False)
 
-        encoder = OneHotEncoder.build_object(dataset, **{"use_positional_info": False,
-                                                         "distance_to_seq_middle": 6,
-                                                         "flatten": False})
+        encoder = OneHotEncoder.build_object(dataset, **{"use_positional_info": False, 'sequence_type': 'amino_acid',
+                                                         "distance_to_seq_middle": 6, "flatten": False})
 
         encoded_data = encoder.encode(dataset, EncoderParams(
             result_path=path,
@@ -100,9 +95,8 @@ class TestOneHotEncoder(unittest.TestCase):
 
         dataset, lc = self._construct_test_repertoiredataset(path, positional=True)
 
-        encoder = OneHotEncoder.build_object(dataset, **{"use_positional_info": True,
-                                                         "distance_to_seq_middle": 6,
-                                                         "flatten": False})
+        encoder = OneHotEncoder.build_object(dataset, **{"use_positional_info": True, 'sequence_type': 'amino_acid',
+                                                         "distance_to_seq_middle": 6, "flatten": False})
 
         encoded_data = encoder.encode(dataset, EncoderParams(
             result_path=path,
@@ -161,7 +155,7 @@ class TestOneHotEncoder(unittest.TestCase):
 
         PathBuilder.build(path)
 
-        encoder = OneHotEncoder.build_object(RepertoireDataset(), **{"use_positional_info": True,
+        encoder = OneHotEncoder.build_object(RepertoireDataset(), **{"use_positional_info": True, 'sequence_type': 'amino_acid',
                                                                      "distance_to_seq_middle": 4,
                                                                      "flatten": False})
 
@@ -181,18 +175,33 @@ class TestOneHotEncoder(unittest.TestCase):
 
         shutil.rmtree(path)
 
+    def test_nucleotide(self):
+        path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "onehot_nt/")
+
+        dataset, lc = self._construct_test_repertoiredataset(path, positional=False)
+
+        encoder = OneHotEncoder.build_object(dataset, **{"use_positional_info": False, "distance_to_seq_middle": None,
+                                                         "flatten": False, 'sequence_type': 'nucleotide'})
+
+        encoded_dataset = encoder.encode(dataset, EncoderParams(result_path=path, label_config=lc, pool_size=1, learn_model=True, model={},
+                                                                filename="dataset.pkl"))
+
+        self.assertTrue(isinstance(encoded_dataset, RepertoireDataset))
+        # TODO: check the values in the examples matrix
+
+        shutil.rmtree(path)
 
     def test_repertoire_flattened(self):
-        path = EnvironmentSettings.root_path / "test/tmp/onehot_recep_flat/"
+        path = EnvironmentSettings.tmp_test_path / "onehot_recep_flat/"
 
         PathBuilder.build(path)
 
         dataset, lc = self._construct_test_repertoiredataset(path, positional=False)
 
         encoder = OneHotEncoder.build_object(dataset, **{"use_positional_info": False, "distance_to_seq_middle": None,
-                                                         "flatten": True})
+                                                         "flatten": True, 'sequence_type': 'amino_acid'})
 
-        encoded_data = encoder.encode(dataset, EncoderParams(
+        encoded_dataset = encoder.encode(dataset, EncoderParams(
             result_path=path,
             label_config=lc,
             pool_size=1,
@@ -201,16 +210,18 @@ class TestOneHotEncoder(unittest.TestCase):
             filename="dataset.pkl"
         ))
 
-        self.assertTrue(isinstance(encoded_data, RepertoireDataset))
+        self.assertTrue(isinstance(encoded_dataset, RepertoireDataset))
 
         onehot_a = [1.0] + [0.0] * 19
         onehot_t = [0.0] * 16 + [1.0] + [0] * 3
         onehot_empty = [0] * 20
 
+        self.assertListEqual(list(encoded_dataset.encoded_data.examples[0]),
+                             onehot_a + onehot_a + onehot_a + onehot_a + onehot_a + onehot_t + onehot_a + onehot_empty + onehot_a + onehot_t + onehot_a + onehot_empty)
+        self.assertListEqual(list(encoded_dataset.encoded_data.examples[1]),
+                             onehot_a + onehot_t + onehot_a + onehot_empty + onehot_t + onehot_a + onehot_a + onehot_empty + onehot_empty + onehot_empty + onehot_empty + onehot_empty)
 
-        self.assertListEqual(list(encoded_data.encoded_data.examples[0]), onehot_a+onehot_a+onehot_a+onehot_a+onehot_a+onehot_t+onehot_a+onehot_empty+onehot_a+onehot_t+onehot_a+onehot_empty)
-        self.assertListEqual(list(encoded_data.encoded_data.examples[1]), onehot_a+onehot_t+onehot_a+onehot_empty+onehot_t+onehot_a+onehot_a+onehot_empty+onehot_empty+onehot_empty+onehot_empty+onehot_empty)
-
-        self.assertListEqual(list(encoded_data.encoded_data.feature_names), [f"{seq}_{pos}_{char}" for seq in range(3) for pos in range(4) for char in EnvironmentSettings.get_sequence_alphabet()])
+        self.assertListEqual(list(encoded_dataset.encoded_data.feature_names),
+                             [f"{seq}_{pos}_{char}" for seq in range(3) for pos in range(4) for char in EnvironmentSettings.get_sequence_alphabet()])
 
         shutil.rmtree(path)

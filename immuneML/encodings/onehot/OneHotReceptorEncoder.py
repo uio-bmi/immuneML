@@ -28,7 +28,7 @@ class OneHotReceptorEncoder(OneHotEncoder):
 
     def _encode_data(self, dataset: ReceptorDataset, params: EncoderParams):
         receptor_objs = [receptor for receptor in dataset.get_data()]
-        sequences = [[getattr(obj, chain).get_sequence() for chain in obj.get_chains()] for obj in receptor_objs]
+        sequences = [[getattr(obj, chain).get_sequence(self.sequence_type) for chain in obj.get_chains()] for obj in receptor_objs]
         first_chain_seqs, second_chain_seqs = zip(*sequences)
 
         max_seq_len = max(max([len(seq) for seq in first_chain_seqs]), max([len(seq) for seq in second_chain_seqs]))

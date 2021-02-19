@@ -36,9 +36,8 @@ class TestOneHotSequenceEncoder(TestCase):
 
         dataset, lc = self._construct_test_dataset(path)
 
-        encoder = OneHotEncoder.build_object(dataset, **{"use_positional_info": False,
-                                                         "distance_to_seq_middle": 6,
-                                                         "flatten": False})
+        encoder = OneHotEncoder.build_object(dataset, **{"use_positional_info": False, 'sequence_type': 'amino_acid',
+                                                         "distance_to_seq_middle": 6, "flatten": False})
 
         encoded_data = encoder.encode(dataset, EncoderParams(
             result_path=path / "encoded",
@@ -89,7 +88,7 @@ class TestOneHotSequenceEncoder(TestCase):
         dataset = self.construct_test_flatten_dataset(path)
 
         encoder = OneHotEncoder.build_object(dataset, **{"use_positional_info": False, "distance_to_seq_middle": None,
-                                                         "flatten": True})
+                                                         'sequence_type': 'amino_acid', "flatten": True})
 
         encoded_data = encoder.encode(dataset, EncoderParams(
             result_path=path,
