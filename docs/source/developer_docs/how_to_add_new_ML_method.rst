@@ -129,28 +129,22 @@ Example scikit-learn-based SVM implementation:
   class MySVM(SklearnMethod):
 
     def __init__(self, parameter_grid: dict = None, parameters: dict = None):
-       super(SVM, self).__init__()
+        _parameters = parameters if parameters is not None else {"max_iter": 10000, "multi_class": "crammer_singer"}
+        _parameter_grid = parameter_grid if parameter_grid is not None else {}
 
-       self._parameters = parameters if parameters is not None else {"max_iter": 10000}
+        super(SVM, self).__init__(parameter_grid=_parameter_grid, parameters=_parameters)
 
-       if parameter_grid is not None:
-           self._parameter_grid = parameter_grid
-       else:
-           self._parameter_grid = {}
+    def _get_ml_model(self, cores_for_training: int = 2, X=None):
+        return LinearSVC(**self._parameters)
 
-    def _get_ml_model(self, cores_for_training: int = 2):
-       params = {**self._parameters, **{}}
-       return LinearSVC(**params)
+    def can_predict_proba(self) -> bool:
+        return False
 
-    def _can_predict_proba(self) -> bool:
-       return False
-
-    def get_params(self, label):
-       params = self.models[label].estimator.get_params() if isinstance(self.models[label], RandomizedSearchCV) \
-           else self.models[label].get_params()
-       params["coefficients"] = self.models[label].coef_.tolist()
-       params["intercept"] = self.models[label].intercept_.tolist()
-       return params
+    def get_params(self):
+        params = self.model.get_params()
+        params["coefficients"] = self.model.coef_[0].tolist()
+        params["intercept"] = self.model.intercept_.tolist()
+        return params
 
 
 Adding native methods
@@ -159,9 +153,9 @@ Adding native methods
 To add a new ML method:
 
   #. Add a new class in a new file, where the class name and the file name must match.
-  #. Make the new class inherit MLMethod class,
+  #. Make the new class inherit :py:obj:`~immuneML.ml_methods.MLMethod.MLMethod` class,
   #. Define an init function,
-  #. Implement all abstract methods as defined in :py:obj:`~source.ml_methods.MLMethod.MLMethod` class.
+  #. Implement all abstract methods as defined in :py:obj:`~immuneML.ml_methods.MLMethod.MLMethod` class.
 
 The name of the new class has to be different from the ML methods’ classes already defined in the same package.
 
@@ -262,4 +256,4 @@ To run this from the root directory of the project, save the specification to sp
 
 .. code-block:: console
 
-  python3 immuneML/app/ImmuneML.py specs.yaml output_dir/
+  immune-ml specs.yaml output_dir/

@@ -33,7 +33,7 @@ from GitHub), install the requirements from the requirements.txt file (this file
 
 .. code-block:: console
 
-  pip install -r requirements.txt
+  pip install -r requirements.txt -e .
 
 See also these troubleshooting issues:
 
@@ -58,7 +58,7 @@ To run a sample analysis, from the project folder run:
 
 .. code-block:: console
 
-  python3 immuneML/workflows/instructions/quickstart.py
+  immune-ml-quickstart ./output_dir/
 
 This will generate a synthetic dataset and run a simple machine machine learning analysis on the generated data.
 The results folder will contain two sub-folders: one for the generated dataset and one for the results of the machine
