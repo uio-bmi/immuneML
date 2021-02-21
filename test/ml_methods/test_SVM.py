@@ -54,7 +54,7 @@ class TestSVM(TestCase):
         svm = SVM()
         svm.fit(EncodedData(x, y), 'default')
 
-        path = EnvironmentSettings.root_path / "test/tmp/svm/"
+        path = EnvironmentSettings.root_path / "my_svm/"
 
         svm.store(path)
         self.assertTrue(os.path.isfile(path / "svm.pickle"))
@@ -73,7 +73,7 @@ class TestSVM(TestCase):
         svm = SVM()
         svm.fit(EncodedData(x, y), 'default')
 
-        path = EnvironmentSettings.root_path / "test/tmp/svm2/"
+        path = EnvironmentSettings.tmp_test_path / "my_svm2/"
         PathBuilder.build(path)
 
         with open(path / "svm.pickle", "wb") as file:

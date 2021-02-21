@@ -62,7 +62,7 @@ Our open-source code can be found on `GitHub <https://github.com/uio-bmi/ImmuneM
    specification
    usecases
    troubleshooting
-   developer_docs
+   developer_docs/developer_docs
 
 
 Indices and tables

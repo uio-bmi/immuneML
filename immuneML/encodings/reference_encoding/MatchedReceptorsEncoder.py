@@ -25,7 +25,7 @@ class MatchedReceptorsEncoder(DatasetEncoder):
     Arguments:
 
         reference (dict): A dictionary describing the reference dataset file, specified the same as regular data import.
-        See the :py:mod:`immuneML.IO.sequence_import` for specification details.
+        See the :py:mod:`~immuneML.IO.sequence_import` for specification details.
         Must contain paired receptor sequences.
 
         max_edit_distances (dict): A dictionary specifying the maximum edit distance between a target sequence

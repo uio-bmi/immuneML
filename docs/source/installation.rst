@@ -23,4 +23,3 @@ Once immuneML has been set up, you can look into :ref:`Quickstart` or look into 
 
   installation/installation_docker
   installation/install_with_package_manager
-  installation/install_for_development
