@@ -59,8 +59,6 @@ class AdaptiveImportHelper:
     @staticmethod
     def parse_germline(dataframe: pd.DataFrame, gene_name_replacement: dict, germline_value_replacement: dict):
         for gene in ["v", "j"]:
-            if f"{gene}_subgroups" in dataframe.columns:
-                dataframe.loc[:, f"{gene}_subgroups"] = dataframe[f"{gene}_subgroups"].replace(germline_value_replacement, regex=True)
 
             if f"{gene}_genes" in dataframe.columns:
                 dataframe.loc[:, f"{gene}_genes"] = dataframe[f"{gene}_genes"].replace(gene_name_replacement, regex=True)
@@ -79,6 +77,13 @@ class AdaptiveImportHelper:
                 dataframe.loc[:, f"{gene}_alleles"] = dataframe[f"{gene}_alleles"].replace(germline_value_replacement, regex=True)
 
                 dataframe.loc[:, f"{gene}_genes"] = dataframe[f"{gene}_alleles"].str.rsplit(Constants.ALLELE_DELIMITER, n=1, expand=True)[0]
+
+            if f"{gene}_subgroups" in dataframe.columns:
+                dataframe.loc[:, f"{gene}_subgroups"] = dataframe[f"{gene}_subgroups"].replace(germline_value_replacement, regex=True)
+            elif f"{gene}_genes" in dataframe.columns:
+                # genes present but subgroups absent, extract subgroups from genes
+                dataframe.loc[:, f"{gene}_subgroups"] = dataframe[f"{gene}_genes"].str.rsplit("-", n=1, expand=True)[0]
+
 
         return dataframe
 
