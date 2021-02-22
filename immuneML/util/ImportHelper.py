@@ -151,7 +151,12 @@ class ImportHelper:
             if alternative_load_func:
                 df = alternative_load_func(filepath, params)
             else:
-                df = pd.read_csv(filepath, sep=params.separator, iterator=False, usecols=params.columns_to_load, dtype=str)
+                try:
+                    df = pd.read_csv(filepath, sep=params.separator, iterator=False, usecols=params.columns_to_load, dtype=str)
+                except ValueError:
+                    df = pd.read_csv(filepath, sep=params.separator, iterator=False, dtype=str)
+                    warnings.warn(f"ImportHelper: failed to import columns {params.columns_to_load}, imported the"
+                                  f"following instead: {list(df.columns)}")
         except Exception as ex:
             raise Exception(f"{ex}\n\nImportHelper: an error occurred during dataset import while parsing the input file: {filepath}.\n"
                             f"Please make sure this is a correct immune receptor data file (not metadata).\n"

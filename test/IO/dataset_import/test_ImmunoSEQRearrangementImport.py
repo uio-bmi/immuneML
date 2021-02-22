@@ -170,6 +170,8 @@ rep1.tsv,TRB,1234a""")
 
         self.assertEqual(1, dataset.get_example_count())
 
+        shutil.rmtree(path)
+
 
 
 
