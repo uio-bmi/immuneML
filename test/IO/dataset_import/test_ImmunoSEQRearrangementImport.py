@@ -137,3 +137,39 @@ rep2.tsv,TRB,1234a,no"""
         self.assertTrue(dataset_file.is_file())
 
         shutil.rmtree(path)
+
+    def test_alternative_repertoire_import(self):
+        path = EnvironmentSettings.root_path / "test/tmp/immunoseq_alternative/"
+
+        rep1text = """sample_name	productive_frequency	templates	amino_acid	rearrangement	v_resolved	d_resolved	j_resolved
+LivMet_45	0.014838454958215437	451	CASSLLGLGSEQYF	CTGCTGTCGGCTGCTCCCTCCCAGACATCTGTGTACTTCTGTGCCAGCAGTTTACTCGGGTTAGGGAGCGAGCAGTACTTCGGGCCG	TCRBV06-05*01	TCRBD02-01*02	TCRBJ02-07*01
+LivMet_45	0.0106928999144568	325	CASSPGQGEGYEQYF	CACGCCCTGCAGCCAGAAGACTCAGCCCTGTATCTCTGCGCCAGCAGCCCGGGACAGGGGGAGGGCTACGAGCAGTACTTCGGGCCG	TCRBV04-01*01	TCRBD01-01*01	TCRBJ02-07*01
+LivMet_45	0.0074356780943607296	226	CASSAGETQYF	ACTCTGACGATCCAGCGCACAGAGCAGCGGGACTCGGCCATGTATCGCTGTGCCAGCAGCGCAGGCGAGACCCAGTACTTCGGGCCA	TCRBV07-06*01	TCRBD01-01*01	TCRBJ02-05*01
+LivMet_45	0.0072053694808185825	219	CASSGTGEKGEQYF	ATCCGGTCCACAAAGCTGGAGGACTCAGCCATGTACTTCTGTGCCAGCAGTGGGACAGGGGAGAAGGGCGAGCAGTACTTCGGGCCG	TCRBV02-01*01	TCRBD01-01*01	TCRBJ02-07*01
+"""
+        PathBuilder.build(path)
+
+        with open(path / "rep1.tsv", "w") as file:
+            file.writelines(rep1text)
+
+        with open(path / "metadata.csv", "w") as file:
+            file.writelines(
+                """filename,chain,subject_id
+rep1.tsv,TRB,1234a""")
+
+        params = DefaultParamsLoader.load(EnvironmentSettings.default_params_path / "datasets/", "ImmunoSEQRearrangement")
+        params["is_repertoire"] = True
+        params["result_path"] = path
+        params["metadata_file"] = path / "metadata.csv"
+        params["path"] = path
+        params["column_mapping"] = {"v_resolved": "v_alleles", "j_resolved": "j_alleles", "templates": "counts",
+          "rearrangement": "sequences", "amino_acid": "sequence_aas"}
+        params["columns_to_load"] = ["v_resolved", "j_resolved", "templates", "amino_acid", "rearrangement"]
+
+        dataset = ImmunoSEQRearrangementImport.import_dataset(params, "alternative")
+
+        self.assertEqual(1, dataset.get_example_count())
+
+
+
+
