@@ -63,8 +63,8 @@ class VDJdbImport(DataImport):
             .. indent with spaces
             .. code-block:: yaml
 
-                    V: v_genes
-                    J: j_genes
+                    V: v_alleles
+                    J: j_alleles
                     CDR3: sequence_aas
                     complex.id: sequence_identifiers
                     Gene: chains

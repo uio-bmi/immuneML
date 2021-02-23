@@ -127,11 +127,11 @@ class ImportHelper:
                     df[f"{gene}_{type}"] = None
 
             # step 2: fill in missing info
-            missing_gene = df[f"{gene}_genes"].isna()
-            missing_allele = df[f"{gene}_alleles"].isna()
+            missing_gene = df[f"{gene}_genes"].isnull()
+            missing_allele = df[f"{gene}_alleles"].isnull()
 
             df.loc[missing_gene, f"{gene}_genes"] = df.loc[missing_gene, f"{gene}_subgroups"]
-            df.loc[missing_allele, f"{gene}_alleles"] = df.loc[missing_gene, f"{gene}_genes"]
+            df.loc[missing_allele, f"{gene}_alleles"] = df.loc[missing_allele, f"{gene}_genes"]
 
         return df
 

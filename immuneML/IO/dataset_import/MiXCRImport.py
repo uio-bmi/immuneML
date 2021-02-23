@@ -52,8 +52,8 @@ class MiXCRImport(DataImport):
         .. code-block:: yaml
 
                 cloneCount: counts
-                allVHitsWithScore: v_genes
-                allJHitsWithScore: j_genes
+                allVHitsWithScore: v_alleles
+                allJHitsWithScore: j_alleles
 
         The columns that specify the sequences to import are handled by the region_type parameter.
         A custom column mapping can be specified here if necessary (for example; adding additional data fields if
