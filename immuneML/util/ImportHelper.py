@@ -179,13 +179,13 @@ class ImportHelper:
                     df = pd.read_csv(filepath, sep=params.separator, iterator=False, usecols=params.columns_to_load, dtype=str)
                 except ValueError:
                     df = pd.read_csv(filepath, sep=params.separator, iterator=False, dtype=str)
-                    warnings.warn(f"ImportHelper: failed to import columns {params.columns_to_load}, imported the"
-                                  f"following instead: {list(df.columns)}")
+                    warnings.warn(f"ImportHelper: failed to import columns {params.columns_to_load} for "
+                                  f"the input file {filepath}, imported the following instead: {list(df.columns)}")
         except Exception as ex:
             raise Exception(f"{ex}\n\nImportHelper: an error occurred during dataset import while parsing the input file: {filepath}.\n"
                             f"Please make sure this is a correct immune receptor data file (not metadata).\n"
-                            f"The parameters used for import are {params}.\nFor technical description of the error, see the log above."
-                            f" For details on how to specify the dataset import, see the documentation.")
+                            f"The parameters used for import are {params}.\nFor technical description of the error, see the log above. "
+                            f"For details on how to specify the dataset import, see the documentation.")
 
         if hasattr(params, "column_mapping") and params.column_mapping is not None:
             df.rename(columns=params.column_mapping, inplace=True)
