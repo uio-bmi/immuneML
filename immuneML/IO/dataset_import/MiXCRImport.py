@@ -142,8 +142,8 @@ class MiXCRImport(DataImport):
 
         df["counts"] = df["counts"].astype(float).astype(int)
 
-        df["v_genes"] = MiXCRImport._load_genes(df, "v_genes")
-        df["j_genes"] = MiXCRImport._load_genes(df, "j_genes")
+        df["v_alleles"] = MiXCRImport._load_alleles(df, "v_alleles")
+        df["j_alleles"] = MiXCRImport._load_alleles(df, "j_alleles")
 
         ImportHelper.drop_empty_sequences(df, params.import_empty_aa_sequences, params.import_empty_nt_sequences)
         ImportHelper.drop_illegal_character_sequences(df, params.import_illegal_characters)
@@ -153,9 +153,9 @@ class MiXCRImport(DataImport):
         return df
 
     @staticmethod
-    def _load_genes(df: pd.DataFrame, column_name):
+    def _load_alleles(df: pd.DataFrame, column_name):
         # note: MiXCR omits the '/' for 'TRA.../DV' genes
-        tmp_df = df.apply(lambda row: row[column_name].split(",")[0].replace("DV", "/DV").replace("//", "/"), axis=1)
+        tmp_df = df.apply(lambda row: row[column_name].split(",")[0].split("(")[0].replace("DV", "/DV").replace("//", "/"), axis=1)
 
         return tmp_df
 
