@@ -11,10 +11,12 @@ class AdaptiveImportHelper:
 
     @staticmethod
     def preprocess_dataframe(dataframe: pd.DataFrame, params: DatasetImportParams):
-        dataframe.loc[:, "frame_types"] = dataframe.frame_types.str.upper()
+        if "frame_types" in dataframe.columns:
+            dataframe.loc[:, "frame_types"] = dataframe.frame_types.str.upper()
 
-        frame_type_list = ImportHelper.prepare_frame_type_list(params)
-        dataframe = dataframe[dataframe["frame_types"].isin(frame_type_list)]
+            frame_type_list = ImportHelper.prepare_frame_type_list(params)
+            dataframe = dataframe[dataframe["frame_types"].isin(frame_type_list)]
+
         dataframe.loc[:, "region_types"] = params.region_type.name
 
         if params.region_type == RegionType.IMGT_CDR3:
@@ -25,18 +27,10 @@ class AdaptiveImportHelper:
             dataframe.loc[:, 'sequences'] = [y[(81 - 3 * len(x)): 81] if x is not None else None for x, y in zip(dataframe['sequence_aas'], dataframe['sequences'])]
 
         dataframe = AdaptiveImportHelper.parse_adaptive_germline_to_imgt(dataframe, params.organism)
-        dataframe = ImportHelper.standardize_none_values(dataframe)
+        ImportHelper.update_gene_info(dataframe)
+        ImportHelper.load_chains(dataframe)
         ImportHelper.drop_empty_sequences(dataframe, params.import_empty_aa_sequences, params.import_empty_nt_sequences)
         ImportHelper.drop_illegal_character_sequences(dataframe, params.import_illegal_characters)
-
-        if "chains" in dataframe.columns:
-            dataframe.loc[:, "chains"] = ImportHelper.load_chains(dataframe)
-        else:
-            # loading from v_subgroups is preferred as sometimes v_genes is None when v_subgroups is defined
-            if "v_subgroups" in dataframe.columns:
-                dataframe.loc[:, "chains"] = ImportHelper.load_chains_from_column(dataframe, "v_subgroups")
-            else:
-                dataframe.loc[:, "chains"] = ImportHelper.load_chains_from_genes(dataframe)
 
         return dataframe
 
@@ -56,19 +50,19 @@ class AdaptiveImportHelper:
 
     @staticmethod
     def parse_germline(dataframe: pd.DataFrame, gene_name_replacement: dict, germline_value_replacement: dict):
+        for gene in ["v", "j"]:
 
-        for column in ["v_genes", "j_genes"]:
-            dataframe.loc[:, column] = dataframe[column].replace(gene_name_replacement, regex=True)
+            if f"{gene}_genes" in dataframe.columns:
+                dataframe.loc[:, f"{gene}_genes"] = dataframe[f"{gene}_genes"].replace(gene_name_replacement, regex=True)
+                dataframe.loc[:, f"{gene}_genes"] = dataframe[f"{gene}_genes"].replace(germline_value_replacement, regex=True)
 
-        for column in ["v_subgroups", "v_genes", "j_subgroups", "j_genes"]:
-            if column in dataframe.columns:
-                dataframe.loc[:, column] = dataframe[column].replace(germline_value_replacement, regex=True)
+            if f"{gene}_alleles" in dataframe.columns:
+                dataframe.loc[:, f"{gene}_alleles"] = dataframe[f"{gene}_alleles"].replace(gene_name_replacement, regex=True)
+                dataframe.loc[:, f"{gene}_alleles"] = dataframe[f"{gene}_alleles"].replace(germline_value_replacement, regex=True)
 
-        for col_gene, col_allele in [["v_genes", "v_alleles"], ["j_genes", "j_alleles"]]:
-            if col_allele in dataframe.columns and col_gene in dataframe.columns:
-                dataframe.loc[:, col_allele] = dataframe[col_gene].str.cat([Constants.ALLELE_DELIMITER + item.split(Constants.ALLELE_DELIMITER)[-1]
-                                                                     if item is not None and Constants.ALLELE_DELIMITER in item else '' for item in dataframe[col_allele]])
-            elif col_gene in dataframe.columns:
-                dataframe.loc[:, col_allele] = dataframe[col_gene].copy()
+            if f"{gene}_subgroups" in dataframe.columns:
+                    dataframe.loc[:, f"{gene}_subgroups"] = dataframe[f"{gene}_subgroups"].replace(germline_value_replacement, regex=True)
 
         return dataframe
+
+

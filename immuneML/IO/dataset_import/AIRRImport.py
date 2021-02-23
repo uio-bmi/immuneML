@@ -167,19 +167,17 @@ class AIRRImport(DataImport):
                 ImportHelper.junction_to_cdr3(df, params.region_type)
         # todo else: support "full_sequence" import through regiontype?
 
-        if "chains" not in df.columns:
-            df.loc[:, "chains"] = ImportHelper.load_chains_from_genes(df)
-
-        df = ImportHelper.update_gene_info(df)
         ImportHelper.drop_empty_sequences(df, params.import_empty_aa_sequences, params.import_empty_nt_sequences)
         ImportHelper.drop_illegal_character_sequences(df, params.import_illegal_characters)
+        ImportHelper.update_gene_info(df)
+        ImportHelper.load_chains(df)
 
         return df
 
     @staticmethod
     def alternative_load_func(filename, params):
         df = airr.load_rearrangement(filename)
-        df = ImportHelper.standardize_none_values(df)
+        ImportHelper.standardize_none_values(df)
         df.dropna(axis="columns", how="all", inplace=True)
         return df
 

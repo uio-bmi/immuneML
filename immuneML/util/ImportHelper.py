@@ -101,14 +101,38 @@ class ImportHelper:
 
     @staticmethod
     def update_gene_info(df: pd.DataFrame):
+        """
+        Updates gene info in 2 steps:
+        - First, columns are added if they were not present. This is done by going from the highest level of information (alleles)
+          towards the lowest level of information (subgroups) by stripping away suffixes. If gene and subgroup columns were already
+          present, suffixes are still stripped away just in case.
+        - Next, if there are None values present, the highest possible level of information is copied in from the lower level information fields.
+          This is done by moving from subgroups towards alleles. So if for one particular receptor only the subgroup was present, the subgroup
+          will be copied into the genes and alleles column.
+        """
         for gene in ['v', 'j']:
-            if f"{gene}_genes" in df.columns:
-                df.loc[:, f"{gene}_alleles"] = df[f"{gene}_genes"]
-                df.loc[:, f"{gene}_genes"] = ImportHelper.strip_alleles(df, f"{gene}_genes")
-                if f'{gene}_subgroups' not in df.columns:
-                    df.loc[:, f'{gene}_subgroups'] = [item.split("-")[0] if item is not None else None for item in df[f"{gene}_genes"]]
-            elif f"{gene}_alleles" in df.columns and f"{gene}_genes" not in df.columns:
+            # step 1: create all columns
+            if f"{gene}_alleles" in df.columns and not f"{gene}_genes" in df.columns:
                 df.loc[:, f"{gene}_genes"] = ImportHelper.strip_alleles(df, f"{gene}_alleles")
+
+            if f"{gene}_genes" in df.columns:
+                df.loc[:, f"{gene}_genes"] = ImportHelper.strip_alleles(df, f"{gene}_genes")
+                if not f"{gene}_subgroups" in df.columns:
+                    df.loc[:, f"{gene}_subgroups"] = ImportHelper.strip_genes(df, f"{gene}_genes")
+            elif f"{gene}_subgroups" in df.columns:
+                df.loc[:, f"{gene}_subgroups"] = ImportHelper.strip_genes(df, f"{gene}_subgroups")
+
+            for type in ["alleles", "genes", "subgroups"]:
+                if f"{gene}_{type}" not in df.columns:
+                    df[f"{gene}_{type}"] = None
+
+            # step 2: fill in missing info
+            missing_gene = df[f"{gene}_genes"].isnull()
+            missing_allele = df[f"{gene}_alleles"].isnull()
+
+            df.loc[missing_gene, f"{gene}_genes"] = df.loc[missing_gene, f"{gene}_subgroups"]
+            df.loc[missing_allele, f"{gene}_alleles"] = df.loc[missing_allele, f"{gene}_genes"]
+
         return df
 
     @staticmethod
@@ -151,12 +175,17 @@ class ImportHelper:
             if alternative_load_func:
                 df = alternative_load_func(filepath, params)
             else:
-                df = pd.read_csv(filepath, sep=params.separator, iterator=False, usecols=params.columns_to_load, dtype=str)
+                try:
+                    df = pd.read_csv(filepath, sep=params.separator, iterator=False, usecols=params.columns_to_load, dtype=str)
+                except ValueError:
+                    df = pd.read_csv(filepath, sep=params.separator, iterator=False, dtype=str)
+                    warnings.warn(f"ImportHelper: failed to import columns {params.columns_to_load} for "
+                                  f"the input file {filepath}, imported the following instead: {list(df.columns)}")
         except Exception as ex:
             raise Exception(f"{ex}\n\nImportHelper: an error occurred during dataset import while parsing the input file: {filepath}.\n"
                             f"Please make sure this is a correct immune receptor data file (not metadata).\n"
-                            f"The parameters used for import are {params}.\nFor technical description of the error, see the log above."
-                            f" For details on how to specify the dataset import, see the documentation.")
+                            f"The parameters used for import are {params}.\nFor technical description of the error, see the log above. "
+                            f"For details on how to specify the dataset import, see the documentation.")
 
         if hasattr(params, "column_mapping") and params.column_mapping is not None:
             df.rename(columns=params.column_mapping, inplace=True)
@@ -164,13 +193,13 @@ class ImportHelper:
         if hasattr(params, "metadata_column_mapping") and params.metadata_column_mapping is not None:
             df.rename(columns=params.metadata_column_mapping, inplace=True)
 
-        df = ImportHelper.standardize_none_values(df)
+        ImportHelper.standardize_none_values(df)
 
         return df
 
     @staticmethod
     def standardize_none_values(dataframe: pd.DataFrame) -> pd.DataFrame:
-        return dataframe.replace({key: Constants.UNKNOWN for key in ["unresolved", "no data", "na", "unknown", "null", "nan", np.nan, ""]})
+        dataframe.replace({key: Constants.UNKNOWN for key in ["unresolved", "no data", "na", "unknown", "null", "nan", np.nan, ""]}, inplace=True)
 
     @staticmethod
     def drop_empty_sequences(dataframe: pd.DataFrame, import_empty_aa_sequences: bool, import_empty_nt_sequences: bool) -> pd.DataFrame:
@@ -235,24 +264,26 @@ class ImportHelper:
         return frame_type_list
 
     @staticmethod
-    def load_chains(df: pd.DataFrame, column_name="chains") -> list:
-        return [Chain.get_chain(chain_str).value if chain_str is not None else None for chain_str in df[column_name]]
+    def load_chains(df: pd.DataFrame) -> list:
+        if "chains" in df.columns:
+            df.loc[:, "chains"] = ImportHelper.load_chains_from_chains(df)
+        else:
+            df.loc[:, "chains"] = ImportHelper.load_chains_from_genes(df)
+
+    @staticmethod
+    def load_chains_from_chains(df: pd.DataFrame) -> list:
+        return [Chain.get_chain(chain_str).value if chain_str is not None else None for chain_str in df["chains"]]
 
     @staticmethod
     def load_chains_from_genes(df: pd.DataFrame) -> list:
-        result = None
-
-        columns_with_gene_info = ["v_genes", "j_genes", "v_alleles", "j_alleles"]
-        present_columns = [col for col in columns_with_gene_info if col in df.columns]
-
-        if len(present_columns) > 0:
-            result = ImportHelper.load_chains_from_column(df, present_columns[0])
-
-        return result
+        return df.apply(ImportHelper.get_chain_for_row, axis=1)
 
     @staticmethod
-    def load_chains_from_column(df: pd.DataFrame, column_name) -> list:
-        return [Chain.get_chain(chain_str).value if chain_str is not None else None for chain_str in df[column_name].str[0:3]]
+    def get_chain_for_row(row):
+        for col in ["v_subgroup", "j_subgroup", "v_genes", "j_genes", "v_alleles", "j_alleles"]:
+            if col in row and row[col] is not None:
+                return Chain.get_chain(str(row[col])[0:3]).value
+        return None
 
     @staticmethod
     def junction_to_cdr3(df: pd.DataFrame, region_type: RegionType):
@@ -270,11 +301,19 @@ class ImportHelper:
 
     @staticmethod
     def strip_alleles(df: pd.DataFrame, column_name):
+        return ImportHelper.strip_suffix(df, column_name, Constants.ALLELE_DELIMITER)
+
+    @staticmethod
+    def strip_genes(df: pd.DataFrame, column_name):
+        return ImportHelper.strip_suffix(df, column_name, Constants.GENE_DELIMITER)
+
+    @staticmethod
+    def strip_suffix(df: pd.DataFrame, column_name, delimiter):
         """
-        Removes alleles (everything after the '*' character) from a column in the DataFrame
+        Safely removes everything after a delimiter from a column in the DataFrame
         """
         if column_name in df.columns:
-            return df[column_name].apply(lambda gene_col: None if gene_col is None else gene_col.split(Constants.ALLELE_DELIMITER)[0])
+            return df[column_name].apply(lambda gene_col: None if gene_col is None else gene_col.rsplit(delimiter)[0])
 
     @staticmethod
     def get_sequence_filenames(path: Path, dataset_name: str):
