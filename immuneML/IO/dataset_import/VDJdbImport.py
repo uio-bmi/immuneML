@@ -146,15 +146,14 @@ class VDJdbImport(DataImport):
         else:
             df.loc[df["sequence_identifiers"] == "0", "sequence_identifiers"] = None
 
-        if "chains" not in df.columns:
-            df.loc[:, "chains"] = ImportHelper.load_chains_from_genes(df)
+        ImportHelper.drop_empty_sequences(df, params.import_empty_aa_sequences, params.import_empty_nt_sequences)
+        ImportHelper.drop_illegal_character_sequences(df, params.import_illegal_characters)
+        ImportHelper.update_gene_info(df)
+        ImportHelper.load_chains(df)
 
         df["receptor_identifiers"] = df["sequence_identifiers"]
         df["sequence_identifiers"] = VDJdbImport.get_sequence_identifiers(df["sequence_identifiers"], df["chains"])
 
-        ImportHelper.update_gene_info(df)
-        ImportHelper.drop_empty_sequences(df, params.import_empty_aa_sequences, params.import_empty_nt_sequences)
-        ImportHelper.drop_illegal_character_sequences(df, params.import_illegal_characters)
         df = VDJdbImport.extract_meta_columns(df, params)
 
         return df

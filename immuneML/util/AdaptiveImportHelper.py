@@ -27,18 +27,10 @@ class AdaptiveImportHelper:
             dataframe.loc[:, 'sequences'] = [y[(81 - 3 * len(x)): 81] if x is not None else None for x, y in zip(dataframe['sequence_aas'], dataframe['sequences'])]
 
         dataframe = AdaptiveImportHelper.parse_adaptive_germline_to_imgt(dataframe, params.organism)
-        dataframe = ImportHelper.standardize_none_values(dataframe)
+        ImportHelper.update_gene_info(dataframe)
+        ImportHelper.load_chains(dataframe)
         ImportHelper.drop_empty_sequences(dataframe, params.import_empty_aa_sequences, params.import_empty_nt_sequences)
         ImportHelper.drop_illegal_character_sequences(dataframe, params.import_illegal_characters)
-
-        if "chains" in dataframe.columns:
-            dataframe.loc[:, "chains"] = ImportHelper.load_chains(dataframe)
-        else:
-            # loading from v_subgroups is preferred as sometimes v_genes is None when v_subgroups is defined
-            if "v_subgroups" in dataframe.columns:
-                dataframe.loc[:, "chains"] = ImportHelper.load_chains_from_column(dataframe, "v_subgroups")
-            else:
-                dataframe.loc[:, "chains"] = ImportHelper.load_chains_from_genes(dataframe)
 
         return dataframe
 
@@ -64,26 +56,13 @@ class AdaptiveImportHelper:
                 dataframe.loc[:, f"{gene}_genes"] = dataframe[f"{gene}_genes"].replace(gene_name_replacement, regex=True)
                 dataframe.loc[:, f"{gene}_genes"] = dataframe[f"{gene}_genes"].replace(germline_value_replacement, regex=True)
 
-                if f"{gene}_alleles" in dataframe.columns:
-                    dataframe.loc[:, f"{gene}_alleles"] = dataframe[f"{gene}_genes"].str.cat(
-                        [Constants.ALLELE_DELIMITER + item.split(Constants.ALLELE_DELIMITER)[-1]
-                         if item is not None and Constants.ALLELE_DELIMITER in item else '' for item in dataframe[f"{gene}_alleles"]])
-                else:
-                    dataframe.loc[:, f"{gene}_alleles"] = dataframe[f"{gene}_genes"].copy()
-
-            elif f"{gene}_alleles" in dataframe.columns:
-                # alleles present but genes absent, extract genes from alleles
+            if f"{gene}_alleles" in dataframe.columns:
                 dataframe.loc[:, f"{gene}_alleles"] = dataframe[f"{gene}_alleles"].replace(gene_name_replacement, regex=True)
                 dataframe.loc[:, f"{gene}_alleles"] = dataframe[f"{gene}_alleles"].replace(germline_value_replacement, regex=True)
 
-                dataframe.loc[:, f"{gene}_genes"] = dataframe[f"{gene}_alleles"].str.rsplit(Constants.ALLELE_DELIMITER, n=1, expand=True)[0]
-
             if f"{gene}_subgroups" in dataframe.columns:
-                dataframe.loc[:, f"{gene}_subgroups"] = dataframe[f"{gene}_subgroups"].replace(germline_value_replacement, regex=True)
-            elif f"{gene}_genes" in dataframe.columns:
-                # genes present but subgroups absent, extract subgroups from genes
-                dataframe.loc[:, f"{gene}_subgroups"] = dataframe[f"{gene}_genes"].str.rsplit("-", n=1, expand=True)[0]
-
+                    dataframe.loc[:, f"{gene}_subgroups"] = dataframe[f"{gene}_subgroups"].replace(germline_value_replacement, regex=True)
 
         return dataframe
+
 

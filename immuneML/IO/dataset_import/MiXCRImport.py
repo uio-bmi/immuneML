@@ -144,11 +144,11 @@ class MiXCRImport(DataImport):
 
         df["v_genes"] = MiXCRImport._load_genes(df, "v_genes")
         df["j_genes"] = MiXCRImport._load_genes(df, "j_genes")
-        df["chains"] = ImportHelper.load_chains_from_genes(df)
 
-        ImportHelper.update_gene_info(df)
         ImportHelper.drop_empty_sequences(df, params.import_empty_aa_sequences, params.import_empty_nt_sequences)
         ImportHelper.drop_illegal_character_sequences(df, params.import_illegal_characters)
+        ImportHelper.update_gene_info(df)
+        ImportHelper.load_chains(df)
 
         return df
 

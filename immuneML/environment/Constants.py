@@ -8,6 +8,7 @@ class Constants:
     # importing constants
     UNKNOWN = None
     ALLELE_DELIMITER = "*"
+    GENE_DELIMITER = "-"
     STOP_CODON = "*"
     CACHE_TYPE = "cache_type"
     COMMENT_SIGN = "#"

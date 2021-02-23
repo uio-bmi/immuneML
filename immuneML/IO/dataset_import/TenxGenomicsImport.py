@@ -144,9 +144,7 @@ class TenxGenomicsImport(DataImport):
         ImportHelper.drop_empty_sequences(df, params.import_empty_aa_sequences, params.import_empty_nt_sequences)
         ImportHelper.drop_illegal_character_sequences(df, params.import_illegal_characters)
         ImportHelper.update_gene_info(df)
-
-        if "chains" not in df.columns:
-            df.loc[:, "chains"] = ImportHelper.load_chains_from_genes(df)
+        ImportHelper.load_chains(df)
 
         return df
 

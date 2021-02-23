@@ -2,6 +2,7 @@ import shutil
 from unittest import TestCase
 
 from immuneML.IO.dataset_import.GenericImport import GenericImport
+from immuneML.data_model.receptor.receptor_sequence.Chain import Chain
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.util.PathBuilder import PathBuilder
 
@@ -56,7 +57,7 @@ rep1.tsv,TRA,1234e,no"""
         self.assertEqual('ASSLVGGPSSEAF', repertoire.sequences[1].amino_acid_sequence)
         self.assertEqual('ASSSFWGSDTGELF', repertoire.sequences[2].amino_acid_sequence)
         self.assertListEqual([1, 3, 7, 2, 10, None, 1, 3, None, 2, 1, 1, 1, 1, 1], list(rep.get_counts()))
-        self.assertEqual(None, rep.get_chains())
+        self.assertListEqual([Chain.BETA for i in range(15)], list(rep.get_chains()))
 
         shutil.rmtree(path)
 

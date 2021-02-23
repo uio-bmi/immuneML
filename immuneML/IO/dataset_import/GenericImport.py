@@ -135,10 +135,11 @@ class GenericImport(DataImport):
 
     @staticmethod
     def preprocess_dataframe(df: pd.DataFrame, params: DatasetImportParams):
-        ImportHelper.junction_to_cdr3(df, params.region_type)
         ImportHelper.drop_empty_sequences(df, params.import_empty_aa_sequences, params.import_empty_nt_sequences)
         ImportHelper.drop_illegal_character_sequences(df, params.import_illegal_characters)
+        ImportHelper.junction_to_cdr3(df, params.region_type)
         ImportHelper.update_gene_info(df)
+        ImportHelper.load_chains(df)
 
         return df
 
