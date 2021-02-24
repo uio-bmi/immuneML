@@ -277,7 +277,7 @@ instruction in the :code:`selection` and :code:`assessment` loop under :code:`re
 `ML model reports <https://docs.immuneml.uio.no/specification.html#ml-model-reports>`_ and `Train ML model reports <https://docs.immuneml.uio.no/specification.html#train-ml-model-reports>`_ can only be run through the :ref:`TrainMLModel` instruction. :ref:`ML reports` can be specified inside both the
 :code:`selection` and :code:`assessment` loop under :code:`reports:models`. :ref:`Train ML model reports` must be specified under :code:`reports`.
 
-Finally, :ref:`Multi dataset reports` can be specified under :code:`benchmark_reports` when running the :ref:`MultiDatasetBenchmarkTool`.
+Finally, :ref:`Multi dataset reports` can be specified under :code:`benchmark_reports` when running the :code:`MultiDatasetBenchmarkTool`.
 
 The following specification shows the places where `Data reports <https://docs.immuneml.uio.no/specification.html#data-reports>`_,
 `Encoding reports <https://docs.immuneml.uio.no/specification.html#encoding-reports>`_ ,

@@ -157,7 +157,7 @@ The full YAML specification:
   output:
     format: HTML # output the result as HTML
 
-The result of this analysis is available at this link.
+The result of this analysis is available in `NIRD research data archive <http://doi.org/10.11582/2021.00008>`_.
 
 Robustness assessment
 --------------------------
@@ -190,7 +190,7 @@ To construct smaller datasets of 400, 200, 100 and 50 subjects randomly from bot
       dataset_export_formats: # in which formats to export the subsampled datasets
         - Pickle
 
-The results of this analysis are available at this link.
+The results of the analysis are available in `NIRD research data archive <http://doi.org/10.11582/2021.00008>`_.
 
 Running the analysis on subsampled datasets
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -346,4 +346,4 @@ The YAML specification is given below:
   output:
     format: HTML
 
-The result of this analysis is available at this link.
+The result of this analysis is available in `NIRD research data archive <http://doi.org/10.11582/2021.00008>`_.

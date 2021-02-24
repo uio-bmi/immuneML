@@ -13,17 +13,17 @@ and some basic knowledge of how git works.
   :maxdepth: 1
   :caption: Developer tutorials
 
-  install_for_development.rst
-  how_to_add_new_ML_method.rst
-  how_to_add_new_encoding.rst
-  how_to_add_new_report.rst
+  developer_docs/install_for_development.rst
+  developer_docs/how_to_add_new_ML_method.rst
+  developer_docs/how_to_add_new_encoding.rst
+  developer_docs/how_to_add_new_report.rst
 
 .. toctree::
   :maxdepth: 1
   :caption: Platform overview
 
-  platform_overview.rst
-  data_model.rst
+  developer_docs/platform_overview.rst
+  developer_docs/data_model.rst
 
 .. toctree::
   :maxdepth: 4

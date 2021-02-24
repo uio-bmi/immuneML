@@ -32,7 +32,7 @@ TCRAV32-01\*01, TCRBVA-or09_02, TCRBV22-01.
 The original data file as downloaded from immuneACCESS is available here: :download:`naiveTCRAB.tsv <../_static/files/Heikkila et al 2020 naive PBMC TCRAB immuneACCESS 20201223.tsv>`
 
 Using this data, three datasets were created by combining epitope-specific paired receptor data with naive randomly paired data. These data along with
-the results of testing are available at this link.
+the results of testing are available in `NIRD research data archive <http://doi.org/10.11582/2021.00009>`_.
 
 Adding a new ML method
 -----------------------
@@ -76,7 +76,7 @@ gain matrices, similar to the work of `Ploenzke and Irizarry 2018 <https://www.b
 models is described in the tutorial :ref:`How to add a new report`. Briefly, adding a report to explore the motifs in the CNN was done by implementing and adding
 a class that implements the given report, without modifying any other part of the code.
 
-The input data, YAML specifications and results of these comparisons are available at this link.
+The input data, YAML specifications and results of these comparisons are available in `NIRD research data archive <http://doi.org/10.11582/2021.00009>`_.
 
 YAML specification for training machine learning models and recovering motifs in the GILGFVFTL dataset:
 
