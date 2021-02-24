@@ -193,6 +193,7 @@ class ImportHelper:
             usecols = set(params.columns_to_load) if hasattr(params, "columns_to_load") and params.columns_to_load is not None else set()
             usecols = usecols.union(set(params.column_mapping.keys()) if hasattr(params, "column_mapping") and params.column_mapping is not None else set())
             usecols = usecols.union(set(params.column_mapping_synonyms.keys()) if hasattr(params, "column_mapping_synonyms") and params.column_mapping_synonyms is not None else set())
+            usecols = usecols.union(set(params.metadata_column_mapping.keys()) if hasattr(params, "metadata_column_mapping") and params.metadata_column_mapping is not None else set())
         else:
             usecols = None
 
