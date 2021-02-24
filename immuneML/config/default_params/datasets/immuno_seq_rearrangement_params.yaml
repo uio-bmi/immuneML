@@ -20,6 +20,9 @@ column_mapping: # adaptive column names -> immuneML repertoire fields
   j_allele: j_alleles
   templates: counts
   locus: chains
+column_mapping_synonyms: # adaptive column names -> immuneML repertoire fields
+  v_resolved: v_alleles  # alternative columns to use when v_alleles and j_alleles are not present
+  j_resolved: j_alleles
 import_empty_nt_sequences: True # keep sequences even though the nucleotide sequence might be empty
 import_empty_aa_sequences: False # filter out sequences if they don't have sequence_aa set
 organism: human

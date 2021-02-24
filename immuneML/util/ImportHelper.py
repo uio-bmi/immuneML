@@ -175,27 +175,53 @@ class ImportHelper:
             if alternative_load_func:
                 df = alternative_load_func(filepath, params)
             else:
-                try:
-                    df = pd.read_csv(filepath, sep=params.separator, iterator=False, usecols=params.columns_to_load, dtype=str)
-                except ValueError:
-                    df = pd.read_csv(filepath, sep=params.separator, iterator=False, dtype=str)
-                    warnings.warn(f"ImportHelper: failed to import columns {params.columns_to_load} for "
-                                  f"the input file {filepath}, imported the following instead: {list(df.columns)}")
+                df = ImportHelper.safe_load_dataframe(filepath, params)
         except Exception as ex:
             raise Exception(f"{ex}\n\nImportHelper: an error occurred during dataset import while parsing the input file: {filepath}.\n"
                             f"Please make sure this is a correct immune receptor data file (not metadata).\n"
                             f"The parameters used for import are {params}.\nFor technical description of the error, see the log above. "
                             f"For details on how to specify the dataset import, see the documentation.")
 
+        ImportHelper.rename_dataframe_columns(df, params)
+        ImportHelper.standardize_none_values(df)
+
+        return df
+
+    @staticmethod
+    def safe_load_dataframe(filepath, params):
+        if hasattr(params, "columns_to_load") and params.columns_to_load is not None:
+            usecols = set(params.columns_to_load) if hasattr(params, "columns_to_load") and params.columns_to_load is not None else set()
+            usecols = usecols.union(set(params.column_mapping.keys()) if hasattr(params, "column_mapping") and params.column_mapping is not None else set())
+            usecols = usecols.union(set(params.column_mapping_synonyms.keys()) if hasattr(params, "column_mapping_synonyms") and params.column_mapping_synonyms is not None else set())
+        else:
+            usecols = None
+
+        try:
+            df = pd.read_csv(filepath, sep=params.separator, iterator=False, usecols=usecols, dtype=str)
+        except ValueError:
+            try:
+                df = pd.read_csv(filepath, sep=params.separator, iterator=False, usecols=params.columns_to_load, dtype=str)
+            except ValueError:
+                df = pd.read_csv(filepath, sep=params.separator, iterator=False, dtype=str)
+                warnings.warn(f"ImportHelper: failed to import columns {params.columns_to_load} for "
+                              f"the input file {filepath}, imported the following instead: {list(df.columns)}")
+
+        return df
+
+    @staticmethod
+    def rename_dataframe_columns(df, params):
         if hasattr(params, "column_mapping") and params.column_mapping is not None:
             df.rename(columns=params.column_mapping, inplace=True)
+
+        if hasattr(params, "column_mapping_synonyms") and params.column_mapping_synonyms is not None:
+            for synonym, colname in params.column_mapping_synonyms.items():
+                if colname not in df.columns:
+                    df.rename(columns={synonym: colname}, inplace=True)
 
         if hasattr(params, "metadata_column_mapping") and params.metadata_column_mapping is not None:
             df.rename(columns=params.metadata_column_mapping, inplace=True)
 
-        ImportHelper.standardize_none_values(df)
 
-        return df
 
     @staticmethod
     def standardize_none_values(dataframe: pd.DataFrame) -> pd.DataFrame:
