@@ -21,7 +21,7 @@ class KmerSequenceEncoder(SequenceEncodingStrategy):
 
         """
         k = params.model["k"]
-        length = len(sequence.get_sequence())
+        length = len(sequence.get_sequence(params.model.get('sequence_type', None)))
 
         if length < k:
             logging.warning(f'KmerSequenceEncoder: Sequence length {length} is less than {k}. Ignoring sequence...')

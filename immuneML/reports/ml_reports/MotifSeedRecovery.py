@@ -34,11 +34,11 @@ class MotifSeedRecovery(MLReport):
     To find the overlap score between kmer features and implanted motif seeds, the two sequences are compared in a sliding
     window approach, and the maximum overlap is calculated.
 
-    Overlap scores between kmer features and implanted motifs are calculated differently based on hamming distance was
+    Overlap scores between kmer features and implanted motifs are calculated differently based on the Hamming distance that was
     allowed during implanting.
 
     .. indent with spaces
-    .. code-block::
+    .. code-block:: text
 
         Without hamming distance:
         Seed:     AAA  -> score = 3
@@ -64,6 +64,7 @@ class MotifSeedRecovery(MLReport):
 
 
     Arguments:
+
         implanted_motifs_per_label (dict): a nested dictionary that specifies the motif seeds that were implanted in
             the given dataset. The first level of keys in this dictionary represents the different labels. In the
             inner dictionary there should be two keys: "seeds" and "hamming_distance"
@@ -98,7 +99,6 @@ class MotifSeedRecovery(MLReport):
                         hamming_distance: True
                         gap_sizes:
                         - 2
-
 
     """
 

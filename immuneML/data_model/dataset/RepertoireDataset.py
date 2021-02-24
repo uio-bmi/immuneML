@@ -64,7 +64,7 @@ class RepertoireDataset(Dataset):
         present only in the label chosen for the ML model (e.g., disease), but also other information (e.g., age, HLA).
 
         Args:
-            field_names (list): list of the metadata fields to return; the fields must be present in the metadata files. To find fields available, use :py:obj:`immuneML.data_model.dataset.RepertoireDataset.RepertoireDataset.get_label_names` function.
+            field_names (list): list of the metadata fields to return; the fields must be present in the metadata files. To find fields available, use :py:obj:`~immuneML.data_model.dataset.RepertoireDataset.RepertoireDataset.get_label_names` function.
             return_df (bool): determines if the results should be returned as a dataframe where each column corresponds to a field or as a dictionary
 
         Returns:
@@ -72,6 +72,10 @@ class RepertoireDataset(Dataset):
             a dictionary where keys are fields names and values are lists of field values for each repertoire; alternatively returns the same information in dataframe format
 
         """
+        assert isinstance(self.metadata_file, Path) and self.metadata_file.is_file(), \
+            f"RepertoireDataset: for dataset {self.name} (id: {self.identifier}) metadata file is not set properly. The metadata file points to " \
+            f"{self.metadata_file}."
+
         df = pd.read_csv(self.metadata_file, sep=",", usecols=field_names, comment=Constants.COMMENT_SIGN)
         if return_df:
             return df
@@ -98,7 +102,7 @@ class RepertoireDataset(Dataset):
         Args:
             example_indices (list): a list of indices of examples (repertoires) to use in the new dataset
             path (Path): a path where to store the newly created dataset
-            dataset_type (str): a type of the dataset used as a part of the name of the resulting dataset; the values are defined as constants in :py:obj:`immuneML.data_model.dataset.Dataset.Dataset`
+            dataset_type (str): a type of the dataset used as a part of the name of the resulting dataset; the values are defined as constants in :py:obj:`~immuneML.data_model.dataset.Dataset.Dataset`
 
         Returns:
 

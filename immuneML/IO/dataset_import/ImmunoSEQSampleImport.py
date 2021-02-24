@@ -83,7 +83,7 @@ class ImmunoSEQSampleImport(DataImport):
         Valid immuneML fields that can be specified here are defined by Repertoire.FIELDS
 
         columns_to_load (list): Specifies which subset of columns must be loaded from the file. By default, this is:
-        [nucleotide, aminoAcid, count (templates/reads), vFamilyName, vGeneName, vGeneAllele, jFamilyName, jGeneName, jGeneAllele, sequenceStatus] # columns from the original file that will be imported
+        [nucleotide, aminoAcid, count (templates/reads), vFamilyName, vGeneName, vGeneAllele, jFamilyName, jGeneName, jGeneAllele, sequenceStatus]; these are the columns from the original file that will be imported
 
         metadata_column_mapping (dict): Specifies metadata for SequenceDatasets. This should specify a mapping similar
         to column_mapping where keys are immunoSEQ column names and values are the names that are internally used in immuneML

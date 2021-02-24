@@ -10,7 +10,7 @@ from immuneML.environment.SequenceType import SequenceType
 class PyTorchReceptorCNN(nn.Module):
     """
     This class implements the ReceptorCNN using PyTorch. This is one specific implementation of the architecture proposed in
-    :py:obj:`immuneML.ml_methods.ReceptorCNN.ReceptorCNN`.
+    :py:obj:`~immuneML.ml_methods.ReceptorCNN.ReceptorCNN`.
     """
 
     def __init__(self, kernel_count: int, kernel_size, positional_channels: int, sequence_type: SequenceType, background_probabilities, chain_names):
