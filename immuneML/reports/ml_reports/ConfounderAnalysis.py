@@ -17,13 +17,24 @@ from immuneML.util.PathBuilder import PathBuilder
 
 class ConfounderAnalysis(MLReport):
     """
-    A report that plots the distributions of the false positives and the false negatives with respect to each of
+    A report that plots the numbers of false positives and false negatives with respect to each value of
     the metadata features specified by the user. This allows checking whether a given machine learning model makes more
     misclassifications for some values of a metadata feature than for the others.
 
     Arguments:
 
         metadata_labels (list): A list of the metadata features to use as a basis for the calculations
+
+    YAML specification:
+
+    .. indent with spaces
+    .. code-block:: yaml
+
+        my_confounder_report:
+            ConfounderAnalysis:
+                metadata_labels:
+                  - age
+                  - sex
     """
 
     @classmethod
@@ -45,10 +56,6 @@ class ConfounderAnalysis(MLReport):
 
         self.metadata_labels = metadata_labels
 
-    # def _write_results_table(self, plotting_data):
-    #     filepath = self.result_path / "coefficients.csv"
-    #     plotting_data.to_csv(filepath, index=False)
-    #     return filepath
 
     def _generate(self) -> ReportResult:
         PathBuilder.build(self.result_path)
@@ -95,8 +102,6 @@ class ConfounderAnalysis(MLReport):
         paths.append(report_output_fig)
 
         result_table_path = self._write_results_table(listOfPlot, self.metadata_labels)
-        print(result_table_path)
-        # return ReportResult(name=self.name, output_figures=paths, output_tables=[ReportOutput([p for p in result_table_path if p is not None])])
         return ReportResult(name=self.name, output_figures=paths, output_tables=[ReportOutput(result_table_path[0])])
 
     def _write_results_table(self, plotting_data, labels):
