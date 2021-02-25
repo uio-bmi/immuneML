@@ -144,6 +144,7 @@ class ImmunoSEQSampleImport(DataImport):
                     vGeneAllele: v_alleles
                     jGeneAllele: j_alleles
                     count (templates/reads): counts
+
     """
 
     @staticmethod

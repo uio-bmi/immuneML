@@ -65,7 +65,7 @@ The :ref:`import of two datasets <How to import data into immuneML>` may be defi
           metadata_column_mapping:          # map column names of the file to label names
             epitope_column_name: my_epitope # my_epitope can be used as label
 
-Where the imported datasets can under :code:`instructions` be referenced using the keys :ref:`my_repertoire_dataset` and :ref:`my_receptor_dataset`.
+Where the imported datasets can under :code:`instructions` be referenced using the keys :code:`my_repertoire_dataset` and :code:`my_receptor_dataset`.
 Note that in practice, most analyses use just one dataset.
 
 An example of a full :code:`definitions` section which may be used for a machine learning task is given below.

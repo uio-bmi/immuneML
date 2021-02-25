@@ -138,6 +138,7 @@ class IReceptorImport(DataImport):
                     locus: chains
                     duplicate_count: counts
                     sequence_id: sequence_identifiers
+
     """
     REPERTOIRES_FOLDER = "repertoires/"
 

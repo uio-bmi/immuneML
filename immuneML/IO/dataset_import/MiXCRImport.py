@@ -107,6 +107,7 @@ class MiXCRImport(DataImport):
                     cloneCount: counts
                     allVHitsWithScore: v_genes
                     allJHitsWithScore: j_genes
+
     """
 
     SEQUENCE_NAME_MAP = {
