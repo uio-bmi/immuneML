@@ -7,10 +7,10 @@ can be replicated within immuneML. Additionally, we test the approach on dataset
 
 The dataset was downloaded from Adaptive Biotechnologies' `website <https://clients.adaptivebiotech.com/pub/Emerson-2017-NatGen>`_.
 Out of the 786 subjects (cohort 1: 666, cohort 2: 120), we removed 103 subjects from cohort 1 (1 with missing repertoire data, 25 with unknown CMV
-status, 3 with negative template counts for some of the sequences and the rest with no template count information). The metadata files for cohorts 1 and 2
-with the list of subjects used in the downstream analysis is available at this link.
+status, 3 with negative template counts for some of the sequences and the rest with no template count information).
 
 The complete collection of original files used in this use case can be found in the NIRD research data archive (DOI: `10.11582/2021.00008 <https://doi.org/10.11582/2021.00008>`_).
+This also includes the metadata files for cohorts 1 and 2 with the list of subjects included in this use case.
 Note that the YAML specifications in the original dataset were compatible with immuneML version 1.0.1.
 This documentation page contains the YAML specifications for equivalent analyses with the latest immuneML version.
 

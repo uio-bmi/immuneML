@@ -23,11 +23,11 @@ file, in columns where the header and values correspond to the label and classes
 
   Metadata for repertoire classification
 
-When training an ML model, the goal is for the model to learn signals within the data which discriminate between the different classes. An ML model
-that predicts classes is also referred to as a classifier. A signal can have a variety of definitions, including the presence of specific receptors,
+When training an ML model, the goal is for the model to learn **signals** within the data which discriminate between the different classes. An ML model
+that predicts classes is also referred to as a **classifier**. A signal can have a variety of definitions, including the presence of specific receptors,
 groups of similar receptors or short CDR3 subsequences in an immune repertoire. Our assumptions about what makes up a ‘signal’ determines how we
-should represent our data to the ML model. This representation is called encoding. In this tool, the appropriate encoding is chosen based on the
-answers to the last two questions in the graphical user interface.
+should represent our data to the ML model. This representation is called **encoding**. In this tool, the encoding is automatically chosen based on
+the user's assumptions about the dataset.
 
 .. figure:: ../_static/images/repertoire_classification_overview.png
   :width: 70%
@@ -52,6 +52,12 @@ new repertoire is no evidence for this repertoire also being diseased.
 Other encoding variants are based on shorter subsequences (e.g., 3 – 5 amino acids long, also referred to as k-mers) in the CDR3 regions of an immune repertoire. With this
 encoding, the CDR3 regions are divided into overlapping subsequences and the (disease) signal may be characterized by the presence or absence of
 certain sequence motifs in the CDR3 regions. Here, two similar CDR3 sequences are no longer independent, because they contain many identical subsequences.
+A graphical representation of how a CDR3 sequence can be divided into k-mers, and how these k-mers can relate to specific positions in a 3D immune receptor
+(here: antibody) is shown in this figure:
+
+.. image:: ../_static/images/3mer_to_3d.png
+  :width: 60%
+
 
 The subsequences may be position-dependent or invariant. Position invariant means that if a subsequence, e.g., ‘EDNA’ occurs in different positions
 in the CDR3 it will still be considered the same signal. This is not the case for position dependent subsequences, if ‘EDNA’ often occurs in the
@@ -67,8 +73,8 @@ Note that in any case, the (sub)sequences that are associated with the ‘positi
 Training a machine learning model
 ----------------------------------
 
-Training an ML model means optimizing the parameters for the model with the goal of predicting the correct class of an (unseen) immune repertoire.
-Different ML methods require different procedures for training. In addition to the model parameters there are the hyperparameters, which
+Training an ML model means optimizing the **parameters** for the model with the goal of predicting the correct class of an (unseen) immune repertoire.
+Different ML methods require different procedures for training. In addition to the model parameters there are the **hyperparameters**, which
 do not directly change the predictions of a model, but they control the learning process (for example: the learning speed).
 
 The immune repertoires are divided into sets with different purposes: the training and validation sets are used for finding the optimal parameters
@@ -78,9 +84,11 @@ In this tool, a range of plausible hyperparameters have been predefined for each
 training/validation data into 5 equal portions, where 4 portions are used to train the ML model (with different hyperparameters) and the remaining
 portion is used to validate the performance of these hyperparameter settings. This is repeated 5 times such that each portion has been used for
 validation once. With the best hyperparameters found in the 5 repetitions, a final model is trained using all 5 portions of the data. This procedure
-is also referred to as 5-fold cross-validation.
+is also referred to as 5-fold cross-validation. Note that this 5-fold cross-validation is separate from the number of times the splitting into
+training + validation and testing sets is done (see the overview figure).
 
-The whole process may be repeated multiple times with different randomly selected repertoires in the test set, to see how robust the performance is.
+Finally, the whole process is repeated one or more times with different randomly selected repertoires in the test set, to see how robust the performance
+of the ML methods is. The number of times to repeat this splitting into training + validation and test sets is determined in the last question.
 
 
 Tool output

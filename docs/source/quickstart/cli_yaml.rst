@@ -35,17 +35,17 @@ Step 1: downloading the dataset
 An archive containing the dataset used in this tutorial can be downloaded here: :download:`quickstart_data.zip <../_static/files/quickstart_data.zip>`.
 It contains the following files:
 
-- The 100 repertoire_<somenumber>.tsv, which are immune repertoire files in `AIRR format <https://docs.airr-community.org/en/stable/datarep/format.html>`_.
+- The 100 repertoire_<somenumber>.tsv, which are immune repertoire files in AIRR format. For details about the AIRR format, see the `AIRR documentation <https://docs.airr-community.org/en/stable/datarep/format.html>`_ and `this example file <https://galaxy.immuneml.uio.no/datasets/e86c1af9d83bf1ee/display/?preview=True>`_).
 
 - A metadata.csv file. The metadata file describes which of the 100 repertoires are diseased and healthy, under the
   column named 'signal_disease' which contains the values True and False.
-  For details about the metadata file, see :ref:`What should the metadata file look like?`
+  For details about the metadata file, see :ref:`What should the metadata file look like?` and `this example file <https://galaxy.immuneml.uio.no/datasets/a6e389145d2bcee5/display/?preview=True>`_
 
 Step 2: writing the YAML specification
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Any immuneML analysis is described by a YAML specification file.
-This file contains nested key-value pairs. Mandatory keywords with a specific meaning are marked like :code:`this`
-in the text. Note that correct whitespace (not tab) indentation of the yaml file is important.
+This file contains nested key-value pairs. Mandatory keywords with a specific meaning are :code:`styled like this`
+in the text. Note that correct whitespace (not tab) indentation of the YAML file is important.
 
 In this tutorial, we will only cover the essential elements of the YAML specification.
 For a more complete introduction, see :ref:`How to specify an analysis with YAML`.
@@ -145,6 +145,7 @@ Once the YAML specification has been saved to a file (for example: quickstart.ya
 #. Run the following command:
 
 .. code-block:: console
+
     immune-ml quickstart_specs.yaml ./quickstart_results/
 
 
