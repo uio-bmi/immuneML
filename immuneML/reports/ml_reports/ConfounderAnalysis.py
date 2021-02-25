@@ -17,12 +17,24 @@ from immuneML.util.PathBuilder import PathBuilder
 
 class ConfounderAnalysis(MLReport):
     """
-    A report that plots the distributions of the false positives and the false negatives made by a given ML method in a barplot.
-    These metrics are ploted separately with respect to each of the metadata features specified by the user.
+    A report that plots the numbers of false positives and false negatives with respect to each value of
+    the metadata features specified by the user. This allows checking whether a given machine learning model makes more
+    misclassifications for some values of a metadata feature than for the others.
 
     Arguments:
 
         metadata_labels (list): A list of the metadata features to use as a basis for the calculations
+
+    YAML specification:
+
+    .. indent with spaces
+    .. code-block:: yaml
+
+        my_confounder_report:
+            ConfounderAnalysis:
+                metadata_labels:
+                  - age
+                  - sex
     """
 
     @classmethod
@@ -44,8 +56,10 @@ class ConfounderAnalysis(MLReport):
 
         self.metadata_labels = metadata_labels
 
+
     def _generate(self) -> ReportResult:
         PathBuilder.build(self.result_path)
+        print("path ", self.result_path)
         paths = []
 
         # make predictions
@@ -55,12 +69,17 @@ class ConfounderAnalysis(MLReport):
         metrics = ["FP", "FN"]
 
         plot = make_subplots(rows=len(self.metadata_labels), cols=2)
+        listOfPlot = []
+
         for label_index, meta_label in enumerate(self.metadata_labels):
+            csv_data = {}
             for metric_index, metric in enumerate(metrics):
                 output_name = metric + "_" + meta_label
 
                 plotting_data = self._metrics(metric=metric, label=self.label, meta_label=meta_label,
                                               predictions=predictions, true_labels=true_labels)
+
+                csv_data[f"{metric}"] = plotting_data[f"{metric}"]
 
                 plot.add_trace(go.Bar(x=plotting_data[meta_label], y=plotting_data[metric]), row=label_index + 1,
                                col=metric_index + 1)
@@ -69,15 +88,29 @@ class ConfounderAnalysis(MLReport):
                                   col=metric_index + 1, type='category')
 
                 plot.update_yaxes(title_text=f"{metric}", row=label_index + 1,
-                                  col=metric_index + 1)
+                                  col=metric_index + 1, rangemode="nonnegative", tick0=0, dtick=1)
+
+            csv_data[f"{meta_label}"] = plotting_data[f"{meta_label}"]
+            csv_data = pd.DataFrame(csv_data)
+
+            listOfPlot.append(csv_data)
 
         plot.update_traces(marker_color=px.colors.sequential.Teal[3], showlegend=False)
-        filename = self.result_path / f"{output_name}.html"
+        filename = self.result_path / "plots.html"
         plot.write_html(str(filename))
         report_output_fig = ReportOutput(filename)
         paths.append(report_output_fig)
 
-        return ReportResult(name=self.name, output_figures=paths)
+        result_table_path = self._write_results_table(listOfPlot, self.metadata_labels)
+        return ReportResult(name=self.name, output_figures=paths, output_tables=[ReportOutput(result_table_path[0])])
+
+    def _write_results_table(self, plotting_data, labels):
+        filepaths = []
+        for label_index, label in enumerate(labels):
+            filepath = self.result_path / f"{label}.csv"
+            plotting_data[label_index].to_csv(filepath, index=False)
+            filepaths.append(filepath)
+        return filepaths
 
     @staticmethod
     def _metrics(metric, label, meta_label, predictions, true_labels):

@@ -23,7 +23,7 @@ class GappedKmerSequenceEncoder(SequenceEncodingStrategy):
         k_right = params.model.get('k_right', k_left)
         max_gap = params.model.get('max_gap')
         min_gap = params.model.get('min_gap', 0)
-        length = len(sequence.get_sequence())
+        length = len(sequence.get_sequence(params.model.get('sequence_type', None)))
 
         if length < k_left + k_right + max_gap:
             warnings.warn('Sequence length is less than k_left + k_right + max_gap. Ignoring sequence')

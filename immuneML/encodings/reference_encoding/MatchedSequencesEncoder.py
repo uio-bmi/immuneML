@@ -18,7 +18,7 @@ class MatchedSequencesEncoder(DatasetEncoder):
 
     Arguments:
 
-        reference (dict): A dictionary describing the reference dataset file. See the :py:mod:`immuneML.IO.sequence_import` for specification details.
+        reference (dict): A dictionary describing the reference dataset file. See the :py:mod:`~immuneML.IO.sequence_import` for specification details.
 
         max_edit_distance (dict): The maximum edit distance between a target sequence (from the repertoire) and the reference sequence. A maximum distance can be specified per chain.
 

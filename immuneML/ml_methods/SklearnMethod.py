@@ -287,4 +287,5 @@ class SklearnMethod(MLMethod):
         By default, model_selection_cv is False. 
         
         model_selection_n_folds (int): The number of folds that should be used for the cross validation grid search if model_selection_cv is True.
+        
         """

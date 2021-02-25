@@ -17,6 +17,7 @@ from immuneML.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType im
 from immuneML.environment.Constants import Constants
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.environment.LabelConfiguration import LabelConfiguration
+from immuneML.environment.SequenceType import SequenceType
 from immuneML.util.PathBuilder import PathBuilder
 
 
@@ -47,6 +48,7 @@ class TestKmerFreqReceptorEncoder(TestCase):
                 "normalization_type": NormalizationType.RELATIVE_FREQUENCY.name,
                 "reads": ReadsType.UNIQUE.name,
                 "sequence_encoding": SequenceEncodingType.CONTINUOUS_KMER.name,
+                "sequence_type": SequenceType.AMINO_ACID.name,
                 "k": 3
             })
 

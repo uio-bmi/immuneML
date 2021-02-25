@@ -27,7 +27,7 @@ class DistanceEncoder(DatasetEncoder):
 
     Arguments:
 
-        distance_metric (:py:mod:`immuneML.encodings.distance_encoding.DistanceMetricType`): The metric used to calculate the
+        distance_metric (:py:mod:`~immuneML.encodings.distance_encoding.DistanceMetricType`): The metric used to calculate the
         distance between two repertoires. Names of different distance metric types are allowed values in the specification.
 
         attributes_to_match: The attributes to consider when determining whether a sequence is present in both repertoires.

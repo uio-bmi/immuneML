@@ -15,6 +15,7 @@ from immuneML.environment.Constants import Constants
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.environment.LabelConfiguration import LabelConfiguration
 from immuneML.environment.Metric import Metric
+from immuneML.environment.SequenceType import SequenceType
 from immuneML.hyperparameter_optimization.HPSetting import HPSetting
 from immuneML.hyperparameter_optimization.config.ReportConfig import ReportConfig
 from immuneML.hyperparameter_optimization.config.SplitConfig import SplitConfig
@@ -65,6 +66,7 @@ class TestReceptorClassification(TestCase):
             "normalization_type": NormalizationType.RELATIVE_FREQUENCY.name,
             "reads": ReadsType.UNIQUE.name,
             "sequence_encoding": SequenceEncodingType.CONTINUOUS_KMER.name,
+            "sequence_type": SequenceType.AMINO_ACID.name,
             "k": 3
         }
 

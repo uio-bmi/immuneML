@@ -17,6 +17,7 @@ from immuneML.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType im
 from immuneML.environment.Constants import Constants
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.environment.LabelConfiguration import LabelConfiguration
+from immuneML.environment.SequenceType import SequenceType
 from immuneML.util.PathBuilder import PathBuilder
 
 
@@ -27,15 +28,24 @@ class TestKmerFreqSequenceEncoder(TestCase):
 
     def test(self):
 
-        sequences = [ReceptorSequence(amino_acid_sequence="AAACCC", identifier="1", metadata=SequenceMetadata(custom_params={"l1": 1})),
-                     ReceptorSequence(amino_acid_sequence="ACACAC", identifier="2", metadata=SequenceMetadata(custom_params={"l1": 2})),
-                     ReceptorSequence(amino_acid_sequence="CCCAAA", identifier="3", metadata=SequenceMetadata(custom_params={"l1": 1})),
-                     ReceptorSequence(amino_acid_sequence="AAACCC", identifier="4", metadata=SequenceMetadata(custom_params={"l1": 2})),
-                     ReceptorSequence(amino_acid_sequence="ACACAC", identifier="5", metadata=SequenceMetadata(custom_params={"l1": 1})),
-                     ReceptorSequence(amino_acid_sequence="CCCAAA", identifier="6", metadata=SequenceMetadata(custom_params={"l1": 2})),
-                     ReceptorSequence(amino_acid_sequence="AAACCC", identifier="7", metadata=SequenceMetadata(custom_params={"l1": 1})),
-                     ReceptorSequence(amino_acid_sequence="ACACAC", identifier="8", metadata=SequenceMetadata(custom_params={"l1": 2})),
-                     ReceptorSequence(amino_acid_sequence="CCCAAA", identifier="9", metadata=SequenceMetadata(custom_params={"l1": 1}))]
+        sequences = [ReceptorSequence(amino_acid_sequence="AAACCC", nucleotide_sequence="AAACCC", identifier="1",
+                                      metadata=SequenceMetadata(custom_params={"l1": 1})),
+                     ReceptorSequence(amino_acid_sequence="ACACAC", nucleotide_sequence="ACACAC", identifier="2",
+                                      metadata=SequenceMetadata(custom_params={"l1": 2})),
+                     ReceptorSequence(amino_acid_sequence="CCCAAA", nucleotide_sequence="CCCAAA", identifier="3",
+                                      metadata=SequenceMetadata(custom_params={"l1": 1})),
+                     ReceptorSequence(amino_acid_sequence="AAACCC", nucleotide_sequence="AAACCC", identifier="4",
+                                      metadata=SequenceMetadata(custom_params={"l1": 2})),
+                     ReceptorSequence(amino_acid_sequence="ACACAC", nucleotide_sequence="ACACAC", identifier="5",
+                                      metadata=SequenceMetadata(custom_params={"l1": 1})),
+                     ReceptorSequence(amino_acid_sequence="CCCAAA", nucleotide_sequence="CCCAAA", identifier="6",
+                                      metadata=SequenceMetadata(custom_params={"l1": 2})),
+                     ReceptorSequence(amino_acid_sequence="AAACCC", nucleotide_sequence="AAACCC", identifier="7",
+                                      metadata=SequenceMetadata(custom_params={"l1": 1})),
+                     ReceptorSequence(amino_acid_sequence="ACACAC", nucleotide_sequence="ACACAC", identifier="8",
+                                      metadata=SequenceMetadata(custom_params={"l1": 2})),
+                     ReceptorSequence(amino_acid_sequence="CCCAAA", nucleotide_sequence="CCCAAA", identifier="9",
+                                      metadata=SequenceMetadata(custom_params={"l1": 1}))]
 
         path = EnvironmentSettings.tmp_test_path / "kmrefreqseqfacencoder/"
         PathBuilder.build(path)
@@ -52,6 +62,7 @@ class TestKmerFreqSequenceEncoder(TestCase):
                 "normalization_type": NormalizationType.RELATIVE_FREQUENCY.name,
                 "reads": ReadsType.UNIQUE.name,
                 "sequence_encoding": SequenceEncodingType.CONTINUOUS_KMER.name,
+                "sequence_type": SequenceType.NUCLEOTIDE.name,
                 "k": 3
             })
 

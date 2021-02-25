@@ -11,24 +11,16 @@ from immuneML.reports.encoding_reports.EncodingReport import EncodingReport
 from immuneML.util.PathBuilder import PathBuilder
 
 
-class FeatureValueBarplot(EncodingReport):
+
+class FeatureDistribution(EncodingReport):
     """
-    Plots a barplot of the feature values in a given encoded data matrix, across examples. Can be used in combination
-    with any encoding. When the distribution of feature values is of interest (as opposed to showing only the mean
-    with user-defined error bar as done in this report), please consider using :ref:`FeatureDistribution` instead.
+    Plots a boxplot for each feature of the encoded dataset in one of the two modes:
+    in the 'normal' mode there are normal boxplots corresponding to each column of the 
+    encoded dataset matrix; in the 'sparse' mode all zero cells are eliminated before 
+    passing the data to the boxplots. If mode is set to 'auto', then it will automatically 
+    set to 'sparse' if the density of the matrix is below 0.01
 
-    This report creates a barplot where the height of each bar is the mean value of a feature in a specific group. By
-    default, all samples are the group, in which case `grouping_label` is "feature", meaning that each bar is the mean
-    value of a given feature, and along the x-axis are the different features. For example, when
-    :ref:`KmerFrequency` encoder is used, the features are the k-mers and the feature values are the frequencies per k-mer.
-
-    Optional (metadata) labels can be specified for dividing the bars into groups to make comparisons. Groups
-    can be visualized by splitting them across the x-axis, using different colors or different row and column facets.
-
-    Note that if `grouping_label` is specified as something other than "feature", then "feature" must be also specified
-    in either `row_grouping_labels` or `column_grouping_labels`, so that each feature is then plotted in a separate
-    panel. This prevents the undesired (and often uninterpretable) case where the mean across multiple features
-    is plotted.
+    When only the mean feature values are of interest, please consider using :ref:`FeatureValueBarplot` instead.
 
 
     Arguments:
@@ -38,9 +30,7 @@ class FeatureValueBarplot(EncodingReport):
 
         color_grouping_label (str): The label that is used to color each bar, at each level of the grouping_label.
 
-        row_grouping_label (str): The label that is used to group bars into different row facets.
-
-        column_grouping_label (str): The label that is used to group bars into different column facets.
+        mode (str): either 'normal', 'sparse' or 'auto' (default)
 
         x_title (str): x-axis label
 
@@ -52,31 +42,28 @@ class FeatureValueBarplot(EncodingReport):
     .. indent with spaces
     .. code-block:: yaml
 
-        my_fvb_report:
-            FeatureValueBarplot:
-                column_grouping_label: timepoint
-                row_grouping_label: disease_status
-                color_grouping_label: age_group
+        my_fdistr_report:
+            FeatureDistribution:
+                mode: sparse
 
     """
 
     @classmethod
     def build_object(cls, **kwargs):
-        return FeatureValueBarplot(**kwargs)
+        return FeatureDistribution(**kwargs)
 
-    def __init__(self, dataset: RepertoireDataset = None, result_path: Path = None, grouping_label: str = "feature",
-                 color_grouping_label: str = None, row_grouping_label=None, column_grouping_label=None,
-                 x_title: str = None, y_title: str = None, name: str = None):
+    def __init__(self, dataset: RepertoireDataset = None, result_path: Path = None,
+                 grouping_label: str = "feature", color_grouping_label: str = None,
+                 mode: str = 'auto', x_title: str = None, y_title: str = None, name: str = None):
         super().__init__(name)
         self.dataset = dataset
         self.result_path = result_path
         self.x = grouping_label
         self.color = color_grouping_label
-        self.facet_row = row_grouping_label
-        self.facet_column = column_grouping_label
+        self.mode = mode
         self.x_title = x_title if x_title is not None else self.x
         self.y_title = y_title if y_title is not None else "value"
-        self.result_name = "feature_values"
+        self.result_name = "feature_distributions"
         self.name = name
 
     def _generate(self) -> ReportResult:
@@ -95,17 +82,38 @@ class FeatureValueBarplot(EncodingReport):
     def std(self, x):
         return x.std(ddof=0)
 
-    def _plot(self, data_long_format) -> ReportOutput:
-        groupby_cols = [self.x, self.color, self.facet_row, self.facet_column]
-        groupby_cols = [i for i in groupby_cols if i]
-        groupby_cols = list(set(groupby_cols))
-        plotting_data = data_long_format.groupby(groupby_cols, as_index=False).agg(
-            {"value": ['mean', self.std]})
+    def _plot(self, data_long_format, mode='sparse') -> ReportOutput:
+        sparse_threshold = 0.01
 
-        plotting_data.columns = plotting_data.columns.map(''.join)
+        if self.mode == 'auto':
+            if (data_long_format.value == 0).mean() < sparse_threshold:
+                self.mode = 'normal'
+            else:
+                self.mode = 'sparse'
 
-        figure = px.bar(plotting_data, x=self.x, y="valuemean", color=self.color, barmode="relative",
-                        facet_row=self.facet_row, facet_col=self.facet_column, error_y="valuestd",
+        if self.mode == 'sparse':
+            return self._plot_sparse(data_long_format)
+        elif self.mode == 'normal': 
+            return self._plot_normal(data_long_format)
+
+
+
+    def _plot_sparse(self, data_long_format) -> ReportOutput:
+        columns_to_filter = [self.x, self.color, "value"] if self.color is not None else [self.x, "value"]
+        data_long_format_filtered = data_long_format.loc[data_long_format.value != 0, columns_to_filter]
+        columns_to_filter.remove("value")
+        total_counts = data_long_format_filtered.groupby(columns_to_filter, as_index=False).agg(
+            {"value": 'sum'})
+        data_long_format_filtered = data_long_format_filtered.merge(total_counts,
+                                                                    on=self.x,
+                                                                    how="left",
+                                                                    suffixes=('', '_sum'))\
+                                                             .fillna(0)\
+                                                             .sort_values(by=self.x)\
+                                                             .reset_index(drop=True)
+
+        
+        figure = px.box(data_long_format_filtered, x=self.x, y="value", color=self.color,
                         labels={
                             "valuemean": self.y_title,
                             self.x: self.x_title,
@@ -116,22 +124,41 @@ class FeatureValueBarplot(EncodingReport):
 
         figure.write_html(str(file_path))
 
-        return ReportOutput(path=file_path, name="feature bar plot")
+        return ReportOutput(path=file_path, name="feature boxplots")
+    
+    def _plot_normal(self, data_long_format) -> ReportOutput:
+        figure = px.box(data_long_format, x=self.x, y="value", color=self.color,
+                        labels={
+                            "valuemean": self.y_title,
+                            self.x: self.x_title,
+                        }, template='plotly_white',
+                        color_discrete_sequence=px.colors.diverging.Tealrose)
 
+        file_path = self.result_path / f"{self.result_name}.html"
+
+        figure.write_html(str(file_path))
+
+        return ReportOutput(path=file_path, name="feature boxplots")
+
+    
     def check_prerequisites(self):
-        location = "FeatureValueBarplot"
+        location = "FeatureDistribution"
         run_report = True
 
         if self.dataset.encoded_data is None or self.dataset.encoded_data.examples is None:
             warnings.warn(
                 f"{location}: this report can only be created for an encoded RepertoireDataset. {location} report will not be created.")
             run_report = False
+        elif len(self.dataset.encoded_data.examples.shape) != 2:
+            warnings.warn(
+                f"{location}: this report can only be created for a 2-dimensional encoded RepertoireDataset. {location} report will not be created.")
+            run_report = False
         else:
             legal_labels = list(self.dataset.encoded_data.labels.keys())
             legal_labels.append("feature")
             legal_labels.append("NULL")
 
-            labels = [self.x, self.color, self.facet_row, self.facet_column]
+            labels = [self.x]
 
             for label_param in labels:
                 if label_param is not None:

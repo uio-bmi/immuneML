@@ -1,5 +1,4 @@
 import logging
-from pathlib import Path
 from typing import List, Tuple
 
 import pandas as pd
@@ -10,7 +9,6 @@ from sklearn.metrics import precision_recall_curve
 
 from immuneML.environment.Constants import Constants
 from immuneML.environment.Label import Label
-from immuneML.hyperparameter_optimization.states.TrainMLModelState import TrainMLModelState
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.multi_dataset_reports.MultiDatasetReport import MultiDatasetReport
@@ -47,11 +45,6 @@ class PerformanceOverview(MultiDatasetReport):
     @classmethod
     def build_object(cls, **kwargs):
         return PerformanceOverview(**kwargs)
-
-    def __init__(self, instruction_states: List[TrainMLModelState] = None, name: str = None, result_path: Path = None):
-        super().__init__(name)
-        self.instruction_states = instruction_states
-        self.result_path = result_path
 
     def _generate(self) -> ReportResult:
 
