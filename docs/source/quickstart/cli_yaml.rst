@@ -45,7 +45,7 @@ Step 2: writing the YAML specification
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Any immuneML analysis is described by a YAML specification file.
 This file contains nested key-value pairs. Mandatory keywords with a specific meaning are :code:`styled like this`
-in the text. Note that correct whitespace (not tab) indentation of the yaml file is important.
+in the text. Note that correct whitespace (not tab) indentation of the YAML file is important.
 
 In this tutorial, we will only cover the essential elements of the YAML specification.
 For a more complete introduction, see :ref:`How to specify an analysis with YAML`.
