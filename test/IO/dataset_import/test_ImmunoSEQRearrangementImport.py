@@ -162,9 +162,6 @@ rep1.tsv,TRB,1234a""")
         params["result_path"] = path
         params["metadata_file"] = path / "metadata.csv"
         params["path"] = path
-        params["column_mapping"] = {"v_resolved": "v_alleles", "j_resolved": "j_alleles", "templates": "counts",
-          "rearrangement": "sequences", "amino_acid": "sequence_aas"}
-        params["columns_to_load"] = ["v_resolved", "j_resolved", "templates", "amino_acid", "rearrangement"]
 
         dataset = ImmunoSEQRearrangementImport.import_dataset(params, "alternative")
 
