@@ -105,4 +105,4 @@ class TestConfounderAnalysis(TestCase):
         # Running the report
         result = report._generate()
 
-        # shutil.rmtree(path)
+        shutil.rmtree(path)
