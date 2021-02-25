@@ -16,6 +16,7 @@ class DatasetImportParams:
     columns_to_load: list = None
     separator: str = None
     column_mapping: dict = None
+    column_mapping_synonyms: dict = None
     region_type: RegionType = None
     import_productive: bool = None
     import_unproductive: bool = None
