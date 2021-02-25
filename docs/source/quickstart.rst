@@ -4,8 +4,15 @@ Quickstart
 The purpose of the Quickstart tutorial is to help new users get started with running immuneML as quickly as possible.
 You will find a step-by-step guide on how to use immuneML for a simple machine learning analysis on an adaptive immune receptor repertoire (AIRR) dataset.
 
-The quickest way for a first-time user to try out immuneML is through our Galaxy interface.
-For immunologists without a machine learning background, we recommend following this tutorial:
+The quickest way for a first-time user to try out immuneML is through our Galaxy interface. Watch this video to see how to perform a simple repertoire classification task in Galaxy.
+
+.. raw:: html
+
+  <iframe width="560" height="315" src="https://www.youtube.com/embed/cuCbkvvxmzQ" frameborder="0" allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
+
+
+To try out immuneML for yourself, follow one of the Quickstart tutorials. For immunologists without a machine learning background, we recommend following this tutorial:
 
 - :ref:`Quickstart: Galaxy with button-based tools`
 
