@@ -1,10 +1,11 @@
 from pathlib import Path
 from typing import List
+
 import numpy as np
 import pandas as pd
 import plotly.express as px
-from plotly.subplots import make_subplots
 import plotly.graph_objects as go
+from plotly.subplots import make_subplots
 
 from immuneML.data_model.dataset.Dataset import Dataset
 from immuneML.hyperparameter_optimization.HPSetting import HPSetting
@@ -12,6 +13,7 @@ from immuneML.ml_methods.MLMethod import MLMethod
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.ml_reports.MLReport import MLReport
+from immuneML.util.ParameterValidator import ParameterValidator
 from immuneML.util.PathBuilder import PathBuilder
 
 
@@ -35,19 +37,18 @@ class ConfounderAnalysis(MLReport):
                 metadata_labels:
                   - age
                   - sex
+
     """
 
     @classmethod
     def build_object(cls, **kwargs):
-        metadata_labels = kwargs["metadata_labels"]
 
-        if not isinstance(metadata_labels, list):
-            raise TypeError("metadata_labels is not a list")
+        ParameterValidator.assert_keys(kwargs.keys(), ['metadata_labels', 'name'], ConfounderAnalysis.__name__, ConfounderAnalysis.__name__)
+        ParameterValidator.assert_type_and_value(kwargs['metadata_labels'], list, ConfounderAnalysis.__name__, 'metadata_labels')
+        ParameterValidator.assert_all_type_and_value(kwargs['metadata_labels'], str, ConfounderAnalysis.__name__, 'metadata_labels')
+        ParameterValidator.assert_type_and_value(kwargs['name'], str, ConfounderAnalysis.__name__, 'name')
 
-        if not all(isinstance(i, str) for i in metadata_labels):
-            raise TypeError("Some elements in metadata_labels are not of type str")
-
-        return ConfounderAnalysis(metadata_labels=metadata_labels)
+        return ConfounderAnalysis(metadata_labels=kwargs['metadata_labels'], name=kwargs['name'])
 
     def __init__(self, metadata_labels: List[str], train_dataset: Dataset = None, test_dataset: Dataset = None,
                  method: MLMethod = None,
@@ -56,10 +57,8 @@ class ConfounderAnalysis(MLReport):
 
         self.metadata_labels = metadata_labels
 
-
     def _generate(self) -> ReportResult:
         PathBuilder.build(self.result_path)
-        print("path ", self.result_path)
         paths = []
 
         # make predictions
@@ -81,16 +80,12 @@ class ConfounderAnalysis(MLReport):
 
                 csv_data[f"{metric}"] = plotting_data[f"{metric}"]
 
-                plot.add_trace(go.Bar(x=plotting_data[meta_label], y=plotting_data[metric]), row=label_index + 1,
-                               col=metric_index + 1)
-
-                plot.update_xaxes(title_text=f"{meta_label}", row=label_index + 1,
-                                  col=metric_index + 1, type='category')
-
-                plot.update_yaxes(title_text=f"{metric}", row=label_index + 1,
-                                  col=metric_index + 1, rangemode="nonnegative", tick0=0, dtick=1)
+                plot.add_trace(go.Bar(x=plotting_data[meta_label], y=plotting_data[metric]), row=label_index + 1, col=metric_index + 1)
+                plot.update_xaxes(title_text=f"{meta_label}", row=label_index + 1, col=metric_index + 1, type='category')
+                plot.update_yaxes(title_text=f"{metric}", row=label_index + 1, col=metric_index + 1, rangemode="nonnegative", tick0=0, dtick=1)
 
             csv_data[f"{meta_label}"] = plotting_data[f"{meta_label}"]
+
             csv_data = pd.DataFrame(csv_data)
 
             listOfPlot.append(csv_data)
@@ -114,7 +109,7 @@ class ConfounderAnalysis(MLReport):
 
     @staticmethod
     def _metrics(metric, label, meta_label, predictions, true_labels):
-        # indices of samples at which misclassification occured
+        # indices of samples at which misclassification occurred
         if metric == "FP":
             metric_inds = np.nonzero(np.greater(predictions, true_labels[label]))[0].tolist()
         else:
@@ -125,9 +120,9 @@ class ConfounderAnalysis(MLReport):
         label_inds = np.array(metadata_values)[metric_inds]
 
         metric_vals = []
-        unique_levels = np.unique(metadata_values).tolist()
+        unique_levels = np.unique(metadata_values)
 
-        # number of metric occurences at each metadata level
+        # number of metric occurrences at each metadata level
         for val in unique_levels:
             metric_vals.append(np.count_nonzero(label_inds == val))
 

@@ -1,4 +1,5 @@
 import os
+import shutil
 from unittest import TestCase
 
 from immuneML.analysis.data_manipulation.NormalizationType import NormalizationType
@@ -11,6 +12,7 @@ from immuneML.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType im
 from immuneML.environment.Constants import Constants
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.environment.LabelConfiguration import LabelConfiguration
+from immuneML.environment.SequenceType import SequenceType
 from immuneML.ml_methods.LogisticRegression import LogisticRegression
 from immuneML.reports.ml_reports.ConfounderAnalysis import ConfounderAnalysis
 from immuneML.simulation.Implanting import Implanting
@@ -72,7 +74,8 @@ class TestConfounderAnalysis(TestCase):
             "normalization_type": NormalizationType.RELATIVE_FREQUENCY.name,
             "reads": ReadsType.UNIQUE.name,
             "sequence_encoding": SequenceEncodingType.CONTINUOUS_KMER.name,
-            "k": 3
+            "k": 3,
+            'sequence_type': SequenceType.AMINO_ACID.name
         })  # encodes the repertoire by frequency of 3-mers
         lc = LabelConfiguration()
         lc.add_label("disease", [True, False])
@@ -85,7 +88,7 @@ class TestConfounderAnalysis(TestCase):
         return encoded_dataset
 
     def _create_report(self, path):
-        report = ConfounderAnalysis.build_object(metadata_labels=["age", "HLA"])
+        report = ConfounderAnalysis.build_object(metadata_labels=["age", "HLA"], name='test')
 
         report.ml_details_path = path / "ml_details.yaml"
         report.label = "disease"
