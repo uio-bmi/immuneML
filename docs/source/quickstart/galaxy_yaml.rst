@@ -13,6 +13,7 @@ Getting started through Galaxy
 
 The Galaxy web interface is available at https://galaxy.immuneml.uio.no/.
 You may choose to register a user account or perform the analysis as an anonymous user.
+If you are an anonymous user, the data will disappear once your browser session expires.
 
 Different functionalities are available as Galaxy tools (left menu), and the analysis results appear in the Galaxy history (right list).
 These history elements can be used as input for the next tool, creating a multi-step analysis workflow.
@@ -29,18 +30,6 @@ available through `this Galaxy history <https://galaxy.immuneml.uio.no/u/immunem
 Alternatively, the tutorial :ref:`How to make an immuneML dataset in Galaxy` describes in detail
 how to make an immuneML dataset using your own data.
 
-This Quickstart dataset Galaxy history contains the following items:
-
-- 100 repertoire .tsv files in `AIRR format <https://docs.airr-community.org/en/stable/datarep/format.html>`_.
-
-- A Collection of repertoires. This history element collects the 100 above-mentioned repertoire files in a Galaxy collection.
-  This Galaxy collection makes it easier to select the repertoires as an input to Galaxy tools (instead of selecting all 100 files manually, you can select the collection).
-  To read how to make your own Galaxy collection, see :ref:`Creating a Galaxy collection of files`.
-
-- A metadata.csv file. The metadata file describes which of the 100 repertoires are diseased and healthy, under the
-  column named 'signal_disease' which contains the values True and False.
-  For details about the metadata file, see :ref:`What should the metadata file look like?`
-
 Individual files can be inspected by clicking the eyeball icons.
 To import the complete history, click the + icon in the right upper corner.
 
@@ -48,12 +37,25 @@ To import the complete history, click the + icon in the right upper corner.
    :alt: import button Galaxy
    :width: 250
 
+This Quickstart dataset Galaxy history contains the following items:
+
+- 100 repertoire .tsv files in AIRR format. For details about the AIRR format, see the `AIRR documentation <https://docs.airr-community.org/en/stable/datarep/format.html>`_ and `this example file <https://galaxy.immuneml.uio.no/datasets/e86c1af9d83bf1ee/display/?preview=True>`_).
+
+- A Collection of repertoires. This history element collects the 100 above-mentioned repertoire files in a Galaxy collection.
+  This Galaxy collection makes it easier to select the repertoires as an input to Galaxy tools (instead of selecting all 100 files manually, you can select the collection).
+  To read how to make your own Galaxy collection, see :ref:`Creating a Galaxy collection of files`.
+
+- A metadata.csv file. The metadata file describes which of the 100 repertoires are diseased and healthy, under the
+  column named 'signal_disease' which contains the values True and False.
+  For details about the metadata file, see :ref:`What should the metadata file look like?` and `this example file <https://galaxy.immuneml.uio.no/datasets/a6e389145d2bcee5/display/?preview=True>`_
+
+
 Step 2: creating an immuneML Galaxy dataset
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Use the `Create dataset Galaxy tool <https://galaxy.immuneml.uio.no/root?tool_id=immune_ml_dataset>`_ (immuneml tools > Create dataset) to import the dataset
+Use the `Create dataset<https://galaxy.immuneml.uio.no/root?tool_id=immune_ml_dataset>`_  Galaxy tool (under 'immuneML tools') to import the dataset
 and create an *immuneML dataset* history item, which can subsequently be used as input for other Galaxy tools.
 
-Using the simplified interface, select 'repertoire dataset' and 'AIRR' data format, and select the metadata.csv file as metadata file.
+Select 'Simplified interface', then 'repertoire dataset' as dataset type and 'AIRR' data format, and select the metadata.csv file as metadata file.
 Under the 'Data files' field, all repertoire files must be selected.
 This can either be done by manually selecting all 100 repertoire files, or by selecting the Collection of repertoires.
 For convenience, we will use the latter option.
@@ -68,13 +70,14 @@ Select the collection of repertoires so it becomes highlighted.
 
 Finally, click 'execute'.
 
-Three new items will appear in the Galaxy history. If everything went correctly, the items will appear green. If the items
+Three new items will appear in the Galaxy history. If everything went correctly, the items would appear green. If the items
 are red, an error occurred (check if you correctly selected the collection of repertoires).
 
 In 'Summary: dataset generation' you can find details about the newly
 generated dataset, including the name of the dataset, the dataset type and size, and a download link.
 
-The next item, 'Archive: dataset generation' contains an archive of the output folder produced by immuneML.
+The next item, 'create_dataset.yaml' the YAML specification file that was used by immuneML to create the dataset.
+This YAML specification could be used when running the Create dataset tool with the 'Advanced' interface.
 
 Finally, 'immuneML dataset' is a new Galaxy collection containing the immuneML dataset in Pickle format.
 The Pickle format is not human-readable, but it ensures that you can quickly import the dataset into various Galaxy tools
@@ -84,7 +87,7 @@ without having to repeatedly specify the import parameters.
 Step 3: writing the YAML specification
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Any immuneML analysis is described by a YAML specification file.
-This file contains nested key-value pairs. Mandatory keywords with a specific meaning are marked like :code:`this`
+This file contains nested key-value pairs. Mandatory keywords with a specific meaning are :code:`styled like this`
 in the text. Note that correct whitespace (not tab) indentation of the yaml file is important.
 
 In this tutorial, we will only cover the essential elements of the YAML specification.
@@ -180,7 +183,7 @@ The file will appear as a new history element.
 Step 4: running the analysis
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Next, the `Train machine learning models <https://galaxy.immuneml.uio.no/root?tool_id=immuneml_train_ml_model>`_ Galaxy tool should be used.
+Next, the `Train machine learning models <https://galaxy.immuneml.uio.no/root?tool_id=immuneml_train_ml_model>`_ Galaxy tool (under 'immuneML tools') should be used.
 Select the YAML specification and previously created dataset from the history, and no additional files.
 
 .. image:: ../_static/images/galaxy/galaxy_train_ml_model.png
@@ -197,9 +200,10 @@ After running the Galaxy tool for training ML models, three new items will appea
    :width: 250
 
 
-The history item 'Summary: repertoire classification' contains HTML pages displaying a summary of the analysis.
+The history item 'Summary: ML model training' contains HTML pages displaying a summary of the analysis.
 On the first page, you will find a table which shows for each of the splits which of the ML settings (combination of ML model and encoding)
 performed best in the inner cross-validation loop, and the performance score of that ML model on the test set.
+Note that in this tutorial, only 1 data split was used.
 Furthermore, you can click 'see details' in the table to find a more detailed explanation about how well each model
 performed in the inner loop of cross validation (on the validation sets).
 By clicking 'see reports' you can find a report that plots the 25 top coefficients of the trained logistic regression model.
@@ -211,7 +215,7 @@ the implanted disease signal 'VLEQ', meaning the ML model learned the correct si
    :alt: coefficients report
    :width: 600
 
-The next item, 'Archive: repertoire classification' contains a downloadable archive of the complete immuneML ouput (including
+The next item, 'Archive: ML model training' contains a downloadable archive of the complete immuneML ouput (including
 the files available through the other history elements).
 
 Finally, history element 'optimal_ml_settings.zip' is a .zip file containing the configuration of the optimal ML settings,

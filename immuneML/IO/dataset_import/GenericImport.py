@@ -76,6 +76,11 @@ class GenericImport(DataImport):
                 file_column_j_genes: j_genes
                 file_column_frequencies: counts
 
+        column_mapping_synonyms (dict): This is a column mapping that can be used if a column could have alternative names.
+        The formatting is the same as column_mapping. If some columns specified in column_mapping are not found in the file,
+        the columns specified in column_mapping_synonyms are instead attempted to be loaded.
+        For Generic import, there is no default column_mapping_synonyms.
+
         metadata_column_mapping (dict): Optional; specifies metadata for Sequence- and ReceptorDatasets. This is a column
         mapping that is formatted similarly to column_mapping, but here the values are the names that immuneML internally
         uses as metadata fields. These fields can subsequently be used as labels in instructions (for example labels
