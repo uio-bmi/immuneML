@@ -56,7 +56,7 @@ A graphical representation of how a CDR3 sequence can be divided into k-mers, an
 (here: antibody) is shown in this figure:
 
 .. image:: ../_static/images/3mer_to_3d.png
-  :width: 70%
+  :width: 60%
 
 
 The subsequences may be position-dependent or invariant. Position invariant means that if a subsequence, e.g., ‘EDNA’ occurs in different positions
