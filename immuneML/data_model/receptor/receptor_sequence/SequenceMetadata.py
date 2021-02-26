@@ -45,3 +45,12 @@ class SequenceMetadata:
         self.region_type = RegionType(region_type) if region_type and isinstance(region_type, str) else region_type if isinstance(region_type, RegionType) else None
         self.cell_id = cell_id
         self.custom_params = custom_params if custom_params is not None else {}
+
+    def get_attribute(self, name: str):
+        """Returns the attribute value if attribute is present either directly or in custom_params, otherwise returns None"""
+        if hasattr(self, name):
+            return getattr(self, name)
+        elif name in self.custom_params:
+            return self.custom_params[name]
+        else:
+            return None
