@@ -188,3 +188,30 @@ YAML specification for training machine learning models and recovering motifs in
       reports: [] # some additional reports, not applicable here
       store_encoded_data: False # whether to store the encoded data, if set to True, it could increase the disk space usage
       refit_optimal_model: False # whether to refit the optimal model before exporting it (not in this use-case as the models will be used for comparison, not for classifying some new data)
+
+
+Results
+-------------------------------------------------
+
+
+We compared the CNN method with the TCRdist-based k-nearest neighbor classifier and logistic regression on a dataset
+consisting of epitope-specific and naive TCRαβ sequences (assumed to be non-epitope-specific).
+
+The resulting ROC curves for the three epitopes (GILGFVFTL, Influenza A; AVFDRKSDAK, Epstein-Barr virus; KLGGALQAK, Cytomegalovirus) are shown below.
+Note that these figures were not included in the results deposited in the NIRD research data archive, but the YAML specification above
+has been updated to produce these plots.
+
+.. figure:: ../_static/images/usecases/epitope_1.png
+   :alt: Epitope 1
+   :width: 60%
+
+.. figure:: ../_static/images/usecases/epitope_2.png
+   :alt: Epitope 2
+   :width: 60%
+
+.. figure:: ../_static/images/usecases/epitope_3.png
+   :alt: Epitope 3
+   :width: 60%
+
+
+

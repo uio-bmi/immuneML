@@ -80,6 +80,18 @@ Reports
 ML methods
 -----------
 
+When choosing which ML method(s) are most suitable for your use-case, please consider the following table.
+The table describes which of the ML methods can be used for binary classification (two classes per label), and which
+can be used for multi-class classification. Note that all classifiers can automatically be used for multi-label classification
+in immuneML.
+Furthermore, it describes what type of dataset the classifier can be applied to, and whether a third level of nested cross-validation
+can be used for the selection of model parameters (scikit-learn classifiers).
+
+.. csv-table:: ML methods properties
+   :file: _static/files/ml_methods_properties.csv
+   :header-rows: 1
+
+
 .. include:: ../specs/definitions/ml_methods.rst
 
 Preprocessings

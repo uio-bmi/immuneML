@@ -30,7 +30,11 @@ class ReceptorCNN(MLMethod):
 
     Requires one-hot encoded data as input (as produced by :ref:`OneHot` encoder).
 
-    Note: ReceptorCNN can only be used with ReceptorDatasets, it does not work with SequenceDatasets
+    Notes:
+
+    - ReceptorCNN can only be used with ReceptorDatasets, it does not work with SequenceDatasets
+
+    - ReceptorCNN can only be used for binary classification, not multi-class classification.
 
 
     Arguments:

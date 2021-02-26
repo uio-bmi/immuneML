@@ -157,7 +157,6 @@ The full YAML specification:
   output:
     format: HTML # output the result as HTML
 
-The result of this analysis is available in `NIRD research data archive <http://doi.org/10.11582/2021.00008>`_.
 
 Robustness assessment
 --------------------------
@@ -190,7 +189,6 @@ To construct smaller datasets of 400, 200, 100 and 50 subjects randomly from bot
       dataset_export_formats: # in which formats to export the subsampled datasets
         - Pickle
 
-The results of the analysis are available in `NIRD research data archive <http://doi.org/10.11582/2021.00008>`_.
 
 Running the analysis on subsampled datasets
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -346,4 +344,24 @@ The YAML specification is given below:
   output:
     format: HTML
 
-The result of this analysis is available in `NIRD research data archive <http://doi.org/10.11582/2021.00008>`_.
+
+Results
+-------------------------------------------------
+
+The results of reproducing the study by Emerson et al. are shown in the following figure:
+
+.. figure:: ../_static/images/usecases/emerson_reproduction.png
+   :alt: Emerson reproduction results
+   :width: 80%
+
+   Reproducing the CMV status prediction study by Emerson et al.5 A. The overlap of the 164 disease-associated TCRβ sequences (V-TCRβaa-J) determined in the original study by Emerson et al., labeled “reference”, with those determined by the optimal model as reproduced here with a p-value threshold of 0.001 (labeled “model”). B. The overlap percentage of disease-associated TCRβ sequences for the optimal model with the p-value threshold of 0.001 between different data splits in 10-fold cross-validation (between 50% and 65% overlap). C. The probability that a TCRβ sequence is CMV-associated following a beta distribution estimated separately for CMV positive and negative subjects, which is then used for CMV status prediction of new subjects. D. Area under the ROC curve (AUROC) over p-value thresholds in training data (average AUROC over 10 cross-validation splits) and test data (AUROC in cohort 2).
+
+
+Furthermore, the results of the robustness assessment (replicating the study with a lower number of repertoires) are show here:
+
+.. figure:: ../_static/images/usecases/emerson_robustness.png
+   :alt: Emerson robustness results
+   :width: 70%
+
+   Decreasing the number of repertoires (400, 200, 100, and 50) leads to decreased prediction accuracy (AUROC: 0.86–0.46).
+

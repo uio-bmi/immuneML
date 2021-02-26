@@ -19,7 +19,7 @@ Creating the YAML specification
 This Galaxy tool takes as input an immuneML dataset from the Galaxy history, optional additional files, and a YAML specification file.
 To see the details on how to write the YAML specification, see :ref:`How to specify an analysis with YAML`.
 
-When writing an analysis specification for Galaxy, it can be assumed that all selected files are present in the current working directory. A path
+When writing an analysis specification for Galaxy, it can be assumed that all files selected under 'Additional files' are present in the current working directory. A path
 to an additional file thus consists only of the filename.
 
 The following YAML specification shows an example of how to run the ExploratoryAnalysis instruction inside Galaxy:

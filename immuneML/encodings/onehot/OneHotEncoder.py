@@ -46,7 +46,7 @@ class OneHotEncoder(DatasetEncoder):
         When using nucleotide sequences: note that the distance is measured in (amino acid) IMGT positions.
         If the complete sequence length is smaller than 2 * distance_to_seq_middle, the maximum value of the
         'start' and 'end' vectors will not reach 0, and the maximum value of the 'middle' vector will not reach 1.
-        A graphical representation of teh positional vectors with a too short sequence is given below:
+        A graphical representation of the positional vectors with a too short sequence is given below:
 
 
         .. code-block:: console
