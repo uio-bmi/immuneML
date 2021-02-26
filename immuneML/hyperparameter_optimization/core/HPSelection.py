@@ -25,7 +25,7 @@ class HPSelection:
 
         path = HPSelection.create_selection_path(state, current_path)
         state = HPSelection.update_split_count(state, train_val_dataset)
-        train_datasets, val_datasets = HPUtil.split_data(train_val_dataset, state.selection, path)
+        train_datasets, val_datasets = HPUtil.split_data(train_val_dataset, state.selection, path, state.label_configuration)
 
         n_labels = state.label_configuration.get_label_count()
 
@@ -79,7 +79,7 @@ class HPSelection:
         return hp_item.performance[state.optimization_metric.name.lower()] if hp_item.performance is not None else None
 
     @staticmethod
-    def create_selection_path(state: TrainMLModelState, current_path: Path) -> str:
+    def create_selection_path(state: TrainMLModelState, current_path: Path) -> Path:
         path = current_path / f"selection_{state.selection.split_strategy.name.lower()}"
         PathBuilder.build(path)
         return path

@@ -13,6 +13,8 @@ class SplitConfig:
 
         - k_fold (k-fold cross-validation)
 
+        - stratified_k_fold (stratified k-fold cross-validation that can be used when immuneML is used for single-label classification)
+
         - random (Monte Carlo cross-validation - randomly splitting the dataset to training and test datasets)
 
         - manual (train and test dataset are explicitly specified by providing metadata files for the two datasets - currently available only for repertoire datasets)
@@ -93,6 +95,8 @@ class SplitConfig:
             desc = f"{self.split_count}-fold MC CV (training percentage: {self.training_percentage})"
         elif self.split_strategy == SplitType.LOOCV:
             desc = "LOOCV"
+        elif self.split_strategy == SplitType.STRATIFIED_K_FOLD:
+            desc = f"stratified {self.split_count}-fold CV"
         return desc
 
     @staticmethod
