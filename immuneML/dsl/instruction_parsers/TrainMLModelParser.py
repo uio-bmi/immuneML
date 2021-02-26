@@ -42,10 +42,10 @@ class TrainMLModelParser:
 
         settings = self._parse_settings(instruction, symbol_table)
         dataset = symbol_table.get(instruction["dataset"])
-        assessment = self._parse_split_config(key, instruction, "assessment", symbol_table, len(settings))
-        selection = self._parse_split_config(key, instruction, "selection", symbol_table, len(settings))
-        assessment, selection = self._update_split_configs(assessment, selection, dataset)
         label_config = self._create_label_config(instruction, dataset, key)
+        assessment = self._parse_split_config(key, instruction, "assessment", symbol_table, len(settings), label_config)
+        selection = self._parse_split_config(key, instruction, "selection", symbol_table, len(settings), label_config)
+        assessment, selection = self._update_split_configs(assessment, selection, dataset)
         strategy = ReflectionHandler.get_class_by_name(instruction["strategy"], "hyperparameter_optimization/")
         metrics = {Metric[metric.upper()] for metric in instruction["metrics"]}
         optimization_metric = Metric[instruction["optimization_metric"].upper()]
@@ -68,7 +68,7 @@ class TrainMLModelParser:
         if assessment.split_strategy == SplitType.LOOCV:
             assessment.split_count = dataset.get_example_count()
             train_val_example_count = assessment.split_count - 1
-        elif assessment.split_strategy == SplitType.K_FOLD:
+        elif assessment.split_strategy == SplitType.K_FOLD or assessment.split_strategy.STRATIFIED_K_FOLD:
             train_val_example_count = int(dataset.get_example_count() * (assessment.split_count - 1) / assessment.split_count)
         else:
             train_val_example_count = int(dataset.get_example_count() * assessment.training_percentage)
@@ -167,7 +167,8 @@ class TrainMLModelParser:
             label_config.add_label(label_name, label_values, positive_class=positive_class)
         return label_config
 
-    def _parse_split_config(self, instruction_key, instruction: dict, split_key: str, symbol_table: SymbolTable, settings_count: int) -> SplitConfig:
+    def _parse_split_config(self, instruction_key, instruction: dict, split_key: str, symbol_table: SymbolTable, settings_count: int,
+                            label_config: LabelConfiguration) -> SplitConfig:
 
         try:
 
@@ -182,6 +183,10 @@ class TrainMLModelParser:
                 raise ValueError(f"{TrainMLModelParser.__name__}: all data under {instruction_key}/{split_key} was specified to be used for "
                                  f"training, but {settings_count} settings were specified for evaluation. Please define a test/validation set by "
                                  f"reducing the training percentage (e.g., to 0.7) or use only one hyperparameter setting to run the analysis.")
+
+            if split_strategy == SplitType.STRATIFIED_K_FOLD and len(label_config.get_labels_by_name()) != 1:
+                raise ValueError(f"{TrainMLModelParser.__name__}: Stratified k-fold cross-validation cannot be used when "
+                                 f"{len(label_config.get_labels_by_name())} labels are specified. It support only one label (and multiple classes).")
 
             return SplitConfig(split_strategy=split_strategy,
                                split_count=int(instruction[split_key]["split_count"]),

@@ -27,7 +27,7 @@ from immuneML.workflows.steps.data_splitter.DataSplitterParams import DataSplitt
 class HPUtil:
 
     @staticmethod
-    def split_data(dataset: Dataset, split_config: SplitConfig, path: Path) -> tuple:
+    def split_data(dataset: Dataset, split_config: SplitConfig, path: Path, label_config: LabelConfiguration) -> tuple:
         paths = [path / f"split_{i + 1}" for i in range(split_config.split_count)]
         params = DataSplitterParams(
             dataset=dataset,
@@ -35,7 +35,8 @@ class HPUtil:
             split_count=split_config.split_count,
             training_percentage=split_config.training_percentage,
             paths=paths,
-            split_config=split_config
+            split_config=split_config,
+            label_config=label_config
         )
         return DataSplitter.run(params)
 

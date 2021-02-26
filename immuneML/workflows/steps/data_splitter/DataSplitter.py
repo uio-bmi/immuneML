@@ -1,7 +1,7 @@
 import random
 
 import numpy as np
-from sklearn.model_selection import KFold
+from sklearn.model_selection import KFold, StratifiedKFold
 
 from immuneML.caching.CacheHandler import CacheHandler
 from immuneML.data_model.dataset.Dataset import Dataset
@@ -44,18 +44,34 @@ class DataSplitter(Step):
         return DataSplitter.k_fold_split(input_params)
 
     @staticmethod
-    def k_fold_split(input_params: DataSplitterParams):
-        dataset = input_params.dataset
-        splits_count = input_params.split_count
-        train_datasets, test_datasets = [], []
-        indices = np.arange(0, dataset.get_example_count())
+    def stratified_k_fold_split(input_params: DataSplitterParams):
 
-        k_fold = KFold(n_splits=splits_count, shuffle=True)
-        for split_index, (train_index, test_index) in enumerate(k_fold.split(indices)):
-            train_dataset = Util.make_dataset(dataset, train_index, input_params, split_index, Dataset.TRAIN)
+        assert len(input_params.label_config.get_labels_by_name()) == 1, \
+            f"{DataSplitter.__name__}: stratified k-fold cross validation is set, but there are " \
+            f"{len(input_params.label_config.get_labels_by_name())} labels specified. Stratified k-fold CV can be used only with one label set."
+
+        classes = input_params.dataset.get_metadata(input_params.label_config.get_labels_by_name())[input_params.label_config.get_labels_by_name()[0]]
+        indices = np.arange(0, input_params.dataset.get_example_count())
+
+        strat_k_fold = StratifiedKFold(n_splits=input_params.split_count, shuffle=True)
+
+        return DataSplitter._make_k_fold_datasets(enumerate(strat_k_fold.split(indices, classes)), input_params)
+
+    @staticmethod
+    def k_fold_split(input_params: DataSplitterParams):
+        indices = np.arange(0, input_params.dataset.get_example_count())
+
+        k_fold = KFold(n_splits=input_params.split_count, shuffle=True)
+        return DataSplitter._make_k_fold_datasets(enumerate(k_fold.split(indices)), input_params)
+
+    @staticmethod
+    def _make_k_fold_datasets(generator, input_params: DataSplitterParams):
+        train_datasets, test_datasets = [], []
+        for split_index, (train_index, test_index) in generator:
+            train_dataset = Util.make_dataset(input_params.dataset, train_index, input_params, split_index, Dataset.TRAIN)
             train_datasets.append(train_dataset)
 
-            test_dataset = Util.make_dataset(dataset, test_index, input_params, split_index, Dataset.TEST)
+            test_dataset = Util.make_dataset(input_params.dataset, test_index, input_params, split_index, Dataset.TEST)
             test_datasets.append(test_dataset)
 
         return train_datasets, test_datasets
