@@ -23,11 +23,11 @@ class TrainingPerformance(MLReport):
     """
     A report that plots the evaluation metrics for the performance given machine learning model and training dataset.
     The available metrics are accuracy, balanced_accuracy, confusion_matrix, f1_micro, f1_macro, f1_weighted, precision,
-    recall, auc and log_loss (see :ref:`Metrics`).
+    recall, auc and log_loss (see :py:obj:`immuneML.environment.Metric.Metric`).
 
     Arguments:
 
-        metrics (list): A list of metrics used to evaluate traning performance. See :ref:`Metrics` for available options.
+        metrics (list): A list of metrics used to evaluate training performance. See :py:obj:`immuneML.environment.Metric.Metric` for available options.
 
     YAML specification:
 
@@ -61,12 +61,12 @@ class TrainingPerformance(MLReport):
         
         ParameterValidator.assert_all_in_valid_list(metrics, valid_metrics, location, 'metrics')
 
-        return TrainingPerformance(metrics, name=name)
+        return TrainingPerformance(set(metrics), name=name)
 
-    def __init__(self, metrics_set: set, train_dataset: Dataset = None, test_dataset: Dataset = None, method: MLMethod = None,
+    def __init__(self, metrics: set, train_dataset: Dataset = None, test_dataset: Dataset = None, method: MLMethod = None,
                  result_path: Path = None, name: str = None, hp_setting: HPSetting = None):
         super().__init__(train_dataset, test_dataset, method, result_path, name, hp_setting)
-        self.metrics_set = set(metrics_set)
+        self.metrics_set = set(metrics)
 
     def _generate(self) -> ReportResult:
         

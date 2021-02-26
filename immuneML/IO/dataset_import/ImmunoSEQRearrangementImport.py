@@ -159,6 +159,7 @@ class ImmunoSEQRearrangementImport(DataImport):
                     j_allele: j_alleles
                     templates: counts
                     locus: chains
+
     """
 
     @staticmethod

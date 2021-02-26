@@ -65,6 +65,7 @@ class OLGAImport(DataImport):
                 # Optional fields with OLGA-specific defaults, only change when different behavior is required:
                 separator: "\\t" # column separator
                 region_type: IMGT_CDR3 # what part of the sequence to import
+
     """
 
     @staticmethod
