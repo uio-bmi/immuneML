@@ -1015,3 +1015,29 @@ In this case, uncomment the lines for AIRR import and remove the lines for Pickl
       type: TrainMLModel
   output:
     format: HTML
+
+Results
+-------------------------------------
+
+When benchmarking the three ML methods (logistic regression (LR), support vector machine (SVM) and random forest (RF))
+in combination with two encodings (3-mer and 4-mer encoding) using the synthetic datset with ground-truth disease
+signals, we show that the classification performance drops as the immune event complexity increases:
+
+
+.. figure:: ../_static/images/usecases/benchmarking.png
+   :alt: Benchmarking results
+   :width: 70%
+
+   The classification performance for the most simple immune signal (signal 1) is highest, while for the most complex immune signal (signal 5) it is lowest.
+
+
+
+Furthermore, when comparing the feature coefficient sizes with how well these features represent the ground-truth signals,
+it was found that models with a good classification performance were indeed able to recover the ground-truth signals (here only shown for immune signals 1 and 5, for data split 1).
+
+
+.. figure:: ../_static/images/usecases/suppl_fig_use_case_3.png
+   :alt: Coefficients and seed recovery results
+   :width: 85%
+
+   The benchmarking use case model coefficients and motif recovery, where the repertoire data is represented by 3-mer amino acid frequencies. Two immune events are shown. Immune event 1 (A, B) is the simplest event simulated by implanting a single 3-mer, while the immune event 5 (C, D) is the most complex one simulated by implanting 20 motifs consisting of a 3-mer with a 50% chance of having a gap and 50% chance of having a Hamming distance of 1. A. The 25 largest coefficients of the logistic regression model, feature importances on random forest model, and coefficients of the support vector machine (SVM) model. The highest value of the coefficients corresponds to the implanted motif. B. Coefficient values for the features depending on the overlap between the recovered features that overlap with the implanted motif, measuring how well the recovered motifs correspond to the implanted motif, shown across the three ML models. C. The 25 largest coefficients and feature importances for the ML models trained on immune event 5. D. Overlap of recovered and implanted motifs for the ML models trained on immune event 5. Motif recovery for immune event 5 is less effective than for immune event 1.
