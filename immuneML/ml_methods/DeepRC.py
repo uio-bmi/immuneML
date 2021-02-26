@@ -24,7 +24,11 @@ class DeepRC(MLMethod):
     This classifier uses the DeepRC method for repertoire classification. The DeepRC ML method should be used in combination
     with the DeepRC encoder.
 
-    Important note: DeepRC uses PyTorch functionalities that depend on GPU. Therefore, DeepRC does not work on a CPU.
+    Notes:
+
+    - DeepRC uses PyTorch functionalities that depend on GPU. Therefore, DeepRC does not work on a CPU.
+
+    - This wrapper around DeepRC currently only supports binary classification.
 
     Reference:
     Michael Widrich, Bernhard Schäfl, Milena Pavlović, Geir Kjetil Sandve, Sepp Hochreiter, Victor Greiff, Günter Klambauer
