@@ -73,8 +73,6 @@ class ConfounderAnalysis(MLReport):
         for label_index, meta_label in enumerate(self.metadata_labels):
             csv_data = {}
             for metric_index, metric in enumerate(metrics):
-                output_name = metric + "_" + meta_label
-
                 plotting_data = self._metrics(metric=metric, label=self.label, meta_label=meta_label,
                                               predictions=predictions, true_labels=true_labels)
 

@@ -33,7 +33,7 @@ class ReceptorDataset(ElementDataset):
         result = {field: [] for field in field_names}
         for receptor in self.get_data():
             for field in field_names:
-                result[field].append(getattr(receptor['metadata'], field, None))
+                result[field].append(receptor.metadata[field] if receptor.metadata and field in receptor.metadata else None)
 
         for field in field_names:
             if all(item is None for item in result[field]):
