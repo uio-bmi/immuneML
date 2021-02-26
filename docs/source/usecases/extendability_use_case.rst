@@ -203,15 +203,15 @@ has been updated to produce these plots.
 
 .. figure:: ../_static/images/usecases/epitope_1.png
    :alt: Epitope 1
-   :width: 70%
+   :width: 60%
 
 .. figure:: ../_static/images/usecases/epitope_2.png
    :alt: Epitope 2
-   :width: 70%
+   :width: 60%
 
 .. figure:: ../_static/images/usecases/epitope_3.png
    :alt: Epitope 3
-   :width: 70%
+   :width: 60%
 
 
 
