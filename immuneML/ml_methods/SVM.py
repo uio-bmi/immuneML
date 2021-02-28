@@ -6,9 +6,9 @@ from scripts.specification_util import update_docs_per_mapping
 
 class SVM(SklearnMethod):
     """
-    This is a wrapper of scikit-learn’s LinearSVC class. Please see the
-    `scikit-learn documentation <https://scikit-learn.org/stable/modules/generated/sklearn.svm.LinearSVC.html>`_
-    of LinearSVC for the parameters.
+    This is a wrapper of scikit-learn’s SVC class. Please see the
+    `scikit-learn documentation <https://scikit-learn.org/stable/modules/generated/sklearn.svm.SVC.html>`_
+    of SVC for the parameters. The default kernel is 'linear', but any kernel valid for this model in scikit-learn can be used.
 
     Note: if you are interested in plotting the coefficients of the SVM model,
     consider running the :ref:`Coefficients` report.
@@ -26,6 +26,7 @@ class SVM(SklearnMethod):
                 # sklearn parameters (same names as in original sklearn class)
                 penalty: l1 # always use penalty l1
                 C: [0.01, 0.1, 1, 10, 100] # find the optimal value for C
+                kernel: linear # default value in immuneML
                 # Additional parameter that determines whether to print convergence warnings
                 show_warnings: True
             # if any of the parameters under SVM is a list and model_selection_cv is True,
