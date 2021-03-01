@@ -78,7 +78,8 @@ a class that implements the given report, without modifying any other part of th
 
 The input data, YAML specifications and results of these comparisons are available in `NIRD research data archive <http://doi.org/10.11582/2021.00009>`_.
 
-YAML specification for training machine learning models and recovering motifs in the GILGFVFTL dataset:
+YAML specification for training machine learning models and recovering motifs in the GILGFVFTL dataset (note that the ROCCurveSummary was not present in the original
+specification and the plots were obtained outside immuneML; it has since been added to immuneML and can be used directly from YAML specification):
 
 .. code-block:: yaml
 
@@ -147,6 +148,7 @@ YAML specification for training machine learning models and recovering motifs in
       gliph_exporter: # will export the receptor data in format compatible with GLIPH2 (Huang et al. 2020) so that it can be directly used on the data as sp$
         GLIPH2Exporter:
           condition: GILGFVFTL # what is the condition, as defined by GLIPH2
+      roc_summary: ROCCurveSummary # plot the ROC curves on the performance for each split in the outer cross-validation loop to compare different methods defined here
   instructions:
     tcrdist_cnn_comparison: # definition of the analysis
       type: TrainMLModel # analysis for training ML models
@@ -185,7 +187,7 @@ YAML specification for training machine learning models and recovering motifs in
       strategy: GridSearch # how to evaluate different combinations of encodings and ML models listed under settings, here: just compare them all with each other
       number_of_processes: 32 # in the parallelized parts of the code, how many processes to use
       optimization_metric: auc # the metric used for optimization
-      reports: [] # some additional reports, not applicable here
+      reports: [roc_summary] # additional reports made on the full results -> here produce the ROC curves for each method as shown in the results
       store_encoded_data: False # whether to store the encoded data, if set to True, it could increase the disk space usage
       refit_optimal_model: False # whether to refit the optimal model before exporting it (not in this use-case as the models will be used for comparison, not for classifying some new data)
 
