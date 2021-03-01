@@ -4,7 +4,7 @@ import shutil
 from unittest import TestCase
 
 import numpy as np
-from sklearn.svm import LinearSVC
+from sklearn.svm import SVC
 
 from immuneML.caching.CacheType import CacheType
 from immuneML.data_model.encoded_data.EncodedData import EncodedData
@@ -62,7 +62,7 @@ class TestSVM(TestCase):
         with open(path / "svm.pickle", "rb") as file:
             svm2 = pickle.load(file)
 
-        self.assertTrue(isinstance(svm2, LinearSVC))
+        self.assertTrue(isinstance(svm2, SVC))
 
         shutil.rmtree(path)
 
@@ -82,6 +82,6 @@ class TestSVM(TestCase):
         svm2 = SVM()
         svm2.load(path)
 
-        self.assertTrue(isinstance(svm2.get_model(), LinearSVC))
+        self.assertTrue(isinstance(svm2.get_model(), SVC))
 
         shutil.rmtree(path)

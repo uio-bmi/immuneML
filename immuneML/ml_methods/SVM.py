@@ -1,4 +1,4 @@
-from sklearn.svm import LinearSVC
+from sklearn.svm import SVC
 
 from immuneML.ml_methods.SklearnMethod import SklearnMethod
 from scripts.specification_util import update_docs_per_mapping
@@ -40,21 +40,20 @@ class SVM(SklearnMethod):
     """
 
     def __init__(self, parameter_grid: dict = None, parameters: dict = None):
-        _parameters = parameters if parameters is not None else {"max_iter": 10000, "multi_class": "crammer_singer"}
         _parameter_grid = parameter_grid if parameter_grid is not None else {}
+        _parameters = parameters if parameters is not None else {}
 
         super(SVM, self).__init__(parameter_grid=_parameter_grid, parameters=_parameters)
 
     def _get_ml_model(self, cores_for_training: int = 2, X=None):
-        return LinearSVC(**self._parameters)
+        return SVC(**self._parameters)
 
     def can_predict_proba(self) -> bool:
         return False
 
     def get_params(self):
-
         params = self.model.get_params()
-        params["coefficients"] = self.model.coef_[0].tolist()
+        params["coefficients"] = self.model.coef_[0].tolist() if self.model.kernel == 'linear' else self.model.dual_coef_
         params["intercept"] = self.model.intercept_.tolist()
         return params
 
