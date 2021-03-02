@@ -26,7 +26,7 @@ Step 1: importing the dataset to a Galaxy history
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Every immuneML analysis takes a dataset as input. For the Quickstart tutorial, an example dataset has been prepared and is
-available through `this Galaxy history <https://galaxy.immuneml.uio.no/u/immuneml/h/quickstart-data>`_.
+available through `this Galaxy history <https://galaxy.immuneml.uio.no/u/immuneml/h/quickstart-data>`_ (under 'Shared data' > 'Histories' > 'Quickstart data').
 Alternatively, the tutorial :ref:`How to make an immuneML dataset in Galaxy` describes in detail
 how to make an immuneML dataset using your own data.
 

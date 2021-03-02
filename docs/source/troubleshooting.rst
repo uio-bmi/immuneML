@@ -31,8 +31,7 @@ On Windows for instance, you can try the following to install PyTorch 1.7.1 for 
 For more information on PyTorch installation for different operating systems, please see `the PyTorch documentation <https://pytorch.org/get-started/previous-versions/>`_,
 and afterwards try to install immuneML again.
 
-Please note that to use DeepRC from immuneML, one would need GPUs and PyTorch distribution that support them.
-
+Please note that when using DeepRC from immuneML, a PyTorch distribution that supports GPUs is required.
 
 Runtime issues
 --------------
