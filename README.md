@@ -161,7 +161,7 @@ For each instruction specified in the YAML specification file, a subfolder is cr
    - [requests](https://requests.readthedocs.io/) (2.21 or higher)
    - [scikit-learn](https://scikit-learn.org/) (0.23 or higher)
    - [scipy](https://www.scipy.org)
-   - [tensorboard](https://www.tensorflow.org/tensorboard) (1.14.0)
+   - [tensorboard](https://www.tensorflow.org/tensorboard) (1.14.0 or higher)
    - [tqdm](https://tqdm.github.io/) (0.24 or higher)
    - [tzlocal](https://pypi.org/project/tzlocal/) 
 - Optional dependencies when using DeepRC:
