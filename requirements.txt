@@ -9,7 +9,7 @@ regex
 tzlocal
 airr>=1
 pystache==0.5.4
-torch==1.5.1
+torch>=1.5.1
 numpy>=1.18
 h5py<=2.10.0
 dill>=0.3
