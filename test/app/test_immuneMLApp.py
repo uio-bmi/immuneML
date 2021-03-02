@@ -76,7 +76,8 @@ class TestImmuneMLApp(TestCase):
                         },
                         "model_selection_cv": False,
                         "model_selection_n_folds": -1,
-                    }
+                    },
+                    "svm": "SVM"
                 },
                 "preprocessing_sequences": {
                     "seq1": [
@@ -135,7 +136,7 @@ class TestImmuneMLApp(TestCase):
                         {
                             "preprocessing": "seq1",
                             "encoding": "e2",
-                            "ml_method": "simpleLR"
+                            "ml_method": "svm"
                         }
                     ],
                     "assessment": {
