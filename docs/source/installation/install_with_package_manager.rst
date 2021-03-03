@@ -50,7 +50,7 @@ To install the DeepRC dependencies, run:
 
 .. code-block:: console
 
-  pip install -r requirements_DeepRC.txt
+  pip install -r requirements_DeepRC.txt --no-dependencies
 
 
 
