@@ -1,7 +1,7 @@
 Running immuneML in the cloud
 ==============================
 
-In this tutorial, we will show how immuneML can be run on Google Cloud and Amazon Web Services using the existing Docker image.
+In this tutorial, we will show how immuneML can be run on Google Cloud and Amazon Web Services (AWS) using the existing Docker image.
 
 Installing immuneML on Google Cloud
 -------------------------------------
@@ -22,7 +22,7 @@ immuneML Docker image is available at `Docker Hub <https://hub.docker.com/reposi
 Installing immuneML on AWS
 ---------------------------
 
-Here we will describe how immuneML can be set up on Amazon Web Services. We will use a single EC2 Linux instance and install
+Here we will describe how immuneML can be set up on AWS. We will use a single EC2 Linux instance and install
 immuneML using Docker. Once the instance is created, the process is the same as for any other installation of a Docker image on a Linux machine.
 
 To install immuneML on AWS, follow these steps:
