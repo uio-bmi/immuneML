@@ -145,19 +145,30 @@ class DeepRC(MLMethod):
 
         self.feature_names = None
 
-    def _metadata_to_hdf5(self, metadata_filepath: Path, label_name):
+    def _metadata_to_hdf5(self, repertoires_path: Path, label_name):
         from deeprc.deeprc_binary.dataset_converters import DatasetToHDF5
 
         hdf5_filepath = metadata_filepath.parent / f"{metadata_filepath.stem}.hdf5"
-        converter = DatasetToHDF5(metadata_file=str(metadata_filepath),
-                                  id_column=DeepRCEncoder.ID_COLUMN,
-                                  single_class_label_columns=tuple([label_name]),
+        converter = DatasetToHDF5(repertoiresdata_directory=str(repertoires_path),
                                   sequence_column=DeepRCEncoder.SEQUENCE_COLUMN,
                                   sequence_counts_column=DeepRCEncoder.COUNTS_COLUMN,
                                   column_sep=DeepRCEncoder.SEP,
                                   filename_extension=f".{DeepRCEncoder.EXTENSION}",
                                   verbose=False)
         converter.save_data_to_file(output_file=str(hdf5_filepath), n_workers=self.n_workers)
+
+
+        # class DatasetToHDF5(object):
+        #     def __init__(repertoiresdata_directory: str,
+        #                  sequence_column: str = 'amino_acid',
+        #                  sequence_counts_column: str = 'templates',
+        #                  column_sep: str = '\t',
+        #                  filename_extension: str = '.tsv',
+        #                  sequence_characters: tuple =
+        #                  ('A', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K', 'L', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'V', 'W',
+        #                   'Y'),
+        #                  exclude_rows: tuple = (), include_rows: dict = (), h5py_dict: dict = None,
+        #                  verbose: bool = True):
 
         return hdf5_filepath
 

@@ -67,14 +67,14 @@ class DeepRCEncoder(DatasetEncoder):
                 max_sequence_length = max(df[DeepRCEncoder.SEQUENCE_COLUMN].str.len())
                 self.max_sequence_length = max(self.max_sequence_length, max_sequence_length)
 
-    def export_metadata_file(self, dataset, labels, output_folder):
-        metadata_filepath = output_folder / f"{dataset.identifier}_metadata.{DeepRCEncoder.EXTENSION}"
-        metadata = dataset.get_metadata(labels, return_df=True)
-        metadata[DeepRCEncoder.ID_COLUMN] = dataset.get_repertoire_ids()
-
-        metadata.to_csv(path_or_buf=metadata_filepath, sep="\t", index=False)
-
-        return metadata_filepath
+    # def export_metadata_file(self, dataset, labels, output_folder):
+    #     metadata_filepath = output_folder / f"{dataset.identifier}_metadata.{DeepRCEncoder.EXTENSION}"
+    #     metadata = dataset.get_metadata(labels, return_df=True)
+    #     metadata[DeepRCEncoder.ID_COLUMN] = dataset.get_repertoire_ids()
+    #
+    #     metadata.to_csv(path_or_buf=metadata_filepath, sep="\t", index=False)
+    #
+    #     return metadata_filepath
 
     def encode(self, dataset, params: EncoderParams) -> RepertoireDataset:
         result_path = params.result_path / "encoding"
@@ -83,13 +83,13 @@ class DeepRCEncoder(DatasetEncoder):
         self.export_repertoire_tsv_files(result_path)
 
         labels = params.label_config.get_labels_by_name()
-        metadata_filepath = self.export_metadata_file(dataset, labels, result_path)
+        # metadata_filepath = self.export_metadata_file(dataset, labels, result_path)
 
         encoded_dataset = dataset.clone()
         encoded_dataset.encoded_data = EncodedData(examples=None, labels=dataset.get_metadata(labels) if params.encode_labels else None,
                                                    example_ids=dataset.repertoire_ids,
                                                    encoding=DeepRCEncoder.__name__,
-                                                   info={"metadata_filepath": metadata_filepath,
+                                                   info={"repertoires_path": result_path,
                                                          "max_sequence_length": self.max_sequence_length})
 
         return encoded_dataset
