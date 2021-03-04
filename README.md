@@ -55,7 +55,7 @@ Important note: DeepRC uses PyTorch functionalities that depend on GPU. Therefor
 To install the DeepRC dependencies, run:
 
 ```bash
-pip install -r requirements_DeepRC.txt
+pip install -r requirements_DeepRC.txt --no-dependencies
 ```
 
 ### Validating the installation
