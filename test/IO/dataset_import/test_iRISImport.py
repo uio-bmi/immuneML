@@ -47,6 +47,7 @@ TCR_AB	1421	AT	TRAV12-3*01	null	TRAJ17*01	null	null	null	null	null	null	null	nul
         # case: minimal dataset (all dual chains and all genes = False)
         dataset = IRISImport.import_dataset({"is_repertoire": True, "result_path": path, "metadata_file": path / "metadata.csv", "path": path,
                                              "import_dual_chains": False, "import_all_gene_combinations": False, "separator": "\t",
+                                             "import_empty_nt_sequences": True,
                                              "extra_columns_to_load": ["extra_col"], "receptor_chains": "TRA_TRB"}, "iris_dataset")
 
         self.assertEqual(number_of_repertoires, dataset.get_example_count())
@@ -72,6 +73,7 @@ TCR_AB	1421	AT	TRAV12-3*01	null	TRAJ17*01	null	null	null	null	null	null	null	nul
 
         dataset = IRISImport.import_dataset({"is_repertoire": True, "result_path": path, "metadata_file": path / "metadata.csv", "path": path,
                                              "import_dual_chains": True, "import_all_gene_combinations": True, "separator": "\t",
+                                             "import_empty_nt_sequences": True,
                                              "extra_columns_to_load": ["extra_col"], "receptor_chains": "TRA_TRB"}, "dataset_name")
 
         self.assertEqual(number_of_repertoires, dataset.get_example_count())
@@ -91,6 +93,7 @@ TCR_AB	1421	AT	TRAV12-3*01	null	TRAJ17*01	null	null	null	null	null	null	null	nul
 
         sequence_dataset = IRISImport.import_dataset({"is_repertoire": False, "result_path": path, "path": path, "separator": "\t",
                                                       "import_dual_chains": True, "sequence_file_size": 1000,
+                                                      "import_empty_nt_sequences": True,
                                                       "import_all_gene_combinations": True, "paired": False,
                                                       "receptor_chains": "TRA_TRB"}, "dataset_name2")
 

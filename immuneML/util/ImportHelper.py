@@ -249,7 +249,7 @@ class ImportHelper:
                         f"{ImportHelper.__name__}: {n_empty} sequences were removed from the dataset because they contained an empty {sequence_name} "
                         f"sequence after preprocessing. ")
             else:
-                raise ValueError(f"{ImportHelper.__name__}: column {sequence_colname} was not set, skipping filtering...")
+                raise ValueError(f"{ImportHelper.__name__}: column {sequence_colname} was not set, but is required for filtering.")
 
         return dataframe
 
