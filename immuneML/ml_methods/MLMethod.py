@@ -164,10 +164,7 @@ class MLMethod(metaclass=abc.ABCMeta):
         """
         The get_model function returns the parameters of the model. This is usually used to show the parameters of the model in a user-friendly way.
 
-        Arguments:
-
-            label_name (str): the name of the label for which the model was trained. It is useful to check if the label_name and the model label
-            match.
+        Arguments: there are no arguments for this function.
 
         Returns:
 
@@ -200,9 +197,7 @@ class MLMethod(metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def get_params(self):
-        """
-        Returns the parameters of the model, similar to get_model function.
-        """
+        """Returns the parameters of the model, similar to get_model function."""
         pass
 
     @abc.abstractmethod
@@ -213,7 +208,7 @@ class MLMethod(metaclass=abc.ABCMeta):
 
         Note that when providing class probabilities the classes should have a specific (constant) order, and in case of binary classification, they
         should be ordered so that the negative class comes first and the positive one comes second. For this handling classes, see
-        py:`immuneML.ml_methods.util.Util.Util.make_binary_class_mapping` method that will automatically create class mapping for binary classification.
+        py:mod:`immuneML.ml_methods.util.Util.Util.make_binary_class_mapping` method that will automatically create class mapping for binary classification.
 
         Arguments:
 
@@ -245,8 +240,8 @@ class MLMethod(metaclass=abc.ABCMeta):
     def get_package_info(self) -> str:
         """
         Returns the package and version used for implementing the ML method if an external package was used or immuneML version if it is custom
-        implementation. See py:`immuneML.ml_methods.SklearnMethod.SklearnMethod` and py:`immuneML.ml_methods.ProbabilisticBinaryClassifier.ProbabilisticBinaryClassifier`
-         for examples of both.
+        implementation. See py:mod:`immuneML.ml_methods.SklearnMethod.SklearnMethod` and py:mod:`immuneML.ml_methods.ProbabilisticBinaryClassifier.ProbabilisticBinaryClassifier`
+        for examples of both.
         """
         pass
 

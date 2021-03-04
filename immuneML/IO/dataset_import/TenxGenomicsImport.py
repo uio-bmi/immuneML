@@ -80,6 +80,11 @@ class TenxGenomicsImport(DataImport):
         they are present in the 10xGenomics file, or using alternative column names).
         Valid immuneML fields that can be specified here are defined by Repertoire.FIELDS
 
+        column_mapping_synonyms (dict): This is a column mapping that can be used if a column could have alternative names.
+        The formatting is the same as column_mapping. If some columns specified in column_mapping are not found in the file,
+        the columns specified in column_mapping_synonyms are instead attempted to be loaded.
+        For 10xGenomics format, there is no default column_mapping_synonyms.
+
         metadata_column_mapping (dict): Specifies metadata for Sequence- and ReceptorDatasets. This should specify a
         mapping similar to column_mapping where keys are 10xGenomics column names and values are the names that are internally
         used in immuneML as metadata fields. These metadata fields can be used as prediction labels for Sequence-
@@ -144,9 +149,7 @@ class TenxGenomicsImport(DataImport):
         ImportHelper.drop_empty_sequences(df, params.import_empty_aa_sequences, params.import_empty_nt_sequences)
         ImportHelper.drop_illegal_character_sequences(df, params.import_illegal_characters)
         ImportHelper.update_gene_info(df)
-
-        if "chains" not in df.columns:
-            df.loc[:, "chains"] = ImportHelper.load_chains_from_genes(df)
+        ImportHelper.load_chains(df)
 
         return df
 

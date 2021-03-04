@@ -19,7 +19,7 @@ class HPAssessment:
     def run_assessment(state: TrainMLModelState) -> TrainMLModelState:
 
         state = HPAssessment._create_root_path(state)
-        train_val_datasets, test_datasets = HPUtil.split_data(state.dataset, state.assessment, state.path)
+        train_val_datasets, test_datasets = HPUtil.split_data(state.dataset, state.assessment, state.path, state.label_configuration)
         n_splits = len(train_val_datasets)
 
         for index in range(n_splits):

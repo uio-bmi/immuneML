@@ -81,7 +81,7 @@ class DeepRCMotifDiscovery(MLReport):
                                                   indices=indices, label=self.label, eval_only=True,
                                                   is_train=False)
 
-        model = self.method.get_model(self.label)[self.label]
+        model = self.method.get_model()
 
         path_inputs = self.result_path / self.filename_inputs
         path_kernels = self.result_path / self.filename_kernels

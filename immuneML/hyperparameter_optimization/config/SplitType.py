@@ -8,3 +8,4 @@ class SplitType(Enum):
     RANDOM = 2
     MANUAL = 3
     LEAVE_ONE_OUT_STRATIFICATION = 4
+    STRATIFIED_K_FOLD = 5

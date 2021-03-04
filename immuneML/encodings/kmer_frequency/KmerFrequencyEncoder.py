@@ -32,26 +32,11 @@ class KmerFrequencyEncoder(DatasetEncoder):
 
     Arguments:
 
-        sequence_encoding (:py:mod:`immuneML.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType`):
-        The type of k-mers that are used. The simplest sequence_encoding is :py:mod:`immuneML.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType.CONTINUOUS_KMER`,
-        which simply uses contiguous subsequences of length k to represent the k-mers.
-        When gapped k-mers are used (:py:mod:`immuneML.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType.GAPPED_KMER`,
-        :py:mod:`immuneML.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType.GAPPED_KMER`), the k-mers may contain
-        gaps with a size between min_gap and max_gap, and the k-mer length is defined as a combination of k_left and k_right.
-        When IMGT k-mers are used (:py:mod:`immuneML.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType.IMGT_CONTINUOUS_KMER`,
-        :py:mod:`immuneML.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType.IMGT_GAPPED_KMER`), IMGT positional information is
-        taken into account (i.e. the same sequence in a different position is considered to be a different k-mer).
-        When the identity representation is used (:py:mod:`immuneML.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType.IDENTITY`),
-        the k-mers just correspond to the original sequences.
+        sequence_encoding (:py:mod:`~immuneML.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType`): The type of k-mers that are used. The simplest sequence_encoding is :py:mod:`~immuneML.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType.CONTINUOUS_KMER`, which uses contiguous subsequences of length k to represent the k-mers. When gapped k-mers are used (:py:mod:`~immuneML.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType.GAPPED_KMER`, :py:mod:`~immuneML.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType.GAPPED_KMER`), the k-mers may contain gaps with a size between min_gap and max_gap, and the k-mer length is defined as a combination of k_left and k_right. When IMGT k-mers are used (:py:mod:`~immuneML.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType.IMGT_CONTINUOUS_KMER`, :py:mod:`~immuneML.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType.IMGT_GAPPED_KMER`), IMGT positional information is taken into account (i.e. the same sequence in a different position is considered to be a different k-mer). When the identity representation is used (:py:mod:`~immuneML.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType.IDENTITY`), the k-mers just correspond to the original sequences.
 
-        normalization_type (:py:mod:`immuneML.analysis.data_manipulation.NormalizationType`): The way in which the
-        k-mer frequencies should be normalized. The default value for normalization_type is l2.
+        normalization_type (:py:mod:`~immuneML.analysis.data_manipulation.NormalizationType`): The way in which the k-mer frequencies should be normalized. The default value for normalization_type is l2.
 
-        reads (:py:mod:`immuneML.encodings.kmer_frequency.ReadsType`): Reads type signify whether the counts of the sequences
-        in the repertoire will be taken into account. If :py:mod:`immuneML.encodings.kmer_frequency.ReadsType.UNIQUE`,
-        only unique sequences (clonotypes) are encoded, and if :py:mod:`immuneML.encodings.kmer_frequency.ReadsType.ALL`,
-        the sequence 'count' value is taken into account when determining the k-mer frequency.
-        The default value for reads is unique.
+        reads (:py:mod:`~immuneML.encodings.kmer_frequency.ReadsType`): Reads type signify whether the counts of the sequences in the repertoire will be taken into account. If :py:mod:`~immuneML.encodings.kmer_frequency.ReadsType.UNIQUE`, only unique sequences (clonotypes) are encoded, and if :py:mod:`~immuneML.encodings.kmer_frequency.ReadsType.ALL`, the sequence 'count' value is taken into account when determining the k-mer frequency. The default value for reads is unique.
 
         k (int): Length of the k-mer (number of amino acids) when ungapped k-mers are used. The default value for k is 3.
 
@@ -63,16 +48,11 @@ class KmerFrequencyEncoder(DatasetEncoder):
 
         max_gap: (int): Maximum gap size when gapped k-mers are used. The default value for max_gap is 0.
 
-        sequence_type (:py:mod:`immuneML.environment.SequenceType.SequenceType`): Whether to work with nucleotide or amino acid sequences. Amino acid
-        sequences are the default. To work with either sequence type, the sequences of the desired type should be included in the datasets, e.g.,
-        listed under 'columns_to_load' parameter. By default, both types will be included if available. Valid values are: AMINO_ACID and NUCLEOTIDE.
+        sequence_type (:py:mod:`~immuneML.environment.SequenceType.SequenceType`): Whether to work with nucleotide or amino acid sequences. Amino acid sequences are the default. To work with either sequence type, the sequences of the desired type should be included in the datasets, e.g., listed under 'columns_to_load' parameter. By default, both types will be included if available. Valid values are: AMINO_ACID and NUCLEOTIDE.
 
-        scale_to_unit_variance (bool): whether to scale the design matrix after normalization to have unit variance per feature. Setting this argument
-        to True might improve the subsequent classifier's performance depending on the type of the classifier. The default value for scale_to_unit_variance is true.
+        scale_to_unit_variance (bool): whether to scale the design matrix after normalization to have unit variance per feature. Setting this argument to True might improve the subsequent classifier's performance depending on the type of the classifier. The default value for scale_to_unit_variance is true.
 
-        scale_to_zero_mean (bool): whether to scale the design matrix after normalization to have zero mean per feature. Setting this argument to True
-        might improve the subsequent classifier's performance depending on the type of the classifier. However, if the original design matrix was
-        sparse, setting this argument to True will destroy the sparsity and will increase the memory consumption. The default value for scale_to_zero_mean is false.
+        scale_to_zero_mean (bool): whether to scale the design matrix after normalization to have zero mean per feature. Setting this argument to True might improve the subsequent classifier's performance depending on the type of the classifier. However, if the original design matrix was sparse, setting this argument to True will destroy the sparsity and will increase the memory consumption. The default value for scale_to_zero_mean is false.
 
 
     YAML specification:

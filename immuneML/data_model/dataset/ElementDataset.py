@@ -56,7 +56,7 @@ class ElementDataset(Dataset):
         Args:
             example_indices (list): a list of indices of examples (receptors or receptor sequences) to use in the new dataset
             path (Path): a path where to store the newly created dataset
-            dataset_type (str): a type of the dataset used as a part of the name of the resulting dataset; the values are defined as constants in :py:obj:`immuneML.data_model.dataset.Dataset.Dataset`
+            dataset_type (str): a type of the dataset used as a part of the name of the resulting dataset; the values are defined as constants in :py:obj:`~immuneML.data_model.dataset.Dataset.Dataset`
 
         Returns:
 

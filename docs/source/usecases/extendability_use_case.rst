@@ -32,7 +32,7 @@ TCRAV32-01\*01, TCRBVA-or09_02, TCRBV22-01.
 The original data file as downloaded from immuneACCESS is available here: :download:`naiveTCRAB.tsv <../_static/files/Heikkila et al 2020 naive PBMC TCRAB immuneACCESS 20201223.tsv>`
 
 Using this data, three datasets were created by combining epitope-specific paired receptor data with naive randomly paired data. These data along with
-the results of testing are available at this link.
+the results of testing are available in `NIRD research data archive <http://doi.org/10.11582/2021.00009>`_.
 
 Adding a new ML method
 -----------------------
@@ -76,9 +76,10 @@ gain matrices, similar to the work of `Ploenzke and Irizarry 2018 <https://www.b
 models is described in the tutorial :ref:`How to add a new report`. Briefly, adding a report to explore the motifs in the CNN was done by implementing and adding
 a class that implements the given report, without modifying any other part of the code.
 
-The input data, YAML specifications and results of these comparisons are available at this link.
+The input data, YAML specifications and results of these comparisons are available in `NIRD research data archive <http://doi.org/10.11582/2021.00009>`_.
 
-YAML specification for training machine learning models and recovering motifs in the GILGFVFTL dataset:
+YAML specification for training machine learning models and recovering motifs in the GILGFVFTL dataset (note that the ROCCurveSummary was not present in the original
+specification and the plots were obtained outside immuneML; it has since been added to immuneML and can be used directly from YAML specification):
 
 .. code-block:: yaml
 
@@ -147,6 +148,7 @@ YAML specification for training machine learning models and recovering motifs in
       gliph_exporter: # will export the receptor data in format compatible with GLIPH2 (Huang et al. 2020) so that it can be directly used on the data as sp$
         GLIPH2Exporter:
           condition: GILGFVFTL # what is the condition, as defined by GLIPH2
+      roc_summary: ROCCurveSummary # plot the ROC curves on the performance for each split in the outer cross-validation loop to compare different methods defined here
   instructions:
     tcrdist_cnn_comparison: # definition of the analysis
       type: TrainMLModel # analysis for training ML models
@@ -185,6 +187,33 @@ YAML specification for training machine learning models and recovering motifs in
       strategy: GridSearch # how to evaluate different combinations of encodings and ML models listed under settings, here: just compare them all with each other
       number_of_processes: 32 # in the parallelized parts of the code, how many processes to use
       optimization_metric: auc # the metric used for optimization
-      reports: [] # some additional reports, not applicable here
+      reports: [roc_summary] # additional reports made on the full results -> here produce the ROC curves for each method as shown in the results
       store_encoded_data: False # whether to store the encoded data, if set to True, it could increase the disk space usage
       refit_optimal_model: False # whether to refit the optimal model before exporting it (not in this use-case as the models will be used for comparison, not for classifying some new data)
+
+
+Results
+-------------------------------------------------
+
+
+We compared the CNN method with the TCRdist-based k-nearest neighbor classifier and logistic regression on a dataset
+consisting of epitope-specific and naive TCRαβ sequences (assumed to be non-epitope-specific).
+
+The resulting ROC curves for the three epitopes (GILGFVFTL, Influenza A; AVFDRKSDAK, Epstein-Barr virus; KLGGALQAK, Cytomegalovirus) are shown below.
+Note that these figures were not included in the results deposited in the NIRD research data archive, but the YAML specification above
+has been updated to produce these plots.
+
+.. figure:: ../_static/images/usecases/epitope_1.png
+   :alt: Epitope 1
+   :width: 60%
+
+.. figure:: ../_static/images/usecases/epitope_2.png
+   :alt: Epitope 2
+   :width: 60%
+
+.. figure:: ../_static/images/usecases/epitope_3.png
+   :alt: Epitope 3
+   :width: 60%
+
+
+

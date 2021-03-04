@@ -7,7 +7,7 @@ import plotly.express as px
 import yaml
 
 from immuneML.data_model.dataset.Dataset import Dataset
-from immuneML.hyperparameter_optimization import HPSetting
+from immuneML.hyperparameter_optimization.HPSetting import HPSetting
 from immuneML.ml_methods.LogisticRegression import LogisticRegression
 from immuneML.ml_methods.MLMethod import MLMethod
 from immuneML.ml_methods.RandomForestClassifier import RandomForestClassifier
@@ -25,7 +25,7 @@ from scripts.specification_util import update_docs_per_mapping
 class Coefficients(MLReport):
     """
     A report that plots the coefficients for a given ML method in a barplot. Can be used for :ref:`LogisticRegression`,
-    :ref:`SVM` and :ref:`RandomForest`. In the case of RandomForest, the feature importances will be plotted.
+    :ref:`SVM` and :ref:`RandomForestClassifier`. In the case of RandomForest, the feature importances will be plotted.
 
     When used in :ref:`TrainMLModel` instruction, the report can be specified under 'models', both on
     the selection and assessment levels.

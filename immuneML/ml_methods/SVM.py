@@ -1,4 +1,4 @@
-from sklearn.svm import LinearSVC
+from sklearn.svm import SVC
 
 from immuneML.ml_methods.SklearnMethod import SklearnMethod
 from scripts.specification_util import update_docs_per_mapping
@@ -6,9 +6,9 @@ from scripts.specification_util import update_docs_per_mapping
 
 class SVM(SklearnMethod):
     """
-    This is a wrapper of scikit-learn’s LinearSVC class. Please see the
-    `scikit-learn documentation <https://scikit-learn.org/stable/modules/generated/sklearn.svm.LinearSVC.html>`_
-    of LinearSVC for the parameters.
+    This is a wrapper of scikit-learn’s SVC class. Please see the
+    `scikit-learn documentation <https://scikit-learn.org/stable/modules/generated/sklearn.svm.SVC.html>`_
+    of SVC for the parameters. The default kernel is 'linear', but any kernel valid for this model in scikit-learn can be used.
 
     Note: if you are interested in plotting the coefficients of the SVM model,
     consider running the :ref:`Coefficients` report.
@@ -26,6 +26,7 @@ class SVM(SklearnMethod):
                 # sklearn parameters (same names as in original sklearn class)
                 penalty: l1 # always use penalty l1
                 C: [0.01, 0.1, 1, 10, 100] # find the optimal value for C
+                kernel: linear # default value in immuneML
                 # Additional parameter that determines whether to print convergence warnings
                 show_warnings: True
             # if any of the parameters under SVM is a list and model_selection_cv is True,
@@ -39,21 +40,20 @@ class SVM(SklearnMethod):
     """
 
     def __init__(self, parameter_grid: dict = None, parameters: dict = None):
-        _parameters = parameters if parameters is not None else {"max_iter": 10000, "multi_class": "crammer_singer"}
         _parameter_grid = parameter_grid if parameter_grid is not None else {}
+        _parameters = parameters if parameters is not None else {}
 
         super(SVM, self).__init__(parameter_grid=_parameter_grid, parameters=_parameters)
 
     def _get_ml_model(self, cores_for_training: int = 2, X=None):
-        return LinearSVC(**self._parameters)
+        return SVC(**self._parameters)
 
     def can_predict_proba(self) -> bool:
         return False
 
     def get_params(self):
-
         params = self.model.get_params()
-        params["coefficients"] = self.model.coef_[0].tolist()
+        params["coefficients"] = self.model.coef_[0].tolist() if self.model.kernel == 'linear' else self.model.dual_coef_
         params["intercept"] = self.model.intercept_.tolist()
         return params
 

@@ -1,5 +1,4 @@
 import logging
-from pathlib import Path
 from typing import List, Tuple
 
 import pandas as pd
@@ -10,7 +9,6 @@ from sklearn.metrics import precision_recall_curve
 
 from immuneML.environment.Constants import Constants
 from immuneML.environment.Label import Label
-from immuneML.hyperparameter_optimization.states.TrainMLModelState import TrainMLModelState
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.multi_dataset_reports.MultiDatasetReport import MultiDatasetReport
@@ -19,11 +17,11 @@ from immuneML.util.PathBuilder import PathBuilder
 
 class PerformanceOverview(MultiDatasetReport):
     """
-    PerformanceOverview report creates AUC plot and precision-recall plot for optimal trained models on multiple datasets. The labels on the plots
+    PerformanceOverview report creates an ROC plot and precision-recall plot for optimal trained models on multiple datasets. The labels on the plots
     are the names of the datasets, so it might be good to have user-friendly names when defining datasets that are still a combination of
     letters, numbers and the underscore sign.
 
-    This report can be used only with MultiDatasetBenchmarkTool as it will plot AUC and PR curve for trained models across datasets. Also, it requires
+    This report can be used only with MultiDatasetBenchmarkTool as it will plot ROC and PR curve for trained models across datasets. Also, it requires
     the task to be immune repertoire classification and cannot be used for receptor or sequence classification. Furthermore, it uses predictions on
     the test dataset to assess the performance and plot the curves. If the parameter refit_optimal_model is set to True, all data will be used to fit
     the optimal model, so there will not be a test dataset which can be used to assess performance and the report will not be generated.
@@ -47,11 +45,6 @@ class PerformanceOverview(MultiDatasetReport):
     @classmethod
     def build_object(cls, **kwargs):
         return PerformanceOverview(**kwargs)
-
-    def __init__(self, instruction_states: List[TrainMLModelState] = None, name: str = None, result_path: Path = None):
-        super().__init__(name)
-        self.instruction_states = instruction_states
-        self.result_path = result_path
 
     def _generate(self) -> ReportResult:
 

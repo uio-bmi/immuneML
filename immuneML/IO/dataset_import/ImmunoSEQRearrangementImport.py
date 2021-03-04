@@ -84,13 +84,24 @@ class ImmunoSEQRearrangementImport(DataImport):
         they are present in the file, or using alternative column names).
         Valid immuneML fields that can be specified here are defined by Repertoire.FIELDS
 
+        column_mapping_synonyms (dict): This is a column mapping that can be used if a column could have alternative names.
+        The formatting is the same as column_mapping. If some columns specified in column_mapping are not found in the file,
+        the columns specified in column_mapping_synonyms are instead attempted to be loaded.
+        For immunoSEQ rearrangement-level files, this is by default set to:
+
+        .. indent with spaces
+        .. code-block:: yaml
+
+                v_resolved: v_alleles
+                j_resolved: j_alleles
+
         columns_to_load (list): Specifies which subset of columns must be loaded from the file. By default, this is:
         [rearrangement, v_family, v_gene, v_allele, j_family, j_gene, j_allele, amino_acid, templates, frame_type, locus]
 
         metadata_column_mapping (dict): Specifies metadata for SequenceDatasets. This should specify a mapping similar
         to column_mapping where keys are immunoSEQ column names and values are the names that are internally used in immuneML
         as metadata fields. These metadata fields can be used as prediction labels for SequenceDatasets.
-        For immunoSEQ .tsv files, there is no default metadata_column_mapping.
+        For immunoSEQ rearrangement .tsv files, there is no default metadata_column_mapping.
         For setting RepertoireDataset metadata, metadata_column_mapping is ignored, see metadata_file instead.
 
         separator (str): Column separator, for ImmunoSEQ files this is by default "\\t".
@@ -148,6 +159,7 @@ class ImmunoSEQRearrangementImport(DataImport):
                     j_allele: j_alleles
                     templates: counts
                     locus: chains
+
     """
 
     @staticmethod

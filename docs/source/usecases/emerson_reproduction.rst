@@ -1,23 +1,23 @@
-Manuscript use case 1: Replication of a published study inside immuneML
+Manuscript use case 1: Reproduction of a published study inside immuneML
 =======================================================================
 
 In this use case, we show how the study by Emerson and colleagues on CMV status prediction from TCRbeta repertoires (`Emerson et al. 2017 <https://www.nature.com/articles/ng.3822>`_)
-can be replicated within immuneML. Additionally, we test the approach on datasets subsampled from the original study (to include randomly chosen 400,
+can be reproduced within immuneML. Additionally, we test the approach on datasets subsampled from the original study (to include randomly chosen 400,
 200, 100 and 50 subjects) and estimate the performance of the approach when fewer examples are available.
 
 The dataset was downloaded from Adaptive Biotechnologies' `website <https://clients.adaptivebiotech.com/pub/Emerson-2017-NatGen>`_.
 Out of the 786 subjects (cohort 1: 666, cohort 2: 120), we removed 103 subjects from cohort 1 (1 with missing repertoire data, 25 with unknown CMV
-status, 3 with negative template counts for some of the sequences and the rest with no template count information). The metadata files for cohorts 1 and 2
-with the list of subjects used in the downstream analysis is available at this link.
+status, 3 with negative template counts for some of the sequences and the rest with no template count information).
 
 The complete collection of original files used in this use case can be found in the NIRD research data archive (DOI: `10.11582/2021.00008 <https://doi.org/10.11582/2021.00008>`_).
+This also includes the metadata files for cohorts 1 and 2 with the list of subjects included in this use case.
 Note that the YAML specifications in the original dataset were compatible with immuneML version 1.0.1.
 This documentation page contains the YAML specifications for equivalent analyses with the latest immuneML version.
 
-Replication of the CMV status predictions study
+Reproduction of the CMV status predictions study
 -------------------------------------------------
 
-To replicate the analysis, we used immuneML as a command line tool. We define the dataset to be used, data representation (encoding) which we call
+To reproduce the analysis, we used immuneML as a command line tool. We define the dataset to be used, data representation (encoding) which we call
 `SequenceAbundance`, the statistical model called `ProbabilisticBinaryClassifier` and different reports.
 
 The encoding represents each repertoire by two numbers: the number of disease-associated sequences as determined by the Fisher's exact test and the
@@ -114,7 +114,7 @@ The full YAML specification:
             - v_genes
             - j_genes
   instructions:
-    cmv_study_replication: # defines what analysis should be like
+    cmv_study_reproduction: # defines what analysis should be like
       reports: [feature_performance_plot, sequence_overlap, emerson_reference_overlap] # reports to run after nested CV is finished
       assessment: # outer loop of nested cross-validation: split manually to training (cohort 1) and test (cohort 2)
         split_strategy: manual
@@ -157,13 +157,12 @@ The full YAML specification:
   output:
     format: HTML # output the result as HTML
 
-The result of this analysis is available at this link.
 
 Robustness assessment
 --------------------------
 
-After replicating the study, we also assessed the robustness of the method on smaller datasets. To do that, we first constructed smaller datasets, and
-and then replicated the analysis on those smaller datasets.
+After reproducing the study, we also assessed the robustness of the method on smaller datasets. To do that, we first constructed smaller datasets, and
+and then reproduced the analysis on those smaller datasets.
 
 Constructing subsampled datasets
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -190,7 +189,6 @@ To construct smaller datasets of 400, 200, 100 and 50 subjects randomly from bot
       dataset_export_formats: # in which formats to export the subsampled datasets
         - Pickle
 
-The results of this analysis are available at this link.
 
 Running the analysis on subsampled datasets
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -205,7 +203,7 @@ The MultiDatasetBenchmarkTool can be run from the command line by providing the 
 
 The YAML specification is mostly the same as when only TrainMLModel instruction is used except:
 
-  - the `dataset` parameter is now called `datasets` and accepts a list of datasets on which the TrainMLModel instruction has to be performed (format and functionality are the same as described under replication), and
+  - the `dataset` parameter is now called `datasets` and accepts a list of datasets on which the TrainMLModel instruction has to be performed (format and functionality are the same as described under reproduction), and
   - it has one additional parameter called `benchmark_reports` that will be executed after all datasets have been used to compare performances.
 
 The YAML specification is given below:
@@ -303,7 +301,7 @@ The YAML specification is given below:
       sequence_overlap_across_datasets: DiseaseAssociatedSequenceOverlap # check how much disease-associated sequences overlap across datasets of different size
       performance_report: PerformanceOverview # show AUROC, AUPRC across datasets
   instructions:
-    cmv_study_replication: # the format of the instruction is the same as above except there is a parameter benchmark_reports which are run when the instructions have finished
+    cmv_study_reproduction: # the format of the instruction is the same as above except there is a parameter benchmark_reports which are run when the instructions have finished
       reports: [feature_performance_plot, sequence_overlap, emerson_reference_overlap] # reports to run after nested CV is finished
       benchmark_reports: [sequence_overlap_across_datasets, performance_report] # reports to run after all dataset have been benchmarked
       assessment: # nested 5-fold CV (outer loop)
@@ -346,4 +344,24 @@ The YAML specification is given below:
   output:
     format: HTML
 
-The result of this analysis is available at this link.
+
+Results
+-------------------------------------------------
+
+The results of reproducing the study by Emerson et al. are shown in the following figure:
+
+.. figure:: ../_static/images/usecases/emerson_reproduction.png
+   :alt: Emerson reproduction results
+   :width: 80%
+
+   Reproducing the CMV status prediction study by Emerson et al.5 A. The overlap of the 164 disease-associated TCRβ sequences (V-TCRβaa-J) determined in the original study by Emerson et al., labeled “reference”, with those determined by the optimal model as reproduced here with a p-value threshold of 0.001 (labeled “model”). B. The overlap percentage of disease-associated TCRβ sequences for the optimal model with the p-value threshold of 0.001 between different data splits in 10-fold cross-validation (between 50% and 65% overlap). C. The probability that a TCRβ sequence is CMV-associated following a beta distribution estimated separately for CMV positive and negative subjects, which is then used for CMV status prediction of new subjects. D. Area under the ROC curve (AUROC) over p-value thresholds in training data (average AUROC over 10 cross-validation splits) and test data (AUROC in cohort 2).
+
+
+Furthermore, the results of the robustness assessment (reproducing the study with a lower number of repertoires) are show here:
+
+.. figure:: ../_static/images/usecases/emerson_robustness.png
+   :alt: Emerson robustness results
+   :width: 70%
+
+   Decreasing the number of repertoires (400, 200, 100, and 50) leads to decreased prediction accuracy (AUROC: 0.86–0.46).
+

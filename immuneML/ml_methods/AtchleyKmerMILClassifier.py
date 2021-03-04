@@ -16,7 +16,7 @@ from immuneML.util.PathBuilder import PathBuilder
 
 class AtchleyKmerMILClassifier(MLMethod):
     """
-    Repertoire classifier which uses the data encoded by :ref:`AtchleyKmerEncoder` to predict the repertoire label.
+    A binary Repertoire classifier which uses the data encoded by :ref:`AtchleyKmer` encoder to predict the repertoire label.
 
     The original publication:
     Ostmeyer J, Christley S, Toby IT, Cowell LG. Biophysicochemical motifs in T cell receptor sequences distinguish repertoires from tumor-infiltrating

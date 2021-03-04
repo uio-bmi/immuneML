@@ -20,9 +20,18 @@ The most common reason for this problem is that the Python version is too new to
 Currently, the `torch package on pypi <https://pypi.org/project/torch/>`_ is only supported up to Python version 3.7.
 We recommend trying to use Python version 3.7 or version 3.8 in a conda virtual environment.
 
-If this does not resolve the problem, try installing torch manually using one of the commands described in `the PyTorch documentation <https://pytorch.org/get-started/previous-versions/>`_,
+If this does not resolve the problem, try installing PyTorch manually.
+
+On Windows for instance, you can try the following to install PyTorch 1.7.1 for CPU only using pip:
+
+.. code-block:: console
+
+  pip install torch==1.7.1+cpu -f https://download.pytorch.org/whl/torch_stable.html
+
+For more information on PyTorch installation for different operating systems, please see `the PyTorch documentation <https://pytorch.org/get-started/previous-versions/>`_,
 and afterwards try to install immuneML again.
 
+Please note that when using DeepRC from immuneML, a PyTorch distribution that supports GPUs is required.
 
 Runtime issues
 --------------

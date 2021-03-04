@@ -1,7 +1,7 @@
 Install immuneML with a package manager
 =========================================
 
-This manual shows how to `install immuneML with pip <https://pypi.org/project/immuneML/>` in an
+This manual shows how to `install immuneML with pip <https://pypi.org/project/immuneML/>`_ in an
 `Anaconda <https://docs.anaconda.com/anaconda/install/>`_ virtual environment.
 
 
@@ -29,28 +29,28 @@ Install immuneML
 
   conda activate immuneml_env/
 
-4. Install basic immuneML including Python dependencies from GitHub using pip:
+4. Install basic immuneML including Python dependencies using pip:
 
 .. code-block:: console
 
   pip install immuneML
 
-Alternatively, if you want to use the :ref:`TCRDISTClassifier` ML method and corresponding :ref:`TCRDistMotifDiscovery` report, include the optional extra :code:`TCRdist`:
+Alternatively, if you want to use the :ref:`TCRdistClassifier` ML method and corresponding :ref:`TCRdistMotifDiscovery` report, include the optional extra :code:`TCRdist`:
 
 .. code-block:: console
 
   pip install immuneML[TCRdist]
 
-See also this FAQ: :ref:`I get an error when installing PyTorch (could not find a version that satisfies the requirement torch)`
+See also this question under 'Troubleshooting': :ref:`I get an error when installing PyTorch (could not find a version that satisfies the requirement torch)`
 
-5. Optionally, if you want to use the :ref:`DeepRC` ML method and and corresponding :ref:`DeepRCMotifDiscovery` report, you
+5. Optionally, if you want to use the :ref:`DeepRC` ML method and and corresponding :ref:`DeepRCMotifDiscovery` report, you also
 have to install DeepRC dependencies using the :download:`requirements_DeepRC.txt <https://raw.githubusercontent.com/uio-bmi/immuneML/master/requirements_DeepRC.txt>` file.
 Important note: DeepRC uses PyTorch functionalities that depend on GPU. Therefore, DeepRC does not work on a CPU.
 To install the DeepRC dependencies, run:
 
 .. code-block:: console
 
-  pip install -r requirements_DeepRC.txt
+  pip install -r requirements_DeepRC.txt --no-dependencies
 
 
 
@@ -90,6 +90,6 @@ The output should look like this:
     immune-ml-quickstart ./quickstart_results/
 
 This will generate a synthetic dataset and run a simple machine machine learning analysis on the generated data.
-The results folder will contain two sub-folders: one for the generated dataset and one for the results of the machine
-learning analysis. The files named specs.yaml are the input files for immuneML that describe how to generate the dataset
+The results folder will contain two sub-folders: one for the generated dataset (:code:`synthetic_dataset`) and one for the results of the machine
+learning analysis (:code:`machine_learning_analysis`). The files named specs.yaml are the input files for immuneML that describe how to generate the dataset
 and how to do the machine learning analysis. The index.html files can be used to navigate through all the results that were produced.

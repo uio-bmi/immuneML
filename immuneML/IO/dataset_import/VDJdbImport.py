@@ -63,8 +63,8 @@ class VDJdbImport(DataImport):
             .. indent with spaces
             .. code-block:: yaml
 
-                    V: v_genes
-                    J: j_genes
+                    V: v_alleles
+                    J: j_alleles
                     CDR3: sequence_aas
                     complex.id: sequence_identifiers
                     Gene: chains
@@ -72,6 +72,11 @@ class VDJdbImport(DataImport):
         A custom column mapping can be specified here if necessary (for example; adding additional data fields if
         they are present in the VDJdb file, or using alternative column names).
         Valid immuneML fields that can be specified here are defined by Repertoire.FIELDS
+
+        column_mapping_synonyms (dict): This is a column mapping that can be used if a column could have alternative names.
+        The formatting is the same as column_mapping. If some columns specified in column_mapping are not found in the file,
+        the columns specified in column_mapping_synonyms are instead attempted to be loaded.
+        For VDJdb format, there is no default column_mapping_synonyms.
 
         metadata_column_mapping (dict): Specifies metadata for Sequence- and ReceptorDatasets. This should specify
         a mapping where keys are VDJdb column names and values are the names that are internally used in immuneML
@@ -146,15 +151,14 @@ class VDJdbImport(DataImport):
         else:
             df.loc[df["sequence_identifiers"] == "0", "sequence_identifiers"] = None
 
-        if "chains" not in df.columns:
-            df.loc[:, "chains"] = ImportHelper.load_chains_from_genes(df)
+        ImportHelper.drop_empty_sequences(df, params.import_empty_aa_sequences, params.import_empty_nt_sequences)
+        ImportHelper.drop_illegal_character_sequences(df, params.import_illegal_characters)
+        ImportHelper.update_gene_info(df)
+        ImportHelper.load_chains(df)
 
         df["receptor_identifiers"] = df["sequence_identifiers"]
         df["sequence_identifiers"] = VDJdbImport.get_sequence_identifiers(df["sequence_identifiers"], df["chains"])
 
-        ImportHelper.update_gene_info(df)
-        ImportHelper.drop_empty_sequences(df, params.import_empty_aa_sequences, params.import_empty_nt_sequences)
-        ImportHelper.drop_illegal_character_sequences(df, params.import_illegal_characters)
         df = VDJdbImport.extract_meta_columns(df, params)
 
         return df

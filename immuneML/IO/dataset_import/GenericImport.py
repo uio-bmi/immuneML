@@ -76,6 +76,11 @@ class GenericImport(DataImport):
                 file_column_j_genes: j_genes
                 file_column_frequencies: counts
 
+        column_mapping_synonyms (dict): This is a column mapping that can be used if a column could have alternative names.
+        The formatting is the same as column_mapping. If some columns specified in column_mapping are not found in the file,
+        the columns specified in column_mapping_synonyms are instead attempted to be loaded.
+        For Generic import, there is no default column_mapping_synonyms.
+
         metadata_column_mapping (dict): Optional; specifies metadata for Sequence- and ReceptorDatasets. This is a column
         mapping that is formatted similarly to column_mapping, but here the values are the names that immuneML internally
         uses as metadata fields. These fields can subsequently be used as labels in instructions (for example labels
@@ -135,10 +140,11 @@ class GenericImport(DataImport):
 
     @staticmethod
     def preprocess_dataframe(df: pd.DataFrame, params: DatasetImportParams):
-        ImportHelper.junction_to_cdr3(df, params.region_type)
         ImportHelper.drop_empty_sequences(df, params.import_empty_aa_sequences, params.import_empty_nt_sequences)
         ImportHelper.drop_illegal_character_sequences(df, params.import_illegal_characters)
+        ImportHelper.junction_to_cdr3(df, params.region_type)
         ImportHelper.update_gene_info(df)
+        ImportHelper.load_chains(df)
 
         return df
 

@@ -1,5 +1,6 @@
 import os
 import shutil
+from pathlib import Path
 from unittest import TestCase
 
 import yaml
@@ -68,9 +69,8 @@ class TestRandomDatasetWorkflow(TestCase):
                         "training_percentage": 0.7,
                     },
                     "selection": {
-                        "split_strategy": "random",
-                        "split_count": 1,
-                        "training_percentage": 0.7,
+                        "split_strategy": "stratified_k_fold",
+                        "split_count": 5
                     },
                     "labels": ["cmv"],
                     "dataset": "d1",
@@ -168,15 +168,15 @@ class TestRandomDatasetWorkflow(TestCase):
         repertoire_specs = self.build_repertoire_specs(path)
         self.run_example(repertoire_specs, path)
 
-        receptor_specs = self.build_receptor_specs(path)
-        self.run_example(receptor_specs, path)
+        # receptor_specs = self.build_receptor_specs(path)
+        # self.run_example(receptor_specs, path)
 
-    def run_example(self, specs: dict, path: str):
+    def run_example(self, specs: dict, path: Path):
 
         PathBuilder.build(path)
 
         specs_filename = path / "specs.yaml"
-        with open(specs_filename, "w") as file:
+        with specs_filename.open("w") as file:
             yaml.dump(specs, file)
 
         app = ImmuneMLApp(specs_filename, path / "result/")

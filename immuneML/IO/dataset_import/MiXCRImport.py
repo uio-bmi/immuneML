@@ -52,13 +52,18 @@ class MiXCRImport(DataImport):
         .. code-block:: yaml
 
                 cloneCount: counts
-                allVHitsWithScore: v_genes
-                allJHitsWithScore: j_genes
+                allVHitsWithScore: v_alleles
+                allJHitsWithScore: j_alleles
 
         The columns that specify the sequences to import are handled by the region_type parameter.
         A custom column mapping can be specified here if necessary (for example; adding additional data fields if
         they are present in the MiXCR file, or using alternative column names).
         Valid immuneML fields that can be specified here are defined by Repertoire.FIELDS
+
+        column_mapping_synonyms (dict): This is a column mapping that can be used if a column could have alternative names.
+        The formatting is the same as column_mapping. If some columns specified in column_mapping are not found in the file,
+        the columns specified in column_mapping_synonyms are instead attempted to be loaded.
+        For MiXCR format, there is no default column_mapping_synonyms.
 
         columns_to_load (list): Specifies which subset of columns must be loaded from the MiXCR file. By default, this is:
         [cloneCount, allVHitsWithScore, allJHitsWithScore, aaSeqCDR3, nSeqCDR3]
@@ -102,6 +107,7 @@ class MiXCRImport(DataImport):
                     cloneCount: counts
                     allVHitsWithScore: v_genes
                     allJHitsWithScore: j_genes
+
     """
 
     SEQUENCE_NAME_MAP = {
@@ -142,20 +148,20 @@ class MiXCRImport(DataImport):
 
         df["counts"] = df["counts"].astype(float).astype(int)
 
-        df["v_genes"] = MiXCRImport._load_genes(df, "v_genes")
-        df["j_genes"] = MiXCRImport._load_genes(df, "j_genes")
-        df["chains"] = ImportHelper.load_chains_from_genes(df)
+        df["v_alleles"] = MiXCRImport._load_alleles(df, "v_alleles")
+        df["j_alleles"] = MiXCRImport._load_alleles(df, "j_alleles")
 
-        ImportHelper.update_gene_info(df)
         ImportHelper.drop_empty_sequences(df, params.import_empty_aa_sequences, params.import_empty_nt_sequences)
         ImportHelper.drop_illegal_character_sequences(df, params.import_illegal_characters)
+        ImportHelper.update_gene_info(df)
+        ImportHelper.load_chains(df)
 
         return df
 
     @staticmethod
-    def _load_genes(df: pd.DataFrame, column_name):
+    def _load_alleles(df: pd.DataFrame, column_name):
         # note: MiXCR omits the '/' for 'TRA.../DV' genes
-        tmp_df = df.apply(lambda row: row[column_name].split(",")[0].replace("DV", "/DV").replace("//", "/"), axis=1)
+        tmp_df = df.apply(lambda row: row[column_name].split(",")[0].split("(")[0].replace("DV", "/DV").replace("//", "/"), axis=1)
 
         return tmp_df
 

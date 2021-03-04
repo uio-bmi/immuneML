@@ -65,6 +65,10 @@ class SingleLineReceptorImport(DataImport):
                 clone_id: identifier
                 epitope: epitope # metadata field
 
+        column_mapping_synonyms (dict): This is a column mapping that can be used if a column could have alternative names.
+        The formatting is the same as column_mapping. If some columns specified in column_mapping are not found in the file,
+        the columns specified in column_mapping_synonyms are instead attempted to be loaded.
+
         columns_to_load (list): Optional; specifies which columns to load from the input file. This may be useful if
         the input files contain many unused columns. If no value is specified, all columns are loaded.
 
