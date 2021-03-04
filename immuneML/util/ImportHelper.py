@@ -188,12 +188,15 @@ class ImportHelper:
         return df
 
     @staticmethod
-    def safe_load_dataframe(filepath, params):
+    def safe_load_dataframe(filepath, params: DatasetImportParams):
         if hasattr(params, "columns_to_load") and params.columns_to_load is not None:
             usecols = set(params.columns_to_load) if hasattr(params, "columns_to_load") and params.columns_to_load is not None else set()
-            usecols = usecols.union(set(params.column_mapping.keys()) if hasattr(params, "column_mapping") and params.column_mapping is not None else set())
-            usecols = usecols.union(set(params.column_mapping_synonyms.keys()) if hasattr(params, "column_mapping_synonyms") and params.column_mapping_synonyms is not None else set())
-            usecols = usecols.union(set(params.metadata_column_mapping.keys()) if hasattr(params, "metadata_column_mapping") and params.metadata_column_mapping is not None else set())
+            usecols = usecols.union(
+                set(params.column_mapping.keys()) if hasattr(params, "column_mapping") and params.column_mapping is not None else set())
+            usecols = usecols.union(set(params.column_mapping_synonyms.keys())
+                                    if hasattr(params, "column_mapping_synonyms") and params.column_mapping_synonyms is not None else set())
+            usecols = usecols.union(set(params.metadata_column_mapping.keys())
+                                    if hasattr(params, "metadata_column_mapping") and params.metadata_column_mapping is not None else set())
         else:
             usecols = None
 
@@ -210,7 +213,7 @@ class ImportHelper:
         return df
 
     @staticmethod
-    def rename_dataframe_columns(df, params):
+    def rename_dataframe_columns(df, params: DatasetImportParams):
         if hasattr(params, "column_mapping") and params.column_mapping is not None:
             df.rename(columns=params.column_mapping, inplace=True)
 
@@ -222,10 +225,8 @@ class ImportHelper:
         if hasattr(params, "metadata_column_mapping") and params.metadata_column_mapping is not None:
             df.rename(columns=params.metadata_column_mapping, inplace=True)
 
-
-
     @staticmethod
-    def standardize_none_values(dataframe: pd.DataFrame) -> pd.DataFrame:
+    def standardize_none_values(dataframe: pd.DataFrame):
         dataframe.replace({key: Constants.UNKNOWN for key in ["unresolved", "no data", "na", "unknown", "null", "nan", np.nan, ""]}, inplace=True)
 
     @staticmethod
@@ -243,12 +244,12 @@ class ImportHelper:
             if sequence_colname in dataframe.columns:
                 n_empty = sum(dataframe[sequence_colname].isnull())
                 if n_empty > 0:
-                    idx = dataframe.loc[dataframe[sequence_colname].isnull()].index
                     dataframe.drop(dataframe.loc[dataframe[sequence_colname].isnull()].index, inplace=True)
                     warnings.warn(
-                        f"{ImportHelper.__name__}: {n_empty} sequences were removed from the dataset because they contained an empty {sequence_name} sequence after preprocessing. ")
+                        f"{ImportHelper.__name__}: {n_empty} sequences were removed from the dataset because they contained an empty {sequence_name} "
+                        f"sequence after preprocessing. ")
             else:
-                warnings.warn(f"{ImportHelper.__name__}: column {sequence_colname} was not set, skipping filtering...")
+                raise ValueError(f"{ImportHelper.__name__}: column {sequence_colname} was not set, but is required for filtering.")
 
         return dataframe
 
@@ -291,7 +292,7 @@ class ImportHelper:
         return frame_type_list
 
     @staticmethod
-    def load_chains(df: pd.DataFrame) -> list:
+    def load_chains(df: pd.DataFrame):
         if "chains" in df.columns:
             df.loc[:, "chains"] = ImportHelper.load_chains_from_chains(df)
         else:

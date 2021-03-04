@@ -42,7 +42,8 @@ rep1.tsv,TRA,1234e,no"""
         self.make_dummy_dataset(path, True)
 
         dataset = GenericImport.import_dataset({"is_repertoire": True, "result_path": path, "path": path,
-                                                "region_type": "IMGT_CDR3", "separator": "\t",
+                                                "region_type": "IMGT_CDR3", "separator": "\t", "import_empty_aa_sequences": False,
+                                                "import_empty_nt_sequences": True,
                                                 "column_mapping": {"CDR3B AA Sequence": "sequence_aas", "import_illegal_characters": False,
                                                                    "TRBV Gene": "v_genes", "TRBJ Gene": "j_genes", "Counts": "counts"},
                                                 "metadata_file": path / "metadata.csv", "number_of_processes": 4}, "generic_dataset")
@@ -67,7 +68,7 @@ rep1.tsv,TRA,1234e,no"""
 
         dataset = GenericImport.import_dataset({"is_repertoire": False, "paired": False,
                                                 "result_path": path, "path": path, "import_illegal_characters": False,
-                                                "region_type": "IMGT_CDR3", "separator": "\t",
+                                                "region_type": "IMGT_CDR3", "separator": "\t", "import_empty_nt_sequences": True,
                                                 "column_mapping": {"CDR3B AA Sequence": "sequence_aas",
                                                                    "TRBV Gene": "v_genes", "TRBJ Gene": "j_genes"},
                                                 "metadata_file": path / "metadata.csv", "number_of_processes": 4}, "generic_dataset")

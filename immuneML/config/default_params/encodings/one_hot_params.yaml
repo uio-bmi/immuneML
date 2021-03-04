@@ -1,3 +1,4 @@
 use_positional_info: False
 distance_to_seq_middle: 3 # When positional info is being used, the default distance to the sequence middle is 3 IMGT positions, meaning positions in the interval [108, 114] receive positional value 1.
 flatten: False
+sequence_type: amino_acid
