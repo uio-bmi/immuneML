@@ -165,8 +165,8 @@ For each instruction specified in the YAML specification file, a subfolder is cr
    - [tqdm](https://tqdm.github.io/) (0.24 or higher)
    - [tzlocal](https://pypi.org/project/tzlocal/) 
 - Optional dependencies when using DeepRC:
-   - [DeepRC](https://github.com/ml-jku/DeepRC)
-   - [widis-lstm-tools](https://github.com/widmi/widis-lstm-tools)
+   - [DeepRC](https://github.com/ml-jku/DeepRC) (0.0.1)
+   - [widis-lstm-tools](https://github.com/widmi/widis-lstm-tools) (0.4)
 - Optional dependencies when using TCRdist:
    - [parasail](https://pypi.org/project/parasail/) (1.2)
    - [tcrdist3](https://github.com/kmayerb/tcrdist3) (0.1.6 or higher)
