@@ -39,6 +39,13 @@ class OneHotRepertoireEncoder(OneHotEncoder):
 
         for repertoire in dataset.repertoires:
             sequences = repertoire.get_attribute(self.sequence_type.value)
+
+            if any(seq is None for seq in sequences):
+                raise ValueError(
+                    f"{OneHotEncoder.__name__}: repertoire {repertoire.identifier} in repertoire dataset {dataset.name} (id: {dataset.identifier}) "
+                    f"contains empty sequences for the specified sequence type {self.sequence_type.name.lower()}. Please check that the dataset is "
+                    f"imported correctly.")
+
             max_rep_len = max(len(sequences), max_rep_len)
             max_seq_len = max(max([len(seq) for seq in sequences]), max_seq_len)
 

@@ -44,4 +44,5 @@ class ReceptorDataset(ElementDataset):
         return pd.DataFrame(result) if return_df else result
 
     def clone(self):
-        return ReceptorDataset(self.labels, copy.deepcopy(self.encoded_data), copy.deepcopy(self._filenames), file_size=self.file_size)
+        return ReceptorDataset(self.labels, copy.deepcopy(self.encoded_data), copy.deepcopy(self._filenames), file_size=self.file_size,
+                               name=self.name)

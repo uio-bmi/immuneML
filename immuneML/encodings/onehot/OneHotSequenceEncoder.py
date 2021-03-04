@@ -29,6 +29,12 @@ class OneHotSequenceEncoder(OneHotEncoder):
         sequence_objs = [obj for obj in dataset.get_data(params.pool_size)]
 
         sequences = [obj.get_sequence(self.sequence_type) for obj in sequence_objs]
+
+        if any(seq is None for seq in sequences):
+            raise ValueError(
+                f"{OneHotEncoder.__name__}: sequence dataset {dataset.name} (id: {dataset.identifier}) contains empty sequences for the specified "
+                f"sequence type {self.sequence_type.name.lower()}. Please check that the dataset is imported correctly.")
+
         example_ids = dataset.get_example_ids()
         max_seq_len = max([len(seq) for seq in sequences])
         labels = self._get_labels(sequence_objs, params) if params.encode_labels else None

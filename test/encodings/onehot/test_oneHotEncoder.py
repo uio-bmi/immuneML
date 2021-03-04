@@ -2,6 +2,8 @@ import os
 import shutil
 import unittest
 
+import numpy as np
+
 from immuneML.caching.CacheType import CacheType
 from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
 from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
@@ -187,7 +189,14 @@ class TestOneHotEncoder(unittest.TestCase):
                                                                 filename="dataset.pkl"))
 
         self.assertTrue(isinstance(encoded_dataset, RepertoireDataset))
-        # TODO: check the values in the examples matrix
+        self.assertEqual((2, 3, 4, 4), encoded_dataset.encoded_data.examples.shape)
+        self.assertTrue(np.array_equal(np.array([[[[1., 0., 0., 0.],   [1., 0., 0., 0.],   [1., 0., 0., 0.],   [1., 0., 0., 0.]],   # rep1: AAAA
+                                                  [[1., 0., 0., 0.],   [0., 0., 0., 1.],   [1., 0., 0., 0.],   [0., 0., 0., 0.]],   # rep1: ATA
+                                                  [[1., 0., 0., 0.],   [0., 0., 0., 1.],   [1., 0., 0., 0.],   [0., 0., 0., 0.]]],  # rep1: ATA
+                                                 [[[1., 0., 0., 0.],   [0., 0., 0., 1.],   [1., 0., 0., 0.],   [0., 0., 0., 0.]],   # rep2: ATA
+                                                  [[0., 0., 0., 1.],   [1., 0., 0., 0.],   [1., 0., 0., 0.],   [0., 0., 0., 0.]],   # rep2: TAA
+                                                  [[0., 0., 0., 0.],  [0., 0., 0., 0.],   [0., 0., 0., 0.],   [0., 0., 0., 0.]]]]), # rep2: padding
+                                       encoded_dataset.encoded_data.examples))
 
         shutil.rmtree(path)
 
