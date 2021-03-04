@@ -3,9 +3,9 @@ Use case examples
 
 
 In the immuneML manuscript, we showcase immuneMLs functionalities based on three use cases.
-The following three sections describe how to replicate these three use cases:
+The following three sections describe how to reproduce these three use cases:
 
-1. :ref:`Manuscript use case 1: Replication of a published study inside immuneML`
+1. :ref:`Manuscript use case 1: Reproduction of a published study inside immuneML`
 
 2. :ref:`Manuscript use case 2: Extending immuneML with a deep learning component for predicting antigen specificity of paired receptor data`
 
@@ -25,7 +25,7 @@ To see how immuneML can be used in combination with other tools, see the followi
   :maxdepth: 1
   :hidden:
 
-  usecases/emerson_replication
+  usecases/emerson_reproduction
   usecases/extendability_use_case
   usecases/benchmarking_use_case
   usecases/immcantation_use_case
