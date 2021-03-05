@@ -455,60 +455,67 @@ class ImportHelper:
     @staticmethod
     def import_receptors(df, params) -> List[Receptor]:
         identifiers = df["receptor_identifiers"].unique()
+
+        chain_pair = params.receptor_chains
+        if chain_pair is None:
+            chains = [Chain.get_chain(chain) for chain in df["chains"].unique()]
+            chain_pair = ChainPair.get_chain_pair(chains)
+
+        metadata_columns = list(params.metadata_column_mapping.values()) if params.metadata_column_mapping else None
+
         all_receptors = []
 
         for identifier in identifiers:
-            receptors = ImportHelper.import_receptors_by_id(df, identifier, params)
+            receptors = ImportHelper.import_receptors_by_id(df, identifier, chain_pair, metadata_columns)
             all_receptors.extend(receptors)
 
         return all_receptors
 
     @staticmethod
-    def import_receptors_by_id(df, identifier, params) -> List[Receptor]:
-        first_row = df.loc[(df["receptor_identifiers"] == identifier) & (df["chains"] == params.receptor_chains.value[0])]
-        second_row = df.loc[(df["receptor_identifiers"] == identifier) & (df["chains"] == params.receptor_chains.value[1])]
+    def import_receptors_by_id(df, identifier, chain_pair, metadata_columns) -> List[Receptor]:
+        first_row = df.loc[(df["receptor_identifiers"] == identifier) & (df["chains"] == chain_pair.value[0])]
+        second_row = df.loc[(df["receptor_identifiers"] == identifier) & (df["chains"] == chain_pair.value[1])]
 
         for i, row in enumerate([first_row, second_row]):
             if row.shape[0] > 1:
                 warnings.warn(
-                    f"Multiple {params.receptor_chains.value[i]} chains found for receptor with identifier {identifier}, only the first entry will be loaded")
+                    f"Multiple {chain_pair.value[i]} chains found for receptor with identifier {identifier}, only the first entry will be loaded")
             elif row.shape[0] == 0:
                 warnings.warn(
-                    f"Missing {params.receptor_chains.value[i]} chain for receptor with identifier {identifier}, this receptor will be omitted.")
+                    f"Missing {chain_pair.value[i]} chain for receptor with identifier {identifier}, this receptor will be omitted.")
                 return []
 
         # todo add options like IRIS import: option to import all dual chains or just the first pair / all V genes when uncertain annotation, etc
         # todo add possibility to import multiple chain combo's? (BCR heavy-light & heavy-kappa, as seen in 10xGenomics?)
 
-        return [ImportHelper.build_receptor_from_rows(first_row.iloc[0], second_row.iloc[0], identifier, params)]
+        return [ImportHelper.build_receptor_from_rows(first_row.iloc[0], second_row.iloc[0], identifier, chain_pair, metadata_columns)]
 
     @staticmethod
-    def build_receptor_from_rows(first_row, second_row, identifier, params):
-        metadata_columns = params.metadata_column_mapping.values() if params.metadata_column_mapping else None
+    def build_receptor_from_rows(first_row, second_row, identifier, chain_pair, metadata_columns):
         first_sequence = ImportHelper.import_sequence(first_row, metadata_columns=metadata_columns)
         second_sequence = ImportHelper.import_sequence(second_row, metadata_columns=metadata_columns)
 
-        if params.receptor_chains == ChainPair.TRA_TRB:
+        if chain_pair == ChainPair.TRA_TRB:
             receptor = TCABReceptor(alpha=first_sequence,
                                     beta=second_sequence,
                                     identifier=identifier,
                                     metadata={**second_sequence.metadata.custom_params})
-        elif params.receptor_chains == ChainPair.TRG_TRD:
+        elif chain_pair == ChainPair.TRG_TRD:
             receptor = TCGDReceptor(gamma=first_sequence,
                                     delta=second_sequence,
                                     identifier=identifier,
                                     metadata={**second_sequence.metadata.custom_params})
-        elif params.receptor_chains == ChainPair.IGH_IGL:
+        elif chain_pair == ChainPair.IGH_IGL:
             receptor = BCReceptor(heavy=first_sequence,
                                   light=second_sequence,
                                   identifier=identifier,
                                   metadata={**first_sequence.metadata.custom_params})
-        elif params.receptor_chains == ChainPair.IGH_IGK:
+        elif chain_pair == ChainPair.IGH_IGK:
             receptor = BCKReceptor(heavy=first_sequence,
                                    kappa=second_sequence,
                                    identifier=identifier,
                                    metadata={**first_sequence.metadata.custom_params})
         else:
-            raise NotImplementedError(f"ImportHelper: {params.receptor_chains} chain pair is not supported.")
+            raise NotImplementedError(f"ImportHelper: {chain_pair} chain pair is not supported.")
 
         return receptor
