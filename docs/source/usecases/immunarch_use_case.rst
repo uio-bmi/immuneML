@@ -27,5 +27,7 @@ This analysis requires the R package `immunarch <https://immunarch.com>`_ versio
 
 The immunarch :code:`geneUsage()` plot shows that TRBV5-1 is the most used V gene among the CMV-associated TCRβ sequences:
 
-.. image:: ../_static/images/usecases/immunarch_geneusage_plot.pdf
+.. image:: ../_static/images/usecases/immunarch_geneusage_plot.png
    :alt: immunarch gene usage
+   :width: 70%
+

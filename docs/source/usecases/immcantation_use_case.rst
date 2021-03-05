@@ -58,10 +58,12 @@ This analysis requires the R packages `alakazam <https://alakazam.readthedocs.io
 
 The alakazam (Immcantation) :code:`countGenes()` function provides the insight that TRBV5-1 is the most used V gene among the CMV-associated TCRβ sequences:
 
-.. image:: ../_static/images/usecases/immcantation_vgene_count_plot.pdf
+.. image:: ../_static/images/usecases/immcantation_vgene_count_plot.png
    :alt: Immcantation gene usage
+   :width: 70%
 
 The :code:`aminoAcidProperties()` function enables insight into the variation of PC properties across those V genes used by the CMV-associated TCRβ sequences:
 
-.. image:: ../_static/images/usecases/immcantation_pcproperties_plot.pdf
+.. image:: ../_static/images/usecases/immcantation_pcproperties_plot.png
    :alt: Immcantation PC properties
+   :width: 70%

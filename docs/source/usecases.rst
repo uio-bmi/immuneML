@@ -20,6 +20,8 @@ To see how immuneML can be used in combination with other tools, see the followi
 
 #. :ref:`Integration use case: post-analysis of sequences with immunarch`
 
+#. :ref:`Integration use case: Performing analysis on immuneSIM-generated repertoires`
+
 
 .. toctree::
   :maxdepth: 1
@@ -30,6 +32,7 @@ To see how immuneML can be used in combination with other tools, see the followi
   usecases/benchmarking_use_case
   usecases/immcantation_use_case
   usecases/immunarch_use_case
+  usecases/immunesim_use_case
 
 
 
