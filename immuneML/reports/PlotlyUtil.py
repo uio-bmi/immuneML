@@ -1,19 +1,25 @@
 import plotly.graph_objects as go
 
+
 class PlotlyUtil:
 
     @staticmethod
     def add_single_axis_labels(figure, x_label, y_label, x_label_position, y_label_position):
-        '''
+        """
         Takes a multi-facet plotly figure and replaces the repetitive x and y axis labels
         with single axis labels in the form of annotations.
 
-        :param figure: a plotly figure
-        :param label_position: the position of the new axis labels relative to the respective axes
-        :param x_label: the x label text
-        :param y_label: the y label text
-        :return: an updated plotly figure
-        '''
+        Args:
+            figure: a plotly figure
+            x_label: the x label text
+            y_label: the y label text
+            x_label_position: the position of the new axis labels relative to the respective axes
+            y_label_position: the position of the new axis labels relative to the respective axes
+
+        Returns:
+             an updated plotly figure
+
+        """
         # hide subplot y-axis titles and x-axis titles
         for axis in figure.layout:
             if type(figure.layout[axis]) == go.layout.YAxis:

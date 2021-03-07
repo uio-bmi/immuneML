@@ -148,7 +148,6 @@ class ImportHelper:
 
     @staticmethod
     def load_repertoire_as_object(import_class, metadata_row, params: DatasetImportParams):
-        alternative_load_func = getattr(import_class, "alternative_load_func", None)
         try:
             alternative_load_func = getattr(import_class, "alternative_load_func", None)
 

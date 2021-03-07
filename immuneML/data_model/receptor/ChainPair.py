@@ -13,7 +13,7 @@ class ChainPair(Enum):
 
     @staticmethod
     def get_chain_pair(chains: List[Chain]):
-        '''Given a list of 2 chain objects, returns the relevant ChainPair'''
+        """Given a list of 2 chain objects, returns the relevant ChainPair"""
         assert len(chains) == 2, f"ChainPair: expected 2 chains, received {len(chains)}"
         assert type(chains[0]) == Chain and type(chains[1]) == Chain, f"ChainPair: expected Chain objects, received {type(chains[0])} and {type(chains[1])}"
 
