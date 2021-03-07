@@ -44,6 +44,7 @@ class TenxGenomicsImport(DataImport):
 
         receptor_chains (str): Required for ReceptorDatasets. Determines which pair of chains to import for each Receptor.
         Valid values for receptor_chains are the names of the :py:obj:`~immuneML.data_model.receptor.ChainPair.ChainPair` enum.
+        If receptor_chains is not provided, the chain pair is automatically detected (only one chain pair type allowed per repertoire).
 
         import_illegal_characters (bool): Whether to import sequences that contain illegal characters, i.e., characters
         that do not appear in the sequence alphabet (amino acids including stop codon '*', or nucleotides). When set to false, filtering is only
