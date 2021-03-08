@@ -31,7 +31,9 @@ author = 'Milena Pavlovic, Lonneke Scheffer, Keshav Motwani, Victor Greiff, Geir
 # The short X.Y version
 version = Constants.Constants.VERSION
 # The full version, including alpha/beta/rc tags
-release = ''
+release = Constants.Constants.VERSION
+
+html_favicon = 'favicon.ico'
 
 
 # -- General configuration ---------------------------------------------------
