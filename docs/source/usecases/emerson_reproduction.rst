@@ -1,5 +1,5 @@
 Manuscript use case 1: Reproduction of a published study inside immuneML
-=======================================================================
+==========================================================================
 
 In this use case, we show how the study by Emerson and colleagues on CMV status prediction from TCRbeta repertoires (`Emerson et al. 2017 <https://www.nature.com/articles/ng.3822>`_)
 can be reproduced within immuneML. Additionally, we test the approach on datasets subsampled from the original study (to include randomly chosen 400,

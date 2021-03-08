@@ -52,7 +52,7 @@ This Quickstart dataset Galaxy history contains the following items:
 
 Step 2: creating an immuneML Galaxy dataset
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Use the `Create dataset<https://galaxy.immuneml.uio.no/root?tool_id=immune_ml_dataset>`_  Galaxy tool (under 'immuneML tools') to import the dataset
+Use the `Create dataset <https://galaxy.immuneml.uio.no/root?tool_id=immune_ml_dataset>`_  Galaxy tool (under 'immuneML tools') to import the dataset
 and create an *immuneML dataset* history item, which can subsequently be used as input for other Galaxy tools.
 
 Select 'Simplified interface', then 'repertoire dataset' as dataset type and 'AIRR' data format, and select the metadata.csv file as metadata file.
