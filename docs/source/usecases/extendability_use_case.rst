@@ -3,7 +3,9 @@ Manuscript use case 2: Extending immuneML with a deep learning component for pre
 
 To demonstrate how immuneML can be extended, we added a convolutional neural network (CNN) for predicting receptor specificity. To show how it can be
 using alongside existing components, we compared the CNN with k-nearest neighbour classifier based on TCRdist distance and a
-logistic regression model on 3-mer frequencies. We also show the motifs extracted by CNN, TCRdist and GLIPH for the datasets we examine.
+logistic regression model on 3-mer frequencies. We also show the motifs extracted by CNN, TCRdist
+(`Mayer-Blackwell et al. 2020 <https://www.biorxiv.org/content/10.1101/2020.12.24.424260v1>`_, `Dash et al. 2017 <https://www.nature.com/articles/nature22383>`_) and GLIPH2
+(`Huang et al. 2020 <https://www.nature.com/articles/s41587-020-0505-4>`_) for the datasets we examine.
 
 This use-case description includes the description of the datasets, how to add a CNN model, how to compare CNN with other models and finally, how to
 extract motifs from models.
@@ -191,10 +193,18 @@ specification and the plots were obtained outside immuneML; it has since been ad
       store_encoded_data: False # whether to store the encoded data, if set to True, it could increase the disk space usage
       refit_optimal_model: False # whether to refit the optimal model before exporting it (not in this use-case as the models will be used for comparison, not for classifying some new data)
 
+GLIPH2 motifs
+***************
+
+Running the previous YAML specification will also output the data in GLIPH2-compatible format. To obtain motifs, we filtered the training data
+exported in this way for positive examples and provided them as input to GLIPH2 web server available at
+`the project website <http://50.255.35.37:8080/>`_. To obtain the motif file, we used GLIPH2 version of the algorithm, reference version 2, CD8
+reference, and assumed all amino acids are interchangeable. The file provided as input to GLIPH2, as well as the resulting file, are available in the
+`NIRD research data archive <http://doi.org/10.11582/2021.00009>`_.
+
 
 Results
 -------------------------------------------------
-
 
 We compared the CNN method with the TCRdist-based k-nearest neighbor classifier and logistic regression on a dataset
 consisting of epitope-specific and naive TCRαβ sequences (assumed to be non-epitope-specific).

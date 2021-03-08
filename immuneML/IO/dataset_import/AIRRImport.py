@@ -40,6 +40,10 @@ class AIRRImport(DataImport):
         In a ReceptorDataset, two sequences with chain types specified by receptor_chains are paired together
         based on the identifier given in the AIRR column named 'cell_id'.
 
+        receptor_chains (str): Required for ReceptorDatasets. Determines which pair of chains to import for each Receptor.
+        Valid values for receptor_chains are the names of the :py:obj:`~immuneML.data_model.receptor.ChainPair.ChainPair` enum.
+        If receptor_chains is not provided, the chain pair is automatically detected (only one chain pair type allowed per repertoire).
+
         import_productive (bool): Whether productive sequences (with value 'T' in column productive) should be included
         in the imported sequences. By default, import_productive is True.
 
@@ -195,11 +199,13 @@ class AIRRImport(DataImport):
     def get_documentation():
         doc = str(AIRRImport.__doc__)
 
+        chain_pair_values = str([chain_pair.name for chain_pair in ChainPair])[1:-1].replace("'", "`")
         region_type_values = str([region_type.name for region_type in RegionType])[1:-1].replace("'", "`")
         repertoire_fields = list(Repertoire.FIELDS)
         repertoire_fields.remove("region_types")
 
         mapping = {
+            "Valid values for receptor_chains are the names of the :py:obj:`~immuneML.data_model.receptor.ChainPair.ChainPair` enum.": f"Valid values are {chain_pair_values}.",
             "Valid values for region_type are the names of the :py:obj:`~immuneML.data_model.receptor.RegionType.RegionType` enum.": f"Valid values are {region_type_values}.",
             "Valid immuneML fields that can be specified here are defined by Repertoire.FIELDS": f"Valid immuneML fields that can be specified here are {repertoire_fields}."
         }

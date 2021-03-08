@@ -23,7 +23,7 @@ class RepertoireDataset(Dataset):
 
     def clone(self):
         return RepertoireDataset(self.labels, copy.deepcopy(self.encoded_data), copy.deepcopy(self.repertoires),
-                                 metadata_file=self.metadata_file)
+                                 metadata_file=self.metadata_file, name=self.name)
 
     def add_encoded_data(self, encoded_data: EncodedData):
         self.encoded_data = encoded_data

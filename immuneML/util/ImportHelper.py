@@ -148,7 +148,6 @@ class ImportHelper:
 
     @staticmethod
     def load_repertoire_as_object(import_class, metadata_row, params: DatasetImportParams):
-        alternative_load_func = getattr(import_class, "alternative_load_func", None)
         try:
             alternative_load_func = getattr(import_class, "alternative_load_func", None)
 
@@ -188,12 +187,15 @@ class ImportHelper:
         return df
 
     @staticmethod
-    def safe_load_dataframe(filepath, params):
+    def safe_load_dataframe(filepath, params: DatasetImportParams):
         if hasattr(params, "columns_to_load") and params.columns_to_load is not None:
             usecols = set(params.columns_to_load) if hasattr(params, "columns_to_load") and params.columns_to_load is not None else set()
-            usecols = usecols.union(set(params.column_mapping.keys()) if hasattr(params, "column_mapping") and params.column_mapping is not None else set())
-            usecols = usecols.union(set(params.column_mapping_synonyms.keys()) if hasattr(params, "column_mapping_synonyms") and params.column_mapping_synonyms is not None else set())
-            usecols = usecols.union(set(params.metadata_column_mapping.keys()) if hasattr(params, "metadata_column_mapping") and params.metadata_column_mapping is not None else set())
+            usecols = usecols.union(
+                set(params.column_mapping.keys()) if hasattr(params, "column_mapping") and params.column_mapping is not None else set())
+            usecols = usecols.union(set(params.column_mapping_synonyms.keys())
+                                    if hasattr(params, "column_mapping_synonyms") and params.column_mapping_synonyms is not None else set())
+            usecols = usecols.union(set(params.metadata_column_mapping.keys())
+                                    if hasattr(params, "metadata_column_mapping") and params.metadata_column_mapping is not None else set())
         else:
             usecols = None
 
@@ -210,7 +212,7 @@ class ImportHelper:
         return df
 
     @staticmethod
-    def rename_dataframe_columns(df, params):
+    def rename_dataframe_columns(df, params: DatasetImportParams):
         if hasattr(params, "column_mapping") and params.column_mapping is not None:
             df.rename(columns=params.column_mapping, inplace=True)
 
@@ -222,10 +224,8 @@ class ImportHelper:
         if hasattr(params, "metadata_column_mapping") and params.metadata_column_mapping is not None:
             df.rename(columns=params.metadata_column_mapping, inplace=True)
 
-
-
     @staticmethod
-    def standardize_none_values(dataframe: pd.DataFrame) -> pd.DataFrame:
+    def standardize_none_values(dataframe: pd.DataFrame):
         dataframe.replace({key: Constants.UNKNOWN for key in ["unresolved", "no data", "na", "unknown", "null", "nan", np.nan, ""]}, inplace=True)
 
     @staticmethod
@@ -243,12 +243,12 @@ class ImportHelper:
             if sequence_colname in dataframe.columns:
                 n_empty = sum(dataframe[sequence_colname].isnull())
                 if n_empty > 0:
-                    idx = dataframe.loc[dataframe[sequence_colname].isnull()].index
                     dataframe.drop(dataframe.loc[dataframe[sequence_colname].isnull()].index, inplace=True)
                     warnings.warn(
-                        f"{ImportHelper.__name__}: {n_empty} sequences were removed from the dataset because they contained an empty {sequence_name} sequence after preprocessing. ")
+                        f"{ImportHelper.__name__}: {n_empty} sequences were removed from the dataset because they contained an empty {sequence_name} "
+                        f"sequence after preprocessing. ")
             else:
-                warnings.warn(f"{ImportHelper.__name__}: column {sequence_colname} was not set, skipping filtering...")
+                raise ValueError(f"{ImportHelper.__name__}: column {sequence_colname} was not set, but is required for filtering.")
 
         return dataframe
 
@@ -291,7 +291,7 @@ class ImportHelper:
         return frame_type_list
 
     @staticmethod
-    def load_chains(df: pd.DataFrame) -> list:
+    def load_chains(df: pd.DataFrame):
         if "chains" in df.columns:
             df.loc[:, "chains"] = ImportHelper.load_chains_from_chains(df)
         else:
@@ -454,60 +454,67 @@ class ImportHelper:
     @staticmethod
     def import_receptors(df, params) -> List[Receptor]:
         identifiers = df["receptor_identifiers"].unique()
+
+        chain_pair = params.receptor_chains
+        if chain_pair is None:
+            chains = [Chain.get_chain(chain) for chain in df["chains"].unique()]
+            chain_pair = ChainPair.get_chain_pair(chains)
+
+        metadata_columns = list(params.metadata_column_mapping.values()) if params.metadata_column_mapping else None
+
         all_receptors = []
 
         for identifier in identifiers:
-            receptors = ImportHelper.import_receptors_by_id(df, identifier, params)
+            receptors = ImportHelper.import_receptors_by_id(df, identifier, chain_pair, metadata_columns)
             all_receptors.extend(receptors)
 
         return all_receptors
 
     @staticmethod
-    def import_receptors_by_id(df, identifier, params) -> List[Receptor]:
-        first_row = df.loc[(df["receptor_identifiers"] == identifier) & (df["chains"] == params.receptor_chains.value[0])]
-        second_row = df.loc[(df["receptor_identifiers"] == identifier) & (df["chains"] == params.receptor_chains.value[1])]
+    def import_receptors_by_id(df, identifier, chain_pair, metadata_columns) -> List[Receptor]:
+        first_row = df.loc[(df["receptor_identifiers"] == identifier) & (df["chains"] == chain_pair.value[0])]
+        second_row = df.loc[(df["receptor_identifiers"] == identifier) & (df["chains"] == chain_pair.value[1])]
 
         for i, row in enumerate([first_row, second_row]):
             if row.shape[0] > 1:
                 warnings.warn(
-                    f"Multiple {params.receptor_chains.value[i]} chains found for receptor with identifier {identifier}, only the first entry will be loaded")
+                    f"Multiple {chain_pair.value[i]} chains found for receptor with identifier {identifier}, only the first entry will be loaded")
             elif row.shape[0] == 0:
                 warnings.warn(
-                    f"Missing {params.receptor_chains.value[i]} chain for receptor with identifier {identifier}, this receptor will be omitted.")
+                    f"Missing {chain_pair.value[i]} chain for receptor with identifier {identifier}, this receptor will be omitted.")
                 return []
 
         # todo add options like IRIS import: option to import all dual chains or just the first pair / all V genes when uncertain annotation, etc
         # todo add possibility to import multiple chain combo's? (BCR heavy-light & heavy-kappa, as seen in 10xGenomics?)
 
-        return [ImportHelper.build_receptor_from_rows(first_row.iloc[0], second_row.iloc[0], identifier, params)]
+        return [ImportHelper.build_receptor_from_rows(first_row.iloc[0], second_row.iloc[0], identifier, chain_pair, metadata_columns)]
 
     @staticmethod
-    def build_receptor_from_rows(first_row, second_row, identifier, params):
-        metadata_columns = params.metadata_column_mapping.values() if params.metadata_column_mapping else None
+    def build_receptor_from_rows(first_row, second_row, identifier, chain_pair, metadata_columns):
         first_sequence = ImportHelper.import_sequence(first_row, metadata_columns=metadata_columns)
         second_sequence = ImportHelper.import_sequence(second_row, metadata_columns=metadata_columns)
 
-        if params.receptor_chains == ChainPair.TRA_TRB:
+        if chain_pair == ChainPair.TRA_TRB:
             receptor = TCABReceptor(alpha=first_sequence,
                                     beta=second_sequence,
                                     identifier=identifier,
                                     metadata={**second_sequence.metadata.custom_params})
-        elif params.receptor_chains == ChainPair.TRG_TRD:
+        elif chain_pair == ChainPair.TRG_TRD:
             receptor = TCGDReceptor(gamma=first_sequence,
                                     delta=second_sequence,
                                     identifier=identifier,
                                     metadata={**second_sequence.metadata.custom_params})
-        elif params.receptor_chains == ChainPair.IGH_IGL:
+        elif chain_pair == ChainPair.IGH_IGL:
             receptor = BCReceptor(heavy=first_sequence,
                                   light=second_sequence,
                                   identifier=identifier,
                                   metadata={**first_sequence.metadata.custom_params})
-        elif params.receptor_chains == ChainPair.IGH_IGK:
+        elif chain_pair == ChainPair.IGH_IGK:
             receptor = BCKReceptor(heavy=first_sequence,
                                    kappa=second_sequence,
                                    identifier=identifier,
                                    metadata={**first_sequence.metadata.custom_params})
         else:
-            raise NotImplementedError(f"ImportHelper: {params.receptor_chains} chain pair is not supported.")
+            raise NotImplementedError(f"ImportHelper: {chain_pair} chain pair is not supported.")
 
         return receptor

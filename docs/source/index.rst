@@ -7,7 +7,7 @@ Welcome to the immuneML documentation!
 ======================================
 
 immuneML is a platform for machine learning-based analysis and classification of adaptive immune receptors and
-repertoires. To **get started using immuneML right away**, check out our :ref:`Quickstart` tutorial.
+repertoires (AIRR). To **get started using immuneML right away**, check out our :ref:`Quickstart` tutorial.
 
 immuneML can be used for:
 
@@ -25,8 +25,8 @@ immuneML can be used for:
 - **Applying trained ML models** to new datasets with unknown class labels.
 
 The starting point for any immuneML analysis is the YAML specification file. In this file, the settings of the analysis
-components are defined, which are shown in six different colors in the figure below. Additionally, the YAML file
-describes an *instruction*, which corresponds to one of the applications listed above (and some additional instructions).
+components are defined (also known as *definitions*), which are shown in six different colors in the figure below. Additionally, the YAML file
+describes one or more *instructions*, which corresponds to one of the applications listed above (and some additional instructions).
 
 
 .. figure:: _static/images/definitions_instructions_overview.png

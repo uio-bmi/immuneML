@@ -2,7 +2,6 @@ import pandas as pd
 
 from immuneML.IO.dataset_import.DatasetImportParams import DatasetImportParams
 from immuneML.data_model.receptor.RegionType import RegionType
-from immuneML.environment.Constants import Constants
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.util.ImportHelper import ImportHelper
 
@@ -21,10 +20,12 @@ class AdaptiveImportHelper:
 
         if params.region_type == RegionType.IMGT_CDR3:
             if "sequences" in dataframe.columns:
-                dataframe.loc[:, 'sequences'] = [y[(84 - 3 * len(x)): 78] if x is not None else None for x, y in zip(dataframe['sequence_aas'], dataframe['sequences'])]
+                dataframe.loc[:, 'sequences'] = [y[(84 - 3 * len(x)): 78] if x is not None else None for x, y in
+                                                 zip(dataframe['sequence_aas'], dataframe['sequences'])]
             dataframe.loc[:, 'sequence_aas'] = dataframe["sequence_aas"].str[1:-1]
         elif "sequences" in dataframe.columns:
-            dataframe.loc[:, 'sequences'] = [y[(81 - 3 * len(x)): 81] if x is not None else None for x, y in zip(dataframe['sequence_aas'], dataframe['sequences'])]
+            dataframe.loc[:, 'sequences'] = [y[(81 - 3 * len(x)): 81] if x is not None else None for x, y in
+                                             zip(dataframe['sequence_aas'], dataframe['sequences'])]
 
         dataframe = AdaptiveImportHelper.parse_adaptive_germline_to_imgt(dataframe, params.organism)
         ImportHelper.update_gene_info(dataframe)
@@ -61,8 +62,6 @@ class AdaptiveImportHelper:
                 dataframe.loc[:, f"{gene}_alleles"] = dataframe[f"{gene}_alleles"].replace(germline_value_replacement, regex=True)
 
             if f"{gene}_subgroups" in dataframe.columns:
-                    dataframe.loc[:, f"{gene}_subgroups"] = dataframe[f"{gene}_subgroups"].replace(germline_value_replacement, regex=True)
+                dataframe.loc[:, f"{gene}_subgroups"] = dataframe[f"{gene}_subgroups"].replace(germline_value_replacement, regex=True)
 
         return dataframe
-
-

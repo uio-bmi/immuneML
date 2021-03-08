@@ -9,12 +9,12 @@ regex
 tzlocal
 airr>=1
 pystache==0.5.4
-torch==1.5.1
+torch>=1.5.1
 numpy>=1.18
 h5py<=2.10.0
 dill>=0.3
 tqdm>=0.24
-tensorboard==1.14.0
+tensorboard>=1.14.0
 requests>=2.21
 plotly>=4
 logomaker>=0.8

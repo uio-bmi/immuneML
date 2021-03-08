@@ -18,6 +18,8 @@ class DeepRCEncoder(DatasetEncoder):
     Additionally, one metadata .tsv file is created, which describes the subset of repertoires that is encoded by
     a given instance of the DeepRCEncoder.
 
+    Note: sequences where count is None, the count value will be set to 1
+
     YAML specification:
 
     .. indent with spaces
@@ -62,6 +64,8 @@ class DeepRCEncoder(DatasetEncoder):
 
             if not filepath.is_file():
                 df = pd.DataFrame({DeepRCEncoder.SEQUENCE_COLUMN: repertoire.get_sequence_aas(), DeepRCEncoder.COUNTS_COLUMN: repertoire.get_counts()})
+                df[DeepRCEncoder.COUNTS_COLUMN].fillna(1, inplace=True)
+
                 df.to_csv(path_or_buf=filepath, sep=DeepRCEncoder.SEP, index=False)
 
                 max_sequence_length = max(df[DeepRCEncoder.SEQUENCE_COLUMN].str.len())

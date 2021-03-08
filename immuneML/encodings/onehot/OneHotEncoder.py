@@ -64,6 +64,8 @@ class OneHotEncoder(DatasetEncoder):
         This must be set to True when using onehot encoding in combination with scikit-learn ML methods (inheriting :py:obj:`~source.ml_methods.SklearnMethod.SklearnMethod`),
         such as :ref:`LogisticRegression`, :ref:`SVM`, :ref:`RandomForestClassifier` and :ref:`KNN`.
 
+        sequence_type: whether to use nucleotide or amino acid sequence for encoding. Valid values are 'nucleotide' and 'amino_acid'.
+
 
     YAML specification:
 
@@ -74,12 +76,14 @@ class OneHotEncoder(DatasetEncoder):
             OneHot:
                 use_positional_info: False
                 flatten: False
+                sequence_type: amino_acid
 
         one_hot_positional:
             OneHot:
                 use_positional_info: True
                 distance_to_seq_middle: 3
                 flatten: False
+                sequence_type: nucleotide
 
     """
 
@@ -89,12 +93,12 @@ class OneHotEncoder(DatasetEncoder):
         "ReceptorDataset": "OneHotReceptorEncoder"
     }
 
-    ALPHABET = EnvironmentSettings.get_sequence_alphabet()
-
-    def __init__(self, use_positional_info: bool, distance_to_seq_middle: int, flatten: bool, name: str = None):
+    def __init__(self, use_positional_info: bool, distance_to_seq_middle: int, flatten: bool, name: str = None, sequence_type: SequenceType = None):
         self.use_positional_info = use_positional_info
         self.distance_to_seq_middle = distance_to_seq_middle
         self.flatten = flatten
+        self.sequence_type = sequence_type
+        self.alphabet = EnvironmentSettings.get_sequence_alphabet(self.sequence_type)
 
         if distance_to_seq_middle:
             self.pos_increasing = [1 / self.distance_to_seq_middle * i for i in range(self.distance_to_seq_middle)]
@@ -104,13 +108,13 @@ class OneHotEncoder(DatasetEncoder):
 
         self.name = name
 
-        if EnvironmentSettings.get_sequence_type() == SequenceType.NUCLEOTIDE: # todo check this / explain in docs
+        if self.sequence_type == SequenceType.NUCLEOTIDE and self.distance_to_seq_middle is not None:  # todo check this / explain in docs
             self.distance_to_seq_middle = self.distance_to_seq_middle * 3
 
-        self.onehot_dimensions = self.ALPHABET + ["start", "mid", "end"] if self.use_positional_info else self.ALPHABET # todo test this
+        self.onehot_dimensions = self.alphabet + ["start", "mid", "end"] if self.use_positional_info else self.alphabet  # todo test this
 
     @staticmethod
-    def _prepare_parameters(use_positional_info, distance_to_seq_middle, flatten, name: str = None):
+    def _prepare_parameters(use_positional_info: bool, distance_to_seq_middle: int, flatten: bool, sequence_type: str, name: str = None):
 
         location = OneHotEncoder.__name__
 
@@ -121,10 +125,12 @@ class OneHotEncoder(DatasetEncoder):
             distance_to_seq_middle = None
 
         ParameterValidator.assert_type_and_value(flatten, bool, location, "flatten")
+        ParameterValidator.assert_type_and_value(sequence_type, str, location, 'sequence_type')
+        ParameterValidator.assert_in_valid_list(sequence_type.upper(), [item.name for item in SequenceType], location, 'sequence_type')
 
         return {"use_positional_info": use_positional_info,
                 "distance_to_seq_middle": distance_to_seq_middle,
-                "flatten": flatten,
+                "flatten": flatten, "sequence_type": SequenceType[sequence_type.upper()],
                 "name": name}
 
     @staticmethod
@@ -167,11 +173,11 @@ class OneHotEncoder(DatasetEncoder):
 
         n_sequences, sequence_len = char_array.shape
 
-        sklearn_enc = SklearnOneHotEncoder(categories=[OneHotEncoder.ALPHABET for i in range(sequence_len)], handle_unknown='ignore')
+        sklearn_enc = SklearnOneHotEncoder(categories=[self.alphabet for i in range(sequence_len)], handle_unknown='ignore')
         encoded_data = sklearn_enc.fit_transform(char_array).toarray()
 
         encoded_data = np.pad(encoded_data, pad_width=((0, pad_n_sequences - n_sequences), (0, 0)))
-        encoded_data = encoded_data.reshape((pad_n_sequences, sequence_len, len(OneHotEncoder.ALPHABET)))
+        encoded_data = encoded_data.reshape((pad_n_sequences, sequence_len, len(self.alphabet)))
         positional_dims = int(self.use_positional_info) * 3
         encoded_data = np.pad(encoded_data, pad_width=((0, 0), (0, pad_sequence_len - sequence_len), (0, positional_dims)))
 
@@ -180,7 +186,7 @@ class OneHotEncoder(DatasetEncoder):
             pos_info = np.stack(pos_info)
             pos_info = np.pad(pos_info, pad_width=((0, pad_n_sequences - n_sequences), (0, 0), (0, 0)))
 
-            encoded_data[:, :, len(OneHotEncoder.ALPHABET):] = pos_info
+            encoded_data[:, :, len(self.alphabet):] = pos_info
 
         return encoded_data
 
