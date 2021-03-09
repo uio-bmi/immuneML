@@ -16,7 +16,7 @@ from immuneML.util.PathBuilder import PathBuilder
 
 class DeepRCMotifDiscovery(MLReport):
     """
-    This report plots the contributions of (i) input sequences and (ii) kernels to trained DeepRC model with respect to
+    This report plots the contributions of (i) input sequences and (ii) kernels to trained :ref:`DeepRC` model with respect to
     the test dataset. Contributions are computed using integrated gradients (IG).
     This report produces two figures:
         - inputs_integrated_gradients: Shows the contributions of the characters within the input sequences (test dataset) that was most important for immune status prediction of the repertoire. IG is only applied to sequences of positive class repertoires.
@@ -26,6 +26,8 @@ class DeepRCMotifDiscovery(MLReport):
     indicating positive contribution and red indicating negative contribution towards the prediction of the immune status.
     For kernels only: contributions to positional encoding are indicated by < (beginning of sequence),
     ∧ (center of sequence), and > (end of sequence).
+
+    See :ref:`DeepRCMotifDiscovery for repertoire classification` for a usage example.
 
     Reference:
     Michael Widrich, Bernhard Schäfl, Milena Pavlović, Geir Kjetil Sandve, Sepp Hochreiter, Victor Greiff, Günter Klambauer
