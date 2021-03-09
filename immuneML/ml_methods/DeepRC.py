@@ -22,7 +22,7 @@ from immuneML.util.PathBuilder import PathBuilder
 class DeepRC(MLMethod):
     """
     This classifier uses the DeepRC method for repertoire classification. The DeepRC ML method should be used in combination
-    with the DeepRC encoder.
+    with the DeepRC encoder. Also consider using the :ref:`DeepRCMotifDiscovery` report for interpretability.
 
     Notes:
 

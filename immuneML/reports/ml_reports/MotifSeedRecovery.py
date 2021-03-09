@@ -28,8 +28,8 @@ class MotifSeedRecovery(MLReport):
 
     Note that to use this report, the following criteria must be met:
     - KmerFrequencyEncoder must be used.
+    - One of the following classifiers must be used: RandomForestClassifier, LogisticRegression, SVM
     - For each label, the implanted motif seeds relevant to that label must be specified
-
 
     To find the overlap score between kmer features and implanted motif seeds, the two sequences are compared in a sliding
     window approach, and the maximum overlap is calculated.
@@ -61,6 +61,8 @@ class MotifSeedRecovery(MLReport):
         Seed:     A/AA  -> score = 3
         Feature: xAxAAx
                   ^/^^
+
+    See :ref:`Recovering simulated immune signals` for more details and an example plot.
 
 
     Arguments:
