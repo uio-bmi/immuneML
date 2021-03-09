@@ -84,6 +84,3 @@ subsequence 'VLEQ' has been implanted in the TCRβ chains, which can be seen in 
    :twitter:title: immuneML: motif recovery
    :twitter:description: See tutorials on how to perform motif recovery in immuneML.
    :twitter:image: https://docs.immuneml.uio.no/_images/receptor_classification_overview.png
-
-
-coming soon!
