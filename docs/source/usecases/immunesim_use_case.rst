@@ -1,6 +1,14 @@
 Integration use case: Performing analysis on immuneSIM-generated repertoires
 ==============================================================================
 
+.. meta::
+
+   :twitter:card: summary
+   :twitter:site: @immuneml
+   :twitter:title: immuneML: performing analysis on immuneSIM-generated repertoires
+   :twitter:description: See how to perform an analysis using immuneML on immune repertoires generated with immuneSIM.
+   :twitter:image: https://docs.immuneml.uio.no/_images/immuneSIML.png
+
 This use case will show you how to use immuneML in conjunction with immuneSIM
 (`Weber et al. 2020 <https://academic.oup.com/bioinformatics/article/36/11/3594/5802461>`_), tunable multi-feature simulation tool of B- and T-cell
 receptor repertoires for immunoinformatics benchmarking.

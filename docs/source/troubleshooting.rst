@@ -1,6 +1,15 @@
 Troubleshooting
 ===============
 
+.. meta::
+
+   :twitter:card: summary
+   :twitter:site: @immuneml
+   :twitter:title: immuneML troubleshooting
+   :twitter:description: See some commonly asked questions related to immuneML installation or notification at runtime.
+   :twitter:image: https://docs.immuneml.uio.no/_images/receptor_classification_overview.png
+
+
 .. toctree::
    :maxdepth: 2
 

@@ -1,6 +1,15 @@
 How to generate a random sequence, receptor or repertoire dataset
 =================================================================
 
+.. meta::
+
+   :twitter:card: summary
+   :twitter:site: @immuneml
+   :twitter:title: immuneML: generate a random dataset
+   :twitter:description: See tutorials on how to generate a random sequence, receptor or repertoire dataset
+   :twitter:image: https://docs.immuneml.uio.no/_images/receptor_classification_overview.png
+
+
 Random immune receptor sequence, immune receptor or immune repertoire datasets (short: random sequence/receptor/repertoire datasets) can be used to quickly try out some immuneML functionalities, and may also be
 used as a baseline when comparing different machine learning models (benchmarking, see Weber et al., Bioinformatics,
 https://doi.org/10.1093/bioinformatics/btaa158). A random sequence/receptor/repertoire dataset consists of randomly generated amino acid sequences, where the amino acids are

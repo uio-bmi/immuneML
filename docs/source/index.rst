@@ -6,6 +6,14 @@
 Welcome to the immuneML documentation!
 ======================================
 
+.. meta::
+
+   :twitter:card: summary
+   :twitter:site: @immuneml
+   :twitter:title: immuneML documentation and tutorials
+   :twitter:description: immuneML is an open-source software platform for machine learning analysis of adaptive immune receptor repertoires, available as a Python library, through Galaxy and as a Docker image. On this website, you can browse the platform's documentation and tutorials.
+   :twitter:image: https://docs.immuneml.uio.no/_images/receptor_classification_overview.png
+
 immuneML is a platform for machine learning-based analysis and classification of adaptive immune receptors and
 repertoires (AIRR). To **get started using immuneML right away**, check out our :ref:`Quickstart` tutorial.
 

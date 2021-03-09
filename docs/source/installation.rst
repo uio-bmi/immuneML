@@ -1,6 +1,13 @@
 Installing immuneML
 ===================
 
+.. meta::
+
+   :twitter:card: summary
+   :twitter:site: @immuneml
+   :twitter:title: immuneML installation
+   :twitter:description: See how to install immuneML.
+
 .. toctree::
    :maxdepth: 2
 

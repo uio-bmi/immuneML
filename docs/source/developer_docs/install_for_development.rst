@@ -1,6 +1,14 @@
 Set up immuneML for development
 =========================================
 
+.. meta::
+
+   :twitter:card: summary
+   :twitter:site: @immuneml
+   :twitter:title: immuneML dev docs: set up for development
+   :twitter:description: See how to set up immuneML for development.
+   :twitter:image: https://docs.immuneml.uio.no/_images/extending_immuneML.png
+
 Prerequisites:
 
 - Create and activate a Python virtual environment with Python 3.8 (`set up a Python virtual environment <https://docs.python.org/3/library/venv.html>`_) or use conda instead with Python 3.8 (`set up conda virtual environment <https://docs.conda.io/projects/conda/en/latest/user-guide/getting-started.html>`_).

@@ -1,6 +1,13 @@
 immuneML platform overview
 ============================
 
+.. meta::
+
+   :twitter:card: summary
+   :twitter:site: @immuneml
+   :twitter:title: immuneML dev docs: platform overview
+   :twitter:image: https://docs.immuneml.uio.no/_images/extending_immuneML.png
+
 An overview of the most used packages with their dependencies in immuneML is shown in the figure below. However, to extend the platform, it is only
 necessary to follow the tutorials without the need to go into all platform details.
 

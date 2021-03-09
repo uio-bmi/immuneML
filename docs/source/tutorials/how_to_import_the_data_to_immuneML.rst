@@ -1,6 +1,15 @@
 How to import data into immuneML
 ==================================
 
+.. meta::
+
+   :twitter:card: summary
+   :twitter:site: @immuneml
+   :twitter:title: immuneML: importing data
+   :twitter:description: See tutorials on how to import the data into immuneML.
+   :twitter:image: https://docs.immuneml.uio.no/_images/receptor_classification_overview.png
+
+
 The first step of any immuneML analysis is to import the dataset that will be used. There exist three types of datasets in immuneML:
 
 - **repertoire datasets** should be used when making predictions per repertoire, such as predicting a disease state.

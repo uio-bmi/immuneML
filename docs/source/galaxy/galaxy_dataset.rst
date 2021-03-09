@@ -1,6 +1,15 @@
 How to make an immuneML dataset in Galaxy
 =========================================
 
+.. meta::
+
+   :twitter:card: summary
+   :twitter:site: @immuneml
+   :twitter:title: immuneML & Galaxy: create a dataset
+   :twitter:description: See tutorials on how to create an immuneML dataset in Galaxy.
+   :twitter:image: https://docs.immuneml.uio.no/_images/receptor_classification_overview.png
+
+
 In Galaxy, an immuneML dataset is simply a Galaxy collection containing all relevant files (including an optional metadata file).
 The `Create dataset <https://galaxy.immuneml.uio.no/root?tool_id=immune_ml_dataset>`_ Galaxy tool allows users to import data
 from various formats and create immuneML datasets in Galaxy. These datasets are in an optimized binary (Pickle) format, which

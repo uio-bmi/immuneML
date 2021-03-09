@@ -1,6 +1,15 @@
 Tutorials
 ==========
 
+.. meta::
+
+   :twitter:card: summary
+   :twitter:site: @immuneml
+   :twitter:title: immuneML tutorials: get started with immuneML by following one of the tutorials
+   :twitter:description: See tutorials covering different analysis (instructions) covered by immuneML.
+   :twitter:image: https://docs.immuneml.uio.no/_images/receptor_classification_overview.png
+
+
 This page provides an overview of tutorials on how to get started using immuneML and instructions on how to use immuneML for various different use cases.
 
 All immuneML analyses are specified using a YAML specification file. To learn how to construct this file, see this tutorial:

@@ -1,6 +1,15 @@
 How to train and assess a receptor or repertoire-level ML classifier
 ====================================================================
 
+.. meta::
+
+   :twitter:card: summary
+   :twitter:site: @immuneml
+   :twitter:title: immuneML: train and assess an ML classifier
+   :twitter:description: See tutorials on how to train and assess an ML classifier.
+   :twitter:image: https://docs.immuneml.uio.no/_images/receptor_classification_overview.png
+
+
 immuneML provides a rich set of functionality for training and assessing machine learning models to classify of receptors
 or repertoires. This is done using the :ref:`TrainMLModel` instruction.
 The goal of the training process is to learn the parameters for a given ML model that result in the most accurate predictions.

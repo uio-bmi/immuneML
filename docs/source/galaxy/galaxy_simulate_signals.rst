@@ -1,6 +1,16 @@
 How to simulate immune events into an existing AIRR dataset in Galaxy
 ========================================================================================
 
+.. meta::
+
+   :twitter:card: summary
+   :twitter:site: @immuneml
+   :twitter:title: immuneML & Galaxy: simulate immune events into an existing AIRR dataset
+   :twitter:description: See tutorials on how to simulate immune events into an existing AIRR dataset in Galaxy.
+   :twitter:image: https://docs.immuneml.uio.no/_images/receptor_classification_overview.png
+
+
+
 The Galaxy tool `Simulate immune events into an existing repertoire dataset <https://galaxy.immuneml.uio.no/root?tool_id=immuneml_simulation>`_
 can be used to implant short disease-associated motifs into an existing
 Repertoire dataset. Such a dataset with simulated immune signals can be used to benchmark different ML methods.

@@ -1,6 +1,15 @@
 How to run any AIRR ML analysis in Galaxy
 =========================================
 
+.. meta::
+
+   :twitter:card: summary
+   :twitter:site: @immuneml
+   :twitter:title: immuneML & Galaxy: run an AIRR ML analysis
+   :twitter:description: See tutorials on how to run any AIRR ML analysis through Galaxy.
+   :twitter:image: https://docs.immuneml.uio.no/_images/receptor_classification_overview.png
+
+
 To be able to run any possible YAML-based immuneML analysis in Galaxy, the tool `Run immuneML with YAML specification <https://galaxy.immuneml.uio.no/root?tool_id=immune_ml>`_ should be used.
 It is typically recommended to use the analysis-specific Galaxy tools for :ref:`creating datasets <How to make an immuneML dataset in Galaxy>`,
 :ref:`simulating synthetic data <How to simulate an AIRR dataset in Galaxy>`,

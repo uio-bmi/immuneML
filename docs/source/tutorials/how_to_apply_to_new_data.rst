@@ -1,6 +1,15 @@
 How to apply previously trained ML models to a new dataset
 =========================================================================
 
+.. meta::
+
+   :twitter:card: summary
+   :twitter:site: @immuneml
+   :twitter:title: immuneML: apply trained ML models to a new dataset
+   :twitter:description: See tutorials on how to apply previously trained ML models to new datasets.
+   :twitter:image: https://docs.immuneml.uio.no/_images/receptor_classification_overview.png
+
+
 When you train an ML model to classify a label on a given dataset using the :ref:`TrainMLModel` instruction,
 the optimal ML settings (a trained model, encoding, and optionally preprocessing) for each label are exported.
 These ML setting configurations can subsequently be used to predict that same label on a new dataset

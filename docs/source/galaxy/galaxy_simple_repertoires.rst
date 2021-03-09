@@ -1,6 +1,16 @@
 How to train immune repertoire classifiers using the simplified Galaxy interface
 ==================================================================================
 
+.. meta::
+
+   :twitter:card: summary
+   :twitter:site: @immuneml
+   :twitter:title: immuneML & Galaxy: train immune repertoire classifier with simplified interface
+   :twitter:description: See tutorials on how to train immune repertoire classifiers using the simplified Galaxy interface.
+   :twitter:image: https://docs.immuneml.uio.no/_images/repertoire_classification_overview.png
+
+
+
 This page provides the documentation for the Galaxy tool `Train immune repertoire classifiers (simplified interface) <https://galaxy.immuneml.uio.no/root?tool_id=novice_immuneml_interface>`_.
 The purpose of this tool is to train machine learning (ML) models to predict a characteristic per immune repertoire, such as
 a disease status. One or more ML models are trained to classify repertoires based on the information within the sets of CDR3 sequences. Finally, the performance
