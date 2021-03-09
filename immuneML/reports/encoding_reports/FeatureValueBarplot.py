@@ -17,10 +17,9 @@ class FeatureValueBarplot(EncodingReport):
     with any encoding. When the distribution of feature values is of interest (as opposed to showing only the mean
     with user-defined error bar as done in this report), please consider using :ref:`FeatureDistribution` instead.
 
-    This report creates a barplot where the height of each bar is the mean value of a feature in a specific group. By
-    default, all samples are the group, in which case `grouping_label` is "feature", meaning that each bar is the mean
-    value of a given feature, and along the x-axis are the different features. For example, when
-    :ref:`KmerFrequency` encoder is used, the features are the k-mers and the feature values are the frequencies per k-mer.
+    This report creates a barplot where the height of each bar is the mean value of a feature in a specific group.
+    Each bar in the barplot represents the mean value of a given feature, and along the x-axis are the different features.
+    For example, when :ref:`KmerFrequency` encoder is used, the features are the k-mers and the feature values are the frequencies per k-mer.
 
     Optional (metadata) labels can be specified for dividing the bars into groups to make comparisons. Groups
     can be visualized by splitting them across the x-axis, using different colors or different row and column facets.
@@ -32,9 +31,6 @@ class FeatureValueBarplot(EncodingReport):
 
 
     Arguments:
-
-        grouping_label (str): The label name used for x-axis grouping of the barplots - defaults to "feature",
-        meaning each bar represents one feature.
 
         color_grouping_label (str): The label that is used to color each bar, at each level of the grouping_label.
 
@@ -64,16 +60,17 @@ class FeatureValueBarplot(EncodingReport):
     def build_object(cls, **kwargs):
         return FeatureValueBarplot(**kwargs)
 
-    def __init__(self, dataset: RepertoireDataset = None, result_path: Path = None, grouping_label: str = "feature",
-                 color_grouping_label: str = None, row_grouping_label=None, column_grouping_label=None,
+    def __init__(self, dataset: RepertoireDataset = None, result_path: Path = None,
+                 color_grouping_label: str = None, row_grouping_label=None, column_grouping_label=None, show_error_bar=True,
                  x_title: str = None, y_title: str = None, name: str = None):
         super().__init__(name)
         self.dataset = dataset
         self.result_path = result_path
-        self.x = grouping_label
+        self.x = "feature"
         self.color = color_grouping_label
         self.facet_row = row_grouping_label
         self.facet_column = column_grouping_label
+        self.show_error_bar = show_error_bar
         self.x_title = x_title if x_title is not None else self.x
         self.y_title = y_title if y_title is not None else "value"
         self.result_name = "feature_values"
@@ -103,6 +100,8 @@ class FeatureValueBarplot(EncodingReport):
             {"value": ['mean', self.std]})
 
         plotting_data.columns = plotting_data.columns.map(''.join)
+
+        error_y = "valuestd" if self.show_error_bar else None
 
         figure = px.bar(plotting_data, x=self.x, y="valuemean", color=self.color, barmode="relative",
                         facet_row=self.facet_row, facet_col=self.facet_column, error_y="valuestd",
@@ -139,13 +138,5 @@ class FeatureValueBarplot(EncodingReport):
                         warnings.warn(
                             f"{location}: undefined label '{label_param}'. Legal options are: {legal_labels}. {location} report will not be created.")
                         run_report = False
-
-            if "feature" not in labels:
-                warnings.warn(
-                    f"{location}: `feature` has not been specified in any of `grouping_label`, `row_grouping_labels`, "
-                    f"or `column_grouping_labels` - this must be specified so that multiple features are not combined"
-                    f"into one, making the plot uninterpretable. {location} report will not be created."
-                )
-                run_report = False
 
         return run_report

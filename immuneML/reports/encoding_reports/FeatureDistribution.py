@@ -25,9 +25,6 @@ class FeatureDistribution(EncodingReport):
 
     Arguments:
 
-        grouping_label (str): The label name used for x-axis grouping of the barplots - defaults to "feature",
-        meaning each bar represents one feature.
-
         color_grouping_label (str): The label that is used to color each bar, at each level of the grouping_label.
 
         mode (str): either 'normal', 'sparse' or 'auto' (default)
@@ -52,13 +49,12 @@ class FeatureDistribution(EncodingReport):
     def build_object(cls, **kwargs):
         return FeatureDistribution(**kwargs)
 
-    def __init__(self, dataset: RepertoireDataset = None, result_path: Path = None,
-                 grouping_label: str = "feature", color_grouping_label: str = None,
+    def __init__(self, dataset: RepertoireDataset = None, result_path: Path = None, color_grouping_label: str = None,
                  mode: str = 'auto', x_title: str = None, y_title: str = None, name: str = None):
         super().__init__(name)
         self.dataset = dataset
         self.result_path = result_path
-        self.x = grouping_label
+        self.x = "feature"
         self.color = color_grouping_label
         self.mode = mode
         self.x_title = x_title if x_title is not None else self.x
@@ -166,13 +162,5 @@ class FeatureDistribution(EncodingReport):
                         warnings.warn(
                             f"{location}: undefined label '{label_param}'. Legal options are: {legal_labels}. {location} report will not be created.")
                         run_report = False
-
-            if "feature" not in labels:
-                warnings.warn(
-                    f"{location}: `feature` has not been specified in any of `grouping_label`, `row_grouping_labels`, "
-                    f"or `column_grouping_labels` - this must be specified so that multiple features are not combined"
-                    f"into one, making the plot uninterpretable. {location} report will not be created."
-                )
-                run_report = False
 
         return run_report

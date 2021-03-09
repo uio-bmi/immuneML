@@ -54,8 +54,7 @@ class TestFeatureDistribution(TestCase):
         report = FeatureDistribution.build_object(**{"dataset": dataset,
                                                      "result_path": path,
                                                      "mode": "sparse",
-                                                     "color_grouping_label": "patient",
-                                                     "grouping_label": "feature"})
+                                                     "color_grouping_label": "patient"})
 
         self.assertTrue(report.check_prerequisites())
 
@@ -72,8 +71,7 @@ class TestFeatureDistribution(TestCase):
 
         # report should succeed to build but check_prerequisites should be false when data is not encoded
         report = FeatureDistribution.build_object(**{"dataset": RepertoireDataset(),
-                                                     "result_path": path,
-                                                     "grouping_label": None})
+                                                     "result_path": path})
 
         self.assertFalse(report.check_prerequisites())
 
