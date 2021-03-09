@@ -1,6 +1,15 @@
 Integration use case: post-analysis of sequences with immunarch
 ==========================================================================================
 
+.. meta::
+
+   :twitter:card: summary
+   :twitter:site: @immuneml
+   :twitter:title: immuneML: post-analysis of sequences with immunarch
+   :twitter:description: See how the sequences extracted from statistical classifiers in immuneML can be used for subsequent analyses with immunarch.
+   :twitter:image: https://docs.immuneml.uio.no/_images/immunarch_geneusage_plot.png
+
+
 This use case will show how to perform a post-analysis of CMV associated TCRβ sequences using `immunarch <https://immunarch.com/>`_/
 These sequences were identified through the method
 `published by Emerson et al. <https://www.nature.com/articles/ng.3822>`_, which was reproduced inside immuneML.

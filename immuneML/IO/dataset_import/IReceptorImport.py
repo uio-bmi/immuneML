@@ -11,6 +11,7 @@ from immuneML.IO.dataset_import.AIRRImport import AIRRImport
 from immuneML.IO.dataset_import.DataImport import DataImport
 from immuneML.data_model.dataset.Dataset import Dataset
 from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
+from immuneML.data_model.receptor.ChainPair import ChainPair
 from immuneML.data_model.receptor.RegionType import RegionType
 from immuneML.data_model.repertoire.Repertoire import Repertoire
 from immuneML.util.ImportHelper import ImportHelper

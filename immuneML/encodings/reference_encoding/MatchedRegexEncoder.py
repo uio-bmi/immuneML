@@ -73,6 +73,7 @@ class MatchedRegexEncoder(DatasetEncoder):
                 motif_filepath: path/to/file.txt
                 match_v_genes: True
                 sum_counts: False
+
     """
 
     dataset_mapping = {

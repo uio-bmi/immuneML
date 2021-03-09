@@ -1,6 +1,15 @@
 immuneML & Galaxy
 =================
 
+.. meta::
+
+   :twitter:card: summary
+   :twitter:site: @immuneml
+   :twitter:title: immuneML & Galaxy
+   :twitter:description: See tutorials on how to run immuneML through Galaxy.
+   :twitter:image: https://docs.immuneml.uio.no/_images/receptor_classification_overview.png
+
+
 All of immuneMLs functionalities are also available through `a Galaxy web interface <https://galaxy.immuneml.uio.no>`_ as a collection of Galaxy tools. We provide a YAML-based Galaxy
 tool that is equivalent to the CLI (command-line interface), as well as repertoire and receptor-level classification tools with an intuitive
 graphical user interface aimed at immunology experts without a machine learning background.

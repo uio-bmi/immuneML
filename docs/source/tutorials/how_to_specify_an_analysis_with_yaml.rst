@@ -1,6 +1,14 @@
 How to specify an analysis with YAML
 ====================================
 
+.. meta::
+
+   :twitter:card: summary
+   :twitter:site: @immuneml
+   :twitter:title: immuneML: specify an analysis with YAML
+   :twitter:description: See tutorials on how to specify analysis in immuneML through YAML specification file.
+   :twitter:image: https://docs.immuneml.uio.no/_images/receptor_classification_overview.png
+
 Analyses in immuneML are specified through a YAML specification file with a fixed structure.
 Depending on the specification, immuneML can execute different tasks, such as training ML models for receptor or repertoire
 classification, simulate data or perform exploratory analyses.

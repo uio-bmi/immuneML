@@ -1,6 +1,14 @@
 Use case examples
 ====================
 
+.. meta::
+
+   :twitter:card: summary
+   :twitter:site: @immuneml
+   :twitter:title: immuneML use cases: get started with immuneML by following one of the tutorials
+   :twitter:description: See tutorials covering different analysis (instructions) covered by immuneML.
+   :twitter:image: https://docs.immuneml.uio.no/_images/receptor_classification_overview.png
+
 
 In the immuneML manuscript, we showcase immuneMLs functionalities based on three use cases.
 The following three sections describe how to reproduce these three use cases:

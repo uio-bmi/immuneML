@@ -1,6 +1,15 @@
 How to train immune receptor classifiers using the simplified Galaxy interface
 ===============================================================================
 
+.. meta::
+
+   :twitter:card: summary
+   :twitter:site: @immuneml
+   :twitter:title: immuneML & Galaxy: train immune receptor classifier with simplified interface
+   :twitter:description: See tutorials on how to train immune receptor classifiers using the simplified Galaxy interface.
+   :twitter:image: https://docs.immuneml.uio.no/_images/receptor_classification_overview.png
+
+
 This is the documentation for the Galaxy tool `Train immune receptor classifiers (simplified interface) <https://galaxy.immuneml.uio.no/root?tool_id=immuneml_train_classifiers>`_.
 The purpose of this tool is to train machine learning (ML) models to predict a characteristic per immune receptor, such as
 antigen specificity. One or more ML models are trained to classify receptors based on the information within the CDR3 sequences. Finally, the performance

@@ -1,6 +1,15 @@
 Introduction to Galaxy
 =========================================
 
+.. meta::
+
+   :twitter:card: summary
+   :twitter:site: @immuneml
+   :twitter:title: immuneML & Galaxy: introduction to Galaxy
+   :twitter:description: See tutorials on how to use Galaxy.
+   :twitter:image: https://docs.immuneml.uio.no/_images/receptor_classification_overview.png
+
+
 Galaxy is an open, web-based platform allowing accessible, reproducible and transparent research.
 The immuneML Galaxy instance can be found at https://galaxy.immuneml.uio.no.
 This introduction covers all essential information needed for users of the immuneML Galaxy instance.

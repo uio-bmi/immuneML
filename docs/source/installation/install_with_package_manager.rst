@@ -1,6 +1,15 @@
 Install immuneML with a package manager
 =========================================
 
+.. meta::
+
+   :twitter:card: summary
+   :twitter:site: @immuneml
+   :twitter:title: immuneML installation through a package manager
+   :twitter:description: See tutorials on how to install immuneML with PyPI
+   :twitter:image: https://docs.immuneml.uio.no/_images/receptor_classification_overview.png
+
+
 This manual shows how to `install immuneML with pip <https://pypi.org/project/immuneML/>`_ in an
 `Anaconda <https://docs.anaconda.com/anaconda/install/>`_ virtual environment.
 

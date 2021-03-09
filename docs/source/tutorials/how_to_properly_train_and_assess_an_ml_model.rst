@@ -1,6 +1,14 @@
 How to properly train and assess an ML model
 ============================================
 
+.. meta::
+
+   :twitter:card: summary
+   :twitter:site: @immuneml
+   :twitter:title: immuneML: training and assessing an ML model
+   :twitter:image: https://docs.immuneml.uio.no/_images/receptor_classification_overview.png
+
+
 The powerful pattern discovery abilities of machine learning methods make them well suited to learn signals that characterize receptors reactive to a
 given antigen or signals that characterize immune repertoires of donors being positive for a given disease. We refer to this as learning a classifier
 for receptors or repertoires. Learning a machine learning classifier amounts to optimizing the parameters of a given model, which is achieved by a

@@ -1,6 +1,15 @@
 How to perform an exploratory data analysis
 ============================================
 
+.. meta::
+
+   :twitter:card: summary
+   :twitter:site: @immuneml
+   :twitter:title: immuneML: perform an exploratory data analysis
+   :twitter:description: See tutorials on how to perform an exploratory data analysis in immuneML.
+   :twitter:image: https://docs.immuneml.uio.no/_images/receptor_classification_overview.png
+
+
 To explore preprocessing, encodings and/or reports without running a machine learning
 algorithm, the :ref:`ExploratoryAnalysis` instruction should be used. The components in the
 definitions section are defined in the same manner as for all other instructions

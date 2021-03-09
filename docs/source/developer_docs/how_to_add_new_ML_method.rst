@@ -1,6 +1,14 @@
 How to add a new machine learning method
 ==========================================
 
+.. meta::
+
+   :twitter:card: summary
+   :twitter:site: @immuneml
+   :twitter:title: immuneML dev docs: add a new machine learning method
+   :twitter:description: See how to add a new machine learning method to the immuneML platform.
+   :twitter:image: https://docs.immuneml.uio.no/_images/extending_immuneML.png
+
 In this tutorial, we will add a new machine learning method. This tutorial assumes you have installed immuneML for development as described at :ref:`Set up immuneML for development`.
 
 To add a new ML method to immuneML, add a class that inherits :py:obj:`~immuneML.ml_methods.MLMethod.MLMethod` class to the :py:mod:`immuneML.ml_methods` package

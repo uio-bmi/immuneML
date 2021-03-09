@@ -1,6 +1,13 @@
 Testing the ML method outside immuneML with a sample design matrix
 -------------------------------------------------------------------
 
+.. meta::
+
+   :twitter:card: summary
+   :twitter:site: @immuneml
+   :twitter:title: immuneML dev docs: testing the ML method outside immuneML with a sample design matrix
+   :twitter:image: https://docs.immuneml.uio.no/_images/extending_immuneML.png
+
 When implementing a new ML method, it can be useful to test the method with a small sample design matrix before integrating it into the immuneML
 codebase. Example design matrices for any encoding can be exported to .csv format with the DesignMatrixExporter report and the ExploratoryAnalysis
 instruction. To quickly generate some random sample data, RandomRepertoireDataset or RandomReceptorDataset may be specified as import formats.
