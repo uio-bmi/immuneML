@@ -114,7 +114,7 @@ class FeatureComparison(FeatureReport):
 
         figure.write_html(str(file_path))
 
-        return ReportOutput(path=file_path, name="feature bar plot")
+        return ReportOutput(path=file_path, name=f"Comparison of feature values across {self.comparison_label}")
 
     def check_prerequisites(self):
         location = self.__class__.__name__

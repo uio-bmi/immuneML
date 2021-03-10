@@ -126,5 +126,5 @@ class FeatureDistribution(FeatureReport):
 
         figure.write_html(str(file_path))
 
-        return ReportOutput(path=file_path, name="feature boxplots")
+        return ReportOutput(path=file_path, name="Distributions of feature values")
 

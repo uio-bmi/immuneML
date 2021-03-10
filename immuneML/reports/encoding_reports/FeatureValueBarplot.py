@@ -88,4 +88,4 @@ class FeatureValueBarplot(FeatureReport):
 
         figure.write_html(str(file_path))
 
-        return ReportOutput(path=file_path, name="feature bar plot")
+        return ReportOutput(path=file_path, name="Average feature values")
