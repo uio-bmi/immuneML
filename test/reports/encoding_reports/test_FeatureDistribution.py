@@ -63,9 +63,9 @@ class TestFeatureDistribution(TestCase):
         self.assertIsInstance(result, ReportResult)
 
         self.assertEqual(result.output_figures[0].path, path / "feature_distributions.html")
-        self.assertEqual(result.output_tables[0].path, path / "feature_distributions.csv")
+        self.assertEqual(result.output_tables[0].path, path / "feature_values.csv")
 
-        content = pd.read_csv(path / "feature_distributions.csv")
+        content = pd.read_csv(path / "feature_values.csv")
         self.assertListEqual(list(content.columns),
                              ["patient", "example_id", "sequence", "feature", "value"])
 
