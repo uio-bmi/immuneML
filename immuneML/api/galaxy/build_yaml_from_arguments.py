@@ -89,8 +89,9 @@ def get_ml_method_spec(ml_method_class, model_selection_n_folds=5):
     elif ml_method_class == "SVM":
         ml_spec = {
             "support_vector_machine": {
-                "SVM": {
+                "SVC": {
                     "penalty": ["l1"],
+                    "dual": False,
                     "C": [0.01, 0.1, 1, 10, 100],
                     "class_weight": ["balanced"],
                     "show_warnings": False

@@ -837,7 +837,7 @@ In this case, uncomment the lines for AIRR import and remove the lines for Pickl
         model_selection_cv: true
         model_selection_n_folds: 3
       SVM:
-        SVM:
+        SVC:
           C:
           - 0.01
           - 0.1
@@ -850,6 +850,7 @@ In this case, uncomment the lines for AIRR import and remove the lines for Pickl
           - 1000
           penalty:
           - l1
+          dual: False
         model_selection_cv: true
         model_selection_n_folds: 3
     reports:
