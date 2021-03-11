@@ -1,5 +1,15 @@
 Manuscript use case 3: Benchmarking ML methods on ground-truth synthetic data
 ==============================================================================
+
+.. meta::
+
+   :twitter:card: summary
+   :twitter:site: @immuneml
+   :twitter:title: immuneML use case: benchmarking ML methods on ground-truth synthetic data
+   :twitter:description: See how benchmarking was done for the immuneML manuscript use case 3 where ML methods were benchmarked on synthetic data.
+   :twitter:image: https://docs.immuneml.uio.no/_images/benchmarking.png
+
+
 In this use case, we show that immuneML can be used for benchmarking ML methods and encodings. To do this,
 we first simulate ground-truth synthetic adaptive immune repertoires, then
 implant known disease signals in these repertoires of varying difficulties, and finally perform a benchmarking.

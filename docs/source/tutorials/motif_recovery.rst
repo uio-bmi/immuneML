@@ -142,3 +142,11 @@ As can be seen in the right figure, the feature 'VLEQ' appears more frequently i
 Alternatively, when investigating the occurrence of more complex motifs in repertoire datasets, the :ref:`MatchedRegex` encoder
 can be used in combination with the :ref:`Matches` report. This will produce a table summarizing how often a set of regular
 expressions are matched in the sequences of the repertoire dataset.
+
+.. meta::
+
+   :twitter:card: summary
+   :twitter:site: @immuneml
+   :twitter:title: immuneML: motif recovery
+   :twitter:description: See tutorials on how to perform motif recovery in immuneML.
+   :twitter:image: https://docs.immuneml.uio.no/_images/receptor_classification_overview.png

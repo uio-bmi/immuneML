@@ -1,6 +1,15 @@
 Manuscript use case 2: Extending immuneML with a deep learning component for predicting antigen specificity of paired receptor data
 ====================================================================================================================================
 
+.. meta::
+
+   :twitter:card: summary
+   :twitter:site: @immuneml
+   :twitter:title: immuneML use case: extending immuneML with a deep learning component for predicting antigen specificity of paired receptor data
+   :twitter:description: See how immuneML was extended with a deep learning component for predicting antigen specificity of paired receptor data in the immuneML manuscript.
+   :twitter:image: https://docs.immuneml.uio.no/_images/epitope_1.png
+
+
 To demonstrate how immuneML can be extended, we added a convolutional neural network (CNN) for predicting receptor specificity. To show how it can be
 using alongside existing components, we compared the CNN with k-nearest neighbour classifier based on TCRdist distance and a
 logistic regression model on 3-mer frequencies. We also show the motifs extracted by CNN, TCRdist

@@ -1,6 +1,14 @@
 immuneML data model
 =====================
 
+
+.. meta::
+
+   :twitter:card: summary
+   :twitter:site: @immuneml
+   :twitter:title: immuneML dev docs: data model
+   :twitter:image: https://docs.immuneml.uio.no/_images/data_model_architecture.png
+
 immuneML data model supports three types of datasets that can be used for analyses:
 
 #. Repertoire dataset (:py:obj:`~immuneML.data_model.dataset.RepertoireDataset.RepertoireDataset`) - one example in the dataset is one repertoire typically coming from one subject

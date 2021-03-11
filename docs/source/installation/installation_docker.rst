@@ -1,6 +1,15 @@
 Setting up immuneML with Docker
 ================================
 
+.. meta::
+
+   :twitter:card: summary
+   :twitter:site: @immuneml
+   :twitter:title: immuneML: setting up with Docker
+   :twitter:description: See tutorials on how to set up immuneML with Docker.
+   :twitter:image: https://docs.immuneml.uio.no/_images/receptor_classification_overview.png
+
+
 This tutorial assumes you have Docker installed on your machine. To install it, see `the official Docker documentation <https://docs.docker.com/get-docker/>`_.
 
 Getting started with immuneML and Docker

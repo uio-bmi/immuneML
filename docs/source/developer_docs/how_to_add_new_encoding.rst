@@ -1,6 +1,14 @@
 How to add a new encoding
 ===========================
 
+.. meta::
+
+   :twitter:card: summary
+   :twitter:site: @immuneml
+   :twitter:title: immuneML dev docs: add a new encoding
+   :twitter:description: See how to add a new encoding to the immuneML platform.
+   :twitter:image: https://docs.immuneml.uio.no/_images/extending_immuneML.png
+
 In this tutorial, we will add a new encoder to represent repertoire datasets by k-mer frequencies.
 
 Adding a new encoder

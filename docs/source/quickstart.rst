@@ -1,6 +1,15 @@
 Quickstart
 ==========
 
+.. meta::
+
+   :twitter:card: summary
+   :twitter:site: @immuneml
+   :twitter:title: immuneML quickstart
+   :twitter:description: See different immuneML quickstart options from Galaxy or command line
+   :twitter:image: https://docs.immuneml.uio.no/_images/receptor_classification_overview.png
+
+
 The purpose of the Quickstart tutorial is to help new users get started with running immuneML as quickly as possible.
 You will find a step-by-step guide on how to use immuneML for a simple machine learning analysis on an adaptive immune receptor repertoire (AIRR) dataset.
 

@@ -1,6 +1,15 @@
 Developer documentation
 =======================
 
+.. meta::
+
+   :twitter:card: summary
+   :twitter:site: @immuneml
+   :twitter:title: immuneML dev docs
+   :twitter:description: Browse developer docs for immuneML and see how to extend the platform with new components.
+   :twitter:image: https://docs.immuneml.uio.no/_images/immuneML_packages.png
+
+
 To get started with adding features to immuneML, follow the steps described here. These steps assume you have some experience with object-oriented programming in Python
 and some basic knowledge of how git works.
 

@@ -1,6 +1,15 @@
 How to train ML models in Galaxy
 =========================================
 
+.. meta::
+
+   :twitter:card: summary
+   :twitter:site: @immuneml
+   :twitter:title: immuneML & Galaxy: train ML models
+   :twitter:description: See tutorials on how to train ML models in Galaxy.
+   :twitter:image: https://docs.immuneml.uio.no/_images/receptor_classification_overview.png
+
+
 The Galaxy tool `Train machine learning models <https://galaxy.immuneml.uio.no/root?tool_id=immuneml_train_ml_model>`_ can be used to run hyperparameter optimization over several different ML settings,
 which include ML models and their parameters, encodings and preprocessing steps. Nested cross-validation is used to identify the optimal combination of ML settings.
 

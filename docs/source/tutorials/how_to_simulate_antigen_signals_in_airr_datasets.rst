@@ -1,6 +1,15 @@
 How to simulate antigen or disease-associated signals in AIRR datasets
 ======================================================================
 
+.. meta::
+
+   :twitter:card: summary
+   :twitter:site: @immuneml
+   :twitter:title: immuneML: simulate antigen or disease-associated signals in AIRR datasets
+   :twitter:description: See tutorials on how to simulate antigen or disease-associated signals in AIRR datasets.
+   :twitter:image: https://docs.immuneml.uio.no/_images/receptor_classification_overview.png
+
+
 In immuneML, it is possible to implant signals in a repertoire dataset in order to simulate the effect of an immune event on the repertoires. This is
 done using the Simulation instruction in the YAML specification. Any type of repertoire dataset (experimental or simulated) can be used as a starting
 point for an immune event simulation.

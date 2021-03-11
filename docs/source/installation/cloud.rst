@@ -1,6 +1,16 @@
 Running immuneML in the cloud
 ==============================
 
+.. meta::
+
+   :twitter:card: summary
+   :twitter:site: @immuneml
+   :twitter:title: immuneML in the cloud
+   :twitter:description: See tutorials on how to run immuneML in the cloud.
+   :twitter:image: https://docs.immuneml.uio.no/_images/receptor_classification_overview.png
+
+
+
 In this tutorial, we will show how immuneML can be run on Google Cloud and Amazon Web Services (AWS) using the existing Docker image.
 
 Installing immuneML on Google Cloud

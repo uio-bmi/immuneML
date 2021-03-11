@@ -4,6 +4,7 @@ import pandas as pd
 from immuneML.IO.dataset_import.DataImport import DataImport
 from immuneML.IO.dataset_import.DatasetImportParams import DatasetImportParams
 from immuneML.data_model.dataset.Dataset import Dataset
+from immuneML.data_model.receptor.ChainPair import ChainPair
 from immuneML.data_model.receptor.RegionType import RegionType
 from immuneML.data_model.receptor.receptor_sequence.SequenceFrameType import SequenceFrameType
 from immuneML.data_model.repertoire.Repertoire import Repertoire
