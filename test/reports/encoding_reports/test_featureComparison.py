@@ -3,6 +3,8 @@ import random
 import shutil
 import string
 from unittest import TestCase
+from immuneML.util.PathBuilder import PathBuilder
+
 
 import numpy as np
 import pandas as pd
@@ -14,11 +16,11 @@ from immuneML.data_model.encoded_data.EncodedData import EncodedData
 from immuneML.environment.Constants import Constants
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.reports.ReportResult import ReportResult
-from immuneML.reports.encoding_reports.FeatureValueBarplot import FeatureValueBarplot
-from immuneML.util.PathBuilder import PathBuilder
+from immuneML.reports.encoding_reports.FeatureComparison import FeatureComparison
+from immuneML.reports.encoding_reports.FeatureDistribution import FeatureDistribution
 
 
-class TestFeatureValueBarplot(TestCase):
+class TestFeatureComparison(TestCase):
 
     def setUp(self) -> None:
         os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
@@ -42,14 +44,9 @@ class TestFeatureValueBarplot(TestCase):
             'encoding': "random"
         }
 
-
         metadata_filepath = path / "metadata.csv"
 
-        metadata = pd.DataFrame({"patient": np.array([i for i in range(n_subjects)]),
-                                 "disease": np.array(["disease 1"] * int(n_subjects / 2) + ["disease 2"] * int(n_subjects / 2)),
-                                 "timepoint": np.array(["timepoint 1", "timepoint 2"] * int(n_subjects / 2))
-                                 })
-
+        metadata = pd.DataFrame({"patient": np.array([i % 2 == 0 for i in range(n_subjects)])})
         metadata.to_csv(metadata_filepath, index=False)
 
         dataset = RepertoireDataset(encoded_data=EncodedData(**encoded_data), metadata_file=metadata_filepath)
@@ -57,17 +54,14 @@ class TestFeatureValueBarplot(TestCase):
         return dataset
 
     def test_generate(self):
-        path = EnvironmentSettings.root_path / "test/tmp/featurevaluebarplot/"
+        path = EnvironmentSettings.root_path / "test/tmp/featuredistribution/"
         PathBuilder.build(path)
-
 
         dataset = self._create_dummy_encoded_data(path)
 
-        report = FeatureValueBarplot.build_object(**{"dataset": dataset,
+        report = FeatureComparison.build_object(**{"dataset": dataset,
                                                      "result_path": path,
-                                                     "column_grouping_label": "disease",
-                                                     "row_grouping_label": "timepoint",
-                                                     "color_grouping_label": "disease"})
+                                                     "comparison_label": "patient"})
 
         self.assertTrue(report.check_prerequisites())
 
@@ -75,19 +69,16 @@ class TestFeatureValueBarplot(TestCase):
 
         self.assertIsInstance(result, ReportResult)
 
-        self.assertEqual(result.output_figures[0].path, path / "feature_value_barplot.html")
+        self.assertEqual(result.output_figures[0].path, path / "feature_comparison.html")
         self.assertEqual(result.output_tables[0].path, path / "feature_values.csv")
 
         content = pd.read_csv(path / "feature_values.csv")
         self.assertListEqual(list(content.columns),
-                             ["patient", "disease", "timepoint", "example_id", "sequence", "feature", "value"])
+                             ["patient", "example_id", "sequence", "feature", "value"])
 
         # report should succeed to build but check_prerequisites should be false when data is not encoded
-        report = FeatureValueBarplot.build_object(**{"dataset": RepertoireDataset(),
-                                                     "result_path": path,
-                                                     "column_grouping_label": None,
-                                                     "row_grouping_label": None,
-                                                     "color_grouping_label": None})
+        report = FeatureDistribution.build_object(**{"dataset": RepertoireDataset(),
+                                                     "result_path": path})
 
         self.assertFalse(report.check_prerequisites())
 

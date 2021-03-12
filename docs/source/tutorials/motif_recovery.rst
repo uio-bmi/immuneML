@@ -77,6 +77,72 @@ subsequence 'VLEQ' has been implanted in the TCRβ chains, which can be seen in 
 
 
 
+Recovering simulated immune signals
+-----------------------------------
+The :ref:`Simulation instruction<How to simulate antigen or disease-associated signals in AIRR datasets>` can be used to implant
+synthetic immune signals into AIRR datasets. Such immune signals can range from simple k-mers to collections of different
+k-mers with possible gap positions or stochastic hamming distance modifications.
+
+The advantage of implanted immune signals is that the ground truth is known, meaning that the motifs learned
+by a classifier can be compared with the motifs that were originally implanted.
+When using  the :ref:`KmerFrequency` encoder in combination with :ref:`LogisticRegression`, :ref:`SVM` or :ref:`RandomForestClassifier`,
+this comparison can be made using the :ref:`MotifSeedRecovery` report.
+
+First, a maximum overlap score is calculated between each :ref:`KmerFrequency` feature ('AAA', 'AAC', ...) and the implanted motif seeds.
+This score represents how well a given feature represents at least one of the motif seeds that comprise the ground truth signal.
+When calculating this overlap score, possible gap positions and hamming distance modifications are considered (see :ref:`MotifSeedRecovery` for details).
+The maximum overlap score between each feature and the motif seeds is determined using a sliding window approach.
+Therefore, the feature and motif seed do not have to have an equal length.
+The resulting overlap scores will be highest for features that completely match the motif seed, lower for features
+that partially match (for example 'A\ **AC**' and '**AC**\ C' have at most 2 positions overlap), and lowest for features that
+do not represent any of the motif seeds.
+
+Next, the features are grouped based on their maximum overlap scores. For each overlap score, a boxplot is made
+representing the coefficient value (LogisticRegression, SVM) or feature importance (RandomForestClassifier) for those features.
+If the classifier succeeded in learning the signal, the coefficient value or feature importance is highest
+for those motifs with a high overlap score.
+
+An example of what the output of the :ref:`MotifSeedRecovery` report looks like for a successful classifier is given here:
+
+.. image:: ../_static/images/reports/motif_seed_recovery.png
+   :alt: Motif seed recovery report
+   :width: 600
+
+
+
+Comparing baseline motif frequencies in repertoires
+-----------------------------------------------------------
+
+Not every motif is equally likely to occur in the sequences of an immune repertoire.
+The variability of immune receptors is for example restricted by which V, D and J genes are present, among other factors.
+Using immuneML, we can investigate the baseline motif frequencies of immune receptor or repertoire datasets.
+
+One method for comparing the baseline motif frequency distributions between different classes (e.g., sick versus healthy,
+or antigen binding versus non-binding) is by encoding the dataset using the :ref:`KmerFrequency` encoder,
+and generating a :ref:`FeatureComparison` report.
+This analysis can be executed using the :ref:`ExploratoryAnalysis` instruction.
+
+The figures below show an example of the FeatureComparison report plot executed on the Quickstart dataset when encoded with a 4-mer frequency encoding.
+In this dataset, the synthetic disease signal 'VLEQ' was implanted. The figure on the left shows the complete plot, where it can be seen that
+there is a subset of 4-mers which occur at a higher frequency in the repertoires where the disease signal is present.
+The figure on the right shows the data from the same figure, but zoomed in on the left lower corner.
+The generated figure is interactive, and it is possible to hover over the points to reveal which feature they represent.
+As can be seen in the right figure, the feature 'VLEQ' appears more frequently in the repertoires where signal_disease = True.
+
+.. image:: ../_static/images/reports/feature_comparison_full.png
+   :alt: Feature comparison full plot
+   :width: 500
+
+
+.. image:: ../_static/images/reports/feature_comparison_zoom.png
+   :alt: Feature comparison zoomed in plot with VLEQ highlighted
+   :width: 500
+
+
+Alternatively, when investigating the occurrence of more complex motifs in repertoire datasets, the :ref:`MatchedRegex` encoder
+can be used in combination with the :ref:`Matches` report. This will produce a table summarizing how often a set of regular
+expressions are matched in the sequences of the repertoire dataset.
+
 .. meta::
 
    :twitter:card: summary

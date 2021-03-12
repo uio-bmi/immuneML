@@ -1,10 +1,12 @@
 import pandas as pd
 
+from immuneML.data_model.dataset.Dataset import Dataset
+
 
 class DataReshaper:
 
     @staticmethod
-    def reshape(dataset):
+    def reshape(dataset: Dataset, labels=None):
         """
         Takes a 2D matrix of values from the encoded data and reshapes it to long format,
         retaining the column and row annotations. This is for ease of use in plotting the data.
@@ -12,8 +14,11 @@ class DataReshaper:
         the resulting data frame is of shape
         (matrix.shape[0] * matrix.shape[1], labels.shape[0] + feature_annotations.shape[1] + 1)
         """
+        if labels is None:
+            row_annotations = pd.DataFrame(dataset.encoded_data.labels)
+        else:
+            row_annotations = pd.DataFrame(dataset.get_metadata(labels, return_df=True))
 
-        row_annotations = pd.DataFrame(dataset.encoded_data.labels)
         row_annotations["example_id"] = dataset.encoded_data.example_ids
 
         column_annotations = dataset.encoded_data.feature_annotations
