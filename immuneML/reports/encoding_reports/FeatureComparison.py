@@ -12,6 +12,7 @@ from immuneML.reports.encoding_reports.FeatureReport import FeatureReport
 class FeatureComparison(FeatureReport):
     """
     Compares the feature values in a given encoded data matrix across two values for a metadata label.
+    These labels are specified in the metadata file for repertoire datasets, or as metadata columns for sequence and receptor datasets.
     Can be used in combination with any encoding and dataset type. This report produces a scatterplot, where each
     point represents one feature, and the values on the x and y axes are the average feature values across two
     subsets of the data. For example, when :ref:`KmerFrequency` encoder is used, and the comparison_label is used to

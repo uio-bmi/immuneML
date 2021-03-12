@@ -16,6 +16,7 @@ class FeatureValueBarplot(FeatureReport):
 
     Optional metadata labels can be specified to divide the barplot into groups based on color, row facets or column facets.
     In this case, the average feature values in each group are plotted.
+    These labels are specified in the metadata file for repertoire datasets, or as metadata columns for sequence and receptor datasets.
 
     Alternatively, when the distribution of feature values is of interest (as opposed to showing only the mean, as done here),
     please consider using :ref:`FeatureDistribution` instead.
