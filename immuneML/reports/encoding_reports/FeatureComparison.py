@@ -130,28 +130,28 @@ class FeatureComparison(FeatureReport):
                 f"{location}: this report can only be created for a 2-dimensional encoded dataset. {location} report will not be created.")
             run_report = False
         else:
-            legal_labels = list(self.dataset.encoded_data.labels.keys())
+            legal_labels = list(self.dataset.get_label_names())
 
             if self.comparison_label not in legal_labels:
                 warnings.warn(
                     f"{location}: comparison_label was not defined. {location} report will not be created.")
                 run_report = False
-            elif len(set(self.dataset.encoded_data.labels[self.comparison_label])) != 2:
+            elif len(set(self.dataset.get_metadata([self.comparison_label])[self.comparison_label])) != 2:
                 warnings.warn(
-                    f"{location}: comparison label {self.comparison_label} does not have 2 values: {set(self.dataset.encoded_data.labels[self.comparison_label])}. {location} report will not be created.")
+                    f"{location}: comparison label {self.comparison_label} does not have 2 values: {set(self.dataset.get_metadata([self.comparison_label])[self.comparison_label])}. {location} report will not be created.")
                 run_report = False
+            else:
+                legal_labels.remove(self.comparison_label)
 
-            legal_labels.remove(self.comparison_label)
-
-            for label_param in [self.color, self.facet_row, self.facet_column]:
-                if label_param is not None:
-                    if label_param == self.comparison_label:
-                        warnings.warn(
-                            f"{location}: comparison label '{self.comparison_label}' can not be used in other fields. {location} report will not be created.")
-                        run_report = False
-                    if label_param not in legal_labels:
-                        warnings.warn(
-                            f"{location}: undefined label '{label_param}'. Legal options are: {legal_labels}. {location} report will not be created.")
-                        run_report = False
+                for label_param in [self.color, self.facet_row, self.facet_column]:
+                    if label_param is not None:
+                        if label_param == self.comparison_label:
+                            warnings.warn(
+                                f"{location}: comparison label '{self.comparison_label}' can not be used in other fields. {location} report will not be created.")
+                            run_report = False
+                        if label_param not in legal_labels:
+                            warnings.warn(
+                                f"{location}: undefined label '{label_param}'. Legal options are: {legal_labels}. {location} report will not be created.")
+                            run_report = False
 
         return run_report

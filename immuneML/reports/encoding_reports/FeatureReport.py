@@ -29,7 +29,7 @@ class FeatureReport(EncodingReport):
 
     def _generate(self) -> ReportResult:
         PathBuilder.build(self.result_path)
-        data_long_format = DataReshaper.reshape(self.dataset)
+        data_long_format = DataReshaper.reshape(self.dataset, self.dataset.get_label_names())
         table_result = self._write_results_table(data_long_format)
         report_output_fig = self._safe_plot(data_long_format=data_long_format)
         output_figures = None if report_output_fig is None else [report_output_fig]
@@ -60,7 +60,7 @@ class FeatureReport(EncodingReport):
                 f"{location}: this report can only be created for a 2-dimensional encoded dataset. {location} report will not be created.")
             run_report = False
         else:
-            legal_labels = list(self.dataset.encoded_data.labels.keys())
+            legal_labels = list(self.dataset.get_label_names())
 
             labels = [self.color, self.facet_row, self.facet_column]
 

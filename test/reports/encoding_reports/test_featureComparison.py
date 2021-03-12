@@ -3,6 +3,8 @@ import random
 import shutil
 import string
 from unittest import TestCase
+from immuneML.util.PathBuilder import PathBuilder
+
 
 import numpy as np
 import pandas as pd
@@ -34,7 +36,6 @@ class TestFeatureComparison(TestCase):
                 np.random.normal(50, 10, n_subjects * n_features).reshape((n_subjects, n_features))),
             'example_ids': [''.join(random.choices(string.ascii_uppercase, k=4)) for i in range(n_subjects)],
             'labels': {
-                "patient": np.array([i%2==0 for i in range(n_subjects)])
             },
             'feature_names': kmers,
             'feature_annotations': pd.DataFrame({
@@ -43,12 +44,18 @@ class TestFeatureComparison(TestCase):
             'encoding': "random"
         }
 
-        dataset = RepertoireDataset(encoded_data=EncodedData(**encoded_data))
+        metadata_filepath = path / "metadata.csv"
+
+        metadata = pd.DataFrame({"patient": np.array([i % 2 == 0 for i in range(n_subjects)])})
+        metadata.to_csv(metadata_filepath, index=False)
+
+        dataset = RepertoireDataset(encoded_data=EncodedData(**encoded_data), metadata_file=metadata_filepath)
 
         return dataset
 
     def test_generate(self):
         path = EnvironmentSettings.root_path / "test/tmp/featuredistribution/"
+        PathBuilder.build(path)
 
         dataset = self._create_dummy_encoded_data(path)
 
