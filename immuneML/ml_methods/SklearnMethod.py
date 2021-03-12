@@ -86,11 +86,12 @@ class SklearnMethod(MLMethod):
         self.class_mapping = None
         self.label_name = None
 
-    def _prepare_caching_params(self, encoded_data: EncodedData, y, type: str, label_name: str = None, number_of_splits: int = -1):
+    def _prepare_caching_params(self, encoded_data: EncodedData, y, method_type: str, label_name: str = None, number_of_splits: int = -1):
         return (("encoded_data", hashlib.sha256(str(encoded_data.examples).encode("utf-8")).hexdigest()),
                 ("y", hashlib.sha256(str(y).encode("utf-8")).hexdigest()),
                 ("label_names", label_name),
-                ("type", type),
+                ("type", method_type),
+                ("class", self.__class__.__name__),
                 ("number_of_splits", str(number_of_splits)),
                 ("parameters", str(self._parameters)),
                 ("parameter_grid", str(self._parameter_grid)),)
