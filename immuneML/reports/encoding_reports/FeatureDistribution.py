@@ -21,6 +21,7 @@ class FeatureDistribution(FeatureReport):
     set to 'sparse' if the density of the matrix is below 0.01
 
     Optional metadata labels can be specified to divide the boxplots into groups based on color, row facets or column facets.
+    These labels are specified in the metadata file for repertoire datasets, or as metadata columns for sequence and receptor datasets.
 
     Alternatively, when only the mean feature values are of interest (as opposed to showing the complete distribution, as done here),
     please consider using :ref:`FeatureValueBarplot` instead.
