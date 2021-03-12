@@ -1,8 +1,8 @@
 import warnings
 from pathlib import Path
 
-import plotly.express as px
 import pandas as pd
+import plotly.express as px
 
 from immuneML.data_model.dataset.Dataset import Dataset
 from immuneML.reports.ReportOutput import ReportOutput
@@ -74,7 +74,6 @@ class FeatureComparison(FeatureReport):
         self.result_name = "feature_comparison"
         self.name = name
 
-
     def _plot(self, data_long_format) -> ReportOutput:
         max_val = data_long_format["value"].max()
 
@@ -87,29 +86,26 @@ class FeatureComparison(FeatureReport):
         plotting_data.columns = plotting_data.columns.map(''.join)
 
         unique_label_values = plotting_data[self.comparison_label].unique()
-        assert len(unique_label_values) == 2, f"FeatureComparison: comparison label {self.comparison_label} does not have 2 values; {unique_label_values}"
+        assert len(
+            unique_label_values) == 2, f"FeatureComparison: comparison label {self.comparison_label} does not have 2 values; {unique_label_values}"
         class_x, class_y = unique_label_values
 
         plotting_data = pd.merge(plotting_data.loc[plotting_data[self.comparison_label] == class_x],
-                          plotting_data.loc[plotting_data[self.comparison_label] == class_y],
-                          on=["feature"])
+                                 plotting_data.loc[plotting_data[self.comparison_label] == class_y],
+                                 on=["feature"])
 
         error_x = "valuestd_x" if self.show_error_bar else None
         error_y = "valuestd_y" if self.show_error_bar else None
 
-        figure = px.scatter(plotting_data, x="valuemean_x", y="valuemean_y",  error_x=error_x, error_y=error_y,
-                        color=self.color, facet_row=self.facet_row, facet_col=self.facet_column, hover_name="feature",
-                        labels={
-                            "valuemean_x": f"Average feature values for {self.comparison_label} = {class_x}",
-                            "valuemean_y": f"Average feature values for {self.comparison_label} = {class_y}",
-                        }, template='plotly_white',
-                        color_discrete_sequence=px.colors.diverging.Tealrose)
+        figure = px.scatter(plotting_data, x="valuemean_x", y="valuemean_y", error_x=error_x, error_y=error_y,
+                            color=self.color, facet_row=self.facet_row, facet_col=self.facet_column, hover_name="feature",
+                            labels={
+                                "valuemean_x": f"Average feature values for {self.comparison_label} = {class_x}",
+                                "valuemean_y": f"Average feature values for {self.comparison_label} = {class_y}",
+                            }, template='plotly_white',
+                            color_discrete_sequence=px.colors.diverging.Tealrose)
 
-        figure.add_shape(type="line",
-                      x0=0, y0=0, x1=max_val, y1=max_val,
-                      line=dict(
-                          color="#B0C2C7",
-                          dash="dash",))
+        figure.add_shape(type="line", x0=0, y0=0, x1=max_val, y1=max_val, line=dict(color="#B0C2C7", dash="dash"))
 
         file_path = self.result_path / f"{self.result_name}.html"
 
