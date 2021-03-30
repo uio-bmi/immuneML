@@ -78,11 +78,10 @@ class DesignMatrixExporter(EncodingReport):
         # Use numpy to create a csv or npy file.
         elif len(data.shape) <= 2 and ext == "csv": 
             np.savetxt(fname=str(file_path), X=data, delimiter=",", comments='',
-                       header=",".join(self.dataset.encoded_data.feature_names))
+                       header=",".join(str(name) for name in self.dataset.encoded_data.feature_names))
         else:
             if ext != "npy":
-                logging.info('The selected Report format is not compatible, '
-                             '.npy is used instead')
+                logging.info('The selected Report format is not compatible, .npy is used instead')
                 file_path = file_path.with_suffix(".npy")
                 ext = "npy"
             np.save(str(file_path), data)

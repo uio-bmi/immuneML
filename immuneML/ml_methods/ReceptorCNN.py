@@ -41,9 +41,7 @@ class ReceptorCNN(MLMethod):
 
         kernel_count (count): number of kernels that will look for motifs for one chain
 
-        kernel_size (list): sizes of the kernels = how many amino acids to consider at the same time in the chain sequence, can be a tuple of
-        values; e.g. for value [3, 4] of kernel_size, kernel_count*len(kernel_size) kernels will be created, with kernel_count kernels of size 3
-        and kernel_count kernels of size 4 per chain
+        kernel_size (list): sizes of the kernels = how many amino acids to consider at the same time in the chain sequence, can be a tuple of values; e.g. for value [3, 4] of kernel_size, kernel_count*len(kernel_size) kernels will be created, with kernel_count kernels of size 3 and kernel_count kernels of size 4 per chain
 
         positional_channels (int): how many positional channels where included in one-hot encoding of the receptor sequences (default is 3 in one-hot encoder)
 
@@ -69,8 +67,7 @@ class ReceptorCNN(MLMethod):
 
         evaluate_at (int): when to evaluate the model, e.g. every 100 iterations
 
-        background_probabilities: used for rescaling the kernel values to produce information gain matrix; represents the background probability of
-        each amino acid (without positional information); if not specified, uniform background is assumed
+        background_probabilities: used for rescaling the kernel values to produce information gain matrix; represents the background probability of each amino acid (without positional information); if not specified, uniform background is assumed
 
     YAML specification:
 
@@ -97,7 +94,7 @@ class ReceptorCNN(MLMethod):
     def __init__(self, kernel_count: int = None, kernel_size=None, positional_channels: int = None, sequence_type: str = None, device=None,
                  number_of_threads: int = None, random_seed: int = None, learning_rate: float = None, iteration_count: int = None,
                  l1_weight_decay: float = None, l2_weight_decay: float = None, batch_size: int = None, training_percentage: float = None,
-                 evaluate_at: int = None, background_probabilities=None, result_path:Path=None):
+                 evaluate_at: int = None, background_probabilities=None, result_path: Path = None):
 
         super().__init__()
         self.kernel_count = kernel_count
@@ -267,7 +264,7 @@ class ReceptorCNN(MLMethod):
 
         return loss
 
-    def store(self, path:Path, feature_names=None, details_path:Path=None):
+    def store(self, path: Path, feature_names=None, details_path: Path = None):
         PathBuilder.build(path)
 
         torch.save(copy.deepcopy(self.CNN).state_dict(), str(path / "CNN.pt"))

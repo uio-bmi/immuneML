@@ -55,7 +55,7 @@ See also the tutorial about :ref:`recovering simulated immune signals <Recoverin
 
 An example of a simulation with disease-associated signals is given below. In this example, the healthy individuals are here represented by a
 randomly generated synthetic dataset (see: :ref:`How to generate a random sequence, receptor or repertoire dataset`). It is also possible to use experimental datasets as a
-baseline for the simulation.
+baseline for the simulation (see :ref:`Datasets` for details how to import datasets from different formats).
 
 .. highlight:: yaml
 .. code-block:: yaml
@@ -106,10 +106,10 @@ baseline for the simulation.
           - my_complex_motif
         implanting: HealthySequence
         sequence_position_weights:
-          109: 1
-          110: 2
-          111: 5
-          112: 1
+          109: 0.1
+          110: 0.2
+          111: 0.5
+          112: 0.1
 
     simulations:
       my_simulation:
