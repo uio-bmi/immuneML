@@ -10,20 +10,22 @@ How to add a new encoding
    :twitter:image: https://docs.immuneml.uio.no/_images/extending_immuneML.png
 
 In this tutorial, we will add a new encoder to represent repertoire datasets by k-mer frequencies.
+This tutorial assumes you have installed immuneML for development as described at :ref:`Set up immuneML for development`.
 
-Adding a new encoder
----------------------
 
-To add a new encoder:
+Adding a new Encoder class
+--------------------------
 
-1. Add a new package to :py:obj:`~immuneML.encodings` package called "my_kmer_encoding"
-2. Add a new class called :code:`MyKmerFrequencyEncoder` to the package. In the YAML specification, the class name will be used without the 'Encoder' suffix.
-3. Set :py:obj:`~immuneML.encodings.DatasetEncoder.DatasetEncoder` as a base class to :code:`MyKmerFrequencyEncoder`.
+To add a new Encoder:
+
+1. Add a new package to the :py:obj:`~immuneML.encodings` package, in this example we name the package "my_kmer_encoding"
+2. Add a new class called to the package, and give the class name the suffix 'Encoder'. In this case, the class will be called :code:`NewKmerFrequencyEncoder`. In the YAML specification, the class name will be used without the 'Encoder' suffix.
+3. Set :py:obj:`~immuneML.encodings.DatasetEncoder.DatasetEncoder` as a base class to :code:`NewKmerFrequencyEncoder`.
 4. Implement the abstract methods :code:`encode()` and :code:`build_object()`.
 5. Implement methods to import and export an encoder: :code:`get_additional_files()`, :code:`export_encoder()` and :code:`load_encoder()`, mostly relying on functionality already available in :py:obj:`~immuneML.encodings.DatasetEncoder.DatasetEncoder`.
 6. Add class documentation including: what the encoder does, what the arguments are and an example on how to use it from YAML specification.
 
-An example of the implementation of :code:`MyKmerFrequencyEncoder` for the :py:obj:`~immuneML.data_model.dataset.RepertoireDataset.RepertoireDataset` is shown.
+An example of the implementation of :code:`NewKmerFrequencyEncoder` for the :py:obj:`~immuneML.data_model.dataset.RepertoireDataset.RepertoireDataset` is shown.
 
 .. code-block:: python
 
@@ -43,7 +45,7 @@ An example of the implementation of :code:`MyKmerFrequencyEncoder` for the :py:o
     from immuneML.util.PathBuilder import PathBuilder
 
 
-    class MyKmerFrequencyEncoder(DatasetEncoder):
+    class NewKmerFrequencyEncoder(DatasetEncoder):
         """
         Encodes the repertoires of the dataset by k-mer frequencies and normalizes the frequencies to zero mean and unit variance.
 
@@ -64,12 +66,12 @@ An example of the implementation of :code:`MyKmerFrequencyEncoder` for the :py:o
 
         @staticmethod
         def build_object(dataset, **kwargs): # called when parsing YAML, check all user-defined arguments here
-            ParameterValidator.assert_keys(kwargs.keys(), ['k', 'name'], MyKmerFrequencyEncoder.__name__, 'KmerFrequency')
-            ParameterValidator.assert_type_and_value(kwargs['name'], str, MyKmerFrequencyEncoder.__name__, 'name')
-            ParameterValidator.assert_type_and_value(kwargs['k'], int, MyKmerFrequencyEncoder.__name__, 'k', 1, 10)
-            ParameterValidator.assert_type_and_value(dataset, RepertoireDataset, MyKmerFrequencyEncoder.__name__, f'dataset under {kwargs["name"]}')
+            ParameterValidator.assert_keys(kwargs.keys(), ['k', 'name'], NewKmerFrequencyEncoder.__name__, 'KmerFrequency')
+            ParameterValidator.assert_type_and_value(kwargs['name'], str, NewKmerFrequencyEncoder.__name__, 'name')
+            ParameterValidator.assert_type_and_value(kwargs['k'], int, NewKmerFrequencyEncoder.__name__, 'k', 1, 10)
+            ParameterValidator.assert_type_and_value(dataset, RepertoireDataset, NewKmerFrequencyEncoder.__name__, f'dataset under {kwargs["name"]}')
 
-            return MyKmerFrequencyEncoder(**kwargs)
+            return NewKmerFrequencyEncoder(**kwargs)
 
         def __init__(self, k: int, name: str = None):
             # user-defined parameters
@@ -84,7 +86,7 @@ An example of the implementation of :code:`MyKmerFrequencyEncoder` for the :py:o
             encoded_repertoires = self._encode_repertoires(dataset, params)
             labels = self._prepare_labels(dataset, params)
             encoded_data = EncodedData(encoded_repertoires["examples"], labels, dataset.get_example_ids(),
-                                       encoded_repertoires['feature_names'], encoding=MyKmerFrequencyEncoder.__name__)
+                                       encoded_repertoires['feature_names'], encoding=NewKmerFrequencyEncoder.__name__)
             encoded_dataset = RepertoireDataset(repertoires=dataset.repertoires, encoded_data=encoded_data,
                                                 labels=dataset.labels, metadata_file=dataset.metadata_file)
 
@@ -166,16 +168,20 @@ An example of the implementation of :code:`MyKmerFrequencyEncoder` for the :py:o
                 encoder = DatasetEncoder.load_attribute(encoder, encoder_file, attribute)
             return encoder
 
-Testing the new encoder
------------------------
+Unit testing the new Encoder
+----------------------------
 
 To test the new encoder:
 
-1. Create a package :code:`~test.encodings.my_kmer_encoding`.
-2. In the package, create a class :code:`TestMyKmerFrequencyEncoder` that inherits :code:`unittest.TestCase`.
-3. Implement test functions as needed.
+#. Create a package :code:`~test.encodings.new_kmer_encoding` and add the file test_newKmerFrequencyEncoder.py.
+#. Create the class :code:`TestNewKmerFrequencyEncoder` that inherits :code:`unittest.TestCase` in this file.
+#. Add a function :code:`setUp()` to set up cache used for testing (see example below).
+#. Define one or more tests for the class and functions you implemented.
+#. If you need to write data to a path (for example test datasets or results), use the following location: :code:`EnvironmentSettings.root_path / "/test/tmp/some_unique_foldername"`
 
-A test example for TestMyKmerFrequencyEncoder is shown below.
+When building unit tests, a useful class is :py:obj:`~immuneML.simulation.dataset_generation.RandomDatasetGenerator.RandomDatasetGenerator`, which can create a dataset with random sequences.
+
+An example of the unit test TestNewKmerFrequencyEncoder is given below.
 
 .. code-block:: python
 
@@ -188,7 +194,7 @@ A test example for TestMyKmerFrequencyEncoder is shown below.
     from immuneML.caching.CacheType import CacheType
     from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
     from immuneML.encodings.EncoderParams import EncoderParams
-    from immuneML.encodings.MyKmerFrequencyEncoder import MyKmerFrequencyEncoder
+    from immuneML.encodings.NewKmerFrequencyEncoder import NewKmerFrequencyEncoder
     from immuneML.environment.Constants import Constants
     from immuneML.environment.EnvironmentSettings import EnvironmentSettings
     from immuneML.environment.LabelConfiguration import LabelConfiguration
@@ -196,7 +202,7 @@ A test example for TestMyKmerFrequencyEncoder is shown below.
     from immuneML.util.RepertoireBuilder import RepertoireBuilder
 
 
-    class TestKmerFrequencyEncoder(TestCase):
+    class NewKmerFrequencyEncoder(TestCase):
 
         def setUp(self) -> None: # useful if cache is used in the encoding (not used in this tutorial)
             os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
@@ -211,7 +217,7 @@ A test example for TestMyKmerFrequencyEncoder is shown below.
             dataset = RepertoireDataset(repertoires=repertoires, metadata_file=metadata)
 
             # create an encoder
-            encoder = MyKmerFrequencyEncoder.build_object(dataset, **{"k": 3, 'name': 'my_encoder'})
+            encoder = NewKmerFrequencyEncoder.build_object(dataset, **{"k": 3, 'name': 'my_encoder'})
 
             lc = LabelConfiguration()
             lc.add_label("l1", [1, 2])
@@ -230,11 +236,11 @@ A test example for TestMyKmerFrequencyEncoder is shown below.
             self.assertTrue(isinstance(encoded_dataset, RepertoireDataset))
             self.assertEqual(-1., np.round(encoded_dataset.encoded_data.examples[0, 2], 2))
             self.assertEqual(1., np.round(encoded_dataset.encoded_data.examples[0, 1], 2))
-            self.assertTrue(isinstance(encoder, MyKmerFrequencyEncoder))
+            self.assertTrue(isinstance(encoder, NewKmerFrequencyEncoder))
 
 
 
-Adding an encoder: additional information
+Adding an Encoder: additional information
 ------------------------------------------
 
 Encoders for different dataset types
@@ -285,13 +291,6 @@ following arguments:
 The :code:`examples` attribute of the :code:`EncodedData` objects will be directly passed to the ML models for training. Other attributes are used for reports and
 interpretability.
 
-Unit testing
-^^^^^^^^^^^^^^
-
-To add a test for the new encoding, create a package under :code:`test.encodings` with the same name as the package created for adding the encoder class.
-Implement a test method that ensures the encoder functions correctly for each relevant dataset type. A useful class here is
-:py:obj:`~immuneML.simulation.dataset_generation.RandomDatasetGenerator.RandomDatasetGenerator`, which can create a dataset with random sequences.
-
 Adding class documentation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -305,6 +304,8 @@ The class docstrings are used to automatically generate the documentation for th
 specific report or ML method, it is possible to refer to these classes by name and create a link to the documentation of that class. For example,
 the documentation of :py:obj:`~immuneML.encodings.reference_encoding.MatchedReceptorsEncoder.MatchedReceptorsEncoder` states ‘This encoding should be
 used in combination with the :ref:`Matches` report’.
+
+Documentation should be written in Sphinx `reStructuredText <https://www.sphinx-doc.org/en/master/usage/restructuredtext/index.html>`_ formatting.
 
 This is the example of documentation for :py:obj:`~immuneML.encodings.filtered_sequence_encoding.SequenceAbundanceEncoder.SequenceAbundanceEncoder`:
 

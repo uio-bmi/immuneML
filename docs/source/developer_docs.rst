@@ -11,7 +11,7 @@ Developer documentation
 
 
 To get started with adding features to immuneML, follow the steps described here. These steps assume you have some experience with object-oriented programming in Python
-and some basic knowledge of how git works.
+and some basic knowledge of how Git works.
 
   #. Follow the guide to :ref:`Set up immuneML for development`.
   #. Create a new branch with a descriptive name from the master branch.
@@ -26,6 +26,7 @@ and some basic knowledge of how git works.
   developer_docs/how_to_add_new_ML_method.rst
   developer_docs/how_to_add_new_encoding.rst
   developer_docs/how_to_add_new_report.rst
+  developer_docs/how_to_add_new_preprocessing.rst
 
 .. toctree::
   :maxdepth: 1

@@ -15,7 +15,7 @@ To add a new ML method to immuneML, add a class that inherits :py:obj:`~immuneML
 and implement abstract methods. The name of the new class has to be different from the ML methods’ classes already defined in the same package.
 
 
-Adding the new method to immuneML
+Adding a new MLMethod class
 -----------------------------------
 
 For methods based on scikit-learn, read how to do this under :ref:`Adding a method based on scikit-learn`.
@@ -56,7 +56,7 @@ Example scikit-learn-based SVM implementation:
   from immuneML.ml_methods.SklearnMethod import SklearnMethod
 
 
-  class MySVM(SklearnMethod):
+  class NewSVM(SklearnMethod):
     """
     This is a wrapper of scikit-learn’s LinearSVC class. Please see the
     `scikit-learn documentation <https://scikit-learn.org/stable/modules/generated/sklearn.svm.LinearSVC.html>`_
@@ -124,17 +124,20 @@ To add a new ML method:
 
   #. Add class documentation describing how to use the new ML method.
 
-Testing the new ML method
-----------------------------
+Unit testing the new MLMethod
+-------------------------------
 
 Add a unit test for the new ML method:
 
-1. Add a new file to :py:mod:`~test.ml_methods` package named test_mySVM.py.
-2. Add a class TestMySVM that inherits :code:`unittest.TestCase`.
-3. Add a function to set up cache used for testing
-4. Define tests for functions you implemented.
+#. Add a new file to :py:mod:`~test.ml_methods` package named test_newSVM.py.
+#. Add a class TestNewSVM that inherits :code:`unittest.TestCase` to the new file..
+#. Add a function :code:`setUp()` to set up cache used for testing (see example below).
+#. Define one or more tests for the class and functions you implemented.
+#. If you need to write data to a path (for example test datasets or results), use the following location: :code:`EnvironmentSettings.root_path / "/test/tmp/some_unique_foldername"`
 
-The full test example for MySVM class is given below:
+When building unit tests, a useful class is :py:obj:`~immuneML.simulation.dataset_generation.RandomDatasetGenerator.RandomDatasetGenerator`, which can create a dataset with random sequences.
+
+An example of the unit test TestSVM is given below.
 
 .. code-block:: python
 
@@ -150,7 +153,7 @@ The full test example for MySVM class is given below:
   from immuneML.data_model.encoded_data.EncodedData import EncodedData
   from immuneML.environment.Constants import Constants
   from immuneML.environment.EnvironmentSettings import EnvironmentSettings
-  from immuneML.ml_methods.MySVM import MySVM # newly added method
+  from immuneML.ml_methods.NewSVM import NewSVM # newly added method
   from immuneML.util.PathBuilder import PathBuilder
 
 
@@ -163,14 +166,14 @@ The full test example for MySVM class is given below:
           x = np.array([[1, 0, 0], [0, 1, 1], [1, 1, 1], [0, 1, 1]])
           y = {"default": np.array([1, 0, 2, 0])}
 
-          svm = MySVM()
+          svm = NewSVM()
           svm.fit(EncodedData(x, y), 'default') # just test if nothing breaks
 
       def test_predict(self):
           x = np.array([[1, 0, 0], [0, 1, 1], [1, 1, 1], [0, 1, 1]]) # encoded data, where one row is one example, and columns are features
           y = {"test_label_name": np.array([1, 0, 2, 0])} # classes for the given label, for each example in the dataset
 
-          svm = MySVM() # create an instance of class for testing
+          svm = NewSVM() # create an instance of class for testing
           svm.fit(EncodedData(x, y), "test_label_name") # fit the classifier using EncodedData object with includes encoded data and classes for each of the examples
 
           test_x = np.array([[0, 1, 0], [1, 0, 0]]) # new encoded data for testing the method
@@ -184,14 +187,14 @@ The full test example for MySVM class is given below:
           x = EncodedData(np.array([[1, 0, 0], [0, 1, 1], [1, 1, 1], [0, 1, 1], [1, 0, 0], [0, 1, 1], [1, 1, 1], [0, 1, 1]]),
                           {"t1": [1, 0, 2, 0, 1, 0, 2, 0], "t2": [1, 0, 2, 0, 1, 0, 2, 0]})
 
-          svm = MySVM()
+          svm = NewSVM()
           svm.fit_by_cross_validation(x, number_of_splits=2, label_name="t1") # check if nothing fails
 
       def test_store(self):
           x = np.array([[1, 0, 0], [0, 1, 1], [1, 1, 1], [0, 1, 1]])
           y = {"default": np.array(['a', "b", "c", "a"])}
 
-          svm = MySVM()
+          svm = NewSVM()
           svm.fit(EncodedData(x, y), 'default')
 
           path = EnvironmentSettings.tmp_test_path / "my_svm_store/"
@@ -212,7 +215,7 @@ The full test example for MySVM class is given below:
           x = np.array([[1, 0, 0], [0, 1, 1], [1, 1, 1], [0, 1, 1]])
           y = {"default": np.array([1, 0, 2, 0])}
 
-          svm = MySVM()
+          svm = NewSVM()
           svm.fit(EncodedData(x, y), 'default')
 
           path = EnvironmentSettings.tmp_test_path / "my_svm_load/"
@@ -221,7 +224,7 @@ The full test example for MySVM class is given below:
           with open(path / "svm.pickle", "wb") as file:
               pickle.dump(svm.get_model(), file)
 
-          svm2 = MySVM()
+          svm2 = NewSVM()
           svm2.load(path)
 
           # when the model is loaded from disk, check if the class matches
@@ -232,7 +235,7 @@ The full test example for MySVM class is given below:
           shutil.rmtree(path)
 
 
-Adding a new ML method: additional information
+Adding a new MLMethod: additional information
 -----------------------------------------------
 
 To test the method outside immuneML, see :ref:`Testing the ML method outside immuneML with a sample design matrix`.
@@ -255,12 +258,12 @@ An example specification for support vector machine without cross-validation (my
 
   ml_methods:
     my_svm: # the name of the method which will be used in the specification to refer to the method
-      MySVM: # class name of the method
+      NewSVM: # class name of the method
         penalty: l1 # parameters of the model
       model_selection_cv: False # should there be a grid search and cross-validation - not here
       model_selection_n_folds: -1 # no number of folds for cross-validation as it is not used here
     my_svm_cv: # the name of the next method
-      MySVM: # class name of the method
+      NewSVM: # class name of the method
         penalty:	# parameter of the model
           - l1 # value of the parameter to test
           - l2 # another value of the parameter to test
@@ -299,12 +302,12 @@ Full specification that trains the added ML method on the simulated data would l
             k: 3
       ml_methods:
         my_svm: # the name of the method which will be used in the specification to refer to the method
-          MySVM: # class name of the method
+          NewSVM: # class name of the method
             C: 10 # parameters of the model
           model_selection_cv: False # should there be a grid search and cross-validation - not here
           model_selection_n_folds: -1 # no number of folds for cross-validation as it is not used here
         my_svm_cv: # the name of the next method
-          MySVM: # class name of the method
+          NewSVM: # class name of the method
             penalty:	# parameter of the model
               - l1 # value of the parameter to test
               - l2 # another value of the parameter to test
