@@ -91,3 +91,9 @@ An example YAML specification looks like this:
 When running DeepRC I get TypeError: can't concat str to bytes
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 This error occurs when h5py version 3 or higher is used. Try using version 2.10.0 or lower.
+
+I am trying to run a report, but it gives no results and no errors. What happened?
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+To ensure that large analyses do not crash if one of the reports failed (for example, due to
+incorrectly specified parameters), reports are run in a 'safe mode' and errors are converted to warnings.
+Check the output log.txt file to see if any errors or warnings were produced by the reports you tried to run.
