@@ -52,10 +52,13 @@ class ClonesPerRepertoireFilter(Filter):
         repertoires = []
         indices = []
         for index, repertoire in enumerate(dataset.get_data()):
-            if "lower_limit" in params.keys() and len(repertoire.sequences) >= params["lower_limit"] and \
-                "upper_limit" in params.keys() and len(repertoire.sequences) <= params["upper_limit"]:
-                repertoires.append(dataset.repertoires[index])
-                indices.append(index)
+            if "lower_limit" in params.keys() and len(repertoire.sequences) < params["lower_limit"]:
+                continue
+            if "upper_limit" in params.keys() and len(repertoire.sequences) > params["upper_limit"]:
+                continue
+            repertoires.append(dataset.repertoires[index])
+            indices.append(index)
+
         processed_dataset.repertoires = repertoires
         processed_dataset.metadata_file = ClonesPerRepertoireFilter.build_new_metadata(dataset, indices, params["result_path"])
 
