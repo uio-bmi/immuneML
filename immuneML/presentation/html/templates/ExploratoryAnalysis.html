@@ -116,6 +116,19 @@
                     </div>
                     {{/output_tables}}
                     {{/show_tables}}
+
+                    {{#show_text}}
+                    Text reports:
+                    {{#output_text}}
+                    <div>
+                        <ul>
+                        {{#is_download_link}}
+                        <li><a href="{{download_link}}" download>{{file_name}}</a></li>
+                        {{/is_download_link}}
+                        </ul>
+                    </div>
+                    {{/output_text}}
+                    {{/show_text}}
                 </div>
                 {{/report}}
             </div>

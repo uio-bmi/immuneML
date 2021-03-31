@@ -119,7 +119,7 @@ class ImmuneMLParser:
             else:
                 symbol_table, path = parse_func(workflow_specification, file_path, result_path)
         except KeyError as key_error:
-            raise Exception(f"ImmuneMLParser: an error occurred during parsing. Missing key was {key_error.args[0]}. "
+            raise Exception(f"ImmuneMLParser: an error occurred during parsing the YAML specification. Missing key was '{key_error.args[0]}'. "
                             f"For more details, refer to the log above and check the documentation.") from key_error
         return symbol_table, path
 
