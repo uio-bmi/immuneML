@@ -172,7 +172,7 @@ When implementing the :code:`process(dataset, params)` method, take the followin
   to store the metadata file of a new repertoire dataset.
 
 - Check if the given dataset is the correct dataset type, for example by using the static method :code:`check_dataset_type(dataset, valid_dataset_types, location)`.
-  Some preprocessings are only sensible for a given type of dataset. Datasets can be of the type RepertoireDataset, SequenceDataset and ReceptorDataset.
+  Some preprocessings are only sensible for a given type of dataset. Datasets can be of the type RepertoireDataset, SequenceDataset and ReceptorDataset (see: :ref:`immuneML data model`).
 
 - Do not modify the given dataset object, but create a clone instead.
 
