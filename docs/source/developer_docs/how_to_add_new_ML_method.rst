@@ -137,7 +137,7 @@ Add a unit test for the new ML method:
 
 When building unit tests, a useful class is :py:obj:`~immuneML.simulation.dataset_generation.RandomDatasetGenerator.RandomDatasetGenerator`, which can create a dataset with random sequences.
 
-An example of the unit test TestSVM is given below.
+An example of the unit test TestNewSVM is given below.
 
 .. code-block:: python
 
@@ -157,7 +157,7 @@ An example of the unit test TestSVM is given below.
   from immuneML.util.PathBuilder import PathBuilder
 
 
-  class TestSVM(TestCase):
+  class TestNewSVM(TestCase):
 
       def setUp(self) -> None:
           os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name # set up cache, always the same
