@@ -18,7 +18,7 @@ Adding a new Encoder class
 
 To add a new Encoder:
 
-1. Add a new package to the :py:obj:`~immuneML.encodings` package, in this example we name the package "my_kmer_encoding"
+1. Add a new package to the :py:obj:`~immuneML.encodings` package, in this example we name the package "new_kmer_encoding"
 2. Add a new class called to the package, and give the class name the suffix 'Encoder'. In this case, the class will be called :code:`NewKmerFrequencyEncoder`. In the YAML specification, the class name will be used without the 'Encoder' suffix.
 3. Set :py:obj:`~immuneML.encodings.DatasetEncoder.DatasetEncoder` as a base class to :code:`NewKmerFrequencyEncoder`.
 4. Implement the abstract methods :code:`encode()` and :code:`build_object()`.
@@ -208,7 +208,7 @@ An example of the unit test TestNewKmerFrequencyEncoder is given below.
             os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
 
         def test_encode(self):
-            path = EnvironmentSettings.tmp_test_path / "my_kmer_freq_enc/"
+            path = EnvironmentSettings.tmp_test_path / "new_kmer_encoding/"
 
             PathBuilder.build(path)
 
