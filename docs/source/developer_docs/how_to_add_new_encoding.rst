@@ -13,10 +13,10 @@ In this tutorial, we will add a new encoder to represent repertoire datasets by 
 This tutorial assumes you have installed immuneML for development as described at :ref:`Set up immuneML for development`.
 
 
-Adding a new Encoder class
+Adding a new encoder class
 --------------------------
 
-To add a new Encoder:
+To add a new encoder:
 
 1. Add a new package to the :py:obj:`~immuneML.encodings` package, in this example we name the package "new_kmer_encoding"
 2. Add a new class called to the package, and give the class name the suffix 'Encoder'. In this case, the class will be called :code:`NewKmerFrequencyEncoder`. In the YAML specification, the class name will be used without the 'Encoder' suffix.
@@ -168,7 +168,7 @@ An example of the implementation of :code:`NewKmerFrequencyEncoder` for the :py:
                 encoder = DatasetEncoder.load_attribute(encoder, encoder_file, attribute)
             return encoder
 
-Unit testing the new Encoder
+Unit testing the new encoder
 ----------------------------
 
 To test the new encoder:
@@ -240,7 +240,7 @@ An example of the unit test TestNewKmerFrequencyEncoder is given below.
 
 
 
-Adding an Encoder: additional information
+Adding an encoder: additional information
 ------------------------------------------
 
 Encoders for different dataset types
