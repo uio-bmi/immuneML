@@ -177,7 +177,7 @@ To test the new encoder:
 #. Create the class :code:`TestNewKmerFrequencyEncoder` that inherits :code:`unittest.TestCase` in this file.
 #. Add a function :code:`setUp()` to set up cache used for testing (see example below).
 #. Define one or more tests for the class and functions you implemented.
-#. If you need to write data to a path (for example test datasets or results), use the following location: :code:`EnvironmentSettings.root_path / "/test/tmp/some_unique_foldername"`
+#. If you need to write data to a path (for example test datasets or results), use the following location: :code:`EnvironmentSettings.tmp_test_path / "some_unique_foldername"`
 
 When building unit tests, a useful class is :py:obj:`~immuneML.simulation.dataset_generation.RandomDatasetGenerator.RandomDatasetGenerator`, which can create a dataset with random sequences.
 

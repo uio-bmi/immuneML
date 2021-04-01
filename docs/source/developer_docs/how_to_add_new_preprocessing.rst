@@ -107,7 +107,7 @@ To add a unit test:
 #. Add a class TestNewClonesPerRepertoireFilter that inherits :code:`unittest.TestCase` to the new file.
 #. Add a function :code:`setUp()` to set up cache used for testing (see example below).
 #. Define one or more tests for the class and functions you implemented.
-#. If you need to write data to a path (for example test datasets or results), use the following location: :code:`EnvironmentSettings.root_path / "/test/tmp/some_unique_foldername"`
+#. If you need to write data to a path (for example test datasets or results), use the following location: :code:`EnvironmentSettings.tmp_test_path / "some_unique_foldername"`
 
 When building unit tests, a useful class is :py:obj:`~immuneML.simulation.dataset_generation.RandomDatasetGenerator.RandomDatasetGenerator`, which can create a dataset with random sequences.
 
@@ -134,7 +134,7 @@ An example of the unit test TestNewClonesPerRepertoireFilter is given below.
             os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
 
         def test_process(self):
-            path = EnvironmentSettings.root_path / "test/tmp/clones_per_repertoire_filter/"
+            path = EnvironmentSettings.tmp_test_path / "clones_per_repertoire_filter"
             PathBuilder.build(path)
             dataset = RepertoireDataset(repertoires=RepertoireBuilder.build([["ACF", "ACF", "ACF"],
                                                                            ["ACF", "ACF"],
