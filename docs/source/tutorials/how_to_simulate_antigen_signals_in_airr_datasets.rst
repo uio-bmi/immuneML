@@ -14,6 +14,9 @@ In immuneML, it is possible to implant signals in a repertoire dataset in order 
 done using the Simulation instruction in the YAML specification. Any type of repertoire dataset (experimental or simulated) can be used as a starting
 point for an immune event simulation.
 
+To import an existing dataset that will be used as a baseline for implanting immune signals, see :ref:`How to import data into immuneML`. Alternatively,
+to generate a dataset consisting of random sequences, see :ref:`How to generate a random sequence, receptor or repertoire dataset`.
+
 YAML specification of the Simulation instruction for introducing immune signals
 ---------------------------------------------------------------------------------
 

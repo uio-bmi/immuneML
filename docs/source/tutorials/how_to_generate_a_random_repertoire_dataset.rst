@@ -15,7 +15,9 @@ used as a baseline when comparing different machine learning models (benchmarkin
 https://doi.org/10.1093/bioinformatics/btaa158). A random sequence/receptor/repertoire dataset consists of randomly generated amino acid sequences, where the amino acids are
 chosen from a uniform distribution. The dataset size, sequence lengths and optional labels can be specified by the user.
 
-
+The generated dataset can then be used to train a classifier (see :ref:`How to train and assess a receptor or repertoire-level ML classifier`),
+apply a classifier (see :ref:`How to apply previously trained ML models to a new dataset`), or simulate immune events (see
+:ref:`How to simulate antigen or disease-associated signals in AIRR datasets`).
 
 YAML specification of a random repertoire dataset
 -------------------------------------------------

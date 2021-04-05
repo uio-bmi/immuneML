@@ -48,6 +48,8 @@ and :code:`reports` may be defined. For detailed descriptions of how the paramet
 please refer to the :ref:`YAML specification` documentation. Under :ref:`Definitions` each analysis component is documented
 and settings are described.
 
+For importing a dataset, see :ref:`How to import data into immuneML` and for more details on writing the YAML specification, see :ref:`How to specify an analysis with YAML`.
+
 An example of the definitions section using a repertoire dataset is given here:
 
 

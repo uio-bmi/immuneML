@@ -13,11 +13,13 @@ KmerFrequency coefficients
 
 When using the :ref:`KmerFrequency` encoder in combination with
 :ref:`LogisticRegression`, :ref:`SVM` or :ref:`RandomForestClassifier`, a straightforward way to investigate which
-k-mer subsequences were learned to be important is by running the :ref:`Coefficients` report.
+k-mer subsequences were learned to be important is by running the :ref:`Coefficients` report. To specify this type of analysis, see
+:ref:`How to train and assess a receptor or repertoire-level ML classifier`, where the Coefficients reports can be provided under :ref:`TrainMLModel`
+instruction, under selection:reports:models or assessment:reports:models.
 This can be applied to repertoire, receptor and sequence classification problems.
 
 Strongly positive coefficients might indicate (partial) disease or antigen specificity-associated motifs.
-Consider the following example, where the groundtruth implanted disease signal was 'VLEQ', the largest 3-mer encoding coefficients
+Consider the following example, where the ground truth implanted disease signal was 'VLEQ', the largest 3-mer encoding coefficients
 are associated with the subsequences 'VLE' and 'LEQ' which are contained inside 'VLEQ'.
 Furthermore, subsequences that partially overlap with the disease signal, such as 'EQD', 'EQV' and 'YVL'
 are also associated with relatively large coefficients.
@@ -36,7 +38,9 @@ be used to investigate the learned patterns in the data.
 This report plots the contributions of input sequences and kernels to trained DeepRC model.
 These contributions are computed using integrated gradients (IG).
 The following two figures show examples of the DeepRCMotifDiscovery report outputs when training a DeepRC model
-on a dataset containing the artificial disease signal 'VLEQ'.
+on a dataset containing the artificial disease signal 'VLEQ'. See :ref:`How to train and assess a receptor or repertoire-level ML classifier` for tutorial
+on how to write an instruction to perform this type of analysis (using :ref:`TrainMLModel` instruction and specifying the report under
+selection:reports:models or assessment:reports:models) and :ref:`DeepRCMotifDiscovery` for more information on the specific report.
 
 The left figure shows the contributions of the characters within the input sequences of the test dataset
 for the immune status prediction of the repertoire. Blue indicates positive contribution, while red indicates
@@ -61,7 +65,10 @@ TCRdistMotifDiscovery for receptor classification
 
 For paired receptor datasets, the ML method :ref:`TCRdistClassifier` can be used in combination with the :ref:`TCRdistMotifDiscovery` report.
 This report hierarchically clusters paired immune receptor sequences based on the TCRdist3 distance metric, and
-for each of the clusters logo plots are created to uncover the motifs within the clustered receptors.
+for each of the clusters logo plots are created to uncover the motifs within the clustered receptors. See :ref:`How to train and assess a receptor or repertoire-level ML classifier` for
+running the :ref:`TrainMLModel` instruction (where :ref:`TCRdistMotifDiscovery` report can be provided under assessment:reports:models or selection:reports:models),
+and :ref:`TCRdistMotifDiscovery` report for more details on the report.
+
 The figures below show examples of the logo plots of the TCRα (left) and TCRβ (right) chains. In this example, the
 subsequence 'VLEQ' has been implanted in the TCRβ chains, which can be seen in positions 4-7 in the logo plot on the right.
 
@@ -102,6 +109,9 @@ representing the coefficient value (LogisticRegression, SVM) or feature importan
 If the classifier succeeded in learning the signal, the coefficient value or feature importance is highest
 for those motifs with a high overlap score.
 
+For running this type of analysis, see :ref:`How to train and assess a receptor or repertoire-level ML classifier` for details on :ref:`TrainMLModel`
+instruction where the :ref:`MotifSeedRecovery` report should be provided directly under reports keyword in the instruction.
+
 An example of what the output of the :ref:`MotifSeedRecovery` report looks like for a successful classifier is given here:
 
 .. image:: ../_static/images/reports/motif_seed_recovery.png
@@ -120,7 +130,7 @@ Using immuneML, we can investigate the baseline motif frequencies of immune rece
 One method for comparing the baseline motif frequency distributions between different classes (e.g., sick versus healthy,
 or antigen binding versus non-binding) is by encoding the dataset using the :ref:`KmerFrequency` encoder,
 and generating a :ref:`FeatureComparison` report.
-This analysis can be executed using the :ref:`ExploratoryAnalysis` instruction.
+This analysis can be executed using the :ref:`ExploratoryAnalysis` instruction, see :ref:`How to perform an exploratory data analysis` for more details.
 
 The figures below show an example of the FeatureComparison report plot executed on the Quickstart dataset when encoded with a 4-mer frequency encoding.
 In this dataset, the synthetic disease signal 'VLEQ' was implanted. The figure on the left shows the complete plot, where it can be seen that

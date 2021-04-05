@@ -28,6 +28,7 @@ may not be as correct on the new dataset as they were on the original test datas
 
 For a tutorial on training ML models, see: :ref:`How to train and assess a receptor or repertoire-level ML classifier`
 
+For a tutorial on importing datasets to immuneML (for training or applying an ML model on the dataset), see :ref:`How to import data into immuneML`.
 
 YAML specification example using the MLApplication instruction
 ------------------------------------------------------------------
@@ -41,6 +42,7 @@ point at one of the .zip files exported by the previously run :ref:`TrainMLModel
 
   definitions:
     datasets:
+      # imported dataset on which the ML model will be applied
       my_dataset: # user-defined dataset name
         format: AIRR
         params:

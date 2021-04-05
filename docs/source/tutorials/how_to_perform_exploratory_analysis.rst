@@ -13,7 +13,9 @@ How to perform an exploratory data analysis
 To explore preprocessing, encodings and/or reports without running a machine learning
 algorithm, the :ref:`ExploratoryAnalysis` instruction should be used. The components in the
 definitions section are defined in the same manner as for all other instructions
-(see: :ref:`How to specify an analysis with YAML`).
+(see: :ref:`How to specify an analysis with YAML`, for importing a dataset see :ref:`How to import data into immuneML`).
+
+
 The instruction consists of a list of analyses to be performed. Each analysis should
 contain at least a :code:`dataset` and a :code:`report`. Optionally, the analysis may also contain an
 :code:`encoding` along with :code:`labels` if applicable.
@@ -28,6 +30,7 @@ In the example below, two analyses are done:
 
   definitions:
     datasets:
+      # imported datasets
       my_dataset: # user-defined dataset name
         format: AIRR
         params:

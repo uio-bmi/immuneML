@@ -32,7 +32,7 @@ see :ref:`How to generate a random sequence, receptor or repertoire dataset`.
 What should the metadata file look like?
 ------------------------------------------
 
-The metadata file is a simple .csv file describing metadata fields for a repertoire dataset.
+The metadata file is a simple .csv file describing metadata fields for a repertoire dataset where each row corresponds to one repertoire.
 Metadata files are only used for repertoire datasets, for receptor and sequence datasets the metadata information should be defined as additional
 columns in the same file that contains the sequences.
 
@@ -45,6 +45,9 @@ The columns :code:`filename` and :code:`subject_id` are mandatory. Other columns
 There are no restrictions as to what type of information these columns should represent, but typically they will represent
 diseases, HLA, age or sex. These columns can be used as a prediction target (also known as :code:`labels`) when training ML models.
 When writing a :ref:`YAML specification`, the :code:`labels` are defined by using the same name as the user-defined column(s) in the metadata file.
+
+For an example of a metadata file, `see here the metadata file <https://ns9999k.webs.sigma2.no/10.11582_2021.00008/cmv_metadata.csv>`_ used to
+replicate the analysis by `Emerson et al. 2017 <https://doi.org/10.1038/ng.3822>`_.
 
 
 YAML specification for importing data from files
