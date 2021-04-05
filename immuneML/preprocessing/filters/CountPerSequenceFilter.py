@@ -6,7 +6,6 @@ import numpy as np
 
 from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
 from immuneML.data_model.repertoire.Repertoire import Repertoire
-from immuneML.preprocessing.Preprocessor import Preprocessor
 from immuneML.preprocessing.filters.Filter import Filter
 
 
@@ -52,7 +51,7 @@ class CountPerSequenceFilter(Filter):
 
     @staticmethod
     def process(dataset: RepertoireDataset, params: dict) -> RepertoireDataset:
-        Preprocessor.check_dataset_type(dataset, [RepertoireDataset], "CountPerSequenceFilter")
+        CountPerSequenceFilter.check_dataset_type(dataset, [RepertoireDataset], "CountPerSequenceFilter")
 
         processed_dataset = copy.deepcopy(dataset)
 
@@ -65,7 +64,7 @@ class CountPerSequenceFilter(Filter):
 
         processed_dataset.repertoires = repertoires
 
-        Filter.check_dataset_not_empty(processed_dataset, "CountPerSequenceFilter")
+        CountPerSequenceFilter.check_dataset_not_empty(processed_dataset, "CountPerSequenceFilter")
 
         return processed_dataset
 

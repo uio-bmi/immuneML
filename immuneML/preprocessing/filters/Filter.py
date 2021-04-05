@@ -6,6 +6,7 @@ import pandas as pd
 from immuneML.data_model.dataset.Dataset import Dataset
 from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
 from immuneML.preprocessing.Preprocessor import Preprocessor
+from immuneML.util.PathBuilder import PathBuilder
 
 
 class Filter(Preprocessor, ABC):
@@ -15,8 +16,10 @@ class Filter(Preprocessor, ABC):
         if dataset.metadata_file:
             df = pd.read_csv(dataset.metadata_file).iloc[indices_to_keep, :]
             df.reset_index(drop=True, inplace=True)
+
+            PathBuilder.build(result_path)
             path = result_path / f"{dataset.metadata_file.stem}_metadata_filtered.csv"
-            df.to_csv(path)
+            df.to_csv(path, index=False)
         else:
             path = None
         return path

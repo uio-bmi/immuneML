@@ -1,7 +1,6 @@
 from pathlib import Path
 
 from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
-from immuneML.preprocessing.Preprocessor import Preprocessor
 from immuneML.preprocessing.filters.Filter import Filter
 
 
@@ -48,18 +47,21 @@ class ClonesPerRepertoireFilter(Filter):
 
     @staticmethod
     def process(dataset: RepertoireDataset, params: dict) -> RepertoireDataset:
-        Preprocessor.check_dataset_type(dataset, [RepertoireDataset], "ClonesPerRepertoireFilter")
+        ClonesPerRepertoireFilter.check_dataset_type(dataset, [RepertoireDataset], "ClonesPerRepertoireFilter")
         processed_dataset = dataset.clone()
         repertoires = []
         indices = []
         for index, repertoire in enumerate(dataset.get_data()):
-            if "lower_limit" in params.keys() and len(repertoire.sequences) >= params["lower_limit"] or \
-                "upper_limit" in params.keys() and len(repertoire.sequences) <= params["upper_limit"]:
-                repertoires.append(dataset.repertoires[index])
-                indices.append(index)
+            if "lower_limit" in params.keys() and len(repertoire.sequences) < params["lower_limit"]:
+                continue
+            if "upper_limit" in params.keys() and len(repertoire.sequences) > params["upper_limit"]:
+                continue
+            repertoires.append(dataset.repertoires[index])
+            indices.append(index)
+
         processed_dataset.repertoires = repertoires
         processed_dataset.metadata_file = ClonesPerRepertoireFilter.build_new_metadata(dataset, indices, params["result_path"])
 
-        Filter.check_dataset_not_empty(processed_dataset, "ClonesPerRepertoireFilter")
+        ClonesPerRepertoireFilter.check_dataset_not_empty(processed_dataset, "ClonesPerRepertoireFilter")
 
         return processed_dataset

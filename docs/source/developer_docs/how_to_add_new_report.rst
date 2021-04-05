@@ -9,15 +9,16 @@ How to add a new report
    :twitter:description: See how to add a new report to the immuneML platform.
    :twitter:image: https://docs.immuneml.uio.no/_images/extending_immuneML.png
 
-In this tutorial, we will show how to add a new report to plot sequence length distribution in repertoire datasets. We will call this report
-MySequenceLengthDistribution.
+In this tutorial, we will show how to add a new report to plot sequence length distribution in repertoire datasets.
+This tutorial assumes you have installed immuneML for development as described at :ref:`Set up immuneML for development`.
 
-Adding a new report
----------------------
+Adding a new Report class
+--------------------------
 
-To add a new report, add a new class called MySequenceLengthDistribution to the :py:mod:`~immuneML.reports.data_reports` package.
+To add a new report, add a new class to the :py:mod:`~immuneML.reports.data_reports` package.
+In this example, the new class is called NewSequenceLengthDistribution.
 
-MySequenceLengthDistribution class should inherit :py:mod:`~immuneML.reports.data_reports.DataReport.DataReport` class and implement all abstract methods.
+The NewSequenceLengthDistribution class should inherit :py:mod:`~immuneML.reports.data_reports.DataReport.DataReport` class and implement all abstract methods.
 
 An example implementation is shown below. It includes implementations of abstract methods :code:`build_object(**kwargs)`, :code:`check_prerequisites()` and
 :code:`_generate()`, and class documentation at the beginning. This class documentation will be shown to the user.
@@ -39,7 +40,7 @@ An example implementation is shown below. It includes implementations of abstrac
     from immuneML.util.PathBuilder import PathBuilder
 
 
-    class SequenceLengthDistribution(DataReport):
+    class NewSequenceLengthDistribution(DataReport):
         """
         Generates a histogram of the lengths of the sequences in a RepertoireDataset.
 
@@ -48,13 +49,13 @@ An example implementation is shown below. It includes implementations of abstrac
         .. indent with spaces
         .. code-block:: yaml
 
-            my_sld_report: SequenceLengthDistribution
+            my_sld_report: NewSequenceLengthDistribution
 
         """
 
         @classmethod
         def build_object(cls, **kwargs): # called when parsing YAML - all checks for parameters (if any) should be in this function
-            return SequenceLengthDistribution(**kwargs)
+            return NewSequenceLengthDistribution(**kwargs)
 
         def __init__(self, dataset: RepertoireDataset = None, batch_size: int = 1, result_path: Path = None, name: str = None):
             super().__init__(dataset=dataset, result_path=result_path, name=name)
@@ -64,7 +65,7 @@ An example implementation is shown below. It includes implementations of abstrac
             if isinstance(self.dataset, RepertoireDataset):
                 return True
             else:
-                logging.warning("SequenceLengthDistribution: report can be generated only from RepertoireDataset. Skipping this report...")
+                logging.warning("NewSequenceLengthDistribution: report can be generated only from RepertoireDataset. Skipping this report...")
                 return False
 
         def _generate(self) -> ReportResult: # the function that creates the report
@@ -101,23 +102,21 @@ An example implementation is shown below. It includes implementations of abstrac
             return ReportOutput(path=file_path, name="sequence length distribution plot")
 
 
-Unit testing the new report
+Unit testing the new Report
 ----------------------------
 
 To add a unit test:
 
-1. Add a new file to :py:mod:`~test.reports.data_reports` package named test_mySequenceLengthDistribution.py.
-
-2. Add a class TestMySequenceLengthDistribution that inherits :code:`unittest.TestCase` to the new file.
-
-3. Add a function to set up cache used for testing.
-
-4. Define tests for functions you implemented.
+#. Add a new file to :py:mod:`~test.reports.data_reports` package named test_newSequenceLengthDistribution.py.
+#. Add a class TestNewSequenceLengthDistribution that inherits :code:`unittest.TestCase` to the new file.
+#. Add a function :code:`setUp()` to set up cache used for testing (see example below). This will ensure that the cache location will be set to :code:`EnvironmentSettings.tmp_test_path / "cache/"`
+#. Define one or more tests for the class and functions you implemented.
+#. If you need to write data to a path (for example test datasets or results), use the following location: :code:`EnvironmentSettings.tmp_test_path / "some_unique_foldername"`
 
 Typically, the :code:`generate_report()` function of the new report should be tested, as well as other relevant methods, to ensure that the report output is correct.
-When building tests for reports, a useful class is :py:obj:`~immuneML.simulation.dataset_generation.RandomDatasetGenerator.RandomDatasetGenerator`, which can create a dataset with random sequences.
+When building unit tests, a useful class is :py:obj:`~immuneML.simulation.dataset_generation.RandomDatasetGenerator.RandomDatasetGenerator`, which can create a dataset with random sequences.
 
-An example of the test is given below.
+An example of the unit test TestNewSequenceLengthDistribution is given below.
 
 .. code-block:: python
 
@@ -131,17 +130,17 @@ An example of the test is given below.
     from immuneML.data_model.repertoire.Repertoire import Repertoire
     from immuneML.environment.Constants import Constants
     from immuneML.environment.EnvironmentSettings import EnvironmentSettings
-    from immuneML.reports.data_reports.MySequenceLengthDistribution import MySequenceLengthDistribution
+    from immuneML.reports.data_reports.NewSequenceLengthDistribution import NewSequenceLengthDistribution
     from immuneML.util.PathBuilder import PathBuilder
 
 
-    class TestSequenceLengthDistribution(TestCase):
+    class TestNewSequenceLengthDistribution(TestCase):
 
         def setUp(self) -> None:
             os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
 
         def test_generate_report(self):
-            path = EnvironmentSettings.root_path / "test/tmp/datareports/"
+            path = EnvironmentSettings.tmp_test_path / "datareports"
             PathBuilder.build(path)
 
             rep1 = Repertoire.build_from_sequence_objects(sequence_objects=[ReceptorSequence(amino_acid_sequence="AAA", identifier="1"),
@@ -157,7 +156,7 @@ An example of the test is given below.
 
             dataset = RepertoireDataset(repertoires=[rep1, rep2])
 
-            report = MySequenceLengthDistribution(dataset, 1, path)
+            report = NewSequenceLengthDistribution(dataset, 1, path)
 
             result = report.generate_report()
             self.assertTrue(os.path.isfile(result.output_figures[0].path))
@@ -165,7 +164,7 @@ An example of the test is given below.
             shutil.rmtree(path)
 
 
-Adding a report: additional information
+Adding a Report: additional information
 ----------------------------------------
 
 In immuneML, it is possible to automatically generate a report describing some aspect of the problem being examined. There are a few types of reports:
@@ -374,6 +373,7 @@ After implementing the desired functionality, the documentation for the report s
 
   #. An example of how the report can be specified in YAML.
 
+Documentation should be written in Sphinx `reStructuredText <https://www.sphinx-doc.org/en/master/usage/restructuredtext/index.html>`_ formatting.
 Here is an example of a documentation for the :ref:`DesignMatrixExporter` report that has no input arguments which can be provided by the user in the YAML
 specification (the encoded dataset to be exported will be provided by immuneML at runtime):
 
@@ -386,4 +386,4 @@ specification (the encoded dataset to be exported will be provided by immuneML a
     .. indent with spaces
     .. code-block:: yaml
 
-        my_sld_report: SequenceLengthDistribution
+        my_sld_report: NewSequenceLengthDistribution

@@ -2,9 +2,7 @@ from pathlib import Path
 
 from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
 from immuneML.data_model.receptor.receptor_sequence.Chain import Chain
-from immuneML.preprocessing.Preprocessor import Preprocessor
 from immuneML.preprocessing.filters.Filter import Filter
-from immuneML.util.PathBuilder import PathBuilder
 
 
 class ChainRepertoireFilter(Filter):
@@ -40,9 +38,9 @@ class ChainRepertoireFilter(Filter):
 
     @staticmethod
     def process(dataset: RepertoireDataset, params: dict) -> RepertoireDataset:
-        Preprocessor.check_dataset_type(dataset, [RepertoireDataset], "ChainRepertoireFilter")
+        ChainRepertoireFilter.check_dataset_type(dataset, [RepertoireDataset], "ChainRepertoireFilter")
         processed_dataset = dataset.clone()
-        PathBuilder.build(params["result_path"])
+
         repertoires = []
         indices = []
         for index, repertoire in enumerate(dataset.get_data()):
@@ -53,6 +51,6 @@ class ChainRepertoireFilter(Filter):
         processed_dataset.repertoires = repertoires
         processed_dataset.metadata_file = ChainRepertoireFilter.build_new_metadata(processed_dataset, indices, params["result_path"])
 
-        Filter.check_dataset_not_empty(processed_dataset, "ChainRepertoireFilter")
+        ChainRepertoireFilter.check_dataset_not_empty(processed_dataset, "ChainRepertoireFilter")
 
         return processed_dataset
