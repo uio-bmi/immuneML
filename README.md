@@ -110,7 +110,7 @@ dataset or trained models, and modified datasets.
 To navigate over the results, immuneML generates a summary HTML file. 
 
 
-![image info](./docs/source/_static/images/definitions_instructions_overview.png)
+![image info](https://docs.immuneml.uio.no/_images/definitions_instructions_overview.png)
 
 For a detailed explanation of the YAML specification file, see the tutorial [How to specify an analysis with YAML](https://docs.immuneml.uio.no/tutorials/how_to_specify_an_analysis_with_yaml.html).
 
