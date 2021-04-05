@@ -1,6 +1,6 @@
 class Constants:
 
-    VERSION = "1.2.3"
+    VERSION = "1.2.4"
 
     # encoding constants
     FEATURE_DELIMITER = "///"
