@@ -131,7 +131,7 @@ Add a unit test for the new ML method:
 
 #. Add a new file to :py:mod:`~test.ml_methods` package named test_newSVM.py.
 #. Add a class TestNewSVM that inherits :code:`unittest.TestCase` to the new file..
-#. Add a function :code:`setUp()` to set up cache used for testing (see example below).
+#. Add a function :code:`setUp()` to set up cache used for testing (see example below). This will ensure that the cache location will be set to :code:`EnvironmentSettings.tmp_test_path / "cache/"`
 #. Define one or more tests for the class and functions you implemented.
 #. If you need to write data to a path (for example test datasets or results), use the following location: :code:`EnvironmentSettings.tmp_test_path / "some_unique_foldername"`
 

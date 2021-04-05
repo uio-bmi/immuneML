@@ -12,7 +12,7 @@ considered a hyperparameter that can be optimized using nested cross validation.
 Adding a new Preprocessor class
 -------------------------------
 
-All preprocessing methods should be placed in the :py:mod:`~immuneML.preprocessing` package, and inherit the immuneML
+All preprocessing classes should be placed in the :py:mod:`~immuneML.preprocessing` package, and inherit the immuneML
 class :py:mod:`~immuneML.preprocessing.Preprocessor.Preprocessor`.
 A filter is a special category of preprocessors which removes sequences or repertoires from the dataset.
 If your preprocessing is a filter, it should be placed in the :py:mod:`~immuneML.preprocessing.filters` package and
@@ -105,7 +105,7 @@ To add a unit test:
 
 #. Create a new python file named test_newClonesPerRepertoireFilter.py and add it to the :py:mod:`~test.preprocessing.filters` test package.
 #. Add a class TestNewClonesPerRepertoireFilter that inherits :code:`unittest.TestCase` to the new file.
-#. Add a function :code:`setUp()` to set up cache used for testing (see example below).
+#. Add a function :code:`setUp()` to set up cache used for testing (see example below). This will ensure that the cache location will be set to :code:`EnvironmentSettings.tmp_test_path / "cache/"`
 #. Define one or more tests for the class and functions you implemented.
 #. If you need to write data to a path (for example test datasets or results), use the following location: :code:`EnvironmentSettings.tmp_test_path / "some_unique_foldername"`
 

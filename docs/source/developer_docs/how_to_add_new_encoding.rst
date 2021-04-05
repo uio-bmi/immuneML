@@ -175,7 +175,7 @@ To test the new encoder:
 
 #. Create a package :code:`~test.encodings.new_kmer_encoding` and add the file test_newKmerFrequencyEncoder.py.
 #. Create the class :code:`TestNewKmerFrequencyEncoder` that inherits :code:`unittest.TestCase` in this file.
-#. Add a function :code:`setUp()` to set up cache used for testing (see example below).
+#. Add a function :code:`setUp()` to set up cache used for testing (see example below). This will ensure that the cache location will be set to :code:`EnvironmentSettings.tmp_test_path / "cache/"`
 #. Define one or more tests for the class and functions you implemented.
 #. If you need to write data to a path (for example test datasets or results), use the following location: :code:`EnvironmentSettings.tmp_test_path / "some_unique_foldername"`
 
@@ -202,7 +202,7 @@ An example of the unit test TestNewKmerFrequencyEncoder is given below.
     from immuneML.util.RepertoireBuilder import RepertoireBuilder
 
 
-    class NewKmerFrequencyEncoder(TestCase):
+    class TestNewKmerFrequencyEncoder(TestCase):
 
         def setUp(self) -> None: # useful if cache is used in the encoding (not used in this tutorial)
             os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
