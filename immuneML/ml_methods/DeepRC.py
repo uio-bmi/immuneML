@@ -17,6 +17,7 @@ from immuneML.ml_methods.MLMethod import MLMethod
 from immuneML.ml_methods.util.Util import Util
 from immuneML.util.FilenameHandler import FilenameHandler
 from immuneML.util.PathBuilder import PathBuilder
+from immuneML.util.ReflectionHandler import ReflectionHandler
 
 
 class DeepRC(MLMethod):
@@ -99,6 +100,10 @@ class DeepRC(MLMethod):
                  learning_rate, l1_weight_decay, l2_weight_decay, evaluate_at, sample_n_sequences, training_batch_size, n_workers,
                  keep_dataset_in_ram, pytorch_device_name):
         super(DeepRC, self).__init__()
+
+        if not ReflectionHandler.is_installed("deeprc"):
+            raise RuntimeError(f"{DeepRC.__name__}: deeprc module is not installed. Please check the documentation at "
+                               f"https://docs.immuneml.uio.no/installation/install_with_package_manager.html for instructions how to install it.")
 
         from deeprc.deeprc_binary.training import train
         self.training_function = train

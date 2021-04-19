@@ -77,8 +77,14 @@ class ImportHelper:
 
         Returns:
             RepertoireDataset object that was created
+
         """
-        metadata = pd.read_csv(params.metadata_file, ",")
+
+        try:
+            metadata = pd.read_csv(params.metadata_file, ",")
+        except Exception as e:
+            raise Exception(f"{e}\nAn error occurred while reading in the metadata file {params.metadata_file}. Please see the error log above for "
+                            f"more details on this error and the documentation for the expected format of the metadata.")
 
         ParameterValidator.assert_keys_present(metadata.columns.tolist(), ["filename"], ImportHelper.__name__,
                                                f'{dataset_name}: params: metadata_file')

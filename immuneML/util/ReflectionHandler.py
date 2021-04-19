@@ -1,4 +1,4 @@
-from importlib import import_module
+from importlib import import_module, util
 from pathlib import Path
 
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
@@ -98,3 +98,7 @@ class ReflectionHandler:
         filenames = ReflectionHandler._get_filenames(class_name_ending, subdirectory, partial=True)
         classes = [ReflectionHandler._import_class(filename, filename.stem) for filename in filenames]
         return classes
+
+    @staticmethod
+    def is_installed(module_name: str) -> bool:
+        return bool(util.find_spec(module_name))
