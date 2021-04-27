@@ -267,6 +267,7 @@ class DeepRC(MLMethod):
                 ("pytorch_device_name", self.pytorch_device_name))
 
     def fit(self, encoded_data: EncodedData, label_name: str, cores_for_training: int = 2):
+        assert encoded_data.encoding == "DeepRCEncoder", f"DeepRC: ML method DeepRC is only compatible with the DeepRC encoder, found {encoded_data.encoding.replace('Encoder','')} encoder"
         self.feature_names = encoded_data.feature_names
         self._set_label_classes({label_name: encoded_data.labels[label_name]})
         self.model = CacheHandler.memo_by_params(self._prepare_caching_params(encoded_data, "fit", label_name),

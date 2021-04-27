@@ -146,7 +146,7 @@ For each instruction specified in the YAML specification file, a subfolder is cr
    - [dill](https://pypi.org/project/dill/) (0.3 or higher)
    - [editdistance](https://pypi.org/project/editdistance/) (0.5.3 or higher)
    - [fishersapi](https://pypi.org/project/fishersapi/)
-   - [gensim](https://pypi.org/project/gensim/) (3.8 or higher)
+   - [gensim](https://pypi.org/project/gensim/) (3.8 or higher, < 4)
    - [h5py](https://www.h5py.org/) (2.10.0 or lower when using the optional DeepRC dependency)
    - [logomaker](https://pypi.org/project/logomaker/) (0.8 or higher)
    - [matplotlib](https://matplotlib.org) (3.1 or higher)
