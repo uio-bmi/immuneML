@@ -8,6 +8,7 @@ import pkg_resources
 import torch
 import yaml
 from sklearn.exceptions import NotFittedError
+from sklearn.model_selection import train_test_split
 from tqdm import tqdm
 
 from immuneML.caching.CacheHandler import CacheHandler
@@ -175,14 +176,11 @@ class DeepRC(MLMethod):
 
         return pre_loaded_hdf5_file
 
-    def get_train_val_indices(self, n_examples):
-        n_train_examples = round((1 - self.validation_part) * n_examples)
+    def _get_train_val_indices(self, n_examples, classes):
+        """splits the data to training and validation and attempts to preserve the class distribution if possible"""
 
-        random_generator = np.random.RandomState()
-        permutation = random_generator.permutation(n_examples)
-
-        train_indices = np.array(permutation[:n_train_examples], dtype=np.int)
-        val_indices = np.array(permutation[n_train_examples:], dtype=np.int)
+        indices = np.arange(0, n_examples)
+        train_indices, val_indices = train_test_split(indices, test_size=self.validation_part, shuffle=True, stratify=classes)
 
         return train_indices, val_indices
 
@@ -279,7 +277,7 @@ class DeepRC(MLMethod):
         hdf5_filepath = self._metadata_to_hdf5(encoded_data.info["metadata_filepath"], label_name)
         pre_loaded_hdf5_file = self._load_dataset_in_ram(hdf5_filepath) if self.keep_dataset_in_ram else None
 
-        train_indices, val_indices = self.get_train_val_indices(len(encoded_data.example_ids))
+        train_indices, val_indices = self._get_train_val_indices(len(encoded_data.example_ids), encoded_data.labels[label_name])
         self.max_seq_len = encoded_data.info["max_sequence_length"]
 
         self._fit_for_label(hdf5_filepath, pre_loaded_hdf5_file, train_indices, val_indices, label_name, cores_for_training)
@@ -413,7 +411,7 @@ class DeepRC(MLMethod):
 
         return file_path.is_file()
 
-    def get_classes(self) -> dict:
+    def get_classes(self) -> list:
         return self.label_classes
 
     def get_package_info(self) -> str:

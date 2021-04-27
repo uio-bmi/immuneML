@@ -17,6 +17,7 @@ class MLSettingsPerformance(TrainMLModelReport):
     """
     Report for TrainMLModel instruction: plots the performance for each of the setting combinations as defined under 'settings' in the
     assessment (outer validation) loop.
+
     The performances are grouped by label (horizontal panels) encoding (vertical panels) and ML method (bar color).
     When multiple data splits are used, the average performance over the data splits is shown with an error bar
     representing the standard deviation.
@@ -26,12 +27,9 @@ class MLSettingsPerformance(TrainMLModelReport):
 
     Arguments:
 
-        single_axis_labels (bool): whether to use single axis labels. Note that using single axis labels makes the
-        figure unsuited for rescaling, as the label position is given in a fixed distance from the axis. By default,
-        single_axis_labels is False, resulting in standard plotly axis labels.
+        single_axis_labels (bool): whether to use single axis labels. Note that using single axis labels makes the figure unsuited for rescaling, as the label position is given in a fixed distance from the axis. By default, single_axis_labels is False, resulting in standard plotly axis labels.
 
-        x_label_position (float): if single_axis_labels is True, this should be an integer specifying the x axis label
-        position relative to the x axis. The default value for label_position is -0.1.
+        x_label_position (float): if single_axis_labels is True, this should be an integer specifying the x axis label position relative to the x axis. The default value for label_position is -0.1.
 
         y_label_position (float): same as x_label_position, but for the y axis.
 

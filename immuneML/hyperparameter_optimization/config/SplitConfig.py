@@ -13,7 +13,7 @@ class SplitConfig:
 
         - k_fold (k-fold cross-validation)
 
-        - stratified_k_fold (stratified k-fold cross-validation that can be used when immuneML is used for single-label classification)
+        - stratified_k_fold (stratified k-fold cross-validation that can be used when immuneML is used for single-label classification, see `this documentation<https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.StratifiedKFold.html>`_ for more details on how this is implemented)
 
         - random (Monte Carlo cross-validation - randomly splitting the dataset to training and test datasets)
 
@@ -23,7 +23,7 @@ class SplitConfig:
 
     Arguments:
 
-        split_strategy (SplitType): one of the three types of cross-validation listed above (`LOOCV`, `K_FOLD` or `RANDOM`)
+        split_strategy (SplitType): one of the types of cross-validation listed above (`LOOCV`, `K_FOLD`, `STRATIFIED_K_FOLD`, `MANUAL`, ``  or `RANDOM`)
 
         split_count (int): if split_strategy is `K_FOLD`, then this defined how many splits to make (K), if split_strategy is RANDOM, split_count defines how many random splits to make, resulting in split_count training/test dataset pairs, or if split_strategy is `LOOCV`, `MANUAL` or `LEAVE_ONE_OUT_STRATIFICATION`, split_count does not need to be specified.
 
