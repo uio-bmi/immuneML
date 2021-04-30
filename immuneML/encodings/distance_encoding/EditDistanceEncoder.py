@@ -80,8 +80,7 @@ class EditDistanceEncoder(DatasetEncoder):
 
     @staticmethod
     def _prepare_parameters(matchairr_path: str, distance_metric: str, differences: int, indels: bool, ignore_frequency: bool, ignore_genes: bool, context: dict = None, name: str = None):
-        #todo convert distance_metric to something useful
-        # todo supply multiple options for functions
+        #todo supply other distance metrics
         ParameterValidator.assert_type_and_value(differences, int, "EditDistanceEncoder", "differences", min_inclusive=0, max_inclusive=2)
         ParameterValidator.assert_type_and_value(indels, bool, "EditDistanceEncoder", "indels")
         if indels:
@@ -90,7 +89,7 @@ class EditDistanceEncoder(DatasetEncoder):
         ParameterValidator.assert_type_and_value(ignore_frequency, bool, "EditDistanceEncoder", "ignore_frequency")
         ParameterValidator.assert_type_and_value(ignore_genes, bool, "EditDistanceEncoder", "ignore_genes")
 
-        # todo infer executable path from somewhere?
+        # todo infer executable path from somewhere (installed)
         matchairr_path = Path(matchairr_path)
         try:
             matchairr_result = subprocess.run([matchairr_path, "-h"], capture_output=True)
