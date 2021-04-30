@@ -1,3 +1,4 @@
 attributes_to_match:
     - sequence_aas
-pool_size: 4
+distance_metric: JACCARD
+sequence_batch_size: 1000
