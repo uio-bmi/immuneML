@@ -47,9 +47,9 @@ class TestDistanceEncoder(TestCase):
         self.assertEqual(8, encoded.encoded_data.examples.shape[0])
         self.assertEqual(8, encoded.encoded_data.examples.shape[1])
 
-        self.assertEqual(1, encoded.encoded_data.examples.iloc[0, 0])
-        self.assertEqual(1, encoded.encoded_data.examples.iloc[1, 1])
-        self.assertEqual(1, encoded.encoded_data.examples.iloc[0, 4])
+        self.assertEqual(0, encoded.encoded_data.examples.iloc[0, 0])
+        self.assertEqual(0, encoded.encoded_data.examples.iloc[1, 1])
+        self.assertEqual(0, encoded.encoded_data.examples.iloc[0, 4])
 
         self.assertTrue(np.array_equal([1, 0, 1, 0, 1, 0, 1, 0], encoded.encoded_data.labels["l1"]))
         self.assertTrue(np.array_equal([2, 3, 2, 3, 2, 3, 3, 3], encoded.encoded_data.labels["l2"]))
