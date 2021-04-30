@@ -17,7 +17,7 @@ from immuneML.util.ParameterValidator import ParameterValidator
 from scripts.specification_util import update_docs_per_mapping
 
 
-class HammingDistanceEncoder(DatasetEncoder):
+class EditDistanceEncoder(DatasetEncoder):
     """
     Encodes a given RepertoireDataset as a distance matrix, internally using `MatchAIRR <https://github.com/uio-bmi/vdjsearch/>`_
     for fast computation. This creates a pairwise distance matrix between each of the repertoires.
@@ -81,13 +81,13 @@ class HammingDistanceEncoder(DatasetEncoder):
     def _prepare_parameters(matchairr_path: str, distance_metric: str, differences: int, indels: bool, ignore_frequency: bool, ignore_genes: bool, context: dict = None, name: str = None):
         #todo convert distance_metric to something useful
         # todo supply multiple options for functions
-        ParameterValidator.assert_type_and_value(differences, int, "HammingDistanceEncoder", "differences", min_inclusive=0, max_inclusive=2)
-        ParameterValidator.assert_type_and_value(indels, bool, "HammingDistanceEncoder", "indels")
+        ParameterValidator.assert_type_and_value(differences, int, "EditDistanceEncoder", "differences", min_inclusive=0, max_inclusive=2)
+        ParameterValidator.assert_type_and_value(indels, bool, "EditDistanceEncoder", "indels")
         if indels:
-            assert differences == 1, f"HammingDistanceEncoder: If indels is True, differences is only allowed to be 1, found {differences}"
+            assert differences == 1, f"EditDistanceEncoder: If indels is True, differences is only allowed to be 1, found {differences}"
 
-        ParameterValidator.assert_type_and_value(ignore_frequency, bool, "HammingDistanceEncoder", "ignore_frequency")
-        ParameterValidator.assert_type_and_value(ignore_genes, bool, "HammingDistanceEncoder", "ignore_genes")
+        ParameterValidator.assert_type_and_value(ignore_frequency, bool, "EditDistanceEncoder", "ignore_frequency")
+        ParameterValidator.assert_type_and_value(ignore_genes, bool, "EditDistanceEncoder", "ignore_genes")
 
         # todo infer executable path from somewhere?
         matchairr_path = Path(matchairr_path)
@@ -95,7 +95,7 @@ class HammingDistanceEncoder(DatasetEncoder):
             matchairr_result = subprocess.run([matchairr_path, "-h"], capture_output=True)
             assert matchairr_result.returncode == 0, "exit code was non-zero."
         except Exception as e:
-            raise Exception(f"HammingDistanceEncoder: failed to call MatchAIRR: {e}\n"
+            raise Exception(f"EditDistanceEncoder: failed to call MatchAIRR: {e}\n"
                             f"Please ensure MatchAIRR has been correctly installed and is available at {matchairr_path}.")
 
         return {
@@ -112,10 +112,10 @@ class HammingDistanceEncoder(DatasetEncoder):
     @staticmethod
     def build_object(dataset, **params):
         if isinstance(dataset, RepertoireDataset):
-            prepared_params = HammingDistanceEncoder._prepare_parameters(**params)
-            return HammingDistanceEncoder(**prepared_params)
+            prepared_params = EditDistanceEncoder._prepare_parameters(**params)
+            return EditDistanceEncoder(**prepared_params)
         else:
-            raise ValueError("DistanceEncoder is not defined for dataset types which are not RepertoireDataset.")
+            raise ValueError("EditDistanceEncoder is not defined for dataset types which are not RepertoireDataset.")
 
 
     def build_labels(self, dataset: RepertoireDataset, params: EncoderParams) -> dict:
@@ -139,7 +139,7 @@ class HammingDistanceEncoder(DatasetEncoder):
 
         encoded_dataset = dataset.clone()
         encoded_dataset.encoded_data = EncodedData(examples=distance_matrix, labels=labels, example_ids=distance_matrix.index.values,
-                                                   encoding=HammingDistanceEncoder.__name__)
+                                                   encoding=EditDistanceEncoder.__name__)
         return encoded_dataset
 
     def build_distance_matrix(self, dataset: RepertoireDataset, params: EncoderParams, train_repertoire_ids: list):
@@ -181,7 +181,7 @@ class HammingDistanceEncoder(DatasetEncoder):
             matchairr_result = subprocess.run(args, capture_output=True, text=True)
 
         if matchairr_result.stdout == "":
-            raise RuntimeError(f"HammingDistanceEncoder: failed to calculate the distance matrix with MatchAIRR, the following error occurred:\n\n{matchairr_result.stderr}")
+            raise RuntimeError(f"EditDistanceEncoder: failed to calculate the distance matrix with MatchAIRR, the following error occurred:\n\n{matchairr_result.stderr}")
 
         raw_distance_matrix = pd.read_csv(StringIO(matchairr_result.stdout), sep="\t", index_col=0)
 
@@ -210,7 +210,7 @@ class HammingDistanceEncoder(DatasetEncoder):
 
     @staticmethod
     def get_documentation():
-        doc = str(HammingDistanceEncoder.__doc__)
+        doc = str(EditDistanceEncoder.__doc__)
 
         valid_values = [metric.name for metric in DistanceMetricType]
         valid_values = str(valid_values)[1:-1].replace("'", "`")
