@@ -205,6 +205,7 @@ class EditDistanceEncoder(DatasetEncoder):
     @staticmethod
     def load_encoder(encoder_file: Path):
         encoder = DatasetEncoder.load_encoder(encoder_file)
+        # todo deal with this??
         # encoder.comparison = UtilIO.import_comparison_data(encoder_file.parent)
         return encoder
 
