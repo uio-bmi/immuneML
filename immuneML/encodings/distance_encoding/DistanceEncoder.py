@@ -29,7 +29,7 @@ class DistanceEncoder(DatasetEncoder):
 
         distance_metric (:py:mod:`~immuneML.encodings.distance_encoding.DistanceMetricType`): The metric used to calculate the
         distance between two repertoires. Names of different distance metric types are allowed values in the specification.
-        The default distance metric is JACCARD.
+        The default distance metric is JACCARD (inverse Jaccard).
 
         sequence_batch_size (int): The number of sequences to be processed at once. Increasing this number increases the memory use.
         The default value is 1000.
