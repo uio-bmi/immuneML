@@ -25,6 +25,7 @@ class EditDistanceEncoder(DatasetEncoder):
     defined to permit 1 or 2 mismatching amino acid/nucleotide positions and 1 indel in the sequence. Furthermore,
     matching may or may not include V and J gene information, and sequence frequencies may be included or ignored.
 
+
     Arguments:
 
         matchairr_path (Path): path to the MatchAIRR executable
@@ -159,13 +160,13 @@ class EditDistanceEncoder(DatasetEncoder):
 
         for rowIndex, row in distance_matrix.iterrows():
             for columnIndex, value in row.items():
-                distance_matrix.loc[rowIndex, columnIndex] = self.jaccard(repertoire_sizes[rowIndex],
-                                                                          repertoire_sizes[columnIndex],
-                                                                          raw_distance_matrix.loc[rowIndex, columnIndex])
+                distance_matrix.loc[rowIndex, columnIndex] = self.jaccard_dist(repertoire_sizes[rowIndex],
+                                                                                repertoire_sizes[columnIndex],
+                                                                                raw_distance_matrix.loc[rowIndex, columnIndex])
         return distance_matrix
 
-    def jaccard(self, rep_1_size, rep_2_size, intersect):
-        return intersect / (rep_1_size + rep_2_size - intersect)
+    def jaccard_dist(self, rep_1_size, rep_2_size, intersect):
+        return 1 - intersect / (rep_1_size + rep_2_size - intersect)
 
     def _run_matchairr(self, dataset: RepertoireDataset, params: EncoderParams):
         repertoire_sizes = {}
