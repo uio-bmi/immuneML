@@ -175,9 +175,10 @@ class EditDistanceEncoder(DatasetEncoder):
                 repertoire_contents = pd.DataFrame({**repertoire_contents, "identifier": repertoire.identifier})
 
                 # todo deal with v/j or counts missing if not specified
-                na_rows = sum(repertoire_contents.isnull())
+                na_rows = sum(repertoire_contents.isnull().any(axis=1))
                 repertoire_contents.dropna(inplace=True)
-                warnings.warn(f"EditDistanceEncoder: removed {na_rows} entries from repertoire {repertoire.identifier} due to missing values.")
+                if na_rows > 0:
+                    warnings.warn(f"EditDistanceEncoder: removed {na_rows} entries from repertoire {repertoire.identifier} due to missing values.")
 
                 repertoire_sizes[repertoire.identifier] = sum(repertoire_contents["counts"].astype(int))
 
