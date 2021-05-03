@@ -169,7 +169,10 @@ class EditDistanceEncoder(DatasetEncoder):
             for repertoire in dataset.get_data():
                 repertoire_contents = repertoire.get_attributes([EnvironmentSettings.get_sequence_type().value, "counts", "v_genes", "j_genes"])
                 repertoire_contents = pd.DataFrame({**repertoire_contents, "identifier": repertoire.identifier})
-                repertoire_sizes[repertoire.identifier] = sum(repertoire_contents["counts"])
+                print(repertoire_contents["counts"])
+                print(repertoire_contents["counts"].astype(int))
+
+                repertoire_sizes[repertoire.identifier] = sum(repertoire_contents["counts"].astype(int))
 
                 repertoire_contents.to_csv(tmp.name, mode='a', header=False, index=False, sep="\t")
             args = self._get_cmd_args(tmp.name, params.pool_size)
