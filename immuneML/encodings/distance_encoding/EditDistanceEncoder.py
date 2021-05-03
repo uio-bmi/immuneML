@@ -169,8 +169,9 @@ class EditDistanceEncoder(DatasetEncoder):
             for repertoire in dataset.get_data():
                 repertoire_contents = repertoire.get_attributes([EnvironmentSettings.get_sequence_type().value, "counts", "v_genes", "j_genes"])
                 repertoire_contents = pd.DataFrame({**repertoire_contents, "identifier": repertoire.identifier})
-                print(repertoire_contents["counts"])
-                print(repertoire_contents["counts"].astype(int))
+
+                # todo deal with v/j or counts missing if not specified
+                repertoire_contents.dropna(inplace=True)
 
                 repertoire_sizes[repertoire.identifier] = sum(repertoire_contents["counts"].astype(int))
 
