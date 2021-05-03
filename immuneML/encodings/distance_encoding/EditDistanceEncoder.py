@@ -2,6 +2,7 @@ from pathlib import Path
 import subprocess
 from io import StringIO
 import pandas as pd
+import warnings
 from tempfile import NamedTemporaryFile
 
 
@@ -165,16 +166,23 @@ class EditDistanceEncoder(DatasetEncoder):
     def _run_matchairr(self, dataset: RepertoireDataset, params: EncoderParams):
         repertoire_sizes = {}
 
+
+        testfile = params.result_path / "test"
+
         with NamedTemporaryFile(mode='w') as tmp:
             for repertoire in dataset.get_data():
                 repertoire_contents = repertoire.get_attributes([EnvironmentSettings.get_sequence_type().value, "counts", "v_genes", "j_genes"])
                 repertoire_contents = pd.DataFrame({**repertoire_contents, "identifier": repertoire.identifier})
 
                 # todo deal with v/j or counts missing if not specified
+                na_rows = sum(repertoire_contents.isnull())
                 repertoire_contents.dropna(inplace=True)
+                warnings.warn(f"EditDistanceEncoder: removed {na_rows} entries from repertoire {repertoire.identifier} due to missing values.")
 
                 repertoire_sizes[repertoire.identifier] = sum(repertoire_contents["counts"].astype(int))
 
+                print(f"result written to {testfile}")
+                repertoire_contents.to_csv(testfile, mode='a', header=False, index=False, sep="\t")
                 repertoire_contents.to_csv(tmp.name, mode='a', header=False, index=False, sep="\t")
             args = self._get_cmd_args(tmp.name, params.pool_size)
             matchairr_result = subprocess.run(args, capture_output=True, text=True)
