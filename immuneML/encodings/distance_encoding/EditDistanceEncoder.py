@@ -20,7 +20,7 @@ from scripts.specification_util import update_docs_per_mapping
 
 class EditDistanceEncoder(DatasetEncoder):
     """
-    Encodes a given RepertoireDataset as a distance matrix, internally using `MatchAIRR <https://github.com/uio-bmi/vdjsearch/>`_
+    Encodes a given RepertoireDataset as a distance matrix, internally using `CompAIRR <https://github.com/uio-bmi/vdjsearch/>`_
     for fast computation. This creates a pairwise distance matrix between each of the repertoires.
     The distance is calculated based on the number of matching receptor chain sequences between the repertoires. This matching may be
     defined to permit 1 or 2 mismatching amino acid/nucleotide positions and 1 indel in the sequence. Furthermore,
@@ -29,7 +29,7 @@ class EditDistanceEncoder(DatasetEncoder):
 
     Arguments:
 
-        matchairr_path (Path): path to the MatchAIRR executable
+        compairr_path (Path): path to the CompAIRR executable
 
         distance_metric (str): The distance metric to be applied after computing the number of overlapping sequences.
         The value is ignored, Jaccard is computed for now.
@@ -54,7 +54,7 @@ class EditDistanceEncoder(DatasetEncoder):
 
         my_distance_encoder:
             Distance:
-                matchairr_path: path/to/matchairr
+                compairr_path: path/to/compairr_path
                 distance_metric: JACCARD
                 # Optional parameters:
                 differences: 0
@@ -64,8 +64,8 @@ class EditDistanceEncoder(DatasetEncoder):
 
     """
 
-    def __init__(self, matchairr_path: Path, distance_metric: DistanceMetricType, differences: int, indels: bool, ignore_frequency: bool, ignore_genes: bool, context: dict = None, name: str = None):
-        self.matchairr_path = Path(matchairr_path)
+    def __init__(self, compairr_path: Path, distance_metric: DistanceMetricType, differences: int, indels: bool, ignore_frequency: bool, ignore_genes: bool, context: dict = None, name: str = None):
+        self.compairr_path = Path(compairr_path)
         self.distance_metric = distance_metric
         self.differences = differences
         self.indels = indels
@@ -80,7 +80,7 @@ class EditDistanceEncoder(DatasetEncoder):
         return self
 
     @staticmethod
-    def _prepare_parameters(matchairr_path: str, distance_metric: str, differences: int, indels: bool, ignore_frequency: bool, ignore_genes: bool, context: dict = None, name: str = None):
+    def _prepare_parameters(compairr_path: str, distance_metric: str, differences: int, indels: bool, ignore_frequency: bool, ignore_genes: bool, context: dict = None, name: str = None):
         #todo supply other distance metrics
         ParameterValidator.assert_type_and_value(differences, int, "EditDistanceEncoder", "differences", min_inclusive=0, max_inclusive=2)
         ParameterValidator.assert_type_and_value(indels, bool, "EditDistanceEncoder", "indels")
@@ -91,16 +91,16 @@ class EditDistanceEncoder(DatasetEncoder):
         ParameterValidator.assert_type_and_value(ignore_genes, bool, "EditDistanceEncoder", "ignore_genes")
 
         # todo infer executable path from somewhere (installed)
-        matchairr_path = Path(matchairr_path)
+        compairr_path = Path(compairr_path)
         try:
-            matchairr_result = subprocess.run([matchairr_path, "-h"], capture_output=True)
-            assert matchairr_result.returncode == 0, "exit code was non-zero."
+            compairr_result = subprocess.run([compairr_path, "-h"], capture_output=True)
+            assert compairr_result.returncode == 0, "exit code was non-zero."
         except Exception as e:
-            raise Exception(f"EditDistanceEncoder: failed to call MatchAIRR: {e}\n"
-                            f"Please ensure MatchAIRR has been correctly installed and is available at {matchairr_path}.")
+            raise Exception(f"EditDistanceEncoder: failed to call CompAIRR: {e}\n"
+                            f"Please ensure CompAIRR has been correctly installed and is available at {compairr_path}.")
 
         return {
-            "matchairr_path": matchairr_path,
+            "compairr_path": compairr_path,
             "distance_metric": distance_metric,
             "differences": differences,
             "indels": indels,
@@ -140,7 +140,7 @@ class EditDistanceEncoder(DatasetEncoder):
 
     def build_distance_matrix(self, dataset: RepertoireDataset, params: EncoderParams, train_repertoire_ids: list):
         current_dataset = dataset if self.context is None or "dataset" not in self.context else self.context["dataset"]
-        raw_distance_matrix, repertoire_sizes = self._run_matchairr(current_dataset, params)
+        raw_distance_matrix, repertoire_sizes = self._run_compairr(current_dataset, params)
 
         distance_matrix = self.apply_distance_fn(raw_distance_matrix, repertoire_sizes)
 
@@ -163,7 +163,7 @@ class EditDistanceEncoder(DatasetEncoder):
     def jaccard_dist(self, rep_1_size, rep_2_size, intersect):
         return 1 - intersect / (rep_1_size + rep_2_size - intersect)
 
-    def _run_matchairr(self, dataset: RepertoireDataset, params: EncoderParams):
+    def _run_compairr(self, dataset: RepertoireDataset, params: EncoderParams):
         repertoire_sizes = {}
 
 
@@ -186,17 +186,20 @@ class EditDistanceEncoder(DatasetEncoder):
                 repertoire_contents.to_csv(testfile, mode='a', header=False, index=False, sep="\t")
                 repertoire_contents.to_csv(tmp.name, mode='a', header=False, index=False, sep="\t")
             args = self._get_cmd_args(tmp.name, params.pool_size)
-            matchairr_result = subprocess.run(args, capture_output=True, text=True)
 
-        print("****stdout")
-        print(matchairr_result.stdout)
-        print("****stderr")
-        print(matchairr_result.stderr)
+            print("***args")
+            print(args)
+            compairr_result = subprocess.run(args, capture_output=True, text=True)
 
-        if matchairr_result.stdout == "":
-            raise RuntimeError(f"EditDistanceEncoder: failed to calculate the distance matrix with MatchAIRR, the following error occurred:\n\n{matchairr_result.stderr}")
+        if compairr_result.stdout == "":
+            raise RuntimeError(f"EditDistanceEncoder: failed to calculate the distance matrix with CompAIRR, the following error occurred:\n\n{compairr_result.stderr}")
 
-        raw_distance_matrix = pd.read_csv(StringIO(matchairr_result.stdout), sep="\t", index_col=0)
+        logfile_path = params.result_path / "compairr_log.txt"
+
+        with logfile_path.open("w") as file:
+            file.write(compairr_result.stderr)
+
+        raw_distance_matrix = pd.read_csv(StringIO(compairr_result.stdout), sep="\t", index_col=0)
 
         print("raw dist matrix")
         print(raw_distance_matrix)
@@ -210,7 +213,7 @@ class EditDistanceEncoder(DatasetEncoder):
 
         number_of_processes = 1 if number_of_processes < 1 else number_of_processes
 
-        return [str(self.matchairr_path), "-m", "-d", str(self.differences), "-t", str(number_of_processes)] + \
+        return [str(self.compairr_path), "-m", "-d", str(self.differences), "-t", str(number_of_processes)] + \
                indels_args + frequency_args + ignore_genes + [filename, filename]
 
     @staticmethod
