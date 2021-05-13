@@ -167,7 +167,7 @@ class EditDistanceEncoder(DatasetEncoder):
         repertoire_sizes = {}
 
 
-        testfile = params.result_path / "test"
+        testfile = params.result_path / "test.tsv"
 
         with NamedTemporaryFile(mode='w') as tmp:
             for repertoire in dataset.get_data():
@@ -188,10 +188,18 @@ class EditDistanceEncoder(DatasetEncoder):
             args = self._get_cmd_args(tmp.name, params.pool_size)
             matchairr_result = subprocess.run(args, capture_output=True, text=True)
 
+        print("****stdout")
+        print(matchairr_result.stdout)
+        print("****stderr")
+        print(matchairr_result.stderr)
+
         if matchairr_result.stdout == "":
             raise RuntimeError(f"EditDistanceEncoder: failed to calculate the distance matrix with MatchAIRR, the following error occurred:\n\n{matchairr_result.stderr}")
 
         raw_distance_matrix = pd.read_csv(StringIO(matchairr_result.stdout), sep="\t", index_col=0)
+
+        print("raw dist matrix")
+        print(raw_distance_matrix)
 
         return raw_distance_matrix, repertoire_sizes
 
