@@ -100,6 +100,10 @@ class TrainMLModelParser:
                     if symbol_table.contains(setting["preprocessing"]):
                         preprocessing_sequence = symbol_table.get(setting["preprocessing"])
                         preproc_name = setting["preprocessing"]
+                        if not all(preproc.keeps_example_count() for preproc in preprocessing_sequence):
+                            raise ValueError(f"{TrainMLModelParser.__name__}: preprocessing sequence {preproc_name} includes preprocessing that "
+                                             f"change the number of examples at runtime and as such cannot be used with this instruction. See the "
+                                             f"documentation for the preprocessing or alternatively use them with other instructions.")
                     else:
                         raise KeyError(f"{TrainMLModelParser.__name__}: preprocessing was set in the TrainMLModel instruction to value "
                                        f"{setting['preprocessing']}, but no such preprocessing was defined in the specification under "

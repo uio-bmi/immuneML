@@ -2,6 +2,7 @@ import datetime
 from pathlib import Path
 
 from immuneML.data_model.dataset.Dataset import Dataset
+from immuneML.environment.LabelConfiguration import LabelConfiguration
 from immuneML.hyperparameter_optimization.HPSetting import HPSetting
 from immuneML.hyperparameter_optimization.core.HPSelection import HPSelection
 from immuneML.hyperparameter_optimization.core.HPUtil import HPUtil
@@ -29,7 +30,7 @@ class HPAssessment:
 
     @staticmethod
     def _create_root_path(state: TrainMLModelState) -> TrainMLModelState:
-        name = state.name if state.name is not None else "state"
+        name = state.name if state.name is not None else "result"
         state.path = state.path / name
         return state
 
@@ -92,7 +93,8 @@ class HPAssessment:
         assessment_item = MLProcess(train_dataset=train_val_dataset, test_dataset=test_dataset, label=label, metrics=state.metrics,
                                     optimization_metric=state.optimization_metric, path=path, hp_setting=hp_setting, report_context=state.context,
                                     ml_reports=state.assessment.reports.model_reports.values(), number_of_processes=state.number_of_processes,
-                                    encoding_reports=state.assessment.reports.encoding_reports.values(), label_config=state.label_configuration,
+                                    encoding_reports=state.assessment.reports.encoding_reports.values(),
+                                    label_config=LabelConfiguration([state.label_configuration.get_label_object(label)]),
                                     store_encoded_data=state.store_encoded_data) \
             .run(split_index)
 

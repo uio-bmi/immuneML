@@ -14,7 +14,6 @@ from immuneML.util.ParameterValidator import ParameterValidator
 from scripts.specification_util import update_docs_per_mapping
 
 
-
 class DuplicateSequenceFilter(Filter):
     """
     Collapses duplicate nucleotide or amino acid sequences within each repertoire in the given RepertoireDataset.
@@ -71,7 +70,8 @@ class DuplicateSequenceFilter(Filter):
         return DuplicateSequenceFilter(filter_sequence_type=SequenceType[kwargs["filter_sequence_type"].upper()],
                                        batch_size=kwargs["batch_size"], count_agg=CountAggregationFunction[kwargs["count_agg"].upper()])
 
-    def __init__(self, filter_sequence_type: SequenceType, batch_size: int, count_agg: CountAggregationFunction):
+    def __init__(self, filter_sequence_type: SequenceType, batch_size: int, count_agg: CountAggregationFunction, result_path: Path = None):
+        super().__init__(result_path)
         self.filter_sequence_type = filter_sequence_type
         self.count_agg = count_agg
         self.batch_size = batch_size
@@ -82,24 +82,23 @@ class DuplicateSequenceFilter(Filter):
         assert self.sequence_of_interest in Repertoire.FIELDS
         assert self.sequence_to_ignore in Repertoire.FIELDS
 
-    @staticmethod
-    def process(dataset: RepertoireDataset, params: dict) -> RepertoireDataset:
-        DuplicateSequenceFilter.check_dataset_type(dataset, [RepertoireDataset], "DuplicateSequenceFilter")
+    def process_dataset(self, dataset: RepertoireDataset, result_path: Path) -> RepertoireDataset:
+        self.result_path = result_path if result_path is not None else self.result_path
+
+        self.check_dataset_type(dataset, [RepertoireDataset], "DuplicateSequenceFilter")
 
         processed_dataset = copy.deepcopy(dataset)
 
-        with Pool(params["batch_size"]) as pool:
-            repertoires = pool.starmap(DuplicateSequenceFilter.process_repertoire,
-                                       [(repertoire, params) for repertoire in dataset.repertoires])
+        with Pool(self.batch_size) as pool:
+            repertoires = pool.map(self._process_repertoire, dataset.repertoires)
 
         processed_dataset.repertoires = repertoires
 
         return processed_dataset
 
-    @staticmethod
-    def _prepare_group_by_field(params, columns):
+    def _prepare_group_by_field(self, columns):
         groupby_fields = copy.deepcopy(list(Repertoire.FIELDS))
-        groupby_fields.remove(params["sequence_to_ignore"])
+        groupby_fields.remove(self.sequence_to_ignore)
         groupby_fields.remove("counts")
         groupby_fields.remove("sequence_identifiers")
         groupby_fields.remove("cell_ids")
@@ -111,16 +110,15 @@ class DuplicateSequenceFilter(Filter):
 
         return groupby_fields
 
-    @staticmethod
-    def _prepare_agg_dict(params, columns, custom_lists):
+    def _prepare_agg_dict(self, columns, custom_lists):
 
         agg_dict = {"sequence_identifiers": "first"}
 
-        if params["sequence_to_ignore"] in columns:
-            agg_dict[params["sequence_to_ignore"]] = "first"
+        if self.sequence_to_ignore in columns:
+            agg_dict[self.sequence_to_ignore] = "first"
 
         if "counts" in columns:
-            agg_dict["counts"] = params["count_agg"].value
+            agg_dict["counts"] = self.count_agg.value
 
         if "cell_ids" in columns:
             agg_dict["cell_ids"] = "first"
@@ -130,13 +128,12 @@ class DuplicateSequenceFilter(Filter):
 
         return agg_dict
 
-    @staticmethod
-    def process_repertoire(repertoire: Repertoire, params: dict) -> Repertoire:
+    def _process_repertoire(self, repertoire: Repertoire) -> Repertoire:
         data = pd.DataFrame(repertoire.load_data())
 
-        groupby_fields = DuplicateSequenceFilter._prepare_group_by_field(params, data.columns)
+        groupby_fields = self._prepare_group_by_field(data.columns)
         custom_lists = list(set(data.columns) - set(Repertoire.FIELDS))
-        agg_dict = DuplicateSequenceFilter._prepare_agg_dict(params, data.columns, custom_lists)
+        agg_dict = self._prepare_agg_dict(data.columns, custom_lists)
 
         # Chain objects can not be aggregated, convert to strings
         if "chains" in data.columns:
@@ -150,24 +147,17 @@ class DuplicateSequenceFilter(Filter):
                                                 sequences=list(no_duplicates["sequences"]) if "sequences" in no_duplicates.columns else None,
                                                 v_genes=list(no_duplicates["v_genes"]) if "v_genes" in no_duplicates.columns else None,
                                                 j_genes=list(no_duplicates["j_genes"]) if 'j_genes' in no_duplicates.columns else None,
-                                                chains=[Chain(key) for key in list(no_duplicates["chains"])] if "chains" in no_duplicates.columns else None,
+                                                chains=[Chain(key) for key in
+                                                        list(no_duplicates["chains"])] if "chains" in no_duplicates.columns else None,
                                                 counts=list(no_duplicates["counts"]) if "counts" in no_duplicates else None,
                                                 region_types=list(no_duplicates["region_types"]) if "region_types" in no_duplicates else None,
                                                 custom_lists={key: list(no_duplicates[key]) for key in custom_lists},
                                                 sequence_identifiers=list(no_duplicates["sequence_identifiers"]),
                                                 metadata=copy.deepcopy(repertoire.metadata),
-                                                path=params["result_path"],
+                                                path=self.result_path,
                                                 filename_base=f"{repertoire.data_filename.stem}_filtered")
 
         return processed_repertoire
-
-    def process_dataset(self, dataset: RepertoireDataset, result_path: Path) -> RepertoireDataset:
-        params = {"result_path": result_path, "filter_sequence_type": self.filter_sequence_type, "count_agg": self.count_agg,
-                  "batch_size": self.batch_size, "sequence_of_interest": self.sequence_of_interest,
-                  "sequence_to_ignore": self.sequence_to_ignore}
-
-        return DuplicateSequenceFilter.process(dataset, params)
-
 
     @staticmethod
     def get_documentation():

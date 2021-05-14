@@ -163,8 +163,7 @@ class KmerFrequencyEncoder(DatasetEncoder):
 
     def encode(self, dataset, params: EncoderParams):
 
-        encoded_dataset = CacheHandler.memo_by_params(self._prepare_caching_params(dataset, params),
-                                                      lambda: self._encode_new_dataset(dataset, params))
+        encoded_dataset = self._encode_new_dataset(dataset, params)
 
         return encoded_dataset
 
@@ -181,13 +180,8 @@ class KmerFrequencyEncoder(DatasetEncoder):
             self._prepare_caching_params(dataset, params, KmerFrequencyEncoder.STEP_ENCODED),
             lambda: self._encode_examples(dataset, params))
 
-        vectorized_examples, feature_names = CacheHandler.memo_by_params(
-            self._prepare_caching_params(dataset, params, KmerFrequencyEncoder.STEP_VECTORIZED),
-            lambda: self._vectorize_encoded(examples=encoded_example_list, params=params))
-
-        normalized_examples = CacheHandler.memo_by_params(
-            self._prepare_caching_params(dataset, params, KmerFrequencyEncoder.STEP_NORMALIZED),
-            lambda: FeatureScaler.normalize(vectorized_examples, self.normalization_type))
+        vectorized_examples, feature_names = self._vectorize_encoded(examples=encoded_example_list, params=params)
+        normalized_examples = FeatureScaler.normalize(vectorized_examples, self.normalization_type)
 
         if self.scale_to_unit_variance:
             examples = self.scale_normalized(params, dataset, normalized_examples)

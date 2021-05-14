@@ -11,6 +11,9 @@ class ChainRepertoireFilter(Filter):
     with chain different than "keep_chain" parameter.
     Note that this filter filters out repertoires, not individual sequences, and can thus only be applied to RepertoireDatasets.
 
+    Since the filter removes repertoires from the dataset (examples in machine learning setting), it cannot be used with :ref:`TrainMLModel`
+    instruction. If you want to filter out repertoires including a given chain, see :ref:`DatasetExport` instruction with preprocessing.
+
     Arguments:
 
         keep_chain (:py:obj:`~immuneML.environment.SequenceType.SequenceType`): Which chain should be kept.
@@ -29,28 +32,28 @@ class ChainRepertoireFilter(Filter):
 
     """
 
-    def __init__(self, keep_chain: Chain):
-        self.keep_chain = keep_chain
+    def __init__(self, keep_chain, result_path: Path = None):
+        super().__init__(result_path)
+        self.keep_chain = Chain.get_chain(keep_chain)
 
-    def process_dataset(self, dataset: RepertoireDataset, result_path: Path = None):
-        return ChainRepertoireFilter.process(dataset=dataset, params={"keep_chain": self.keep_chain,
-                                                                      "result_path": result_path})
-
-    @staticmethod
-    def process(dataset: RepertoireDataset, params: dict) -> RepertoireDataset:
-        ChainRepertoireFilter.check_dataset_type(dataset, [RepertoireDataset], "ChainRepertoireFilter")
+    def process_dataset(self, dataset: RepertoireDataset, result_path: Path):
+        self.check_dataset_type(dataset, [RepertoireDataset], "ChainRepertoireFilter")
         processed_dataset = dataset.clone()
+        self.result_path = result_path if result_path is not None else self.result_path
 
         repertoires = []
         indices = []
         for index, repertoire in enumerate(dataset.get_data()):
-            if all(sequence.metadata.chain == Chain.get_chain(params["keep_chain"]) for sequence in repertoire.sequences):
+            if all(sequence.metadata.chain == self.keep_chain for sequence in repertoire.sequences):
                 repertoires.append(repertoire)
                 indices.append(index)
 
         processed_dataset.repertoires = repertoires
-        processed_dataset.metadata_file = ChainRepertoireFilter.build_new_metadata(processed_dataset, indices, params["result_path"])
+        processed_dataset.metadata_file = self._build_new_metadata(processed_dataset, indices)
 
-        ChainRepertoireFilter.check_dataset_not_empty(processed_dataset, "ChainRepertoireFilter")
+        self.check_dataset_not_empty(processed_dataset, "ChainRepertoireFilter")
 
         return processed_dataset
+
+    def keeps_example_count(self) -> bool:
+        return False
