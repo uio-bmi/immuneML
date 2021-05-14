@@ -13,7 +13,7 @@ from scripts.specification_util import update_docs_per_mapping
 
 class DatasetExportInstruction(Instruction):
     """
-    DatasetExport instruction takes a list of datasets as input and outputs them in specified formats.
+    DatasetExport instruction takes a list of datasets as input, optionally applies preprocessing steps, and outputs the data in specified formats.
 
     Arguments:
 
