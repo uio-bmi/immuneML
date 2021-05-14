@@ -2,4 +2,4 @@ differences: 0
 indels: False
 ignore_frequency: False
 ignore_genes: False
-distance_metric: JACCARD
+distance_metric: MORISITA_HORN

@@ -2,6 +2,7 @@ from pathlib import Path
 import subprocess
 from io import StringIO
 import pandas as pd
+import numpy as np
 import warnings
 from tempfile import NamedTemporaryFile
 
@@ -32,7 +33,7 @@ class EditDistanceEncoder(DatasetEncoder):
         compairr_path (Path): path to the CompAIRR executable
 
         distance_metric (str): The distance metric to be applied after computing the number of overlapping sequences.
-        The value is ignored, Jaccard is computed for now.
+        The value is ignored, Morisita-Horn is computed for now.
 
         differences (int): Number of differences allowed between the sequences of two immune receptor chains, this
         may be between 0 and 2. By default differences is 0.
@@ -55,7 +56,7 @@ class EditDistanceEncoder(DatasetEncoder):
         my_distance_encoder:
             Distance:
                 compairr_path: path/to/compairr_path
-                distance_metric: JACCARD
+                distance_metric: MORISITA_HORN
                 # Optional parameters:
                 differences: 0
                 indels: False
@@ -140,9 +141,9 @@ class EditDistanceEncoder(DatasetEncoder):
 
     def build_distance_matrix(self, dataset: RepertoireDataset, params: EncoderParams, train_repertoire_ids: list):
         current_dataset = dataset if self.context is None or "dataset" not in self.context else self.context["dataset"]
-        raw_distance_matrix, repertoire_sizes = self._run_compairr(current_dataset, params)
+        raw_distance_matrix, repertoire_sizes, repertoire_indices = self._run_compairr(current_dataset, params)
 
-        distance_matrix = self.apply_distance_fn(raw_distance_matrix, repertoire_sizes)
+        distance_matrix = self._morisita_horn(raw_distance_matrix, repertoire_sizes, repertoire_indices)
 
         repertoire_ids = dataset.get_repertoire_ids()
 
@@ -150,24 +151,37 @@ class EditDistanceEncoder(DatasetEncoder):
 
         return distance_matrix
 
-    def apply_distance_fn(self, raw_distance_matrix, repertoire_sizes):
+    def _morisita_horn(self, raw_distance_matrix, repertoire_sizes, repertoire_indices):
+        # todo why does it sometimes exceed 1? (rounding errors?)
+
         distance_matrix = pd.DataFrame().reindex_like(raw_distance_matrix)
 
         for rowIndex, row in distance_matrix.iterrows():
             for columnIndex, value in row.items():
-                distance_matrix.loc[rowIndex, columnIndex] = self.jaccard_dist(repertoire_sizes[rowIndex],
-                                                                                repertoire_sizes[columnIndex],
-                                                                                raw_distance_matrix.loc[rowIndex, columnIndex])
+                distance_matrix.loc[rowIndex, columnIndex] = (2 * raw_distance_matrix.loc[rowIndex, columnIndex]) / ((repertoire_indices[rowIndex] + repertoire_indices[columnIndex]) * repertoire_sizes[rowIndex] * repertoire_sizes[columnIndex])
+
         return distance_matrix
 
-    def jaccard_dist(self, rep_1_size, rep_2_size, intersect):
-        return 1 - intersect / (rep_1_size + rep_2_size - intersect)
+    # def apply_distance_fn(self, raw_distance_matrix, repertoire_sizes):
+    #     distance_matrix = pd.DataFrame().reindex_like(raw_distance_matrix)
+    #
+    #     for rowIndex, row in distance_matrix.iterrows():
+    #         for columnIndex, value in row.items():
+    #             jacc = self.jaccard_dist(repertoire_sizes[rowIndex], repertoire_sizes[columnIndex], raw_distance_matrix.loc[rowIndex, columnIndex])
+    #             rep_1_size, rep_2_size, intersect = repertoire_sizes[rowIndex], repertoire_sizes[columnIndex], raw_distance_matrix.loc[rowIndex, columnIndex]
+    #             result = 1 - intersect / (rep_1_size + rep_2_size - intersect)
+    #
+    #             distance_matrix.loc[rowIndex, columnIndex] = self.jaccard_dist(repertoire_sizes[rowIndex],
+    #                                                                             repertoire_sizes[columnIndex],
+    #                                                                             raw_distance_matrix.loc[rowIndex, columnIndex])
+    #     return distance_matrix
+    #
+    # def jaccard_dist(self, rep_1_size, rep_2_size, intersect):
+    #     return 1 - intersect / (rep_1_size + rep_2_size - intersect)
 
     def _run_compairr(self, dataset: RepertoireDataset, params: EncoderParams):
         repertoire_sizes = {}
-
-
-        testfile = params.result_path / "test.tsv"
+        repertoire_indices = {}
 
         with NamedTemporaryFile(mode='w') as tmp:
             for repertoire in dataset.get_data():
@@ -180,15 +194,12 @@ class EditDistanceEncoder(DatasetEncoder):
                 if na_rows > 0:
                     warnings.warn(f"EditDistanceEncoder: removed {na_rows} entries from repertoire {repertoire.identifier} due to missing values.")
 
-                repertoire_sizes[repertoire.identifier] = sum(repertoire_contents["counts"].astype(int))
+                repertoire_counts = repertoire_contents["counts"].astype(int)
+                repertoire_sizes[repertoire.identifier] = sum(repertoire_counts)
+                repertoire_indices[repertoire.identifier] = sum(np.square(repertoire_counts)) / np.square(sum(repertoire_counts))
 
-                print(f"result written to {testfile}")
-                repertoire_contents.to_csv(testfile, mode='a', header=False, index=False, sep="\t")
                 repertoire_contents.to_csv(tmp.name, mode='a', header=False, index=False, sep="\t")
             args = self._get_cmd_args(tmp.name, params.pool_size)
-
-            print("***args")
-            print(args)
             compairr_result = subprocess.run(args, capture_output=True, text=True)
 
         if compairr_result.stdout == "":
@@ -201,10 +212,7 @@ class EditDistanceEncoder(DatasetEncoder):
 
         raw_distance_matrix = pd.read_csv(StringIO(compairr_result.stdout), sep="\t", index_col=0)
 
-        print("raw dist matrix")
-        print(raw_distance_matrix)
-
-        return raw_distance_matrix, repertoire_sizes
+        return raw_distance_matrix, repertoire_sizes, repertoire_indices
 
     def _get_cmd_args(self, filename, number_of_processes):
         indels_args = ["-i"] if self.indels else []
