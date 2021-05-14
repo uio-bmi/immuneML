@@ -4,6 +4,7 @@ from typing import List
 
 from immuneML.IO.dataset_export.DataExporter import DataExporter
 from immuneML.data_model.dataset.Dataset import Dataset
+from immuneML.preprocessing.Preprocessor import Preprocessor
 from immuneML.util.ReflectionHandler import ReflectionHandler
 from immuneML.workflows.instructions.Instruction import Instruction
 from immuneML.workflows.instructions.dataset_generation.DatasetExportState import DatasetExportState
@@ -18,6 +19,9 @@ class DatasetExportInstruction(Instruction):
 
         datasets (list): a list of datasets to export in all given formats
 
+        preprocessing_sequence (str): which preprocessing sequence to use on the dataset(s), this item is optional and does not have to be specified.
+        When specified, the same preprocessing sequence will be applied to all datasets.
+
         formats (list): a list of formats in which to export the datasets. Valid formats are class names of any non-abstract class inheriting :py:obj:`~immuneML.IO.dataset_export.DataExporter.DataExporter`. Important note: Pickle files might not be compatible between different immuneML (sub)versions.
 
     YAML specification:
@@ -30,15 +34,17 @@ class DatasetExportInstruction(Instruction):
             datasets: # list of datasets to export
                 - my_generated_dataset
                 - my_dataset_from_adaptive
+            preprocessing_sequence: my_preprocessing_sequence
             export_formats: # list of formats to export the datasets to
                 - AIRR
                 - Pickle
 
     """
 
-    def __init__(self, datasets: List[Dataset], exporters: List[DataExporter], result_path: Path = None, name: str = None):
+    def __init__(self, datasets: List[Dataset], exporters: List[DataExporter], preprocessing_sequence: List[Preprocessor] = None, result_path: Path = None, name: str = None):
         self.datasets = datasets
         self.exporters = exporters
+        self.preprocessing_sequence = preprocessing_sequence
         self.result_path = result_path
         self.name = name
 
@@ -46,8 +52,16 @@ class DatasetExportInstruction(Instruction):
         self.result_path = result_path / self.name
         paths = {}
 
+        # todo add to html how it was preprocessed
+
         for dataset in self.datasets:
             dataset_name = dataset.name if dataset.name is not None else dataset.identifier
+
+            if self.preprocessing_sequence is not None and len(self.preprocessing_sequence) > 0:
+                for preprocessing in self.preprocessing_sequence:
+                    dataset = preprocessing.process_dataset(dataset, result_path)
+                    print(f"{datetime.datetime.now()}: Preprocessed dataset {dataset_name} with {preprocessing.__class__.__name__}", flush=True)
+
             paths[dataset_name] = {}
             for exporter in self.exporters:
                 export_format = exporter.__name__[:-8]

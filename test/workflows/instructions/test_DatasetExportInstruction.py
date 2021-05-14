@@ -5,6 +5,7 @@ from unittest import TestCase
 
 from immuneML.IO.dataset_export.AIRRExporter import AIRRExporter
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
+from immuneML.preprocessing.filters.CountPerSequenceFilter import CountPerSequenceFilter
 from immuneML.simulation.dataset_generation.RandomDatasetGenerator import RandomDatasetGenerator
 from immuneML.util.PathBuilder import PathBuilder
 from immuneML.workflows.instructions.dataset_generation.DatasetExportInstruction import DatasetExportInstruction
@@ -16,7 +17,9 @@ class TestDatasetExportInstruction(TestCase):
         path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "dataset_export_instruction/")
         dataset = RandomDatasetGenerator.generate_repertoire_dataset(10, {10: 1}, {12: 1}, {}, path)
         dataset.name = "d1"
-        instruction = DatasetExportInstruction(datasets=[dataset], exporters=[AIRRExporter], name="export_instr")
+
+        filter = CountPerSequenceFilter(low_count_limit=1, remove_without_count=True, remove_empty_repertoires=True,  batch_size=100)
+        instruction = DatasetExportInstruction(datasets=[dataset], preprocessing_sequence=[filter], exporters=[AIRRExporter], name="export_instr")
 
         result_path = path / "generated/"
         state = instruction.run(result_path=result_path)
