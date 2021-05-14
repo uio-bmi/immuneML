@@ -29,10 +29,14 @@ class DistanceEncoder(DatasetEncoder):
 
         distance_metric (:py:mod:`~immuneML.encodings.distance_encoding.DistanceMetricType`): The metric used to calculate the
         distance between two repertoires. Names of different distance metric types are allowed values in the specification.
+        The default distance metric is JACCARD (inverse Jaccard).
 
-        attributes_to_match: The attributes to consider when determining whether a sequence is present in both repertoires.
+        sequence_batch_size (int): The number of sequences to be processed at once. Increasing this number increases the memory use.
+        The default value is 1000.
+
+        attributes_to_match (list): The attributes to consider when determining whether a sequence is present in both repertoires.
         Only the fields defined under attributes_to_match will be considered, all other fields are ignored.
-        Valid values include any repertoire attribute (sequence, amino acid sequence, V gene etc).
+        Valid values include any repertoire attribute (sequence, amino acid sequence, V gene etc). The default value is ['sequence_aas']
 
     YAML specification:
 
@@ -67,7 +71,7 @@ class DistanceEncoder(DatasetEncoder):
         return self
 
     @staticmethod
-    def _prepare_parameters(distance_metric: str, attributes_to_match: list, sequence_batch_size: int, context: dict = None):
+    def _prepare_parameters(distance_metric: str, attributes_to_match: list, sequence_batch_size: int, context: dict = None, name: str = None):
         valid_metrics = [metric.name for metric in DistanceMetricType]
         ParameterValidator.assert_in_valid_list(distance_metric, valid_metrics, "DistanceEncoder", "distance_metric")
 
@@ -75,7 +79,8 @@ class DistanceEncoder(DatasetEncoder):
             "distance_metric": DistanceMetricType[distance_metric.upper()],
             "attributes_to_match": attributes_to_match,
             "sequence_batch_size": sequence_batch_size,
-            "context": context
+            "context": context,
+            "name": name
         }
 
     @staticmethod

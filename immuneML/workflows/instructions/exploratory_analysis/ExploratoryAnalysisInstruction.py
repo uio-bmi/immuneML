@@ -42,6 +42,7 @@ class ExploratoryAnalysisInstruction(Instruction):
             analyses: # analyses to perform
                 my_first_analysis: # user-defined name of the analysis
                     dataset: d1 # dataset to use in the first analysis
+                    preprocessing_sequence: p1 # preprocessing sequence to use in the first analysis
                     report: r1 # which report to generate using the dataset d1
                 my_second_analysis: # user-defined name of another analysis
                     dataset: d1 # dataset to use in the second analysis - can be the same or different from other analyses

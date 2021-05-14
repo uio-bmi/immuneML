@@ -247,6 +247,8 @@ class ImportHelper:
             sequence_name = sequence_type.name.lower().replace("_", " ")
 
             if sequence_colname in dataframe.columns:
+                dataframe[sequence_colname].replace({"": Constants.UNKNOWN}, inplace=True)
+
                 n_empty = sum(dataframe[sequence_colname].isnull())
                 if n_empty > 0:
                     dataframe.drop(dataframe.loc[dataframe[sequence_colname].isnull()].index, inplace=True)

@@ -47,6 +47,14 @@ class ExploratoryAnalysisHTMLBuilder:
                 "dataset_type": StringHelper.camel_case_to_word_string(type(analysis.dataset).__name__),
                 "example_count": analysis.dataset.get_example_count(),
                 "dataset_size": f"{analysis.dataset.get_example_count()} {type(analysis.dataset).__name__.replace('Dataset', 's').lower()}",
+                "preprocessing_sequence": [
+                    {
+                        "preprocessing_name": preprocessing.__class__.__name__,
+                        "preprocessing_params": ", ".join(
+                            [f"{key}: {value}" for key, value in vars(preprocessing).items()])
+                    } for preprocessing in analysis.preprocessing_sequence
+                ] if analysis.preprocessing_sequence is not None else [],
+                "show_preprocessing": analysis.preprocessing_sequence is not None and len(analysis.preprocessing_sequence) > 0,
                 "show_labels": analysis.label_config is not None and len(analysis.label_config.get_labels_by_name()) > 0,
                 "labels": [{"name": label.name, "values": str(label.values)[1:-1]}
                            for label in analysis.label_config.get_label_objects()] if analysis.label_config else None,

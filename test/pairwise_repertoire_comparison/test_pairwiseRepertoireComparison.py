@@ -39,11 +39,11 @@ class TestPairwiseRepertoireComparison(TestCase):
 
         result = comparison.compare_repertoires(dataset, comparison_fn)
 
-        self.assertTrue(np.array_equal(result, np.array([[1., 0., 0., 0.3333333333333333, 0.3333333333333333],
-                                                         [0., 1., 0., 0., 0.5],
-                                                         [0., 0., 1., 0., 0.],
-                                                         [0.3333333333333333, 0., 0., 1., 0.],
-                                                         [0.3333333333333333, 0.5, 0., 0., 1.]])))
+        self.assertTrue(np.array_equal(result, np.array([[0., 1., 1., 0.6666666666666667, 0.6666666666666667],
+                                                         [1., 0., 1., 1., 0.5],
+                                                         [1., 1., 0., 1., 1.],
+                                                         [0.6666666666666667, 1., 1., 0., 1.],
+                                                         [0.6666666666666667, 0.5, 1., 1., 0.]])))
 
         shutil.rmtree(path)
 
