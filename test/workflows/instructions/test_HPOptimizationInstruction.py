@@ -63,10 +63,10 @@ class TestHPOptimizationProcess(TestCase):
         enc2 = {"k": 3, "model_type": ModelType.SEQUENCE.name, "vector_size": 6}
         hp_settings = [HPSetting(Word2VecEncoder.build_object(dataset, **enc1), enc1,
                                  LogisticRegression(), {"model_selection_cv": False, "model_selection_n_folds": -1},
-                                 []),
+                                 [], "e1", "ml1"),
                        HPSetting(Word2VecEncoder.build_object(dataset, **enc2), enc2,
                                  SVM(), {"model_selection_cv": False, "model_selection_n_folds": -1},
-                                 [ClonesPerRepertoireFilter(lower_limit=-1, upper_limit=1000)])
+                                 [ClonesPerRepertoireFilter(lower_limit=-1, upper_limit=1000)], "e2", "ml2", "p2")
                        ]
 
         report = SequenceLengthDistribution()

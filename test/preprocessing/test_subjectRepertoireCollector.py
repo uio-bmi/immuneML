@@ -30,7 +30,7 @@ class TestSubjectRepertoireCollector(TestCase):
 
         dataset = RepertoireDataset(repertoires=reps)
 
-        dataset2 = SubjectRepertoireCollector.process(dataset, {"result_path": path / "result"})
+        dataset2 = SubjectRepertoireCollector().process_dataset(dataset, path / "result")
 
         self.assertEqual(2, len(dataset2.get_data()))
         self.assertEqual(3, len(dataset.get_data()))

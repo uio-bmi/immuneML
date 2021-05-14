@@ -35,7 +35,7 @@ class TestChainRepertoireFilter(TestCase):
 
         dataset = RepertoireDataset(repertoires=[rep1, rep2], metadata_file=path / "metadata.csv")
 
-        dataset2 = ChainRepertoireFilter.process(dataset, {"keep_chain": "ALPHA", "result_path": path / "results"})
+        dataset2 = ChainRepertoireFilter(**{"keep_chain": "ALPHA"}).process_dataset(dataset, path / "results")
 
         self.assertEqual(1, len(dataset2.get_data()))
         self.assertEqual(2, len(dataset.get_data()))
@@ -47,6 +47,6 @@ class TestChainRepertoireFilter(TestCase):
         for rep in dataset2.get_data():
             self.assertEqual("AAA", rep.sequences[0].get_sequence())
 
-        self.assertRaises(AssertionError, ChainRepertoireFilter.process, dataset, {"keep_chain": "GAMMA", "result_path": path / "results"})
+        self.assertRaises(AssertionError, ChainRepertoireFilter(**{"keep_chain": "GAMMA"}).process_dataset, dataset, path / "results")
 
         shutil.rmtree(path)
