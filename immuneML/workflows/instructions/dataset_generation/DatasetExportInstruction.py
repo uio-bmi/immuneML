@@ -52,8 +52,6 @@ class DatasetExportInstruction(Instruction):
         self.result_path = result_path / self.name
         paths = {}
 
-        # todo add to html how it was preprocessed
-
         for dataset in self.datasets:
             dataset_name = dataset.name if dataset.name is not None else dataset.identifier
 
@@ -72,7 +70,7 @@ class DatasetExportInstruction(Instruction):
                 print(f"{datetime.datetime.now()}: Exported dataset {dataset_name} containing {dataset.get_example_count()} {contains} in {export_format} format.", flush=True)
 
         return DatasetExportState(datasets=self.datasets, formats=[exporter.__name__[:-8] for exporter in self.exporters],
-                                      paths=paths, result_path=self.result_path, name=self.name)
+                                  preprocessing_sequence=self.preprocessing_sequence, paths=paths, result_path=self.result_path, name=self.name)
 
     @staticmethod
     def get_documentation():

@@ -3,7 +3,6 @@ from pathlib import Path
 from immuneML.IO.dataset_export.DataExporter import DataExporter
 from immuneML.dsl.symbol_table.SymbolTable import SymbolTable
 from immuneML.dsl.symbol_table.SymbolType import SymbolType
-from immuneML.preprocessing.Preprocessor import Preprocessor
 from immuneML.util.ParameterValidator import ParameterValidator
 from immuneML.util.ReflectionHandler import ReflectionHandler
 from immuneML.workflows.instructions.dataset_generation.DatasetExportInstruction import DatasetExportInstruction

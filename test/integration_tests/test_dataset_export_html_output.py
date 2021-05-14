@@ -32,9 +32,20 @@ class TestDatasetExportHTMLOutput(TestCase):
                             "result_path": str(dataset_path)
                         }
                     }
+                },
+                "preprocessing_sequences": {
+                    "p1": [
+                        {
+                            "my_filter": {
+                                "ClonesPerRepertoireFilter": {
+                                    "lower_limit": 1,
+                                }
+                            }
+                        }
+                    ]
                 }
             },
-            "instructions": {"instr1": {"type": "DatasetExport", "export_formats": ["Pickle", "AIRR"], "datasets": ["d1"]}},
+            "instructions": {"instr1": {"type": "DatasetExport", "export_formats": ["Pickle", "AIRR"], "datasets": ["d1"], "preprocessing_sequence": "p1"}},
             "output": {"format": "HTML"}
         }
 

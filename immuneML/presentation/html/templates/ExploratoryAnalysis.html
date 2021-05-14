@@ -38,6 +38,17 @@
                             </tr>
                         </table>
                         </div>
+                        {{#show_preprocessing}}
+                        <h4>Preprocessings</h4>
+                        The following preprocessing steps have been applied to the dataset:
+                        <div>
+                            <ul>
+                                {{#preprocessing_sequence}}
+                                <li>{{preprocessing_name}}; {{preprocessing_params}}</li>
+                                {{/preprocessing_sequence}}
+                            </ul>
+                        </div>
+                        {{/show_preprocessing}}
                     </div>
                 </div>
                 <div class="col-container">
