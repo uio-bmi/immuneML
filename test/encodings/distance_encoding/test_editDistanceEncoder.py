@@ -36,7 +36,7 @@ class TestDistanceEncoder(TestCase):
         if matchairr_path.exists():
             self._run_test(matchairr_path)
 
-    def _run_test(self, matchairr_path):
+    def _run_test(self, compairr_path):
 
         path = EnvironmentSettings.tmp_test_path / "distance_encoder/"
 
@@ -44,8 +44,7 @@ class TestDistanceEncoder(TestCase):
 
         dataset = self.create_dataset(path)
 
-        enc = EditDistanceEncoder.build_object(dataset, **{"matchairr_path": matchairr_path,
-                                                        "distance_metric": "JACCARD",
+        enc = EditDistanceEncoder.build_object(dataset, **{"compairr_path": compairr_path,
                                                         "differences": 0,
                                                         "indels": False,
                                                         "ignore_frequency": False,
