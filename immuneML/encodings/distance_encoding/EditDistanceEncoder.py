@@ -33,6 +33,8 @@ class EditDistanceEncoder(DatasetEncoder):
 
         compairr_path (Path): path to the CompAIRR executable
 
+        keep_compairr_input (bool): whether to keep the input file that was passed to CompAIRR. This may take a lot of storage space.
+
         differences (int): Number of differences allowed between the sequences of two immune receptor chains, this
         may be between 0 and 2. By default, differences is 0.
 
@@ -63,10 +65,12 @@ class EditDistanceEncoder(DatasetEncoder):
     """
 
     OUTPUT_FILENAME = "compairr_results.txt"
+    INPUT_FILENAME = "compairr_input.tsv"
     LOG_FILENAME = "compairr_log.txt"
 
-    def __init__(self, compairr_path: Path, differences: int, indels: bool, ignore_frequency: bool, ignore_genes: bool, context: dict = None, name: str = None):
+    def __init__(self, compairr_path: Path, keep_compairr_input: bool, differences: int, indels: bool, ignore_frequency: bool, ignore_genes: bool, context: dict = None, name: str = None):
         self.compairr_path = Path(compairr_path)
+        self.keep_compairr_input = keep_compairr_input
         self.differences = differences
         self.indels = indels
         self.ignore_frequency = ignore_frequency
@@ -80,7 +84,7 @@ class EditDistanceEncoder(DatasetEncoder):
         return self
 
     @staticmethod
-    def _prepare_parameters(compairr_path: str, differences: int, indels: bool, ignore_frequency: bool, ignore_genes: bool, context: dict = None, name: str = None):
+    def _prepare_parameters(compairr_path: str, keep_compairr_input: bool, differences: int, indels: bool, ignore_frequency: bool, ignore_genes: bool, context: dict = None, name: str = None):
         ParameterValidator.assert_type_and_value(differences, int, "EditDistanceEncoder", "differences", min_inclusive=0, max_inclusive=2)
         ParameterValidator.assert_type_and_value(indels, bool, "EditDistanceEncoder", "indels")
         if indels:
@@ -88,10 +92,11 @@ class EditDistanceEncoder(DatasetEncoder):
 
         ParameterValidator.assert_type_and_value(ignore_frequency, bool, "EditDistanceEncoder", "ignore_frequency")
         ParameterValidator.assert_type_and_value(ignore_genes, bool, "EditDistanceEncoder", "ignore_genes")
+        ParameterValidator.assert_type_and_value(keep_compairr_input, bool, "EditDistanceEncoder", "keep_compairr_input")
 
         compairr_path = Path(compairr_path)
         try:
-            compairr_result = subprocess.run([compairr_path, "-h"])
+            compairr_result = subprocess.run([compairr_path, "-h"], capture_output=True,)
             assert compairr_result.returncode == 0, "exit code was non-zero."
         except Exception as e:
             raise Exception(f"EditDistanceEncoder: failed to call CompAIRR: {e}\n"
@@ -99,6 +104,7 @@ class EditDistanceEncoder(DatasetEncoder):
 
         return {
             "compairr_path": compairr_path,
+            "keep_compairr_input": keep_compairr_input,
             "differences": differences,
             "indels": indels,
             "ignore_frequency": ignore_frequency,
@@ -136,7 +142,7 @@ class EditDistanceEncoder(DatasetEncoder):
 
     def build_distance_matrix(self, dataset: RepertoireDataset, params: EncoderParams, train_repertoire_ids: list):
         current_dataset = dataset if self.context is None or "dataset" not in self.context else self.context["dataset"]
-        raw_distance_matrix, repertoire_sizes, repertoire_indices = self._run_compairr(current_dataset, params)
+        raw_distance_matrix, repertoire_sizes, repertoire_indices = self._get_raw_overlap(current_dataset, params)
 
         distance_matrix = self._morisita_horn(raw_distance_matrix, repertoire_sizes, repertoire_indices)
 
@@ -163,7 +169,7 @@ class EditDistanceEncoder(DatasetEncoder):
         mh_distance = 1 - mh_similarity
 
         if mh_distance < -0.3 and self.differences == 0:
-            raise ValueError(
+            warnings.warn(
                 f"EditDistanceEncoder: Morisita-Horn similarity can only be in the range [0, 1], found {mh_similarity} "
                 f"when comparing repertoires {rowIndex} and {columnIndex}.")
         elif mh_distance < 0:
@@ -174,23 +180,13 @@ class EditDistanceEncoder(DatasetEncoder):
 
         return mh_distance
 
-    def _run_compairr(self, dataset: RepertoireDataset, params: EncoderParams):
-        repertoire_sizes = {}
-        repertoire_indices = {}
+    def _get_raw_overlap(self, dataset: RepertoireDataset, params: EncoderParams):
 
-        with NamedTemporaryFile(mode='w') as tmp:
-            for repertoire in dataset.get_data():
-                repertoire_contents = self._get_repertoire_contents(repertoire)
-
-                repertoire_counts = repertoire_contents["counts"].astype(int)
-
-                repertoire_sizes[repertoire.identifier] = sum(repertoire_counts)
-                repertoire_indices[repertoire.identifier] = sum(np.square(repertoire_counts)) / np.square(sum(repertoire_counts))
-
-                repertoire_contents.to_csv(tmp.name, mode='a', header=False, index=False, sep="\t")
-
-            args = self._get_cmd_args(tmp.name, params.result_path, 1)
-            compairr_result = subprocess.run(args, capture_output=True, text=True)
+        if self.keep_compairr_input:
+            compairr_result, repertoire_sizes, repertoire_indices = self._run_compairr(dataset, params, params.result_path / EditDistanceEncoder.INPUT_FILENAME)
+        else:
+            with NamedTemporaryFile(mode='w') as tmp:
+                compairr_result, repertoire_sizes, repertoire_indices = self._run_compairr(dataset, params, tmp.name)
 
         output_file = params.result_path / EditDistanceEncoder.OUTPUT_FILENAME
 
@@ -201,6 +197,28 @@ class EditDistanceEncoder(DatasetEncoder):
         raw_distance_matrix = pd.read_csv(output_file, sep="\t", index_col=0)
 
         return raw_distance_matrix, repertoire_sizes, repertoire_indices
+
+    def _run_compairr(self, dataset, params, filename):
+        repertoire_sizes = {}
+        repertoire_indices = {}
+
+        for repertoire in dataset.get_data():
+            repertoire_contents = self._get_repertoire_contents(repertoire)
+
+            repertoire_counts = repertoire_contents["counts"].astype(int)
+
+            repertoire_sizes[repertoire.identifier] = sum(repertoire_counts)
+            repertoire_indices[repertoire.identifier] = sum(np.square(repertoire_counts)) / np.square(
+                sum(repertoire_counts))
+
+            repertoire_contents.to_csv(filename, mode='a', header=False, index=False, sep="\t")
+
+        args = self._get_cmd_args(filename, params.result_path, 1)
+        compairr_result = subprocess.run(args, capture_output=True, text=True)
+
+        return compairr_result, repertoire_sizes, repertoire_indices
+
+
 
     def _get_repertoire_contents(self, repertoire):
         repertoire_contents = repertoire.get_attributes([EnvironmentSettings.get_sequence_type().value, "counts", "v_genes", "j_genes"])

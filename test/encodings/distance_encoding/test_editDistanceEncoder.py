@@ -38,13 +38,14 @@ class TestDistanceEncoder(TestCase):
 
     def _run_test(self, compairr_path):
 
-        path = EnvironmentSettings.tmp_test_path / "distance_encoder/"
+        path = EnvironmentSettings.tmp_test_path / "edit_distance_encoder/"
 
         PathBuilder.build(path)
 
         dataset = self.create_dataset(path)
 
         enc = EditDistanceEncoder.build_object(dataset, **{"compairr_path": compairr_path,
+                                                           "keep_compairr_input": True,
                                                         "differences": 0,
                                                         "indels": False,
                                                         "ignore_frequency": False,
