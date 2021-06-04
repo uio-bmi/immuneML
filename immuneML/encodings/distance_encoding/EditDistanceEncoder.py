@@ -195,7 +195,8 @@ class EditDistanceEncoder(DatasetEncoder):
             warnings.warn(
                 f"EditDistanceEncoder: Morisita-Horn similarity can only be in the range [0, 1], found {mh_similarity} "
                 f"when comparing repertoires {rowIndex} and {columnIndex}.")
-        elif mh_distance < 0:
+
+        if mh_distance < 0:
             warnings.warn(
                 f"EditDistanceEncoder: found negative distance {mh_distance} when comparing repertoires {rowIndex} and {columnIndex}, "
                 f"distance will be set to 0.")
