@@ -31,19 +31,21 @@ class EditDistanceEncoder(DatasetEncoder):
 
     Arguments:
 
-        compairr_path (Path): path to the CompAIRR executable
+        compairr_path (Path): optional path to the CompAIRR executable. If not given, it is assumed that CompAIRR
+        has been installed such that it can be called directly on the command line, or that it is located at /usr/local/bin/compairr.
 
-        keep_compairr_input (bool): whether to keep the input file that was passed to CompAIRR. This may take a lot of storage space.
+        keep_compairr_input (bool): whether to keep the input file that was passed to CompAIRR. This may take a lot of
+        storage space if the input dataset is large.
 
         differences (int): Number of differences allowed between the sequences of two immune receptor chains, this
         may be between 0 and 2. By default, differences is 0.
 
         indels (bool): Whether to allow an indel. This is only possible if differences is 1. By default, indels is False.
 
-        ignore_frequency (bool): Whether to ignore the frequencies of the immune receptor chains. If False, frequencies
+        ignore_counts (bool): Whether to ignore the frequencies of the immune receptor chains. If False, frequencies
         will be included, meaning the 'counts' values for the receptors available in two repertoires are multiplied.
         If False, only the number of unique overlapping immune receptors ('clones') are considered.
-        By default, ignore_frequency is False.
+        By default, ignore_counts is False.
 
         ignore_genes (bool): Whether to ignore V and J gene information. If False, the V and J genes between two receptor chains
         have to match. If True, gene information is ignored. By default, ignore_genes is False.
@@ -55,11 +57,10 @@ class EditDistanceEncoder(DatasetEncoder):
 
         my_distance_encoder:
             Distance:
-                compairr_path: path/to/compairr
-                # Optional parameters:
+                compairr_path: optional/path/to/compairr
                 differences: 0
                 indels: False
-                ignore_frequency: False
+                ignore_counts: False
                 ignore_genes: False
 
     """
@@ -68,12 +69,12 @@ class EditDistanceEncoder(DatasetEncoder):
     INPUT_FILENAME = "compairr_input.tsv"
     LOG_FILENAME = "compairr_log.txt"
 
-    def __init__(self, compairr_path: Path, keep_compairr_input: bool, differences: int, indels: bool, ignore_frequency: bool, ignore_genes: bool, context: dict = None, name: str = None):
+    def __init__(self, compairr_path: Path, keep_compairr_input: bool, differences: int, indels: bool, ignore_counts: bool, ignore_genes: bool, context: dict = None, name: str = None):
         self.compairr_path = Path(compairr_path)
         self.keep_compairr_input = keep_compairr_input
         self.differences = differences
         self.indels = indels
-        self.ignore_frequency = ignore_frequency
+        self.ignore_counts = ignore_counts
         self.ignore_genes = ignore_genes
         self.context = context
         self.name = name
@@ -84,34 +85,56 @@ class EditDistanceEncoder(DatasetEncoder):
         return self
 
     @staticmethod
-    def _prepare_parameters(compairr_path: str, keep_compairr_input: bool, differences: int, indels: bool, ignore_frequency: bool, ignore_genes: bool, context: dict = None, name: str = None):
+    def _prepare_parameters(compairr_path: str, keep_compairr_input: bool, differences: int, indels: bool, ignore_counts: bool, ignore_genes: bool, context: dict = None, name: str = None):
         ParameterValidator.assert_type_and_value(differences, int, "EditDistanceEncoder", "differences", min_inclusive=0, max_inclusive=2)
         ParameterValidator.assert_type_and_value(indels, bool, "EditDistanceEncoder", "indels")
         if indels:
             assert differences == 1, f"EditDistanceEncoder: If indels is True, differences is only allowed to be 1, found {differences}"
 
-        ParameterValidator.assert_type_and_value(ignore_frequency, bool, "EditDistanceEncoder", "ignore_frequency")
+        ParameterValidator.assert_type_and_value(ignore_counts, bool, "EditDistanceEncoder", "ignore_counts")
         ParameterValidator.assert_type_and_value(ignore_genes, bool, "EditDistanceEncoder", "ignore_genes")
         ParameterValidator.assert_type_and_value(keep_compairr_input, bool, "EditDistanceEncoder", "keep_compairr_input")
 
-        compairr_path = Path(compairr_path)
-        try:
-            compairr_result = subprocess.run([compairr_path, "-h"], capture_output=True,)
-            assert compairr_result.returncode == 0, "exit code was non-zero."
-        except Exception as e:
-            raise Exception(f"EditDistanceEncoder: failed to call CompAIRR: {e}\n"
-                            f"Please ensure CompAIRR has been correctly installed and is available at {compairr_path}.")
+        compairr_path = EditDistanceEncoder._determine_compairr_path(compairr_path)
 
         return {
             "compairr_path": compairr_path,
             "keep_compairr_input": keep_compairr_input,
             "differences": differences,
             "indels": indels,
-            "ignore_frequency": ignore_frequency,
+            "ignore_counts": ignore_counts,
             "ignore_genes": ignore_genes,
             "context": context,
             "name": name
         }
+
+    @staticmethod
+    def _determine_compairr_path(compairr_path):
+        if compairr_path is None:
+            try:
+                compairr_path = EditDistanceEncoder._check_compairr_path("compairr")
+            except Exception as e:
+                compairr_path = EditDistanceEncoder._check_compairr_path("/usr/local/bin/compairr")
+        else:
+            compairr_path = EditDistanceEncoder._check_compairr_path(compairr_path)
+
+        return compairr_path
+
+
+    @staticmethod
+    def _check_compairr_path(compairr_path):
+        try:
+            compairr_result = subprocess.run([str(Path(compairr_path)), "--version"], capture_output=True)
+            assert compairr_result.returncode == 0, "exit code was non-zero."
+            output = str(compairr_result.stderr).split()
+            major, minor, patch = output[1].split(".")
+            assert int(major) >= 1, f"CompAIRR version 1 or higher is required, found version {output[1]}"
+        except Exception as e:
+            raise Exception(f"EditDistanceEncoder: failed to call CompAIRR: {e}\n"
+                            f"Please ensure the correct version of CompAIRR has been installed, or provide the path to the CompAIRR executable.")
+
+        return compairr_path
+
 
     @staticmethod
     def build_object(dataset, **params):
@@ -202,6 +225,9 @@ class EditDistanceEncoder(DatasetEncoder):
         repertoire_sizes = {}
         repertoire_indices = {}
 
+        with open(filename, "w") as file:
+            file.write("junction_aa\tduplicate_count\tv_call\tj_call\trepertoire_id\n")
+
         for repertoire in dataset.get_data():
             repertoire_contents = self._get_repertoire_contents(repertoire)
 
@@ -213,7 +239,7 @@ class EditDistanceEncoder(DatasetEncoder):
 
             repertoire_contents.to_csv(filename, mode='a', header=False, index=False, sep="\t")
 
-        args = self._get_cmd_args(filename, params.result_path, 1)
+        args = self._get_cmd_args(filename, params.result_path, params.pool_size)
         compairr_result = subprocess.run(args, capture_output=True, text=True)
 
         return compairr_result, repertoire_sizes, repertoire_indices
@@ -225,7 +251,7 @@ class EditDistanceEncoder(DatasetEncoder):
         repertoire_contents = pd.DataFrame({**repertoire_contents, "identifier": repertoire.identifier})
 
         check_na_rows = [EnvironmentSettings.get_sequence_type().value]
-        check_na_rows += [] if self.ignore_frequency else ["counts"]
+        check_na_rows += [] if self.ignore_counts else ["counts"]
         check_na_rows += [] if self.ignore_genes else ["v_genes", "j_genes"]
 
         n_rows_before = len(repertoire_contents)
@@ -236,14 +262,14 @@ class EditDistanceEncoder(DatasetEncoder):
             warnings.warn(
                 f"EditDistanceEncoder: removed {n_rows_before - len(repertoire_contents)} entries from repertoire {repertoire.identifier} due to missing values.")
 
-        if self.ignore_frequency:
+        if self.ignore_counts:
             repertoire_contents["counts"] = 1
 
         return repertoire_contents
 
     def _get_cmd_args(self, input_file, result_path, number_of_processes=1):
         indels_args = ["-i"] if self.indels else []
-        frequency_args = ["-f"] if self.ignore_frequency else []
+        frequency_args = ["-f"] if self.ignore_counts else []
         ignore_genes = ["-g"] if self.ignore_genes else []
         output_args = ["-o", str(result_path / EditDistanceEncoder.OUTPUT_FILENAME), "-l", str(result_path / EditDistanceEncoder.LOG_FILENAME)]
 

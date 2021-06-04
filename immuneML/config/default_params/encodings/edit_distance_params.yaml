@@ -1,5 +1,6 @@
 differences: 0
 indels: False
-ignore_frequency: False
+ignore_counts: False
 ignore_genes: False
 keep_compairr_input: False
+compairr_path: Null

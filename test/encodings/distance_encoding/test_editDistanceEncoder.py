@@ -30,11 +30,10 @@ class TestDistanceEncoder(TestCase):
         return dataset
 
     def test_encode(self):
-        # todo: automatically determine path
-        matchairr_path = Path("/Users/lonneke/Programs/vdjsearch/bin/vdjsearch")
+        compairr_path = Path("/usr/local/bin/compairr")
 
-        if matchairr_path.exists():
-            self._run_test(matchairr_path)
+        if compairr_path.exists():
+            self._run_test(compairr_path)
 
     def _run_test(self, compairr_path):
 
@@ -48,7 +47,7 @@ class TestDistanceEncoder(TestCase):
                                                            "keep_compairr_input": True,
                                                         "differences": 0,
                                                         "indels": False,
-                                                        "ignore_frequency": False,
+                                                        "ignore_counts": False,
                                                         "ignore_genes": False})
 
         enc.set_context({"dataset": dataset})
