@@ -277,7 +277,7 @@ class EditDistanceEncoder(DatasetEncoder):
         number_of_processes = 1 if number_of_processes < 1 else number_of_processes
 
         return [str(self.compairr_path), "-m", "-d", str(self.differences), "-t", str(number_of_processes)] + \
-               indels_args + frequency_args + ignore_genes + output_args + [input_file, input_file]
+               indels_args + frequency_args + ignore_genes + output_args + [input_file]
 
     @staticmethod
     def export_encoder(path: Path, encoder) -> Path:
