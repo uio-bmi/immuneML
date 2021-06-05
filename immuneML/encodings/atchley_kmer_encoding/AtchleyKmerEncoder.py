@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Tuple, List
 
 import numpy as np
-import yaml
+from sklearn.preprocessing import StandardScaler
 
 from immuneML.caching.CacheHandler import CacheHandler
 from immuneML.caching.CacheObjectType import CacheObjectType
@@ -17,7 +17,6 @@ from immuneML.encodings.atchley_kmer_encoding.RelativeAbundanceType import Relat
 from immuneML.encodings.atchley_kmer_encoding.Util import Util
 from immuneML.encodings.preprocessing.FeatureScaler import FeatureScaler
 from immuneML.util.ParameterValidator import ParameterValidator
-from immuneML.util.PathBuilder import PathBuilder
 from scripts.specification_util import update_docs_per_mapping
 
 
@@ -64,56 +63,65 @@ class AtchleyKmerEncoder(DatasetEncoder):
     @staticmethod
     def build_object(dataset, **params):
         if isinstance(dataset, RepertoireDataset):
+            location = "AtchleyKmerEncoder"
+            ParameterValidator.assert_type_and_value(params["k"], int, location, "k", 1)
+            ParameterValidator.assert_type_and_value(params["skip_first_n_aa"], int, location, "skip_first_n_aa", 0)
+            ParameterValidator.assert_type_and_value(params["skip_last_n_aa"], int, location, "skip_last_n_aa", 0)
+            ParameterValidator.assert_in_valid_list(params["abundance"].upper(), [ab.name for ab in RelativeAbundanceType], location, "abundance")
+            ParameterValidator.assert_type_and_value(params["normalize_all_features"], bool, location, "normalize_all_features")
+
             return AtchleyKmerEncoder(**params)
         else:
             raise ValueError(f"AtchleyKmerEncoder can only be applied to repertoire dataset, got {type(dataset).__name__} instead.")
 
     def __init__(self, k: int, skip_first_n_aa: int, skip_last_n_aa: int, abundance: str, normalize_all_features: bool, name: str = None):
-        location = "AtchleyKmerEncoder"
-        ParameterValidator.assert_type_and_value(k, int, location, "k", 1)
-        ParameterValidator.assert_type_and_value(skip_first_n_aa, int, location, "skip_first_n_aa", 0)
-        ParameterValidator.assert_type_and_value(skip_last_n_aa, int, location, "skip_last_n_aa", 0)
-        ParameterValidator.assert_in_valid_list(abundance.upper(), [ab.name for ab in RelativeAbundanceType], location, "abundance")
-        ParameterValidator.assert_type_and_value(normalize_all_features, bool, location, "normalize_all_features")
         self.k = k
         self.skip_first_n_aa = skip_first_n_aa
         self.skip_last_n_aa = skip_last_n_aa
         self.abundance = RelativeAbundanceType[abundance.upper()]
         self.normalize_all_features = normalize_all_features
         self.name = name
-        self.scaler_path = None
-        self.vectorizer_path = None
+        self.scaler = None
+        self.kmer_keys = None
 
     def encode(self, dataset, params: EncoderParams):
 
         examples, keys, labels = self._encode_examples(dataset, params)
-        examples, kmer_keys = self._vectorize_examples(examples, params, keys)
+        examples = self._vectorize_examples(examples, params, keys)
 
         # normalize to zero mean and unit variance only features coming from Atchley factors
         tmp_examples = examples[:, :, :-1] if not self.normalize_all_features else examples
         flattened_vectorized_examples = tmp_examples.reshape(examples.shape[0] * examples.shape[1], -1)
-        if self.scaler_path is None:
-            self.scaler_path = params.result_path / "atchley_factor_scaler.pickle"
-        scaled_examples = FeatureScaler.standard_scale(self.scaler_path, flattened_vectorized_examples)
-        if hasattr(scaled_examples, "todense"):
-            scaled_examples = scaled_examples.todense()
+        scaled_examples = self._scale_examples(flattened_vectorized_examples, params)
 
         if self.normalize_all_features:
-            examples = np.array(scaled_examples).reshape(examples.shape[0], len(kmer_keys), -1)
+            examples = np.array(scaled_examples).reshape((examples.shape[0], len(self.kmer_keys), -1))
         else:
-            examples[:, :, :-1] = np.array(scaled_examples).reshape(examples.shape[0], len(kmer_keys), -1)
+            examples[:, :, :-1] = np.array(scaled_examples).reshape((examples.shape[0], len(self.kmer_keys), -1))
 
         # swap axes to get examples x atchley_factors x kmers dimensions
         examples = np.swapaxes(examples, 1, 2)
 
-        feature_names = [f"atchley_factor_{j}_aa_{i}" for i in range(1, self.k+1) for j in range(1, Util.ATCHLEY_FACTOR_COUNT+1)] + ["abundance"]
+        feature_names = [f"atchley_factor_{j}_aa_{i}" for i in range(1, self.k + 1) for j in range(1, Util.ATCHLEY_FACTOR_COUNT + 1)] + ["abundance"]
         encoded_data = EncodedData(examples=examples, example_ids=dataset.get_example_ids(), feature_names=feature_names, labels=labels,
-                                   encoding=AtchleyKmerEncoder.__name__, info={"kmer_keys": kmer_keys})
+                                   encoding=AtchleyKmerEncoder.__name__, info={"kmer_keys": self.kmer_keys})
 
         encoded_dataset = dataset.clone()
         encoded_dataset.encoded_data = encoded_data
 
         return encoded_dataset
+
+    def _scale_examples(self, flattened_vectorized_examples, params: EncoderParams):
+        if params.learn_model:
+            self.scaler = StandardScaler(with_mean=True, with_std=True)
+            scaled_examples = FeatureScaler.standard_scale_fit(self.scaler, flattened_vectorized_examples)
+        else:
+            scaled_examples = FeatureScaler.standard_scale(self.scaler, flattened_vectorized_examples)
+
+        if hasattr(scaled_examples, "todense"):
+            scaled_examples = scaled_examples.todense()
+
+        return scaled_examples
 
     def _encode_examples(self, dataset: RepertoireDataset, params: EncoderParams) -> Tuple[list, set, dict]:
 
@@ -158,24 +166,16 @@ class AtchleyKmerEncoder(DatasetEncoder):
         encoded = {key: list(encoded[key].values()) for key in encoded}
         return encoded
 
-    def _vectorize_examples(self, examples, params: EncoderParams, keys: set) -> Tuple[np.ndarray, list]:
+    def _vectorize_examples(self, examples, params: EncoderParams, keys: set) -> np.ndarray:
 
-        if self.vectorizer_path is None:
-            self.vectorizer_path = params.result_path / "vectorizer_keys.yaml"
-
-        if params.learn_model is True:
-            kmer_keys = sorted(list(keys))
-            PathBuilder.build(params.result_path)
-            with self.vectorizer_path.open("w") as file:
-                yaml.dump(kmer_keys, file)
-        else:
-            with self.vectorizer_path.open("r") as file:
-                kmer_keys = yaml.safe_load(file)
+        if params.learn_model:
+            self.kmer_keys = sorted(list(keys))
 
         vectorized_examples = [
-            np.array([np.array(example[key]) if key in example else np.zeros(self.k * Util.ATCHLEY_FACTOR_COUNT + 1) for key in kmer_keys])
+            np.array([np.array(example[key]) if key in example else np.zeros(self.k * Util.ATCHLEY_FACTOR_COUNT + 1) for key in self.kmer_keys])
             for example in examples]
-        return np.array(vectorized_examples, dtype=np.float32), kmer_keys
+
+        return np.array(vectorized_examples, dtype=np.float32)
 
     def _trunc_sequences(self, repertoire, remove_aa_func):
         sequences = repertoire.get_sequence_aas()
@@ -188,7 +188,7 @@ class AtchleyKmerEncoder(DatasetEncoder):
         return sequences, counts
 
     def get_additional_files(self) -> List[str]:
-        return [self.scaler_path, self.vectorizer_path]
+        return []
 
     @staticmethod
     def export_encoder(path: Path, encoder) -> Path:
@@ -198,8 +198,6 @@ class AtchleyKmerEncoder(DatasetEncoder):
     @staticmethod
     def load_encoder(encoder_file: Path):
         encoder = DatasetEncoder.load_encoder(encoder_file)
-        for attribute in ["scaler_path", "vectorizer_path"]:
-            encoder = DatasetEncoder.load_attribute(encoder, encoder_file, attribute)
         return encoder
 
     @staticmethod

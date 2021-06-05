@@ -44,8 +44,6 @@ class TestMLApplicationInstruction(TestCase):
                                          "k": 3, "scale_to_zero_mean": True, "scale_to_unit_variance": True}, ml_method, {}, [], 'enc1', 'ml1')
 
         PathBuilder.build(path / 'result/instr1/')
-        shutil.copy(path / 'dict_vectorizer.pickle', path / 'result/instr1/dict_vectorizer.pickle')
-        shutil.copy(path / 'scaler.pickle', path / 'result/instr1/scaler.pickle')
 
         ml_app = MLApplicationInstruction(dataset, label_config, hp_setting, 4, "instr1", False)
         ml_app.run(path / 'result/')

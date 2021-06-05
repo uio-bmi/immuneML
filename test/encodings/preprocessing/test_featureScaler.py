@@ -2,6 +2,7 @@ import shutil
 from unittest import TestCase
 
 import numpy as np
+from sklearn.preprocessing import StandardScaler
 
 from immuneML.analysis.data_manipulation.NormalizationType import NormalizationType
 from immuneML.encodings.preprocessing.FeatureScaler import FeatureScaler
@@ -15,7 +16,7 @@ class TestFeatureScaler(TestCase):
         PathBuilder.build(path)
 
         feature_matrix = np.array([[0, 2, 3], [0, 0.1, 1], [0, -2, 1]])
-        scaled_feature_matrix = FeatureScaler.standard_scale(path / "scaler.pkl", feature_matrix)
+        scaled_feature_matrix = FeatureScaler.standard_scale_fit(StandardScaler(), feature_matrix)
 
         self.assertEqual((3, 3), scaled_feature_matrix.shape)
         self.assertTrue(all(scaled_feature_matrix[i, 0] == 0 for i in range(3)))

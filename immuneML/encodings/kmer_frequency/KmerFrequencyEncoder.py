@@ -1,10 +1,10 @@
 import abc
-import pickle
 from pathlib import Path
 from typing import List
 
 import pandas as pd
 from sklearn.feature_extraction import DictVectorizer
+from sklearn.preprocessing import StandardScaler
 
 from immuneML.analysis.data_manipulation.NormalizationType import NormalizationType
 from immuneML.caching.CacheHandler import CacheHandler
@@ -17,9 +17,8 @@ from immuneML.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType im
 from immuneML.encodings.preprocessing.FeatureScaler import FeatureScaler
 from immuneML.environment.Constants import Constants
 from immuneML.environment.SequenceType import SequenceType
-from immuneML.util.FilenameHandler import FilenameHandler
+from immuneML.util.EncoderHelper import EncoderHelper
 from immuneML.util.ParameterValidator import ParameterValidator
-from immuneML.util.PathBuilder import PathBuilder
 from immuneML.util.ReflectionHandler import ReflectionHandler
 
 
@@ -111,8 +110,8 @@ class KmerFrequencyEncoder(DatasetEncoder):
         self.name = name
         self.scale_to_unit_variance = scale_to_unit_variance
         self.scale_to_zero_mean = scale_to_zero_mean
-        self.scaler_path = None
-        self.vectorizer_path = None
+        self.scaler = None
+        self.vectorizer = None
 
     @staticmethod
     def _prepare_parameters(normalization_type: str, reads: str, sequence_encoding: str, k: int = 0, k_left: int = 0,
@@ -163,7 +162,12 @@ class KmerFrequencyEncoder(DatasetEncoder):
 
     def encode(self, dataset, params: EncoderParams):
 
-        encoded_dataset = self._encode_new_dataset(dataset, params)
+        cache_params = self._prepare_caching_params(dataset, params)
+
+        encoded_dataset = CacheHandler.memo_by_params(cache_params, lambda: self._encode_new_dataset(dataset, params))
+
+        EncoderHelper.sync_encoder_with_cache(cache_params, lambda: {'vectorizer': self.vectorizer, 'scaler': self.scaler}, self,
+                                              ['vectorizer', 'scaler'])
 
         return encoded_dataset
 
@@ -180,7 +184,9 @@ class KmerFrequencyEncoder(DatasetEncoder):
             self._prepare_caching_params(dataset, params, KmerFrequencyEncoder.STEP_ENCODED),
             lambda: self._encode_examples(dataset, params))
 
-        vectorized_examples, feature_names = self._vectorize_encoded(examples=encoded_example_list, params=params)
+        self._initialize_vectorizer(params)
+        vectorized_examples = self._vectorize_encoded(examples=encoded_example_list, params=params)
+        feature_names = self.vectorizer.get_feature_names()
         normalized_examples = FeatureScaler.normalize(vectorized_examples, self.normalization_type)
 
         if self.scale_to_unit_variance:
@@ -200,11 +206,16 @@ class KmerFrequencyEncoder(DatasetEncoder):
         return encoded_data
 
     def scale_normalized(self, params, dataset, normalized_examples):
-        self.scaler_path = params.result_path / 'scaler.pickle' if self.scaler_path is None else self.scaler_path
 
-        examples = CacheHandler.memo_by_params(
-            self._prepare_caching_params(dataset, params, step=KmerFrequencyEncoder.STEP_SCALED),
-            lambda: FeatureScaler.standard_scale(self.scaler_path, normalized_examples, with_mean=self.scale_to_zero_mean))
+        if params.learn_model:
+            self.scaler = StandardScaler(with_mean=self.scale_to_zero_mean)
+            examples = CacheHandler.memo_by_params(
+                self._prepare_caching_params(dataset, params, step=KmerFrequencyEncoder.STEP_SCALED),
+                lambda: FeatureScaler.standard_scale_fit(self.scaler, normalized_examples, with_mean=self.scale_to_zero_mean))
+        else:
+            examples = CacheHandler.memo_by_params(
+                self._prepare_caching_params(dataset, params, step=KmerFrequencyEncoder.STEP_SCALED),
+                lambda: FeatureScaler.standard_scale(self.scaler, normalized_examples, with_mean=self.scale_to_zero_mean))
 
         return examples
 
@@ -216,23 +227,18 @@ class KmerFrequencyEncoder(DatasetEncoder):
     def _encode_examples(self, dataset, params: EncoderParams):
         pass
 
+    def _initialize_vectorizer(self, params: EncoderParams):
+        if self.vectorizer is None or params.learn_model:
+            self.vectorizer = DictVectorizer(sparse=True, dtype=float)
+
     def _vectorize_encoded(self, examples: list, params: EncoderParams):
 
-        if self.vectorizer_path is None:
-            self.vectorizer_path = params.result_path / FilenameHandler.get_filename(DictVectorizer.__name__, "pickle")
-
         if params.learn_model:
-            vectorizer = DictVectorizer(sparse=True, dtype=float)
-            vectorized_examples = vectorizer.fit_transform(examples)
-            PathBuilder.build(params.result_path)
-            with self.vectorizer_path.open('wb') as file:
-                pickle.dump(vectorizer, file)
+            vectorized_examples = self.vectorizer.fit_transform(examples)
         else:
-            with self.vectorizer_path.open('rb') as file:
-                vectorizer = pickle.load(file)
-            vectorized_examples = vectorizer.transform(examples)
+            vectorized_examples = self.vectorizer.transform(examples)
 
-        return vectorized_examples, vectorizer.get_feature_names()
+        return vectorized_examples
 
     def _get_feature_annotations(self, feature_names, feature_annotation_names):
         feature_annotations = pd.DataFrame({"feature": feature_names})
@@ -256,12 +262,7 @@ class KmerFrequencyEncoder(DatasetEncoder):
         return counts
 
     def get_additional_files(self) -> List[str]:
-        files = []
-        if self.scaler_path is not None and self.scaler_path.is_file():
-            files.append(self.scaler_path)
-        if self.vectorizer_path is not None and self.vectorizer_path.is_file():
-            files.append(self.vectorizer_path)
-        return files
+        return []
 
     @staticmethod
     def export_encoder(path: Path, encoder) -> Path:
@@ -271,6 +272,4 @@ class KmerFrequencyEncoder(DatasetEncoder):
     @staticmethod
     def load_encoder(encoder_file: Path):
         encoder = DatasetEncoder.load_encoder(encoder_file)
-        for attribute in ['scaler_path', 'vectorizer_path']:
-            encoder = DatasetEncoder.load_attribute(encoder, encoder_file, attribute)
         return encoder
