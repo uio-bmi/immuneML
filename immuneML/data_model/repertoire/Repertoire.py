@@ -1,7 +1,6 @@
 # quality: gold
 import ast
 import logging
-import pickle
 import shutil
 import weakref
 from pathlib import Path
@@ -9,6 +8,7 @@ from typing import List
 from uuid import uuid4
 
 import numpy as np
+import yaml
 
 from immuneML.data_model.DatasetItem import DatasetItem
 from immuneML.data_model.cell.Cell import Cell
@@ -100,11 +100,11 @@ class Repertoire(DatasetItem):
         repertoire_matrix = np.array(list(map(tuple, zip(*values))), order='F', dtype=dtype)
         np.save(str(data_filename), repertoire_matrix)
 
-        metadata_filename = path / f"{filename_base}_metadata.pickle"
+        metadata_filename = path / f"{filename_base}_metadata.yaml"
         metadata = {} if metadata is None else metadata
         metadata["field_list"] = field_list
-        with metadata_filename.open("wb") as file:
-            pickle.dump(metadata, file)
+        with metadata_filename.open("w") as file:
+            yaml.dump(metadata, file)
 
         repertoire = Repertoire(data_filename, metadata_filename, identifier)
         return repertoire
@@ -122,7 +122,7 @@ class Repertoire(DatasetItem):
             data_filename = result_path / f"{filename_base}.npy"
             np.save(str(data_filename), data)
 
-            metadata_filename = result_path / f"{filename_base}_metadata.pickle"
+            metadata_filename = result_path / f"{filename_base}_metadata.yaml"
             shutil.copyfile(repertoire.metadata_filename, metadata_filename)
 
             new_repertoire = Repertoire(data_filename, metadata_filename, identifier)
@@ -180,8 +180,8 @@ class Repertoire(DatasetItem):
         self.data_filename = data_filename
 
         if metadata_filename:
-            with metadata_filename.open("rb") as file:
-                self.metadata = pickle.load(file)
+            with metadata_filename.open("r") as file:
+                self.metadata = yaml.safe_load(file)
             self.fields = self.metadata["field_list"]
 
         self.metadata_filename = metadata_filename
