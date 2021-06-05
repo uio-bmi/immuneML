@@ -69,14 +69,8 @@ class TestConfounderAnalysis(TestCase):
 
         return dataset
 
-    def _encode_dataset(self, dataset, path, learn_model: bool = True):
-        encoder = KmerFrequencyEncoder.build_object(dataset, **{
-            "normalization_type": NormalizationType.RELATIVE_FREQUENCY.name,
-            "reads": ReadsType.UNIQUE.name,
-            "sequence_encoding": SequenceEncodingType.CONTINUOUS_KMER.name,
-            "k": 3,
-            'sequence_type': SequenceType.AMINO_ACID.name
-        })  # encodes the repertoire by frequency of 3-mers
+    def _encode_dataset(self, encoder, dataset, path, learn_model: bool = True):
+        # encodes the repertoire by frequency of 3-mers
         lc = LabelConfiguration()
         lc.add_label("disease", [True, False])
         encoded_dataset = encoder.encode(dataset, EncoderParams(
@@ -93,8 +87,15 @@ class TestConfounderAnalysis(TestCase):
         report.ml_details_path = path / "ml_details.yaml"
         report.label = "disease"
         report.result_path = path
-        report.train_dataset = self._encode_dataset(self._make_dataset(path / "train", size=100), path)
-        report.test_dataset = self._encode_dataset(self._make_dataset(path / "test", size=40), path, learn_model=False)
+        encoder = KmerFrequencyEncoder.build_object(RepertoireDataset(), **{
+            "normalization_type": NormalizationType.RELATIVE_FREQUENCY.name,
+            "reads": ReadsType.UNIQUE.name,
+            "sequence_encoding": SequenceEncodingType.CONTINUOUS_KMER.name,
+            "k": 3,
+            'sequence_type': SequenceType.AMINO_ACID.name
+        })
+        report.train_dataset = self._encode_dataset(encoder, self._make_dataset(path / "train", size=100), path)
+        report.test_dataset = self._encode_dataset(encoder, self._make_dataset(path / "test", size=40), path, learn_model=False)
         report.method = self._create_dummy_lr_model(path, report.train_dataset.encoded_data, report.label)
 
         return report
