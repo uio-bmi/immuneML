@@ -46,14 +46,13 @@ class TestMLIE(TestCase):
                 },
                 "preprocessing_sequences": {
                     "seq1": [
-                        {"collect": "SubjectRepertoireCollector"},
                         {
                             "count_filter": {
                                 "CountPerSequenceFilter": {
                                     "remove_without_count": True,
                                     "low_count_limit": 0,
                                     "batch_size": 4,
-                                    'remove_empty_repertoires': True
+                                    'remove_empty_repertoires': False
                                 }
                             }
                         }

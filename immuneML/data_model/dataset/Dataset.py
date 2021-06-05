@@ -5,6 +5,7 @@ class Dataset:
     TRAIN = "train"
     TEST = "test"
     SUBSAMPLED = "subsampled"
+    PREPROCESSED = "preprocessed"
 
     def __init__(self, encoded_data=None, name: str = None, identifier: str = None, labels: dict = None):
         self.encoded_data = encoded_data

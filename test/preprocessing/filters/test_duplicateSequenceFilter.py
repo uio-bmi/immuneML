@@ -38,7 +38,7 @@ class TestDuplicateSequenceFilter(TestCase):
 
         # collapse by amino acids & use sum counts
         dupfilter = DuplicateSequenceFilter(filter_sequence_type=SequenceType.AMINO_ACID,
-                                            count_agg=CountAggregationFunction.SUM, batch_size=4)
+                                            count_agg=CountAggregationFunction.SUM, batch_size=1)
 
         reduced_repertoire = dupfilter.process_dataset(dataset=dataset, result_path=path).repertoires[0]
 

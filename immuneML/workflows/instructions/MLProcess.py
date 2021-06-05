@@ -68,7 +68,8 @@ class MLProcess:
         PathBuilder.build(self.path)
         self._set_paths()
 
-        processed_dataset = HPUtil.preprocess_dataset(self.train_dataset, self.hp_setting.preproc_sequence, self.path / "preprocessed_train_dataset")
+        processed_dataset = HPUtil.preprocess_dataset(self.train_dataset, self.hp_setting.preproc_sequence, self.path / "preprocessed_train_dataset",
+                                                      self.report_context)
 
         encoded_train_dataset = HPUtil.encode_dataset(processed_dataset, self.hp_setting, self.path / "encoded_datasets", learn_model=True,
                                                       context=self.report_context, number_of_processes=self.number_of_processes,
@@ -88,7 +89,6 @@ class MLProcess:
         if self.test_dataset is not None and self.test_dataset.get_example_count() > 0:
             processed_test_dataset = HPUtil.preprocess_dataset(self.test_dataset, self.hp_setting.preproc_sequence,
                                                                self.path / "preprocessed_test_dataset")
-
             encoded_test_dataset = HPUtil.encode_dataset(processed_test_dataset, self.hp_setting, self.path / "encoded_datasets",
                                                          learn_model=False, context=self.report_context, number_of_processes=self.number_of_processes,
                                                          label_configuration=self.label_config, store_encoded_data=self.store_encoded_data)

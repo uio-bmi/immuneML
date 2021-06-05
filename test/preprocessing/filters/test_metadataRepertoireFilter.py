@@ -32,30 +32,29 @@ class TestMetadataRepertoireFilter(TestCase):
 
         dataset.metadata_file = path/"metadata.csv"
 
-        dataset1 = MetadataRepertoireFilter.process(dataset, {
+        dataset1 = MetadataRepertoireFilter(**{
             "criteria": {
-                "type": OperationType.GREATER_THAN,
+                "type": OperationType.GREATER_THAN.name,
                 "value": {
-                    "type": DataType.COLUMN,
+                    "type": DataType.COLUMN.name,
                     "name": "key2"
                 },
                 "threshold": 1
             },
             "result_path": path
-        })
+        }).process_dataset(dataset, path)
 
         self.assertEqual(1, dataset1.get_example_count())
 
-        self.assertRaises(AssertionError, MetadataRepertoireFilter.process, dataset, {
+        self.assertRaises(AssertionError, MetadataRepertoireFilter(**{
             "criteria": {
-                "type": OperationType.GREATER_THAN,
+                "type": OperationType.GREATER_THAN.name,
                 "value": {
-                    "type": DataType.COLUMN,
+                    "type": DataType.COLUMN.name,
                     "name": "key2"
                 },
                 "threshold": 10
-            },
-            "result_path": path
-        })
+            }
+        }).process_dataset, dataset, path)
 
         shutil.rmtree(path)

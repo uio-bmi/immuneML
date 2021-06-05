@@ -6,6 +6,7 @@ from typing import List
 
 import pandas as pd
 from gensim.models import Word2Vec
+from sklearn.preprocessing import StandardScaler
 
 from immuneML.caching.CacheHandler import CacheHandler
 from immuneML.data_model.dataset.Dataset import Dataset
@@ -16,7 +17,7 @@ from immuneML.encodings.preprocessing.FeatureScaler import FeatureScaler
 from immuneML.encodings.word2vec.model_creator.KmerPairModelCreator import KmerPairModelCreator
 from immuneML.encodings.word2vec.model_creator.ModelType import ModelType
 from immuneML.encodings.word2vec.model_creator.SequenceModelCreator import SequenceModelCreator
-from immuneML.util.FilenameHandler import FilenameHandler
+from immuneML.util.EncoderHelper import EncoderHelper
 from immuneML.util.ParameterValidator import ParameterValidator
 from immuneML.util.PathBuilder import PathBuilder
 from immuneML.util.ReflectionHandler import ReflectionHandler
@@ -74,6 +75,7 @@ class Word2VecEncoder(DatasetEncoder):
         self.k = k
         self.model_type = model_type
         self.model_path = None
+        self.scaler = None
         self.name = name
 
     @staticmethod
@@ -96,8 +98,11 @@ class Word2VecEncoder(DatasetEncoder):
         return encoder
 
     def encode(self, dataset, params: EncoderParams):
-        encoded_dataset = CacheHandler.memo_by_params(self._prepare_caching_params(dataset, params),
-                                                      lambda: self._encode_new_dataset(dataset, params))
+        cache_params = self._prepare_caching_params(dataset, params)
+        encoded_dataset = CacheHandler.memo_by_params(cache_params, lambda: self._encode_new_dataset(dataset, params))
+
+        EncoderHelper.sync_encoder_with_cache(cache_params, lambda: {'model_path': self.model_path, 'scaler': self.scaler}, self,
+                                              ['model_path', 'scaler'])
 
         return encoded_dataset
 
@@ -141,8 +146,11 @@ class Word2VecEncoder(DatasetEncoder):
         else:
             labels = None
 
-        scaler_filename = params.result_path / FilenameHandler.get_filename("standard_scaling", "pkl")
-        scaled_examples = FeatureScaler.standard_scale(scaler_filename, examples)
+        if params.learn_model:
+            self.scaler = StandardScaler(with_std=True, with_mean=True)
+            scaled_examples = FeatureScaler.standard_scale_fit(self.scaler, examples)
+        else:
+            scaled_examples = FeatureScaler.standard_scale(self.scaler, examples)
 
         encoded_dataset = self._build_encoded_dataset(dataset, scaled_examples, labels, params)
         return encoded_dataset
@@ -170,8 +178,8 @@ class Word2VecEncoder(DatasetEncoder):
         pass
 
     def _load_model(self, params):
-        model_path = self._create_model_path(params)
-        model = Word2Vec.load(str(model_path))
+        self.model_path = self._create_model_path(params) if self.model_path is None else self.model_path
+        model = Word2Vec.load(str(self.model_path))
         return model
 
     def _create_model(self, dataset, params: EncoderParams):
