@@ -76,9 +76,14 @@ class DesignMatrixExporter(EncodingReport):
             with h5py.File(str(file_path), 'w') as hf_object:
                 hf_object.create_dataset(str(file_path), data=data)
         # Use numpy to create a csv or npy file.
-        elif len(data.shape) <= 2 and ext == "csv": 
+        elif len(data.shape) <= 2 and ext == "csv":
+            if self.dataset.encoded_data.feature_names is not None:
+                header = ",".join(str(name) for name in self.dataset.encoded_data.feature_names)
+            else:
+                header = ""
+
             np.savetxt(fname=str(file_path), X=data, delimiter=",", comments='',
-                       header=",".join(str(name) for name in self.dataset.encoded_data.feature_names))
+                       header=header)
         else:
             if ext != "npy":
                 logging.info('The selected Report format is not compatible, .npy is used instead')
