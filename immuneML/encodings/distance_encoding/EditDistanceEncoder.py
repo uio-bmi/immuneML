@@ -159,7 +159,7 @@ class EditDistanceEncoder(DatasetEncoder):
         distance_matrix = self.build_distance_matrix(dataset, params, train_repertoire_ids)
 
         encoded_dataset = dataset.clone()
-        encoded_dataset.encoded_data = EncodedData(examples=distance_matrix, labels=labels, example_ids=distance_matrix.index.values,
+        encoded_dataset.encoded_data = EncodedData(examples=distance_matrix.to_numpy(), labels=labels, example_ids=distance_matrix.index.values,
                                                    encoding=EditDistanceEncoder.__name__)
         return encoded_dataset
 
