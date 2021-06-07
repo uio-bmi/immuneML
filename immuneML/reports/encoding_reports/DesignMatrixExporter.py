@@ -37,7 +37,7 @@ class DesignMatrixExporter(EncodingReport):
     .. indent with spaces
     .. code-block:: yaml
 
-        my_dme_report: DesignMatrixExporter
+        my_dme_report:
             DesignMatrixExporter:
                 file_format: csv
 
@@ -97,7 +97,10 @@ class DesignMatrixExporter(EncodingReport):
 
     def _get_data(self) -> np.ndarray:
         if not isinstance(self.dataset.encoded_data.examples, np.ndarray):
-            data = self.dataset.encoded_data.examples.toarray()
+            try:
+                data = self.dataset.encoded_data.examples.toarray()
+            except AttributeError:
+                data = self.dataset.encoded_data.examples.to_numpy()
         else:
             data = self.dataset.encoded_data.examples
         return data
