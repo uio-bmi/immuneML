@@ -2,6 +2,8 @@ import pickle
 import random
 from pathlib import Path
 
+import numpy as np
+
 from immuneML.data_model.dataset.ReceptorDataset import ReceptorDataset
 from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
 from immuneML.data_model.dataset.SequenceDataset import SequenceDataset
@@ -217,10 +219,10 @@ class RandomDatasetGenerator:
                                                                          for label, label_dict in labels.items()}, **{"subject": f"subj_{i + 1}"}}))
             for i in range(sequence_count)]
 
-        filename = path / "batch01.pickle"
+        filename = path / "batch01.npy"
 
-        with filename.open("wb") as file:
-            pickle.dump(sequences, file)
+        sequence_matrix = np.core.records.fromrecords([seq.get_record() for seq in sequences], names=list(ReceptorSequence.FIELDS.keys()))
+        np.save(str(filename), sequence_matrix, allow_pickle=False)
 
         return SequenceDataset(labels={label: list(label_dict.keys()) for label, label_dict in labels.items()},
                                filenames=[filename], file_size=sequence_count)

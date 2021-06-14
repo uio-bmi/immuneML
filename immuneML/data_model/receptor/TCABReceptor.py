@@ -6,6 +6,10 @@ from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import Rece
 
 class TCABReceptor(Receptor):
 
+    @classmethod
+    def get_from_record(cls, record):
+        return TCABReceptor(...)
+
     def __init__(self, alpha: ReceptorSequence = None, beta: ReceptorSequence = None, metadata: dict = None, identifier: str = None):
 
         self.alpha = alpha

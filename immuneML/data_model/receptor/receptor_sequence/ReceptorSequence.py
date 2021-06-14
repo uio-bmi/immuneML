@@ -1,12 +1,33 @@
 # quality: gold
+import json
+
+import numpy as np
+
 from immuneML.data_model.DatasetItem import DatasetItem
 from immuneML.data_model.receptor.receptor_sequence.SequenceAnnotation import SequenceAnnotation
 from immuneML.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.environment.SequenceType import SequenceType
+from immuneML.util.NumpyHelper import NumpyHelper
 
 
 class ReceptorSequence(DatasetItem):
+    FIELDS = {'amino_acid_sequence': str, 'nucleotide_sequence': str, 'identifier': str, 'metadata': dict, 'annotation': dict, 'version': str}
+    version = "1"
+
+    @classmethod
+    def create_from_record(cls, record: np.void):
+        if 'version' in record.dtype.names and record['version'] == cls.version:
+            return ReceptorSequence(**{**{key: record[key] for key, val_type in ReceptorSequence.FIELDS.items()
+                                          if val_type == str and key != 'version'},
+                                       **{'metadata': SequenceMetadata(**json.loads(record['metadata'])),
+                                          'annotation': SequenceAnnotation(**json.loads(record['annotation']))}})
+        else:
+            raise NotImplementedError
+
+    @classmethod
+    def get_record_types(cls):
+        return [(key, value if value != dict else str) for key, value in ReceptorSequence.FIELDS.items()]
 
     def __init__(self,
                  amino_acid_sequence: str = None,
@@ -42,6 +63,11 @@ class ReceptorSequence(DatasetItem):
         else:
             self.nucleotide_sequence = sequence
 
+    def get_record(self):
+        """exports the sequence object as a numpy record"""
+        return [NumpyHelper.get_numpy_representation(getattr(self, name)) if hasattr(self, name) else getattr(ReceptorSequence, name)
+                for name in ReceptorSequence.FIELDS.keys()]
+
     def get_attribute(self, name: str):
         if hasattr(self, name):
             return getattr(self, name)
@@ -52,4 +78,4 @@ class ReceptorSequence(DatasetItem):
         elif hasattr(self.annotation, name):
             return getattr(self.annotation, name)
         else:
-            raise KeyError("ReceptorSequence does not have attribute {}.".format(name))
+            raise KeyError(f"ReceptorSequence {self.identifier} does not have attribute {name}.")

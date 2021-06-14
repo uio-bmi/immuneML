@@ -1,18 +1,29 @@
 import math
-import pickle
 from pathlib import Path
+
+import numpy as np
+
+from immuneML.util.ReflectionHandler import ReflectionHandler
+
 
 class ElementGenerator:
 
-    def __init__(self, file_list: list, file_size: int = 1000):
+    def __init__(self, file_list: list, file_size: int = 1000, element_class_name: str = ""):
         self.file_list = file_list
         self.file_lengths = [-1 for i in range(len(file_list))]
         self.file_size = file_size
+        self.element_class_name = element_class_name
 
     def _load_batch(self, current_file: int):
 
-        with self.file_list[current_file].open("rb") as file:
-            elements = pickle.load(file)
+        element_class = ReflectionHandler.get_class_by_name(self.element_class_name, "data_model")
+        assert hasattr(element_class, 'create_from_record'), \
+            f"{ElementGenerator.__name__}: cannot load the binary file, the class {element_class.__name__} has no 'create_from_record' method."
+
+        try:
+            elements = [element_class.create_from_record(el) for el in np.load(self.file_list[current_file], allow_pickle=False)]
+        except ValueError as error:
+            raise ValueError(f'{ElementGenerator.__name__}: an error occurred while creating an object from binary file. Details: {error}')
 
         return elements
 
@@ -22,7 +33,7 @@ class ElementGenerator:
 
         if self.file_lengths[file_index] == -1:
             with self.file_list[file_index].open("rb") as file:
-                count = len(pickle.load(file))
+                count = len(np.load(file))
             self.file_lengths[file_index] = count
 
         return self.file_lengths[file_index]
@@ -84,13 +95,14 @@ class ElementGenerator:
     def _prepare_batch_filenames(self, example_count: int, path: Path, dataset_type: str, dataset_identifier: str):
         batch_count = math.ceil(example_count / self.file_size)
         digits_count = len(str(batch_count)) + 1
-        filenames = [path / f"{dataset_identifier}_{dataset_type}_batch{''.join(['0' for i in range(digits_count-len(str(index)))])}{index}.pkl"
+        filenames = [path / f"{dataset_identifier}_{dataset_type}_batch{''.join(['0' for i in range(digits_count-len(str(index)))])}{index}.npy"
                      for index in range(batch_count)]
         return filenames
 
     def _store_elements_to_file(self, path, elements):
-        with path.open("wb") as file:
-            pickle.dump(elements, file)
+        if isinstance(elements, list) and len(elements) > 0:
+            element_matrix = np.core.records.fromrecords([el.get_record() for el in elements], names=list(type(elements[0]).FIELDS.keys()))
+            np.save(str(path), element_matrix, allow_pickle=False)
 
     def _extract_elements_from_batch(self, index, batch_size, batch, example_indices):
         upper_limit, lower_limit = (index + 1) * batch_size, index * batch_size

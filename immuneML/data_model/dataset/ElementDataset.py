@@ -12,13 +12,13 @@ class ElementDataset(Dataset):
     """
 
     def __init__(self, labels: dict = None, encoded_data: EncodedData = None, filenames: list = None, identifier: str = None,
-                 file_size: int = 50000, name: str = None):
+                 file_size: int = 50000, name: str = None, class_name: str = None):
         super().__init__()
         self.labels = labels
         self.encoded_data = encoded_data
         self.identifier = identifier if identifier is not None else uuid4().hex
         self._filenames = sorted(filenames) if filenames is not None else []
-        self.element_generator = ElementGenerator(self._filenames, file_size)
+        self.element_generator = ElementGenerator(self._filenames, file_size, class_name)
         self.file_size = file_size
         self.element_ids = None
         self.name = name
