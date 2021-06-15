@@ -1,5 +1,4 @@
 import os
-import pickle
 import shutil
 from unittest import TestCase
 
@@ -34,15 +33,11 @@ class TestKmerFreqReceptorEncoder(TestCase):
                      TCABReceptor(alpha=ReceptorSequence(amino_acid_sequence="AAA"), beta=ReceptorSequence(amino_acid_sequence="CCC"), identifier="4")]
 
         path = EnvironmentSettings.tmp_test_path / "kmer_receptor_frequency/"
-        PathBuilder.build(path)
-        filename = path / "receptors.pkl"
-        with open(filename, "wb") as file:
-            pickle.dump(receptors, file)
+        PathBuilder.build(path / 'data')
+        dataset = ReceptorDataset.build(receptors, path=path, file_size=10)
 
         lc = LabelConfiguration()
         lc.add_label("l1", [1, 2])
-
-        dataset = ReceptorDataset(labels={"l1": [1, 2]}, filenames=[filename], identifier="d1")
 
         encoder = KmerFreqReceptorEncoder.build_object(dataset, **{
                 "normalization_type": NormalizationType.RELATIVE_FREQUENCY.name,

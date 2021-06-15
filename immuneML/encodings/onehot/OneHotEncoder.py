@@ -4,7 +4,7 @@ import math
 import numpy as np
 from sklearn.preprocessing import OneHotEncoder as SklearnOneHotEncoder
 
-from immuneML.IO.dataset_export.PickleExporter import PickleExporter
+from immuneML.IO.dataset_export.BinaryExporter import BinaryExporter
 from immuneML.caching.CacheHandler import CacheHandler
 from immuneML.encodings.DatasetEncoder import DatasetEncoder
 from immuneML.encodings.EncoderParams import EncoderParams
@@ -165,7 +165,7 @@ class OneHotEncoder(DatasetEncoder):
         pass
 
     def store(self, encoded_dataset, params: EncoderParams):
-        PickleExporter.export(encoded_dataset, params.result_path)
+        BinaryExporter.export(encoded_dataset, params.result_path)
 
     def _encode_sequence_list(self, sequences, pad_n_sequences, pad_sequence_len):
         char_array = np.array(sequences, dtype=str)

@@ -5,7 +5,7 @@ from unittest import TestCase
 
 import yaml
 
-from immuneML.IO.dataset_export.PickleExporter import PickleExporter
+from immuneML.IO.dataset_export.BinaryExporter import BinaryExporter
 from immuneML.app.ImmuneMLApp import run_immuneML
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.simulation.dataset_generation.RandomDatasetGenerator import RandomDatasetGenerator
@@ -20,13 +20,13 @@ class TestGalaxyYamlTool(TestCase):
 
         dataset = RandomDatasetGenerator.generate_repertoire_dataset(10, {10: 1}, {12: 1}, {}, result_path)
         dataset.name = "d1"
-        PickleExporter.export(dataset, result_path)
+        BinaryExporter.export(dataset, result_path)
 
         specs = {
             "definitions": {
                 "datasets": {
                     "new_d1": {
-                        "format": "Pickle",
+                        "format": "Binary",
                         "params": {
                             "metadata_file": str(result_path / "d1_metadata.csv")
                         }

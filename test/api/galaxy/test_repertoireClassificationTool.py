@@ -3,7 +3,7 @@ import random as rn
 import shutil
 from unittest import TestCase
 
-from immuneML.IO.dataset_export.PickleExporter import PickleExporter
+from immuneML.IO.dataset_export.BinaryExporter import BinaryExporter
 from immuneML.api.galaxy.RepertoireClassificationTool import RepertoireClassificationTool
 from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
@@ -19,7 +19,7 @@ class TestRepertoireClassificationTool(TestCase):
 
         repertoires, metadata = RepertoireBuilder.build(sequences, path, subject_ids=[i % 2 for i in range(len(sequences))])
         dataset = RepertoireDataset(repertoires=repertoires, metadata_file=metadata)
-        PickleExporter.export(dataset, path)
+        BinaryExporter.export(dataset, path)
 
     def test_run(self):
         path = EnvironmentSettings.tmp_test_path / "galaxy_repertoire_classification/"

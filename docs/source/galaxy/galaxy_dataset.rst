@@ -12,7 +12,7 @@ How to make an immuneML dataset in Galaxy
 
 In Galaxy, an immuneML dataset is simply a Galaxy collection containing all relevant files (including an optional metadata file).
 The `Create dataset <https://galaxy.immuneml.uio.no/root?tool_id=immune_ml_dataset>`_ Galaxy tool allows users to import data
-from various formats and create immuneML datasets in Galaxy. These datasets are in an optimized binary (Pickle) format, which
+from various formats and create immuneML datasets in Galaxy. These datasets are in an optimized binary format, which
 reduces the time needed to read the data into immuneML, and ensures that you can quickly import the dataset into Galaxy tools
 without having to repeatedly specify the import parameters.
 
@@ -75,7 +75,7 @@ In subsequent YAML-based analyses, the dataset created through the simplified in
     definitions:
       datasets:
         my_analysis_dataset: # user-defined dataset name
-          format: Pickle
+          format: Binary
           params:
             path: dataset.iml_dataset
 
@@ -120,7 +120,7 @@ A complete YAML specification for a repertoire dataset could look like this:
           export_formats:
           # only one format can be specified here and the dataset in this format will be
           # available as a Galaxy collection afterwards
-              - Pickle # Can be AIRR (human-readable) or Pickle (recommended for further Galaxy-analysis)
+              - Binary # Can be AIRR (human-readable) or Binary (recommended for further Galaxy-analysis)
 
 Alternatively, for a receptor dataset the complete YAML specification may look like this:
 
@@ -150,12 +150,12 @@ Alternatively, for a receptor dataset the complete YAML specification may look l
           export_formats:
           # only one format can be specified here and the dataset in this format will be
           # available as a Galaxy collection afterwards
-              - Pickle # Can be AIRR (human-readable) or Pickle (recommended for further Galaxy-analysis)
+              - Binary # Can be AIRR (human-readable) or Binary (recommended for further Galaxy-analysis)
 
 Note that the export format specified here will determine how dataset import should be defined in the subsequent
 YAML specifications for other immuneML Galaxy tools ('Run immuneML with YAML specification' and 'Simulate events in an immune
-dataset'). The recommended format is Pickle, as it is easiest to specify dataset import from Pickle format.
-If Pickle is chosen as the export format, the dataset definition for subsequent analyses will look like this:
+dataset'). The recommended format is Binary, as it is easiest to specify dataset import from Binary format.
+If Binary is chosen as the export format, the dataset definition for subsequent analyses will look like this:
 
 .. indent with spaces
 .. code-block:: yaml
@@ -163,7 +163,7 @@ If Pickle is chosen as the export format, the dataset definition for subsequent 
     definitions:
       datasets:
         my_analysis_dataset: # user-defined dataset name
-          format: Pickle
+          format: Binary
           params:
             # note that my_dataset is the name given earlier in the 'Create dataset' YAML
             path: my_dataset.iml_dataset
@@ -185,7 +185,7 @@ parameters need to be specified in subsequent analyses:
             # other import parameters may be specified here
 
 
-Note: if you used the 'Pickle' export format and your immuneML dataset history element suddenly gives you errors when
+Note: if you used the 'Binary' export format and your immuneML dataset history element suddenly gives you errors when
 you use it as an input to other tools (while it used to work before), it could be due to an immuneML version update.
 To solve this problem, try to rerun the 'Create dataset' tool with the same input files (for example by clicking :ref:`the
 'Run this job again' button <History items>`), and use the new immuneML dataset history element.
@@ -218,5 +218,5 @@ This Galaxy tool will produce the following history elements:
   This file can be downloaded and altered (for example to export files in AIRR format, or use non-standard import parameters),
   and run again using the 'Advanced' interface.
 
-- immuneML dataset: a Galaxy collection containing the immuneML dataset in Pickle format.
+- immuneML dataset: a Galaxy collection containing the immuneML dataset in Binary format.
 

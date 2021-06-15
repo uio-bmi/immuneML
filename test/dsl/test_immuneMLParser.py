@@ -4,7 +4,7 @@ from unittest import TestCase
 import yaml
 from yaml import YAMLError
 
-from immuneML.IO.dataset_export.PickleExporter import PickleExporter
+from immuneML.IO.dataset_export.BinaryExporter import BinaryExporter
 from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
 from immuneML.dsl.ImmuneMLParser import ImmuneMLParser
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
@@ -17,13 +17,13 @@ class TestImmuneMLParser(TestCase):
         path = EnvironmentSettings.root_path / "test/tmp/parser/"
         dataset = RepertoireDataset(repertoires=RepertoireBuilder.build([["AAA", "CCC"], ["TTTT"]], path, {"default": [1, 2]})[0],
                                     labels={"default": [1, 2]})
-        PickleExporter.export(dataset, path)
+        BinaryExporter.export(dataset, path)
 
         spec = {
             "definitions": {
                 "datasets": {
                     "d1": {
-                        "format": "Pickle",
+                        "format": "Binary",
                         "params": {
                             "path": str(path / f"{dataset.name}.iml_dataset"),
                         }

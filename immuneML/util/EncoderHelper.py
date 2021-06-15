@@ -1,7 +1,7 @@
 import copy
 import pickle
 
-from immuneML.IO.dataset_export.PickleExporter import PickleExporter
+from immuneML.IO.dataset_export.BinaryExporter import BinaryExporter
 from immuneML.caching.CacheHandler import CacheHandler
 from immuneML.data_model.dataset.Dataset import Dataset
 from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
@@ -49,7 +49,7 @@ class EncoderHelper:
 
     @staticmethod
     def store(encoded_dataset, params: EncoderParams):
-        PickleExporter.export(encoded_dataset, params.result_path)
+        BinaryExporter.export(encoded_dataset, params.result_path)
 
     @staticmethod
     def sync_encoder_with_cache(cache_params: tuple, encoder_memo_func, encoder, param_names):

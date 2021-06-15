@@ -183,7 +183,7 @@ To construct smaller datasets of 400, 200, 100 and 50 subjects randomly from bot
   definitions:
     datasets:
       cmv2017: # we import the full dataset with 683 subjects as it was imported previously in immuneML-optimized format
-        format: Pickle
+        format: Binary
         params:
           path: imported_data/cmv2017.iml_dataset
   instructions:
@@ -196,7 +196,7 @@ To construct smaller datasets of 400, 200, 100 and 50 subjects randomly from bot
         - 100
         - 50
       dataset_export_formats: # in which formats to export the subsampled datasets
-        - Pickle
+        - Binary
 
 
 Running the analysis on subsampled datasets
@@ -222,21 +222,21 @@ The YAML specification is given below:
   definitions:
     datasets: # datasets for assessing robustness
       cmv2017_400: # with 400 repertoires
-        format: Pickle
+        format: Binary
         params:
-          path: subsampled_datasets/subsampling_inst/cmv2017_400_subsampled_1/exported/pickle/cmv2017_400_subsampled_1.iml_dataset
+          path: subsampled_datasets/subsampling_inst/cmv2017_400_subsampled_1/exported/binary/cmv2017_400_subsampled_1.iml_dataset
       cmv2017_200: # with 200 repertoires
-        format: Pickle
+        format: Binary
         params:
-          path: subsampled_datasets/subsampling_inst/cmv2017_200_subsampled_2/exported/pickle/cmv2017_200_subsampled_2.iml_dataset
+          path: subsampled_datasets/subsampling_inst/cmv2017_200_subsampled_2/exported/binary/cmv2017_200_subsampled_2.iml_dataset
       cmv2017_100: # with 100 repertoires
-        format: Pickle
+        format: Binary
         params:
-          path: subsampled_datasets/subsampling_inst/cmv2017_100_subsampled_3/exported/pickle/cmv2017_100_subsampled_3.iml_dataset
+          path: subsampled_datasets/subsampling_inst/cmv2017_100_subsampled_3/exported/binary/cmv2017_100_subsampled_3.iml_dataset
       cmv2017_50: # with 50 repertoires
-        format: Pickle
+        format: Binary
         params:
-          path: subsampled_datasets/subsampling_inst/cmv2017_50_subsampled_4/exported/pickle/cmv2017_50_subsampled_4.iml_dataset
+          path: subsampled_datasets/subsampling_inst/cmv2017_50_subsampled_4/exported/binary/cmv2017_50_subsampled_4.iml_dataset
     encodings: # encodings as in Emerson et al. 2017 with different p-values to discover disease-associated combination of amino acid sequence and V and J gene
       enc01:
         SequenceAbundance:

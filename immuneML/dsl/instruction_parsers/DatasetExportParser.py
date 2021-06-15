@@ -44,7 +44,7 @@ class DatasetExportParser:
         preprocessing_sequence: my_preprocessing_sequence
         export_formats: # list of formats to export the datasets to
           - AIRR
-          - Pickle
+          - Binary
 
     """
 

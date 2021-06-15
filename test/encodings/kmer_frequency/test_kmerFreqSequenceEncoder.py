@@ -1,5 +1,4 @@
 import os
-import pickle
 import shutil
 from unittest import TestCase
 
@@ -49,14 +48,10 @@ class TestKmerFreqSequenceEncoder(TestCase):
 
         path = EnvironmentSettings.tmp_test_path / "kmrefreqseqfacencoder/"
         PathBuilder.build(path)
-        filename = path / "sequences.pkl"
-        with open(filename, "wb") as file:
-            pickle.dump(sequences, file)
+        dataset = SequenceDataset.build(sequences, 100, PathBuilder.build(path / 'data'), 'd2')
 
         lc = LabelConfiguration()
         lc.add_label("l1", [1, 2])
-
-        dataset = SequenceDataset(labels={"l1": [1, 2]}, filenames=[filename], identifier="d2")
 
         encoder = KmerFreqSequenceEncoder.build_object(dataset, **{
                 "normalization_type": NormalizationType.RELATIVE_FREQUENCY.name,

@@ -31,7 +31,7 @@ class TestDatasetGenerationTool(TestCase):
                     }
             },
             "instructions": {
-                "inst1": {"type": "DatasetExport", "export_formats": ["Pickle"], "datasets": ["d1"]}
+                "inst1": {"type": "DatasetExport", "export_formats": ["Binary"], "datasets": ["d1"]}
             }
         }
 

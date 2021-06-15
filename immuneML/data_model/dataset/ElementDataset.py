@@ -63,7 +63,7 @@ class ElementDataset(Dataset):
             a new dataset object (ReceptorDataset or SequenceDataset, as the original dataset) which includes only the examples specified under example_indices
 
         """
-        new_dataset = self.__class__(labels=self.labels, file_size=self.file_size)
+        new_dataset = self.__class__(labels=self.labels, file_size=self.file_size, class_name=self.element_generator.element_class_name)
         batch_filenames = self.element_generator.make_subset(example_indices, path, dataset_type, new_dataset.identifier)
         new_dataset.set_filenames(batch_filenames)
         new_dataset.name = f"{self.name}_split_{dataset_type.lower()}"

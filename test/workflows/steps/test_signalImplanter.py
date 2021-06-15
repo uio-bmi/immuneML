@@ -56,7 +56,7 @@ class TestSignalImplanter(TestCase):
         simulation = Simulation([Implanting(dataset_implanting_rate=0.2, repertoire_implanting_rate=0.5, signals=[s1, s2], name="i1"),
                                  Implanting(dataset_implanting_rate=0.2, repertoire_implanting_rate=0.5, signals=[s2], name="i2")])
 
-        input_params = SimulationState(dataset=dataset, result_path=path, simulation=simulation, signals=[s1, s2], formats=["Pickle"])
+        input_params = SimulationState(dataset=dataset, result_path=path, simulation=simulation, signals=[s1, s2], formats=["Binary"])
 
         new_dataset = SignalImplanter.run(input_params)
         reps_with_s2 = sum([rep.metadata[s2.id] is True for rep in new_dataset.get_data(batch_size=10)])
@@ -85,7 +85,7 @@ class TestSignalImplanter(TestCase):
 
         simulation = Simulation([Implanting(dataset_implanting_rate=0.5, signals=[signal1])])
 
-        sim_state = SimulationState(dataset=dataset, result_path=path, simulation=simulation, signals=[signal1], formats=["Pickle"])
+        sim_state = SimulationState(dataset=dataset, result_path=path, simulation=simulation, signals=[signal1], formats=["Binary"])
 
         new_dataset = SignalImplanter.run(sim_state)
 

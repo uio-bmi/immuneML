@@ -175,11 +175,11 @@ by several other `.pickle` and `.npy` files. When running immuneML locally, you 
 dataset files in the folder 'datasets', which is located in the main output folder of your analysis.
 
 Some instructions (:ref:`Simulation`, :ref:`DatasetExport`, :ref:`SubSampling`) also explicitly export binarized immuneML
-datasets when selecting 'Pickle' as the export format.
+datasets when selecting 'Binary' as the export format.
 
 These `.iml_dataset` files can later be imported easily and with few parameters, and importing from `.iml_dataset` is
-also faster than importing from other data formats. A YAML specification for Pickle data import is shown below.
-Important note: Pickle files might not be compatible between different immuneML (sub)versions.
+also faster than importing from other data formats. A YAML specification for Binary data import is shown below.
+Important note: Binary files might not be compatible between different immuneML (sub)versions.
 
 .. indent with spaces
 .. code-block:: yaml
@@ -187,7 +187,7 @@ Important note: Pickle files might not be compatible between different immuneML 
   definitions:
     datasets:
       my_dataset:
-        format: Pickle
+        format: Binary
         params:
           path: path/to/dataset.iml_dataset
           # specifying a metadata_file is optional, it will update the dataset using this new metadata.

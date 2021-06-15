@@ -1,4 +1,3 @@
-import pickle
 import random
 from pathlib import Path
 
@@ -161,13 +160,13 @@ class RandomDatasetGenerator:
                                                for label, label_dict in labels.items()}, **{"subject": f"subj_{i + 1}"}})
                      for i in range(receptor_count)]
 
-        filename = path / "batch01.pickle"
+        filename = path / "batch01.npy"
 
-        with filename.open("wb") as file:
-            pickle.dump(receptors, file)
+        receptor_matrix = np.core.records.fromrecords([receptor.get_record() for receptor in receptors], names=TCABReceptor.get_record_names())
+        np.save(str(filename), receptor_matrix, allow_pickle=False)
 
         return ReceptorDataset(labels={label: list(label_dict.keys()) for label, label_dict in labels.items()},
-                               filenames=[filename], file_size=receptor_count)
+                               filenames=[filename], file_size=receptor_count, class_name=type(receptors[0]).__name__ if len(receptors) > 0 else None)
 
     @staticmethod
     def _check_sequence_dataset_generation_params(receptor_count: int, length_probabilities: dict, labels: dict, path: Path):
@@ -221,8 +220,8 @@ class RandomDatasetGenerator:
 
         filename = path / "batch01.npy"
 
-        sequence_matrix = np.core.records.fromrecords([seq.get_record() for seq in sequences], names=list(ReceptorSequence.FIELDS.keys()))
+        sequence_matrix = np.core.records.fromrecords([seq.get_record() for seq in sequences], names=ReceptorSequence.get_record_names())
         np.save(str(filename), sequence_matrix, allow_pickle=False)
 
         return SequenceDataset(labels={label: list(label_dict.keys()) for label, label_dict in labels.items()},
-                               filenames=[filename], file_size=sequence_count)
+                               filenames=[filename], file_size=sequence_count, class_name=TCABReceptor.__name__)

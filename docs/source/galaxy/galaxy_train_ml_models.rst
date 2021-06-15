@@ -42,7 +42,7 @@ A complete YAML specification for training ML models is shown here:
     definitions:
       datasets:
         dataset: # user-defined dataset name
-          format: Pickle # the default format used by the 'Create dataset' galaxy tool is Pickle
+          format: Binary # the default format used by the 'Create dataset' galaxy tool is Binary
           params:
             path: dataset.iml_dataset # specify the dataset name, the default name used by
                                       # the 'Create dataset' galaxy tool is dataset.iml_dataset

@@ -26,8 +26,8 @@ class ReceptorSequence(DatasetItem):
             raise NotImplementedError
 
     @classmethod
-    def get_record_types(cls):
-        return [(key, value if value != dict else str) for key, value in ReceptorSequence.FIELDS.items()]
+    def get_record_names(cls):
+        return [key for key in cls.FIELDS]
 
     def __init__(self,
                  amino_acid_sequence: str = None,

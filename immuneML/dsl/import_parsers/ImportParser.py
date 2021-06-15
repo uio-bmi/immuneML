@@ -43,16 +43,15 @@ class ImportParser:
         if "is_repertoire" in params:
             ParameterValidator.assert_type_and_value(params["is_repertoire"], bool, location, "is_repertoire")
 
-            if params["is_repertoire"] == True:
+            if params["is_repertoire"]:
                 if import_cls != IReceptorImport:
                     assert "metadata_file" in params, f"{location}: Missing parameter: metadata_file under {key}/params/"
                     ParameterValidator.assert_type_and_value(params["metadata_file"], Path, location, "metadata_file")
-
-            if params["is_repertoire"] == False:
+            else:
                 assert "paired" in params, f"{location}: Missing parameter: paired under {key}/params/"
                 ParameterValidator.assert_type_and_value(params["paired"], bool, location, "paired")
 
-                if params["paired"] == True:
+                if params["paired"]:
                     assert "receptor_chains" in params, f"{location}: Missing parameter: receptor_chains under {key}/params/"
                     ParameterValidator.assert_in_valid_list(params["receptor_chains"], ["_".join(cp.value) for cp in ChainPair], location, "receptor_chains")
 

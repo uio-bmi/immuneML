@@ -55,20 +55,20 @@ If TrainMLModel does nested cross-validation, it might require a bit more data. 
 that `split_strategy` is `random` and that `training_percentage` is `1` (to use all data from the inner loop for training). In this way, instead of having
 multiple training/validation/test splits, there will be only training/test splits as specified under key `assessment` in TrainMLModel instruction.
 
-I get an error when importing an immuneML dataset in Pickle format
+I get an error when importing an immuneML dataset in Binary format
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-immuneML Pickle files are not guaranteed to be compatible between different immuneML (sub)versions.
+immuneML Binary files are not guaranteed to be compatible between different immuneML (sub)versions.
 Furthermore, the pickle protocol in Python 3.8 is 5, whereas in Python 3.7 it is 4 (immuneML always uses the highest protocol).
 
-In the folder where your Pickle dataset was exported, you can find a file named info.txt, which shows the
+In the folder where your Binary dataset was exported, you can find a file named info.txt, which shows the
 immuneML version, Python version and pickle protocol that were used to export the given dataset.
-If you install the same Python and immuneML version as displayed in this file, you should be able to import the Pickle dataset.
+If you install the same Python and immuneML version as displayed in this file, you should be able to import the Binary dataset.
 
 If you want to use your dataset with a different version of immuneML, try to load the dataset using the version that
 was originally used to generate it and export the dataset to AIRR format. The exported AIRR dataset can subsequently
 be imported in a different version of immuneML.
 
-Converting a Pickle dataset to AIRR format can be done using the :ref:`DatasetExport` instruction.
+Converting a Binary dataset to AIRR format can be done using the :ref:`DatasetExport` instruction.
 An example YAML specification looks like this:
 
 .. highlight:: yaml
@@ -77,7 +77,7 @@ An example YAML specification looks like this:
   definitions:
     datasets:
       my_dataset:
-        format: Pickle
+        format: Binary
         params:
           path: path/to/dataset.iml_dataset # change the path to the location of the .iml_dataset file
   instructions:

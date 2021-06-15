@@ -20,11 +20,11 @@ class SequenceDataset(ElementDataset):
 
         file_count = math.ceil(len(sequences) / file_size)
         file_names = [path / f"batch{''.join(['0' for i in range(1, len(str(file_count)) - len(str(index)) + 1)])}{index}.npy"
-                      for index in range(1, file_count+1)]
+                      for index in range(1, file_count + 1)]
 
         for index in range(file_count):
-            sequence_matrix = np.array([seq.get_record() for seq in sequences[index*file_size:(index+1)*file_size]],
-                                       type(sequences[0]).get_record_types())
+            sequence_matrix = np.core.records.fromrecords([seq.get_record() for seq in sequences[index * file_size:(index + 1) * file_size]],
+                                                          names=type(sequences[0]).get_record_names())
             np.save(str(file_names[index]), sequence_matrix, allow_pickle=False)
 
         return SequenceDataset(filenames=file_names, file_size=file_size, name=name)

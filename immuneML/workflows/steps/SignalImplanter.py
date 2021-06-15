@@ -3,7 +3,7 @@ from typing import List
 
 import pandas as pd
 
-from immuneML.IO.dataset_import.PickleImport import PickleImport
+from immuneML.IO.dataset_import.BinaryImport import BinaryImport
 from immuneML.data_model.dataset.Dataset import Dataset
 from immuneML.data_model.dataset.ReceptorDataset import ReceptorDataset
 from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
@@ -24,7 +24,7 @@ class SignalImplanter(Step):
         path = simulation_state.result_path / FilenameHandler.get_dataset_name(SignalImplanter.__name__)
 
         if path.is_file():
-            dataset = PickleImport.import_dataset({"path": path}, SignalImplanter.DATASET_NAME)
+            dataset = BinaryImport.import_dataset({"path": path}, SignalImplanter.DATASET_NAME)
         else:
             dataset = SignalImplanter._implant_signals_in_dataset(simulation_state)
 

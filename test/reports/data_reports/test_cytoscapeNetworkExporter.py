@@ -1,5 +1,4 @@
 import os
-import pickle
 import shutil
 from unittest import TestCase
 
@@ -28,11 +27,9 @@ class TestCytoscapeNetworkExporter(TestCase):
                                            path=path)
 
         if dataset_type == "receptor":
-            receptordataset_filename = path / "receptors.pkl"
-            with open(receptordataset_filename, "wb") as file:
-                pickle.dump(test_repertoire.receptors, file)
 
-            dataset = ReceptorDataset(filenames=[receptordataset_filename], identifier="receptor_dataset")
+            dataset = ReceptorDataset.build(test_repertoire.receptors, 100, path, name="receptor_dataset")
+            dataset.identifier = 'receptor_dataset'
 
         elif dataset_type == "repertoire":
             test_repertoire.identifier = "repertoire_dataset"

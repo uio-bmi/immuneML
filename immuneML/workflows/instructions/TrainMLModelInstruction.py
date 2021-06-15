@@ -118,7 +118,7 @@ class TrainMLModelInstruction(Instruction):
             number_of_processes: 4 # number of parallel processes to create (could speed up the computation)
             optimization_metric: balanced_accuracy # the metric to use for choosing the optimal model and during training
             refit_optimal_model: False # use trained model, do not refit on the full dataset
-            store_encoded_data: True # store encoded datasets in pickle format
+            store_encoded_data: True # store encoded datasets in binary format
 
     """
 

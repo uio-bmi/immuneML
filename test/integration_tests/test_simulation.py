@@ -6,8 +6,8 @@ from unittest import TestCase
 import pandas as pd
 import yaml
 
-from immuneML.IO.dataset_export.PickleExporter import PickleExporter
-from immuneML.IO.dataset_import.PickleImport import PickleImport
+from immuneML.IO.dataset_export.BinaryExporter import BinaryExporter
+from immuneML.IO.dataset_import.BinaryImport import BinaryImport
 from immuneML.app.ImmuneMLApp import ImmuneMLApp
 from immuneML.caching.CacheType import CacheType
 from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
@@ -27,7 +27,7 @@ class TestSimulation(TestCase):
             "definitions": {
                 "datasets": {
                     "d1": {
-                        "format": 'Pickle',
+                        "format": 'Binary',
                         "params": {
                             "path": str(path / "dataset1.iml_dataset")
                         }
@@ -82,7 +82,7 @@ class TestSimulation(TestCase):
                     "type": "Simulation",
                     "dataset": "d1",
                     "simulation": "sim1",
-                    "export_formats": ["AIRR", "Pickle"]
+                    "export_formats": ["AIRR", "Binary"]
                 }
             },
             "output": {
@@ -120,7 +120,7 @@ class TestSimulation(TestCase):
                                                                        0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1]})
 
         dataset = RepertoireDataset(repertoires=repertoires, metadata_file=metadata, labels={"l1": [1, 2], "l2": [0, 1]}, name="dataset1")
-        PickleExporter.export(dataset, path)
+        BinaryExporter.export(dataset, path)
 
     def test_simulation(self):
         path = EnvironmentSettings.tmp_test_path / "integration_simulation/"
@@ -139,7 +139,7 @@ class TestSimulation(TestCase):
         self.assertEqual(17, sum(metadata_df["signal1"]))
 
         self.assertTrue(os.path.isfile(path / "result/index.html"))
-        self.assertTrue(os.path.isfile(path / "result/inst1/exported_dataset/pickle/d1.iml_dataset"))
+        self.assertTrue(os.path.isfile(path / "result/inst1/exported_dataset/binary/d1.iml_dataset"))
 
         shutil.rmtree(path)
 
@@ -211,7 +211,7 @@ class TestSimulation(TestCase):
                     "type": "Simulation",
                     "dataset": "d1",
                     "simulation": "sim1",
-                    "export_formats": ["Pickle"]
+                    "export_formats": ["Binary"]
                 }
             },
             "output": {
@@ -226,8 +226,8 @@ class TestSimulation(TestCase):
         app.run()
 
         self.assertTrue(os.path.isfile(path / "result/index.html"))
-        self.assertTrue(os.path.isfile(path / "result/inst1/exported_dataset/pickle/d1.iml_dataset"))
-        dataset = PickleImport.import_dataset({"path": path / "result/inst1/exported_dataset/pickle/d1.iml_dataset"}, "d1")
+        self.assertTrue(os.path.isfile(path / "result/inst1/exported_dataset/binary/d1.iml_dataset"))
+        dataset = BinaryImport.import_dataset({"path": path / "result/inst1/exported_dataset/binary/d1.iml_dataset"}, "d1")
 
         self.assertEqual(100, dataset.get_example_count())
         self.assertEqual(100, len([receptor for receptor in dataset.get_data() if "signal1" in receptor.metadata]))

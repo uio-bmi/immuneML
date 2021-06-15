@@ -1,9 +1,9 @@
 # quality: gold
 
 import copy
-import platform
 import os
 import pickle
+import platform
 import shutil
 from pathlib import Path
 from typing import List
@@ -20,22 +20,22 @@ from immuneML.environment.Constants import Constants
 from immuneML.util.PathBuilder import PathBuilder
 
 
-class PickleExporter(DataExporter):
+class BinaryExporter(DataExporter):
 
     @staticmethod
     def export(dataset: Dataset, path: Path):
         PathBuilder.build(path)
-        exported_dataset = copy.deepcopy(dataset)
-        dataset_name = exported_dataset.name if exported_dataset.name is not None else exported_dataset.identifier
+        exported_dataset = dataset.clone()
+        dataset_name = exported_dataset.name
         dataset_filename = f"{dataset_name}.iml_dataset"
 
         if isinstance(dataset, RepertoireDataset):
             repertoires_path = PathBuilder.build(path / "repertoires")
-            exported_repertoires = PickleExporter._export_repertoires(dataset.repertoires, repertoires_path)
+            exported_repertoires = BinaryExporter._export_repertoires(dataset.repertoires, repertoires_path)
             exported_dataset.repertoires = exported_repertoires
-            exported_dataset.metadata_file = PickleExporter._export_metadata(dataset, path, dataset_filename, repertoires_path)
+            exported_dataset.metadata_file = BinaryExporter._export_metadata(dataset, path, dataset_filename, repertoires_path)
         elif isinstance(dataset, SequenceDataset) or isinstance(dataset, ReceptorDataset):
-            exported_dataset.set_filenames(PickleExporter._export_receptors(exported_dataset.get_filenames(), path))
+            exported_dataset.set_filenames(BinaryExporter._export_receptors(exported_dataset.get_filenames(), path))
 
         file_path = path / dataset_filename
         with file_path.open("wb") as file:
@@ -59,8 +59,8 @@ class PickleExporter(DataExporter):
         if not metadata_file.is_file():
             shutil.copyfile(dataset.metadata_file, metadata_file)
 
-        PickleExporter._update_repertoire_paths_in_metadata(metadata_file, repertoires_path)
-        PickleExporter._add_dataset_to_metadata(metadata_file, dataset_filename)
+        BinaryExporter._update_repertoire_paths_in_metadata(metadata_file, repertoires_path)
+        BinaryExporter._add_dataset_to_metadata(metadata_file, dataset_filename)
 
         old_metadata_file = metadata_folder_path / "metadata.csv"
         if old_metadata_file.is_file():
@@ -86,7 +86,7 @@ class PickleExporter(DataExporter):
     def _export_receptors(filenames_old: List[str], path: Path) -> List[str]:
         filenames_new = []
         for filename_old in filenames_old:
-            filename_new = PickleExporter._copy_if_exists(filename_old, path)
+            filename_new = BinaryExporter._copy_if_exists(filename_old, path)
             filenames_new.append(filename_new)
         return filenames_new
 
@@ -96,8 +96,8 @@ class PickleExporter(DataExporter):
 
         for repertoire_old in repertoires:
             repertoire = copy.deepcopy(repertoire_old)
-            repertoire.data_filename = PickleExporter._copy_if_exists(repertoire_old.data_filename, repertoires_path)
-            repertoire.metadata_filename = PickleExporter._copy_if_exists(repertoire_old.metadata_filename, repertoires_path)
+            repertoire.data_filename = BinaryExporter._copy_if_exists(repertoire_old.data_filename, repertoires_path)
+            repertoire.metadata_filename = BinaryExporter._copy_if_exists(repertoire_old.metadata_filename, repertoires_path)
             new_repertoires.append(repertoire)
 
         return new_repertoires
@@ -110,4 +110,4 @@ class PickleExporter(DataExporter):
                 shutil.copyfile(old_file, new_file)
             return new_file
         else:
-            raise RuntimeError(f"{PickleExporter.__name__}: tried exporting file {old_file}, but it does not exist.")
+            raise RuntimeError(f"{BinaryExporter.__name__}: tried exporting file {old_file}, but it does not exist.")

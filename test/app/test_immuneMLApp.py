@@ -6,7 +6,7 @@ from unittest import TestCase
 
 import yaml
 
-from immuneML.IO.dataset_export.PickleExporter import PickleExporter
+from immuneML.IO.dataset_export.BinaryExporter import BinaryExporter
 from immuneML.app import ImmuneMLApp
 from immuneML.caching.CacheType import CacheType
 from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
@@ -34,7 +34,7 @@ class TestImmuneMLApp(TestCase):
                                                          for j in range(repertoire_count)])
 
         dataset = RepertoireDataset(repertoires=repertoires, metadata_file=metadata, labels={"CD": [True, False], "CMV": [True, False]}, name="d1")
-        PickleExporter.export(dataset, path)
+        BinaryExporter.export(dataset, path)
 
         return path / "d1.iml_dataset"
 
@@ -46,7 +46,7 @@ class TestImmuneMLApp(TestCase):
             "definitions": {
                 "datasets": {
                     "d1": {
-                        "format": "Pickle",
+                        "format": "Binary",
                         "params": {
                             "path": str(dataset_path),
                             "result_path": str(dataset_path.parents[0] / "imported_data/")

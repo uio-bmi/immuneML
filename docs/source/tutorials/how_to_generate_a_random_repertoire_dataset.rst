@@ -103,7 +103,7 @@ Finally, a random receptor dataset can be specified as follows:
 Exporting a random sequence/receptor/repertoire dataset
 -------------------------------------------------------
 
-It is possible to export the generated random sequence/receptor/repertoire dataset to AIRR or Pickle format. This can be done by exporting the generated dataset
+It is possible to export the generated random sequence/receptor/repertoire dataset to AIRR or Binary format. This can be done by exporting the generated dataset
 through the :ref:`DatasetExport` instruction. The generated dataset can subsequently be used for other analyses or machine learning. A complete YAML
 specification for random repertoire generation and export is given below:
 
@@ -128,8 +128,8 @@ specification for random repertoire generation and export is given below:
     my_dataset_export_instruction:
       type: DatasetExport
       datasets: [my_dataset] # list of datasets to export
-      export_formats: [AIRR, Pickle] # list of formats to export the datasets to.
-                                     # Important note: Pickle files might not be compatible between different immuneML (sub)versions.
+      export_formats: [AIRR, Binary] # list of formats to export the datasets to.
+                                     # Important note: Binary files might not be compatible between different immuneML (sub)versions.
 
 
 Generating random sequence/receptor/repertoire datasets in the code

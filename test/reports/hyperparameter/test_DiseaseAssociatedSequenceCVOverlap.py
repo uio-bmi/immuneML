@@ -4,7 +4,7 @@ from unittest import TestCase
 
 import yaml
 
-from immuneML.IO.dataset_export.PickleExporter import PickleExporter
+from immuneML.IO.dataset_export.BinaryExporter import BinaryExporter
 from immuneML.app.ImmuneMLApp import ImmuneMLApp
 from immuneML.caching.CacheType import CacheType
 from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
@@ -36,13 +36,13 @@ class TestDiseaseAssociatedSequenceCVOverlap(TestCase):
                                                                        True, False, True, False, True, False]}, path=path)
 
         dataset = RepertoireDataset(repertoires=repertoires, metadata_file=metadata, labels={"l1": [True, False]})
-        PickleExporter.export(dataset, path)
+        BinaryExporter.export(dataset, path)
 
         specs = {
             "definitions": {
                 "datasets": {
                     "d1": {
-                        "format": "Pickle",
+                        "format": "Binary",
                         "params": {
                             "path": str(path / f"{dataset.name}.iml_dataset"),
                         }

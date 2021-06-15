@@ -154,7 +154,7 @@ def build_specs(args):
         "definitions": {
             "datasets": {
                 "d1": {
-                    "format": "Pickle",
+                    "format": "Binary",
                     "params": None
                 }
             },

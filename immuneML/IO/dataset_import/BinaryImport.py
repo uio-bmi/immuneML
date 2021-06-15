@@ -14,7 +14,7 @@ from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
 from immuneML.environment.Constants import Constants
 
 
-class PickleImport(DataImport):
+class BinaryImport(DataImport):
     """
     Imports the dataset from the pickle files previously exported by immuneML.
     PickleImport can import any kind of dataset (RepertoireDataset, SequenceDataset, ReceptorDataset).
@@ -49,20 +49,19 @@ class PickleImport(DataImport):
         pickle_params = DatasetImportParams.build_object(**params)
 
         if pickle_params.path is not None:
-            dataset = PickleImport._import_from_path(pickle_params)
+            dataset = BinaryImport._import_from_path(pickle_params)
         elif pickle_params.metadata_file is not None:
-            dataset = PickleImport._import_from_metadata(pickle_params, dataset_name)
+            dataset = BinaryImport._import_from_metadata(pickle_params, dataset_name)
         else:
-            raise ValueError(f"PickleImport: no path nor metadata file were defined under key {dataset_name}. At least one of these has "
+            raise ValueError(f"{BinaryImport.__name__}: no path nor metadata file were defined under key {dataset_name}. At least one of these has "
                              f"to be specified to import the dataset.")
 
         if isinstance(dataset, RepertoireDataset):
-            dataset = PickleImport._update_repertoire_paths(pickle_params, dataset)
+            dataset = BinaryImport._update_repertoire_paths(pickle_params, dataset)
         else:
-            dataset = PickleImport._update_receptor_paths(pickle_params, dataset)
+            dataset = BinaryImport._update_receptor_paths(pickle_params, dataset)
 
         return dataset
-
 
     @staticmethod
     def _import_from_path(pickle_params):
@@ -78,28 +77,28 @@ class PickleImport(DataImport):
                     new_metadata_file = Path(dataset.metadata_file.name)
                     if new_metadata_file.is_file():
                         dataset.metadata_file = new_metadata_file
-                        logging.warning(f"PickleImport: metadata file could not be found at {pickle_params.metadata_file}, "
+                        logging.warning(f"{BinaryImport.__name__}: metadata file could not be found at {pickle_params.metadata_file}, "
                                         f"using {new_metadata_file} instead.")
                     else:
-                        raise FileNotFoundError(f"PickleImport: the metadata file could not be found at {pickle_params.metadata_file}"
+                        raise FileNotFoundError(f"{BinaryImport.__name__}: the metadata file could not be found at {pickle_params.metadata_file}"
                                                 f"or at {new_metadata_file}. Please update the path to the metadata file.")
         return dataset
 
     @staticmethod
-    def _import_from_metadata(pickle_params,  dataset_name):
+    def _import_from_metadata(pickle_params, dataset_name):
         with pickle_params.metadata_file.open("r") as file:
             dataset_filename = file.readline().replace(Constants.COMMENT_SIGN, "").replace("\n", "")
         pickle_params.path = pickle_params.metadata_file.parent / dataset_filename
 
-        assert pickle_params.path.is_file(), f"PickleImport: dataset file {dataset_filename} specified in " \
-                                                   f"{pickle_params.metadata_file} could not be found ({pickle_params.path} is not a file), " \
-                                                   f"failed to import the dataset {dataset_name}."
+        assert pickle_params.path.is_file(), f"{BinaryImport.__name__}: dataset file {dataset_filename} specified in " \
+                                             f"{pickle_params.metadata_file} could not be found ({pickle_params.path} is not a file), " \
+                                             f"failed to import the dataset {dataset_name}."
 
-        return PickleImport._import_from_path(pickle_params)
+        return BinaryImport._import_from_path(pickle_params)
 
     @staticmethod
     def _update_repertoire_paths(pickle_params, dataset):
-        path = PickleImport._discover_repertoire_path(pickle_params, dataset)
+        path = BinaryImport._discover_repertoire_path(pickle_params, dataset)
         if path is not None:
             for repertoire in dataset.repertoires:
                 repertoire.data_filename = path / repertoire.data_filename.name
@@ -112,7 +111,7 @@ class PickleImport(DataImport):
 
     @staticmethod
     def _update_receptor_paths(pickle_params, dataset: ElementDataset):
-        dataset_dir = PickleImport._discover_dataset_dir(pickle_params)
+        dataset_dir = BinaryImport._discover_dataset_dir(pickle_params)
 
         if len(list(dataset_dir.glob("*.pickle"))) == len(dataset.get_filenames()):
             path = dataset_dir
@@ -125,7 +124,7 @@ class PickleImport(DataImport):
 
     @staticmethod
     def _discover_repertoire_path(pickle_params, dataset):
-        dataset_dir = PickleImport._discover_dataset_dir(pickle_params)
+        dataset_dir = BinaryImport._discover_dataset_dir(pickle_params)
 
         if len(list(dataset_dir.glob("*.npy"))) == len(dataset.repertoires):
             path = dataset_dir

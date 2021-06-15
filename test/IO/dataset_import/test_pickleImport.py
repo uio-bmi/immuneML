@@ -2,8 +2,8 @@ import pickle
 import shutil
 from unittest import TestCase
 
-from immuneML.IO.dataset_export.PickleExporter import PickleExporter
-from immuneML.IO.dataset_import.PickleImport import PickleImport
+from immuneML.IO.dataset_export.BinaryExporter import BinaryExporter
+from immuneML.IO.dataset_import.BinaryImport import BinaryImport
 from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.simulation.dataset_generation.RandomDatasetGenerator import RandomDatasetGenerator
@@ -11,7 +11,7 @@ from immuneML.util.PathBuilder import PathBuilder
 from immuneML.util.RepertoireBuilder import RepertoireBuilder
 
 
-class TestPickleLoader(TestCase):
+class TestBinaryLoader(TestCase):
     def test_load(self):
         path = EnvironmentSettings.root_path / "test/tmp/pathbuilder/"
         PathBuilder.build(path)
@@ -22,7 +22,7 @@ class TestPickleLoader(TestCase):
         with open(path / "dataset.pkl", "wb") as file:
             pickle.dump(dataset, file)
 
-        dataset2 = PickleImport.import_dataset({"path": path / "dataset.pkl"}, "dataset_name")
+        dataset2 = BinaryImport.import_dataset({"path": path / "dataset.pkl"}, "dataset_name")
 
         shutil.rmtree(path)
 
@@ -36,9 +36,9 @@ class TestPickleLoader(TestCase):
 
         dataset = RandomDatasetGenerator.generate_receptor_dataset(10, {2: 1}, {3: 1}, {}, path)
         dataset.name = "d1"
-        PickleExporter.export(dataset, path)
+        BinaryExporter.export(dataset, path)
 
-        receptor_dataset = PickleImport.import_dataset({"path": path / "d1.iml_dataset"}, "dataset_name")
+        receptor_dataset = BinaryImport.import_dataset({"path": path / "d1.iml_dataset"}, "dataset_name")
 
         self.assertEqual(10, len(list(receptor_dataset.get_data())))
 

@@ -2,7 +2,7 @@ import os
 import shutil
 import unittest
 
-from immuneML.IO.dataset_export.PickleExporter import PickleExporter
+from immuneML.IO.dataset_export.BinaryExporter import BinaryExporter
 from immuneML.api.galaxy.build_yaml_from_arguments import build_settings_specs, build_ml_methods_specs, get_sequence_enc_type, \
     build_encodings_specs, build_labels
 from immuneML.api.galaxy.build_yaml_from_arguments import main as yamlbuilder_main
@@ -24,7 +24,7 @@ class MyTestCase(unittest.TestCase):
 
         dataset = RepertoireDataset(repertoires=repertoires, metadata_file=metadata)
         dataset.name = "my_dataset"
-        PickleExporter.export(dataset, path)
+        BinaryExporter.export(dataset, path)
 
         return f"{dataset.name}.iml_dataset"
 

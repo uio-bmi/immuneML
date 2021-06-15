@@ -2,7 +2,7 @@ from typing import List
 
 import pandas as pd
 
-from immuneML.IO.dataset_export.PickleExporter import PickleExporter
+from immuneML.IO.dataset_export.BinaryExporter import BinaryExporter
 from immuneML.IO.dataset_import.DataImport import DataImport
 from immuneML.IO.dataset_import.DatasetImportParams import DatasetImportParams
 from immuneML.data_model.dataset.ReceptorDataset import ReceptorDataset
@@ -129,7 +129,7 @@ class SingleLineReceptorImport(DataImport):
         dataset.name = dataset_name
         dataset.labels = ImportHelper.extract_sequence_dataset_params(params=generic_params)
 
-        PickleExporter.export(dataset, generic_params.result_path)
+        BinaryExporter.export(dataset, generic_params.result_path)
 
         return dataset
 

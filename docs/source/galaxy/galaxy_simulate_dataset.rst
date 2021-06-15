@@ -66,7 +66,7 @@ A complete example of a full YAML specification for generating a RandomRepertoir
       export_formats:
       # only one format can be specified here and the dataset in this format will be
       # available as a Galaxy collection afterwards
-      - Pickle # Can be AIRR (human-readable) or Pickle (recommended for further Galaxy-analysis)
+      - Binary # Can be AIRR (human-readable) or Binary (recommended for further Galaxy-analysis)
 
 
 

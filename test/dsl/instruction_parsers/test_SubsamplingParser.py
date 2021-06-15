@@ -19,19 +19,19 @@ class TestSubsamplingParser(TestCase):
         symbol_table.add("d1", SymbolType.DATASET, dataset)
 
         SubsamplingParser().parse('inst1',
-                                  {'dataset': 'd1', 'type': 'Subsampling', 'subsampled_dataset_sizes': [10, 20], 'dataset_export_formats': ['Pickle']},
+                                  {'dataset': 'd1', 'type': 'Subsampling', 'subsampled_dataset_sizes': [10, 20], 'dataset_export_formats': ['Binary']},
                                   symbol_table)
 
         with self.assertRaises(AssertionError):
             SubsamplingParser().parse('inst1',
                                       {'dataset': 'd1', 'type': 'Subsampling', 'subsampled_dataset_sizes': [10, 50],
-                                       'dataset_export_formats': ['Pickle']},
+                                       'dataset_export_formats': ['Binary']},
                                       symbol_table)
 
         with self.assertRaises(AssertionError):
             SubsamplingParser().parse('inst1',
                                       {'dataset': 'd2', 'type': 'Subsampling', 'subsampled_dataset_sizes': [10, 20],
-                                       'dataset_export_formats': ['Pickle']},
+                                       'dataset_export_formats': ['Binary']},
                                       symbol_table)
 
         with self.assertRaises(AssertionError):

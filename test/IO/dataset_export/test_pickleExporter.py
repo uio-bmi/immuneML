@@ -3,7 +3,7 @@ import pickle
 import shutil
 from unittest import TestCase
 
-from immuneML.IO.dataset_export.PickleExporter import PickleExporter
+from immuneML.IO.dataset_export.BinaryExporter import BinaryExporter
 from immuneML.caching.CacheType import CacheType
 from immuneML.data_model.dataset.ReceptorDataset import ReceptorDataset
 from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
@@ -14,7 +14,7 @@ from immuneML.util.PathBuilder import PathBuilder
 from immuneML.util.RepertoireBuilder import RepertoireBuilder
 
 
-class TestPickleExporter(TestCase):
+class TestBinaryExporter(TestCase):
 
     def setUp(self) -> None:
         os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
@@ -25,7 +25,7 @@ class TestPickleExporter(TestCase):
 
         repertoires, metadata = RepertoireBuilder.build([["AA"], ["CC"]], path)
         dataset = RepertoireDataset(repertoires=repertoires, metadata_file=metadata)
-        PickleExporter.export(dataset, EnvironmentSettings.tmp_test_path / "pickleexporter/")
+        BinaryExporter.export(dataset, EnvironmentSettings.tmp_test_path / "pickleexporter/")
 
         with open(EnvironmentSettings.tmp_test_path / f"pickleexporter/{dataset.name}.iml_dataset", "rb") as file:
             dataset2 = pickle.load(file)
@@ -42,7 +42,7 @@ class TestPickleExporter(TestCase):
 
         dataset = RandomDatasetGenerator.generate_receptor_dataset(10, {2: 1}, {3: 1}, {}, path)
         dataset.name = "d1"
-        PickleExporter.export(dataset, path)
+        BinaryExporter.export(dataset, path)
 
         with open(path / f"{dataset.name}.iml_dataset", "rb") as file:
             dataset2 = pickle.load(file)

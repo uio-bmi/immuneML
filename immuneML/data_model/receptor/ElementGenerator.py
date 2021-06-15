@@ -10,7 +10,7 @@ class ElementGenerator:
 
     def __init__(self, file_list: list, file_size: int = 1000, element_class_name: str = ""):
         self.file_list = file_list
-        self.file_lengths = [-1 for i in range(len(file_list))]
+        self.file_lengths = [-1 for _ in range(len(file_list))]
         self.file_size = file_size
         self.element_class_name = element_class_name
 
@@ -101,7 +101,7 @@ class ElementGenerator:
 
     def _store_elements_to_file(self, path, elements):
         if isinstance(elements, list) and len(elements) > 0:
-            element_matrix = np.core.records.fromrecords([el.get_record() for el in elements], names=list(type(elements[0]).FIELDS.keys()))
+            element_matrix = np.core.records.fromrecords([el.get_record() for el in elements], names=type(elements[0]).get_record_names())
             np.save(str(path), element_matrix, allow_pickle=False)
 
     def _extract_elements_from_batch(self, index, batch_size, batch, example_indices):

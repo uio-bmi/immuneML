@@ -64,7 +64,7 @@ class SimulationParser:
                 type: Simulation
                 dataset: my_dataset
                 simulation: sim1
-                export_formats: [AIRR, Pickle]
+                export_formats: [AIRR, Binary]
 
     """
 
