@@ -70,8 +70,8 @@ class TestAIRRExporter(TestCase):
         self.assertListEqual(list(resulting_data["locus"]), ["TRB", "TRA"])
         self.assertListEqual(list(resulting_data["duplicate_count"]), [5, 15])
         self.assertListEqual(list(resulting_data["custom_test"]), ["cust1", "cust2"])
-        self.assertListEqual(list(resulting_data["productive"]), ['T', nan])
-        self.assertListEqual(list(resulting_data["stop_codon"]), ['F', nan])
+        self.assertListEqual(list(resulting_data["productive"]), ['T', 'F'])
+        self.assertListEqual(list(resulting_data["stop_codon"]), ['F', 'F'])
 
         shutil.rmtree(path)
 

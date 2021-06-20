@@ -78,7 +78,7 @@ class TestSignalImplanter(TestCase):
 
         path = PathBuilder.build(EnvironmentSettings.root_path / "test/tmp/signalImplanter_receptor/")
 
-        dataset = RandomDatasetGenerator.generate_receptor_dataset(100, {10: 1}, {12: 1}, {}, path / "dataset/")
+        dataset = RandomDatasetGenerator.generate_receptor_dataset(10, {10: 1}, {12: 1}, {}, path / "dataset/")
         motif1 = Motif(identifier="motif1", instantiation=GappedKmerInstantiation(), seed_chain1="AAA", name_chain1=Chain.ALPHA, seed_chain2="CCC",
                        name_chain2=Chain.BETA)
         signal1 = Signal(identifier="signal1", motifs=[motif1], implanting_strategy=ReceptorImplanting(GappedMotifImplanting()))
@@ -89,7 +89,7 @@ class TestSignalImplanter(TestCase):
 
         new_dataset = SignalImplanter.run(sim_state)
 
-        self.assertEqual(100, new_dataset.get_example_count())
-        self.assertEqual(50, len([receptor for receptor in new_dataset.get_data(40) if receptor.metadata["signal1"] is True]))
+        self.assertEqual(10, new_dataset.get_example_count())
+        self.assertEqual(5, len([receptor for receptor in new_dataset.get_data(40) if receptor.metadata["signal1"] is True]))
 
         shutil.rmtree(path)

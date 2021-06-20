@@ -17,7 +17,7 @@ class NumpyHelper:
     @staticmethod
     def is_simple_type(t):
         """returns if the type t is string or a number so that it does not use pickle if serialized"""
-        return t in [str, int, float, np.str_, np.int_, np.float_]
+        return t in [str, int, float, bool, np.str_, np.int_, np.float_, np.bool_]
 
     @staticmethod
     def get_numpy_representation(obj):
@@ -28,22 +28,15 @@ class NumpyHelper:
             return '{}'
         elif NumpyHelper.is_simple_type(type(obj)):
             return obj
-        elif not isinstance(obj, dict):
-            try:
-                representation = vars(obj)
-            except Exception as e:
-                print(e)
-                print(obj)
-                print(type(obj))
-                raise e
+        elif isinstance(obj, Enum):
+            return obj.name
+        elif not isinstance(obj, dict) and not isinstance(obj, list) and not isinstance(obj, Enum):
+            representation = vars(obj)
         else:
             representation = obj
 
-        return json.dumps(representation, default=lambda x: NumpyHelper.convert_to_str(x))
+        return json.dumps(representation, default=lambda x: x.name if isinstance(x, Enum) else str(x))
 
     @staticmethod
-    def convert_to_str(x):
-        if isinstance(x, Enum):
-            return x.name
-        else:
-            return str(x)
+    def is_nan_or_empty(value):
+        return value == 'nan' or value is None or (not isinstance(value, str) and np.isnan(value)) or value == ''

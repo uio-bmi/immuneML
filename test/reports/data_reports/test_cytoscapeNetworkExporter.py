@@ -23,7 +23,7 @@ class TestCytoscapeNetworkExporter(TestCase):
                                            chains=[Chain.ALPHA, Chain.BETA, Chain.BETA, Chain.ALPHA, Chain.BETA],
                                            custom_lists={"custom_1": [f"CUST-{i}" for i in range(5)],
                                                          "custom_2": [f"CUST-A" for i in range(3)] + [f"CUST-B" for i in range(2)]},
-                                           cell_ids=[1, 1, 1, 2, 2],
+                                           cell_ids=["1", "1", "1", "2", '2'],
                                            path=path)
 
         if dataset_type == "receptor":

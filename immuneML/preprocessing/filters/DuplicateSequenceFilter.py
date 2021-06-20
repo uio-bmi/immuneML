@@ -147,7 +147,7 @@ class DuplicateSequenceFilter(Filter):
                                                 sequences=list(no_duplicates["sequences"]) if "sequences" in no_duplicates.columns else None,
                                                 v_genes=list(no_duplicates["v_genes"]) if "v_genes" in no_duplicates.columns else None,
                                                 j_genes=list(no_duplicates["j_genes"]) if 'j_genes' in no_duplicates.columns else None,
-                                                chains=[Chain(key) for key in
+                                                chains=[Chain.get_chain(key) for key in
                                                         list(no_duplicates["chains"])] if "chains" in no_duplicates.columns else None,
                                                 counts=list(no_duplicates["counts"]) if "counts" in no_duplicates else None,
                                                 region_types=list(no_duplicates["region_types"]) if "region_types" in no_duplicates else None,
