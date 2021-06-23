@@ -40,7 +40,7 @@ The following YAML specification shows an example of how to run the ExploratoryA
   definitions:
     datasets:
       dataset: # user-defined dataset name
-        format: Binary # the default format used by the 'Create dataset' galaxy tool is Binary
+        format: ImmuneML # the default format used by the 'Create dataset' galaxy tool is ImmuneML
         params:
           path: dataset.iml_dataset # specify the dataset name, the default name used by
                                     # the 'Create dataset' galaxy tool is dataset.iml_dataset

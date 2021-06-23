@@ -166,7 +166,7 @@ class RandomDatasetGenerator:
         np.save(str(filename), receptor_matrix, allow_pickle=False)
 
         return ReceptorDataset(labels={label: list(label_dict.keys()) for label, label_dict in labels.items()},
-                               filenames=[filename], file_size=receptor_count, class_name=type(receptors[0]).__name__ if len(receptors) > 0 else None)
+                               filenames=[filename], file_size=receptor_count, element_class_name=type(receptors[0]).__name__ if len(receptors) > 0 else None)
 
     @staticmethod
     def _check_sequence_dataset_generation_params(receptor_count: int, length_probabilities: dict, labels: dict, path: Path):
@@ -224,4 +224,4 @@ class RandomDatasetGenerator:
         np.save(str(filename), sequence_matrix, allow_pickle=False)
 
         return SequenceDataset(labels={label: list(label_dict.keys()) for label, label_dict in labels.items()},
-                               filenames=[filename], file_size=sequence_count, class_name=TCABReceptor.__name__)
+                               filenames=[filename], file_size=sequence_count)

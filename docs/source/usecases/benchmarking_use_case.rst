@@ -762,7 +762,7 @@ the 2000 repertoires and metadata file generated in the previous step are locate
       dataset: olga2000
       export_formats:
       - AIRR
-      - Binary
+      - ImmuneML
       simulation: sim1
       type: Simulation
   output:
@@ -781,7 +781,7 @@ The YAML specification below shows the settings that were used for the benchmark
 with simulated signals can be found at :code:`path/to/simulated_data/olga2000.iml_dataset`.
 Alternatively, you may want to use the AIRR files (airr.zip) that were produced in the original use case, which can be downloaded
 from the NIRD research data archive (DOI: `10.11582/2021.00005 <https://doi.org/10.11582/2021.00005>`_).
-In this case, uncomment the lines for AIRR import and remove the lines for Binary import.
+In this case, uncomment the lines for AIRR import and remove the lines for ImmuneML import.
 
 
 .. highlight:: yaml
@@ -790,7 +790,7 @@ In this case, uncomment the lines for AIRR import and remove the lines for Binar
   definitions:
     datasets:
       d1:
-        format: Binary
+        format: ImmuneML
         params:
           path: path/to/simulated_data/olga2000.iml_dataset
       #d1:

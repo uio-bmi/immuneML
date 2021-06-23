@@ -22,7 +22,7 @@ class DatasetExportInstruction(Instruction):
         preprocessing_sequence (str): which preprocessing sequence to use on the dataset(s), this item is optional and does not have to be specified.
         When specified, the same preprocessing sequence will be applied to all datasets.
 
-        formats (list): a list of formats in which to export the datasets. Valid formats are class names of any non-abstract class inheriting :py:obj:`~immuneML.IO.dataset_export.DataExporter.DataExporter`. Important note: Pickle files might not be compatible between different immuneML (sub)versions.
+        formats (list): a list of formats in which to export the datasets. Valid formats are class names of any non-abstract class inheriting :py:obj:`~immuneML.IO.dataset_export.DataExporter.DataExporter`.
 
     YAML specification:
 
@@ -37,7 +37,7 @@ class DatasetExportInstruction(Instruction):
             preprocessing_sequence: my_preprocessing_sequence
             export_formats: # list of formats to export the datasets to
                 - AIRR
-                - Pickle
+                - ImmuneML
 
     """
 

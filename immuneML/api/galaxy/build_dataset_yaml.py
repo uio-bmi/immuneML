@@ -29,7 +29,7 @@ def build_specs(args):
             "my_dataset_generation_instruction": {
                 "type": "DatasetExport",
                 "datasets": [args.dataset_name],
-                "export_formats": ["Binary"]
+                "export_formats": ["ImmuneML"]
             }
         }
     }

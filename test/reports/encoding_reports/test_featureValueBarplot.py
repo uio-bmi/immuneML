@@ -82,7 +82,7 @@ class TestFeatureValueBarplot(TestCase):
         self.assertListEqual(list(content.columns),
                              ["patient", "disease", "timepoint", "example_id", "sequence", "feature", "value"])
 
-        # report should succeed to build but check_prerequisites should be false when data is not encoded
+        # report should succeed to build_from_objects but check_prerequisites should be false when data is not encoded
         report = FeatureValueBarplot.build_object(**{"dataset": RepertoireDataset(),
                                                      "result_path": path,
                                                      "column_grouping_label": None,

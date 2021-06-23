@@ -171,15 +171,15 @@ Importing previously generated immuneML datasets
 
 When you import a dataset into immuneML for the first time, it is converted to an optimized binary format,
 which speeds up the analysis. The main resulting file has an `.iml_dataset` extension, and may be accompanied
-by several other `.pickle` and `.npy` files. When running immuneML locally, you can by default find these immuneML
+by several other `.yaml` and `.npy` files. When running immuneML locally, you can by default find these immuneML
 dataset files in the folder 'datasets', which is located in the main output folder of your analysis.
 
 Some instructions (:ref:`Simulation`, :ref:`DatasetExport`, :ref:`SubSampling`) also explicitly export binarized immuneML
-datasets when selecting 'Binary' as the export format.
+datasets when selecting 'ImmuneML' as the export format.
 
 These `.iml_dataset` files can later be imported easily and with few parameters, and importing from `.iml_dataset` is
-also faster than importing from other data formats. A YAML specification for Binary data import is shown below.
-Important note: Binary files might not be compatible between different immuneML (sub)versions.
+also faster than importing from other data formats. A YAML specification for ImmuneML data import is shown below.
+Important note: ImmuneML files might not be compatible between different immuneML (sub)versions.
 
 .. indent with spaces
 .. code-block:: yaml
@@ -187,7 +187,7 @@ Important note: Binary files might not be compatible between different immuneML 
   definitions:
     datasets:
       my_dataset:
-        format: Binary
+        format: ImmuneML
         params:
           path: path/to/dataset.iml_dataset
           # specifying a metadata_file is optional, it will update the dataset using this new metadata.

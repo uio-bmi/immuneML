@@ -37,7 +37,7 @@ class TestDataSimulationTool(TestCase):
             }
         },
             "instructions": {
-                "inst1": {"type": "DatasetExport", "export_formats": ["Binary"], "datasets": ["d1"]}
+                "inst1": {"type": "DatasetExport", "export_formats": ["ImmuneML"], "datasets": ["d1"]}
             }
         }
 

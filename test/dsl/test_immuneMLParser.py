@@ -4,7 +4,7 @@ from unittest import TestCase
 import yaml
 from yaml import YAMLError
 
-from immuneML.IO.dataset_export.BinaryExporter import BinaryExporter
+from immuneML.IO.dataset_export.ImmuneMLExporter import ImmuneMLExporter
 from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
 from immuneML.dsl.ImmuneMLParser import ImmuneMLParser
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
@@ -14,16 +14,16 @@ from immuneML.util.RepertoireBuilder import RepertoireBuilder
 
 class TestImmuneMLParser(TestCase):
     def test_parse_yaml_file(self):
-        path = EnvironmentSettings.root_path / "test/tmp/parser/"
-        dataset = RepertoireDataset(repertoires=RepertoireBuilder.build([["AAA", "CCC"], ["TTTT"]], path, {"default": [1, 2]})[0],
-                                    labels={"default": [1, 2]})
-        BinaryExporter.export(dataset, path)
+        path = EnvironmentSettings.tmp_test_path / "parser/"
+        reps, metadata = RepertoireBuilder.build([["AAA", "CCC"], ["TTTT"]], path, {"default": [1, 2]})
+        dataset = RepertoireDataset(repertoires=reps, metadata_file=metadata, labels={"default": [1, 2]})
+        ImmuneMLExporter.export(dataset, path)
 
         spec = {
             "definitions": {
                 "datasets": {
                     "d1": {
-                        "format": "Binary",
+                        "format": "ImmuneML",
                         "params": {
                             "path": str(path / f"{dataset.name}.iml_dataset"),
                         }

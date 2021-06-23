@@ -154,7 +154,7 @@ def build_specs(args):
         "definitions": {
             "datasets": {
                 "d1": {
-                    "format": "Binary",
+                    "format": "ImmuneML",
                     "params": None
                 }
             },

@@ -2,13 +2,13 @@
 
 import copy
 import os
-import pickle
 import platform
 import shutil
 from pathlib import Path
 from typing import List
 
 import pandas as pd
+import yaml
 
 from immuneML.IO.dataset_export.DataExporter import DataExporter
 from immuneML.data_model.dataset.Dataset import Dataset
@@ -20,34 +20,45 @@ from immuneML.environment.Constants import Constants
 from immuneML.util.PathBuilder import PathBuilder
 
 
-class BinaryExporter(DataExporter):
+class ImmuneMLExporter(DataExporter):
 
     @staticmethod
     def export(dataset: Dataset, path: Path):
         PathBuilder.build(path)
-        exported_dataset = dataset.clone()
+        exported_dataset = dataset.clone(keep_identifier=True)
         dataset_name = exported_dataset.name
         dataset_filename = f"{dataset_name}.iml_dataset"
 
         if isinstance(dataset, RepertoireDataset):
             repertoires_path = PathBuilder.build(path / "repertoires")
-            exported_repertoires = BinaryExporter._export_repertoires(dataset.repertoires, repertoires_path)
+            exported_repertoires = ImmuneMLExporter._export_repertoires(dataset.repertoires, repertoires_path)
             exported_dataset.repertoires = exported_repertoires
-            exported_dataset.metadata_file = BinaryExporter._export_metadata(dataset, path, dataset_filename, repertoires_path)
+            exported_dataset.metadata_file = ImmuneMLExporter._export_metadata(dataset, path, dataset_filename, repertoires_path)
         elif isinstance(dataset, SequenceDataset) or isinstance(dataset, ReceptorDataset):
-            exported_dataset.set_filenames(BinaryExporter._export_receptors(exported_dataset.get_filenames(), path))
+            exported_dataset.set_filenames(ImmuneMLExporter._export_receptors(exported_dataset.get_filenames(), path))
 
         file_path = path / dataset_filename
-        with file_path.open("wb") as file:
-            pickle.dump(exported_dataset, file, pickle.HIGHEST_PROTOCOL)
+        with file_path.open("w") as file:
+            yaml_dict = {**{key: ImmuneMLExporter._parse_val_for_export(val) for key, val in vars(exported_dataset).items()
+                            if key not in ['repertoires', 'element_generator', 'encoded_data']},
+                         **{'dataset_class': type(exported_dataset).__name__}}
+            yaml.dump(yaml_dict, file)
 
         version_path = path / "info.txt"
         with version_path.open("w") as file:
-            file.writelines(f"immuneML version: {Constants.VERSION}\n" 
-                            f"Python version: {platform.python_version()}\n" 
-                            f"Pickle protocol: {pickle.HIGHEST_PROTOCOL}")
+            file.writelines(f"immuneML_version: {Constants.VERSION}\n"
+                            f"Python_version: {platform.python_version()}\n")
 
         return exported_dataset
+
+    @staticmethod
+    def _parse_val_for_export(val):
+        if isinstance(val, Path):
+            return str(val)
+        elif isinstance(val, list) and any(isinstance(v, Path) for v in val):
+            return [str(v) for v in val]
+        else:
+            return val
 
     @staticmethod
     def _export_metadata(dataset, metadata_folder_path: Path, dataset_filename, repertoires_path):
@@ -59,12 +70,12 @@ class BinaryExporter(DataExporter):
         if not metadata_file.is_file():
             shutil.copyfile(dataset.metadata_file, metadata_file)
 
-        BinaryExporter._update_repertoire_paths_in_metadata(metadata_file, repertoires_path)
-        BinaryExporter._add_dataset_to_metadata(metadata_file, dataset_filename)
+        ImmuneMLExporter._update_repertoire_paths_in_metadata(metadata_file, repertoires_path)
+        ImmuneMLExporter._add_dataset_to_metadata(metadata_file, dataset_filename)
 
         old_metadata_file = metadata_folder_path / "metadata.csv"
         if old_metadata_file.is_file():
-            os.remove(old_metadata_file)
+            os.remove(str(old_metadata_file))
 
         return metadata_file
 
@@ -86,7 +97,7 @@ class BinaryExporter(DataExporter):
     def _export_receptors(filenames_old: List[str], path: Path) -> List[str]:
         filenames_new = []
         for filename_old in filenames_old:
-            filename_new = BinaryExporter._copy_if_exists(filename_old, path)
+            filename_new = ImmuneMLExporter._copy_if_exists(filename_old, path)
             filenames_new.append(filename_new)
         return filenames_new
 
@@ -96,8 +107,8 @@ class BinaryExporter(DataExporter):
 
         for repertoire_old in repertoires:
             repertoire = copy.deepcopy(repertoire_old)
-            repertoire.data_filename = BinaryExporter._copy_if_exists(repertoire_old.data_filename, repertoires_path)
-            repertoire.metadata_filename = BinaryExporter._copy_if_exists(repertoire_old.metadata_filename, repertoires_path)
+            repertoire.data_filename = ImmuneMLExporter._copy_if_exists(repertoire_old.data_filename, repertoires_path)
+            repertoire.metadata_filename = ImmuneMLExporter._copy_if_exists(repertoire_old.metadata_filename, repertoires_path)
             new_repertoires.append(repertoire)
 
         return new_repertoires
@@ -110,4 +121,4 @@ class BinaryExporter(DataExporter):
                 shutil.copyfile(old_file, new_file)
             return new_file
         else:
-            raise RuntimeError(f"{BinaryExporter.__name__}: tried exporting file {old_file}, but it does not exist.")
+            raise RuntimeError(f"{ImmuneMLExporter.__name__}: tried exporting file {old_file}, but it does not exist.")

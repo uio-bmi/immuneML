@@ -11,7 +11,6 @@ from immuneML.util.PathBuilder import PathBuilder
 class TestDatasetExportHTMLOutput(TestCase):
 
     def test_repertoire_dataset(self):
-
         path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "integration_dataset_gen_html_repertoire/")
         dataset_path = path / "repertoire_dataset/"
 
@@ -45,7 +44,8 @@ class TestDatasetExportHTMLOutput(TestCase):
                     ]
                 }
             },
-            "instructions": {"instr1": {"type": "DatasetExport", "export_formats": ["Binary", "AIRR"], "datasets": ["d1"], "preprocessing_sequence": "p1"}},
+            "instructions": {
+                "instr1": {"type": "DatasetExport", "export_formats": ["ImmuneML", "AIRR"], "datasets": ["d1"], "preprocessing_sequence": "p1"}},
             "output": {"format": "HTML"}
         }
 
@@ -58,9 +58,7 @@ class TestDatasetExportHTMLOutput(TestCase):
 
         shutil.rmtree(path)
 
-
     def test_receptor_dataset(self):
-
         path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "integration_dataset_gen_html_receptor/")
         dataset_path = path / "receptor_dataset/"
 
@@ -84,7 +82,7 @@ class TestDatasetExportHTMLOutput(TestCase):
                     }
                 }
             },
-            "instructions": {"instr1": {"type": "DatasetExport", "export_formats": ["Binary", "AIRR"], "datasets": ["receptordataset"]}},
+            "instructions": {"instr1": {"type": "DatasetExport", "export_formats": ["ImmuneML", "AIRR"], "datasets": ["receptordataset"]}},
             "output": {"format": "HTML"}
         }
 
@@ -97,9 +95,7 @@ class TestDatasetExportHTMLOutput(TestCase):
 
         shutil.rmtree(path)
 
-
     def test_sequence_dataset(self):
-
         path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "integration_dataset_gen_html_sequence/")
         dataset_path = path / "sequence_dataset/"
 
@@ -120,7 +116,7 @@ class TestDatasetExportHTMLOutput(TestCase):
                     }
                 }
             },
-            "instructions": {"instr1": {"type": "DatasetExport", "export_formats": ["Binary", "AIRR"], "datasets": ["sequencedataset"]}},
+            "instructions": {"instr1": {"type": "DatasetExport", "export_formats": ["ImmuneML", "AIRR"], "datasets": ["sequencedataset"]}},
             "output": {"format": "HTML"}
         }
 

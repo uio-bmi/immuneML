@@ -48,7 +48,7 @@ class TestKmerFreqSequenceEncoder(TestCase):
 
         path = EnvironmentSettings.tmp_test_path / "kmrefreqseqfacencoder/"
         PathBuilder.build(path)
-        dataset = SequenceDataset.build(sequences, 100, PathBuilder.build(path / 'data'), 'd2')
+        dataset = SequenceDataset.build_from_objects(sequences, 100, PathBuilder.build(path / 'data'), 'd2')
 
         lc = LabelConfiguration()
         lc.add_label("l1", [1, 2])

@@ -16,7 +16,11 @@ class SequenceDataset(ElementDataset):
     dataset and obtaining metadata."""
 
     @classmethod
-    def build(cls, sequences: List[ReceptorSequence], file_size: int, path: Path, name: str = None):
+    def build(cls, **kwargs):
+        return SequenceDataset(**kwargs)
+
+    @classmethod
+    def build_from_objects(cls, sequences: List[ReceptorSequence], file_size: int, path: Path, name: str = None):
 
         file_count = math.ceil(len(sequences) / file_size)
         file_names = [path / f"batch{''.join(['0' for i in range(1, len(str(file_count)) - len(str(index)) + 1)])}{index}.npy"
@@ -31,7 +35,7 @@ class SequenceDataset(ElementDataset):
 
     def __init__(self, **kwargs):
 
-        super().__init__(**{**kwargs, **{'class_name': ReceptorSequence.__name__}})
+        super().__init__(**{**kwargs, **{'element_class_name': ReceptorSequence.__name__}})
 
     def get_metadata(self, field_names: list, return_df: bool = False):
         """Returns a dict or an equivalent pandas DataFrame with metadata information under 'custom_params' attribute in SequenceMetadata object
@@ -49,6 +53,10 @@ class SequenceDataset(ElementDataset):
 
         return pd.DataFrame(result) if return_df else result
 
-    def clone(self):
-        return SequenceDataset(labels=self.labels, encoded_data=copy.deepcopy(self.encoded_data), filenames=copy.deepcopy(self._filenames),
-                               file_size=self.file_size, name=self.name)
+    def clone(self, keep_identifier: bool = False):
+        dataset = SequenceDataset(labels=self.labels, encoded_data=copy.deepcopy(self.encoded_data), filenames=copy.deepcopy(self.filenames),
+                                  file_size=self.file_size, name=self.name)
+        if keep_identifier:
+            dataset.identifier = self.identifier
+        dataset.element_ids = self.element_ids
+        return dataset

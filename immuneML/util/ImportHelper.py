@@ -6,9 +6,9 @@ from typing import List
 import numpy as np
 import pandas as pd
 
-from immuneML.IO.dataset_export.BinaryExporter import BinaryExporter
-from immuneML.IO.dataset_import.BinaryImport import BinaryImport
+from immuneML.IO.dataset_export.ImmuneMLExporter import ImmuneMLExporter
 from immuneML.IO.dataset_import.DatasetImportParams import DatasetImportParams
+from immuneML.IO.dataset_import.ImmuneMLImport import ImmuneMLImport
 from immuneML.data_model.dataset import Dataset
 from immuneML.data_model.dataset.ReceptorDataset import ReceptorDataset
 from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
@@ -60,7 +60,7 @@ class ImportHelper:
 
         if dataset_file.is_file():
             params["path"] = dataset_file
-            dataset = BinaryImport.import_dataset(params, dataset_name)
+            dataset = ImmuneMLImport.import_dataset(params, dataset_name)
 
         return dataset
 
@@ -100,7 +100,7 @@ class ImportHelper:
         dataset = RepertoireDataset(labels={key: list(set(metadata[key].values.tolist())) for key in potential_labels},
                                     repertoires=repertoires, metadata_file=new_metadata_file, name=dataset_name)
 
-        BinaryExporter.export(dataset, params.result_path)
+        ImmuneMLExporter.export(dataset, params.result_path)
 
         return dataset
 
@@ -378,6 +378,7 @@ class ImportHelper:
         dataset_filenames = []
         dataset_params = {}
         items = None
+        class_name = None
 
         for index, filename in enumerate(filenames):
             new_items = ImportHelper.import_items(import_class, filename, params)
@@ -392,11 +393,11 @@ class ImportHelper:
                 file_index += 1
 
         init_kwargs = {"filenames": dataset_filenames, "file_size": params.sequence_file_size, "name": dataset_name, "labels": dataset_params,
-                       "class_name": class_name}
+                       "element_class_name": class_name}
 
         dataset = ReceptorDataset(**init_kwargs) if params.paired else SequenceDataset(**init_kwargs)
 
-        BinaryExporter.export(dataset, params.result_path)
+        ImmuneMLExporter.export(dataset, params.result_path)
 
         return dataset
 

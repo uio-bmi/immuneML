@@ -34,7 +34,7 @@ class TestKmerFreqReceptorEncoder(TestCase):
 
         path = EnvironmentSettings.tmp_test_path / "kmer_receptor_frequency/"
         PathBuilder.build(path / 'data')
-        dataset = ReceptorDataset.build(receptors, path=path, file_size=10)
+        dataset = ReceptorDataset.build_from_objects(receptors, path=path, file_size=10)
 
         lc = LabelConfiguration()
         lc.add_label("l1", [1, 2])

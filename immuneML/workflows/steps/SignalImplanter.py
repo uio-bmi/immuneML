@@ -1,9 +1,10 @@
 import copy
+from pathlib import Path
 from typing import List
 
 import pandas as pd
 
-from immuneML.IO.dataset_import.BinaryImport import BinaryImport
+from immuneML.IO.dataset_import.ImmuneMLImport import ImmuneMLImport
 from immuneML.data_model.dataset.Dataset import Dataset
 from immuneML.data_model.dataset.ReceptorDataset import ReceptorDataset
 from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
@@ -24,7 +25,7 @@ class SignalImplanter(Step):
         path = simulation_state.result_path / FilenameHandler.get_dataset_name(SignalImplanter.__name__)
 
         if path.is_file():
-            dataset = BinaryImport.import_dataset({"path": path}, SignalImplanter.DATASET_NAME)
+            dataset = ImmuneMLImport.import_dataset({"path": path}, SignalImplanter.DATASET_NAME)
         else:
             dataset = SignalImplanter._implant_signals_in_dataset(simulation_state)
 
@@ -44,11 +45,11 @@ class SignalImplanter(Step):
     @staticmethod
     def _implant_signals_in_receptors(simulation_state: SimulationState) -> Dataset:
         processed_receptors = SignalImplanter._implant_signals(simulation_state, SignalImplanter._process_receptor)
-        processed_dataset = ReceptorDataset.build(receptors=processed_receptors, file_size=simulation_state.dataset.file_size,
-                                                  name=simulation_state.dataset.name, path=simulation_state.result_path)
+        processed_dataset = ReceptorDataset.build_from_objects(receptors=processed_receptors, file_size=simulation_state.dataset.file_size,
+                                                               name=simulation_state.dataset.name, path=simulation_state.result_path)
 
         processed_dataset.labels = {**(simulation_state.dataset.labels if simulation_state.dataset.labels is not None else {}),
-                                    **{signal: [True, False] for signal in simulation_state.signals}}
+                                    **{signal.id: [True, False] for signal in simulation_state.signals}}
 
         return processed_dataset
 
@@ -60,7 +61,7 @@ class SignalImplanter(Step):
         processed_dataset = RepertoireDataset(repertoires=processed_repertoires, labels={**(simulation_state.dataset.labels if simulation_state.dataset.labels is not None else {}),
                                                                                          **{signal.id: [True, False] for signal in simulation_state.signals}},
                                               name=simulation_state.dataset.name,
-                                              metadata_file=SignalImplanter._create_metadata_file(processed_repertoires, simulation_state))
+                                              metadata_file=Path(SignalImplanter._create_metadata_file(processed_repertoires, simulation_state)))
         return processed_dataset
 
     @staticmethod

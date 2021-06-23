@@ -28,7 +28,7 @@ class TestCytoscapeNetworkExporter(TestCase):
 
         if dataset_type == "receptor":
 
-            dataset = ReceptorDataset.build(test_repertoire.receptors, 100, path, name="receptor_dataset")
+            dataset = ReceptorDataset.build_from_objects(test_repertoire.receptors, 100, path, name="receptor_dataset")
             dataset.identifier = 'receptor_dataset'
 
         elif dataset_type == "repertoire":
