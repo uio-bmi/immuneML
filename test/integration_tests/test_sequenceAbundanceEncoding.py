@@ -5,7 +5,7 @@ from unittest import TestCase
 import pandas as pd
 import yaml
 
-from immuneML.IO.dataset_export.PickleExporter import PickleExporter
+from immuneML.IO.dataset_export.ImmuneMLExporter import ImmuneMLExporter
 from immuneML.app.ImmuneMLApp import ImmuneMLApp
 from immuneML.caching.CacheType import CacheType
 from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
@@ -47,13 +47,13 @@ class TestSequenceAbundanceEncoding(TestCase):
                                                                        True, True, False, False]}, path=path)
 
         dataset = RepertoireDataset(repertoires=repertoires, metadata_file=metadata, labels={"l1": [True, False]})
-        PickleExporter.export(dataset, path)
+        ImmuneMLExporter.export(dataset, path)
 
         specs = {
             "definitions": {
                 "datasets": {
                     "d1": {
-                        "format": "Pickle",
+                        "format": "ImmuneML",
                         "params": {
                             "path": str(path / f"{dataset.name}.iml_dataset"),
                         }
@@ -107,7 +107,6 @@ class TestSequenceAbundanceEncoding(TestCase):
                     "reports": ["r1"],
                     "optimization_metric": "balanced_accuracy",
                     "refit_optimal_model": True,
-                    "store_encoded_data": False
                 }
             }
         }

@@ -1,5 +1,4 @@
 import os
-import pickle
 import shutil
 from unittest import TestCase
 
@@ -24,15 +23,13 @@ class TestCytoscapeNetworkExporter(TestCase):
                                            chains=[Chain.ALPHA, Chain.BETA, Chain.BETA, Chain.ALPHA, Chain.BETA],
                                            custom_lists={"custom_1": [f"CUST-{i}" for i in range(5)],
                                                          "custom_2": [f"CUST-A" for i in range(3)] + [f"CUST-B" for i in range(2)]},
-                                           cell_ids=[1, 1, 1, 2, 2],
+                                           cell_ids=["1", "1", "1", "2", '2'],
                                            path=path)
 
         if dataset_type == "receptor":
-            receptordataset_filename = path / "receptors.pkl"
-            with open(receptordataset_filename, "wb") as file:
-                pickle.dump(test_repertoire.receptors, file)
 
-            dataset = ReceptorDataset(filenames=[receptordataset_filename], identifier="receptor_dataset")
+            dataset = ReceptorDataset.build_from_objects(test_repertoire.receptors, 100, path, name="receptor_dataset")
+            dataset.identifier = 'receptor_dataset'
 
         elif dataset_type == "repertoire":
             test_repertoire.identifier = "repertoire_dataset"

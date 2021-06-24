@@ -25,7 +25,7 @@ class ReceptorBuilder:
         elif all(chain in ChainPair.IGH_IGK.value for chain in sequences.keys()):
             return BCKReceptor(heavy=sequences[Chain.HEAVY.value], kappa=sequences[Chain.KAPPA.value], identifier=identifier, metadata=metadata)
         else:
-            warnings.warn(f"ReceptorBuilder: attempt to build receptor with chains {sequences.keys()}, returning None...")
+            warnings.warn(f"ReceptorBuilder: attempt to build_from_objects receptor with chains {sequences.keys()}, returning None...")
             return None
 
     @classmethod

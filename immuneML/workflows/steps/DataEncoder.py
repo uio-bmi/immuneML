@@ -20,10 +20,6 @@ class DataEncoder(Step):
 
         encoded_dataset = encoder.encode(dataset, encoder_params)
 
-        if input_params.store_encoded_data:
-            print(f"{datetime.datetime.now()}: Saving encoded dataset to disk.")
-            encoder.store(encoded_dataset, encoder_params)
-
         print(f"{datetime.datetime.now()}: Encoding finished.")
 
         return encoded_dataset

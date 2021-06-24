@@ -2,7 +2,7 @@ from typing import List
 
 import pandas as pd
 
-from immuneML.IO.dataset_export.PickleExporter import PickleExporter
+from immuneML.IO.dataset_export.ImmuneMLExporter import ImmuneMLExporter
 from immuneML.IO.dataset_import.DataImport import DataImport
 from immuneML.IO.dataset_import.DatasetImportParams import DatasetImportParams
 from immuneML.data_model.dataset.ReceptorDataset import ReceptorDataset
@@ -129,7 +129,7 @@ class SingleLineReceptorImport(DataImport):
         dataset.name = dataset_name
         dataset.labels = ImportHelper.extract_sequence_dataset_params(params=generic_params)
 
-        PickleExporter.export(dataset, generic_params.result_path)
+        ImmuneMLExporter.export(dataset, generic_params.result_path)
 
         return dataset
 
@@ -176,7 +176,7 @@ class SingleLineReceptorImport(DataImport):
                                                               if all(item not in key for item in
                                                                      ["v_gene", 'j_gene', "count", "identifier"] + chain_names)}))
 
-        return ReceptorDataset.build(elements, generic_params.sequence_file_size, generic_params.result_path)
+        return ReceptorDataset.build_from_objects(elements, generic_params.sequence_file_size, generic_params.result_path)
 
     @staticmethod
     def make_gene_columns(df: pd.DataFrame, genes: list, chain_name=None):

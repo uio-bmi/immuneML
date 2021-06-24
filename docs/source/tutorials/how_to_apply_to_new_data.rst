@@ -56,4 +56,3 @@ point at one of the .zip files exported by the previously run :ref:`TrainMLModel
       # path to the exported optimal ML settings file for label 'disease'
       config_path: results/instruction_name/optimal_disease/zip/ml_settings_disease.zip
       number_of_processes: 4
-      store_encoded_data: False

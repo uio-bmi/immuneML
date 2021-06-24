@@ -1,10 +1,10 @@
 import copy
 import logging
 import math
-import pickle
 from pathlib import Path
 from typing import List
 
+import numpy as np
 import pandas as pd
 
 from immuneML.data_model.dataset.ElementDataset import ElementDataset
@@ -16,17 +16,26 @@ class SequenceDataset(ElementDataset):
     dataset and obtaining metadata."""
 
     @classmethod
-    def build(cls, sequences: List[ReceptorSequence], file_size: int, path: Path, name: str = None):
+    def build(cls, **kwargs):
+        return SequenceDataset(**kwargs)
+
+    @classmethod
+    def build_from_objects(cls, sequences: List[ReceptorSequence], file_size: int, path: Path, name: str = None):
 
         file_count = math.ceil(len(sequences) / file_size)
-        file_names = [path / f"batch{''.join(['0' for i in range(1, len(str(file_count)) - len(str(index)) + 1)])}{index}.pickle"
-                      for index in range(1, file_count+1)]
+        file_names = [path / f"batch{''.join(['0' for i in range(1, len(str(file_count)) - len(str(index)) + 1)])}{index}.npy"
+                      for index in range(1, file_count + 1)]
 
         for index in range(file_count):
-            with file_names[index].open("wb") as file:
-                pickle.dump(sequences[index*file_size:(index+1)*file_size], file)
+            sequence_matrix = np.core.records.fromrecords([seq.get_record() for seq in sequences[index * file_size:(index + 1) * file_size]],
+                                                          names=type(sequences[0]).get_record_names())
+            np.save(str(file_names[index]), sequence_matrix, allow_pickle=False)
 
         return SequenceDataset(filenames=file_names, file_size=file_size, name=name)
+
+    def __init__(self, **kwargs):
+
+        super().__init__(**{**kwargs, **{'element_class_name': ReceptorSequence.__name__}})
 
     def get_metadata(self, field_names: list, return_df: bool = False):
         """Returns a dict or an equivalent pandas DataFrame with metadata information under 'custom_params' attribute in SequenceMetadata object
@@ -44,6 +53,10 @@ class SequenceDataset(ElementDataset):
 
         return pd.DataFrame(result) if return_df else result
 
-    def clone(self):
-        return SequenceDataset(self.labels, copy.deepcopy(self.encoded_data), copy.deepcopy(self._filenames), file_size=self.file_size,
-                               name=self.name)
+    def clone(self, keep_identifier: bool = False):
+        dataset = SequenceDataset(labels=self.labels, encoded_data=copy.deepcopy(self.encoded_data), filenames=copy.deepcopy(self.filenames),
+                                  file_size=self.file_size, name=self.name)
+        if keep_identifier:
+            dataset.identifier = self.identifier
+        dataset.element_ids = self.element_ids
+        return dataset

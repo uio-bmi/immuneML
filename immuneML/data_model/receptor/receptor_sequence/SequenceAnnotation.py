@@ -1,6 +1,4 @@
 # quality: gold
-from immuneML.simulation.implants.ImplantAnnotation import ImplantAnnotation
-
 
 class SequenceAnnotation:
     """
@@ -11,5 +9,5 @@ class SequenceAnnotation:
         self.implants = implants if implants is not None else []
         self.other = other if other is not None else {}
 
-    def add_implant(self, implant: ImplantAnnotation):
+    def add_implant(self, implant):
         self.implants.append(implant)

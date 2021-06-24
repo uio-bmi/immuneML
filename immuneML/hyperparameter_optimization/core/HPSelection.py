@@ -70,8 +70,7 @@ class HPSelection:
         hp_item = MLProcess(train_dataset=train_dataset, test_dataset=val_dataset, encoding_reports=state.selection.reports.encoding_reports.values(),
                             label_config=LabelConfiguration([state.label_configuration.get_label_object(label)]), report_context=state.context,
                             number_of_processes=state.number_of_processes, metrics=state.metrics, optimization_metric=state.optimization_metric,
-                            ml_reports=state.selection.reports.model_reports.values(), label=label, path=current_path, hp_setting=hp_setting,
-                            store_encoded_data=state.store_encoded_data)\
+                            ml_reports=state.selection.reports.model_reports.values(), label=label, path=current_path, hp_setting=hp_setting)\
             .run(split_index)
 
         state.assessment_states[assessment_index].label_states[label].selection_state.hp_items[hp_setting.get_key()].append(hp_item)

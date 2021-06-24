@@ -27,7 +27,7 @@ class MLProcess:
 
     def __init__(self, train_dataset: Dataset, test_dataset: Dataset, label: str, metrics: set, optimization_metric: Metric,
                  path: Path, ml_reports: List[MLReport] = None, encoding_reports: list = None, data_reports: list = None, number_of_processes: int = 2,
-                 label_config: LabelConfiguration = None, report_context: dict = None, hp_setting: HPSetting = None, store_encoded_data: bool = None):
+                 label_config: LabelConfiguration = None, report_context: dict = None, hp_setting: HPSetting = None):
         self.train_dataset = train_dataset
         self.test_dataset = test_dataset
         self.label = label
@@ -50,7 +50,6 @@ class MLProcess:
         self.data_reports = data_reports if data_reports is not None else []
         self.report_context = report_context
         self.hp_setting = copy.deepcopy(hp_setting)
-        self.store_encoded_data = store_encoded_data
 
     def _set_paths(self):
         if self.path is None:
@@ -73,7 +72,7 @@ class MLProcess:
 
         encoded_train_dataset = HPUtil.encode_dataset(processed_dataset, self.hp_setting, self.path / "encoded_datasets", learn_model=True,
                                                       context=self.report_context, number_of_processes=self.number_of_processes,
-                                                      label_configuration=self.label_config, store_encoded_data=self.store_encoded_data)
+                                                      label_configuration=self.label_config)
 
         method = HPUtil.train_method(self.label, encoded_train_dataset, self.hp_setting, self.path, self.train_predictions_path, self.ml_details_path, self.number_of_processes, self.optimization_metric)
 
@@ -91,7 +90,7 @@ class MLProcess:
                                                                self.path / "preprocessed_test_dataset")
             encoded_test_dataset = HPUtil.encode_dataset(processed_test_dataset, self.hp_setting, self.path / "encoded_datasets",
                                                          learn_model=False, context=self.report_context, number_of_processes=self.number_of_processes,
-                                                         label_configuration=self.label_config, store_encoded_data=self.store_encoded_data)
+                                                         label_configuration=self.label_config)
 
             performance = HPUtil.assess_performance(method, self.metrics, self.optimization_metric, encoded_test_dataset, split_index, self.path,
                                                     self.test_predictions_path, self.label, self.ml_score_path)

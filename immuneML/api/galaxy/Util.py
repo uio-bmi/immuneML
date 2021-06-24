@@ -29,11 +29,11 @@ class Util:
                 Util.check_paths(specs[key], tool_name)
 
     @staticmethod
-    def update_result_paths(specs: dict, result_path: str, yaml_path: str):
+    def update_result_paths(specs: dict, result_path: Path, yaml_path: Path):
         for key, item in specs["definitions"]["datasets"].items():
             if isinstance(item, dict) and 'params' in item.keys() and isinstance(item["params"], dict):
                 item['params']["result_path"] = str(result_path / key)
-                if item['format'] not in ['Pickle', 'RandomRepertoireDataset', 'RandomReceptorDataset']:
+                if item['format'] not in ['ImmuneML', 'RandomRepertoireDataset', 'RandomReceptorDataset']:
                     item['params']['path'] = str(yaml_path.parent)
 
         with yaml_path.open("w") as file:

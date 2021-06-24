@@ -10,7 +10,7 @@ from immuneML.workflows.instructions.dataset_generation.DatasetExportInstruction
 
 class TestDatasetExportParser(TestCase):
     def test_parse_no_preproc(self):
-        specs = {"type": "DatasetExport", "export_formats": ["Pickle", "AIRR"], "datasets": ["d1"]}
+        specs = {"type": "DatasetExport", "export_formats": ["ImmuneML", "AIRR"], "datasets": ["d1"]}
 
         symbol_table = SymbolTable()
         symbol_table.add("d1", SymbolType.DATASET, RepertoireDataset())
@@ -23,7 +23,7 @@ class TestDatasetExportParser(TestCase):
         self.assertIsNone(instruction.preprocessing_sequence)
 
     def test_parse_preproc(self):
-        specs = {"type": "DatasetExport", "export_formats": ["Pickle", "AIRR"], "datasets": ["d1"], "preprocessing_sequence": "p1"}
+        specs = {"type": "DatasetExport", "export_formats": ["ImmuneML", "AIRR"], "datasets": ["d1"], "preprocessing_sequence": "p1"}
 
         symbol_table = SymbolTable()
         symbol_table.add("d1", SymbolType.DATASET, RepertoireDataset())

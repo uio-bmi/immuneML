@@ -40,7 +40,7 @@ class TestSubsamplingWorkflow(TestCase):
                     "type": "Subsampling",
                     "dataset": "d1",
                     "subsampled_dataset_sizes": [20, 30],
-                    "dataset_export_formats": ["Pickle", 'AIRR']
+                    "dataset_export_formats": ["ImmuneML", 'AIRR']
                 }
             }
         }

@@ -1,4 +1,3 @@
-import pickle
 import warnings
 from multiprocessing.pool import Pool
 from pathlib import Path
@@ -7,9 +6,9 @@ from typing import List
 import numpy as np
 import pandas as pd
 
-from immuneML.IO.dataset_export.PickleExporter import PickleExporter
+from immuneML.IO.dataset_export.ImmuneMLExporter import ImmuneMLExporter
 from immuneML.IO.dataset_import.DatasetImportParams import DatasetImportParams
-from immuneML.IO.dataset_import.PickleImport import PickleImport
+from immuneML.IO.dataset_import.ImmuneMLImport import ImmuneMLImport
 from immuneML.data_model.dataset import Dataset
 from immuneML.data_model.dataset.ReceptorDataset import ReceptorDataset
 from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
@@ -61,7 +60,7 @@ class ImportHelper:
 
         if dataset_file.is_file():
             params["path"] = dataset_file
-            dataset = PickleImport.import_dataset(params, dataset_name)
+            dataset = ImmuneMLImport.import_dataset(params, dataset_name)
 
         return dataset
 
@@ -101,7 +100,7 @@ class ImportHelper:
         dataset = RepertoireDataset(labels={key: list(set(metadata[key].values.tolist())) for key in potential_labels},
                                     repertoires=repertoires, metadata_file=new_metadata_file, name=dataset_name)
 
-        PickleExporter.export(dataset, params.result_path)
+        ImmuneMLExporter.export(dataset, params.result_path)
 
         return dataset
 
@@ -379,23 +378,26 @@ class ImportHelper:
         dataset_filenames = []
         dataset_params = {}
         items = None
+        class_name = None
 
         for index, filename in enumerate(filenames):
             new_items = ImportHelper.import_items(import_class, filename, params)
             items = np.append(items, new_items) if items is not None else new_items
             dataset_params = ImportHelper.extract_sequence_dataset_params(items, params)
+            class_name = type(new_items[0]).__name__ if len(new_items) > 0 else None
 
             while len(items) > params.sequence_file_size or (index == len(filenames) - 1 and len(items) > 0):
-                dataset_filenames.append(params.result_path / "batch_{}.pickle".format(file_index))
+                dataset_filenames.append(params.result_path / "batch_{}.npy".format(file_index))
                 ImportHelper.store_sequence_items(dataset_filenames, items, params.sequence_file_size)
                 items = items[params.sequence_file_size:]
                 file_index += 1
 
-        init_kwargs = {"filenames": dataset_filenames, "file_size": params.sequence_file_size, "name": dataset_name, "labels": dataset_params}
+        init_kwargs = {"filenames": dataset_filenames, "file_size": params.sequence_file_size, "name": dataset_name, "labels": dataset_params,
+                       "element_class_name": class_name}
 
         dataset = ReceptorDataset(**init_kwargs) if params.paired else SequenceDataset(**init_kwargs)
 
-        PickleExporter.export(dataset, params.result_path)
+        ImmuneMLExporter.export(dataset, params.result_path)
 
         return dataset
 
@@ -434,8 +436,9 @@ class ImportHelper:
 
     @staticmethod
     def store_sequence_items(dataset_filenames: list, items: list, sequence_file_size: int):
-        with dataset_filenames[-1].open("wb") as file:
-            pickle.dump(items[:sequence_file_size], file)
+        sequence_matrix = np.core.records.fromrecords([item.get_record() for item in items[:sequence_file_size]],
+                                                      names=type(items[0]).get_record_names())
+        np.save(str(dataset_filenames[-1]), sequence_matrix, allow_pickle=False)
 
     @staticmethod
     def import_sequence(row, metadata_columns=None) -> ReceptorSequence:

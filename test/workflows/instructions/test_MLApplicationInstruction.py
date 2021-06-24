@@ -45,7 +45,7 @@ class TestMLApplicationInstruction(TestCase):
 
         PathBuilder.build(path / 'result/instr1/')
 
-        ml_app = MLApplicationInstruction(dataset, label_config, hp_setting, 4, "instr1", False)
+        ml_app = MLApplicationInstruction(dataset, label_config, hp_setting, 4, "instr1")
         ml_app.run(path / 'result/')
 
         predictions_path = path / "result/instr1/predictions.csv"

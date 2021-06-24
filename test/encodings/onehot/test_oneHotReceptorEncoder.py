@@ -27,7 +27,7 @@ class TestOneHotSequenceEncoder(TestCase):
         lc = LabelConfiguration()
         lc.add_label("l1", [1, 2])
 
-        dataset = ReceptorDataset.build(receptors, 2, path)
+        dataset = ReceptorDataset.build_from_objects(receptors, 2, path)
         return dataset, lc
 
     def test(self):
@@ -78,7 +78,7 @@ class TestOneHotSequenceEncoder(TestCase):
                                   metadata={"l1": 2},
                                   identifier="2")]
 
-        return ReceptorDataset.build(receptors, 10, path)
+        return ReceptorDataset.build_from_objects(receptors, 10, path)
 
     def test_receptor_flattened(self):
         path = EnvironmentSettings.root_path / "test/tmp/onehot_recep_flat/"

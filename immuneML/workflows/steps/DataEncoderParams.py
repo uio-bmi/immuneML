@@ -12,4 +12,3 @@ class DataEncoderParams(StepParams):
     dataset: Dataset
     encoder: DatasetEncoder
     encoder_params: EncoderParams
-    store_encoded_data: bool
