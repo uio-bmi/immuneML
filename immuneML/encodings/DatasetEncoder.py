@@ -4,7 +4,7 @@ import shutil
 from pathlib import Path
 from typing import List
 
-from immuneML.IO.dataset_export.PickleExporter import PickleExporter
+from immuneML.IO.dataset_export.ImmuneMLExporter import ImmuneMLExporter
 from immuneML.encodings.EncoderParams import EncoderParams
 
 
@@ -63,4 +63,4 @@ class DatasetEncoder(metaclass=abc.ABCMeta):
         return self
 
     def store(self, encoded_dataset, params: EncoderParams):
-        PickleExporter.export(encoded_dataset, params.result_path)
+        ImmuneMLExporter.export(encoded_dataset, params.result_path)

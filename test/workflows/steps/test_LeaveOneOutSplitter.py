@@ -1,4 +1,3 @@
-import pickle
 import shutil
 from unittest import TestCase
 
@@ -21,11 +20,7 @@ class TestLeaveOneOutSplitter(TestCase):
         for i in range(10):
             receptors.append(TCABReceptor(ReceptorSequence(), ReceptorSequence(), {"subject": i % 3}))
 
-        filename = path / "batch1.pickle"
-        with open(filename, "wb") as file:
-            pickle.dump(receptors, file)
-
-        dataset = ReceptorDataset(filenames=[filename])
+        dataset = ReceptorDataset.build_from_objects(receptors, 100, path, 'd1')
 
         params = DataSplitterParams(dataset, SplitType.LEAVE_ONE_OUT_STRATIFICATION, 3, paths=[path / f"result_{i}/" for i in range(1, 4)],
                                     split_config=SplitConfig(SplitType.LEAVE_ONE_OUT_STRATIFICATION, split_count=3,

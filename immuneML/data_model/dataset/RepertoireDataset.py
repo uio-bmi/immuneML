@@ -9,21 +9,45 @@ from immuneML.data_model.dataset.Dataset import Dataset
 from immuneML.data_model.encoded_data.EncodedData import EncodedData
 from immuneML.data_model.repertoire.Repertoire import Repertoire
 from immuneML.environment.Constants import Constants
+from immuneML.util.ParameterValidator import ParameterValidator
 
 
 class RepertoireDataset(Dataset):
 
+    @classmethod
+    def build(cls, **kwargs):
+        ParameterValidator.assert_keys_present(list(kwargs.keys()), ['metadata_file', 'name', 'repertoire_ids', 'metadata_fields'],
+                                               RepertoireDataset.__name__, "repertoire dataset")
+        repertoires = []
+        metadata_df = pd.read_csv(kwargs['metadata_file'], comment=Constants.COMMENT_SIGN)
+        for index, row in metadata_df.iterrows():
+            filename = Path(kwargs['metadata_file']).parent / row['filename']
+            repertoire = Repertoire(data_filename=filename,
+                                    metadata_filename=filename.parent / f'{filename.stem}_metadata.yaml',
+                                    identifier=row['repertoire_identifier'])
+            repertoires.append(repertoire)
+
+        if "repertoire_ids" in kwargs.keys() and "repertoires" not in kwargs.keys() and kwargs['repertoire_ids'] is not None:
+            assert all(rep.identifier == kwargs['repertoire_ids'][i] for i, rep in enumerate(repertoires)), \
+                f"{RepertoireDataset.__name__}: repertoire ids from the iml_dataset file and metadata file don't match for the dataset " \
+                f"{kwargs['name']} with identifier {kwargs['identifier']}."
+
+        return RepertoireDataset(**{**kwargs, **{"repertoires": repertoires}})
+
     def __init__(self, labels: dict = None, encoded_data: EncodedData = None, repertoires: list = None, identifier: str = None,
-                 metadata_file: Path = None, name: str = None):
+                 metadata_file: Path = None, name: str = None, metadata_fields: list = None, repertoire_ids: list = None):
         super().__init__(encoded_data, name, identifier if identifier is not None else uuid.uuid4().hex, labels)
-        self.metadata_file = metadata_file
-        self.metadata_fields = None
-        self.repertoire_ids = None
+        self.metadata_file = Path(metadata_file) if metadata_file is not None else None
+        self.metadata_fields = metadata_fields
+        self.repertoire_ids = repertoire_ids
         self.repertoires = repertoires
 
-    def clone(self):
-        return RepertoireDataset(self.labels, copy.deepcopy(self.encoded_data), copy.deepcopy(self.repertoires),
-                                 metadata_file=self.metadata_file, name=self.name)
+    def clone(self, keep_identifier: bool = False):
+        dataset = RepertoireDataset(self.labels, copy.deepcopy(self.encoded_data), copy.deepcopy(self.repertoires),
+                                    metadata_file=self.metadata_file, name=self.name)
+        if keep_identifier:
+            dataset.identifier = self.identifier
+        return dataset
 
     def add_encoded_data(self, encoded_data: EncodedData):
         self.encoded_data = encoded_data

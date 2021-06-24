@@ -50,7 +50,7 @@ A complete YAML specification for immune event simulation in Galaxy is show here
   definitions:
     datasets:
       dataset: # user-defined dataset name
-        format: Pickle # the default format used by the 'Create dataset' galaxy tool is Pickle
+        format: ImmuneML # the default format used by the 'Create dataset' galaxy tool is ImmuneML
         params:
           path: dataset.iml_dataset # specify the dataset name, the default name used by
                                     # the 'Create dataset' galaxy tool is dataset.iml_dataset
@@ -107,7 +107,7 @@ A complete YAML specification for immune event simulation in Galaxy is show here
       export_formats:
       # only one format can be specified here and the dataset in this format will be
       # available as a Galaxy collection afterwards
-        - Pickle # Can be AIRR (human-readable) or Pickle (recommended for further Galaxy-analysis)
+        - ImmuneML # Can be AIRR (human-readable) or ImmuneML (recommended for further Galaxy-analysis)
 
 
 

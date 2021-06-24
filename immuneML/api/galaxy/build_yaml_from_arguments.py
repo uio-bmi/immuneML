@@ -154,7 +154,7 @@ def build_specs(args):
         "definitions": {
             "datasets": {
                 "d1": {
-                    "format": "Pickle",
+                    "format": "ImmuneML",
                     "params": None
                 }
             },
@@ -194,8 +194,7 @@ def build_specs(args):
                 "number_of_processes": 10,
                 "reports": ["benchmark"],
                 "optimization_metric": "accuracy",
-                'refit_optimal_model': True,
-                "store_encoded_data": False
+                'refit_optimal_model': True
             }
         }
     }

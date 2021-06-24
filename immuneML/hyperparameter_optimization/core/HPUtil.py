@@ -87,7 +87,7 @@ class HPUtil:
 
     @staticmethod
     def encode_dataset(dataset, hp_setting: HPSetting, path: Path, learn_model: bool, context: dict, number_of_processes: int,
-                       label_configuration: LabelConfiguration, encode_labels: bool = True, store_encoded_data: bool = False):
+                       label_configuration: LabelConfiguration, encode_labels: bool = True):
         PathBuilder.build(path)
 
         encoded_dataset = DataEncoder.run(DataEncoderParams(
@@ -102,7 +102,6 @@ class HPUtil:
                 filename="train_dataset.pkl" if learn_model else "test_dataset.pkl",
                 encode_labels=encode_labels
             ),
-            store_encoded_data=store_encoded_data
         ))
         return encoded_dataset
 

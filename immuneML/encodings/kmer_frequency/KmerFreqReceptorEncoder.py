@@ -9,9 +9,8 @@ class KmerFreqReceptorEncoder(KmerFrequencyEncoder):
     def _encode_new_dataset(self, dataset, params: EncoderParams):
         encoded_data = self._encode_data(dataset, params)
 
-        encoded_dataset = ReceptorDataset(filenames=dataset.get_filenames(),
-                                          encoded_data=encoded_data,
-                                          labels=dataset.labels)
+        encoded_dataset = dataset.clone()
+        encoded_dataset.encoded_data = encoded_data
 
         return encoded_dataset
 

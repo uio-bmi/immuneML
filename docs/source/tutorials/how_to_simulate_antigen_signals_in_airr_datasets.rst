@@ -127,8 +127,7 @@ baseline for the simulation (see :ref:`Datasets` for details how to import datas
       type: Simulation
       dataset: my_synthetic_dataset
       simulation: my_simulation
-      export_formats: [AIRR, Pickle] # export the simulated dataset to these formats
-                                     # Important note: Pickle files might not be compatible between different immuneML (sub)versions.
+      export_formats: [AIRR, ImmuneML] # export the simulated dataset to these formats
 
 
 ..
@@ -205,4 +204,4 @@ baseline for the simulation (see :ref:`Datasets` for details how to import datas
         type: Simulation # which instruction to execute
         dataset: simulated_dataset # which dataset to use for implanting the signals
         simulation: use_case_3_simulation # how to implanting the signals - definition of the simulation
-        export_formats: [Pickle] # in which formats to export the dataset
+        export_formats: [ImmuneML] # in which formats to export the dataset

@@ -64,7 +64,7 @@ class TestConfounderAnalysis(TestCase):
                                  Implanting(dataset_implanting_rate=0.1, signals=[signals[1]], name='i5', repertoire_implanting_rate=0.25)
                                  ])
 
-        dataset = SignalImplanter.run(SimulationState(signals=signals, dataset=random_dataset, formats=['Pickle'], result_path=path,
+        dataset = SignalImplanter.run(SimulationState(signals=signals, dataset=random_dataset, formats=['ImmuneML'], result_path=path,
                                                       name='my_synthetic_dataset', simulation=simulation))
 
         return dataset

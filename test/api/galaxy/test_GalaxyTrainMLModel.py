@@ -90,7 +90,6 @@ class TestGalaxyTrainMLModel(TestCase):
                     "number_of_processes": 10,
                     "optimization_metric": "accuracy",
                     'refit_optimal_model': False,
-                    "store_encoded_data": False
                 }
             }
         }

@@ -38,7 +38,7 @@ class TestDesignMatrixExporter(TestCase):
         self.assertTrue(np.array_equal(labels, np.array([[1, 0], [0, 0], [1, 1]])))
 
         with open(path / "encoding_details.yaml", "r") as file:
-            loaded = yaml.load(file)
+            loaded = yaml.safe_load(file)
 
         self.assertTrue("feature_names" in loaded)
         self.assertTrue("encoding" in loaded)

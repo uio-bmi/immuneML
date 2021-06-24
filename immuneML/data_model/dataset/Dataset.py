@@ -13,6 +13,11 @@ class Dataset:
         self.name = name if name is not None else self.identifier
         self.labels = labels
 
+    @classmethod
+    @abc.abstractmethod
+    def build_from_objects(cls, **kwargs):
+        pass
+
     @abc.abstractmethod
     def make_subset(self, example_indices, path, dataset_type: str):
         pass
@@ -38,7 +43,7 @@ class Dataset:
         pass
 
     @abc.abstractmethod
-    def clone(self):
+    def clone(self, keep_identifier: bool = False):
         pass
 
     @abc.abstractmethod

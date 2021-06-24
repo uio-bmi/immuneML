@@ -38,7 +38,7 @@ A complete YAML specification for applying ML models to a new dataset is shown h
     definitions:
       datasets:
         dataset: # user-defined dataset name
-          format: Pickle # the default format used by the 'Create dataset' galaxy tool is Pickle
+          format: ImmuneML # the default format used by the 'Create dataset' galaxy tool is ImmuneML
           params:
             path: dataset.iml_dataset # specify the dataset name, the default name used by
                                       # the 'Create dataset' galaxy tool is dataset.iml_dataset
@@ -48,7 +48,6 @@ A complete YAML specification for applying ML models to a new dataset is shown h
         dataset: dataset
         config_path: optimal_ml_settings.zip # the name of the ML model
         number_of_processes: 4
-        store_encoded_data: False
 
 
 Tool output

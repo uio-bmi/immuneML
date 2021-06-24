@@ -28,7 +28,7 @@ class TrainMLModelParser:
     def parse(self, key: str, instruction: dict, symbol_table: SymbolTable, path: Path = None) -> TrainMLModelInstruction:
 
         valid_keys = ["assessment", "selection", "dataset", "strategy", "labels", "metrics", "settings", "number_of_processes", "type", "reports",
-                      "optimization_metric", 'refit_optimal_model', 'store_encoded_data']
+                      "optimization_metric", 'refit_optimal_model']
         ParameterValidator.assert_type_and_value(instruction['settings'], list, TrainMLModelParser.__name__, 'settings')
         ParameterValidator.assert_keys(list(instruction.keys()), valid_keys, TrainMLModelParser.__name__, "TrainMLModel")
         ParameterValidator.assert_type_and_value(instruction['refit_optimal_model'], bool, TrainMLModelParser.__name__, 'refit_optimal_model')
@@ -36,7 +36,6 @@ class TrainMLModelParser:
         ParameterValidator.assert_type_and_value(instruction['optimization_metric'], str, TrainMLModelParser.__name__, 'optimization_metric')
         ParameterValidator.assert_type_and_value(instruction['number_of_processes'], int, TrainMLModelParser.__name__, 'number_of_processes')
         ParameterValidator.assert_type_and_value(instruction['strategy'], str, TrainMLModelParser.__name__, 'strategy')
-        ParameterValidator.assert_type_and_value(instruction['store_encoded_data'], bool, TrainMLModelParser.__name__, 'store_encoded_data')
         if instruction["reports"] is not None:
             ParameterValidator.assert_type_and_value(instruction['reports'], list, TrainMLModelParser.__name__, 'reports')
 
@@ -58,7 +57,6 @@ class TrainMLModelParser:
                                                  hp_settings=settings, assessment=assessment, selection=selection, metrics=metrics,
                                                  optimization_metric=optimization_metric, refit_optimal_model=instruction['refit_optimal_model'],
                                                  label_configuration=label_config, path=path, context=context,
-                                                 store_encoded_data=instruction['store_encoded_data'],
                                                  number_of_processes=instruction["number_of_processes"], reports=reports, name=key)
 
         return hp_instruction

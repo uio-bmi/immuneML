@@ -98,7 +98,7 @@ class ExploratoryAnalysisInstruction(Instruction):
                                                                                              pool_size=unit.number_of_processes,
                                                                                              learn_model=True,
                                                                                              encode_labels=unit.label_config is not None),
-                                                                store_encoded_data=True))
+                                                                ))
         else:
             encoded_dataset = unit.dataset
         return encoded_dataset

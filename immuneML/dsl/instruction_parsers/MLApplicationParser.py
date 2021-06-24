@@ -27,23 +27,20 @@ class MLApplicationParser:
             config_path: ./config.zip
             number_of_processes: 4
             label: CD
-            store_encoded_data: True
 
     """
 
     def parse(self, key: str, instruction: dict, symbol_table: SymbolTable, path: Path) -> MLApplicationInstruction:
         location = MLApplicationParser.__name__
-        ParameterValidator.assert_keys(instruction.keys(), ['type', 'dataset', 'number_of_processes', 'config_path', 'store_encoded_data'], location, key)
+        ParameterValidator.assert_keys(instruction.keys(), ['type', 'dataset', 'number_of_processes', 'config_path'], location, key)
         ParameterValidator.assert_in_valid_list(instruction['dataset'], symbol_table.get_keys_by_type(SymbolType.DATASET), location, f"{key}: dataset")
         ParameterValidator.assert_type_and_value(instruction['number_of_processes'], int, location, f"{key}: number_of_processes", min_inclusive=1)
         ParameterValidator.assert_type_and_value(instruction['config_path'], str, location, f'{key}: config_path')
-        ParameterValidator.assert_type_and_value(instruction['store_encoded_data'], bool, location, f'{key}: store_encoded_data')
 
         hp_setting, label = self._parse_hp_setting(instruction, path, key)
 
         instruction = MLApplicationInstruction(dataset=symbol_table.get(instruction['dataset']), name=key, number_of_processes=instruction['number_of_processes'],
-                                               label_configuration=LabelConfiguration([label]), hp_setting=hp_setting,
-                                               store_encoded_data=instruction['store_encoded_data'])
+                                               label_configuration=LabelConfiguration([label]), hp_setting=hp_setting)
 
         return instruction
 

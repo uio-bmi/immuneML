@@ -2,7 +2,6 @@ reports: [] # by default there are no TrainMLModel reports to be run after the n
 strategy: GridSearch # try out every option under settings
 number_of_processes: 4 # number of processes to use for parallel parts of the code
 refit_optimal_model: False # do not refit optimal model on the full dataset after the optimal model was determined by nested CV
-store_encoded_data: False # do not store encoded data as pickle files
 metrics: [] # no additional metrics set by default
 assessment: # outer loop of nested CV
   split_strategy: random # perform Monte Carlo CV (randomly split the data into train and test)

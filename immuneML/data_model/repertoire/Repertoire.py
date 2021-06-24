@@ -1,7 +1,6 @@
 # quality: gold
 import ast
 import logging
-import pickle
 import shutil
 import weakref
 from pathlib import Path
@@ -9,6 +8,7 @@ from typing import List
 from uuid import uuid4
 
 import numpy as np
+import yaml
 
 from immuneML.data_model.DatasetItem import DatasetItem
 from immuneML.data_model.cell.Cell import Cell
@@ -40,8 +40,8 @@ class Repertoire(DatasetItem):
     def process_custom_lists(custom_lists):
         if custom_lists:
             field_list = list(custom_lists.keys())
-            values = [custom_lists[field] for field in custom_lists.keys()]
-            dtype = [(field, np.object) for field in custom_lists.keys()]
+            values = [[NumpyHelper.get_numpy_representation(el) for el in custom_lists[field]] for field in custom_lists.keys()]
+            dtype = [(field, np.array(values[index]).dtype) for index, field in enumerate(custom_lists.keys())]
         else:
             field_list, values, dtype = [], [], []
         return field_list, values, dtype
@@ -66,12 +66,12 @@ class Repertoire(DatasetItem):
               v_subgroups: list = None, j_subgroups: list = None, v_alleles: list = None, j_alleles: list = None,
               chains: list = None, counts: list = None, region_types: list = None, frame_types: list = None,
               custom_lists: dict = None, sequence_identifiers: list = None, path: Path = None, metadata: dict = None,
-              signals: dict = None, cell_ids: list = None, filename_base: str = None):
+              signals: dict = None, cell_ids: List[str] = None, filename_base: str = None):
 
         sequence_count = Repertoire.check_count(sequence_aas, sequences, custom_lists)
 
         if sequence_identifiers is None or len(sequence_identifiers) == 0 or any(identifier is None for identifier in sequence_identifiers):
-            sequence_identifiers = list(range(sequence_count))
+            sequence_identifiers = np.arange(sequence_count).astype(str)
 
         identifier = uuid4().hex
 
@@ -92,19 +92,17 @@ class Repertoire(DatasetItem):
         for field in Repertoire.FIELDS:
             if eval(field) is not None and not all(el is None for el in eval(field)):
                 field_list.append(field)
-                values.append(eval(field))
-                dtype.append((field, np.object))
-
-        dtype = np.dtype(dtype)
+                values.append([NumpyHelper.get_numpy_representation(val) if val is not None else np.nan for val in eval(field)])
+                dtype.append((field, np.array(values[-1]).dtype))
 
         repertoire_matrix = np.array(list(map(tuple, zip(*values))), order='F', dtype=dtype)
-        np.save(str(data_filename), repertoire_matrix)
+        np.save(str(data_filename), repertoire_matrix, allow_pickle=False)
 
-        metadata_filename = path / f"{filename_base}_metadata.pickle"
+        metadata_filename = path / f"{filename_base}_metadata.yaml"
         metadata = {} if metadata is None else metadata
         metadata["field_list"] = field_list
-        with metadata_filename.open("wb") as file:
-            pickle.dump(metadata, file)
+        with metadata_filename.open("w") as file:
+            yaml.dump(metadata, file)
 
         repertoire = Repertoire(data_filename, metadata_filename, identifier)
         return repertoire
@@ -122,7 +120,7 @@ class Repertoire(DatasetItem):
             data_filename = result_path / f"{filename_base}.npy"
             np.save(str(data_filename), data)
 
-            metadata_filename = result_path / f"{filename_base}_metadata.pickle"
+            metadata_filename = result_path / f"{filename_base}_metadata.yaml"
             shutil.copyfile(repertoire.metadata_filename, metadata_filename)
 
             new_repertoire = Repertoire(data_filename, metadata_filename, identifier)
@@ -180,8 +178,8 @@ class Repertoire(DatasetItem):
         self.data_filename = data_filename
 
         if metadata_filename:
-            with metadata_filename.open("rb") as file:
-                self.metadata = pickle.load(file)
+            with metadata_filename.open("r") as file:
+                self.metadata = yaml.safe_load(file)
             self.fields = self.metadata["field_list"]
 
         self.metadata_filename = metadata_filename
@@ -204,7 +202,7 @@ class Repertoire(DatasetItem):
     def get_counts(self):
         counts = self.get_attribute("counts")
         if counts is not None:
-            counts = np.array([int(count) if count is not None else None for count in counts])
+            counts = np.array([int(count) if not NumpyHelper.is_nan_or_empty(count) else None for count in counts])
         return counts
 
     def get_chains(self):
@@ -215,7 +213,7 @@ class Repertoire(DatasetItem):
 
     def load_data(self):
         if self.data is None or (isinstance(self.data, weakref.ref) and self.data() is None):
-            data = np.load(self.data_filename, allow_pickle=True)
+            data = np.load(self.data_filename, allow_pickle=False)
             self.data = weakref.ref(data) if EnvironmentSettings.low_memory else data
         data = self.data() if EnvironmentSettings.low_memory else self.data
         self.element_count = data.shape[0]
@@ -281,7 +279,7 @@ class Repertoire(DatasetItem):
                                                          v_allele=row["v_alleles"] if "v_alleles" in fields else None,
                                                          j_allele=row["j_alleles"] if "j_alleles" in fields else None,
                                                          chain=row["chains"] if "chains" in fields else None,
-                                                         count=row["counts"] if "counts" in fields else None,
+                                                         count=row["counts"] if "counts" in fields and not NumpyHelper.is_nan_or_empty(row['counts']) else None,
                                                          region_type=row["region_types"] if "region_types" in fields else None,
                                                          frame_type=row["frame_types"] if "frame_types" in fields else "IN",
                                                          cell_id=row["cell_ids"] if "cell_ids" in fields else None,
