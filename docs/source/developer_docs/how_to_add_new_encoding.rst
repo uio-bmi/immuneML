@@ -131,7 +131,7 @@ An example of the implementation of :code:`NewKmerFrequencyEncoder` for the :py:
             if params.learn_model:
                 vectorizer = DictVectorizer(sparse=False, dtype=float)
                 vectorized_examples = vectorizer.fit_transform(examples)
-                PathBuilder.build_from_objects(params.result_path)
+                PathBuilder.build(params.result_path)
                 with self.vectorizer_path.open('wb') as file:
                     pickle.dump(vectorizer, file)
             else:
@@ -210,7 +210,7 @@ An example of the unit test TestNewKmerFrequencyEncoder is given below.
         def test_encode(self):
             path = EnvironmentSettings.tmp_test_path / "new_kmer_encoding/"
 
-            PathBuilder.build_from_objects(path)
+            PathBuilder.build(path)
 
             # create a dataset
             repertoires, metadata = RepertoireBuilder.build_from_objects([["AAAT"], ["TAAA"]], path, {'l1': [1, 0]})

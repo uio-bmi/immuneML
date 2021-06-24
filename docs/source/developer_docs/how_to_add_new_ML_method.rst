@@ -219,7 +219,7 @@ An example of the unit test TestNewSVM is given below.
           svm.fit(EncodedData(x, y), 'default')
 
           path = EnvironmentSettings.tmp_test_path / "my_svm_load/"
-          PathBuilder.build_from_objects(path)
+          PathBuilder.build(path)
 
           with open(path / "svm.pickle", "wb") as file:
               pickle.dump(svm.get_model(), file)
