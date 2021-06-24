@@ -30,7 +30,8 @@ class ImmuneMLImport(DataImport):
         - identifier,
         - metadata_file (for repertoire datasets),
         - metadata_fields (for repertoire datasets),
-        - repertoire_ids (for repertoire datasets; for other dataset types this field is called element_ids),
+        - repertoire_ids (for repertoire datasets)
+        - element_ids (for receptor and sequence datasets),
         - labels,
 
      2. a csv metadata file (only for repertoire datasets),
