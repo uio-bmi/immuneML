@@ -80,7 +80,6 @@ class TestRandomDatasetWorkflow(TestCase):
                     "reports": None,
                     "optimization_metric": "balanced_accuracy",
                     "refit_optimal_model": False,
-                    "store_encoded_data": False
                 }
             }
         }
@@ -156,7 +155,6 @@ class TestRandomDatasetWorkflow(TestCase):
                     "reports": None,
                     "optimization_metric": "balanced_accuracy",
                     "refit_optimal_model": True,
-                    "store_encoded_data": False
                 }
             }
         }

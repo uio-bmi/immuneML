@@ -113,7 +113,6 @@ A complete YAML specification for training ML models is shown here:
         strategy: GridSearch # strategy for hyperparameter optimization, GridSearch is currently the only available option
         refit_optimal_model: true # whether to retrain the model on the whole dataset after optimizing hyperparameters
         number_of_processes: 4 # processes for parallelization
-        store_encoded_data: false # whether to store intermediate encoded data files (increases disk usage)
 
 
 Tool output

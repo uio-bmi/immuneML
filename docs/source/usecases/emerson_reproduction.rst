@@ -151,7 +151,6 @@ The full YAML specification:
       strategy: GridSearch # try out all settings combinations (all encodings here)
       type: TrainMLModel # name of the instruction
       refit_optimal_model: True # whether to refit the data on the whole dataset when all training and testing is finished
-      store_encoded_data: False # implementation detaill
       settings: # combinations of encodings and classifiers to try out, basically, just listing all encodings with different p-values
       - encoding: enc01
         ml_method: ml
@@ -340,7 +339,6 @@ The YAML specification is given below:
       strategy: GridSearch # try out all combinations of encoding and ml_method listed under settings
       type: TrainMLModel # the type of the instruction which will be executed for each dataset
       refit_optimal_model: False
-      store_encoded_data: False # do not store encoded data in binary format since it's already exported as csv (enc_data report)
       settings: # combinations to try out to choose the best p-value
       - encoding: enc01
         ml_method: ml

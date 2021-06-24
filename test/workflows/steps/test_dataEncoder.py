@@ -52,8 +52,7 @@ class TestDataEncoder(TestCase):
                 label_config=lc,
                 result_path=path,
                 filename="dataset.csv"
-            ),
-            store_encoded_data=False
+            )
         ))
 
         self.assertTrue(isinstance(res, RepertoireDataset))

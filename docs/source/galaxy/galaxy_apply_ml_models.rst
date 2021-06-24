@@ -48,7 +48,6 @@ A complete YAML specification for applying ML models to a new dataset is shown h
         dataset: dataset
         config_path: optimal_ml_settings.zip # the name of the ML model
         number_of_processes: 4
-        store_encoded_data: False
 
 
 Tool output

@@ -199,7 +199,6 @@ specification and the plots were obtained outside immuneML; it has since been ad
       number_of_processes: 32 # in the parallelized parts of the code, how many processes to use
       optimization_metric: auc # the metric used for optimization
       reports: [roc_summary] # additional reports made on the full results -> here produce the ROC curves for each method as shown in the results
-      store_encoded_data: False # whether to store the encoded data, if set to True, it could increase the disk space usage
       refit_optimal_model: False # whether to refit the optimal model before exporting it (not in this use-case as the models will be used for comparison, not for classifying some new data)
 
 GLIPH2 motifs

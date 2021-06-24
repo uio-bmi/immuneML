@@ -94,8 +94,7 @@ class HPAssessment:
                                     optimization_metric=state.optimization_metric, path=path, hp_setting=hp_setting, report_context=state.context,
                                     ml_reports=state.assessment.reports.model_reports.values(), number_of_processes=state.number_of_processes,
                                     encoding_reports=state.assessment.reports.encoding_reports.values(),
-                                    label_config=LabelConfiguration([state.label_configuration.get_label_object(label)]),
-                                    store_encoded_data=state.store_encoded_data) \
+                                    label_config=LabelConfiguration([state.label_configuration.get_label_object(label)])) \
             .run(split_index)
 
         state.assessment_states[split_index].label_states[label].assessment_items[str(hp_setting)] = assessment_item

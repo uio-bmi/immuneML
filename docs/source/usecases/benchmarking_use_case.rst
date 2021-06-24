@@ -1019,7 +1019,6 @@ In this case, uncomment the lines for AIRR import and remove the lines for Immun
         ml_method: RF
       reports:
       - hp_report
-      store_encoded_data: false
       refit_optimal_model: false
       number_of_processes: 32
       strategy: GridSearch

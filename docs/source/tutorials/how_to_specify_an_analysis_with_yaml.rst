@@ -196,7 +196,6 @@ See the tutorial :ref:`How to train and assess a receptor or repertoire-level ML
       optimization_metric: accuracy
       reports: null # no reports
       refit_optimal_model: False
-      store_encoded_data: False
       number_of_processes: 4
 
 Specifying output
@@ -267,7 +266,6 @@ An example of a complete YAML specification for training an ML model through nes
       optimization_metric: accuracy
       reports: null # no reports
       refit_optimal_model: False
-      store_encoded_data: False
       number_of_processes: 4
   output:
     format: HTML
