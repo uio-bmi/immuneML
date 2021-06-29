@@ -22,6 +22,8 @@ class RepertoireDataset(Dataset):
         metadata_df = pd.read_csv(kwargs['metadata_file'], comment=Constants.COMMENT_SIGN)
         for index, row in metadata_df.iterrows():
             filename = Path(kwargs['metadata_file']).parent / row['filename']
+            if not filename.is_file() and 'repertoires' in str(filename):
+                filename = filename.parent.parent / Path(row['filename']).name
             repertoire = Repertoire(data_filename=filename,
                                     metadata_filename=filename.parent / f'{filename.stem}_metadata.yaml',
                                     identifier=row['repertoire_identifier'])
