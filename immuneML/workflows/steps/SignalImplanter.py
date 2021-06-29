@@ -3,6 +3,7 @@ from pathlib import Path
 from typing import List
 
 import pandas as pd
+import yaml
 
 from immuneML.IO.dataset_import.ImmuneMLImport import ImmuneMLImport
 from immuneML.data_model.dataset.Dataset import Dataset
@@ -44,7 +45,7 @@ class SignalImplanter(Step):
 
     @staticmethod
     def _implant_signals_in_receptors(simulation_state: SimulationState) -> Dataset:
-        processed_receptors = SignalImplanter._implant_signals(simulation_state, SignalImplanter._process_receptor)
+        processed_receptors = SignalImplanter._implant_signals(simulation_state, SignalImplanter._process_receptor, None)
         processed_dataset = ReceptorDataset.build_from_objects(receptors=processed_receptors, file_size=simulation_state.dataset.file_size,
                                                                name=simulation_state.dataset.name, path=simulation_state.result_path)
 
@@ -56,8 +57,8 @@ class SignalImplanter(Step):
     @staticmethod
     def _implant_signals_in_repertoires(simulation_state: SimulationState = None) -> Dataset:
 
-        PathBuilder.build(simulation_state.result_path / "repertoires")
-        processed_repertoires = SignalImplanter._implant_signals(simulation_state, SignalImplanter._process_repertoire)
+        repertoires_path = PathBuilder.build(simulation_state.result_path / "repertoires")
+        processed_repertoires = SignalImplanter._implant_signals(simulation_state, SignalImplanter._process_repertoire, repertoires_path)
         processed_dataset = RepertoireDataset(repertoires=processed_repertoires, labels={**(simulation_state.dataset.labels if simulation_state.dataset.labels is not None else {}),
                                                                                          **{signal.id: [True, False] for signal in simulation_state.signals}},
                                               name=simulation_state.dataset.name,
@@ -65,7 +66,7 @@ class SignalImplanter(Step):
         return processed_dataset
 
     @staticmethod
-    def _implant_signals(simulation_state: SimulationState, process_element_func):
+    def _implant_signals(simulation_state: SimulationState, process_element_func, output_path: Path):
         processed_elements = []
         simulation_limits = SignalImplanter._prepare_simulation_limits(simulation_state.simulation.implantings,
                                                                        simulation_state.dataset.get_example_count())
@@ -81,13 +82,13 @@ class SignalImplanter(Step):
                 else:
                     current_implanting = None
 
-            processed_element = process_element_func(index, element, current_implanting, simulation_state)
+            processed_element = process_element_func(index, element, current_implanting, simulation_state, output_path)
             processed_elements.append(processed_element)
 
         return processed_elements
 
     @staticmethod
-    def _process_receptor(index, receptor, implanting, simulation_state) -> Receptor:
+    def _process_receptor(index, receptor, implanting, simulation_state, output_path: Path = None) -> Receptor:
         if implanting is not None:
             new_receptor = receptor
             for signal in implanting.signals:
@@ -100,19 +101,17 @@ class SignalImplanter(Step):
         return new_receptor
 
     @staticmethod
-    def _process_repertoire(index, repertoire, current_implanting, simulation_state) -> Repertoire:
+    def _process_repertoire(index, repertoire, current_implanting, simulation_state, output_path: Path = None) -> Repertoire:
         if current_implanting is not None:
 
-            return SignalImplanter._implant_in_repertoire(index, repertoire, current_implanting, simulation_state)
+            new_repertoire = SignalImplanter._implant_in_repertoire(index, repertoire, current_implanting, simulation_state)
 
         else:
+            new_metadata = {**repertoire.metadata, **{f"{signal.id}": False for signal in simulation_state.signals}}
             new_repertoire = Repertoire.build_from_sequence_objects(repertoire.sequences, simulation_state.result_path / "repertoires",
-                                                                    repertoire.metadata)
+                                                                    metadata=new_metadata)
 
-            for signal in simulation_state.signals:
-                new_repertoire.metadata[f"{signal.id}"] = False
-
-            return new_repertoire
+        return new_repertoire
 
     @staticmethod
     def _create_metadata_file(processed_repertoires: List[Repertoire], simulation_state) -> str:
@@ -142,6 +141,9 @@ class SignalImplanter(Step):
         for signal in simulation_state.signals:
             if signal not in implanting.signals:
                 new_repertoire.metadata[f"{signal.id}"] = False
+
+        with Path(new_repertoire.metadata_filename).open('w') as file:
+            yaml.safe_dump(new_repertoire.metadata, file)
 
         return new_repertoire
 
