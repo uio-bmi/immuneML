@@ -69,8 +69,8 @@ class TestSignalImplanter(TestCase):
 
         self.assertEqual(10, len(new_dataset.get_example_ids()))
 
-        metadata_filenames = new_dataset.get_filenames()
-        self.assertTrue(all([repertoire.data_filename in metadata_filenames for repertoire in new_dataset.repertoires]))
+        metadata_filenames = [filename.name for filename in new_dataset.get_filenames()]
+        self.assertTrue(all([repertoire.data_filename.name in metadata_filenames for repertoire in new_dataset.repertoires]))
 
         shutil.rmtree(path)
 

@@ -1,9 +1,7 @@
 # quality: gold
 
-import logging
 from pathlib import Path
 
-import pandas as pd
 import yaml
 
 from immuneML.IO.dataset_import.DataImport import DataImport
@@ -34,7 +32,7 @@ class ImmuneMLImport(DataImport):
         - element_ids (for receptor and sequence datasets),
         - labels,
 
-     2. a csv metadata file (only for repertoire datasets),
+     2. a csv metadata file (only for repertoire datasets, should be in the same folder as the iml_dataset file),
 
      3. data files for different types of data. For repertoire datasets, data files include one binary numpy file per repertoire with sequences and
      associated information and one metadata yaml file per repertoire with details such as repertoire identifier, disease status, subject id and
@@ -84,34 +82,23 @@ class ImmuneMLImport(DataImport):
         return dataset
 
     @staticmethod
-    def _import_dataset_dict(iml_params):
+    def _import_from_path(iml_params):
         with iml_params.path.open("r") as file:
             dataset_dict = yaml.safe_load(file)
         assert 'dataset_class' in dataset_dict, f"{ImmuneMLImport.__name__}: 'dataset_class' parameter is missing from the dataset file " \
                                                 f"{iml_params.path}."
         dataset_class = ReflectionHandler.get_class_by_name(dataset_dict['dataset_class'])
         del dataset_dict['dataset_class']
-        dataset = dataset_class.build(**dataset_dict)
-        return dataset
 
-    @staticmethod
-    def _import_from_path(iml_params):
-        dataset = ImmuneMLImport._import_dataset_dict(iml_params)
-        if hasattr(dataset, "metadata_file"):
-            if iml_params.metadata_file is not None:
-                dataset.metadata_file = iml_params.metadata_file
-                metadata = pd.read_csv(dataset.metadata_file, comment=Constants.COMMENT_SIGN)
-                metadata.to_csv(dataset.metadata_file, index=False)
-            else:
-                if dataset.metadata_file is not None and not dataset.metadata_file.is_file():
-                    new_metadata_file = Path(dataset.metadata_file.name)
-                    if new_metadata_file.is_file():
-                        dataset.metadata_file = new_metadata_file
-                        logging.warning(f"{ImmuneMLImport.__name__}: metadata file could not be found at {iml_params.metadata_file}, "
-                                        f"using {new_metadata_file} instead.")
-                    else:
-                        raise FileNotFoundError(f"{ImmuneMLImport.__name__}: the metadata file could not be found at {iml_params.metadata_file}"
-                                                f"or at {new_metadata_file}. Please update the path to the metadata file.")
+        if iml_params.metadata_file is not None and iml_params.metadata_file != '':
+            dataset_dict['metadata_file'] = iml_params.metadata_file
+
+        cwd = Path.cwd()
+        if 'metadata_file' in dataset_dict and Path(dataset_dict['metadata_file']).parent.samefile(cwd) and not iml_params.path.samefile(cwd):
+            dataset_dict['metadata_file'] = iml_params.path.parent / Path(dataset_dict['metadata_file']).name
+
+        dataset = dataset_class.build(**dataset_dict)
+
         return dataset
 
     @staticmethod

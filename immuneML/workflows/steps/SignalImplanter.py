@@ -119,9 +119,9 @@ class SignalImplanter(Step):
 
         path = simulation_state.result_path / "metadata.csv"
 
-        new_df = pd.DataFrame([repertoire.metadata for repertoire in processed_repertoires])
+        new_df = pd.DataFrame([{**repertoire.metadata, **{'repertoire_identifier': repertoire.identifier}} for repertoire in processed_repertoires])
         new_df.drop('field_list', axis=1, inplace=True)
-        new_df["filename"] = [repertoire.data_filename for repertoire in processed_repertoires]
+        new_df["filename"] = [repertoire.data_filename.name for repertoire in processed_repertoires]
         new_df.to_csv(path, index=False)
 
         return path

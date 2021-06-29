@@ -54,9 +54,9 @@ class ImmuneMLExporter(DataExporter):
     @staticmethod
     def _parse_val_for_export(val):
         if isinstance(val, Path):
-            return str(val)
+            return str(val.name)
         elif isinstance(val, list) and any(isinstance(v, Path) for v in val):
-            return [str(v) for v in val]
+            return [str(v.name) for v in val]
         else:
             return val
 
@@ -82,7 +82,7 @@ class ImmuneMLExporter(DataExporter):
     @staticmethod
     def _update_repertoire_paths_in_metadata(metadata_file: Path, repertoires_path: Path):
         metadata = pd.read_csv(metadata_file, comment=Constants.COMMENT_SIGN)
-        path = Path(os.path.relpath(repertoires_path, os.path.dirname(metadata_file)))
+        path = Path(os.path.relpath(str(repertoires_path), str(metadata_file.parent)))
         metadata["filename"] = [path / os.path.basename(name) for name in metadata["filename"].values.tolist()]
         metadata.to_csv(metadata_file, index=False)
 
