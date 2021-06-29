@@ -4,6 +4,7 @@ import copy
 import os
 import platform
 import shutil
+from enum import Enum
 from pathlib import Path
 from typing import List
 
@@ -53,9 +54,9 @@ class ImmuneMLExporter(DataExporter):
 
     @staticmethod
     def _parse_val_for_export(val):
-        if isinstance(val, Path):
+        if isinstance(val, Path) or isinstance(val, Enum):
             return str(val.name)
-        elif isinstance(val, list) and any(isinstance(v, Path) for v in val):
+        elif isinstance(val, list) and all(isinstance(v, Path) for v in val):
             return [str(v.name) for v in val]
         else:
             return val
