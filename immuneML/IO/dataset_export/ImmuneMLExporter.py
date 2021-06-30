@@ -58,6 +58,8 @@ class ImmuneMLExporter(DataExporter):
             return str(val.name)
         elif isinstance(val, list) and all(isinstance(v, Path) for v in val):
             return [str(v.name) for v in val]
+        elif isinstance(val, dict):
+            return {inner_key: ImmuneMLExporter._parse_val_for_export(inner_val) for inner_key, inner_val in val.items()}
         else:
             return val
 
