@@ -8,7 +8,7 @@ class KNN(SklearnMethod):
     """
     This is a wrapper of scikit-learn’s KNeighborsClassifier class.
     This ML method creates a distance matrix using the given encoded data. If the encoded data is already a distance
-    matrix (for example, when using the :ref:`Distance` or :ref:`HammingDistance` encoders), please use :ref:`PrecomputedKNN` instead.
+    matrix (for example, when using the :ref:`Distance` or :ref:`EditDistance` encoders), please use :ref:`PrecomputedKNN` instead.
 
     Please see the `scikit-learn documentation <https://scikit-learn.org/stable/modules/generated/sklearn.neighbors.KNeighborsClassifier.html>`_
     of KNeighborsClassifier for the parameters.

@@ -7,7 +7,7 @@ from scripts.specification_util import update_docs_per_mapping
 class PrecomputedKNN(SklearnMethod):
     """
     This is a wrapper of scikit-learn’s KNeighborsClassifier class.
-    This ML method takes a pre-computed distance matrix, as created by the :ref:`Distance` or :ref:`HammingDistance` encoders.
+    This ML method takes a pre-computed distance matrix, as created by the :ref:`Distance` or :ref:`EditDistance` encoders.
     If you would like to use a different encoding in combination with KNN, please use :ref:`KNN` instead.
 
     Please see the `scikit-learn documentation <https://scikit-learn.org/stable/modules/generated/sklearn.neighbors.KNeighborsClassifier.html>`_
