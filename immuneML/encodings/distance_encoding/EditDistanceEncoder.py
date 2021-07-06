@@ -19,7 +19,7 @@ from immuneML.util.ParameterValidator import ParameterValidator
 class EditDistanceEncoder(DatasetEncoder):
     """
     Encodes a given RepertoireDataset as a distance matrix, using the Morisita-Horn distance metric.
-    Internally, `CompAIRR <https://github.com/uio-bmi/vdjsearch/>`_ is used for fast calculation of overlap between repertoires.
+    Internally, `CompAIRR <https://github.com/uio-bmi/compairr/>`_ is used for fast calculation of overlap between repertoires.
     This creates a pairwise distance matrix between each of the repertoires.
     The distance is calculated based on the number of matching receptor chain sequences between the repertoires. This matching may be
     defined to permit 1 or 2 mismatching amino acid/nucleotide positions and 1 indel in the sequence. Furthermore,
@@ -32,10 +32,11 @@ class EditDistanceEncoder(DatasetEncoder):
     Arguments:
 
         compairr_path (Path): optional path to the CompAIRR executable. If not given, it is assumed that CompAIRR
-        has been installed such that it can be called directly on the command line, or that it is located at /usr/local/bin/compairr.
+        has been installed such that it can be called directly on the command line with the command 'compairr',
+        or that it is located at /usr/local/bin/compairr.
 
         keep_compairr_input (bool): whether to keep the input file that was passed to CompAIRR. This may take a lot of
-        storage space if the input dataset is large.
+        storage space if the input dataset is large. By default the input file is not kept.
 
         differences (int): Number of differences allowed between the sequences of two immune receptor chains, this
         may be between 0 and 2. By default, differences is 0.
