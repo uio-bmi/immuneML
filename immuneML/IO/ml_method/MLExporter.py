@@ -36,7 +36,8 @@ class MLExporter:
                                               train_dataset_id=hp_item.train_dataset.identifier, train_dataset_name=hp_item.train_dataset.name,
                                               preprocessing_sequence_name=hp_item.hp_setting.preproc_sequence_name,
                                               preprocessing_file=os.path.basename(preproc_filename),
-                                              preprocessing_parameters={type(seq).__name__: vars(seq) for seq in hp_item.hp_setting.preproc_sequence})
+                                              preprocessing_parameters={type(seq).__name__: {str(key): str(val) for key, val in vars(seq).items()}
+                                                                        for seq in hp_item.hp_setting.preproc_sequence})
 
         method_config.store(path / 'ml_config.yaml')
 

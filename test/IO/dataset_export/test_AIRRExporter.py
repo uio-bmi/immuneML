@@ -70,8 +70,8 @@ class TestAIRRExporter(TestCase):
         self.assertListEqual(list(resulting_data["locus"]), ["TRB", "TRA"])
         self.assertListEqual(list(resulting_data["duplicate_count"]), [5, 15])
         self.assertListEqual(list(resulting_data["custom_test"]), ["cust1", "cust2"])
-        self.assertListEqual(list(resulting_data["productive"]), ['T', nan])
-        self.assertListEqual(list(resulting_data["stop_codon"]), ['F', nan])
+        self.assertListEqual(list(resulting_data["productive"]), ['T', 'F'])
+        self.assertListEqual(list(resulting_data["stop_codon"]), ['F', 'F'])
 
         shutil.rmtree(path)
 
@@ -105,7 +105,7 @@ class TestAIRRExporter(TestCase):
 
         receptors_path = path / "receptors"
         PathBuilder.build(receptors_path)
-        return ReceptorDataset.build(receptors, 2, receptors_path)
+        return ReceptorDataset.build_from_objects(receptors, 2, receptors_path)
 
     def test_receptor_export(self):
         path = EnvironmentSettings.tmp_test_path / "airr_exporter_receptor/"
@@ -147,7 +147,7 @@ class TestAIRRExporter(TestCase):
                                                                                "custom2": "cust1"}))]
         sequences_path = path / "sequences"
         PathBuilder.build(sequences_path)
-        return SequenceDataset.build(sequences, 2, sequences_path)
+        return SequenceDataset.build_from_objects(sequences, 2, sequences_path)
 
     def test_sequence_export(self):
         path = EnvironmentSettings.tmp_test_path / "airr_exporter_receptor/"

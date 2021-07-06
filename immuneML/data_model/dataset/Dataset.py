@@ -5,12 +5,18 @@ class Dataset:
     TRAIN = "train"
     TEST = "test"
     SUBSAMPLED = "subsampled"
+    PREPROCESSED = "preprocessed"
 
     def __init__(self, encoded_data=None, name: str = None, identifier: str = None, labels: dict = None):
         self.encoded_data = encoded_data
         self.identifier = identifier
         self.name = name if name is not None else self.identifier
         self.labels = labels
+
+    @classmethod
+    @abc.abstractmethod
+    def build_from_objects(cls, **kwargs):
+        pass
 
     @abc.abstractmethod
     def make_subset(self, example_indices, path, dataset_type: str):
@@ -37,7 +43,7 @@ class Dataset:
         pass
 
     @abc.abstractmethod
-    def clone(self):
+    def clone(self, keep_identifier: bool = False):
         pass
 
     @abc.abstractmethod

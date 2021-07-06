@@ -38,7 +38,7 @@ class TestDuplicateSequenceFilter(TestCase):
 
         # collapse by amino acids & use sum counts
         dupfilter = DuplicateSequenceFilter(filter_sequence_type=SequenceType.AMINO_ACID,
-                                            count_agg=CountAggregationFunction.SUM, batch_size=4)
+                                            count_agg=CountAggregationFunction.SUM, batch_size=1)
 
         reduced_repertoire = dupfilter.process_dataset(dataset=dataset, result_path=path).repertoires[0]
 
@@ -49,7 +49,7 @@ class TestDuplicateSequenceFilter(TestCase):
         self.assertListEqual(["ntAAA", "ntCCC", "ntDDD"], list(attr["sequences"]))
         self.assertListEqual([35, 50, 40], list(attr["counts"]))
         self.assertListEqual([1, 3, 7], list(attr["sequence_identifiers"]))
-        self.assertListEqual([Chain.get_chain("A"), Chain.get_chain("A"), Chain.get_chain('B')], list(attr["chains"]))
+        self.assertListEqual(['ALPHA', 'ALPHA', 'BETA'], list(attr["chains"]))
 
         # collapse by nucleotides & use min counts
         dupfilter = DuplicateSequenceFilter(filter_sequence_type=SequenceType.NUCLEOTIDE,

@@ -151,7 +151,6 @@ The full YAML specification:
       strategy: GridSearch # try out all settings combinations (all encodings here)
       type: TrainMLModel # name of the instruction
       refit_optimal_model: True # whether to refit the data on the whole dataset when all training and testing is finished
-      store_encoded_data: False # implementation detaill
       settings: # combinations of encodings and classifiers to try out, basically, just listing all encodings with different p-values
       - encoding: enc01
         ml_method: ml
@@ -183,7 +182,7 @@ To construct smaller datasets of 400, 200, 100 and 50 subjects randomly from bot
   definitions:
     datasets:
       cmv2017: # we import the full dataset with 683 subjects as it was imported previously in immuneML-optimized format
-        format: Pickle
+        format: ImmuneML
         params:
           path: imported_data/cmv2017.iml_dataset
   instructions:
@@ -196,7 +195,7 @@ To construct smaller datasets of 400, 200, 100 and 50 subjects randomly from bot
         - 100
         - 50
       dataset_export_formats: # in which formats to export the subsampled datasets
-        - Pickle
+        - ImmuneML
 
 
 Running the analysis on subsampled datasets
@@ -222,21 +221,21 @@ The YAML specification is given below:
   definitions:
     datasets: # datasets for assessing robustness
       cmv2017_400: # with 400 repertoires
-        format: Pickle
+        format: ImmuneML
         params:
-          path: subsampled_datasets/subsampling_inst/cmv2017_400_subsampled_1/exported/pickle/cmv2017_400_subsampled_1.iml_dataset
+          path: subsampled_datasets/subsampling_inst/cmv2017_400_subsampled_1/exported/immuneml/cmv2017_400_subsampled_1.iml_dataset
       cmv2017_200: # with 200 repertoires
-        format: Pickle
+        format: ImmuneML
         params:
-          path: subsampled_datasets/subsampling_inst/cmv2017_200_subsampled_2/exported/pickle/cmv2017_200_subsampled_2.iml_dataset
+          path: subsampled_datasets/subsampling_inst/cmv2017_200_subsampled_2/exported/immuneml/cmv2017_200_subsampled_2.iml_dataset
       cmv2017_100: # with 100 repertoires
-        format: Pickle
+        format: ImmuneML
         params:
-          path: subsampled_datasets/subsampling_inst/cmv2017_100_subsampled_3/exported/pickle/cmv2017_100_subsampled_3.iml_dataset
+          path: subsampled_datasets/subsampling_inst/cmv2017_100_subsampled_3/exported/immuneml/cmv2017_100_subsampled_3.iml_dataset
       cmv2017_50: # with 50 repertoires
-        format: Pickle
+        format: ImmuneML
         params:
-          path: subsampled_datasets/subsampling_inst/cmv2017_50_subsampled_4/exported/pickle/cmv2017_50_subsampled_4.iml_dataset
+          path: subsampled_datasets/subsampling_inst/cmv2017_50_subsampled_4/exported/immuneml/cmv2017_50_subsampled_4.iml_dataset
     encodings: # encodings as in Emerson et al. 2017 with different p-values to discover disease-associated combination of amino acid sequence and V and J gene
       enc01:
         SequenceAbundance:
@@ -340,7 +339,6 @@ The YAML specification is given below:
       strategy: GridSearch # try out all combinations of encoding and ml_method listed under settings
       type: TrainMLModel # the type of the instruction which will be executed for each dataset
       refit_optimal_model: False
-      store_encoded_data: False # do not store encoded data in binary format since it's already exported as csv (enc_data report)
       settings: # combinations to try out to choose the best p-value
       - encoding: enc01
         ml_method: ml

@@ -76,7 +76,7 @@ class TestFeatureDistribution(TestCase):
         self.assertListEqual(list(content.columns),
                              ["patient", "example_id", "sequence", "feature", "value"])
 
-        # report should succeed to build but check_prerequisites should be false when data is not encoded
+        # report should succeed to build_from_objects but check_prerequisites should be false when data is not encoded
         report = FeatureDistribution.build_object(**{"dataset": RepertoireDataset(),
                                                      "result_path": path})
 

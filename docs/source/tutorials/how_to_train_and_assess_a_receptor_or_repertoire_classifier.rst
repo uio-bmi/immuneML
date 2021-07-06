@@ -222,7 +222,7 @@ The following YAML example shows how these parameters are defined:
       refit_optimal_model: False
 
 :ref:`Train ML model reports` summarizing the performance of multiple different models should be set under :code:`reports`.
-And finally, the :code:`number_of_processes` used for parallelization and whether to :code:`store_encoded_data` should be set.
+And finally, the :code:`number_of_processes` used for parallelization should be set.
 
 .. highlight:: yaml
 .. code-block:: yaml
@@ -230,7 +230,6 @@ And finally, the :code:`number_of_processes` used for parallelization and whethe
       reports:
       - my_performance
       number_of_processes: 4
-      store_encoded_data: False
 
 Complete YAML
 ^^^^^^^^^^^^^^^^^^^^^^^
@@ -326,7 +325,6 @@ An example of the complete YAML specification is shown here:
       reports:
       - my_performance
       number_of_processes: 4
-      store_encoded_data: False
 
 
 Example datasets

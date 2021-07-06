@@ -88,7 +88,6 @@ class TestCVSplitVariants(TestCase):
                     "reports": None,
                     "optimization_metric": "balanced_accuracy",
                     "refit_optimal_model": False,
-                    "store_encoded_data": False
                 }
             }
         }

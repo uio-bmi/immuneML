@@ -213,7 +213,7 @@ An example of the unit test TestNewKmerFrequencyEncoder is given below.
             PathBuilder.build(path)
 
             # create a dataset
-            repertoires, metadata = RepertoireBuilder.build([["AAAT"], ["TAAA"]], path, {'l1': [1, 0]})
+            repertoires, metadata = RepertoireBuilder.build_from_objects([["AAAT"], ["TAAA"]], path, {'l1': [1, 0]})
             dataset = RepertoireDataset(repertoires=repertoires, metadata_file=metadata)
 
             # create an encoder

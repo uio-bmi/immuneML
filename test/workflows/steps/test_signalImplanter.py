@@ -56,7 +56,7 @@ class TestSignalImplanter(TestCase):
         simulation = Simulation([Implanting(dataset_implanting_rate=0.2, repertoire_implanting_rate=0.5, signals=[s1, s2], name="i1"),
                                  Implanting(dataset_implanting_rate=0.2, repertoire_implanting_rate=0.5, signals=[s2], name="i2")])
 
-        input_params = SimulationState(dataset=dataset, result_path=path, simulation=simulation, signals=[s1, s2], formats=["Pickle"])
+        input_params = SimulationState(dataset=dataset, result_path=path, simulation=simulation, signals=[s1, s2], formats=["ImmuneML"])
 
         new_dataset = SignalImplanter.run(input_params)
         reps_with_s2 = sum([rep.metadata[s2.id] is True for rep in new_dataset.get_data(batch_size=10)])
@@ -69,8 +69,8 @@ class TestSignalImplanter(TestCase):
 
         self.assertEqual(10, len(new_dataset.get_example_ids()))
 
-        metadata_filenames = new_dataset.get_filenames()
-        self.assertTrue(all([repertoire.data_filename in metadata_filenames for repertoire in new_dataset.repertoires]))
+        metadata_filenames = [filename.name for filename in new_dataset.get_filenames()]
+        self.assertTrue(all([repertoire.data_filename.name in metadata_filenames for repertoire in new_dataset.repertoires]))
 
         shutil.rmtree(path)
 
@@ -78,18 +78,18 @@ class TestSignalImplanter(TestCase):
 
         path = PathBuilder.build(EnvironmentSettings.root_path / "test/tmp/signalImplanter_receptor/")
 
-        dataset = RandomDatasetGenerator.generate_receptor_dataset(100, {10: 1}, {12: 1}, {}, path / "dataset/")
+        dataset = RandomDatasetGenerator.generate_receptor_dataset(10, {10: 1}, {12: 1}, {}, path / "dataset/")
         motif1 = Motif(identifier="motif1", instantiation=GappedKmerInstantiation(), seed_chain1="AAA", name_chain1=Chain.ALPHA, seed_chain2="CCC",
                        name_chain2=Chain.BETA)
         signal1 = Signal(identifier="signal1", motifs=[motif1], implanting_strategy=ReceptorImplanting(GappedMotifImplanting()))
 
         simulation = Simulation([Implanting(dataset_implanting_rate=0.5, signals=[signal1])])
 
-        sim_state = SimulationState(dataset=dataset, result_path=path, simulation=simulation, signals=[signal1], formats=["Pickle"])
+        sim_state = SimulationState(dataset=dataset, result_path=path, simulation=simulation, signals=[signal1], formats=["ImmuneML"])
 
         new_dataset = SignalImplanter.run(sim_state)
 
-        self.assertEqual(100, new_dataset.get_example_count())
-        self.assertEqual(50, len([receptor for receptor in new_dataset.get_data(40) if receptor.metadata["signal1"] is True]))
+        self.assertEqual(10, new_dataset.get_example_count())
+        self.assertEqual(5, len([receptor for receptor in new_dataset.get_data(40) if receptor.metadata["signal1"] is True]))
 
         shutil.rmtree(path)

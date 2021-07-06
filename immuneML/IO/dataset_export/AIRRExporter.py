@@ -18,6 +18,7 @@ from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import Rece
 from immuneML.data_model.receptor.receptor_sequence.SequenceFrameType import SequenceFrameType
 from immuneML.data_model.repertoire.Repertoire import Repertoire
 from immuneML.environment.Constants import Constants
+from immuneML.util.NumpyHelper import NumpyHelper
 from immuneML.util.PathBuilder import PathBuilder
 
 
@@ -84,7 +85,7 @@ class AIRRExporter(DataExporter):
     def export_updated_metadata(dataset: RepertoireDataset, result_path: Path, repertoire_folder: str):
         df = pd.read_csv(dataset.metadata_file, comment=Constants.COMMENT_SIGN)
         identifiers = df["repertoire_identifier"].values.tolist() if "repertoire_identifier" in df.columns else dataset.get_example_ids()
-        df["filename"] =[str(Path(repertoire_folder) / f"{repertoire.data_filename.stem}.tsv") for repertoire in dataset.get_data()]
+        df["filename"] = [str(Path(repertoire_folder) / f"{repertoire.data_filename.stem}.tsv") for repertoire in dataset.get_data()]
         df.to_csv(result_path / "metadata.csv", index=False)
 
     @staticmethod
@@ -94,7 +95,7 @@ class AIRRExporter(DataExporter):
 
         for column in ['v_alleles', 'j_alleles', 'v_genes', 'j_genes']:
             if column not in df.columns:
-                df.loc[:, column] = None
+                df.loc[:, column] = ''
 
         AIRRExporter.update_gene_columns(df, 'alleles', 'genes')
 
@@ -133,7 +134,7 @@ class AIRRExporter(DataExporter):
             if sequence.metadata is not None and sequence.metadata.custom_params is not None:
                 for custom_param in sequence.metadata.custom_params:
                     if custom_param not in attributes_dict:
-                        attributes_dict[custom_param] = [None for i in range(i)]
+                        attributes_dict[custom_param] = ['' for i in range(i)]
 
             for attribute in attributes_dict.keys():
                 try:
@@ -142,12 +143,13 @@ class AIRRExporter(DataExporter):
                         attr_value = attr_value.value
                     attributes_dict[attribute].append(attr_value)
                 except KeyError:
-                    attributes_dict[attribute].append(None)
+                    attributes_dict[attribute].append('')
 
         df = pd.DataFrame({**attributes_dict, **main_data_dict})
 
         AIRRExporter.update_gene_columns(df, 'allele', 'gene')
-        df.rename(columns={"v_allele": "v_call", "j_allele": "j_call", "chain": "locus", "count": "duplicate_count", "frame_type": "frame_types"}, inplace=True)
+        df.rename(columns={"v_allele": "v_call", "j_allele": "j_call", "chain": "locus", "count": "duplicate_count", "frame_type": "frame_types"},
+                  inplace=True)
 
         return df
 
@@ -155,24 +157,24 @@ class AIRRExporter(DataExporter):
     def update_gene_columns(df, allele_name, gene_name):
         for index, row in df.iterrows():
             for gene in ['v', 'j']:
-                if row[f"{gene}_{allele_name}"] is None and row[f"{gene}_{gene_name}"] is not None:
-                    row[f"{gene}_{allele_name}"] = row[f"{gene}_{gene_name}"]
+                if NumpyHelper.is_nan_or_empty(row[f"{gene}_{allele_name}"]) and not NumpyHelper.is_nan_or_empty(row[f"{gene}_{gene_name}"]):
+                    df[f"{gene}_{allele_name}"][index] = row[f"{gene}_{gene_name}"]
 
     @staticmethod
     def _postprocess_dataframe(df):
         if "locus" in df.columns:
-            df["locus"] = [Chain.get_chain(chain).value if chain else None for chain in df["locus"]]
+            df["locus"] = [Chain.get_chain(chain).value if chain else '' for chain in df["locus"]]
 
         if "frame_types" in df.columns:
             AIRRExporter._enums_to_strings(df, "frame_types")
 
             df["productive"] = df["frame_types"] == SequenceFrameType.IN.name
-            df.loc[df["frame_types"].isnull(), "productive"] = None
+            df.loc[df["frame_types"].isnull(), "productive"] = ''
 
             df["vj_in_frame"] = df["productive"]
 
             df["stop_codon"] = df["frame_types"] == SequenceFrameType.STOP.name
-            df.loc[df["frame_types"].isnull(), "stop_codon"] = None
+            df.loc[df["frame_types"].isnull(), "stop_codon"] = ''
 
             df.drop(columns=["frame_types"])
 

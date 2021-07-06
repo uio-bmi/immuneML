@@ -85,8 +85,8 @@ generated dataset, including the name of the dataset, the dataset type and size,
 The next item, 'create_dataset.yaml' the YAML specification file that was used by immuneML to create the dataset.
 This YAML specification could be used when running the Create dataset tool with the 'Advanced' interface.
 
-Finally, 'immuneML dataset' is a new Galaxy collection containing the immuneML dataset in Pickle format.
-The Pickle format is not human-readable, but it ensures that you can quickly import the dataset into various Galaxy tools
+Finally, 'immuneML dataset' is a new Galaxy collection containing the immuneML dataset in the ImmuneML format.
+The ImmuneML format is not human-readable, but it ensures that you can quickly import the dataset into various Galaxy tools
 without having to repeatedly specify the import parameters.
 
 

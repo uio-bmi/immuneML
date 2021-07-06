@@ -370,7 +370,7 @@ mouse_subject0045,PA,1,TRAV16D/DV11*03,TRAJ53*01,CAMRGNSGGSNYKLTF,tgtgctatgagggg
 
         self.assertEqual(324, dataset.get_example_count())
         self.assertTrue(all(item.identifier is not None for item in dataset.get_data()))
-        self.assertTrue(os.path.isfile(path / "result/batch1.pickle"))
+        self.assertTrue(os.path.isfile(path / "result/batch1.npy"))
         self.assertTrue(os.path.isfile(path / "result/dataset name 2.iml_dataset"))
         self.assertEqual("mouse", dataset.labels["organism"])
 

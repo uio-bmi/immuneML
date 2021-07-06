@@ -3,8 +3,6 @@ import random
 import shutil
 import string
 from unittest import TestCase
-from immuneML.util.PathBuilder import PathBuilder
-
 
 import numpy as np
 import pandas as pd
@@ -18,6 +16,7 @@ from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.encoding_reports.FeatureComparison import FeatureComparison
 from immuneML.reports.encoding_reports.FeatureDistribution import FeatureDistribution
+from immuneML.util.PathBuilder import PathBuilder
 
 
 class TestFeatureComparison(TestCase):
@@ -76,7 +75,7 @@ class TestFeatureComparison(TestCase):
         self.assertListEqual(list(content.columns),
                              ["patient", "example_id", "sequence", "feature", "value"])
 
-        # report should succeed to build but check_prerequisites should be false when data is not encoded
+        # report should succeed to build_from_objects but check_prerequisites should be false when data is not encoded
         report = FeatureDistribution.build_object(**{"dataset": RepertoireDataset(),
                                                      "result_path": path})
 

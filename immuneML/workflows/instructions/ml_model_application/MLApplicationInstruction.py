@@ -48,9 +48,6 @@ class MLApplicationInstruction(Instruction):
 
         number_of_processes (int): number of processes to use for prediction
 
-        store_encoded_data (bool): whether encoded dataset should be stored on disk; can be True or False; setting this argument to True might
-        increase the disk space usage
-
     Specification example for the MLApplication instruction:
 
     .. highlight:: yaml
@@ -61,15 +58,12 @@ class MLApplicationInstruction(Instruction):
             dataset: d1
             config_path: ./config.zip
             number_of_processes: 4
-            store_encoded_data: False
 
     """
 
-    def __init__(self, dataset: Dataset, label_configuration: LabelConfiguration, hp_setting: HPSetting, number_of_processes: int, name: str,
-                 store_encoded_data: bool):
+    def __init__(self, dataset: Dataset, label_configuration: LabelConfiguration, hp_setting: HPSetting, number_of_processes: int, name: str):
 
-        self.state = MLApplicationState(dataset=dataset, hp_setting=hp_setting, label_config=label_configuration, pool_size=number_of_processes, name=name,
-                                        store_encoded_data=store_encoded_data)
+        self.state = MLApplicationState(dataset=dataset, hp_setting=hp_setting, label_config=label_configuration, pool_size=number_of_processes, name=name)
 
     def run(self, result_path: Path):
         self.state.path = PathBuilder.build(result_path / self.state.name)
@@ -80,8 +74,7 @@ class MLApplicationInstruction(Instruction):
             dataset = HPUtil.preprocess_dataset(dataset, self.state.hp_setting.preproc_sequence, self.state.path)
 
         dataset = HPUtil.encode_dataset(dataset, self.state.hp_setting, self.state.path, learn_model=False, number_of_processes=self.state.pool_size,
-                                        label_configuration=self.state.label_config, context={}, encode_labels=False,
-                                        store_encoded_data=self.state.store_encoded_data)
+                                        label_configuration=self.state.label_config, context={}, encode_labels=False)
 
         self._make_predictions(dataset)
 

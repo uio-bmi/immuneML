@@ -95,8 +95,7 @@ class Quickstart:
                     "reports": ["hprep"],
                     "number_of_processes": 3,
                     "optimization_metric": "balanced_accuracy",
-                    "refit_optimal_model": False,
-                    "store_encoded_data": False
+                    "refit_optimal_model": False
                 }
             }
         }

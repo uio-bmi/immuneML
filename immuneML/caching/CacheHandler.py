@@ -40,6 +40,10 @@ class CacheHandler:
         return path / f"{cache_key}.pickle"
 
     @staticmethod
+    def exists(params: tuple, object_type: CacheObjectType = CacheObjectType.OTHER, cache_type=None):
+        return CacheHandler.get_by_key(CacheHandler.generate_cache_key(params), object_type, cache_type) is not None
+
+    @staticmethod
     def add(params: tuple, caching_object, object_type: CacheObjectType = CacheObjectType.OTHER, cache_type=None):
         PathBuilder.build(EnvironmentSettings.get_cache_path(cache_type))
         h = CacheHandler.generate_cache_key(params)

@@ -136,7 +136,7 @@ An example of the unit test TestNewClonesPerRepertoireFilter is given below.
         def test_process(self):
             path = EnvironmentSettings.tmp_test_path / "clones_per_repertoire_filter"
             PathBuilder.build(path)
-            dataset = RepertoireDataset(repertoires=RepertoireBuilder.build([["ACF", "ACF", "ACF"],
+            dataset = RepertoireDataset(repertoires=RepertoireBuilder.build_from_objects([["ACF", "ACF", "ACF"],
                                                                            ["ACF", "ACF"],
                                                                            ["ACF", "ACF", "ACF", "ACF"]], path)[0])
 

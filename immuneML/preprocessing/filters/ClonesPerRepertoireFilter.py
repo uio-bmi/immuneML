@@ -10,6 +10,9 @@ class ClonesPerRepertoireFilter(Filter):
     lower_limit, or more clonotypes than specified by the upper_limit.
     Note that this filter filters out repertoires, not individual sequences, and can thus only be applied to RepertoireDatasets.
 
+    Since the filter removes repertoires from the dataset (examples in machine learning setting), it cannot be used with :ref:`TrainMLModel`
+    instruction. If you want to use this filter, see :ref:`DatasetExport` instruction with preprocessing.
+
     Arguments:
 
         lower_limit (int): The minimal inclusive lower limit for the number of clonotypes allowed in a repertoire.
@@ -33,35 +36,32 @@ class ClonesPerRepertoireFilter(Filter):
 
     """
 
-    def __init__(self, lower_limit: int = -1, upper_limit: int = -1):
+    def __init__(self, result_path: Path = None, lower_limit: int = -1, upper_limit: int = -1):
+        super().__init__(result_path)
         self.lower_limit = lower_limit
         self.upper_limit = upper_limit
 
-    def process_dataset(self, dataset: RepertoireDataset, result_path: Path = None):
-        params = {"result_path": result_path}
-        if self.lower_limit > -1:
-            params["lower_limit"] = self.lower_limit
-        if self.upper_limit > -1:
-            params["upper_limit"] = self.upper_limit
-        return ClonesPerRepertoireFilter.process(dataset, params)
+    def keeps_example_count(self) -> bool:
+        return False
 
-    @staticmethod
-    def process(dataset: RepertoireDataset, params: dict) -> RepertoireDataset:
-        ClonesPerRepertoireFilter.check_dataset_type(dataset, [RepertoireDataset], "ClonesPerRepertoireFilter")
+    def process_dataset(self, dataset: RepertoireDataset, result_path: Path = None):
+        self.check_dataset_type(dataset, [RepertoireDataset], "ClonesPerRepertoireFilter")
+        self.result_path = result_path if result_path is not None else self.result_path
+
         processed_dataset = dataset.clone()
-        repertoires = []
-        indices = []
+        repertoires, indices = [], []
+
         for index, repertoire in enumerate(dataset.get_data()):
-            if "lower_limit" in params.keys() and len(repertoire.sequences) < params["lower_limit"]:
+            if self.lower_limit != -1 and len(repertoire.sequences) < self.lower_limit:
                 continue
-            if "upper_limit" in params.keys() and len(repertoire.sequences) > params["upper_limit"]:
+            if self.upper_limit != -1 and len(repertoire.sequences) > self.upper_limit:
                 continue
             repertoires.append(dataset.repertoires[index])
             indices.append(index)
 
         processed_dataset.repertoires = repertoires
-        processed_dataset.metadata_file = ClonesPerRepertoireFilter.build_new_metadata(dataset, indices, params["result_path"])
+        processed_dataset.metadata_file = self._build_new_metadata(dataset, indices)
 
-        ClonesPerRepertoireFilter.check_dataset_not_empty(processed_dataset, "ClonesPerRepertoireFilter")
+        self.check_dataset_not_empty(processed_dataset, "ClonesPerRepertoireFilter")
 
         return processed_dataset

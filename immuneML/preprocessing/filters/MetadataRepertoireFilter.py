@@ -12,7 +12,11 @@ from immuneML.preprocessing.filters.Filter import Filter
 class MetadataRepertoireFilter(Filter):
     """
     Removes repertoires from a RepertoireDataset based on information stored in the metadata_file.
-    Note that this filter filters out repertoires, not individual sequences, and can thus only be applied to RepertoireDatasets.
+    Note that this filters out repertoires, not individual sequences, and can thus only be applied to RepertoireDatasets.
+
+    Since this filter changes the number of repertoires (examples for the machine learning task), it cannot be used with
+    :ref:`TrainMLModel` instruction. To filter out repertoires, use preprocessing from the :ref:`DatasetExport` instruction that will create
+    a new dataset ready to be used for training machine learning models.
 
     Arguments:
 
@@ -36,32 +40,30 @@ class MetadataRepertoireFilter(Filter):
 
     """
 
-    def __init__(self, criteria: dict):
+    def __init__(self, criteria: dict, result_path: Path = None):
+        super().__init__(result_path)
         self.criteria = CriteriaTypeInstantiator.instantiate(criteria)
 
+    def keeps_example_count(self) -> bool:
+        return False
+
     def process_dataset(self, dataset: RepertoireDataset, result_path: Path):
-        params = {"result_path": result_path, "criteria": self.criteria}
-
-        return MetadataRepertoireFilter.process(dataset, params)
-
-    @staticmethod
-    def process(dataset: RepertoireDataset, params: dict) -> RepertoireDataset:
-        MetadataRepertoireFilter.check_dataset_type(dataset, [RepertoireDataset], "MetadataRepertoireFilter")
+        self.check_dataset_type(dataset, [RepertoireDataset], "MetadataRepertoireFilter")
+        self.result_path = result_path if result_path is not None else self.result_path
 
         processed_dataset = dataset.clone()
         original_repertoires = processed_dataset.get_data()
-        indices = MetadataRepertoireFilter.get_matching_indices(processed_dataset, params["criteria"])
+        indices = self._get_matching_indices(processed_dataset)
         processed_dataset.repertoires = [original_repertoires[i] for i in indices]
-        processed_dataset.metadata_file = MetadataRepertoireFilter.build_new_metadata(dataset, indices, params["result_path"])
+        processed_dataset.metadata_file = self._build_new_metadata(dataset, indices)
 
-        MetadataRepertoireFilter.check_dataset_not_empty(processed_dataset, "MetadataRepertoireFilter")
+        self.check_dataset_not_empty(processed_dataset, "MetadataRepertoireFilter")
 
         return processed_dataset
 
-    @staticmethod
-    def get_matching_indices(dataset: RepertoireDataset, criteria):
+    def _get_matching_indices(self, dataset: RepertoireDataset):
         metadata = pd.DataFrame(dataset.get_metadata(None))
-        matches = CriteriaMatcher().match(criteria, metadata)
+        matches = CriteriaMatcher().match(self.criteria, metadata)
         indices = np.where(matches)[0]
         return indices
 

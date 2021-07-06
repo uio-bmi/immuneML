@@ -29,4 +29,7 @@ class Chain(Enum):
         elif item in ["IGK", "K", "KAPPA"]:
             return Chain.KAPPA
         else:
-            return Chain[item.upper()]
+            return None
+
+    def __str__(self):
+        return self.name

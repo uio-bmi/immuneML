@@ -46,14 +46,13 @@ class TestMLIE(TestCase):
                 },
                 "preprocessing_sequences": {
                     "seq1": [
-                        {"collect": "SubjectRepertoireCollector"},
                         {
                             "count_filter": {
                                 "CountPerSequenceFilter": {
                                     "remove_without_count": True,
                                     "low_count_limit": 0,
                                     "batch_size": 4,
-                                    'remove_empty_repertoires': True
+                                    'remove_empty_repertoires': False
                                 }
                             }
                         }
@@ -88,7 +87,6 @@ class TestMLIE(TestCase):
                     "number_of_processes": 10,
                     "optimization_metric": "accuracy",
                     'refit_optimal_model': False,
-                    "store_encoded_data": False
                 }
             },
             "output": {
@@ -123,7 +121,6 @@ class TestMLIE(TestCase):
                     "dataset": "d1",
                     "config_path": str(path / "result_export/inst1/optimal_CD/zip/ml_settings_CD.zip"),
                     "number_of_processes": 4,
-                    "store_encoded_data": False
                 }
             },
             "output": {

@@ -23,12 +23,12 @@ class TestClonesPerRepertoireFilter(TestCase):
                                                                        ["ACF", "ACF"],
                                                                        ["ACF", "ACF", "ACF", "ACF"]], path)[0])
 
-        dataset1 = ClonesPerRepertoireFilter.process(dataset, {"lower_limit": 3, "result_path": path})
+        dataset1 = ClonesPerRepertoireFilter(**{"lower_limit": 3, "result_path": path}).process_dataset(dataset, path)
         self.assertEqual(2, dataset1.get_example_count())
 
-        dataset2 = ClonesPerRepertoireFilter.process(dataset, {"upper_limit": 2, "result_path": path})
+        dataset2 = ClonesPerRepertoireFilter(**{"upper_limit": 2, "result_path": path}).process_dataset(dataset, path)
         self.assertEqual(1, dataset2.get_example_count())
 
-        self.assertRaises(AssertionError, ClonesPerRepertoireFilter.process, dataset, {"lower_limit": 10, "result_path": path})
+        self.assertRaises(AssertionError, ClonesPerRepertoireFilter(**{"lower_limit": 10, "result_path": path}).process_dataset, dataset, path)
 
         shutil.rmtree(path)
