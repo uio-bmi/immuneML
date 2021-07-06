@@ -1,6 +1,6 @@
 from pathlib import Path
 import subprocess
-from io import StringIO
+import os
 import pandas as pd
 import numpy as np
 import warnings
@@ -220,6 +220,10 @@ class EditDistanceEncoder(DatasetEncoder):
         if not output_file.is_file():
             raise RuntimeError(f"EditDistanceEncoder: failed to calculate the distance matrix with CompAIRR. "
                                f"The following error occurred: {compairr_result.stderr}")
+
+        if os.path.getsize(output_file) == 0:
+            raise RuntimeError(f"EditDistanceEncoder: failed to calculate the distance matrix with CompAIRR, output matrix is empty. "
+                               f"For details see the log file at {params.result_path / EditDistanceEncoder.LOG_FILENAME}")
 
         raw_distance_matrix = pd.read_csv(output_file, sep="\t", index_col=0)
 

@@ -23,8 +23,8 @@ class TestDistanceEncoder(TestCase):
         os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
 
     def create_dataset(self, path: str) -> RepertoireDataset:
-        repertoires, metadata = RepertoireBuilder.build([["A", "G"], ["G", "C"], ["D"], ["E", "F"],
-                                                       ["A", "G"], ["G", "C"], ["D"], ["E", "F"]], path,
+        repertoires, metadata = RepertoireBuilder.build([["A", "Q"], ["Q", "C"], ["D"], ["E", "F"],
+                                                       ["A", "Q"], ["Q", "C"], ["D"], ["E", "F"]], path,
                                                       {"l1": [1, 0, 1, 0, 1, 0, 1, 0], "l2": [2, 3, 2, 3, 2, 3, 3, 3]})
         dataset = RepertoireDataset(repertoires=repertoires, metadata_file=metadata)
         return dataset
@@ -58,9 +58,9 @@ class TestDistanceEncoder(TestCase):
         self.assertEqual(8, encoded.encoded_data.examples.shape[0])
         self.assertEqual(8, encoded.encoded_data.examples.shape[1])
 
-        self.assertEqual(0, encoded.encoded_data.examples.iloc[0, 0])
-        self.assertEqual(0, encoded.encoded_data.examples.iloc[1, 1])
-        self.assertEqual(0, encoded.encoded_data.examples.iloc[0, 4])
+        self.assertEqual(0, encoded.encoded_data.examples[0, 0])
+        self.assertEqual(0, encoded.encoded_data.examples[1, 1])
+        self.assertEqual(0, encoded.encoded_data.examples[0, 4])
 
         self.assertTrue(np.array_equal([1, 0, 1, 0, 1, 0, 1, 0], encoded.encoded_data.labels["l1"]))
         self.assertTrue(np.array_equal([2, 3, 2, 3, 2, 3, 3, 3], encoded.encoded_data.labels["l2"]))
