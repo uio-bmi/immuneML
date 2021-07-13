@@ -94,7 +94,7 @@ Example scikit-learn-based SVM implementation:
         _parameters = parameters if parameters is not None else {"max_iter": 10000, "multi_class": "crammer_singer"}
         _parameter_grid = parameter_grid if parameter_grid is not None else {}
 
-        super(SVM, self).__init__(parameter_grid=_parameter_grid, parameters=_parameters)
+        super(NewSVM, self).__init__(parameter_grid=_parameter_grid, parameters=_parameters)
 
     def _get_ml_model(self, cores_for_training: int = 2, X=None):
         return LinearSVC(**self._parameters)
@@ -202,9 +202,9 @@ An example of the unit test TestNewSVM is given below.
           svm.store(path)
 
           # when the trained method is stored, check if the format is as defined in store()
-          self.assertTrue(os.path.isfile(path / "svm.pickle"))
+          self.assertTrue(os.path.isfile(path / "new_svm.pickle"))
 
-          with open(path / "svm.pickle", "rb") as file:
+          with open(path / "new_svm.pickle", "rb") as file:
               svm2 = pickle.load(file)
 
           self.assertTrue(isinstance(svm2, LinearSVC))
@@ -221,7 +221,7 @@ An example of the unit test TestNewSVM is given below.
           path = EnvironmentSettings.tmp_test_path / "my_svm_load/"
           PathBuilder.build(path)
 
-          with open(path / "svm.pickle", "wb") as file:
+          with open(path / "new_svm.pickle", "wb") as file:
               pickle.dump(svm.get_model(), file)
 
           svm2 = NewSVM()
@@ -277,7 +277,7 @@ During parsing, the parameters of the model will be assigned to “parameters”
 possible values. Otherwise, the parameters will be assigned to the parameter_grid parameter which will be later used for grid search and
 cross-validation.
 
-Full specification that trains the added ML method on the simulated data would look like this:
+Full specification that simulates the data and trains the added ML method on that data would look like this:
 
 .. indent with spaces
 .. code-block:: yaml
