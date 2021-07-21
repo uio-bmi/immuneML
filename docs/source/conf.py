@@ -53,7 +53,11 @@ extensions = [
     'sphinx_rtd_theme',
     'sphinx.ext.napoleon',
     'sphinx.ext.autosectionlabel',
+    'sphinx_sitemap'
 ]
+
+# html_baseurl
+html_baseurl = 'https://docs.immuneml.uio.no'
 
 # mathjax configuration
 mathjax_config = {

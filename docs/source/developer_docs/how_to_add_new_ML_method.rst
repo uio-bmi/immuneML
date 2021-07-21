@@ -14,6 +14,15 @@ In this tutorial, we will add a new machine learning method. This tutorial assum
 To add a new ML method to immuneML, add a class that inherits :py:obj:`~immuneML.ml_methods.MLMethod.MLMethod` class to the :py:mod:`immuneML.ml_methods` package
 and implement abstract methods. The name of the new class has to be different from the ML methods’ classes already defined in the same package.
 
+.. note::
+
+  The initial development of the new ML method need not take place within immuneML. immuneML can be used to prepare, encode and export the data for
+  developing the method using the :ref:`ExploratoryAnalysis` instruction, desired encoding, and :ref:`DesignMatrixExporter` report. For more details,
+  see :ref:`Testing the ML method outside immuneML with a sample design matrix`. The method can
+  then be developed and debugged separately, and later integrated into the platform as described below to fully benefit from available immuneML
+  functionalities related to importing datasets from different formats, using various data representations, benchmarking against existing methods and
+  robustly assessing the performance.
+
 
 Adding a new MLMethod class
 -----------------------------------
