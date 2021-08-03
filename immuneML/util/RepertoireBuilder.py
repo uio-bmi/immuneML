@@ -56,7 +56,7 @@ class RepertoireBuilder:
 
         df = pd.DataFrame({**{"filename": [repertoire.data_filename for repertoire in repertoires],
                               "subject_id": subject_ids,
-                              "repertoire_identifier": [repertoire.identifier for repertoire in repertoires]},
+                              "identifier": [repertoire.identifier for repertoire in repertoires]},
                            **(labels if labels is not None else {})})
         df.to_csv(path / "metadata.csv", index=False)
 

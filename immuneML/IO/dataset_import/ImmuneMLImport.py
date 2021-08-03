@@ -140,8 +140,8 @@ class ImmuneMLImport(DataImport):
         return dataset
 
     @staticmethod
-    def _discover_repertoire_path(pickle_params, dataset):
-        dataset_dir = ImmuneMLImport._discover_dataset_dir(pickle_params)
+    def _discover_repertoire_path(params, dataset):
+        dataset_dir = ImmuneMLImport._discover_dataset_dir(params)
 
         if len(list(dataset_dir.glob("*.npy"))) == len(dataset.repertoires):
             path = dataset_dir

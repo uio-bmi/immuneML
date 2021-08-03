@@ -495,7 +495,6 @@ class ImportHelper:
                     f"Missing {chain_pair.value[i]} chain for receptor with identifier {identifier}, this receptor will be omitted.")
                 return []
 
-        # todo add options like IRIS import: option to import all dual chains or just the first pair / all V genes when uncertain annotation, etc
         # todo add possibility to import multiple chain combo's? (BCR heavy-light & heavy-kappa, as seen in 10xGenomics?)
 
         return [ImportHelper.build_receptor_from_rows(first_row.iloc[0], second_row.iloc[0], identifier, chain_pair, metadata_columns)]
