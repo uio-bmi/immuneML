@@ -19,6 +19,10 @@ class FullSequenceImplanting(SignalImplantingStrategy):
     generated from the motifs of the signal. Motifs here cannot include gaps and the motif instances are the full sequences and will be
     a part of the repertoire.
 
+    Note: when providing the sequence to be implanted, check if the import setting regarding the sequence type (CDR3 vs IMGT junction) matches
+    the sequence to be implanted. For example, if importing would convert junction sequences to CDR3, but the sequence specified here for implanting
+    would be the junction, the results of the simulation could be inconsistent.
+
     Arguments: this signal implanting strategy has no arguments.
 
     YAML specification:
