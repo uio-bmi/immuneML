@@ -36,7 +36,8 @@ from GitHub), install the requirements from the requirements.txt file (this file
 
   .. code-block:: console
 
-    pip install -r requirements.txt -e .
+    pip install -r requirements.txt
+    pip install -e .
 
   See also these troubleshooting issues:
 

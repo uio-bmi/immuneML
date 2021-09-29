@@ -10,6 +10,7 @@ from immuneML.data_model.repertoire.Repertoire import Repertoire
 from immuneML.encodings.DatasetEncoder import DatasetEncoder
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.encodings.filtered_sequence_encoding.SequenceFilterHelper import SequenceFilterHelper
+from immuneML.environment.Label import Label
 from immuneML.pairwise_repertoire_comparison.ComparisonData import ComparisonData
 from immuneML.util.EncoderHelper import EncoderHelper
 from scripts.specification_util import update_docs_per_mapping
@@ -29,6 +30,9 @@ class SequenceAbundanceEncoder(DatasetEncoder):
     ‘Immunosequencing Identifies Signatures of Cytomegalovirus Exposure History and HLA-Mediated Effects on the T Cell Repertoire’.
     Nature Genetics 49, no. 5 (May 2017): 659–65. `doi.org/10.1038/ng.3822 <https://doi.org/10.1038/ng.3822>`_.
 
+    Note: to use this encoder, it is necessary to explicitly define the positive class for the label when defining the label
+    in the instruction. With positive class defined, it can then be determined which sequences are indicative of the positive class.
+    For full example of using this encoder, see :ref:`Reproduction of the CMV status predictions study`.
 
     Arguments:
 
@@ -84,19 +88,31 @@ class SequenceAbundanceEncoder(DatasetEncoder):
         return SequenceAbundanceEncoder(**params)
 
     def encode(self, dataset, params: EncoderParams):
+
+        self._check_label(params)
+
         self.comparison_data = SequenceFilterHelper.build_comparison_data(dataset, self.context, self.comparison_attributes, params,
                                                                           self.sequence_batch_size)
         return self._encode_data(dataset, params)
 
-    def _encode_data(self, dataset: RepertoireDataset, params: EncoderParams):
-        labels = params.label_config.get_labels_by_name()
+    def _check_label(self, params: EncoderParams):
+
+        labels = params.label_config.get_label_objects()
 
         assert len(labels) == 1, \
             "SequenceAbundanceEncoder: this encoding works only for single label."
 
-        examples = self._calculate_sequence_abundance(dataset, self.comparison_data, labels[0], params)
+        assert isinstance(labels[0], Label) and labels[0].positive_class is not None and labels[0].positive_class != "", \
+            f"{SequenceAbundanceEncoder.__name__}: to use this encoder, in the label definition in the specification of the instruction, define " \
+            f"the positive class for the label. Now it is set to '{labels[0].positive_class}'. See documentation for this encoder for more details."
 
-        encoded_data = EncodedData(examples, dataset.get_metadata([labels[0]]) if params.encode_labels else None, dataset.get_repertoire_ids(),
+    def _encode_data(self, dataset: RepertoireDataset, params: EncoderParams):
+
+        label = params.label_config.get_labels_by_name()[0]
+
+        examples = self._calculate_sequence_abundance(dataset, self.comparison_data, label, params)
+
+        encoded_data = EncodedData(examples, dataset.get_metadata([label]) if params.encode_labels else None, dataset.get_repertoire_ids(),
                                    [SequenceAbundanceEncoder.RELEVANT_SEQUENCE_ABUNDANCE, SequenceAbundanceEncoder.TOTAL_SEQUENCE_ABUNDANCE],
                                    encoding=SequenceAbundanceEncoder.__name__, info={'relevant_sequence_path': self.relevant_sequence_csv_path})
 

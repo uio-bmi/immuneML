@@ -84,8 +84,9 @@ class AIRRExporter(DataExporter):
     @staticmethod
     def export_updated_metadata(dataset: RepertoireDataset, result_path: Path, repertoire_folder: str):
         df = pd.read_csv(dataset.metadata_file, comment=Constants.COMMENT_SIGN)
-        identifiers = df["repertoire_identifier"].values.tolist() if "repertoire_identifier" in df.columns else dataset.get_example_ids()
+        identifiers = df["identifier"].values.tolist() if "identifier" in df.columns else dataset.get_example_ids()
         df["filename"] = [str(Path(repertoire_folder) / f"{repertoire.data_filename.stem}.tsv") for repertoire in dataset.get_data()]
+        df['identifier'] = identifiers
         df.to_csv(result_path / "metadata.csv", index=False)
 
     @staticmethod

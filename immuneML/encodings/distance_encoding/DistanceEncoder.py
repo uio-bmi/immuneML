@@ -107,10 +107,15 @@ class DistanceEncoder(DatasetEncoder):
 
     def build_labels(self, dataset: RepertoireDataset, params: EncoderParams) -> dict:
 
-        lbl = params.label_config.get_labels_by_name()
-        tmp_labels = dataset.get_metadata(lbl, return_df=True)
+        lbl = ["identifier"]
+        lbl.extend(params.label_config.get_labels_by_name())
 
-        return tmp_labels.to_dict("list")
+        tmp_labels = dataset.get_metadata(lbl, return_df=True)
+        tmp_labels = tmp_labels.iloc[pd.Index(tmp_labels['identifier']).get_indexer(dataset.get_repertoire_ids())]
+        tmp_labels = tmp_labels.to_dict("list")
+        del tmp_labels["identifier"]
+
+        return tmp_labels
 
     def encode(self, dataset, params: EncoderParams) -> RepertoireDataset:
 

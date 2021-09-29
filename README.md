@@ -110,7 +110,7 @@ dataset or trained models, and modified datasets.
 To navigate over the results, immuneML generates a summary HTML file. 
 
 
-![image info](https://docs.immuneml.uio.no/_images/definitions_instructions_overview.png)
+![image info](https://docs.immuneml.uio.no/latest/_images/definitions_instructions_overview.png)
 
 For a detailed explanation of the YAML specification file, see the tutorial [How to specify an analysis with YAML](https://docs.immuneml.uio.no/tutorials/how_to_specify_an_analysis_with_yaml.html).
 
@@ -137,6 +137,22 @@ For each instruction specified in the YAML specification file, a subfolder is cr
 - A copy of the used YAML specification (`full_specification.yaml`) with all default parameters explicitly set.
 - A folder containing all raw results produced by the instruction.
 - A folder containing the imported dataset(s) in optimized binary (Pickle) format.
+
+## Support
+
+We will prioritize fixing important bugs, and try to answer any questions as soon as possible. We may implement suggested features and enhancements as time permits. 
+
+If you run into problems when using immuneML, please see [the documentation](https://docs.immuneml.uio.no/latest/). In particular, we recommend you check out:
+- The [Quickstart tutorial](https://docs.immuneml.uio.no/latest/quickstart.html) for new users
+- The [Troubleshooting](https://docs.immuneml.uio.no/latest/troubleshooting.html) page
+
+If this does not answer your question, you can contact us via:
+- Twitter [`@immuneml`](https://twitter.com/immuneml)
+- Email [`contact@immuneml.uio.no`](mailto:contact@immuneml.uio.no)
+
+To report a potential bug or suggest new features, please [submit an issue on GitHub](https://github.com/uio-bmi/immuneML/issues).
+
+If you would like to make contributions, for example by adding a new ML method, encoding, report or preprocessing, please [see our developer documentation](https://docs.immuneml.uio.no/latest/developer_docs.html) and [submit a pull request](https://github.com/uio-bmi/compairr/pulls).
 
 ## Requirements
 

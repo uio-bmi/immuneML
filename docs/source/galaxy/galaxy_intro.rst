@@ -163,4 +163,4 @@ you expected of the tool, and click 'Report'.
 
 .. image:: ../_static/images/galaxy/report_bug.png
    :alt: bug report
-   :width: 250
+   :width: 80%
