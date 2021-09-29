@@ -16,7 +16,7 @@ from immuneML.util.EncoderHelper import EncoderHelper
 from immuneML.util.ParameterValidator import ParameterValidator
 
 
-class EditDistanceEncoder(DatasetEncoder):
+class CompAIRRDistanceEncoder(DatasetEncoder):
     """
     Encodes a given RepertoireDataset as a distance matrix, using the Morisita-Horn distance metric.
     Internally, `CompAIRR <https://github.com/uio-bmi/compairr/>`_ is used for fast calculation of overlap between repertoires.
@@ -51,6 +51,8 @@ class EditDistanceEncoder(DatasetEncoder):
         ignore_genes (bool): Whether to ignore V and J gene information. If False, the V and J genes between two receptor chains
         have to match. If True, gene information is ignored. By default, ignore_genes is False.
 
+        threads (int): The number of threads to use for parallelization. Default is 8.
+
     YAML specification:
 
     .. indent with spaces
@@ -70,13 +72,14 @@ class EditDistanceEncoder(DatasetEncoder):
     INPUT_FILENAME = "compairr_input.tsv"
     LOG_FILENAME = "compairr_log.txt"
 
-    def __init__(self, compairr_path: Path, keep_compairr_input: bool, differences: int, indels: bool, ignore_counts: bool, ignore_genes: bool, context: dict = None, name: str = None):
+    def __init__(self, compairr_path: Path, keep_compairr_input: bool, differences: int, indels: bool, ignore_counts: bool, ignore_genes: bool, threads: int, context: dict = None, name: str = None):
         self.compairr_path = Path(compairr_path)
         self.keep_compairr_input = keep_compairr_input
         self.differences = differences
         self.indels = indels
         self.ignore_counts = ignore_counts
         self.ignore_genes = ignore_genes
+        self.threads = threads
         self.context = context
         self.name = name
         self.comparison = None
@@ -86,17 +89,18 @@ class EditDistanceEncoder(DatasetEncoder):
         return self
 
     @staticmethod
-    def _prepare_parameters(compairr_path: str, keep_compairr_input: bool, differences: int, indels: bool, ignore_counts: bool, ignore_genes: bool, context: dict = None, name: str = None):
-        ParameterValidator.assert_type_and_value(differences, int, "EditDistanceEncoder", "differences", min_inclusive=0, max_inclusive=2)
-        ParameterValidator.assert_type_and_value(indels, bool, "EditDistanceEncoder", "indels")
+    def _prepare_parameters(compairr_path: str, keep_compairr_input: bool, differences: int, indels: bool, ignore_counts: bool, ignore_genes: bool, threads: int, context: dict = None, name: str = None):
+        ParameterValidator.assert_type_and_value(differences, int, "CompAIRRDistanceEncoder", "differences", min_inclusive=0, max_inclusive=2)
+        ParameterValidator.assert_type_and_value(indels, bool, "CompAIRRDistanceEncoder", "indels")
         if indels:
-            assert differences == 1, f"EditDistanceEncoder: If indels is True, differences is only allowed to be 1, found {differences}"
+            assert differences == 1, f"CompAIRRDistanceEncoder: If indels is True, differences is only allowed to be 1, found {differences}"
 
-        ParameterValidator.assert_type_and_value(ignore_counts, bool, "EditDistanceEncoder", "ignore_counts")
-        ParameterValidator.assert_type_and_value(ignore_genes, bool, "EditDistanceEncoder", "ignore_genes")
-        ParameterValidator.assert_type_and_value(keep_compairr_input, bool, "EditDistanceEncoder", "keep_compairr_input")
+        ParameterValidator.assert_type_and_value(ignore_counts, bool, "CompAIRRDistanceEncoder", "ignore_counts")
+        ParameterValidator.assert_type_and_value(ignore_genes, bool, "CompAIRRDistanceEncoder", "ignore_genes")
+        ParameterValidator.assert_type_and_value(keep_compairr_input, bool, "CompAIRRDistanceEncoder", "keep_compairr_input")
+        ParameterValidator.assert_type_and_value(threads, int, "CompAIRRDistanceEncoder", "threads", min_inclusive=1)
 
-        compairr_path = EditDistanceEncoder._determine_compairr_path(compairr_path)
+        compairr_path = CompAIRRDistanceEncoder._determine_compairr_path(compairr_path)
 
         return {
             "compairr_path": compairr_path,
@@ -105,6 +109,7 @@ class EditDistanceEncoder(DatasetEncoder):
             "indels": indels,
             "ignore_counts": ignore_counts,
             "ignore_genes": ignore_genes,
+            "threads": threads,
             "context": context,
             "name": name
         }
@@ -113,11 +118,11 @@ class EditDistanceEncoder(DatasetEncoder):
     def _determine_compairr_path(compairr_path):
         if compairr_path is None:
             try:
-                compairr_path = EditDistanceEncoder._check_compairr_path("compairr")
+                compairr_path = CompAIRRDistanceEncoder._check_compairr_path("compairr")
             except Exception as e:
-                compairr_path = EditDistanceEncoder._check_compairr_path("/usr/local/bin/compairr")
+                compairr_path = CompAIRRDistanceEncoder._check_compairr_path("/usr/local/bin/compairr")
         else:
-            compairr_path = EditDistanceEncoder._check_compairr_path(compairr_path)
+            compairr_path = CompAIRRDistanceEncoder._check_compairr_path(compairr_path)
 
         return compairr_path
 
@@ -131,7 +136,7 @@ class EditDistanceEncoder(DatasetEncoder):
             major, minor, patch = output[1].split(".")
             assert int(major) >= 1, f"CompAIRR version 1 or higher is required, found version {output[1]}"
         except Exception as e:
-            raise Exception(f"EditDistanceEncoder: failed to call CompAIRR: {e}\n"
+            raise Exception(f"CompAIRRDistanceEncoder: failed to call CompAIRR: {e}\n"
                             f"Please ensure the correct version of CompAIRR has been installed, or provide the path to the CompAIRR executable.")
 
         return compairr_path
@@ -140,10 +145,10 @@ class EditDistanceEncoder(DatasetEncoder):
     @staticmethod
     def build_object(dataset, **params):
         if isinstance(dataset, RepertoireDataset):
-            prepared_params = EditDistanceEncoder._prepare_parameters(**params)
-            return EditDistanceEncoder(**prepared_params)
+            prepared_params = CompAIRRDistanceEncoder._prepare_parameters(**params)
+            return CompAIRRDistanceEncoder(**prepared_params)
         else:
-            raise ValueError("EditDistanceEncoder is not defined for dataset types which are not RepertoireDataset.")
+            raise ValueError("CompAIRRDistanceEncoder is not defined for dataset types which are not RepertoireDataset.")
 
 
     def build_labels(self, dataset: RepertoireDataset, params: EncoderParams) -> dict:
@@ -164,7 +169,7 @@ class EditDistanceEncoder(DatasetEncoder):
                                                    labels=labels,
                                                    feature_names=distance_matrix.columns.values,
                                                    example_ids=distance_matrix.index.values,
-                                                   encoding=EditDistanceEncoder.__name__)
+                                                   encoding=CompAIRRDistanceEncoder.__name__)
         return encoded_dataset
 
     def build_distance_matrix(self, dataset: RepertoireDataset, params: EncoderParams, train_repertoire_ids: list):
@@ -197,12 +202,12 @@ class EditDistanceEncoder(DatasetEncoder):
 
         if mh_distance < -0.3 and self.differences == 0:
             warnings.warn(
-                f"EditDistanceEncoder: Morisita-Horn similarity can only be in the range [0, 1], found {mh_similarity} "
+                f"CompAIRRDistanceEncoder: Morisita-Horn similarity can only be in the range [0, 1], found {mh_similarity} "
                 f"when comparing repertoires {rowIndex} and {columnIndex}.")
 
         if mh_distance < 0:
             warnings.warn(
-                f"EditDistanceEncoder: found negative distance {mh_distance} when comparing repertoires {rowIndex} and {columnIndex}, "
+                f"CompAIRRDistanceEncoder: found negative distance {mh_distance} when comparing repertoires {rowIndex} and {columnIndex}, "
                 f"distance will be set to 0.")
             mh_distance = 0
 
@@ -211,20 +216,20 @@ class EditDistanceEncoder(DatasetEncoder):
     def _get_raw_overlap(self, dataset: RepertoireDataset, params: EncoderParams):
 
         if self.keep_compairr_input:
-            compairr_result, repertoire_sizes, repertoire_indices = self._run_compairr(dataset, params, params.result_path / EditDistanceEncoder.INPUT_FILENAME)
+            compairr_result, repertoire_sizes, repertoire_indices = self._run_compairr(dataset, params, params.result_path / CompAIRRDistanceEncoder.INPUT_FILENAME)
         else:
             with NamedTemporaryFile(mode='w') as tmp:
                 compairr_result, repertoire_sizes, repertoire_indices = self._run_compairr(dataset, params, tmp.name)
 
-        output_file = params.result_path / EditDistanceEncoder.OUTPUT_FILENAME
+        output_file = params.result_path / CompAIRRDistanceEncoder.OUTPUT_FILENAME
 
         if not output_file.is_file():
-            raise RuntimeError(f"EditDistanceEncoder: failed to calculate the distance matrix with CompAIRR. "
+            raise RuntimeError(f"CompAIRRDistanceEncoder: failed to calculate the distance matrix with CompAIRR. "
                                f"The following error occurred: {compairr_result.stderr}")
 
         if os.path.getsize(output_file) == 0:
-            raise RuntimeError(f"EditDistanceEncoder: failed to calculate the distance matrix with CompAIRR, output matrix is empty. "
-                               f"For details see the log file at {params.result_path / EditDistanceEncoder.LOG_FILENAME}")
+            raise RuntimeError(f"CompAIRRDistanceEncoder: failed to calculate the distance matrix with CompAIRR, output matrix is empty. "
+                               f"For details see the log file at {params.result_path / CompAIRRDistanceEncoder.LOG_FILENAME}")
 
         raw_distance_matrix = pd.read_csv(output_file, sep="\t", index_col=0)
 
@@ -269,22 +274,20 @@ class EditDistanceEncoder(DatasetEncoder):
 
         if n_rows_before > len(repertoire_contents):
             warnings.warn(
-                f"EditDistanceEncoder: removed {n_rows_before - len(repertoire_contents)} entries from repertoire {repertoire.identifier} due to missing values.")
+                f"CompAIRRDistanceEncoder: removed {n_rows_before - len(repertoire_contents)} entries from repertoire {repertoire.identifier} due to missing values.")
 
         if self.ignore_counts:
             repertoire_contents["counts"] = 1
 
         return repertoire_contents
 
-    def _get_cmd_args(self, input_file, result_path, number_of_processes=1):
+    def _get_cmd_args(self, input_file, result_path):
         indels_args = ["-i"] if self.indels else []
         frequency_args = ["-f"] if self.ignore_counts else []
         ignore_genes = ["-g"] if self.ignore_genes else []
-        output_args = ["-o", str(result_path / EditDistanceEncoder.OUTPUT_FILENAME), "-l", str(result_path / EditDistanceEncoder.LOG_FILENAME)]
+        output_args = ["-o", str(result_path / CompAIRRDistanceEncoder.OUTPUT_FILENAME), "-l", str(result_path / CompAIRRDistanceEncoder.LOG_FILENAME)]
 
-        number_of_processes = 1 if number_of_processes < 1 else number_of_processes
-
-        return [str(self.compairr_path), "-m", "-d", str(self.differences), "-t", str(number_of_processes)] + \
+        return [str(self.compairr_path), "-m", "-d", str(self.differences), "-t", str(self.threads)] + \
                indels_args + frequency_args + ignore_genes + output_args + [input_file]
 
     @staticmethod

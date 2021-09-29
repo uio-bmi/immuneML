@@ -8,7 +8,7 @@ from pathlib import Path
 from immuneML.caching.CacheType import CacheType
 from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
 from immuneML.encodings.EncoderParams import EncoderParams
-from immuneML.encodings.distance_encoding.EditDistanceEncoder import EditDistanceEncoder
+from immuneML.encodings.distance_encoding.CompAIRRDistanceEncoder import CompAIRRDistanceEncoder
 from immuneML.environment.Constants import Constants
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.environment.Label import Label
@@ -17,7 +17,7 @@ from immuneML.util.PathBuilder import PathBuilder
 from immuneML.util.RepertoireBuilder import RepertoireBuilder
 
 
-class TestDistanceEncoder(TestCase):
+class TestCompAIRRDistanceEncoder(TestCase):
 
     def setUp(self) -> None:
         os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
@@ -37,17 +37,18 @@ class TestDistanceEncoder(TestCase):
 
     def _run_test(self, compairr_path):
 
-        path = EnvironmentSettings.tmp_test_path / "edit_distance_encoder/"
+        path = EnvironmentSettings.tmp_test_path / "compairr_distance_encoder/"
 
         PathBuilder.build(path)
 
         dataset = self.create_dataset(path)
 
-        enc = EditDistanceEncoder.build_object(dataset, **{"compairr_path": compairr_path,
+        enc = CompAIRRDistanceEncoder.build_object(dataset, **{"compairr_path": compairr_path,
                                                            "keep_compairr_input": True,
                                                         "differences": 0,
                                                         "indels": False,
                                                         "ignore_counts": False,
+                                                        "threads": 8,
                                                         "ignore_genes": False})
 
         enc.set_context({"dataset": dataset})
