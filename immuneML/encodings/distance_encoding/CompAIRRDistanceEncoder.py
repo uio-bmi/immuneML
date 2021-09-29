@@ -253,7 +253,7 @@ class CompAIRRDistanceEncoder(DatasetEncoder):
 
             repertoire_contents.to_csv(filename, mode='a', header=False, index=False, sep="\t")
 
-        args = self._get_cmd_args(filename, params.result_path, params.pool_size)
+        args = self._get_cmd_args(filename, params.result_path)
         compairr_result = subprocess.run(args, capture_output=True, text=True)
 
         return compairr_result, repertoire_sizes, repertoire_indices
