@@ -71,6 +71,7 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
     LOG_FILENAME = "compairr_log.txt"
 
     def __init__(self, p_value_threshold: float, compairr_path: str, keep_compairr_input: bool, ignore_genes: bool, threads: int, name: str = None):
+        # todo deal with keepcompairrinput param
         self.name = name
         self.p_value_threshold = p_value_threshold
 
@@ -78,6 +79,7 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
         self.relevant_sequence_csv_path = None
         self.repertoires_filepath = None
         self.sequences_filepath = None
+        self.context = None
 
         self.compairr_params = CompAIRRParams(compairr_path=Path(compairr_path),
                                               keep_compairr_input=keep_compairr_input,
@@ -118,8 +120,14 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
 
 
     def encode(self, dataset, params: EncoderParams):
-
         self._check_label(params)
+
+        # full_dataset = self.context["dataset"]
+        full_dataset = EncoderHelper.get_current_dataset(dataset, self.context)
+        sequence_presence_matrix, matrix_repertoire_ids = self._compute_sequence_presence_with_compairr(full_dataset, params)
+
+        self.sequence_presence_matrix = sequence_presence_matrix
+        self.matrix_repertoire_ids = matrix_repertoire_ids
 
         return self._encode_data(dataset, params)
 
@@ -135,11 +143,27 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
             f"the positive class for the label. Now it is set to '{labels[0].positive_class}'. See documentation for this encoder for more details."
 
 
-    def _encode_data(self, dataset: RepertoireDataset, params: EncoderParams):
+    def _compute_sequence_presence_with_compairr(self, dataset, params):
+        self._prepare_compairr_input_files(dataset, params.result_path)
 
+        args = CompAIRRHelper.get_cmd_args(self.compairr_params, [self.sequences_filepath, self.repertoires_filepath],
+                                           params.result_path)
+        compairr_result = subprocess.run(args, capture_output=True, text=True)
+        sequence_presence_matrix = CompAIRRHelper.process_compairr_output_file(compairr_result, self.compairr_params,
+                                                                               params.result_path)
+
+        matrix_repertoire_ids = sequence_presence_matrix.columns.values
+
+        sequence_presence_matrix = sequence_presence_matrix.to_numpy()
+        sequence_presence_matrix[sequence_presence_matrix > 1] = 1
+
+        return sequence_presence_matrix, matrix_repertoire_ids
+
+
+    def _encode_data(self, dataset: RepertoireDataset, params: EncoderParams):
         label = params.label_config.get_labels_by_name()[0]
 
-        examples = self._calculate_sequence_abundance(dataset, label, params)
+        examples = self._calculate_sequence_abundance(dataset, self.sequence_presence_matrix, self.matrix_repertoire_ids, label, params)
 
         encoded_data = EncodedData(examples, dataset.get_metadata([label]) if params.encode_labels else None, dataset.get_repertoire_ids(),
                                    [CompAIRRSequenceAbundanceEncoder.RELEVANT_SEQUENCE_ABUNDANCE, CompAIRRSequenceAbundanceEncoder.TOTAL_SEQUENCE_ABUNDANCE],
@@ -149,12 +173,8 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
 
         return encoded_dataset
 
-
-    def _calculate_sequence_abundance(self, dataset: RepertoireDataset, label_str: str, params: EncoderParams):
-        self._prepare_compairr_input_files(dataset, params.result_path)
-
-        sequence_presence_matrix, matrix_repertoire_ids = self._compute_sequence_presence_with_compairr(params)
-
+    # todo untangle params
+    def _calculate_sequence_abundance(self, dataset: RepertoireDataset, sequence_presence_matrix, matrix_repertoire_ids, label_str: str, params: EncoderParams):
         sequence_p_values = self._find_label_associated_sequence_p_values(sequence_presence_matrix, matrix_repertoire_ids, dataset, params, label_str)
 
         relevant_sequence_indices = self._get_relevant_sequence_indices(params, label_str, sequence_p_values)
@@ -175,19 +195,6 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
 
         self.full_sequence_set = self.get_sequence_set(dataset)
         self.write_sequence_set_file(self.full_sequence_set, self.sequences_filepath)
-
-
-    def _compute_sequence_presence_with_compairr(self, params):
-        args = CompAIRRHelper.get_cmd_args(self.compairr_params, [self.sequences_filepath, self.repertoires_filepath], params.result_path)
-        compairr_result = subprocess.run(args, capture_output=True, text=True)
-        sequence_presence_matrix = CompAIRRHelper.process_compairr_output_file(compairr_result, self.compairr_params, params.result_path)
-
-        matrix_repertoire_ids = sequence_presence_matrix.columns.values
-
-        sequence_presence_matrix = sequence_presence_matrix.to_numpy()
-        sequence_presence_matrix[sequence_presence_matrix > 1] = 1
-
-        return sequence_presence_matrix, matrix_repertoire_ids
 
 
     def _get_relevant_sequence_indices(self, params, label_str, sequence_p_values):
@@ -220,6 +227,11 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
 
 
     def _find_label_associated_sequence_p_values(self, sequence_presence_matrix, matrix_repertoire_ids, dataset, params, label_str):
+        # todo make this part clearer.. maybe subset already before sending in?
+        relevant = np.isin(matrix_repertoire_ids, dataset.get_repertoire_ids())
+        sequence_presence_matrix = sequence_presence_matrix[:,relevant]
+        matrix_repertoire_ids = matrix_repertoire_ids[relevant]
+
         is_first_class = self._is_first_class(dataset, matrix_repertoire_ids, params, label_str)
 
         sequence_p_values = []
@@ -243,11 +255,13 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
 
     def _is_first_class(self, dataset, matrix_repertoire_ids, params, label_str):
         # todo untangle
-
         label = params.label_config.get_label_object(label_str)
+        # is_first_class = np.array([repertoire.metadata[label.name] for repertoire in repertoires]) == label.positive_class
+
         is_first_class = np.array(
             [dataset.get_repertoire(repertoire_identifier=repertoire_id).metadata[label.name] for repertoire_id in
              matrix_repertoire_ids]) == label.positive_class
+
 
         return is_first_class
 
