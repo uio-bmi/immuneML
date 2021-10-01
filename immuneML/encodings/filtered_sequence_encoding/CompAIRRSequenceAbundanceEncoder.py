@@ -7,6 +7,7 @@ import numpy as np
 import fisher
 import pickle
 
+from immuneML.caching.CacheHandler import CacheHandler
 from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
 from immuneML.data_model.encoded_data.EncodedData import EncodedData
 from immuneML.data_model.repertoire.Repertoire import Repertoire
@@ -71,7 +72,7 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
     LOG_FILENAME = "compairr_log.txt"
 
     def __init__(self, p_value_threshold: float, compairr_path: str, keep_compairr_input: bool, ignore_genes: bool, threads: int, name: str = None):
-        # todo deal with keepcompairrinput param
+        # todo deal with keepcompairrinput param, maybe remove?
         self.name = name
         self.p_value_threshold = p_value_threshold
 
@@ -121,16 +122,10 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
 
     def encode(self, dataset, params: EncoderParams):
         self._check_label(params)
+        self._prepare_sequence_presence_data(dataset, params)
+        encoded_dataset = self._encode_data(dataset, params)
 
-        # full_dataset = self.context["dataset"]
-        full_dataset = EncoderHelper.get_current_dataset(dataset, self.context)
-        sequence_presence_matrix, matrix_repertoire_ids = self._compute_sequence_presence_with_compairr(full_dataset, params)
-
-        self.sequence_presence_matrix = sequence_presence_matrix
-        self.matrix_repertoire_ids = matrix_repertoire_ids
-
-        return self._encode_data(dataset, params)
-
+        return encoded_dataset
 
     def _check_label(self, params: EncoderParams):
         labels = params.label_config.get_label_objects()
@@ -142,9 +137,45 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
             f"{CompAIRRSequenceAbundanceEncoder.__name__}: to use this encoder, in the label definition in the specification of the instruction, define " \
             f"the positive class for the label. Now it is set to '{labels[0].positive_class}'. See documentation for this encoder for more details."
 
+    def _prepare_sequence_presence_data(self, dataset, params):
+        full_dataset = EncoderHelper.get_current_dataset(dataset, self.context)
 
-    def _compute_sequence_presence_with_compairr(self, dataset, params):
-        self._prepare_compairr_input_files(dataset, params.result_path)
+        full_sequence_set = self._get_full_sequence_set(full_dataset)
+        sequence_presence_matrix, matrix_repertoire_ids = self._get_sequence_presence(full_dataset, full_sequence_set, params)
+
+        self.full_sequence_set = full_sequence_set
+        self.sequence_presence_matrix = sequence_presence_matrix
+        self.matrix_repertoire_ids = matrix_repertoire_ids
+
+    def _get_full_sequence_set(self, full_dataset):
+        full_sequence_set = CacheHandler.memo_by_params(self._build_dataset_params(full_dataset),
+                                                        lambda: self.get_sequence_set(full_dataset))
+
+        return full_sequence_set
+
+    def _get_sequence_presence(self, full_dataset, full_sequence_set, params):
+        sequence_presence_matrix, matrix_repertoire_ids = CacheHandler.memo_by_params(self._build_sequence_presence_params(full_dataset, self.compairr_params),
+                                                                                      lambda: self._compute_sequence_presence_with_compairr(full_dataset, full_sequence_set, params))
+
+        return sequence_presence_matrix, matrix_repertoire_ids
+
+
+    def _build_sequence_presence_params(self, dataset, compairr_params):
+        return (("dataset_identifier", dataset.identifier),
+                ("repertoire_ids", tuple(dataset.get_repertoire_ids())),
+                ("ignore_genes", compairr_params.ignore_genes),
+                ("indels", compairr_params.indels),
+                ("differences", compairr_params.differences),
+                ("ignore_counts", compairr_params.ignore_counts))
+
+    def _build_dataset_params(self, dataset):
+        return (("dataset_identifier", dataset.identifier),
+                ("repertoire_ids", tuple(dataset.get_repertoire_ids())),
+                "sequence_attributes", tuple(self.get_relevant_sequence_attributes()))
+
+
+    def _compute_sequence_presence_with_compairr(self, dataset, full_sequence_set, params):
+        self._prepare_compairr_input_files(dataset, full_sequence_set, params.result_path)
 
         args = CompAIRRHelper.get_cmd_args(self.compairr_params, [self.sequences_filepath, self.repertoires_filepath],
                                            params.result_path)
@@ -184,7 +215,7 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
         return abundance_matrix
 
 
-    def _prepare_compairr_input_files(self, dataset, result_path):
+    def _prepare_compairr_input_files(self, dataset, full_sequence_set, result_path):
         if self.repertoires_filepath is None:
             self.repertoires_filepath = result_path / "compairr_repertoires.tsv"
 
@@ -193,8 +224,7 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
         if self.sequences_filepath is None:
             self.sequences_filepath = result_path / "compairr_sequences.tsv"
 
-        self.full_sequence_set = self.get_sequence_set(dataset)
-        self.write_sequence_set_file(self.full_sequence_set, self.sequences_filepath)
+        self.write_sequence_set_file(full_sequence_set, self.sequences_filepath)
 
 
     def _get_relevant_sequence_indices(self, params, label_str, sequence_p_values):
@@ -221,7 +251,7 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
             self.relevant_sequence_csv_path = result_path / 'relevant_sequences.csv'
 
         df = pd.DataFrame(relevant_sequences,
-                          columns=["sequence_aas", "v_genes", "j_genes"])  # todo dynamically update relevant columns based on compairr params & write correct file format
+                          columns=self.get_relevant_sequence_attributes())
 
         df.to_csv(self.relevant_sequence_csv_path, sep=",", index=False)
 
@@ -287,7 +317,7 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
         return attributes
 
     def write_sequence_set_file(self, sequence_set, filename):
-        with open(filename, "w") as file:
+        with open(filename, "w") as file: # todo use get_relevant_sequence_attributes
             file.write("junction_aa\tv_call\tj_call\tduplicate_count\trepertoire_id\n")
 
             for id, sequence_info in enumerate(sequence_set):
