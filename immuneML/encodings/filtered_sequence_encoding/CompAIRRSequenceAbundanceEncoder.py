@@ -180,8 +180,8 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
         args = CompAIRRHelper.get_cmd_args(self.compairr_params, [self.sequences_filepath, self.repertoires_filepath],
                                            params.result_path)
         compairr_result = subprocess.run(args, capture_output=True, text=True)
-        sequence_presence_matrix = CompAIRRHelper.process_compairr_output_file(compairr_result, self.compairr_params,
-                                                                               params.result_path)
+        sequence_presence_matrix = CompAIRRHelper.process_compairr_output_file(compairr_result, self.compairr_params, params.result_path)
+        sequence_presence_matrix = sequence_presence_matrix.reindex(range(0, len(sequence_presence_matrix)))
 
         matrix_repertoire_ids = sequence_presence_matrix.columns.values
 
@@ -337,7 +337,6 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
             abundance_matrix[idx_in_dataset] = [relevant_sequence_abundance, total_sequence_abundance]
 
         return abundance_matrix
-
 
     def set_context(self, context: dict):
         self.context = context
