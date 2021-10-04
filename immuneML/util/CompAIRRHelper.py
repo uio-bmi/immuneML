@@ -16,7 +16,7 @@ class CompAIRRHelper:
             try:
                 compairr_path = CompAIRRHelper.check_compairr_path("compairr")
             except Exception as e:
-                compairr_path = CompAIRRHelper._heck_compairr_path("/usr/local/bin/compairr")
+                compairr_path = CompAIRRHelper._check_compairr_path("/usr/local/bin/compairr")
         else:
             compairr_path = CompAIRRHelper.check_compairr_path(compairr_path)
 
