@@ -95,7 +95,7 @@ class SequenceAbundanceEncoder(DatasetEncoder):
         self.comparison_data = SequenceFilterHelper.build_comparison_data(dataset, self.context, self.comparison_attributes, params,
                                                                           self.sequence_batch_size)
         ############ todo remove, is for testing CompAIRRSequenceAbundanceEncoder on immunohub
-        comparison_matrix = pd.DataFrame(self.comparison_data.get_repertoire_vectors(self.context["dataset"].get_repertoire_ids()),
+        comparison_matrix = pd.DataFrame(self.comparison_data.get_repertoire_vectors(EncoderHelper.get_current_dataset(dataset, self.context).get_repertoire_ids()),
                             index=self.comparison_data.get_item_names())
 
         comparison_matrix.to_csv(params.result_path / "comparison_matrix.tsv", sep="\t")

@@ -20,6 +20,7 @@ from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.environment.Label import Label
 from immuneML.util.EncoderHelper import EncoderHelper
 from immuneML.util.ParameterValidator import ParameterValidator
+from immuneML.util.PathBuilder import PathBuilder
 from scripts.specification_util import update_docs_per_mapping
 from immuneML.util.CompAIRRHelper import CompAIRRHelper
 
@@ -188,7 +189,9 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
 
         sequence_presence_matrix = sequence_presence_matrix.to_numpy()
         sequence_presence_matrix[sequence_presence_matrix > 1] = 1
-
+        #### todo remove just for immunohub testing
+        np.savetxt(params.result_path/"numpymatrix.tsv", sequence_presence_matrix, delimiter="\t")
+        #####
         return sequence_presence_matrix, matrix_repertoire_ids
 
 
@@ -217,6 +220,8 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
 
 
     def _prepare_compairr_input_files(self, dataset, full_sequence_set, result_path):
+        PathBuilder.build(result_path)
+
         if self.repertoires_filepath is None:
             self.repertoires_filepath = result_path / "compairr_repertoires.tsv"
 
