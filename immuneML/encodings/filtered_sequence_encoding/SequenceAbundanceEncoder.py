@@ -2,6 +2,7 @@ from pathlib import Path
 from typing import List
 
 import numpy as np
+import pandas as pd
 
 from immuneML.IO.ml_method.UtilIO import UtilIO
 from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
@@ -93,6 +94,12 @@ class SequenceAbundanceEncoder(DatasetEncoder):
 
         self.comparison_data = SequenceFilterHelper.build_comparison_data(dataset, self.context, self.comparison_attributes, params,
                                                                           self.sequence_batch_size)
+        ############ todo remove, is for testing CompAIRRSequenceAbundanceEncoder on immunohub
+        comparison_matrix = pd.DataFrame(self.comparison_data.get_repertoire_vectors(self.context["dataset"].get_repertoire_ids()),
+                            index=self.comparison_data.get_item_names())
+
+        comparison_matrix.to_csv(params.result_path / "comparison_matrix.tsv", sep="\t")
+        ###########
         return self._encode_data(dataset, params)
 
     def _check_label(self, params: EncoderParams):
