@@ -13,6 +13,7 @@ from immuneML.data_model.encoded_data.EncodedData import EncodedData
 from immuneML.data_model.repertoire.Repertoire import Repertoire
 from immuneML.encodings.DatasetEncoder import DatasetEncoder
 from immuneML.encodings.EncoderParams import EncoderParams
+from immuneML.environment.SequenceType import SequenceType
 from immuneML.util.CompAIRRParams import CompAIRRParams
 from immuneML.encodings.filtered_sequence_encoding.SequenceFilterHelper import SequenceFilterHelper
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
@@ -317,17 +318,21 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
         return attributes
 
     def write_sequence_set_file(self, sequence_set, filename):
-        with open(filename, "w") as file: # todo use get_relevant_sequence_attributes
-            file.write("junction_aa\tv_call\tj_call\tduplicate_count\trepertoire_id\n")
+        sequence_col = "junction_aa" if EnvironmentSettings.get_sequence_type() == SequenceType.AMINO_ACID else "junction"
+        vj_fill = "\t\t" if self.compairr_params.ignore_genes else ""
+
+        with open(filename, "w") as file:
+            file.write(f"{sequence_col}\tv_call\tj_call\tduplicate_count\trepertoire_id\n")
 
             for id, sequence_info in enumerate(sequence_set):
-                file.write("\t".join(sequence_info) + f"\t1\t{id}\n")
+                file.write("\t".join(sequence_info) + f"{vj_fill}\t1\t{id}\n")
 
 
     def _build_abundance_matrix(self, sequence_presence_matrix, matrix_repertoire_ids, dataset_repertoire_ids, sequence_p_values_indices):
         abundance_matrix = np.zeros((len(dataset_repertoire_ids), 2))
 
         for idx_in_dataset, dataset_repertoire_id in enumerate(dataset_repertoire_ids):
+            # todo maybe clearer if get_repertoire_vectors dict with rep id and select the relevant one instead of this??
             relevant_row = np.where(matrix_repertoire_ids == dataset_repertoire_id)
 
             repertoire_vector = sequence_presence_matrix.T[relevant_row]
