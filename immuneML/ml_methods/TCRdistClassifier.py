@@ -3,6 +3,7 @@ import copy
 import numpy as np
 from sklearn.neighbors import KNeighborsClassifier
 
+from immuneML.encodings.distance_encoding.TCRdistEncoder import TCRdistEncoder
 from immuneML.ml_methods.SklearnMethod import SklearnMethod
 from immuneML.util.ParameterValidator import ParameterValidator
 
@@ -67,3 +68,5 @@ class TCRdistClassifier(SklearnMethod):
     def _get_model_filename(self):
         return "tcrdist_classifier"
 
+    def get_compatible_encoders(self):
+        return [TCRdistEncoder]

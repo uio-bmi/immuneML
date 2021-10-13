@@ -14,6 +14,10 @@ from sklearn.utils.validation import check_is_fitted
 
 from immuneML.caching.CacheHandler import CacheHandler
 from immuneML.data_model.encoded_data.EncodedData import EncodedData
+from immuneML.encodings.evenness_profile.EvennessProfileEncoder import EvennessProfileEncoder
+from immuneML.encodings.kmer_frequency.KmerFrequencyEncoder import KmerFrequencyEncoder
+from immuneML.encodings.onehot.OneHotEncoder import OneHotEncoder
+from immuneML.encodings.word2vec.Word2VecEncoder import Word2VecEncoder
 from immuneML.ml_methods.MLMethod import MLMethod
 from immuneML.ml_methods.util.Util import Util
 from immuneML.util.FilenameHandler import FilenameHandler
@@ -256,6 +260,9 @@ class SklearnMethod(MLMethod):
     def get_class_mapping(self) -> dict:
         """Returns a dictionary containing the mapping between label values and values internally used in the classifier"""
         return self.class_mapping
+
+    def get_compatible_encoders(self):
+        return [KmerFrequencyEncoder, OneHotEncoder, Word2VecEncoder, EvennessProfileEncoder]
 
     @staticmethod
     def get_usage_documentation(model_name):
