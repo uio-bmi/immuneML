@@ -84,13 +84,8 @@ class AtchleyKmerMILClassifier(MLMethod):
 
         self.logistic_regression = PyTorchLogisticRegression(in_features=self.input_size, zero_abundance_weight_init=self.zero_abundance_weight_init)
 
-    def _check_encoded_data(self, encoded_data: EncodedData):
-        assert encoded_data.encoding == 'AtchleyKmerEncoder', f"AtchleyKmerMILClassifier: the encoding is not compatible with the given classifier. " \
-                                                              f"Expected AtchleyKmer encoding, got {encoded_data.encoding} instead. "
-
     def fit(self, encoded_data: EncodedData, label_name: str, cores_for_training: int = 2):
         self.feature_names = encoded_data.feature_names
-        self._check_encoded_data(encoded_data)
 
         Util.setup_pytorch(self.number_of_threads, self.random_seed)
         self.input_size = encoded_data.examples.shape[1]
@@ -227,3 +222,7 @@ class AtchleyKmerMILClassifier(MLMethod):
 
     def get_class_mapping(self) -> dict:
         return self.class_mapping
+
+    def get_compatible_encoders(self):
+        from immuneML.encodings.atchley_kmer_encoding.AtchleyKmerEncoder import AtchleyKmerEncoder
+        return [AtchleyKmerEncoder]

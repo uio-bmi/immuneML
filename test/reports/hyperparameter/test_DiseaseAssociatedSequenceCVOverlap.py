@@ -59,7 +59,7 @@ class TestDiseaseAssociatedSequenceCVOverlap(TestCase):
                     "knn": {
                         "KNN": {
                             "n_neighbors": 1
-                        },
+                        }
                     }
                 },
                 "reports": {

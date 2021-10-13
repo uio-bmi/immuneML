@@ -336,3 +336,7 @@ class ReceptorCNN(MLMethod):
 
     def get_class_mapping(self) -> dict:
         return self.class_mapping
+
+    def get_compatible_encoders(self):
+        from immuneML.encodings.onehot.OneHotEncoder import OneHotEncoder
+        return [OneHotEncoder]

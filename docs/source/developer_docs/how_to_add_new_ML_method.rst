@@ -347,3 +347,10 @@ To run this from the root directory of the project, save the specification to sp
 .. code-block:: console
 
   immune-ml specs.yaml output_dir/
+
+Compatible encoders
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Each ML method is only compatible with a limited set of encoders. immuneML automatically checks if the given encoder and ML method are
+compatible when running the TrainMLModel instruction, and raises an error if they are not compatible.
+To ensure immuneML recognizes the encoder-ML method compatibility, make sure that the encoder(s) of interest is added to the list
+of encoder classes returned by the :code:`get_compatible_encoders()` method of the ML method.

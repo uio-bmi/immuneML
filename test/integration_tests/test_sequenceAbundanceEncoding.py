@@ -68,9 +68,9 @@ class TestSequenceAbundanceEncoding(TestCase):
                 },
                 "ml_methods": {
                     "knn": {
-                        "KNN": {
-                            "n_neighbors": 1
-                        },
+                         "KNN": {
+                             "n_neighbors": 1
+                         },
                     }
                 },
                 "reports": {

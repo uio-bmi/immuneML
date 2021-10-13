@@ -257,6 +257,13 @@ class SklearnMethod(MLMethod):
         """Returns a dictionary containing the mapping between label values and values internally used in the classifier"""
         return self.class_mapping
 
+    def get_compatible_encoders(self):
+        from immuneML.encodings.evenness_profile.EvennessProfileEncoder import EvennessProfileEncoder
+        from immuneML.encodings.kmer_frequency.KmerFrequencyEncoder import KmerFrequencyEncoder
+        from immuneML.encodings.onehot.OneHotEncoder import OneHotEncoder
+        from immuneML.encodings.word2vec.Word2VecEncoder import Word2VecEncoder
+        return [KmerFrequencyEncoder, OneHotEncoder, Word2VecEncoder, EvennessProfileEncoder]
+
     @staticmethod
     def get_usage_documentation(model_name):
         return f"""

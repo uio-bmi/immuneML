@@ -67,3 +67,6 @@ class TCRdistClassifier(SklearnMethod):
     def _get_model_filename(self):
         return "tcrdist_classifier"
 
+    def get_compatible_encoders(self):
+        from immuneML.encodings.distance_encoding.TCRdistEncoder import TCRdistEncoder
+        return [TCRdistEncoder]

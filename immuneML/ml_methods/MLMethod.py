@@ -264,3 +264,22 @@ class MLMethod(metaclass=abc.ABCMeta):
     def get_class_mapping(self) -> dict:
         """Returns a dictionary containing the mapping between label values and values internally used in the classifier"""
         pass
+
+    @abc.abstractmethod
+    def get_compatible_encoders(self):
+        pass
+
+    def check_encoder_compatibility(self, encoder):
+        """Checks whether the given encoder is compatible with this ML method, and throws an error if it is not."""
+        is_valid = False
+
+        for encoder_class in self.get_compatible_encoders():
+            if issubclass(encoder.__class__, encoder_class):
+                is_valid = True
+                break
+
+        if not is_valid:
+            raise ValueError(f"{encoder.__class__.__name__} is not compatible with ML Method {self.__class__.__name__}. "
+                             f"Please use one of the following encoders instead: {', '.join([enc_class.__name__ for enc_class in self.get_compatible_encoders()])}")
+
+
