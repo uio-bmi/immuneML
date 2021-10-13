@@ -58,7 +58,7 @@ class TestDiseaseAssociatedSequenceCVOverlap(TestCase):
                 "ml_methods": {
                     "knn": {
                         "KNN": {
-                            "n_neighbors":1
+                            "n_neighbors": 1
                         }
                     }
                 },

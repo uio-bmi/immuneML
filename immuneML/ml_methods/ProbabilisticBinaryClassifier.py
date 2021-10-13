@@ -12,7 +12,6 @@ from scipy.special import digamma
 from scipy.stats import betabinom as beta_binomial
 
 from immuneML.data_model.encoded_data.EncodedData import EncodedData
-from immuneML.encodings.filtered_sequence_encoding.SequenceAbundanceEncoder import SequenceAbundanceEncoder
 from immuneML.ml_methods.MLMethod import MLMethod
 from immuneML.ml_methods.util.Util import Util
 from immuneML.util.FilenameHandler import FilenameHandler
@@ -453,4 +452,5 @@ class ProbabilisticBinaryClassifier(MLMethod):
         return self.class_mapping
 
     def get_compatible_encoders(self):
+        from immuneML.encodings.filtered_sequence_encoding.SequenceAbundanceEncoder import SequenceAbundanceEncoder
         return [SequenceAbundanceEncoder]
