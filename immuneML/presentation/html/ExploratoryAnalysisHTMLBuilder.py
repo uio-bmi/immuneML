@@ -61,7 +61,7 @@ class ExploratoryAnalysisHTMLBuilder:
                 "encoding_key": analysis.encoder.name if analysis.encoder is not None else None,
                 "encoding_name": StringHelper.camel_case_to_word_string(type(analysis.encoder).__name__) if analysis.encoder is not None
                 else None,
-                "encoding_params": [{"param_name": key, "param_value": value} for key, value in vars(analysis.encoder).items()] if analysis.encoder is not None else None,
+                "encoding_params": [{"param_name": key, "param_value": str(value)} for key, value in vars(analysis.encoder).items()] if analysis.encoder is not None else None,
                 "show_encoding": analysis.encoder is not None,
                 "report": Util.to_dict_recursive(analysis.report_result, base_path)
             } for name, analysis in state.exploratory_analysis_units.items()]
