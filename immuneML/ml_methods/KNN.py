@@ -59,7 +59,7 @@ class KNN(SklearnMethod):
         return True
 
     def get_compatible_encoders(self):
-        return [KmerFrequencyEncoder, OneHotEncoder, Word2VecEncoder, EvennessProfileEncoder, DistanceEncoder]
+        return [KmerFrequencyEncoder, OneHotEncoder, Word2VecEncoder, SequenceAbundanceEncoder, EvennessProfileEncoder, DistanceEncoder]
 
     @staticmethod
     def get_documentation():

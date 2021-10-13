@@ -67,12 +67,10 @@ class TestSequenceAbundanceEncoding(TestCase):
                     }
                 },
                 "ml_methods": {
-                    "prob": {
-                        "ProbabilisticBinaryClassifier": {
-                            "max_iterations": 1,
-                            "update_rate": 0.1,
-                            "likelihood_threshold": 0.1
-                        }
+                    "knn": {
+                         "KNN": {
+                             "n_neighbors": 1
+                         },
                     }
                 },
                 "reports": {
@@ -86,7 +84,7 @@ class TestSequenceAbundanceEncoding(TestCase):
                     "settings": [
                         {
                             "encoding": "e1",
-                            "ml_method": "prob"
+                            "ml_method": "knn"
                         }
                     ],
                     "assessment": {
