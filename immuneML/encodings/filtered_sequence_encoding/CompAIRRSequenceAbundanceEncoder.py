@@ -26,12 +26,16 @@ from immuneML.util.CompAIRRHelper import CompAIRRHelper
 
 class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
     """
+    This encoder works similarly to the :py:obj:`~immuneML.encodings.filtered_sequence_encoding.SequenceAbundanceEncoder.SequenceAbundanceEncoder`,
+    but internally uses CompAIRR to accelerate core computations. This encoder does not process the data in batches, and
+    may therefore consume more memory than :py:obj:`~immuneML.encodings.filtered_sequence_encoding.SequenceAbundanceEncoder.SequenceAbundanceEncoder`.
+
     This encoder represents the repertoires as vectors where:
 
     - the first element corresponds to the number of label-associated clonotypes
     - the second element is the total number of unique clonotypes
 
-    To determine what clonotypes (with features defined by comparison_attributes) are label-associated
+    To determine what clonotypes (with or without matching V/J genes) are label-associated
     based on a statistical test. The statistical test used is Fisher's exact test (one-sided).
 
     Reference: Emerson, Ryan O. et al.
@@ -40,19 +44,20 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
 
     Note: to use this encoder, it is necessary to explicitly define the positive class for the label when defining the label
     in the instruction. With positive class defined, it can then be determined which sequences are indicative of the positive class.
-    For full example of using this encoder, see :ref:`Reproduction of the CMV status predictions study`.
+    See :ref:`Reproduction of the CMV status predictions study` for an example using :py:obj:`~immuneML.encodings.filtered_sequence_encoding.SequenceAbundanceEncoder.SequenceAbundanceEncoder`.
 
     Arguments:
 
-        <compairr settings>
-
         p_value_threshold (float): The p value threshold to be used by the statistical test.
 
-        sequence_batch_size (int): The number of sequences in a batch when comparing sequences across repertoires, typically 100s of thousands.
-        This does not affect the results of the encoding, only the speed.
+        compairr_path (Path): optional path to the CompAIRR executable. If not given, it is assumed that CompAIRR
+        has been installed such that it can be called directly on the command line with the command 'compairr',
+        or that it is located at /usr/local/bin/compairr.
 
-        repertoire_batch_size (int): How many repertoires will be loaded at once. This does not affect the result of the encoding, only the speed.
-        This value is a trade-off between the number of repertoires that can fit the RAM at the time and loading time from disk.
+        ignore_genes (bool): Whether to ignore V and J gene information. If False, the V and J genes between two receptor chains
+        have to match. If True, gene information is ignored. By default, ignore_genes is False.
+
+        threads (int): The number of threads to use for parallelization. Default is 8.
 
 
     YAML specification:
@@ -62,9 +67,10 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
 
         my_sa_encoding:
             SequenceAbundance:
+                compairr_path: optional/path/to/compairr
                 p_value_threshold: 0.05
-                sequence_batch_size: 100000
-                repertoire_batch_size: 32
+                ignore_genes: False
+                threads: 8
 
     """
 
@@ -73,8 +79,7 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
     OUTPUT_FILENAME = "compairr_out.tsv"
     LOG_FILENAME = "compairr_log.txt"
 
-    def __init__(self, p_value_threshold: float, compairr_path: str, keep_compairr_input: bool, ignore_genes: bool, threads: int, name: str = None):
-        # todo deal with keepcompairrinput param, maybe remove?
+    def __init__(self, p_value_threshold: float, compairr_path: str, ignore_genes: bool, threads: int, name: str = None):
         self.name = name
         self.p_value_threshold = p_value_threshold
 
@@ -85,7 +90,7 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
         self.context = None
 
         self.compairr_params = CompAIRRParams(compairr_path=Path(compairr_path),
-                                              keep_compairr_input=keep_compairr_input,
+                                              keep_compairr_input=True,
                                               differences=0,
                                               indels=False,
                                               ignore_counts=True,
@@ -98,18 +103,16 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
         self.raw_distance_matrix_np = None
 
     @staticmethod
-    def _prepare_parameters(p_value_threshold: float, compairr_path: str, keep_compairr_input: bool, ignore_genes: bool, threads: int, name: str = None):
-        ParameterValidator.assert_type_and_value(p_value_threshold, float, "CompAIRRSequenceAbundanceEncoder", "differences", min_inclusive=0, max_inclusive=1)
+    def _prepare_parameters(p_value_threshold: float, compairr_path: str, ignore_genes: bool, threads: int, name: str = None):
+        ParameterValidator.assert_type_and_value(p_value_threshold, float, "CompAIRRSequenceAbundanceEncoder", "p_value_threshold", min_inclusive=0, max_inclusive=1)
         ParameterValidator.assert_type_and_value(ignore_genes, bool, "CompAIRRSequenceAbundanceEncoder", "ignore_genes")
         ParameterValidator.assert_type_and_value(threads, int, "CompAIRRSequenceAbundanceEncoder", "threads", min_inclusive=1)
-        ParameterValidator.assert_type_and_value(keep_compairr_input, bool, "CompAIRRSequenceAbundanceEncoder", "keep_compairr_input")
 
         compairr_path = CompAIRRHelper.determine_compairr_path(compairr_path)
 
         return {
             "p_value_threshold": p_value_threshold,
             "compairr_path": compairr_path,
-            "keep_compairr_input": keep_compairr_input,
             "ignore_genes": ignore_genes,
             "threads": threads,
             "name": name
@@ -189,9 +192,9 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
 
         sequence_presence_matrix = sequence_presence_matrix.to_numpy()
         sequence_presence_matrix[sequence_presence_matrix > 1] = 1
-        #### todo remove just for immunohub testing
-        np.savetxt(params.result_path/"numpymatrix.tsv", sequence_presence_matrix, delimiter="\t")
-        #####
+        # #### todo remove just for immunohub testing
+        # np.savetxt(params.result_path/"numpymatrix.tsv", sequence_presence_matrix, delimiter="\t")
+        # #####
         return sequence_presence_matrix, matrix_repertoire_ids
 
 
@@ -208,7 +211,7 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
 
         return encoded_dataset
 
-    # todo untangle params
+
     def _calculate_sequence_abundance(self, dataset: RepertoireDataset, sequence_presence_matrix, matrix_repertoire_ids, label_str: str, params: EncoderParams):
         sequence_p_values = self._find_label_associated_sequence_p_values(sequence_presence_matrix, matrix_repertoire_ids, dataset, params, label_str)
 
@@ -263,13 +266,16 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
 
 
     def _find_label_associated_sequence_p_values(self, sequence_presence_matrix, matrix_repertoire_ids, dataset, params, label_str):
-        # todo make this part clearer.. maybe subset already before sending in?
         relevant = np.isin(matrix_repertoire_ids, dataset.get_repertoire_ids())
         sequence_presence_matrix = sequence_presence_matrix[:,relevant]
         matrix_repertoire_ids = matrix_repertoire_ids[relevant]
 
         is_first_class = self._is_first_class(dataset, matrix_repertoire_ids, params, label_str)
 
+        return self._find_sequence_p_values_with_fisher(sequence_presence_matrix, is_first_class)
+
+
+    def _find_sequence_p_values_with_fisher(self, sequence_presence_matrix, is_first_class):
         sequence_p_values = []
 
         for sequence_vector in sequence_presence_matrix:
@@ -290,14 +296,11 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
 
 
     def _is_first_class(self, dataset, matrix_repertoire_ids, params, label_str):
-        # todo untangle
         label = params.label_config.get_label_object(label_str)
-        # is_first_class = np.array([repertoire.metadata[label.name] for repertoire in repertoires]) == label.positive_class
 
         is_first_class = np.array(
             [dataset.get_repertoire(repertoire_identifier=repertoire_id).metadata[label.name] for repertoire_id in
              matrix_repertoire_ids]) == label.positive_class
-
 
         return is_first_class
 
@@ -337,7 +340,6 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
         abundance_matrix = np.zeros((len(dataset_repertoire_ids), 2))
 
         for idx_in_dataset, dataset_repertoire_id in enumerate(dataset_repertoire_ids):
-            # todo maybe clearer if get_repertoire_vectors dict with rep id and select the relevant one instead of this??
             relevant_row = np.where(matrix_repertoire_ids == dataset_repertoire_id)
 
             repertoire_vector = sequence_presence_matrix.T[relevant_row]
@@ -356,19 +358,18 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
         EncoderHelper.store(encoded_dataset, params)
 
     @staticmethod
-    def export_encoder(path: Path, encoder) -> Path: #todo
+    def export_encoder(path: Path, encoder) -> Path:
         encoder_file = DatasetEncoder.store_encoder(encoder, path / "encoder.pickle")
-        # UtilIO.export_comparison_data(encoder.comparison_data, path)
         return encoder_file
 
     def get_additional_files(self) -> List[Path]:
-        return [self.relevant_indices_path]
+        return [self.relevant_indices_path, self.relevant_sequence_csv_path]
 
     @staticmethod
-    def load_encoder(encoder_file: Path): # todo
+    def load_encoder(encoder_file: Path):
         encoder = DatasetEncoder.load_encoder(encoder_file)
         encoder.relevant_indices_path = DatasetEncoder.load_attribute(encoder, encoder_file, "relevant_indices_path")
-        # encoder.comparison_data = UtilIO.import_comparison_data(encoder_file.parent)
+        encoder.relevant_sequence_csv_path = DatasetEncoder.load_attribute(encoder, encoder_file, "relevant_sequence_csv_path")
         return encoder
 
     @staticmethod

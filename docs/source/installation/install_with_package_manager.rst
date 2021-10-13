@@ -61,8 +61,8 @@ To install the DeepRC dependencies, run:
 
   pip install -r requirements_DeepRC.txt --no-dependencies
 
-6. Optionally, if you want to use the :ref:`CompAIRRDistanceEncoder`, you have to install the C++ tool `CompAIRR <https://github.com/uio-bmi/compairr>`_,
-for example by cloning CompAIRR from GitHub and installing it using :code:`make` in the main folder:
+6. Optionally, if you want to use the :ref:`CompAIRRDistanceEncoder` or :ref:`CompAIRRSequenceAbundanceEncoder`, you have to install the C++ tool `CompAIRR <https://github.com/uio-bmi/compairr>`_.
+The easiest way to do this is by cloning CompAIRR from GitHub and installing it using :code:`make` in the main folder:
 
 .. code-block:: console
 

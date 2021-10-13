@@ -3,6 +3,7 @@ import shutil
 from unittest import TestCase
 
 import numpy as np
+from pathlib import Path
 
 from immuneML.caching.CacheType import CacheType
 from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
@@ -21,6 +22,12 @@ class TestCompAIRRSequenceAbundanceEncoder(TestCase):
         os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
 
     def test_encode(self):
+        compairr_path = Path("/usr/local/bin/compairr")
+
+        if compairr_path.exists():
+            self._test_encode(compairr_path)
+
+    def _test_encode(self, compairr_path):
         path = EnvironmentSettings.tmp_test_path / "compairr_abundance_encoder/"
         PathBuilder.build(path)
 
@@ -32,106 +39,64 @@ class TestCompAIRRSequenceAbundanceEncoder(TestCase):
 
         dataset = RepertoireDataset(repertoires=repertoires, metadata_file=metadata, identifier="1")
 
-        encoder = CompAIRRSequenceAbundanceEncoder.build_object(dataset, **{
-            "p_value_threshold": 0.4, "compairr_path": None, "keep_compairr_input": True, "ignore_genes": False, "threads": 8 # todo deal with compairr path argument
-        })
+        for ignore_genes in [True, False]:
+            result_path = path / f"ignore_genes={ignore_genes}"
 
-        label_config = LabelConfiguration([Label("l1", [True, False], positive_class=True)])
+            encoder = CompAIRRSequenceAbundanceEncoder.build_object(dataset, **{
+                "p_value_threshold": 0.4, "compairr_path": compairr_path, "ignore_genes": ignore_genes, "threads": 8
+            })
 
-        encoded_dataset = encoder.encode(dataset, EncoderParams(result_path=path, label_config=label_config))
+            label_config = LabelConfiguration([Label("l1", [True, False], positive_class=True)])
 
-        self.assertTrue(np.array_equal(np.array([[1, 4], [1, 6], [0, 3], [0, 6]]), encoded_dataset.encoded_data.examples))
+            encoded_dataset = encoder.encode(dataset, EncoderParams(result_path=result_path, label_config=label_config))
 
-        encoder.p_value_threshold = 0.05
+            self.assertTrue(np.array_equal(np.array([[1, 4], [1, 6], [0, 3], [0, 6]]), encoded_dataset.encoded_data.examples))
 
-        encoded_dataset = encoder.encode(dataset, EncoderParams(result_path=path, label_config=label_config))
+            encoder.p_value_threshold = 0.05
 
-        self.assertTrue(np.array_equal(np.array([[0, 4], [0, 6], [0, 3], [0, 6]]), encoded_dataset.encoded_data.examples))
+            encoded_dataset = encoder.encode(dataset, EncoderParams(result_path=result_path, label_config=label_config))
 
-        #todo test with/without ignore genes
-    #
+            self.assertTrue(np.array_equal(np.array([[0, 4], [0, 6], [0, 3], [0, 6]]), encoded_dataset.encoded_data.examples))
+
         shutil.rmtree(path)
-    # #
-    # def test__build_abundance_matrix(self):
-    #     path = EnvironmentSettings.tmp_test_path / "abundance_encoder_matrix/"
-    #     PathBuilder.build(path)
-    #     expected_abundance_matrix = np.array([[1, 4], [1, 6], [1, 3], [1, 6]])
-    #
-    #     comparison_data = ComparisonData(repertoire_ids=["rep_0", "rep_1", "rep_2", "rep_3"],
-    #                                      comparison_attributes=["sequence_aas"], sequence_batch_size=2, path=path)
-    #     comparison_data.batches = [ComparisonDataBatch(matrix=np.array([[1., 0., 0., 0.],
-    #                                                                     [1., 1., 0., 0.]]),
-    #                                                    items=[('GGG',), ('III',)], identifier=0,
-    #                                                    repertoire_index_mapping={'rep_0': 0, 'rep_1': 1, 'rep_2': 2, 'rep_3': 3}, path=path),
-    #                                ComparisonDataBatch(matrix=np.array([[1., 1., 0., 1.],
-    #                                                                     [1., 1., 1., 1.]]),
-    #                                                    items=[('LLL',), ('MMM',)], identifier=1, path=path,
-    #                                                    repertoire_index_mapping={'rep_0': 0, 'rep_1': 1, 'rep_2': 2, 'rep_3': 3}),
-    #                                ComparisonDataBatch(matrix=np.array([[0., 1., 0., 0.],
-    #                                                                     [0., 1., 0., 1.]]),
-    #                                                    items=[('DDD',), ('EEE',)], identifier=2, path=path,
-    #                                                    repertoire_index_mapping={'rep_0': 0, 'rep_1': 1, 'rep_2': 2, 'rep_3': 3}),
-    #                                ComparisonDataBatch(matrix=np.array([[0., 1., 1., 1.],
-    #                                                                     [0., 0., 1., 1.]]),
-    #                                                    items=[('FFF',), ('CCC',)], identifier=3, path=path,
-    #                                                    repertoire_index_mapping={'rep_0': 0, 'rep_1': 1, 'rep_2': 2, 'rep_3': 3}),
-    #                                ComparisonDataBatch(matrix=np.array([[0., 0., 0., 1.]]),
-    #                                                    items=[('AAA',)], identifier=4, path=path,
-    #                                                    repertoire_index_mapping={'rep_0': 0, 'rep_1': 1, 'rep_2': 2, 'rep_3': 3})]
-    #     comparison_data.item_count = 9
-    #
-    #     p_value = 0.4
-    #     sequence_p_value_indices = np.array([1., 0.3333333333333334, 1., 1., 1., 1., 1., 0.3333333333333334, 1.]) < p_value
-    #
-    #     encoder = SequenceAbundanceEncoder.build_object(RepertoireDataset(), **{
-    #         "comparison_attributes": ["sequence_aas"],
-    #         "p_value_threshold": 0.4, "sequence_batch_size": 4, "repertoire_batch_size": 10
-    #     })
-    #
-    #     abundance_matrix = encoder._build_abundance_matrix(comparison_data, ["rep_0", "rep_1", "rep_2", "rep_3"], sequence_p_value_indices)
-    #
-    #     self.assertTrue(np.array_equal(expected_abundance_matrix, abundance_matrix))
-    #
-    #     shutil.rmtree(path)
-    # #
-    # def test_find_label_associated_sequence_p_values(self):
-    #     path = EnvironmentSettings.tmp_test_path / "comparison_data_find_label_assocseqpvalues/"
-    #     PathBuilder.build(path)
-    #
-    #     repertoires = [Repertoire.build_from_sequence_objects([ReceptorSequence()], path, {
-    #         "l1": val, "subject_id": subject_id
-    #     }) for val, subject_id in zip([True, True, False, False], ["rep_0", "rep_1", "rep_2", "rep_3"])]
-    #
-    #     col_name_index = {repertoires[index].identifier: index for index in range(len(repertoires))}
-    #
-    #     comparison_data = ComparisonData(repertoire_ids=[repertoire.identifier for repertoire in repertoires],
-    #                                      comparison_attributes=["sequence_aas"], sequence_batch_size=4, path=path)
-    #     comparison_data.batches = [ComparisonDataBatch(**{'matrix': np.array([[1., 0., 0., 0.],
-    #                                                                           [1., 1., 0., 0.]]),
-    #                                                       'items': [('GGG',), ('III',)],
-    #                                                       'repertoire_index_mapping': col_name_index, 'path': path, 'identifier': 0}),
-    #                                ComparisonDataBatch(**{'matrix': np.array([[1., 1., 0., 1.],
-    #                                                                           [1., 1., 1., 1.]]),
-    #                                                       'items': [('LLL',), ('MMM',)],
-    #                                                       'repertoire_index_mapping': col_name_index, 'path': path, 'identifier': 1}),
-    #                                ComparisonDataBatch(**{'matrix': np.array([[0., 1., 0., 0.],
-    #                                                                           [0., 1., 0., 1.]]),
-    #                                                       'items': [('DDD',), ('EEE',)],
-    #                                                       'repertoire_index_mapping': col_name_index, 'path': path, 'identifier': 2}),
-    #                                ComparisonDataBatch(**{'matrix': np.array([[0., 1., 1., 1.],
-    #                                                                           [0., 0., 1., 1.]]),
-    #                                                       'items': [('FFF',), ('CCC',)],
-    #                                                       'repertoire_index_mapping': col_name_index, 'path': path, 'identifier': 3}),
-    #                                ComparisonDataBatch(**{'matrix': np.array([[0., 0., 0., 1.]]),
-    #                                                       'items': [('AAA',)],
-    #                                                       'repertoire_index_mapping': col_name_index, 'path': path, 'identifier': 4})]
-    #
-    #     p_values = SequenceFilterHelper.find_label_associated_sequence_p_values(comparison_data, repertoires, Label('l1', [True, False], positive_class=True))
-    #
-    #     print(p_values)
-    #
-    #     self.assertTrue(
-    #         np.allclose([SequenceFilterHelper.INVALID_P_VALUE, 0.1666666666666667, 0.5000000000000001, 1., SequenceFilterHelper.INVALID_P_VALUE,
-    #                      0.8333333333333331, 1., 1., 2], p_values, equal_nan=True))
-    #
-    #     shutil.rmtree(path)
+
+    def test_find_sequence_p_values_with_fisher(self):
+        encoder = CompAIRRSequenceAbundanceEncoder(p_value_threshold=None,
+                                                   compairr_path="",
+                                                   ignore_genes=None,
+                                                   threads=None)
+
+        sequence_presence_matrix = np.array([[1, 0, 0, 0],
+                                             [1, 0, 1, 1],
+                                             [1, 1, 1, 1],
+                                             [0, 0, 0, 1],
+                                             [0, 0, 1, 0]])
+
+        is_first_class = np.array([True, False, False, True])
+
+        pvals = encoder._find_sequence_p_values_with_fisher(sequence_presence_matrix, is_first_class)
+
+        expected = [2, 0.5, 1.0, 2, 2]
+
+        for real, expected in zip(pvals, expected):
+            self.assertAlmostEqual(real, expected, places=7)
+
+
+    def test_build_abundance_matrix(self):
+        encoder = CompAIRRSequenceAbundanceEncoder(p_value_threshold=None,
+                                                   compairr_path="",
+                                                   ignore_genes=None,
+                                                   threads=None)
+
+        sequence_presence_matrix = np.array([[0, 1], [1, 1], [1, 0]])
+        matrix_repertoire_ids = np.array(["r1", "r2"])
+        dataset_repertoire_ids = ["r2"]
+        sequence_p_values_indices = [True, False, True]
+
+        abundance_matrix = encoder._build_abundance_matrix(sequence_presence_matrix, matrix_repertoire_ids,
+                                                           dataset_repertoire_ids, sequence_p_values_indices)
+
+        expected = np.array([[1., 2.]])
+
+        self.assertTrue((abundance_matrix == expected).all())
+
