@@ -1,5 +1,6 @@
 from sklearn.neighbors import KNeighborsClassifier
 
+from immuneML.encodings.distance_encoding.CompAIRRDistanceEncoder import CompAIRRDistanceEncoder
 from immuneML.encodings.distance_encoding.DistanceEncoder import DistanceEncoder
 from immuneML.encodings.evenness_profile.EvennessProfileEncoder import EvennessProfileEncoder
 from immuneML.encodings.filtered_sequence_encoding.SequenceAbundanceEncoder import SequenceAbundanceEncoder
