@@ -119,10 +119,14 @@ class TrainMLModelParser:
                                                                              **symbol_table.get_config(setting["encoding"])["encoder_params"])\
                     .set_context({"dataset": symbol_table.get(instruction['dataset'])})
 
+                ml_method = symbol_table.get(setting["ml_method"])
+                ml_method.check_encoder_compatibility(encoder)
+
                 s = HPSetting(encoder=encoder,
                               encoder_name=setting["encoding"],
                               encoder_params=symbol_table.get_config(setting["encoding"])["encoder_params"],
-                              ml_method=symbol_table.get(setting["ml_method"]), ml_method_name=setting["ml_method"],
+                              ml_method=ml_method,
+                              ml_method_name=setting["ml_method"],
                               ml_params=symbol_table.get_config(setting["ml_method"]),
                               preproc_sequence=preprocessing_sequence, preproc_sequence_name=preproc_name)
                 settings.append(s)

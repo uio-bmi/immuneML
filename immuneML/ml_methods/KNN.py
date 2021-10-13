@@ -1,5 +1,11 @@
 from sklearn.neighbors import KNeighborsClassifier
 
+from immuneML.encodings.distance_encoding.DistanceEncoder import DistanceEncoder
+from immuneML.encodings.evenness_profile.EvennessProfileEncoder import EvennessProfileEncoder
+from immuneML.encodings.filtered_sequence_encoding.SequenceAbundanceEncoder import SequenceAbundanceEncoder
+from immuneML.encodings.kmer_frequency.KmerFrequencyEncoder import KmerFrequencyEncoder
+from immuneML.encodings.onehot.OneHotEncoder import OneHotEncoder
+from immuneML.encodings.word2vec.Word2VecEncoder import Word2VecEncoder
 from immuneML.ml_methods.SklearnMethod import SklearnMethod
 from scripts.specification_util import update_docs_per_mapping
 
@@ -53,6 +59,9 @@ class KNN(SklearnMethod):
 
     def can_predict_proba(self) -> bool:
         return True
+
+    def get_compatible_encoders(self):
+        return [KmerFrequencyEncoder, OneHotEncoder, Word2VecEncoder, EvennessProfileEncoder, DistanceEncoder]
 
     @staticmethod
     def get_documentation():

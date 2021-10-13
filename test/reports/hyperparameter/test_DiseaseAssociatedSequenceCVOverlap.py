@@ -56,10 +56,12 @@ class TestDiseaseAssociatedSequenceCVOverlap(TestCase):
                     }
                 },
                 "ml_methods": {
-                    "knn": {
-                        "KNN": {
-                            "n_neighbors": 1
-                        },
+                    "prob": {
+                        "ProbabilisticBinaryClassifier": {
+                            "max_iterations": 1,
+                            "update_rate": 0.1,
+                            "likelihood_threshold": 0.1
+                        }
                     }
                 },
                 "reports": {
@@ -77,7 +79,7 @@ class TestDiseaseAssociatedSequenceCVOverlap(TestCase):
                     "settings": [
                         {
                             "encoding": "e1",
-                            "ml_method": "knn"
+                            "ml_method": "prob"
                         }
                     ],
                     "assessment": {
