@@ -2,6 +2,7 @@
 
 ![Python application](https://github.com/uio-bmi/immuneML/workflows/Python%20application/badge.svg?branch=master)
 ![Docker](https://github.com/uio-bmi/immuneML/workflows/Docker/badge.svg?branch=master)
+[![](https://img.shields.io/static/v1?label=AIRR-C%20sw-tools%20v1&message=compliant&color=008AFF&labelColor=000000&style=plastic)](https://docs.airr-community.org/en/stable/swtools/airr_swtools_standard.html)
 
 
 immuneML is a platform for machine learning-based analysis and 
@@ -170,6 +171,16 @@ For each instruction specified in the YAML specification file, a subfolder is cr
 - Optional dependencies when using TCRdist:
    - [parasail](https://pypi.org/project/parasail/) (1.2)
    - [tcrdist3](https://github.com/kmayerb/tcrdist3) (0.1.6 or higher)
+
+# Citing immuneML
+
+If you are using immuneML in any published work, please cite:
+
+Pavlovic, M., Scheffer, L., Motwani, K., Kanduri, C., Kompova, R., Vazov, N., Waagan, K., Bernal, F. L. M., Costa, A. A., Corrie, B., Akbar, R., 
+Hajj, G. S. A., Balaban, G., Brusko, T. M., Chernigovskaya, M., Christley, S., Cowell, L. G., Frank, R., Grytten, I., … Sandve, G. K. (2021). 
+immuneML: An ecosystem for machine learning analysis of adaptive immune receptor repertoires. BioRxiv, 2021.03.08.433891. 
+https://doi.org/10.1101/2021.03.08.433891
+
 
 
 <hr>
