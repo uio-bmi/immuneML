@@ -192,9 +192,7 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
 
         sequence_presence_matrix = sequence_presence_matrix.to_numpy()
         sequence_presence_matrix[sequence_presence_matrix > 1] = 1
-        # #### todo remove just for immunohub testing
-        np.savetxt(params.result_path/"numpymatrix.tsv", sequence_presence_matrix, delimiter="\t")
-        # #####
+
         return sequence_presence_matrix, matrix_repertoire_ids
 
 
