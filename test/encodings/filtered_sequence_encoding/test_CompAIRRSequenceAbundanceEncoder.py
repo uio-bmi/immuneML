@@ -27,10 +27,7 @@ class TestCompAIRRSequenceAbundanceEncoder(TestCase):
         if compairr_path.exists():
             self._test_encode(compairr_path)
 
-    def _test_encode(self, compairr_path):
-        path = EnvironmentSettings.tmp_test_path / "compairr_abundance_encoder/"
-        PathBuilder.build(path)
-
+    def _build_test_dataset(self, path):
         repertoires, metadata = RepertoireBuilder.build([["GGG", "III", "LLL", "MMM"],
                                                          ["DDD", "EEE", "FFF", "III", "LLL", "MMM"],
                                                          ["CCC", "FFF", "MMM"],
@@ -39,11 +36,19 @@ class TestCompAIRRSequenceAbundanceEncoder(TestCase):
 
         dataset = RepertoireDataset(repertoires=repertoires, metadata_file=metadata, identifier="1")
 
+        return dataset
+
+    def _test_encode(self, compairr_path):
+        path = EnvironmentSettings.tmp_test_path / "compairr_abundance_encoder/"
+        PathBuilder.build(path)
+
+        dataset = self._build_test_dataset(path)
+
         for ignore_genes in [True, False]:
             result_path = path / f"ignore_genes={ignore_genes}"
 
             encoder = CompAIRRSequenceAbundanceEncoder.build_object(dataset, **{
-                "p_value_threshold": 0.4, "compairr_path": compairr_path, "ignore_genes": ignore_genes, "threads": 8
+                "p_value_threshold": 0.4, "compairr_path": compairr_path, "sequence_batch_size": 2, "ignore_genes": ignore_genes, "threads": 8
             })
 
             label_config = LabelConfiguration([Label("l1", [True, False], positive_class=True)])
@@ -63,6 +68,7 @@ class TestCompAIRRSequenceAbundanceEncoder(TestCase):
     def test_find_sequence_p_values_with_fisher(self):
         encoder = CompAIRRSequenceAbundanceEncoder(p_value_threshold=None,
                                                    compairr_path="",
+                                                   sequence_batch_size=1000,
                                                    ignore_genes=None,
                                                    threads=None)
 
@@ -85,6 +91,7 @@ class TestCompAIRRSequenceAbundanceEncoder(TestCase):
     def test_build_abundance_matrix(self):
         encoder = CompAIRRSequenceAbundanceEncoder(p_value_threshold=None,
                                                    compairr_path="",
+                                                   sequence_batch_size=1000,
                                                    ignore_genes=None,
                                                    threads=None)
 

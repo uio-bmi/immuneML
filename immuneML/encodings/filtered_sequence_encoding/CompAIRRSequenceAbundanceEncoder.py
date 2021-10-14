@@ -4,6 +4,7 @@ import subprocess
 
 import pandas as pd
 import numpy as np
+import math
 import fisher
 import pickle
 
@@ -57,7 +58,11 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
         ignore_genes (bool): Whether to ignore V and J gene information. If False, the V and J genes between two receptor chains
         have to match. If True, gene information is ignored. By default, ignore_genes is False.
 
-        threads (int): The number of threads to use for parallelization. Default is 8.
+        sequence_batch_size (int): The number of sequences in a batch when comparing sequences across repertoires, typically 100s of thousands.
+        This does not affect the results of the encoding, only the speed and memory usage.
+
+        threads (int): The number of threads to use for parallelization. This does not affect the results of the encoding, only the speed.
+        The default number of threads is 8.
 
 
     YAML specification:
@@ -79,14 +84,15 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
     OUTPUT_FILENAME = "compairr_out.tsv"
     LOG_FILENAME = "compairr_log.txt"
 
-    def __init__(self, p_value_threshold: float, compairr_path: str, ignore_genes: bool, threads: int, name: str = None):
+    def __init__(self, p_value_threshold: float, compairr_path: str, sequence_batch_size: int, ignore_genes: bool, threads: int, name: str = None):
         self.name = name
         self.p_value_threshold = p_value_threshold
+        self.sequence_batch_size = sequence_batch_size
 
         self.relevant_indices_path = None
         self.relevant_sequence_csv_path = None
         self.repertoires_filepath = None
-        self.sequences_filepath = None
+        self.sequences_filepaths = None
         self.context = None
 
         self.compairr_params = CompAIRRParams(compairr_path=Path(compairr_path),
@@ -103,8 +109,9 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
         self.raw_distance_matrix_np = None
 
     @staticmethod
-    def _prepare_parameters(p_value_threshold: float, compairr_path: str, ignore_genes: bool, threads: int, name: str = None):
+    def _prepare_parameters(p_value_threshold: float, compairr_path: str, sequence_batch_size: int, ignore_genes: bool, threads: int, name: str = None):
         ParameterValidator.assert_type_and_value(p_value_threshold, float, "CompAIRRSequenceAbundanceEncoder", "p_value_threshold", min_inclusive=0, max_inclusive=1)
+        ParameterValidator.assert_type_and_value(sequence_batch_size, int, "CompAIRRSequenceAbundanceEncoder", "sequence_batch_size", min_inclusive=1)
         ParameterValidator.assert_type_and_value(ignore_genes, bool, "CompAIRRSequenceAbundanceEncoder", "ignore_genes")
         ParameterValidator.assert_type_and_value(threads, int, "CompAIRRSequenceAbundanceEncoder", "threads", min_inclusive=1)
 
@@ -113,6 +120,7 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
         return {
             "p_value_threshold": p_value_threshold,
             "compairr_path": compairr_path,
+            "sequence_batch_size": sequence_batch_size,
             "ignore_genes": ignore_genes,
             "threads": threads,
             "name": name
@@ -182,10 +190,12 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
     def _compute_sequence_presence_with_compairr(self, dataset, full_sequence_set, params):
         self._prepare_compairr_input_files(dataset, full_sequence_set, params.result_path)
 
-        args = CompAIRRHelper.get_cmd_args(self.compairr_params, [self.sequences_filepath, self.repertoires_filepath],
-                                           params.result_path)
-        compairr_result = subprocess.run(args, capture_output=True, text=True)
-        sequence_presence_matrix = CompAIRRHelper.process_compairr_output_file(compairr_result, self.compairr_params, params.result_path)
+        matrices = []
+
+        for sequences_filepath in self.sequences_filepaths:
+            matrices.append(self._run_compairr_on_batch(sequences_filepath, params.result_path))
+
+        sequence_presence_matrix = pd.concat(matrices)
         sequence_presence_matrix = sequence_presence_matrix.reindex(range(0, len(sequence_presence_matrix)))
 
         matrix_repertoire_ids = sequence_presence_matrix.columns.values
@@ -194,6 +204,11 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
         sequence_presence_matrix[sequence_presence_matrix > 1] = 1
 
         return sequence_presence_matrix, matrix_repertoire_ids
+
+    def _run_compairr_on_batch(self, sequences_filepath, result_path):
+        args = CompAIRRHelper.get_cmd_args(self.compairr_params, [sequences_filepath, self.repertoires_filepath], result_path)
+        compairr_result = subprocess.run(args, capture_output=True, text=True)
+        return CompAIRRHelper.process_compairr_output_file(compairr_result, self.compairr_params, result_path)
 
 
     def _encode_data(self, dataset: RepertoireDataset, params: EncoderParams):
@@ -228,10 +243,22 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
 
         CompAIRRHelper.write_repertoire_file(dataset, self.repertoires_filepath, self.compairr_params)
 
-        if self.sequences_filepath is None:
-            self.sequences_filepath = result_path / "compairr_sequences.tsv"
+        if self.sequences_filepaths is None:
+            self.sequences_filepaths = []
 
-        self.write_sequence_set_file(full_sequence_set, self.sequences_filepath)
+            n_sequence_files = math.ceil(len(full_sequence_set) / self.sequence_batch_size)
+            subset_start_index = 0
+            subset_end_index = min(self.sequence_batch_size, len(full_sequence_set))
+
+            for file_index in range(n_sequence_files):
+                filename = result_path / f"compairr_sequences{file_index}.tsv"
+                self.sequences_filepaths.append(filename)
+                sequence_subset = full_sequence_set[subset_start_index:subset_end_index]
+
+                self.write_sequence_set_file(sequence_subset, filename, offset=subset_start_index)
+
+                subset_start_index += self.sequence_batch_size
+                subset_end_index = min(subset_end_index + self.sequence_batch_size, len(full_sequence_set))
 
 
     def _get_relevant_sequence_indices(self, params, label_str, sequence_p_values):
@@ -323,14 +350,14 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
 
         return attributes
 
-    def write_sequence_set_file(self, sequence_set, filename):
+    def write_sequence_set_file(self, sequence_set, filename, offset=0):
         sequence_col = "junction_aa" if EnvironmentSettings.get_sequence_type() == SequenceType.AMINO_ACID else "junction"
         vj_fill = "\t\t" if self.compairr_params.ignore_genes else ""
 
         with open(filename, "w") as file:
             file.write(f"{sequence_col}\tv_call\tj_call\tduplicate_count\trepertoire_id\n")
 
-            for id, sequence_info in enumerate(sequence_set):
+            for id, sequence_info in enumerate(sequence_set, offset):
                 file.write("\t".join(sequence_info) + f"{vj_fill}\t1\t{id}\n")
 
 
