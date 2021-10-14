@@ -224,4 +224,5 @@ class AtchleyKmerMILClassifier(MLMethod):
         return self.class_mapping
 
     def get_compatible_encoders(self):
+        from immuneML.encodings.atchley_kmer_encoding.AtchleyKmerEncoder import AtchleyKmerEncoder
         return [AtchleyKmerEncoder]

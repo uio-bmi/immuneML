@@ -16,7 +16,6 @@ from immuneML.ml_methods.MLMethod import MLMethod
 from immuneML.ml_methods.pytorch_implementations.PyTorchReceptorCNN import PyTorchReceptorCNN as RCNN
 from immuneML.ml_methods.util.Util import Util
 from immuneML.util.PathBuilder import PathBuilder
-from immuneML.encodings.onehot.OneHotEncoder import OneHotEncoder
 
 
 class ReceptorCNN(MLMethod):
@@ -339,4 +338,5 @@ class ReceptorCNN(MLMethod):
         return self.class_mapping
 
     def get_compatible_encoders(self):
+        from immuneML.encodings.onehot.OneHotEncoder import OneHotEncoder
         return [OneHotEncoder]
