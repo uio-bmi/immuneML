@@ -70,7 +70,9 @@ The easiest way to do this is by cloning CompAIRR from GitHub and installing it 
   cd compairr
   make install
 
-
+If such installation is unsuccessful (for example if you do not have the rights to install CompAIRR via make),
+it is also possible to directly provide the path to a CompAIRR executable as a parameter
+to :ref:`CompAIRRDistanceEncoder` or :ref:`CompAIRRSequenceAbundanceEncoder`.
 
 
 
