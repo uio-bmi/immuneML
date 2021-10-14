@@ -1,6 +1,8 @@
+import copy
 from pathlib import Path
 from typing import List
 import subprocess
+from multiprocessing.pool import Pool
 
 import pandas as pd
 import numpy as np
@@ -102,8 +104,8 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
                                               ignore_counts=True,
                                               ignore_genes=ignore_genes,
                                               threads=threads,
-                                              output_filename=CompAIRRSequenceAbundanceEncoder.OUTPUT_FILENAME,
-                                              log_filename=CompAIRRSequenceAbundanceEncoder.LOG_FILENAME)
+                                              output_filename=None,
+                                              log_filename=None)
 
         self.full_sequence_set = None
         self.raw_distance_matrix_np = None
@@ -190,10 +192,10 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
     def _compute_sequence_presence_with_compairr(self, dataset, full_sequence_set, params):
         self._prepare_compairr_input_files(dataset, full_sequence_set, params.result_path)
 
-        matrices = []
+        arguments = [(sequences_filepath, params.result_path) for sequences_filepath in self.sequences_filepaths]
 
-        for sequences_filepath in self.sequences_filepaths:
-            matrices.append(self._run_compairr_on_batch(sequences_filepath, params.result_path))
+        with Pool(params.pool_size) as pool:
+            matrices = pool.starmap(self._run_compairr_on_batch, arguments)
 
         sequence_presence_matrix = pd.concat(matrices)
         sequence_presence_matrix = sequence_presence_matrix.reindex(range(0, len(sequence_presence_matrix)))
@@ -206,9 +208,14 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
         return sequence_presence_matrix, matrix_repertoire_ids
 
     def _run_compairr_on_batch(self, sequences_filepath, result_path):
-        args = CompAIRRHelper.get_cmd_args(self.compairr_params, [sequences_filepath, self.repertoires_filepath], result_path)
+        batch = sequences_filepath.stem.split("_")[-1]
+        compairr_params = copy.copy(self.compairr_params)
+        compairr_params.output_filename=f"compairr_out_{batch}.txt"
+        compairr_params.log_filename=f"compairr_log_{batch}.txt"
+
+        args = CompAIRRHelper.get_cmd_args(compairr_params, [sequences_filepath, self.repertoires_filepath], result_path)
         compairr_result = subprocess.run(args, capture_output=True, text=True)
-        return CompAIRRHelper.process_compairr_output_file(compairr_result, self.compairr_params, result_path)
+        return CompAIRRHelper.process_compairr_output_file(compairr_result, compairr_params, result_path)
 
 
     def _encode_data(self, dataset: RepertoireDataset, params: EncoderParams):
@@ -251,7 +258,7 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
             subset_end_index = min(self.sequence_batch_size, len(full_sequence_set))
 
             for file_index in range(n_sequence_files):
-                filename = result_path / f"compairr_sequences{file_index}.tsv"
+                filename = result_path / f"compairr_sequences_batch{file_index}.tsv"
                 self.sequences_filepaths.append(filename)
                 sequence_subset = full_sequence_set[subset_start_index:subset_end_index]
 
