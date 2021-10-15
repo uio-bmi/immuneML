@@ -9,7 +9,6 @@ import numpy as np
 import math
 import fisher
 import pickle
-import datetime
 
 from immuneML.caching.CacheHandler import CacheHandler
 from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
@@ -139,7 +138,6 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
     def encode(self, dataset, params: EncoderParams):
         self._check_label(params)
         self._prepare_sequence_presence_data(dataset, params)
-        print(f"{datetime.datetime.now()}: 6 enter encode data", flush=True)
         encoded_dataset = self._encode_data(dataset, params)
 
         return encoded_dataset
@@ -199,17 +197,12 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
         with Pool(params.pool_size) as pool:
             matrices = pool.starmap(self._run_compairr_on_batch, arguments)
 
-        print(f"{datetime.datetime.now()}: 1 concat matrices", flush=True)
         sequence_presence_matrix = pd.concat(matrices)
-        print(f"{datetime.datetime.now()}: 2 reindex", flush=True)
         sequence_presence_matrix = sequence_presence_matrix.reindex(range(0, len(sequence_presence_matrix)))
-        print(f"{datetime.datetime.now()}: 3 get rep ids", flush=True)
 
         matrix_repertoire_ids = sequence_presence_matrix.columns.values
-        print(f"{datetime.datetime.now()}: 4 to numpy", flush=True)
 
         sequence_presence_matrix = sequence_presence_matrix.to_numpy()
-        print(f"{datetime.datetime.now()}: 5 set to 1", flush=True)
         sequence_presence_matrix[sequence_presence_matrix > 1] = 1
 
         return sequence_presence_matrix, matrix_repertoire_ids
@@ -227,10 +220,8 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
 
     def _encode_data(self, dataset: RepertoireDataset, params: EncoderParams):
         label = params.label_config.get_labels_by_name()[0]
-        print(f"{datetime.datetime.now()}: 7 enter calc seq abundance", flush=True)
 
         examples = self._calculate_sequence_abundance(dataset, self.sequence_presence_matrix, self.matrix_repertoire_ids, label, params)
-        print(f"{datetime.datetime.now()}: 20 make encodeddata object", flush=True)
 
         encoded_data = EncodedData(examples, dataset.get_metadata([label]) if params.encode_labels else None, dataset.get_repertoire_ids(),
                                    [CompAIRRSequenceAbundanceEncoder.RELEVANT_SEQUENCE_ABUNDANCE, CompAIRRSequenceAbundanceEncoder.TOTAL_SEQUENCE_ABUNDANCE],
@@ -242,13 +233,8 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
 
 
     def _calculate_sequence_abundance(self, dataset: RepertoireDataset, sequence_presence_matrix, matrix_repertoire_ids, label_str: str, params: EncoderParams):
-        print(f"{datetime.datetime.now()}: 8 enter _find_label_associated_sequence_p_values", flush=True)
         sequence_p_values = self._find_label_associated_sequence_p_values(sequence_presence_matrix, matrix_repertoire_ids, dataset, params, label_str)
-        print(f"{datetime.datetime.now()}: 15 enter _get_relevant_sequence_indices", flush=True)
-
         relevant_sequence_indices = self._get_relevant_sequence_indices(params, label_str, sequence_p_values)
-        print(f"{datetime.datetime.now()}: 18 enter _build_abundance_matrix", flush=True)
-
         abundance_matrix = self._build_abundance_matrix(sequence_presence_matrix, matrix_repertoire_ids, dataset.get_repertoire_ids(), relevant_sequence_indices)
 
         return abundance_matrix
@@ -286,13 +272,11 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
 
         if params.learn_model:
             SequenceFilterHelper._check_label_object(params, label_str)
-            print(f"{datetime.datetime.now()}: 16 determine relevant_sequence_indices", flush=True)
 
             relevant_sequence_indices = np.array(sequence_p_values) < self.p_value_threshold
 
             with self.relevant_indices_path.open("wb") as file:
                 pickle.dump(relevant_sequence_indices, file)
-            print(f"{datetime.datetime.now()}: 17 _write_relevant_sequence_csv ", flush=True)
 
             self._write_relevant_sequence_csv(self.full_sequence_set[relevant_sequence_indices], params.result_path)
 
@@ -313,16 +297,11 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
 
 
     def _find_label_associated_sequence_p_values(self, sequence_presence_matrix, matrix_repertoire_ids, dataset, params, label_str):
-        print(f"{datetime.datetime.now()}: 9 ret rep cols", flush=True)
         relevant = np.isin(matrix_repertoire_ids, dataset.get_repertoire_ids())
-        print(f"{datetime.datetime.now()}: 10 subset matrix", flush=True)
         sequence_presence_matrix = sequence_presence_matrix[:,relevant]
-        print(f"{datetime.datetime.now()}: 11 subset matrix rep ids", flush=True)
         matrix_repertoire_ids = matrix_repertoire_ids[relevant]
-        print(f"{datetime.datetime.now()}: 12 determine is first cclass", flush=True)
 
         is_first_class = self._is_first_class(dataset, matrix_repertoire_ids, params, label_str)
-        print(f"{datetime.datetime.now()}: 13 enter _find_sequence_p_values_with_fisher", flush=True)
 
         return self._find_sequence_p_values_with_fisher(sequence_presence_matrix, is_first_class)
 
@@ -330,18 +309,14 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
     def _find_sequence_p_values_with_fisher(self, sequence_presence_matrix, is_first_class):
         sequence_p_values = []
 
-        print(f"{datetime.datetime.now()}: 14 for loop seqvector", flush=True)
-
         for sequence_vector in sequence_presence_matrix:
             if sequence_vector.sum() > 1:
-                print(f"{datetime.datetime.now()}: --- determine presence", flush=True)
 
                 first_class_present = np.sum(sequence_vector[np.logical_and(sequence_vector, is_first_class)])
                 second_class_present = np.sum(
                     sequence_vector[np.logical_and(sequence_vector, np.logical_not(is_first_class))])
                 first_class_absent = np.sum(np.logical_and(is_first_class, sequence_vector == 0))
                 second_class_absent = np.sum(np.logical_and(np.logical_not(is_first_class), sequence_vector == 0))
-                print(f"{datetime.datetime.now()}: --- fishertest", flush=True)
 
                 sequence_p_values.append(fisher.pvalue(first_class_present, second_class_present, first_class_absent,
                                                        second_class_absent).right_tail)
@@ -395,21 +370,11 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
     def _build_abundance_matrix(self, sequence_presence_matrix, matrix_repertoire_ids, dataset_repertoire_ids, sequence_p_values_indices):
         abundance_matrix = np.zeros((len(dataset_repertoire_ids), 2))
 
-        print(f"{datetime.datetime.now()}: 19 start looping through dataset rep ids", flush=True)
-
         for idx_in_dataset, dataset_repertoire_id in enumerate(dataset_repertoire_ids):
-            print(f"{datetime.datetime.now()}: --- get relevant row", flush=True)
             relevant_row = np.where(matrix_repertoire_ids == dataset_repertoire_id)
-
-            print(f"{datetime.datetime.now()}: --- get repertoire vector", flush=True)
             repertoire_vector = sequence_presence_matrix.T[relevant_row]
-
-            print(f"{datetime.datetime.now()}: --- get relevant_sequence_abundance", flush=True)
             relevant_sequence_abundance = np.sum(repertoire_vector[np.logical_and(sequence_p_values_indices, repertoire_vector)])
-            print(f"{datetime.datetime.now()}: --- get total_sequence_abundance", flush=True)
             total_sequence_abundance = np.sum(repertoire_vector)
-            print(f"{datetime.datetime.now()}: --- put in abundance matrix", flush=True)
-
             abundance_matrix[idx_in_dataset] = [relevant_sequence_abundance, total_sequence_abundance]
 
         return abundance_matrix
