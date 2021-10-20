@@ -59,7 +59,7 @@ class CompAIRRDistanceEncoder(DatasetEncoder):
     .. code-block:: yaml
 
         my_distance_encoder:
-            Distance:
+            CompAIRRDistance:
                 compairr_path: optional/path/to/compairr
                 differences: 0
                 indels: False
