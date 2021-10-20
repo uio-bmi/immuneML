@@ -30,8 +30,7 @@ from immuneML.util.CompAIRRHelper import CompAIRRHelper
 class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
     """
     This encoder works similarly to the :py:obj:`~immuneML.encodings.filtered_sequence_encoding.SequenceAbundanceEncoder.SequenceAbundanceEncoder`,
-    but internally uses CompAIRR to accelerate core computations. This encoder does not process the data in batches, and
-    may therefore consume more memory than :py:obj:`~immuneML.encodings.filtered_sequence_encoding.SequenceAbundanceEncoder.SequenceAbundanceEncoder`.
+    but internally uses `CompAIRR <https://github.com/uio-bmi/compairr/>`_ to accelerate core computations.
 
     This encoder represents the repertoires as vectors where:
 
