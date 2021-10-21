@@ -221,7 +221,7 @@ class SklearnMethod(MLMethod):
 
         if params_path.is_file():
             with params_path.open("r") as file:
-                desc = yaml.load(file)
+                desc = yaml.safe_load(file)
                 for param in ["feature_names", "classes", "class_mapping", "label"]:
                     if param in desc:
                         setattr(self, param, desc[param])
