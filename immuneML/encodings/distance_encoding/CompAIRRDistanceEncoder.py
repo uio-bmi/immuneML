@@ -1,17 +1,17 @@
-from pathlib import Path
 import subprocess
-import pandas as pd
-import numpy as np
 import warnings
+from pathlib import Path
 from tempfile import NamedTemporaryFile
 
+import numpy as np
+import pandas as pd
 
 from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
 from immuneML.data_model.encoded_data.EncodedData import EncodedData
 from immuneML.encodings.DatasetEncoder import DatasetEncoder
 from immuneML.encodings.EncoderParams import EncoderParams
-from immuneML.util.CompAIRRParams import CompAIRRParams
 from immuneML.util.CompAIRRHelper import CompAIRRHelper
+from immuneML.util.CompAIRRParams import CompAIRRParams
 from immuneML.util.EncoderHelper import EncoderHelper
 from immuneML.util.ParameterValidator import ParameterValidator
 
@@ -72,7 +72,8 @@ class CompAIRRDistanceEncoder(DatasetEncoder):
     INPUT_FILENAME = "compairr_input.tsv"
     LOG_FILENAME = "compairr_log.txt"
 
-    def __init__(self, compairr_path: Path, keep_compairr_input: bool, differences: int, indels: bool, ignore_counts: bool, ignore_genes: bool, threads: int, context: dict = None, name: str = None):
+    def __init__(self, compairr_path: Path, keep_compairr_input: bool, differences: int, indels: bool, ignore_counts: bool, ignore_genes: bool,
+                 threads: int, context: dict = None, name: str = None):
         self.compairr_params = CompAIRRParams(compairr_path=Path(compairr_path),
                                               keep_compairr_input=keep_compairr_input,
                                               differences=differences,
@@ -86,14 +87,13 @@ class CompAIRRDistanceEncoder(DatasetEncoder):
         self.context = context
         self.name = name
 
-
     def set_context(self, context: dict):
         self.context = context
         return self
 
-
     @staticmethod
-    def _prepare_parameters(compairr_path: str, keep_compairr_input: bool, differences: int, indels: bool, ignore_counts: bool, ignore_genes: bool, threads: int, context: dict = None, name: str = None):
+    def _prepare_parameters(compairr_path: str, keep_compairr_input: bool, differences: int, indels: bool, ignore_counts: bool, ignore_genes: bool,
+                            threads: int, context: dict = None, name: str = None):
         ParameterValidator.assert_type_and_value(differences, int, "CompAIRRDistanceEncoder", "differences", min_inclusive=0, max_inclusive=2)
         ParameterValidator.assert_type_and_value(indels, bool, "CompAIRRDistanceEncoder", "indels")
         if indels:
@@ -118,7 +118,6 @@ class CompAIRRDistanceEncoder(DatasetEncoder):
             "name": name
         }
 
-
     @staticmethod
     def build_object(dataset, **params):
         if isinstance(dataset, RepertoireDataset):
@@ -127,13 +126,11 @@ class CompAIRRDistanceEncoder(DatasetEncoder):
         else:
             raise ValueError("CompAIRRDistanceEncoder is not defined for dataset types which are not RepertoireDataset.")
 
-
     def build_labels(self, dataset: RepertoireDataset, params: EncoderParams) -> dict:
         lbl = params.label_config.get_labels_by_name()
         tmp_labels = dataset.get_metadata(lbl, return_df=True)
 
         return tmp_labels.to_dict("list")
-
 
     def encode(self, dataset: RepertoireDataset, params: EncoderParams) -> RepertoireDataset:
         train_repertoire_ids = EncoderHelper.prepare_training_ids(dataset, params)
@@ -149,7 +146,6 @@ class CompAIRRDistanceEncoder(DatasetEncoder):
                                                    encoding=CompAIRRDistanceEncoder.__name__)
         return encoded_dataset
 
-
     def build_distance_matrix(self, dataset: RepertoireDataset, params: EncoderParams, train_repertoire_ids: list):
         current_dataset = dataset if self.context is None or "dataset" not in self.context else self.context["dataset"]
         raw_distance_matrix, repertoire_sizes, repertoire_indices = self._compute_overlap_with_compairr(current_dataset, params)
@@ -161,7 +157,6 @@ class CompAIRRDistanceEncoder(DatasetEncoder):
         distance_matrix = distance_matrix.loc[repertoire_ids, train_repertoire_ids]
 
         return distance_matrix
-
 
     def _morisita_horn(self, raw_distance_matrix, repertoire_sizes, repertoire_indices):
         distance_matrix = pd.DataFrame().reindex_like(raw_distance_matrix)
@@ -175,7 +170,6 @@ class CompAIRRDistanceEncoder(DatasetEncoder):
                 distance_matrix.loc[rowIndex, columnIndex] = self._check_distance(mh_similarity, rowIndex, columnIndex)
 
         return distance_matrix
-
 
     def _check_distance(self, mh_similarity, rowIndex, columnIndex):
         mh_distance = 1 - mh_similarity
@@ -193,17 +187,16 @@ class CompAIRRDistanceEncoder(DatasetEncoder):
 
         return mh_distance
 
-
     def _compute_overlap_with_compairr(self, dataset: RepertoireDataset, params: EncoderParams):
 
         if self.compairr_params.keep_compairr_input:
-            raw_distance_matrix, repertoire_sizes, repertoire_indices = self._run_compairr(dataset, params, params.result_path / CompAIRRDistanceEncoder.INPUT_FILENAME)
+            raw_distance_matrix, repertoire_sizes, repertoire_indices = self._run_compairr(dataset, params,
+                                                                                           params.result_path / CompAIRRDistanceEncoder.INPUT_FILENAME)
         else:
             with NamedTemporaryFile(mode='w') as tmp:
                 raw_distance_matrix, repertoire_sizes, repertoire_indices = self._run_compairr(dataset, params, tmp.name)
 
         return raw_distance_matrix, repertoire_sizes, repertoire_indices
-
 
     def _run_compairr(self, dataset, params, filename):
         repertoire_sizes, repertoire_indices = self._prepare_repertoire_file(dataset, filename)
@@ -214,7 +207,6 @@ class CompAIRRDistanceEncoder(DatasetEncoder):
         raw_distance_matrix = CompAIRRHelper.process_compairr_output_file(compairr_result, self.compairr_params, params.result_path)
 
         return raw_distance_matrix, repertoire_sizes, repertoire_indices
-
 
     def _prepare_repertoire_file(self, dataset, filename):
         repertoire_sizes = {}
@@ -236,12 +228,10 @@ class CompAIRRDistanceEncoder(DatasetEncoder):
 
         return repertoire_sizes, repertoire_indices
 
-
     @staticmethod
     def export_encoder(path: Path, encoder) -> Path:
         encoder_file = DatasetEncoder.store_encoder(encoder, path / "encoder.pickle")
         return encoder_file
-
 
     @staticmethod
     def load_encoder(encoder_file: Path):

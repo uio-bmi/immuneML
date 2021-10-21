@@ -1,14 +1,14 @@
 import copy
-from pathlib import Path
-from typing import List
+import math
+import pickle
 import subprocess
 from multiprocessing.pool import Pool
+from pathlib import Path
+from typing import List
 
-import pandas as pd
-import numpy as np
-import math
 import fisher
-import pickle
+import numpy as np
+import pandas as pd
 
 from immuneML.caching.CacheHandler import CacheHandler
 from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
@@ -16,16 +16,17 @@ from immuneML.data_model.encoded_data.EncodedData import EncodedData
 from immuneML.data_model.repertoire.Repertoire import Repertoire
 from immuneML.encodings.DatasetEncoder import DatasetEncoder
 from immuneML.encodings.EncoderParams import EncoderParams
-from immuneML.environment.SequenceType import SequenceType
-from immuneML.util.CompAIRRParams import CompAIRRParams
 from immuneML.encodings.filtered_sequence_encoding.SequenceFilterHelper import SequenceFilterHelper
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.environment.Label import Label
+from immuneML.environment.SequenceType import SequenceType
+from immuneML.util.CompAIRRHelper import CompAIRRHelper
+from immuneML.util.CompAIRRParams import CompAIRRParams
 from immuneML.util.EncoderHelper import EncoderHelper
 from immuneML.util.ParameterValidator import ParameterValidator
 from immuneML.util.PathBuilder import PathBuilder
 from scripts.specification_util import update_docs_per_mapping
-from immuneML.util.CompAIRRHelper import CompAIRRHelper
+
 
 class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
     """
@@ -110,8 +111,10 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
         self.raw_distance_matrix_np = None
 
     @staticmethod
-    def _prepare_parameters(p_value_threshold: float, compairr_path: str, sequence_batch_size: int, ignore_genes: bool, threads: int, name: str = None):
-        ParameterValidator.assert_type_and_value(p_value_threshold, float, "CompAIRRSequenceAbundanceEncoder", "p_value_threshold", min_inclusive=0, max_inclusive=1)
+    def _prepare_parameters(p_value_threshold: float, compairr_path: str, sequence_batch_size: int, ignore_genes: bool, threads: int,
+                            name: str = None):
+        ParameterValidator.assert_type_and_value(p_value_threshold, float, "CompAIRRSequenceAbundanceEncoder", "p_value_threshold", min_inclusive=0,
+                                                 max_inclusive=1)
         ParameterValidator.assert_type_and_value(sequence_batch_size, int, "CompAIRRSequenceAbundanceEncoder", "sequence_batch_size", min_inclusive=1)
         ParameterValidator.assert_type_and_value(ignore_genes, bool, "CompAIRRSequenceAbundanceEncoder", "ignore_genes")
         ParameterValidator.assert_type_and_value(threads, int, "CompAIRRSequenceAbundanceEncoder", "threads", min_inclusive=1)
@@ -132,7 +135,6 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
         assert isinstance(dataset, RepertoireDataset), "CompAIRRSequenceAbundanceEncoder: this encoding only works on repertoire datasets."
         prepared_params = CompAIRRSequenceAbundanceEncoder._prepare_parameters(**params)
         return CompAIRRSequenceAbundanceEncoder(**prepared_params)
-
 
     def encode(self, dataset, params: EncoderParams):
         self._check_label(params)
@@ -168,11 +170,11 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
         return full_sequence_set
 
     def _get_sequence_presence(self, full_dataset, full_sequence_set, params):
-        sequence_presence_matrix, matrix_repertoire_ids = CacheHandler.memo_by_params(self._build_sequence_presence_params(full_dataset, self.compairr_params),
-                                                                                      lambda: self._compute_sequence_presence_with_compairr(full_dataset, full_sequence_set, params))
+        sequence_presence_matrix, matrix_repertoire_ids = CacheHandler.memo_by_params(
+            self._build_sequence_presence_params(full_dataset, self.compairr_params),
+            lambda: self._compute_sequence_presence_with_compairr(full_dataset, full_sequence_set, params))
 
         return sequence_presence_matrix, matrix_repertoire_ids
-
 
     def _build_sequence_presence_params(self, dataset, compairr_params):
         return (("dataset_identifier", dataset.identifier),
@@ -186,7 +188,6 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
         return (("dataset_identifier", dataset.identifier),
                 ("repertoire_ids", tuple(dataset.get_repertoire_ids())),
                 "sequence_attributes", tuple(self.get_relevant_sequence_attributes()))
-
 
     def _compute_sequence_presence_with_compairr(self, dataset, full_sequence_set, params):
         self._prepare_compairr_input_files(dataset, full_sequence_set, params.result_path)
@@ -209,13 +210,12 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
     def _run_compairr_on_batch(self, sequences_filepath, result_path):
         batch = sequences_filepath.stem.split("_")[-1]
         compairr_params = copy.copy(self.compairr_params)
-        compairr_params.output_filename=f"compairr_out_{batch}.txt"
-        compairr_params.log_filename=f"compairr_log_{batch}.txt"
+        compairr_params.output_filename = f"compairr_out_{batch}.txt"
+        compairr_params.log_filename = f"compairr_log_{batch}.txt"
 
         args = CompAIRRHelper.get_cmd_args(compairr_params, [sequences_filepath, self.repertoires_filepath], result_path)
         compairr_result = subprocess.run(args, capture_output=True, text=True)
         return CompAIRRHelper.process_compairr_output_file(compairr_result, compairr_params, result_path)
-
 
     def _encode_data(self, dataset: RepertoireDataset, params: EncoderParams):
         label = params.label_config.get_labels_by_name()[0]
@@ -223,21 +223,23 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
         examples = self._calculate_sequence_abundance(dataset, self.sequence_presence_matrix, self.matrix_repertoire_ids, label, params)
 
         encoded_data = EncodedData(examples, dataset.get_metadata([label]) if params.encode_labels else None, dataset.get_repertoire_ids(),
-                                   [CompAIRRSequenceAbundanceEncoder.RELEVANT_SEQUENCE_ABUNDANCE, CompAIRRSequenceAbundanceEncoder.TOTAL_SEQUENCE_ABUNDANCE],
-                                   encoding=CompAIRRSequenceAbundanceEncoder.__name__, info={'relevant_sequence_path': self.relevant_sequence_csv_path})
+                                   [CompAIRRSequenceAbundanceEncoder.RELEVANT_SEQUENCE_ABUNDANCE,
+                                    CompAIRRSequenceAbundanceEncoder.TOTAL_SEQUENCE_ABUNDANCE],
+                                   encoding=CompAIRRSequenceAbundanceEncoder.__name__,
+                                   info={'relevant_sequence_path': self.relevant_sequence_csv_path})
 
         encoded_dataset = RepertoireDataset(labels=dataset.labels, encoded_data=encoded_data, repertoires=dataset.repertoires)
 
         return encoded_dataset
 
-
-    def _calculate_sequence_abundance(self, dataset: RepertoireDataset, sequence_presence_matrix, matrix_repertoire_ids, label_str: str, params: EncoderParams):
+    def _calculate_sequence_abundance(self, dataset: RepertoireDataset, sequence_presence_matrix, matrix_repertoire_ids, label_str: str,
+                                      params: EncoderParams):
         sequence_p_values = self._find_label_associated_sequence_p_values(sequence_presence_matrix, matrix_repertoire_ids, dataset, params, label_str)
         relevant_sequence_indices = self._get_relevant_sequence_indices(params, label_str, sequence_p_values)
-        abundance_matrix = self._build_abundance_matrix(sequence_presence_matrix, matrix_repertoire_ids, dataset.get_repertoire_ids(), relevant_sequence_indices)
+        abundance_matrix = self._build_abundance_matrix(sequence_presence_matrix, matrix_repertoire_ids, dataset.get_repertoire_ids(),
+                                                        relevant_sequence_indices)
 
         return abundance_matrix
-
 
     def _prepare_compairr_input_files(self, dataset, full_sequence_set, result_path):
         PathBuilder.build(result_path)
@@ -263,7 +265,6 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
 
                 subset_start_index += self.sequence_batch_size
                 subset_end_index = min(subset_end_index + self.sequence_batch_size, len(full_sequence_set))
-
 
     def _get_relevant_sequence_indices(self, params, label_str, sequence_p_values):
         if self.relevant_indices_path is None:
@@ -294,16 +295,14 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
 
         df.to_csv(self.relevant_sequence_csv_path, sep=",", index=False)
 
-
     def _find_label_associated_sequence_p_values(self, sequence_presence_matrix, matrix_repertoire_ids, dataset, params, label_str):
         relevant = np.isin(matrix_repertoire_ids, dataset.get_repertoire_ids())
-        sequence_presence_matrix = sequence_presence_matrix[:,relevant]
+        sequence_presence_matrix = sequence_presence_matrix[:, relevant]
         matrix_repertoire_ids = matrix_repertoire_ids[relevant]
 
         is_first_class = self._is_first_class(dataset, matrix_repertoire_ids, params, label_str)
 
         return self._find_sequence_p_values_with_fisher(sequence_presence_matrix, is_first_class)
-
 
     def _find_sequence_p_values_with_fisher(self, sequence_presence_matrix, is_first_class):
         sequence_p_values = []
@@ -324,7 +323,6 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
 
         return sequence_p_values
 
-
     def _is_first_class(self, dataset, matrix_repertoire_ids, params, label_str):
         label = params.label_config.get_label_object(label_str)
 
@@ -333,7 +331,6 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
              matrix_repertoire_ids]) == label.positive_class
 
         return is_first_class
-
 
     def get_sequence_set_for_repertoire(self, repertoire, sequence_attributes):
         return set(zip(*[value for value in repertoire.get_attributes(sequence_attributes).values() if value is not None]))
@@ -364,7 +361,6 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
 
             for id, sequence_info in enumerate(sequence_set, offset):
                 file.write("\t".join(sequence_info) + f"{vj_fill}\t1\t{id}\n")
-
 
     def _build_abundance_matrix(self, sequence_presence_matrix, matrix_repertoire_ids, dataset_repertoire_ids, sequence_p_values_indices):
         abundance_matrix = np.zeros((len(dataset_repertoire_ids), 2))

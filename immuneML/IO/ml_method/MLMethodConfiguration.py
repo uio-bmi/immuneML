@@ -34,5 +34,5 @@ class MLMethodConfiguration:
 
     def load(self, path: Path):
         with path.open('r') as file:
-            obj = yaml.load(file)
+            obj = yaml.safe_load(file)
         self.__init__(**obj)
