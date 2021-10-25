@@ -31,7 +31,7 @@ jobs:
     - name: Install CompAIRR
       run: |
         git clone https://github.com/uio-bmi/compairr.git
-        make -C compairr install
+        make -C compairr
 #    - name: Lint with flake8
 #      run: |
 #        # stop the build if there are Python syntax errors or undefined names

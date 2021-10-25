@@ -30,10 +30,12 @@ class TestCompAIRRDistanceEncoder(TestCase):
         return dataset
 
     def test_encode(self):
-        compairr_path = Path("/usr/local/bin/compairr")
+        compairr_paths = [Path("/usr/local/bin/compairr"), Path("./compairr/src/compairr")]
 
-        if compairr_path.exists():
-            self._run_test(compairr_path)
+        for compairr_path in compairr_paths:
+            if compairr_path.exists():
+                self._run_test(compairr_path)
+                break
 
     def _run_test(self, compairr_path):
 
