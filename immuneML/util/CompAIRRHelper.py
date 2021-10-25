@@ -30,7 +30,13 @@ class CompAIRRHelper:
             assert compairr_result.returncode == 0, "exit code was non-zero."
             output = str(compairr_result.stderr).split()
             major, minor, patch = output[1].split(".")
-            assert int(major) >= 1, f"CompAIRR version 1 or higher is required, found version {output[1]}"
+
+            mssg = f"CompAIRR version 1.3.2 or higher is required, found version {output[1]}"
+            assert int(major) >= 1, mssg
+            if major == 1:
+                assert int(minor) >= 3, mssg
+                if minor == 3:
+                    assert int(patch) >= 2, mssg
         except Exception as e:
             raise Exception(f"CompAIRRHelper: failed to call CompAIRR: {e}\n"
                             f"Please ensure the correct version of CompAIRR has been installed, or provide the path to the CompAIRR executable.")

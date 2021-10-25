@@ -18,7 +18,6 @@ from immuneML.encodings.DatasetEncoder import DatasetEncoder
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.encodings.filtered_sequence_encoding.SequenceFilterHelper import SequenceFilterHelper
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
-from immuneML.environment.Label import Label
 from immuneML.environment.SequenceType import SequenceType
 from immuneML.util.CompAIRRHelper import CompAIRRHelper
 from immuneML.util.CompAIRRParams import CompAIRRParams
@@ -346,13 +345,13 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
 
     def write_sequence_set_file(self, sequence_set, filename, offset=0):
         sequence_col = "junction_aa" if EnvironmentSettings.get_sequence_type() == SequenceType.AMINO_ACID else "junction"
-        vj_fill = "\t\t" if self.compairr_params.ignore_genes else ""
+        vj_header = "" if self.compairr_params.ignore_genes else "\tv_call\tj_call"
 
         with open(filename, "w") as file:
-            file.write(f"{sequence_col}\tv_call\tj_call\tduplicate_count\trepertoire_id\n")
+            file.write(f"{sequence_col}{vj_header}\tduplicate_count\trepertoire_id\n")
 
             for id, sequence_info in enumerate(sequence_set, offset):
-                file.write("\t".join(sequence_info) + f"{vj_fill}\t1\t{id}\n")
+                file.write("\t".join(sequence_info) + f"\t1\t{id}\n")
 
     def _build_abundance_matrix(self, sequence_presence_matrix, matrix_repertoire_ids, dataset_repertoire_ids, sequence_p_values_indices):
         abundance_matrix = np.zeros((len(dataset_repertoire_ids), 2))
