@@ -28,7 +28,7 @@ class GalaxyMLApplicationTool(GalaxyTool):
 
     def _check_specs(self):
         with open(self.yaml_path, "r") as file:
-            specs = yaml.load(file)
+            specs = yaml.safe_load(file)
 
         instruction_name = Util.check_instruction_type(specs, GalaxyMLApplicationTool.__name__, MLApplicationInstruction.__name__[:-11])
 

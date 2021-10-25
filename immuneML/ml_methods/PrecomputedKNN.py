@@ -63,7 +63,6 @@ class PrecomputedKNN(SklearnMethod):
     def get_compatible_encoders(self):
         return [DistanceEncoder, CompAIRRDistanceEncoder]
 
-
     @staticmethod
     def get_documentation():
         doc = str(PrecomputedKNN.__doc__)

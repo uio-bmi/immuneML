@@ -46,7 +46,7 @@ class TestImmuneMLExporter(TestCase):
         ImmuneMLExporter.export(dataset, path)
 
         with open(path / f"{dataset.name}.iml_dataset", "r") as file:
-            dataset2 = yaml.load(file)
+            dataset2 = yaml.safe_load(file)
 
         self.assertEqual('ReceptorDataset', dataset2['dataset_class'])
         self.assertEqual(element_ids, dataset2['element_ids'])
