@@ -21,5 +21,11 @@ RUN pip3 install wheel setuptools
 # manually install DeepRC dependencies (they are listed separately as they are not available on PyPI yet)
 RUN pip3 install -r ./immuneML/requirements_DeepRC.txt
 
+# install the dependency CompAIRR
+RUN yum install git -y
+RUN git clone https://github.com/uio-bmi/compairr.git compairr_folder
+RUN make -C compairr_folder
+COPY compairr_folder/src/compairr compairr
+
 # Voila: install immuneML
 RUN pip3 install ./immuneML/[TCRdist]
