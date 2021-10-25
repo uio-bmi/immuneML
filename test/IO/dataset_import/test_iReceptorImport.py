@@ -3,7 +3,6 @@ import shutil
 from unittest import TestCase
 from zipfile import ZipFile
 
-import numpy as np
 import pandas as pd
 
 from immuneML.IO.dataset_import.IReceptorImport import IReceptorImport
@@ -439,8 +438,6 @@ class TestIReceptorImport(TestCase):
 
         return zip_path
 
-
-
     def test_import_repertoire_dataset(self):
         base_path = EnvironmentSettings.root_path / "test/tmp/ireceptorimport/"
         path = base_path / "repertoiredataset/"
@@ -457,7 +454,7 @@ class TestIReceptorImport(TestCase):
         self.assertEqual(6, dataset.get_example_count())
         self.assertEqual(RepertoireDataset, type(dataset))
 
-        metadata_df = pd.read_csv(params["result_path"] / "ireceptor_repertoiredataset_metadata.csv",  comment=Constants.COMMENT_SIGN)
+        metadata_df = pd.read_csv(params["result_path"] / "ireceptor_repertoiredataset_metadata.csv", comment=Constants.COMMENT_SIGN)
 
         valid_metadata = '''
 subject_id	repertoire_id	sample_processing_id	data_processing_id	study_id	species_label	sex	age_min	age_max	age_event	tissue_label	collection_time_point_relative	collection_time_point_reference	COVID-19	COVID-19_stage	second_disease	first_disease
@@ -484,7 +481,6 @@ person2	second_zip_rep2	samp2	5faf101103b9977a150a9eaa	PRJCA002413	Homo sapiens	
         pd.testing.assert_frame_equal(valid_metadata_df.reset_index(drop=True), metadata_df_subset.reset_index(drop=True))
 
         shutil.rmtree(base_path)
-
 
     def test_import_sequence_dataset(self):
         base_path = EnvironmentSettings.root_path / "test/tmp/ireceptorimport/"
