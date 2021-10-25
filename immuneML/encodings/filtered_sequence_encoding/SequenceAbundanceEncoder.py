@@ -10,7 +10,6 @@ from immuneML.data_model.repertoire.Repertoire import Repertoire
 from immuneML.encodings.DatasetEncoder import DatasetEncoder
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.encodings.filtered_sequence_encoding.SequenceFilterHelper import SequenceFilterHelper
-from immuneML.environment.Label import Label
 from immuneML.pairwise_repertoire_comparison.ComparisonData import ComparisonData
 from immuneML.util.EncoderHelper import EncoderHelper
 from scripts.specification_util import update_docs_per_mapping
@@ -89,22 +88,13 @@ class SequenceAbundanceEncoder(DatasetEncoder):
 
     def encode(self, dataset, params: EncoderParams):
 
-        self._check_label(params)
+        EncoderHelper.check_positive_class_label(SequenceAbundanceEncoder.__name__,
+                                                 params.label_config.get_label_objects())
 
         self.comparison_data = SequenceFilterHelper.build_comparison_data(dataset, self.context, self.comparison_attributes, params,
                                                                           self.sequence_batch_size)
         return self._encode_data(dataset, params)
 
-    def _check_label(self, params: EncoderParams):
-
-        labels = params.label_config.get_label_objects()
-
-        assert len(labels) == 1, \
-            "SequenceAbundanceEncoder: this encoding works only for single label."
-
-        assert isinstance(labels[0], Label) and labels[0].positive_class is not None and labels[0].positive_class != "", \
-            f"{SequenceAbundanceEncoder.__name__}: to use this encoder, in the label definition in the specification of the instruction, define " \
-            f"the positive class for the label. Now it is set to '{labels[0].positive_class}'. See documentation for this encoder for more details."
 
     def _encode_data(self, dataset: RepertoireDataset, params: EncoderParams):
 

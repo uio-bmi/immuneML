@@ -20,7 +20,6 @@ from immuneML.environment.SequenceType import SequenceType
 from immuneML.util.CompAIRRParams import CompAIRRParams
 from immuneML.encodings.filtered_sequence_encoding.SequenceFilterHelper import SequenceFilterHelper
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
-from immuneML.environment.Label import Label
 from immuneML.util.EncoderHelper import EncoderHelper
 from immuneML.util.ParameterValidator import ParameterValidator
 from immuneML.util.PathBuilder import PathBuilder
@@ -135,21 +134,13 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
 
 
     def encode(self, dataset, params: EncoderParams):
-        self._check_label(params)
+        EncoderHelper.check_positive_class_label(CompAIRRSequenceAbundanceEncoder.__name__,
+                                                 params.label_config.get_label_objects())
         self._prepare_sequence_presence_data(dataset, params)
         encoded_dataset = self._encode_data(dataset, params)
 
         return encoded_dataset
 
-    def _check_label(self, params: EncoderParams):
-        labels = params.label_config.get_label_objects()
-
-        assert len(labels) == 1, \
-            "CompAIRRSequenceAbundanceEncoder: this encoding works only for single label."
-
-        assert isinstance(labels[0], Label) and labels[0].positive_class is not None and labels[0].positive_class != "", \
-            f"{CompAIRRSequenceAbundanceEncoder.__name__}: to use this encoder, in the label definition in the specification of the instruction, define " \
-            f"the positive class for the label. Now it is set to '{labels[0].positive_class}'. See documentation for this encoder for more details."
 
     def _prepare_sequence_presence_data(self, dataset, params):
         full_dataset = EncoderHelper.get_current_dataset(dataset, self.context)

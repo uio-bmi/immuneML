@@ -130,9 +130,7 @@ class CompAIRRDistanceEncoder(DatasetEncoder):
 
     def build_labels(self, dataset: RepertoireDataset, params: EncoderParams) -> dict:
         lbl = params.label_config.get_labels_by_name()
-        tmp_labels = dataset.get_metadata(lbl, return_df=True)
-
-        return tmp_labels.to_dict("list")
+        return dataset.get_metadata(lbl, return_df=False)
 
 
     def encode(self, dataset: RepertoireDataset, params: EncoderParams) -> RepertoireDataset:
