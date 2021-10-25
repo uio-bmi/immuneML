@@ -1,5 +1,4 @@
 import abc
-import hashlib
 import os
 import warnings
 from pathlib import Path
@@ -12,7 +11,6 @@ from sklearn.metrics import SCORERS
 from sklearn.model_selection import RandomizedSearchCV
 from sklearn.utils.validation import check_is_fitted
 
-from immuneML.caching.CacheHandler import CacheHandler
 from immuneML.data_model.encoded_data.EncodedData import EncodedData
 from immuneML.ml_methods.MLMethod import MLMethod
 from immuneML.ml_methods.util.Util import Util
@@ -86,16 +84,6 @@ class SklearnMethod(MLMethod):
         self.class_mapping = None
         self.label_name = None
 
-    def _prepare_caching_params(self, encoded_data: EncodedData, y, method_type: str, label_name: str = None, number_of_splits: int = -1):
-        return (("encoded_data", hashlib.sha256(str(encoded_data.examples).encode("utf-8")).hexdigest()),
-                ("y", hashlib.sha256(str(y).encode("utf-8")).hexdigest()),
-                ("label_names", label_name),
-                ("type", method_type),
-                ("class", self.__class__.__name__),
-                ("number_of_splits", str(number_of_splits)),
-                ("parameters", str(self._parameters)),
-                ("parameter_grid", str(self._parameter_grid)),)
-
     def fit(self, encoded_data: EncodedData, label_name: str, cores_for_training: int = 2):
 
         self.class_mapping = Util.make_class_mapping(encoded_data.labels[label_name])
@@ -104,8 +92,7 @@ class SklearnMethod(MLMethod):
 
         mapped_y = Util.map_to_new_class_values(encoded_data.labels[label_name], self.class_mapping)
 
-        self.model = CacheHandler.memo_by_params(self._prepare_caching_params(encoded_data, encoded_data.labels[label_name], self.FIT, label_name),
-                                                 lambda: self._fit(encoded_data.examples, mapped_y, cores_for_training))
+        self.model = self._fit(encoded_data.examples, mapped_y, cores_for_training)
 
     def predict(self, encoded_data: EncodedData, label_name: str):
         self.check_is_fitted(label_name)
@@ -148,10 +135,8 @@ class SklearnMethod(MLMethod):
         self.label_name = label_name
         mapped_y = Util.map_to_new_class_values(encoded_data.labels[label_name], self.class_mapping)
 
-        self.model = CacheHandler.memo_by_params(
-            self._prepare_caching_params(encoded_data, mapped_y, self.FIT_CV, label_name, number_of_splits),
-            lambda: self._fit_by_cross_validation(encoded_data.examples, mapped_y, number_of_splits, label_name, cores_for_training,
-                                                  optimization_metric))
+        self.model = self._fit_by_cross_validation(encoded_data.examples, mapped_y, number_of_splits, label_name, cores_for_training,
+                                                  optimization_metric)
 
     def _fit_by_cross_validation(self, X, y, number_of_splits: int = 5, label_name: str = None, cores_for_training: int = 1,
                                  optimization_metric: str = "balanced_accuracy"):
