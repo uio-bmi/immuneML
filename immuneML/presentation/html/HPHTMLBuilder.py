@@ -7,7 +7,6 @@ import pandas as pd
 
 from immuneML.environment.Constants import Constants
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
-from immuneML.environment.Metric import Metric
 from immuneML.hyperparameter_optimization.config.SplitType import SplitType
 from immuneML.hyperparameter_optimization.states.HPAssessmentState import HPAssessmentState
 from immuneML.hyperparameter_optimization.states.HPItem import HPItem
@@ -15,6 +14,7 @@ from immuneML.hyperparameter_optimization.states.HPLabelState import HPLabelStat
 from immuneML.hyperparameter_optimization.states.HPSelectionState import HPSelectionState
 from immuneML.hyperparameter_optimization.states.TrainMLModelState import TrainMLModelState
 from immuneML.ml_methods.util.Util import Util as MLUtil
+from immuneML.ml_metrics.Metric import Metric
 from immuneML.presentation.TemplateParser import TemplateParser
 from immuneML.presentation.html.Util import Util
 from immuneML.reports.ReportResult import ReportResult

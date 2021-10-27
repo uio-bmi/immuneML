@@ -9,10 +9,10 @@ from immuneML.data_model.dataset.Dataset import Dataset
 from immuneML.data_model.encoded_data.EncodedData import EncodedData
 from immuneML.environment.Constants import Constants
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
-from immuneML.environment.Metric import Metric
 from immuneML.ml_methods.LogisticRegression import LogisticRegression
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.ml_reports.TrainingPerformance import TrainingPerformance
+
 
 class TestEvaluation(unittest.TestCase):
 
@@ -29,7 +29,6 @@ class TestEvaluation(unittest.TestCase):
         return dummy_lr, encoded_tr
 
     def _create_report(self, path):
-
         report = TrainingPerformance.build_object(name='testcase')
 
         report.train_dataset = Dataset()

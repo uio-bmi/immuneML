@@ -11,8 +11,8 @@ from immuneML.data_model.encoded_data.EncodedData import EncodedData
 from immuneML.environment.Constants import Constants
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.environment.LabelConfiguration import LabelConfiguration
-from immuneML.environment.Metric import Metric
 from immuneML.ml_methods.LogisticRegression import LogisticRegression
+from immuneML.ml_metrics.Metric import Metric
 from immuneML.util.PathBuilder import PathBuilder
 from immuneML.util.RepertoireBuilder import RepertoireBuilder
 from immuneML.workflows.steps.MLMethodAssessment import MLMethodAssessment

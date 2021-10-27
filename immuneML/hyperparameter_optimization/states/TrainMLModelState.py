@@ -4,12 +4,12 @@ from typing import List, Set, Dict
 
 from immuneML.data_model.dataset.Dataset import Dataset
 from immuneML.environment.LabelConfiguration import LabelConfiguration
-from immuneML.environment.Metric import Metric
 from immuneML.hyperparameter_optimization.HPSetting import HPSetting
 from immuneML.hyperparameter_optimization.config.SplitConfig import SplitConfig
 from immuneML.hyperparameter_optimization.states.HPAssessmentState import HPAssessmentState
 from immuneML.hyperparameter_optimization.states.HPItem import HPItem
 from immuneML.hyperparameter_optimization.strategy.HPOptimizationStrategy import HPOptimizationStrategy
+from immuneML.ml_metrics.Metric import Metric
 from immuneML.reports.ReportResult import ReportResult
 
 

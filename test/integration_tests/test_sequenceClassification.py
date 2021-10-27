@@ -10,7 +10,6 @@ from immuneML.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType im
 from immuneML.environment.Constants import Constants
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.environment.LabelConfiguration import LabelConfiguration
-from immuneML.environment.Metric import Metric
 from immuneML.environment.SequenceType import SequenceType
 from immuneML.hyperparameter_optimization.HPSetting import HPSetting
 from immuneML.hyperparameter_optimization.config.ReportConfig import ReportConfig
@@ -18,6 +17,7 @@ from immuneML.hyperparameter_optimization.config.SplitConfig import SplitConfig
 from immuneML.hyperparameter_optimization.config.SplitType import SplitType
 from immuneML.hyperparameter_optimization.strategy.GridSearch import GridSearch
 from immuneML.ml_methods.LogisticRegression import LogisticRegression
+from immuneML.ml_metrics.Metric import Metric
 from immuneML.simulation.dataset_generation.RandomDatasetGenerator import RandomDatasetGenerator
 from immuneML.workflows.instructions.TrainMLModelInstruction import TrainMLModelInstruction
 
