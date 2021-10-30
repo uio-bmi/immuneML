@@ -25,21 +25,26 @@ class CompAIRRHelper:
 
     @staticmethod
     def check_compairr_path(compairr_path):
+        required_major = 1
+        required_minor = 3
+        required_patch = 2
+
         try:
             compairr_result = subprocess.run([str(Path(compairr_path)), "--version"], capture_output=True)
             assert compairr_result.returncode == 0, "exit code was non-zero."
             output = str(compairr_result.stderr).split()
             major, minor, patch = output[1].split(".")
 
-            mssg = f"CompAIRR version 1.3.2 or higher is required, found version {output[1]}"
-            assert int(major) >= 1, mssg
+            mssg = f"CompAIRR version {required_major}.{required_minor}.{required_patch} or higher is required, found version {output[1]}"
+            assert int(major) >= required_major, mssg
             if major == 1:
-                assert int(minor) >= 3, mssg
+                assert int(minor) >= required_minor, mssg
                 if minor == 3:
-                    assert int(patch) >= 2, mssg
+                    assert int(patch) >= {required_patch}, mssg
         except Exception as e:
             raise Exception(f"CompAIRRHelper: failed to call CompAIRR: {e}\n"
-                            f"Please ensure the correct version of CompAIRR has been installed, or provide the path to the CompAIRR executable.")
+                            f"Please ensure the correct version of CompAIRR has been installed (version {required_major}.{required_minor}.{required_patch} or later), "
+                            f"or provide the path to the CompAIRR executable.")
 
         return compairr_path
 
@@ -93,12 +98,12 @@ class CompAIRRHelper:
         output_file = result_path / compairr_params.output_filename
 
         if not output_file.is_file():
-            raise RuntimeError(f"CompAIRRHelper: failed to calculate the distance matrix with CompAIRR. "
+            raise RuntimeError(f"CompAIRRHelper: failed to calculate the distance matrix with CompAIRR ({compairr_params.compairr_path}). "
                                f"The following error occurred: {subprocess_result.stderr}")
 
         if os.path.getsize(output_file) == 0:
             raise RuntimeError(
-                f"CompAIRRHelper: failed to calculate the distance matrix with CompAIRR, output matrix is empty. "
+                f"CompAIRRHelper: failed to calculate the distance matrix with CompAIRR ({compairr_params.compairr_path}), output matrix is empty. "
                 f"For details see the log file at {result_path / compairr_params.log_filename}")
 
         raw_distance_matrix = pd.read_csv(output_file, sep="\t", index_col=0)
