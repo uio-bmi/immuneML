@@ -11,6 +11,7 @@ class Constants:
     GENE_DELIMITER = "-"
     STOP_CODON = "*"
     CACHE_TYPE = "cache_type"
+    CACHE_PATH = 'cache_path'
     COMMENT_SIGN = "#"
     NOT_COMPUTED = "not computed"
 

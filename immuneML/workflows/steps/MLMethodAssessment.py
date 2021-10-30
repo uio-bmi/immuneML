@@ -5,10 +5,10 @@ from pathlib import Path
 import pandas as pd
 from sklearn import metrics
 
-from immuneML.environment.Metric import Metric
 from immuneML.ml_methods.MLMethod import MLMethod
 from immuneML.ml_methods.util.Util import Util
 from immuneML.ml_metrics import ml_metrics
+from immuneML.ml_metrics.Metric import Metric
 from immuneML.util.PathBuilder import PathBuilder
 from immuneML.workflows.steps.MLMethodAssessmentParams import MLMethodAssessmentParams
 from immuneML.workflows.steps.Step import Step

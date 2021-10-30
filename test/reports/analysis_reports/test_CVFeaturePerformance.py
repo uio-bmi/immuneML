@@ -7,7 +7,6 @@ from immuneML.encodings.filtered_sequence_encoding.SequenceAbundanceEncoder impo
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.environment.Label import Label
 from immuneML.environment.LabelConfiguration import LabelConfiguration
-from immuneML.environment.Metric import Metric
 from immuneML.hyperparameter_optimization.HPSetting import HPSetting
 from immuneML.hyperparameter_optimization.config.SplitConfig import SplitConfig
 from immuneML.hyperparameter_optimization.config.SplitType import SplitType
@@ -18,6 +17,7 @@ from immuneML.hyperparameter_optimization.states.HPSelectionState import HPSelec
 from immuneML.hyperparameter_optimization.states.TrainMLModelState import TrainMLModelState
 from immuneML.hyperparameter_optimization.strategy.GridSearch import GridSearch
 from immuneML.ml_methods.ProbabilisticBinaryClassifier import ProbabilisticBinaryClassifier
+from immuneML.ml_metrics.Metric import Metric
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.train_ml_model_reports.CVFeaturePerformance import CVFeaturePerformance
 

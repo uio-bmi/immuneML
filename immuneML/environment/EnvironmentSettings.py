@@ -31,11 +31,13 @@ class EnvironmentSettings:
     @staticmethod
     def reset_cache_path():
         EnvironmentSettings.cache_path = EnvironmentSettings.root_path / "cache"
+        del os.environ[Constants.CACHE_PATH]
 
     @staticmethod
     def set_cache_path(path: Path):
         EnvironmentSettings.cache_path = Path(path)
         PathBuilder.build(path)
+        os.environ[Constants.CACHE_PATH] = str(EnvironmentSettings.cache_path)
         print(f"{datetime.datetime.now()}: Setting temporary cache path to {path}", flush=True)
 
     @staticmethod
@@ -48,7 +50,7 @@ class EnvironmentSettings:
     def get_cache_path(cache_type: CacheType = None):
         cache_type = EnvironmentSettings.get_cache_type() if cache_type is None else cache_type
         if cache_type == CacheType.PRODUCTION:
-            return EnvironmentSettings.cache_path
+            return EnvironmentSettings.cache_path if Constants.CACHE_PATH not in os.environ else Path(os.environ[Constants.CACHE_PATH])
         elif cache_type == CacheType.TEST:
             return EnvironmentSettings.tmp_cache_path
         else:

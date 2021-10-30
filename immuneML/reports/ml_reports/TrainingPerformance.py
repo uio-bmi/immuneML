@@ -8,10 +8,10 @@ from sklearn import metrics as sklearn_metrics
 from sklearn.preprocessing import label_binarize
 
 from immuneML.data_model.dataset.Dataset import Dataset
-from immuneML.environment.Metric import Metric
 from immuneML.hyperparameter_optimization import HPSetting
 from immuneML.ml_methods.MLMethod import MLMethod
 from immuneML.ml_metrics import ml_metrics
+from immuneML.ml_metrics.Metric import Metric
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.ml_reports.MLReport import MLReport

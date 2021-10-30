@@ -1,8 +1,8 @@
 from pathlib import Path
 
 from immuneML.data_model.dataset.Dataset import Dataset
-from immuneML.environment.Metric import Metric
 from immuneML.ml_methods.MLMethod import MLMethod
+from immuneML.ml_metrics.Metric import Metric
 from immuneML.workflows.steps.StepParams import StepParams
 
 

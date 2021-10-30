@@ -1,5 +1,4 @@
 import hashlib
-import warnings
 from inspect import signature
 from pathlib import Path
 from typing import Tuple
@@ -11,13 +10,13 @@ from immuneML.dsl.instruction_parsers.LabelHelper import LabelHelper
 from immuneML.dsl.symbol_table.SymbolTable import SymbolTable
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.environment.LabelConfiguration import LabelConfiguration
-from immuneML.environment.Metric import Metric
 from immuneML.hyperparameter_optimization.HPSetting import HPSetting
 from immuneML.hyperparameter_optimization.config.LeaveOneOutConfig import LeaveOneOutConfig
 from immuneML.hyperparameter_optimization.config.ManualSplitConfig import ManualSplitConfig
 from immuneML.hyperparameter_optimization.config.ReportConfig import ReportConfig
 from immuneML.hyperparameter_optimization.config.SplitConfig import SplitConfig
 from immuneML.hyperparameter_optimization.config.SplitType import SplitType
+from immuneML.ml_metrics.Metric import Metric
 from immuneML.reports.train_ml_model_reports.TrainMLModelReport import TrainMLModelReport
 from immuneML.util.ParameterValidator import ParameterValidator
 from immuneML.util.ReflectionHandler import ReflectionHandler
