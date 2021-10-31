@@ -1,0 +1,5 @@
+ignore_genes: False
+threads: 8
+compairr_path: Null
+p_value_threshold: 0.05
+sequence_batch_size: 100000

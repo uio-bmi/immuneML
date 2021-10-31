@@ -37,7 +37,7 @@ class DesignMatrixExporter(EncodingReport):
     .. indent with spaces
     .. code-block:: yaml
 
-        my_dme_report: DesignMatrixExporter
+        my_dme_report:
             DesignMatrixExporter:
                 file_format: csv
 

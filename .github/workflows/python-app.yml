@@ -28,6 +28,10 @@ jobs:
         python -m pip install --upgrade pip
         pip install flake8 pytest numpy==1.18.5
         pip install -r requirements.txt -r requirements_TCRdist.txt -r requirements_DeepRC.txt
+    - name: Install CompAIRR
+      run: |
+        git clone https://github.com/uio-bmi/compairr.git
+        make -C compairr
 #    - name: Lint with flake8
 #      run: |
 #        # stop the build if there are Python syntax errors or undefined names

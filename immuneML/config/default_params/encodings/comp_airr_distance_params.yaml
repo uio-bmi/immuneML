@@ -1,0 +1,7 @@
+differences: 0
+indels: False
+ignore_counts: False
+ignore_genes: False
+keep_compairr_input: False
+threads: 8
+compairr_path: Null
