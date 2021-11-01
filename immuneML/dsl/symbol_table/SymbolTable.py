@@ -10,11 +10,24 @@ class SymbolTable:
     """
     Symbol table contains all objects parsed from the specification in the following format:
 
-    --------------------------------------------------------------------------------------------------
-    symbol | symbol_type   | item                                                      | config      |
-    --------------------------------------------------------------------------------------------------
-    e1     | encoding      | EncodingObject                                            | {...}       | -> SymbolTableEntry object
-    seq1   | preprocessing | [ClonesPerRepertoireFilter(), MetadataRepertoireFilter()] | {...}       | -> SymbolTableEntry object
+    .. list-table::
+        :header-rows: 1
+
+        * - symbol
+          - symbol_type
+          - item
+          - config
+          -
+        * - e1
+          - encoding
+          - EncodingObject
+          - {..}
+          - -> SymbolTableEntry object
+        * - seq1
+          - preprocessing
+          - [ClonesPerRepertoireFilter(), MetadataRepertoireFilter()]
+          - {..}
+          - -> SymbolTableEntry object
 
     """
 

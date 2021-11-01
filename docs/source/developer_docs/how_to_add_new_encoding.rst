@@ -24,7 +24,7 @@ To add a new encoder:
 4. Implement the abstract methods :code:`encode()` and :code:`build_object()`.
 5. Implement methods to import and export an encoder: :code:`get_additional_files()`, :code:`export_encoder()` and :code:`load_encoder()`, mostly relying on functionality already available in :py:obj:`~immuneML.encodings.DatasetEncoder.DatasetEncoder`.
 6. Add class documentation including: what the encoder does, what the arguments are and an example on how to use it from YAML specification.
-7. Add the new encoder class to the list of compatible encoders returned by the :code:`get_compatible_encoders()` method of the :ref:`MLMethod` of interest.
+7. Add the new encoder class to the list of compatible encoders returned by the :code:`get_compatible_encoders()` method of the :py:obj:`~immuneML.ml_methods.MLMethod.MLMethod` of interest.
 
 An example of the implementation of :code:`NewKmerFrequencyEncoder` for the :py:obj:`~immuneML.data_model.dataset.RepertoireDataset.RepertoireDataset` is shown.
 

@@ -108,12 +108,13 @@ class ImportHelper:
     def update_gene_info(df: pd.DataFrame):
         """
         Updates gene info in 2 steps:
+
         - First, columns are added if they were not present. This is done by going from the highest level of information (alleles)
-          towards the lowest level of information (subgroups) by stripping away suffixes. If gene and subgroup columns were already
-          present, suffixes are still stripped away just in case.
+        towards the lowest level of information (subgroups) by stripping away suffixes. If gene and subgroup columns were already
+        present, suffixes are still stripped away just in case.
         - Next, if there are None values present, the highest possible level of information is copied in from the lower level information fields.
-          This is done by moving from subgroups towards alleles. So if for one particular receptor only the subgroup was present, the subgroup
-          will be copied into the genes and alleles column.
+        This is done by moving from subgroups towards alleles. So if for one particular receptor only the subgroup was present, the subgroup
+        will be copied into the genes and alleles column.
         """
         for gene in ['v', 'j']:
             # step 1: create all columns

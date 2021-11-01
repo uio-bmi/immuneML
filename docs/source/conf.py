@@ -60,7 +60,7 @@ extensions = [
 html_baseurl = 'https://docs.immuneml.uio.no'
 
 # mathjax configuration
-mathjax_config = {
+mathjax3_config = {
     'extensions': ['tex2jax.js'],
     'jax': ['input/TeX', 'output/HTML-CSS'],
 }

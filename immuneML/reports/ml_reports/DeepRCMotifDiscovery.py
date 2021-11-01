@@ -19,8 +19,9 @@ class DeepRCMotifDiscovery(MLReport):
     This report plots the contributions of (i) input sequences and (ii) kernels to trained :ref:`DeepRC` model with respect to
     the test dataset. Contributions are computed using integrated gradients (IG).
     This report produces two figures:
-        - inputs_integrated_gradients: Shows the contributions of the characters within the input sequences (test dataset) that was most important for immune status prediction of the repertoire. IG is only applied to sequences of positive class repertoires.
-        - kernel_integrated_gradients: Shows the 1D CNN kernels with the highest contribution over all positions and amino acids.
+
+    - inputs_integrated_gradients: Shows the contributions of the characters within the input sequences (test dataset) that was most important for immune status prediction of the repertoire. IG is only applied to sequences of positive class repertoires.
+    - kernel_integrated_gradients: Shows the 1D CNN kernels with the highest contribution over all positions and amino acids.
 
     For both inputs and kernels: Larger characters in the extracted motifs indicate higher contribution, with blue
     indicating positive contribution and red indicating negative contribution towards the prediction of the immune status.

@@ -58,6 +58,14 @@ documentation under :ref:`YAML specification`.
 
 Our open-source code can be found on `GitHub <https://github.com/uio-bmi/ImmuneML>`_ :)
 
+Previous versions
+-------------------
+
+Documentation for previous immuneML versions can be found here:
+
+- `v2.0.4 <https://docs.immuneml.uio.no/v2.0.4/>`_
+- `v1.2.5 <https://docs.immuneml.uio.no/v1.2.5/>`_
+
 
 .. toctree::
    :maxdepth: 1
