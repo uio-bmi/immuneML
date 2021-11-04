@@ -39,7 +39,7 @@ class TestKmerAbundanceEncoder(TestCase):
         dataset = RepertoireDataset(repertoires=repertoires, metadata_file=metadata, identifier="1")
 
         encoder = KmerAbundanceEncoder.build_object(dataset, **{
-            "p_value_threshold": 0.4
+            "p_value_threshold": 0.4, "sequence_encoding": "continuous_kmer", "k":3, "k_left": 0, "k_right": 0, "min_gap": 0, "max_gap": 0
         })
 
         label_config = LabelConfiguration([Label("l1", [True, False], positive_class=True)])
@@ -55,6 +55,8 @@ class TestKmerAbundanceEncoder(TestCase):
         self.assertTrue(np.array_equal(np.array([[0, 4], [0, 6], [0, 3], [0, 6]]), encoded_dataset.encoded_data.examples))
 
         shutil.rmtree(path)
+
+        # todo test files that are outputted
 
 
 

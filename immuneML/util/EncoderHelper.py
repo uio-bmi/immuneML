@@ -62,14 +62,3 @@ class EncoderHelper:
             setattr(encoder, param, copy.deepcopy(encoder_from_cache[param]))
 
         return encoder
-
-    @staticmethod
-    def check_positive_class_label(class_name, labels):
-        assert len(labels) == 1, \
-            f"{class_name}: this encoding works only for single label."
-
-        assert isinstance(labels[0], Label) and labels[0].positive_class is not None and labels[0].positive_class != "", \
-            f"{class_name}: to use this encoder, in the label definition in the specification of the instruction, define " \
-            f"the positive class for the label. Now it is set to '{labels[0].positive_class}'. See documentation for this encoder for more details."
-
-

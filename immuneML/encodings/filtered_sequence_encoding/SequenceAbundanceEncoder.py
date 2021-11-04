@@ -9,6 +9,7 @@ from immuneML.data_model.encoded_data.EncodedData import EncodedData
 from immuneML.data_model.repertoire.Repertoire import Repertoire
 from immuneML.encodings.DatasetEncoder import DatasetEncoder
 from immuneML.encodings.EncoderParams import EncoderParams
+from immuneML.encodings.filtered_sequence_encoding.AbundanceEncoderHelper import AbundanceEncoderHelper
 from immuneML.encodings.filtered_sequence_encoding.SequenceFilterHelper import SequenceFilterHelper
 from immuneML.pairwise_repertoire_comparison.ComparisonData import ComparisonData
 from immuneML.util.EncoderHelper import EncoderHelper
@@ -87,9 +88,7 @@ class SequenceAbundanceEncoder(DatasetEncoder):
         return SequenceAbundanceEncoder(**params)
 
     def encode(self, dataset, params: EncoderParams):
-
-        EncoderHelper.check_positive_class_label(SequenceAbundanceEncoder.__name__,
-                                                 params.label_config.get_label_objects())
+        AbundanceEncoderHelper.check_labels(params.label_config, SequenceAbundanceEncoder.__name__)
 
         self.comparison_data = SequenceFilterHelper.build_comparison_data(dataset, self.context, self.comparison_attributes, params,
                                                                           self.sequence_batch_size)

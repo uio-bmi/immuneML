@@ -67,45 +67,47 @@ class TestCompAIRRSequenceAbundanceEncoder(TestCase):
 
         shutil.rmtree(path)
 
-    def test_find_sequence_p_values_with_fisher(self):
-        encoder = CompAIRRSequenceAbundanceEncoder(p_value_threshold=None,
-                                                   compairr_path="",
-                                                   sequence_batch_size=1000,
-                                                   ignore_genes=None,
-                                                   threads=None)
+        # todo test for file outputs
 
-        sequence_presence_matrix = np.array([[1, 0, 0, 0],
-                                             [1, 0, 1, 1],
-                                             [1, 1, 1, 1],
-                                             [0, 0, 0, 1],
-                                             [0, 0, 1, 0]])
-
-        is_first_class = np.array([True, False, False, True])
-
-        pvals = encoder._find_sequence_p_values_with_fisher(sequence_presence_matrix, is_first_class)
-
-        expected = [2, 0.5, 1.0, 2, 2]
-
-        for real, expected in zip(pvals, expected):
-            self.assertAlmostEqual(real, expected, places=7)
-
-
-    def test_build_abundance_matrix(self):
-        encoder = CompAIRRSequenceAbundanceEncoder(p_value_threshold=None,
-                                                   compairr_path="",
-                                                   sequence_batch_size=1000,
-                                                   ignore_genes=None,
-                                                   threads=None)
-
-        sequence_presence_matrix = np.array([[0, 1], [1, 1], [1, 0]])
-        matrix_repertoire_ids = np.array(["r1", "r2"])
-        dataset_repertoire_ids = ["r2"]
-        sequence_p_values_indices = [True, False, True]
-
-        abundance_matrix = encoder._build_abundance_matrix(sequence_presence_matrix, matrix_repertoire_ids,
-                                                           dataset_repertoire_ids, sequence_p_values_indices)
-
-        expected = np.array([[1., 2.]])
-
-        self.assertTrue((abundance_matrix == expected).all())
-
+    # def test_find_sequence_p_values_with_fisher(self):
+    #     encoder = CompAIRRSequenceAbundanceEncoder(p_value_threshold=None,
+    #                                                compairr_path="",
+    #                                                sequence_batch_size=1000,
+    #                                                ignore_genes=None,
+    #                                                threads=None)
+    #
+    #     sequence_presence_matrix = np.array([[1, 0, 0, 0],
+    #                                          [1, 0, 1, 1],
+    #                                          [1, 1, 1, 1],
+    #                                          [0, 0, 0, 1],
+    #                                          [0, 0, 1, 0]])
+    #
+    #     is_first_class = np.array([True, False, False, True])
+    #
+    #     pvals = encoder._find_sequence_p_values_with_fisher(sequence_presence_matrix, is_first_class)
+    #
+    #     expected = [2, 0.5, 1.0, 2, 2]
+    #
+    #     for real, expected in zip(pvals, expected):
+    #         self.assertAlmostEqual(real, expected, places=7)
+    #
+    #
+    # def test_build_abundance_matrix(self):
+    #     encoder = CompAIRRSequenceAbundanceEncoder(p_value_threshold=None,
+    #                                                compairr_path="",
+    #                                                sequence_batch_size=1000,
+    #                                                ignore_genes=None,
+    #                                                threads=None)
+    #
+    #     sequence_presence_matrix = np.array([[0, 1], [1, 1], [1, 0]])
+    #     matrix_repertoire_ids = np.array(["r1", "r2"])
+    #     dataset_repertoire_ids = ["r2"]
+    #     sequence_p_values_indices = [True, False, True]
+    #
+    #     abundance_matrix = encoder._build_abundance_matrix(sequence_presence_matrix, matrix_repertoire_ids,
+    #                                                        dataset_repertoire_ids, sequence_p_values_indices)
+    #
+    #     expected = np.array([[1., 2.]])
+    #
+    #     self.assertTrue((abundance_matrix == expected).all())
+    #
