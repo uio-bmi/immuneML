@@ -130,9 +130,7 @@ class KmerAbundanceEncoder(DatasetEncoder):
         AbundanceEncoderHelper.check_labels(params.label_config, KmerAbundanceEncoder.__name__)
 
         self._prepare_kmer_presence_data(dataset, params)
-        encoded_dataset = self._encode_data(dataset, params)
-
-        return encoded_dataset
+        return self._encode_data(dataset, params)
 
     def _prepare_kmer_presence_data(self, dataset, params):
         full_dataset = EncoderHelper.get_current_dataset(dataset, self.context)
@@ -172,7 +170,7 @@ class KmerAbundanceEncoder(DatasetEncoder):
     def _encode_data(self, dataset: RepertoireDataset, params: EncoderParams):
         label = params.label_config.get_label_objects()[0]
 
-        examples = self.calculate_abundance_matrix(dataset, self.kmer_presence_matrix, self.matrix_repertoire_ids, params)
+        examples = self._calculate_abundance_matrix(dataset, self.kmer_presence_matrix, self.matrix_repertoire_ids, params)
 
         encoded_data = EncodedData(examples, dataset.get_metadata([label.name]) if params.encode_labels else None, dataset.get_repertoire_ids(),
                                    [KmerAbundanceEncoder.RELEVANT_SEQUENCE_ABUNDANCE,
@@ -186,7 +184,7 @@ class KmerAbundanceEncoder(DatasetEncoder):
 
         return encoded_dataset
 
-    def calculate_abundance_matrix(self, dataset: RepertoireDataset, sequence_presence_matrix, matrix_repertoire_ids,
+    def _calculate_abundance_matrix(self, dataset: RepertoireDataset, sequence_presence_matrix, matrix_repertoire_ids,
                                    params: EncoderParams):
         relevant = np.isin(matrix_repertoire_ids, dataset.get_repertoire_ids())
         sequence_presence_matrix = sequence_presence_matrix[:, relevant]

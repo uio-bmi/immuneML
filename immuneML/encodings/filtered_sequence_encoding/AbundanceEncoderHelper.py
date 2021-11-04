@@ -39,12 +39,12 @@ class AbundanceEncoderHelper:
         return is_positive_class
 
     @staticmethod
-    def get_relevant_sequence_indices(sequence_presence_matrix, is_first_class, p_value_threshold, relevant_indices_path, params):
+    def get_relevant_sequence_indices(sequence_presence_iterator, is_first_class, p_value_threshold, relevant_indices_path, params):
         relevant_indices_path = relevant_indices_path if relevant_indices_path is not None else params.result_path / 'relevant_sequence_indices.pickle'
         file_paths = {"relevant_indices_path": relevant_indices_path}
 
         if params.learn_model:
-            contingency_table = AbundanceEncoderHelper._get_contingency_table(sequence_presence_matrix, is_first_class)
+            contingency_table = AbundanceEncoderHelper._get_contingency_table(sequence_presence_iterator, is_first_class)
             p_values = AbundanceEncoderHelper._find_sequence_p_values_with_fisher(contingency_table)
             relevant_sequence_indices = p_values < p_value_threshold
 
@@ -60,12 +60,13 @@ class AbundanceEncoderHelper:
         return relevant_sequence_indices, file_paths
 
     @staticmethod
-    def _get_contingency_table(sequence_presence_matrix, is_first_class):
-        contingency_table = np.zeros(shape=(sequence_presence_matrix.shape[0], 4), dtype=int)
+    def _get_contingency_table(sequence_presence_iterator, is_first_class):
+        contingency_table = np.zeros(shape=(len(sequence_presence_iterator), 4), dtype=int)
 
-        for i, sequence_vector in enumerate(sequence_presence_matrix):
+        for i, sequence_vector in enumerate(sequence_presence_iterator):
             contingency_table[i, 0] = np.sum(sequence_vector[np.logical_and(sequence_vector, is_first_class)])
-            contingency_table[i, 1] = np.sum(sequence_vector[np.logical_and(sequence_vector, np.logical_not(is_first_class))])
+            contingency_table[i, 1] = np.sum(
+                sequence_vector[np.logical_and(sequence_vector, np.logical_not(is_first_class))])
             contingency_table[i, 2] = np.sum(np.logical_and(is_first_class, sequence_vector == 0))
             contingency_table[i, 3] = np.sum(np.logical_and(np.logical_not(is_first_class), sequence_vector == 0))
 

@@ -6,18 +6,12 @@ import numpy as np
 
 from immuneML.caching.CacheType import CacheType
 from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
-from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
-from immuneML.data_model.repertoire.Repertoire import Repertoire
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.encodings.filtered_sequence_encoding.KmerAbundanceEncoder import KmerAbundanceEncoder
-from immuneML.encodings.filtered_sequence_encoding.SequenceAbundanceEncoder import SequenceAbundanceEncoder
-from immuneML.encodings.filtered_sequence_encoding.SequenceFilterHelper import SequenceFilterHelper
 from immuneML.environment.Constants import Constants
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.environment.Label import Label
 from immuneML.environment.LabelConfiguration import LabelConfiguration
-from immuneML.pairwise_repertoire_comparison.ComparisonData import ComparisonData
-from immuneML.pairwise_repertoire_comparison.ComparisonDataBatch import ComparisonDataBatch
 from immuneML.util.PathBuilder import PathBuilder
 from immuneML.util.RepertoireBuilder import RepertoireBuilder
 

@@ -1,12 +1,10 @@
 import copy
 import math
-import pickle
 import subprocess
 from multiprocessing.pool import Pool
 from pathlib import Path
 from typing import List
 
-import fisher
 import numpy as np
 import pandas as pd
 
@@ -17,7 +15,6 @@ from immuneML.data_model.repertoire.Repertoire import Repertoire
 from immuneML.encodings.DatasetEncoder import DatasetEncoder
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.encodings.filtered_sequence_encoding.AbundanceEncoderHelper import AbundanceEncoderHelper
-from immuneML.encodings.filtered_sequence_encoding.SequenceFilterHelper import SequenceFilterHelper
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.environment.SequenceType import SequenceType
 from immuneML.util.CompAIRRHelper import CompAIRRHelper
@@ -142,9 +139,7 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
         AbundanceEncoderHelper.check_labels(params.label_config, CompAIRRSequenceAbundanceEncoder.__name__)
 
         self._prepare_sequence_presence_data(dataset, params)
-        encoded_dataset = self._encode_data(dataset, params)
-
-        return encoded_dataset
+        return self._encode_data(dataset, params)
 
     def _prepare_sequence_presence_data(self, dataset, params):
         full_dataset = EncoderHelper.get_current_dataset(dataset, self.context)
@@ -260,7 +255,7 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
     def _encode_data(self, dataset: RepertoireDataset, params: EncoderParams):
         label = params.label_config.get_label_objects()[0]
 
-        examples = self.calculate_abundance_matrix(dataset, self.sequence_presence_matrix, self.matrix_repertoire_ids, params)
+        examples = self._calculate_abundance_matrix(dataset, self.sequence_presence_matrix, self.matrix_repertoire_ids, params)
 
         encoded_data = EncodedData(examples, dataset.get_metadata([label.name]) if params.encode_labels else None, dataset.get_repertoire_ids(),
                                    [CompAIRRSequenceAbundanceEncoder.RELEVANT_SEQUENCE_ABUNDANCE,
@@ -274,7 +269,7 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
 
         return encoded_dataset
 
-    def calculate_abundance_matrix(self, dataset: RepertoireDataset, sequence_presence_matrix, matrix_repertoire_ids,
+    def _calculate_abundance_matrix(self, dataset: RepertoireDataset, sequence_presence_matrix, matrix_repertoire_ids,
                                    params: EncoderParams):
         relevant = np.isin(matrix_repertoire_ids, dataset.get_repertoire_ids())
         sequence_presence_matrix = sequence_presence_matrix[:, relevant]
