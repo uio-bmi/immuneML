@@ -21,7 +21,7 @@ class ComparisonData:
         self.item_count = 0
         self.comparison_attributes = comparison_attributes
         self.repertoire_ids = repertoire_ids
-        self.current_repertoire_ids = None
+        self.iteration_repertoire_ids = None
         self.batches = []
         self.tmp_batch_paths = []
 
@@ -29,7 +29,11 @@ class ComparisonData:
         return self.item_count
 
     def __iter__(self):
-        return self.get_item_vectors(self.current_repertoire_ids)
+        return self.get_item_vectors(self.iteration_repertoire_ids)
+
+    def set_iteration_repertoire_ids(self, iteration_repertoire_ids):
+        '''Defines the subset and order of repertoires to iterate over'''
+        self.iteration_repertoire_ids = iteration_repertoire_ids
 
     def build_matching_fn(self):
         return lambda repertoire: list(set(zip(*[value for value in repertoire.get_attributes(self.comparison_attributes).values() if value is not None])))

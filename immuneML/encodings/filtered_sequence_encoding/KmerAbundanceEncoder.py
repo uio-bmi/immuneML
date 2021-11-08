@@ -27,20 +27,15 @@ from scripts.specification_util import update_docs_per_mapping
 
 class KmerAbundanceEncoder(DatasetEncoder):
     """
-    This encoder works similarly to the :py:obj:`~immuneML.encodings.filtered_sequence_encoding.SequenceAbundanceEncoder.SequenceAbundanceEncoder`,
-    but internally uses `CompAIRR <https://github.com/uio-bmi/compairr/>`_ to accelerate core computations.
+    This encoder is related to the :py:obj:`~immuneML.encodings.filtered_sequence_encoding.SequenceAbundanceEncoder.SequenceAbundanceEncoder`,
+    but identifies label-associated subsequences (k-mers) instead of full label-associated sequences.
 
     This encoder represents the repertoires as vectors where:
 
-    - the first element corresponds to the number of label-associated clonotypes
-    - the second element is the total number of unique clonotypes
+    - the first element corresponds to the number of label-associated k-mers found in a repertoire
+    - the second element is the total number of unique k-mers per repertoire
 
-    To determine what clonotypes (with or without matching V/J genes) are label-associated
-    based on a statistical test. The statistical test used is Fisher's exact test (one-sided).
-
-    Reference: Emerson, Ryan O. et al.
-    ‘Immunosequencing Identifies Signatures of Cytomegalovirus Exposure History and HLA-Mediated Effects on the T Cell Repertoire’.
-    Nature Genetics 49, no. 5 (May 2017): 659–65. `doi.org/10.1038/ng.3822 <https://doi.org/10.1038/ng.3822>`_.
+    The label-associated k-mers are determined based on a one-sided Fisher's exact test.
 
     Note: to use this encoder, it is necessary to explicitly define the positive class for the label when defining the label
     in the instruction. With positive class defined, it can then be determined which sequences are indicative of the positive class.
@@ -50,18 +45,17 @@ class KmerAbundanceEncoder(DatasetEncoder):
 
         p_value_threshold (float): The p value threshold to be used by the statistical test.
 
-        compairr_path (Path): optional path to the CompAIRR executable. If not given, it is assumed that CompAIRR
-        has been installed such that it can be called directly on the command line with the command 'compairr',
-        or that it is located at /usr/local/bin/compairr.
+        sequence_encoding (:py:mod:`~immuneML.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType`): The type of k-mers that are used. The simplest (default) sequence_encoding is :py:mod:`~immuneML.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType.CONTINUOUS_KMER`, which uses contiguous subsequences of length k to represent the k-mers. When gapped k-mers are used (:py:mod:`~immuneML.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType.GAPPED_KMER`, :py:mod:`~immuneML.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType.GAPPED_KMER`), the k-mers may contain gaps with a size between min_gap and max_gap, and the k-mer length is defined as a combination of k_left and k_right. When IMGT k-mers are used (:py:mod:`~immuneML.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType.IMGT_CONTINUOUS_KMER`, :py:mod:`~immuneML.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType.IMGT_GAPPED_KMER`), IMGT positional information is taken into account (i.e. the same sequence in a different position is considered to be a different k-mer).
 
-        ignore_genes (bool): Whether to ignore V and J gene information. If False, the V and J genes between two receptor chains
-        have to match. If True, gene information is ignored. By default, ignore_genes is False.
+        k (int): Length of the k-mer (number of amino acids) when ungapped k-mers are used. The default value for k is 3.
 
-        sequence_batch_size (int): The number of sequences in a batch when comparing sequences across repertoires, typically 100s of thousands.
-        This does not affect the results of the encoding, only the speed and memory usage.
+        k_left (int): When gapped k-mers are used, k_left indicates the length of the k-mer left of the gap. The default value for k_left is 1.
 
-        threads (int): The number of threads to use for parallelization. This does not affect the results of the encoding, only the speed.
-        The default number of threads is 8.
+        k_right (int): Same as k_left, but k_right determines the length of the k-mer right of the gap. The default value for k_right is 1.
+
+        min_gap (int): Minimum gap size when gapped k-mers are used. The default value for min_gap is 0.
+
+        max_gap: (int): Maximum gap size when gapped k-mers are used. The default value for max_gap is 0.
 
 
     YAML specification:
@@ -79,8 +73,8 @@ class KmerAbundanceEncoder(DatasetEncoder):
     RELEVANT_SEQUENCE_ABUNDANCE = "relevant_sequence_abundance"
     TOTAL_SEQUENCE_ABUNDANCE = "total_sequence_abundance"
 
-    def __init__(self, p_value_threshold: float, sequence_encoding: SequenceEncodingType, k: int = 0,
-                 k_left: int = 0, k_right: int = 0, min_gap: int = 0, max_gap: int = 0, name: str = None):
+    def __init__(self, p_value_threshold: float, sequence_encoding: SequenceEncodingType, k: int,
+                 k_left: int, k_right: int, min_gap: int, max_gap: int, name: str = None):
         self.name = name
         self.p_value_threshold = p_value_threshold
 
@@ -100,11 +94,13 @@ class KmerAbundanceEncoder(DatasetEncoder):
         self.raw_distance_matrix_np = None
 
     @staticmethod
-    def _prepare_parameters(p_value_threshold: float, sequence_encoding: str, k: int = 0,
-                 k_left: int = 0, k_right: int = 0, min_gap: int = 0, max_gap: int = 0, name: str = None):
+    def _prepare_parameters(p_value_threshold: float, sequence_encoding: str, k: int,
+                 k_left: int, k_right: int, min_gap: int, max_gap: int, name: str = None):
         ParameterValidator.assert_type_and_value(p_value_threshold, float, "KmerAbundanceEncoder", "p_value_threshold", min_inclusive=0, max_inclusive=1)
 
-        kmerfreq_params = KmerFrequencyEncoder._prepare_parameters(normalization_type="binary", reads= "unique",
+        assert sequence_encoding.upper() != SequenceEncodingType.IDENTITY.name, "KmerAbundanceEncoder: sequence encoding type 'identity' is not a valid option for this encoder. To encode a dataset based on the presence or absence of complete sequences, please use SequenceAbundanceEncoder or CompAIRRSequenceAbundanceEncoder instead."
+
+        kmerfreq_params = KmerFrequencyEncoder._prepare_parameters(normalization_type="binary", reads="unique",
                                                                    sequence_encoding=sequence_encoding,
                                                                    k= k, k_left=k_left, k_right=k_right, min_gap=min_gap,
                                                                    max_gap=max_gap, sequence_type="amino_acid")
@@ -234,9 +230,6 @@ class KmerAbundanceEncoder(DatasetEncoder):
     def load_encoder(encoder_file: Path):
         encoder = DatasetEncoder.load_encoder(encoder_file)
         encoder.relevant_indices_path = DatasetEncoder.load_attribute(encoder, encoder_file, "relevant_indices_path")
-        encoder.relevant_sequence_path = DatasetEncoder.load_attribute(encoder, encoder_file, "relevant_sequence_path")
-        encoder.contingency_table_path = DatasetEncoder.load_attribute(encoder, encoder_file, "contingency_table_path")
-        encoder.p_values_path = DatasetEncoder.load_attribute(encoder, encoder_file, "p_values_path")
 
         return encoder
 

@@ -22,11 +22,11 @@ class SequenceAnalysisHelper:
 
         for index1 in range(len(hp_items)):
             overlap_matrix[index1, index1] = 100
-            sequences1 = import_sequences_as_set(hp_items[index1].encoder.relevant_sequence_csv_path)
+            sequences1 = import_sequences_as_set(hp_items[index1].encoder.relevant_sequence_path)
             if len(sequences1) == 0:
                 return None
             for index2 in range(index1 + 1, len(hp_items)):
-                sequences2 = import_sequences_as_set(hp_items[index2].encoder.relevant_sequence_csv_path)
+                sequences2 = import_sequences_as_set(hp_items[index2].encoder.relevant_sequence_path)
                 if len(sequences2) == 0:
                     return None
                 intersection = sequences1.intersection(sequences2)

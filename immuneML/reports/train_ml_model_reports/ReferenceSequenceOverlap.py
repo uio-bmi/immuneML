@@ -156,7 +156,7 @@ class ReferenceSequenceOverlap(TrainMLModelReport):
 
     def _extract_from_model(self, encoder):
 
-        model_sequences_df = pd.read_csv(getattr(encoder, "relevant_sequence_csv_path"))
+        model_sequences_df = pd.read_csv(getattr(encoder, "relevant_sequence_path"))
         model_attributes = model_sequences_df.columns.tolist()
         assert all(attribute in self.comparison_attributes for attribute in model_attributes), \
             f"{ReferenceSequenceOverlap.__name__}: comparison attributes from the report {self.name} ({self.comparison_attributes}) and from the optimal " \

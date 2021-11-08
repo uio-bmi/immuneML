@@ -15,7 +15,7 @@ from immuneML.util.PathBuilder import PathBuilder
 
 class RelevantSequenceExporter(EncodingReport):
     """
-    Exports the sequences that are extracted as label-associated using the `SequenceAbundance` encoder in AIRR-compliant format.
+    Exports the sequences that are extracted as label-associated when using the `SequenceAbundance` or `CompAIRRSequenceAbundance` encoder in AIRR-compliant format.
 
     Arguments: there are no arguments for this report.
 
