@@ -53,14 +53,15 @@ class TestFeatureComparison(TestCase):
         return dataset
 
     def test_generate(self):
-        path = EnvironmentSettings.root_path / "test/tmp/featuredistribution/"
+        path = EnvironmentSettings.root_path / "test/tmp/featurecomparison/"
         PathBuilder.build(path)
 
         dataset = self._create_dummy_encoded_data(path)
 
         report = FeatureComparison.build_object(**{"dataset": dataset,
                                                      "result_path": path,
-                                                     "comparison_label": "patient"})
+                                                     "comparison_label": "patient",
+                                                   "keep_fraction": 0.2})
 
         self.assertTrue(report.check_prerequisites())
 
