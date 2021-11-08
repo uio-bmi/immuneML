@@ -21,3 +21,4 @@ logomaker>=0.8
 fishersapi
 matplotlib-venn>=0.11
 scipy
+Cython
