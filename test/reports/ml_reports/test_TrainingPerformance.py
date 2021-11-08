@@ -14,7 +14,7 @@ from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.ml_reports.TrainingPerformance import TrainingPerformance
 
 
-class TestEvaluation(unittest.TestCase):
+class TestTrainPerformance(unittest.TestCase):
 
     def setUp(self) -> None:
         os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
@@ -39,7 +39,7 @@ class TestEvaluation(unittest.TestCase):
         return report
 
     def test_generate(self):
-        path = EnvironmentSettings.root_path / "test/tmp/evaluations/"
+        path = EnvironmentSettings.tmp_test_path / "training_performance/"
 
         report = self._create_report(path)
 
@@ -54,7 +54,3 @@ class TestEvaluation(unittest.TestCase):
         self.assertEqual(os.path.isfile(path / "testcase.html"), True)
 
         shutil.rmtree(path)
-
-
-if __name__ == '__main__':
-    unittest.main()
