@@ -186,7 +186,7 @@ class KmerFrequencyEncoder(DatasetEncoder):
 
         self._initialize_vectorizer(params)
         vectorized_examples = self._vectorize_encoded(examples=encoded_example_list, params=params)
-        feature_names = self.vectorizer.get_feature_names()
+        feature_names = self.vectorizer.feature_names_
         normalized_examples = FeatureScaler.normalize(vectorized_examples, self.normalization_type)
 
         if self.scale_to_unit_variance:

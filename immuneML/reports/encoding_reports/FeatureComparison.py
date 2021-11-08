@@ -7,6 +7,7 @@ import plotly.express as px
 from immuneML.data_model.dataset.Dataset import Dataset
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.encoding_reports.FeatureReport import FeatureReport
+from immuneML.util.ParameterValidator import ParameterValidator
 
 
 class FeatureComparison(FeatureReport):
@@ -21,7 +22,7 @@ class FeatureComparison(FeatureReport):
 
     Optional metadata labels can be specified to divide the scatterplot into groups based on color, row facets or column facets.
 
-    Alternatively, when the feature values are of interest without comparing them between subgroups of the data, please
+    Alternatively, when the feature values are of interest without comparing them between labelled subgroups of the data, please
     use :ref:`FeatureValueBarplot` or :ref:`FeatureDistribution` instead.
 
     Arguments:
@@ -29,13 +30,18 @@ class FeatureComparison(FeatureReport):
         comparison_label (str): Mandatory label. This label is used to split the encoded data matrix and define the x and y axes of the plot.
         This label is only allowed to have 2 classes (for example: sick and healthy, binding and non-binding).
 
-        color_grouping_label (str): The label that is used to color the points in the scatterplot. This can not be the same as comparison_label.
+        color_grouping_label (str): Optional label that is used to color the points in the scatterplot. This can not be the same as comparison_label.
 
-        row_grouping_label (str): The label that is used to group scatterplots into different row facets. This can not be the same as comparison_label.
+        row_grouping_label (str): Optional label that is used to group scatterplots into different row facets. This can not be the same as comparison_label.
 
-        column_grouping_label (str): The label that is used to group scatterplots into different column facets. This can not be the same as comparison_label.
+        column_grouping_label (str): Optional label that is used to group scatterplots into different column facets. This can not be the same as comparison_label.
 
         show_error_bar (bool): Whether to show the error bar (standard deviation) for the points, both in the x and y dimension.
+
+        keep_fraction (float): The total number of features may be very large and only the features differing significantly across
+        comparison labels may be of interest. When the keep_fraction parameter is set below 1, only the fraction of features that
+        differs the most across comparison labels is kept for plotting (note that the produced .csv file still contains all data).
+        By default, keep_fraction is 1, meaning that all features are plotted.
 
 
     YAML specification:
@@ -55,6 +61,8 @@ class FeatureComparison(FeatureReport):
         color_grouping_label = kwargs["color_grouping_label"] if "color_grouping_label" in kwargs else None
         row_grouping_label = kwargs["row_grouping_label"] if "row_grouping_label" in kwargs else None
         column_grouping_label = kwargs["column_grouping_label"] if "column_grouping_label" in kwargs else None
+        keep_fraction = float(kwargs["keep_fraction"]) if "keep_fraction" in kwargs else 1.0
+        ParameterValidator.assert_type_and_value(keep_fraction, float, "FeatureComparison", "keep_fraction", min_inclusive=0, max_inclusive=1)
 
         assert comparison_label is not None, "FeatureComparison: the parameter 'comparison_label' must be set in order to be able to compare across this label"
 
@@ -66,11 +74,12 @@ class FeatureComparison(FeatureReport):
 
     def __init__(self, dataset: Dataset = None, result_path: Path = None, comparison_label: str = None,
                  color_grouping_label: str = None, row_grouping_label=None, column_grouping_label=None,
-                 show_error_bar=True, name: str = None):
+                 show_error_bar=True, keep_fraction: int = 1, name: str = None):
         super().__init__(dataset=dataset, result_path=result_path, color_grouping_label=color_grouping_label,
                          row_grouping_label=row_grouping_label, column_grouping_label=column_grouping_label, name=name)
         self.comparison_label = comparison_label
         self.show_error_bar = show_error_bar
+        self.keep_fraction = keep_fraction
         self.result_name = "feature_comparison"
         self.name = name
 
@@ -90,9 +99,13 @@ class FeatureComparison(FeatureReport):
             unique_label_values) == 2, f"FeatureComparison: comparison label {self.comparison_label} does not have 2 values; {unique_label_values}"
         class_x, class_y = unique_label_values
 
+        merge_labels = [label for label in ["feature", self.color, self.facet_row, self.facet_column] if label]
+
         plotting_data = pd.merge(plotting_data.loc[plotting_data[self.comparison_label] == class_x],
                                  plotting_data.loc[plotting_data[self.comparison_label] == class_y],
-                                 on=["feature"])
+                                 on=merge_labels)
+
+        plotting_data = self._filter_keep_fraction(plotting_data)
 
         error_x = "valuestd_x" if self.show_error_bar else None
         error_y = "valuestd_y" if self.show_error_bar else None
@@ -112,6 +125,14 @@ class FeatureComparison(FeatureReport):
         figure.write_html(str(file_path))
 
         return ReportOutput(path=file_path, name=f"Comparison of feature values across {self.comparison_label}")
+
+    def _filter_keep_fraction(self, plotting_data):
+        plotting_data["diff_xy"] = abs(plotting_data["valuemean_x"] - plotting_data["valuemean_y"])
+        plotting_data.sort_values(by="diff_xy", inplace=True, ascending=False)
+        plotting_data.drop(columns="diff_xy", inplace=True)
+
+        keep_nrows = round(plotting_data.shape[0] * self.keep_fraction)
+        return plotting_data.head(keep_nrows)
 
     def check_prerequisites(self):
         location = self.__class__.__name__

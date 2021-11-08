@@ -8,6 +8,7 @@ from sklearn import metrics as sklearn_metrics
 from sklearn.preprocessing import label_binarize
 
 from immuneML.data_model.dataset.Dataset import Dataset
+from immuneML.environment.Constants import Constants
 from immuneML.hyperparameter_optimization import HPSetting
 from immuneML.ml_methods.MLMethod import MLMethod
 from immuneML.ml_metrics import ml_metrics
@@ -132,26 +133,33 @@ class TrainingPerformance(MLReport):
         except ValueError as err:
             warnings.warn(f"TrainingPerformance: score for metric {metric.name} could not be calculated."
                           f"\nPredicted values: {predicted_y}\nTrue values: {true_y}.\nMore details: {err}", RuntimeWarning)
-            score = "not computed"
+            score = Constants.NOT_COMPUTED
 
         return score
 
     def _generate_barplot(self, df, output):
+        import plotly.express as px
+
         path_csv = self.result_path / f"{self.name}.csv"
         path_html = self.result_path / f"{self.name}.html"
 
         df.to_csv(path_csv)
+        #
+        # layout = go.Layout(title=f'Evaluation Metrics ({self.label})',
+        #                    xaxis=dict(title='Metrics'),
+        #                    yaxis=dict(title='Value'), template='plotly_white')
+        # trace = go.Bar(x=df.index, y=df[self.label], orientation='v', marker={'colorscale': 'Tealrose'})
+        #
+        # fig = go.Figure(data=[trace], layout=layout)
 
-        layout = go.Layout(title=f'Evaluation Metrics ({self.label})',
-                           xaxis=dict(title='Value'),
-                           yaxis=dict(title='Metrics'))
-        trace = go.Bar(x=df[self.label], y=df.index, marker_color='navy', orientation='h')
+        figure = px.bar(df, x=df.index, y=self.label, labels={'index': "metrics"},
+                        template='plotly_white', color_discrete_sequence=px.colors.diverging.Tealrose,
+                        title=f"Evaluation metrics ({self.label})")
 
-        fig = go.Figure(data=[trace], layout=layout)
-        fig.write_html(str(path_html))
+        figure.write_html(str(path_html))
 
-        output['tables'].append(ReportOutput(path_csv, "TrainingPerformance table"))
-        output['figures'].append(ReportOutput(path_html, "TrainingPerformance html"))
+        output['tables'].append(ReportOutput(path_csv, "training performance in csv"))
+        output['figures'].append(ReportOutput(path_html, "training performance on selected metrics"))
 
         return
 
@@ -196,22 +204,19 @@ class TrainingPerformance(MLReport):
 
     def check_prerequisites(self) -> bool:
         if not hasattr(self, "result_path") or self.result_path is None:
-            warnings.warn(f"{self.__class__.__name__} requires an output"
-                          f" 'path' to be set. {self.__class__.__name__}"
+            warnings.warn(f"{self.__class__.__name__} requires an output 'path' to be set. {self.__class__.__name__}"
                           f" report will not be created.")
             return False
 
         if self.train_dataset is None or self.train_dataset.encoded_data is None:
             warnings.warn(
-                f"{self.__class__.__name__}: train dataset is"
-                f" not encoded and can not be run."
+                f"{self.__class__.__name__}: train dataset is not encoded and can not be run."
                 f"{self.__class__.__name__} report will not be created.")
             return False
 
         if self.method is None:
             warnings.warn(
-                f"{self.__class__.__name__}: method is"
-                f" not defined and can not be run."
+                f"{self.__class__.__name__}: method is not defined and can not be run."
                 f"{self.__class__.__name__} report will not be created.")
             return False
 
