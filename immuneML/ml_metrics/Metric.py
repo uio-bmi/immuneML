@@ -22,5 +22,12 @@ class Metric(Enum):
             return max
 
     @staticmethod
+    def get_sklearn_score_name(metric):
+        if metric in [Metric.LOG_LOSS]:
+            return f"neg_{metric.name.lower()}"
+        else:
+            return metric.name.lower()
+
+    @staticmethod
     def get_probability_based_metric_types():
         return [Metric.LOG_LOSS, Metric.AUC]
