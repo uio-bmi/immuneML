@@ -99,9 +99,11 @@ class FeatureComparison(FeatureReport):
             unique_label_values) == 2, f"FeatureComparison: comparison label {self.comparison_label} does not have 2 values; {unique_label_values}"
         class_x, class_y = unique_label_values
 
+        merge_labels = [label for label in ["feature", self.color, self.facet_row, self.facet_column] if label]
+
         plotting_data = pd.merge(plotting_data.loc[plotting_data[self.comparison_label] == class_x],
                                  plotting_data.loc[plotting_data[self.comparison_label] == class_y],
-                                 on=["feature"])
+                                 on=merge_labels)
 
         plotting_data = self._filter_keep_fraction(plotting_data)
 
