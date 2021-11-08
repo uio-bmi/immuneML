@@ -7,7 +7,9 @@ import matplotlib.pyplot as plt
 import pandas as pd
 from matplotlib_venn import venn2
 
-from immuneML.encodings.filtered_sequence_encoding.SequenceAbundanceEncoder import SequenceAbundanceEncoder
+from immuneML.encodings.abundance_encoding.CompAIRRSequenceAbundanceEncoder import CompAIRRSequenceAbundanceEncoder
+from immuneML.encodings.abundance_encoding.KmerAbundanceEncoder import KmerAbundanceEncoder
+from immuneML.encodings.abundance_encoding.SequenceAbundanceEncoder import SequenceAbundanceEncoder
 from immuneML.hyperparameter_optimization.states.TrainMLModelState import TrainMLModelState
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
@@ -18,8 +20,11 @@ from immuneML.util.PathBuilder import PathBuilder
 
 class ReferenceSequenceOverlap(TrainMLModelReport):
     """
-    The ReferenceSequenceOverlap report compares a list of disease-associated sequences produced by the :ref:`SequenceAbundance` encoder to
-    a list of reference receptor sequences. It outputs a Venn diagram and a list of receptor sequences found both in the encoder and reference.
+    The ReferenceSequenceOverlap report compares a list of disease-associated sequences (or k-mers) produced by the
+    :py:obj:`~immuneML.encodings.abundance_encoding.SequenceAbundanceEncoder.SequenceAbundanceEncoder`,
+    :py:obj:`~immuneML.encodings.abundance_encoding.CompAIRRSequenceAbundanceEncoder.CompAIRRSequenceAbundanceEncoder` or
+    :py:obj:`~immuneML.encodings.abundance_encoding.KmerAbundanceEncoder.KmerAbundanceEncoder` to
+    a list of reference sequences. It outputs a Venn diagram and a list of sequences found both in the encoder and reference list.
 
     The report compares the sequences by their sequence content and the additional comparison_attributes (such as V or J gene), as specified by the user.
 
@@ -31,7 +36,7 @@ class ReferenceSequenceOverlap(TrainMLModelReport):
         comparison_attributes (list): list of attributes to use for comparison; all of them have to be present in the reference file where they should
         be the names of the columns
 
-        label (str): name of the label for which the reference sequences should be compared to the model; if none, it takes the one label from the
+        label (str): name of the label for which the reference sequences/k-mers should be compared to the model; if none, it takes the one label from the
         instruction; if it is none and multiple labels were specified for the instruction, the report will not be generated
 
     YAML specification:
@@ -42,11 +47,16 @@ class ReferenceSequenceOverlap(TrainMLModelReport):
         reports: # the report is defined with all other reports under definitions/reports
             my_reference_overlap_report:
                 ReferenceSequenceOverlap:
-                    reference_path: reference.csv # a reference file with columns listed under comparison_attributes
+                    reference_path: reference_sequences.csv  # example usage with SequenceAbundanceEncoder or CompAIRRSequenceAbundanceEncoder
                     comparison_attributes:
                         - sequence_aas
                         - v_genes
                         - j_genes
+            my_reference_overlap_report_with_kmers:
+                ReferenceSequenceOverlap:
+                    reference_path: reference_kmers.csv  # example usage with KmerAbundanceEncoder
+                    comparison_attributes:
+                        - k-mer
 
     """
 
@@ -105,7 +115,7 @@ class ReferenceSequenceOverlap(TrainMLModelReport):
 
     @staticmethod
     def _check_encoder_class(encoder):
-        return any(isinstance(encoder, cls) for cls in [SequenceAbundanceEncoder])
+        return any(isinstance(encoder, cls) for cls in [SequenceAbundanceEncoder, CompAIRRSequenceAbundanceEncoder, KmerAbundanceEncoder])
 
     def check_prerequisites(self):
 

@@ -6,7 +6,8 @@ import pandas as pd
 
 from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
 from immuneML.data_model.receptor.RegionType import RegionType
-from immuneML.encodings.filtered_sequence_encoding.SequenceAbundanceEncoder import SequenceAbundanceEncoder
+from immuneML.encodings.abundance_encoding.CompAIRRSequenceAbundanceEncoder import CompAIRRSequenceAbundanceEncoder
+from immuneML.encodings.abundance_encoding.SequenceAbundanceEncoder import SequenceAbundanceEncoder
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.encoding_reports.EncodingReport import EncodingReport
@@ -15,7 +16,8 @@ from immuneML.util.PathBuilder import PathBuilder
 
 class RelevantSequenceExporter(EncodingReport):
     """
-    Exports the sequences that are extracted as label-associated when using the `SequenceAbundance` or `CompAIRRSequenceAbundance` encoder in AIRR-compliant format.
+    Exports the sequences that are extracted as label-associated when using the :py:obj:`~immuneML.encodings.abundance_encoding.SequenceAbundanceEncoder.SequenceAbundanceEncoder` or
+    :py:obj:`~immuneML.encodings.abundance_encoding.CompAIRRSequenceAbundanceEncoder.CompAIRRSequenceAbundanceEncoder` in AIRR-compliant format.
 
     Arguments: there are no arguments for this report.
 
@@ -68,7 +70,7 @@ class RelevantSequenceExporter(EncodingReport):
         return {**RelevantSequenceExporter.COLUMN_MAPPING, **column_mapping}
 
     def check_prerequisites(self):
-        valid_encodings = [SequenceAbundanceEncoder.__name__]
+        valid_encodings = [SequenceAbundanceEncoder.__name__, CompAIRRSequenceAbundanceEncoder.__name__]
         if self.dataset.encoded_data is None or self.dataset.encoded_data.info is None:
             logging.warning("RelevantSequenceExporter: the dataset is not encoded, skipping this report...")
             return False

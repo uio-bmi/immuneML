@@ -3,7 +3,9 @@ from typing import List
 import numpy as np
 import pandas as pd
 
-from immuneML.encodings.filtered_sequence_encoding.SequenceAbundanceEncoder import SequenceAbundanceEncoder
+from immuneML.encodings.abundance_encoding.CompAIRRSequenceAbundanceEncoder import CompAIRRSequenceAbundanceEncoder
+from immuneML.encodings.abundance_encoding.KmerAbundanceEncoder import KmerAbundanceEncoder
+from immuneML.encodings.abundance_encoding.SequenceAbundanceEncoder import SequenceAbundanceEncoder
 from immuneML.hyperparameter_optimization.states.HPItem import HPItem
 from immuneML.util.ParameterValidator import ParameterValidator
 
@@ -12,9 +14,10 @@ class SequenceAnalysisHelper:
 
     @staticmethod
     def compute_overlap_matrix(hp_items: List[HPItem]):
-
-        ParameterValidator.assert_all_type_and_value([hp_item.encoder for hp_item in hp_items], SequenceAbundanceEncoder,
-                                                     'Overlap matrix computation', 'encoders')
+        for hp_item in hp_items:
+            ParameterValidator.assert_in_valid_list(hp_item.encoder.__class__,
+                                                    [SequenceAbundanceEncoder, CompAIRRSequenceAbundanceEncoder, KmerAbundanceEncoder],
+                                                    'Overlap matrix computation', 'encoder')
 
         overlap_matrix = np.zeros((len(hp_items), len(hp_items)))
 

@@ -5,7 +5,9 @@ from typing import List, Tuple
 import pandas as pd
 import plotly.express as px
 
-from immuneML.encodings.filtered_sequence_encoding.SequenceAbundanceEncoder import SequenceAbundanceEncoder
+from immuneML.encodings.abundance_encoding.CompAIRRSequenceAbundanceEncoder import CompAIRRSequenceAbundanceEncoder
+from immuneML.encodings.abundance_encoding.KmerAbundanceEncoder import KmerAbundanceEncoder
+from immuneML.encodings.abundance_encoding.SequenceAbundanceEncoder import SequenceAbundanceEncoder
 from immuneML.hyperparameter_optimization.states.HPItem import HPItem
 from immuneML.hyperparameter_optimization.states.TrainMLModelState import TrainMLModelState
 from immuneML.reports.ReportOutput import ReportOutput
@@ -17,7 +19,10 @@ from immuneML.util.SequenceAnalysisHelper import SequenceAnalysisHelper
 
 class DiseaseAssociatedSequenceCVOverlap(TrainMLModelReport):
     """
-    DiseaseAssociatedSequenceCVOverlap report makes one heatmap per label showing the overlap of disease-associated sequences produced by the :ref:`SequenceAbundance` encoder
+    DiseaseAssociatedSequenceCVOverlap report makes one heatmap per label showing the overlap of disease-associated sequences (or k-mers)
+    produced by the :py:obj:`~immuneML.encodings.abundance_encoding.SequenceAbundanceEncoder.SequenceAbundanceEncoder`,
+    :py:obj:`~immuneML.encodings.abundance_encoding.CompAIRRSequenceAbundanceEncoder.CompAIRRSequenceAbundanceEncoder` or
+    :py:obj:`~immuneML.encodings.abundance_encoding.KmerAbundanceEncoder.KmerAbundanceEncoder`
     between folds of cross-validation (either inner or outer loop of the nested CV). The overlap is computed by the following equation:
 
     .. math::
@@ -45,6 +50,7 @@ class DiseaseAssociatedSequenceCVOverlap(TrainMLModelReport):
             my_overlap_report: DiseaseAssociatedSequenceCVOverlap # report has no parameters
 
     """
+    COMPATIBLE_ENCODERS = (SequenceAbundanceEncoder, CompAIRRSequenceAbundanceEncoder, KmerAbundanceEncoder)
 
     @classmethod
     def build_object(cls, **kwargs):
@@ -76,7 +82,7 @@ class DiseaseAssociatedSequenceCVOverlap(TrainMLModelReport):
 
     def _generate_for_assessment(self, label: str):
         hp_items = [st.label_states[label].optimal_assessment_item for st in self.state.assessment_states
-                    if isinstance(st.label_states[label].optimal_assessment_item.encoder, SequenceAbundanceEncoder)]
+                    if st.label_states[label].optimal_assessment_item.encoder.__class__ in DiseaseAssociatedSequenceCVOverlap.COMPATIBLE_ENCODERS]
         table, figure = self._compute_overlap(hp_items, f'sequence_overlap_{label}_assessment')
         return table, figure
 
@@ -84,7 +90,7 @@ class DiseaseAssociatedSequenceCVOverlap(TrainMLModelReport):
         tables, figures = [], []
         for assessment_index, assessment_state in enumerate(self.state.assessment_states):
             selection_state = assessment_state.label_states[label].selection_state
-            if isinstance(selection_state.optimal_hp_setting.encoder, SequenceAbundanceEncoder):
+            if selection_state.optimal_hp_setting.encoder.__class__ in DiseaseAssociatedSequenceCVOverlap.COMPATIBLE_ENCODERS:
                 hp_items = selection_state.hp_items[selection_state.optimal_hp_setting.get_key()]
                 table, figure = self._compute_overlap(hp_items, f'sequence_overlap_{label}_selection_{assessment_index + 1}_split')
                 tables.append(table)

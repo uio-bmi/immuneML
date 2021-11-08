@@ -12,7 +12,7 @@ from immuneML.data_model.encoded_data.EncodedData import EncodedData
 from immuneML.data_model.repertoire.Repertoire import Repertoire
 from immuneML.encodings.DatasetEncoder import DatasetEncoder
 from immuneML.encodings.EncoderParams import EncoderParams
-from immuneML.encodings.filtered_sequence_encoding.AbundanceEncoderHelper import AbundanceEncoderHelper
+from immuneML.encodings.abundance_encoding.AbundanceEncoderHelper import AbundanceEncoderHelper
 from immuneML.encodings.kmer_frequency.KmerFreqRepertoireEncoder import KmerFreqRepertoireEncoder
 from immuneML.encodings.kmer_frequency.KmerFrequencyEncoder import KmerFrequencyEncoder
 from immuneML.encodings.kmer_frequency.ReadsType import ReadsType
@@ -27,7 +27,7 @@ from scripts.specification_util import update_docs_per_mapping
 
 class KmerAbundanceEncoder(DatasetEncoder):
     """
-    This encoder is related to the :py:obj:`~immuneML.encodings.filtered_sequence_encoding.SequenceAbundanceEncoder.SequenceAbundanceEncoder`,
+    This encoder is related to the :py:obj:`~immuneML.encodings.abundance_encoding.SequenceAbundanceEncoder.SequenceAbundanceEncoder`,
     but identifies label-associated subsequences (k-mers) instead of full label-associated sequences.
 
     This encoder represents the repertoires as vectors where:
@@ -37,9 +37,12 @@ class KmerAbundanceEncoder(DatasetEncoder):
 
     The label-associated k-mers are determined based on a one-sided Fisher's exact test.
 
+    The encoder also writes out files containing the contingency table used for fisher's exact test,
+    the resulting p-values, and the significantly abundant k-mers.
+
     Note: to use this encoder, it is necessary to explicitly define the positive class for the label when defining the label
     in the instruction. With positive class defined, it can then be determined which sequences are indicative of the positive class.
-    See :ref:`Reproduction of the CMV status predictions study` for an example using :py:obj:`~immuneML.encodings.filtered_sequence_encoding.SequenceAbundanceEncoder.SequenceAbundanceEncoder`.
+    See :ref:`Reproduction of the CMV status predictions study` for an example using :py:obj:`~immuneML.encodings.abundance_encoding.SequenceAbundanceEncoder.SequenceAbundanceEncoder`.
 
     Arguments:
 
@@ -199,8 +202,8 @@ class KmerAbundanceEncoder(DatasetEncoder):
 
     def _set_file_paths(self, file_paths):
         self.relevant_indices_path = file_paths["relevant_indices_path"]
-        self.contingency_table_path = file_paths["contingency_table_path"]
-        self.p_values_path = file_paths["p_values_path"]
+        self.contingency_table_path = file_paths["contingency_table_path"] if "contingency_table_path" in file_paths else None
+        self.p_values_path = file_paths["p_values_path"] if "p_values_path" in file_paths else None
 
     def _write_relevant_kmers_csv(self, relevant_sequence_indices, result_path):
         relevant_kmers = self.full_kmer_set[relevant_sequence_indices]
@@ -232,14 +235,3 @@ class KmerAbundanceEncoder(DatasetEncoder):
         encoder.relevant_indices_path = DatasetEncoder.load_attribute(encoder, encoder_file, "relevant_indices_path")
 
         return encoder
-
-    @staticmethod
-    def get_documentation():
-        doc = str(KmerAbundanceEncoder.__doc__)
-
-        valid_field_values = str(Repertoire.FIELDS)[1:-1].replace("'", "`")
-        mapping = {
-            "Valid comparison value can be any repertoire field name.": f"Valid values are {valid_field_values}."
-        }
-        doc = update_docs_per_mapping(doc, mapping)
-        return doc

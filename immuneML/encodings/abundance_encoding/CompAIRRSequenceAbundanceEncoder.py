@@ -11,10 +11,9 @@ import pandas as pd
 from immuneML.caching.CacheHandler import CacheHandler
 from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
 from immuneML.data_model.encoded_data.EncodedData import EncodedData
-from immuneML.data_model.repertoire.Repertoire import Repertoire
 from immuneML.encodings.DatasetEncoder import DatasetEncoder
 from immuneML.encodings.EncoderParams import EncoderParams
-from immuneML.encodings.filtered_sequence_encoding.AbundanceEncoderHelper import AbundanceEncoderHelper
+from immuneML.encodings.abundance_encoding.AbundanceEncoderHelper import AbundanceEncoderHelper
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.environment.SequenceType import SequenceType
 from immuneML.util.CompAIRRHelper import CompAIRRHelper
@@ -22,12 +21,11 @@ from immuneML.util.CompAIRRParams import CompAIRRParams
 from immuneML.util.EncoderHelper import EncoderHelper
 from immuneML.util.ParameterValidator import ParameterValidator
 from immuneML.util.PathBuilder import PathBuilder
-from scripts.specification_util import update_docs_per_mapping
 
 
 class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
     """
-    This encoder works similarly to the :py:obj:`~immuneML.encodings.filtered_sequence_encoding.SequenceAbundanceEncoder.SequenceAbundanceEncoder`,
+    This encoder works similarly to the :py:obj:`~immuneML.encodings.abundance_encoding.SequenceAbundanceEncoder.SequenceAbundanceEncoder`,
     but internally uses `CompAIRR <https://github.com/uio-bmi/compairr/>`_ to accelerate core computations.
 
     This encoder represents the repertoires as vectors where:
@@ -38,13 +36,17 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
     To determine what clonotypes (with or without matching V/J genes) are label-associated
     based on a statistical test. The statistical test used is Fisher's exact test (one-sided).
 
+    The encoder also writes out files containing the contingency table used for fisher's exact test,
+    the resulting p-values, and the significantly abundant sequences
+    (use :py:obj:`~immuneML.reports.encoding_reports.RelevantSequenceExporter.RelevantSequenceExporter` to export these sequences in AIRR format).
+
     Reference: Emerson, Ryan O. et al.
     ‘Immunosequencing Identifies Signatures of Cytomegalovirus Exposure History and HLA-Mediated Effects on the T Cell Repertoire’.
     Nature Genetics 49, no. 5 (May 2017): 659–65. `doi.org/10.1038/ng.3822 <https://doi.org/10.1038/ng.3822>`_.
 
     Note: to use this encoder, it is necessary to explicitly define the positive class for the label when defining the label
     in the instruction. With positive class defined, it can then be determined which sequences are indicative of the positive class.
-    See :ref:`Reproduction of the CMV status predictions study` for an example using :py:obj:`~immuneML.encodings.filtered_sequence_encoding.SequenceAbundanceEncoder.SequenceAbundanceEncoder`.
+    See :ref:`Reproduction of the CMV status predictions study` for an example using :py:obj:`~immuneML.encodings.abundance_encoding.SequenceAbundanceEncoder.SequenceAbundanceEncoder`.
 
     Arguments:
 
@@ -288,8 +290,8 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
 
     def _set_file_paths(self, file_paths):
         self.relevant_indices_path = file_paths["relevant_indices_path"]
-        self.contingency_table_path = file_paths["contingency_table_path"]
-        self.p_values_path = file_paths["p_values_path"]
+        self.contingency_table_path = file_paths["contingency_table_path"] if "contingency_table_path" in file_paths else None
+        self.p_values_path = file_paths["p_values_path"] if "p_values_path" in file_paths else None
 
     def _write_relevant_sequences_csv(self, relevant_sequence_indices, result_path):
         relevant_sequences = self.full_sequence_set[relevant_sequence_indices]
@@ -329,14 +331,3 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
         encoder.relevant_indices_path = DatasetEncoder.load_attribute(encoder, encoder_file, "relevant_indices_path")
 
         return encoder
-
-    @staticmethod
-    def get_documentation():
-        doc = str(CompAIRRSequenceAbundanceEncoder.__doc__)
-
-        valid_field_values = str(Repertoire.FIELDS)[1:-1].replace("'", "`")
-        mapping = {
-            "Valid comparison value can be any repertoire field name.": f"Valid values are {valid_field_values}."
-        }
-        doc = update_docs_per_mapping(doc, mapping)
-        return doc

@@ -57,11 +57,14 @@ class KNN(SklearnMethod):
     def get_compatible_encoders(self):
         from immuneML.encodings.distance_encoding.DistanceEncoder import DistanceEncoder
         from immuneML.encodings.evenness_profile.EvennessProfileEncoder import EvennessProfileEncoder
-        from immuneML.encodings.filtered_sequence_encoding.SequenceAbundanceEncoder import SequenceAbundanceEncoder
+        from immuneML.encodings.abundance_encoding.SequenceAbundanceEncoder import SequenceAbundanceEncoder
+        from immuneML.encodings.abundance_encoding.CompAIRRSequenceAbundanceEncoder import CompAIRRSequenceAbundanceEncoder
+        from immuneML.encodings.abundance_encoding.KmerAbundanceEncoder import KmerAbundanceEncoder
         from immuneML.encodings.kmer_frequency.KmerFrequencyEncoder import KmerFrequencyEncoder
         from immuneML.encodings.onehot.OneHotEncoder import OneHotEncoder
         from immuneML.encodings.word2vec.Word2VecEncoder import Word2VecEncoder
-        return [KmerFrequencyEncoder, OneHotEncoder, Word2VecEncoder, SequenceAbundanceEncoder, EvennessProfileEncoder, DistanceEncoder]
+        return [KmerFrequencyEncoder, OneHotEncoder, Word2VecEncoder, SequenceAbundanceEncoder,
+                CompAIRRSequenceAbundanceEncoder, KmerAbundanceEncoder, EvennessProfileEncoder, DistanceEncoder]
 
     @staticmethod
     def get_documentation():
