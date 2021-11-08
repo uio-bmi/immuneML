@@ -213,9 +213,7 @@ class MotifSeedRecovery(MLReport):
             figure = px.box(plotting_data, x="max_seed_overlap", y="coefficients", labels={
                 "max_seed_overlap": self._x_axis_title,
                 "coefficients": self._y_axis_title
-            }, template='plotly_white',
-                         color_discrete_sequence=px.colors.diverging.Tealrose)
-            # figure.update_layout(title={"text":self.title, "x":0.5, "font": {"size":14}})
+            }, template='plotly_white', color_discrete_sequence=px.colors.diverging.Tealrose)
 
             figure.write_html(str(filename))
 
