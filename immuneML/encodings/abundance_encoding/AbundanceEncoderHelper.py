@@ -29,8 +29,8 @@ class AbundanceEncoderHelper:
                                        f"relevant sequences for the label, but got these classes for label {label.name} instead: {label.values}."
 
     @staticmethod
-    def check_is_positive_class(dataset, matrix_repertoire_ids, params: EncoderParams):
-        label = params.label_config.get_label_objects()[0]
+    def check_is_positive_class(dataset, matrix_repertoire_ids, label_config: LabelConfiguration):
+        label = label_config.get_label_objects()[0]
 
         is_positive_class = np.array(
             [dataset.get_repertoire(repertoire_identifier=repertoire_id).metadata[label.name] for repertoire_id in

@@ -189,7 +189,7 @@ class KmerAbundanceEncoder(DatasetEncoder):
         sequence_presence_matrix = sequence_presence_matrix[:, relevant]
         matrix_repertoire_ids = matrix_repertoire_ids[relevant]
 
-        is_positive_class = AbundanceEncoderHelper.check_is_positive_class(dataset, matrix_repertoire_ids, params)
+        is_positive_class = AbundanceEncoderHelper.check_is_positive_class(dataset, matrix_repertoire_ids, params.label_config)
 
         relevant_sequence_indices, file_paths = AbundanceEncoderHelper.get_relevant_sequence_indices(sequence_presence_matrix, is_positive_class,
                                                                                                      self.p_value_threshold, self.relevant_indices_path, params)

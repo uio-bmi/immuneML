@@ -129,7 +129,7 @@ class SequenceAbundanceEncoder(DatasetEncoder):
 
     def _calculate_abundance_matrix(self, dataset: RepertoireDataset, comparison_data: ComparisonData, params: EncoderParams):
         comparison_data.set_iteration_repertoire_ids(dataset.get_repertoire_ids())
-        is_positive_class = AbundanceEncoderHelper.check_is_positive_class(dataset, dataset.get_repertoire_ids(), params)
+        is_positive_class = AbundanceEncoderHelper.check_is_positive_class(dataset, dataset.get_repertoire_ids(), params.label_config)
 
         relevant_sequence_indices, file_paths = AbundanceEncoderHelper.get_relevant_sequence_indices(comparison_data, is_positive_class, self.p_value_threshold, self.relevant_indices_path, params)
 
