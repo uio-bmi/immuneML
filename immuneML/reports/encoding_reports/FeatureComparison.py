@@ -84,8 +84,6 @@ class FeatureComparison(FeatureReport):
         self.name = name
 
     def _plot(self, data_long_format) -> ReportOutput:
-        max_val = data_long_format["value"].max()
-
         groupby_cols = [self.comparison_label, self.x, self.color, self.facet_row, self.facet_column]
         groupby_cols = [i for i in groupby_cols if i]
         groupby_cols = list(set(groupby_cols))
@@ -105,7 +103,9 @@ class FeatureComparison(FeatureReport):
                                  plotting_data.loc[plotting_data[self.comparison_label] == class_y],
                                  on=merge_labels)
 
-        plotting_data = self._filter_keep_fraction(plotting_data)
+        plotting_data = self._filter_keep_fraction(plotting_data) if self.keep_fraction < 1 else plotting_data
+
+        max_x, max_y = self._get_max_axes(plotting_data)
 
         error_x = "valuestd_x" if self.show_error_bar else None
         error_y = "valuestd_y" if self.show_error_bar else None
@@ -118,13 +118,19 @@ class FeatureComparison(FeatureReport):
                             }, template='plotly_white',
                             color_discrete_sequence=px.colors.diverging.Tealrose)
 
-        figure.add_shape(type="line", x0=0, y0=0, x1=max_val, y1=max_val, line=dict(color="#B0C2C7", dash="dash"))
+        figure.add_shape(type="line", x0=0, y0=0, x1=max_x, y1=max_y, line=dict(color="#B0C2C7", dash="dash"))
 
         file_path = self.result_path / f"{self.result_name}.html"
 
         figure.write_html(str(file_path))
 
         return ReportOutput(path=file_path, name=f"Comparison of feature values across {self.comparison_label}")
+
+    def _get_max_axes(self, plotting_data):
+        max_x = max(plotting_data["valuemean_x"] + plotting_data["valuestd_x"])
+        max_y = max(plotting_data["valuemean_y"] + plotting_data["valuestd_y"])
+
+        return max_x, max_y
 
     def _filter_keep_fraction(self, plotting_data):
         plotting_data["diff_xy"] = abs(plotting_data["valuemean_x"] - plotting_data["valuemean_y"])
