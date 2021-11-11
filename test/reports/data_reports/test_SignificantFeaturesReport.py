@@ -11,11 +11,11 @@ from immuneML.data_model.repertoire.Repertoire import Repertoire
 from immuneML.environment.Constants import Constants
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.reports.ReportResult import ReportResult
-from immuneML.reports.data_reports.SignificantFeaturesReport import SignificantFeaturesReport
+from immuneML.reports.data_reports.SignificantFeatures import SignificantFeatures
 from immuneML.util.PathBuilder import PathBuilder
 
 
-class TestSignificantFeaturesReport(TestCase):
+class TestSignificantFeatures(TestCase):
 
     def setUp(self) -> None:
         os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
@@ -76,7 +76,7 @@ class TestSignificantFeaturesReport(TestCase):
 
         dataset = self._get_example_dataset(path)
 
-        report = SignificantFeaturesReport.build_object(**{"dataset": dataset,
+        report = SignificantFeatures.build_object(**{"dataset": dataset,
                                                            "p_values": [0.5, 0.0],
                                                            "k_values": ["full_sequence", 3],
                                                            "compairr_path": compairr_path,

@@ -24,7 +24,7 @@ from immuneML.util.ParameterValidator import ParameterValidator
 from immuneML.util.PathBuilder import PathBuilder
 
 
-class SignificantFeaturesReport(DataReport):
+class SignificantFeatures(DataReport):
     """
     Plots a boxplot of the number of significant features (label-associated k-mers or sequences) per Repertoire according to Fisher's exact test,
     across different classes for the given label.
@@ -57,7 +57,7 @@ class SignificantFeaturesReport(DataReport):
     .. indent with spaces
     .. code-block:: yaml
 
-        my_abundance_Report:
+        my_significant_features_report:
             SignificantFeatures:
                 p_values:
                     - 0.1
@@ -77,7 +77,7 @@ class SignificantFeaturesReport(DataReport):
 
     @classmethod
     def build_object(cls, **kwargs):
-        location = SignificantFeaturesReport.__name__
+        location = SignificantFeatures.__name__
         ParameterValidator.assert_keys_present(kwargs.keys(), ["p_values", "k_values", "label"], location, location)
 
         ParameterValidator.assert_type_and_value(kwargs["p_values"], list, location, "p_values")
@@ -99,7 +99,7 @@ class SignificantFeaturesReport(DataReport):
             ParameterValidator.assert_type_and_value(kwargs["compairr_path"], str, location, "compairr_path")
             kwargs["compairr_path"] = Path(kwargs["compairr_path"])
 
-        return SignificantFeaturesReport(**kwargs)
+        return SignificantFeatures(**kwargs)
 
     def __init__(self, dataset: RepertoireDataset = None, p_values: List[float] = None, k_values: List[int] = None,
                  label_config: LabelConfiguration = None, compairr_path: Path = None, result_path: Path = None, name: str = None):
@@ -113,7 +113,7 @@ class SignificantFeaturesReport(DataReport):
         if isinstance(self.dataset, RepertoireDataset):
             return True
         else:
-            warnings.warn("SignificantFeaturesReport: report can be generated only from RepertoireDataset. Skipping this report...")
+            warnings.warn(f"{SignificantFeatures.__name__}: report can be generated only from RepertoireDataset. Skipping this report...")
             return False
 
     def _generate(self) -> ReportResult:
