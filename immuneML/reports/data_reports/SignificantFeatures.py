@@ -22,6 +22,7 @@ from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.data_reports.DataReport import DataReport
 from immuneML.util.ParameterValidator import ParameterValidator
 from immuneML.util.PathBuilder import PathBuilder
+from immuneML.util.SignificantFeaturesHelper import SignificantFeaturesHelper
 
 
 class SignificantFeatures(DataReport):
@@ -120,7 +121,7 @@ class SignificantFeatures(DataReport):
         plotting_data = self._compute_plotting_data()
         table_result = self._write_results_table(plotting_data)
 
-        report_output_fig = self._plot(plotting_data=plotting_data)
+        report_output_fig = self._safe_plot(plotting_data=plotting_data)
         output_figures = None if report_output_fig is None else [report_output_fig]
 
         return ReportResult(self.name, output_figures, [table_result])
@@ -134,13 +135,14 @@ class SignificantFeatures(DataReport):
         positive_class, negative_class = self._get_positive_negative_classes()
 
         for k in self.k_values:
+            encoder_name = SignificantFeaturesHelper._get_encoder_name(k)
+
             for p_value in self.p_values:
                 encoder_result_path = self._get_encoder_result_path(k, p_value)
-                pos_class_feature_counts, neg_class_feature_counts = self._compute_significant_features(k, p_value,
-                                                                                                        encoder_result_path)
+                pos_class_feature_counts, neg_class_feature_counts = self._compute_significant_feature_counts(k, p_value, encoder_result_path)
                 n_examples = len(pos_class_feature_counts) + len(neg_class_feature_counts)
 
-                result["encoding"].extend([self._get_encoder_name(k)] * n_examples)
+                result["encoding"].extend([encoder_name] * n_examples)
                 result["p-value"].extend([p_value] * n_examples)
                 result["class"].extend(
                     [positive_class] * len(pos_class_feature_counts) + [negative_class] * len(neg_class_feature_counts))
@@ -155,12 +157,8 @@ class SignificantFeatures(DataReport):
 
         return positive_class, negative_class
 
-    def _get_encoder_name(self, k):
-        encoder_name = f"{k}-mer" if type(k) == int else k
-        return encoder_name
-
     def _get_encoder_result_path(self, k, p_value):
-        return self.result_path / f"{self._get_encoder_name(k)}_{p_value}"
+        return self.result_path / f"{SignificantFeaturesHelper._get_encoder_name(k)}_{p_value}"
 
     def _write_results_table(self, data) -> ReportOutput:
         table_path = self.result_path / f"significant_features_report.csv"
@@ -171,7 +169,7 @@ class SignificantFeatures(DataReport):
         figure = px.box(plotting_data, x="encoding", y="significant_features", color="class",
                         facet_row=None, facet_col="p-value",
                         labels={
-                            "significant_features": "Number of significant k-mers per AIRR according to Fisher's exact test",
+                            "significant_features": "Number of significant features per AIRR according to Fisher's exact test",
                             "encoding": "Encoding",
                             "class": "Repertoire class"
                         }, template='plotly_white',
@@ -183,21 +181,22 @@ class SignificantFeatures(DataReport):
 
         return ReportOutput(file_path, name="Significant features across different Repertoire classes")
 
-    def _compute_significant_features(self, k, p_value, encoder_result_path):
+    def _compute_significant_feature_counts(self, k, p_value, encoder_result_path):
         PathBuilder.build(encoder_result_path)
 
+        encoder_params = SignificantFeaturesHelper._build_encoder_params(self.label_config, encoder_result_path)
+
         if type(k) == int:
-            pos_class_feature_counts, neg_class_feature_counts = self._compute_significant_kmers(k, p_value, encoder_result_path)
+            pos_class_feature_counts, neg_class_feature_counts = self._compute_significant_kmer_counts(k, p_value, encoder_params)
         elif self.compairr_path is None:
-            pos_class_feature_counts, neg_class_feature_counts = self._compute_significant_sequences(p_value, encoder_result_path)
+            pos_class_feature_counts, neg_class_feature_counts = self._compute_significant_sequence_counts(p_value, encoder_params)
         else:
-            pos_class_feature_counts, neg_class_feature_counts = self._compute_significant_sequences_compairr(p_value, encoder_result_path)
+            pos_class_feature_counts, neg_class_feature_counts = self._compute_significant_compairr_sequence_counts(p_value, encoder_params)
 
         return pos_class_feature_counts, neg_class_feature_counts
 
-    def _compute_significant_kmers(self, k, p_value, encoder_result_path):
-        encoder_params = self._build_encoder_params(encoder_result_path)
-        encoder = self._build_kmer_encoder(k, p_value, encoder_params)
+    def _compute_significant_kmer_counts(self, k, p_value, encoder_params):
+        encoder = SignificantFeaturesHelper._build_kmer_encoder(self.dataset, k, p_value, encoder_params)
 
         with encoder.relevant_indices_path.open("rb") as file:
             relevant_indices = pickle.load(file)
@@ -206,9 +205,8 @@ class SignificantFeatures(DataReport):
 
         return self._get_positive_negative_class(relevant_feature_presence, encoder.matrix_repertoire_ids)
 
-    def _compute_significant_sequences(self, p_value, encoder_result_path):
-        encoder_params = self._build_encoder_params(encoder_result_path)
-        encoder = self._build_sequence_encoder(p_value, encoder_params)
+    def _compute_significant_sequence_counts(self, p_value, encoder_params):
+        encoder = SignificantFeaturesHelper._build_sequence_encoder(self.dataset, p_value, encoder_params)
 
         with encoder.relevant_indices_path.open("rb") as file:
             relevant_indices = pickle.load(file)
@@ -221,9 +219,8 @@ class SignificantFeatures(DataReport):
 
         return self._get_positive_negative_class(relevant_feature_presence, self.dataset.get_repertoire_ids())
 
-    def _compute_significant_sequences_compairr(self, p_value, encoder_result_path):
-        encoder_params = self._build_encoder_params(encoder_result_path)
-        encoder = self._build_compairr_sequence_encoder(p_value, encoder_params)
+    def _compute_significant_compairr_sequence_counts(self, p_value, encoder_params):
+        encoder = SignificantFeaturesHelper._build_compairr_sequence_encoder(self.dataset, p_value, encoder_params, self.compairr_path)
 
         with encoder.relevant_indices_path.open("rb") as file:
             relevant_indices = pickle.load(file)
@@ -231,40 +228,6 @@ class SignificantFeatures(DataReport):
         relevant_feature_presence = np.sum(encoder.sequence_presence_matrix[relevant_indices], axis=0)
 
         return self._get_positive_negative_class(relevant_feature_presence, encoder.matrix_repertoire_ids)
-
-    def _build_encoder_params(self, encoder_result_path):
-        encoder_params = EncoderParams(result_path=encoder_result_path,
-                                       label_config=self.label_config,
-                                       pool_size=1,
-                                       learn_model=True,
-                                       encode_labels=False)
-
-        return encoder_params
-
-    def _build_kmer_encoder(self, k, p_value, encoder_params):
-        encoder = KmerAbundanceEncoder(p_value_threshold=p_value,
-                                       sequence_encoding=SequenceEncodingType.CONTINUOUS_KMER,
-                                       k=k, k_left=0, k_right=0, min_gap=0, max_gap=0)
-
-        encoder.encode(self.dataset, encoder_params)
-
-        return encoder
-
-    def _build_sequence_encoder(self, p_value, encoder_params):
-        encoder = SequenceAbundanceEncoder(comparison_attributes=[EnvironmentSettings.get_sequence_type().value],
-                                           p_value_threshold=p_value, sequence_batch_size=100000, repertoire_batch_size=16)
-
-        encoder.encode(self.dataset, encoder_params)
-
-        return encoder
-
-    def _build_compairr_sequence_encoder(self, p_value, encoder_params):
-        encoder = CompAIRRSequenceAbundanceEncoder(p_value_threshold=p_value, compairr_path=self.compairr_path,
-                                                   sequence_batch_size=100000, ignore_genes=True, threads=8)
-
-        encoder.encode(self.dataset, encoder_params)
-
-        return encoder
 
     def _get_relevant_feature_presence(self, encoder, relevant_indices):
 
