@@ -210,19 +210,21 @@ class CompAIRRDistanceEncoder(DatasetEncoder):
         repertoire_sizes = {}
         repertoire_indices = {}
 
-        with open(filename, "w") as file:
-            file.write("junction_aa\tduplicate_count\tv_call\tj_call\trepertoire_id\n")
+        mode = "w"
+        header = True
 
         for repertoire in dataset.get_data():
             repertoire_contents = CompAIRRHelper.get_repertoire_contents(repertoire, self.compairr_params)
 
-            repertoire_counts = repertoire_contents["counts"].astype(int)
+            repertoire_counts = repertoire_contents["duplicate_count"].astype(int)
 
             repertoire_sizes[repertoire.identifier] = sum(repertoire_counts)
-            repertoire_indices[repertoire.identifier] = sum(np.square(repertoire_counts)) / np.square(
-                sum(repertoire_counts))
+            repertoire_indices[repertoire.identifier] = sum(np.square(repertoire_counts)) / np.square(sum(repertoire_counts))
 
-            repertoire_contents.to_csv(filename, mode='a', header=False, index=False, sep="\t")
+            repertoire_contents.to_csv(filename, mode=mode, header=header, index=False, sep="\t")
+
+            mode = "a"
+            header = False
 
         return repertoire_sizes, repertoire_indices
 

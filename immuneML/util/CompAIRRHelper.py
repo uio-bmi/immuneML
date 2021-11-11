@@ -61,18 +61,22 @@ class CompAIRRHelper:
 
     @staticmethod
     def write_repertoire_file(repertoire_dataset, filename, compairr_params):
-        with open(filename, "w") as file:
-            file.write("junction_aa\tduplicate_count\tv_call\tj_call\trepertoire_id\n")
+        mode = "w"
+        header = True
 
         for repertoire in repertoire_dataset.get_data():
             repertoire_contents = CompAIRRHelper.get_repertoire_contents(repertoire, compairr_params)
+            repertoire_contents.to_csv(filename, mode=mode, header=header, index=False, sep="\t")
 
-            repertoire_contents.to_csv(filename, mode='a', header=False, index=False, sep="\t")
+            mode = "a"
+            header = False
 
 
     @staticmethod
     def get_repertoire_contents(repertoire, compairr_params):
-        repertoire_contents = repertoire.get_attributes([EnvironmentSettings.get_sequence_type().value, "counts", "v_genes", "j_genes"])
+        attributes = [EnvironmentSettings.get_sequence_type().value, "counts"]
+        attributes += [] if compairr_params.ignore_genes else ["v_genes", "j_genes"]
+        repertoire_contents = repertoire.get_attributes(attributes)
         repertoire_contents = pd.DataFrame({**repertoire_contents, "identifier": repertoire.identifier})
 
         check_na_rows = [EnvironmentSettings.get_sequence_type().value]
@@ -89,6 +93,11 @@ class CompAIRRHelper:
 
         if compairr_params.ignore_counts:
             repertoire_contents["counts"] = 1
+
+        repertoire_contents.rename(columns={EnvironmentSettings.get_sequence_type().value: "junction_aa",
+                                           "v_genes": "v_call", "j_genes": "j_call",
+                                           "counts": "duplicate_count", "identifier": "repertoire_id"},
+                                   inplace=True)
 
         return repertoire_contents
 
