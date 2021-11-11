@@ -71,10 +71,10 @@ class ExploratoryAnalysisParser:
         if "encoding" in analysis:
             params["encoder"] = symbol_table.get(analysis["encoding"]).build_object(dataset, **symbol_table.get_config(analysis["encoding"])["encoder_params"])
 
-            if "labels" in analysis:
-                params["label_config"] = LabelHelper.create_label_config(analysis["labels"], dataset, ExploratoryAnalysisParser.__name__, yaml_location)
-            else:
-                params["label_config"] = LabelConfiguration()
+        if "labels" in analysis:
+            params["label_config"] = LabelHelper.create_label_config(analysis["labels"], dataset, ExploratoryAnalysisParser.__name__, yaml_location)
+        else:
+            params["label_config"] = LabelConfiguration()
 
         if "preprocessing_sequence" in analysis:
             params["preprocessing_sequence"] = symbol_table.get(analysis["preprocessing_sequence"])
