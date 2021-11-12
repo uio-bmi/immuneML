@@ -26,7 +26,7 @@ class ExploratoryAnalysisHTMLBuilder:
         Returns:
              path to the main HTML file (which is located under state.result_path)
         """
-        base_path = PathBuilder.build(state.result_path / "../HTML_output")
+        base_path = PathBuilder.build(state.result_path / "../HTML_output/")
         html_map = ExploratoryAnalysisHTMLBuilder.make_html_map(state, base_path)
         result_file = base_path / f"ExploratoryAnalysis_{state.name}.html"
 
@@ -63,7 +63,7 @@ class ExploratoryAnalysisHTMLBuilder:
                 else None,
                 "encoding_params": [{"param_name": key, "param_value": str(value)} for key, value in vars(analysis.encoder).items()] if analysis.encoder is not None else None,
                 "show_encoding": analysis.encoder is not None,
-                "report": Util.to_dict_recursive(analysis.report_result, base_path)
+                "report": Util.to_dict_recursive(Util.update_report_paths(analysis.report_result, base_path), base_path)
             } for name, analysis in state.exploratory_analysis_units.items()]
         }
 
