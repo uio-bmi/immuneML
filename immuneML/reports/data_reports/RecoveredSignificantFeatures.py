@@ -134,8 +134,7 @@ class RecoveredSignificantFeatures(DataReport):
             encoder_name = SignificantFeaturesHelper._get_encoder_name(k)
 
             for p_value in self.p_values:
-                encoder_result_path = self._get_encoder_result_path(k, p_value)
-                significant_features = self._compute_significant_features(k, p_value, encoder_result_path)
+                significant_features = self._compute_significant_features(k, p_value)
                 true_features = self._compute_true_features(k)
 
                 result["encoding"].append(encoder_name)
@@ -151,7 +150,9 @@ class RecoveredSignificantFeatures(DataReport):
         return encoder_name
 
     def _get_encoder_result_path(self, k, p_value):
-        return self.result_path / f"{self._get_encoder_name(k)}_{p_value}"
+        result_path = self.result_path / f"{self._get_encoder_name(k)}_{p_value}"
+        PathBuilder.build(result_path)
+        return result_path
 
     def _write_results_table(self, data) -> ReportOutput:
         table_path = self.result_path / f"recovered_significant_features_report.csv"
@@ -179,9 +180,8 @@ class RecoveredSignificantFeatures(DataReport):
 
         return ReportOutput(file_path, name=y_label)
 
-    def _compute_significant_features(self, k, p_value, encoder_result_path):
-        PathBuilder.build(encoder_result_path)
-
+    def _compute_significant_features(self, k, p_value):
+        encoder_result_path = self._get_encoder_result_path(k, p_value)
         encoder_params = SignificantFeaturesHelper._build_encoder_params(self.label_config, encoder_result_path)
 
         if type(k) == int:

@@ -107,8 +107,7 @@ class SignificantKmerPositions(DataReport):
 
         for k in self.k_values:
             for p_value in self.p_values:
-                encoder_result_path = self._get_encoder_result_path(k, p_value)
-                significant_kmer_positions = self._compute_significant_kmer_positions(k, p_value, encoder_result_path)
+                significant_kmer_positions = self._compute_significant_kmer_positions(k, p_value)
 
                 for imgt_pos, kmer_dict in significant_kmer_positions.items():
                     for kmer, count in kmer_dict.items():
@@ -121,7 +120,9 @@ class SignificantKmerPositions(DataReport):
         return pd.DataFrame(result)
 
     def _get_encoder_result_path(self, k, p_value):
-        return self.result_path / f"{k}-mer_{p_value}"
+        result_path =  self.result_path / f"{k}-mer_{p_value}"
+        PathBuilder.build(result_path)
+        return result_path
 
     def _write_results_table(self, data) -> ReportOutput:
         table_path = self.result_path / f"significant_kmer_positions_report.csv"
@@ -146,8 +147,6 @@ class SignificantKmerPositions(DataReport):
         return ReportOutput(file_path, name="Significant k-mers observed at each position in the reference sequences")
 
     def _compute_significant_kmer_positions(self, k, p_value, encoder_result_path):
-        PathBuilder.build(encoder_result_path)
-
         significant_kmers = self._compute_significant_kmers(k, p_value, encoder_result_path)
 
         results = {}
@@ -167,7 +166,8 @@ class SignificantKmerPositions(DataReport):
 
         return results
 
-    def _compute_significant_kmers(self, k, p_value, encoder_result_path):
+    def _compute_significant_kmers(self, k, p_value):
+        encoder_result_path = self._get_encoder_result_path(k, p_value)
         encoder_params = SignificantFeaturesHelper._build_encoder_params(self.label_config, encoder_result_path)
         encoder = SignificantFeaturesHelper._build_kmer_encoder(self.dataset, k, p_value, encoder_params)
         sequences = pd.read_csv(encoder.relevant_sequence_path)

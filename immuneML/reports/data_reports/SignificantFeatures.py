@@ -123,8 +123,7 @@ class SignificantFeatures(DataReport):
             encoder_name = SignificantFeaturesHelper._get_encoder_name(k)
 
             for p_value in self.p_values:
-                encoder_result_path = self._get_encoder_result_path(k, p_value)
-                pos_class_feature_counts, neg_class_feature_counts = self._compute_significant_feature_counts(k, p_value, encoder_result_path)
+                pos_class_feature_counts, neg_class_feature_counts = self._compute_significant_feature_counts(k, p_value)
                 n_examples = len(pos_class_feature_counts) + len(neg_class_feature_counts)
 
                 result["encoding"].extend([encoder_name] * n_examples)
@@ -143,7 +142,9 @@ class SignificantFeatures(DataReport):
         return positive_class, negative_class
 
     def _get_encoder_result_path(self, k, p_value):
-        return self.result_path / f"{SignificantFeaturesHelper._get_encoder_name(k)}_{p_value}"
+        result_path = self.result_path / f"{SignificantFeaturesHelper._get_encoder_name(k)}_{p_value}"
+        PathBuilder.build(result_path)
+        return result_path
 
     def _write_results_table(self, data) -> ReportOutput:
         table_path = self.result_path / f"significant_features_report.csv"
@@ -166,9 +167,8 @@ class SignificantFeatures(DataReport):
 
         return ReportOutput(file_path, name="Significant features across different Repertoire classes")
 
-    def _compute_significant_feature_counts(self, k, p_value, encoder_result_path):
-        PathBuilder.build(encoder_result_path)
-
+    def _compute_significant_feature_counts(self, k, p_value):
+        encoder_result_path = self._get_encoder_result_path(k, p_value)
         encoder_params = SignificantFeaturesHelper._build_encoder_params(self.label_config, encoder_result_path)
 
         if type(k) == int:
