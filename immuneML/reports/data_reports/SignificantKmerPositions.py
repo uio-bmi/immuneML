@@ -146,8 +146,8 @@ class SignificantKmerPositions(DataReport):
 
         return ReportOutput(file_path, name="Significant k-mers observed at each position in the reference sequences")
 
-    def _compute_significant_kmer_positions(self, k, p_value, encoder_result_path):
-        significant_kmers = self._compute_significant_kmers(k, p_value, encoder_result_path)
+    def _compute_significant_kmer_positions(self, k, p_value):
+        significant_kmers = self._compute_significant_kmers(k, p_value)
 
         results = {}
 
