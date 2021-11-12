@@ -79,35 +79,18 @@ class SignificantFeatures(DataReport):
     @classmethod
     def build_object(cls, **kwargs):
         location = SignificantFeatures.__name__
-        ParameterValidator.assert_keys_present(kwargs.keys(), ["p_values", "k_values", "label"], location, location)
 
-        ParameterValidator.assert_type_and_value(kwargs["p_values"], list, location, "p_values")
-        ParameterValidator.assert_type_and_value(kwargs["k_values"], list, location, "k_values")
-
-        assert len(kwargs["p_values"]) == len(set(kwargs["p_values"])), f"{location}: p_values should only contain unique values, found {kwargs['p_values']}"
-        assert len(kwargs["k_values"]) == len(set(kwargs["k_values"])), f"{location}: k_values should only contain unique values, found {kwargs['k_values']}"
-
-        ParameterValidator.assert_all_type_and_value(kwargs["p_values"], float, "location", "p_values", min_inclusive=0)
-
-        for value in kwargs["k_values"]:
-            if value != "full_sequence":
-                ParameterValidator.assert_type_and_value(value, int, location, "k_values", 1)
-
-        label_str = kwargs.pop("label")
-        kwargs["label_config"] = LabelHelper.create_label_config([label_str], kwargs["dataset"], location, f"{location}/label")
-
-        if "compairr_path" in kwargs and kwargs["compairr_path"] is not None:
-            ParameterValidator.assert_type_and_value(kwargs["compairr_path"], str, location, "compairr_path")
-            kwargs["compairr_path"] = Path(kwargs["compairr_path"])
+        kwargs = SignificantFeaturesHelper.parse_parameters(kwargs, location)
 
         return SignificantFeatures(**kwargs)
 
     def __init__(self, dataset: RepertoireDataset = None, p_values: List[float] = None, k_values: List[int] = None,
-                 label_config: LabelConfiguration = None, compairr_path: Path = None, result_path: Path = None, name: str = None):
+                 label: dict = None, compairr_path: Path = None, result_path: Path = None, name: str = None):
         super().__init__(dataset=dataset, result_path=result_path, name=name)
         self.p_values = p_values
         self.k_values = k_values
-        self.label_config = label_config
+        self.label = label
+        self.label_config = None
         self.compairr_path = compairr_path
 
     def check_prerequisites(self):
@@ -118,6 +101,8 @@ class SignificantFeatures(DataReport):
             return False
 
     def _generate(self) -> ReportResult:
+        self.label_config = LabelHelper.create_label_config([self.label], self.dataset, SignificantFeatures.__name__, f"{SignificantFeatures.__name__}/label")
+
         plotting_data = self._compute_plotting_data()
         table_result = self._write_results_table(plotting_data)
 

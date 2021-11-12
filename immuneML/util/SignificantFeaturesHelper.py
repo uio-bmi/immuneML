@@ -1,7 +1,6 @@
 from pathlib import Path
 import numpy as np
 import os
-from immuneML.dsl.instruction_parsers.LabelHelper import LabelHelper
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.encodings.abundance_encoding.CompAIRRSequenceAbundanceEncoder import CompAIRRSequenceAbundanceEncoder
 from immuneML.encodings.abundance_encoding.KmerAbundanceEncoder import KmerAbundanceEncoder
@@ -20,20 +19,24 @@ class SignificantFeaturesHelper:
         ParameterValidator.assert_type_and_value(kwargs["p_values"], list, location, "p_values")
         ParameterValidator.assert_type_and_value(kwargs["k_values"], list, location, "k_values")
 
-        assert len(kwargs["p_values"]) == len(set(
-            kwargs["p_values"])), f"{location}: p_values should only contain unique values, found {kwargs['p_values']}"
-        assert len(kwargs["k_values"]) == len(set(
-            kwargs["k_values"])), f"{location}: k_values should only contain unique values, found {kwargs['k_values']}"
+        assert isinstance(kwargs["label"], dict), f"{location}: {kwargs['label']} is not a valid value for parameter label. " \
+                                                  f"It has to be of type dict, but is now of type {type(kwargs['label']).__name__}." \
+                                                  f"Did you remember to set the positive_class?"
+
+        assert len(kwargs["label"]) == 1, f"{location}: only one label is allowed to be set, found {len(kwargs['label'])}: {list(kwargs['label'])}"
+
+        label_name = list(kwargs["label"].keys())[0]
+
+        assert "positive_class" in kwargs["label"][label_name], f"{location}: positive_class must be set for label {label_name}"
+
+        assert len(kwargs["p_values"]) == len(set( kwargs["p_values"])), f"{location}: p_values should only contain unique values, found {kwargs['p_values']}"
+        assert len(kwargs["k_values"]) == len(set( kwargs["k_values"])), f"{location}: k_values should only contain unique values, found {kwargs['k_values']}"
 
         ParameterValidator.assert_all_type_and_value(kwargs["p_values"], float, "location", "p_values", min_inclusive=0)
 
         for value in kwargs["k_values"]:
             if value != "full_sequence":
                 ParameterValidator.assert_type_and_value(value, int, location, "k_values", 1)
-
-        label_str = kwargs.pop("label")
-        kwargs["label_config"] = LabelHelper.create_label_config([label_str], kwargs["dataset"], location,
-                                                                 f"{location}/label")
 
         if "compairr_path" in kwargs and kwargs["compairr_path"] is not None:
             ParameterValidator.assert_type_and_value(kwargs["compairr_path"], str, location, "compairr_path")

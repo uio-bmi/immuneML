@@ -6,8 +6,8 @@ import pandas as pd
 import plotly.express as px
 
 from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
+from immuneML.dsl.instruction_parsers.LabelHelper import LabelHelper
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
-from immuneML.environment.LabelConfiguration import LabelConfiguration
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.data_reports.DataReport import DataReport
@@ -64,7 +64,7 @@ class RecoveredSignificantFeatures(DataReport):
     .. indent with spaces
     .. code-block:: yaml
 
-        my_significant_features_report:
+        my_recovered_significant_features_report:
             RecoveredSignificantFeatures:
                 groundtruth_sequences_path: path/to/groundtruth/sequences.txt
                 p_values:
@@ -93,14 +93,14 @@ class RecoveredSignificantFeatures(DataReport):
         return RecoveredSignificantFeatures(**kwargs)
 
     def __init__(self, dataset: RepertoireDataset = None, groundtruth_sequences_path: Path = None,
-                 p_values: List[float] = None, k_values: List[int] = None, label_config: LabelConfiguration = None,
+                 p_values: List[float] = None, k_values: List[int] = None, label: dict = None,
                  compairr_path: Path = None, result_path: Path = None, name: str = None):
         super().__init__(dataset=dataset, result_path=result_path, name=name)
         self.groundtruth_sequences_path = groundtruth_sequences_path
         self.groundtruth_sequences = SignificantFeaturesHelper.load_sequences(groundtruth_sequences_path)
         self.p_values = p_values
         self.k_values = k_values
-        self.label_config = label_config
+        self.label = label
         self.compairr_path = compairr_path
 
     def check_prerequisites(self):
@@ -111,6 +111,9 @@ class RecoveredSignificantFeatures(DataReport):
             return False
 
     def _generate(self) -> ReportResult:
+        self.label_config = LabelHelper.create_label_config([self.label], self.dataset, RecoveredSignificantFeatures.__name__,
+                                                            f"{RecoveredSignificantFeatures.__name__}/label")
+
         plotting_data = self._compute_plotting_data()
         table_result = self._write_results_table(plotting_data)
 
