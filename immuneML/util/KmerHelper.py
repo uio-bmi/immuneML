@@ -22,8 +22,12 @@ class KmerHelper:
 
     @staticmethod
     def create_IMGT_kmers_from_sequence(sequence: ReceptorSequence, k: int):
-        positions = PositionHelper.gen_imgt_positions_from_length(len(sequence.get_sequence()))
-        sequence_w_pos = list(zip(list(sequence.get_sequence()), positions))
+        return KmerHelper.create_IMGT_kmers_from_string(sequence.get_sequence(), k)
+
+    @staticmethod
+    def create_IMGT_kmers_from_string(sequence: str, k: int):
+        positions = PositionHelper.gen_imgt_positions_from_length(len(sequence))
+        sequence_w_pos = list(zip(list(sequence), positions))
         kmers = KmerHelper.create_kmers_from_string(sequence_w_pos, k)
         kmers = [(''.join([x[0] for x in kmer]), min([i[1] for i in kmer]) if int(min([i[1] for i in kmer])) != 112 else max([i[1] for i in kmer if int(i[1]) == 112]))
                  for kmer in kmers]

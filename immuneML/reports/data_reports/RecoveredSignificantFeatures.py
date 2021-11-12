@@ -4,7 +4,6 @@ from typing import List
 
 import pandas as pd
 import plotly.express as px
-import os
 
 from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
@@ -13,20 +12,32 @@ from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.data_reports.DataReport import DataReport
 from immuneML.util.KmerHelper import KmerHelper
-from immuneML.util.ParameterValidator import ParameterValidator
 from immuneML.util.PathBuilder import PathBuilder
 from immuneML.util.SignificantFeaturesHelper import SignificantFeaturesHelper
 
 
 class RecoveredSignificantFeatures(DataReport):
     """
-    xxx
+    Compares a given collection of groundtruth implanted signals (sequences or k-mers) to the significant label-associated
+    k-mers or sequences according to Fisher's exact test.
 
     Internally uses the :py:obj:`~immuneML.encodings.abundance_encoding.KmerAbundanceEncoder.KmerAbundanceEncoder` for calculating
     significant k-mers, and
     :py:obj:`~immuneML.encodings.abundance_encoding.SequenceAbundanceEncoder.SequenceAbundanceEncoder` or
     :py:obj:`~immuneML.encodings.abundance_encoding.CompAIRRSequenceAbundanceEncoder.CompAIRRSequenceAbundanceEncoder`
     to calculate significant full sequences (depending on whether the argument compairr_path was set).
+
+    This report creates two plots:
+
+        - the first plot is a bar chart showing what percentage of the groundtruth implanted signals were found to be significant.
+
+        - the second plot is a bar chart showing what percentage of the k-mers/sequences found to be significant match the
+        groundtruth implanted signals.
+
+    To compare k-mers or sequences of differing lengths, the groundtruth sequences or long k-mers are split into k-mers
+    of the given size through a sliding window approach. When comparing 'full_sequences' to groundtruth sequences, a match
+    is only registered if both sequences are of equal length.
+
 
     Arguments:
 
@@ -38,7 +49,7 @@ class RecoveredSignificantFeatures(DataReport):
         k_values (list): Length of the k-mers (number of amino acids) created by the :py:obj:`~immuneML.encodings.abundance_encoding.KmerAbundanceEncoder.KmerAbundanceEncoder`.
         When using a full sequence encoding (:py:obj:`~immuneML.encodings.abundance_encoding.SequenceAbundanceEncoder.SequenceAbundanceEncoder` or
         :py:obj:`~immuneML.encodings.abundance_encoding.CompAIRRSequenceAbundanceEncoder.CompAIRRSequenceAbundanceEncoder`), specify 'full_sequence' here.
-        Each value specified under k_values will represent one boxplot in the output figure.
+        Each value specified under k_values will represent one bar in the output figure.
 
         label (dict): A label configuration. One label should be specified, and the positive_class for this label should be defined. See the YAML specification below for an example.
 
@@ -76,13 +87,8 @@ class RecoveredSignificantFeatures(DataReport):
     def build_object(cls, **kwargs):
         location = RecoveredSignificantFeatures.__name__
 
-        ParameterValidator.assert_keys_present(kwargs.keys(), ["groundtruth_sequences_path"], location, location)
-        ParameterValidator.assert_type_and_value(kwargs["groundtruth_sequences_path"], str, location, "groundtruth_sequences_path")
-        assert os.path.isfile(kwargs["groundtruth_sequences_path"]), f"{location}: implanted_sequences_path does not exist: {kwargs['groundtruth_sequences_path']}"
-
-        kwargs["groundtruth_sequences_path"] = Path(kwargs["groundtruth_sequences_path"])
-
         kwargs = SignificantFeaturesHelper.parse_parameters(kwargs, location)
+        kwargs = SignificantFeaturesHelper.parse_sequences_path(kwargs, "groundtruth_sequences_path", location)
 
         return RecoveredSignificantFeatures(**kwargs)
 
@@ -91,7 +97,7 @@ class RecoveredSignificantFeatures(DataReport):
                  compairr_path: Path = None, result_path: Path = None, name: str = None):
         super().__init__(dataset=dataset, result_path=result_path, name=name)
         self.groundtruth_sequences_path = groundtruth_sequences_path
-        self.groundtruth_sequences = self._load_groundtruth_sequences(groundtruth_sequences_path)
+        self.groundtruth_sequences = SignificantFeaturesHelper.load_sequences(groundtruth_sequences_path)
         self.p_values = p_values
         self.k_values = k_values
         self.label_config = label_config
@@ -103,12 +109,6 @@ class RecoveredSignificantFeatures(DataReport):
         else:
             warnings.warn(f"{RecoveredSignificantFeatures.__name__}: report can be generated only from RepertoireDataset. Skipping this report...")
             return False
-
-    def _load_groundtruth_sequences(self, groundtruth_sequences_path):
-        with open(groundtruth_sequences_path) as f:
-            readlines = f.readlines()
-            sequences = [seq.strip() for seq in readlines]
-        return sequences
 
     def _generate(self) -> ReportResult:
         plotting_data = self._compute_plotting_data()
@@ -142,13 +142,6 @@ class RecoveredSignificantFeatures(DataReport):
                 result["n_intersect"].append(len(significant_features.intersection(true_features)))
 
         return pd.DataFrame(result)
-
-    def _get_positive_negative_classes(self):
-        label = self.label_config.get_label_objects()[0]
-        positive_class = label.positive_class
-        negative_class = [value for value in label.values if value != positive_class][0]
-
-        return positive_class, negative_class
 
     def _get_encoder_name(self, k):
         encoder_name = f"{k}-mer" if type(k) == int else k

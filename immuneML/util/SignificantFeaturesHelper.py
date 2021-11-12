@@ -1,5 +1,6 @@
 from pathlib import Path
 import numpy as np
+import os
 from immuneML.dsl.instruction_parsers.LabelHelper import LabelHelper
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.encodings.abundance_encoding.CompAIRRSequenceAbundanceEncoder import CompAIRRSequenceAbundanceEncoder
@@ -39,6 +40,24 @@ class SignificantFeaturesHelper:
             kwargs["compairr_path"] = Path(kwargs["compairr_path"])
 
         return kwargs
+
+    @staticmethod
+    def parse_sequences_path(kwargs, field_name, location):
+        ParameterValidator.assert_keys_present(kwargs.keys(), [field_name], location, location)
+        ParameterValidator.assert_type_and_value(kwargs[field_name], str, location,
+                                                 field_name)
+        assert os.path.isfile(kwargs[field_name]), f"{location}: implanted_sequences_path does not exist: {kwargs['field_name']}"
+
+        kwargs[field_name] = Path(kwargs[field_name])
+
+        return kwargs
+
+    @staticmethod
+    def load_sequences(groundtruth_sequences_path):
+        with open(groundtruth_sequences_path) as f:
+            readlines = f.readlines()
+            sequences = [seq.strip() for seq in readlines]
+        return sequences
 
     @staticmethod
     def _get_encoder_name(k):
