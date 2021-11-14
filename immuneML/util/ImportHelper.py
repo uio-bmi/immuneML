@@ -80,7 +80,7 @@ class ImportHelper:
         """
 
         try:
-            metadata = pd.read_csv(params.metadata_file, ",")
+            metadata = pd.read_csv(params.metadata_file, sep=",")
         except Exception as e:
             raise Exception(f"{e}\nAn error occurred while reading in the metadata file {params.metadata_file}. Please see the error log above for "
                             f"more details on this error and the documentation for the expected format of the metadata.")
