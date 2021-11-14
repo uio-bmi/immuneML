@@ -15,7 +15,7 @@ class Util:
     def map_to_old_class_values(y, class_mapping: dict):
         try:
             old_class_type = np.array(list(class_mapping.values())).dtype
-            mapped_y = np.copy(y).astype(np.object)
+            mapped_y = np.copy(y).astype(object)
             for i in range(mapped_y.shape[0]):
                 mapped_y[i] = class_mapping[y[i]]
             return mapped_y.astype(old_class_type)
@@ -27,7 +27,7 @@ class Util:
     @staticmethod
     def map_to_new_class_values(y, class_mapping: dict):
         try:
-            mapped_y = np.copy(y).astype(np.object)
+            mapped_y = np.copy(y).astype(object)
             switched_mapping = {value: key for key, value in class_mapping.items()}
             new_class_type = np.array(list(switched_mapping.values())).dtype
             for i in range(mapped_y.shape[0]):
