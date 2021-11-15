@@ -137,6 +137,9 @@ class SignificantKmerPositions(DataReport):
                             "imgt_position": "sequence position (IMGT scheme)",
                             "count": "Number of significant k-mers observed"
                         }, template="plotly_white",
+                        category_orders={
+                            "imgt_position": self._get_imgt_position_order(set(plotting_data["imgt_position"]))
+                        },
                         barmode="stack",
                         color_discrete_sequence=px.colors.diverging.Tealrose)
 
@@ -145,6 +148,10 @@ class SignificantKmerPositions(DataReport):
         figure.write_html(str(file_path))
 
         return ReportOutput(file_path, name="Significant k-mers observed at each position in the reference sequences")
+
+    def _get_imgt_position_order(self, imgt_positions):
+        sorted_positions = sorted([float(pos) for pos in imgt_positions])
+        return [str(pos_float) if int(pos_float) != pos_float else str(int(pos_float)) for pos_float in sorted_positions]
 
     def _compute_significant_kmer_positions(self, k, p_value):
         significant_kmers = self._compute_significant_kmers(k, p_value)
