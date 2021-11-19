@@ -8,7 +8,7 @@ editdistance==0.5.3
 regex
 tzlocal
 airr>=1
-pystache==0.5.4
+pystache
 torch>=1.5.1
 numpy>=1.18.5
 h5py<=2.10.0
