@@ -197,7 +197,8 @@ class Word2VecEncoder(DatasetEncoder):
                                            k=self.k,
                                            vector_size=self.vector_size,
                                            batch_size=params.pool_size,
-                                           model_path=self.model_path)
+                                           model_path=self.model_path,
+                                           sequence_type=params.model.get('sequence_type', None))
 
         return model
 

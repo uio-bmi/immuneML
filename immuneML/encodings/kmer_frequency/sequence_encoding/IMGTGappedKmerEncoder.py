@@ -24,14 +24,15 @@ class IMGTGappedKmerEncoder(SequenceEncodingStrategy):
         k_right = params.model.get('k_right', k_left)
         max_gap = params.model.get('max_gap')
         min_gap = params.model.get('min_gap', 0)
-        length = len(sequence.get_sequence())
+        sequence_type = params.model.get('sequence_type', None)
+        length = len(sequence.get_sequence(sequence_type))
 
         if length < k_left + k_right + max_gap:
             warnings.warn('Sequence length is less than k_left + k_right + max_gap. Ignoring sequence')
             return None
 
         gapped_kmers = KmerHelper.create_IMGT_gapped_kmers_from_sequence(sequence, k_left=k_left, max_gap=max_gap,
-                                                                         min_gap=min_gap, k_right=k_right)
+                                                                         min_gap=min_gap, k_right=k_right, sequence_type=sequence_type)
 
         gapped_kmers = [Constants.FEATURE_DELIMITER.join([str(mer) for mer in kmer]) for kmer in gapped_kmers]
 

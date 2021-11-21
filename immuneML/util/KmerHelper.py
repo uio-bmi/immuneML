@@ -4,13 +4,14 @@ import warnings
 
 from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
 from immuneML.data_model.repertoire.Repertoire import Repertoire
+from immuneML.environment.SequenceType import SequenceType
 from immuneML.util.PositionHelper import PositionHelper
 
 
 class KmerHelper:
     @staticmethod
-    def create_kmers_from_sequence(sequence: ReceptorSequence, k: int, overlap: bool = True):
-        return KmerHelper.create_kmers_from_string(sequence.get_sequence(), k, overlap)
+    def create_kmers_from_sequence(sequence: ReceptorSequence, k: int, sequence_type: SequenceType, overlap: bool = True):
+        return KmerHelper.create_kmers_from_string(sequence.get_sequence(sequence_type), k, overlap)
 
     @staticmethod
     def create_kmers_from_string(sequence, k: int, overlap: bool = True):
@@ -21,18 +22,18 @@ class KmerHelper:
         return kmers
 
     @staticmethod
-    def create_IMGT_kmers_from_sequence(sequence: ReceptorSequence, k: int):
-        positions = PositionHelper.gen_imgt_positions_from_length(len(sequence.get_sequence()))
-        sequence_w_pos = list(zip(list(sequence.get_sequence()), positions))
+    def create_IMGT_kmers_from_sequence(sequence: ReceptorSequence, k: int, sequence_type: SequenceType):
+        positions = PositionHelper.gen_imgt_positions_from_length(len(sequence.get_sequence(sequence_type)))
+        sequence_w_pos = list(zip(list(sequence.get_sequence(sequence_type)), positions))
         kmers = KmerHelper.create_kmers_from_string(sequence_w_pos, k)
         kmers = [(''.join([x[0] for x in kmer]), min([i[1] for i in kmer]) if int(min([i[1] for i in kmer])) != 112 else max([i[1] for i in kmer if int(i[1]) == 112]))
                  for kmer in kmers]
         return kmers
 
     @staticmethod
-    def create_IMGT_gapped_kmers_from_sequence(sequence: ReceptorSequence, k_left: int, max_gap: int, k_right: int = None, min_gap: int = 0):
-        positions = PositionHelper.gen_imgt_positions_from_length(len(sequence.get_sequence()))
-        sequence_w_pos = list(zip(list(sequence.get_sequence()), positions))
+    def create_IMGT_gapped_kmers_from_sequence(sequence: ReceptorSequence, sequence_type: SequenceType, k_left: int, max_gap: int, k_right: int = None, min_gap: int = 0):
+        positions = PositionHelper.gen_imgt_positions_from_length(len(sequence.get_sequence(sequence_type)))
+        sequence_w_pos = list(zip(list(sequence.get_sequence(sequence_type)), positions))
         kmers = KmerHelper.create_gapped_kmers_from_string(sequence_w_pos, k_left=k_left, max_gap=max_gap,
                                                            k_right=k_right, min_gap=min_gap)
         if kmers is not None:
@@ -65,8 +66,9 @@ class KmerHelper:
         return gapped_kmers
 
     @staticmethod
-    def create_gapped_kmers_from_sequence(sequence: ReceptorSequence, k_left: int, max_gap: int, k_right: int = None, min_gap: int = 0):
-        return KmerHelper.create_gapped_kmers_from_string(sequence.get_sequence(), k_left, max_gap, k_right, min_gap)
+    def create_gapped_kmers_from_sequence(sequence: ReceptorSequence, sequence_type: SequenceType, k_left: int, max_gap: int, k_right: int = None,
+                                          min_gap: int = 0):
+        return KmerHelper.create_gapped_kmers_from_string(sequence.get_sequence(sequence_type), k_left, max_gap, k_right, min_gap)
 
     @staticmethod
     def create_all_kmers(k: int, alphabet: list):
@@ -81,10 +83,10 @@ class KmerHelper:
         return kmers
 
     @staticmethod
-    def create_sentences_from_repertoire(repertoire: Repertoire, k: int, overlap: bool = True):
+    def create_sentences_from_repertoire(repertoire: Repertoire, k: int, sequence_type: SequenceType, overlap: bool = True):
         sentences = []
         for sequence in repertoire.sequences:
-            sentences.append(KmerHelper.create_kmers_from_sequence(sequence=sequence, k=k, overlap=overlap))
+            sentences.append(KmerHelper.create_kmers_from_sequence(sequence=sequence, k=k, overlap=overlap, sequence_type=sequence_type))
         return sentences
 
     @staticmethod

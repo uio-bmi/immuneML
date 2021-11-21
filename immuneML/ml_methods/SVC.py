@@ -27,7 +27,7 @@ class SVC(SklearnMethod):
                 C: [0.01, 0.1, 1, 10, 100] # find the optimal value for C
                 # Additional parameter that determines whether to print convergence warnings
                 show_warnings: True
-            # if any of the parameters under SVM is a list and model_selection_cv is True,
+            # if any of the parameters under SVC is a list and model_selection_cv is True,
             # a grid search will be done over the given parameters, using the number of folds specified in model_selection_n_folds,
             # and the optimal model will be selected
             model_selection_cv: True
@@ -60,7 +60,7 @@ class SVC(SklearnMethod):
         doc = str(SVC.__doc__)
 
         mapping = {
-            "For usage instructions, check :py:obj:`~immuneML.ml_methods.SklearnMethod.SklearnMethod`.": SklearnMethod.get_usage_documentation("SVM"),
+            "For usage instructions, check :py:obj:`~immuneML.ml_methods.SklearnMethod.SklearnMethod`.": SklearnMethod.get_usage_documentation("SVC"),
         }
 
         doc = update_docs_per_mapping(doc, mapping)
