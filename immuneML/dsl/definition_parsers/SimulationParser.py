@@ -3,9 +3,12 @@ import copy
 from immuneML.dsl.symbol_table.SymbolTable import SymbolTable
 from immuneML.dsl.symbol_table.SymbolType import SymbolType
 from immuneML.simulation.Implanting import Implanting
+from immuneML.simulation.LIgOSimulationItem import LIgOSimulationItem
 from immuneML.simulation.Simulation import Simulation
+from immuneML.simulation.generative_models.GenerativeModel import GenerativeModel
 from immuneML.util.Logger import log
 from immuneML.util.ParameterValidator import ParameterValidator
+from immuneML.util.ReflectionHandler import ReflectionHandler
 
 
 class SimulationParser:
@@ -80,24 +83,81 @@ class SimulationParser:
     @log
     def _parse_simulation(key: str, simulation: dict, symbol_table: SymbolTable) -> SymbolTable:
 
-        location = "SimulationParser"
-        valid_implanting_keys = ["dataset_implanting_rate", "repertoire_implanting_rate", "signals", "is_noise"]
-        implantings = []
+        location = SimulationParser.__name__
 
-        for impl_key, implanting in simulation.items():
+        simulation_items = []
 
-            ParameterValidator.assert_keys(implanting.keys(), valid_implanting_keys, location, impl_key, exclusive=False)
-            ParameterValidator.assert_keys(implanting["signals"], symbol_table.get_keys_by_type(SymbolType.SIGNAL), location, impl_key, False)
+        for sim_key, simulation_item in simulation.items():
 
-            implanting_params = copy.deepcopy(implanting)
-            implanting_params["signals"] = [symbol_table.get(signal) for signal in implanting["signals"]]
-            implanting_params["name"] = impl_key
+            ParameterValidator.assert_keys_present(simulation_item.keys(), ['type'], location, 'simulation')
 
-            implantings.append(Implanting(**implanting_params))
+            if simulation_item['type'] == 'Implanting':
+                item = SimulationParser._parse_implanting(simulation_item, sim_key, symbol_table)
+            elif simulation_item['type'] == 'LIgOSimulationItem':
+                item = SimulationParser._parse_simulation_item(simulation_item, sim_key, symbol_table)
+            else:
+                raise ValueError(f"{location}: in simulation {key}, for simulation item {sim_key}, the type was set to {simulation_item['type']},"
+                                 f" but only 'Implanting' and 'LIgOSimulationItem' are supported.")
 
-        assert sum([settings["dataset_implanting_rate"] for settings in simulation.values()]) <= 1, \
-            "The total dataset implanting rate can not exceed 1."
+            simulation_items.append(item)
 
-        symbol_table.add(key, SymbolType.SIMULATION, Simulation(implantings))
+        assert all(isinstance(item, type(simulation_items[0])) for item in simulation_items), "All simulation items must be of the same type."
+
+        symbol_table.add(key, SymbolType.SIMULATION, Simulation(simulation_items, identifier=key))
 
         return symbol_table
+
+    @staticmethod
+    def _parse_implanting(simulation_item: dict, key: str, symbol_table: SymbolTable) -> Implanting:
+        location = SimulationParser.__name__
+        valid_simulation_item_keys = ["dataset_implanting_rate", "repertoire_implanting_rate", "signals", "is_noise", "type"]
+
+        ParameterValidator.assert_keys(simulation_item.keys(), valid_simulation_item_keys, location, key, exclusive=False)
+        ParameterValidator.assert_keys(simulation_item["signals"], symbol_table.get_keys_by_type(SymbolType.SIGNAL), location, key, False)
+
+        implanting_params = copy.deepcopy(simulation_item)
+        implanting_params["signals"] = [symbol_table.get(signal) for signal in simulation_item["signals"]]
+        implanting_params["name"] = key
+
+        return Implanting(**implanting_params)
+
+    @staticmethod
+    def _parse_simulation_item(simulation_item: dict, key: str, symbol_table: SymbolTable) -> LIgOSimulationItem:
+        location = SimulationParser.__name__
+        valid_simulation_item_keys = ["number_of_examples", "repertoire_implanting_rate", "signals", "is_noise",
+                                      "number_of_receptors_in_repertoire", "generative_model", "type"]
+
+        ParameterValidator.assert_keys(simulation_item.keys(), valid_simulation_item_keys, location, key, exclusive=True)
+        ParameterValidator.assert_keys(simulation_item["signals"], symbol_table.get_keys_by_type(SymbolType.SIGNAL), location, key, False)
+        ParameterValidator.assert_type_and_value(simulation_item['is_noise'], bool, location, 'is_noise')
+        ParameterValidator.assert_type_and_value(simulation_item['number_of_examples'], int, location, 'number_of_examples', min_inclusive=1)
+
+        if simulation_item['repertoire_implanting_rate']:
+            ParameterValidator.assert_type_and_value(simulation_item['repertoire_implanting_rate'], float, location, 'repertoire_implanting_rate', 0, 1)
+
+        if simulation_item['number_of_receptors_in_repertoire']:
+            ParameterValidator.assert_type_and_value(simulation_item['number_of_receptors_in_repertoire'], int, location,
+                                                     'number_of_receptors_in_repertoire', 1)
+
+        gen_model = SimulationParser._parse_generative_model(simulation_item, location)
+
+        params = copy.deepcopy(simulation_item)
+        params["signals"] = [symbol_table.get(signal) for signal in simulation_item["signals"]]
+        params["name"] = key
+        params['generative_model'] = gen_model
+
+        return LIgOSimulationItem(**{key: val for key, val in params.items() if key != 'type'})
+
+    @staticmethod
+    def _parse_generative_model(simulation_item: dict, location: str):
+        ParameterValidator.assert_type_and_value(simulation_item['generative_model'], dict, location, 'generative_model')
+        ParameterValidator.assert_keys_present(simulation_item['generative_model'].keys(), ['type'], location, 'generative_model')
+
+        gen_model_classes = ReflectionHandler.all_nonabstract_subclass_basic_names(GenerativeModel, "", "simulation/generative_models/")
+        ParameterValidator.assert_in_valid_list(simulation_item['generative_model']['type'], gen_model_classes, location, "generative_model:type")
+
+        gen_model_cls = ReflectionHandler.get_class_by_name(simulation_item['generative_model']['type'], "simulation/generative_models/")
+        params = {key: val for key, val in simulation_item['generative_model'].items() if key != 'type'}
+        gen_model = gen_model_cls.build_object(**params)
+
+        return gen_model

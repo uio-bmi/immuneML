@@ -2,6 +2,7 @@ import logging
 import math
 
 from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
+from immuneML.environment.SequenceType import SequenceType
 
 
 class PositionHelper:
@@ -22,7 +23,7 @@ class PositionHelper:
 
     @staticmethod
     def gen_imgt_positions_from_sequence(sequence: ReceptorSequence):
-        input_length = len(sequence.get_sequence())
+        input_length = len(sequence.get_sequence(sequence_type=SequenceType.AMINO_ACID))
         return PositionHelper.gen_imgt_positions_from_length(input_length)
 
     @staticmethod

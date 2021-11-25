@@ -10,6 +10,7 @@ from immuneML.data_model.encoded_data.EncodedData import EncodedData
 from immuneML.data_model.repertoire.Repertoire import Repertoire
 from immuneML.environment.Constants import Constants
 from immuneML.util.ParameterValidator import ParameterValidator
+from immuneML.util.PathBuilder import PathBuilder
 
 
 class RepertoireDataset(Dataset):
@@ -35,6 +36,23 @@ class RepertoireDataset(Dataset):
                 f"{kwargs['name']} with identifier {kwargs['identifier']}."
 
         return RepertoireDataset(**{**kwargs, **{"repertoires": repertoires}})
+
+    @classmethod
+    def build_from_objects(cls, **kwargs):
+        location = RepertoireDataset.__name__
+        ParameterValidator.assert_keys(kwargs.keys(), ['repertoires', 'labels', 'name', 'metadata_path'], location, 'RepertoireDataset')
+        ParameterValidator.assert_all_type_and_value(kwargs['repertoires'], Repertoire, location, 'repertoires')
+        ParameterValidator.assert_type_and_value(kwargs['metadata_path'], Path, location, 'metadata_path')
+        ParameterValidator.assert_type_and_value(kwargs['name'], str, location, 'name')
+        ParameterValidator.assert_type_and_value(kwargs['labels'], dict, location, 'labels')
+
+        PathBuilder.build(kwargs['metadata_path'].parent)
+        pd.DataFrame([{**{"subject_id": f"subject_{index}", "filename": repertoire.data_filename, 'repertoire_id': repertoire.identifier},
+                       **repertoire.metadata}
+                      for index, repertoire in enumerate(kwargs['repertoires'])]).to_csv(kwargs['metadata_path'])
+
+        return RepertoireDataset(labels=kwargs['labels'], repertoires=kwargs['repertoires'], metadata_file=kwargs['metadata_path'],
+                                 name=kwargs['name'])
 
     def __init__(self, labels: dict = None, encoded_data: EncodedData = None, repertoires: list = None, identifier: str = None,
                  metadata_file: Path = None, name: str = None, metadata_fields: list = None, repertoire_ids: list = None):

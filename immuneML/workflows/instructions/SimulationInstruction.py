@@ -5,6 +5,7 @@ from immuneML.IO.dataset_export.DataExporter import DataExporter
 from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
 from immuneML.simulation.Simulation import Simulation
 from immuneML.simulation.SimulationState import SimulationState
+from immuneML.util.ExporterHelper import ExporterHelper
 from immuneML.util.ReflectionHandler import ReflectionHandler
 from immuneML.workflows.instructions.Instruction import Instruction
 from immuneML.workflows.steps.SignalImplanter import SignalImplanter
@@ -46,25 +47,10 @@ class SimulationInstruction(Instruction):
     def run(self, result_path: Path):
         self.state.result_path = result_path / self.state.name
         self.state.resulting_dataset = SignalImplanter.run(self.state)
-        self.export_dataset()
+        export_output = ExporterHelper.export_dataset(self.state.resulting_dataset, self.exporters, self.state.result_path)
+        self.state.formats = export_output['formats']
+        self.state.paths = export_output['paths']
         return self.state
-
-    def export_dataset(self):
-        dataset_name = self.state.resulting_dataset.name if self.state.resulting_dataset.name is not None else self.state.resulting_dataset.identifier
-        paths = {dataset_name: {}}
-        formats = []
-
-        if self.exporters is not None and len(self.exporters) > 0:
-            for exporter in self.exporters:
-                export_format = exporter.__name__[:-8]
-                path = self.state.result_path / f"exported_dataset/{exporter.__name__.replace('Exporter', '').lower()}/"
-                exporter.export(self.state.resulting_dataset,
-                                path)
-                paths[dataset_name][export_format] = path
-                formats.append(export_format)
-
-        self.state.paths = paths
-        self.state.formats = formats
 
     @staticmethod
     def get_documentation():

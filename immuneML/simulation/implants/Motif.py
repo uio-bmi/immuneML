@@ -75,6 +75,8 @@ class Motif:
     name_chain1: Chain = None
     seed_chain2: str = None
     name_chain2: Chain = None
+    v_gene: str = None
+    j_gene: str = None
 
     def instantiate_motif(self, chain_name: Chain = None):
         """
@@ -87,7 +89,7 @@ class Motif:
              for the corresponding chains
         """
         assert self.instantiation is not None, "Motif: set instantiation strategy before instantiating a motif."
-        # TODO: handle PWMs also, here it always uses seed
+
         if self.seed is not None:
             return self.instantiation.instantiate_motif(self.seed)
         else:

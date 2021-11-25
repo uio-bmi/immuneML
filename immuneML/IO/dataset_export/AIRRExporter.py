@@ -63,7 +63,7 @@ class AIRRExporter(DataExporter):
                     df = AIRRExporter._sequences_to_dataframe(batch, region_type)
 
                 df = AIRRExporter._postprocess_dataframe(df)
-                airr.dump_rearrangement(df, filename)
+                airr.dump_rearrangement(df, str(filename))
 
                 index += 1
 
@@ -91,7 +91,7 @@ class AIRRExporter(DataExporter):
 
     @staticmethod
     def _repertoire_to_dataframe(repertoire: Repertoire, region_type):
-        # get all fields (including custom fields)
+
         df = pd.DataFrame(repertoire.load_data())
 
         for column in ['v_alleles', 'j_alleles', 'v_genes', 'j_genes']:

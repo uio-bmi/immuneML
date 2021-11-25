@@ -10,6 +10,9 @@ class Receptor(DatasetItem):
 
     FIELDS = {}
 
+    def __init__(self, identifier):
+        self.identifier = identifier
+
     @abc.abstractmethod
     def get_chains(self):
         pass

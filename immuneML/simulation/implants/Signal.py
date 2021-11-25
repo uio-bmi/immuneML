@@ -3,6 +3,7 @@ from pathlib import Path
 from typing import List
 
 from immuneML.data_model.receptor.Receptor import Receptor
+from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
 from immuneML.data_model.repertoire.Repertoire import Repertoire
 from immuneML.simulation.implants.Motif import Motif
 from immuneML.simulation.signal_implanting_strategy.SignalImplantingStrategy import SignalImplantingStrategy
@@ -58,6 +59,9 @@ class Signal:
                                    repertoire_implanting_rate=repertoire_implanting_rate,
                                    signal=self, path=path)
         return processed_repertoire
+
+    def implant_in_sequence(self, sequence: ReceptorSequence, is_noise: bool) -> ReceptorSequence:
+        return self.implanting_strategy.implant_in_sequence(sequence=sequence, signal=self)
 
     def implant_in_receptor(self, receptor: Receptor, is_noise: bool) -> Receptor:
         processed_receptor = self.implanting_strategy.implant_in_receptor(receptor, self, is_noise)

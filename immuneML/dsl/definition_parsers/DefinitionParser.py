@@ -1,3 +1,4 @@
+from inspect import signature
 from pathlib import Path
 
 from immuneML.IO.dataset_import.DataImport import DataImport
@@ -45,7 +46,7 @@ class DefinitionParser:
         symbol_table, specs_encoding = DefinitionParser._call_if_exists("encodings", EncodingParser.parse, specs, symbol_table)
         symbol_table, specs_ml = DefinitionParser._call_if_exists("ml_methods", MLParser.parse, specs, symbol_table)
         symbol_table, specs_report = DefinitionParser._call_if_exists("reports", ReportParser.parse_reports, specs, symbol_table)
-        symbol_table, specs_import = ImportParser.parse(specs, symbol_table, result_path)
+        symbol_table, specs_import = DefinitionParser._call_if_exists('datasets', ImportParser.parse, specs, symbol_table, result_path)
 
         specs_defs = DefinitionParser.create_specs_defs(specs_import, specs_simulation, specs_preprocessing, specs_motifs, specs_signals,
                                                         specs_encoding, specs_ml, specs_report)
@@ -53,9 +54,12 @@ class DefinitionParser:
         return DefinitionParserOutput(symbol_table=symbol_table, specification=workflow_specification), specs_defs
 
     @staticmethod
-    def _call_if_exists(key: str, method, specs: dict, symbol_table: SymbolTable):
+    def _call_if_exists(key: str, method, specs: dict, symbol_table: SymbolTable, path=None):
         if key in specs:
-            return method(specs[key], symbol_table)
+            if "path" in signature(method).parameters:
+                return method(specs[key], symbol_table, path)
+            else:
+                return method(specs[key], symbol_table)
         else:
             return symbol_table, {}
 
