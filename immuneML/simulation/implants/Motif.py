@@ -2,6 +2,7 @@
 from dataclasses import dataclass
 
 from immuneML.data_model.receptor.receptor_sequence.Chain import Chain
+from immuneML.environment.SequenceType import SequenceType
 from immuneML.simulation.motif_instantiation_strategy.MotifInstantiationStrategy import MotifInstantiationStrategy
 from immuneML.util.ReflectionHandler import ReflectionHandler
 from scripts.specification_util import update_docs_per_mapping
@@ -78,7 +79,7 @@ class Motif:
     v_gene: str = None
     j_gene: str = None
 
-    def instantiate_motif(self, chain_name: Chain = None):
+    def instantiate_motif(self, chain_name: Chain = None, sequence_type: SequenceType = SequenceType.AMINO_ACID):
         """
         Creates a motif instance based on the seed; if seed parameter is defined for the motif, it is assumed that single chain data are used for
         the analysis. If seed is None, then it is assumed that paired chain receptor data are required in which case this function will return a
@@ -91,7 +92,7 @@ class Motif:
         assert self.instantiation is not None, "Motif: set instantiation strategy before instantiating a motif."
 
         if self.seed is not None:
-            return self.instantiation.instantiate_motif(self.seed)
+            return self.instantiation.instantiate_motif(self.seed, sequence_type=sequence_type)
         else:
             assert self.name_chain1 is not None and self.name_chain2 is not None, \
                 f"Motif: chain names have to be set when working with paired chain data, here these are: {self.name_chain1} and {self.name_chain2}."
@@ -100,7 +101,7 @@ class Motif:
                 f"Motif: specified chain name {chain_name.name.lower()} is not in valid list of chain names specified for motif {self.identifier}: " \
                 f"{[self.name_chain1.name.lower(), self.name_chain2.name.lower()]}."
 
-            return self.instantiation.instantiate_motif(self.seed_chain1 if chain_name == self.name_chain1 else self.seed_chain2)
+            return self.instantiation.instantiate_motif(self.seed_chain1 if chain_name == self.name_chain1 else self.seed_chain2, sequence_type=sequence_type)
 
     def get_max_length(self):
         if self.seed is not None:
