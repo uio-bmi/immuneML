@@ -85,7 +85,7 @@ class KmerAbundanceEncoder(DatasetEncoder):
         self.kmer_frequency_params = {"normalization_type": NormalizationType.BINARY, "reads": ReadsType.UNIQUE,
                                       "sequence_encoding": sequence_encoding, "k": k, "k_left": k_left, "k_right": k_right,
                                       "min_gap": min_gap, "max_gap": max_gap, "scale_to_unit_variance": False,
-                                      "scale_to_zero_mean": False, "sequence_type": SequenceType.AMINO_ACID}
+                                      "scale_to_zero_mean": False, "sequence_type": EnvironmentSettings.get_sequence_type().name}
 
         self.relevant_indices_path = None
         self.relevant_sequence_path = None
