@@ -17,6 +17,7 @@ from immuneML.encodings.kmer_frequency.KmerFreqRepertoireEncoder import KmerFreq
 from immuneML.encodings.kmer_frequency.KmerFrequencyEncoder import KmerFrequencyEncoder
 from immuneML.encodings.kmer_frequency.ReadsType import ReadsType
 from immuneML.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType import SequenceEncodingType
+from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.environment.SequenceType import SequenceType
 from immuneML.util.EncoderHelper import EncoderHelper
 from immuneML.util.ParameterValidator import ParameterValidator
@@ -106,7 +107,7 @@ class KmerAbundanceEncoder(DatasetEncoder):
         kmerfreq_params = KmerFrequencyEncoder._prepare_parameters(normalization_type="binary", reads="unique",
                                                                    sequence_encoding=sequence_encoding,
                                                                    k= k, k_left=k_left, k_right=k_right, min_gap=min_gap,
-                                                                   max_gap=max_gap, sequence_type="amino_acid")
+                                                                   max_gap=max_gap, sequence_type=EnvironmentSettings.get_sequence_type().name)
 
         return {
             "p_value_threshold": p_value_threshold,
