@@ -16,6 +16,21 @@ Troubleshooting
 Installation issues
 -------------------
 
+During installation of the dependency pystache, I get an error: use_2to3 is invalid.
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The full error reads:
+
+.. code-block:: console
+
+    pystache: using: version '58.0.4' of <module 'setuptools' from 'immuneml_env/lib/python3.8/site-packages/setuptools/__init__.py'>
+    Warning: 'classifiers' should be a list, got type 'tuple'
+    error in pystache setup command: use_2to3 is invalid.
+
+This issue occurs due to an incompatibility between pystache and newer version of setuptools (known to occur with setuptools version 58.0.4 and higher).
+A temporary workaround is to use an older version of setuptools, for example version 50.3.2.
+Updates on fixing the incompatibility in pystache can be followed in this GitHub issue: https://github.com/pypa/pypi-support/issues/1422
+
 When installing all requirements from requirements.txt, there is afterward an error with yaml package (No module named yaml)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -44,6 +59,12 @@ Please note that when using DeepRC from immuneML, a PyTorch distribution that su
 
 Runtime issues
 --------------
+
+When running immuneML, I get "ModuleNotFoundError: No module named 'init'"
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+This issue occurs due to an incompatibility between pystache and newer version of setuptools (known to occur with setuptools version 58.0.4 and higher).
+A temporary workaround is to use an older version of setuptools, for example version 50.3.2.
+Updates on fixing the incompatibility in pystache can be followed in this GitHub issue: https://github.com/pypa/pypi-support/issues/1422
 
 When running the TrainMLModel instruction multiple times, sometimes it fails saying that there is only one class in the data. Why does this happen?
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
