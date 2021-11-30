@@ -30,7 +30,9 @@ Install immuneML
 
 .. code-block:: console
 
-  conda create --prefix immuneml_env/ python=3.8
+  conda create --prefix immuneml_env/ python=3.8 setuptools=50.3.2
+
+Including :code:`setuptools=50.3.2` is a temporary workaround for the issue described here: :ref:`When running immuneML, I get "ModuleNotFoundError: No module named 'init'"`.
 
 3. Activate the created environment:
 
