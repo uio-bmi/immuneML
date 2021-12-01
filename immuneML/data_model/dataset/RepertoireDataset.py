@@ -30,8 +30,8 @@ class RepertoireDataset(Dataset):
                                     identifier=row['identifier'])
             repertoires.append(repertoire)
 
-        if "repertoire_ids" in kwargs.keys() and "repertoires" not in kwargs.keys() and kwargs['repertoire_ids'] is not None:
-            assert all(rep.identifier == kwargs['repertoire_ids'][i] for i, rep in enumerate(repertoires)), \
+        if "repertoire_id" in kwargs.keys() and "repertoires" not in kwargs.keys() and kwargs['repertoire_id'] is not None:
+            assert all(rep.identifier == kwargs['repertoire_id'][i] for i, rep in enumerate(repertoires)), \
                 f"{RepertoireDataset.__name__}: repertoire ids from the iml_dataset file and metadata file don't match for the dataset " \
                 f"{kwargs['name']} with identifier {kwargs['identifier']}."
 
@@ -49,7 +49,8 @@ class RepertoireDataset(Dataset):
         PathBuilder.build(kwargs['metadata_path'].parent)
         pd.DataFrame([{**{"subject_id": f"subject_{index}", "filename": repertoire.data_filename, 'repertoire_id': repertoire.identifier},
                        **repertoire.metadata}
-                      for index, repertoire in enumerate(kwargs['repertoires'])]).to_csv(kwargs['metadata_path'])
+                      for index, repertoire in enumerate(kwargs['repertoires'])]).drop(columns=['field_list'])\
+            .to_csv(kwargs['metadata_path'], index=False)
 
         return RepertoireDataset(labels=kwargs['labels'], repertoires=kwargs['repertoires'], metadata_file=kwargs['metadata_path'],
                                  name=kwargs['name'])
@@ -96,7 +97,7 @@ class RepertoireDataset(Dataset):
     def get_label_names(self, refresh=False):
         """Returns the list of metadata fields which can be used as labels; if refresh=True, it reloads the fields from disk"""
         all_metadata_fields = set(self.get_metadata_fields(refresh))
-        for non_label in ["subject_id", "filename", "repertoire_identifier", "identifier"]:
+        for non_label in ["subject_id", "filename", "repertoire_id", "identifier"]:
             if non_label in all_metadata_fields:
                 all_metadata_fields.remove(non_label)
 
