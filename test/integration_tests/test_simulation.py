@@ -64,11 +64,13 @@ class TestSimulation(TestCase):
                 "simulations": {
                     "sim1": {
                         "var1": {
+                            "type": "Implanting",
                             "signals": ["signal1", "signal2"],
                             "dataset_implanting_rate": 0.5,
                             "repertoire_implanting_rate": 0.33
                         },
                         "var2": {
+                            "type": "Implanting",
                             "signals": ["signal1", "signal2"],
                             "dataset_implanting_rate": 0.5,
                             "is_noise": True,
@@ -196,10 +198,12 @@ class TestSimulation(TestCase):
                 "simulations": {
                     "sim1": {
                         "var1": {
+                            "type": "Implanting",
                             "signals": ["signal1"],
                             "dataset_implanting_rate": 0.5
                         },
                         "var2": {
+                            "type": "Implanting",
                             "signals": ["signal2"],
                             "dataset_implanting_rate": 0.5
                         }

@@ -7,7 +7,7 @@ from immuneML.simulation.implants.MotifInstance import MotifInstance
 class MotifInstantiationStrategy(metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
-    def instantiate_motif(self, base, sequence_type: SequenceType) -> MotifInstance:
+    def instantiate_motif(self, base, sequence_type: SequenceType = SequenceType.AMINO_ACID) -> MotifInstance:
         pass
 
     @abc.abstractmethod

@@ -57,6 +57,7 @@ class TestGalaxySimulationTool(TestCase):
                 "simulations": {
                     "sim1": {
                         "var1": {
+                            "type": "Implanting",
                             "signals": ["signal1"],
                             "dataset_implanting_rate": 0.5,
                             "repertoire_implanting_rate": 0.5

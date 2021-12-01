@@ -155,7 +155,12 @@ class Repertoire(DatasetItem):
                 frame_types.append(sequence.metadata.frame_type)
                 cell_ids.append(sequence.metadata.cell_id)
                 for param in sequence.metadata.custom_params.keys():
-                    custom_lists[param].append(sequence.metadata.custom_params[param] if param in sequence.metadata.custom_params else None)
+                    current_value = sequence.metadata.custom_params[param] if param in sequence.metadata.custom_params else None
+                    if param in custom_lists:
+                        custom_lists[param].append(current_value)
+                    else:
+                        custom_lists[param] = [None for _ in range(index)]
+                        custom_lists[param].append(current_value)
             if sequence.annotation and sequence.annotation.implants and len(sequence.annotation.implants) > 0:
                 for implant in sequence.annotation.implants:
                     if implant.signal_id in signals:

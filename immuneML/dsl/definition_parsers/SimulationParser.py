@@ -112,12 +112,13 @@ class SimulationParser:
         location = SimulationParser.__name__
         valid_simulation_item_keys = ["dataset_implanting_rate", "repertoire_implanting_rate", "signals", "is_noise", "type"]
 
-        ParameterValidator.assert_keys(simulation_item.keys(), valid_simulation_item_keys, location, key, exclusive=False)
+        ParameterValidator.assert_keys(list(simulation_item.keys()), valid_simulation_item_keys, location, key, exclusive=False)
         ParameterValidator.assert_keys(simulation_item["signals"], symbol_table.get_keys_by_type(SymbolType.SIGNAL), location, key, False)
 
         implanting_params = copy.deepcopy(simulation_item)
         implanting_params["signals"] = [symbol_table.get(signal) for signal in simulation_item["signals"]]
         implanting_params["name"] = key
+        del implanting_params['type']
 
         return Implanting(**implanting_params)
 

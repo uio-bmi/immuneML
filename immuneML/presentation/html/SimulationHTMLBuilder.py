@@ -57,7 +57,7 @@ class SimulationHTMLBuilder:
                         start=base_path)
                 } for format_name in state.formats
             ],
-            "implantings": [Util.to_dict_recursive(implanting, base_path) for implanting in state.simulation.implantings]
+            "simulation_items": [Util.to_dict_recursive(simulation_item, base_path) for simulation_item in state.simulation.simulation_items]
         }
 
         return html_map

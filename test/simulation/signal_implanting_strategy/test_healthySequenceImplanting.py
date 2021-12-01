@@ -4,6 +4,7 @@ from unittest import TestCase
 
 from immuneML.caching.CacheType import CacheType
 from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
+from immuneML.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
 from immuneML.data_model.repertoire.Repertoire import Repertoire
 from immuneML.environment.Constants import Constants
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
@@ -25,8 +26,10 @@ class TestHealthySequenceImplanting(TestCase):
         path = EnvironmentSettings.tmp_test_path / "healthysequenceimplanting/"
         PathBuilder.build(path)
 
-        repertoire = Repertoire.build_from_sequence_objects([ReceptorSequence(amino_acid_sequence="ACDFQ", identifier="1"),
-                                                             ReceptorSequence(amino_acid_sequence="TGCDF", identifier="2")],
+        repertoire = Repertoire.build_from_sequence_objects([ReceptorSequence(amino_acid_sequence="ACDFQ", identifier="1",
+                                                                              metadata=SequenceMetadata(region_type='IMGT_CDR3')),
+                                                             ReceptorSequence(amino_acid_sequence="TGCDF", identifier="2",
+                                                                              metadata=SequenceMetadata(region_type='IMGT_CDR3'))],
                                                             path=path, metadata={"subject_id": "1"})
         implanting = HealthySequenceImplanting(GappedMotifImplanting(), implanting_computation=ImplantingComputation.ROUND)
         signal = Signal("1", [Motif("m1", GappedKmerInstantiation(), "CCC")], implanting)
@@ -42,7 +45,7 @@ class TestHealthySequenceImplanting(TestCase):
     def test_implant_in_sequence(self):
         implanting = HealthySequenceImplanting(GappedMotifImplanting(), implanting_computation=ImplantingComputation.ROUND)
         signal = Signal("1", [Motif("m1", GappedKmerInstantiation(), "CCC")], implanting)
-        sequence = ReceptorSequence(amino_acid_sequence="ACDFQ")
+        sequence = ReceptorSequence(amino_acid_sequence="ACDFQ", metadata=SequenceMetadata(region_type='IMGT_CDR3'))
         sequence2 = implanting.implant_in_sequence(sequence, signal)
 
         self.assertEqual(len(sequence.get_sequence()), len(sequence2.get_sequence()))

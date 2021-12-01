@@ -144,7 +144,7 @@ class RandomDatasetGenerator:
 
         get_random_sequence = lambda proba, chain, id: ReceptorSequence("".join(random.choices(alphabet, k=random.choices(list(proba.keys()),
                                                                                                                           proba.values())[0])),
-                                                                        metadata=SequenceMetadata(count=1,
+                                                                        metadata=SequenceMetadata(count=1, region_type='IMGT_CDR3',
                                                                                                   v_subgroup=chain + "V1",
                                                                                                   v_gene=chain + "V1-1",
                                                                                                   v_allele=chain + "V1-1*01",

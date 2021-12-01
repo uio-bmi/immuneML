@@ -18,14 +18,12 @@ class ImportParser:
     valid_keys = ["format", "params"]
 
     @staticmethod
-    def parse(workflow_specification: dict, symbol_table: SymbolTable, result_path: Path) -> Tuple[SymbolTable, dict]:
-        assert ImportParser.keyword in workflow_specification and isinstance(workflow_specification[ImportParser.keyword], dict), \
-            "ImmuneMLParser: datasets are not defined."
+    def parse(workflow_specification: dict, symbol_table: SymbolTable, path: Path) -> Tuple[SymbolTable, dict]:
 
-        for key in workflow_specification[ImportParser.keyword].keys():
-            symbol_table = ImportParser._parse_dataset(key, workflow_specification[ImportParser.keyword][key], symbol_table, result_path)
+        for key in workflow_specification.keys():
+            symbol_table = ImportParser._parse_dataset(key, workflow_specification[key], symbol_table, path)
 
-        return symbol_table, workflow_specification[ImportParser.keyword]
+        return symbol_table, workflow_specification
 
     @staticmethod
     @log

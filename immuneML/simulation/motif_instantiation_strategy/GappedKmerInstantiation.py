@@ -85,7 +85,7 @@ class GappedKmerInstantiation(MotifInstantiationStrategy):
     def get_max_gap(self) -> int:
         return self._max_gap
 
-    def instantiate_motif(self, base, sequence_type: SequenceType) -> MotifInstance:
+    def instantiate_motif(self, base, sequence_type: SequenceType = SequenceType.AMINO_ACID) -> MotifInstance:
 
         self.alphabet_weights = self.set_default_weights(self.alphabet_weights, EnvironmentSettings.get_sequence_alphabet(sequence_type=sequence_type))
 

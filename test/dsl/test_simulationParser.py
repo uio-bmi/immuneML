@@ -24,6 +24,7 @@ class TestSimulationParser(TestCase):
         simulation = {
             "sim1": {
                 "var1": {
+                    "type": "Implanting",
                     "signals": ["signal1"],
                     "dataset_implanting_rate": 0.5,
                     "repertoire_implanting_rate": 0.1
@@ -40,4 +41,4 @@ class TestSimulationParser(TestCase):
 
         self.assertTrue(symbol_table.contains("sim1"))
         sim1 = symbol_table.get("sim1")
-        self.assertEqual(1, len(sim1.implantings))
+        self.assertEqual(1, len(sim1.simulation_items))
