@@ -61,7 +61,8 @@ class TestLIgOSimulation(TestCase):
                             "generative_model": {
                                 "type": "OLGA",
                                 "model_path": None,
-                                "default_model_name": "humanTRB"
+                                "default_model_name": "humanTRB",
+                                "chain": 'beta'
                             }
                         },
                         "var2": {
@@ -74,7 +75,8 @@ class TestLIgOSimulation(TestCase):
                             "generative_model": {
                                 'type': 'OLGA',
                                 "model_path": None,
-                                "default_model_name": "humanTRB"
+                                "default_model_name": "humanTRB",
+                                "chain": "beta"
                             }
                         }
                     }
@@ -119,4 +121,4 @@ class TestLIgOSimulation(TestCase):
         metadata_df = pd.read_csv(path / "result/inst1/metadata.csv", comment=Constants.COMMENT_SIGN)
         self.assertTrue("signal1" in metadata_df.columns)
 
-        shutil.rmtree(path)
+        # shutil.rmtree(path)
