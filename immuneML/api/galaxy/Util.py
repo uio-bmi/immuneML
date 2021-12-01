@@ -29,6 +29,30 @@ class Util:
                 Util.check_paths(specs[key], tool_name)
 
     @staticmethod
+    def update_dataset_key(specs: dict, location, new_key="dataset"):
+        dataset_keys = list(specs["definitions"]["datasets"].keys())
+        assert len(dataset_keys) == 1, f"{location}: one dataset has to be defined under definitions/datasets, got {dataset_keys} instead."
+
+        orig_key = dataset_keys[0]
+
+        if orig_key != "dataset":
+            specs["definitions"]["datasets"][new_key] = specs["definitions"]["datasets"][orig_key]
+            specs["definitions"]["datasets"].pop(orig_key)
+
+            for instruction_key in specs["instructions"].keys():
+                if "dataset" in specs["instructions"][instruction_key]:
+                    specs["instructions"][instruction_key]["dataset"] = new_key
+
+                if "datasets" in specs["instructions"][instruction_key]:
+                    specs["instructions"][instruction_key]["datasets"] = [new_key]
+
+                if "analyses" in specs["instructions"][instruction_key]:
+                    for analysis_key in specs["instructions"][instruction_key]["analyses"].keys():
+                        specs["instructions"][instruction_key]["analyses"][analysis_key]["dataset"] = new_key
+
+            logging.info(f"{location}: renamed dataset '{orig_key}' to '{new_key}'.")
+
+    @staticmethod
     def update_result_paths(specs: dict, result_path: Path, yaml_path: Path):
         for key, item in specs["definitions"]["datasets"].items():
             if isinstance(item, dict) and 'params' in item.keys() and isinstance(item["params"], dict):

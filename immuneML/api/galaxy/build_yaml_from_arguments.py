@@ -152,7 +152,7 @@ def build_specs(args):
     specs = {
         "definitions": {
             "datasets": {
-                "d1": {
+                "dataset": {
                     "format": "ImmuneML",
                     "params": None
                 }
@@ -187,7 +187,7 @@ def build_specs(args):
                     "training_percentage": 0.7,
                 },
                 "labels": [],
-                "dataset": "d1",
+                "dataset": "dataset",
                 "strategy": "GridSearch",
                 "metrics": [],
                 "number_of_processes": 10,
@@ -204,7 +204,7 @@ def build_specs(args):
     dataset_params = discover_dataset_params()
     labels = build_labels(args.labels)
 
-    specs["definitions"]["datasets"]["d1"]["params"] = dataset_params
+    specs["definitions"]["datasets"]["dataset"]["params"] = dataset_params
     specs["definitions"]["encodings"] = enc_specs
     specs["definitions"]["ml_methods"] = ml_specs
     specs["instructions"]["inst1"]["settings"] = settings_specs
