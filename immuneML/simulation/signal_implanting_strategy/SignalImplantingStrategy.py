@@ -6,6 +6,7 @@ from pathlib import Path
 
 from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
 from immuneML.data_model.repertoire.Repertoire import Repertoire
+from immuneML.environment.SequenceType import SequenceType
 from immuneML.simulation.sequence_implanting.SequenceImplantingStrategy import SequenceImplantingStrategy
 from immuneML.simulation.signal_implanting_strategy.ImplantingComputation import ImplantingComputation
 
@@ -22,7 +23,7 @@ class SignalImplantingStrategy(metaclass=abc.ABCMeta):
     def implant_in_repertoire(self, repertoire: Repertoire, repertoire_implanting_rate: float, signal, path: Path):
         pass
 
-    def implant_in_sequence(self, sequence: ReceptorSequence, signal, motif=None, chain=None) -> ReceptorSequence:
+    def implant_in_sequence(self, sequence: ReceptorSequence, signal, motif=None, chain=None, sequence_type: SequenceType = SequenceType.AMINO_ACID) -> ReceptorSequence:
         assert self.sequence_implanting_strategy is not None, \
             "SignalImplanting: set SequenceImplantingStrategy in SignalImplanting object before calling implant_in_sequence method."
 
@@ -34,7 +35,8 @@ class SignalImplantingStrategy(metaclass=abc.ABCMeta):
                                                                  signal={"signal_id": signal.id,
                                                                          "motif_id": motif.identifier,
                                                                          "motif_instance": motif_instance},
-                                                                 sequence_position_weights=self.sequence_position_weights)
+                                                                 sequence_position_weights=self.sequence_position_weights,
+                                                                 sequence_type=sequence_type)
         return new_sequence
 
     @abc.abstractmethod

@@ -5,6 +5,7 @@ from typing import List
 from immuneML.data_model.receptor.Receptor import Receptor
 from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
 from immuneML.data_model.repertoire.Repertoire import Repertoire
+from immuneML.environment.SequenceType import SequenceType
 from immuneML.simulation.implants.Motif import Motif
 from immuneML.simulation.signal_implanting_strategy.SignalImplantingStrategy import SignalImplantingStrategy
 from immuneML.util.ReflectionHandler import ReflectionHandler
@@ -67,8 +68,8 @@ class Signal:
                                    signal=self, path=path)
         return processed_repertoire
 
-    def implant_in_sequence(self, sequence: ReceptorSequence, is_noise: bool) -> ReceptorSequence:
-        return self.implanting_strategy.implant_in_sequence(sequence=sequence, signal=self)
+    def implant_in_sequence(self, sequence: ReceptorSequence, is_noise: bool, sequence_type: SequenceType = SequenceType.AMINO_ACID) -> ReceptorSequence:
+        return self.implanting_strategy.implant_in_sequence(sequence=sequence, signal=self, sequence_type=sequence_type)
 
     def implant_in_receptor(self, receptor: Receptor, is_noise: bool) -> Receptor:
         processed_receptor = self.implanting_strategy.implant_in_receptor(receptor, self, is_noise)

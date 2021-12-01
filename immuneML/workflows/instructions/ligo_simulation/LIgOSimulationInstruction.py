@@ -120,8 +120,7 @@ class LIgOSimulationInstruction(Instruction):
 
         return repertoires
 
-    def _make_receptors_with_signal(self, item: LIgOSimulationItem, receptor_count: int, path: Path) \
-        -> list:
+    def _make_receptors_with_signal(self, item: LIgOSimulationItem, receptor_count: int, path: Path) -> list:
         if self.state.simulation_strategy == SimulationStrategy.IMPLANTING:
 
             new_sequences = self._make_sequences_by_implanting(item=item, receptor_with_signal_count=receptor_count, path=path)
@@ -169,7 +168,8 @@ class LIgOSimulationInstruction(Instruction):
             sequence_indices[signal.id] = random.sample(available_indices, k=receptor_with_signal_count)
             available_indices = [ind for ind in available_indices if ind not in sequence_indices[signal.id]]
             for index in sequence_indices[signal.id]:
-                implanted_sequence = signal.implant_in_sequence(background_sequences[index], is_noise=item.is_noise)
+                implanted_sequence = signal.implant_in_sequence(sequence=background_sequences[index], is_noise=item.is_noise,
+                                                                sequence_type=self.state.sequence_type)
                 for other_signal in self.state.signals:
                     if other_signal.id != signal.id:
                         implanted_sequence.metadata.custom_params[other_signal.id] = False
