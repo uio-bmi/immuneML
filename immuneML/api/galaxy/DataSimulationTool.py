@@ -39,11 +39,8 @@ class DataSimulationTool(GalaxyTool):
         ParameterValidator.assert_keys_present(specs["definitions"], ["datasets"], DataSimulationTool.__name__, "definitions/datasets")
         ParameterValidator.assert_type_and_value(specs['definitions']['datasets'], dict, DataSimulationTool.__name__, "definitions/datasets")
 
-        dataset_names = list(specs['definitions']['datasets'].keys())
-        assert len(dataset_names) == 1, f"{DataSimulationTool.__name__}: one dataset has to be defined under definitions/datasets, got " \
-                                        f"{dataset_names} instead."
-
-        self.dataset_name = dataset_names[0]
+        self.dataset_name = "dataset"
+        Util.update_dataset_key(specs, DataSimulationTool.__name__, self.dataset_name)
 
         Util.check_paths(specs, DataSimulationTool.__name__)
         Util.update_result_paths(specs, self.result_path, self.yaml_path)
