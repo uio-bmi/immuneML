@@ -61,7 +61,8 @@ class TestFeatureComparison(TestCase):
         report = FeatureComparison.build_object(**{"dataset": dataset,
                                                      "result_path": path,
                                                      "comparison_label": "patient",
-                                                   "keep_fraction": 0.2})
+                                                   "keep_fraction": 0.2,
+                                                   "log_scale": True})
 
         self.assertTrue(report.check_prerequisites())
 
