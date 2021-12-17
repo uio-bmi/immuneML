@@ -49,9 +49,9 @@ class HPAssessment:
         state = HPAssessment.run_assessment_split_per_label(state, split_index)
 
         assessment_state.train_val_data_reports = ReportUtil.run_data_reports(train_val_dataset, state.assessment.reports.data_split_reports.values(),
-                                                                              current_path / "data_report_train", state.context)
+                                                                              current_path / "data_report_train", state.number_of_processes, state.context)
         assessment_state.test_data_reports = ReportUtil.run_data_reports(test_dataset, state.assessment.reports.data_split_reports.values(),
-                                                                         current_path / "data_report_test", state.context)
+                                                                         current_path / "data_report_test", state.number_of_processes, state.context)
 
         print(f'{datetime.datetime.now()}: Training ML model: running outer CV loop: finished split {split_index + 1}/{n_splits}.\n', flush=True)
 

@@ -127,6 +127,7 @@ class HPUtil:
             tmp_report = copy.deepcopy(report)
             tmp_report.state = state
             tmp_report.result_path = path / key
+            tmp_report.number_of_processes = state.number_of_processes
             report_result = tmp_report.generate_report()
             report_results.append(report_result)
         return report_results
@@ -139,9 +140,12 @@ class HPUtil:
             split_reports_path = path / f"split_{index + 1}"
 
             selection_state.train_data_reports += ReportUtil.run_data_reports(train_datasets[index], data_split_reports,
-                                                                              split_reports_path / "data_reports_train", state.context)
+                                                                              split_reports_path / "data_reports_train",
+                                                                              state.number_of_processes, state.context)
             selection_state.val_data_reports += ReportUtil.run_data_reports(val_datasets[index], data_split_reports,
-                                                                            split_reports_path / "data_reports_test", state.context)
+                                                                            split_reports_path / "data_reports_test",
+                                                                            state.number_of_processes, state.context)
 
         data_reports = state.selection.reports.data_reports.values()
-        selection_state.data_reports = ReportUtil.run_data_reports(dataset, data_reports, path / "reports", state.context)
+        selection_state.data_reports = ReportUtil.run_data_reports(dataset, data_reports, path / "reports",
+                                                                   state.number_of_processes, state.context)

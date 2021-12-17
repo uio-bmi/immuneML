@@ -20,14 +20,19 @@ class EncodingReport(Report):
     Arguments:
 
         dataset (Dataset): an encoded dataset where encoded_data attribute is set to an instance of EncodedData object
+
         result_path (Path): path where the results will be stored (plots, tables, etc.)
+
         name (str): user-defined name of the report that will be shown in the HTML overview later
+
+        number_of_processes (int): how many processes should be created at once to speed up the analysis. For personal machines, 4 or 8 is usually a good choice.
 
     """
 
-    dataset: Dataset = None
-    result_path: Path = None
-    name: str = None
+    def __init__(self, dataset: Dataset = None, result_path: Path = None, name: str = None, number_of_processes: int = 1):
+        super().__init__(name, number_of_processes)
+        self.dataset = dataset
+        self.result_path = result_path
 
     @staticmethod
     def get_title():
