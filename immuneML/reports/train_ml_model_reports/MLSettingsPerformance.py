@@ -82,7 +82,9 @@ class MLSettingsPerformance(TrainMLModelReport):
         report_output_fig = self._safe_plot(plotting_data=plotting_data)
         output_figures = [report_output_fig] if report_output_fig is not None else []
 
-        return ReportResult(self.name, output_tables=[result_table], output_figures=output_figures)
+        return ReportResult(self.name,
+                            info="The performance on the test set in the assessment (outer cross-validation) loop for each of the setting combinations as defined under 'settings'.",
+                            output_tables=[result_table], output_figures=output_figures)
 
     def _get_vertical_grouping(self, assessment_item):
         return assessment_item.hp_setting.encoder_name

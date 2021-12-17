@@ -78,7 +78,9 @@ class CytoscapeNetworkExporter(DataReport):
             PathBuilder.build(result_path)
             report_output_tables = self.export_receptorlist(receptors, result_path=result_path)
 
-        return ReportResult(output_tables=report_output_tables)
+        return ReportResult(name=self.name,
+                            info="This report exports the Receptor sequences to .sif format, such that they can directly be imported as a network in Cytoscape, to visualize chain sharing between the different receptors in a dataset (for example, for TCRs: how often one alpha chain is shared with multiple beta chains, and vice versa).",
+                            output_tables=report_output_tables)
 
     def export_receptorlist(self, receptors, result_path: Path):
         export_list = []

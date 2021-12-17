@@ -104,6 +104,7 @@ class TrainingPerformance(MLReport):
         self._generate_barplot(scores_df, output)
 
         return ReportResult(self.name,
+                            info="Plots the evaluation metrics for the performance given machine learning model and training dataset.",
                             output_tables=output['tables'],
                             output_figures=output['figures'])
 

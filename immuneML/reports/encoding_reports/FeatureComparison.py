@@ -87,6 +87,7 @@ class FeatureComparison(FeatureReport):
         self.keep_fraction = keep_fraction
         self.result_name = "feature_comparison"
         self.name = name
+        self.info = "Compares the feature values in a given encoded data matrix across two values for a metadata label. Each point in the resulting scatterplot represents one feature, and the values on the x and y axes are the average feature values across examples of two different classes. "
 
     def _plot(self, data_long_format) -> ReportOutput:
         groupby_cols = [self.comparison_label, self.x, self.color, self.facet_row, self.facet_column]

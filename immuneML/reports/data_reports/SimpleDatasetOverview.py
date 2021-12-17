@@ -12,7 +12,7 @@ from immuneML.util.PathBuilder import PathBuilder
 
 class SimpleDatasetOverview(DataReport):
     """
-    Generates a simple overview of the properties of any dataset, including the dataset name, size, and metadata labels.
+    Generates a simple text-based overview of the properties of any dataset, including the dataset name, size, and metadata labels.
 
     YAML specification:
 
@@ -49,7 +49,9 @@ class SimpleDatasetOverview(DataReport):
 
         text_path.write_text(output_text)
 
-        return ReportResult(name=self.name, output_text=[ReportOutput(text_path, f"Description of dataset {dataset_name}")])
+        return ReportResult(name=self.name,
+                            info="A simple text-based overview of the properties of any dataset, including the dataset name, size, and metadata labels.",
+                            output_text=[ReportOutput(text_path, f"Description of dataset {dataset_name}")])
 
     def _get_generic_dataset_text(self):
         element_name = type(self.dataset).__name__.replace("Dataset", "s").lower()
@@ -76,7 +78,7 @@ class SimpleDatasetOverview(DataReport):
             output_text += f"- Name: {repertoire.data_filename.name}\n"
             output_text += f"  Number of sequences: {repertoire.get_element_count()}\n"
 
-            chains = [chain.value for chain in set(repertoire.get_chains())]
+            chains = [chain.value if chain else "unknown" for chain in set(repertoire.get_chains())]
             if len(chains) == 1:
                 output_text += f"  Chain type: {chains[0]}\n"
             else:
@@ -95,7 +97,8 @@ class SimpleDatasetOverview(DataReport):
         return output_text
 
     def _get_sequence_dataset_text(self):
-        chains = list(set([sequence.get_attribute("chain").value for sequence in self.dataset.get_data()]))
+        chains = list(set([sequence.get_attribute("chain") for sequence in self.dataset.get_data()]))
+        chains = [chain.value if chain else "unknown" for chain in chains]
 
         if len(chains) > 1:
             output_text = "\nChain types: " + ",".join(chains)

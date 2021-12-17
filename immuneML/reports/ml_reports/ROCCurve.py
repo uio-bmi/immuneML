@@ -60,6 +60,7 @@ class ROCCurve(MLReport):
         fig.write_html(str(path_htm))
         np.savetxt(str(path_csv), csv_result, header="fpr,tpr")
         return ReportResult(self.name,
+                            info="A report that plots the ROC curve for a binary classifier.",
                             output_figures=[ReportOutput(path_htm)],
                             output_tables=[ReportOutput(path_csv)])
 

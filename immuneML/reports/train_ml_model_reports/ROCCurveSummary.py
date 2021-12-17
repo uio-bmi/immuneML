@@ -18,7 +18,7 @@ from immuneML.util.PathBuilder import PathBuilder
 
 class ROCCurveSummary(TrainMLModelReport):
     """
-    This report plots ROC curves for all trained ML settings ([preprocessing], encoding, ML model) in the outer loop of cross-validation in
+    This report plots ROC curves for all trained ML settings ([preprocessing], encoding, ML model) in the outer loop of cross-validation in the
     :ref:`TrainMLModel` instruction. If there are multiple splits in the outer loop, this report will make one plot per split. This report is
     defined only for binary classification. If there are multiple labels defined in the instruction, each label has to have two classes to be included
     in this report.
@@ -40,7 +40,8 @@ class ROCCurveSummary(TrainMLModelReport):
         return ROCCurveSummary(**kwargs)
 
     def _generate(self) -> ReportResult:
-        report_result = ReportResult()
+        report_result = ReportResult(name=self.name,
+                                     info="Plots ROC curves for all trained ML settings ([preprocessing], encoding, ML model) in the outer loop of cross-validation in the TrainMLModel instruction")
 
         PathBuilder.build(self.result_path)
 

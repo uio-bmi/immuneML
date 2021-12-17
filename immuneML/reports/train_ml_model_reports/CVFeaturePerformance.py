@@ -94,7 +94,9 @@ class CVFeaturePerformance(TrainMLModelReport):
         report_output_fig = self._plot(training_dataframe=training_dataframe, test_dataframe=test_dataframe)
         output_figures = None if report_output_fig is None else [report_output_fig]
 
-        return ReportResult(output_tables=table_results,
+        return ReportResult(name=self.name,
+                            info=f"The average training vs test performance w.r.t. the given encoding parameter {self.feature}.",
+                            output_tables=table_results,
                             output_figures=output_figures)
 
     def _plot(self, training_dataframe, test_dataframe):

@@ -95,7 +95,9 @@ class ConfounderAnalysis(MLReport):
         paths.append(report_output_fig)
 
         result_table_path = self._write_results_table(listOfPlot, self.metadata_labels)
-        return ReportResult(name=self.name, output_figures=paths, output_tables=[ReportOutput(result_table_path[0])])
+        return ReportResult(name=self.name,
+                            info="Plots the numbers of false positives and false negatives with respect to each value of the metadata features specified by the user.",
+                            output_figures=paths, output_tables=[ReportOutput(result_table_path[0])])
 
     def _write_results_table(self, plotting_data, labels):
         filepaths = []

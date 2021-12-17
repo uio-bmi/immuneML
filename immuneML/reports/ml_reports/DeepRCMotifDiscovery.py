@@ -94,6 +94,7 @@ class DeepRCMotifDiscovery(MLReport):
                                    path_kernels=self.result_path / self.filename_kernels)
 
         return ReportResult(self.name,
+                            info="Plots the contributions of (i) input sequences and (ii) kernels to trained `DeepRC` model with respect to the test dataset. Contributions are computed using integrated gradients.",
                             output_figures=[ReportOutput(path_inputs, "Integrated Gradients over the inputs to DeepRC"),
                                             ReportOutput(path_kernels, "Integrated Gradients over the kernels of DeepRC")])
 

@@ -45,7 +45,9 @@ class SequenceLengthDistribution(DataReport):
         sequence_lengths = self._get_sequence_lengths()
         report_output_fig = self._plot(sequence_lengths=sequence_lengths)
         output_figures = None if report_output_fig is None else [report_output_fig]
-        return ReportResult(type(self).__name__, output_figures=output_figures)
+        return ReportResult(name=self.name,
+                            info="A histogram of the lengths of the sequences in a RepertoireDataset.",
+                            output_figures=output_figures)
 
     def _get_sequence_lengths(self) -> Counter:
         sequence_lenghts = Counter()

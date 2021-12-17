@@ -106,7 +106,7 @@ class TCRdistMotifDiscovery(MLReport):
 
         tables.append(ReportOutput(path=self.result_path / "tcrdist_summary.csv", name="TCRdist summary (csv)"))
 
-        return ReportResult("TCRdist motif discovery", figures, tables)
+        return ReportResult(name=self.name, info="TCRdist motif discovery", output_figures=figures, output_tables=tables)
 
     def _discover_motif_in_cluster(self, tcr_rep, index, row, negative_examples=None) -> Tuple[List[ReportOutput], List[ReportOutput]]:
         from tcrdist.adpt_funcs import get_centroid_seq

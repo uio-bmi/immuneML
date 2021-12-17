@@ -25,6 +25,8 @@
         {{#ml_reports}}
         <h3>{{label}}</h3>
         {{#reports}}
+        <h4>Report {{name}}</h4>
+        <p>{{info}}</p>
         {{#output_figures}}
         <div class="padded center">
             {{#is_embed}}
@@ -51,6 +53,8 @@
         <h3>{{label}}</h3>
         <div class="padded-top padded-bottom">
             {{#reports}}
+            <h4>Report {{name}}</h4>
+            <p>{{info}}</p>
             {{#output_figures}}
             {{#is_embed}}
             <embed src="{{path}}">

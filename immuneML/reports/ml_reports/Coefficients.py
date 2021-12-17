@@ -138,7 +138,9 @@ class Coefficients(MLReport):
                 report_output_fig = self._plot(plotting_data=n_largest_data, output_name="largest_{}_coefficients".format(n_val))
                 paths.append(report_output_fig)
 
-        return ReportResult(self.name, output_tables=[ReportOutput(result_table_path, "features and coefficients csv")],
+        return ReportResult(self.name,
+                            info=f"{self._y_axis_title}s of the trained {self.method.__class__.__name__} model",
+                            output_tables=[ReportOutput(result_table_path, "features and coefficients csv")],
                             output_figures=[p for p in paths if p is not None])
 
     def _set_plotting_parameters(self):

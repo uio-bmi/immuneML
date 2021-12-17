@@ -59,7 +59,9 @@ class GLIPH2Exporter(DataReport):
         file_path = self.result_path / "exported_data.tsv"
         df.to_csv(file_path, sep="\t", index=False)
 
-        return ReportResult(self.name, output_tables=[ReportOutput(file_path, "exported data in GLIPH2 format")])
+        return ReportResult(self.name,
+                            info="Report which exports the receptor data to GLIPH2 format so that it can be directly used in GLIPH2 tool.",
+                            output_tables=[ReportOutput(file_path, "exported data in GLIPH2 format")])
 
     def check_prerequisites(self):
         if isinstance(self.dataset, ReceptorDataset):

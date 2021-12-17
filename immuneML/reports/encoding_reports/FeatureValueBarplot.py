@@ -64,6 +64,7 @@ class FeatureValueBarplot(FeatureReport):
         self.y_title = y_title if y_title is not None else "value"
         self.result_name = "feature_value_barplot"
         self.name = name
+        self.info = "A barplot of the feature values in a given encoded data matrix, averaged across examples. Each bar in the barplot represents the mean value of a given feature, and along the x-axis are the different features."
 
 
     def _plot(self, data_long_format) -> ReportOutput:

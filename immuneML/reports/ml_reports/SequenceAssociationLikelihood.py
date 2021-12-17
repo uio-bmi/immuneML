@@ -59,7 +59,8 @@ class SequenceAssociationLikelihood(MLReport):
         report_output_fig = self._plot(upper_limit=upper_limit, lower_limit=lower_limit)
         output_figures = [] if report_output_fig is None else [report_output_fig]
 
-        return ReportResult(name="Beta distribution priors - probability that a sequence is disease-associated",
+        return ReportResult(name=self.name,
+                            info="Beta distribution priors - probability that a sequence is disease-associated",
                             output_figures=output_figures)
 
     def _plot(self, upper_limit, lower_limit):

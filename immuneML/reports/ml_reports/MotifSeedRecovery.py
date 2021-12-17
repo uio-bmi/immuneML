@@ -158,7 +158,9 @@ class MotifSeedRecovery(MLReport):
         report_output_table = self._write_results_table(plot_df)
         report_output_fig = self._plot(plot_df, "motif_seed_recovery")
 
-        return ReportResult(self.name, output_tables=[report_output_table],
+        return ReportResult(self.name,
+                            info="This report shows how well implanted ('ground truth') motifs are recovered by ML models using the k-mer encoding. The x axis (box grouping) represents the maximum number of overlapping positions between a 'ground truth' motif seed and a k-mer feature. The y axis values represent the learned coefficients. ",
+                            output_tables=[report_output_table],
                             output_figures=[report_output_fig])
 
     def _write_results_table(self, plotting_data):

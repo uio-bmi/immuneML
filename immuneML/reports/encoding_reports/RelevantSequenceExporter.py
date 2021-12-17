@@ -54,7 +54,9 @@ class RelevantSequenceExporter(EncodingReport):
         filename = self.result_path / "relevant_sequences.csv"
         df.to_csv(filename, index=False)
 
-        return ReportResult(self.name, output_tables=[ReportOutput(filename, "relevant sequences")])
+        return ReportResult(self.name,
+                            info=f"Exports the sequences that are extracted as label-associated using the {self.dataset.encoded_data.encoding} in AIRR-compliant format.",
+                            output_tables=[ReportOutput(filename, "relevant sequences")])
 
     def _compute_column_mapping(self, df: pd.DataFrame) -> dict:
         columns = df.columns.values.tolist()

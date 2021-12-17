@@ -144,15 +144,18 @@
             <p>Hyperparameter reports are executed on the trained models and have access to assessment and selection data (both the outer and the inner
                 loop of nested cross-validation) and typically show trends in the models, over different splits to training, validation or test datasets.</p>
             {{#hp_reports}}
+
+            <h4>Report {{name}}</h4>
+            <p>{{info}}</p>
             <div class="grid-container">
-            {{#output_figures}}
-                {{#is_embed}}
-                <div class="grid-item-full-width"><embed src="{{path}}">{{#name}}<p>{{name}}</p>{{/name}}</div>
-                {{/is_embed}}
-                {{^is_embed}}
-                <div><img src="{{path}}">{{#name}}<p>{{name}}</p>{{/name}}</div>
-                {{/is_embed}}
-            {{/output_figures}}
+                {{#output_figures}}
+                    {{#is_embed}}
+                    <div class="grid-item-full-width"><embed src="{{path}}">{{#name}}<p>{{name}}</p>{{/name}}</div>
+                    {{/is_embed}}
+                    {{^is_embed}}
+                    <div><img src="{{path}}">{{#name}}<p>{{name}}</p>{{/name}}</div>
+                    {{/is_embed}}
+                {{/output_figures}}
             </div>
             {{/hp_reports}}
         </div>

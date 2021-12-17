@@ -74,7 +74,9 @@ class Matches(EncodingReport):
             if self.dataset.encoded_data.encoding == "MatchedReceptorsEncoder":
                 output_tables += self._write_receptor_info(self.result_path / "receptor_info")
 
-        return ReportResult(self.name, output_tables=output_tables)
+        return ReportResult(self.name,
+                            info=f"Reports the number of matches that were found when using {self.dataset.encoded_data.encoding}",
+                            output_tables=output_tables)
 
     def _write_match_table(self):
         id_df = pd.DataFrame({"repertoire_id": self.dataset.encoded_data.example_ids})

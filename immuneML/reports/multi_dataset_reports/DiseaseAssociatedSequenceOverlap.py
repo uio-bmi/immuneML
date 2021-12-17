@@ -59,7 +59,9 @@ class DiseaseAssociatedSequenceOverlap(MultiDatasetReport):
         figure_path = self._make_figure(overlap_matrix, labels)
         data_path = self._export_matrix(overlap_matrix, labels)
 
-        return ReportResult(output_figures=[ReportOutput(figure_path, 'sequence overlap across datasets')],
+        return ReportResult(name=self.name,
+                            info="A heatmap showing the overlap of disease-associated sequences produced by SequenceAbundance encoders between multiple datasets of different sizes.",
+                            output_figures=[ReportOutput(figure_path, 'sequence overlap across datasets')],
                             output_tables=[ReportOutput(data_path, 'sequence overlap across datasets (csv)')])
 
     def _extract_label(self):

@@ -72,7 +72,10 @@ class DiseaseAssociatedSequenceCVOverlap(TrainMLModelReport):
                 tables += tmp_tables
                 figures += tmp_figures
 
-        return ReportResult(self.name, [fig for fig in figures if fig is not None], [tab for tab in tables if tab is not None])
+        return ReportResult(self.name,
+                            info="One heatmap per label showing the overlap of disease-associated sequences produced by the SequenceAbundance encoder between folds of cross-validation (either inner or outer loop of the nested CV)",
+                            output_figures=[fig for fig in figures if fig is not None],
+                            output_tables=[tab for tab in tables if tab is not None])
 
     def _generate_for_assessment(self, label: str):
         hp_items = [st.label_states[label].optimal_assessment_item for st in self.state.assessment_states

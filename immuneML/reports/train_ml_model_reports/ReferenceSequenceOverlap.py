@@ -101,7 +101,9 @@ class ReferenceSequenceOverlap(TrainMLModelReport):
                 figures.append(figure)
                 tables.append(data)
 
-        return ReportResult(self.name, output_figures=figures, output_tables=tables)
+        return ReportResult(self.name,
+                            info="A Venn diagram between the list of disease-associated sequences produced by the SequenceAbundance encoder and a list of reference receptor sequences, and a file containing the overlapping sequences.",
+                            output_figures=figures, output_tables=tables)
 
     @staticmethod
     def _check_encoder_class(encoder):
