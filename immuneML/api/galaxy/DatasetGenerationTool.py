@@ -46,6 +46,7 @@ class DatasetGenerationTool(GalaxyTool):
         self._check_dataset(specs)
         self._check_instruction(specs)
 
+        Util.update_dataset_key(specs, DatasetGenerationTool.__name__)
         Util.check_paths(specs, DatasetGenerationTool.__name__)
         Util.update_result_paths(specs, self.result_path, self.yaml_path)
 

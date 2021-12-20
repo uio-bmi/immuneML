@@ -29,7 +29,7 @@ class TestKmerPairModelCreator(TestCase):
         dataset = RepertoireDataset(repertoires=[rep1, rep2])
 
         model_creator = KmerPairModelCreator()
-        model = model_creator.create_model(dataset=dataset, k=2, vector_size=16, batch_size=1, model_path=test_path/"model.model")
+        model = model_creator.create_model(dataset=dataset, k=2, vector_size=16, batch_size=1, model_path=test_path/"model.model", sequence_type=None)
 
         self.assertTrue(isinstance(model, Word2Vec))
         self.assertTrue("CA" in model.wv.vocab)

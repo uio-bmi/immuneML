@@ -7,6 +7,7 @@ from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import Rece
 from immuneML.data_model.repertoire.Repertoire import Repertoire
 from immuneML.environment.Constants import Constants
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
+from immuneML.environment.SequenceType import SequenceType
 from immuneML.util.KmerHelper import KmerHelper
 from immuneML.util.PathBuilder import PathBuilder
 
@@ -25,11 +26,11 @@ class TestKmerHelper(TestCase):
         self.assertTrue("DA" in kmers)
 
     def test_create_kmers_from_sequence(self):
-        kmers = KmerHelper.create_kmers_from_sequence(ReceptorSequence(amino_acid_sequence="ABCDEFG"), 3)
+        kmers = KmerHelper.create_kmers_from_sequence(ReceptorSequence(amino_acid_sequence="ABCDEFG"), 3, sequence_type=SequenceType.AMINO_ACID)
         self.assertTrue("ABC" in kmers and "BCD" in kmers and "CDE" in kmers and "DEF" in kmers and "EFG" in kmers)
         self.assertEqual(5, len(kmers))
 
-        kmers = KmerHelper.create_kmers_from_sequence(ReceptorSequence(amino_acid_sequence="AB"), 3)
+        kmers = KmerHelper.create_kmers_from_sequence(ReceptorSequence(amino_acid_sequence="AB"), 3, sequence_type=SequenceType.AMINO_ACID)
         self.assertTrue(len(kmers) == 0)
 
     def test_create_sentences_from_repertoire(self):
@@ -41,7 +42,7 @@ class TestKmerHelper(TestCase):
                                                       ReceptorSequence(amino_acid_sequence="ACCT"),
                                                       ReceptorSequence(amino_acid_sequence="AACT")], path, {})
 
-        sentences = KmerHelper.create_sentences_from_repertoire(rep, 3)
+        sentences = KmerHelper.create_sentences_from_repertoire(rep, 3, sequence_type=SequenceType.AMINO_ACID)
 
         self.assertEqual(3, len(sentences))
         self.assertTrue(len(sentences[0]) == 2 and "AAC" in sentences[0] and "ACT" in sentences[0])
@@ -65,7 +66,7 @@ class TestKmerHelper(TestCase):
         self.assertTrue(len(kmers) == 0)
 
     def test_create_IMGT_kmers_from_sequence(self):
-        kmers = KmerHelper.create_IMGT_kmers_from_sequence(ReceptorSequence("CASSRYUF"), 3)
+        kmers = KmerHelper.create_IMGT_kmers_from_sequence(ReceptorSequence("CASSRYUF"), 3, sequence_type=SequenceType.AMINO_ACID)
         self.assertTrue(("CAS", 105) in kmers)
         self.assertTrue(("ASS", 106) in kmers)
         self.assertTrue(("SSR", 107) in kmers)
@@ -74,7 +75,7 @@ class TestKmerHelper(TestCase):
         self.assertTrue(("YUF", 115) in kmers)
 
     def test_create_IMGT_gapped_kmers_from_sequence(self):
-        kmers = KmerHelper.create_IMGT_gapped_kmers_from_sequence(ReceptorSequence("CASSRYUF"), 2, 1, 1, 1)
+        kmers = KmerHelper.create_IMGT_gapped_kmers_from_sequence(ReceptorSequence("CASSRYUF"), SequenceType.AMINO_ACID, 2, 1, 1, 1)
         self.assertTrue(all([k in kmers for k in [('CA.S', 105), ('AS.R', 106), ('SS.Y', 107), ('SR.U', 108), ('RY.F', 114)]]))
 
     def test_create_gapped_kmers_from_string(self):

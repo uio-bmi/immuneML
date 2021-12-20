@@ -9,6 +9,7 @@ from immuneML.data_model.dataset.Dataset import Dataset
 from immuneML.ml_methods.LogisticRegression import LogisticRegression
 from immuneML.ml_methods.MLMethod import MLMethod
 from immuneML.ml_methods.RandomForestClassifier import RandomForestClassifier
+from immuneML.ml_methods.SVC import SVC
 from immuneML.ml_methods.SVM import SVM
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
@@ -29,7 +30,7 @@ class MotifSeedRecovery(MLReport):
     Note that to use this report, the following criteria must be met:
 
     - KmerFrequencyEncoder must be used.
-    - One of the following classifiers must be used: RandomForestClassifier, LogisticRegression, SVM
+    - One of the following classifiers must be used: RandomForestClassifier, LogisticRegression, SVM, SVC
     - For each label, the implanted motif seeds relevant to that label must be specified
 
     To find the overlap score between kmer features and implanted motif seeds, the two sequences are compared in a sliding
@@ -72,10 +73,8 @@ class MotifSeedRecovery(MLReport):
         level of keys in this dictionary represents the different labels. In the inner dictionary there should be two keys: "seeds" and
         "hamming_distance":
                 - seeds: a list of motif seeds. The seeds may contain gaps, specified by a '/' symbol.
-                - hamming_distance: A boolean value that specifies whether hamming distance was allowed when implanting the motif seeds for a given
-                label. Note that this applies to all seeds for this label.
-                - gap_sizes: a list of all the possible gap sizes that were used when implanting a gapped motif seed.
-                When no gapped seeds are used, this value has no effect.
+                - hamming_distance: A boolean value that specifies whether hamming distance was allowed when implanting the motif seeds for a given label. Note that this applies to all seeds for this label.
+                - gap_sizes: a list of all the possible gap sizes that were used when implanting a gapped motif seed. When no gapped seeds are used, this value has no effect.
 
 
     YAML specification:
@@ -273,8 +272,8 @@ class MotifSeedRecovery(MLReport):
 
         run_report = True
 
-        if not any([isinstance(self.method, legal_method) for legal_method in (RandomForestClassifier, LogisticRegression, SVM)]):
-            logging.warning(f"{location} report can only be created for RandomForestClassifier, LogisticRegression or SVM, but got "
+        if not any([isinstance(self.method, legal_method) for legal_method in (RandomForestClassifier, LogisticRegression, SVM, SVC)]):
+            logging.warning(f"{location} report can only be created for RandomForestClassifier, LogisticRegression, SVC, or SVM, but got "
                             f"{type(self.method).__name__} instead. {location} report will not be created.")
             run_report = False
 

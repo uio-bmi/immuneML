@@ -19,8 +19,9 @@ class IdentitySequenceEncoder(SequenceEncodingStrategy):
         """
 
         res = []
+        sequence_type = params.model.get('sequence_type', None)
         if params.model.get("sequence", True):
-            res.append(sequence.get_sequence(params.model.get('sequence_type', None)))
+            res.append(sequence.get_sequence(sequence_type))
 
         for field in params.model.get("metadata_fields_to_include", []):
             if sequence.metadata is None:

@@ -1,2 +1,3 @@
 show_error_bar: true
 keep_fraction: 1.0
+log_scale: false

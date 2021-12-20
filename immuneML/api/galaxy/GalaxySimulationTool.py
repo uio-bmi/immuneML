@@ -106,5 +106,6 @@ class GalaxySimulationTool(GalaxyTool):
         instruction_name = Util.check_instruction_type(specs, GalaxySimulationTool.__name__, SimulationInstruction.__name__[:-11])
         Util.check_export_format(specs, GalaxySimulationTool.__name__, instruction_name)
 
+        Util.update_dataset_key(specs, GalaxySimulationTool.__name__)
         Util.check_paths(specs, "GalaxySimulationTool")
         Util.update_result_paths(specs, self.result_path, self.yaml_path)

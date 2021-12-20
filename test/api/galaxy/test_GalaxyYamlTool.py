@@ -13,9 +13,9 @@ from immuneML.util.PathBuilder import PathBuilder
 
 
 class TestGalaxyYamlTool(TestCase):
-    def test_run(self):
+    def test_run1(self):
 
-        path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "api_galaxy_yaml_tool/")
+        path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "api_galaxy_yaml_tool1/")
         result_path = path / "result/"
 
         dataset = RandomDatasetGenerator.generate_repertoire_dataset(10, {10: 1}, {12: 1}, {}, result_path)
@@ -30,7 +30,36 @@ class TestGalaxyYamlTool(TestCase):
                         "params": {
                             "metadata_file": str(result_path / "d1_metadata.csv")
                         }
-                    },
+                    }
+                },
+            },
+            "instructions": {
+                "inst1": {
+                    "type": "DatasetExport",
+                    "datasets": ["new_d1"],
+                    "export_formats": ["AIRR"]
+                }
+            }
+        }
+
+        specs_path = path / "specs.yaml"
+        with open(specs_path, "w") as file:
+            yaml.dump(specs, file)
+
+        run_immuneML(Namespace(**{"specification_path": specs_path, "result_path": result_path / 'result/', 'tool': "GalaxyYamlTool"}))
+
+        self.assertTrue(os.path.exists(result_path / "result/inst1/dataset/AIRR"))
+
+        shutil.rmtree(path)
+
+    def test_run2(self):
+
+        path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "api_galaxy_yaml_tool2/")
+        result_path = path / "result/"
+
+        specs = {
+            "definitions": {
+                "datasets": {
                     "d2": {
                         "format": "RandomRepertoireDataset",
                         "params": {
@@ -73,11 +102,6 @@ class TestGalaxyYamlTool(TestCase):
                 },
             },
             "instructions": {
-                "inst1": {
-                    "type": "DatasetExport",
-                    "datasets": ["new_d1", 'd2'],
-                    "export_formats": ["AIRR"]
-                },
                 "inst2": {
                     "type": "TrainMLModel",
                     "settings": [
@@ -116,10 +140,9 @@ class TestGalaxyYamlTool(TestCase):
         with open(specs_path, "w") as file:
             yaml.dump(specs, file)
 
-        run_immuneML(Namespace(**{"specification_path": specs_path, "result_path": result_path / 'result/', 'tool': "GalaxyYamlTool"}))
+        run_immuneML(Namespace(**{"specification_path": specs_path, "result_path": result_path, 'tool': "GalaxyYamlTool"}))
 
-        self.assertTrue(os.path.exists(result_path / "result/inst1/new_d1/AIRR"))
-        self.assertTrue(os.path.exists(result_path / "result/inst1/d2/AIRR"))
-        self.assertTrue(os.path.exists(result_path / "result/d2"))
+        self.assertTrue(os.path.exists(result_path / "dataset/"))
+        self.assertTrue(os.path.exists(result_path / "inst2/"))
 
         shutil.rmtree(path)

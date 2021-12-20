@@ -27,6 +27,7 @@ class GalaxyYamlTool(GalaxyTool):
         with self.yaml_path.open("r") as file:
             specs_dict = yaml.safe_load(file)
 
+        Util.update_dataset_key(specs_dict, GalaxyYamlTool.__name__)
         Util.check_paths(specs_dict, 'GalaxyYamlTool')
         Util.update_result_paths(specs_dict, self.result_path, self.yaml_path)
 
