@@ -73,6 +73,7 @@ class RecoveredSignificantFeatures(DataReport):
         my_recovered_significant_features_report:
             RecoveredSignificantFeatures:
                 groundtruth_sequences_path: path/to/groundtruth/sequences.txt
+                trim_leading_trailing: False
                 p_values:
                     - 0.1
                     - 0.01
