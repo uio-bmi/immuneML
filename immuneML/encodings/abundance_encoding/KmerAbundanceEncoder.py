@@ -228,7 +228,7 @@ class KmerAbundanceEncoder(DatasetEncoder):
         return encoder_file
 
     def get_additional_files(self) -> List[Path]:
-        return [self.relevant_indices_path, self.relevant_sequence_path, self.contingency_table_path, self.p_values_path]
+        return [file for file in [self.relevant_indices_path, self.relevant_sequence_path, self.contingency_table_path, self.p_values_path] if file]
 
     @staticmethod
     def load_encoder(encoder_file: Path):
