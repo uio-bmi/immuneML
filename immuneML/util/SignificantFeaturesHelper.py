@@ -56,10 +56,13 @@ class SignificantFeaturesHelper:
         return kwargs
 
     @staticmethod
-    def load_sequences(groundtruth_sequences_path):
+    def load_sequences(groundtruth_sequences_path, trim_leading_trailing=False):
         with open(groundtruth_sequences_path) as f:
             readlines = f.readlines()
-            sequences = [seq.strip() for seq in readlines]
+            if trim_leading_trailing:
+                sequences = [seq.strip()[1:-1] for seq in readlines]
+            else:
+                sequences = [seq.strip() for seq in readlines]
         return sequences
 
     @staticmethod

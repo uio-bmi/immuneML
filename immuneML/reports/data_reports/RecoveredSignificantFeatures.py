@@ -12,6 +12,7 @@ from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.data_reports.DataReport import DataReport
 from immuneML.util.KmerHelper import KmerHelper
+from immuneML.util.ParameterValidator import ParameterValidator
 from immuneML.util.PathBuilder import PathBuilder
 from immuneML.util.SignificantFeaturesHelper import SignificantFeaturesHelper
 
@@ -43,6 +44,11 @@ class RecoveredSignificantFeatures(DataReport):
 
         groundtruth_sequences_path (str): Path to a file containing the true implanted (sub)sequences, e.g., full sequences or k-mers.
         The file should contain one sequence per line, without a header, and without V or J genes.
+
+        trim_leading_trailing (bool): Whether to trim the leading and trailing first positions from the provided groundtruth sequences,
+        e.g., the leading C and trailing Y/F amino acids.
+        This is necessary for comparing full sequences when the main dataset is imported using settings that also trim
+        the leading and trailing positions (specified by the region_type parameter). By default, trim_leading_trailing is False.
 
         p_values (list): The p value thresholds to be used by Fisher's exact test. Each p-value specified here will become one panel in the output figure.
 
@@ -90,14 +96,19 @@ class RecoveredSignificantFeatures(DataReport):
         kwargs = SignificantFeaturesHelper.parse_parameters(kwargs, location)
         kwargs = SignificantFeaturesHelper.parse_sequences_path(kwargs, "groundtruth_sequences_path", location)
 
+        ParameterValidator.assert_keys_present(kwargs.keys(), ["trim_leading_trailing"], location, location)
+        ParameterValidator.assert_type_and_value(kwargs["trim_leading_trailing"], bool, "RecoveredSignificantFeatures", "trim_leading_trailing")
+
         return RecoveredSignificantFeatures(**kwargs)
 
     def __init__(self, dataset: RepertoireDataset = None, groundtruth_sequences_path: Path = None,
+                 trim_leading_trailing: bool = None,
                  p_values: List[float] = None, k_values: List[int] = None, label: dict = None,
                  compairr_path: Path = None, result_path: Path = None, name: str = None):
         super().__init__(dataset=dataset, result_path=result_path, name=name)
         self.groundtruth_sequences_path = groundtruth_sequences_path
-        self.groundtruth_sequences = SignificantFeaturesHelper.load_sequences(groundtruth_sequences_path)
+        self.trim_leading_trailing = trim_leading_trailing
+        self.groundtruth_sequences = SignificantFeaturesHelper.load_sequences(groundtruth_sequences_path, trim_leading_trailing)
         self.p_values = p_values
         self.k_values = k_values
         self.label = label

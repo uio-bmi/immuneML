@@ -52,6 +52,8 @@ class SignificantFeatures(DataReport):
         will be used to compute the significant sequences. If the path is not specified and 'full_sequence' is listed under
         k-values, :py:obj:`~immuneML.encodings.abundance_encoding.SequenceAbundanceEncoder.SequenceAbundanceEncoder` will be used.
 
+        log_scale (bool): Whether to plot the y axis in log10 scale (log_scale = True) or continuous scale (log_scale = False). By default, log_scale is False.
+
 
     YAML specification:
 
@@ -74,6 +76,7 @@ class SignificantFeatures(DataReport):
                 label: # Define a label, and the positive class for that given label
                     CMV:
                         positive_class: +
+                log_scale: False
     """
 
     @classmethod
@@ -82,16 +85,21 @@ class SignificantFeatures(DataReport):
 
         kwargs = SignificantFeaturesHelper.parse_parameters(kwargs, location)
 
+        ParameterValidator.assert_keys_present(kwargs.keys(), ["log_scale"], location, location)
+        ParameterValidator.assert_type_and_value(kwargs["log_scale"], bool, "SignificantFeatures", "log_scale")
+
         return SignificantFeatures(**kwargs)
 
     def __init__(self, dataset: RepertoireDataset = None, p_values: List[float] = None, k_values: List[int] = None,
-                 label: dict = None, compairr_path: Path = None, result_path: Path = None, name: str = None):
+                 label: dict = None, compairr_path: Path = None, log_scale: bool = False, result_path: Path = None,
+                 name: str = None):
         super().__init__(dataset=dataset, result_path=result_path, name=name)
         self.p_values = p_values
         self.k_values = k_values
         self.label = label
         self.label_config = None
         self.compairr_path = compairr_path
+        self.log_scale = log_scale
 
     def check_prerequisites(self):
         if isinstance(self.dataset, RepertoireDataset):
@@ -153,7 +161,7 @@ class SignificantFeatures(DataReport):
 
     def _plot(self, plotting_data):
         figure = px.box(plotting_data, x="encoding", y="significant_features", color="class",
-                        facet_row=None, facet_col="p-value",
+                        facet_row=None, facet_col="p-value", log_y=self.log_scale,
                         labels={
                             "significant_features": "Number of significant features per AIRR according to Fisher's exact test",
                             "encoding": "Encoding",

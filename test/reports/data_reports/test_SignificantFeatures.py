@@ -81,7 +81,8 @@ class TestSignificantFeatures(TestCase):
                                                            "k_values": ["full_sequence", 3],
                                                            "compairr_path": compairr_path,
                                                            "label": {"mylabel": {"positive_class": "+"}},
-                                                           "result_path": path})
+                                                           "result_path": path,
+                                                     "log_scale": False})
 
         result = report._generate()
 

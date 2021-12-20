@@ -91,7 +91,8 @@ class TestSignificantFeatures(TestCase):
                                                               "compairr_path": compairr_path,
                                                               "groundtruth_sequences_path": implanted_sequences_path,
                                                               "label": {"mylabel": {"positive_class": "+"}},
-                                                              "result_path": path})
+                                                              "result_path": path,
+                                                              "trim_leading_trailing": False})
 
         self.assertListEqual(report.groundtruth_sequences, ["MMM", "GGG"])
 
