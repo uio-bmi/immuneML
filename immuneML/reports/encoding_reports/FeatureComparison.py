@@ -1,3 +1,4 @@
+import logging
 import warnings
 from pathlib import Path
 
@@ -107,6 +108,10 @@ class FeatureComparison(FeatureReport):
         plotting_data = pd.merge(plotting_data.loc[plotting_data[self.comparison_label] == class_x],
                                  plotting_data.loc[plotting_data[self.comparison_label] == class_y],
                                  on=merge_labels)
+
+        if plotting_data.shape[0] == 0:
+            logging.warning(f"{FeatureComparison.__name__}: there is no overlap between the (combination of) values of {merge_labels} for "
+                            f"different values the {self.comparison_label}.")
 
         plotting_data = self._filter_keep_fraction(plotting_data) if self.keep_fraction < 1 else plotting_data
 
