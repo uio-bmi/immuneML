@@ -59,24 +59,24 @@ class SequenceFilterHelper:
         return sequence_p_values
 
     @staticmethod
-    def _check_label_object(params: EncoderParams, label: str):
-        label_values = params.label_config.get_label_values(label)
+    def _check_label_object(params: EncoderParams, label_name: str):
+        label_values = params.label_config.get_label_values(label_name)
         assert len(label_values) == 2, f"{SequenceFilterHelper.__name__}: only binary classification (2 classes) is possible when extracting " \
-                                       f"relevant sequences for the label, but got these classes for label {label} instead: {label_values}."
-        assert params.label_config.get_label_object(label).positive_class is not None, \
-            f'{SequenceFilterHelper.__name__}: positive_class parameter was not set for label {label}. It has to be set to determine the ' \
+                                       f"relevant sequences for the label, but got these classes for label {label_name} instead: {label_values}."
+        assert params.label_config.get_label_object(label_name).positive_class is not None, \
+            f'{SequenceFilterHelper.__name__}: positive_class parameter was not set for label {label_name}. It has to be set to determine the ' \
             f'receptor sequences associated with the positive class.'
 
     @staticmethod
-    def get_relevant_sequences(dataset: RepertoireDataset, params: EncoderParams, comparison_data: ComparisonData, label: str, p_value_threshold,
+    def get_relevant_sequences(dataset: RepertoireDataset, params: EncoderParams, comparison_data: ComparisonData, label_name: str, p_value_threshold,
                                comparison_attributes: list, sequence_indices_path: Path):
 
         sequence_path = sequence_indices_path if sequence_indices_path is not None else params.result_path / 'relevant_sequence_indices.pickle'
         sequence_csv_path = None
 
         if params.learn_model:
-            SequenceFilterHelper._check_label_object(params, label)
-            relevant_sequence_indices = SequenceFilterHelper.filter_sequences(dataset, comparison_data, params.label_config.get_label_object(label),
+            SequenceFilterHelper._check_label_object(params, label_name)
+            relevant_sequence_indices = SequenceFilterHelper.filter_sequences(dataset, comparison_data, params.label_config.get_label_object(label_name),
                                                                               p_value_threshold)
             with sequence_path.open("wb") as file:
                 pickle.dump(relevant_sequence_indices, file)

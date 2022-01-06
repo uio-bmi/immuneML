@@ -30,11 +30,11 @@ class MLMethodTrainer(Step):
         if input_params.model_selection_cv:
             method.fit_by_cross_validation(encoded_data=input_params.dataset.encoded_data,
                                            number_of_splits=input_params.model_selection_n_folds,
-                                           label_name=input_params.label,
+                                           label=input_params.label,
                                            cores_for_training=input_params.cores_for_training,
                                            optimization_metric=input_params.optimization_metric)
         else:
-            method.fit(encoded_data=input_params.dataset.encoded_data, label_name=input_params.label, cores_for_training=input_params.cores_for_training)
+            method.fit(encoded_data=input_params.dataset.encoded_data, label=input_params.label, cores_for_training=input_params.cores_for_training)
 
         return method
 
@@ -45,12 +45,12 @@ class MLMethodTrainer(Step):
         train_proba_predictions = method.predict_proba(input_params.dataset.encoded_data, input_params.label)
 
         df = pd.DataFrame({"example_ids": input_params.dataset.encoded_data.example_ids,
-                           f"{input_params.label}_predicted_class": train_predictions[input_params.label],
-                           f"{input_params.label}_true_class": input_params.dataset.encoded_data.labels[input_params.label]})
+                           f"{input_params.label.name}_predicted_class": train_predictions[input_params.label.name],
+                           f"{input_params.label.name}_true_class": input_params.dataset.encoded_data.labels[input_params.label.name]})
 
         classes = method.get_classes()
         for cls_index, cls in enumerate(classes):
-            tmp = train_proba_predictions[input_params.label][:, cls_index] if train_proba_predictions is not None and train_proba_predictions[input_params.label] is not None else None
-            df["{}_{}_proba".format(input_params.label, cls)] = tmp
+            tmp = train_proba_predictions[input_params.label.name][:, cls_index] if train_proba_predictions is not None and train_proba_predictions[input_params.label.name] is not None else None
+            df[f"{input_params.label.name}_{cls}_proba"] = tmp
 
         df.to_csv(input_params.train_predictions_path, index=False)

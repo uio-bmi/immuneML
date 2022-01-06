@@ -15,5 +15,5 @@ class HPAssessmentState:
         self.test_data_reports = []
 
         # computed
-        self.label_states = {label: HPLabelState(label, label_configuration.get_auxiliary_labels(label))
-                             for label in label_configuration.get_labels_by_name()}
+        self.label_states = {label_name: HPLabelState(label_name, label_configuration.get_auxiliary_labels(label_name))
+                             for label_name in label_configuration.get_labels_by_name()}

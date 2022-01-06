@@ -75,21 +75,19 @@ class DeepRCMotifDiscovery(MLReport):
         PathBuilder.build(self.result_path)
 
         test_metadata_filepath = self.test_dataset.encoded_data.info['metadata_filepath']
-        hdf5_filepath = self.method._metadata_to_hdf5(test_metadata_filepath, self.label)
+        hdf5_filepath = self.method._metadata_to_hdf5(metadata_filepath=test_metadata_filepath, label_name=self.label.name)
 
         n_examples_test = len(self.test_dataset.encoded_data.example_ids)
         indices = np.array(range(n_examples_test))
 
         dataloader = self.method.make_data_loader(hdf5_filepath, pre_loaded_hdf5_file=None,
-                                                  indices=indices, label=self.label, eval_only=True,
+                                                  indices=indices, label_name=self.label.name, eval_only=True,
                                                   is_train=False)
-
-        model = self.method.get_model()
 
         path_inputs = self.result_path / self.filename_inputs
         path_kernels = self.result_path / self.filename_kernels
 
-        self.compute_contributions(intgrds_set_loader=dataloader, deeprc_model=model, n_steps=self.n_steps,
+        self.compute_contributions(intgrds_set_loader=dataloader, deeprc_model=self.method.model, n_steps=self.n_steps,
                                    threshold=self.threshold, path_inputs=path_inputs,
                                    path_kernels=self.result_path / self.filename_kernels)
 

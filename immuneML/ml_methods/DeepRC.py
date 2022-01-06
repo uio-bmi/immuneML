@@ -14,6 +14,7 @@ from tqdm import tqdm
 from immuneML.caching.CacheHandler import CacheHandler
 from immuneML.data_model.encoded_data.EncodedData import EncodedData
 from immuneML.encodings.deeprc.DeepRCEncoder import DeepRCEncoder
+from immuneML.environment.Label import Label
 from immuneML.ml_methods.MLMethod import MLMethod
 from immuneML.ml_methods.util.Util import Util
 from immuneML.util.FilenameHandler import FilenameHandler
@@ -113,9 +114,8 @@ class DeepRC(MLMethod):
         self.result_path = None
 
         self.max_seq_len = None
-        self.label_classes = None
-        self.label_is_bool = None
         self.label = None
+
         self.keep_dataset_in_ram = keep_dataset_in_ram
         self.pytorch_device_name = pytorch_device_name
         self.pytorch_device = torch.device(self.pytorch_device_name)
@@ -151,7 +151,7 @@ class DeepRC(MLMethod):
 
         self.feature_names = None
 
-    def _metadata_to_hdf5(self, metadata_filepath: Path, label_name):
+    def _metadata_to_hdf5(self, metadata_filepath: Path, label_name: str):
         from deeprc.deeprc_binary.dataset_converters import DatasetToHDF5
 
         hdf5_filepath = metadata_filepath.parent / f"{metadata_filepath.stem}.hdf5"
@@ -184,7 +184,7 @@ class DeepRC(MLMethod):
 
         return train_indices, val_indices
 
-    def make_data_loader(self, hdf5_filepath: Path, pre_loaded_hdf5_file, indices, label, eval_only: bool, is_train: bool, n_workers=1):
+    def make_data_loader(self, hdf5_filepath: Path, pre_loaded_hdf5_file, indices, label_name, eval_only: bool, is_train: bool, n_workers=1):
         """
         Creates a pytorch dataloader using DeepRC's RepertoireDataReaderBinary
 
@@ -194,7 +194,7 @@ class DeepRC(MLMethod):
             If None, the hdf5 file will be read from the disk and consume less RAM.
         :param indices: indices of the subset of repertoires in the data that will be used for this dataset.
                 If 'None', all repertoires will be used.
-        :param label: the label to be predicted
+        :param label_name: the name of the label to be predicted
         :param eval_only: whether the dataloader will only be used for evaluation (no training).
                 if false, sample_n_sequences can be set
         :param is_train: whether this is a dataloader for training data. If true, self.training_batch_size is used.
@@ -207,10 +207,12 @@ class DeepRC(MLMethod):
         sample_n_sequences = None if eval_only else self.sample_n_sequences
         training_batch_size = self.training_batch_size if is_train else 1
 
+        positive_class = self.label.positive_class if self.label.positive_class is not None else self.label.values[0]
+
         dataset = RepertoireDataReaderBinary(
             hdf5_filepath=str(hdf5_filepath), set_inds=indices,
-            sample_n_sequences=sample_n_sequences, target_label=label,
-            true_class_label_value=self.label_classes[0],
+            sample_n_sequences=sample_n_sequences, target_label=label_name,
+            true_class_label_value=positive_class,
             pre_loaded_hdf5_file=pre_loaded_hdf5_file,
             verbose=False)
         dataloader = torch.utils.data.DataLoader(dataset, batch_size=training_batch_size,
@@ -218,25 +220,6 @@ class DeepRC(MLMethod):
                                                  num_workers=n_workers,
                                                  collate_fn=no_stack_collate_fn)
         return dataloader
-
-    def _set_label_classes(self, y):
-        self.label = list(y.keys())[0]
-        label_classes_raw = {label: set(classes) for label, classes in y.items()}
-        self.label_is_bool = {label: label_classes_raw[label] == {True, False} for label in y.keys()}
-
-        label_classes = {label: sorted([str(class_name) for class_name in classes]) for label, classes in label_classes_raw.items()}
-
-        for label in label_classes.keys():
-            n_classes = len(label_classes[label])
-            assert n_classes == 2, f"DeepRC: this method assumes there are 2 possible classes per label, " \
-                                   f"for label '{label}' {n_classes} classes were found: {label_classes[label]}"
-
-            # If a possible label class is False, make sure it is the second class (so True is the first class)
-            # to prevent error in DeepRC RepertoireDataReaderBinary.__init__()
-            if label_classes[label][0] in ("False", "false"):
-                label_classes[label] = label_classes[label][::-1]
-
-        self.label_classes = label_classes[self.label]
 
     def _prepare_caching_params(self, encoded_data: EncodedData, type: str, label_name: str):
         return (("metadata_filepath", str(encoded_data.info["metadata_filepath"])),
@@ -266,11 +249,11 @@ class DeepRC(MLMethod):
                 ("evaluate_at", self.evaluate_at),
                 ("pytorch_device_name", self.pytorch_device_name))
 
-    def fit(self, encoded_data: EncodedData, label_name: str, cores_for_training: int = 2):
+    def fit(self, encoded_data: EncodedData, label: Label, cores_for_training: int = 2):
         self.feature_names = encoded_data.feature_names
-        self._set_label_classes({label_name: encoded_data.labels[label_name]})
-        self.model = CacheHandler.memo_by_params(self._prepare_caching_params(encoded_data, "fit", label_name),
-                                                 lambda: self._fit(encoded_data, label_name, cores_for_training))
+        self.label = label
+        self.model = CacheHandler.memo_by_params(self._prepare_caching_params(encoded_data, "fit", label.name),
+                                                 lambda: self._fit(encoded_data, label.name, cores_for_training))
 
     def _fit(self, encoded_data: EncodedData, label_name: str, cores_for_training: int = 2):
 
@@ -281,17 +264,16 @@ class DeepRC(MLMethod):
         self.max_seq_len = encoded_data.info["max_sequence_length"]
 
         self._fit_for_label(hdf5_filepath, pre_loaded_hdf5_file, train_indices, val_indices, label_name, cores_for_training)
-        self.label = label_name
 
         return self.model
 
-    def _fit_for_label(self, hdf5_filepath: Path, pre_loaded_hdf5_file, train_indices, val_indices, label: str, cores_for_training: int):
+    def _fit_for_label(self, hdf5_filepath: Path, pre_loaded_hdf5_file, train_indices, val_indices, label_name: str, cores_for_training: int):
         from deeprc.deeprc_binary.architectures import DeepRC as DeepRCInternal
 
-        train_dataloader = self.make_data_loader(hdf5_filepath, pre_loaded_hdf5_file, train_indices, label, eval_only=False, is_train=True,
+        train_dataloader = self.make_data_loader(hdf5_filepath, pre_loaded_hdf5_file, train_indices, label_name, eval_only=False, is_train=True,
                                                  n_workers=self.n_workers)
-        train_eval_dataloader = self.make_data_loader(hdf5_filepath, pre_loaded_hdf5_file, train_indices, label, eval_only=True, is_train=True)
-        val_eval_dataloader = self.make_data_loader(hdf5_filepath, pre_loaded_hdf5_file, val_indices, label, eval_only=True, is_train=False)
+        train_eval_dataloader = self.make_data_loader(hdf5_filepath, pre_loaded_hdf5_file, train_indices, label_name, eval_only=True, is_train=True)
+        val_eval_dataloader = self.make_data_loader(hdf5_filepath, pre_loaded_hdf5_file, val_indices, label_name, eval_only=True, is_train=False)
 
         self.model = DeepRCInternal(n_input_features=self.n_input_features, n_output_features=1, max_seq_len=self.max_seq_len,
                                     kernel_size=self.kernel_size, consider_seq_counts=self.consider_seq_counts,
@@ -310,47 +292,44 @@ class DeepRC(MLMethod):
                                l1_weight_decay=self.l1_weight_decay, l2_weight_decay=self.l2_weight_decay,
                                show_progress=False, device=self.pytorch_device, evaluate_at=self.evaluate_at)
 
-    def fit_by_cross_validation(self, encoded_data: EncodedData, number_of_splits: int = 5, label_name: str = None, cores_for_training: int = -1,
+    def fit_by_cross_validation(self, encoded_data: EncodedData, number_of_splits: int = 5, label: Label = None, cores_for_training: int = -1,
                                 optimization_metric=None):
         warnings.warn("DeepRC: cross-validation on this classifier is not defined: fitting one model instead...")
-        self.fit(encoded_data, label_name)
-
-    def get_model(self):
-        return self.model
+        self.fit(encoded_data, label)
 
     def get_params(self):
         return {name: param.data.tolist() for name, param in self.model.named_parameters()}
 
     def check_is_fitted(self, label_name: str):
-        if label_name != self.label:
+        if label_name != self.label.name:
             raise NotFittedError("This DeepRCs instance is not fitted yet. "
                                  "Call 'fit' with appropriate arguments before using this method.")
 
-    def predict(self, encoded_data: EncodedData, label_name: str):
-        probabilities = self.predict_proba(encoded_data, label_name)
+    def predict(self, encoded_data: EncodedData, label: Label):
+        probabilities = self.predict_proba(encoded_data, label)
         predictions = dict()
 
         classes = self.get_classes()
-        pos_class_probs = probabilities[label_name][:, 0]
-        predictions[label_name] = [classes[0] if probability > 0.5 else classes[1] for probability in pos_class_probs]
+        pos_class_probs = probabilities[label.name][:, 0]
+        predictions[label.name] = [classes[0] if probability > 0.5 else classes[1] for probability in pos_class_probs]
 
-        if self.label_is_bool[label_name]:
-            predictions[label_name] = [pred_class == "True" for pred_class in predictions[label_name]]
+        if label.positive_class is not None:
+            predictions[label.name] = [pred_class == label.positive_class for pred_class in predictions[label.name]]
 
         return predictions
 
-    def predict_proba(self, encoded_data: EncodedData, label_name: str):
-        self.check_is_fitted(label_name)
+    def predict_proba(self, encoded_data: EncodedData, label: Label):
+        self.check_is_fitted(label.name)
 
         probabilities = {}
 
-        hdf5_filepath = self._metadata_to_hdf5(encoded_data.info["metadata_filepath"], label_name)
+        hdf5_filepath = self._metadata_to_hdf5(encoded_data.info["metadata_filepath"], label.name)
         pre_loaded_hdf5_file = self._load_dataset_in_ram(hdf5_filepath) if self.keep_dataset_in_ram else None
 
-        test_dataloader = self.make_data_loader(hdf5_filepath, pre_loaded_hdf5_file, indices=None, label=label_name, eval_only=True, is_train=False)
+        test_dataloader = self.make_data_loader(hdf5_filepath, pre_loaded_hdf5_file, indices=None, label_name=label.name, eval_only=True, is_train=False)
 
         probs_pos_class = self._model_predict(self.model, test_dataloader)
-        probabilities[label_name] = np.vstack((probs_pos_class, 1 - probs_pos_class)).T
+        probabilities[label.name] = np.vstack((probs_pos_class, 1 - probs_pos_class)).T
 
         return probabilities
 
@@ -378,7 +357,7 @@ class DeepRC(MLMethod):
 
         return scoring_predictions
 
-    def load(self, path: Path):
+    def load(self, path: Path, details_path: Path = None):
         name = FilenameHandler.get_filename(self.__class__.__name__, "pt")
         file_path = path / name
         if file_path.is_file():
@@ -387,6 +366,20 @@ class DeepRC(MLMethod):
         else:
             raise FileNotFoundError(f"{self.__class__.__name__} model could not be loaded from {file_path}. "
                                     f"Check if the path to the {name} file is properly set.")
+
+        if details_path is None:
+            params_path = path / FilenameHandler.get_filename(self.__class__.__name__, "yaml")
+        else:
+            params_path = details_path
+
+        if params_path.is_file():
+            with params_path.open("r") as file:
+                desc = yaml.safe_load(file)
+                if "label" in desc:
+                    setattr(self, "label", Label(**desc["label"]))
+                for param in ["feature_names", "classes"]:
+                    if param in desc:
+                        setattr(self, param, desc[param])
 
     def store(self, path, feature_names=None, details_path: Path = None):
         PathBuilder.build(path)
@@ -404,15 +397,14 @@ class DeepRC(MLMethod):
                 "feature_names": feature_names,
                 "classes": self.get_classes()
             }
+            if self.label is not None:
+                desc["label"] = vars(self.label)
             yaml.dump(desc, file)
 
     def check_if_exists(self, path):
         file_path = path / FilenameHandler.get_filename(self.__class__.__name__, "pt")
 
         return file_path.is_file()
-
-    def get_classes(self) -> list:
-        return self.label_classes
 
     def get_package_info(self) -> str:
         return 'immuneML ' + Util.get_immuneML_version() + '; deepRC ' + pkg_resources.get_distribution('DeepRC').version
@@ -426,8 +418,8 @@ class DeepRC(MLMethod):
     def get_class_mapping(self) -> dict:
         return {}
 
-    def get_label(self) -> str:
-        return self.label
+    def get_label_name(self) -> str:
+        return self.label.name
 
     def get_compatible_encoders(self):
         return [DeepRCEncoder]

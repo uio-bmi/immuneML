@@ -116,27 +116,27 @@ class MotifSeedRecovery(MLReport):
                                                  "MotifSeedRecovery",
                                                  f"implanted_motifs_per_label")
 
-        for label in implanted_motifs_per_label.keys():
-            ParameterValidator.assert_type_and_value(implanted_motifs_per_label[label], dict,
+        for label_name in implanted_motifs_per_label.keys():
+            ParameterValidator.assert_type_and_value(implanted_motifs_per_label[label_name], dict,
                                                      "MotifSeedRecovery",
-                                                     f"implanted_motifs_per_label/{label}")
+                                                     f"implanted_motifs_per_label/{label_name}")
 
-            ParameterValidator.assert_keys_present(implanted_motifs_per_label[label].keys(),
+            ParameterValidator.assert_keys_present(implanted_motifs_per_label[label_name].keys(),
                                                    ["hamming_distance", "seeds", "gap_sizes"],
-                                                   "MotifSeedRecovery", f"implanted_motifs_per_label/{label}")
-            ParameterValidator.assert_type_and_value(implanted_motifs_per_label[label]["hamming_distance"], bool,
-                                                     "MotifSeedRecovery", f"implanted_motifs_per_label/{label}/hamming_distance")
-            ParameterValidator.assert_type_and_value(implanted_motifs_per_label[label]["gap_sizes"], list,
+                                                   "MotifSeedRecovery", f"implanted_motifs_per_label/{label_name}")
+            ParameterValidator.assert_type_and_value(implanted_motifs_per_label[label_name]["hamming_distance"], bool,
+                                                     "MotifSeedRecovery", f"implanted_motifs_per_label/{label_name}/hamming_distance")
+            ParameterValidator.assert_type_and_value(implanted_motifs_per_label[label_name]["gap_sizes"], list,
                                                      "MotifSeedRecovery",
-                                                     f"implanted_motifs_per_label/{label}/gap_sizes")
-            ParameterValidator.assert_type_and_value(implanted_motifs_per_label[label]["seeds"], list,
-                                                     "MotifSeedRecovery", f"implanted_motifs_per_label/{label}/seeds")
-            for gap_size in implanted_motifs_per_label[label]["gap_sizes"]:
+                                                     f"implanted_motifs_per_label/{label_name}/gap_sizes")
+            ParameterValidator.assert_type_and_value(implanted_motifs_per_label[label_name]["seeds"], list,
+                                                     "MotifSeedRecovery", f"implanted_motifs_per_label/{label_name}/seeds")
+            for gap_size in implanted_motifs_per_label[label_name]["gap_sizes"]:
                 ParameterValidator.assert_type_and_value(gap_size, int, "MotifSeedRecovery",
-                                                         f"implanted_motifs_per_label/{label}/gap_sizes", min_inclusive=0)
-            for seed in implanted_motifs_per_label[label]["seeds"]:
+                                                         f"implanted_motifs_per_label/{label_name}/gap_sizes", min_inclusive=0)
+            for seed in implanted_motifs_per_label[label_name]["seeds"]:
                 ParameterValidator.assert_type_and_value(seed, str, "MotifSeedRecovery",
-                                                         f"implanted_motifs_per_label/{label}/seeds")
+                                                         f"implanted_motifs_per_label/{label_name}/seeds")
 
         return MotifSeedRecovery(implanted_motifs_per_label)
 
@@ -175,7 +175,7 @@ class MotifSeedRecovery(MLReport):
             self._param_field = "coefficients"
             self._y_axis_title = "Coefficient value"
 
-        if self.implanted_motifs_per_label[self.label]["hamming_distance"]:
+        if self.implanted_motifs_per_label[self.label.name]["hamming_distance"]:
             self._x_axis_title = "Positions overlap between feature and motif seeds<br>(hamming distance allowed)"
         else:
             self._x_axis_title = "Positions overlap between feature and motif seeds"
@@ -190,10 +190,10 @@ class MotifSeedRecovery(MLReport):
         return plot_df
 
     def _get_implanted_seeds(self):
-        return self.implanted_motifs_per_label[self.label]["seeds"]
+        return self.implanted_motifs_per_label[self.label.name]["seeds"]
 
     def _get_overlap_fn(self):
-        is_hamming_distance = self.implanted_motifs_per_label[self.label]["hamming_distance"]
+        is_hamming_distance = self.implanted_motifs_per_label[self.label.name]["hamming_distance"]
         overlap_fn = self.hamming_overlap if is_hamming_distance else self.identical_overlap
         return overlap_fn
 
@@ -241,7 +241,7 @@ class MotifSeedRecovery(MLReport):
     def max_overlap_sliding(self, seed, feature, overlap_fn):
         max_score = 0
 
-        sizes = self.implanted_motifs_per_label[self.label]["gap_sizes"]
+        sizes = self.implanted_motifs_per_label[self.label.name]["gap_sizes"]
 
         for gap_size in sizes:
             gap_adjusted_seed = seed.replace("/", "/" * gap_size)
@@ -277,7 +277,7 @@ class MotifSeedRecovery(MLReport):
                             f"{type(self.method).__name__} instead. {location} report will not be created.")
             run_report = False
 
-        if self.label not in self.implanted_motifs_per_label.keys():
+        if self.label.name not in self.implanted_motifs_per_label.keys():
             warnings.warn(
                 f"{location}: no implanted motifs were specified for the label '{self.label}'. "
                 f"These motifs should be specified under 'implanted_motifs_per_label'. {location} report will not be created.")

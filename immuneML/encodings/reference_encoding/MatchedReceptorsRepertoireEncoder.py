@@ -88,8 +88,8 @@ class MatchedReceptorsRepertoireEncoder(MatchedReceptorsEncoder):
             encoded_repertories[i] = self._match_repertoire_to_receptors(repertoire)
 
             if labels is not None:
-                for label in params.label_config.get_labels_by_name():
-                    labels[label].append(repertoire.metadata[label])
+                for label_name in params.label_config.get_labels_by_name():
+                    labels[label_name].append(repertoire.metadata[label_name])
 
         return encoded_repertories, labels, dataset.get_repertoire_ids()
 

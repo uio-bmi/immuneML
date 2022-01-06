@@ -8,6 +8,7 @@ import torch
 import yaml
 
 from immuneML.data_model.encoded_data.EncodedData import EncodedData
+from immuneML.environment.Label import Label
 from immuneML.ml_methods.MLMethod import MLMethod
 from immuneML.ml_methods.pytorch_implementations.PyTorchLogisticRegression import PyTorchLogisticRegression
 from immuneML.ml_methods.util.Util import Util
@@ -74,7 +75,6 @@ class AtchleyKmerMILClassifier(MLMethod):
         self.learning_rate = learning_rate
         self.zero_abundance_weight_init = zero_abundance_weight_init
         self.number_of_threads = number_of_threads
-        self.label_name = None
         self.class_mapping = None
         self.input_size = 0
         self.result_path = result_path
@@ -84,7 +84,7 @@ class AtchleyKmerMILClassifier(MLMethod):
 
         self.logistic_regression = PyTorchLogisticRegression(in_features=self.input_size, zero_abundance_weight_init=self.zero_abundance_weight_init)
 
-    def fit(self, encoded_data: EncodedData, label_name: str, cores_for_training: int = 2):
+    def fit(self, encoded_data: EncodedData, label: Label, cores_for_training: int = 2):
         self.feature_names = encoded_data.feature_names
 
         Util.setup_pytorch(self.number_of_threads, self.random_seed)
@@ -92,8 +92,9 @@ class AtchleyKmerMILClassifier(MLMethod):
 
         self._make_log_reg()
 
-        self.class_mapping = Util.make_binary_class_mapping(encoded_data.labels[label_name])
-        self.label_name = label_name
+        self.label = label
+        self.class_mapping = Util.make_binary_class_mapping(encoded_data.labels[self.label.name])
+
         loss = np.inf
 
         state = {"loss": loss, "model": None}
@@ -112,7 +113,7 @@ class AtchleyKmerMILClassifier(MLMethod):
             logits = self.logistic_regression(examples)
 
             # compute the loss
-            loss = loss_func(logits, torch.tensor(encoded_data.labels[self.label_name]).float())
+            loss = loss_func(logits, torch.tensor(encoded_data.labels[self.label.name]).float())
 
             # perform update
             loss.backward()
@@ -139,15 +140,15 @@ class AtchleyKmerMILClassifier(MLMethod):
         max_logits_indices = torch.argmax(logits, dim=1)
         return max_logits_indices.long()
 
-    def predict(self, encoded_data: EncodedData, label_name: str):
-        predictions_proba = self.predict_proba(encoded_data, label_name)
-        return {self.label_name: [self.class_mapping[val] for val in (predictions_proba[self.label_name][:, 1] > 0.5).tolist()]}
+    def predict(self, encoded_data: EncodedData, label: Label):
+        predictions_proba = self.predict_proba(encoded_data, label)
+        return {label.name: [self.class_mapping[val] for val in (predictions_proba[label.name][:, 1] > 0.5).tolist()]}
 
-    def fit_by_cross_validation(self, encoded_data: EncodedData, number_of_splits: int = 5, label_name: str = None, cores_for_training: int = -1,
+    def fit_by_cross_validation(self, encoded_data: EncodedData, number_of_splits: int = 5, label: Label = None, cores_for_training: int = -1,
                                 optimization_metric=None):
         logging.warning(f"AtchleyKmerMILClassifier: fitting by cross validation is not implemented internally for the model, fitting without "
                         f"cross-validation instead.")
-        self.fit(encoded_data, label_name)
+        self.fit(encoded_data, label)
 
     def store(self, path: Path, feature_names=None, details_path: Path = None):
         PathBuilder.build(path)
@@ -160,6 +161,10 @@ class AtchleyKmerMILClassifier(MLMethod):
 
         del custom_vars["result_path"]
         del custom_vars["logistic_regression"]
+        del custom_vars["label"]
+
+        if self.label:
+            custom_vars["label"] = vars(self.label)
 
         params_path = path / "custom_params.yaml"
         with params_path.open('w') as file:
@@ -172,41 +177,33 @@ class AtchleyKmerMILClassifier(MLMethod):
 
         for param, value in custom_params.items():
             if hasattr(self, param):
-                setattr(self, param, value)
+                if param == "label":
+                    setattr(self, "label", Label(**value))
+                else:
+                    setattr(self, param, value)
 
         self._make_log_reg()
         self.logistic_regression.load_state_dict(torch.load(str(path / "log_reg.pt")))
 
-    def get_model(self, label_name: str = None):
-        return vars(self)
-
     def check_if_exists(self, path) -> bool:
         return self.logistic_regression is not None
-
-    def get_classes_for_label(self, label):
-        if self.label_name == label:
-            return np.array(list(self.class_mapping.values()))
-
-    def get_class_mapping_for_label(self, label) -> dict:
-        if self.label_name == label:
-            return self.class_mapping
 
     def get_params(self):
         params = copy.deepcopy(vars(self))
         params["logistic_regression"] = copy.deepcopy(self.logistic_regression).state_dict()
         return params
 
-    def predict_proba(self, encoded_data: EncodedData, label_name: str):
+    def predict_proba(self, encoded_data: EncodedData, label: Label):
         self.logistic_regression.eval()
         example_count = encoded_data.examples.shape[0]
         max_logit_indices = self._get_max_logits_indices(encoded_data.examples)
         with torch.no_grad():
             data = torch.from_numpy(encoded_data.examples).float()[torch.arange(example_count).long(), :, max_logit_indices]
             predictions = torch.sigmoid(self.logistic_regression(data)).numpy()
-        return {self.label_name: np.vstack([1 - np.array(predictions), predictions]).T}
+        return {label.name: np.vstack([1 - np.array(predictions), predictions]).T}
 
-    def get_label(self):
-        return [self.label_name]
+    def get_label_name(self):
+        return self.label.name
 
     def get_package_info(self) -> str:
         return Util.get_immuneML_version()
@@ -216,9 +213,6 @@ class AtchleyKmerMILClassifier(MLMethod):
 
     def can_predict_proba(self) -> bool:
         return True
-
-    def get_classes(self) -> list:
-        return list(self.class_mapping.values())
 
     def get_class_mapping(self) -> dict:
         return self.class_mapping
