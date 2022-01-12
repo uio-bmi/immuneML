@@ -60,13 +60,13 @@ class DiseaseAssociatedSequenceCVOverlap(TrainMLModelReport):
         PathBuilder.build(self.result_path)
 
         tables, figures = [], []
-        for label in self.state.label_configuration.get_labels_by_name():
+        for label_name in self.state.label_configuration.get_labels_by_name():
             if self.compare_in_assessment:
-                table, figure = self._generate_for_assessment(label)
+                table, figure = self._generate_for_assessment(label_name)
                 tables.append(table)
                 figures.append(figure)
             if self.compare_in_selection:
-                tmp_tables, tmp_figures = self._generate_for_selection(label)
+                tmp_tables, tmp_figures = self._generate_for_selection(label_name)
                 tables += tmp_tables
                 figures += tmp_figures
 
@@ -75,19 +75,19 @@ class DiseaseAssociatedSequenceCVOverlap(TrainMLModelReport):
                             output_figures=[fig for fig in figures if fig is not None],
                             output_tables=[tab for tab in tables if tab is not None])
 
-    def _generate_for_assessment(self, label: str):
-        hp_items = [st.label_states[label].optimal_assessment_item for st in self.state.assessment_states
-                    if isinstance(st.label_states[label].optimal_assessment_item.encoder, SequenceAbundanceEncoder)]
-        table, figure = self._compute_overlap(hp_items, f'sequence_overlap_{label}_assessment')
+    def _generate_for_assessment(self, label_name: str):
+        hp_items = [st.label_states[label_name].optimal_assessment_item for st in self.state.assessment_states
+                    if isinstance(st.label_states[label_name].optimal_assessment_item.encoder, SequenceAbundanceEncoder)]
+        table, figure = self._compute_overlap(hp_items, f'sequence_overlap_{label_name}_assessment')
         return table, figure
 
-    def _generate_for_selection(self, label: str):
+    def _generate_for_selection(self, label_name: str):
         tables, figures = [], []
         for assessment_index, assessment_state in enumerate(self.state.assessment_states):
-            selection_state = assessment_state.label_states[label].selection_state
+            selection_state = assessment_state.label_states[label_name].selection_state
             if isinstance(selection_state.optimal_hp_setting.encoder, SequenceAbundanceEncoder):
                 hp_items = selection_state.hp_items[selection_state.optimal_hp_setting.get_key()]
-                table, figure = self._compute_overlap(hp_items, f'sequence_overlap_{label}_selection_{assessment_index + 1}_split')
+                table, figure = self._compute_overlap(hp_items, f'sequence_overlap_{label_name}_selection_{assessment_index + 1}_split')
                 tables.append(table)
                 figures.append(figure)
         return tables, figures

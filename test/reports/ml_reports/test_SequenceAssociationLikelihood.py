@@ -5,6 +5,7 @@ from unittest import TestCase
 from immuneML.caching.CacheType import CacheType
 from immuneML.environment.Constants import Constants
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
+from immuneML.environment.Label import Label
 from immuneML.ml_methods.ProbabilisticBinaryClassifier import ProbabilisticBinaryClassifier
 from immuneML.reports.ml_reports.SequenceAssociationLikelihood import SequenceAssociationLikelihood
 
@@ -24,7 +25,7 @@ class TestSequenceAssociationLikelihood(TestCase):
         classifier.alpha_1 = 4
         classifier.beta_1 = 51820.1
         classifier.class_mapping = {0: "-", 1: "+"}
-        classifier.label_name = "CMV"
+        classifier.label = Label("CMV", values=["-", "+"])
 
         report = SequenceAssociationLikelihood(method=classifier, result_path=path)
 

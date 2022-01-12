@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import List
 
 from immuneML.data_model.dataset.Dataset import Dataset
+from immuneML.environment.Label import Label
 from immuneML.environment.LabelConfiguration import LabelConfiguration
 from immuneML.hyperparameter_optimization.HPSetting import HPSetting
 from immuneML.hyperparameter_optimization.core.HPUtil import HPUtil
@@ -25,7 +26,7 @@ class MLProcess:
     It performs the task for a given label configuration, and given list of metrics (used only in the assessment step).
     """
 
-    def __init__(self, train_dataset: Dataset, test_dataset: Dataset, label: str, metrics: set, optimization_metric: Metric,
+    def __init__(self, train_dataset: Dataset, test_dataset: Dataset, label: Label, metrics: set, optimization_metric: Metric,
                  path: Path, ml_reports: List[MLReport] = None, encoding_reports: list = None, data_reports: list = None, number_of_processes: int = 2,
                  label_config: LabelConfiguration = None, report_context: dict = None, hp_setting: HPSetting = None):
         self.train_dataset = train_dataset

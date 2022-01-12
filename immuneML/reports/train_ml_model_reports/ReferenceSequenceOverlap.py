@@ -8,6 +8,7 @@ import pandas as pd
 from matplotlib_venn import venn2
 
 from immuneML.encodings.filtered_sequence_encoding.SequenceAbundanceEncoder import SequenceAbundanceEncoder
+from immuneML.environment.Label import Label
 from immuneML.hyperparameter_optimization.states.TrainMLModelState import TrainMLModelState
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
@@ -71,11 +72,10 @@ class ReferenceSequenceOverlap(TrainMLModelReport):
         return ReferenceSequenceOverlap(**kwargs)
 
     def __init__(self, reference_path: Path = None, comparison_attributes: list = None, name: str = None, state: TrainMLModelState = None,
-                 result_path: Path = None, label: str = None, number_of_processes: int = 1):
-        super().__init__(name=name, state=state, result_path=result_path, number_of_processes=number_of_processes)
+                 result_path: Path = None, label: Label = None, number_of_processes: int = 1):
+        super().__init__(name=name, state=state, label=label, result_path=result_path, number_of_processes=number_of_processes)
         self.reference_path = reference_path
         self.comparison_attributes = comparison_attributes
-        self.label = label
 
     def _generate(self) -> ReportResult:
 
@@ -83,16 +83,16 @@ class ReferenceSequenceOverlap(TrainMLModelReport):
 
         PathBuilder.build(self.result_path)
 
-        if ReferenceSequenceOverlap._check_encoder_class(self.state.optimal_hp_items[self.label].encoder):
+        if ReferenceSequenceOverlap._check_encoder_class(self.state.optimal_hp_items[self.label.name].encoder):
             figure, data = self._compute_optimal_model_overlap()
             figures.append(figure)
             tables.append(data)
 
         for assessment_state in self.state.assessment_states:
-            encoder = assessment_state.label_states[self.label].optimal_assessment_item.encoder
+            encoder = assessment_state.label_states[self.label.name].optimal_assessment_item.encoder
             if ReferenceSequenceOverlap._check_encoder_class(encoder):
-                figure_filename = self.result_path / f"assessment_split_{assessment_state.split_index + 1}_model_vs_reference_overlap_{self.label}.pdf"
-                df_filename = self.result_path / f"assessment_split_{assessment_state.split_index + 1}_overlap_sequences_{self.label}"
+                figure_filename = self.result_path / f"assessment_split_{assessment_state.split_index + 1}_model_vs_reference_overlap_{self.label.name}.pdf"
+                df_filename = self.result_path / f"assessment_split_{assessment_state.split_index + 1}_overlap_sequences_{self.label.name}"
                 figure, data = self._compute_model_overlap(figure_filename, df_filename, encoder,
                                                            f"overlap sequences between the model for assessment split "
                                                            f"{assessment_state.split_index + 1} and reference list")
@@ -120,18 +120,18 @@ class ReferenceSequenceOverlap(TrainMLModelReport):
                                 f"report...")
                 valid = False
             else:
-                self.label = self.state.label_configuration.get_labels_by_name()[0]
+                self.label = self.state.label_configuration.get_label_objects()[0]
 
         return valid
 
     def _compute_optimal_model_overlap(self) -> Tuple[ReportOutput, ReportOutput]:
 
-        filename = self.result_path / f"optimal_model_vs_reference_overlap_{self.label}.pdf"
-        df_filename = self.result_path / f"overlap_sequences_{self.label}.csv"
-        encoder = self.state.optimal_hp_items[self.label].encoder
+        filename = self.result_path / f"optimal_model_vs_reference_overlap_{self.label.name}.pdf"
+        df_filename = self.result_path / f"overlap_sequences_{self.label.name}.csv"
+        encoder = self.state.optimal_hp_items[self.label.name].encoder
 
         return self._compute_model_overlap(filename, df_filename, encoder,
-                                           f"overlap sequences between the reference and the optimal model for label {self.label}")
+                                           f"overlap sequences between the reference and the optimal model for label {self.label.name}")
 
     def _compute_model_overlap(self, figure_filename, df_filename, encoder, name):
 

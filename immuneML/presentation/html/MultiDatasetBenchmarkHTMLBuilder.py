@@ -23,6 +23,7 @@ class MultiDatasetBenchmarkHTMLBuilder:
 
     @staticmethod
     def _make_html_map(report_results: dict, result_path: Path, instruction_result_paths: dict) -> dict:
+        print(report_results)
         html_map = {
             "css_style": Util.get_css_content(MultiDatasetBenchmarkHTMLBuilder.CSS_PATH),
             "reports": Util.to_dict_recursive(report_results.values(), result_path),
@@ -34,5 +35,7 @@ class MultiDatasetBenchmarkHTMLBuilder:
 
         if len(html_map['reports']) == 0:
             html_map['show_reports'] = False
+
+        print(html_map)
 
         return html_map

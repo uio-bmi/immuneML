@@ -82,20 +82,20 @@ class MLApplicationInstruction(Instruction):
 
     def _make_predictions(self, dataset):
 
-        label = self.state.label_config.get_labels_by_name()[0]
+        label = self.state.label_config.get_label_objects()[0]
 
         method = self.state.hp_setting.ml_method
         predictions = method.predict(dataset.encoded_data, label)
-        predictions_df = pd.DataFrame({"example_id": dataset.get_example_ids(), label: predictions[label]})
+        predictions_df = pd.DataFrame({"example_id": dataset.get_example_ids(), label.name: predictions[label.name]})
 
         if type(dataset) == RepertoireDataset:
             predictions_df.insert(0, 'repertoire_file', [repertoire.data_filename.name for repertoire in dataset.get_data()])
 
         if method.can_predict_proba():
             classes = method.get_classes()
-            predictions_proba = method.predict_proba(dataset.encoded_data, label)[label]
+            predictions_proba = method.predict_proba(dataset.encoded_data, label)[label.name]
             for cls_index, cls in enumerate(classes):
-                predictions_df[f'{label}_{cls}_proba'] = predictions_proba[:, cls_index]
+                predictions_df[f'{label.name}_{cls}_proba'] = predictions_proba[:, cls_index]
 
         self.state.predictions_path = self.state.path / "predictions.csv"
         predictions_df.to_csv(self.state.predictions_path, index=False)

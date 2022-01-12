@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
 
+from immuneML.environment.Label import Label
 from immuneML.hyperparameter_optimization.states.TrainMLModelState import TrainMLModelState
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
@@ -43,7 +44,7 @@ class CVFeaturePerformance(TrainMLModelReport):
     def build_object(cls, **kwargs):
         return CVFeaturePerformance(**kwargs)
 
-    def __init__(self, feature: str = None, state: TrainMLModelState = None, result_path: Path = None, label: str = None,
+    def __init__(self, feature: str = None, state: TrainMLModelState = None, result_path: Path = None, label: Label = None,
                  name: str = None, is_feature_axis_categorical: bool = None, number_of_processes: int = 1):
         super().__init__(name=name, state=state, result_path=result_path, number_of_processes=number_of_processes)
         self.feature = feature
@@ -71,8 +72,8 @@ class CVFeaturePerformance(TrainMLModelReport):
         return True
 
     def _extract_label(self):
-        if self.label is None and len(self.state.label_configuration.get_labels_by_name()) == 1:
-            self.label = self.state.label_configuration.get_labels_by_name()[0]
+        if self.label is None and len(self.state.label_configuration.get_label_objects()) == 1:
+            self.label = self.state.label_configuration.get_label_objects()[0]
 
     def _extract_hp_settings(self):
         self.relevant_hp_settings = [hp_setting for hp_setting in self.state.hp_settings
@@ -135,7 +136,7 @@ class CVFeaturePerformance(TrainMLModelReport):
 
         for assessment_split_index, assessment_state in enumerate(self.state.assessment_states):
 
-            assessment_items = [assessment_state.label_states[self.label].assessment_items[hp_setting.get_key()]
+            assessment_items = [assessment_state.label_states[self.label.name].assessment_items[hp_setting.get_key()]
                                 for hp_setting in self.relevant_hp_settings]
             features_test[assessment_split_index] = [item.hp_setting.encoder_params[self.feature] for item in assessment_items]
             performance_test[assessment_split_index] = [item.performance[self.state.optimization_metric.name.lower()] for item in assessment_items]
@@ -143,7 +144,7 @@ class CVFeaturePerformance(TrainMLModelReport):
             for hp_index, hp_setting in enumerate(self.relevant_hp_settings):
                 performance_training[hp_index, assessment_split_index] = \
                     [item.performance[self.state.optimization_metric.name.lower()]
-                     for item in assessment_state.label_states[self.label].selection_state.hp_items[hp_setting.get_key()]]
+                     for item in assessment_state.label_states[self.label.name].selection_state.hp_items[hp_setting.get_key()]]
 
         feature_values = self.feature_values.astype(str)
 

@@ -5,6 +5,7 @@ from typing import List
 from immuneML.data_model.dataset.Dataset import Dataset
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.environment.Constants import Constants
+from immuneML.environment.Label import Label
 from immuneML.environment.LabelConfiguration import LabelConfiguration
 from immuneML.hyperparameter_optimization.HPSetting import HPSetting
 from immuneML.hyperparameter_optimization.config.SplitConfig import SplitConfig
@@ -70,7 +71,7 @@ class HPUtil:
                 return dataset
 
     @staticmethod
-    def train_method(label: str, dataset, hp_setting: HPSetting, path: Path, train_predictions_path, ml_details_path, cores_for_training, optimization_metric) -> MLMethod:
+    def train_method(label: Label, dataset, hp_setting: HPSetting, path: Path, train_predictions_path, ml_details_path, cores_for_training, optimization_metric) -> MLMethod:
         method = MLMethodTrainer.run(MLMethodTrainerParams(
             method=copy.deepcopy(hp_setting.ml_method),
             result_path=path / "ml_method",
@@ -106,7 +107,7 @@ class HPUtil:
         return encoded_dataset
 
     @staticmethod
-    def assess_performance(method, metrics, optimization_metric, dataset, split_index, current_path: Path, test_predictions_path: Path, label: str,
+    def assess_performance(method, metrics, optimization_metric, dataset, split_index, current_path: Path, test_predictions_path: Path, label: Label,
                            ml_score_path: Path):
         return MLMethodAssessment.run(MLMethodAssessmentParams(
             method=method,

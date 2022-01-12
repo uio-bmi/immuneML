@@ -11,6 +11,7 @@ from immuneML.caching.CacheType import CacheType
 from immuneML.data_model.encoded_data.EncodedData import EncodedData
 from immuneML.environment.Constants import Constants
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
+from immuneML.environment.Label import Label
 from immuneML.ml_methods.KNN import KNN
 from immuneML.util.PathBuilder import PathBuilder
 
@@ -25,17 +26,17 @@ class TestKNN(TestCase):
         y = {"test": np.array([1, 0, 2, 0])}
 
         knn = KNN()
-        knn.fit(EncodedData(examples=sparse.csr_matrix(x), labels=y), "test")
+        knn.fit(EncodedData(examples=sparse.csr_matrix(x), labels=y), Label("test"))
 
     def test_predict(self):
         x = np.array([[1, 0, 0], [0, 1, 1], [1, 1, 1], [0, 1, 1]])
         y = {"test1": [1, 0, 2, 0], "test2": [1, 0, 2, 0]}
 
         knn = KNN(parameters={"n_neighbors": 2})
-        knn.fit(EncodedData(sparse.csr_matrix(x), labels=y), "test2")
+        knn.fit(EncodedData(sparse.csr_matrix(x), labels=y), Label("test2"))
 
         test_x = np.array([[0, 1, 0], [1, 0, 0]])
-        y = knn.predict(EncodedData(sparse.csr_matrix(test_x)), "test2")
+        y = knn.predict(EncodedData(sparse.csr_matrix(test_x)), Label("test2"))
 
         self.assertTrue(len(y["test2"]) == 2)
         self.assertTrue(y["test2"][1] in [0, 1, 2])
@@ -46,14 +47,14 @@ class TestKNN(TestCase):
             labels={"test1": [1, 0, 2, 0, 1, 0, 2, 0], "test2": [1, 0, 2, 0, 1, 0, 2, 0]})
 
         knn = KNN(parameters={"n_neighbors": 2})
-        knn.fit_by_cross_validation(x, number_of_splits=2, label_name="test1")
+        knn.fit_by_cross_validation(x, number_of_splits=2, label=Label("test1"))
 
     def test_store(self):
         x = np.array([[1, 0, 0], [0, 1, 1], [1, 1, 1], [0, 1, 1]])
         y = {"default": np.array([1, 0, 2, 0])}
 
         knn = KNN()
-        knn.fit(EncodedData(sparse.csr_matrix(x), y), "default")
+        knn.fit(EncodedData(sparse.csr_matrix(x), y), Label("default"))
 
         path = EnvironmentSettings.root_path / "test/tmp/knn/"
 
@@ -73,19 +74,19 @@ class TestKNN(TestCase):
         y = {"default": np.array([1, 0, 2, 0])}
 
         knn = KNN()
-        knn.fit(EncodedData(sparse.csr_matrix(x), y), "default")
+        knn.fit(EncodedData(sparse.csr_matrix(x), y), Label("default"))
 
         path = EnvironmentSettings.root_path / "test/tmp/knn2/"
         PathBuilder.build(path)
 
         pickle_file_path = path / "knn.pickle"
         with pickle_file_path.open("wb") as file:
-            pickle.dump(knn.get_model(), file)
+            pickle.dump(knn.model, file)
 
         knn2 = KNN()
         knn2.load(path)
 
-        self.assertTrue(isinstance(knn2.get_model(), KNeighborsClassifier))
+        self.assertTrue(isinstance(knn2.model, KNeighborsClassifier))
 
         shutil.rmtree(path)
 

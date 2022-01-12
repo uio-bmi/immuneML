@@ -9,6 +9,7 @@ from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
 from immuneML.data_model.encoded_data.EncodedData import EncodedData
 from immuneML.environment.Constants import Constants
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
+from immuneML.environment.Label import Label
 from immuneML.ml_methods.LogisticRegression import LogisticRegression
 from immuneML.workflows.steps.MLMethodTrainer import MLMethodTrainer
 from immuneML.workflows.steps.MLMethodTrainerParams import MLMethodTrainerParams
@@ -36,7 +37,7 @@ class TestMLMethodTrainer(TestCase):
         method = MLMethodTrainer.run(MLMethodTrainerParams(
             result_path=path,
             dataset=dataset,
-            label="l1",
+            label=Label(name="l1", values=[0,1]),
             method=method,
             model_selection_n_folds=2,
             model_selection_cv=True,
@@ -46,7 +47,7 @@ class TestMLMethodTrainer(TestCase):
             optimization_metric="balanced_accuracy"
         ))
 
-        method.predict(EncodedData(np.array([1, 2, 3]).reshape(1, -1)), "l1")
+        method.predict(EncodedData(np.array([1, 2, 3]).reshape(1, -1)), Label("l1"))
         self.assertTrue(os.path.isfile(path / "predictions.csv"))
         self.assertTrue(os.path.isfile(path / "details.yaml"))
 

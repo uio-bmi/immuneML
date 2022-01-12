@@ -174,7 +174,7 @@ class TrainMLModelParser:
             raise KeyError(f"{TrainMLModelParser.__name__}: parameter {key_error.args[0]} was not defined under {split_key}.")
 
     def _prepare_report_config(self, instruction_key, instruction, split_key, symbol_table):
-        if "reports" in instruction[split_key]:
+        if "reports" in instruction[split_key] and len(instruction[split_key]["reports"]) > 0:
             location = f"{instruction_key}/{split_key}/reports"
             report_types = list(signature(ReportConfig).parameters.keys())
             ParameterValidator.assert_all_in_valid_list(instruction[split_key]["reports"].keys(), report_types,

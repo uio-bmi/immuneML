@@ -1,5 +1,6 @@
 from pathlib import Path
 
+from immuneML.environment.Label import Label
 from immuneML.hyperparameter_optimization.states.TrainMLModelState import TrainMLModelState
 from immuneML.reports.Report import Report
 
@@ -25,10 +26,11 @@ class TrainMLModelReport(Report):
 
     """
 
-    def __init__(self, name: str = None, state: TrainMLModelState = None, result_path: Path = None, number_of_processes: int = 1):
+    def __init__(self, name: str = None, state: TrainMLModelState = None, label: Label = None, result_path: Path = None, number_of_processes: int = 1):
         super().__init__(name, number_of_processes)
         self.state = state
         self.result_path = result_path
+        self.label = label
 
     @staticmethod
     def get_title():

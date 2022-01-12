@@ -73,9 +73,9 @@ class TrainingPerformance(MLReport):
     def _generate(self) -> ReportResult:
         
         X = self.train_dataset.encoded_data
-        predicted_y = self.method.predict(X, self.label)[self.label]
-        predicted_proba_y = self.method.predict_proba(X, self.label)[self.label]
-        true_y = self.train_dataset.encoded_data.labels[self.label]
+        predicted_y = self.method.predict(X, self.label)[self.label.name]
+        predicted_proba_y = self.method.predict_proba(X, self.label)[self.label.name]
+        true_y = self.train_dataset.encoded_data.labels[self.label.name]
         classes = self.method.get_classes()
 
         PathBuilder.build(self.result_path)
@@ -100,7 +100,7 @@ class TrainingPerformance(MLReport):
                 scores[metric] = _score
 
         scores_df = pd.DataFrame.from_dict(scores, orient='index')
-        scores_df.columns = [self.label]
+        scores_df.columns = [self.label.name]
 
         self._generate_barplot(scores_df, output)
 
@@ -146,15 +146,8 @@ class TrainingPerformance(MLReport):
         path_html = self.result_path / f"{self.name}.html"
 
         df.to_csv(path_csv)
-        #
-        # layout = go.Layout(title=f'Evaluation Metrics ({self.label})',
-        #                    xaxis=dict(title='Metrics'),
-        #                    yaxis=dict(title='Value'), template='plotly_white')
-        # trace = go.Bar(x=df.index, y=df[self.label], orientation='v', marker={'colorscale': 'Tealrose'})
-        #
-        # fig = go.Figure(data=[trace], layout=layout)
 
-        figure = px.bar(df, x=df.index, y=self.label, labels={'index': "metrics"},
+        figure = px.bar(df, x=df.index, y=self.label.name, labels={'index': "metrics"},
                         template='plotly_white', color_discrete_sequence=px.colors.diverging.Tealrose,
                         title=f"Evaluation metrics ({self.label})")
 

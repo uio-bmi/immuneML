@@ -48,31 +48,31 @@ class HPHTMLBuilder:
         TemplateParser.parse(template_path=EnvironmentSettings.html_templates_path / "HPOptimization.html",
                              template_map=html_map, result_path=result_file)
 
-        for label in state.label_configuration.get_labels_by_name():
-            for index, item in enumerate(HPHTMLBuilder._make_assessment_pages(state, base_path, label)):
+        for label_name in state.label_configuration.get_labels_by_name():
+            for index, item in enumerate(HPHTMLBuilder._make_assessment_pages(state, base_path, label_name)):
                 TemplateParser.parse(template_path=EnvironmentSettings.html_templates_path / "AssessmentSplitDetails.html",
                                      template_map=item,
-                                     result_path=base_path / HPHTMLBuilder._make_assessment_split_path(index, state.name, label))
+                                     result_path=base_path / HPHTMLBuilder._make_assessment_split_path(index, state.name, label_name))
 
-        for label in state.label_configuration.get_labels_by_name():
+        for label_name in state.label_configuration.get_labels_by_name():
             for assessment_index in range(state.assessment.split_count):
                 TemplateParser.parse(template_path=EnvironmentSettings.html_templates_path / "SelectionDetails.html",
-                                     template_map=HPHTMLBuilder._make_selection(state, assessment_index, label, base_path),
-                                     result_path=base_path / HPHTMLBuilder._make_selection_split_path(assessment_index, label, state.name))
+                                     template_map=HPHTMLBuilder._make_selection(state, assessment_index, label_name, base_path),
+                                     result_path=base_path / HPHTMLBuilder._make_selection_split_path(assessment_index, label_name, state.name))
 
         return result_file
 
     @staticmethod
-    def _make_assessment_split_path(split_index: int, state_name: str, label: str) -> Path:
-        return Path(f"{state_name}_CV_assessment_split_{split_index + 1}_{label}.html")
+    def _make_assessment_split_path(split_index: int, state_name: str, label_name: str) -> Path:
+        return Path(f"{state_name}_CV_assessment_split_{split_index + 1}_{label_name}.html")
 
     @staticmethod
-    def _make_selection_split_path(assessment_index: int, label: str, state_name: str) -> Path:
-        return Path(f"{state_name}_selection_details_{label}_split_{assessment_index + 1}.html")
+    def _make_selection_split_path(assessment_index: int, label_name: str, state_name: str) -> Path:
+        return Path(f"{state_name}_selection_details_{label_name}_split_{assessment_index + 1}.html")
 
     @staticmethod
-    def _make_selection(state: TrainMLModelState, assessment_index: int, label: str, base_path):
-        selection_state = state.assessment_states[assessment_index].label_states[label].selection_state
+    def _make_selection(state: TrainMLModelState, assessment_index: int, label_name: str, base_path):
+        selection_state = state.assessment_states[assessment_index].label_states[label_name].selection_state
 
         hp_settings = []
         optimal = selection_state.optimal_hp_setting.get_key()
@@ -101,7 +101,7 @@ class HPHTMLBuilder:
 
         return {
             "css_style": Util.get_css_content(HPHTMLBuilder.CSS_PATH),
-            "label": label,
+            "label": label_name,
             "assessment_split": assessment_index + 1,
             "splits": [{"split_index": i} for i in range(1, state.selection.split_count + 1)],
             "split_count": state.selection.split_count,
@@ -147,7 +147,7 @@ class HPHTMLBuilder:
         return result if len(result) > 0 else None
 
     @staticmethod
-    def _make_assessment_pages(state: TrainMLModelState, base_path: Path, label: str):
+    def _make_assessment_pages(state: TrainMLModelState, base_path: Path, label_name: str):
         assessment_list = []
 
         for i, assessment_state in enumerate(state.assessment_states):
@@ -173,10 +173,10 @@ class HPHTMLBuilder:
             else:
                 assessment_item["test_metadata_path"] = None
 
-            assessment_item["label"] = label
-            for hp_setting, item in assessment_state.label_states[label].assessment_items.items():
-                optimal = str(assessment_state.label_states[label].optimal_hp_setting.get_key())
-                reports_path = HPHTMLBuilder._make_assessment_reports(state, i, hp_setting, assessment_state, label, base_path)
+            assessment_item["label"] = label_name
+            for hp_setting, item in assessment_state.label_states[label_name].assessment_items.items():
+                optimal = str(assessment_state.label_states[label_name].optimal_hp_setting.get_key())
+                reports_path = HPHTMLBuilder._make_assessment_reports(state, i, hp_setting, assessment_state, label_name, base_path)
                 assessment_item["hp_settings"].append({
                     "optimal": str(hp_setting) == optimal,
                     "hp_setting": str(hp_setting),
@@ -185,17 +185,17 @@ class HPHTMLBuilder:
                 })
             assessment_item["show_non_optimal"] = len(assessment_item["hp_settings"]) > 1
 
-            assessment_item["selection_path"] = HPHTMLBuilder._make_selection_split_path(i, label, state.name)
-            assessment_item['performances_per_metric'] = HPHTMLBuilder._extract_assessment_performances_per_metric(state, assessment_state, label)
+            assessment_item["selection_path"] = HPHTMLBuilder._make_selection_split_path(i, label_name, state.name)
+            assessment_item['performances_per_metric'] = HPHTMLBuilder._extract_assessment_performances_per_metric(state, assessment_state, label_name)
 
             assessment_list.append(assessment_item)
 
         return assessment_list
 
     @staticmethod
-    def _extract_assessment_performances_per_metric(state: TrainMLModelState, assessment_state: HPAssessmentState, label: str) -> str:
+    def _extract_assessment_performances_per_metric(state: TrainMLModelState, assessment_state: HPAssessmentState, label_name: str) -> str:
         performance_metric = {"setting": [], **{metric.name.lower(): [] for metric in state.metrics}}
-        for hp_setting, hp_item in assessment_state.label_states[label].assessment_items.items():
+        for hp_setting, hp_item in assessment_state.label_states[label_name].assessment_items.items():
             performance_metric['setting'].append(str(hp_setting))
             for metric in sorted(state.metrics, key=lambda metric: metric.name.lower()):
                 performance_metric[metric.name.lower()].append(HPHTMLBuilder._print_metric(hp_item.performance, metric))
@@ -206,14 +206,14 @@ class HPHTMLBuilder:
         return Util.get_table_string_from_csv_string(s.getvalue(), separator="\t")
 
     @staticmethod
-    def _make_assessment_reports(state, i, hp_setting_key, assessment_state, label, base_path: Path):
-        path = base_path / f"{state.name}_{label}_{hp_setting_key}_assessment_reports_split_{i + 1}.html"
+    def _make_assessment_reports(state, i, hp_setting_key, assessment_state, label_name: str, base_path: Path):
+        path = base_path / f"{state.name}_{label_name}_{hp_setting_key}_assessment_reports_split_{i + 1}.html"
 
-        hp_item = assessment_state.label_states[label].assessment_items[hp_setting_key]
+        hp_item = assessment_state.label_states[label_name].assessment_items[hp_setting_key]
         data = {
             "split_index": i + 1,
             "hp_setting": hp_setting_key,
-            "label": label,
+            "label": label_name,
             "css_style": Util.get_css_content(HPHTMLBuilder.CSS_PATH),
             "has_encoding_reports": len(hp_item.encoding_train_results) > 0 or len(hp_item.encoding_test_results) > 0,
             "has_ml_reports": len(hp_item.model_report_results) > 0,
@@ -235,18 +235,18 @@ class HPHTMLBuilder:
     def _make_hp_per_label(state: TrainMLModelState):
         mapping = []
 
-        for label in state.label_configuration.get_labels_by_name():
+        for label_name in state.label_configuration.get_labels_by_name():
             results = []
             for i, assessment_state in enumerate(state.assessment_states):
                 results.append({
                     "index": assessment_state.split_index + 1,
-                    "hp_setting": assessment_state.label_states[label].optimal_assessment_item.hp_setting,
-                    "optimization_metric_val": HPHTMLBuilder._print_metric(assessment_state.label_states[label].optimal_assessment_item.performance,
+                    "hp_setting": assessment_state.label_states[label_name].optimal_assessment_item.hp_setting,
+                    "optimization_metric_val": HPHTMLBuilder._print_metric(assessment_state.label_states[label_name].optimal_assessment_item.performance,
                                                                            state.optimization_metric),
-                    "split_details_path": HPHTMLBuilder._make_assessment_split_path(assessment_state.split_index, state.name, label)
+                    "split_details_path": HPHTMLBuilder._make_assessment_split_path(assessment_state.split_index, state.name, label_name)
                 })
 
-            mapping.append({"label": label, "assessment_results": results})
+            mapping.append({"label": label_name, "assessment_results": results})
 
         return mapping
 
@@ -265,10 +265,10 @@ class HPHTMLBuilder:
 
         mapping = []
 
-        for label in state.label_configuration.get_labels_by_name():
+        for label_name in state.label_configuration.get_labels_by_name():
             mapping.append({
-                "label": label,
-                "model_path": Path(os.path.relpath(path=str(state.optimal_hp_item_paths[label]), start=str(base_path)))
+                "label": label_name,
+                "model_path": Path(os.path.relpath(path=str(state.optimal_hp_item_paths[label_name]), start=str(base_path)))
             })
 
         return mapping

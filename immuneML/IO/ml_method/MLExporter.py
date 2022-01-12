@@ -13,10 +13,10 @@ from immuneML.util.PathBuilder import PathBuilder
 class MLExporter:
 
     @staticmethod
-    def export_zip(hp_item: HPItem, path: Path, label: str) -> str:
+    def export_zip(hp_item: HPItem, path: Path, label_name: str) -> str:
         state_path = path.absolute()
         export_path = MLExporter.export(hp_item, state_path / "exported")
-        filename = f"ml_settings_{label}"
+        filename = f"ml_settings_{label_name}"
         abs_zip_path = Path(shutil.make_archive(state_path / "zip" / filename, "zip", str(export_path))).absolute()
         return abs_zip_path
 
@@ -27,7 +27,7 @@ class MLExporter:
         encoder_filename = MLExporter._store_encoder(hp_item.hp_setting.encoder, path).name
 
         hp_item.method.store(path, hp_item.method.get_feature_names())
-        labels_with_values = {hp_item.method.get_label(): hp_item.method.get_classes()}
+        labels_with_values = {hp_item.method.get_label_name(): hp_item.method.get_classes()}
 
         method_config = MLMethodConfiguration(labels_with_values=labels_with_values, software_used=hp_item.method.get_package_info(),
                                               encoding_name=hp_item.hp_setting.encoder_name, encoding_parameters=hp_item.hp_setting.encoder_params,

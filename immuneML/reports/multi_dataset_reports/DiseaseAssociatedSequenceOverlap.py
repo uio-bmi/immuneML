@@ -50,7 +50,7 @@ class DiseaseAssociatedSequenceOverlap(MultiDatasetReport):
         self.result_path = PathBuilder.build(self.result_path / self.name)
         self._extract_label()
 
-        hp_items = [state.optimal_hp_items[self.label] for state in self.instruction_states]
+        hp_items = [state.optimal_hp_items[self.label.name] for state in self.instruction_states]
         overlap_matrix = SequenceAnalysisHelper.compute_overlap_matrix(hp_items)
 
         labels = [state.dataset.name for state in self.instruction_states]
@@ -65,11 +65,11 @@ class DiseaseAssociatedSequenceOverlap(MultiDatasetReport):
     def _extract_label(self):
         all_labels = []
         for state in self.instruction_states:
-            all_labels += state.label_configuration.get_labels_by_name()
+            all_labels += state.label_configuration.get_label_objects()
 
-        all_labels = set(all_labels)
-        assert len(all_labels) == 1, \
-            f"{DiseaseAssociatedSequenceOverlap.__name__}: multiple labels were specified {all_labels}, but this report accepts only one label."
+        label_names = set([label.name for label in all_labels])
+        assert len(label_names) == 1, \
+            f"{DiseaseAssociatedSequenceOverlap.__name__}: multiple labels were specified {label_names}, but this report accepts only one label."
 
         self.label = list(all_labels)[0]
 

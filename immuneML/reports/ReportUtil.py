@@ -3,6 +3,7 @@ from pathlib import Path
 from typing import List
 
 from immuneML.data_model.dataset.Dataset import Dataset
+from immuneML.environment.Label import Label
 from immuneML.hyperparameter_optimization.HPSetting import HPSetting
 from immuneML.ml_methods.MLMethod import MLMethod
 from immuneML.reports.Report import Report
@@ -25,7 +26,7 @@ class ReportUtil:
 
     @staticmethod
     def run_ML_reports(train_dataset: Dataset, test_dataset: Dataset, method: MLMethod, reports: List[MLReport], path: Path,
-                       hp_setting: HPSetting, label: str, number_of_processes: int = 1, context: dict = None) -> List[ReportResult]:
+                       hp_setting: HPSetting, label: Label, number_of_processes: int = 1, context: dict = None) -> List[ReportResult]:
         report_results = []
         for report in reports:
             tmp_report = ReportUtil._make_new_report(report, path, number_of_processes, context)

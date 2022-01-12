@@ -72,10 +72,10 @@ class SequenceAssociationLikelihood(MLReport):
         positive_pdf = beta.pdf(beta_distribution_x, self.method.alpha_1, self.method.beta_1)
 
         figure = go.Figure()
-        figure.add_trace(go.Scatter(x=beta_distribution_x, y=negative_pdf, mode='lines', line=dict(color='#E69F00', width=2), name=f"{self.method.label_name} {self.method.class_mapping[0]}"))
-        figure.add_trace(go.Scatter(x=beta_distribution_x, y=positive_pdf, mode='lines', line=dict(color='#0072B2', width=2), name=f"{self.method.label_name} {self.method.class_mapping[1]}"))
+        figure.add_trace(go.Scatter(x=beta_distribution_x, y=negative_pdf, mode='lines', line=dict(color='#E69F00', width=2), name=f"{self.method.get_label_name()} {self.method.class_mapping[0]}"))
+        figure.add_trace(go.Scatter(x=beta_distribution_x, y=positive_pdf, mode='lines', line=dict(color='#0072B2', width=2), name=f"{self.method.get_label_name()} {self.method.class_mapping[1]}"))
 
-        figure.update_layout(template="plotly_white", xaxis_title=f"probability that receptor sequence is {self.method.label_name}-associated",
+        figure.update_layout(template="plotly_white", xaxis_title=f"probability that receptor sequence is {self.method.get_label_name()}-associated",
                              yaxis_title="probability density function", xaxis={'tickformat': '.2e'}, yaxis={'tickformat': '.2e'})
 
         output_path = self.result_path / f"{self.result_name}.html"

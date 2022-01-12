@@ -1,13 +1,14 @@
 from pathlib import Path
 
 from immuneML.data_model.dataset.Dataset import Dataset
+from immuneML.environment import Label
 from immuneML.ml_methods.MLMethod import MLMethod
 from immuneML.workflows.steps.StepParams import StepParams
 
 
 class MLMethodTrainerParams(StepParams):
 
-    def __init__(self, method: MLMethod, dataset: Dataset, result_path: Path, label: str, model_selection_cv: bool,
+    def __init__(self, method: MLMethod, dataset: Dataset, result_path: Path, label: Label, model_selection_cv: bool,
                  model_selection_n_folds: int, cores_for_training: int, train_predictions_path: Path, ml_details_path: Path,
                  optimization_metric: str):
         self.method = method

@@ -209,11 +209,11 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
         return CompAIRRHelper.process_compairr_output_file(compairr_result, compairr_params, result_path)
 
     def _encode_data(self, dataset: RepertoireDataset, params: EncoderParams):
-        label = params.label_config.get_labels_by_name()[0]
+        label_name = params.label_config.get_labels_by_name()[0]
 
-        examples = self._calculate_sequence_abundance(dataset, self.sequence_presence_matrix, self.matrix_repertoire_ids, label, params)
+        examples = self._calculate_sequence_abundance(dataset, self.sequence_presence_matrix, self.matrix_repertoire_ids, label_name, params)
 
-        encoded_data = EncodedData(examples, dataset.get_metadata([label]) if params.encode_labels else None, dataset.get_repertoire_ids(),
+        encoded_data = EncodedData(examples, dataset.get_metadata([label_name]) if params.encode_labels else None, dataset.get_repertoire_ids(),
                                    [CompAIRRSequenceAbundanceEncoder.RELEVANT_SEQUENCE_ABUNDANCE,
                                     CompAIRRSequenceAbundanceEncoder.TOTAL_SEQUENCE_ABUNDANCE],
                                    encoding=CompAIRRSequenceAbundanceEncoder.__name__,

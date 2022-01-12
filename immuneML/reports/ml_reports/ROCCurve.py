@@ -32,8 +32,8 @@ class ROCCurve(MLReport):
 
     def _generate(self) -> ReportResult:
         x = self.test_dataset.encoded_data
-        y_score = self.method.predict_proba(x, self.label)[self.label]
-        fpr, tpr, _ = roc_curve(x.labels[self.label], y_score[:, 0])
+        y_score = self.method.predict_proba(x, self.label)[self.label.name]
+        fpr, tpr, _ = roc_curve(x.labels[self.label.name], y_score[:, 0])
         roc_auc = auc(fpr, tpr)
 
         trace1 = go.Scatter(x=fpr, y=tpr,

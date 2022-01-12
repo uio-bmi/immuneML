@@ -62,9 +62,9 @@ class ConfounderAnalysis(MLReport):
         paths = []
 
         # make predictions
-        predictions = self.method.predict(self.test_dataset.encoded_data, self.label)[self.label]  # label = disease
+        predictions = self.method.predict(self.test_dataset.encoded_data, self.label)[self.label.name]
 
-        true_labels = self.test_dataset.get_metadata(self.metadata_labels + [self.label])
+        true_labels = self.test_dataset.get_metadata(self.metadata_labels + [self.label.name])
         metrics = ["FP", "FN"]
 
         plot = make_subplots(rows=len(self.metadata_labels), cols=2)
@@ -73,7 +73,7 @@ class ConfounderAnalysis(MLReport):
         for label_index, meta_label in enumerate(self.metadata_labels):
             csv_data = {}
             for metric_index, metric in enumerate(metrics):
-                plotting_data = self._metrics(metric=metric, label=self.label, meta_label=meta_label,
+                plotting_data = self._metrics(metric=metric, label_name=self.label.name, meta_label=meta_label,
                                               predictions=predictions, true_labels=true_labels)
 
                 csv_data[f"{metric}"] = plotting_data[f"{metric}"]
@@ -108,12 +108,12 @@ class ConfounderAnalysis(MLReport):
         return filepaths
 
     @staticmethod
-    def _metrics(metric, label, meta_label, predictions, true_labels):
+    def _metrics(metric, label_name, meta_label, predictions, true_labels):
         # indices of samples at which misclassification occurred
         if metric == "FP":
-            metric_inds = np.nonzero(np.greater(predictions, true_labels[label]))[0].tolist()
+            metric_inds = np.nonzero(np.greater(predictions, true_labels[label_name]))[0].tolist()
         else:
-            metric_inds = np.nonzero(np.less(predictions, true_labels[label]))[0].tolist()
+            metric_inds = np.nonzero(np.less(predictions, true_labels[label_name]))[0].tolist()
 
         metadata_values = true_labels[meta_label]
         # indices of misclassification with respect to the metadata label

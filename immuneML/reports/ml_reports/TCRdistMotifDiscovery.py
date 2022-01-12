@@ -70,7 +70,6 @@ class TCRdistMotifDiscovery(MLReport):
                  use_reference_sequences: bool = None, hp_setting: HPSetting = None, label=None, number_of_processes: int = 1):
         super().__init__(train_dataset=train_dataset, test_dataset=test_dataset, method=method, result_path=result_path,
                          name=name, hp_setting=hp_setting, label=label, number_of_processes=number_of_processes)
-        self.label = list(train_dataset.encoded_data.labels.keys())[0] if train_dataset is not None else None
         self.cores = cores
         self.positive_class_name = positive_class_name
         self.min_cluster_size = min_cluster_size
@@ -78,9 +77,6 @@ class TCRdistMotifDiscovery(MLReport):
         self.context = context
 
     def _generate(self) -> ReportResult:
-
-        self.label = list(self.train_dataset.encoded_data.labels.keys())[0]
-
         from immuneML.util.TCRdistHelper import TCRdistHelper
         from tcrdist.rep_diff import hcluster_diff
         from tcrdist.summarize import member_summ
@@ -89,7 +85,7 @@ class TCRdistMotifDiscovery(MLReport):
 
         subsampled_dataset = self._extract_positive_example_dataset()
         reference_sequences = self._extract_reference_sequences()
-        tcr_rep = TCRdistHelper.compute_tcr_dist(subsampled_dataset, [self.label], self.cores)
+        tcr_rep = TCRdistHelper.compute_tcr_dist(subsampled_dataset, [self.label.name], self.cores)
         tcr_rep.hcluster_df, tcr_rep.Z = hcluster_diff(clone_df=tcr_rep.clone_df, pwmat=tcr_rep.pw_alpha + tcr_rep.pw_beta, x_cols=["epitope"],
                                                        count_col='count')
 
@@ -156,7 +152,7 @@ class TCRdistMotifDiscovery(MLReport):
     def _extract_positive_example_dataset(self) -> ReceptorDataset:
         positive_example_indices = []
         for index, receptor in enumerate(self.train_dataset.get_data()):
-            if str(receptor.metadata[self.label]) == str(self.positive_class_name):
+            if str(receptor.metadata[self.label.name]) == str(self.positive_class_name):
                 positive_example_indices.append(index)
 
         subsampled_dataset = self.train_dataset.make_subset(example_indices=positive_example_indices, path=self.result_path,
@@ -173,7 +169,7 @@ class TCRdistMotifDiscovery(MLReport):
 
         if self.use_reference_sequences:
             for index, receptor in enumerate(self.train_dataset.get_data()):
-                if str(receptor.metadata[self.label]) != str(self.positive_class_name):
+                if str(receptor.metadata[self.label.name]) != str(self.positive_class_name):
                     reference_sequences['a'].append(receptor.alpha.amino_acid_sequence)
                     reference_sequences['b'].append(receptor.beta.amino_acid_sequence)
 
