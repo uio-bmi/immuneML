@@ -23,6 +23,7 @@ class SimpleDatasetOverview(DataReport):
             my_overview: SimpleDatasetOverview
 
     """
+    UNKNOWN_CHAIN = "unknown"
 
     def __init__(self, dataset: Dataset = None, result_path: Path = None, name: str = None):
         super().__init__(dataset, result_path, name)
@@ -78,7 +79,7 @@ class SimpleDatasetOverview(DataReport):
             output_text += f"- Name: {repertoire.data_filename.name}\n"
             output_text += f"  Number of sequences: {repertoire.get_element_count()}\n"
 
-            chains = [chain.value if chain else "unknown" for chain in set(repertoire.get_chains())]
+            chains = [chain.value if chain else SimpleDatasetOverview.UNKNOWN_CHAIN for chain in set(repertoire.get_chains())]
             if len(chains) == 1:
                 output_text += f"  Chain type: {chains[0]}\n"
             else:
@@ -98,7 +99,7 @@ class SimpleDatasetOverview(DataReport):
 
     def _get_sequence_dataset_text(self):
         chains = list(set([sequence.get_attribute("chain") for sequence in self.dataset.get_data()]))
-        chains = [chain.value if chain else "unknown" for chain in chains]
+        chains = [chain.value if chain else SimpleDatasetOverview.UNKNOWN_CHAIN for chain in chains]
 
         if len(chains) > 1:
             output_text = "\nChain types: " + ",".join(chains)
