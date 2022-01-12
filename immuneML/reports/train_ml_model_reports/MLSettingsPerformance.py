@@ -62,15 +62,12 @@ class MLSettingsPerformance(TrainMLModelReport):
         name = kwargs["name"] if "name" in kwargs else None
         return MLSettingsPerformance(single_axis_labels, x_label_position, y_label_position, name)
 
-    def __init__(self, single_axis_labels, x_label_position, y_label_position, name: str = None, state: TrainMLModelState = None, result_path: Path = None):
-        super().__init__(name)
-
+    def __init__(self, single_axis_labels, x_label_position, y_label_position, name: str = None, state: TrainMLModelState = None,
+                 result_path: Path = None, number_of_processes: int = 1):
+        super().__init__(name=name, state=state, result_path=result_path, number_of_processes=number_of_processes)
         self.single_axis_labels = single_axis_labels
         self.x_label_position = x_label_position
         self.y_label_position = y_label_position
-        self.state = state
-        self.result_path = None
-        self.name = name
         self.result_name = "performance"
         self.vertical_grouping = "encoding"
 

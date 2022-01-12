@@ -56,9 +56,11 @@ class FeatureValueBarplot(FeatureReport):
 
     def __init__(self, dataset: RepertoireDataset = None, result_path: Path = None,
                  color_grouping_label: str = None, row_grouping_label=None, column_grouping_label=None,
-                 x_title: str = None, y_title: str = None, show_error_bar=True, name: str = None):
+                 x_title: str = None, y_title: str = None, show_error_bar=True, name: str = None,
+                 number_of_processes: int = 1):
         super().__init__(dataset=dataset, result_path=result_path, color_grouping_label=color_grouping_label,
-                         row_grouping_label=row_grouping_label, column_grouping_label=column_grouping_label, name=name)
+                         row_grouping_label=row_grouping_label, column_grouping_label=column_grouping_label,
+                         name=name, number_of_processes=number_of_processes)
         self.show_error_bar = show_error_bar
         self.x_title = x_title if x_title is not None else self.x
         self.y_title = y_title if y_title is not None else "value"

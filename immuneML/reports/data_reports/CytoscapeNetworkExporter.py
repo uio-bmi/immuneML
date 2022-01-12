@@ -47,8 +47,8 @@ class CytoscapeNetworkExporter(DataReport):
 
     def __init__(self, dataset: Dataset = None, result_path: Path = None,
                  chains=("alpha", "beta"), drop_duplicates=True,
-                 additional_node_attributes=[], additional_edge_attributes=[], name: str = None,):
-        super().__init__(dataset=dataset, result_path=result_path, name=name)
+                 additional_node_attributes=[], additional_edge_attributes=[], number_of_processes: int = 1, name: str = None,):
+        super().__init__(dataset=dataset, result_path=result_path, number_of_processes=number_of_processes, name=name)
         self.chains = chains
         self.drop_duplicates = drop_duplicates
         self.additional_node_attributes = additional_node_attributes

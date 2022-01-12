@@ -49,11 +49,8 @@ class Matches(EncodingReport):
     def build_object(cls, **kwargs):
         return Matches(**kwargs)
 
-    def __init__(self, dataset: RepertoireDataset = None, result_path: Path = None, name: str = None):
-        super().__init__(name)
-        self.dataset = dataset
-        self.result_path = result_path
-        self.name = name
+    def __init__(self, dataset: RepertoireDataset = None, result_path: Path = None, name: str = None, number_of_processes: int = 1):
+        super().__init__(dataset=dataset, result_path=result_path, name=name, number_of_processes=number_of_processes)
 
     def _generate(self) -> ReportResult:
         PathBuilder.build(self.result_path)

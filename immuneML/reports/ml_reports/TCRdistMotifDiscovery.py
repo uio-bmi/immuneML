@@ -4,6 +4,7 @@ from typing import List, Tuple
 
 from immuneML.data_model.dataset.ReceptorDataset import ReceptorDataset
 from immuneML.data_model.receptor.receptor_sequence.Chain import Chain
+from immuneML.hyperparameter_optimization.HPSetting import HPSetting
 from immuneML.ml_methods.MLMethod import MLMethod
 from immuneML.ml_methods.TCRdistClassifier import TCRdistClassifier
 from immuneML.reports.ReportOutput import ReportOutput
@@ -66,8 +67,9 @@ class TCRdistMotifDiscovery(MLReport):
 
     def __init__(self, train_dataset: ReceptorDataset = None, test_dataset: ReceptorDataset = None, method: MLMethod = None, result_path: Path = None,
                  name: str = None, cores: int = None, context: dict = None, positive_class_name=None, min_cluster_size: int = None,
-                 use_reference_sequences: bool = None):
-        super().__init__(train_dataset, test_dataset, method, result_path, name)
+                 use_reference_sequences: bool = None, hp_setting: HPSetting = None, label=None, number_of_processes: int = 1):
+        super().__init__(train_dataset=train_dataset, test_dataset=test_dataset, method=method, result_path=result_path,
+                         name=name, hp_setting=hp_setting, label=label, number_of_processes=number_of_processes)
         self.label = list(train_dataset.encoded_data.labels.keys())[0] if train_dataset is not None else None
         self.cores = cores
         self.positive_class_name = positive_class_name

@@ -42,10 +42,8 @@ class DiseaseAssociatedSequenceOverlap(MultiDatasetReport):
     def build_object(cls, **kwargs):
         return DiseaseAssociatedSequenceOverlap(**kwargs)
 
-    def __init__(self, instruction_states: List[TrainMLModelState] = None, name: str = None, result_path: Path = None):
-        super().__init__(name)
-        self.instruction_states = instruction_states
-        self.result_path = result_path
+    def __init__(self, instruction_states: List[TrainMLModelState] = None, name: str = None, result_path: Path = None, number_of_processes: int = 1):
+        super().__init__(instruction_states=instruction_states, name=name, result_path=result_path, number_of_processes=number_of_processes)
         self.label = None
 
     def _generate(self) -> ReportResult:

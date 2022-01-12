@@ -6,7 +6,10 @@ import torch
 from matplotlib import pyplot as plt
 from tqdm import tqdm
 
+from immuneML.data_model.dataset.Dataset import Dataset
+from immuneML.hyperparameter_optimization.HPSetting import HPSetting
 from immuneML.ml_methods.DeepRC import DeepRC
+from immuneML.ml_methods.MLMethod import MLMethod
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.ml_reports.MLReport import MLReport
@@ -54,13 +57,15 @@ class DeepRCMotifDiscovery(MLReport):
 
     """
 
-    def __init__(self, n_steps, threshold, name: str = None):
-        super().__init__(name=name)
+    def __init__(self, n_steps, threshold, train_dataset: Dataset = None, test_dataset: Dataset = None,
+                 method: MLMethod = None, result_path: Path = None, name: str = None, hp_setting: HPSetting = None,
+                 label=None, number_of_processes: int = 1):
+        super().__init__(train_dataset=train_dataset, test_dataset=test_dataset, method=method, result_path=result_path,
+                         name=name, hp_setting=hp_setting, label=label, number_of_processes=number_of_processes)
         self.n_steps = n_steps
         self.threshold = threshold
         self.filename_inputs = Path("inputs_integrated_gradients.pdf")
         self.filename_kernels = Path("kernel_integrated_gradients.pdf")
-        self.name = name
 
     @classmethod
     def build_object(cls, **kwargs):

@@ -36,7 +36,6 @@ class MLReport(Report):
 
 
     """
-
     def __init__(self, train_dataset: Dataset = None, test_dataset: Dataset = None, method: MLMethod = None,
                  result_path: Path = None, name: str = None, hp_setting: HPSetting = None, label=None, number_of_processes: int = 1):
         super().__init__(name, number_of_processes)

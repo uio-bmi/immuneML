@@ -30,7 +30,7 @@ class DataReport(Report):
     """
 
     def __init__(self, dataset: Dataset = None, result_path: Path = None, name: str = None, number_of_processes: int = 1):
-        super().__init__(name, number_of_processes)
+        super().__init__(name=name, number_of_processes=number_of_processes)
         self.dataset = dataset
         self.result_path = result_path
 

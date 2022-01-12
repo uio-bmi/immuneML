@@ -65,8 +65,9 @@ class TrainingPerformance(MLReport):
         return TrainingPerformance(set(metrics), name=name)
 
     def __init__(self, metrics: set, train_dataset: Dataset = None, test_dataset: Dataset = None, method: MLMethod = None,
-                 result_path: Path = None, name: str = None, hp_setting: HPSetting = None):
-        super().__init__(train_dataset, test_dataset, method, result_path, name, hp_setting)
+                 result_path: Path = None, name: str = None, hp_setting: HPSetting = None, label=None, number_of_processes: int = 1):
+        super().__init__(train_dataset=train_dataset, test_dataset=test_dataset, method=method, result_path=result_path,
+                         name=name, hp_setting=hp_setting, label=label, number_of_processes=number_of_processes)
         self.metrics_set = set(metrics)
 
     def _generate(self) -> ReportResult:

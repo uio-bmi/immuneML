@@ -44,16 +44,13 @@ class CVFeaturePerformance(TrainMLModelReport):
         return CVFeaturePerformance(**kwargs)
 
     def __init__(self, feature: str = None, state: TrainMLModelState = None, result_path: Path = None, label: str = None,
-                 name: str = None, is_feature_axis_categorical: bool = None):
-        super().__init__(name)
+                 name: str = None, is_feature_axis_categorical: bool = None, number_of_processes: int = 1):
+        super().__init__(name=name, state=state, result_path=result_path, number_of_processes=number_of_processes)
         self.feature = feature
-        self.state = state
-        self.result_path = result_path
         self.label = label
         self.relevant_hp_settings = []
         self.feature_values = None
         self.feature_count = None
-        self.name = name
         self.result_name = None
         self.is_feature_axis_categorical = is_feature_axis_categorical
 

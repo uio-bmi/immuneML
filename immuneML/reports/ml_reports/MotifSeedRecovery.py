@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 
 from immuneML.data_model.dataset.Dataset import Dataset
+from immuneML.hyperparameter_optimization.HPSetting import HPSetting
 from immuneML.ml_methods.LogisticRegression import LogisticRegression
 from immuneML.ml_methods.MLMethod import MLMethod
 from immuneML.ml_methods.RandomForestClassifier import RandomForestClassifier
@@ -140,11 +141,13 @@ class MotifSeedRecovery(MLReport):
 
         return MotifSeedRecovery(implanted_motifs_per_label)
 
-    def __init__(self, implanted_motifs_per_label, train_dataset: Dataset = None,
-                 test_dataset: Dataset = None, method: MLMethod = None, result_path: Path = None, name: str = None):
-        super().__init__(train_dataset, test_dataset, method, result_path, name)
+    def __init__(self, implanted_motifs_per_label, train_dataset: Dataset = None, test_dataset: Dataset = None,
+                 method: MLMethod = None, result_path: Path = None, name: str = None, hp_setting: HPSetting = None,
+                 label=None, number_of_processes: int = 1):
+        super().__init__(train_dataset=train_dataset, test_dataset=test_dataset, method=method, result_path=result_path,
+                         name=name, hp_setting=hp_setting, label=label, number_of_processes=number_of_processes)
+
         self.implanted_motifs_per_label = implanted_motifs_per_label
-        self.label = None
         self._param_field = None
         self._y_axis_title = None
         self._x_axis_title = None

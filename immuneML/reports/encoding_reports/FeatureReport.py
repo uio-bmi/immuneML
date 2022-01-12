@@ -18,7 +18,7 @@ class FeatureReport(EncodingReport):
     def __init__(self, dataset: Dataset = None, result_path: Path = None,
                  color_grouping_label: str = None, row_grouping_label=None, column_grouping_label=None,
                  name: str = None, number_of_processes: int = 1):
-        super().__init__(dataset, result_path, name, number_of_processes)
+        super().__init__(dataset=dataset, result_path=result_path, name=name, number_of_processes=number_of_processes)
         self.x = "feature"
         self.color = color_grouping_label
         self.facet_row = row_grouping_label

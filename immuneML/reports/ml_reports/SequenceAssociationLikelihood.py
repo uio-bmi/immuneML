@@ -5,6 +5,8 @@ import numpy as np
 import plotly.graph_objects as go
 from scipy.stats import beta
 
+from immuneML.data_model.dataset.Dataset import Dataset
+from immuneML.hyperparameter_optimization.HPSetting import HPSetting
 from immuneML.ml_methods.MLMethod import MLMethod
 from immuneML.ml_methods.ProbabilisticBinaryClassifier import ProbabilisticBinaryClassifier
 from immuneML.reports.ReportOutput import ReportOutput
@@ -42,11 +44,11 @@ class SequenceAssociationLikelihood(MLReport):
         else:
             return True
 
-    def __init__(self, method: MLMethod = None, result_path: Path = None, name: str = None, **kwargs):
-        super().__init__(method=method, result_path=result_path, name=name)
-        self.method = method
-        self.result_path = result_path
-        self.name = name
+    def __init__(self, train_dataset: Dataset = None, test_dataset: Dataset = None,
+                 method: MLMethod = None, result_path: Path = None, name: str = None, hp_setting: HPSetting = None,
+                 label=None, number_of_processes: int = 1):
+        super().__init__(train_dataset=train_dataset, test_dataset=test_dataset, method=method, result_path=result_path,
+                         name=name, hp_setting=hp_setting, label=label, number_of_processes=number_of_processes)
         self.result_name = None
 
     def _generate(self) -> ReportResult:

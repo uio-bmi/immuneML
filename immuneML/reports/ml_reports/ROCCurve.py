@@ -25,9 +25,6 @@ class ROCCurve(MLReport):
 
     """
 
-    def __init__(self, name: str = None):
-        super().__init__(name=name)
-
     @classmethod
     def build_object(cls, **kwargs):
         name = kwargs["name"] if "name" in kwargs else "ROC_curve"

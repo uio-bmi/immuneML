@@ -96,13 +96,13 @@ class Coefficients(MLReport):
         return Coefficients(coefs_to_plot=coefs, cutoff=cutoff, n_largest=n_largest, name=name)
 
     def __init__(self, coefs_to_plot: CoefficientPlottingSettingList, cutoff: list, n_largest: list, train_dataset: Dataset = None,
-                 test_dataset: Dataset = None, method: MLMethod = None, result_path: Path = None, name: str = None, hp_setting: HPSetting = None):
-        super().__init__(train_dataset, test_dataset, method, result_path, name, hp_setting)
-
+                 test_dataset: Dataset = None, method: MLMethod = None, result_path: Path = None, name: str = None, hp_setting: HPSetting = None,
+                 label=None, number_of_processes: int = 1):
+        super().__init__(train_dataset=train_dataset, test_dataset=test_dataset, method=method, result_path=result_path,
+                         name=name, hp_setting=hp_setting, label=label, number_of_processes=number_of_processes)
         self._coefs_to_plot = coefs_to_plot
         self._cutoff = cutoff
         self._n_largest = n_largest
-        self.label = None
 
     def _generate(self):
         PathBuilder.build(self.result_path)

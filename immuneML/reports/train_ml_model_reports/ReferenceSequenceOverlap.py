@@ -71,12 +71,10 @@ class ReferenceSequenceOverlap(TrainMLModelReport):
         return ReferenceSequenceOverlap(**kwargs)
 
     def __init__(self, reference_path: Path = None, comparison_attributes: list = None, name: str = None, state: TrainMLModelState = None,
-                 result_path: Path = None, label: str = None):
-        super().__init__(name)
+                 result_path: Path = None, label: str = None, number_of_processes: int = 1):
+        super().__init__(name=name, state=state, result_path=result_path, number_of_processes=number_of_processes)
         self.reference_path = reference_path
         self.comparison_attributes = comparison_attributes
-        self.state = state
-        self.result_path = result_path
         self.label = label
 
     def _generate(self) -> ReportResult:

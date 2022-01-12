@@ -25,8 +25,8 @@ class SimpleDatasetOverview(DataReport):
     """
     UNKNOWN_CHAIN = "unknown"
 
-    def __init__(self, dataset: Dataset = None, result_path: Path = None, name: str = None):
-        super().__init__(dataset, result_path, name)
+    def __init__(self, dataset: Dataset = None, result_path: Path = None, number_of_processes: int = 1, name: str = None):
+        super().__init__(dataset=dataset, result_path=result_path, number_of_processes=number_of_processes, name=name)
 
     @classmethod
     def build_object(cls, **kwargs):

@@ -51,10 +51,10 @@ class ConfounderAnalysis(MLReport):
         return ConfounderAnalysis(metadata_labels=kwargs['metadata_labels'], name=kwargs['name'])
 
     def __init__(self, metadata_labels: List[str], train_dataset: Dataset = None, test_dataset: Dataset = None,
-                 method: MLMethod = None,
-                 result_path: Path = None, name: str = None, hp_setting: HPSetting = None, label=None):
-        super().__init__(train_dataset, test_dataset, method, result_path, name, hp_setting, label)
-
+                 method: MLMethod = None, result_path: Path = None, name: str = None, hp_setting: HPSetting = None,
+                 label=None, number_of_processes: int=1):
+        super().__init__(train_dataset=train_dataset, test_dataset=test_dataset, method=method, result_path=result_path,
+                         name=name, hp_setting=hp_setting, label=label, number_of_processes=number_of_processes)
         self.metadata_labels = metadata_labels
 
     def _generate(self) -> ReportResult:

@@ -60,9 +60,10 @@ class FeatureDistribution(FeatureReport):
 
     def __init__(self, dataset: Dataset = None, result_path: Path = None, color_grouping_label: str = None,
                  row_grouping_label=None, column_grouping_label=None,
-                 mode: str = 'auto', x_title: str = None, y_title: str = None, name: str = None):
+                 mode: str = 'auto', x_title: str = None, y_title: str = None, number_of_processes: int = 1, name: str = None):
         super().__init__(dataset=dataset, result_path=result_path, color_grouping_label=color_grouping_label,
-                         row_grouping_label=row_grouping_label, column_grouping_label=column_grouping_label, name=name)
+                         row_grouping_label=row_grouping_label, column_grouping_label=column_grouping_label,
+                         number_of_processes=number_of_processes, name=name)
         self.x_title = x_title if x_title is not None else self.x
         self.y_title = y_title if y_title is not None else "value"
         self.mode = mode

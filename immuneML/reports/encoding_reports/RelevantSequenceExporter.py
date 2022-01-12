@@ -35,10 +35,8 @@ class RelevantSequenceExporter(EncodingReport):
         'sequence_aas': "cdr3_aa"
     }
 
-    def __init__(self, dataset: RepertoireDataset = None, result_path: Path = None, name: str = None):
-        super().__init__(name)
-        self.dataset = dataset
-        self.result_path = result_path
+    def __init__(self, dataset: RepertoireDataset = None, result_path: Path = None, name: str = None, number_of_processes: int = 1):
+        super().__init__(dataset=dataset, result_path=result_path, name=name, number_of_processes=number_of_processes)
 
     @classmethod
     def build_object(cls, **kwargs):

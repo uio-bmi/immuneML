@@ -78,9 +78,10 @@ class FeatureComparison(FeatureReport):
 
     def __init__(self, dataset: Dataset = None, result_path: Path = None, comparison_label: str = None,
                  color_grouping_label: str = None, row_grouping_label=None, column_grouping_label=None,
-                 show_error_bar=True, log_scale: bool = False, keep_fraction: int = 1, name: str = None):
+                 show_error_bar=True, log_scale: bool = False, keep_fraction: int = 1, number_of_processes: int = 1, name: str = None):
         super().__init__(dataset=dataset, result_path=result_path, color_grouping_label=color_grouping_label,
-                         row_grouping_label=row_grouping_label, column_grouping_label=column_grouping_label, name=name)
+                         row_grouping_label=row_grouping_label, column_grouping_label=column_grouping_label,
+                         number_of_processes=number_of_processes, name=name)
         self.comparison_label = comparison_label
         self.show_error_bar = show_error_bar
         self.log_scale = log_scale

@@ -51,10 +51,8 @@ class DiseaseAssociatedSequenceCVOverlap(TrainMLModelReport):
         return DiseaseAssociatedSequenceCVOverlap(**kwargs)
 
     def __init__(self, state: TrainMLModelState = None, result_path: Path = None, name: str = None, compare_in_selection: bool = False,
-                 compare_in_assessment: bool = False):
-        super().__init__(name)
-        self.state = state
-        self.result_path = result_path
+                 compare_in_assessment: bool = False, number_of_processes: int = 1):
+        super().__init__(name=name, state=state, result_path=result_path, number_of_processes=number_of_processes)
         self.compare_in_selection = compare_in_selection
         self.compare_in_assessment = compare_in_assessment
 

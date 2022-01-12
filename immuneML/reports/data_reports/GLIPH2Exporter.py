@@ -38,8 +38,8 @@ class GLIPH2Exporter(DataReport):
     def build_object(cls, **kwargs):
         return GLIPH2Exporter(**kwargs)
 
-    def __init__(self, dataset: ReceptorDataset = None, result_path: Path = None, name: str = None, condition: str = None):
-        super().__init__(dataset, result_path, name)
+    def __init__(self, dataset: ReceptorDataset = None, result_path: Path = None, name: str = None, condition: str = None, number_of_processes: int = 1):
+        super().__init__(dataset=dataset, result_path=result_path, number_of_processes=number_of_processes, name=name)
         self.condition = condition
 
     def _generate(self) -> ReportResult:

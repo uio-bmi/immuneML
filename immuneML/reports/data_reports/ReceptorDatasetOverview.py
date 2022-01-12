@@ -30,8 +30,8 @@ class ReceptorDatasetOverview(DataReport):
 
     """
 
-    def __init__(self, batch_size: int, dataset: ReceptorDataset = None, result_path: Path = None, name: str = None):
-        super().__init__(dataset, result_path, name)
+    def __init__(self, batch_size: int, dataset: ReceptorDataset = None, result_path: Path = None, number_of_processes: int = 1, name: str = None):
+        super().__init__(dataset=dataset, result_path=result_path, number_of_processes=number_of_processes, name=name)
         self.batch_size = batch_size
 
     @classmethod

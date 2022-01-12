@@ -5,7 +5,6 @@ from immuneML.data_model.dataset.Dataset import Dataset
 from immuneML.reports.Report import Report
 
 
-@dataclass
 class EncodingReport(Report):
     """
     Encoding reports show some type of features or statistics about an encoded dataset, or may in some cases
