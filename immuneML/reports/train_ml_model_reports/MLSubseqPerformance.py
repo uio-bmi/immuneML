@@ -2,6 +2,7 @@ import warnings
 from pathlib import Path
 
 from immuneML.encodings.kmer_frequency.KmerFrequencyEncoder import KmerFrequencyEncoder
+from immuneML.environment.Label import Label
 from immuneML.hyperparameter_optimization.states.TrainMLModelState import TrainMLModelState
 from immuneML.ml_methods.DeepRC import DeepRC
 from immuneML.reports.train_ml_model_reports.MLSettingsPerformance import MLSettingsPerformance
@@ -36,8 +37,8 @@ class MLSubseqPerformance(MLSettingsPerformance):
     def build_object(cls, **kwargs):
         return MLSubseqPerformance(kwargs["name"] if "name" in kwargs else None)
 
-    def __init__(self, name: str = None, state: TrainMLModelState = None, result_path: Path = None, number_of_processes: int = 1):
-        super().__init__(name=name, state=state, result_path=result_path, number_of_processes=number_of_processes)
+    def __init__(self, name: str = None, state: TrainMLModelState = None, label: Label = None, result_path: Path = None, number_of_processes: int = 1):
+        super().__init__(name=name, state=state, label=label, result_path=result_path, number_of_processes=number_of_processes)
         self.vertical_grouping = "subsequence_size"
         self.result_name = "subseq_performance"
 

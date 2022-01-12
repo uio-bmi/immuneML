@@ -4,6 +4,7 @@ from pathlib import Path
 import pandas as pd
 import plotly.express as px
 
+from immuneML.environment.Label import Label
 from immuneML.hyperparameter_optimization.states.TrainMLModelState import TrainMLModelState
 from immuneML.reports.PlotlyUtil import PlotlyUtil
 from immuneML.reports.ReportOutput import ReportOutput
@@ -63,8 +64,8 @@ class MLSettingsPerformance(TrainMLModelReport):
         return MLSettingsPerformance(single_axis_labels, x_label_position, y_label_position, name)
 
     def __init__(self, single_axis_labels, x_label_position, y_label_position, name: str = None, state: TrainMLModelState = None,
-                 result_path: Path = None, number_of_processes: int = 1):
-        super().__init__(name=name, state=state, result_path=result_path, number_of_processes=number_of_processes)
+                 label: Label = None, result_path: Path = None, number_of_processes: int = 1):
+        super().__init__(name=name, state=state, label=label, result_path=result_path, number_of_processes=number_of_processes)
         self.single_axis_labels = single_axis_labels
         self.x_label_position = x_label_position
         self.y_label_position = y_label_position

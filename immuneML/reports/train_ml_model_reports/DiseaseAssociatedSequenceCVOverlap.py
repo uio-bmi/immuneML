@@ -6,6 +6,7 @@ import pandas as pd
 import plotly.express as px
 
 from immuneML.encodings.filtered_sequence_encoding.SequenceAbundanceEncoder import SequenceAbundanceEncoder
+from immuneML.environment.Label import Label
 from immuneML.hyperparameter_optimization.states.HPItem import HPItem
 from immuneML.hyperparameter_optimization.states.TrainMLModelState import TrainMLModelState
 from immuneML.reports.ReportOutput import ReportOutput
@@ -51,8 +52,8 @@ class DiseaseAssociatedSequenceCVOverlap(TrainMLModelReport):
         return DiseaseAssociatedSequenceCVOverlap(**kwargs)
 
     def __init__(self, state: TrainMLModelState = None, result_path: Path = None, name: str = None, compare_in_selection: bool = False,
-                 compare_in_assessment: bool = False, number_of_processes: int = 1):
-        super().__init__(name=name, state=state, result_path=result_path, number_of_processes=number_of_processes)
+                 compare_in_assessment: bool = False, label: Label = None, number_of_processes: int = 1):
+        super().__init__(name=name, state=state, label=label, result_path=result_path, number_of_processes=number_of_processes)
         self.compare_in_selection = compare_in_selection
         self.compare_in_assessment = compare_in_assessment
 
