@@ -187,7 +187,7 @@ class MLMethod(metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def get_params(self):
-        """Returns the parameters of the model, similar to get_model function."""
+        """Returns the model parameters in a readable yaml-friendly way (consisting of lists, dictionaries and strings)."""
         pass
 
     @abc.abstractmethod

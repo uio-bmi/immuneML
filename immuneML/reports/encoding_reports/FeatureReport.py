@@ -24,13 +24,13 @@ class FeatureReport(EncodingReport):
         self.facet_row = row_grouping_label
         self.facet_column = column_grouping_label
 
-    def _generate(self) -> ReportResult:
+    def _generate_report_result(self) -> ReportResult:
         PathBuilder.build(self.result_path)
         data_long_format = DataReshaper.reshape(self.dataset, self.dataset.get_label_names())
         table_result = self._write_results_table(data_long_format)
         report_output_fig = self._safe_plot(data_long_format=data_long_format)
         output_figures = None if report_output_fig is None else [report_output_fig]
-        return ReportResult(name=self.name, info=self.info, output_figures=output_figures, output_tables=[table_result])
+        return ReportResult(name=self.name, output_figures=output_figures, output_tables=[table_result])
 
     def _write_results_table(self, data) -> ReportOutput:
         table_path = self.result_path / f"feature_values.csv"

@@ -68,7 +68,11 @@ class FeatureDistribution(FeatureReport):
         self.y_title = y_title if y_title is not None else "value"
         self.mode = mode
         self.result_name = "feature_distributions"
-        self.info = "Each boxplot represents one feature of the encoded data matrix, and shows the distribution of values for that feature."
+
+    def _generate(self):
+        result = self._generate_report_result()
+        result.info = "Each boxplot represents one feature of the encoded data matrix, and shows the distribution of values for that feature."
+        return result
 
     def _plot(self, data_long_format, mode='sparse') -> ReportOutput:
         sparse_threshold = 0.01

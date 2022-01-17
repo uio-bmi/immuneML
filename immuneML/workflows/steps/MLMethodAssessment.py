@@ -37,10 +37,6 @@ class MLMethodAssessment(Step):
 
         return scores
 
-    # @staticmethod
-    # def _get_optimization_metric(df: pd.DataFrame, label: str, metric: Metric) -> float:
-    #     return df["{}_{}".format(label, metric.name.lower())].iloc[0]
-
     @staticmethod
     def _score(metrics_list: set, optimization_metric: Metric, label_name: str, predicted_y, predicted_proba_y, true_y, ml_score_path: Path,
                split_index: int, method: MLMethod):

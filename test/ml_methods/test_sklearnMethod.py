@@ -60,19 +60,21 @@ class TestSklearnMethod(TestCase):
         self.assertTrue(isinstance(svm2, SVC))
 
         shutil.rmtree(path)
-    #
-    # def test_store_load(self):
-    #     x = np.array([[1, 0, 0], [0, 1, 1], [1, 1, 1], [0, 1, 1]])
-    #     y = {"default": np.array(['a', "b", "c", "a"])}
-    #
-    #     svm = SVM()
-    #     svm._fit(sparse.csr_matrix(x), y["default"])
-    #
-    #     path = EnvironmentSettings.root_path / "test/tmp/storesklearn/"
-    #     details_path = EnvironmentSettings.root_path / "test/tmp/storesklearn/details.yaml"
-    #
-    #     svm.store(path=path, details_path=details_path)
-    #
-    #     svm2 = SVM()
-    #     svm2.load(path=path, details_path=details_path)
-    #
+
+    def test_store_load(self):
+        x = np.array([[1, 0, 0], [0, 1, 1], [1, 1, 1], [0, 1, 1]])
+        y = {"default": np.array(['a', "b", "c", "a"])}
+
+        svm = SVM()
+        svm._fit(sparse.csr_matrix(x), y["default"])
+
+        path = EnvironmentSettings.root_path / "test/tmp/store_load_sklearn/"
+        details_path = EnvironmentSettings.root_path / "test/tmp/store_load_sklearn/details.yaml"
+
+        svm.store(path=path, details_path=details_path)
+
+        svm2 = SVM()
+        svm2.load(path=path, details_path=details_path)
+
+        shutil.rmtree(path)
+
