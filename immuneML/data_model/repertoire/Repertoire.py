@@ -66,14 +66,14 @@ class Repertoire(DatasetItem):
               v_subgroups: list = None, j_subgroups: list = None, v_alleles: list = None, j_alleles: list = None,
               chains: list = None, counts: list = None, region_types: list = None, frame_types: list = None,
               custom_lists: dict = None, sequence_identifiers: list = None, path: Path = None, metadata: dict = None,
-              signals: dict = None, cell_ids: List[str] = None, filename_base: str = None):
+              signals: dict = None, cell_ids: List[str] = None, filename_base: str = None, identifier: str = None):
 
         sequence_count = Repertoire.check_count(sequence_aas, sequences, custom_lists)
 
         if sequence_identifiers is None or len(sequence_identifiers) == 0 or any(identifier is None for identifier in sequence_identifiers):
             sequence_identifiers = np.arange(sequence_count).astype(str)
 
-        identifier = uuid4().hex
+        identifier = uuid4().hex if identifier is None else identifier
 
         filename_base = filename_base if filename_base is not None else identifier
 
@@ -129,7 +129,7 @@ class Repertoire(DatasetItem):
             return None
 
     @classmethod
-    def build_from_sequence_objects(cls, sequence_objects: list, path: Path, metadata: dict, filename_base: str = None):
+    def build_from_sequence_objects(cls, sequence_objects: list, path: Path, metadata: dict, filename_base: str = None, repertoire_id: str = None):
 
         assert all(isinstance(sequence, ReceptorSequence) for sequence in sequence_objects), \
             "Repertoire: all sequences have to be instances of ReceptorSequence class."
@@ -171,7 +171,7 @@ class Repertoire(DatasetItem):
         return cls.build(sequence_aas=sequence_aas, sequences=sequences, v_genes=v_genes, j_genes=j_genes, v_subgroups=v_subgroups,
                          j_subgroups=j_subgroups, v_alleles=v_alleles, j_alleles=j_alleles, chains=chains, counts=counts, region_types=region_types,
                          frame_types=frame_types, custom_lists=custom_lists, sequence_identifiers=sequence_identifiers, path=path, metadata=metadata,
-                         signals=signals, cell_ids=cell_ids, filename_base=filename_base)
+                         signals=signals, cell_ids=cell_ids, filename_base=filename_base, identifier=repertoire_id)
 
     def __init__(self, data_filename: Path, metadata_filename: Path, identifier: str):
         data_filename = Path(data_filename)

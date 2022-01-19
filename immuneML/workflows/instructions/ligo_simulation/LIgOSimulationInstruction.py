@@ -2,6 +2,9 @@ import random
 import shutil
 from pathlib import Path
 from typing import List
+from uuid import uuid4
+
+import pandas as pd
 
 from immuneML.IO.dataset_export.DataExporter import DataExporter
 from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
@@ -35,8 +38,7 @@ class LIgOSimulationInstruction(Instruction):
         simulation (str): a name of a simulation object containing a list of LIgOSimulationItem as specified under definitions key; defines how
         to combine signals with simulated data; specified under definitions
 
-        store_signal_in_receptors (bool): for repertoire-level simulation, whether to store the information on what exact motif is implanted in each
-        receptor
+        store_signal_in_receptors (bool): for repertoire-level simulation, whether to store the information on what exact motif is implanted in each receptor
 
         export_formats: in which formats to export the dataset after simulation. Valid formats are class names of any non-abstract class
         inheriting :py:obj:`~immuneML.IO.dataset_export.DataExporter.DataExporter`. Important note: Binary files in ImmuneML might not be compatible
@@ -72,9 +74,10 @@ class LIgOSimulationInstruction(Instruction):
         self.state.result_path = PathBuilder.build(result_path / self.state.name)
 
         examples = []
+        summary_path = self.state.result_path / "summary.csv"
 
         for item in self.state.simulation.simulation_items:
-            tmp_examples = self._create_examples(item)
+            tmp_examples = self._create_examples(item, summary_path)
             examples.extend(tmp_examples)
 
         labels = {signal.id: [True, False] for signal in self.state.signals}
@@ -94,25 +97,26 @@ class LIgOSimulationInstruction(Instruction):
 
         return self.state
 
-    def _create_examples(self, item: LIgOSimulationItem) -> list:
+    def _create_examples(self, item: LIgOSimulationItem, summary_path: Path) -> list:
 
         if self.state.is_repertoire:
-            return self._create_repertoires(item)
+            return self._create_repertoires(item, summary_path)
         else:
-            return self._create_receptors(item)
+            return self._create_receptors(item, summary_path)
 
-    def _create_receptors(self, item: LIgOSimulationItem):
+    def _create_receptors(self, item: LIgOSimulationItem, summary_path: Path):
         raise NotImplementedError
 
-    def _create_repertoires(self, item: LIgOSimulationItem) -> list:
+    def _create_repertoires(self, item: LIgOSimulationItem, summary_path: Path) -> list:
 
         repertoires = []
         repertoires_path = PathBuilder.build(self.state.result_path / "repertoires")
 
         for i in range(1, item.number_of_examples + 1):
             path = PathBuilder.build(self.state.result_path / f"tmp_background_repertoire_{i}/")
+            repertoire_id = uuid4().hex
 
-            receptors = self._make_receptors_with_signal(item, path=path)
+            receptors = self._make_receptors_with_signal(item, path=path, summary_path=summary_path, repertoire_id=repertoire_id)
 
             repertoire = Repertoire.build_from_sequence_objects(receptors, repertoires_path,
                                                                 {**{signal.id: True for signal in item.signals},
@@ -124,10 +128,10 @@ class LIgOSimulationInstruction(Instruction):
 
         return repertoires
 
-    def _make_receptors_with_signal(self, item: LIgOSimulationItem, path: Path) -> list:
+    def _make_receptors_with_signal(self, item: LIgOSimulationItem, path: Path, summary_path: Path, repertoire_id: str) -> list:
         if self.state.simulation_strategy == SimulationStrategy.IMPLANTING:
 
-            new_sequences = self._make_sequences_by_implanting(item=item, path=path)
+            new_sequences = self._make_sequences_by_implanting(item=item, path=path, summary_path=summary_path, repertoire_id=repertoire_id)
 
         elif self.state.simulation_strategy == SimulationStrategy.REJECTION_SAMPLING:
 
@@ -140,7 +144,7 @@ class LIgOSimulationInstruction(Instruction):
 
         return new_sequences
 
-    def _make_sequences_by_rejection(self, item, receptor_with_signal_count: int, path: Path) -> list:
+    def _make_sequences_by_rejection(self, item, path: Path) -> list:
 
         raise NotImplementedError()
 
@@ -159,7 +163,7 @@ class LIgOSimulationInstruction(Instruction):
         #
         # return receptors
 
-    def _make_sequences_by_implanting(self, item: LIgOSimulationItem, path: Path) -> list:
+    def _make_sequences_by_implanting(self, item: LIgOSimulationItem, path: Path, summary_path: Path, repertoire_id: str) -> list:
 
         background_sequences = item.generative_model.generate_sequences(item.number_of_receptors_in_repertoire, seed=1, path=path / "tmp.tsv",
                                                                         sequence_type=self.state.sequence_type)
@@ -173,6 +177,9 @@ class LIgOSimulationInstruction(Instruction):
                                                                                        item.number_of_receptors_in_repertoire)
             sequence_indices[signal.id] = random.sample(available_indices, k=receptor_with_signal_count)
             available_indices = [ind for ind in available_indices if ind not in sequence_indices[signal.id]]
+
+            self._add_to_summary(summary_path, receptor_with_signal_count, signal, item, repertoire_id)
+
             for index in sequence_indices[signal.id]:
                 implanted_sequence = signal.implant_in_sequence(sequence=background_sequences[index], is_noise=item.is_noise,
                                                                 sequence_type=self.state.sequence_type)
@@ -195,3 +202,15 @@ class LIgOSimulationInstruction(Instruction):
             new_sequences.append(background_sequence)
 
         return new_sequences
+
+    def _add_to_summary(self, summary_path, receptor_with_signal_count, signal, item, repertoire_id):
+
+        df = pd.DataFrame({"receptors_with_signal": [receptor_with_signal_count],
+                           "receptors_total": [item.number_of_receptors_in_repertoire],
+                           "signal_id": [signal.id], "simulation_item": [item.name],
+                           "repertoire_id": [repertoire_id]})
+
+        if summary_path.is_file():
+            df.to_csv(summary_path, mode='a', header=False, index=False)
+        else:
+            df.to_csv(summary_path, mode='w', index=False)
