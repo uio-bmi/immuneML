@@ -10,6 +10,7 @@ from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
 from immuneML.data_model.encoded_data.EncodedData import EncodedData
 from immuneML.environment.Constants import Constants
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
+from immuneML.environment.Label import Label
 from immuneML.environment.LabelConfiguration import LabelConfiguration
 from immuneML.ml_methods.LogisticRegression import LogisticRegression
 from immuneML.ml_metrics.Metric import Metric
@@ -36,8 +37,10 @@ class TestMLMethodAssessment(TestCase):
         label_config = LabelConfiguration()
         label_config.add_label("l1", [1, 3])
 
+        label = Label(name='l1', values=[1,2])
+
         method1 = LogisticRegression()
-        method1.fit(dataset.encoded_data, label_name='l1')
+        method1.fit(dataset.encoded_data, label=label)
 
         res = MLMethodAssessment.run(MLMethodAssessmentParams(
             dataset=dataset,
@@ -45,7 +48,7 @@ class TestMLMethodAssessment(TestCase):
             metrics={Metric.ACCURACY, Metric.BALANCED_ACCURACY, Metric.F1_MACRO},
             optimization_metric=Metric.LOG_LOSS,
             predictions_path=EnvironmentSettings.root_path / "test/tmp/mlmethodassessment/predictions.csv",
-            label="l1",
+            label=label,
             ml_score_path=EnvironmentSettings.root_path / "test/tmp/mlmethodassessment/ml_score.csv",
             split_index=1,
             path=EnvironmentSettings.root_path / "test/tmp/mlmethodassessment/"

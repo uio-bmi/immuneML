@@ -35,10 +35,8 @@ class RelevantSequenceExporter(EncodingReport):
         'sequence_aas': "cdr3_aa"
     }
 
-    def __init__(self, dataset: RepertoireDataset = None, result_path: Path = None, name: str = None):
-        super().__init__(name)
-        self.dataset = dataset
-        self.result_path = result_path
+    def __init__(self, dataset: RepertoireDataset = None, result_path: Path = None, name: str = None, number_of_processes: int = 1):
+        super().__init__(dataset=dataset, result_path=result_path, name=name, number_of_processes=number_of_processes)
 
     @classmethod
     def build_object(cls, **kwargs):
@@ -54,7 +52,9 @@ class RelevantSequenceExporter(EncodingReport):
         filename = self.result_path / "relevant_sequences.csv"
         df.to_csv(filename, index=False)
 
-        return ReportResult(self.name, output_tables=[ReportOutput(filename, "relevant sequences")])
+        return ReportResult(self.name,
+                            info=f"Exports the sequences that are extracted as label-associated using the {self.dataset.encoded_data.encoding} in AIRR-compliant format.",
+                            output_tables=[ReportOutput(filename, "relevant sequences")])
 
     def _compute_column_mapping(self, df: pd.DataFrame) -> dict:
         columns = df.columns.values.tolist()

@@ -65,16 +65,17 @@ class TrainingPerformance(MLReport):
         return TrainingPerformance(set(metrics), name=name)
 
     def __init__(self, metrics: set, train_dataset: Dataset = None, test_dataset: Dataset = None, method: MLMethod = None,
-                 result_path: Path = None, name: str = None, hp_setting: HPSetting = None):
-        super().__init__(train_dataset, test_dataset, method, result_path, name, hp_setting)
+                 result_path: Path = None, name: str = None, hp_setting: HPSetting = None, label=None, number_of_processes: int = 1):
+        super().__init__(train_dataset=train_dataset, test_dataset=test_dataset, method=method, result_path=result_path,
+                         name=name, hp_setting=hp_setting, label=label, number_of_processes=number_of_processes)
         self.metrics_set = set(metrics)
 
     def _generate(self) -> ReportResult:
         
         X = self.train_dataset.encoded_data
-        predicted_y = self.method.predict(X, self.label)[self.label]
-        predicted_proba_y = self.method.predict_proba(X, self.label)[self.label]
-        true_y = self.train_dataset.encoded_data.labels[self.label]
+        predicted_y = self.method.predict(X, self.label)[self.label.name]
+        predicted_proba_y = self.method.predict_proba(X, self.label)[self.label.name]
+        true_y = self.train_dataset.encoded_data.labels[self.label.name]
         classes = self.method.get_classes()
 
         PathBuilder.build(self.result_path)
@@ -99,11 +100,12 @@ class TrainingPerformance(MLReport):
                 scores[metric] = _score
 
         scores_df = pd.DataFrame.from_dict(scores, orient='index')
-        scores_df.columns = [self.label]
+        scores_df.columns = [self.label.name]
 
         self._generate_barplot(scores_df, output)
 
         return ReportResult(self.name,
+                            info="Plots the evaluation metrics for the performance given machine learning model and training dataset.",
                             output_tables=output['tables'],
                             output_figures=output['figures'])
 
@@ -144,15 +146,8 @@ class TrainingPerformance(MLReport):
         path_html = self.result_path / f"{self.name}.html"
 
         df.to_csv(path_csv)
-        #
-        # layout = go.Layout(title=f'Evaluation Metrics ({self.label})',
-        #                    xaxis=dict(title='Metrics'),
-        #                    yaxis=dict(title='Value'), template='plotly_white')
-        # trace = go.Bar(x=df.index, y=df[self.label], orientation='v', marker={'colorscale': 'Tealrose'})
-        #
-        # fig = go.Figure(data=[trace], layout=layout)
 
-        figure = px.bar(df, x=df.index, y=self.label, labels={'index': "metrics"},
+        figure = px.bar(df, x=df.index, y=self.label.name, labels={'index': "metrics"},
                         template='plotly_white', color_discrete_sequence=px.colors.diverging.Tealrose,
                         title=f"Evaluation metrics ({self.label})")
 

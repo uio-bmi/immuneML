@@ -31,6 +31,7 @@ class ExploratoryAnalysisInstruction(Instruction):
         - labels: if encoding is specified, the relevant labels must be specified here.
         - report: which report to run on the dataset. Reports specified here may be of the category :ref:`Data reports` or :ref:`Encoding reports`, depending on whether 'encoding' was specified.
 
+        number_of_processes: (int): how many processes should be created at once to speed up the analysis. For personal machines, 4 or 8 is usually a good choice.
 
     YAML specification:
 
@@ -51,7 +52,7 @@ class ExploratoryAnalysisInstruction(Instruction):
                     labels: # labels present in the dataset d1 which will be included in the encoded data on which report r2 will be run
                         - celiac # name of the first label as present in the column of dataset's metadata file
                         - CMV # name of the second label as present in the column of dataset's metadata file
-
+            number_of_processes: 4 # number of parallel processes to create (could speed up the computation)
     """
 
     def __init__(self, exploratory_analysis_units: dict, name: str = None):
@@ -77,6 +78,7 @@ class ExploratoryAnalysisInstruction(Instruction):
         encoded_dataset = self.encode(unit, result_path / "encoded_dataset")
         unit.report.dataset = encoded_dataset
         unit.report.result_path = result_path / "report"
+        unit.report.number_of_processes = unit.number_of_processes
         report_result = unit.report.generate_report()
         return report_result
 

@@ -8,6 +8,7 @@ from immuneML.caching.CacheType import CacheType
 from immuneML.data_model.encoded_data.EncodedData import EncodedData
 from immuneML.environment.Constants import Constants
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
+from immuneML.environment.Label import Label
 from immuneML.ml_methods.ProbabilisticBinaryClassifier import ProbabilisticBinaryClassifier
 from immuneML.util.PathBuilder import PathBuilder
 
@@ -23,7 +24,7 @@ class TestProbabilisticBinaryClassifier(TestCase):
         X = np.array([[3, 4], [1, 7], [5, 7], [3, 8]])
         y = {"cmv": [True, False, True, False]}
 
-        classifier.fit(EncodedData(X, y), "cmv")
+        classifier.fit(EncodedData(X, y), Label("cmv"))
 
         return classifier
 
@@ -31,16 +32,13 @@ class TestProbabilisticBinaryClassifier(TestCase):
 
         classifier = self.train_classifier()
 
-        predictions = classifier.predict(EncodedData(np.array([[6, 7], [1, 6]])), "cmv")
-        proba_predictions = classifier.predict_proba(EncodedData(np.array([[6, 7], [1, 6]])), "cmv")
-
-        labels = classifier.get_classes_for_label("cmv")
+        predictions = classifier.predict(EncodedData(np.array([[6, 7], [1, 6]])), Label("cmv"))
+        proba_predictions = classifier.predict_proba(EncodedData(np.array([[6, 7], [1, 6]])), Label("cmv"))
 
         self.assertEqual([True, False], predictions["cmv"])
         self.assertTrue(proba_predictions["cmv"][0, 1] > proba_predictions["cmv"][0, 0])
         self.assertTrue(proba_predictions["cmv"][1, 0] > proba_predictions["cmv"][1, 1])
         self.assertTrue((proba_predictions["cmv"] <= 1.0).all() and (proba_predictions["cmv"] >= 0.0).all())
-        self.assertTrue(isinstance(labels, np.ndarray))
 
     def test_store(self):
 

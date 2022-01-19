@@ -1,9 +1,9 @@
 class Constants:
 
-    VERSION = "2.1.0"
+    VERSION = "2.1.2"
 
     # encoding constants
-    FEATURE_DELIMITER = "///"
+    FEATURE_DELIMITER = "-"
 
     # importing constants
     UNKNOWN = None

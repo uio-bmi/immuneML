@@ -10,12 +10,12 @@ from immuneML.data_model.receptor.RegionType import RegionType
 class TCRdistHelper:
 
     @staticmethod
-    def compute_tcr_dist(dataset: ReceptorDataset, labels: list, cores: int = 1):
+    def compute_tcr_dist(dataset: ReceptorDataset, label_names: list, cores: int = 1):
         return CacheHandler.memo_by_params((('dataset_identifier', dataset.identifier), ("type", "TCRrep")),
-                                           lambda: TCRdistHelper._compute_tcr_dist(dataset, labels, cores))
+                                           lambda: TCRdistHelper._compute_tcr_dist(dataset, label_names, cores))
 
     @staticmethod
-    def _compute_tcr_dist(dataset: ReceptorDataset, labels: list, cores: int):
+    def _compute_tcr_dist(dataset: ReceptorDataset, label_names: list, cores: int):
         """
         Computes the tcrdist distances by creating a TCRrep object and calling compute_distances() function.
 
@@ -25,7 +25,7 @@ class TCRdistHelper:
 
         Args:
             dataset: receptor dataset for which all pairwise distances between receptors will be computed
-            labels: a list of label names (e.g., specific epitopes) to be used for later classification or reports
+            label_names: a list of label names (e.g., specific epitopes) to be used for later classification or reports
             cores: how many cpus to use for computation
 
         Returns:
@@ -34,7 +34,7 @@ class TCRdistHelper:
         """
         from tcrdist.repertoire import TCRrep
 
-        df = TCRdistHelper.prepare_tcr_dist_dataframe(dataset, labels)
+        df = TCRdistHelper.prepare_tcr_dist_dataframe(dataset, label_names)
         tcr_rep = TCRrep(cell_df=df, chains=['alpha', 'beta'], organism=dataset.labels["organism"], cpus=cores, deduplicate=False,
                          compute_distances=False)
 
@@ -63,18 +63,18 @@ class TCRdistHelper:
             return v_gene
 
     @staticmethod
-    def prepare_tcr_dist_dataframe(dataset: ReceptorDataset, labels: list) -> pd.DataFrame:
-        if len(labels) > 1:
-            raise NotImplementedError(f"TCRdist: multiple labels specified ({str(labels)[1:-1]}), but only single label binary class "
+    def prepare_tcr_dist_dataframe(dataset: ReceptorDataset, label_names: list) -> pd.DataFrame:
+        if len(label_names) > 1:
+            raise NotImplementedError(f"TCRdist: multiple labels specified ({str(label_names)[1:-1]}), but only single label binary class "
                                       f"is currently supported in immuneML.")
-        label = labels[0]
+        label_name = label_names[0]
 
         subject, epitope, count, v_a_gene, j_a_gene, cdr3_a_aa, v_b_gene, j_b_gene, cdr3_b_aa, clone_id, cdr3_b_nucseq, cdr3_a_nucseq = \
             [], [], [], [], [], [], [], [], [], [], [], []
 
         for receptor in dataset.get_data():
             subject.append(receptor.metadata["subject"] if "subject" in receptor.metadata else "sub" + receptor.identifier)
-            epitope.append(receptor.metadata[label])
+            epitope.append(receptor.metadata[label_name])
             count.append(receptor.get_chain("alpha").metadata.count
                          if receptor.get_chain("alpha").metadata.count == receptor.get_chain("beta").metadata.count
                             and receptor.get_chain("beta").metadata.count is not None else 1)

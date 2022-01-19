@@ -38,6 +38,8 @@ class FeatureComparison(FeatureReport):
 
         show_error_bar (bool): Whether to show the error bar (standard deviation) for the points, both in the x and y dimension.
 
+        log_scale (bool): Whether to plot the x and y axes in log scale (log_scale = True) or continuous scale (log_scale = False). By default, log_scale is False.
+
         keep_fraction (float): The total number of features may be very large and only the features differing significantly across
         comparison labels may be of interest. When the keep_fraction parameter is set below 1, only the fraction of features that
         differs the most across comparison labels is kept for plotting (note that the produced .csv file still contains all data).
@@ -61,8 +63,10 @@ class FeatureComparison(FeatureReport):
         color_grouping_label = kwargs["color_grouping_label"] if "color_grouping_label" in kwargs else None
         row_grouping_label = kwargs["row_grouping_label"] if "row_grouping_label" in kwargs else None
         column_grouping_label = kwargs["column_grouping_label"] if "column_grouping_label" in kwargs else None
+        log_scale = kwargs["log_scale"] if "log_scale" in kwargs else None
         keep_fraction = float(kwargs["keep_fraction"]) if "keep_fraction" in kwargs else 1.0
         ParameterValidator.assert_type_and_value(keep_fraction, float, "FeatureComparison", "keep_fraction", min_inclusive=0, max_inclusive=1)
+        ParameterValidator.assert_type_and_value(log_scale, bool, "FeatureComparison", "log_scale")
 
         assert comparison_label is not None, "FeatureComparison: the parameter 'comparison_label' must be set in order to be able to compare across this label"
 
@@ -74,14 +78,21 @@ class FeatureComparison(FeatureReport):
 
     def __init__(self, dataset: Dataset = None, result_path: Path = None, comparison_label: str = None,
                  color_grouping_label: str = None, row_grouping_label=None, column_grouping_label=None,
-                 show_error_bar=True, keep_fraction: int = 1, name: str = None):
+                 show_error_bar=True, log_scale: bool = False, keep_fraction: int = 1, number_of_processes: int = 1, name: str = None):
         super().__init__(dataset=dataset, result_path=result_path, color_grouping_label=color_grouping_label,
-                         row_grouping_label=row_grouping_label, column_grouping_label=column_grouping_label, name=name)
+                         row_grouping_label=row_grouping_label, column_grouping_label=column_grouping_label,
+                         number_of_processes=number_of_processes, name=name)
         self.comparison_label = comparison_label
         self.show_error_bar = show_error_bar
+        self.log_scale = log_scale
         self.keep_fraction = keep_fraction
         self.result_name = "feature_comparison"
         self.name = name
+
+    def _generate(self):
+        result = self._generate_report_result()
+        result.info = "Compares the feature values in a given encoded data matrix across two values for a metadata label. Each point in the resulting scatterplot represents one feature, and the values on the x and y axes are the average feature values across examples of two different classes. "
+        return result
 
     def _plot(self, data_long_format) -> ReportOutput:
         groupby_cols = [self.comparison_label, self.x, self.color, self.facet_row, self.facet_column]
@@ -105,20 +116,21 @@ class FeatureComparison(FeatureReport):
 
         plotting_data = self._filter_keep_fraction(plotting_data) if self.keep_fraction < 1 else plotting_data
 
-        max_x, max_y = self._get_max_axes(plotting_data)
+        max_x, max_y, min_x, min_y = self._get_axes_limits(plotting_data)
 
         error_x = "valuestd_x" if self.show_error_bar else None
         error_y = "valuestd_y" if self.show_error_bar else None
 
         figure = px.scatter(plotting_data, x="valuemean_x", y="valuemean_y", error_x=error_x, error_y=error_y,
                             color=self.color, facet_row=self.facet_row, facet_col=self.facet_column, hover_name="feature",
+                            log_x=self.log_scale, log_y=self.log_scale,
                             labels={
                                 "valuemean_x": f"Average feature values for {self.comparison_label} = {class_x}",
                                 "valuemean_y": f"Average feature values for {self.comparison_label} = {class_y}",
                             }, template='plotly_white',
                             color_discrete_sequence=px.colors.diverging.Tealrose)
 
-        figure.add_shape(type="line", x0=0, y0=0, x1=max_x, y1=max_y, line=dict(color="#B0C2C7", dash="dash"))
+        figure.add_shape(type="line", x0=min_x, y0=min_y, x1=max_x, y1=max_y, line=dict(color="#B0C2C7", dash="dash"))
 
         file_path = self.result_path / f"{self.result_name}.html"
 
@@ -126,11 +138,13 @@ class FeatureComparison(FeatureReport):
 
         return ReportOutput(path=file_path, name=f"Comparison of feature values across {self.comparison_label}")
 
-    def _get_max_axes(self, plotting_data):
+    def _get_axes_limits(self, plotting_data):
         max_x = max(plotting_data["valuemean_x"] + plotting_data["valuestd_x"])
         max_y = max(plotting_data["valuemean_y"] + plotting_data["valuestd_y"])
+        min_x = min(plotting_data["valuemean_x"] - plotting_data["valuestd_x"])
+        min_y = min(plotting_data["valuemean_y"] - plotting_data["valuestd_y"])
 
-        return max_x, max_y
+        return max_x, max_y, min_x, min_y
 
     def _filter_keep_fraction(self, plotting_data):
         plotting_data["diff_xy"] = abs(plotting_data["valuemean_x"] - plotting_data["valuemean_y"])

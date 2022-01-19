@@ -8,7 +8,8 @@ editdistance==0.5.3
 regex
 tzlocal
 airr>=1
-pystache
+fishersapi
+pystache==0.5.4
 torch>=1.5.1
 numpy>=1.18.5
 h5py<=2.10.0
@@ -18,7 +19,6 @@ tensorboard>=1.14.0
 requests>=2.21
 plotly>=4
 logomaker>=0.8
-Cython
-fishersapi
 matplotlib-venn>=0.11
 scipy
+Cython

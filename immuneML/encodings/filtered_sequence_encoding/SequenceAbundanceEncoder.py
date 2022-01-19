@@ -98,11 +98,11 @@ class SequenceAbundanceEncoder(DatasetEncoder):
 
     def _encode_data(self, dataset: RepertoireDataset, params: EncoderParams):
 
-        label = params.label_config.get_labels_by_name()[0]
+        label_name = params.label_config.get_labels_by_name()[0]
 
-        examples = self._calculate_sequence_abundance(dataset, self.comparison_data, label, params)
+        examples = self._calculate_sequence_abundance(dataset, self.comparison_data, label_name, params)
 
-        encoded_data = EncodedData(examples, dataset.get_metadata([label]) if params.encode_labels else None, dataset.get_repertoire_ids(),
+        encoded_data = EncodedData(examples, dataset.get_metadata([label_name]) if params.encode_labels else None, dataset.get_repertoire_ids(),
                                    [SequenceAbundanceEncoder.RELEVANT_SEQUENCE_ABUNDANCE, SequenceAbundanceEncoder.TOTAL_SEQUENCE_ABUNDANCE],
                                    encoding=SequenceAbundanceEncoder.__name__, info={'relevant_sequence_path': self.relevant_sequence_csv_path})
 
@@ -110,10 +110,10 @@ class SequenceAbundanceEncoder(DatasetEncoder):
 
         return encoded_dataset
 
-    def _calculate_sequence_abundance(self, dataset: RepertoireDataset, comparison_data: ComparisonData, label: str, params: EncoderParams):
+    def _calculate_sequence_abundance(self, dataset: RepertoireDataset, comparison_data: ComparisonData, label_name: str, params: EncoderParams):
         sequence_p_values_indices, indices_path, sequence_csv_path = SequenceFilterHelper.get_relevant_sequences(dataset=dataset, params=params,
                                                                                               comparison_data=comparison_data,
-                                                                                              label=label, p_value_threshold=self.p_value_threshold,
+                                                                                              label_name=label_name, p_value_threshold=self.p_value_threshold,
                                                                                               comparison_attributes=self.comparison_attributes,
                                                                                               sequence_indices_path=self.relevant_indices_path)
 

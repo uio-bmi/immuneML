@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import List
 
 from immuneML.data_model.dataset.Dataset import Dataset
+from immuneML.environment.Label import Label
 from immuneML.environment.LabelConfiguration import LabelConfiguration
 from immuneML.hyperparameter_optimization.HPSetting import HPSetting
 from immuneML.hyperparameter_optimization.core.HPUtil import HPUtil
@@ -25,7 +26,7 @@ class MLProcess:
     It performs the task for a given label configuration, and given list of metrics (used only in the assessment step).
     """
 
-    def __init__(self, train_dataset: Dataset, test_dataset: Dataset, label: str, metrics: set, optimization_metric: Metric,
+    def __init__(self, train_dataset: Dataset, test_dataset: Dataset, label: Label, metrics: set, optimization_metric: Metric,
                  path: Path, ml_reports: List[MLReport] = None, encoding_reports: list = None, data_reports: list = None, number_of_processes: int = 2,
                  label_config: LabelConfiguration = None, report_context: dict = None, hp_setting: HPSetting = None):
         self.train_dataset = train_dataset
@@ -76,7 +77,7 @@ class MLProcess:
 
         method = HPUtil.train_method(self.label, encoded_train_dataset, self.hp_setting, self.path, self.train_predictions_path, self.ml_details_path, self.number_of_processes, self.optimization_metric)
 
-        encoding_train_results = ReportUtil.run_encoding_reports(encoded_train_dataset, self.encoding_reports, self.report_path / "encoding_train")
+        encoding_train_results = ReportUtil.run_encoding_reports(encoded_train_dataset, self.encoding_reports, self.report_path / "encoding_train", self.number_of_processes)
 
         hp_item = self._assess_on_test_dataset(encoded_train_dataset, encoding_train_results, method, split_index)
 
@@ -95,10 +96,10 @@ class MLProcess:
             performance = HPUtil.assess_performance(method, self.metrics, self.optimization_metric, encoded_test_dataset, split_index, self.path,
                                                     self.test_predictions_path, self.label, self.ml_score_path)
 
-            encoding_test_results = ReportUtil.run_encoding_reports(encoded_test_dataset, self.encoding_reports, self.report_path / "encoding_test")
+            encoding_test_results = ReportUtil.run_encoding_reports(encoded_test_dataset, self.encoding_reports, self.report_path / "encoding_test", self.number_of_processes)
 
             model_report_results = ReportUtil.run_ML_reports(encoded_train_dataset, encoded_test_dataset, method, self.ml_reports,
-                                                             self.report_path / "ml_method", self.hp_setting, self.label, self.report_context)
+                                                             self.report_path / "ml_method", self.hp_setting, self.label, self.number_of_processes, self.report_context)
 
             hp_item = HPItem(method=method, hp_setting=self.hp_setting, train_predictions_path=self.train_predictions_path,
                              test_predictions_path=self.test_predictions_path, ml_details_path=self.ml_details_path, train_dataset=self.train_dataset,
