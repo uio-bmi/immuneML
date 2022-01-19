@@ -41,12 +41,14 @@ class TestLIgOSimulation(TestCase):
                     "signal1": {
                         "motifs": ["motif1", "motif2"],
                         "implanting": "HealthySequence",
-                        "sequence_position_weights": None
+                        "sequence_position_weights": None,
+                        "implanting_computation": "round"
                     },
                     "signal2": {
                         "motifs": ["motif1"],
                         "implanting": "HealthySequence",
-                        "sequence_position_weights": None
+                        "sequence_position_weights": None,
+                        "implanting_computation": "round"
                     }
                 },
                 "simulations": {
@@ -92,7 +94,7 @@ class TestLIgOSimulation(TestCase):
                     "sequence_type": "nucleotide",
                     "use_generation_probabilities": False,
                     "simulation_strategy": "IMPLANTING",
-                    "store_signal_in_receptors": False
+                    "store_signal_in_receptors": True
                 }
             },
             "output": {

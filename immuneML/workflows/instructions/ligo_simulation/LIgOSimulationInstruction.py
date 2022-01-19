@@ -110,10 +110,9 @@ class LIgOSimulationInstruction(Instruction):
         repertoires_path = PathBuilder.build(self.state.result_path / "repertoires")
 
         for i in range(1, item.number_of_examples + 1):
-            receptors_with_signal_count = int(item.number_of_receptors_in_repertoire * item.repertoire_implanting_rate)
             path = PathBuilder.build(self.state.result_path / f"tmp_background_repertoire_{i}/")
 
-            receptors = self._make_receptors_with_signal(item, receptor_count=receptors_with_signal_count, path=path)
+            receptors = self._make_receptors_with_signal(item, path=path)
 
             repertoire = Repertoire.build_from_sequence_objects(receptors, repertoires_path,
                                                                 {**{signal.id: True for signal in item.signals},
@@ -125,14 +124,14 @@ class LIgOSimulationInstruction(Instruction):
 
         return repertoires
 
-    def _make_receptors_with_signal(self, item: LIgOSimulationItem, receptor_count: int, path: Path) -> list:
+    def _make_receptors_with_signal(self, item: LIgOSimulationItem, path: Path) -> list:
         if self.state.simulation_strategy == SimulationStrategy.IMPLANTING:
 
-            new_sequences = self._make_sequences_by_implanting(item=item, receptor_with_signal_count=receptor_count, path=path)
+            new_sequences = self._make_sequences_by_implanting(item=item, path=path)
 
         elif self.state.simulation_strategy == SimulationStrategy.REJECTION_SAMPLING:
 
-            new_sequences = self._make_sequences_by_rejection(item=item, receptor_with_signal_count=receptor_count, path=path)
+            new_sequences = self._make_sequences_by_rejection(item=item, path=path)
 
         else:
             raise RuntimeError(f"{LIgOSimulationInstruction.__name__}: simulation strategy was not properly set, accepted are "
@@ -160,7 +159,7 @@ class LIgOSimulationInstruction(Instruction):
         #
         # return receptors
 
-    def _make_sequences_by_implanting(self, item: LIgOSimulationItem, receptor_with_signal_count: int, path: Path) -> list:
+    def _make_sequences_by_implanting(self, item: LIgOSimulationItem, path: Path) -> list:
 
         background_sequences = item.generative_model.generate_sequences(item.number_of_receptors_in_repertoire, seed=1, path=path / "tmp.tsv",
                                                                         sequence_type=self.state.sequence_type)
@@ -170,6 +169,8 @@ class LIgOSimulationInstruction(Instruction):
         new_sequences = []
 
         for signal in item.signals:
+            receptor_with_signal_count = signal.implanting_strategy.compute_implanting(item.repertoire_implanting_rate,
+                                                                                       item.number_of_receptors_in_repertoire)
             sequence_indices[signal.id] = random.sample(available_indices, k=receptor_with_signal_count)
             available_indices = [ind for ind in available_indices if ind not in sequence_indices[signal.id]]
             for index in sequence_indices[signal.id]:
