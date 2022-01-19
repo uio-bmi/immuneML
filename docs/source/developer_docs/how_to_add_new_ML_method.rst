@@ -150,98 +150,100 @@ An example of the unit test TestNewSVM is given below.
 
 .. code-block:: python
 
-  import os
-  import pickle
-  import shutil
-  from unittest import TestCase
-
-  import numpy as np
-  from sklearn.svm import LinearSVC
-
-  from immuneML.caching.CacheType import CacheType
-  from immuneML.data_model.encoded_data.EncodedData import EncodedData
-  from immuneML.environment.Constants import Constants
-  from immuneML.environment.EnvironmentSettings import EnvironmentSettings
-  from immuneML.ml_methods.NewSVM import NewSVM # newly added method
-  from immuneML.util.PathBuilder import PathBuilder
 
 
-  class TestNewSVM(TestCase):
+    import os
+    import pickle
+    import shutil
+    from unittest import TestCase
 
-      def setUp(self) -> None:
-          os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name # set up cache, always the same
+    import numpy as np
+    from sklearn.svm import SVC
 
-      def test_fit(self):
-          x = np.array([[1, 0, 0], [0, 1, 1], [1, 1, 1], [0, 1, 1]])
-          y = {"default": np.array([1, 0, 2, 0])}
+    from immuneML.caching.CacheType import CacheType
+    from immuneML.data_model.encoded_data.EncodedData import EncodedData
+    from immuneML.environment.Constants import Constants
+    from immuneML.environment.EnvironmentSettings import EnvironmentSettings
+    from immuneML.environment.Label import Label
+    from immuneML.ml_methods.NewSVM import NewSVM # newly added method
+    from immuneML.util.PathBuilder import PathBuilder
 
-          svm = NewSVM()
-          svm.fit(EncodedData(x, y), 'default') # just test if nothing breaks
 
-      def test_predict(self):
-          x = np.array([[1, 0, 0], [0, 1, 1], [1, 1, 1], [0, 1, 1]]) # encoded data, where one row is one example, and columns are features
-          y = {"test_label_name": np.array([1, 0, 2, 0])} # classes for the given label, for each example in the dataset
+    class TestNewSVM(TestCase):
 
-          svm = NewSVM() # create an instance of class for testing
-          svm.fit(EncodedData(x, y), "test_label_name") # fit the classifier using EncodedData object with includes encoded data and classes for each of the examples
+        def setUp(self) -> None:
+            os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name # set up cache, always the same
 
-          test_x = np.array([[0, 1, 0], [1, 0, 0]]) # new encoded data for testing the method
-          y = svm.predict(EncodedData(test_x), 'test_label_name')["test_label_name"] # extract predictions for new encoded data for the given label
+        def test_fit(self):
+            x = np.array([[1, 0, 0], [0, 1, 1], [1, 1, 1], [0, 1, 1]])
+            y = {"default": np.array([1, 0, 2, 0])}
 
-          self.assertTrue(len(y) == 2) # check the number of predictions (2 because there were 2 examples in the new encoded data)
-          self.assertTrue(y[0] in [0, 1, 2]) # check that classes are in the list of valid classes for each prediction
-          self.assertTrue(y[1] in [0, 1, 2])
+            svm = NewSVM()
+            svm.fit(EncodedData(x, y), Label("default")) # just test if nothing breaks
 
-      def test_fit_by_cross_validation(self):
-          x = EncodedData(np.array([[1, 0, 0], [0, 1, 1], [1, 1, 1], [0, 1, 1], [1, 0, 0], [0, 1, 1], [1, 1, 1], [0, 1, 1]]),
-                          {"t1": [1, 0, 2, 0, 1, 0, 2, 0], "t2": [1, 0, 2, 0, 1, 0, 2, 0]})
+        def test_predict(self):
+            x = np.array([[1, 0, 0], [0, 1, 1], [1, 1, 1], [0, 1, 1]]) # encoded data, where one row is one example, and columns are features
+            y = {"test": np.array([1, 0, 2, 0])} # classes for the given label, for each example in the dataset
 
-          svm = NewSVM()
-          svm.fit_by_cross_validation(x, number_of_splits=2, label_name="t1") # check if nothing fails
+            svm = NewSVM() # create an instance of class for testing
+            svm.fit(EncodedData(x, y), Label("test"))  # fit the classifier using EncodedData object with includes encoded data and classes for each of the examples
 
-      def test_store(self):
-          x = np.array([[1, 0, 0], [0, 1, 1], [1, 1, 1], [0, 1, 1]])
-          y = {"default": np.array(['a', "b", "c", "a"])}
+            test_x = np.array([[0, 1, 0], [1, 0, 0]]) # new encoded data for testing the method
+            y = svm.predict(EncodedData(test_x), Label("test"))["test"] # extract predictions for new encoded data for the given label
 
-          svm = NewSVM()
-          svm.fit(EncodedData(x, y), 'default')
+            self.assertTrue(len(y) == 2) # check the number of predictions (2 because there were 2 examples in the new encoded data)
+            self.assertTrue(y[0] in [0, 1, 2]) # check that classes are in the list of valid classes for each prediction
+            self.assertTrue(y[1] in [0, 1, 2])
 
-          path = EnvironmentSettings.tmp_test_path / "my_svm_store/"
+        def test_fit_by_cross_validation(self):
+            x = EncodedData(np.array([[1, 0, 0], [0, 1, 1], [1, 1, 1], [0, 1, 1], [1, 0, 0], [0, 1, 1], [1, 1, 1], [0, 1, 1]]),
+                            {"t1": [1, 0, 2, 0, 1, 0, 2, 0], "t2": [1, 0, 2, 0, 1, 0, 2, 0]})
 
-          svm.store(path)
+            svm = NewSVM()
+            svm.fit_by_cross_validation(x, number_of_splits=2, label=Label("t1")) # check if nothing fails
 
-          # when the trained method is stored, check if the format is as defined in store()
-          self.assertTrue(os.path.isfile(path / "new_svm.pickle"))
+        def test_store(self):
+            x = np.array([[1, 0, 0], [0, 1, 1], [1, 1, 1], [0, 1, 1]])
+            y = {"default": np.array(['a', "b", "c", "a"])}
 
-          with open(path / "new_svm.pickle", "rb") as file:
-              svm2 = pickle.load(file)
+            svm = NewSVM()
+            svm.fit(EncodedData(x, y), Label("default"))
 
-          self.assertTrue(isinstance(svm2, LinearSVC))
+            path = EnvironmentSettings.root_path / "my_svm/"
 
-          shutil.rmtree(path)
+            # when the trained method is stored, check if the format is as defined in store()
+            svm.store(path)
+            self.assertTrue(os.path.isfile(path / "svm.pickle"))
 
-      def test_load(self):
-          x = np.array([[1, 0, 0], [0, 1, 1], [1, 1, 1], [0, 1, 1]])
-          y = {"default": np.array([1, 0, 2, 0])}
+            with open(path / "svm.pickle", "rb") as file:
+                svm2 = pickle.load(file)
 
-          svm = NewSVM()
-          svm.fit(EncodedData(x, y), 'default')
+            self.assertTrue(isinstance(svm2, SVC))
 
-          path = EnvironmentSettings.tmp_test_path / "my_svm_load/"
-          PathBuilder.build(path)
+            shutil.rmtree(path)
 
-          with open(path / "new_svm.pickle", "wb") as file:
-              pickle.dump(svm.get_model(), file)
+        def test_load(self):
+            x = np.array([[1, 0, 0], [0, 1, 1], [1, 1, 1], [0, 1, 1]])
+            y = {"default": np.array([1, 0, 2, 0])}
 
-          svm2 = NewSVM()
-          svm2.load(path)
+            svm = NewSVM()
+            svm.fit(EncodedData(x, y), Label("default"))
 
-          # when the model is loaded from disk, check if the class matches
-          self.assertTrue(isinstance(svm2.get_model(), LinearSVC))
+            path = EnvironmentSettings.tmp_test_path / "my_svm2/"
+            PathBuilder.build(path)
 
-          # optionally, more checks can be added
+            with open(path / "svm.pickle", "wb") as file:
+                pickle.dump(svm.model, file)
 
-          shutil.rmtree(path)
+            svm2 = NewSVM()
+            svm2.load(path)
+
+            # when the model is loaded from disk, check if the class matches
+            self.assertTrue(isinstance(svm2.model, SVC))
+
+            shutil.rmtree(path)
+
+            # optionally, more checks can be added
 
 
 Adding a new MLMethod: additional information

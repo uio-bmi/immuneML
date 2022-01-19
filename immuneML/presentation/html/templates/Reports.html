@@ -14,6 +14,8 @@
         {{#has_ml_reports}}
         <h3>ML reports</h3>
         {{#ml_reports}}
+        <h4>Report {{name}}</h4>
+        <p>{{info}}</p>
         <div class="grid-container">
             {{#output_figures}}
             <div class="">
@@ -41,6 +43,8 @@
         <div class="grid-container padded-top padded-bottom">
             <div class="">
                 {{#encoding_train_reports}}
+                <h4>Report {{name}} (training)</h4>
+                <p>{{info}}</p>
                 {{#output_figures}}
                 {{#is_embed}}
                 <embed src="{{path}}">
@@ -60,6 +64,8 @@
             </div>
             <div class="">
                 {{#encoding_test_reports}}
+                <h4>Report {{name}} (test)</h4>
+                <p>{{info}}</p>
                 {{#output_figures}}
                 {{#is_embed}}
                 <embed src="{{path}}">

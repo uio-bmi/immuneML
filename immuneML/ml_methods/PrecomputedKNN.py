@@ -1,7 +1,6 @@
 from sklearn.neighbors import KNeighborsClassifier
 
-from immuneML.encodings.distance_encoding.CompAIRRDistanceEncoder import CompAIRRDistanceEncoder
-from immuneML.encodings.distance_encoding.DistanceEncoder import DistanceEncoder
+
 from immuneML.ml_methods.SklearnMethod import SklearnMethod
 from scripts.specification_util import update_docs_per_mapping
 
@@ -40,8 +39,6 @@ class PrecomputedKNN(SklearnMethod):
 
     """
 
-    # todo raise error if the given encoded data is not a distance matrix?
-
     def __init__(self, parameter_grid: dict = None, parameters: dict = None):
         parameters = parameters if parameters is not None else {}
         parameter_grid = parameter_grid if parameter_grid is not None else {}
@@ -60,7 +57,11 @@ class PrecomputedKNN(SklearnMethod):
     def can_predict_proba(self) -> bool:
         return True
 
+
     def get_compatible_encoders(self):
+        from immuneML.encodings.distance_encoding.CompAIRRDistanceEncoder import CompAIRRDistanceEncoder
+        from immuneML.encodings.distance_encoding.DistanceEncoder import DistanceEncoder
+
         return [DistanceEncoder, CompAIRRDistanceEncoder]
 
     @staticmethod
@@ -73,3 +74,4 @@ class PrecomputedKNN(SklearnMethod):
 
         doc = update_docs_per_mapping(doc, mapping)
         return doc
+

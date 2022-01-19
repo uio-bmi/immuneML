@@ -14,6 +14,7 @@ from immuneML.dsl.DefaultParamsLoader import DefaultParamsLoader
 from immuneML.encodings.deeprc.DeepRCEncoder import DeepRCEncoder
 from immuneML.environment.Constants import Constants
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
+from immuneML.environment.Label import Label
 from immuneML.util.PathBuilder import PathBuilder
 
 
@@ -88,9 +89,8 @@ class TestDeepRC(TestCase):
             self.assertEqual(set(list(train_indices) + list(val_indices)), set(range(10)))
 
             # test if 'fit' function saves models
-            classifier.fit(encoded_data, "status")
+            classifier.fit(encoded_data, Label("status", values=["A", "B"]))
 
-            self.assertListEqual(classifier.get_classes(), ["A", "B"])
             self.assertIsInstance(classifier.model, DeepRCInternal)
 
             # Test storing and loading of models

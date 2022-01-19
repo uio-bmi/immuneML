@@ -45,10 +45,11 @@ class TestExploratoryAnalysisParser(TestCase):
 
         instruction = {
             "type": "ExploratoryAnalysis",
+            "number_of_processes": 32,
             "analyses": {
                 "1": {"dataset": "d1", "report": "r1", "preprocessing_sequence": "p1"},
-                "2": {"dataset": "d1", "report": "r2", "encoding": "e1", "number_of_processes": 32},
-                "3": {"dataset": "d1", "report": "r2", "encoding": "e1", "labels": ["l1"], "number_of_processes": 32}
+                "2": {"dataset": "d1", "report": "r2", "encoding": "e1", },
+                "3": {"dataset": "d1", "report": "r2", "encoding": "e1", "labels": ["l1"]}
             }
         }
 

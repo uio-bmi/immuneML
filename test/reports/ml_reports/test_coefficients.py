@@ -11,6 +11,7 @@ from immuneML.data_model.dataset.Dataset import Dataset
 from immuneML.data_model.encoded_data.EncodedData import EncodedData
 from immuneML.environment.Constants import Constants
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
+from immuneML.environment.Label import Label
 from immuneML.ml_methods.LogisticRegression import LogisticRegression
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.ml_reports.CoefficientPlottingSetting import CoefficientPlottingSetting
@@ -27,7 +28,7 @@ class TestCoefficients(TestCase):
         # dummy logistic regression with 100 observations with 20 features belonging to 2 classes
         dummy_lr = LogisticRegression()
         dummy_lr.fit_by_cross_validation(EncodedData(np.random.rand(100, 20), {"l1": [i % 2 for i in range(0, 100)]}),
-                                         number_of_splits=2, label_name="l1")
+                                         number_of_splits=2, label=Label("l1"))
 
         # Change coefficients to values 1-20
         dummy_lr.model.coef_ = np.array(list(range(0, 20))).reshape(1, -1)
@@ -49,7 +50,7 @@ class TestCoefficients(TestCase):
 
         report.method = self._create_dummy_lr_model(path)
         report.ml_details_path = path / "ml_details.yaml"
-        report.label = "l1"
+        report.label = Label("l1")
         report.result_path = path
         report.train_dataset = Dataset()
         report.train_dataset.encoded_data = EncodedData(examples=np.zeros((1, 20)), labels={"A": [1]},

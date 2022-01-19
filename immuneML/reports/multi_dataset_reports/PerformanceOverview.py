@@ -71,7 +71,9 @@ class PerformanceOverview(MultiDatasetReport):
         figure_auc, table_aucs = self.plot_roc(optimal_hp_items, label, colors)
         figure_pr, table_pr = self.plot_precision_recall(optimal_hp_items, label, colors)
 
-        return ReportResult(output_figures=[figure_auc, figure_pr], output_tables=table_aucs + table_pr)
+        return ReportResult(name=self.name,
+                            info="A ROC plot and a precision-recall plot for optimal trained models on multiple datasets.",
+                            output_figures=[figure_auc, figure_pr], output_tables=table_aucs + table_pr)
 
     def plot_roc(self, optimal_hp_items, label: Label, colors) -> Tuple[ReportOutput, List[ReportOutput]]:
         report_data_outputs = []

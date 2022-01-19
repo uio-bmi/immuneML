@@ -1,7 +1,10 @@
 import abc
 from pathlib import Path
 
+from sklearn.exceptions import NotFittedError
+
 from immuneML.data_model.encoded_data.EncodedData import EncodedData
+from immuneML.environment import Label
 
 
 class MLMethod(metaclass=abc.ABCMeta):
@@ -26,9 +29,10 @@ class MLMethod(metaclass=abc.ABCMeta):
     """
     def __init__(self):
         self.name = None
+        self.label = None
 
     @abc.abstractmethod
-    def fit(self, encoded_data: EncodedData, label_name: str, cores_for_training: int = 2):
+    def fit(self, encoded_data: EncodedData, label: Label, cores_for_training: int = 2):
         """
         The fit function fits the parameters of the machine learning model.
 
@@ -40,7 +44,7 @@ class MLMethod(metaclass=abc.ABCMeta):
                 which make multidimensional outputs that do not follow this pattern, but they are tailored to specific ML methods which require such input
                 (for instance, one hot encoding and ReceptorCNN method).
 
-            label_name (str): name of the label for which the classifier will be created. immuneML also supports multi-label classification, but it is
+            label (Label): the label for which the classifier will be created. immuneML also supports multi-label classification, but it is
                 handled outside MLMethod class by creating an MLMethod instance for each label. This means that each MLMethod should handle only one label.
 
             cores_for_training (int): if parallelization is available in the MLMethod (and the availability depends on the specific classifier), this
@@ -54,7 +58,7 @@ class MLMethod(metaclass=abc.ABCMeta):
         pass
 
     @abc.abstractmethod
-    def predict(self, encoded_data: EncodedData, label_name: str):
+    def predict(self, encoded_data: EncodedData, label: Label):
         """
         The predict function predicts the class for the given label across examples provided in encoded data.
 
@@ -66,7 +70,7 @@ class MLMethod(metaclass=abc.ABCMeta):
                 which make multidimensional outputs that do not follow this pattern, but they are tailored to specific ML methods which require such input
                 (for instance, one hot encoding and ReceptorCNN method).
 
-            label_name (str): name of the label for which the classifier will be created. immuneML also supports multi-label classification, but it is
+            label: (Label): the label for which the classifier will be created. immuneML also supports multi-label classification, but it is
                 handled outside MLMethod class by creating an MLMethod instance for each label. This means that each MLMethod should handle only one label.
 
         Returns:
@@ -78,7 +82,7 @@ class MLMethod(metaclass=abc.ABCMeta):
         pass
 
     @abc.abstractmethod
-    def fit_by_cross_validation(self, encoded_data: EncodedData, number_of_splits: int = 5, label_name: str = None, cores_for_training: int = -1,
+    def fit_by_cross_validation(self, encoded_data: EncodedData, number_of_splits: int = 5, label: Label = None, cores_for_training: int = -1,
                                 optimization_metric=None):
         """
         The fit_by_cross_validation function should implement finding the best model hyperparameters through cross-validation. In immuneML,
@@ -100,7 +104,7 @@ class MLMethod(metaclass=abc.ABCMeta):
                 note that if this is used in combination with nested cross-validation in TrainMLModel instruction, it can result in very few examples in
                 each split depending on the orginal dataset size and the nested cross-validation setup.
 
-            label_name (str): name of the label for which the classifier will be created. immuneML also supports multi-label classification, but it is
+            label (Label): the label for which the classifier will be created. immuneML also supports multi-label classification, but it is
                 handled outside MLMethod class by creating an MLMethod instance for each label. This means that each MLMethod should handle only one label.
 
             cores_for_training (int): number of processes to be used during the cross-validation for model selection
@@ -160,20 +164,6 @@ class MLMethod(metaclass=abc.ABCMeta):
         pass
 
     @abc.abstractmethod
-    def get_model(self) -> dict:
-        """
-        The get_model function returns the parameters of the model. This is usually used to show the parameters of the model in a user-friendly way.
-
-        Arguments: there are no arguments for this function.
-
-        Returns:
-
-            a dictionary with model parameter values; the values could be of any complexity (e.g., dictionaries, lists)
-
-        """
-        pass
-
-    @abc.abstractmethod
     def check_if_exists(self, path: Path) -> bool:
         """
         The check_if_exists function checks if there is a stored model on the given path. Might be useful in the future for implementing checkpoints.
@@ -197,11 +187,11 @@ class MLMethod(metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def get_params(self):
-        """Returns the parameters of the model, similar to get_model function."""
+        """Returns the model parameters in a readable yaml-friendly way (consisting of lists, dictionaries and strings)."""
         pass
 
     @abc.abstractmethod
-    def predict_proba(self, encoded_data: EncodedData, label_name: str):
+    def predict_proba(self, encoded_data: EncodedData, Label: Label):
         """
         The predict_proba function predicts class probabilities for the given label if the model supports probabilistic output. If not, it should
         raise a warning and return predicted classes without probabilities.
@@ -217,7 +207,7 @@ class MLMethod(metaclass=abc.ABCMeta):
             provided here can include labels (in model assessment scenario) or not (when predicting the class probabilities on new data which has not
             been labels), so the labels attribute of the EncodedData object should NOT be used in this function, even if it is set.
 
-            label_name (str): the name of the label for which the prediction should be made. It can be used to check if it matches the label that the
+            label (Label): the label for which the prediction should be made. It can be used to check if it matches the label that the
             model has been trained for and if not, an exception should be thrown. It is often an AssertionError as this can be checked before any
             prediction is made, but could also be a RuntimeError. It both cases, it should include a user-friendly message.
 
@@ -232,7 +222,7 @@ class MLMethod(metaclass=abc.ABCMeta):
         pass
 
     @abc.abstractmethod
-    def get_label(self) -> str:
+    def get_label_name(self) -> str:
         """Returns the name of the label for which the model was fitted."""
         pass
 
@@ -282,4 +272,5 @@ class MLMethod(metaclass=abc.ABCMeta):
             raise ValueError(f"{encoder.__class__.__name__} is not compatible with ML Method {self.__class__.__name__}. "
                              f"Please use one of the following encoders instead: {', '.join([enc_class.__name__ for enc_class in self.get_compatible_encoders()])}")
 
-
+    def get_classes(self):
+        return self.label.values
