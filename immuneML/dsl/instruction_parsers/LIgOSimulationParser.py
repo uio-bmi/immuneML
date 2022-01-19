@@ -16,10 +16,11 @@ class LIgOSimulationParser:
     def parse(self, key: str, instruction: dict, symbol_table: SymbolTable, path: Path = None) -> LIgOSimulationInstruction:
 
         location = LIgOSimulationParser.__name__
-        keys = ["simulation", "type", "is_repertoire", "paired", "use_generation_probabilities", "simulation_strategy", 'sequence_type', "export_formats"]
+        keys = ["simulation", "type", "is_repertoire", "paired", "use_generation_probabilities", "simulation_strategy", 'sequence_type',
+                "export_formats", "store_signal_in_receptors"]
         ParameterValidator.assert_keys(instruction.keys(), keys, location, key)
 
-        for param_key in ['is_repertoire', 'paired', 'use_generation_probabilities']:
+        for param_key in ['is_repertoire', 'paired', 'use_generation_probabilities', "store_signal_in_receptors"]:
             ParameterValidator.assert_type_and_value(instruction[param_key], bool, location, param_key)
 
         ParameterValidator.assert_type_and_value(instruction['simulation_strategy'], str, location, 'simulation_strategy')

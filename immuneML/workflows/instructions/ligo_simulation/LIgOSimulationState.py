@@ -23,4 +23,5 @@ class LIgOSimulationState:
     dataset: Dataset = None
     formats: list = None
     paths: list = None
+    store_signal_in_receptors: bool = None
 

@@ -35,6 +35,9 @@ class LIgOSimulationInstruction(Instruction):
         simulation (str): a name of a simulation object containing a list of LIgOSimulationItem as specified under definitions key; defines how
         to combine signals with simulated data; specified under definitions
 
+        store_signal_in_receptors (bool): for repertoire-level simulation, whether to store the information on what exact motif is implanted in each
+        receptor
+
         export_formats: in which formats to export the dataset after simulation. Valid formats are class names of any non-abstract class
         inheriting :py:obj:`~immuneML.IO.dataset_export.DataExporter.DataExporter`. Important note: Binary files in ImmuneML might not be compatible
         between different immuneML versions.
@@ -51,16 +54,18 @@ class LIgOSimulationInstruction(Instruction):
             use_generation_probabilities: False
             simulation_strategy: IMPLANTING
             simulation: sim1
+            store_signal_in_receptors: True
             export_formats: [AIRR] # in which formats to export the dataset
 
     """
 
     def __init__(self, is_repertoire: bool, paired: bool, use_generation_probabilities: bool, simulation_strategy: SimulationStrategy,
-                 simulation: Simulation, sequence_type: SequenceType, signals: List[Signal], name: str, exporters: List[DataExporter] = None):
+                 simulation: Simulation, sequence_type: SequenceType, signals: List[Signal], name: str, store_signal_in_receptors: bool,
+                 exporters: List[DataExporter] = None):
 
         self.state = LIgOSimulationState(is_repertoire=is_repertoire, paired=paired, use_generation_probabilities=use_generation_probabilities,
                                          simulation_strategy=simulation_strategy, simulation=simulation, sequence_type=sequence_type,
-                                         signals=signals, name=name)
+                                         signals=signals, name=name, store_signal_in_receptors=store_signal_in_receptors)
         self.exporters = exporters
 
     def run(self, result_path: Path):
@@ -173,12 +178,19 @@ class LIgOSimulationInstruction(Instruction):
                 for other_signal in self.state.signals:
                     if other_signal.id != signal.id:
                         implanted_sequence.metadata.custom_params[other_signal.id] = False
+
+                if not self.state.store_signal_in_receptors:
+                    implanted_sequence.metadata.custom_params = {}
+                    implanted_sequence.annotation = None
+
                 new_sequences.append(implanted_sequence)
 
         for index in available_indices:
             background_sequence = background_sequences[index]
-            background_sequence.metadata.custom_params = {**background_sequence.metadata.custom_params,
-                                                          **{signal.id: False for signal in self.state.signals}}
+
+            if self.state.store_signal_in_receptors:
+                background_sequence.metadata.custom_params = {**background_sequence.metadata.custom_params,
+                                                              **{signal.id: False for signal in self.state.signals}}
             new_sequences.append(background_sequence)
 
         return new_sequences

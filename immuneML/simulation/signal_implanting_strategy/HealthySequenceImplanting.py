@@ -92,10 +92,8 @@ class HealthySequenceImplanting(SignalImplantingStrategy):
         else:
             metadata = {}
 
-        # when adding implant to a repertoire, only signal id is stored:
-        # more detailed information is available in each receptor_sequence
-        # (specific motif and motif instance)
         metadata[signal.id] = True
+        random.shuffle(sequences)
         repertoire = Repertoire.build_from_sequence_objects(sequences, path, metadata)
 
         return repertoire

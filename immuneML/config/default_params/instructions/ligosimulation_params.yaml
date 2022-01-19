@@ -1,0 +1,6 @@
+is_repertoire: True
+paired: False
+use_generation_probabilities: False
+simulation_strategy: IMPLANTING
+store_signal_in_receptors: True
+export_formats: [AIRR]

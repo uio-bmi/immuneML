@@ -91,7 +91,8 @@ class TestLIgOSimulation(TestCase):
                     "paired": False,
                     "sequence_type": "nucleotide",
                     "use_generation_probabilities": False,
-                    "simulation_strategy": "IMPLANTING"
+                    "simulation_strategy": "IMPLANTING",
+                    "store_signal_in_receptors": False
                 }
             },
             "output": {
@@ -121,4 +122,4 @@ class TestLIgOSimulation(TestCase):
         metadata_df = pd.read_csv(path / "result/inst1/metadata.csv", comment=Constants.COMMENT_SIGN)
         self.assertTrue("signal1" in metadata_df.columns)
 
-        # shutil.rmtree(path)
+        shutil.rmtree(path)
