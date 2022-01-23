@@ -68,7 +68,9 @@ class SimulationParser:
     """
 
     def parse(self, key: str, instruction: dict, symbol_table: SymbolTable, path: Path = None) -> SimulationInstruction:
-        ParameterValidator.assert_keys(instruction.keys(), ["dataset", "simulation", "type", "export_formats"], "SimulationParser", key)
+        ParameterValidator.assert_keys(instruction.keys(), ["dataset", "simulation", "type", "export_formats", "store_signal_in_receptors"],
+                                       "SimulationParser", key)
+        ParameterValidator.assert_type_and_value(instruction['store_signal_in_receptors'], bool, key, 'store_signal_in_receptors')
 
         signals = [signal.item for signal in symbol_table.get_by_type(SymbolType.SIGNAL)]
         simulation = symbol_table.get(instruction["simulation"])
@@ -76,5 +78,6 @@ class SimulationParser:
 
         exporters = Util.parse_exporters(instruction, SimulationParser.__name__)
 
-        process = SimulationInstruction(signals=signals, simulation=simulation, dataset=dataset, name=key, exporters=exporters)
+        process = SimulationInstruction(signals=signals, simulation=simulation, dataset=dataset, name=key, exporters=exporters,
+                                        store_signal_in_receptors=instruction['store_signal_in_receptors'])
         return process

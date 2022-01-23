@@ -24,6 +24,8 @@ class SimulationInstruction(Instruction):
 
         simulation (Simulation): definition of how to perform the simulation.
 
+        store_signal_in_receptors (bool): for repertoire-level simulation, whether to store the information on what exact motif is implanted in each receptor
+
         export_formats: in which formats to export the dataset after simulation. Valid formats are class names of any non-abstract class inheriting :py:obj:`~immuneML.IO.dataset_export.DataExporter.DataExporter`. Important note: Binary files in ImmuneML might not be compatible between different immuneML versions.
 
     YAML specification:
@@ -36,13 +38,15 @@ class SimulationInstruction(Instruction):
             dataset: my_dataset # which dataset to use for implanting the signals
             simulation: my_simulation # how to implanting the signals - definition of the simulation
             export_formats: [AIRR] # in which formats to export the dataset
+            store_signal_in_receptors: True
 
     """
 
-    def __init__(self, signals: list, simulation: Simulation, dataset: RepertoireDataset,
+    def __init__(self, signals: list, simulation: Simulation, dataset: RepertoireDataset, store_signal_in_receptors: bool,
                  name: str = None, exporters: List[DataExporter] = None):
         self.exporters = exporters
-        self.state = SimulationState(signals, simulation, dataset, name=name)
+        self.state = SimulationState(signals=signals, simulation=simulation, dataset=dataset, name=name,
+                                     store_signal_in_receptors=store_signal_in_receptors)
 
     def run(self, result_path: Path):
         self.state.result_path = result_path / self.state.name

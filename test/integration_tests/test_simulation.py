@@ -84,7 +84,8 @@ class TestSimulation(TestCase):
                     "type": "Simulation",
                     "dataset": "d1",
                     "simulation": "sim1",
-                    "export_formats": ["AIRR", "ImmuneML"]
+                    "export_formats": ["AIRR", 'ImmuneML'],
+                    "store_signal_in_receptors": False
                 }
             },
             "output": {

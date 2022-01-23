@@ -10,6 +10,7 @@ from immuneML.simulation.Simulation import Simulation
 class SimulationState:
     signals: list
     simulation: Simulation
+    store_signal_in_receptors: bool
     dataset: Dataset
     formats: List[str] = None
     paths: dict = None

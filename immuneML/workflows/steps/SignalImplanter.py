@@ -1,4 +1,5 @@
 import copy
+import os
 from pathlib import Path
 from typing import List
 
@@ -128,10 +129,20 @@ class SignalImplanter(Step):
     @staticmethod
     def _implant_in_repertoire(index, repertoire, implanting, simulation_state) -> Repertoire:
         new_repertoire = copy.deepcopy(repertoire)
+        data_filenames, metadata_filenames = [], []
         for signal in implanting.signals:
             new_repertoire = signal.implant_to_repertoire(repertoire=new_repertoire,
                                                           repertoire_implanting_rate=implanting.repertoire_implanting_rate,
                                                           path=simulation_state.result_path / "repertoires/")
+            data_filenames.append(new_repertoire.data_filename)
+            metadata_filenames.append(new_repertoire.metadata_filename)
+
+        for index in range(len(data_filenames) - 1):
+            os.remove(data_filenames[index])
+            os.remove(metadata_filenames[index])
+
+        if not simulation_state.store_signal_in_receptors:
+            new_repertoire = SignalImplanter._remove_signal_label_from_receptors(new_repertoire, simulation_state.result_path, implanting.signals)
 
         for signal in implanting.signals:
             if implanting.is_noise:
@@ -144,6 +155,23 @@ class SignalImplanter(Step):
 
         with Path(new_repertoire.metadata_filename).open('w') as file:
             yaml.safe_dump(new_repertoire.metadata, file)
+
+        return new_repertoire
+
+    @staticmethod
+    def _remove_signal_label_from_receptors(repertoire: Repertoire, result_path: Path, signals):
+        sequences = list(repertoire.sequences)
+        for sequence in sequences:
+            for signal in signals:
+                if signal.id in sequence.metadata.custom_params:
+                    del sequence.metadata.custom_params[signal.id]
+            sequence.annotation = None
+
+        os.remove(repertoire.data_filename)
+        os.remove(repertoire.metadata_filename)
+
+        new_repertoire = Repertoire.build_from_sequence_objects(sequences, result_path / "repertoires/", repertoire.metadata,
+                                                                repertoire_id=repertoire.identifier)
 
         return new_repertoire
 

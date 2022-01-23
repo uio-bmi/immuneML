@@ -72,8 +72,12 @@ class HealthySequenceImplanting(SignalImplantingStrategy):
                                                                                            max_motif_length)
         processed_sequences = self._implant_in_sequences(sequences_to_be_processed, signal)
         sequences = other_sequences + processed_sequences
+
+        for sequence in other_sequences:
+            sequence.metadata.custom_params[signal.id] = False
+
         metadata = self._build_new_metadata(repertoire.metadata, signal)
-        new_repertoire = self._build_new_repertoire(sequences, metadata, signal, path)
+        new_repertoire = self._build_new_repertoire(sequences, metadata, path)
 
         return new_repertoire
 
@@ -86,15 +90,10 @@ class HealthySequenceImplanting(SignalImplantingStrategy):
         max_motif_length = max([motif.get_max_length() for motif in signal.motifs])
         return max_motif_length
 
-    def _build_new_repertoire(self, sequences, repertoire_metadata, signal, path: Path) -> Repertoire:
-        if repertoire_metadata is not None:
-            metadata = copy.deepcopy(repertoire_metadata)
-        else:
-            metadata = {}
+    def _build_new_repertoire(self, sequences, repertoire_metadata, path: Path) -> Repertoire:
 
-        metadata[signal.id] = True
         random.shuffle(sequences)
-        repertoire = Repertoire.build_from_sequence_objects(sequences, path, metadata)
+        repertoire = Repertoire.build_from_sequence_objects(sequences, path, repertoire_metadata)
 
         return repertoire
 

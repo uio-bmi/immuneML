@@ -66,7 +66,7 @@ class TestConfounderAnalysis(TestCase):
                                  ])
 
         dataset = SignalImplanter.run(SimulationState(signals=signals, dataset=random_dataset, formats=['ImmuneML'], result_path=path,
-                                                      name='my_synthetic_dataset', simulation=simulation))
+                                                      name='my_synthetic_dataset', simulation=simulation, store_signal_in_receptors=True))
 
         return dataset
 

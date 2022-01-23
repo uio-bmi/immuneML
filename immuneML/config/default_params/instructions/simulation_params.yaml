@@ -1,1 +1,2 @@
 export_formats: [AIRR]
+store_signal_in_receptors: True

@@ -168,6 +168,13 @@ class Repertoire(DatasetItem):
                     else:
                         signals[implant.signal_id] = [None for _ in range(index)] + [str(implant)]
 
+        sequence_count = len(sequences)
+
+        for signal in signals.keys():
+            signal_info_count = len(signals[signal])
+            if signal_info_count < sequence_count:
+                signals[signal].extend([None for _ in range(sequence_count - signal_info_count)])
+
         return cls.build(sequence_aas=sequence_aas, sequences=sequences, v_genes=v_genes, j_genes=j_genes, v_subgroups=v_subgroups,
                          j_subgroups=j_subgroups, v_alleles=v_alleles, j_alleles=j_alleles, chains=chains, counts=counts, region_types=region_types,
                          frame_types=frame_types, custom_lists=custom_lists, sequence_identifiers=sequence_identifiers, path=path, metadata=metadata,
