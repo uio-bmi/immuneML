@@ -10,7 +10,7 @@ from immuneML.data_model.encoded_data.EncodedData import EncodedData
 from immuneML.data_model.receptor.receptor_sequence.Chain import Chain
 from immuneML.data_model.repertoire.Repertoire import Repertoire
 from immuneML.encodings.EncoderParams import EncoderParams
-from immuneML.encodings.kmer_frequency.ReadsType import ReadsType
+from immuneML.util.ReadsType import ReadsType
 from immuneML.encodings.reference_encoding.MatchedRegexEncoder import MatchedRegexEncoder
 
 

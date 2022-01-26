@@ -8,7 +8,7 @@ from immuneML.data_model.receptor.TCABReceptor import TCABReceptor
 from immuneML.data_model.receptor.TCGDReceptor import TCGDReceptor
 from immuneML.encodings.DatasetEncoder import DatasetEncoder
 from immuneML.encodings.EncoderParams import EncoderParams
-from immuneML.encodings.kmer_frequency.ReadsType import ReadsType
+from immuneML.util.ReadsType import ReadsType
 from immuneML.encodings.reference_encoding.MatchedReferenceUtil import MatchedReferenceUtil
 from immuneML.util.ParameterValidator import ParameterValidator
 from immuneML.util.ReflectionHandler import ReflectionHandler
@@ -32,7 +32,7 @@ class MatchedReceptorsEncoder(DatasetEncoder):
 
         max_edit_distances (dict): A dictionary specifying the maximum edit distance between a target sequence (from the repertoire) and the reference sequence. A maximum distance can be specified per chain, for example to allow for less strict matching of TCR alpha and BCR light chains. When only an integer is specified, this distance is applied to all possible chains.
 
-        reads (:py:mod:`~immuneML.encodings.kmer_frequency.ReadsType`): Reads type signify whether the counts of the sequences in the repertoire will be taken into account. If :py:mod:`~immuneML.encodings.kmer_frequency_ReadsType.UNIQUE`, only unique sequences (clonotypes) are counted, and if :py:mod:`~immuneML.encodings.kmer_frequency.ReadsType.ALL`, the sequence 'count' value is summed when determining the number of matches. The default value for reads is all.
+        reads (:py:mod:`~immuneML.util.ReadsType`): Reads type signify whether the counts of the sequences in the repertoire will be taken into account. If :py:mod:`~immuneML.util.ReadsType.UNIQUE`, only unique sequences (clonotypes) are counted, and if :py:mod:`~immuneML.util.ReadsType.ALL`, the sequence 'count' value is summed when determining the number of matches. The default value for reads is all.
 
         sum_matches (bool): When sum_matches is False, the resulting encoded data matrix contains multiple columns with the number of matches per reference receptor chain. When sum_matches is true, the columns representing each of the two chains are summed together, meaning that there are only two aggregated sums of matches (one per chain) per repertoire in the encoded data.
         To use this encoder in combination with the :ref:`Matches` report, sum_matches must be set to False. When sum_matches is set to True, this encoder behaves similarly to the encoder described by Yao, Y. et al. By default, sum_matches is False.

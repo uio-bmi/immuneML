@@ -4,7 +4,7 @@ from immuneML.caching.CacheHandler import CacheHandler
 from immuneML.data_model.receptor.receptor_sequence.ReceptorSequenceList import ReceptorSequenceList
 from immuneML.encodings.DatasetEncoder import DatasetEncoder
 from immuneML.encodings.EncoderParams import EncoderParams
-from immuneML.encodings.kmer_frequency.ReadsType import ReadsType
+from immuneML.util.ReadsType import ReadsType
 from immuneML.encodings.reference_encoding.MatchedReferenceUtil import MatchedReferenceUtil
 from immuneML.util.ParameterValidator import ParameterValidator
 from immuneML.util.ReflectionHandler import ReflectionHandler
@@ -26,7 +26,7 @@ class MatchedSequencesEncoder(DatasetEncoder):
 
         max_edit_distance (int): The maximum edit distance between a target sequence (from the repertoire) and the reference sequence.
 
-        reads (:py:mod:`~immuneML.encodings.kmer_frequency.ReadsType`): Reads type signify whether the counts of the sequences in the repertoire will be taken into account. If :py:mod:`~immuneML.encodings.kmer_frequency.ReadsType.UNIQUE`, only unique sequences (clonotypes) are counted, and if :py:mod:`~immuneML.encodings.kmer_frequency.ReadsType.ALL`, the sequence 'count' value is summed when determining the number of matches. The default value for reads is all.
+        reads (:py:mod:`~immuneML.util.ReadsType`): Reads type signify whether the counts of the sequences in the repertoire will be taken into account. If :py:mod:`~immuneML.util.ReadsType.UNIQUE`, only unique sequences (clonotypes) are counted, and if :py:mod:`~immuneML.util.ReadsType.ALL`, the sequence 'count' value is summed when determining the number of matches. The default value for reads is all.
 
         sum_matches (bool): When sum_matches is False, the resulting encoded data matrix contains multiple columns with the number of matches per reference sequence. When sum_matches is true, all columns are summed together, meaning that there is only one aggregated sum of matches per repertoire in the encoded data.
         To use this encoder in combination with the :ref:`Matches` report, sum_matches must be set to False. When sum_matches is set to True, this encoder behaves as described by Yao, Y. et al. By default, sum_matches is False.

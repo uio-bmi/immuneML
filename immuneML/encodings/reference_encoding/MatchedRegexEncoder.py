@@ -8,7 +8,7 @@ from immuneML.caching.CacheHandler import CacheHandler
 from immuneML.data_model.receptor.receptor_sequence.Chain import Chain
 from immuneML.encodings.DatasetEncoder import DatasetEncoder
 from immuneML.encodings.EncoderParams import EncoderParams
-from immuneML.encodings.kmer_frequency.ReadsType import ReadsType
+from immuneML.util.ReadsType import ReadsType
 from immuneML.util.ParameterValidator import ParameterValidator
 from immuneML.util.ReflectionHandler import ReflectionHandler
 from scripts.specification_util import update_docs_per_mapping
@@ -31,9 +31,9 @@ class MatchedRegexEncoder(DatasetEncoder):
         match_v_genes (bool): Whether V gene matches are required. If this is True, a match is only counted if the
         V gene matches the gene specified in the motif input file. By default match_v_genes is False.
 
-        reads (:py:mod:`~immuneML.encodings.kmer_frequency.ReadsType`): Reads type signify whether the counts of the sequences in the
-        repertoire will be taken into account. If :py:mod:`~immuneML.encodings.kmer_frequency.ReadsType.UNIQUE`, only unique sequences
-        (clonotypes) are counted, and if :py:mod:`~immuneML.encodings.kmer_frequency.ReadsType.ALL`, the sequence 'count' value is
+        reads (:py:mod:`~immuneML.util.ReadsType`): Reads type signify whether the counts of the sequences in the
+        repertoire will be taken into account. If :py:mod:`~immuneML.util.ReadsType.UNIQUE`, only unique sequences
+        (clonotypes) are counted, and if :py:mod:`~immuneML.util.ReadsType.ALL`, the sequence 'count' value is
         summed when determining the number of matches. The default value for reads is all.
 
         motif_filepath (str): The path to the motif input file. This should be a tab separated file containing a
