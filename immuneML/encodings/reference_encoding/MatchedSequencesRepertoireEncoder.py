@@ -36,9 +36,9 @@ class MatchedSequencesRepertoireEncoder(MatchedSequencesEncoder):
 
     def _normalize(self, dataset, encoded_repertoires):
         if self.reads == ReadsType.UNIQUE:
-            repertoire_totals = np.asarray([[repertoire.get_element_count() for repertoire in dataset.get_data() for chain in range(2)]]).T
+            repertoire_totals = np.asarray([[repertoire.get_element_count() for repertoire in dataset.get_data()]]).T
         else:
-            repertoire_totals = np.asarray([[sum(repertoire.get_counts()) for repertoire in dataset.get_data() for chain in range(2)]]).T
+            repertoire_totals = np.asarray([[sum(repertoire.get_counts()) for repertoire in dataset.get_data()]]).T
 
         return encoded_repertoires / repertoire_totals
 

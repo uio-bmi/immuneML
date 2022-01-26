@@ -50,6 +50,7 @@ class MatchedReceptorsRepertoireEncoder(MatchedReceptorsEncoder):
 
         return encoded_repertoires / repertoire_totals
 
+
     def _get_feature_info(self):
         """
         returns a pandas dataframe containing:
