@@ -52,7 +52,7 @@ class ProbabilisticBinaryClassifier(MLMethod):
 
     SMALL_POSITIVE_NUMBER = 1e-15
 
-    def __init__(self, max_iterations: int, update_rate: float, likelihood_threshold: float = None):
+    def __init__(self, max_iterations: int = None, update_rate: float = None, likelihood_threshold: float = None):
         super().__init__()
         self.max_iterations = max_iterations
         self.update_rate = update_rate
