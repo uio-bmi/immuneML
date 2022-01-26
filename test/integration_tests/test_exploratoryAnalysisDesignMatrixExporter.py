@@ -51,7 +51,10 @@ class TestExploratoryAnalysisDesignMatrixExporter(TestCase):
                                                              label_config=label_config,
                                                              encoder=MatchedSequencesRepertoireEncoder.build_object(dataset,
                                                                                                              **{"max_edit_distance": 1,
-                                                                                                                "reference": refs}))}
+                                                                                                                "reference": refs,
+                                                                                                                "reads": "all",
+                                                                                                                "sum_matches": False
+                                                                                                                }))}
 
         process = ExploratoryAnalysisInstruction(units, name="exp")
         process.run(path / "results/")

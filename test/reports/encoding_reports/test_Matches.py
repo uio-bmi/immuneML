@@ -58,7 +58,9 @@ class TestMatches(unittest.TestCase):
 
         encoder = MatchedReceptorsEncoder.build_object(dataset, **{
             "reference": reference_receptors,
-            "max_edit_distances": 0
+            "max_edit_distances": 0,
+            "reads": "all",
+            "sum_matches": False
         })
 
         encoded = encoder.encode(dataset, EncoderParams(
@@ -146,7 +148,9 @@ class TestMatches(unittest.TestCase):
 
         encoder = MatchedSequencesEncoder.build_object(dataset, **{
             "reference": reference_sequences,
-            "max_edit_distance": 0
+            "max_edit_distance": 0,
+            "reads": "all",
+            "sum_matches": False
         })
 
         encoded = encoder.encode(dataset, EncoderParams(
@@ -229,7 +233,7 @@ class TestMatches(unittest.TestCase):
         encoder = MatchedRegexEncoder.build_object(dataset, **{
             "motif_filepath": filepath,
             "match_v_genes": False,
-            "sum_counts": True
+            "reads": "all"
         })
 
         encoded = encoder.encode(dataset, EncoderParams(

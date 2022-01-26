@@ -5,3 +5,5 @@ max_edit_distances: # max Levenshtein distances allowed for different chains
   delta: 0
   heavy: 0
   light: 0
+sum_matches: False
+reads: all

@@ -8,6 +8,7 @@ from immuneML.data_model.receptor.TCABReceptor import TCABReceptor
 from immuneML.data_model.receptor.TCGDReceptor import TCGDReceptor
 from immuneML.encodings.DatasetEncoder import DatasetEncoder
 from immuneML.encodings.EncoderParams import EncoderParams
+from immuneML.encodings.kmer_frequency.ReadsType import ReadsType
 from immuneML.encodings.reference_encoding.MatchedReferenceUtil import MatchedReferenceUtil
 from immuneML.util.ParameterValidator import ParameterValidator
 from immuneML.util.ReflectionHandler import ReflectionHandler
@@ -19,19 +20,22 @@ class MatchedReceptorsEncoder(DatasetEncoder):
     and a paired reference receptor dataset.
     For each paired reference receptor, the frequency of either chain in the dataset is counted.
 
-    This encoding should be used in combination with the :ref:`Matches`
-    report.
+    This encoding can be used in combination with the :ref:`Matches` report.
+
+    When sum_matches is set to True, this encoder behaves similarly as described in: Yao, Y. et al. ‘T cell receptor repertoire as a potential diagnostic marker for celiac disease’.
+    Clinical Immunology Volume 222 (January 2021): 108621. `doi.org/10.1016/j.clim.2020.108621 <https://doi.org/10.1016/j.clim.2020.108621>`_
+    with the only exception being that this encoder uses paired receptors, while the original publication used single sequences (see also: :ref:`MatchedSequences` encoder).
 
     Arguments:
 
-        reference (dict): A dictionary describing the reference dataset file, specified the same as regular data import.
-        See the :py:mod:`~immuneML.IO.sequence_import` for specification details.
-        Must contain paired receptor sequences.
+        reference (dict): A dictionary describing the reference dataset file. Import should be specified the same way as regular dataset import. It is only allowed to import a receptor dataset here (i.e., is_repertoire is False and paired is True by default, and these are not allowed to be changed).
 
-        max_edit_distances (dict): A dictionary specifying the maximum edit distance between a target sequence
-        (from the repertoire) and the reference sequence. A maximum distance can be specified per chain, for example
-        to allow for less strict matching of TCR alpha and BCR light chains. When only an integer is specified,
-        this distance is applied to all possible chains.
+        max_edit_distances (dict): A dictionary specifying the maximum edit distance between a target sequence (from the repertoire) and the reference sequence. A maximum distance can be specified per chain, for example to allow for less strict matching of TCR alpha and BCR light chains. When only an integer is specified, this distance is applied to all possible chains.
+
+        reads (:py:mod:`~immuneML.encodings.kmer_frequency.ReadsType`): Reads type signify whether the counts of the sequences in the repertoire will be taken into account. If :py:mod:`~immuneML.encodings.kmer_frequency_ReadsType.UNIQUE`, only unique sequences (clonotypes) are counted, and if :py:mod:`~immuneML.encodings.kmer_frequency.ReadsType.ALL`, the sequence 'count' value is summed when determining the number of matches. The default value for reads is all.
+
+        sum_matches (bool): When sum_matches is False, the resulting encoded data matrix contains multiple columns with the number of matches per reference receptor chain. When sum_matches is true, the columns representing each of the two chains are summed together, meaning that there are only two aggregated sums of matches (one per chain) per repertoire in the encoded data.
+        To use this encoder in combination with the :ref:`Matches` report, sum_matches must be set to False. When sum_matches is set to True, this encoder behaves similarly to the encoder described by Yao, Y. et al. By default, sum_matches is False.
 
 
     YAML Specification:
@@ -42,12 +46,8 @@ class MatchedReceptorsEncoder(DatasetEncoder):
         my_mr_encoding:
             MatchedReceptors:
                 reference:
-                    format: IRIS
-                    params:
-                        path: path/to/file.txt
-                        paired: True
-                        all_dual_chains: True
-                        all_genes: True
+                    path: path/to/file.txt
+                    format: VDJDB
                 max_edit_distances:
                     alpha: 1
                     beta: 0
@@ -57,14 +57,20 @@ class MatchedReceptorsEncoder(DatasetEncoder):
         "RepertoireDataset": "MatchedReceptorsRepertoireEncoder"
     }
 
-    def __init__(self, reference_receptors: List[Receptor], max_edit_distances: dict, name: str = None):
+    def __init__(self, reference_receptors: List[Receptor], max_edit_distances: dict, reads: ReadsType, sum_matches: bool, name: str = None):
         self.reference_receptors = reference_receptors
         self.max_edit_distances = max_edit_distances
+        self.reads = reads
+        self.sum_matches = sum_matches
+        self.feature_count = 2 if self.sum_matches else len(self.reference_receptors) * 2
         self.name = name
 
     @staticmethod
-    def _prepare_parameters(reference: dict, max_edit_distances: dict, name: str = None):
+    def _prepare_parameters(reference: dict, max_edit_distances: dict, reads: str, sum_matches: bool, name: str = None):
         location = "MatchedReceptorsEncoder"
+
+        ParameterValidator.assert_type_and_value(sum_matches, bool, location, "sum_matches")
+        ParameterValidator.assert_in_valid_list(reads.upper(), [item.name for item in ReadsType], location, "reads")
 
         legal_chains = [chain for receptor in (TCABReceptor(), TCGDReceptor(), BCReceptor()) for chain in receptor.get_chains()]
 
@@ -80,6 +86,8 @@ class MatchedReceptorsEncoder(DatasetEncoder):
         return {
             "reference_receptors": reference_receptors,
             "max_edit_distances": max_edit_distances,
+            "reads": ReadsType[reads.upper()],
+            "sum_matches": sum_matches,
             "name": name
         }
 

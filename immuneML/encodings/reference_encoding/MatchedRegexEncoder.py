@@ -8,6 +8,7 @@ from immuneML.caching.CacheHandler import CacheHandler
 from immuneML.data_model.receptor.receptor_sequence.Chain import Chain
 from immuneML.encodings.DatasetEncoder import DatasetEncoder
 from immuneML.encodings.EncoderParams import EncoderParams
+from immuneML.encodings.kmer_frequency.ReadsType import ReadsType
 from immuneML.util.ParameterValidator import ParameterValidator
 from immuneML.util.ReflectionHandler import ReflectionHandler
 from scripts.specification_util import update_docs_per_mapping
@@ -22,8 +23,7 @@ class MatchedRegexEncoder(DatasetEncoder):
     The regular expressions are defined per chain, and it is possible to require a V gene match in addition to the
     CDR3 sequence containing the regular expression.
 
-    This encoding should be used in combination with the :ref:`Matches`
-    report.
+    This encoding can be used in combination with the :ref:`Matches` report.
 
 
     Arguments:
@@ -31,9 +31,10 @@ class MatchedRegexEncoder(DatasetEncoder):
         match_v_genes (bool): Whether V gene matches are required. If this is True, a match is only counted if the
         V gene matches the gene specified in the motif input file. By default match_v_genes is False.
 
-        sum_counts (bool): When counting the number of matches, one can choose to count the number of matching sequences
-        or sum the frequencies of those sequences. If sum_counts is True, the sequence frequencies are summed. Otherwise,
-        if sum_counts is False, the number of matching unique sequences is counted. By default sum_counts is False.
+        reads (:py:mod:`~immuneML.encodings.kmer_frequency.ReadsType`): Reads type signify whether the counts of the sequences in the
+        repertoire will be taken into account. If :py:mod:`~immuneML.encodings.kmer_frequency.ReadsType.UNIQUE`, only unique sequences
+        (clonotypes) are counted, and if :py:mod:`~immuneML.encodings.kmer_frequency.ReadsType.ALL`, the sequence 'count' value is
+        summed when determining the number of matches. The default value for reads is all.
 
         motif_filepath (str): The path to the motif input file. This should be a tab separated file containing a
         column named 'id' and for every chain that should be matched a column containing the regex (<chain>_regex) and a column containing
@@ -72,7 +73,7 @@ class MatchedRegexEncoder(DatasetEncoder):
             MatchedRegex:
                 motif_filepath: path/to/file.txt
                 match_v_genes: True
-                sum_counts: False
+                reads: unique
 
     """
 
@@ -80,20 +81,20 @@ class MatchedRegexEncoder(DatasetEncoder):
         "RepertoireDataset": "MatchedRegexRepertoireEncoder"
     }
 
-    def __init__(self, motif_filepath: Path, match_v_genes: bool, sum_counts: bool, chains: list, name: str = None):
+    def __init__(self, motif_filepath: Path, match_v_genes: bool, reads: ReadsType, chains: list, name: str = None):
         self.motif_filepath = motif_filepath
         self.match_v_genes = match_v_genes
-        self.sum_counts = sum_counts
+        self.reads = reads
         self.chains = chains
         self.regex_df = None
         self.feature_count = None
         self.name = name
 
     @staticmethod
-    def _prepare_parameters(motif_filepath: str, match_v_genes: bool, sum_counts: bool, name: str = None):
+    def _prepare_parameters(motif_filepath: str, match_v_genes: bool, reads: str, name: str = None):
 
         ParameterValidator.assert_type_and_value(match_v_genes, bool, "MatchedRegexEncoder", "match_v_genes")
-        ParameterValidator.assert_type_and_value(sum_counts, bool, "MatchedRegexEncoder", "sum_counts")
+        ParameterValidator.assert_in_valid_list(reads.upper(), [item.name for item in ReadsType], "MatchedRegexEncoder", "reads")
 
         motif_filepath = Path(motif_filepath)
         assert motif_filepath.is_file(), f"MatchedRegexEncoder: the file {motif_filepath} does not exist. " \
@@ -112,7 +113,7 @@ class MatchedRegexEncoder(DatasetEncoder):
         return {
             "motif_filepath": motif_filepath,
             "match_v_genes": match_v_genes,
-            "sum_counts": sum_counts,
+            "reads": ReadsType[reads.upper()],
             "chains": chains,
             "name": name
         }

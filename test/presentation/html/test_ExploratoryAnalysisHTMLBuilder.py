@@ -51,7 +51,9 @@ class TestExploratoryAnalysisHTMLBuilder(TestCase):
 
         encoder = MatchedSequencesEncoder.build_object(dataset, **{
             "reference": refs_dict,
-            "max_edit_distance": 0
+            "max_edit_distance": 0,
+            "reads": "all",
+            "sum_matches": False
         }, name="test_encoding")
 
         encoded = encoder.encode(dataset, EncoderParams(
