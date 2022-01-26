@@ -60,7 +60,8 @@ class TestMatches(unittest.TestCase):
             "reference": reference_receptors,
             "max_edit_distances": 0,
             "reads": "all",
-            "sum_matches": False
+            "sum_matches": False,
+            "normalize": False
         })
 
         encoded = encoder.encode(dataset, EncoderParams(
@@ -150,7 +151,8 @@ class TestMatches(unittest.TestCase):
             "reference": reference_sequences,
             "max_edit_distance": 0,
             "reads": "all",
-            "sum_matches": False
+            "sum_matches": False,
+            "normalize": False
         })
 
         encoded = encoder.encode(dataset, EncoderParams(

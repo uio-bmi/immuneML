@@ -122,7 +122,10 @@ class MatchedReceptorsEncoder(DatasetEncoder):
         encoding_params_desc = {"max_edit_distance": sorted(self.max_edit_distances.items()),
                                 "reference_receptors": sorted([chain_a.get_sequence() + chain_a.metadata.v_gene + chain_a.metadata.j_gene + "|" +
                                                                 chain_b.get_sequence() + chain_b.metadata.v_gene + chain_b.metadata.j_gene
-                                                                for chain_a, chain_b in chains])}
+                                                                for chain_a, chain_b in chains]),
+                                "reads": self.reads.name,
+                                "sum_matches": self.sum_matches,
+                                "normalize": self.normalize}
 
         return (("dataset_identifiers", tuple(dataset.get_example_ids())),
                 ("dataset_metadata", dataset.metadata_file),

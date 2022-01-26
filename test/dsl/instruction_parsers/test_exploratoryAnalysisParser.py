@@ -61,7 +61,8 @@ class TestExploratoryAnalysisParser(TestCase):
             "max_edit_distance": 1,
             "reference": refs,
             "reads": "all",
-            "sum_matches": False
+            "sum_matches": False,
+            "normalize": False
         }})
         symbol_table.add("p1", SymbolType.PREPROCESSING, p1)
 

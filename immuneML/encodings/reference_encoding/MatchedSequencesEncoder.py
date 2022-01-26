@@ -103,7 +103,10 @@ class MatchedSequencesEncoder(DatasetEncoder):
 
         encoding_params_desc = {"max_edit_distance": self.max_edit_distance,
                                 "reference_sequences": sorted([seq.get_sequence() + seq.metadata.v_gene + seq.metadata.j_gene
-                                                               for seq in self.reference_sequences])}
+                                                               for seq in self.reference_sequences]),
+                                "reads": self.reads.name,
+                                "sum_matches": self.sum_matches,
+                                "normalize": self.normalize}
 
         return (("dataset_identifiers", tuple(dataset.get_example_ids())),
                 ("dataset_metadata", dataset.metadata_file),

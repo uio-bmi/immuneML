@@ -53,7 +53,8 @@ class TestExploratoryAnalysisHTMLBuilder(TestCase):
             "reference": refs_dict,
             "max_edit_distance": 0,
             "reads": "all",
-            "sum_matches": False
+            "sum_matches": False,
+            "normalize": False
         }, name="test_encoding")
 
         encoded = encoder.encode(dataset, EncoderParams(

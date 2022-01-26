@@ -53,8 +53,8 @@ class TestExploratoryAnalysisDesignMatrixExporter(TestCase):
                                                                                                              **{"max_edit_distance": 1,
                                                                                                                 "reference": refs,
                                                                                                                 "reads": "all",
-                                                                                                                "sum_matches": False
-                                                                                                                }))}
+                                                                                                                "sum_matches": False,
+                                                                                                                "normalize": False}))}
 
         process = ExploratoryAnalysisInstruction(units, name="exp")
         process.run(path / "results/")
