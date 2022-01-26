@@ -22,10 +22,13 @@ class MultiDatasetReport(Report):
 
         instruction_states (list): a list of states for each instruction that was run as a part of the tool, e.g., TrainMLModelState objects
 
+        number_of_processes (int): how many processes should be created at once to speed up the analysis. For personal machines, 4 or 8 is usually a good choice.
+
+
     """
 
-    def __init__(self, instruction_states: List[TrainMLModelState] = None, name: str = None, result_path: Path = None):
-        super().__init__(name)
+    def __init__(self, instruction_states: List[TrainMLModelState] = None, name: str = None, result_path: Path = None, number_of_processes: int = 1):
+        super().__init__(name, number_of_processes)
         self.instruction_states = instruction_states
         self.result_path = result_path
 

@@ -18,7 +18,6 @@ from immuneML.util.ParameterValidator import ParameterValidator
 from immuneML.util.PathBuilder import PathBuilder
 
 
-@dataclass
 class DesignMatrixExporter(EncodingReport):
     """
     Exports the design matrix and related information of a given encoded Dataset to csv files.
@@ -42,10 +41,9 @@ class DesignMatrixExporter(EncodingReport):
                 file_format: csv
 
     """
-    dataset: Dataset = None
-    result_path: Path = None
-    name: str = None
-    file_format: str = None
+    def __init__(self, dataset: Dataset = None, result_path: Path = None, file_format: str = None, number_of_processes: int = 1, name: str = None):
+        super().__init__(dataset=dataset, result_path=result_path, number_of_processes=number_of_processes, name=name)
+        self.file_format = file_format
 
     @classmethod
     def build_object(cls, **kwargs):
@@ -61,7 +59,9 @@ class DesignMatrixExporter(EncodingReport):
         details_result = self._export_details()
         label_result = self._export_labels()
 
-        return ReportResult(self.name, output_tables=[matrix_result, label_result], output_text=[details_result])
+        return ReportResult(self.name,
+                            info="The design matrix and related information of a given encoded Dataset",
+                            output_tables=[matrix_result, label_result], output_text=[details_result])
 
     def _export_matrix(self) -> ReportOutput:
         """Create a file for the design matrix in the desired format."""

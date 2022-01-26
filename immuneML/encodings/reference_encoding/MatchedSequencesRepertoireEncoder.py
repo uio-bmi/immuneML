@@ -64,8 +64,8 @@ class MatchedSequencesRepertoireEncoder(MatchedSequencesEncoder):
         for i, repertoire in enumerate(dataset.get_data()):
             encoded_repertories[i] = self._match_repertoire_to_reference(repertoire)
 
-            for label in params.label_config.get_labels_by_name():
-                labels[label].append(repertoire.metadata[label])
+            for label_name in params.label_config.get_labels_by_name():
+                labels[label_name].append(repertoire.metadata[label_name])
 
         return encoded_repertories, labels
 

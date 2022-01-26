@@ -33,13 +33,13 @@ class TestAtchleyKmerMILClassifier(TestCase):
                                                                                                                  [Label("l1", [True, False])])))
         cls = AtchleyKmerMILClassifier(iteration_count=10, threshold=-0.0001, evaluate_at=2, use_early_stopping=False, random_seed=1, learning_rate=0.01,
                                        zero_abundance_weight_init=True, number_of_threads=8)
-        cls.fit(enc_dataset.encoded_data, "l1")
+        cls.fit(enc_dataset.encoded_data, Label("l1"))
 
-        predictions = cls.predict(enc_dataset.encoded_data, "l1")
+        predictions = cls.predict(enc_dataset.encoded_data, Label("l1"))
         self.assertEqual(repertoire_count, len(predictions["l1"]))
         self.assertEqual(repertoire_count, len([pred for pred in predictions["l1"] if isinstance(pred, bool)]))
 
-        predictions_proba = cls.predict_proba(enc_dataset.encoded_data, "l1")
+        predictions_proba = cls.predict_proba(enc_dataset.encoded_data, Label("l1"))
         self.assertEqual(repertoire_count, np.rint(np.sum(predictions_proba["l1"])))
         self.assertEqual(repertoire_count, predictions_proba["l1"].shape[0])
 
@@ -55,11 +55,8 @@ class TestAtchleyKmerMILClassifier(TestCase):
         del cls_vars["logistic_regression"]
 
         for item, value in cls_vars.items():
-            if not isinstance(value, np.ndarray):
+            if not isinstance(value, np.ndarray) and not isinstance(value, Label):
                 loaded_value = cls2_vars[item]
                 self.assertEqual(value, loaded_value)
-
-        model = cls.get_model("l1")
-        self.assertEqual(vars(cls), model)
 
         shutil.rmtree(path)

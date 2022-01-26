@@ -5,6 +5,8 @@ import numpy as np
 import plotly.graph_objects as go
 from scipy.stats import beta
 
+from immuneML.data_model.dataset.Dataset import Dataset
+from immuneML.hyperparameter_optimization.HPSetting import HPSetting
 from immuneML.ml_methods.MLMethod import MLMethod
 from immuneML.ml_methods.ProbabilisticBinaryClassifier import ProbabilisticBinaryClassifier
 from immuneML.reports.ReportOutput import ReportOutput
@@ -42,11 +44,11 @@ class SequenceAssociationLikelihood(MLReport):
         else:
             return True
 
-    def __init__(self, method: MLMethod = None, result_path: Path = None, name: str = None, **kwargs):
-        super().__init__(method=method, result_path=result_path, name=name)
-        self.method = method
-        self.result_path = result_path
-        self.name = name
+    def __init__(self, train_dataset: Dataset = None, test_dataset: Dataset = None,
+                 method: MLMethod = None, result_path: Path = None, name: str = None, hp_setting: HPSetting = None,
+                 label=None, number_of_processes: int = 1):
+        super().__init__(train_dataset=train_dataset, test_dataset=test_dataset, method=method, result_path=result_path,
+                         name=name, hp_setting=hp_setting, label=label, number_of_processes=number_of_processes)
         self.result_name = None
 
     def _generate(self) -> ReportResult:
@@ -59,7 +61,8 @@ class SequenceAssociationLikelihood(MLReport):
         report_output_fig = self._plot(upper_limit=upper_limit, lower_limit=lower_limit)
         output_figures = [] if report_output_fig is None else [report_output_fig]
 
-        return ReportResult(name="Beta distribution priors - probability that a sequence is disease-associated",
+        return ReportResult(name=self.name,
+                            info="Beta distribution priors - probability that a sequence is disease-associated",
                             output_figures=output_figures)
 
     def _plot(self, upper_limit, lower_limit):
@@ -69,10 +72,10 @@ class SequenceAssociationLikelihood(MLReport):
         positive_pdf = beta.pdf(beta_distribution_x, self.method.alpha_1, self.method.beta_1)
 
         figure = go.Figure()
-        figure.add_trace(go.Scatter(x=beta_distribution_x, y=negative_pdf, mode='lines', line=dict(color='#E69F00', width=2), name=f"{self.method.label_name} {self.method.class_mapping[0]}"))
-        figure.add_trace(go.Scatter(x=beta_distribution_x, y=positive_pdf, mode='lines', line=dict(color='#0072B2', width=2), name=f"{self.method.label_name} {self.method.class_mapping[1]}"))
+        figure.add_trace(go.Scatter(x=beta_distribution_x, y=negative_pdf, mode='lines', line=dict(color='#E69F00', width=2), name=f"{self.method.get_label_name()} {self.method.class_mapping[0]}"))
+        figure.add_trace(go.Scatter(x=beta_distribution_x, y=positive_pdf, mode='lines', line=dict(color='#0072B2', width=2), name=f"{self.method.get_label_name()} {self.method.class_mapping[1]}"))
 
-        figure.update_layout(template="plotly_white", xaxis_title=f"probability that receptor sequence is {self.method.label_name}-associated",
+        figure.update_layout(template="plotly_white", xaxis_title=f"probability that receptor sequence is {self.method.get_label_name()}-associated",
                              yaxis_title="probability density function", xaxis={'tickformat': '.2e'}, yaxis={'tickformat': '.2e'})
 
         output_path = self.result_path / f"{self.result_name}.html"

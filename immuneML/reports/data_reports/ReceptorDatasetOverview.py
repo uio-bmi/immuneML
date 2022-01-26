@@ -30,8 +30,8 @@ class ReceptorDatasetOverview(DataReport):
 
     """
 
-    def __init__(self, batch_size: int, dataset: ReceptorDataset = None, result_path: Path = None, name: str = None):
-        super().__init__(dataset, result_path, name)
+    def __init__(self, batch_size: int, dataset: ReceptorDataset = None, result_path: Path = None, number_of_processes: int = 1, name: str = None):
+        super().__init__(dataset=dataset, result_path=result_path, number_of_processes=number_of_processes, name=name)
         self.batch_size = batch_size
 
     @classmethod
@@ -41,7 +41,9 @@ class ReceptorDatasetOverview(DataReport):
     def _generate(self) -> ReportResult:
         PathBuilder.build(self.result_path)
         figure, tables = self._generate_sequence_length_distribution_plots()
-        return ReportResult(name=self.name, output_figures=[figure], output_tables=tables)
+        return ReportResult(name=self.name,
+                            info="This report plots the length distribution per chain for a receptor (paired-chain) dataset.",
+                            output_figures=[figure], output_tables=tables)
 
     def _prepare_data_for_length_distribution(self):
         receptors = {}

@@ -56,15 +56,21 @@ class FeatureValueBarplot(FeatureReport):
 
     def __init__(self, dataset: RepertoireDataset = None, result_path: Path = None,
                  color_grouping_label: str = None, row_grouping_label=None, column_grouping_label=None,
-                 x_title: str = None, y_title: str = None, show_error_bar=True, name: str = None):
+                 x_title: str = None, y_title: str = None, show_error_bar=True, name: str = None,
+                 number_of_processes: int = 1):
         super().__init__(dataset=dataset, result_path=result_path, color_grouping_label=color_grouping_label,
-                         row_grouping_label=row_grouping_label, column_grouping_label=column_grouping_label, name=name)
+                         row_grouping_label=row_grouping_label, column_grouping_label=column_grouping_label,
+                         name=name, number_of_processes=number_of_processes)
         self.show_error_bar = show_error_bar
         self.x_title = x_title if x_title is not None else self.x
         self.y_title = y_title if y_title is not None else "value"
         self.result_name = "feature_value_barplot"
         self.name = name
 
+    def _generate(self):
+        result = self._generate_report_result()
+        result.info = "A barplot of the feature values in a given encoded data matrix, averaged across examples. Each bar in the barplot represents the mean value of a given feature, and along the x-axis are the different features."
+        return result
 
     def _plot(self, data_long_format) -> ReportOutput:
         groupby_cols = [self.x, self.color, self.facet_row, self.facet_column]

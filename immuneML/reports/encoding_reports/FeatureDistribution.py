@@ -60,13 +60,19 @@ class FeatureDistribution(FeatureReport):
 
     def __init__(self, dataset: Dataset = None, result_path: Path = None, color_grouping_label: str = None,
                  row_grouping_label=None, column_grouping_label=None,
-                 mode: str = 'auto', x_title: str = None, y_title: str = None, name: str = None):
+                 mode: str = 'auto', x_title: str = None, y_title: str = None, number_of_processes: int = 1, name: str = None):
         super().__init__(dataset=dataset, result_path=result_path, color_grouping_label=color_grouping_label,
-                         row_grouping_label=row_grouping_label, column_grouping_label=column_grouping_label, name=name)
+                         row_grouping_label=row_grouping_label, column_grouping_label=column_grouping_label,
+                         number_of_processes=number_of_processes, name=name)
         self.x_title = x_title if x_title is not None else self.x
         self.y_title = y_title if y_title is not None else "value"
         self.mode = mode
         self.result_name = "feature_distributions"
+
+    def _generate(self):
+        result = self._generate_report_result()
+        result.info = "Each boxplot represents one feature of the encoded data matrix, and shows the distribution of values for that feature."
+        return result
 
     def _plot(self, data_long_format, mode='sparse') -> ReportOutput:
         sparse_threshold = 0.01

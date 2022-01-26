@@ -75,11 +75,11 @@ class Util:
         return mapping
 
     @staticmethod
-    def binarize_labels(true_y, predicted_y, labels):
+    def binarize_label_classes(true_y, predicted_y, classes):
         """Binarizes the predictions in place using scikit-learn's label_binarize() method"""
         if hasattr(true_y, 'dtype') and true_y.dtype.type is np.str_ or isinstance(true_y, list) and any(isinstance(item, str) for item in true_y):
-            true_y = label_binarize(true_y, classes=labels)
-            predicted_y = label_binarize(predicted_y, classes=labels)
+            true_y = label_binarize(true_y, classes=classes)
+            predicted_y = label_binarize(predicted_y, classes=classes)
 
         return true_y, predicted_y
 

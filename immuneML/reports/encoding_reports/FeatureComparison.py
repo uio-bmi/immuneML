@@ -79,15 +79,21 @@ class FeatureComparison(FeatureReport):
 
     def __init__(self, dataset: Dataset = None, result_path: Path = None, comparison_label: str = None,
                  color_grouping_label: str = None, row_grouping_label=None, column_grouping_label=None,
-                 show_error_bar=True, log_scale: bool = False, keep_fraction: int = 1, name: str = None):
+                 show_error_bar=True, log_scale: bool = False, keep_fraction: int = 1, number_of_processes: int = 1, name: str = None):
         super().__init__(dataset=dataset, result_path=result_path, color_grouping_label=color_grouping_label,
-                         row_grouping_label=row_grouping_label, column_grouping_label=column_grouping_label, name=name)
+                         row_grouping_label=row_grouping_label, column_grouping_label=column_grouping_label,
+                         number_of_processes=number_of_processes, name=name)
         self.comparison_label = comparison_label
         self.show_error_bar = show_error_bar
         self.log_scale = log_scale
         self.keep_fraction = keep_fraction
         self.result_name = "feature_comparison"
         self.name = name
+
+    def _generate(self):
+        result = self._generate_report_result()
+        result.info = "Compares the feature values in a given encoded data matrix across two values for a metadata label. Each point in the resulting scatterplot represents one feature, and the values on the x and y axes are the average feature values across examples of two different classes. "
+        return result
 
     def _plot(self, data_long_format) -> ReportOutput:
         groupby_cols = [self.comparison_label, self.x, self.color, self.facet_row, self.facet_column]

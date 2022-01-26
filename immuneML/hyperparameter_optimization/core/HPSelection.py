@@ -1,6 +1,7 @@
 import datetime
 from pathlib import Path
 
+from immuneML.environment.Label import Label
 from immuneML.environment.LabelConfiguration import LabelConfiguration
 from immuneML.hyperparameter_optimization.HPSetting import HPSetting
 from immuneML.hyperparameter_optimization.config.SplitType import SplitType
@@ -29,13 +30,13 @@ class HPSelection:
 
         n_labels = state.label_configuration.get_label_count()
 
-        for idx, label in enumerate(state.label_configuration.get_labels_by_name()):
+        for idx, label in enumerate(state.label_configuration.get_label_objects()):
 
-            print(f"{datetime.datetime.now()}: Hyperparameter optimization: running the inner loop of nested CV: selection for label {label} "
+            print(f"{datetime.datetime.now()}: Hyperparameter optimization: running the inner loop of nested CV: selection for label {label.name} "
                   f"(label {idx + 1} / {n_labels}).\n", flush=True)
 
             selection_state = HPSelectionState(train_datasets, val_datasets, path, state.hp_strategy)
-            state.assessment_states[split_index].label_states[label].selection_state = selection_state
+            state.assessment_states[split_index].label_states[label.name].selection_state = selection_state
 
             hp_setting = selection_state.hp_strategy.generate_next_setting()
             while hp_setting is not None:
@@ -46,13 +47,13 @@ class HPSelection:
             HPUtil.run_selection_reports(state, train_val_dataset, train_datasets, val_datasets, selection_state)
 
             print(f"{datetime.datetime.now()}: Hyperparameter optimization: running the inner loop of nested CV: completed selection for "
-                  f"label {label} (label {idx + 1} / {n_labels}).\n", flush=True)
+                  f"label {label.name} (label {idx + 1} / {n_labels}).\n", flush=True)
 
         return state
 
     @staticmethod
     def evaluate_hp_setting(state: TrainMLModelState, hp_setting: HPSetting, train_datasets: list, val_datasets: list,
-                            current_path: Path, label: str, assessment_split_index: int):
+                            current_path: Path, label: Label, assessment_split_index: int):
 
         performances = []
         for index in range(state.selection.split_count):
@@ -65,15 +66,15 @@ class HPSelection:
 
     @staticmethod
     def run_setting(state: TrainMLModelState, hp_setting, train_dataset, val_dataset, split_index: int,
-                    current_path: Path, label: str, assessment_index: int):
+                    current_path: Path, label: Label, assessment_index: int):
 
         hp_item = MLProcess(train_dataset=train_dataset, test_dataset=val_dataset, encoding_reports=state.selection.reports.encoding_reports.values(),
-                            label_config=LabelConfiguration([state.label_configuration.get_label_object(label)]), report_context=state.context,
+                            label_config=LabelConfiguration([label]), report_context=state.context,
                             number_of_processes=state.number_of_processes, metrics=state.metrics, optimization_metric=state.optimization_metric,
                             ml_reports=state.selection.reports.model_reports.values(), label=label, path=current_path, hp_setting=hp_setting)\
             .run(split_index)
 
-        state.assessment_states[assessment_index].label_states[label].selection_state.hp_items[hp_setting.get_key()].append(hp_item)
+        state.assessment_states[assessment_index].label_states[label.name].selection_state.hp_items[hp_setting.get_key()].append(hp_item)
 
         return hp_item.performance[state.optimization_metric.name.lower()] if hp_item.performance is not None else None
 

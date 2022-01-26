@@ -79,6 +79,7 @@ mouse_subject0053,PA,1,TRAV6D-6*01,TRAJ53*01,CALGGGSNYKLTF,tgtgctctgggtggaggcagc
 
         report = TCRdistMotifDiscovery(train_dataset=dataset, test_dataset=dataset, result_path=path / "report", name="report name", cores=8,
                                        positive_class_name="PA", min_cluster_size=3)
+        report.label = Label("epitope")
         report._generate()
 
         shutil.rmtree(path)

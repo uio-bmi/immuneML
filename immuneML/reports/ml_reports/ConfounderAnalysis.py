@@ -51,10 +51,10 @@ class ConfounderAnalysis(MLReport):
         return ConfounderAnalysis(metadata_labels=kwargs['metadata_labels'], name=kwargs['name'])
 
     def __init__(self, metadata_labels: List[str], train_dataset: Dataset = None, test_dataset: Dataset = None,
-                 method: MLMethod = None,
-                 result_path: Path = None, name: str = None, hp_setting: HPSetting = None, label=None):
-        super().__init__(train_dataset, test_dataset, method, result_path, name, hp_setting, label)
-
+                 method: MLMethod = None, result_path: Path = None, name: str = None, hp_setting: HPSetting = None,
+                 label=None, number_of_processes: int=1):
+        super().__init__(train_dataset=train_dataset, test_dataset=test_dataset, method=method, result_path=result_path,
+                         name=name, hp_setting=hp_setting, label=label, number_of_processes=number_of_processes)
         self.metadata_labels = metadata_labels
 
     def _generate(self) -> ReportResult:
@@ -62,9 +62,9 @@ class ConfounderAnalysis(MLReport):
         paths = []
 
         # make predictions
-        predictions = self.method.predict(self.test_dataset.encoded_data, self.label)[self.label]  # label = disease
+        predictions = self.method.predict(self.test_dataset.encoded_data, self.label)[self.label.name]
 
-        true_labels = self.test_dataset.get_metadata(self.metadata_labels + [self.label])
+        true_labels = self.test_dataset.get_metadata(self.metadata_labels + [self.label.name])
         metrics = ["FP", "FN"]
 
         plot = make_subplots(rows=len(self.metadata_labels), cols=2)
@@ -73,7 +73,7 @@ class ConfounderAnalysis(MLReport):
         for label_index, meta_label in enumerate(self.metadata_labels):
             csv_data = {}
             for metric_index, metric in enumerate(metrics):
-                plotting_data = self._metrics(metric=metric, label=self.label, meta_label=meta_label,
+                plotting_data = self._metrics(metric=metric, label_name=self.label.name, meta_label=meta_label,
                                               predictions=predictions, true_labels=true_labels)
 
                 csv_data[f"{metric}"] = plotting_data[f"{metric}"]
@@ -95,7 +95,9 @@ class ConfounderAnalysis(MLReport):
         paths.append(report_output_fig)
 
         result_table_path = self._write_results_table(listOfPlot, self.metadata_labels)
-        return ReportResult(name=self.name, output_figures=paths, output_tables=[ReportOutput(result_table_path[0])])
+        return ReportResult(name=self.name,
+                            info="Plots the numbers of false positives and false negatives with respect to each value of the metadata features specified by the user.",
+                            output_figures=paths, output_tables=[ReportOutput(result_table_path[0])])
 
     def _write_results_table(self, plotting_data, labels):
         filepaths = []
@@ -106,12 +108,12 @@ class ConfounderAnalysis(MLReport):
         return filepaths
 
     @staticmethod
-    def _metrics(metric, label, meta_label, predictions, true_labels):
+    def _metrics(metric, label_name, meta_label, predictions, true_labels):
         # indices of samples at which misclassification occurred
         if metric == "FP":
-            metric_inds = np.nonzero(np.greater(predictions, true_labels[label]))[0].tolist()
+            metric_inds = np.nonzero(np.greater(predictions, true_labels[label_name]))[0].tolist()
         else:
-            metric_inds = np.nonzero(np.less(predictions, true_labels[label]))[0].tolist()
+            metric_inds = np.nonzero(np.less(predictions, true_labels[label_name]))[0].tolist()
 
         metadata_values = true_labels[meta_label]
         # indices of misclassification with respect to the metadata label

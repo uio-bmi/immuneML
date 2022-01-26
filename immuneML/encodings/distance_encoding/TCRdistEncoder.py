@@ -64,19 +64,19 @@ class TCRdistEncoder(DatasetEncoder):
 
         return encoded_dataset
 
-    def _build_tcr_dist_matrix(self, dataset: ReceptorDataset, labels):
+    def _build_tcr_dist_matrix(self, dataset: ReceptorDataset, label_names):
         from immuneML.util.TCRdistHelper import TCRdistHelper
 
         current_dataset = dataset if self.context is None or "dataset" not in self.context else self.context["dataset"]
-        tcr_rep = TCRdistHelper.compute_tcr_dist(current_dataset, labels, self.cores)
+        tcr_rep = TCRdistHelper.compute_tcr_dist(current_dataset, label_names, self.cores)
         self.distance_matrix = pd.DataFrame(tcr_rep.pw_alpha + tcr_rep.pw_beta, index=tcr_rep.clone_df.clone_id.values,
                                             columns=tcr_rep.clone_df.clone_id.values)
 
     def _build_labels(self, dataset: ReceptorDataset, params: EncoderParams) -> dict:
         labels = {label: [] for label in params.label_config.get_labels_by_name()}
         for receptor in dataset.get_data():
-            for label in labels.keys():
-                labels[label].append(receptor.metadata[label])
+            for label_name in labels.keys():
+                labels[label_name].append(receptor.metadata[label_name])
         return labels
 
     @staticmethod
