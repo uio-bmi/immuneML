@@ -18,6 +18,8 @@ class MatchedSequencesRepertoireEncoder(MatchedSequencesEncoder):
 
         encoded_repertoires, labels = self._encode_repertoires(dataset, params)
 
+        encoded_repertoires = self._normalize(dataset, encoded_repertoires) if self.normalize else encoded_repertoires
+
         feature_annotations = None if self.sum_matches else self._get_feature_info()
         feature_names = [f"sum_of_{self.reads.value}_reads"] if self.sum_matches else list(feature_annotations["sequence_id"])
 
@@ -31,6 +33,14 @@ class MatchedSequencesRepertoireEncoder(MatchedSequencesEncoder):
         ))
 
         return encoded_dataset
+
+    def _normalize(self, dataset, encoded_repertoires):
+        if self.reads == ReadsType.UNIQUE:
+            repertoire_totals = np.asarray([[repertoire.get_element_count() for repertoire in dataset.get_data() for chain in range(2)]]).T
+        else:
+            repertoire_totals = np.asarray([[sum(repertoire.get_counts()) for repertoire in dataset.get_data() for chain in range(2)]]).T
+
+        return encoded_repertoires / repertoire_totals
 
     def _get_feature_info(self):
         """

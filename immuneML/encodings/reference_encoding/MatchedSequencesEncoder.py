@@ -16,7 +16,7 @@ class MatchedSequencesEncoder(DatasetEncoder):
 
     This encoding can be used in combination with the :ref:`Matches` report.
 
-    When sum_matches is set to True, this encoder behaves as described in: Yao, Y. et al. ‘T cell receptor repertoire as a potential diagnostic marker for celiac disease’.
+    When sum_matches and normalize are set to True, this encoder behaves as described in: Yao, Y. et al. ‘T cell receptor repertoire as a potential diagnostic marker for celiac disease’.
     Clinical Immunology Volume 222 (January 2021): 108621. `doi.org/10.1016/j.clim.2020.108621 <https://doi.org/10.1016/j.clim.2020.108621>`_
 
 
@@ -30,6 +30,9 @@ class MatchedSequencesEncoder(DatasetEncoder):
 
         sum_matches (bool): When sum_matches is False, the resulting encoded data matrix contains multiple columns with the number of matches per reference sequence. When sum_matches is true, all columns are summed together, meaning that there is only one aggregated sum of matches per repertoire in the encoded data.
         To use this encoder in combination with the :ref:`Matches` report, sum_matches must be set to False. When sum_matches is set to True, this encoder behaves as described by Yao, Y. et al. By default, sum_matches is False.
+
+        normalize (bool): If True, the sequence matches are divided by the total number of unique sequences in the repertoire (when reads = unique) or the total number of reads in the repertoire (when reads = all).
+
 
     YAML Specification:
 
@@ -48,20 +51,22 @@ class MatchedSequencesEncoder(DatasetEncoder):
         "RepertoireDataset": "MatchedSequencesRepertoireEncoder"
     }
 
-    def __init__(self, max_edit_distance: int, reference_sequences: ReceptorSequenceList, reads: ReadsType, sum_matches: bool, name: str = None):
+    def __init__(self, max_edit_distance: int, reference_sequences: ReceptorSequenceList, reads: ReadsType, sum_matches: bool, normalize: bool, name: str = None):
         self.max_edit_distance = max_edit_distance
         self.reference_sequences = reference_sequences
         self.reads = reads
         self.sum_matches = sum_matches
+        self.normalize = normalize
         self.feature_count = 1 if self.sum_matches else len(self.reference_sequences)
         self.name = name
 
     @staticmethod
-    def _prepare_parameters(max_edit_distance: int, reference: dict, reads: str, sum_matches: bool, name: str = None):
+    def _prepare_parameters(max_edit_distance: int, reference: dict, reads: str, sum_matches: bool, normalize: bool, name: str = None):
         location = "MatchedSequencesEncoder"
 
         ParameterValidator.assert_type_and_value(max_edit_distance, int, location, "max_edit_distance", min_inclusive=0)
         ParameterValidator.assert_type_and_value(sum_matches, bool, location, "sum_matches")
+        ParameterValidator.assert_type_and_value(normalize, bool, location, "normalize")
         ParameterValidator.assert_in_valid_list(reads.upper(), [item.name for item in ReadsType], location, "reads")
 
         reference_sequences = MatchedReferenceUtil.prepare_reference(reference_params=reference, location=location, paired=False)
@@ -71,6 +76,7 @@ class MatchedSequencesEncoder(DatasetEncoder):
             "reference_sequences": reference_sequences,
             "reads": ReadsType[reads.upper()],
             "sum_matches": sum_matches,
+            "normalize": normalize,
             "name": name
         }
 

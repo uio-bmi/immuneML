@@ -22,7 +22,7 @@ class MatchedReceptorsEncoder(DatasetEncoder):
 
     This encoding can be used in combination with the :ref:`Matches` report.
 
-    When sum_matches is set to True, this encoder behaves similarly as described in: Yao, Y. et al. ‘T cell receptor repertoire as a potential diagnostic marker for celiac disease’.
+    When sum_matches and normalize are set to True, this encoder behaves similarly as described in: Yao, Y. et al. ‘T cell receptor repertoire as a potential diagnostic marker for celiac disease’.
     Clinical Immunology Volume 222 (January 2021): 108621. `doi.org/10.1016/j.clim.2020.108621 <https://doi.org/10.1016/j.clim.2020.108621>`_
     with the only exception being that this encoder uses paired receptors, while the original publication used single sequences (see also: :ref:`MatchedSequences` encoder).
 
@@ -36,6 +36,8 @@ class MatchedReceptorsEncoder(DatasetEncoder):
 
         sum_matches (bool): When sum_matches is False, the resulting encoded data matrix contains multiple columns with the number of matches per reference receptor chain. When sum_matches is true, the columns representing each of the two chains are summed together, meaning that there are only two aggregated sums of matches (one per chain) per repertoire in the encoded data.
         To use this encoder in combination with the :ref:`Matches` report, sum_matches must be set to False. When sum_matches is set to True, this encoder behaves similarly to the encoder described by Yao, Y. et al. By default, sum_matches is False.
+
+        normalize (bool): If True, the chain matches are divided by the total number of unique receptors in the repertoire (when reads = unique) or the total number of reads in the repertoire (when reads = all).
 
 
     YAML Specification:
@@ -57,19 +59,21 @@ class MatchedReceptorsEncoder(DatasetEncoder):
         "RepertoireDataset": "MatchedReceptorsRepertoireEncoder"
     }
 
-    def __init__(self, reference_receptors: List[Receptor], max_edit_distances: dict, reads: ReadsType, sum_matches: bool, name: str = None):
+    def __init__(self, reference_receptors: List[Receptor], max_edit_distances: dict, reads: ReadsType, sum_matches: bool, normalize: bool, name: str = None):
         self.reference_receptors = reference_receptors
         self.max_edit_distances = max_edit_distances
         self.reads = reads
         self.sum_matches = sum_matches
+        self.normalize = normalize
         self.feature_count = 2 if self.sum_matches else len(self.reference_receptors) * 2
         self.name = name
 
     @staticmethod
-    def _prepare_parameters(reference: dict, max_edit_distances: dict, reads: str, sum_matches: bool, name: str = None):
+    def _prepare_parameters(reference: dict, max_edit_distances: dict, reads: str, sum_matches: bool, normalize: bool, name: str = None):
         location = "MatchedReceptorsEncoder"
 
         ParameterValidator.assert_type_and_value(sum_matches, bool, location, "sum_matches")
+        ParameterValidator.assert_type_and_value(normalize, bool, location, "normalize")
         ParameterValidator.assert_in_valid_list(reads.upper(), [item.name for item in ReadsType], location, "reads")
 
         legal_chains = [chain for receptor in (TCABReceptor(), TCGDReceptor(), BCReceptor()) for chain in receptor.get_chains()]
@@ -88,6 +92,7 @@ class MatchedReceptorsEncoder(DatasetEncoder):
             "max_edit_distances": max_edit_distances,
             "reads": ReadsType[reads.upper()],
             "sum_matches": sum_matches,
+            "normalize": normalize,
             "name": name
         }
 

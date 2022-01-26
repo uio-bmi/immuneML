@@ -52,130 +52,89 @@ class TestMatchedSequencesEncoder(TestCase):
 
         return dataset, label_config, reference_sequences, labels
 
-    def test__encode_new_dataset_all_reads(self):
-        path = EnvironmentSettings.root_path / "test/tmp/matched_sequences_encoder_all/"
+    def test__encode_new_dataset(self):
+        expected_outcomes = {"unique":
+                                 {True: [[1, 0],[0, 1],[0, 0.5]],
+                                  False: [[1, 0],[0, 1],[0, 1]]},
+                             "all":
+                                 {True: [[1, 0],[0, 1],[0, 0.5]],
+                                  False: [[10, 0],[0, 10],[0, 5]]}}
 
-        dataset, label_config, reference_sequences, labels = self.create_dummy_data(path)
+        for reads in ["unique", "all"]:
+            for normalize in [True, False]:
 
-        encoder = MatchedSequencesEncoder.build_object(dataset, **{
-            "reference": reference_sequences,
-            "max_edit_distance": 0,
-            "reads": "all",
-            "sum_matches": False
-        })
+                path = EnvironmentSettings.root_path / "test/tmp/matched_sequences_encoder_all/"
 
-        encoded = encoder.encode(dataset, EncoderParams(
-            result_path=path,
-            label_config=label_config,
-            filename="dataset.csv"
-        ))
+                dataset, label_config, reference_sequences, labels = self.create_dummy_data(path)
 
-        expected_outcome = [[10, 0],[0, 10],[0, 5]]
-        for index, row in enumerate(expected_outcome):
-            self.assertListEqual(list(encoded.encoded_data.examples[index]), expected_outcome[index])
+                encoder = MatchedSequencesEncoder.build_object(dataset, **{
+                    "reference": reference_sequences,
+                    "max_edit_distance": 0,
+                    "reads": reads,
+                    "sum_matches": False,
+                    "normalize": normalize
+                })
 
-        self.assertDictEqual(encoded.encoded_data.labels, {"label": ["yes", "yes", "no"],
-                                                           "subject_id": ["subject_1", "subject_2", "subject_3"]})
-        self.assertListEqual(encoded.encoded_data.feature_names, ["100_TRB", "200_TRB"])
+                encoded = encoder.encode(dataset, EncoderParams(
+                    result_path=path,
+                    label_config=label_config,
+                    filename="dataset.csv"
+                ))
 
-        self.assertListEqual(list(encoded.encoded_data.feature_annotations.sequence_id), ["100_TRB", "200_TRB"])
-        self.assertListEqual(list(encoded.encoded_data.feature_annotations.chain), ["beta", "beta"])
-        self.assertListEqual(list(encoded.encoded_data.feature_annotations.sequence), ["AAAA", "SSSS"])
-        self.assertListEqual(list(encoded.encoded_data.feature_annotations.v_gene), ["TRBV1", "TRBV1"])
-        self.assertListEqual(list(encoded.encoded_data.feature_annotations.j_gene), ["TRBJ1", "TRBJ1"])
+                expected_outcome = expected_outcomes[reads][normalize]
+                for index, row in enumerate(expected_outcome):
+                    self.assertListEqual(list(encoded.encoded_data.examples[index]), expected_outcome[index])
 
-        shutil.rmtree(path)
+                self.assertDictEqual(encoded.encoded_data.labels, {"label": ["yes", "yes", "no"],
+                                                                   "subject_id": ["subject_1", "subject_2", "subject_3"]})
+                self.assertListEqual(encoded.encoded_data.feature_names, ["100_TRB", "200_TRB"])
 
-    def test__encode_new_dataset_unique_reads(self):
-        path = EnvironmentSettings.root_path / "test/tmp/matched_sequences_encoder_unique/"
+                self.assertListEqual(list(encoded.encoded_data.feature_annotations.sequence_id), ["100_TRB", "200_TRB"])
+                self.assertListEqual(list(encoded.encoded_data.feature_annotations.chain), ["beta", "beta"])
+                self.assertListEqual(list(encoded.encoded_data.feature_annotations.sequence), ["AAAA", "SSSS"])
+                self.assertListEqual(list(encoded.encoded_data.feature_annotations.v_gene), ["TRBV1", "TRBV1"])
+                self.assertListEqual(list(encoded.encoded_data.feature_annotations.j_gene), ["TRBJ1", "TRBJ1"])
 
-        dataset, label_config, reference_sequences, labels = self.create_dummy_data(path)
+                shutil.rmtree(path)
 
-        encoder = MatchedSequencesEncoder.build_object(dataset, **{
-            "reference": reference_sequences,
-            "max_edit_distance": 0,
-            "reads": "unique",
-            "sum_matches": False
-        })
 
-        encoded = encoder.encode(dataset, EncoderParams(
-            result_path=path,
-            label_config=label_config,
-            filename="dataset.csv"
-        ))
+    def test__encode_new_dataset_sum(self):
+        expected_outcomes = {"unique":
+                                 {True: [[1],[1],[0.5]],
+                                  False: [[1],[1],[1]]},
+                             "all":
+                                 {True: [[1],[1],[0.5]],
+                                  False:[[10],[10],[5]]}}
 
-        expected_outcome = [[1, 0],[0, 1],[0, 1]]
-        for index, row in enumerate(expected_outcome):
-            self.assertListEqual(list(encoded.encoded_data.examples[index]), expected_outcome[index])
+        for reads in ["unique", "all"]:
+            for normalize in [True, False]:
+                path = EnvironmentSettings.root_path / "test/tmp/matched_sequences_encoder_all_sum/"
 
-        self.assertDictEqual(encoded.encoded_data.labels, {"label": ["yes", "yes", "no"],
-                                                           "subject_id": ["subject_1", "subject_2", "subject_3"]})
-        self.assertListEqual(encoded.encoded_data.feature_names, ["100_TRB", "200_TRB"])
+                dataset, label_config, reference_sequences, labels = self.create_dummy_data(path)
 
-        self.assertListEqual(list(encoded.encoded_data.feature_annotations.sequence_id), ["100_TRB", "200_TRB"])
-        self.assertListEqual(list(encoded.encoded_data.feature_annotations.chain), ["beta", "beta"])
-        self.assertListEqual(list(encoded.encoded_data.feature_annotations.sequence), ["AAAA", "SSSS"])
-        self.assertListEqual(list(encoded.encoded_data.feature_annotations.v_gene), ["TRBV1", "TRBV1"])
-        self.assertListEqual(list(encoded.encoded_data.feature_annotations.j_gene), ["TRBJ1", "TRBJ1"])
+                encoder = MatchedSequencesEncoder.build_object(dataset, **{
+                    "reference": reference_sequences,
+                    "max_edit_distance": 0,
+                    "reads": reads,
+                    "sum_matches": True,
+                    "normalize": normalize
+                })
 
-        shutil.rmtree(path)
+                encoded = encoder.encode(dataset, EncoderParams(
+                    result_path=path,
+                    label_config=label_config,
+                    filename="dataset.csv"
+                ))
 
-    def test__encode_new_dataset_all_reads_sum(self):
-        path = EnvironmentSettings.root_path / "test/tmp/matched_sequences_encoder_all_sum/"
+                expected_outcome = expected_outcomes[reads][normalize]
 
-        dataset, label_config, reference_sequences, labels = self.create_dummy_data(path)
+                for index, row in enumerate(expected_outcome):
+                    self.assertListEqual(list(encoded.encoded_data.examples[index]), expected_outcome[index])
 
-        encoder = MatchedSequencesEncoder.build_object(dataset, **{
-            "reference": reference_sequences,
-            "max_edit_distance": 0,
-            "reads": "all",
-            "sum_matches": True
-        })
+                self.assertDictEqual(encoded.encoded_data.labels, {"label": ["yes", "yes", "no"],
+                                                                   "subject_id": ["subject_1", "subject_2", "subject_3"]})
+                self.assertListEqual(encoded.encoded_data.feature_names, [f"sum_of_{reads}_reads"])
 
-        encoded = encoder.encode(dataset, EncoderParams(
-            result_path=path,
-            label_config=label_config,
-            filename="dataset.csv"
-        ))
+                self.assertIsNone(encoded.encoded_data.feature_annotations)
 
-        expected_outcome = [[10],[10],[5]]
-        for index, row in enumerate(expected_outcome):
-            self.assertListEqual(list(encoded.encoded_data.examples[index]), expected_outcome[index])
-
-        self.assertDictEqual(encoded.encoded_data.labels, {"label": ["yes", "yes", "no"],
-                                                           "subject_id": ["subject_1", "subject_2", "subject_3"]})
-        self.assertListEqual(encoded.encoded_data.feature_names, ["sum_of_all_reads"])
-
-        self.assertIsNone(encoded.encoded_data.feature_annotations)
-
-        shutil.rmtree(path)
-
-    def test__encode_new_dataset_unique_reads_sum(self):
-        path = EnvironmentSettings.root_path / "test/tmp/matched_sequences_encoder_unique/"
-
-        dataset, label_config, reference_sequences, labels = self.create_dummy_data(path)
-
-        encoder = MatchedSequencesEncoder.build_object(dataset, **{
-            "reference": reference_sequences,
-            "max_edit_distance": 0,
-            "reads": "unique",
-            "sum_matches": True
-        })
-
-        encoded = encoder.encode(dataset, EncoderParams(
-            result_path=path,
-            label_config=label_config,
-            filename="dataset.csv"
-        ))
-
-        expected_outcome = [[1],[1],[1]]
-        for index, row in enumerate(expected_outcome):
-            self.assertListEqual(list(encoded.encoded_data.examples[index]), expected_outcome[index])
-
-        self.assertDictEqual(encoded.encoded_data.labels, {"label": ["yes", "yes", "no"],
-                                                           "subject_id": ["subject_1", "subject_2", "subject_3"]})
-        self.assertListEqual(encoded.encoded_data.feature_names, ["sum_of_unique_reads"])
-
-        self.assertIsNone(encoded.encoded_data.feature_annotations)
-
-        shutil.rmtree(path)
+                shutil.rmtree(path)

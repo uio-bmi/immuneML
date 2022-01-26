@@ -25,6 +25,7 @@ class MatchedReceptorsRepertoireEncoder(MatchedReceptorsEncoder):
             feature_names = [f"{row['receptor_id']}.{row['chain']}" for index, row in feature_annotations.iterrows()]
 
         encoded_repertoires, labels, example_ids = self._encode_repertoires(dataset, params)
+        encoded_repertoires = self._normalize(dataset, encoded_repertoires) if self.normalize else encoded_repertoires
 
         encoded_dataset.add_encoded_data(EncodedData(
             # examples contains a np.ndarray with counts
@@ -40,6 +41,14 @@ class MatchedReceptorsRepertoireEncoder(MatchedReceptorsEncoder):
         ))
 
         return encoded_dataset
+
+    def _normalize(self, dataset, encoded_repertoires):
+        if self.reads == ReadsType.UNIQUE:
+            repertoire_totals = np.asarray([[repertoire.get_element_count() for repertoire in dataset.get_data()]]).T
+        else:
+            repertoire_totals = np.asarray([[sum(repertoire.get_counts()) for repertoire in dataset.get_data()]]).T
+
+        return encoded_repertoires / repertoire_totals
 
     def _get_feature_info(self):
         """
