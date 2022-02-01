@@ -35,7 +35,7 @@ class MatchedReferenceUtil:
 
         format_str = reference_params["format"]
 
-        import_class = ReflectionHandler.get_class_by_name("{}Import".format(format_str))
+        import_class = ReflectionHandler.get_class_by_name(f"{format_str}Import")
         default_params = DefaultParamsLoader.load(EnvironmentSettings.default_params_path / "datasets",
                                           DefaultParamsLoader.convert_to_snake_case(format_str))
 

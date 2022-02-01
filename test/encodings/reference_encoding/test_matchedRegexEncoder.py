@@ -60,7 +60,7 @@ class TestMatchedReceptorsEncoder(TestCase):
 
         return dataset, label_config, filepath, labels
 
-    def test_encode_no_v(self):
+    def test_encode_no_v_all(self):
         path = EnvironmentSettings.root_path / "test/tmp/regex_matches_encoder/"
 
         dataset, label_config, motif_filepath, labels = self.create_dummy_data(path)
@@ -68,7 +68,7 @@ class TestMatchedReceptorsEncoder(TestCase):
         encoder = MatchedRegexEncoder.build_object(dataset, **{
             "motif_filepath": motif_filepath,
             "match_v_genes": False,
-            "sum_counts": True
+            "reads": "all"
         })
 
 
@@ -89,7 +89,7 @@ class TestMatchedReceptorsEncoder(TestCase):
         shutil.rmtree(path)
 
 
-    def test_encode_no_v_no_count(self):
+    def test_encode_no_v_unique(self):
         path = EnvironmentSettings.root_path / "test/tmp/regex_matches_encoder/"
 
         dataset, label_config, motif_filepath, labels = self.create_dummy_data(path)
@@ -97,7 +97,7 @@ class TestMatchedReceptorsEncoder(TestCase):
         encoder = MatchedRegexEncoder.build_object(dataset, **{
             "motif_filepath": motif_filepath,
             "match_v_genes": False,
-            "sum_counts": False
+            "reads": "unique"
         })
 
 
@@ -118,7 +118,7 @@ class TestMatchedReceptorsEncoder(TestCase):
         shutil.rmtree(path)
 
 
-    def test_encode_with_v(self):
+    def test_encode_with_v_all(self):
         path = EnvironmentSettings.root_path / "test/tmp/regex_matches_encoder/"
 
         dataset, label_config, motif_filepath, labels = self.create_dummy_data(path)
@@ -126,7 +126,7 @@ class TestMatchedReceptorsEncoder(TestCase):
         encoder = MatchedRegexEncoder.build_object(dataset, **{
             "motif_filepath": motif_filepath,
             "match_v_genes": True,
-            "sum_counts": True
+            "reads": "all"
         })
 
 
