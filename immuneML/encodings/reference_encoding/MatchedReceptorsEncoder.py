@@ -8,9 +8,9 @@ from immuneML.data_model.receptor.TCABReceptor import TCABReceptor
 from immuneML.data_model.receptor.TCGDReceptor import TCGDReceptor
 from immuneML.encodings.DatasetEncoder import DatasetEncoder
 from immuneML.encodings.EncoderParams import EncoderParams
-from immuneML.util.ReadsType import ReadsType
 from immuneML.encodings.reference_encoding.MatchedReferenceUtil import MatchedReferenceUtil
 from immuneML.util.ParameterValidator import ParameterValidator
+from immuneML.util.ReadsType import ReadsType
 from immuneML.util.ReflectionHandler import ReflectionHandler
 
 
@@ -59,8 +59,8 @@ class MatchedReceptorsEncoder(DatasetEncoder):
         "RepertoireDataset": "MatchedReceptorsRepertoireEncoder"
     }
 
-    def __init__(self, reference_receptors: List[Receptor], max_edit_distances: dict, reads: ReadsType, sum_matches: bool, normalize: bool, name: str = None):
-        self.reference_receptors = reference_receptors
+    def __init__(self, reference: List[Receptor], max_edit_distances: dict, reads: ReadsType, sum_matches: bool, normalize: bool, name: str = None):
+        self.reference_receptors = reference
         self.max_edit_distances = max_edit_distances
         self.reads = reads
         self.sum_matches = sum_matches
@@ -88,7 +88,7 @@ class MatchedReceptorsEncoder(DatasetEncoder):
         reference_receptors = MatchedReferenceUtil.prepare_reference(reference, location=location, paired=True)
 
         return {
-            "reference_receptors": reference_receptors,
+            "reference": reference_receptors,
             "max_edit_distances": max_edit_distances,
             "reads": ReadsType[reads.upper()],
             "sum_matches": sum_matches,
