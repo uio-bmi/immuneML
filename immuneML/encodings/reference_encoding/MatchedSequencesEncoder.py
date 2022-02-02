@@ -4,9 +4,9 @@ from immuneML.caching.CacheHandler import CacheHandler
 from immuneML.data_model.receptor.receptor_sequence.ReceptorSequenceList import ReceptorSequenceList
 from immuneML.encodings.DatasetEncoder import DatasetEncoder
 from immuneML.encodings.EncoderParams import EncoderParams
-from immuneML.util.ReadsType import ReadsType
 from immuneML.encodings.reference_encoding.MatchedReferenceUtil import MatchedReferenceUtil
 from immuneML.util.ParameterValidator import ParameterValidator
+from immuneML.util.ReadsType import ReadsType
 from immuneML.util.ReflectionHandler import ReflectionHandler
 
 
@@ -51,9 +51,9 @@ class MatchedSequencesEncoder(DatasetEncoder):
         "RepertoireDataset": "MatchedSequencesRepertoireEncoder"
     }
 
-    def __init__(self, max_edit_distance: int, reference_sequences: ReceptorSequenceList, reads: ReadsType, sum_matches: bool, normalize: bool, name: str = None):
+    def __init__(self, max_edit_distance: int, reference: ReceptorSequenceList, reads: ReadsType, sum_matches: bool, normalize: bool, name: str = None):
         self.max_edit_distance = max_edit_distance
-        self.reference_sequences = reference_sequences
+        self.reference_sequences = reference
         self.reads = reads
         self.sum_matches = sum_matches
         self.normalize = normalize
@@ -73,7 +73,7 @@ class MatchedSequencesEncoder(DatasetEncoder):
 
         return {
             "max_edit_distance": max_edit_distance,
-            "reference_sequences": reference_sequences,
+            "reference": reference_sequences,
             "reads": ReadsType[reads.upper()],
             "sum_matches": sum_matches,
             "normalize": normalize,

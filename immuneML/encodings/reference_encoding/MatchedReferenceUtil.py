@@ -43,6 +43,10 @@ class MatchedReferenceUtil:
 
         processed_params = DatasetImportParams.build_object(**params)
 
-        receptors = ImportHelper.import_items(import_class, reference_params["params"]["path"], processed_params)
+        if format_str == "SingleLineReceptor":
+            processed_params.result_path = reference_params['params']['path']
+            receptors = import_class.import_dataset(processed_params, 'tmp_receptor_dataset').get_data()
+        else:
+            receptors = ImportHelper.import_items(import_class, reference_params["params"]["path"], processed_params)
 
         return receptors
