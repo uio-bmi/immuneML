@@ -1,6 +1,7 @@
 # quality: gold
 import math
 from enum import Enum
+from multiprocessing import Pool
 from pathlib import Path
 from typing import List
 
@@ -35,18 +36,15 @@ class AIRRExporter(DataExporter):
     """
 
     @staticmethod
-    def export(dataset: Dataset, path: Path, region_type=RegionType.IMGT_CDR3):
+    def export(dataset: Dataset, path: Path, region_type=RegionType.IMGT_CDR3, number_of_processes: int = 1):
         PathBuilder.build(path)
 
         if isinstance(dataset, RepertoireDataset):
             repertoire_folder = "repertoires/"
             repertoire_path = PathBuilder.build(path / repertoire_folder)
 
-            for index, repertoire in enumerate(dataset.repertoires):
-                df = AIRRExporter._repertoire_to_dataframe(repertoire, region_type)
-                df = AIRRExporter._postprocess_dataframe(df)
-                output_file = repertoire_path / f"{repertoire.data_filename.stem}.tsv"
-                airr.dump_rearrangement(df, str(output_file))
+            with Pool(processes=number_of_processes) as pool:
+                pool.starmap(AIRRExporter.export_repertoire, [(repertoire, region_type, repertoire_path) for repertoire in dataset.repertoires])
 
             AIRRExporter.export_updated_metadata(dataset, path, repertoire_folder)
         else:
@@ -66,6 +64,13 @@ class AIRRExporter(DataExporter):
                 airr.dump_rearrangement(df, filename)
 
                 index += 1
+
+    @staticmethod
+    def export_repertoire(repertoire: Repertoire, region_type: RegionType, repertoire_path: Path):
+        df = AIRRExporter._repertoire_to_dataframe(repertoire, region_type)
+        df = AIRRExporter._postprocess_dataframe(df)
+        output_file = repertoire_path / f"{repertoire.data_filename.stem}.tsv"
+        airr.dump_rearrangement(df, str(output_file))
 
     @staticmethod
     def get_sequence_field(region_type):
