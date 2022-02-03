@@ -23,7 +23,7 @@ class TestDataEncoder(TestCase):
         os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
 
     def test_run(self):
-        path = EnvironmentSettings.root_path / "test/tmp/dataencoder/"
+        path = EnvironmentSettings.tmp_test_path / "data_encoder/"
         PathBuilder.build(path)
 
         rep1 = Repertoire.build_from_sequence_objects([ReceptorSequence("AAA", identifier="1")],
@@ -40,7 +40,9 @@ class TestDataEncoder(TestCase):
         encoder = Word2VecEncoder.build_object(dataset, **{
                     "k": 3,
                     "model_type": ModelType.SEQUENCE.name,
-                    "vector_size": 6
+                    "vector_size": 6,
+                    "epochs": 10,
+                    "window": 5
                 })
 
         res = DataEncoder.run(DataEncoderParams(

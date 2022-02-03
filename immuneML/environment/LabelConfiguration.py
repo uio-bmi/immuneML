@@ -1,7 +1,7 @@
 # quality: gold
+import logging
 import warnings
 from typing import List
-import logging
 
 from immuneML.environment.Label import Label
 from immuneML.util.ParameterValidator import ParameterValidator
@@ -28,18 +28,18 @@ class LabelConfiguration:
             warnings.warn("Label " + label_name + " has already been set. Overriding existing values...", Warning)
 
         if positive_class is not None:
-            if all(isinstance(val, str) for val in values) and not isinstance(positive_class, str):
+            if all(isinstance(val, str) for val in vals) and not isinstance(positive_class, str):
                 positive_class = str(positive_class)
-            ParameterValidator.assert_in_valid_list(positive_class, values, Label.__name__, 'positive_class')
+            ParameterValidator.assert_in_valid_list(positive_class, vals, Label.__name__, 'positive_class')
         else:
-            positive_class = self._get_default_positive_class(values)
+            positive_class = self._get_default_positive_class(vals)
             if positive_class:
                 logging.info(f"LabelConfiguration: set default positive class '{positive_class}' for label {label_name}")
 
         self._labels[label_name] = Label(label_name, vals, auxiliary_labels, positive_class)
 
     def _get_default_positive_class(self, classes):
-        '''Returns the default positive class when a class pair is given where the positive class is obvious (0, 1; true, false)'''
+        """Returns the default positive class when a class pair is given where the positive class is obvious (0, 1; true, false)"""
 
         if len(classes) != 2:
             return None

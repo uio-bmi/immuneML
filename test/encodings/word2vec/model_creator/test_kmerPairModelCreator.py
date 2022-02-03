@@ -8,6 +8,7 @@ from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import Rece
 from immuneML.data_model.repertoire.Repertoire import Repertoire
 from immuneML.encodings.word2vec.model_creator.KmerPairModelCreator import KmerPairModelCreator
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
+from immuneML.environment.SequenceType import SequenceType
 from immuneML.util.PathBuilder import PathBuilder
 
 
@@ -28,8 +29,9 @@ class TestKmerPairModelCreator(TestCase):
 
         dataset = RepertoireDataset(repertoires=[rep1, rep2])
 
-        model_creator = KmerPairModelCreator()
-        model = model_creator.create_model(dataset=dataset, k=2, vector_size=16, batch_size=1, model_path=test_path/"model.model", sequence_type=None)
+        model_creator = KmerPairModelCreator(epochs=10, window=5)
+        model = model_creator.create_model(dataset=dataset, k=2, vector_size=16, batch_size=1, model_path=test_path/"model.model",
+                                           sequence_type=SequenceType.AMINO_ACID)
 
         self.assertTrue(isinstance(model, Word2Vec))
         self.assertTrue("CA" in model.wv.vocab)

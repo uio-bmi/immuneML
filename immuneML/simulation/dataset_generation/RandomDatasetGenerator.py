@@ -1,4 +1,5 @@
 import random
+import uuid
 from pathlib import Path
 
 import numpy as np
@@ -215,7 +216,8 @@ class RandomDatasetGenerator:
                                                        j_allele=chain + "J1-1*01",
                                                        chain=chain,
                                                        custom_params={**{label: random.choices(list(label_dict.keys()), label_dict.values(), k=1)[0]
-                                                                         for label, label_dict in labels.items()}, **{"subject": f"subj_{i + 1}"}}))
+                                                                         for label, label_dict in labels.items()}, **{"subject": f"subj_{i + 1}"}}),
+                             identifier=uuid.uuid4().hex)
             for i in range(sequence_count)]
 
         filename = path / "batch01.npy"

@@ -48,9 +48,8 @@ class TestSemanticModel(TestCase):
         label_config = LabelConfiguration()
         label_config.add_label("default", [1, 2])
 
-        hp_settings = [HPSetting(Word2VecEncoder.build_object(dataset, **{"vector_size": 8, "model_type": ModelType.SEQUENCE.name, "k": 3}),
-                                 {"vector_size": 8, "model_type": ModelType.SEQUENCE.name, "k": 3},
-                                 LogisticRegression(),
+        encoder_params = {"vector_size": 8, "model_type": ModelType.SEQUENCE.name, "k": 3, "epochs": 10, "window": 5}
+        hp_settings = [HPSetting(Word2VecEncoder.build_object(dataset, **encoder_params), encoder_params, LogisticRegression(),
                                  {"model_selection_cv": False, "model_selection_n_folds": -1}, [])]
 
         split_config_assessment = SplitConfig(SplitType.RANDOM, 1, 0.5, ReportConfig())
