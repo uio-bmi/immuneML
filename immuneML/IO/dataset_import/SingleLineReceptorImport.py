@@ -123,7 +123,7 @@ class SingleLineReceptorImport(DataImport):
 
         filenames = ImportHelper.get_sequence_filenames(generic_params.path, dataset_name)
 
-        PathBuilder.build(generic_params.result_path, warn_if_exists=True)
+        generic_params.result_path = PathBuilder.build(generic_params.result_path, warn_if_exists=True)
 
         dataset = SingleLineReceptorImport._import_from_files(filenames, generic_params)
         dataset.name = dataset_name
