@@ -26,15 +26,14 @@ from immuneML.util.RepertoireBuilder import RepertoireBuilder
 from immuneML.workflows.instructions.TrainMLModelInstruction import TrainMLModelInstruction
 
 
-class TestHPOptimizationProcess(TestCase):
+class TestTrainMLModelInstruction(TestCase):
 
     def setUp(self) -> None:
         os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
 
     def test_run(self):
 
-        path = EnvironmentSettings.tmp_test_path / "hpoptimproc/"
-        PathBuilder.build(path)
+        path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "hpoptimproc/")
 
         repertoires, metadata = RepertoireBuilder.build(sequences=[["AAA", "CCC", "DDD"], ["AAA", "CCC", "DDD"],
                                                                  ["AAA", "CCC", "DDD"], ["AAA", "CCC", "DDD"],
@@ -59,8 +58,8 @@ class TestHPOptimizationProcess(TestCase):
                                                                      0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1]})
 
         dataset = RepertoireDataset(repertoires=repertoires, metadata_file=metadata, labels={"l1": [1, 2], "l2": [0, 1]})
-        enc1 = {"k": 3, "model_type": ModelType.SEQUENCE.name, "vector_size": 4}
-        enc2 = {"k": 3, "model_type": ModelType.SEQUENCE.name, "vector_size": 6}
+        enc1 = {"k": 3, "model_type": ModelType.SEQUENCE.name, "vector_size": 4, "epochs": 10, 'window': 5}
+        enc2 = {"k": 3, "model_type": ModelType.SEQUENCE.name, "vector_size": 6, "epochs": 10, "window": 5}
         hp_settings = [HPSetting(Word2VecEncoder.build_object(dataset, **enc1), enc1,
                                  LogisticRegression(), {"model_selection_cv": False, "model_selection_n_folds": -1},
                                  [], "e1", "ml1"),
