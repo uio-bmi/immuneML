@@ -1,12 +1,14 @@
 import logging
 import math
 
+from immuneML.data_model.receptor.RegionType import RegionType
 from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
+from immuneML.environment.SequenceType import SequenceType
 
 
 class PositionHelper:
     @staticmethod
-    def gen_imgt_positions_from_length(input_length: int):
+    def gen_imgt_positions_from_cdr3_length(input_length: int):
         start = 105
         end = 117
         imgt_range = list(range(start, end + 1))
@@ -21,9 +23,23 @@ class PositionHelper:
         return imgt_positions
 
     @staticmethod
-    def gen_imgt_positions_from_sequence(sequence: ReceptorSequence):
+    def gen_imgt_positions_from_junction_length(input_length: int):
+        return [104] + PositionHelper.gen_imgt_positions_from_cdr3_length(input_length - 2) + [118]
+
+    @staticmethod
+    def gen_imgt_positions_from_sequence(sequence: ReceptorSequence, sequence_type=SequenceType.AMINO_ACID):
+        if sequence_type != sequence_type.AMINO_ACID:
+            raise NotImplementedError(f"PositionHelper: IMGT positions are not implemented for sequence type {sequence_type}")
+
+        region_type = sequence.get_attribute("region_type")
         input_length = len(sequence.get_sequence())
-        return PositionHelper.gen_imgt_positions_from_length(input_length)
+
+        if region_type == RegionType.IMGT_CDR3:
+            return PositionHelper.gen_imgt_positions_from_cdr3_length(input_length)
+        if region_type == RegionType.IMGT_JUNCTION:
+            return PositionHelper.gen_imgt_positions_from_junction_length(input_length)
+        else:
+            raise NotImplementedError(f"PositionHelper: IMGT positions are not implemented for region type {region_type}")
 
     @staticmethod
     def adjust_position_weights(sequence_position_weights: dict, imgt_positions, limit: int) -> dict:

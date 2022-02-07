@@ -24,7 +24,7 @@ from immuneML.util.PathBuilder import PathBuilder
 class ImmuneMLExporter(DataExporter):
 
     @staticmethod
-    def export(dataset: Dataset, path: Path, region_type=None, number_of_processes: int = 1):
+    def export(dataset: Dataset, path: Path, number_of_processes: int = 1):
         PathBuilder.build(path)
         exported_dataset = dataset.clone(keep_identifier=True)
         dataset_name = exported_dataset.name

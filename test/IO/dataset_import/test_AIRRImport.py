@@ -149,7 +149,7 @@ IVKNQEJ01AIS74	1	IVKNQEJ01AIS74	GGCGCAGGACTGTTGAAGCCTTCACAGACCCTGTCCCTCACCTGCACT
         dataset1 = AIRRImport.import_dataset(params, "airr_repertoire_dataset1")
 
         path_exported = path / "exported_repertoires"
-        AIRRExporter.export(dataset1, path_exported, region_type=RegionType.IMGT_CDR3)
+        AIRRExporter.export(dataset1, path_exported)
 
         params["path"] = path_exported
         params["metadata_file"] = path_exported / "metadata.csv"

@@ -4,6 +4,7 @@ from unittest import TestCase
 
 from immuneML.caching.CacheType import CacheType
 from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
+from immuneML.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
 from immuneML.data_model.repertoire.Repertoire import Repertoire
 from immuneML.environment.Constants import Constants
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
@@ -66,7 +67,7 @@ class TestKmerHelper(TestCase):
         self.assertTrue(len(kmers) == 0)
 
     def test_create_IMGT_kmers_from_sequence(self):
-        kmers = KmerHelper.create_IMGT_kmers_from_sequence(ReceptorSequence("CASSRYUF"), 3, sequence_type=SequenceType.AMINO_ACID)
+        kmers = KmerHelper.create_IMGT_kmers_from_sequence(ReceptorSequence("CASSRYUF", metadata=SequenceMetadata(region_type="IMGT_CDR3")), 3, sequence_type=SequenceType.AMINO_ACID)
         self.assertTrue(("CAS", 105) in kmers)
         self.assertTrue(("ASS", 106) in kmers)
         self.assertTrue(("SSR", 107) in kmers)
@@ -75,7 +76,7 @@ class TestKmerHelper(TestCase):
         self.assertTrue(("YUF", 115) in kmers)
 
     def test_create_IMGT_gapped_kmers_from_sequence(self):
-        kmers = KmerHelper.create_IMGT_gapped_kmers_from_sequence(ReceptorSequence("CASSRYUF"), SequenceType.AMINO_ACID, 2, 1, 1, 1)
+        kmers = KmerHelper.create_IMGT_gapped_kmers_from_sequence(ReceptorSequence("CASSRYUF", metadata=SequenceMetadata(region_type="IMGT_CDR3")), SequenceType.AMINO_ACID, 2, 1, 1, 1)
         self.assertTrue(all([k in kmers for k in [('CA.S', 105), ('AS.R', 106), ('SS.Y', 107), ('SR.U', 108), ('RY.F', 114)]]))
 
     def test_create_gapped_kmers_from_string(self):

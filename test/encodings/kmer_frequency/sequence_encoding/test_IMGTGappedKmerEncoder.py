@@ -3,6 +3,7 @@ from unittest import TestCase
 
 from immuneML.caching.CacheType import CacheType
 from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
+from immuneML.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.encodings.kmer_frequency.sequence_encoding.IMGTGappedKmerEncoder import IMGTGappedKmerEncoder
 from immuneML.environment.Constants import Constants
@@ -15,7 +16,7 @@ class TestIMGTGappedKmerEncoder(TestCase):
         os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
 
     def test_encode_sequence(self):
-        sequence = ReceptorSequence("AHCDE", None, None)
+        sequence = ReceptorSequence("AHCDE", None, None, metadata=SequenceMetadata(region_type="IMGT_CDR3"))
         kmers = IMGTGappedKmerEncoder.encode_sequence(sequence, EncoderParams(model={"k_left": 1, "max_gap": 1},
                                                                               label_config=LabelConfiguration(),
                                                                               result_path=""))
@@ -23,7 +24,7 @@ class TestIMGTGappedKmerEncoder(TestCase):
         self.assertEqual({'AH-105', 'HC-106', 'CD-107', 'DE-116', 'A.C-105', 'H.D-106', 'C.E-107'},
                          set(kmers))
 
-        sequence = ReceptorSequence("CASSPRERATYEQCAY", None, None)
+        sequence = ReceptorSequence("CASSPRERATYEQCAY", None, None, metadata=SequenceMetadata(region_type="IMGT_CDR3"))
         kmers = IMGTGappedKmerEncoder.encode_sequence(sequence, EncoderParams(model={"k_left": 1, "max_gap": 1},
                                                                               label_config=LabelConfiguration(),
                                                                               result_path=""))

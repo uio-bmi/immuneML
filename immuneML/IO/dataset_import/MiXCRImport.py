@@ -145,6 +145,7 @@ class MiXCRImport(DataImport):
         df["sequence_aas"] = df[MiXCRImport.SEQUENCE_NAME_MAP[params.region_type]["AA"]]
         df["sequences"] = df[MiXCRImport.SEQUENCE_NAME_MAP[params.region_type]["NT"]]
         ImportHelper.junction_to_cdr3(df, params.region_type)
+        df.loc[:, "region_types"] = params.region_type.name
 
         df["counts"] = df["counts"].astype(float).astype(int)
 

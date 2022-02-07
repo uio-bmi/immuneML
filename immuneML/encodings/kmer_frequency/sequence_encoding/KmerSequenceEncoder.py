@@ -3,6 +3,7 @@ import logging
 from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.encodings.kmer_frequency.sequence_encoding.SequenceEncodingStrategy import SequenceEncodingStrategy
+from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.util.KmerHelper import KmerHelper
 
 
@@ -21,7 +22,7 @@ class KmerSequenceEncoder(SequenceEncodingStrategy):
 
         """
         k = params.model["k"]
-        sequence_type = params.model.get('sequence_type', None)
+        sequence_type = params.model.get('sequence_type', EnvironmentSettings.sequence_type)
         length = len(sequence.get_sequence(sequence_type))
 
         if length < k:
