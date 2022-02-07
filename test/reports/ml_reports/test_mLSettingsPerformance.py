@@ -57,7 +57,7 @@ class TestMLSettingsPerformance(TestCase):
 
         dataset = RepertoireDataset(repertoires=repertoires, metadata_file=metadata,
                                     labels={"l1": [1, 2], "l2": [0, 1]})
-        enc_params = {"k": 3, "model_type": ModelType.SEQUENCE.name, "vector_size": 4}
+        enc_params = {"k": 3, "model_type": ModelType.SEQUENCE.name, "vector_size": 4, "epochs": 10, "window": 5}
         hp_settings = [HPSetting(Word2VecEncoder.build_object(dataset, **enc_params), enc_params,
                                  LogisticRegression(),
                                  {"model_selection_cv": False, "model_selection_n_folds": -1},
@@ -75,8 +75,7 @@ class TestMLSettingsPerformance(TestCase):
         return state
 
     def test_generate(self):
-        path = EnvironmentSettings.root_path / "test/tmp/mlsettingsperformance/"
-        PathBuilder.build(path)
+        path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "mlsettingsperformance/")
 
         report = MLSettingsPerformance(**{"single_axis_labels": False, "x_label_position": None, "y_label_position": None})
 
@@ -100,21 +99,20 @@ class TestMLSettingsPerformance(TestCase):
     def test_plot(self):
         # Does not assert anything, but can be used to manually check if the plot looks like it should
 
-        path = EnvironmentSettings.root_path / "test/tmp/mlsettingsperformance/"
-        PathBuilder.build(path)
+        path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "mlsettingsperformance/")
 
         report = MLSettingsPerformance(**{"single_axis_labels": True, "x_label_position": -0.12, "y_label_position": -0.08})
 
         report.result_path = path
         report.state = self._create_state_object(path / "input_data/")
 
-        df = pd.DataFrame({"fold": [0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1],
-                      "label": ["l1", "l1", "l1", "l1", "l2", "l2", "l2", "l2", "l1", "l1", "l1", "l1", "l2", "l2", "l2", "l2"],
-                      report.vertical_grouping: ["e1", "e2", "e1", "e2", "e1", "e2", "e1", "e2", "e1", "e2", "e1", "e2", "e1", "e2", "e1", "e2"],
-                      "ml_method": ["ml1", "ml1", "ml2", "ml2", "ml1", "ml1", "ml2", "ml2", "ml1", "ml1", "ml2", "ml2", "ml1", "ml1", "ml2", "ml2"],
-                      "performance": [0.5, 0.8, 0.4, 0.8, 0.9, 0.2, 0.5, 0.6, 0.8, 0.4, 0.8, 0.9, 0.2, 0.5, 0.6, 0.5]})
+        df = pd.DataFrame({"fold": [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1],
+                           "label": ["l1", "l1", "l1", "l1", "l2", "l2", "l2", "l2", "l1", "l1", "l1", "l1", "l2", "l2", "l2", "l2"],
+                           report.vertical_grouping: ["e1", "e2", "e1", "e2", "e1", "e2", "e1", "e2", "e1", "e2", "e1", "e2", "e1", "e2", "e1", "e2"],
+                           "ml_method": ["ml1", "ml1", "ml2", "ml2", "ml1", "ml1", "ml2", "ml2", "ml1", "ml1", "ml2", "ml2", "ml1", "ml1", "ml2",
+                                         "ml2"],
+                           "performance": [0.5, 0.8, 0.4, 0.8, 0.9, 0.2, 0.5, 0.6, 0.8, 0.4, 0.8, 0.9, 0.2, 0.5, 0.6, 0.5]})
 
         report._plot(df)
 
         shutil.rmtree(path)
-

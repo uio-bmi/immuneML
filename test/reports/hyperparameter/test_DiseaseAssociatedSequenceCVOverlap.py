@@ -31,8 +31,16 @@ class TestDiseaseAssociatedSequenceCVOverlap(TestCase):
                                                          ["DDD", "EEE", "FFF"], ["GGG", "III", "LLL", "MMM"],
                                                          ["DDD", "EEE", "FFF"], ["GGG", "III", "LLL", "MMM"],
                                                          ["DDD", "EEE", "FFF"], ["GGG", "III", "LLL", "MMM"],
+                                                         ["DDD", "EEE", "FFF"], ["GGG", "III", "LLL", "MMM"],
+                                                         ["DDD", "EEE", "FFF"], ["GGG", "III", "LLL", "MMM"],
+                                                         ["DDD", "EEE", "FFF"], ["GGG", "III", "LLL", "MMM"],
+                                                         ["DDD", "EEE", "FFF"], ["GGG", "III", "LLL", "MMM"],
+                                                         ["DDD", "EEE", "FFF"], ["GGG", "III", "LLL", "MMM"],
+                                                         ["DDD", "EEE", "FFF"], ["GGG", "III", "LLL", "MMM"],
+                                                         ["DDD", "EEE", "FFF"], ["GGG", "III", "LLL", "MMM"],
                                                          ["DDD", "EEE", "FFF"]],
-                                                        labels={"l1": [True, False, True, False, True, False, True, False,
+                                                        labels={"l1": [True, False, True, False, True, False, True, False, True, False, True, False,
+                                                                       True, False, True, False, True, False, True, False, True, False,
                                                                        True, False, True, False, True, False]}, path=path)
 
         dataset = RepertoireDataset(repertoires=repertoires, metadata_file=metadata, labels={"l1": [True, False]})

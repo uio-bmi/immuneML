@@ -19,10 +19,12 @@ class DatasetExportInstruction(Instruction):
 
         datasets (list): a list of datasets to export in all given formats
 
-        preprocessing_sequence (str): which preprocessing sequence to use on the dataset(s), this item is optional and does not have to be specified.
+        preprocessing_sequence (list): which preprocessing sequence to use on the dataset(s), this item is optional and does not have to be specified.
         When specified, the same preprocessing sequence will be applied to all datasets.
 
-        formats (list): a list of formats in which to export the datasets. Valid formats are class names of any non-abstract class inheriting :py:obj:`~immuneML.IO.dataset_export.DataExporter.DataExporter`.
+        exporters (list): a list of formats in which to export the datasets. Valid formats are class names of any non-abstract class inheriting :py:obj:`~immuneML.IO.dataset_export.DataExporter.DataExporter`.
+
+        number_of_processes (int): how many processes to use during repertoire export (not used for sequence datasets)
 
     YAML specification:
 
@@ -35,17 +37,20 @@ class DatasetExportInstruction(Instruction):
                 - my_generated_dataset
                 - my_dataset_from_adaptive
             preprocessing_sequence: my_preprocessing_sequence
+            number_of_processes: 4
             export_formats: # list of formats to export the datasets to
                 - AIRR
                 - ImmuneML
 
     """
 
-    def __init__(self, datasets: List[Dataset], exporters: List[DataExporter], preprocessing_sequence: List[Preprocessor] = None, result_path: Path = None, name: str = None):
+    def __init__(self, datasets: List[Dataset], exporters: List[DataExporter], number_of_processes: int = 1,
+                 preprocessing_sequence: List[Preprocessor] = None, result_path: Path = None, name: str = None):
         self.datasets = datasets
         self.exporters = exporters
         self.preprocessing_sequence = preprocessing_sequence
         self.result_path = result_path
+        self.number_of_processes = number_of_processes
         self.name = name
 
     def run(self, result_path: Path) -> DatasetExportState:
@@ -64,7 +69,7 @@ class DatasetExportInstruction(Instruction):
             for exporter in self.exporters:
                 export_format = exporter.__name__[:-8]
                 path = self.result_path / dataset_name / export_format
-                exporter.export(dataset, path)
+                exporter.export(dataset, path, number_of_processes=self.number_of_processes)
                 paths[dataset_name][export_format] = path
                 contains = str(dataset.__class__.__name__).replace("Dataset", "s").lower()
                 print(f"{datetime.datetime.now()}: Exported dataset {dataset_name} containing {dataset.get_example_count()} {contains} in {export_format} format.", flush=True)
@@ -80,7 +85,9 @@ class DatasetExportInstruction(Instruction):
         valid_strategy_values = str(valid_strategy_values)[1:-1].replace("'", "`")
         mapping = {
             "Valid formats are class names of any non-abstract class inheriting "
-            ":py:obj:`~immuneML.IO.dataset_export.DataExporter.DataExporter`.": f"Valid values are: {valid_strategy_values}."
+            ":py:obj:`~immuneML.IO.dataset_export.DataExporter.DataExporter`.": f"Valid values are: {valid_strategy_values}.",
+            "preprocessing_sequence (list)": "preprocessing_sequence (str)",
+            "exporters (list)": "formats (list)"
         }
         doc = update_docs_per_mapping(doc, mapping)
         return doc
