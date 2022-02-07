@@ -153,7 +153,8 @@ class RandomDatasetGenerator:
                                                                                                   j_gene=chain + "J1-1",
                                                                                                   j_allele=chain + "J1-1*01",
                                                                                                   chain=chain,
-                                                                                                  cell_id=id))
+                                                                                                  cell_id=id,
+                                                                                                  region_type="IMGT_CDR3"))
 
         receptors = [TCABReceptor(alpha=get_random_sequence(chain_1_length_probabilities, "TRA", i),
                                   beta=get_random_sequence(chain_2_length_probabilities, "TRB", i),
@@ -215,6 +216,7 @@ class RandomDatasetGenerator:
                                                        j_gene=chain + "J1-1",
                                                        j_allele=chain + "J1-1*01",
                                                        chain=chain,
+                                                       region_type="IMGT_CDR3",
                                                        custom_params={**{label: random.choices(list(label_dict.keys()), label_dict.values(), k=1)[0]
                                                                          for label, label_dict in labels.items()}, **{"subject": f"subj_{i + 1}"}}),
                              identifier=uuid.uuid4().hex)

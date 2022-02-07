@@ -6,6 +6,7 @@ from immuneML.caching.CacheType import CacheType
 from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
 from immuneML.data_model.receptor.receptor_sequence.Chain import Chain
 from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
+from immuneML.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
 from immuneML.data_model.repertoire.Repertoire import Repertoire
 from immuneML.environment.Constants import Constants
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
@@ -38,8 +39,8 @@ class TestSignalImplanter(TestCase):
         if not os.path.isdir(path):
             os.makedirs(path)
 
-        sequences = [ReceptorSequence("ACDEFG", identifier="1"), ReceptorSequence("ACDEFG", identifier="2"),
-                     ReceptorSequence("ACDEFG", identifier="3"), ReceptorSequence("ACDEFG", identifier="4")]
+        sequences = [ReceptorSequence("ACDEFG", identifier="1", metadata=SequenceMetadata(region_type="IMGT_CDR3")), ReceptorSequence("ACDEFG", identifier="2", metadata=SequenceMetadata(region_type="IMGT_CDR3")),
+                     ReceptorSequence("ACDEFG", identifier="3", metadata=SequenceMetadata(region_type="IMGT_CDR3")), ReceptorSequence("ACDEFG", identifier="4", metadata=SequenceMetadata(region_type="IMGT_CDR3"))]
 
         for i in range(10):
             rep = Repertoire.build_from_sequence_objects(sequence_objects=sequences, path=path, metadata={})
