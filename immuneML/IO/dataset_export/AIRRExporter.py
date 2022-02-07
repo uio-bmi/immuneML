@@ -76,6 +76,8 @@ class AIRRExporter(DataExporter):
     def get_sequence_field(region_type):
         if region_type == RegionType.IMGT_CDR3:
             return "cdr3"
+        elif region_type == RegionType.IMGT_JUNCTION:
+            return "junction"
         else:
             return "sequence"
 
@@ -83,6 +85,8 @@ class AIRRExporter(DataExporter):
     def get_sequence_aa_field(region_type):
         if region_type == RegionType.IMGT_CDR3:
             return "cdr3_aa"
+        elif region_type == RegionType.IMGT_JUNCTION:
+            return "junction_aa"
         else:
             return "sequence_aa"
 
