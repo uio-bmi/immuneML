@@ -11,5 +11,5 @@ class DataExporter(metaclass=abc.ABCMeta):
 
     @staticmethod
     @abc.abstractmethod
-    def export(dataset: Dataset, path: Path, region_type: RegionType = None, number_of_processes: int = 1):
+    def export(dataset: Dataset, path: Path, number_of_processes: int = 1):
         pass

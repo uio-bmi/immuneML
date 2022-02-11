@@ -18,6 +18,7 @@ from immuneML.encodings.preprocessing.FeatureScaler import FeatureScaler
 from immuneML.encodings.word2vec.model_creator.KmerPairModelCreator import KmerPairModelCreator
 from immuneML.encodings.word2vec.model_creator.ModelType import ModelType
 from immuneML.encodings.word2vec.model_creator.SequenceModelCreator import SequenceModelCreator
+from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.util.EncoderHelper import EncoderHelper
 from immuneML.util.ParameterValidator import ParameterValidator
 from immuneML.util.PathBuilder import PathBuilder
@@ -188,7 +189,7 @@ class Word2VecEncoder(DatasetEncoder):
     def _encode_examples(self, encoded_dataset, vectors, params):
         examples = np.zeros(shape=[encoded_dataset.get_example_count(), vectors.vector_size])
         for (index, example) in enumerate(encoded_dataset.get_data()):
-            examples[index] = self._encode_item(example, vectors, params.model.get('sequence_type', None))
+            examples[index] = self._encode_item(example, vectors, params.model.get('sequence_type', EnvironmentSettings.sequence_type))
         return examples
 
     @abc.abstractmethod
@@ -216,7 +217,7 @@ class Word2VecEncoder(DatasetEncoder):
                                            vector_size=self.vector_size,
                                            batch_size=params.pool_size,
                                            model_path=self.model_path,
-                                           sequence_type=params.model.get('sequence_type', None))
+                                           sequence_type=params.model.get('sequence_type', EnvironmentSettings.sequence_type))
 
         return model
 

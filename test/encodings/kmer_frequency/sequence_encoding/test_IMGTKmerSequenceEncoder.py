@@ -3,6 +3,7 @@ from unittest import TestCase
 
 from immuneML.caching.CacheType import CacheType
 from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
+from immuneML.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.encodings.kmer_frequency.sequence_encoding.IMGTKmerSequenceEncoder import IMGTKmerSequenceEncoder
 from immuneML.environment.Constants import Constants
@@ -15,7 +16,7 @@ class TestIMGTKmerSequenceEncoder(TestCase):
         os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
 
     def test_encode_sequence(self):
-        sequence = ReceptorSequence("CASSPRERATYEQCASSPRERATYEQCASSPRERATYEQ", None, None)
+        sequence = ReceptorSequence("CASSPRERATYEQCASSPRERATYEQCASSPRERATYEQ", None, None, metadata=SequenceMetadata(region_type="IMGT_CDR3"))
         result = IMGTKmerSequenceEncoder.encode_sequence(sequence, EncoderParams(
                                                                     model={"k": 3},
                                                                     label_config=LabelConfiguration(),
@@ -32,7 +33,7 @@ class TestIMGTKmerSequenceEncoder(TestCase):
 
         self.assertEqual(len(result), len(sequence.get_sequence()) - 3 + 1)
 
-        sequence = ReceptorSequence("AHCDE", None, None)
+        sequence = ReceptorSequence("AHCDE", None, None, metadata=SequenceMetadata(region_type="IMGT_CDR3"))
         result = IMGTKmerSequenceEncoder.encode_sequence(sequence, EncoderParams(
                                                                     model={"k": 3},
                                                                     label_config=LabelConfiguration(),
