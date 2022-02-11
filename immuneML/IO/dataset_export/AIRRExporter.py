@@ -1,6 +1,7 @@
 # quality: gold
 import math
 from enum import Enum
+from multiprocessing import Pool
 from pathlib import Path
 from typing import List
 
@@ -35,18 +36,15 @@ class AIRRExporter(DataExporter):
     """
 
     @staticmethod
-    def export(dataset: Dataset, path: Path, region_type=RegionType.IMGT_CDR3):
+    def export(dataset: Dataset, path: Path, number_of_processes: int = 1):
         PathBuilder.build(path)
 
         if isinstance(dataset, RepertoireDataset):
             repertoire_folder = "repertoires/"
             repertoire_path = PathBuilder.build(path / repertoire_folder)
 
-            for index, repertoire in enumerate(dataset.repertoires):
-                df = AIRRExporter._repertoire_to_dataframe(repertoire, region_type)
-                df = AIRRExporter._postprocess_dataframe(df)
-                output_file = repertoire_path / f"{repertoire.data_filename.stem}.tsv"
-                airr.dump_rearrangement(df, str(output_file))
+            with Pool(processes=number_of_processes) as pool:
+                pool.starmap(AIRRExporter.export_repertoire, [(repertoire, repertoire_path) for repertoire in dataset.repertoires])
 
             AIRRExporter.export_updated_metadata(dataset, path, repertoire_folder)
         else:
@@ -58,9 +56,9 @@ class AIRRExporter(DataExporter):
                 filename = path / f"batch{''.join(['0' for i in range(1, len(str(file_count)) - len(str(index)) + 1)])}{index}.tsv"
 
                 if isinstance(dataset, ReceptorDataset):
-                    df = AIRRExporter._receptors_to_dataframe(batch, region_type)
+                    df = AIRRExporter._receptors_to_dataframe(batch)
                 else:
-                    df = AIRRExporter._sequences_to_dataframe(batch, region_type)
+                    df = AIRRExporter._sequences_to_dataframe(batch)
 
                 df = AIRRExporter._postprocess_dataframe(df)
                 airr.dump_rearrangement(df, str(filename))
@@ -68,18 +66,24 @@ class AIRRExporter(DataExporter):
                 index += 1
 
     @staticmethod
+    def export_repertoire(repertoire: Repertoire, repertoire_path: Path):
+        df = AIRRExporter._repertoire_to_dataframe(repertoire)
+        df = AIRRExporter._postprocess_dataframe(df)
+        output_file = repertoire_path / f"{repertoire.data_filename.stem}.tsv"
+        airr.dump_rearrangement(df, str(output_file))
+
+    @staticmethod
     def get_sequence_field(region_type):
         if region_type == RegionType.IMGT_CDR3:
             return "cdr3"
+        elif region_type == RegionType.IMGT_JUNCTION:
+            return "junction"
         else:
             return "sequence"
 
     @staticmethod
     def get_sequence_aa_field(region_type):
-        if region_type == RegionType.IMGT_CDR3:
-            return "cdr3_aa"
-        else:
-            return "sequence_aa"
+        return f"{AIRRExporter.get_sequence_field(region_type)}_aa"
 
     @staticmethod
     def export_updated_metadata(dataset: RepertoireDataset, result_path: Path, repertoire_folder: str):
@@ -90,8 +94,8 @@ class AIRRExporter(DataExporter):
         df.to_csv(result_path / "metadata.csv", index=False)
 
     @staticmethod
-    def _repertoire_to_dataframe(repertoire: Repertoire, region_type):
-
+    def _repertoire_to_dataframe(repertoire: Repertoire):
+        # get all fields (including custom fields)
         df = pd.DataFrame(repertoire.load_data())
 
         for column in ['v_alleles', 'j_alleles', 'v_genes', 'j_genes']:
@@ -99,6 +103,8 @@ class AIRRExporter(DataExporter):
                 df.loc[:, column] = ''
 
         AIRRExporter.update_gene_columns(df, 'alleles', 'genes')
+
+        region_type = repertoire.get_region_type()
 
         # rename mandatory fields for airr-compliance
         mapper = {"sequence_identifiers": "sequence_id", "v_alleles": "v_call", "j_alleles": "j_call", "chains": "locus", "counts": "duplicate_count",
@@ -108,18 +114,27 @@ class AIRRExporter(DataExporter):
         return df
 
     @staticmethod
-    def _receptors_to_dataframe(receptors: List[Receptor], region_type):
+    def _receptors_to_dataframe(receptors: List[Receptor]):
         sequences = [(receptor.get_chain(receptor.get_chains()[0]), receptor.get_chain(receptor.get_chains()[1])) for receptor in receptors]
         sequences = [item for sublist in sequences for item in sublist]
         receptor_ids = [(receptor.identifier, receptor.identifier) for receptor in receptors]
         receptor_ids = [item for sublist in receptor_ids for item in sublist]
 
-        df = AIRRExporter._sequences_to_dataframe(sequences, region_type)
+        df = AIRRExporter._sequences_to_dataframe(sequences)
         df["cell_id"] = receptor_ids
         return df
 
     @staticmethod
-    def _sequences_to_dataframe(sequences: List[ReceptorSequence], region_type):
+    def _get_sequence_list_region_type(sequences: List[ReceptorSequence]):
+        region_types = set([sequence.get_attribute("region_type") for sequence in sequences])
+
+        assert len(region_types) == 1, f"AIRRExporter: expected one region_type, found: {region_types}"
+
+        return RegionType(region_types.pop())
+
+    @staticmethod
+    def _sequences_to_dataframe(sequences: List[ReceptorSequence]):
+        region_type = AIRRExporter._get_sequence_list_region_type(sequences)
         sequence_field = AIRRExporter.get_sequence_field(region_type)
         sequence_aa_field = AIRRExporter.get_sequence_aa_field(region_type)
 

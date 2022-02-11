@@ -256,7 +256,7 @@ class ImportHelper:
                         f"{ImportHelper.__name__}: {n_empty} sequences were removed from the dataset because they contained an empty {sequence_name} "
                         f"sequence after preprocessing. ")
             else:
-                raise ValueError(f"{ImportHelper.__name__}: column {sequence_colname} was not set, but is required for filtering.")
+                warnings.warn(f"{ImportHelper.__name__}: column {sequence_colname} was not set, but is required for filtering. Skipping this filtering...")
 
         return dataframe
 
@@ -317,7 +317,8 @@ class ImportHelper:
     def get_chain_for_row(row):
         for col in ["v_subgroup", "j_subgroup", "v_genes", "j_genes", "v_alleles", "j_alleles"]:
             if col in row and row[col] is not None:
-                return Chain.get_chain(str(row[col])[0:3]).value
+                chain = Chain.get_chain(str(row[col])[0:3])
+                return chain.value if chain is not None else None
         return None
 
     @staticmethod

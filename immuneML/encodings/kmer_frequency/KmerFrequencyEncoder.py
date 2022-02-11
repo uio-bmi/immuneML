@@ -12,7 +12,7 @@ from immuneML.data_model.encoded_data.EncodedData import EncodedData
 from immuneML.data_model.receptor.receptor_sequence import ReceptorSequence
 from immuneML.encodings.DatasetEncoder import DatasetEncoder
 from immuneML.encodings.EncoderParams import EncoderParams
-from immuneML.encodings.kmer_frequency.ReadsType import ReadsType
+from immuneML.util.ReadsType import ReadsType
 from immuneML.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType import SequenceEncodingType
 from immuneML.encodings.preprocessing.FeatureScaler import FeatureScaler
 from immuneML.environment.Constants import Constants
@@ -35,7 +35,7 @@ class KmerFrequencyEncoder(DatasetEncoder):
 
         normalization_type (:py:mod:`~immuneML.analysis.data_manipulation.NormalizationType`): The way in which the k-mer frequencies should be normalized. The default value for normalization_type is l2.
 
-        reads (:py:mod:`~immuneML.encodings.kmer_frequency.ReadsType`): Reads type signify whether the counts of the sequences in the repertoire will be taken into account. If :py:mod:`~immuneML.encodings.kmer_frequency.ReadsType.UNIQUE`, only unique sequences (clonotypes) are encoded, and if :py:mod:`~immuneML.encodings.kmer_frequency.ReadsType.ALL`, the sequence 'count' value is taken into account when determining the k-mer frequency. The default value for reads is unique.
+        reads (:py:mod:`~immuneML.util.ReadsType`): Reads type signify whether the counts of the sequences in the repertoire will be taken into account. If :py:mod:`~immuneML.util.ReadsType.UNIQUE`, only unique sequences (clonotypes) are encoded, and if :py:mod:`~immuneML.util.ReadsType.ALL`, the sequence 'count' value is taken into account when determining the k-mer frequency. The default value for reads is unique.
 
         k (int): Length of the k-mer (number of amino acids) when ungapped k-mers are used. The default value for k is 3.
 

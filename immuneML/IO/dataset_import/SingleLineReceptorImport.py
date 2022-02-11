@@ -119,11 +119,11 @@ class SingleLineReceptorImport(DataImport):
 
     @staticmethod
     def import_dataset(params, dataset_name: str) -> ReceptorDataset:
-        generic_params = DatasetImportParams.build_object(**params)
+        generic_params = DatasetImportParams.build_object(**params) if isinstance(params, dict) else params
 
         filenames = ImportHelper.get_sequence_filenames(generic_params.path, dataset_name)
 
-        PathBuilder.build(generic_params.result_path, warn_if_exists=True)
+        generic_params.result_path = PathBuilder.build(generic_params.result_path, warn_if_exists=True)
 
         dataset = SingleLineReceptorImport._import_from_files(filenames, generic_params)
         dataset.name = dataset_name

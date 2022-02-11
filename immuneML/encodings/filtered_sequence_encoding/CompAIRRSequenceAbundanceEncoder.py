@@ -46,7 +46,6 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
 
     Note: to use this encoder, it is necessary to explicitly define the positive class for the label when defining the label
     in the instruction. With positive class defined, it can then be determined which sequences are indicative of the positive class.
-    See :ref:`Reproduction of the CMV status predictions study` for an example using :py:obj:`~immuneML.encodings.filtered_sequence_encoding.SequenceAbundanceEncoder.SequenceAbundanceEncoder`.
 
     Arguments:
 
@@ -143,7 +142,6 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
 
         return encoded_dataset
 
-
     def _prepare_sequence_presence_data(self, dataset, params):
         full_dataset = EncoderHelper.get_current_dataset(dataset, self.context)
 
@@ -217,7 +215,7 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
                                    [CompAIRRSequenceAbundanceEncoder.RELEVANT_SEQUENCE_ABUNDANCE,
                                     CompAIRRSequenceAbundanceEncoder.TOTAL_SEQUENCE_ABUNDANCE],
                                    encoding=CompAIRRSequenceAbundanceEncoder.__name__,
-                                   info={'relevant_sequence_path': self.relevant_sequence_csv_path})
+                                   info={'relevant_sequence_csv_path': self.relevant_sequence_csv_path})
 
         encoded_dataset = RepertoireDataset(labels=dataset.labels, encoded_data=encoded_data, repertoires=dataset.repertoires)
 
@@ -350,8 +348,8 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
         with open(filename, "w") as file:
             file.write(f"{sequence_col}{vj_header}\tduplicate_count\trepertoire_id\n")
 
-            for id, sequence_info in enumerate(sequence_set, offset):
-                file.write("\t".join(sequence_info) + f"\t1\t{id}\n")
+            for identifier, sequence_info in enumerate(sequence_set, offset):
+                file.write("\t".join(sequence_info) + f"\t1\t{identifier}\n")
 
     def _build_abundance_matrix(self, sequence_presence_matrix, matrix_repertoire_ids, dataset_repertoire_ids, sequence_p_values_indices):
         abundance_matrix = np.zeros((len(dataset_repertoire_ids), 2))

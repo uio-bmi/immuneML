@@ -142,6 +142,7 @@ class VDJdbImport(DataImport):
     def preprocess_dataframe(df: pd.DataFrame, params: DatasetImportParams):
         df["frame_types"] = SequenceFrameType.IN.name
         ImportHelper.junction_to_cdr3(df, params.region_type)
+        df.loc[:, "region_types"] = params.region_type.name
 
         if not params.is_repertoire and params.paired:
             n_single_chains = sum(df["sequence_identifiers"] == "0")

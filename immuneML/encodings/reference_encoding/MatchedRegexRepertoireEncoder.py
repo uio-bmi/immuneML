@@ -10,6 +10,7 @@ from immuneML.data_model.encoded_data.EncodedData import EncodedData
 from immuneML.data_model.receptor.receptor_sequence.Chain import Chain
 from immuneML.data_model.repertoire.Repertoire import Repertoire
 from immuneML.encodings.EncoderParams import EncoderParams
+from immuneML.util.ReadsType import ReadsType
 from immuneML.encodings.reference_encoding.MatchedRegexEncoder import MatchedRegexEncoder
 
 
@@ -100,7 +101,7 @@ class MatchedRegexRepertoireEncoder(MatchedRegexEncoder):
                         if rep_seq.metadata.chain is not None:
                             if rep_seq.metadata.chain.value == chain_type:
                                 if self._matches(rep_seq, regex, v_gene):
-                                    n_matches = 1 if not self.sum_counts else rep_seq.metadata.count
+                                    n_matches = 1 if self.reads == ReadsType.UNIQUE else rep_seq.metadata.count
                                     if n_matches is None:
                                         warnings.warn(f"MatchedRegexRepertoireEncoder: count not defined for sequence with id {rep_seq.identifier} in repertoire {repertoire.identifier}, ignoring sequence...")
                                         n_matches = 0

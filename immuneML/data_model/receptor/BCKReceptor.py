@@ -19,9 +19,11 @@ class BCKReceptor(Receptor):
             kappa_record = record[['kappa_' + name for name in ReceptorSequence.get_record_names()]]
             kappa_record.dtype.names = ReceptorSequence.get_record_names()
 
+            metadata = json.loads(record['metadata']) if record['metadata'] != '' else None
+
             return BCKReceptor(heavy=ReceptorSequence.create_from_record(heavy_record),
                                kappa=ReceptorSequence.create_from_record(kappa_record),
-                               identifier=record['identifier'], metadata=json.loads(record['metadata']))
+                               identifier=record['identifier'], metadata=metadata)
         else:
             raise NotImplementedError(f"Supported ({BCKReceptor.version}) and available version differ, but there is no converter available.")
 

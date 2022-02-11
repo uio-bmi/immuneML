@@ -76,6 +76,7 @@ rep2.tsv,TRB,1234a,no"""
         params["import_productive"] = True
         params["import_with_stop_codon"] = True
         params["import_out_of_frame"] = True
+        params["number_of_processes"] = 2
 
         dataset_name = "adaptive_dataset_reps"
 

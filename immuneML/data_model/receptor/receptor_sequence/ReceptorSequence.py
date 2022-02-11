@@ -31,8 +31,9 @@ class ReceptorSequence(DatasetItem):
         if 'version' in record.dtype.names and record['version'] == cls.version:
             return ReceptorSequence(**{**{key: record[key] for key, val_type in ReceptorSequence.FIELDS.items()
                                           if val_type == str and key != 'version'},
-                                       **{'metadata': SequenceMetadata(**json.loads(record['metadata'])),
-                                          'annotation': SequenceAnnotation(**json.loads(record['annotation']))}})
+                                       **{'metadata': SequenceMetadata(**json.loads(record['metadata'])) if record['metadata'] != '' else None,
+                                          'annotation': SequenceAnnotation(**json.loads(record['annotation'])) if record['annotation'] != ''
+                                          else None}})
         else:
             raise NotImplementedError
 

@@ -8,12 +8,6 @@ from immuneML.util.KmerHelper import KmerHelper
 
 class W2VRepertoireEncoder(Word2VecEncoder):
 
-    def _encode_examples(self, encoded_dataset, vectors, params):
-        repertoires = np.zeros(shape=[encoded_dataset.get_example_count(), vectors.vector_size])
-        for (index, repertoire) in enumerate(encoded_dataset.get_data()):
-            repertoires[index] = self._encode_repertoire(repertoire, vectors, params.model.get('sequence_type', None))
-        return repertoires
-
     def _encode_labels(self, dataset, params: EncoderParams):
 
         label_config = params.label_config
@@ -27,9 +21,9 @@ class W2VRepertoireEncoder(Word2VecEncoder):
 
         return np.array([labels[name] for name in labels.keys()])
 
-    def _encode_repertoire(self, repertoire, vectors, sequence_type: SequenceType):
+    def _encode_item(self, item, vectors, sequence_type: SequenceType):
         repertoire_vector = np.zeros(vectors.vector_size)
-        for (index2, sequence) in enumerate(repertoire.sequences):
+        for (index2, sequence) in enumerate(item.sequences):
             kmers = KmerHelper.create_kmers_from_sequence(sequence=sequence, k=self.k, sequence_type=sequence_type)
             sequence_vector = np.zeros(vectors.vector_size)
             for kmer in kmers:
