@@ -61,7 +61,9 @@ class KNN(SklearnMethod):
         from immuneML.encodings.kmer_frequency.KmerFrequencyEncoder import KmerFrequencyEncoder
         from immuneML.encodings.onehot.OneHotEncoder import OneHotEncoder
         from immuneML.encodings.word2vec.Word2VecEncoder import Word2VecEncoder
-        return [KmerFrequencyEncoder, OneHotEncoder, Word2VecEncoder, SequenceAbundanceEncoder, EvennessProfileEncoder, DistanceEncoder]
+        from immuneML.encodings.filtered_sequence_encoding.CompAIRRSequenceAbundanceEncoder import CompAIRRSequenceAbundanceEncoder
+        return [KmerFrequencyEncoder, OneHotEncoder, Word2VecEncoder, SequenceAbundanceEncoder, EvennessProfileEncoder, DistanceEncoder,
+                CompAIRRSequenceAbundanceEncoder]
 
     @staticmethod
     def get_documentation():

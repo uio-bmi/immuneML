@@ -1,10 +1,10 @@
-import warnings
-import pandas as pd
-import subprocess
 import os
-
-
+import subprocess
+import warnings
 from pathlib import Path
+
+import pandas as pd
+
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 
 
@@ -16,12 +16,11 @@ class CompAIRRHelper:
             try:
                 compairr_path = CompAIRRHelper.check_compairr_path("compairr")
             except Exception as e:
-                compairr_path = CompAIRRHelper._check_compairr_path("/usr/local/bin/compairr")
+                compairr_path = CompAIRRHelper.check_compairr_path("/usr/local/bin/compairr")
         else:
             compairr_path = CompAIRRHelper.check_compairr_path(compairr_path)
 
         return compairr_path
-
 
     @staticmethod
     def check_compairr_path(compairr_path):

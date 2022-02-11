@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 from matplotlib_venn import venn2
 
+from immuneML.encodings.filtered_sequence_encoding.CompAIRRSequenceAbundanceEncoder import CompAIRRSequenceAbundanceEncoder
 from immuneML.encodings.filtered_sequence_encoding.SequenceAbundanceEncoder import SequenceAbundanceEncoder
 from immuneML.environment.Label import Label
 from immuneML.hyperparameter_optimization.states.TrainMLModelState import TrainMLModelState
@@ -105,7 +106,7 @@ class ReferenceSequenceOverlap(TrainMLModelReport):
 
     @staticmethod
     def _check_encoder_class(encoder):
-        return any(isinstance(encoder, cls) for cls in [SequenceAbundanceEncoder])
+        return any(isinstance(encoder, cls) for cls in [SequenceAbundanceEncoder, CompAIRRSequenceAbundanceEncoder])
 
     def check_prerequisites(self):
 
