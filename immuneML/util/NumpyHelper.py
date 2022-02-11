@@ -6,6 +6,8 @@ import numpy as np
 
 class NumpyHelper:
 
+    SIMPLE_TYPES = [str, int, float, bool, np.str_, np.int_, np.float_, np.bool_]
+
     @staticmethod
     def group_structured_array_by(data, field):
         for col in data.dtype.names:
@@ -17,7 +19,7 @@ class NumpyHelper:
     @staticmethod
     def is_simple_type(t):
         """returns if the type t is string or a number so that it does not use pickle if serialized"""
-        return t in [str, int, float, bool, np.str_, np.int_, np.float_, np.bool_]
+        return t in NumpyHelper.SIMPLE_TYPES
 
     @staticmethod
     def get_numpy_representation(obj):
@@ -25,8 +27,8 @@ class NumpyHelper:
         it will be serialized to a json string"""
 
         if obj is None:
-            return '{}'
-        elif NumpyHelper.is_simple_type(type(obj)):
+            return ''
+        elif type(obj) in NumpyHelper.SIMPLE_TYPES:
             return obj
         elif isinstance(obj, Enum):
             return obj.name

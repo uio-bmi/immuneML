@@ -16,7 +16,6 @@ from immuneML.util.KmerHelper import KmerHelper
 class SequenceModelCreator(ModelCreatorStrategy):
 
     def create_model(self, dataset: Dataset, k: int, vector_size: int, batch_size: int, model_path: Path, sequence_type: SequenceType):
-        print("starting to create model")
         model = Word2Vec(size=vector_size, min_count=1, window=self.window)  # creates an empty model
         all_kmers = KmerHelper.create_all_kmers(k=k, alphabet=EnvironmentSettings.get_sequence_alphabet())
         all_kmers = [[kmer] for kmer in all_kmers]

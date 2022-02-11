@@ -12,7 +12,7 @@ from immuneML.util.PathBuilder import PathBuilder
 class TestSubsamplingParser(TestCase):
     def test_parse(self):
 
-        path = PathBuilder.build(f'{EnvironmentSettings.tmp_test_path}subsampling_parser/')
+        path = PathBuilder.build(f'{EnvironmentSettings.tmp_test_path}/subsampling_parser/')
         dataset = RandomDatasetGenerator.generate_receptor_dataset(30, {3: 1}, {2: 1}, {}, path)
 
         symbol_table = SymbolTable()
