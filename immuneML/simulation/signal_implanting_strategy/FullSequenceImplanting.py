@@ -53,6 +53,9 @@ class FullSequenceImplanting(SignalImplantingStrategy):
             f"FullSequenceImplanting: there are too few sequences ({len(sequences)}) in the repertoire with identifier {repertoire.identifier} " \
             f"to have the given repertoire implanting rate ({repertoire_implanting_rate}). Please consider increasing the repertoire implanting rate."
         new_sequences = self._create_new_sequences(sequences, new_sequence_count, signal)
+
+        random.shuffle(new_sequences)
+
         metadata = copy.deepcopy(repertoire.metadata)
         metadata[signal.id] = True
 
