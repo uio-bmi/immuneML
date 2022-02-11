@@ -95,7 +95,6 @@ class AIRRExporter(DataExporter):
 
     @staticmethod
     def _repertoire_to_dataframe(repertoire: Repertoire):
-        # get all fields (including custom fields)
         df = pd.DataFrame(repertoire.load_data())
 
         for column in ['v_alleles', 'j_alleles', 'v_genes', 'j_genes']:
