@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+import logging
 
 from immuneML.IO.dataset_import.DatasetImportParams import DatasetImportParams
 from immuneML.dsl.DefaultParamsLoader import DefaultParamsLoader
@@ -53,5 +54,6 @@ class MatchedReferenceUtil:
             receptors = ImportHelper.import_items(import_class, reference_params["params"]["path"], processed_params)
 
         assert len(receptors) > 0, f"MatchedReferenceUtil: The total number of imported reference {'receptors' if paired else 'sequences'} is 0, please ensure that reference import is specified correctly."
+        logging.info(f"MatchedReferenceUtil: successfully imported {len(receptors)} reference {'receptors' if paired else 'sequences'}.")
 
         return receptors
