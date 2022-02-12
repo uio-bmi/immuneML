@@ -1,4 +1,5 @@
 import copy
+import json
 import os
 from pathlib import Path
 from typing import List
@@ -160,11 +161,19 @@ class SignalImplanter(Step):
 
     @staticmethod
     def _remove_signal_label_from_receptors(repertoire: Repertoire, result_path: Path, signals):
-        sequences = list(repertoire.sequences)
+
+        removed_info = {'sequence': [], 'sequence_aa': [], 'annotation': [], 'signal_id': [], 'repertoire_id': []}
+
+        sequences = list(repertoire.get_sequence_objects(load_implants=True))
         for sequence in sequences:
             for signal in signals:
                 if signal.id in sequence.metadata.custom_params:
+                    if sequence.metadata.custom_params[signal.id]:
+                        removed_info['sequence_aa'].append(sequence.amino_acid_sequence)
+                        removed_info['sequence'].append(sequence.nucleotide_sequence)
+                        removed_info['signal_id'].append(signal.id)
                     del sequence.metadata.custom_params[signal.id]
+            removed_info['annotation'] = json.dumps(str(sequence.annotation))
             sequence.annotation = None
 
         os.remove(repertoire.data_filename)
@@ -172,6 +181,14 @@ class SignalImplanter(Step):
 
         new_repertoire = Repertoire.build_from_sequence_objects(sequences, result_path / "repertoires/", repertoire.metadata,
                                                                 repertoire_id=repertoire.identifier)
+
+        removed_info['repertoire_id'] = [new_repertoire.identifier for _ in range(len(removed_info['signal_id']))]
+
+        removed_info_path = Path(result_path / 'removed_info_from_sequences.csv')
+        if removed_info_path.is_file():
+            pd.DataFrame(removed_info).to_csv(removed_info_path, mode='a', index=False, header=False)
+        else:
+            pd.DataFrame(removed_info).to_csv(removed_info_path, mode='w', index=False, header=True)
 
         return new_repertoire
 

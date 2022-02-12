@@ -67,9 +67,7 @@ class GappedMotifImplanting(SequenceImplantingStrategy):
         annotation.add_implant(ImplantAnnotation(signal_id=signal["signal_id"], motif_id=signal["motif_id"], motif_instance=signal["motif_instance"],
                                                  position=position))
 
-        new_sequence = ReceptorSequence()
-        new_sequence.set_annotation(annotation)
-        new_sequence.set_metadata(copy.deepcopy(sequence.metadata))
+        new_sequence = ReceptorSequence(annotation=annotation, metadata=copy.deepcopy(sequence.metadata))
         new_sequence.metadata.custom_params[signal['signal_id']] = True
         new_sequence.set_sequence(new_sequence_string, sequence_type)
 

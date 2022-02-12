@@ -83,7 +83,7 @@ class Repertoire(DatasetItem):
         field_list, values, dtype = Repertoire.process_custom_lists(custom_lists)
 
         if signals:
-            signals_filtered = {signal: signals[signal] for signal in signals if signal not in metadata}
+            signals_filtered = {f'{signal}_info': signals[signal] for signal in signals}
             field_list_signals, values_signals, dtype_signals = Repertoire.process_custom_lists(signals_filtered)
 
             field_list.extend(field_list_signals)

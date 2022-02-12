@@ -23,7 +23,7 @@ class KmerHelper:
 
     @staticmethod
     def create_IMGT_kmers_from_sequence(sequence: ReceptorSequence, k: int, sequence_type: SequenceType):
-        positions = PositionHelper.gen_imgt_positions_from_sequence(sequence, sequence_type)
+        positions = PositionHelper.gen_imgt_positions_from_sequence(sequence)
 
         sequence_w_pos = list(zip(list(sequence.get_sequence(sequence_type)), positions))
         kmers = KmerHelper.create_kmers_from_string(sequence_w_pos, k)
@@ -33,7 +33,7 @@ class KmerHelper:
 
     @staticmethod
     def create_IMGT_gapped_kmers_from_sequence(sequence: ReceptorSequence, sequence_type: SequenceType, k_left: int, max_gap: int, k_right: int = None, min_gap: int = 0):
-        positions = PositionHelper.gen_imgt_positions_from_sequence(sequence, sequence_type)
+        positions = PositionHelper.gen_imgt_positions_from_sequence(sequence)
 
         sequence_w_pos = list(zip(list(sequence.get_sequence(sequence_type)), positions))
         kmers = KmerHelper.create_gapped_kmers_from_string(sequence_w_pos, k_left=k_left, max_gap=max_gap,
