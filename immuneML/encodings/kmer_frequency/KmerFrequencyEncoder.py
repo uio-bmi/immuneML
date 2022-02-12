@@ -152,12 +152,12 @@ class KmerFrequencyEncoder(DatasetEncoder):
 
     @staticmethod
     def build_object(dataset=None, **params):
-        try:
-            prepared_params = KmerFrequencyEncoder._prepare_parameters(**params)
-            encoder = ReflectionHandler.get_class_by_name(KmerFrequencyEncoder.dataset_mapping[dataset.__class__.__name__],
+        EncoderHelper.check_dataset_type_available_in_mapping(dataset, KmerFrequencyEncoder)
+
+        prepared_params = KmerFrequencyEncoder._prepare_parameters(**params)
+        encoder = ReflectionHandler.get_class_by_name(KmerFrequencyEncoder.dataset_mapping[dataset.__class__.__name__],
                                                           "kmer_frequency/")(**prepared_params)
-        except ValueError:
-            raise ValueError("{} is not defined for dataset of type {}.".format(KmerFrequencyEncoder.__name__, dataset.__class__.__name__))
+
         return encoder
 
     def encode(self, dataset, params: EncoderParams):

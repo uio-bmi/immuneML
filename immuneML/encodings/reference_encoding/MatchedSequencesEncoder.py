@@ -5,6 +5,7 @@ from immuneML.data_model.receptor.receptor_sequence.ReceptorSequenceList import 
 from immuneML.encodings.DatasetEncoder import DatasetEncoder
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.encodings.reference_encoding.MatchedReferenceUtil import MatchedReferenceUtil
+from immuneML.util.EncoderHelper import EncoderHelper
 from immuneML.util.ParameterValidator import ParameterValidator
 from immuneML.util.ReadsType import ReadsType
 from immuneML.util.ReflectionHandler import ReflectionHandler
@@ -82,13 +83,12 @@ class MatchedSequencesEncoder(DatasetEncoder):
 
     @staticmethod
     def build_object(dataset=None, **params):
-        try:
-            prepared_parameters = MatchedSequencesEncoder._prepare_parameters(**params)
-            encoder = ReflectionHandler.get_class_by_name(MatchedSequencesEncoder.dataset_mapping[dataset.__class__.__name__],
+        EncoderHelper.check_dataset_type_available_in_mapping(dataset, MatchedSequencesEncoder)
+
+        prepared_parameters = MatchedSequencesEncoder._prepare_parameters(**params)
+        encoder = ReflectionHandler.get_class_by_name(MatchedSequencesEncoder.dataset_mapping[dataset.__class__.__name__],
                                                           "reference_encoding/")(**prepared_parameters)
-        except ValueError:
-            raise ValueError("{} is not defined for dataset of type {}.".format(MatchedSequencesEncoder.__name__,
-                                                                                dataset.__class__.__name__))
+
         return encoder
 
     def encode(self, dataset, params: EncoderParams):
