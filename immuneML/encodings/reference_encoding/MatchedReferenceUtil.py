@@ -52,4 +52,6 @@ class MatchedReferenceUtil:
         else:
             receptors = ImportHelper.import_items(import_class, reference_params["params"]["path"], processed_params)
 
+        assert len(receptors) > 0, f"MatchedReferenceUtil: The total number of imported reference {'receptors' if paired else 'sequences'} is 0, please ensure that reference import is specified correctly."
+
         return receptors
