@@ -22,8 +22,8 @@ class Quickstart:
                     "d1": {
                         "format": "AIRR",
                         "params": {
-                            "path": str(path / "../synthetic_dataset/result/simulation_instruction/exported_dataset/airr/"),
-                            "metadata_file": str(path / "../synthetic_dataset/result/simulation_instruction/exported_dataset/airr/metadata.csv")
+                            "path": str(path.parent / "synthetic_dataset/result/simulation_instruction/exported_dataset/airr/"),
+                            "metadata_file": str(path.parent / "synthetic_dataset/result/simulation_instruction/exported_dataset/airr/metadata.csv")
                         }
                     }
                 },
