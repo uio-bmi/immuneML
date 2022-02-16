@@ -110,6 +110,8 @@ class AIRRExporter(DataExporter):
                   "sequences": AIRRExporter.get_sequence_field(region_type), "sequence_aas": AIRRExporter.get_sequence_aa_field(region_type)}
 
         df = df.rename(mapper=mapper, axis="columns")
+        df.drop(columns=['region_types'], inplace=True)
+
         return df
 
     @staticmethod
@@ -178,7 +180,7 @@ class AIRRExporter(DataExporter):
     @staticmethod
     def _postprocess_dataframe(df):
         if "locus" in df.columns:
-            df["locus"] = [Chain.get_chain(chain).value if chain else '' for chain in df["locus"]]
+            df["locus"] = [Chain.get_chain(chain).value if chain and Chain.get_chain(chain) else '' for chain in df["locus"]]
 
         if "frame_types" in df.columns:
             AIRRExporter._enums_to_strings(df, "frame_types")

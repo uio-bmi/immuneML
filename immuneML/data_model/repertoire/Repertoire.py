@@ -252,6 +252,10 @@ class Repertoire(DatasetItem):
 
     def get_region_type(self):
         region_types = set(self.get_attribute("region_types"))
+
+        if 'nan' in region_types:
+            region_types.remove('nan')
+
         assert len(region_types) == 1, f"Repertoire: expected one region_type, found: {region_types}"
 
         return RegionType(region_types.pop())

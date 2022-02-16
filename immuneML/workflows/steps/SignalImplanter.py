@@ -167,12 +167,13 @@ class SignalImplanter(Step):
         sequences = list(repertoire.get_sequence_objects(load_implants=True))
         for sequence in sequences:
             for signal in signals:
-                if signal.id in sequence.metadata.custom_params:
-                    if sequence.metadata.custom_params[signal.id]:
+                signal_key = f"{signal.id}_info"
+                if signal_key in sequence.metadata.custom_params:
+                    if sequence.metadata.custom_params[signal_key]:
                         removed_info['sequence_aa'].append(sequence.amino_acid_sequence)
                         removed_info['sequence'].append(sequence.nucleotide_sequence)
                         removed_info['signal_id'].append(signal.id)
-                    del sequence.metadata.custom_params[signal.id]
+                    del sequence.metadata.custom_params[signal_key]
             removed_info['annotation'] = json.dumps(str(sequence.annotation))
             sequence.annotation = None
 
