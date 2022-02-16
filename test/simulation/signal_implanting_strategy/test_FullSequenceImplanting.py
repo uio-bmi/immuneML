@@ -13,14 +13,15 @@ from immuneML.util.PathBuilder import PathBuilder
 class TestFullSequenceImplanting(TestCase):
     def test_implant_in_repertoire(self):
         path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "full_seq_implanting/")
-        signal = Signal("sig1", [Motif("motif1", GappedKmerInstantiation(max_gap=0), "AAAA")], FullSequenceImplanting())
+        signal = Signal("sig1", [Motif("motif1", GappedKmerInstantiation(max_gap=0), "AAAA", v_gene="v1", j_gene="j1")],
+                        FullSequenceImplanting())
 
         repertoire = Repertoire.build(["CCCC", "CCCC", "CCCC"], path=path)
 
         new_repertoire = signal.implant_to_repertoire(repertoire, 0.33, path)
 
         self.assertEqual(len(repertoire.sequences), len(new_repertoire.sequences))
-        self.assertEqual(1, len([seq for seq in new_repertoire.sequences if seq.amino_acid_sequence == "AAAA"]))
-        self.assertEqual(2, len([seq for seq in new_repertoire.sequences if seq.amino_acid_sequence == "CCCC"]))
+        self.assertEqual(1, len([seq for seq in new_repertoire.sequences if seq.amino_acid_sequence == "AAAA" and seq.metadata.v_gene == "v1"]))
+        self.assertEqual(2, len([seq for seq in new_repertoire.sequences if seq.amino_acid_sequence == "CCCC" and seq.metadata.v_gene != "v1"]))
 
         shutil.rmtree(path)

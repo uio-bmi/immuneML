@@ -28,12 +28,6 @@ class Signal:
         implanting (:py:obj:`~immuneML.simulation.signal_implanting_strategy.SignalImplantingStrategy.SignalImplantingStrategy`):
         The strategy that is used to decide in which sequences the motifs should be implanted, and how. Valid values for this argument are class names of different signal implanting strategies.
 
-        v_gene (str): which V gene is used the create the receptor sequence containing this signal; could be gene name or None to indicate that it
-        could be any V gene
-
-        j_gene (str): which J gene is used the create the receptor sequence containing this signal; could be gene name or None to indicate that it
-        could be any J gene
-
     YAML specification:
 
     .. indent with spaces
@@ -44,8 +38,6 @@ class Signal:
                 motifs:
                     - my_simple_motif
                     - my_gapped_motif
-                v_gene: V1-1
-                j_gene: None
                 implanting: HealthySequence
                 sequence_position_weights:
                     109: 0.5
@@ -57,8 +49,6 @@ class Signal:
         self.id = str(identifier)
         self.motifs = motifs
         self.implanting_strategy = implanting_strategy
-        self.v_gene = v_gene
-        self.j_gene = j_gene
 
     def implant_to_repertoire(self, repertoire: Repertoire, repertoire_implanting_rate: float, path: Path) \
             -> Repertoire:

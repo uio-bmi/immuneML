@@ -42,6 +42,9 @@ class Motif:
         name_chain2: name of the second chain 2 if paired receptor data are simulated. The value should be an instance of
         :py:obj:`~immuneML.data_model.receptor.receptor_sequence.Chain.Chain`. This argument is used only if the seed argument is not set.
 
+        v_gene (str): which V gene is used the create the receptor sequence containing this signal; used only in combination with FullSequence implanting so far
+
+        j_gene (str): which J gene is used the create the receptor sequence containing this signal; used only in combination with FullSequence implanting so far
 
     YAML specification:
 
@@ -53,6 +56,8 @@ class Motif:
             my_simple_motif: # this will be the identifier of the motif
                 seed: AAA
                 instantiation: GappedKmer
+                v_gene: TRBV1
+                j_gene: TRBJ1
             my_gapped_motif:
                 seed: AA/A
                 instantiation:
@@ -101,7 +106,8 @@ class Motif:
                 f"Motif: specified chain name {chain_name.name.lower()} is not in valid list of chain names specified for motif {self.identifier}: " \
                 f"{[self.name_chain1.name.lower(), self.name_chain2.name.lower()]}."
 
-            return self.instantiation.instantiate_motif(self.seed_chain1 if chain_name == self.name_chain1 else self.seed_chain2, sequence_type=sequence_type)
+            return self.instantiation.instantiate_motif(self.seed_chain1 if chain_name == self.name_chain1 else self.seed_chain2,
+                                                        sequence_type=sequence_type)
 
     def get_max_length(self):
         if self.seed is not None:

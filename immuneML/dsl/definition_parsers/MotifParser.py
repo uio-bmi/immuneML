@@ -16,7 +16,7 @@ class MotifParser:
     @staticmethod
     def parse_motifs(motifs: dict, symbol_table: SymbolTable):
 
-        valid_motif_keys = ["seed", "instantiation", "seed_chain1", "seed_chain2", "name_chain1", "name_chain2"]
+        valid_motif_keys = ["seed", "instantiation", "seed_chain1", "seed_chain2", "name_chain1", "name_chain2", "v_gene", "j_gene"]
         for key in motifs.keys():
 
             ParameterValidator.assert_keys(motifs[key].keys(), valid_motif_keys, "MotifParser", key, exclusive=False)
