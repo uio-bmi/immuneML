@@ -8,6 +8,7 @@ from immuneML.caching.CacheHandler import CacheHandler
 from immuneML.data_model.encoded_data.EncodedData import EncodedData
 from immuneML.encodings.DatasetEncoder import DatasetEncoder
 from immuneML.encodings.EncoderParams import EncoderParams
+from immuneML.util.EncoderHelper import EncoderHelper
 from immuneML.util.ReflectionHandler import ReflectionHandler
 
 
@@ -75,12 +76,12 @@ class EvennessProfileEncoder(DatasetEncoder):
 
     @staticmethod
     def build_object(dataset=None, **params):
-        try:
-            prepared_params = EvennessProfileEncoder._prepare_parameters(**params)
-            encoder = ReflectionHandler.get_class_by_name(EvennessProfileEncoder.dataset_mapping[dataset.__class__.__name__],
+        EncoderHelper.check_dataset_type_available_in_mapping(dataset, EvennessProfileEncoder)
+
+        prepared_params = EvennessProfileEncoder._prepare_parameters(**params)
+        encoder = ReflectionHandler.get_class_by_name(EvennessProfileEncoder.dataset_mapping[dataset.__class__.__name__],
                                                           "evenness_profile/")(**prepared_params)
-        except ValueError:
-            raise ValueError("{} is not defined for dataset of type {}.".format(EvennessProfileEncoder.__name__, dataset.__class__.__name__))
+
         return encoder
 
     def encode(self, dataset, params: EncoderParams):

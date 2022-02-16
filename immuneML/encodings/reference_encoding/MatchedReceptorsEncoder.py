@@ -9,6 +9,7 @@ from immuneML.data_model.receptor.TCGDReceptor import TCGDReceptor
 from immuneML.encodings.DatasetEncoder import DatasetEncoder
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.encodings.reference_encoding.MatchedReferenceUtil import MatchedReferenceUtil
+from immuneML.util.EncoderHelper import EncoderHelper
 from immuneML.util.ParameterValidator import ParameterValidator
 from immuneML.util.ReadsType import ReadsType
 from immuneML.util.ReflectionHandler import ReflectionHandler
@@ -98,13 +99,11 @@ class MatchedReceptorsEncoder(DatasetEncoder):
 
     @staticmethod
     def build_object(dataset=None, **params):
-        try:
-            prepared_params = MatchedReceptorsEncoder._prepare_parameters(**params)
-            encoder = ReflectionHandler.get_class_by_name(
-                MatchedReceptorsEncoder.dataset_mapping[dataset.__class__.__name__], "reference_encoding/")(**prepared_params)
-        except ValueError:
-            raise ValueError("{} is not defined for dataset of type {}.".format(MatchedReceptorsEncoder.__name__,
-                                                                                dataset.__class__.__name__))
+        EncoderHelper.check_dataset_type_available_in_mapping(dataset, MatchedReceptorsEncoder)
+
+        prepared_params = MatchedReceptorsEncoder._prepare_parameters(**params)
+        encoder = ReflectionHandler.get_class_by_name(MatchedReceptorsEncoder.dataset_mapping[dataset.__class__.__name__], "reference_encoding/")(**prepared_params)
+
         return encoder
 
     def encode(self, dataset, params: EncoderParams):
