@@ -79,8 +79,9 @@
         before any preprocessing, encoding or model training.</p>
         <div class="padded">
             {{#data_split_reports}}
-            <p>Split {{split_index}}</p>
+            <h3>Split {{split_index}}</h3>
             {{#train}}
+            <p>Report {{name}} (training): {{info}}</p>
             <div class="grid-container">
                 {{#output_figures}}
                 <div class="">
@@ -98,9 +99,14 @@
             {{#output_tables}}
                 <li><a href="{{path}}">Download {{#name}}{{name}} report{{/name}} (training data)</a></li>
             {{/output_tables}}
+            {{#output_text}}
+                <li><a href="{{path}}">Download {{#name}}{{name}} report{{/name}} (training data)</a></li>
+            {{/output_text}}
             </ul>
+
             {{/train}}
             {{#test}}
+            <p>Report {{name}} (validation): {{info}}</p>
             <div class="grid-container">
                 {{#output_figures}}
                 <div class="">
@@ -115,9 +121,12 @@
                 {{/output_figures}}
             </div>
             <ul>
-            {{#output_tables}}
-            <li><a href="{{path}}">Download {{#name}}{{name}} report{{/name}} (validation data)</a></li>
-            {{/output_tables}}
+                {{#output_tables}}
+                    <li><a href="{{path}}">Download {{#name}}{{name}} report{{/name}} (validation data)</a></li>
+                {{/output_tables}}
+                {{#output_text}}
+                    <li><a href="{{path}}">Download {{#name}}{{name}} report{{/name}} (validation data)</a></li>
+                {{/output_text}}
             </ul>
             {{/test}}
             {{/data_split_reports}}
@@ -138,6 +147,7 @@
                 <h5>Encoded training data reports</h5>
                 {{/has_encoding_train_reports}}
                 {{#encoding_train_reports}}
+                <p>Report {{name}} (training): {{info}}</p>
                 {{#output_figures}}
                 <div class="padded center">
                     {{#is_embed}}
@@ -151,8 +161,11 @@
                 {{/output_figures}}
                 <ul>
                 {{#output_tables}}
-                <li><a href="{{path}}">Download {{#name}}{{name}} report{{/name}}</a></li>
+                <li><a href="{{path}}">Download {{#name}}{{name}} report{{/name}} (encoded training data)</a></li>
                 {{/output_tables}}
+                {{#output_text}}
+                <li><a href="{{path}}">Download {{#name}}{{name}} report{{/name}} (encoded training data)</a></li>
+                {{/output_text}}
                 </ul>
                 {{/encoding_train_reports}}
 
@@ -160,6 +173,7 @@
                 <h5>Encoded validation data reports</h5>
                 {{/has_encoding_test_reports}}
                 {{#encoding_test_reports}}
+                <p>Report {{name}} (validation): {{info}}</p>
                 {{#output_figures}}
                 <div class="padded center">
                     {{#is_embed}}
@@ -173,8 +187,11 @@
                 {{/output_figures}}
                 <ul>
                 {{#output_tables}}
-                <li><a href="{{path}}">Download {{#name}}{{name}} report{{/name}}</a></li>
+                <li><a href="{{path}}">Download {{#name}}{{name}} report{{/name}} (encoded validation data)</a></li>
                 {{/output_tables}}
+                {{#output_text}}
+                <li><a href="{{path}}">Download {{#name}}{{name}} report{{/name}} (encoded validation data)</a></li>
+                {{/output_text}}
                 </ul>
                 {{/encoding_test_reports}}
 
@@ -182,6 +199,7 @@
                 <h5>ML model reports</h5>
                 {{/has_ml_reports}}
                 {{#ml_reports}}
+                <p>Report {{name}}: {{info}}</p>
                 <div class="grid-container">
                 {{#output_figures}}
                 <div class="">
@@ -199,6 +217,9 @@
                 {{#output_tables}}
                 <li><a href="{{path}}">Download {{#name}}{{name}} report{{/name}}</a></li>
                 {{/output_tables}}
+                {{#output_text}}
+                <li><a href="{{path}}">Download {{#name}}{{name}} report{{/name}}</a></li>
+                {{/output_text}}
                 </ul>
                 {{/ml_reports}}
 

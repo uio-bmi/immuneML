@@ -37,10 +37,8 @@ class RelevantSequenceExporter(EncodingReport):
         'sequence_aas': "cdr3_aa"
     }
 
-    def __init__(self, dataset: RepertoireDataset = None, result_path: Path = None, name: str = None):
-        super().__init__(name)
-        self.dataset = dataset
-        self.result_path = result_path
+    def __init__(self, dataset: RepertoireDataset = None, result_path: Path = None, name: str = None, number_of_processes: int = 1):
+        super().__init__(dataset=dataset, result_path=result_path, name=name, number_of_processes=number_of_processes)
 
     @classmethod
     def build_object(cls, **kwargs):
@@ -48,7 +46,7 @@ class RelevantSequenceExporter(EncodingReport):
 
     def _generate(self) -> ReportResult:
 
-        df = pd.read_csv(self.dataset.encoded_data.info["relevant_sequence_path"])
+        df = pd.read_csv(self.dataset.encoded_data.info["relevant_sequence_csv_path"])
         column_mapping = self._compute_column_mapping(df)
         df.rename(columns=column_mapping, inplace=True)
 
@@ -56,7 +54,9 @@ class RelevantSequenceExporter(EncodingReport):
         filename = self.result_path / "relevant_sequences.csv"
         df.to_csv(filename, index=False)
 
-        return ReportResult(self.name, output_tables=[ReportOutput(filename, "relevant sequences")])
+        return ReportResult(self.name,
+                            info=f"Exports the sequences that are extracted as label-associated using the {self.dataset.encoded_data.encoding} in AIRR-compliant format.",
+                            output_tables=[ReportOutput(filename, "relevant sequences")])
 
     def _compute_column_mapping(self, df: pd.DataFrame) -> dict:
         columns = df.columns.values.tolist()
@@ -78,7 +78,7 @@ class RelevantSequenceExporter(EncodingReport):
             logging.warning(f"RelevantSequenceExporter: the dataset encoding ({self.dataset.encoded_data.encoding}) was not in the list of valid "
                             f"encodings ({valid_encodings}), skipping this report...")
             return False
-        elif "relevant_sequence_path" not in self.dataset.encoded_data.info or not os.path.isfile(self.dataset.encoded_data.info['relevant_sequence_path']):
+        elif "relevant_sequence_csv_path" not in self.dataset.encoded_data.info or not os.path.isfile(self.dataset.encoded_data.info['relevant_sequence_csv_path']):
             logging.warning(f"RelevantSequenceExporter: the relevant sequences were not set for this encoded data, skipping this report...")
             return False
         else:

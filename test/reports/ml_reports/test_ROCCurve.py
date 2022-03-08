@@ -9,6 +9,7 @@ from immuneML.data_model.dataset.Dataset import Dataset
 from immuneML.data_model.encoded_data.EncodedData import EncodedData
 from immuneML.environment.Constants import Constants
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
+from immuneML.environment.Label import Label
 from immuneML.ml_methods.LogisticRegression import LogisticRegression
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.ml_reports.ROCCurve import ROCCurve
@@ -25,14 +26,14 @@ class TestROCCurve(unittest.TestCase):
                                  {"l1": [i % 2 for i in range(0, 100)]})
 
         dummy_lr.fit_by_cross_validation(encoded_tr, number_of_splits=2,
-                                         label_name="l1")
+                                         label=Label("l1"))
         return dummy_lr
 
     def _create_report(self, path):
         report = ROCCurve.build_object(name='testcase')
 
         report.method = self._create_dummy_lr_model()
-        report.label = "l1"
+        report.label = Label("l1")
         report.result_path = path
         report.test_dataset = Dataset()
         encoded_te = EncodedData(np.random.rand(100, 20),

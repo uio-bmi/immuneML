@@ -15,6 +15,7 @@ from immuneML.data_model.cell.Cell import Cell
 from immuneML.data_model.cell.CellList import CellList
 from immuneML.data_model.receptor.Receptor import Receptor
 from immuneML.data_model.receptor.ReceptorBuilder import ReceptorBuilder
+from immuneML.data_model.receptor.RegionType import RegionType
 from immuneML.data_model.receptor.receptor_sequence.Chain import Chain
 from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
 from immuneML.data_model.receptor.receptor_sequence.ReceptorSequenceList import ReceptorSequenceList
@@ -236,6 +237,12 @@ class Repertoire(DatasetItem):
             else:
                 logging.warning(f"{Repertoire.__name__}: attribute {attribute} is not present in the repertoire {self.identifier}, skipping...")
         return result
+
+    def get_region_type(self):
+        region_types = set(self.get_attribute("region_types"))
+        assert len(region_types) == 1, f"Repertoire: expected one region_type, found: {region_types}"
+
+        return RegionType(region_types.pop())
 
     def free_memory(self):
         self.data = None

@@ -96,13 +96,13 @@ class Coefficients(MLReport):
         return Coefficients(coefs_to_plot=coefs, cutoff=cutoff, n_largest=n_largest, name=name)
 
     def __init__(self, coefs_to_plot: CoefficientPlottingSettingList, cutoff: list, n_largest: list, train_dataset: Dataset = None,
-                 test_dataset: Dataset = None, method: MLMethod = None, result_path: Path = None, name: str = None, hp_setting: HPSetting = None):
-        super().__init__(train_dataset, test_dataset, method, result_path, name, hp_setting)
-
+                 test_dataset: Dataset = None, method: MLMethod = None, result_path: Path = None, name: str = None, hp_setting: HPSetting = None,
+                 label=None, number_of_processes: int = 1):
+        super().__init__(train_dataset=train_dataset, test_dataset=test_dataset, method=method, result_path=result_path,
+                         name=name, hp_setting=hp_setting, label=label, number_of_processes=number_of_processes)
         self._coefs_to_plot = coefs_to_plot
         self._cutoff = cutoff
         self._n_largest = n_largest
-        self.label = None
 
     def _generate(self):
         PathBuilder.build(self.result_path)
@@ -138,7 +138,9 @@ class Coefficients(MLReport):
                 report_output_fig = self._plot(plotting_data=n_largest_data, output_name="largest_{}_coefficients".format(n_val))
                 paths.append(report_output_fig)
 
-        return ReportResult(self.name, output_tables=[ReportOutput(result_table_path, "features and coefficients csv")],
+        return ReportResult(self.name,
+                            info=f"{self._y_axis_title}s of the trained {self.method.__class__.__name__} model",
+                            output_tables=[ReportOutput(result_table_path, "features and coefficients csv")],
                             output_figures=[p for p in paths if p is not None])
 
     def _set_plotting_parameters(self):

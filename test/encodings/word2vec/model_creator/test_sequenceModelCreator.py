@@ -29,7 +29,7 @@ class TestSequenceModelCreator(TestCase):
 
         dataset = RepertoireDataset(repertoires=[rep1, rep2])
 
-        model_creator = SequenceModelCreator()
+        model_creator = SequenceModelCreator(epochs=10, window=5)
         model = model_creator.create_model(dataset=dataset, k=2, vector_size=16, batch_size=2, model_path=test_path / "model.model",
                                            sequence_type=SequenceType.AMINO_ACID)
 

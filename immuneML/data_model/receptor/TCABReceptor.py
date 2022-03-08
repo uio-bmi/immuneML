@@ -20,10 +20,11 @@ class TCABReceptor(Receptor):
 
             beta_record = record[['beta_' + name for name in ReceptorSequence.get_record_names()]]
             beta_record.dtype.names = ReceptorSequence.get_record_names()
+            metadata = json.loads(record['metadata']) if record['metadata'] != '' else None
 
             return TCABReceptor(alpha=ReceptorSequence.create_from_record(alpha_record),
                                 beta=ReceptorSequence.create_from_record(beta_record),
-                                identifier=record['identifier'], metadata=json.loads(record['metadata']))
+                                identifier=record['identifier'], metadata=metadata)
         else:
             raise NotImplementedError(f"Supported ({TCABReceptor.version}) and available version differ, but there is no converter available.")
 

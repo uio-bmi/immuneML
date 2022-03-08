@@ -122,6 +122,9 @@
             <div class="grid-container">
                 <div class="">
                     {{#train_data_reports}}
+
+                    <h4>Report {{name}} (training)</h4>
+                    <p>{{info}}</p>
                     {{#output_figures}}
                     {{#is_embed}}
                     <embed src="{{path}}">
@@ -135,11 +138,16 @@
                     {{#output_tables}}
                     <li><a href="{{path}}">Download {{#name}}{{name}} report{{/name}} (training data)</a></li>
                     {{/output_tables}}
+                    {{#output_text}}
+                    <li><a href="{{path}}">Download {{#name}}{{name}} report{{/name}} (training data)</a></li>
+                    {{/output_text}}
                     </ul>
                     {{/train_data_reports}}
                 </div>
                 <div class="">
                     {{#test_data_reports}}
+                    <h4>Report {{name}} (test)</h4>
+                    <p>{{info}}</p>
                     {{#output_figures}}
                     {{#is_embed}}
                     <embed src="{{path}}">
@@ -153,6 +161,9 @@
                     {{#output_tables}}
                     <li><a href="{{path}}">Download {{#name}}{{name}} report{{/name}} (test data)</a></li>
                     {{/output_tables}}
+                    {{#output_text}}
+                    <li><a href="{{path}}">Download {{#name}}{{name}} report{{/name}} (test data)</a></li>
+                    {{/output_text}}
                     </ul>
                     {{/test_data_reports}}
                 </div>

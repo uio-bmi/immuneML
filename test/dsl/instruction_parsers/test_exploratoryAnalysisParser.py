@@ -45,10 +45,11 @@ class TestExploratoryAnalysisParser(TestCase):
 
         instruction = {
             "type": "ExploratoryAnalysis",
+            "number_of_processes": 32,
             "analyses": {
                 "1": {"dataset": "d1", "report": "r1", "preprocessing_sequence": "p1"},
-                "2": {"dataset": "d1", "report": "r2", "encoding": "e1", "number_of_processes": 32},
-                "3": {"dataset": "d1", "report": "r2", "encoding": "e1", "labels": ["l1"], "number_of_processes": 32}
+                "2": {"dataset": "d1", "report": "r2", "encoding": "e1", },
+                "3": {"dataset": "d1", "report": "r2", "encoding": "e1", "labels": ["l1"]}
             }
         }
 
@@ -58,7 +59,10 @@ class TestExploratoryAnalysisParser(TestCase):
         symbol_table.add("r2", SymbolType.REPORT, report2)
         symbol_table.add("e1", SymbolType.ENCODING, encoding, {"encoder_params": {
             "max_edit_distance": 1,
-            "reference": refs
+            "reference": refs,
+            "reads": "all",
+            "sum_matches": False,
+            "normalize": False
         }})
         symbol_table.add("p1", SymbolType.PREPROCESSING, p1)
 

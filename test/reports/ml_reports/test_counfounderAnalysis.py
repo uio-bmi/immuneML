@@ -7,10 +7,11 @@ from immuneML.caching.CacheType import CacheType
 from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.encodings.kmer_frequency.KmerFrequencyEncoder import KmerFrequencyEncoder
-from immuneML.encodings.kmer_frequency.ReadsType import ReadsType
+from immuneML.util.ReadsType import ReadsType
 from immuneML.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType import SequenceEncodingType
 from immuneML.environment.Constants import Constants
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
+from immuneML.environment.Label import Label
 from immuneML.environment.LabelConfiguration import LabelConfiguration
 from immuneML.environment.SequenceType import SequenceType
 from immuneML.ml_methods.LogisticRegression import LogisticRegression
@@ -38,7 +39,7 @@ class TestConfounderAnalysis(TestCase):
         # dummy logistic regression with 100 observations with 3 features belonging to 2 classes
         dummy_lr = LogisticRegression()
         dummy_lr.fit_by_cross_validation(encoded_data,
-                                         number_of_splits=2, label_name=label)
+                                         number_of_splits=2, label=label)
 
         return dummy_lr
 
@@ -85,7 +86,7 @@ class TestConfounderAnalysis(TestCase):
         report = ConfounderAnalysis.build_object(metadata_labels=["age", "HLA"], name='test')
 
         report.ml_details_path = path / "ml_details.yaml"
-        report.label = "disease"
+        report.label = Label("disease")
         report.result_path = path
         encoder = KmerFrequencyEncoder.build_object(RepertoireDataset(), **{
             "normalization_type": NormalizationType.RELATIVE_FREQUENCY.name,
@@ -96,7 +97,7 @@ class TestConfounderAnalysis(TestCase):
         })
         report.train_dataset = self._encode_dataset(encoder, self._make_dataset(path / "train", size=100), path)
         report.test_dataset = self._encode_dataset(encoder, self._make_dataset(path / "test", size=40), path, learn_model=False)
-        report.method = self._create_dummy_lr_model(path, report.train_dataset.encoded_data, report.label)
+        report.method = self._create_dummy_lr_model(path, report.train_dataset.encoded_data, Label("disease"))
 
         return report
 

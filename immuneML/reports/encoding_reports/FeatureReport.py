@@ -17,23 +17,20 @@ class FeatureReport(EncodingReport):
 
     def __init__(self, dataset: Dataset = None, result_path: Path = None,
                  color_grouping_label: str = None, row_grouping_label=None, column_grouping_label=None,
-                 name: str = None):
-        super().__init__(name)
-        self.dataset = dataset
-        self.result_path = result_path
+                 name: str = None, number_of_processes: int = 1):
+        super().__init__(dataset=dataset, result_path=result_path, name=name, number_of_processes=number_of_processes)
         self.x = "feature"
         self.color = color_grouping_label
         self.facet_row = row_grouping_label
         self.facet_column = column_grouping_label
-        self.name = name
 
-    def _generate(self) -> ReportResult:
+    def _generate_report_result(self) -> ReportResult:
         PathBuilder.build(self.result_path)
         data_long_format = DataReshaper.reshape(self.dataset, self.dataset.get_label_names())
         table_result = self._write_results_table(data_long_format)
         report_output_fig = self._safe_plot(data_long_format=data_long_format)
         output_figures = None if report_output_fig is None else [report_output_fig]
-        return ReportResult(self.name, output_figures, [table_result])
+        return ReportResult(name=self.name, output_figures=output_figures, output_tables=[table_result])
 
     def _write_results_table(self, data) -> ReportOutput:
         table_path = self.result_path / f"feature_values.csv"

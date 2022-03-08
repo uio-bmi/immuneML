@@ -8,7 +8,7 @@ from pathlib import Path
 
 import yaml
 
-from immuneML.encodings.kmer_frequency.ReadsType import ReadsType
+from immuneML.util.ReadsType import ReadsType
 from immuneML.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType import SequenceEncodingType
 from immuneML.ml_methods.MLMethod import MLMethod
 from immuneML.reports.ml_reports.CoefficientPlottingSetting import CoefficientPlottingSetting

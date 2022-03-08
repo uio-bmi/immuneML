@@ -48,7 +48,7 @@ class GenericImport(DataImport):
         import_illegal_characters (bool): Whether to import sequences that contain illegal characters, i.e., characters
         that do not appear in the sequence alphabet (amino acids including stop codon '*', or nucleotides). When set to false, filtering is only
         applied to the sequence type of interest (when running immuneML in amino acid mode, only entries with illegal
-        characters in the amino acid sequence are removed).
+        characters in the amino acid sequence are removed). By default import_illegal_characters is False.
 
         import_empty_nt_sequences (bool): imports sequences which have an empty nucleotide sequence field; can be True or False.
         By default, import_empty_nt_sequences is set to True.
@@ -56,7 +56,7 @@ class GenericImport(DataImport):
         import_empty_aa_sequences (bool): imports sequences which have an empty amino acid sequence field; can be True or False; for analysis on
         amino acid sequences, this parameter should be False (import only non-empty amino acid sequences). By default, import_empty_aa_sequences is set to False.
 
-        region_type (str): Which part of the sequence to import. When IMGT_CDR3 is specified, immuneML assumes the IMGT
+        region_type (str): Which part of the sequence to import. By default, this value is set to IMGT_CDR3. This means immuneML assumes the IMGT
         junction (including leading C and trailing Y/F amino acids) is used in the input file, and the first and last
         amino acids will be removed from the sequences to retrieve the IMGT CDR3 sequence. Specifying any other value
         will result in importing the sequences as they are.
@@ -97,7 +97,7 @@ class GenericImport(DataImport):
         columns_to_load (list): Optional; specifies which columns to load from the input file. This may be useful if
         the input files contain many unused columns. If no value is specified, all columns are loaded.
 
-        separator (str): Required parameter. Column separator, for example "\\t" or ",".
+        separator (str): Required parameter. Column separator, for example "\\t" or ",". The default value is "\\t"
 
 
     YAML specification:
@@ -143,6 +143,7 @@ class GenericImport(DataImport):
         ImportHelper.drop_empty_sequences(df, params.import_empty_aa_sequences, params.import_empty_nt_sequences)
         ImportHelper.drop_illegal_character_sequences(df, params.import_illegal_characters)
         ImportHelper.junction_to_cdr3(df, params.region_type)
+        df.loc[:, "region_types"] = params.region_type.name
         ImportHelper.update_gene_info(df)
         ImportHelper.load_chains(df)
 

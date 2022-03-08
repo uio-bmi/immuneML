@@ -1,3 +1,5 @@
 k: 3  # word size
 model_type: "sequence"  # use sequence as context
 vector_size: 64 # vector size
+epochs: 20 # number of epochs to train word2vec model
+window: 5 # max distance between two k-mers in a sequence (same as window parameter in gensim's word2vec)

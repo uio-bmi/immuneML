@@ -28,7 +28,7 @@ class KmerHelper:
     @staticmethod
     def create_IMGT_kmers_from_string(sequence: str, k: int):
         positions = PositionHelper.gen_imgt_positions_from_length(len(sequence))
-        sequence_w_pos = list(zip(list(sequence), positions))
+        sequence_w_pos = list(zip(list(sequence.get_sequence(sequence_type)), positions))
         kmers = KmerHelper.create_kmers_from_string(sequence_w_pos, k)
         kmers = [(''.join([x[0] for x in kmer]), min([i[1] for i in kmer]) if int(min([i[1] for i in kmer])) != 112 else max([i[1] for i in kmer if int(i[1]) == 112]))
                  for kmer in kmers]
@@ -36,7 +36,8 @@ class KmerHelper:
 
     @staticmethod
     def create_IMGT_gapped_kmers_from_sequence(sequence: ReceptorSequence, sequence_type: SequenceType, k_left: int, max_gap: int, k_right: int = None, min_gap: int = 0):
-        positions = PositionHelper.gen_imgt_positions_from_length(len(sequence.get_sequence(sequence_type)))
+        positions = PositionHelper.gen_imgt_positions_from_sequence(sequence, sequence_type)
+
         sequence_w_pos = list(zip(list(sequence.get_sequence(sequence_type)), positions))
         kmers = KmerHelper.create_gapped_kmers_from_string(sequence_w_pos, k_left=k_left, max_gap=max_gap,
                                                            k_right=k_right, min_gap=min_gap)

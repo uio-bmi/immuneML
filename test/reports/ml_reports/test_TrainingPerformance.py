@@ -9,6 +9,7 @@ from immuneML.data_model.dataset.Dataset import Dataset
 from immuneML.data_model.encoded_data.EncodedData import EncodedData
 from immuneML.environment.Constants import Constants
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
+from immuneML.environment.Label import Label
 from immuneML.ml_methods.LogisticRegression import LogisticRegression
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.ml_reports.TrainingPerformance import TrainingPerformance
@@ -25,7 +26,7 @@ class TestTrainPerformance(unittest.TestCase):
                                  {"l1": [i % 2 for i in range(0, 100)]})
 
         dummy_lr.fit_by_cross_validation(encoded_tr, number_of_splits=2,
-                                         label_name="l1")
+                                         label=Label("l1", values=[0, 1]))
         return dummy_lr, encoded_tr
 
     def _create_report(self, path):
@@ -33,7 +34,7 @@ class TestTrainPerformance(unittest.TestCase):
 
         report.train_dataset = Dataset()
         report.method, report.train_dataset.encoded_data = self._create_dummy_lr_model()
-        report.label = "l1"
+        report.label = Label("l1", values=[0, 1])
         report.result_path = path
 
         return report

@@ -20,10 +20,11 @@ class TCGDReceptor(Receptor):
 
             delta_record = record[['delta_' + name for name in ReceptorSequence.get_record_names()]]
             delta_record.dtype.names = ReceptorSequence.get_record_names()
+            metadata = json.loads(record['metadata']) if record['metadata'] != '' else None
 
             return TCGDReceptor(gamma=ReceptorSequence.create_from_record(gamma_record),
                                 delta=ReceptorSequence.create_from_record(delta_record),
-                                identifier=record['identifier'], metadata=json.loads(record['metadata']))
+                                identifier=record['identifier'], metadata=metadata)
         else:
             raise NotImplementedError(f"Supported ({TCGDReceptor.version}) and available version differ, but there is no converter available.")
 

@@ -18,10 +18,11 @@ class BCReceptor(Receptor):
 
             light_record = record[['light_' + name for name in ReceptorSequence.get_record_names()]]
             light_record.dtype.names = ReceptorSequence.get_record_names()
+            metadata = json.loads(record['metadata']) if record['metadata'] != '' else None
 
             return BCReceptor(heavy=ReceptorSequence.create_from_record(heavy_record),
                               light=ReceptorSequence.create_from_record(light_record),
-                              identifier=record['identifier'], metadata=json.loads(record['metadata']))
+                              identifier=record['identifier'], metadata=metadata)
         else:
             raise NotImplementedError(f"Supported ({BCReceptor.version}) and available version differ, but there is no converter available.")
 

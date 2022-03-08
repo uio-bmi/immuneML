@@ -4,6 +4,7 @@ from pathlib import Path
 import pandas as pd
 import plotly.express as px
 
+from immuneML.environment.Label import Label
 from immuneML.hyperparameter_optimization.states.TrainMLModelState import TrainMLModelState
 from immuneML.reports.PlotlyUtil import PlotlyUtil
 from immuneML.reports.ReportOutput import ReportOutput
@@ -62,15 +63,12 @@ class MLSettingsPerformance(TrainMLModelReport):
         name = kwargs["name"] if "name" in kwargs else None
         return MLSettingsPerformance(single_axis_labels, x_label_position, y_label_position, name)
 
-    def __init__(self, single_axis_labels, x_label_position, y_label_position, name: str = None, state: TrainMLModelState = None, result_path: Path = None):
-        super().__init__(name)
-
+    def __init__(self, single_axis_labels, x_label_position, y_label_position, name: str = None, state: TrainMLModelState = None,
+                 label: Label = None, result_path: Path = None, number_of_processes: int = 1):
+        super().__init__(name=name, state=state, label=label, result_path=result_path, number_of_processes=number_of_processes)
         self.single_axis_labels = single_axis_labels
         self.x_label_position = x_label_position
         self.y_label_position = y_label_position
-        self.state = state
-        self.result_path = None
-        self.name = name
         self.result_name = "performance"
         self.vertical_grouping = "encoding"
 
@@ -82,7 +80,9 @@ class MLSettingsPerformance(TrainMLModelReport):
         report_output_fig = self._safe_plot(plotting_data=plotting_data)
         output_figures = [report_output_fig] if report_output_fig is not None else []
 
-        return ReportResult(self.name, output_tables=[result_table], output_figures=output_figures)
+        return ReportResult(self.name,
+                            info="The performance on the test set in the assessment (outer cross-validation) loop for each of the setting combinations as defined under 'settings'.",
+                            output_tables=[result_table], output_figures=output_figures)
 
     def _get_vertical_grouping(self, assessment_item):
         return assessment_item.hp_setting.encoder_name

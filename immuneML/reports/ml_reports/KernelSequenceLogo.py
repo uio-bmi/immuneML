@@ -43,7 +43,7 @@ class KernelSequenceLogo(MLReport):
 
     def _generate(self) -> ReportResult:
         PathBuilder.build(self.result_path)
-        report_result = ReportResult()
+        report_result = ReportResult(name=self.name, info="A report that plots kernels of a CNN model as sequence logos.")
         sequence_alphabet = EnvironmentSettings.get_sequence_alphabet(self.method.sequence_type)
         for kernel_name in self.method.CNN.conv_chain_1 + self.method.CNN.conv_chain_2:
             figure_outputs, table_outputs = self._plot_kernels(kernel_name, sequence_alphabet)

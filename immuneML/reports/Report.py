@@ -13,8 +13,9 @@ class Report(metaclass=abc.ABCMeta):
 
     """
 
-    def __init__(self, name: str = None):
+    def __init__(self, name: str = None, number_of_processes: int = 1):
         self.name = name
+        self.number_of_processes = number_of_processes
 
     @classmethod
     @abc.abstractmethod
@@ -104,6 +105,7 @@ class Report(metaclass=abc.ABCMeta):
         except Exception as e:
             logging.exception(f"An exception occurred while generating report {self.name}. See the details below:")
             logging.warning(f"Report {self.name} encountered an error and could not be generated: {e}.")
+            return ReportResult(name=f"{self.name} (failed)", info="This report failed, see the log file for more information")
 
     def _safe_plot(self, output_written=True, **kwargs):
         """

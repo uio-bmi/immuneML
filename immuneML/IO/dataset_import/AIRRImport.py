@@ -36,9 +36,8 @@ class AIRRImport(DataImport):
         Only the AIRR files included under the column 'filename' are imported into the RepertoireDataset.
         For setting SequenceDataset metadata, metadata_file is ignored, see metadata_column_mapping instead.
 
-        paired (str): Required for Sequence- or ReceptorDatasets. This parameter determines whether to import a
-        SequenceDataset (paired = False) or a ReceptorDataset (paired = True).
-        In a ReceptorDataset, two sequences with chain types specified by receptor_chains are paired together
+        paired (str): Required for Sequence- or ReceptorDatasets. This parameter determines whether to import a SequenceDataset (paired = False)
+        or a ReceptorDataset (paired = True). In a ReceptorDataset, two sequences with chain types specified by receptor_chains are paired together
         based on the identifier given in the AIRR column named 'cell_id'.
 
         receptor_chains (str): Required for ReceptorDatasets. Determines which pair of chains to import for each Receptor.

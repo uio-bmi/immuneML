@@ -38,8 +38,8 @@ class GLIPH2Exporter(DataReport):
     def build_object(cls, **kwargs):
         return GLIPH2Exporter(**kwargs)
 
-    def __init__(self, dataset: ReceptorDataset = None, result_path: Path = None, name: str = None, condition: str = None):
-        super().__init__(dataset, result_path, name)
+    def __init__(self, dataset: ReceptorDataset = None, result_path: Path = None, name: str = None, condition: str = None, number_of_processes: int = 1):
+        super().__init__(dataset=dataset, result_path=result_path, number_of_processes=number_of_processes, name=name)
         self.condition = condition
 
     def _generate(self) -> ReportResult:
@@ -59,7 +59,9 @@ class GLIPH2Exporter(DataReport):
         file_path = self.result_path / "exported_data.tsv"
         df.to_csv(file_path, sep="\t", index=False)
 
-        return ReportResult(self.name, output_tables=[ReportOutput(file_path, "exported data in GLIPH2 format")])
+        return ReportResult(self.name,
+                            info="Report which exports the receptor data to GLIPH2 format so that it can be directly used in GLIPH2 tool.",
+                            output_tables=[ReportOutput(file_path, "exported data in GLIPH2 format")])
 
     def check_prerequisites(self):
         if isinstance(self.dataset, ReceptorDataset):

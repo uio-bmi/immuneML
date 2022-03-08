@@ -148,13 +148,13 @@ Once the YAML specification has been saved to a file (for example: quickstart.ya
 
 #. Activate the virtual environment where immuneML is available.
 
-#. Navigate to the directory where :code:`quickstart_specs.yaml` was saved.
+#. Navigate to the directory where :code:`quickstart.yaml` was saved.
 
 #. Run the following command:
 
 .. code-block:: console
 
-    immune-ml quickstart_specs.yaml ./quickstart_results/
+    immune-ml quickstart.yaml ./quickstart_results/
 
 
 Step 4: understanding the results

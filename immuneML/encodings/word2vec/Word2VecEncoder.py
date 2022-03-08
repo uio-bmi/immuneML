@@ -4,6 +4,7 @@ import hashlib
 from pathlib import Path
 from typing import List
 
+import numpy as np
 import pandas as pd
 from gensim.models import Word2Vec
 from sklearn.preprocessing import StandardScaler
@@ -17,6 +18,7 @@ from immuneML.encodings.preprocessing.FeatureScaler import FeatureScaler
 from immuneML.encodings.word2vec.model_creator.KmerPairModelCreator import KmerPairModelCreator
 from immuneML.encodings.word2vec.model_creator.ModelType import ModelType
 from immuneML.encodings.word2vec.model_creator.SequenceModelCreator import SequenceModelCreator
+from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.util.EncoderHelper import EncoderHelper
 from immuneML.util.ParameterValidator import ParameterValidator
 from immuneML.util.PathBuilder import PathBuilder
@@ -27,9 +29,11 @@ from scripts.specification_util import update_docs_per_mapping
 class Word2VecEncoder(DatasetEncoder):
     """
 
-    Word2VecEncoder learns the vector representations of k-mers in the sequences in a repertoire from the
-    context the k-mers appear in.
-    It relies on gensim's implementation of Word2Vec and KmerHelper for k-mer extraction.
+    Word2VecEncoder learns the vector representations of k-mers based on the context (receptor sequence). It works for
+    sequence and repertoire datasets. Similar idea was discussed in: Ostrovsky-Berman, M., Frankel, B., Polak, P. & Yaari, G.
+    Immune2vec: Embedding B/T Cell Receptor Sequences in ℝN Using Natural Language Processing. Frontiers in Immunology 12, (2021).
+
+    This encoder relies on gensim's implementation of Word2Vec and KmerHelper for k-mer extraction. Currently it works on amino acid level.
 
 
     Arguments:
@@ -48,6 +52,10 @@ class Word2VecEncoder(DatasetEncoder):
 
         k (int): The length of the k-mers used for the encoding.
 
+        epochs (int): for how many epochs to train the word2vec model for a given set of sentences (corresponding to epochs parameter in gensim package)
+
+        window (int): max distance between two k-mers in a sequence (same as window parameter in gensim's word2vec)
+
 
     YAML specification:
 
@@ -60,6 +68,8 @@ class Word2VecEncoder(DatasetEncoder):
                     vector_size: 16
                     k: 3
                     model_type: SEQUENCE
+                    epochs: 100
+                    window: 8
 
     """
 
@@ -67,37 +77,42 @@ class Word2VecEncoder(DatasetEncoder):
     DESCRIPTION_LABELS = "labels"
 
     dataset_mapping = {
-        "RepertoireDataset": "W2VRepertoireEncoder"
+        "RepertoireDataset": "W2VRepertoireEncoder",
+        "SequenceDataset": "W2VSequenceEncoder"
     }
 
-    def __init__(self, vector_size: int, k: int, model_type: ModelType, name: str = None):
+    def __init__(self, vector_size: int, k: int, model_type: ModelType, epochs: int, window: int, name: str = None):
         self.vector_size = vector_size
         self.k = k
+        self.epochs = epochs
+        self.window = window
         self.model_type = model_type
         self.model_path = None
         self.scaler = None
         self.name = name
 
     @staticmethod
-    def _prepare_parameters(vector_size: int, k: int, model_type: str, name: str = None):
+    def _prepare_parameters(vector_size: int, k: int, model_type: str, epochs: int, window: int, name: str = None):
         location = "Word2VecEncoder"
         ParameterValidator.assert_type_and_value(vector_size, int, location, "vector_size", min_inclusive=1)
         ParameterValidator.assert_type_and_value(k, int, location, "k", min_inclusive=1)
         ParameterValidator.assert_in_valid_list(model_type.upper(), [item.name for item in ModelType], location, "model_type")
-        return {"vector_size": vector_size, "k": k, "model_type": ModelType[model_type.upper()], "name": name}
+        ParameterValidator.assert_type_and_value(epochs, int, location, 'epochs', min_inclusive=1)
+        ParameterValidator.assert_type_and_value(window, int, location, 'window')
+        return {"vector_size": vector_size, "k": k, "model_type": ModelType[model_type.upper()], "name": name, "epochs": epochs, "window": window}
 
     @staticmethod
     def build_object(dataset=None, **params):
-        try:
-            prepared_params = Word2VecEncoder._prepare_parameters(**params)
-            encoder = ReflectionHandler.get_class_by_name(
+        EncoderHelper.check_dataset_type_available_in_mapping(dataset, Word2VecEncoder)
+
+        prepared_params = Word2VecEncoder._prepare_parameters(**params)
+        encoder = ReflectionHandler.get_class_by_name(
                 Word2VecEncoder.dataset_mapping[dataset.__class__.__name__], "word2vec/")(**prepared_params)
-        except ValueError:
-            raise ValueError("{} is not defined for dataset of type {}.".format(Word2VecEncoder.__name__,
-                                                                                dataset.__class__.__name__))
+
         return encoder
 
     def encode(self, dataset, params: EncoderParams):
+        params.model = vars(self)
         cache_params = self._prepare_caching_params(dataset, params)
         encoded_dataset = CacheHandler.memo_by_params(cache_params, lambda: self._encode_new_dataset(dataset, params))
 
@@ -108,8 +123,7 @@ class Word2VecEncoder(DatasetEncoder):
 
     def _prepare_caching_params(self, dataset, params: EncoderParams, vectors=None, description: str = ""):
         return (("dataset_id", dataset.identifier),
-                ("dataset_filenames", tuple(dataset.get_example_ids())),
-                ("dataset_metadata", dataset.metadata_file),
+                ("example_ids", tuple(dataset.get_example_ids())),
                 ("dataset_type", dataset.__class__.__name__),
                 ("labels", tuple(params.label_config.get_labels_by_name())),
                 ("vectors", hashlib.sha256(str(vectors).encode("utf-8")).hexdigest()),
@@ -163,18 +177,22 @@ class Word2VecEncoder(DatasetEncoder):
         feature_names = [str(i) for i in range(scaled_examples.shape[1])]
         feature_annotations = pd.DataFrame({"feature": feature_names})
 
-        encoded_data = EncodedData(examples=scaled_examples,
+        encoded_dataset.encoded_data = EncodedData(examples=scaled_examples,
                                    labels={label: labels[i] for i, label in enumerate(label_names)} if labels is not None else None,
                                    example_ids=[example.identifier for example in encoded_dataset.get_data()],
                                    feature_names=feature_names,
                                    feature_annotations=feature_annotations,
                                    encoding=Word2VecEncoder.__name__)
-
-        encoded_dataset.add_encoded_data(encoded_data)
         return encoded_dataset
 
-    @abc.abstractmethod
     def _encode_examples(self, encoded_dataset, vectors, params):
+        examples = np.zeros(shape=[encoded_dataset.get_example_count(), vectors.vector_size])
+        for (index, example) in enumerate(encoded_dataset.get_data()):
+            examples[index] = self._encode_item(example, vectors, params.model.get('sequence_type', EnvironmentSettings.sequence_type))
+        return examples
+
+    @abc.abstractmethod
+    def _encode_item(self, example, vectors, sequence_type):
         pass
 
     def _load_model(self, params):
@@ -188,9 +206,9 @@ class Word2VecEncoder(DatasetEncoder):
             self.model_path = self._create_model_path(params)
 
         if self.model_type == ModelType.SEQUENCE:
-            model_creator = SequenceModelCreator()
+            model_creator = SequenceModelCreator(epochs=self.epochs, window=self.window)
         else:
-            model_creator = KmerPairModelCreator()
+            model_creator = KmerPairModelCreator(epochs=self.epochs, window=self.window)
 
         PathBuilder.build(self.model_path.parent)
         model = model_creator.create_model(dataset=dataset,
@@ -198,7 +216,7 @@ class Word2VecEncoder(DatasetEncoder):
                                            vector_size=self.vector_size,
                                            batch_size=params.pool_size,
                                            model_path=self.model_path,
-                                           sequence_type=params.model.get('sequence_type', None))
+                                           sequence_type=params.model.get('sequence_type', EnvironmentSettings.sequence_type))
 
         return model
 

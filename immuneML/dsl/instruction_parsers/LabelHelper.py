@@ -21,18 +21,19 @@ class LabelHelper:
 
         assert all(len(list(label.keys())) == 1 and isinstance(list(label.values())[0], dict) and 'positive_class' in list(label.values())[0]
                    and len(list(list(label.values())[0].keys())) == 1 for label in [l for l in labels if isinstance(l, dict)]), \
-            f"{instruction_name}: The only legal parameter under a label name is 'positive_class'. If 'positive_class' is not specified, please remove the colon after the label name. "
+            f"{instruction_name}: The only legal parameter under a label name is 'positive_class'. If 'positive_class' is not specified, please " \
+            f"remove the colon after the label name. "
 
     @staticmethod
-    def create_label_config(labels_dict: dict, dataset: Dataset, instruction_name: str, yaml_location: str) -> LabelConfiguration:
-        LabelHelper.check_label_format(labels_dict, instruction_name, yaml_location)
+    def create_label_config(labels: list, dataset: Dataset, instruction_name: str, yaml_location: str) -> LabelConfiguration:
+        LabelHelper.check_label_format(labels, instruction_name, yaml_location)
 
         label_config = LabelConfiguration()
-        for label in labels_dict:
+        for label in labels:
             label_name = label if isinstance(label, str) else list(label.keys())[0]
             positive_class = label[label_name]['positive_class'] if isinstance(label, dict) else None
             if dataset.labels is not None and label_name in dataset.labels:
-                label_values = dataset.labels[label_name]
+                label_values = list(dataset.labels[label_name])
             elif hasattr(dataset, "get_metadata"):
                 label_values = list(set(dataset.get_metadata([label_name])[label_name]))
             else:
@@ -42,4 +43,5 @@ class LabelHelper:
                               f"and could cause problems with some encodings.")
 
             label_config.add_label(label_name, label_values, positive_class=positive_class)
+
         return label_config

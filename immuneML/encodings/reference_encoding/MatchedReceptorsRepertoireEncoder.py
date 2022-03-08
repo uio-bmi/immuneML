@@ -6,6 +6,7 @@ from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
 from immuneML.data_model.encoded_data.EncodedData import EncodedData
 from immuneML.data_model.repertoire.Repertoire import Repertoire
 from immuneML.encodings.EncoderParams import EncoderParams
+from immuneML.util.ReadsType import ReadsType
 from immuneML.encodings.reference_encoding.MatchedReceptorsEncoder import MatchedReceptorsEncoder
 
 
@@ -15,8 +16,16 @@ class MatchedReceptorsRepertoireEncoder(MatchedReceptorsEncoder):
         encoded_dataset = RepertoireDataset(repertoires=dataset.repertoires, labels=dataset.labels,
                                             metadata_file=dataset.metadata_file)
 
-        feature_annotations = self._get_feature_info()
+        feature_annotations = None if self.sum_matches else self._get_feature_info()
+
+        if self.sum_matches:
+            chains = self.reference_receptors[0].get_chains()
+            feature_names = [f"sum_of_{self.reads.value}_reads_{chains[0]}", f"sum_of_{self.reads.value}_reads_{chains[1]}"]
+        else:
+            feature_names = [f"{row['receptor_id']}.{row['chain']}" for index, row in feature_annotations.iterrows()]
+
         encoded_repertoires, labels, example_ids = self._encode_repertoires(dataset, params)
+        encoded_repertoires = self._normalize(dataset, encoded_repertoires) if self.normalize else encoded_repertoires
 
         encoded_dataset.add_encoded_data(EncodedData(
             # examples contains a np.ndarray with counts
@@ -24,7 +33,7 @@ class MatchedReceptorsRepertoireEncoder(MatchedReceptorsEncoder):
             # example_ids contains a list of repertoire identifiers
             example_ids=example_ids,
             # feature_names contains a list of reference receptor identifiers
-            feature_names=["{receptor_id}.{chain}".format(receptor_id=row["receptor_id"], chain=row["chain"]) for index, row in feature_annotations.iterrows()],
+            feature_names=feature_names,
             # feature_annotations contains a PD dataframe with sequence and VDJ gene usage per reference receptor
             feature_annotations=feature_annotations,
             labels=labels,
@@ -32,6 +41,15 @@ class MatchedReceptorsRepertoireEncoder(MatchedReceptorsEncoder):
         ))
 
         return encoded_dataset
+
+    def _normalize(self, dataset, encoded_repertoires):
+        if self.reads == ReadsType.UNIQUE:
+            repertoire_totals = np.asarray([[repertoire.get_element_count() for repertoire in dataset.get_data()]]).T
+        else:
+            repertoire_totals = np.asarray([[sum(repertoire.get_counts()) for repertoire in dataset.get_data()]]).T
+
+        return encoded_repertoires / repertoire_totals
+
 
     def _get_feature_info(self):
         """
@@ -43,7 +61,7 @@ class MatchedReceptorsRepertoireEncoder(MatchedReceptorsEncoder):
          - j gene
         """
 
-        features = [[] for i in range(0, len(self.reference_receptors) * 2)]
+        features = [[] for i in range(0, self.feature_count)]
 
         for i, receptor in enumerate(self.reference_receptors):
             id = receptor.identifier
@@ -80,7 +98,7 @@ class MatchedReceptorsRepertoireEncoder(MatchedReceptorsEncoder):
     def _encode_repertoires(self, dataset: RepertoireDataset, params: EncoderParams):
         # Rows = repertoires, Columns = reference chains (two per sequence receptor)
         encoded_repertories = np.zeros((dataset.get_example_count(),
-                                        len(self.reference_receptors) * 2),
+                                        self.feature_count),
                                        dtype=int)
         labels = {label: [] for label in params.label_config.get_labels_by_name()} if params.encode_labels else None
 
@@ -88,14 +106,14 @@ class MatchedReceptorsRepertoireEncoder(MatchedReceptorsEncoder):
             encoded_repertories[i] = self._match_repertoire_to_receptors(repertoire)
 
             if labels is not None:
-                for label in params.label_config.get_labels_by_name():
-                    labels[label].append(repertoire.metadata[label])
+                for label_name in params.label_config.get_labels_by_name():
+                    labels[label_name].append(repertoire.metadata[label_name])
 
         return encoded_repertories, labels, dataset.get_repertoire_ids()
 
     def _match_repertoire_to_receptors(self, repertoire: Repertoire):
         matcher = SequenceMatcher()
-        matches = np.zeros(len(self.reference_receptors) * 2, dtype=int)
+        matches = np.zeros(self.feature_count, dtype=int)
         rep_seqs = repertoire.sequences
 
         for i, ref_receptor in enumerate(self.reference_receptors):
@@ -104,12 +122,15 @@ class MatchedReceptorsRepertoireEncoder(MatchedReceptorsEncoder):
             second_chain = ref_receptor.get_chain(chain_names[1])
 
             for rep_seq in rep_seqs:
+                matches_idx = 0 if self.sum_matches else i * 2
+                match_count = 1 if self.reads == ReadsType.UNIQUE else rep_seq.metadata.count
+
                 # Match with first chain: add to even columns in matches.
                 # Match with second chain: add to odd columns
                 if matcher.matches_sequence(first_chain, rep_seq, max_distance=self.max_edit_distances[chain_names[0]]):
-                    matches[i * 2] += rep_seq.metadata.count
+                    matches[matches_idx] += match_count
                 if matcher.matches_sequence(second_chain, rep_seq, max_distance=self.max_edit_distances[chain_names[1]]):
-                    matches[i * 2 + 1] += rep_seq.metadata.count
+                    matches[matches_idx + 1] += match_count
 
         return matches
 

@@ -30,8 +30,8 @@ class SequenceLengthDistribution(DataReport):
     def build_object(cls, **kwargs):
         return SequenceLengthDistribution(**kwargs)
 
-    def __init__(self, dataset: RepertoireDataset = None, batch_size: int = 1, result_path: Path = None, name: str = None):
-        super().__init__(dataset=dataset, result_path=result_path, name=name)
+    def __init__(self, dataset: RepertoireDataset = None, batch_size: int = 1, result_path: Path = None, number_of_processes: int = 1, name: str = None):
+        super().__init__(dataset=dataset, result_path=result_path, number_of_processes=number_of_processes, name=name)
         self.batch_size = batch_size
 
     def check_prerequisites(self):
@@ -45,7 +45,9 @@ class SequenceLengthDistribution(DataReport):
         sequence_lengths = self._get_sequence_lengths()
         report_output_fig = self._safe_plot(sequence_lengths=sequence_lengths)
         output_figures = None if report_output_fig is None else [report_output_fig]
-        return ReportResult(type(self).__name__, output_figures=output_figures)
+        return ReportResult(name=self.name,
+                            info="A histogram of the lengths of the sequences in a RepertoireDataset.",
+                            output_figures=output_figures)
 
     def _get_sequence_lengths(self) -> Counter:
         sequence_lenghts = Counter()
