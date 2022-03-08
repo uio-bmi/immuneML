@@ -6,6 +6,7 @@ import pandas as pd
 import plotly.express as px
 
 from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
+from immuneML.data_model.receptor.RegionType import RegionType
 from immuneML.dsl.instruction_parsers.LabelHelper import LabelHelper
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
@@ -70,8 +71,9 @@ class SignificantKmerPositions(DataReport):
 
     def __init__(self, dataset: RepertoireDataset = None, reference_sequences_path: Path = None,
                  p_values: List[float] = None, k_values: List[int] = None, label: dict = None,
-                 compairr_path: Path = None, result_path: Path = None, name: str = None):
-        super().__init__(dataset=dataset, result_path=result_path, name=name)
+                 compairr_path: Path = None, result_path: Path = None, name: str = None,
+                 number_of_processes: int = 1):
+        super().__init__(dataset=dataset, result_path=result_path, number_of_processes=number_of_processes, name=name)
         self.reference_sequences_path = reference_sequences_path
         self.reference_sequences = SignificantFeaturesHelper.load_sequences(reference_sequences_path)
         self.p_values = p_values
@@ -96,7 +98,10 @@ class SignificantKmerPositions(DataReport):
         report_output_fig = self._safe_plot(plotting_data=plotting_data)
         output_figures = None if report_output_fig is None else [report_output_fig]
 
-        return ReportResult(self.name, output_figures, [table_result])
+        return ReportResult(name=self.name,
+                            info="The number of significant k-mers observed at each IMGT position of a given list of reference sequences.",
+                            output_figures=output_figures,
+                            output_tables=[table_result])
 
     def _compute_plotting_data(self):
         result = {"encoding": [],
@@ -159,7 +164,7 @@ class SignificantKmerPositions(DataReport):
         results = {}
 
         for sequence in self.reference_sequences:
-            reference_imgt_kmers = KmerHelper.create_IMGT_kmers_from_string(sequence, k)
+            reference_imgt_kmers = KmerHelper.create_IMGT_kmers_from_string(sequence, k, region_type=RegionType.IMGT_CDR3)
 
             for kmer, imgt_pos in reference_imgt_kmers:
                 if imgt_pos not in results:

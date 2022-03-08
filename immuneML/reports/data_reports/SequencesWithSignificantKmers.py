@@ -69,8 +69,9 @@ class SequencesWithSignificantKmers(DataReport):
 
     def __init__(self, dataset: RepertoireDataset = None, reference_sequences_path: Path = None,
                  p_values: List[float] = None, k_values: List[int] = None, label: dict = None,
-                 compairr_path: Path = None, result_path: Path = None, name: str = None):
-        super().__init__(dataset=dataset, result_path=result_path, name=name)
+                 compairr_path: Path = None, result_path: Path = None, name: str = None,
+                 number_of_processes: int = 1):
+        super().__init__(dataset=dataset, result_path=result_path, number_of_processes=number_of_processes, name=name)
         self.reference_sequences_path = reference_sequences_path
         self.reference_sequences = SignificantFeaturesHelper.load_sequences(reference_sequences_path)
         self.p_values = p_values
@@ -91,7 +92,9 @@ class SequencesWithSignificantKmers(DataReport):
 
         report_outputs = self._write_output_files()
 
-        return ReportResult(self.name, None, report_outputs)
+        return ReportResult(name=self.name,
+                            info="Given a list of reference sequences, this report writes out the subsets of reference sequences containing significant k-mers.",
+                            output_tables=report_outputs)
 
     def _write_output_files(self):
         report_outputs = []

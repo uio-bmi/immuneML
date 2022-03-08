@@ -105,8 +105,8 @@ class RecoveredSignificantFeatures(DataReport):
     def __init__(self, dataset: RepertoireDataset = None, groundtruth_sequences_path: Path = None,
                  trim_leading_trailing: bool = None,
                  p_values: List[float] = None, k_values: List[int] = None, label: dict = None,
-                 compairr_path: Path = None, result_path: Path = None, name: str = None):
-        super().__init__(dataset=dataset, result_path=result_path, name=name)
+                 compairr_path: Path = None, result_path: Path = None, name: str = None, number_of_processes: int = 1):
+        super().__init__(dataset=dataset, result_path=result_path, number_of_processes=number_of_processes, name=name)
         self.groundtruth_sequences_path = groundtruth_sequences_path
         self.trim_leading_trailing = trim_leading_trailing
         self.groundtruth_sequences = SignificantFeaturesHelper.load_sequences(groundtruth_sequences_path, trim_leading_trailing)
@@ -133,7 +133,10 @@ class RecoveredSignificantFeatures(DataReport):
         fig_true = self._safe_plot(plotting_data=plotting_data, column_of_interest="n_true", y_label="Percentage of ground truth features that match the significant features")
         output_figures = [figure for figure in [fig_significant, fig_true] if figure]
 
-        return ReportResult(self.name, output_figures, [table_result])
+        return ReportResult(name=self.name,
+                            info="Compares a given collection of groundtruth implanted signals (sequences or k-mers) to the significant label-associated k-mers or sequences according to Fisher's exact test.",
+                            output_figures=output_figures,
+                            output_tables=[table_result])
 
     def _compute_plotting_data(self):
         result = {"encoding": [],

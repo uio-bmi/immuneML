@@ -8,7 +8,6 @@ import plotly.express as px
 from immuneML.encodings.abundance_encoding.CompAIRRSequenceAbundanceEncoder import CompAIRRSequenceAbundanceEncoder
 from immuneML.encodings.abundance_encoding.KmerAbundanceEncoder import KmerAbundanceEncoder
 from immuneML.encodings.abundance_encoding.SequenceAbundanceEncoder import SequenceAbundanceEncoder
-from immuneML.encodings.filtered_sequence_encoding.SequenceAbundanceEncoder import SequenceAbundanceEncoder
 from immuneML.environment.Label import Label
 from immuneML.hyperparameter_optimization.states.HPItem import HPItem
 from immuneML.hyperparameter_optimization.states.TrainMLModelState import TrainMLModelState

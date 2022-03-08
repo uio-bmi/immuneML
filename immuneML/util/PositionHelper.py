@@ -34,6 +34,10 @@ class PositionHelper:
         region_type = sequence.get_attribute("region_type")
         input_length = len(sequence.get_sequence())
 
+        return PositionHelper.gen_imgt_positions_from_length(input_length, region_type)
+
+    @staticmethod
+    def gen_imgt_positions_from_length(input_length: int, region_type: RegionType):
         if region_type == RegionType.IMGT_CDR3:
             return PositionHelper.gen_imgt_positions_from_cdr3_length(input_length)
         if region_type == RegionType.IMGT_JUNCTION:

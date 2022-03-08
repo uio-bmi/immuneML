@@ -46,7 +46,7 @@ class RelevantSequenceExporter(EncodingReport):
 
     def _generate(self) -> ReportResult:
 
-        df = pd.read_csv(self.dataset.encoded_data.info["relevant_sequence_csv_path"])
+        df = pd.read_csv(self.dataset.encoded_data.info["relevant_sequence_path"])
         column_mapping = self._compute_column_mapping(df)
         df.rename(columns=column_mapping, inplace=True)
 
@@ -78,7 +78,7 @@ class RelevantSequenceExporter(EncodingReport):
             logging.warning(f"RelevantSequenceExporter: the dataset encoding ({self.dataset.encoded_data.encoding}) was not in the list of valid "
                             f"encodings ({valid_encodings}), skipping this report...")
             return False
-        elif "relevant_sequence_csv_path" not in self.dataset.encoded_data.info or not os.path.isfile(self.dataset.encoded_data.info['relevant_sequence_csv_path']):
+        elif "relevant_sequence_path" not in self.dataset.encoded_data.info or not os.path.isfile(self.dataset.encoded_data.info['relevant_sequence_path']):
             logging.warning(f"RelevantSequenceExporter: the relevant sequences were not set for this encoded data, skipping this report...")
             return False
         else:

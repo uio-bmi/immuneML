@@ -9,14 +9,9 @@ import numpy as np
 
 from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
 from immuneML.dsl.instruction_parsers.LabelHelper import LabelHelper
-from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.encodings.abundance_encoding.AbundanceEncoderHelper import AbundanceEncoderHelper
 from immuneML.encodings.abundance_encoding.CompAIRRSequenceAbundanceEncoder import CompAIRRSequenceAbundanceEncoder
 from immuneML.encodings.abundance_encoding.KmerAbundanceEncoder import KmerAbundanceEncoder
-from immuneML.encodings.abundance_encoding.SequenceAbundanceEncoder import SequenceAbundanceEncoder
-from immuneML.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType import SequenceEncodingType
-from immuneML.environment.EnvironmentSettings import EnvironmentSettings
-from immuneML.environment.LabelConfiguration import LabelConfiguration
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.data_reports.DataReport import DataReport
@@ -92,8 +87,8 @@ class SignificantFeatures(DataReport):
 
     def __init__(self, dataset: RepertoireDataset = None, p_values: List[float] = None, k_values: List[int] = None,
                  label: dict = None, compairr_path: Path = None, log_scale: bool = False, result_path: Path = None,
-                 name: str = None):
-        super().__init__(dataset=dataset, result_path=result_path, name=name)
+                 name: str = None, number_of_processes: int = 1):
+        super().__init__(dataset=dataset, result_path=result_path, number_of_processes=number_of_processes, name=name)
         self.p_values = p_values
         self.k_values = k_values
         self.label = label
@@ -117,7 +112,10 @@ class SignificantFeatures(DataReport):
         report_output_fig = self._safe_plot(plotting_data=plotting_data)
         output_figures = None if report_output_fig is None else [report_output_fig]
 
-        return ReportResult(self.name, output_figures, [table_result])
+        return ReportResult(name=self.name,
+                            info="The number of significant features (label-associated k-mers or sequences) per Repertoire according to Fisher's exact test, across different classes for the given label.",
+                            output_figures=output_figures,
+                            output_tables=[table_result])
 
     def _compute_plotting_data(self):
         result = {"encoding": [],
