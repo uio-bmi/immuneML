@@ -108,8 +108,6 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
                                               output_filename=None,
                                               log_filename=None)
 
-        self.raw_distance_matrix_np = None
-
     @staticmethod
     def _prepare_parameters(p_value_threshold: float, compairr_path: str, sequence_batch_size: int, ignore_genes: bool, threads: int,
                             name: str = None):
@@ -139,7 +137,6 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
     def encode(self, dataset, params: EncoderParams):
         AbundanceEncoderHelper.check_labels(params.label_config, CompAIRRSequenceAbundanceEncoder.__name__)
 
-        self._prepare_sequence_presence_data(dataset, params)
         return self._encode_data(dataset, params)
 
     def _prepare_sequence_presence_data(self, dataset, params):
@@ -148,8 +145,7 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
         full_sequence_set = self._get_full_sequence_set(full_dataset)
         sequence_presence_matrix, matrix_repertoire_ids = self._get_sequence_presence(full_dataset, full_sequence_set, params)
 
-        self.sequence_presence_matrix = sequence_presence_matrix
-        self.matrix_repertoire_ids = matrix_repertoire_ids
+        return sequence_presence_matrix, matrix_repertoire_ids
 
     def _get_full_sequence_set(self, full_dataset):
         full_sequence_set = CacheHandler.memo_by_params(self._build_dataset_params(full_dataset),
@@ -255,7 +251,9 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
     def _encode_data(self, dataset: RepertoireDataset, params: EncoderParams):
         label = params.label_config.get_label_objects()[0]
 
-        examples = self._calculate_abundance_matrix(dataset, self.sequence_presence_matrix, self.matrix_repertoire_ids, params)
+        sequence_presence_matrix, matrix_repertoire_ids = self._prepare_sequence_presence_data(dataset, params)
+
+        examples = self._calculate_abundance_matrix(dataset, sequence_presence_matrix, matrix_repertoire_ids, params)
 
         encoded_data = EncodedData(examples, dataset.get_metadata([label.name]) if params.encode_labels else None, dataset.get_repertoire_ids(),
                                    [CompAIRRSequenceAbundanceEncoder.RELEVANT_SEQUENCE_ABUNDANCE,
