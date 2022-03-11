@@ -108,7 +108,6 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
                                               output_filename=None,
                                               log_filename=None)
 
-        self.full_sequence_set = None
         self.raw_distance_matrix_np = None
 
     @staticmethod
@@ -149,7 +148,6 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
         full_sequence_set = self._get_full_sequence_set(full_dataset)
         sequence_presence_matrix, matrix_repertoire_ids = self._get_sequence_presence(full_dataset, full_sequence_set, params)
 
-        self.full_sequence_set = full_sequence_set
         self.sequence_presence_matrix = sequence_presence_matrix
         self.matrix_repertoire_ids = matrix_repertoire_ids
 
@@ -281,7 +279,7 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
 
         relevant_sequence_indices, file_paths = AbundanceEncoderHelper.get_relevant_sequence_indices(sequence_presence_matrix, is_positive_class,
                                                                                                      self.p_value_threshold, self.relevant_indices_path, params)
-        self._write_relevant_sequences_csv(relevant_sequence_indices, params.result_path)
+        self._write_relevant_sequences_csv(dataset, relevant_sequence_indices, params.result_path)
         self._set_file_paths(file_paths)
 
         abundance_matrix = AbundanceEncoderHelper.build_abundance_matrix(sequence_presence_matrix, matrix_repertoire_ids, dataset.get_repertoire_ids(), relevant_sequence_indices)
@@ -293,8 +291,10 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
         self.contingency_table_path = file_paths["contingency_table_path"] if "contingency_table_path" in file_paths else None
         self.p_values_path = file_paths["p_values_path"] if "p_values_path" in file_paths else None
 
-    def _write_relevant_sequences_csv(self, relevant_sequence_indices, result_path):
-        relevant_sequences = self.full_sequence_set[relevant_sequence_indices]
+    def _write_relevant_sequences_csv(self, dataset, relevant_sequence_indices, result_path):
+        full_dataset = EncoderHelper.get_current_dataset(dataset, self.context)
+        full_sequence_set = self._get_full_sequence_set(full_dataset)
+        relevant_sequences = full_sequence_set[relevant_sequence_indices]
 
         if self.relevant_sequence_path is None:
             self.relevant_sequence_path = result_path / 'relevant_sequences.csv'
