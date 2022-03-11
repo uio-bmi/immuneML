@@ -216,9 +216,15 @@ class SignificantFeatures(DataReport):
         with encoder.relevant_indices_path.open("rb") as file:
             relevant_indices = pickle.load(file)
 
-        relevant_feature_presence = np.sum(encoder.sequence_presence_matrix[relevant_indices], axis=0)
+        with encoder.sequence_presence_matrix_path.open("rb") as file:
+            sequence_presence_matrix = pickle.load(file)
 
-        return self._get_positive_negative_class(relevant_feature_presence, encoder.matrix_repertoire_ids)
+        with encoder.matrix_repertoire_ids_path.open("rb") as file:
+            matrix_repertoire_ids = pickle.load(file)
+
+        relevant_feature_presence = np.sum(sequence_presence_matrix[relevant_indices], axis=0)
+
+        return self._get_positive_negative_class(relevant_feature_presence, matrix_repertoire_ids)
 
     def _get_relevant_feature_presence(self, encoder, relevant_indices):
 

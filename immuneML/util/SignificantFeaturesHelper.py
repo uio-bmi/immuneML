@@ -102,7 +102,8 @@ class SignificantFeaturesHelper:
     @staticmethod
     def _build_compairr_sequence_encoder(dataset, p_value, encoder_params, compairr_path):
         encoder = CompAIRRSequenceAbundanceEncoder(p_value_threshold=p_value, compairr_path=compairr_path,
-                                                   sequence_batch_size=100000, ignore_genes=True, threads=8)
+                                                   sequence_batch_size=100000, ignore_genes=True, threads=8,
+                                                   keep_temporary_files=True)
 
         encoder.encode(dataset, encoder_params)
 
