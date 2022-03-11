@@ -6,8 +6,8 @@ import pandas as pd
 
 from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
 from immuneML.data_model.receptor.RegionType import RegionType
-from immuneML.encodings.filtered_sequence_encoding.CompAIRRSequenceAbundanceEncoder import CompAIRRSequenceAbundanceEncoder
-from immuneML.encodings.filtered_sequence_encoding.SequenceAbundanceEncoder import SequenceAbundanceEncoder
+from immuneML.encodings.abundance_encoding.CompAIRRSequenceAbundanceEncoder import CompAIRRSequenceAbundanceEncoder
+from immuneML.encodings.abundance_encoding.SequenceAbundanceEncoder import SequenceAbundanceEncoder
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.encoding_reports.EncodingReport import EncodingReport
@@ -16,8 +16,8 @@ from immuneML.util.PathBuilder import PathBuilder
 
 class RelevantSequenceExporter(EncodingReport):
     """
-    Exports the sequences that are extracted as label-associated using the `SequenceAbundance` and `CompAIRRSequenceAbundance` encoders
-    in AIRR-compliant format.
+    Exports the sequences that are extracted as label-associated when using the :py:obj:`~immuneML.encodings.abundance_encoding.SequenceAbundanceEncoder.SequenceAbundanceEncoder` or
+    :py:obj:`~immuneML.encodings.abundance_encoding.CompAIRRSequenceAbundanceEncoder.CompAIRRSequenceAbundanceEncoder` in AIRR-compliant format.
 
     Arguments: there are no arguments for this report.
 
@@ -46,7 +46,7 @@ class RelevantSequenceExporter(EncodingReport):
 
     def _generate(self) -> ReportResult:
 
-        df = pd.read_csv(self.dataset.encoded_data.info["relevant_sequence_csv_path"])
+        df = pd.read_csv(self.dataset.encoded_data.info["relevant_sequence_path"])
         column_mapping = self._compute_column_mapping(df)
         df.rename(columns=column_mapping, inplace=True)
 
@@ -78,7 +78,7 @@ class RelevantSequenceExporter(EncodingReport):
             logging.warning(f"RelevantSequenceExporter: the dataset encoding ({self.dataset.encoded_data.encoding}) was not in the list of valid "
                             f"encodings ({valid_encodings}), skipping this report...")
             return False
-        elif "relevant_sequence_csv_path" not in self.dataset.encoded_data.info or not os.path.isfile(self.dataset.encoded_data.info['relevant_sequence_csv_path']):
+        elif "relevant_sequence_path" not in self.dataset.encoded_data.info or not os.path.isfile(self.dataset.encoded_data.info['relevant_sequence_path']):
             logging.warning(f"RelevantSequenceExporter: the relevant sequences were not set for this encoded data, skipping this report...")
             return False
         else:

@@ -4,11 +4,13 @@ from unittest import TestCase
 
 import numpy as np
 from pathlib import Path
+import pandas as pd
 
 from immuneML.caching.CacheType import CacheType
 from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
 from immuneML.encodings.EncoderParams import EncoderParams
-from immuneML.encodings.filtered_sequence_encoding.CompAIRRSequenceAbundanceEncoder import CompAIRRSequenceAbundanceEncoder
+from immuneML.encodings.abundance_encoding.AbundanceEncoderHelper import AbundanceEncoderHelper
+from immuneML.encodings.abundance_encoding.CompAIRRSequenceAbundanceEncoder import CompAIRRSequenceAbundanceEncoder
 from immuneML.environment.Constants import Constants
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.environment.Label import Label
@@ -61,51 +63,23 @@ class TestCompAIRRSequenceAbundanceEncoder(TestCase):
 
             encoder.p_value_threshold = 0.05
 
+            contingency = pd.read_csv(result_path / "contingency_table.csv")
+            p_values = pd.read_csv(result_path / "p_values.csv")
+            relevant_sequences = pd.read_csv(result_path / "relevant_sequences.csv")
+
+            self.assertListEqual(sorted(list(contingency["positive_present"])), sorted([0, 0, 1, 1, 1, 1, 2, 2, 2]))
+            self.assertListEqual(sorted(list(contingency["negative_present"])), sorted([1, 2, 0, 1, 2, 0, 0, 1, 2]))
+            self.assertListEqual(sorted(list(contingency["positive_absent"])), sorted([2, 2, 1, 1, 1, 1, 0, 0, 0]))
+            self.assertListEqual(sorted(list(contingency["negative_absent"])), sorted([1, 0, 2, 1, 0, 2, 2, 1, 0]))
+
+            self.assertListEqual(sorted([round(val, 1) for val in p_values["p_values"]]), sorted([2.0, 1.0, 2.0, 0.8, 1.0, 2.0, 0.2, 0.5, 1.0]))
+            self.assertListEqual(list(relevant_sequences["sequence_aas"]), ["III"])
+
             encoded_dataset = encoder.encode(dataset, EncoderParams(result_path=result_path, label_config=label_config))
 
             self.assertTrue(np.array_equal(np.array([[0, 4], [0, 6], [0, 3], [0, 6]]), encoded_dataset.encoded_data.examples))
 
         shutil.rmtree(path)
 
-    def test_find_sequence_p_values_with_fisher(self):
-        encoder = CompAIRRSequenceAbundanceEncoder(p_value_threshold=None,
-                                                   compairr_path="",
-                                                   sequence_batch_size=1000,
-                                                   ignore_genes=None,
-                                                   threads=None)
 
-        sequence_presence_matrix = np.array([[1, 0, 0, 0],
-                                             [1, 0, 1, 1],
-                                             [1, 1, 1, 1],
-                                             [0, 0, 0, 1],
-                                             [0, 0, 1, 0]])
-
-        is_first_class = np.array([True, False, False, True])
-
-        pvals = encoder._find_sequence_p_values_with_fisher(sequence_presence_matrix, is_first_class)
-
-        expected = [2, 0.5, 1.0, 2, 2]
-
-        for real, expected in zip(pvals, expected):
-            self.assertAlmostEqual(real, expected, places=7)
-
-
-    def test_build_abundance_matrix(self):
-        encoder = CompAIRRSequenceAbundanceEncoder(p_value_threshold=None,
-                                                   compairr_path="",
-                                                   sequence_batch_size=1000,
-                                                   ignore_genes=None,
-                                                   threads=None)
-
-        sequence_presence_matrix = np.array([[0, 1], [1, 1], [1, 0]])
-        matrix_repertoire_ids = np.array(["r1", "r2"])
-        dataset_repertoire_ids = ["r2"]
-        sequence_p_values_indices = [True, False, True]
-
-        abundance_matrix = encoder._build_abundance_matrix(sequence_presence_matrix, matrix_repertoire_ids,
-                                                           dataset_repertoire_ids, sequence_p_values_indices)
-
-        expected = np.array([[1., 2.]])
-
-        self.assertTrue((abundance_matrix == expected).all())
-
+    #

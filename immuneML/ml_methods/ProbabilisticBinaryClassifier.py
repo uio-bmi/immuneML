@@ -449,6 +449,7 @@ class ProbabilisticBinaryClassifier(MLMethod):
         return self.class_mapping
 
     def get_compatible_encoders(self):
-        from immuneML.encodings.filtered_sequence_encoding.SequenceAbundanceEncoder import SequenceAbundanceEncoder
-        from immuneML.encodings.filtered_sequence_encoding.CompAIRRSequenceAbundanceEncoder import CompAIRRSequenceAbundanceEncoder
-        return [SequenceAbundanceEncoder, CompAIRRSequenceAbundanceEncoder]
+        from immuneML.encodings.abundance_encoding.SequenceAbundanceEncoder import SequenceAbundanceEncoder
+        from immuneML.encodings.abundance_encoding.CompAIRRSequenceAbundanceEncoder import CompAIRRSequenceAbundanceEncoder
+        from immuneML.encodings.abundance_encoding.KmerAbundanceEncoder import KmerAbundanceEncoder
+        return [SequenceAbundanceEncoder, CompAIRRSequenceAbundanceEncoder, KmerAbundanceEncoder]

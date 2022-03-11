@@ -2,6 +2,7 @@
 import itertools
 import warnings
 
+from immuneML.data_model.receptor.RegionType import RegionType
 from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
 from immuneML.data_model.repertoire.Repertoire import Repertoire
 from immuneML.environment.SequenceType import SequenceType
@@ -23,9 +24,12 @@ class KmerHelper:
 
     @staticmethod
     def create_IMGT_kmers_from_sequence(sequence: ReceptorSequence, k: int, sequence_type: SequenceType):
-        positions = PositionHelper.gen_imgt_positions_from_sequence(sequence, sequence_type)
+        return KmerHelper.create_IMGT_kmers_from_string(sequence.get_sequence(sequence_type), k, sequence.get_attribute("region_type"))
 
-        sequence_w_pos = list(zip(list(sequence.get_sequence(sequence_type)), positions))
+    @staticmethod
+    def create_IMGT_kmers_from_string(sequence: str, k: int, region_type: RegionType):
+        positions = PositionHelper.gen_imgt_positions_from_length(len(sequence), region_type)
+        sequence_w_pos = list(zip(list(sequence), positions))
         kmers = KmerHelper.create_kmers_from_string(sequence_w_pos, k)
         kmers = [(''.join([x[0] for x in kmer]), min([i[1] for i in kmer]) if int(min([i[1] for i in kmer])) != 112 else max([i[1] for i in kmer if int(i[1]) == 112]))
                  for kmer in kmers]

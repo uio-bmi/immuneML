@@ -39,7 +39,7 @@ class FeatureComparison(FeatureReport):
 
         show_error_bar (bool): Whether to show the error bar (standard deviation) for the points, both in the x and y dimension.
 
-        log_scale (bool): Whether to plot the x and y axes in log scale (log_scale = True) or continuous scale (log_scale = False). By default, log_scale is False.
+        log_scale (bool): Whether to plot the x and y axes in log10 scale (log_scale = True) or continuous scale (log_scale = False). By default, log_scale is False.
 
         keep_fraction (float): The total number of features may be very large and only the features differing significantly across
         comparison labels may be of interest. When the keep_fraction parameter is set below 1, only the fraction of features that
