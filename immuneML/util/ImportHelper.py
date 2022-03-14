@@ -212,8 +212,12 @@ class ImportHelper:
                 df = pd.read_csv(filepath, sep=params.separator, iterator=False, usecols=params.columns_to_load, dtype=str)
             except ValueError:
                 df = pd.read_csv(filepath, sep=params.separator, iterator=False, dtype=str)
-                warnings.warn(f"ImportHelper: failed to import columns {params.columns_to_load} for "
-                              f"the input file {filepath}, imported the following instead: {list(df.columns)}")
+
+                expected = [e for e in params.columns_to_load if e not in list(df.columns)]
+
+                warnings.warn(f"ImportHelper: expected to find the following column(s) in the input file '{filepath.name}', which were not found: {expected}."
+                              f"The following columns were imported instead: {list(df.columns)}. \nTo remove this warning, add the relevant columns "
+                              f"to the input file, or change which columns are imported under 'datasets/<dataset_key>/params/columns_to_load' and 'datasets/<dataset_key>/params/column_mapping'.")
 
         return df
 
