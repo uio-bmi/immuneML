@@ -63,6 +63,7 @@ Previous versions
 
 Documentation for previous immuneML versions can be found here:
 
+- `v2.1.2 <https://docs.immuneml.uio.no/v2.1.2/>`_
 - `v2.1.0 <https://docs.immuneml.uio.no/v2.1.0/>`_
 - `v2.0.4 <https://docs.immuneml.uio.no/v2.0.4/>`_
 - `v1.2.5 <https://docs.immuneml.uio.no/v1.2.5/>`_
