@@ -9,7 +9,6 @@ import pandas as pd
 from immuneML.caching.CacheType import CacheType
 from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
 from immuneML.encodings.EncoderParams import EncoderParams
-from immuneML.encodings.abundance_encoding.AbundanceEncoderHelper import AbundanceEncoderHelper
 from immuneML.encodings.abundance_encoding.CompAIRRSequenceAbundanceEncoder import CompAIRRSequenceAbundanceEncoder
 from immuneML.environment.Constants import Constants
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
@@ -52,7 +51,7 @@ class TestCompAIRRSequenceAbundanceEncoder(TestCase):
             result_path = path / f"ignore_genes={ignore_genes}"
 
             encoder = CompAIRRSequenceAbundanceEncoder.build_object(dataset, **{
-                "p_value_threshold": 0.4, "compairr_path": compairr_path, "sequence_batch_size": 2, "ignore_genes": ignore_genes, "threads": 8
+                "p_value_threshold": 0.4, "compairr_path": compairr_path, "sequence_batch_size": 2, "ignore_genes": ignore_genes, "threads": 8, "keep_temporary_files": False,
             })
 
             label_config = LabelConfiguration([Label("l1", [True, False], positive_class=True)])
@@ -80,6 +79,3 @@ class TestCompAIRRSequenceAbundanceEncoder(TestCase):
             self.assertTrue(np.array_equal(np.array([[0, 4], [0, 6], [0, 3], [0, 6]]), encoded_dataset.encoded_data.examples))
 
         shutil.rmtree(path)
-
-
-    #
