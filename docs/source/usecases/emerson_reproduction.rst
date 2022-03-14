@@ -37,6 +37,12 @@ The statistical model `ProbabilisticBinaryClassifier` relies on `SequenceAbundan
 and {:math:`\alpha_1`, :math:`\beta_1`}) to describe beta-distributed prior for CMV-negative and CMV-positive subjects. These parameters are then used
 to create log-posterior odds ratio for class assignment for new subjects.
 
+.. note::
+
+  When used on large datasets, 'SequenceAbundance' encoder might be slow. If you want to reproduce the analysis faster and you are using
+  immuneML version 2.2.0 or later, use :ref:`CompAIRRSequenceAbundance` encoder instead. `p_value_threshold` parameter is the same, and by default
+  the analysis is performed using the amino acid sequence, and V and J genes. This can be turned of by setting `ignore_genes` to True (it is False by default).
+
 To find the optimal p-value threshold we used 10-fold cross-validation on the cohort 1 and chose the one minimizing the cross-entropy loss (also
 called logarithmic loss). We then tested the performance of the optimal model (optimal p-value and the classifier fitted on resulting data representation)
 on the cohort 2 (as it was done in the original study).

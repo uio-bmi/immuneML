@@ -24,10 +24,9 @@ class SequenceAbundanceEncoder(DatasetEncoder):
     - the first element corresponds to the number of label-associated clonotypes
     - the second element is the total number of unique clonotypes
 
-    To determine what clonotypes (with features defined by comparison_attributes) are label-associated
-    based on a statistical test. The statistical test used is Fisher's exact test (one-sided).
+    To determine what clonotypes (with features defined by comparison_attributes) are label-associated, one-sided Fisher's exact test is used.
 
-    The encoder also writes out files containing the contingency table used for fisher's exact test,
+    The encoder also writes out files containing the contingency table used for Fisher's exact test,
     the resulting p-values, and the significantly abundant sequences
     (use :py:obj:`~immuneML.reports.encoding_reports.RelevantSequenceExporter.RelevantSequenceExporter` to export these sequences in AIRR format).
 

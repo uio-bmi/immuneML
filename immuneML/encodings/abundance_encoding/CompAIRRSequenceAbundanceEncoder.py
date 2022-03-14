@@ -34,8 +34,8 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
     - the first element corresponds to the number of label-associated clonotypes
     - the second element is the total number of unique clonotypes
 
-    To determine what clonotypes (with or without matching V/J genes) are label-associated
-    based on a statistical test. The statistical test used is Fisher's exact test (one-sided).
+    To determine what clonotypes (amino acid sequences with or without matching V/J genes) are label-associated, Fisher's exact test (one-sided)
+    is used.
 
     The encoder also writes out files containing the contingency table used for fisher's exact test,
     the resulting p-values, and the significantly abundant sequences
