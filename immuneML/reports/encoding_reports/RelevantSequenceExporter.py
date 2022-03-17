@@ -61,7 +61,7 @@ class RelevantSequenceExporter(EncodingReport):
     def _compute_column_mapping(self, df: pd.DataFrame) -> dict:
         columns = df.columns.values.tolist()
         column_mapping = {}
-        region_type = self.dataset.get_repertoire(0).get_attribute("region_types")[0]
+        region_type = self.dataset.get_repertoire(0).get_region_type()
         if "sequence_aas" in columns and (region_type != RegionType.IMGT_CDR3 and region_type != RegionType.IMGT_CDR3.name):
             column_mapping["sequence_aas"] = "sequence_aa"
         if "sequences" in columns and (region_type != RegionType.IMGT_CDR3 and region_type != RegionType.IMGT_CDR3.name):

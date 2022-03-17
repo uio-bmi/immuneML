@@ -174,6 +174,8 @@ class AIRRImport(DataImport):
                 df.loc[:, "region_types"] = params.region_type.name
             elif "junction" in params.column_mapping or "junction_aa" in params.column_mapping:
                 ImportHelper.junction_to_cdr3(df, params.region_type)
+        else:
+            df.loc[:, "region_types"] = params.region_type.name
         # todo else: support "full_sequence" import through regiontype?
 
         ImportHelper.drop_empty_sequences(df, params.import_empty_aa_sequences, params.import_empty_nt_sequences)
