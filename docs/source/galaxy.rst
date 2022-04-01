@@ -10,7 +10,7 @@ immuneML & Galaxy
    :twitter:image: https://docs.immuneml.uio.no/_images/receptor_classification_overview.png
 
 
-All of immuneMLs functionalities are also available through `a Galaxy web interface <https://galaxy.immuneml.uio.no>`_ as a collection of Galaxy tools. We provide a YAML-based Galaxy
+All of immuneMLs functionalities are also available through `a Galaxy web interface <https://galaxy.immuneml.uiocloud.no>`_ as a collection of Galaxy tools. We provide a YAML-based Galaxy
 tool that is equivalent to the CLI (command-line interface), as well as repertoire and receptor-level classification tools with an intuitive
 graphical user interface aimed at immunology experts without a machine learning background.
 
@@ -45,8 +45,6 @@ Alternatively, CLI equivalent tools based on the YAML specification can be run u
 
 - :ref:`How to train ML models in Galaxy`
 
-- :ref:`How to apply previously trained ML models to a new AIRR dataset in Galaxy`
-
 - :ref:`How to run any AIRR ML analysis in Galaxy`
 
 .. toctree::
@@ -71,5 +69,4 @@ Alternatively, CLI equivalent tools based on the YAML specification can be run u
   galaxy/galaxy_simple_repertoires
   galaxy/galaxy_simple_receptors
   galaxy/galaxy_train_ml_models
-  galaxy/galaxy_apply_ml_models
   galaxy/galaxy_general_yaml

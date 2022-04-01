@@ -10,14 +10,14 @@ How to train ML models in Galaxy
    :twitter:image: https://docs.immuneml.uio.no/_images/receptor_classification_overview.png
 
 
-The Galaxy tool `Train machine learning models <https://galaxy.immuneml.uio.no/root?tool_id=immuneml_train_ml_model>`_ can be used to run hyperparameter optimization over several different ML settings,
+The Galaxy tool `Train machine learning models <https://galaxy.immuneml.uiocloud.no/root?tool_id=immuneml_train_ml_model>`_ can be used to run hyperparameter optimization over several different ML settings,
 which include ML models and their parameters, encodings and preprocessing steps. Nested cross-validation is used to identify the optimal combination of ML settings.
 
 This is a YAML-based Galaxy tool, if you prefer a button-based interface that assumes less ML knowledge, see the tutorials for training ML models for
 :ref:`receptor <How to train immune receptor classifiers using the simplified Galaxy interface>` and :ref:`repertoire <How to train immune repertoire classifiers using the simplified Galaxy interface>`
 classification using the easy Galaxy interfaces.
 
-An example Galaxy history showing how to use this tool `can be found here <https://galaxy.immuneml.uio.no/u/immuneml/h/ml-model-training>`_.
+An example Galaxy history showing how to use this tool `can be found here <https://galaxy.immuneml.uiocloud.no/u/immuneml/h/train-machine-learning-models>`_.
 
 
 Creating the YAML specification
@@ -127,4 +127,5 @@ This Galaxy tool will produce the following history elements:
   Furthermore, the folder contains the complete YAML specification file for the immuneML run, the HTML output and a log file.
 
 - optimal_ml_settings.zip: a .zip file containing the raw files for the optimal trained ML settings (ML model, encoding, and
-  optionally preprocessing steps). This .zip file can subsequently be used as an input when :ref:`applying previously trained ML models to a new AIRR dataset in Galaxy <How to apply previously trained ML models to a new AIRR dataset in Galaxy>`
+  optionally preprocessing steps). This .zip file can subsequently be used as an input when applying previously trained
+  ML models to a new dataset. Currently, this can only be done locally using the command-line interface.

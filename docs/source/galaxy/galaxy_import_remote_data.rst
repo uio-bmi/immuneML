@@ -11,7 +11,7 @@ How to import remote AIRR datasets in Galaxy
 
 
 The immuneML Galaxy web interface integrates with the iReceptor Gateway and VDJdb such that data can automatically be sent to the Galaxy history,
-and subsequently an immuneML dataset can be generated through the `Create dataset <https://galaxy.immuneml.uio.no/root?tool_id=immune_ml_dataset>`_ tool.
+and subsequently an immuneML dataset can be generated through the `Create dataset <https://galaxy.immuneml.uiocloud.no/root?tool_id=immune_ml_dataset>`_ tool.
 
 We strongly recommend to:
 
@@ -22,7 +22,7 @@ We strongly recommend to:
 How to import data from the iReceptor Gateway into an immuneML RepertoireDataset
 --------------------------------------------------------------------------------
 
-See `this example Galaxy history <https://galaxy.immuneml.uio.no/u/immuneml/h/create-ireceptor-dataset>`_ showing how to make a dataset from the iReceptor Gateway into an immuneML dataset.
+See `this example Galaxy history <https://galaxy.immuneml.uiocloud.no/u/immuneml/h/create-ireceptor-dataset>`_ showing how to make a dataset from the iReceptor Gateway into an immuneML dataset.
 
 Retrieving the dataset
 ^^^^^^^^^^^^^^^^^^^^^^
@@ -31,6 +31,11 @@ Note that you must apply for a user account to be able to use the iReceptor Gate
 See `the iReceptor Gateway documentation <http://ireceptor.irmacs.sfu.ca/platform/doc>`_ for more details.
 On the Downloads page on the iReceptor Gateway website, you should find your downloaded dataset and a button named 'Send to Galaxy →'
 A new .zip file should now appear in the Galaxy history.
+
+.. image:: ../_static/images/galaxy/ireceptor_gateway.png
+   :alt: ireceptor gateway
+   :width: 900
+
 By clicking 'View data' (eyeball icon), the .zip file can be downloaded and inspected locally if desired. The .zip should
 contain one info.txt file, one or more .tsv files, and for each .tsv file there should be a corresponding file with -metadata.json extension.
 
@@ -39,13 +44,13 @@ Combining multiple datasets
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 It is possible to collect multiple iReceptor datasets into one immuneML dataset, for example when combining one dataset
 with repertoires from diseased subjects, and a second dataset from healthy subjects. In this case, make sure that each of the
-.zip files must have a unique name in the history, as duplicate names will be ignored by the `Create dataset <https://galaxy.immuneml.uio.no/root?tool_id=immune_ml_dataset>`_ tool.
+.zip files must have a unique name in the history, as duplicate names will be ignored by the `Create dataset <https://galaxy.immuneml.uiocloud.no/root?tool_id=immune_ml_dataset>`_ tool.
 The names of  history elements can be altered by clicking their 'Edit attributes' button (pencil icon).
 
 
 Creating the immuneML dataset
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Under immuneML, use the `Create dataset <https://galaxy.immuneml.uio.no/root?tool_id=immune_ml_dataset>`_ tool to create the immuneML dataset (see :ref:`How to make an immuneML dataset in Galaxy` for a more general explanation of this tool).
+Under immuneML, use the `Create dataset <https://galaxy.immuneml.uiocloud.no/root?tool_id=immune_ml_dataset>`_ tool to create the immuneML dataset (see :ref:`How to make an immuneML dataset in Galaxy` for a more general explanation of this tool).
 Select the iReceptor Gateway data format, and select one or more .zip files from the Galaxy history.
 A difference between creating an immuneML repertoire dataset from iReceptor Gateway .zip files and other file formats is that in the former case, no metadata file needs to be provided.
 The metadata file will internally be constructed by immuneML based on the metadata.json files provided in the .zip file.
@@ -73,7 +78,7 @@ from multiple sample_processing_id's together into repertoires), this can be don
 How to import data from VDJdb into an immuneML Receptor- or SequenceDataset
 ---------------------------------------------------------------------------
 
-See `this example Galaxy history <https://galaxy.immuneml.uio.no/u/immuneml/h/create-vdjdb-dataset>`_ showing how to retrieve data from VDJdb and turn it into an immuneML sequence or receptor dataset.
+See `this example Galaxy history <https://galaxy.immuneml.uiocloud.no/u/immuneml/h/create-vdjdb-dataset>`_ showing how to retrieve data from VDJdb and turn it into an immuneML sequence or receptor dataset.
 
 
 Retrieving the dataset
@@ -89,12 +94,12 @@ Combining multiple datasets
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 It is possible to collect multiple VDJdb files into one immuneML dataset, for example when combining one file with sequences binding
 to a given epitope, and a second file with sequences that do not bind. In this case, make sure that each of the files has a unique
-name in the history, as duplicate names will be ignored by the `Create dataset <https://galaxy.immuneml.uio.no/root?tool_id=immune_ml_dataset>`_ tool.
+name in the history, as duplicate names will be ignored by the `Create dataset <https://galaxy.immuneml.uiocloud.no/root?tool_id=immune_ml_dataset>`_ tool.
 The names of  history elements can be altered by clicking their 'Edit attributes' button (pencil icon).
 
 
 Creating the immuneML dataset
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Under immuneML, use the `Create dataset <https://galaxy.immuneml.uio.no/root?tool_id=immune_ml_dataset>`_ tool to create the immuneML dataset (see :ref:`How to make an immuneML dataset in Galaxy` for a more general explanation of this tool), select
+Under immuneML, use the `Create dataset <https://galaxy.immuneml.uiocloud.no/root?tool_id=immune_ml_dataset>`_ tool to create the immuneML dataset (see :ref:`How to make an immuneML dataset in Galaxy` for a more general explanation of this tool), select
 one or more files from the history and use the VDJdb data format.
 VDJdb files contain the columns Epitope, Epitope gene and Epitope species which may be filled in under the field Metadata columns such that these fields can be used as receptor sequence classification labels.

@@ -11,7 +11,7 @@ How to make an immuneML dataset in Galaxy
 
 
 In Galaxy, an immuneML dataset is simply a Galaxy collection containing all relevant files (including an optional metadata file).
-The `Create dataset <https://galaxy.immuneml.uio.no/root?tool_id=immune_ml_dataset>`_ Galaxy tool allows users to import data
+The `Create dataset <https://galaxy.immuneml.uiocloud.no/root?tool_id=immune_ml_dataset>`_ Galaxy tool allows users to import data
 from various formats and create immuneML datasets in Galaxy. These datasets are in an optimized binary format, which
 reduces the time needed to read the data into immuneML, and ensures that you can quickly import the dataset into Galaxy tools
 without having to repeatedly specify the import parameters.
@@ -32,9 +32,9 @@ If your history contains more than 100 files, you may want to consider using a G
 
 See also the following example Galaxy histories, showing how to run the tool:
 
-- `Create repertoire dataset <https://galaxy.immuneml.uio.no/u/immuneml/h/create-repertoire-dataset>`_.
+- `Create repertoire dataset <https://galaxy.immuneml.uiocloud.no/u/immuneml/h/create-repertoire-dataset>`_.
 
-- `Create receptor and sequence dataset <https://galaxy.immuneml.uio.no/u/immuneml/h/create-receptor-and-sequence-dataset>`_.
+- `Create receptor and sequence dataset <https://galaxy.immuneml.uiocloud.no/u/immuneml/h/create-receptor-and-sequence-dataset>`_.
 
 
 immuneML datasets
