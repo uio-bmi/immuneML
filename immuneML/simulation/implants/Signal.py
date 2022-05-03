@@ -69,11 +69,7 @@ class Signal:
         return processed_receptor
 
     def is_in(self, sequence: ReceptorSequence, sequence_type: SequenceType):
-        for motif in self.motifs:
-            if motif.is_in(sequence, sequence_type):
-                return True
-
-        return False
+        return any(motif.is_in(sequence, sequence_type) for motif in self.motifs)
 
     def __str__(self):
         return "Signal id: " + self.id + "; motifs: " + ", ".join([str(motif) for motif in self.motifs])

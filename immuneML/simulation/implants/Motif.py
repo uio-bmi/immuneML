@@ -1,4 +1,5 @@
 # quality: gold
+import re
 from dataclasses import dataclass
 
 from immuneML.data_model.receptor.receptor_sequence.Chain import Chain
@@ -84,6 +85,7 @@ class Motif:
     name_chain2: Chain = None
     v_gene: str = None
     j_gene: str = None
+    all_possible_instances: list = None
 
     def instantiate_motif(self, chain_name: Chain = None, sequence_type: SequenceType = SequenceType.AMINO_ACID):
         """
@@ -117,11 +119,15 @@ class Motif:
             return max(len(self.seed_chain1.replace("/", "")), len(self.seed_chain2.replace("/", ""))) + self.instantiation.get_max_gap()
 
     def is_in(self, sequence: ReceptorSequence, sequence_type: SequenceType) -> bool:
+        if self.all_possible_instances is None:
+            self.all_possible_instances = self.instantiation.get_all_possible_instances(self.seed)
 
         if self.v_gene and self.j_gene and (self.v_gene != sequence.metadata.v_gene or self.j_gene != sequence.metadata.j_gene):
             return False
-
-        return True
+        if any(re.search(motif_instance, sequence.get_sequence(sequence_type)) for motif_instance in self.all_possible_instances):
+            return True
+        else:
+            return False
 
     def __str__(self):
         return self.identifier + " - " + \

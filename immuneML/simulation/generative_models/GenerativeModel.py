@@ -11,7 +11,7 @@ class GenerativeModel:
         pass
 
     @abc.abstractmethod
-    def generate_sequences(self, count: int, seed: int = 1, path: Path = None, sequence_type: SequenceType = SequenceType.AMINO_ACID):
+    def generate_sequences(self, count: int, seed: int = None, path: Path = None, sequence_type: SequenceType = SequenceType.AMINO_ACID):
         pass
 
     @abc.abstractmethod

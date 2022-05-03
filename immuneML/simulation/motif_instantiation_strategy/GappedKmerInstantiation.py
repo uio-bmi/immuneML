@@ -107,6 +107,17 @@ class GappedKmerInstantiation(MotifInstantiationStrategy):
 
         return MotifInstance(instance, gap_size)
 
+    def get_all_possible_instances(self, base) -> list:
+        gap_length = f"{self._min_gap},{self._max_gap}"
+        base_motif = base.replace("/", ".{" + gap_length + "}")
+
+        if self.hamming_distance_probabilities:
+            raise NotImplementedError
+            # allowed_positions = [i for i in range(len(base)) if base[i] != "/"]
+            # for key, val in self.hamming_distance_probabilities.items():
+
+        return [base_motif]
+
     def _substitute_letters(self, position_weights, alphabet_weights, allowed_positions: list, instance: list):
 
         if self.hamming_distance_probabilities:

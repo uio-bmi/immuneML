@@ -14,6 +14,7 @@ from immuneML.simulation.LIgOSimulationItem import LIgOSimulationItem
 from immuneML.simulation.Simulation import Simulation
 from immuneML.simulation.SimulationStrategy import SimulationStrategy
 from immuneML.simulation.implants.Signal import Signal
+from immuneML.simulation.rejection_sampling.RejectionSampler import RejectionSampler
 from immuneML.util.ExporterHelper import ExporterHelper
 from immuneML.util.PathBuilder import PathBuilder
 from immuneML.workflows.instructions.Instruction import Instruction
@@ -69,6 +70,7 @@ class LIgOSimulationInstruction(Instruction):
                                          simulation_strategy=simulation_strategy, simulation=simulation, sequence_type=sequence_type,
                                          signals=signals, name=name, store_signal_in_receptors=store_signal_in_receptors)
         self.exporters = exporters
+        self.seed = 1
 
     def run(self, result_path: Path):
         self.state.result_path = PathBuilder.build(result_path / self.state.name)
@@ -145,21 +147,10 @@ class LIgOSimulationInstruction(Instruction):
         return new_sequences
 
     def _make_sequences_by_rejection(self, item, path: Path) -> list:
-
-        batch_id = 1
-        receptors = []
-
-        while len(receptors) < item.number_of_receptors_in_repertoire:
-            background_sequences = item.generative_model.generate_sequences(item.number_of_receptors_in_repertoire, seed=1, path=path,
-                                                                            sequence_type=self.state.sequence_type)
-
-            new_receptors = []
-
-            receptors.extend(new_receptors)
-
-            batch_id += 1
-
-        return receptors
+        sampler = RejectionSampler(simulation_item=item, sequence_type=self.state.sequence_type, all_signals=self.state.signals, seed=self.seed)
+        sequences = sampler.make_repertoire_sequences(path)
+        self.seed = sampler.seed + 1
+        return sequences
 
     def _make_sequences_by_implanting(self, item: LIgOSimulationItem, path: Path, summary_path: Path, repertoire_id: str) -> list:
 

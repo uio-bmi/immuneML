@@ -13,3 +13,7 @@ class MotifInstantiationStrategy(metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def get_max_gap(self) -> int:
         pass
+
+    @abc.abstractmethod
+    def get_all_possible_instances(self, base) -> list:
+        pass

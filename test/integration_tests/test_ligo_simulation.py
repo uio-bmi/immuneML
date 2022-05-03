@@ -33,19 +33,19 @@ class TestLIgOSimulation(TestCase):
                         }
                     },
                     "motif2": {
-                        "seed": "TTT",
+                        "seed": "GG",
                         "instantiation": "GappedKmer"
                     }
                 },
                 "signals": {
                     "signal1": {
-                        "motifs": ["motif1", "motif2"],
+                        "motifs": ["motif1"],
                         "implanting": "HealthySequence",
                         "sequence_position_weights": None,
                         "implanting_computation": "round"
                     },
                     "signal2": {
-                        "motifs": ["motif1"],
+                        "motifs": ["motif2"],
                         "implanting": "HealthySequence",
                         "sequence_position_weights": None,
                         "implanting_computation": "round"
@@ -91,9 +91,9 @@ class TestLIgOSimulation(TestCase):
                     "export_formats": ["AIRR"],
                     "is_repertoire": True,
                     "paired": False,
-                    "sequence_type": "nucleotide",
+                    "sequence_type": "amino_acid",
                     "use_generation_probabilities": False,
-                    "simulation_strategy": "IMPLANTING",
+                    "simulation_strategy": "REJECTION_SAMPLING",
                     "store_signal_in_receptors": True
                 }
             },
