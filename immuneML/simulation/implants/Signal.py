@@ -45,25 +45,35 @@ class Signal:
 
     """
 
-    def __init__(self, identifier: str, motifs: List[Motif], implanting_strategy: SignalImplantingStrategy, v_gene: str=None, j_gene: str=None):
+    def __init__(self, identifier: str, motifs: List[Motif], implanting_strategy: SignalImplantingStrategy, v_gene: str = None, j_gene: str = None):
         self.id = str(identifier)
         self.motifs = motifs
         self.implanting_strategy = implanting_strategy
+        self.v_gene = v_gene
+        self.j_gene = j_gene
 
     def implant_to_repertoire(self, repertoire: Repertoire, repertoire_implanting_rate: float, path: Path) \
-            -> Repertoire:
+        -> Repertoire:
         processed_repertoire = self.implanting_strategy \
             .implant_in_repertoire(repertoire=repertoire,
                                    repertoire_implanting_rate=repertoire_implanting_rate,
                                    signal=self, path=path)
         return processed_repertoire
 
-    def implant_in_sequence(self, sequence: ReceptorSequence, is_noise: bool, sequence_type: SequenceType = SequenceType.AMINO_ACID) -> ReceptorSequence:
+    def implant_in_sequence(self, sequence: ReceptorSequence, is_noise: bool,
+                            sequence_type: SequenceType = SequenceType.AMINO_ACID) -> ReceptorSequence:
         return self.implanting_strategy.implant_in_sequence(sequence=sequence, signal=self, sequence_type=sequence_type)
 
     def implant_in_receptor(self, receptor: Receptor, is_noise: bool) -> Receptor:
         processed_receptor = self.implanting_strategy.implant_in_receptor(receptor, self, is_noise)
         return processed_receptor
+
+    def is_in(self, sequence: ReceptorSequence, sequence_type: SequenceType):
+        for motif in self.motifs:
+            if motif.is_in(sequence, sequence_type):
+                return True
+
+        return False
 
     def __str__(self):
         return "Signal id: " + self.id + "; motifs: " + ", ".join([str(motif) for motif in self.motifs])
@@ -74,7 +84,7 @@ class Signal:
 
         valid_implanting_values = str(
             ReflectionHandler.all_nonabstract_subclass_basic_names(SignalImplantingStrategy, 'Implanting', 'signal_implanting_strategy/'))[
-                       1:-1].replace("'", "`")
+                                  1:-1].replace("'", "`")
 
         docs_mapping = {
             "Valid values for this argument are class names of different signal implanting strategies.":

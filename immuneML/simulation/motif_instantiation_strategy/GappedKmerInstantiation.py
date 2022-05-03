@@ -74,7 +74,7 @@ class GappedKmerInstantiation(MotifInstantiationStrategy):
                 "GappedKmerInstantiation: for each possible Hamming distance a probability between 0 and 1 has to be assigned " \
                 "so that the probabilities for all distance possibilities sum to 1."
 
-        self._hamming_distance_probabilities = hamming_distance_probabilities
+        self.hamming_distance_probabilities = hamming_distance_probabilities
         self.position_weights = position_weights
         # if weights are not given for each letter of the alphabet, distribute the remaining probability
         # equally among letters
@@ -87,7 +87,8 @@ class GappedKmerInstantiation(MotifInstantiationStrategy):
 
     def instantiate_motif(self, base, sequence_type: SequenceType = SequenceType.AMINO_ACID) -> MotifInstance:
 
-        self.alphabet_weights = self.set_default_weights(self.alphabet_weights, EnvironmentSettings.get_sequence_alphabet(sequence_type=sequence_type))
+        self.alphabet_weights = self.set_default_weights(self.alphabet_weights,
+                                                         EnvironmentSettings.get_sequence_alphabet(sequence_type=sequence_type))
 
         allowed_positions = list(range(len(base)))
         instance = list(base)
@@ -108,9 +109,9 @@ class GappedKmerInstantiation(MotifInstantiationStrategy):
 
     def _substitute_letters(self, position_weights, alphabet_weights, allowed_positions: list, instance: list):
 
-        if self._hamming_distance_probabilities:
-            substitution_count = random.choices(list(self._hamming_distance_probabilities.keys()),
-                                                list(self._hamming_distance_probabilities.values()), k=1)[0]
+        if self.hamming_distance_probabilities:
+            substitution_count = random.choices(list(self.hamming_distance_probabilities.keys()),
+                                                list(self.hamming_distance_probabilities.values()), k=1)[0]
             allowed_position_weights = {key: value for key, value in position_weights.items() if key in allowed_positions}
             position_probabilities = self._prepare_probabilities(allowed_position_weights)
             positions = list(np.random.choice(allowed_positions, size=substitution_count, p=position_probabilities))

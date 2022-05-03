@@ -2,6 +2,7 @@
 from dataclasses import dataclass
 
 from immuneML.data_model.receptor.receptor_sequence.Chain import Chain
+from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
 from immuneML.environment.SequenceType import SequenceType
 from immuneML.simulation.motif_instantiation_strategy.MotifInstantiationStrategy import MotifInstantiationStrategy
 from immuneML.util.ReflectionHandler import ReflectionHandler
@@ -114,6 +115,13 @@ class Motif:
             return len(self.seed.replace("/", "")) + self.instantiation.get_max_gap()
         else:
             return max(len(self.seed_chain1.replace("/", "")), len(self.seed_chain2.replace("/", ""))) + self.instantiation.get_max_gap()
+
+    def is_in(self, sequence: ReceptorSequence, sequence_type: SequenceType) -> bool:
+
+        if self.v_gene and self.j_gene and (self.v_gene != sequence.metadata.v_gene or self.j_gene != sequence.metadata.j_gene):
+            return False
+
+        return True
 
     def __str__(self):
         return self.identifier + " - " + \

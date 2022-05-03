@@ -146,22 +146,20 @@ class LIgOSimulationInstruction(Instruction):
 
     def _make_sequences_by_rejection(self, item, path: Path) -> list:
 
-        raise NotImplementedError()
+        batch_id = 1
+        receptors = []
 
-        # batch_id = 1
-        # receptors = []
-        #
-        # while len(receptors) < item.number_of_receptors_in_repertoire:
-        #     background_sequences = item.generative_model.generate_sequences(item.number_of_receptors_in_repertoire, seed=1, path=path,
-        #                                                                     sequence_type=self.state.sequence_type)
-        #
-        #     new_receptors = []
-        #
-        #     receptors.extend(new_receptors)
-        #
-        #     batch_id += 1
-        #
-        # return receptors
+        while len(receptors) < item.number_of_receptors_in_repertoire:
+            background_sequences = item.generative_model.generate_sequences(item.number_of_receptors_in_repertoire, seed=1, path=path,
+                                                                            sequence_type=self.state.sequence_type)
+
+            new_receptors = []
+
+            receptors.extend(new_receptors)
+
+            batch_id += 1
+
+        return receptors
 
     def _make_sequences_by_implanting(self, item: LIgOSimulationItem, path: Path, summary_path: Path, repertoire_id: str) -> list:
 
