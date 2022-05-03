@@ -43,11 +43,11 @@ Step 1: downloading the dataset
 An archive containing the dataset used in this tutorial can be downloaded here: :download:`quickstart_data.zip <../_static/files/quickstart_data.zip>`.
 It contains the following files:
 
-- The 100 repertoire_<somenumber>.tsv, which are immune repertoire files in AIRR format. For details about the AIRR format, see the `AIRR documentation <https://docs.airr-community.org/en/stable/datarep/format.html>`_ and `this example file <https://galaxy.immuneml.uio.no/datasets/e86c1af9d83bf1ee/display/?preview=True>`_).
+- The 100 repertoire_<somenumber>.tsv, which are immune repertoire files in AIRR format. For details about the AIRR format, see the `AIRR documentation <https://docs.airr-community.org/en/stable/datarep/format.html>`_ and `this example file <https://galaxy.immuneml.uiocloud.no/datasets/2a4bf9d66c01414a/display/?preview=True>`_.
 
 - A metadata.csv file. The metadata file describes which of the 100 repertoires are diseased and healthy, under the
   column named 'signal_disease' which contains the values True and False.
-  For details about the metadata file, see :ref:`What should the metadata file look like?` and `this example file <https://galaxy.immuneml.uio.no/datasets/a6e389145d2bcee5/display/?preview=True>`_
+  For details about the metadata file, see :ref:`What should the metadata file look like?` and `this example file <https://galaxy.immuneml.uiocloud.no/datasets/dfa1565938e7b4c3/display/?preview=True>`_.
 
 Step 2: writing the YAML specification
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -137,7 +137,11 @@ Make sure to change :code:`path/to/repertoires/` and :code:`path/to/metadata.csv
         - precision
         - recall
 
-        number_of_processes: 4 # processes for parallelization
+        strategy: GridSearch # strategy for hyperparameter optimization, GridSearch is currently the only available option
+
+        reports: []                # optional train ML model reports to run
+        number_of_processes: 4     # processes for parallelization
+        refit_optimal_model: false # whether to retrain the model on the whole dataset after optimizing hyperparameters
 
 
 Step 3: running the analysis
