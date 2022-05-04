@@ -70,7 +70,7 @@ class Util:
         elif 0 == unique_values[0] and 1 == unique_values[1] and unique_values.dtype == bool:
             mapping = {0: False, 1: True}
         else:
-            mapping = {0: unique_values[0], 1: unique_values[1]}
+            mapping = {0: str(unique_values[0]), 1: str(unique_values[1])}
 
         return mapping
 
