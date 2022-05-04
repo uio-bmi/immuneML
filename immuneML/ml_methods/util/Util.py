@@ -65,14 +65,7 @@ class Util:
                                             f" instead got {str(unique_values)[1:-1]}. For multi-class classification, " \
                                             f"consider some of the other classifiers."
 
-        if 0 == unique_values[0] and 1 == unique_values[1] and unique_values.dtype != bool:
-            mapping = {0: 0, 1: 1}
-        elif 0 == unique_values[0] and 1 == unique_values[1] and unique_values.dtype == bool:
-            mapping = {0: False, 1: True}
-        else:
-            mapping = {0: unique_values[0], 1: unique_values[1]}
-
-        return mapping
+        return {0: unique_values[0], 1: unique_values[1]}
 
     @staticmethod
     def binarize_label_classes(true_y, predicted_y, classes):
