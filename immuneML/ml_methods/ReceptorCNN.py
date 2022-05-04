@@ -111,10 +111,9 @@ class ReceptorCNN(MLMethod):
         self.batch_size = batch_size
         self.evaluate_at = evaluate_at
         self.training_percentage = training_percentage
-        self.sequence_type = SequenceType[sequence_type.upper()]
-        self.background_probabilities = background_probabilities if background_probabilities is not None \
-            else np.array([1. / len(EnvironmentSettings.get_sequence_alphabet(self.sequence_type))
-                           for i in range(len(EnvironmentSettings.get_sequence_alphabet(self.sequence_type)))])
+        self.sequence_type = None if sequence_type is None else SequenceType[sequence_type.upper()]
+
+        self.background_probabilities = None
         self.CNN = None
         self.label = None
         self.class_mapping = None
@@ -125,6 +124,10 @@ class ReceptorCNN(MLMethod):
     def predict(self, encoded_data: EncodedData, label: Label):
         predictions_proba = self.predict_proba(encoded_data, label)
         return {label.name: [self.class_mapping[val] for val in (predictions_proba[label.name][:, 1] > 0.5).tolist()]}
+
+    def set_background_probabilities(self):
+        self.background_probabilities = np.array([1. / len(EnvironmentSettings.get_sequence_alphabet(self.sequence_type))
+                           for i in range(len(EnvironmentSettings.get_sequence_alphabet(self.sequence_type)))])
 
     def predict_proba(self, encoded_data: EncodedData, label: Label):
         # set the model to evaluation mode for inference
@@ -304,6 +307,9 @@ class ReceptorCNN(MLMethod):
         self.CNN.load_state_dict(torch.load(str(path / "CNN.pt")))
 
     def _make_CNN(self):
+        if self.background_probabilities is None:
+            self.set_background_probabilities()
+
         self.CNN = RCNN(kernel_count=self.kernel_count, kernel_size=self.kernel_size, positional_channels=self.positional_channels,
                         sequence_type=self.sequence_type, background_probabilities=self.background_probabilities, chain_names=self.chain_names)
 
