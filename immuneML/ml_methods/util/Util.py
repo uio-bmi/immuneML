@@ -60,9 +60,9 @@ class Util:
              mapping dictionary where 0 and 1 are always the keys and the values are original class names which were mapped for these values
 
         """
-        unique_values = np.sort(np.unique(y))
-        assert unique_values.shape[0] == 2, f"MLMethod: there has two be exactly two classes to use this classifier," \
-                                            f" instead got {str(unique_values.tolist())[1:-1]}. For multi-class classification, " \
+        unique_values = sorted(set(y))
+        assert len(unique_values) == 2, f"MLMethod: there has two be exactly two classes to use this classifier," \
+                                            f" instead got {str(unique_values)[1:-1]}. For multi-class classification, " \
                                             f"consider some of the other classifiers."
 
         if 0 == unique_values[0] and 1 == unique_values[1] and unique_values.dtype != bool:
@@ -70,7 +70,7 @@ class Util:
         elif 0 == unique_values[0] and 1 == unique_values[1] and unique_values.dtype == bool:
             mapping = {0: False, 1: True}
         else:
-            mapping = {0: str(unique_values[0]), 1: str(unique_values[1])}
+            mapping = {0: unique_values[0], 1: unique_values[1]}
 
         return mapping
 
