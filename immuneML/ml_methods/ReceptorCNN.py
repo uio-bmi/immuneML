@@ -29,7 +29,7 @@ class ReceptorCNN(MLMethod):
 
         The architecture of the CNN for paired-chain receptor data
 
-    Requires one-hot encoded data as input (as produced by :ref:`OneHot` encoder).
+    Requires one-hot encoded data as input (as produced by :ref:`OneHot` encoder), where use_positional_info must be set to True.
 
     Notes:
 
@@ -44,7 +44,7 @@ class ReceptorCNN(MLMethod):
 
         kernel_size (list): sizes of the kernels = how many amino acids to consider at the same time in the chain sequence, can be a tuple of values; e.g. for value [3, 4] of kernel_size, kernel_count*len(kernel_size) kernels will be created, with kernel_count kernels of size 3 and kernel_count kernels of size 4 per chain
 
-        positional_channels (int): how many positional channels where included in one-hot encoding of the receptor sequences (default is 3 in one-hot encoder)
+        positional_channels (int): how many positional channels where included in one-hot encoding of the receptor sequences (:ref:`OneHot` encoder adds 3 positional channels positional information is enabled)
 
         sequence_type (SequenceType): type of the sequence
 
@@ -111,10 +111,9 @@ class ReceptorCNN(MLMethod):
         self.batch_size = batch_size
         self.evaluate_at = evaluate_at
         self.training_percentage = training_percentage
-        self.sequence_type = SequenceType[sequence_type.upper()]
-        self.background_probabilities = background_probabilities if background_probabilities is not None \
-            else np.array([1. / len(EnvironmentSettings.get_sequence_alphabet(self.sequence_type))
-                           for i in range(len(EnvironmentSettings.get_sequence_alphabet(self.sequence_type)))])
+        self.sequence_type = None if sequence_type is None else SequenceType[sequence_type.upper()]
+
+        self.background_probabilities = None
         self.CNN = None
         self.label = None
         self.class_mapping = None
@@ -125,6 +124,10 @@ class ReceptorCNN(MLMethod):
     def predict(self, encoded_data: EncodedData, label: Label):
         predictions_proba = self.predict_proba(encoded_data, label)
         return {label.name: [self.class_mapping[val] for val in (predictions_proba[label.name][:, 1] > 0.5).tolist()]}
+
+    def set_background_probabilities(self):
+        self.background_probabilities = np.array([1. / len(EnvironmentSettings.get_sequence_alphabet(self.sequence_type))
+                           for i in range(len(EnvironmentSettings.get_sequence_alphabet(self.sequence_type)))])
 
     def predict_proba(self, encoded_data: EncodedData, label: Label):
         # set the model to evaluation mode for inference
@@ -304,6 +307,9 @@ class ReceptorCNN(MLMethod):
         self.CNN.load_state_dict(torch.load(str(path / "CNN.pt")))
 
     def _make_CNN(self):
+        if self.background_probabilities is None:
+            self.set_background_probabilities()
+
         self.CNN = RCNN(kernel_count=self.kernel_count, kernel_size=self.kernel_size, positional_channels=self.positional_channels,
                         sequence_type=self.sequence_type, background_probabilities=self.background_probabilities, chain_names=self.chain_names)
 
@@ -333,3 +339,34 @@ class ReceptorCNN(MLMethod):
     def get_compatible_encoders(self):
         from immuneML.encodings.onehot.OneHotEncoder import OneHotEncoder
         return [OneHotEncoder]
+
+    def check_encoder_compatibility(self, encoder):
+        """Checks whether the given encoder is compatible with this ML method, and throws an error if it is not."""
+        is_valid = False
+
+        for encoder_class in self.get_compatible_encoders():
+            if issubclass(encoder.__class__, encoder_class):
+                is_valid = True
+                break
+
+        if not is_valid:
+            raise ValueError(f"{encoder.__class__.__name__} is not compatible with ML Method {self.__class__.__name__}. "
+                             f"Please use one of the following encoders instead: {', '.join([enc_class.__name__ for enc_class in self.get_compatible_encoders()])}")
+
+        if (self.positional_channels == 3 and encoder.use_positional_info == False) or (self.positional_channels == 0 and encoder.use_positional_info == True):
+            mssg = f"The specified parameters for {encoder.__class__.__name__} are not compatible with ML Method {self.__class__.__name__}. "
+
+            if encoder.use_positional_info:
+                mssg += f"To include positional information, set the parameter 'positional_channels' of {self.__class__.__name__} to 3 (now {self.positional_channels}), " \
+                        f"or to ignore positional information, set the parameter 'use_positional_info' of {encoder.__class__.__name__} to False (now {encoder.use_positional_info}). "
+            else:
+                mssg += f"To include positional information, set the parameter 'use_positional_info' of {encoder.__class__.__name__} to True (now {encoder.use_positional_info}), " \
+                        f"or to ignore positional information, set the parameter 'positional_channels' of {self.__class__.__name__} to 0 (now {self.positional_channels})."
+
+            raise ValueError(mssg)
+
+
+
+
+
+

@@ -8,7 +8,6 @@ from sklearn.metrics import roc_curve
 from immuneML.environment.Constants import Constants
 from immuneML.environment.Label import Label
 from immuneML.hyperparameter_optimization.states.HPItem import HPItem
-from immuneML.ml_methods.util.Util import Util
 from immuneML.ml_metrics.ml_metrics import roc_auc_score
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
@@ -72,9 +71,12 @@ class ROCCurveSummary(TrainMLModelReport):
         df = pd.read_csv(hp_item.test_predictions_path)
 
         true_y = df[f"{label_name}_true_class"].values
-        predicted_y = df[proba_name].values
 
-        true_y = Util.map_to_new_class_values(true_y, hp_item.method.get_class_mapping())
+        if hp_item.method.can_predict_proba():
+            predicted_y = df[proba_name].values
+        else:
+            predicted_y = df[f"{label_name}_predicted_class"].values
+
         fpr, tpr, _ = roc_curve(y_true=true_y, y_score=predicted_y)
 
         return {
