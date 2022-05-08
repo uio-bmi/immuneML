@@ -65,7 +65,19 @@ see the virtual environment documentation linked above):
 
   source ./immuneml_venv/bin/activate
 
-3. To install `immuneML from PyPI <https://pypi.org/project/immuneML/>`_ in this virtual environment, run the following:
+3. If not already up-to-date, update pip:
+
+.. code-block:: console
+
+  python3 -m pip install --upgrade pip
+
+4. If not already installed, install the wheel package. If it is not installed, the installation of some of the dependencies might default to legacy 'setup.py install'.
+
+.. code-block:: console
+
+  pip install wheel
+
+5. To install `immuneML from PyPI <https://pypi.org/project/immuneML/>`_ in this virtual environment, run the following:
 
 .. code-block:: console
 
