@@ -1,0 +1,35 @@
+definitions:
+  datasets:
+    my_dataset:
+      format: ImmuneML
+      params:
+        path: dataset.iml_dataset
+  encodings:
+    my_encoding:
+      ...
+  ml_methods:
+    my_ml_method:
+      ...
+  reports:
+    ...
+instructions:
+  my_instruction:
+    type: TrainMLModel
+    dataset: my_dataset
+    labels: [binder]
+    settings: 
+      - encoding: ...
+        ml_method: ...
+    optimization_metric: balanced_accuracy
+    selection:
+      split_strategy: random
+      split_count: 1
+      training_percentage: 0.7 
+    assessment:
+      split_strategy: k_fold
+      split_count: 5 
+      reports:
+        models: 
+          - ...
+    reports: 
+      - ...

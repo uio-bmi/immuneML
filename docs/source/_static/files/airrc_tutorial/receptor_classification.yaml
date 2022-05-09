@@ -1,0 +1,105 @@
+definitions:
+  datasets:
+    dataset:
+      format: ImmuneML
+      params:
+        path: dataset.iml_dataset
+  encodings:
+    encoding_1:
+      KmerFrequency:
+        k: 3
+        reads: unique
+        sequence_encoding: CONTINUOUS_KMER
+  ml_methods:
+    k_nearest_neighbors:
+      KNN:
+        n_neighbors:
+        - 3
+        - 5
+        - 7
+        show_warnings: false
+      model_selection_cv: true
+      model_selection_n_folds: 5
+    logistic_regression:
+      LogisticRegression:
+        C:
+        - 0.01
+        - 0.1
+        - 1
+        - 10
+        - 100
+        class_weight:
+        - balanced
+        penalty:
+        - l1
+        show_warnings: false
+      model_selection_cv: true
+      model_selection_n_folds: 5
+    random_forest:
+      RandomForestClassifier:
+        class_weight:
+        - balanced
+        n_estimators:
+        - 10
+        - 50
+        - 100
+        show_warnings: false
+      model_selection_cv: true
+      model_selection_n_folds: 5
+    support_vector_machine:
+      SVC:
+        C:
+        - 0.01
+        - 0.1
+        - 1
+        - 10
+        - 100
+        class_weight:
+        - balanced
+        dual: false
+        penalty:
+        - l1
+        show_warnings: false
+      model_selection_cv: true
+      model_selection_n_folds: 5
+  reports:
+    benchmark: MLSettingsPerformance
+    coefficients:
+      Coefficients:
+        coefs_to_plot:
+        - N_LARGEST
+        n_largest:
+        - 25
+instructions:
+  inst1:
+    assessment:
+      reports:
+        models:
+        - coefficients
+      split_count: 3
+      split_strategy: random
+      training_percentage: 0.7
+    dataset: dataset
+    labels:
+    - binder
+    metrics: []
+    number_of_processes: 10
+    optimization_metric: accuracy
+    refit_optimal_model: true
+    reports:
+    - benchmark
+    selection:
+      split_count: 1
+      split_strategy: random
+      training_percentage: 0.7
+    settings:
+    - encoding: encoding_1
+      ml_method: random_forest
+    - encoding: encoding_1
+      ml_method: logistic_regression
+    - encoding: encoding_1
+      ml_method: support_vector_machine
+    - encoding: encoding_1
+      ml_method: k_nearest_neighbors
+    strategy: GridSearch
+    type: TrainMLModel
