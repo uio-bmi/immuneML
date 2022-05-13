@@ -81,6 +81,7 @@ Documentation for previous immuneML versions can be found here:
    usecases
    troubleshooting
    developer_docs
+   airrc_tutorial
 
 
 Indices and tables
