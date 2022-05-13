@@ -29,73 +29,42 @@ class GenericImport(DataImport):
 
         path (str): Required parameter. This is the path to a directory with files to import.
 
-        is_repertoire (bool): If True, this imports a RepertoireDataset. If False, it imports a SequenceDataset or
-        ReceptorDataset. By default, is_repertoire is set to True.
+        is_repertoire (bool): If True, this imports a RepertoireDataset. If False, it imports a SequenceDataset or ReceptorDataset. By default, is_repertoire is set to True.
 
-        metadata_file (str): Required for RepertoireDatasets. This parameter specifies the path to the metadata file.
-        This is a csv file with columns filename, subject_id and arbitrary other columns which can be used as labels in instructions.
-        For setting Sequence- or ReceptorDataset metadata, metadata_file is ignored, see metadata_column_mapping instead.
+        metadata_file (str): Required for RepertoireDatasets. This parameter specifies the path to the metadata file. This is a csv file with columns filename, subject_id and arbitrary other columns which can be used as labels in instructions. For setting Sequence- or ReceptorDataset metadata, metadata_file is ignored, see metadata_column_mapping instead.
 
-        paired (str): Required for Sequence- or ReceptorDatasets. This parameter determines whether to import a
-        SequenceDataset (paired = False) or a ReceptorDataset (paired = True).
-        In a ReceptorDataset, two sequences with chain types specified by receptor_chains are paired together based
-        on a common identifier. This identifier should be mapped to the immuneML field 'sequence_identifiers' using
-        the column_mapping.
+        paired (str): Required for Sequence- or ReceptorDatasets. This parameter determines whether to import a SequenceDataset (paired = False) or a ReceptorDataset (paired = True). In a ReceptorDataset, two sequences with chain types specified by receptor_chains are paired together based on a common identifier. This identifier should be mapped to the immuneML field 'sequence_identifiers' using the column_mapping.
 
-        receptor_chains (str): Required for ReceptorDatasets. Determines which pair of chains to import for each Receptor.
-        Valid values for receptor_chains are the names of the ChainPair enum.
+        receptor_chains (str): Required for ReceptorDatasets. Determines which pair of chains to import for each Receptor. Valid values for receptor_chains are the names of the ChainPair enum.
 
-        import_illegal_characters (bool): Whether to import sequences that contain illegal characters, i.e., characters
-        that do not appear in the sequence alphabet (amino acids including stop codon '*', or nucleotides). When set to false, filtering is only
-        applied to the sequence type of interest (when running immuneML in amino acid mode, only entries with illegal
-        characters in the amino acid sequence are removed). By default import_illegal_characters is False.
+        import_illegal_characters (bool): Whether to import sequences that contain illegal characters, i.e., characters that do not appear in the sequence alphabet (amino acids including stop codon '*', or nucleotides). When set to false, filtering is only applied to the sequence type of interest (when running immuneML in amino acid mode, only entries with illegal characters in the amino acid sequence are removed). By default import_illegal_characters is False.
 
-        import_empty_nt_sequences (bool): imports sequences which have an empty nucleotide sequence field; can be True or False.
-        By default, import_empty_nt_sequences is set to True.
+        import_empty_nt_sequences (bool): imports sequences which have an empty nucleotide sequence field; can be True or False. By default, import_empty_nt_sequences is set to True.
 
-        import_empty_aa_sequences (bool): imports sequences which have an empty amino acid sequence field; can be True or False; for analysis on
-        amino acid sequences, this parameter should be False (import only non-empty amino acid sequences). By default, import_empty_aa_sequences is set to False.
+        import_empty_aa_sequences (bool): imports sequences which have an empty amino acid sequence field; can be True or False; for analysis on amino acid sequences, this parameter should be False (import only non-empty amino acid sequences). By default, import_empty_aa_sequences is set to False.
 
-        region_type (str): Which part of the sequence to import. By default, this value is set to IMGT_CDR3. This means immuneML assumes the IMGT
-        junction (including leading C and trailing Y/F amino acids) is used in the input file, and the first and last
-        amino acids will be removed from the sequences to retrieve the IMGT CDR3 sequence. Specifying any other value
-        will result in importing the sequences as they are.
-        Valid values for region_type are the names of the :py:obj:`~immuneML.data_model.receptor.RegionType.RegionType` enum.
+        region_type (str): Which part of the sequence to import. By default, this value is set to IMGT_CDR3. This means immuneML assumes the IMGT junction (including leading C and trailing Y/F amino acids) is used in the input file, and the first and last amino acids will be removed from the sequences to retrieve the IMGT CDR3 sequence. Specifying any other value will result in importing the sequences as they are. Valid values for region_type are the names of the :py:obj:`~immuneML.data_model.receptor.RegionType.RegionType` enum.
 
-        column_mapping (dict): Required for all datasets. A mapping where the keys are the column names in the input file,
-        and the values correspond to the names used in immuneML's internal data representation.
-        Valid immuneML fields that can be specified here are defined by Repertoire.FIELDS
-        At least sequences (nucleotide) or sequence_aas (amino acids) must be specified, but all other fields
-        are optional. A column mapping can look for example like this:
+        column_mapping (dict): Required for all datasets. A mapping where the keys are the column names in the input file, and the values correspond to the names used in immuneML's internal data representation. Valid immuneML fields that can be specified here are defined by Repertoire.FIELDS. At least sequences (nucleotide) or sequence_aas (amino acids) must be specified, but all other fields are optional. A column mapping can look for example like this:
 
-        .. indent with spaces
-        .. code-block:: yaml
+            .. indent with spaces
+            .. code-block:: yaml
 
-                file_column_amino_acids: sequence_aas
-                file_column_v_genes: v_genes
-                file_column_j_genes: j_genes
-                file_column_frequencies: counts
+                    file_column_amino_acids: sequence_aas
+                    file_column_v_genes: v_genes
+                    file_column_j_genes: j_genes
+                    file_column_frequencies: counts
 
-        column_mapping_synonyms (dict): This is a column mapping that can be used if a column could have alternative names.
-        The formatting is the same as column_mapping. If some columns specified in column_mapping are not found in the file,
-        the columns specified in column_mapping_synonyms are instead attempted to be loaded.
-        For Generic import, there is no default column_mapping_synonyms.
+        column_mapping_synonyms (dict): This is a column mapping that can be used if a column could have alternative names. The formatting is the same as column_mapping. If some columns specified in column_mapping are not found in the file, the columns specified in column_mapping_synonyms are instead attempted to be loaded. For Generic import, there is no default column_mapping_synonyms.
 
-        metadata_column_mapping (dict): Optional; specifies metadata for Sequence- and ReceptorDatasets. This is a column
-        mapping that is formatted similarly to column_mapping, but here the values are the names that immuneML internally
-        uses as metadata fields. These fields can subsequently be used as labels in instructions (for example labels
-        that are used for prediction by ML methods). This column mapping could for example look like this:
+        metadata_column_mapping (dict): Optional; specifies metadata for Sequence- and ReceptorDatasets. This is a column mapping that is formatted similarly to column_mapping, but here the values are the names that immuneML internally uses as metadata fields. These fields can subsequently be used as labels in instructions (for example labels that are used for prediction by ML methods). This column mapping could for example look like YAML below. The label antigen_specificity can then be used throughout immuneML. For setting RepertoireDataset metadata, metadata_column_mapping is ignored, see metadata_file instead.
 
-        .. indent with spaces
-        .. code-block:: yaml
+            .. indent with spaces
+            .. code-block:: yaml
 
-                file_column_antigen_specificity: antigen_specificity
+                    file_column_antigen_specificity: antigen_specificity
 
-        The label antigen_specificity can now be used throughout immuneML.
-        For setting RepertoireDataset metadata, metadata_column_mapping is ignored, see metadata_file instead.
-
-        columns_to_load (list): Optional; specifies which columns to load from the input file. This may be useful if
-        the input files contain many unused columns. If no value is specified, all columns are loaded.
+        columns_to_load (list): Optional; specifies which columns to load from the input file. This may be useful if the input files contain many unused columns. If no value is specified, all columns are loaded.
 
         separator (str): Required parameter. Column separator, for example "\\t" or ",". The default value is "\\t"
 
