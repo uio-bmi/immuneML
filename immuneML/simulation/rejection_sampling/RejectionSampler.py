@@ -33,7 +33,6 @@ class RejectionSampler:
                 max(self.simulation_item.number_of_receptors_in_repertoire, RejectionSampler.MIN_SEQUENCES_TO_GENERATE), seed=self.seed,
                 path=path / "tmp.tsv", sequence_type=self.sequence_type)
             self.seed += 1
-            print([seq.get_sequence(self.sequence_type) for seq in background_sequences.tolist()], flush=True)
 
             signal_matrix = self.get_signal_matrix(background_sequences)
             background_sequences, signal_matrix = self.filter_out_illegal_sequences(background_sequences, signal_matrix)

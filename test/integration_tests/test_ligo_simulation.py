@@ -23,10 +23,10 @@ class TestLIgOSimulation(TestCase):
             "definitions": {
                 "motifs": {
                     "motif1": {
-                        "seed": "A/A",
+                        "seed": "AS",
                         "instantiation": {
                             "GappedKmer": {
-                                "max_gap": 1,
+                                # "max_gap": 1,
                                 "alphabet_weights": None,
                                 "position_weights": None
                             },
@@ -42,7 +42,8 @@ class TestLIgOSimulation(TestCase):
                         "motifs": ["motif1"],
                         "implanting": "HealthySequence",
                         "sequence_position_weights": None,
-                        "implanting_computation": "round"
+                        "implanting_computation": "round",
+                        "v_gene": "TRBV7"
                     },
                     "signal2": {
                         "motifs": ["motif2"],
@@ -124,4 +125,4 @@ class TestLIgOSimulation(TestCase):
         metadata_df = pd.read_csv(path / "result/inst1/metadata.csv", comment=Constants.COMMENT_SIGN)
         self.assertTrue("signal1" in metadata_df.columns)
 
-        shutil.rmtree(path)
+        # shutil.rmtree(path)

@@ -25,8 +25,11 @@ class Signal:
 
         motifs (list): A list of the motifs associated with this signal.
 
-        implanting (:py:obj:`~immuneML.simulation.signal_implanting_strategy.SignalImplantingStrategy.SignalImplantingStrategy`):
-        The strategy that is used to decide in which sequences the motifs should be implanted, and how. Valid values for this argument are class names of different signal implanting strategies.
+        implanting (:py:obj:`~immuneML.simulation.signal_implanting_strategy.SignalImplantingStrategy.SignalImplantingStrategy`): The strategy that is used to decide in which sequences the motifs should be implanted, and how. Valid values for this argument are class names of different signal implanting strategies.
+
+        v_gene (str): V gene that has to co-occur with one of the motifs for the signal to exist; can be used only in combination with rejection sampling, otherwise ignored; to match in a sequence for rejection sampling, it is checked if this value is contained by the "v_gene" field from the sequence metadata;
+
+        j_gene (str): J gene that has to co-occur with one of the motifs for the signal to exist; can be used only in combination with rejection sampling, otherwise ignored; to match in a sequence for rejection sampling, it is checked if this value is contained by the "j_gene" field from the sequence metadata;
 
     YAML specification:
 
@@ -52,8 +55,7 @@ class Signal:
         self.v_gene = v_gene
         self.j_gene = j_gene
 
-    def implant_to_repertoire(self, repertoire: Repertoire, repertoire_implanting_rate: float, path: Path) \
-        -> Repertoire:
+    def implant_to_repertoire(self, repertoire: Repertoire, repertoire_implanting_rate: float, path: Path) -> Repertoire:
         processed_repertoire = self.implanting_strategy \
             .implant_in_repertoire(repertoire=repertoire,
                                    repertoire_implanting_rate=repertoire_implanting_rate,
@@ -69,7 +71,8 @@ class Signal:
         return processed_receptor
 
     def is_in(self, sequence: ReceptorSequence, sequence_type: SequenceType):
-        return any(motif.is_in(sequence, sequence_type) for motif in self.motifs)
+        gene_match = all(getattr(self, gene) in getattr(sequence.metadata, gene) if getattr(self, gene) else True for gene in ['v_gene', 'j_gene'])
+        return gene_match and any(motif.is_in(sequence, sequence_type) for motif in self.motifs)
 
     def __str__(self):
         return "Signal id: " + self.id + "; motifs: " + ", ".join([str(motif) for motif in self.motifs])

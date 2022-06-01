@@ -27,7 +27,8 @@ class SignalParser:
                                            f"motifs in signal {key}", False)
 
             signal_motifs = [symbol_table.get(motif_id) for motif_id in signal_spec["motifs"]]
-            signal = Signal(key, signal_motifs, implanting_strategy)
+            kwargs = {k: v for k, v in signal_spec.items() if k in ['v_gene', 'j_gene']}
+            signal = Signal(key, signal_motifs, implanting_strategy, **kwargs)
             symbol_table.add(key, SymbolType.SIGNAL, signal)
 
         return symbol_table, signals
