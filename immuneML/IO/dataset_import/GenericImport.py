@@ -71,10 +71,10 @@ class GenericImport(DataImport):
         .. indent with spaces
         .. code-block:: yaml
 
-                file_column_amino_acids: sequence_aas
-                file_column_v_genes: v_genes
-                file_column_j_genes: j_genes
-                file_column_frequencies: counts
+                file_column_amino_acids: sequence_aa
+                file_column_v_genes: v_call
+                file_column_j_genes: j_call
+                file_column_frequencies: duplicate_count
 
         column_mapping_synonyms (dict): This is a column mapping that can be used if a column could have alternative names.
         The formatting is the same as column_mapping. If some columns specified in column_mapping are not found in the file,
@@ -120,9 +120,9 @@ class GenericImport(DataImport):
                 region_type: IMGT_CDR3 # what part of the sequence to import
                 column_mapping: # column mapping file: immuneML
                     file_column_amino_acids: sequence_aas
-                    file_column_v_genes: v_genes
-                    file_column_j_genes: j_genes
-                    file_column_frequencies: counts
+                    file_column_v_genes: v_call
+                    file_column_j_genes: j_call
+                    file_column_frequencies: duplicate_count
                 metadata_column_mapping: # metadata column mapping file: immuneML
                     file_column_antigen_specificity: antigen_specificity
                 columns_to_load:  # which subset of columns to load from the file
@@ -143,15 +143,14 @@ class GenericImport(DataImport):
         ImportHelper.drop_empty_sequences(df, params.import_empty_aa_sequences, params.import_empty_nt_sequences)
         ImportHelper.drop_illegal_character_sequences(df, params.import_illegal_characters)
         ImportHelper.junction_to_cdr3(df, params.region_type)
-        df.loc[:, "region_types"] = params.region_type.name
-        ImportHelper.update_gene_info(df)
+        df.loc[:, "region_type"] = params.region_type.name
         ImportHelper.load_chains(df)
 
         return df
 
     @staticmethod
     def import_receptors(df, params):
-        df["receptor_identifiers"] = df["sequence_identifiers"]
+        df["receptor_id"] = df["sequence_id"]
         return ImportHelper.import_receptors(df, params)
 
     @staticmethod
@@ -161,7 +160,7 @@ class GenericImport(DataImport):
         chain_pair_values = str([chain_pair.name for chain_pair in ChainPair])[1:-1].replace("'", "`")
         region_type_values = str([region_type.name for region_type in RegionType])[1:-1].replace("'", "`")
         repertoire_fields = list(Repertoire.FIELDS)
-        repertoire_fields.remove("region_types")
+        repertoire_fields.remove("region_type")
 
         mapping = {
             "Valid values for receptor_chains are the names of the ChainPair enum.": f"Valid values are {chain_pair_values}.",

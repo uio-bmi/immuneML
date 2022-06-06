@@ -3,7 +3,6 @@ from unittest import TestCase
 
 from immuneML.IO.dataset_export.AIRRExporter import AIRRExporter
 from immuneML.IO.dataset_import.AIRRImport import AIRRImport
-from immuneML.data_model.receptor.RegionType import RegionType
 from immuneML.data_model.receptor.receptor_sequence.Chain import Chain
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.util.PathBuilder import PathBuilder
@@ -39,19 +38,13 @@ rep2.tsv,2""")
 
     def get_column_mapping(self):
         column_mapping = {
-            "junction": "sequences",
-            "junction_aa": "sequence_aas",
-            "v_call": "v_alleles",
-            "j_call": "j_alleles",
-            "locus": "chains",
-            "duplicate_count": "counts",
-            "sequence_id": "sequence_identifiers"
+            "locus": "chain"
         }
 
         return column_mapping
 
     def test_import_repertoire_dataset(self):
-        path = EnvironmentSettings.root_path / "test/tmp/ioairr/"
+        path = EnvironmentSettings.tmp_test_path / "ioairr_repertoire/"
         PathBuilder.build(path)
         self.create_dummy_dataset(path, True)
 
@@ -69,7 +62,7 @@ rep2.tsv,2""")
             if index == 0:
                 self.assertEqual(3, len(rep.sequences))
                 self.assertListEqual(["IVKNQEJ01BVGQ6", "IVKNQEJ01AQVWS", "IVKNQEJ01EI5S4"], list(rep.get_sequence_identifiers()))
-                self.assertListEqual(['IGHV4-31', 'IGHV4-31', 'IGHV4-31'], list(rep.get_v_genes()))
+                self.assertListEqual(['IGHV4-31*03', 'IGHV4-31*03', 'IGHV4-31*03'], list(rep.get_v_genes()))
                 self.assertListEqual([36, 36, 36], list(rep.get_attribute("junction_length")))
                 self.assertListEqual(["ASGVAGTFDY", "ASGVAGTFDY", "ASGVAGTFDY"], list(rep.get_sequence_aas()))
                 self.assertListEqual([1247, 4, 2913], list(rep.get_counts()))
@@ -80,7 +73,7 @@ rep2.tsv,2""")
         shutil.rmtree(path)
 
     def test_sequence_dataset(self):
-        path = EnvironmentSettings.root_path / "test/tmp/ioairr/"
+        path = EnvironmentSettings.tmp_test_path / "ioairr_sequence"
         PathBuilder.build(path)
         self.create_dummy_dataset(path, False)
 
@@ -99,8 +92,8 @@ rep2.tsv,2""")
         for idx, sequence in enumerate(dataset.get_data()):
             self.assertEqual(sequence.amino_acid_sequence, "ASGVAGTFDY")
 
-        v_genes = sorted(["IGHV4-59", "IGHV4-34", "IGHV4-31", "IGHV4-31", "IGHV4-31"])
-        self.assertListEqual(sorted([sequence.metadata.v_gene for sequence in dataset.get_data()]), v_genes)
+        v_genes = sorted(["IGHV4-31*03", "IGHV4-31*03", "IGHV4-31*03", "IGHV4-34*09", "IGHV4-59*06"])
+        self.assertListEqual(sorted([sequence.metadata.v_call for sequence in dataset.get_data()]), v_genes)
 
         shutil.rmtree(path)
 
@@ -135,12 +128,12 @@ IVKNQEJ01AIS74	1	IVKNQEJ01AIS74	GGCGCAGGACTGTTGAAGCCTTCACAGACCCTGTCCCTCACCTGCACT
         shutil.rmtree(path)
 
     def test_import_exported_dataset(self):
-        path = EnvironmentSettings.root_path / "test/tmp/ioairr/"
-        PathBuilder.build(path)
-        self.create_dummy_dataset(path, True)
+        path = EnvironmentSettings.tmp_test_path / "ioairr/"
+        PathBuilder.build(path / 'initial')
+        self.create_dummy_dataset(path / 'initial', True)
 
         column_mapping = self.get_column_mapping()
-        params = {"is_repertoire": True, "result_path": path, "path": path, "metadata_file": path / "metadata.csv",
+        params = {"is_repertoire": True, "result_path": path, "path": path / 'initial', "metadata_file": path / "initial/metadata.csv",
                   "import_out_of_frame": False, "import_with_stop_codon": False,
                   "import_productive": True, "region_type": "IMGT_CDR3", "import_empty_nt_sequences": True, "import_empty_aa_sequences": False,
                   "column_mapping": column_mapping, "import_illegal_characters": False,
@@ -156,7 +149,7 @@ IVKNQEJ01AIS74	1	IVKNQEJ01AIS74	GGCGCAGGACTGTTGAAGCCTTCACAGACCCTGTCCCTCACCTGCACT
         params["result_path"] = path_exported / "result_path"
         dataset2 = AIRRImport.import_dataset(params, "airr_repertoire_dataset2")
 
-        for attribute in ["amino_acid_sequence", "nucleotide_sequence", "v_gene", "j_gene", "chain", "frame_type", "region_type", "custom_params"]:
+        for attribute in ["amino_acid_sequence", "nucleotide_sequence", "v_call", "j_call", "chain", "frame_type", "region_type", "custom_params"]:
             self.assertListEqual([sequence.get_attribute(attribute) for sequence in dataset1.repertoires[0].sequences],
                                  [sequence.get_attribute(attribute) for sequence in dataset2.repertoires[0].sequences])
 

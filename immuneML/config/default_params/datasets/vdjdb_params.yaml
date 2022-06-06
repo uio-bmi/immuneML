@@ -1,11 +1,11 @@
 is_repertoire: True
 path: ./
 column_mapping:
-  V: v_alleles
-  J: j_alleles
-  CDR3: sequence_aas
-  complex.id: sequence_identifiers
-  Gene: chains
+  V: v_call
+  J: j_call
+  CDR3: sequence_aa
+  complex.id: sequence_id
+  Gene: chain
 metadata_column_mapping:
   Epitope: epitope
   Epitope gene: epitope_gene

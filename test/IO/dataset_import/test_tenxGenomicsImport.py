@@ -35,10 +35,9 @@ clonotype104,clonotype104_consensus_1,680,TRA,TRAV3D-3,None,TRAJ31,TRAC,True,Tru
 rep1.tsv,1
 rep2.tsv,2""")
 
-
     def test_import_repertoire_dataset(self):
-        path = EnvironmentSettings.root_path / "test/tmp/io_10xGenomics/"
-        PathBuilder.build(path)
+        path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "io_10xGenomics_rep")
+
         self.create_dumy_dataset(path, add_metadata=True)
 
         params = DefaultParamsLoader.load(EnvironmentSettings.default_params_path / "datasets/", "tenx_genomics")
@@ -56,15 +55,13 @@ rep2.tsv,2""")
 
         self.assertEqual(dataset.repertoires[0].sequences[0].amino_acid_sequence, "ALSGTGGYKVV")
         self.assertListEqual([Chain.ALPHA, Chain.BETA], list(dataset.repertoires[0].get_chains()))
-        self.assertListEqual([2,4], list(dataset.repertoires[0].get_counts()))
+        self.assertListEqual([2, 4], list(dataset.repertoires[0].get_counts()))
 
         shutil.rmtree(path)
 
-
-
     def test_import_sequence_dataset(self):
-        path = EnvironmentSettings.root_path / "test/tmp/io_10xGenomics/"
-        PathBuilder.build(path)
+        path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "io_10xGenomics_seq")
+
         self.create_dumy_dataset(path, add_metadata=False)
 
         params = DefaultParamsLoader.load(EnvironmentSettings.default_params_path / "datasets/", "tenx_genomics")
@@ -81,14 +78,14 @@ rep2.tsv,2""")
 
         data = dataset.get_data(1)
         for receptorseq in data:
-            self.assertTrue(receptorseq.amino_acid_sequence in ["ALSGTGGYKVV", "ASSLYGGPEVF", "AAKGTQVVGQLT", "AIVGNTGKLI", "ASSFATNSDYT", "AVSANSNNRIF"])
+            self.assertTrue(
+                receptorseq.amino_acid_sequence in ["ALSGTGGYKVV", "ASSLYGGPEVF", "AAKGTQVVGQLT", "AIVGNTGKLI", "ASSFATNSDYT", "AVSANSNNRIF"])
 
         shutil.rmtree(path)
 
-
     def test_import_receptor_dataset(self):
-        path = EnvironmentSettings.root_path / "test/tmp/io_10xGenomics/"
-        PathBuilder.build(path)
+        path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "io_10xGenomics_receptor")
+
         self.create_dumy_dataset(path, add_metadata=False)
 
         params = DefaultParamsLoader.load(EnvironmentSettings.default_params_path / "datasets/", "tenx_genomics")
@@ -110,4 +107,3 @@ rep2.tsv,2""")
             self.assertTrue(receptor.beta.amino_acid_sequence in ["ASSLYGGPEVF", "ASSFATNSDYT"])
 
         shutil.rmtree(path)
-

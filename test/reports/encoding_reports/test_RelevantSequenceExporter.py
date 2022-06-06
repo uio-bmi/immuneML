@@ -22,7 +22,7 @@ class TestRelevantSequenceExporter(TestCase):
         path = EnvironmentSettings.tmp_test_path / "relevant_sequence_exporter/"
         PathBuilder.build(path)
 
-        df = pd.DataFrame({"v_genes": ["TRBV1-1", "TRBV1-1"], 'j_genes': ["TRBJ1-1", "TRBJ1-2"], "sequence_aas": ['ACCF', "EEFG"]})
+        df = pd.DataFrame({"v_call": ["TRBV1-1", "TRBV1-1"], 'j_call': ["TRBJ1-1", "TRBJ1-2"], "sequence_aa": ['ACCF', "EEFG"]})
         df.to_csv(path / 'sequences.csv', index=False)
 
         dataset = RandomDatasetGenerator.generate_repertoire_dataset(2, {2: 1}, {4: 1}, {}, path / "data")

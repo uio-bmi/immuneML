@@ -64,11 +64,12 @@ mouse_subject0053,PA,1,TRAV6D-6*01,TRAJ53*01,CALGGGSNYKLTF,tgtgctctgggtggaggcagc
                                                                "cdr3_b_aa": "beta_amino_acid_sequence",
                                                                "cdr3_a_nucseq": "alpha_nucleotide_sequence",
                                                                "cdr3_b_nucseq": "beta_nucleotide_sequence",
-                                                               "v_a_gene": "alpha_v_gene",
-                                                               "v_b_gene": "beta_v_gene",
-                                                               "j_a_gene": "alpha_j_gene",
-                                                               "j_b_gene": "beta_j_gene",
-                                                               "clone_id": "identifier"
+                                                               "v_a_gene": "alpha_v_call",
+                                                               "v_b_gene": "beta_v_call",
+                                                               "j_a_gene": "alpha_j_call",
+                                                               "j_b_gene": "beta_j_call",
+                                                               "clone_id": "identifier",
+                                                               "count": "duplicate_count"
                                                            },
                                                            "receptor_chains": "TRA_TRB",
                                                            "region_type": "IMGT_CDR3",

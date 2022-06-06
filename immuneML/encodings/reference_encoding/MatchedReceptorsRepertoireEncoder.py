@@ -6,8 +6,8 @@ from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
 from immuneML.data_model.encoded_data.EncodedData import EncodedData
 from immuneML.data_model.repertoire.Repertoire import Repertoire
 from immuneML.encodings.EncoderParams import EncoderParams
-from immuneML.util.ReadsType import ReadsType
 from immuneML.encodings.reference_encoding.MatchedReceptorsEncoder import MatchedReceptorsEncoder
+from immuneML.util.ReadsType import ReadsType
 
 
 class MatchedReceptorsRepertoireEncoder(MatchedReceptorsEncoder):
@@ -50,7 +50,6 @@ class MatchedReceptorsRepertoireEncoder(MatchedReceptorsEncoder):
 
         return encoded_repertoires / repertoire_totals
 
-
     def _get_feature_info(self):
         """
         returns a pandas dataframe containing:
@@ -72,10 +71,12 @@ class MatchedReceptorsRepertoireEncoder(MatchedReceptorsEncoder):
             clonotype_id = receptor.metadata["clonotype_id"] if "clonotype_id" in receptor.metadata else None
 
             if first_chain.metadata.custom_params is not None:
-                first_dual_chain_id = first_chain.metadata.custom_params["dual_chain_id"] if "dual_chain_id" in first_chain.metadata.custom_params else None
+                first_dual_chain_id = first_chain.metadata.custom_params[
+                    "dual_chain_id"] if "dual_chain_id" in first_chain.metadata.custom_params else None
 
             if second_chain.metadata.custom_params is not None:
-                second_dual_chain_id = second_chain.metadata.custom_params["dual_chain_id"] if "dual_chain_id" in second_chain.metadata.custom_params else None
+                second_dual_chain_id = second_chain.metadata.custom_params[
+                    "dual_chain_id"] if "dual_chain_id" in second_chain.metadata.custom_params else None
 
             features[i * 2] = [id, clonotype_id, chain_names[0],
                                first_dual_chain_id,
@@ -123,7 +124,7 @@ class MatchedReceptorsRepertoireEncoder(MatchedReceptorsEncoder):
 
             for rep_seq in rep_seqs:
                 matches_idx = 0 if self.sum_matches else i * 2
-                match_count = 1 if self.reads == ReadsType.UNIQUE else rep_seq.metadata.count
+                match_count = 1 if self.reads == ReadsType.UNIQUE else rep_seq.metadata.duplicate_count
 
                 # Match with first chain: add to even columns in matches.
                 # Match with second chain: add to odd columns
@@ -133,4 +134,3 @@ class MatchedReceptorsRepertoireEncoder(MatchedReceptorsEncoder):
                     matches[matches_idx + 1] += match_count
 
         return matches
-

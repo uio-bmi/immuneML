@@ -132,14 +132,14 @@ class CytoscapeNetworkExporter(DataReport):
         For example: *a*s=AMREGPEHSGYALN*v=V7-3*j=J41"""
         return f"*{seq.get_attribute('chain').value.lower()}" \
                f"*s={seq.get_sequence()}" \
-               f"*v={seq.get_attribute('v_gene')}" \
-               f"*j={seq.get_attribute('j_gene')}"
+               f"*v={seq.get_attribute('v_call')}" \
+               f"*j={seq.get_attribute('j_call')}"
 
     def get_formatted_node_metadata(self, seq: ReceptorSequence):
         # sequence, v_gene_subgroup, v_gene, j_gene_subgroup, j_gene
         chain = seq.get_attribute('chain').value
-        v_gene = seq.get_attribute('v_gene')
-        j_gene = seq.get_attribute('j_gene')
+        v_gene = seq.get_attribute('v_call')
+        j_gene = seq.get_attribute('j_call')
 
         additional_info = []
 

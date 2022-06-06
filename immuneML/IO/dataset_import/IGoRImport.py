@@ -133,22 +133,22 @@ class IGoRImport(DataImport):
 
     @staticmethod
     def preprocess_dataframe(df: pd.DataFrame, params: DatasetImportParams):
-        if "counts" not in df.columns:
-            df["counts"] = 1
+        if "duplicate_count" not in df.columns:
+            df["duplicate_count"] = 1
 
         df = df[df.anchors_found == "1"]
 
         if not params.import_out_of_frame:
             df = df[df.is_inframe == "1"]
 
-        df["sequence_aas"] = df["sequences"].apply(IGoRImport.translate_sequence)
+        df["sequence_aa"] = df["sequence"].apply(IGoRImport.translate_sequence)
 
         if not params.import_with_stop_codon:
-            no_stop_codon = ["*" not in seq for seq in df.sequence_aas]
+            no_stop_codon = ["*" not in seq for seq in df.sequence_aa]
             df = df[no_stop_codon]
 
         ImportHelper.junction_to_cdr3(df, params.region_type)
-        df.loc[:, "region_types"] = params.region_type.name
+        df.loc[:, "region_type"] = params.region_type.name
         # note: import_empty_aa_sequences is set to true here; since IGoR doesnt output aa, this parameter is insensible
         ImportHelper.drop_empty_sequences(df, True, params.import_empty_nt_sequences)
         ImportHelper.drop_illegal_character_sequences(df, params.import_illegal_characters)

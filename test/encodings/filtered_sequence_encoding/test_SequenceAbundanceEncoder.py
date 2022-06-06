@@ -38,7 +38,7 @@ class TestEmersonSequenceAbundanceEncoder(TestCase):
         dataset = RepertoireDataset(repertoires=repertoires, metadata_file=metadata, identifier="1")
 
         encoder = SequenceAbundanceEncoder.build_object(dataset, **{
-            "comparison_attributes": ["sequence_aas"],
+            "comparison_attributes": ["sequence_aa"],
             "p_value_threshold": 0.4, "sequence_batch_size": 4, "repertoire_batch_size": 8
         })
 

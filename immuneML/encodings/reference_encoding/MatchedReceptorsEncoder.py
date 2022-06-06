@@ -120,9 +120,10 @@ class MatchedReceptorsEncoder(DatasetEncoder):
                   for receptor in self.reference_receptors]
 
         encoding_params_desc = {"max_edit_distance": sorted(self.max_edit_distances.items()),
-                                "reference_receptors": sorted([chain_a.get_sequence() + chain_a.metadata.v_gene + chain_a.metadata.j_gene + "|" +
-                                                                chain_b.get_sequence() + chain_b.metadata.v_gene + chain_b.metadata.j_gene
-                                                                for chain_a, chain_b in chains]),
+                                "reference_receptors": sorted([chain_a.get_sequence() + chain_a.metadata.v_gene +
+                                                               chain_a.metadata.j_gene + "|" + chain_b.get_sequence() +
+                                                               chain_b.metadata.v_gene + chain_b.metadata.j_gene
+                                                               for chain_a, chain_b in chains]),
                                 "reads": self.reads.name,
                                 "sum_matches": self.sum_matches,
                                 "normalize": self.normalize}
@@ -133,7 +134,7 @@ class MatchedReceptorsEncoder(DatasetEncoder):
                 ("labels", tuple(params.label_config.get_labels_by_name())),
                 ("encoding", MatchedReceptorsEncoder.__name__),
                 ("learn_model", params.learn_model),
-                ("encoding_params", encoding_params_desc), )
+                ("encoding_params", encoding_params_desc),)
 
     @abc.abstractmethod
     def _encode_new_dataset(self, dataset, params: EncoderParams):

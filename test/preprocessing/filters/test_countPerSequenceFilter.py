@@ -22,10 +22,12 @@ class TestCountPerSequenceFilter(TestCase):
         dataset = RepertoireDataset(repertoires=RepertoireBuilder.build([["ACF", "ACF", "ACF"],
                                                                          ["ACF", "ACF"],
                                                                          ["ACF", "ACF", "ACF", "ACF"]], path,
-                                                                        seq_metadata=[[{"count": 1}, {"count": 2}, {"count": 3}],
-                                                                                      [{"count": 4}, {"count": 1}],
-                                                                                      [{"count": 5}, {"count": 6}, {"count": None},
-                                                                                       {"count": 1}]])[0])
+                                                                        seq_metadata=[[{"duplicate_count": 1}, {"duplicate_count": 2},
+                                                                                       {"duplicate_count": 3}], [{"duplicate_count": 4},
+                                                                                                                 {"duplicate_count": 1}],
+                                                                                      [{"duplicate_count": 5}, {"duplicate_count": 6},
+                                                                                       {"duplicate_count": None},
+                                                                                       {"duplicate_count": 1}]])[0])
 
         dataset1 = CountPerSequenceFilter(**{"low_count_limit": 2, "remove_without_count": True, "remove_empty_repertoires": False,
                                              "result_path": path, "batch_size": 4}).process_dataset(dataset, path)
@@ -42,10 +44,11 @@ class TestCountPerSequenceFilter(TestCase):
         dataset = RepertoireDataset(repertoires=RepertoireBuilder.build([["ACF", "ACF", "ACF"],
                                                                          ["ACF", "ACF"],
                                                                          ["ACF", "ACF", "ACF", "ACF"]], path,
-                                                                        seq_metadata=[[{"count": None}, {"count": None}, {"count": None}],
-                                                                                      [{"count": None}, {"count": None}],
-                                                                                      [{"count": None}, {"count": None}, {"count": None},
-                                                                                       {"count": None}]])[0])
+                                                                        seq_metadata=[[{"duplicate_count": None}, {"duplicate_count": None},
+                                                                                       {"duplicate_count": None}],
+                                                                                      [{"duplicate_count": None}, {"duplicate_count": None}],
+                                                                                      [{"duplicate_count": None}, {"duplicate_count": None},
+                                                                                       {"duplicate_count": None}, {"duplicate_count": None}]])[0])
 
         dataset4 = CountPerSequenceFilter(**{"low_count_limit": 0, "remove_without_count": True, "remove_empty_repertoires": False,
                                              "result_path": path, "batch_size": 4}).process_dataset(dataset, path)

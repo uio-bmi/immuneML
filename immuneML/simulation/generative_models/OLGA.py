@@ -1,12 +1,18 @@
-import os
+from dataclasses import dataclass
 from dataclasses import dataclass
 from pathlib import Path
-from typing import List
+from typing import Union
+
+import numpy as np
+import pandas as pd
+from olga import load_model
+from olga.sequence_generation import SequenceGenerationVJ, SequenceGenerationVDJ
 
 from immuneML.IO.dataset_import.DatasetImportParams import DatasetImportParams
 from immuneML.IO.dataset_import.OLGAImport import OLGAImport
+from immuneML.data_model.receptor.RegionType import RegionType
 from immuneML.data_model.receptor.receptor_sequence.Chain import Chain
-from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
+from immuneML.data_model.receptor.receptor_sequence.SequenceFrameType import SequenceFrameType
 from immuneML.dsl.DefaultParamsLoader import DefaultParamsLoader
 from immuneML.environment.SequenceType import SequenceType
 from immuneML.simulation.generative_models.GenerativeModel import GenerativeModel
@@ -30,6 +36,18 @@ class OLGA(GenerativeModel):
     model_path: Path
     default_model_name: str
     chain: Chain = None
+    sequence_gen_model: Union[SequenceGenerationVDJ, SequenceGenerationVJ] = None
+    v_gene_mapping: np.ndarray = None
+    j_gene_mapping: np.ndarray = None
+
+    DEFAULT_MODEL_FOLDER_MAP = {
+        "humanTRA": "human_T_alpha", "humanTRB": "human_T_beta",
+        "humanIGH": "human_B_heavy", "humanIGK": "human_B_kappa", "humanIGL": "human_B_lambda",
+        "mouseTRB": "mouse_T_beta", "mouseTRA": "mouse_T_alpha"
+    }
+    MODEL_FILENAMES = {'marginals': 'model_marginals.txt', 'params': 'model_params.txt', 'v_gene_anchor': 'V_gene_CDR3_anchors.csv',
+                       'j_gene_anchor': 'J_gene_CDR3_anchors.csv'}
+    OUTPUT_COLUMNS = ["sequence", 'sequence_aa', 'v_call', 'j_call', 'region_type', "frame_type"]
 
     @classmethod
     def build_object(cls, **kwargs):
@@ -43,7 +61,7 @@ class OLGA(GenerativeModel):
                 f"{OLGA.__name__}: the model path is not a directory. It has to be a directory and contain files with the exact names as " \
                 f"described in the OLGA package documentation: https://github.com/statbiophys/OLGA."
 
-            for filename in ['model_marginals.txt', 'model_params.txt', 'V_gene_CDR3_anchors.csv', 'J_gene_CDR3_anchors.csv']:
+            for filename in OLGA.MODEL_FILENAMES.values():
                 assert (Path(kwargs['model_path']) / filename).is_file(), \
                     f"{OLGA.__name__}: file {filename} is missing in the specified directory: {kwargs['model_path']}"
 
@@ -51,26 +69,39 @@ class OLGA(GenerativeModel):
                 f"{OLGA.__name__}: default_model_name must be None when model_path is set, but now it is {kwargs['default_model_name']}."
             chain = Chain.get_chain(kwargs['chain'])
         else:
-            ParameterValidator.assert_in_valid_list(kwargs['default_model_name'], ['humanTRA', 'humanTRB', 'mouseTRB', 'humanIGH'], location,
+            ParameterValidator.assert_in_valid_list(kwargs['default_model_name'], list(OLGA.DEFAULT_MODEL_FOLDER_MAP.keys()), location,
                                                     'default_model_name')
             chain = Chain.get_chain(kwargs['default_model_name'][-3:])
+            kwargs['model_path'] = Path(load_model.__file__).parent / f"default_models/{OLGA.DEFAULT_MODEL_FOLDER_MAP[kwargs['default_model_name']]}"
 
         return OLGA(model_path=kwargs['model_path'], default_model_name=kwargs['default_model_name'], chain=chain)
 
     def load_model(self):
-        pass
+        is_vdj = self.chain in [Chain.BETA, Chain.HEAVY]
+        olga_gen_model = load_model.GenerativeModelVDJ() if is_vdj else load_model.GenerativeModelVJ()
+        olga_gen_model.load_and_process_igor_model(str(self.model_path / OLGA.MODEL_FILENAMES['marginals']))
 
-    def generate_sequences(self, count: int, seed: int = 1, path: Path = None, sequence_type: SequenceType = SequenceType.AMINO_ACID) -> List[
-        ReceptorSequence]:
+        genomic_data = load_model.GenomicDataVDJ() if is_vdj else load_model.GenomicDataVJ()
+        genomic_data.load_igor_genomic_data(params_file_name=str(self.model_path / OLGA.MODEL_FILENAMES['params']),
+                                            V_anchor_pos_file=str(self.model_path / OLGA.MODEL_FILENAMES['v_gene_anchor']),
+                                            J_anchor_pos_file=str(self.model_path / OLGA.MODEL_FILENAMES['j_gene_anchor']))
 
-        self._run_olga_command(count, seed, path)
+        self.v_gene_mapping = pd.read_csv(self.model_path / OLGA.MODEL_FILENAMES['v_gene_anchor'])['gene'].values
+        self.j_gene_mapping = pd.read_csv(self.model_path / OLGA.MODEL_FILENAMES['j_gene_anchor'])['gene'].values
 
-        sequences = self._import_olga_sequences(sequence_type, path)
+        self.sequence_gen_model = SequenceGenerationVDJ(olga_gen_model, genomic_data) if is_vdj \
+            else SequenceGenerationVJ(olga_gen_model, genomic_data)
 
-        assert len(sequences) == count, f"{OLGA.__name__}: an error occurred while generating sequences. Expected {count} sequences, " \
-                                        f"but got {len(sequences)} instead. See the generated sequences at {path}."
+    def generate_sequences(self, count: int, seed: int = 1, path: Path = None, sequence_type: SequenceType = SequenceType.AMINO_ACID) -> pd.DataFrame:
 
-        os.remove(path)
+        if not self.sequence_gen_model:
+            self.load_model()
+
+        sequences = pd.DataFrame(index=np.arange(count), columns=OLGA.OUTPUT_COLUMNS)
+        for i in range(count):
+            seq_row = self.sequence_gen_model.gen_rnd_prod_CDR3()
+            sequences.loc[i] = (seq_row[0], seq_row[1], self.v_gene_mapping[seq_row[2]], self.j_gene_mapping[seq_row[3]],
+                                RegionType.IMGT_JUNCTION.name, SequenceFrameType.IN.name)
 
         return sequences
 
@@ -87,18 +118,3 @@ class OLGA(GenerativeModel):
         params = DatasetImportParams.build_object(**{**default_params, **{'path': path, "import_empty_nt_sequences": import_empty_nt_sequences}})
         sequences = ImportHelper.import_items(OLGAImport, path, params)
         return sequences
-
-    def _run_olga_command(self, count: int, seed: int, path: Path):
-        command = f"olga-generate_sequences -n {count} --seed={seed} -o {path}"
-        if self.default_model_name:
-            command += f" --{self.default_model_name}"
-        elif self.model_path:
-            if self.chain in [Chain.BETA, Chain.HEAVY]:
-                command += f" --set_custom_model_VDJ {self.model_path}"
-            else:
-                command += f" --set_custom_model_VJ {self.model_path}"
-
-        code = os.system(command)
-
-        if code != 0:
-            raise RuntimeError(f"An error occurred while running the OLGA model with the following parameters: {vars(self)}.\nError code: {code}.")

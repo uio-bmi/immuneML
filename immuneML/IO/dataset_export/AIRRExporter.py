@@ -97,20 +97,15 @@ class AIRRExporter(DataExporter):
     def _repertoire_to_dataframe(repertoire: Repertoire):
         df = pd.DataFrame(repertoire.load_data())
 
-        for column in ['v_alleles', 'j_alleles', 'v_genes', 'j_genes']:
-            if column not in df.columns:
-                df.loc[:, column] = ''
-
-        AIRRExporter.update_gene_columns(df, 'alleles', 'genes')
-
         region_type = repertoire.get_region_type()
 
         # rename mandatory fields for airr-compliance
-        mapper = {"sequence_identifiers": "sequence_id", "v_alleles": "v_call", "j_alleles": "j_call", "chains": "locus", "counts": "duplicate_count",
-                  "sequences": AIRRExporter.get_sequence_field(region_type), "sequence_aas": AIRRExporter.get_sequence_aa_field(region_type)}
+        mapper = {"chain": "locus", "sequence": AIRRExporter.get_sequence_field(region_type),
+                  "sequence_aa": AIRRExporter.get_sequence_aa_field(region_type)}
 
         df = df.rename(mapper=mapper, axis="columns")
-        df.drop(columns=['region_types'], inplace=True)
+
+        df.drop(columns=['region_type'], inplace=True)
 
         return df
 
@@ -140,7 +135,7 @@ class AIRRExporter(DataExporter):
         sequence_aa_field = AIRRExporter.get_sequence_aa_field(region_type)
 
         main_data_dict = {"sequence_id": [], sequence_field: [], sequence_aa_field: []}
-        attributes_dict = {"chain": [], "v_allele": [], 'v_gene': [], "j_allele": [], 'j_gene': [], "count": [], "cell_id": [], "frame_type": []}
+        attributes_dict = {"chain": [], "v_call": [], "j_call": [], "duplicate_count": [], "cell_id": [], "frame_type": []}
 
         for i, sequence in enumerate(sequences):
             main_data_dict["sequence_id"].append(sequence.identifier)
@@ -164,9 +159,8 @@ class AIRRExporter(DataExporter):
 
         df = pd.DataFrame({**attributes_dict, **main_data_dict})
 
-        AIRRExporter.update_gene_columns(df, 'allele', 'gene')
-        df.rename(columns={"v_allele": "v_call", "j_allele": "j_call", "chain": "locus", "count": "duplicate_count", "frame_type": "frame_types"},
-                  inplace=True)
+        # AIRRExporter.update_gene_columns(df, 'allele', 'gene')
+        df.rename(columns={"chain": "locus"}, inplace=True)
 
         return df
 
@@ -182,21 +176,21 @@ class AIRRExporter(DataExporter):
         if "locus" in df.columns:
             df["locus"] = [Chain.get_chain(chain).value if chain and Chain.get_chain(chain) else '' for chain in df["locus"]]
 
-        if "frame_types" in df.columns:
-            AIRRExporter._enums_to_strings(df, "frame_types")
+        if "frame_type" in df.columns:
+            AIRRExporter._enums_to_strings(df, "frame_type")
 
-            df["productive"] = df["frame_types"] == SequenceFrameType.IN.name
-            df.loc[df["frame_types"].isnull(), "productive"] = ''
+            df["productive"] = df["frame_type"] == SequenceFrameType.IN.name
+            df.loc[df["frame_type"].isnull(), "productive"] = ''
 
             df["vj_in_frame"] = df["productive"]
 
-            df["stop_codon"] = df["frame_types"] == SequenceFrameType.STOP.name
-            df.loc[df["frame_types"].isnull(), "stop_codon"] = ''
+            df["stop_codon"] = df["frame_type"] == SequenceFrameType.STOP.name
+            df.loc[df["frame_type"].isnull(), "stop_codon"] = ''
 
-            df.drop(columns=["frame_types"])
+            df.drop(columns=["frame_type"], inplace=True)
 
-        if "region_types" in df.columns:
-            df.drop(columns=["region_types"])
+        if "region_type" in df.columns:
+            df.drop(columns=["region_type"], inplace=True)
 
         return df
 

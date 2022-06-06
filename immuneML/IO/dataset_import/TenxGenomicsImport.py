@@ -68,14 +68,13 @@ class TenxGenomicsImport(DataImport):
         .. indent with spaces
         .. code-block:: yaml
 
-                cdr3: sequence_aas
-                cdr3_nt: sequences
-                v_gene: v_genes
-                j_gene: j_genes
-                umis: counts
-                chain: chains
-                clonotype_id: cell_ids
-                consensus_id: sequence_identifiers
+                cdr3: sequence_aa
+                cdr3_nt: sequence
+                v_gene: v_call
+                j_gene: j_call
+                umis: duplicate_count
+                clonotype_id: cell_id
+                consensus_id: sequence_id
 
         A custom column mapping can be specified here if necessary (for example; adding additional data fields if
         they are present in the 10xGenomics file, or using alternative column names).
@@ -118,14 +117,13 @@ class TenxGenomicsImport(DataImport):
                 separator: "," # column separator
                 region_type: IMGT_CDR3 # what part of the sequence to import
                 column_mapping: # column mapping 10xGenomics: immuneML
-                    cdr3: sequence_aas
-                    cdr3_nt: sequences
-                    v_gene: v_genes
-                    j_gene: j_genes
-                    umis: counts
-                    chain: chains
-                    clonotype_id: cell_ids
-                    consensus_id: sequence_identifiers
+                    cdr3: sequence_aa
+                    cdr3_nt: sequence
+                    v_gene: v_call
+                    j_gene: j_call
+                    umis: duplicate_count
+                    clonotype_id: cell_id
+                    consensus_id: sequence_id
 
     """
 
@@ -135,8 +133,8 @@ class TenxGenomicsImport(DataImport):
 
     @staticmethod
     def preprocess_dataframe(df: pd.DataFrame, params: DatasetImportParams):
-        df["frame_types"] = None
-        df.loc[df["productive"].eq("True"), "frame_types"] = SequenceFrameType.IN.name
+        df["frame_type"] = None
+        df.loc[df["productive"].eq("True"), "frame_type"] = SequenceFrameType.IN.name
 
         allowed_productive_values = []
         if params.import_productive:
@@ -147,17 +145,16 @@ class TenxGenomicsImport(DataImport):
         df = df[df.productive.isin(allowed_productive_values)]
 
         ImportHelper.junction_to_cdr3(df, params.region_type)
-        df.loc[:, "region_types"] = params.region_type.name
+        df.loc[:, "region_type"] = params.region_type.name
         ImportHelper.drop_empty_sequences(df, params.import_empty_aa_sequences, params.import_empty_nt_sequences)
         ImportHelper.drop_illegal_character_sequences(df, params.import_illegal_characters)
-        ImportHelper.update_gene_info(df)
         ImportHelper.load_chains(df)
 
         return df
 
     @staticmethod
     def import_receptors(df, params):
-        df["receptor_identifiers"] = df["cell_ids"]
+        df["receptor_id"] = df["cell_id"]
         return ImportHelper.import_receptors(df, params)
 
     @staticmethod
@@ -167,7 +164,7 @@ class TenxGenomicsImport(DataImport):
         chain_pair_values = str([chain_pair.name for chain_pair in ChainPair])[1:-1].replace("'", "`")
         region_type_values = str([region_type.name for region_type in RegionType])[1:-1].replace("'", "`")
         repertoire_fields = list(Repertoire.FIELDS)
-        repertoire_fields.remove("region_types")
+        repertoire_fields.remove("region_type")
 
         mapping = {
             "Valid values for receptor_chains are the names of the :py:obj:`~immuneML.data_model.receptor.ChainPair.ChainPair` enum.": f"Valid values are {chain_pair_values}.",

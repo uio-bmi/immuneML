@@ -46,19 +46,19 @@ rep2.tsv,2""")
         for index, rep in enumerate(dataset.get_data()):
             self.assertEqual(3, len(rep.sequences))
             for sequence in rep.sequences:
-                self.assertEqual(sequence.metadata.count, 1)
+                self.assertEqual(sequence.metadata.duplicate_count, 1)
 
             if index == 0:
                 self.assertListEqual(["GCCAGCAGTTTATCGCCGGGACTGGCCTACGAGCAGTAC",
                                       "GCCAGCAAAGTCAGAATTGCTGCAACTAATGAAAAACTGTTT",
                                       "AGTGCCGACTCCAAGAACAGAGGAGCGGGGGGGGAGGCAAGCTCCTACGAGCAGTAC"],
-                                     list(rep.get_attribute("sequences")))
+                                     list(rep.get_attribute("sequence")))
                 self.assertListEqual(["ASSLSPGLAYEQY",
                                       "ASKVRIAATNEKLF",
                                       "SADSKNRGAGGEASSYEQY"], list(rep.get_sequence_aas()))
                 self.assertListEqual(["TRBV27", "TRBV5-6", "TRBV20-1"], list(rep.get_v_genes()))
                 self.assertListEqual(["TRBJ2-7", "TRBJ1-4", "TRBJ2-7"], list(rep.get_j_genes()))
-                self.assertListEqual([1,1,1], list(rep.get_counts()))
+                self.assertListEqual([1, 1, 1], list(rep.get_counts()))
                 self.assertListEqual([Chain.BETA, Chain.BETA, Chain.BETA], list(rep.get_chains()))
 
         shutil.rmtree(path)

@@ -6,6 +6,8 @@ from immuneML.environment.SequenceType import SequenceType
 
 class GenerativeModel:
 
+    OUTPUT_COLUMNS = []
+
     @abc.abstractmethod
     def load_model(self):
         pass

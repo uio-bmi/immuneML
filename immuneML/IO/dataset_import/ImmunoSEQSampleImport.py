@@ -67,16 +67,16 @@ class ImmunoSEQSampleImport(DataImport):
         .. indent with spaces
         .. code-block:: yaml
 
-                nucleotide: sequences
-                aminoAcid: sequence_aas
-                vGeneName: v_genes
-                jGeneName: j_genes
-                sequenceStatus: frame_types
-                vFamilyName: v_subgroups
-                jFamilyName: j_subgroups
-                vGeneAllele: v_alleles
-                jGeneAllele: j_alleles
-                count (templates/reads): counts
+                nucleotide: sequence
+                aminoAcid: sequence_aa
+                vGeneName: v_call
+                jGeneName: j_call
+                sequenceStatus: frame_type
+                vFamilyName: v_family
+                jFamilyName: j_family
+                vGeneAllele: v_allele
+                jGeneAllele: j_allele
+                count (templates/reads): duplicate_count
 
         A custom column mapping can be specified here if necessary (for example; adding additional data fields if
         they are present in the file, or using alternative column names).
@@ -134,16 +134,16 @@ class ImmunoSEQSampleImport(DataImport):
                 - sequenceStatus
                 region_type: IMGT_CDR3 # what part of the sequence to import
                 column_mapping: # column mapping immunoSEQ: immuneML
-                    nucleotide: sequences
-                    aminoAcid: sequence_aas
-                    vGeneName: v_genes
-                    jGeneName: j_genes
-                    sequenceStatus: frame_types
-                    vFamilyName: v_subgroups
-                    jFamilyName: j_subgroups
-                    vGeneAllele: v_alleles
-                    jGeneAllele: j_alleles
-                    count (templates/reads): counts
+                    nucleotide: sequence
+                    aminoAcid: sequence_aa
+                    vGeneName: v_call
+                    jGeneName: j_call
+                    sequenceStatus: frame_type
+                    vFamilyName: v_family
+                    jFamilyName: j_family
+                    vGeneAllele: v_allele
+                    jGeneAllele: j_allele
+                    count (templates/reads): duplicate_count
 
     """
 
@@ -161,7 +161,7 @@ class ImmunoSEQSampleImport(DataImport):
 
         region_type_values = str([region_type.name for region_type in RegionType])[1:-1].replace("'", "`")
         repertoire_fields = list(Repertoire.FIELDS)
-        repertoire_fields.remove("region_types")
+        repertoire_fields.remove("region_type")
 
         mapping = {
             "Valid values for region_type are the names of the :py:obj:`~immuneML.data_model.receptor.RegionType.RegionType` enum.": f"Valid values are {region_type_values}.",

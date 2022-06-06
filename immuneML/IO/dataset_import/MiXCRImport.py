@@ -104,9 +104,9 @@ class MiXCRImport(DataImport):
                 - aaSeqCDR3
                 - nSeqCDR3
                 column_mapping: # column mapping MiXCR: immuneML
-                    cloneCount: counts
-                    allVHitsWithScore: v_genes
-                    allJHitsWithScore: j_genes
+                    cloneCount: duplicate_count
+                    allVHitsWithScore: v_call
+                    allJHitsWithScore: j_call
 
     """
 
@@ -142,28 +142,26 @@ class MiXCRImport(DataImport):
             data frame corresponding to Repertoire.FIELDS and custom lists which can be used to create a Repertoire object
 
         """
-        df["sequence_aas"] = df[MiXCRImport.SEQUENCE_NAME_MAP[params.region_type]["AA"]]
-        df["sequences"] = df[MiXCRImport.SEQUENCE_NAME_MAP[params.region_type]["NT"]]
+        df["sequence_aa"] = df[MiXCRImport.SEQUENCE_NAME_MAP[params.region_type]["AA"]]
+        df["sequence"] = df[MiXCRImport.SEQUENCE_NAME_MAP[params.region_type]["NT"]]
         ImportHelper.junction_to_cdr3(df, params.region_type)
-        df.loc[:, "region_types"] = params.region_type.name
+        df.loc[:, "region_type"] = params.region_type.name
 
-        df["counts"] = df["counts"].astype(float).astype(int)
+        df["duplicate_count"] = df["duplicate_count"].astype(float).astype(int)
 
-        df["v_alleles"] = MiXCRImport._load_alleles(df, "v_alleles")
-        df["j_alleles"] = MiXCRImport._load_alleles(df, "j_alleles")
+        df["v_call"] = MiXCRImport._load_alleles(df, "v_call")
+        df["j_call"] = MiXCRImport._load_alleles(df, "j_call")
 
         ImportHelper.drop_empty_sequences(df, params.import_empty_aa_sequences, params.import_empty_nt_sequences)
         ImportHelper.drop_illegal_character_sequences(df, params.import_illegal_characters)
-        ImportHelper.update_gene_info(df)
         ImportHelper.load_chains(df)
 
         return df
 
     @staticmethod
     def _load_alleles(df: pd.DataFrame, column_name):
-        # note: MiXCR omits the '/' for 'TRA.../DV' genes
-        tmp_df = df.apply(lambda row: row[column_name].split(",")[0].split("(")[0].replace("DV", "/DV").replace("//", "/"), axis=1)
-
+        # note: MiXCR omits the '/' for 'TRA.../DV' genes, and remove "*00" for allele if set
+        tmp_df = df.apply(lambda row: row[column_name].split(",")[0].split("(")[0].replace("DV", "/DV").replace("//", "/").replace(r'*00', ''), axis=1)
         return tmp_df
 
     @staticmethod
@@ -172,7 +170,7 @@ class MiXCRImport(DataImport):
 
         region_type_values = str([region_type.name for region_type in MiXCRImport.SEQUENCE_NAME_MAP.keys()])[1:-1].replace("'", "`")
         repertoire_fields = list(Repertoire.FIELDS)
-        repertoire_fields.remove("region_types")
+        repertoire_fields.remove("region_type")
 
         mapping = {
             "Valid values for region_type are defined in MiXCRImport.SEQUENCE_NAME_MAP.": f"Valid values are {region_type_values}.",

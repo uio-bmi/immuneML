@@ -75,24 +75,23 @@ class OLGAImport(DataImport):
     @staticmethod
     def alternative_load_func(filepath, params):
         df = pd.read_csv(filepath, sep=params.separator, iterator=False, dtype=str, header=None)
-        df.columns = ["sequences", "sequence_aas", "v_genes", "j_genes"]
+        df.columns = ["sequence", "sequence_aa", "v_call", "j_call"]
         return df
 
     @staticmethod
     def preprocess_dataframe(df: pd.DataFrame, params: DatasetImportParams):
-        if "sequences" not in df.columns and "sequence_aas" not in df.columns:
-            raise IOError("OLGAImport: Columns should contain at least 'sequences' or 'sequence_aas'.")
+        if "sequence" not in df.columns and "sequence_aa" not in df.columns:
+            raise IOError("OLGAImport: Columns should contain at least 'sequence' or 'sequence_aa'.")
 
-        if "counts" not in df.columns:
-            df["counts"] = 1
+        if "duplicate_count" not in df.columns:
+            df["duplicate_count"] = 1
 
-        df["sequence_identifiers"] = None
+        df["sequence_id"] = None
 
         ImportHelper.drop_empty_sequences(df, params.import_empty_aa_sequences, params.import_empty_nt_sequences)
         ImportHelper.drop_illegal_character_sequences(df, params.import_illegal_characters)
         ImportHelper.junction_to_cdr3(df, params.region_type)
-        df.loc[:, "region_types"] = params.region_type.name
-        ImportHelper.update_gene_info(df)
+        df.loc[:, "region_type"] = params.region_type.name
         ImportHelper.load_chains(df)
 
         return df

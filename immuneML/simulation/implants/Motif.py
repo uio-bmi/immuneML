@@ -3,7 +3,6 @@ import re
 from dataclasses import dataclass
 
 from immuneML.data_model.receptor.receptor_sequence.Chain import Chain
-from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
 from immuneML.environment.SequenceType import SequenceType
 from immuneML.simulation.motif_instantiation_strategy.MotifInstantiationStrategy import MotifInstantiationStrategy
 from immuneML.util.ReflectionHandler import ReflectionHandler
@@ -44,9 +43,10 @@ class Motif:
         name_chain2: name of the second chain 2 if paired receptor data are simulated. The value should be an instance of
         :py:obj:`~immuneML.data_model.receptor.receptor_sequence.Chain.Chain`. This argument is used only if the seed argument is not set.
 
-        v_gene (str): which V gene is used the create the receptor sequence containing this signal; used only in combination with FullSequence implanting so far
+        v_call: V gene with allele if available that has to co-occur with one of the motifs for the signal to exist; can be used in combination with rejection sampling, or full sequence implanting, otherwise ignored; to match in a sequence for rejection sampling, it is checked if this value is contained in the same field of generated sequence;
 
-        j_gene (str): which J gene is used the create the receptor sequence containing this signal; used only in combination with FullSequence implanting so far
+        j_call: J gene with allele if available that has to co-occur with one of the motifs for the signal to exist; can be used in combination with rejection sampling, or full sequence implanting, otherwise ignored; to match in a sequence for rejection sampling, it is checked if this value is contained in the same field of generated sequence;
+
 
     YAML specification:
 
@@ -58,8 +58,8 @@ class Motif:
             my_simple_motif: # this will be the identifier of the motif
                 seed: AAA
                 instantiation: GappedKmer
-                v_gene: TRBV1
-                j_gene: TRBJ1
+                v_call: TRBV1
+                j_call: TRBJ1
             my_gapped_motif:
                 seed: AA/A
                 instantiation:
@@ -83,8 +83,8 @@ class Motif:
     name_chain1: Chain = None
     seed_chain2: str = None
     name_chain2: Chain = None
-    v_gene: str = None
-    j_gene: str = None
+    v_call: str = None
+    j_call: str = None
     all_possible_instances: list = None
 
     def instantiate_motif(self, chain_name: Chain = None, sequence_type: SequenceType = SequenceType.AMINO_ACID):
@@ -118,16 +118,14 @@ class Motif:
         else:
             return max(len(self.seed_chain1.replace("/", "")), len(self.seed_chain2.replace("/", ""))) + self.instantiation.get_max_gap()
 
-    def is_in(self, sequence: ReceptorSequence, sequence_type: SequenceType) -> bool:
+    def is_in(self, sequence: dict, sequence_type: SequenceType) -> bool:
         if self.all_possible_instances is None:
             self.all_possible_instances = self.instantiation.get_all_possible_instances(self.seed)
 
-        if self.v_gene and self.j_gene and (self.v_gene != sequence.metadata.v_gene or self.j_gene != sequence.metadata.j_gene):
-            return False
-        if any(re.search(motif_instance, sequence.get_sequence(sequence_type)) for motif_instance in self.all_possible_instances):
-            return True
-        else:
-            return False
+        gene_match = all(getattr(self, gene) in getattr(sequence, gene) if getattr(self, gene) else True for gene in ['v_call', 'j_call'])
+        return gene_match and \
+               any(re.search(motif_instance, sequence['sequence'] if sequence_type == SequenceType.NUCLEOTIDE else sequence['sequence_aa'])
+                   for motif_instance in self.all_possible_instances)
 
     def __str__(self):
         return self.identifier + " - " + \

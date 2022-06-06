@@ -47,7 +47,7 @@ class SingleLineReceptorImport(DataImport):
         mapped to the following fields: <chain>_amino_acid_sequence, <chain>_nucleotide_sequence, <chain>_v_gene,
         <chain>_j_gene, identifier, epitope.
         The possible names that can be filled in for <chain> are given in :py:obj:`~immuneML.data_model.receptor.receptor_sequence.Chain.Chain`
-        Any column namme other than the sequence, v/j genes and identifier will be set as metadata fields to the
+        Any column name other than the sequence, v/j genes and identifier will be set as metadata fields to the
         Receptors, and can subsequently be used as labels in immuneML instructions.
         For TCR alpha-beta receptor import, a column mapping could for example look like this:
 
@@ -58,11 +58,12 @@ class SingleLineReceptorImport(DataImport):
                 cdr3_b_aa: beta_amino_acid_sequence
                 cdr3_a_nucseq: alpha_nucleotide_sequence
                 cdr3_b_nucseq: beta_nucleotide_sequence
-                v_a_gene: alpha_v_gene
-                v_b_gene: beta_v_gene
-                j_a_gene: alpha_j_gene
-                j_b_gene: beta_j_gene
+                v_a_gene: alpha_v_call
+                v_b_gene: beta_v_call
+                j_a_gene: alpha_j_call
+                j_b_gene: beta_j_call
                 clone_id: identifier
+                count: duplicate_count
                 epitope: epitope # metadata field
 
         column_mapping_synonyms (dict): This is a column mapping that can be used if a column could have alternative names.
@@ -107,10 +108,11 @@ class SingleLineReceptorImport(DataImport):
                     cdr3_b_aa: beta_amino_acid_sequence
                     cdr3_a_nucseq: alpha_nucleotide_sequence
                     cdr3_b_nucseq: beta_nucleotide_sequence
-                    v_a_gene: alpha_v_gene
-                    v_b_gene: beta_v_gene
-                    j_a_gene: alpha_j_gene
-                    j_b_gene: beta_j_gene
+                    v_a_gene: alpha_v_call
+                    v_b_gene: beta_v_call
+                    j_a_gene: alpha_j_call
+                    j_b_gene: beta_j_call
+                    count: duplicate_count
                     clone_id: identifier
                     epitope: epitope
                     organism: mouse
@@ -163,12 +165,9 @@ class SingleLineReceptorImport(DataImport):
                                      chain_name + "_amino_acid_sequence"] if chain_name + "_amino_acid_sequence" in row else None,
                                                   nucleotide_sequence=row[
                                                       chain_name + "_nucleotide_sequence"] if chain_name + "_nucleotide_sequence" in row else None,
-                                                  metadata=SequenceMetadata(
-                                                      v_gene=row[f"{chain_name}_v_gene"], v_allele=row[f"{chain_name}_v_allele"],
-                                                      v_subgroup=row[f'{chain_name}_v_subgroup'],
-                                                      j_gene=row[f"{chain_name}_j_gene"], j_allele=row[f"{chain_name}_j_allele"],
-                                                      j_subgroup=row[f'{chain_name}_j_subgroup'],
-                                                      chain=chain_name, count=row["count"], region_type=generic_params.region_type.value))
+                                                  metadata=SequenceMetadata(v_call=row[f"{chain_name}_v_call"], j_call=row[f"{chain_name}_j_call"],
+                                                                            chain=chain_name, duplicate_count=row["duplicate_count"],
+                                                                            region_type=generic_params.region_type.value))
                              for i, chain_name in enumerate(chain_names)}
 
                 elements.append(ReceptorBuilder.build_object(sequences, row["identifier"],

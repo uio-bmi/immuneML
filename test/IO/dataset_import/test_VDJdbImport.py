@@ -28,7 +28,8 @@ class TestVDJdbLoader(TestCase):
         default_params = DefaultParamsLoader.load(EnvironmentSettings.default_params_path / "datasets/", "vdjdb")
 
         dataset = VDJdbImport.import_dataset({"is_repertoire": False, "result_path": path, "paired": False, "path": path, "sequence_file_size": 1,
-                                              "column_mapping": default_params["column_mapping"], "metadata_column_mapping": default_params["metadata_column_mapping"],
+                                              "column_mapping": default_params["column_mapping"],
+                                              "metadata_column_mapping": default_params["metadata_column_mapping"],
                                               "import_empty_nt_sequences": True, "import_empty_aa_sequences": False,
                                               "import_illegal_characters": False,
                                               "separator": "\t", "region_type": "IMGT_CDR3"}, "vdjdb_seq_dataset")
@@ -38,12 +39,13 @@ class TestVDJdbLoader(TestCase):
 
         for sequence in dataset.get_data():
             self.assertTrue(sequence.identifier in ["3050_TRA", "3050_TRB", "15760_TRB", "15760_TRA1", "15760_TRA2"])
-            self.assertTrue(sequence.amino_acid_sequence in ["ASSPPRVYSNGAGLAGVGWRNEQF", "ASSWTWDAATLWGQGALGGANVLT", "AAIYESRGSTLGRLY", "ALRLNNQGGKLI"])
+            self.assertTrue(
+                sequence.amino_acid_sequence in ["ASSPPRVYSNGAGLAGVGWRNEQF", "ASSWTWDAATLWGQGALGGANVLT", "AAIYESRGSTLGRLY", "ALRLNNQGGKLI"])
             self.assertTrue(sequence.metadata.custom_params["epitope_species"] in ["EBV", "CMV"])
             self.assertTrue(sequence.metadata.custom_params["epitope"] in ["AVFDRKSDAK", "KLGGALQAK"])
             self.assertTrue(sequence.metadata.custom_params["epitope_gene"] in ["EBNA4", "IE1"])
-            self.assertTrue(sequence.metadata.v_gene in ["TRBV5-4", "TRBV5-5", "TRAV13-1", "TRAV9-2"])
-            self.assertTrue(sequence.metadata.j_gene in ["TRBJ2-1", "TRBJ2-6", "TRAJ18", "TRAJ23"])
+            self.assertTrue(sequence.metadata.v_call in ["TRBV5-4*01", "TRBV5-5*01", "TRAV13-1*01", "TRAV9-2*01"])
+            self.assertTrue(sequence.metadata.j_call in ["TRBJ2-1*01", "TRBJ2-6*01", "TRAJ18*01", "TRAJ23*01"])
 
         shutil.rmtree(path)
 
@@ -57,8 +59,7 @@ class TestVDJdbLoader(TestCase):
 0	TRA	CALRLNNQGGKLIF	TRAV9-2*01	TRAJ23*01	HomoSapiens	HLA-A*03:01	B2M	MHCI	KLGGALQAK	IE1	CMV	https://www.10xgenomics.com/resources/application-notes/a-new-way-of-exploring-immunity-linking-highly-multiplexed-antigen-recognition-to-immune-repertoire-and-phenotype/#	{"frequency": "1/25584", "identification": "dextramer-sort", "sequencing": "rna-seq", "singlecell": "yes", "verification": ""}	{"cell.subset": "", "clone.id": "", "donor.MHC": "", "donor.MHC.method": "", "epitope.id": "", "replica.id": "", "samples.found": 1, "structure.id": "", "studies.found": 1, "study.id": "", "subject.cohort": "", "subject.id": "3", "tissue": ""}	{"cdr3": "CALRLNNQGGKLIF", "cdr3_old": "CALRLNNQGGKLIF", "fixNeeded": false, "good": true, "jCanonical": true, "jFixType": "NoFixNeeded", "jId": "TRAJ23*01", "jStart": 6, "vCanonical": true, "vEnd": 3, "vFixType": "NoFixNeeded", "vId": "TRAV9-2*01"}	0
 0	TRA	CALRLNNQGGKLIF	TRAV9-2*01	TRAJ23*01	HomoSapiens	HLA-A*03:01	B2M	MHCI	KLGGALQAK	IE1	CMV	https://www.10xgenomics.com/resources/application-notes/a-new-way-of-exploring-immunity-linking-highly-multiplexed-antigen-recognition-to-immune-repertoire-and-phenotype/#	{"frequency": "1/25584", "identification": "dextramer-sort", "sequencing": "rna-seq", "singlecell": "yes", "verification": ""}	{"cell.subset": "", "clone.id": "", "donor.MHC": "", "donor.MHC.method": "", "epitope.id": "", "replica.id": "", "samples.found": 1, "structure.id": "", "studies.found": 1, "study.id": "", "subject.cohort": "", "subject.id": "3", "tissue": ""}	{"cdr3": "CALRLNNQGGKLIF", "cdr3_old": "CALRLNNQGGKLIF", "fixNeeded": false, "good": true, "jCanonical": true, "jFixType": "NoFixNeeded", "jId": "TRAJ23*01", "jStart": 6, "vCanonical": true, "vEnd": 3, "vFixType": "NoFixNeeded", "vId": "TRAV9-2*01"}	0
 """
-        path = EnvironmentSettings.root_path / "test/tmp/iovdjdb/"
-        PathBuilder.build(path)
+        path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "iovdjdb/")
 
         with open(path / "receptors.tsv", "w") as file:
             file.writelines(file_content)
@@ -111,8 +112,8 @@ class TestVDJdbLoader(TestCase):
         dataset = VDJdbImport.import_dataset({"is_repertoire": True, "result_path": path, "metadata_file": path / "metadata.csv", "path": path,
                                               "import_empty_nt_sequences": True, "import_empty_aa_sequences": False,
                                               "import_illegal_characters": False,
-                                              "column_mapping": default_params["column_mapping"], "separator": "\t", "region_type": "IMGT_CDR3"}, "vdjdb_rep_dataset")
-
+                                              "column_mapping": default_params["column_mapping"], "separator": "\t", "region_type": "IMGT_CDR3"},
+                                             "vdjdb_rep_dataset")
 
         self.assertEqual(number_of_repertoires, dataset.get_example_count())
         self.assertEqual(number_of_repertoires, len(dataset.get_data()))
@@ -157,13 +158,12 @@ class TestVDJdbLoader(TestCase):
 
         for receptor in dataset.get_data(2):
             self.assertTrue(receptor.alpha.amino_acid_sequence in ["AAIYESRGSTLGRLY", "ALRLNNQGGKLI"])
-            self.assertTrue(receptor.alpha.get_attribute("v_gene") in ["TRAV13-1", None])
-            self.assertTrue(receptor.alpha.get_attribute("j_gene") in [None])
-            self.assertTrue(receptor.beta.get_attribute("v_gene") in ["TRBV5-4", None])
-            self.assertTrue(receptor.beta.get_attribute("j_gene") in ["TRBJ2-1", "TRBJ2-6"])
+            self.assertTrue(receptor.alpha.get_attribute("v_call") in ["TRAV13-1*01", None])
+            self.assertTrue(receptor.alpha.get_attribute("j_call") in [None])
+            self.assertTrue(receptor.beta.get_attribute("v_call") in ["TRBV5-4*01", None])
+            self.assertTrue(receptor.beta.get_attribute("j_call") in ["TRBJ2-1*01", "TRBJ2-6*01"])
             self.assertTrue(receptor.metadata["epitope_species"] in ["EBV", "CMV"])
             self.assertTrue(receptor.metadata["epitope"] in ["AVFDRKSDAK", "KLGGALQAK"])
             self.assertTrue(receptor.metadata["epitope_gene"] in ["EBNA4", "IE1"])
-
 
         shutil.rmtree(path)

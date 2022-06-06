@@ -28,16 +28,15 @@ class TestMatches(unittest.TestCase):
         labels = {"subject_id": ["subject_1", "subject_2"],
                   "label": ["yes", "no"]}
 
-        metadata_alpha = {"v_gene": "TRAV1", "j_gene": "TRAJ1", "chain": Chain.ALPHA.value}
-        metadata_beta = {"v_gene": "TRBV1", "j_gene": "TRBJ1", "chain": Chain.BETA.value}
+        metadata_alpha = {"v_call": "TRAV1", "j_call": "TRAJ1", "chain": Chain.ALPHA.value}
+        metadata_beta = {"v_call": "TRBV1", "j_call": "TRBJ1", "chain": Chain.BETA.value}
 
-        repertoires, metadata = RepertoireBuilder.build(sequences=[["AAAA", "TTTT"],
-                                                                   ["SSSS", "TTTT"]],
+        repertoires, metadata = RepertoireBuilder.build(sequences=[["AAAA", "TTTT"], ["SSSS", "TTTT"]],
                                                         path=path, labels=labels,
-                                                        seq_metadata=[[{**metadata_alpha, "count": 10},
-                                                                       {**metadata_beta, "count": 10}],
-                                                                      [{**metadata_alpha, "count": 5},
-                                                                       {**metadata_beta, "count": 5}]],
+                                                        seq_metadata=[[{**metadata_alpha, "duplicate_count": 10},
+                                                                       {**metadata_beta, "duplicate_count": 10}],
+                                                                      [{**metadata_alpha, "duplicate_count": 5},
+                                                                       {**metadata_beta, "duplicate_count": 5}]],
                                                         subject_ids=labels["subject_id"])
 
         dataset = RepertoireDataset(repertoires=repertoires, metadata_file=metadata)
@@ -73,7 +72,7 @@ class TestMatches(unittest.TestCase):
         return encoded
 
     def test_generate_for_matchedreceptors(self):
-        path = EnvironmentSettings.root_path / "test/tmp/matches_for_matchedreceptors/"
+        path = EnvironmentSettings.tmp_test_path / "matches_for_matchedreceptors/"
 
         encoded_data = self.create_encoded_matchedreceptors(path)
 
@@ -120,15 +119,14 @@ class TestMatches(unittest.TestCase):
         labels = {"subject_id": ["subject_1", "subject_2"],
                   "label": ["yes", "no"]}
 
-        metadata_beta = {"v_gene": "TRBV1", "j_gene": "TRBJ1", "chain": Chain.BETA.value}
+        metadata_beta = {"v_call": "TRBV1", "j_call": "TRBJ1", "chain": Chain.BETA.value}
 
-        repertoires, metadata = RepertoireBuilder.build(sequences=[["AAAA", "TTTT"],
-                                                                   ["SSSS", "TTTT"]],
+        repertoires, metadata = RepertoireBuilder.build(sequences=[["AAAA", "TTTT"], ["SSSS", "TTTT"]],
                                                         path=path, labels=labels,
-                                                        seq_metadata=[[{**metadata_beta, "count": 10},
-                                                                       {**metadata_beta, "count": 10}],
-                                                                      [{**metadata_beta, "count": 5},
-                                                                       {**metadata_beta, "count": 5}]],
+                                                        seq_metadata=[[{**metadata_beta, "duplicate_count": 10},
+                                                                       {**metadata_beta, "duplicate_count": 10}],
+                                                                      [{**metadata_beta, "duplicate_count": 5},
+                                                                       {**metadata_beta, "duplicate_count": 5}]],
                                                         subject_ids=labels["subject_id"])
 
         dataset = RepertoireDataset(repertoires=repertoires, metadata_file=metadata)
@@ -164,7 +162,7 @@ class TestMatches(unittest.TestCase):
         return encoded
 
     def test_generate_for_matchedsequences(self):
-        path = EnvironmentSettings.root_path / "test/tmp/matches_for_matchedsequences/"
+        path = EnvironmentSettings.tmp_test_path / "matches_for_matchedsequences/"
 
         encoded_data = self.create_encoded_matchedsequences(path)
 
@@ -197,22 +195,22 @@ class TestMatches(unittest.TestCase):
         labels = {"subject_id": ["subject_1", "subject_2", "subject_3"],
                   "label": ["yes", "no", "no"]}
 
-        metadata_alpha = {"v_gene": "V1", "j_gene": "J1", "chain": Chain.ALPHA.value}
-        metadata_beta = {"v_gene": "V1", "j_gene": "J1", "chain": Chain.BETA.value}
+        metadata_alpha = {"v_call": "V1", "j_call": "J1", "chain": Chain.ALPHA.value}
+        metadata_beta = {"v_call": "V1", "j_call": "J1", "chain": Chain.BETA.value}
 
         repertoires, metadata = RepertoireBuilder.build(
             sequences=[["XXAGQXGSSNTGKLIXX", "XXAGQXGSSNTGKLIYY", "XXSAGQGETQYXX"],
                        ["ASSXRXX"],
                        ["XXIXXNDYKLSXX", "CCCC", "SSSS", "TTTT"]],
             path=path, labels=labels,
-            seq_metadata=[[{**metadata_alpha, "count": 10, "v_gene": "TRAV35"},
-                           {**metadata_alpha, "count": 10},
-                           {**metadata_beta, "count": 10, "v_gene": "TRBV29-1"}],
-                          [{**metadata_beta, "count": 10, "v_gene": "TRBV7-3"}],
-                          [{**metadata_alpha, "count": 5, "v_gene": "TRAV26-2"},
-                           {**metadata_alpha, "count": 2},
-                           {**metadata_beta, "count": 1},
-                           {**metadata_beta, "count": 2}]],
+            seq_metadata=[[{**metadata_alpha, "duplicate_count": 10, "v_call": "TRAV35"},
+                           {**metadata_alpha, "duplicate_count": 10},
+                           {**metadata_beta, "duplicate_count": 10, "v_call": "TRBV29-1"}],
+                          [{**metadata_beta, "duplicate_count": 10, "v_call": "TRBV7-3"}],
+                          [{**metadata_alpha, "duplicate_count": 5, "v_call": "TRAV26-2"},
+                           {**metadata_alpha, "duplicate_count": 2},
+                           {**metadata_beta, "duplicate_count": 1},
+                           {**metadata_beta, "duplicate_count": 2}]],
             subject_ids=labels["subject_id"])
 
         dataset = RepertoireDataset(repertoires=repertoires, metadata_file=metadata)
@@ -247,7 +245,7 @@ class TestMatches(unittest.TestCase):
         return encoded
 
     def test_generate_for_matchedregex(self):
-        path = EnvironmentSettings.root_path / "test/tmp/regex_matches_report/"
+        path = EnvironmentSettings.tmp_test_path / "regex_matches_report/"
 
         encoded_data = self.create_encoded_matchedregex(path / "input_data/")
 

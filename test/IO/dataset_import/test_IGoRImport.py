@@ -52,7 +52,6 @@ rep2.tsv,2""")
 
         dataset = IGoRImport.import_dataset(params, "igor_repertoire_dataset")
 
-
         self.assertEqual(2, dataset.get_example_count())
         self.assertEqual(len(dataset.repertoires[0].sequences), 1)
         self.assertEqual(len(dataset.repertoires[1].sequences), 1)
@@ -78,7 +77,6 @@ rep2.tsv,2""")
         params["metadata_file"] = path / "metadata.csv"
 
         dataset_stop_codons = IGoRImport.import_dataset(params, "igor_dataset_stop")
-
 
         self.assertEqual(2, dataset_stop_codons.get_example_count())
         self.assertEqual(len(dataset_stop_codons.repertoires[0].sequences), 2)
@@ -109,9 +107,9 @@ rep2.tsv,2""")
         self.assertEqual(4, dataset.get_example_count())
 
         self.assertListEqual(sorted(["GCGAGACGTGTCTAGGGAGGATATTGTAGTAGTACCAGCTGCTATGACGGGCGGTCCGGTAGTACTACTTTGACTAC",
-                              "GCGAGAGGCTTCCATGGAACTACAGTAACTACGTTTGTAGGCTGTAGTACTACATGGACGTC",
-                              "GCGAGAGTTAATCGGCATATTGTGGTGGTGACTGCTATTATGACCGGGTAAAACTGGTTCGACCCC",
-                              "GCGAGAGATAGGTGGTCAACCCCAGTATTACGATATTTTGACTGGTGGACCCCGCCCTACTACTACTACATGGACGTC"]),
+                                     "GCGAGAGGCTTCCATGGAACTACAGTAACTACGTTTGTAGGCTGTAGTACTACATGGACGTC",
+                                     "GCGAGAGTTAATCGGCATATTGTGGTGGTGACTGCTATTATGACCGGGTAAAACTGGTTCGACCCC",
+                                     "GCGAGAGATAGGTGGTCAACCCCAGTATTACGATATTTTGACTGGTGGACCCCGCCCTACTACTACTACATGGACGTC"]),
                              sorted([seq.nucleotide_sequence for seq in seqs]))
 
         shutil.rmtree(path)

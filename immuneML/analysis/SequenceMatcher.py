@@ -57,8 +57,8 @@ class SequenceMatcher:
         :return: True if chain, v_gene and j_gene are the same and sequences are within given Levenshtein distance
         """
         return reference_sequence.metadata.chain == original_sequence.metadata.chain \
-            and self.matches_gene(reference_sequence.metadata.v_gene, original_sequence.metadata.v_gene) \
-            and self.matches_gene(reference_sequence.metadata.j_gene, original_sequence.metadata.j_gene) \
+            and self.matches_gene(reference_sequence.metadata.v_call, original_sequence.metadata.v_call) \
+            and self.matches_gene(reference_sequence.metadata.j_call, original_sequence.metadata.j_call) \
             and edit_distance(original_sequence.get_sequence(), reference_sequence.get_sequence()) <= max_distance
 
     def match_repertoire(self, repertoire: Repertoire, index: int, reference_sequences: list, max_distance: int,
@@ -71,8 +71,8 @@ class SequenceMatcher:
             matched["sequences"] = pool.starmap(self.match_sequence, arguments)
 
         if summary_type == SequenceMatchingSummaryType.CLONAL_PERCENTAGE:
-            total_count = np.sum([sequence.metadata.count for sequence in repertoire.sequences])
-            matched["clonal_percentage"] = np.sum([sequence.metadata.count for index, sequence in enumerate(repertoire.sequences) if len(matched["sequences"][index]["matching_sequences"]) > 0]) / total_count
+            total_count = np.sum([sequence.metadata.duplicate_count for sequence in repertoire.sequences])
+            matched["clonal_percentage"] = np.sum([sequence.metadata.duplicate_count for index, sequence in enumerate(repertoire.sequences) if len(matched["sequences"][index]["matching_sequences"]) > 0]) / total_count
         else:
             matched["count"] = len([r for r in matched["sequences"] if len(r["matching_sequences"]) > 0])
             matched["percentage"] = matched["count"] / len(matched["sequences"])
@@ -89,7 +89,7 @@ class SequenceMatcher:
         return {
             "matching_sequences": matching_sequences,
             "sequence": sequence.get_sequence(),
-            "v_gene": sequence.metadata.v_gene,
-            "j_gene": sequence.metadata.j_gene,
+            "v_call": sequence.metadata.v_call,
+            "j_call": sequence.metadata.j_call,
             "chain": sequence.metadata.chain
         }

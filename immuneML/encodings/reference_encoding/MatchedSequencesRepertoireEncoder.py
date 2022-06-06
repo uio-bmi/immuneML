@@ -6,8 +6,8 @@ from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
 from immuneML.data_model.encoded_data.EncodedData import EncodedData
 from immuneML.data_model.repertoire.Repertoire import Repertoire
 from immuneML.encodings.EncoderParams import EncoderParams
-from immuneML.util.ReadsType import ReadsType
 from immuneML.encodings.reference_encoding.MatchedSequencesEncoder import MatchedSequencesEncoder
+from immuneML.util.ReadsType import ReadsType
 
 
 class MatchedSequencesRepertoireEncoder(MatchedSequencesEncoder):
@@ -58,8 +58,8 @@ class MatchedSequencesRepertoireEncoder(MatchedSequencesEncoder):
             features[i] = [sequence.identifier,
                            sequence.get_attribute("chain").name.lower(),
                            sequence.get_sequence(),
-                           sequence.get_attribute("v_gene"),
-                           sequence.get_attribute("j_gene")]
+                           sequence.metadata.v_gene,
+                           sequence.metadata.j_gene]
 
         features = pd.DataFrame(features,
                                 columns=["sequence_id", "chain", "sequence", "v_gene", "j_gene"])
@@ -68,9 +68,7 @@ class MatchedSequencesRepertoireEncoder(MatchedSequencesEncoder):
 
     def _encode_repertoires(self, dataset: RepertoireDataset, params):
         # Rows = repertoires, Columns = reference sequences
-        encoded_repertories = np.zeros((dataset.get_example_count(),
-                                        self.feature_count),
-                                       dtype=int)
+        encoded_repertories = np.zeros((dataset.get_example_count(), self.feature_count), dtype=int)
 
         labels = {label: [] for label in params.label_config.get_labels_by_name()} if params.encode_labels else None
 
@@ -92,7 +90,7 @@ class MatchedSequencesRepertoireEncoder(MatchedSequencesEncoder):
             for repertoire_seq in rep_seqs:
                 if matcher.matches_sequence(reference_seq, repertoire_seq, max_distance=self.max_edit_distance):
                     matches_idx = 0 if self.sum_matches else i
-                    match_count = 1 if self.reads == ReadsType.UNIQUE else repertoire_seq.metadata.count
+                    match_count = 1 if self.reads == ReadsType.UNIQUE else repertoire_seq.metadata.duplicate_count
                     matches[matches_idx] += match_count
 
         return matches
