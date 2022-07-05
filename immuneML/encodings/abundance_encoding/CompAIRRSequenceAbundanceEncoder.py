@@ -15,6 +15,7 @@ from immuneML.data_model.encoded_data.EncodedData import EncodedData
 from immuneML.encodings.DatasetEncoder import DatasetEncoder
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.encodings.abundance_encoding.AbundanceEncoderHelper import AbundanceEncoderHelper
+from immuneML.encodings.abundance_encoding.CompAIRRBatchIterator import CompAIRRBatchIterator
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.environment.SequenceType import SequenceType
 from immuneML.util.CompAIRRHelper import CompAIRRHelper
@@ -100,8 +101,6 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
         self.relevant_indices_path = None
         self.relevant_sequence_path = None
         self.contingency_table_path = None
-        self.sequence_presence_matrix_path = None
-        self.matrix_repertoire_ids_path = None
         self.p_values_path = None
         self.context = None
 
@@ -152,25 +151,9 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
         full_dataset = EncoderHelper.get_current_dataset(dataset, self.context)
 
         full_sequence_set = self._get_full_sequence_set(full_dataset)
-        sequence_presence_matrix, matrix_repertoire_ids = self._get_sequence_presence(full_dataset, full_sequence_set, params)
+        compairr_sequence_presence = self._get_sequence_presence(full_dataset, full_sequence_set, params)
 
-        if self.keep_temporary_files:
-            self._store_sequence_presence_data(sequence_presence_matrix, matrix_repertoire_ids, params.result_path)
-
-        return sequence_presence_matrix, matrix_repertoire_ids
-
-    def _store_sequence_presence_data(self, sequence_presence_matrix, matrix_repertoire_ids, result_path):
-        if self.sequence_presence_matrix_path is None:
-            self.sequence_presence_matrix_path = result_path / 'sequence_presence_matrix.pickle'
-
-        if self.matrix_repertoire_ids_path is None:
-            self.matrix_repertoire_ids_path = result_path / 'matrix_repertoire_ids.pickle'
-
-        with self.sequence_presence_matrix_path.open("wb") as file:
-            pickle.dump(sequence_presence_matrix, file)
-
-        with self.matrix_repertoire_ids_path.open("wb") as file:
-            pickle.dump(matrix_repertoire_ids, file)
+        return compairr_sequence_presence
 
     def _get_full_sequence_set(self, full_dataset):
         full_sequence_set = CacheHandler.memo_by_params(self._build_dataset_params(full_dataset),
@@ -191,11 +174,12 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
         return set(zip(*[value for value in repertoire.get_attributes(sequence_attributes).values() if value is not None]))
 
     def _get_sequence_presence(self, full_dataset, full_sequence_set, params):
-        sequence_presence_matrix, matrix_repertoire_ids = CacheHandler.memo_by_params(
+        # todo can this work?? caching at this level?
+        compairr_sequence_presence = CacheHandler.memo_by_params(
             self._build_sequence_presence_params(full_dataset, self.compairr_params),
             lambda: self._compute_sequence_presence_with_compairr(full_dataset, full_sequence_set, params))
 
-        return sequence_presence_matrix, matrix_repertoire_ids
+        return compairr_sequence_presence
 
     def _build_sequence_presence_params(self, dataset, compairr_params):
         return (("dataset_identifier", dataset.identifier),
@@ -216,20 +200,12 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
         arguments = [(sequences_filepath, params.result_path) for sequences_filepath in self.sequences_filepaths]
 
         with Pool(params.pool_size) as pool:
-            matrices = pool.starmap(self._run_compairr_on_batch, arguments)
+            paths = pool.starmap(self._new_run_compairr_on_batch, arguments)
 
         if not self.keep_temporary_files:
-            self._remove_temporary_files(params.result_path)
+           self._remove_temporary_files(params.result_path)
 
-        sequence_presence_matrix = pd.concat(matrices)
-        sequence_presence_matrix = sequence_presence_matrix.reindex(range(0, len(sequence_presence_matrix)))
-
-        matrix_repertoire_ids = sequence_presence_matrix.columns.values
-
-        sequence_presence_matrix = sequence_presence_matrix.to_numpy()
-        sequence_presence_matrix[sequence_presence_matrix > 1] = 1
-
-        return sequence_presence_matrix, matrix_repertoire_ids
+        return CompAIRRBatchIterator(paths, self.sequence_batch_size)
 
     def _prepare_compairr_input_files(self, dataset, full_sequence_set, result_path):
         PathBuilder.build(result_path)
@@ -262,8 +238,8 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
         for file in self.sequences_filepaths:
             file.unlink()
 
-        for file in result_path.glob("compairr_*_batch*.txt"):
-            file.unlink()
+        # for file in result_path.glob("compairr_*_batch*.txt"):
+        #     file.unlink()
 
     def write_sequence_set_file(self, sequence_set, filename, offset=0):
         sequence_col = "junction_aa" if EnvironmentSettings.get_sequence_type() == SequenceType.AMINO_ACID else "junction"
@@ -285,12 +261,23 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
         compairr_result = subprocess.run(args, capture_output=True, text=True)
         return CompAIRRHelper.process_compairr_output_file(compairr_result, compairr_params, result_path)
 
+    def _new_run_compairr_on_batch(self, sequences_filepath, result_path):
+        batch = sequences_filepath.stem.split("_")[-1]
+        compairr_params = copy.copy(self.compairr_params)
+        compairr_params.output_filename = f"compairr_out_{batch}.txt"
+        compairr_params.log_filename = f"compairr_log_{batch}.txt"
+
+        args = CompAIRRHelper.get_cmd_args(compairr_params, [sequences_filepath, self.repertoires_filepath], result_path)
+        compairr_result = subprocess.run(args, capture_output=True, text=True)
+        return CompAIRRHelper.verify_compairr_output_path(compairr_result, compairr_params, result_path)
+
+
     def _encode_data(self, dataset: RepertoireDataset, params: EncoderParams):
         label = params.label_config.get_label_objects()[0]
 
-        sequence_presence_matrix, matrix_repertoire_ids = self._prepare_sequence_presence_data(dataset, params)
+        compairr_sequence_presence = self._prepare_sequence_presence_data(dataset, params)
 
-        examples = self._calculate_abundance_matrix(dataset, sequence_presence_matrix, matrix_repertoire_ids, params)
+        examples = self._calculate_abundance_matrix(dataset, compairr_sequence_presence, params)
 
         encoded_data = EncodedData(examples, dataset.get_metadata([label.name]) if params.encode_labels else None, dataset.get_repertoire_ids(),
                                    [CompAIRRSequenceAbundanceEncoder.RELEVANT_SEQUENCE_ABUNDANCE,
@@ -306,20 +293,39 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
 
         return encoded_dataset
 
-    def _calculate_abundance_matrix(self, dataset: RepertoireDataset, sequence_presence_matrix, matrix_repertoire_ids,
-                                   params: EncoderParams):
-        relevant = np.isin(matrix_repertoire_ids, dataset.get_repertoire_ids())
-        sequence_presence_matrix = sequence_presence_matrix[:, relevant]
-        matrix_repertoire_ids = matrix_repertoire_ids[relevant]
+    def _calculate_abundance_matrix(self, dataset: RepertoireDataset, compairr_sequence_presence, params: EncoderParams):
+        repertoire_ids = dataset.get_repertoire_ids()
+        compairr_sequence_presence.set_repertoire_ids(repertoire_ids)
 
-        is_positive_class = AbundanceEncoderHelper.check_is_positive_class(dataset, matrix_repertoire_ids, params.label_config)
+        is_positive_class = AbundanceEncoderHelper.check_is_positive_class(dataset, repertoire_ids, params.label_config)
 
-        relevant_sequence_indices, file_paths = AbundanceEncoderHelper.get_relevant_sequence_indices(sequence_presence_matrix, is_positive_class,
+        relevant_sequence_indices, file_paths = AbundanceEncoderHelper.get_relevant_sequence_indices(compairr_sequence_presence, is_positive_class,
                                                                                                      self.p_value_threshold, self.relevant_indices_path, params)
         self._write_relevant_sequences_csv(dataset, relevant_sequence_indices, params.result_path)
         self._set_file_paths(file_paths)
 
-        abundance_matrix = AbundanceEncoderHelper.build_abundance_matrix(sequence_presence_matrix, matrix_repertoire_ids, dataset.get_repertoire_ids(), relevant_sequence_indices)
+        abundance_matrix = self._build_abundance_matrix(compairr_sequence_presence, repertoire_ids, relevant_sequence_indices)
+
+        return abundance_matrix
+
+    def _build_abundance_matrix(self, compairr_sequence_presence, repertoire_ids, sequence_p_values_indices):
+        abundance_matrix = np.zeros((len(repertoire_ids), 2))
+
+        batch_start = 0
+
+        for batch in compairr_sequence_presence.get_batches(repertoire_ids):
+            batch_end = min(batch_start + self.sequence_batch_size, len(sequence_p_values_indices))
+
+            partial_sequence_p_values_indices = sequence_p_values_indices[batch_start:batch_end]
+
+            for idx, repertoire_id in enumerate(repertoire_ids):
+                partial_repertoire_vector = batch[repertoire_id].to_numpy()
+
+                relevant_sequence_abundance = np.sum(partial_repertoire_vector[np.logical_and(partial_sequence_p_values_indices, partial_repertoire_vector)])
+                total_sequence_abundance = np.sum(partial_repertoire_vector)
+                abundance_matrix[idx] += [relevant_sequence_abundance, total_sequence_abundance]
+
+            batch_start = batch_start + self.sequence_batch_size
 
         return abundance_matrix
 
@@ -359,8 +365,8 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
         encoder_file = DatasetEncoder.store_encoder(encoder, path / "encoder.pickle")
         return encoder_file
 
-    def get_additional_files(self) -> List[Path]:
-        return [file for file in [self.relevant_indices_path, self.relevant_sequence_path, self.contingency_table_path, self.sequence_presence_matrix_path, self.matrix_repertoire_ids_path, self.p_values_path] if file]
+    def get_additional_files(self) -> List[Path]: # todo fix the get additional files part, should compairr files be here?
+        return [file for file in [self.relevant_indices_path, self.relevant_sequence_path, self.contingency_table_path, self.p_values_path] if file]
 
     @staticmethod
     def load_encoder(encoder_file: Path):

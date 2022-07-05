@@ -100,21 +100,27 @@ class CompAIRRHelper:
 
         return repertoire_contents
 
-
     @staticmethod
-    def process_compairr_output_file(subprocess_result, compairr_params, result_path):
+    def verify_compairr_output_path(subprocess_result, compairr_params, result_path):
         output_file = result_path / compairr_params.output_filename
 
         if not output_file.is_file():
-            raise RuntimeError(f"CompAIRRHelper: failed to calculate the distance matrix with CompAIRR ({compairr_params.compairr_path}). "
-                               f"The following error occurred: {subprocess_result.stderr}")
+            raise RuntimeError(
+                f"CompAIRRHelper: failed to calculate the distance matrix with CompAIRR ({compairr_params.compairr_path}). "
+                f"The following error occurred: {subprocess_result.stderr}")
 
         if os.path.getsize(output_file) == 0:
             raise RuntimeError(
                 f"CompAIRRHelper: failed to calculate the distance matrix with CompAIRR ({compairr_params.compairr_path}), output matrix is empty. "
                 f"For details see the log file at {result_path / compairr_params.log_filename}")
 
-        raw_distance_matrix = pd.read_csv(output_file, sep="\t", index_col=0)
+        return output_file
 
-        return raw_distance_matrix
+    @staticmethod
+    def read_compairr_output_file(output_file):
+        return pd.read_csv(output_file, sep="\t", index_col=0)
 
+    @staticmethod
+    def process_compairr_output_file(subprocess_result, compairr_params, result_path):
+        output_file = CompAIRRHelper.verify_compairr_output_path(subprocess_result, compairr_params, result_path)
+        return CompAIRRHelper.read_compairr_output_file(output_file)
