@@ -1,6 +1,5 @@
 import copy
 import math
-import pickle
 import subprocess
 from multiprocessing.pool import Pool
 from pathlib import Path
@@ -174,7 +173,6 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
         return set(zip(*[value for value in repertoire.get_attributes(sequence_attributes).values() if value is not None]))
 
     def _get_sequence_presence(self, full_dataset, full_sequence_set, params):
-        # todo can this work?? caching at this level?
         compairr_sequence_presence = CacheHandler.memo_by_params(
             self._build_sequence_presence_params(full_dataset, self.compairr_params),
             lambda: self._compute_sequence_presence_with_compairr(full_dataset, full_sequence_set, params))
@@ -238,9 +236,6 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
         for file in self.sequences_filepaths:
             file.unlink()
 
-        # for file in result_path.glob("compairr_*_batch*.txt"):
-        #     file.unlink()
-
     def write_sequence_set_file(self, sequence_set, filename, offset=0):
         sequence_col = "junction_aa" if EnvironmentSettings.get_sequence_type() == SequenceType.AMINO_ACID else "junction"
         vj_header = "" if self.compairr_params.ignore_genes else "\tv_call\tj_call"
@@ -271,7 +266,6 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
         compairr_result = subprocess.run(args, capture_output=True, text=True)
         return CompAIRRHelper.verify_compairr_output_path(compairr_result, compairr_params, result_path)
 
-
     def _encode_data(self, dataset: RepertoireDataset, params: EncoderParams):
         label = params.label_config.get_label_objects()[0]
 
@@ -285,8 +279,6 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
                                    encoding=CompAIRRSequenceAbundanceEncoder.__name__,
                                    info={"relevant_sequence_path": self.relevant_sequence_path,
                                          "contingency_table_path": self.contingency_table_path,
-                                         "sequence_presence_matrix_path": self.sequence_presence_matrix_path,
-                                         "matrix_repertoire_ids_path": self.matrix_repertoire_ids_path,
                                          "p_values_path": self.p_values_path})
 
         encoded_dataset = RepertoireDataset(labels=dataset.labels, encoded_data=encoded_data, repertoires=dataset.repertoires)
@@ -365,7 +357,7 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
         encoder_file = DatasetEncoder.store_encoder(encoder, path / "encoder.pickle")
         return encoder_file
 
-    def get_additional_files(self) -> List[Path]: # todo fix the get additional files part, should compairr files be here?
+    def get_additional_files(self) -> List[Path]:
         return [file for file in [self.relevant_indices_path, self.relevant_sequence_path, self.contingency_table_path, self.p_values_path] if file]
 
     @staticmethod

@@ -57,6 +57,7 @@ class DatasetEncoder(metaclass=abc.ABCMeta):
 
     @staticmethod
     def get_additional_files() -> List[str]:
+        '''Should return a list with all the files that need to be stored when storing the encoder.'''
         return []
 
     def set_context(self, context: dict):
