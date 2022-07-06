@@ -61,7 +61,7 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
         have to match. If True, gene information is ignored. By default, ignore_genes is False.
 
         sequence_batch_size (int): The number of sequences in a batch when comparing sequences across repertoires, typically 100s of thousands.
-        This does not affect the results of the encoding, only the speed and memory usage.
+        This does not affect the results of the encoding, but may affect the speed and memory usage. The default value is 1.000.000
 
         threads (int): The number of threads to use for parallelization. This does not affect the results of the encoding, only the speed.
         The default number of threads is 8.
@@ -143,6 +143,7 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
 
     def encode(self, dataset, params: EncoderParams):
         AbundanceEncoderHelper.check_labels(params.label_config, CompAIRRSequenceAbundanceEncoder.__name__)
+        self.compairr_sequence_presence = self._prepare_sequence_presence_data(dataset, params)
 
         return self._encode_data(dataset, params)
 
@@ -269,9 +270,7 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
     def _encode_data(self, dataset: RepertoireDataset, params: EncoderParams):
         label = params.label_config.get_label_objects()[0]
 
-        compairr_sequence_presence = self._prepare_sequence_presence_data(dataset, params)
-
-        examples = self._calculate_abundance_matrix(dataset, compairr_sequence_presence, params)
+        examples = self._calculate_abundance_matrix(dataset, self.compairr_sequence_presence, params)
 
         encoded_data = EncodedData(examples, dataset.get_metadata([label.name]) if params.encode_labels else None, dataset.get_repertoire_ids(),
                                    [CompAIRRSequenceAbundanceEncoder.RELEVANT_SEQUENCE_ABUNDANCE,
@@ -364,5 +363,7 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
     def load_encoder(encoder_file: Path):
         encoder = DatasetEncoder.load_encoder(encoder_file)
         encoder.relevant_indices_path = DatasetEncoder.load_attribute(encoder, encoder_file, "relevant_indices_path")
+        # todo: loader of compairr_sequence_presence
+        # encoder.compairr_sequence_presence = UtilIO.import_comparison_data(encoder_file.parent)
 
         return encoder

@@ -41,12 +41,13 @@ class CompAIRRBatchIterator:
 
             # count clones only
             batch[batch > 1] = 1
+            batch.sort_index(inplace=True)
 
             yield batch
 
     def get_sequence_vectors(self, repertoire_ids = None):
         for batch in self.get_batches(repertoire_ids):
-            for sequence_idx in sorted(batch.index):
-                yield batch.loc[sequence_idx].to_numpy()
+            for idx, sequence_vector in batch.iterrows():
+                yield sequence_vector.to_numpy()
 
 

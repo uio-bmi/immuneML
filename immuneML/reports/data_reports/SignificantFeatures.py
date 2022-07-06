@@ -202,11 +202,7 @@ class SignificantFeatures(DataReport):
         with encoder.relevant_indices_path.open("rb") as file:
             relevant_indices = pickle.load(file)
 
-        relevant_feature_presence = np.zeros(shape=(6,))
-
-        for i, sequence_vector in enumerate(encoder.comparison_data.get_item_vectors()):
-            if relevant_indices[i]:
-                relevant_feature_presence += sequence_vector
+        relevant_feature_presence = self._sum_sequence_vectors_iterable(relevant_indices, encoder.comparison_data.get_item_vectors())
 
         return self._get_positive_negative_class(relevant_feature_presence, self.dataset.get_repertoire_ids())
 
@@ -216,15 +212,18 @@ class SignificantFeatures(DataReport):
         with encoder.relevant_indices_path.open("rb") as file:
             relevant_indices = pickle.load(file)
 
-        with encoder.sequence_presence_matrix_path.open("rb") as file:
-            sequence_presence_matrix = pickle.load(file)
+        relevant_feature_presence = self._sum_sequence_vectors_iterable(relevant_indices, encoder.compairr_sequence_presence)
 
-        with encoder.matrix_repertoire_ids_path.open("rb") as file:
-            matrix_repertoire_ids = pickle.load(file)
+        return self._get_positive_negative_class(relevant_feature_presence, self.dataset.get_repertoire_ids())
 
-        relevant_feature_presence = np.sum(sequence_presence_matrix[relevant_indices], axis=0)
+    def _sum_sequence_vectors_iterable(self, relevant_indices, sequence_vector_iterable):
+        relevant_feature_presence = np.zeros(shape=(6,))
 
-        return self._get_positive_negative_class(relevant_feature_presence, matrix_repertoire_ids)
+        for i, sequence_vector in enumerate(sequence_vector_iterable):
+            if relevant_indices[i]:
+                relevant_feature_presence += sequence_vector
+
+        return relevant_feature_presence
 
     def _get_relevant_feature_presence(self, encoder, relevant_indices):
 
