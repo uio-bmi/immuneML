@@ -363,7 +363,5 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
     def load_encoder(encoder_file: Path):
         encoder = DatasetEncoder.load_encoder(encoder_file)
         encoder.relevant_indices_path = DatasetEncoder.load_attribute(encoder, encoder_file, "relevant_indices_path")
-        # todo: loader of compairr_sequence_presence
-        # encoder.compairr_sequence_presence = UtilIO.import_comparison_data(encoder_file.parent)
 
         return encoder
