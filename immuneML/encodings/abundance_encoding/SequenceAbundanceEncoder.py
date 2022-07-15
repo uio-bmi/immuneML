@@ -46,7 +46,7 @@ class SequenceAbundanceEncoder(DatasetEncoder):
         p_value_threshold (float): The p value threshold to be used by the statistical test.
 
         sequence_batch_size (int): The number of sequences in a batch when comparing sequences across repertoires, typically 100s of thousands.
-        This does not affect the results of the encoding, only the speed.
+        This does not affect the results of the encoding, only the speed. The default value is 1.000.000
 
         repertoire_batch_size (int): How many repertoires will be loaded at once. This does not affect the result of the encoding, only the speed.
         This value is a trade-off between the number of repertoires that can fit the RAM at the time and loading time from disk.
