@@ -1,6 +1,5 @@
 import os
 import random
-import shutil
 import string
 from unittest import TestCase
 
@@ -53,16 +52,13 @@ class TestFeatureComparison(TestCase):
         return dataset
 
     def test_generate(self):
-        path = EnvironmentSettings.root_path / "test/tmp/featurecomparison/"
+        path = EnvironmentSettings.tmp_test_path / "feature_comparison/"
         PathBuilder.build(path)
 
         dataset = self._create_dummy_encoded_data(path)
 
-        report = FeatureComparison.build_object(**{"dataset": dataset,
-                                                     "result_path": path,
-                                                     "comparison_label": "patient",
-                                                   "keep_fraction": 0.2,
-                                                   "log_scale": True})
+        report = FeatureComparison.build_object(**{"dataset": dataset, "result_path": path, "comparison_label": "patient",
+                                                   "keep_fraction": 0.2, "log_scale": True})
 
         self.assertTrue(report.check_prerequisites())
 
@@ -83,4 +79,4 @@ class TestFeatureComparison(TestCase):
 
         self.assertFalse(report.check_prerequisites())
 
-        shutil.rmtree(path)
+        # shutil.rmtree(path)

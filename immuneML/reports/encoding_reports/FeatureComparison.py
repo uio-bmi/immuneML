@@ -46,6 +46,8 @@ class FeatureComparison(FeatureReport):
         differs the most across comparison labels is kept for plotting (note that the produced .csv file still contains all data).
         By default, keep_fraction is 1, meaning that all features are plotted.
 
+        opacity (float): a value between 0 and 1 setting the opacity for data points making it easier to see if there are overlapping points
+
 
     YAML specification:
 
@@ -78,7 +80,7 @@ class FeatureComparison(FeatureReport):
         return FeatureComparison(**kwargs)
 
     def __init__(self, dataset: Dataset = None, result_path: Path = None, comparison_label: str = None,
-                 color_grouping_label: str = None, row_grouping_label=None, column_grouping_label=None,
+                 color_grouping_label: str = None, row_grouping_label=None, column_grouping_label=None, opacity: float = 0.7,
                  show_error_bar=True, log_scale: bool = False, keep_fraction: int = 1, number_of_processes: int = 1, name: str = None):
         super().__init__(dataset=dataset, result_path=result_path, color_grouping_label=color_grouping_label,
                          row_grouping_label=row_grouping_label, column_grouping_label=column_grouping_label,
@@ -87,6 +89,7 @@ class FeatureComparison(FeatureReport):
         self.show_error_bar = show_error_bar
         self.log_scale = log_scale
         self.keep_fraction = keep_fraction
+        self.opacity = opacity
         self.result_name = "feature_comparison"
         self.name = name
 
@@ -128,20 +131,25 @@ class FeatureComparison(FeatureReport):
 
         figure = px.scatter(plotting_data, x="valuemean_x", y="valuemean_y", error_x=error_x, error_y=error_y,
                             color=self.color, facet_row=self.facet_row, facet_col=self.facet_column, hover_name="feature",
-                            log_x=self.log_scale, log_y=self.log_scale,
+                            log_x=self.log_scale, log_y=self.log_scale, opacity=self.opacity,
                             labels={
                                 "valuemean_x": f"Average feature values for {self.comparison_label} = {class_x}",
                                 "valuemean_y": f"Average feature values for {self.comparison_label} = {class_y}",
                             }, template='plotly_white',
                             color_discrete_sequence=px.colors.diverging.Tealrose)
 
-        figure.add_shape(type="line", x0=min_x, y0=min_y, x1=max_x, y1=max_y, line=dict(color="#B0C2C7", dash="dash"))
+        self.add_diagonal(min_x, max_x, min_y, max_y, figure)
 
         file_path = self.result_path / f"{self.result_name}.html"
 
         figure.write_html(str(file_path))
 
         return ReportOutput(path=file_path, name=f"Comparison of feature values across {self.comparison_label}")
+
+    def add_diagonal(self, min_x, max_x, min_y, max_y, figure):
+        max_coord = max_x if max_x > max_y else max_y
+        min_coord = min_y if min_y < min_x else min_x
+        figure.add_shape(type="line", x0=min_coord, y0=min_coord, x1=max_coord, y1=max_coord, line=dict(color="#B0C2C7", dash="dash"))
 
     def _get_axes_limits(self, plotting_data):
         max_x = max(plotting_data["valuemean_x"] + plotting_data["valuestd_x"])
