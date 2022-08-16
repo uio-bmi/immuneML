@@ -149,7 +149,7 @@ class TrainMLModelInstruction(Instruction):
         if self.state.refit_optimal_model:
             print(f"{datetime.datetime.now()}: TrainMLModel: retraining optimal model for label {label.name} {index_repr}.\n", flush=True)
             self.state.optimal_hp_items[label.name] = MLProcess(self.state.dataset, None, label, self.state.metrics, self.state.optimization_metric,
-                                                           self.state.path / f"optimal_{label}", number_of_processes=self.state.number_of_processes,
+                                                           self.state.path / f"optimal_{label.name}", number_of_processes=self.state.number_of_processes,
                                                            label_config=self.state.label_configuration, hp_setting=optimal_hp_setting).run(0)
             print(f"{datetime.datetime.now()}: TrainMLModel: finished retraining optimal model for label {label.name} {index_repr}.\n", flush=True)
 

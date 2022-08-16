@@ -10,15 +10,15 @@ How to train immune receptor classifiers using the simplified Galaxy interface
    :twitter:image: https://docs.immuneml.uio.no/_images/receptor_classification_overview.png
 
 
-This is the documentation for the Galaxy tool `Train immune receptor classifiers (simplified interface) <https://galaxy.immuneml.uio.no/root?tool_id=immuneml_train_classifiers>`_.
+This is the documentation for the Galaxy tool `Train immune receptor classifiers (simplified interface) <https://galaxy.immuneml.uiocloud.no/root?tool_id=immuneml_train_classifiers>`_.
 The purpose of this tool is to train machine learning (ML) models to predict a characteristic per immune receptor, such as
 antigen specificity. One or more ML models are trained to classify receptors based on the information within the CDR3 sequences. Finally, the performance
 of the different methods is compared.
 Alternatively, if you want to predict a property per immune repertoire, such as disease status, check out the
-`Train immune repertoire classifiers (simplified interface) <https://galaxy.immuneml.uio.no/root?tool_id=novice_immuneml_interface>`_ tool instead.
+`Train immune repertoire classifiers (simplified interface) <https://galaxy.immuneml.uiocloud.no/root?tool_id=novice_immuneml_interface>`_ tool instead.
 
 
-An example Galaxy history showing how to use this tool `can be found here <https://galaxy.immuneml.uio.no/u/immuneml/h/receptor-classification-simplified-interface>`_.
+An example Galaxy history showing how to use this tool `can be found here <https://galaxy.immuneml.uiocloud.no/u/immuneml/h/receptor-classification-simplified-interface>`_.
 
 Basic terminology
 -----------------
@@ -106,7 +106,8 @@ This Galaxy tool will produce the following history elements:
   Furthermore, the folder contains the complete YAML specification file for the immuneML run, the HTML output and a log file.
 
 - optimal_ml_settings.zip: a .zip file containing the raw files for the optimal trained ML settings (ML model, encoding).
-  This .zip file can subsequently be used as an input when :ref:`applying previously trained ML models to a new AIRR dataset in Galaxy <How to apply previously trained ML models to a new AIRR dataset in Galaxy>`
+  This .zip file can subsequently be used as an input when applying previously trained ML models to a new dataset.
+  Currently, this can only be done locally using the command-line interface.
 
 - receptor_classification.yaml: the YAML specification file that was used by immuneML internally to run the analysis. This file can be
   downloaded, altered, and run again by immuneML using the :ref:`YAML-based Galaxy tool <How to train ML models in Galaxy>`.

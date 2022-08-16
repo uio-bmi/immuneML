@@ -20,7 +20,7 @@ Using immuneML, we will encode the data as 3-mer frequencies and train a logisti
 Getting started through Galaxy
 -------------------------------------------------
 
-The Galaxy web interface is available at https://galaxy.immuneml.uio.no/.
+The Galaxy web interface is available at https://galaxy.immuneml.uiocloud.no/.
 You may choose to register a user account or perform the analysis as an anonymous user.
 If you are an anonymous user, the data will disappear once your browser session expires.
 
@@ -35,7 +35,7 @@ Step 1: importing the dataset to a Galaxy history
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Every immuneML analysis takes a dataset as input. For the Quickstart tutorial, an example dataset has been prepared and is
-available through `this Galaxy history <https://galaxy.immuneml.uio.no/u/immuneml/h/quickstart-data>`_ (under 'Shared data' > 'Histories' > 'Quickstart data').
+available through `this Galaxy history <https://galaxy.immuneml.uiocloud.no/u/immuneml/h/quickstart-data>`_ (under 'Shared data' > 'Histories' > 'Quickstart data').
 Alternatively, the tutorial :ref:`How to make an immuneML dataset in Galaxy` describes in detail
 how to make an immuneML dataset using your own data.
 
@@ -48,7 +48,7 @@ To import the complete history, click the + icon in the right upper corner.
 
 This Quickstart dataset Galaxy history contains the following items:
 
-- 100 repertoire .tsv files in AIRR format. For details about the AIRR format, see the `AIRR documentation <https://docs.airr-community.org/en/stable/datarep/format.html>`_ and `this example file <https://galaxy.immuneml.uio.no/datasets/e86c1af9d83bf1ee/display/?preview=True>`_).
+- 100 repertoire .tsv files in AIRR format. For details about the AIRR format, see the `AIRR documentation <https://docs.airr-community.org/en/stable/datarep/format.html>`_ and `this example file <https://galaxy.immuneml.uiocloud.no/datasets/2a4bf9d66c01414a/display/?preview=True>`_.
 
 - A Collection of repertoires. This history element collects the 100 above-mentioned repertoire files in a Galaxy collection.
   This Galaxy collection makes it easier to select the repertoires as an input to Galaxy tools (instead of selecting all 100 files manually, you can select the collection).
@@ -56,12 +56,12 @@ This Quickstart dataset Galaxy history contains the following items:
 
 - A metadata.csv file. The metadata file describes which of the 100 repertoires are diseased and healthy, under the
   column named 'signal_disease' which contains the values True and False.
-  For details about the metadata file, see :ref:`What should the metadata file look like?` and `this example file <https://galaxy.immuneml.uio.no/datasets/a6e389145d2bcee5/display/?preview=True>`_
+  For details about the metadata file, see :ref:`What should the metadata file look like?` and `this example file <https://galaxy.immuneml.uiocloud.no/datasets/dfa1565938e7b4c3/display/?preview=True>`_.
 
 
 Step 2: creating an immuneML Galaxy dataset
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Use the `Create dataset <https://galaxy.immuneml.uio.no/root?tool_id=immune_ml_dataset>`_  Galaxy tool (under 'immuneML tools') to import the dataset
+Use the `Create dataset <https://galaxy.immuneml.uiocloud.no/root?tool_id=immune_ml_dataset>`_  Galaxy tool (under 'immuneML tools') to import the dataset
 and create an *immuneML dataset* history item, which can subsequently be used as input for other Galaxy tools.
 
 Select 'Simplified interface', then 'repertoire dataset' as dataset type and 'AIRR' data format, and select the metadata.csv file as metadata file.
@@ -179,10 +179,14 @@ The complete YAML specification for this analysis looks like this and can be dow
         - precision
         - recall
 
-        number_of_processes: 4 # processes for parallelization
+        strategy: GridSearch # strategy for hyperparameter optimization, GridSearch is currently the only available option
 
-Save the YAML specification to a local file (for example: quickstart.yaml), and upload it to Galaxy.
-This can be done through the left-hand meny, by going to 'Get Local Data' > 'Upload File'.
+        reports: []                # optional train ML model reports to run
+        number_of_processes: 4     # processes for parallelization
+        refit_optimal_model: false # whether to retrain the model on the whole dataset after optimizing hyperparameters
+
+The YAML specification can either be saved to a local file and uploaded to Galaxy, or pasted directly as a new entry.
+This can be done by clicking 'Upload Data' in the left-hand menu, and choosing either 'Choose local files' or 'Paste/Fetch data'.
 The file will appear as a new history element
 
 .. image:: ../_static/images/galaxy/galaxy_upload_data.png
@@ -192,7 +196,7 @@ The file will appear as a new history element
 Step 4: running the analysis
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Next, the `Train machine learning models <https://galaxy.immuneml.uio.no/root?tool_id=immuneml_train_ml_model>`_ Galaxy tool (under 'immuneML tools') should be used.
+Next, the `Train machine learning models <https://galaxy.immuneml.uiocloud.no/root?tool_id=immuneml_train_ml_model>`_ Galaxy tool (under 'immuneML tools') should be used.
 Select the YAML specification and previously created dataset from the history, and no additional files.
 
 .. image:: ../_static/images/galaxy/galaxy_train_ml_model.png
@@ -228,8 +232,8 @@ The next item, 'Archive: ML model training' contains a downloadable archive of t
 the files available through the other history elements).
 
 Finally, history element 'optimal_ml_settings.zip' is a .zip file containing the configuration of the optimal ML settings,
-including settings for the encoding and machine learning method. Using the YAML-based Galaxy tool `Apply machine learning models to new data <https://galaxy.immuneml.uio.no/root?tool_id=immuneml_apply_ml_model>`_
-the trained ML model can be used to make predictions on a new dataset where the true disease labels are not known.
+including settings for the encoding and machine learning method. This .zip file can be used to apply a previously
+trained ML model to a new dataset, which can currently only be done :ref:`How to apply previously trained ML models to a new dataset`<using the command-line interface>.
 
 
 What's next?

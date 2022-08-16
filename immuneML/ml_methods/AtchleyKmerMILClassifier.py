@@ -95,6 +95,8 @@ class AtchleyKmerMILClassifier(MLMethod):
         self.label = label
         self.class_mapping = Util.make_binary_class_mapping(encoded_data.labels[self.label.name])
 
+        mapped_y = Util.map_to_new_class_values(encoded_data.labels[self.label.name], self.class_mapping)
+
         loss = np.inf
 
         state = {"loss": loss, "model": None}
@@ -113,7 +115,7 @@ class AtchleyKmerMILClassifier(MLMethod):
             logits = self.logistic_regression(examples)
 
             # compute the loss
-            loss = loss_func(logits, torch.tensor(encoded_data.labels[self.label.name]).float())
+            loss = loss_func(logits, torch.tensor(mapped_y).float())
 
             # perform update
             loss.backward()

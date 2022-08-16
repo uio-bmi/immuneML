@@ -92,7 +92,6 @@ class SklearnMethod(MLMethod):
         self.class_mapping = Util.make_class_mapping(encoded_data.labels[self.label.name])
         self.feature_names = encoded_data.feature_names
 
-
         mapped_y = Util.map_to_new_class_values(encoded_data.labels[self.label.name], self.class_mapping)
 
         self.model = self._fit(encoded_data.examples, mapped_y, cores_for_training)

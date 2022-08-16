@@ -23,7 +23,7 @@ representations, ML models, reports and visualizations.
 Useful links:
 - Main website: https://immuneml.uio.no
 - Documentation: https://docs.immuneml.uio.no
-- Galaxy web interface: https://galaxy.immuneml.uio.no
+- Galaxy web interface: https://galaxy.immuneml.uiocloud.no
 
 
 
@@ -90,7 +90,7 @@ The quickest way to familiarize yourself with immuneML usage is to follow
 one of the [Quickstart tutorials](https://docs.immuneml.uio.no/quickstart.html).
 These tutorials provide a step-by-step guide on how to use immuneML for a 
 simple machine learning analysis on an adaptive immune receptor repertoire (AIRR) dataset,
-using either the command line tool or the [Galaxy web interface](https://galaxy.immuneml.uio.no). 
+using either the command line tool or the [Galaxy web interface](https://galaxy.immuneml.uiocloud.no). 
 
 
 ### Overview of input, analyses and results

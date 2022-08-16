@@ -64,12 +64,10 @@ class EncoderHelper:
         return encoder
 
     @staticmethod
-    def check_positive_class_label(class_name, labels):
-        assert len(labels) == 1, \
-            f"{class_name}: this encoding works only for single label."
+    def check_dataset_type_available_in_mapping(dataset, class_name):
+        if dataset.__class__.__name__ not in class_name.dataset_mapping.keys():
+            raise ValueError(f"{class_name.__name__}: this encoder is not defined for dataset of type {dataset.__class__.__name__}. "
+                             f"Valid dataset types for this encoder are: {', '.join(list(class_name.dataset_mapping.keys()))}")
 
-        assert isinstance(labels[0], Label) and labels[0].positive_class is not None and labels[0].positive_class != "", \
-            f"{class_name}: to use this encoder, in the label definition in the specification of the instruction, define " \
-            f"the positive class for the label. Now it is set to '{labels[0].positive_class}'. See documentation for this encoder for more details."
 
 

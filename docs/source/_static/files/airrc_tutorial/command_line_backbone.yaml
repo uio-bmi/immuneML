@@ -1,0 +1,43 @@
+definitions:
+  datasets:
+    my_dataset:
+      format: AIRR
+      params:
+        path: 100_receptors.tsv # path to the receptors file relative to the working directory where immuneML is executed
+        is_repertoire: false
+        paired: true
+        receptor_chains: TRA_TRB
+        metadata_column_mapping:
+          binder: binder
+  encodings:
+    my_encoding:
+      ...
+  ml_methods:
+    my_ml_method:
+      ...
+  reports:
+    my_first_report:
+      ...
+    my_second_report:
+      ...
+instructions:
+  my_instruction:
+    type: TrainMLModel
+    dataset: my_dataset
+    labels: [binder]
+    settings: 
+      - encoding: ...
+        ml_method: ...
+    optimization_metric: balanced_accuracy
+    selection:
+      split_strategy: random
+      split_count: 1
+      training_percentage: 0.7 
+    assessment:
+      split_strategy: k_fold
+      split_count: 5 
+      reports:
+        models: 
+          - ...
+    reports: 
+      - ...

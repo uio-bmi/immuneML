@@ -58,7 +58,7 @@ class HPSelection:
         performances = []
         for index in range(state.selection.split_count):
             performance = HPSelection.run_setting(state, hp_setting, train_datasets[index], val_datasets[index], index + 1,
-                                                  current_path / f"split_{index + 1}" / f"{label}_{hp_setting.get_key()}",
+                                                  current_path / f"split_{index + 1}" / f"{label.name}_{hp_setting.get_key()}",
                                                   label, assessment_split_index)
             performances.append(performance)
 

@@ -28,31 +28,18 @@ class SingleLineReceptorImport(DataImport):
 
         path (str): Required parameter. This is the path to a directory with files to import.
 
-        receptor_chains (str): Required parameter. Determines which pair of chains to import for each Receptor.
-        Valid values for receptor_chains are the names of the :py:obj:`~immuneML.data_model.receptor.ChainPair.ChainPair` enum.
+        receptor_chains (str): Required parameter. Determines which pair of chains to import for each Receptor. Valid values for receptor_chains are the names of the :py:obj:`~immuneML.data_model.receptor.ChainPair.ChainPair` enum.
 
-        import_empty_nt_sequences (bool): imports sequences which have an empty nucleotide sequence field; can be True or False.
-        By default, import_empty_nt_sequences is set to True.
+        import_empty_nt_sequences (bool): imports sequences which have an empty nucleotide sequence field; can be True or False. By default, import_empty_nt_sequences is set to True.
 
-        import_empty_aa_sequences (bool): imports sequences which have an empty amino acid sequence field; can be True or False; for analysis on
-        amino acid sequences, this parameter should be False (import only non-empty amino acid sequences). By default, import_empty_aa_sequences is set to False.
+        import_empty_aa_sequences (bool): imports sequences which have an empty amino acid sequence field; can be True or False; for analysis on amino acid sequences, this parameter should be False (import only non-empty amino acid sequences). By default, import_empty_aa_sequences is set to False.
 
-        region_type (str): Which part of the sequence to import. When IMGT_CDR3 is specified, immuneML assumes the IMGT
-        junction (including leading C and trailing Y/F amino acids) is used in the input file, and the first and last
-        amino acids will be removed from the sequences to retrieve the IMGT CDR3 sequence. Specifying any other value
-        will result in importing the sequences as they are.
-        Valid values for region_type are the names of the :py:obj:`~immuneML.data_model.receptor.RegionType.RegionType` enum.
+        region_type (str): Which part of the sequence to import. When IMGT_CDR3 is specified, immuneML assumes the IMGT junction (including leading C and trailing Y/F amino acids) is used in the input file, and the first and last amino acids will be removed from the sequences to retrieve the IMGT CDR3 sequence. Specifying any other value will result in importing the sequences as they are. Valid values for region_type are the names of the :py:obj:`~immuneML.data_model.receptor.RegionType.RegionType` enum.
 
-        column_mapping (dict): A mapping where the keys are the column names in the input file, and the values must be
-        mapped to the following fields: <chain>_amino_acid_sequence, <chain>_nucleotide_sequence, <chain>_v_gene,
-        <chain>_j_gene, identifier, epitope.
-        The possible names that can be filled in for <chain> are given in :py:obj:`~immuneML.data_model.receptor.receptor_sequence.Chain.Chain`
-        Any column name other than the sequence, v/j genes and identifier will be set as metadata fields to the
-        Receptors, and can subsequently be used as labels in immuneML instructions.
-        For TCR alpha-beta receptor import, a column mapping could for example look like this:
+        column_mapping (dict): A mapping where the keys are the column names in the input file, and the values must be mapped to the following fields: <chain>_amino_acid_sequence, <chain>_nucleotide_sequence, <chain>_v_gene, <chain>_j_gene, identifier, epitope. The possible names that can be filled in for <chain> are given in :py:obj:`~immuneML.data_model.receptor.receptor_sequence.Chain.Chain` Any column namme other than the sequence, v/j genes and identifier will be set as metadata fields to the Receptors, and can subsequently be used as labels in immuneML instructions. For TCR alpha-beta receptor import, a column mapping could for example look like this:
 
-        .. indent with spaces
-        .. code-block:: yaml
+            .. indent with spaces
+            .. code-block:: yaml
 
                 cdr3_a_aa: alpha_amino_acid_sequence
                 cdr3_b_aa: beta_amino_acid_sequence
@@ -66,12 +53,9 @@ class SingleLineReceptorImport(DataImport):
                 count: duplicate_count
                 epitope: epitope # metadata field
 
-        column_mapping_synonyms (dict): This is a column mapping that can be used if a column could have alternative names.
-        The formatting is the same as column_mapping. If some columns specified in column_mapping are not found in the file,
-        the columns specified in column_mapping_synonyms are instead attempted to be loaded.
+        column_mapping_synonyms (dict): This is a column mapping that can be used if a column could have alternative names. The formatting is the same as column_mapping. If some columns specified in column_mapping are not found in the file, the columns specified in column_mapping_synonyms are instead attempted to be loaded.
 
-        columns_to_load (list): Optional; specifies which columns to load from the input file. This may be useful if
-        the input files contain many unused columns. If no value is specified, all columns are loaded.
+        columns_to_load (list): Optional; specifies which columns to load from the input file. This may be useful if the input files contain many unused columns. If no value is specified, all columns are loaded.
 
         separator (str): Required parameter. Column separator, for example "\\t" or ",".
 

@@ -44,7 +44,7 @@ describes one or more *instructions*, which corresponds to one of the applicatio
 
 If you want to **use immuneML locally**, see :ref:`Installing immuneML`.
 
-Alternatively, to **run immuneML in a web browser**, go to our `Galaxy Portal <https://galaxy.immuneml.uio.no/>`_.
+Alternatively, to **run immuneML in a web browser**, go to our `Galaxy Portal <https://galaxy.immuneml.uiocloud.no/>`_.
 Here, we offer the same functionalities as in the command-line interface, and in addition simplified button-based interfaces for training classifiers.
 
 To become familiar with the **YAML-based specification**, you can find a concrete example in our :ref:`Quickstart` guide, or read about the overall YAML structure and options in :ref:`How to specify an analysis with YAML`.
@@ -63,6 +63,7 @@ Previous versions
 
 Documentation for previous immuneML versions can be found here:
 
+- `v2.1.2 <https://docs.immuneml.uio.no/v2.1.2/>`_
 - `v2.1.0 <https://docs.immuneml.uio.no/v2.1.0/>`_
 - `v2.0.4 <https://docs.immuneml.uio.no/v2.0.4/>`_
 - `v1.2.5 <https://docs.immuneml.uio.no/v1.2.5/>`_
@@ -80,6 +81,7 @@ Documentation for previous immuneML versions can be found here:
    usecases
    troubleshooting
    developer_docs
+   airrc_tutorial
 
 
 Indices and tables

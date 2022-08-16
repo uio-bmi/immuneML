@@ -2,14 +2,16 @@ from pathlib import Path
 from typing import List
 
 import numpy as np
+import pandas as pd
 
 from immuneML.IO.ml_method.UtilIO import UtilIO
+from immuneML.caching.CacheHandler import CacheHandler
 from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
 from immuneML.data_model.encoded_data.EncodedData import EncodedData
 from immuneML.data_model.repertoire.Repertoire import Repertoire
 from immuneML.encodings.DatasetEncoder import DatasetEncoder
 from immuneML.encodings.EncoderParams import EncoderParams
-from immuneML.encodings.filtered_sequence_encoding.SequenceFilterHelper import SequenceFilterHelper
+from immuneML.encodings.abundance_encoding.AbundanceEncoderHelper import AbundanceEncoderHelper
 from immuneML.pairwise_repertoire_comparison.ComparisonData import ComparisonData
 from immuneML.util.EncoderHelper import EncoderHelper
 from scripts.specification_util import update_docs_per_mapping
@@ -22,8 +24,11 @@ class SequenceAbundanceEncoder(DatasetEncoder):
     - the first element corresponds to the number of label-associated clonotypes
     - the second element is the total number of unique clonotypes
 
-    To determine what clonotypes (with features defined by comparison_attributes) are label-associated
-    based on a statistical test. The statistical test used is Fisher's exact test (one-sided).
+    To determine what clonotypes (with features defined by comparison_attributes) are label-associated, one-sided Fisher's exact test is used.
+
+    The encoder also writes out files containing the contingency table used for Fisher's exact test,
+    the resulting p-values, and the significantly abundant sequences
+    (use :py:obj:`~immuneML.reports.encoding_reports.RelevantSequenceExporter.RelevantSequenceExporter` to export these sequences in AIRR format).
 
     Reference: Emerson, Ryan O. et al.
     ‘Immunosequencing Identifies Signatures of Cytomegalovirus Exposure History and HLA-Mediated Effects on the T Cell Repertoire’.
@@ -41,7 +46,7 @@ class SequenceAbundanceEncoder(DatasetEncoder):
         p_value_threshold (float): The p value threshold to be used by the statistical test.
 
         sequence_batch_size (int): The number of sequences in a batch when comparing sequences across repertoires, typically 100s of thousands.
-        This does not affect the results of the encoding, only the speed.
+        This does not affect the results of the encoding, only the speed. The default value is 1.000.000
 
         repertoire_batch_size (int): How many repertoires will be loaded at once. This does not affect the result of the encoding, only the speed.
         This value is a trade-off between the number of repertoires that can fit the RAM at the time and loading time from disk.
@@ -77,55 +82,79 @@ class SequenceAbundanceEncoder(DatasetEncoder):
         self.context = None
         self.p_value_threshold = p_value_threshold
         self.relevant_indices_path = None
-        self.relevant_sequence_csv_path = None
+        self.relevant_sequence_path = None
+        self.contingency_table_path = None
+        self.p_values_path = None
         self.comparison_data = None
         self.repertoire_batch_size = repertoire_batch_size
 
     @staticmethod
     def build_object(dataset, **params):
-        assert isinstance(dataset, RepertoireDataset), "FilteredSequenceEncoder: this encoding only works on repertoire datasets."
+        assert isinstance(dataset, RepertoireDataset), "SequenceAbundanceEncoder: this encoding only works on repertoire datasets."
         return SequenceAbundanceEncoder(**params)
 
     def encode(self, dataset, params: EncoderParams):
+        AbundanceEncoderHelper.check_labels(params.label_config, SequenceAbundanceEncoder.__name__)
 
-        EncoderHelper.check_positive_class_label(SequenceAbundanceEncoder.__name__,
-                                                 params.label_config.get_label_objects())
-
-        self.comparison_data = SequenceFilterHelper.build_comparison_data(dataset, self.context, self.comparison_attributes, params,
-                                                                          self.sequence_batch_size)
+        self.comparison_data = self._build_comparison_data(dataset, params)
         return self._encode_data(dataset, params)
+
+    def _build_comparison_data(self, dataset: RepertoireDataset, params: EncoderParams):
+
+        current_dataset = EncoderHelper.get_current_dataset(dataset, self.context)
+        comparison_data = CacheHandler.memo_by_params(
+            EncoderHelper.build_comparison_params(current_dataset, self.comparison_attributes),
+            lambda: EncoderHelper.build_comparison_data(current_dataset, params,
+                                                        self.comparison_attributes,
+                                                        self.sequence_batch_size))
+
+        return comparison_data
 
     def _encode_data(self, dataset: RepertoireDataset, params: EncoderParams):
 
         label_name = params.label_config.get_labels_by_name()[0]
 
-        examples = self._calculate_sequence_abundance(dataset, self.comparison_data, label_name, params)
+        examples = self._calculate_abundance_matrix(dataset, self.comparison_data, params)
 
         encoded_data = EncodedData(examples, dataset.get_metadata([label_name]) if params.encode_labels else None, dataset.get_repertoire_ids(),
                                    [SequenceAbundanceEncoder.RELEVANT_SEQUENCE_ABUNDANCE, SequenceAbundanceEncoder.TOTAL_SEQUENCE_ABUNDANCE],
-                                   encoding=SequenceAbundanceEncoder.__name__, info={'relevant_sequence_csv_path': self.relevant_sequence_csv_path})
+                                   encoding=SequenceAbundanceEncoder.__name__, info={'relevant_sequence_path': self.relevant_sequence_path,
+                                                                                     "contingency_table_path": self.contingency_table_path,
+                                                                                     "p_values_path": self.p_values_path})
 
         encoded_dataset = RepertoireDataset(labels=dataset.labels, encoded_data=encoded_data, repertoires=dataset.repertoires)
 
         return encoded_dataset
 
-    def _calculate_sequence_abundance(self, dataset: RepertoireDataset, comparison_data: ComparisonData, label_name: str, params: EncoderParams):
-        sequence_p_values_indices, indices_path, sequence_csv_path = SequenceFilterHelper\
-            .get_relevant_sequences(dataset=dataset, params=params, comparison_data=comparison_data, label_name=label_name,
-                                    p_value_threshold=self.p_value_threshold, comparison_attributes=self.comparison_attributes,
-                                    sequence_indices_path=self.relevant_indices_path)
+    def _calculate_abundance_matrix(self, dataset: RepertoireDataset, comparison_data: ComparisonData, params: EncoderParams):
+        comparison_data.set_iteration_repertoire_ids(dataset.get_repertoire_ids())
+        is_positive_class = AbundanceEncoderHelper.check_is_positive_class(dataset, dataset.get_repertoire_ids(), params.label_config)
 
-        if self.relevant_indices_path is None:
-            self.relevant_indices_path = indices_path
+        relevant_sequence_indices, file_paths = AbundanceEncoderHelper.get_relevant_sequence_indices(comparison_data, is_positive_class, self.p_value_threshold, self.relevant_indices_path, params)
 
-        if self.relevant_sequence_csv_path is None:
-            self.relevant_sequence_csv_path = sequence_csv_path
+        self._write_relevant_sequences_csv(comparison_data, relevant_sequence_indices, params.result_path)
+        self._set_file_paths(file_paths)
 
-        abundance_matrix = self._build_abundance_matrix(comparison_data, dataset.get_repertoire_ids(), sequence_p_values_indices)
+        abundance_matrix = self._build_abundance_matrix(comparison_data, dataset.get_repertoire_ids(), relevant_sequence_indices)
 
         return abundance_matrix
 
-    def _build_abundance_matrix(self, comparison_data, repertoire_ids, sequence_p_values_indices):
+    def _write_relevant_sequences_csv(self, comparison_data, relevant_sequence_indices, result_path):
+        if self.relevant_sequence_path is None:
+            self.relevant_sequence_path = result_path / 'relevant_sequences.csv'
+
+        all_sequences = comparison_data.get_item_names()
+        relevant_sequences = all_sequences[relevant_sequence_indices]
+        df = pd.DataFrame(relevant_sequences, columns=self.comparison_attributes)
+        sequence_csv_path = result_path / 'relevant_sequences.csv'
+        df.to_csv(sequence_csv_path, sep=',', index=False)
+
+    def _set_file_paths(self, file_paths):
+        self.relevant_indices_path = file_paths["relevant_indices_path"]
+        self.contingency_table_path = file_paths["contingency_table_path"] if "contingency_table_path" in file_paths else None
+        self.p_values_path = file_paths["p_values_path"] if "p_values_path" in file_paths else None
+
+    def _build_abundance_matrix(self, comparison_data, repertoire_ids, relevant_sequence_indices):
         abundance_matrix = np.zeros((len(repertoire_ids), 2))
 
         for index in range(0, len(repertoire_ids) + self.repertoire_batch_size, self.repertoire_batch_size):
@@ -135,7 +164,7 @@ class SequenceAbundanceEncoder(DatasetEncoder):
             for rep_index in range(ind_start, ind_end):
                 repertoire_vector = repertoire_vectors[repertoire_ids[rep_index]]
                 relevant_sequence_abundance = np.sum(
-                    repertoire_vector[np.logical_and(sequence_p_values_indices, repertoire_vector)])
+                    repertoire_vector[np.logical_and(relevant_sequence_indices, repertoire_vector)])
                 total_sequence_abundance = np.sum(repertoire_vector)
                 abundance_matrix[rep_index] = [relevant_sequence_abundance, total_sequence_abundance]
 

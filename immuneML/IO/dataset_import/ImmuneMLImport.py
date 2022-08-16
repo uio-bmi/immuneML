@@ -34,19 +34,13 @@ class ImmuneMLImport(DataImport):
 
      2. a csv metadata file (only for repertoire datasets, should be in the same folder as the iml_dataset file),
 
-     3. data files for different types of data. For repertoire datasets, data files include one binary numpy file per repertoire with sequences and
-     associated information and one metadata yaml file per repertoire with details such as repertoire identifier, disease status, subject id and
-     other similar available information. For sequence and receptor datasets, sequences or receptors respectively, are stored in batches in binary
-     numpy files.
+     3. data files for different types of data. For repertoire datasets, data files include one binary numpy file per repertoire with sequences and associated information and one metadata yaml file per repertoire with details such as repertoire identifier, disease status, subject id and other similar available information. For sequence and receptor datasets, sequences or receptors respectively, are stored in batches in binary numpy files.
 
     Arguments:
 
-        path (str): The path to the previously created dataset file. This file should have an '.iml_dataset' extension.
-        If the path has not been specified, immuneML attempts to load the dataset from a specified metadata file
-        (only for RepertoireDatasets).
+        path (str): The path to the previously created dataset file. This file should have an '.iml_dataset' extension. If the path has not been specified, immuneML attempts to load the dataset from a specified metadata file (only for RepertoireDatasets).
 
-        metadata_file (str): An optional metadata file for a RepertoireDataset. If specified, the RepertoireDataset
-        metadata will be updated to the newly specified metadata without otherwise changing the Repertoire objects
+        metadata_file (str): An optional metadata file for a RepertoireDataset. If specified, the RepertoireDataset metadata will be updated to the newly specified metadata without otherwise changing the Repertoire objects
 
 
     YAML specification:

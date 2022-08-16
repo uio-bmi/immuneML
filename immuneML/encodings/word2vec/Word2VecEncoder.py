@@ -103,13 +103,12 @@ class Word2VecEncoder(DatasetEncoder):
 
     @staticmethod
     def build_object(dataset=None, **params):
-        try:
-            prepared_params = Word2VecEncoder._prepare_parameters(**params)
-            encoder = ReflectionHandler.get_class_by_name(
+        EncoderHelper.check_dataset_type_available_in_mapping(dataset, Word2VecEncoder)
+
+        prepared_params = Word2VecEncoder._prepare_parameters(**params)
+        encoder = ReflectionHandler.get_class_by_name(
                 Word2VecEncoder.dataset_mapping[dataset.__class__.__name__], "word2vec/")(**prepared_params)
-        except ValueError:
-            raise ValueError("{} is not defined for dataset of type {}.".format(Word2VecEncoder.__name__,
-                                                                                dataset.__class__.__name__))
+
         return encoder
 
     def encode(self, dataset, params: EncoderParams):

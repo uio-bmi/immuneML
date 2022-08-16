@@ -6,11 +6,8 @@ import numpy as np
 
 from immuneML.caching.CacheType import CacheType
 from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
-from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
-from immuneML.data_model.repertoire.Repertoire import Repertoire
 from immuneML.encodings.EncoderParams import EncoderParams
-from immuneML.encodings.filtered_sequence_encoding.SequenceAbundanceEncoder import SequenceAbundanceEncoder
-from immuneML.encodings.filtered_sequence_encoding.SequenceFilterHelper import SequenceFilterHelper
+from immuneML.encodings.abundance_encoding.SequenceAbundanceEncoder import SequenceAbundanceEncoder
 from immuneML.environment.Constants import Constants
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.environment.Label import Label
@@ -95,47 +92,5 @@ class TestEmersonSequenceAbundanceEncoder(TestCase):
         abundance_matrix = encoder._build_abundance_matrix(comparison_data, ["rep_0", "rep_1", "rep_2", "rep_3"], sequence_p_value_indices)
 
         self.assertTrue(np.array_equal(expected_abundance_matrix, abundance_matrix))
-
-        shutil.rmtree(path)
-
-    def test_find_label_associated_sequence_p_values(self):
-        path = EnvironmentSettings.tmp_test_path / "comparison_data_find_label_assocseqpvalues/"
-        PathBuilder.build(path)
-
-        repertoires = [Repertoire.build_from_sequence_objects([ReceptorSequence()], path, {
-            "l1": val, "subject_id": subject_id
-        }) for val, subject_id in zip([True, True, False, False], ["rep_0", "rep_1", "rep_2", "rep_3"])]
-
-        col_name_index = {repertoires[index].identifier: index for index in range(len(repertoires))}
-
-        comparison_data = ComparisonData(repertoire_ids=[repertoire.identifier for repertoire in repertoires],
-                                         comparison_attributes=["sequence_aas"], sequence_batch_size=4, path=path)
-        comparison_data.batches = [ComparisonDataBatch(**{'matrix': np.array([[1., 0., 0., 0.],
-                                                                              [1., 1., 0., 0.]]),
-                                                          'items': [('GGG',), ('III',)],
-                                                          'repertoire_index_mapping': col_name_index, 'path': path, 'identifier': 0}),
-                                   ComparisonDataBatch(**{'matrix': np.array([[1., 1., 0., 1.],
-                                                                              [1., 1., 1., 1.]]),
-                                                          'items': [('LLL',), ('MMM',)],
-                                                          'repertoire_index_mapping': col_name_index, 'path': path, 'identifier': 1}),
-                                   ComparisonDataBatch(**{'matrix': np.array([[0., 1., 0., 0.],
-                                                                              [0., 1., 0., 1.]]),
-                                                          'items': [('DDD',), ('EEE',)],
-                                                          'repertoire_index_mapping': col_name_index, 'path': path, 'identifier': 2}),
-                                   ComparisonDataBatch(**{'matrix': np.array([[0., 1., 1., 1.],
-                                                                              [0., 0., 1., 1.]]),
-                                                          'items': [('FFF',), ('CCC',)],
-                                                          'repertoire_index_mapping': col_name_index, 'path': path, 'identifier': 3}),
-                                   ComparisonDataBatch(**{'matrix': np.array([[0., 0., 0., 1.]]),
-                                                          'items': [('AAA',)],
-                                                          'repertoire_index_mapping': col_name_index, 'path': path, 'identifier': 4})]
-
-        p_values = SequenceFilterHelper.find_label_associated_sequence_p_values(comparison_data, repertoires, Label('l1', [True, False], positive_class=True))
-
-        print(p_values)
-
-        self.assertTrue(
-            np.allclose([SequenceFilterHelper.INVALID_P_VALUE, 0.1666666666666667, 0.5000000000000001, 1., SequenceFilterHelper.INVALID_P_VALUE,
-                         0.8333333333333331, 1., 1., 2], p_values, equal_nan=True))
 
         shutil.rmtree(path)

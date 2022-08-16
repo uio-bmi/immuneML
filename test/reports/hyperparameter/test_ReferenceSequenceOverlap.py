@@ -22,8 +22,8 @@ class TestReferenceSequenceOverlap(TestCase):
         report = ReferenceSequenceOverlap(result_path=path, reference_path=ref_path, comparison_attributes=['sequence_aas', 'v_genes'])
 
         class Enc:
-            def __init__(self, relevant_sequence_csv_path):
-                self.relevant_sequence_csv_path = relevant_sequence_csv_path
+            def __init__(self, relevant_sequence_path):
+                self.relevant_sequence_path = relevant_sequence_path
 
         encoder = Enc(model_path)
 
