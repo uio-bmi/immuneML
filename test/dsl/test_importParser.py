@@ -53,7 +53,7 @@ class TestImportParser(TestCase):
         shutil.rmtree(path)
 
     def test_parse(self):
-        path = EnvironmentSettings.root_path / "test/tmp/parser/"
+        path = EnvironmentSettings.tmp_test_path / "parser/"
 
         PathBuilder.build(path / "tmp_input/")
         with open(path / "tmp_input/CD1_clones_TRA.csv", "w") as file:

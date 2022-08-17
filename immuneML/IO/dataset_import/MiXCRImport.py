@@ -39,9 +39,9 @@ class MiXCRImport(DataImport):
             .. indent with spaces
             .. code-block:: yaml
 
-                    cloneCount: counts
-                    allVHitsWithScore: v_alleles
-                    allJHitsWithScore: j_alleles
+                    cloneCount: duplicate_count
+                    allVHitsWithScore: v_call
+                    allJHitsWithScore: j_call
 
         column_mapping_synonyms (dict): This is a column mapping that can be used if a column could have alternative names. The formatting is the same as column_mapping. If some columns specified in column_mapping are not found in the file, the columns specified in column_mapping_synonyms are instead attempted to be loaded. For MiXCR format, there is no default column_mapping_synonyms.
 
@@ -125,9 +125,9 @@ class MiXCRImport(DataImport):
         ParameterValidator.assert_any_value_present(params.columns_to_load, [aa_column, nt_column], MiXCRImport.__name__, 'columns_to_load')
 
         if aa_column in params.columns_to_load:
-            df["sequence_aas"] = df[aa_column]
+            df["sequence_aa"] = df[aa_column]
         if nt_column in params.columns_to_load:
-            df["sequences"] = df[nt_column]
+            df["sequence"] = df[nt_column]
 
         ImportHelper.junction_to_cdr3(df, params.region_type)
         df.loc[:, "region_type"] = params.region_type.name

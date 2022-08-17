@@ -79,4 +79,4 @@ class TestFeatureComparison(TestCase):
 
         self.assertFalse(report.check_prerequisites())
 
-        # shutil.rmtree(path)
+        shutil.rmtree(path)

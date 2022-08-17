@@ -133,8 +133,7 @@ class AIRRImport(DataImport):
                 df.rename(columns={'junction': 'sequence', 'junction_aa': 'sequence_aa'}, inplace=True)
                 ImportHelper.junction_to_cdr3(df, params.region_type)
 
-        else:
-            df.loc[:, "region_type"] = params.region_type.name
+        df.loc[:, "region_type"] = params.region_type.name
 
         ImportHelper.drop_empty_sequences(df, params.import_empty_aa_sequences, params.import_empty_nt_sequences)
         ImportHelper.drop_illegal_character_sequences(df, params.import_illegal_characters)
