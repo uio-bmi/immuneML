@@ -1,5 +1,6 @@
 import os
 import random
+import shutil
 import string
 from unittest import TestCase
 
