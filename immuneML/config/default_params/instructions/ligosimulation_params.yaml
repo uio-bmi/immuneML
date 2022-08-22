@@ -3,4 +3,5 @@ paired: False
 use_generation_probabilities: False
 simulation_strategy: IMPLANTING
 store_signal_in_receptors: True
+max_iterations: 100
 export_formats: [AIRR]

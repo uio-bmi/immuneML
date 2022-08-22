@@ -41,6 +41,8 @@ class LIgOSimulationInstruction(Instruction):
 
         sequence_batch_size (bool): how many sequences to generate at once using the generative model before checking for signals and filtering
 
+        max_iterations (int): how many iterations are allowed when creating sequences
+
         export_formats: in which formats to export the dataset after simulation. Valid formats are class names of any non-abstract class
         inheriting :py:obj:`~immuneML.IO.dataset_export.DataExporter.DataExporter`. Important note: Binary files in ImmuneML might not be compatible
         between different immuneML versions.
@@ -59,18 +61,19 @@ class LIgOSimulationInstruction(Instruction):
             simulation: sim1
             store_signal_in_receptors: True
             sequence_batch_size: 1000
+            max_iterations: 1000
             export_formats: [AIRR] # in which formats to export the dataset
 
     """
 
     def __init__(self, is_repertoire: bool, paired: bool, use_generation_probabilities: bool, simulation_strategy: SimulationStrategy,
                  simulation: Simulation, sequence_type: SequenceType, signals: List[Signal], name: str, store_signal_in_receptors: bool,
-                 sequence_batch_size: int, exporters: List[DataExporter] = None):
+                 sequence_batch_size: int, max_iterations: int, exporters: List[DataExporter] = None):
 
         self.state = LIgOSimulationState(is_repertoire=is_repertoire, paired=paired, use_generation_probabilities=use_generation_probabilities,
                                          simulation_strategy=simulation_strategy, simulation=simulation, sequence_type=sequence_type,
                                          signals=signals, name=name, store_signal_in_receptors=store_signal_in_receptors,
-                                         sequence_batch_size=sequence_batch_size)
+                                         sequence_batch_size=sequence_batch_size, max_iterations=max_iterations)
         self.exporters = exporters
         self.seed = 1
 
@@ -118,7 +121,7 @@ class LIgOSimulationInstruction(Instruction):
         else:
             if self.state.simulation_strategy == SimulationStrategy.REJECTION_SAMPLING:
                 sampler = RejectionSampler(sim_item=item, sequence_type=self.state.sequence_type, all_signals=self.state.signals, seed=self.seed,
-                                           sequence_batch_size=self.state.sequence_batch_size)
+                                           sequence_batch_size=self.state.sequence_batch_size, max_iterations=self.state.max_iterations)
                 sequences = sampler.make_sequences(self.state.result_path)
                 return sequences
             else:
@@ -134,7 +137,7 @@ class LIgOSimulationInstruction(Instruction):
         elif self.state.simulation_strategy == SimulationStrategy.REJECTION_SAMPLING:
 
             sampler = RejectionSampler(sim_item=item, sequence_type=self.state.sequence_type, all_signals=self.state.signals, seed=self.seed,
-                                       sequence_batch_size=self.state.sequence_batch_size)
+                                       sequence_batch_size=self.state.sequence_batch_size, max_iterations=self.state.max_iterations)
             repertoires = sampler.make_repertoires(self.state.result_path)
 
         else:

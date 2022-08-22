@@ -17,20 +17,22 @@ class LIgOSimulationParser:
 
         location = LIgOSimulationParser.__name__
         keys = ["simulation", "type", "is_repertoire", "paired", "use_generation_probabilities", "simulation_strategy", 'sequence_type',
-                "export_formats", "store_signal_in_receptors", 'sequence_batch_size']
+                "export_formats", "store_signal_in_receptors", 'sequence_batch_size', "max_iterations"]
         ParameterValidator.assert_keys(instruction.keys(), keys, location, key)
 
         for param_key in ['is_repertoire', 'paired', 'use_generation_probabilities', "store_signal_in_receptors"]:
             ParameterValidator.assert_type_and_value(instruction[param_key], bool, location, param_key)
+        for param_key in ['max_iterations', 'sequence_batch_size']:
+            ParameterValidator.assert_type_and_value(instruction[param_key], int, location, param_key, 1)
 
         ParameterValidator.assert_type_and_value(instruction['simulation_strategy'], str, location, 'simulation_strategy')
         ParameterValidator.assert_in_valid_list(instruction['simulation_strategy'].upper(), [item.name for item in SimulationStrategy], location,
                                                 'simulation_strategy')
-        ParameterValidator.assert_type_and_value(instruction['sequence_batch_size'], int, location, 'sequence_batch_size', 1)
 
         signals = [signal.item for signal in symbol_table.get_by_type(SymbolType.SIGNAL)]
 
-        ParameterValidator.assert_in_valid_list(instruction['simulation'], [sim.item.identifier for sim in symbol_table.get_by_type(SymbolType.SIMULATION)],
+        ParameterValidator.assert_in_valid_list(instruction['simulation'],
+                                                [sim.item.identifier for sim in symbol_table.get_by_type(SymbolType.SIMULATION)],
                                                 location, 'simulation')
         simulation = symbol_table.get(instruction["simulation"])
         sequence_type = SequenceType[instruction['sequence_type'].upper()]
@@ -40,9 +42,9 @@ class LIgOSimulationParser:
         exporters = Util.parse_exporters(instruction, location)
 
         params = {**{key: value for key, value in instruction.items() if key not in ['type', 'export_formats']},
-                                               **{'simulation': simulation, 'signals': signals, 'exporters': exporters,
-                                                  'simulation_strategy': SimulationStrategy[instruction['simulation_strategy'].upper()],
-                                                  'sequence_type': sequence_type, 'name': key}}
+                  **{'simulation': simulation, 'signals': signals, 'exporters': exporters,
+                     'simulation_strategy': SimulationStrategy[instruction['simulation_strategy'].upper()],
+                     'sequence_type': sequence_type, 'name': key}}
         instruction = LIgOSimulationInstruction(**params)
         return instruction
 

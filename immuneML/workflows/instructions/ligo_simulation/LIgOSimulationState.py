@@ -25,4 +25,5 @@ class LIgOSimulationState:
     paths: list = None
     store_signal_in_receptors: bool = None
     sequence_batch_size: int = None
+    max_iterations: int = None
 

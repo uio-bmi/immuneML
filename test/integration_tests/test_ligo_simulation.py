@@ -65,7 +65,8 @@ class TestLIgOSimulation(TestCase):
                                 "type": "OLGA",
                                 "model_path": None,
                                 "default_model_name": "humanTRB",
-                                "chain": 'beta'
+                                "chain": 'beta',
+                                "use_only_productive": True
                             }
                         },
                         "var2": {
@@ -79,7 +80,8 @@ class TestLIgOSimulation(TestCase):
                                 'type': 'OLGA',
                                 "model_path": None,
                                 "default_model_name": "humanTRB",
-                                "chain": "beta"
+                                "chain": "beta",
+                                "use_only_productive": True
                             }
                         }
                     }
@@ -96,7 +98,8 @@ class TestLIgOSimulation(TestCase):
                     "use_generation_probabilities": False,
                     "simulation_strategy": "REJECTION_SAMPLING",
                     "store_signal_in_receptors": True,
-                    "sequence_batch_size": 100
+                    "sequence_batch_size": 100,
+                    'max_iterations': 100
                 }
             },
             "output": {

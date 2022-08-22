@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from dataclasses import dataclass
 from pathlib import Path
 from typing import Union
 
@@ -36,6 +35,7 @@ class OLGA(GenerativeModel):
     model_path: Path
     default_model_name: str
     chain: Chain = None
+    use_only_productive: bool = True
     sequence_gen_model: Union[SequenceGenerationVDJ, SequenceGenerationVJ] = None
     v_gene_mapping: np.ndarray = None
     j_gene_mapping: np.ndarray = None
@@ -54,7 +54,8 @@ class OLGA(GenerativeModel):
 
         location = OLGA.__name__
 
-        ParameterValidator.assert_keys(kwargs.keys(), ['model_path', 'default_model_name', 'chain'], location, 'OLGA generative model')
+        ParameterValidator.assert_keys(kwargs.keys(), ['model_path', 'default_model_name', 'chain', 'use_only_productive'], location, 'OLGA generative model')
+        ParameterValidator.assert_type_and_value(kwargs['use_only_productive'], bool, location, 'use_only_productive')
 
         if kwargs['model_path']:
             assert Path(kwargs['model_path']).is_dir(), \
@@ -74,7 +75,7 @@ class OLGA(GenerativeModel):
             chain = Chain.get_chain(kwargs['default_model_name'][-3:])
             kwargs['model_path'] = Path(load_model.__file__).parent / f"default_models/{OLGA.DEFAULT_MODEL_FOLDER_MAP[kwargs['default_model_name']]}"
 
-        return OLGA(model_path=kwargs['model_path'], default_model_name=kwargs['default_model_name'], chain=chain)
+        return OLGA(**{**kwargs, **{'chain': chain}})
 
     def load_model(self):
         is_vdj = self.chain in [Chain.BETA, Chain.HEAVY]
@@ -93,6 +94,9 @@ class OLGA(GenerativeModel):
             else SequenceGenerationVJ(olga_gen_model, genomic_data)
 
     def generate_sequences(self, count: int, seed: int = 1, path: Path = None, sequence_type: SequenceType = SequenceType.AMINO_ACID) -> pd.DataFrame:
+
+        if not self.use_only_productive:
+            raise NotImplementedError("Generating unproductive sequences is currently not supported.")
 
         if not self.sequence_gen_model:
             self.load_model()

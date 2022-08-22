@@ -1,3 +1,4 @@
+import logging
 import shutil
 import uuid
 from dataclasses import dataclass
@@ -22,6 +23,7 @@ class RejectionSampler:
     sequence_type: SequenceType
     all_signals: List[Signal]
     sequence_batch_size: int
+    max_iterations: int
     seqs_no_signal_path: Path = None
     seqs_with_signal_path: dict = None
     seed: int = 1
@@ -101,8 +103,9 @@ class RejectionSampler:
     def _generate_sequences(self, path: Path, sequence_without_signal_count: int, sequence_with_signal_count: dict):
         PathBuilder.build(path)
         self._setup_tmp_sequence_paths(path)
+        iteration = 1
 
-        while sum(sequence_with_signal_count.values()) != 0 or sequence_without_signal_count != 0:
+        while (sum(sequence_with_signal_count.values()) != 0 or sequence_without_signal_count != 0) and iteration <= self.max_iterations:
             background_sequences = self.sim_item.generative_model.generate_sequences(
                 max(self.sim_item.number_of_receptors_in_repertoire, self.sequence_batch_size), seed=self.seed,
                 path=path / f"gen_model/tmp_{self.seed}.tsv", sequence_type=self.sequence_type)
@@ -113,6 +116,10 @@ class RejectionSampler:
 
             sequence_without_signal_count = self._update_seqs_without_signal(sequence_without_signal_count, signal_matrix, background_sequences)
             sequence_with_signal_count = self._update_seqs_with_signal(sequence_with_signal_count, signal_matrix, background_sequences)
+
+            if iteration == int(self.max_iterations * 0.75):
+                logging.warning(f"Iteration {iteration} out of {self.max_iterations} max iterations reached.")
+            iteration += 1
 
     def _setup_tmp_sequence_paths(self, path):
         if self.seqs_with_signal_path is None:
