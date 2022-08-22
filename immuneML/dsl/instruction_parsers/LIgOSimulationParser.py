@@ -17,7 +17,7 @@ class LIgOSimulationParser:
 
         location = LIgOSimulationParser.__name__
         keys = ["simulation", "type", "is_repertoire", "paired", "use_generation_probabilities", "simulation_strategy", 'sequence_type',
-                "export_formats", "store_signal_in_receptors"]
+                "export_formats", "store_signal_in_receptors", 'sequence_batch_size']
         ParameterValidator.assert_keys(instruction.keys(), keys, location, key)
 
         for param_key in ['is_repertoire', 'paired', 'use_generation_probabilities', "store_signal_in_receptors"]:
@@ -26,6 +26,7 @@ class LIgOSimulationParser:
         ParameterValidator.assert_type_and_value(instruction['simulation_strategy'], str, location, 'simulation_strategy')
         ParameterValidator.assert_in_valid_list(instruction['simulation_strategy'].upper(), [item.name for item in SimulationStrategy], location,
                                                 'simulation_strategy')
+        ParameterValidator.assert_type_and_value(instruction['sequence_batch_size'], int, location, 'sequence_batch_size', 1)
 
         signals = [signal.item for signal in symbol_table.get_by_type(SymbolType.SIGNAL)]
 

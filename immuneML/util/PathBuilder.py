@@ -21,3 +21,13 @@ class PathBuilder:
                     raise
 
         return path
+
+    @staticmethod
+    def remove_old_and_build(path):
+        path = Path(path)
+        if path.is_dir():
+            path.rmdir()
+
+        path.mkdir()
+
+        return path

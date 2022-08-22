@@ -15,6 +15,8 @@ class SequenceDataset(ElementDataset):
     """A dataset class for sequence datasets (single chain). All the functionality is implemented in ElementDataset class, except creating a new
     dataset and obtaining metadata."""
 
+    DEFAULT_FILE_SIZE = 100000
+
     @classmethod
     def build(cls, **kwargs):
         return SequenceDataset(**kwargs)

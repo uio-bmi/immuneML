@@ -1,14 +1,12 @@
 import random
-import shutil
 from pathlib import Path
 from typing import List
-from uuid import uuid4
 
 import pandas as pd
 
 from immuneML.IO.dataset_export.DataExporter import DataExporter
 from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
-from immuneML.data_model.repertoire.Repertoire import Repertoire
+from immuneML.data_model.dataset.SequenceDataset import SequenceDataset
 from immuneML.environment.SequenceType import SequenceType
 from immuneML.simulation.LIgOSimulationItem import LIgOSimulationItem
 from immuneML.simulation.Simulation import Simulation
@@ -41,6 +39,8 @@ class LIgOSimulationInstruction(Instruction):
 
         store_signal_in_receptors (bool): for repertoire-level simulation, whether to store the information on what exact motif is implanted in each receptor
 
+        sequence_batch_size (bool): how many sequences to generate at once using the generative model before checking for signals and filtering
+
         export_formats: in which formats to export the dataset after simulation. Valid formats are class names of any non-abstract class
         inheriting :py:obj:`~immuneML.IO.dataset_export.DataExporter.DataExporter`. Important note: Binary files in ImmuneML might not be compatible
         between different immuneML versions.
@@ -58,23 +58,35 @@ class LIgOSimulationInstruction(Instruction):
             simulation_strategy: IMPLANTING
             simulation: sim1
             store_signal_in_receptors: True
+            sequence_batch_size: 1000
             export_formats: [AIRR] # in which formats to export the dataset
 
     """
 
     def __init__(self, is_repertoire: bool, paired: bool, use_generation_probabilities: bool, simulation_strategy: SimulationStrategy,
                  simulation: Simulation, sequence_type: SequenceType, signals: List[Signal], name: str, store_signal_in_receptors: bool,
-                 exporters: List[DataExporter] = None):
+                 sequence_batch_size: int, exporters: List[DataExporter] = None):
 
         self.state = LIgOSimulationState(is_repertoire=is_repertoire, paired=paired, use_generation_probabilities=use_generation_probabilities,
                                          simulation_strategy=simulation_strategy, simulation=simulation, sequence_type=sequence_type,
-                                         signals=signals, name=name, store_signal_in_receptors=store_signal_in_receptors)
+                                         signals=signals, name=name, store_signal_in_receptors=store_signal_in_receptors,
+                                         sequence_batch_size=sequence_batch_size)
         self.exporters = exporters
         self.seed = 1
 
     def run(self, result_path: Path):
         self.state.result_path = PathBuilder.build(result_path / self.state.name)
 
+        self._simulate_dataset()
+
+        exporter_output = ExporterHelper.export_dataset(self.state.dataset, self.exporters, self.state.result_path)
+
+        self.state.formats = exporter_output['formats']
+        self.state.paths = exporter_output['paths']
+
+        return self.state
+
+    def _simulate_dataset(self):
         examples = []
         summary_path = self.state.result_path / "summary.csv"
 
@@ -90,14 +102,8 @@ class LIgOSimulationInstruction(Instruction):
         elif self.state.paired:
             raise NotImplementedError()
         else:
-            raise NotImplementedError()
-
-        exporter_output = ExporterHelper.export_dataset(self.state.dataset, self.exporters, self.state.result_path)
-
-        self.state.formats = exporter_output['formats']
-        self.state.paths = exporter_output['paths']
-
-        return self.state
+            self.state.dataset = SequenceDataset.build_from_objects(examples, path=self.state.result_path, name='simulated_dataset',
+                                                                    file_size=SequenceDataset.DEFAULT_FILE_SIZE)
 
     def _create_examples(self, item: LIgOSimulationItem, summary_path: Path) -> list:
 
@@ -107,51 +113,58 @@ class LIgOSimulationInstruction(Instruction):
             return self._create_receptors(item, summary_path)
 
     def _create_receptors(self, item: LIgOSimulationItem, summary_path: Path):
-        raise NotImplementedError
+        if self.state.paired:
+            raise NotImplementedError
+        else:
+            if self.state.simulation_strategy == SimulationStrategy.REJECTION_SAMPLING:
+                sampler = RejectionSampler(sim_item=item, sequence_type=self.state.sequence_type, all_signals=self.state.signals, seed=self.seed,
+                                           sequence_batch_size=self.state.sequence_batch_size)
+                sequences = sampler.make_sequences(self.state.result_path)
+                return sequences
+            else:
+                raise NotImplementedError
 
     def _create_repertoires(self, item: LIgOSimulationItem, summary_path: Path) -> list:
 
-        repertoires = []
-
-        for i in range(1, item.number_of_examples + 1):
-            path = PathBuilder.build(self.state.result_path / f"tmp_background_repertoire_{i}/")
-            repertoire_id = uuid4().hex
-
-            repertoire = self._make_repertoire_with_signal(item, path=path, summary_path=summary_path, repertoire_id=repertoire_id)
-
-            repertoires.append(repertoire)
-
-            shutil.rmtree(path)
-
-        return repertoires
-
-    def _make_repertoire_with_signal(self, item: LIgOSimulationItem, path: Path, summary_path: Path, repertoire_id: str) -> Repertoire:
-        repertoires_path = PathBuilder.build(self.state.result_path / "repertoires")
-        metadata = {**{signal.id: True for signal in item.signals},
-                    **{signal.id: False for signal in self.state.signals if signal not in item.signals}}
-
         if self.state.simulation_strategy == SimulationStrategy.IMPLANTING:
 
-            new_sequences = self._make_sequences_by_implanting(item=item, path=path, summary_path=summary_path, repertoire_id=repertoire_id)
-            repertoire = Repertoire.build_from_sequence_objects(new_sequences, path=repertoires_path, metadata=metadata)
+            repertoires = []
+            raise NotImplementedError
 
         elif self.state.simulation_strategy == SimulationStrategy.REJECTION_SAMPLING:
 
-            new_sequences_df = self._make_sequences_by_rejection(item=item, path=path)
-            repertoire = Repertoire.build(**new_sequences_df.to_dict('list'), path=repertoires_path, metadata=metadata)
+            sampler = RejectionSampler(sim_item=item, sequence_type=self.state.sequence_type, all_signals=self.state.signals, seed=self.seed,
+                                       sequence_batch_size=self.state.sequence_batch_size)
+            repertoires = sampler.make_repertoires(self.state.result_path)
 
         else:
             raise RuntimeError(f"{LIgOSimulationInstruction.__name__}: simulation strategy was not properly set, accepted are "
                                f"{SimulationStrategy.IMPLANTING.name} and {SimulationStrategy.REJECTION_SAMPLING.name}, but got "
                                f"{self.state.simulation_strategy} instead.")
 
-        return repertoire
+        return repertoires
 
-    def _make_sequences_by_rejection(self, item, path: Path) -> pd.DataFrame:
-        sampler = RejectionSampler(simulation_item=item, sequence_type=self.state.sequence_type, all_signals=self.state.signals, seed=self.seed)
-        sequences = sampler.make_repertoire_sequences(path)
-        self.seed = sampler.seed + 1
-        return sequences
+    # def _make_repertoire_with_signal(self, item: LIgOSimulationItem, path: Path, summary_path: Path, repertoire_id: str) -> Repertoire:
+    #     repertoires_path = PathBuilder.build(self.state.result_path / "repertoires")
+    #     metadata = {**{signal.id: True for signal in item.signals},
+    #                 **{signal.id: False for signal in self.state.signals if signal not in item.signals}}
+    #
+    #     if self.state.simulation_strategy == SimulationStrategy.IMPLANTING:
+    #
+    #         new_sequences = self._make_sequences_by_implanting(item=item, path=path, summary_path=summary_path, repertoire_id=repertoire_id)
+    #         repertoire = Repertoire.build_from_sequence_objects(new_sequences, path=repertoires_path, metadata=metadata)
+    #
+    #     elif self.state.simulation_strategy == SimulationStrategy.REJECTION_SAMPLING:
+    #
+    #         new_sequences_df = self._make_sequences_by_rejection(item=item, path=path)
+    #         repertoire = Repertoire.build(**new_sequences_df.to_dict('list'), path=repertoires_path, metadata=metadata)
+    #
+    #     else:
+    #         raise RuntimeError(f"{LIgOSimulationInstruction.__name__}: simulation strategy was not properly set, accepted are "
+    #                            f"{SimulationStrategy.IMPLANTING.name} and {SimulationStrategy.REJECTION_SAMPLING.name}, but got "
+    #                            f"{self.state.simulation_strategy} instead.")
+    #
+    #     return repertoire
 
     def _make_sequences_by_implanting(self, item: LIgOSimulationItem, path: Path, summary_path: Path, repertoire_id: str) -> list:
 

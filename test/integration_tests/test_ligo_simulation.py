@@ -95,7 +95,8 @@ class TestLIgOSimulation(TestCase):
                     "sequence_type": "amino_acid",
                     "use_generation_probabilities": False,
                     "simulation_strategy": "REJECTION_SAMPLING",
-                    "store_signal_in_receptors": True
+                    "store_signal_in_receptors": True,
+                    "sequence_batch_size": 100
                 }
             },
             "output": {
@@ -125,4 +126,4 @@ class TestLIgOSimulation(TestCase):
         metadata_df = pd.read_csv(path / "result/inst1/metadata.csv", comment=Constants.COMMENT_SIGN)
         self.assertTrue("signal1" in metadata_df.columns)
 
-        # shutil.rmtree(path)
+        shutil.rmtree(path)
