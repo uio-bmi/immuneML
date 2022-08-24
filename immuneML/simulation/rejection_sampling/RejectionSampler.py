@@ -5,14 +5,17 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import List
 
+import bionumpy as bnp
 import numpy as np
 import pandas as pd
+from bionumpy.string_matcher import RegexMatcher
 
 from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
 from immuneML.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
 from immuneML.data_model.repertoire.Repertoire import Repertoire
 from immuneML.environment.SequenceType import SequenceType
 from immuneML.simulation.LIgOSimulationItem import LIgOSimulationItem
+from immuneML.simulation.generative_models.OLGAAsTSV import OLGAAsTSV
 from immuneML.simulation.implants.Signal import Signal
 from immuneML.util.PathBuilder import PathBuilder
 
@@ -106,11 +109,14 @@ class RejectionSampler:
         iteration = 1
 
         while (sum(sequence_with_signal_count.values()) != 0 or sequence_without_signal_count != 0) and iteration <= self.max_iterations:
-            background_sequences = self.sim_item.generative_model.generate_sequences(
-                max(self.sim_item.number_of_receptors_in_repertoire, self.sequence_batch_size), seed=self.seed,
-                path=path / f"gen_model/tmp_{self.seed}.tsv", sequence_type=self.sequence_type)
+            sequence_path = PathBuilder.build(path / f"gen_model/") / "tmp_{self.seed}.tsv"
+
+            self.sim_item.generative_model.generate_sequences(max(self.sim_item.number_of_receptors_in_repertoire, self.sequence_batch_size),
+                                                              seed=self.seed, path=sequence_path, sequence_type=self.sequence_type)
             self.seed += 1
 
+            background_sequences = bnp.open(sequence_path, mode='full', buffer_type=bnp.delimited_buffers.get_bufferclass_for_datatype(OLGAAsTSV),
+                                            has_header=True)
             signal_matrix = self.get_signal_matrix(background_sequences)
             background_sequences, signal_matrix = self.filter_out_illegal_sequences(background_sequences, signal_matrix)
 
@@ -129,7 +135,8 @@ class RejectionSampler:
 
     def _update_seqs_without_signal(self, sequence_without_signal_count, signal_matrix, background_sequences: pd.DataFrame):
         if sequence_without_signal_count > 0:
-            seqs = background_sequences[signal_matrix.sum(axis=1) == 0][:sequence_without_signal_count]
+            seqs = pd.DataFrame({key: getattr(background_sequences, key)[signal_matrix.sum(axis=1) == 0][:sequence_without_signal_count].to_sequences()
+                                 for key in self.sim_item.generative_model.OUTPUT_COLUMNS})
             self._store_sequences(seqs, self.seqs_no_signal_path)
             return sequence_without_signal_count - len(seqs)
         else:
@@ -140,8 +147,9 @@ class RejectionSampler:
 
         for signal in self.sim_item.signals:
             if sequence_with_signal_count[signal.id] > 0:
-                selection = signal_matrix[signal.id]
-                seqs = background_sequences.loc[selection][:sequence_with_signal_count[signal.id]]
+                selection = signal_matrix[:, all_signal_ids.index(signal.id)]
+                seqs = pd.DataFrame({key: getattr(background_sequences, key)[selection][:sequence_with_signal_count[signal.id]].to_sequences()
+                                     for key in self.sim_item.generative_model.OUTPUT_COLUMNS})
                 seqs[all_signal_ids] = pd.DataFrame([[True if id == signal.id else False for id in all_signal_ids]], index=seqs.index)
                 self._store_sequences(seqs, self.seqs_with_signal_path[signal.id])
                 sequence_with_signal_count[signal.id] -= len(seqs)
@@ -195,15 +203,50 @@ class RejectionSampler:
         other_signals = [signal.id not in sim_signal_ids for signal in self.all_signals]
         background_to_keep = np.logical_and(signal_matrix.sum(axis=1) <= RejectionSampler.MAX_SIGNALS_PER_SEQUENCE,
                                             signal_matrix[:, other_signals] == 0 if any(other_signals) else 1)
-        sequences = sequences[background_to_keep]
-        signal_matrix = signal_matrix[background_to_keep]
 
-        return sequences, signal_matrix
+        return sequences[background_to_keep], signal_matrix[background_to_keep]
 
-    def get_signal_matrix(self, sequences: pd.DataFrame) -> np.ndarray:
-        sequence_mask = sequences.apply(lambda row: self.contains_signals(row.to_dict()), axis=1, result_type='expand')
-        sequence_mask.columns = [signal.id for signal in self.all_signals]
-        return sequence_mask
+    def get_signal_matrix(self, sequences) -> np.ndarray:
 
-    def contains_signals(self, sequence: dict):
-        return [signal.is_in(sequence, self.sequence_type) for signal in self.all_signals]
+        encoding = bnp.encodings.ACTGEncoding if self.sequence_type == SequenceType.NUCLEOTIDE else bnp.encodings.AminoAcidEncoding
+
+        sequence_array = bnp.as_sequence_array(sequences.sequence if self.sequence_type == SequenceType.NUCLEOTIDE else sequences.sequence_aa,
+                                               encoding=encoding)
+        v_call_array = bnp.as_sequence_array(sequences.v_call)
+        j_call_array = bnp.as_sequence_array(sequences.j_call)
+
+        signal_matrix = np.zeros((self.sequence_batch_size, len(self.all_signals)))
+
+        for index, signal in enumerate(self.all_signals):
+            for motifs, v_call, j_call in signal.get_all_motif_instances(self.sequence_type):
+
+                matches_gene = self._match_genes(v_call, v_call_array, j_call, j_call_array)
+                matches = None
+
+                for motif in motifs:
+
+                    matches_motif = self._match_motif(motif, encoding, sequence_array)
+                    if matches is None:
+                        matches = np.logical_and(matches_motif, matches_gene)
+                    else:
+                        matches = np.logical_or(matches, np.logical_and((matches_motif, matches_gene)))
+
+                signal_matrix[:, index] = np.logical_or(signal_matrix[:, index], np.logical_or.reduce(matches, axis=1))
+
+        return signal_matrix.astype(dtype=np.bool)
+
+    def _match_genes(self, v_call, v_call_array, j_call, j_call_array):
+        if v_call is not None and v_call != "":
+            matches_gene = np.where(np.char.find(v_call_array, v_call) != -1)
+        else:
+            matches_gene = np.ones(self.sequence_batch_size)
+
+        if j_call is not None and j_call != "":
+            matches_gene = np.logical_and(matches_gene, np.where(np.char.find(j_call_array, j_call) != -1))
+
+        return matches_gene.reshape(-1, 1)
+
+    def _match_motif(self, motif, encoding, sequence_array):
+        matcher = RegexMatcher(motif, encoding=encoding, allow_flexible_lengths=True)
+        matches = matcher.rolling_window(sequence_array)
+        return matches

@@ -1,4 +1,5 @@
 # quality: gold
+from itertools import chain
 from pathlib import Path
 from typing import List
 
@@ -66,6 +67,9 @@ class Signal:
 
     def is_in(self, sequence: dict, sequence_type: SequenceType):
         return any(motif.is_in(sequence, sequence_type) for motif in self.motifs)
+
+    def get_all_motif_instances(self, sequence_type: SequenceType):
+        return chain((motif.get_all_possible_instances(sequence_type), motif.v_call, motif.j_call) for motif in self.motifs)
 
     def __str__(self):
         return "Signal id: " + self.id + "; motifs: " + ", ".join([str(motif) for motif in self.motifs])

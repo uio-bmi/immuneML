@@ -1,4 +1,5 @@
 import random
+from itertools import combinations
 
 import numpy as np
 
@@ -76,8 +77,6 @@ class GappedKmerInstantiation(MotifInstantiationStrategy):
 
         self.hamming_distance_probabilities = hamming_distance_probabilities
         self.position_weights = position_weights
-        # if weights are not given for each letter of the alphabet, distribute the remaining probability
-        # equally among letters
         self.alphabet_weights = alphabet_weights
         self._min_gap = min_gap
         self._max_gap = max_gap
@@ -87,9 +86,6 @@ class GappedKmerInstantiation(MotifInstantiationStrategy):
 
     def instantiate_motif(self, base, sequence_type: SequenceType = SequenceType.AMINO_ACID) -> MotifInstance:
 
-        self.alphabet_weights = self.set_default_weights(self.alphabet_weights,
-                                                         EnvironmentSettings.get_sequence_alphabet(sequence_type=sequence_type))
-
         allowed_positions = list(range(len(base)))
         instance = list(base)
 
@@ -97,26 +93,45 @@ class GappedKmerInstantiation(MotifInstantiationStrategy):
             gap_index = base.index("/")
             allowed_positions.remove(gap_index)
 
-        self.position_weights = self.set_default_weights(self.position_weights, allowed_positions)
+        alphabet_weights = self.set_default_weights(self.alphabet_weights, EnvironmentSettings.get_sequence_alphabet(sequence_type=sequence_type))
+        position_weights = self.set_default_weights(self.position_weights, allowed_positions)
 
         gap_size = np.random.choice(range(self._min_gap, self._max_gap + 1))
-        instance = self._substitute_letters(self.position_weights,
-                                            self.alphabet_weights,
-                                            allowed_positions, instance)
+        instance = self._substitute_letters(position_weights, alphabet_weights, allowed_positions, instance)
         instance = "".join(instance)
 
         return MotifInstance(instance, gap_size)
 
-    def get_all_possible_instances(self, base) -> list:
-        gap_length = f"{self._min_gap},{self._max_gap}"
-        base_motif = base.replace("/", ".{" + gap_length + "}")
+    def get_all_possible_instances(self, base, sequence_type: SequenceType) -> list:
+
+        motif_instances = []
 
         if self.hamming_distance_probabilities:
-            raise NotImplementedError
-            # allowed_positions = [i for i in range(len(base)) if base[i] != "/"]
-            # for key, val in self.hamming_distance_probabilities.items():
+            allowed_positions = [i for i in range(len(base)) if base[i] != "/"]
+            allowed_positions = [key for key, val in self.set_default_weights(self.position_weights, allowed_positions).items() if val > 0]
 
-        return [base_motif]
+            alphabet_weights = self.set_default_weights(self.alphabet_weights, EnvironmentSettings.get_sequence_alphabet(sequence_type=sequence_type))
+
+            for hamming_dist in self.hamming_distance_probabilities.keys():
+                replacement_alphabet = "[" + "".join([letter for letter, weight in alphabet_weights.items() if weight > 0]) + "]"
+                for position_group in combinations(allowed_positions, hamming_dist):
+                    motif_parts = [base[i: j] for i, j in zip([0] + [el + 1 for el in position_group], position_group + [len(base)])]
+                    motif_instance = replacement_alphabet.join(motif_parts)
+                    motif_instance = self._add_gap(motif_instance)
+
+                    motif_instances.append(motif_instance)
+        else:
+            motif_instance = self._add_gap(base)
+            motif_instances.append(motif_instance)
+
+        return motif_instances
+
+    def _add_gap(self, motif_instance):
+        if self._max_gap > 0 or "/" in motif_instance:
+            gap_length = f"{self._min_gap},{self._max_gap}"
+            return motif_instance.replace("/", ".{" + gap_length + "}")
+        else:
+            return motif_instance
 
     def _substitute_letters(self, position_weights, alphabet_weights, allowed_positions: list, instance: list):
 

@@ -15,5 +15,5 @@ class MotifInstantiationStrategy(metaclass=abc.ABCMeta):
         pass
 
     @abc.abstractmethod
-    def get_all_possible_instances(self, base) -> list:
+    def get_all_possible_instances(self, base: str, sequence_type: SequenceType) -> list:
         pass

@@ -1,3 +1,4 @@
+import os
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Union
@@ -93,21 +94,42 @@ class OLGA(GenerativeModel):
         self.sequence_gen_model = SequenceGenerationVDJ(olga_gen_model, genomic_data) if is_vdj \
             else SequenceGenerationVJ(olga_gen_model, genomic_data)
 
-    def generate_sequences(self, count: int, seed: int = 1, path: Path = None, sequence_type: SequenceType = SequenceType.AMINO_ACID) -> pd.DataFrame:
-
-        if not self.use_only_productive:
-            raise NotImplementedError("Generating unproductive sequences is currently not supported.")
+    def generate_sequences(self, count: int, seed: int = 1, path: Path = None, sequence_type: SequenceType = SequenceType.AMINO_ACID) -> Path:
 
         if not self.sequence_gen_model:
             self.load_model()
 
+        if self.use_only_productive:
+            self._generate_productive_sequences(count, path, seed)
+        else:
+            self._generate_all_sequences(count, path, seed)
+
+        return path
+
+    def _generate_all_sequences(self, count: int, path: Path, seed: int):
+        command = f"olga-generate_sequences -n {count} --seed={seed} -o {path}"
+        if self.default_model_name:
+            command += f" --{self.default_model_name}"
+        elif self.model_path:
+            if self.chain in [Chain.BETA, Chain.HEAVY]:
+                command += f" --set_custom_model_VDJ {self.model_path}"
+            else:
+                command += f" --set_custom_model_VJ {self.model_path}"
+
+        code = os.system(command)
+
+        if code != 0:
+            raise RuntimeError(f"An error occurred while running the OLGA model with the following parameters: {vars(self)}.\nError code: {code}.")
+
+    def _generate_productive_sequences(self, count: int, path: Path, seed: int):
         sequences = pd.DataFrame(index=np.arange(count), columns=OLGA.OUTPUT_COLUMNS)
         for i in range(count):
             seq_row = self.sequence_gen_model.gen_rnd_prod_CDR3()
             sequences.loc[i] = (seq_row[0], seq_row[1], self.v_gene_mapping[seq_row[2]], self.j_gene_mapping[seq_row[3]],
                                 RegionType.IMGT_JUNCTION.name, SequenceFrameType.IN.name)
 
-        return sequences
+        sequences.to_csv(path, index=False, sep='\t')
+        return path
 
     def compute_p_gens(self):
         raise NotImplementedError

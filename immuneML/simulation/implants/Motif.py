@@ -120,12 +120,18 @@ class Motif:
 
     def is_in(self, sequence: dict, sequence_type: SequenceType) -> bool:
         if self.all_possible_instances is None:
-            self.all_possible_instances = self.instantiation.get_all_possible_instances(self.seed)
+            self.all_possible_instances = self.instantiation.get_all_possible_instances(self.seed, sequence_type)
 
         gene_match = all(getattr(self, gene) in getattr(sequence, gene) if getattr(self, gene) else True for gene in ['v_call', 'j_call'])
         return gene_match and \
                any(re.search(motif_instance, sequence['sequence'] if sequence_type == SequenceType.NUCLEOTIDE else sequence['sequence_aa'])
                    for motif_instance in self.all_possible_instances)
+
+    def get_all_possible_instances(self, sequence_type: SequenceType):
+        if self.all_possible_instances is None:
+            self.all_possible_instances = self.instantiation.get_all_possible_instances(self.seed, sequence_type)
+
+        return self.all_possible_instances
 
     def __str__(self):
         return self.identifier + " - " + \
