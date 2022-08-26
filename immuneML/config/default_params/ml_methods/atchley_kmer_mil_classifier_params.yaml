@@ -5,3 +5,5 @@ learning_rate: 0.01
 random_seed: 100
 zero_abundance_weight_init: True
 number_of_threads: 8
+initialization_count: 1
+threshold: -0.0001
