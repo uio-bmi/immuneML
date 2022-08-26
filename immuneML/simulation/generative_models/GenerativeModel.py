@@ -23,3 +23,11 @@ class GenerativeModel:
     @abc.abstractmethod
     def can_compute_p_gens(self) -> bool:
         pass
+
+    @abc.abstractmethod
+    def can_generate_from_skewed_gene_models(self) -> bool:
+        pass
+
+    @abc.abstractmethod
+    def generate_from_skewed_gene_models(self, gene_pair_probabilities: dict) -> bool:
+        pass

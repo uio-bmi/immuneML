@@ -137,6 +137,12 @@ class OLGA(GenerativeModel):
     def can_compute_p_gens(self) -> bool:
         return True
 
+    def can_generate_from_skewed_gene_models(self) -> bool:
+        return True
+
+    def generate_from_skewed_gene_models(self, gene_pair_probabilities: dict) -> bool:
+        pass
+
     def _import_olga_sequences(self, sequence_type: SequenceType, path: Path):
         import_empty_nt_sequences = False if sequence_type == SequenceType.NUCLEOTIDE else True
 
