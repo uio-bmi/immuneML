@@ -29,5 +29,5 @@ class GenerativeModel:
         pass
 
     @abc.abstractmethod
-    def generate_from_skewed_gene_models(self, gene_pair_probabilities: dict) -> bool:
+    def generate_from_skewed_gene_models(self, v_genes: list, j_genes: list, seed: int, path: Path, sequence_type: SequenceType, batch_size: int):
         pass

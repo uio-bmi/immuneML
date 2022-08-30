@@ -24,12 +24,13 @@ class TestLIgOSimulation(TestCase):
                 "motifs": {
                     "motif1": {
                         "seed": "AS",
+                        "v_call": "TRBV7",
                         "instantiation": {
                             "GappedKmer": {
                                 # "max_gap": 1,
                                 "alphabet_weights": None,
                                 "position_weights": None
-                            },
+                            }
                         }
                     },
                     "motif2": {
@@ -42,8 +43,7 @@ class TestLIgOSimulation(TestCase):
                         "motifs": ["motif1"],
                         "implanting": "HealthySequence",
                         "sequence_position_weights": None,
-                        "implanting_computation": "round",
-                        "v_gene": "TRBV7"
+                        "implanting_computation": "round"
                     },
                     "signal2": {
                         "motifs": ["motif2"],

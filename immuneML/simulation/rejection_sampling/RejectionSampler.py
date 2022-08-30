@@ -2,13 +2,15 @@ import logging
 import shutil
 import uuid
 from dataclasses import dataclass
+from itertools import chain
 from pathlib import Path
 from typing import List
 
 import bionumpy as bnp
 import numpy as np
 import pandas as pd
-from bionumpy.string_matcher import RegexMatcher
+from bionumpy.encodings import BaseEncoding
+from bionumpy.string_matcher import RegexMatcher, StringMatcher
 
 from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
 from immuneML.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
@@ -103,16 +105,26 @@ class RejectionSampler:
             f"{RejectionSampler.__name__}: error when simulating repertoire, needed {self.sim_item.number_of_receptors_in_repertoire} sequences, " \
             f"but got {sequences.shape[0]}."
 
+    def _make_sequences_from_generative_model(self, sequence_path: Path, needs_seqs_with_signal: bool):
+        self.sim_item.generative_model.generate_sequences(self.sequence_batch_size, seed=self.seed, path=sequence_path,
+                                                          sequence_type=self.sequence_type)
+
+        if self.sim_item.generative_model.can_generate_from_skewed_gene_models() and needs_seqs_with_signal:
+            v_genes = sorted(list(set(chain.from_iterable([[motif.v_call for motif in signal.motifs if motif.v_call] for signal in self.sim_item.signals]))))
+            j_genes = sorted(list(set(chain.from_iterable([[motif.j_call for motif in signal.motifs if motif.j_call] for signal in self.sim_item.signals]))))
+
+            self.sim_item.generative_model.generate_from_skewed_gene_models(v_genes=v_genes, j_genes=j_genes, seed=self.seed, path=sequence_path,
+                                                                            sequence_type=self.sequence_type, batch_size=self.sequence_batch_size)
+
     def _generate_sequences(self, path: Path, sequence_without_signal_count: int, sequence_with_signal_count: dict):
         PathBuilder.build(path)
         self._setup_tmp_sequence_paths(path)
         iteration = 1
 
         while (sum(sequence_with_signal_count.values()) != 0 or sequence_without_signal_count != 0) and iteration <= self.max_iterations:
-            sequence_path = PathBuilder.build(path / f"gen_model/") / "tmp_{self.seed}.tsv"
+            sequence_path = PathBuilder.build(path / f"gen_model/") / f"tmp_{self.seed}.tsv"
 
-            self.sim_item.generative_model.generate_sequences(max(self.sim_item.number_of_receptors_in_repertoire, self.sequence_batch_size),
-                                                              seed=self.seed, path=sequence_path, sequence_type=self.sequence_type)
+            self._make_sequences_from_generative_model(sequence_path, needs_seqs_with_signal=sum(sequence_with_signal_count.values()) != 0)
             self.seed += 1
 
             background_sequences = bnp.open(sequence_path, mode='full', buffer_type=bnp.delimited_buffers.get_bufferclass_for_datatype(OLGAAsTSV),
@@ -124,7 +136,7 @@ class RejectionSampler:
             sequence_with_signal_count = self._update_seqs_with_signal(sequence_with_signal_count, signal_matrix, background_sequences)
 
             if iteration == int(self.max_iterations * 0.75):
-                logging.warning(f"Iteration {iteration} out of {self.max_iterations} max iterations reached.")
+                logging.warning(f"Iteration {iteration} out of {self.max_iterations} max iterations reached during rejection sampling.")
             iteration += 1
 
     def _setup_tmp_sequence_paths(self, path):
@@ -212,10 +224,10 @@ class RejectionSampler:
 
         sequence_array = bnp.as_sequence_array(sequences.sequence if self.sequence_type == SequenceType.NUCLEOTIDE else sequences.sequence_aa,
                                                encoding=encoding)
-        v_call_array = bnp.as_sequence_array(sequences.v_call)
-        j_call_array = bnp.as_sequence_array(sequences.j_call)
+        v_call_array = bnp.as_sequence_array(sequences.v_call, encoding=bnp.encodings.BaseEncoding)
+        j_call_array = bnp.as_sequence_array(sequences.j_call, encoding=bnp.encodings.BaseEncoding)
 
-        signal_matrix = np.zeros((self.sequence_batch_size, len(self.all_signals)))
+        signal_matrix = np.zeros((len(sequence_array), len(self.all_signals)))
 
         for index, signal in enumerate(self.all_signals):
             for motifs, v_call, j_call in signal.get_all_motif_instances(self.sequence_type):
@@ -237,16 +249,18 @@ class RejectionSampler:
 
     def _match_genes(self, v_call, v_call_array, j_call, j_call_array):
         if v_call is not None and v_call != "":
-            matches_gene = np.where(np.char.find(v_call_array, v_call) != -1)
+            matcher = StringMatcher(v_call, encoding=BaseEncoding)
+            matches_gene = np.any(matcher.rolling_window(v_call_array), axis=1)
         else:
-            matches_gene = np.ones(self.sequence_batch_size)
+            matches_gene = np.ones(len(v_call_array))
 
         if j_call is not None and j_call != "":
-            matches_gene = np.logical_and(matches_gene, np.where(np.char.find(j_call_array, j_call) != -1))
+            matcher = StringMatcher(j_call, encoding=BaseEncoding)
+            matches_gene = np.logical_and(matches_gene, np.any(matcher.rolling_window(j_call_array), axis=1))
 
         return matches_gene.reshape(-1, 1)
 
     def _match_motif(self, motif, encoding, sequence_array):
-        matcher = RegexMatcher(motif, encoding=encoding, allow_flexible_lengths=True)
+        matcher = RegexMatcher(motif, encoding=encoding)
         matches = matcher.rolling_window(sequence_array)
         return matches

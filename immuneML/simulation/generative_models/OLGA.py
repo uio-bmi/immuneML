@@ -16,8 +16,10 @@ from immuneML.data_model.receptor.receptor_sequence.SequenceFrameType import Seq
 from immuneML.dsl.DefaultParamsLoader import DefaultParamsLoader
 from immuneML.environment.SequenceType import SequenceType
 from immuneML.simulation.generative_models.GenerativeModel import GenerativeModel
+from immuneML.simulation.util.igor_helper import make_skewed_model_files
 from immuneML.util.ImportHelper import ImportHelper
 from immuneML.util.ParameterValidator import ParameterValidator
+from immuneML.util.PathBuilder import PathBuilder
 
 
 @dataclass
@@ -55,7 +57,8 @@ class OLGA(GenerativeModel):
 
         location = OLGA.__name__
 
-        ParameterValidator.assert_keys(kwargs.keys(), ['model_path', 'default_model_name', 'chain', 'use_only_productive'], location, 'OLGA generative model')
+        ParameterValidator.assert_keys(kwargs.keys(), ['model_path', 'default_model_name', 'chain', 'use_only_productive'], location,
+                                       'OLGA generative model')
         ParameterValidator.assert_type_and_value(kwargs['use_only_productive'], bool, location, 'use_only_productive')
 
         if kwargs['model_path']:
@@ -78,21 +81,27 @@ class OLGA(GenerativeModel):
 
         return OLGA(**{**kwargs, **{'chain': chain}})
 
-    def load_model(self):
+    def load_model(self, return_new_model: bool = False, model_path: Path = None):
+        model_path = self.model_path if model_path is None else model_path
         is_vdj = self.chain in [Chain.BETA, Chain.HEAVY]
         olga_gen_model = load_model.GenerativeModelVDJ() if is_vdj else load_model.GenerativeModelVJ()
-        olga_gen_model.load_and_process_igor_model(str(self.model_path / OLGA.MODEL_FILENAMES['marginals']))
+        olga_gen_model.load_and_process_igor_model(str(model_path / OLGA.MODEL_FILENAMES['marginals']))
 
         genomic_data = load_model.GenomicDataVDJ() if is_vdj else load_model.GenomicDataVJ()
-        genomic_data.load_igor_genomic_data(params_file_name=str(self.model_path / OLGA.MODEL_FILENAMES['params']),
-                                            V_anchor_pos_file=str(self.model_path / OLGA.MODEL_FILENAMES['v_gene_anchor']),
-                                            J_anchor_pos_file=str(self.model_path / OLGA.MODEL_FILENAMES['j_gene_anchor']))
+        genomic_data.load_igor_genomic_data(params_file_name=str(model_path / OLGA.MODEL_FILENAMES['params']),
+                                            V_anchor_pos_file=str(model_path / OLGA.MODEL_FILENAMES['v_gene_anchor']),
+                                            J_anchor_pos_file=str(model_path / OLGA.MODEL_FILENAMES['j_gene_anchor']))
 
-        self.v_gene_mapping = pd.read_csv(self.model_path / OLGA.MODEL_FILENAMES['v_gene_anchor'])['gene'].values
-        self.j_gene_mapping = pd.read_csv(self.model_path / OLGA.MODEL_FILENAMES['j_gene_anchor'])['gene'].values
+        v_gene_mapping = pd.read_csv(model_path / OLGA.MODEL_FILENAMES['v_gene_anchor'])['gene'].values
+        j_gene_mapping = pd.read_csv(model_path / OLGA.MODEL_FILENAMES['j_gene_anchor'])['gene'].values
 
-        self.sequence_gen_model = SequenceGenerationVDJ(olga_gen_model, genomic_data) if is_vdj \
+        sequence_gen_model = SequenceGenerationVDJ(olga_gen_model, genomic_data) if is_vdj \
             else SequenceGenerationVJ(olga_gen_model, genomic_data)
+
+        if return_new_model:
+            return {"sequence_gen_model": sequence_gen_model, 'v_gene_mapping': v_gene_mapping, 'j_gene_mapping': j_gene_mapping}
+        else:
+            self.sequence_gen_model, self.v_gene_mapping, self.j_gene_mapping = sequence_gen_model, v_gene_mapping, j_gene_mapping
 
     def generate_sequences(self, count: int, seed: int = 1, path: Path = None, sequence_type: SequenceType = SequenceType.AMINO_ACID) -> Path:
 
@@ -106,27 +115,31 @@ class OLGA(GenerativeModel):
 
         return path
 
-    def _generate_all_sequences(self, count: int, path: Path, seed: int):
+    def _generate_all_sequences(self, count: int, path: Path, seed: int, model_path: Path = None):
         command = f"olga-generate_sequences -n {count} --seed={seed} -o {path}"
-        if self.default_model_name:
+        if model_path is not None:
+            command += f" --set_custom_model_VDJ {model_path}" if self.chain in [Chain.BETA, Chain.HEAVY] else f" --set_custom_model_VJ {model_path}"
+        elif self.default_model_name:
             command += f" --{self.default_model_name}"
         elif self.model_path:
-            if self.chain in [Chain.BETA, Chain.HEAVY]:
-                command += f" --set_custom_model_VDJ {self.model_path}"
-            else:
-                command += f" --set_custom_model_VJ {self.model_path}"
+            command += f" --set_custom_model_VDJ {self.model_path}" if self.chain in [Chain.BETA,
+                                                                                      Chain.HEAVY] else f" --set_custom_model_VJ {self.model_path}"
 
         code = os.system(command)
 
         if code != 0:
             raise RuntimeError(f"An error occurred while running the OLGA model with the following parameters: {vars(self)}.\nError code: {code}.")
 
-    def _generate_productive_sequences(self, count: int, path: Path, seed: int):
+    def _generate_productive_sequences(self, count: int, path: Path, seed: int, sequence_gen_model=None, v_gene_mapping=None, j_gene_mapping=None):
         sequences = pd.DataFrame(index=np.arange(count), columns=OLGA.OUTPUT_COLUMNS)
+        sequence_gen_model = self.sequence_gen_model if sequence_gen_model is None else sequence_gen_model
+        v_gene_mapping = self.v_gene_mapping if v_gene_mapping is None else v_gene_mapping
+        j_gene_mapping = self.j_gene_mapping if j_gene_mapping is None else j_gene_mapping
+
         for i in range(count):
-            seq_row = self.sequence_gen_model.gen_rnd_prod_CDR3()
-            sequences.loc[i] = (seq_row[0], seq_row[1], self.v_gene_mapping[seq_row[2]], self.j_gene_mapping[seq_row[3]],
-                                RegionType.IMGT_JUNCTION.name, SequenceFrameType.IN.name)
+            seq_row = sequence_gen_model.gen_rnd_prod_CDR3()
+            sequences.loc[i] = (seq_row[0], seq_row[1], v_gene_mapping[seq_row[2]], j_gene_mapping[seq_row[3]], RegionType.IMGT_JUNCTION.name,
+                                SequenceFrameType.IN.name)
 
         sequences.to_csv(path, index=False, sep='\t')
         return path
@@ -140,8 +153,23 @@ class OLGA(GenerativeModel):
     def can_generate_from_skewed_gene_models(self) -> bool:
         return True
 
-    def generate_from_skewed_gene_models(self, gene_pair_probabilities: dict) -> bool:
-        pass
+    def generate_from_skewed_gene_models(self, v_genes: list, j_genes: list, seed: int, path: Path, sequence_type: SequenceType, batch_size: int):
+        if len(v_genes) > 0 or len(j_genes) > 0:
+
+            skewed_model_path = PathBuilder.build(path.parent / "skewed_model/")
+            skewed_seqs_path = PathBuilder.build(path.parent) / "tmp_skewed_model_seqs.tsv"
+            make_skewed_model_files(v_genes, j_genes, self.model_path, skewed_model_path)
+
+            if self.use_only_productive:
+                model_dict = self.load_model(return_new_model=True, model_path=skewed_model_path)
+                self._generate_productive_sequences(count=batch_size, path=skewed_seqs_path, seed=seed, **model_dict)
+            else:
+                self._generate_all_sequences(count=batch_size, path=skewed_seqs_path, seed=seed, model_path=skewed_model_path)
+
+            pd.read_csv(skewed_seqs_path, sep='\t').to_csv(path, mode='a', sep='\t', index=False)
+
+            if skewed_seqs_path.is_file():
+                os.remove(skewed_seqs_path)
 
     def _import_olga_sequences(self, sequence_type: SequenceType, path: Path):
         import_empty_nt_sequences = False if sequence_type == SequenceType.NUCLEOTIDE else True
