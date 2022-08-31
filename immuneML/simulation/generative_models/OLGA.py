@@ -34,6 +34,10 @@ class OLGA(GenerativeModel):
     of B- and T-cell receptor amino acid sequences and motifs, Bioinformatics, Volume 35, Issue 17, 1 September 2019, Pages 2974–2981,
     https://doi.org/10.1093/bioinformatics/btz035
 
+    Note:
+        - OLGA model generates sequences that correspond to IMGT junction and are used for matching as such. See the https://github.com/statbiophys/OLGA for more details.
+        - Gene names are as provided in OLGA (either in default models or in the user-specified model files). For simulation, one should use gene names in the same format.
+
     """
     model_path: Path
     default_model_name: str
