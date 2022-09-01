@@ -94,7 +94,7 @@ class SequenceAbundanceEncoder(DatasetEncoder):
         return SequenceAbundanceEncoder(**params)
 
     def encode(self, dataset, params: EncoderParams):
-        AbundanceEncoderHelper.check_labels(params.label_config, SequenceAbundanceEncoder.__name__)
+        EncoderHelper.check_positive_class_labels(params.label_config, SequenceAbundanceEncoder.__name__)
 
         self.comparison_data = self._build_comparison_data(dataset, params)
         return self._encode_data(dataset, params)

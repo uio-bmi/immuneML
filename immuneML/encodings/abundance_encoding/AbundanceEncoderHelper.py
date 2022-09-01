@@ -13,22 +13,6 @@ class AbundanceEncoderHelper:
     INVALID_P_VALUE = 2.0
 
     @staticmethod
-    def check_labels(label_config: LabelConfiguration, location: str):
-        labels = label_config.get_label_objects()
-        assert len(labels) == 1, f"{location}: this encoding works only for single label."
-
-        label = labels[0]
-
-        assert isinstance(label, Label) and label.positive_class is not None and label.positive_class != "", \
-            f"{location}: positive_class parameter was not set for label {label}. It has to be set to determine the " \
-            f"receptor sequences associated with the positive class. " \
-            f"To use this encoder, in the label definition in the specification of the instruction, define " \
-            f"the positive class for the label. See documentation for this encoder for more details."
-
-        assert len(label.values) == 2, f"{location}: only binary classification (2 classes) is possible when extracting " \
-                                       f"relevant sequences for the label, but got these classes for label {label.name} instead: {label.values}."
-
-    @staticmethod
     def check_is_positive_class(dataset, matrix_repertoire_ids, label_config: LabelConfiguration):
         label = label_config.get_label_objects()[0]
 

@@ -124,7 +124,7 @@ class KmerAbundanceEncoder(DatasetEncoder):
         return KmerAbundanceEncoder(**prepared_params)
 
     def encode(self, dataset, params: EncoderParams):
-        AbundanceEncoderHelper.check_labels(params.label_config, KmerAbundanceEncoder.__name__)
+        EncoderHelper.check_positive_class_labels(params.label_config, KmerAbundanceEncoder.__name__)
 
         self._prepare_kmer_presence_data(dataset, params)
         return self._encode_data(dataset, params)

@@ -27,8 +27,10 @@ class ParameterValidator:
 
     @staticmethod
     def assert_type_and_value(value, parameter_type, location: str, parameter_name: str, min_inclusive=None, max_inclusive=None, exact_value=None):
+        type_name = " or ".join([t.__name__ for t in parameter_type]) if type(parameter_type) is tuple else parameter_type.__name__
+
         assert isinstance(value, parameter_type), f"{location}: {value} is not a valid value for parameter {parameter_name}. " \
-                                                  f"It has to be of type {parameter_type.__name__}, but is now of type {type(value).__name__}."
+                                                  f"It has to be of type {type_name}, but is now of type {type(value).__name__}."
 
         if min_inclusive is not None:
             assert value >= min_inclusive, f"{location}: {value} is not a valid value for parameter {parameter_name}. " \

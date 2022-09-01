@@ -142,7 +142,7 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
         return CompAIRRSequenceAbundanceEncoder(**prepared_params)
 
     def encode(self, dataset, params: EncoderParams):
-        AbundanceEncoderHelper.check_labels(params.label_config, CompAIRRSequenceAbundanceEncoder.__name__)
+        EncoderHelper.check_positive_class_labels(params.label_config, CompAIRRSequenceAbundanceEncoder.__name__)
         self.compairr_sequence_presence = self._prepare_sequence_presence_data(dataset, params)
 
         return self._encode_data(dataset, params)
