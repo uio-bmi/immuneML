@@ -2,7 +2,7 @@ from npstructures import npdataclass
 
 
 @npdataclass
-class OLGAAsTSV:
+class GenModelAsTSV:
     sequence: str
     sequence_aa: str
     v_call: str

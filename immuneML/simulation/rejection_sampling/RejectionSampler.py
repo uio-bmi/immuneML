@@ -17,7 +17,7 @@ from immuneML.data_model.receptor.receptor_sequence.SequenceMetadata import Sequ
 from immuneML.data_model.repertoire.Repertoire import Repertoire
 from immuneML.environment.SequenceType import SequenceType
 from immuneML.simulation.LIgOSimulationItem import LIgOSimulationItem
-from immuneML.simulation.generative_models.OLGAAsTSV import OLGAAsTSV
+from immuneML.simulation.generative_models.GenModelAsTSV import GenModelAsTSV
 from immuneML.simulation.implants.Signal import Signal
 from immuneML.util.PathBuilder import PathBuilder
 
@@ -32,6 +32,7 @@ class RejectionSampler:
     seqs_no_signal_path: Path = None
     seqs_with_signal_path: dict = None
     seed: int = 1
+    export_pgens: bool = None
 
     MAX_SIGNALS_PER_SEQUENCE = 1
 
@@ -54,6 +55,7 @@ class RejectionSampler:
 
             sequences = self._get_no_signal_sequences(repertoire_index=i, seqs_no_signal_count=seqs_no_signal_count, column_names=column_names)
             sequences = self._add_signal_sequences(sequences, column_names, repertoire_index=i)
+            sequences = self._add_pgens(sequences)
 
             self._check_sequence_count(sequences)
 
@@ -67,10 +69,12 @@ class RejectionSampler:
     def _make_repertoire_from_sequences(self, sequences, repertoires_path) -> Repertoire:
         metadata = self._make_signal_metadata()
 
-        custom_params = sequences[[signal.id for signal in self.all_signals]]
+        custom_params = sequences[[signal.id for signal in self.all_signals] + ['p_gen']]
+
+        print(custom_params.columns)
 
         repertoire = Repertoire.build(**{**{key: val for key, val in sequences.to_dict('list').items()
-                                            if key not in [s.id for s in self.all_signals]}, **{"custom_lists": custom_params.to_dict('list')}},
+                                            if key not in [s.id for s in self.all_signals] + ['p_gen']}, **{"custom_lists": custom_params.to_dict('list')}},
                                       path=repertoires_path, metadata=metadata)
         return repertoire
 
@@ -127,7 +131,7 @@ class RejectionSampler:
             self._make_sequences_from_generative_model(sequence_path, needs_seqs_with_signal=sum(sequence_with_signal_count.values()) != 0)
             self.seed += 1
 
-            background_sequences = bnp.open(sequence_path, mode='full', buffer_type=bnp.delimited_buffers.get_bufferclass_for_datatype(OLGAAsTSV),
+            background_sequences = bnp.open(sequence_path, mode='full', buffer_type=bnp.delimited_buffers.get_bufferclass_for_datatype(GenModelAsTSV),
                                             has_header=True)
             signal_matrix = self.get_signal_matrix(background_sequences)
             background_sequences, signal_matrix = self.filter_out_illegal_sequences(background_sequences, signal_matrix)
@@ -183,28 +187,42 @@ class RejectionSampler:
                                                      f"but {len(self.sim_item.signals)} were specified."
 
         PathBuilder.build(path)
+        sequences = None
 
         seqs_no_signal_count = 0 if len(self.sim_item.signals) == 0 else self.sim_item.number_of_examples
         sequence_with_signal_count = {signal.id: self.sim_item.number_of_examples for signal in self.sim_item.signals}
 
         self._generate_sequences(path / "tmp", seqs_no_signal_count, sequence_with_signal_count)
 
-        sequences = []
-
         metadata = {**{signal.id: False if self.sim_item.is_noise else True for signal in self.sim_item.signals},
                     **{signal.id: False for signal in self.all_signals if signal not in self.sim_item.signals}}
 
         if seqs_no_signal_count > 0:
-            sequences = pd.read_csv(self.seqs_no_signal_path)
-        else:
-            for signal in self.sim_item.signals:
-                sequences = pd.read_csv(self.seqs_with_signal_path[signal.id])
+            sequences = pd.read_csv(self.seqs_no_signal_path, sep='\t')
+
+        for signal in self.sim_item.signals:
+            if sequences:
+                sequences.concat(pd.read_csv(self.seqs_with_signal_path[signal.id], sep='\t'))
+            else:
+                sequences = pd.read_csv(self.seqs_with_signal_path[signal.id], sep='\t')
+
+        sequences = self._add_pgens(sequences)
 
         sequences = [ReceptorSequence(seq['sequence_aa'], seq['sequence'], identifier=uuid.uuid4().hex,
-                                      metadata=SequenceMetadata(custom_params=metadata, v_call=seq['v_call'] if 'v_call' in seq else None,
+                                      metadata=SequenceMetadata(custom_params={**metadata, **{'p_gen': seq['p_gen']}},
+                                                                v_call=seq['v_call'] if 'v_call' in seq else None,
                                                                 j_call=seq['j_call'] if 'j_call' in seq else None)) for seq in sequences.iterrows()]
 
         shutil.rmtree(path / "tmp")
+        return sequences
+
+    def _add_pgens(self, sequences: pd.DataFrame) -> pd.DataFrame:
+        if 'p_gen' not in sequences.columns:
+            if self.export_pgens and self.sim_item.generative_model.can_compute_p_gens():
+                sequences['p_gen'] = self.sim_item.generative_model.compute_p_gens(sequences, self.sequence_type)
+            else:
+                sequences['p_gen'] = None
+
         return sequences
 
     def filter_out_illegal_sequences(self, sequences: pd.DataFrame, signal_matrix: np.ndarray):

@@ -1,6 +1,8 @@
 import abc
 from pathlib import Path
 
+import numpy as np
+
 from immuneML.environment.SequenceType import SequenceType
 
 
@@ -17,7 +19,7 @@ class GenerativeModel:
         pass
 
     @abc.abstractmethod
-    def compute_p_gens(self):
+    def compute_p_gens(self, sequences, sequence_type: SequenceType) -> np.ndarray:
         pass
 
     @abc.abstractmethod

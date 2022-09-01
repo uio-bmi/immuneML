@@ -99,7 +99,8 @@ class TestLIgOSimulation(TestCase):
                     "simulation_strategy": "REJECTION_SAMPLING",
                     "store_signal_in_receptors": True,
                     "sequence_batch_size": 100,
-                    'max_iterations': 100
+                    'max_iterations': 100,
+                    "export_p_gens": True
                 }
             },
             "output": {
