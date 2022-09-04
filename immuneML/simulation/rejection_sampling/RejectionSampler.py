@@ -4,7 +4,7 @@ import uuid
 from dataclasses import dataclass
 from itertools import chain
 from pathlib import Path
-from typing import List
+from typing import List, Tuple
 
 import bionumpy as bnp
 import numpy as np
@@ -35,6 +35,11 @@ class RejectionSampler:
     export_pgens: bool = None
 
     MAX_SIGNALS_PER_SEQUENCE = 1
+    MAX_MOTIF_POSITION_LENGTH = 10
+
+    @property
+    def is_amino_acid(self):
+        return self.sequence_type == SequenceType.AMINO_ACID
 
     def make_repertoires(self, path: Path) -> List[Repertoire]:
         repertoires_path = PathBuilder.build(path / "repertoires")
@@ -48,8 +53,8 @@ class RejectionSampler:
         repertoires = []
 
         for i in range(self.sim_item.number_of_examples):
-
-            seqs_no_signal_count = self.sim_item.number_of_receptors_in_repertoire - self._get_signal_sequence_count(repertoire_count=1) * len(self.sim_item.signals)
+            seqs_no_signal_count = self.sim_item.number_of_receptors_in_repertoire - self._get_signal_sequence_count(repertoire_count=1) * len(
+                self.sim_item.signals)
 
             column_names = self.sim_item.generative_model.OUTPUT_COLUMNS + [s.id for s in self.all_signals]
 
@@ -71,10 +76,9 @@ class RejectionSampler:
 
         custom_params = sequences[[signal.id for signal in self.all_signals] + ['p_gen']]
 
-        print(custom_params.columns)
-
         repertoire = Repertoire.build(**{**{key: val for key, val in sequences.to_dict('list').items()
-                                            if key not in [s.id for s in self.all_signals] + ['p_gen']}, **{"custom_lists": custom_params.to_dict('list')}},
+                                            if key not in [s.id for s in self.all_signals] + ['p_gen']},
+                                         **{"custom_lists": custom_params.to_dict('list')}},
                                       path=repertoires_path, metadata=metadata)
         return repertoire
 
@@ -114,8 +118,10 @@ class RejectionSampler:
                                                           sequence_type=self.sequence_type)
 
         if self.sim_item.generative_model.can_generate_from_skewed_gene_models() and needs_seqs_with_signal:
-            v_genes = sorted(list(set(chain.from_iterable([[motif.v_call for motif in signal.motifs if motif.v_call] for signal in self.sim_item.signals]))))
-            j_genes = sorted(list(set(chain.from_iterable([[motif.j_call for motif in signal.motifs if motif.j_call] for signal in self.sim_item.signals]))))
+            v_genes = sorted(
+                list(set(chain.from_iterable([[motif.v_call for motif in signal.motifs if motif.v_call] for signal in self.sim_item.signals]))))
+            j_genes = sorted(
+                list(set(chain.from_iterable([[motif.j_call for motif in signal.motifs if motif.j_call] for signal in self.sim_item.signals]))))
 
             self.sim_item.generative_model.generate_from_skewed_gene_models(v_genes=v_genes, j_genes=j_genes, seed=self.seed, path=sequence_path,
                                                                             sequence_type=self.sequence_type, batch_size=self.sequence_batch_size)
@@ -133,7 +139,7 @@ class RejectionSampler:
 
             background_sequences = bnp.open(sequence_path, mode='full', buffer_type=bnp.delimited_buffers.get_bufferclass_for_datatype(GenModelAsTSV),
                                             has_header=True)
-            signal_matrix = self.get_signal_matrix(background_sequences)
+            signal_matrix, signal_positions = self.get_signal_matrix(background_sequences)
             background_sequences, signal_matrix = self.filter_out_illegal_sequences(background_sequences, signal_matrix)
 
             sequence_without_signal_count = self._update_seqs_without_signal(sequence_without_signal_count, signal_matrix, background_sequences)
@@ -151,8 +157,9 @@ class RejectionSampler:
 
     def _update_seqs_without_signal(self, sequence_without_signal_count, signal_matrix, background_sequences: pd.DataFrame):
         if sequence_without_signal_count > 0:
-            seqs = pd.DataFrame({key: getattr(background_sequences, key)[signal_matrix.sum(axis=1) == 0][:sequence_without_signal_count].to_sequences()
-                                 for key in self.sim_item.generative_model.OUTPUT_COLUMNS})
+            seqs = pd.DataFrame(
+                {key: getattr(background_sequences, key)[signal_matrix.sum(axis=1) == 0][:sequence_without_signal_count].to_sequences()
+                 for key in self.sim_item.generative_model.OUTPUT_COLUMNS})
             self._store_sequences(seqs, self.seqs_no_signal_path)
             return sequence_without_signal_count - len(seqs)
         else:
@@ -236,20 +243,22 @@ class RejectionSampler:
 
         return sequences[background_to_keep], signal_matrix[background_to_keep]
 
-    def get_signal_matrix(self, sequences) -> np.ndarray:
+    def get_signal_matrix(self, sequences) -> Tuple[np.ndarray, np.ndarray]:
 
-        encoding = bnp.encodings.ACTGEncoding if self.sequence_type == SequenceType.NUCLEOTIDE else bnp.encodings.AminoAcidEncoding
+        encoding = bnp.encodings.AminoAcidEncoding if self.is_amino_acid else bnp.encodings.ACTGEncoding
 
-        sequence_array = bnp.as_sequence_array(sequences.sequence if self.sequence_type == SequenceType.NUCLEOTIDE else sequences.sequence_aa,
-                                               encoding=encoding)
+        sequence_array = bnp.as_sequence_array(sequences.sequence_aa if self.is_amino_acid else sequences.sequence, encoding=encoding)
         v_call_array = bnp.as_sequence_array(sequences.v_call, encoding=bnp.encodings.BaseEncoding)
         j_call_array = bnp.as_sequence_array(sequences.j_call, encoding=bnp.encodings.BaseEncoding)
 
         signal_matrix = np.zeros((len(sequence_array), len(self.all_signals)))
 
-        for index, signal in enumerate(self.all_signals):
-            for motifs, v_call, j_call in signal.get_all_motif_instances(self.sequence_type):
+        signal_positions = np.ndarray(signal_matrix.shape, dtype=f"S{RejectionSampler.MAX_MOTIF_POSITION_LENGTH}")
+        signal_positions[:] = ""
 
+        for index, signal in enumerate(self.all_signals):
+            signal_pos_col = None
+            for motifs, v_call, j_call in signal.get_all_motif_instances(self.sequence_type):
                 matches_gene = self._match_genes(v_call, v_call_array, j_call, j_call_array)
                 matches = None
 
@@ -261,11 +270,16 @@ class RejectionSampler:
                     else:
                         matches = np.logical_or(matches, np.logical_and((matches_motif, matches_gene)))
 
+                signal_pos_col = np.logical_or(signal_pos_col, matches) if signal_pos_col is not None else matches
                 signal_matrix[:, index] = np.logical_or(signal_matrix[:, index], np.logical_or.reduce(matches, axis=1))
 
-        return signal_matrix.astype(dtype=np.bool)
+            np_mask = np.where(signal_pos_col.ravel(), "1", "0")
+            signal_positions[:, index] = ["".join(np_mask[start:end]) for start, end in zip(signal_pos_col.shape.starts, signal_pos_col.shape.ends)]
+
+        return signal_matrix.astype(dtype=np.bool), signal_positions.astype(dtype=str)
 
     def _match_genes(self, v_call, v_call_array, j_call, j_call_array):
+
         if v_call is not None and v_call != "":
             matcher = StringMatcher(v_call, encoding=BaseEncoding)
             matches_gene = np.any(matcher.rolling_window(v_call_array), axis=1)
@@ -276,7 +290,7 @@ class RejectionSampler:
             matcher = StringMatcher(j_call, encoding=BaseEncoding)
             matches_gene = np.logical_and(matches_gene, np.any(matcher.rolling_window(j_call_array), axis=1))
 
-        return matches_gene.reshape(-1, 1)
+        return matches_gene.reshape(-1, 1).astype(bool)
 
     def _match_motif(self, motif, encoding, sequence_array):
         matcher = RegexMatcher(motif, encoding=encoding)

@@ -112,7 +112,8 @@ class OLGA(GenerativeModel):
             return {"sequence_gen_model": sequence_gen_model, 'v_gene_mapping': v_gene_mapping, 'j_gene_mapping': j_gene_mapping,
                     "genomic_data": genomic_data, "olga_gen_model": olga_gen_model}
         else:
-            self._sequence_gen_model, self._v_gene_mapping, self._j_gene_mapping, self._genomic_data, self._olga_gen_model = sequence_gen_model, v_gene_mapping, j_gene_mapping, genomic_data, olga_gen_model
+            self._sequence_gen_model, self._v_gene_mapping, self._j_gene_mapping, self._genomic_data, self._olga_gen_model = \
+                sequence_gen_model, v_gene_mapping, j_gene_mapping, genomic_data, olga_gen_model
 
     def generate_sequences(self, count: int, seed: int = 1, path: Path = None, sequence_type: SequenceType = SequenceType.AMINO_ACID) -> Path:
 
@@ -159,9 +160,10 @@ class OLGA(GenerativeModel):
 
         cls = GenerationProbabilityVDJ if self.is_vdj else GenerationProbabilityVJ
         p_gen_model = cls(generative_model=self._olga_gen_model, genomic_data=self._genomic_data)
+        p_gen_func = p_gen_model.compute_nt_CDR3_pgen if sequence_type == SequenceType.NUCLEOTIDE else p_gen_model.compute_aa_CDR3_pgen
+        seq_col = 'sequence' if sequence_type == SequenceType.NUCLEOTIDE else 'sequence_aa'
 
-        return sequences.apply(lambda row: p_gen_model.compute_aa_CDR3_pgen(row['sequence_aa'], row['v_call'], row['j_call'])
-        if sequence_type == SequenceType.AMINO_ACID else p_gen_model.compute_nt_CDR3_pgen(row['sequence'], row['v_call'], row['j_call']), axis=1)
+        return sequences.apply(lambda row: p_gen_func(row[seq_col], row['v_call'], row['j_call']), axis=1)
 
     def can_compute_p_gens(self) -> bool:
         return True

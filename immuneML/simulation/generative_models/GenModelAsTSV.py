@@ -3,8 +3,8 @@ from npstructures import npdataclass
 
 @npdataclass
 class GenModelAsTSV:
-    sequence: str
     sequence_aa: str
+    sequence: str
     v_call: str
     j_call: str
     region_type: str
