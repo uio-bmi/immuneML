@@ -1,3 +1,4 @@
+import logging
 import numpy as np
 from multiprocessing import Pool
 import itertools as it
@@ -5,6 +6,7 @@ from functools import partial
 
 
 from immuneML.data_model.dataset.SequenceDataset import SequenceDataset
+from immuneML.encodings.motif_encoding.PositionalMotifParams import PositionalMotifParams
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.environment.SequenceType import SequenceType
 from immuneML.util.PathBuilder import PathBuilder
@@ -98,6 +100,8 @@ class PositionalMotifHelper:
     @staticmethod
     def _add_multi_aa_candidate_motifs(np_sequences, candidate_motifs, legal_positional_aas, params):
         for n_positions in range(2, params.max_positions + 1):
+            logging.info(f"{PositionalMotifHelper.__name__}: finding motifs with {n_positions} positions")
+
             with Pool(params.pool_size) as pool:
                 partial_func = partial(PositionalMotifHelper.extend_motif, np_sequences=np_sequences,
                                        legal_positional_aas=legal_positional_aas, count_threshold=params.count_threshold)
@@ -109,11 +113,16 @@ class PositionalMotifHelper:
         return candidate_motifs
 
     @staticmethod
-    def compute_all_candidate_motifs(np_sequences, params):
+    def compute_all_candidate_motifs(np_sequences, params: PositionalMotifParams):
+
+        logging.info(f"{PositionalMotifHelper.__name__}: computing candidate motifs with occurrence > {params.count_threshold} in dataset")
+
         legal_positional_aas = PositionalMotifHelper.identify_legal_positional_aas(np_sequences, params.count_threshold)
         candidate_motifs = PositionalMotifHelper._get_single_aa_candidate_motifs(legal_positional_aas)
         candidate_motifs = PositionalMotifHelper._add_multi_aa_candidate_motifs(np_sequences, candidate_motifs, legal_positional_aas, params)
         candidate_motifs = list(it.chain(*candidate_motifs.values()))
+
+        logging.info(f"{PositionalMotifHelper.__name__}: candidate motif computing done")
 
         return candidate_motifs
 
