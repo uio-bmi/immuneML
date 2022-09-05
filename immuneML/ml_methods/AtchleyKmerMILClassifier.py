@@ -1,5 +1,6 @@
 import copy
 import logging
+import random
 from pathlib import Path
 
 import numpy as np
@@ -44,6 +45,8 @@ class AtchleyKmerMILClassifier(MLMethod):
 
         number_of_threads: number of threads to be used for training
 
+        initialization_count (int): how many times to repeat the fitting procedure from the beginning before choosing the optimal model (trains the model with multiple random initializations)
+
     YAML specification:
 
     .. indent with spaces
@@ -59,12 +62,16 @@ class AtchleyKmerMILClassifier(MLMethod):
                 zero_abundance_weight_init: True
                 number_of_threads: 8
                 threshold: 0.00001
+                initialization_count: 4
 
     """
 
+    MIN_SEED_VALUE = 1
+    MAX_SEED_VALUE = 100000
+
     def __init__(self, iteration_count: int = None, threshold: float = None, evaluate_at: int = None, use_early_stopping: bool = None,
                  random_seed: int = None, learning_rate: float = None, zero_abundance_weight_init: bool = None, number_of_threads: int = None,
-                 result_path: Path = None):
+                 result_path: Path = None, initialization_count: int = None):
         super().__init__()
         self.logistic_regression = None
         self.random_seed = random_seed
@@ -79,65 +86,78 @@ class AtchleyKmerMILClassifier(MLMethod):
         self.input_size = 0
         self.result_path = result_path
         self.feature_names = None
+        self.initialization_count = initialization_count
 
     def _make_log_reg(self):
-
-        self.logistic_regression = PyTorchLogisticRegression(in_features=self.input_size, zero_abundance_weight_init=self.zero_abundance_weight_init)
+        return PyTorchLogisticRegression(in_features=self.input_size, zero_abundance_weight_init=self.zero_abundance_weight_init)
 
     def fit(self, encoded_data: EncodedData, label: Label, cores_for_training: int = 2):
         self.feature_names = encoded_data.feature_names
-
-        Util.setup_pytorch(self.number_of_threads, self.random_seed)
-        self.input_size = encoded_data.examples.shape[1]
-
-        self._make_log_reg()
 
         self.label = label
         self.class_mapping = Util.make_binary_class_mapping(encoded_data.labels[self.label.name])
 
         mapped_y = Util.map_to_new_class_values(encoded_data.labels[self.label.name], self.class_mapping)
+        self.logistic_regression = None
+        min_loss = np.inf
 
-        loss = np.inf
+        for initialization in range(self.initialization_count):
 
-        state = {"loss": loss, "model": None}
-        loss_func = torch.nn.BCEWithLogitsLoss(reduction='mean')
-        optimizer = torch.optim.SGD(self.logistic_regression.parameters(), lr=self.learning_rate)
+            random.seed(self.random_seed)
+            random_seed = random.randint(AtchleyKmerMILClassifier.MIN_SEED_VALUE, AtchleyKmerMILClassifier.MAX_SEED_VALUE)
 
-        for iteration in range(self.iteration_count):
+            Util.setup_pytorch(self.number_of_threads, random_seed)
+            self.input_size = encoded_data.examples.shape[1]
 
-            # reset gradients
-            optimizer.zero_grad()
+            log_reg = self._make_log_reg()
+            loss = np.inf
 
-            # compute predictions only for k-mers with max score
-            max_logit_indices = self._get_max_logits_indices(encoded_data.examples)
-            example_count = encoded_data.examples.shape[0]
-            examples = torch.from_numpy(encoded_data.examples).float()[torch.arange(example_count).long(), :, max_logit_indices]
-            logits = self.logistic_regression(examples)
+            state = {"loss": loss, "model": None}
+            loss_func = torch.nn.BCEWithLogitsLoss(reduction='mean')
+            optimizer = torch.optim.SGD(log_reg.parameters(), lr=self.learning_rate)
 
-            # compute the loss
-            loss = loss_func(logits, torch.tensor(mapped_y).float())
+            for iteration in range(self.iteration_count):
 
-            # perform update
-            loss.backward()
-            optimizer.step()
+                # reset gradients
+                optimizer.zero_grad()
 
-            # log current score and keep model for early stopping if specified
-            if iteration % self.evaluate_at == 0 or iteration == self.iteration_count - 1:
-                logging.info(f"AtchleyKmerMILClassifier: log loss at iteration {iteration+1}/{self.iteration_count}: {loss}.")
-                if state["loss"] < loss and self.use_early_stopping:
-                    state = {"loss": loss.numpy(), "model": copy.deepcopy(self.logistic_regression)}
+                # compute predictions only for k-mers with max score
+                max_logit_indices = self._get_max_logits_indices(encoded_data.examples, log_reg)
+                example_count = encoded_data.examples.shape[0]
+                examples = torch.from_numpy(encoded_data.examples).float()[torch.arange(example_count).long(), :, max_logit_indices]
+                logits = log_reg(examples)
 
-            if loss < self.threshold:
-                break
+                # compute the loss
+                loss = loss_func(logits, torch.tensor(mapped_y).float())
 
-        logging.warning(f"AtchleyKmerMILClassifier: the logistic regression model did not converge.")
+                # perform update
+                loss.backward()
+                optimizer.step()
 
-        if loss > state['loss'] and self.use_early_stopping:
-            self.logistic_regression.load_state_dict(state["model"])
+                # log current score and keep model for early stopping if specified
+                if iteration % self.evaluate_at == 0 or iteration == self.iteration_count - 1:
+                    logging.info(f"AtchleyKmerMILClassifier: log loss at iteration {iteration + 1}/{self.iteration_count}: {loss}.")
+                    if state["loss"] < loss and self.use_early_stopping:
+                        state = {"loss": loss.numpy(), "model": copy.deepcopy(log_reg)}
 
-    def _get_max_logits_indices(self, data):
+                if loss < self.threshold:
+                    break
+
+            logging.warning(f"AtchleyKmerMILClassifier: the logistic regression model did not converge.")
+
+            if loss > state['loss'] and self.use_early_stopping:
+                log_reg.load_state_dict(state["model"])
+
+            if min_loss > loss:
+                self.logistic_regression = log_reg
+                min_loss = loss
+
+    def _get_max_logits_indices(self, data, log_reg=None):
         with torch.no_grad():
-            logits = self.logistic_regression(torch.from_numpy(np.swapaxes(data, 1, 2).reshape(data.shape[0] * data.shape[2], -1)))
+            if log_reg:
+                logits = log_reg(torch.from_numpy(np.swapaxes(data, 1, 2).reshape(data.shape[0] * data.shape[2], -1)))
+            else:
+                logits = self.logistic_regression(torch.from_numpy(np.swapaxes(data, 1, 2).reshape(data.shape[0] * data.shape[2], -1)))
         logits = torch.reshape(logits, (data.shape[0], data.shape[2]))
         max_logits_indices = torch.argmax(logits, dim=1)
         return max_logits_indices.long()
@@ -184,7 +204,7 @@ class AtchleyKmerMILClassifier(MLMethod):
                 else:
                     setattr(self, param, value)
 
-        self._make_log_reg()
+        self.logistic_regression = self._make_log_reg()
         self.logistic_regression.load_state_dict(torch.load(str(path / "log_reg.pt")))
 
     def check_if_exists(self, path) -> bool:
