@@ -1,3 +1,4 @@
+import logging
 from pathlib import Path
 
 import pandas as pd
@@ -228,6 +229,8 @@ class PositionalMotifEncoder(DatasetEncoder):
                                          f"Please try decreasing the values for parameters 'min_precision' and/or 'min_recall'."
 
     def _construct_encoded_data_matrix(self, np_sequences, sequence_weights, y_true, candidate_motifs):
+        logging.info(f"{PositionalMotifEncoder.__name__}: filtering motifs with precision >= {self.min_precision} and recall >= {self.min_recall}")
+
         feature_names = []
         examples = []
 
@@ -240,6 +243,8 @@ class PositionalMotifEncoder(DatasetEncoder):
                         examples.append(pred)
 
         self.check_filtered_motifs(feature_names)
+
+        logging.info(f"{PositionalMotifEncoder.__name__}: filtering motifs done, {len(feature_names)} motifs found")
 
         return np.column_stack(examples), feature_names
 
