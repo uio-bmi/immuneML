@@ -139,12 +139,18 @@ class PositionalMotifEncoder(DatasetEncoder):
         y_true = self._get_y_true(labels, params.label_config)
         np_sequences = PositionalMotifHelper.get_numpy_sequence_representation(dataset)
 
-        self.weight_pseudocount = 1  # todo these parameters need to be set by the user, probably when changing the YAML specification to specify weights
-        self.weight_upper_limit = 1
-        self.weight_lower_limit = 0
+        if self.use_weights:
+            self.weight_pseudocount = 1  # todo these parameters need to be set by the user, probably when changing the YAML specification to specify weights
+            self.weight_upper_limit = 1
+            self.weight_lower_limit = 0
 
-        positional_weights = self._get_positional_weights(np_sequences)
-        sequence_weights = self._get_sequence_weights(np_sequences, positional_weights)
+            positional_weights = self._get_positional_weights(np_sequences)
+            sequence_weights = self._get_sequence_weights(np_sequences, positional_weights)
+        else:
+            print("Not using weights")
+            positional_weights = None
+            sequence_weights = None
+
         examples, feature_names = self._construct_encoded_data_matrix(np_sequences, sequence_weights, y_true,
                                                                       candidate_motifs)
 
