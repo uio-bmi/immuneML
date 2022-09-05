@@ -1,4 +1,6 @@
 import logging
+from functools import partial
+from multiprocessing.pool import Pool
 from pathlib import Path
 
 import pandas as pd
@@ -134,7 +136,7 @@ class PositionalMotifEncoder(DatasetEncoder):
         return self._encode_data(dataset, params)
 
     def _encode_data(self, dataset, params: EncoderParams):
-        candidate_motifs = self._prepare_candidate_motifs(dataset, params)
+        motifs = self._prepare_candidate_motifs(dataset, params)
 
         labels = EncoderHelper.encode_element_dataset_labels(dataset, params.label_config)
         y_true = self._get_y_true(labels, params.label_config)
@@ -152,8 +154,9 @@ class PositionalMotifEncoder(DatasetEncoder):
             positional_weights = None
             sequence_weights = None
 
-        examples, feature_names = self._construct_encoded_data_matrix(np_sequences, sequence_weights, y_true,
-                                                                      candidate_motifs)
+        motifs = self._filter_motifs(motifs, np_sequences, sequence_weights, y_true, params.pool_size)
+
+        examples, feature_names = self._construct_encoded_data_matrix(motifs, np_sequences)
 
         encoded_dataset = dataset.clone()
         encoded_dataset.encoded_data = EncodedData(examples=examples,
@@ -228,23 +231,33 @@ class PositionalMotifEncoder(DatasetEncoder):
         assert len(filtered_motifs) > 0, f"{PositionalMotifEncoder.__name__}: no significant motifs were found. " \
                                          f"Please try decreasing the values for parameters 'min_precision' and/or 'min_recall'."
 
-    def _construct_encoded_data_matrix(self, np_sequences, sequence_weights, y_true, candidate_motifs):
+    def _filter_motifs(self, candidate_motifs, np_sequences, sequence_weights, y_true, pool_size):
         logging.info(f"{PositionalMotifEncoder.__name__}: filtering motifs with precision >= {self.min_precision} and recall >= {self.min_recall}")
 
-        feature_names = []
-        examples = []
+        with Pool(pool_size) as pool:
+            partial_func = partial(self._check_motif, np_sequences=np_sequences,
+                                   sequence_weights=sequence_weights, y_true=y_true)
 
-        for indices, amino_acids in candidate_motifs:
-            pred = PositionalMotifHelper.test_motif(np_sequences, indices, amino_acids)
-            if sum(pred) >= self.min_true_positives:
-                if precision_score(y_true=y_true, y_pred=pred, sample_weight=sequence_weights) >= self.min_precision:
-                    if recall_score(y_true=y_true, y_pred=pred, sample_weight=sequence_weights) >= self.min_recall:
-                        feature_names.append(PositionalMotifHelper.motif_to_string(indices, amino_acids, motif_sep="-", newline=False))
-                        examples.append(pred)
+            filtered_motifs = list(filter(None, pool.map(partial_func, candidate_motifs)))
 
-        self.check_filtered_motifs(feature_names)
+        self.check_filtered_motifs(filtered_motifs)
+        logging.info(f"{PositionalMotifEncoder.__name__}: filtering motifs done, {len(filtered_motifs)} motifs left")
 
-        logging.info(f"{PositionalMotifEncoder.__name__}: filtering motifs done, {len(feature_names)} motifs found")
+        return filtered_motifs
+
+    def _check_motif(self, motif, np_sequences, sequence_weights, y_true):
+        indices, amino_acids = motif
+
+        pred = PositionalMotifHelper.test_motif(np_sequences, indices, amino_acids)
+        if sum(pred) >= self.min_true_positives:
+            if precision_score(y_true=y_true, y_pred=pred, sample_weight=sequence_weights) >= self.min_precision:
+                if recall_score(y_true=y_true, y_pred=pred, sample_weight=sequence_weights) >= self.min_recall:
+                    return motif
+
+    def _construct_encoded_data_matrix(self, motifs, np_sequences):
+
+        feature_names = [PositionalMotifHelper.motif_to_string(indices, amino_acids, motif_sep="-", newline=False) for indices, amino_acids in motifs]
+        examples = [PositionalMotifHelper.test_motif(np_sequences, indices, amino_acids) for indices, amino_acids in motifs]
 
         return np.column_stack(examples), feature_names
 
