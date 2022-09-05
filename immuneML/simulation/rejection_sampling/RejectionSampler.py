@@ -140,10 +140,12 @@ class RejectionSampler:
             background_sequences = bnp.open(sequence_path, mode='full', buffer_type=bnp.delimited_buffers.get_bufferclass_for_datatype(GenModelAsTSV),
                                             has_header=True)
             signal_matrix, signal_positions = self.get_signal_matrix(background_sequences)
-            background_sequences, signal_matrix = self.filter_out_illegal_sequences(background_sequences, signal_matrix)
+            legal_indices = self.filter_out_illegal_sequences(signal_matrix)
+            signal_matrix, signal_positions = signal_matrix[legal_indices], signal_positions[legal_indices]
+            background_sequences = background_sequences[legal_indices]
 
             sequence_without_signal_count = self._update_seqs_without_signal(sequence_without_signal_count, signal_matrix, background_sequences)
-            sequence_with_signal_count = self._update_seqs_with_signal(sequence_with_signal_count, signal_matrix, background_sequences)
+            sequence_with_signal_count = self._update_seqs_with_signal(sequence_with_signal_count, signal_matrix, background_sequences, signal_positions)
 
             if iteration == int(self.max_iterations * 0.75):
                 logging.warning(f"Iteration {iteration} out of {self.max_iterations} max iterations reached during rejection sampling.")
@@ -160,12 +162,13 @@ class RejectionSampler:
             seqs = pd.DataFrame(
                 {key: getattr(background_sequences, key)[signal_matrix.sum(axis=1) == 0][:sequence_without_signal_count].to_sequences()
                  for key in self.sim_item.generative_model.OUTPUT_COLUMNS})
+            seqs = pd.concat((seqs, pd.DataFrame({f'{signal.id}_positions': ['' for _ in range(seqs.shape[0])] for signal in self.all_signals})), axis=1)
             self._store_sequences(seqs, self.seqs_no_signal_path)
             return sequence_without_signal_count - len(seqs)
         else:
             return sequence_without_signal_count
 
-    def _update_seqs_with_signal(self, sequence_with_signal_count: dict, signal_matrix, background_sequences: pd.DataFrame):
+    def _update_seqs_with_signal(self, sequence_with_signal_count: dict, signal_matrix, background_sequences: pd.DataFrame, signal_positions):
         all_signal_ids = [signal.id for signal in self.all_signals]
 
         for signal in self.sim_item.signals:
@@ -174,6 +177,7 @@ class RejectionSampler:
                 seqs = pd.DataFrame({key: getattr(background_sequences, key)[selection][:sequence_with_signal_count[signal.id]].to_sequences()
                                      for key in self.sim_item.generative_model.OUTPUT_COLUMNS})
                 seqs[all_signal_ids] = pd.DataFrame([[True if id == signal.id else False for id in all_signal_ids]], index=seqs.index)
+                seqs[f'{signal.id}_positions'] = signal_positions[signal.id]
                 self._store_sequences(seqs, self.seqs_with_signal_path[signal.id])
                 sequence_with_signal_count[signal.id] -= len(seqs)
 
@@ -232,7 +236,7 @@ class RejectionSampler:
 
         return sequences
 
-    def filter_out_illegal_sequences(self, sequences: pd.DataFrame, signal_matrix: np.ndarray):
+    def filter_out_illegal_sequences(self, signal_matrix: np.ndarray):
         if RejectionSampler.MAX_SIGNALS_PER_SEQUENCE != 1:
             raise NotImplementedError
 
@@ -241,9 +245,9 @@ class RejectionSampler:
         background_to_keep = np.logical_and(signal_matrix.sum(axis=1) <= RejectionSampler.MAX_SIGNALS_PER_SEQUENCE,
                                             signal_matrix[:, other_signals] == 0 if any(other_signals) else 1)
 
-        return sequences[background_to_keep], signal_matrix[background_to_keep]
+        return background_to_keep
 
-    def get_signal_matrix(self, sequences) -> Tuple[np.ndarray, np.ndarray]:
+    def get_signal_matrix(self, sequences) -> Tuple[np.ndarray, pd.DataFrame]:
 
         encoding = bnp.encodings.AminoAcidEncoding if self.is_amino_acid else bnp.encodings.ACTGEncoding
 
@@ -276,7 +280,8 @@ class RejectionSampler:
             np_mask = np.where(signal_pos_col.ravel(), "1", "0")
             signal_positions[:, index] = ["".join(np_mask[start:end]) for start, end in zip(signal_pos_col.shape.starts, signal_pos_col.shape.ends)]
 
-        return signal_matrix.astype(dtype=np.bool), signal_positions.astype(dtype=str)
+        signal_positions = pd.DataFrame(signal_positions.astype(str), columns=[signal.id for signal in self.all_signals])
+        return signal_matrix.astype(dtype=np.bool), signal_positions
 
     def _match_genes(self, v_call, v_call_array, j_call, j_call_array):
 
