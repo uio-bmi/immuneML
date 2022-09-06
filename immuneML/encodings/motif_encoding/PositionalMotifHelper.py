@@ -164,3 +164,50 @@ class PositionalMotifHelper:
             for indices, amino_acids in motifs:
                 file.write(PositionalMotifHelper.motif_to_string(indices, amino_acids))
 
+    @staticmethod
+    def get_generalized_motifs(motifs):
+        sorted_motifs = PositionalMotifHelper.sort_motifs_by_index(motifs)
+        generalized_motifs = []
+
+        for indices, all_motif_amino_acids in sorted_motifs.items():
+            if len(all_motif_amino_acids) > 1 and len(indices) > 1:
+                generalized_motifs.extend(list(PositionalMotifHelper.get_generalized_motifs_for_index(indices, all_motif_amino_acids)))
+
+        return generalized_motifs
+
+    @staticmethod
+    def sort_motifs_by_index(motifs):
+        sorted_motifs = {}
+
+        for index, amino_acids in motifs:
+            if tuple(index) not in sorted_motifs:
+                sorted_motifs[tuple(index)] = [amino_acids]
+            else:
+                sorted_motifs[tuple(index)].append(amino_acids)
+
+        return sorted_motifs
+
+    @staticmethod
+    def get_generalized_motifs_for_index(indices, all_motif_amino_acids):
+        # loop over motifs, allowing flexibility only in the amino acid at flex_aa_index
+        for flex_aa_index in range(len(indices)):
+            shared_aa_indices = [i for i in range(len(indices)) if i != flex_aa_index]
+
+            # for each motif, get the flexible aa (1) and constant aas (>= 1)
+            flex_aa = [motif[flex_aa_index] for motif in all_motif_amino_acids]
+            constant_aas = ["".join([motif[index] for index in shared_aa_indices]) for motif in all_motif_amino_acids]
+
+            # get only those motifs where there exist another motif sharing the constant_aas
+            is_generalizable = [i for i in range(len(all_motif_amino_acids)) if constant_aas.count(constant_aas[i]) > 1]
+            flex_aa = [flex_aa[i] for i in is_generalizable]
+            constant_aas = [constant_aas[i] for i in is_generalizable]
+
+            # from a constant part and multiple flexible amino acids, construct a generalized motif
+            for constant_motif_part in set(constant_aas):
+                flex_motif_part = [flex_aa[i] for i in range(len(constant_aas)) if constant_aas[i] == constant_motif_part]
+
+                generalized_motif = list(constant_motif_part)
+                generalized_motif.insert(flex_aa_index, "".join(sorted(flex_motif_part)))
+
+                yield [list(indices), generalized_motif]
+

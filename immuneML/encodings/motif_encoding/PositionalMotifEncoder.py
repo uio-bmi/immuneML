@@ -13,6 +13,7 @@ from immuneML.data_model.encoded_data.EncodedData import EncodedData
 from immuneML.encodings.DatasetEncoder import DatasetEncoder
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.encodings.motif_encoding.PositionalMotifParams import PositionalMotifParams
+from immuneML.encodings.motif_encoding.WeightedSequenceContainer import WeigthedSequenceContainer
 from immuneML.environment.LabelConfiguration import LabelConfiguration
 from immuneML.util.EncoderHelper import EncoderHelper
 from immuneML.util.ParameterValidator import ParameterValidator
@@ -37,6 +38,8 @@ class PositionalMotifEncoder(DatasetEncoder):
 
         min_recall (float):
 
+        min_recall_before_merging (float):
+
         min_true_positives (int):
 
         generalize_motifs (bool):
@@ -44,6 +47,8 @@ class PositionalMotifEncoder(DatasetEncoder):
         motif_candidate_filepath (str):
 
         label (str):
+
+        use_weights (bool):
 
         # todo should weighting be a parameter here?
 
@@ -67,12 +72,14 @@ class PositionalMotifEncoder(DatasetEncoder):
         "SequenceDataset": "PositionalMotifSequenceEncoder",
     }
 
-    def __init__(self, max_positions: int = None, min_precision: float = 0, min_recall: float = 0, min_true_positives: int = 1,
-                 generalize_motifs: bool = False, use_weights: bool = True, motif_candidate_filepath: str = None, label: str = None,
+    def __init__(self, max_positions: int = None, min_precision: float = None, min_recall: float = None,
+                 min_recall_before_merging: float = None, min_true_positives: int = None, generalize_motifs: bool = False,
+                 use_weights: bool = True, motif_candidate_filepath: str = None, label: str = None,
                  name: str = None):
         self.max_positions = max_positions
         self.min_precision = min_precision
         self.min_recall = min_recall
+        self.min_recall_before_merging = min_recall_before_merging
         self.min_true_positives = min_true_positives
         self.generalize_motifs = generalize_motifs
         self.use_weights = use_weights
@@ -82,7 +89,8 @@ class PositionalMotifEncoder(DatasetEncoder):
         self.context = None
 
     @staticmethod
-    def _prepare_parameters(max_positions: int = None, min_precision: float = 0, min_recall: float = 0, min_true_positives: int = 1,
+    def _prepare_parameters(max_positions: int = None, min_precision: float = None, min_recall: float = None,
+                            min_recall_before_merging: float = None, min_true_positives: int = None,
                             generalize_motifs: bool = False, use_weights: bool = False, motif_candidate_filepath: str = None,
                             label: str = None, name: str = None):
 
@@ -94,6 +102,13 @@ class PositionalMotifEncoder(DatasetEncoder):
         ParameterValidator.assert_type_and_value(min_true_positives, int, location, "min_true_positives", min_inclusive=1)
         ParameterValidator.assert_type_and_value(generalize_motifs, bool, location, "generalize_motifs")
         ParameterValidator.assert_type_and_value(use_weights, bool, location, "use_weights")
+
+        if min_recall_before_merging is None:
+            min_recall_before_merging = min_recall
+        else:
+            ParameterValidator.assert_type_and_value(min_recall_before_merging, (int, float), location, "min_recall_before_merging", min_inclusive=0, max_inclusive=1)
+
+        assert min_recall >= min_recall_before_merging, f"{location}: min_recall_before_merging (value = {min_recall_before_merging}) cannot exceed min_recall (value = {min_recall})"
 
         if motif_candidate_filepath is not None:
             ParameterValidator.assert_type_and_value(motif_candidate_filepath, str, location, "motif_candidate_filepath")
@@ -111,10 +126,12 @@ class PositionalMotifEncoder(DatasetEncoder):
         if label is not None:
             ParameterValidator.assert_type_and_value(label, str, location, "label")
 
+
         return {
             "max_positions": max_positions,
             "min_precision": min_precision,
             "min_recall": min_recall,
+            "min_recall_before_merging": min_recall_before_merging,
             "min_true_positives": min_true_positives,
             "generalize_motifs": generalize_motifs,
             "use_weights": use_weights,
@@ -138,6 +155,8 @@ class PositionalMotifEncoder(DatasetEncoder):
     def _encode_data(self, dataset, params: EncoderParams):
         motifs = self._prepare_candidate_motifs(dataset, params)
 
+        # todo after weights have been implemented properly, move stuff to get sequence_container to separate function
+
         labels = EncoderHelper.encode_element_dataset_labels(dataset, params.label_config)
         y_true = self._get_y_true(labels, params.label_config)
         np_sequences = PositionalMotifHelper.get_numpy_sequence_representation(dataset)
@@ -148,13 +167,24 @@ class PositionalMotifEncoder(DatasetEncoder):
             self.weight_lower_limit = 0
 
             positional_weights = self._get_positional_weights(np_sequences)
-            sequence_weights = self._get_sequence_weights(np_sequences, positional_weights)
+            weights = self._get_sequence_weights(np_sequences, positional_weights)
         else:
             print("Not using weights")
             positional_weights = None
-            sequence_weights = None
+            weights = None
 
-        motifs = self._filter_motifs(motifs, np_sequences, sequence_weights, y_true, params.pool_size)
+        sequence_container = WeigthedSequenceContainer(np_sequences, weights, y_true)
+
+        motifs = self._filter_motifs(motifs, sequence_container, params.pool_size, generalized=False)
+
+        if self.generalize_motifs:
+            generalized_motifs = PositionalMotifHelper.get_generalized_motifs(motifs)
+            generalized_motifs = self._filter_motifs(generalized_motifs, sequence_container, params.pool_size, generalized=True)
+
+            motifs += generalized_motifs
+
+        PositionalMotifHelper.write_motifs_to_file(motifs, params.result_path / "significant_motifs.tsv")
+
 
         examples, feature_names = self._construct_encoded_data_matrix(motifs, np_sequences)
 
@@ -175,7 +205,7 @@ class PositionalMotifEncoder(DatasetEncoder):
         assert len(candidate_motifs) > 0, f"{PositionalMotifEncoder.__name__}: no candidate motifs were found. " \
                                           f"Please try decreasing the value for parameter 'min_true_positives'."
 
-        PositionalMotifHelper.write_motifs_to_file(candidate_motifs, params.result_path / "candidate_motifs.tsv")
+        PositionalMotifHelper.write_motifs_to_file(candidate_motifs, params.result_path / "all_candidate_motifs.tsv")
 
         return candidate_motifs
 
@@ -229,29 +259,33 @@ class PositionalMotifEncoder(DatasetEncoder):
 
     def check_filtered_motifs(self, filtered_motifs):
         assert len(filtered_motifs) > 0, f"{PositionalMotifEncoder.__name__}: no significant motifs were found. " \
-                                         f"Please try decreasing the values for parameters 'min_precision' and/or 'min_recall'."
+                                         f"Please try decreasing the values for parameters 'min_precision', 'min_recall' and/or 'min_recall_before_merging'."
 
-    def _filter_motifs(self, candidate_motifs, np_sequences, sequence_weights, y_true, pool_size):
-        logging.info(f"{PositionalMotifEncoder.__name__}: filtering motifs with precision >= {self.min_precision} and recall >= {self.min_recall}")
+    def _filter_motifs(self, candidate_motifs, sequence_container, pool_size, generalized=False):
+        motif_type = "generalized motifs" if generalized else "motifs"
+        min_recall = self.min_recall if generalized else self.min_recall_before_merging
+
+        logging.info(f"{PositionalMotifEncoder.__name__}: filtering {len(candidate_motifs)} {motif_type} with precision >= {self.min_precision} and recall >= {min_recall}")
 
         with Pool(pool_size) as pool:
-            partial_func = partial(self._check_motif, np_sequences=np_sequences,
-                                   sequence_weights=sequence_weights, y_true=y_true)
+            partial_func = partial(self._check_motif, sequence_container=sequence_container, min_recall=min_recall)
 
             filtered_motifs = list(filter(None, pool.map(partial_func, candidate_motifs)))
 
-        self.check_filtered_motifs(filtered_motifs)
-        logging.info(f"{PositionalMotifEncoder.__name__}: filtering motifs done, {len(filtered_motifs)} motifs left")
+        if not generalized:
+            self.check_filtered_motifs(filtered_motifs)
+
+        logging.info(f"{PositionalMotifEncoder.__name__}: filtering {motif_type} done, {len(filtered_motifs)} motifs left")
 
         return filtered_motifs
 
-    def _check_motif(self, motif, np_sequences, sequence_weights, y_true):
+    def _check_motif(self, motif, sequence_container, min_recall):
         indices, amino_acids = motif
 
-        pred = PositionalMotifHelper.test_motif(np_sequences, indices, amino_acids)
+        pred = PositionalMotifHelper.test_motif(sequence_container.np_sequences, indices, amino_acids)
         if sum(pred) >= self.min_true_positives:
-            if precision_score(y_true=y_true, y_pred=pred, sample_weight=sequence_weights) >= self.min_precision:
-                if recall_score(y_true=y_true, y_pred=pred, sample_weight=sequence_weights) >= self.min_recall:
+            if precision_score(y_true=sequence_container.y_true, y_pred=pred, sample_weight=sequence_container.weights) >= self.min_precision:
+                if recall_score(y_true=sequence_container.y_true, y_pred=pred, sample_weight=sequence_container.weights) >= min_recall:
                     return motif
 
     def _construct_encoded_data_matrix(self, motifs, np_sequences):

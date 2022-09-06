@@ -127,3 +127,35 @@ class TestPositionalMotifHelper(TestCase):
 
         shutil.rmtree(path)
 
+    def test_get_generalized_motifs(self):
+        motifs = [[[2, 3, 5], ["A", "A", "A"]], [[2, 3, 5], ["A", "A", "D"]], [[2, 3, 6], ["A", "A", "C"]]]
+
+        result = PositionalMotifHelper.get_generalized_motifs(motifs)
+        expected = [[[2, 3, 5], ["A", "A", "AD"]]]
+
+        self.assertListEqual(result, expected)
+
+        motifs = [[[2, 3, 5], ["A", "A", "A"]], [[2, 3, 7], ["A", "A", "D"]], [[2, 3, 6], ["A", "A", "C"]]]
+
+        result = PositionalMotifHelper.get_generalized_motifs(motifs)
+        expected = []
+
+        self.assertListEqual(result, expected)
+
+    def test__sort_motifs_by_index(self):
+        motifs = [[[1,2], ["A", "A"]], [[1, 2], ["A", "F"]], [[1, 2], ["G", "D"]], [[5, 6], ["A", "A"]], [[6, 7], ["A", "A"]]]
+        result = PositionalMotifHelper.sort_motifs_by_index(motifs)
+        expected = {(1,2): [["A", "A"], ["A", "F"], ["G", "D"]],
+                    (5, 6): [["A", "A"]],
+                    (6, 7): [["A", "A"]]}
+
+        self.assertDictEqual(result, expected)
+
+    def test_get_generalized_motifs_for_index(self):
+        indices = [2, 3, 5]
+        all_motif_amino_acids = [["A", "A", "A"], ["A", "A", "C"], ["A", "A", "D"], ["D", "A", "D"]]
+
+        result = list(PositionalMotifHelper.get_generalized_motifs_for_index(indices, all_motif_amino_acids))
+        expected = [[[2, 3, 5], ["AD", "A", "D"]], [[2, 3, 5], ["A", "A", "ACD"]]]
+
+        self.assertListEqual(result, expected)
