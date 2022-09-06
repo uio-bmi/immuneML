@@ -204,10 +204,22 @@ class PositionalMotifHelper:
 
             # from a constant part and multiple flexible amino acids, construct a generalized motif
             for constant_motif_part in set(constant_aas):
-                flex_motif_part = [flex_aa[i] for i in range(len(constant_aas)) if constant_aas[i] == constant_motif_part]
+                flex_motif_aas = [flex_aa[i] for i in range(len(constant_aas)) if constant_aas[i] == constant_motif_part]
 
-                generalized_motif = list(constant_motif_part)
-                generalized_motif.insert(flex_aa_index, "".join(sorted(flex_motif_part)))
+                for flex_aa_subset in PositionalMotifHelper.get_flex_aa_sets(flex_motif_aas):
+                    generalized_motif = list(constant_motif_part)
+                    generalized_motif.insert(flex_aa_index, flex_aa_subset)
 
-                yield [list(indices), generalized_motif]
+                    yield [list(indices), generalized_motif]
+
+    @staticmethod
+    def get_flex_aa_sets(amino_acids):
+        sets = []
+        amino_acids = sorted(amino_acids)
+
+        for subset_size in range(2, len(amino_acids)+1):
+            for combo in it.combinations(amino_acids, subset_size):
+                sets.append("".join(combo))
+
+        return sets
 

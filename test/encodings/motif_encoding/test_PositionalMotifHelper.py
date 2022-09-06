@@ -156,6 +156,15 @@ class TestPositionalMotifHelper(TestCase):
         all_motif_amino_acids = [["A", "A", "A"], ["A", "A", "C"], ["A", "A", "D"], ["D", "A", "D"]]
 
         result = list(PositionalMotifHelper.get_generalized_motifs_for_index(indices, all_motif_amino_acids))
-        expected = [[[2, 3, 5], ["AD", "A", "D"]], [[2, 3, 5], ["A", "A", "ACD"]]]
+        expected = [[[2, 3, 5], ["AD", "A", "D"]], [[2, 3, 5], ["A", "A", "AC"]], [[2, 3, 5], ["A", "A", "AD"]],
+                    [[2, 3, 5], ["A", "A", "CD"]], [[2, 3, 5], ["A", "A", "ACD"]]]
+
+        self.assertListEqual(result, expected)
+
+    def test_get_generalized_motifs_for_index(self):
+        amino_acids = ["A", "B", "C", "D"]
+
+        result = PositionalMotifHelper.get_flex_aa_sets(amino_acids)
+        expected = ["AB", "AC", "AD", "BC", "BD", "CD", "ABC", "ABD", "ACD", "BCD", "ABCD"]
 
         self.assertListEqual(result, expected)
