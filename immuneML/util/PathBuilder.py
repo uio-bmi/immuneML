@@ -2,6 +2,7 @@
 
 import errno
 import os
+import shutil
 import warnings
 from pathlib import Path
 
@@ -26,7 +27,7 @@ class PathBuilder:
     def remove_old_and_build(path):
         path = Path(path)
         if path.is_dir():
-            path.rmdir()
+            shutil.rmtree(path)
 
         path.mkdir()
 

@@ -114,10 +114,8 @@ class TestLIgOSimulation(TestCase):
         return path / "specs.yaml"
 
     def test_simulation(self):
-        path = EnvironmentSettings.tmp_test_path / "integration_ligo_simulation/"
-        if path.is_dir():
-            shutil.rmtree(path)
-        path = PathBuilder.build(path)
+        path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / "integration_ligo_simulation/")
+
         specs_path = self.prepare_specs(path)
 
         PathBuilder.build(path / "result/")
@@ -130,4 +128,4 @@ class TestLIgOSimulation(TestCase):
         metadata_df = pd.read_csv(path / "result/inst1/metadata.csv", comment=Constants.COMMENT_SIGN)
         self.assertTrue("signal1" in metadata_df.columns)
 
-        # shutil.rmtree(path)
+        shutil.rmtree(path)

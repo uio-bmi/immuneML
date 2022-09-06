@@ -56,11 +56,13 @@ class RejectionSampler:
             seqs_no_signal_count = self.sim_item.number_of_receptors_in_repertoire - self._get_signal_sequence_count(repertoire_count=1) * len(
                 self.sim_item.signals)
 
-            column_names = self.sim_item.generative_model.OUTPUT_COLUMNS + [s.id for s in self.all_signals]
+            column_names = self.sim_item.generative_model.OUTPUT_COLUMNS + self._get_custom_keys(with_p_gens=False)
 
             sequences = self._get_no_signal_sequences(repertoire_index=i, seqs_no_signal_count=seqs_no_signal_count, column_names=column_names)
             sequences = self._add_signal_sequences(sequences, column_names, repertoire_index=i)
+            print(sequences.head())
             sequences = self._add_pgens(sequences)
+            print(sequences.head())
 
             self._check_sequence_count(sequences)
 
@@ -71,14 +73,18 @@ class RejectionSampler:
         shutil.rmtree(path / "tmp")
         return repertoires
 
+    def _get_custom_keys(self, with_p_gens: bool = True):
+        keys = [sig.id for sig in self.all_signals] + [f'{signal.id}_positions' for signal in self.all_signals]
+        if with_p_gens:
+            keys += ['p_gen']
+        return keys
+
     def _make_repertoire_from_sequences(self, sequences, repertoires_path) -> Repertoire:
         metadata = self._make_signal_metadata()
+        custom_keys = self._get_custom_keys()
 
-        custom_params = sequences[[signal.id for signal in self.all_signals] + ['p_gen']]
-
-        repertoire = Repertoire.build(**{**{key: val for key, val in sequences.to_dict('list').items()
-                                            if key not in [s.id for s in self.all_signals] + ['p_gen']},
-                                         **{"custom_lists": custom_params.to_dict('list')}},
+        repertoire = Repertoire.build(**{**{key: val for key, val in sequences.to_dict('list').items() if key not in custom_keys},
+                                         **{"custom_lists": sequences[custom_keys].to_dict('list')}},
                                       path=repertoires_path, metadata=metadata)
         return repertoire
 
@@ -92,15 +98,18 @@ class RejectionSampler:
     def _get_no_signal_sequences(self, repertoire_index: int, seqs_no_signal_count, column_names):
         if self.seqs_no_signal_path.is_file() and seqs_no_signal_count > 0:
             skip_rows = repertoire_index * seqs_no_signal_count + 1
-            return pd.read_csv(self.seqs_no_signal_path, skiprows=skip_rows, nrows=seqs_no_signal_count, names=column_names)
+            return pd.read_csv(self.seqs_no_signal_path, skiprows=skip_rows, nrows=seqs_no_signal_count, names=column_names, sep='\t',
+                               dtype={col: str for col in column_names if 'position' in col})
         else:
             return None
 
     def _add_signal_sequences(self, sequences: pd.DataFrame, column_names, repertoire_index: int):
         for signal in self.sim_item.signals:
             skip_rows = self._get_signal_sequence_count(repertoire_count=repertoire_index) + 1
-            tmp_df = pd.read_csv(self.seqs_with_signal_path[signal.id], names=column_names, skiprows=skip_rows,
-                                 nrows=int(self.sim_item.number_of_receptors_in_repertoire * self.sim_item.repertoire_implanting_rate))
+            tmp_df = pd.read_csv(self.seqs_with_signal_path[signal.id], names=column_names, skiprows=skip_rows, sep='\t',
+                                 nrows=int(self.sim_item.number_of_receptors_in_repertoire * self.sim_item.repertoire_implanting_rate),
+                                 dtype={col: str for col in column_names if 'position' in col})
+            print(tmp_df.head())
             if sequences is None:
                 sequences = tmp_df
             else:
@@ -137,15 +146,18 @@ class RejectionSampler:
             self._make_sequences_from_generative_model(sequence_path, needs_seqs_with_signal=sum(sequence_with_signal_count.values()) != 0)
             self.seed += 1
 
-            background_sequences = bnp.open(sequence_path, mode='full', buffer_type=bnp.delimited_buffers.get_bufferclass_for_datatype(GenModelAsTSV),
+            background_sequences = bnp.open(sequence_path, mode='full',
+                                            buffer_type=bnp.delimited_buffers.get_bufferclass_for_datatype(GenModelAsTSV, delimiter="\t"),
                                             has_header=True)
             signal_matrix, signal_positions = self.get_signal_matrix(background_sequences)
             legal_indices = self.filter_out_illegal_sequences(signal_matrix)
-            signal_matrix, signal_positions = signal_matrix[legal_indices], signal_positions[legal_indices]
+            signal_matrix = signal_matrix[legal_indices]
+            signal_positions = signal_positions.iloc[legal_indices]
             background_sequences = background_sequences[legal_indices]
 
             sequence_without_signal_count = self._update_seqs_without_signal(sequence_without_signal_count, signal_matrix, background_sequences)
-            sequence_with_signal_count = self._update_seqs_with_signal(sequence_with_signal_count, signal_matrix, background_sequences, signal_positions)
+            sequence_with_signal_count = self._update_seqs_with_signal(sequence_with_signal_count, signal_matrix, background_sequences,
+                                                                       signal_positions)
 
             if iteration == int(self.max_iterations * 0.75):
                 logging.warning(f"Iteration {iteration} out of {self.max_iterations} max iterations reached during rejection sampling.")
@@ -153,16 +165,16 @@ class RejectionSampler:
 
     def _setup_tmp_sequence_paths(self, path):
         if self.seqs_with_signal_path is None:
-            self.seqs_with_signal_path = {signal.id: path / f"sequences_with_signal_{signal.id}.csv" for signal in self.sim_item.signals}
+            self.seqs_with_signal_path = {signal.id: path / f"sequences_with_signal_{signal.id}.tsv" for signal in self.sim_item.signals}
         if self.seqs_no_signal_path is None:
-            self.seqs_no_signal_path = path / "sequences_no_signal.csv"
+            self.seqs_no_signal_path = path / "sequences_no_signal.tsv"
 
     def _update_seqs_without_signal(self, sequence_without_signal_count, signal_matrix, background_sequences: pd.DataFrame):
         if sequence_without_signal_count > 0:
             seqs = pd.DataFrame(
                 {key: getattr(background_sequences, key)[signal_matrix.sum(axis=1) == 0][:sequence_without_signal_count].to_sequences()
                  for key in self.sim_item.generative_model.OUTPUT_COLUMNS})
-            seqs = pd.concat((seqs, pd.DataFrame({f'{signal.id}_positions': ['' for _ in range(seqs.shape[0])] for signal in self.all_signals})), axis=1)
+            seqs = self._init_signal_positions(seqs, [s.id for s in self.all_signals])
             self._store_sequences(seqs, self.seqs_no_signal_path)
             return sequence_without_signal_count - len(seqs)
         else:
@@ -174,20 +186,29 @@ class RejectionSampler:
         for signal in self.sim_item.signals:
             if sequence_with_signal_count[signal.id] > 0:
                 selection = signal_matrix[:, all_signal_ids.index(signal.id)]
-                seqs = pd.DataFrame({key: getattr(background_sequences, key)[selection][:sequence_with_signal_count[signal.id]].to_sequences()
-                                     for key in self.sim_item.generative_model.OUTPUT_COLUMNS})
-                seqs[all_signal_ids] = pd.DataFrame([[True if id == signal.id else False for id in all_signal_ids]], index=seqs.index)
-                seqs[f'{signal.id}_positions'] = signal_positions[signal.id]
-                self._store_sequences(seqs, self.seqs_with_signal_path[signal.id])
-                sequence_with_signal_count[signal.id] -= len(seqs)
+                if np.any(selection):
+                    seqs = pd.DataFrame({key: getattr(background_sequences, key)[selection][:sequence_with_signal_count[signal.id]].to_sequences()
+                                         for key in self.sim_item.generative_model.OUTPUT_COLUMNS})
+                    seqs[all_signal_ids] = pd.DataFrame([[True if id == signal.id else False for id in all_signal_ids]], index=seqs.index)
+                    seqs = self._init_signal_positions(seqs, all_signal_ids)
+                    seqs.update(pd.DataFrame({f'{signal.id}_positions': signal_positions.loc[selection][signal.id].values}))
+                    self._store_sequences(seqs, self.seqs_with_signal_path[signal.id])
+                    sequence_with_signal_count[signal.id] -= len(seqs)
 
         return sequence_with_signal_count
 
+    def _init_signal_positions(self, seqs, all_signal_ids):
+        zero_positions = 'm' + seqs['sequence_aa' if self.is_amino_acid else 'sequence'].str.replace("([A-Z])", "0").astype(str)
+        for signal_id in all_signal_ids:
+            seqs[f'{signal_id}_positions'] = zero_positions
+
+        return seqs
+
     def _store_sequences(self, seqs: pd.DataFrame, path: Path):
         if path.is_file():
-            seqs.to_csv(str(path), mode='a', header=False, index=False)
+            seqs.to_csv(str(path), mode='a', header=False, index=False, sep='\t')
         else:
-            seqs.to_csv(str(path), mode='w', header=True, index=False)
+            seqs.to_csv(str(path), mode='w', header=True, index=False, sep='\t')
 
     def make_receptors(self, path: Path):
         raise NotImplementedError
@@ -200,8 +221,8 @@ class RejectionSampler:
         PathBuilder.build(path)
         sequences = None
 
-        seqs_no_signal_count = 0 if len(self.sim_item.signals) == 0 else self.sim_item.number_of_examples
-        sequence_with_signal_count = {signal.id: self.sim_item.number_of_examples for signal in self.sim_item.signals}
+        seqs_no_signal_count = 0 if len(self.sim_item.signals) > 0 else self.sim_item.number_of_examples
+        sequence_with_signal_count = {signal.id: self.sim_item.number_of_examples // len(self.sim_item.signals) for signal in self.sim_item.signals}
 
         self._generate_sequences(path / "tmp", seqs_no_signal_count, sequence_with_signal_count)
 
@@ -212,17 +233,19 @@ class RejectionSampler:
             sequences = pd.read_csv(self.seqs_no_signal_path, sep='\t')
 
         for signal in self.sim_item.signals:
-            if sequences:
-                sequences.concat(pd.read_csv(self.seqs_with_signal_path[signal.id], sep='\t'))
+            if sequences is not None:
+                sequences = pd.concat([sequences, pd.read_csv(self.seqs_with_signal_path[signal.id], sep='\t')], ignore_index=True, axis=0)
             else:
                 sequences = pd.read_csv(self.seqs_with_signal_path[signal.id], sep='\t')
 
         sequences = self._add_pgens(sequences)
+        custom_params_keys = self._get_custom_keys()
 
         sequences = [ReceptorSequence(seq['sequence_aa'], seq['sequence'], identifier=uuid.uuid4().hex,
-                                      metadata=SequenceMetadata(custom_params={**metadata, **{'p_gen': seq['p_gen']}},
+                                      metadata=SequenceMetadata(custom_params={**metadata, **{key: str(seq[key]) if 'position' in key else seq[key]
+                                                                                              for key in custom_params_keys}},
                                                                 v_call=seq['v_call'] if 'v_call' in seq else None,
-                                                                j_call=seq['j_call'] if 'j_call' in seq else None)) for seq in sequences.iterrows()]
+                                                                j_call=seq['j_call'] if 'j_call' in seq else None)) for _, seq in sequences.iterrows()]
 
         shutil.rmtree(path / "tmp")
         return sequences
@@ -243,7 +266,7 @@ class RejectionSampler:
         sim_signal_ids = [signal.id for signal in self.sim_item.signals]
         other_signals = [signal.id not in sim_signal_ids for signal in self.all_signals]
         background_to_keep = np.logical_and(signal_matrix.sum(axis=1) <= RejectionSampler.MAX_SIGNALS_PER_SEQUENCE,
-                                            signal_matrix[:, other_signals] == 0 if any(other_signals) else 1)
+                                            np.array((signal_matrix[:, other_signals] == 0 if any(other_signals) else 1)).reshape(-1))
 
         return background_to_keep
 
@@ -257,8 +280,7 @@ class RejectionSampler:
 
         signal_matrix = np.zeros((len(sequence_array), len(self.all_signals)))
 
-        signal_positions = np.ndarray(signal_matrix.shape, dtype=f"S{RejectionSampler.MAX_MOTIF_POSITION_LENGTH}")
-        signal_positions[:] = ""
+        signal_positions = pd.DataFrame("", index=np.arange(len(sequence_array)), dtype=str, columns=[signal.id for signal in self.all_signals])
 
         for index, signal in enumerate(self.all_signals):
             signal_pos_col = None
@@ -278,9 +300,8 @@ class RejectionSampler:
                 signal_matrix[:, index] = np.logical_or(signal_matrix[:, index], np.logical_or.reduce(matches, axis=1))
 
             np_mask = np.where(signal_pos_col.ravel(), "1", "0")
-            signal_positions[:, index] = ["".join(np_mask[start:end]) for start, end in zip(signal_pos_col.shape.starts, signal_pos_col.shape.ends)]
+            signal_positions.iloc[:, index] = ['m' + "".join(np_mask[start:end]) for start, end in zip(signal_pos_col.shape.starts, signal_pos_col.shape.ends)]
 
-        signal_positions = pd.DataFrame(signal_positions.astype(str), columns=[signal.id for signal in self.all_signals])
         return signal_matrix.astype(dtype=np.bool), signal_positions
 
     def _match_genes(self, v_call, v_call_array, j_call, j_call_array):
