@@ -191,7 +191,7 @@ class RejectionSampler:
                                          for key in self.sim_item.generative_model.OUTPUT_COLUMNS})
                     seqs[all_signal_ids] = pd.DataFrame([[True if id == signal.id else False for id in all_signal_ids]], index=seqs.index)
                     seqs = self._init_signal_positions(seqs, all_signal_ids)
-                    seqs.update(pd.DataFrame({f'{signal.id}_positions': signal_positions.loc[selection][signal.id].values}))
+                    seqs.update(pd.DataFrame({f'{signal.id}_positions': signal_positions.loc[selection][f'{signal.id}_positions'].values}))
                     self._store_sequences(seqs, self.seqs_with_signal_path[signal.id])
                     sequence_with_signal_count[signal.id] -= len(seqs)
 
@@ -280,7 +280,7 @@ class RejectionSampler:
 
         signal_matrix = np.zeros((len(sequence_array), len(self.all_signals)))
 
-        signal_positions = pd.DataFrame("", index=np.arange(len(sequence_array)), dtype=str, columns=[signal.id for signal in self.all_signals])
+        signal_positions = pd.DataFrame("", index=np.arange(len(sequence_array)), dtype=str, columns=[f'{signal.id}_positions' for signal in self.all_signals])
 
         for index, signal in enumerate(self.all_signals):
             signal_pos_col = None

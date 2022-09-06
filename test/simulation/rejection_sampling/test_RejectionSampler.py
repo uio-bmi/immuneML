@@ -43,7 +43,6 @@ class TestRejectionSampler(TestCase):
             seqs = pd.read_csv(path / filename, sep='\t')
             assert seqs.shape[0] == 15, seqs
             for index, row in seqs.iterrows():
-                print(row)
                 assert len(row['s1_positions']) == len(row['s2_positions'])
                 assert len(row['sequence_aa']) + 1 == len(row['s1_positions']), (row['sequence_aa'], row['s1_positions'])
                 assert len(row['sequence_aa']) + 1 == len(row['s2_positions']), (row['sequence_aa'], row['s2_positions'])
@@ -77,8 +76,8 @@ class TestRejectionSampler(TestCase):
 
         sampler = self.make_sampler()
         signal_matrix = np.array([[True, False], [False, False], [False, True]])
-        signal_positions = pd.DataFrame({'s1': ['m10', 'm000', 'm000000'],
-                                         's2': ['m00', 'm000', 'm001000']})
+        signal_positions = pd.DataFrame({'s1_positions': ['m10', 'm000', 'm000000'],
+                                         's2_positions': ['m00', 'm000', 'm001000']})
         pd.DataFrame({**{key: ['', '', ''] for key in sampler.sim_item.generative_model.OUTPUT_COLUMNS},
                       **{'sequence_aa': ['AA', 'DFG', 'DGEAFT']}}) \
             .to_csv(path / 'tmp.tsv', sep='\t', index=False, header=True)
