@@ -174,17 +174,24 @@ class PositionalMotifEncoder(DatasetEncoder):
             weights = None
 
         sequence_container = WeigthedSequenceContainer(np_sequences, weights, y_true)
+        # todo current solution only filters motifs based on 'min recall before merging'; find a way to reduce the unnecessary extra tests (precision for generalized motifs) & maybe completely remove this option of one recall before and one after merging?
+        # current solution only good if min_recall_before_merging == min_recall
 
-        motifs = self._filter_motifs(motifs, sequence_container, params.pool_size, generalized=False)
+        motifs = self._filter_motifs(motifs, sequence_container, params.pool_size,
+                                     min_recall=self.min_recall_before_merging, generalized=False)
+
 
         if self.generalize_motifs:
             generalized_motifs = PositionalMotifHelper.get_generalized_motifs(motifs)
-            generalized_motifs = self._filter_motifs(generalized_motifs, sequence_container, params.pool_size, generalized=True)
+            generalized_motifs = self._filter_motifs(generalized_motifs, sequence_container, params.pool_size,
+                                                     min_recall=self.min_recall, generalized=True)
+
+            motifs = self._filter_motifs(motifs, sequence_container, params.pool_size,
+                                                     min_recall=self.min_recall, generalized=False)
 
             motifs += generalized_motifs
 
         PositionalMotifHelper.write_motifs_to_file(motifs, params.result_path / "significant_motifs.tsv")
-
 
         examples, feature_names = self._construct_encoded_data_matrix(motifs, np_sequences)
 
@@ -261,9 +268,8 @@ class PositionalMotifEncoder(DatasetEncoder):
         assert len(filtered_motifs) > 0, f"{PositionalMotifEncoder.__name__}: no significant motifs were found. " \
                                          f"Please try decreasing the values for parameters 'min_precision', 'min_recall' and/or 'min_recall_before_merging'."
 
-    def _filter_motifs(self, candidate_motifs, sequence_container, pool_size, generalized=False):
+    def _filter_motifs(self, candidate_motifs, sequence_container, pool_size, min_recall, generalized=False):
         motif_type = "generalized motifs" if generalized else "motifs"
-        min_recall = self.min_recall if generalized else self.min_recall_before_merging
 
         logging.info(f"{PositionalMotifEncoder.__name__}: filtering {len(candidate_motifs)} {motif_type} with precision >= {self.min_precision} and recall >= {min_recall}")
 
