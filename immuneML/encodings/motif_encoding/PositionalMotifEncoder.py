@@ -44,7 +44,7 @@ class PositionalMotifEncoder(DatasetEncoder):
 
         generalize_motifs (bool):
 
-        motif_candidate_filepath (str):
+        candidate_motif_filepath (str):
 
         label (str):
 
@@ -74,7 +74,7 @@ class PositionalMotifEncoder(DatasetEncoder):
 
     def __init__(self, max_positions: int = None, min_precision: float = None, min_recall: float = None,
                  min_recall_before_merging: float = None, min_true_positives: int = None, generalize_motifs: bool = False,
-                 use_weights: bool = True, motif_candidate_filepath: str = None, label: str = None,
+                 use_weights: bool = True, candidate_motif_filepath: str = None, label: str = None,
                  name: str = None):
         self.max_positions = max_positions
         self.min_precision = min_precision
@@ -83,7 +83,9 @@ class PositionalMotifEncoder(DatasetEncoder):
         self.min_true_positives = min_true_positives
         self.generalize_motifs = generalize_motifs
         self.use_weights = use_weights
-        self.motif_candidate_filepath = motif_candidate_filepath
+        self.candidate_motif_filepath = candidate_motif_filepath
+        self.significant_motif_filepath = None
+
         self.label = label
         self.name = name
         self.context = None
@@ -91,7 +93,7 @@ class PositionalMotifEncoder(DatasetEncoder):
     @staticmethod
     def _prepare_parameters(max_positions: int = None, min_precision: float = None, min_recall: float = None,
                             min_recall_before_merging: float = None, min_true_positives: int = None,
-                            generalize_motifs: bool = False, use_weights: bool = False, motif_candidate_filepath: str = None,
+                            generalize_motifs: bool = False, use_weights: bool = False, candidate_motif_filepath: str = None,
                             label: str = None, name: str = None):
 
         location = PositionalMotifEncoder.__name__
@@ -110,18 +112,18 @@ class PositionalMotifEncoder(DatasetEncoder):
 
         assert min_recall >= min_recall_before_merging, f"{location}: min_recall_before_merging (value = {min_recall_before_merging}) cannot exceed min_recall (value = {min_recall})"
 
-        if motif_candidate_filepath is not None:
-            ParameterValidator.assert_type_and_value(motif_candidate_filepath, str, location, "motif_candidate_filepath")
+        if candidate_motif_filepath is not None:
+            ParameterValidator.assert_type_and_value(candidate_motif_filepath, str, location, "candidate_motif_filepath")
 
-            motif_candidate_filepath = Path(motif_candidate_filepath)
-            assert motif_candidate_filepath.is_file(), f"{location}: the file {motif_candidate_filepath} does not exist. " \
+            candidate_motif_filepath = Path(candidate_motif_filepath)
+            assert candidate_motif_filepath.is_file(), f"{location}: the file {candidate_motif_filepath} does not exist. " \
                                                        f"Specify the correct path under motif_filepath."
 
-            file_columns = list(pd.read_csv(motif_candidate_filepath, sep="\t", iterator=False, dtype=str, nrows=0).columns)
+            file_columns = list(pd.read_csv(candidate_motif_filepath, sep="\t", iterator=False, dtype=str, nrows=0).columns)
 
             ParameterValidator.assert_all_in_valid_list(file_columns,
                                                         ["indices", "amino_acids"],
-                                                        location, "motif_candidate_filepath (column names)")
+                                                        location, "candidate_motif_filepath (column names)")
 
         if label is not None:
             ParameterValidator.assert_type_and_value(label, str, location, "label")
@@ -191,7 +193,8 @@ class PositionalMotifEncoder(DatasetEncoder):
 
             motifs += generalized_motifs
 
-        PositionalMotifHelper.write_motifs_to_file(motifs, params.result_path / "significant_motifs.tsv")
+        self.significant_motif_filepath = params.result_path / "significant_motifs.tsv"
+        PositionalMotifHelper.write_motifs_to_file(motifs, self.significant_motif_filepath)
 
         examples, feature_names = self._construct_encoded_data_matrix(motifs, np_sequences)
 
@@ -201,7 +204,9 @@ class PositionalMotifEncoder(DatasetEncoder):
                                                    feature_names=feature_names,
                                                    example_ids=dataset.get_example_ids(),
                                                    encoding=PositionalMotifEncoder.__name__,
-                                                   info={"positional_weights": positional_weights})
+                                                   info={"positional_weights": positional_weights,
+                                                         "candidate_motif_filepath": self.candidate_motif_filepath,
+                                                         "significant_motif_filepath": self.significant_motif_filepath})
 
         return encoded_dataset
 
@@ -212,18 +217,19 @@ class PositionalMotifEncoder(DatasetEncoder):
         assert len(candidate_motifs) > 0, f"{PositionalMotifEncoder.__name__}: no candidate motifs were found. " \
                                           f"Please try decreasing the value for parameter 'min_true_positives'."
 
-        PositionalMotifHelper.write_motifs_to_file(candidate_motifs, params.result_path / "all_candidate_motifs.tsv")
+        self.candidate_motif_filepath = params.result_path / "all_candidate_motifs.tsv"
+        PositionalMotifHelper.write_motifs_to_file(candidate_motifs, self.candidate_motif_filepath)
 
         return candidate_motifs
 
     def _get_candidate_motifs(self, full_dataset, pool_size=4):
         '''Returns all candidate motifs, which are either read from the input file or computed by finding
         all motifs occuring in at least a given number of sequences of the full dataset.'''
-        if self.motif_candidate_filepath is None:
+        if self.candidate_motif_filepath is None:
             return CacheHandler.memo_by_params(self._build_candidate_motifs_params(full_dataset),
                                                lambda: self._compute_candidate_motifs(full_dataset, pool_size))
         else:
-            return PositionalMotifHelper.read_motifs_from_file(self.motif_candidate_filepath)
+            return PositionalMotifHelper.read_motifs_from_file(self.candidate_motif_filepath)
 
     def _build_candidate_motifs_params(self, dataset: SequenceDataset):
         return (("dataset_identifier", dataset.identifier),
