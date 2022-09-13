@@ -106,6 +106,7 @@ class SklearnMethod(MLMethod):
             predictions = {label.name: self.model.predict_proba(encoded_data.examples)}
             return predictions
         else:
+            warnings.warn(f"{self.__class__.__name__}: cannot predict probabilities.")
             return None
 
     def _fit(self, X, y, cores_for_training: int = 1):
@@ -252,9 +253,10 @@ class SklearnMethod(MLMethod):
         from immuneML.encodings.reference_encoding.MatchedSequencesEncoder import MatchedSequencesEncoder
         from immuneML.encodings.reference_encoding.MatchedReceptorsEncoder import MatchedReceptorsEncoder
         from immuneML.encodings.reference_encoding.MatchedRegexEncoder import MatchedRegexEncoder
+        from immuneML.encodings.motif_encoding.PositionalMotifEncoder import PositionalMotifEncoder
 
         return [KmerFrequencyEncoder, OneHotEncoder, Word2VecEncoder, EvennessProfileEncoder,
-                MatchedSequencesEncoder, MatchedReceptorsEncoder, MatchedRegexEncoder]
+                MatchedSequencesEncoder, MatchedReceptorsEncoder, MatchedRegexEncoder, PositionalMotifEncoder]
 
     @staticmethod
     def get_usage_documentation(model_name):
