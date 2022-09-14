@@ -147,8 +147,8 @@ class RejectionSampler:
             self.seed += 1
 
             background_sequences = bnp.open(sequence_path, mode='full',
-                                            buffer_type=bnp.delimited_buffers.get_bufferclass_for_datatype(GenModelAsTSV, delimiter="\t"),
-                                            has_header=True)
+                                            buffer_type=bnp.delimited_buffers.get_bufferclass_for_datatype(GenModelAsTSV, delimiter="\t",
+                                                                                                           has_header=True))
             signal_matrix, signal_positions = self.get_signal_matrix(background_sequences)
             legal_indices = self.filter_out_illegal_sequences(signal_matrix)
             signal_matrix = signal_matrix[legal_indices]
@@ -245,7 +245,8 @@ class RejectionSampler:
                                       metadata=SequenceMetadata(custom_params={**metadata, **{key: str(seq[key]) if 'position' in key else seq[key]
                                                                                               for key in custom_params_keys}},
                                                                 v_call=seq['v_call'] if 'v_call' in seq else None,
-                                                                j_call=seq['j_call'] if 'j_call' in seq else None)) for _, seq in sequences.iterrows()]
+                                                                j_call=seq['j_call'] if 'j_call' in seq else None)) for _, seq in
+                     sequences.iterrows()]
 
         shutil.rmtree(path / "tmp")
         return sequences
@@ -280,7 +281,8 @@ class RejectionSampler:
 
         signal_matrix = np.zeros((len(sequence_array), len(self.all_signals)))
 
-        signal_positions = pd.DataFrame("", index=np.arange(len(sequence_array)), dtype=str, columns=[f'{signal.id}_positions' for signal in self.all_signals])
+        signal_positions = pd.DataFrame("", index=np.arange(len(sequence_array)), dtype=str,
+                                        columns=[f'{signal.id}_positions' for signal in self.all_signals])
 
         for index, signal in enumerate(self.all_signals):
             signal_pos_col = None
@@ -300,7 +302,8 @@ class RejectionSampler:
                 signal_matrix[:, index] = np.logical_or(signal_matrix[:, index], np.logical_or.reduce(matches, axis=1))
 
             np_mask = np.where(signal_pos_col.ravel(), "1", "0")
-            signal_positions.iloc[:, index] = ['m' + "".join(np_mask[start:end]) for start, end in zip(signal_pos_col.shape.starts, signal_pos_col.shape.ends)]
+            signal_positions.iloc[:, index] = ['m' + "".join(np_mask[start:end]) for start, end in
+                                               zip(signal_pos_col.shape.starts, signal_pos_col.shape.ends)]
 
         return signal_matrix.astype(dtype=np.bool), signal_positions
 
