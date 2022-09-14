@@ -47,6 +47,8 @@ class AtchleyKmerMILClassifier(MLMethod):
 
         initialization_count (int): how many times to repeat the fitting procedure from the beginning before choosing the optimal model (trains the model with multiple random initializations)
 
+        pytorch_device_name (str): The name of the pytorch device to use. This name will be passed to torch.device(pytorch_device_name).
+
     YAML specification:
 
     .. indent with spaces
@@ -71,7 +73,7 @@ class AtchleyKmerMILClassifier(MLMethod):
 
     def __init__(self, iteration_count: int = None, threshold: float = None, evaluate_at: int = None, use_early_stopping: bool = None,
                  random_seed: int = None, learning_rate: float = None, zero_abundance_weight_init: bool = None, number_of_threads: int = None,
-                 result_path: Path = None, initialization_count: int = None):
+                 result_path: Path = None, initialization_count: int = None, pytorch_device_name: str = None):
         super().__init__()
         self.logistic_regression = None
         self.random_seed = random_seed
@@ -87,6 +89,7 @@ class AtchleyKmerMILClassifier(MLMethod):
         self.result_path = result_path
         self.feature_names = None
         self.initialization_count = initialization_count
+        self.pytorch_device_name = pytorch_device_name
 
     def _make_log_reg(self):
         return PyTorchLogisticRegression(in_features=self.input_size, zero_abundance_weight_init=self.zero_abundance_weight_init)
@@ -106,7 +109,7 @@ class AtchleyKmerMILClassifier(MLMethod):
             random.seed(self.random_seed)
             random_seed = random.randint(AtchleyKmerMILClassifier.MIN_SEED_VALUE, AtchleyKmerMILClassifier.MAX_SEED_VALUE)
 
-            Util.setup_pytorch(self.number_of_threads, random_seed)
+            Util.setup_pytorch(self.number_of_threads, random_seed, self.pytorch_device_name)
             self.input_size = encoded_data.examples.shape[1]
 
             log_reg = self._make_log_reg()
@@ -143,7 +146,7 @@ class AtchleyKmerMILClassifier(MLMethod):
                 if loss < self.threshold:
                     break
 
-            logging.warning(f"AtchleyKmerMILClassifier: the logistic regression model did not converge.")
+                logging.warning(f"AtchleyKmerMILClassifier: the logistic regression model did not converge.")
 
             if loss > state['loss'] and self.use_early_stopping:
                 log_reg.load_state_dict(state["model"])

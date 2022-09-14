@@ -81,9 +81,11 @@ class Util:
         return true_y, predicted_y
 
     @staticmethod
-    def setup_pytorch(number_of_threads, random_seed):
+    def setup_pytorch(number_of_threads, random_seed, pytorch_device_name=None):
         torch.set_num_threads(number_of_threads)
         torch.manual_seed(random_seed)
+        if pytorch_device_name is not None:
+            torch.device(pytorch_device_name)
 
     @staticmethod
     def get_immuneML_version():
