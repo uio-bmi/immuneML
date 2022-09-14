@@ -69,7 +69,11 @@ class Util:
 
     @staticmethod
     def binarize_label_classes(true_y, predicted_y, classes):
-        """Binarizes the predictions in place using scikit-learn's label_binarize() method"""
+        """
+        Binarizes the predictions in place using scikit-learn's label_binarize() method
+
+        Necessary for some sklearn metrics, like roc_auc_score
+        """
         if hasattr(true_y, 'dtype') and true_y.dtype.type is np.str_ or isinstance(true_y, list) and any(isinstance(item, str) for item in true_y):
             true_y = label_binarize(true_y, classes=classes)
             predicted_y = label_binarize(predicted_y, classes=classes)
