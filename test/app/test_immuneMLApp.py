@@ -15,7 +15,6 @@ from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.util.PathBuilder import PathBuilder
 from immuneML.util.RepertoireBuilder import RepertoireBuilder
 
-
 class TestImmuneMLApp(TestCase):
 
     def setUp(self) -> None:

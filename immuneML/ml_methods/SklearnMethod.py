@@ -22,6 +22,7 @@ from immuneML.util.PathBuilder import PathBuilder
 
 class SklearnMethod(MLMethod):
     """
+
     Base class for ML methods imported from scikit-learn. The classes inheriting SklearnMethod acting as wrappers around imported
     ML methods from scikit-learn have to implement:
         - the __init__() method,
