@@ -1,5 +1,7 @@
+import keras
 import tensorflow as tf
 import numpy as np
+from keras.layers.rnn.lstm import LSTM as LongShortTermMemory
 
 from immuneML.ml_methods.GenerativeModel import GenerativeModel
 from scripts.specification_util import update_docs_per_mapping
@@ -47,15 +49,8 @@ class LSTM(GenerativeModel):
     def _get_ml_model(self, cores_for_training: int = 2, X=None):
         params = self._parameters
         params["n_jobs"] = cores_for_training
-        model = tf.keras.Sequential([
-            tf.keras.layers.Embedding(vocab_size, embedding_dim, batch_input_shape=[batch_size, None]),
-            tf.keras.layers.LSTM(rnn_units,
-                                 return_sequences=True,
-                                 stateful=True,
-                                 recurrent_initializer='glorot_uniform'),
-            tf.keras.layers.Dense(vocab_size)
-        ])
-        return KNeighborsClassifier(**params)
+
+        return LongShortTermMemory(**params)
 
     def get_params(self):
         return self.model.get_params(deep=True)
@@ -77,10 +72,10 @@ class LSTM(GenerativeModel):
 
     @staticmethod
     def get_documentation():
-        doc = str(KNN.__doc__)
+        doc = str(LSTM.__doc__)
 
         mapping = {
-            "For usage instructions, check :py:obj:`~immuneML.ml_methods.SklearnMethod.SklearnMethod`.": SklearnMethod.get_usage_documentation("KNN"),
+            "For usage instructions, check :py:obj:`~immuneML.ml_methods.SklearnMethod.SklearnMethod`.": GenerativeModel.get_usage_documentation("LSTM"),
         }
 
         doc = update_docs_per_mapping(doc, mapping)
