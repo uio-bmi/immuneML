@@ -2,11 +2,13 @@ import copy
 
 from immuneML.dsl.symbol_table.SymbolTable import SymbolTable
 from immuneML.dsl.symbol_table.SymbolType import SymbolType
+from immuneML.environment.EnvironmentSettings import EnvironmentSettings
+from immuneML.environment.SequenceType import SequenceType
 from immuneML.simulation.Implanting import Implanting
 from immuneML.simulation.LIgOSimulationItem import LIgOSimulationItem
 from immuneML.simulation.Simulation import Simulation
+from immuneML.simulation.SimulationStrategy import SimulationStrategy
 from immuneML.simulation.generative_models.GenerativeModel import GenerativeModel
-from immuneML.util.Logger import log
 from immuneML.util.ParameterValidator import ParameterValidator
 from immuneML.util.ReflectionHandler import ReflectionHandler
 
@@ -74,41 +76,26 @@ class SimulationParser:
 
     @staticmethod
     def parse_simulations(simulations: dict, symbol_table: SymbolTable):
+        location = SimulationParser.__name__
         for key, simulation in simulations.items():
-            symbol_table = SimulationParser._parse_simulation(key, simulation, symbol_table)
+
+            ParameterValidator.assert_keys_present(simulation.keys(), ['type'], location, 'simulation')
+
+            if simulation['type'] == 'Implanting':
+                item = SimulationParser._parse_implanting(simulation, key, symbol_table)
+            elif simulation['type'] == 'LIgOSimulation':
+                item = SimulationParser._parse_ligo_simulation(simulation, key, symbol_table)
+            else:
+                raise ValueError(f"{location}: in simulation {key}, for simulation item {key}, the type was set to {simulation['type']},"
+                                 f" but only 'Implanting' and 'LIgOSimulation' are supported.")
+
+            symbol_table.add(key, SymbolType.SIMULATION, item)
+            print(f"Added {key}, item: {item} as a simulation")
 
         return symbol_table, simulations
 
     @staticmethod
-    @log
-    def _parse_simulation(key: str, simulation: dict, symbol_table: SymbolTable) -> SymbolTable:
-
-        location = SimulationParser.__name__
-
-        simulation_items = []
-
-        for sim_key, simulation_item in simulation.items():
-
-            ParameterValidator.assert_keys_present(simulation_item.keys(), ['type'], location, 'simulation')
-
-            if simulation_item['type'] == 'Implanting':
-                item = SimulationParser._parse_implanting(simulation_item, sim_key, symbol_table)
-            elif simulation_item['type'] == 'LIgOSimulationItem':
-                item = SimulationParser._parse_simulation_item(simulation_item, sim_key, symbol_table)
-            else:
-                raise ValueError(f"{location}: in simulation {key}, for simulation item {sim_key}, the type was set to {simulation_item['type']},"
-                                 f" but only 'Implanting' and 'LIgOSimulationItem' are supported.")
-
-            simulation_items.append(item)
-
-        assert all(isinstance(item, type(simulation_items[0])) for item in simulation_items), "All simulation items must be of the same type."
-
-        symbol_table.add(key, SymbolType.SIMULATION, Simulation(simulation_items, identifier=key))
-
-        return symbol_table
-
-    @staticmethod
-    def _parse_implanting(simulation_item: dict, key: str, symbol_table: SymbolTable) -> Implanting:
+    def _parse_implanting(simulation_item: dict, key: str, symbol_table: SymbolTable) -> Simulation:
         location = SimulationParser.__name__
         valid_simulation_item_keys = ["dataset_implanting_rate", "repertoire_implanting_rate", "signals", "is_noise", "type"]
 
@@ -120,25 +107,48 @@ class SimulationParser:
         implanting_params["name"] = key
         del implanting_params['type']
 
-        return Implanting(**implanting_params)
+        return Simulation(sim_items=[Implanting(**implanting_params)])
 
     @staticmethod
-    def _parse_simulation_item(simulation_item: dict, key: str, symbol_table: SymbolTable) -> LIgOSimulationItem:
+    def _parse_ligo_simulation(simulation: dict, key: str, symbol_table: SymbolTable) -> Simulation:
         location = SimulationParser.__name__
-        valid_simulation_item_keys = ["number_of_examples", "repertoire_implanting_rate", "signals", "is_noise",
-                                      "number_of_receptors_in_repertoire", "generative_model", "type"]
+        valid_keys = {'is_repertoire': bool, 'paired': bool, 'sequence_type': str, 'use_generation_probabilities': bool,
+                      'simulation_strategy': str, 'sim_items': dict, 'type': str}
+        ParameterValidator.assert_keys(simulation.keys(), valid_keys.keys(), location, key, exclusive=True)
+        for k, val_type in valid_keys.items():
+            ParameterValidator.assert_type_and_value(simulation[k], val_type, location, k)
+
+        ParameterValidator.assert_in_valid_list(simulation['sequence_type'].upper(), [st.name for st in SequenceType], location, 'sequence_type')
+        ParameterValidator.assert_in_valid_list(simulation['simulation_strategy'].upper(), [item.name for item in SimulationStrategy], location,
+                                                'simulation_strategy')
+
+        sim_items = []
+        for sim_key, item in simulation['sim_items'].items():
+            sim_items.append(SimulationParser._parse_ligo_sim_item(item, sim_key, symbol_table))
+
+        sim_obj = Simulation(**{**{k: v for k, v in simulation.items() if k != 'type'},
+                                **{'sequence_type': SequenceType[simulation['sequence_type'].upper()], "sim_items": sim_items,
+                                   "identifier": key, 'simulation_strategy': SimulationStrategy[simulation['simulation_strategy'].upper()]}})
+
+        SimulationParser._signal_content_matches_seq_type(sim_obj)
+        return sim_obj
+
+    @staticmethod
+    def _parse_ligo_sim_item(simulation_item: dict, key: str, symbol_table: SymbolTable) -> LIgOSimulationItem:
+        location = SimulationParser.__name__
+        valid_simulation_item_keys = ["number_of_examples", "repertoire_implanting_rate", "signals", "is_noise", "seed",
+                                      "number_of_receptors_in_repertoire", "generative_model"]
 
         ParameterValidator.assert_keys(simulation_item.keys(), valid_simulation_item_keys, location, key, exclusive=True)
         ParameterValidator.assert_keys(simulation_item["signals"], symbol_table.get_keys_by_type(SymbolType.SIGNAL), location, key, False)
         ParameterValidator.assert_type_and_value(simulation_item['is_noise'], bool, location, 'is_noise')
-        ParameterValidator.assert_type_and_value(simulation_item['number_of_examples'], int, location, 'number_of_examples', min_inclusive=1)
 
-        if simulation_item['repertoire_implanting_rate']:
-            ParameterValidator.assert_type_and_value(simulation_item['repertoire_implanting_rate'], float, location, 'repertoire_implanting_rate', 0, 1)
+        for key in ['number_of_examples', 'seed']:
+            ParameterValidator.assert_type_and_value(simulation_item[key], int, location, key, min_inclusive=1)
 
-        if simulation_item['number_of_receptors_in_repertoire']:
-            ParameterValidator.assert_type_and_value(simulation_item['number_of_receptors_in_repertoire'], int, location,
-                                                     'number_of_receptors_in_repertoire', 1)
+        for key, val_type in zip(['repertoire_implanting_rate', 'number_of_receptors_in_repertoire'], [float, int]):
+            if simulation_item[key]:
+                ParameterValidator.assert_type_and_value(simulation_item[key], val_type, location, key)
 
         gen_model = SimulationParser._parse_generative_model(simulation_item, location)
 
@@ -162,3 +172,13 @@ class SimulationParser:
         gen_model = gen_model_cls.build_object(**params)
 
         return gen_model
+
+    @staticmethod
+    def _signal_content_matches_seq_type(simulation: Simulation):
+        for sim_item in simulation.sim_items:
+            for signal in sim_item.signals:
+                for motif in signal.motifs:
+                    ParameterValidator.assert_all_in_valid_list([letter for letter in motif.seed if letter != '/'],
+                                                                EnvironmentSettings.get_sequence_alphabet(simulation.sequence_type),
+                                                                SimulationParser.__name__, f"motif seed {motif.seed}")
+

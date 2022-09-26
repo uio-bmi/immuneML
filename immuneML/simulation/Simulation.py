@@ -1,8 +1,17 @@
-class Simulation:
+from dataclasses import dataclass
 
-    def __init__(self, simulation_items: list, identifier=None):
-        self.simulation_items = simulation_items
-        self.identifier = identifier
+from immuneML.environment.SequenceType import SequenceType
+
+
+@dataclass
+class Simulation:
+    sim_items: list = None
+    identifier: str = None
+    is_repertoire: bool = None
+    paired: bool = None
+    sequence_type: SequenceType = None
+    use_generation_probabilities: bool = None
+    simulation_strategy: str = None
 
     def __str__(self):
-        return ",\n".join(str(simulation_item) for simulation_item in self.simulation_items)
+        return ",\n".join(str(simulation_item) for simulation_item in self.sim_items)

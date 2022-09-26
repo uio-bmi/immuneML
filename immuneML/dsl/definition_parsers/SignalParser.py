@@ -3,8 +3,8 @@ from immuneML.dsl.symbol_table.SymbolTable import SymbolTable
 from immuneML.dsl.symbol_table.SymbolType import SymbolType
 from immuneML.simulation.implants.Signal import Signal
 from immuneML.simulation.sequence_implanting.GappedMotifImplanting import GappedMotifImplanting
-from immuneML.simulation.signal_implanting_strategy.ImplantingComputation import ImplantingComputation
-from immuneML.simulation.signal_implanting_strategy.SignalImplantingStrategy import SignalImplantingStrategy
+from immuneML.simulation.signal_implanting.ImplantingComputation import ImplantingComputation
+from immuneML.simulation.signal_implanting.SignalImplantingStrategy import SignalImplantingStrategy
 from immuneML.util.Logger import log
 from immuneML.util.ParameterValidator import ParameterValidator
 from immuneML.util.ReflectionHandler import ReflectionHandler
@@ -36,10 +36,10 @@ class SignalParser:
     def _get_implanting_strategy(key: str, signal: dict) -> SignalImplantingStrategy:
 
         valid_strategies = [cls[:-10] for cls in
-                            ReflectionHandler.discover_classes_by_partial_name("Implanting", "simulation/signal_implanting_strategy/")]
+                            ReflectionHandler.discover_classes_by_partial_name("Implanting", "simulation/signal_implanting/")]
         ParameterValidator.assert_in_valid_list(signal["implanting"], valid_strategies, "SignalParser", key)
 
-        defaults = DefaultParamsLoader.load("signal_implanting_strategy/", f"{signal['implanting']}Implanting")
+        defaults = DefaultParamsLoader.load("signal_implanting/", f"{signal['implanting']}Implanting")
         signal = {**defaults, **signal}
 
         ParameterValidator.assert_keys_present(list(signal.keys()), ["motifs", "implanting", "sequence_position_weights"], SignalParser.__name__, key)

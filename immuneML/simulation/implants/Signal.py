@@ -8,7 +8,7 @@ from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import Rece
 from immuneML.data_model.repertoire.Repertoire import Repertoire
 from immuneML.environment.SequenceType import SequenceType
 from immuneML.simulation.implants.Motif import Motif
-from immuneML.simulation.signal_implanting_strategy.SignalImplantingStrategy import SignalImplantingStrategy
+from immuneML.simulation.signal_implanting.SignalImplantingStrategy import SignalImplantingStrategy
 from immuneML.util.ReflectionHandler import ReflectionHandler
 from scripts.specification_util import update_docs_per_mapping
 
@@ -26,7 +26,7 @@ class Signal:
 
         motifs (list): A list of the motifs associated with this signal.
 
-        implanting (:py:obj:`~immuneML.simulation.signal_implanting_strategy.SignalImplantingStrategy.SignalImplantingStrategy`): The strategy that is used to decide in which sequences the motifs should be implanted, and how. Valid values for this argument are class names of different signal implanting strategies.
+        implanting (:py:obj:`~immuneML.simulation.signal_implanting.SignalImplantingStrategy.SignalImplantingStrategy`): The strategy that is used to decide in which sequences the motifs should be implanted, and how. Valid values for this argument are class names of different signal implanting strategies.
 
     YAML specification:
 
@@ -79,7 +79,7 @@ class Signal:
         initial_doc = str(Signal.__doc__)
 
         valid_implanting_values = str(
-            ReflectionHandler.all_nonabstract_subclass_basic_names(SignalImplantingStrategy, 'Implanting', 'signal_implanting_strategy/'))[
+            ReflectionHandler.all_nonabstract_subclass_basic_names(SignalImplantingStrategy, 'Implanting', 'signal_implanting/'))[
                                   1:-1].replace("'", "`")
 
         docs_mapping = {

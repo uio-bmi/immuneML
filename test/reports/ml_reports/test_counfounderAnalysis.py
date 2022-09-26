@@ -7,7 +7,6 @@ from immuneML.caching.CacheType import CacheType
 from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.encodings.kmer_frequency.KmerFrequencyEncoder import KmerFrequencyEncoder
-from immuneML.util.ReadsType import ReadsType
 from immuneML.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType import SequenceEncodingType
 from immuneML.environment.Constants import Constants
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
@@ -24,9 +23,10 @@ from immuneML.simulation.implants.Motif import Motif
 from immuneML.simulation.implants.Signal import Signal
 from immuneML.simulation.motif_instantiation_strategy.GappedKmerInstantiation import GappedKmerInstantiation
 from immuneML.simulation.sequence_implanting.GappedMotifImplanting import GappedMotifImplanting
-from immuneML.simulation.signal_implanting_strategy.HealthySequenceImplanting import HealthySequenceImplanting
-from immuneML.simulation.signal_implanting_strategy.ImplantingComputation import ImplantingComputation
+from immuneML.simulation.signal_implanting.HealthySequenceImplanting import HealthySequenceImplanting
+from immuneML.simulation.signal_implanting.ImplantingComputation import ImplantingComputation
 from immuneML.util.PathBuilder import PathBuilder
+from immuneML.util.ReadsType import ReadsType
 from immuneML.workflows.steps.SignalImplanter import SignalImplanter
 
 

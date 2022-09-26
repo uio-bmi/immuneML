@@ -53,35 +53,42 @@ class TestLIgOSimulation(TestCase):
                 },
                 "simulations": {
                     "sim1": {
-
-                        "var1": {
-                            "type": "LIgOSimulationItem",
-                            "signals": ["signal1", "signal2"],
-                            "number_of_examples": 10,
-                            "is_noise": False,
-                            "repertoire_implanting_rate": 0.5,
-                            "number_of_receptors_in_repertoire": 6,
-                            "generative_model": {
-                                "type": "OLGA",
-                                "model_path": None,
-                                "default_model_name": "humanTRB",
-                                "chain": 'beta',
-                                "use_only_productive": True
-                            }
-                        },
-                        "var2": {
-                            "type": "LIgOSimulationItem",
-                            "signals": ["signal1", "signal2"],
-                            "number_of_examples": 10,
-                            "is_noise": True,
-                            "repertoire_implanting_rate": 0.2,
-                            "number_of_receptors_in_repertoire": 6,
-                            "generative_model": {
-                                'type': 'OLGA',
-                                "model_path": None,
-                                "default_model_name": "humanTRB",
-                                "chain": "beta",
-                                "use_only_productive": True
+                        "type": "LIgOSimulation",
+                        "is_repertoire": True,
+                        "paired": False,
+                        "sequence_type": "amino_acid",
+                        "use_generation_probabilities": False,
+                        "simulation_strategy": "REJECTION_SAMPLING",
+                        "sim_items": {
+                            "var1": {
+                                "signals": ["signal1", "signal2"],
+                                "number_of_examples": 10,
+                                "is_noise": False,
+                                "seed": 100,
+                                "repertoire_implanting_rate": 0.5,
+                                "number_of_receptors_in_repertoire": 6,
+                                "generative_model": {
+                                    "type": "OLGA",
+                                    "model_path": None,
+                                    "default_model_name": "humanTRB",
+                                    "chain": 'beta',
+                                    "use_only_productive": True
+                                }
+                            },
+                            "var2": {
+                                "signals": ["signal1", "signal2"],
+                                "number_of_examples": 10,
+                                "is_noise": True,
+                                "seed": 2,
+                                "repertoire_implanting_rate": 0.2,
+                                "number_of_receptors_in_repertoire": 6,
+                                "generative_model": {
+                                    'type': 'OLGA',
+                                    "model_path": None,
+                                    "default_model_name": "humanTRB",
+                                    "chain": "beta",
+                                    "use_only_productive": True
+                                }
                             }
                         }
                     }
@@ -92,11 +99,6 @@ class TestLIgOSimulation(TestCase):
                     "type": "LIgOSimulation",
                     "simulation": "sim1",
                     "export_formats": ["AIRR"],
-                    "is_repertoire": True,
-                    "paired": False,
-                    "sequence_type": "amino_acid",
-                    "use_generation_probabilities": False,
-                    "simulation_strategy": "REJECTION_SAMPLING",
                     "store_signal_in_receptors": True,
                     "sequence_batch_size": 100,
                     'max_iterations': 100,

@@ -1,9 +1,11 @@
+from dataclasses import dataclass
 from typing import List
 
 from immuneML.simulation.generative_models.GenerativeModel import GenerativeModel
 from immuneML.simulation.implants.Signal import Signal
 
 
+@dataclass
 class LIgOSimulationItem:
     """
     When performing a Simulation, one or more implantings can be specified. An implanting represents
@@ -20,7 +22,7 @@ class LIgOSimulationItem:
         signals (list): The list of :ref:`Signal` objects to be implanted in a subset of the repertoires in a RepertoireDataset.
         When multiple signals are specified, this means that all of these signals are implanted in
         the same repertoires in a RepertoireDataset, although they may not be implanted in the same sequences
-        within those repertoires (this depends on the :py:obj:`~immuneML.simulation.signal_implanting_strategy.SignalImplantingStrategy.SignalImplantingStrategy`).
+        within those repertoires (this depends on the :py:obj:`~immuneML.simulation.signal_implanting.SignalImplantingStrategy.SignalImplantingStrategy`).
 
         repertoire_implanting_rate (float): The proportion of sequences in a Repertoire where a motif associated
         with one of the signals should be implanted.
@@ -28,6 +30,9 @@ class LIgOSimulationItem:
         is_noise (bool): indicates whether the implanting should be regarded as noise; if it is True, the signals will be implanted as specified, but
         the repertoire/receptor in question will have negative class.
 
+        generative_model: parameters of the generative model, including its type, path to the model
+
+        seed (int): starting random seed for the generative model (ideally should differ across simulation items)
 
     YAML specification:
 
@@ -51,16 +56,14 @@ class LIgOSimulationItem:
 
     """
 
-    def __init__(self, signals: List[Signal], name: str = "", repertoire_implanting_rate: float = None, is_noise: bool = False,
-                 generative_model: GenerativeModel = None, number_of_examples: int = 0, number_of_receptors_in_repertoire: int = 0):
-
-        self.number_of_examples = number_of_examples
-        self.repertoire_implanting_rate = repertoire_implanting_rate
-        self.number_of_receptors_in_repertoire = number_of_receptors_in_repertoire
-        self.signals = signals
-        self.is_noise = is_noise
-        self.generative_model = generative_model
-        self.name = name
+    signals: List[Signal]
+    name: str = ""
+    repertoire_implanting_rate: float = None
+    is_noise: bool = False
+    seed: int = None
+    generative_model: GenerativeModel = None
+    number_of_examples: int = 0
+    number_of_receptors_in_repertoire: int = 0
 
     def __str__(self):
 

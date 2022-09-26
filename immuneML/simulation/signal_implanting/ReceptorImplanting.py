@@ -1,12 +1,12 @@
 import random
 
 from immuneML.data_model.repertoire.Repertoire import Repertoire
-from immuneML.simulation.signal_implanting_strategy.SignalImplantingStrategy import SignalImplantingStrategy
+from immuneML.simulation.signal_implanting.SignalImplantingStrategy import SignalImplantingStrategy
 
 
 class ReceptorImplanting(SignalImplantingStrategy):
     """
-    This class represents a :py:obj:`~immuneML.simulation.signal_implanting_strategy.SignalImplantingStrategy.SignalImplantingStrategy`
+    This class represents a :py:obj:`~immuneML.simulation.signal_implanting.SignalImplantingStrategy.SignalImplantingStrategy`
     where signals will be implanted in both chains of immune receptors. This class should be used only when simulating paired chain data.
 
     Arguments:

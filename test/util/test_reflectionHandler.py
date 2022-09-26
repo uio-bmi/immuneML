@@ -1,9 +1,9 @@
 from unittest import TestCase
 
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
-from immuneML.simulation.signal_implanting_strategy.FullSequenceImplanting import FullSequenceImplanting
-from immuneML.simulation.signal_implanting_strategy.HealthySequenceImplanting import HealthySequenceImplanting
-from immuneML.simulation.signal_implanting_strategy.ReceptorImplanting import ReceptorImplanting
+from immuneML.simulation.signal_implanting.FullSequenceImplanting import FullSequenceImplanting
+from immuneML.simulation.signal_implanting.HealthySequenceImplanting import HealthySequenceImplanting
+from immuneML.simulation.signal_implanting.ReceptorImplanting import ReceptorImplanting
 from immuneML.util.KmerHelper import KmerHelper
 from immuneML.util.ReflectionHandler import ReflectionHandler
 

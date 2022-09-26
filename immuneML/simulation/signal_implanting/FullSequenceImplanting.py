@@ -9,12 +9,12 @@ from immuneML.data_model.receptor.receptor_sequence.SequenceAnnotation import Se
 from immuneML.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
 from immuneML.data_model.repertoire.Repertoire import Repertoire
 from immuneML.simulation.implants.ImplantAnnotation import ImplantAnnotation
-from immuneML.simulation.signal_implanting_strategy.SignalImplantingStrategy import SignalImplantingStrategy
+from immuneML.simulation.signal_implanting.SignalImplantingStrategy import SignalImplantingStrategy
 
 
 class FullSequenceImplanting(SignalImplantingStrategy):
     """
-    This class represents a :py:obj:`~immuneML.simulation.signal_implanting_strategy.SignalImplantingStrategy.SignalImplantingStrategy`
+    This class represents a :py:obj:`~immuneML.simulation.signal_implanting.SignalImplantingStrategy.SignalImplantingStrategy`
     where signals will be implanted in the repertoire by replacing `repertoire_implanting_rate` percent of the sequences with sequences
     generated from the motifs of the signal. Motifs here cannot include gaps and the motif instances are the full sequences and will be
     a part of the repertoire.

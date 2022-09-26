@@ -5,13 +5,13 @@ from pathlib import Path
 
 from immuneML.data_model.repertoire.Repertoire import Repertoire
 from immuneML.simulation.sequence_implanting.SequenceImplantingStrategy import SequenceImplantingStrategy
-from immuneML.simulation.signal_implanting_strategy.ImplantingComputation import ImplantingComputation, get_implanting_function
-from immuneML.simulation.signal_implanting_strategy.SignalImplantingStrategy import SignalImplantingStrategy
+from immuneML.simulation.signal_implanting.ImplantingComputation import ImplantingComputation, get_implanting_function
+from immuneML.simulation.signal_implanting.SignalImplantingStrategy import SignalImplantingStrategy
 
 
 class HealthySequenceImplanting(SignalImplantingStrategy):
     """
-    This class represents a :py:obj:`~immuneML.simulation.signal_implanting_strategy.SignalImplantingStrategy.SignalImplantingStrategy`
+    This class represents a :py:obj:`~immuneML.simulation.signal_implanting.SignalImplantingStrategy.SignalImplantingStrategy`
     where signals will be implanted in 'healthy sequences', meaning sequences in which no signal has been implanted
     previously. This ensures that there is only one signal per receptor sequence.
 

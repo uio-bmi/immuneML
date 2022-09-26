@@ -8,7 +8,7 @@ from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import Rece
 from immuneML.data_model.repertoire.Repertoire import Repertoire
 from immuneML.environment.SequenceType import SequenceType
 from immuneML.simulation.sequence_implanting.SequenceImplantingStrategy import SequenceImplantingStrategy
-from immuneML.simulation.signal_implanting_strategy.ImplantingComputation import ImplantingComputation
+from immuneML.simulation.signal_implanting.ImplantingComputation import ImplantingComputation
 
 
 class SignalImplantingStrategy(metaclass=abc.ABCMeta):

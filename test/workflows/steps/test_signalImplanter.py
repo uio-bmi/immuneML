@@ -18,9 +18,9 @@ from immuneML.simulation.implants.Motif import Motif
 from immuneML.simulation.implants.Signal import Signal
 from immuneML.simulation.motif_instantiation_strategy.GappedKmerInstantiation import GappedKmerInstantiation
 from immuneML.simulation.sequence_implanting.GappedMotifImplanting import GappedMotifImplanting
-from immuneML.simulation.signal_implanting_strategy.HealthySequenceImplanting import HealthySequenceImplanting
-from immuneML.simulation.signal_implanting_strategy.ImplantingComputation import ImplantingComputation
-from immuneML.simulation.signal_implanting_strategy.ReceptorImplanting import ReceptorImplanting
+from immuneML.simulation.signal_implanting.HealthySequenceImplanting import HealthySequenceImplanting
+from immuneML.simulation.signal_implanting.ImplantingComputation import ImplantingComputation
+from immuneML.simulation.signal_implanting.ReceptorImplanting import ReceptorImplanting
 from immuneML.util.PathBuilder import PathBuilder
 from immuneML.workflows.steps.SignalImplanter import SignalImplanter
 

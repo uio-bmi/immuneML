@@ -20,7 +20,7 @@ class Implanting:
         signals (list): The list of :ref:`Signal` objects to be implanted in a subset of the repertoires in a RepertoireDataset.
         When multiple signals are specified, this means that all of these signals are implanted in
         the same repertoires in a RepertoireDataset, although they may not be implanted in the same sequences
-        within those repertoires (this depends on the :py:obj:`~immuneML.simulation.signal_implanting_strategy.SignalImplantingStrategy.SignalImplantingStrategy`).
+        within those repertoires (this depends on the :py:obj:`~immuneML.simulation.signal_implanting.SignalImplantingStrategy.SignalImplantingStrategy`).
 
         dataset_implanting_rate (float): The proportion of repertoires in the RepertoireDataset in which the
         signals should be implanted. When specifying multiple implantings, the sum of all dataset_implanting_rates

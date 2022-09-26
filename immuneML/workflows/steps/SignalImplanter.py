@@ -70,17 +70,17 @@ class SignalImplanter(Step):
     @staticmethod
     def _implant_signals(simulation_state: SimulationState, process_element_func, output_path: Path):
         processed_elements = []
-        simulation_limits = SignalImplanter._prepare_simulation_limits(simulation_state.simulation.simulation_items,
+        simulation_limits = SignalImplanter._prepare_simulation_limits(simulation_state.simulation.sim_items,
                                                                        simulation_state.dataset.get_example_count())
         current_implanting_index = 0
-        current_implanting = simulation_state.simulation.simulation_items[current_implanting_index]
+        current_implanting = simulation_state.simulation.sim_items[current_implanting_index]
 
         for index, element in enumerate(simulation_state.dataset.get_data()):
 
             if current_implanting is not None and index >= simulation_limits[current_implanting.name]:
                 current_implanting_index += 1
                 if current_implanting_index < len(simulation_limits.keys()):
-                    current_implanting = simulation_state.simulation.simulation_items[current_implanting_index]
+                    current_implanting = simulation_state.simulation.sim_items[current_implanting_index]
                 else:
                     current_implanting = None
 

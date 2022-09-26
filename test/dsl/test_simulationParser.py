@@ -10,8 +10,8 @@ from immuneML.simulation.implants.Motif import Motif
 from immuneML.simulation.implants.Signal import Signal
 from immuneML.simulation.motif_instantiation_strategy.GappedKmerInstantiation import GappedKmerInstantiation
 from immuneML.simulation.sequence_implanting.GappedMotifImplanting import GappedMotifImplanting
-from immuneML.simulation.signal_implanting_strategy.HealthySequenceImplanting import HealthySequenceImplanting
-from immuneML.simulation.signal_implanting_strategy.ImplantingComputation import ImplantingComputation
+from immuneML.simulation.signal_implanting.HealthySequenceImplanting import HealthySequenceImplanting
+from immuneML.simulation.signal_implanting.ImplantingComputation import ImplantingComputation
 
 
 class TestSimulationParser(TestCase):
@@ -41,4 +41,4 @@ class TestSimulationParser(TestCase):
 
         self.assertTrue(symbol_table.contains("sim1"))
         sim1 = symbol_table.get("sim1")
-        self.assertEqual(1, len(sim1.simulation_items))
+        self.assertEqual(1, len(sim1.sim_items))

@@ -10,12 +10,12 @@ import pandas as pd
 from immuneML.IO.dataset_export.DataExporter import DataExporter
 from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
 from immuneML.data_model.dataset.SequenceDataset import SequenceDataset
-from immuneML.environment.SequenceType import SequenceType
 from immuneML.simulation.LIgOSimulationItem import LIgOSimulationItem
 from immuneML.simulation.Simulation import Simulation
 from immuneML.simulation.SimulationStrategy import SimulationStrategy
 from immuneML.simulation.implants.Signal import Signal
 from immuneML.simulation.rejection_sampling.RejectionSampler import RejectionSampler
+from immuneML.simulation.signal_implanting.LigoImplanter import LigoImplanter
 from immuneML.util.ExporterHelper import ExporterHelper
 from immuneML.util.PathBuilder import PathBuilder
 from immuneML.workflows.instructions.Instruction import Instruction
@@ -28,14 +28,6 @@ class LIgOSimulationInstruction(Instruction):
     the user.
 
     Arguments:
-
-        is_repertoire (bool): indicates if simulation should be on repertoire or receptor level
-
-        paired (bool): if the simulated data should be paired or not
-
-        use_generation_probabilities (bool): whether to base computations on generation probabilities of individual receptors
-
-        simulation_strategy (str): how to construct receptors that contain a signal; possible options are `IMPLANTING` and `REJECTION_SAMPLING`
 
         simulation (str): a name of a simulation object containing a list of LIgOSimulationItem as specified under definitions key; defines how
         to combine signals with simulated data; specified under definitions
@@ -61,10 +53,6 @@ class LIgOSimulationInstruction(Instruction):
 
         my_simulation_instruction: # user-defined name of the instruction
             type: LIgOSimulation # which instruction to execute
-            is_repertoire: True
-            paired: False
-            use_generation_probabilities: False
-            simulation_strategy: IMPLANTING
             simulation: sim1
             store_signal_in_receptors: True
             sequence_batch_size: 1000
@@ -75,18 +63,14 @@ class LIgOSimulationInstruction(Instruction):
 
     """
 
-    def __init__(self, is_repertoire: bool, paired: bool, use_generation_probabilities: bool, simulation_strategy: SimulationStrategy,
-                 simulation: Simulation, sequence_type: SequenceType, signals: List[Signal], name: str, store_signal_in_receptors: bool,
+    def __init__(self, simulation: Simulation, signals: List[Signal], name: str, store_signal_in_receptors: bool,
                  sequence_batch_size: int, max_iterations: int, number_of_processes: int, exporters: List[DataExporter] = None,
                  export_p_gens: bool = None):
 
-        self.state = LIgOSimulationState(is_repertoire=is_repertoire, paired=paired, use_generation_probabilities=use_generation_probabilities,
-                                         simulation_strategy=simulation_strategy, simulation=simulation, sequence_type=sequence_type,
-                                         signals=signals, name=name, store_signal_in_receptors=store_signal_in_receptors,
+        self.state = LIgOSimulationState(simulation=simulation, signals=signals, name=name, store_signal_in_receptors=store_signal_in_receptors,
                                          number_of_processes=number_of_processes, sequence_batch_size=sequence_batch_size,
                                          max_iterations=max_iterations)
         self.exporters = exporters
-        self.seed = 1
         self.export_p_gens = export_p_gens
 
     def run(self, result_path: Path):
@@ -103,19 +87,19 @@ class LIgOSimulationInstruction(Instruction):
 
     def _simulate_dataset(self):
         summary_path = self.state.result_path / "summary.csv"
-        chunk_size = math.ceil(len(self.state.simulation.simulation_items) / self.state.number_of_processes)
+        chunk_size = math.ceil(len(self.state.simulation.sim_items) / self.state.number_of_processes)
 
         with Pool(processes=self.state.number_of_processes) as pool:
             examples = list(chain.from_iterable(
-                pool.starmap(self._create_examples, [(item, summary_path) for item in self.state.simulation.simulation_items],
+                pool.starmap(self._create_examples, [(item, summary_path) for item in self.state.simulation.sim_items],
                              chunksize=chunk_size)))
 
         labels = {signal.id: [True, False] for signal in self.state.signals}
 
-        if self.state.is_repertoire:
+        if self.state.simulation.is_repertoire:
             self.state.dataset = RepertoireDataset.build_from_objects(labels=labels, repertoires=examples, name='simulated_dataset',
                                                                       metadata_path=self.state.result_path / 'metadata.csv')
-        elif self.state.paired:
+        elif self.state.simulation.paired:
             raise NotImplementedError()
         else:
             self.state.dataset = SequenceDataset.build_from_objects(examples, path=self.state.result_path, name='simulated_dataset',
@@ -123,19 +107,19 @@ class LIgOSimulationInstruction(Instruction):
 
     def _create_examples(self, item: LIgOSimulationItem, summary_path: Path) -> list:
 
-        if self.state.is_repertoire:
+        if self.state.simulation.is_repertoire:
             return self._create_repertoires(item, summary_path)
         else:
             return self._create_receptors(item, summary_path)
 
     def _create_receptors(self, item: LIgOSimulationItem, summary_path: Path):
-        if self.state.paired:
+        if self.state.simulation.paired:
             raise NotImplementedError
         else:
-            if self.state.simulation_strategy == SimulationStrategy.REJECTION_SAMPLING:
-                sampler = RejectionSampler(sim_item=item, sequence_type=self.state.sequence_type, all_signals=self.state.signals, seed=self.seed,
-                                           sequence_batch_size=self.state.sequence_batch_size, max_iterations=self.state.max_iterations,
-                                           export_pgens=self.export_p_gens)
+            if self.state.simulation.simulation_strategy == SimulationStrategy.REJECTION_SAMPLING:
+                sampler = RejectionSampler(sim_item=item, sequence_type=self.state.simulation.sequence_type, all_signals=self.state.signals,
+                                           seed=item.seed, sequence_batch_size=self.state.sequence_batch_size,
+                                           max_iterations=self.state.max_iterations, export_pgens=self.export_p_gens)
                 sequences = sampler.make_sequences(self.state.result_path)
                 return sequences
             else:
@@ -143,22 +127,22 @@ class LIgOSimulationInstruction(Instruction):
 
     def _create_repertoires(self, item: LIgOSimulationItem, summary_path: Path) -> list:
 
-        if self.state.simulation_strategy == SimulationStrategy.IMPLANTING:
+        if self.state.simulation.simulation_strategy == SimulationStrategy.IMPLANTING:
 
-            repertoires = []
-            raise NotImplementedError
+            repertoires = LigoImplanter(item, self.state.simulation.sequence_type, self.state.signals, self.state.sequence_batch_size, item.seed,
+                                        self.export_p_gens).make_repertoires(self.state.result_path)
 
-        elif self.state.simulation_strategy == SimulationStrategy.REJECTION_SAMPLING:
+        elif self.state.simulation.simulation_strategy == SimulationStrategy.REJECTION_SAMPLING:
 
-            sampler = RejectionSampler(sim_item=item, sequence_type=self.state.sequence_type, all_signals=self.state.signals, seed=self.seed,
-                                       sequence_batch_size=self.state.sequence_batch_size, max_iterations=self.state.max_iterations,
+            sampler = RejectionSampler(sim_item=item, sequence_type=self.state.simulation.sequence_type, all_signals=self.state.signals,
+                                       seed=item.seed, sequence_batch_size=self.state.sequence_batch_size, max_iterations=self.state.max_iterations,
                                        export_pgens=self.export_p_gens)
             repertoires = sampler.make_repertoires(self.state.result_path)
 
         else:
             raise RuntimeError(f"{LIgOSimulationInstruction.__name__}: simulation strategy was not properly set, accepted are "
                                f"{SimulationStrategy.IMPLANTING.name} and {SimulationStrategy.REJECTION_SAMPLING.name}, but got "
-                               f"{self.state.simulation_strategy} instead.")
+                               f"{self.state.simulation.simulation_strategy} instead.")
 
         return repertoires
 
@@ -203,7 +187,7 @@ class LIgOSimulationInstruction(Instruction):
 
             for index in sequence_indices[signal.id]:
                 implanted_sequence = signal.implant_in_sequence(sequence=background_sequences[index], is_noise=item.is_noise,
-                                                                sequence_type=self.state.sequence_type)
+                                                                sequence_type=self.state.simulation.sequence_type)
                 for other_signal in self.state.signals:
                     if other_signal.id != signal.id:
                         implanted_sequence.metadata.custom_params[other_signal.id] = False

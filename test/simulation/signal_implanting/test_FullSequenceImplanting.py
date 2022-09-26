@@ -6,7 +6,7 @@ from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.simulation.implants.Motif import Motif
 from immuneML.simulation.implants.Signal import Signal
 from immuneML.simulation.motif_instantiation_strategy.GappedKmerInstantiation import GappedKmerInstantiation
-from immuneML.simulation.signal_implanting_strategy.FullSequenceImplanting import FullSequenceImplanting
+from immuneML.simulation.signal_implanting.FullSequenceImplanting import FullSequenceImplanting
 from immuneML.util.PathBuilder import PathBuilder
 
 
