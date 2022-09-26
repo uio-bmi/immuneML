@@ -1,4 +1,7 @@
+import math
 import random
+from itertools import chain
+from multiprocessing import Pool
 from pathlib import Path
 from typing import List
 
@@ -45,6 +48,8 @@ class LIgOSimulationInstruction(Instruction):
 
         export_p_gens (bool): whether to compute generation probabilities (if supported by the generative model) for sequences and include them as part of output
 
+        number_of_processes (int): determines how many simulation items can be simulated in parallel
+
         export_formats: in which formats to export the dataset after simulation. Valid formats are class names of any non-abstract class
         inheriting :py:obj:`~immuneML.IO.dataset_export.DataExporter.DataExporter`. Important note: Binary files in ImmuneML might not be compatible
         between different immuneML versions.
@@ -65,18 +70,21 @@ class LIgOSimulationInstruction(Instruction):
             sequence_batch_size: 1000
             max_iterations: 1000
             export_p_gens: False
+            number_of_processes: 4
             export_formats: [AIRR] # in which formats to export the dataset
 
     """
 
     def __init__(self, is_repertoire: bool, paired: bool, use_generation_probabilities: bool, simulation_strategy: SimulationStrategy,
                  simulation: Simulation, sequence_type: SequenceType, signals: List[Signal], name: str, store_signal_in_receptors: bool,
-                 sequence_batch_size: int, max_iterations: int, exporters: List[DataExporter] = None, export_p_gens: bool = None):
+                 sequence_batch_size: int, max_iterations: int, number_of_processes: int, exporters: List[DataExporter] = None,
+                 export_p_gens: bool = None):
 
         self.state = LIgOSimulationState(is_repertoire=is_repertoire, paired=paired, use_generation_probabilities=use_generation_probabilities,
                                          simulation_strategy=simulation_strategy, simulation=simulation, sequence_type=sequence_type,
                                          signals=signals, name=name, store_signal_in_receptors=store_signal_in_receptors,
-                                         sequence_batch_size=sequence_batch_size, max_iterations=max_iterations)
+                                         number_of_processes=number_of_processes, sequence_batch_size=sequence_batch_size,
+                                         max_iterations=max_iterations)
         self.exporters = exporters
         self.seed = 1
         self.export_p_gens = export_p_gens
@@ -94,12 +102,13 @@ class LIgOSimulationInstruction(Instruction):
         return self.state
 
     def _simulate_dataset(self):
-        examples = []
         summary_path = self.state.result_path / "summary.csv"
+        chunk_size = math.ceil(len(self.state.simulation.simulation_items) / self.state.number_of_processes)
 
-        for item in self.state.simulation.simulation_items:
-            tmp_examples = self._create_examples(item, summary_path)
-            examples.extend(tmp_examples)
+        with Pool(processes=self.state.number_of_processes) as pool:
+            examples = list(chain.from_iterable(
+                pool.starmap(self._create_examples, [(item, summary_path) for item in self.state.simulation.simulation_items],
+                             chunksize=chunk_size)))
 
         labels = {signal.id: [True, False] for signal in self.state.signals}
 

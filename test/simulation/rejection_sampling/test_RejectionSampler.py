@@ -37,7 +37,7 @@ class TestRejectionSampler(TestCase):
         path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / 'rej_sampling_gen_seqs')
 
         sampler = self.make_sampler()
-        sampler._generate_sequences(path, 15, {'s1': 15})
+        sampler._make_background_sequences(path, 15, {'s1': 15})
 
         for filename in ['sequences_no_signal.tsv', 'sequences_with_signal_s1.tsv']:
             seqs = pd.read_csv(path / filename, sep='\t')

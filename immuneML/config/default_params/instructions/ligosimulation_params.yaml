@@ -4,4 +4,5 @@ use_generation_probabilities: False
 simulation_strategy: IMPLANTING
 store_signal_in_receptors: True
 max_iterations: 100
+number_of_processes: 4
 export_formats: [AIRR]

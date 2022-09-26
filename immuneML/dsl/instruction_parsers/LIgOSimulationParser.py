@@ -17,12 +17,12 @@ class LIgOSimulationParser:
 
         location = LIgOSimulationParser.__name__
         keys = ["simulation", "type", "is_repertoire", "paired", "use_generation_probabilities", "simulation_strategy", 'sequence_type',
-                "export_formats", "store_signal_in_receptors", 'sequence_batch_size', "max_iterations", "export_p_gens"]
+                "export_formats", "store_signal_in_receptors", 'sequence_batch_size', "max_iterations", "export_p_gens", "number_of_processes"]
         ParameterValidator.assert_keys(instruction.keys(), keys, location, key)
 
         for param_key in ['is_repertoire', 'paired', 'use_generation_probabilities', "store_signal_in_receptors", 'export_p_gens']:
             ParameterValidator.assert_type_and_value(instruction[param_key], bool, location, param_key)
-        for param_key in ['max_iterations', 'sequence_batch_size']:
+        for param_key in ['max_iterations', 'sequence_batch_size', 'number_of_processes']:
             ParameterValidator.assert_type_and_value(instruction[param_key], int, location, param_key, 1)
 
         ParameterValidator.assert_type_and_value(instruction['simulation_strategy'], str, location, 'simulation_strategy')

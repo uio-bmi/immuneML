@@ -49,7 +49,7 @@ class RejectionSampler:
                                       for signal in self.sim_item.signals}
         sequence_without_signal_count = sequence_count - sum(sequence_with_signal_count.values())
 
-        self._generate_sequences(path / "tmp", sequence_without_signal_count, sequence_with_signal_count)
+        self._make_background_sequences(path / "tmp", sequence_without_signal_count, sequence_with_signal_count)
         repertoires = []
 
         for i in range(self.sim_item.number_of_examples):
@@ -60,9 +60,7 @@ class RejectionSampler:
 
             sequences = self._get_no_signal_sequences(repertoire_index=i, seqs_no_signal_count=seqs_no_signal_count, column_names=column_names)
             sequences = self._add_signal_sequences(sequences, column_names, repertoire_index=i)
-            print(sequences.head())
             sequences = self._add_pgens(sequences)
-            print(sequences.head())
 
             self._check_sequence_count(sequences)
 
@@ -70,7 +68,7 @@ class RejectionSampler:
 
             repertoires.append(repertoire)
 
-        shutil.rmtree(path / "tmp")
+        shutil.rmtree(path / "tmp", ignore_errors=True)
         return repertoires
 
     def _get_custom_keys(self, with_p_gens: bool = True):
@@ -109,7 +107,6 @@ class RejectionSampler:
             tmp_df = pd.read_csv(self.seqs_with_signal_path[signal.id], names=column_names, skiprows=skip_rows, sep='\t',
                                  nrows=int(self.sim_item.number_of_receptors_in_repertoire * self.sim_item.repertoire_implanting_rate),
                                  dtype={col: str for col in column_names if 'position' in col})
-            print(tmp_df.head())
             if sequences is None:
                 sequences = tmp_df
             else:
@@ -135,7 +132,7 @@ class RejectionSampler:
             self.sim_item.generative_model.generate_from_skewed_gene_models(v_genes=v_genes, j_genes=j_genes, seed=self.seed, path=sequence_path,
                                                                             sequence_type=self.sequence_type, batch_size=self.sequence_batch_size)
 
-    def _generate_sequences(self, path: Path, sequence_without_signal_count: int, sequence_with_signal_count: dict):
+    def _make_background_sequences(self, path: Path, sequence_without_signal_count: int, sequence_with_signal_count: dict):
         PathBuilder.build(path)
         self._setup_tmp_sequence_paths(path)
         iteration = 1
@@ -146,6 +143,7 @@ class RejectionSampler:
             self._make_sequences_from_generative_model(sequence_path, needs_seqs_with_signal=sum(sequence_with_signal_count.values()) != 0)
             self.seed += 1
 
+            # TODO: close file here after bnp.open (check in new bionumpy version)
             background_sequences = bnp.open(sequence_path, mode='full',
                                             buffer_type=bnp.delimited_buffers.get_bufferclass_for_datatype(GenModelAsTSV, delimiter="\t",
                                                                                                            has_header=True))
@@ -224,7 +222,7 @@ class RejectionSampler:
         seqs_no_signal_count = 0 if len(self.sim_item.signals) > 0 else self.sim_item.number_of_examples
         sequence_with_signal_count = {signal.id: self.sim_item.number_of_examples // len(self.sim_item.signals) for signal in self.sim_item.signals}
 
-        self._generate_sequences(path / "tmp", seqs_no_signal_count, sequence_with_signal_count)
+        self._make_background_sequences(path / "tmp", seqs_no_signal_count, sequence_with_signal_count)
 
         metadata = {**{signal.id: False if self.sim_item.is_noise else True for signal in self.sim_item.signals},
                     **{signal.id: False for signal in self.all_signals if signal not in self.sim_item.signals}}

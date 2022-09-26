@@ -53,6 +53,7 @@ class TestLIgOSimulation(TestCase):
                 },
                 "simulations": {
                     "sim1": {
+
                         "var1": {
                             "type": "LIgOSimulationItem",
                             "signals": ["signal1", "signal2"],
@@ -99,7 +100,8 @@ class TestLIgOSimulation(TestCase):
                     "store_signal_in_receptors": True,
                     "sequence_batch_size": 100,
                     'max_iterations': 100,
-                    "export_p_gens": True
+                    "export_p_gens": True,
+                    "number_of_processes": 4
                 }
             },
             "output": {
