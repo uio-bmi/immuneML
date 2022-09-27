@@ -193,6 +193,8 @@ class PositionalMotifEncoder(DatasetEncoder):
 
             motifs += generalized_motifs
 
+        # todo separate file for significant motifs and generalized motifs???
+
         self.significant_motif_filepath = params.result_path / "significant_motifs.tsv"
         PositionalMotifHelper.write_motifs_to_file(motifs, self.significant_motif_filepath)
 
@@ -209,7 +211,6 @@ class PositionalMotifEncoder(DatasetEncoder):
                                                          "significant_motif_filepath": self.significant_motif_filepath})
 
         return encoded_dataset
-
 
     def _prepare_candidate_motifs(self, dataset, params):
         full_dataset = EncoderHelper.get_current_dataset(dataset, self.context)
