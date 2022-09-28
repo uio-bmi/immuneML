@@ -215,12 +215,7 @@ class ReceptorCNN(MLMethod):
                   encoded_data.example_ids[start_index: end_index]
 
     def _prepare_and_split_data(self, encoded_data: EncodedData):
-        indices = list(range(len(encoded_data.example_ids)))
-        random.shuffle(indices)
-
-        limit = int(len(encoded_data.example_ids) * self.training_percentage)
-        train_indices = indices[:limit]
-        val_indices = indices[limit:]
+        train_indices, val_indices = Util.get_train_val_indices(len(encoded_data.example_ids), self.training_percentage)
 
         train_data = self._make_encoded_data(encoded_data, train_indices)
         val_data = self._make_encoded_data(encoded_data, val_indices)

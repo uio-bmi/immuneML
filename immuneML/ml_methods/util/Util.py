@@ -1,11 +1,13 @@
 import logging
 from datetime import datetime
 
+import random
 import numpy as np
 import pkg_resources
 import torch
 from sklearn.preprocessing import label_binarize
 
+from immuneML.data_model.encoded_data.EncodedData import EncodedData
 from immuneML.environment.Constants import Constants
 
 
@@ -90,3 +92,25 @@ class Util:
                 return 'immuneML ' + Constants.VERSION
             except Exception as e:
                 return f'immuneML-dev-{datetime.now()}'
+
+    @staticmethod
+    def get_train_val_indices(n_examples, training_percentage):
+        indices = list(range(n_examples))
+        random.shuffle(indices)
+
+        limit = int(n_examples * training_percentage)
+        train_indices = indices[:limit]
+        val_indices = indices[limit:]
+
+        return train_indices, val_indices
+
+    @staticmethod
+    def subset_encoded_data(encoded_data: EncodedData, indices):
+        return EncodedData(examples=encoded_data.examples[indices],
+                           labels={label_name: [encoded_data.labels[label_name][i] for i in indices]
+                                   for label_name in encoded_data.labels.keys()},
+                           example_ids=[encoded_data.example_ids[i] for i in indices],
+                           feature_names=encoded_data.feature_names,
+                           feature_annotations=encoded_data.feature_annotations,
+                           encoding=encoded_data.encoding,
+                           info=encoded_data.info)

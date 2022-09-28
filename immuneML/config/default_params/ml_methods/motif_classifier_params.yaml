@@ -1,0 +1,4 @@
+training_percentage: 0.7
+max_motifs: 100
+patience: 5
+min_delta: 0
