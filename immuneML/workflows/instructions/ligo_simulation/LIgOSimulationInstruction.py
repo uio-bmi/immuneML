@@ -103,7 +103,7 @@ class LIgOSimulationInstruction(Instruction):
             raise NotImplementedError()
         else:
             self.state.dataset = SequenceDataset.build_from_objects(examples, path=self.state.result_path, name='simulated_dataset',
-                                                                    file_size=SequenceDataset.DEFAULT_FILE_SIZE)
+                                                                    file_size=SequenceDataset.DEFAULT_FILE_SIZE, labels=labels)
 
     def _create_examples(self, item: LIgOSimulationItem, summary_path: Path) -> list:
 

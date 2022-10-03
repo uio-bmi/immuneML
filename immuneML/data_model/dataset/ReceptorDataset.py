@@ -20,7 +20,7 @@ class ReceptorDataset(ElementDataset):
         return ReceptorDataset(**kwargs)
 
     @classmethod
-    def build_from_objects(cls, receptors: List[Receptor], file_size: int, path: Path, name: str = None):
+    def build_from_objects(cls, receptors: List[Receptor], file_size: int, path: Path, name: str = None, labels: dict = None):
 
         file_count = math.ceil(len(receptors) / file_size)
         file_names = [path / f"batch{''.join(['0' for i in range(1, len(str(file_count)) - len(str(index)) + 1)])}{index}.npy"
@@ -32,7 +32,7 @@ class ReceptorDataset(ElementDataset):
                 names=type(receptors[0]).get_record_names())
             np.save(str(file_names[index]), receptor_matrix, allow_pickle=False)
 
-        return ReceptorDataset(filenames=file_names, file_size=file_size, name=name,
+        return ReceptorDataset(filenames=file_names, file_size=file_size, name=name, labels=labels,
                                element_class_name=type(receptors[0]).__name__ if len(receptors) > 0 else None)
 
     def get_metadata(self, field_names: list, return_df: bool = False):

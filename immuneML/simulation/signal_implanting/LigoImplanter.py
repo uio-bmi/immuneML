@@ -17,7 +17,7 @@ class LigoImplanter:
     export_p_gens: bool = None
 
     def make_repertoires(self, path: Path):
-        raise NotImplementedError
+        pass
 
     def make_receptors(self, path: Path):
         raise NotImplementedError

@@ -238,15 +238,18 @@ class RejectionSampler:
 
         sequences = self._add_pgens(sequences)
         custom_params_keys = self._get_custom_keys()
+        print(custom_params_keys)
 
         sequences = [ReceptorSequence(seq['sequence_aa'], seq['sequence'], identifier=uuid.uuid4().hex,
-                                      metadata=SequenceMetadata(custom_params={**metadata, **{key: str(seq[key]) if 'position' in key else seq[key]
+                                      metadata=SequenceMetadata(custom_params={**metadata, **{key: str(seq[key]) if 'position' in key else getattr(seq, key, None)
                                                                                               for key in custom_params_keys}},
                                                                 v_call=seq['v_call'] if 'v_call' in seq else None,
-                                                                j_call=seq['j_call'] if 'j_call' in seq else None)) for _, seq in
+                                                                j_call=seq['j_call'] if 'j_call' in seq else None,
+                                                                region_type=seq['region_type'])) for _, seq in
                      sequences.iterrows()]
 
-        shutil.rmtree(path / "tmp")
+        shutil.rmtree(path / "tmp", ignore_errors=True)
+
         return sequences
 
     def _add_pgens(self, sequences: pd.DataFrame) -> pd.DataFrame:
@@ -265,7 +268,7 @@ class RejectionSampler:
         sim_signal_ids = [signal.id for signal in self.sim_item.signals]
         other_signals = [signal.id not in sim_signal_ids for signal in self.all_signals]
         background_to_keep = np.logical_and(signal_matrix.sum(axis=1) <= RejectionSampler.MAX_SIGNALS_PER_SEQUENCE,
-                                            np.array((signal_matrix[:, other_signals] == 0 if any(other_signals) else 1)).reshape(-1))
+                                            np.array(signal_matrix[:, other_signals] == 0 if any(other_signals) else 1).all(axis=1))
 
         return background_to_keep
 

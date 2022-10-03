@@ -1,5 +1,6 @@
 import copy
 
+from immuneML.dsl.DefaultParamsLoader import DefaultParamsLoader
 from immuneML.dsl.symbol_table.SymbolTable import SymbolTable
 from immuneML.dsl.symbol_table.SymbolType import SymbolType
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
@@ -90,7 +91,6 @@ class SimulationParser:
                                  f" but only 'Implanting' and 'LIgOSimulation' are supported.")
 
             symbol_table.add(key, SymbolType.SIMULATION, item)
-            print(f"Added {key}, item: {item} as a simulation")
 
         return symbol_table, simulations
 
@@ -114,6 +114,9 @@ class SimulationParser:
         location = SimulationParser.__name__
         valid_keys = {'is_repertoire': bool, 'paired': bool, 'sequence_type': str, 'use_generation_probabilities': bool,
                       'simulation_strategy': str, 'sim_items': dict, 'type': str}
+
+        simulation = {**DefaultParamsLoader.load("simulation", "ligo_simulation"), **simulation}
+
         ParameterValidator.assert_keys(simulation.keys(), valid_keys.keys(), location, key, exclusive=True)
         for k, val_type in valid_keys.items():
             ParameterValidator.assert_type_and_value(simulation[k], val_type, location, k)
@@ -138,6 +141,8 @@ class SimulationParser:
         location = SimulationParser.__name__
         valid_simulation_item_keys = ["number_of_examples", "repertoire_implanting_rate", "signals", "is_noise", "seed",
                                       "number_of_receptors_in_repertoire", "generative_model"]
+
+        simulation_item = {**DefaultParamsLoader.load('simulation', 'ligo_simulation_item'), **simulation_item}
 
         ParameterValidator.assert_keys(simulation_item.keys(), valid_simulation_item_keys, location, key, exclusive=True)
         ParameterValidator.assert_keys(simulation_item["signals"], symbol_table.get_keys_by_type(SymbolType.SIGNAL), location, key, False)

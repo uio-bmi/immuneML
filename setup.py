@@ -43,7 +43,8 @@ setup(
     entry_points={
         'console_scripts': [
             'immune-ml = immuneML.app.ImmuneMLApp:main',
-            'immune-ml-quickstart = immuneML.workflows.instructions.quickstart:main'
+            'immune-ml-quickstart = immuneML.workflows.instructions.quickstart:main',
+            'ligo = immuneML.app.ImmuneMLApp:main'
         ]
     },
 )
