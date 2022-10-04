@@ -2,13 +2,12 @@ import abc
 import os
 import warnings
 import numpy as np
+import tensorflow
 
 from immuneML.ml_methods.util.Util import Util
 from immuneML.data_model.encoded_data.EncodedData import EncodedData
 from immuneML.environment import Label
 from immuneML.ml_methods.MLMethod import MLMethod
-
-
 
 
 class GenerativeModel(MLMethod):
@@ -57,7 +56,17 @@ class GenerativeModel(MLMethod):
             warnings.simplefilter("ignore")
             os.environ["PYTHONWARNINGS"] = "ignore"
 
-        self.model = self._get_ml_model(cores_for_training, X)
+        print(X[:50])
+        vocab_size = 21
+        embedding_dim = 256
+        batch_size = 64
+
+        self.model = tensorflow.keras.Sequential([
+            tensorflow.keras.layers.Embedding(vocab_size, embedding_dim, batch_input_shape = [batch_size,None]),
+            self._get_ml_model(cores_for_training, X),
+            tensorflow.keras.layers.Dense(vocab_size)
+        ])
+
         self.model.fit(X, y)
 
         if not self.show_warnings:
@@ -68,6 +77,7 @@ class GenerativeModel(MLMethod):
 
     @abc.abstractmethod
     def _get_ml_model(self, cores_for_training: int = 2, X=None):
+
         pass
 
     @abc.abstractmethod
