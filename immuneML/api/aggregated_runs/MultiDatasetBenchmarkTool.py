@@ -8,6 +8,7 @@ from immuneML.dsl.definition_parsers.ReportParser import ReportParser
 from immuneML.dsl.symbol_table.SymbolTable import SymbolTable
 from immuneML.dsl.symbol_table.SymbolType import SymbolType
 from immuneML.presentation.html.MultiDatasetBenchmarkHTMLBuilder import MultiDatasetBenchmarkHTMLBuilder
+from immuneML.util.Logger import print_log
 from immuneML.util.ParameterValidator import ParameterValidator
 from immuneML.util.PathBuilder import PathBuilder
 
@@ -76,23 +77,23 @@ class MultiDatasetBenchmarkTool:
         self.reports = None
 
     def run(self):
-        print("Starting MultiDatasetBenchmarkTool...", flush=True)
+        print_log("Starting MultiDatasetBenchmarkTool...")
         PathBuilder.build(self.result_path)
         specs = self._split_specs_file()
         self._extract_reports()
         instruction_states = {}
         for index, specs_name in enumerate(specs.keys()):
-            print(f"Running nested cross-validation on dataset {specs_name} ({index+1}/{len(list(specs.keys()))})..", flush=True)
+            print_log(f"Running nested cross-validation on dataset {specs_name} ({index+1}/{len(list(specs.keys()))})..")
             app = ImmuneMLApp(specification_path=specs[specs_name], result_path=self.result_path / specs_name)
             instruction_states[specs_name] = app.run()[0]
-            print(f"Finished nested cross-validation on dataset {specs_name} ({index+1}/{len(list(specs.keys()))})..", flush=True)
+            print_log(f"Finished nested cross-validation on dataset {specs_name} ({index+1}/{len(list(specs.keys()))})..")
 
-        print("Running reports on the results of nested cross-validation on all datasets...", flush=True)
+        print_log("Running reports on the results of nested cross-validation on all datasets...")
         report_results = self._run_reports(instruction_states)
-        print("Finished reports, now generating HTML output...", flush=True)
+        print_log("Finished reports, now generating HTML output...")
         MultiDatasetBenchmarkHTMLBuilder.build(report_results, self.result_path,
                                                {specs_name: self.result_path / specs_name for specs_name in specs.keys()})
-        print("MultiDatasetBenchmarkTool finished.", flush=True)
+        print_log("MultiDatasetBenchmarkTool finished.")
 
     def _extract_reports(self):
         with self.specification_path.open("r") as file:
@@ -171,7 +172,7 @@ class MultiDatasetBenchmarkTool:
     def _run_reports(self, instruction_states: dict):
         report_results = {}
         for index, report in enumerate(self.reports):
-            print(f"Running report {report.name} ({index+1}/{len(self.reports)})...", flush=True)
+            print_log(f"Running report {report.name} ({index+1}/{len(self.reports)})...")
             report.instruction_states = list(instruction_states.values())
             report.result_path = PathBuilder.build(self.result_path / 'benchmarking_reports/')
             report_result = report.generate_report()
