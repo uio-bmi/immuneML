@@ -12,7 +12,7 @@ from immuneML.util.ReflectionHandler import ReflectionHandler
 
 class SignalParser:
 
-    VALID_KEYS = ["motifs", "implanting"]
+    VALID_KEYS = ["motifs"]
 
     @staticmethod
     @log
@@ -35,24 +35,28 @@ class SignalParser:
     @staticmethod
     def _get_implanting_strategy(key: str, signal: dict) -> SignalImplantingStrategy:
 
-        valid_strategies = [cls[:-10] for cls in
-                            ReflectionHandler.discover_classes_by_partial_name("Implanting", "simulation/signal_implanting/")]
-        ParameterValidator.assert_in_valid_list(signal["implanting"], valid_strategies, "SignalParser", key)
+        if key in signal:
+            valid_strategies = [cls[:-10] for cls in
+                                ReflectionHandler.discover_classes_by_partial_name("Implanting", "simulation/signal_implanting/")]
+            ParameterValidator.assert_in_valid_list(signal["implanting"], valid_strategies, "SignalParser", key)
 
-        defaults = DefaultParamsLoader.load("signal_implanting/", f"{signal['implanting']}Implanting")
-        signal = {**defaults, **signal}
+            defaults = DefaultParamsLoader.load("signal_implanting/", f"{signal['implanting']}Implanting")
+            signal = {**defaults, **signal}
 
-        ParameterValidator.assert_keys_present(list(signal.keys()), ["motifs", "implanting", "sequence_position_weights"], SignalParser.__name__, key)
+            ParameterValidator.assert_keys_present(list(signal.keys()), ["motifs", "implanting", "sequence_position_weights"], SignalParser.__name__, key)
 
-        implanting_comp = None
-        if 'implanting_computation' in signal:
-            implanting_comp = signal['implanting_computation'].lower()
-            ParameterValidator.assert_in_valid_list(implanting_comp, [el.name.lower() for el in ImplantingComputation], SignalParser.__name__,
-                                                    'implanting_computation')
-            implanting_comp = ImplantingComputation[implanting_comp.upper()]
+            implanting_comp = None
+            if 'implanting_computation' in signal:
+                implanting_comp = signal['implanting_computation'].lower()
+                ParameterValidator.assert_in_valid_list(implanting_comp, [el.name.lower() for el in ImplantingComputation], SignalParser.__name__,
+                                                        'implanting_computation')
+                implanting_comp = ImplantingComputation[implanting_comp.upper()]
 
-        implanting_strategy = ReflectionHandler.get_class_by_name(f"{signal['implanting']}Implanting")(GappedMotifImplanting(),
-                                                                                                       signal["sequence_position_weights"],
-                                                                                                       implanting_comp)
+            implanting_strategy = ReflectionHandler.get_class_by_name(f"{signal['implanting']}Implanting")(GappedMotifImplanting(),
+                                                                                                           signal["sequence_position_weights"],
+                                                                                                           implanting_comp)
 
-        return implanting_strategy
+            return implanting_strategy
+
+        else:
+            return None
