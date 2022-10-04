@@ -24,7 +24,7 @@ setup(
                       "editdistance==0.5.3", "regex", "tzlocal", "airr>=1,<1.4", "pystache", "torch>=1.5.1", "Cython", "h5py<=2.10.0", "dill>=0.3",
                       "tqdm>=0.24",  # Note: h5py v3 does not work with DeepRC, but works with everything else
                       "tensorboard>=1.14.0", "requests>=2.21", "plotly>=4", "logomaker>=0.8", "fishersapi", "matplotlib-venn>=0.11", "scipy",
-                      "bionumpy"],
+                      "bionumpy", "olga"],
     extras_require={
         "TCRdist": ["parasail==1.2", "tcrdist3>=0.1.6"]
     },
