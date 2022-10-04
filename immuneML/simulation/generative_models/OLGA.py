@@ -184,7 +184,6 @@ class OLGA(GenerativeModel):
             else:
                 self._generate_all_sequences(count=batch_size, path=skewed_seqs_path, seed=seed, model_path=skewed_model_path)
 
-            print(skewed_seqs_path)
             pd.read_csv(skewed_seqs_path, sep='\t').to_csv(path, mode='a', sep='\t', index=False)
 
             if skewed_seqs_path.is_file():

@@ -169,10 +169,12 @@ class RejectionSampler:
 
     def _update_seqs_without_signal(self, sequence_without_signal_count, signal_matrix, background_sequences: pd.DataFrame):
         if sequence_without_signal_count > 0:
+            all_signal_ids = [s.id for s in self.all_signals]
             seqs = pd.DataFrame(
                 {key: getattr(background_sequences, key)[signal_matrix.sum(axis=1) == 0][:sequence_without_signal_count].to_sequences()
                  for key in self.sim_item.generative_model.OUTPUT_COLUMNS})
-            seqs = self._init_signal_positions(seqs, [s.id for s in self.all_signals])
+            seqs = self._init_signal_positions(seqs, all_signal_ids)
+            seqs[all_signal_ids] = pd.DataFrame([[False for _ in all_signal_ids]], index=seqs.index)
             self._store_sequences(seqs, self.seqs_no_signal_path)
             return sequence_without_signal_count - len(seqs)
         else:
@@ -238,7 +240,6 @@ class RejectionSampler:
 
         sequences = self._add_pgens(sequences)
         custom_params_keys = self._get_custom_keys()
-        print(custom_params_keys)
 
         sequences = [ReceptorSequence(seq['sequence_aa'], seq['sequence'], identifier=uuid.uuid4().hex,
                                       metadata=SequenceMetadata(custom_params={**metadata, **{key: str(seq[key]) if 'position' in key else getattr(seq, key, None)
