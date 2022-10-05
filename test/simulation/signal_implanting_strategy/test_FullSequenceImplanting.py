@@ -1,6 +1,7 @@
 import shutil
 from unittest import TestCase
 
+from immuneML.data_model.receptor.RegionType import RegionType
 from immuneML.data_model.repertoire.Repertoire import Repertoire
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.simulation.implants.Motif import Motif
@@ -15,12 +16,13 @@ class TestFullSequenceImplanting(TestCase):
         path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "full_seq_implanting/")
         signal = Signal("sig1", [Motif("motif1", GappedKmerInstantiation(max_gap=0), "AAAA")], FullSequenceImplanting())
 
-        repertoire = Repertoire.build(["CCCC", "CCCC", "CCCC"], path=path)
+        repertoire = Repertoire.build(["CCCC", "CCCC", "CCCC"], region_types=[RegionType.IMGT_JUNCTION for _ in range(3)], path=path)
 
         new_repertoire = signal.implant_to_repertoire(repertoire, 0.33, path)
 
         self.assertEqual(len(repertoire.sequences), len(new_repertoire.sequences))
         self.assertEqual(1, len([seq for seq in new_repertoire.sequences if seq.amino_acid_sequence == "AAAA"]))
         self.assertEqual(2, len([seq for seq in new_repertoire.sequences if seq.amino_acid_sequence == "CCCC"]))
+        self.assertEqual(new_repertoire.get_region_type(), RegionType.IMGT_JUNCTION)
 
         shutil.rmtree(path)

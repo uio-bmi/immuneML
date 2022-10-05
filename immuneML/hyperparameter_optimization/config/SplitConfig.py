@@ -17,7 +17,7 @@ class SplitConfig:
 
         - random (Monte Carlo cross-validation - randomly splitting the dataset to training and test datasets)
 
-        - manual (train and test dataset are explicitly specified by providing metadata files for the two datasets - currently available only for repertoire datasets)
+        - manual (train and test dataset are explicitly specified by providing metadata files for the two datasets)
 
         - leave_one_out_stratification (leave-one-out CV where one refers to a specific parameter, e.g. if subject is known in a receptor dataset, it is possible to have leave-subject-out CV - currently only available for receptor datasets).
 
@@ -33,9 +33,10 @@ class SplitConfig:
 
         manual_config (:py:obj:`~immuneML.hyperparameter_optimization.config.ManualSplitConfig.ManualSplitConfig`): if split strategy is `MANUAL`,
         here the paths to metadata files should be given (fields `train_metadata_path` and `test_metadata_path`). The matching of examples is done
-        using the "subject_id" field so it has to be present in both the original dataset and the metadata files provided here. Manual splitting to
-        train and test dataset is currently supported only for repertoire datasets. If split strategy is anything else, this field has no effect
-        and can be omitted.
+        using the "subject_id" field in for repertoire datasets so it has to be present in both the original dataset and the metadata files provided
+        here. For receptor and sequence datasets, "example_id" field needs to be provided in the metadata files and it will be mapped to either
+        'sequence_identifiers' or 'receptor_identifiers' in the original dataset. If split strategy is anything other than `MANUAL`, this field has
+        no effect and can be omitted.
 
         leave_one_out_config (:py:obj:`~immuneML.hyperparameter_optimization.config.LeaveOneOutConfig.LeaveOneOutConfig`): if split strategy is
         `LEAVE_ONE_OUT_STRATIFICATION`, this config describes which parameter to use for stratification thus making a list of train/test dataset

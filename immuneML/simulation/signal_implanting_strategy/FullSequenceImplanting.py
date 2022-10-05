@@ -67,7 +67,7 @@ class FullSequenceImplanting(SignalImplantingStrategy):
             motif_instance = motif.instantiate_motif()
             annotation = SequenceAnnotation([ImplantAnnotation(signal_id=signal.id, motif_id=motif.identifier,
                                                                motif_instance=motif_instance.instance, position=0)])
-            metadata = SequenceMetadata(v_gene="TRBV6-1", j_gene="TRBJ2-7", count=1, chain="B")
+            metadata = SequenceMetadata(v_gene="TRBV6-1", j_gene="TRBJ2-7", count=1, chain="B", region_type=sequences[0].metadata.region_type)
 
             new_sequences.append(ReceptorSequence(amino_acid_sequence=motif_instance.instance, annotation=annotation, metadata=metadata))
 

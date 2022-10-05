@@ -22,7 +22,7 @@ class TestImmuneMLApp(TestCase):
         os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
 
     def create_dataset(self):
-        path = Path(os.path.relpath(EnvironmentSettings.root_path / "test/tmp/immunemlapp/initial_dataset"))
+        path = Path(os.path.relpath(EnvironmentSettings.tmp_test_path / "immuneml_app/initial_dataset"))
         PathBuilder.build(path)
 
         repertoire_count = 30
@@ -174,7 +174,7 @@ class TestImmuneMLApp(TestCase):
             }
         }
 
-        path = EnvironmentSettings.root_path / "test/tmp/immunemlapp/"
+        path = EnvironmentSettings.tmp_test_path / "immuneml_app/"
         PathBuilder.build(path)
         specs_file = path / "specs.yaml"
         with specs_file.open("w") as file:
