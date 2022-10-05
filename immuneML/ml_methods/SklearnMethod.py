@@ -86,7 +86,7 @@ class SklearnMethod(MLMethod):
         self.class_mapping = None
         self.label = None
 
-    def fit(self, encoded_data: EncodedData, label: Label, cores_for_training: int = 2):
+    def fit(self, encoded_data: EncodedData, label: Label, optimization_metric=None, cores_for_training: int = 2):
 
         self.label = label
         self.class_mapping = Util.make_class_mapping(encoded_data.labels[self.label.name])

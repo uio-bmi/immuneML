@@ -4,14 +4,13 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 import plotly.graph_objs as go
-from sklearn import metrics as sklearn_metrics
 from sklearn.preprocessing import label_binarize
 
 from immuneML.data_model.dataset.Dataset import Dataset
 from immuneML.environment.Constants import Constants
 from immuneML.hyperparameter_optimization import HPSetting
 from immuneML.ml_methods.MLMethod import MLMethod
-from immuneML.ml_metrics import ml_metrics
+from immuneML.ml_metrics.MetricUtil import MetricUtil
 from immuneML.ml_metrics.Metric import Metric
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
@@ -111,10 +110,7 @@ class TrainingPerformance(MLReport):
 
     @staticmethod
     def _compute_score(metric: Metric, predicted_y, predicted_proba_y, true_y, labels):
-        if hasattr(ml_metrics, metric.value):
-            fn = getattr(ml_metrics, metric.value)
-        else:
-            fn = getattr(sklearn_metrics, metric.value)
+        fn = MetricUtil.get_metric_fn(metric)
 
         if hasattr(true_y, 'dtype') and true_y.dtype.type is np.str_ or isinstance(true_y, list) and any(isinstance(item, str) for item in true_y):
             true_y = label_binarize(true_y, classes=labels)

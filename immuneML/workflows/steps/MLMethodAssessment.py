@@ -4,7 +4,7 @@ import warnings
 from pathlib import Path
 
 import pandas as pd
-from sklearn import metrics
+from immuneML.ml_metrics.MetricUtil import MetricUtil
 
 from immuneML.ml_methods.MLMethod import MLMethod
 from immuneML.ml_methods.util.Util import Util
@@ -70,10 +70,7 @@ class MLMethodAssessment(Step):
 
     @staticmethod
     def _score_for_metric(metric: Metric, predicted_y, predicted_proba_y, true_y, classes):
-        if hasattr(ml_metrics, metric.value):
-            fn = getattr(ml_metrics, metric.value)
-        else:
-            fn = getattr(metrics, metric.value)
+        fn = MetricUtil.get_metric_fn(metric)
 
         true_y, predicted_y = Util.binarize_label_classes(true_y=true_y, predicted_y=predicted_y, classes=classes)
 

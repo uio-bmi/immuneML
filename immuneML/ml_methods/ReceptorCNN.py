@@ -146,7 +146,7 @@ class ReceptorCNN(MLMethod):
 
         return {self.label.name: np.vstack([1 - np.array(predictions), predictions]).T}
 
-    def fit(self, encoded_data: EncodedData, label: Label, cores_for_training: int = 2):
+    def fit(self, encoded_data: EncodedData, label: Label, optimization_metric=None, cores_for_training: int = 2):
 
         self.feature_names = encoded_data.feature_names
 

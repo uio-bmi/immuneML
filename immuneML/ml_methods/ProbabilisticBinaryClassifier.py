@@ -67,7 +67,7 @@ class ProbabilisticBinaryClassifier(MLMethod):
         self.label = None
         self.feature_names = None
 
-    def fit(self, encoded_data: EncodedData, label: Label, cores_for_training: int = 2):
+    def fit(self, encoded_data: EncodedData, label: Label, optimization_metric=None, cores_for_training: int = 2):
         self.feature_names = encoded_data.feature_names
         X = encoded_data.examples
         assert X.shape[1] == 2, "ProbabilisticBinaryClassifier: the shape of the input is not compatible with the classifier. " \
@@ -87,7 +87,7 @@ class ProbabilisticBinaryClassifier(MLMethod):
     def fit_by_cross_validation(self, encoded_data: EncodedData, number_of_splits: int = 5, label: Label = None, cores_for_training: int = -1,
                                 optimization_metric=None):
         warnings.warn("ProbabilisticBinaryClassifier: cross-validation on this classifier is not defined: fitting one model instead...")
-        self.fit(encoded_data, label)
+        self.fit(encoded_data=encoded_data, label=label)
 
     def predict(self, encoded_data: EncodedData, label: Label):
         """
