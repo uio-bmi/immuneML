@@ -1,26 +1,21 @@
 import copy
 import logging
-import math
-import random
 import warnings
 from pathlib import Path
 
 import numpy as np
-import torch
 import yaml
-from torch import nn
 
 from immuneML.data_model.encoded_data.EncodedData import EncodedData
-from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.environment.Label import Label
-from immuneML.environment.SequenceType import SequenceType
 from immuneML.ml_methods.MLMethod import MLMethod
-from immuneML.ml_methods.pytorch_implementations.PyTorchReceptorCNN import PyTorchReceptorCNN as RCNN
 from immuneML.ml_methods.util.Util import Util
+from immuneML.ml_metrics.Metric import Metric
+from immuneML.ml_metrics.MetricUtil import MetricUtil
 from immuneML.util.PathBuilder import PathBuilder
 
 
-class MotifClassifier(MLMethod):
+class MotifClassifier(MLMethod): # todo name? (Greedy)BinaryFeatureClassifier? RuleTree? something with OR?
     """
 
     Arguments:
@@ -41,34 +36,142 @@ class MotifClassifier(MLMethod):
     """
 
     def __init__(self, training_percentage: float = None, max_motifs: int = None,
-                 patience: int = None, min_delta: float = None, optimization_metric: str = None,
+                 patience: int = None, min_delta: float = None,
                  result_path: Path = None):
         super().__init__()
         self.training_percentage = training_percentage
         self.max_motifs = max_motifs
         self.patience = patience
         self.min_delta = min_delta
-        self.optimization_metric = optimization_metric
 
+        self.feature_names = None
+        self.rule_tree_indices = None
+        self.rule_tree_features = None
+        self.label = None
+        self.optimization_metric = None
         self.class_mapping = None
         self.result_path = result_path
 
     def predict(self, encoded_data: EncodedData, label: Label):
-
-        pass
-        # predictions_proba = self.predict_proba(encoded_data, label)
-        # return {label.name: [self.class_mapping[val] for val in (predictions_proba[label.name][:, 1] > 0.5).tolist()]}
-
-
+        return self._get_rule_tree_predictions(encoded_data, self.rule_tree_indices)
 
     def predict_proba(self, encoded_data: EncodedData, label: Label):
         warnings.warn(f"{MotifClassifier.__name__}: cannot predict probabilities.")
         return None
 
-    def fit(self, encoded_data: EncodedData, label: Label, cores_for_training: int = 2):
-        train_data, validation_data = self._prepare_and_split_data(encoded_data)
+    def fit(self, encoded_data: EncodedData, label: Label, optimization_metric: str, cores_for_training: int = 2):
+        self.feature_names = encoded_data.feature_names
+        self.label = label
+        self.class_mapping = Util.make_binary_class_mapping(encoded_data.labels[self.label.name])
+        # todo deal with positive_class, what if it is not explicitly set?
+        # todo generalize with the positive class label stuff in PositionalMotifEncoder
+        # todo weights in immuneML general must also be recalculated here for specific training and validation sets!
+
+        encoded_train_data, encoded_val_data = self._prepare_and_split_data(encoded_data)
+        self.optimization_metric = optimization_metric
+        self.rule_tree_indices = self._build_rule_tree(encoded_train_data, encoded_val_data)
+        self.rule_tree_features = self._get_rule_tree_features_from_indices(self.rule_tree_indices, self.feature_names)
 
         logging.info(f"{MotifClassifier.__name__}: finished training.")
+
+    def _build_rule_tree(self, encoded_train_data, encoded_val_data):
+        return self._recursively_select_rules(encoded_train_data=encoded_train_data,
+                                              encoded_val_data=encoded_val_data,
+                                              last_val_scores=[], prev_rule_indices=[])
+
+    def _get_rule_tree_features_from_indices(self, rule_tree_indices, feature_names):
+        return [feature_names[idx] for idx in rule_tree_indices]
+
+    def _recursively_select_rules(self, encoded_train_data, encoded_val_data, last_val_scores, prev_rule_indices):
+        new_rule_indices = self._add_next_best_rule(encoded_train_data, prev_rule_indices)
+
+        if new_rule_indices == prev_rule_indices or len(new_rule_indices) > self.max_motifs:
+            logging.info(f"{MotifClassifier.__name__}: no improvement on training set or max motifs reached")
+
+            is_improvement = self._test_is_improvement(last_val_scores, self.min_delta)
+            return self._get_optimal_indices(new_rule_indices, is_improvement)
+
+        val_scores = last_val_scores + [self._test_performance_rule_tree(encoded_data=encoded_val_data, rule_indices=new_rule_indices)]
+        is_improvement = self._test_is_improvement(val_scores, self.min_delta)
+
+        if self._test_earlystopping(is_improvement): # originally also included 'if args.earlystopping'
+            logging.info(f"{MotifClassifier.__name__}: reached earlystopping criterion")
+
+            return self._get_optimal_indices(new_rule_indices, is_improvement)
+
+        return self._recursively_select_rules(encoded_train_data, encoded_val_data,
+                                        last_val_scores=val_scores, prev_rule_indices=new_rule_indices)
+
+    def _test_earlystopping(self, is_improvement):
+        # patience has not reached yet, continue training
+        if len(is_improvement) < self.patience:
+            return False
+
+        # last few trees did not improve, stop training
+        if not any(is_improvement[-self.patience:]):
+            return True
+
+        return False
+
+    def _test_is_improvement(self, scores, min_delta):
+        best = scores[0]
+        is_improvement = [True]
+
+        for score in scores[1:]:
+            if score > best + min_delta:
+                best = score
+                is_improvement.append(True)
+            else:
+                is_improvement.append(False)
+
+        return is_improvement
+
+    def _get_optimal_indices(self, rule_indices, is_improvement):
+        optimal_tree_idx = max([i if is_improvement[i] else -1 for i in range(len(is_improvement))])
+
+        return rule_indices[:optimal_tree_idx + 1]
+
+    def _add_next_best_rule(self, encoded_train_data, prev_rule_indices):
+        # train_np_sequences, train_y_true, train_weights = train_data
+        prev_train_performance = self._get_prev_train_performance(encoded_train_data, prev_rule_indices)
+
+        unused_indices = self._get_unused_rule_indices(encoded_train_data, prev_rule_indices)
+
+        if len(unused_indices) == 0:
+            return prev_rule_indices
+
+        new_training_performances = self._get_new_performances(encoded_train_data, prev_rule_indices=prev_rule_indices, new_indices_to_test=unused_indices)
+
+        best_new_performance = max(new_training_performances)
+        best_new_index = unused_indices[new_training_performances.index(best_new_performance)]
+
+        if best_new_performance > prev_train_performance:
+            return prev_rule_indices + [best_new_index]
+        else:
+            return prev_rule_indices
+
+    def _get_prev_train_performance(self, encoded_train_data, prev_rule_indices):
+        if not prev_rule_indices:
+            return 0
+        else:
+            return self._test_performance_rule_tree(encoded_train_data, rule_indices=prev_rule_indices)
+
+    def _get_unused_rule_indices(self, encoded_train_data, rule_indices):
+        return [idx for idx in range(encoded_train_data.examples.shape[1]) if idx not in rule_indices]
+
+    def _get_new_performances(self, encoded_data, prev_rule_indices, new_indices_to_test):
+        return [self._test_performance_rule_tree(encoded_data, rule_indices=prev_rule_indices + [idx]) for idx in new_indices_to_test]
+
+    def _test_performance_rule_tree(self, encoded_data, rule_indices):
+        optimization_scoring_fn = MetricUtil.get_metric_fn(Metric[self.optimization_metric.upper()])
+        pred = self._get_rule_tree_predictions(encoded_data, rule_indices)
+
+        y_true = Util.map_to_new_class_values(encoded_data.labels[self.label.name], self.class_mapping)
+
+        return optimization_scoring_fn(y_true=y_true, y_pred=pred, sample_weight=None)
+
+    def _get_rule_tree_predictions(self, encoded_data, rule_indices):
+        return np.logical_or.reduce([encoded_data.examples[:, i] for i in rule_indices])
 
     def fit_by_cross_validation(self, encoded_data: EncodedData, number_of_splits: int = 5, label: Label = None, cores_for_training: int = -1,
                                 optimization_metric=None):
@@ -86,53 +189,35 @@ class MotifClassifier(MLMethod):
 
     def store(self, path: Path, feature_names=None, details_path: Path = None):
         PathBuilder.build(path)
-        #
-        # torch.save(copy.deepcopy(self.CNN).state_dict(), str(path / "CNN.pt"))
-        #
-        # custom_vars = copy.deepcopy(vars(self))
-        # del custom_vars["CNN"]
-        # del custom_vars["result_path"]
-        #
-        # custom_vars["background_probabilities"] = custom_vars["background_probabilities"].tolist()
-        # custom_vars["kernel_size"] = list(custom_vars["kernel_size"])
-        # custom_vars["sequence_type"] = custom_vars["sequence_type"].name.lower()
-        #
-        # if self.label:
-        #     custom_vars["label"] = vars(self.label)
-        #
-        # params_path = path / "custom_params.yaml"
-        # with params_path.open('w') as file:
-        #     yaml.dump(custom_vars, file)
+
+        custom_vars = copy.deepcopy(vars(self))
+        del custom_vars["result_path"]
+
+        if self.label:
+            custom_vars["label"] = vars(self.label)
+
+        params_path = path / "custom_params.yaml"
+        with params_path.open('w') as file:
+            yaml.dump(custom_vars, file)
 
     def load(self, path):
-        pass
-        # params_path = path / "custom_params.yaml"
-        # with params_path.open("r") as file:
-        #     custom_params = yaml.load(file, Loader=yaml.SafeLoader)
-        #
-        # for param, value in custom_params.items():
-        #     if hasattr(self, param):
-        #         if param == "label":
-        #             setattr(self, "label", Label(**value))
-        #         else:
-        #             setattr(self, param, value)
+        params_path = path / "custom_params.yaml"
+        with params_path.open("r") as file:
+            custom_params = yaml.load(file, Loader=yaml.SafeLoader)
 
-        # self.background_probabilities = np.array(self.background_probabilities)
-        # self.sequence_type = SequenceType[self.sequence_type.upper()]
-        #
-        # self._make_CNN()
-        # self.CNN.load_state_dict(torch.load(str(path / "CNN.pt")))
-
+        for param, value in custom_params.items():
+            if hasattr(self, param):
+                if param == "label":
+                    setattr(self, "label", Label(**value))
+                else:
+                    setattr(self, param, value)
 
     def check_if_exists(self, path):
-        pass
-        # return self.CNN is not None
+        return self.rule_tree_indices is not None
 
     def get_params(self):
-        pass
-        # params = copy.deepcopy(vars(self))
-        # params["CNN"] = copy.deepcopy(self.CNN).state_dict()
-        # return params
+        params = copy.deepcopy(vars(self))
+        return params
 
     def get_label_name(self):
         return self.label.name
@@ -152,33 +237,6 @@ class MotifClassifier(MLMethod):
     def get_compatible_encoders(self):
         from immuneML.encodings.motif_encoding.PositionalMotifEncoder import PositionalMotifEncoder
         return [PositionalMotifEncoder]
-
-    def check_encoder_compatibility(self, encoder):
-        """Checks whether the given encoder is compatible with this ML method, and throws an error if it is not."""
-        is_valid = False
-
-        # for encoder_class in self.get_compatible_encoders():
-        #     if issubclass(encoder.__class__, encoder_class):
-        #         is_valid = True
-        #         break
-        #
-        # if not is_valid:
-        #     raise ValueError(f"{encoder.__class__.__name__} is not compatible with ML Method {self.__class__.__name__}. "
-        #                      f"Please use one of the following encoders instead: {', '.join([enc_class.__name__ for enc_class in self.get_compatible_encoders()])}")
-        #
-        # if (self.positional_channels == 3 and encoder.use_positional_info == False) or (self.positional_channels == 0 and encoder.use_positional_info == True):
-        #     mssg = f"The specified parameters for {encoder.__class__.__name__} are not compatible with ML Method {self.__class__.__name__}. "
-        #
-        #     if encoder.use_positional_info:
-        #         mssg += f"To include positional information, set the parameter 'positional_channels' of {self.__class__.__name__} to 3 (now {self.positional_channels}), " \
-        #                 f"or to ignore positional information, set the parameter 'use_positional_info' of {encoder.__class__.__name__} to False (now {encoder.use_positional_info}). "
-        #     else:
-        #         mssg += f"To include positional information, set the parameter 'use_positional_info' of {encoder.__class__.__name__} to True (now {encoder.use_positional_info}), " \
-        #                 f"or to ignore positional information, set the parameter 'positional_channels' of {self.__class__.__name__} to 0 (now {self.positional_channels})."
-        #
-        #     raise ValueError(mssg)
-        #
-
 
 
 
