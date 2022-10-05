@@ -130,19 +130,19 @@ class SklearnMethod(MLMethod):
         if self.label.name == label_name or label_name is None:
             return check_is_fitted(self.model, ["estimators_", "coef_", "estimator", "_fit_X", "dual_coef_"], all_or_any=any)
 
-    def fit_by_cross_validation(self, encoded_data: EncodedData, number_of_splits: int = 5, label: Label = None, cores_for_training: int = -1,
-                                optimization_metric='balanced_accuracy'):
+    def fit_by_cross_validation(self, encoded_data: EncodedData, label: Label = None, optimization_metric="balanced_accuracy",
+                                number_of_splits: int = 5, cores_for_training: int = -1):
 
         self.class_mapping = Util.make_class_mapping(encoded_data.labels[label.name])
         self.feature_names = encoded_data.feature_names
         self.label = label
         mapped_y = Util.map_to_new_class_values(encoded_data.labels[self.label.name], self.class_mapping)
 
-        self.model = self._fit_by_cross_validation(encoded_data.examples, mapped_y, number_of_splits, label, cores_for_training,
-                                                  optimization_metric)
+        self.model = self._fit_by_cross_validation(X=encoded_data.examples, y=mapped_y, label=label, optimization_metric=optimization_metric,
+                                                   number_of_splits=number_of_splits, cores_for_training=cores_for_training)
 
-    def _fit_by_cross_validation(self, X, y, number_of_splits: int = 5, label: Label = None, cores_for_training: int = 1,
-                                 optimization_metric: str = "balanced_accuracy"):
+    def _fit_by_cross_validation(self, X, y, label: Label = None, optimization_metric: str = "balanced_accuracy",
+                                 number_of_splits: int = 5, cores_for_training: int = 1):
 
         model = self._get_ml_model()
         scoring = Metric.get_sklearn_score_name(Metric[optimization_metric.upper()])

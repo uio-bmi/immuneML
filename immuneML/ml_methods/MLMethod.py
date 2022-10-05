@@ -5,6 +5,7 @@ from sklearn.exceptions import NotFittedError
 
 from immuneML.data_model.encoded_data.EncodedData import EncodedData
 from immuneML.environment import Label
+from immuneML.ml_metrics.Metric import Metric
 
 
 class MLMethod(metaclass=abc.ABCMeta):
@@ -87,7 +88,7 @@ class MLMethod(metaclass=abc.ABCMeta):
         pass
 
     @abc.abstractmethod
-    def fit_by_cross_validation(self, encoded_data: EncodedData, label: Label, optimization_metric, number_of_splits: int = 5, cores_for_training: int = -1):
+    def fit_by_cross_validation(self, encoded_data: EncodedData, label: Label, optimization_metric: str, number_of_splits: int = 5, cores_for_training: int = -1):
         """
         The fit_by_cross_validation function should implement finding the best model hyperparameters through cross-validation. In immuneML,
         preprocessing, encoding and ML hyperparameters can be optimized by using nested cross-validation (see TrainMLModelInstruction for more

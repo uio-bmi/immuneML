@@ -292,8 +292,8 @@ class DeepRC(MLMethod):
                                l1_weight_decay=self.l1_weight_decay, l2_weight_decay=self.l2_weight_decay,
                                show_progress=False, device=self.pytorch_device, evaluate_at=self.evaluate_at)
 
-    def fit_by_cross_validation(self, encoded_data: EncodedData, number_of_splits: int = 5, label: Label = None, cores_for_training: int = -1,
-                                optimization_metric=None):
+    def fit_by_cross_validation(self, encoded_data: EncodedData, label: Label = None, optimization_metric: str = None,
+                                number_of_splits: int = 5,  cores_for_training: int = -1):
         warnings.warn("DeepRC: cross-validation on this classifier is not defined: fitting one model instead...")
         self.fit(encoded_data=encoded_data, label=label)
 

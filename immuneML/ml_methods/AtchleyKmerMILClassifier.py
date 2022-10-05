@@ -169,8 +169,8 @@ class AtchleyKmerMILClassifier(MLMethod):
         predictions_proba = self.predict_proba(encoded_data, label)
         return {label.name: [self.class_mapping[val] for val in (predictions_proba[label.name][:, 1] > 0.5).tolist()]}
 
-    def fit_by_cross_validation(self, encoded_data: EncodedData, number_of_splits: int = 5, label: Label = None, cores_for_training: int = -1,
-                                optimization_metric=None):
+    def fit_by_cross_validation(self, encoded_data: EncodedData, label: Label = None, optimization_metric: str = None,
+                                number_of_splits: int = 5, cores_for_training: int = -1):
         logging.warning(f"AtchleyKmerMILClassifier: fitting by cross validation is not implemented internally for the model, fitting without "
                         f"cross-validation instead.")
         self.fit(encoded_data=encoded_data, label=label)
