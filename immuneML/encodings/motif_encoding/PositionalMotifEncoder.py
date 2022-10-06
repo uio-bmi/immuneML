@@ -86,6 +86,7 @@ class PositionalMotifEncoder(DatasetEncoder):
         self.candidate_motif_filepath = candidate_motif_filepath
         self.significant_motif_filepath = None
 
+        self.learned_motifs = None
         self.label = label
         self.name = name
         self.context = None
@@ -150,11 +151,22 @@ class PositionalMotifEncoder(DatasetEncoder):
             raise ValueError(f"{PositionalMotifEncoder.__name__} is not defined for dataset types which are not SequenceDataset.")
 
     def encode(self, dataset, params: EncoderParams):
-        EncoderHelper.check_positive_class_labels(params.label_config, PositionalMotifEncoder.__name__)
+        if params.learn_model:
+            EncoderHelper.check_positive_class_labels(params.label_config, PositionalMotifEncoder.__name__)
+            return self._encode_data(dataset, params)
+        else:
+            return self.get_encoded_dataset_from_motifs(dataset, self.learned_motifs, params.label_config)
 
-        return self._encode_data(dataset, params)
 
     def _encode_data(self, dataset, params: EncoderParams):
+        self.learned_motifs = self._compute_motifs(dataset, params)
+
+        self.significant_motif_filepath = params.result_path / "significant_motifs.tsv"
+        PositionalMotifHelper.write_motifs_to_file(self.learned_motifs, self.significant_motif_filepath)
+
+        return self.get_encoded_dataset_from_motifs(dataset, self.learned_motifs, params.label_config)
+
+    def _compute_motifs(self, dataset, params):
         motifs = self._prepare_candidate_motifs(dataset, params)
 
         # todo after weights have been implemented properly, move stuff to get sequence_container to separate function
@@ -182,23 +194,22 @@ class PositionalMotifEncoder(DatasetEncoder):
         motifs = self._filter_motifs(motifs, sequence_container, params.pool_size,
                                      min_recall=self.min_recall_before_merging, generalized=False)
 
-
         if self.generalize_motifs:
             generalized_motifs = PositionalMotifHelper.get_generalized_motifs(motifs)
             generalized_motifs = self._filter_motifs(generalized_motifs, sequence_container, params.pool_size,
                                                      min_recall=self.min_recall, generalized=True)
 
             motifs = self._filter_motifs(motifs, sequence_container, params.pool_size,
-                                                     min_recall=self.min_recall, generalized=False)
+                                         min_recall=self.min_recall, generalized=False)
 
             motifs += generalized_motifs
 
-        # todo separate file for significant motifs and generalized motifs???
+        return motifs
 
-        self.significant_motif_filepath = params.result_path / "significant_motifs.tsv"
-        PositionalMotifHelper.write_motifs_to_file(motifs, self.significant_motif_filepath)
+    def get_encoded_dataset_from_motifs(self, dataset, motifs, label_config):
+        labels = EncoderHelper.encode_element_dataset_labels(dataset, label_config)
 
-        examples, feature_names = self._construct_encoded_data_matrix(motifs, np_sequences)
+        examples, feature_names = self._construct_encoded_data_matrix(dataset, motifs)
 
         encoded_dataset = dataset.clone()
         encoded_dataset.encoded_data = EncodedData(examples=examples,
@@ -206,9 +217,8 @@ class PositionalMotifEncoder(DatasetEncoder):
                                                    feature_names=feature_names,
                                                    example_ids=dataset.get_example_ids(),
                                                    encoding=PositionalMotifEncoder.__name__,
-                                                   info={"positional_weights": positional_weights,
-                                                         "candidate_motif_filepath": self.candidate_motif_filepath,
-                                                         "significant_motif_filepath": self.significant_motif_filepath})
+                                                   info={"candidate_motif_filepath": self.candidate_motif_filepath,
+                                                         "significant_motif_filepath": self.significant_motif_filepath}) # todo maybe include "positional_weights": positional_weights, but thenit should be stored as part of learn model
 
         return encoded_dataset
 
@@ -301,7 +311,8 @@ class PositionalMotifEncoder(DatasetEncoder):
                 if recall_score(y_true=sequence_container.y_true, y_pred=pred, sample_weight=sequence_container.weights) >= min_recall:
                     return motif
 
-    def _construct_encoded_data_matrix(self, motifs, np_sequences):
+    def _construct_encoded_data_matrix(self, dataset, motifs):
+        np_sequences = PositionalMotifHelper.get_numpy_sequence_representation(dataset)
 
         feature_names = [PositionalMotifHelper.motif_to_string(indices, amino_acids, motif_sep="-", newline=False) for indices, amino_acids in motifs]
         examples = [PositionalMotifHelper.test_motif(np_sequences, indices, amino_acids) for indices, amino_acids in motifs]

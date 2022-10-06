@@ -4,7 +4,7 @@ from multiprocessing import Pool
 import itertools as it
 from functools import partial
 
-
+from immuneML.caching.CacheHandler import CacheHandler
 from immuneML.data_model.dataset.SequenceDataset import SequenceDataset
 from immuneML.encodings.motif_encoding.PositionalMotifParams import PositionalMotifParams
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
@@ -16,6 +16,13 @@ class PositionalMotifHelper:
 
     @staticmethod
     def get_numpy_sequence_representation(dataset: SequenceDataset):
+        return CacheHandler.memo_by_params((("dataset_identifier", dataset.identifier),
+                                            "np_sequence_representation",
+                                            ("example_ids", dataset.get_example_ids())),
+                                           lambda: PositionalMotifHelper.compute_numpy_sequence_representation(dataset))
+
+    @staticmethod
+    def compute_numpy_sequence_representation(dataset: SequenceDataset):
         n_sequences = dataset.get_example_count()
         all_sequences = [None] * n_sequences
         sequence_length = None
