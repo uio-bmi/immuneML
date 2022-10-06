@@ -1,5 +1,6 @@
 # quality: gold
 import json
+from uuid import uuid4
 
 import numpy as np
 
@@ -36,7 +37,7 @@ class ReceptorSequence(DatasetItem):
                  identifier: str = None,
                  annotation: SequenceAnnotation = None,
                  metadata: SequenceMetadata = SequenceMetadata()):
-        self.identifier = identifier
+        self.identifier = uuid4().hex if identifier is None else identifier
         self.amino_acid_sequence = amino_acid_sequence
         self.nucleotide_sequence = nucleotide_sequence
         self.annotation = annotation
