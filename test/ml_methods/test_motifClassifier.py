@@ -57,7 +57,9 @@ class TestMotifClassifier(TestCase):
 
         predictions = motif_classifier.predict(enc_data, label)
 
-        self.assertListEqual(list(predictions), [True, True, True, True, False, False, False, False])
+        self.assertListEqual(list(predictions.keys()), ["l1"])
+        self.assertListEqual(list(predictions["l1"]), [True, True, True, True, False, False, False, False])
+
         self.assertListEqual(sorted(motif_classifier.rule_tree_features), ["rule1", "rule2"])
         self.assertDictEqual(motif_classifier.class_mapping, {0: False, 1: True})
 
@@ -84,8 +86,11 @@ class TestMotifClassifier(TestCase):
         predictions = motif_classifier.predict(enc_data, label)
         predictions2 = motif_classifier2.predict(enc_data, label)
 
-        self.assertListEqual(list(predictions), [True, True, True, True, False, False, False, False])
-        self.assertListEqual(list(predictions2), [True, True, True, True, False, False, False, False])
+        self.assertListEqual(list(predictions.keys()), ["l1"])
+        self.assertListEqual(list(predictions["l1"]), [True, True, True, True, False, False, False, False])
+
+        self.assertListEqual(list(predictions2.keys()), ["l1"])
+        self.assertListEqual(list(predictions2["l1"]), [True, True, True, True, False, False, False, False])
 
         shutil.rmtree(path)
 
@@ -96,6 +101,7 @@ class TestMotifClassifier(TestCase):
         motif_classifier.optimization_metric = "accuracy"
         motif_classifier.class_mapping = {0: False, 1: True}
         motif_classifier.label = Label("l1", positive_class=True)
+        motif_classifier.feature_names = ["rule"]
 
         enc_data = EncodedData(encoding=PositionalMotifEncoder.__name__,
                                example_ids=["1", "2", "3", "4"],
@@ -117,6 +123,8 @@ class TestMotifClassifier(TestCase):
                                               [False, False, False],
                                               [False, False, False]]),
                            labels={"l1": [True, True, True, True]})
+
+        motif_classifier.feature_names = ["rule1", "rule2", "rule3"]
 
         result_add_one_rule = motif_classifier._recursively_select_rules(enc_data, enc_data, [0], [0])
         self.assertListEqual(result_add_one_rule, [0, 1])
@@ -184,6 +192,7 @@ class TestMotifClassifier(TestCase):
                                labels={"l1": [True, True, True, True]})
 
         motif_classifier = MotifClassifier()
+        motif_classifier.feature_names = ["rule1", "rule2", "rule3"]
 
         result = motif_classifier._get_rule_tree_predictions(enc_data, [0])
         self.assertListEqual(list(result), [True, False, False, False])

@@ -53,7 +53,7 @@ class MotifClassifier(MLMethod): # todo name? (Greedy)BinaryFeatureClassifier? R
         self.result_path = result_path
 
     def predict(self, encoded_data: EncodedData, label: Label):
-        return self._get_rule_tree_predictions(encoded_data, self.rule_tree_indices)
+        return {self.label.name: self._get_rule_tree_predictions(encoded_data, self.rule_tree_indices)}
 
     def predict_proba(self, encoded_data: EncodedData, label: Label):
         warnings.warn(f"{MotifClassifier.__name__}: cannot predict probabilities.")
@@ -171,7 +171,15 @@ class MotifClassifier(MLMethod): # todo name? (Greedy)BinaryFeatureClassifier? R
         return optimization_scoring_fn(y_true=y_true, y_pred=pred, sample_weight=None)
 
     def _get_rule_tree_predictions(self, encoded_data, rule_indices):
+        self._check_features(encoded_data.feature_names)
         return np.logical_or.reduce([encoded_data.examples[:, i] for i in rule_indices])
+
+    def _check_features(self, encoded_data_features):
+        if self.feature_names != encoded_data_features:
+            mssg = f"{MotifClassifier.__name__}: features during evaluation did not match the features set during fitting."
+
+            logging.info(mssg + f"\n\nEvaluation features: {encoded_data_features}\nFitting features: {self.feature_names}")
+            raise ValueError(mssg + " See the log file for more info.")
 
     def fit_by_cross_validation(self, encoded_data: EncodedData, label: Label = None, optimization_metric: str = None,
                                 number_of_splits: int = 5, cores_for_training: int = -1):
