@@ -5,6 +5,8 @@ from setuptools import setup, find_packages
 from immuneML.environment.Constants import Constants
 
 
+import tensorflow
+
 def import_requirements(filename) -> list:
     with open(filename, 'r') as file:
         requirements = file.read().split("\n")
@@ -25,7 +27,8 @@ setup(
                       "tqdm>=0.24",  # Note: h5py v3 does not work with DeepRC, but works with everything else
                       "tensorboard>=1.14.0", "requests>=2.21", "plotly>=4", "logomaker>=0.8", "fishersapi", "matplotlib-venn>=0.11", "scipy"],
     extras_require={
-        "TCRdist": ["parasail==1.2", "tcrdist3>=0.1.6"]
+        "TCRdist": ["parasail==1.2", "tcrdist3>=0.1.6"],
+        "KerasSequenceCNN": ["keras>=2.3.1", "tensorflow>=2.2.0"]
     },
     classifiers=[
         "Programming Language :: Python :: 3",

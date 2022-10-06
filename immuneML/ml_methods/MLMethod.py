@@ -1,11 +1,8 @@
 import abc
 from pathlib import Path
 
-from sklearn.exceptions import NotFittedError
-
 from immuneML.data_model.encoded_data.EncodedData import EncodedData
 from immuneML.environment import Label
-from immuneML.ml_metrics.Metric import Metric
 
 
 class MLMethod(metaclass=abc.ABCMeta):
