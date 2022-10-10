@@ -58,9 +58,7 @@ class ReflectionHandler:
 
     @staticmethod
     def all_subclasses(cls):
-
         subclasses = set(cls.__subclasses__()).union([s for c in cls.__subclasses__() for s in ReflectionHandler.all_subclasses(c)])
-
         return subclasses
 
     @staticmethod
