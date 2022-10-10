@@ -25,7 +25,6 @@ class MLParser:
     @staticmethod
     @log
     def _parse_ml_method(ml_method_id: str, ml_specification) -> tuple:
-
         valid_class_values = ReflectionHandler.all_nonabstract_subclass_basic_names(MLMethod, "", "ml_methods/")
         valid_class_values += ReflectionHandler.all_nonabstract_subclass_basic_names(UnsupervisedMLMethod, "", "ml_methods/")
 
