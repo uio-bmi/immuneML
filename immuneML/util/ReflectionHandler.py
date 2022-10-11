@@ -60,8 +60,7 @@ class ReflectionHandler:
     def all_subclasses(cls):
 
         subclasses = set(cls.__subclasses__()).union([s for c in cls.__subclasses__() for s in ReflectionHandler.all_subclasses(c)])
-        if cls == "<class 'immuneML.ml_methods.MLMethod.MLMethod'>":
-            print(subclasses)
+
         return subclasses
 
     @staticmethod
@@ -72,15 +71,12 @@ class ReflectionHandler:
 
     @staticmethod
     def all_nonabstract_subclass_basic_names(cls, drop_part: str, subdirectory: str = ""):
-        print([c.__name__.replace(drop_part, "") for c in ReflectionHandler.all_nonabstract_subclasses(cls, drop_part, subdirectory)])
         return [c.__name__.replace(drop_part, "") for c in ReflectionHandler.all_nonabstract_subclasses(cls, drop_part, subdirectory)]
 
     @staticmethod
     def all_nonabstract_subclasses(cls, drop_part=None, subdirectory=None):
         if drop_part is not None and subdirectory is not None:
             classes = ReflectionHandler.get_classes_by_partial_name(drop_part, subdirectory)
-        print(cls)
-        print([cl for cl in ReflectionHandler.all_subclasses(cls) if not bool(getattr(cl, "__abstractmethods__", False))])
         return [cl for cl in ReflectionHandler.all_subclasses(cls) if not bool(getattr(cl, "__abstractmethods__", False))]
 
     @staticmethod

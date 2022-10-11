@@ -1,13 +1,24 @@
 import abc
 import os
 import warnings
-import numpy as np
-import tensorflow
+from pathlib import Path
 
-from immuneML.ml_methods.util.Util import Util
+import dill
+import numpy as np
+import pkg_resources
+import yaml
+from sklearn.metrics import SCORERS
+from sklearn.model_selection import RandomizedSearchCV
+from sklearn.utils.validation import check_is_fitted
+
 from immuneML.data_model.encoded_data.EncodedData import EncodedData
-from immuneML.environment import Label
+from immuneML.environment.Label import Label
 from immuneML.ml_methods.MLMethod import MLMethod
+from immuneML.ml_methods.util.Util import Util
+from immuneML.ml_metrics.Metric import Metric
+from immuneML.util.FilenameHandler import FilenameHandler
+from immuneML.util.PathBuilder import PathBuilder
+import tensorflow
 
 
 class GenerativeModel(MLMethod):
@@ -67,6 +78,8 @@ class GenerativeModel(MLMethod):
             tensorflow.keras.layers.Dense(vocab_size)
         ])
 
+        self.model.compile(optimizer='adam', loss=tensorflow.keras.losses.CategoricalCrossentropy())
+
         self.model.fit(X, y)
 
         if not self.show_warnings:
@@ -75,15 +88,140 @@ class GenerativeModel(MLMethod):
 
         return self.model
 
+    def can_predict_proba(self) -> bool:
+        return False
+
+    def check_is_fitted(self, label_name: str):
+        if self.label.name == label_name or label_name is None:
+            return check_is_fitted(self.model, ["estimators_", "coef_", "estimator", "_fit_X", "dual_coef_"], all_or_any=any)
+
+    def fit_by_cross_validation(self, encoded_data: EncodedData, number_of_splits: int = 5, label: Label = None, cores_for_training: int = -1,
+                                optimization_metric='balanced_accuracy'):
+
+        self.class_mapping = Util.make_class_mapping(encoded_data.labels[label.name])
+        self.feature_names = encoded_data.feature_names
+        self.label = label
+        mapped_y = Util.map_to_new_class_values(encoded_data.labels[self.label.name], self.class_mapping)
+
+        self.model = self._fit_by_cross_validation(encoded_data.examples, mapped_y, number_of_splits, label, cores_for_training,
+                                                  optimization_metric)
+
+    def _fit_by_cross_validation(self, X, y, number_of_splits: int = 5, label: Label = None, cores_for_training: int = 1,
+                                 optimization_metric: str = "balanced_accuracy"):
+
+        model = self._get_ml_model()
+        scoring = Metric.get_sklearn_score_name(Metric[optimization_metric.upper()])
+
+        if scoring not in SCORERS.keys():
+            scoring = "balanced_accuracy"
+            warnings.warn(
+                f"{self.__class__.__name__}: specified optimization metric ({optimization_metric}) is not defined as a sklearn scoring function, using {scoring} instead... ")
+
+        if not self.show_warnings:
+            warnings.simplefilter("ignore")
+            os.environ["PYTHONWARNINGS"] = "ignore"
+
+        self.model = RandomizedSearchCV(model, param_distributions=self._parameter_grid, cv=number_of_splits, n_jobs=cores_for_training,
+                                        scoring=scoring, refit=True)
+        self.model.fit(X, y)
+
+        if not self.show_warnings:
+            del os.environ["PYTHONWARNINGS"]
+            warnings.simplefilter("always")
+
+        self.model = self.model.best_estimator_  # do not leave RandomSearchCV object to be in models, use the best estimator instead
+
+        return self.model
+
+    def store(self, path: Path, feature_names=None, details_path: Path = None):
+        PathBuilder.build(path)
+        file_path = path / f"{self._get_model_filename()}.pickle"
+        with file_path.open("wb") as file:
+            dill.dump(self.model, file)
+
+        if details_path is None:
+            params_path = path / f"{self._get_model_filename()}.yaml"
+        else:
+            params_path = details_path
+
+        with params_path.open("w") as file:
+            desc = {
+                **(self.get_params()),
+                "feature_names": feature_names,
+                "classes": self.model.classes_.tolist(),
+                "class_mapping": self.class_mapping,
+            }
+
+            if self.label is not None:
+                desc["label"] = vars(self.label)
+
+            yaml.dump(desc, file)
+
+    def _get_model_filename(self):
+        return FilenameHandler.get_filename(self.__class__.__name__, "")
+
+    def load(self, path: Path, details_path: Path = None):
+        print("Jeg fant en ting\n\n\n\n")
+        name = f"{self._get_model_filename()}.pickle"
+        file_path = path / name
+        if file_path.is_file():
+            with file_path.open("rb") as file:
+                self.model = dill.load(file)
+        else:
+            raise FileNotFoundError(f"{self.__class__.__name__} model could not be loaded from {file_path}"
+                                    f". Check if the path to the {name} file is properly set.")
+
+        if details_path is None:
+            params_path = path / f"{self._get_model_filename()}.yaml"
+        else:
+            params_path = details_path
+
+        if params_path.is_file():
+            with params_path.open("r") as file:
+                desc = yaml.safe_load(file)
+                if "label" in desc:
+                    setattr(self, "label", Label(**desc["label"]))
+                for param in ["feature_names", "classes", "class_mapping"]:
+                    if param in desc:
+                        setattr(self, param, desc[param])
+
+    def check_if_exists(self, path: Path):
+        file_path = path / f"{self._get_model_filename()}.pickle"
+        return file_path.is_file()
+
     @abc.abstractmethod
     def _get_ml_model(self, cores_for_training: int = 2, X=None):
-
         pass
 
     @abc.abstractmethod
     def get_params(self):
         '''Returns the model parameters in a readable yaml-friendly way (consisting of lists, dictionaries and strings).'''
         pass
+
+    def get_label_name(self):
+        return self.label.name
+
+    def get_package_info(self) -> str:
+        return 'scikit-learn ' + pkg_resources.get_distribution('scikit-learn').version
+
+    def get_feature_names(self) -> list:
+        return self.feature_names
+
+    def get_class_mapping(self) -> dict:
+        """Returns a dictionary containing the mapping between label values and values internally used in the classifier"""
+        return self.class_mapping
+
+    def get_compatible_encoders(self):
+        from immuneML.encodings.evenness_profile.EvennessProfileEncoder import EvennessProfileEncoder
+        from immuneML.encodings.kmer_frequency.KmerFrequencyEncoder import KmerFrequencyEncoder
+        from immuneML.encodings.onehot.OneHotEncoder import OneHotEncoder
+        from immuneML.encodings.word2vec.Word2VecEncoder import Word2VecEncoder
+        from immuneML.encodings.reference_encoding.MatchedSequencesEncoder import MatchedSequencesEncoder
+        from immuneML.encodings.reference_encoding.MatchedReceptorsEncoder import MatchedReceptorsEncoder
+        from immuneML.encodings.reference_encoding.MatchedRegexEncoder import MatchedRegexEncoder
+
+        return [KmerFrequencyEncoder, OneHotEncoder, Word2VecEncoder, EvennessProfileEncoder,
+                MatchedSequencesEncoder, MatchedReceptorsEncoder, MatchedRegexEncoder]
 
     @staticmethod
     def get_usage_documentation(model_name):
@@ -122,4 +260,5 @@ class GenerativeModel(MLMethod):
             model_selection_n_folds (int): The number of folds that should be used for the cross validation grid search if model_selection_cv is True.
 
             """
+
 
