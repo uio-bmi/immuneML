@@ -7,6 +7,8 @@ from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.environment.Constants import Constants
 from immuneML.environment.Label import Label
 from immuneML.environment.LabelConfiguration import LabelConfiguration
+from immuneML.example_weighting.ExampleWeightingParams import ExampleWeightingParams
+from immuneML.example_weighting.ExampleWeightingStrategy import ExampleWeightingStrategy
 from immuneML.hyperparameter_optimization.HPSetting import HPSetting
 from immuneML.hyperparameter_optimization.config.SplitConfig import SplitConfig
 from immuneML.hyperparameter_optimization.states.HPSelectionState import HPSelectionState
@@ -15,8 +17,10 @@ from immuneML.ml_methods.MLMethod import MLMethod
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.ReportUtil import ReportUtil
 from immuneML.util.PathBuilder import PathBuilder
+from immuneML.workflows.steps.DataWeighter import DataWeighter
 from immuneML.workflows.steps.DataEncoder import DataEncoder
 from immuneML.workflows.steps.DataEncoderParams import DataEncoderParams
+from immuneML.workflows.steps.DataWeighterParams import DataWeighterParams
 from immuneML.workflows.steps.MLMethodAssessment import MLMethodAssessment
 from immuneML.workflows.steps.MLMethodAssessmentParams import MLMethodAssessmentParams
 from immuneML.workflows.steps.MLMethodTrainer import MLMethodTrainer
@@ -87,6 +91,20 @@ class HPUtil:
         return method
 
     @staticmethod
+    def weight_examples(dataset, weighting_strategy: ExampleWeightingStrategy, path: Path, learn_model: bool, number_of_processes: int):
+        weighted_dataset = DataWeighter.run(DataWeighterParams(
+            dataset=dataset,
+            weighting_strategy=weighting_strategy,
+            weighting_params=ExampleWeightingParams(
+                result_path=path,
+                pool_size=number_of_processes,
+                learn_model=learn_model
+            ),
+        ))
+        return weighted_dataset
+
+
+    @staticmethod
     def encode_dataset(dataset, hp_setting: HPSetting, path: Path, learn_model: bool, context: dict, number_of_processes: int,
                        label_configuration: LabelConfiguration, encode_labels: bool = True):
         PathBuilder.build(path)
@@ -100,7 +118,6 @@ class HPUtil:
                 pool_size=number_of_processes,
                 label_config=label_configuration,
                 learn_model=learn_model,
-                filename="train_dataset.pkl" if learn_model else "test_dataset.pkl",
                 encode_labels=encode_labels
             ),
         ))

@@ -60,7 +60,6 @@ class TestExploratoryAnalysisHTMLBuilder(TestCase):
         encoded = encoder.encode(dataset, EncoderParams(
             result_path=path,
             label_config=label_config,
-            filename="dataset.csv"
         ))
 
         units = {"named_analysis_1": ExploratoryAnalysisUnit(dataset=dataset, report=SequenceLengthDistribution(), number_of_processes=16),

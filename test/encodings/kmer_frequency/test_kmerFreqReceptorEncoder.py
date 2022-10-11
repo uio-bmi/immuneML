@@ -53,7 +53,6 @@ class TestKmerFreqReceptorEncoder(TestCase):
             pool_size=2,
             learn_model=True,
             model={},
-            filename="dataset.csv",
             encode_labels=False
         ))
 

@@ -78,7 +78,6 @@ class TestMatchedSequencesEncoder(TestCase):
                 encoded = encoder.encode(dataset, EncoderParams(
                     result_path=path,
                     label_config=label_config,
-                    filename="dataset.csv"
                 ))
 
                 expected_outcome = expected_outcomes[reads][normalize]
@@ -123,7 +122,6 @@ class TestMatchedSequencesEncoder(TestCase):
                 encoded = encoder.encode(dataset, EncoderParams(
                     result_path=path,
                     label_config=label_config,
-                    filename="dataset.csv"
                 ))
 
                 expected_outcome = expected_outcomes[reads][normalize]

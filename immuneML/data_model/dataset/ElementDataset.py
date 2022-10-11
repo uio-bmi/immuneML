@@ -13,17 +13,14 @@ class ElementDataset(Dataset):
     """
 
     def __init__(self, labels: dict = None, encoded_data: EncodedData = None, filenames: list = None, identifier: str = None,
-                 file_size: int = 50000, name: str = None, element_class_name: str = None, element_ids: list = None):
-        super().__init__()
-        self.labels = labels
-        self.encoded_data = encoded_data
-        self.identifier = identifier if identifier is not None else uuid4().hex
+                 file_size: int = 50000, name: str = None, element_class_name: str = None, element_ids: list = None,
+                 example_weights: list = None):
+        super().__init__(encoded_data, name, identifier if identifier is not None else uuid4().hex, labels, example_weights)
         self.filenames = sorted(filenames) if filenames is not None else []
         self.filenames = [Path(filename) for filename in self.filenames]
         self.element_generator = ElementGenerator(self.filenames, file_size, element_class_name)
         self.file_size = file_size
         self.element_ids = element_ids
-        self.name = name
         self.element_class_name = element_class_name
 
     def get_data(self, batch_size: int = 10000):

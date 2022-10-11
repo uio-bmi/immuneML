@@ -106,10 +106,15 @@ class FeatureDistribution(FeatureReport):
             .sort_values(by=self.x) \
             .reset_index(drop=True)
 
+        print("*****")
+        print(self.y_title)
+        print(self.x_title)
+
         figure = px.box(data_long_format_filtered, x=self.x, y="value", color=self.color,
                         facet_row=self.facet_row, facet_col=self.facet_column,
                         labels={
                             "valuemean": self.y_title,
+                            "value": self.y_title,
                             self.x: self.x_title,
                         }, template='plotly_white',
                         color_discrete_sequence=px.colors.diverging.Tealrose)
@@ -121,10 +126,14 @@ class FeatureDistribution(FeatureReport):
         return ReportOutput(path=file_path, name="feature boxplots")
 
     def _plot_normal(self, data_long_format) -> ReportOutput:
+        print("cccccc")
+        print(self.y_title)
+        print(self.x_title)
+
         figure = px.box(data_long_format, x=self.x, y="value", color=self.color,
                         facet_row=self.facet_row, facet_col=self.facet_column,
                         labels={
-                            "valuemean": self.y_title,
+                            "value": self.y_title,
                             self.x: self.x_title,
                         }, template='plotly_white',
                         color_discrete_sequence=px.colors.diverging.Tealrose)

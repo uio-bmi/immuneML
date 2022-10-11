@@ -63,7 +63,6 @@ class TestPositionalMotifEncoder(TestCase):
             pool_size=2,
             learn_model=True,
             model={},
-            filename="dataset.csv"
         ))
 
         self.assertEqual(8, encoded_dataset.encoded_data.examples.shape[0])
@@ -104,7 +103,6 @@ class TestPositionalMotifEncoder(TestCase):
             pool_size=2,
             learn_model=True,
             model={},
-            filename="dataset.csv"
         ))
 
         self.assertEqual(8, encoded_dataset.encoded_data.examples.shape[0])

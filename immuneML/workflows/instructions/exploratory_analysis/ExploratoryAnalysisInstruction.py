@@ -96,7 +96,6 @@ class ExploratoryAnalysisInstruction(Instruction):
             encoded_dataset = DataEncoder.run(DataEncoderParams(dataset=unit.dataset, encoder=unit.encoder,
                                                                 encoder_params=EncoderParams(result_path=result_path,
                                                                                              label_config=unit.label_config,
-                                                                                             filename="encoded_dataset.pkl",
                                                                                              pool_size=unit.number_of_processes,
                                                                                              learn_model=True,
                                                                                              encode_labels=unit.label_config is not None),

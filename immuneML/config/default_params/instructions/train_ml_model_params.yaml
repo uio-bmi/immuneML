@@ -11,3 +11,4 @@ selection: # inner loop of nested CV
   split_strategy: random # perform random split to train and validation datasets
   split_count: 1 # how many fold to create
   training_percentage: 0.7
+example_weighting: null

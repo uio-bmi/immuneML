@@ -76,6 +76,7 @@ class TrainingPerformance(MLReport):
         predicted_proba_y = self.method.predict_proba(X, self.label)[self.label.name]
         true_y = self.train_dataset.encoded_data.labels[self.label.name]
         classes = self.method.get_classes()
+        example_weights = self.train_dataset.get_example_weights()
 
         PathBuilder.build(self.result_path)
 
@@ -91,6 +92,7 @@ class TrainingPerformance(MLReport):
                 predicted_y,
                 predicted_proba_y,
                 true_y,
+                example_weights,
                 classes,
             )
             if metric == 'CONFUSION_MATRIX':
@@ -109,7 +111,7 @@ class TrainingPerformance(MLReport):
                             output_figures=output['figures'])
 
     @staticmethod
-    def _compute_score(metric: Metric, predicted_y, predicted_proba_y, true_y, labels):
+    def _compute_score(metric: Metric, predicted_y, predicted_proba_y, true_y, example_weights, labels):
         fn = MetricUtil.get_metric_fn(metric)
 
         if hasattr(true_y, 'dtype') and true_y.dtype.type is np.str_ or isinstance(true_y, list) and any(isinstance(item, str) for item in true_y):
@@ -126,7 +128,7 @@ class TrainingPerformance(MLReport):
             else:
                 predictions = predicted_y
             
-            score = fn(true_y, predictions)
+            score = fn(true_y, predictions, sample_weight=example_weights)
 
         except ValueError as err:
             warnings.warn(f"TrainingPerformance: score for metric {metric.name} could not be calculated."

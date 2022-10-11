@@ -67,7 +67,6 @@ class TestMatches(unittest.TestCase):
         encoded = encoder.encode(dataset, EncoderParams(
             result_path=path,
             label_config=label_config,
-            filename="dataset.csv"
         ))
 
         return encoded
@@ -158,7 +157,6 @@ class TestMatches(unittest.TestCase):
         encoded = encoder.encode(dataset, EncoderParams(
             result_path=path,
             label_config=label_config,
-            filename="dataset.csv"
         ))
 
         return encoded
@@ -241,7 +239,6 @@ class TestMatches(unittest.TestCase):
         encoded = encoder.encode(dataset, EncoderParams(
             result_path=path,
             label_config=label_config,
-            filename="dataset.csv"
         ))
 
         return encoded

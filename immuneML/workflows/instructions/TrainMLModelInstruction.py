@@ -7,6 +7,7 @@ import pandas as pd
 from immuneML.IO.ml_method.MLExporter import MLExporter
 from immuneML.environment.Label import Label
 from immuneML.environment.LabelConfiguration import LabelConfiguration
+from immuneML.example_weighting.ExampleWeightingStrategy import ExampleWeightingStrategy
 from immuneML.hyperparameter_optimization.config.SplitConfig import SplitConfig
 from immuneML.hyperparameter_optimization.config.SplitType import SplitType
 from immuneML.hyperparameter_optimization.core.HPAssessment import HPAssessment
@@ -121,10 +122,11 @@ class TrainMLModelInstruction(Instruction):
 
     def __init__(self, dataset, hp_strategy: HPOptimizationStrategy, hp_settings: list, assessment: SplitConfig, selection: SplitConfig,
                  metrics: set, optimization_metric: Metric, label_configuration: LabelConfiguration, path: Path = None, context: dict = None,
-                 number_of_processes: int = 1, reports: dict = None, name: str = None, refit_optimal_model: bool = False):
+                 number_of_processes: int = 1, reports: dict = None, name: str = None, refit_optimal_model: bool = False,
+                 example_weighting: ExampleWeightingStrategy = None):
         self.state = TrainMLModelState(dataset, hp_strategy, hp_settings, assessment, selection, metrics,
                                        optimization_metric, label_configuration, path, context, number_of_processes,
-                                       reports if reports is not None else {}, name, refit_optimal_model)
+                                       reports if reports is not None else {}, name, refit_optimal_model, example_weighting)
 
     def run(self, result_path: Path):
         self.state.path = result_path
@@ -149,8 +151,9 @@ class TrainMLModelInstruction(Instruction):
         if self.state.refit_optimal_model:
             print(f"{datetime.datetime.now()}: TrainMLModel: retraining optimal model for label {label.name} {index_repr}.\n", flush=True)
             self.state.optimal_hp_items[label.name] = MLProcess(self.state.dataset, None, label, self.state.metrics, self.state.optimization_metric,
-                                                           self.state.path / f"optimal_{label.name}", number_of_processes=self.state.number_of_processes,
-                                                           label_config=self.state.label_configuration, hp_setting=optimal_hp_setting).run(0)
+                                                                self.state.path / f"optimal_{label.name}", number_of_processes=self.state.number_of_processes,
+                                                                label_config=self.state.label_configuration, hp_setting=optimal_hp_setting,
+                                                                example_weighting=self.state.example_weighting).run(0)
             print(f"{datetime.datetime.now()}: TrainMLModel: finished retraining optimal model for label {label.name} {index_repr}.\n", flush=True)
 
         else:

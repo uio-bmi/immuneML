@@ -4,6 +4,7 @@ from immuneML.IO.dataset_import.DataImport import DataImport
 from immuneML.dsl.DefaultParamsLoader import DefaultParamsLoader
 from immuneML.dsl.definition_parsers.DefinitionParserOutput import DefinitionParserOutput
 from immuneML.dsl.definition_parsers.EncodingParser import EncodingParser
+from immuneML.dsl.definition_parsers.ExampleWeightingParser import ExampleWeightingParser
 from immuneML.dsl.definition_parsers.MLParser import MLParser
 from immuneML.dsl.definition_parsers.MotifParser import MotifParser
 from immuneML.dsl.definition_parsers.PreprocessingParser import PreprocessingParser
@@ -43,12 +44,13 @@ class DefinitionParser:
         symbol_table, specs_simulation = DefinitionParser._call_if_exists("simulations", SimulationParser.parse_simulations, specs, symbol_table)
         symbol_table, specs_preprocessing = DefinitionParser._call_if_exists(PreprocessingParser.keyword, PreprocessingParser.parse, specs, symbol_table)
         symbol_table, specs_encoding = DefinitionParser._call_if_exists("encodings", EncodingParser.parse, specs, symbol_table)
+        symbol_table, specs_weighting = DefinitionParser._call_if_exists(ExampleWeightingParser.keyword, ExampleWeightingParser.parse, specs, symbol_table)
         symbol_table, specs_ml = DefinitionParser._call_if_exists("ml_methods", MLParser.parse, specs, symbol_table)
         symbol_table, specs_report = DefinitionParser._call_if_exists("reports", ReportParser.parse_reports, specs, symbol_table)
         symbol_table, specs_import = ImportParser.parse(specs, symbol_table, result_path)
 
         specs_defs = DefinitionParser.create_specs_defs(specs_import, specs_simulation, specs_preprocessing, specs_motifs, specs_signals,
-                                                        specs_encoding, specs_ml, specs_report)
+                                                        specs_encoding, specs_ml, specs_report, specs_weighting)
 
         return DefinitionParserOutput(symbol_table=symbol_table, specification=workflow_specification), specs_defs
 
@@ -61,11 +63,11 @@ class DefinitionParser:
 
     @staticmethod
     def create_specs_defs(specs_datasets: dict, simulation: dict, preprocessings: dict, motifs: dict, signals: dict,
-                          encodings: dict, ml_methods: dict, reports: dict):
+                          encodings: dict, ml_methods: dict, reports: dict, example_weighting: dict):
 
         return {
             "datasets": specs_datasets, "simulations": simulation, PreprocessingParser.keyword: preprocessings, "motifs": motifs, "signals": signals,
-            "encodings": encodings, "ml_methods": ml_methods, "reports": reports
+            "encodings": encodings, "ml_methods": ml_methods, "reports": reports, ExampleWeightingParser.keyword: example_weighting
         }
 
     @staticmethod

@@ -37,8 +37,9 @@ class RepertoireDataset(Dataset):
         return RepertoireDataset(**{**kwargs, **{"repertoires": repertoires}})
 
     def __init__(self, labels: dict = None, encoded_data: EncodedData = None, repertoires: list = None, identifier: str = None,
-                 metadata_file: Path = None, name: str = None, metadata_fields: list = None, repertoire_ids: list = None):
-        super().__init__(encoded_data, name, identifier if identifier is not None else uuid.uuid4().hex, labels)
+                 metadata_file: Path = None, name: str = None, metadata_fields: list = None, repertoire_ids: list = None,
+                 example_weights: list = None):
+        super().__init__(encoded_data, name, identifier if identifier is not None else uuid.uuid4().hex, labels, example_weights)
         self.metadata_file = Path(metadata_file) if metadata_file is not None else None
         self.metadata_fields = metadata_fields
         self.repertoire_ids = repertoire_ids

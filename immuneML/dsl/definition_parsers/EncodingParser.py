@@ -33,11 +33,4 @@ class EncodingParser:
 
         return encoder, params
 
-    @staticmethod
-    def parse_encoder_internal(short_class_name: str, encoder_params: dict):
-        encoder_class = ReflectionHandler.get_class_by_name(f"{short_class_name}Encoder", "encodings")
-        params = ObjectParser.get_all_params({short_class_name: encoder_params}, "encodings", short_class_name)
-        return encoder_class, params, params
-
-
 

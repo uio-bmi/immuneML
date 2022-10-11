@@ -75,7 +75,6 @@ class TestMatchedReceptorsEncoder(TestCase):
         encoded = encoder.encode(dataset, EncoderParams(
             result_path=path,
             label_config=label_config,
-            filename="dataset.csv"
         ))
 
         expected_outcome = [[20, 10, 0, 0], [0, 0, 10, 0], [0, 0, 0, 5]]
@@ -104,7 +103,6 @@ class TestMatchedReceptorsEncoder(TestCase):
         encoded = encoder.encode(dataset, EncoderParams(
             result_path=path,
             label_config=label_config,
-            filename="dataset.csv"
         ))
 
         expected_outcome = [[2, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]
@@ -133,7 +131,6 @@ class TestMatchedReceptorsEncoder(TestCase):
         encoded = encoder.encode(dataset, EncoderParams(
             result_path=path,
             label_config=label_config,
-            filename="dataset.csv"
         ))
 
         expected_outcome = [[10, 10, 0, 0, 0], [0, 0, 10, 0, 0], [0, 0, 0, 0, 5]]

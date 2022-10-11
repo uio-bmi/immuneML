@@ -8,8 +8,11 @@ from immuneML.IO.dataset_export.ImmuneMLExporter import ImmuneMLExporter
 from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
 from immuneML.dsl.ImmuneMLParser import ImmuneMLParser
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
+from immuneML.ml_methods.LogisticRegression import LogisticRegression
+from immuneML.reports.data_reports.SequenceLengthDistribution import SequenceLengthDistribution
 from immuneML.util.PathBuilder import PathBuilder
 from immuneML.util.RepertoireBuilder import RepertoireBuilder
+
 
 
 class TestImmuneMLParser(TestCase):
@@ -52,6 +55,12 @@ class TestImmuneMLParser(TestCase):
                 "reports": {
                     "rep1": "SequenceLengthDistribution"
 
+                },
+                "example_weightings": {
+                    "w1": {
+                        "PredefinedWeighting":
+                            {"file_path": "test"}
+                    }
                 }
             },
             "instructions": {}
@@ -67,8 +76,10 @@ class TestImmuneMLParser(TestCase):
         symbol_table, _ = ImmuneMLParser.parse_yaml_file(specs_filename, result_path=path)
 
         self.assertTrue(all([symbol_table.contains(key) for key in
-                             ["simpleLR", "rep1", "a1", "d1"]]))
+                             ["simpleLR", "rep1", "a1", "d1", "w1"]]))
         self.assertTrue(isinstance(symbol_table.get("d1"), RepertoireDataset))
+        self.assertTrue(isinstance(symbol_table.get("rep1"), SequenceLengthDistribution))
+        self.assertTrue(isinstance(symbol_table.get("simpleLR2"), LogisticRegression))
 
         with self.assertRaises(YAMLError):
             with specs_filename.open("r") as file:

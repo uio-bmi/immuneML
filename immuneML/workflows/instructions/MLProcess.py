@@ -6,6 +6,7 @@ from typing import List
 from immuneML.data_model.dataset.Dataset import Dataset
 from immuneML.environment.Label import Label
 from immuneML.environment.LabelConfiguration import LabelConfiguration
+from immuneML.example_weighting.ExampleWeightingStrategy import ExampleWeightingStrategy
 from immuneML.hyperparameter_optimization.HPSetting import HPSetting
 from immuneML.hyperparameter_optimization.core.HPUtil import HPUtil
 from immuneML.hyperparameter_optimization.states.HPItem import HPItem
@@ -28,7 +29,7 @@ class MLProcess:
 
     def __init__(self, train_dataset: Dataset, test_dataset: Dataset, label: Label, metrics: set, optimization_metric: Metric,
                  path: Path, ml_reports: List[MLReport] = None, encoding_reports: list = None, data_reports: list = None, number_of_processes: int = 2,
-                 label_config: LabelConfiguration = None, report_context: dict = None, hp_setting: HPSetting = None):
+                 label_config: LabelConfiguration = None, report_context: dict = None, hp_setting: HPSetting = None, example_weighting: ExampleWeightingStrategy = None):
         self.train_dataset = train_dataset
         self.test_dataset = test_dataset
         self.label = label
@@ -51,6 +52,7 @@ class MLProcess:
         self.data_reports = data_reports if data_reports is not None else []
         self.report_context = report_context
         self.hp_setting = copy.deepcopy(hp_setting)
+        self.example_weighting = example_weighting
 
     def _set_paths(self):
         if self.path is None:
@@ -71,7 +73,10 @@ class MLProcess:
         processed_dataset = HPUtil.preprocess_dataset(self.train_dataset, self.hp_setting.preproc_sequence, self.path / "preprocessed_train_dataset",
                                                       self.report_context)
 
-        encoded_train_dataset = HPUtil.encode_dataset(processed_dataset, self.hp_setting, self.path / "encoded_datasets", learn_model=True,
+        weighted_dataset = HPUtil.weight_examples(dataset=processed_dataset, weighting_strategy=self.example_weighting, path=self.path / "weighted_train_datasets",
+                                                  learn_model=True, number_of_processes=self.number_of_processes)
+
+        encoded_train_dataset = HPUtil.encode_dataset(weighted_dataset, self.hp_setting, self.path / "encoded_datasets", learn_model=True,
                                                       context=self.report_context, number_of_processes=self.number_of_processes,
                                                       label_configuration=self.label_config)
 
@@ -89,7 +94,12 @@ class MLProcess:
         if self.test_dataset is not None and self.test_dataset.get_example_count() > 0:
             processed_test_dataset = HPUtil.preprocess_dataset(self.test_dataset, self.hp_setting.preproc_sequence,
                                                                self.path / "preprocessed_test_dataset")
-            encoded_test_dataset = HPUtil.encode_dataset(processed_test_dataset, self.hp_setting, self.path / "encoded_datasets",
+
+            weighted_test_dataset = HPUtil.weight_examples(dataset=processed_test_dataset, weighting_strategy=self.example_weighting,
+                                                           path=self.path / "weighted_test_datasets", learn_model=False,
+                                                           number_of_processes=self.number_of_processes)
+
+            encoded_test_dataset = HPUtil.encode_dataset(weighted_test_dataset, self.hp_setting, self.path / "encoded_datasets",
                                                          learn_model=False, context=self.report_context, number_of_processes=self.number_of_processes,
                                                          label_configuration=self.label_config)
 
