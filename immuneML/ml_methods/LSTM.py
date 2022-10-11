@@ -48,8 +48,7 @@ class LSTM(GenerativeModel):
 
     def _get_ml_model(self, cores_for_training: int = 2, X=None):
         params = self._parameters
-        params["n_jobs"] = cores_for_training
-
+        print("dette er params", params)
         return LongShortTermMemory(**params)
 
     def get_params(self):
