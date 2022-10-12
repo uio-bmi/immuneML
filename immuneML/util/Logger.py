@@ -5,11 +5,11 @@ import logging
 def log(func):
     def wrapped(*args, **kwargs):
         try:
-            logging.info("%s --- Entering: %s with parameters %s" % (datetime.datetime.now(), func.__name__, args))
+            logging.info("--- Entering: %s with parameters %s" % (func.__name__, args))
             try:
                 return func(*args, **kwargs)
             except Exception as e:
-                logging.error('\n\n%s --- Exception in %s : %s\n\n' % (datetime.datetime.now(), func.__name__, e))
+                logging.error('\n\n--- Exception in %s : %s\n\n' % (func.__name__, e))
                 if "dsl" in func.__globals__["__name__"]:
                     raise Exception(f"{e}\n\n"
                                     f"ImmuneMLParser: an error occurred during parsing in function {func.__name__} "
@@ -18,7 +18,14 @@ def log(func):
                 else:
                     raise e
         finally:
-            logging.info("%s --- Exiting: %s" % (datetime.datetime.now(), func.__name__))
+            logging.info("--- Exiting: %s" % (func.__name__))
 
     return wrapped
 
+def print_log(mssg, include_datetime=False):
+    logging.info(mssg)
+
+    if include_datetime:
+        mssg = f"{datetime.datetime.now()}: {mssg}"
+
+    print(mssg, flush=True)
