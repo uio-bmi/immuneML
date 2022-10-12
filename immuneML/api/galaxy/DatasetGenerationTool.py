@@ -6,6 +6,7 @@ import yaml
 from immuneML.api.galaxy.GalaxyTool import GalaxyTool
 from immuneML.api.galaxy.Util import Util
 from immuneML.app.ImmuneMLApp import ImmuneMLApp
+from immuneML.util.Logger import print_log
 from immuneML.util.ParameterValidator import ParameterValidator
 from immuneML.util.PathBuilder import PathBuilder
 from immuneML.workflows.instructions.dataset_generation.DatasetExportInstruction import DatasetExportInstruction
@@ -34,7 +35,7 @@ class DatasetGenerationTool(GalaxyTool):
         self._update_specs()
         state = ImmuneMLApp(self.yaml_path, self.result_path).run()[0]
         shutil.copytree(list(list(state.paths.values())[0].values())[0], self.result_path / "result/")
-        print("Exported dataset.")
+        print_log("Exported dataset.")
 
     def _update_specs(self):
         with self.yaml_path.open('r') as file:

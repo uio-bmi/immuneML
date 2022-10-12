@@ -1,11 +1,11 @@
 # quality: gold
-import datetime
 import os
 from pathlib import Path
 
 from immuneML.caching.CacheType import CacheType
 from immuneML.environment.Constants import Constants
 from immuneML.environment.SequenceType import SequenceType
+from immuneML.util.Logger import print_log
 from immuneML.util.PathBuilder import PathBuilder
 
 
@@ -38,7 +38,7 @@ class EnvironmentSettings:
         EnvironmentSettings.cache_path = Path(path)
         PathBuilder.build(path)
         os.environ[Constants.CACHE_PATH] = str(EnvironmentSettings.cache_path)
-        print(f"{datetime.datetime.now()}: Setting temporary cache path to {path}", flush=True)
+        print_log(f"Setting temporary cache path to {path}", include_datetime=True)
 
     @staticmethod
     def get_cache_type():

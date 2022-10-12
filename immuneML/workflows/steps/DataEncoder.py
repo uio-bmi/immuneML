@@ -1,5 +1,4 @@
-import datetime
-
+from immuneML.util.Logger import print_log
 from immuneML.workflows.steps.DataEncoderParams import DataEncoderParams
 from immuneML.workflows.steps.Step import Step
 from immuneML.workflows.steps.StepParams import StepParams
@@ -16,10 +15,10 @@ class DataEncoder(Step):
         encoder = input_params.encoder
         encoder_params = input_params.encoder_params
 
-        print(f"{datetime.datetime.now()}: Encoding started...")
+        print_log(f"Encoding started...", include_datetime=True)
 
         encoded_dataset = encoder.encode(dataset, encoder_params)
 
-        print(f"{datetime.datetime.now()}: Encoding finished.")
+        print_log(f"Encoding finished.", include_datetime=True)
 
         return encoded_dataset

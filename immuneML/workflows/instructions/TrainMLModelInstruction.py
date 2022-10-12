@@ -1,4 +1,3 @@
-import datetime
 from collections import Counter
 from pathlib import Path
 
@@ -16,6 +15,7 @@ from immuneML.hyperparameter_optimization.states.TrainMLModelState import TrainM
 from immuneML.hyperparameter_optimization.strategy.HPOptimizationStrategy import HPOptimizationStrategy
 from immuneML.ml_metrics.Metric import Metric
 from immuneML.reports.train_ml_model_reports.TrainMLModelReport import TrainMLModelReport
+from immuneML.util.Logger import print_log
 from immuneML.util.ReflectionHandler import ReflectionHandler
 from immuneML.workflows.instructions.Instruction import Instruction
 from immuneML.workflows.instructions.MLProcess import MLProcess
@@ -149,30 +149,30 @@ class TrainMLModelInstruction(Instruction):
         optimal_hp_settings = [state.label_states[label.name].optimal_hp_setting for state in self.state.assessment_states]
         optimal_hp_setting = Counter(optimal_hp_settings).most_common(1)[0][0]
         if self.state.refit_optimal_model:
-            print(f"{datetime.datetime.now()}: TrainMLModel: retraining optimal model for label {label.name} {index_repr}.\n", flush=True)
+            print_log(f"TrainMLModel: retraining optimal model for label {label.name} {index_repr}.\n", include_datetime=True)
             self.state.optimal_hp_items[label.name] = MLProcess(self.state.dataset, None, label, self.state.metrics, self.state.optimization_metric,
                                                                 self.state.path / f"optimal_{label.name}", number_of_processes=self.state.number_of_processes,
                                                                 label_config=self.state.label_configuration, hp_setting=optimal_hp_setting,
                                                                 example_weighting=self.state.example_weighting).run(0)
-            print(f"{datetime.datetime.now()}: TrainMLModel: finished retraining optimal model for label {label.name} {index_repr}.\n", flush=True)
+            print_log(f"TrainMLModel: finished retraining optimal model for label {label.name} {index_repr}.\n", include_datetime=True)
 
         else:
             optimal_assessment_state = self.state.assessment_states[optimal_hp_settings.index(optimal_hp_setting)]
             self.state.optimal_hp_items[label.name] = optimal_assessment_state.label_states[label.name].optimal_assessment_item
 
     def print_performances(self, state: TrainMLModelState):
-        print(f"Performances ({state.optimization_metric.name.lower()}) -----------------------------------------------", flush=True)
+        print_log(f"Performances ({state.optimization_metric.name.lower()}) -----------------------------------------------")
 
         for label_name in state.label_configuration.get_labels_by_name():
-            print(f"\n\nLabel: {label_name}", flush=True)
-            print(f"Performance ({state.optimization_metric.name.lower()}) per assessment split:", flush=True)
+            print_log(f"\n\nLabel: {label_name}")
+            print_log(f"Performance ({state.optimization_metric.name.lower()}) per assessment split:")
             for split in range(state.assessment.split_count):
-                print(f"Split {split+1}: {state.assessment_states[split].label_states[label_name].optimal_assessment_item.performance[state.optimization_metric.name.lower()]}", flush=True)
+                print_log(f"Split {split+1}: {state.assessment_states[split].label_states[label_name].optimal_assessment_item.performance[state.optimization_metric.name.lower()]}")
             if all(isinstance(a_state.label_states[label_name].optimal_assessment_item.performance[state.optimization_metric.name.lower()], float)
                    for a_state in state.assessment_states):
-                print(f"Average performance ({state.optimization_metric.name.lower()}): "
-                      f"{sum([state.assessment_states[split].label_states[label_name].optimal_assessment_item.performance[state.optimization_metric.name.lower()] for split in range(state.assessment.split_count)])/state.assessment.split_count}", flush=True)
-            print("------------------------------", flush=True)
+                print_log(f"Average performance ({state.optimization_metric.name.lower()}): "
+                      f"{sum([state.assessment_states[split].label_states[label_name].optimal_assessment_item.performance[state.optimization_metric.name.lower()] for split in range(state.assessment.split_count)])/state.assessment.split_count}")
+            print_log("------------------------------")
 
     def _export_all_performances_to_csv(self):
         self._export_optimal_performances_to_csv()
