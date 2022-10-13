@@ -42,10 +42,6 @@ class GenerativeModel(MLMethod):
 
     def fit(self, encoded_data: EncodedData, label: Label, cores_for_training: int = 2):
 
-        self.label = label
-        self.class_mapping = Util.make_class_mapping(encoded_data.labels[self.label.name])
-        self.feature_names = encoded_data.feature_names
-
         mapped_y = Util.map_to_new_class_values(encoded_data.labels[self.label.name], self.class_mapping)
 
         self.model = self._fit(encoded_data.examples, mapped_y, cores_for_training)
@@ -67,18 +63,7 @@ class GenerativeModel(MLMethod):
             warnings.simplefilter("ignore")
             os.environ["PYTHONWARNINGS"] = "ignore"
 
-        print(X[:50])
-        vocab_size = 21
-        embedding_dim = 256
-        batch_size = 64
-
-        self.model = tensorflow.keras.Sequential([
-            tensorflow.keras.layers.Embedding(vocab_size, embedding_dim, batch_input_shape = [batch_size,None]),
-            self._get_ml_model(cores_for_training, X),
-            tensorflow.keras.layers.Dense(vocab_size)
-        ])
-
-        self.model.compile(optimizer='adam', loss=tensorflow.keras.losses.CategoricalCrossentropy())
+        self.model = self._get_ml_model(X)
 
         self.model.fit(X, y)
 
