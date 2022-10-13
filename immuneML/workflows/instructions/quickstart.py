@@ -56,12 +56,6 @@ class Quickstart:
                     "hprep": "MLSettingsPerformance",
                     "coef": "Coefficients"
                 },
-                "example_weightings": {
-                    "w1": {
-                        "PredefinedWeighting":
-                            {"file_path": "test"}
-                    }
-                }
             },
             "instructions": {
                 "machine_learning_instruction": {
@@ -94,7 +88,6 @@ class Quickstart:
                             "models": [],
                         }
                     },
-                    "example_weighting": "w1",
                     "labels": ["my_signal"],
                     "dataset": "d1",
                     "strategy": "GridSearch",

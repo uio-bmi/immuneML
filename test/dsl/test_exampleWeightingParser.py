@@ -14,7 +14,7 @@ class TestExampleWeightingParser(TestCase):
     def setUp(self) -> None:
         os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
 
-    def test_parse_ml_methods(self):
+    def test_parse_example_weightings(self):
 
         params = {
             "w1": {
@@ -43,11 +43,16 @@ class TestExampleWeightingParser(TestCase):
         self.assertEqual(symbol_table.get("w3"), PredefinedWeighting)
         self.assertEqual(symbol_table.get_config("w1"), {'example_weighting_params': {'baseline_dist': 'olga',
                                                                                       'dataset_dist': 'mutagenesis',
+                                                                                      'export_weights': True,
+                                                                                      'pseudocount_value': 1,
                                                                                       'name': 'w1'}})
         self.assertEqual(symbol_table.get_config("w2"), {'example_weighting_params': {'baseline_dist': 'uniform',
                                                                                       'dataset_dist': 'mutagenesis',
+                                                                                      'export_weights': True,
+                                                                                      'pseudocount_value': 1,
                                                                                       'name': 'w2'}})
         self.assertEqual(symbol_table.get_config("w3"), {'example_weighting_params': {'file_path': 'example/path.csv',
+                                                                                      'separator': '\t',
                                                                                       'name': 'w3'}})
 
 

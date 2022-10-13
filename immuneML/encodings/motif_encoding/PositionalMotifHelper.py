@@ -4,8 +4,6 @@ from multiprocessing import Pool
 import itertools as it
 from functools import partial
 
-from immuneML.caching.CacheHandler import CacheHandler
-from immuneML.data_model.dataset.SequenceDataset import SequenceDataset
 from immuneML.encodings.motif_encoding.PositionalMotifParams import PositionalMotifParams
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.environment.SequenceType import SequenceType
@@ -13,33 +11,6 @@ from immuneML.util.PathBuilder import PathBuilder
 
 
 class PositionalMotifHelper:
-
-    @staticmethod
-    def get_numpy_sequence_representation(dataset: SequenceDataset):
-        return CacheHandler.memo_by_params((("dataset_identifier", dataset.identifier),
-                                            "np_sequence_representation",
-                                            ("example_ids", dataset.get_example_ids())),
-                                           lambda: PositionalMotifHelper.compute_numpy_sequence_representation(dataset))
-
-    @staticmethod
-    def compute_numpy_sequence_representation(dataset: SequenceDataset):
-        n_sequences = dataset.get_example_count()
-        all_sequences = [None] * n_sequences
-        sequence_length = None
-
-        for i, sequence in enumerate(dataset.get_data()):
-            sequence_str = sequence.get_sequence(SequenceType.AMINO_ACID)
-            all_sequences[i] = sequence_str
-
-            if sequence_length is None:
-                sequence_length = len(sequence_str)
-            else:
-                assert len(sequence_str) == sequence_length, f"{PositionalMotifHelper.__name__}: expected all " \
-                                                             f"sequences to be of length {sequence_length}, found " \
-                                                             f"{len(sequence_str)}: '{sequence_str}'."
-
-        unicode = np.array(all_sequences, dtype=f"U{sequence_length}")
-        return unicode.view('U1').reshape(n_sequences, -1)
 
     @staticmethod
     def test_aa(sequences, index, aa):

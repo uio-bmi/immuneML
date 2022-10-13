@@ -1,5 +1,4 @@
 import os
-import shutil
 import numpy as np
 from unittest import TestCase
 
@@ -8,17 +7,12 @@ from immuneML.caching.CacheType import CacheType
 from immuneML.data_model.dataset.SequenceDataset import SequenceDataset
 from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
 from immuneML.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
-from immuneML.encodings.EncoderParams import EncoderParams
-from immuneML.encodings.motif_encoding.PositionalMotifEncoder import PositionalMotifEncoder
-from immuneML.encodings.motif_encoding.PositionalMotifHelper import PositionalMotifHelper
-from immuneML.encodings.motif_encoding.WeightHelper import WeightHelper
+from immuneML.example_weighting.importance_weighting.ImportanceWeightHelper import ImportanceWeightHelper
 from immuneML.environment.Constants import Constants
-from immuneML.environment.EnvironmentSettings import EnvironmentSettings
-from immuneML.environment.LabelConfiguration import LabelConfiguration
 from immuneML.util.PathBuilder import PathBuilder
 
 
-class TestWeightHelper(TestCase):
+class TestImportanceWeightHelper(TestCase):
 
     def setUp(self) -> None:
         os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
@@ -41,7 +35,7 @@ class TestWeightHelper(TestCase):
 
         correct_result = {**{aa: 0.0 for aa in "ACDEFGHIKLMNPQRSTVWY"}, **{"A": 0.2, "Y": 0.4, "C": 0.4}}
 
-        self.assertDictEqual(WeightHelper.compute_column_contributions(column, pseudocount_value=0), correct_result)
+        self.assertDictEqual(ImportanceWeightHelper._compute_column_contributions(column, pseudocount_value=0), correct_result)
 
     def test_compute_positional_aa_contributions(self):
         np_sequences = np.asarray(['A' 'A', 'Y' 'A', 'Y' 'Y', 'C' 'Y', 'C' 'Y']).view('U1').reshape(5, -1)
@@ -49,19 +43,23 @@ class TestWeightHelper(TestCase):
         correct_result = {0: {**{aa: 0.0 for aa in "ACDEFGHIKLMNPQRSTVWY"}, **{"A": 0.2, "Y": 0.4, "C": 0.4}},
                           1: {**{aa: 0.0 for aa in "ACDEFGHIKLMNPQRSTVWY"}, **{"A": 0.4, "Y": 0.6}}}
 
-        result = WeightHelper.compute_positional_aa_contributions(np_sequences, pseudocount_value=0)
+        result = ImportanceWeightHelper._compute_positional_aa_frequences_np_sequences(np_sequences, pseudocount_value=0)
 
         self.assertDictEqual(result, correct_result)
 
-    def test_compute_sequence_weight(self):
+    def test_compute_mutagenesis_probability(self):
         positional_weights = {0: {"A": 0.2, "B": 0.4, "C": 0.4}, 1: {"A": 0.4, "B": 0.6}}
-        alphabet = "ABCD"
 
-        self.assertEqual(WeightHelper.compute_sequence_weight("AA", positional_weights, alphabet=alphabet), 0.25 / 0.2 * 0.25 / 0.4)
-        self.assertEqual(WeightHelper.compute_sequence_weight("AB", positional_weights, alphabet=alphabet), 0.25 / 0.2 * 0.25 / 0.6)
-        self.assertEqual(WeightHelper.compute_sequence_weight("BA", positional_weights, alphabet=alphabet), 0.25 / 0.4 * 0.25 / 0.4)
-        self.assertEqual(WeightHelper.compute_sequence_weight("BB", positional_weights, alphabet=alphabet), 0.25 / 0.4 * 0.25 / 0.6)
-        self.assertEqual(WeightHelper.compute_sequence_weight("CA", positional_weights, alphabet=alphabet), 0.25 / 0.4 * 0.25 / 0.4)
-        self.assertEqual(WeightHelper.compute_sequence_weight("CB", positional_weights, alphabet=alphabet), 0.25 / 0.4 * 0.25 / 0.6)
+        self.assertEqual(ImportanceWeightHelper.compute_mutagenesis_probability("AA", positional_weights), 0.2 * 0.4)
+        self.assertEqual(ImportanceWeightHelper.compute_mutagenesis_probability("AB", positional_weights), 0.2 * 0.6)
+        self.assertEqual(ImportanceWeightHelper.compute_mutagenesis_probability("BA", positional_weights), 0.4 * 0.4)
+        self.assertEqual(ImportanceWeightHelper.compute_mutagenesis_probability("BB", positional_weights), 0.4 * 0.6)
+        self.assertEqual(ImportanceWeightHelper.compute_mutagenesis_probability("CA", positional_weights), 0.4 * 0.4)
+        self.assertEqual(ImportanceWeightHelper.compute_mutagenesis_probability("CB", positional_weights), 0.4 * 0.6)
+
+    def test_compute_uniform_probability(self):
+        self.assertEqual(ImportanceWeightHelper.compute_uniform_probability("ABCD", 5), (1/5)**4)
+        self.assertEqual(ImportanceWeightHelper.compute_uniform_probability("ABCDEFG", 8), (1/8)**7)
+        self.assertEqual(ImportanceWeightHelper.compute_uniform_probability("AB", 4), (1/4)**2)
 
 

@@ -168,7 +168,7 @@ class MotifClassifier(MLMethod): # todo name? (Greedy)BinaryFeatureClassifier? R
 
         y_true = Util.map_to_new_class_values(encoded_data.labels[self.label.name], self.class_mapping)
 
-        return optimization_scoring_fn(y_true=y_true, y_pred=pred, sample_weight=None)
+        return optimization_scoring_fn(y_true=y_true, y_pred=pred, sample_weight=encoded_data.example_weights)
 
     def _get_rule_tree_predictions(self, encoded_data, rule_indices):
         self._check_features(encoded_data.feature_names)

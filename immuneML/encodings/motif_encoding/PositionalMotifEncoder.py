@@ -13,14 +13,13 @@ from immuneML.data_model.encoded_data.EncodedData import EncodedData
 from immuneML.encodings.DatasetEncoder import DatasetEncoder
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.encodings.motif_encoding.PositionalMotifParams import PositionalMotifParams
-from immuneML.encodings.motif_encoding.WeightedSequenceContainer import WeigthedSequenceContainer
 from immuneML.environment.LabelConfiguration import LabelConfiguration
 from immuneML.util.EncoderHelper import EncoderHelper
+from immuneML.util.NumpyHelper import NumpyHelper
 from immuneML.util.ParameterValidator import ParameterValidator
 
 
 from immuneML.encodings.motif_encoding.PositionalMotifHelper import PositionalMotifHelper
-from immuneML.encodings.motif_encoding.WeightHelper import WeightHelper
 
 
 class PositionalMotifEncoder(DatasetEncoder):
@@ -169,37 +168,21 @@ class PositionalMotifEncoder(DatasetEncoder):
     def _compute_motifs(self, dataset, params):
         motifs = self._prepare_candidate_motifs(dataset, params)
 
-        # todo after weights have been implemented properly, move stuff to get sequence_container to separate function
-
         labels = EncoderHelper.encode_element_dataset_labels(dataset, params.label_config)
         y_true = self._get_y_true(labels, params.label_config)
-        np_sequences = PositionalMotifHelper.get_numpy_sequence_representation(dataset)
 
-        if self.use_weights:
-            self.weight_pseudocount = 1  # todo these parameters need to be set by the user, probably when changing the YAML specification to specify weights
-            self.weight_upper_limit = 1
-            self.weight_lower_limit = 0
-
-            positional_weights = self._get_positional_weights(np_sequences)
-            weights = self._get_sequence_weights(np_sequences, positional_weights)
-        else:
-            print("Not using weights")
-            positional_weights = None
-            weights = None
-
-        sequence_container = WeigthedSequenceContainer(np_sequences, weights, y_true)
         # todo current solution only filters motifs based on 'min recall before merging'; find a way to reduce the unnecessary extra tests (precision for generalized motifs) & maybe completely remove this option of one recall before and one after merging?
         # current solution only good if min_recall_before_merging == min_recall
 
-        motifs = self._filter_motifs(motifs, sequence_container, params.pool_size,
+        motifs = self._filter_motifs(motifs, dataset, y_true, params.pool_size,
                                      min_recall=self.min_recall_before_merging, generalized=False)
 
         if self.generalize_motifs:
             generalized_motifs = PositionalMotifHelper.get_generalized_motifs(motifs)
-            generalized_motifs = self._filter_motifs(generalized_motifs, sequence_container, params.pool_size,
+            generalized_motifs = self._filter_motifs(generalized_motifs, dataset, y_true, params.pool_size,
                                                      min_recall=self.min_recall, generalized=True)
 
-            motifs = self._filter_motifs(motifs, sequence_container, params.pool_size,
+            motifs = self._filter_motifs(motifs, dataset, y_true, params.pool_size,
                                          min_recall=self.min_recall, generalized=False)
 
             motifs += generalized_motifs
@@ -217,6 +200,7 @@ class PositionalMotifEncoder(DatasetEncoder):
                                                    feature_names=feature_names,
                                                    example_ids=dataset.get_example_ids(),
                                                    encoding=PositionalMotifEncoder.__name__,
+                                                   example_weights=dataset.get_example_weights(),
                                                    info={"candidate_motif_filepath": self.candidate_motif_filepath,
                                                          "significant_motif_filepath": self.significant_motif_filepath}) # todo maybe include "positional_weights": positional_weights, but thenit should be stored as part of learn model
 
@@ -245,11 +229,12 @@ class PositionalMotifEncoder(DatasetEncoder):
     def _build_candidate_motifs_params(self, dataset: SequenceDataset):
         return (("dataset_identifier", dataset.identifier),
                 ("sequence_ids", tuple(dataset.get_example_ids()),
+                ("example_weights", type(dataset.get_example_weights())),
                 ("max_positions", self.max_positions),
                 ("min_true_positives", self.min_true_positives)))
 
     def _compute_candidate_motifs(self, full_dataset, pool_size=4):
-        np_sequences = PositionalMotifHelper.get_numpy_sequence_representation(full_dataset)
+        np_sequences = NumpyHelper.get_numpy_sequence_representation(full_dataset)
         params = PositionalMotifParams(max_positions=self.max_positions, count_threshold=self.min_true_positives,
                                        pool_size=pool_size)
         return PositionalMotifHelper.compute_all_candidate_motifs(np_sequences, params)
@@ -275,23 +260,20 @@ class PositionalMotifEncoder(DatasetEncoder):
 
         return label_name
 
-    def _get_positional_weights(self, np_sequences):
-        return WeightHelper.compute_positional_aa_contributions(np_sequences, self.weight_pseudocount)
-
-    def _get_sequence_weights(self, np_sequences, positional_weights):
-        return np.apply_along_axis(WeightHelper.compute_sequence_weight, 1, np_sequences, positional_weights=positional_weights, lower_limit=self.weight_lower_limit, upper_limit=self.weight_upper_limit)
-
     def check_filtered_motifs(self, filtered_motifs):
         assert len(filtered_motifs) > 0, f"{PositionalMotifEncoder.__name__}: no significant motifs were found. " \
                                          f"Please try decreasing the values for parameters 'min_precision', 'min_recall' and/or 'min_recall_before_merging'."
 
-    def _filter_motifs(self, candidate_motifs, sequence_container, pool_size, min_recall, generalized=False):
+    def _filter_motifs(self, candidate_motifs, dataset, y_true, pool_size, min_recall, generalized=False):
         motif_type = "generalized motifs" if generalized else "motifs"
 
         logging.info(f"{PositionalMotifEncoder.__name__}: filtering {len(candidate_motifs)} {motif_type} with precision >= {self.min_precision} and recall >= {min_recall}")
 
+        np_sequences = NumpyHelper.get_numpy_sequence_representation(dataset)
+        weights = dataset.get_example_weights()
+
         with Pool(pool_size) as pool:
-            partial_func = partial(self._check_motif, sequence_container=sequence_container, min_recall=min_recall)
+            partial_func = partial(self._check_motif,  np_sequences=np_sequences, y_true=y_true, weights=weights, min_recall=min_recall)
 
             filtered_motifs = list(filter(None, pool.map(partial_func, candidate_motifs)))
 
@@ -302,17 +284,18 @@ class PositionalMotifEncoder(DatasetEncoder):
 
         return filtered_motifs
 
-    def _check_motif(self, motif, sequence_container, min_recall):
+    def _check_motif(self, motif, np_sequences, y_true, weights, min_recall):
         indices, amino_acids = motif
 
-        pred = PositionalMotifHelper.test_motif(sequence_container.np_sequences, indices, amino_acids)
+        pred = PositionalMotifHelper.test_motif(np_sequences, indices, amino_acids)
+
         if sum(pred) >= self.min_true_positives:
-            if precision_score(y_true=sequence_container.y_true, y_pred=pred, sample_weight=sequence_container.weights) >= self.min_precision:
-                if recall_score(y_true=sequence_container.y_true, y_pred=pred, sample_weight=sequence_container.weights) >= min_recall:
+            if precision_score(y_true=y_true, y_pred=pred, sample_weight=weights) >= self.min_precision:
+                if recall_score(y_true=y_true, y_pred=pred, sample_weight=weights) >= min_recall:
                     return motif
 
     def _construct_encoded_data_matrix(self, dataset, motifs):
-        np_sequences = PositionalMotifHelper.get_numpy_sequence_representation(dataset)
+        np_sequences = NumpyHelper.get_numpy_sequence_representation(dataset)
 
         feature_names = [PositionalMotifHelper.motif_to_string(indices, amino_acids, motif_sep="-", newline=False) for indices, amino_acids in motifs]
         examples = [PositionalMotifHelper.test_motif(np_sequences, indices, amino_acids) for indices, amino_acids in motifs]

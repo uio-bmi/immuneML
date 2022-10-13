@@ -17,7 +17,7 @@ class EncodedData:
     """
 
     def __init__(self, examples, labels: dict = None, example_ids: list = None, feature_names: list = None,
-                 feature_annotations: pd.DataFrame = None, encoding: str = None, info: dict = None):
+                 feature_annotations: pd.DataFrame = None, encoding: str = None, example_weights: list = None, info: dict = None):
 
         assert feature_names is None or examples.shape[1] == len(feature_names)
         if feature_names is not None:
@@ -28,8 +28,14 @@ class EncodedData:
                     .format(len(label), len(example_ids))
                 assert examples is None or len(example_ids) == examples.shape[0], "EncodedData: there are {} example ids, but {} examples."\
                     .format(len(example_ids), examples.shape[0])
+
+            if example_weights is not None:
+                assert len(example_weights) == len(example_ids)
         if examples is not None:
             assert all(len(labels[key]) == examples.shape[0] for key in labels.keys()) if labels is not None else True
+
+            if example_weights is not None:
+                assert len(example_weights) == examples.shape[0]
 
         self.examples = examples
         self.labels = labels
@@ -37,4 +43,5 @@ class EncodedData:
         self.feature_names = feature_names
         self.feature_annotations = feature_annotations
         self.encoding = encoding
+        self.example_weights = example_weights
         self.info = info

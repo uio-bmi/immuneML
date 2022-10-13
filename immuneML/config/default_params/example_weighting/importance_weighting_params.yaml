@@ -1,2 +1,6 @@
 dataset_dist: mutagenesis
 baseline_dist: uniform
+export_weights: True
+pseudocount_value: 1
+lower_weight_limit: null
+upper_weight_limit: null

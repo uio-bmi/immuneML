@@ -18,7 +18,7 @@ class ExploratoryAnalysisParser:
     Each analysis is defined by a dataset identifier, a report identifier and optionally encoding and labels
     and are loaded into ExploratoryAnalysisUnit objects;
 
-    DSL example for ExploratoryAnalysisInstruction assuming that d1, r1, r2, e1 are defined previously in definitions section:
+    DSL example for ExploratoryAnalysisInstruction assuming that d1, p1, r1, r2, e1, w1 are defined previously in definitions section:
 
     .. highlight:: yaml
     .. code-block:: yaml
@@ -27,12 +27,14 @@ class ExploratoryAnalysisParser:
             type: ExploratoryAnalysis
             number_of_processes: 4
             analyses:
-                my_first_analysis:
+                my_first_analysis: # simple analysis running a report on a dataset
                     dataset: d1
                     report: r1
-                my_second_analysis:
+                my_second_analysis: # more complicated analysis; including preprocessing, encoding, example weighting and running a report
                     dataset: d1
+                    preprocessing_sequence: p1
                     encoding: e1
+                    example_weighting: w1
                     report: r2
                     labels:
                         - CD
@@ -57,7 +59,7 @@ class ExploratoryAnalysisParser:
 
     def _prepare_params(self, analysis: dict, symbol_table: SymbolTable, yaml_location: str) -> dict:
 
-        valid_keys = ["dataset", "report", "preprocessing_sequence", "labels", "encoding", "number_of_processes"]
+        valid_keys = ["dataset", "report", "preprocessing_sequence", "labels", "encoding", "example_weighting"]
         ParameterValidator.assert_keys(list(analysis.keys()), valid_keys, "ExploratoryAnalysisParser", "analysis", False)
 
         params = {"dataset": symbol_table.get(analysis["dataset"]), "report": copy.deepcopy(symbol_table.get(analysis["report"]))}
@@ -82,5 +84,8 @@ class ExploratoryAnalysisParser:
 
         if "preprocessing_sequence" in analysis:
             params["preprocessing_sequence"] = symbol_table.get(analysis["preprocessing_sequence"])
+
+        if "example_weighting" in analysis:
+            params["example_weighting"] = symbol_table.get(analysis["example_weighting"]).build_object(dataset, **symbol_table.get_config(analysis["example_weighting"])["example_weighting_params"])
 
         return params

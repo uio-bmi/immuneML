@@ -1,6 +1,7 @@
 import os
 import shutil
 from unittest import TestCase
+import pandas as pd
 
 from immuneML.caching.CacheType import CacheType
 from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
@@ -10,6 +11,7 @@ from immuneML.dsl.symbol_table.SymbolType import SymbolType
 from immuneML.encodings.reference_encoding.MatchedSequencesEncoder import MatchedSequencesEncoder
 from immuneML.environment.Constants import Constants
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
+from immuneML.example_weighting.predefined_weighting.PredefinedWeighting import PredefinedWeighting
 from immuneML.preprocessing.SubjectRepertoireCollector import SubjectRepertoireCollector
 from immuneML.reports.data_reports.SequenceLengthDistribution import SequenceLengthDistribution
 from immuneML.reports.encoding_reports.Matches import Matches
@@ -27,7 +29,7 @@ class TestExploratoryAnalysisParser(TestCase):
         path = EnvironmentSettings.tmp_test_path / "explanalysisparser/"
         PathBuilder.build(path)
 
-        dataset = self.prepare_dataset(path)
+        dataset, weights_path = self.prepare_dataset(path)
         report1 = SequenceLengthDistribution()
 
         file_content = """complex.id	Gene	CDR3	V	J	Species	MHC A	MHC B	MHC class	Epitope	Epitope gene	Epitope species	Reference	Method	Meta	CDR3fix	Score
@@ -42,6 +44,7 @@ class TestExploratoryAnalysisParser(TestCase):
         report2 = Matches.build_object()
         encoding = MatchedSequencesEncoder
         p1 = [SubjectRepertoireCollector()]
+        weighting = PredefinedWeighting
 
         instruction = {
             "type": "ExploratoryAnalysis",
@@ -49,7 +52,7 @@ class TestExploratoryAnalysisParser(TestCase):
             "analyses": {
                 "1": {"dataset": "d1", "report": "r1", "preprocessing_sequence": "p1"},
                 "2": {"dataset": "d1", "report": "r2", "encoding": "e1", },
-                "3": {"dataset": "d1", "report": "r2", "encoding": "e1", "labels": ["l1"]}
+                "3": {"dataset": "d1", "report": "r2", "encoding": "e1", "labels": ["l1"], "example_weighting": "w1"},
             }
         }
 
@@ -65,6 +68,10 @@ class TestExploratoryAnalysisParser(TestCase):
             "normalize": False
         }})
         symbol_table.add("p1", SymbolType.PREPROCESSING, p1)
+        symbol_table.add("w1", SymbolType.WEIGHTING, weighting, {"example_weighting_params": {
+            "file_path": weights_path,
+            "separator": ","
+        }})
 
         process = ExploratoryAnalysisParser().parse("a", instruction, symbol_table)
 
@@ -78,7 +85,9 @@ class TestExploratoryAnalysisParser(TestCase):
 
         self.assertTrue(isinstance(list(process.state.exploratory_analysis_units.values())[2].report, Matches))
         self.assertTrue(isinstance(list(process.state.exploratory_analysis_units.values())[2].encoder, MatchedSequencesEncoder))
+        self.assertTrue(isinstance(list(process.state.exploratory_analysis_units.values())[2].example_weighting, PredefinedWeighting))
         self.assertEqual(1, len(list(process.state.exploratory_analysis_units.values())[2].encoder.reference_sequences))
+        self.assertEqual(weights_path, list(process.state.exploratory_analysis_units.values())[2].example_weighting.file_path)
         self.assertEqual("l1", list(process.state.exploratory_analysis_units.values())[2].label_config.get_labels_by_name()[0])
         self.assertEqual(32, process.state.exploratory_analysis_units["2"].number_of_processes)
 
@@ -89,4 +98,9 @@ class TestExploratoryAnalysisParser(TestCase):
                                                         {"l1": [1, 1, 1, 0, 0, 0], "l2": [2, 3, 2, 3, 2, 3]})
 
         dataset = RepertoireDataset(repertoires=repertoires, labels={"l1": [0, 1], "l2": [2, 3]}, metadata_file=metadata)
-        return dataset
+
+        weights_path = path / "mock_weights.tsv"
+        df = pd.DataFrame({"identifier": dataset.get_example_ids(), "example_weight": [1 for i in range(dataset.get_example_count())]})
+        df.to_csv(weights_path, index=False)
+
+        return dataset, weights_path

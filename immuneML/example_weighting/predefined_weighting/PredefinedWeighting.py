@@ -1,4 +1,5 @@
 from pathlib import Path
+import pandas as pd
 
 from immuneML.example_weighting.ExampleWeightingParams import ExampleWeightingParams
 from immuneML.example_weighting.ExampleWeightingStrategy import ExampleWeightingStrategy
@@ -6,14 +7,20 @@ from immuneML.util.ParameterValidator import ParameterValidator
 
 
 class PredefinedWeighting(ExampleWeightingStrategy):
+    '''
 
-    def __init__(self, file_path, separator, name):
+    file:
+    identifier  example_weight
+
+    '''
+
+    def __init__(self, file_path, separator, name: str = None):
         super().__init__(name)
         self.file_path = Path(file_path)
         self.separator = separator
 
     @staticmethod
-    def _prepare_parameters(file_path, separator, name):
+    def _prepare_parameters(file_path, separator, name: str = None):
         file_path = Path(file_path)
 
         if not file_path.is_file():
@@ -35,4 +42,15 @@ class PredefinedWeighting(ExampleWeightingStrategy):
         return PredefinedWeighting(**prepared_params)
 
     def compute_weights(self, dataset, params: ExampleWeightingParams):
-        raise NotImplementedError
+        weights_df = self._read_example_weights_file()
+
+        return self._get_example_weights(dataset, weights_df)
+
+    def _get_example_weights(self, dataset, weights_df):
+        return [self._get_example_weight_by_identifier(example.identifier, weights_df) for example in dataset.get_data()]
+
+    def _read_example_weights_file(self):
+        return pd.read_csv(self.file_path, sep=self.separator, usecols=["identifier", "example_weight"])
+
+    def _get_example_weight_by_identifier(self, identifier, weights_df):
+        return float(weights_df[weights_df["identifier"] == identifier].example_weight)

@@ -54,6 +54,8 @@ class TrainMLModelInstruction(Instruction):
 
         optimization_metric (Metric): a metric to use for optimization and assessment in the nested cross-validation.
 
+        example_weighting: which example weighting strategy to use. Example weighting can be used to up-weight or down-weight the importance of each example in the dataset. These weights will be applied when computing (optimization) metrics, and are used by some encoders and ML methods.
+
         label_configuration (LabelConfiguration): a list of labels for which to train the classifiers. The goal of the nested CV is to find the
         setting which will have best performance in predicting the given label (e.g., if a subject has experienced an immune event or not).
         Performance and optimal settings will be reported for each label separately. If a label is binary, instead of specifying only its name, one
