@@ -49,7 +49,21 @@ class LSTM(GenerativeModel):
     def _get_ml_model(self, cores_for_training: int = 2, X=None):
         params = self._parameters
         print("dette er params", params)
-        return LongShortTermMemory(**params)
+
+        vocab_size = 21
+        embedding_dim = 256
+        batch_size = 64
+
+        model = tf.keras.Sequential([
+            tf.keras.layers.Embedding(vocab_size, embedding_dim, batch_input_shape=[batch_size, None]),
+            LongShortTermMemory(**params),
+            tf.keras.layers.Dense(vocab_size)
+        ])
+
+        model.compile(optimizer='adam', loss=tf.keras.losses.CategoricalCrossentropy())
+
+        return model
+
 
     def get_params(self):
         return self.model.get_params(deep=True)
