@@ -265,9 +265,6 @@ class RejectionSampler:
         sequences = self._add_pgens(sequences)
         custom_params_keys = self._get_custom_keys()
 
-        print(sequences.head())
-        print(sequences.columns.tolist())
-
         sequences = [ReceptorSequence(seq['sequence_aa'], seq['sequence'], identifier=uuid.uuid4().hex,
                                       metadata=SequenceMetadata(
                                           custom_params={**metadata, **{key: str(seq[key]) if 'position' in key else getattr(seq, key, None)
