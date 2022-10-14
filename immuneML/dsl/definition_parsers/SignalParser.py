@@ -21,7 +21,7 @@ class SignalParser:
 
             ParameterValidator.assert_keys_present(signal_spec.keys(), SignalParser.VALID_KEYS, "SignalParser", key)
 
-            implanting_strategy = SignalParser._get_implanting_strategy(key, signal_spec)
+            implanting_strategy = SignalParser._get_implanting_strategy('implanting', signal_spec)
 
             ParameterValidator.assert_keys(signal_spec["motifs"], symbol_table.get_keys_by_type(SymbolType.MOTIF), "SignalParser",
                                            f"motifs in signal {key}", False)

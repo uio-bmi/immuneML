@@ -23,7 +23,8 @@ class Quickstart:
                         "format": "AIRR",
                         "params": {
                             "path": str(path.parent / "synthetic_dataset/result/simulation_instruction/exported_dataset/airr/"),
-                            "metadata_file": str(path.parent / "synthetic_dataset/result/simulation_instruction/exported_dataset/airr/metadata.csv")
+                            "metadata_file": str(path.parent / "synthetic_dataset/result/simulation_instruction/exported_dataset/airr/metadata.csv"),
+                            "import_illegal_characters": True
                         }
                     }
                 },
@@ -129,8 +130,18 @@ class Quickstart:
                 },
                 "motifs": {"my_motif": {"seed": "AA", "instantiation": "GappedKmer"}},
                 "signals": {"my_signal": {"motifs": ["my_motif"], "implanting": "HealthySequence"}},
-                "simulations": {"my_simulation": {"my_implantng": {"type": "Implanting", "signals": ["my_signal"], "dataset_implanting_rate": 0.5,
-                                                                   "repertoire_implanting_rate": 0.1}}}
+                "simulations": {"my_simulation": {
+                    "type": "Implanting",
+                    "sim_items": {
+                        "my_implantng": {
+                            "type": "Implanting",
+                            "signals": ["my_signal"],
+                            "dataset_implanting_rate": 0.5,
+                            "repertoire_implanting_rate": 0.1
+                        }
+                    }
+                }
+                }
             },
             "instructions": {"simulation_instruction": {"type": "Simulation", "dataset": "my_synthetic_dataset", "simulation": "my_simulation",
                                                         "export_formats": ["AIRR"]}}

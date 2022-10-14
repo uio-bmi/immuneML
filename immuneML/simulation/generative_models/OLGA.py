@@ -175,7 +175,7 @@ class OLGA(GenerativeModel):
         if len(v_genes) > 0 or len(j_genes) > 0:
 
             skewed_model_path = PathBuilder.build(path.parent / "skewed_model/")
-            skewed_seqs_path = PathBuilder.build(path.parent) / "tmp_skewed_model_seqs.tsv"
+            skewed_seqs_path = PathBuilder.build(path.parent) / f"tmp_skewed_model_seqs_{seed}.tsv"
             make_skewed_model_files(v_genes, j_genes, self.model_path, skewed_model_path)
 
             if self.use_only_productive:
@@ -184,9 +184,8 @@ class OLGA(GenerativeModel):
             else:
                 self._generate_all_sequences(count=batch_size, path=skewed_seqs_path, seed=seed, model_path=skewed_model_path)
 
-            pd.read_csv(skewed_seqs_path, sep='\t').to_csv(path, mode='a', sep='\t', index=False)
-
             if skewed_seqs_path.is_file():
+                pd.read_csv(skewed_seqs_path, sep='\t').to_csv(path, mode='a', sep='\t', index=False)
                 os.remove(skewed_seqs_path)
 
     def _import_olga_sequences(self, sequence_type: SequenceType, path: Path):

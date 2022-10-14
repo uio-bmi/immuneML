@@ -1,10 +1,11 @@
-from npstructures import npdataclass
+from bionumpy import AminoAcidArray, DNAArray
+from bionumpy.bnpdataclass import bnpdataclass
 
 
-@npdataclass
+@bnpdataclass
 class GenModelAsTSV:
-    sequence_aa: str
-    sequence: str
+    sequence_aa: AminoAcidArray
+    sequence: DNAArray
     v_call: str
     j_call: str
     region_type: str

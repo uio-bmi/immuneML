@@ -57,8 +57,8 @@ class TestRejectionSampler(TestCase):
         pd.DataFrame({**{key: ['', '', '', ''] for key in sampler.sim_item.generative_model.OUTPUT_COLUMNS},
                       **{'sequence_aa': ['AA', 'DFG', 'AAEA', 'DGEAFT']}}) \
             .to_csv(path / 'tmp.tsv', sep='\t', index=False, header=True)
-        background_seqs = bnp.open(path / 'tmp.tsv', mode='full', buffer_type=bnp.delimited_buffers.get_bufferclass_for_datatype(GenModelAsTSV),
-                                   has_header=True)
+        background_seqs = bnp.open(path / 'tmp.tsv',
+                                   buffer_type=bnp.delimited_buffers.get_bufferclass_for_datatype(GenModelAsTSV, has_header=True)).read()
         sampler.seqs_no_signal_path = path / 'no_sig.tsv'
         count = sampler._update_seqs_without_signal(5, signal_matrix, background_seqs)
 
@@ -81,8 +81,8 @@ class TestRejectionSampler(TestCase):
         pd.DataFrame({**{key: ['', '', ''] for key in sampler.sim_item.generative_model.OUTPUT_COLUMNS},
                       **{'sequence_aa': ['AA', 'DFG', 'DGEAFT']}}) \
             .to_csv(path / 'tmp.tsv', sep='\t', index=False, header=True)
-        background_seqs = bnp.open(path / 'tmp.tsv', mode='full', buffer_type=bnp.delimited_buffers.get_bufferclass_for_datatype(GenModelAsTSV),
-                                   has_header=True)
+        background_seqs = bnp.open(path / 'tmp.tsv',
+                                   buffer_type=bnp.delimited_buffers.get_bufferclass_for_datatype(GenModelAsTSV, has_header=True)).read()
         sampler.seqs_with_signal_path = {'s1': path / 'with_sig.tsv'}
         count = sampler._update_seqs_with_signal({'s1': 5}, signal_matrix, background_seqs, signal_positions)
 
@@ -137,15 +137,14 @@ class TestRejectionSampler(TestCase):
         sampler = RejectionSampler(LIgOSimulationItem([signal1, signal2], repertoire_implanting_rate=0.5, number_of_examples=5,
                                                       number_of_receptors_in_repertoire=5,
                                                       generative_model=OLGA(default_model_name="humanTRB", chain=Chain.BETA, model_path=None)),
-                                   SequenceType.AMINO_ACID, [signal1, signal2], 40, 100)
+                                   sequence_type=SequenceType.AMINO_ACID, all_signals=[signal1, signal2], sequence_batch_size=40, max_iterations=100)
 
         sequences = pd.DataFrame({'sequence_aa': ['AAACCC', 'EEAAF'], 'sequence': ['A', 'CCA'], 'v_call': ['V1-1', 'V2'], 'j_call': ['J2', 'J3-2'],
                                   'region_type': ['JUNCTION', 'JUNCTION'], 'frame_type': ['in', 'in']})
         sequences.to_csv(path / 'sequences.tsv', sep='\t', index=False)
 
-        sequences = bnp.open(path / 'sequences.tsv', mode='full',
-                             buffer_type=bnp.delimited_buffers.get_bufferclass_for_datatype(GenModelAsTSV, delimiter="\t"),
-                             has_header=True)
+        sequences = bnp.open(path / 'sequences.tsv',
+                             buffer_type=bnp.delimited_buffers.get_bufferclass_for_datatype(GenModelAsTSV, delimiter="\t", has_header=True)).read()
 
         signal_matrix, signal_positions = sampler.get_signal_matrix(sequences)
 

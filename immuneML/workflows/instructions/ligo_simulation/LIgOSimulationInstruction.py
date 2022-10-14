@@ -5,6 +5,7 @@ from multiprocessing import Pool
 from pathlib import Path
 from typing import List
 
+import dill
 import pandas as pd
 
 from immuneML.IO.dataset_export.DataExporter import DataExporter
@@ -89,10 +90,9 @@ class LIgOSimulationInstruction(Instruction):
         summary_path = self.state.result_path / "summary.csv"
         chunk_size = math.ceil(len(self.state.simulation.sim_items) / self.state.number_of_processes)
 
+        pickled = [(dill.dumps(item), summary_path) for item in self.state.simulation.sim_items]
         with Pool(processes=self.state.number_of_processes) as pool:
-            examples = list(chain.from_iterable(
-                pool.starmap(self._create_examples, [(item, summary_path) for item in self.state.simulation.sim_items],
-                             chunksize=chunk_size)))
+            examples = list(chain.from_iterable([dill.loads(el) for el in pool.starmap(self._create_examples, pickled, chunksize=chunk_size)]))
 
         labels = {signal.id: [True, False] for signal in self.state.signals}
 
@@ -105,12 +105,16 @@ class LIgOSimulationInstruction(Instruction):
             self.state.dataset = SequenceDataset.build_from_objects(examples, path=self.state.result_path, name='simulated_dataset',
                                                                     file_size=SequenceDataset.DEFAULT_FILE_SIZE, labels=labels)
 
-    def _create_examples(self, item: LIgOSimulationItem, summary_path: Path) -> list:
+    def _create_examples(self, item_pickled, summary_path) -> list:
+
+        item = dill.loads(item_pickled)
 
         if self.state.simulation.is_repertoire:
-            return self._create_repertoires(item, summary_path)
+            res = dill.dumps(self._create_repertoires(item, summary_path))
         else:
-            return self._create_receptors(item, summary_path)
+            res = dill.dumps(self._create_receptors(item, summary_path))
+
+        return res
 
     def _create_receptors(self, item: LIgOSimulationItem, summary_path: Path):
         if self.state.simulation.paired:

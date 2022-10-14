@@ -97,17 +97,26 @@ class SimulationParser:
     @staticmethod
     def _parse_implanting(simulation_item: dict, key: str, symbol_table: SymbolTable) -> Simulation:
         location = SimulationParser.__name__
-        valid_simulation_item_keys = ["dataset_implanting_rate", "repertoire_implanting_rate", "signals", "is_noise", "type"]
 
-        ParameterValidator.assert_keys(list(simulation_item.keys()), valid_simulation_item_keys, location, key, exclusive=False)
-        ParameterValidator.assert_keys(simulation_item["signals"], symbol_table.get_keys_by_type(SymbolType.SIGNAL), location, key, False)
+        ParameterValidator.assert_keys(simulation_item.keys(), ['type', 'sim_items'], location, 'simulation')
 
-        implanting_params = copy.deepcopy(simulation_item)
-        implanting_params["signals"] = [symbol_table.get(signal) for signal in simulation_item["signals"]]
-        implanting_params["name"] = key
-        del implanting_params['type']
+        sim_items = []
 
-        return Simulation(sim_items=[Implanting(**implanting_params)])
+        for sim_item_name, sim_item in simulation_item['sim_items'].items():
+            valid_simulation_item_keys = ["dataset_implanting_rate", "repertoire_implanting_rate", "signals", "is_noise", "type"]
+
+            ParameterValidator.assert_keys(list(sim_item.keys()), valid_simulation_item_keys, location, key, exclusive=False)
+            ParameterValidator.assert_keys(sim_item["signals"], symbol_table.get_keys_by_type(SymbolType.SIGNAL), location, key, False)
+
+            ParameterValidator.assert_type_and_value(sim_item['type'], str, location, f'{sim_item_name}/type', exact_value='Implanting')
+
+            implanting_params = copy.deepcopy(sim_item)
+            implanting_params["signals"] = [symbol_table.get(signal) for signal in sim_item["signals"]]
+            implanting_params["name"] = sim_item_name
+            del implanting_params['type']
+            sim_items.append(Implanting(**implanting_params))
+
+        return Simulation(sim_items=sim_items)
 
     @staticmethod
     def _parse_ligo_simulation(simulation: dict, key: str, symbol_table: SymbolTable) -> Simulation:
@@ -148,12 +157,12 @@ class SimulationParser:
         ParameterValidator.assert_keys(simulation_item["signals"], symbol_table.get_keys_by_type(SymbolType.SIGNAL), location, key, False)
         ParameterValidator.assert_type_and_value(simulation_item['is_noise'], bool, location, 'is_noise')
 
-        for key in ['number_of_examples', 'seed']:
-            ParameterValidator.assert_type_and_value(simulation_item[key], int, location, key, min_inclusive=1)
+        for k in ['number_of_examples', 'seed']:
+            ParameterValidator.assert_type_and_value(simulation_item[k], int, location, k, min_inclusive=1)
 
-        for key, val_type in zip(['repertoire_implanting_rate', 'number_of_receptors_in_repertoire'], [float, int]):
-            if simulation_item[key]:
-                ParameterValidator.assert_type_and_value(simulation_item[key], val_type, location, key)
+        for k, val_type in zip(['repertoire_implanting_rate', 'number_of_receptors_in_repertoire'], [float, int]):
+            if simulation_item[k]:
+                ParameterValidator.assert_type_and_value(simulation_item[k], val_type, location, k)
 
         gen_model = SimulationParser._parse_generative_model(simulation_item, location)
 
