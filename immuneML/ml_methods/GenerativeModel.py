@@ -11,6 +11,7 @@ from sklearn.metrics import SCORERS
 from sklearn.model_selection import RandomizedSearchCV
 from sklearn.utils.validation import check_is_fitted
 
+from immuneML.data_model.dataset.Dataset import Dataset
 from immuneML.data_model.encoded_data.EncodedData import EncodedData
 from immuneML.environment.Label import Label
 from immuneML.ml_methods.MLMethod import MLMethod
@@ -40,11 +41,11 @@ class GenerativeModel(MLMethod):
         self.class_mapping = None
         self.label = None
 
-    def fit(self, encoded_data: EncodedData, label: Label, cores_for_training: int = 2):
+    def fit(self, encoded_data: EncodedData, label: Label, cores_for_training: int = 2, dataset: Dataset = None):
 
         #mapped_y = Util.map_to_new_class_values(encoded_data.labels[self.label.name], self.class_mapping)
 
-        self.model = self._fit(encoded_data.examples, label, cores_for_training)
+        self.model = self._fit(encoded_data.examples, label, cores_for_training, dataset)
 
     def predict(self, encoded_data: EncodedData, label: Label):
         #self.check_is_fitted(label.name)

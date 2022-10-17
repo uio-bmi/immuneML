@@ -44,7 +44,7 @@ class GenerativeModelInstruction(Instruction):
     def run_unit(self, unit: GenerativeModelUnit, result_path: Path) -> ReportResult:
         encoded_dataset = self.encode(unit, result_path / "encoded_dataset")
         unit.report.dataset = encoded_dataset
-        unit.genModel.fit(encoded_dataset.encoded_data, unit.label_config.get_label_objects()[0])
+        unit.genModel.fit(encoded_dataset.encoded_data, unit.label_config.get_label_objects()[0], dataset=unit.dataset)
         unit.report.result_path = result_path / "report"
         report_result = unit.report.generate_report()
         return report_result
