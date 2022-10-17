@@ -59,7 +59,12 @@ class ImmuneMLApp:
 
 def run_immuneML(namespace: argparse.Namespace):
     if os.path.isdir(namespace.result_path) and len(os.listdir(namespace.result_path)) != 0:
-        raise ValueError(f"Directory {namespace.result_path} already exists. Please specify a new output directory for the analysis.")
+        delete = input(f"Directory {namespace.result_path} already exists. Would you like to replace it?")
+        if delete.lower() == "yes" or delete.lower() == "y":
+            shutil.rmtree(namespace.result_path, ignore_errors=False)
+            print(f"Directory {namespace.result_path} was deleted successfully.")
+        else:
+            raise ValueError(f"Directory {namespace.result_path} already exists. Please specify a new output directory for the analysis.")
     PathBuilder.build(namespace.result_path)
 
     logging.basicConfig(filename=Path(namespace.result_path) / "log.txt", level=logging.INFO, format='%(asctime)s %(levelname)s: %(message)s')

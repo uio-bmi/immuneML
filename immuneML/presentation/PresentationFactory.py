@@ -11,6 +11,8 @@ from immuneML.workflows.instructions.dataset_generation.DatasetExportState impor
 from immuneML.workflows.instructions.exploratory_analysis.ExploratoryAnalysisState import ExploratoryAnalysisState
 from immuneML.workflows.instructions.ml_model_application.MLApplicationState import MLApplicationState
 from immuneML.workflows.instructions.subsampling.SubsamplingState import SubsamplingState
+from immuneML.workflows.instructions.generative_model.GenerativeModelState import GenerativeModelState
+from immuneML.presentation.html.GenerativeModelHTMLBuilder import GenerativeModelHTMLBuilder
 
 
 class PresentationFactory:
@@ -29,6 +31,8 @@ class PresentationFactory:
             return MLApplicationHTMLBuilder
         elif isinstance(state, SubsamplingState) and presentation_format == PresentationFormat.HTML:
             return SubsamplingHTMLBuilder
+        elif isinstance(state, GenerativeModelState) and presentation_format == PresentationFormat.HTML:
+            return GenerativeModelHTMLBuilder
         else:
             raise ValueError(f"PresentationFactory: state and format combination ({type(state).__name__}, {presentation_format.name}) "
                              f"is not supported.")
