@@ -21,8 +21,21 @@ class PositionalMotifFrequencies(EncodingReport):
     investigating motif continuity which displays a bar plot of the gap sizes between the amino acids in the motifs in
     the given dataset. Note that a distance of 1 means that the amino acids are continuous (next to each other).
 
-    # todo write args, YAML specification and other information that might be needed
+    YAML specification example:
 
+    .. indent with spaces
+    .. code-block:: yaml
+
+      my_expl_analysis_instruction:
+          type: ExploratoryAnalysis
+          analyses:
+              my_second_analysis:
+                  dataset: d1
+                  encoding: e1
+                  report: r2
+                  labels:
+                      - is_binding
+          number_of_processes: 4
     """
 
     @classmethod
@@ -206,6 +219,3 @@ class PositionalMotifFrequencies(EncodingReport):
             )
 
         return gap_size_tables
-
-
-# todo add tests under ImmuneML/test/reports/encoding_reports/test_<name_of_class>.py, see other tests in that folder as examples
