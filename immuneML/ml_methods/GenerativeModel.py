@@ -42,9 +42,9 @@ class GenerativeModel(MLMethod):
 
     def fit(self, encoded_data: EncodedData, label: Label, cores_for_training: int = 2):
 
-        mapped_y = Util.map_to_new_class_values(encoded_data.labels[self.label.name], self.class_mapping)
+        #mapped_y = Util.map_to_new_class_values(encoded_data.labels[self.label.name], self.class_mapping)
 
-        self.model = self._fit(encoded_data.examples, mapped_y, cores_for_training)
+        self.model = self._fit(encoded_data.examples, label, cores_for_training)
 
     def predict(self, encoded_data: EncodedData, label: Label):
         #self.check_is_fitted(label.name)
@@ -146,7 +146,6 @@ class GenerativeModel(MLMethod):
         return FilenameHandler.get_filename(self.__class__.__name__, "")
 
     def load(self, path: Path, details_path: Path = None):
-        print("Jeg fant en ting\n\n\n\n")
         name = f"{self._get_model_filename()}.pickle"
         file_path = path / name
         if file_path.is_file():

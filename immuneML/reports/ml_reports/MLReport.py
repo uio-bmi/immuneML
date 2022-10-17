@@ -53,7 +53,6 @@ class MLReport(Report):
         self.method = method
         self.result_path = result_path
         self.name = name
-        self.hp_setting = hp_setting
         self.label = label
 
     @staticmethod

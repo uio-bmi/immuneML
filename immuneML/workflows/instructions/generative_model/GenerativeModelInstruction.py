@@ -11,8 +11,8 @@ from immuneML.workflows.instructions.generative_model.GenerativeModelUnit import
 from immuneML.workflows.steps.DataEncoder import DataEncoder
 from immuneML.workflows.steps.DataEncoderParams import DataEncoderParams
 
-class GenerativeModelInstruction(Instruction):
 
+class GenerativeModelInstruction(Instruction):
 
     """
     Allows for the generation of data based on existing data
@@ -25,12 +25,14 @@ class GenerativeModelInstruction(Instruction):
         assert all(isinstance(unit, GenerativeModelUnit) for unit in generative_model_units.values()), \
             "GenerativeModelInstruction: not all elements passed to init method are instances of GenerativeModelUnit."
         self.state = GenerativeModelState(generative_model_units, name=name)
+
         self.name = name
 
     def run(self, result_path: Path):
         name = self.name if self.name is not None else "generative_model"
         self.state.result_path = result_path / name
         for index, (key, unit) in enumerate(self.state.generative_model_units.items()):
+            print(unit)
             print("{}: Started analysis {} ({}/{}).".format(datetime.datetime.now(), key, index+1, len(self.state.generative_model_units)), flush=True)
             path = self.state.result_path / f"analysis_{key}"
             PathBuilder.build(path)
@@ -40,22 +42,12 @@ class GenerativeModelInstruction(Instruction):
         return self.state
 
     def run_unit(self, unit: GenerativeModelUnit, result_path: Path) -> ReportResult:
-        unit.dataset = self.preprocess_dataset(unit, result_path / "preprocessed_dataset")
         encoded_dataset = self.encode(unit, result_path / "encoded_dataset")
         unit.report.dataset = encoded_dataset
+        unit.genModel.fit(encoded_dataset.encoded_data, unit.label_config.get_label_objects()[0])
         unit.report.result_path = result_path / "report"
-        unit.report.number_of_processes = unit.number_of_processes
         report_result = unit.report.generate_report()
         return report_result
-
-    def preprocess_dataset(self, unit: GenerativeModelUnit, result_path: Path) -> Dataset:
-        if unit.preprocessing_sequence is not None and len(unit.preprocessing_sequence) > 0:
-            dataset = unit.dataset
-            for preprocessing in unit.preprocessing_sequence:
-                dataset = preprocessing.process_dataset(dataset, result_path)
-        else:
-            dataset = unit.dataset
-        return dataset
 
     def encode(self, unit: GenerativeModelUnit, result_path: Path) -> Dataset:
         if unit.encoder is not None:
@@ -63,7 +55,6 @@ class GenerativeModelInstruction(Instruction):
                                                                 encoder_params=EncoderParams(result_path=result_path,
                                                                                              label_config=unit.label_config,
                                                                                              filename="encoded_dataset.pkl",
-                                                                                             pool_size=unit.number_of_processes,
                                                                                              learn_model=True,
                                                                                              encode_labels=unit.label_config is not None),
                                                                 ))

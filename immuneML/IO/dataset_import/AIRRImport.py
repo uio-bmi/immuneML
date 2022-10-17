@@ -154,7 +154,6 @@ class AIRRImport(DataImport):
 
     @staticmethod
     def alternative_load_func(filename, params):
-        print(filename)
         df = airr.load_rearrangement(filename)
         ImportHelper.standardize_none_values(df)
         df.dropna(axis="columns", how="all", inplace=True)

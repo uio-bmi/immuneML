@@ -17,13 +17,19 @@ class PWM(GenerativeModel):
 
 
     def _get_ml_model(self, cores_for_training: int = 2, X=None):
-        self._motif = motifs.create(X)
 
+        print(X.get_encoded_repertoire(X))
+
+        self.model = motifs.create(X, alphabet="GPAVLIMCFYWHKRQNEDST")
+
+        print(self.model)
         params = self._parameters
 
+        return self.model
 
     def _fit(self, X, y, cores_for_training: int = 1):
-        print(self._motif)
+        self.model = self._get_ml_model(X=X)
+        print("Her er motif", self.model)
 
     def get_params(self):
         return self.model.get_params(deep=True)

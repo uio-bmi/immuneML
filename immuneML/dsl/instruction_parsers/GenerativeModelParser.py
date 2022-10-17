@@ -1,11 +1,19 @@
 import copy
+import os
+import shutil
+from typing import Tuple
 from pathlib import Path
+
+from immuneML.IO.ml_method.MLImport import MLImport
+from immuneML.environment.Label import Label
+from immuneML.hyperparameter_optimization.HPSetting import HPSetting
+from immuneML.util.PathBuilder import PathBuilder
 
 from immuneML.dsl.instruction_parsers.LabelHelper import LabelHelper
 from immuneML.dsl.symbol_table.SymbolTable import SymbolTable
 from immuneML.environment.LabelConfiguration import LabelConfiguration
 from immuneML.util.ParameterValidator import ParameterValidator
-from immuneML.workflows.instructions.GenerativeModelInstruction import GenerativeModelInstruction
+from immuneML.workflows.instructions.generative_model.GenerativeModelInstruction import GenerativeModelInstruction
 from immuneML.workflows.instructions.generative_model.GenerativeModelUnit import GenerativeModelUnit
 
 
@@ -35,11 +43,10 @@ class GenerativeModelParser:
         gen_model_units = {}
 
         ParameterValidator.assert_keys(instruction, ["generators", "type"], "GenerativeModelParser", "GenerativeModel")
-        #ParameterValidator.assert_type_and_value(instruction["number_of_processes"], int, GenerativeModelInstruction.__name__, "number_of_processes")
 
         for generator_key, generator in instruction["generators"].items():
-
             params = self._prepare_params(generator, symbol_table, f"{key}/{generator_key}")
+
             #params["number_of_processes"] = instruction["number_of_processes"]
             gen_model_units[generator_key] = GenerativeModelUnit(**params)
 
@@ -47,16 +54,17 @@ class GenerativeModelParser:
         return process
 
     def _prepare_params(self, generator: dict, symbol_table: SymbolTable, yaml_location: str) -> dict:
-        valid_keys = ["dataset", "report", "preprocessing_sequence", "labels", "encoding", "number_of_processes"]
+        valid_keys = ["dataset", "report", "ml_method", "labels", "encoding", "number_of_processes"]
         ParameterValidator.assert_keys(list(generator.keys()), valid_keys, "GenerativeModelParser", "generator",
                                        False)
 
         params = {"dataset": symbol_table.get(generator["dataset"]),
-                  "report": copy.deepcopy(symbol_table.get(generator["report"]))}
+                  "report": copy.deepcopy(symbol_table.get(generator["report"])),
+                  "genModel": symbol_table.get(generator["ml_method"])}
 
         optional_params = self._prepare_optional_params(generator, symbol_table, yaml_location)
         params = {**params, **optional_params}
-
+        return params
 
     def _prepare_optional_params(self, generator: dict, symbol_table: SymbolTable, yaml_location: str) -> dict:
 
@@ -69,7 +77,7 @@ class GenerativeModelParser:
         if "labels" in generator:
             params["label_config"] = LabelHelper.create_label_config(generator["labels"], dataset, GenerativeModelParser.__name__, yaml_location)
         else:
-            params["label_config"] = LabelConfiguration()
+            params["label_config"] = LabelHelper.create_label_config([x for x in dataset.labels if isinstance(dataset.labels[x], list)], dataset, GenerativeModelParser.__name__, yaml_location)
 
         if "preprocessing_sequence" in generator:
             params["preprocessing_sequence"] = symbol_table.get(generator["preprocessing_sequence"])
