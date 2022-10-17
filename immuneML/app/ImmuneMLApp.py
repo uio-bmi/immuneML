@@ -59,7 +59,7 @@ class ImmuneMLApp:
 
 def run_immuneML(namespace: argparse.Namespace):
     if os.path.isdir(namespace.result_path) and len(os.listdir(namespace.result_path)) != 0:
-        delete = input(f"Directory {namespace.result_path} already exists. Would you like to replace it?")
+        delete = input(f"Directory {namespace.result_path} already exists. Would you like to replace it?\n")
         if delete.lower() == "yes" or delete.lower() == "y":
             shutil.rmtree(namespace.result_path, ignore_errors=False)
             print(f"Directory {namespace.result_path} was deleted successfully.")
