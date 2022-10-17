@@ -1,6 +1,5 @@
 from dataclasses import dataclass
 from pathlib import Path
-import numpy
 
 from immuneML.data_model.dataset.Dataset import Dataset
 from immuneML.encodings.DatasetEncoder import DatasetEncoder
@@ -13,11 +12,9 @@ from immuneML.ml_methods.GenerativeModel import GenerativeModel
 @dataclass
 class GenerativeModelUnit:
 
+    dataset: Dataset
     report: Report
     genModel: GenerativeModel
-    amount: int = 10
-    dataset: Dataset = None
-    generated_sequences: list = None
     encoder: DatasetEncoder = None
     label_config: LabelConfiguration = None
     report_result: ReportResult = None

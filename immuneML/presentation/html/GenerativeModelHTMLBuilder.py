@@ -11,7 +11,7 @@ from immuneML.workflows.instructions.generative_model.GenerativeModelState impor
 
 class GenerativeModelHTMLBuilder:
     """
-    A class that will make a HTML file(s) out of ExploratoryAnalysisState object to show what generator took place in
+    A class that will make a HTML file(s) out of GenerativeModelState object to show what analysis took place in
     the ExploratoryAnalysisInstruction.
     """
 
@@ -22,15 +22,15 @@ class GenerativeModelHTMLBuilder:
         """
         Function that builds the HTML files based on the ExploratoryAnalysis state.
         Arguments:
-            state: ExploratoryAnalysisState object with details and results of the instruction
+            state: GenerativeModelState object with details and results of the instruction
         Returns:
              path to the main HTML file (which is located under state.result_path)
         """
         base_path = PathBuilder.build(state.result_path / "../HTML_output/")
         html_map = GenerativeModelHTMLBuilder.make_html_map(state, base_path)
-        result_file = base_path / f"GenerativeModel_{state.name}.html"
+        result_file = base_path / f"ExploratoryAnalysis_{state.name}.html"
 
-        TemplateParser.parse(template_path=EnvironmentSettings.html_templates_path / "GenerativeModel.html",
+        TemplateParser.parse(template_path=EnvironmentSettings.html_templates_path / "ExploratoryAnalysis.html",
                              template_map=html_map, result_path=result_file)
 
         return result_file
@@ -43,25 +43,20 @@ class GenerativeModelHTMLBuilder:
             'immuneML_version': MLUtil.get_immuneML_version(),
             "analyses": [{
                 "name": name,
-                "generated_sequences": [{"seq_nr": ind, "seq": seq} for ind, seq in enumerate(generator.generated_sequences)],
-                "dataset_information": {
-                    "dataset_name": generator.dataset.name if generator.dataset.name is not None else generator.dataset.identifier,
-                    "dataset_type": StringHelper.camel_case_to_word_string(
-                        type(generator.dataset).__name__),
-                    "example_count": generator.dataset.get_example_count(),
-                    "dataset_size": f"{generator.dataset.get_example_count()} {type(generator.dataset).__name__.replace('Dataset', 's').lower()}",
-                } if generator.dataset is not None else None,
-                "encoding_key": generator.encoder.name if generator.encoder is not None else None,
-                "encoding_name": StringHelper.camel_case_to_word_string(type(generator.encoder).__name__) if generator.encoder is not None else None,
-                "encoding_params": [{"param_name": key, "param_value": str(value)} for key, value in vars(generator.encoder).items()] if generator.encoder is not None else None,
-                "show_encoding": generator.encoder is not None,
-                "report": Util.to_dict_recursive(Util.update_report_paths(generator.report_result, base_path), base_path)
-            } for name, generator in state.generative_model_units.items()]
+                "dataset_name": analysis.dataset.name if analysis.dataset.name is not None else analysis.dataset.identifier,
+                "dataset_type": StringHelper.camel_case_to_word_string(type(analysis.dataset).__name__),
+                "example_count": analysis.dataset.get_example_count(),
+                "dataset_size": f"{analysis.dataset.get_example_count()} {type(analysis.dataset).__name__.replace('Dataset', 's').lower()}",
+                "show_labels": analysis.label_config is not None and len(analysis.label_config.get_labels_by_name()) > 0,
+                "labels": [{"name": label.name, "values": str(label.values)[1:-1]}
+                           for label in analysis.label_config.get_label_objects()] if analysis.label_config else None,
+                "encoding_key": analysis.encoder.name if analysis.encoder is not None else None,
+                "encoding_name": StringHelper.camel_case_to_word_string(type(analysis.encoder).__name__) if analysis.encoder is not None
+                else None,
+                "encoding_params": [{"param_name": key, "param_value": str(value)} for key, value in vars(analysis.encoder).items()] if analysis.encoder is not None else None,
+                "show_encoding": analysis.encoder is not None,
+                "report": Util.to_dict_recursive(Util.update_report_paths(analysis.report_result, base_path), base_path)
+            } for name, analysis in state.generative_model_units.items()]
         }
-
-        for generator in html_map["analyses"]:
-            generator["show_tables"] = len(generator["report"]["output_tables"]) > 0 if "output_tables" in generator["report"] else False
-            generator["show_text"] = len(generator["report"]["output_text"]) > 0 if "output_text" in generator["report"] else False
-            generator["show_info"] = generator["report"]["info"] is not None and len(generator["report"]["info"]) > 0 if "info" in generator["report"] else False
 
         return html_map

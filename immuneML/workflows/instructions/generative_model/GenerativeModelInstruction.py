@@ -32,6 +32,7 @@ class GenerativeModelInstruction(Instruction):
         name = self.name if self.name is not None else "generative_model"
         self.state.result_path = result_path / name
         for index, (key, unit) in enumerate(self.state.generative_model_units.items()):
+            print(unit)
             print("{}: Started analysis {} ({}/{}).".format(datetime.datetime.now(), key, index+1, len(self.state.generative_model_units)), flush=True)
             path = self.state.result_path / f"analysis_{key}"
             PathBuilder.build(path)
@@ -43,12 +44,8 @@ class GenerativeModelInstruction(Instruction):
     def run_unit(self, unit: GenerativeModelUnit, result_path: Path) -> ReportResult:
         encoded_dataset = self.encode(unit, result_path / "encoded_dataset")
         unit.report.dataset = encoded_dataset
-        unit.genModel.fit(dataset=unit.dataset)
-        unit.genModel.store(result_path)
-        sequences = unit.genModel.generate(amount=unit.amount)
-        unit.report.method = unit.genModel
+        unit.genModel.fit(encoded_dataset.encoded_data, unit.label_config.get_label_objects()[0])
         unit.report.result_path = result_path / "report"
-        unit.generated_sequences = sequences
         report_result = unit.report.generate_report()
         return report_result
 

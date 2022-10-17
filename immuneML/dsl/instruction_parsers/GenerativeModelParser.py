@@ -27,7 +27,7 @@ class GenerativeModelParser:
     .. code-block:: yaml
 
         instruction_name:
-            type: GenerativeModel
+            type: LSTM
             generators:
                 generator_1:
                     encoding: e1
@@ -47,13 +47,14 @@ class GenerativeModelParser:
         for generator_key, generator in instruction["generators"].items():
             params = self._prepare_params(generator, symbol_table, f"{key}/{generator_key}")
 
+            #params["number_of_processes"] = instruction["number_of_processes"]
             gen_model_units[generator_key] = GenerativeModelUnit(**params)
 
         process = GenerativeModelInstruction(generative_model_units=gen_model_units, name=key)
         return process
 
     def _prepare_params(self, generator: dict, symbol_table: SymbolTable, yaml_location: str) -> dict:
-        valid_keys = ["dataset", "report", "ml_method", "labels", "encoding", "number_of_processes", "amount"]
+        valid_keys = ["dataset", "report", "ml_method", "labels", "encoding", "number_of_processes"]
         ParameterValidator.assert_keys(list(generator.keys()), valid_keys, "GenerativeModelParser", "generator",
                                        False)
 
@@ -68,8 +69,18 @@ class GenerativeModelParser:
     def _prepare_optional_params(self, generator: dict, symbol_table: SymbolTable, yaml_location: str) -> dict:
 
         params = {}
-        if "amount" in generator:
-            params["amount"] = generator["amount"]
+        dataset = symbol_table.get(generator["dataset"])
+
+        if "encoding" in generator:
+            params["encoder"] = symbol_table.get(generator["encoding"]).build_object(dataset, **symbol_table.get_config(generator["encoding"])["encoder_params"])
+
+        if "labels" in generator:
+            params["label_config"] = LabelHelper.create_label_config(generator["labels"], dataset, GenerativeModelParser.__name__, yaml_location)
+        else:
+            params["label_config"] = LabelHelper.create_label_config([x for x in dataset.labels if isinstance(dataset.labels[x], list)], dataset, GenerativeModelParser.__name__, yaml_location)
+
+        if "preprocessing_sequence" in generator:
+            params["preprocessing_sequence"] = symbol_table.get(generator["preprocessing_sequence"])
 
         return params
 
