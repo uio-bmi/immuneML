@@ -1,8 +1,9 @@
+import numpy as np
 
-from Bio import motifs
+from pathlib import Path
 from immuneML.ml_methods.GenerativeModel import GenerativeModel
 from scripts.specification_util import update_docs_per_mapping
-
+from immuneML.util.PathBuilder import PathBuilder
 
 class PWM(GenerativeModel):
 
@@ -18,9 +19,21 @@ class PWM(GenerativeModel):
 
     def _get_ml_model(self, cores_for_training: int = 2, X=None, dataset=None):
 
-        instances = [sequence.get_sequence() for repertoire in dataset.get_data() for sequence in repertoire.sequences]
+        instances = np.array([sequence.get_sequence() for repertoire in dataset.get_data() for sequence in repertoire.sequences])
 
-        self.model = motifs.create(instances, alphabet="GPAVLIMCFYWHKRQNEDST")
+        print(instances)
+
+        alphabet = ""
+
+        for instance in instances:
+            alphabet = "".join(set(instance + alphabet))
+            if len(alphabet) == 20:
+                break
+
+        print(alphabet)
+
+        matrix = np.zeros(shape=(len(max(instances)), len(alphabet)))
+        print(matrix)
 
         params = self._parameters
 
@@ -41,6 +54,30 @@ class PWM(GenerativeModel):
 
     def get_compatible_encoders(self):
         raise Exception("get_compatible_encoders has not been implemented")
+
+    def store(self, path: Path, feature_names=None, details_path: Path = None):
+        PathBuilder.build(path)
+        file_path = path / f"{self._get_model_filename()}.pickle"
+        with file_path.open("wb") as file:
+            dill.dump(self.model, file)
+
+        if details_path is None:
+            params_path = path / f"{self._get_model_filename()}.yaml"
+        else:
+            params_path = details_path
+
+        with params_path.open("w") as file:
+            desc = {
+                **(self.get_params()),
+                "feature_names": feature_names,
+                "classes": self.model.classes_.tolist(),
+                "class_mapping": self.class_mapping,
+            }
+
+            if self.label is not None:
+                desc["label"] = vars(self.label)
+
+            yaml.dump(desc, file)
 
     @staticmethod
     def get_documentation():
