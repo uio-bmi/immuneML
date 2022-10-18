@@ -45,7 +45,7 @@ class GenerativeModel(MLMethod):
 
         #mapped_y = Util.map_to_new_class_values(encoded_data.labels[self.label.name], self.class_mapping)
 
-        self.model = self._fit(encoded_data.examples, label, cores_for_training, dataset)
+        self.model = self._fit(encoded_data, label, cores_for_training, dataset)
 
     def predict(self, encoded_data: EncodedData, label: Label):
         #self.check_is_fitted(label.name)
