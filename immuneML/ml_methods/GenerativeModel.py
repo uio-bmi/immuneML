@@ -11,6 +11,7 @@ from sklearn.metrics import SCORERS
 from sklearn.model_selection import RandomizedSearchCV
 from sklearn.utils.validation import check_is_fitted
 
+from immuneML.data_model.dataset.Dataset import Dataset
 from immuneML.data_model.encoded_data.EncodedData import EncodedData
 from immuneML.environment.Label import Label
 from immuneML.ml_methods.MLMethod import MLMethod
@@ -18,60 +19,13 @@ from immuneML.ml_methods.util.Util import Util
 from immuneML.ml_metrics.Metric import Metric
 from immuneML.util.FilenameHandler import FilenameHandler
 from immuneML.util.PathBuilder import PathBuilder
+import tensorflow
 
 
-class SklearnMethod(MLMethod):
-    """
-
-    Base class for ML methods imported from scikit-learn. The classes inheriting SklearnMethod acting as wrappers around imported
-    ML methods from scikit-learn have to implement:
-        - the __init__() method,
-        - get_params(label) and
-        - _get_ml_model()
-    Other methods can also be overwritten if needed.
-    The arguments and specification described bellow applied for all classes inheriting SklearnMethod.
-
-    Arguments:
-
-        parameters: a dictionary of parameters that will be directly passed to scikit-learn's class upon calling __init__()
-            method; for detailed list see scikit-learn's documentation of the specific class inheriting SklearnMethod
-
-        parameter_grid: a dictionary of parameters which all have to be valid arguments for scikit-learn's corresponding class' __init__() method
-            (same as parameters), but unlike parameters argument can contain list of values instead of one value; if this is specified and
-            "model_selection_cv" is True (in the specification) or just if fit_by_cross_validation() is called, a grid search will be performed over
-            these parameters and the optimal model will be kept
-
-    YAML specification:
-
-        ml_methods:
-            log_reg:
-                LogisticRegression: # name of the class inheriting SklearnMethod
-                    # sklearn parameters (same names as in original sklearn class)
-                    max_iter: 1000 # specific parameter value
-                    penalty: l1
-                    # Additional parameter that determines whether to print convergence warnings
-                    show_warnings: True
-                # if any of the parameters under LogisticRegression is a list and model_selection_cv is True,
-                # a grid search will be done over the given parameters, using the number of folds specified in model_selection_n_folds,
-                # and the optimal model will be selected
-                model_selection_cv: True
-                model_selection_n_folds: 5
-            svm_with_cv:
-                SVM: # name of another class inheriting SklearnMethod
-                    # sklearn parameters (same names as in original sklearn class)
-                    alpha: 10
-                    # Additional parameter that determines whether to print convergence warnings
-                    show_warnings: True
-                # no grid search will be done
-                model_selection_cv: False
-
-    """
-
-    FIT_CV = "fit_CV"
-    FIT = "fit"
+class GenerativeModel(MLMethod):
 
     def __init__(self, parameter_grid: dict = None, parameters: dict = None):
-        super(SklearnMethod, self).__init__()
+        super(GenerativeModel, self).__init__()
         self.model = None
 
         if parameter_grid is not None and "show_warnings" in parameter_grid:
@@ -87,18 +41,14 @@ class SklearnMethod(MLMethod):
         self.class_mapping = None
         self.label = None
 
-    def fit(self, encoded_data: EncodedData, label: Label, cores_for_training: int = 2):
+    def fit(self, encoded_data: EncodedData, label: Label, cores_for_training: int = 2, dataset: Dataset = None):
 
-        self.label = label
-        self.class_mapping = Util.make_class_mapping(encoded_data.labels[self.label.name])
-        self.feature_names = encoded_data.feature_names
+        #mapped_y = Util.map_to_new_class_values(encoded_data.labels[self.label.name], self.class_mapping)
 
-        mapped_y = Util.map_to_new_class_values(encoded_data.labels[self.label.name], self.class_mapping)
-
-        self.model = self._fit(encoded_data.examples, mapped_y, cores_for_training)
+        self.model = self._fit(encoded_data, label, cores_for_training, dataset)
 
     def predict(self, encoded_data: EncodedData, label: Label):
-        self.check_is_fitted(label.name)
+        #self.check_is_fitted(label.name)
         predictions = self.model.predict(encoded_data.examples)
         return {label.name: Util.map_to_old_class_values(np.array(predictions), self.class_mapping)}
 
@@ -109,12 +59,16 @@ class SklearnMethod(MLMethod):
         else:
             return None
 
+    def generate(self, length_of_sequences: int = None, amount=10, path_to_model: Path = None):
+        pass
+
     def _fit(self, X, y, cores_for_training: int = 1):
         if not self.show_warnings:
             warnings.simplefilter("ignore")
             os.environ["PYTHONWARNINGS"] = "ignore"
 
-        self.model = self._get_ml_model(cores_for_training, X)
+        self.model = self._get_ml_model(X)
+
         self.model.fit(X, y)
 
         if not self.show_warnings:
@@ -260,33 +214,39 @@ class SklearnMethod(MLMethod):
     @staticmethod
     def get_usage_documentation(model_name):
         return f"""
-    
-    Scikit-learn models can be trained in two modes: 
-    
-    1. Creating a model using a given set of hyperparameters, and relying on the selection and assessment loop in the
-    TrainMLModel instruction to select the optimal model. 
-    
-    2. Passing a range of different hyperparameters to {model_name}, and using a third layer of nested cross-validation 
-    to find the optimal hyperparameters through grid search. In this case, only the {model_name} model with the optimal 
-    hyperparameter settings is further used in the inner selection loop of the TrainMLModel instruction. 
-    
-    By default, mode 1 is used. In order to use mode 2, model_selection_cv and model_selection_n_folds must be set. 
-    
-    
-    Arguments:
+        
+        TODO
+        
+        Following text does not relate to generative models
 
-        {model_name} (dict): Under this key, hyperparameters can be specified that will be passed to the scikit-learn class.
-        Any scikit-learn hyperparameters can be specified here. In mode 1, a single value must be specified for each of the scikit-learn
-        hyperparameters. In mode 2, it is possible to specify a range of different hyperparameters values in a list. It is also allowed
-        to mix lists and single values in mode 2, in which case the grid search will only be done for the lists, while the
-        single-value hyperparameters will be fixed. 
-        In addition to the scikit-learn hyperparameters, parameter show_warnings (True/False) can be specified here. This determines
-        whether scikit-learn warnings, such as convergence warnings, should be printed. By default show_warnings is True.
-        
-        model_selection_cv (bool): If any of the hyperparameters under {model_name} is a list and model_selection_cv is True, 
-        a grid search will be done over the given hyperparameters, using the number of folds specified in model_selection_n_folds.
-        By default, model_selection_cv is False. 
-        
-        model_selection_n_folds (int): The number of folds that should be used for the cross validation grid search if model_selection_cv is True.
-        
-        """
+        Scikit-learn models can be trained in two modes: 
+
+        1. Creating a model using a given set of hyperparameters, and relying on the selection and assessment loop in the
+        TrainMLModel instruction to select the optimal model. 
+
+        2. Passing a range of different hyperparameters to {model_name}, and using a third layer of nested cross-validation 
+        to find the optimal hyperparameters through grid search. In this case, only the {model_name} model with the optimal 
+        hyperparameter settings is further used in the inner selection loop of the TrainMLModel instruction. 
+
+        By default, mode 1 is used. In order to use mode 2, model_selection_cv and model_selection_n_folds must be set. 
+
+
+        Arguments:
+
+            {model_name} (dict): Under this key, hyperparameters can be specified that will be passed to the scikit-learn class.
+            Any scikit-learn hyperparameters can be specified here. In mode 1, a single value must be specified for each of the scikit-learn
+            hyperparameters. In mode 2, it is possible to specify a range of different hyperparameters values in a list. It is also allowed
+            to mix lists and single values in mode 2, in which case the grid search will only be done for the lists, while the
+            single-value hyperparameters will be fixed. 
+            In addition to the scikit-learn hyperparameters, parameter show_warnings (True/False) can be specified here. This determines
+            whether scikit-learn warnings, such as convergence warnings, should be printed. By default show_warnings is True.
+
+            model_selection_cv (bool): If any of the hyperparameters under {model_name} is a list and model_selection_cv is True, 
+            a grid search will be done over the given hyperparameters, using the number of folds specified in model_selection_n_folds.
+            By default, model_selection_cv is False. 
+
+            model_selection_n_folds (int): The number of folds that should be used for the cross validation grid search if model_selection_cv is True.
+
+            """
+
+
