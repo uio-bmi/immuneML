@@ -44,9 +44,10 @@ class GenerativeModelInstruction(Instruction):
     def run_unit(self, unit: GenerativeModelUnit, result_path: Path) -> ReportResult:
         encoded_dataset = self.encode(unit, result_path / "encoded_dataset")
         unit.report.dataset = encoded_dataset
-        unit.genModel.fit(encoded_dataset.encoded_data, unit.label_config.get_label_objects()[0], dataset=unit.dataset)
+        unit.genModel.fit(encoded_dataset.encoded_data, dataset=unit.dataset)
         unit.genModel.store(result_path)
         matrix, sequences, alphabet = unit.genModel.generate(amount=50)
+        unit.report.method = unit.genModel
         unit.report.result_path = result_path / "report"
         unit.generated_sequences = sequences
         unit.alphabet = alphabet
