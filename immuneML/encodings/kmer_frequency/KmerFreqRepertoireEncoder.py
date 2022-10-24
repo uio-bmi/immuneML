@@ -20,7 +20,6 @@ class KmerFreqRepertoireEncoder(KmerFrequencyEncoder):
                                             encoded_data=encoded_data,
                                             labels=dataset.labels,
                                             metadata_file=dataset.metadata_file)
-        print(encoded_dataset.encoded_data)
         return encoded_dataset
 
     @log
