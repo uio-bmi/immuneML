@@ -30,7 +30,7 @@ class PWM(GenerativeModel):
         for instance in instances:
             for letter in instance:
                 alphabet = "".join(set(letter + alphabet))
-                if len(alphabet) == 20:
+                if len(alphabet) == 20:  # max alphabet reached
                     break
 
         self.alphabet = "".join(sorted(alphabet))
@@ -44,14 +44,13 @@ class PWM(GenerativeModel):
                         matrix[x][y] += 1
                         break
 
-        matrix = matrix / sum(matrix)
+        for ind, row in enumerate(matrix):
+            matrix[ind] = matrix[ind] / sum(matrix[ind])
 
         return matrix
 
     def _fit(self, X, y, cores_for_training: int = 1, dataset=None):
         self.model = self._get_ml_model(cores_for_training, X, dataset)
-
-        print(self.model)
 
         return self.model
 
@@ -59,6 +58,7 @@ class PWM(GenerativeModel):
 
         if self.model is None:
             model_as_array = []
+            print(f'{datetime.datetime.now()}: Fetching model...')
             with open(path_to_model, 'r') as file:
 
                 reader = csv.reader(file)
@@ -67,14 +67,39 @@ class PWM(GenerativeModel):
                     model_as_array.append(row)
             self.model = np.array(model_as_array)
 
-        length_of_sequences = length_of_sequences if length_of_sequences is not None else self.model.shape(0)
+        length_of_sequences = length_of_sequences if length_of_sequences is not None else self.model.shape[0]
         generated_sequences = []
-        for i in range(amount):
+        for _ in range(amount):
             sequence = []
-            for j in range(length_of_sequences):
-                sequence.append(np.random.choice(list(self.alphabet), p=self.model[i]))
+            for i in range(length_of_sequences):
+                sequence.append(np.random.choice(list(self.alphabet), 1, p=self.model[i])[0])
             generated_sequences.append(sequence)
-        print(generated_sequences)
+
+        instances = np.array(generated_sequences)
+
+        matrix = np.zeros(shape=(instances.shape[1], len(self.alphabet)))
+
+        instances = instances.T
+
+        for x, pos in enumerate(instances):
+            for i, element in enumerate(pos):
+                for y, char in enumerate(list(self.alphabet)):
+                    if element == char:
+                        matrix[x][y] += 1
+                        break
+
+        for ind, row in enumerate(matrix):
+            matrix[ind] = matrix[ind] / sum(matrix[ind]) * 100
+        matrix = np.around(matrix, 2)
+        return_sequences = []
+        instances = instances.T
+
+        for row in instances:
+            return_sequences.append("".join(row))
+
+        matrix = matrix.T
+
+        return list(matrix), instances, self.alphabet
 
     def get_params(self):
         return self._parameters
@@ -89,7 +114,7 @@ class PWM(GenerativeModel):
 
         PathBuilder.build(path)
 
-        print(f'{datetime.datetime.now()}: Writing to file')
+        print(f'{datetime.datetime.now()}: Writing to file...')
         file_path = path / f"{self._get_model_filename()}.csv"
         with open(file_path, "w") as file:
             writer = csv.writer(file)

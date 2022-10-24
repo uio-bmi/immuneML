@@ -13,7 +13,7 @@ import plotly.graph_objs as go
 class GeneratorReport(MLReport):
     @classmethod
     def build_object(cls, **kwargs):
-        name = kwargs["name"] if "name" in kwargs else "ClusterReport"
+        name = kwargs["name"] if "name" in kwargs else "GeneratorReport"
         return GeneratorReport(name=name)
 
     def __init__(self, dataset: Dataset = None, train_dataset: Dataset = None, test_dataset: Dataset = None,
@@ -23,6 +23,7 @@ class GeneratorReport(MLReport):
         self.dataset = dataset
 
     def _generate(self) -> ReportResult:
-        markerText = list("Cluster id: {}<br>Receptor id: {}".format(self.method.model.labels_[i], self.dataset.encoded_data.example_ids[i]) for i in range(len(self.dataset.encoded_data.example_ids)))
+
+        generatorReport = ReportResult()
 
         return ReportResult()
