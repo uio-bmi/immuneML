@@ -59,6 +59,9 @@ class GenerativeModel(MLMethod):
         else:
             return None
 
+    def generate(self, length_of_sequences: int = None, amount=10, path_to_model: Path = None):
+        pass
+
     def _fit(self, X, y, cores_for_training: int = 1):
         if not self.show_warnings:
             warnings.simplefilter("ignore")

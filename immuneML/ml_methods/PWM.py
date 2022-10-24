@@ -1,3 +1,7 @@
+import csv
+import yaml
+import datetime
+
 import numpy as np
 
 from pathlib import Path
@@ -19,35 +23,61 @@ class PWM(GenerativeModel):
 
     def _get_ml_model(self, cores_for_training: int = 2, X=None, dataset=None):
 
-        instances = np.array([sequence.get_sequence() for repertoire in dataset.get_data() for sequence in repertoire.sequences])
-
-        print(instances)
+        instances = np.array([list(sequence.get_sequence()) for repertoire in dataset.get_data() for sequence in repertoire.sequences])
 
         alphabet = ""
 
         for instance in instances:
-            alphabet = "".join(set(instance + alphabet))
-            if len(alphabet) == 20:
-                break
+            for letter in instance:
+                alphabet = "".join(set(letter + alphabet))
+                if len(alphabet) == 20:
+                    break
 
-        print(alphabet)
+        self.alphabet = "".join(sorted(alphabet))
+        matrix = np.zeros(shape=(instances.shape[1], len(self.alphabet)))
 
-        matrix = np.zeros(shape=(len(max(instances)), len(alphabet)))
-        print(matrix)
+        instances = instances.T
+        for x, pos in enumerate(instances):
+            for i, element in enumerate(pos):
+                for y, char in enumerate(list(self.alphabet)):
+                    if element == char:
+                        matrix[x][y] += 1
+                        break
 
-        params = self._parameters
+        matrix = matrix / sum(matrix)
 
-        return self.model
+        return matrix
 
     def _fit(self, X, y, cores_for_training: int = 1, dataset=None):
         self.model = self._get_ml_model(cores_for_training, X, dataset)
-        self.model.weblogo("mymotif.jpg")
-        pwm = self.model.counts.normalize(pseudocounts=0.5)
-        print(pwm)
-        return pwm
+
+        print(self.model)
+
+        return self.model
+
+    def generate(self, length_of_sequences: int = None, amount=10, path_to_model: Path = None):
+
+        if self.model is None:
+            model_as_array = []
+            with open(path_to_model, 'r') as file:
+
+                reader = csv.reader(file)
+                self.alphabet = "".join(next(reader))
+                for row in reader:
+                    model_as_array.append(row)
+            self.model = np.array(model_as_array)
+
+        length_of_sequences = length_of_sequences if length_of_sequences is not None else self.model.shape(0)
+        generated_sequences = []
+        for i in range(amount):
+            sequence = []
+            for j in range(length_of_sequences):
+                sequence.append(np.random.choice(list(self.alphabet), p=self.model[i]))
+            generated_sequences.append(sequence)
+        print(generated_sequences)
 
     def get_params(self):
-        return self.model.get_params(deep=True)
+        return self._parameters
 
     def can_predict_proba(self) -> bool:
         raise Exception("can_predict_proba has not been implemented")
@@ -56,10 +86,17 @@ class PWM(GenerativeModel):
         raise Exception("get_compatible_encoders has not been implemented")
 
     def store(self, path: Path, feature_names=None, details_path: Path = None):
+
         PathBuilder.build(path)
-        file_path = path / f"{self._get_model_filename()}.pickle"
-        with file_path.open("wb") as file:
-            dill.dump(self.model, file)
+
+        print(f'{datetime.datetime.now()}: Writing to file')
+        file_path = path / f"{self._get_model_filename()}.csv"
+        with open(file_path, "w") as file:
+            writer = csv.writer(file)
+            writer.writerow(list(self.alphabet))
+            for row in self.model:
+                writer.writerow(row)
+
 
         if details_path is None:
             params_path = path / f"{self._get_model_filename()}.yaml"
@@ -70,7 +107,6 @@ class PWM(GenerativeModel):
             desc = {
                 **(self.get_params()),
                 "feature_names": feature_names,
-                "classes": self.model.classes_.tolist(),
                 "class_mapping": self.class_mapping,
             }
 
