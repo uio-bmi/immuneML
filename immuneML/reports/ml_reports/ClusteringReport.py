@@ -1,11 +1,9 @@
-import logging
-
 from pathlib import Path
 from immuneML.data_model.dataset.Dataset import Dataset
-from immuneML.ml_methods.MLMethod import MLMethod
+from immuneML.ml_methods.UnsupervisedMLMethod import UnsupervisedMLMethod
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
-from immuneML.reports.ml_reports.MLReport import MLReport
+from immuneML.reports.ml_reports.UnsupervisedMLReport import UnsupervisedMLReport
 from immuneML.util.PathBuilder import PathBuilder
 
 from scipy.sparse import csr_matrix
@@ -14,17 +12,15 @@ import plotly.graph_objs as go
 from sklearn.metrics import silhouette_score, calinski_harabasz_score, davies_bouldin_score
 
 
-class ClusteringReport(MLReport):
+class ClusteringReport(UnsupervisedMLReport):
     @classmethod
     def build_object(cls, **kwargs):
         name = kwargs["name"] if "name" in kwargs else "ClusteringReport"
         return ClusteringReport(name=name)
 
-    def __init__(self, dataset: Dataset = None, train_dataset: Dataset = None, test_dataset: Dataset = None,
-                 method: MLMethod = None, result_path: Path = None, name: str = None, number_of_processes: int = 1):
-        super().__init__(train_dataset=train_dataset, test_dataset=test_dataset, method=method, result_path=result_path,
+    def __init__(self, dataset: Dataset = None, method: UnsupervisedMLMethod = None, result_path: Path = None, name: str = None, number_of_processes: int = 1):
+        super().__init__(dataset=dataset, method=method, result_path=result_path,
                          name=name, number_of_processes=number_of_processes)
-        self.dataset = dataset
 
     def _generate(self) -> ReportResult:
         PathBuilder.build(self.result_path)
