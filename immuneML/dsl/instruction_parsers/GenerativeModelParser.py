@@ -47,7 +47,6 @@ class GenerativeModelParser:
         for generator_key, generator in instruction["generators"].items():
             params = self._prepare_params(generator, symbol_table, f"{key}/{generator_key}")
 
-            #params["number_of_processes"] = instruction["number_of_processes"]
             gen_model_units[generator_key] = GenerativeModelUnit(**params)
 
         process = GenerativeModelInstruction(generative_model_units=gen_model_units, name=key)
