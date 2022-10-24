@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>immuneML: Clustering Analysis Overview</title>
+    <style>
+        {{{css_style}}}
+    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+</head>
+<body>
+    <div class="container">
+        <h1>Analyses</h1>
+        <div>Full specification is available <a href="{{{full_specs}}}">here</a>.</div>
+        <div class="padded-bottom padded-top">immuneML version: {{immuneML_version}}</div>
+        {{#analyses}}
+        <div>
+            <h2>Analysis {{name}}</h2>
+            <div class="card">
+                <details>
+                    <summary>Dataset details</summary>
+                    <div class="col-container">
+                        <div class="">
+                            <div class="table-container padded-top padded-bottom">
+                                <table>
+                                <tr>
+                                    <td><b>Name</b></td>
+                                    <td>{{dataset_name}}</td>
+                                </tr>
+                                <tr>
+                                    <td><b>Type</b></td>
+                                    <td>{{dataset_type}}</td>
+                                </tr>
+                                <tr>
+                                    <td><b>Dataset size</b></td>
+                                    <td>{{dataset_size}}</td>
+                                </tr>
+                            </table>
+                            </div>
+                        </div>
+                    </div>
+                </details>
+                {{#show_encoding}}
+                <details>
+                    <summary>Encoding details</summary>
+                    <div class="col-container">
+                        <div>
+                            <h4 style="margin: 0.3em 0;">Encoding {{encoding_key}}</h4>
+                            <h5 style="margin: 0.3em 0;">{{encoding_name}}</h5>
+                        </div>
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Parameter</th>
+                                        <th>Value</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {{#encoding_params}}
+                                    <tr>
+                                        <td>{{param_name}}</td>
+                                        <td>{{param_value}}</td>
+                                    </tr>
+                                    {{/encoding_params}}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </details>
+                {{/show_encoding}}
+                <details>
+                    <summary>Clustering algorithm details</summary>
+                    <div class="col-container">
+                        <h4 style="margin: 0.3em 0;">{{clustering_key}}</h4>
+                        <h5 style="margin: 0.3em 0;">Algorithm: {{clustering_name}}</h5>
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Parameter</th>
+                                        <th>Value</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {{#clustering_params}}
+                                    <tr>
+                                        <td>{{param_name}}</td>
+                                        <td>{{param_value}}</td>
+                                    </tr>
+                                    {{/clustering_params}}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </details>
+                {{#show_dimRed}}
+                <details>
+                    <summary>Dimensionality reduction details</summary>
+                    <div class="col-container">
+                        <div>
+                            <h4 style="margin: 0.3em 0;">{{dimRed_key}}</h4>
+                            <h5 style="margin: 0.3em 0;">Algorithm: {{dimRed_name}}</h5>
+                        </div>
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Parameter</th>
+                                        <th>Value</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {{#dimRed_params}}
+                                    <tr>
+                                        <td>{{param_name}}</td>
+                                        <td>{{param_value}}</td>
+                                    </tr>
+                                    {{/dimRed_params}}
+                                </tbody>
+                            </table>
+                        </div>
+
+                    </div>
+                </details>
+                {{/show_dimRed}}
+                {{#report}}
+                <h3>Report {{name}}</h3>
+                <div>
+                    {{#show_info}}
+                    <pre>{{info}}</pre>
+                    {{/show_info}}
+
+                    {{#output_figures}}
+                    <div class="center padded-bottom">
+                        {{#name}}<p>{{name}}</p>{{/name}}
+                        {{#is_embed}}
+                        <embed src="{{path}}">
+                        {{/is_embed}}
+                        {{^is_embed}}
+                        <img src="{{path}}">
+                        {{/is_embed}}
+                    </div>
+                    {{/output_figures}}
+
+                    {{#show_tables}}
+                    <p>Downloadable tables:</p>
+                    {{#output_tables}}
+                    <div>
+                        <ul>
+                        {{#is_download_link}}
+                        <li><a href="{{download_link}}" download>{{file_name}}</a></li>
+                        {{/is_download_link}}
+                        </ul>
+                    </div>
+                    {{/output_tables}}
+                    {{/show_tables}}
+
+                    {{#show_text}}
+                    <p>Text reports:</p>
+                    {{#output_text}}
+                    <div>
+                        <ul>
+                        {{#is_download_link}}
+                        <li><a href="{{download_link}}" download>{{file_name}}</a></li>
+                        {{/is_download_link}}
+                        </ul>
+                    </div>
+                    {{/output_text}}
+                    {{/show_text}}
+                </div>
+                {{/report}}
+            </div>
+        </div>
+        {{/analyses}}
+    </div>
+</body>
+</html>
