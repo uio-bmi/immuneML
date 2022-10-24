@@ -16,12 +16,12 @@ from immuneML.util.PathBuilder import PathBuilder
 from scipy.sparse import csr_matrix
 
 
-class USklearnMethod(UnsupervisedMLMethod):
+class UnsupervisedSklearnMethod(UnsupervisedMLMethod):
     FIT_CV = "fit_CV"
     FIT = "fit"
 
     def __init__(self, parameter_grid: dict = None, parameters: dict = None):
-        super(USklearnMethod, self).__init__()
+        super(UnsupervisedSklearnMethod, self).__init__()
         self.model = None
 
         if parameter_grid is not None and "show_warnings" in parameter_grid:
