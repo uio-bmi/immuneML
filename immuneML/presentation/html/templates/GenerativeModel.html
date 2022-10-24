@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>immuneML: Generative Model Overview</title>
+    <style>
+        {{{css_style}}}
+    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+</head>
+<body>
+    <div class="container">
+        <h1>Generator</h1>
+        <div>Full specification is available <a href="{{{full_specs}}}">here</a>.</div>
+        <div class="padded-bottom padded-top">immuneML version: {{immuneML_version}}</div>
+        {{#analyses}}
+        <div>
+            <h2>Analysis {{name}}</h2>
+            <div class="card">
+                <div class="col-container">
+                    <div class="col">
+                        <h3>Dataset information</h3>
+                        <h4>General information</h4>
+                        <div class="table-container">
+                            <table>
+                            <tr>
+                                <td><b>Name</b></td>
+                                <td>{{dataset_name}}</td>
+                            </tr>
+                            <tr>
+                                <td><b>Type</b></td>
+                                <td>{{dataset_type}}</td>
+                            </tr>
+                            <tr>
+                                <td><b>Dataset size</b></td>
+                                <td>{{dataset_size}}</td>
+                            </tr>
+                        </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-container">
+                    <div>
+                        {{#show_encoding}}
+                        <h3>Encoding {{encoding_key}}</h3>
+                        <h4>{{encoding_name}}</h4>
+
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Parameter</th>
+                                        <th>Value</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {{#encoding_params}}
+                                    <tr>
+                                        <td>{{param_name}}</td>
+                                        <td>{{param_value}}</td>
+                                    </tr>
+                                    {{/encoding_params}}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        {{/show_encoding}}
+
+                    </div>
+                </div>
+                <div class="col-container">
+                    <div>
+                        <h3>Generated Sequences</h3>
+
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Sequence Number</th>
+                                        <th>Sequence</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {{#generated_sequences}}
+                                    <tr>
+
+                                        <td>{{seq_nr}}</td>
+                                        <td>{{seq}}</td>
+
+                                    </tr>
+                                    {{/generated_sequences}}
+                                </tbody>
+                            </table>
+                        </div>
+
+
+                    </div>
+                </div>
+                <div class="col-container">
+                    <div>
+                        <h3>Generated Sequences</h3>
+
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Letter</th>
+                                        {{#positions}}
+                                        <th>{{pos}}</th>
+                                        {{/positions}}
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {{#PWM}}
+                                    <tr>
+                                        <td>{{letter}}</td>
+                                        {{#row}}
+                                        <td>{{weight}}</td>
+                                        {{/row}}
+                                    </tr>
+                                    {{/PWM}}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                {{#report}}
+                <h3>Report {{name}}</h3>
+                <div>
+                    {{#show_info}}
+                    <p class="padded-bottom">{{info}}</p>
+                    {{/show_info}}
+                    {{#output_figures}}
+                    <div class="center padded">
+                        {{#name}}<p>{{name}}</p>{{/name}}
+                        {{#is_embed}}
+                        <embed src="{{path}}">
+                        {{/is_embed}}
+                        {{^is_embed}}
+                        <img src="{{path}}">
+                        {{/is_embed}}
+                    </div>
+                    {{/output_figures}}
+
+                    {{#show_tables}}
+                    <p>Downloadable tables:</p>
+                    {{#output_tables}}
+                    <div>
+                        <ul>
+                        {{#is_download_link}}
+                        <li><a href="{{download_link}}" download>{{file_name}}</a></li>
+                        {{/is_download_link}}
+                        </ul>
+                    </div>
+                    {{/output_tables}}
+                    {{/show_tables}}
+
+                    {{#show_text}}
+                    <p>Text reports:</p>
+                    {{#output_text}}
+                    <div>
+                        <ul>
+                        {{#is_download_link}}
+                        <li><a href="{{download_link}}" download>{{file_name}}</a></li>
+                        {{/is_download_link}}
+                        </ul>
+                    </div>
+                    {{/output_text}}
+                    {{/show_text}}
+                </div>
+                {{/report}}
+            </div>
+        </div>
+        {{/analyses}}
+    </div>
+</body>
+</html>

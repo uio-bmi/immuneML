@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from pathlib import Path
+import numpy
 
 from immuneML.data_model.dataset.Dataset import Dataset
 from immuneML.encodings.DatasetEncoder import DatasetEncoder
@@ -15,6 +16,9 @@ class GenerativeModelUnit:
     dataset: Dataset
     report: Report
     genModel: GenerativeModel
+    alphabet: str = "ACGT"
+    generated_sequences: list = None
+    PWM: numpy.array = None
     encoder: DatasetEncoder = None
     label_config: LabelConfiguration = None
     report_result: ReportResult = None
