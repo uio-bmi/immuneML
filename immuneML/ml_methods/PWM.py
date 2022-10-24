@@ -45,7 +45,8 @@ class PWM(GenerativeModel):
                         break
 
         for ind, row in enumerate(matrix):
-            matrix[ind] = matrix[ind] / sum(matrix[ind])
+            matrix[ind] = matrix[ind] / sum(matrix[ind]) * 100
+        #matrix = np.around(matrix, 2)
 
         return matrix
 
@@ -72,7 +73,7 @@ class PWM(GenerativeModel):
         for _ in range(amount):
             sequence = []
             for i in range(length_of_sequences):
-                sequence.append(np.random.choice(list(self.alphabet), 1, p=self.model[i])[0])
+                sequence.append(np.random.choice(list(self.alphabet), 1, p=self.model[i]/100)[0])
             generated_sequences.append(sequence)
 
         instances = np.array(generated_sequences)
