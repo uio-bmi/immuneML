@@ -32,7 +32,6 @@ class GenerativeModelInstruction(Instruction):
         name = self.name if self.name is not None else "generative_model"
         self.state.result_path = result_path / name
         for index, (key, unit) in enumerate(self.state.generative_model_units.items()):
-            print(unit)
             print("{}: Started analysis {} ({}/{}).".format(datetime.datetime.now(), key, index+1, len(self.state.generative_model_units)), flush=True)
             path = self.state.result_path / f"analysis_{key}"
             PathBuilder.build(path)
@@ -51,8 +50,6 @@ class GenerativeModelInstruction(Instruction):
         unit.report.result_path = result_path / "report"
         unit.generated_sequences = sequences
         unit.alphabet = alphabet
-        for sequence in sequences:
-            print(sequence)
         unit.PWM = matrix
         report_result = unit.report.generate_report()
         return report_result
