@@ -4,6 +4,7 @@ from immuneML.IO.dataset_import.DataImport import DataImport
 from immuneML.dsl.DefaultParamsLoader import DefaultParamsLoader
 from immuneML.dsl.definition_parsers.DefinitionParserOutput import DefinitionParserOutput
 from immuneML.dsl.definition_parsers.EncodingParser import EncodingParser
+from immuneML.dsl.definition_parsers.DimensionalityReductionParser import DimensionalityReductionParser
 from immuneML.dsl.definition_parsers.MLParser import MLParser
 from immuneML.dsl.definition_parsers.MotifParser import MotifParser
 from immuneML.dsl.definition_parsers.PreprocessingParser import PreprocessingParser
@@ -44,6 +45,7 @@ class DefinitionParser:
         symbol_table, specs_preprocessing = DefinitionParser._call_if_exists(PreprocessingParser.keyword, PreprocessingParser.parse, specs, symbol_table)
         symbol_table, specs_encoding = DefinitionParser._call_if_exists("encodings", EncodingParser.parse, specs, symbol_table)
         symbol_table, specs_ml = DefinitionParser._call_if_exists("ml_methods", MLParser.parse, specs, symbol_table)
+        symbol_table, specs_dim_reduction = DefinitionParser._call_if_exists("dimensionality_reduction", DimensionalityReductionParser.parse_dim_reductions, specs, symbol_table)
         symbol_table, specs_report = DefinitionParser._call_if_exists("reports", ReportParser.parse_reports, specs, symbol_table)
         symbol_table, specs_import = ImportParser.parse(specs, symbol_table, result_path)
 

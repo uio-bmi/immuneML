@@ -2,6 +2,7 @@ from immuneML.hyperparameter_optimization.states.TrainMLModelState import TrainM
 from immuneML.presentation.PresentationFormat import PresentationFormat
 from immuneML.presentation.html.DatasetExportHTMLBuilder import DatasetExportHTMLBuilder
 from immuneML.presentation.html.ExploratoryAnalysisHTMLBuilder import ExploratoryAnalysisHTMLBuilder
+from immuneML.presentation.html.ClusteringHTMLBuilder import ClusteringHTMLBuilder
 from immuneML.presentation.html.HPHTMLBuilder import HPHTMLBuilder
 from immuneML.presentation.html.MLApplicationHTMLBuilder import MLApplicationHTMLBuilder
 from immuneML.presentation.html.SimulationHTMLBuilder import SimulationHTMLBuilder
@@ -9,6 +10,7 @@ from immuneML.presentation.html.SubsamplingHTMLBuilder import SubsamplingHTMLBui
 from immuneML.simulation.SimulationState import SimulationState
 from immuneML.workflows.instructions.dataset_generation.DatasetExportState import DatasetExportState
 from immuneML.workflows.instructions.exploratory_analysis.ExploratoryAnalysisState import ExploratoryAnalysisState
+from immuneML.workflows.instructions.clustering.ClusteringState import ClusteringState
 from immuneML.workflows.instructions.ml_model_application.MLApplicationState import MLApplicationState
 from immuneML.workflows.instructions.subsampling.SubsamplingState import SubsamplingState
 
@@ -21,6 +23,8 @@ class PresentationFactory:
             return HPHTMLBuilder
         elif isinstance(state, ExploratoryAnalysisState) and presentation_format == PresentationFormat.HTML:
             return ExploratoryAnalysisHTMLBuilder
+        elif isinstance(state, ClusteringState) and presentation_format == PresentationFormat.HTML:
+            return ClusteringHTMLBuilder
         elif isinstance(state, SimulationState) and presentation_format == PresentationFormat.HTML:
             return SimulationHTMLBuilder
         elif isinstance(state, DatasetExportState) and presentation_format == PresentationFormat.HTML:
