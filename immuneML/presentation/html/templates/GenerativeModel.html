@@ -20,7 +20,6 @@
             <div class="card">
                 <div class="col-container">
                     <div class="col">
-                        {{#dataset_information}}
                         <h3>Dataset information</h3>
                         <h4>General information</h4>
                         <div class="table-container">
@@ -39,7 +38,6 @@
                             </tr>
                         </table>
                         </div>
-                        {{/dataset_information}}
                     </div>
                 </div>
                 <div class="col-container">
@@ -71,82 +69,106 @@
 
                     </div>
                 </div>
-                <details>
-                    <summary>Generated Sequences</summary>
-                    <div class="col-container">
-                        <div>
-                            <h3>Generated Sequences</h3>
-                            <div class="table-container">
-                                <table>
-                                    <thead>
-                                        <tr>
-                                            <th>Sequence Number</th>
-                                            <th>Sequence</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {{#generated_sequences}}
-                                        <tr>
-                                            <td>{{seq_nr}}</td>
-                                            <td>{{seq}}</td>
-                                        </tr>
-                                        {{/generated_sequences}}
-                                    </tbody>
-                                </table>
-                            </div>
-
-
-                        </div>
-                    </div>
-                </details>
-
-                {{#report}}
+                <div class="col-container">
                     <div>
-                        {{#show_info}}
-                        <p class="padded-bottom">{{info}}</p>
-                        {{/show_info}}
-                        {{#output_figures}}
-                        <details>
-                            <summary>{{name}}</summary>
-                            <div class="center padded">
-                                {{#name}}<p>{{name}}</p>{{/name}}
-                                {{#is_embed}}
-                                <embed src="{{path}}">
-                                {{/is_embed}}
-                                {{^is_embed}}
-                                <img src="{{path}}">
-                                {{/is_embed}}
-                            </div>
-                        </details>
-                        {{/output_figures}}
+                        <h3>Generated Sequences</h3>
 
-                        {{#show_tables}}
-                        <p>Downloadable tables:</p>
-                        {{#output_tables}}
-                        <div>
-                            <ul>
-                            {{#is_download_link}}
-                            <li><a href="{{download_link}}" download>{{file_name}}</a></li>
-                            {{/is_download_link}}
-                            </ul>
-                        </div>
-                        {{/output_tables}}
-                        {{/show_tables}}
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Sequence Number</th>
+                                        <th>Sequence</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {{#generated_sequences}}
+                                    <tr>
 
-                        {{#show_text}}
-                        <p>Text reports:</p>
-                        {{#output_text}}
-                        <div>
-                            <ul>
-                            {{#is_download_link}}
-                            <li><a href="{{download_link}}" download>{{file_name}}</a></li>
-                            {{/is_download_link}}
-                            </ul>
+                                        <td>{{seq_nr}}</td>
+                                        <td>{{seq}}</td>
+
+                                    </tr>
+                                    {{/generated_sequences}}
+                                </tbody>
+                            </table>
                         </div>
-                        {{/output_text}}
-                        {{/show_text}}
+
+
                     </div>
+                </div>
+                <div class="col-container">
+                    <div>
+                        <h3>Generated Sequences</h3>
 
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Letter</th>
+                                        {{#positions}}
+                                        <th>{{pos}}</th>
+                                        {{/positions}}
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {{#PWM}}
+                                    <tr>
+                                        <td>{{letter}}</td>
+                                        {{#row}}
+                                        <td>{{weight}}</td>
+                                        {{/row}}
+                                    </tr>
+                                    {{/PWM}}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                {{#report}}
+                <h3>Report {{name}}</h3>
+                <div>
+                    {{#show_info}}
+                    <p class="padded-bottom">{{info}}</p>
+                    {{/show_info}}
+                    {{#output_figures}}
+                    <div class="center padded">
+                        {{#name}}<p>{{name}}</p>{{/name}}
+                        {{#is_embed}}
+                        <embed src="{{path}}">
+                        {{/is_embed}}
+                        {{^is_embed}}
+                        <img src="{{path}}">
+                        {{/is_embed}}
+                    </div>
+                    {{/output_figures}}
+
+                    {{#show_tables}}
+                    <p>Downloadable tables:</p>
+                    {{#output_tables}}
+                    <div>
+                        <ul>
+                        {{#is_download_link}}
+                        <li><a href="{{download_link}}" download>{{file_name}}</a></li>
+                        {{/is_download_link}}
+                        </ul>
+                    </div>
+                    {{/output_tables}}
+                    {{/show_tables}}
+
+                    {{#show_text}}
+                    <p>Text reports:</p>
+                    {{#output_text}}
+                    <div>
+                        <ul>
+                        {{#is_download_link}}
+                        <li><a href="{{download_link}}" download>{{file_name}}</a></li>
+                        {{/is_download_link}}
+                        </ul>
+                    </div>
+                    {{/output_text}}
+                    {{/show_text}}
+                </div>
                 {{/report}}
             </div>
         </div>
