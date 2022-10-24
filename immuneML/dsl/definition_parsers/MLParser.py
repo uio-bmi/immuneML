@@ -4,6 +4,7 @@ from immuneML.dsl.DefaultParamsLoader import DefaultParamsLoader
 from immuneML.dsl.symbol_table.SymbolTable import SymbolTable
 from immuneML.dsl.symbol_table.SymbolType import SymbolType
 from immuneML.ml_methods.MLMethod import MLMethod
+from immuneML.ml_methods.UnsupervisedMLMethod import UnsupervisedMLMethod
 from immuneML.util.Logger import log
 from immuneML.util.ParameterValidator import ParameterValidator
 from immuneML.util.ReflectionHandler import ReflectionHandler
@@ -26,6 +27,7 @@ class MLParser:
     def _parse_ml_method(ml_method_id: str, ml_specification) -> tuple:
 
         valid_class_values = ReflectionHandler.all_nonabstract_subclass_basic_names(MLMethod, "", "ml_methods/")
+        valid_class_values += ReflectionHandler.all_nonabstract_subclass_basic_names(UnsupervisedMLMethod, "", "ml_methods/")
 
         if type(ml_specification) is str:
             ml_specification = {ml_specification: {}}
