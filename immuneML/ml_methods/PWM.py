@@ -38,7 +38,7 @@ class PWM(GenerativeModel):
 
         instances = instances.T
         for x, pos in enumerate(instances):
-            for i, element in enumerate(pos):
+            for element in pos:
                 for y, char in enumerate(list(self.alphabet)):
                     if element == char:
                         matrix[x][y] += 1
@@ -46,7 +46,6 @@ class PWM(GenerativeModel):
 
         for ind, row in enumerate(matrix):
             matrix[ind] = matrix[ind] / sum(matrix[ind]) * 100
-        #matrix = np.around(matrix, 2)
 
         return matrix
 
