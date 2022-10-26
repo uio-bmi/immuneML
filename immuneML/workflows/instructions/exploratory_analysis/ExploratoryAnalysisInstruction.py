@@ -80,7 +80,7 @@ class ExploratoryAnalysisInstruction(Instruction):
             unit.dimensionality_reduction.fit(encoded_dataset.encoded_data)
             unit.dimensionality_reduction.transform(encoded_dataset.encoded_data)
 
-        unit.report.method = unit.dimensionality_reduction.model
+        unit.report.method = unit.dimensionality_reduction
         unit.report.dataset = encoded_dataset
         unit.report.result_path = result_path / "report"
         unit.report.number_of_processes = unit.number_of_processes
