@@ -57,7 +57,7 @@ class ExploratoryAnalysisParser:
 
     def _prepare_params(self, analysis: dict, symbol_table: SymbolTable, yaml_location: str) -> dict:
 
-        valid_keys = ["dataset", "report", "preprocessing_sequence", "labels", "encoding", "number_of_processes"]
+        valid_keys = ["dataset", "report", "preprocessing_sequence", "labels", "encoding", "number_of_processes", "dimensionality_reduction"]
         ParameterValidator.assert_keys(list(analysis.keys()), valid_keys, "ExploratoryAnalysisParser", "analysis", False)
 
         params = {"dataset": symbol_table.get(analysis["dataset"]), "report": copy.deepcopy(symbol_table.get(analysis["report"]))}
@@ -82,5 +82,8 @@ class ExploratoryAnalysisParser:
 
         if "preprocessing_sequence" in analysis:
             params["preprocessing_sequence"] = symbol_table.get(analysis["preprocessing_sequence"])
+
+        if "dimensionality_reduction" in analysis:
+            params["dimensionality_reduction"] = symbol_table.get(analysis["dimensionality_reduction"])
 
         return params

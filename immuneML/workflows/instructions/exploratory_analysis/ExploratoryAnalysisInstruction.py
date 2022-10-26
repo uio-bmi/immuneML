@@ -76,6 +76,11 @@ class ExploratoryAnalysisInstruction(Instruction):
     def run_unit(self, unit: ExploratoryAnalysisUnit, result_path: Path) -> ReportResult:
         unit.dataset = self.preprocess_dataset(unit, result_path / "preprocessed_dataset")
         encoded_dataset = self.encode(unit, result_path / "encoded_dataset")
+        if unit.dimensionality_reduction is not None:
+            unit.dimensionality_reduction.fit(encoded_dataset.encoded_data)
+            unit.dimensionality_reduction.transform(encoded_dataset.encoded_data)
+
+        unit.report.method = unit.dimensionality_reduction.model
         unit.report.dataset = encoded_dataset
         unit.report.result_path = result_path / "report"
         unit.report.number_of_processes = unit.number_of_processes
