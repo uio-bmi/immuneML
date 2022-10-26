@@ -1,7 +1,7 @@
 import copy
 import logging
 import math
-import random
+import warnings
 from pathlib import Path
 
 import numpy as np
@@ -147,6 +147,8 @@ class ReceptorCNN(MLMethod):
         return {self.label.name: np.vstack([1 - np.array(predictions), predictions]).T}
 
     def fit(self, encoded_data: EncodedData, label: Label, optimization_metric=None, cores_for_training: int = 2):
+        if encoded_data.example_weights is not None:
+            warnings.warn(f"{self.__class__.__name__}: cannot fit this classifier with example weights, fitting without example weights instead... Example weights will still be applied when computing evaluation metrics after fitting.")
 
         self.feature_names = encoded_data.feature_names
 

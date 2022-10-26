@@ -28,7 +28,8 @@ class MatchedSequencesRepertoireEncoder(MatchedSequencesEncoder):
             labels=labels,
             feature_names=feature_names,
             feature_annotations=feature_annotations,
-            example_ids=[repertoire.identifier for repertoire in dataset.get_data()],
+            example_ids=dataset.get_example_ids(),
+            example_weights=dataset.get_example_weights(),
             encoding=MatchedSequencesEncoder.__name__
         ))
 

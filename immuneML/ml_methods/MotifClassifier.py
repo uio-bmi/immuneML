@@ -132,7 +132,6 @@ class MotifClassifier(MLMethod): # todo name? (Greedy)BinaryFeatureClassifier? R
         return rule_indices[:optimal_tree_idx + 1]
 
     def _add_next_best_rule(self, encoded_train_data, prev_rule_indices):
-        # train_np_sequences, train_y_true, train_weights = train_data
         prev_train_performance = self._get_prev_train_performance(encoded_train_data, prev_rule_indices)
 
         unused_indices = self._get_unused_rule_indices(encoded_train_data, prev_rule_indices)

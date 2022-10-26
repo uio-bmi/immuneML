@@ -1,6 +1,6 @@
 import copy
 import pickle
-import numpy as np
+import warnings
 
 from immuneML.IO.dataset_export.ImmuneMLExporter import ImmuneMLExporter
 from immuneML.caching.CacheHandler import CacheHandler
@@ -107,4 +107,12 @@ class EncoderHelper:
                                        f"relevant sequences for the label, but got these classes for label {label.name} instead: {label.values}."
 
 
+    @staticmethod
+    def get_example_weights_by_identifiers(dataset, example_identifiers):
+        weights = dataset.get_example_weights()
+
+        if weights is not None:
+            weights_dict = dict(zip(dataset.get_example_ids(), weights))
+
+            return [weights_dict[identifier] for identifier in example_identifiers]
 

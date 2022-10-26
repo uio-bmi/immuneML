@@ -1,3 +1,4 @@
+import warnings
 from pathlib import Path
 
 import pandas as pd
@@ -118,13 +119,13 @@ class DistanceEncoder(DatasetEncoder):
         return tmp_labels
 
     def encode(self, dataset, params: EncoderParams) -> RepertoireDataset:
-
         train_repertoire_ids = EncoderHelper.prepare_training_ids(dataset, params)
         distance_matrix = self.build_distance_matrix(dataset, params, train_repertoire_ids)
         labels = self.build_labels(dataset, params) if params.encode_labels else None
 
         encoded_dataset = dataset.clone()
         encoded_dataset.encoded_data = EncodedData(examples=distance_matrix, labels=labels, example_ids=distance_matrix.index.values,
+                                                   example_weights=EncoderHelper.get_example_weights_by_identifiers(dataset, distance_matrix.index.values),
                                                    encoding=DistanceEncoder.__name__)
 
         return encoded_dataset

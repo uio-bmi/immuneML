@@ -91,7 +91,8 @@ class DeepRCEncoder(DatasetEncoder):
 
         encoded_dataset = dataset.clone()
         encoded_dataset.encoded_data = EncodedData(examples=None, labels=dataset.get_metadata(labels) if params.encode_labels else None,
-                                                   example_ids=dataset.repertoire_ids,
+                                                   example_ids=dataset.get_repertoire_ids(),
+                                                   example_weights=dataset.get_example_weights(),
                                                    encoding=DeepRCEncoder.__name__,
                                                    info={"metadata_filepath": metadata_filepath,
                                                          "max_sequence_length": self.max_sequence_length})

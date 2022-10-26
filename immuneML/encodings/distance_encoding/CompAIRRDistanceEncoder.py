@@ -141,6 +141,7 @@ class CompAIRRDistanceEncoder(DatasetEncoder):
                                                    labels=labels,
                                                    feature_names=distance_matrix.columns.values,
                                                    example_ids=distance_matrix.index.values,
+                                                   example_weights=EncoderHelper.get_example_weights_by_identifiers(dataset, distance_matrix.index.values),
                                                    encoding=CompAIRRDistanceEncoder.__name__)
         return encoded_dataset
 

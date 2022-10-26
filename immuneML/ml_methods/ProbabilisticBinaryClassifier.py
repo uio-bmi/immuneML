@@ -15,7 +15,6 @@ from immuneML.data_model.encoded_data.EncodedData import EncodedData
 from immuneML.environment.Label import Label
 from immuneML.ml_methods.MLMethod import MLMethod
 from immuneML.ml_methods.util.Util import Util
-from immuneML.ml_metrics.Metric import Metric
 from immuneML.util.FilenameHandler import FilenameHandler
 from immuneML.util.PathBuilder import PathBuilder
 
@@ -69,6 +68,9 @@ class ProbabilisticBinaryClassifier(MLMethod):
         self.feature_names = None
 
     def fit(self, encoded_data: EncodedData, label: Label, optimization_metric=None, cores_for_training: int = 2):
+        if encoded_data.example_weights is not None:
+            warnings.warn(f"{self.__class__.__name__}: cannot fit this classifier with example weights, fitting without example weights instead... Example weights will still be applied when computing evaluation metrics after fitting.")
+
         self.feature_names = encoded_data.feature_names
         X = encoded_data.examples
         assert X.shape[1] == 2, "ProbabilisticBinaryClassifier: the shape of the input is not compatible with the classifier. " \

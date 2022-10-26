@@ -131,8 +131,8 @@ class KerasSequenceCNN(MLMethod):
         X_val = encoded_val_data.examples
         y_train = Util.map_to_new_class_values(encoded_train_data.labels[self.label.name], self.class_mapping)
         y_val = Util.map_to_new_class_values(encoded_val_data.labels[self.label.name], self.class_mapping)
-        w_train = None
-        w_val = None
+        w_train = encoded_train_data.example_weights
+        w_val = encoded_val_data.example_weights
 
         # Compiling the CNN
         opt = Adam(learning_rate=0.000075)
@@ -145,7 +145,6 @@ class KerasSequenceCNN(MLMethod):
             epochs=20, batch_size=16, verbose=0
         )
 
-        # print("*****")
         # print(_.history.keys())
         # print(_.history['val_loss'])
 

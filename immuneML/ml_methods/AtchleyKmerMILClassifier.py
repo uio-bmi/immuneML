@@ -1,6 +1,7 @@
 import copy
 import logging
 import random
+import warnings
 from pathlib import Path
 
 import numpy as np
@@ -95,6 +96,9 @@ class AtchleyKmerMILClassifier(MLMethod):
         return PyTorchLogisticRegression(in_features=self.input_size, zero_abundance_weight_init=self.zero_abundance_weight_init)
 
     def fit(self, encoded_data: EncodedData, label: Label, optimization_metric=None, cores_for_training: int = 2):
+        if encoded_data.example_weights is not None:
+            warnings.warn(f"{self.__class__.__name__}: cannot fit this classifier with example weights, fitting without example weights instead... Example weights will still be applied when computing evaluation metrics after fitting.")
+
         self.feature_names = encoded_data.feature_names
 
         self.label = label

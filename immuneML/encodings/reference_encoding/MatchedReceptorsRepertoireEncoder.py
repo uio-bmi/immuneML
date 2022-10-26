@@ -6,6 +6,7 @@ from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
 from immuneML.data_model.encoded_data.EncodedData import EncodedData
 from immuneML.data_model.repertoire.Repertoire import Repertoire
 from immuneML.encodings.EncoderParams import EncoderParams
+from immuneML.util.EncoderHelper import EncoderHelper
 from immuneML.util.ReadsType import ReadsType
 from immuneML.encodings.reference_encoding.MatchedReceptorsEncoder import MatchedReceptorsEncoder
 
@@ -28,11 +29,9 @@ class MatchedReceptorsRepertoireEncoder(MatchedReceptorsEncoder):
         encoded_repertoires = self._normalize(dataset, encoded_repertoires) if self.normalize else encoded_repertoires
 
         encoded_dataset.add_encoded_data(EncodedData(
-            # examples contains a np.ndarray with counts
             examples=encoded_repertoires,
-            # example_ids contains a list of repertoire identifiers
             example_ids=example_ids,
-            # feature_names contains a list of reference receptor identifiers
+            example_weights=EncoderHelper.get_example_weights_by_identifiers(dataset, example_ids),
             feature_names=feature_names,
             # feature_annotations contains a PD dataframe with sequence and VDJ gene usage per reference receptor
             feature_annotations=feature_annotations,

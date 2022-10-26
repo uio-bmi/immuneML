@@ -3,8 +3,6 @@ import pickle
 import fisher
 import numpy as np
 
-from immuneML.encodings.EncoderParams import EncoderParams
-from immuneML.environment.Label import Label
 from immuneML.environment.LabelConfiguration import LabelConfiguration
 
 

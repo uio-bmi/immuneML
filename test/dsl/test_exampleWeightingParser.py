@@ -45,11 +45,15 @@ class TestExampleWeightingParser(TestCase):
                                                                                       'dataset_dist': 'mutagenesis',
                                                                                       'export_weights': True,
                                                                                       'pseudocount_value': 1,
+                                                                                      'lower_weight_limit': None,
+                                                                                      'upper_weight_limit': None,
                                                                                       'name': 'w1'}})
         self.assertEqual(symbol_table.get_config("w2"), {'example_weighting_params': {'baseline_dist': 'uniform',
                                                                                       'dataset_dist': 'mutagenesis',
                                                                                       'export_weights': True,
                                                                                       'pseudocount_value': 1,
+                                                                                      'lower_weight_limit': None,
+                                                                                      'upper_weight_limit': None,
                                                                                       'name': 'w2'}})
         self.assertEqual(symbol_table.get_config("w3"), {'example_weighting_params': {'file_path': 'example/path.csv',
                                                                                       'separator': '\t',

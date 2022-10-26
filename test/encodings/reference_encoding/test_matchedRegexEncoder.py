@@ -83,7 +83,7 @@ class TestMatchedReceptorsEncoder(TestCase):
             self.assertListEqual(list(encoded.encoded_data.examples[index]), expected_outcome[index])
 
         self.assertListEqual(["1_IGL", "1_IGH", "2_IGH", "3_IGL"], encoded.encoded_data.feature_names)
-        self.assertListEqual(["subject_1", "subject_2", "subject_3"], encoded.encoded_data.example_ids)
+        self.assertListEqual(dataset.get_example_ids(), encoded.encoded_data.example_ids)
 
         shutil.rmtree(path)
 
@@ -111,7 +111,7 @@ class TestMatchedReceptorsEncoder(TestCase):
             self.assertListEqual(list(encoded.encoded_data.examples[index]), expected_outcome[index])
 
         self.assertListEqual(["1_IGL", "1_IGH", "2_IGH", "3_IGL"], encoded.encoded_data.feature_names)
-        self.assertListEqual(["subject_1", "subject_2", "subject_3"], encoded.encoded_data.example_ids)
+        self.assertListEqual(dataset.get_example_ids(), encoded.encoded_data.example_ids)
 
         shutil.rmtree(path)
 
@@ -139,6 +139,6 @@ class TestMatchedReceptorsEncoder(TestCase):
             self.assertListEqual(list(encoded.encoded_data.examples[index]), expected_outcome[index])
 
         self.assertListEqual(["1_IGL", "1_IGH", "2_IGH", "3_IGL", "4_IGL"], encoded.encoded_data.feature_names)
-        self.assertListEqual(["subject_1", "subject_2", "subject_3"], encoded.encoded_data.example_ids)
+        self.assertListEqual(dataset.get_example_ids(), encoded.encoded_data.example_ids)
 
         shutil.rmtree(path)

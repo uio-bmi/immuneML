@@ -178,11 +178,13 @@ class Word2VecEncoder(DatasetEncoder):
         feature_annotations = pd.DataFrame({"feature": feature_names})
 
         encoded_dataset.encoded_data = EncodedData(examples=scaled_examples,
-                                   labels={label: labels[i] for i, label in enumerate(label_names)} if labels is not None else None,
-                                   example_ids=[example.identifier for example in encoded_dataset.get_data()],
-                                   feature_names=feature_names,
-                                   feature_annotations=feature_annotations,
-                                   encoding=Word2VecEncoder.__name__)
+                                                   labels={label: labels[i] for i, label in
+                                                           enumerate(label_names)} if labels is not None else None,
+                                                   example_ids=dataset.get_example_ids(),
+                                                   feature_names=feature_names,
+                                                   feature_annotations=feature_annotations,
+                                                   example_weights=dataset.get_example_weights(),
+                                                   encoding=Word2VecEncoder.__name__)
         return encoded_dataset
 
     def _encode_examples(self, encoded_dataset, vectors, params):

@@ -116,6 +116,7 @@ class Util:
                            labels={label_name: [encoded_data.labels[label_name][i] for i in indices]
                                    for label_name in encoded_data.labels.keys()},
                            example_ids=[encoded_data.example_ids[i] for i in indices],
+                           example_weights=[encoded_data.example_weights[i] for i in indices] if encoded_data.example_weights is not None else None,
                            feature_names=encoded_data.feature_names,
                            feature_annotations=encoded_data.feature_annotations,
                            encoding=encoded_data.encoding,
