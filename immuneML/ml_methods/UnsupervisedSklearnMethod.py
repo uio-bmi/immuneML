@@ -12,6 +12,7 @@ from immuneML.data_model.encoded_data.EncodedData import EncodedData
 from immuneML.ml_methods.UnsupervisedMLMethod import UnsupervisedMLMethod
 from immuneML.util.FilenameHandler import FilenameHandler
 from immuneML.util.PathBuilder import PathBuilder
+from immuneML.util.Logger import print_log
 
 from scipy.sparse import csr_matrix
 
@@ -36,9 +37,11 @@ class UnsupervisedSklearnMethod(UnsupervisedMLMethod):
         self.feature_names = None
 
     def fit(self, encoded_data: EncodedData, cores_for_training: int = 2):
+        print_log(f"Fitting {self.name}...", include_datetime=True)
         self.feature_names = encoded_data.feature_names
 
         self.model = self._fit(encoded_data.examples, cores_for_training)
+        print_log(f"Fitting finished...", include_datetime=True)
 
     def _fit(self, X, cores_for_training: int = 1):
         if not self.show_warnings:
@@ -48,7 +51,7 @@ class UnsupervisedSklearnMethod(UnsupervisedMLMethod):
         self.model = self._get_ml_model(cores_for_training, X)
         if type(self.model).__name__ == "AgglomerativeClustering":
             if isinstance(X, csr_matrix):
-                X = X.todense()
+                X = X.toarray()
         self.model.fit(X)
 
         if not self.show_warnings:

@@ -1,4 +1,6 @@
+import shutil
 from pathlib import Path
+
 from immuneML.data_model.dataset.Dataset import Dataset
 from immuneML.ml_methods.UnsupervisedMLMethod import UnsupervisedMLMethod
 from immuneML.reports.ReportOutput import ReportOutput
@@ -10,6 +12,8 @@ from scipy.sparse import csr_matrix
 
 import plotly.graph_objs as go
 from sklearn.metrics import silhouette_score, calinski_harabasz_score, davies_bouldin_score
+
+from immuneML.IO.dataset_export.ImmuneMLExporter import ImmuneMLExporter
 
 
 class ClusteringReport(UnsupervisedMLReport):
@@ -24,17 +28,18 @@ class ClusteringReport(UnsupervisedMLReport):
 
     def _generate(self) -> ReportResult:
         PathBuilder.build(self.result_path)
-        paths = []
+        fig_paths = []
+        table_paths = []
         data = self.dataset.encoded_data.examples
 
         if isinstance(data, csr_matrix):
             data = data.toarray()
         if self.dataset.encoded_data.examples.shape[1] == 2:
-            paths.append(self._2dplot(data, f'2d_{self.name}'))
+            fig_paths.append(self._2dplot(data, f'2d_{self.name}'))
         elif self.dataset.encoded_data.examples.shape[1] == 3:
-            paths.append(self._3dplot(data, f'3d_{self.name}'))
+            fig_paths.append(self._3dplot(data, f'3d_{self.name}'))
 
-        #Check if more than 1 cluster
+        # Check if more than 1 cluster
         if max(self.method.model.labels_) > 0:
             infoText = f'Silhouette Score(Worst -1|Best 1): {silhouette_score(data, self.method.model.labels_)}\n' \
                        f'Calinski-Harabasz Score(Higher better): {calinski_harabasz_score(data, self.method.model.labels_)}\n' \
@@ -42,9 +47,16 @@ class ClusteringReport(UnsupervisedMLReport):
         else:
             infoText = "Too few clusters to calculate score"
 
+        datasetPath = PathBuilder.build(f'{self.result_path}/{self.dataset.name}_clusterId')
+        ImmuneMLExporter.export(self.dataset, datasetPath, False)
+
+        shutil.make_archive(datasetPath, "zip", datasetPath)
+        table_paths.append(ReportOutput(self.result_path / f"{self.dataset.name}_clusterId.zip", f"{self.dataset.name} with cluster id"))
+
         return ReportResult(self.name,
                             info=infoText,
-                            output_figures=[p for p in paths if p is not None])
+                            output_figures=[p for p in fig_paths if p is not None],
+                            output_tables=[p for p in table_paths if p is not None])
 
     def _2dplot(self, plotting_data, output_name):
         traces = []

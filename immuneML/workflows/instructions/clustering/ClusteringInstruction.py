@@ -1,7 +1,6 @@
 import datetime
 from pathlib import Path
 
-
 from immuneML.data_model.dataset.Dataset import Dataset
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.reports.ReportResult import ReportResult
@@ -11,6 +10,8 @@ from immuneML.workflows.instructions.clustering.ClusteringState import Clusterin
 from immuneML.workflows.instructions.clustering.ClusteringUnit import ClusteringUnit
 from immuneML.workflows.steps.DataEncoder import DataEncoder
 from immuneML.workflows.steps.DataEncoderParams import DataEncoderParams
+
+from immuneML.data_model.dataset.ReceptorDataset import ReceptorDataset
 
 
 class ClusteringInstruction(Instruction):
@@ -24,12 +25,12 @@ class ClusteringInstruction(Instruction):
         name = self.name if self.name is not None else "clustering"
         self.state.result_path = result_path / name
         for index, (key, unit) in enumerate(self.state.clustering_units.items()):
-            print("{}: Started analysis {} ({}/{}).".format(datetime.datetime.now(), key, index+1, len(self.state.clustering_units)), flush=True)
+            print("{}: Started analysis {} ({}/{}).".format(datetime.datetime.now(), key, index + 1, len(self.state.clustering_units)), flush=True)
             path = self.state.result_path / f"analysis_{key}"
             PathBuilder.build(path)
             report_result = self.run_unit(unit, path)
             unit.report_result = report_result
-            print("{}: Finished analysis {} ({}/{}).\n".format(datetime.datetime.now(), key, index+1, len(self.state.clustering_units)), flush=True)
+            print("{}: Finished analysis {} ({}/{}).\n".format(datetime.datetime.now(), key, index + 1, len(self.state.clustering_units)), flush=True)
         return self.state
 
     def run_unit(self, unit: ClusteringUnit, result_path: Path) -> ReportResult:
@@ -41,7 +42,10 @@ class ClusteringInstruction(Instruction):
 
         unit.clustering_method.fit(encoded_dataset.encoded_data)
 
-        unit.report.dataset = encoded_dataset
+        processed_dataset = self.add_label(encoded_dataset, unit.clustering_method.model.labels_, result_path / "dataset_clustered")
+
+        unit.report.dataset = processed_dataset
+
         unit.report.method = unit.clustering_method
         unit.report.result_path = result_path / "report"
         unit.report.number_of_processes = unit.number_of_processes
@@ -61,3 +65,23 @@ class ClusteringInstruction(Instruction):
         else:
             encoded_dataset = unit.dataset
         return encoded_dataset
+
+    def add_label(self, dataset: Dataset, labels: [str], path: Path):
+        PathBuilder.build(path)
+        if type(dataset).__name__ == "RepertoireDataset":
+            # TO DO: Fix building for repertoire dataset
+            for index, x in enumerate(dataset.get_data()):
+                x.metadata["clusterId"] = str(labels[index])
+
+            processed_dataset = dataset
+        else:
+            processed_receptors = [x for x in dataset.get_data()]
+            for index, x in enumerate(processed_receptors):
+                x.metadata["clusterId"] = str(labels[index])
+
+            processed_dataset = ReceptorDataset.build_from_objects(receptors=processed_receptors, file_size=dataset.file_size, name=dataset.name, path=path)
+            processed_dataset.labels = dataset.labels
+            processed_dataset.encoded_data = dataset.encoded_data
+
+        processed_dataset.labels["clusterId"] = list(range(max(labels)))
+        return processed_dataset
