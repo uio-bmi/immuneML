@@ -1,3 +1,4 @@
+import operator
 from pathlib import Path
 
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
@@ -7,7 +8,6 @@ from immuneML.presentation.html.Util import Util
 from immuneML.util.PathBuilder import PathBuilder
 from immuneML.util.StringHelper import StringHelper
 from immuneML.workflows.instructions.clustering import ClusteringState
-
 
 class ClusteringHTMLBuilder:
     """
@@ -41,6 +41,18 @@ class ClusteringHTMLBuilder:
             "css_style": Util.get_css_content(ClusteringHTMLBuilder.CSS_PATH),
             "full_specs": Util.get_full_specs_path(base_path),
             'immuneML_version': MLUtil.get_immuneML_version(),
+            "analyses_summary": len(state.clustering_units) > 1 and state.clustering_scores is not None,
+            "best_analyses_scores": [{
+                "Silhouette_score": max({key: x["Silhouette"] for key, x in state.clustering_scores.items()}.items(), key=operator.itemgetter(1))[0] if len(state.clustering_scores) > 0 else 0,
+                "Calinski-Harabasz_score": max({key: x["Calinski-Harabasz"] for key, x in state.clustering_scores.items()}.items(), key=operator.itemgetter(1))[0] if len(state.clustering_scores) > 0 else 0,
+                "Davies-Bouldin_score": min({key: x["Davies-Bouldin"] for key, x in state.clustering_scores.items()}.items(), key=operator.itemgetter(1))[0] if len(state.clustering_scores) > 0 else 0,
+            } for metric, scores in state.clustering_scores.items()],
+            "analyses_scores": [{
+                "analyses_name": name,
+                "Silhouette_score": round(state.clustering_scores[name]["Silhouette"], 3) if state.clustering_scores[name] is not None else 0,
+                "Calinski-Harabasz_score": round(state.clustering_scores[name]["Calinski-Harabasz"], 3) if state.clustering_scores[name] is not None else 0,
+                "Davies-Bouldin_score": round(state.clustering_scores[name]["Davies-Bouldin"], 3) if state.clustering_scores[name] is not None else 0,
+            } for name, analysis in state.clustering_units.items()],
             "analyses": [{
                 "name": name,
                 "dataset_name": analysis.dataset.name if analysis.dataset.name is not None else analysis.dataset.identifier,

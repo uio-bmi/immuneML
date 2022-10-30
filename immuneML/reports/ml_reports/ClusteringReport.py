@@ -39,14 +39,6 @@ class ClusteringReport(UnsupervisedMLReport):
         elif self.dataset.encoded_data.examples.shape[1] == 3:
             fig_paths.append(self._3dplot(data, f'3d_{self.name}'))
 
-        # Check if more than 1 cluster
-        if max(self.method.model.labels_) > 0:
-            infoText = f'Silhouette Score(Worst -1|Best 1): {silhouette_score(data, self.method.model.labels_)}\n' \
-                       f'Calinski-Harabasz Score(Higher better): {calinski_harabasz_score(data, self.method.model.labels_)}\n' \
-                       f'Davies-Bouldin Score(Best 0): {davies_bouldin_score(data, self.method.model.labels_)}'
-        else:
-            infoText = "Too few clusters to calculate score"
-
         datasetPath = PathBuilder.build(f'{self.result_path}/{self.dataset.name}_clusterId')
         ImmuneMLExporter.export(self.dataset, datasetPath, False)
 
@@ -54,7 +46,6 @@ class ClusteringReport(UnsupervisedMLReport):
         table_paths.append(ReportOutput(self.result_path / f"{self.dataset.name}_clusterId.zip", f"{self.dataset.name} with cluster id"))
 
         return ReportResult(self.name,
-                            info=infoText,
                             output_figures=[p for p in fig_paths if p is not None],
                             output_tables=[p for p in table_paths if p is not None])
 

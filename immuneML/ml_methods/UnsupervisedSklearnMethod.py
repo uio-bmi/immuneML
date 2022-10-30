@@ -41,7 +41,7 @@ class UnsupervisedSklearnMethod(UnsupervisedMLMethod):
         self.feature_names = encoded_data.feature_names
 
         self.model = self._fit(encoded_data.examples, cores_for_training)
-        print_log(f"Fitting finished...", include_datetime=True)
+        print_log(f"Fitting finished.", include_datetime=True)
 
     def _fit(self, X, cores_for_training: int = 1):
         if not self.show_warnings:
