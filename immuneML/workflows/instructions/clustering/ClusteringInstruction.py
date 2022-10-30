@@ -54,10 +54,17 @@ class ClusteringInstruction(Instruction):
             if isinstance(data, csr_matrix):
                 data = encoded_dataset.encoded_data.examples.toarray()
 
-            scores = {"Silhouette": silhouette_score(data, unit.clustering_method.model.labels_),
-                      "Calinski-Harabasz": calinski_harabasz_score(data, unit.clustering_method.model.labels_),
-                      "Davies-Bouldin": davies_bouldin_score(data, unit.clustering_method.model.labels_),
-                      }
+            scores = {
+                "Silhouette": silhouette_score(data, unit.clustering_method.model.labels_),
+                "Calinski-Harabasz": calinski_harabasz_score(data, unit.clustering_method.model.labels_),
+                "Davies-Bouldin": davies_bouldin_score(data, unit.clustering_method.model.labels_),
+            }
+            target_score = {
+                "Silhouette": 1,
+                "Calinski-Harabasz": 999999,
+                "Davies-Bouldin": 0,
+            }
+            self.state.clustering_scores["target_score"] = target_score
             self.state.clustering_scores[key] = scores
 
         processed_dataset = self.add_label(encoded_dataset, unit.clustering_method.model.labels_, result_path / "dataset_clustered")

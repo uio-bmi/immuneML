@@ -17,16 +17,14 @@
         {{#analyses_summary}}
         <div>
             <h2>Analyses summary</h2>
-            {{#best_analyses_scores}}
             <div>
                 <div>
                     <b>Best scores:</b><br>
-                    Silhouette Score(Worst -1|Best 1): <b>{{Silhouette_score}}</b><br>
-                    Calinski-Harabasz Score(Higher better): <b>{{Calinski-Harabasz_score}}</b><br>
-                    Davies-Bouldin Score(Lower better): <b>{{Davies-Bouldin_score}}</b>
+                    {{#best_analyses_scores}}
+                    {{metric}}: <b>{{best_score}}</b><br>
+                    {{/best_analyses_scores}}
                 </div>
             </div>
-            {{/best_analyses_scores}}
             <details>
                 <summary>Analyses scores</summary>
                 <div class="col-container">
@@ -36,20 +34,20 @@
                                 <thead>
                                     <tr>
                                         <th>Analysis</th>
-                                        <th>Silhouette</th>
-                                        <th>Calinski-Harabasz</th>
-                                        <th>Davies-Bouldin</th>
+                                        {{#evaluation_metrics}}
+                                        <th>{{.}}</th>
+                                        {{/evaluation_metrics}}
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {{#analyses_scores}}
+                                {{#analyses_scores}}
                                     <tr>
                                         <td>{{analyses_name}}</td>
-                                        <td>{{Silhouette_score}}</td>
-                                        <td>{{Calinski-Harabasz_score}}</td>
-                                        <td>{{Davies-Bouldin_score}}</td>
+                                        {{#scores}}
+                                        <td>{{.}}</td>
+                                        {{/scores}}
                                     </tr>
-                                    {{/analyses_scores}}
+                                {{/analyses_scores}}
                                 </tbody>
                             </table>
                         </div>
@@ -169,11 +167,34 @@
                     </div>
                 </details>
                 {{/show_dimRed}}
+                {{#show_evaluation_metrics}}
+                <details>
+                    <summary>Clustering evaluation scores</summary>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Metric</th>
+                                    <th>Score</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {{#evaluation_scores}}
+                                <tr>
+                                    <td>{{metric}}</td>
+                                    <td>{{score}}</td>
+                                </tr>
+                                {{/evaluation_scores}}
+                            </tbody>
+                        </table>
+                    </div>
+                </details>
+                {{/show_evaluation_metrics}}
                 {{#report}}
                 <h3>Report {{name}}</h3>
                 <div>
                     {{#show_info}}
-                    <pre>{{info}}</pre>
+                    <p>{{info}}</p>
                     {{/show_info}}
 
                     {{#output_figures}}
