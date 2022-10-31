@@ -14,10 +14,34 @@ from immuneML.util.PathBuilder import PathBuilder
 class ImportanceWeighting(ExampleWeightingStrategy):
     '''
 
-
     pseudocount_value: only if one of distributions is mutagenesis
 
     mutagenesis -> assumed positonal independence, like in Mason dataset
+
+
+    Arguments:
+
+        baseline_dist
+
+        dataset_dist
+
+        pseudocount_value
+
+        lower_weight_limit
+
+        upper_weight_limit
+
+        export_weights
+
+
+    YAML specification:
+
+    .. indent with spaces
+    .. code-block:: yaml
+
+        my_weighting:
+            ImportanceWeighting:
+                ...
 
     '''
 

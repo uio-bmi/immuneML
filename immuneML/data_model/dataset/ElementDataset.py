@@ -67,6 +67,11 @@ class ElementDataset(Dataset):
         batch_filenames = self.element_generator.make_subset(example_indices, path, dataset_type, new_dataset.identifier)
         new_dataset.set_filenames(batch_filenames)
         new_dataset.name = f"{self.name}_split_{dataset_type.lower()}"
+
+        original_example_weights = self.get_example_weights()
+        if original_example_weights is not None:
+            new_dataset.set_example_weights([original_example_weights[i] for i in example_indices])
+
         return new_dataset
 
     def get_label_names(self):

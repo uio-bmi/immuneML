@@ -8,14 +8,14 @@ from immuneML.data_model.dataset.SequenceDataset import SequenceDataset
 from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
 from immuneML.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
 from immuneML.encodings.EncoderParams import EncoderParams
-from immuneML.encodings.motif_encoding.PositionalMotifEncoder import PositionalMotifEncoder
+from immuneML.encodings.motif_encoding.SignificantMotifEncoder import SignificantMotifEncoder
 from immuneML.environment.Constants import Constants
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.environment.LabelConfiguration import LabelConfiguration
 from immuneML.util.PathBuilder import PathBuilder
 
 
-class TestPositionalMotifEncoder(TestCase):
+class TestSignificantMotifEncoder(TestCase):
 
     def setUp(self) -> None:
         os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
@@ -43,13 +43,13 @@ class TestPositionalMotifEncoder(TestCase):
         return SequenceDataset.build_from_objects(sequences, 100, PathBuilder.build(path / 'data'), 'd2')
 
     def test(self):
-        path = EnvironmentSettings.tmp_test_path / "positional_motif_sequence_encoder/test/"
+        path = EnvironmentSettings.tmp_test_path / "significant_motif_sequence_encoder/test/"
         dataset = self._prepare_dataset(path)
 
         lc = LabelConfiguration()
         lc.add_label("l1", [1, 2], positive_class=1)
 
-        encoder = PositionalMotifEncoder.build_object(dataset, **{
+        encoder = SignificantMotifEncoder.build_object(dataset, **{
                 "max_positions": 3,
                 "min_precision": 0.9,
                 "min_recall": 0.5,
@@ -83,13 +83,13 @@ class TestPositionalMotifEncoder(TestCase):
         shutil.rmtree(path)
 
     def test_generalized(self):
-        path = EnvironmentSettings.tmp_test_path / "positional_motif_sequence_encoder/test/"
+        path = EnvironmentSettings.tmp_test_path / "significant_motif_sequence_encoder/test/"
         dataset = self._prepare_dataset(path)
 
         lc = LabelConfiguration()
         lc.add_label("l1", [1, 2], positive_class=1)
 
-        encoder = PositionalMotifEncoder.build_object(dataset, **{
+        encoder = SignificantMotifEncoder.build_object(dataset, **{
                 "max_positions": 3,
                 "min_precision": 0.9,
                 "min_recall": 0.5,

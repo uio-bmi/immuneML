@@ -64,7 +64,7 @@ class MotifClassifier(MLMethod): # todo name? (Greedy)BinaryFeatureClassifier? R
         self.label = label
         self.class_mapping = Util.make_binary_class_mapping(encoded_data.labels[self.label.name])
         # todo deal with positive_class, what if it is not explicitly set?
-        # todo generalize with the positive class label stuff in PositionalMotifEncoder
+        # todo generalize with the positive class label stuff in SignificantMotifEncoder
         # todo weights in immuneML general must also be recalculated here for specific training and validation sets!
 
         encoded_train_data, encoded_val_data = self._prepare_and_split_data(encoded_data)
@@ -242,8 +242,8 @@ class MotifClassifier(MLMethod): # todo name? (Greedy)BinaryFeatureClassifier? R
         return self.class_mapping
 
     def get_compatible_encoders(self):
-        from immuneML.encodings.motif_encoding.PositionalMotifEncoder import PositionalMotifEncoder
-        return [PositionalMotifEncoder]
+        from immuneML.encodings.motif_encoding.SignificantMotifEncoder import SignificantMotifEncoder
+        return [SignificantMotifEncoder]
 
 
 

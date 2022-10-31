@@ -141,6 +141,10 @@ class RepertoireDataset(Dataset):
         new_dataset = RepertoireDataset(repertoires=[self.repertoires[i] for i in example_indices], labels=copy.deepcopy(self.labels),
                                         metadata_file=metadata_file, identifier=str(uuid.uuid1()))
 
+        original_example_weights = self.get_example_weights()
+        if original_example_weights is not None:
+            new_dataset.set_example_weights([original_example_weights[i] for i in example_indices])
+
         return new_dataset
 
     def get_repertoire_ids(self) -> list:
