@@ -5,8 +5,6 @@ from setuptools import setup, find_packages
 from immuneML.environment.Constants import Constants
 
 
-import tensorflow
-
 def import_requirements(filename) -> list:
     with open(filename, 'r') as file:
         requirements = file.read().split("\n")
