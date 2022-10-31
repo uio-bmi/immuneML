@@ -4,10 +4,10 @@ from pathlib import Path
 
 import bionumpy as bnp
 import numpy as np
-from bionumpy import AminoAcidArray, DNAArray
+from bionumpy import AminoAcidEncoding, DNAEncoding
 from bionumpy.bnpdataclass import bnpdataclass
 from bionumpy.encodings import BaseEncoding
-from bionumpy.sequences import ASCIIText
+from bionumpy.io import delimited_buffers
 from bionumpy.string_matcher import RegexMatcher, StringMatcher
 from npstructures import RaggedArray
 
@@ -30,13 +30,13 @@ def get_sequence_per_signal_count(sim_item) -> dict:
 
         return {**seq_with_signal_count, **seq_without_signal_count}
     elif len(sim_item.signals) == 1:
-        return {sim_item.signals[0].id: sim_item.number_of_examples}
+        return {sim_item.signals[0].id: sim_item.number_of_examples, 'no_signal': 0}
     else:
         raise NotImplementedError
 
 
 def get_bnp_data(sequence_path):
-    buff_type = bnp.delimited_buffers.get_bufferclass_for_datatype(GenModelAsTSV, delimiter="\t", has_header=True)
+    buff_type = delimited_buffers.get_bufferclass_for_datatype(GenModelAsTSV, delimiter="\t", has_header=True)
     file = bnp.open(sequence_path, buffer_type=buff_type)
     data = file.read()
     file.close()
@@ -44,7 +44,7 @@ def get_bnp_data(sequence_path):
 
 
 def write_bnp_data(path: Path, data, append_if_exists: bool = True):
-    buff_type = bnp.delimited_buffers.get_bufferclass_for_datatype(type(data), delimiter="\t", has_header=True)
+    buff_type = delimited_buffers.get_bufferclass_for_datatype(type(data), delimiter="\t", has_header=True)
 
     if path.is_file() and append_if_exists:
         with bnp.open(path, buffer_type=buff_type, mode='a') as file:
@@ -57,7 +57,7 @@ def write_bnp_data(path: Path, data, append_if_exists: bool = True):
 
 
 def annotate_sequences(sequences, is_amino_acid: bool, all_signals: list):
-    encoding = AminoAcidArray if is_amino_acid else DNAArray
+    encoding = AminoAcidEncoding if is_amino_acid else DNAEncoding
     sequence_array = sequences.sequence_aa if is_amino_acid else sequences.sequence
 
     signal_matrix = np.zeros((len(sequence_array), len(all_signals)))
@@ -110,8 +110,10 @@ def match_motif(motif: str, encoding, sequence_array):
 
 
 def filter_out_illegal_sequences(sequences, sim_item: LIgOSimulationItem, all_signals: list, max_signals_per_sequence: int):
-    if max_signals_per_sequence != 1:
+    if max_signals_per_sequence > 1:
         raise NotImplementedError
+    elif max_signals_per_sequence == -1:
+        return sequences
 
     sim_signal_ids = [signal.id for signal in sim_item.signals]
     other_signals = [signal.id not in sim_signal_ids for signal in all_signals]
@@ -137,8 +139,8 @@ def make_sequences_from_gen_model(sim_item: LIgOSimulationItem, sequence_batch_s
 
 
 def make_bnp_annotated_sequences(sequences: GenModelAsTSV, all_signals: list, signal_matrix: np.ndarray, signal_positions: dict):
-    kwargs = {**{s.id: signal_matrix[:, ind] for ind, s in enumerate(all_signals)},
-              **{f"{s.id}_positions": bnp.as_encoded_sequence_array(signal_positions[f"{s.id}_positions"], bnp.encodings.BaseEncoding) for ind, s in
+    kwargs = {**{s.id: signal_matrix[:, ind].astype(int) for ind, s in enumerate(all_signals)},
+              **{f"{s.id}_positions": bnp.as_encoded_array(signal_positions[f"{s.id}_positions"], bnp.encodings.BaseEncoding) for ind, s in
                  enumerate(all_signals)},
               **{field_name: getattr(sequences, field_name) for field_name in GenModelAsTSV.__annotations__.keys()}}
 
@@ -148,7 +150,7 @@ def make_bnp_annotated_sequences(sequences: GenModelAsTSV, all_signals: list, si
 
 def make_signal_matrix_bnpdataclass(signals: list):
     signal_fields = [(s.id, int) for s in signals]
-    signal_position_fields = [(f"{s.id}_positions", ASCIIText) for s in signals]
+    signal_position_fields = [(f"{s.id}_positions", str) for s in signals]
     base_fields = [(field_name, field_type) for field_name, field_type in GenModelAsTSV.__annotations__.items()]
 
     functions = {"get_signal_matrix": lambda self: np.array([getattr(self, field) for field, t in signal_fields]).T,

@@ -11,6 +11,8 @@ from immuneML.util.ReflectionHandler import ReflectionHandler
 
 class MLParser:
 
+    keyword = "ml_methods"
+
     @staticmethod
     def parse(specification: dict, symbol_table: SymbolTable):
 

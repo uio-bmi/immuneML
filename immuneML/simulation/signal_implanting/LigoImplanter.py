@@ -88,6 +88,7 @@ class LigoImplanter:
                                f"compute sequence generation probabilities. Use other generative model or set keep_p_gen_dist parameter to False.")
 
         sequence_df = pd.read_csv(sequence_path, sep='\t')
+        sequence_df.columns = self.sim_item.generative_model.OUTPUT_COLUMNS
         p_gens = self.sim_item.generative_model.compute_p_gens(sequence_df, self.sequence_type)
         self.p_gen_histogram = np.histogram(np.log10(p_gens), bins=self.p_gen_bin_count, density=True)
 

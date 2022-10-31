@@ -75,8 +75,10 @@ class SimulationParser:
 
     """
 
+    keyword = "simulations"
+
     @staticmethod
-    def parse_simulations(simulations: dict, symbol_table: SymbolTable):
+    def parse(simulations: dict, symbol_table: SymbolTable):
         location = SimulationParser.__name__
         for key, simulation in simulations.items():
 

@@ -12,11 +12,12 @@ from immuneML.util.ReflectionHandler import ReflectionHandler
 
 class SignalParser:
 
+    keyword = "signals"
     VALID_KEYS = ["motifs"]
 
     @staticmethod
     @log
-    def parse_signals(signals: dict, symbol_table: SymbolTable):
+    def parse(signals: dict, symbol_table: SymbolTable):
         for key, signal_spec in signals.items():
 
             ParameterValidator.assert_keys_present(signal_spec.keys(), SignalParser.VALID_KEYS, "SignalParser", key)

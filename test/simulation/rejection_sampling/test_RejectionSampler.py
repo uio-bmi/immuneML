@@ -4,6 +4,10 @@ from unittest import TestCase
 import bionumpy as bnp
 import numpy as np
 import pandas as pd
+from bionumpy import as_encoded_array, DNAEncoding, AminoAcidEncoding
+from bionumpy.encodings import BaseEncoding
+from bionumpy.io import delimited_buffers
+from npstructures.testing import assert_raggedarray_equal
 
 from immuneML.data_model.receptor.receptor_sequence.Chain import Chain
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
@@ -43,12 +47,13 @@ class TestRejectionSampler(TestCase):
         signal1 = Signal('s1', [motif1, motif2], None)
         signal2 = Signal('s2', [motif3, motif4], None)
 
-        sequences = pd.DataFrame({'sequence_aa': ['AAACCC', 'EEAAF', 'EEFAF'], 'sequence': ['A', 'CCA', 'CTA'], 'v_call': ['V1-1', 'V2', 'V7'], 'j_call': ['J2', 'J3-2', 'J1'],
+        sequences = pd.DataFrame({'sequence_aa': ['AAACCC', 'EEAAF', 'EEFAF'], 'sequence': ['A', 'CCA', 'CTA'], 'v_call': ['V1-1', 'V2', 'V7'],
+                                  'j_call': ['J2', 'J3-2', 'J1'],
                                   'region_type': ['JUNCTION', 'JUNCTION', 'JUNCTION'], 'frame_type': ['in', 'in', 'in']})
         sequences.to_csv(path / 'sequences.tsv', sep='\t', index=False)
 
         sequences = bnp.open(path / 'sequences.tsv',
-                             buffer_type=bnp.delimited_buffers.get_bufferclass_for_datatype(GenModelAsTSV, delimiter="\t", has_header=True)).read()
+                             buffer_type=delimited_buffers.get_bufferclass_for_datatype(GenModelAsTSV, delimiter="\t", has_header=True)).read()
 
         return sequences, [signal1, signal2]
 
@@ -62,11 +67,18 @@ class TestRejectionSampler(TestCase):
         path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / 'rej_sampling_gen_seqs')
 
         sampler = self.make_sampler()
-        sampler._make_background_sequences(path, {'s1': 10, 'no_signal': 5})
+        sequence_counts = {'s1': 10, 'no_signal': 5}
+        sampler._make_background_sequences(path, sequence_counts)
 
-        for filename in ['sequences_no_signal.tsv', 'sequences_with_signal_s1.tsv']:
+        for filename, expected_count in zip(['sequences_no_signal.tsv', 'sequences_with_signal_s1.tsv'], [5, 10]):
             seqs = pd.read_csv(path / filename, sep='\t')
-            assert seqs.shape[0] == 15, seqs
+            assert seqs.shape[0] == expected_count, seqs
+
+            if 'no_signal.tsv' in filename:
+                assert seqs['s1'].values.sum() == 0, f"sum in no signal: {seqs['s1'].values.sum()}"
+            else:
+                assert seqs['s1'].values.sum() == seqs.shape[0], f"sum in signal: {seqs['s1'].values.sum()}, expected {seqs.shape[0]}"
+
             for index, row in seqs.iterrows():
                 assert len(row['s1_positions']) == len(row['s2_positions'])
                 assert len(row['sequence_aa']) + 1 == len(row['s1_positions']), (row['sequence_aa'], row['s1_positions'])
@@ -79,22 +91,15 @@ class TestRejectionSampler(TestCase):
 
         sampler = self.make_sampler()  # s1: AA, s2: EA
         signal_matrix = np.array([[True, False], [False, False], [True, True], [False, True]])
-        pd.DataFrame({**{key: ['', '', '', ''] for key in sampler.sim_item.generative_model.OUTPUT_COLUMNS},
-                      **{'sequence_aa': ['AA', 'DFG', 'AAEA', 'DGEAFT']}}) \
-            .to_csv(path / 'tmp.tsv', sep='\t', index=False, header=True)
-        background_seqs = bnp.open(path / 'tmp.tsv',
-                                   buffer_type=bnp.delimited_buffers.get_bufferclass_for_datatype(GenModelAsTSV, has_header=True)).read()
+        background_seqs = GenModelAsTSV(**{**{key: as_encoded_array(['A', 'A', 'A', 'A'], BaseEncoding if 'sequence' not in key else DNAEncoding)
+                                              for key in sampler.sim_item.generative_model.OUTPUT_COLUMNS},
+                                           **{'sequence_aa': as_encoded_array(['AA', 'DFG', 'AAEA', 'DGEAFT'], AminoAcidEncoding)}})
         seqs = make_bnp_annotated_sequences(background_seqs, [Signal('s1', None, None), Signal("s2", None, None)], signal_matrix,
-                                            {"s1_positions": ['', '', '', ''], "s2_positions": ['', '', '', '']})
+                                            {"s1_positions": ['m', 'm', 'm', 'm'], "s2_positions": ['m', 'm', 'm', 'm']})
         sampler.seqs_no_signal_path = path / 'no_sig.tsv'
         count = sampler._update_seqs_without_signal(5, seqs)
 
         assert count == 4, count
-
-        df = pd.read_csv(path / 'no_sig.tsv', sep='\t')
-        for i, row in df.iterrows():
-            assert len(row['sequence_aa']) + 1 == len(row['s1_positions']), (row['sequence_aa'], row['s1_positions'])
-            assert len(row['sequence_aa']) + 1 == len(row['s2_positions']), (row['sequence_aa'], row['s2_positions'])
 
         shutil.rmtree(path)
 
@@ -103,15 +108,18 @@ class TestRejectionSampler(TestCase):
 
         sampler = self.make_sampler()
         signal_matrix = np.array([[True, False], [False, False], [False, True]])
-        signal_positions = pd.DataFrame({'s1_positions': ['m10', 'm000', 'm000000'],
-                                         's2_positions': ['m00', 'm000', 'm001000']})
+        signal_positions = {'s1_positions': ['m10', 'm000', 'm000000'], 's2_positions': ['m00', 'm000', 'm001000']}
         pd.DataFrame({**{key: ['', '', ''] for key in sampler.sim_item.generative_model.OUTPUT_COLUMNS},
                       **{'sequence_aa': ['AA', 'DFG', 'DGEAFT']}}) \
             .to_csv(path / 'tmp.tsv', sep='\t', index=False, header=True)
         background_seqs = bnp.open(path / 'tmp.tsv',
-                                   buffer_type=bnp.delimited_buffers.get_bufferclass_for_datatype(GenModelAsTSV, has_header=True)).read()
+                                   buffer_type=delimited_buffers.get_bufferclass_for_datatype(GenModelAsTSV, has_header=True)).read()
+        annotated_sequences = make_bnp_annotated_sequences(background_seqs, sampler.all_signals, signal_matrix, signal_positions)
         sampler.seqs_with_signal_path = {'s1': path / 'with_sig.tsv'}
-        count = sampler._update_seqs_with_signal({'s1': 5}, background_seqs)
+
+        print(annotated_sequences)
+
+        count = sampler._update_seqs_with_signal({'s1': 5}, annotated_sequences)
 
         assert count['s1'] == 4, count
 
@@ -129,6 +137,7 @@ class TestRejectionSampler(TestCase):
         path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / 'rej_sampling_make_seqs')
 
         sampler = self.make_sampler()
+        sampler.sim_item.receptors_in_repertoire_count = None
 
         sequences = sampler.make_sequences(path)
 
@@ -150,7 +159,7 @@ class TestRejectionSampler(TestCase):
         expected_sequences = annotated_sequences[[False, False, True]]
 
         for field_name in vars(filtered_sequences):
-            assert np.array_equal(getattr(filtered_sequences, field_name).tolist(), getattr(expected_sequences, field_name).tolist()), filtered_sequences
+            assert_raggedarray_equal(getattr(filtered_sequences, field_name), getattr(expected_sequences, field_name)), filtered_sequences
 
         shutil.rmtree(path)
 

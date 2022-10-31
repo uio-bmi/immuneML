@@ -20,10 +20,12 @@ class TestLigoImplanter(TestCase):
         path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / 'ligo_implanter')
 
         signals = [Signal('s1', [Motif('m1', GappedKmerInstantiation(), 'AA')], None)]
-        implanter = LigoImplanter(LIgOSimulationItem(signals, 'sim_item1', 0.3,
-                                                     is_noise=False, seed=1, generative_model=OLGA(None, 'humanTRB'),
-                                                     number_of_examples=5, number_of_receptors_in_repertoire=20), SequenceType.AMINO_ACID, signals,
-                                  1000, 1, True, True, True)
+        implanter = LigoImplanter(LIgOSimulationItem(signals, 'sim_item1', 0.3, is_noise=False, seed=1,
+                                                     generative_model=OLGA.build_object(**{"default_model_name": 'humanTRB', 'model_path': None,
+                                                                                           'use_only_productive': False}),
+                                                     number_of_examples=5, receptors_in_repertoire_count=20), SequenceType.AMINO_ACID, signals,
+                                  sequence_batch_size=1000, seed=1, export_p_gens=True, keep_p_gen_dist=True, remove_seqs_with_signals=True,
+                                  max_iterations=100, p_gen_bin_count=5)
         repertoires = implanter.make_repertoires(path)
 
         self.assertEqual(len(repertoires), 5)

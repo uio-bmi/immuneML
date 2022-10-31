@@ -1,4 +1,5 @@
 import os
+import shutil
 from pathlib import Path
 from unittest import TestCase
 
@@ -80,6 +81,10 @@ class TestLIgOSimulation(TestCase):
                                 }
                             },
                             "var2": {
+                                "immune_events": {
+                                  "ievent1": False,
+                                  "ievent2": False,
+                                },
                                 "signals": ["signal1", "signal2"],
                                 "number_of_examples": 10,
                                 "is_noise": True,
@@ -133,6 +138,6 @@ class TestLIgOSimulation(TestCase):
         self.assertTrue(os.path.isfile(path / "result/inst1/metadata.csv"))
 
         metadata_df = pd.read_csv(path / "result/inst1/metadata.csv", comment=Constants.COMMENT_SIGN)
-        self.assertTrue("signal1" in metadata_df.columns)
+        self.assertTrue(all(el in metadata_df.columns for el in ["signal1", "ievent1", "ievent2", "signal2"]))
 
-        # shutil.rmtree(path)
+        shutil.rmtree(path)

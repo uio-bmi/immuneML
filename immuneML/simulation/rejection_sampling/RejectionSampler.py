@@ -119,7 +119,7 @@ class RejectionSampler:
         while (sum(sequence_per_signal_count.values()) != 0) and iteration <= self.max_iterations:
             sequence_path = PathBuilder.build(path / f"gen_model/") / f"tmp_{self.seed}_{self.sim_item.name}.tsv"
 
-            needs_seqs_with_signal = sum(sequence_per_signal_count.values()) - sequence_per_signal_count['no_signal'] != 0
+            needs_seqs_with_signal = (sum(sequence_per_signal_count.values()) - sequence_per_signal_count['no_signal']) > 0
             make_sequences_from_gen_model(self.sim_item, self.sequence_batch_size, self.seed, sequence_path, self.sequence_type,
                                           needs_seqs_with_signal)
             self.seed += 1
@@ -145,8 +145,10 @@ class RejectionSampler:
     def _update_seqs_without_signal(self, max_count, annotated_sequences):
         if max_count > 0:
             selection = annotated_sequences.get_signal_matrix().sum(axis=1) == 0
-            write_bnp_data(data=annotated_sequences[selection][:max_count], path=self.seqs_no_signal_path)
-            return max_count - max(selection.sum(), max_count)
+            data_to_write = annotated_sequences[selection][:max_count]
+            if len(data_to_write) > 0:
+                write_bnp_data(data=data_to_write, path=self.seqs_no_signal_path)
+            return max_count - len(data_to_write)
         else:
             return max_count
 
@@ -157,9 +159,11 @@ class RejectionSampler:
 
         for signal in self.sim_item.signals:
             if max_counts[signal.id] > 0:
-                selection = signal_matrix[:, all_signal_ids.index(signal.id)]
-                write_bnp_data(data=annotated_sequences[selection][:max_counts[signal.id]], path=self.seqs_with_signal_path[signal.id])
-                max_counts[signal.id] -= max(selection.sum(), max_counts[signal.id])
+                selection = signal_matrix[:, all_signal_ids.index(signal.id)].astype(bool)
+                data_to_write = annotated_sequences[selection][:max_counts[signal.id]]
+                if len(data_to_write) > 0:
+                    write_bnp_data(data=data_to_write, path=self.seqs_with_signal_path[signal.id])
+                max_counts[signal.id] -= len(data_to_write)
 
         return max_counts
 
