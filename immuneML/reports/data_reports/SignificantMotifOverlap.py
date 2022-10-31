@@ -3,6 +3,7 @@ from pathlib import Path
 import pandas as pd
 import warnings
 import logging
+import numpy as np
 
 from immuneML.data_model.dataset.Dataset import Dataset
 from immuneML.dsl.instruction_parsers.LabelHelper import LabelHelper
@@ -79,11 +80,14 @@ class SignificantMotifOverlap(DataReport):
 
     def _generate(self) -> ReportResult:
         self.label_config = self._get_label_config()
-        features_per_subset = self._get_significant_features_per_subset()
-        result_files = self._write_result_files(features_per_subset)
+
+        encoded_datasets = self._encode_datasets(self._get_splitted_dataset())
+        # features_per_subset = self._get_significant_features_per_subset(encoded_datasets)
+
+        result_files = self._write_result_files(encoded_datasets)
 
         return ReportResult(name=self.name,
-                            info=f"Analysis of significant motifs found across {len(features_per_subset)} subsets of the dataset.",
+                            info=f"Analysis of significant motifs found across {self.n_splits} subsets of the dataset.",
                             output_tables=result_files)
 
 
@@ -95,19 +99,32 @@ class SignificantMotifOverlap(DataReport):
             # but we also find more motifs?? generally:number overlapping is good enough. also finding more motifs in all cases and having more overlapping is good.. right?
             # no also need to show total number found -> just in case you just find 100x more, but not more overlapping.. that would be bad. just as double check
 
-    def _write_result_files(self, features_per_subset):
+    def _write_result_files(self, encoded_datasets):
         results_folder = PathBuilder.build(self.result_path / "feature_intersections")
 
+        # features_per_subset = for encoded_dataset in encoded_datasets:
+    #         if encoded_dataset is None:
+    #             features_per_subset.append(set())
+    #         else:
+    #             features_per_subset.append(set(encoded_dataset.encoded_data.feature_names))
 
-        subset_sizes_output = self._write_subset_sizes(features_per_subset, results_folder)
-        pairwise_intersection_output = self._write_pairwise_intersections(features_per_subset, results_folder)
-        multi_intersection_motifs = self._write_multi_intersection_motifs(features_per_subset, results_folder)
+
+        subset_sizes_output = self._write_subset_sizes(encoded_datasets, results_folder)
+        pairwise_intersection_output = self._write_pairwise_intersections(encoded_datasets, results_folder)
+        multi_intersection_motifs = self._write_multi_intersection_motifs(encoded_datasets, results_folder)
 
         return [subset_sizes_output, pairwise_intersection_output, multi_intersection_motifs]
 
-    def _write_subset_sizes(self, features_per_subset, results_folder):
-        results_df = pd.DataFrame({"subset_idx": list(range(len(features_per_subset))),
-                                   "number_of_features": [len(feature_list) for feature_list in features_per_subset]})
+    def _get_motif_set(self, encoded_dataset):
+        if encoded_dataset is None:
+            return set()
+        else:
+            return set(encoded_dataset.encoded_data.feature_names)
+
+    def _write_subset_sizes(self, encoded_datasets, results_folder):
+        results_df = pd.DataFrame({"subset_idx": list(range(self.n_splits)),
+                                   "number_of_motifs": [len(self._get_motif_set(encoded_dataset)) for encoded_dataset in encoded_datasets],
+                                   "number_of_tps": [self._compute_tp_sequence_count(encoded_dataset) for encoded_dataset in encoded_datasets]})
 
         output_file_path = results_folder / "number_of_features_per_subset.tsv"
 
@@ -115,21 +132,27 @@ class SignificantMotifOverlap(DataReport):
 
         return ReportOutput(output_file_path, "Number of significant features found in each data subset")
 
-    def _write_pairwise_intersections(self, features_per_subset, results_folder):
+    def _write_pairwise_intersections(self, encoded_datasets, results_folder):
         result = {"first_subset_idx": [], "second_subset_idx": [],
-                  "first_subset_size": [], "second_subset_size": [],
-                  "intersection_size": []}
+                  "first_subset_number_of_motifs": [], "second_subset_number_of_motifs": [],
+                  "intersecting_motifs": []}
 
-        for first_subset_idx in range(len(features_per_subset)):
-            for second_subset_idx in range(first_subset_idx + 1, len(features_per_subset)):
-                pairwise_intersection = set.intersection(features_per_subset[first_subset_idx],
-                                                         features_per_subset[second_subset_idx])
+        for first_subset_idx in range(self.n_splits):
+            for second_subset_idx in range(first_subset_idx + 1, self.n_splits):
+                first_motif_set = self._get_motif_set(encoded_datasets[first_subset_idx])
+                second_motif_set = self._get_motif_set(encoded_datasets[second_subset_idx])
+
+                pairwise_intersection = set.intersection(first_motif_set, second_motif_set)
 
                 result["first_subset_idx"].append(first_subset_idx)
-                result["first_subset_size"].append(len(features_per_subset[first_subset_idx]))
+                result["first_subset_number_of_motifs"].append(len(first_motif_set))
                 result["second_subset_idx"].append(second_subset_idx)
-                result["second_subset_size"].append(len(features_per_subset[second_subset_idx]))
-                result["intersection_size"].append(len(pairwise_intersection))
+                result["second_subset_number_of_motifs"].append(len(second_motif_set))
+                result["intersecting_motifs"].append(len(pairwise_intersection))
+
+                # todo: somehow add the intersection of positive predictions in first and second sets tps_first_subset/tps_second_subset
+                # should also the first file info be in here??
+
 
         output_file_path = results_folder / "pairwise_intersections.tsv"
 
@@ -138,15 +161,32 @@ class SignificantMotifOverlap(DataReport):
 
         return ReportOutput(output_file_path, "Pairwise intersections between the significant features in each data subset")
 
-    def _write_multi_intersection_motifs(self, features_per_subset, results_folder):
+    def _compute_tp_sequence_count(self, encoded_dataset):
+        if encoded_dataset is None:
+            return 0
+        else:
+            positives = np.any(encoded_dataset.encoded_data.examples, axis=1)
+            y_true = self._get_y_true(encoded_dataset)
+            return sum(np.logical_and(positives, y_true))
+
+    def _get_y_true(self, encoded_dataset):
+        label_name = self.label_config.get_labels_by_name()[0]
+        label = self.label_config.get_label_object(label_name)
+
+        return np.array([cls == label.positive_class for cls in encoded_dataset.encoded_data.labels[label_name]])
+
+
+    def _write_multi_intersection_motifs(self, encoded_datasets, results_folder):
         output_file_path = results_folder / "multi_intersection_motifs.tsv"
 
-        multi_intersection = list(sorted(set.intersection(*features_per_subset)))
+        motif_sets = [self._get_motif_set(encoded_dataset) for encoded_dataset in encoded_datasets]
+
+        multi_intersection = list(sorted(set.intersection(*motif_sets)))
 
         motifs = [PositionalMotifHelper.string_to_motif(string, value_sep="&", motif_sep="-") for string in multi_intersection]
         PositionalMotifHelper.write_motifs_to_file(motifs, output_file_path)
 
-        return ReportOutput(output_file_path, f"Intersection of significant motifs across all {len(features_per_subset)} data subsets")
+        return ReportOutput(output_file_path, f"Intersection of significant motifs across all {self.n_splits} data subsets")
 
     def _get_label_config(self):
         label_config = LabelHelper.create_label_config([self.label], self.dataset, SignificantMotifOverlap.__name__,
@@ -155,21 +195,35 @@ class SignificantMotifOverlap(DataReport):
 
         return label_config
 
-    def _get_significant_features_per_subset(self):
-        features_per_subset = []
+    def _encode_datasets(self, data_subsets):
+        encoded_data_subsets = []
 
-        for i, data_subset in enumerate(self._split_dataset()):
+        for i, data_subset in enumerate(data_subsets):
             try:
                 encoded_dataset = self._encode_subset(data_subset, i)
-                features_per_subset.append(set(encoded_dataset.encoded_data.feature_names))
             except AssertionError:
-                warnings.warn(f"{SignificantMotifOverlap.__name__}: No significant features were found for data subset {i}. "
-                              f"Please try decreasing the values for parameters 'min_precision' or 'min_recall' to find more features.")
-                features_per_subset.append(set())
+                warnings.warn(
+                    f"{SignificantMotifOverlap.__name__}: No significant features were found for data subset {i}. "
+                    f"Please try decreasing the values for parameters 'min_precision' or 'min_recall' to find more features.")
 
-        return features_per_subset
+                encoded_dataset = None
 
-    def _split_dataset(self):
+            encoded_data_subsets.append(encoded_dataset)
+
+        return encoded_data_subsets
+
+    # def _get_significant_features_per_subset(self, encoded_datasets):
+    #     features_per_subset = []
+    #
+    #     for encoded_dataset in encoded_datasets:
+    #         if encoded_dataset is None:
+    #             features_per_subset.append(set())
+    #         else:
+    #             features_per_subset.append(set(encoded_dataset.encoded_data.feature_names))
+    #
+    #     return features_per_subset
+
+    def _get_splitted_dataset(self):
         data_subsets = []
         subset_indices = self._get_subset_indices(self.dataset.get_example_count())
 
@@ -202,9 +256,9 @@ class SignificantMotifOverlap(DataReport):
                                                                       "name": f"motif_encoder_{data_subset.name}"})
 
         encoder_params = EncoderParams(result_path=self.result_path / "encoded_data" / f"split_{i}",
-                                                       pool_size=self.number_of_processes,
-                                                       learn_model=True,
-                                                       label_config=self.label_config)
+                                       pool_size=self.number_of_processes,
+                                       learn_model=True,
+                                       label_config=self.label_config) # todo need individual label config per data subset???
 
         encoded_dataset = encoder.encode(data_subset, encoder_params)
 
