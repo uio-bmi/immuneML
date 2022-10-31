@@ -174,7 +174,7 @@ class LIgOSimulationInstruction(Instruction):
 
     def _make_sequences_by_implanting(self, item: LIgOSimulationItem, path: Path, summary_path: Path, repertoire_id: str) -> list:
 
-        background_sequences = item.generative_model.generate_sequences(item.number_of_receptors_in_repertoire, seed=1, path=path / "tmp.tsv",
+        background_sequences = item.generative_model.generate_sequences(item.receptors_in_repertoire_count, seed=1, path=path / "tmp.tsv",
                                                                         sequence_type=self.state.sequence_type)
 
         sequence_indices = {}
@@ -183,7 +183,7 @@ class LIgOSimulationInstruction(Instruction):
 
         for signal in item.signals:
             receptor_with_signal_count = signal.implanting_strategy.compute_implanting(item.repertoire_implanting_rate,
-                                                                                       item.number_of_receptors_in_repertoire)
+                                                                                       item.receptors_in_repertoire_count)
             sequence_indices[signal.id] = random.sample(available_indices, k=receptor_with_signal_count)
             available_indices = [ind for ind in available_indices if ind not in sequence_indices[signal.id]]
 
@@ -215,7 +215,7 @@ class LIgOSimulationInstruction(Instruction):
     def _add_to_summary(self, summary_path, receptor_with_signal_count, signal, item, repertoire_id):
 
         df = pd.DataFrame({"receptors_with_signal": [receptor_with_signal_count],
-                           "receptors_total": [item.number_of_receptors_in_repertoire],
+                           "receptors_total": [item.receptors_in_repertoire_count],
                            "signal_id": [signal.id], "simulation_item": [item.name],
                            "repertoire_id": [repertoire_id]})
 

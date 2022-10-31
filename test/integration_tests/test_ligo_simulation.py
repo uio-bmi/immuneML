@@ -61,12 +61,16 @@ class TestLIgOSimulation(TestCase):
                         "simulation_strategy": "REJECTION_SAMPLING",
                         "sim_items": {
                             "var1": {
+                                "immune_events": {
+                                  "ievent1": True,
+                                  "ievent2": False,
+                                },
                                 "signals": ["signal1", "signal2"],
                                 "number_of_examples": 10,
                                 "is_noise": False,
                                 "seed": 100,
                                 "repertoire_implanting_rate": 0.5,
-                                "number_of_receptors_in_repertoire": 6,
+                                "receptors_in_repertoire_count": 6,
                                 "generative_model": {
                                     "type": "OLGA",
                                     "model_path": None,
@@ -81,7 +85,7 @@ class TestLIgOSimulation(TestCase):
                                 "is_noise": True,
                                 "seed": 2,
                                 "repertoire_implanting_rate": 0.2,
-                                "number_of_receptors_in_repertoire": 6,
+                                "receptors_in_repertoire_count": 6,
                                 "generative_model": {
                                     'type': 'OLGA',
                                     "model_path": None,

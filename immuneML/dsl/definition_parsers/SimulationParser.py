@@ -149,7 +149,7 @@ class SimulationParser:
     def _parse_ligo_sim_item(simulation_item: dict, key: str, symbol_table: SymbolTable) -> LIgOSimulationItem:
         location = SimulationParser.__name__
         valid_simulation_item_keys = ["number_of_examples", "repertoire_implanting_rate", "signals", "is_noise", "seed",
-                                      "number_of_receptors_in_repertoire", "generative_model"]
+                                      "receptors_in_repertoire_count", "generative_model", "immune_events"]
 
         simulation_item = {**DefaultParamsLoader.load('simulation', 'ligo_simulation_item'), **simulation_item}
 
@@ -160,9 +160,14 @@ class SimulationParser:
         for k in ['number_of_examples', 'seed']:
             ParameterValidator.assert_type_and_value(simulation_item[k], int, location, k, min_inclusive=1)
 
-        for k, val_type in zip(['repertoire_implanting_rate', 'number_of_receptors_in_repertoire'], [float, int]):
+        for k, val_type in zip(['repertoire_implanting_rate', 'receptors_in_repertoire_count', 'immune_events'], [float, int, dict]):
             if simulation_item[k]:
                 ParameterValidator.assert_type_and_value(simulation_item[k], val_type, location, k)
+
+        ParameterValidator.assert_all_type_and_value(simulation_item.keys(), str, location, 'immune_events')
+        for k, val in simulation_item['immune_events'].items():
+            assert isinstance(val, int) or isinstance(val, bool) or isinstance(val, str), \
+                f"The values for immune events under {k} has to be int, bool or string, got {val} ({type(val)}."
 
         gen_model = SimulationParser._parse_generative_model(simulation_item, location)
 
