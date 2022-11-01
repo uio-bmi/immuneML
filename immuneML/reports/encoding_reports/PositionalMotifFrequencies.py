@@ -139,8 +139,8 @@ class PositionalMotifFrequencies(EncodingReport):
                 x=data.keys(),
                 y=data.values(),
                 labels={
-                    "x": "Distance between Amino Acids",
-                    "y": "Distance occurrence",
+                    "x": "Gap size",
+                    "y": "Gap size occurrence",
                 },
                 color_discrete_sequence=self._get_color_discrete_sequence(),
                 template="plotly_white",
@@ -210,7 +210,7 @@ class PositionalMotifFrequencies(EncodingReport):
             gap_size_df = pd.DataFrame.from_dict(
                 gap_size_sub_dict, orient="index", dtype=str
             )
-            gap_size_df.to_csv(table_path, index=True, header=["Gap size, occurance"])
+            gap_size_df.to_csv(table_path, index=True, header=["Gap size, occurrence"])
             gap_size_tables.append(
                 ReportOutput(
                     path=table_path,

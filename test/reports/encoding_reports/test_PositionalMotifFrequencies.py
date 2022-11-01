@@ -1,27 +1,16 @@
 import os
 import shutil
 import pandas as pd
-from pathlib import Path
 from unittest import TestCase
 
 from immuneML.caching.CacheType import CacheType
 from immuneML.data_model.dataset.SequenceDataset import SequenceDataset
-from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import (
-    ReceptorSequence,
-)
-from immuneML.data_model.receptor.receptor_sequence.SequenceMetadata import (
-    SequenceMetadata,
-)
+from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
+from immuneML.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
 from immuneML.encodings.EncoderParams import EncoderParams
-from immuneML.reports.encoding_reports.PositionalMotifFrequencies import (
-    PositionalMotifFrequencies,
-)
-from immuneML.environment.EnvironmentSettings import EnvironmentSettings
+from immuneML.encodings.motif_encoding.SignificantMotifEncoder import SignificantMotifEncoder
+from immuneML.reports.encoding_reports.PositionalMotifFrequencies import PositionalMotifFrequencies
 from immuneML.environment.LabelConfiguration import LabelConfiguration
-from immuneML.encodings.motif_encoding.PositionalMotifEncoder import (
-    PositionalMotifEncoder,
-)
-from immuneML.data_model.repertoire.Repertoire import Repertoire
 from immuneML.environment.Constants import Constants
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.reports.ReportResult import ReportResult
@@ -85,7 +74,7 @@ class TestPositionalMotifFrequencies(TestCase):
         lc = LabelConfiguration()
         lc.add_label("l1", [1, 2], positive_class=1)
 
-        encoder = PositionalMotifEncoder.build_object(
+        encoder = SignificantMotifEncoder.build_object(
             dataset,
             **{
                 "max_positions": 3,
@@ -104,7 +93,6 @@ class TestPositionalMotifFrequencies(TestCase):
                 pool_size=2,
                 learn_model=True,
                 model={},
-                filename="dataset.csv",
             ),
         )
 
@@ -126,21 +114,13 @@ class TestPositionalMotifFrequencies(TestCase):
 
         self.assertIsInstance(result, ReportResult)
 
-        self.assertEqual(
-            result.output_figures[0].path, path / "gap_size_for_motif_size_2.html"
-        )
-        self.assertEqual(
-            result.output_figures[1].path, path / "positional_motif_frequencies.html"
-        )
-        self.assertEqual(
-            result.output_tables[0].path, path / "gap_size_table_motif_size_2.csv"
-        )
-        self.assertEqual(
-            result.output_tables[1].path, path / "positional_aa_counts.csv"
-        )
+        self.assertEqual(result.output_figures[0].path, path / "gap_size_for_motif_size_2.html")
+        self.assertEqual(result.output_figures[1].path, path / "positional_motif_frequencies.html")
+        self.assertEqual(result.output_tables[0].path, path / "gap_size_table_motif_size_2.csv")
+        self.assertEqual(result.output_tables[1].path, path / "positional_aa_counts.csv")
 
         content = pd.read_csv(path / "gap_size_table_motif_size_2.csv")
-        self.assertEqual((list(content.columns))[1], "Gap size, occurance")
+        self.assertEqual((list(content.columns))[1], "Gap size, occurrence")
 
         content = pd.read_csv(path / "positional_aa_counts.csv")
         self.assertEqual(list(content.index), [i for i in range(4)])
