@@ -21,6 +21,10 @@ class PositionalMotifFrequencies(EncodingReport):
     investigating motif continuity which displays a bar plot of the gap sizes between the amino acids in the motifs in
     the given dataset. Note that a distance of 1 means that the amino acids are continuous (next to each other).
 
+    # todo:
+    - make gap sizes 0-based (essentially: subtract 1 from all gap sizes, so that contiguous amino acids have gap size 0)
+    - the header of gap_size_table_motif_size_{motif_size}.csv is wrong; make sure it contains no quotes
+
     YAML specification example:
 
     .. indent with spaces
