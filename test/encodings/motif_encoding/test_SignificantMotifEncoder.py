@@ -43,7 +43,7 @@ class TestSignificantMotifEncoder(TestCase):
         return SequenceDataset.build_from_objects(sequences, 100, PathBuilder.build(path / 'data'), 'd2')
 
     def test(self):
-        path = EnvironmentSettings.tmp_test_path / "significant_motif_sequence_encoder/test/"
+        path = EnvironmentSettings.tmp_test_path / "significant_motif_sequence_encoder_test/"
         dataset = self._prepare_dataset(path)
 
         lc = LabelConfiguration()
@@ -83,7 +83,7 @@ class TestSignificantMotifEncoder(TestCase):
         shutil.rmtree(path)
 
     def test_generalized(self):
-        path = EnvironmentSettings.tmp_test_path / "significant_motif_sequence_encoder/test/"
+        path = EnvironmentSettings.tmp_test_path / "significant_motif_sequence_encoder_generalized/"
         dataset = self._prepare_dataset(path)
 
         lc = LabelConfiguration()

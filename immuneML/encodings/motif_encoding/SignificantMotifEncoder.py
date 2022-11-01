@@ -152,10 +152,7 @@ class SignificantMotifEncoder(DatasetEncoder):
     def _compute_motifs(self, dataset, params):
         motifs = self._prepare_candidate_motifs(dataset, params)
 
-        labels = EncoderHelper.encode_element_dataset_labels(dataset, params.label_config)
-        y_true = self._get_y_true(labels, params.label_config)
-
-        # todo current solution only filters motifs based on 'min recall before merging'; find a way to reduce the unnecessary extra tests (precision for generalized motifs)
+        y_true = self._get_y_true(dataset, params.label_config)
 
         motifs = self._filter_motifs(motifs, dataset, y_true, params.pool_size,
                                      min_recall=self.min_recall, generalized=False)
@@ -172,17 +169,20 @@ class SignificantMotifEncoder(DatasetEncoder):
     def get_encoded_dataset_from_motifs(self, dataset, motifs, label_config):
         labels = EncoderHelper.encode_element_dataset_labels(dataset, label_config)
 
-        examples, feature_names = self._construct_encoded_data_matrix(dataset, motifs)
+        examples, feature_names, feature_annotations = self._construct_encoded_data_matrix(dataset, motifs, label_config)
 
         encoded_dataset = dataset.clone()
         encoded_dataset.encoded_data = EncodedData(examples=examples,
                                                    labels=labels,
                                                    feature_names=feature_names,
+                                                   feature_annotations=feature_annotations,
                                                    example_ids=dataset.get_example_ids(),
                                                    encoding=SignificantMotifEncoder.__name__,
                                                    example_weights=dataset.get_example_weights(),
                                                    info={"candidate_motif_filepath": self.candidate_motif_filepath,
-                                                         "significant_motif_filepath": self.significant_motif_filepath})
+                                                         "significant_motif_filepath": self.significant_motif_filepath,
+                                                         "min_precision": self.min_precision,
+                                                         "min_recall": self.min_recall})
 
         return encoded_dataset
 
@@ -219,7 +219,9 @@ class SignificantMotifEncoder(DatasetEncoder):
                                        pool_size=pool_size)
         return PositionalMotifHelper.compute_all_candidate_motifs(np_sequences, params)
 
-    def _get_y_true(self, labels, label_config: LabelConfiguration):
+    def _get_y_true(self, dataset, label_config: LabelConfiguration):
+        labels = EncoderHelper.encode_element_dataset_labels(dataset, label_config)
+
         label_name = self._get_label_name(label_config)
         label = label_config.get_label_object(label_name)
 
@@ -274,13 +276,31 @@ class SignificantMotifEncoder(DatasetEncoder):
                 if recall_score(y_true=y_true, y_pred=pred, sample_weight=weights) >= min_recall:
                     return motif
 
-    def _construct_encoded_data_matrix(self, dataset, motifs):
+    def _construct_encoded_data_matrix(self, dataset, motifs, label_config):
         np_sequences = NumpyHelper.get_numpy_sequence_representation(dataset)
 
-        feature_names = [PositionalMotifHelper.motif_to_string(indices, amino_acids, motif_sep="-", newline=False) for indices, amino_acids in motifs]
-        examples = [PositionalMotifHelper.test_motif(np_sequences, indices, amino_acids) for indices, amino_acids in motifs]
+        feature_names = []
+        examples = []
+        precision_scores = []
+        recall_scores = []
 
-        return np.column_stack(examples), feature_names
+        weights = dataset.get_example_weights()
+        y_true = self._get_y_true(dataset, label_config)
+
+        for indices, amino_acids in motifs:
+            feature_name = PositionalMotifHelper.motif_to_string(indices, amino_acids, motif_sep="-", newline=False)
+            predictions = PositionalMotifHelper.test_motif(np_sequences, indices, amino_acids)
+
+            feature_names.append(feature_name)
+            examples.append(predictions)
+            precision_scores.append(precision_score(y_true=y_true, y_pred=predictions, sample_weight=weights))
+            recall_scores.append(recall_score(y_true=y_true, y_pred=predictions, sample_weight=weights))
+
+        feature_annotations = pd.DataFrame({"feature_names": feature_names,
+                                            "precision_scores": precision_scores,
+                                            "recall_scores": recall_scores})
+
+        return np.column_stack(examples), feature_names, feature_annotations
 
     def set_context(self, context: dict):
         self.context = context
