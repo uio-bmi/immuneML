@@ -1,4 +1,5 @@
 import copy
+from typing import Tuple
 
 from immuneML.dsl.DefaultParamsLoader import DefaultParamsLoader
 from immuneML.dsl.symbol_table.SymbolTable import SymbolTable
@@ -85,26 +86,27 @@ class SimulationParser:
             ParameterValidator.assert_keys_present(simulation.keys(), ['type'], location, 'simulation')
 
             if simulation['type'] == 'Implanting':
-                item = SimulationParser._parse_implanting(simulation, key, symbol_table)
+                item, sim_dict = SimulationParser._parse_implanting(simulation, key, symbol_table)
             elif simulation['type'] == 'LIgOSimulation':
-                item = SimulationParser._parse_ligo_simulation(simulation, key, symbol_table)
+                item, sim_dict = SimulationParser._parse_ligo_simulation(simulation, key, symbol_table)
             else:
                 raise ValueError(f"{location}: in simulation {key}, for simulation item {key}, the type was set to {simulation['type']},"
                                  f" but only 'Implanting' and 'LIgOSimulation' are supported.")
 
             symbol_table.add(key, SymbolType.SIMULATION, item)
+            simulations[key] = sim_dict
 
         return symbol_table, simulations
 
     @staticmethod
-    def _parse_implanting(simulation_item: dict, key: str, symbol_table: SymbolTable) -> Simulation:
+    def _parse_implanting(simulation: dict, key: str, symbol_table: SymbolTable) -> Tuple[Simulation, dict]:
         location = SimulationParser.__name__
 
-        ParameterValidator.assert_keys(simulation_item.keys(), ['type', 'sim_items'], location, 'simulation')
+        ParameterValidator.assert_keys(simulation.keys(), ['type', 'sim_items'], location, 'simulation')
 
         sim_items = []
 
-        for sim_item_name, sim_item in simulation_item['sim_items'].items():
+        for sim_item_name, sim_item in simulation['sim_items'].items():
             valid_simulation_item_keys = ["dataset_implanting_rate", "repertoire_implanting_rate", "signals", "is_noise", "type"]
 
             ParameterValidator.assert_keys(list(sim_item.keys()), valid_simulation_item_keys, location, key, exclusive=False)
@@ -118,10 +120,10 @@ class SimulationParser:
             del implanting_params['type']
             sim_items.append(Implanting(**implanting_params))
 
-        return Simulation(sim_items=sim_items)
+        return Simulation(sim_items=sim_items), simulation
 
     @staticmethod
-    def _parse_ligo_simulation(simulation: dict, key: str, symbol_table: SymbolTable) -> Simulation:
+    def _parse_ligo_simulation(simulation: dict, key: str, symbol_table: SymbolTable) -> Tuple[Simulation, dict]:
         location = SimulationParser.__name__
         valid_keys = {'is_repertoire': bool, 'paired': bool, 'sequence_type': str, 'use_generation_probabilities': bool,
                       'simulation_strategy': str, 'sim_items': dict, 'type': str}
@@ -138,17 +140,19 @@ class SimulationParser:
 
         sim_items = []
         for sim_key, item in simulation['sim_items'].items():
-            sim_items.append(SimulationParser._parse_ligo_sim_item(item, sim_key, symbol_table))
+            sim_item, sim_item_dict = SimulationParser._parse_ligo_sim_item(item, sim_key, symbol_table)
+            sim_items.append(sim_item)
+            simulation['sim_items'][sim_key] = sim_item_dict
 
         sim_obj = Simulation(**{**{k: v for k, v in simulation.items() if k != 'type'},
                                 **{'sequence_type': SequenceType[simulation['sequence_type'].upper()], "sim_items": sim_items,
                                    "identifier": key, 'simulation_strategy': SimulationStrategy[simulation['simulation_strategy'].upper()]}})
 
         SimulationParser._signal_content_matches_seq_type(sim_obj)
-        return sim_obj
+        return sim_obj, simulation
 
     @staticmethod
-    def _parse_ligo_sim_item(simulation_item: dict, key: str, symbol_table: SymbolTable) -> LIgOSimulationItem:
+    def _parse_ligo_sim_item(simulation_item: dict, key: str, symbol_table: SymbolTable) -> Tuple[LIgOSimulationItem, dict]:
         location = SimulationParser.__name__
         valid_simulation_item_keys = ["number_of_examples", "repertoire_implanting_rate", "signals", "is_noise", "seed",
                                       "receptors_in_repertoire_count", "generative_model", "immune_events"]
@@ -178,7 +182,7 @@ class SimulationParser:
         params["name"] = key
         params['generative_model'] = gen_model
 
-        return LIgOSimulationItem(**{key: val for key, val in params.items() if key != 'type'})
+        return LIgOSimulationItem(**{key: val for key, val in params.items() if key != 'type'}), simulation_item
 
     @staticmethod
     def _parse_generative_model(simulation_item: dict, location: str):
