@@ -20,7 +20,8 @@ from immuneML.util.PathBuilder import PathBuilder
 class SignificantMotifOverlap(DataReport):
     """
     This report splits the given dataset into n subsets, identifies significant motifs using the
-    SignificantMotifEncoder for each of the data subsets, and computes the intersections between the significant
+    :py:obj:`~immuneML.encodings.motif_encoding.SignificantMotifEncoder.SignificantMotifEncoder`
+    for each of the data subsets, and computes the intersections between the significant
     motifs found in each pair of subsets. This can be used to investigate generalizability of motifs and calibrate
     example weighting parameters.
 
