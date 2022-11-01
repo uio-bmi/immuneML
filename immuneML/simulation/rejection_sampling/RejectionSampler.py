@@ -184,14 +184,14 @@ class RejectionSampler:
         metadata = {**{signal.id: False if self.sim_item.is_noise else True for signal in self.sim_item.signals},
                     **{signal.id: False for signal in self.all_signals if signal not in self.sim_item.signals}}
 
-        if seqs_per_signal_count['no_signal'] > 0:
+        if len(self.sim_item.signals) == 0:
             sequences = pd.read_csv(self.seqs_no_signal_path, sep='\t')
-
-        for signal in self.sim_item.signals:
-            if sequences is not None:
-                sequences = pd.concat([sequences, pd.read_csv(self.seqs_with_signal_path[signal.id], sep='\t')], ignore_index=True, axis=0)
-            else:
-                sequences = pd.read_csv(self.seqs_with_signal_path[signal.id], sep='\t')
+        else:
+            for signal in self.sim_item.signals:
+                if sequences is not None:
+                    sequences = pd.concat([sequences, pd.read_csv(self.seqs_with_signal_path[signal.id], sep='\t')], ignore_index=True, axis=0)
+                else:
+                    sequences = pd.read_csv(self.seqs_with_signal_path[signal.id], sep='\t')
 
         sequences = self._add_pgens(sequences)
         custom_params_keys = self._get_custom_keys()

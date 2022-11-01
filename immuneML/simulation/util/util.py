@@ -22,7 +22,6 @@ def get_signal_sequence_count(repertoire_count: int, sim_item) -> int:
 
 def get_sequence_per_signal_count(sim_item) -> dict:
     if sim_item.receptors_in_repertoire_count:
-
         sequence_count = sim_item.receptors_in_repertoire_count * sim_item.number_of_examples
         seq_with_signal_count = {signal.id: get_signal_sequence_count(repertoire_count=sim_item.number_of_examples, sim_item=sim_item)
                                  for signal in sim_item.signals}
@@ -31,6 +30,8 @@ def get_sequence_per_signal_count(sim_item) -> dict:
         return {**seq_with_signal_count, **seq_without_signal_count}
     elif len(sim_item.signals) == 1:
         return {sim_item.signals[0].id: sim_item.number_of_examples, 'no_signal': 0}
+    elif len(sim_item.signals) == 0:
+        return {'no_signal': sim_item.number_of_examples}
     else:
         raise NotImplementedError
 

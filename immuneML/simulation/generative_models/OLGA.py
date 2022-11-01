@@ -64,8 +64,8 @@ class OLGA(GenerativeModel):
 
         location = OLGA.__name__
 
-        ParameterValidator.assert_keys(kwargs.keys(), ['model_path', 'default_model_name', 'use_only_productive'], location,
-                                       'OLGA generative model')
+        ParameterValidator.assert_keys_present(list(kwargs.keys()), ['model_path', 'default_model_name', 'use_only_productive'], location,
+                                               'OLGA generative model')
         ParameterValidator.assert_type_and_value(kwargs['use_only_productive'], bool, location, 'use_only_productive')
 
         if kwargs['model_path']:
