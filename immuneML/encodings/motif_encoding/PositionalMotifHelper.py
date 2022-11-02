@@ -3,10 +3,12 @@ import numpy as np
 from multiprocessing import Pool
 import itertools as it
 from functools import partial
+from pathlib import Path
 
 from immuneML.encodings.motif_encoding.PositionalMotifParams import PositionalMotifParams
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.environment.SequenceType import SequenceType
+from immuneML.util.ParameterValidator import ParameterValidator
 from immuneML.util.PathBuilder import PathBuilder
 
 
@@ -123,6 +125,17 @@ class PositionalMotifHelper:
         assert header == "indices\tamino_acids\n", f"{PositionalMotifHelper.__name__}: motif file at {motif_filepath} " \
                                                    f"is expected to contain this header: 'indices\tamino_acids', " \
                                                    f"found the following instead: '{header}'"
+    @staticmethod
+    def check_motif_filepath(motif_filepath, location, parameter_name):
+        ParameterValidator.assert_type_and_value(motif_filepath, str, location, parameter_name)
+
+        motif_filepath = Path(motif_filepath)
+
+        assert motif_filepath.is_file(), f"{location}: the file {motif_filepath} does not exist. " \
+                                                   f"Specify the correct path under motif_filepath."
+
+        with open(motif_filepath) as file:
+            PositionalMotifHelper._check_file_header(file.readline(), motif_filepath)
 
     @staticmethod
     def read_motifs_from_file(filepath):

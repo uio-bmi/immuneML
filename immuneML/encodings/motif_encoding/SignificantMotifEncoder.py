@@ -43,7 +43,7 @@ class SignificantMotifEncoder(DatasetEncoder):
 
         candidate_motif_filepath (str):
 
-        label (str):
+        label (str): # todo refactor label_name
 
 
         # todo should weighting be a parameter here?
@@ -59,7 +59,13 @@ class SignificantMotifEncoder(DatasetEncoder):
 
             my_motif_encoder:
                 MotifEncoder:
-                    ...
+                    max_positions: 5
+                    min_precision: 0.9
+                    min_recall: 0.1
+                    min_true_positives: 10
+                    generalize_motifs: False
+
+
 
 
     """
@@ -77,7 +83,7 @@ class SignificantMotifEncoder(DatasetEncoder):
         self.min_recall = min_recall
         self.min_true_positives = min_true_positives
         self.generalize_motifs = generalize_motifs
-        self.candidate_motif_filepath = candidate_motif_filepath
+        self.candidate_motif_filepath = Path(candidate_motif_filepath) if candidate_motif_filepath is not None else None
         self.significant_motif_filepath = None
 
         self.learned_motifs = None
@@ -99,21 +105,10 @@ class SignificantMotifEncoder(DatasetEncoder):
         ParameterValidator.assert_type_and_value(generalize_motifs, bool, location, "generalize_motifs")
 
         if candidate_motif_filepath is not None:
-            ParameterValidator.assert_type_and_value(candidate_motif_filepath, str, location, "candidate_motif_filepath")
-
-            candidate_motif_filepath = Path(candidate_motif_filepath)
-            assert candidate_motif_filepath.is_file(), f"{location}: the file {candidate_motif_filepath} does not exist. " \
-                                                       f"Specify the correct path under motif_filepath."
-
-            file_columns = list(pd.read_csv(candidate_motif_filepath, sep="\t", iterator=False, dtype=str, nrows=0).columns)
-
-            ParameterValidator.assert_all_in_valid_list(file_columns,
-                                                        ["indices", "amino_acids"],
-                                                        location, "candidate_motif_filepath (column names)")
+            PositionalMotifHelper.check_motif_filepath(candidate_motif_filepath, location)
 
         if label is not None:
             ParameterValidator.assert_type_and_value(label, str, location, "label")
-
 
         return {
             "max_positions": max_positions,
@@ -121,6 +116,7 @@ class SignificantMotifEncoder(DatasetEncoder):
             "min_recall": min_recall,
             "min_true_positives": min_true_positives,
             "generalize_motifs": generalize_motifs,
+            "candidate_motif_filepath": candidate_motif_filepath,
             "label": label,
             "name": name,
         }
@@ -271,7 +267,7 @@ class SignificantMotifEncoder(DatasetEncoder):
 
         pred = PositionalMotifHelper.test_motif(np_sequences, indices, amino_acids)
 
-        if sum(pred) >= self.min_true_positives:
+        if sum(pred & y_true) >= self.min_true_positives:
             if precision_score(y_true=y_true, y_pred=pred, sample_weight=weights) >= self.min_precision:
                 if recall_score(y_true=y_true, y_pred=pred, sample_weight=weights) >= min_recall:
                     return motif
@@ -283,6 +279,7 @@ class SignificantMotifEncoder(DatasetEncoder):
         examples = []
         precision_scores = []
         recall_scores = []
+        tp_counts = []
 
         weights = dataset.get_example_weights()
         y_true = self._get_y_true(dataset, label_config)
@@ -295,10 +292,14 @@ class SignificantMotifEncoder(DatasetEncoder):
             examples.append(predictions)
             precision_scores.append(precision_score(y_true=y_true, y_pred=predictions, sample_weight=weights))
             recall_scores.append(recall_score(y_true=y_true, y_pred=predictions, sample_weight=weights))
+            tp_counts.append(sum(predictions & y_true))
+
+        prefix = "weighted_" if weights is not None else ""
 
         feature_annotations = pd.DataFrame({"feature_names": feature_names,
-                                            "precision_scores": precision_scores,
-                                            "recall_scores": recall_scores})
+                                            f"{prefix}precision_scores": precision_scores,
+                                            f"{prefix}recall_scores": recall_scores,
+                                            "raw_tp_count": tp_counts})
 
         return np.column_stack(examples), feature_names, feature_annotations
 

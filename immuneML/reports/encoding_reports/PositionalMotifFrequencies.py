@@ -2,11 +2,10 @@ from pathlib import Path
 
 import plotly.express as px
 import pandas as pd
+from typing import List
 
 from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
-from immuneML.encodings.motif_encoding.PositionalMotifHelper import (
-    PositionalMotifHelper,
-)
+from immuneML.encodings.motif_encoding.PositionalMotifHelper import PositionalMotifHelper
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.environment.SequenceType import SequenceType
 from immuneML.reports.ReportOutput import ReportOutput
@@ -169,7 +168,7 @@ class PositionalMotifFrequencies(EncodingReport):
     def _get_color_discrete_sequence(self):
         return px.colors.qualitative.Pastel[:-1] + px.colors.qualitative.Set3
 
-    def _plot(self, positional_aa_counts_df, gap_size_dict) -> ReportOutput:
+    def _plot(self, positional_aa_counts_df, gap_size_dict) -> List[ReportOutput]:
         report_outputs = self._plot_gap_sizes(gap_size_dict)
         report_outputs.append(self._plot_positional_aa_counts(positional_aa_counts_df))
 
