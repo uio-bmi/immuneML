@@ -17,6 +17,7 @@ from immuneML.data_model.dataset.ReceptorDataset import ReceptorDataset
 
 from sklearn.metrics import silhouette_score, calinski_harabasz_score, davies_bouldin_score
 
+
 class ClusteringInstruction(Instruction):
     def __init__(self, clustering_units: dict, name: str = None):
         assert all(isinstance(unit, ClusteringUnit) for unit in clustering_units.values()), \

@@ -61,7 +61,7 @@ class UnsupervisedSklearnMethod(UnsupervisedMLMethod):
         return self.model
 
     def check_is_fitted(self):
-        check_is_fitted(self.model, ["cluster_centers_", "components_"], all_or_any=any)
+        check_is_fitted(self.model, ["labels_", "components_"], all_or_any=any)
 
     def store(self, path: Path, feature_names=None, details_path: Path = None):
         PathBuilder.build(path)

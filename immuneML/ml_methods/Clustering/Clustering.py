@@ -13,3 +13,9 @@ class Clustering(UnsupervisedSklearnMethod, ABC):
     def get_params(self):
         params = self.model.get_params()
         return params
+
+    def get_compatible_encoders(self):
+        from immuneML.encodings.kmer_frequency.KmerFrequencyEncoder import KmerFrequencyEncoder
+        from immuneML.encodings.onehot.OneHotEncoder import OneHotEncoder
+
+        return [KmerFrequencyEncoder, OneHotEncoder]
