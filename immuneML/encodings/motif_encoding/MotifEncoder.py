@@ -309,10 +309,10 @@ class MotifEncoder(DatasetEncoder):
         return PositionalMotifHelper.test_motif(np_sequences=np_sequences, indices=indices, amino_acids=amino_acids)
 
     def _get_precision(self, pred, y_true, weights):
-        return precision_score(y_true=y_true, y_pred=pred, sample_weight=weights)
+        return precision_score(y_true=y_true, y_pred=pred, sample_weight=weights, zero_division=0)
 
     def _get_recall(self, pred, y_true, weights):
-        return recall_score(y_true=y_true, y_pred=pred, sample_weight=weights)
+        return recall_score(y_true=y_true, y_pred=pred, sample_weight=weights, zero_division=0)
 
     def _get_tp(self, pred, y_true):
         return sum(pred & y_true)

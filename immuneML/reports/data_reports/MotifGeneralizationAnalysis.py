@@ -197,10 +197,10 @@ class MotifGeneralizationAnalysis(DataReport):
                              "feature_names": "Motif"
                          })
 
-        if min_precision is not None:
+        if min_precision is not None and min_precision > 0:
             fig.add_hline(y=min_precision, line_dash="dash")
 
-        if min_recall is not None:
+        if min_recall is not None and min_recall > 0:
             fig.add_vline(x=min_recall, line_dash="dash")
 
         fig.write_html(str(file_path))
