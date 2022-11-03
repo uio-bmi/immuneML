@@ -1,12 +1,10 @@
 import plotly.express as px
 import warnings
-from collections import Counter
 from pathlib import Path
 
 import pandas as pd
 
-from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
-from immuneML.data_model.repertoire.Repertoire import Repertoire
+from immuneML.data_model.dataset.SequenceDataset import SequenceDataset
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.data_reports.DataReport import DataReport
@@ -33,7 +31,7 @@ class WeightsDistribution(DataReport):
     def build_object(cls, **kwargs):
         return WeightsDistribution(**kwargs)
 
-    def __init__(self, dataset: RepertoireDataset = None, result_path: Path = None, number_of_processes: int = 1, name: str = None, label: dict = None, weight_thresholds: dict = None, split_classes: bool = None):
+    def __init__(self, dataset: SequenceDataset = None, result_path: Path = None, number_of_processes: int = 1, name: str = None, label: dict = None, weight_thresholds: dict = None, split_classes: bool = None):
             super().__init__(dataset=dataset, result_path=result_path, number_of_processes=number_of_processes, name=name)
             self.label = label
             self.weight_thresholds = weight_thresholds
