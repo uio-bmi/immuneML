@@ -88,8 +88,9 @@ class MotifGeneralizationAnalysis(DataReport):
         if "random_seed" in kwargs and kwargs["random_seed"] is not None:
             ParameterValidator.assert_type_and_value(kwargs["random_seed"], int, location, "random_seed")
 
-        ParameterValidator.assert_type_and_value(kwargs["label"], dict, location, "label")
-        assert len(kwargs["label"]) == 1, f"{location}: The number of specified labels must be 1, found {len(kwargs['label'])}: {', '.join(list(len(kwargs['label'].keys())))}"
+        ParameterValidator.assert_type_and_value(kwargs["label"], (dict, str), location, "label")
+        if type(kwargs["label"]) is dict:
+           assert len(kwargs["label"]) == 1, f"{location}: The number of specified labels must be 1, found {len(kwargs['label'])}: {', '.join(list(len(kwargs['label'].keys())))}"
 
         if "highlight_motifs_path" in kwargs and kwargs["highlight_motifs_path"] is not None:
             PositionalMotifHelper.check_motif_filepath(kwargs["highlight_motifs_path"], location, "highlight_motifs_path")
