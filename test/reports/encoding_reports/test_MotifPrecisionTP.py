@@ -7,15 +7,15 @@ from immuneML.data_model.dataset.SequenceDataset import SequenceDataset
 from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
 from immuneML.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
 from immuneML.encodings.EncoderParams import EncoderParams
-from immuneML.encodings.motif_encoding.SignificantMotifEncoder import SignificantMotifEncoder
+from immuneML.encodings.motif_encoding.MotifEncoder import MotifEncoder
 from immuneML.environment.LabelConfiguration import LabelConfiguration
 from immuneML.environment.Constants import Constants
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
-from immuneML.reports.encoding_reports.SignificantMotifPrecisionTP import SignificantMotifPrecisionTP
+from immuneML.reports.encoding_reports.MotifPrecisionTP import MotifPrecisionTP
 from immuneML.util.PathBuilder import PathBuilder
 
 
-class TestPositionalMotifFrequencies(TestCase):
+class TestMotifPrecisionTP(TestCase):
     def setUp(self) -> None:
         os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
 
@@ -76,7 +76,7 @@ class TestPositionalMotifFrequencies(TestCase):
         lc = LabelConfiguration()
         lc.add_label("l1", [1, 2], positive_class=1)
 
-        encoder = SignificantMotifEncoder.build_object(
+        encoder = MotifEncoder.build_object(
             dataset,
             **{
                 "max_positions": 3,
@@ -110,7 +110,7 @@ class TestPositionalMotifFrequencies(TestCase):
 
         encoded_dataset = self._create_dummy_encoded_data(path)
 
-        report = SignificantMotifPrecisionTP.build_object(
+        report = MotifPrecisionTP.build_object(
             **{"dataset": encoded_dataset,
                "result_path": path,
                "highlight_motifs_path": str(highlight_motifs_path)}

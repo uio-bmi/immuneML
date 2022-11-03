@@ -16,14 +16,14 @@ from immuneML.util.PathBuilder import PathBuilder
 
 class PositionalMotifFrequencies(EncodingReport):
     """
-    This report must be used in combination with the :py:obj:`~immuneML.encodings.motif_encoding.SignificantMotifEncoder.SignificantMotifEncoder`.
+    This report must be used in combination with the :py:obj:`~immuneML.encodings.motif_encoding.MotifEncoder.MotifEncoder`.
     Plots a stacked bar plot of amino acid occurrence at different indices in any given dataset, along with a plot
     investigating motif continuity which displays a bar plot of the gap sizes between the amino acids in the motifs in
     the given dataset. Note that a distance of 1 means that the amino acids are continuous (next to each other).
 
     # todo: make gap sizes 0-based (essentially: subtract 1 from all gap sizes, so that contiguous amino acids have gap size 0)
     # todo: the header of gap_size_table_motif_size_{motif_size}.csv is wrong; make sure it contains no quotes
-    # todo: implement check_prerequisites() (from Report class), which should check that the used encoder is SignificantMotifEncoder. see e.g. RelevantSequenceExporter for an example
+    # todo: implement check_prerequisites() (from Report class), which should check that the used encoder is MotifEncoder. see e.g. RelevantSequenceExporter for an example
 
     YAML specification example:
 

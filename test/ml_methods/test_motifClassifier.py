@@ -7,7 +7,7 @@ import numpy as np
 
 from immuneML.caching.CacheType import CacheType
 from immuneML.data_model.encoded_data.EncodedData import EncodedData
-from immuneML.encodings.motif_encoding.SignificantMotifEncoder import SignificantMotifEncoder
+from immuneML.encodings.motif_encoding.SignificantMotifEncoder import MotifEncoder
 from immuneML.environment.Constants import Constants
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.environment.Label import Label
@@ -21,7 +21,7 @@ class TestMotifClassifier(TestCase):
         os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
 
     def get_enc_data(self):
-        enc_data = EncodedData(encoding=SignificantMotifEncoder.__name__,
+        enc_data = EncodedData(encoding=MotifEncoder.__name__,
                                example_ids=["1", "2", "3", "4", "5", "6", "7", "8"],
                                feature_names=["useless_rule", "rule1", "rule2", "rule3"],
                                examples=np.array([[False, True, False, False],
@@ -103,7 +103,7 @@ class TestMotifClassifier(TestCase):
         motif_classifier.label = Label("l1", positive_class=True)
         motif_classifier.feature_names = ["rule"]
 
-        enc_data = EncodedData(encoding=SignificantMotifEncoder.__name__,
+        enc_data = EncodedData(encoding=MotifEncoder.__name__,
                                example_ids=["1", "2", "3", "4"],
                                feature_names=["rule"],
                                examples=np.array([[False],
@@ -115,14 +115,14 @@ class TestMotifClassifier(TestCase):
         result_no_improvement_on_training = motif_classifier._recursively_select_rules(enc_data, None, [1], [0])
         self.assertListEqual(result_no_improvement_on_training, [0])
 
-        enc_data = EncodedData(encoding=SignificantMotifEncoder.__name__,
-                           example_ids=["1", "2", "3", "4"],
-                           feature_names=["rule1", "rule2", "rule3"],
-                           examples=np.array([[True, False, False],
+        enc_data = EncodedData(encoding=MotifEncoder.__name__,
+                               example_ids=["1", "2", "3", "4"],
+                               feature_names=["rule1", "rule2", "rule3"],
+                               examples=np.array([[True, False, False],
                                               [False, True, False],
                                               [False, False, False],
                                               [False, False, False]]),
-                           labels={"l1": [True, True, True, True]})
+                               labels={"l1": [True, True, True, True]})
 
         motif_classifier.feature_names = ["rule1", "rule2", "rule3"]
 
@@ -182,7 +182,7 @@ class TestMotifClassifier(TestCase):
         self.assertListEqual(result, [1, 2, 3, 4, 5])
 
     def test_get_rule_tree_predictions(self):
-        enc_data = EncodedData(encoding=SignificantMotifEncoder.__name__,
+        enc_data = EncodedData(encoding=MotifEncoder.__name__,
                                example_ids=["1", "2", "3", "4"],
                                feature_names=["rule1", "rule2", "rule3"],
                                examples=np.array([[True, False, False],

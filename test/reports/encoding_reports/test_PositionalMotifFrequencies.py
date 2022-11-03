@@ -8,7 +8,7 @@ from immuneML.data_model.dataset.SequenceDataset import SequenceDataset
 from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
 from immuneML.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
 from immuneML.encodings.EncoderParams import EncoderParams
-from immuneML.encodings.motif_encoding.SignificantMotifEncoder import SignificantMotifEncoder
+from immuneML.encodings.motif_encoding.MotifEncoder import MotifEncoder
 from immuneML.reports.encoding_reports.PositionalMotifFrequencies import PositionalMotifFrequencies
 from immuneML.environment.LabelConfiguration import LabelConfiguration
 from immuneML.environment.Constants import Constants
@@ -74,7 +74,7 @@ class TestPositionalMotifFrequencies(TestCase):
         lc = LabelConfiguration()
         lc.add_label("l1", [1, 2], positive_class=1)
 
-        encoder = SignificantMotifEncoder.build_object(
+        encoder = MotifEncoder.build_object(
             dataset,
             **{
                 "max_positions": 3,

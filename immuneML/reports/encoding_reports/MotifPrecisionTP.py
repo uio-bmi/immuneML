@@ -5,34 +5,35 @@ import logging
 import plotly.express as px
 import plotly.graph_objects as go
 
-from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
+from immuneML.data_model.dataset.SequenceDataset import SequenceDataset
 from immuneML.encodings.motif_encoding.PositionalMotifHelper import PositionalMotifHelper
-from immuneML.encodings.motif_encoding.SignificantMotifEncoder import SignificantMotifEncoder
+from immuneML.encodings.motif_encoding.MotifEncoder import MotifEncoder
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.encoding_reports.EncodingReport import EncodingReport
 from immuneML.util.PathBuilder import PathBuilder
 
 
-class SignificantMotifPrecisionTP(EncodingReport):
+class MotifPrecisionTP(EncodingReport):
     """
+    # todo maybe: custom highlight motif name
+    # todo maybe: x axis log scale
 
-    todo add highlight motifs: groundtruth motifs, name taken from filename
+    # todo refactor to share code with MotifGeneralizationAnalysis
 
     """
 
     @classmethod
     def build_object(cls, **kwargs):
-        location = SignificantMotifPrecisionTP.__name__
+        location = MotifPrecisionTP.__name__
 
         if "highlight_motifs_path" in kwargs and kwargs["highlight_motifs_path"] is not None:
             PositionalMotifHelper.check_motif_filepath(kwargs["highlight_motifs_path"], location, "highlight_motifs_path")
 
-        return SignificantMotifPrecisionTP(**kwargs)
+        return MotifPrecisionTP(**kwargs)
 
-    def __init__(self, highlight_motifs_path: str = None, dataset: RepertoireDataset = None,
-                 result_path: Path = None, name: str = None,
-                 number_of_processes: int = 1):
+    def __init__(self, highlight_motifs_path: str = None, dataset: SequenceDataset = None,
+                 result_path: Path = None, name: str = None, number_of_processes: int = 1):
         super().__init__(dataset=dataset, result_path=result_path, name=name, number_of_processes=number_of_processes)
         self.highlight_motifs_path = Path(highlight_motifs_path) if highlight_motifs_path is not None else None
         self.highlight_motifs = None
@@ -40,10 +41,6 @@ class SignificantMotifPrecisionTP(EncodingReport):
         if self.highlight_motifs_path is not None:
             self.highlight_motifs = [PositionalMotifHelper.motif_to_string(indices, amino_acids, motif_sep="-", newline=False)
                                      for indices, amino_acids in PositionalMotifHelper.read_motifs_from_file(highlight_motifs_path)]
-
-    def get_sequence_length(self):
-        my_sequence = next(self.dataset.get_data())
-        return len(my_sequence.get_sequence())
 
     def _generate(self):
         PathBuilder.build(self.result_path)
@@ -150,15 +147,15 @@ class SignificantMotifPrecisionTP(EncodingReport):
 
     def check_prerequisites(self) -> bool:
         if self.dataset.encoded_data is None or self.dataset.encoded_data.info is None:
-            logging.warning(f"{SignificantMotifPrecisionTP.__name__}: the dataset is not encoded, skipping this report...")
+            logging.warning(f"{MotifPrecisionTP.__name__}: the dataset is not encoded, skipping this report...")
             return False
-        elif self.dataset.encoded_data.encoding != SignificantMotifEncoder.__name__:
+        elif self.dataset.encoded_data.encoding != MotifEncoder.__name__:
             logging.warning(
-                f"{SignificantMotifPrecisionTP.__name__}: the dataset encoding ({self.dataset.encoded_data.encoding}) "
-                f"does not match the required encoding ({SignificantMotifEncoder.__name__}), skipping this report...")
+                f"{MotifPrecisionTP.__name__}: the dataset encoding ({self.dataset.encoded_data.encoding}) "
+                f"does not match the required encoding ({MotifEncoder.__name__}), skipping this report...")
             return False
         elif self.dataset.encoded_data.feature_annotations is None:
-            logging.warning(f"{SignificantMotifPrecisionTP.__name__}: missing feature annotations for {SignificantMotifEncoder.__name__},"
+            logging.warning(f"{MotifPrecisionTP.__name__}: missing feature annotations for {MotifEncoder.__name__},"
                             f"skipping this report...")
             return False
         else:

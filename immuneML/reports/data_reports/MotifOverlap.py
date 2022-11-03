@@ -8,7 +8,7 @@ import numpy as np
 from immuneML.data_model.dataset.Dataset import Dataset
 from immuneML.dsl.instruction_parsers.LabelHelper import LabelHelper
 from immuneML.encodings.EncoderParams import EncoderParams
-from immuneML.encodings.motif_encoding.SignificantMotifEncoder import SignificantMotifEncoder
+from immuneML.encodings.motif_encoding.MotifEncoder import MotifEncoder
 from immuneML.encodings.motif_encoding.PositionalMotifHelper import PositionalMotifHelper
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
@@ -17,13 +17,15 @@ from immuneML.util.EncoderHelper import EncoderHelper
 from immuneML.util.ParameterValidator import ParameterValidator
 from immuneML.util.PathBuilder import PathBuilder
 
-class SignificantMotifOverlap(DataReport):
+class MotifOverlap(DataReport):
     """
     This report splits the given dataset into n subsets, identifies significant motifs using the
-    :py:obj:`~immuneML.encodings.motif_encoding.SignificantMotifEncoder.SignificantMotifEncoder`
+    :py:obj:`~immuneML.encodings.motif_encoding.MotifEncoder.MotifEncoder`
     for each of the data subsets, and computes the intersections between the significant
     motifs found in each pair of subsets. This can be used to investigate generalizability of motifs and calibrate
     example weighting parameters.
+
+    # todo refactor to share code with MotifGeneralizationAnalysis (encoder stuff)
 
     Arguments:
 
@@ -39,7 +41,7 @@ class SignificantMotifOverlap(DataReport):
 
 
         my_report:
-            SignificantMotifOverlap:
+            MotifOverlap:
                 ...
                 label: # Define a label, and the positive class for that given label
                     CMV:
@@ -63,7 +65,7 @@ class SignificantMotifOverlap(DataReport):
 
     @classmethod
     def build_object(cls, **kwargs):
-        location = SignificantMotifOverlap.__name__
+        location = MotifOverlap.__name__
 
         ParameterValidator.assert_type_and_value(kwargs["n_splits"], int, location, "n_splits", min_inclusive=2)
         ParameterValidator.assert_type_and_value(kwargs["max_positions"], int, location, "max_positions", min_inclusive=1)
@@ -77,13 +79,12 @@ class SignificantMotifOverlap(DataReport):
         ParameterValidator.assert_type_and_value(kwargs["label"], dict, location, "label")
         assert len(kwargs["label"]) == 1, f"{location}: The number of specified labels must be 1, found {len(kwargs['label'])}: {', '.join(list(len(kwargs['label'].keys())))}"
 
-        return SignificantMotifOverlap(**kwargs)
+        return MotifOverlap(**kwargs)
 
     def _generate(self) -> ReportResult:
         self.label_config = self._get_label_config()
 
         encoded_datasets = self._encode_datasets(self._get_splitted_dataset())
-        # features_per_subset = self._get_significant_features_per_subset(encoded_datasets)
 
         result_files = self._write_result_files(encoded_datasets)
 
@@ -102,13 +103,6 @@ class SignificantMotifOverlap(DataReport):
 
     def _write_result_files(self, encoded_datasets):
         results_folder = PathBuilder.build(self.result_path / "feature_intersections")
-
-        # features_per_subset = for encoded_dataset in encoded_datasets:
-    #         if encoded_dataset is None:
-    #             features_per_subset.append(set())
-    #         else:
-    #             features_per_subset.append(set(encoded_dataset.encoded_data.feature_names))
-
 
         subset_sizes_output = self._write_subset_sizes(encoded_datasets, results_folder)
         pairwise_intersection_output = self._write_pairwise_intersections(encoded_datasets, results_folder)
@@ -190,9 +184,9 @@ class SignificantMotifOverlap(DataReport):
         return ReportOutput(output_file_path, f"Intersection of significant motifs across all {self.n_splits} data subsets")
 
     def _get_label_config(self):
-        label_config = LabelHelper.create_label_config([self.label], self.dataset, SignificantMotifOverlap.__name__,
-                                                       f"{SignificantMotifOverlap.__name__}/label")
-        EncoderHelper.check_positive_class_labels(label_config, f"{SignificantMotifOverlap.__name__}/label")
+        label_config = LabelHelper.create_label_config([self.label], self.dataset, MotifOverlap.__name__,
+                                                       f"{MotifOverlap.__name__}/label")
+        EncoderHelper.check_positive_class_labels(label_config, f"{MotifOverlap.__name__}/label")
 
         return label_config
 
@@ -204,7 +198,7 @@ class SignificantMotifOverlap(DataReport):
                 encoded_dataset = self._encode_subset(data_subset, i)
             except AssertionError:
                 warnings.warn(
-                    f"{SignificantMotifOverlap.__name__}: No significant features were found for data subset {i}. "
+                    f"{MotifOverlap.__name__}: No significant features were found for data subset {i}. "
                     f"Please try decreasing the values for parameters 'min_precision' or 'min_recall' to find more features.")
 
                 encoded_dataset = None
@@ -212,17 +206,6 @@ class SignificantMotifOverlap(DataReport):
             encoded_data_subsets.append(encoded_dataset)
 
         return encoded_data_subsets
-
-    # def _get_significant_features_per_subset(self, encoded_datasets):
-    #     features_per_subset = []
-    #
-    #     for encoded_dataset in encoded_datasets:
-    #         if encoded_dataset is None:
-    #             features_per_subset.append(set())
-    #         else:
-    #             features_per_subset.append(set(encoded_dataset.encoded_data.feature_names))
-    #
-    #     return features_per_subset
 
     def _get_splitted_dataset(self):
         data_subsets = []
@@ -246,15 +229,15 @@ class SignificantMotifOverlap(DataReport):
         return [example_indices[i::self.n_splits] for i in range(self.n_splits)]
 
     def _encode_subset(self, data_subset, i):
-        logging.info(f"{SignificantMotifOverlap.__name__}: Encoding data subset {i+1}/{self.n_splits}.")
+        logging.info(f"{MotifOverlap.__name__}: Encoding data subset {i + 1}/{self.n_splits}.")
 
-        encoder = SignificantMotifEncoder.build_object(data_subset, **{"max_positions": self.max_positions,
+        encoder = MotifEncoder.build_object(data_subset, **{"max_positions": self.max_positions,
                                                                       "min_precision": self.min_precision,
                                                                       "min_recall": self.min_recall,
                                                                       "min_true_positives": self.min_true_positives,
                                                                       "generalize_motifs": False,
-                                                                      "label": None,
-                                                                      "name": f"motif_encoder_{data_subset.name}"})
+                                                            "label": None,
+                                                            "name": f"motif_encoder_{data_subset.name}"})
 
         encoder_params = EncoderParams(result_path=self.result_path / "encoded_data" / f"split_{i}",
                                        pool_size=self.number_of_processes,
@@ -263,7 +246,7 @@ class SignificantMotifOverlap(DataReport):
 
         encoded_dataset = encoder.encode(data_subset, encoder_params)
 
-        logging.info(f"{SignificantMotifOverlap.__name__}: Finished encoding data subset {i+1}/{self.n_splits}.")
+        logging.info(f"{MotifOverlap.__name__}: Finished encoding data subset {i + 1}/{self.n_splits}.")
 
         return encoded_dataset
 

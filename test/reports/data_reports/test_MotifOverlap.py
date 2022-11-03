@@ -3,12 +3,12 @@ import shutil
 from unittest import TestCase
 
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
-from immuneML.reports.data_reports.SignificantMotifOverlap import SignificantMotifOverlap
+from immuneML.reports.data_reports.MotifOverlap import MotifOverlap
 from immuneML.simulation.dataset_generation.RandomDatasetGenerator import RandomDatasetGenerator
 from immuneML.util.PathBuilder import PathBuilder
 
 
-class TestSignificantMotifOverlap(TestCase):
+class TestMotifOverlap(TestCase):
     def test_generate(self):
         path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "significant_motif_overlap/")
 
@@ -17,15 +17,15 @@ class TestSignificantMotifOverlap(TestCase):
 
         # sequence_count: int, length_probabilities: dict, labels: dict, path: Path
 
-        report = SignificantMotifOverlap.build_object(**{"n_splits": 5,
+        report = MotifOverlap.build_object(**{"n_splits": 5,
                                                       "max_positions": 1,
                                                       "min_precision": 0.8,
                                                       "min_recall": 0.01,
                                                       "min_true_positives": 1,
                                                       "dataset": dataset,
                                                       "random_seed": 1,
-                                                      "result_path": path / "result",
-                                                      "label": {"l1": {"positive_class": "A"}}})
+                                              "result_path": path / "result",
+                                              "label": {"l1": {"positive_class": "A"}}})
 
         report._generate()
 

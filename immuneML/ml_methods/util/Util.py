@@ -100,9 +100,12 @@ class Util:
                 return f'immuneML-dev-{datetime.now()}'
 
     @staticmethod
-    def get_train_val_indices(n_examples, training_percentage):
+    def get_train_val_indices(n_examples, training_percentage, random_seed=None):
         indices = list(range(n_examples))
+
+        random.seed(random_seed)
         random.shuffle(indices)
+        random.seed(None)
 
         limit = int(n_examples * training_percentage)
         train_indices = indices[:limit]
