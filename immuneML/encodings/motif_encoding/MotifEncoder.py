@@ -275,24 +275,26 @@ class MotifEncoder(DatasetEncoder):
     def _construct_encoded_data_matrix(self, dataset, motifs, label_config):
         np_sequences = NumpyHelper.get_numpy_sequence_representation(dataset)
 
-        feature_names = []
-        examples = []
-        precision_scores = []
-        recall_scores = []
-        tp_counts = []
+        feature_names = [None] * len(motifs)
+        examples = [None] * len(motifs)
+        precision_scores = [None] * len(motifs)
+        recall_scores = [None] * len(motifs)
+        tp_counts = [None] * len(motifs)
 
         weights = dataset.get_example_weights()
         y_true = self._get_y_true(dataset, label_config)
 
-        for indices, amino_acids in motifs:
+        for i in range(len(motifs)):
+            indices, amino_acids = motifs[i]
+
             feature_name = PositionalMotifHelper.motif_to_string(indices, amino_acids, motif_sep="-", newline=False)
             predictions = PositionalMotifHelper.test_motif(np_sequences, indices, amino_acids)
 
-            feature_names.append(feature_name)
-            examples.append(predictions)
-            precision_scores.append(precision_score(y_true=y_true, y_pred=predictions, sample_weight=weights))
-            recall_scores.append(recall_score(y_true=y_true, y_pred=predictions, sample_weight=weights))
-            tp_counts.append(sum(predictions & y_true))
+            feature_names[i] = feature_name
+            examples[i] = predictions
+            precision_scores[i] = precision_score(y_true=y_true, y_pred=predictions, sample_weight=weights)
+            recall_scores[i] = recall_score(y_true=y_true, y_pred=predictions, sample_weight=weights)
+            tp_counts[i] = sum(predictions & y_true)
 
         prefix = "weighted_" if weights is not None else ""
 
