@@ -60,7 +60,7 @@ class TestMotifEncoder(TestCase):
         encoded_dataset = encoder.encode(dataset, EncoderParams(
             result_path=path / "encoder_result/",
             label_config=lc,
-            pool_size=2,
+            pool_size=4,
             learn_model=True,
             model={},
         ))

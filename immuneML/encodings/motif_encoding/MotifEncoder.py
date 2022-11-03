@@ -76,8 +76,7 @@ class MotifEncoder(DatasetEncoder):
 
     def __init__(self, max_positions: int = None, min_precision: float = None, min_recall: float = None,
                  min_true_positives: int = None, generalize_motifs: bool = False,
-                 candidate_motif_filepath: str = None, label: str = None,
-                 name: str = None):
+                 candidate_motif_filepath: str = None, label: str = None, name: str = None):
         self.max_positions = max_positions
         self.min_precision = min_precision
         self.min_recall = min_recall
@@ -134,8 +133,7 @@ class MotifEncoder(DatasetEncoder):
             return self._encode_data(dataset, params)
         else:
             learned_motifs = PositionalMotifHelper.read_motifs_from_file(self.learned_motif_filepath)
-            return self.get_encoded_dataset_from_motifs(dataset, learned_motifs, params.label_config)
-
+            return self.get_encoded_dataset_from_motifs(dataset, learned_motifs, params.label_config, params.pool_size)
 
     def _encode_data(self, dataset, params: EncoderParams):
         learned_motifs = self._compute_motifs(dataset, params)
@@ -143,7 +141,7 @@ class MotifEncoder(DatasetEncoder):
         self.learned_motif_filepath = params.result_path / "significant_motifs.tsv"
         PositionalMotifHelper.write_motifs_to_file(learned_motifs, self.learned_motif_filepath)
 
-        return self.get_encoded_dataset_from_motifs(dataset, learned_motifs, params.label_config)
+        return self.get_encoded_dataset_from_motifs(dataset, learned_motifs, params.label_config, params.pool_size)
 
     def _compute_motifs(self, dataset, params):
         motifs = self._prepare_candidate_motifs(dataset, params)
@@ -162,10 +160,11 @@ class MotifEncoder(DatasetEncoder):
 
         return motifs
 
-    def get_encoded_dataset_from_motifs(self, dataset, motifs, label_config):
+    def get_encoded_dataset_from_motifs(self, dataset, motifs, label_config, number_of_processes):
         labels = EncoderHelper.encode_element_dataset_labels(dataset, label_config)
 
-        examples, feature_names, feature_annotations = self._construct_encoded_data_matrix(dataset, motifs, label_config)
+        examples, feature_names, feature_annotations = self._construct_encoded_data_matrix(dataset, motifs,
+                                                                                           label_config, number_of_processes)
 
         encoded_dataset = dataset.clone()
         encoded_dataset.encoded_data = EncodedData(examples=examples,
@@ -272,29 +271,18 @@ class MotifEncoder(DatasetEncoder):
                 if recall_score(y_true=y_true, y_pred=pred, sample_weight=weights) >= min_recall:
                     return motif
 
-    def _construct_encoded_data_matrix(self, dataset, motifs, label_config):
-        np_sequences = NumpyHelper.get_numpy_sequence_representation(dataset)
-
-        feature_names = [None] * len(motifs)
-        examples = [None] * len(motifs)
-        precision_scores = [None] * len(motifs)
-        recall_scores = [None] * len(motifs)
-        tp_counts = [None] * len(motifs)
+    def _construct_encoded_data_matrix(self, dataset, motifs, label_config, number_of_processes):
+        feature_names = [PositionalMotifHelper.motif_to_string(indices, amino_acids, motif_sep="-", newline=False)
+                         for indices, amino_acids in motifs]
 
         weights = dataset.get_example_weights()
         y_true = self._get_y_true(dataset, label_config)
+        np_sequences = NumpyHelper.get_numpy_sequence_representation(dataset)
+        predictions = self._get_predictions(np_sequences, motifs, number_of_processes)
 
-        for i in range(len(motifs)):
-            indices, amino_acids = motifs[i]
-
-            feature_name = PositionalMotifHelper.motif_to_string(indices, amino_acids, motif_sep="-", newline=False)
-            predictions = PositionalMotifHelper.test_motif(np_sequences, indices, amino_acids)
-
-            feature_names[i] = feature_name
-            examples[i] = predictions
-            precision_scores[i] = precision_score(y_true=y_true, y_pred=predictions, sample_weight=weights)
-            recall_scores[i] = recall_score(y_true=y_true, y_pred=predictions, sample_weight=weights)
-            tp_counts[i] = sum(predictions & y_true)
+        precision_scores = [precision_score(y_true=y_true, y_pred=pred, sample_weight=weights) for pred in predictions]
+        recall_scores = [recall_score(y_true=y_true, y_pred=pred, sample_weight=weights) for pred in predictions]
+        tp_counts = [sum(pred & y_true) for pred in predictions]
 
         prefix = "weighted_" if weights is not None else ""
 
@@ -303,7 +291,17 @@ class MotifEncoder(DatasetEncoder):
                                             f"{prefix}recall_scores": recall_scores,
                                             "raw_tp_count": tp_counts})
 
-        return np.column_stack(examples), feature_names, feature_annotations
+        return np.column_stack(predictions), feature_names, feature_annotations
+
+    def _get_predictions(self, np_sequences, motifs, number_of_processes):
+        with Pool(number_of_processes) as pool:
+            partial_func = partial(self._test_motif, np_sequences=np_sequences)
+            predictions = pool.starmap(partial_func, motifs)
+
+        return predictions
+
+    def _test_motif(self, indices, amino_acids, np_sequences):
+        return PositionalMotifHelper.test_motif(np_sequences=np_sequences, indices=indices, amino_acids=amino_acids)
 
     def set_context(self, context: dict):
         self.context = context
