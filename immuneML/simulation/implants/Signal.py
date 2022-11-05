@@ -1,4 +1,5 @@
 # quality: gold
+import random
 from itertools import chain
 from pathlib import Path
 from typing import List
@@ -45,7 +46,7 @@ class Signal:
 
     """
 
-    def __init__(self, identifier: str, motifs: List[Motif], implanting_strategy: SignalImplantingStrategy):
+    def __init__(self, identifier: str, motifs: List[Motif], implanting_strategy: SignalImplantingStrategy = None):
         self.id = str(identifier)
         self.motifs = motifs
         self.implanting_strategy = implanting_strategy
@@ -70,6 +71,9 @@ class Signal:
 
     def get_all_motif_instances(self, sequence_type: SequenceType):
         return chain((motif.get_all_possible_instances(sequence_type), motif.v_call, motif.j_call) for motif in self.motifs)
+
+    def make_motif_instances(self, count, sequence_type):
+        return [motif.instantiate_motif(sequence_type=sequence_type) for motif in random.choices(self.motifs, k=count)]
 
     def __str__(self):
         return "Signal id: " + self.id + "; motifs: " + ", ".join([str(motif) for motif in self.motifs])

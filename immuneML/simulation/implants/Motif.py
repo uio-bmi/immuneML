@@ -100,17 +100,13 @@ class Motif:
         assert self.instantiation is not None, "Motif: set instantiation strategy before instantiating a motif."
 
         if self.seed is not None:
-            return self.instantiation.instantiate_motif(self.seed, sequence_type=sequence_type)
+            motif_instance = self.instantiation.instantiate_motif(self.seed, sequence_type=sequence_type)
+            if self.v_call or self.j_call:
+                return self.v_call, motif_instance, self.j_call
+            else:
+                return motif_instance
         else:
-            assert self.name_chain1 is not None and self.name_chain2 is not None, \
-                f"Motif: chain names have to be set when working with paired chain data, here these are: {self.name_chain1} and {self.name_chain2}."
-            assert chain_name is not None, "Motif: when working with paired chain data, please specify the chain for which the motif is instantiated."
-            assert chain_name in [self.name_chain1, self.name_chain2], \
-                f"Motif: specified chain name {chain_name.name.lower()} is not in valid list of chain names specified for motif {self.identifier}: " \
-                f"{[self.name_chain1.name.lower(), self.name_chain2.name.lower()]}."
-
-            return self.instantiation.instantiate_motif(self.seed_chain1 if chain_name == self.name_chain1 else self.seed_chain2,
-                                                        sequence_type=sequence_type)
+            raise NotImplementedError
 
     def get_max_length(self):
         if self.seed is not None:

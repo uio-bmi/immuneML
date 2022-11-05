@@ -14,16 +14,16 @@ from immuneML.util.PositionHelper import PositionHelper
 
 class GappedMotifImplanting(SequenceImplantingStrategy):
 
-    def implant(self, sequence: ReceptorSequence, signal: dict, sequence_position_weights=None, sequence_type: SequenceType = SequenceType.AMINO_ACID) -> ReceptorSequence:
+    def implant(self, sequence, signal: dict, sequence_position_weights=None, sequence_type: SequenceType = SequenceType.AMINO_ACID) -> ReceptorSequence:
 
-        assert sequence.metadata.region_type == RegionType.IMGT_CDR3, \
-            f"{GappedMotifImplanting.__name__}: sequence is of type {sequence.metadata.region_type}, but currently only {RegionType.IMGT_CDR3} " \
-            f"is supported."
+        assert sequence.region_type in [RegionType.IMGT_CDR3.name, RegionType.IMGT_JUNCTION.name], \
+            f"{GappedMotifImplanting.__name__}: sequence is of type {sequence.region_type}, but currently only {RegionType.IMGT_CDR3.name} and " \
+            f"{RegionType.IMGT_JUNCTION.name} are supported."
 
         motif_instance = signal["motif_instance"]
         imgt_aa_positions = self._build_imgt_positions(sequence, motif_instance, sequence_type)
 
-        limit = len(motif_instance.instance) - motif_instance.instance.count("/") + motif_instance.gap - 1
+        limit = len(motif_instance)
         if sequence_type == SequenceType.NUCLEOTIDE:
             limit = limit * 3
 
@@ -32,18 +32,25 @@ class GappedMotifImplanting(SequenceImplantingStrategy):
         new_sequence = self._build_new_sequence(sequence, implant_position, signal, sequence_type)
         return new_sequence
 
-    def _build_imgt_positions(self, sequence: ReceptorSequence, motif_instance: MotifInstance, sequence_type: SequenceType):
-        assert len(sequence.get_sequence(sequence_type)) >= motif_instance.gap + len(motif_instance.instance) - 1, \
-            "The motif instance is longer than receptor_sequence length. Remove the receptor_sequence from the repertoire or reduce max gap length " \
-            "to be able to proceed. "
-        return PositionHelper.gen_imgt_positions_from_sequence(sequence)
+    def _build_imgt_positions(self, sequence, motif_instance: MotifInstance, sequence_type: SequenceType):
+        sequence_length = len(str(getattr(sequence, "sequence" if sequence_type == SequenceType.NUCLEOTIDE else 'sequence_aa')))
+        assert sequence_length >= len(motif_instance), \
+            "The motif instance is longer than sequence length. Remove the receptor_sequence from the repertoire or reduce max gap length " \
+            "to be able to proceed."
+
+        if sequence.region_type == RegionType.IMGT_JUNCTION.name:
+            return PositionHelper.gen_imgt_positions_from_junction_length(sequence_length)
+        elif sequence.region_type == RegionType.IMGT_CDR3.name:
+            return PositionHelper.gen_imgt_positions_from_cdr3_length(sequence_length)
+        else:
+            raise NotImplementedError(f"IMGT positions here are defined only for CDR3 and JUNCTION region types, got {sequence.region_type}")
 
     def _choose_implant_position(self, imgt_positions, position_weights):
         imgt_implant_position = np.random.choice(list(position_weights.keys()), size=1, p=list(position_weights.values()))
         position = np.where(imgt_positions == imgt_implant_position)[0][0]
         return position
 
-    def _build_new_sequence(self, sequence: ReceptorSequence, position, signal: dict, sequence_type: SequenceType = SequenceType.AMINO_ACID) -> ReceptorSequence:
+    def _build_new_sequence(self, sequence, position, signal: dict, sequence_type: SequenceType = SequenceType.AMINO_ACID):
 
         gap_length = signal["motif_instance"].gap
         if "/" in signal["motif_instance"].instance:
@@ -54,12 +61,15 @@ class GappedMotifImplanting(SequenceImplantingStrategy):
 
         if sequence_type == SequenceType.NUCLEOTIDE:
             position *= 3
+            sequence_string = str(sequence.sequence)
+        else:
+            sequence_string = str(sequence.sequence_aa)
 
         gap_start = position+len(motif_left)
         gap_end = gap_start+gap_length
-        part1 = sequence.get_sequence(sequence_type)[:position]
-        part2 = sequence.get_sequence(sequence_type)[gap_start:gap_end]
-        part3 = sequence.get_sequence(sequence_type)[gap_end+len(motif_right):]
+        part1 = sequence_string[:position]
+        part2 = sequence_string[gap_start:gap_end]
+        part3 = sequence_string[gap_end+len(motif_right):]
 
         new_sequence_string = part1 + motif_left + part2 + motif_right + part3
 

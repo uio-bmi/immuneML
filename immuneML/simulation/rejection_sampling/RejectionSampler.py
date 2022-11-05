@@ -136,6 +136,10 @@ class RejectionSampler:
                 logging.warning(f"Iteration {iteration} out of {self.max_iterations} max iterations reached during rejection sampling.")
             iteration += 1
 
+        if iteration == self.max_iterations and sum(sequence_per_signal_count.values()) != 0:
+            raise RuntimeError(f"{RejectionSampler.__name__}: maximum iterations were reached, but the simulation could not finish "
+                               f"with parameters: {vars(self)}.\n")
+
     def _setup_tmp_sequence_paths(self, path):
         if self.seqs_with_signal_path is None:
             self.seqs_with_signal_path = {signal.id: path / f"sequences_with_signal_{signal.id}.tsv" for signal in self.sim_item.signals}

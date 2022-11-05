@@ -9,3 +9,6 @@ class MotifInstance:
 
     def __str__(self):
         return self.instance.replace("/", "".join(["/" for _ in range(self.gap)]))
+
+    def __len__(self):
+        return len(self.instance) + max(self.gap - 1, 0)
