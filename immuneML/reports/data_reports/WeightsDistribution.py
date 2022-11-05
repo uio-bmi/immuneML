@@ -43,6 +43,7 @@ class WeightsDistribution(DataReport):
             return True
         else:
             warnings.warn("WeightsDistribution: report requires weighting. Skipping this report...")
+            return False
 
     def _generate(self) -> ReportResult:
         self.label_config = LabelHelper.create_label_config([self.label], self.dataset, WeightsDistribution.__name__,

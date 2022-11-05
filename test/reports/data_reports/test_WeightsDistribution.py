@@ -86,29 +86,10 @@ class TestWeightsDistribution(TestCase):
         lc = LabelConfiguration()
         lc.add_label("l1", [1, 2], positive_class=1)
 
-        encoder = MotifEncoder.build_object(
-            dataset,
-            **{
-                "max_positions": 3,
-                "min_precision": 0.9,
-                "min_recall": 0.5,
-                "min_true_positives": 1,
-                "generalize_motifs": False,
-            }
-        )
+        dataset.set_example_weights([i+1 for i in range(dataset.get_example_count())])
 
-        encoded_dataset = encoder.encode(
-            dataset,
-            EncoderParams(
-                result_path=path / "encoded_data/",
-                label_config=lc,
-                pool_size=2,
-                learn_model=True,
-                model={},
-            ),
-        )
 
-        return encoded_dataset
+        return dataset
 
     def test_generate(self):
         path = EnvironmentSettings.tmp_test_path / "weight_distribution/"
