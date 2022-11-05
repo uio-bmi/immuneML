@@ -163,14 +163,15 @@ class OLGA(GenerativeModel):
         sequences.to_csv(path, index=False, sep='\t')
         return path
 
-    def compute_p_gens(self, sequences: pd.DataFrame, sequence_type: SequenceType) -> np.ndarray:
+    def compute_p_gens(self, sequences, sequence_type: SequenceType) -> np.ndarray:
 
         cls = GenerationProbabilityVDJ if self.is_vdj else GenerationProbabilityVJ
         p_gen_model = cls(generative_model=self._olga_gen_model, genomic_data=self._genomic_data)
         p_gen_func = p_gen_model.compute_nt_CDR3_pgen if sequence_type == SequenceType.NUCLEOTIDE else p_gen_model.compute_aa_CDR3_pgen
-        seq_col = 'sequence' if sequence_type == SequenceType.NUCLEOTIDE else 'sequence_aa'
+        seq_field = 'sequence' if sequence_type == SequenceType.NUCLEOTIDE else 'sequence_aa'
 
-        return sequences.apply(lambda row: p_gen_func(row[seq_col], row['v_call'], row['j_call']), axis=1)
+        return np.array([p_gen_func(str(getattr(seq, seq_field)), str(seq.v_call) if seq.v_call else None, str(seq.j_call) if seq.j_call else None)
+                         for seq in sequences])
 
     def can_compute_p_gens(self) -> bool:
         return True
@@ -197,7 +198,6 @@ class OLGA(GenerativeModel):
 
     def _import_olga_sequences(self, sequence_type: SequenceType, path: Path):
         import_empty_nt_sequences = False if sequence_type == SequenceType.NUCLEOTIDE else True
-
         default_params = DefaultParamsLoader.load('datasets', 'olga')
         params = DatasetImportParams.build_object(**{**default_params, **{'path': path, "import_empty_nt_sequences": import_empty_nt_sequences}})
         sequences = ImportHelper.import_items(OLGAImport, path, params)
