@@ -11,9 +11,12 @@ from bionumpy.io import delimited_buffers
 from bionumpy.string_matcher import RegexMatcher, StringMatcher
 from npstructures import RaggedArray
 
+from immuneML.data_model.receptor.RegionType import RegionType
 from immuneML.environment.SequenceType import SequenceType
 from immuneML.simulation.LIgOSimulationItem import LIgOSimulationItem
 from immuneML.simulation.generative_models.GenModelAsTSV import GenModelAsTSV
+from immuneML.simulation.implants.MotifInstance import MotifInstance
+from immuneML.util.PositionHelper import PositionHelper
 
 
 def get_signal_sequence_count(repertoire_count: int, sim_item) -> int:
@@ -163,11 +166,23 @@ def make_signal_matrix_bnpdataclass(signals: list):
     return AnnotatedGenData
 
 
-def make_bnp_dataclass_with_new_field(original_object, new_field_name, new_field_type, new_field_value):
-    original_class = type(original_object)
-    base_fields = [(field_name, field_type) for field_name, field_type in original_class.__annotations__.items()]
-    functions = {func: getattr(original_class, func) for func in dir(original_class)
-                 if callable(getattr(original_class, func)) and not func.startswith("__")}
+def build_imgt_positions(sequence_length: int, motif_instance: MotifInstance, sequence_region_type: RegionType):
+    assert sequence_length >= len(motif_instance), \
+        "The motif instance is longer than sequence length. Remove the receptor_sequence from the repertoire or reduce max gap length " \
+        "to be able to proceed."
 
-    NewClass = bnpdataclass(make_dataclass('ExtendendData', fields=base_fields + [(new_field_name, new_field_type)], namespace=functions))
-    return NewClass(**{**vars(original_object), **{new_field_name: new_field_value}})
+    if sequence_region_type == RegionType.IMGT_JUNCTION.name:
+        return PositionHelper.gen_imgt_positions_from_junction_length(sequence_length)
+    elif sequence_region_type == RegionType.IMGT_CDR3.name:
+        return PositionHelper.gen_imgt_positions_from_cdr3_length(sequence_length)
+    else:
+        raise NotImplementedError(f"IMGT positions here are defined only for CDR3 and JUNCTION region types, got {sequence_region_type}")
+
+
+def choose_implant_position(imgt_positions, position_weights):
+    imgt_implant_position = np.random.choice(list(position_weights.keys()), size=1, p=list(position_weights.values()))
+    position = np.where(imgt_positions == imgt_implant_position)[0][0]
+    return position
+
+
+

@@ -87,7 +87,7 @@ class Motif:
     j_call: str = None
     all_possible_instances: list = None
 
-    def instantiate_motif(self, chain_name: Chain = None, sequence_type: SequenceType = SequenceType.AMINO_ACID):
+    def instantiate_motif(self, sequence_type: SequenceType = SequenceType.AMINO_ACID):
         """
         Creates a motif instance based on the seed; if seed parameter is defined for the motif, it is assumed that single chain data are used for
         the analysis. If seed is None, then it is assumed that paired chain receptor data are required in which case this function will return a

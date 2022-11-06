@@ -1,5 +1,6 @@
 # quality: gold
 import random
+from dataclasses import dataclass
 from itertools import chain
 from pathlib import Path
 from typing import List
@@ -9,11 +10,14 @@ from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import Rece
 from immuneML.data_model.repertoire.Repertoire import Repertoire
 from immuneML.environment.SequenceType import SequenceType
 from immuneML.simulation.implants.Motif import Motif
+from immuneML.simulation.sequence_implanting.SequenceImplantingStrategy import SequenceImplantingStrategy
+from immuneML.simulation.signal_implanting.ImplantingComputation import ImplantingComputation
 from immuneML.simulation.signal_implanting.SignalImplantingStrategy import SignalImplantingStrategy
 from immuneML.util.ReflectionHandler import ReflectionHandler
 from scripts.specification_util import update_docs_per_mapping
 
 
+@dataclass
 class Signal:
     """
     This class represents the signal that will be implanted during a Simulation.
@@ -45,11 +49,11 @@ class Signal:
                     110: 0.5
 
     """
-
-    def __init__(self, identifier: str, motifs: List[Motif], implanting_strategy: SignalImplantingStrategy = None):
-        self.id = str(identifier)
-        self.motifs = motifs
-        self.implanting_strategy = implanting_strategy
+    id: str
+    motifs: List[Motif]
+    sequence_implanting_strategy: SequenceImplantingStrategy = None
+    sequence_position_weights: dict = None
+    implanting_computation: ImplantingComputation = None
 
     def implant_to_repertoire(self, repertoire: Repertoire, repertoire_implanting_rate: float, path: Path) -> Repertoire:
         processed_repertoire = self.implanting_strategy \

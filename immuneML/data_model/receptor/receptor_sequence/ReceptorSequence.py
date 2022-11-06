@@ -77,6 +77,10 @@ class ReceptorSequence(DatasetItem):
             self.amino_acid_sequence = self._convert_to_aa(sequence)
 
     def _convert_to_aa(self, nt_sequence: str) -> str:
+        return ReceptorSequence.nt_to_aa(nt_sequence)
+
+    @classmethod
+    def nt_to_aa(cls, nt_sequence: str):
         kmer_length = 3
         kmers = [nt_sequence[i:i + kmer_length] for i in range(0, len(nt_sequence), kmer_length)]
         return "".join([ReceptorSequence.nt_to_aa_map[kmer] for kmer in kmers])
