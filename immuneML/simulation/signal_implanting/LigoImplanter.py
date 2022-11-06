@@ -12,9 +12,10 @@ from immuneML.environment.SequenceType import SequenceType
 from immuneML.simulation.LIgOSimulationItem import LIgOSimulationItem
 from immuneML.simulation.implants.MotifInstance import MotifInstance
 from immuneML.simulation.implants.Signal import Signal
-from immuneML.simulation.util.bnp_util import make_bnp_dataclass_from_dicts, add_fields_to_bnp_dataclass, merge_dataclass_objects
+from immuneML.simulation.util.bnp_util import make_bnp_dataclass_from_dicts, add_fields_to_bnp_dataclass, merge_dataclass_objects, \
+    add_field_to_bnp_dataclass
 from immuneML.simulation.util.util import get_sequence_per_signal_count, make_sequences_from_gen_model, get_bnp_data, filter_out_illegal_sequences, \
-    annotate_sequences, build_imgt_positions, choose_implant_position, add_field_to_bnp_dataclass
+    annotate_sequences, build_imgt_positions, choose_implant_position
 from immuneML.util.PathBuilder import PathBuilder
 from immuneML.util.PositionHelper import PositionHelper
 
