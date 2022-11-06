@@ -4,6 +4,7 @@ from pathlib import Path
 
 import pandas as pd
 
+from immuneML.data_model.dataset.Dataset import Dataset
 from immuneML.data_model.dataset.SequenceDataset import SequenceDataset
 from immuneML.reports.ReportOutput import ReportOutput
 from immuneML.reports.ReportResult import ReportResult
@@ -13,7 +14,23 @@ from immuneML.dsl.instruction_parsers.LabelHelper import LabelHelper
 
 class WeightsDistribution(DataReport):
     """
-    Generates a line diagram of the weight distribution of a SequenceDataset
+    Plots the distribution of weights in a given Dataset. This report can only be used if example weighting has been applied to the given dataset.
+
+
+    # todo: the report should work with any label, with any number of classes (currently assumes is_binder with classes 0 and 1)
+    # use self.label property to find the label name.
+    # do not hardcode any text related to the is_binder label
+
+    # todo: make sure the same classes always get the same color in the figures
+    # currently when running the report multiple times, class 0 is sometimes blue and sometimes purple
+    # solution: retrieve the classes, sort the classes, use color_discrete_map instead of color_discrete_sequence
+    # to map each class to a color. Get these colors for example from px.colors.diverging.Tealrose
+
+    # todo: label is only a useful parameter when split_classes is true. these parameters can thus be merged
+    # instead, use parameter color_grouping_label. if set, use different colors. if not set, use one color
+    # see FeatureComparison report for an example where multiple labels can be used to change features of the plot
+
+
 
     Example YAML specification:
         r1:
@@ -31,7 +48,7 @@ class WeightsDistribution(DataReport):
     def build_object(cls, **kwargs):
         return WeightsDistribution(**kwargs)
 
-    def __init__(self, dataset: SequenceDataset = None, result_path: Path = None, number_of_processes: int = 1, name: str = None, label: dict = None, weight_thresholds: dict = None, split_classes: bool = None):
+    def __init__(self, dataset: Dataset = None, result_path: Path = None, number_of_processes: int = 1, name: str = None, label: dict = None, weight_thresholds: dict = None, split_classes: bool = None):
             super().__init__(dataset=dataset, result_path=result_path, number_of_processes=number_of_processes, name=name)
             self.label = label
             self.weight_thresholds = weight_thresholds
@@ -42,7 +59,7 @@ class WeightsDistribution(DataReport):
         if self.dataset.get_example_weights() is not None:
             return True
         else:
-            warnings.warn("WeightsDistribution: report requires weighting. Skipping this report...")
+            warnings.warn("WeightsDistribution: report requires weights to be set for the given Dataset. Skipping this report...")
             return False
 
     def _generate(self) -> ReportResult:
