@@ -110,6 +110,29 @@ class PWM(GenerativeModel):
     def get_compatible_encoders(self):
         raise Exception("get_compatible_encoders has not been implemented")
 
+    def load(self, path: Path, details_path: Path = None):
+
+        name = f"{self._get_model_filename()}.csv"
+        file_path = path / name
+        if file_path.is_file():
+            with file_path.open("rb") as file:
+                self.model = csv.reader(file)
+        else:
+            raise FileNotFoundError(f"{self.__class__.__name__} model could not be loaded from {file_path}"
+                                    f". Check if the path to the {name} file is properly set.")
+
+        if details_path is None:
+            params_path = path / f"{self._get_model_filename()}.yaml"
+        else:
+            params_path = details_path
+
+        if params_path.is_file():
+            with params_path.open("r") as file:
+                desc = yaml.safe_load(file)
+                for param in ["feature_names"]:
+                    if param in desc:
+                        setattr(self, param, desc[param])
+
     def store(self, path: Path, feature_names=None, details_path: Path = None):
 
         PathBuilder.build(path)

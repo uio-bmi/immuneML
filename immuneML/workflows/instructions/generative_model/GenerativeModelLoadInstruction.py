@@ -12,7 +12,7 @@ from immuneML.workflows.steps.DataEncoder import DataEncoder
 from immuneML.workflows.steps.DataEncoderParams import DataEncoderParams
 
 
-class GenerativeModelLoadInstruction(Instruction):
+class GenerativeModelInstruction(Instruction):
 
     """
     Allows for the generation of data based on existing data
@@ -23,13 +23,13 @@ class GenerativeModelLoadInstruction(Instruction):
 
     def __init__(self, generative_model_units: dict, name: str = None):
         assert all(isinstance(unit, GenerativeModelUnit) for unit in generative_model_units.values()), \
-            "GenerativeModelLoadInstruction: not all elements passed to init method are instances of GenerativeModelUnit."
+            "GenerativeModelInstruction: not all elements passed to init method are instances of GenerativeModelUnit."
         self.state = GenerativeModelState(generative_model_units, name=name)
 
         self.name = name
 
     def run(self, result_path: Path):
-        name = self.name if self.name is not None else "generative_model_load"
+        name = self.name if self.name is not None else "generative_model"
         self.state.result_path = result_path / name
         for index, (key, unit) in enumerate(self.state.generative_model_units.items()):
             print("{}: Started analysis {} ({}/{}).".format(datetime.datetime.now(), key, index+1, len(self.state.generative_model_units)), flush=True)
@@ -41,11 +41,12 @@ class GenerativeModelLoadInstruction(Instruction):
         return self.state
 
     def run_unit(self, unit: GenerativeModelUnit, result_path: Path) -> ReportResult:
-        path = PathBuilder.build(unit.path)
-        unit.genModel.load(path)
-        sequences = unit.genModel.generate(amount=unit.amount)
+        unit.genModel.load(unit.path)
+        matrix, sequences, alphabet = unit.genModel.generate(amount=50)
         unit.report.method = unit.genModel
         unit.report.result_path = result_path / "report"
         unit.generated_sequences = sequences
+        unit.alphabet = alphabet
+        unit.PWM = matrix
         report_result = unit.report.generate_report()
         return report_result

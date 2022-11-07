@@ -13,9 +13,9 @@ from immuneML.ml_methods.GenerativeModel import GenerativeModel
 @dataclass
 class GenerativeModelUnit:
 
-    dataset: Dataset
     report: Report
     genModel: GenerativeModel
+    dataset: None
     alphabet: str = "ACGT"
     generated_sequences: list = None
     PWM: numpy.array = None
