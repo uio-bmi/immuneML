@@ -3,6 +3,7 @@ import yaml
 import datetime
 
 import numpy as np
+import pandas as pd
 
 from pathlib import Path
 from immuneML.ml_methods.GenerativeModel import GenerativeModel
@@ -17,7 +18,7 @@ class PWM(GenerativeModel):
     def __init__(self, parameter_grid: dict = None, parameters: dict = None):
         parameters = parameters if parameters is not None else {}
         parameter_grid = parameter_grid if parameter_grid is not None else {}
-
+        self.alphabet = ""
         super(PWM, self).__init__(parameter_grid=parameter_grid, parameters=parameters)
 
 
@@ -115,8 +116,7 @@ class PWM(GenerativeModel):
         name = f"{self._get_model_filename()}.csv"
         file_path = path / name
         if file_path.is_file():
-            with file_path.open("rb") as file:
-                self.model = csv.reader(file)
+            dataframe = file_path
         else:
             raise FileNotFoundError(f"{self.__class__.__name__} model could not be loaded from {file_path}"
                                     f". Check if the path to the {name} file is properly set.")
@@ -139,11 +139,9 @@ class PWM(GenerativeModel):
 
         print(f'{datetime.datetime.now()}: Writing to file...')
         file_path = path / f"{self._get_model_filename()}.csv"
-        with open(file_path, "w") as file:
-            writer = csv.writer(file)
-            writer.writerow(list(self.alphabet))
-            for row in self.model:
-                writer.writerow(row)
+        data = {"PWM": self.model, "alphabet": self.alphabet}
+        dataframe = pd.DataFrame(data)
+        dataframe.to_csv(file_path)
 
 
         if details_path is None:

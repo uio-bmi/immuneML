@@ -59,30 +59,13 @@ class GenerativeModelLoadParser:
         ParameterValidator.assert_keys(list(generator.keys()), valid_keys, "GenerativeModelLoadParser", "generator",
                                        False)
 
-        params = {"path": symbol_table.get(generator["path"]),
+        params = {"path": generator["path"],
                   "report": copy.deepcopy(symbol_table.get(generator["report"])),
                   "genModel": symbol_table.get(generator["ml_method"])}
 
-        optional_params = self._prepare_optional_params(generator, symbol_table, yaml_location)
-        params = {**params, **optional_params}
-        return params
-
-    def _prepare_optional_params(self, generator: dict, symbol_table: SymbolTable, yaml_location: str) -> dict:
-
-        params = {}
-        dataset = symbol_table.get(generator["dataset"])
-
-        if "encoding" in generator:
-            params["encoder"] = symbol_table.get(generator["encoding"]).build_object(dataset, **symbol_table.get_config(generator["encoding"])["encoder_params"])
-
-        if "labels" in generator:
-            params["label_config"] = LabelHelper.create_label_config(generator["labels"], dataset, GenerativeModelLoadParser.__name__, yaml_location)
-        else:
-            params["label_config"] = LabelHelper.create_label_config([x for x in dataset.labels if isinstance(dataset.labels[x], list)], dataset, GenerativeModelLoadParser.__name__, yaml_location)
-
-        if "preprocessing_sequence" in generator:
-            params["preprocessing_sequence"] = symbol_table.get(generator["preprocessing_sequence"])
+        params = {**params}
 
         return params
+
 
 
