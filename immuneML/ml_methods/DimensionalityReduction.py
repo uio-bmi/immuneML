@@ -3,6 +3,8 @@ from abc import ABC
 from immuneML.ml_methods.UnsupervisedSklearnMethod import UnsupervisedSklearnMethod
 from immuneML.data_model.encoded_data.EncodedData import EncodedData
 
+from scipy.sparse import csr_matrix
+
 
 class DimensionalityReduction(UnsupervisedSklearnMethod, ABC):
     def __init__(self, parameter_grid: dict = None, parameters: dict = None):
@@ -13,7 +15,11 @@ class DimensionalityReduction(UnsupervisedSklearnMethod, ABC):
 
     def transform(self, encoded_data: EncodedData):
         self.check_is_fitted()
-        encoded_data.set_dim_reduction(self.model.transform(encoded_data.examples))
+        data = encoded_data.examples
+        if type(self.model).__name__ in ["PCA"]:
+            if isinstance(data, csr_matrix):
+                data = data.toarray()
+        encoded_data.set_dim_reduction(self.model.transform(data))
 
     def get_params(self):
         params = self.model.get_params()

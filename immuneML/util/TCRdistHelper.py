@@ -67,6 +67,8 @@ class TCRdistHelper:
         if len(label_names) > 1:
             raise NotImplementedError(f"TCRdist: multiple labels specified ({str(label_names)[1:-1]}), but only single label binary class "
                                       f"is currently supported in immuneML.")
+        elif len(label_names) < 1:
+            label_names.append('epitope')
         label_name = label_names[0]
 
         subject, epitope, count, v_a_gene, j_a_gene, cdr3_a_aa, v_b_gene, j_b_gene, cdr3_b_aa, clone_id, cdr3_b_nucseq, cdr3_a_nucseq = \

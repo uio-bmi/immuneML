@@ -25,7 +25,7 @@ class ClusteringParser:
 
     def _prepare_params(self, analysis: dict, symbol_table: SymbolTable, yaml_location: str) -> dict:
 
-        valid_keys = ["dataset", "report", "clustering_method", "encoding", "dimensionality_reduction"]
+        valid_keys = ["dataset", "report", "clustering_method", "encoding", "dimensionality_reduction", "dim_red_before_clustering"]
         ParameterValidator.assert_keys(list(analysis.keys()), valid_keys, "ClusteringParser", yaml_location[yaml_location.rfind("/")+1:], False)
         must_have_keys = ["dataset", "report", "clustering_method", "encoding"]
         ParameterValidator.assert_keys_present(list(analysis.keys()), must_have_keys, "ClusteringParser", yaml_location[yaml_location.rfind("/")+1:])
@@ -53,5 +53,8 @@ class ClusteringParser:
 
         if "dimensionality_reduction" in analysis:
             params["dimensionality_reduction"] = symbol_table.get(analysis["dimensionality_reduction"])
+
+        if "dim_red_before_clustering" in analysis:
+            params["dim_red_before_clustering"] = analysis["dim_red_before_clustering"]
 
         return params

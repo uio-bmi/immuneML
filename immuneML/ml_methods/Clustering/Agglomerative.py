@@ -11,3 +11,10 @@ class Agglomerative(Clustering):
 
     def _get_ml_model(self, cores_for_training: int = 2, X=None):
         return AgglomerativeClustering(**self._parameters)
+
+    def get_compatible_encoders(self):
+        encodings = super().get_compatible_encoders()
+        from immuneML.encodings.distance_encoding.TCRdistEncoder import TCRdistEncoder
+
+        encodings.append(TCRdistEncoder)
+        return encodings

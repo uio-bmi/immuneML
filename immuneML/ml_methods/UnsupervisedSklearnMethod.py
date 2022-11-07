@@ -49,7 +49,7 @@ class UnsupervisedSklearnMethod(UnsupervisedMLMethod):
             os.environ["PYTHONWARNINGS"] = "ignore"
 
         self.model = self._get_ml_model(cores_for_training, X)
-        if type(self.model).__name__ == "AgglomerativeClustering":
+        if type(self.model).__name__ in ["AgglomerativeClustering", "PCA"]:
             if isinstance(X, csr_matrix):
                 X = X.toarray()
         self.model.fit(X)

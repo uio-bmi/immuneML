@@ -18,4 +18,5 @@ class ClusteringUnit:
     encoder: DatasetEncoder = None
     report_result: ReportResult = None
     label_config: LabelConfiguration = None
+    dim_red_before_clustering: bool = True
     number_of_processes: int = 1

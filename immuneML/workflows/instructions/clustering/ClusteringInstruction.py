@@ -10,6 +10,7 @@ from immuneML.workflows.instructions.clustering.ClusteringState import Clusterin
 from immuneML.workflows.instructions.clustering.ClusteringUnit import ClusteringUnit
 from immuneML.workflows.steps.DataEncoder import DataEncoder
 from immuneML.workflows.steps.DataEncoderParams import DataEncoderParams
+from immuneML.util.Logger import print_log
 
 from scipy.sparse import csr_matrix
 
@@ -29,49 +30,36 @@ class ClusteringInstruction(Instruction):
         name = self.name if self.name is not None else "clustering"
         self.state.result_path = result_path / name
         for index, (key, unit) in enumerate(self.state.clustering_units.items()):
-            print("{}: Started analysis {} ({}/{}).".format(datetime.datetime.now(), key, index + 1, len(self.state.clustering_units)), flush=True)
+            print_log("Started analysis {} ({}/{}).".format(key, index + 1, len(self.state.clustering_units)), include_datetime=True)
             path = self.state.result_path / f"analysis_{key}"
             PathBuilder.build(path)
             report_result = self.run_unit(unit, path, key)
             unit.report_result = report_result
-            print("{}: Finished analysis {} ({}/{}).\n".format(datetime.datetime.now(), key, index + 1, len(self.state.clustering_units)), flush=True)
+            print_log("Finished analysis {} ({}/{}).\n".format(key, index + 1, len(self.state.clustering_units)), include_datetime=True)
         return self.state
 
     def run_unit(self, unit: ClusteringUnit, result_path: Path, key) -> ReportResult:
         encoded_dataset = self.encode(unit, result_path / "encoded_dataset")
 
-        if unit.dimensionality_reduction is not None:
-            unit.dimensionality_reduction.fit(encoded_dataset.encoded_data)
-            unit.dimensionality_reduction.transform(encoded_dataset.encoded_data)
+        if unit.dim_red_before_clustering:
+            if unit.dimensionality_reduction is not None:
+                unit.dimensionality_reduction.fit(encoded_dataset.encoded_data)
+                unit.dimensionality_reduction.transform(encoded_dataset.encoded_data)
 
         unit.clustering_method.fit(encoded_dataset.encoded_data)
 
         # Check if more than 1 cluster
         if max(unit.clustering_method.model.labels_) > 0:
-            if self.state.clustering_scores is None:
-                self.state.clustering_scores = {}
+            self.calculate_scores(key, encoded_dataset.encoded_data.examples, unit.clustering_method.model.labels_)
 
-            data = encoded_dataset.encoded_data.examples
-            if isinstance(data, csr_matrix):
-                data = encoded_dataset.encoded_data.examples.toarray()
-
-            scores = {
-                "Silhouette": silhouette_score(data, unit.clustering_method.model.labels_),
-                "Calinski-Harabasz": calinski_harabasz_score(data, unit.clustering_method.model.labels_),
-                "Davies-Bouldin": davies_bouldin_score(data, unit.clustering_method.model.labels_),
-            }
-            target_score = {
-                "Silhouette": 1,
-                "Calinski-Harabasz": 999999,
-                "Davies-Bouldin": 0,
-            }
-            self.state.clustering_scores["target_score"] = target_score
-            self.state.clustering_scores[key] = scores
+        if not unit.dim_red_before_clustering:
+            if unit.dimensionality_reduction is not None:
+                unit.dimensionality_reduction.fit(encoded_dataset.encoded_data)
+                unit.dimensionality_reduction.transform(encoded_dataset.encoded_data)
 
         processed_dataset = self.add_label(encoded_dataset, unit.clustering_method.model.labels_, result_path / "dataset_clustered")
 
         unit.report.dataset = processed_dataset
-
         unit.report.method = unit.clustering_method
         unit.report.result_path = result_path / "report"
         unit.report.number_of_processes = unit.number_of_processes
@@ -92,22 +80,44 @@ class ClusteringInstruction(Instruction):
             encoded_dataset = unit.dataset
         return encoded_dataset
 
+    def calculate_scores(self, key, data, labels):
+        if self.state.clustering_scores is None:
+            self.state.clustering_scores = {}
+
+        if isinstance(data, csr_matrix):
+            data = data.toarray()
+
+        scores = {
+            "Silhouette": silhouette_score(data, labels),
+            "Calinski-Harabasz": calinski_harabasz_score(data, labels),
+            "Davies-Bouldin": davies_bouldin_score(data, labels),
+        }
+        target_score = {
+            "Silhouette": 1,
+            "Calinski-Harabasz": 999999,
+            "Davies-Bouldin": 0,
+        }
+        self.state.clustering_scores["target_score"] = target_score
+        self.state.clustering_scores[key] = scores
+
     def add_label(self, dataset: Dataset, labels: [str], path: Path):
         PathBuilder.build(path)
         if type(dataset).__name__ == "RepertoireDataset":
             # TO DO: Fix building for repertoire dataset
             for index, x in enumerate(dataset.get_data()):
-                x.metadata["clusterId"] = str(labels[index])
+                x.metadata["cluster_id"] = str(labels[index])
 
             processed_dataset = dataset
         else:
             processed_receptors = [x for x in dataset.get_data()]
-            for index, x in enumerate(processed_receptors):
-                x.metadata["clusterId"] = str(labels[index])
+            for index, receptor in enumerate(processed_receptors):
+                for seq in receptor.get_chains():
+                    receptor.__dict__[seq].metadata.custom_params["cluster_id"] = str(labels[index])
+                receptor.metadata["cluster_id"] = str(labels[index])
 
             processed_dataset = ReceptorDataset.build_from_objects(receptors=processed_receptors, file_size=dataset.file_size, name=dataset.name, path=path)
             processed_dataset.labels = dataset.labels
             processed_dataset.encoded_data = dataset.encoded_data
 
-        processed_dataset.labels["clusterId"] = list(range(max(labels)))
+        processed_dataset.labels["cluster_id"] = list(range(max(labels)))
         return processed_dataset

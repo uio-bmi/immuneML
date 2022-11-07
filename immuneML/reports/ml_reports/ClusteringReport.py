@@ -11,9 +11,8 @@ from immuneML.util.PathBuilder import PathBuilder
 from scipy.sparse import csr_matrix
 
 import plotly.graph_objs as go
-from sklearn.metrics import silhouette_score, calinski_harabasz_score, davies_bouldin_score
 
-from immuneML.IO.dataset_export.ImmuneMLExporter import ImmuneMLExporter
+from immuneML.IO.dataset_export.AIRRExporter import AIRRExporter
 
 
 class ClusteringReport(UnsupervisedMLReport):
@@ -39,11 +38,11 @@ class ClusteringReport(UnsupervisedMLReport):
         elif self.dataset.encoded_data.examples.shape[1] == 3:
             fig_paths.append(self._3dplot(data, f'3d_{self.name}'))
 
-        datasetPath = PathBuilder.build(f'{self.result_path}/{self.dataset.name}_clusterId')
-        ImmuneMLExporter.export(self.dataset, datasetPath, False)
+        datasetPath = PathBuilder.build(f'{self.result_path}/{self.dataset.name}_cluster_id')
+        AIRRExporter.export(self.dataset, datasetPath, False)
 
         shutil.make_archive(datasetPath, "zip", datasetPath)
-        table_paths.append(ReportOutput(self.result_path / f"{self.dataset.name}_clusterId.zip", f"{self.dataset.name} with cluster id"))
+        table_paths.append(ReportOutput(self.result_path / f"{self.dataset.name}_cluster_id.zip", f"{self.dataset.name} with cluster id"))
 
         return ReportResult(self.name,
                             output_figures=[p for p in fig_paths if p is not None],
@@ -65,23 +64,6 @@ class ClusteringReport(UnsupervisedMLReport):
                             showlegend=True
                             )
         traces.append(trace0)
-        if hasattr(self.method.model, "cluster_centers_"):
-            trace1 = go.Scatter(x=self.method.model.cluster_centers_[:, 0],
-                                y=self.method.model.cluster_centers_[:, 1],
-                                name='Cluster centers',
-                                text=list("Cluster id: '%s'" % i for i in range(self.method.model.cluster_centers_.shape[0])),
-                                mode='markers',
-                                marker=go.scatter.Marker(symbol='x',
-                                                         size=16,
-                                                         line=dict(
-                                                             color='DarkSlateGrey',
-                                                             width=2
-                                                         ),
-                                                         color=list(
-                                                             range(self.method.model.cluster_centers_.shape[0]))),
-                                showlegend=True
-                                )
-            traces.append(trace1)
         layout = go.Layout(xaxis=go.layout.XAxis(showgrid=False,
                                                  zeroline=False,
                                                  showline=True,
@@ -123,26 +105,6 @@ class ClusteringReport(UnsupervisedMLReport):
                               showlegend=True
                               )
         traces.append(trace0)
-        if hasattr(self.method.model, "cluster_centers_"):
-            trace1 = go.Scatter3d(x=self.method.model.cluster_centers_[:, 0],
-                                  y=self.method.model.cluster_centers_[:, 1],
-                                  z=self.method.model.cluster_centers_[:, 2],
-                                  name='Cluster centers',
-                                  text=list(
-                                      "Cluster id: '%s'" % i for i in
-                                      range(self.method.model.cluster_centers_.shape[0])),
-                                  mode='markers',
-                                  marker=dict(symbol='x',
-                                              size=12,
-                                              line=dict(
-                                                  color='DarkSlateGrey',
-                                                  width=8
-                                              ),
-                                              color=list(range(self.method.model.cluster_centers_.shape[0]))),
-                                  showlegend=True
-                                  )
-            traces.append(trace1)
-
         figure = go.Figure(data=traces)
 
         with filename.open("w") as file:
