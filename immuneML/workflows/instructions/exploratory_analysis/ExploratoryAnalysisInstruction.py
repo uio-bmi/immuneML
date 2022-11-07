@@ -81,7 +81,6 @@ class ExploratoryAnalysisInstruction(Instruction):
         if unit.dimensionality_reduction is not None:
             unit.dimensionality_reduction.fit(encoded_dataset.encoded_data)
             unit.dimensionality_reduction.store(result_path)
-            unit.dimensionality_reduction.load(result_path)
             unit.dimensionality_reduction.transform(encoded_dataset.encoded_data)
 
         unit.report.method = unit.dimensionality_reduction
