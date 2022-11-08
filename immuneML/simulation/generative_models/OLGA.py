@@ -170,7 +170,7 @@ class OLGA(GenerativeModel):
         p_gen_func = p_gen_model.compute_nt_CDR3_pgen if sequence_type == SequenceType.NUCLEOTIDE else p_gen_model.compute_aa_CDR3_pgen
         seq_field = 'sequence' if sequence_type == SequenceType.NUCLEOTIDE else 'sequence_aa'
 
-        return np.array([p_gen_func(str(getattr(seq, seq_field)), getattr(seq, 'v_call', None), getattr(seq, 'j_call', None))
+        return np.array([p_gen_func(str(getattr(seq, seq_field)), getattr(seq, 'v_call', None), getattr(seq, 'j_call', None), False)
                          for seq in sequences])
 
     def can_compute_p_gens(self) -> bool:

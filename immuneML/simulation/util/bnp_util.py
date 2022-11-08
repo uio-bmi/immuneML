@@ -19,7 +19,7 @@ def make_bnp_dataclass_from_dicts(dict_objects: List[dict]):
 
         if field_name in ['sequence', 'sequence_aa']:
             field_type = DNAEncoding if field_name == "sequence" else AminoAcidEncoding
-            transformed_objs[field_name] = as_encoded_array(transformed_objs[field_name], field_type)
+            transformed_objs[field_name] = as_encoded_array(transformed_objs[field_name], field_type) if any(transformed_objs[field_name]) else None
         else:
             field_type = type(transformed_objs[field_name][0])
 

@@ -24,7 +24,7 @@ class TestLigoImplanter(TestCase):
                                                      generative_model=OLGA.build_object(**{"default_model_name": 'humanTRB', 'model_path': None,
                                                                                            'use_only_productive': False}),
                                                      number_of_examples=5, receptors_in_repertoire_count=20), SequenceType.AMINO_ACID, signals,
-                                  sequence_batch_size=1000, seed=1, export_p_gens=True, keep_p_gen_dist=True, remove_seqs_with_signals=True,
+                                  sequence_batch_size=100, seed=1, export_p_gens=True, keep_p_gen_dist=True, remove_seqs_with_signals=True,
                                   max_iterations=100, p_gen_bin_count=5)
         repertoires = implanter.make_repertoires(path)
 

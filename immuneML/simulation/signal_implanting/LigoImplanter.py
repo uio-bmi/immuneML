@@ -38,9 +38,16 @@ class LigoImplanter:
     keep_low_p_gen_proba: float = None
     sequence_paths: dict = None
 
+    MIN_HIST_VAL = 1e-10
+    MAX_HIST_VAL = 0.99999
+
     @property
     def max_signals(self):
         return 0 if self.remove_seqs_with_signals else -1
+
+    @property
+    def bins(self):
+        return np.r_[-np.inf, np.logspace(start=LigoImplanter.MIN_HIST_VAL, stop=LigoImplanter.MAX_HIST_VAL, num=self.p_gen_bin_count - 2)]
 
     def make_repertoires(self, path: Path) -> List[Repertoire]:
 
@@ -102,9 +109,9 @@ class LigoImplanter:
                 motif_instances = self._make_motif_instances(signal, seqs_per_signal_count[signal.id])
 
                 for instance in motif_instances:
-                    suitable_seqs = np.argwhere(remaining_seq_mask & sequence_lengths >= len(instance))
-                    if len(suitable_seqs) > 0:
-                        sequence_index = np.random.choice(suitable_seqs, 1)[0]
+                    suitable_seqs = np.argwhere(np.logical_and(remaining_seq_mask, sequence_lengths >= len(instance))).reshape(-1)
+                    if suitable_seqs.shape[0] > 0:
+                        sequence_index = np.random.choice(suitable_seqs, size=1)[0]
                         new_sequence = self._implant_in_sequence(sequences[sequence_index], signal, instance)
                         remaining_seq_mask[sequence_index] = False
                         modified_sequences.append(new_sequence)
@@ -140,7 +147,7 @@ class LigoImplanter:
         return add_fields_to_bnp_dataclass(sequences, new_fields)
 
     def _implant_in_sequence(self, sequence_row: bnpdataclass, signal: Signal, motif_instance: MotifInstance) -> dict:
-        imgt_aa_positions = build_imgt_positions(len(sequence_row.get_sequence(self.sequence_type)), motif_instance, sequence_row.region_type)
+        imgt_aa_positions = build_imgt_positions(len(getattr(sequence_row, self.sequence_type.value)), motif_instance, sequence_row.region_type)
 
         limit = len(motif_instance)
         if self.sequence_type == SequenceType.NUCLEOTIDE:
@@ -153,9 +160,9 @@ class LigoImplanter:
 
         new_sequence[signal.id] = 1
         new_sequence[f'{signal.id}_positions'] = "m" + "".join("0" for _ in range(implant_position)) + "1" + \
-                                                 "".join("0" for _ in range(len(sequence_row.get_sequence(self.sequence_type)) - implant_position))
+                                                 "".join("0" for _ in range(len(getattr(sequence_row, self.sequence_type.value)) - implant_position))
 
-        zero_mask = "m" + "".join(["0" for _ in range(getattr(new_sequence, self.sequence_type.value))])
+        zero_mask = "m" + "".join(["0" for _ in range(len(new_sequence[self.sequence_type.value]))])
         new_sequence = {**{f"{s.id}_positions": zero_mask for s in self.all_signals}, **new_sequence}
         return new_sequence
 
@@ -168,7 +175,7 @@ class LigoImplanter:
 
         if self.sequence_type == SequenceType.NUCLEOTIDE:
             position *= 3
-        sequence_string = getattr(sequence_row, self.sequence_type.value)
+        sequence_string = getattr(sequence_row, self.sequence_type.value).to_string()
 
         gap_start = position + len(motif_left)
         gap_end = gap_start + motif_instance.gap
@@ -189,7 +196,7 @@ class LigoImplanter:
         if seqs_count > 0:
             instances = signal.make_motif_instances(seqs_count, self.sequence_type)
 
-            if any(any(not isinstance(el, MotifInstance) for el in signal_motifs) for signal_id, signal_motifs in instances.items()):
+            if any(not isinstance(el, MotifInstance) for el in instances):
                 raise NotImplementedError(
                     "When using implanting, V and J genes must not been set in the motifs -- V/J gene implanting is not supported.")
 
@@ -203,7 +210,7 @@ class LigoImplanter:
                                f"compute sequence generation probabilities. Use other generative model or set keep_p_gen_dist parameter to False.")
 
         p_gens = self.sim_item.generative_model.compute_p_gens(sequences, self.sequence_type)
-        self.target_p_gen_histogram = np.histogram(np.log10(p_gens), bins=self.p_gen_bin_count, density=True)
+        self.target_p_gen_histogram = np.histogram(np.log10(p_gens), bins=self.bins, density=True)[0]
         print(self.target_p_gen_histogram)
 
     def _distribution_matches(self) -> bool:

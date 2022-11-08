@@ -166,14 +166,14 @@ def make_signal_matrix_bnpdataclass(signals: list):
     return AnnotatedGenData
 
 
-def build_imgt_positions(sequence_length: int, motif_instance: MotifInstance, sequence_region_type: RegionType):
+def build_imgt_positions(sequence_length: int, motif_instance: MotifInstance, sequence_region_type):
     assert sequence_length >= len(motif_instance), \
         "The motif instance is longer than sequence length. Remove the receptor_sequence from the repertoire or reduce max gap length " \
         "to be able to proceed."
 
-    if sequence_region_type == RegionType.IMGT_JUNCTION.name:
+    if sequence_region_type.to_string() == RegionType.IMGT_JUNCTION.name:
         return PositionHelper.gen_imgt_positions_from_junction_length(sequence_length)
-    elif sequence_region_type == RegionType.IMGT_CDR3.name:
+    elif sequence_region_type.to_string() == RegionType.IMGT_CDR3.name:
         return PositionHelper.gen_imgt_positions_from_cdr3_length(sequence_length)
     else:
         raise NotImplementedError(f"IMGT positions here are defined only for CDR3 and JUNCTION region types, got {sequence_region_type}")
