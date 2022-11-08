@@ -2,6 +2,7 @@ import numpy as np
 
 from immuneML.data_model.dataset.ReceptorDataset import ReceptorDataset
 from immuneML.data_model.dataset.SequenceDataset import SequenceDataset
+from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
 from immuneML.workflows.steps.data_splitter.DataSplitterParams import DataSplitterParams
 from immuneML.workflows.steps.data_splitter.Util import Util
 
@@ -65,9 +66,16 @@ class LeaveOneOutSplitter:
         train_indices, test_indices = {value: [] for value in unique_values}, {value: [] for value in unique_values}
         for index, receptor in enumerate(dataset.get_data()):
             for value in unique_values:
-                if receptor.metadata[param] == value:
+                if LeaveOneOutSplitter._get_key_from_element_obj(receptor, param) == value:
                     test_indices[value].append(index)
                 else:
                     train_indices[value].append(index)
 
         return train_indices, test_indices
+
+    @staticmethod
+    def _get_key_from_element_obj(obj, param):
+        if isinstance(obj, ReceptorSequence):
+            return obj.metadata.custom_params[param]
+        else:
+            return obj.metadata[param]
