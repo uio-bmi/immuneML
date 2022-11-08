@@ -7,7 +7,7 @@ from immuneML.environment.LabelConfiguration import LabelConfiguration
 from immuneML.encodings.DatasetEncoder import DatasetEncoder
 from immuneML.reports.Report import Report
 from immuneML.reports.ReportResult import ReportResult
-
+from pathlib import Path
 
 @dataclass
 class ClusteringUnit:
@@ -19,4 +19,5 @@ class ClusteringUnit:
     report_result: ReportResult = None
     label_config: LabelConfiguration = None
     dim_red_before_clustering: bool = True
+    true_labels_path: Path = None
     number_of_processes: int = 1

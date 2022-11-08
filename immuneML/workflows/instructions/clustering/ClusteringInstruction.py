@@ -1,5 +1,5 @@
-import datetime
 from pathlib import Path
+from numpy import genfromtxt
 
 from immuneML.data_model.dataset.Dataset import Dataset
 from immuneML.encodings.EncoderParams import EncoderParams
@@ -16,7 +16,8 @@ from scipy.sparse import csr_matrix
 
 from immuneML.data_model.dataset.ReceptorDataset import ReceptorDataset
 
-from sklearn.metrics import silhouette_score, calinski_harabasz_score, davies_bouldin_score
+from sklearn.metrics import silhouette_score, calinski_harabasz_score, davies_bouldin_score, adjusted_rand_score, adjusted_mutual_info_score, homogeneity_score, completeness_score, v_measure_score, \
+    fowlkes_mallows_score
 
 
 class ClusteringInstruction(Instruction):
@@ -50,7 +51,14 @@ class ClusteringInstruction(Instruction):
 
         # Check if more than 1 cluster
         if max(unit.clustering_method.model.labels_) > 0:
-            self.calculate_scores(key, encoded_dataset.encoded_data.examples, unit.clustering_method.model.labels_)
+            labels_true = None
+            if unit.true_labels_path is not None:
+                if unit.true_labels_path.is_file():
+                    try:
+                        labels_true = genfromtxt(unit.true_labels_path, dtype=int, delimiter=',')
+                    except:
+                        print_log("Problem getting true_labels_path file\nCheck the file is in the right format(CSV in 1 line)")
+            self.calculate_scores(key, encoded_dataset.encoded_data.examples, unit.clustering_method.model.labels_, labels_true)
 
         if not unit.dim_red_before_clustering:
             if unit.dimensionality_reduction is not None:
@@ -63,7 +71,9 @@ class ClusteringInstruction(Instruction):
         unit.report.method = unit.clustering_method
         unit.report.result_path = result_path / "report"
         unit.report.number_of_processes = unit.number_of_processes
+        print_log("Report generation started...", include_datetime=True)
         report_result = unit.report.generate_report()
+        print_log("Report generating finished.", include_datetime=True)
         return report_result
 
     def encode(self, unit: ClusteringUnit, result_path: Path) -> Dataset:
@@ -80,7 +90,7 @@ class ClusteringInstruction(Instruction):
             encoded_dataset = unit.dataset
         return encoded_dataset
 
-    def calculate_scores(self, key, data, labels):
+    def calculate_scores(self, key, data, labels_pred, labels_true):
         if self.state.clustering_scores is None:
             self.state.clustering_scores = {}
 
@@ -88,16 +98,38 @@ class ClusteringInstruction(Instruction):
             data = data.toarray()
 
         scores = {
-            "Silhouette": silhouette_score(data, labels),
-            "Calinski-Harabasz": calinski_harabasz_score(data, labels),
-            "Davies-Bouldin": davies_bouldin_score(data, labels),
+            "Silhouette": silhouette_score(data, labels_pred),
+            "Calinski-Harabasz": calinski_harabasz_score(data, labels_pred),
+            "Davies-Bouldin": davies_bouldin_score(data, labels_pred)
         }
-        target_score = {
-            "Silhouette": 1,
-            "Calinski-Harabasz": 999999,
-            "Davies-Bouldin": 0,
-        }
-        self.state.clustering_scores["target_score"] = target_score
+        if "target_score" not in self.state.clustering_scores.keys():
+            self.state.clustering_scores["target_score"] = {
+                "Silhouette": 1,
+                "Calinski-Harabasz": 999999,
+                "Davies-Bouldin": 0
+            }
+
+        if labels_true is not None:
+            labels_true_scores = {
+                "Rand index": adjusted_rand_score(labels_true, labels_pred),
+                "Mutual Information": adjusted_mutual_info_score(labels_true, labels_pred),
+                "Homogeneity": homogeneity_score(labels_true, labels_pred),
+                "Completeness": completeness_score(labels_true, labels_pred),
+                "V-measure": v_measure_score(labels_true, labels_pred),
+                "Fowlkes-Mallows": fowlkes_mallows_score(labels_true, labels_pred)
+            }
+            if "Rand index" not in self.state.clustering_scores["target_score"]:
+                labels_true_target_score = {
+                    "Rand index": 1,
+                    "Mutual Information": 1,
+                    "Homogeneity": 1,
+                    "Completeness": 1,
+                    "V-measure": 1,
+                    "Fowlkes-Mallows": 1
+                }
+                self.state.clustering_scores["target_score"].update(labels_true_target_score)
+            scores.update(labels_true_scores)
+
         self.state.clustering_scores[key] = scores
 
     def add_label(self, dataset: Dataset, labels: [str], path: Path):
@@ -118,6 +150,7 @@ class ClusteringInstruction(Instruction):
             processed_dataset = ReceptorDataset.build_from_objects(receptors=processed_receptors, file_size=dataset.file_size, name=dataset.name, path=path)
             processed_dataset.labels = dataset.labels
             processed_dataset.encoded_data = dataset.encoded_data
+            processed_dataset.encoded_data.labels["cluster_id"] = labels
 
-        processed_dataset.labels["cluster_id"] = list(range(max(labels)))
+        processed_dataset.labels["cluster_id"] = list(range(max(labels)+1))
         return processed_dataset
