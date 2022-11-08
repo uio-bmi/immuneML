@@ -1,6 +1,7 @@
 import numpy as np
 
 from immuneML.data_model.dataset.ReceptorDataset import ReceptorDataset
+from immuneML.data_model.dataset.SequenceDataset import SequenceDataset
 from immuneML.workflows.steps.data_splitter.DataSplitterParams import DataSplitterParams
 from immuneML.workflows.steps.data_splitter.Util import Util
 
@@ -9,7 +10,7 @@ class LeaveOneOutSplitter:
 
     @staticmethod
     def split_dataset(input_params: DataSplitterParams):
-        if isinstance(input_params.dataset, ReceptorDataset):
+        if isinstance(input_params.dataset, ReceptorDataset) or isinstance(input_params.dataset, SequenceDataset):
             return LeaveOneOutSplitter._split_receptor_dataset(input_params)
         else:
             raise NotImplementedError("LeaveOneOutSplitter: leave-one-out stratification is currently implemented only for receptor dataset, "
@@ -41,8 +42,8 @@ class LeaveOneOutSplitter:
     def _make_datasets_from_indices(unique_values, dataset, train_indices, test_indices, input_params):
         train_datasets, test_datasets = [], []
         for index, value in enumerate(unique_values):
-            train_datasets.append(Util.make_dataset(dataset, train_indices[value], input_params, index, ReceptorDataset.TRAIN))
-            test_datasets.append(Util.make_dataset(dataset, test_indices[value], input_params, index, ReceptorDataset.TEST))
+            train_datasets.append(Util.make_dataset(dataset, train_indices[value], input_params, index, type(dataset).TRAIN))
+            test_datasets.append(Util.make_dataset(dataset, test_indices[value], input_params, index, type(dataset).TEST))
 
         return train_datasets, test_datasets
 
