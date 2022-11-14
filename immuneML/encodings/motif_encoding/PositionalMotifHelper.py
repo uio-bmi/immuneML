@@ -16,7 +16,10 @@ class PositionalMotifHelper:
 
     @staticmethod
     def test_aa(sequences, index, aa):
-        return sequences[:, index] == aa
+        if aa.isupper():
+            return sequences[:, index] == aa
+        else:
+            return sequences[:, index] != aa.upper()
 
     @staticmethod
     def test_position(sequences, index, aas):
@@ -41,14 +44,26 @@ class PositionalMotifHelper:
         return True
 
     @staticmethod
-    def extend_motif(base_motif, np_sequences, legal_positional_aas, count_threshold=10):
+    def get_new_aa_possibilities(new_positional_aas, allow_negative_aas):
+        if allow_negative_aas:
+            return new_positional_aas + [aa.lower() for aa in new_positional_aas]
+        else:
+            return new_positional_aas
+
+    @staticmethod
+    def extend_motif(base_motif, np_sequences, legal_positional_aas, allow_negative_aas, count_threshold=10):
         new_candidates = []
 
         sequence_length = len(np_sequences[0])
 
         for new_position in range(sequence_length):
-            if PositionalMotifHelper._test_new_position(base_motif[0], new_position):
-                for new_aa in legal_positional_aas[new_position]:
+            # todo maybe have two different sections
+            # adding new positive positions (only forward)
+            # adding new negative positions (only if no neg aa present yet?)
+
+            if PositionalMotifHelper._test_new_position(base_motif[0], new_position): # todo: test positive aas only forward, but negative aas also backward??
+                # for new_aa in legal_positional_aas[new_position]:
+                for new_aa in PositionalMotifHelper.get_new_aa_possibilities(legal_positional_aas[new_position], allow_negative_aas):
                     new_index = base_motif[0] + [new_position]
                     new_aas = base_motif[1] + [new_aa]
                     pred = PositionalMotifHelper.test_motif(np_sequences, new_index, new_aas)
@@ -83,7 +98,8 @@ class PositionalMotifHelper:
             logging.info(f"{PositionalMotifHelper.__name__}: finding motifs with {n_positions} positions and occurrence > {params.count_threshold}")
 
             with Pool(params.pool_size) as pool:
-                partial_func = partial(PositionalMotifHelper.extend_motif, np_sequences=np_sequences,
+                partial_func = partial(PositionalMotifHelper.extend_motif,
+                                       np_sequences=np_sequences, allow_negative_aas=params.allow_negative_amino_acids,
                                        legal_positional_aas=legal_positional_aas, count_threshold=params.count_threshold)
                 new_candidates = pool.map(partial_func, candidate_motifs[n_positions - 1])
 

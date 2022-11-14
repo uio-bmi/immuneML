@@ -42,10 +42,16 @@ class TestPositionalMotifHelper(TestCase):
         self.assertListEqual(list(PositionalMotifHelper.test_aa(sequence_array, 0, "B")), [False, True, False, True])
         self.assertListEqual(list(PositionalMotifHelper.test_aa(sequence_array, 1, "B")), [False, True, True, False])
 
+        self.assertListEqual(list(PositionalMotifHelper.test_aa(sequence_array, 0, "a")), [False, True, False, True])
+        self.assertListEqual(list(PositionalMotifHelper.test_aa(sequence_array, 1, "a")), [False, True, True, False])
+        self.assertListEqual(list(PositionalMotifHelper.test_aa(sequence_array, 0, "b")), [True, False, True, False])
+        self.assertListEqual(list(PositionalMotifHelper.test_aa(sequence_array, 1, "b")), [True, False, False, True])
+
     def test_test_position(self):
         sequence_array = np.asarray(['A' 'A', 'B' 'B', 'A' 'B', 'C' 'A']).view('U1').reshape(4, -1)
 
         self.assertListEqual(list(PositionalMotifHelper.test_position(sequence_array, 0, "A")), [True, False, True, False])
+        self.assertListEqual(list(PositionalMotifHelper.test_position(sequence_array, 0, "a")), [False, True, False, True])
         self.assertListEqual(list(PositionalMotifHelper.test_position(sequence_array, 0, "AB")), [True, True, True, False])
         self.assertListEqual(list(PositionalMotifHelper.test_position(sequence_array, 0, "BC")), [False, True, False, True])
         self.assertListEqual(list(PositionalMotifHelper.test_position(sequence_array, 0, "ABC")), [True, True, True, True])
@@ -54,23 +60,42 @@ class TestPositionalMotifHelper(TestCase):
         sequence_array = np.asarray(['A' 'A', 'B' 'B', 'A' 'B', 'B' 'A']).view('U1').reshape(4, -1)
 
         self.assertListEqual(list(PositionalMotifHelper.test_motif(sequence_array, (0, 1), ("A", "B"))), [False, False, True, False])
+        self.assertListEqual(list(PositionalMotifHelper.test_motif(sequence_array, (0, 1), ("a", "B"))), [False, True, False, False])
+        self.assertListEqual(list(PositionalMotifHelper.test_motif(sequence_array, (0, 1), ("a", "a"))), [False, True, False, False])
+        self.assertListEqual(list(PositionalMotifHelper.test_motif(sequence_array, (0,), ("a",))), [False, True, False, True])
+        self.assertListEqual(list(PositionalMotifHelper.test_motif(sequence_array, (1,), ("b",))), [True, False, False, True])
+        self.assertListEqual(list(PositionalMotifHelper.test_motif(sequence_array, (0, 1), ("a", "b"))), [False, False, False, True])
         self.assertListEqual(list(PositionalMotifHelper.test_motif(sequence_array, (0, 1), ("E", "E"))), [False, False, False, False])
         self.assertListEqual(list(PositionalMotifHelper.test_motif(sequence_array, (0, 1), ("DE", "DE"))), [False, False, False, False])
         self.assertListEqual(list(PositionalMotifHelper.test_motif(sequence_array, (0, 1), ("A", "BA"))), [True, False, True, False])
         self.assertListEqual(list(PositionalMotifHelper.test_motif(sequence_array, (0, 1), ("AB", "AB"))), [True, True, True, True])
         self.assertListEqual(list(PositionalMotifHelper.test_motif(sequence_array, (0, 1), ("C", "AB"))), [False, False, False, False])
         self.assertListEqual(list(PositionalMotifHelper.test_motif(sequence_array, (0, 1), ("AB", "C"))), [False, False, False, False])
+        self.assertListEqual(list(PositionalMotifHelper.test_motif(sequence_array, (0, 1), ("AB", "c"))), [True, True, True, True])
 
     def test_extend_motif(self):
         np_sequences = np.asarray(['A' 'A', 'C' 'C', 'A' 'C', 'C' 'A']).view('U1').reshape(4, -1)
 
-        outcome = PositionalMotifHelper.extend_motif([[0], ["A"]], np_sequences, {0: ["A", "C"], 1: ["C"]}, count_threshold=1)
+        # todo: find a way to make motifs with negative aas that are relevant
+        # maybe: restrict get_new_aa_possibilities to not include neg aa if there are already other neg aa's in the motif
+        # maybe: enforce a certain amount of sequences containing a motif to choose that aa as a negative option
+        # for example legal_positional_aas for negative aas?
+
+        outcome = PositionalMotifHelper.extend_motif([[0], ["A"]], np_sequences, {0: ["A", "C"], 1: ["C"]}, allow_negative_aas=False, count_threshold=1)
         self.assertListEqual(outcome, [[[0, 1], ['A', 'C']]])
 
-        outcome = PositionalMotifHelper.extend_motif([[0], ["A"]], np_sequences, {0: ["A", "C"], 1: ["A", "C", "D"]}, count_threshold=1)
+        # todo look into this: should motif search only go 'forward'?
+        # if it does, should maybe neg aa's go backwards as well??
+        outcome = PositionalMotifHelper.extend_motif([[1], ["A"]], np_sequences, {0: ["C"], 1: ["A", "C"]}, allow_negative_aas=False, count_threshold=1)
+        self.assertListEqual(outcome, [[[0, 1], ['C', 'A']]])
+
+        outcome = PositionalMotifHelper.extend_motif([[0], ["A"]], np_sequences, {0: ["A", "C"], 1: ["C"]}, allow_negative_aas=True, count_threshold=1)
+        self.assertListEqual(outcome, [[[0, 1], ['A', 'C']], [[0, 1], ['A', 'c']]])
+
+        outcome = PositionalMotifHelper.extend_motif([[0], ["A"]], np_sequences, {0: ["A", "C"], 1: ["A", "C", "D"]}, allow_negative_aas=False, count_threshold=1)
         self.assertListEqual(outcome, [[[0, 1], ['A', 'A']], [[0, 1], ['A', 'C']]])
 
-        outcome = PositionalMotifHelper.extend_motif([[0], ["A"]], np_sequences, {0: ["A", "C"], 1: ["A", "C", "D"]}, count_threshold=0)
+        outcome = PositionalMotifHelper.extend_motif([[0], ["A"]], np_sequences, {0: ["A", "C"], 1: ["A", "C", "D"]}, allow_negative_aas=False, count_threshold=0)
         self.assertListEqual(outcome, [[[0, 1], ['A', 'A']], [[0, 1], ['A', 'C']], [[0, 1], ['A', 'D']]])
 
     def test_identify_legal_positional_aas(self):
@@ -87,15 +112,15 @@ class TestPositionalMotifHelper(TestCase):
     def test_compute_all_candidate_motifs(self):
         np_sequences = np.asarray(['A' 'A', 'A' 'A', 'C' 'C']).view('U1').reshape(3, -1)
 
-        outcome = PositionalMotifHelper.compute_all_candidate_motifs(np_sequences, params=PositionalMotifParams(max_positions=1, count_threshold=2))
+        outcome = PositionalMotifHelper.compute_all_candidate_motifs(np_sequences, params=PositionalMotifParams(max_positions=1, count_threshold=2, allow_negative_amino_acids=False))
         expected = [[[0], ["A"]], [[1], ["A"]]]
         self.assertListEqual(outcome, expected)
 
-        outcome = PositionalMotifHelper.compute_all_candidate_motifs(np_sequences, params=PositionalMotifParams(max_positions=1, count_threshold=1))
+        outcome = PositionalMotifHelper.compute_all_candidate_motifs(np_sequences, params=PositionalMotifParams(max_positions=1, count_threshold=1, allow_negative_amino_acids=False))
         expected = [[[0], ["A"]], [[0], ["C"]], [[1], ["A"]], [[1], ["C"]]]
         self.assertListEqual(outcome, expected)
 
-        outcome = PositionalMotifHelper.compute_all_candidate_motifs(np_sequences, params=PositionalMotifParams(max_positions=2, count_threshold=2))
+        outcome = PositionalMotifHelper.compute_all_candidate_motifs(np_sequences, params=PositionalMotifParams(max_positions=2, count_threshold=2, allow_negative_amino_acids=False))
         expected = [[[0], ["A"]], [[1], ["A"]], [[0, 1], ["A", "A"]]]
         self.assertListEqual(outcome, expected)
 

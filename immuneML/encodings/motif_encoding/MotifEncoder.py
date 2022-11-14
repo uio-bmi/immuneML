@@ -39,6 +39,8 @@ class MotifEncoder(DatasetEncoder):
 
         min_true_positives (int):
 
+        allow_negative_amino_acids (bool):
+
         generalize_motifs (bool):
 
         candidate_motif_filepath (str):
@@ -75,12 +77,13 @@ class MotifEncoder(DatasetEncoder):
     }
 
     def __init__(self, max_positions: int = None, min_precision: float = None, min_recall: float = None,
-                 min_true_positives: int = None, generalize_motifs: bool = False,
+                 min_true_positives: int = None, allow_negative_amino_acids: bool = False, generalize_motifs: bool = False,
                  candidate_motif_filepath: str = None, label: str = None, name: str = None):
         self.max_positions = max_positions
         self.min_precision = min_precision
         self.min_recall = min_recall
         self.min_true_positives = min_true_positives
+        self.allow_negative_amino_acids = allow_negative_amino_acids
         self.generalize_motifs = generalize_motifs
         self.candidate_motif_filepath = Path(candidate_motif_filepath) if candidate_motif_filepath is not None else None
         self.learned_motif_filepath = None
@@ -91,7 +94,7 @@ class MotifEncoder(DatasetEncoder):
 
     @staticmethod
     def _prepare_parameters(max_positions: int = None, min_precision: float = None, min_recall: float = None,
-                            min_true_positives: int = None, generalize_motifs: bool = False,
+                            min_true_positives: int = None, allow_negative_amino_acids: bool = False, generalize_motifs: bool = False,
                             candidate_motif_filepath: str = None, label: str = None, name: str = None):
 
         location = MotifEncoder.__name__
@@ -100,6 +103,7 @@ class MotifEncoder(DatasetEncoder):
         ParameterValidator.assert_type_and_value(min_precision, (int, float), location, "min_precision", min_inclusive=0, max_inclusive=1)
         ParameterValidator.assert_type_and_value(min_recall, (int, float), location, "min_recall", min_inclusive=0, max_inclusive=1)
         ParameterValidator.assert_type_and_value(min_true_positives, int, location, "min_true_positives", min_inclusive=1)
+        ParameterValidator.assert_type_and_value(allow_negative_amino_acids, bool, location, "allow_negative_amino_acids")
         ParameterValidator.assert_type_and_value(generalize_motifs, bool, location, "generalize_motifs")
 
         if candidate_motif_filepath is not None:
@@ -113,6 +117,7 @@ class MotifEncoder(DatasetEncoder):
             "min_precision": min_precision,
             "min_recall": min_recall,
             "min_true_positives": min_true_positives,
+            "allow_negative_amino_acids": allow_negative_amino_acids,
             "generalize_motifs": generalize_motifs,
             "candidate_motif_filepath": candidate_motif_filepath,
             "label": label,
@@ -211,7 +216,7 @@ class MotifEncoder(DatasetEncoder):
     def _compute_candidate_motifs(self, full_dataset, pool_size=4):
         np_sequences = NumpyHelper.get_numpy_sequence_representation(full_dataset)
         params = PositionalMotifParams(max_positions=self.max_positions, count_threshold=self.min_true_positives,
-                                       pool_size=pool_size)
+                                       pool_size=pool_size, allow_negative_amino_acids=allow_negative_amino_acids)
         return PositionalMotifHelper.compute_all_candidate_motifs(np_sequences, params)
 
     def _get_y_true(self, dataset, label_config: LabelConfiguration):
