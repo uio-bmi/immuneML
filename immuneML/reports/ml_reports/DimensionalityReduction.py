@@ -7,9 +7,10 @@ from immuneML.reports.ml_reports.UnsupervisedMLReport import UnsupervisedMLRepor
 from immuneML.util.PathBuilder import PathBuilder
 
 from scipy.sparse import csr_matrix
-
+import numpy as np
 import plotly.graph_objs as go
-
+import plotly as plt
+from sklearn.preprocessing import StandardScaler
 
 class DimensionalityReduction(UnsupervisedMLReport):
     @classmethod
@@ -30,13 +31,42 @@ class DimensionalityReduction(UnsupervisedMLReport):
             data = data.toarray()
         if self.dataset.encoded_data.examples.shape[1] == 2:
             paths.append(self._2dplot(data, f'2d_{self.name}'))
-
+        if self.method is not None:
+            paths.append(self.explained_varience_plot())
         infoText = f"Dimensionality Reduction with {type(self.method.model).__name__}"
 
         return ReportResult(self.name,
                             info=infoText,
                             output_figures=[p for p in paths if p is not None])
+    def explained_varience_plot(self):
+        filename = self.result_path / "explained_variance.html"
 
+        exp_var_pca = self.method.model.explained_variance_ratio_
+        x = list(range(0, len(exp_var_pca)))
+        #
+        # Cumulative sum of eigenvalues; This will be used to create step plot
+        # for visualizing the variance explained by each principal component.
+        #
+        cum_sum_eigenvalues = np.cumsum(exp_var_pca)
+        #
+        # Create the visualization plot
+        traces = []
+        bar0 = go.Bar(x=x, y=exp_var_pca, name="Individual explained variance")
+        traces.append(bar0)
+        bar1 = go.Scatter(x=x, y=cum_sum_eigenvalues, line_shape="hvh", mode="lines", name="Cumulative explained variance")
+        traces.append(bar1)
+        # plt.step(range(0, len(cum_sum_eigenvalues)), cum_sum_eigenvalues, where='mid', label='Cumulative explained variance')
+        # plt.ylabel('Explained variance ratio')
+        # plt.xlabel('Principal component index')
+        # plt.legend(loc='best')
+        # plt.tight_layout()
+        # plt.show()
+        figure = go.Figure(data=traces)
+
+        with filename.open("w") as file:
+            figure.write_html(file)
+
+        return ReportOutput(filename)
     def _2dplot(self, plotting_data, output_name):
         traces = []
         filename = self.result_path / f"{output_name}.html"
@@ -53,10 +83,12 @@ class DimensionalityReduction(UnsupervisedMLReport):
                                                  zeroline=False,
                                                  showline=True,
                                                  mirror=True,
+                                                 title="PC1",
                                                  linewidth=1,
                                                  linecolor='gray',
                                                  showticklabels=False),
                            yaxis=go.layout.YAxis(showgrid=False,
+                                                 title="PC2",
                                                  zeroline=False,
                                                  showline=True,
                                                  mirror=True,
@@ -67,6 +99,8 @@ class DimensionalityReduction(UnsupervisedMLReport):
                            template="ggplot2"
                            )
         figure = go.Figure(data=traces, layout=layout)
+
+
 
         with filename.open("w") as file:
             figure.write_html(file)
