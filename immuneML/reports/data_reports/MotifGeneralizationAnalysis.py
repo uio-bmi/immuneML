@@ -214,7 +214,6 @@ class MotifGeneralizationAnalysis(DataReport):
         assert dataset_type in ["training set", "test set"]
         return "train_" if dataset_type == "training set" else "test_"
 
-
     def _get_pr_plot(self, encoded_data, dataset_type):
         prefix = self._get_dataset_type_prefix(dataset_type)
 
@@ -256,7 +255,7 @@ class MotifGeneralizationAnalysis(DataReport):
 
         return ReportOutput(
             path=file_path,
-            name=f"Precision scores on the {self._get_result_suffix(dataset_type)} for motifs found at each true positive rate of the training set.",
+            name=f"Precision scores on the {self._get_result_suffix(dataset_type)} for motifs found at each true positive count of the training set.",
         )
 
     def _get_tp_plot(self, feature_annotations, dataset_type):
