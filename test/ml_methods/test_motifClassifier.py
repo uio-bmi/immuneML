@@ -7,7 +7,7 @@ import numpy as np
 
 from immuneML.caching.CacheType import CacheType
 from immuneML.data_model.encoded_data.EncodedData import EncodedData
-from immuneML.encodings.motif_encoding.SignificantMotifEncoder import MotifEncoder
+from immuneML.encodings.motif_encoding.MotifEncoder import MotifEncoder
 from immuneML.environment.Constants import Constants
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.environment.Label import Label

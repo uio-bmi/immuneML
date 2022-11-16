@@ -35,8 +35,8 @@ class TestMotifGeneralizationAnalysis(TestCase):
         self.assertTrue(os.path.isdir(path / "result/datasets/test"))
         self.assertTrue(os.path.isdir(path / "result/encoded_data"))
 
-        self.assertTrue(os.path.isfile(path / "result/train_motif_precision_recall_tp.csv"))
-        self.assertTrue(os.path.isfile(path / "result/test_motif_precision_recall_tp.csv"))
+        self.assertTrue(os.path.isfile(path / "result/training_set_scores.csv"))
+        self.assertTrue(os.path.isfile(path / "result/test_set_scores.csv"))
 
         self.assertTrue(os.path.isfile(path / "result/train_precision_per_tp.html"))
         self.assertTrue(os.path.isfile(path / "result/test_precision_per_tp.html"))

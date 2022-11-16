@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pandas as pd
 import numpy as np
-from sklearn.metrics import precision_score, recall_score
+from sklearn.metrics import precision_score, recall_score, confusion_matrix
 
 from immuneML.caching.CacheHandler import CacheHandler
 from immuneML.data_model.dataset.SequenceDataset import SequenceDataset
@@ -283,20 +283,44 @@ class MotifEncoder(DatasetEncoder):
 
         with Pool(number_of_processes) as pool:
             predictions = pool.starmap(partial(self._test_motif, np_sequences=np_sequences), motifs)
-            precision_scores = pool.map(partial(self._get_precision, y_true=y_true, weights=weights), predictions)
-            recall_scores = pool.map(partial(self._get_recall, y_true=y_true, weights=weights), predictions)
-            tp_counts = pool.map(partial(self._get_tp, y_true=y_true), predictions)
+            conf_matrix_raw = np.array(pool.map(partial(self._get_confusion_matrix, y_true=y_true), predictions))
+
+            if weights is not None:
+                conf_matrix_weighted = np.array(pool.map(partial(self._get_confusion_matrix, y_true=y_true), predictions))
+            else:
+                conf_matrix_weighted = None
+
+            # precision_scores = pool.map(partial(self._get_precision, y_true=y_true, weights=weights), predictions)
+            # recall_scores = pool.map(partial(self._get_recall, y_true=y_true, weights=weights), predictions)
+            # tp_counts = pool.map(partial(self._get_tp, y_true=y_true), predictions)
 
         logging.info(f"{MotifEncoder.__name__}: building encoded data matrix done")
 
         prefix = "weighted_" if weights is not None else ""
 
-        feature_annotations = pd.DataFrame({"feature_names": feature_names,
-                                            f"{prefix}precision_scores": precision_scores,
-                                            f"{prefix}recall_scores": recall_scores,
-                                            "raw_tp_count": tp_counts})
+        # feature_annotations0 = pd.DataFrame({"feature_names": feature_names,
+        #                                     f"{prefix}precision_scores": precision_scores,
+        #                                     f"{prefix}recall_scores": recall_scores,
+        #                                     "raw_tp_count": tp_counts})
+
+        feature_annotations = self._get_feature_annotations(feature_names, conf_matrix_raw, conf_matrix_weighted)
 
         return np.column_stack(predictions), feature_names, feature_annotations
+
+    def _get_feature_annotations(self, feature_names, conf_matrix_raw, conf_matrix_weighted):
+        feature_annotations_mapping = {"feature_names": feature_names,
+                                       "raw_tn_count": conf_matrix_raw.T[0],
+                                       "raw_fp_count": conf_matrix_raw.T[1],
+                                       "raw_fn_count": conf_matrix_raw.T[2],
+                                       "raw_tp_count": conf_matrix_raw.T[3]}
+
+        if conf_matrix_weighted is not None:
+            feature_annotations_mapping["weighted_tn_count"] = conf_matrix_weighted.T[0]
+            feature_annotations_mapping["weighted_fp_count"] = conf_matrix_weighted.T[1]
+            feature_annotations_mapping["weighted_fn_count"] = conf_matrix_weighted.T[2]
+            feature_annotations_mapping["weighted_tp_count"] = conf_matrix_weighted.T[3]
+
+        return pd.DataFrame(feature_annotations_mapping)
 
     def _get_predictions(self, np_sequences, motifs, number_of_processes):
         with Pool(number_of_processes) as pool:
@@ -308,14 +332,17 @@ class MotifEncoder(DatasetEncoder):
     def _test_motif(self, indices, amino_acids, np_sequences):
         return PositionalMotifHelper.test_motif(np_sequences=np_sequences, indices=indices, amino_acids=amino_acids)
 
-    def _get_precision(self, pred, y_true, weights):
-        return precision_score(y_true=y_true, y_pred=pred, sample_weight=weights, zero_division=0)
+    def _get_confusion_matrix(self, pred, y_true, weights=None):
+        return confusion_matrix(y_true=y_true, y_pred=pred, sample_weight=weights).ravel()
 
-    def _get_recall(self, pred, y_true, weights):
-        return recall_score(y_true=y_true, y_pred=pred, sample_weight=weights, zero_division=0)
-
-    def _get_tp(self, pred, y_true):
-        return sum(pred & y_true)
+    # def _get_precision(self, pred, y_true, weights):
+    #     return precision_score(y_true=y_true, y_pred=pred, sample_weight=weights, zero_division=0)
+    #
+    # def _get_recall(self, pred, y_true, weights):
+    #     return recall_score(y_true=y_true, y_pred=pred, sample_weight=weights, zero_division=0)
+    #
+    # def _get_tp(self, pred, y_true):
+    #     return sum(pred & y_true)
 
     def set_context(self, context: dict):
         self.context = context
