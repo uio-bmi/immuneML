@@ -16,7 +16,6 @@ class ElementDataset(Dataset):
                  file_size: int = 50000, name: str = None, element_class_name: str = None, element_ids: list = None,
                  example_weights: list = None):
         super().__init__(encoded_data, name, identifier if identifier is not None else uuid4().hex, labels, example_weights)
-        # self.filenames = sorted(filenames) if filenames is not None else []
         self.filenames = filenames if filenames is not None else []
         self.filenames = [Path(filename) for filename in self.filenames]
         self.element_generator = ElementGenerator(self.filenames, file_size, element_class_name)
@@ -25,12 +24,10 @@ class ElementDataset(Dataset):
         self.element_class_name = element_class_name
 
     def get_data(self, batch_size: int = 10000):
-        # self.filenames.sort()
         self.element_generator.file_list = self.filenames
         return self.element_generator.build_element_generator()
 
     def get_batch(self, batch_size: int = 10000):
-        # self.filenames.sort()
         self.element_generator.file_list = self.filenames
         return self.element_generator.build_batch_generator()
 
@@ -68,9 +65,6 @@ class ElementDataset(Dataset):
         batch_filenames = self.element_generator.make_subset(example_indices, path, dataset_type, new_dataset.identifier)
         new_dataset.set_filenames(batch_filenames)
         new_dataset.name = f"{self.name}_split_{dataset_type.lower()}"
-
-        print("new dataset example count:", new_dataset.get_example_count())
-        print("len example indices:", len(example_indices))
 
         original_example_weights = self.get_example_weights()
         if original_example_weights is not None:

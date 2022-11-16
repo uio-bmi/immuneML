@@ -25,10 +25,6 @@ class ElementGenerator:
         except ValueError as error:
             raise ValueError(f'{ElementGenerator.__name__}: an error occurred while creating an object from binary file. Details: {error}')
 
-        print("current_file in _load_batch", current_file)
-        print("self.file_list", self.file_list)
-        print("self.file_list[current_file]", self.file_list[current_file])
-        print("len(elements)", len(elements))
         return elements
 
     def _get_element_count(self, file_index: int):
@@ -57,7 +53,6 @@ class ElementGenerator:
         """
 
         for current_file_index in range(len(self.file_list)):
-            print("current_file_index", current_file_index)
             batch = self._load_batch(current_file_index)
             yield batch
 
@@ -84,13 +79,10 @@ class ElementGenerator:
         batch_filenames = self._prepare_batch_filenames(len(example_indices), path, dataset_type, dataset_identifier)
 
         for index, batch in enumerate(self.build_batch_generator()):
-            print("index: ", index)
-            print("len(batch): ", len(batch))
             extracted_elements = self._extract_elements_from_batch(index, batch_size, batch, example_indices)
             elements.extend(extracted_elements)
 
             if len(elements) >= self.file_size or len(elements) == len(example_indices):
-                print("if statement reached")
                 self._store_elements_to_file(batch_filenames[file_count-1], elements[:self.file_size])
                 file_count += 1
                 elements = elements[self.file_size:]
@@ -113,18 +105,9 @@ class ElementGenerator:
             np.save(str(path), element_matrix, allow_pickle=False)
 
     def _extract_elements_from_batch(self, index, batch_size, batch, example_indices):
-        lower_limit = index * batch_size
-        upper_limit = (index + 1) * batch_size
-        # upper_limit = (index + 1) * batch_size if len(batch) == batch_size else lower_limit + len(batch)
-
-        # print("---upper_limit:", upper_limit)
-        # print("---lower_limit:", lower_limit)
-        # print("---batch_size:", batch_size)
-        # print("---index:", index)
+        lower_limit, upper_limit = index * batch_size, (index + 1) * batch_size
 
         batch_indices = [ind for ind in example_indices if lower_limit <= ind < upper_limit]
-        # print("---batch_indices[0,-1]:", batch_indices[0], batch_indices[-1])
-        # print("---len(batch):", len(batch))
 
         elements = [batch[i - lower_limit] for i in batch_indices]
 
