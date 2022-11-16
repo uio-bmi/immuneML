@@ -105,7 +105,9 @@ class ElementGenerator:
             np.save(str(path), element_matrix, allow_pickle=False)
 
     def _extract_elements_from_batch(self, index, batch_size, batch, example_indices):
-        upper_limit, lower_limit = (index + 1) * batch_size, index * batch_size
+        lower_limit = index * batch_size
+        upper_limit = (index + 1) * batch_size if len(batch) == batch_size else lower_limit + len(batch)
+
         print("upper_limit:", upper_limit)
         print("lower_limit:", lower_limit)
         print("batch_size:", batch_size)
