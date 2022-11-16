@@ -112,7 +112,8 @@ class ElementGenerator:
         print("index:", index)
 
         batch_indices = [ind for ind in example_indices if lower_limit <= ind < upper_limit]
-        print("batch_indices:", index)
+        print("batch_indices:", batch_indices)
+        print("len(batch):", len(batch))
         for i in batch_indices:
             print("i - lower_limit:", i - lower_limit)
             test_b = batch[i - lower_limit]
