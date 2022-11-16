@@ -25,6 +25,10 @@ class ElementGenerator:
         except ValueError as error:
             raise ValueError(f'{ElementGenerator.__name__}: an error occurred while creating an object from binary file. Details: {error}')
 
+        print("current_file in _load_batch", current_file)
+        print("self.file_list", self.file_list)
+        print("self.file_list[current_file]", self.file_list[current_file])
+        print("len(elements)", len(elements))
         return elements
 
     def _get_element_count(self, file_index: int):
@@ -53,6 +57,7 @@ class ElementGenerator:
         """
 
         for current_file_index in range(len(self.file_list)):
+            print("current_file_index", current_file_index)
             batch = self._load_batch(current_file_index)
             yield batch
 
