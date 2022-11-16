@@ -79,10 +79,13 @@ class ElementGenerator:
         batch_filenames = self._prepare_batch_filenames(len(example_indices), path, dataset_type, dataset_identifier)
 
         for index, batch in enumerate(self.build_batch_generator()):
+            print("index: ", index)
+            print("len(batch): ", len(batch))
             extracted_elements = self._extract_elements_from_batch(index, batch_size, batch, example_indices)
             elements.extend(extracted_elements)
 
             if len(elements) >= self.file_size or len(elements) == len(example_indices):
+                print("if statement reached")
                 self._store_elements_to_file(batch_filenames[file_count-1], elements[:self.file_size])
                 file_count += 1
                 elements = elements[self.file_size:]
@@ -106,19 +109,18 @@ class ElementGenerator:
 
     def _extract_elements_from_batch(self, index, batch_size, batch, example_indices):
         lower_limit = index * batch_size
+        upper_limit = (index + 1) * batch_size
         upper_limit = (index + 1) * batch_size if len(batch) == batch_size else lower_limit + len(batch)
 
-        print("upper_limit:", upper_limit)
-        print("lower_limit:", lower_limit)
-        print("batch_size:", batch_size)
-        print("index:", index)
+        # print("---upper_limit:", upper_limit)
+        # print("---lower_limit:", lower_limit)
+        # print("---batch_size:", batch_size)
+        # print("---index:", index)
 
         batch_indices = [ind for ind in example_indices if lower_limit <= ind < upper_limit]
-        print("batch_indices:", batch_indices)
-        print("len(batch):", len(batch))
-        for i in batch_indices:
-            print("i - lower_limit:", i - lower_limit)
-            test_b = batch[i - lower_limit]
+        # print("---batch_indices[0,-1]:", batch_indices[0], batch_indices[-1])
+        # print("---len(batch):", len(batch))
+
         elements = [batch[i - lower_limit] for i in batch_indices]
 
         return elements
