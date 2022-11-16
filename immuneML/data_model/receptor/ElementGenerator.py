@@ -106,6 +106,16 @@ class ElementGenerator:
 
     def _extract_elements_from_batch(self, index, batch_size, batch, example_indices):
         upper_limit, lower_limit = (index + 1) * batch_size, index * batch_size
+        print("upper_limit:", upper_limit)
+        print("lower_limit:", lower_limit)
+        print("batch_size:", batch_size)
+        print("index:", index)
+
         batch_indices = [ind for ind in example_indices if lower_limit <= ind < upper_limit]
+        print("batch_indices:", index)
+        for i in batch_indices:
+            print("i - lower_limit:", i - lower_limit)
+            test_b = batch[i - lower_limit]
         elements = [batch[i - lower_limit] for i in batch_indices]
+
         return elements
