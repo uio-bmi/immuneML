@@ -25,119 +25,65 @@ Useful links:
 - Documentation: https://docs.immuneml.uio.no
 - Galaxy web interface: https://galaxy.immuneml.uiocloud.no
 
+# Dimensionality reducion
 
-
-## Installation
-
-immuneML can be installed directly [using pip](<https://pypi.org/project/immuneML/>).
-immuneML uses Python 3.7 or 3.8, we recommend installing immuneML inside a virtual environment 
-with one of these Python versions. 
-
-For more detailed instructions (virtual environment, troubleshooting, Docker, developer installation), please see the [installation documentation](https://docs.immuneml.uio.no/installation/install_with_package_manager.html).
-
-### Installation using pip
-
-
-To install the immuneML core package, run:
-
-```bash
-pip install immuneML
-```
-
-Alternatively, to use the TCRdistClassifier ML method and corresponding TCRdistMotifDiscovery report, install immuneML with the optional TCRdist extra:
-
-```bash
-pip install immuneML[TCRdist]
-```
-
-Optionally, if you want to use the DeepRC ML method and and corresponding DeepRCMotifDiscovery report, you also
-have to install DeepRC dependencies using the [requirements_DeepRC.txt](https://raw.githubusercontent.com/uio-bmi/immuneML/master/requirements_DeepRC.txt) file.
-Important note: DeepRC uses PyTorch functionalities that depend on GPU. Therefore, DeepRC does not work on a CPU.
-To install the DeepRC dependencies, run:
-
-```bash
-pip install -r requirements_DeepRC.txt --no-dependencies
-```
-
-### Validating the installation
-
-To validate the installation, run:
-
-```bash
-immune-ml -h
-```
-
-This should display a help message explaining immuneML usage.
-
-To quickly test out whether immuneML is able to run, try running the quickstart command:
-
-```bash
-immune-ml-quickstart ./quickstart_results/
-```
-
-This will generate a synthetic dataset and run a simple machine machine learning analysis 
-on the generated data. The results folder will contain two sub-folders: one for the generated dataset (`synthetic_dataset`) 
-and one for the results of the machine learning analysis (`machine_learning_analysis`). 
-The files named `specs.yaml` are the input files for immuneML that describe how to generate 
-the dataset and how to do the machine learning analysis. The `index.html` files can be used 
-to navigate through all the results that were produced.
+This is a branch dedicated to **dimensionality reduction**, so if you are looking for installation guide or other general information refer to the readme on the Main branch: https://github.com/uio-bmi/immuneML
 
 ## Usage 
 
 ### Quickstart
 
-The quickest way to familiarize yourself with immuneML usage is to follow
-one of the [Quickstart tutorials](https://docs.immuneml.uio.no/quickstart.html).
-These tutorials provide a step-by-step guide on how to use immuneML for a 
-simple machine learning analysis on an adaptive immune receptor repertoire (AIRR) dataset,
-using either the command line tool or the [Galaxy web interface](https://galaxy.immuneml.uiocloud.no). 
+Here we will go over how to a quickstart run in order to get started using dimensionality reduction in immuneML
 
+#### Command line usage 
 
-### Overview of input, analyses and results
-
-The figure below shows an overview of immuneML usage. 
-All parameters for an immuneML analysis are defined in the a YAML specification file. 
-In this file, the settings of the analysis components are defined (also known as `definitions`, 
-shown in six different colors in the figure). 
-Additionally, the YAML file describes one or more `instructions`, which are workflows that are
-applied to the defined analysis components. 
-Each instruction uses at least a dataset component, and optionally additional components.
-AIRR datasets may either be [imported from files](https://docs.immuneml.uio.no/tutorials/how_to_import_the_data_to_immuneML.html), 
-or [generated synthetically](https://docs.immuneml.uio.no/tutorials/how_to_generate_a_random_repertoire_dataset.html) during runtime.
-
-Each instruction produces different types of results, including trained ML models, 
-ML model predictions on a given dataset, plots or other reports describing the 
-dataset or trained models, and modified datasets. 
-To navigate over the results, immuneML generates a summary HTML file. 
-
-
-![image info](https://docs.immuneml.uio.no/latest/_images/definitions_instructions_overview.png)
-
-For a detailed explanation of the YAML specification file, see the tutorial [How to specify an analysis with YAML](https://docs.immuneml.uio.no/tutorials/how_to_specify_an_analysis_with_yaml.html).
-
-See also the following tutorials for specific instructions:
-- [Training ML models](https://docs.immuneml.uio.no/tutorials/how_to_train_and_assess_a_receptor_or_repertoire_classifier.html) for repertoire classification (e.g., disease prediction) or receptor sequence classification (e.g., antigen binding prediction). In immuneML, the performance of different machine learning (ML) settings can be compared by nested cross-validation. These ML settings consist of data preprocessing steps, encodings and ML models and their hyperparameters.
-- [Exploratory analysis](https://docs.immuneml.uio.no/tutorials/how_to_perform_exploratory_analysis.html) of datasets by applying preprocessing and encoding, and plotting descriptive statistics without training ML models.
-- [Simulating](https://docs.immuneml.uio.no/tutorials/how_to_simulate_antigen_signals_in_airr_datasets.html) immune events, such as disease states, into experimental or synthetic repertoire datasets. By implanting known immune signals into a given dataset, a ground truth benchmarking dataset is created. Such a dataset can be used to test the performance of ML settings under known conditions.
-- [Applying trained ML models](https://docs.immuneml.uio.no/tutorials/how_to_apply_to_new_data.html) to new datasets with unknown class labels.
-- And [other tutorials](https://docs.immuneml.uio.no/tutorials.html)
-
-
-### Command line usage 
-
-The `immune-ml` command takes only two parameters: the YAML specification file and a result path. 
-An example is given here:
+To run immuneML thorugh the command line we need to specify what yaml file to use as well as a path to the output folder:
 
 ```bash
-immune-ml path/to/specification.yaml result/folder/path/
+immune-ml .\dim_reduction_quickstart.yaml .\output\
 ```
 
-For each instruction specified in the YAML specification file, a subfolder is created in the 
-`result/folder/path`. Each subfolder will contain:
-- An `index.html` file which shows an overview of the results produced by that instruction. Inspecting the results of an immuneML analysis typically starts here. 
-- A copy of the used YAML specification (`full_specification.yaml`) with all default parameters explicitly set.
-- A folder containing all raw results produced by the instruction.
-- A folder containing the imported dataset(s) in optimized binary (Pickle) format.
+The quickstart yaml:
+
+```yaml
+definitions:
+  datasets:
+    d1:
+      format: VDJdb # specify what format the data is in
+      params:
+        path: AVF.tsv # path to dataset
+        is_repertoire: False # no, this is receptor dataset
+        paired: True
+        receptor_chains: TRA_TRB # what chain pair to import for a ReceptorDataset
+  encodings:
+    kmer_encoding: KmerFrequency
+  reports: # Specifying what report to use
+    dim_red: # user-defined report name
+      DimensionalityReduction # Which report to use
+  dimensionality_reduction: # Specifying what dimensionality reduction method(s) to use
+    pca: # user-defined instruction name
+      PCA: # Dimensionality reduction method name
+        n_components: 2 # user-defined parameters
+instructions:
+  my_expl_analysis_instruction: # user-defined instruction name
+    type: ExploratoryAnalysis # which instruction to execute
+    analyses: # analyses to perform
+      my_analysis: # user-defined name of the analysisy
+        dataset: d1 # dataset to use in the first analysis
+        encoding: kmer_encoding # what encoding to use on the dataset
+        dimensionality_reduction: pca # what dimensionality reduction method to use
+        report: dim_red # which report to generate using the dataset d1
+    number_of_processes: 4
+```
+The example data the yaml data refers to (AVF.tsv) can already be found on the branch
+
+immuneML needs a 
+For a detailed explanation of the YAML specification file, see the tutorial [How to specify an analysis with YAML](https://docs.immuneml.uio.no/tutorials/how_to_specify_an_analysis_with_yaml.html).
+
+#### Expected result
+When opening the html file the expected result should be something like this:
+![quickstart_expected_result_pca_explained](https://user-images.githubusercontent.com/33656177/202472563-3f606020-15c0-49f4-a146-6e933eb4975d.PNG)
+![quickstart_expected_result_pca_plot](https://user-images.githubusercontent.com/33656177/202473145-f8c5eb10-6750-4fe2-8f7f-9448d8bf3f15.PNG)
 
 ## Support
 
