@@ -4,19 +4,14 @@ import warnings
 from pathlib import Path
 
 import dill
-import numpy as np
 import pkg_resources
 import yaml
-from sklearn.metrics import SCORERS
-from sklearn.model_selection import RandomizedSearchCV
 from sklearn.utils.validation import check_is_fitted
 
 from immuneML.data_model.dataset.Dataset import Dataset
 from immuneML.data_model.encoded_data.EncodedData import EncodedData
 from immuneML.environment.Label import Label
 from immuneML.ml_methods.UnsupervisedMLMethod import UnsupervisedMLMethod
-from immuneML.ml_methods.util.Util import Util
-from immuneML.ml_metrics.Metric import Metric
 from immuneML.util.FilenameHandler import FilenameHandler
 from immuneML.util.PathBuilder import PathBuilder
 

@@ -53,7 +53,7 @@ class GenerativeModelParser:
         return process
 
     def _prepare_params(self, generator: dict, symbol_table: SymbolTable, yaml_location: str) -> dict:
-        valid_keys = ["dataset", "report", "ml_method", "labels", "encoding", "number_of_processes"]
+        valid_keys = ["dataset", "report", "ml_method", "labels", "encoding", "number_of_processes", "amount"]
         ParameterValidator.assert_keys(list(generator.keys()), valid_keys, "GenerativeModelParser", "generator",
                                        False)
 
@@ -68,18 +68,8 @@ class GenerativeModelParser:
     def _prepare_optional_params(self, generator: dict, symbol_table: SymbolTable, yaml_location: str) -> dict:
 
         params = {}
-        dataset = symbol_table.get(generator["dataset"])
-
-        if "encoding" in generator:
-            params["encoder"] = symbol_table.get(generator["encoding"]).build_object(dataset, **symbol_table.get_config(generator["encoding"])["encoder_params"])
-
-        if "labels" in generator:
-            params["label_config"] = LabelHelper.create_label_config(generator["labels"], dataset, GenerativeModelParser.__name__, yaml_location)
-        else:
-            params["label_config"] = LabelHelper.create_label_config([x for x in dataset.labels if isinstance(dataset.labels[x], list)], dataset, GenerativeModelParser.__name__, yaml_location)
-
-        if "preprocessing_sequence" in generator:
-            params["preprocessing_sequence"] = symbol_table.get(generator["preprocessing_sequence"])
+        if "amount" in generator:
+            params["amount"] = generator["amount"]
 
         return params
 

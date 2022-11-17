@@ -51,7 +51,7 @@ class GenerativeModelLoadParser:
         return process
 
     def _prepare_params(self, generator: dict, symbol_table: SymbolTable, yaml_location: str) -> dict:
-        valid_keys = ["path", "report", "ml_method", "number_of_processes"]
+        valid_keys = ["path", "report", "ml_method", "number_of_processes", "amount"]
         ParameterValidator.assert_keys(list(generator.keys()), valid_keys, "GenerativeModelLoadParser", "generator",
                                        False)
 
@@ -59,9 +59,17 @@ class GenerativeModelLoadParser:
                   "report": copy.deepcopy(symbol_table.get(generator["report"])),
                   "genModel": symbol_table.get(generator["ml_method"])}
 
-        params = {**params}
+        optional_params = self._prepare_optional_params(generator, symbol_table, yaml_location)
+        params = {**params, **optional_params}
 
         return params
 
+    def _prepare_optional_params(self, generator: dict, symbol_table: SymbolTable, yaml_location: str) -> dict:
+
+        params = {}
+        if "amount" in generator:
+            params["amount"] = generator["amount"]
+
+        return params
 
 

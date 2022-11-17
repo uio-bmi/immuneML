@@ -45,7 +45,7 @@ class GenerativeModelInstruction(Instruction):
         unit.report.dataset = encoded_dataset
         unit.genModel.fit(encoded_dataset.encoded_data, dataset=unit.dataset)
         unit.genModel.store(result_path)
-        sequences = unit.genModel.generate(amount=50)
+        sequences = unit.genModel.generate(amount=unit.amount)
         unit.report.method = unit.genModel
         unit.report.result_path = result_path / "report"
         unit.generated_sequences = sequences
