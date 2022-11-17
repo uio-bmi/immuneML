@@ -3,7 +3,7 @@ definitions:
     d1: # user-defined dataset name
       format: VDJdb # dataset format
       params:
-        path: ../../EBV.tsv # path to the folder containing the receptor .tsv file
+        path: EBV.tsv # path to the folder containing the receptor .tsv file
         is_repertoire: False  # we are importing a receptor dataset
         paired: True   # data is paired TRA to TRB
         receptor_chains: TRA_TRB
