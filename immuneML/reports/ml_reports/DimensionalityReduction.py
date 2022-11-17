@@ -43,25 +43,29 @@ class DimensionalityReduction(UnsupervisedMLReport):
 
         exp_var_pca = self.method.model.explained_variance_ratio_
         x = list(range(0, len(exp_var_pca)))
-        #
-        # Cumulative sum of eigenvalues; This will be used to create step plot
-        # for visualizing the variance explained by each principal component.
-        #
         cum_sum_eigenvalues = np.cumsum(exp_var_pca)
-        #
-        # Create the visualization plot
         traces = []
         bar0 = go.Bar(x=x, y=exp_var_pca, name="Individual explained variance")
         traces.append(bar0)
         bar1 = go.Scatter(x=x, y=cum_sum_eigenvalues, line_shape="hvh", mode="lines", name="Cumulative explained variance")
         traces.append(bar1)
-        # plt.step(range(0, len(cum_sum_eigenvalues)), cum_sum_eigenvalues, where='mid', label='Cumulative explained variance')
-        # plt.ylabel('Explained variance ratio')
-        # plt.xlabel('Principal component index')
-        # plt.legend(loc='best')
-        # plt.tight_layout()
-        # plt.show()
-        figure = go.Figure(data=traces)
+        layout = go.Layout(xaxis=go.layout.XAxis(showgrid=False,
+                                                 zeroline=False,
+                                                 showline=True,
+                                                 mirror=True,
+                                                 title="Principal component index",
+                                                 linewidth=1,
+                                                 linecolor='gray'),
+                           yaxis=go.layout.YAxis(showgrid=True,
+                                                 title="Explained variance ratio",
+                                                 zeroline=False,
+                                                 showline=True,
+                                                 mirror=True,
+                                                 linewidth=1,
+                                                 linecolor='black'),
+                           hovermode='closest'
+                           )
+        figure = go.Figure(data=traces, layout=layout)
 
         with filename.open("w") as file:
             figure.write_html(file)
@@ -86,7 +90,7 @@ class DimensionalityReduction(UnsupervisedMLReport):
                                                  title="PC1",
                                                  linewidth=1,
                                                  linecolor='gray',
-                                                 showticklabels=False),
+                                                 showticklabels=True),
                            yaxis=go.layout.YAxis(showgrid=False,
                                                  title="PC2",
                                                  zeroline=False,
@@ -94,7 +98,7 @@ class DimensionalityReduction(UnsupervisedMLReport):
                                                  mirror=True,
                                                  linewidth=1,
                                                  linecolor='black',
-                                                 showticklabels=False),
+                                                 showticklabels=True),
                            hovermode='closest',
                            template="ggplot2"
                            )
