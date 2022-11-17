@@ -283,10 +283,10 @@ class MotifEncoder(DatasetEncoder):
 
         with Pool(number_of_processes) as pool:
             predictions = pool.starmap(partial(self._test_motif, np_sequences=np_sequences), motifs)
-            conf_matrix_raw = np.array(pool.map(partial(self._get_confusion_matrix, y_true=y_true), predictions))
+            conf_matrix_raw = np.array(pool.map(partial(self._get_confusion_matrix, y_true=y_true, weights=None), predictions))
 
             if weights is not None:
-                conf_matrix_weighted = np.array(pool.map(partial(self._get_confusion_matrix, y_true=y_true), predictions))
+                conf_matrix_weighted = np.array(pool.map(partial(self._get_confusion_matrix, y_true=y_true, weights=weights), predictions))
             else:
                 conf_matrix_weighted = None
 
@@ -332,15 +332,15 @@ class MotifEncoder(DatasetEncoder):
     def _test_motif(self, indices, amino_acids, np_sequences):
         return PositionalMotifHelper.test_motif(np_sequences=np_sequences, indices=indices, amino_acids=amino_acids)
 
-    def _get_confusion_matrix(self, pred, y_true, weights=None):
+    def _get_confusion_matrix(self, pred, y_true, weights):
         return confusion_matrix(y_true=y_true, y_pred=pred, sample_weight=weights).ravel()
-
+    #
     # def _get_precision(self, pred, y_true, weights):
     #     return precision_score(y_true=y_true, y_pred=pred, sample_weight=weights, zero_division=0)
     #
     # def _get_recall(self, pred, y_true, weights):
     #     return recall_score(y_true=y_true, y_pred=pred, sample_weight=weights, zero_division=0)
-    #
+
     # def _get_tp(self, pred, y_true):
     #     return sum(pred & y_true)
 

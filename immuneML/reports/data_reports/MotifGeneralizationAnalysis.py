@@ -59,7 +59,7 @@ class MotifGeneralizationAnalysis(DataReport):
 
     def __init__(self, training_percentage: float = None, max_positions: int = None, min_precision: float = None,
                  min_recall: float = None, min_true_positives: int = None,  random_seed: int = None, label: dict = None,
-                 highlight_motifs_path: str = None, highlight_motifs_name: str = None,
+                 smoothing_bin_size: int = None, highlight_motifs_path: str = None, highlight_motifs_name: str = None,
                  dataset: SequenceDataset = None, result_path: Path = None, number_of_processes: int = 1, name: str = None):
         super().__init__(dataset=dataset, result_path=result_path, number_of_processes=number_of_processes, name=name)
         self.training_percentage = training_percentage
@@ -70,8 +70,9 @@ class MotifGeneralizationAnalysis(DataReport):
         self.min_true_positives = min_true_positives
         self.random_seed = random_seed
         self.label = label
+        self.smoothing_bin_size = smoothing_bin_size
         self.label_config = None
-        self.weighted = None
+        self.col_names = None
 
         self.highlight_motifs_name = highlight_motifs_name
         self.highlight_motifs_path = Path(highlight_motifs_path) if highlight_motifs_path is not None else None
@@ -85,6 +86,7 @@ class MotifGeneralizationAnalysis(DataReport):
         ParameterValidator.assert_type_and_value(kwargs["min_precision"], (int, float), location, "min_precision", min_inclusive=0, max_inclusive=1)
         ParameterValidator.assert_type_and_value(kwargs["min_recall"], (int, float), location, "min_recall", min_inclusive=0, max_inclusive=1)
         ParameterValidator.assert_type_and_value(kwargs["min_true_positives"], int, location, "min_true_positives", min_inclusive=1)
+        ParameterValidator.assert_type_and_value(kwargs["smoothing_bin_size"], int, location, "smoothing_bin_size", min_inclusive=1)
 
         if "random_seed" in kwargs and kwargs["random_seed"] is not None:
             ParameterValidator.assert_type_and_value(kwargs["random_seed"], int, location, "random_seed")
@@ -101,31 +103,55 @@ class MotifGeneralizationAnalysis(DataReport):
         return MotifGeneralizationAnalysis(**kwargs)
 
     def _generate(self):
-        self.weighted = True if self.dataset.get_example_weights() is not None else False
+        self._set_colnames()
 
         encoded_training_data, encoded_test_data = self._get_encoded_train_test_data()
+        training_plotting_data, test_plotting_data = self._get_plotting_data(encoded_training_data, encoded_test_data)
 
-        training_feature_annotations = self._annotate_precision_recall(encoded_training_data.encoded_data.feature_annotations)
-        test_feature_annotations = self._annotate_precision_recall(encoded_test_data.encoded_data.feature_annotations)
+        train_results_table = self._write_output_table(training_plotting_data, self.result_path / f"training_set_scores.csv", "training set")
+        test_results_table = self._write_output_table(test_plotting_data, self.result_path / f"test_set_scores.csv", "test set")
 
-        train_results_table = self._write_output_table(training_feature_annotations, self.result_path / f"training_set_scores.csv", "training set")
-        test_results_table = self._write_output_table(test_feature_annotations, self.result_path / f"test_set_scores.csv", "test set")
-
-        results_plots = self._safe_plot(training_feature_annotations=training_feature_annotations,
-                                        test_feature_annotations=test_feature_annotations)
+        results_plots = self._safe_plot(training_plotting_data=training_plotting_data,
+                                        test_plotting_data=test_plotting_data)
 
         return ReportResult(output_tables=[table for table in [train_results_table, test_results_table] if table is not None],
                             output_figures=results_plots)
 
+    def _set_colnames(self):
+        self.col_names = dict()
+
+        if self.dataset.get_example_weights() is not None:
+            for name in ["precision", "recall"]:
+                self.col_names[name] = f"weighted_{name}_scores"
+
+            for name in ["tp", "fp", "fn", "tn"]:
+                self.col_names[name] = f"weighted_{name}_count"
+        else:
+            for name in ["precision", "recall"]:
+                self.col_names[name] = f"{name}_scores"
+
+            for name in ["tp", "fp", "fn", "tn"]:
+                self.col_names[name] = f"raw_{name}_count"
+
+
+    def _get_plotting_data(self, encoded_training_data, encoded_test_data):
+        training_feature_annotations = self._annotate_precision_recall(encoded_training_data.encoded_data.feature_annotations)
+        test_feature_annotations = self._annotate_precision_recall(encoded_test_data.encoded_data.feature_annotations)
+
+        training_feature_annotations["training_tp_count"] = training_feature_annotations["raw_tp_count"]
+        test_feature_annotations = self._get_merged_train_test_feature_annotations(training_feature_annotations,
+                                                                                   test_feature_annotations)
+
+        return training_feature_annotations, test_feature_annotations
+
     def _annotate_precision_recall(self, feature_annotations_table):
         feature_annotations_table = feature_annotations_table.copy()
 
-        if self.weighted:
-            tp, fp, fn = "weighted_tp_count", "weighted_fp_count", "weighted_fn_count"
-            precision, recall = "weighted_precision_scores", "weighted_recall_scores"
-        else:
-            tp, fp, fn = "raw_tp_count", "raw_fp_count", "raw_fn_count"
-            precision, recall = "precision_scores", "recall_scores"
+        precision = self.col_names["precision"]
+        recall = self.col_names["recall"]
+        tp = self.col_names["tp"]
+        fp = self.col_names["fp"]
+        fn = self.col_names["fn"]
 
         feature_annotations_table[precision] = feature_annotations_table.apply(
             lambda row: 0 if row[tp] == 0 else row[tp] / (row[tp] + row[fp]), axis="columns")
@@ -207,13 +233,10 @@ class MotifGeneralizationAnalysis(DataReport):
             return [self.highlight_motifs_name if motif in highlight_motifs else "Significant motif" for motif in
                     feature_annotations["feature_names"]]
 
-    def _plot_precision_recall(self, file_path, feature_annotations, min_recall=None, min_precision=None, dataset_type=None):
-        y = "weighted_precision_scores" if self.weighted else "precision_scores"
-        x = "weighted_recall_scores" if self.weighted else "recall_scores"
-
-        fig = px.scatter(feature_annotations,
-                         y=y, x=x, hover_data=["feature_names"],
-                         range_x=[0, 1], range_y=[0, 1], color=self._get_color(feature_annotations),
+    def _plot_precision_recall(self, file_path, plotting_data, min_recall=None, min_precision=None, dataset_type=None):
+        fig = px.scatter(plotting_data,
+                         y=self.col_names["precision"], x=self.col_names["recall"], hover_data=["feature_names"],
+                         range_x=[0, 1], range_y=[0, 1], color=self._get_color(plotting_data),
                          color_discrete_sequence=px.colors.qualitative.Pastel,
                          labels={
                              "precision_scores": f"Precision ({dataset_type})",
@@ -240,22 +263,43 @@ class MotifGeneralizationAnalysis(DataReport):
         assert dataset_type in ["training set", "test set"]
         return "train_" if dataset_type == "training set" else "test_"
 
-    def _get_pr_plot(self, feature_annotations, dataset_type):
+    def _get_pr_plot(self, plotting_data, dataset_type):
         prefix = self._get_dataset_type_prefix(dataset_type)
 
         return self._plot_precision_recall(self.result_path / f"{prefix}precision_recall.html",
-                                            feature_annotations,
+                                            plotting_data,
                                             min_recall=self.min_recall,
-                                            min_precision=0,
+                                            min_precision=self.min_precision,
                                             dataset_type=dataset_type)
 
-    def _plot_precision_per_tp(self, file_path, feature_annotations, dataset_type):
-        y = "weighted_precision_scores" if self.weighted else "precision_scores"
-        tp, fp = ("weighted_tp_count", "weighted_fp_count") if self.weighted else ("raw_tp_count", "raw_fp_count")
+    def _smooth_combined_precision(self, combined_precision, count_per_value):
+        smooth_combined_precision = []
 
-        fig = px.strip(feature_annotations,
-                       y=y, x="training_tp_count", hover_data=["feature_names"],
-                       range_y=[0, 1], color=self._get_color(feature_annotations),
+        for i in range(len(combined_precision)):
+            n_data_points = count_per_value[i]
+            smooth_val = combined_precision[i]
+
+            i_dist = 0
+            while n_data_points < self.smoothing_bin_size:
+                i_dist += 1
+
+                i_min = max(0, i - i_dist)
+                i_max = min(len(combined_precision) - 1, i + i_dist + 1)
+
+                n_data_points = sum(count_per_value[i_min:i_max])
+                smooth_val = sum([combined_precision[j] * count_per_value[j] for j in range(i_min, i_max)]) / n_data_points
+
+                if i_min == 0 and i_max == len(combined_precision):
+                    break
+
+            smooth_combined_precision.append(smooth_val)
+
+        return smooth_combined_precision
+
+    def _plot_precision_per_tp(self, file_path, plotting_data, dataset_type):
+        fig = px.strip(plotting_data,
+                       y=self.col_names["precision"], x="training_tp_count", hover_data=["feature_names"],
+                       range_y=[0, 1], color=self._get_color(plotting_data),
                        color_discrete_sequence=px.colors.qualitative.Pastel,
                        stripmode='overlay', log_x=True,
                        labels={
@@ -265,12 +309,21 @@ class MotifGeneralizationAnalysis(DataReport):
                            "raw_tp_count": "True positive predictions (training set)"
                        })
 
-        # mean_precision = feature_annotations.groupby("raw_tp_count")[y].mean()
-        group_by_tp = feature_annotations.groupby("training_tp_count")
+        group_by_tp = plotting_data.groupby("training_tp_count")
+
+        tp, fp = self.col_names["tp"], self.col_names["fp"]
         combined_precision = group_by_tp[tp].sum() / (group_by_tp[tp].sum() + group_by_tp[fp].sum())
+
 
         fig.add_trace(go.Scatter(x=list(combined_precision.index), y=list(combined_precision),
                                  marker=dict(color=px.colors.diverging.Tealrose[0])), secondary_y=False)
+
+        smooth_combined_precision = self._smooth_combined_precision(list(combined_precision),
+                                                                    list(group_by_tp[tp].count()))
+
+        fig.add_trace(go.Scatter(x=list(combined_precision.index), y=list(smooth_combined_precision),
+                                 marker=dict(color=px.colors.diverging.Tealrose[-1])), secondary_y=False)
+
 
         fig.update_layout(showlegend=False)
 
@@ -288,36 +341,27 @@ class MotifGeneralizationAnalysis(DataReport):
             name=f"Precision scores on the {self._get_result_suffix(dataset_type)} for motifs found at each true positive count of the training set.",
         )
 
-    def _get_tp_plot(self, feature_annotations, dataset_type):
+    def _get_tp_plot(self, plotting_data, dataset_type):
         prefix = self._get_dataset_type_prefix(dataset_type)
 
         return self._plot_precision_per_tp(file_path=self.result_path / f"{prefix}precision_per_tp.html",
-                                           feature_annotations=feature_annotations,
+                                           plotting_data=plotting_data,
                                            dataset_type=dataset_type)
 
     def _get_merged_train_test_feature_annotations(self, training_feature_annotations, test_feature_annotations):
-        precision_colname = "weighted_precision_scores" if self.weighted else "precision_scores"
-        tp_colname, fp_colname = ("weighted_tp_count", "weighted_fp_count") if self.weighted else ("raw_tp_count", "raw_fp_count")
-
         training_info_to_merge = training_feature_annotations[["feature_names", "training_tp_count"]].copy()
-        test_info_to_merge = test_feature_annotations[["feature_names", tp_colname, fp_colname, precision_colname]].copy()
+        test_info_to_merge = test_feature_annotations.copy()
 
         merged_train_test_info = training_info_to_merge.merge(test_info_to_merge)
-
-        # merged_train_test_info = merged_train_test_info.loc[merged_train_test_info[tp_colname] != 0]
 
         return merged_train_test_info
 
 
-    def _plot(self, training_feature_annotations, test_feature_annotations) -> List[ReportOutput]:
-        training_pr_plot = self._get_pr_plot(training_feature_annotations, "training set")
-        test_pr_plot = self._get_pr_plot(test_feature_annotations, "test set")
+    def _plot(self, training_plotting_data, test_plotting_data) -> List[ReportOutput]:
+        training_pr_plot = self._get_pr_plot(training_plotting_data, "training set")
+        test_pr_plot = self._get_pr_plot(test_plotting_data, "test set")
 
-        training_feature_annotations["training_tp_count"] = training_feature_annotations["raw_tp_count"]
-        training_tp_plot = self._get_tp_plot(training_feature_annotations, "training set")
-
-        merged_train_test_feature_annotations = self._get_merged_train_test_feature_annotations(training_feature_annotations, test_feature_annotations)
-
-        test_tp_plot = self._get_tp_plot(merged_train_test_feature_annotations, "test set")
+        training_tp_plot = self._get_tp_plot(training_plotting_data, "training set")
+        test_tp_plot = self._get_tp_plot(test_plotting_data, "test set")
 
         return [plot for plot in [training_pr_plot, test_pr_plot, training_tp_plot, test_tp_plot] if plot is not None]
