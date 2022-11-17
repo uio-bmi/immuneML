@@ -1,0 +1,51 @@
+definitions:
+  datasets:
+    d1: # user-defined dataset name
+      format: VDJdb # dataset format
+      params:
+        path: ../../EBV.tsv # path to the folder containing the receptor .tsv file
+        is_repertoire: False  # we are importing a receptor dataset
+        paired: True   # data is paired TRA to TRB
+        receptor_chains: TRA_TRB
+  encodings:
+    3mer_encoding:  # user-defined encoding name
+      KmerFrequency:  # encoding type
+        k: 3  # encoding parameters
+  dimensionality_reduction:
+    pca_2d: # user-defined dimensionality reduction name
+      PCA:  # dimensionality reduction type
+        n_components: 2 #number of dimensions to reduce to
+    pca_3d:
+      PCA:
+        n_components: 3
+  ml_methods:
+    kmeans: # user-defined ml method name
+      KMeans: # clustering method type
+        n_clusters: 5 # number of wanted clusters
+  reports:
+    clusteringReport:  # user-defined report name
+      ClusteringReport: # report type
+        labels: # labels in data to compare clustering to
+          - epitope
+instructions:
+  clustering_inst1: # user-defined instruction name
+    type: Clustering  # instruction type
+    analyses: # all analyses to run
+      kmeans_2d:  # user-defined analysis name
+        dataset: d1 # dataset to run this analysis on
+        encoding: 3mer_encoding # encoding to use for this analysis
+        dimensionality_reduction: pca_2d # dimensionality reduction to run before clustering (optional)
+        clustering_method: kmeans # clustering method to use for this analysis
+        report: clusteringReport # report name for this analysis
+      kmeans_3d:
+        dataset: d1
+        encoding: 3mer_encoding
+        dimensionality_reduction: pca_3d
+        clustering_method: kmeans
+        report: clusteringReport
+      kmeans_no_dim_reduction:
+        dataset: d1
+        encoding: 3mer_encoding
+        clustering_method: kmeans
+        report: clusteringReport
+    number_of_processes: 4  # processes for parallelization

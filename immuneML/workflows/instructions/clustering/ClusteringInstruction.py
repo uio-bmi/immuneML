@@ -15,6 +15,10 @@ from immuneML.util.Logger import print_log
 from scipy.sparse import csr_matrix
 
 from immuneML.data_model.dataset.ReceptorDataset import ReceptorDataset
+from immuneML.data_model.repertoire.Repertoire import Repertoire
+from immuneML.util.ImportHelper import ImportHelper
+from pandas import DataFrame, read_csv
+from yaml import dump
 
 from sklearn.metrics import silhouette_score, calinski_harabasz_score, davies_bouldin_score, adjusted_rand_score, adjusted_mutual_info_score, homogeneity_score, completeness_score, v_measure_score, \
     fowlkes_mallows_score
@@ -41,7 +45,7 @@ class ClusteringInstruction(Instruction):
 
     def run_unit(self, unit: ClusteringUnit, result_path: Path, key) -> ReportResult:
         encoded_dataset = self.encode(unit, result_path / "encoded_dataset")
-
+        encoded_dataset.name = unit.dataset.name
         if unit.dim_red_before_clustering:
             if unit.dimensionality_reduction is not None:
                 unit.dimensionality_reduction.fit(encoded_dataset.encoded_data)
@@ -49,16 +53,14 @@ class ClusteringInstruction(Instruction):
 
         unit.clustering_method.fit(encoded_dataset.encoded_data)
 
-        # Check if more than 1 cluster
-        if max(unit.clustering_method.model.labels_) > 0:
-            labels_true = None
-            if unit.true_labels_path is not None:
-                if unit.true_labels_path.is_file():
-                    try:
-                        labels_true = genfromtxt(unit.true_labels_path, dtype=int, delimiter=',')
-                    except:
-                        print_log("Problem getting true_labels_path file\nCheck the file is in the right format(CSV in 1 line)")
-            self.calculate_scores(key, encoded_dataset.encoded_data.examples, unit.clustering_method.model.labels_, labels_true)
+        labels_true = None
+        if unit.true_labels_path is not None:
+            if unit.true_labels_path.is_file():
+                try:
+                    labels_true = genfromtxt(unit.true_labels_path, dtype=int, delimiter=',')
+                except:
+                    print_log("Problem getting true_labels_path file\nCheck the file is in the right format(CSV, 1 line)")
+        self.calculate_scores(key, encoded_dataset.encoded_data.examples, unit.clustering_method.model.labels_, labels_true)
 
         if not unit.dim_red_before_clustering:
             if unit.dimensionality_reduction is not None:
@@ -97,11 +99,19 @@ class ClusteringInstruction(Instruction):
         if isinstance(data, csr_matrix):
             data = data.toarray()
 
-        scores = {
-            "Silhouette": silhouette_score(data, labels_pred),
-            "Calinski-Harabasz": calinski_harabasz_score(data, labels_pred),
-            "Davies-Bouldin": davies_bouldin_score(data, labels_pred)
-        }
+        #Check if more than one cluster
+        if max(labels_pred) <= 0:
+            scores = {
+                "Silhouette": "Only 1 cluster",
+                "Calinski-Harabasz": "Only 1 cluster",
+                "Davies-Bouldin": "Only 1 cluster"
+            }
+        else:
+            scores = {
+                "Silhouette": silhouette_score(data, labels_pred),
+                "Calinski-Harabasz": calinski_harabasz_score(data, labels_pred),
+                "Davies-Bouldin": davies_bouldin_score(data, labels_pred)
+            }
         if "target_score" not in self.state.clustering_scores.keys():
             self.state.clustering_scores["target_score"] = {
                 "Silhouette": 1,
@@ -110,14 +120,24 @@ class ClusteringInstruction(Instruction):
             }
 
         if labels_true is not None:
-            labels_true_scores = {
-                "Rand index": adjusted_rand_score(labels_true, labels_pred),
-                "Mutual Information": adjusted_mutual_info_score(labels_true, labels_pred),
-                "Homogeneity": homogeneity_score(labels_true, labels_pred),
-                "Completeness": completeness_score(labels_true, labels_pred),
-                "V-measure": v_measure_score(labels_true, labels_pred),
-                "Fowlkes-Mallows": fowlkes_mallows_score(labels_true, labels_pred)
-            }
+            if max(labels_pred) <= 0:
+                labels_true_scores = {
+                    "Rand index": "Only 1 cluster",
+                    "Mutual Information": "Only 1 cluster",
+                    "Homogeneity": "Only 1 cluster",
+                    "Completeness": "Only 1 cluster",
+                    "V-measure": "Only 1 cluster",
+                    "Fowlkes-Mallows": "Only 1 cluster"
+                }
+            else:
+                labels_true_scores = {
+                    "Rand index": adjusted_rand_score(labels_true, labels_pred),
+                    "Mutual Information": adjusted_mutual_info_score(labels_true, labels_pred),
+                    "Homogeneity": homogeneity_score(labels_true, labels_pred),
+                    "Completeness": completeness_score(labels_true, labels_pred),
+                    "V-measure": v_measure_score(labels_true, labels_pred),
+                    "Fowlkes-Mallows": fowlkes_mallows_score(labels_true, labels_pred)
+                }
             if "Rand index" not in self.state.clustering_scores["target_score"]:
                 labels_true_target_score = {
                     "Rand index": 1,
@@ -133,13 +153,33 @@ class ClusteringInstruction(Instruction):
         self.state.clustering_scores[key] = scores
 
     def add_label(self, dataset: Dataset, labels: [str], path: Path):
+        print_log("Started copying dataset...", include_datetime=True)
         PathBuilder.build(path)
         if type(dataset).__name__ == "RepertoireDataset":
-            # TO DO: Fix building for repertoire dataset
+            repertoiresPath = path / "repertoires"
+            PathBuilder.build(repertoiresPath)
+            dataset_name = dataset.name
+
+            repertoires = []
             for index, x in enumerate(dataset.get_data()):
-                x.metadata["cluster_id"] = str(labels[index])
+                filename = x.data_filename.stem
+                newRepertoire = Repertoire.build_like(repertoire=x, indices_to_keep=list(range(x.get_element_count())), result_path=repertoiresPath, filename_base=filename)
+                newRepertoire.metadata["cluster_id"] = str(labels[index])
+                repertoires.append(newRepertoire)
+
+                metadata_filename = repertoiresPath / f"{filename}_metadata.yaml"
+                with metadata_filename.open("w") as file:
+                    dump(newRepertoire.metadata, file)
+
+            df = dataset.get_metadata(dataset.get_metadata_fields(), return_df=True)
+            df.insert(0, "cluster_id", labels.tolist(), True)
+
+            metadata_filename = ImportHelper.make_new_metadata_file(repertoires=repertoires, metadata=df, result_path=path, dataset_name=dataset_name)
 
             processed_dataset = dataset
+            processed_dataset.repertoires = repertoires
+            processed_dataset.metadata_file = metadata_filename
+            processed_dataset.metadata_fields.append("cluster_id")
         else:
             processed_receptors = [x for x in dataset.get_data()]
             for index, receptor in enumerate(processed_receptors):
@@ -148,9 +188,21 @@ class ClusteringInstruction(Instruction):
                 receptor.metadata["cluster_id"] = str(labels[index])
 
             processed_dataset = ReceptorDataset.build_from_objects(receptors=processed_receptors, file_size=dataset.file_size, name=dataset.name, path=path)
-            processed_dataset.labels = dataset.labels
             processed_dataset.encoded_data = dataset.encoded_data
-            processed_dataset.encoded_data.labels["cluster_id"] = labels
+            processed_dataset.labels = dataset.labels
 
-        processed_dataset.labels["cluster_id"] = list(range(max(labels)+1))
+        processed_dataset.encoded_data.labels["cluster_id"] = labels
+        processed_dataset.labels["cluster_id"] = list(range(max(labels) + 1))
+        print_log("Finished copying dataset.", include_datetime=True)
         return processed_dataset
+
+    @staticmethod
+    def _copy_if_exists(old_file: Path, path: Path):
+        import shutil
+        if old_file is not None and old_file.is_file():
+            new_file = path / old_file.name
+            if not new_file.is_file():
+                shutil.copyfile(old_file, new_file)
+            return new_file
+        else:
+            raise RuntimeError(f"Clustering instruction: tried exporting file {old_file}, but it does not exist.")

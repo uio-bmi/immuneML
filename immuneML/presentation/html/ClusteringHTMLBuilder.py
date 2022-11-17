@@ -47,13 +47,13 @@ class ClusteringHTMLBuilder:
             "best_analyses_scores": [{
                 "metric": metric,
                 "best_score":
-                    max({key: x[metric] if metric in x.keys() else 0 for key, x in state.clustering_scores.items() if key != "target_score"}.items(), key=operator.itemgetter(1))[0] if state.clustering_scores["target_score"][
+                    max({key: x[metric] if metric in x.keys() and type(x[metric]) != str else 0 for key, x in state.clustering_scores.items() if key != "target_score"}.items(), key=operator.itemgetter(1))[0] if state.clustering_scores["target_score"][
                                                                                                                                                                metric] > 0 else
-                    min({key: x[metric] if metric in x.keys() else 0 for key, x in state.clustering_scores.items() if key != "target_score"}.items(), key=operator.itemgetter(1))[0] if state.clustering_scores is not None else None,
+                    min({key: x[metric] if metric in x.keys() and type(x[metric]) != str else 0 for key, x in state.clustering_scores.items() if key != "target_score"}.items(), key=operator.itemgetter(1))[0] if state.clustering_scores is not None else None,
             } for metric in list(state.clustering_scores["target_score"].keys()) if state.clustering_scores is not None],
             "analyses_scores": [{
                 "analyses_name": name,
-                "scores": [round(score, 3) for score in analysis.values()]
+                "scores": [round(score, 3) if type(score) != str else score for score in analysis.values()]
             } for name, analysis in state.clustering_scores.items()],
             "analyses": [{
                 "name": name,
@@ -78,8 +78,8 @@ class ClusteringHTMLBuilder:
                                   analysis.dimensionality_reduction.get_params().items()] if analysis.dimensionality_reduction is not None else None,
                 "show_dimRed": analysis.dimensionality_reduction is not None,
                 "show_evaluation_metrics": state.clustering_scores[name] is not None,
-                "evaluation_scores": [{"metric": metric, "score": round(score, 3)} for metric, score in state.clustering_scores[name].items()] if state.clustering_scores is not None and
-                                                                                                                                                  state.clustering_scores[name] is not None else None,
+                "evaluation_scores": [{"metric": metric, "score": round(score, 3) if type(score) != str else score}
+                                      for metric, score in state.clustering_scores[name].items()] if state.clustering_scores is not None and state.clustering_scores[name] is not None else None,
                 "report": Util.to_dict_recursive(Util.update_report_paths(analysis.report_result, base_path), base_path)
             } for name, analysis in state.clustering_units.items()]
         }
