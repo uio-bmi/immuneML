@@ -9,6 +9,7 @@ from immuneML.reports.Report import Report
 from immuneML.reports.ReportResult import ReportResult
 from pathlib import Path
 
+
 @dataclass
 class ClusteringUnit:
     dataset: Dataset

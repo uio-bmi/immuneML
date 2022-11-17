@@ -47,10 +47,10 @@ class ClusteringReport(UnsupervisedMLReport):
             # table_paths.append(t)
 
         datasetPath = PathBuilder.build(f'{self.result_path}/{self.dataset.name}_cluster_id')
-        AIRRExporter.export(self.dataset, datasetPath, False)
+        AIRRExporter.export(self.dataset, datasetPath)
 
         shutil.make_archive(datasetPath, "zip", datasetPath)
-        table_paths.append(ReportOutput(self.result_path / f"{self.dataset.name}_cluster_id.zip", f"{self.dataset.name} with cluster id"))
+        table_paths.append(ReportOutput(self.result_path / f"{self.dataset.name}_cluster_id.zip", f"dataset with cluster id"))
 
         return ReportResult(self.name,
                             output_figures=[p for p in fig_paths if p is not None],
@@ -99,14 +99,14 @@ class ClusteringReport(UnsupervisedMLReport):
         with filename.open("w") as file:
             figure.write_html(file)
 
-        return ReportOutput(filename)
+        return ReportOutput(path=filename, name="2d scatter plot")
 
     def _3dplot(self, plotting_data, output_name):
         traces = []
         filename = self.result_path / f"{output_name}.html"
 
         markerText = list(
-            "Cluster id: {}<br>Repertoire id: {}".format(self.method.model.labels_[i], self.dataset.encoded_data.example_ids[i]) for i in range(len(self.dataset.encoded_data.example_ids)))
+            "Cluster id: {}<br> Item id: {}".format(self.method.model.labels_[i], self.dataset.encoded_data.example_ids[i]) for i in range(len(self.dataset.encoded_data.example_ids)))
         trace0 = go.Scatter3d(x=plotting_data[:, 0],
                               y=plotting_data[:, 1],
                               z=plotting_data[:, 2],
@@ -128,7 +128,7 @@ class ClusteringReport(UnsupervisedMLReport):
         with filename.open("w") as file:
             figure.write_html(file)
 
-        return ReportOutput(filename)
+        return ReportOutput(path=filename, name="3d scatter plot")
 
     def _label_comparison(self, label, output_name):
         filenameFig = self.result_path / f"{output_name}.html"
@@ -137,21 +137,20 @@ class ClusteringReport(UnsupervisedMLReport):
         clusters = {}
         total = {}
 
-        if type(self.dataset).__name__ == "ReceptorDataset":
-            for receptor in list(self.dataset.get_data()):
-                label_value = receptor.metadata[label]
+        for item in list(self.dataset.get_data()):
+            label_value = item.metadata[label]
 
-                if label_value not in total.keys():
-                    total[label_value] = 0
-                total[label_value] += 1
+            if label_value not in total.keys():
+                total[label_value] = 0
+            total[label_value] += 1
 
-                cluster_id = receptor.metadata["cluster_id"]
-                if cluster_id not in clusters.keys():
-                    clusters[cluster_id] = {}
-                if label_value in clusters[cluster_id].keys():
-                    clusters[cluster_id][label_value] += 1
-                else:
-                    clusters[cluster_id][label_value] = 1
+            cluster_id = item.metadata["cluster_id"]
+            if cluster_id not in clusters.keys():
+                clusters[cluster_id] = {}
+            if label_value in clusters[cluster_id].keys():
+                clusters[cluster_id][label_value] += 1
+            else:
+                clusters[cluster_id][label_value] = 1
 
         percentage_data = []
         fig_text = []
@@ -190,4 +189,4 @@ class ClusteringReport(UnsupervisedMLReport):
         # with filenameTbl.open("w") as file:
         #     tbl.write_html(file)
 
-        return ReportOutput(filenameFig), ReportOutput(filenameTbl)
+        return ReportOutput(path=filenameFig, name=f"{label} to cluster_id label comparison"), ReportOutput(filenameTbl)

@@ -198,15 +198,17 @@
                     {{/show_info}}
 
                     {{#output_figures}}
-                    <div class="center padded-bottom">
-                        {{#name}}<p>{{name}}</p>{{/name}}
-                        {{#is_embed}}
-                        <embed src="{{path}}">
-                        {{/is_embed}}
-                        {{^is_embed}}
-                        <img src="{{path}}">
-                        {{/is_embed}}
-                    </div>
+                    <details>
+                        <summary>Figure {{name}}</summary>
+                        <div class="center padded-bottom">
+                            {{#is_embed}}
+                            <embed src="{{path}}">
+                            {{/is_embed}}
+                            {{^is_embed}}
+                            <img src="{{path}}">
+                            {{/is_embed}}
+                        </div>
+                    </details>
                     {{/output_figures}}
 
                     {{#show_tables}}
