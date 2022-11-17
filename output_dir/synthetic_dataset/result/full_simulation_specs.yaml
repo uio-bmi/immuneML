@@ -1,0 +1,43 @@
+definitions:
+  datasets:
+    my_synthetic_dataset:
+      format: RandomRepertoireDataset
+      params:
+        labels: {}
+        repertoire_count: 100
+        result_path: output_dir/synthetic_dataset/result/datasets/my_synthetic_dataset
+        sequence_count_probabilities:
+          10: 0.5
+          20: 0.5
+        sequence_length_probabilities:
+          10: 0.5
+          12: 0.5
+  encodings: {}
+  ml_methods: {}
+  motifs:
+    my_motif:
+      instantiation: GappedKmer
+      seed: AA
+  preprocessing_sequences: {}
+  reports: {}
+  signals:
+    my_signal:
+      implanting: HealthySequence
+      motifs:
+      - my_motif
+  simulations:
+    my_simulation:
+      my_implantng:
+        dataset_implanting_rate: 0.5
+        repertoire_implanting_rate: 0.1
+        signals:
+        - my_signal
+instructions:
+  simulation_instruction:
+    dataset: my_synthetic_dataset
+    export_formats:
+    - AIRR
+    simulation: my_simulation
+    type: Simulation
+output:
+  format: HTML

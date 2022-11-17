@@ -1,0 +1,31 @@
+definitions:
+  datasets:
+    d1:
+      format: RandomRepertoireDataset
+      params:
+        labels:
+          some_label_name:
+            false: 0.5
+            true: 0.5
+        repertoire_count: 5
+        result_path: new_random_data2/datasets/d1
+        sequence_count_probabilities:
+          25: 1
+        sequence_length_probabilities:
+          25: 1
+  encodings: {}
+  ml_methods: {}
+  motifs: {}
+  preprocessing_sequences: {}
+  reports: {}
+  signals: {}
+  simulations: {}
+instructions:
+  my_dataset_export_instruction:
+    datasets:
+    - d1
+    export_formats:
+    - AIRR
+    type: DatasetExport
+output:
+  format: HTML

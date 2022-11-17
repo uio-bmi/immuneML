@@ -1,0 +1,17 @@
+definitions:
+  ml_methods:
+    G1:
+      PWM:
+        cores_for_training: 2
+  reports:
+    GeneratorReport: GeneratorReportPWM
+instructions:
+  machine_learning_instruction:
+    type: GenerativeModelLoad
+    generators:
+      generator_1:
+        ml_method: G1
+        report: GeneratorReport
+        path: existing_PWM_model\machine_learning_instruction\analysis_generator_1
+
+

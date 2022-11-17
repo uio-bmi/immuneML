@@ -1,0 +1,21 @@
+field_list:
+- productive
+- stop_codon
+- vj_in_frame
+- my_signal
+- sequence_aas
+- v_genes
+- j_genes
+- v_subgroups
+- j_subgroups
+- v_alleles
+- j_alleles
+- chains
+- counts
+- region_types
+- frame_types
+- sequence_identifiers
+filename: repertoires\232b31bb3d8f4a5d85b582433b40f61c.tsv
+identifier: 232b31bb3d8f4a5d85b582433b40f61c
+my_signal: true
+subject_id: rep_40

@@ -1,0 +1,21 @@
+field_list:
+- ''
+- vj_in_frame
+- productive
+- stop_codon
+- sequence_aas
+- v_genes
+- j_genes
+- v_subgroups
+- j_subgroups
+- v_alleles
+- j_alleles
+- chains
+- counts
+- region_types
+- frame_types
+- sequence_identifiers
+filename: repertoires\rep_1.tsv
+identifier: f6779c8a440e48a49d899d5e3f59f054
+some_label_name: true
+subject_id: rep_1

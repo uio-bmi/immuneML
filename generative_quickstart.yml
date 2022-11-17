@@ -1,0 +1,24 @@
+definitions:
+  datasets:
+    d1:
+      format: AIRR
+      params:
+        path: generative_model_data\my_dataset_export_instruction\d1\AIRR
+        metadata_file: generative_model_data\my_dataset_export_instruction\d1\AIRR\metadata.csv
+        is_repertoire: True
+  ml_methods:
+    G1:
+      PWM:
+        cores_for_training: 2
+  reports:
+    GeneratorReport: GeneratorReportPWM
+instructions:
+  machine_learning_instruction:
+    type: GenerativeModel
+    generators:
+      generator_1:
+        dataset: d1
+        ml_method: G1
+        report: GeneratorReport
+
+

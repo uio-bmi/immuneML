@@ -1,0 +1,62 @@
+definitions:
+  datasets:
+    d1:
+      format: AIRR
+      params:
+        metadata_file: D:\Documents\Master\immuneML\output_dir\synthetic_dataset\result\simulation_instruction\exported_dataset\airr\metadata.csv
+        path: D:\Documents\Master\immuneML\output_dir\synthetic_dataset\result\simulation_instruction\exported_dataset\airr
+  encodings:
+    e1:
+      KmerFrequency:
+        k: 3
+    e2:
+      KmerFrequency:
+        k: 2
+  ml_methods:
+    simpleLR:
+      LogisticRegression:
+        C: 0.1
+        max_iter: 200
+        penalty: l1
+  reports:
+    coef: Coefficients
+    hprep: MLSettingsPerformance
+    rep1:
+      SequenceLengthDistribution:
+        batch_size: 3
+instructions:
+  machine_learning_instruction:
+    assessment:
+      reports:
+        data_splits:
+        - rep1
+        models:
+        - coef
+      split_count: 1
+      split_strategy: random
+      training_percentage: 0.7
+    dataset: d1
+    labels:
+    - my_signal
+    metrics:
+    - accuracy
+    number_of_processes: 3
+    optimization_metric: balanced_accuracy
+    refit_optimal_model: false
+    reports:
+    - hprep
+    selection:
+      reports:
+        data_splits:
+        - rep1
+        models: []
+      split_count: 1
+      split_strategy: random
+      training_percentage: 0.7
+    settings:
+    - encoding: e1
+      ml_method: simpleLR
+    - encoding: e2
+      ml_method: simpleLR
+    strategy: GridSearch
+    type: TrainMLModel
