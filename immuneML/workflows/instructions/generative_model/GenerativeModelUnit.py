@@ -15,6 +15,7 @@ class GenerativeModelUnit:
 
     report: Report
     genModel: GenerativeModel
+    amount: int = 10
     dataset: Dataset = None
     generated_sequences: list = None
     encoder: DatasetEncoder = None

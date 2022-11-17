@@ -11,7 +11,7 @@ definitions:
       PWM:
         cores_for_training: 2
   reports:
-    GeneratorReport: GeneratorReportPWM
+    GeneratorReport: GeneratorReport
 instructions:
   machine_learning_instruction:
     type: GenerativeModel

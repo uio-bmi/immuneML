@@ -19,6 +19,7 @@ class PWM(GenerativeModel):
         parameters = parameters if parameters is not None else {}
         parameter_grid = parameter_grid if parameter_grid is not None else {}
         self.alphabet = ""
+        self.generated_sequences = []
         super(PWM, self).__init__(parameter_grid=parameter_grid, parameters=parameters)
 
 
@@ -100,7 +101,7 @@ class PWM(GenerativeModel):
             return_sequences.append("".join(row))
 
         matrix = matrix.T
-
+        self.generated_sequences = ["".join(sequence) for sequence in generated_sequences]
         return instances
 
     def get_params(self):
