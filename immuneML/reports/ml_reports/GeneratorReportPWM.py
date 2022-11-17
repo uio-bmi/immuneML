@@ -49,10 +49,4 @@ class GeneratorReportPWM(UnsupervisedMLReport):
         result = ReportOutput(heatmap, name="Heatmap")
         tableResult = ReportOutput(fullTable, name="Raw table")
 
-        generated_sequences = self.result_path / f"{self.name}GeneratedSequences.csv"
-
-        data = pd.DataFrame(self.method.generated_sequences, columns=["Generated Sequences"])
-        data.to_csv(generated_sequences, index=False)
-        sequences_to_output = ReportOutput(generated_sequences, name="Generated Sequences")
-
-        return ReportResult(self.name, output_figures=[tableResult, result], output_tables=[tableResult, sequences_to_output])
+        return ReportResult(self.name, output_figures=[tableResult, result], output_tables=[tableResult])
