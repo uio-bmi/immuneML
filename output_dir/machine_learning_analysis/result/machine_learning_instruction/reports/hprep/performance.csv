@@ -1,0 +1,3 @@
+fold,label,encoding,ml_method,performance
+0,my_signal,e1,simpleLR,0.5666666666666667
+0,my_signal,e2,simpleLR,0.8666666666666667

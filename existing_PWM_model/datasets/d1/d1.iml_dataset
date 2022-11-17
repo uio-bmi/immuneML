@@ -1,0 +1,22 @@
+dataset_class: RepertoireDataset
+identifier: b5a43e19f77a4ec3ad8d696e00d3ee82
+labels:
+  identifier:
+  - aeee5154b8574a61a31cc3217764fb5d
+  - f6779c8a440e48a49d899d5e3f59f054
+  - dd9fe9189a2b4d6bb198aabfbfc559c6
+  - 5affd31fc4e14def954b5e2633be7660
+  - 05d5e9cbd4a541659450b7d6abf48adb
+  some_label_name:
+  - false
+  - true
+  subject_id:
+  - rep_2
+  - rep_1
+  - rep_4
+  - rep_0
+  - rep_3
+metadata_fields: null
+metadata_file: d1_metadata.csv
+name: d1
+repertoire_ids: null

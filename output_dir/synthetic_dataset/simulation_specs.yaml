@@ -1,0 +1,29 @@
+definitions:
+  datasets:
+    my_synthetic_dataset:
+      format: RandomRepertoireDataset
+      params:
+        labels: {}
+  motifs:
+    my_motif:
+      instantiation: GappedKmer
+      seed: AA
+  signals:
+    my_signal:
+      implanting: HealthySequence
+      motifs:
+      - my_motif
+  simulations:
+    my_simulation:
+      my_implantng:
+        dataset_implanting_rate: 0.5
+        repertoire_implanting_rate: 0.1
+        signals:
+        - my_signal
+instructions:
+  simulation_instruction:
+    dataset: my_synthetic_dataset
+    export_formats:
+    - AIRR
+    simulation: my_simulation
+    type: Simulation

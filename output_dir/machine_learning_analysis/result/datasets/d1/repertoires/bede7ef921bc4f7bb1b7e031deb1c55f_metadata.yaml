@@ -1,0 +1,20 @@
+field_list:
+- productive
+- stop_codon
+- vj_in_frame
+- sequence_aas
+- v_genes
+- j_genes
+- v_subgroups
+- j_subgroups
+- v_alleles
+- j_alleles
+- chains
+- counts
+- region_types
+- frame_types
+- sequence_identifiers
+filename: repertoires\bede7ef921bc4f7bb1b7e031deb1c55f.tsv
+identifier: bede7ef921bc4f7bb1b7e031deb1c55f
+my_signal: false
+subject_id: rep_82
