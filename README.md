@@ -37,7 +37,7 @@ Here we will go over how to a quickstart run in order to get started using dimen
 
 #### Command line usage 
 
-To run immuneML thorugh the command line we need to specify what yaml file to use as well as a path to the output folder:
+To run immuneML through the command line we need to specify what yaml file to use as well as a path to the output folder:
 
 ```bash
 immune-ml .\dim_reduction_quickstart.yaml .\output\
@@ -75,12 +75,13 @@ instructions:
         report: dim_red # which report to generate using the dataset d1
     number_of_processes: 4
 ```
-The example data the yaml data refers to (AVF.tsv) as well as the yaml file can already be found on the branch.
+The example dataset the yaml refers to (AVF.tsv) as well as the yaml file can already be found on the branch.
 
 For a detailed explanation of the YAML specification file, see the tutorial [How to specify an analysis with YAML](https://docs.immuneml.uio.no/tutorials/how_to_specify_an_analysis_with_yaml.html).
 
 #### Expected result
-When opening the html file the expected result should be something like this:
+After running the quickstart and opening the html file in the output folder, the expected result should be something like this:
+
 ![quickstart_expected_result_pca_plot](https://user-images.githubusercontent.com/33656177/202473145-f8c5eb10-6750-4fe2-8f7f-9448d8bf3f15.PNG)
 ![quickstart_expected_result_pca_explained](https://user-images.githubusercontent.com/33656177/202472563-3f606020-15c0-49f4-a146-6e933eb4975d.PNG)
 
