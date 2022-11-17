@@ -34,19 +34,19 @@ class PWM(GenerativeModel):
                 if len(alphabet) == 20:  # max alphabet reached
                     break
 
-        self.alphabet = "".join(sorted(alphabet))
+        self.alphabet = sorted(alphabet)
         matrix = np.zeros(shape=(instances.shape[1], len(self.alphabet)))
 
         instances = instances.T
         for x, pos in enumerate(instances):
             for element in pos:
-                for y, char in enumerate(list(self.alphabet)):
+                for y, char in enumerate(self.alphabet):
                     if element == char:
                         matrix[x][y] += 1
                         break
 
         for ind, row in enumerate(matrix):
-            matrix[ind] = matrix[ind] / sum(matrix[ind]) * 100
+            matrix[ind] = matrix[ind] / sum(matrix[ind])
 
         return matrix
 
@@ -56,24 +56,25 @@ class PWM(GenerativeModel):
         return self.model
 
     def generate(self, length_of_sequences: int = None, amount=10, path_to_model: Path = None):
+        #
+        # if self.model is None:
+        #     model_as_array = []
+        #     print(f'{datetime.datetime.now()}: Fetching model...')
+        #     with open(path_to_model, 'r') as file:
+        #
+        #         reader = csv.reader(file)
+        #         self.alphabet = "".join(next(reader))
+        #         for row in reader:
+        #             model_as_array.append(row)
+        #     self.model = np.array(model_as_array)
 
-        if self.model is None:
-            model_as_array = []
-            print(f'{datetime.datetime.now()}: Fetching model...')
-            with open(path_to_model, 'r') as file:
-
-                reader = csv.reader(file)
-                self.alphabet = "".join(next(reader))
-                for row in reader:
-                    model_as_array.append(row)
-            self.model = np.array(model_as_array)
-
-        length_of_sequences = length_of_sequences if length_of_sequences is not None else self.model.shape[0]
+        # length_of_sequences = length_of_sequences if length_of_sequences is not None else self.model.shape[0]
+        length_of_sequences = self.model.shape[0]
         generated_sequences = []
         for _ in range(amount):
             sequence = []
             for i in range(length_of_sequences):
-                sequence.append(np.random.choice(list(self.alphabet), 1, p=self.model[i]/100)[0])
+                sequence.append(np.random.choice(self.alphabet, 1, p=self.model[i])[0])
             generated_sequences.append(sequence)
 
         instances = np.array(generated_sequences)
@@ -84,7 +85,7 @@ class PWM(GenerativeModel):
 
         for x, pos in enumerate(instances):
             for i, element in enumerate(pos):
-                for y, char in enumerate(list(self.alphabet)):
+                for y, char in enumerate(self.alphabet):
                     if element == char:
                         matrix[x][y] += 1
                         break
@@ -100,7 +101,7 @@ class PWM(GenerativeModel):
 
         matrix = matrix.T
 
-        return list(matrix), instances, self.alphabet
+        return instances
 
     def get_params(self):
         return self._parameters
@@ -116,7 +117,9 @@ class PWM(GenerativeModel):
         name = f"{self._get_model_filename()}.csv"
         file_path = path / name
         if file_path.is_file():
-            dataframe = file_path
+            dataframe = pd.read_csv(file_path, index_col=False)
+            self.alphabet = dataframe.pop('alphabet').values
+            self.model = np.array(dataframe.values).T
         else:
             raise FileNotFoundError(f"{self.__class__.__name__} model could not be loaded from {file_path}"
                                     f". Check if the path to the {name} file is properly set.")
@@ -139,9 +142,11 @@ class PWM(GenerativeModel):
 
         print(f'{datetime.datetime.now()}: Writing to file...')
         file_path = path / f"{self._get_model_filename()}.csv"
-        data = {"PWM": self.model, "alphabet": self.alphabet}
+        data = {str(ind + 1): numbers for ind, numbers in enumerate(self.model)}
+
+        data["alphabet"] = list(self.alphabet)
         dataframe = pd.DataFrame(data)
-        dataframe.to_csv(file_path)
+        dataframe.to_csv(file_path, index=False)
 
 
         if details_path is None:

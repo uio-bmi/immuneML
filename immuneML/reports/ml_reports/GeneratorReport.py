@@ -9,7 +9,6 @@ from immuneML.reports.ReportResult import ReportResult
 from immuneML.reports.ml_reports.UnsupervisedMLReport import UnsupervisedMLReport
 from immuneML.util.PathBuilder import PathBuilder
 import numpy as np
-import seaborn as sns
 import matplotlib.pylab as plt
 plt.style.use("seaborn")
 
@@ -29,17 +28,18 @@ class GeneratorReport(UnsupervisedMLReport):
         self.dataset = dataset
 
     def _generate(self) -> ReportResult:
-        filename = self.result_path / f"{self.name}.html"
-        PathBuilder.build(self.result_path)
+        # filename = self.result_path / f"{self.name}.html"
+        # PathBuilder.build(self.result_path)
+        #
+        # fig = go.Figure(data=go.Heatmap(
+        #     x=np.arange(1, len(self.method.model[0]) + 1),
+        #     y=list(reversed(list(self.method.alphabet))),
+        #     z=list(reversed(self.method.model.T,))))
+        # fig.update_xaxes(side="top", dtick=1)
+        # with filename.open("w") as file:
+        #     fig.write_html(file)
+        #
+        # result = ReportOutput(filename)
 
-        fig = go.Figure(data=go.Heatmap(
-            x=np.arange(1, len(self.method.model[0]) + 1),
-            y=list(reversed(list(self.method.alphabet))),
-            z=list(reversed(self.method.model.T,))))
-        fig.update_xaxes(side="top", dtick=1)
-        with filename.open("w") as file:
-            fig.write_html(file)
-
-        result = ReportOutput(filename)
-
-        return ReportResult(self.name, output_figures=[result])
+        # return ReportResult(self.name, output_figures=[result])
+        return ReportResult()

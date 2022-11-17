@@ -43,17 +43,16 @@ class GenerativeModelHTMLBuilder:
             'immuneML_version': MLUtil.get_immuneML_version(),
             "analyses": [{
                 "name": name,
-                "alphabet": [{"letter": c} for c in generator.alphabet],
-                "positions": [{"pos": i} for i in range(1, len(generator.PWM[0]) + 1)],
                 "generated_sequences": [{"seq_nr": ind, "seq": seq} for ind, seq in enumerate(generator.generated_sequences)],
-                "PWM": [{"row": [{"weight": weight} for weight in row], "letter": letter} for row, letter in zip(generator.PWM, generator.alphabet)] if generator.PWM is not None else None,
-                "dataset_name": generator.dataset.name if generator.dataset.name is not None else generator.dataset.identifier,
-                "dataset_type": StringHelper.camel_case_to_word_string(type(generator.dataset).__name__),
-                "example_count": generator.dataset.get_example_count(),
-                "dataset_size": f"{generator.dataset.get_example_count()} {type(generator.dataset).__name__.replace('Dataset', 's').lower()}",
+                "dataset_information": {
+                    "dataset_name": generator.dataset.name if generator.dataset.name is not None else generator.dataset.identifier,
+                    "dataset_type": StringHelper.camel_case_to_word_string(
+                        type(generator.dataset).__name__),
+                    "example_count": generator.dataset.get_example_count(),
+                    "dataset_size": f"{generator.dataset.get_example_count()} {type(generator.dataset).__name__.replace('Dataset', 's').lower()}",
+                } if generator.dataset is not None else None,
                 "encoding_key": generator.encoder.name if generator.encoder is not None else None,
-                "encoding_name": StringHelper.camel_case_to_word_string(type(generator.encoder).__name__) if generator.encoder is not None
-                else None,
+                "encoding_name": StringHelper.camel_case_to_word_string(type(generator.encoder).__name__) if generator.encoder is not None else None,
                 "encoding_params": [{"param_name": key, "param_value": str(value)} for key, value in vars(generator.encoder).items()] if generator.encoder is not None else None,
                 "show_encoding": generator.encoder is not None,
                 "report": Util.to_dict_recursive(Util.update_report_paths(generator.report_result, base_path), base_path)

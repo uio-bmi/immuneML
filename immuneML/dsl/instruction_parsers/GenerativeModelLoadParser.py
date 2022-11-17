@@ -30,13 +30,9 @@ class GenerativeModelLoadParser:
             type: GenerativeModelLoad
             generators:
                 generator_1:
-                    encoding: e1
-                    dataset: d1
                     report: r1
                     ml_method: LSTM
                 generator_2:
-                    encoding: e2
-                    dataset: d2
                     report: r2
                     ml_method: PWM
     """
@@ -55,7 +51,7 @@ class GenerativeModelLoadParser:
         return process
 
     def _prepare_params(self, generator: dict, symbol_table: SymbolTable, yaml_location: str) -> dict:
-        valid_keys = ["path", "report", "ml_method", "labels", "encoding", "number_of_processes"]
+        valid_keys = ["path", "report", "ml_method", "number_of_processes"]
         ParameterValidator.assert_keys(list(generator.keys()), valid_keys, "GenerativeModelLoadParser", "generator",
                                        False)
 
