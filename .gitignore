@@ -1,0 +1,41 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*/__pychache__/
+*.py[cod]
+.pytest_cache/
+
+# C extensions
+*.so
+
+# Distribution / packaging
+bin/
+build/
+develop-eggs/
+dist/
+eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Unit test / coverage reports
+.tox/
+.coverage
+.cache
+nosetests.xml
+coverage.xml
+
+# Sphinx documentation
+docs/build/
+
+# PyCharm-specific
+.idea/
+venv/
+
+# temporary files and folders
+tmp/
+.vscode/settings.json
