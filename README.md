@@ -25,7 +25,7 @@ Useful links:
 - Documentation: https://docs.immuneml.uio.no
 - Galaxy web interface: https://galaxy.immuneml.uiocloud.no
 
-# Dimensionality reducion
+# Dimensionality reduction
 
 This is a branch dedicated to **dimensionality reduction**, so if you are looking for installation guide or other general information refer to the readme on the Main branch: https://github.com/uio-bmi/immuneML
 
