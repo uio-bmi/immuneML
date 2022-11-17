@@ -43,11 +43,9 @@ class GenerativeModelLoadInstruction(Instruction):
     def run_unit(self, unit: GenerativeModelUnit, result_path: Path) -> ReportResult:
         path = PathBuilder.build(unit.path)
         unit.genModel.load(path)
-        matrix, sequences, alphabet = unit.genModel.generate(amount=50)
+        sequences = unit.genModel.generate(amount=50)
         unit.report.method = unit.genModel
         unit.report.result_path = result_path / "report"
         unit.generated_sequences = sequences
-        unit.alphabet = alphabet
-        unit.PWM = matrix
         report_result = unit.report.generate_report()
         return report_result
