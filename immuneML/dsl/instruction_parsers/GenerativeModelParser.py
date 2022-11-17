@@ -27,7 +27,7 @@ class GenerativeModelParser:
     .. code-block:: yaml
 
         instruction_name:
-            type: LSTM
+            type: GenerativeModel
             generators:
                 generator_1:
                     encoding: e1

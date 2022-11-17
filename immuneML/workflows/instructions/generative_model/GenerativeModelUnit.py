@@ -16,9 +16,7 @@ class GenerativeModelUnit:
     report: Report
     genModel: GenerativeModel
     dataset: Dataset = None
-    alphabet: str = "ACGT"
     generated_sequences: list = None
-    PWM: numpy.array = None
     encoder: DatasetEncoder = None
     label_config: LabelConfiguration = None
     report_result: ReportResult = None

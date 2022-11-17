@@ -19,7 +19,6 @@ from immuneML.ml_methods.util.Util import Util
 from immuneML.ml_metrics.Metric import Metric
 from immuneML.util.FilenameHandler import FilenameHandler
 from immuneML.util.PathBuilder import PathBuilder
-import tensorflow
 
 
 class GenerativeModel(UnsupervisedMLMethod):
