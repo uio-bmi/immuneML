@@ -3,6 +3,7 @@ from functools import partial
 import pandas as pd
 
 from immuneML.caching.CacheHandler import CacheHandler
+from immuneML.data_model.dataset.Dataset import Dataset
 from immuneML.data_model.dataset.SequenceDataset import SequenceDataset
 from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
@@ -92,22 +93,24 @@ class ImportanceWeighting(ExampleWeightingStrategy):
 
         for dist, parameter_name in zip([baseline_dist, dataset_dist], ["baseline_dist", "dataset_dist"]):
             if type(dist) is dict:
-                error_mssg = f"{location}: {dist} is not a valid value for parameter {parameter_name}. " \
-                             f"Expected either a single value (legal values are: {', '.join(ImportanceWeighting.VALID_DISTRIBUTIONS)}), " \
-                             f"or alternatively you may specify the 'restrict_to' parameter for the distribution of type " \
+                error_mssg1 = location + ": {} is not a valid value for parameter {}. " \
+                             f"Expected either a single value (legal values are: {', '.join(ImportanceWeighting.VALID_DISTRIBUTIONS)}). "
+
+                error_mssg2 = f"Alternatively you may specify the 'restrict_to' parameter for the distribution of type " \
                              f"{ImportanceWeighting.TYPE_MUTAGENESIS}, for example:\n\n" \
                              f"mutagenesis:\n" \
                              f"  restrict_to:\n" \
                              f"    label: CMV\n" \
                              f"    class: -\n"
 
-                assert list(dist.keys()) == [ImportanceWeighting.TYPE_MUTAGENESIS], error_mssg
-                assert dist["mutagenesis"].keys() == ["restrict_to"], error_mssg
-                assert dist["mutagenesis"]["restrict_to"].keys() == ["label", "class"], error_mssg
-                assert type(dist["mutagenesis"]["restrict_to"]["label"]) is str, error_mssg
-                assert type(dist["mutagenesis"]["restrict_to"]["class"]) is str, error_mssg
-                # todo make error messages more specific from 'restrict_to' and onward
+                assert list(dist.keys()) == [ImportanceWeighting.TYPE_MUTAGENESIS], error_mssg1.format(dist, parameter_name) + "\n" + error_mssg2
+                assert list(dist["mutagenesis"].keys()) == ["restrict_to"], error_mssg1.format(dist, parameter_name) + "\n" + error_mssg2
+                ParameterValidator.assert_all_in_valid_list(values=list(dist["mutagenesis"]["restrict_to"].keys()),
+                                                            valid_values=["label", "class"],
+                                                            location=location, parameter_name="mutagenesis/restrict_to")
 
+                ParameterValidator.assert_type_and_value(dist["mutagenesis"]["restrict_to"]["label"], (str, int), location=location, parameter_name="mutagenesis/restrict_to/label")
+                ParameterValidator.assert_type_and_value(dist["mutagenesis"]["restrict_to"]["class"], (str, int), location=location, parameter_name="mutagenesis/restrict_to/class")
             else:
                 ParameterValidator.assert_in_valid_list(dist.lower(), valid_values=ImportanceWeighting.VALID_DISTRIBUTIONS,
                                                         location=location, parameter_name=parameter_name)
@@ -149,7 +152,7 @@ class ImportanceWeighting(ExampleWeightingStrategy):
 
     def compute_weights(self, dataset: SequenceDataset, params: ExampleWeightingParams):
         if params.learn_model:
-            self._prepare_weighting_parameters(dataset)
+            self._prepare_weighting_parameters(dataset, params)
 
         weights = self.get_weights_for_each_sequence(dataset)
 
@@ -162,29 +165,38 @@ class ImportanceWeighting(ExampleWeightingStrategy):
 
         return weights
 
-    def _prepare_weighting_parameters(self, dataset: SequenceDataset):
-        self.dataset_positional_frequences = self._get_positional_frequencies(dataset, self.dataset_dist)
-        self.baseline_positional_frequences = self._get_positional_frequencies(dataset, self.baseline_dist)
+    def _prepare_weighting_parameters(self, dataset: SequenceDataset, params: ExampleWeightingParams):
+        self.dataset_positional_frequences = self._get_positional_frequencies(dataset, self.dataset_dist, params)
+        self.baseline_positional_frequences = self._get_positional_frequencies(dataset, self.baseline_dist, params)
 
         self.alphabet_size = len(EnvironmentSettings.get_sequence_alphabet())
 
         self._compute_dataset_probability = self.get_probability_fn(self.dataset_dist)
         self._compute_baseline_probability = self.get_probability_fn(self.baseline_dist)
 
-    def _get_positional_frequencies(self, dataset, dist):
+    def _get_positional_frequencies(self, dataset, dist, params: ExampleWeightingParams):
         if dist.distribution_type == ImportanceWeighting.TYPE_MUTAGENESIS:
             if dist.class_name is None:
-                return ImportanceWeightHelper.compute_positional_aa_frequences(dataset,
-                                                                               pseudocount_value=self.pseudocount_value)
+                dataset_for_aa_freq = dataset
             else:
-                varsss = vars(dist)
-                label_name = dist.label_name
-                class_name = dist.class_name
-                result = dataset.get_metadata([label_name], return_df=True)
-                result2 = dataset.get_metadata([label_name], return_df=False)
-                # todo get subset
+                path = params.result_path / f"subset_{dist.label_name}_{dist.class_name}"
+                dataset_for_aa_freq = self._get_label_class_restricted_subset(dataset, dist, path)
+
+            return ImportanceWeightHelper.compute_positional_aa_frequences(dataset_for_aa_freq,
+                                                                           pseudocount_value=self.pseudocount_value)
         else:
             return None
+
+    def _get_label_class_restricted_subset(self, dataset, dist, path):
+        PathBuilder.build(path)
+        dataset_items_to_select = dataset.get_metadata([dist.label_name], return_df=True).astype(str) == str(dist.class_name)
+        dataset_items_to_select = list(dataset_items_to_select[dist.label_name])
+
+        example_indices = [i for i in range(len(dataset_items_to_select)) if dataset_items_to_select[i]]
+
+        return dataset.make_subset(example_indices,
+                                   path=path,
+                                   dataset_type=Dataset.SUBSAMPLED)
 
     def get_weights_for_each_sequence(self, dataset: SequenceDataset):
         return CacheHandler.memo_by_params(self._prepare_caching_params(dataset),
@@ -193,8 +205,8 @@ class ImportanceWeighting(ExampleWeightingStrategy):
     def _prepare_caching_params(self, dataset: SequenceDataset):
         return ("compute_weight_for_each_sequence",
                 ("dataset_identifier", dataset.identifier),
-                ("baseline_dist", vars(self.baseline_dist)),
-                ("dataset_dist", vars(self.dataset_dist)),
+                ("baseline_dist", tuple(vars(self.baseline_dist).items())),
+                ("dataset_dist", tuple(vars(self.dataset_dist).items())),
                 ("pseudocount_value", self.pseudocount_value),
                 ("lower_weight_limit", self.lower_weight_limit),
                 ("upper_weight_limit", self.upper_weight_limit),
