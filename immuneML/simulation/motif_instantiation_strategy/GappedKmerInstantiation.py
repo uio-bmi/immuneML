@@ -112,13 +112,17 @@ class GappedKmerInstantiation(MotifInstantiationStrategy):
 
             alphabet_weights = self.set_default_weights(self.alphabet_weights, EnvironmentSettings.get_sequence_alphabet(sequence_type=sequence_type))
 
-            for hamming_dist in self.hamming_distance_probabilities.keys():
-                replacement_alphabet = "[" + "".join([letter for letter, weight in alphabet_weights.items() if weight > 0]) + "]"
-                for position_group in combinations(allowed_positions, hamming_dist):
-                    motif_parts = [base[i: j] for i, j in zip([0] + [el + 1 for el in position_group], position_group + [len(base)])]
-                    motif_instance = replacement_alphabet.join(motif_parts)
-                    motif_instance = self._add_gap(motif_instance)
+            for hamming_dist, dist_proba in self.hamming_distance_probabilities.items():
+                if hamming_dist > 0 and dist_proba > 0:
+                    replacement_alphabet = "[" + "".join([letter for letter, weight in alphabet_weights.items() if weight > 0]) + "]"
+                    for position_group in combinations(allowed_positions, hamming_dist):
+                        motif_parts = [base[i: j] for i, j in zip([0] + [el + 1 for el in position_group], list(position_group) + [len(base)])]
+                        motif_instance = replacement_alphabet.join(motif_parts)
+                        motif_instance = self._add_gap(motif_instance)
+                        motif_instances.append(motif_instance)
 
+                elif dist_proba > 0:
+                    motif_instance = self._add_gap(base)
                     motif_instances.append(motif_instance)
         else:
             motif_instance = self._add_gap(base)
