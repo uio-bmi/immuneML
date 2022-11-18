@@ -1,0 +1,12 @@
+from bionumpy import AminoAcidEncoding, DNAEncoding
+from bionumpy.bnpdataclass import bnpdataclass
+
+
+@bnpdataclass
+class GenModelAsTSV:
+    sequence_aa: AminoAcidEncoding
+    sequence: DNAEncoding
+    v_call: str
+    j_call: str
+    region_type: str
+    frame_type: str
