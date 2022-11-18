@@ -1,3 +1,5 @@
+from functools import partial
+
 import pandas as pd
 
 from immuneML.caching.CacheHandler import CacheHandler
@@ -6,6 +8,7 @@ from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import Rece
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.example_weighting.ExampleWeightingParams import ExampleWeightingParams
 from immuneML.example_weighting.ExampleWeightingStrategy import ExampleWeightingStrategy
+from immuneML.example_weighting.importance_weighting.DistributionParameters import DistributionParameters
 from immuneML.example_weighting.importance_weighting.ImportanceWeightHelper import ImportanceWeightHelper
 from immuneML.util.ParameterValidator import ParameterValidator
 from immuneML.util.PathBuilder import PathBuilder
@@ -34,6 +37,8 @@ class ImportanceWeighting(ExampleWeightingStrategy):
         export_weights
 
 
+
+
     YAML specification:
 
     .. indent with spaces
@@ -45,9 +50,14 @@ class ImportanceWeighting(ExampleWeightingStrategy):
 
     '''
 
-    VALID_DISTRIBUTIONS = ("uniform", "mutagenesis", "olga")
+    TYPE_UNIFORM = "uniform"
+    TYPE_MUTAGENESIS = "mutagenesis"
+    TYPE_OLGA = "olga"
+    VALID_DISTRIBUTIONS = (TYPE_UNIFORM, TYPE_MUTAGENESIS, TYPE_OLGA)
 
-    def __init__(self, baseline_dist, dataset_dist, pseudocount_value, lower_weight_limit, upper_weight_limit, export_weights, name: str = None):
+    def __init__(self, baseline_dist: DistributionParameters, dataset_dist: DistributionParameters,
+                 pseudocount_value: int, lower_weight_limit: float, upper_weight_limit: float,
+                 export_weights: bool, name: str = None):
         super().__init__(name)
         self.baseline_dist = baseline_dist
         self.dataset_dist = dataset_dist
@@ -56,21 +66,53 @@ class ImportanceWeighting(ExampleWeightingStrategy):
         self.upper_weight_limit = upper_weight_limit
         self.export_weights = export_weights
 
-        self._compute_baseline_probability = self.get_probability_fn(baseline_dist)
-        self._compute_dataset_probability = self.get_probability_fn(dataset_dist)
+        self._compute_baseline_probability = None
+        self._compute_dataset_probability = None
 
         self.alphabet_size = None
+        self.baseline_positional_frequences = None
         self.dataset_positional_frequences = None
+
+    @staticmethod
+    def _build_distribution_parameters(dist_yaml, dataset_type):
+        if type(dist_yaml) is str:
+            return DistributionParameters(distribution_type=dist_yaml, dataset_type=dataset_type)
+        else:
+            distribution_type = list(dist_yaml.keys())[0]
+            return DistributionParameters(distribution_type=distribution_type,
+                                          dataset_type=dataset_type,
+                                          label_name=dist_yaml[distribution_type]["restrict_to"]["label"],
+                                          class_name=dist_yaml[distribution_type]["restrict_to"]["class"])
 
 
     @staticmethod
-    def _prepare_parameters(baseline_dist, dataset_dist, pseudocount_value, lower_weight_limit, upper_weight_limit, export_weights, name: str = None):
+    def _prepare_parameters(baseline_dist, dataset_dist, pseudocount_value: int,
+                            lower_weight_limit: float, upper_weight_limit: float, export_weights: bool, name: str = None):
         location = ImportanceWeighting.__name__
 
-        ParameterValidator.assert_in_valid_list(baseline_dist.lower(), valid_values=ImportanceWeighting.VALID_DISTRIBUTIONS,
-                                                location=location, parameter_name="baseline_dist")
-        ParameterValidator.assert_in_valid_list(dataset_dist.lower(), valid_values=ImportanceWeighting.VALID_DISTRIBUTIONS,
-                                                location=location, parameter_name="dataset_dist")
+        for dist, parameter_name in zip([baseline_dist, dataset_dist], ["baseline_dist", "dataset_dist"]):
+            if type(dist) is dict:
+                error_mssg = f"{location}: {dist} is not a valid value for parameter {parameter_name}. " \
+                             f"Expected either a single value (legal values are: {', '.join(ImportanceWeighting.VALID_DISTRIBUTIONS)}), " \
+                             f"or alternatively you may specify the 'restrict_to' parameter for the distribution of type " \
+                             f"{ImportanceWeighting.TYPE_MUTAGENESIS}, for example:\n\n" \
+                             f"mutagenesis:\n" \
+                             f"  restrict_to:\n" \
+                             f"    label: CMV\n" \
+                             f"    class: -\n"
+
+                assert list(dist.keys()) == [ImportanceWeighting.TYPE_MUTAGENESIS], error_mssg
+                assert dist["mutagenesis"].keys() == ["restrict_to"], error_mssg
+                assert dist["mutagenesis"]["restrict_to"].keys() == ["label", "class"], error_mssg
+                assert type(dist["mutagenesis"]["restrict_to"]["label"]) is str, error_mssg
+                assert type(dist["mutagenesis"]["restrict_to"]["class"]) is str, error_mssg
+                # todo make error messages more specific from 'restrict_to' and onward
+
+            else:
+                ParameterValidator.assert_in_valid_list(dist.lower(), valid_values=ImportanceWeighting.VALID_DISTRIBUTIONS,
+                                                        location=location, parameter_name=parameter_name)
+        # ParameterValidator.assert_in_valid_list(dataset_dist.lower(), valid_values=ImportanceWeighting.VALID_DISTRIBUTIONS,
+        #                                         location=location, parameter_name="dataset_dist")
 
         assert baseline_dist != dataset_dist, f"{location}: baseline_dist cannot be the same as dataset_dist, found: {baseline_dist}"
 
@@ -85,8 +127,8 @@ class ImportanceWeighting(ExampleWeightingStrategy):
         ParameterValidator.assert_type_and_value(export_weights, bool, location, "export_weights")
 
         return {
-            "baseline_dist": baseline_dist.lower(),
-            "dataset_dist": dataset_dist.lower(),
+            "baseline_dist": ImportanceWeighting._build_distribution_parameters(baseline_dist, "baseline"),
+            "dataset_dist": ImportanceWeighting._build_distribution_parameters(dataset_dist, "dataset"),
             "pseudocount_value" : pseudocount_value,
             "lower_weight_limit": lower_weight_limit,
             "upper_weight_limit": upper_weight_limit,
@@ -121,11 +163,28 @@ class ImportanceWeighting(ExampleWeightingStrategy):
         return weights
 
     def _prepare_weighting_parameters(self, dataset: SequenceDataset):
-        if "mutagenesis" in [self.baseline_dist, self.dataset_dist]:
-            self.dataset_positional_frequences = ImportanceWeightHelper.compute_positional_aa_frequences(dataset, pseudocount_value=self.pseudocount_value)
+        self.dataset_positional_frequences = self._get_positional_frequencies(dataset, self.dataset_dist)
+        self.baseline_positional_frequences = self._get_positional_frequencies(dataset, self.baseline_dist)
 
-        if "uniform" in [self.baseline_dist, self.dataset_dist]:
-            self.alphabet_size = len(EnvironmentSettings.get_sequence_alphabet())
+        self.alphabet_size = len(EnvironmentSettings.get_sequence_alphabet())
+
+        self._compute_dataset_probability = self.get_probability_fn(self.dataset_dist)
+        self._compute_baseline_probability = self.get_probability_fn(self.baseline_dist)
+
+    def _get_positional_frequencies(self, dataset, dist):
+        if dist.distribution_type == ImportanceWeighting.TYPE_MUTAGENESIS:
+            if dist.class_name is None:
+                return ImportanceWeightHelper.compute_positional_aa_frequences(dataset,
+                                                                               pseudocount_value=self.pseudocount_value)
+            else:
+                varsss = vars(dist)
+                label_name = dist.label_name
+                class_name = dist.class_name
+                result = dataset.get_metadata([label_name], return_df=True)
+                result2 = dataset.get_metadata([label_name], return_df=False)
+                # todo get subset
+        else:
+            return None
 
     def get_weights_for_each_sequence(self, dataset: SequenceDataset):
         return CacheHandler.memo_by_params(self._prepare_caching_params(dataset),
@@ -134,8 +193,8 @@ class ImportanceWeighting(ExampleWeightingStrategy):
     def _prepare_caching_params(self, dataset: SequenceDataset):
         return ("compute_weight_for_each_sequence",
                 ("dataset_identifier", dataset.identifier),
-                ("baseline_dist", self.baseline_dist),
-                ("dataset_dist", self.dataset_dist),
+                ("baseline_dist", vars(self.baseline_dist)),
+                ("dataset_dist", vars(self.dataset_dist)),
                 ("pseudocount_value", self.pseudocount_value),
                 ("lower_weight_limit", self.lower_weight_limit),
                 ("upper_weight_limit", self.upper_weight_limit),
@@ -152,7 +211,6 @@ class ImportanceWeighting(ExampleWeightingStrategy):
 
         df.to_csv(result_path, index=False, header=True, sep="\t")
 
-
     def _compute_sequence_weight(self, sequence: ReceptorSequence):
         sequence_weight = self._compute_baseline_probability(sequence) / self._compute_dataset_probability(sequence)
         return self._apply_weight_thresholds(sequence_weight)
@@ -166,20 +224,23 @@ class ImportanceWeighting(ExampleWeightingStrategy):
 
         return sequence_weight
 
-    def get_probability_fn(self, distribution):
-        if distribution == "uniform":
+    def get_probability_fn(self, dist):
+        if dist.distribution_type == ImportanceWeighting.TYPE_UNIFORM:
             return self._uniform_probability
-        elif distribution == "mutagenesis":
-            return self._mutagenesis_probability
-        elif distribution == "olga":
+        elif dist.distribution_type == ImportanceWeighting.TYPE_OLGA:
             return self._olga_probability
+        elif dist.distribution_type == ImportanceWeighting.TYPE_MUTAGENESIS:
+            if dist.dataset_type == "dataset":
+                return partial(self._mutagenesis_probability, positional_frequencies=self.dataset_positional_frequences)
+            elif dist.dataset_type == "baseline":
+                return partial(self._mutagenesis_probability, positional_frequencies=self.baseline_positional_frequences)
 
     def _uniform_probability(self, sequence: ReceptorSequence):
         return ImportanceWeightHelper.compute_uniform_probability(sequence.get_sequence(), self.alphabet_size)
 
-    def _mutagenesis_probability(self, sequence: ReceptorSequence):
+    def _mutagenesis_probability(self, sequence: ReceptorSequence, positional_frequencies):
         return ImportanceWeightHelper.compute_mutagenesis_probability(sequence.get_sequence(),
-                                                                      self.dataset_positional_frequences)
+                                                                      positional_frequencies)
 
     def _olga_probability(self, sequence: ReceptorSequence):
         raise NotImplementedError
