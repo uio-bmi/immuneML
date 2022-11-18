@@ -1,3 +1,4 @@
+import logging
 import random
 from itertools import combinations
 
@@ -72,8 +73,8 @@ class GappedKmerInstantiation(MotifInstantiationStrategy):
             assert all(isinstance(key, int) for key in hamming_distance_probabilities.keys()) \
                    and all(isinstance(val, float) for val in hamming_distance_probabilities.values()) \
                    and 0.99 <= sum(hamming_distance_probabilities.values()) <= 1, \
-                "GappedKmerInstantiation: for each possible Hamming distance a probability between 0 and 1 has to be assigned " \
-                "so that the probabilities for all distance possibilities sum to 1."
+                   "GappedKmerInstantiation: for each possible Hamming distance a probability between 0 and 1 has to be assigned " \
+                   "so that the probabilities for all distance possibilities sum to 1."
 
         self.hamming_distance_probabilities = hamming_distance_probabilities
         self.position_weights = position_weights
@@ -102,27 +103,43 @@ class GappedKmerInstantiation(MotifInstantiationStrategy):
 
         return MotifInstance(instance, gap_size)
 
-    def get_all_possible_instances(self, base, sequence_type: SequenceType) -> list:
+    def _get_allowed_positions(self, base) -> list:
+        allowed_positions = [i for i in range(len(base)) if base[i] != "/"]
+        allowed_positions = [key for key, val in self.set_default_weights(self.position_weights, allowed_positions).items() if val > 0]
+        return allowed_positions
 
+    def _get_all_motif_regex(self, alphabet_weights: dict, allowed_positions: list, hamming_dist: int, base: str):
+        motif_regex_instances = []
+        replacement_alphabet = "[" + "".join([letter for letter, weight in alphabet_weights.items() if weight > 0]) + "]"
+
+        for position_group in combinations(allowed_positions, hamming_dist):
+            motif_parts = [base[i: j] for i, j in zip([0] + [el + 1 for el in position_group], list(position_group) + [len(base)])]
+            motif_instance = replacement_alphabet.join(motif_parts)
+            motif_instance = self._add_gap(motif_instance)
+            motif_regex_instances.append(motif_instance)
+
+        return motif_regex_instances
+
+    def _get_all_hamming_dist_instances(self, base, sequence_type) -> list:
+        allowed_positions = self._get_allowed_positions(base)
+        alphabet_weights = self.set_default_weights(self.alphabet_weights, EnvironmentSettings.get_sequence_alphabet(sequence_type=sequence_type))
         motif_instances = []
 
+        for hamming_dist, dist_proba in self.hamming_distance_probabilities.items():
+            if hamming_dist > 0 and dist_proba > 0:
+                motif_regex_instances = self._get_all_motif_regex(alphabet_weights, allowed_positions, hamming_dist, base)
+                motif_instances.extend(motif_regex_instances)
+            elif dist_proba > 0:
+                motif_instance = self._add_gap(base)
+                motif_instances.append(motif_instance)
+
+        return motif_instances
+
+    def get_all_possible_instances(self, base, sequence_type: SequenceType) -> list:
         if self.hamming_distance_probabilities:
-            allowed_positions = [i for i in range(len(base)) if base[i] != "/"]
-            allowed_positions = [key for key, val in self.set_default_weights(self.position_weights, allowed_positions).items() if val > 0]
-
-            alphabet_weights = self.set_default_weights(self.alphabet_weights, EnvironmentSettings.get_sequence_alphabet(sequence_type=sequence_type))
-
-            for hamming_dist in self.hamming_distance_probabilities.keys():
-                replacement_alphabet = "[" + "".join([letter for letter, weight in alphabet_weights.items() if weight > 0]) + "]"
-                for position_group in combinations(allowed_positions, hamming_dist):
-                    motif_parts = [base[i: j] for i, j in zip([0] + [el + 1 for el in position_group], position_group + [len(base)])]
-                    motif_instance = replacement_alphabet.join(motif_parts)
-                    motif_instance = self._add_gap(motif_instance)
-
-                    motif_instances.append(motif_instance)
+            motif_instances = self._get_all_hamming_dist_instances(base, sequence_type)
         else:
-            motif_instance = self._add_gap(base)
-            motif_instances.append(motif_instance)
+            motif_instances = [self._add_gap(base)]
 
         return motif_instances
 
@@ -163,6 +180,14 @@ class GappedKmerInstantiation(MotifInstantiationStrategy):
         return [weights[key] / s for key in keys]
 
     def set_default_weights(self, weights, keys):
+
+        if weights is not None and any(key not in keys for key in weights):
+            for key in weights:
+                if key not in keys:
+                    logging.warning(f"{GappedKmerInstantiation.__name__}: probability was set for key: {key} but it is not in the list of "
+                                    f"valid keys: {keys}, setting the probability to 0.")
+                    weights[key] = 0
+
         if weights is not None and len(weights.keys()) < len(keys):
             remaining_probability = (1 - sum(weights.values())) / (len(keys) - len(weights.keys()))
             additional_keys = set(keys) - set(weights.keys())
