@@ -13,6 +13,7 @@ from immuneML.data_model.repertoire.Repertoire import Repertoire
 from immuneML.environment.SequenceType import SequenceType
 from immuneML.simulation.LIgOSimulationItem import LIgOSimulationItem
 from immuneML.simulation.implants.Signal import Signal
+from immuneML.simulation.util.bnp_util import merge_dataclass_objects, add_field_to_bnp_dataclass
 from immuneML.simulation.util.util import get_signal_sequence_count, get_sequence_per_signal_count, make_sequences_from_gen_model, get_bnp_data, \
     annotate_sequences, filter_out_illegal_sequences, write_bnp_data
 from immuneML.util.PathBuilder import PathBuilder
@@ -50,10 +51,10 @@ class RejectionSampler:
                                                                                                            sim_item=self.sim_item) * len(
                 self.sim_item.signals)
 
-            column_names = self.sim_item.generative_model.OUTPUT_COLUMNS + self._get_custom_keys(with_p_gens=False)
+            custom_columns = self._get_custom_keys(with_p_gens=False)
 
-            sequences = self._get_no_signal_sequences(repertoire_index=i, seqs_no_signal_count=seqs_no_signal_count, column_names=column_names)
-            sequences = self._add_signal_sequences(sequences, column_names, repertoire_index=i)
+            sequences = self._get_no_signal_sequences(repertoire_index=i, seqs_no_signal_count=seqs_no_signal_count, columns=custom_columns)
+            sequences = self._add_signal_sequences(sequences, custom_columns, repertoire_index=i)
             sequences = self._add_pgens(sequences)
 
             self._check_sequence_count(sequences)
@@ -67,9 +68,9 @@ class RejectionSampler:
         return repertoires
 
     def _get_custom_keys(self, with_p_gens: bool = True):
-        keys = [sig.id for sig in self.all_signals] + [f'{signal.id}_positions' for signal in self.all_signals]
+        keys = [(sig.id, int) for sig in self.all_signals] + [(f'{signal.id}_positions', str) for signal in self.all_signals]
         if with_p_gens:
-            keys += ['p_gen']
+            keys += [('p_gen', float)]
         return keys
 
     def _make_repertoire_from_sequences(self, sequences, repertoires_path) -> Repertoire:
@@ -85,24 +86,26 @@ class RejectionSampler:
         return {**{signal.id: True if not self.sim_item.is_noise else False for signal in self.sim_item.signals},
                 **{signal.id: False for signal in self.all_signals if signal not in self.sim_item.signals}}
 
-    def _get_no_signal_sequences(self, repertoire_index: int, seqs_no_signal_count, column_names):
+    def _get_no_signal_sequences(self, repertoire_index: int, seqs_no_signal_count, columns):
         if self.seqs_no_signal_path.is_file() and seqs_no_signal_count > 0:
             skip_rows = repertoire_index * seqs_no_signal_count + 1
-            return pd.read_csv(self.seqs_no_signal_path, skiprows=skip_rows, nrows=seqs_no_signal_count, names=column_names, sep='\t',
-                               dtype={col: str for col in column_names if 'position' in col})
+            return get_bnp_data(self.seqs_no_signal_path, columns)[skip_rows:skip_rows+seqs_no_signal_count]
         else:
             return None
 
-    def _add_signal_sequences(self, sequences: pd.DataFrame, column_names, repertoire_index: int):
+    def _add_signal_sequences(self, sequences, columns, repertoire_index: int):
+
         for signal in self.sim_item.signals:
+
             skip_rows = get_signal_sequence_count(repertoire_count=repertoire_index, sim_item=self.sim_item) + 1
-            tmp_df = pd.read_csv(self.seqs_with_signal_path[signal.id], names=column_names, skiprows=skip_rows, sep='\t',
-                                 nrows=int(self.sim_item.receptors_in_repertoire_count * self.sim_item.repertoire_implanting_rate),
-                                 dtype={col: str for col in column_names if 'position' in col})
+            n_rows = int(self.sim_item.receptors_in_repertoire_count * self.sim_item.repertoire_implanting_rate)
+
+            sequences_sig = get_bnp_data(self.seqs_with_signal_path[signal.id], columns)[skip_rows:skip_rows+n_rows]
+
             if sequences is None:
-                sequences = tmp_df
+                sequences = sequences_sig
             else:
-                sequences = pd.concat([sequences, tmp_df], axis=0, ignore_index=True)
+                sequences = merge_dataclass_objects([sequences, sequences_sig])
 
         return sequences
 
@@ -213,11 +216,13 @@ class RejectionSampler:
 
         return sequences
 
-    def _add_pgens(self, sequences: pd.DataFrame) -> pd.DataFrame:
-        if 'p_gen' not in sequences.columns:
+    def _add_pgens(self, sequences):
+        if not hasattr(sequences, 'p_gen'):
             if self.export_pgens and self.sim_item.generative_model.can_compute_p_gens():
-                sequences['p_gen'] = self.sim_item.generative_model.compute_p_gens(sequences, self.sequence_type)
+                p_gens = self.sim_item.generative_model.compute_p_gens(sequences, self.sequence_type)
             else:
-                sequences['p_gen'] = None
+                p_gens = None
+
+            sequences = add_field_to_bnp_dataclass(sequences, 'p_gen', float, p_gens)
 
         return sequences

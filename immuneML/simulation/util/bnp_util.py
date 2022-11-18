@@ -6,7 +6,7 @@ from bionumpy import DNAEncoding, AminoAcidEncoding, as_encoded_array
 from bionumpy.bnpdataclass import bnpdataclass
 
 
-def make_bnp_dataclass_from_dicts(dict_objects: List[dict]):
+def make_bnp_dataclass_object_from_dicts(dict_objects: List[dict]):
     if not isinstance(dict_objects, list) or len(dict_objects) == 0:
         raise RuntimeError("Cannot make dataclass, got empty list as input.")
 
@@ -29,14 +29,14 @@ def make_bnp_dataclass_from_dicts(dict_objects: List[dict]):
     return new_class(**transformed_objs)
 
 
-def merge_dataclass_objects(objects: List[bnpdataclass]):
+def merge_dataclass_objects(objects: list):
     field_names = list(set(chain.from_iterable(list(obj.__annotations__.keys()) for obj in objects)))
 
     for obj in objects:
         assert all(hasattr(obj, field) for field in field_names), (obj, field_names)
 
     cls = type(objects[0])
-    return cls(**{key: chain.from_iterable([getattr(obj, key) for obj in objects]) for key in objects[0].__annotations__.keys()})
+    return cls(**{field_name: chain.from_iterable([getattr(obj, field_name) for obj in objects]) for field_name in field_names})
 
 
 def add_field_to_bnp_dataclass(original_object, new_field_name, new_field_type, new_field_value):
@@ -44,17 +44,22 @@ def add_field_to_bnp_dataclass(original_object, new_field_name, new_field_type, 
     return add_fields_to_bnp_dataclass(original_object, {new_field_name: new_field_value})
 
 
-def add_fields_to_bnp_dataclass(original_object: bnpdataclass, new_fields: dict):
-    original_class = type(original_object)
-    base_fields = [(field_name, field_type) for field_name, field_type in original_class.__annotations__.items()]
-    functions = {func: getattr(original_class, func) for func in dir(original_class)
-                 if callable(getattr(original_class, func)) and not func.startswith("__")}
-
-    new_cls = bnpdataclass(make_dataclass('DynamicDC',
-                                          fields=base_fields + _make_new_fields(new_fields),
-                                          namespace=functions))
+def add_fields_to_bnp_dataclass(original_object, new_fields: dict):
+    new_cls = make_new_bnp_dataclass(fields=_make_new_fields(new_fields), original_class=type(original_object))
 
     return new_cls(**{**vars(original_object), **new_fields})
+
+
+def make_new_bnp_dataclass(fields: list, original_class=None):
+    if original_class is not None:
+        base_fields = [(field_name, field_type) for field_name, field_type in original_class.__annotations__.items()]
+        functions = {func: getattr(original_class, func) for func in dir(original_class)
+                     if callable(getattr(original_class, func)) and not func.startswith("__")}
+    else:
+        base_fields, functions = [], {}
+
+    new_cls = bnpdataclass(make_dataclass('DynamicDC', fields=base_fields + fields, namespace=functions))
+    return new_cls
 
 
 def _make_new_fields(new_fields: dict) -> List[tuple]:

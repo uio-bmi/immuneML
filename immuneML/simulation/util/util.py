@@ -16,6 +16,7 @@ from immuneML.environment.SequenceType import SequenceType
 from immuneML.simulation.LIgOSimulationItem import LIgOSimulationItem
 from immuneML.simulation.generative_models.GenModelAsTSV import GenModelAsTSV
 from immuneML.simulation.implants.MotifInstance import MotifInstance
+from immuneML.simulation.util.bnp_util import make_new_bnp_dataclass
 from immuneML.util.PositionHelper import PositionHelper
 
 
@@ -39,8 +40,14 @@ def get_sequence_per_signal_count(sim_item) -> dict:
         raise NotImplementedError
 
 
-def get_bnp_data(sequence_path):
-    buff_type = delimited_buffers.get_bufferclass_for_datatype(GenModelAsTSV, delimiter="\t", has_header=True)
+def get_bnp_data(sequence_path, columns_with_types: list = None):
+    if columns_with_types is None or isinstance(columns_with_types, list) and len(columns_with_types) == 0:
+        data_class = GenModelAsTSV
+    else:
+        data_class = make_new_bnp_dataclass(columns_with_types, GenModelAsTSV)
+
+    buff_type = delimited_buffers.get_bufferclass_for_datatype(data_class, delimiter='\t', has_header=True)
+
     file = bnp.open(sequence_path, buffer_type=buff_type)
     data = file.read()
     file.close()

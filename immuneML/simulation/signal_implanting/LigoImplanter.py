@@ -12,7 +12,7 @@ from immuneML.environment.SequenceType import SequenceType
 from immuneML.simulation.LIgOSimulationItem import LIgOSimulationItem
 from immuneML.simulation.implants.MotifInstance import MotifInstance
 from immuneML.simulation.implants.Signal import Signal
-from immuneML.simulation.util.bnp_util import make_bnp_dataclass_from_dicts, add_fields_to_bnp_dataclass, merge_dataclass_objects, \
+from immuneML.simulation.util.bnp_util import make_bnp_dataclass_object_from_dicts, add_fields_to_bnp_dataclass, merge_dataclass_objects, \
     add_field_to_bnp_dataclass
 from immuneML.simulation.util.util import get_sequence_per_signal_count, make_sequences_from_gen_model, get_bnp_data, filter_out_illegal_sequences, \
     annotate_sequences, build_imgt_positions, choose_implant_position
@@ -119,7 +119,7 @@ class LigoImplanter:
                         logging.warning(f"{LigoImplanter.__name__}: could not find a sequence to implant {instance} for signal {signal.id}, "
                                         f"skipping for now.")
 
-                modified_sequences = make_bnp_dataclass_from_dicts(modified_sequences)
+                modified_sequences = make_bnp_dataclass_object_from_dicts(modified_sequences)
 
                 if self.sim_item.generative_model.can_compute_p_gens() and (self.export_p_gens or self.keep_p_gen_dist):
                     p_gens = self.sim_item.generative_model.compute_p_gens(modified_sequences, self.sequence_type)

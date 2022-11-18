@@ -1,5 +1,4 @@
 import os
-import shutil
 from pathlib import Path
 from unittest import TestCase
 
@@ -27,7 +26,8 @@ class TestLIgOSimulation(TestCase):
                         "v_call": "TRBV7",
                         "instantiation": {
                             "GappedKmer": {
-                                # "max_gap": 1,
+                                "max_gap": 2,
+                                "min_gap": 2,
                                 "alphabet_weights": None,
                                 "position_weights": None
                             }
@@ -140,4 +140,4 @@ class TestLIgOSimulation(TestCase):
         metadata_df = pd.read_csv(path / "result/inst1/metadata.csv", comment=Constants.COMMENT_SIGN)
         self.assertTrue(all(el in metadata_df.columns for el in ["signal1", "ievent1", "ievent2", "signal2"]))
 
-        shutil.rmtree(path)
+        # shutil.rmtree(path)

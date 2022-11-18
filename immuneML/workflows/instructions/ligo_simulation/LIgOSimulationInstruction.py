@@ -1,11 +1,10 @@
 import math
-import random
+import pickle
 from itertools import chain
 from multiprocessing import Pool
 from pathlib import Path
 from typing import List
 
-import dill
 import pandas as pd
 
 from immuneML.IO.dataset_export.DataExporter import DataExporter
@@ -87,12 +86,11 @@ class LIgOSimulationInstruction(Instruction):
         return self.state
 
     def _simulate_dataset(self):
-        summary_path = self.state.result_path / "summary.csv"
         chunk_size = math.ceil(len(self.state.simulation.sim_items) / self.state.number_of_processes)
 
-        pickled = [(dill.dumps(item), summary_path) for item in self.state.simulation.sim_items]
         with Pool(processes=self.state.number_of_processes) as pool:
-            examples = list(chain.from_iterable([dill.loads(el) for el in pool.starmap(self._create_examples, pickled, chunksize=chunk_size)]))
+            result = pool.map(self._create_examples, [vars(item) for item in self.state.simulation.sim_items], chunksize=chunk_size)
+            examples = list(chain.from_iterable(result))
 
         labels = {signal.id: [True, False] for signal in self.state.signals}
 
@@ -105,18 +103,30 @@ class LIgOSimulationInstruction(Instruction):
             self.state.dataset = SequenceDataset.build_from_objects(examples, path=self.state.result_path, name='simulated_dataset',
                                                                     file_size=SequenceDataset.DEFAULT_FILE_SIZE, labels=labels)
 
-    def _create_examples(self, item_pickled, summary_path) -> list:
+    def _create_examples(self, item_in: dict) -> list:
 
-        item = dill.loads(item_pickled)
+        print("entering create examples", flush=True)
+
+        item = LIgOSimulationItem(**item_in)
 
         if self.state.simulation.is_repertoire:
-            res = dill.dumps(self._create_repertoires(item, summary_path))
+            res = self._create_repertoires(item)
         else:
-            res = dill.dumps(self._create_receptors(item, summary_path))
+            res = self._create_receptors(item)
+
+        for el in res:
+            try:
+                pickle.dumps(el)
+            except Exception as e:
+                print("can't pickle result", flush=True)
+                print(el)
+                print(e)
+
+        print("exiting create examples", flush=True)
 
         return res
 
-    def _create_receptors(self, item: LIgOSimulationItem, summary_path: Path):
+    def _create_receptors(self, item: LIgOSimulationItem):
         if self.state.simulation.paired:
             raise NotImplementedError
         else:
@@ -129,7 +139,7 @@ class LIgOSimulationInstruction(Instruction):
             else:
                 raise NotImplementedError
 
-    def _create_repertoires(self, item: LIgOSimulationItem, summary_path: Path) -> list:
+    def _create_repertoires(self, item: LIgOSimulationItem) -> list:
 
         if self.state.simulation.simulation_strategy == SimulationStrategy.IMPLANTING:
 
@@ -149,68 +159,6 @@ class LIgOSimulationInstruction(Instruction):
                                f"{self.state.simulation.simulation_strategy} instead.")
 
         return repertoires
-
-    # def _make_repertoire_with_signal(self, item: LIgOSimulationItem, path: Path, summary_path: Path, repertoire_id: str) -> Repertoire:
-    #     repertoires_path = PathBuilder.build(self.state.result_path / "repertoires")
-    #     metadata = {**{signal.id: True for signal in item.signals},
-    #                 **{signal.id: False for signal in self.state.signals if signal not in item.signals}}
-    #
-    #     if self.state.simulation_strategy == SimulationStrategy.IMPLANTING:
-    #
-    #         new_sequences = self._make_sequences_by_implanting(item=item, path=path, summary_path=summary_path, repertoire_id=repertoire_id)
-    #         repertoire = Repertoire.build_from_sequence_objects(new_sequences, path=repertoires_path, metadata=metadata)
-    #
-    #     elif self.state.simulation_strategy == SimulationStrategy.REJECTION_SAMPLING:
-    #
-    #         new_sequences_df = self._make_sequences_by_rejection(item=item, path=path)
-    #         repertoire = Repertoire.build(**new_sequences_df.to_dict('list'), path=repertoires_path, metadata=metadata)
-    #
-    #     else:
-    #         raise RuntimeError(f"{LIgOSimulationInstruction.__name__}: simulation strategy was not properly set, accepted are "
-    #                            f"{SimulationStrategy.IMPLANTING.name} and {SimulationStrategy.REJECTION_SAMPLING.name}, but got "
-    #                            f"{self.state.simulation_strategy} instead.")
-    #
-    #     return repertoire
-
-    def _make_sequences_by_implanting(self, item: LIgOSimulationItem, path: Path, summary_path: Path, repertoire_id: str) -> list:
-
-        background_sequences = item.generative_model.generate_sequences(item.receptors_in_repertoire_count, seed=1, path=path / "tmp.tsv",
-                                                                        sequence_type=self.state.sequence_type)
-
-        sequence_indices = {}
-        available_indices = range(len(background_sequences))
-        new_sequences = []
-
-        for signal in item.signals:
-            receptor_with_signal_count = signal.implanting_strategy.compute_implanting(item.repertoire_implanting_rate,
-                                                                                       item.receptors_in_repertoire_count)
-            sequence_indices[signal.id] = random.sample(available_indices, k=receptor_with_signal_count)
-            available_indices = [ind for ind in available_indices if ind not in sequence_indices[signal.id]]
-
-            self._add_to_summary(summary_path, receptor_with_signal_count, signal, item, repertoire_id)
-
-            for index in sequence_indices[signal.id]:
-                implanted_sequence = signal.implant_in_sequence(sequence=background_sequences[index], is_noise=item.is_noise,
-                                                                sequence_type=self.state.simulation.sequence_type)
-                for other_signal in self.state.signals:
-                    if other_signal.id != signal.id:
-                        implanted_sequence.metadata.custom_params[other_signal.id] = False
-
-                if not self.state.store_signal_in_receptors:
-                    implanted_sequence.metadata.custom_params = {}
-                    implanted_sequence.annotation = None
-
-                new_sequences.append(implanted_sequence)
-
-        for index in available_indices:
-            background_sequence = background_sequences[index]
-
-            if self.state.store_signal_in_receptors:
-                background_sequence.metadata.custom_params = {**background_sequence.metadata.custom_params,
-                                                              **{signal.id: False for signal in self.state.signals}}
-            new_sequences.append(background_sequence)
-
-        return new_sequences
 
     def _add_to_summary(self, summary_path, receptor_with_signal_count, signal, item, repertoire_id):
 
