@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import List
 
 from immuneML.simulation.generative_models.GenerativeModel import GenerativeModel
@@ -34,6 +34,8 @@ class LIgOSimulationItem:
 
         seed (int): starting random seed for the generative model (ideally should differ across simulation items)
 
+        immune_events (dict): a set of key-value pairs that will be added to the metadata (same values for all data generated in one simulation item) and can be later used as labels
+
     YAML specification:
 
     .. indent with spaces
@@ -63,16 +65,8 @@ class LIgOSimulationItem:
     seed: int = None
     generative_model: GenerativeModel = None
     number_of_examples: int = 0
-    number_of_receptors_in_repertoire: int = 0
+    receptors_in_repertoire_count: int = 0
+    immune_events: dict = field(default_factory=dict)
 
     def __str__(self):
-
-        s = self.name + f":\nnumber_of_examples: {self.number_of_examples}"
-        if self.repertoire_implanting_rate:
-            s += f"\nrepertoire_implanting_rate: {self.repertoire_implanting_rate}"
-        if self.generative_model:
-            s += f"\ngenerative_model: {self.generative_model}"
-
-        s += f"signals: {str([str(s) for s in self.signals])[1:-1]}"
-
-        return s
+        return str(vars(self))

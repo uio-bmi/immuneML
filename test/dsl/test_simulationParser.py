@@ -40,7 +40,7 @@ class TestSimulationParser(TestCase):
         symbol_table.add("signal1", SymbolType.SIGNAL, Signal("signal1", [symbol_table.get("motif1")],
                                                               HealthySequenceImplanting(GappedMotifImplanting(), implanting_computation=ImplantingComputation.ROUND)))
 
-        symbol_table, specs = SimulationParser.parse_simulations(simulation, symbol_table)
+        symbol_table, specs = SimulationParser.parse(simulation, symbol_table)
 
         self.assertTrue(symbol_table.contains("sim1"))
         sim1 = symbol_table.get("sim1")

@@ -11,6 +11,8 @@ from immuneML.util.ReflectionHandler import ReflectionHandler
 
 class EncodingParser:
 
+    keyword = "encodings"
+
     @staticmethod
     def parse(encodings: dict, symbol_table: SymbolTable):
         for key in encodings.keys():

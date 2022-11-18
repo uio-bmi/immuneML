@@ -13,8 +13,10 @@ from immuneML.util.ReflectionHandler import ReflectionHandler
 
 class MotifParser:
 
+    keyword = "motifs"
+
     @staticmethod
-    def parse_motifs(motifs: dict, symbol_table: SymbolTable):
+    def parse(motifs: dict, symbol_table: SymbolTable):
 
         valid_motif_keys = ["seed", "instantiation", "seed_chain1", "seed_chain2", "name_chain1", "name_chain2", "v_call", "j_call"]
         for key in motifs.keys():

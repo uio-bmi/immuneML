@@ -64,11 +64,12 @@ class OLGA(GenerativeModel):
 
         location = OLGA.__name__
 
-        ParameterValidator.assert_keys(kwargs.keys(), ['model_path', 'default_model_name', 'chain', 'use_only_productive'], location,
-                                       'OLGA generative model')
+        ParameterValidator.assert_keys_present(list(kwargs.keys()), ['model_path', 'default_model_name', 'use_only_productive'], location,
+                                               'OLGA generative model')
         ParameterValidator.assert_type_and_value(kwargs['use_only_productive'], bool, location, 'use_only_productive')
 
         if kwargs['model_path']:
+            assert 'chain' in kwargs, f"{OLGA.__name__}: chain not defined."
             assert Path(kwargs['model_path']).is_dir(), \
                 f"{OLGA.__name__}: the model path is not a directory. It has to be a directory and contain files with the exact names as " \
                 f"described in the OLGA package documentation: https://github.com/statbiophys/OLGA."
@@ -141,6 +142,12 @@ class OLGA(GenerativeModel):
         if code != 0:
             raise RuntimeError(f"An error occurred while running the OLGA model with the following parameters: {vars(self)}.\nError code: {code}.")
 
+        df = pd.read_csv(path, sep='\t')
+        df.columns = self.OUTPUT_COLUMNS[:4]
+        df['region_type'] = RegionType.IMGT_JUNCTION.name
+        df['frame_type'] = None
+        df.to_csv(path, sep='\t', index=False)
+
     def _generate_productive_sequences(self, count: int, path: Path, seed: int, sequence_gen_model=None, v_gene_mapping=None, j_gene_mapping=None,
                                        **kwargs):
         sequences = pd.DataFrame(index=np.arange(count), columns=OLGA.OUTPUT_COLUMNS)
@@ -185,7 +192,7 @@ class OLGA(GenerativeModel):
                 self._generate_all_sequences(count=batch_size, path=skewed_seqs_path, seed=seed, model_path=skewed_model_path)
 
             if skewed_seqs_path.is_file():
-                pd.read_csv(skewed_seqs_path, sep='\t').to_csv(path, mode='a', sep='\t', index=False)
+                pd.read_csv(skewed_seqs_path, sep='\t').to_csv(path, mode='a', sep='\t', index=False, header=False)
                 os.remove(skewed_seqs_path)
 
     def _import_olga_sequences(self, sequence_type: SequenceType, path: Path):

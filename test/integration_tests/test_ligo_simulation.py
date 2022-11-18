@@ -1,4 +1,5 @@
 import os
+import shutil
 from pathlib import Path
 from unittest import TestCase
 
@@ -61,12 +62,16 @@ class TestLIgOSimulation(TestCase):
                         "simulation_strategy": "REJECTION_SAMPLING",
                         "sim_items": {
                             "var1": {
+                                "immune_events": {
+                                  "ievent1": True,
+                                  "ievent2": False,
+                                },
                                 "signals": ["signal1", "signal2"],
                                 "number_of_examples": 10,
                                 "is_noise": False,
                                 "seed": 100,
                                 "repertoire_implanting_rate": 0.5,
-                                "number_of_receptors_in_repertoire": 6,
+                                "receptors_in_repertoire_count": 6,
                                 "generative_model": {
                                     "type": "OLGA",
                                     "model_path": None,
@@ -76,12 +81,16 @@ class TestLIgOSimulation(TestCase):
                                 }
                             },
                             "var2": {
+                                "immune_events": {
+                                  "ievent1": False,
+                                  "ievent2": False,
+                                },
                                 "signals": ["signal1", "signal2"],
                                 "number_of_examples": 10,
                                 "is_noise": True,
                                 "seed": 2,
                                 "repertoire_implanting_rate": 0.2,
-                                "number_of_receptors_in_repertoire": 6,
+                                "receptors_in_repertoire_count": 6,
                                 "generative_model": {
                                     'type': 'OLGA',
                                     "model_path": None,
@@ -129,6 +138,6 @@ class TestLIgOSimulation(TestCase):
         self.assertTrue(os.path.isfile(path / "result/inst1/metadata.csv"))
 
         metadata_df = pd.read_csv(path / "result/inst1/metadata.csv", comment=Constants.COMMENT_SIGN)
-        self.assertTrue("signal1" in metadata_df.columns)
+        self.assertTrue(all(el in metadata_df.columns for el in ["signal1", "ievent1", "ievent2", "signal2"]))
 
-        # shutil.rmtree(path)
+        shutil.rmtree(path)

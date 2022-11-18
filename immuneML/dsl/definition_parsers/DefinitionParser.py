@@ -39,17 +39,11 @@ class DefinitionParser:
 
         specs = workflow_specification["definitions"]
 
-        symbol_table, specs_motifs = DefinitionParser._call_if_exists("motifs", MotifParser.parse_motifs, specs, symbol_table)
-        symbol_table, specs_signals = DefinitionParser._call_if_exists("signals", SignalParser.parse_signals, specs, symbol_table)
-        symbol_table, specs_simulation = DefinitionParser._call_if_exists("simulations", SimulationParser.parse_simulations, specs, symbol_table)
-        symbol_table, specs_preprocessing = DefinitionParser._call_if_exists(PreprocessingParser.keyword, PreprocessingParser.parse, specs, symbol_table)
-        symbol_table, specs_encoding = DefinitionParser._call_if_exists("encodings", EncodingParser.parse, specs, symbol_table)
-        symbol_table, specs_ml = DefinitionParser._call_if_exists("ml_methods", MLParser.parse, specs, symbol_table)
-        symbol_table, specs_report = DefinitionParser._call_if_exists("reports", ReportParser.parse_reports, specs, symbol_table)
-        symbol_table, specs_import = DefinitionParser._call_if_exists('datasets', ImportParser.parse, specs, symbol_table, result_path)
+        specs_defs = {}
 
-        specs_defs = DefinitionParser.create_specs_defs(specs_import, specs_simulation, specs_preprocessing, specs_motifs, specs_signals,
-                                                        specs_encoding, specs_ml, specs_report)
+        for parser in [MotifParser, SignalParser, SimulationParser, PreprocessingParser, EncodingParser, MLParser, ReportParser, ImportParser]:
+            symbol_table, new_specs = DefinitionParser._call_if_exists(parser.keyword, parser.parse, specs, symbol_table, result_path)
+            specs_defs[parser.keyword] = new_specs
 
         return DefinitionParserOutput(symbol_table=symbol_table, specification=workflow_specification), specs_defs
 
@@ -62,15 +56,6 @@ class DefinitionParser:
                 return method(specs[key], symbol_table)
         else:
             return symbol_table, {}
-
-    @staticmethod
-    def create_specs_defs(specs_datasets: dict, simulation: dict, preprocessings: dict, motifs: dict, signals: dict,
-                          encodings: dict, ml_methods: dict, reports: dict):
-
-        return {
-            "datasets": specs_datasets, "simulations": simulation, PreprocessingParser.keyword: preprocessings, "motifs": motifs, "signals": signals,
-            "encodings": encodings, "ml_methods": ml_methods, "reports": reports
-        }
 
     @staticmethod
     def generate_docs(path: Path):
