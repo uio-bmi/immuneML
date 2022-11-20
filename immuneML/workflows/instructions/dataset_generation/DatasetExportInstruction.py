@@ -1,10 +1,10 @@
-import datetime
 from pathlib import Path
 from typing import List
 
 from immuneML.IO.dataset_export.DataExporter import DataExporter
 from immuneML.data_model.dataset.Dataset import Dataset
 from immuneML.preprocessing.Preprocessor import Preprocessor
+from immuneML.util.Logger import print_log
 from immuneML.util.ReflectionHandler import ReflectionHandler
 from immuneML.workflows.instructions.Instruction import Instruction
 from immuneML.workflows.instructions.dataset_generation.DatasetExportState import DatasetExportState
@@ -63,7 +63,7 @@ class DatasetExportInstruction(Instruction):
             if self.preprocessing_sequence is not None and len(self.preprocessing_sequence) > 0:
                 for preprocessing in self.preprocessing_sequence:
                     dataset = preprocessing.process_dataset(dataset, result_path)
-                    print(f"{datetime.datetime.now()}: Preprocessed dataset {dataset_name} with {preprocessing.__class__.__name__}", flush=True)
+                    print_log(f"Preprocessed dataset {dataset_name} with {preprocessing.__class__.__name__}", include_datetime=True)
 
             paths[dataset_name] = {}
             for exporter in self.exporters:
@@ -72,7 +72,7 @@ class DatasetExportInstruction(Instruction):
                 exporter.export(dataset, path, number_of_processes=self.number_of_processes)
                 paths[dataset_name][export_format] = path
                 contains = str(dataset.__class__.__name__).replace("Dataset", "s").lower()
-                print(f"{datetime.datetime.now()}: Exported dataset {dataset_name} containing {dataset.get_example_count()} {contains} in {export_format} format.", flush=True)
+                print_log(f"Exported dataset {dataset_name} containing {dataset.get_example_count()} {contains} in {export_format} format.", include_datetime=True)
 
         return DatasetExportState(datasets=self.datasets, formats=[exporter.__name__[:-8] for exporter in self.exporters],
                                   preprocessing_sequence=self.preprocessing_sequence, paths=paths, result_path=self.result_path, name=self.name)

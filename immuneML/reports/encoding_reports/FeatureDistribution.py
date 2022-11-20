@@ -109,7 +109,7 @@ class FeatureDistribution(FeatureReport):
         figure = px.box(data_long_format_filtered, x=self.x, y="value", color=self.color,
                         facet_row=self.facet_row, facet_col=self.facet_column,
                         labels={
-                            "valuemean": self.y_title,
+                            "value": self.y_title,
                             self.x: self.x_title,
                         }, template='plotly_white',
                         color_discrete_sequence=px.colors.diverging.Tealrose)
@@ -124,7 +124,7 @@ class FeatureDistribution(FeatureReport):
         figure = px.box(data_long_format, x=self.x, y="value", color=self.color,
                         facet_row=self.facet_row, facet_col=self.facet_column,
                         labels={
-                            "valuemean": self.y_title,
+                            "value": self.y_title,
                             self.x: self.x_title,
                         }, template='plotly_white',
                         color_discrete_sequence=px.colors.diverging.Tealrose)

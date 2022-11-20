@@ -1,4 +1,3 @@
-import datetime
 import re
 import warnings
 
@@ -10,6 +9,7 @@ from immuneML.data_model.encoded_data.EncodedData import EncodedData
 from immuneML.data_model.receptor.receptor_sequence.Chain import Chain
 from immuneML.data_model.repertoire.Repertoire import Repertoire
 from immuneML.encodings.EncoderParams import EncoderParams
+from immuneML.util.Logger import print_log
 from immuneML.util.ReadsType import ReadsType
 from immuneML.encodings.reference_encoding.MatchedRegexEncoder import MatchedRegexEncoder
 
@@ -75,7 +75,7 @@ class MatchedRegexRepertoireEncoder(MatchedRegexEncoder):
         n_repertoires = dataset.get_example_count()
 
         for i, repertoire in enumerate(dataset.get_data()):
-            print(f"{datetime.datetime.now()}: Encoding repertoire {i+1}/{n_repertoires}")
+            print_log(f"Encoding repertoire {i+1}/{n_repertoires}", include_datetime=True)
             encoded_repertoires[i] = self._match_repertoire_to_regexes(repertoire)
 
             if labels is not None:

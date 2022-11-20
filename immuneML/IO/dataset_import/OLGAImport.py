@@ -19,7 +19,7 @@ class OLGAImport(DataImport):
 
     Arguments:
 
-        path (str): This is the path to a directory with OLGA files to import. By default path is set to the current working directory.
+        path (str): For RepertoireDatasets, this is the path to a directory with OLGA files to import. For Sequence- or ReceptorDatasets this path may either be the path to the file to import, or the path to the folder locating one or multiple files with .tsv, .csv or .txt extensions. By default path is set to the current working directory.
 
         is_repertoire (bool): If True, this imports a RepertoireDataset. If False, it imports a SequenceDataset. By default, is_repertoire is set to True.
 
