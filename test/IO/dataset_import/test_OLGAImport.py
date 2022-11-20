@@ -31,15 +31,19 @@ rep2.tsv,2""")
 
     def test_import_repertoire(self):
         """Test dataset content with and without a header included in the input file"""
-        path = EnvironmentSettings.root_path / "test/tmp/io_olga_load/"
+        path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "io_olga_load_rep/")
 
-        PathBuilder.build(path)
         self.write_dummy_files(path, True)
 
         dataset = OLGAImport.import_dataset({"is_repertoire": True, "result_path": path, "metadata_file": path / "metadata.csv",
-                                             "columns_to_load": None, "separator": "\t", "region_type": "IMGT_CDR3",
+                                             "separator": "\t", "region_type": "IMGT_CDR3",
                                              "import_empty_nt_sequences": True, "import_empty_aa_sequences": False,
-                                             "import_illegal_characters": False,
+                                             "import_illegal_characters": False, "columns_to_load": [0, 1, 2, 3],
+                                             "column_mapping":
+                                                 {0: "sequences",
+                                                  1: "sequence_aas",
+                                                  2: "v_genes",
+                                                  3: 'j_genes'},
                                              "path": path, "number_of_processes": 4}, "olga_repertoire_dataset")
 
         self.assertEqual(2, dataset.get_example_count())
@@ -58,39 +62,26 @@ rep2.tsv,2""")
                                       "SADSKNRGAGGEASSYEQY"], list(rep.get_sequence_aas()))
                 self.assertListEqual(["TRBV27", "TRBV5-6", "TRBV20-1"], list(rep.get_v_genes()))
                 self.assertListEqual(["TRBJ2-7", "TRBJ1-4", "TRBJ2-7"], list(rep.get_j_genes()))
-                self.assertListEqual([1,1,1], list(rep.get_counts()))
+                self.assertListEqual([1, 1, 1], list(rep.get_counts()))
                 self.assertListEqual([Chain.BETA, Chain.BETA, Chain.BETA], list(rep.get_chains()))
 
         shutil.rmtree(path)
 
     def test_import_sequences(self):
         """Test dataset content with and without a header included in the input file"""
-        path = EnvironmentSettings.root_path / "test/tmp/io_olga_load/"
+        path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "io_olga_load_seq/")
 
-        PathBuilder.build(path)
         self.write_dummy_files(path, False)
-        dataset = OLGAImport.import_dataset({"is_repertoire": False, "paired": False, "result_path": path, "metadata_file": path / "metadata.csv",
-                                             "columns_to_load": None, "separator": "\t", "region_type": "IMGT_CDR3",
+        dataset = OLGAImport.import_dataset({"is_repertoire": False, "paired": False, "result_path": path,
+                                             "columns_to_load": [1, 2, 3], "separator": "\t", "region_type": "IMGT_CDR3",
                                              "import_empty_nt_sequences": True, "import_empty_aa_sequences": False,
-                                             "import_illegal_characters": False,
+                                             "import_illegal_characters": False, "column_mapping": {1: "sequence_aas", 2: "v_genes", 3: "j_genes"},
                                              "path": path, "number_of_processes": 4}, "olga_sequence_dataset")
 
         self.assertEqual(6, dataset.get_example_count())
 
-        seqs = [sequence for sequence in dataset.get_data()]
-        self.assertListEqual(sorted(["GCCAGCAGTTTATCGCCGGGACTGGCCTACGAGCAGTAC",
-                                     "GCCAGCAAAGTCAGAATTGCTGCAACTAATGAAAAACTGTTT",
-                                     "AGTGCCGACTCCAAGAACAGAGGAGCGGGGGGGGAGGCAAGCTCCTACGAGCAGTAC",
-                                     "GCCAGCATCGGTGGCGGGACTAGTCTCTCCTACAATGAGCAGTTC",
-                                     "GCCAGTATCTGCGGATGTACTAGCACAGATACGCAGTAT",
-                                     "GCTAGTGGGAAAAATCGGGACTCTAGTGCAGGCCAAGAGACCCAGTAC"]), sorted([seq.nucleotide_sequence for seq in seqs]))
+        expected = ["ASSLSPGLAYEQY", "ASKVRIAATNEKLF", "SADSKNRGAGGEASSYEQY", "ASIGGGTSLSYNEQF", "ASICGCTSTDTQY", "ASGKNRDSSAGQETQY"]
 
-        self.assertListEqual(sorted(["ASSLSPGLAYEQY",
-                                     "ASKVRIAATNEKLF",
-                                     "SADSKNRGAGGEASSYEQY",
-                                     "ASIGGGTSLSYNEQF",
-                                     "ASICGCTSTDTQY",
-                                     "ASGKNRDSSAGQETQY"]), sorted([seq.amino_acid_sequence for seq in seqs]))
+        self.assertTrue(all(seq.amino_acid_sequence in expected for seq in dataset.get_data()))
 
         shutil.rmtree(path)
-
