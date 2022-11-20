@@ -52,8 +52,11 @@ class LeaveOneOutSplitter:
     def _get_unique_param_values(dataset, param, min_count):
         if isinstance(dataset, ReceptorDataset):
             parameter_values = [receptor.metadata[param] for receptor in dataset.get_data()]
-        else:
+        elif isinstance(dataset, SequenceDataset):
             parameter_values = [seq.metadata.custom_params[param] for seq in dataset.get_data()]
+        else:
+            raise RuntimeError(f"{LeaveOneOutSplitter.__name__}: dataset of type {type(dataset)} cannot be used with this splitter.")
+
         unique_values, count = np.unique(parameter_values, return_counts=True)
 
         assert all(el > min_count for el in count), f"DataSplitter: there are not enough examples with different values of the parameter {param} " \
