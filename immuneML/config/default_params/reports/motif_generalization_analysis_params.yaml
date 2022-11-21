@@ -4,4 +4,7 @@ min_precision: 0
 min_recall: 0
 min_true_positives: 1
 highlight_motifs_name: Significant motifs
-smoothing_bin_size: 10
+min_points_in_window: 50
+smoothing_constant1: 5
+smoothing_constant2: 10
+plot_smoothed_combined_precision: True

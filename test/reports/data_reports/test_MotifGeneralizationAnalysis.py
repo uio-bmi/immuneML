@@ -22,6 +22,7 @@ class TestMotifGeneralizationAnalysis(TestCase):
         params["max_positions"] = 1
         params["min_precision"] = 0.8
         params["random_seed"] = 1
+        params["min_points_in_window"] = 2
         params["dataset"] = dataset
         params["result_path"] = path / "result"
         params["label"] = {"l1": {"positive_class": "A"}}

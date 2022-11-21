@@ -2,6 +2,7 @@ from pathlib import Path
 
 import plotly.express as px
 import plotly.graph_objects as go
+from scipy.stats import lognorm
 
 from typing import List
 
@@ -36,10 +37,11 @@ class MotifGeneralizationAnalysis(DataReport):
 
         label (dict): A label configuration. One label should be specified, and the positive_class for this label should be defined. See the YAML specification below for an example.
 
-
         highlight_motifs_path (str): path to a set of motifs of interest to highlight in the output figures. By default no motifs are highlighted.
 
         highlight_motifs_name (str): if highlight_motifs_path is defined, this name will be used to label the motifs of interest in the output figures.
+
+        plot_smoothed_combined_precision (bool): whether to add a smoothed line representing the combined precision to the precision-vs-TP plot. When set to True, this may take considerable extra time to compute. By default, plot_smoothed_combined_precision is set to True.
 
     YAML specification:
 
@@ -59,7 +61,9 @@ class MotifGeneralizationAnalysis(DataReport):
 
     def __init__(self, training_percentage: float = None, max_positions: int = None, min_precision: float = None,
                  min_recall: float = None, min_true_positives: int = None,  random_seed: int = None, label: dict = None,
-                 smoothing_bin_size: int = None, highlight_motifs_path: str = None, highlight_motifs_name: str = None,
+                 plot_smoothed_combined_precision: bool = None,
+                 min_points_in_window: int = None, smoothing_constant1: float = None, smoothing_constant2: float = None,
+                 highlight_motifs_path: str = None, highlight_motifs_name: str = None,
                  dataset: SequenceDataset = None, result_path: Path = None, number_of_processes: int = 1, name: str = None):
         super().__init__(dataset=dataset, result_path=result_path, number_of_processes=number_of_processes, name=name)
         self.training_percentage = training_percentage
@@ -68,9 +72,12 @@ class MotifGeneralizationAnalysis(DataReport):
         self.min_precision = min_precision
         self.min_recall = min_recall
         self.min_true_positives = min_true_positives
+        self.plot_smoothed_combined_precision = plot_smoothed_combined_precision
+        self.min_points_in_window = min_points_in_window
+        self.smoothing_constant1 = smoothing_constant1
+        self.smoothing_constant2 = smoothing_constant2
         self.random_seed = random_seed
         self.label = label
-        self.smoothing_bin_size = smoothing_bin_size
         self.label_config = None
         self.col_names = None
 
@@ -86,7 +93,10 @@ class MotifGeneralizationAnalysis(DataReport):
         ParameterValidator.assert_type_and_value(kwargs["min_precision"], (int, float), location, "min_precision", min_inclusive=0, max_inclusive=1)
         ParameterValidator.assert_type_and_value(kwargs["min_recall"], (int, float), location, "min_recall", min_inclusive=0, max_inclusive=1)
         ParameterValidator.assert_type_and_value(kwargs["min_true_positives"], int, location, "min_true_positives", min_inclusive=1)
-        ParameterValidator.assert_type_and_value(kwargs["smoothing_bin_size"], int, location, "smoothing_bin_size", min_inclusive=1)
+        ParameterValidator.assert_type_and_value(kwargs["plot_smoothed_combined_precision"], bool, location, "plot_smoothed_combined_precision")
+        ParameterValidator.assert_type_and_value(kwargs["min_points_in_window"], int, location, "min_points_in_window", min_inclusive=1)
+        ParameterValidator.assert_type_and_value(kwargs["smoothing_constant1"], (int, float), location, "smoothing_constant1", min_exclusive=0)
+        ParameterValidator.assert_type_and_value(kwargs["smoothing_constant2"], (int, float), location, "smoothing_constant2", min_exclusive=0)
 
         if "random_seed" in kwargs and kwargs["random_seed"] is not None:
             ParameterValidator.assert_type_and_value(kwargs["random_seed"], int, location, "random_seed")
@@ -111,11 +121,13 @@ class MotifGeneralizationAnalysis(DataReport):
         train_results_table = self._write_output_table(training_plotting_data, self.result_path / f"training_set_scores.csv", "training set")
         test_results_table = self._write_output_table(test_plotting_data, self.result_path / f"test_set_scores.csv", "test set")
 
-        results_plots = self._safe_plot(training_plotting_data=training_plotting_data,
-                                        test_plotting_data=test_plotting_data)
+        training_pr_plot = self._safe_plot(plotting_data=training_plotting_data, dataset_type="training set", plot_callable="_get_pr_plot")
+        test_pr_plot = self._safe_plot(plotting_data=test_plotting_data, dataset_type="test set", plot_callable="_get_pr_plot")
+        training_tp_plot = self._safe_plot(plotting_data=training_plotting_data, dataset_type="training set", plot_callable="_get_tp_plot")
+        test_tp_plot = self._safe_plot(plotting_data=test_plotting_data, dataset_type="test set", plot_callable="_get_tp_plot")
 
         return ReportResult(output_tables=[table for table in [train_results_table, test_results_table] if table is not None],
-                            output_figures=results_plots)
+                            output_figures=[plot for plot in [training_pr_plot, test_pr_plot, training_tp_plot, test_tp_plot] if plot is not None])
 
     def _set_colnames(self):
         self.col_names = dict()
@@ -272,29 +284,62 @@ class MotifGeneralizationAnalysis(DataReport):
                                             min_precision=self.min_precision,
                                             dataset_type=dataset_type)
 
-    def _smooth_combined_precision(self, combined_precision, count_per_value):
-        smooth_combined_precision = []
+    # def _smooth_combined_precision(self, combined_precision, count_per_value):
+    #     smooth_combined_precision = []
+    #
+    #     for i in range(len(combined_precision)):
+    #         n_data_points = count_per_value[i]
+    #         smooth_val = combined_precision[i]
+    #
+    #         i_dist = 0
+    #         while n_data_points < self.smoothing_bin_size:
+    #             i_dist += 1
+    #
+    #             i_min = max(0, i - i_dist)
+    #             i_max = min(len(combined_precision) - 1, i + i_dist + 1)
+    #
+    #             n_data_points = sum(count_per_value[i_min:i_max])
+    #             smooth_val = sum([combined_precision[j] * count_per_value[j] for j in range(i_min, i_max)]) / n_data_points
+    #
+    #             if i_min == 0 and i_max == len(combined_precision):
+    #                 break
+    #
+    #         smooth_combined_precision.append(smooth_val)
+    #
+    #     return smooth_combined_precision
 
-        for i in range(len(combined_precision)):
-            n_data_points = count_per_value[i]
-            smooth_val = combined_precision[i]
+    def _determine_window_size(self, x, i, weights):
+        x_rng = 0
+        n_data_points = weights[i]
 
-            i_dist = 0
-            while n_data_points < self.smoothing_bin_size:
-                i_dist += 1
+        assert sum(weights) > self.min_points_in_window, f"{self.__class__.__name__}: min_points_in_window ({self.min_points_in_window}) is smaller than the total number of points in the plot ({sum(weights)}). Please decrease the value for min_points_in_window. Skipping this plot..."
 
-                i_min = max(0, i - i_dist)
-                i_max = min(len(combined_precision) - 1, i + i_dist + 1)
+        while n_data_points < self.min_points_in_window:
+            x_rng += 1
 
-                n_data_points = sum(count_per_value[i_min:i_max])
-                smooth_val = sum([combined_precision[j] * count_per_value[j] for j in range(i_min, i_max)]) / n_data_points
+            to_select = [j for j in range(len(x)) if (x[i] - x_rng) <= x[j] <= (x[i] + x_rng)]
+            lower_index = min(to_select)
+            upper_index = max(to_select)
 
-                if i_min == 0 and i_max == len(combined_precision):
-                    break
+            n_data_points = sum(weights[lower_index:upper_index + 1])
 
-            smooth_combined_precision.append(smooth_val)
+        return x_rng
 
-        return smooth_combined_precision
+    def _get_lognorm_scale(self, x, i, weights):
+        window_size = self._determine_window_size(x, i, weights)
+        return window_size * self.smoothing_constant1 + self.smoothing_constant2
+
+    def _smooth_combined_precision(self, x, y, weights):
+        smoothed_y = []
+
+        for i in range(len(x)):
+            scale = self._get_lognorm_scale(x, i, weights)
+
+            lognorm_for_this_x = lognorm.pdf(x, s=0.1, loc=x[i] - scale, scale=scale)
+
+            smoothed_y.append(sum(lognorm_for_this_x * y) / sum(lognorm_for_this_x))
+
+        return smoothed_y
 
     def _plot_precision_per_tp(self, file_path, plotting_data, dataset_type):
         fig = px.strip(plotting_data,
@@ -309,6 +354,8 @@ class MotifGeneralizationAnalysis(DataReport):
                            "raw_tp_count": "True positive predictions (training set)"
                        })
 
+        # todo eventually: move this part outside the plotting code, precompute(?), add links to output files
+
         group_by_tp = plotting_data.groupby("training_tp_count")
 
         tp, fp = self.col_names["tp"], self.col_names["fp"]
@@ -318,21 +365,18 @@ class MotifGeneralizationAnalysis(DataReport):
         fig.add_trace(go.Scatter(x=list(combined_precision.index), y=list(combined_precision),
                                  marker=dict(color=px.colors.diverging.Tealrose[0])), secondary_y=False)
 
-        smooth_combined_precision = self._smooth_combined_precision(list(combined_precision),
-                                                                    list(group_by_tp[tp].count()))
+        if self.plot_smoothed_combined_precision:
 
-        fig.add_trace(go.Scatter(x=list(combined_precision.index), y=list(smooth_combined_precision),
-                                 marker=dict(color=px.colors.diverging.Tealrose[-1])), secondary_y=False)
+            smooth_combined_precision = self._smooth_combined_precision(list(combined_precision.index),
+                                                                        list(combined_precision),
+                                                                        list(group_by_tp[tp].count()))
 
+            fig.add_trace(go.Scatter(x=list(combined_precision.index), y=list(smooth_combined_precision),
+                                     marker=dict(color=px.colors.diverging.Tealrose[-1]),
+                                     line_shape='spline', line={'smoothing': 1.3}),
+                          secondary_y=False,)
 
-        fig.update_layout(showlegend=False)
-
-        fig.update_layout(
-            xaxis=dict(
-                # tickmode='linear',
-                dtick=1
-            )
-        )
+        fig.update_layout(showlegend=False, xaxis=dict(dtick=1))
 
         fig.write_html(str(file_path))
 
@@ -355,13 +399,3 @@ class MotifGeneralizationAnalysis(DataReport):
         merged_train_test_info = training_info_to_merge.merge(test_info_to_merge)
 
         return merged_train_test_info
-
-
-    def _plot(self, training_plotting_data, test_plotting_data) -> List[ReportOutput]:
-        training_pr_plot = self._get_pr_plot(training_plotting_data, "training set")
-        test_pr_plot = self._get_pr_plot(test_plotting_data, "test set")
-
-        training_tp_plot = self._get_tp_plot(training_plotting_data, "training set")
-        test_tp_plot = self._get_tp_plot(test_plotting_data, "test set")
-
-        return [plot for plot in [training_pr_plot, test_pr_plot, training_tp_plot, test_tp_plot] if plot is not None]
