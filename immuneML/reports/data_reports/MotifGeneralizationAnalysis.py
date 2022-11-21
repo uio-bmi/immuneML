@@ -1,10 +1,10 @@
 from pathlib import Path
 
+import pandas as pd
+
 import plotly.express as px
 import plotly.graph_objects as go
 from scipy.stats import lognorm
-
-from typing import List
 
 from immuneML.data_model.dataset.Dataset import Dataset
 from immuneML.data_model.dataset.SequenceDataset import SequenceDataset
@@ -118,16 +118,14 @@ class MotifGeneralizationAnalysis(DataReport):
         encoded_training_data, encoded_test_data = self._get_encoded_train_test_data()
         training_plotting_data, test_plotting_data = self._get_plotting_data(encoded_training_data, encoded_test_data)
 
-        train_results_table = self._write_output_table(training_plotting_data, self.result_path / f"training_set_scores.csv", "training set")
-        test_results_table = self._write_output_table(test_plotting_data, self.result_path / f"test_set_scores.csv", "test set")
+        training_combined_precision = self._get_combined_precision(training_plotting_data)
+        test_combined_precision = self._get_combined_precision(test_plotting_data)
 
-        training_pr_plot = self._safe_plot(plotting_data=training_plotting_data, dataset_type="training set", plot_callable="_get_pr_plot")
-        test_pr_plot = self._safe_plot(plotting_data=test_plotting_data, dataset_type="test set", plot_callable="_get_pr_plot")
-        training_tp_plot = self._safe_plot(plotting_data=training_plotting_data, dataset_type="training set", plot_callable="_get_tp_plot")
-        test_tp_plot = self._safe_plot(plotting_data=test_plotting_data, dataset_type="test set", plot_callable="_get_tp_plot")
+        output_tables = self._write_output_tables(training_plotting_data, test_plotting_data, training_combined_precision, test_combined_precision)
+        plots = self._write_plots(training_plotting_data, test_plotting_data, training_combined_precision, test_combined_precision)
 
-        return ReportResult(output_tables=[table for table in [train_results_table, test_results_table] if table is not None],
-                            output_figures=[plot for plot in [training_pr_plot, test_pr_plot, training_tp_plot, test_tp_plot] if plot is not None])
+        return ReportResult(output_tables=output_tables,
+                            output_figures=plots)
 
     def _set_colnames(self):
         self.col_names = dict()
@@ -138,6 +136,8 @@ class MotifGeneralizationAnalysis(DataReport):
 
             for name in ["tp", "fp", "fn", "tn"]:
                 self.col_names[name] = f"weighted_{name}_count"
+
+            self.col_names["combined precision"] = "Combined weighted precision"
         else:
             for name in ["precision", "recall"]:
                 self.col_names[name] = f"{name}_scores"
@@ -145,34 +145,7 @@ class MotifGeneralizationAnalysis(DataReport):
             for name in ["tp", "fp", "fn", "tn"]:
                 self.col_names[name] = f"raw_{name}_count"
 
-
-    def _get_plotting_data(self, encoded_training_data, encoded_test_data):
-        training_feature_annotations = self._annotate_precision_recall(encoded_training_data.encoded_data.feature_annotations)
-        test_feature_annotations = self._annotate_precision_recall(encoded_test_data.encoded_data.feature_annotations)
-
-        training_feature_annotations["training_tp_count"] = training_feature_annotations["raw_tp_count"]
-        test_feature_annotations = self._get_merged_train_test_feature_annotations(training_feature_annotations,
-                                                                                   test_feature_annotations)
-
-        return training_feature_annotations, test_feature_annotations
-
-    def _annotate_precision_recall(self, feature_annotations_table):
-        feature_annotations_table = feature_annotations_table.copy()
-
-        precision = self.col_names["precision"]
-        recall = self.col_names["recall"]
-        tp = self.col_names["tp"]
-        fp = self.col_names["fp"]
-        fn = self.col_names["fn"]
-
-        feature_annotations_table[precision] = feature_annotations_table.apply(
-            lambda row: 0 if row[tp] == 0 else row[tp] / (row[tp] + row[fp]), axis="columns")
-
-        feature_annotations_table[recall] = feature_annotations_table.apply(
-            lambda row: 0 if row[tp] == 0 else row[tp] / (row[tp] + row[fn]), axis="columns")
-
-        return feature_annotations_table
-
+            self.col_names["combined precision"] = "Combined precision"
 
     def _get_encoded_train_test_data(self):
         train_data_path = PathBuilder.build(self.result_path / "datasets/train")
@@ -189,13 +162,6 @@ class MotifGeneralizationAnalysis(DataReport):
         encoded_test_data = self._encode_dataset(test_data, encoder, learn_model=False)
 
         return encoded_training_data, encoded_test_data
-
-    def _write_results_tables(self, training_feature_annotations, test_feature_annotations):
-
-        train_results_table = self._write_output_table(training_feature_annotations, self.result_path  / f"training_set_scores.csv", "training set")
-        test_results_table = self._write_output_table(test_feature_annotations, self.result_path  / f"test_set_scores.csv", "test set")
-
-        return [table for table in [train_results_table, test_results_table] if table is not None]
 
     def _get_encoder(self):
         encoder = MotifEncoder.build_object(self.dataset, **{"max_positions": self.max_positions,
@@ -226,108 +192,93 @@ class MotifGeneralizationAnalysis(DataReport):
 
         return label_config
 
-    def _get_result_suffix(self, dataset_type):
-        return f" on the {dataset_type}" if dataset_type is not None else ""
+    def _write_output_tables(self, training_plotting_data, test_plotting_data, training_combined_precision, test_combined_precision):
+        results_table_name = "Confusion matrix and precision/recall scores for each significant motif on the {} set"
+        combined_precision_table_name = "Combined precision scores on the {} set for each TP value on the training set"
 
-    def _write_output_table(self, feature_annotations, file_path, dataset_type=None):
+        train_results_table = self._write_output_table(training_plotting_data, self.result_path / f"training_set_scores.csv", results_table_name.format("training"))
+        test_results_table = self._write_output_table(test_plotting_data, self.result_path / f"test_set_scores.csv", results_table_name.format("test"))
+        training_combined_precision_table = self._write_output_table(training_combined_precision, self.result_path / f"training_combined_precision.csv", combined_precision_table_name.format("training"))
+        test_combined_precision_table = self._write_output_table(test_combined_precision, self.result_path / f"test_combined_precision.csv", combined_precision_table_name.format("test"))
+
+        return [table for table in [train_results_table, test_results_table, training_combined_precision_table, test_combined_precision_table] if table is not None]
+
+    def _write_output_table(self, feature_annotations, file_path, name=None):
         feature_annotations.to_csv(file_path, index=False)
 
         return ReportOutput(
             path=file_path,
-            name=f"Confusion matrix and precision/recall scores for each significant motif{self._get_result_suffix(dataset_type)}",
-        )
+            name=name)
 
-    def _get_color(self, feature_annotations):
+    def _write_plots(self, training_plotting_data, test_plotting_data, training_combined_precision, test_combined_precision):
+        training_tp_plot = self._safe_plot(plotting_data=training_plotting_data, combined_precision=training_combined_precision, dataset_type="training set", file_path=self.result_path / f"training_precision_per_tp.html", plot_callable="_plot_precision_per_tp")
+        test_tp_plot = self._safe_plot(plotting_data=test_plotting_data, combined_precision=test_combined_precision, dataset_type="test set", file_path=self.result_path / f"test_precision_per_tp.html", plot_callable="_plot_precision_per_tp")
+        training_pr_plot = self._safe_plot(plotting_data=training_plotting_data, dataset_type="training set", plot_callable="_plot_precision_recall", file_path=self.result_path / f"training_precision_recall.html")
+        test_pr_plot = self._safe_plot(plotting_data=test_plotting_data, dataset_type="test set", plot_callable="_plot_precision_recall", file_path=self.result_path / f"test_precision_recall.html")
+
+        return [plot for plot in [training_tp_plot, test_tp_plot, training_pr_plot, test_pr_plot] if plot is not None]
+
+    def _get_plotting_data(self, encoded_training_data, encoded_test_data):
+        training_feature_annotations = self._annotate_precision_recall(encoded_training_data.encoded_data.feature_annotations)
+        test_feature_annotations = self._annotate_precision_recall(encoded_test_data.encoded_data.feature_annotations)
+
+        training_feature_annotations["training_tp_count"] = training_feature_annotations["raw_tp_count"]
+        test_feature_annotations = self._get_merged_train_test_feature_annotations(training_feature_annotations,
+                                                                                   test_feature_annotations)
+
+        training_feature_annotations["highlight"] = self._get_highlight(training_feature_annotations)
+        test_feature_annotations["highlight"] = self._get_highlight(test_feature_annotations)
+
+        return training_feature_annotations, test_feature_annotations
+
+    def _annotate_precision_recall(self, feature_annotations_table):
+        feature_annotations_table = feature_annotations_table.copy()
+
+        precision = self.col_names["precision"]
+        recall = self.col_names["recall"]
+        tp = self.col_names["tp"]
+        fp = self.col_names["fp"]
+        fn = self.col_names["fn"]
+
+        feature_annotations_table[precision] = feature_annotations_table.apply(
+            lambda row: 0 if row[tp] == 0 else row[tp] / (row[tp] + row[fp]), axis="columns")
+
+        feature_annotations_table[recall] = feature_annotations_table.apply(
+            lambda row: 0 if row[tp] == 0 else row[tp] / (row[tp] + row[fn]), axis="columns")
+
+        return feature_annotations_table
+
+    def _get_merged_train_test_feature_annotations(self, training_feature_annotations, test_feature_annotations):
+        training_info_to_merge = training_feature_annotations[["feature_names", "training_tp_count"]].copy()
+        test_info_to_merge = test_feature_annotations.copy()
+
+        merged_train_test_info = training_info_to_merge.merge(test_info_to_merge)
+
+        return merged_train_test_info
+
+    def _get_highlight(self, feature_annotations):
         if self.highlight_motifs_path is not None:
             highlight_motifs = [PositionalMotifHelper.motif_to_string(indices, amino_acids, motif_sep="-", newline=False)
                                 for indices, amino_acids in PositionalMotifHelper.read_motifs_from_file(self.highlight_motifs_path)]
 
-            return [self.highlight_motifs_name if motif in highlight_motifs else "Significant motif" for motif in
-                    feature_annotations["feature_names"]]
+            return [self.highlight_motifs_name if motif in highlight_motifs else "Motif" for motif in feature_annotations["feature_names"]]
+        else:
+            return ["Motif"] * len(feature_annotations)
 
-    def _plot_precision_recall(self, file_path, plotting_data, min_recall=None, min_precision=None, dataset_type=None):
-        fig = px.scatter(plotting_data,
-                         y=self.col_names["precision"], x=self.col_names["recall"], hover_data=["feature_names"],
-                         range_x=[0, 1], range_y=[0, 1], color=self._get_color(plotting_data),
-                         color_discrete_sequence=px.colors.qualitative.Pastel,
-                         labels={
-                             "precision_scores": f"Precision ({dataset_type})",
-                             "recall_scores": f"Recall ({dataset_type})",
-                             "weighted_precision_scores": f"Weighted precision ({dataset_type})",
-                             "weighted_recall_scores": f"Weighted recall ({dataset_type})",
-                             "feature_names": "Motif"
-                         })
+    def _get_combined_precision(self, plotting_data):
+        group_by_tp = plotting_data.groupby("training_tp_count")
 
-        if min_precision is not None and min_precision > 0:
-            fig.add_hline(y=min_precision, line_dash="dash")
+        tp, fp = self.col_names["tp"], self.col_names["fp"]
+        combined_precision = group_by_tp[tp].sum() / (group_by_tp[tp].sum() + group_by_tp[fp].sum())
 
-        if min_recall is not None and min_recall > 0:
-            fig.add_vline(x=min_recall, line_dash="dash")
+        df = pd.DataFrame({"training_tp": list(combined_precision.index),
+                           "combined_precision": list(combined_precision)})
 
-        fig.write_html(str(file_path))
-
-        return ReportOutput(
-            path=file_path,
-            name=f"Precision versus recall of significant motifs{self._get_result_suffix(dataset_type)}",
-        )
-
-    def _get_dataset_type_prefix(self, dataset_type):
-        assert dataset_type in ["training set", "test set"]
-        return "train_" if dataset_type == "training set" else "test_"
-
-    def _get_pr_plot(self, plotting_data, dataset_type):
-        prefix = self._get_dataset_type_prefix(dataset_type)
-
-        return self._plot_precision_recall(self.result_path / f"{prefix}precision_recall.html",
-                                            plotting_data,
-                                            min_recall=self.min_recall,
-                                            min_precision=self.min_precision,
-                                            dataset_type=dataset_type)
-
-    # def _smooth_combined_precision(self, combined_precision, count_per_value):
-    #     smooth_combined_precision = []
-    #
-    #     for i in range(len(combined_precision)):
-    #         n_data_points = count_per_value[i]
-    #         smooth_val = combined_precision[i]
-    #
-    #         i_dist = 0
-    #         while n_data_points < self.smoothing_bin_size:
-    #             i_dist += 1
-    #
-    #             i_min = max(0, i - i_dist)
-    #             i_max = min(len(combined_precision) - 1, i + i_dist + 1)
-    #
-    #             n_data_points = sum(count_per_value[i_min:i_max])
-    #             smooth_val = sum([combined_precision[j] * count_per_value[j] for j in range(i_min, i_max)]) / n_data_points
-    #
-    #             if i_min == 0 and i_max == len(combined_precision):
-    #                 break
-    #
-    #         smooth_combined_precision.append(smooth_val)
-    #
-    #     return smooth_combined_precision
-
-    def _determine_window_size(self, x, i, weights):
-        x_rng = 0
-        n_data_points = weights[i]
-
-        assert sum(weights) > self.min_points_in_window, f"{self.__class__.__name__}: min_points_in_window ({self.min_points_in_window}) is smaller than the total number of points in the plot ({sum(weights)}). Please decrease the value for min_points_in_window. Skipping this plot..."
-
-        while n_data_points < self.min_points_in_window:
-            x_rng += 1
-
-            to_select = [j for j in range(len(x)) if (x[i] - x_rng) <= x[j] <= (x[i] + x_rng)]
-            lower_index = min(to_select)
-            upper_index = max(to_select)
-
-            n_data_points = sum(weights[lower_index:upper_index + 1])
-
-        return x_rng
-
-    def _get_lognorm_scale(self, x, i, weights):
-        window_size = self._determine_window_size(x, i, weights)
-        return window_size * self.smoothing_constant1 + self.smoothing_constant2
+        if self.plot_smoothed_combined_precision:
+            df["smooth_combined_precision"] = self._smooth_combined_precision(list(combined_precision.index),
+                                                                              list(combined_precision),
+                                                                              list(group_by_tp[tp].count()))
+        return df
 
     def _smooth_combined_precision(self, x, y, weights):
         smoothed_y = []
@@ -341,11 +292,34 @@ class MotifGeneralizationAnalysis(DataReport):
 
         return smoothed_y
 
-    def _plot_precision_per_tp(self, file_path, plotting_data, dataset_type):
+    def _get_lognorm_scale(self, x, i, weights):
+        window_size = self._determine_window_size(x, i, weights)
+        return window_size * self.smoothing_constant1 + self.smoothing_constant2
+
+    def _determine_window_size(self, x, i, weights):
+        x_rng = 0
+        n_data_points = weights[i]
+
+        assert sum(
+            weights) > self.min_points_in_window, f"{self.__class__.__name__}: min_points_in_window ({self.min_points_in_window}) is smaller than the total number of points in the plot ({sum(weights)}). Please decrease the value for min_points_in_window. Skipping this plot..."
+
+        while n_data_points < self.min_points_in_window:
+            x_rng += 1
+
+            to_select = [j for j in range(len(x)) if (x[i] - x_rng) <= x[j] <= (x[i] + x_rng)]
+            lower_index = min(to_select)
+            upper_index = max(to_select)
+
+            n_data_points = sum(weights[lower_index:upper_index + 1])
+
+        return x_rng
+
+    def _plot_precision_per_tp(self, file_path, plotting_data, combined_precision, dataset_type):
         fig = px.strip(plotting_data,
                        y=self.col_names["precision"], x="training_tp_count", hover_data=["feature_names"],
-                       range_y=[0, 1], color=self._get_color(plotting_data),
-                       color_discrete_sequence=px.colors.qualitative.Pastel,
+                       range_y=[0, 1], color="highlight",
+                       color_discrete_map={"Motif": "#74C4C4",
+                                           self.highlight_motifs_name: px.colors.qualitative.Pastel[1]},
                        stripmode='overlay', log_x=True,
                        labels={
                            "precision_scores": f"Precision ({dataset_type})",
@@ -354,48 +328,50 @@ class MotifGeneralizationAnalysis(DataReport):
                            "raw_tp_count": "True positive predictions (training set)"
                        })
 
-        # todo eventually: move this part outside the plotting code, precompute(?), add links to output files
-
-        group_by_tp = plotting_data.groupby("training_tp_count")
-
-        tp, fp = self.col_names["tp"], self.col_names["fp"]
-        combined_precision = group_by_tp[tp].sum() / (group_by_tp[tp].sum() + group_by_tp[fp].sum())
-
-
-        fig.add_trace(go.Scatter(x=list(combined_precision.index), y=list(combined_precision),
-                                 marker=dict(color=px.colors.diverging.Tealrose[0])), secondary_y=False)
+        fig.add_trace(go.Scatter(x=combined_precision["training_tp"], y=combined_precision["combined_precision"],
+                                 mode='markers', name=self.col_names["combined precision"],
+                                 marker=dict(symbol="diamond", size=10, color=px.colors.diverging.Tealrose[0])),
+                      secondary_y=False)
 
         if self.plot_smoothed_combined_precision:
-
-            smooth_combined_precision = self._smooth_combined_precision(list(combined_precision.index),
-                                                                        list(combined_precision),
-                                                                        list(group_by_tp[tp].count()))
-
-            fig.add_trace(go.Scatter(x=list(combined_precision.index), y=list(smooth_combined_precision),
+            fig.add_trace(go.Scatter(x=combined_precision["training_tp"], y=combined_precision["smooth_combined_precision"],
                                      marker=dict(color=px.colors.diverging.Tealrose[-1]),
-                                     line_shape='spline', line={'smoothing': 1.3}),
-                          secondary_y=False,)
+                                     name=self.col_names["combined precision"] + ", smoothed",
+                                     mode="lines", line_shape='spline', line={'smoothing': 1.3}),
+                          secondary_y=False, )
 
-        fig.update_layout(showlegend=False, xaxis=dict(dtick=1))
+        fig.update_layout(xaxis=dict(dtick=1), showlegend=True)
 
         fig.write_html(str(file_path))
 
         return ReportOutput(
             path=file_path,
-            name=f"Precision scores on the {self._get_result_suffix(dataset_type)} for motifs found at each true positive count of the training set.",
+            name=f"Precision scores on the {dataset_type} for motifs found at each true positive count of the training set.",
         )
 
-    def _get_tp_plot(self, plotting_data, dataset_type):
-        prefix = self._get_dataset_type_prefix(dataset_type)
+    def _plot_precision_recall(self, file_path, plotting_data, min_recall=None, min_precision=None, dataset_type=None):
+        fig = px.scatter(plotting_data,
+                         y=self.col_names["precision"], x=self.col_names["recall"], hover_data=["feature_names"],
+                         range_x=[0, 1], range_y=[0, 1], color="highlight",
+                         color_discrete_map={"Motif": px.colors.qualitative.Pastel[0],
+                                             self.highlight_motifs_name: px.colors.qualitative.Pastel[1]},
+                         labels={
+                             "precision_scores": f"Precision ({dataset_type})",
+                             "recall_scores": f"Recall ({dataset_type})",
+                             "weighted_precision_scores": f"Weighted precision ({dataset_type})",
+                             "weighted_recall_scores": f"Weighted recall ({dataset_type})",
+                             "feature_names": "Motif",
+                         })
 
-        return self._plot_precision_per_tp(file_path=self.result_path / f"{prefix}precision_per_tp.html",
-                                           plotting_data=plotting_data,
-                                           dataset_type=dataset_type)
+        if min_precision is not None and min_precision > 0:
+            fig.add_hline(y=min_precision, line_dash="dash")
 
-    def _get_merged_train_test_feature_annotations(self, training_feature_annotations, test_feature_annotations):
-        training_info_to_merge = training_feature_annotations[["feature_names", "training_tp_count"]].copy()
-        test_info_to_merge = test_feature_annotations.copy()
+        if min_recall is not None and min_recall > 0:
+            fig.add_vline(x=min_recall, line_dash="dash")
 
-        merged_train_test_info = training_info_to_merge.merge(test_info_to_merge)
+        fig.write_html(str(file_path))
 
-        return merged_train_test_info
+        return ReportOutput(
+            path=file_path,
+            name=f"Precision versus recall of significant motifs on the {dataset_type}",
+        )

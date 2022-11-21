@@ -38,11 +38,13 @@ class TestMotifGeneralizationAnalysis(TestCase):
 
         self.assertTrue(os.path.isfile(path / "result/training_set_scores.csv"))
         self.assertTrue(os.path.isfile(path / "result/test_set_scores.csv"))
+        self.assertTrue(os.path.isfile(path / "result/training_combined_precision.csv"))
+        self.assertTrue(os.path.isfile(path / "result/test_combined_precision.csv"))
 
-        self.assertTrue(os.path.isfile(path / "result/train_precision_per_tp.html"))
+        self.assertTrue(os.path.isfile(path / "result/training_precision_per_tp.html"))
         self.assertTrue(os.path.isfile(path / "result/test_precision_per_tp.html"))
 
-        self.assertTrue(os.path.isfile(path / "result/train_precision_recall.html"))
+        self.assertTrue(os.path.isfile(path / "result/training_precision_recall.html"))
         self.assertTrue(os.path.isfile(path / "result/test_precision_recall.html"))
 
         shutil.rmtree(path)
