@@ -30,6 +30,8 @@ class WeightsDistribution(DataReport):
     # instead, use parameter color_grouping_label. if set, use different colors. if not set, use one color
     # see FeatureComparison report for an example where multiple labels can be used to change features of the plot
 
+    # todo add unit tests
+    # todo add the sequence as one of the hover values (plotly argument hover_data=["..."]), see example: https://plotly.com/python/hover-text-and-formatting/
 
 
     Example YAML specification:
