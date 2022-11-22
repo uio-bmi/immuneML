@@ -23,34 +23,9 @@ class LSTM(GenerativeModel):
 
 
     def _get_ml_model(self, cores_for_training: int = 2, X=None, dataset=None):
+        return self.model
 
-        instances = np.array([list(sequence.get_sequence()) for repertoire in dataset.get_data() for sequence in repertoire.sequences])
-
-        alphabet = ""
-
-        for instance in instances:
-            for letter in instance:
-                alphabet = "".join(set(letter + alphabet))
-                if len(alphabet) == 20:  # max alphabet reached
-                    break
-
-        self.alphabet = "".join(sorted(alphabet))
-        matrix = np.zeros(shape=(instances.shape[1], len(self.alphabet)))
-
-        instances = instances.T
-        for x, pos in enumerate(instances):
-            for element in pos:
-                for y, char in enumerate(list(self.alphabet)):
-                    if element == char:
-                        matrix[x][y] += 1
-                        break
-
-        for ind, row in enumerate(matrix):
-            matrix[ind] = matrix[ind] / sum(matrix[ind]) * 100
-
-        return matrix
-
-    def _fit(self, X, y, cores_for_training: int = 1, dataset=None):
+    def _fit(self, X, cores_for_training: int = 1, dataset=None):
         self.model = self._get_ml_model(cores_for_training, X, dataset)
 
         return self.model

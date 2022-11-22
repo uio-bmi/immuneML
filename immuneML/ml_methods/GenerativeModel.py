@@ -42,18 +42,9 @@ class GenerativeModel(UnsupervisedMLMethod):
     def generate(self, length_of_sequences: int = None, amount=10, path_to_model: Path = None):
         pass
 
-    def _fit(self, X, y, cores_for_training: int = 1, dataset=None):
-        if not self.show_warnings:
-            warnings.simplefilter("ignore")
-            os.environ["PYTHONWARNINGS"] = "ignore"
+    def _fit(self, X, cores_for_training: int = 1, dataset=None):
 
         self.model = self._get_ml_model(X)
-
-        self.model.fit(X, y)
-
-        if not self.show_warnings:
-            del os.environ["PYTHONWARNINGS"]
-            warnings.simplefilter("always")
 
         return self.model
 

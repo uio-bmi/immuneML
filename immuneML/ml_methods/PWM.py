@@ -51,7 +51,7 @@ class PWM(GenerativeModel):
 
         return matrix
 
-    def _fit(self, X, y, cores_for_training: int = 1, dataset=None):
+    def _fit(self, X, cores_for_training: int = 1, dataset=None):
         self.model = self._get_ml_model(cores_for_training, X, dataset)
 
         return self.model
