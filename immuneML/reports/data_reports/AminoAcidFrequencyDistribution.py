@@ -30,12 +30,20 @@ class AminoAcidFrequencyDistribution(DataReport):
 
         relative_frequency (bool): Whether to plot relative frequencies (true) or absolute counts (false) of the positional amino acids. By default, relative_frequency is True.
 
+        split_by_label (bool): Whether to split the plots by a label. If set to true, the Dataset must either contain a single label, or alternatively the label of interest can be specified under 'label'. By default, split_by_label is False.
+
+        label (str): if split_by_label is set to True, a label can be specified here.
+
     YAML specification:
 
     .. indent with spaces
     .. code-block:: yaml
 
-        my_aa_freq_report: AminoAcidFrequencyDistribution
+        my_aa_freq_report:
+          AminoAcidFrequencyDistribution:
+            relative_frequency: False
+            split_by_label: True
+            label: CMV
 
     """
 
