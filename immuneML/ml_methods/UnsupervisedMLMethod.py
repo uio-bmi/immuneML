@@ -9,7 +9,7 @@ class UnsupervisedMLMethod(metaclass=abc.ABCMeta):
         self.name = None
 
     @abc.abstractmethod
-    def fit(self, encoded_data: EncodedData, cores_for_training: int = 2):
+    def fit(self, encoded_data, cores_for_training: int = 2):
         pass
 
     @abc.abstractmethod
