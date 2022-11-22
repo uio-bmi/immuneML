@@ -15,13 +15,14 @@ class TestAminoAcidFrequencyDistribution(TestCase):
         path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "amino_acid_frequency_distribution_sequences/")
 
 
-        dataset = RandomDatasetGenerator.generate_sequence_dataset(100, {10: 0.5, 11:0.25, 20:0.25}, {}, path / "dataset")
+        dataset = RandomDatasetGenerator.generate_sequence_dataset(100, {10: 0.5, 11:0.25, 20:0.25}, {"l1": {"a": 0.5, "b": 0.5}}, path / "dataset")
 
         params = DefaultParamsLoader.load(EnvironmentSettings.default_params_path / "reports/", "AminoAcidFrequencyDistribution")
         params["dataset"] = dataset
         params["result_path"] = path / "result"
 
         report = AminoAcidFrequencyDistribution.build_object(**params)
+        self.assertTrue(report.check_prerequisites())
 
         report._generate()
 
@@ -36,14 +37,15 @@ class TestAminoAcidFrequencyDistribution(TestCase):
 
         dataset = RandomDatasetGenerator.generate_receptor_dataset(100, chain_1_length_probabilities={10: 0.5, 11:0.25, 20:0.25},
                                                                    chain_2_length_probabilities={10: 0.5, 11: 0.25, 15: 0.25},
-                                                                   labels={}, path=path / "dataset")
+                                                                   labels={"l1": {"a": 0.5, "b": 0.5}}, path=path / "dataset")
 
         params = DefaultParamsLoader.load(EnvironmentSettings.default_params_path / "reports/", "AminoAcidFrequencyDistribution")
         params["dataset"] = dataset
-        params["relative_frequency"] = False
+        # params["relative_frequency"] = False
         params["result_path"] = path / "result"
 
         report = AminoAcidFrequencyDistribution.build_object(**params)
+        self.assertTrue(report.check_prerequisites())
 
         report._generate()
 
@@ -58,14 +60,16 @@ class TestAminoAcidFrequencyDistribution(TestCase):
 
         dataset = RandomDatasetGenerator.generate_repertoire_dataset(repertoire_count=5, sequence_count_probabilities={20:1},
                                                                      sequence_length_probabilities={10: 1},
-                                                                     labels={}, path=path / "dataset")
+                                                                     labels={"l1": {"a": 0.5, "b": 0.5}}, path=path / "dataset")
 
         params = DefaultParamsLoader.load(EnvironmentSettings.default_params_path / "reports/", "AminoAcidFrequencyDistribution")
         params["dataset"] = dataset
         params["relative_frequency"] = False
+        params["split_by_label"] = True
         params["result_path"] = path / "result"
 
         report = AminoAcidFrequencyDistribution.build_object(**params)
+        self.assertTrue(report.check_prerequisites())
 
         report._generate()
 
