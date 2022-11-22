@@ -8,7 +8,7 @@ from bionumpy import AminoAcidEncoding, DNAEncoding
 from bionumpy.bnpdataclass import bnpdataclass
 from bionumpy.encodings import BaseEncoding
 from bionumpy.io import delimited_buffers
-from bionumpy.string_matcher import RegexMatcher, StringMatcher
+from bionumpy.sequence.string_matcher import RegexMatcher, StringMatcher
 from npstructures import RaggedArray
 
 from immuneML.data_model.receptor.RegionType import RegionType

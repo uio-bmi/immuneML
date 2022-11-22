@@ -5,6 +5,7 @@ from typing import List, Tuple
 
 import numpy as np
 from bionumpy.bnpdataclass import bnpdataclass
+from bionumpy.encodings.base_encoding import ASCIIEncoding
 
 from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
 from immuneML.data_model.repertoire.Repertoire import Repertoire
@@ -118,8 +119,10 @@ class LigoImplanter:
                     else:
                         logging.warning(f"{LigoImplanter.__name__}: could not find a sequence to implant {instance} for signal {signal.id}, "
                                         f"skipping for now.")
-
-                modified_sequences = make_bnp_dataclass_object_from_dicts(modified_sequences)
+                encoding_dict = {
+                    "str": ASCIIEncoding
+                }
+                modified_sequences = make_bnp_dataclass_object_from_dicts(modified_sequences, encoding_dict)
 
                 if self.sim_item.generative_model.can_compute_p_gens() and (self.export_p_gens or self.keep_p_gen_dist):
                     p_gens = self.sim_item.generative_model.compute_p_gens(modified_sequences, self.sequence_type)
