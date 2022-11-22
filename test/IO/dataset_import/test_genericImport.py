@@ -38,7 +38,7 @@ rep1.tsv,TRA,1234e,no"""
                 )
 
     def test_import_repertoire_dataset(self):
-        path = EnvironmentSettings.root_path / "test/tmp/generic/"
+        path = EnvironmentSettings.tmp_test_path / "generic_io_repertoire"
         self.make_dummy_dataset(path, True)
 
         dataset = GenericImport.import_dataset({"is_repertoire": True, "result_path": path, "path": path,
@@ -63,7 +63,7 @@ rep1.tsv,TRA,1234e,no"""
         shutil.rmtree(path)
 
     def test_import_sequence_dataset(self):
-        path = EnvironmentSettings.root_path / "test/tmp/generic/"
+        path = EnvironmentSettings.tmp_test_path / "generic_io_seq"
         self.make_dummy_dataset(path, False)
 
         dataset = GenericImport.import_dataset({"is_repertoire": False, "paired": False,

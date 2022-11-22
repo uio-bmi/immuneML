@@ -1,8 +1,12 @@
 is_repertoire: True
 paired: False
 separator: "\t"
-columns_to_load: null # OLGA columns are assumed to correspond to: sequences, sequence_aas, v_genes, j_genes
-column_mapping: null
+columns_to_load: [0, 1, 2, 3] # OLGA columns are assumed to correspond to: sequences, sequence_aas, v_genes, j_genes
+column_mapping:
+  0: sequences
+  1: sequence_aas
+  2: v_genes
+  3: j_genes
 region_type: "IMGT_CDR3" # which region to use - IMGT_CDR3 option means removing first and last amino acid as OLGA uses IMGT junction as CDR3
 import_empty_nt_sequences: True # keep sequences even though the nucleotide sequence might be empty
 import_empty_aa_sequences: False # filter out sequences if they don't have sequence_aa set
