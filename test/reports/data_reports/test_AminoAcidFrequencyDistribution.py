@@ -14,7 +14,6 @@ class TestAminoAcidFrequencyDistribution(TestCase):
     def test_generate_sequence_dataset(self):
         path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "amino_acid_frequency_distribution_sequences/")
 
-
         dataset = RandomDatasetGenerator.generate_sequence_dataset(100, {10: 0.5, 11:0.25, 20:0.25}, {"l1": {"a": 0.5, "b": 0.5}}, path / "dataset")
 
         params = DefaultParamsLoader.load(EnvironmentSettings.default_params_path / "reports/", "AminoAcidFrequencyDistribution")
@@ -41,7 +40,6 @@ class TestAminoAcidFrequencyDistribution(TestCase):
 
         params = DefaultParamsLoader.load(EnvironmentSettings.default_params_path / "reports/", "AminoAcidFrequencyDistribution")
         params["dataset"] = dataset
-        # params["relative_frequency"] = False
         params["result_path"] = path / "result"
 
         report = AminoAcidFrequencyDistribution.build_object(**params)
