@@ -12,7 +12,7 @@ from immuneML.util.PathBuilder import PathBuilder
 
 class TestAminoAcidFrequencyDistribution(TestCase):
     def test_generate_sequence_dataset(self):
-        path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "amino_acid_frequency_distribution/")
+        path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "amino_acid_frequency_distribution_sequences/")
 
 
         dataset = RandomDatasetGenerator.generate_sequence_dataset(100, {10: 0.5, 11:0.25, 20:0.25}, {}, path / "dataset")
