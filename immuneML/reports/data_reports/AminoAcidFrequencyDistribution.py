@@ -147,20 +147,33 @@ class AminoAcidFrequencyDistribution(DataReport):
 
         return ReportOutput(path=file_path, name="Table of amino acid frequencies")
 
+
+    def _get_colors(self):
+        return ['rgb(102, 197, 204)','rgb(179,222,105)', 'rgb(220, 176, 242)', 'rgb(217,217,217)',
+                'rgb(141,211,199)', 'rgb(251,128,114)', 'rgb(158, 185, 243)', 'rgb(248, 156, 116)',
+                'rgb(135, 197, 95)', 'rgb(254, 136, 177)', 'rgb(201, 219, 116)', 'rgb(255,237,111)',
+                'rgb(180, 151, 231)', 'rgb(246, 207, 113)', 'rgb(190,186,218)', 'rgb(128,177,211)',
+                'rgb(253,180,98)',  'rgb(252,205,229)', 'rgb(188,128,189)', 'rgb(204,235,197)', ]
+
     def _plot(self, freq_dist):
+        freq_dist.sort_values(by=["amino acid"], ascending=False, inplace=True)
+
         y = "relative frequency" if self.relative_frequency else "count"
 
         figure = px.bar(freq_dist, x="position", y=y, color="amino acid", text="amino acid",
                         facet_col="chain" if "chain" in freq_dist.columns else None,
+                        color_discrete_sequence=self._get_colors(),
                         labels={"position": "IMGT position" if self.imgt_positions else "Sequence index",
                                 "count": "Count",
                                 "relative frequency": "Relative frequency",
-                                "amino acid": "Amino acid"})
+                                "amino acid": "Amino acid"}, template="plotly_white")
         figure.update_xaxes(categoryorder='array', categoryarray=self._get_position_order(freq_dist["position"]))
-        figure.update_layout(showlegend=False)
+        figure.update_layout(showlegend=False, yaxis={'categoryorder':'category ascending'})
+
 
         if self.relative_frequency:
             figure.update_layout(yaxis={"tickformat": ",.0%", "range": [0,1]})
+
 
         file_path = self.result_path / "amino_acid_frequency_distribution.html"
         figure.write_html(str(file_path))
