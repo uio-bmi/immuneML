@@ -31,7 +31,7 @@ class DimensionalityReduction(UnsupervisedMLReport):
             data = data.toarray()
         if self.dataset.encoded_data.examples.shape[1] == 2:
             paths.append(self._2dplot(data, f'2d_{self.name}'))
-        if self.method is not None:
+        if type(self.method.model).__name__ is not "TSNE" or None:
             paths.append(self.explained_varience_plot())
         infoText = f"Dimensionality Reduction with {type(self.method.model).__name__}"
 

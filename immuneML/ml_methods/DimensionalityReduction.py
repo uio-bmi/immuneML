@@ -19,7 +19,10 @@ class DimensionalityReduction(UnsupervisedSklearnMethod, ABC):
         if type(self.model).__name__ in ["PCA"]:
             if isinstance(data, csr_matrix):
                 data = data.toarray()
-        encoded_data.set_dim_reduction(self.model.transform(data))
+        if type(self.model).__name__ in ["TSNE"]:
+            return
+        else:
+            encoded_data.set_dim_reduction(self.model.transform(data))
 
     def get_params(self):
         params = self.model.get_params()
