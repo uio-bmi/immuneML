@@ -107,5 +107,9 @@ class ElementGenerator:
     def _extract_elements_from_batch(self, index, batch_size, batch, example_indices):
         upper_limit, lower_limit = (index + 1) * batch_size, index * batch_size
         batch_indices = [ind for ind in example_indices if lower_limit <= ind < upper_limit]
+
+        assert len(batch_indices) == 0  or max(batch_indices) - lower_limit < len(batch), f"ElementGenerator: Found batch of size {len(batch)}, but expected {batch_size}. " \
+                                                                                          f"Are the batch files sorted correctly? All files except the last file must have batch size {batch_size}."
+
         elements = [batch[i - lower_limit] for i in batch_indices]
         return elements
