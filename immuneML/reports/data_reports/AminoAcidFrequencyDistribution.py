@@ -229,13 +229,14 @@ class AminoAcidFrequencyDistribution(DataReport):
 
     def _plot(self, freq_dist):
         freq_dist.sort_values(by=["amino acid"], ascending=False, inplace=True)
+        category_orders = None if "class" not in freq_dist.columns else {"class": sorted(set(freq_dist["class"]))}
 
         y = "relative frequency" if self.relative_frequency else "count"
 
         figure = px.bar(freq_dist, x="position", y=y, color="amino acid", text="amino acid",
                         facet_col="class" if "class" in freq_dist.columns else None,
                         facet_row="chain" if "chain" in freq_dist.columns else None,
-                        color_discrete_sequence=self._get_colors(),
+                        color_discrete_sequence=self._get_colors(), category_orders=category_orders,
                         labels={"position": "IMGT position" if self.imgt_positions else "Sequence index",
                                 "count": "Count",
                                 "relative frequency": "Relative frequency",
