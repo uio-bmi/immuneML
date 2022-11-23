@@ -330,7 +330,7 @@ class MotifGeneralizationAnalysis(DataReport):
 
         fig.add_trace(go.Scatter(x=combined_precision["training_tp"], y=combined_precision["combined_precision"],
                                  mode='markers', name=self.col_names["combined precision"],
-                                 marker=dict(symbol="diamond", size=10, color=px.colors.diverging.Tealrose[0])),
+                                 marker=dict(symbol="diamond", color=px.colors.diverging.Tealrose[0])),
                       secondary_y=False)
 
         if self.plot_smoothed_combined_precision:
