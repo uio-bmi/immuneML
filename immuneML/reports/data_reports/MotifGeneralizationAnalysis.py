@@ -317,7 +317,7 @@ class MotifGeneralizationAnalysis(DataReport):
     def _plot_precision_per_tp(self, file_path, plotting_data, combined_precision, dataset_type):
         fig = px.strip(plotting_data,
                        y=self.col_names["precision"], x="training_tp_count", hover_data=["feature_names"],
-                       range_y=[0, 1], color="highlight",
+                       range_y=[0, 1.01], color="highlight",
                        color_discrete_map={"Motif": "#74C4C4",
                                            self.highlight_motifs_name: px.colors.qualitative.Pastel[1]},
                        stripmode='overlay', log_x=True,
@@ -352,7 +352,7 @@ class MotifGeneralizationAnalysis(DataReport):
     def _plot_precision_recall(self, file_path, plotting_data, min_recall=None, min_precision=None, dataset_type=None):
         fig = px.scatter(plotting_data,
                          y=self.col_names["precision"], x=self.col_names["recall"], hover_data=["feature_names"],
-                         range_x=[0, 1], range_y=[0, 1], color="highlight",
+                         range_x=[0, 1.01], range_y=[0, 1.01], color="highlight",
                          color_discrete_map={"Motif": px.colors.qualitative.Pastel[0],
                                              self.highlight_motifs_name: px.colors.qualitative.Pastel[1]},
                          labels={

@@ -47,4 +47,4 @@ class TestMotifGeneralizationAnalysis(TestCase):
         self.assertTrue(os.path.isfile(path / "result/training_precision_recall.html"))
         self.assertTrue(os.path.isfile(path / "result/test_precision_recall.html"))
 
-        shutil.rmtree(path)
+        # shutil.rmtree(path)
