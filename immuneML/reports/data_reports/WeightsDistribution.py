@@ -94,7 +94,11 @@ class WeightsDistribution(DataReport):
 
     def _get_plotting_data(self):
         weights = self.dataset.get_example_weights()
-        data = self.dataset.get_metadata(["is_binding"], return_df=True)
+        data = self.dataset.get_metadata([self.label], return_df=True)
+
+        # todo remove this, this was temporary
+        if isinstance(self.dataset, SequenceDataset):
+            data["seq"] = [seq.amino_acid_sequence for seq in self.dataset.get_data()]
 
         if self.split_classes:
             data = self.get_weights_by_class_df(data, weights)
@@ -104,23 +108,26 @@ class WeightsDistribution(DataReport):
         return data
 
     def _plot(self, data) -> ReportOutput:
+        print(data)
         PathBuilder.build(self.result_path)
 
         if self.split_classes:
-            color = "is_binding"
+            color = self.label
         else:
             color = None
 
         fig = px.line(data, y="weights", color=color, x="sorted", log_y=True,
                       color_discrete_sequence=["#65D0B8", "#AB80D8"],
+                      hover_data=["seq"],
                       labels={
                           "weights": "Weights",
                           "sorted": "Sequences (sorted by weight)",
                           "is_binding": "Is binder"
                       }, template="plotly_white")
 
-        for hline in self.weight_thresholds:
-            fig.add_shape(type="line", x0=0, x1=max(data["sorted"]), y0=hline, y1=hline, line=dict(color="black", width=1.5, dash="dash"))
+        if self.weight_thresholds is not None:
+            for hline in self.weight_thresholds:
+                fig.add_shape(type="line", x0=0, x1=max(data["sorted"]), y0=hline, y1=hline, line=dict(color="black", width=1.5, dash="dash"))
 
         file_path = self.result_path / "weights_distribution.html"
         fig.write_html(str(file_path))
