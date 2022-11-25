@@ -39,15 +39,17 @@ class AbundanceEncoderHelper:
         return is_positive_class
 
     @staticmethod
-    def get_relevant_sequence_indices(sequence_presence_iterator, is_positive_class, p_value_threshold, relevant_indices_path, params, repertoire_ids: list):
-        relevant_indices_path = relevant_indices_path if relevant_indices_path is not None else params.result_path / 'relevant_sequence_indices.pickle'
+    def get_relevant_sequence_indices(sequence_presence_iterator, is_positive_class, p_value_threshold, relevant_indices_path, params,
+                                      cache_params=None):
+        relevant_indices_path = relevant_indices_path if relevant_indices_path is not None else params.result_path / 'relevant_sequence_indices' \
+                                                                                                                     '.pickle '
         file_paths = {"relevant_indices_path": relevant_indices_path}
 
         if params.learn_model:
-            contingency_table = CacheHandler.memo_by_params(('rep_ids', repertoire_ids, ('type', 'contig_table')),
+            contingency_table = CacheHandler.memo_by_params(('cache_params', cache_params, ('type', 'contingency_table')),
                                                             lambda: AbundanceEncoderHelper._get_contingency_table(sequence_presence_iterator,
                                                                                                                   is_positive_class))
-            p_values = CacheHandler.memo_by_params((('rep_ids', repertoire_ids), ("type", "fisher_p_vals")),
+            p_values = CacheHandler.memo_by_params((('cache_params', cache_params), ("type", "fisher_p_values")),
                                                    lambda: AbundanceEncoderHelper._find_sequence_p_values_with_fisher(contingency_table))
             relevant_sequence_indices = p_values < p_value_threshold
 

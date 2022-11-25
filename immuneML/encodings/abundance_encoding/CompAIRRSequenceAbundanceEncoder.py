@@ -294,7 +294,7 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
         relevant_sequence_indices, file_paths = AbundanceEncoderHelper.get_relevant_sequence_indices(compairr_sequence_presence, is_positive_class,
                                                                                                      self.p_value_threshold,
                                                                                                      self.relevant_indices_path, params,
-                                                                                                     repertoire_ids)
+                                                                                                     cache_params=repertoire_ids)
         self._write_relevant_sequences_csv(dataset, relevant_sequence_indices, params.result_path)
         self._set_file_paths(file_paths)
 
