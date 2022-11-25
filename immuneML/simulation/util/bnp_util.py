@@ -3,51 +3,33 @@ from itertools import chain
 from typing import List
 
 import numpy as np
-from bionumpy import DNAEncoding, AminoAcidEncoding, as_encoded_array, EncodedArray
+from bionumpy import as_encoded_array, EncodedArray
 from bionumpy.bnpdataclass import bnpdataclass
+from bionumpy.encodings import Encoding
 
 
 def _encode_dict_of_lists(transformed_objs: dict, fields: dict) -> dict:
     encoded_objs = {}
-    for index, key in enumerate(fields.keys()):
-        print(key)
-        print(transformed_objs[key])
-        if transformed_objs[key] is not None:
-            if all(isinstance(el, EncodedArray) for el in transformed_objs[key]) and isinstance(transformed_objs[key], list):
-                encoded_objs[key] = np.concatenate(transformed_objs[key])
-            elif fields[key] != int:
-                encoded_objs[key] = as_encoded_array(transformed_objs[key], fields[key])
-            else:
-                encoded_objs[key] = np.array(transformed_objs[key])
 
-    print(encoded_objs)
+    for index, field_name in enumerate(fields.keys()):
+        if transformed_objs[field_name] is not None:
+            if all(isinstance(el, EncodedArray) for el in transformed_objs[field_name]) and isinstance(transformed_objs[field_name], list):
+                encoded_objs[field_name] = np.concatenate(transformed_objs[field_name])
+            elif isinstance(fields[field_name], Encoding):
+                encoded_objs[field_name] = as_encoded_array(transformed_objs[field_name], fields[field_name])
+            else:
+                encoded_objs[field_name] = transformed_objs[field_name]
+
     return encoded_objs
 
 
-def make_bnp_dataclass_object_from_dicts(dict_objects: List[dict], encoding_dict: dict):
+def make_bnp_dataclass_object_from_dicts(dict_objects: List[dict], field_type_map: dict = None):
     if not isinstance(dict_objects, list) or len(dict_objects) == 0:
         raise RuntimeError("Cannot make dataclass, got empty list as input.")
 
     transformed_objs = _list_of_dicts_to_dict_of_lists(dict_objects)
 
-    fields = {}
-    for field_name in transformed_objs.keys():
-        assert all(isinstance(val, type(transformed_objs[field_name][0])) for val in transformed_objs[field_name]), \
-            [type(val) for val in transformed_objs[field_name]]
-
-        if field_name in ['sequence', 'sequence_aa']:
-            field_type = DNAEncoding if field_name == "sequence" else AminoAcidEncoding
-            transformed_objs[field_name] = as_encoded_array(transformed_objs[field_name], field_type) if any(transformed_objs[field_name]) else None
-        elif isinstance(transformed_objs[field_name][0], EncodedArray):
-            field_type = type(transformed_objs[field_name][0].encoding)
-        else:
-            cls = type(transformed_objs[field_name][0])
-            field_type = encoding_dict[cls.__name__] if cls.__name__ in encoding_dict else cls
-
-        if transformed_objs[field_name] is not None:
-            fields[field_name] = field_type
-
-    print(fields)
+    fields = _extract_fields(transformed_objs, field_type_map)
 
     transformed_objs = _encode_dict_of_lists(transformed_objs, fields)
 
@@ -55,7 +37,27 @@ def make_bnp_dataclass_object_from_dicts(dict_objects: List[dict], encoding_dict
     return new_class(**transformed_objs)
 
 
-def merge_dataclass_objects(objects: list):
+def _extract_fields(transformed_objs, field_type_map):
+    fields = {}
+    for field_name in transformed_objs.keys():
+        assert all(isinstance(val, type(transformed_objs[field_name][0])) for val in transformed_objs[field_name]), \
+            [type(val) for val in transformed_objs[field_name]]
+
+        if field_type_map is not None and field_name in field_type_map:
+            field_type = field_type_map[field_name]
+            transformed_objs[field_name] = as_encoded_array(transformed_objs[field_name], field_type) if any(transformed_objs[field_name]) else None
+        elif isinstance(transformed_objs[field_name][0], EncodedArray):
+            field_type = type(transformed_objs[field_name][0].encoding)
+        else:
+            field_type = type(transformed_objs[field_name][0])
+
+        if transformed_objs[field_name] is not None:
+            fields[field_name] = field_type
+
+    return fields
+
+
+def merge_dataclass_objects(objects: list):  # TODO: replace with equivalent from npstructures
     field_names = list(set(chain.from_iterable(list(obj.__annotations__.keys()) for obj in objects)))
 
     for obj in objects:
@@ -76,15 +78,12 @@ def add_fields_to_bnp_dataclass(original_object, new_fields: dict):
     return new_cls(**{**vars(original_object), **new_fields})
 
 
-def make_new_bnp_dataclass(fields: list, original_class=None):
+def make_new_bnp_dataclass(fields: list, original_class=None) -> type:
     if original_class is not None:
-        base_fields = [(field_name, field_type) for field_name, field_type in original_class.__annotations__.items()]
-        functions = {func: getattr(original_class, func) for func in dir(original_class)
-                     if callable(getattr(original_class, func)) and not func.startswith("__")}
+        new_cls = make_dataclass("DynamicDC", bases=(original_class,), fields=fields)
     else:
-        base_fields, functions = [], {}
+        new_cls = bnpdataclass(make_dataclass('DynamicDC', fields=fields))
 
-    new_cls = bnpdataclass(make_dataclass('DynamicDC', fields=base_fields + fields, namespace=functions))
     return new_cls
 
 
