@@ -27,7 +27,7 @@ class ImmunoSEQRearrangementImport(DataImport):
 
     Arguments:
 
-        path (str): This is the path to a directory with files to import. By default path is set to the current working directory.
+        path (str): For RepertoireDatasets, this is the path to a directory with files to import. For Sequence- or ReceptorDatasets this path may either be the path to the file to import, or the path to the folder locating one or multiple files with .tsv, .csv or .txt extensions. By default path is set to the current working directory.
 
         is_repertoire (bool): If True, this imports a RepertoireDataset. If False, it imports a SequenceDataset. By default, is_repertoire is set to True.
 
@@ -69,7 +69,7 @@ class ImmunoSEQRearrangementImport(DataImport):
 
         columns_to_load (list): Specifies which subset of columns must be loaded from the file. By default, this is: [rearrangement, v_family, v_gene, v_allele, j_family, j_gene, j_allele, amino_acid, templates, frame_type, locus]
 
-        metadata_column_mapping (dict): Specifies metadata for SequenceDatasets. This should specify a mapping similar to column_mapping where keys are immunoSEQ column names and values are the names that are internally used in immuneML as metadata fields. These metadata fields can be used as prediction labels for SequenceDatasets. For immunoSEQ rearrangement .tsv files, there is no default metadata_column_mapping. For setting RepertoireDataset metadata, metadata_column_mapping is ignored, see metadata_file instead.
+        metadata_column_mapping (dict): Specifies metadata for Sequence- and ReceptorDatasets. This should specify a mapping similar to column_mapping where keys are immunoSEQ column names and values are the names that are internally used in immuneML as metadata fields. These metadata fields can be used as prediction labels for Sequence- and ReceptorDatasets. This parameter can also be used to specify sequence-level metadata columns for RepertoireDatasets, which can be used by reports. To set prediction label metadata for RepertoireDatasets, see metadata_file instead. For immunoSEQ rearrangement .tsv files, there is no default metadata_column_mapping.
 
         separator (str): Column separator, for ImmunoSEQ files this is by default "\\t".
 

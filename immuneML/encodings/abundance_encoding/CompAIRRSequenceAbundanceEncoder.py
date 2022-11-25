@@ -103,6 +103,7 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
         self.contingency_table_path = None
         self.p_values_path = None
         self.context = None
+        self.compairr_sequence_presence = None
 
         self.compairr_params = CompAIRRParams(compairr_path=Path(compairr_path),
                                               keep_compairr_input=True,
@@ -294,7 +295,8 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
 
         relevant_sequence_indices, file_paths = AbundanceEncoderHelper.get_relevant_sequence_indices(compairr_sequence_presence, is_positive_class,
                                                                                                      self.p_value_threshold,
-                                                                                                     self.relevant_indices_path, params)
+                                                                                                     self.relevant_indices_path, params,
+                                                                                                     cache_params=repertoire_ids)
         self._write_relevant_sequences_csv(dataset, relevant_sequence_indices, params.result_path)
         self._set_file_paths(file_paths)
 

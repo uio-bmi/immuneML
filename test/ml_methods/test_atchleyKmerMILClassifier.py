@@ -32,7 +32,7 @@ class TestAtchleyKmerMILClassifier(TestCase):
                                                                                                              LabelConfiguration(
                                                                                                                  [Label("l1", [True, False])])))
         cls = AtchleyKmerMILClassifier(iteration_count=10, threshold=-0.0001, evaluate_at=2, use_early_stopping=False, random_seed=1, learning_rate=0.01,
-                                       zero_abundance_weight_init=True, number_of_threads=8, initialization_count=2)
+                                       zero_abundance_weight_init=True, number_of_threads=8, initialization_count=2, pytorch_device_name='cpu')
         cls.fit(enc_dataset.encoded_data, Label("l1"))
 
         predictions = cls.predict(enc_dataset.encoded_data, Label("l1"))

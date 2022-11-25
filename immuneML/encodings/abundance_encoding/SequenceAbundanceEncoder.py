@@ -130,7 +130,10 @@ class SequenceAbundanceEncoder(DatasetEncoder):
         comparison_data.set_iteration_repertoire_ids(dataset.get_repertoire_ids())
         is_positive_class = AbundanceEncoderHelper.check_is_positive_class(dataset, dataset.get_repertoire_ids(), params.label_config)
 
-        relevant_sequence_indices, file_paths = AbundanceEncoderHelper.get_relevant_sequence_indices(comparison_data, is_positive_class, self.p_value_threshold, self.relevant_indices_path, params)
+        relevant_sequence_indices, file_paths = AbundanceEncoderHelper.get_relevant_sequence_indices(comparison_data, is_positive_class,
+                                                                                                     self.p_value_threshold,
+                                                                                                     self.relevant_indices_path, params,
+                                                                                                     cache_params=dataset.get_repertoire_ids())
 
         self._write_relevant_sequences_csv(comparison_data, relevant_sequence_indices, params.result_path)
         self._set_file_paths(file_paths)

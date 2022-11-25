@@ -69,7 +69,11 @@ class Util:
 
     @staticmethod
     def binarize_label_classes(true_y, predicted_y, classes):
-        """Binarizes the predictions in place using scikit-learn's label_binarize() method"""
+        """
+        Binarizes the predictions in place using scikit-learn's label_binarize() method
+
+        Necessary for some sklearn metrics, like roc_auc_score
+        """
         if hasattr(true_y, 'dtype') and true_y.dtype.type is np.str_ or isinstance(true_y, list) and any(isinstance(item, str) for item in true_y):
             true_y = label_binarize(true_y, classes=classes)
             predicted_y = label_binarize(predicted_y, classes=classes)
@@ -77,9 +81,11 @@ class Util:
         return true_y, predicted_y
 
     @staticmethod
-    def setup_pytorch(number_of_threads, random_seed):
+    def setup_pytorch(number_of_threads, random_seed, pytorch_device_name=None):
         torch.set_num_threads(number_of_threads)
         torch.manual_seed(random_seed)
+        if pytorch_device_name is not None:
+            torch.device(pytorch_device_name)
 
     @staticmethod
     def get_immuneML_version():
