@@ -291,10 +291,9 @@ class CompAIRRSequenceAbundanceEncoder(DatasetEncoder):
 
         is_positive_class = AbundanceEncoderHelper.check_is_positive_class(dataset, repertoire_ids, params.label_config)
 
-        relevant_sequence_indices, file_paths = AbundanceEncoderHelper.get_relevant_sequence_indices(compairr_sequence_presence, is_positive_class,
-                                                                                                     self.p_value_threshold,
-                                                                                                     self.relevant_indices_path, params,
-                                                                                                     cache_params=repertoire_ids)
+        relevant_sequence_indices, file_paths = AbundanceEncoderHelper\
+            .get_relevant_sequence_indices(compairr_sequence_presence, is_positive_class, self.p_value_threshold, self.relevant_indices_path, params,
+                                           cache_params=self._build_sequence_presence_params(dataset, self.compairr_params))
         self._write_relevant_sequences_csv(dataset, relevant_sequence_indices, params.result_path)
         self._set_file_paths(file_paths)
 
