@@ -16,8 +16,8 @@ class GappedMotifImplanting(SequenceImplantingStrategy):
 
     def implant(self, sequence, signal: dict, sequence_position_weights=None, sequence_type: SequenceType = SequenceType.AMINO_ACID) -> ReceptorSequence:
 
-        assert sequence.region_type in [RegionType.IMGT_CDR3.name, RegionType.IMGT_JUNCTION.name], \
-            f"{GappedMotifImplanting.__name__}: sequence is of type {sequence.region_type}, but currently only {RegionType.IMGT_CDR3.name} and " \
+        assert sequence.metadata.region_type in [RegionType.IMGT_CDR3.name, RegionType.IMGT_JUNCTION.name], \
+            f"{GappedMotifImplanting.__name__}: sequence is of type {sequence.metadata.region_type}, but currently only {RegionType.IMGT_CDR3.name} and " \
             f"{RegionType.IMGT_JUNCTION.name} are supported."
 
         motif_instance = signal["motif_instance"]
@@ -38,12 +38,12 @@ class GappedMotifImplanting(SequenceImplantingStrategy):
             "The motif instance is longer than sequence length. Remove the receptor_sequence from the repertoire or reduce max gap length " \
             "to be able to proceed."
 
-        if sequence.region_type == RegionType.IMGT_JUNCTION.name:
+        if sequence.metadata.region_type == RegionType.IMGT_JUNCTION.name:
             return PositionHelper.gen_imgt_positions_from_junction_length(sequence_length)
-        elif sequence.region_type == RegionType.IMGT_CDR3.name:
+        elif sequence.metadata.region_type == RegionType.IMGT_CDR3.name:
             return PositionHelper.gen_imgt_positions_from_cdr3_length(sequence_length)
         else:
-            raise NotImplementedError(f"IMGT positions here are defined only for CDR3 and JUNCTION region types, got {sequence.region_type}")
+            raise NotImplementedError(f"IMGT positions here are defined only for CDR3 and JUNCTION region types, got {sequence.metadata.region_type}")
 
     def _choose_implant_position(self, imgt_positions, position_weights):
         imgt_implant_position = np.random.choice(list(position_weights.keys()), size=1, p=list(position_weights.values()))

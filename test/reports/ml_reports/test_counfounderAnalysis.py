@@ -48,13 +48,13 @@ class TestConfounderAnalysis(TestCase):
         random_dataset = RandomDatasetGenerator.generate_repertoire_dataset(repertoire_count=size, sequence_count_probabilities={100: 1.},
                                                                             sequence_length_probabilities={5: 1.}, labels={}, path=path)
 
-        signals = [Signal(identifier="disease", motifs=[Motif(identifier="m1", instantiation=GappedKmerInstantiation(), seed="AAA")],
+        signals = [Signal(id="disease", motifs=[Motif(identifier="m1", instantiation=GappedKmerInstantiation(), seed="AAA")],
                           implanting_strategy=HealthySequenceImplanting(implanting_computation=ImplantingComputation.ROUND,
                                                                         implanting=GappedMotifImplanting())),
-                   Signal(identifier="HLA", motifs=[Motif(identifier="m2", instantiation=GappedKmerInstantiation(), seed="CCC")],
+                   Signal(id="HLA", motifs=[Motif(identifier="m2", instantiation=GappedKmerInstantiation(), seed="CCC")],
                           implanting_strategy=HealthySequenceImplanting(implanting_computation=ImplantingComputation.ROUND,
                                                                         implanting=GappedMotifImplanting())),
-                   Signal(identifier="age", motifs=[Motif(identifier="m3", instantiation=GappedKmerInstantiation(), seed="GGG")],
+                   Signal(id="age", motifs=[Motif(identifier="m3", instantiation=GappedKmerInstantiation(), seed="GGG")],
                           implanting_strategy=HealthySequenceImplanting(implanting_computation=ImplantingComputation.ROUND,
                                                                         implanting=GappedMotifImplanting()))]
 

@@ -71,7 +71,7 @@ class TestRejectionSampler(TestCase):
         sampler._make_background_sequences(path, sequence_counts)
 
         for filename, expected_count in zip(['sequences_no_signal.tsv', 'sequences_with_signal_s1.tsv'], [5, 10]):
-            seqs = pd.read_csv(path / filename, sep='\t')
+            seqs = pd.read_csv(path / f"tmp_/{filename}", sep='\t')
             assert seqs.shape[0] == expected_count, seqs
 
             if 'no_signal.tsv' in filename:

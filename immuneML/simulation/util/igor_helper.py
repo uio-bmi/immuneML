@@ -3,6 +3,7 @@ import shutil
 from pathlib import Path
 
 import numpy as np
+import pandas as pd
 
 
 def make_skewed_model_files(v_genes: list, j_genes: list, original_model_path: Path, new_model_path: Path) -> Path:
@@ -19,7 +20,7 @@ def make_skewed_model_files(v_genes: list, j_genes: list, original_model_path: P
 
     """
 
-    genes = _import_original_genes(original_model_path)
+    genes = _import_genes_from_model_params(original_model_path)
     _check_if_all_genes_present(genes, v_genes, j_genes)
 
     if len(v_genes) != 0:
@@ -89,12 +90,9 @@ def _get_new_independent_genes(marginals_text: list, gene_weights, gene_name: st
 
 
 def _recompute_gene_proba_from_line(line, gene_weights) -> str:
-
-    # line_gene_pattern = re.compile("^\%(0(\.\d+){0,1}(\,(0\.\d+))*$")
-    # assert re.match(line_gene_pattern, line), line
-
     original_probabilities = np.array(line.split("%")[1].split(","), dtype=float)
-    updated_probabilities = (original_probabilities * gene_weights).astype(str)
+    updated_probabilities = original_probabilities * gene_weights
+    updated_probabilities = (updated_probabilities / updated_probabilities.sum()).astype(str)
     return "%" + ",".join(updated_probabilities) + "\n"
 
 
@@ -104,7 +102,17 @@ def _check_if_all_genes_present(original_model_genes, signal_v_genes: list, sign
             f"Not all {gene_name.upper()} genes in signals are present in the original generative model."
 
 
-def _import_original_genes(original_model_path: Path) -> dict:
+def _import_genes_from_anchor_files(original_model_path: Path) -> dict:
+    genes = {"v": [], "j": []}
+
+    for key in genes.keys():
+        df = pd.read_csv(original_model_path / f"{key.upper()}_gene_CDR3_anchors.csv")
+        genes[key] = df['gene'].values
+
+    return genes
+
+
+def _import_genes_from_model_params(original_model_path: Path) -> dict:
     genes = {"v": [], "j": []}
 
     with (original_model_path / 'model_params.txt').open('r') as file:

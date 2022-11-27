@@ -22,6 +22,7 @@ def log(func):
 
     return wrapped
 
+
 def print_log(mssg, include_datetime=False):
     logging.info(mssg)
 

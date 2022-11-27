@@ -1,10 +1,7 @@
-import dataclasses
-
 import pytest
-from bionumpy import DNAEncoding, AminoAcidEncoding
-from bionumpy.bnpdataclass import bnpdataclass
+from bionumpy import DNAEncoding
 
-from immuneML.simulation.util.bnp_util import make_bnp_dataclass_object_from_dicts, make_new_bnp_dataclass
+from immuneML.simulation.util.bnp_util import make_bnp_dataclass_object_from_dicts
 
 
 def test_make_bnpdataclass_from_dict():
@@ -27,16 +24,3 @@ def test_make_bnpdataclass_from_dict():
     with pytest.raises(Exception):
         del dict_list[0]["a"]
         make_bnp_dataclass_object_from_dicts(dict_list)
-
-
-def test_make_bnp_dataclass():
-
-    @bnpdataclass
-    class DynamicBaseDC:
-        sequence_aa: AminoAcidEncoding
-
-    new_cls = make_new_bnp_dataclass([("sequence", DNAEncoding), ('signal1', int)], DynamicBaseDC)
-
-    assert issubclass(new_cls, DynamicBaseDC)
-    assert new_cls.__name__ == "DynamicDC"
-    assert all(field.name in ['sequence_aa', 'sequence', 'signal1'] for field in dataclasses.fields(new_cls))

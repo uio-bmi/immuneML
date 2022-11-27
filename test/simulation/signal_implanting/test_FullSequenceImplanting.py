@@ -17,7 +17,7 @@ class TestFullSequenceImplanting(TestCase):
         signal = Signal("sig1", [Motif("motif1", GappedKmerInstantiation(max_gap=0), "AAAA", v_call="v1", j_call="j1")],
                         FullSequenceImplanting())
 
-        repertoire = Repertoire.build(["CCCC", "CCCC", "CCCC"], region_types=[RegionType.IMGT_JUNCTION for _ in range(3)], path=path)
+        repertoire = Repertoire.build(["CCCC", "CCCC", "CCCC"], region_type=[RegionType.IMGT_JUNCTION for _ in range(3)], path=path)
 
         new_repertoire = signal.implant_to_repertoire(repertoire, 0.33, path)
 

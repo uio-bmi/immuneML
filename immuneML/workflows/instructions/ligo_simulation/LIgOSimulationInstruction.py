@@ -1,5 +1,4 @@
 import math
-import pickle
 from itertools import chain
 from multiprocessing import Pool
 from pathlib import Path
@@ -105,24 +104,12 @@ class LIgOSimulationInstruction(Instruction):
 
     def _create_examples(self, item_in: dict) -> list:
 
-        print("entering create examples", flush=True)
-
         item = LIgOSimulationItem(**item_in)
 
         if self.state.simulation.is_repertoire:
             res = self._create_repertoires(item)
         else:
             res = self._create_receptors(item)
-
-        for el in res:
-            try:
-                pickle.dumps(el)
-            except Exception as e:
-                print("can't pickle result", flush=True)
-                print(el)
-                print(e)
-
-        print("exiting create examples", flush=True)
 
         return res
 

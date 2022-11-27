@@ -5,6 +5,7 @@ from typing import Union
 
 import numpy as np
 import pandas as pd
+from bionumpy.bnpdataclass import BNPDataClass
 from olga import load_model
 from olga.generation_probability import GenerationProbabilityVJ, GenerationProbabilityVDJ
 from olga.sequence_generation import SequenceGenerationVJ, SequenceGenerationVDJ
@@ -45,8 +46,8 @@ class OLGA(GenerativeModel):
     chain: Chain = None
     use_only_productive: bool = True
     _sequence_gen_model: Union[SequenceGenerationVDJ, SequenceGenerationVJ] = None
-    _v_gene_mapping: np.ndarray = None
-    _j_gene_mapping: np.ndarray = None
+    _v_gene_mapping: list = None
+    _j_gene_mapping: list = None
     _genomic_data = None
     _olga_gen_model = None
 
@@ -103,8 +104,8 @@ class OLGA(GenerativeModel):
                                             V_anchor_pos_file=str(model_path / OLGA.MODEL_FILENAMES['v_gene_anchor']),
                                             J_anchor_pos_file=str(model_path / OLGA.MODEL_FILENAMES['j_gene_anchor']))
 
-        v_gene_mapping = pd.read_csv(model_path / OLGA.MODEL_FILENAMES['v_gene_anchor'])['gene'].values
-        j_gene_mapping = pd.read_csv(model_path / OLGA.MODEL_FILENAMES['j_gene_anchor'])['gene'].values
+        v_gene_mapping = [gene[0] for gene in genomic_data.genV]
+        j_gene_mapping = [gene[0] for gene in genomic_data.genJ]
 
         sequence_gen_model = SequenceGenerationVDJ(olga_gen_model, genomic_data) if self.is_vdj \
             else SequenceGenerationVJ(olga_gen_model, genomic_data)
@@ -163,15 +164,14 @@ class OLGA(GenerativeModel):
         sequences.to_csv(path, index=False, sep='\t')
         return path
 
-    def compute_p_gens(self, sequences, sequence_type: SequenceType) -> np.ndarray:
+    def compute_p_gens(self, sequences: BNPDataClass, sequence_type: SequenceType) -> list:
 
         cls = GenerationProbabilityVDJ if self.is_vdj else GenerationProbabilityVJ
         p_gen_model = cls(generative_model=self._olga_gen_model, genomic_data=self._genomic_data)
         p_gen_func = p_gen_model.compute_nt_CDR3_pgen if sequence_type == SequenceType.NUCLEOTIDE else p_gen_model.compute_aa_CDR3_pgen
         seq_field = 'sequence' if sequence_type == SequenceType.NUCLEOTIDE else 'sequence_aa'
 
-        return np.array([p_gen_func(str(getattr(seq, seq_field)), getattr(seq, 'v_call', None), getattr(seq, 'j_call', None), False)
-                         for seq in sequences])
+        return [p_gen_func(getattr(seq, seq_field).to_string(), seq.v_call.to_string(), seq.j_call.to_string(), False) for seq in sequences]
 
     def can_compute_p_gens(self) -> bool:
         return True

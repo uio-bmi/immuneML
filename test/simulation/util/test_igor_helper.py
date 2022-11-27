@@ -2,7 +2,7 @@ import shutil
 from unittest import TestCase
 
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
-from immuneML.simulation.util.igor_helper import _import_original_genes
+from immuneML.simulation.util.igor_helper import _import_genes_from_model_params
 from immuneML.util.PathBuilder import PathBuilder
 
 
@@ -451,7 +451,7 @@ class IGoRHelperTest(TestCase):
         with (path / "model_params.txt").open('w') as file:
             file.write(file_content)
 
-        genes = _import_original_genes(path)
+        genes = _import_genes_from_model_params(path)
 
         self.assertEqual(len(genes['j']), 7)
         self.assertEqual(len(genes['v']), 97)

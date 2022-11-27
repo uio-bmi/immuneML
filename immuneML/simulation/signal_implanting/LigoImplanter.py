@@ -5,7 +5,7 @@ from typing import List, Tuple
 
 import numpy as np
 from bionumpy import DNAEncoding, AminoAcidEncoding
-from bionumpy.bnpdataclass import bnpdataclass
+from bionumpy.bnpdataclass import bnpdataclass, BNPDataClass
 
 from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
 from immuneML.data_model.repertoire.Repertoire import Repertoire
@@ -13,8 +13,7 @@ from immuneML.environment.SequenceType import SequenceType
 from immuneML.simulation.LIgOSimulationItem import LIgOSimulationItem
 from immuneML.simulation.implants.MotifInstance import MotifInstance
 from immuneML.simulation.implants.Signal import Signal
-from immuneML.simulation.util.bnp_util import make_bnp_dataclass_object_from_dicts, add_fields_to_bnp_dataclass, merge_dataclass_objects, \
-    add_field_to_bnp_dataclass
+from immuneML.simulation.util.bnp_util import make_bnp_dataclass_object_from_dicts, merge_dataclass_objects
 from immuneML.simulation.util.util import get_sequence_per_signal_count, make_sequences_from_gen_model, get_bnp_data, filter_out_illegal_sequences, \
     annotate_sequences, build_imgt_positions, choose_implant_position
 from immuneML.util.PathBuilder import PathBuilder
@@ -98,10 +97,10 @@ class LigoImplanter:
             annotated_sequences = filter_out_illegal_sequences(annotated_sequences, self.sim_item, self.all_signals, self.max_signals)
         return annotated_sequences
 
-    def _implant_in_sequences(self, sequences: bnpdataclass, seqs_per_signal_count: dict) -> Tuple[bnpdataclass, dict]:
+    def _implant_in_sequences(self, sequences: BNPDataClass, seqs_per_signal_count: dict) -> Tuple[BNPDataClass, dict]:
 
         sequence_lengths = getattr(sequences, self.sequence_type.value).shape.lengths
-        remaining_seq_mask = np.ones(len(sequences))
+        remaining_seq_mask = np.ones(len(sequences), dtype=bool)
         modified_sequence_dataclass_objs = []
 
         for signal in self.sim_item.signals:
@@ -119,16 +118,13 @@ class LigoImplanter:
                     else:
                         logging.warning(f"{LigoImplanter.__name__}: could not find a sequence to implant {instance} for signal {signal.id}, "
                                         f"skipping for now.")
-                encoding_dict = {
+                field_type_map = {
                     "sequence": DNAEncoding,
                     "sequence_aa": AminoAcidEncoding
                 }
 
-                modified_sequences = make_bnp_dataclass_object_from_dicts(modified_sequences, encoding_dict)
-
-                if self.sim_item.generative_model.can_compute_p_gens() and (self.export_p_gens or self.keep_p_gen_dist):
-                    p_gens = self.sim_item.generative_model.compute_p_gens(modified_sequences, self.sequence_type)
-                    modified_sequences = add_field_to_bnp_dataclass(modified_sequences, 'p_gen', float, p_gens)
+                modified_sequences = make_bnp_dataclass_object_from_dicts(modified_sequences, field_type_map)
+                modified_sequences = self._add_optional_p_gens(modified_sequences)
 
                 modified_sequence_dataclass_objs.append(modified_sequences)
 
@@ -140,16 +136,23 @@ class LigoImplanter:
 
         return sequences, seqs_per_signal_count
 
-    def _add_info_to_no_signal_sequences(self, sequences) -> bnpdataclass:
+    def _add_optional_p_gens(self, modified_sequences):
+        if self.sim_item.generative_model.can_compute_p_gens() and (self.export_p_gens or self.keep_p_gen_dist):
+            p_gens = self.sim_item.generative_model.compute_p_gens(modified_sequences, self.sequence_type)
+            modified_sequences = modified_sequences.add_fields({'p_gen': p_gens}, {'p_gen': float})
+        return modified_sequences
+
+    def _add_info_to_no_signal_sequences(self, sequences: BNPDataClass) -> BNPDataClass:
 
         new_fields = {**{s.id: [0 for _ in range(len(sequences))] for s in self.all_signals},
-                      **{f"{s.id}_positions": ["m" + "".join("0" for _ in range(sequences.shape.lengths[i])) for i in range(len(sequences))]
+                      **{f"{s.id}_positions": ["m" + "".join("0" for _ in range(getattr(sequences, self.sequence_type.value).shape.lengths[i]))
+                                               for i in range(len(sequences))]
                          for s in self.all_signals}}
 
         if self.sim_item.generative_model.can_compute_p_gens() and (self.export_p_gens or self.keep_p_gen_dist):
             new_fields['p_gen'] = self.sim_item.generative_model.compute_p_gens(sequences, self.sequence_type)
 
-        return add_fields_to_bnp_dataclass(sequences, new_fields)
+        return sequences.add_fields(new_fields, {'p_gen': float})
 
     def _implant_in_sequence(self, sequence_row: bnpdataclass, signal: Signal, motif_instance: MotifInstance) -> dict:
         imgt_aa_positions = build_imgt_positions(len(getattr(sequence_row, self.sequence_type.value)), motif_instance, sequence_row.region_type)
@@ -216,7 +219,6 @@ class LigoImplanter:
 
         p_gens = self.sim_item.generative_model.compute_p_gens(sequences, self.sequence_type)
         self.target_p_gen_histogram = np.histogram(np.log10(p_gens), bins=self.bins, density=True)[0]
-        print(self.target_p_gen_histogram)
 
     def _distribution_matches(self) -> bool:
         raise NotImplementedError

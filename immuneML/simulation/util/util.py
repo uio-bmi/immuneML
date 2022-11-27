@@ -1,3 +1,4 @@
+import logging
 from dataclasses import make_dataclass
 from itertools import chain
 from pathlib import Path
@@ -16,7 +17,6 @@ from immuneML.environment.SequenceType import SequenceType
 from immuneML.simulation.LIgOSimulationItem import LIgOSimulationItem
 from immuneML.simulation.generative_models.GenModelAsTSV import GenModelAsTSV
 from immuneML.simulation.implants.MotifInstance import MotifInstance
-from immuneML.simulation.util.bnp_util import make_new_bnp_dataclass
 from immuneML.util.PositionHelper import PositionHelper
 
 
@@ -44,13 +44,13 @@ def get_bnp_data(sequence_path, columns_with_types: list = None):
     if columns_with_types is None or isinstance(columns_with_types, list) and len(columns_with_types) == 0:
         data_class = GenModelAsTSV
     else:
-        data_class = make_new_bnp_dataclass(columns_with_types, GenModelAsTSV)
+        data_class = GenModelAsTSV.extend(tuple(columns_with_types))
 
     buff_type = delimited_buffers.get_bufferclass_for_datatype(data_class, delimiter='\t', has_header=True)
 
-    file = bnp.open(sequence_path, buffer_type=buff_type)
-    data = file.read()
-    file.close()
+    with bnp.open(sequence_path, buffer_type=buff_type) as file:
+        data = file.read()
+
     return data
 
 
@@ -192,4 +192,6 @@ def choose_implant_position(imgt_positions, position_weights):
     return position
 
 
-
+def check_iteration_progress(iteration: int, max_iterations: int):
+    if iteration == round(max_iterations * 0.75):
+        logging.warning(f"Iteration {iteration} out of {max_iterations} max iterations reached during rejection sampling.")

@@ -40,10 +40,10 @@ rep2.tsv,2""")
                                              "import_empty_nt_sequences": True, "import_empty_aa_sequences": False,
                                              "import_illegal_characters": False, "columns_to_load": [0, 1, 2, 3],
                                              "column_mapping":
-                                                 {0: "sequences",
-                                                  1: "sequence_aas",
-                                                  2: "v_genes",
-                                                  3: 'j_genes'},
+                                                 {0: "sequence",
+                                                  1: "sequence_aa",
+                                                  2: "v_call",
+                                                  3: 'j_call'},
                                              "path": path, "number_of_processes": 4}, "olga_repertoire_dataset")
 
         self.assertEqual(2, dataset.get_example_count())
@@ -75,7 +75,7 @@ rep2.tsv,2""")
         dataset = OLGAImport.import_dataset({"is_repertoire": False, "paired": False, "result_path": path,
                                              "columns_to_load": [1, 2, 3], "separator": "\t", "region_type": "IMGT_CDR3",
                                              "import_empty_nt_sequences": True, "import_empty_aa_sequences": False,
-                                             "import_illegal_characters": False, "column_mapping": {1: "sequence_aas", 2: "v_genes", 3: "j_genes"},
+                                             "import_illegal_characters": False, "column_mapping": {1: "sequence_aa", 2: "v_call", 3: "j_call"},
                                              "path": path, "number_of_processes": 4}, "olga_sequence_dataset")
 
         self.assertEqual(6, dataset.get_example_count())
