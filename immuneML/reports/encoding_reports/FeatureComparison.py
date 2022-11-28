@@ -124,8 +124,6 @@ class FeatureComparison(FeatureReport):
 
         plotting_data = self._filter_keep_fraction(plotting_data) if self.keep_fraction < 1 else plotting_data
 
-        max_x, max_y, min_x, min_y = self._get_axes_limits(plotting_data)
-
         error_x = "valuestd_x" if self.show_error_bar else None
         error_y = "valuestd_y" if self.show_error_bar else None
 
@@ -138,7 +136,7 @@ class FeatureComparison(FeatureReport):
                             }, template='plotly_white',
                             color_discrete_sequence=px.colors.diverging.Tealrose)
 
-        self.add_diagonal(min_x, max_x, min_y, max_y, figure)
+        self.add_diagonal(figure)
 
         file_path = self.result_path / f"{self.result_name}.html"
 
@@ -146,18 +144,9 @@ class FeatureComparison(FeatureReport):
 
         return ReportOutput(path=file_path, name=f"Comparison of feature values across {self.comparison_label}")
 
-    def add_diagonal(self, min_x, max_x, min_y, max_y, figure):
-        max_coord = max_x if max_x > max_y else max_y
-        min_coord = min_y if min_y < min_x else min_x
-        figure.add_shape(type="line", x0=min_coord, y0=min_coord, x1=max_coord, y1=max_coord, line=dict(color="#B0C2C7", dash="dash"))
-
-    def _get_axes_limits(self, plotting_data):
-        max_x = max(plotting_data["valuemean_x"] + plotting_data["valuestd_x"])
-        max_y = max(plotting_data["valuemean_y"] + plotting_data["valuestd_y"])
-        min_x = min(plotting_data["valuemean_x"] - plotting_data["valuestd_x"])
-        min_y = min(plotting_data["valuemean_y"] - plotting_data["valuestd_y"])
-
-        return max_x, max_y, min_x, min_y
+    def add_diagonal(self, figure):
+        figure.update_layout(shapes=[{'type': "line", 'line': dict(color="#B0C2C7", dash="dash"), 'yref': 'paper', 'xref': 'paper', 'y0': 0,
+                                      'y1': 1, 'x0': 0, 'x1': 1, 'layer': 'below'}])
 
     def _filter_keep_fraction(self, plotting_data):
         plotting_data["diff_xy"] = abs(plotting_data["valuemean_x"] - plotting_data["valuemean_y"])
