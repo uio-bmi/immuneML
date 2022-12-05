@@ -86,7 +86,7 @@ def annotate_sequences(sequences, is_amino_acid: bool, all_signals: list):
                 if matches is None:
                     matches = np.logical_and(matches_motif, matches_gene)
                 else:
-                    matches = np.logical_or(matches, np.logical_and((matches_motif, matches_gene)))
+                    matches = np.logical_or(matches, np.logical_and(matches_motif, matches_gene))
 
             signal_pos_col = np.logical_or(signal_pos_col, matches) if signal_pos_col is not None else matches
             signal_matrix[:, index] = np.logical_or(signal_matrix[:, index], np.logical_or.reduce(matches, axis=1))
