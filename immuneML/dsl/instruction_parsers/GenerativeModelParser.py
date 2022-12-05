@@ -68,8 +68,14 @@ class GenerativeModelParser:
     def _prepare_optional_params(self, generator: dict, symbol_table: SymbolTable, yaml_location: str) -> dict:
 
         params = {}
+        dataset = symbol_table.get(generator["dataset"])
+
+
         if "amount" in generator:
             params["amount"] = generator["amount"]
+        if "encoding" in generator:
+            params["encoder"] = symbol_table.get(generator["encoding"]).build_object(dataset, **symbol_table.get_config(generator["encoding"])["encoder_params"])
+
 
         return params
 

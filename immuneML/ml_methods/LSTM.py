@@ -4,6 +4,7 @@ import datetime
 
 import numpy as np
 import pandas as pd
+import tensorflow as tf
 
 from pathlib import Path
 from immuneML.ml_methods.GenerativeModel import GenerativeModel
@@ -22,11 +23,68 @@ class LSTM(GenerativeModel):
         super(LSTM, self).__init__(parameter_grid=parameter_grid, parameters=parameters)
 
 
-    def _get_ml_model(self, cores_for_training: int = 2, X=None, dataset=None):
+    def _get_ml_model(self, cores_for_training: int = 2, X=None):
+
+
+        """
+        :param cores_for_training:
+        :param X:
+        :return: keras.Sequential object
+
+        The initial parameters set have been determined through testing on a previous project using LSTM. It is
+        worthwhile considering changing these.
+        """
+        embedding_dim = 256
+        rnn_units = 1024
+        seq_length = 42  # window size (w)
+        batch_size = 64
+        buffer_size = 1000
+
+        instances = np.array(
+            [list(sequence.get_sequence()) for repertoire in X.get_data() for sequence in repertoire.sequences])
+
+        self.alphabet = sorted(set(instances.view().reshape(instances.shape[0] * instances.shape[
+            1])))  # Mashes all data into 1 dimension and uses the set function to find the unique characters
+
+        vocab_size = len(self.alphabet)
+
+        self.model = tf.keras.Sequential([
+            tf.keras.layers.Embedding(vocab_size, embedding_dim, batch_input_shape=[batch_size, None]),
+            tf.keras.layers.LSTM(rnn_units,
+                                 return_sequences=True,
+                                 stateful=True,
+                                 recurrent_initializer='glorot_uniform'),
+            tf.keras.layers.Dense(vocab_size)
+        ])
+
         return self.model
 
-    def _fit(self, X, cores_for_training: int = 1, dataset=None):
-        self.model = self._get_ml_model(cores_for_training, X, dataset)
+    def _fit(self, X, cores_for_training: int = 1):
+
+        train_size = int(0.7 * len(X))
+        val_size = int(0.15 * len(X))
+        test_size = int(0.15 * len(X))
+        print('Trains batches {}, val batches {}, test batches {}'.format(train_size, val_size, test_size))
+
+        train_dataset = X.take(train_size)
+        test_dataset = dataset.skip(train_size)
+        val_dataset = test_dataset.skip(val_size)
+        test_dataset = test_dataset.take(test_size)
+
+        self.model = self._get_ml_model(cores_for_training, X)
+
+        history = self.model.fit(train_dataset, epochs=nb_epoch,
+                            callbacks=[checkpoint_callback],
+                            validation_data=val_dataset)
+        history_outfile = 'outfiles/%s_history.txt'
+
+        history_contents = []
+        for key in history.history:
+            for i, val in enumerate(history.history[key]):
+                history_content = [key, i + 1, val]
+                history_contents.append(history_content)
+        historydf = pd.DataFrame(history_contents, columns=['loss_cat', 'epoch', 'value'])
+        historydf.to_csv(history_outfile, index=False)
 
         return self.model
 

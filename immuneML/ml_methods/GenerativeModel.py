@@ -35,14 +35,14 @@ class GenerativeModel(UnsupervisedMLMethod):
         self.class_mapping = None
         self.label = None
 
-    def fit(self, encoded_data: EncodedData, cores_for_training: int = 2, dataset: Dataset = None):
+    def fit(self, dataset, cores_for_training: int = 2):
 
-        self.model = self._fit(encoded_data, cores_for_training, dataset=dataset)
+        self.model = self._fit(dataset, cores_for_training)
 
     def generate(self, length_of_sequences: int = None, amount=10, path_to_model: Path = None):
         pass
 
-    def _fit(self, X, cores_for_training: int = 1, dataset=None):
+    def _fit(self, X, cores_for_training: int = 1):
 
         self.model = self._get_ml_model(X)
 
