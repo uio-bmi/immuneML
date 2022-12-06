@@ -42,8 +42,6 @@ class MatchedSequencesEncoder(DatasetEncoder):
 
         normalize (bool): If True, the sequence matches are divided by the total number of unique sequences in the repertoire (when reads = unique) or the total number of reads in the repertoire (when reads = all).
 
-        compairr_path (Path): optional path to the CompAIRR executable. If specified, the sequence abundance matrix will be computed using CompAIRR.
-
 
     YAML Specification:
 
@@ -57,25 +55,23 @@ class MatchedSequencesEncoder(DatasetEncoder):
                     params:
                         path: path/to/file.txt
                 max_edit_distance: 1
-                compairr_path: path/to/compairr
     """
 
 
 
     def __init__(self, max_edit_distance: int, reference: ReceptorSequenceList, reads: ReadsType, sum_matches: bool, normalize: bool,
-                 compairr_path: Path = None, name: str = None):
+                 name: str = None):
         self.max_edit_distance = max_edit_distance
         self.reference_sequences = reference
         self.reads = reads
         self.sum_matches = sum_matches
         self.normalize = normalize
         self.feature_count = 1 if self.sum_matches else len(self.reference_sequences)
-        self.compairr_path = compairr_path
         self.name = name
 
     @staticmethod
     def _prepare_parameters(max_edit_distance: int, reference: dict, reads: str, sum_matches: bool, normalize: bool,
-                            compairr_path: str = None, name: str = None):
+                            name: str = None):
         location = "MatchedSequencesEncoder"
 
         ParameterValidator.assert_type_and_value(max_edit_distance, int, location, "max_edit_distance", min_inclusive=0)
@@ -85,18 +81,12 @@ class MatchedSequencesEncoder(DatasetEncoder):
 
         reference_sequences = MatchedReferenceUtil.prepare_reference(reference_params=reference, location=location, paired=False)
 
-        if compairr_path is not None:
-            ParameterValidator.assert_type_and_value(compairr_path, str, location, "compairr_path")
-            CompAIRRHelper.check_compairr_path(compairr_path)
-            compairr_path = Path(compairr_path)
-
         return {
             "max_edit_distance": max_edit_distance,
             "reference": reference_sequences,
             "reads": ReadsType[reads.upper()],
             "sum_matches": sum_matches,
             "normalize": normalize,
-            "compairr_path": compairr_path,
             "name": name
         }
 
