@@ -2,6 +2,7 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
+from multiprocessing.pool import Pool
 
 from immuneML.caching.CacheHandler import CacheHandler
 from immuneML.data_model.receptor.receptor_sequence.ReceptorSequenceList import ReceptorSequenceList
@@ -187,16 +188,12 @@ class MatchedSequencesEncoder(DatasetEncoder):
         return features
 
     def _encode_repertoires(self, dataset: RepertoireDataset, params):
-        # Rows = repertoires, Columns = reference sequences
-        encoded_repertories = np.zeros((dataset.get_example_count(),
-                                        self.feature_count),
-                                       dtype=int)
-
         labels = {label: [] for label in params.label_config.get_labels_by_name()} if params.encode_labels else None
 
-        for i, repertoire in enumerate(dataset.get_data()):
-            encoded_repertories[i] = self._get_repertoire_matches_to_reference(repertoire)
+        with Pool(params.pool_size) as pool:
+            encoded_repertories = np.array(pool.map(self._get_repertoire_matches_to_reference, dataset.repertoires))
 
+        for repertoire in dataset.repertoires:
             for label_name in params.label_config.get_labels_by_name():
                 labels[label_name].append(repertoire.metadata[label_name])
 
