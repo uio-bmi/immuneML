@@ -194,6 +194,7 @@ class MatchedSequencesEncoder(DatasetEncoder):
              (("repertoire_identifier", repertoire.identifier),
               ("encoding", MatchedSequencesEncoder.__name__),
               ("readstype", self.reads.name),
+              ("sum_matches", self.sum_matches),
               ("max_edit_distance", self.max_edit_distance),
               ("reference_sequences", tuple([(seq.get_attribute("chain"), seq.get_sequence(), seq.get_attribute("v_gene"), seq.get_attribute("j_gene")) for seq in self.reference_sequences]))),
             lambda: self._compute_matches_to_reference(repertoire))
