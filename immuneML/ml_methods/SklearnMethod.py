@@ -89,7 +89,7 @@ class SklearnMethod(MLMethod):
     def fit(self, encoded_data: EncodedData, label: Label, cores_for_training: int = 2):
 
         self.label = label
-        self.class_mapping = Util.make_class_mapping(encoded_data.labels[self.label.name])
+        self.class_mapping = Util.make_class_mapping(encoded_data.labels[self.label.name], self.label.positive_class)
         self.feature_names = encoded_data.feature_names
 
         mapped_y = Util.map_to_new_class_values(encoded_data.labels[self.label.name], self.class_mapping)
@@ -132,7 +132,7 @@ class SklearnMethod(MLMethod):
     def fit_by_cross_validation(self, encoded_data: EncodedData, number_of_splits: int = 5, label: Label = None, cores_for_training: int = -1,
                                 optimization_metric='balanced_accuracy'):
 
-        self.class_mapping = Util.make_class_mapping(encoded_data.labels[label.name])
+        self.class_mapping = Util.make_class_mapping(encoded_data.labels[label.name], label.positive_class)
         self.feature_names = encoded_data.feature_names
         self.label = label
         mapped_y = Util.map_to_new_class_values(encoded_data.labels[self.label.name], self.class_mapping)
