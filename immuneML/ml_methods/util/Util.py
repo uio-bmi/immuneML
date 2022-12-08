@@ -39,16 +39,16 @@ class Util:
             raise e
 
     @staticmethod
-    def make_class_mapping(y) -> dict:
+    def make_class_mapping(y, positive_class=None) -> dict:
         """Creates a class mapping from a list of classes which can be strings, numbers of booleans; maps to same name in multi-class settings"""
         classes = np.unique(y)
         if classes.shape[0] == 2:
-            return Util.make_binary_class_mapping(y)
+            return Util.make_binary_class_mapping(y, positive_class)
         else:
             return {cls: cls for cls in classes}
 
     @staticmethod
-    def make_binary_class_mapping(y) -> dict:
+    def make_binary_class_mapping(y, positive_class=None) -> dict:
         """
         Creates binary class mapping from a list of classes which can be strings, numbers or boolean values
 
@@ -62,10 +62,17 @@ class Util:
         """
         unique_values = sorted(set(y))
         assert len(unique_values) == 2, f"MLMethod: there has two be exactly two classes to use this classifier," \
-                                            f" instead got {str(unique_values)[1:-1]}. For multi-class classification, " \
-                                            f"consider some of the other classifiers."
+                                        f" instead got {str(unique_values)[1:-1]}. For multi-class classification, " \
+                                        f"consider some of the other classifiers."
 
-        return {0: unique_values[0], 1: unique_values[1]}
+        if positive_class is None:
+            return {0: unique_values[0], 1: unique_values[1]}
+        else:
+            assert positive_class in unique_values, f"MLMethod: the specified positive class '{positive_class}' does not occur " \
+                                                    f"in the list of available classes: {str(unique_values)[1:-1]}."
+            unique_values.pop(positive_class)
+            return {0: unique_values[0], 1: positive_class}
+
 
     @staticmethod
     def binarize_label_classes(true_y, predicted_y, classes):

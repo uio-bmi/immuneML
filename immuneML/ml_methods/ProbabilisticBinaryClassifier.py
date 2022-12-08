@@ -75,7 +75,7 @@ class ProbabilisticBinaryClassifier(MLMethod):
                                 "and the total number of trials. If this is not targeted use-case and the encoding, please consider using " \
                                 "another classifier."
 
-        self.class_mapping = Util.make_binary_class_mapping(encoded_data.labels[label.name])
+        self.class_mapping = Util.make_binary_class_mapping(encoded_data.labels[label.name], label.positive_class)
         self.label = label
         self.N_0 = int(np.sum(np.array(encoded_data.labels[label.name]) == self.class_mapping[0]))
         self.N_1 = int(np.sum(np.array(encoded_data.labels[label.name]) == self.class_mapping[1]))
