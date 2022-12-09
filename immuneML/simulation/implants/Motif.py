@@ -76,6 +76,10 @@ class Motif:
     seed_chain2: str = None
     name_chain2: Chain = None
 
+    v_call: str = None
+    j_call: str = None
+    mutation_position_possibilities: dict = None
+
     def instantiate_motif(self, chain_name: Chain = None):
         """
         Creates a motif instance based on the seed; if seed parameter is defined for the motif, it is assumed that single chain data are used for
@@ -87,6 +91,7 @@ class Motif:
              for the corresponding chains
         """
         assert self.instantiation is not None, "Motif: set instantiation strategy before instantiating a motif."
+
         # TODO: handle PWMs also, here it always uses seed
         if self.seed is not None:
             return self.instantiation.instantiate_motif(self.seed)

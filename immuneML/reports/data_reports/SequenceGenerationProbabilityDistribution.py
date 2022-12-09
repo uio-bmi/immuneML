@@ -25,6 +25,7 @@ class SequenceGenerationProbabilityDistribution(DataReport):
         appears in (True) or by the total sequence count in all repertoires (False).
         Default value is False.
         mark_implanted_labels (bool): Plot the implanted sequences with different colors. Default value is True.
+        dataset_generation_method (str): Name of main dataset (all non-implanted sequences) in the plot legend. Default value is "dataset".
 
     YAML specification:
 
@@ -35,6 +36,7 @@ class SequenceGenerationProbabilityDistribution(DataReport):
             SequenceGenerationProbabilityDistribution:
                 count_by_repertoire: False
                 mark_implanted_labels: True
+                dataset_generation_method: OLGA
     """
 
     @classmethod
@@ -44,11 +46,13 @@ class SequenceGenerationProbabilityDistribution(DataReport):
         return SequenceGenerationProbabilityDistribution(**kwargs)
 
     def __init__(self, dataset: RepertoireDataset = None, batch_size: int = 1, result_path: Path = None,
-                 name: str = None, count_by_repertoire: bool = False, mark_implanted_labels: bool = True):
+                 name: str = None, count_by_repertoire: bool = False, mark_implanted_labels: bool = True,
+                 dataset_generation_method: str = "dataset"):
         super().__init__(dataset=dataset, result_path=result_path, name=name)
         self.batch_size = batch_size
         self.count_by_repertoire = count_by_repertoire
         self.mark_implanted_labels = mark_implanted_labels
+        self.dataset_generation_method = dataset_generation_method
 
     def check_prerequisites(
             self):  # called at runtime to check if the report can be run with params assigned at runtime (e.g., dataset is set at runtime)
@@ -115,7 +119,7 @@ class SequenceGenerationProbabilityDistribution(DataReport):
                             break
 
                 if not seq_gen_method:
-                    seq_gen_method = "natural"
+                    seq_gen_method = self.dataset_generation_method
 
                 generation_method[rep_attributes["sequence_aas"][i]] = seq_gen_method
 

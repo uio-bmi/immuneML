@@ -1,20 +1,15 @@
 import copy
 import math
-import random
 from pathlib import Path
+import random
 from typing import List
-
-import pandas as pd
 
 from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
 from immuneML.data_model.receptor.receptor_sequence.SequenceAnnotation import SequenceAnnotation
 from immuneML.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
 from immuneML.data_model.repertoire.Repertoire import Repertoire
-from immuneML.environment.EnvironmentSettings import EnvironmentSettings
-from immuneML.environment.SequenceType import SequenceType
-from immuneML.simulation.generative_models.OLGA import OLGA
+from immuneML.simulation import SequenceDispenser
 from immuneML.simulation.implants.ImplantAnnotation import ImplantAnnotation
-from immuneML.simulation.implants.MotifInstance import MotifInstance
 from immuneML.simulation.signal_implanting_strategy.SignalImplantingStrategy import SignalImplantingStrategy
 
 
@@ -48,6 +43,16 @@ class MutationImplanting(SignalImplantingStrategy):
 
     """
 
+    """def __init__(self, implanting: SequenceImplantingStrategy = None, sequence_position_weights: dict = None,
+                 implanting_computation: ImplantingComputation = None, sequence_dispenser: SequenceDispenser = None):
+        super().__init__(implanting, sequence_position_weights, implanting_computation)
+        self.sequence_dispenser = sequence_dispenser"""
+
+    sequence_dispenser = None
+
+    def set_sequence_dispenser(self, sequence_dispenser: SequenceDispenser):
+        self.sequence_dispenser = sequence_dispenser
+
     def implant_in_repertoire(self, repertoire: Repertoire, repertoire_implanting_rate: float, signal, path: Path):
 
         assert all("/" not in motif.seed for motif in signal.motifs), \
@@ -59,7 +64,7 @@ class MutationImplanting(SignalImplantingStrategy):
         assert new_sequence_count > 0, \
             f"MutationImplanting: there are too few sequences ({len(sequences)}) in the repertoire with identifier {repertoire.identifier} " \
             f"to have the given repertoire implanting rate ({repertoire_implanting_rate}). Please consider increasing the repertoire implanting rate."
-        new_sequences = self._create_new_sequences(sequences, new_sequence_count, signal)
+        new_sequences = self._create_new_sequences(sequences, new_sequence_count, signal, repertoire_id=repertoire.identifier)
         metadata = copy.deepcopy(repertoire.metadata)
         metadata[signal.id] = True
 
@@ -68,78 +73,28 @@ class MutationImplanting(SignalImplantingStrategy):
 
         return Repertoire.build_from_sequence_objects(new_sequences, path, metadata)
 
-    def _create_new_sequences(self, sequences, new_sequence_count, signal) -> List[ReceptorSequence]:
+    def _create_new_sequences(self, sequences, new_sequence_count, signal, repertoire_id) -> List[ReceptorSequence]:
+
+        assert self.sequence_dispenser, "No SequenceDispenser has been set"
+
         new_sequences = sequences[:-new_sequence_count]
 
-        # V and J genes for when there is none from the seed sequence
-        placeholder_v_gene = None # "TRBV5-1"
-        placeholder_j_gene = None # "TRBJ4-2"
-
-        all_mutations = []
-
-        # TODO keep track of which mutations are for which signals so the implant annotation is correct
         for motif in signal.motifs:
-            all_mutations += self._get_mutations(motif.seed, placeholder_v_gene, placeholder_j_gene)
+            self.sequence_dispenser.add_seed_sequence(motif)
 
-        # TODO weighted choices by pgen? (random.choices(weights=[p1,p2,p3,...] or maybe cumulative weights with mutations ordered by pgen)
-        sequences_to_implant = random.sample(all_mutations, new_sequence_count)
+        for _ in range(new_sequence_count):
+            motif = self.sequence_dispenser.generate_mutation(repertoire_id=repertoire_id)
 
-        for index, seq in enumerate(sequences_to_implant):
-            motif_instance = MotifInstance(instance=seq, gap=0)
-
-            annotation = SequenceAnnotation([ImplantAnnotation(signal_id=signal.id, motif_id=f"mutation{index}",
-                                                               motif_instance=motif_instance, position=0)])
-            metadata = SequenceMetadata(v_gene=placeholder_v_gene, j_gene=placeholder_j_gene, count=1, chain="B",
+            motif_instance = motif.instantiate_motif()
+            annotation = SequenceAnnotation([ImplantAnnotation(signal_id=signal.id, motif_id=motif.identifier,
+                                                               motif_instance=motif_instance.instance, position=0)])
+            metadata = SequenceMetadata(v_gene="TRBV6-1", j_gene="TRBJ2-7", count=1, chain="B",
                                         region_type=sequences[0].metadata.region_type)
+
             new_sequences.append(
                 ReceptorSequence(amino_acid_sequence=motif_instance.instance, annotation=annotation, metadata=metadata))
 
         return new_sequences
-
-    def _get_mutations(self, seed_seq: str, v_gene: str, j_gene: str):
-        mutations = []
-        mutation_pos = []
-        amino_alphabet = EnvironmentSettings.get_sequence_alphabet(sequence_type=SequenceType.AMINO_ACID)
-
-        # TODO test different values (maybe add as input variable?)
-        mutation_range_from_ends = 2
-        print(f"Generating mutations from sequence {seed_seq} from position with indexes {mutation_range_from_ends} to "
-              f"{len(seed_seq) - mutation_range_from_ends} (exclusionary). Area to be mutated: {seed_seq[mutation_range_from_ends: len(seed_seq) - mutation_range_from_ends]}")
-
-        for i in range(mutation_range_from_ends, len(seed_seq) - mutation_range_from_ends):
-            for amino_acid in amino_alphabet:
-                mutation = seed_seq[:i] + amino_acid + seed_seq[i + 1:]
-
-                if mutation == seed_seq:
-                    continue
-
-                mutations.append(mutation)
-                mutation_pos.append(i)
-
-        olga = OLGA.build_object(model_path=None, default_model_name="humanTRB", chain=None, use_only_productive=False)
-        olga.load_model()
-
-        df = pd.DataFrame(data={
-            "sequence_aas": mutations,
-            "v_genes": v_gene,
-            "j_genes": j_gene,
-            "mutation_pos": mutation_pos
-        })
-
-        df.drop_duplicates(subset=["sequence_aas"], inplace=True, ignore_index=True)
-
-        # compute pgen
-        df["pgen"] = olga.compute_p_gens(df, SequenceType.AMINO_ACID)
-
-        df = df[df['pgen'] > 0].reset_index(drop=True)
-
-        print(f"\nNr. of possible seqs.: {len(df)}")
-
-        print("\nMEAN ___________________")
-        print(df.groupby('mutation_pos').mean())
-        print()
-
-        return df["sequence_aas"].tolist()
 
     def implant_in_receptor(self, receptor, signal, is_noise: bool):
         raise RuntimeError("MutationImplanting was called on a receptor object. Check the simulation parameters.")

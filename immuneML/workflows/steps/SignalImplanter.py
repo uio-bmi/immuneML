@@ -11,7 +11,9 @@ from immuneML.data_model.dataset.ReceptorDataset import ReceptorDataset
 from immuneML.data_model.dataset.RepertoireDataset import RepertoireDataset
 from immuneML.data_model.receptor.Receptor import Receptor
 from immuneML.data_model.repertoire.Repertoire import Repertoire
+from immuneML.simulation.SequenceDispenser import SequenceDispenser
 from immuneML.simulation.SimulationState import SimulationState
+from immuneML.simulation.signal_implanting_strategy.MutationImplanting import MutationImplanting
 from immuneML.util.FilenameHandler import FilenameHandler
 from immuneML.util.PathBuilder import PathBuilder
 from immuneML.workflows.steps.Step import Step
@@ -56,6 +58,16 @@ class SignalImplanter(Step):
 
     @staticmethod
     def _implant_signals_in_repertoires(simulation_state: SimulationState = None) -> Dataset:
+
+        # only runs if any of the signal implanting strategies are MutationImplanting
+        if any([isinstance(signal.implanting_strategy, MutationImplanting) for implanting in
+                simulation_state.simulation.implantings for signal in implanting.signals]):
+            total_sequence_count = SequenceDispenser.total_sequence_count(simulation_state.dataset.get_data())
+
+            for implanting in simulation_state.simulation.implantings:
+                for signal in implanting.signals:
+                    if isinstance(signal.implanting_strategy, MutationImplanting):
+                        signal.implanting_strategy.set_sequence_dispenser(SequenceDispenser(total_sequence_count))
 
         repertoires_path = PathBuilder.build(simulation_state.result_path / "repertoires")
         processed_repertoires = SignalImplanter._implant_signals(simulation_state, SignalImplanter._process_repertoire, repertoires_path)
@@ -128,7 +140,9 @@ class SignalImplanter(Step):
     @staticmethod
     def _implant_in_repertoire(index, repertoire, implanting, simulation_state) -> Repertoire:
         new_repertoire = copy.deepcopy(repertoire)
+
         for signal in implanting.signals:
+
             new_repertoire = signal.implant_to_repertoire(repertoire=new_repertoire,
                                                           repertoire_implanting_rate=implanting.repertoire_implanting_rate,
                                                           path=simulation_state.result_path / "repertoires/")
