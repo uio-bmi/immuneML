@@ -3,6 +3,7 @@ from pathlib import Path
 import logging
 import pandas as pd
 import os
+import warnings
 
 import plotly.express as px
 import plotly.graph_objects as go
@@ -41,7 +42,7 @@ class MotifGeneralizationAnalysis(DataReport):
 
         highlight_motifs_name (str): if highlight_motifs_path is defined, this name will be used to label the motifs of interest in the output figures.
 
-        plot_smoothed_combined_precision (bool): whether to add a smoothed line representing the combined precision to the precision-vs-TP plot. When set to True, this may take considerable extra time to compute. By default, plot_smoothed_combined_precision is set to True.
+        smoothen_combined_precision (bool): whether to add a smoothed line representing the combined precision to the precision-vs-TP plot. When set to True, this may take considerable extra time to compute. By default, plot_smoothed_combined_precision is set to True.
 
         training_set_identifier_path (str): path to a file containing 'sequence_identifiers' of the sequences used for the training set. Each line in the file should represent one sequence identifier, with no file header. The remaining sequences will be used as the validation set. If training_set_identifier_path is not set, a random subset of the data (according to training_percentage) will be assigned to be the training set.
 
@@ -64,7 +65,7 @@ class MotifGeneralizationAnalysis(DataReport):
     def __init__(self, training_set_identifier_path: str = None, training_percentage: float = None,
                  max_positions: int = None, min_precision: float = None,
                  min_recall: float = None, min_true_positives: int = None,  random_seed: int = None, label: dict = None,
-                 plot_smoothed_combined_precision: bool = None,
+                 smoothen_combined_precision: bool = None,
                  min_points_in_window: int = None, smoothing_constant1: float = None, smoothing_constant2: float = None,
                  highlight_motifs_path: str = None, highlight_motifs_name: str = None,
                  dataset: SequenceDataset = None, result_path: Path = None, number_of_processes: int = 1, name: str = None):
@@ -76,14 +77,15 @@ class MotifGeneralizationAnalysis(DataReport):
         self.min_precision = min_precision
         self.min_recall = min_recall
         self.min_true_positives = min_true_positives
-        self.plot_smoothed_combined_precision = plot_smoothed_combined_precision
+        self.smoothen_combined_precision = smoothen_combined_precision
         self.min_points_in_window = min_points_in_window
         self.smoothing_constant1 = smoothing_constant1
         self.smoothing_constant2 = smoothing_constant2
         self.random_seed = random_seed
         self.label = label
-        self.label_config = None
         self.col_names = None
+        self.tp_cutoff = None
+        self.recall_cutoff = None
 
         self.highlight_motifs_name = highlight_motifs_name
         self.highlight_motifs_path = Path(highlight_motifs_path) if highlight_motifs_path is not None else None
@@ -96,7 +98,7 @@ class MotifGeneralizationAnalysis(DataReport):
         ParameterValidator.assert_type_and_value(kwargs["min_precision"], (int, float), location, "min_precision", min_inclusive=0, max_inclusive=1)
         ParameterValidator.assert_type_and_value(kwargs["min_recall"], (int, float), location, "min_recall", min_inclusive=0, max_inclusive=1)
         ParameterValidator.assert_type_and_value(kwargs["min_true_positives"], int, location, "min_true_positives", min_inclusive=1)
-        ParameterValidator.assert_type_and_value(kwargs["plot_smoothed_combined_precision"], bool, location, "plot_smoothed_combined_precision")
+        ParameterValidator.assert_type_and_value(kwargs["smoothen_combined_precision"], bool, location, "smoothen_combined_precision")
         ParameterValidator.assert_type_and_value(kwargs["min_points_in_window"], int, location, "min_points_in_window", min_inclusive=1)
         ParameterValidator.assert_type_and_value(kwargs["smoothing_constant1"], (int, float), location, "smoothing_constant1", min_exclusive=0)
         ParameterValidator.assert_type_and_value(kwargs["smoothing_constant2"], (int, float), location, "smoothing_constant2", min_exclusive=0)
@@ -130,11 +132,16 @@ class MotifGeneralizationAnalysis(DataReport):
 
         training_combined_precision = self._get_combined_precision(training_plotting_data)
         test_combined_precision = self._get_combined_precision(test_plotting_data)
+        self._set_tp_cutoff(test_combined_precision)
+        self._set_recall_cutoff(encoded_training_data)
 
         output_tables = self._write_output_tables(training_plotting_data, test_plotting_data, training_combined_precision, test_combined_precision)
+        output_text = self._write_stats()
+
         plots = self._write_plots(training_plotting_data, test_plotting_data, training_combined_precision, test_combined_precision)
 
         return ReportResult(output_tables=output_tables,
+                            output_text=output_text,
                             output_figures=plots)
 
     def _set_colnames(self):
@@ -244,6 +251,12 @@ class MotifGeneralizationAnalysis(DataReport):
 
         return [table for table in [train_results_table, test_results_table, training_combined_precision_table, test_combined_precision_table] if table is not None]
 
+    def _write_stats(self):
+        with open(self.result_path / f"info.txt", "w") as file:
+            file.writelines([f"total training+test size: {self.dataset.get_example_count()}\n",
+                             f"training TP cutoff: {self.tp_cutoff}\n",
+                             f"training recall cutoff: {self.recall_cutoff}"])
+
     def _write_output_table(self, feature_annotations, file_path, name=None):
         feature_annotations.to_csv(file_path, index=False)
 
@@ -315,11 +328,34 @@ class MotifGeneralizationAnalysis(DataReport):
         df = pd.DataFrame({"training_tp": list(combined_precision.index),
                            "combined_precision": list(combined_precision)})
 
-        if self.plot_smoothed_combined_precision:
+        if self.smoothen_combined_precision:
             df["smooth_combined_precision"] = self._smooth_combined_precision(list(combined_precision.index),
                                                                               list(combined_precision),
                                                                               list(group_by_tp[tp].count()))
+
         return df
+
+    def _set_tp_cutoff(self, combined_precision):
+        col = "smooth_combined_precision" if "smooth_combined_precision" in combined_precision.columns else "combined_precision"
+
+        above_threshold = combined_precision[combined_precision[col] > self.min_precision]
+        if len(above_threshold) > 0:
+            self.tp_cutoff = min(above_threshold["training_tp"])
+        else:
+            warnings.warn(f"{MotifGeneralizationAnalysis.__name__}: could not automatically determine optimal TP threshold, {col} did not reach minimal preciison {self.min_precision}")
+            self.tp_cutoff = None
+
+    def _get_positive_count(self, dataset):
+        label_config = self._get_label_config(dataset)
+        label_name = label_config.get_label_objects()[0].name
+        label_positive_class = label_config.get_label_objects()[0].positive_class
+
+        return sum([1 for label_class in dataset.get_metadata([label_name])[label_name] if label_class == label_positive_class])
+
+    def _set_recall_cutoff(self, encoded_training_data):
+        positive_count_training = self._get_positive_count(encoded_training_data)
+        if self.tp_cutoff is not None:
+            self.recall_cutoff = self.tp_cutoff / positive_count_training
 
     def _smooth_combined_precision(self, x, y, weights):
         smoothed_y = []
@@ -374,12 +410,15 @@ class MotifGeneralizationAnalysis(DataReport):
                                  marker=dict(symbol="diamond", color=px.colors.diverging.Tealrose[0])),
                       secondary_y=False)
 
-        if self.plot_smoothed_combined_precision:
+        if self.smoothen_combined_precision:
             fig.add_trace(go.Scatter(x=combined_precision["training_tp"], y=combined_precision["smooth_combined_precision"],
                                      marker=dict(color=px.colors.diverging.Tealrose[-1]),
                                      name=self.col_names["combined precision"] + ", smoothed",
                                      mode="lines", line_shape='spline', line={'smoothing': 1.3}),
                           secondary_y=False, )
+
+        if self.tp_cutoff is not None:
+            fig.add_vline(x=self.tp_cutoff, line_dash="dash")
 
         fig.update_layout(xaxis=dict(dtick=1), showlegend=True)
 
