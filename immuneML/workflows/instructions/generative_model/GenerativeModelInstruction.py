@@ -43,7 +43,7 @@ class GenerativeModelInstruction(Instruction):
     def run_unit(self, unit: GenerativeModelUnit, result_path: Path) -> ReportResult:
         encoded_dataset = self.encode(unit, result_path / "encoded_dataset")
         unit.report.dataset = encoded_dataset
-        unit.genModel.fit(encoded_dataset.encoded_data, dataset=unit.dataset)
+        unit.genModel.fit(encoded_dataset.encoded_data)
         unit.genModel.store(result_path)
         sequences = unit.genModel.generate(amount=unit.amount)
         unit.report.method = unit.genModel

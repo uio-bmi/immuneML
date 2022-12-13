@@ -4,6 +4,7 @@ import datetime
 
 import numpy as np
 import pandas as pd
+import tensorflow as tf
 
 from pathlib import Path
 from immuneML.ml_methods.GenerativeModel import GenerativeModel
@@ -18,89 +19,120 @@ class LSTM(GenerativeModel):
     def __init__(self, parameter_grid: dict = None, parameters: dict = None):
         parameters = parameters if parameters is not None else {}
         parameter_grid = parameter_grid if parameter_grid is not None else {}
-        self.alphabet = ""
         super(LSTM, self).__init__(parameter_grid=parameter_grid, parameters=parameters)
 
 
-    def _get_ml_model(self, cores_for_training: int = 2, X=None, dataset=None):
+    def _get_ml_model(self, cores_for_training: int = 2, X=None):
 
-        instances = np.array([list(sequence.get_sequence()) for repertoire in dataset.get_data() for sequence in repertoire.sequences])
 
-        alphabet = ""
+        """
+        :param cores_for_training:
+        :param X:
+        :return: keras.Sequential object
 
-        for instance in instances:
-            for letter in instance:
-                alphabet = "".join(set(letter + alphabet))
-                if len(alphabet) == 20:  # max alphabet reached
-                    break
+        The initial parameters set have been determined through testing on a previous project using LSTM. It is
+        worthwhile considering changing these.
+        """
+        embedding_dim = 256
+        rnn_units = 1024
+        seq_length = 42  # window size (w)
+        batch_size = 64
+        buffer_size = 1000
 
-        self.alphabet = "".join(sorted(alphabet))
-        matrix = np.zeros(shape=(instances.shape[1], len(self.alphabet)))
+        vocab_size = len(self._alphabet)
 
-        instances = instances.T
-        for x, pos in enumerate(instances):
-            for element in pos:
-                for y, char in enumerate(list(self.alphabet)):
-                    if element == char:
-                        matrix[x][y] += 1
-                        break
-
-        for ind, row in enumerate(matrix):
-            matrix[ind] = matrix[ind] / sum(matrix[ind]) * 100
-
-        return matrix
-
-    def _fit(self, X, y, cores_for_training: int = 1, dataset=None):
-        self.model = self._get_ml_model(cores_for_training, X, dataset)
+        self.model = tf.keras.Sequential([
+            tf.keras.layers.Embedding(vocab_size, embedding_dim, batch_input_shape=[batch_size, None]),
+            tf.keras.layers.LSTM(rnn_units,
+                                 return_sequences=True,
+                                 stateful=True,
+                                 recurrent_initializer='glorot_uniform'),
+            tf.keras.layers.Dense(vocab_size)
+        ])
 
         return self.model
 
-    def generate(self, length_of_sequences: int = None, amount=10, path_to_model: Path = None):
+    def loss(self, labels, logits):
+        '''
+        loss function for the net output
+        :param labels:
+        :param logits:
+        :return:
+        '''
+        loss = tf.keras.losses.sparse_categorical_crossentropy(labels, logits, from_logits=True)
+        return loss
 
-        if self.model is None:
-            model_as_array = []
-            print(f'{datetime.datetime.now()}: Fetching model...')
-            with open(path_to_model, 'r') as file:
+    # split input target
+    def split_input_target(self, seq):
+        '''
+        split input output, return input-output pairs
+        :param seq:
+        :return:
+        '''
+        input_seq = seq[:-1]
+        target_seq = seq[1:]
+        return input_seq, target_seq
 
-                reader = csv.reader(file)
-                self.alphabet = "".join(next(reader))
-                for row in reader:
-                    model_as_array.append(row)
-            self.model = np.array(model_as_array)
+    def _fit(self, encoded_data, cores_for_training: int = 1):
 
-        length_of_sequences = length_of_sequences if length_of_sequences is not None else self.model.shape[0]
-        generated_sequences = []
-        for _ in range(amount):
-            sequence = []
-            for i in range(length_of_sequences):
-                sequence.append(np.random.choice(list(self.alphabet), 1, p=self.model[i]/100)[0])
-            generated_sequences.append(sequence)
+        nb_epoch = 20
 
-        instances = np.array(generated_sequences)
+        char_dataset = tf.data.Dataset.from_tensor_slices(encoded_data)
 
-        matrix = np.zeros(shape=(instances.shape[1], len(self.alphabet)))
+        sequences = char_dataset.batch(self._length_of_sequence + 1, drop_remainder=True)
 
-        instances = instances.T
+        dataset = sequences.map(self.split_input_target)
+        batch_size = 64
+        buffer_size = 1000
+        dataset = dataset.shuffle(buffer_size).batch(batch_size, drop_remainder=True)
+        # get dataset size since there is no dim/shape attributes in tf.dataset
+        dataset_size = 0
+        for _ in dataset:
+            dataset_size += 1
+        scaller = 1
+        # split train, val, test
+        train_size = int(0.7 / scaller * dataset_size)
+        val_size = int(0.15 / scaller * dataset_size)
+        test_size = int(0.15 / scaller * dataset_size)
+        print('Trains batches {}, val batches {}, test batches {}'.format(train_size, val_size, test_size))
 
-        for x, pos in enumerate(instances):
-            for i, element in enumerate(pos):
-                for y, char in enumerate(list(self.alphabet)):
-                    if element == char:
-                        matrix[x][y] += 1
-                        break
+        train_dataset = dataset.take(train_size)
+        test_dataset = dataset.skip(train_size)
+        val_dataset = test_dataset.skip(val_size)
+        test_dataset = test_dataset.take(test_size)
 
-        for ind, row in enumerate(matrix):
-            matrix[ind] = matrix[ind] / sum(matrix[ind]) * 100
-        matrix = np.around(matrix, 2)
-        return_sequences = []
-        instances = instances.T
+        self.model = self._get_ml_model()
 
-        for row in instances:
-            return_sequences.append("".join(row))
+        self.model.summary()
+        # sanity checks
+        for input_example_batch, output_example_batch in dataset.take(1):
+            example_batch_predictions = self.model(input_example_batch)
+            print(example_batch_predictions.shape)
+            sampled_indices = tf.random.categorical(example_batch_predictions[0], num_samples=1)
+            print(sampled_indices)
+            sampled_indices = tf.squeeze(sampled_indices, axis=-1).numpy()
+        ####
 
-        matrix = matrix.T
+        example_loss = self.loss(output_example_batch, example_batch_predictions)
+        print(example_loss.numpy().mean())
+        self.model.compile(optimizer='adam', loss=self.loss)
 
-        return list(matrix), instances, self.alphabet
+        self.model.fit(train_dataset, epochs=nb_epoch,
+                            validation_data=val_dataset)
+
+        return self.model
+
+    def generate(self, amount=10, path_to_model: Path = None):
+
+        test = self.model("VICTR")
+
+        test2 = self.model.predict(self._length_of_sequences)
+
+
+        print(test)
+        print(test2)
+
+        return test2
 
     def get_params(self):
         return self._parameters
@@ -135,31 +167,7 @@ class LSTM(GenerativeModel):
 
     def store(self, path: Path, feature_names=None, details_path: Path = None):
 
-        PathBuilder.build(path)
-
-        print(f'{datetime.datetime.now()}: Writing to file...')
-        file_path = path / f"{self._get_model_filename()}.csv"
-        data = {"LSTM": self.model, "alphabet": self.alphabet}
-        dataframe = pd.DataFrame(data)
-        dataframe.to_csv(file_path)
-
-
-        if details_path is None:
-            params_path = path / f"{self._get_model_filename()}.yaml"
-        else:
-            params_path = details_path
-
-        with params_path.open("w") as file:
-            desc = {
-                **(self.get_params()),
-                "feature_names": feature_names,
-                "class_mapping": self.class_mapping,
-            }
-
-            if self.label is not None:
-                desc["label"] = vars(self.label)
-
-            yaml.dump(desc, file)
+        pass
 
     @staticmethod
     def get_documentation():
