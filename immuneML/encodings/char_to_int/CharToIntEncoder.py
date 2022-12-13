@@ -59,17 +59,20 @@ class CharToIntEncoder(DatasetEncoder):
         instances = np.array(
             [list(sequence.get_sequence()) for repertoire in dataset.get_data() for sequence in repertoire.sequences])
 
-        feature_names = ["pos: " + str(ind + 1) for ind in np.arange(instances.shape[1])]
+        #feature_names = ["pos: " + str(ind + 1) for ind in np.arange(instances.shape[1])]
 
         alphabet = sorted(set(instances.view().reshape(instances.shape[0] * instances.shape[1]))) #This assumes all acids are included, consider hardcoding in alphabet
 
         char2idx = {u: i for i, u in enumerate(alphabet)}
 
-        examples = np.array([[char2idx[c] for c in sequence] for sequence in instances])
-        #np.reshape(examples, instances.shape)
+        length_of_sequence = instances.shape[1]
+        info = {"alphabet": alphabet, "length_of_sequence": length_of_sequence}
+        examples = np.array([char2idx[c] for sequence in instances for c in sequence])
+
         encoded_data = EncodedData(examples=examples,
-                                   feature_names=feature_names,
-                                   encoding=CharToIntEncoder.__name__)
+                                   #feature_names=feature_names,
+                                   encoding=CharToIntEncoder.__name__,
+                                   info=info)
 
         return encoded_data
 

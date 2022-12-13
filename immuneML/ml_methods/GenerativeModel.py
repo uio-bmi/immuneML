@@ -31,15 +31,18 @@ class GenerativeModel(UnsupervisedMLMethod):
 
         self._parameter_grid = parameter_grid
         self._parameters = parameters
+        self._alphabet = None
+        self._length_of_sequence = 20 #Set as average, will be overwritten
         self.feature_names = None
         self.class_mapping = None
         self.label = None
 
-    def fit(self, dataset, cores_for_training: int = 2):
+    def fit(self, encoded_data, cores_for_training: int = 2):
+        self._alphabet = encoded_data.info["alphabet"]
+        self._length_of_sequence = encoded_data.info["length_of_sequence"]
+        self.model = self._fit(encoded_data.examples, cores_for_training)
 
-        self.model = self._fit(dataset, cores_for_training)
-
-    def generate(self, length_of_sequences: int = None, amount=10, path_to_model: Path = None):
+    def generate(self, amount=10, path_to_model: Path = None):
         pass
 
     def _fit(self, X, cores_for_training: int = 1):
