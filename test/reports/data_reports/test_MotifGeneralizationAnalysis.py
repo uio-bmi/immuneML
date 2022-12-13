@@ -16,9 +16,15 @@ class TestMotifGeneralizationAnalysis(TestCase):
 
         dataset = RandomDatasetGenerator.generate_sequence_dataset(100, {10: 1}, {"l1": {"A": 0.5, "B": 0.5}}, path / "dataset")
 
-        # sequence_count: int, length_probabilities: dict, labels: dict, path: Path
+
+        identifiers = [seq.identifier for seq in dataset.get_data()]
+        training_set_identifiers = identifiers[::2]
+
+        with open(path / "training_ids.txt", "w") as identifiers_file:
+            identifiers_file.writelines([identifier + "\n" for identifier in training_set_identifiers])
 
         params = DefaultParamsLoader.load(EnvironmentSettings.default_params_path / "reports/", "MotifGeneralizationAnalysis")
+        params["training_set_identifier_path"] = str(path / "training_ids.txt")
         params["max_positions"] = 1
         params["min_precision"] = 0.8
         params["random_seed"] = 1
@@ -47,4 +53,4 @@ class TestMotifGeneralizationAnalysis(TestCase):
         self.assertTrue(os.path.isfile(path / "result/training_precision_recall.html"))
         self.assertTrue(os.path.isfile(path / "result/test_precision_recall.html"))
 
-        # shutil.rmtree(path)
+        shutil.rmtree(path)

@@ -1,6 +1,8 @@
 from pathlib import Path
 
+import logging
 import pandas as pd
+import os
 
 import plotly.express as px
 import plotly.graph_objects as go
@@ -33,8 +35,6 @@ class MotifGeneralizationAnalysis(DataReport):
 
     Arguments:
 
-        n_splits (int): number of random data splits
-
         label (dict): A label configuration. One label should be specified, and the positive_class for this label should be defined. See the YAML specification below for an example.
 
         highlight_motifs_path (str): path to a set of motifs of interest to highlight in the output figures. By default no motifs are highlighted.
@@ -42,6 +42,8 @@ class MotifGeneralizationAnalysis(DataReport):
         highlight_motifs_name (str): if highlight_motifs_path is defined, this name will be used to label the motifs of interest in the output figures.
 
         plot_smoothed_combined_precision (bool): whether to add a smoothed line representing the combined precision to the precision-vs-TP plot. When set to True, this may take considerable extra time to compute. By default, plot_smoothed_combined_precision is set to True.
+
+        training_set_identifier_path (str): path to a file containing 'sequence_identifiers' of the sequences used for the training set. Each line in the file should represent one sequence identifier, with no file header. The remaining sequences will be used as the validation set. If training_set_identifier_path is not set, a random subset of the data (according to training_percentage) will be assigned to be the training set.
 
     YAML specification:
 
@@ -59,13 +61,15 @@ class MotifGeneralizationAnalysis(DataReport):
 
     """
 
-    def __init__(self, training_percentage: float = None, max_positions: int = None, min_precision: float = None,
+    def __init__(self, training_set_identifier_path: str = None, training_percentage: float = None,
+                 max_positions: int = None, min_precision: float = None,
                  min_recall: float = None, min_true_positives: int = None,  random_seed: int = None, label: dict = None,
                  plot_smoothed_combined_precision: bool = None,
                  min_points_in_window: int = None, smoothing_constant1: float = None, smoothing_constant2: float = None,
                  highlight_motifs_path: str = None, highlight_motifs_name: str = None,
                  dataset: SequenceDataset = None, result_path: Path = None, number_of_processes: int = 1, name: str = None):
         super().__init__(dataset=dataset, result_path=result_path, number_of_processes=number_of_processes, name=name)
+        self.training_set_identifier_path = Path(training_set_identifier_path) if training_set_identifier_path is not None else None
         self.training_percentage = training_percentage
         self.max_positions = max_positions
         self.max_positions = max_positions
@@ -88,7 +92,6 @@ class MotifGeneralizationAnalysis(DataReport):
     def build_object(cls, **kwargs):
         location = MotifGeneralizationAnalysis.__name__
 
-        ParameterValidator.assert_type_and_value(kwargs["training_percentage"], float, location, "training_percentage", min_exclusive=0, max_exclusive=1)
         ParameterValidator.assert_type_and_value(kwargs["max_positions"], int, location, "max_positions", min_inclusive=1)
         ParameterValidator.assert_type_and_value(kwargs["min_precision"], (int, float), location, "min_precision", min_inclusive=0, max_inclusive=1)
         ParameterValidator.assert_type_and_value(kwargs["min_recall"], (int, float), location, "min_recall", min_inclusive=0, max_inclusive=1)
@@ -97,6 +100,13 @@ class MotifGeneralizationAnalysis(DataReport):
         ParameterValidator.assert_type_and_value(kwargs["min_points_in_window"], int, location, "min_points_in_window", min_inclusive=1)
         ParameterValidator.assert_type_and_value(kwargs["smoothing_constant1"], (int, float), location, "smoothing_constant1", min_exclusive=0)
         ParameterValidator.assert_type_and_value(kwargs["smoothing_constant2"], (int, float), location, "smoothing_constant2", min_exclusive=0)
+
+        if kwargs["training_set_identifier_path"] is not None:
+            ParameterValidator.assert_type_and_value(kwargs["training_set_identifier_path"], str, location, "training_set_identifier_path")
+            assert os.path.isfile(kwargs["training_set_identifier_path"]), f"{location}: the file {kwargs['training_set_identifier_path']} does not exist. " \
+                                         f"Specify the correct path under training_set_identifier_path."
+        else:
+            ParameterValidator.assert_type_and_value(kwargs["training_percentage"], float, location, "training_percentage", min_exclusive=0, max_exclusive=1)
 
         if "random_seed" in kwargs and kwargs["random_seed"] is not None:
             ParameterValidator.assert_type_and_value(kwargs["random_seed"], int, location, "random_seed")
@@ -151,8 +161,8 @@ class MotifGeneralizationAnalysis(DataReport):
         train_data_path = PathBuilder.build(self.result_path / "datasets/train")
         test_data_path = PathBuilder.build(self.result_path / "datasets/test")
 
-        train_indices, val_indices = Util.get_train_val_indices(self.dataset.get_example_count(),
-                                                                self.training_percentage, random_seed=self.random_seed)
+        train_indices, val_indices = self._get_train_val_indices()
+
         training_data = self.dataset.make_subset(train_indices, train_data_path, Dataset.TRAIN)
         test_data = self.dataset.make_subset(val_indices, test_data_path, Dataset.TEST)
 
@@ -162,6 +172,37 @@ class MotifGeneralizationAnalysis(DataReport):
         encoded_test_data = self._encode_dataset(test_data, encoder, learn_model=False)
 
         return encoded_training_data, encoded_test_data
+
+    def _get_train_val_indices(self):
+        if self.training_set_identifier_path is None:
+            return Util.get_train_val_indices(self.dataset.get_example_count(),
+                                              self.training_percentage, random_seed=self.random_seed)
+        else:
+            return self._get_train_val_indices_from_file()
+
+
+    def _get_train_val_indices_from_file(self):
+        with open(self.training_set_identifier_path, "r") as file:
+            train_identifiers = [identifier.strip() for identifier in file.readlines()]
+
+        train_indices = []
+        val_indices = []
+        val_identifiers = []
+
+        for idx, sequence in enumerate(self.dataset.get_data()):
+            if sequence.identifier in train_identifiers:
+                train_indices.append(idx)
+            else:
+                val_indices.append(idx)
+                val_identifiers.append(sequence.identifier)
+
+        logging.info(f"{MotifGeneralizationAnalysis.__name__}: \nTraining set identifiers ({len(train_identifiers)}): {train_identifiers}\nValidation set identifiers ({len(val_identifiers)}): {val_identifiers}")
+
+        assert len(train_indices) > 0, f"{MotifGeneralizationAnalysis.__name__}: error when reading training set identifiers from training_set_identifier_path, 0 of the identifiers were present in the dataset. Please check training_set_identifier_path: {self.training_set_identifier_path}, and see the log file for more information."
+        assert len(val_indices) > 0, f"{MotifGeneralizationAnalysis.__name__}: error when inferring validation set identifiers from training_set_identifier_path, all of the identifiers were present in the dataset resulting in 0 sequences in the validation set. Please check training_set_identifier_path: {self.training_set_identifier_path}, and see the log file for more information."
+        assert len(train_indices) == len(train_identifiers), f"{MotifGeneralizationAnalysis.__name__}: error when reading training set identifiers from training_set_identifier_path, not all identifiers provided in the file occurred in the dataset ({len(train_indices)} of {len(train_identifiers)} found). Please check training_set_identifier_path: {self.training_set_identifier_path}, and see the log file for more information."
+
+        return train_indices, val_indices
 
     def _get_encoder(self):
         encoder = MotifEncoder.build_object(self.dataset, **{"max_positions": self.max_positions,
