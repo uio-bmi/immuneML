@@ -6,7 +6,7 @@ from pathlib import Path
 import bionumpy as bnp
 import numpy as np
 from bionumpy import AminoAcidEncoding, DNAEncoding
-from bionumpy.bnpdataclass import bnpdataclass
+from bionumpy.bnpdataclass import bnpdataclass, BNPDataClass
 from bionumpy.encodings import BaseEncoding
 from bionumpy.io import delimited_buffers
 from bionumpy.sequence.string_matcher import RegexMatcher, StringMatcher
@@ -17,6 +17,7 @@ from immuneML.environment.SequenceType import SequenceType
 from immuneML.simulation.LIgOSimulationItem import LIgOSimulationItem
 from immuneML.simulation.generative_models.GenModelAsTSV import GenModelAsTSV
 from immuneML.simulation.implants.MotifInstance import MotifInstance
+from immuneML.simulation.implants.Signal import Signal
 from immuneML.util.PositionHelper import PositionHelper
 
 
@@ -67,15 +68,38 @@ def write_bnp_data(path: Path, data, append_if_exists: bool = True):
         raise RuntimeError(f"Tried writing to {path}, but it already exists and append_if_exists parameter is set to False.")
 
 
+def get_allowed_positions(signal: Signal, sequence_array: RaggedArray, region_type: RegionType):
+    sequence_lengths = sequence_array.shape.lengths
+    if signal.sequence_position_weights is not None:
+        signal_positions = [key for key, val in signal.sequence_position_weights.items() if val > 0]
+        allowed_positions = RaggedArray([[pos in signal_positions for pos in PositionHelper.gen_imgt_positions_from_length(seq_len, region_type)]
+                                         for seq_len in sequence_lengths])
+    else:
+        allowed_positions = None
+
+    return allowed_positions
+
+
+def get_region_type(sequences) -> RegionType:
+    if hasattr(sequences, "region_type") and \
+       np.all([el.to_string() == getattr(sequences, 'region_type')[0].to_string() for el in getattr(sequences, 'region_type')]):
+        return RegionType[getattr(sequences, 'region_type')[0].to_string()]
+    else:
+        raise RuntimeError(f"The region types could not be obtained.")
+
+
 def annotate_sequences(sequences, is_amino_acid: bool, all_signals: list):
     encoding = AminoAcidEncoding if is_amino_acid else DNAEncoding
     sequence_array = sequences.sequence_aa if is_amino_acid else sequences.sequence
+    region_type = get_region_type(sequences)
 
     signal_matrix = np.zeros((len(sequence_array), len(all_signals)))
     signal_positions = {}
 
     for index, signal in enumerate(all_signals):
         signal_pos_col = None
+        allowed_positions = get_allowed_positions(signal, sequence_array, region_type)
+
         for motifs, v_call, j_call in signal.get_all_motif_instances(SequenceType.AMINO_ACID if is_amino_acid else SequenceType.NUCLEOTIDE):
             matches_gene = match_genes(v_call, sequences.v_call, j_call, sequences.j_call)
             matches = None
@@ -87,6 +111,9 @@ def annotate_sequences(sequences, is_amino_acid: bool, all_signals: list):
                     matches = np.logical_and(matches_motif, matches_gene)
                 else:
                     matches = np.logical_or(matches, np.logical_and(matches_motif, matches_gene))
+
+            if allowed_positions is not None:
+                matches = np.logical_and(matches, allowed_positions)
 
             signal_pos_col = np.logical_or(signal_pos_col, matches) if signal_pos_col is not None else matches
             signal_matrix[:, index] = np.logical_or(signal_matrix[:, index], np.logical_or.reduce(matches, axis=1))
@@ -149,7 +176,7 @@ def make_sequences_from_gen_model(sim_item: LIgOSimulationItem, sequence_batch_s
                                                                    sequence_type=sequence_type, batch_size=sequence_batch_size)
 
 
-def make_bnp_annotated_sequences(sequences: GenModelAsTSV, all_signals: list, signal_matrix: np.ndarray, signal_positions: dict):
+def make_bnp_annotated_sequences(sequences: BNPDataClass, all_signals: list, signal_matrix: np.ndarray, signal_positions: dict):
     kwargs = {**{s.id: signal_matrix[:, ind].astype(int) for ind, s in enumerate(all_signals)},
               **{f"{s.id}_positions": bnp.as_encoded_array(signal_positions[f"{s.id}_positions"], bnp.encodings.BaseEncoding) for ind, s in
                  enumerate(all_signals)},

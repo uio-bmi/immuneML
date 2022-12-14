@@ -5,7 +5,6 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import List
 
-import numpy as np
 from bionumpy import EncodedRaggedArray
 from bionumpy.bnpdataclass import BNPDataClass
 
@@ -47,6 +46,10 @@ class RejectionSampler:
                [(signal.id, int) for signal in self.all_signals] + \
                [(f"{signal.id}_positions", str) for signal in self.all_signals]
 
+    @property
+    def use_p_gens(self) -> bool:
+        return self.export_pgens and self.sim_item.generative_model.can_compute_p_gens()
+
     def make_repertoires(self, path: Path) -> List[Repertoire]:
         repertoires_path = PathBuilder.build(path / "repertoires")
 
@@ -77,7 +80,7 @@ class RejectionSampler:
 
         return repertoires
 
-    def _get_custom_keys(self, with_p_gens: bool = True):
+    def _get_custom_keys(self, with_p_gens: bool):
         keys = [(sig.id, int) for sig in self.all_signals] + [(f'{signal.id}_positions', str) for signal in self.all_signals]
         if with_p_gens:
             keys += [('p_gen', float)]
@@ -89,7 +92,7 @@ class RejectionSampler:
         return Repertoire.build(**rep_data, path=repertoires_path, metadata=metadata)
 
     def _prepare_data_for_repertoire_obj(self, sequences: BNPDataClass) -> dict:
-        custom_keys = self._get_custom_keys()
+        custom_keys = self._get_custom_keys(with_p_gens=self.use_p_gens)
 
         custom_lists = {}
         for field, field_type in custom_keys:
@@ -241,18 +244,14 @@ class RejectionSampler:
                 **{signal.id: False for signal in self.all_signals if signal not in self.sim_item.signals}}
 
     def _add_pgens(self, sequences: BNPDataClass):
-        if not hasattr(sequences, 'p_gen'):
-            if self.export_pgens and self.sim_item.generative_model.can_compute_p_gens():
-                p_gens = self.sim_item.generative_model.compute_p_gens(sequences, self.sequence_type)
-            else:
-                p_gens = np.array([])
-
+        if not hasattr(sequences, 'p_gen') and self.export_pgens and self.sim_item.generative_model.can_compute_p_gens():
+            p_gens = self.sim_item.generative_model.compute_p_gens(sequences, self.sequence_type)
             sequences = sequences.add_fields({'p_gen': p_gens}, {'p_gen': float})
 
         return sequences
 
     def _make_receptor_sequence_objects(self, sequences: BNPDataClass) -> List[ReceptorSequence]:
-        custom_params = self._get_custom_keys()
+        custom_params = self._get_custom_keys(self.use_p_gens)
         metadata = self._make_sequence_metadata()
 
         return [ReceptorSequence(seq.sequence_aa.to_string(), seq.sequence.to_string(), identifier=uuid.uuid4().hex,

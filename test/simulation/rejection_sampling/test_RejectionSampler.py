@@ -1,12 +1,10 @@
 import shutil
 from unittest import TestCase
 
-import bionumpy as bnp
 import numpy as np
 import pandas as pd
 from bionumpy import as_encoded_array, DNAEncoding, AminoAcidEncoding
 from bionumpy.encodings import BaseEncoding
-from bionumpy.io import delimited_buffers
 from npstructures.testing import assert_raggedarray_equal
 
 from immuneML.data_model.receptor.receptor_sequence.Chain import Chain
@@ -33,35 +31,25 @@ class TestRejectionSampler(TestCase):
         signal2 = Signal('s2', [motif2], None)
 
         return RejectionSampler(LIgOSimulationItem([signal1], repertoire_implanting_rate=0.5, number_of_examples=5,
-                                                   receptors_in_repertoire_count=6,
+                                                   receptors_in_repertoire_count=6, immune_events={},
                                                    generative_model=OLGA.build_object(default_model_name="humanTRB", chain=Chain.BETA,
                                                                                       model_path=None, use_only_productive=True)),
                                 SequenceType.AMINO_ACID, [signal1, signal2], 40, 100)
 
-    def make_data_and_signals(self, path):
+    def make_data_and_signals(self):
         motif1 = Motif(identifier='m1', instantiation=GappedKmerInstantiation(), seed='AA', v_call='V1')
         motif2 = Motif(identifier='m2', instantiation=GappedKmerInstantiation(), seed='AA')
         motif3 = Motif(identifier='m3', instantiation=GappedKmerInstantiation(), seed='AC', v_call='V1-1')
         motif4 = Motif(identifier='m4', instantiation=GappedKmerInstantiation(), seed='EA', j_call='J3')
 
         signal1 = Signal('s1', [motif1, motif2], None)
-        signal2 = Signal('s2', [motif3, motif4], None)
+        signal2 = Signal('s2', [motif3, motif4], None, {106: 0.5, 105: 0.5})
 
-        sequences = pd.DataFrame({'sequence_aa': ['AAACCC', 'EEAAF', 'EEFAF'], 'sequence': ['A', 'CCA', 'CTA'], 'v_call': ['V1-1', 'V2', 'V7'],
-                                  'j_call': ['J2', 'J3-2', 'J1'],
-                                  'region_type': ['JUNCTION', 'JUNCTION', 'JUNCTION'], 'frame_type': ['in', 'in', 'in']})
-        sequences.to_csv(path / 'sequences.tsv', sep='\t', index=False)
-
-        sequences = bnp.open(path / 'sequences.tsv',
-                             buffer_type=delimited_buffers.get_bufferclass_for_datatype(GenModelAsTSV, delimiter="\t", has_header=True)).read()
+        sequences = GenModelAsTSV(sequence_aa=['AAACCC', 'EEAAF', 'EEFAF'], sequence=['A', 'CCA', 'CTA'], v_call=['V1-1', 'V2', 'V7'],
+                                  j_call=['J2', 'J3-2', 'J1'], region_type=['IMGT_JUNCTION', 'IMGT_JUNCTION', 'IMGT_JUNCTION'],
+                                  frame_type=['in', 'in', 'in'])
 
         return sequences, [signal1, signal2]
-
-    def make_annotated_data(self, path):
-        seqs, signals = self.make_data_and_signals(path)
-        seqs = annotate_sequences(seqs, True, signals)
-        seqs = filter_out_illegal_sequences(seqs, LIgOSimulationItem(signals=signals), signals, 1)
-        return seqs, signals
 
     def test__generate_sequences(self):
         path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / 'rej_sampling_gen_seqs')
@@ -109,15 +97,11 @@ class TestRejectionSampler(TestCase):
         sampler = self.make_sampler()
         signal_matrix = np.array([[True, False], [False, False], [False, True]])
         signal_positions = {'s1_positions': ['m10', 'm000', 'm000000'], 's2_positions': ['m00', 'm000', 'm001000']}
-        pd.DataFrame({**{key: ['', '', ''] for key in sampler.sim_item.generative_model.OUTPUT_COLUMNS},
-                      **{'sequence_aa': ['AA', 'DFG', 'DGEAFT']}}) \
-            .to_csv(path / 'tmp.tsv', sep='\t', index=False, header=True)
-        background_seqs = bnp.open(path / 'tmp.tsv',
-                                   buffer_type=delimited_buffers.get_bufferclass_for_datatype(GenModelAsTSV, has_header=True)).read()
+
+        background_seqs = GenModelAsTSV(**{**{key: ['', '', ''] for key in sampler.sim_item.generative_model.OUTPUT_COLUMNS},
+                                           **{'sequence_aa': ['AA', 'DFG', 'DGEAFT']}})
         annotated_sequences = make_bnp_annotated_sequences(background_seqs, sampler.all_signals, signal_matrix, signal_positions)
         sampler.seqs_with_signal_path = {'s1': path / 'with_sig.tsv'}
-
-        print(annotated_sequences)
 
         count = sampler._update_seqs_with_signal({'s1': 5}, annotated_sequences)
 
@@ -153,9 +137,9 @@ class TestRejectionSampler(TestCase):
     def test_filter_out_illegal_sequences(self):
         path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / 'rej_sampling_filter')
 
-        sequences, signals = self.make_data_and_signals(path)
+        sequences, signals = self.make_data_and_signals()
         annotated_sequences = annotate_sequences(sequences, True, signals)
-        filtered_sequences = filter_out_illegal_sequences(annotated_sequences, LIgOSimulationItem(signals=signals), signals, 1)
+        filtered_sequences = filter_out_illegal_sequences(annotated_sequences, LIgOSimulationItem(signals=signals, immune_events={}), signals, 1)
         expected_sequences = annotated_sequences[[False, False, True]]
 
         for field_name in vars(filtered_sequences):
@@ -164,9 +148,7 @@ class TestRejectionSampler(TestCase):
         shutil.rmtree(path)
 
     def test_annotate_sequences(self):
-        path = PathBuilder.remove_old_and_build(EnvironmentSettings.tmp_test_path / 'rej_sampling_signal_matrix')
-
-        sequences, signals = self.make_data_and_signals(path)
+        sequences, signals = self.make_data_and_signals()
 
         annotated_seqs = annotate_sequences(sequences, True, signals)
 
@@ -176,5 +158,3 @@ class TestRejectionSampler(TestCase):
         assert np.array_equal(annotated_seqs.s2, [True, True, False])
         assert np.array_equal([s.to_string() for s in annotated_seqs.s1_positions], ['m110000', 'm00100', 'm00000'])
         assert np.array_equal([s.to_string() for s in annotated_seqs.s2_positions], ['m001000', 'm01000', 'm00000'])
-
-        shutil.rmtree(path)
