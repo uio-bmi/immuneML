@@ -22,13 +22,12 @@ class SignalParser:
 
             ParameterValidator.assert_keys_present(signal_spec.keys(), SignalParser.VALID_KEYS, "SignalParser", key)
 
-            implanting_strategy = SignalParser._get_implanting_strategy('implanting', signal_spec)
-
             ParameterValidator.assert_keys(signal_spec["motifs"], symbol_table.get_keys_by_type(SymbolType.MOTIF), "SignalParser",
                                            f"motifs in signal {key}", False)
 
             signal_motifs = [symbol_table.get(motif_id) for motif_id in signal_spec["motifs"]]
-            signal = Signal(key, signal_motifs, implanting_strategy)
+            signal = Signal(key, signal_motifs,
+                            sequence_position_weights=signal_spec['sequence_position_weights'] if 'sequence_position_weights' in signal_spec else {})
             symbol_table.add(key, SymbolType.SIGNAL, signal)
 
         return symbol_table, signals

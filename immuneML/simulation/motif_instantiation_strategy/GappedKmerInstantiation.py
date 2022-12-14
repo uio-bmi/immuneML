@@ -1,4 +1,3 @@
-import logging
 import random
 from itertools import combinations
 
@@ -181,22 +180,10 @@ class GappedKmerInstantiation(MotifInstantiationStrategy):
 
     def set_default_weights(self, weights, keys):
 
-        if weights is not None and any(key not in keys for key in weights):
-            for key in weights:
-                if key not in keys:
-                    logging.warning(f"{GappedKmerInstantiation.__name__}: probability was set for key: {key} but it is not in the list of "
-                                    f"valid keys: {keys}, setting the probability to 0.")
-                    weights[key] = 0
+        for key in keys:
+            if key not in weights:
+                weights[key] = 0
 
-        if weights is not None and len(weights.keys()) < len(keys):
-            remaining_probability = (1 - sum(weights.values())) / (len(keys) - len(weights.keys()))
-            additional_keys = set(keys) - set(weights.keys())
-
-            for key in additional_keys:
-                weights[key] = remaining_probability
-
-        elif weights is None:
-            remaining_probability = 1 / len(keys)
-            weights = {key: remaining_probability for key in keys}
+        assert 0.99 <= sum(list(weights.values())) <= 1.
 
         return weights

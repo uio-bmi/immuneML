@@ -2,16 +2,10 @@
 import random
 from dataclasses import dataclass
 from itertools import chain
-from pathlib import Path
 from typing import List
 
-from immuneML.data_model.receptor.Receptor import Receptor
-from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
-from immuneML.data_model.repertoire.Repertoire import Repertoire
 from immuneML.environment.SequenceType import SequenceType
 from immuneML.simulation.implants.Motif import Motif
-from immuneML.simulation.sequence_implanting.SequenceImplantingStrategy import SequenceImplantingStrategy
-from immuneML.simulation.signal_implanting.ImplantingComputation import ImplantingComputation
 from immuneML.simulation.signal_implanting.SignalImplantingStrategy import SignalImplantingStrategy
 from immuneML.util.ReflectionHandler import ReflectionHandler
 from scripts.specification_util import update_docs_per_mapping
@@ -21,7 +15,8 @@ from scripts.specification_util import update_docs_per_mapping
 class Signal:
     """
     This class represents the signal that will be implanted during a Simulation.
-    A signal is represented by a list of motifs, and an implanting strategy.
+    A signal is represented by a list of motifs, and optionally, positions weights showing where one of the motifs of the signal can
+    occur in a sequence.
 
     A signal is associated with a metadata label, which is assigned to a receptor or repertoire.
     For example antigen-specific/disease-associated (receptor) or diseased (repertoire).
@@ -31,7 +26,7 @@ class Signal:
 
         motifs (list): A list of the motifs associated with this signal.
 
-        implanting (:py:obj:`~immuneML.simulation.signal_implanting.SignalImplantingStrategy.SignalImplantingStrategy`): The strategy that is used to decide in which sequences the motifs should be implanted, and how. Valid values for this argument are class names of different signal implanting strategies.
+        sequence_position_weights (dict): a dictionary specifying for each IMGT position in the sequence how likely it is for signal to be there. For positions not specified, the probability of having the signal there is 0.
 
     YAML specification:
 
@@ -43,7 +38,6 @@ class Signal:
                 motifs:
                     - my_simple_motif
                     - my_gapped_motif
-                implanting: HealthySequence
                 sequence_position_weights:
                     109: 0.5
                     110: 0.5
@@ -51,24 +45,7 @@ class Signal:
     """
     id: str
     motifs: List[Motif]
-    sequence_implanting_strategy: SequenceImplantingStrategy = None
     sequence_position_weights: dict = None
-    implanting_computation: ImplantingComputation = None
-
-    def implant_to_repertoire(self, repertoire: Repertoire, repertoire_implanting_rate: float, path: Path) -> Repertoire:
-        processed_repertoire = self.implanting_strategy \
-            .implant_in_repertoire(repertoire=repertoire,
-                                   repertoire_implanting_rate=repertoire_implanting_rate,
-                                   signal=self, path=path)
-        return processed_repertoire
-
-    def implant_in_sequence(self, sequence: ReceptorSequence, is_noise: bool,
-                            sequence_type: SequenceType = SequenceType.AMINO_ACID) -> ReceptorSequence:
-        return self.implanting_strategy.implant_in_sequence(sequence=sequence, signal=self, sequence_type=sequence_type)
-
-    def implant_in_receptor(self, receptor: Receptor, is_noise: bool) -> Receptor:
-        processed_receptor = self.implanting_strategy.implant_in_receptor(receptor, self, is_noise)
-        return processed_receptor
 
     def is_in(self, sequence: dict, sequence_type: SequenceType):
         return any(motif.is_in(sequence, sequence_type) for motif in self.motifs)
