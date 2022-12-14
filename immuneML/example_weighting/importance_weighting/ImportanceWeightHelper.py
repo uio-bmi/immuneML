@@ -1,13 +1,13 @@
 from immuneML.data_model.dataset.SequenceDataset import SequenceDataset
+from immuneML.encodings.motif_encoding.PositionalMotifHelper import PositionalMotifHelper
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
-from immuneML.util.NumpyHelper import NumpyHelper
 
 
 class ImportanceWeightHelper:
 
     @staticmethod
     def compute_positional_aa_frequences(dataset: SequenceDataset, pseudocount_value=1):
-        np_sequences = NumpyHelper.get_numpy_sequence_representation(dataset)
+        np_sequences = PositionalMotifHelper.get_numpy_sequence_representation(dataset)
         return ImportanceWeightHelper._compute_positional_aa_frequences_np_sequences(np_sequences, pseudocount_value)
 
     @staticmethod

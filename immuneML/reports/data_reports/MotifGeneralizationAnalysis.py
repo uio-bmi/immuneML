@@ -417,7 +417,7 @@ class MotifGeneralizationAnalysis(DataReport):
                                      mode="lines", line_shape='spline', line={'smoothing': 1.3}),
                           secondary_y=False, )
 
-        if self.tp_cutoff is not None:
+        if self.tp_cutoff is not None and dataset_type == "test set":
             fig.add_vline(x=self.tp_cutoff, line_dash="dash")
 
         fig.update_layout(xaxis=dict(dtick=1), showlegend=True)

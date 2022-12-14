@@ -126,3 +126,5 @@ class TestMotifPrecisionTP(TestCase):
         self.assertTrue(os.path.isfile(path / "precision_recall.html"))
 
         shutil.rmtree(path)
+
+        # todo rewrite this report to be compatible with newest feature annotations

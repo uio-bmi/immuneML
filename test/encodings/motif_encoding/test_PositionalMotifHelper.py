@@ -33,6 +33,22 @@ class TestPositionalMotifHelper(TestCase):
         PathBuilder.build(path)
         return SequenceDataset.build_from_objects(sequences, 100, PathBuilder.build(path / 'data'), 'd2')
 
+    def test_get_numpy_sequence_representation(self):
+        path = EnvironmentSettings.tmp_test_path / "positional_motif_sequence_encoder/test_np/"
+        dataset = self._prepare_dataset(path = path)
+        output = PositionalMotifHelper.get_numpy_sequence_representation(dataset)
+
+        expected = np.asarray(['A' 'A', 'C' 'C', 'A' 'C', 'C' 'A']).view('U1').reshape(4, -1)
+
+        self.assertEqual(output.shape, expected.shape)
+
+        for i in range(len(output)):
+            self.assertListEqual(list(output[i]), list(expected[i]))
+
+            for j in range(len(output[i])):
+                self.assertEqual(type(output[i][j]), type(expected[i][j]))
+
+        shutil.rmtree(path)
 
     def test_test_aa(self):
         sequence_array = np.asarray(['A' 'A', 'B' 'B', 'A' 'B', 'B' 'A']).view('U1').reshape(4, -1)

@@ -209,7 +209,7 @@ class MotifEncoder(DatasetEncoder):
                 ("min_true_positives", self.min_true_positives)))
 
     def _compute_candidate_motifs(self, full_dataset, pool_size=4):
-        np_sequences = NumpyHelper.get_numpy_sequence_representation(full_dataset)
+        np_sequences = PositionalMotifHelper.get_numpy_sequence_representation(full_dataset)
         params = PositionalMotifParams(max_positions=self.max_positions, count_threshold=self.min_true_positives,
                                        pool_size=pool_size)
         return PositionalMotifHelper.compute_all_candidate_motifs(np_sequences, params)
@@ -246,7 +246,7 @@ class MotifEncoder(DatasetEncoder):
 
         logging.info(f"{MotifEncoder.__name__}: filtering {len(candidate_motifs)} {motif_type} with precision >= {self.min_precision} and recall >= {min_recall}")
 
-        np_sequences = NumpyHelper.get_numpy_sequence_representation(dataset)
+        np_sequences = PositionalMotifHelper.get_numpy_sequence_representation(dataset)
         weights = dataset.get_example_weights()
 
         with Pool(pool_size) as pool:
@@ -277,7 +277,7 @@ class MotifEncoder(DatasetEncoder):
 
         weights = dataset.get_example_weights()
         y_true = self._get_y_true(dataset, label_config)
-        np_sequences = NumpyHelper.get_numpy_sequence_representation(dataset)
+        np_sequences = PositionalMotifHelper.get_numpy_sequence_representation(dataset)
 
         logging.info(f"{MotifEncoder.__name__}: building encoded data matrix...")
 

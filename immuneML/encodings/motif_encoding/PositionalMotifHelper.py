@@ -5,6 +5,7 @@ import itertools as it
 from functools import partial
 from pathlib import Path
 
+from immuneML.caching.CacheHandler import CacheHandler
 from immuneML.encodings.motif_encoding.PositionalMotifParams import PositionalMotifParams
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.environment.SequenceType import SequenceType
@@ -15,12 +16,43 @@ from immuneML.util.PathBuilder import PathBuilder
 class PositionalMotifHelper:
 
     @staticmethod
-    def test_aa(sequences, index, aa):
-        return sequences[:, index] == aa
+    def get_numpy_sequence_representation(dataset):
+        return CacheHandler.memo_by_params((("dataset_identifier", dataset.identifier),
+                                            "np_sequence_representation",
+                                            ("example_ids", tuple(dataset.get_example_ids()))),
+                                           lambda: PositionalMotifHelper.compute_numpy_sequence_representation(dataset))
 
     @staticmethod
-    def test_position(sequences, index, aas):
-        return np.logical_or.reduce([PositionalMotifHelper.test_aa(sequences, index, aa) for aa in aas])
+    def compute_numpy_sequence_representation(dataset, location=None):
+        '''Computes an efficient unicode representation for SequenceDatasets where all sequences have the same length'''
+
+        location = PositionalMotifHelper.__name__ if location is None else location
+
+        n_sequences = dataset.get_example_count()
+        all_sequences = [None] * n_sequences
+        sequence_length = None
+
+        for i, sequence in enumerate(dataset.get_data()):
+            sequence_str = sequence.get_sequence()
+            all_sequences[i] = sequence_str
+
+            if sequence_length is None:
+                sequence_length = len(sequence_str)
+            else:
+                assert len(sequence_str) == sequence_length, f"{location}: expected all " \
+                                                             f"sequences to be of length {sequence_length}, found " \
+                                                             f"{len(sequence_str)}: '{sequence_str}'."
+
+        unicode = np.array(all_sequences, dtype=f"U{sequence_length}")
+        return unicode.view('U1').reshape(n_sequences, -1)
+
+    @staticmethod
+    def test_aa(np_sequences, index, aa):
+        return np_sequences[:, index] == aa
+
+    @staticmethod
+    def test_position(np_sequences, index, aas):
+        return np.logical_or.reduce([PositionalMotifHelper.test_aa(np_sequences, index, aa) for aa in aas])
 
     @staticmethod
     def test_motif(np_sequences, indices, amino_acids):
