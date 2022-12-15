@@ -15,6 +15,7 @@ from immuneML.simulation.SimulationStrategy import SimulationStrategy
 from immuneML.simulation.implants.Signal import Signal
 from immuneML.simulation.rejection_sampling.RejectionSampler import RejectionSampler
 from immuneML.simulation.signal_implanting.LigoImplanter import LigoImplanter
+from immuneML.simulation.signal_implanting.LigoImplanterState import LigoImplanterState
 from immuneML.util.ExporterHelper import ExporterHelper
 from immuneML.util.PathBuilder import PathBuilder
 from immuneML.workflows.instructions.Instruction import Instruction
@@ -130,8 +131,10 @@ class LIgOSimulationInstruction(Instruction):
 
         if self.state.simulation.simulation_strategy == SimulationStrategy.IMPLANTING:
 
-            repertoires = LigoImplanter(item, self.state.simulation.sequence_type, self.state.signals, self.state.sequence_batch_size, item.seed,
-                                        self.export_p_gens).make_repertoires(self.state.result_path)
+            repertoires = LigoImplanter(state=LigoImplanterState(sim_item=item, sequence_type=self.state.simulation.sequence_type, seed=item.seed,
+                                                                 all_signals=self.state.signals, sequence_batch_size=self.state.sequence_batch_size,
+                                                                 export_p_gens=self.export_p_gens))\
+                .make_repertoires(self.state.result_path)
 
         elif self.state.simulation.simulation_strategy == SimulationStrategy.REJECTION_SAMPLING:
 
