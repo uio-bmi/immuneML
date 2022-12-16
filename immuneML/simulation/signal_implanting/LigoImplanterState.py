@@ -23,3 +23,4 @@ class LigoImplanterState:
     p_gen_bin_count: int = None
     keep_low_p_gen_proba: float = None
     sequence_paths: dict = None
+    p_gen_bins = None

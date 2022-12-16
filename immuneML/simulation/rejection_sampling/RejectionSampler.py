@@ -5,7 +5,6 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import List
 
-from bionumpy import EncodedRaggedArray
 from bionumpy.bnpdataclass import BNPDataClass
 
 from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
@@ -17,7 +16,8 @@ from immuneML.simulation.generative_models.GenModelAsTSV import GenModelAsTSV
 from immuneML.simulation.implants.Signal import Signal
 from immuneML.simulation.util.bnp_util import merge_dataclass_objects
 from immuneML.simulation.util.util import get_signal_sequence_count, get_sequence_per_signal_count, make_sequences_from_gen_model, get_bnp_data, \
-    annotate_sequences, filter_out_illegal_sequences, write_bnp_data, check_iteration_progress
+    annotate_sequences, filter_out_illegal_sequences, check_iteration_progress, get_custom_keys, check_sequence_count, \
+    prepare_data_for_repertoire_obj, update_seqs_with_signal, update_seqs_without_signal
 from immuneML.util.PathBuilder import PathBuilder
 
 
@@ -64,13 +64,13 @@ class RejectionSampler:
                                                                                                            sim_item=self.sim_item) * len(
                 self.sim_item.signals)
 
-            custom_columns = self._get_custom_keys(with_p_gens=False)
+            custom_columns = get_custom_keys(self.all_signals)
 
             sequences, used_seq_count = self._get_no_signal_sequences(used_seq_count=used_seq_count, seqs_no_signal_count=seqs_no_signal_count, columns=custom_columns)
             sequences, used_seq_count = self._add_signal_sequences(sequences, custom_columns, used_seq_count)
             sequences = self._add_pgens(sequences)
 
-            self._check_sequence_count(sequences)
+            check_sequence_count(self.sim_item, sequences)
 
             repertoire = self._make_repertoire_from_sequences(sequences, repertoires_path)
 
@@ -80,36 +80,10 @@ class RejectionSampler:
 
         return repertoires
 
-    def _get_custom_keys(self, with_p_gens: bool):
-        keys = [(sig.id, int) for sig in self.all_signals] + [(f'{signal.id}_positions', str) for signal in self.all_signals]
-        if with_p_gens:
-            keys += [('p_gen', float)]
-        return keys
-
     def _make_repertoire_from_sequences(self, sequences: BNPDataClass, repertoires_path) -> Repertoire:
         metadata = {**self._make_signal_metadata(), **self.sim_item.immune_events}
-        rep_data = self._prepare_data_for_repertoire_obj(sequences)
+        rep_data = prepare_data_for_repertoire_obj(self.all_signals, sequences)
         return Repertoire.build(**rep_data, path=repertoires_path, metadata=metadata)
-
-    def _prepare_data_for_repertoire_obj(self, sequences: BNPDataClass) -> dict:
-        custom_keys = self._get_custom_keys(with_p_gens=self.use_p_gens)
-
-        custom_lists = {}
-        for field, field_type in custom_keys:
-            if field_type is int or field_type is float:
-                custom_lists[field] = getattr(sequences, field)
-            else:
-                custom_lists[field] = [el.to_string() for el in getattr(sequences, field)]
-
-        default_lists = {}
-        for field in dataclasses.fields(sequences):
-            if field.name not in custom_lists:
-                if isinstance(getattr(sequences, field.name), EncodedRaggedArray):
-                    default_lists[field.name] = [el.to_string() for el in getattr(sequences, field.name)]
-                else:
-                    default_lists[field.name] = getattr(sequences, field.name)
-
-        return {**{"custom_lists": custom_lists}, **default_lists}
 
     def _make_signal_metadata(self) -> dict:
         return {**{signal.id: True if not self.sim_item.is_noise else False for signal in self.sim_item.signals},
@@ -141,11 +115,6 @@ class RejectionSampler:
 
         return sequences, used_seq_count
 
-    def _check_sequence_count(self, sequences: BNPDataClass):
-        assert len(sequences) == self.sim_item.receptors_in_repertoire_count, \
-            f"{RejectionSampler.__name__}: error when simulating repertoire, needed {self.sim_item.receptors_in_repertoire_count} sequences, " \
-            f"but got {len(sequences)}."
-
     def _make_background_sequences(self, path: Path, sequence_per_signal_count: dict):
         background_path = PathBuilder.build(path / f"tmp_{self.sim_item.name}")
         self._setup_tmp_sequence_paths(background_path)
@@ -164,8 +133,8 @@ class RejectionSampler:
             annotated_sequences = filter_out_illegal_sequences(annotated_sequences, self.sim_item, self.all_signals,
                                                                RejectionSampler.MAX_SIGNALS_PER_SEQUENCE)
 
-            sequence_per_signal_count['no_signal'] = self._update_seqs_without_signal(sequence_per_signal_count['no_signal'], annotated_sequences)
-            sequence_per_signal_count = self._update_seqs_with_signal(sequence_per_signal_count, annotated_sequences)
+            sequence_per_signal_count['no_signal'] = update_seqs_without_signal(sequence_per_signal_count['no_signal'], annotated_sequences, self.seqs_no_signal_path)
+            sequence_per_signal_count = update_seqs_with_signal(sequence_per_signal_count, annotated_sequences, self.all_signals, self.sim_item.signals, self.seqs_with_signal_path)
 
             check_iteration_progress(iteration, self.max_iterations)
             iteration += 1
@@ -182,31 +151,6 @@ class RejectionSampler:
             self.seqs_with_signal_path = {signal.id: path / f"sequences_with_signal_{signal.id}.tsv" for signal in self.sim_item.signals}
         if self.seqs_no_signal_path is None:
             self.seqs_no_signal_path = path / "sequences_no_signal.tsv"
-
-    def _update_seqs_without_signal(self, max_count, annotated_sequences):
-        if max_count > 0:
-            selection = annotated_sequences.get_signal_matrix().sum(axis=1) == 0
-            data_to_write = annotated_sequences[selection][:max_count]
-            if len(data_to_write) > 0:
-                write_bnp_data(data=data_to_write, path=self.seqs_no_signal_path)
-            return max_count - len(data_to_write)
-        else:
-            return max_count
-
-    def _update_seqs_with_signal(self, max_counts: dict, annotated_sequences):
-
-        all_signal_ids = [signal.id for signal in self.all_signals]
-        signal_matrix = annotated_sequences.get_signal_matrix()
-
-        for signal in self.sim_item.signals:
-            if max_counts[signal.id] > 0:
-                selection = signal_matrix[:, all_signal_ids.index(signal.id)].astype(bool)
-                data_to_write = annotated_sequences[selection][:max_counts[signal.id]]
-                if len(data_to_write) > 0:
-                    write_bnp_data(data=data_to_write, path=self.seqs_with_signal_path[signal.id])
-                max_counts[signal.id] -= len(data_to_write)
-
-        return max_counts
 
     def make_receptors(self, path: Path):
         raise NotImplementedError
@@ -243,14 +187,12 @@ class RejectionSampler:
         return {**{signal.id: False if self.sim_item.is_noise else True for signal in self.sim_item.signals},
                 **{signal.id: False for signal in self.all_signals if signal not in self.sim_item.signals}}
 
-    def _add_pgens(self, sequences: BNPDataClass):
-        if not hasattr(sequences, 'p_gen') and self.export_pgens and self.sim_item.generative_model.can_compute_p_gens():
-            p_gens = self.sim_item.generative_model.compute_p_gens(sequences, self.sequence_type)
-            sequences = sequences.add_fields({'p_gen': p_gens}, {'p_gen': float})
-
+    def _add_pgens(self, sequences: GenModelAsTSV) -> GenModelAsTSV:
+        if sequences.p_gen is None and self.export_pgens and self.sim_item.generative_model.can_compute_p_gens():
+            sequences.p_gen = self.sim_item.generative_model.compute_p_gens(sequences, self.sequence_type)
         return sequences
 
-    def _make_receptor_sequence_objects(self, sequences: BNPDataClass) -> List[ReceptorSequence]:
+    def _make_receptor_sequence_objects(self, sequences: GenModelAsTSV) -> List[ReceptorSequence]:
         custom_params = self._get_custom_keys(self.use_p_gens)
         metadata = self._make_sequence_metadata()
 

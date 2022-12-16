@@ -1,11 +1,13 @@
+import dataclasses
 import logging
 from dataclasses import make_dataclass
 from itertools import chain
 from pathlib import Path
+from typing import List
 
 import bionumpy as bnp
 import numpy as np
-from bionumpy import AminoAcidEncoding, DNAEncoding
+from bionumpy import AminoAcidEncoding, DNAEncoding, EncodedRaggedArray
 from bionumpy.bnpdataclass import bnpdataclass, BNPDataClass
 from bionumpy.encodings import BaseEncoding
 from bionumpy.io import delimited_buffers
@@ -69,7 +71,7 @@ def write_bnp_data(path: Path, data, append_if_exists: bool = True):
 
 
 def get_allowed_positions(signal: Signal, sequence_array: RaggedArray, region_type: RegionType):
-    sequence_lengths = sequence_array.shape.lengths
+    sequence_lengths = sequence_array.lengths
     if signal.sequence_position_weights is not None:
         signal_positions = [key for key, val in signal.sequence_position_weights.items() if val > 0]
         allowed_positions = RaggedArray([[pos in signal_positions for pos in PositionHelper.gen_imgt_positions_from_length(seq_len, region_type)]
@@ -82,7 +84,7 @@ def get_allowed_positions(signal: Signal, sequence_array: RaggedArray, region_ty
 
 def get_region_type(sequences) -> RegionType:
     if hasattr(sequences, "region_type") and \
-       np.all([el.to_string() == getattr(sequences, 'region_type')[0].to_string() for el in getattr(sequences, 'region_type')]):
+        np.all([el.to_string() == getattr(sequences, 'region_type')[0].to_string() for el in getattr(sequences, 'region_type')]):
         return RegionType[getattr(sequences, 'region_type')[0].to_string()]
     else:
         raise RuntimeError(f"The region types could not be obtained.")
@@ -222,3 +224,60 @@ def choose_implant_position(imgt_positions, position_weights):
 def check_iteration_progress(iteration: int, max_iterations: int):
     if iteration == round(max_iterations * 0.75):
         logging.warning(f"Iteration {iteration} out of {max_iterations} max iterations reached during rejection sampling.")
+
+
+def get_custom_keys(all_signals: List[Signal]):
+    return [(sig.id, int) for sig in all_signals] + [(f'{signal.id}_positions', str) for signal in all_signals]
+
+
+def check_sequence_count(sim_item, sequences: GenModelAsTSV):
+    assert len(sequences) == sim_item.receptors_in_repertoire_count, \
+        f"Error when simulating repertoire, needed {sim_item.receptors_in_repertoire_count} sequences, " \
+        f"but got {len(sequences)}."
+
+
+def prepare_data_for_repertoire_obj(all_signals: list, sequences: BNPDataClass) -> dict:
+    custom_keys = get_custom_keys(all_signals)
+
+    custom_lists = {}
+    for field, field_type in custom_keys:
+        if field_type is int or field_type is float:
+            custom_lists[field] = getattr(sequences, field)
+        else:
+            custom_lists[field] = [el.to_string() for el in getattr(sequences, field)]
+
+    default_lists = {}
+    for field in dataclasses.fields(sequences):
+        if field.name not in custom_lists:
+            if isinstance(getattr(sequences, field.name), EncodedRaggedArray):
+                default_lists[field.name] = [el.to_string() for el in getattr(sequences, field.name)]
+            else:
+                default_lists[field.name] = getattr(sequences, field.name)
+
+    return {**{"custom_lists": custom_lists}, **default_lists}
+
+
+def update_seqs_without_signal(max_count, annotated_sequences, seqs_no_signal_path: Path):
+    if max_count > 0:
+        selection = annotated_sequences.get_signal_matrix().sum(axis=1) == 0
+        data_to_write = annotated_sequences[selection][:max_count]
+        if len(data_to_write) > 0:
+            write_bnp_data(data=data_to_write, path=seqs_no_signal_path)
+        return max_count - len(data_to_write)
+    else:
+        return max_count
+
+
+def update_seqs_with_signal(max_counts: dict, annotated_sequences, all_signals, sim_item_signals, seqs_with_signal_path: dict):
+    all_signal_ids = [signal.id for signal in all_signals]
+    signal_matrix = annotated_sequences.get_signal_matrix()
+
+    for signal in sim_item_signals:
+        if max_counts[signal.id] > 0:
+            selection = signal_matrix[:, all_signal_ids.index(signal.id)].astype(bool)
+            data_to_write = annotated_sequences[selection][:max_counts[signal.id]]
+            if len(data_to_write) > 0:
+                write_bnp_data(data=data_to_write, path=seqs_with_signal_path[signal.id])
+            max_counts[signal.id] -= len(data_to_write)
+
+    return max_counts

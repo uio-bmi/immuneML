@@ -12,6 +12,7 @@ class GenModelAsTSV:
     j_call: str
     region_type: str
     frame_type: str
+    p_gen: float
 
     def get_sequence(self, sequence_type: SequenceType = SequenceType.AMINO_ACID):
         if sequence_type == SequenceType.AMINO_ACID:
