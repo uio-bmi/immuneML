@@ -347,9 +347,11 @@ class MotifGeneralizationAnalysis(DataReport):
     def _set_tp_cutoff(self, combined_precision):
         col = "smooth_combined_precision" if "smooth_combined_precision" in combined_precision.columns else "combined_precision"
 
-        above_threshold = combined_precision[combined_precision[col] > self.min_precision]
-        if len(above_threshold) > 0:
-            self.tp_cutoff = min(above_threshold["training_tp"])
+        max_tp_below_threshold = max(combined_precision[combined_precision[col] < self.min_precision]["training_tp"])
+        all_above_threshold = combined_precision[combined_precision["training_tp"] > max_tp_below_threshold]
+
+        if len(all_above_threshold) > 0:
+            self.tp_cutoff = min(all_above_threshold["training_tp"])
         else:
             warnings.warn(f"{MotifGeneralizationAnalysis.__name__}: could not automatically determine optimal TP threshold, {col} did not reach minimal preciison {self.min_precision}")
             self.tp_cutoff = None
