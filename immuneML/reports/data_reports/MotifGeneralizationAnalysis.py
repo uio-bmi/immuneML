@@ -190,26 +190,35 @@ class MotifGeneralizationAnalysis(DataReport):
 
     def _get_train_val_indices_from_file(self):
         with open(self.training_set_identifier_path, "r") as file:
-            train_identifiers = [identifier.strip() for identifier in file.readlines()]
+            input_train_identifiers = [identifier.strip() for identifier in file.readlines()]
 
         train_indices = []
         val_indices = []
         val_identifiers = []
+        actual_train_identifiers = []
 
         for idx, sequence in enumerate(self.dataset.get_data()):
-            if sequence.identifier in train_identifiers:
+            if sequence.identifier in input_train_identifiers:
                 train_indices.append(idx)
+                actual_train_identifiers.append(sequence.identifier)
             else:
                 val_indices.append(idx)
                 val_identifiers.append(sequence.identifier)
 
-        logging.info(f"{MotifGeneralizationAnalysis.__name__}: \nTraining set identifiers ({len(train_identifiers)}): {train_identifiers}\nValidation set identifiers ({len(val_identifiers)}): {val_identifiers}")
+        self._write_identifiers(self.result_path / "training_set_identifiers.txt", actual_train_identifiers, "Training")
+        self._write_identifiers(self.result_path / "validation_set_identifiers.txt", val_identifiers, "Validation")
 
         assert len(train_indices) > 0, f"{MotifGeneralizationAnalysis.__name__}: error when reading training set identifiers from training_set_identifier_path, 0 of the identifiers were present in the dataset. Please check training_set_identifier_path: {self.training_set_identifier_path}, and see the log file for more information."
         assert len(val_indices) > 0, f"{MotifGeneralizationAnalysis.__name__}: error when inferring validation set identifiers from training_set_identifier_path, all of the identifiers were present in the dataset resulting in 0 sequences in the validation set. Please check training_set_identifier_path: {self.training_set_identifier_path}, and see the log file for more information."
-        assert len(train_indices) == len(train_identifiers), f"{MotifGeneralizationAnalysis.__name__}: error when reading training set identifiers from training_set_identifier_path, not all identifiers provided in the file occurred in the dataset ({len(train_indices)} of {len(train_identifiers)} found). Please check training_set_identifier_path: {self.training_set_identifier_path}, and see the log file for more information."
+        assert len(train_indices) == len(input_train_identifiers), f"{MotifGeneralizationAnalysis.__name__}: error when reading training set identifiers from training_set_identifier_path, not all identifiers provided in the file occurred in the dataset ({len(train_indices)} of {len(input_train_identifiers)} found). Please check training_set_identifier_path: {self.training_set_identifier_path}, and see the log file for more information."
 
         return train_indices, val_indices
+
+    def _write_identifiers(self, path, identifiers, set_name):
+        logging.info(f"{MotifGeneralizationAnalysis.__name__}: {len(identifiers)} {set_name} set identifiers written to: {path}")
+
+        with open(path, "w") as file:
+            file.writelines([f"{identifier}\n" for identifier in identifiers])
 
     def _get_encoder(self):
         encoder = MotifEncoder.build_object(self.dataset, **{"max_positions": self.max_positions,
