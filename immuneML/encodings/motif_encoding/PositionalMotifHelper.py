@@ -153,6 +153,10 @@ class PositionalMotifHelper:
         return indices, amino_acids
 
     @staticmethod
+    def get_motif_size(string_repr, value_sep="&", motif_sep="-"):
+        return len(PositionalMotifHelper.string_to_motif(string_repr, value_sep=value_sep, motif_sep=motif_sep)[0])
+
+    @staticmethod
     def _check_file_header(header, motif_filepath):
         assert header == "indices\tamino_acids\n", f"{PositionalMotifHelper.__name__}: motif file at {motif_filepath} " \
                                                    f"is expected to contain this header: 'indices\tamino_acids', " \

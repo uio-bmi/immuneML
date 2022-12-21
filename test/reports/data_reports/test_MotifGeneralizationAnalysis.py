@@ -28,6 +28,7 @@ class TestMotifGeneralizationAnalysis(TestCase):
         params["training_set_identifier_path"] = str(path / "training_ids.txt")
         params["max_positions"] = 1
         params["min_precision"] = 0.8
+        params["split_by_motif_size"] = True
         params["random_seed"] = 1
         params["min_points_in_window"] = 2
         params["dataset"] = dataset
@@ -43,16 +44,16 @@ class TestMotifGeneralizationAnalysis(TestCase):
         self.assertTrue(os.path.isdir(path / "result/datasets/test"))
         self.assertTrue(os.path.isdir(path / "result/encoded_data"))
 
-        self.assertTrue(os.path.isfile(path / "result/training_set_scores.csv"))
-        self.assertTrue(os.path.isfile(path / "result/test_set_scores.csv"))
-        self.assertTrue(os.path.isfile(path / "result/training_combined_precision.csv"))
-        self.assertTrue(os.path.isfile(path / "result/test_combined_precision.csv"))
+        self.assertTrue(os.path.isfile(path / "result/training_set_scores_motif_size=1.csv"))
+        self.assertTrue(os.path.isfile(path / "result/test_set_scores_motif_size=1.csv"))
+        self.assertTrue(os.path.isfile(path / "result/training_combined_precision_motif_size=1.csv"))
+        self.assertTrue(os.path.isfile(path / "result/test_combined_precision_motif_size=1.csv"))
 
-        self.assertTrue(os.path.isfile(path / "result/training_precision_per_tp.html"))
-        self.assertTrue(os.path.isfile(path / "result/test_precision_per_tp.html"))
+        self.assertTrue(os.path.isfile(path / "result/training_precision_per_tp_motif_size=1.html"))
+        self.assertTrue(os.path.isfile(path / "result/test_precision_per_tp_motif_size=1.html"))
 
-        self.assertTrue(os.path.isfile(path / "result/training_precision_recall.html"))
-        self.assertTrue(os.path.isfile(path / "result/test_precision_recall.html"))
+        self.assertTrue(os.path.isfile(path / "result/training_precision_recall_motif_size=1.html"))
+        self.assertTrue(os.path.isfile(path / "result/test_precision_recall_motif_size=1.html"))
 
         shutil.rmtree(path)
 
