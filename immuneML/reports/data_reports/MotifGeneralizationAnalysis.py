@@ -428,10 +428,11 @@ class MotifGeneralizationAnalysis(DataReport):
         x_rng = 0
         n_data_points = weights[i]
 
-        assert sum(
-            weights) > self.min_points_in_window, f"{self.__class__.__name__}: min_points_in_window ({self.min_points_in_window}) is smaller than the total number of points in the plot ({sum(weights)}). Please decrease the value for min_points_in_window. Skipping this plot..."
+        if sum(weights) > self.min_points_in_window:
+            warnings.warn(f"{self.__class__.__name__}: min_points_in_window ({self.min_points_in_window}) is smaller than the total number of points in the plot ({sum(weights)}). Setting min_points_in_window to {sum(weights)} instead...")
+            min_points_in_window = sum(weights)
 
-        while n_data_points < self.min_points_in_window:
+        while n_data_points < min_points_in_window:
             x_rng += 1
 
             to_select = [j for j in range(len(x)) if (x[i] - x_rng) <= x[j] <= (x[i] + x_rng)]
