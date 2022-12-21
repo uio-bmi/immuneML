@@ -403,11 +403,15 @@ class MotifGeneralizationAnalysis(DataReport):
         return x_rng
 
     def _plot_precision_per_tp(self, file_path, plotting_data, combined_precision, dataset_type):
+        # plotting_data_no_highlight = plotting_data[plotting_data["highlight"] == "Motif"]
+
+
         fig = px.strip(plotting_data,
                        y=self.col_names["precision"], x="training_tp_count", hover_data=["feature_names"],
-                       range_y=[0, 1.01], color="highlight",
-                       color_discrete_map={"Motif": "#74C4C4",
-                                           self.highlight_motifs_name: px.colors.qualitative.Pastel[1]},
+                       range_y=[0, 1.01], color_discrete_sequence=["#74C4C4"],
+                       # color="highlight",
+                       # color_discrete_map={"Motif": "#74C4C4",
+                       #                     self.highlight_motifs_name: px.colors.qualitative.Pastel[1]},
                        stripmode='overlay', log_x=True,
                        labels={
                            "precision_scores": f"Precision ({dataset_type})",
@@ -416,11 +420,13 @@ class MotifGeneralizationAnalysis(DataReport):
                            "raw_tp_count": "True positive predictions (training set)"
                        })
 
+        # add combined precision
         fig.add_trace(go.Scatter(x=combined_precision["training_tp"], y=combined_precision["combined_precision"],
                                  mode='markers+lines', name=self.col_names["combined precision"],
                                  marker=dict(symbol="diamond", color=px.colors.diverging.Tealrose[0])),
                       secondary_y=False)
 
+        # add smoothed combined precision
         if self.smoothen_combined_precision:
             fig.add_trace(go.Scatter(x=combined_precision["training_tp"], y=combined_precision["smooth_combined_precision"],
                                      marker=dict(color=px.colors.diverging.Tealrose[-1]),
@@ -428,6 +434,15 @@ class MotifGeneralizationAnalysis(DataReport):
                                      mode="lines", line_shape='spline', line={'smoothing': 1.3}),
                           secondary_y=False, )
 
+        # add highlighted motifs
+        plotting_data_highlight = plotting_data[plotting_data["highlight"] != "Motif"]
+        if len(plotting_data_highlight) > 0:
+            fig.add_trace(go.Scatter(x=plotting_data_highlight["training_tp_count"], y=plotting_data_highlight[self.col_names["precision"]],
+                                     mode='markers', name=self.highlight_motifs_name,
+                                     marker=dict(symbol="circle", color="#F5C144")),
+                          secondary_y=False)
+
+        # add vertical TP cutoff line
         if self.tp_cutoff is not None and dataset_type == "test set":
             fig.add_vline(x=self.tp_cutoff, line_dash="dash")
 
