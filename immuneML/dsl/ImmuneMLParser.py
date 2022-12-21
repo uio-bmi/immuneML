@@ -7,6 +7,7 @@ import yaml
 from yaml import MarkedYAMLError
 
 from immuneML.dsl.InstructionParser import InstructionParser
+from immuneML.dsl.ToolParser import ToolParser
 from immuneML.dsl.OutputParser import OutputParser
 from immuneML.dsl.definition_parsers.DefinitionParser import DefinitionParser
 from immuneML.dsl.symbol_table.SymbolTable import SymbolTable
@@ -138,6 +139,7 @@ class ImmuneMLParser:
 
         symbol_table = SymbolTable()
 
+        symbol_table = ToolParser.parse(workflow_specification, symbol_table)
         def_parser_output, specs_defs = DefinitionParser.parse(workflow_specification, symbol_table, result_path)
         symbol_table, specs_instructions = InstructionParser.parse(def_parser_output, result_path)
         app_output = OutputParser.parse(workflow_specification, symbol_table)

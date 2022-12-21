@@ -21,6 +21,7 @@ class EnvironmentSettings:
     tmp_test_path = root_path / "test/tmp"
     default_analysis_path = root_path / "analysis_runs"
     cache_path = root_path / "cache"
+    tool_path = ""
     tmp_cache_path = tmp_test_path / "cache"
     html_templates_path = root_path / "immuneML/presentation/html/templates"
     specs_docs_path = root_path / "docs/specs"
@@ -50,7 +51,8 @@ class EnvironmentSettings:
     def get_cache_path(cache_type: CacheType = None):
         cache_type = EnvironmentSettings.get_cache_type() if cache_type is None else cache_type
         if cache_type == CacheType.PRODUCTION:
-            return EnvironmentSettings.cache_path if Constants.CACHE_PATH not in os.environ else Path(os.environ[Constants.CACHE_PATH])
+            return EnvironmentSettings.cache_path if Constants.CACHE_PATH not in os.environ else Path(
+                os.environ[Constants.CACHE_PATH])
         elif cache_type == CacheType.TEST:
             return EnvironmentSettings.tmp_cache_path
         else:
@@ -77,6 +79,11 @@ class EnvironmentSettings:
             alphabet = list("ACGT")
             alphabet.sort()
         else:
-            raise RuntimeError("EnvironmentSettings: the sequence alphabet cannot be obtained if sequence_type was not set properly. "
-                               f"Expected AMINO_ACID or NUCLEOTIDE, but got {seq_type} instead.")
+            raise RuntimeError(
+                "EnvironmentSettings: the sequence alphabet cannot be obtained if sequence_type was not set properly. "
+                f"Expected AMINO_ACID or NUCLEOTIDE, but got {seq_type} instead.")
         return alphabet
+
+    @staticmethod
+    def set_tool_path(path: str):
+        EnvironmentSettings.tool_path = path

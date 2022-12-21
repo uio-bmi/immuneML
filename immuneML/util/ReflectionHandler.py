@@ -31,6 +31,12 @@ class ReflectionHandler:
             class_name = path.stem
 
         return ReflectionHandler._import_class(path, class_name)
+    @staticmethod
+    def _import_tool_class(path: Path, class_name: str):
+        spec = util.spec_from_file_location(class_name, path)
+        foo = util.module_from_spec(spec)
+        spec.loader.exec_module(foo)
+        cls = getattr(foo, class_name)
 
     @staticmethod
     def _import_class(path: Path, class_name: str):
