@@ -132,8 +132,8 @@ class MotifGeneralizationAnalysis(DataReport):
 
         training_combined_precision = self._get_combined_precision(training_plotting_data)
         test_combined_precision = self._get_combined_precision(test_plotting_data)
-        self._set_tp_cutoff(test_combined_precision)
-        self._set_recall_cutoff(encoded_training_data)
+        self.tp_cutoff = self._determine_tp_cutoff(test_combined_precision)
+        self.recall_cutoff = self._determine_recall_cutoff(encoded_training_data)
 
         output_tables = self._write_output_tables(training_plotting_data, test_plotting_data, training_combined_precision, test_combined_precision)
         output_text = self._write_stats()
@@ -344,17 +344,17 @@ class MotifGeneralizationAnalysis(DataReport):
 
         return df
 
-    def _set_tp_cutoff(self, combined_precision):
+    def _determine_tp_cutoff(self, combined_precision):
         col = "smooth_combined_precision" if "smooth_combined_precision" in combined_precision.columns else "combined_precision"
 
         max_tp_below_threshold = max(combined_precision[combined_precision[col] < self.min_precision]["training_tp"])
         all_above_threshold = combined_precision[combined_precision["training_tp"] > max_tp_below_threshold]
 
         if len(all_above_threshold) > 0:
-            self.tp_cutoff = min(all_above_threshold["training_tp"])
+            return min(all_above_threshold["training_tp"])
         else:
             warnings.warn(f"{MotifGeneralizationAnalysis.__name__}: could not automatically determine optimal TP threshold, {col} did not reach minimal preciison {self.min_precision}")
-            self.tp_cutoff = None
+            return None
 
     def _get_positive_count(self, dataset):
         label_config = self._get_label_config(dataset)
@@ -363,10 +363,10 @@ class MotifGeneralizationAnalysis(DataReport):
 
         return sum([1 for label_class in dataset.get_metadata([label_name])[label_name] if label_class == label_positive_class])
 
-    def _set_recall_cutoff(self, encoded_training_data):
+    def _determine_recall_cutoff(self, encoded_training_data):
         positive_count_training = self._get_positive_count(encoded_training_data)
         if self.tp_cutoff is not None:
-            self.recall_cutoff = self.tp_cutoff / positive_count_training
+            return self.tp_cutoff / positive_count_training
 
     def _smooth_combined_precision(self, x, y, weights):
         smoothed_y = []

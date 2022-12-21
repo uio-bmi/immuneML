@@ -54,7 +54,7 @@ class TestMotifGeneralizationAnalysis(TestCase):
         self.assertTrue(os.path.isfile(path / "result/training_precision_recall.html"))
         self.assertTrue(os.path.isfile(path / "result/test_precision_recall.html"))
 
-        # shutil.rmtree(path)
+        shutil.rmtree(path)
 
 
     def test_set_tp_cutoff(self):
@@ -62,11 +62,8 @@ class TestMotifGeneralizationAnalysis(TestCase):
         ma = MotifGeneralizationAnalysis()
 
         ma.min_precision = 0.7
-        ma._set_tp_cutoff(test_df)
-
-        self.assertEqual(ma.tp_cutoff, 7)
+        self.assertEqual(ma._determine_tp_cutoff(test_df), 7)
 
         ma.min_precision = 1
-        ma._set_tp_cutoff(test_df)
-        self.assertEqual(ma.tp_cutoff, None)
+        self.assertEqual(ma._determine_tp_cutoff(test_df), None)
 
