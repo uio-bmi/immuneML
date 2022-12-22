@@ -434,7 +434,7 @@ class MotifGeneralizationAnalysis(DataReport):
         else:
             min_points_in_window = self.min_points_in_window
 
-        while n_data_points < min_points_in_window:
+        while n_data_points <= min_points_in_window:
             x_rng += 1
 
             to_select = [j for j in range(len(x)) if (x[i] - x_rng) <= x[j] <= (x[i] + x_rng)]
