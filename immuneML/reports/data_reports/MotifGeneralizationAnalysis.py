@@ -174,7 +174,7 @@ class MotifGeneralizationAnalysis(DataReport):
         motifs_name = f"motifs of lenght {motif_size}" if motif_size is not None else "motifs"
 
         output_tables = self._write_output_tables(training_plotting_data, test_plotting_data, training_combined_precision, test_combined_precision, motifs_name=motifs_name, file_suffix=motif_size_suffix)
-        output_texts = self._write_stats(tp_cutoff, recall_cutoff, file_suffix=motif_size_suffix)
+        output_texts = self._write_stats(tp_cutoff, recall_cutoff, motifs_name=motifs_name, file_suffix=motif_size_suffix)
         output_plots = self._write_plots(training_plotting_data, test_plotting_data, training_combined_precision, test_combined_precision, tp_cutoff, motifs_name=motifs_name, file_suffix=motif_size_suffix)
 
         return output_tables, output_texts, output_plots
@@ -302,7 +302,7 @@ class MotifGeneralizationAnalysis(DataReport):
 
         return [table for table in [train_results_table, test_results_table, training_combined_precision_table, test_combined_precision_table] if table is not None]
 
-    def _write_stats(self, tp_cutoff, recall_cutoff, file_suffix=""):
+    def _write_stats(self, tp_cutoff, recall_cutoff, motifs_name="all motifs", file_suffix=""):
         output_path = self.result_path / f"tp_recall_cutoffs{file_suffix}.txt"
 
         with open(output_path, "w") as file:
@@ -311,7 +311,7 @@ class MotifGeneralizationAnalysis(DataReport):
                              f"training TP cutoff: {tp_cutoff}\n",
                              f"training recall cutoff: {recall_cutoff}"])
 
-        return [ReportOutput(path=output_path, name="TP and recall cutoffs")]
+        return [ReportOutput(path=output_path, name=f"TP and recall cutoffs for {motifs_name}")]
 
     def _write_output_table(self, feature_annotations, file_path, name=None):
         feature_annotations.to_csv(file_path, index=False)
@@ -457,7 +457,7 @@ class MotifGeneralizationAnalysis(DataReport):
                            "precision_scores": f"Precision ({dataset_type})",
                            "weighted_precision_scores": f"Weighted precision ({dataset_type})",
                            "feature_names": "Motif",
-                           "raw_tp_count": "True positive predictions (training set)"
+                           "training_tp_count": "True positive predictions (training set)"
                        })
 
         # add combined precision
