@@ -16,7 +16,9 @@ from immuneML.util.PathBuilder import PathBuilder
 from immuneML.util.ReflectionHandler import ReflectionHandler
 
 
+#
 class ImmuneMLApp:
+
 
     def __init__(self, specification_path: Path, result_path: Path):
         self._specification_path = Path(specification_path)
