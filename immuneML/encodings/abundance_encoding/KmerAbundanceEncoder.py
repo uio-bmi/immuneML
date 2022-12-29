@@ -14,11 +14,13 @@ from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.encodings.abundance_encoding.AbundanceEncoderHelper import AbundanceEncoderHelper
 from immuneML.encodings.kmer_frequency.KmerFreqRepertoireEncoder import KmerFreqRepertoireEncoder
 from immuneML.encodings.kmer_frequency.KmerFrequencyEncoder import KmerFrequencyEncoder
+from immuneML.util.ReadsType import ReadsType
 from immuneML.encodings.kmer_frequency.sequence_encoding.SequenceEncodingType import SequenceEncodingType
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 from immuneML.util.EncoderHelper import EncoderHelper
 from immuneML.util.ParameterValidator import ParameterValidator
-from immuneML.util.ReadsType import ReadsType
+
+
 
 
 class KmerAbundanceEncoder(DatasetEncoder):
@@ -94,15 +96,14 @@ class KmerAbundanceEncoder(DatasetEncoder):
 
     @staticmethod
     def _prepare_parameters(p_value_threshold: float, sequence_encoding: str, k: int,
-                            k_left: int, k_right: int, min_gap: int, max_gap: int, name: str = None):
-        ParameterValidator.assert_type_and_value(p_value_threshold, float, "KmerAbundanceEncoder", "p_value_threshold", min_inclusive=0,
-                                                 max_inclusive=1)
+                 k_left: int, k_right: int, min_gap: int, max_gap: int, name: str = None):
+        ParameterValidator.assert_type_and_value(p_value_threshold, float, "KmerAbundanceEncoder", "p_value_threshold", min_inclusive=0, max_inclusive=1)
 
         assert sequence_encoding.upper() != SequenceEncodingType.IDENTITY.name, "KmerAbundanceEncoder: sequence encoding type 'identity' is not a valid option for this encoder. To encode a dataset based on the presence or absence of complete sequences, please use SequenceAbundanceEncoder or CompAIRRSequenceAbundanceEncoder instead."
 
         kmerfreq_params = KmerFrequencyEncoder._prepare_parameters(normalization_type="binary", reads="unique",
                                                                    sequence_encoding=sequence_encoding,
-                                                                   k=k, k_left=k_left, k_right=k_right, min_gap=min_gap,
+                                                                   k= k, k_left=k_left, k_right=k_right, min_gap=min_gap,
                                                                    max_gap=max_gap, sequence_type=EnvironmentSettings.get_sequence_type().name)
 
         return {
@@ -181,7 +182,7 @@ class KmerAbundanceEncoder(DatasetEncoder):
         return encoded_dataset
 
     def _calculate_abundance_matrix(self, dataset: RepertoireDataset, sequence_presence_matrix, matrix_repertoire_ids,
-                                    params: EncoderParams):
+                                   params: EncoderParams):
         relevant = np.isin(matrix_repertoire_ids, dataset.get_repertoire_ids())
         sequence_presence_matrix = sequence_presence_matrix[:, relevant]
         matrix_repertoire_ids = matrix_repertoire_ids[relevant]
@@ -189,15 +190,11 @@ class KmerAbundanceEncoder(DatasetEncoder):
         is_positive_class = AbundanceEncoderHelper.check_is_positive_class(dataset, matrix_repertoire_ids, params.label_config)
 
         relevant_sequence_indices, file_paths = AbundanceEncoderHelper.get_relevant_sequence_indices(sequence_presence_matrix, is_positive_class,
-                                                                                                     self.p_value_threshold,
-                                                                                                     self.relevant_indices_path, params,
-                                                                                                     cache_params=(dataset.get_repertoire_ids(),
-                                                                                                                   self.kmer_frequency_params))
+                                                                                                     self.p_value_threshold, self.relevant_indices_path, params)
         self._write_relevant_kmers_csv(relevant_sequence_indices, params.result_path)
         self._set_file_paths(file_paths)
 
-        abundance_matrix = AbundanceEncoderHelper.build_abundance_matrix(sequence_presence_matrix, matrix_repertoire_ids,
-                                                                         dataset.get_repertoire_ids(), relevant_sequence_indices)
+        abundance_matrix = AbundanceEncoderHelper.build_abundance_matrix(sequence_presence_matrix, matrix_repertoire_ids, dataset.get_repertoire_ids(), relevant_sequence_indices)
 
         return abundance_matrix
 

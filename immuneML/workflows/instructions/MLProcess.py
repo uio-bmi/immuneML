@@ -1,4 +1,5 @@
 import copy
+import datetime
 from pathlib import Path
 from typing import List
 
@@ -11,7 +12,6 @@ from immuneML.hyperparameter_optimization.states.HPItem import HPItem
 from immuneML.ml_metrics.Metric import Metric
 from immuneML.reports.ReportUtil import ReportUtil
 from immuneML.reports.ml_reports.MLReport import MLReport
-from immuneML.util.Logger import print_log
 from immuneML.util.PathBuilder import PathBuilder
 
 
@@ -63,7 +63,7 @@ class MLProcess:
 
     def run(self, split_index: int) -> HPItem:
 
-        print_log(f"Evaluating hyperparameter setting: {self.hp_setting}...", include_datetime=True)
+        print(f"{datetime.datetime.now()}: Evaluating hyperparameter setting: {self.hp_setting}...", flush=True)
 
         PathBuilder.build(self.path)
         self._set_paths()
@@ -81,7 +81,7 @@ class MLProcess:
 
         hp_item = self._assess_on_test_dataset(encoded_train_dataset, encoding_train_results, method, split_index)
 
-        print_log(f"Completed hyperparameter setting {self.hp_setting}.\n", include_datetime=True)
+        print(f"{datetime.datetime.now()}: Completed hyperparameter setting {self.hp_setting}.\n", flush=True)
 
         return hp_item
 

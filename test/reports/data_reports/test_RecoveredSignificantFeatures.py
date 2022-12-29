@@ -2,7 +2,6 @@ import os
 import shutil
 from pathlib import Path
 from unittest import TestCase
-
 import pandas as pd
 
 from immuneML.caching.CacheType import CacheType
@@ -78,7 +77,7 @@ class TestSignificantFeatures(TestCase):
 
     def test_generate(self, compairr_path=None):
         path_suffix = "compairr" if compairr_path else "no_compairr"
-        base_path = EnvironmentSettings.tmp_test_path / f"recovered_significant_features/"
+        base_path = EnvironmentSettings.root_path / f"test/tmp/recovered_significant_features/"
         path = base_path / path_suffix
 
         PathBuilder.build(path)
@@ -103,9 +102,10 @@ class TestSignificantFeatures(TestCase):
         self.assertEqual(len(result.output_figures), 2)
         self.assertEqual(len(result.output_tables), 1)
 
-        self.assertEqual(result.output_figures[0].path, path / "n_significant_features_figure.html")
-        self.assertEqual(result.output_figures[1].path, path / "n_true_features_figure.html")
-        self.assertEqual(result.output_tables[0].path, path / "recovered_significant_features_report.csv")
+        self.assertEqual(result.output_figures[0].path, Path(path / "n_significant_features_figure.html"))
+        self.assertEqual(result.output_figures[1].path, Path(path / "n_true_features_figure.html"))
+        self.assertEqual(result.output_tables[0].path, Path(path / "recovered_significant_features_report.csv"))
+
 
         self.assertTrue(os.path.isfile(result.output_figures[0].path))
         self.assertTrue(os.path.isfile(result.output_figures[1].path))
@@ -113,7 +113,7 @@ class TestSignificantFeatures(TestCase):
 
         result_output = pd.read_csv(path / "recovered_significant_features_report.csv", sep=",")
 
-        self.assertListEqual(list(result_output.columns), ["encoding", "p-value", "n_significant", "n_true", "n_intersect"])
+        self.assertListEqual(list(result_output.columns), ["encoding","p-value","n_significant","n_true","n_intersect"])
         self.assertListEqual(list(result_output["encoding"]), ["full_sequence"] * 2 + ["3-mer"] * 2)
         self.assertListEqual(list(result_output["p-value"]), [0.5, 0., 0.5, 0.])
         self.assertListEqual(list(result_output["n_significant"]), [2, 0] * 2)
@@ -121,3 +121,5 @@ class TestSignificantFeatures(TestCase):
         self.assertListEqual(list(result_output["n_intersect"]), [1, 0, 2, 0])
 
         shutil.rmtree(base_path)
+
+

@@ -10,7 +10,6 @@ from immuneML.dsl.InstructionParser import InstructionParser
 from immuneML.dsl.OutputParser import OutputParser
 from immuneML.dsl.definition_parsers.DefinitionParser import DefinitionParser
 from immuneML.dsl.symbol_table.SymbolTable import SymbolTable
-from immuneML.util.Logger import print_log
 from immuneML.util.PathBuilder import PathBuilder
 
 
@@ -167,7 +166,7 @@ class ImmuneMLParser:
         with filepath.open("w") as file:
             yaml.dump(result, file)
 
-        print_log(f"Full specification is available at {filepath}.\n", include_datetime=True)
+        print(f"{datetime.datetime.now()}: Full specification is available at {filepath}.\n", flush=True)
         return filepath
 
     @staticmethod

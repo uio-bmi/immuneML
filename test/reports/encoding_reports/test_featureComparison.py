@@ -1,6 +1,5 @@
 import os
 import random
-import shutil
 import string
 from unittest import TestCase
 
@@ -80,4 +79,4 @@ class TestFeatureComparison(TestCase):
 
         self.assertFalse(report.check_prerequisites())
 
-        shutil.rmtree(path)
+        # shutil.rmtree(path)

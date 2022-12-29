@@ -1,9 +1,9 @@
 import copy
+import datetime
 
 import pandas as pd
 
 from immuneML.ml_methods.MLMethod import MLMethod
-from immuneML.util.Logger import print_log
 from immuneML.workflows.steps.MLMethodTrainerParams import MLMethodTrainerParams
 from immuneML.workflows.steps.Step import Step
 
@@ -13,12 +13,12 @@ class MLMethodTrainer(Step):
     @staticmethod
     def run(input_params: MLMethodTrainerParams = None):
 
-        print_log(f"ML model training started...", include_datetime=True)
+        print(f"{datetime.datetime.now()}: ML model training started...", flush=True)
 
         method = MLMethodTrainer._fit_method(input_params)
         MLMethodTrainer.store(method, input_params)
 
-        print_log(f"ML model training finished.", include_datetime=True)
+        print(f"{datetime.datetime.now()}: ML model training finished.", flush=True)
 
         return method
 

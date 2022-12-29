@@ -1,9 +1,9 @@
+import datetime
 from pathlib import Path
 
 from immuneML.data_model.dataset.Dataset import Dataset
 from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.reports.ReportResult import ReportResult
-from immuneML.util.Logger import print_log
 from immuneML.util.PathBuilder import PathBuilder
 from immuneML.workflows.instructions.Instruction import Instruction
 from immuneML.workflows.instructions.exploratory_analysis.ExploratoryAnalysisState import ExploratoryAnalysisState
@@ -65,12 +65,12 @@ class ExploratoryAnalysisInstruction(Instruction):
         name = self.name if self.name is not None else "exploratory_analysis"
         self.state.result_path = result_path / name
         for index, (key, unit) in enumerate(self.state.exploratory_analysis_units.items()):
-            print_log(f"Started analysis {key} ({index+1}/{len(self.state.exploratory_analysis_units)}).", include_datetime=True)
+            print("{}: Started analysis {} ({}/{}).".format(datetime.datetime.now(), key, index+1, len(self.state.exploratory_analysis_units)), flush=True)
             path = self.state.result_path / f"analysis_{key}"
             PathBuilder.build(path)
             report_result = self.run_unit(unit, path)
             unit.report_result = report_result
-            print_log(f"Finished analysis {key} ({index+1}/{len(self.state.exploratory_analysis_units)}).\n", include_datetime=True)
+            print("{}: Finished analysis {} ({}/{}).\n".format(datetime.datetime.now(), key, index+1, len(self.state.exploratory_analysis_units)), flush=True)
         return self.state
 
     def run_unit(self, unit: ExploratoryAnalysisUnit, result_path: Path) -> ReportResult:

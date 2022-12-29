@@ -54,7 +54,7 @@ class GappedMotifImplanting(SequenceImplantingStrategy):
         annotation = SequenceAnnotation()
         implant = ImplantAnnotation(signal_id=signal["signal_id"],
                                     motif_id=signal["motif_id"],
-                                    motif_instance=str(signal["motif_instance"]),
+                                    motif_instance=signal["motif_instance"],
                                     position=position)
         annotation.add_implant(implant)
 

@@ -11,11 +11,9 @@ from immuneML.data_model.dataset.SequenceDataset import SequenceDataset
 from immuneML.data_model.receptor.TCABReceptor import TCABReceptor
 from immuneML.data_model.receptor.receptor_sequence.Chain import Chain
 from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
-from immuneML.data_model.receptor.receptor_sequence.SequenceAnnotation import SequenceAnnotation
 from immuneML.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
 from immuneML.data_model.repertoire.Repertoire import Repertoire
 from immuneML.environment.EnvironmentSettings import EnvironmentSettings
-from immuneML.simulation.implants.ImplantAnnotation import ImplantAnnotation
 from immuneML.util.PathBuilder import PathBuilder
 
 
@@ -35,7 +33,6 @@ class TestAIRRExporter(TestCase):
                             ReceptorSequence(amino_acid_sequence="GGG",
                                              nucleotide_sequence="GGTGGTGGT",
                                              identifier="receptor_2",
-                                             annotation=SequenceAnnotation(implants=[ImplantAnnotation('sig1', 'm1', "G", 1)]),
                                              metadata=SequenceMetadata(v_gene="TRAV2", v_allele="TRAV2*01",
                                                                        j_gene="TRAJ2",
                                                                        chain=Chain.ALPHA,
@@ -53,7 +50,8 @@ class TestAIRRExporter(TestCase):
         return repertoire, path / "metadata.csv"
 
     def test_repertoire_export(self):
-        path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "airr_exporter_repertoire/")
+        path = EnvironmentSettings.tmp_test_path / "airr_exporter_repertoire/"
+        PathBuilder.build(path)
 
         repertoire, metadata_path = self.create_dummy_repertoire(path)
         dataset = RepertoireDataset(repertoires=[repertoire], metadata_file=metadata_path)
@@ -74,7 +72,6 @@ class TestAIRRExporter(TestCase):
         self.assertListEqual(list(resulting_data["custom_test"]), ["cust1", "cust2"])
         self.assertListEqual(list(resulting_data["productive"]), ['T', 'F'])
         self.assertListEqual(list(resulting_data["stop_codon"]), ['F', 'F'])
-        self.assertListEqual(list(resulting_data['sig1']), [False, True])
 
         shutil.rmtree(path)
 
@@ -115,7 +112,8 @@ class TestAIRRExporter(TestCase):
         return ReceptorDataset.build_from_objects(receptors, 2, receptors_path)
 
     def test_receptor_export(self):
-        path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "airr_exporter_receptor/")
+        path = EnvironmentSettings.tmp_test_path / "airr_exporter_receptor/"
+        PathBuilder.build(path)
 
         dataset = self.create_dummy_receptordataset(path)
 
@@ -159,7 +157,8 @@ class TestAIRRExporter(TestCase):
         return SequenceDataset.build_from_objects(sequences, 2, sequences_path)
 
     def test_sequence_export(self):
-        path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "airr_exporter_sequence/")
+        path = EnvironmentSettings.tmp_test_path / "airr_exporter_receptor/"
+        PathBuilder.build(path)
 
         dataset = self.create_dummy_sequencedataset(path)
 

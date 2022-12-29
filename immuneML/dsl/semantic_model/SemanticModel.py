@@ -1,6 +1,6 @@
+import datetime
 from pathlib import Path
 
-from immuneML.util.Logger import print_log
 from immuneML.util.ReflectionHandler import ReflectionHandler
 from immuneML.workflows.instructions.Instruction import Instruction
 
@@ -22,18 +22,18 @@ class SemanticModel:
 
     def build_reports(self, instruction_states):
         report_builder = self.make_report_builder()
-        print_log(f"Generating {self.output['format']} reports...", include_datetime=True)
+        print(f"{datetime.datetime.now()}: Generating {self.output['format']} reports...", flush=True)
         result_path = report_builder.build(instruction_states, self.result_path)
-        print_log(f"{self.output['format']} reports are generated.", include_datetime=True)
+        print(f"{datetime.datetime.now()}: {self.output['format']} reports are generated.", flush=True)
         return result_path
 
     def run_instructions(self) -> list:
         instruction_states = []
         for index, instruction in enumerate(self.instructions):
-            print_log(f"Instruction {index+1}/{len(self.instructions)} has started.", include_datetime=True)
+            print("{}: Instruction {}/{} has started.".format(datetime.datetime.now(), index+1, len(self.instructions)), flush=True)
             result = instruction.run(result_path=self.result_path)
             instruction_states.append(result)
-            print_log(f"Instruction {index+1}/{len(self.instructions)} has finished.", include_datetime=True)
+            print("{}: Instruction {}/{} has finished.".format(datetime.datetime.now(), index+1, len(self.instructions)), flush=True)
         return instruction_states
 
     def make_report_builder(self):

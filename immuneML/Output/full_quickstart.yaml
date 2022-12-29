@@ -1,0 +1,32 @@
+definitions:
+  datasets:
+    my_dataset:
+      format: PDB
+      params:
+        metadata_file: C:/Users/Wii/Documents/UiO/Master/immuneMLReal/immuneML/app/quickstart_data/metadata.csv
+        path: C:/Users/Wii/Documents/UiO/Master/immuneMLReal/immuneML/app/quickstart_data/repertoires
+        result_path: ../Output/datasets/my_dataset
+  encodings:
+    my_encoding:
+      PDB:
+        name: Test
+  ml_methods: {}
+  motifs: {}
+  preprocessing_sequences: {}
+  reports:
+    my_data_report:
+      PDBDataReport:
+        name: my_data_report
+  signals: {}
+  simulations: {}
+instructions:
+  my_expl_analysis_instruction:
+    analyses:
+      my_first_analysis:
+        dataset: my_dataset
+        encoding: my_encoding
+        report: my_data_report
+    number_of_processes: 4
+    type: ExploratoryAnalysis
+output:
+  format: HTML

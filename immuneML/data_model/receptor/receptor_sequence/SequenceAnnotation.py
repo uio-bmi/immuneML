@@ -11,6 +11,3 @@ class SequenceAnnotation:
 
     def add_implant(self, implant):
         self.implants.append(implant)
-
-    def __repr__(self):
-        return f"SequenceAnnotation(implants={self.implants})"

@@ -111,9 +111,6 @@ class AIRRExporter(DataExporter):
                   "sequences": AIRRExporter.get_sequence_field(region_type), "sequence_aas": AIRRExporter.get_sequence_aa_field(region_type)}
 
         df = df.rename(mapper=mapper, axis="columns")
-
-        df.drop(columns=["v_genes", "j_genes", "v_subgroups", "j_subgroups"], inplace=True, errors='ignore')
-
         return df
 
     @staticmethod
@@ -169,7 +166,6 @@ class AIRRExporter(DataExporter):
         AIRRExporter.update_gene_columns(df, 'allele', 'gene')
         df.rename(columns={"v_allele": "v_call", "j_allele": "j_call", "chain": "locus", "count": "duplicate_count", "frame_type": "frame_types"},
                   inplace=True)
-        df.drop(columns=['v_gene', 'j_gene'], inplace=True, errors='ignore')
 
         return df
 
@@ -178,7 +174,7 @@ class AIRRExporter(DataExporter):
         for index, row in df.iterrows():
             for gene in ['v', 'j']:
                 if NumpyHelper.is_nan_or_empty(row[f"{gene}_{allele_name}"]) and not NumpyHelper.is_nan_or_empty(row[f"{gene}_{gene_name}"]):
-                    df.at[index, f"{gene}_{allele_name}"] = row[f"{gene}_{gene_name}"]
+                    df[f"{gene}_{allele_name}"][index] = row[f"{gene}_{gene_name}"]
 
     @staticmethod
     def _postprocess_dataframe(df):
@@ -196,17 +192,10 @@ class AIRRExporter(DataExporter):
             df["stop_codon"] = df["frame_types"] == SequenceFrameType.STOP.name
             df.loc[df["frame_types"].isnull(), "stop_codon"] = ''
 
-            df.drop(columns=["frame_types"], inplace=True, errors='ignore')
+            df.drop(columns=["frame_types"])
 
         if "region_types" in df.columns:
-            df.drop(columns=["region_types"], inplace=True, errors='ignore')
-
-        columns = [col for col in df.columns[df.dtypes == 'object'] if col not in
-                   ['cdr3_aa', 'cdr3', 'sequence', 'sequence_aa', 'v_call', 'j_call', 'locus', 'sequence_id', 'productive', 'vj_in_frame',
-                    'stop_codon', "cell_id", "d_call", "duplicate_count"]]
-        for col in columns:
-            if df[col].str.contains('signal_id').values.any():
-                df[col] = df[col] != ''
+            df.drop(columns=["region_types"])
 
         return df
 

@@ -83,14 +83,12 @@ class Repertoire(DatasetItem):
         field_list, values, dtype = Repertoire.process_custom_lists(custom_lists)
 
         if signals:
-            signals_filtered = {signal: signals[signal] for signal in signals if signal not in Repertoire.FIELDS}
+            signals_filtered = {signal: signals[signal] for signal in signals if signal not in metadata["field_list"]}
             field_list_signals, values_signals, dtype_signals = Repertoire.process_custom_lists(signals_filtered)
 
-            for index, field_name in enumerate(field_list_signals):
-                if field_name not in field_list:
-                    field_list.append(field_name)
-                    values.append(values_signals[index])
-                    dtype.append(dtype_signals[index])
+            field_list.extend(field_list_signals)
+            values.extend(values_signals)
+            dtype.extend(dtype_signals)
 
         for field in Repertoire.FIELDS:
             if eval(field) is not None and not all(el is None for el in eval(field)):
@@ -162,9 +160,9 @@ class Repertoire(DatasetItem):
             if sequence.annotation and sequence.annotation.implants and len(sequence.annotation.implants) > 0:
                 for implant in sequence.annotation.implants:
                     if implant.signal_id in signals:
-                        signals[implant.signal_id].append(str(vars(implant)))
+                        signals[implant.signal_id].append(str(implant))
                     else:
-                        signals[implant.signal_id] = [None for _ in range(index)] + [str(vars(implant))]
+                        signals[implant.signal_id] = [None for _ in range(index)] + [str(implant)]
 
         return cls.build(sequence_aas=sequence_aas, sequences=sequences, v_genes=v_genes, j_genes=j_genes, v_subgroups=v_subgroups,
                          j_subgroups=j_subgroups, v_alleles=v_alleles, j_alleles=j_alleles, chains=chains, counts=counts, region_types=region_types,
@@ -276,7 +274,7 @@ class Repertoire(DatasetItem):
                     try:
                         implants.append(ImplantAnnotation(**ast.literal_eval(value_dict)))
                     except (SyntaxError, ValueError, TypeError) as e:
-                        implants.append(ImplantAnnotation(signal_id=key))
+                        pass
 
         seq = ReceptorSequence(amino_acid_sequence=row["sequence_aas"] if "sequence_aas" in fields else None,
                                nucleotide_sequence=row["sequences"] if "sequences" in fields else None,
@@ -314,7 +312,7 @@ class Repertoire(DatasetItem):
             sequences.append(self._make_sequence_object(item))
         return ReceptorBuilder.build_objects(sequences)
 
-    def get_sequence_objects(self, load_implants: bool = True) -> List[ReceptorSequence]:
+    def get_sequence_objects(self, load_implants: bool = False) -> List[ReceptorSequence]:
         """
         Lazily loads sequences from disk to reduce RAM consumption
 
@@ -336,7 +334,7 @@ class Repertoire(DatasetItem):
 
     @property
     def sequences(self):
-        return self.get_sequence_objects(True)
+        return self.get_sequence_objects(False)
 
     @property
     def receptors(self) -> List[Receptor]:

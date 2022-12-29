@@ -22,27 +22,21 @@ class TestHealthySequenceImplanting(TestCase):
     def setUp(self) -> None:
         os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
 
-    def _make_baseline_repertoire(self, path):
-        return Repertoire.build_from_sequence_objects(
-            [ReceptorSequence(amino_acid_sequence="ACDFQ", identifier="1", metadata=SequenceMetadata(region_type="IMGT_CDR3")),
-             ReceptorSequence(amino_acid_sequence="TGCDF", identifier="2", metadata=SequenceMetadata(region_type="IMGT_CDR3")),
-             ReceptorSequence(amino_acid_sequence="AAAAA", identifier="3", metadata=SequenceMetadata(region_type="IMGT_CDR3"))],
-            path=path, metadata={"subject_id": "1"})
-
     def test_implant_in_repertoire(self):
-        path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "healthysequenceimplanting/")
+        path = EnvironmentSettings.tmp_test_path / "healthysequenceimplanting/"
+        PathBuilder.build(path)
 
-        repertoire = self._make_baseline_repertoire(path)
+        repertoire = Repertoire.build_from_sequence_objects([ReceptorSequence(amino_acid_sequence="ACDFQ", identifier="1", metadata=SequenceMetadata(region_type="IMGT_CDR3")),
+                                                             ReceptorSequence(amino_acid_sequence="TGCDF", identifier="2", metadata=SequenceMetadata(region_type="IMGT_CDR3"))],
+                                                            path=path, metadata={"subject_id": "1"})
         implanting = HealthySequenceImplanting(GappedMotifImplanting(), implanting_computation=ImplantingComputation.ROUND)
         signal = Signal("1", [Motif("m1", GappedKmerInstantiation(), "CCC")], implanting)
 
-        repertoire2 = implanting.implant_in_repertoire(repertoire, 0.33, signal, path)
+        repertoire2 = implanting.implant_in_repertoire(repertoire, 0.5, signal, path)
 
         new_sequences = [sequence.get_sequence() for sequence in repertoire2.sequences]
-        self.assertTrue("ACDFQ" in new_sequences or "TGCDF" in new_sequences or "AAAAA" in new_sequences)
+        self.assertTrue("ACDFQ" in new_sequences or "TGCDF" in new_sequences)
         self.assertTrue(any(["CCC" in sequence for sequence in new_sequences]))
-        self.assertTrue(any(len(sequence.annotation.implants) > 0 for sequence in repertoire2.sequences))
-        self.assertTrue(all(len(sequence.annotation.implants) <= 1 for sequence in repertoire2.sequences))
 
         shutil.rmtree(path)
 

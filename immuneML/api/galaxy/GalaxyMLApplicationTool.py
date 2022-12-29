@@ -7,7 +7,6 @@ import yaml
 from immuneML.api.galaxy.GalaxyTool import GalaxyTool
 from immuneML.api.galaxy.Util import Util
 from immuneML.app.ImmuneMLApp import ImmuneMLApp
-from immuneML.util.Logger import print_log
 from immuneML.util.ParameterValidator import ParameterValidator
 from immuneML.util.PathBuilder import PathBuilder
 from immuneML.workflows.instructions.ml_model_application.MLApplicationInstruction import MLApplicationInstruction
@@ -25,7 +24,7 @@ class GalaxyMLApplicationTool(GalaxyTool):
         state = ImmuneMLApp(self.yaml_path, self.result_path).run()[0]
         if os.path.relpath(state.predictions_path) != os.path.relpath(self.result_path / "predictions.csv"):
             shutil.copy(state.predictions_path, self.result_path / "predictions.csv")
-        print_log("Applied ML model to the dataset, predictions are available.")
+        print("Applied ML model to the dataset, predictions are available.")
 
     def _check_specs(self):
         with open(self.yaml_path, "r") as file:

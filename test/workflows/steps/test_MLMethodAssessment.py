@@ -26,10 +26,9 @@ class TestMLMethodAssessment(TestCase):
         os.environ[Constants.CACHE_TYPE] = CacheType.TEST.name
 
     def test_run(self):
-        path = EnvironmentSettings.tmp_test_path / "mlmethodassessment/"
+        path = EnvironmentSettings.root_path / "test/tmp/mlmethodassessment/"
         PathBuilder.build(path)
-        dataset = RepertoireDataset(repertoires=RepertoireBuilder.build(
-            [["AA"], ["CC"], ["AA"], ["CC"], ["AA"], ["CC"], ["AA"], ["CC"], ["AA"], ["CC"], ["AA"], ["CC"]], path)[0])
+        dataset = RepertoireDataset(repertoires=RepertoireBuilder.build([["AA"], ["CC"], ["AA"], ["CC"], ["AA"], ["CC"], ["AA"], ["CC"], ["AA"], ["CC"], ["AA"], ["CC"]], path)[0])
         dataset.encoded_data = EncodedData(
             examples=np.array([[1, 1], [1, 1], [3, 3], [1, 1], [1, 1], [3, 3], [1, 1], [1, 1], [3, 3], [1, 1], [1, 1], [3, 3]]),
             labels={"l1": [1, 1, 3, 1, 1, 3, 1, 1, 3, 1, 1, 3], "l2": [1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3]}
@@ -38,7 +37,7 @@ class TestMLMethodAssessment(TestCase):
         label_config = LabelConfiguration()
         label_config.add_label("l1", [1, 3])
 
-        label = Label(name='l1', values=[1, 3])
+        label = Label(name='l1', values=[1,2])
 
         method1 = LogisticRegression()
         method1.fit(dataset.encoded_data, label=label)
@@ -48,22 +47,22 @@ class TestMLMethodAssessment(TestCase):
             method=method1,
             metrics={Metric.ACCURACY, Metric.BALANCED_ACCURACY, Metric.F1_MACRO},
             optimization_metric=Metric.LOG_LOSS,
-            predictions_path=EnvironmentSettings.tmp_test_path / "mlmethodassessment/predictions.csv",
+            predictions_path=EnvironmentSettings.root_path / "test/tmp/mlmethodassessment/predictions.csv",
             label=label,
-            ml_score_path=EnvironmentSettings.tmp_test_path / "mlmethodassessment/ml_score.csv",
+            ml_score_path=EnvironmentSettings.root_path / "test/tmp/mlmethodassessment/ml_score.csv",
             split_index=1,
-            path=EnvironmentSettings.tmp_test_path / "mlmethodassessment/"
+            path=EnvironmentSettings.root_path / "test/tmp/mlmethodassessment/"
         ))
 
         self.assertTrue(isinstance(res, dict))
         self.assertTrue(res[Metric.LOG_LOSS.name.lower()] <= 0.1)
 
-        self.assertTrue(os.path.isfile(EnvironmentSettings.tmp_test_path / "mlmethodassessment/ml_score.csv"))
+        self.assertTrue(os.path.isfile(EnvironmentSettings.root_path / "test/tmp/mlmethodassessment/ml_score.csv"))
 
-        df = pd.read_csv(EnvironmentSettings.tmp_test_path / "mlmethodassessment/ml_score.csv")
-        self.assertEqual(df.shape[0], 1)
+        df = pd.read_csv(EnvironmentSettings.root_path / "test/tmp/mlmethodassessment/ml_score.csv")
+        self.assertTrue(df.shape[0] == 1)
 
-        df = pd.read_csv(EnvironmentSettings.tmp_test_path / "mlmethodassessment/predictions.csv")
+        df = pd.read_csv(EnvironmentSettings.root_path / "test/tmp/mlmethodassessment/predictions.csv")
         self.assertEqual(12, df.shape[0])
 
-        shutil.rmtree(EnvironmentSettings.tmp_test_path / "mlmethodassessment/")
+        shutil.rmtree(EnvironmentSettings.root_path / "test/tmp/mlmethodassessment/")

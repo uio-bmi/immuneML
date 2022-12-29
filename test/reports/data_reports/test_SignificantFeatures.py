@@ -2,7 +2,6 @@ import os
 import shutil
 from pathlib import Path
 from unittest import TestCase
-
 import pandas as pd
 
 from immuneML.caching.CacheType import CacheType
@@ -70,16 +69,19 @@ class TestSignificantFeatures(TestCase):
 
     def test_generate(self, compairr_path=None):
         path_suffix = "compairr" if compairr_path else "no_compairr"
-        path = PathBuilder.build(EnvironmentSettings.tmp_test_path / f"significant_features_{path_suffix}/")
+        base_path = EnvironmentSettings.root_path / f"test/tmp/significant_features/"
+        path = base_path / path_suffix
+
+        PathBuilder.build(path)
 
         dataset = self._get_example_dataset(path)
 
         report = SignificantFeatures.build_object(**{"dataset": dataset,
-                                                     "p_values": [0.5, 0.0],
-                                                     "k_values": ["full_sequence", 3],
-                                                     "compairr_path": compairr_path,
-                                                     "label": {"mylabel": {"positive_class": "+"}},
-                                                     "result_path": path,
+                                                           "p_values": [0.5, 0.0],
+                                                           "k_values": ["full_sequence", 3],
+                                                           "compairr_path": compairr_path,
+                                                           "label": {"mylabel": {"positive_class": "+"}},
+                                                           "result_path": path,
                                                      "log_scale": False})
 
         result = report._generate()
@@ -88,18 +90,20 @@ class TestSignificantFeatures(TestCase):
         self.assertEqual(len(result.output_figures), 1)
         self.assertEqual(len(result.output_tables), 1)
 
-        self.assertEqual(result.output_figures[0].path, path / "significant_features_figure.html")
-        self.assertEqual(result.output_tables[0].path, path / "significant_features_report.csv")
+        self.assertEqual(result.output_figures[0].path, Path(path / "significant_features_figure.html"))
+        self.assertEqual(result.output_tables[0].path, Path(path / "significant_features_report.csv"))
 
         self.assertTrue(os.path.isfile(result.output_figures[0].path))
         self.assertTrue(os.path.isfile(result.output_tables[0].path))
 
         result_output = pd.read_csv(path / "significant_features_report.csv", sep=",")
 
-        self.assertListEqual(list(result_output.columns), ["encoding", "p-value", "class", "significant_features"])
+        self.assertListEqual(list(result_output.columns), ["encoding","p-value","class","significant_features"])
         self.assertListEqual(list(result_output["encoding"]), ["full_sequence"] * 12 + ["3-mer"] * 12)
         self.assertListEqual(list(result_output["p-value"]), [0.5] * 6 + [0.] * 6 + [0.5] * 6 + [0.] * 6)
         self.assertListEqual(list(result_output["class"]), ["+", "+", "+", "-", "-", "-"] * 4)
         self.assertListEqual(list(result_output["significant_features"]), [2.] * 3 + [0.] * 9 + [2.] * 3 + [0.] * 9)
 
-        shutil.rmtree(path)
+        shutil.rmtree(base_path)
+
+

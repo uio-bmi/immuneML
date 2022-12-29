@@ -2,7 +2,6 @@ import os
 import shutil
 from pathlib import Path
 from unittest import TestCase
-
 import pandas as pd
 
 from immuneML.caching.CacheType import CacheType
@@ -69,7 +68,7 @@ class TestSignificantKmerPositions(TestCase):
         return str(file_path)
 
     def test_generate(self):
-        path = EnvironmentSettings.tmp_test_path / f"significant_kmer_positions/"
+        path = EnvironmentSettings.root_path / f"test/tmp/significant_kmer_positions/"
 
         PathBuilder.build(path)
 
@@ -77,11 +76,11 @@ class TestSignificantKmerPositions(TestCase):
         implanted_sequences_path = self._get_implanted_sequences(path)
 
         report = SignificantKmerPositions.build_object(**{"dataset": dataset,
-                                                          "p_values": [1.0, 0.5],
-                                                          "k_values": [2, 3],
-                                                          "reference_sequences_path": implanted_sequences_path,
-                                                          "label": {"mylabel": {"positive_class": "+"}},
-                                                          "result_path": path})
+                                                              "p_values": [1.0, 0.5],
+                                                              "k_values": [2, 3],
+                                                              "reference_sequences_path": implanted_sequences_path,
+                                                              "label": {"mylabel": {"positive_class": "+"}},
+                                                              "result_path": path})
 
         self.assertListEqual(report.reference_sequences, ["IAIAA", "GGGG"])
 
@@ -99,10 +98,12 @@ class TestSignificantKmerPositions(TestCase):
 
         result_output = pd.read_csv(path / "significant_kmer_positions_report.csv", sep=",")
 
-        self.assertListEqual(list(result_output.columns), ["encoding", "p-value", "imgt_position", "k-mer", "count"])
+        self.assertListEqual(list(result_output.columns), ["encoding","p-value","imgt_position","k-mer","count"])
         self.assertListEqual(list(result_output["encoding"]), ["2-mer"] * 12 + ["3-mer"] * 10)
         self.assertListEqual(list(result_output["p-value"]), [1.] * 6 + [0.5] * 6 + [1.] * 5 + [0.5] * 5)
         self.assertListEqual(list(result_output["imgt_position"]), [105, 105, 106, 106, 107, 116] * 2 + [105, 105, 106, 106, 107] * 2)
         self.assertListEqual(list(result_output["count"]), [1] * 22)
 
         shutil.rmtree(path)
+
+

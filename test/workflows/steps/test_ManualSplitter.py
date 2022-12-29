@@ -25,11 +25,11 @@ class TestManualSplitter(TestCase):
         test_metadata = pd.DataFrame({"subject_id": ["rep_0", "rep_3", "rep_6", "rep_8"]})
         test_metadata.to_csv(path / "test.csv")
 
-        train_datasets, test_datasets = ManualSplitter._split_dataset(
+        train_datasets, test_datasets = ManualSplitter._split_repertoire_dataset(
             DataSplitterParams(dataset, SplitType.MANUAL, split_count=1, paths=[path / 'result/'],
                                split_config=SplitConfig(manual_config=ManualSplitConfig(path / "train.csv",
                                                                                         path / "test.csv"),
-                                                        split_count=1, split_strategy=SplitType.MANUAL)), ManualSplitter._make_repertoire_dataset)
+                                                        split_count=1, split_strategy=SplitType.MANUAL)))
 
         self.assertEqual(1, len(train_datasets))
         self.assertEqual(1, len(test_datasets))

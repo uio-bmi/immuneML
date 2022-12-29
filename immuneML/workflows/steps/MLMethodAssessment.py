@@ -1,4 +1,3 @@
-import inspect
 import os
 import warnings
 from pathlib import Path
@@ -87,10 +86,7 @@ class MLMethodAssessment(Step):
             else:
                 predictions = predicted_y
 
-            if 'labels' in inspect.getfullargspec(fn).kwonlyargs or 'labels' in inspect.getfullargspec(fn).args:
-                score = fn(true_y, predictions, labels=classes)
-            else:
-                score = fn(true_y, predictions)
+            score = fn(true_y, predictions)
 
         except ValueError as err:
             warnings.warn(f"MLMethodAssessment: score for metric {metric.name} could not be calculated."

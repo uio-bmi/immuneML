@@ -34,7 +34,10 @@ class TestSignalImplanter(TestCase):
 
         r = []
 
-        path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "signal_implanter/")
+        path = EnvironmentSettings.tmp_test_path / "signalImplanter/"
+
+        if not os.path.isdir(path):
+            os.makedirs(path)
 
         sequences = [ReceptorSequence("ACDEFG", identifier="1", metadata=SequenceMetadata(region_type="IMGT_CDR3")), ReceptorSequence("ACDEFG", identifier="2", metadata=SequenceMetadata(region_type="IMGT_CDR3")),
                      ReceptorSequence("ACDEFG", identifier="3", metadata=SequenceMetadata(region_type="IMGT_CDR3")), ReceptorSequence("ACDEFG", identifier="4", metadata=SequenceMetadata(region_type="IMGT_CDR3"))]

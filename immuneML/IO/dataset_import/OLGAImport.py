@@ -19,7 +19,7 @@ class OLGAImport(DataImport):
 
     Arguments:
 
-        path (str): For RepertoireDatasets, this is the path to a directory with OLGA files to import. For Sequence- or ReceptorDatasets this path may either be the path to the file to import, or the path to the folder locating one or multiple files with .tsv, .csv or .txt extensions. By default path is set to the current working directory.
+        path (str): This is the path to a directory with OLGA files to import. By default path is set to the current working directory.
 
         is_repertoire (bool): If True, this imports a RepertoireDataset. If False, it imports a SequenceDataset. By default, is_repertoire is set to True.
 
@@ -34,8 +34,6 @@ class OLGAImport(DataImport):
         region_type (str): Which part of the sequence to import. By default, this value is set to IMGT_CDR3. This means the first and last amino acids are removed from the CDR3 sequence, as OLGA uses the IMGT junction. Specifying any other value will result in importing the sequences as they are. Valid values for region_type are the names of the :py:obj:`~immuneML.data_model.receptor.RegionType.RegionType` enum.
 
         separator (str): Column separator, for OLGA this is by default "\\t".
-
-        column_mapping (dict): defines which columns to import from olga format: keys are the number of the columns and values are the names of the columns to be mapped to
 
 
     YAML specification:
@@ -55,26 +53,18 @@ class OLGAImport(DataImport):
                 # Optional fields with OLGA-specific defaults, only change when different behavior is required:
                 separator: "\\t" # column separator
                 region_type: IMGT_CDR3 # what part of the sequence to import
-                columns_to_load: [0, 1, 2, 3]
-                column_mapping:
-                    0: sequences
-                    1: sequence_aas
-                    2: v_genes
-                    3: j_genes
 
     """
 
     @staticmethod
     def import_dataset(params: dict, dataset_name: str) -> Dataset:
-
-        assert sorted(params["columns_to_load"]) == sorted(list(params["column_mapping"].keys()))
-
         return ImportHelper.import_dataset(OLGAImport, params, dataset_name)
 
     @staticmethod
     def alternative_load_func(filepath, params):
-        return pd.read_csv(filepath, sep=params.separator, iterator=False, dtype=str, header=None, usecols=list(params.column_mapping.keys()),
-                           names=list(params.column_mapping.values()))
+        df = pd.read_csv(filepath, sep=params.separator, iterator=False, dtype=str, header=None)
+        df.columns = ["sequences", "sequence_aas", "v_genes", "j_genes"]
+        return df
 
     @staticmethod
     def preprocess_dataframe(df: pd.DataFrame, params: DatasetImportParams):
