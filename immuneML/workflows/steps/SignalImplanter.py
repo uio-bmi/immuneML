@@ -62,12 +62,10 @@ class SignalImplanter(Step):
         # only runs if any of the signal implanting strategies are MutationImplanting
         if any([isinstance(signal.implanting_strategy, MutationImplanting) for implanting in
                 simulation_state.simulation.implantings for signal in implanting.signals]):
-            total_sequence_count = SequenceDispenser.total_sequence_count(simulation_state.dataset.get_data())
-
             for implanting in simulation_state.simulation.implantings:
                 for signal in implanting.signals:
                     if isinstance(signal.implanting_strategy, MutationImplanting):
-                        signal.implanting_strategy.set_sequence_dispenser(SequenceDispenser(total_sequence_count))
+                        signal.implanting_strategy.set_sequence_dispenser(SequenceDispenser(simulation_state.dataset.get_data()))
 
         repertoires_path = PathBuilder.build(simulation_state.result_path / "repertoires")
         processed_repertoires = SignalImplanter._implant_signals(simulation_state, SignalImplanter._process_repertoire, repertoires_path)

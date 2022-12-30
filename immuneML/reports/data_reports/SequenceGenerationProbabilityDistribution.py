@@ -39,6 +39,8 @@ class SequenceGenerationProbabilityDistribution(DataReport):
                 dataset_generation_method: OLGA
     """
 
+    # TODO change code so that a dataframe is passed down instead of many dicts
+
     @classmethod
     def build_object(cls,
                      **kwargs):  # called when parsing YAML - all checks for parameters (if any) should be in this function
@@ -92,15 +94,6 @@ class SequenceGenerationProbabilityDistribution(DataReport):
         label_names = list(self.dataset.get_label_names())
         generation_method = {}
 
-        '''
-        for repertoire, meta_dataset in zip(self.dataset.get_data(self.batch_size),
-                                            self.dataset.get_metadata(["dataset"])["dataset"]):
-            rep_attributes = repertoire.get_attributes(["sequence_aas"] + label_names)
-
-            for i in range(len(rep_attributes["sequence_aas"])):
-                generation_method[rep_attributes["sequence_aas"][i]] = meta_dataset
-        '''
-
         for repertoire in self.dataset.get_data(self.batch_size):
             rep_attributes = repertoire.get_attributes(["sequence_aas"] + label_names)
 
@@ -114,8 +107,7 @@ class SequenceGenerationProbabilityDistribution(DataReport):
                 for label in label_names:
                     if label in rep_attributes:
                         if rep_attributes[label][i]:
-                            # TODO do ImplantAnnotation parsing better
-                            seq_gen_method = re.split("=|'|,|\s", rep_attributes[label][i])[2]
+                            seq_gen_method = re.findall("signal_id='([^\"']+)", rep_attributes[label][i])[0]
                             break
 
                 if not seq_gen_method:
@@ -148,7 +140,7 @@ class SequenceGenerationProbabilityDistribution(DataReport):
 
     def _get_sequence_count(self):
         """
-        Either counts number of duplicates of each sequence from self.dataset, or how many repertoires each sequence
+        Either counts number of duplicates of each sequence from dataset, or how many repertoires each sequence
         appears in. This is specified in yaml file.
 
         Returns:
@@ -168,7 +160,8 @@ class SequenceGenerationProbabilityDistribution(DataReport):
 
         return sequence_count
 
-    def _get_total_sequence_count(self, repertoire: Repertoire) -> dict:
+    @staticmethod
+    def _get_total_sequence_count(repertoire: Repertoire) -> dict:
         """
         Counts number of duplicates of each sequence in repertoire.
 
@@ -185,7 +178,8 @@ class SequenceGenerationProbabilityDistribution(DataReport):
 
         return sequence_count
 
-    def _get_repertoire_appearance_rate(self, repertoire: Repertoire) -> dict:
+    @staticmethod
+    def _get_repertoire_appearance_rate(repertoire: Repertoire) -> dict:
         """
         Marks sequences that appear in repertoire with 1.
 

@@ -11,20 +11,10 @@ from immuneML.simulation.motif_instantiation_strategy.GappedKmerInstantiation im
 
 
 class SequenceDispenser:
-    # TODO handle not finding mutations better
-    # TODO improve assert messages
-    # TODO improve variable names
 
-    """
-    TODO: ERROR!!!
-        - All signals only have 1 signal_id in annotation
-        - Only 1 motif gets implanted of the signals???
-    """
+    def __init__(self, dataset):
 
-    def __init__(self, sequence_count: dict):
-
-        assert sequence_count, "Sequence count has not been set"
-        self.sequence_count = sequence_count
+        self.sequence_count = self.total_sequence_count(dataset)
 
         self.seeds = []
 
@@ -38,30 +28,61 @@ class SequenceDispenser:
 
         self.amino_alphabet = EnvironmentSettings.get_sequence_alphabet(sequence_type=SequenceType.AMINO_ACID)
 
-    def add_seed_sequence(self, motif: Motif):
-        if motif not in self.seeds:
-            self.seeds.append(motif)
+    def add_seed_sequence(self, seed_motif: Motif):
+        """
+        Add a full sequence from a Motif-object to the Sequence Dispenser
+
+        Args:
+            seed_motif (Motif): Motif-object with full sequence
+        """
+        if seed_motif in self.seeds:
+            return
+
+        if seed_motif.mutation_position_possibilities is not None:
+            mutation_position_probabilities = {key: float(value) for key, value in
+                                               seed_motif.mutation_position_possibilities.items()}
+            assert all(isinstance(key, int) for key in mutation_position_probabilities.keys()) \
+                   and all(isinstance(val, float) for val in mutation_position_probabilities.values()) \
+                   and 0.99 <= sum(mutation_position_probabilities.values()) <= 1, \
+                f"For each possible mutation position a probability between 0 and 1 has to be assigned so that the " \
+                f"probabilities for all distance possibilities sum to 1. sum({mutation_position_probabilities.values()}) = {sum(mutation_position_probabilities.values())}"
+
+            assert all(0 <= i < len(seed_motif.seed) for i in mutation_position_probabilities.keys()), \
+                f"All positions in {mutation_position_probabilities=} must be inside the seed sequence (i.e. in in " \
+                f"range 0 to {len(seed_motif.seed) - 1}"
+        else:
+            raise ValueError("SequenceDispenser: Motifs must have mutation_position_possibilities")
+
+        self.seeds.append(seed_motif)
 
     def generate_mutation(self, repertoire_id) -> Motif:
-        assert self.seeds, "No signals to mutate"
+        """
+        Generate a mutated sequence using added sequences
 
-        # pick random seed sequence from given signal
+        Args:
+            repertoire_id: id
+
+        Returns:
+            Motif: Motif-object with a randomly selected legal amino acid sequence
+        """
+
+        assert self.seeds, "SequenceDispenser: No signals to mutate"
+
         seed_motif = random.choice(self.seeds)
-
-        mutation_position_probabilities = seed_motif.mutation_position_possibilities
-
-        #        if mutation_position_probabilities is not None:
-        #            mutation_position_probabilities = {key: float(value) for key, value in
-        #                                              mutation_position_probabilities.items()}
-        #            assert all(isinstance(key, int) for key in mutation_position_probabilities.keys()) \
-        #                   and all(isinstance(val, float) for val in mutation_position_probabilities.values()) \
-        #                   and 0.99 <= sum(mutation_position_probabilities.values()) <= 1, \
-        #                f"For each possible mutation position a probability between 0 and 1 has to be assigned so that the " \
-        #                f"probabilities for all distance possibilities sum to 1. sum({mutation_position_probabilities.values()}) = {sum(mutation_position_probabilities.values())}"
 
         seed_seq = seed_motif.seed
         v_call = seed_motif.v_call
         j_call = seed_motif.j_call
+
+        seed_pgen = self.olga.compute_p_gens(
+            pd.DataFrame(data={
+                "sequence_aas": [seed_seq],
+                "v_genes": [v_call],
+                "j_genes": [j_call]
+            })
+            , SequenceType.AMINO_ACID)[0]
+
+        mutation_position_probabilities = seed_motif.mutation_position_possibilities
 
         attempt_counter = 1
 
@@ -81,21 +102,21 @@ class SequenceDispenser:
 
             attempt_counter += 1
             if attempt_counter > 200:
-                raise Exception(f"Could not find valid mutation for {seed_seq}")
-                # print(f"Could not find valid mutation for {seed_seq}")
-                # return self.generate_mutation(repertoire_id)
-
-        print(f"\nFINAL PGEN: {pgen}\n"
-              f"MUTATION: {mutation}")
-        print(f"{attempt_counter=}")
+                # if no legal mutation is found, implant seed seq if it's legal, if not recursively run gen. mutation
+                if self._legal_mutation(seed_seq, seed_pgen, repertoire_id):
+                    return Motif(identifier=f"mutation_{seed_seq}", instantiation=GappedKmerInstantiation(),
+                                 seed=seed_seq,
+                                 v_call=v_call,
+                                 j_call=j_call)
+                return self.generate_mutation(repertoire_id)
 
         if mutation in self._mutation_implanted_repertoires:
             self._mutation_implanted_repertoires[mutation].append(repertoire_id)
         else:
             self._mutation_implanted_repertoires[mutation] = [repertoire_id]
 
-        # TODO: unique id
-        return Motif(identifier="m1", instantiation=GappedKmerInstantiation(), seed=mutation, v_call=v_call,
+        return Motif(identifier=f"mutation_{mutation}", instantiation=GappedKmerInstantiation(), seed=mutation,
+                     v_call=v_call,
                      j_call=j_call)
 
     def _mutate_sequence(self, seq: str, mutation_position_probabilities: dict):
@@ -131,8 +152,6 @@ class SequenceDispenser:
             self._mutation_count_limit[seq] = self._draw_random_limit_count()
         count_limit = self._mutation_count_limit[seq]
 
-        print(f"------------------------{count_limit=}")
-
         return count < count_limit
 
     def _draw_random_limit_count(self):
@@ -150,16 +169,25 @@ class SequenceDispenser:
 
     @staticmethod
     def total_sequence_count(repertoire_dataset):
+        """
+        Args:
+            repertoire_dataset (Dataset): Repertoire dataset
 
+        Returns:
+            dict: Dictionary with count of how many of each duplicate count there are in the dataset
+        """
+
+        # count of how often each sequence appears
         sequence_count = defaultdict(lambda: 0)
 
         for repertoire in repertoire_dataset:
             for seq, count in zip(repertoire.get_sequence_aas(), repertoire.get_counts()):
                 sequence_count[seq] = sequence_count[seq] + count
 
-        count_count = defaultdict(lambda: 0)
+        # count of how many of each count there are in the dataset
+        duplicate_counter = defaultdict(lambda: 0)
 
         for _, v in sequence_count.items():
-            count_count[v] = count_count[v] + 1
+            duplicate_counter[v] = duplicate_counter[v] + 1
 
-        return count_count
+        return duplicate_counter
