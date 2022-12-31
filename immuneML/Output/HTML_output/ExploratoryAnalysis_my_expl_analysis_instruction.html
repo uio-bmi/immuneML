@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>immuneML: Exploratory Analysis Overview</title>
+    <style>
+        /**
+*** SIMPLE GRID
+*** (C) ZACH COLE 2016
+**/
+
+@import url(https://fonts.googleapis.com/css?family=Lato:400,300,300italic,400italic,700,700italic);
+
+/* UNIVERSAL */
+
+html,
+body {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  left: 0;
+  top: 0;
+  font-size: 100%;
+  font-family: 'Lato', Helvetica, sans-serif;
+  color: #333447;
+  line-height: 1.2;
+}
+
+/* TYPOGRAPHY */
+
+h1 {
+  font-size: 2.5rem;
+}
+
+h2 {
+  font-size: 2rem;
+}
+
+h3 {
+  font-size: 1.375rem;
+}
+
+h4 {
+  font-size: 1.125rem;
+}
+
+h5 {
+  font-size: 1rem;
+}
+
+h6 {
+  font-size: 0.875rem;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-weight: normal;
+}
+
+p {
+  font-size: 1.125rem;
+  font-weight: 200;
+  line-height: 1.8;
+}
+
+a {
+    color: #25537b;
+    text-decoration: none;
+    background-color: transparent;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+.center {
+  text-align: center;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.container {
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 1em;
+}
+
+/* immuneML custom */
+
+table, td, th {
+    border: 1px solid #cccccc;
+}
+
+table {
+    border-collapse: collapse;
+}
+
+td, th {
+    padding: 0.4em;
+    text-align: center;
+}
+
+img {
+    max-height: 100%;
+    max-width: 100%;
+}
+
+details {
+    margin: 0.7em 0;
+}
+
+details > summary {
+    cursor: pointer;
+}
+
+details > summary > h3 {
+    display: inline-block;
+}
+
+details > summary:focus{
+    outline: none;
+}
+
+details > table {
+    margin: 1.5em;
+}
+
+embed {
+    width: 100%;
+    min-height: 650px;
+}
+
+.grid-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-gap: 10px;
+    text-align: center;
+}
+
+.grid-item-full-width {
+    grid-column: span 2;
+}
+
+ul > li {
+    text-align: left;
+}
+
+@media screen and (max-width: 960px) {
+  .grid-container{
+    display: grid;
+    grid-template-columns: auto;
+    grid-gap: 10px;
+    text-align: center;
+  }
+}
+
+.padded {
+    padding: 1em 2em;
+}
+
+.padded-bottom{
+    padding-bottom: 1em;
+}
+
+.padded-left {
+    padding-left: 2em;
+}
+
+.padded-md {
+    padding: 0.75em 2em;
+}
+
+.padded-sm {
+    padding: 0.5em 2em;
+}
+
+.padded-xs {
+    padding: 0.25em 2em;
+}
+
+.padded-top {
+    padding-top: 1em;
+}
+
+.table-container{
+    width: 100%;
+    overflow-x: auto;
+}
+
+.table-container table thead {
+    font-weight: bold;
+}
+
+@media only screen and (max-width: 600px) {
+  .col {
+    display: block;
+    width: 100%;
+  }
+}
+
+@media print {
+    .card {
+        box-shadow: none;
+    }
+}
+
+code {
+    max-width: 100%;
+    white-space: pre-wrap;
+}
+    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+</head>
+<body>
+    <div class="container">
+        <h1>Analyses</h1>
+        <div>Full specification is available <a href="..\full_quickstart.yaml">here</a>.</div>
+        <div class="padded-bottom padded-top">immuneML version: immuneML 2.1.2</div>
+        <div>
+            <h2>Analysis my_first_analysis</h2>
+            <div class="card">
+                <div class="col-container">
+                    <div class="col">
+                        <h3>Dataset information</h3>
+                        <h4>General information</h4>
+                        <div class="table-container">
+                            <table>
+                            <tr>
+                                <td><b>Name</b></td>
+                                <td>my_dataset</td>
+                            </tr>
+                            <tr>
+                                <td><b>Type</b></td>
+                                <td>PDB Dataset</td>
+                            </tr>
+                            <tr>
+                                <td><b>Dataset size</b></td>
+                                <td>9 pdbs</td>
+                            </tr>
+                        </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-container">
+                    <div>
+                        <h3>Encoding my_encoding</h3>
+                        <h4>PDB Encoder</h4>
+
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Parameter</th>
+                                        <th>Value</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>name</td>
+                                        <td>my_encoding</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                    </div>
+                </div>
+                <h3>Report PDBDataReport</h3>
+                <div>
+                    <p class="padded-bottom">Heatmap</p>
+
+                    <div class="center padded">
+                        <p>1f90 - Heatmap of distance from carbon alphas in the LIGHT chain to carbon alphas in the antigen </p>
+                        <embed src="my_expl_analysis_instruction_analysis_my_first_analysis_report_1f90_lightChainDistanceToAntigen.html">
+                    </div>
+                    <div class="center padded">
+                        <p>1f90 - Heatmap of distance from carbon alphas in the HEAVY chain to carbon alphas in the antigen </p>
+                        <embed src="my_expl_analysis_instruction_analysis_my_first_analysis_report_1f90_heavyChainDistanceToAntigen.html">
+                    </div>
+                    <div class="center padded">
+                        <p>1u8o - Heatmap of distance from carbon alphas in the LIGHT chain to carbon alphas in the antigen </p>
+                        <embed src="my_expl_analysis_instruction_analysis_my_first_analysis_report_1u8o_lightChainDistanceToAntigen.html">
+                    </div>
+                    <div class="center padded">
+                        <p>1u8o - Heatmap of distance from carbon alphas in the HEAVY chain to carbon alphas in the antigen </p>
+                        <embed src="my_expl_analysis_instruction_analysis_my_first_analysis_report_1u8o_heavyChainDistanceToAntigen.html">
+                    </div>
+                    <div class="center padded">
+                        <p>2p8l - Heatmap of distance from carbon alphas in the LIGHT chain to carbon alphas in the antigen </p>
+                        <embed src="my_expl_analysis_instruction_analysis_my_first_analysis_report_2p8l_lightChainDistanceToAntigen.html">
+                    </div>
+                    <div class="center padded">
+                        <p>2p8l - Heatmap of distance from carbon alphas in the HEAVY chain to carbon alphas in the antigen </p>
+                        <embed src="my_expl_analysis_instruction_analysis_my_first_analysis_report_2p8l_heavyChainDistanceToAntigen.html">
+                    </div>
+                    <div class="center padded">
+                        <p>2p8m - Heatmap of distance from carbon alphas in the LIGHT chain to carbon alphas in the antigen </p>
+                        <embed src="my_expl_analysis_instruction_analysis_my_first_analysis_report_2p8m_lightChainDistanceToAntigen.html">
+                    </div>
+                    <div class="center padded">
+                        <p>2p8m - Heatmap of distance from carbon alphas in the HEAVY chain to carbon alphas in the antigen </p>
+                        <embed src="my_expl_analysis_instruction_analysis_my_first_analysis_report_2p8m_heavyChainDistanceToAntigen.html">
+                    </div>
+                    <div class="center padded">
+                        <p>5vic - Heatmap of distance from carbon alphas in the LIGHT chain to carbon alphas in the antigen </p>
+                        <embed src="my_expl_analysis_instruction_analysis_my_first_analysis_report_5vic_lightChainDistanceToAntigen.html">
+                    </div>
+                    <div class="center padded">
+                        <p>5vic - Heatmap of distance from carbon alphas in the HEAVY chain to carbon alphas in the antigen </p>
+                        <embed src="my_expl_analysis_instruction_analysis_my_first_analysis_report_5vic_heavyChainDistanceToAntigen.html">
+                    </div>
+                    <div class="center padded">
+                        <p>6b0e - Heatmap of distance from carbon alphas in the LIGHT chain to carbon alphas in the antigen </p>
+                        <embed src="my_expl_analysis_instruction_analysis_my_first_analysis_report_6b0e_lightChainDistanceToAntigen.html">
+                    </div>
+                    <div class="center padded">
+                        <p>6b0e - Heatmap of distance from carbon alphas in the HEAVY chain to carbon alphas in the antigen </p>
+                        <embed src="my_expl_analysis_instruction_analysis_my_first_analysis_report_6b0e_heavyChainDistanceToAntigen.html">
+                    </div>
+                    <div class="center padded">
+                        <p>6phd - Heatmap of distance from carbon alphas in the LIGHT chain to carbon alphas in the antigen </p>
+                        <embed src="my_expl_analysis_instruction_analysis_my_first_analysis_report_6phd_lightChainDistanceToAntigen.html">
+                    </div>
+                    <div class="center padded">
+                        <p>6phd - Heatmap of distance from carbon alphas in the HEAVY chain to carbon alphas in the antigen </p>
+                        <embed src="my_expl_analysis_instruction_analysis_my_first_analysis_report_6phd_heavyChainDistanceToAntigen.html">
+                    </div>
+                    <div class="center padded">
+                        <p>6xqw - Heatmap of distance from carbon alphas in the LIGHT chain to carbon alphas in the antigen </p>
+                        <embed src="my_expl_analysis_instruction_analysis_my_first_analysis_report_6xqw_lightChainDistanceToAntigen.html">
+                    </div>
+                    <div class="center padded">
+                        <p>6xqw - Heatmap of distance from carbon alphas in the HEAVY chain to carbon alphas in the antigen </p>
+                        <embed src="my_expl_analysis_instruction_analysis_my_first_analysis_report_6xqw_heavyChainDistanceToAntigen.html">
+                    </div>
+                    <div class="center padded">
+                        <p>6ym0 - Heatmap of distance from carbon alphas in the LIGHT chain to carbon alphas in the antigen </p>
+                        <embed src="my_expl_analysis_instruction_analysis_my_first_analysis_report_6ym0_lightChainDistanceToAntigen.html">
+                    </div>
+                    <div class="center padded">
+                        <p>6ym0 - Heatmap of distance from carbon alphas in the HEAVY chain to carbon alphas in the antigen </p>
+                        <embed src="my_expl_analysis_instruction_analysis_my_first_analysis_report_6ym0_heavyChainDistanceToAntigen.html">
+                    </div>
+
+
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
