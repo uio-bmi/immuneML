@@ -133,7 +133,7 @@ class MotifEncoder(DatasetEncoder):
             return self._encode_data(dataset, params)
         else:
             learned_motifs = PositionalMotifHelper.read_motifs_from_file(self.learned_motif_filepath)
-            return self.get_encoded_dataset_from_motifs(dataset, learned_motifs, params.label_config, params.pool_size)
+            return self.get_encoded_dataset_from_motifs(dataset, learned_motifs, params)
 
     def _encode_data(self, dataset, params: EncoderParams):
         learned_motifs = self._compute_motifs(dataset, params)
@@ -141,7 +141,7 @@ class MotifEncoder(DatasetEncoder):
         self.learned_motif_filepath = params.result_path / "significant_motifs.tsv"
         PositionalMotifHelper.write_motifs_to_file(learned_motifs, self.learned_motif_filepath)
 
-        return self.get_encoded_dataset_from_motifs(dataset, learned_motifs, params.label_config, params.pool_size)
+        return self.get_encoded_dataset_from_motifs(dataset, learned_motifs, params)
 
     def _compute_motifs(self, dataset, params):
         motifs = self._prepare_candidate_motifs(dataset, params)
@@ -160,11 +160,13 @@ class MotifEncoder(DatasetEncoder):
 
         return motifs
 
-    def get_encoded_dataset_from_motifs(self, dataset, motifs, label_config, number_of_processes):
-        labels = EncoderHelper.encode_element_dataset_labels(dataset, label_config)
+    def get_encoded_dataset_from_motifs(self, dataset, motifs, params):
+        labels = EncoderHelper.encode_element_dataset_labels(dataset, params.label_config)
 
         examples, feature_names, feature_annotations = self._construct_encoded_data_matrix(dataset, motifs,
-                                                                                           label_config, number_of_processes)
+                                                                                           params.label_config, params.pool_size)
+
+        feature_annotations.to_csv(params.result_path / "confusion_matrix.tsv", index=False, sep="\t")
 
         encoded_dataset = dataset.clone()
         encoded_dataset.encoded_data = EncodedData(examples=examples,
