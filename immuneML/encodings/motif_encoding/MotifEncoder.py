@@ -20,6 +20,7 @@ from immuneML.util.ParameterValidator import ParameterValidator
 
 
 from immuneML.encodings.motif_encoding.PositionalMotifHelper import PositionalMotifHelper
+from immuneML.util.PathBuilder import PathBuilder
 
 
 class MotifEncoder(DatasetEncoder):
@@ -166,7 +167,7 @@ class MotifEncoder(DatasetEncoder):
         examples, feature_names, feature_annotations = self._construct_encoded_data_matrix(dataset, motifs,
                                                                                            params.label_config, params.pool_size)
 
-        feature_annotations.to_csv(params.result_path / "confusion_matrix.tsv", index=False, sep="\t")
+        self._export_confusion_matrix(params.result_path, feature_annotations)
 
         encoded_dataset = dataset.clone()
         encoded_dataset.encoded_data = EncodedData(examples=examples,
@@ -182,6 +183,13 @@ class MotifEncoder(DatasetEncoder):
                                                          "min_recall": self.min_recall})
 
         return encoded_dataset
+
+    def _export_confusion_matrix(self, result_path, feature_annotations):
+        try:
+            PathBuilder.build(result_path)
+            feature_annotations.to_csv(result_path / "confusion_matrix.tsv", index=False, sep="\t")
+        except Exception as e:
+            logging.exception(f"MotifEncoder: An exception occurred while exporting the confusion matrix: {e}")
 
     def _prepare_candidate_motifs(self, dataset, params):
         full_dataset = EncoderHelper.get_current_dataset(dataset, self.context)
