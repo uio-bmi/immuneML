@@ -47,6 +47,7 @@ class ROCCurve(MLReport):
         fpr, tpr, _ = roc_curve(true_y, predicted_y)
         roc_auc = auc(fpr, tpr)
 
+
         trace1 = go.Scatter(x=fpr, y=tpr,
                             mode='lines',
                             line=dict(color='darkorange', width=2),
@@ -57,7 +58,8 @@ class ROCCurve(MLReport):
                             showlegend=False)
         layout = go.Layout(title='Receiver operating characteristic example',
                            xaxis=dict(title='False Positive Rate'),
-                           yaxis=dict(title='True Positive Rate'))
+                           yaxis=dict(title='True Positive Rate'),
+                           template='plotly_white')
 
         fig = go.Figure(data=[trace1, trace2], layout=layout)
 
