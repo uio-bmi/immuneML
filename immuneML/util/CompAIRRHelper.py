@@ -57,7 +57,6 @@ class CompAIRRHelper:
         return [str(compairr_params.compairr_path), "-m", "-d", str(compairr_params.differences), "-t", str(compairr_params.threads)] + \
                indels_args + frequency_args + ignore_genes + output_args + input_file_list
 
-
     @staticmethod
     def write_repertoire_file(repertoire_dataset, filename, compairr_params):
         mode = "w"
@@ -69,7 +68,6 @@ class CompAIRRHelper:
 
             mode = "a"
             header = False
-
 
     @staticmethod
     def get_repertoire_contents(repertoire, compairr_params):
@@ -94,8 +92,8 @@ class CompAIRRHelper:
             repertoire_contents["counts"] = 1
 
         repertoire_contents.rename(columns={EnvironmentSettings.get_sequence_type().value: "junction_aa",
-                                           "v_genes": "v_call", "j_genes": "j_call",
-                                           "counts": "duplicate_count", "identifier": "repertoire_id"},
+                                            "v_genes": "v_call", "j_genes": "j_call",
+                                            "counts": "duplicate_count", "identifier": "repertoire_id"},
                                    inplace=True)
 
         return repertoire_contents

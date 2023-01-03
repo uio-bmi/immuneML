@@ -162,7 +162,7 @@ class ReceptorCNN(MLMethod):
         self.CNN.to(device=self.device)
 
         self.label = label
-        self.class_mapping = Util.make_binary_class_mapping(encoded_data.labels[self.label.name])
+        self.class_mapping = Util.make_binary_class_mapping(encoded_data.labels[self.label.name], self.label.positive_class)
 
         self.CNN.train()
 
