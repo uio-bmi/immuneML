@@ -40,7 +40,6 @@ class ToolParser:
         tool_item = {**default_params, **tool_item}
 
         # TODO:
-        #  - create tool type?
         #  - check that the tool is reachable on the specified path - reflection handler
         #  - check that name of tool is key in definitions (MLMethod in first version)
 

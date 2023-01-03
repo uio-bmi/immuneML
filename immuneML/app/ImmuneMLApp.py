@@ -4,6 +4,7 @@ import os
 import shutil
 import warnings
 from pathlib import Path
+import random
 
 from immuneML.caching.CacheType import CacheType
 from immuneML.dsl.ImmuneMLParser import ImmuneMLParser
@@ -84,7 +85,10 @@ def main():
 
     namespace = parser.parse_args()
     namespace.specification_path = Path(namespace.specification_path)
-    namespace.result_path = Path(namespace.result_path)
+    #namespace.result_path = Path(namespace.result_path)
+
+    # for testing, create unique result path everytime
+    namespace.result_path = "../../results/quickstart_results" + str(random.randint(0, 10000))
 
     run_immuneML(namespace)
 

@@ -10,9 +10,11 @@ from immuneML.dsl.InstructionParser import InstructionParser
 from immuneML.dsl.ToolParser import ToolParser
 from immuneML.dsl.OutputParser import OutputParser
 from immuneML.dsl.definition_parsers.DefinitionParser import DefinitionParser
+from immuneML.dsl.symbol_table.SymbolType import SymbolType
 from immuneML.dsl.symbol_table.SymbolTable import SymbolTable
 from immuneML.util.Logger import print_log
 from immuneML.util.PathBuilder import PathBuilder
+from immuneML.environment.EnvironmentSettings import EnvironmentSettings
 
 
 class ImmuneMLParser:
@@ -140,6 +142,10 @@ class ImmuneMLParser:
         symbol_table = SymbolTable()
 
         symbol_table = ToolParser.parse(workflow_specification, symbol_table)
+
+        # temporary solution
+        EnvironmentSettings.set_tool_path(symbol_table.get_by_type(SymbolType.TOOL)[0].item["path"])
+
         def_parser_output, specs_defs = DefinitionParser.parse(workflow_specification, symbol_table, result_path)
         symbol_table, specs_instructions = InstructionParser.parse(def_parser_output, result_path)
         app_output = OutputParser.parse(workflow_specification, symbol_table)
