@@ -144,7 +144,7 @@ class SklearnMethod(MLMethod):
                                  optimization_metric: str = "balanced_accuracy"):
 
         model = self._get_ml_model()
-        scoring = Metric.get_sklearn_score_name(Metric[optimization_metric.upper()])
+        scoring = Metric.get_sklearn_score_name(Metric.get_metric(optimization_metric.upper()))
 
         if scoring not in SCORERS.keys():
             scoring = "balanced_accuracy"

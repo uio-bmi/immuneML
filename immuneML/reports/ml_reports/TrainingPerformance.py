@@ -88,7 +88,7 @@ class TrainingPerformance(MLReport):
 
         for metric in self.metrics_set:
             _score = TrainingPerformance._compute_score(
-                Metric[metric],
+                Metric.get_metric(metric),
                 predicted_y,
                 predicted_proba_y,
                 true_y,
