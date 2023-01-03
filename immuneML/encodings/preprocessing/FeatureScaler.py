@@ -1,4 +1,5 @@
 from sklearn.preprocessing import normalize, binarize
+import numpy as np
 
 from immuneML.analysis.data_manipulation.NormalizationType import NormalizationType
 
@@ -59,7 +60,7 @@ class FeatureScaler:
             scaled_design_matrix = design_matrix.todense()
         else:
             scaled_design_matrix = design_matrix
-        return scaled_design_matrix
+        return np.asarray(scaled_design_matrix)
 
     @staticmethod
     def normalize(design_matrix, normalization_type: NormalizationType):
