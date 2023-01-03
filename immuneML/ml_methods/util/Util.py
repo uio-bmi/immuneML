@@ -72,7 +72,7 @@ class Util:
         else:
             assert positive_class in unique_values, f"MLMethod: the specified positive class '{positive_class}' does not occur " \
                                                     f"in the list of available classes: {str(unique_values)[1:-1]}."
-            unique_values.pop(positive_class)
+            unique_values.remove(positive_class)
             return {0: unique_values[0], 1: positive_class}
 
 
