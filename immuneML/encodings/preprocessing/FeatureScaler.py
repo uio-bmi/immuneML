@@ -57,10 +57,10 @@ class FeatureScaler:
     @staticmethod
     def _optional_convert_to_dense(design_matrix, with_mean: bool):
         if with_mean and hasattr(design_matrix, "todense"):
-            scaled_design_matrix = design_matrix.todense()
+            scaled_design_matrix = np.array(design_matrix.todense())
         else:
             scaled_design_matrix = design_matrix
-        return np.asarray(scaled_design_matrix)
+        return scaled_design_matrix
 
     @staticmethod
     def normalize(design_matrix, normalization_type: NormalizationType):
