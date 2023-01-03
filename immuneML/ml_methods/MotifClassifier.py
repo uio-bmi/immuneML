@@ -36,13 +36,14 @@ class MotifClassifier(MLMethod): # todo name? (Greedy)BinaryFeatureClassifier? R
     """
 
     def __init__(self, training_percentage: float = None, max_motifs: int = None,
-                 patience: int = None, min_delta: float = None,
+                 patience: int = None, min_delta: float = None, keep_all: bool = None,
                  result_path: Path = None):
         super().__init__()
         self.training_percentage = training_percentage
         self.max_motifs = max_motifs
         self.patience = patience
         self.min_delta = min_delta
+        self.keep_all = keep_all
 
         self.feature_names = None
         self.rule_tree_indices = None
@@ -63,21 +64,25 @@ class MotifClassifier(MLMethod): # todo name? (Greedy)BinaryFeatureClassifier? R
         self.feature_names = encoded_data.feature_names
         self.label = label
         self.class_mapping = Util.make_binary_class_mapping(encoded_data.labels[self.label.name])
+        self.optimization_metric = optimization_metric
+        
         # todo deal with positive_class, what if it is not explicitly set?
         # todo generalize with the positive class label stuff in MotifEncoder
         # todo weights in immuneML general must also be recalculated here for specific training and validation sets!
 
-        encoded_train_data, encoded_val_data = self._prepare_and_split_data(encoded_data)
-        self.optimization_metric = optimization_metric
-        self.rule_tree_indices = self._build_rule_tree(encoded_train_data, encoded_val_data)
+        self.rule_tree_indices = self._build_rule_tree(encoded_data)
         self.rule_tree_features = self._get_rule_tree_features_from_indices(self.rule_tree_indices, self.feature_names)
 
         logging.info(f"{MotifClassifier.__name__}: finished training.")
 
-    def _build_rule_tree(self, encoded_train_data, encoded_val_data):
-        return self._recursively_select_rules(encoded_train_data=encoded_train_data,
-                                              encoded_val_data=encoded_val_data,
-                                              last_val_scores=[], prev_rule_indices=[])
+    def _build_rule_tree(self, encoded_data):
+        if self.keep_all:
+            return list(range(len(self.feature_names)))
+        else:
+            encoded_train_data, encoded_val_data = self._prepare_and_split_data(encoded_data)
+            return self._recursively_select_rules(encoded_train_data=encoded_train_data,
+                                                  encoded_val_data=encoded_val_data,
+                                                  last_val_scores=[], prev_rule_indices=[])
 
     def _get_rule_tree_features_from_indices(self, rule_tree_indices, feature_names):
         return [feature_names[idx] for idx in rule_tree_indices]

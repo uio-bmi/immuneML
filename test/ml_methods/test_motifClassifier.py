@@ -41,7 +41,8 @@ class TestMotifClassifier(TestCase):
         motif_classifier = MotifClassifier(training_percentage=0.7,
                                            max_motifs=100,
                                            patience=10,
-                                           min_delta=0)
+                                           min_delta=0,
+                                           keep_all=False)
 
         random.seed(1)
         motif_classifier.fit(encoded_data=enc_data, label=label,
@@ -50,21 +51,20 @@ class TestMotifClassifier(TestCase):
 
         return motif_classifier
 
-
     def test_fit(self):
         enc_data, label = self.get_enc_data()
         motif_classifier = self.get_fitted_classifier(enc_data, label)
 
         predictions = motif_classifier.predict(enc_data, label)
 
-        self.assertListEqual(list(predictions.keys()), ["l1"])
-        self.assertListEqual(list(predictions["l1"]), [True, True, True, True, False, False, False, False])
-
         self.assertListEqual(sorted(motif_classifier.rule_tree_features), ["rule1", "rule2"])
         self.assertDictEqual(motif_classifier.class_mapping, {0: False, 1: True})
 
+        self.assertListEqual(list(predictions.keys()), ["l1"])
+        self.assertListEqual(list(predictions["l1"]), [True, True, True, True, False, False, False, False])
+
     def test_load_store(self):
-        path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "motif_classifier")
+        path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "motif_classifier_load_store")
 
         enc_data, label = self.get_enc_data()
         motif_classifier = self.get_fitted_classifier(enc_data, label)
@@ -85,6 +85,8 @@ class TestMotifClassifier(TestCase):
 
         predictions = motif_classifier.predict(enc_data, label)
         predictions2 = motif_classifier2.predict(enc_data, label)
+
+        self.assertEqual(motif_classifier.rule_tree_indices, motif_classifier2.rule_tree_indices)
 
         self.assertListEqual(list(predictions.keys()), ["l1"])
         self.assertListEqual(list(predictions["l1"]), [True, True, True, True, False, False, False, False])

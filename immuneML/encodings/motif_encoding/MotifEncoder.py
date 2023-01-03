@@ -15,7 +15,6 @@ from immuneML.encodings.EncoderParams import EncoderParams
 from immuneML.encodings.motif_encoding.PositionalMotifParams import PositionalMotifParams
 from immuneML.environment.LabelConfiguration import LabelConfiguration
 from immuneML.util.EncoderHelper import EncoderHelper
-from immuneML.util.NumpyHelper import NumpyHelper
 from immuneML.util.ParameterValidator import ParameterValidator
 
 
