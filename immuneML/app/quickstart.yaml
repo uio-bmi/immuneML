@@ -12,7 +12,6 @@ definitions:
     my_encoding:
       PDB:
         name: Test
-        region_type: IMGT_CDR3
 instructions:
     my_expl_analysis_instruction: # user-defined instruction name
       type: ExploratoryAnalysis # which instruction to execute

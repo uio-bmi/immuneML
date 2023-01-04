@@ -21,8 +21,7 @@ class PDBEncoder(DatasetEncoder):
     def __init__(self, name: str = None, region_type: RegionType = None):
 
         self.name = name
-        self.region_type = RegionType(region_type) if region_type and isinstance(region_type,str) and region_type != 'nan' else region_type if isinstance(
-            region_type, RegionType) else None
+        self.region_type = region_type
 
     def encode(self, dataset, params: EncoderParams):
 
