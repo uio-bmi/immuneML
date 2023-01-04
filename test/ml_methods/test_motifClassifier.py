@@ -32,7 +32,7 @@ class TestMotifClassifier(TestCase):
                                                   [True, False, False, True],
                                                   [False, False, False, False],
                                                   [True, False, False, False]]),
-                               labels={"l1": [True, True, True, True, False, False, False, False]})
+                               labels={"l1": ["True", "True", "True", "True", "False", "False", "False", "False"]})
 
         label = Label("l1", positive_class=True)
         return enc_data, label
@@ -58,10 +58,10 @@ class TestMotifClassifier(TestCase):
         predictions = motif_classifier.predict(enc_data, label)
 
         self.assertListEqual(sorted(motif_classifier.rule_tree_features), ["rule1", "rule2"])
-        self.assertDictEqual(motif_classifier.class_mapping, {0: False, 1: True})
+        self.assertDictEqual(motif_classifier.class_mapping, {0: "False", 1: "True"})
 
         self.assertListEqual(list(predictions.keys()), ["l1"])
-        self.assertListEqual(list(predictions["l1"]), [True, True, True, True, False, False, False, False])
+        self.assertListEqual(list(predictions["l1"]), ["True", "True", "True", "True", "False", "False", "False", "False"])
 
     def test_load_store(self):
         path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "motif_classifier_load_store")
@@ -89,10 +89,10 @@ class TestMotifClassifier(TestCase):
         self.assertEqual(motif_classifier.rule_tree_indices, motif_classifier2.rule_tree_indices)
 
         self.assertListEqual(list(predictions.keys()), ["l1"])
-        self.assertListEqual(list(predictions["l1"]), [True, True, True, True, False, False, False, False])
+        self.assertListEqual(list(predictions["l1"]), ["True", "True", "True", "True", "False", "False", "False", "False"])
 
         self.assertListEqual(list(predictions2.keys()), ["l1"])
-        self.assertListEqual(list(predictions2["l1"]), [True, True, True, True, False, False, False, False])
+        self.assertListEqual(list(predictions2["l1"]), ["True", "True", "True", "True", "False", "False", "False", "False"])
 
         shutil.rmtree(path)
 
@@ -196,13 +196,13 @@ class TestMotifClassifier(TestCase):
         motif_classifier = MotifClassifier()
         motif_classifier.feature_names = ["rule1", "rule2", "rule3"]
 
-        result = motif_classifier._get_rule_tree_predictions(enc_data, [0])
+        result = motif_classifier._get_rule_tree_predictions_bool(enc_data, [0])
         self.assertListEqual(list(result), [True, False, False, False])
 
-        result = motif_classifier._get_rule_tree_predictions(enc_data, [0, 1])
+        result = motif_classifier._get_rule_tree_predictions_bool(enc_data, [0, 1])
         self.assertListEqual(list(result), [True, True, False, False])
 
-        result = motif_classifier._get_rule_tree_predictions(enc_data, [0, 1, 2])
+        result = motif_classifier._get_rule_tree_predictions_bool(enc_data, [0, 1, 2])
         self.assertListEqual(list(result), [True, True, False, False])
 
 

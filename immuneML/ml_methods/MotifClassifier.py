@@ -54,7 +54,7 @@ class MotifClassifier(MLMethod): # todo name? (Greedy)BinaryFeatureClassifier? R
         self.result_path = result_path
 
     def predict(self, encoded_data: EncodedData, label: Label):
-        return {self.label.name: self._get_rule_tree_predictions(encoded_data, self.rule_tree_indices)}
+        return {self.label.name: self._get_rule_tree_predictions_class(encoded_data, self.rule_tree_indices)}
 
     def predict_proba(self, encoded_data: EncodedData, label: Label):
         warnings.warn(f"{MotifClassifier.__name__}: cannot predict probabilities.")
@@ -168,15 +168,19 @@ class MotifClassifier(MLMethod): # todo name? (Greedy)BinaryFeatureClassifier? R
 
     def _test_performance_rule_tree(self, encoded_data, rule_indices):
         optimization_scoring_fn = MetricUtil.get_metric_fn(Metric[self.optimization_metric.upper()])
-        pred = self._get_rule_tree_predictions(encoded_data, rule_indices)
+        pred = self._get_rule_tree_predictions_bool(encoded_data, rule_indices)
 
         y_true = Util.map_to_new_class_values(encoded_data.labels[self.label.name], self.class_mapping)
 
         return optimization_scoring_fn(y_true=y_true, y_pred=pred, sample_weight=encoded_data.example_weights)
 
-    def _get_rule_tree_predictions(self, encoded_data, rule_indices):
+    def _get_rule_tree_predictions_bool(self, encoded_data, rule_indices):
         self._check_features(encoded_data.feature_names)
         return np.logical_or.reduce([encoded_data.examples[:, i] for i in rule_indices])
+
+    def _get_rule_tree_predictions_class(self, encoded_data, rule_indices):
+        y = self._get_rule_tree_predictions_bool(encoded_data, rule_indices).astype(int)
+        return Util.map_to_old_class_values(y, self.class_mapping)
 
     def _check_features(self, encoded_data_features):
         if self.feature_names != encoded_data_features:
