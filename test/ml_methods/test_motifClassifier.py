@@ -1,6 +1,7 @@
 import os
 import random
 import shutil
+from pathlib import Path
 from unittest import TestCase
 
 import numpy as np
@@ -37,12 +38,13 @@ class TestMotifClassifier(TestCase):
         label = Label("l1", positive_class=True)
         return enc_data, label
 
-    def get_fitted_classifier(self, enc_data, label):
+    def get_fitted_classifier(self, path, enc_data, label):
         motif_classifier = MotifClassifier(training_percentage=0.7,
                                            max_motifs=100,
                                            patience=10,
                                            min_delta=0,
-                                           keep_all=False)
+                                           keep_all=False,
+                                           result_path=path)
 
         random.seed(1)
         motif_classifier.fit(encoded_data=enc_data, label=label,
@@ -52,8 +54,10 @@ class TestMotifClassifier(TestCase):
         return motif_classifier
 
     def test_fit(self):
+        path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "motif_classifier_fit")
+
         enc_data, label = self.get_enc_data()
-        motif_classifier = self.get_fitted_classifier(enc_data, label)
+        motif_classifier = self.get_fitted_classifier(path, enc_data, label)
 
         predictions = motif_classifier.predict(enc_data, label)
 
@@ -63,17 +67,19 @@ class TestMotifClassifier(TestCase):
         self.assertListEqual(list(predictions.keys()), ["l1"])
         self.assertListEqual(list(predictions["l1"]), ["True", "True", "True", "True", "False", "False", "False", "False"])
 
+        with open(path / "selected_features.txt", "r") as file:
+            lines = file.readlines()
+            self.assertEqual(lines, ['rule1\n', 'rule2\n'])
+
+        shutil.rmtree(path)
+
     def test_load_store(self):
         path = PathBuilder.build(EnvironmentSettings.tmp_test_path / "motif_classifier_load_store")
 
         enc_data, label = self.get_enc_data()
-        motif_classifier = self.get_fitted_classifier(enc_data, label)
+        motif_classifier = self.get_fitted_classifier(path, enc_data, label)
 
         motif_classifier.store(path / "model_storage")
-
-        with open(path / "model_storage" / "selected_features.txt", "r") as file:
-            lines = file.readlines()
-            self.assertEqual(lines, ['rule1\n', 'rule2\n'])
 
         motif_classifier2 = MotifClassifier()
         motif_classifier2.load(path / "model_storage")
@@ -84,19 +90,23 @@ class TestMotifClassifier(TestCase):
         for item, value in cnn_vars.items():
             if isinstance(value, Label):
                 self.assertDictEqual(vars(value), (vars(motif_classifier2_vars[item])))
+            elif isinstance(value, Path):
+                pass
             else:
                 self.assertEqual(value, motif_classifier2_vars[item])
+
+        self.assertEqual(motif_classifier.rule_tree_indices, motif_classifier2.rule_tree_indices)
 
         predictions = motif_classifier.predict(enc_data, label)
         predictions2 = motif_classifier2.predict(enc_data, label)
 
-        self.assertEqual(motif_classifier.rule_tree_indices, motif_classifier2.rule_tree_indices)
-
         self.assertListEqual(list(predictions.keys()), ["l1"])
-        self.assertListEqual(list(predictions["l1"]), ["True", "True", "True", "True", "False", "False", "False", "False"])
+        self.assertListEqual(list(predictions["l1"]), list(predictions2["l1"]))
 
-        self.assertListEqual(list(predictions2.keys()), ["l1"])
-        self.assertListEqual(list(predictions2["l1"]), ["True", "True", "True", "True", "False", "False", "False", "False"])
+        # self.assertListEqual(), ["True", "True", "True", "True", "False", "False", "False", "False"])
+        #
+        # self.assertListEqual(list(predictions2.keys()), ["l1"])
+        # self.assertListEqual(list(predictions2["l1"]), ["True", "True", "True", "True", "False", "False", "False", "False"])
 
         shutil.rmtree(path)
 

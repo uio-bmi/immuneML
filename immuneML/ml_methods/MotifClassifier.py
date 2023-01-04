@@ -36,7 +36,8 @@ class MotifClassifier(MLMethod): # todo name? (Greedy)BinaryFeatureClassifier? R
     """
 
     def __init__(self, training_percentage: float = None, max_motifs: int = None,
-                 patience: int = None, min_delta: float = None, keep_all: bool = None):
+                 patience: int = None, min_delta: float = None, keep_all: bool = None,
+                 result_path: Path = None):
         super().__init__()
         self.training_percentage = training_percentage
         self.max_motifs = max_motifs
@@ -50,6 +51,8 @@ class MotifClassifier(MLMethod): # todo name? (Greedy)BinaryFeatureClassifier? R
         self.label = None
         self.optimization_metric = None
         self.class_mapping = None
+
+        self.result_path = result_path
 
     def predict(self, encoded_data: EncodedData, label: Label):
         return {self.label.name: self._get_rule_tree_predictions_class(encoded_data, self.rule_tree_indices)}
@@ -70,6 +73,7 @@ class MotifClassifier(MLMethod): # todo name? (Greedy)BinaryFeatureClassifier? R
 
         self.rule_tree_indices = self._build_rule_tree(encoded_data)
         self.rule_tree_features = self._get_rule_tree_features_from_indices(self.rule_tree_indices, self.feature_names)
+        self._export_selected_features(self.result_path, self.rule_tree_features)
 
         logging.info(f"{MotifClassifier.__name__}: finished training.")
 
@@ -191,6 +195,11 @@ class MotifClassifier(MLMethod): # todo name? (Greedy)BinaryFeatureClassifier? R
             logging.info(mssg + f"\n\nEvaluation features: {encoded_data_features}\nFitting features: {self.feature_names}")
             raise ValueError(mssg + " See the log file for more info.")
 
+    def _export_selected_features(self, path, rule_tree_features):
+        if path is not None:
+            with open(path / "selected_features.txt", "w") as file:
+                file.writelines([f"{feature}\n" for feature in rule_tree_features])
+
     def fit_by_cross_validation(self, encoded_data: EncodedData, label: Label = None, optimization_metric: str = None,
                                 number_of_splits: int = 5, cores_for_training: int = -1):
         logging.warning(f"{MotifClassifier.__name__}: cross_validation is not implemented for this method. Using standard fitting instead...")
@@ -207,9 +216,8 @@ class MotifClassifier(MLMethod): # todo name? (Greedy)BinaryFeatureClassifier? R
     def store(self, path: Path, feature_names=None, details_path: Path = None):
         PathBuilder.build(path)
 
-        self._export_selected_features(path, self.rule_tree_features)
-
         custom_vars = copy.deepcopy(vars(self))
+        del custom_vars["result_path"]
 
         if self.label:
             custom_vars["label"] = vars(self.label)
@@ -217,10 +225,6 @@ class MotifClassifier(MLMethod): # todo name? (Greedy)BinaryFeatureClassifier? R
         params_path = path / "custom_params.yaml"
         with params_path.open('w') as file:
             yaml.dump(custom_vars, file)
-
-    def _export_selected_features(self, path, rule_tree_features):
-        with open(path / "selected_features.txt", "w") as file:
-            file.writelines([f"{feature}\n" for feature in rule_tree_features])
 
     def load(self, path):
         params_path = path / "custom_params.yaml"
