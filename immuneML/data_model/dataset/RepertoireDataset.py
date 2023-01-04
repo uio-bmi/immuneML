@@ -156,3 +156,7 @@ class RepertoireDataset(Dataset):
     def get_example_ids(self):
         """Returns a list of example identifiers"""
         return self.get_repertoire_ids()
+
+    def get_subject_ids(self):
+        """Returns a list of subject identifiers"""
+        return self.get_metadata(["subject_id"])["subject_id"]
