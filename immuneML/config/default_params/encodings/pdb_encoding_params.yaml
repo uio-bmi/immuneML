@@ -1,1 +1,3 @@
 path: ./
+encodings:
+  region_type: IMGT_CDR3

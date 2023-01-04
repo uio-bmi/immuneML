@@ -5,12 +5,14 @@ definitions:
     my_dataset:
       format: PDB
       params:
-        path: C:\Users\Wii\Documents\UiO\Master\immuneML2\immuneML\app\quickstart_data\repertoires        # path to the folder containing the repertoire .tsv files
-        metadata_file: C:\Users\Wii\Documents\UiO\Master\immuneML2\immuneML\app\quickstart_data\metadata.csv
+        path: C:\Users\Wii\Documents\UiO\Master\immuneMLReal\immuneML\app\quickstart_data\repertoires       # path to the folder containing the repertoire .tsv files
+        metadata_file: C:\Users\Wii\Documents\UiO\Master\immuneMLReal\immuneML\app\quickstart_data\metadata.csv
+        region_type: IMGT_CDR3
   encodings:
     my_encoding:
       PDB:
         name: Test
+        region_type: IMGT_CDR3
 instructions:
     my_expl_analysis_instruction: # user-defined instruction name
       type: ExploratoryAnalysis # which instruction to execute

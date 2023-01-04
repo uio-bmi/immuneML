@@ -7,9 +7,8 @@ from immuneML.data_model.dataset.PDBDataset import PDBDataset
 from immuneML.encodings.DatasetEncoder import DatasetEncoder
 from immuneML.encodings.EncoderParams import EncoderParams
 import numpy as np
-import plotly.express as px
-import matplotlib.colors as colors
-import matplotlib.pyplot as plt
+from immuneML.data_model.receptor.RegionType import RegionType
+
 
 class PDBEncoder(DatasetEncoder):
 
@@ -19,9 +18,11 @@ class PDBEncoder(DatasetEncoder):
     def build_object(dataset=None, **params):
         return PDBEncoder(**params)
 
-    def __init__(self, name: str = None):
+    def __init__(self, name: str = None, region_type: RegionType = None):
 
         self.name = name
+        self.region_type = RegionType(region_type) if region_type and isinstance(region_type,str) and region_type != 'nan' else region_type if isinstance(
+            region_type, RegionType) else None
 
     def encode(self, dataset, params: EncoderParams):
 
@@ -31,8 +32,9 @@ class PDBEncoder(DatasetEncoder):
             PERMISSIVE=True
         )
 
-        CDR = dataset.get_metadata(["CDR"])
         CDRcounter = 0
+
+
 
         for files in dataset.get_data():
             parserObject = pdbParser.get_structure("pdbStructure", files)
@@ -41,7 +43,7 @@ class PDBEncoder(DatasetEncoder):
             collection = []
             list = []
 
-            meta = str(CDR["CDR"][CDRcounter])
+            region = self.region_type.name
             counter = 0
 
             for model in parserObject:
@@ -55,17 +57,17 @@ class PDBEncoder(DatasetEncoder):
                         for atom in residue:
                             if (atom.get_name() == "CA"):
 
-                                if "0" in meta:
+                                if "FULL_SEQUENCE" in region:
                                     list.append(atom.get_coord())
 
                                 else:
-                                    if "3" in meta and (isInCDR3(atom.full_id[3][1]) or len(collection) >= 2):
+                                    if "IMGT_CDR3" in region and (isInCDR3(atom.full_id[3][1]) or len(collection) >= 2):
                                         list.append(atom.get_coord())
 
-                                    if "2" in meta and (isInCDR2(atom.full_id[3][1]) or len(collection) >= 2):
+                                    if "IMGT_CDR2" in region and (isInCDR2(atom.full_id[3][1]) or len(collection) >= 2):
                                         list.append(atom.get_coord())
 
-                                    if "1" in meta and (isInCDR1(atom.full_id[3][1]) or len(collection) >= 2):
+                                    if "IMGT_CDR1" in region and (isInCDR1(atom.full_id[3][1]) or len(collection) >= 2):
                                         list.append(atom.get_coord())
 
 

@@ -52,10 +52,8 @@ class PDBDataReport(EncodingReport):
         dataset = np.array(self.dataset.encoded_data.examples.copy(),dtype=float)
         output_files = []
 
-        CDR = self.dataset.get_metadata(["CDR"])
 
         for i in range(0, len(dataset)):
-                meta = str(CDR["CDR"][i])
 
                 fileName = Path(self.dataset.get_example_ids()[i])
                 PathBuilder.build(self.result_path)
