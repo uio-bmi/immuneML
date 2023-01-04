@@ -36,8 +36,7 @@ class MotifClassifier(MLMethod): # todo name? (Greedy)BinaryFeatureClassifier? R
     """
 
     def __init__(self, training_percentage: float = None, max_motifs: int = None,
-                 patience: int = None, min_delta: float = None, keep_all: bool = None,
-                 result_path: Path = None):
+                 patience: int = None, min_delta: float = None, keep_all: bool = None):
         super().__init__()
         self.training_percentage = training_percentage
         self.max_motifs = max_motifs
@@ -51,7 +50,6 @@ class MotifClassifier(MLMethod): # todo name? (Greedy)BinaryFeatureClassifier? R
         self.label = None
         self.optimization_metric = None
         self.class_mapping = None
-        self.result_path = result_path
 
     def predict(self, encoded_data: EncodedData, label: Label):
         return {self.label.name: self._get_rule_tree_predictions_class(encoded_data, self.rule_tree_indices)}
@@ -77,12 +75,16 @@ class MotifClassifier(MLMethod): # todo name? (Greedy)BinaryFeatureClassifier? R
 
     def _build_rule_tree(self, encoded_data):
         if self.keep_all:
-            return list(range(len(self.feature_names)))
+            rules = list(range(len(self.feature_names)))
+            logging.info(f"{MotifClassifier.__name__}: all {len(rules)} rules kept.")
         else:
             encoded_train_data, encoded_val_data = self._prepare_and_split_data(encoded_data)
-            return self._recursively_select_rules(encoded_train_data=encoded_train_data,
+            rules = self._recursively_select_rules(encoded_train_data=encoded_train_data,
                                                   encoded_val_data=encoded_val_data,
                                                   last_val_scores=[], prev_rule_indices=[])
+            logging.info(f"{MotifClassifier.__name__}: selected {len(rules)} out of {len(self.feature_names)} rules.")
+
+        return rules
 
     def _get_rule_tree_features_from_indices(self, rule_tree_indices, feature_names):
         return [feature_names[idx] for idx in rule_tree_indices]
@@ -194,7 +196,6 @@ class MotifClassifier(MLMethod): # todo name? (Greedy)BinaryFeatureClassifier? R
         logging.warning(f"{MotifClassifier.__name__}: cross_validation is not implemented for this method. Using standard fitting instead...")
         self.fit(encoded_data=encoded_data, label=label)
 
-
     def _prepare_and_split_data(self, encoded_data: EncodedData):
         train_indices, val_indices = Util.get_train_val_indices(len(encoded_data.example_ids), self.training_percentage)
 
@@ -206,8 +207,9 @@ class MotifClassifier(MLMethod): # todo name? (Greedy)BinaryFeatureClassifier? R
     def store(self, path: Path, feature_names=None, details_path: Path = None):
         PathBuilder.build(path)
 
+        self._export_selected_features(path, self.rule_tree_features)
+
         custom_vars = copy.deepcopy(vars(self))
-        del custom_vars["result_path"]
 
         if self.label:
             custom_vars["label"] = vars(self.label)
@@ -215,6 +217,10 @@ class MotifClassifier(MLMethod): # todo name? (Greedy)BinaryFeatureClassifier? R
         params_path = path / "custom_params.yaml"
         with params_path.open('w') as file:
             yaml.dump(custom_vars, file)
+
+    def _export_selected_features(self, path, rule_tree_features):
+        with open(path / "selected_features.txt", "w") as file:
+            file.writelines([f"{feature}\n" for feature in rule_tree_features])
 
     def load(self, path):
         params_path = path / "custom_params.yaml"

@@ -71,6 +71,10 @@ class TestMotifClassifier(TestCase):
 
         motif_classifier.store(path / "model_storage")
 
+        with open(path / "model_storage" / "selected_features.txt", "r") as file:
+            lines = file.readlines()
+            self.assertEqual(lines, ['rule1\n', 'rule2\n'])
+
         motif_classifier2 = MotifClassifier()
         motif_classifier2.load(path / "model_storage")
 
