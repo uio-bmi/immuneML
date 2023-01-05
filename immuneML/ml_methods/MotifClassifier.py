@@ -197,6 +197,7 @@ class MotifClassifier(MLMethod): # todo name? (Greedy)BinaryFeatureClassifier? R
 
     def _export_selected_features(self, path, rule_tree_features):
         if path is not None:
+            PathBuilder.build(path)
             with open(path / "selected_features.txt", "w") as file:
                 file.writelines([f"{feature}\n" for feature in rule_tree_features])
 
