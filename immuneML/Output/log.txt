@@ -1,0 +1,19 @@
+2023-01-06 15:56:05,033 INFO: Setting temporary cache path to ..\Output\cache
+2023-01-06 15:56:05,033 INFO: ImmuneML: parsing the specification...
+
+2023-01-06 15:56:05,033 INFO: --- Entering: parse_encoder with parameters ('my_encoding', {'PDB': {'name': 'Test'}})
+2023-01-06 15:56:05,913 INFO: --- Exiting: parse_encoder
+2023-01-06 15:56:05,913 INFO: --- Entering: _parse_report with parameters ('my_data_report', 'PDBDataReport', SymbolTable())
+2023-01-06 15:56:09,108 INFO: DefaultParams: no default parameters were found for PDBDataReport. Proceeding...
+2023-01-06 15:56:09,108 INFO: --- Exiting: _parse_report
+2023-01-06 15:56:09,108 INFO: --- Entering: _parse_dataset with parameters ('my_dataset', {'format': 'PDB', 'params': {'path': 'C:\\Users\\Wii\\Documents\\UiO\\Master\\immuneMLReal\\immuneML\\app\\quickstart_data\\repertoires', 'metadata_file': 'C:\\Users\\Wii\\Documents\\UiO\\Master\\immuneMLReal\\immuneML\\app\\quickstart_data\\metadata.csv', 'region_type': 'IMGT_CDR3'}}, SymbolTable(), WindowsPath('../Output'))
+2023-01-06 15:56:09,202 INFO: --- Exiting: _parse_dataset
+2023-01-06 15:56:09,202 INFO: --- Entering: parse_instruction with parameters ('my_expl_analysis_instruction', {'type': 'ExploratoryAnalysis', 'analyses': {'my_first_analysis': {'dataset': 'my_dataset', 'encoding': 'my_encoding', 'report': 'my_data_report'}}}, SymbolTable(), WindowsPath('../Output'))
+2023-01-06 15:56:09,257 INFO: --- Exiting: parse_instruction
+2023-01-06 15:56:09,265 INFO: Full specification is available at ..\Output\full_quickstart.yaml.
+
+2023-01-06 15:56:09,265 INFO: ImmuneML: starting the analysis...
+
+2023-01-06 15:56:09,265 INFO: Instruction 1/1 has started.
+2023-01-06 15:56:09,265 INFO: Started analysis my_first_analysis (1/1).
+2023-01-06 15:56:09,265 INFO: Encoding started...

@@ -42,7 +42,7 @@ class PDBEncoder(DatasetEncoder):
             collection = []
             list = []
 
-            region = self.region_type.name
+            region = self.region_type
             counter = 0
 
             for model in parserObject:
