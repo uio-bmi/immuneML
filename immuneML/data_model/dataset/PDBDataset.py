@@ -32,11 +32,19 @@ class PDBDataset(Dataset):
         self.filenames = filenames
         self.metadata_file = metadata_file
 
-
-
-
-#Return an iterator of the pdb objects
+    # Return an iterator of the pdb structures
     def get_data(self):
+        for files in self.get_files():
+            pdbParser = PDBParser(
+                PERMISSIVE=True
+            )
+            pdbStructure = pdbParser.get_structure("pdbStructure", files)
+            yield pdbStructure
+
+
+
+#Return an iterator of the pdb files
+    def get_files(self):
         for files in self.pdbFilePaths:
             yield files
 

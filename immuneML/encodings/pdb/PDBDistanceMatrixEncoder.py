@@ -10,13 +10,13 @@ import numpy as np
 from immuneML.data_model.receptor.RegionType import RegionType
 
 
-class PDBEncoder(DatasetEncoder):
+class PDBDistanceMatrixEncoder(DatasetEncoder):
 
 
 
     @staticmethod
     def build_object(dataset=None, **params):
-        return PDBEncoder(**params)
+        return PDBDistanceMatrixEncoder(**params)
 
     def __init__(self, name: str = None, region_type: RegionType = None):
 
@@ -26,18 +26,9 @@ class PDBEncoder(DatasetEncoder):
     def encode(self, dataset, params: EncoderParams):
 
         structures =[]
-
-        pdbParser = PDBParser(
-            PERMISSIVE=True
-        )
-
         CDRcounter = 0
 
-
-
-        for files in dataset.get_data():
-            parserObject = pdbParser.get_structure("pdbStructure", files)
-
+        for parserObject in dataset.get_data():
 
             collection = []
             list = []

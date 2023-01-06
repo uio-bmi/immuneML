@@ -9,7 +9,7 @@ definitions:
         result_path: ../Output/datasets/my_dataset
   encodings:
     my_encoding:
-      PDB:
+      PDBDistanceMatrix:
         name: Test
   ml_methods: {}
   motifs: {}
