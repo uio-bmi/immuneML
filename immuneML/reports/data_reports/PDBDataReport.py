@@ -18,17 +18,16 @@ from immuneML.reports.data_reports.DataReport import DataReport
 from immuneML.util.PathBuilder import PathBuilder
 
 
-
 class PDBDataReport(EncodingReport):
     """
-    Generates heatmaps of the distance between the light and heavy chain to the antigen in the given PDB files.
+    Generates a histogram of the lengths of the sequences in a RepertoireDataset.
 
     YAML specification:
 
     .. indent with spaces
     .. code-block:: yaml
 
-        my_pdb_heatmap: PDBDataReport
+        my_sld_report: NewSequenceLengthDistribution
 
     """
 
@@ -53,10 +52,8 @@ class PDBDataReport(EncodingReport):
         dataset = np.array(self.dataset.encoded_data.examples.copy(),dtype=float)
         output_files = []
 
-        CDR = self.dataset.get_metadata(["CDR"])
 
         for i in range(0, len(dataset)):
-                meta = str(CDR["CDR"][i])
 
                 fileName = Path(self.dataset.get_example_ids()[i])
                 PathBuilder.build(self.result_path)
@@ -72,6 +69,7 @@ class PDBDataReport(EncodingReport):
 
                 fig2 = px.imshow(heavyChainDistanceToAntigen)
                 fig2.write_html(str(heavyChainDistance))
+
 
 
                 output_files.append(ReportOutput(

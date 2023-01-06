@@ -5,8 +5,9 @@ definitions:
     my_dataset:
       format: PDB
       params:
-        path: C:\Users\Wii\Documents\UiO\Master\immuneMLReal\immuneML\app\quickstart_data\repertoires        # path to the folder containing the repertoire .tsv files
+        path: C:\Users\Wii\Documents\UiO\Master\immuneMLReal\immuneML\app\quickstart_data\repertoires       # path to the folder containing the repertoire .tsv files
         metadata_file: C:\Users\Wii\Documents\UiO\Master\immuneMLReal\immuneML\app\quickstart_data\metadata.csv
+        region_type: IMGT_CDR3
   encodings:
     my_encoding:
       PDB:

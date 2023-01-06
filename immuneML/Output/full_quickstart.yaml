@@ -5,6 +5,7 @@ definitions:
       params:
         metadata_file: C:/Users/Wii/Documents/UiO/Master/immuneMLReal/immuneML/app/quickstart_data/metadata.csv
         path: C:/Users/Wii/Documents/UiO/Master/immuneMLReal/immuneML/app/quickstart_data/repertoires
+        region_type: IMGT_CDR3
         result_path: ../Output/datasets/my_dataset
   encodings:
     my_encoding:

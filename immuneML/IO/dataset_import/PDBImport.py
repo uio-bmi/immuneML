@@ -36,8 +36,6 @@ class PDBImport(DataImport):
 
         return PDBDataset(pathsOfPDBStructures, fileNames,labels, params.get("metadata_file"))
 
-
-## TODO
     @staticmethod
     def get_documentation():
         doc = str(PDBImport.__doc__)

@@ -7,14 +7,16 @@ import Bio
 
 from immuneML.data_model.dataset.Dataset import Dataset
 from immuneML.data_model.encoded_data.EncodedData import EncodedData
+from immuneML.data_model.receptor.ElementGenerator import ElementGenerator
+from Bio.PDB import *
 from typing import List
 
 
 
 class PDBDataset(Dataset):
     """
-    A dataset for PDB files. The PDBDataset class is similar to the other dataset classes, it just handles data related
-    to the given PDB files.
+    This is the base class for ReceptorDataset and SequenceDataset which implements all the functionality for both classes. The only difference between
+    these two classes is whether paired or single chain data is stored.
     """
 
 
@@ -38,6 +40,13 @@ class PDBDataset(Dataset):
         for files in self.pdbFilePaths:
             yield files
 
+       ## return self.pdbFilePaths
+
+    def get_batch(self, batch_size: int = 10000):
+        self.filenames.sort()
+        self.element_generator.file_list = self.filenames
+        return self.element_generator.build_batch_generator()
+
     def get_filenames(self):
         return self.filenames
 
@@ -45,9 +54,9 @@ class PDBDataset(Dataset):
         self.filenames = filenames
 
     def get_example_count(self):
-        return len(self.get_example_ids())
+        return len(self.pdbFilePaths)
 
-
+#Filenames as temp
     def get_example_ids(self):
         example_ids =[]
         for files in self.filenames:
@@ -79,7 +88,7 @@ class PDBDataset(Dataset):
 
         """
         assert isinstance(self.metadata_file, Path) and self.metadata_file.is_file(), \
-            f"PDBDataset: for dataset {self.name} (id: {self.identifier}) metadata file is not set properly. The metadata file points to " \
+            f"RepertoireDataset: for dataset {self.name} (id: {self.identifier}) metadata file is not set properly. The metadata file points to " \
             f"{self.metadata_file}."
 
         df = pd.read_csv(self.metadata_file, sep=",", usecols=field_names, comment=Constants.COMMENT_SIGN)
