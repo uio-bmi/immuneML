@@ -52,11 +52,11 @@ class PDBDataReport(EncodingReport):
         dataset = np.array(self.dataset.encoded_data.examples.copy(),dtype=float)
         output_files = []
 
+        PathBuilder.build(self.result_path)
 
         for i in range(0, len(dataset)):
 
                 fileName = Path(self.dataset.get_example_ids()[i])
-                PathBuilder.build(self.result_path)
 
                 lightChainDistance = self.result_path / "{}_lightChainDistanceToAntigen.html".format(fileName)
                 heavyChainDistance = self.result_path / "{}_heavyChainDistanceToAntigen.html".format(fileName)
