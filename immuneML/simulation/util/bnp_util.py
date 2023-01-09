@@ -1,19 +1,29 @@
 from dataclasses import fields as get_fields
+from dataclasses import make_dataclass as dc_make_dataclass
 from itertools import chain
 from typing import List
 
+import numpy as np
 from bionumpy import as_encoded_array, EncodedArray
-from bionumpy.bnpdataclass import make_dataclass, BNPDataClass
+from bionumpy.bnpdataclass import BNPDataClass, bnpdataclass
 from bionumpy.encodings import Encoding
 
 
-def make_bnp_dataclass_object_from_dicts(dict_objects: List[dict], field_type_map: dict = None) -> BNPDataClass:
+def make_bnp_dataclass_object_from_dicts(dict_objects: List[dict], field_type_map: dict = None, signals: list = None, base_class=None) -> BNPDataClass:
     if not isinstance(dict_objects, list) or len(dict_objects) == 0:
         raise RuntimeError("Cannot make dataclass, got empty list as input.")
 
     transformed_objs = _list_of_dicts_to_dict_of_lists(dict_objects)
     fields = _extract_fields(transformed_objs, field_type_map)
-    new_class = make_dataclass(list(fields.items()))
+
+    if signals is not None:
+        signal_names = [field for field in fields if field in [signal.id for signal in signals]]
+        functions = {"get_signal_matrix": lambda self: np.array([getattr(self, name) for name in signal_names]).T,
+                     "get_signal_names": lambda self: signal_names}
+        new_class = bnpdataclass(dc_make_dataclass("DynamicDC", bases=tuple([base_class]) if base_class is not None else (), namespace=functions,
+                                                   fields=[(field_name, field_type) for field_name, field_type in fields.items()]))
+    else:
+        new_class = base_class.extend(list(fields.items()))
 
     for key in transformed_objs:
         if transformed_objs[key] is None and isinstance(fields[key], Encoding):
@@ -24,13 +34,14 @@ def make_bnp_dataclass_object_from_dicts(dict_objects: List[dict], field_type_ma
 
 def _extract_fields(transformed_objs, field_type_map):
     fields = {}
-    for field_name in transformed_objs.keys():
+    for field_name in sorted(list(transformed_objs.keys())):
         assert all(isinstance(val, type(transformed_objs[field_name][0])) for val in transformed_objs[field_name]), \
             [type(val) for val in transformed_objs[field_name]]
 
         if field_type_map is not None and field_name in field_type_map:
             field_type = field_type_map[field_name]
-            transformed_objs[field_name] = as_encoded_array(transformed_objs[field_name], field_type) if any(transformed_objs[field_name]) else None
+            if isinstance(field_type, Encoding):
+                transformed_objs[field_name] = as_encoded_array(transformed_objs[field_name], field_type) if any(transformed_objs[field_name]) else None
         elif isinstance(transformed_objs[field_name][0], EncodedArray):
             field_type = transformed_objs[field_name][0].encoding
         elif transformed_objs[field_name] is not None:

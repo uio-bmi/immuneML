@@ -129,6 +129,14 @@ class OLGA(GenerativeModel):
         sequences.to_csv(path, index=False, sep='\t')
         return path
 
+    def compute_p_gen(self, sequence: dict, sequence_type: SequenceType) -> float:
+        cls = GenerationProbabilityVDJ if self.is_vdj else GenerationProbabilityVJ
+        p_gen_model = cls(generative_model=self._olga_model.olga_gen_model, genomic_data=self._olga_model.genomic_data)
+        if sequence_type == SequenceType.NUCLEOTIDE:
+            return p_gen_model.compute_nt_CDR3_pgen(sequence['sequence'], sequence['v_call'], sequence['j_call'])
+        else:
+            return p_gen_model.compute_aa_CDR3_pgen(sequence['sequence_aa'], sequence['v_call'], sequence['j_call'])
+
     def compute_p_gens(self, sequences: BNPDataClass, sequence_type: SequenceType) -> list:
 
         cls = GenerationProbabilityVDJ if self.is_vdj else GenerationProbabilityVJ

@@ -1,6 +1,5 @@
 import dataclasses
 import shutil
-import uuid
 from dataclasses import dataclass
 from pathlib import Path
 from typing import List
@@ -8,7 +7,6 @@ from typing import List
 from bionumpy.bnpdataclass import BNPDataClass
 
 from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
-from immuneML.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
 from immuneML.data_model.repertoire.Repertoire import Repertoire
 from immuneML.environment.SequenceType import SequenceType
 from immuneML.simulation.LIgOSimulationItem import LIgOSimulationItem
@@ -17,7 +15,7 @@ from immuneML.simulation.implants.Signal import Signal
 from immuneML.simulation.util.bnp_util import merge_dataclass_objects
 from immuneML.simulation.util.util import get_signal_sequence_count, get_sequence_per_signal_count, make_sequences_from_gen_model, get_bnp_data, \
     annotate_sequences, filter_out_illegal_sequences, check_iteration_progress, get_custom_keys, check_sequence_count, \
-    prepare_data_for_repertoire_obj, update_seqs_with_signal, update_seqs_without_signal
+    prepare_data_for_repertoire_obj, update_seqs_with_signal, update_seqs_without_signal, make_receptor_sequence_objects
 from immuneML.util.PathBuilder import PathBuilder
 
 
@@ -177,7 +175,7 @@ class RejectionSampler:
                     sequences = signal_sequences
 
         sequences = self._add_pgens(sequences)
-        sequences = self._make_receptor_sequence_objects(sequences)
+        sequences = make_receptor_sequence_objects(sequences, self.use_p_gens, self._make_sequence_metadata())
 
         self._remove_tmp_paths(path)
 
@@ -191,26 +189,6 @@ class RejectionSampler:
         if sequences.p_gen is None and self.export_pgens and self.sim_item.generative_model.can_compute_p_gens():
             sequences.p_gen = self.sim_item.generative_model.compute_p_gens(sequences, self.sequence_type)
         return sequences
-
-    def _make_receptor_sequence_objects(self, sequences: GenModelAsTSV) -> List[ReceptorSequence]:
-        custom_params = self._get_custom_keys(self.use_p_gens)
-        metadata = self._make_sequence_metadata()
-
-        return [ReceptorSequence(seq.sequence_aa.to_string(), seq.sequence.to_string(), identifier=uuid.uuid4().hex,
-                                 metadata=self._construct_sequence_metadata_object(seq, metadata, custom_params)) for seq in sequences]
-
-    def _construct_sequence_metadata_object(self, sequence, metadata: dict, custom_params) -> SequenceMetadata:
-        custom = {}
-
-        for key, key_type in custom_params:
-            if 'position' in key:
-                custom[key] = getattr(sequence, key).to_string()
-            else:
-                custom[key] = getattr(sequence, key).item()
-
-        return SequenceMetadata(
-            custom_params={**metadata, **custom, **self.sim_item.immune_events},
-            v_call=sequence.v_call.to_string(), j_call=sequence.j_call.to_string(), region_type=sequence.region_type.to_string())
 
     def _remove_tmp_paths(self, path: Path):
         if (path / f"tmp_{self.sim_item.name}").exists():

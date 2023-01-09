@@ -1,5 +1,6 @@
 import dataclasses
 import logging
+import uuid
 from dataclasses import make_dataclass
 from itertools import chain
 from pathlib import Path
@@ -15,6 +16,8 @@ from bionumpy.sequence.string_matcher import RegexMatcher, StringMatcher
 from npstructures import RaggedArray
 
 from immuneML.data_model.receptor.RegionType import RegionType
+from immuneML.data_model.receptor.receptor_sequence.ReceptorSequence import ReceptorSequence
+from immuneML.data_model.receptor.receptor_sequence.SequenceMetadata import SequenceMetadata
 from immuneML.environment.SequenceType import SequenceType
 from immuneML.simulation.LIgOSimulationItem import LIgOSimulationItem
 from immuneML.simulation.generative_models.GenModelAsTSV import GenModelAsTSV
@@ -55,6 +58,26 @@ def get_bnp_data(sequence_path, columns_with_types: list = None):
         data = file.read()
 
     return data
+
+
+def make_receptor_sequence_objects(sequences: GenModelAsTSV, all_signals, metadata, immune_events: dict) -> List[ReceptorSequence]:
+    custom_params = get_custom_keys(all_signals, [('p_gen', float)])
+
+    return [ReceptorSequence(seq.sequence_aa.to_string(), seq.sequence.to_string(), identifier=uuid.uuid4().hex,
+                             metadata=construct_sequence_metadata_object(seq, metadata, custom_params, immune_events)) for seq in sequences]
+
+
+def construct_sequence_metadata_object(sequence, metadata: dict, custom_params, immune_events: dict) -> SequenceMetadata:
+    custom = {}
+
+    for key, key_type in custom_params:
+        if 'position' in key:
+            custom[key] = getattr(sequence, key).to_string()
+        else:
+            custom[key] = getattr(sequence, key).item()
+
+    return SequenceMetadata(custom_params={**metadata, **custom, **immune_events},
+                            v_call=sequence.v_call.to_string(), j_call=sequence.j_call.to_string(), region_type=sequence.region_type.to_string())
 
 
 def write_bnp_data(path: Path, data, append_if_exists: bool = True):
@@ -226,8 +249,8 @@ def check_iteration_progress(iteration: int, max_iterations: int):
         logging.warning(f"Iteration {iteration} out of {max_iterations} max iterations reached during rejection sampling.")
 
 
-def get_custom_keys(all_signals: List[Signal]):
-    return [(sig.id, int) for sig in all_signals] + [(f'{signal.id}_positions', str) for signal in all_signals]
+def get_custom_keys(all_signals: List[Signal], custom_keys: list):
+    return [(sig.id, int) for sig in all_signals] + [(f'{signal.id}_positions', str) for signal in all_signals] + custom_keys
 
 
 def check_sequence_count(sim_item, sequences: GenModelAsTSV):
@@ -236,8 +259,8 @@ def check_sequence_count(sim_item, sequences: GenModelAsTSV):
         f"but got {len(sequences)}."
 
 
-def prepare_data_for_repertoire_obj(all_signals: list, sequences: BNPDataClass) -> dict:
-    custom_keys = get_custom_keys(all_signals)
+def prepare_data_for_repertoire_obj(all_signals: list, sequences: BNPDataClass, custom_keys: list) -> dict:
+    custom_keys = get_custom_keys(all_signals, custom_keys)
 
     custom_lists = {}
     for field, field_type in custom_keys:

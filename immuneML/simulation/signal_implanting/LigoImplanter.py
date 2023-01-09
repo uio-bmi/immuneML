@@ -1,4 +1,5 @@
 import copy
+import dataclasses
 import logging
 import shutil
 from pathlib import Path
@@ -18,7 +19,7 @@ from immuneML.simulation.signal_implanting.LigoImplanterState import LigoImplant
 from immuneML.simulation.util.bnp_util import make_bnp_dataclass_object_from_dicts, merge_dataclass_objects
 from immuneML.simulation.util.util import get_sequence_per_signal_count, make_sequences_from_gen_model, get_bnp_data, filter_out_illegal_sequences, \
     annotate_sequences, build_imgt_positions, choose_implant_position, check_iteration_progress, get_signal_sequence_count, get_custom_keys, \
-    check_sequence_count, prepare_data_for_repertoire_obj, update_seqs_without_signal, update_seqs_with_signal
+    check_sequence_count, prepare_data_for_repertoire_obj, update_seqs_without_signal, update_seqs_with_signal, make_receptor_sequence_objects
 from immuneML.util.PathBuilder import PathBuilder
 from immuneML.util.PositionHelper import PositionHelper
 
@@ -34,17 +35,32 @@ class LigoImplanter:
     def max_signals(self):
         return 0 if self._state.remove_seqs_with_signals else -1
 
+    @property
+    def fields(self) -> list:
+        return [(field.name, field.type) for field in dataclasses.fields(GenModelAsTSV)] + \
+               [(signal.id, int) for signal in self._state.all_signals] + \
+               [(f"{signal.id}_positions", str) for signal in self._state.all_signals]
+
+    @property
+    def use_p_gens(self) -> bool:
+        return (self._state.export_p_gens or self._state.keep_p_gen_dist) and self._state.sim_item.generative_model.can_compute_p_gens()
+
     def make_repertoires(self, path: Path) -> List[Repertoire]:
 
+        self._gen_necessary_sequences(path)
+        repertoires = self._make_repertoire_objects(path)
+        return repertoires
+
+    def _gen_necessary_sequences(self, path: Path):
         seqs_per_signal_count = get_sequence_per_signal_count(self._state.sim_item)
         self._make_sequence_paths(path)
         iteration = 0
 
         while sum(seqs_per_signal_count.values()) > 0 and iteration < self._state.max_iterations:
-            sequences = self._make_background_sequences(path)
+            sequences = self._make_background_sequences(path, iteration)
 
             if self._state.keep_p_gen_dist and iteration == 0:
-                self._make_p_gen_histogram(sequences)
+                sequences = self._make_p_gen_histogram(sequences)
 
             if self._state.remove_seqs_with_signals:
                 sequences = self._filter_background_sequences(sequences)
@@ -52,10 +68,13 @@ class LigoImplanter:
             sequences = self._implant_in_sequences(sequences, copy.deepcopy(seqs_per_signal_count))
 
             if self._state.keep_p_gen_dist or self._state.p_gen_threshold:
-                sequences, seqs_per_signal_count = self._filter_using_p_gens(sequences, seqs_per_signal_count)
+                sequences = self._filter_using_p_gens(sequences)
 
-            update_seqs_without_signal(seqs_per_signal_count['no_signal'], sequences, self._state.sequence_paths['no_signal'])
-            update_seqs_with_signal(seqs_per_signal_count, sequences, self._state.all_signals, self._state.sim_item.signals, self._state.sequence_paths)
+            seqs_per_signal_count['no_signal'] = update_seqs_without_signal(seqs_per_signal_count['no_signal'], sequences,
+                                                                            self._state.sequence_paths['no_signal'])
+            seqs_per_signal_count = update_seqs_with_signal(copy.deepcopy(seqs_per_signal_count), sequences, self._state.all_signals,
+                                                            self._state.sim_item.signals,
+                                                            self._state.sequence_paths)
 
             check_iteration_progress(iteration, self._state.max_iterations)
             iteration += 1
@@ -64,17 +83,39 @@ class LigoImplanter:
             raise RuntimeError(f"{LigoImplanter.__name__}: maximum iterations were reached, but the simulation could not finish "
                                f"with parameters: {vars(self)}.\n")
 
-        repertoires = self._make_repertoire_objects(path)
-        return repertoires
-
     def make_receptors(self, path: Path):
         raise NotImplementedError
 
-    def make_sequences(self, path: Path):
-        raise NotImplementedError
+    def make_sequences(self, path: Path) -> List[ReceptorSequence]:
 
-    def _make_background_sequences(self, path) -> GenModelAsTSV:
-        sequence_path = PathBuilder.build(path / f"gen_model/") / f"tmp_{self._state.seed}_{self._state.sim_item.name}.tsv"
+        assert len(self._state.sim_item.signals) in [0, 1], f"RejectionSampler: for sequence datasets, only 0 or 1 signal per sequence are " \
+                                                            f"supported, but {len(self._state.sim_item.signals)} were specified."
+
+        self._gen_necessary_sequences(path)
+        sequences = None
+
+        if len(self._state.sim_item.signals) == 0:
+            sequences = get_bnp_data(self._state.sequence_paths['no_signal'], self.fields)
+        else:
+            for signal in self._state.sim_item.signals:
+                signal_sequences = get_bnp_data(self._state.sequence_paths[signal.id], self.fields)
+                if sequences is not None:
+                    sequences = merge_dataclass_objects([sequences, signal_sequences])
+                else:
+                    sequences = signal_sequences
+
+        sequences = self._add_pgens(sequences)
+        sequences = make_receptor_sequence_objects(sequences, self._state.all_signals, self._make_signal_metadata(), self._state.sim_item.immune_events)
+
+        return sequences
+
+    def _add_pgens(self, sequences: GenModelAsTSV) -> GenModelAsTSV:
+        if sequences.p_gen is None and self.use_p_gens:
+            sequences.p_gen = self._state.sim_item.generative_model.compute_p_gens(sequences, self._state.sequence_type)
+        return sequences
+
+    def _make_background_sequences(self, path, iteration: int) -> GenModelAsTSV:
+        sequence_path = PathBuilder.build(path / f"gen_model/") / f"tmp_{iteration}_{self._state.sim_item.name}.tsv"
         make_sequences_from_gen_model(self._state.sim_item, self._state.sequence_batch_size, self._state.seed, sequence_path,
                                       self._state.sequence_type, False)
         return get_bnp_data(sequence_path)
@@ -107,37 +148,34 @@ class LigoImplanter:
                         logging.warning(f"{LigoImplanter.__name__}: could not find a sequence to implant {instance} for signal {signal.id}, "
                                         f"skipping for now.")
 
-                modified_sequences = make_bnp_dataclass_object_from_dicts(modified_sequences,
-                                                                          field_type_map={"sequence": DNAEncoding, "sequence_aa": AminoAcidEncoding})
-                modified_sequences = self._add_optional_p_gens(modified_sequences)
+                modified_sequences = make_bnp_dataclass_object_from_dicts(modified_sequences, signals=self._state.all_signals,
+                                                                          base_class=GenModelAsTSV,
+                                                                          field_type_map={"sequence": DNAEncoding, "sequence_aa": AminoAcidEncoding,
+                                                                                          'p_gen': float})
 
                 modified_sequence_dataclass_objs.append(modified_sequences)
 
                 seqs_per_signal_count[signal.id] -= len(modified_sequences)
 
-        sequences = self._add_info_to_no_signal_sequences(sequences[remaining_seq_mask])
-
-        sequences = merge_dataclass_objects([sequences] + modified_sequence_dataclass_objs)
+        if seqs_per_signal_count['no_signal'] > 0 and remaining_seq_mask.sum() > 0:
+            sequences = self._add_info_to_no_signal_sequences(sequences[remaining_seq_mask])
+            sequences = merge_dataclass_objects([sequences] + modified_sequence_dataclass_objs)
+        else:
+            sequences = merge_dataclass_objects(modified_sequence_dataclass_objs)
 
         return sequences
 
-    def _add_optional_p_gens(self, modified_sequences):
-        if self._state.sim_item.generative_model.can_compute_p_gens() and (self._state.export_p_gens or self._state.keep_p_gen_dist):
-            p_gens = self._state.sim_item.generative_model.compute_p_gens(modified_sequences, self._state.sequence_type)
-            modified_sequences = modified_sequences.add_fields({'p_gen': p_gens}, {'p_gen': float})
-        return modified_sequences
-
-    def _add_info_to_no_signal_sequences(self, sequences: BNPDataClass) -> BNPDataClass:
+    def _add_info_to_no_signal_sequences(self, sequences: GenModelAsTSV) -> BNPDataClass:
 
         new_fields = {**{s.id: [0 for _ in range(len(sequences))] for s in self._state.all_signals},
                       **{f"{s.id}_positions": ["m" + "".join("0" for _ in range(getattr(sequences, self._state.sequence_type.value).lengths[i]))
                                                for i in range(len(sequences))]
                          for s in self._state.all_signals}}
 
-        if self._state.sim_item.generative_model.can_compute_p_gens() and (self._state.export_p_gens or self._state.keep_p_gen_dist):
-            new_fields['p_gen'] = self._state.sim_item.generative_model.compute_p_gens(sequences, self._state.sequence_type)
+        if self.use_p_gens and np.any(sequences.p_gen < 0):
+            sequences.p_gen = self._state.sim_item.generative_model.compute_p_gens(sequences, self._state.sequence_type)
 
-        return sequences.add_fields(new_fields, {'p_gen': float})
+        return sequences.add_fields(new_fields)
 
     def _implant_in_sequence(self, sequence_row: GenModelAsTSV, signal: Signal, motif_instance: MotifInstance) -> dict:
         imgt_aa_positions = build_imgt_positions(len(getattr(sequence_row, self._state.sequence_type.value)), motif_instance,
@@ -152,6 +190,13 @@ class LigoImplanter:
 
         new_sequence = self._make_new_sequence(sequence_row, motif_instance, implant_position)
 
+        if self.use_p_gens:
+            new_sequence['p_gen'] = self._state.sim_item.generative_model.compute_p_gen(
+                {key: val.to_string() if hasattr(val, "to_string") else val for key, val in new_sequence.items()},
+                self._state.sequence_type)
+        else:
+            new_sequence['p_gen'] = -1.
+
         new_sequence[signal.id] = 1
         new_sequence[f'{signal.id}_positions'] = "m" + "".join("0" for _ in range(implant_position)) + "1" + \
                                                  "".join("0" for _ in
@@ -159,6 +204,7 @@ class LigoImplanter:
 
         zero_mask = "m" + "".join(["0" for _ in range(len(new_sequence[self._state.sequence_type.value]))])
         new_sequence = {**{f"{s.id}_positions": zero_mask for s in self._state.all_signals}, **new_sequence}
+
         return new_sequence
 
     def _make_new_sequence(self, sequence_row: GenModelAsTSV, motif_instance: MotifInstance, position) -> dict:
@@ -204,7 +250,8 @@ class LigoImplanter:
         p_gens = self._state.sim_item.generative_model.compute_p_gens(sequences, self._state.sequence_type)
         sequences.p_gen = p_gens
         log_p_gens = np.log10(p_gens)
-        hist, self._state.p_gen_bins = np.histogram(log_p_gens, bins=np.concatenate(([np.NINF], np.histogram_bin_edges(log_p_gens, self._state.p_gen_bin_count), [np.PINF])),
+        hist, self._state.p_gen_bins = np.histogram(log_p_gens, bins=np.concatenate(
+            ([np.NINF], np.histogram_bin_edges(log_p_gens, self._state.p_gen_bin_count), [np.PINF])),
                                                     density=False)
         self._state.target_p_gen_histogram = hist / len(sequences)
 
@@ -213,7 +260,9 @@ class LigoImplanter:
         self._state.target_p_gen_histogram[np.logical_not(zero_regions)] -= \
             LigoImplanter.MIN_RANGE_PROBABILITY * np.sum(zero_regions) / np.sum(np.logical_not(zero_regions))
 
-    def _filter_using_p_gens(self, sequences: GenModelAsTSV, seqs_per_signal_count: dict) -> Tuple[BNPDataClass, dict]:
+        return sequences
+
+    def _filter_using_p_gens(self, sequences: GenModelAsTSV) -> Tuple[BNPDataClass, dict]:
         if np.any(sequences.p_gen == -1):
             missing_p_gens = sequences.p_gen == -1
             sequences.p_gen[missing_p_gens] = self._state.sim_item.generative_model.compute_p_gens(sequences[missing_p_gens],
@@ -223,16 +272,7 @@ class LigoImplanter:
         sequence_bins = np.digitize(p_gens, self._state.p_gen_bins) - 1
         keep_sequences = np.random.uniform(0, 1, len(sequences)) <= self._state.target_p_gen_histogram[sequence_bins]
 
-        filtered_sequences = sequences[keep_sequences]
-        seqs_per_signal = copy.deepcopy(seqs_per_signal_count)
-
-        for signal in self._state.sim_item.signals:
-            seqs_per_signal[signal.id] -= np.sum(getattr(filtered_sequences, signal.id))
-
-        seqs_per_signal['no_signal'] -= len(filtered_sequences[np.all(np.array([getattr(filtered_sequences, signal.id) == 0
-                                                                                for signal in self._state.sim_item.signals]), axis=0)])
-
-        return filtered_sequences, seqs_per_signal
+        return sequences[keep_sequences]
 
     def _make_repertoire_objects(self, path: Path):
         repertoires = []
@@ -243,7 +283,7 @@ class LigoImplanter:
             seqs_no_signal_count = self._state.sim_item.receptors_in_repertoire_count \
                                    - get_signal_sequence_count(repertoire_count=1, sim_item=self._state.sim_item) * len(self._state.sim_item.signals)
 
-            custom_columns = get_custom_keys(self._state.all_signals)
+            custom_columns = get_custom_keys(self._state.all_signals, [('p_gen', float)])
 
             sequences, used_seq_count = self._get_no_signal_sequences(used_seq_count=used_seq_count, seqs_no_signal_count=seqs_no_signal_count,
                                                                       columns=custom_columns)
@@ -261,7 +301,7 @@ class LigoImplanter:
 
     def _make_repertoire_from_sequences(self, sequences: BNPDataClass, repertoires_path) -> Repertoire:
         metadata = {**self._make_signal_metadata(), **self._state.sim_item.immune_events}
-        rep_data = prepare_data_for_repertoire_obj(self._state.all_signals, sequences)
+        rep_data = prepare_data_for_repertoire_obj(self._state.all_signals, sequences, [('p_gen', float)])
         return Repertoire.build(**rep_data, path=repertoires_path, metadata=metadata)
 
     def _make_signal_metadata(self) -> dict:

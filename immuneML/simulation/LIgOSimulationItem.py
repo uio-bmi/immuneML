@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import List
 
 from immuneML.simulation.generative_models.GenerativeModel import GenerativeModel
@@ -66,4 +66,4 @@ class LIgOSimulationItem:
     generative_model: GenerativeModel = None
     number_of_examples: int = 0
     receptors_in_repertoire_count: int = 0
-    immune_events: dict = None
+    immune_events: dict = field(default_factory=dict)

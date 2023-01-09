@@ -23,6 +23,10 @@ class GenerativeModel:
         pass
 
     @abc.abstractmethod
+    def compute_p_gen(self, sequence: dict, sequence_type: SequenceType) -> float:
+        pass
+
+    @abc.abstractmethod
     def can_compute_p_gens(self) -> bool:
         pass
 
