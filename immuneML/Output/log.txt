@@ -1,372 +1,372 @@
-2023-01-06 17:20:31,863 INFO: 2023-01-06 17:20:31.863409 --- Entering: parse_encoder with parameters ('my_encoding', {'PDBDistanceMatrix': {'name': 'Test'}})
-2023-01-06 17:20:32,374 INFO: 2023-01-06 17:20:32.374456 --- Exiting: parse_encoder
-2023-01-06 17:20:32,374 INFO: 2023-01-06 17:20:32.374456 --- Entering: _parse_report with parameters ('my_data_report', 'PDBDataReport', SymbolTable())
-2023-01-06 17:20:34,134 INFO: DefaultParams: no default parameters were found for PDBDataReport. Proceeding...
-2023-01-06 17:20:34,134 INFO: 2023-01-06 17:20:34.134671 --- Exiting: _parse_report
-2023-01-06 17:20:34,134 INFO: 2023-01-06 17:20:34.134671 --- Entering: _parse_dataset with parameters ('my_dataset', {'format': 'PDB', 'params': {'path': 'C:\\Users\\Wii\\Documents\\UiO\\Master\\immuneMLReal\\immuneML\\app\\quickstart_data\\repertoires', 'metadata_file': 'C:\\Users\\Wii\\Documents\\UiO\\Master\\immuneMLReal\\immuneML\\app\\quickstart_data\\metadata.csv', 'region_type': 'IMGT_CDR3'}}, SymbolTable(), WindowsPath('../Output'))
-2023-01-06 17:20:34,197 INFO: 2023-01-06 17:20:34.197984 --- Exiting: _parse_dataset
-2023-01-06 17:20:34,197 INFO: 2023-01-06 17:20:34.197984 --- Entering: parse_instruction with parameters ('my_expl_analysis_instruction', {'type': 'ExploratoryAnalysis', 'analyses': {'my_first_analysis': {'dataset': 'my_dataset', 'encoding': 'my_encoding', 'report': 'my_data_report'}}}, SymbolTable(), WindowsPath('../Output'))
-2023-01-06 17:20:34,258 INFO: 2023-01-06 17:20:34.258239 --- Exiting: parse_instruction
-2023-01-06 17:20:34,464 WARNING: PDBConstructionException: ('W', 224, ' ') defined twice at line 4133.
+2023-01-09 16:43:33,892 INFO: 2023-01-09 16:43:33.892781 --- Entering: parse_encoder with parameters ('my_encoding', {'PDBDistanceMatrix': {'name': 'Test'}})
+2023-01-09 16:43:34,269 INFO: 2023-01-09 16:43:34.269700 --- Exiting: parse_encoder
+2023-01-09 16:43:34,269 INFO: 2023-01-09 16:43:34.269700 --- Entering: _parse_report with parameters ('my_data_report', 'PDBDataReport', SymbolTable())
+2023-01-09 16:43:35,853 INFO: DefaultParams: no default parameters were found for PDBDataReport. Proceeding...
+2023-01-09 16:43:35,853 INFO: 2023-01-09 16:43:35.853352 --- Exiting: _parse_report
+2023-01-09 16:43:35,853 INFO: 2023-01-09 16:43:35.853352 --- Entering: _parse_dataset with parameters ('my_dataset', {'format': 'PDB', 'params': {'path': 'C:\\Users\\Wii\\Documents\\UiO\\Master\\immuneMLReal\\immuneML\\app\\quickstart_data\\repertoires', 'metadata_file': 'C:\\Users\\Wii\\Documents\\UiO\\Master\\immuneMLReal\\immuneML\\app\\quickstart_data\\metadata.csv', 'region_type': 'IMGT_CDR3'}}, SymbolTable(), WindowsPath('../Output'))
+2023-01-09 16:43:35,906 INFO: 2023-01-09 16:43:35.906260 --- Exiting: _parse_dataset
+2023-01-09 16:43:35,906 INFO: 2023-01-09 16:43:35.906260 --- Entering: parse_instruction with parameters ('my_expl_analysis_instruction', {'type': 'ExploratoryAnalysis', 'analyses': {'my_first_analysis': {'dataset': 'my_dataset', 'encoding': 'my_encoding', 'report': 'my_data_report'}}}, SymbolTable(), WindowsPath('../Output'))
+2023-01-09 16:43:35,953 INFO: 2023-01-09 16:43:35.953489 --- Exiting: parse_instruction
+2023-01-09 16:43:36,125 WARNING: PDBConstructionException: ('W', 224, ' ') defined twice at line 4133.
 Exception ignored.
 Some atoms or residues may be missing in the data structure.
-2023-01-06 17:20:34,464 WARNING: PDBConstructionException: ('W', 225, ' ') defined twice at line 4134.
+2023-01-09 16:43:36,125 WARNING: PDBConstructionException: ('W', 225, ' ') defined twice at line 4134.
 Exception ignored.
 Some atoms or residues may be missing in the data structure.
-2023-01-06 17:20:34,464 WARNING: PDBConstructionException: ('W', 226, ' ') defined twice at line 4135.
+2023-01-09 16:43:36,125 WARNING: PDBConstructionException: ('W', 226, ' ') defined twice at line 4135.
 Exception ignored.
 Some atoms or residues may be missing in the data structure.
-2023-01-06 17:20:34,464 WARNING: PDBConstructionException: ('W', 227, ' ') defined twice at line 4136.
+2023-01-09 16:43:36,125 WARNING: PDBConstructionException: ('W', 227, ' ') defined twice at line 4136.
 Exception ignored.
 Some atoms or residues may be missing in the data structure.
-2023-01-06 17:20:34,464 WARNING: PDBConstructionException: ('W', 228, ' ') defined twice at line 4137.
+2023-01-09 16:43:36,125 WARNING: PDBConstructionException: ('W', 228, ' ') defined twice at line 4137.
 Exception ignored.
 Some atoms or residues may be missing in the data structure.
-2023-01-06 17:20:34,464 WARNING: PDBConstructionException: ('W', 229, ' ') defined twice at line 4138.
+2023-01-09 16:43:36,141 WARNING: PDBConstructionException: ('W', 229, ' ') defined twice at line 4138.
 Exception ignored.
 Some atoms or residues may be missing in the data structure.
-2023-01-06 17:20:34,464 WARNING: PDBConstructionException: ('W', 230, ' ') defined twice at line 4139.
+2023-01-09 16:43:36,141 WARNING: PDBConstructionException: ('W', 230, ' ') defined twice at line 4139.
 Exception ignored.
 Some atoms or residues may be missing in the data structure.
-2023-01-06 17:20:34,464 WARNING: PDBConstructionException: ('W', 231, ' ') defined twice at line 4140.
+2023-01-09 16:43:36,141 WARNING: PDBConstructionException: ('W', 231, ' ') defined twice at line 4140.
 Exception ignored.
 Some atoms or residues may be missing in the data structure.
-2023-01-06 17:20:34,464 WARNING: PDBConstructionException: ('W', 232, ' ') defined twice at line 4141.
+2023-01-09 16:43:36,141 WARNING: PDBConstructionException: ('W', 232, ' ') defined twice at line 4141.
 Exception ignored.
 Some atoms or residues may be missing in the data structure.
-2023-01-06 17:20:34,464 WARNING: PDBConstructionException: ('W', 233, ' ') defined twice at line 4142.
+2023-01-09 16:43:36,141 WARNING: PDBConstructionException: ('W', 233, ' ') defined twice at line 4142.
 Exception ignored.
 Some atoms or residues may be missing in the data structure.
-2023-01-06 17:20:34,464 WARNING: PDBConstructionException: ('W', 234, ' ') defined twice at line 4143.
+2023-01-09 16:43:36,141 WARNING: PDBConstructionException: ('W', 234, ' ') defined twice at line 4143.
 Exception ignored.
 Some atoms or residues may be missing in the data structure.
-2023-01-06 17:20:34,464 WARNING: PDBConstructionException: ('W', 235, ' ') defined twice at line 4144.
+2023-01-09 16:43:36,141 WARNING: PDBConstructionException: ('W', 235, ' ') defined twice at line 4144.
 Exception ignored.
 Some atoms or residues may be missing in the data structure.
-2023-01-06 17:20:34,464 WARNING: PDBConstructionException: ('W', 236, ' ') defined twice at line 4145.
+2023-01-09 16:43:36,141 WARNING: PDBConstructionException: ('W', 236, ' ') defined twice at line 4145.
 Exception ignored.
 Some atoms or residues may be missing in the data structure.
-2023-01-06 17:20:34,464 WARNING: PDBConstructionException: ('W', 237, ' ') defined twice at line 4146.
+2023-01-09 16:43:36,141 WARNING: PDBConstructionException: ('W', 237, ' ') defined twice at line 4146.
 Exception ignored.
 Some atoms or residues may be missing in the data structure.
-2023-01-06 17:20:34,464 WARNING: PDBConstructionException: ('W', 238, ' ') defined twice at line 4147.
+2023-01-09 16:43:36,141 WARNING: PDBConstructionException: ('W', 238, ' ') defined twice at line 4147.
 Exception ignored.
 Some atoms or residues may be missing in the data structure.
-2023-01-06 17:20:34,464 WARNING: PDBConstructionException: ('W', 239, ' ') defined twice at line 4148.
+2023-01-09 16:43:36,141 WARNING: PDBConstructionException: ('W', 239, ' ') defined twice at line 4148.
 Exception ignored.
 Some atoms or residues may be missing in the data structure.
-2023-01-06 17:20:34,464 WARNING: PDBConstructionException: ('W', 240, ' ') defined twice at line 4149.
+2023-01-09 16:43:36,141 WARNING: PDBConstructionException: ('W', 240, ' ') defined twice at line 4149.
 Exception ignored.
 Some atoms or residues may be missing in the data structure.
-2023-01-06 17:20:34,464 WARNING: PDBConstructionException: ('W', 241, ' ') defined twice at line 4150.
+2023-01-09 16:43:36,141 WARNING: PDBConstructionException: ('W', 241, ' ') defined twice at line 4150.
 Exception ignored.
 Some atoms or residues may be missing in the data structure.
-2023-01-06 17:20:34,464 WARNING: PDBConstructionException: ('W', 242, ' ') defined twice at line 4151.
+2023-01-09 16:43:36,141 WARNING: PDBConstructionException: ('W', 242, ' ') defined twice at line 4151.
 Exception ignored.
 Some atoms or residues may be missing in the data structure.
-2023-01-06 17:20:34,464 WARNING: PDBConstructionException: ('W', 243, ' ') defined twice at line 4152.
+2023-01-09 16:43:36,141 WARNING: PDBConstructionException: ('W', 243, ' ') defined twice at line 4152.
 Exception ignored.
 Some atoms or residues may be missing in the data structure.
-2023-01-06 17:20:34,464 WARNING: PDBConstructionException: ('W', 244, ' ') defined twice at line 4153.
+2023-01-09 16:43:36,141 WARNING: PDBConstructionException: ('W', 244, ' ') defined twice at line 4153.
 Exception ignored.
 Some atoms or residues may be missing in the data structure.
-2023-01-06 17:20:34,464 WARNING: PDBConstructionException: ('W', 245, ' ') defined twice at line 4154.
+2023-01-09 16:43:36,141 WARNING: PDBConstructionException: ('W', 245, ' ') defined twice at line 4154.
 Exception ignored.
 Some atoms or residues may be missing in the data structure.
-2023-01-06 17:20:34,464 WARNING: PDBConstructionException: ('W', 246, ' ') defined twice at line 4155.
+2023-01-09 16:43:36,141 WARNING: PDBConstructionException: ('W', 246, ' ') defined twice at line 4155.
 Exception ignored.
 Some atoms or residues may be missing in the data structure.
-2023-01-06 17:20:34,464 WARNING: PDBConstructionException: ('W', 247, ' ') defined twice at line 4156.
+2023-01-09 16:43:36,141 WARNING: PDBConstructionException: ('W', 247, ' ') defined twice at line 4156.
 Exception ignored.
 Some atoms or residues may be missing in the data structure.
-2023-01-06 17:20:34,464 WARNING: PDBConstructionException: ('W', 248, ' ') defined twice at line 4157.
+2023-01-09 16:43:36,141 WARNING: PDBConstructionException: ('W', 248, ' ') defined twice at line 4157.
 Exception ignored.
 Some atoms or residues may be missing in the data structure.
-2023-01-06 17:20:34,464 WARNING: PDBConstructionException: ('W', 249, ' ') defined twice at line 4158.
+2023-01-09 16:43:36,141 WARNING: PDBConstructionException: ('W', 249, ' ') defined twice at line 4158.
 Exception ignored.
 Some atoms or residues may be missing in the data structure.
-2023-01-06 17:20:34,464 WARNING: PDBConstructionException: ('W', 250, ' ') defined twice at line 4159.
+2023-01-09 16:43:36,141 WARNING: PDBConstructionException: ('W', 250, ' ') defined twice at line 4159.
 Exception ignored.
 Some atoms or residues may be missing in the data structure.
-2023-01-06 17:20:34,464 WARNING: PDBConstructionException: ('W', 251, ' ') defined twice at line 4160.
+2023-01-09 16:43:36,141 WARNING: PDBConstructionException: ('W', 251, ' ') defined twice at line 4160.
 Exception ignored.
 Some atoms or residues may be missing in the data structure.
-2023-01-06 17:20:34,464 WARNING: PDBConstructionException: ('W', 252, ' ') defined twice at line 4161.
+2023-01-09 16:43:36,141 WARNING: PDBConstructionException: ('W', 252, ' ') defined twice at line 4161.
 Exception ignored.
 Some atoms or residues may be missing in the data structure.
-2023-01-06 17:20:34,464 WARNING: PDBConstructionException: ('W', 253, ' ') defined twice at line 4162.
+2023-01-09 16:43:36,141 WARNING: PDBConstructionException: ('W', 253, ' ') defined twice at line 4162.
 Exception ignored.
 Some atoms or residues may be missing in the data structure.
-2023-01-06 17:20:34,464 WARNING: PDBConstructionException: ('W', 254, ' ') defined twice at line 4163.
+2023-01-09 16:43:36,141 WARNING: PDBConstructionException: ('W', 254, ' ') defined twice at line 4163.
 Exception ignored.
 Some atoms or residues may be missing in the data structure.
-2023-01-06 17:20:34,464 WARNING: PDBConstructionException: ('W', 255, ' ') defined twice at line 4164.
+2023-01-09 16:43:36,141 WARNING: PDBConstructionException: ('W', 255, ' ') defined twice at line 4164.
 Exception ignored.
 Some atoms or residues may be missing in the data structure.
-2023-01-06 17:20:34,464 WARNING: PDBConstructionException: ('W', 256, ' ') defined twice at line 4165.
+2023-01-09 16:43:36,141 WARNING: PDBConstructionException: ('W', 256, ' ') defined twice at line 4165.
 Exception ignored.
 Some atoms or residues may be missing in the data structure.
-2023-01-06 17:20:34,464 WARNING: PDBConstructionException: ('W', 257, ' ') defined twice at line 4166.
+2023-01-09 16:43:36,141 WARNING: PDBConstructionException: ('W', 257, ' ') defined twice at line 4166.
 Exception ignored.
 Some atoms or residues may be missing in the data structure.
-2023-01-06 17:20:34,464 WARNING: PDBConstructionException: ('W', 258, ' ') defined twice at line 4167.
+2023-01-09 16:43:36,141 WARNING: PDBConstructionException: ('W', 258, ' ') defined twice at line 4167.
 Exception ignored.
 Some atoms or residues may be missing in the data structure.
-2023-01-06 17:20:34,480 WARNING: PDBConstructionException: ('W', 259, ' ') defined twice at line 4168.
+2023-01-09 16:43:36,141 WARNING: PDBConstructionException: ('W', 259, ' ') defined twice at line 4168.
 Exception ignored.
 Some atoms or residues may be missing in the data structure.
-2023-01-06 17:20:34,480 WARNING: PDBConstructionException: ('W', 260, ' ') defined twice at line 4169.
+2023-01-09 16:43:36,141 WARNING: PDBConstructionException: ('W', 260, ' ') defined twice at line 4169.
 Exception ignored.
 Some atoms or residues may be missing in the data structure.
-2023-01-06 17:20:34,480 WARNING: PDBConstructionException: ('W', 261, ' ') defined twice at line 4170.
+2023-01-09 16:43:36,141 WARNING: PDBConstructionException: ('W', 261, ' ') defined twice at line 4170.
 Exception ignored.
 Some atoms or residues may be missing in the data structure.
-2023-01-06 17:20:34,480 WARNING: PDBConstructionException: ('W', 262, ' ') defined twice at line 4171.
+2023-01-09 16:43:36,141 WARNING: PDBConstructionException: ('W', 262, ' ') defined twice at line 4171.
 Exception ignored.
 Some atoms or residues may be missing in the data structure.
-2023-01-06 17:20:34,480 WARNING: PDBConstructionException: ('W', 263, ' ') defined twice at line 4172.
+2023-01-09 16:43:36,141 WARNING: PDBConstructionException: ('W', 263, ' ') defined twice at line 4172.
 Exception ignored.
 Some atoms or residues may be missing in the data structure.
-2023-01-06 17:20:34,480 WARNING: PDBConstructionException: ('W', 264, ' ') defined twice at line 4173.
+2023-01-09 16:43:36,141 WARNING: PDBConstructionException: ('W', 264, ' ') defined twice at line 4173.
 Exception ignored.
 Some atoms or residues may be missing in the data structure.
-2023-01-06 17:20:34,480 WARNING: PDBConstructionException: ('W', 265, ' ') defined twice at line 4174.
+2023-01-09 16:43:36,141 WARNING: PDBConstructionException: ('W', 265, ' ') defined twice at line 4174.
 Exception ignored.
 Some atoms or residues may be missing in the data structure.
-2023-01-06 17:20:34,480 WARNING: PDBConstructionException: ('W', 266, ' ') defined twice at line 4175.
+2023-01-09 16:43:36,141 WARNING: PDBConstructionException: ('W', 266, ' ') defined twice at line 4175.
 Exception ignored.
 Some atoms or residues may be missing in the data structure.
-2023-01-06 17:20:34,480 WARNING: PDBConstructionException: ('W', 267, ' ') defined twice at line 4176.
+2023-01-09 16:43:36,141 WARNING: PDBConstructionException: ('W', 267, ' ') defined twice at line 4176.
 Exception ignored.
 Some atoms or residues may be missing in the data structure.
-2023-01-06 17:20:34,480 WARNING: PDBConstructionException: ('W', 268, ' ') defined twice at line 4177.
+2023-01-09 16:43:36,141 WARNING: PDBConstructionException: ('W', 268, ' ') defined twice at line 4177.
 Exception ignored.
 Some atoms or residues may be missing in the data structure.
-2023-01-06 17:20:34,480 WARNING: PDBConstructionException: ('W', 269, ' ') defined twice at line 4178.
+2023-01-09 16:43:36,141 WARNING: PDBConstructionException: ('W', 269, ' ') defined twice at line 4178.
 Exception ignored.
 Some atoms or residues may be missing in the data structure.
-2023-01-06 17:20:34,480 WARNING: PDBConstructionException: ('W', 270, ' ') defined twice at line 4179.
+2023-01-09 16:43:36,141 WARNING: PDBConstructionException: ('W', 270, ' ') defined twice at line 4179.
 Exception ignored.
 Some atoms or residues may be missing in the data structure.
-2023-01-06 17:20:34,480 WARNING: PDBConstructionException: ('W', 271, ' ') defined twice at line 4180.
+2023-01-09 16:43:36,141 WARNING: PDBConstructionException: ('W', 271, ' ') defined twice at line 4180.
 Exception ignored.
 Some atoms or residues may be missing in the data structure.
-2023-01-06 17:20:34,480 WARNING: PDBConstructionException: ('W', 272, ' ') defined twice at line 4181.
+2023-01-09 16:43:36,141 WARNING: PDBConstructionException: ('W', 272, ' ') defined twice at line 4181.
 Exception ignored.
 Some atoms or residues may be missing in the data structure.
-2023-01-06 17:20:34,480 WARNING: PDBConstructionException: ('W', 273, ' ') defined twice at line 4182.
+2023-01-09 16:43:36,141 WARNING: PDBConstructionException: ('W', 273, ' ') defined twice at line 4182.
 Exception ignored.
 Some atoms or residues may be missing in the data structure.
-2023-01-06 17:20:34,480 WARNING: PDBConstructionException: ('W', 274, ' ') defined twice at line 4183.
+2023-01-09 16:43:36,141 WARNING: PDBConstructionException: ('W', 274, ' ') defined twice at line 4183.
 Exception ignored.
 Some atoms or residues may be missing in the data structure.
-2023-01-06 17:20:34,480 WARNING: PDBConstructionException: ('W', 275, ' ') defined twice at line 4184.
+2023-01-09 16:43:36,141 WARNING: PDBConstructionException: ('W', 275, ' ') defined twice at line 4184.
 Exception ignored.
 Some atoms or residues may be missing in the data structure.
-2023-01-06 17:20:34,480 WARNING: PDBConstructionException: ('W', 276, ' ') defined twice at line 4185.
+2023-01-09 16:43:36,141 WARNING: PDBConstructionException: ('W', 276, ' ') defined twice at line 4185.
 Exception ignored.
 Some atoms or residues may be missing in the data structure.
-2023-01-06 17:20:34,480 WARNING: PDBConstructionException: ('W', 277, ' ') defined twice at line 4186.
+2023-01-09 16:43:36,141 WARNING: PDBConstructionException: ('W', 277, ' ') defined twice at line 4186.
 Exception ignored.
 Some atoms or residues may be missing in the data structure.
-2023-01-06 17:20:34,480 WARNING: PDBConstructionException: ('W', 278, ' ') defined twice at line 4187.
+2023-01-09 16:43:36,141 WARNING: PDBConstructionException: ('W', 278, ' ') defined twice at line 4187.
 Exception ignored.
 Some atoms or residues may be missing in the data structure.
-2023-01-06 17:20:34,480 WARNING: PDBConstructionException: ('W', 279, ' ') defined twice at line 4188.
+2023-01-09 16:43:36,141 WARNING: PDBConstructionException: ('W', 279, ' ') defined twice at line 4188.
 Exception ignored.
 Some atoms or residues may be missing in the data structure.
-2023-01-06 17:20:34,480 WARNING: PDBConstructionException: ('W', 280, ' ') defined twice at line 4189.
+2023-01-09 16:43:36,141 WARNING: PDBConstructionException: ('W', 280, ' ') defined twice at line 4189.
 Exception ignored.
 Some atoms or residues may be missing in the data structure.
-2023-01-06 17:20:34,480 WARNING: PDBConstructionException: ('W', 281, ' ') defined twice at line 4190.
+2023-01-09 16:43:36,141 WARNING: PDBConstructionException: ('W', 281, ' ') defined twice at line 4190.
 Exception ignored.
 Some atoms or residues may be missing in the data structure.
-2023-01-06 17:20:34,480 WARNING: PDBConstructionException: ('W', 282, ' ') defined twice at line 4191.
+2023-01-09 16:43:36,141 WARNING: PDBConstructionException: ('W', 282, ' ') defined twice at line 4191.
 Exception ignored.
 Some atoms or residues may be missing in the data structure.
-2023-01-06 17:20:34,480 WARNING: PDBConstructionException: ('W', 283, ' ') defined twice at line 4192.
+2023-01-09 16:43:36,141 WARNING: PDBConstructionException: ('W', 283, ' ') defined twice at line 4192.
 Exception ignored.
 Some atoms or residues may be missing in the data structure.
-2023-01-06 17:20:34,480 WARNING: PDBConstructionException: ('W', 284, ' ') defined twice at line 4193.
+2023-01-09 16:43:36,141 WARNING: PDBConstructionException: ('W', 284, ' ') defined twice at line 4193.
 Exception ignored.
 Some atoms or residues may be missing in the data structure.
-2023-01-06 17:20:34,480 WARNING: PDBConstructionException: ('W', 285, ' ') defined twice at line 4194.
+2023-01-09 16:43:36,141 WARNING: PDBConstructionException: ('W', 285, ' ') defined twice at line 4194.
 Exception ignored.
 Some atoms or residues may be missing in the data structure.
-2023-01-06 17:20:34,480 WARNING: PDBConstructionException: ('W', 286, ' ') defined twice at line 4195.
+2023-01-09 16:43:36,141 WARNING: PDBConstructionException: ('W', 286, ' ') defined twice at line 4195.
 Exception ignored.
 Some atoms or residues may be missing in the data structure.
-2023-01-06 17:20:34,480 WARNING: PDBConstructionException: ('W', 287, ' ') defined twice at line 4196.
+2023-01-09 16:43:36,141 WARNING: PDBConstructionException: ('W', 287, ' ') defined twice at line 4196.
 Exception ignored.
 Some atoms or residues may be missing in the data structure.
-2023-01-06 17:20:34,480 WARNING: PDBConstructionException: ('W', 288, ' ') defined twice at line 4197.
+2023-01-09 16:43:36,141 WARNING: PDBConstructionException: ('W', 288, ' ') defined twice at line 4197.
 Exception ignored.
 Some atoms or residues may be missing in the data structure.
-2023-01-06 17:20:34,480 WARNING: PDBConstructionException: ('W', 289, ' ') defined twice at line 4198.
+2023-01-09 16:43:36,141 WARNING: PDBConstructionException: ('W', 289, ' ') defined twice at line 4198.
 Exception ignored.
 Some atoms or residues may be missing in the data structure.
-2023-01-06 17:20:34,480 WARNING: PDBConstructionException: ('W', 290, ' ') defined twice at line 4199.
+2023-01-09 16:43:36,141 WARNING: PDBConstructionException: ('W', 290, ' ') defined twice at line 4199.
 Exception ignored.
 Some atoms or residues may be missing in the data structure.
-2023-01-06 17:20:34,480 WARNING: PDBConstructionException: ('W', 291, ' ') defined twice at line 4200.
+2023-01-09 16:43:36,141 WARNING: PDBConstructionException: ('W', 291, ' ') defined twice at line 4200.
 Exception ignored.
 Some atoms or residues may be missing in the data structure.
-2023-01-06 17:20:34,480 WARNING: PDBConstructionException: ('W', 292, ' ') defined twice at line 4201.
+2023-01-09 16:43:36,141 WARNING: PDBConstructionException: ('W', 292, ' ') defined twice at line 4201.
 Exception ignored.
 Some atoms or residues may be missing in the data structure.
-2023-01-06 17:20:34,480 WARNING: PDBConstructionException: ('W', 293, ' ') defined twice at line 4202.
+2023-01-09 16:43:36,141 WARNING: PDBConstructionException: ('W', 293, ' ') defined twice at line 4202.
 Exception ignored.
 Some atoms or residues may be missing in the data structure.
-2023-01-06 17:20:34,480 WARNING: PDBConstructionException: ('W', 294, ' ') defined twice at line 4203.
+2023-01-09 16:43:36,141 WARNING: PDBConstructionException: ('W', 294, ' ') defined twice at line 4203.
 Exception ignored.
 Some atoms or residues may be missing in the data structure.
-2023-01-06 17:20:34,480 WARNING: PDBConstructionException: ('W', 295, ' ') defined twice at line 4204.
+2023-01-09 16:43:36,141 WARNING: PDBConstructionException: ('W', 295, ' ') defined twice at line 4204.
 Exception ignored.
 Some atoms or residues may be missing in the data structure.
-2023-01-06 17:20:34,480 WARNING: PDBConstructionException: ('W', 296, ' ') defined twice at line 4205.
+2023-01-09 16:43:36,141 WARNING: PDBConstructionException: ('W', 296, ' ') defined twice at line 4205.
 Exception ignored.
 Some atoms or residues may be missing in the data structure.
-2023-01-06 17:20:34,480 WARNING: PDBConstructionException: ('W', 297, ' ') defined twice at line 4206.
+2023-01-09 16:43:36,141 WARNING: PDBConstructionException: ('W', 297, ' ') defined twice at line 4206.
 Exception ignored.
 Some atoms or residues may be missing in the data structure.
-2023-01-06 17:20:34,480 WARNING: PDBConstructionException: ('W', 298, ' ') defined twice at line 4207.
+2023-01-09 16:43:36,141 WARNING: PDBConstructionException: ('W', 298, ' ') defined twice at line 4207.
 Exception ignored.
 Some atoms or residues may be missing in the data structure.
-2023-01-06 17:20:34,480 WARNING: PDBConstructionException: ('W', 299, ' ') defined twice at line 4208.
+2023-01-09 16:43:36,141 WARNING: PDBConstructionException: ('W', 299, ' ') defined twice at line 4208.
 Exception ignored.
 Some atoms or residues may be missing in the data structure.
-2023-01-06 17:20:34,480 WARNING: PDBConstructionException: ('W', 300, ' ') defined twice at line 4209.
+2023-01-09 16:43:36,141 WARNING: PDBConstructionException: ('W', 300, ' ') defined twice at line 4209.
 Exception ignored.
 Some atoms or residues may be missing in the data structure.
-2023-01-06 17:20:34,480 WARNING: PDBConstructionException: ('W', 301, ' ') defined twice at line 4210.
+2023-01-09 16:43:36,141 WARNING: PDBConstructionException: ('W', 301, ' ') defined twice at line 4210.
 Exception ignored.
 Some atoms or residues may be missing in the data structure.
-2023-01-06 17:20:34,480 WARNING: PDBConstructionException: ('W', 302, ' ') defined twice at line 4211.
+2023-01-09 16:43:36,141 WARNING: PDBConstructionException: ('W', 302, ' ') defined twice at line 4211.
 Exception ignored.
 Some atoms or residues may be missing in the data structure.
-2023-01-06 17:20:34,480 WARNING: PDBConstructionException: ('W', 303, ' ') defined twice at line 4212.
+2023-01-09 16:43:36,141 WARNING: PDBConstructionException: ('W', 303, ' ') defined twice at line 4212.
 Exception ignored.
 Some atoms or residues may be missing in the data structure.
-2023-01-06 17:20:34,480 WARNING: PDBConstructionException: ('W', 304, ' ') defined twice at line 4213.
+2023-01-09 16:43:36,141 WARNING: PDBConstructionException: ('W', 304, ' ') defined twice at line 4213.
 Exception ignored.
 Some atoms or residues may be missing in the data structure.
-2023-01-06 17:20:34,480 WARNING: PDBConstructionException: ('W', 305, ' ') defined twice at line 4214.
+2023-01-09 16:43:36,141 WARNING: PDBConstructionException: ('W', 305, ' ') defined twice at line 4214.
 Exception ignored.
 Some atoms or residues may be missing in the data structure.
-2023-01-06 17:20:34,480 WARNING: PDBConstructionException: ('W', 306, ' ') defined twice at line 4215.
+2023-01-09 16:43:36,141 WARNING: PDBConstructionException: ('W', 306, ' ') defined twice at line 4215.
 Exception ignored.
 Some atoms or residues may be missing in the data structure.
-2023-01-06 17:20:34,480 WARNING: PDBConstructionException: ('W', 307, ' ') defined twice at line 4216.
+2023-01-09 16:43:36,141 WARNING: PDBConstructionException: ('W', 307, ' ') defined twice at line 4216.
 Exception ignored.
 Some atoms or residues may be missing in the data structure.
-2023-01-06 17:20:34,480 WARNING: PDBConstructionException: ('W', 308, ' ') defined twice at line 4217.
+2023-01-09 16:43:36,141 WARNING: PDBConstructionException: ('W', 308, ' ') defined twice at line 4217.
 Exception ignored.
 Some atoms or residues may be missing in the data structure.
-2023-01-06 17:20:34,480 WARNING: PDBConstructionException: ('W', 309, ' ') defined twice at line 4218.
+2023-01-09 16:43:36,141 WARNING: PDBConstructionException: ('W', 309, ' ') defined twice at line 4218.
 Exception ignored.
 Some atoms or residues may be missing in the data structure.
-2023-01-06 17:20:34,480 WARNING: PDBConstructionException: ('W', 310, ' ') defined twice at line 4219.
+2023-01-09 16:43:36,141 WARNING: PDBConstructionException: ('W', 310, ' ') defined twice at line 4219.
 Exception ignored.
 Some atoms or residues may be missing in the data structure.
-2023-01-06 17:20:34,480 WARNING: PDBConstructionException: ('W', 311, ' ') defined twice at line 4220.
+2023-01-09 16:43:36,141 WARNING: PDBConstructionException: ('W', 311, ' ') defined twice at line 4220.
 Exception ignored.
 Some atoms or residues may be missing in the data structure.
-2023-01-06 17:20:34,480 WARNING: PDBConstructionException: ('W', 312, ' ') defined twice at line 4221.
+2023-01-09 16:43:36,141 WARNING: PDBConstructionException: ('W', 312, ' ') defined twice at line 4221.
 Exception ignored.
 Some atoms or residues may be missing in the data structure.
-2023-01-06 17:20:34,480 WARNING: PDBConstructionException: ('W', 313, ' ') defined twice at line 4222.
+2023-01-09 16:43:36,141 WARNING: PDBConstructionException: ('W', 313, ' ') defined twice at line 4222.
 Exception ignored.
 Some atoms or residues may be missing in the data structure.
-2023-01-06 17:20:34,480 WARNING: PDBConstructionException: ('W', 314, ' ') defined twice at line 4223.
+2023-01-09 16:43:36,141 WARNING: PDBConstructionException: ('W', 314, ' ') defined twice at line 4223.
 Exception ignored.
 Some atoms or residues may be missing in the data structure.
-2023-01-06 17:20:34,480 WARNING: PDBConstructionException: ('W', 315, ' ') defined twice at line 4224.
+2023-01-09 16:43:36,141 WARNING: PDBConstructionException: ('W', 315, ' ') defined twice at line 4224.
 Exception ignored.
 Some atoms or residues may be missing in the data structure.
-2023-01-06 17:20:34,480 WARNING: PDBConstructionException: ('W', 316, ' ') defined twice at line 4225.
+2023-01-09 16:43:36,141 WARNING: PDBConstructionException: ('W', 316, ' ') defined twice at line 4225.
 Exception ignored.
 Some atoms or residues may be missing in the data structure.
-2023-01-06 17:20:34,480 WARNING: PDBConstructionException: ('W', 317, ' ') defined twice at line 4226.
+2023-01-09 16:43:36,141 WARNING: PDBConstructionException: ('W', 317, ' ') defined twice at line 4226.
 Exception ignored.
 Some atoms or residues may be missing in the data structure.
-2023-01-06 17:20:34,480 WARNING: PDBConstructionException: ('W', 318, ' ') defined twice at line 4227.
+2023-01-09 16:43:36,141 WARNING: PDBConstructionException: ('W', 318, ' ') defined twice at line 4227.
 Exception ignored.
 Some atoms or residues may be missing in the data structure.
-2023-01-06 17:20:34,480 WARNING: PDBConstructionException: ('W', 319, ' ') defined twice at line 4228.
+2023-01-09 16:43:36,141 WARNING: PDBConstructionException: ('W', 319, ' ') defined twice at line 4228.
 Exception ignored.
 Some atoms or residues may be missing in the data structure.
-2023-01-06 17:20:34,480 WARNING: PDBConstructionException: ('W', 320, ' ') defined twice at line 4229.
+2023-01-09 16:43:36,141 WARNING: PDBConstructionException: ('W', 320, ' ') defined twice at line 4229.
 Exception ignored.
 Some atoms or residues may be missing in the data structure.
-2023-01-06 17:20:34,480 WARNING: PDBConstructionException: ('W', 321, ' ') defined twice at line 4230.
+2023-01-09 16:43:36,141 WARNING: PDBConstructionException: ('W', 321, ' ') defined twice at line 4230.
 Exception ignored.
 Some atoms or residues may be missing in the data structure.
-2023-01-06 17:20:34,480 WARNING: PDBConstructionException: ('W', 322, ' ') defined twice at line 4231.
+2023-01-09 16:43:36,141 WARNING: PDBConstructionException: ('W', 322, ' ') defined twice at line 4231.
 Exception ignored.
 Some atoms or residues may be missing in the data structure.
-2023-01-06 17:20:34,480 WARNING: PDBConstructionException: ('W', 323, ' ') defined twice at line 4232.
+2023-01-09 16:43:36,141 WARNING: PDBConstructionException: ('W', 323, ' ') defined twice at line 4232.
 Exception ignored.
 Some atoms or residues may be missing in the data structure.
-2023-01-06 17:20:34,480 WARNING: PDBConstructionException: ('W', 324, ' ') defined twice at line 4233.
+2023-01-09 16:43:36,141 WARNING: PDBConstructionException: ('W', 324, ' ') defined twice at line 4233.
 Exception ignored.
 Some atoms or residues may be missing in the data structure.
-2023-01-06 17:20:34,480 WARNING: PDBConstructionException: ('W', 325, ' ') defined twice at line 4234.
+2023-01-09 16:43:36,141 WARNING: PDBConstructionException: ('W', 325, ' ') defined twice at line 4234.
 Exception ignored.
 Some atoms or residues may be missing in the data structure.
-2023-01-06 17:20:34,480 WARNING: PDBConstructionException: ('W', 326, ' ') defined twice at line 4235.
+2023-01-09 16:43:36,141 WARNING: PDBConstructionException: ('W', 326, ' ') defined twice at line 4235.
 Exception ignored.
 Some atoms or residues may be missing in the data structure.
-2023-01-06 17:20:34,480 WARNING: PDBConstructionException: ('W', 327, ' ') defined twice at line 4236.
+2023-01-09 16:43:36,141 WARNING: PDBConstructionException: ('W', 327, ' ') defined twice at line 4236.
 Exception ignored.
 Some atoms or residues may be missing in the data structure.
-2023-01-06 17:20:34,480 WARNING: PDBConstructionException: ('W', 328, ' ') defined twice at line 4237.
+2023-01-09 16:43:36,141 WARNING: PDBConstructionException: ('W', 328, ' ') defined twice at line 4237.
 Exception ignored.
 Some atoms or residues may be missing in the data structure.
-2023-01-06 17:20:34,480 WARNING: PDBConstructionException: ('W', 329, ' ') defined twice at line 4238.
+2023-01-09 16:43:36,141 WARNING: PDBConstructionException: ('W', 329, ' ') defined twice at line 4238.
 Exception ignored.
 Some atoms or residues may be missing in the data structure.
-2023-01-06 17:20:34,480 WARNING: PDBConstructionException: ('W', 330, ' ') defined twice at line 4239.
+2023-01-09 16:43:36,141 WARNING: PDBConstructionException: ('W', 330, ' ') defined twice at line 4239.
 Exception ignored.
 Some atoms or residues may be missing in the data structure.
-2023-01-06 17:20:34,480 WARNING: PDBConstructionException: ('W', 331, ' ') defined twice at line 4240.
+2023-01-09 16:43:36,141 WARNING: PDBConstructionException: ('W', 331, ' ') defined twice at line 4240.
 Exception ignored.
 Some atoms or residues may be missing in the data structure.
-2023-01-06 17:20:34,480 WARNING: PDBConstructionException: ('W', 332, ' ') defined twice at line 4241.
+2023-01-09 16:43:36,150 WARNING: PDBConstructionException: ('W', 332, ' ') defined twice at line 4241.
 Exception ignored.
 Some atoms or residues may be missing in the data structure.
-2023-01-06 17:20:34,480 WARNING: PDBConstructionException: ('W', 333, ' ') defined twice at line 4242.
+2023-01-09 16:43:36,150 WARNING: PDBConstructionException: ('W', 333, ' ') defined twice at line 4242.
 Exception ignored.
 Some atoms or residues may be missing in the data structure.
-2023-01-06 17:20:34,480 WARNING: PDBConstructionException: ('W', 334, ' ') defined twice at line 4243.
+2023-01-09 16:43:36,150 WARNING: PDBConstructionException: ('W', 334, ' ') defined twice at line 4243.
 Exception ignored.
 Some atoms or residues may be missing in the data structure.
-2023-01-06 17:20:34,480 WARNING: PDBConstructionException: ('W', 335, ' ') defined twice at line 4244.
+2023-01-09 16:43:36,150 WARNING: PDBConstructionException: ('W', 335, ' ') defined twice at line 4244.
 Exception ignored.
 Some atoms or residues may be missing in the data structure.
-2023-01-06 17:20:34,480 WARNING: PDBConstructionException: ('W', 336, ' ') defined twice at line 4245.
+2023-01-09 16:43:36,150 WARNING: PDBConstructionException: ('W', 336, ' ') defined twice at line 4245.
 Exception ignored.
 Some atoms or residues may be missing in the data structure.
-2023-01-06 17:20:34,480 WARNING: PDBConstructionException: ('W', 337, ' ') defined twice at line 4246.
+2023-01-09 16:43:36,150 WARNING: PDBConstructionException: ('W', 337, ' ') defined twice at line 4246.
 Exception ignored.
 Some atoms or residues may be missing in the data structure.
-2023-01-06 17:20:34,480 WARNING: PDBConstructionException: ('W', 338, ' ') defined twice at line 4247.
+2023-01-09 16:43:36,150 WARNING: PDBConstructionException: ('W', 338, ' ') defined twice at line 4247.
 Exception ignored.
 Some atoms or residues may be missing in the data structure.
-2023-01-06 17:20:34,480 WARNING: PDBConstructionException: ('W', 339, ' ') defined twice at line 4248.
+2023-01-09 16:43:36,150 WARNING: PDBConstructionException: ('W', 339, ' ') defined twice at line 4248.
 Exception ignored.
 Some atoms or residues may be missing in the data structure.
-2023-01-06 17:20:34,480 WARNING: PDBConstructionException: ('W', 340, ' ') defined twice at line 4249.
+2023-01-09 16:43:36,150 WARNING: PDBConstructionException: ('W', 340, ' ') defined twice at line 4249.
 Exception ignored.
 Some atoms or residues may be missing in the data structure.
-2023-01-06 17:20:34,480 WARNING: PDBConstructionException: ('W', 341, ' ') defined twice at line 4250.
+2023-01-09 16:43:36,150 WARNING: PDBConstructionException: ('W', 341, ' ') defined twice at line 4250.
 Exception ignored.
 Some atoms or residues may be missing in the data structure.
-2023-01-06 17:20:34,480 WARNING: PDBConstructionException: ('W', 342, ' ') defined twice at line 4251.
+2023-01-09 16:43:36,150 WARNING: PDBConstructionException: ('W', 342, ' ') defined twice at line 4251.
 Exception ignored.
 Some atoms or residues may be missing in the data structure.
-2023-01-06 17:20:34,480 WARNING: PDBConstructionException: ('W', 343, ' ') defined twice at line 4252.
+2023-01-09 16:43:36,150 WARNING: PDBConstructionException: ('W', 343, ' ') defined twice at line 4252.
 Exception ignored.
 Some atoms or residues may be missing in the data structure.
-2023-01-06 17:20:34,480 WARNING: PDBConstructionException: ('W', 344, ' ') defined twice at line 4253.
+2023-01-09 16:43:36,150 WARNING: PDBConstructionException: ('W', 344, ' ') defined twice at line 4253.
 Exception ignored.
 Some atoms or residues may be missing in the data structure.
